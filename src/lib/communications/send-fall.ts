@@ -17,19 +17,19 @@ export async function sendFallCommunication(
   fallId: string,
   triggerName: string,
   extraData?: Record<string, string>,
-): Promise<void> {
+): Promise<{ sent: boolean; reason?: string }> {
   try {
     const supabase = createAdminClient()
     const config = COMMUNICATION_REGISTRY[triggerName]
     if (!config) {
       console.warn(`[sendFallCommunication] Unknown trigger: ${triggerName}`)
-      return
+      return { sent: false, reason: 'unbekannter Trigger' }
     }
 
     // CMM-49: faelle-frei — claims = SSoT. lead_id/sv_id/geschaedigter_user_id/sprache sind
     // 0-diff zu faelle; claim_nummer/kundenbetreuer_id/regulierungs_betrag claims-nativ.
     const claimId = await resolveClaimId(supabase, fallId)
-    if (!claimId) return
+    if (!claimId) return { sent: false, reason: 'kein Claim' }
     const { data: claim } = await supabase
       .from('claims')
       // Payment-Ledger Phase 3 (Collapse): VS-Betrag aus dem (claim,'vs')-Ledger (admin-Client, RLS-Bypass).
@@ -37,7 +37,7 @@ export async function sendFallCommunication(
       .eq('id', claimId)
       .maybeSingle()
 
-    if (!claim) return
+    if (!claim) return { sent: false, reason: 'Claim nicht gefunden' }
     const kundenbetreuerId = claim.kundenbetreuer_id ?? null
     const fallSprache = (claim as { sprache?: string | null }).sprache ?? null
 
@@ -112,7 +112,7 @@ export async function sendFallCommunication(
       }
     }
 
-    if (!telefon && !email) return
+    if (!telefon && !email) return { sent: false, reason: 'kein Empfaenger (Telefon/Email)' }
 
     const regBetrag = vsBetragAusEmbed(claim.claim_payments)
     const betragFormatted = regBetrag != null
@@ -137,8 +137,12 @@ export async function sendFallCommunication(
         ? 'de'
         : leadSprache ?? fallSprache ?? 'de'
 
+    // sendCommunication liefert void und WIRFT bei Fehlern (AAR-117) -> catch.
+    // Kommen wir hier an, wurde ueber mind. einen Kanal (WA/Email) gesendet.
     await sendCommunication(triggerName, data, { locale: recipientLocale })
+    return { sent: true }
   } catch (err) {
     console.error(`[sendFallCommunication] ${triggerName} for fall ${fallId}:`, err)
+    return { sent: false, reason: err instanceof Error ? err.message : 'Ausnahme' }
   }
 }

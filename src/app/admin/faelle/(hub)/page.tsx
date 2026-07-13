@@ -67,7 +67,11 @@ export default async function AdminFaellePage() {
     .select(
       'claim_id, claim_nummer, status, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, main_phase, sub_phase, kunde_anzeigename, kennzeichen, created_at',
     )
-    .not('status', 'eq', 'storniert')
+    // F3-Fix: NULL-safe. claims.status ist NULL bis Terminal/VS-Event; ein blankes
+    // .not('status','eq','storniert') droppt via 3-wertiger SQL-Logik ALLE frischen
+    // (NULL-status) Claims aus dem Board. .or(is.null,neq) schliesst nur echte
+    // 'storniert' aus und behaelt frische Claims in der Liste.
+    .or('status.is.null,status.neq.storniert')
     .order('created_at', { ascending: false })
 
   if (profile?.rolle === 'kundenbetreuer' && user) {
