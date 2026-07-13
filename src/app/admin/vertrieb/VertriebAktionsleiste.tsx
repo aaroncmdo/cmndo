@@ -1,14 +1,15 @@
 'use client'
 // Vertrieb-Cockpit: kontextuelle Aktions-Leiste. Zeigt je aktiver Rolle-Pill x Lead/Partner
 // die passenden Aktionen. „SV anlegen" oeffnet den Onboarding-Wizard als Drawer-Overlay (D2);
-// die uebrigen Aktionen (CSV/Scrapen/Makler+Werkstatt-Liste/QR/Basis-Freigaben/SV-Karte) sind
-// Deep-Links auf die tiefe Verwaltung — die sind RSC-daten-abhaengig und gehoeren als eigene
-// Seiten (nicht sinnvoll in einen Drawer einbettbar).
+// CSV/Scrapen oeffnen als Cockpit-Drawer (kein Full-Page-Nav); die uebrigen Aktionen sind
+// Deep-Links auf die tiefe Verwaltung.
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Drawer } from '@/components/primitives'
 import AnlegenTabs from '@/app/admin/sachverstaendige/anlegen/AnlegenTabs'
 import QrPoolDrawerContent from './wizards/QrPoolDrawerContent'
+import CsvImportPanel from '@/app/admin/partner-leads/CsvImportPanel'
+import ScrapePanel from '@/app/admin/partner-leads/ScrapePanel'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
 import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
@@ -22,6 +23,8 @@ export default function VertriebAktionsleiste({
   const router = useRouter()
   const [svAnlegen, setSvAnlegen] = useState(false)
   const [qrDrawer, setQrDrawer] = useState(false)
+  const [csvDrawer, setCsvDrawer] = useState(false)
+  const [scrapeDrawer, setScrapeDrawer] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
   if (aktionen.length === 0) return null
 
@@ -32,6 +35,14 @@ export default function VertriebAktionsleiste({
     }
     if (a.key === 'qrpool') {
       setQrDrawer(true)
+      return
+    }
+    if (a.key === 'csv') {
+      setCsvDrawer(true)
+      return
+    }
+    if (a.key === 'scrape') {
+      setScrapeDrawer(true)
       return
     }
     if (a.href) router.push(a.href)
@@ -73,6 +84,30 @@ export default function VertriebAktionsleiste({
         ariaLabel="QR-Pool verwalten"
       >
         <QrPoolDrawerContent />
+      </Drawer>
+
+      <Drawer
+        open={csvDrawer}
+        onClose={() => setCsvDrawer(false)}
+        width={720}
+        ariaLabel="CSV importieren"
+      >
+        <CsvImportPanel
+          onClose={() => setCsvDrawer(false)}
+          onImported={() => { setCsvDrawer(false); router.refresh() }}
+        />
+      </Drawer>
+
+      <Drawer
+        open={scrapeDrawer}
+        onClose={() => setScrapeDrawer(false)}
+        width={720}
+        ariaLabel="Leads scrapen"
+      >
+        <ScrapePanel
+          onClose={() => setScrapeDrawer(false)}
+          onImported={() => { setScrapeDrawer(false); router.refresh() }}
+        />
       </Drawer>
     </>
   )

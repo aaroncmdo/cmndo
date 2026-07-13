@@ -116,3 +116,56 @@ test('4) QR-Pool oeffnet als Drawer im Cockpit (kein Full-Page-Weg)', async ({ p
 
   await page.screenshot({ path: 'test-results/vertrieb-cockpit-4-qrpool.png', fullPage: true }).catch(() => {})
 })
+
+// ---------------------------------------------------------------------------
+// 5 — CSV-Import oeffnet als Drawer im Cockpit (kein Full-Page-Weg).
+// ---------------------------------------------------------------------------
+test('5) CSV-Import oeffnet als Drawer im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Leads-Modus aktivieren (CSV-Aktion erscheint nur im Lead-Modus)
+  await page.getByRole('button', { name: 'Leads' }).first().click()
+
+  // CSV-Import-Aktion im Cockpit ausloesen
+  await page.getByRole('button', { name: 'CSV importieren' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen — Heading aus CsvImportPanel via getByRole(heading),
+  // NICHT der gleichlautende Aktions-Button "CSV importieren" (sonst Strict-Mode-Ambiguitaet).
+  await expect(page.getByRole('heading', { name: 'CSV importieren' })).toBeVisible({ timeout: 60_000 })
+
+  // URL darf NICHT auf /admin/partner-leads navigiert haben
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-5-csv.png', fullPage: true }).catch(() => {})
+})
+
+// ---------------------------------------------------------------------------
+// 6 — Scrapen oeffnet als Drawer im Cockpit (kein Full-Page-Weg).
+// ---------------------------------------------------------------------------
+test('6) Scrapen oeffnet als Drawer im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Leads-Modus aktivieren (Scrapen-Aktion erscheint nur im Lead-Modus)
+  await page.getByRole('button', { name: 'Leads' }).first().click()
+
+  // Scrapen-Aktion im Cockpit ausloesen
+  await page.getByRole('button', { name: 'Scrapen (Google Places)' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen — stabiler Text-Anker aus ScrapePanel heading
+  await expect(page.getByText('Leads scrapen', { exact: false })).toBeVisible({ timeout: 60_000 })
+
+  // URL darf NICHT auf /admin/partner-leads navigiert haben
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-6-scrape.png', fullPage: true }).catch(() => {})
+})
