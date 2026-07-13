@@ -43,4 +43,35 @@ describe('erstelleOeffentlichenRueckruf — Makler-Attribution + Standort', () =
     const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
     expect(extra.promotion_code_id).toBeUndefined()
   })
+
+  it('schreibt fahrzeug_standort_lat/lng/place_id wenn Koordinaten-Paar da ist', async () => {
+    await erstelleOeffentlichenRueckruf({
+      name: 'Max Mustermann', telefon: '+4915112345678', quelle: 'makler-anfrage-rueckruf',
+      standortLat: 50.9384, standortLng: 6.9601, standortPlaceId: 'ChIJ-test',
+    })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.fahrzeug_standort_lat).toBe(50.9384)
+    expect(extra.fahrzeug_standort_lng).toBe(6.9601)
+    expect(extra.fahrzeug_standort_place_id).toBe('ChIJ-test')
+  })
+
+  it('ohne Koordinaten: kein lat/lng/place_id', async () => {
+    await erstelleOeffentlichenRueckruf({ name: 'Erika Frei', telefon: '+4915100000000', quelle: 'rueckruf', standortOrt: 'Koeln' })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect('fahrzeug_standort_lat' in extra).toBe(false)
+    expect('fahrzeug_standort_place_id' in extra).toBe(false)
+  })
+
+  it('nur lat ohne lng -> kein Partial-Write (Pair-Guard)', async () => {
+    await erstelleOeffentlichenRueckruf({ name: 'Max M', telefon: '+4915112345678', quelle: 'rueckruf', standortLat: 50.9, standortLng: null })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect('fahrzeug_standort_lat' in extra).toBe(false)
+    expect('fahrzeug_standort_lng' in extra).toBe(false)
+  })
+
+  it('NaN-Koordinate wird verworfen (Number.isFinite-Guard)', async () => {
+    await erstelleOeffentlichenRueckruf({ name: 'Max M', telefon: '+4915112345678', quelle: 'rueckruf', standortLat: Number.NaN, standortLng: 6.96 })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect('fahrzeug_standort_lat' in extra).toBe(false)
+  })
 })

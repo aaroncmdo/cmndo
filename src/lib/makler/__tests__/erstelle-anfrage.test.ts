@@ -166,6 +166,23 @@ describe('erstelleMaklerAnfrage', () => {
     expect(res.ok).toBe(true)
   })
 
+  it('rueckruf: reicht Standort-Koordinaten (lat/lng/place_id) an erstelleOeffentlichenRueckruf durch', async () => {
+    await erstelleMaklerAnfrage({
+      ...baseInput,
+      ausgang: 'rueckruf',
+      standortPlz: '50667',
+      standortOrt: 'Hauptstraße 5, 50667 Köln',
+      standortLat: 50.9384,
+      standortLng: 6.9601,
+      standortPlaceId: 'ChIJ-test',
+    })
+    const arg = rueckrufMock.mock.calls[0][0] as Record<string, unknown>
+    expect(arg.standortLat).toBe(50.9384)
+    expect(arg.standortLng).toBe(6.9601)
+    expect(arg.standortPlaceId).toBe('ChIJ-test')
+    expect(arg.standortPlz).toBe('50667')
+  })
+
   it('Einwilligungs-Nachweis wird als Timeline-Eintrag protokolliert', async () => {
     await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect(timelineInsertMock).toHaveBeenCalled()
