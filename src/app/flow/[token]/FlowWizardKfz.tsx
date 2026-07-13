@@ -43,6 +43,8 @@ import { SheetCard } from '@/components/shared/SheetCard'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import SaSignaturStep from './SaSignaturStep'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
+import { FlowWerkstattHinweisHaftpflicht } from './FlowWerkstattHinweisHaftpflicht'
+import { resolveAbrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -272,6 +274,11 @@ export default function FlowWizardKfz({
   const [schuldfrageWahl, setSchuldfrageWahl] = useState<string | null>(initialSchuldfrage)
   const istIncomplete = initialNeedsBooking
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
+  // Task 12: Haftpflicht (schuldfrage='gegner') erreicht den Werkstatt-Step nie
+  // (quali-flow-outcome: reparaturwunsch=null) — read-only Reparatur-nach-Gutachten-Hinweis am SA-Step.
+  const istHaftpflicht =
+    resolveAbrechnungsweg({ schuldfrage: schuldfrageWahl, ueberEigeneVersicherung: null }) ===
+    'haftpflicht'
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
   // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
   const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
@@ -754,6 +761,9 @@ export default function FlowWizardKfz({
                   sub={t('step_sa.sub')}
                   icon={<PenToolIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
+
+                {/* Task 12: Haftpflicht — Reparatur-nach-Gutachten-Hinweis vor der Beauftragung. */}
+                {istHaftpflicht && <FlowWerkstattHinweisHaftpflicht />}
 
                 <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-md px-4 py-4 mb-5 text-sm text-claimondo-navy leading-relaxed">
                   <p className="font-medium text-claimondo-navy mb-2">{t('step_sa.summary_label')}</p>
