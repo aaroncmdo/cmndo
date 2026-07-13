@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Drawer } from '@/components/primitives'
 import AnlegenTabs from '@/app/admin/sachverstaendige/anlegen/AnlegenTabs'
+import QrPoolDrawerContent from './wizards/QrPoolDrawerContent'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
 import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
@@ -20,12 +21,17 @@ export default function VertriebAktionsleiste({
 }) {
   const router = useRouter()
   const [svAnlegen, setSvAnlegen] = useState(false)
+  const [qrDrawer, setQrDrawer] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
   if (aktionen.length === 0) return null
 
   function ausloesen(a: VertriebAktion) {
     if (a.key === 'anlegen-sv') {
       setSvAnlegen(true)
+      return
+    }
+    if (a.key === 'qrpool') {
+      setQrDrawer(true)
       return
     }
     if (a.href) router.push(a.href)
@@ -58,6 +64,15 @@ export default function VertriebAktionsleiste({
               zeigt z. B. das Initial-Passwort). onCancel/„Zur SV-Liste": Drawer schliessen. */}
           <AnlegenTabs onSuccess={() => router.refresh()} onCancel={schliessen} />
         </div>
+      </Drawer>
+
+      <Drawer
+        open={qrDrawer}
+        onClose={() => { setQrDrawer(false); router.refresh() }}
+        width={860}
+        ariaLabel="QR-Pool verwalten"
+      >
+        <QrPoolDrawerContent />
       </Drawer>
     </>
   )
