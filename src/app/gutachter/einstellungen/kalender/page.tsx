@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import KalenderEinstellungenClient from './KalenderEinstellungenClient'
@@ -30,7 +31,10 @@ export default async function KalenderEinstellungenPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  const { data: caldavRow } = await supabase
+  // kalender_verbindungen ist RLS-locked (server-only, wie linkedin_oauth_tokens) — der
+  // User-Kontext-Client liefe leer. Admin-Client + expliziter profile_id-Self-Filter (=
+  // einzige Zugriffsgrenze, MUSS bleiben). Kein Credential-Select (password_encrypted/server_url).
+  const { data: caldavRow } = await createAdminClient()
     .from('kalender_verbindungen')
     .select('id, provider_label, username, calendar_display_name, connected_at, last_sync_at, last_error, last_error_at')
     .eq('profile_id', user.id)

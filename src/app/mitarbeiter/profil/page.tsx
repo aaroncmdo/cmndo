@@ -4,6 +4,7 @@
 // SP2b: + Kalender-Connect-Section (Google + CalDAV) via geteiltem KalenderConnectPanel.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { BellIcon } from 'lucide-react'
 import MitarbeiterProfilClient from './MitarbeiterProfilClient'
@@ -35,7 +36,10 @@ export default async function MitarbeiterProfilPage() {
 
   // SP2b: Kalender-Connect-Status — Google aus profiles (kanonisch, rollen-agnostisch),
   // CalDAV aus kalender_verbindungen (SP2a-SSoT) per profile_id (= user.id).
-  const { data: caldavRow } = await supabase
+  // kalender_verbindungen ist RLS-locked (server-only, wie linkedin_oauth_tokens) — der
+  // User-Kontext-Client liefe leer. Admin-Client + expliziter profile_id-Self-Filter (=
+  // einzige Zugriffsgrenze, MUSS bleiben). Kein Credential-Select (password_encrypted/server_url).
+  const { data: caldavRow } = await createAdminClient()
     .from('kalender_verbindungen')
     .select('id, provider_label, username, calendar_display_name, connected_at, last_sync_at, last_error, last_error_at')
     .eq('profile_id', user.id)

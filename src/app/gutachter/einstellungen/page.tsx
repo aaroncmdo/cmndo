@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { CalendarIcon, UserIcon, ChevronRightIcon, Code2Icon, ClockIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { berlinIsoDate } from '@/lib/time/berlin-day'
@@ -68,7 +69,9 @@ export default async function EinstellungenPage() {
       ? { label: 'Individuell', tone: 'green' as const }
       : { label: 'Standard-Zeiten', tone: 'gray' as const }
 
-  const { data: caldavRow } = await supabase
+  // kalender_verbindungen ist RLS-locked (server-only) — User-Kontext liefe leer. Admin-Client
+  // + expliziter profile_id-Self-Filter (einzige Zugriffsgrenze, MUSS bleiben).
+  const { data: caldavRow } = await createAdminClient()
     .from('kalender_verbindungen')
     .select('id, last_error')
     .eq('profile_id', user.id)
