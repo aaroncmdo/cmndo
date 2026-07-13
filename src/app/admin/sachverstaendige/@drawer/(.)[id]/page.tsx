@@ -18,7 +18,9 @@ export default async function InterceptedSvDetailPage({
   return (
     <DrawerShell title="Sachverständigen-Profil" width={860}>
       <div className="px-6 py-6">
-        <SvDetailPage params={params} searchParams={searchParams} />
+        {/* variant="drawer": kein Zurueck-Link — der Drawer liegt ueber der Liste
+            und hat bereits Titelzeile + Close-Button. */}
+        <SvDetailPage params={params} searchParams={searchParams} variant="drawer" />
       </div>
     </DrawerShell>
   )

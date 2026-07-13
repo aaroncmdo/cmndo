@@ -9,7 +9,7 @@ import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './V
 import AbrechnungsTab from './AbrechnungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
-import PageHeader from '@/components/shared/PageHeader'
+import EntityDetailShell, { type DetailTab } from '@/components/shared/detail/EntityDetailShell'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
@@ -21,13 +21,25 @@ type SvSearchParams = { tab?: string }
 export default async function SvDetailPage({
   params,
   searchParams,
+  variant = 'page',
 }: {
   params: Promise<{ id: string }>
   searchParams?: Promise<SvSearchParams>
+  /**
+   * "drawer" wenn eine Intercepting-Route diese Page im DrawerShell rendert
+   * (@drawer/(.)[id] bzw. vertrieb/@drawer/(.)sachverstaendige/[id]).
+   * Next uebergibt der echten Route nur params/searchParams -> Default "page".
+   */
+  variant?: 'page' | 'drawer'
 }) {
   const { id } = await params
   const sp = (await searchParams) ?? {}
   const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : sp.tab === 'abrechnungen' ? 'abrechnungen' : 'stammdaten'
+  const tabs: DetailTab[] = [
+    { key: 'stammdaten', label: 'Stammdaten', href: `/admin/sachverstaendige/${id}` },
+    { key: 'verifizierung', label: 'Verifizierung', href: `/admin/sachverstaendige/${id}?tab=verifizierung` },
+    { key: 'abrechnungen', label: 'Abrechnungen', href: `/admin/sachverstaendige/${id}?tab=abrechnungen` },
+  ]
   const supabase = await createClient()
 
   // AAR-659: profiles-Embed mit FK-Hint (Follow-up zu AAR-657 — die Stelle
@@ -282,16 +294,14 @@ export default async function SvDetailPage({
   }
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
-      {/* ── Header (Card via PageHeader; flex-shrink-0 fixiert) ── */}
-      <div className="flex-shrink-0 px-4 pt-4">
-        <div>
-          <Link href="/admin/sachverstaendige" className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo transition-colors mb-1.5 inline-block">
-            &larr; Gutachter-Übersicht
-          </Link>
-          <PageHeader
-            title={name || 'Sachverständiger'}
-            description={
+    <EntityDetailShell
+      variant={variant}
+      title={name || 'Sachverständiger'}
+      backHref="/admin/sachverstaendige"
+      backLabel="Gutachter-Übersicht"
+      tabs={tabs}
+      activeTab={activeTab}
+      description={
               <span className="flex items-center gap-3 flex-wrap">
                 {profile?.email && <span>{profile.email}</span>}
                 {sv.gutachter_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-1.5 py-0.5 rounded text-[10px] font-medium">{sv.gutachter_typ}</span>}
@@ -368,48 +378,9 @@ export default async function SvDetailPage({
                   }}
                 />
               </>
-            }
-          />
-        </div>
-      </div>
-
-      {/* ── Tab-Navigation (AAR-359 W6) ────────────────────────────── */}
-      <div className="border-b border-claimondo-border bg-white flex-shrink-0 px-4">
-        <div className="max-w-6xl mx-auto flex gap-1">
-          <Link
-            href={`/admin/sachverstaendige/${id}`}
-            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'stammdaten'
-                ? 'border-claimondo-ondo text-claimondo-shield'
-                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
-          >
-            Stammdaten
-          </Link>
-          <Link
-            href={`/admin/sachverstaendige/${id}?tab=verifizierung`}
-            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'verifizierung'
-                ? 'border-claimondo-ondo text-claimondo-shield'
-                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
-          >
-            Verifizierung
-          </Link>
-          <Link
-            href={`/admin/sachverstaendige/${id}?tab=abrechnungen`}
-            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
-              activeTab === 'abrechnungen'
-                ? 'border-claimondo-ondo text-claimondo-shield'
-                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
-            }`}
-          >
-            Abrechnungen
-          </Link>
-        </div>
-      </div>
-
-      {/* ── Tab-Content ──────────────────────────────────────────── */}
+      }
+    >
+      {/* ── Tab-Content (Tab-Bar liefert EntityDetailShell) ────────── */}
       {activeTab === 'abrechnungen' ? (
         <AbrechnungsTab rows={abrechnungsRows} aggregat={abrechnungsAggregat} />
       ) : activeTab === 'verifizierung' ? (
@@ -591,6 +562,6 @@ export default async function SvDetailPage({
         </div>
       </div>
       )}
-    </div>
+    </EntityDetailShell>
   )
 }

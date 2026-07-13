@@ -66,8 +66,17 @@ describe('EntityDetailShell', () => {
     expect(html).not.toContain('href="/admin/organisationen"')
   })
 
-  it('rendert die Sidebar nur wenn uebergeben', () => {
-    expect(render({ sidebar: React.createElement('div', null, 'SIDEBAR') })).toContain('SIDEBAR')
-    expect(render()).not.toContain('SIDEBAR')
+  it('rendert den Tab-Content unveraendert durch (kein aufgezwungenes Layout)', () => {
+    // Die Shell schreibt bewusst KEIN Content-Layout vor — das Related-Panel
+    // gehoert dem Tab (siehe SV-Stammdaten: 2-Spalten im max-w-6xl-Container).
+    const html = render({
+      children: React.createElement(
+        'div',
+        { className: 'flex-1' },
+        React.createElement('aside', null, 'RELATED-PANEL'),
+      ),
+    })
+    expect(html).toContain('RELATED-PANEL')
+    expect(html).toContain('flex-1')
   })
 })

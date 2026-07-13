@@ -16,7 +16,8 @@ export default async function InterceptedCockpitSvDetail({
   return (
     <DrawerShell title="Sachverständigen-Profil" width={860}>
       <div className="px-6 py-6">
-        <SvDetailPage params={params} searchParams={searchParams} />
+        {/* variant="drawer": kein Zurueck-Link (der Drawer liegt ueber dem Cockpit). */}
+        <SvDetailPage params={params} searchParams={searchParams} variant="drawer" />
       </div>
     </DrawerShell>
   )

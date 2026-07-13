@@ -1,16 +1,18 @@
 // P0 (Detail-View-Konsistenz): Geteiltes Chrome fuer Entity-Detail-Views.
 // Verallgemeinert das Skelett von admin/sachverstaendige/[id] (Gold-Standard):
-// Back-Link + PageHeader + Tab-Bar + Content mit optionaler Related-Sidebar.
+// Back-Link + PageHeader + Tab-Bar. Der Content-Bereich bleibt frei — jeder Tab
+// bringt sein eigenes Layout mit (das SV-Stammdaten-Tab z.B. ein 2-Spalten-
+// Layout mit Related-Panel). Die Shell schreibt bewusst KEIN Content-Layout vor:
+// das Related-Panel gehoert dem Tab, nicht der Shell.
 //
 // SERVER-Component MIT ABSICHT: die Tabs sind <Link>s (?tab=), kein Client-State.
 // Dadurch kann die konsumierende Server-Page NUR die Daten des AKTIVEN Tabs laden
-// (siehe SV-Detail: die Verifizierungs-Daten werden nur bei tab=verifizierung
-// gequeryt). FallakteTabs (client, onTabChange, <button>) bleibt den Fallakte-
-// Shells vorbehalten — anderes Paradigma, bewusst getrennt.
+// (siehe SV-Detail: Verifizierungs- bzw. Abrechnungs-Daten werden nur gequeryt,
+// wenn der jeweilige Tab aktiv ist). FallakteTabs (client, onTabChange, <button>)
+// bleibt den Fallakte-Shells vorbehalten — anderes Paradigma, bewusst getrennt.
 //
-// Das Chrome ist bewusst 1:1 das heutige SV-Detail-Chrome (weisse Leiste +
-// PageHeader + separate Tab-Zeile) => der SV-Refactor ist visuell net-zero.
-// Header-Optik-Harmonisierung gehoert der portal-header-Lane (7ca8e37c).
+// Das Chrome ist 1:1 das heutige SV-Detail-Chrome => der SV-Refactor ist visuell
+// net-zero. Header-Optik-Harmonisierung gehoert der portal-header-Lane (7ca8e37c).
 //
 // Rezept fuer neue Detail-Views: docs/superpowers/detail-view-recipe.md
 
@@ -40,14 +42,16 @@ export type EntityDetailShellProps = {
   /** Weglassen => keine Tab-Bar (Single-View-Entities). */
   tabs?: readonly DetailTab[]
   activeTab?: string
-  /** Optionale rechte Spalte (verwandte Entities: Faelle, Tasks …). */
-  sidebar?: ReactNode
   /**
-   * "page"   = Full-Page (sticky Header + Back-Link).
-   * "drawer" = im DrawerShell gerendert — kein Back-Link, nicht sticky
-   *            (der Drawer hat bereits Titelzeile + Close-Button).
+   * "page"   = Full-Page (mit Back-Link zur Liste).
+   * "drawer" = im DrawerShell gerendert — kein Back-Link, denn der Drawer liegt
+   *            ueber der Liste und hat bereits Titelzeile + Close-Button.
    */
   variant?: 'page' | 'drawer'
+  /**
+   * Tab-Inhalt. Bringt sein eigenes Layout mit (i.d.R. ein `flex-1`-Wrapper,
+   * damit er den Rest der Hoehe fuellt).
+   */
   children: ReactNode
 }
 
@@ -59,7 +63,6 @@ export default function EntityDetailShell({
   backLabel = 'Übersicht',
   tabs,
   activeTab,
-  sidebar,
   variant = 'page',
   children,
 }: EntityDetailShellProps) {
@@ -68,11 +71,7 @@ export default function EntityDetailShell({
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Header ─────────────────────────────────────────────────── */}
-      <div
-        className={`bg-white border-b border-claimondo-border shrink-0 px-4 py-3 ${
-          isDrawer ? '' : 'sticky top-0 z-20'
-        }`}
-      >
+      <div className="flex-shrink-0 px-4 pt-4">
         {!isDrawer && backHref ? (
           <Link
             href={backHref}
@@ -88,9 +87,9 @@ export default function EntityDetailShell({
       {tabs && tabs.length > 0 ? (
         <nav
           aria-label="Detail-Tabs"
-          className="border-b border-claimondo-border bg-white shrink-0 px-4"
+          className="border-b border-claimondo-border bg-white flex-shrink-0 px-4"
         >
-          <div className="flex items-center gap-1 overflow-x-auto py-1.5">
+          <div className="max-w-6xl mx-auto flex gap-1">
             {tabs.map((tab) => {
               const active = tab.key === activeTab
               return (
@@ -98,15 +97,15 @@ export default function EntityDetailShell({
                   key={tab.key}
                   href={tab.href}
                   aria-current={active ? 'page' : undefined}
-                  className={`relative flex items-center gap-2 px-3.5 py-2 text-sm rounded-ios-lg transition-all whitespace-nowrap ${
+                  className={`inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
                     active
-                      ? 'bg-claimondo-ondo/10 text-claimondo-navy font-semibold ring-1 ring-claimondo-ondo/20'
-                      : 'text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg font-medium'
+                      ? 'border-claimondo-ondo text-claimondo-shield'
+                      : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
                   }`}
                 >
                   {tab.label}
                   {tab.badgeCount && tab.badgeCount > 0 ? (
-                    <span className="ml-1 inline-flex items-center justify-center min-w-4 h-4 px-1 text-caption font-bold text-white bg-danger rounded-full">
+                    <span className="inline-flex items-center justify-center min-w-4 h-4 px-1 text-caption font-bold text-white bg-danger rounded-full">
                       {tab.badgeCount > 99 ? '99+' : tab.badgeCount}
                     </span>
                   ) : null}
@@ -117,17 +116,8 @@ export default function EntityDetailShell({
         </nav>
       ) : null}
 
-      {/* ── Content ‖ optionale Related-Sidebar ────────────────────── */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <div className="h-full flex min-w-0">
-          <main className="flex-1 min-w-0 overflow-y-auto">{children}</main>
-          {sidebar ? (
-            <aside className="w-[340px] shrink-0 border-l border-claimondo-border overflow-y-auto bg-claimondo-bg/30">
-              {sidebar}
-            </aside>
-          ) : null}
-        </div>
-      </div>
+      {/* ── Tab-Content (bringt sein eigenes Layout mit) ───────────── */}
+      {children}
     </div>
   )
 }
