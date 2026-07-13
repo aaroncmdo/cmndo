@@ -1,21 +1,34 @@
 'use server'
 
-import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { buildWelcomeConfirmLink } from '@/lib/auth/welcome-link'
+
+// NICHT exportieren — aus 'use server'-Files exportierte Konstanten werden im
+// Client-Bundle zu undefined (AGENTS.md, AAR-664).
+const MAX_RESET_MAILS_PRO_STUNDE = 3
 
 /**
  * BUG-84: Passwort-Reset Backend.
  *
  * Schickt einen Reset-Link an die angegebene Email. Returnt aus
  * Sicherheits-Gründen IMMER `success: true` (Email-Enumeration-Schutz —
- * der Caller darf nicht erfahren, ob die Email überhaupt einen Account
- * hat).
+ * der Caller darf nicht erfahren, ob die Email überhaupt einen Account hat).
  *
- * Der redirectTo-Pfad muss in der Supabase-Dashboard-Konfiguration unter
- * "Auth → URL Configuration → Redirect URLs" freigegeben sein, sonst lehnt
- * Supabase den Link ab.
+ * VERSAND ÜBER DIE APP-PIPELINE (Resend/SMTP + branded react-email-Template),
+ * nicht mehr über `supabase.auth.resetPasswordForEmail`. Grund (13.07.2026,
+ * evidenzbasiert): resetPasswordForEmail geht über Supabases Built-in-Mailer
+ * (noreply@mail.app.supabase.io) — generisches Template, projektweites Rate-Limit
+ * (~2-4 Mails/h) und schlechte Zustellbarkeit bei Firmen-Domains. Reset-Mails kamen
+ * schlicht nicht an; der User sah nur den alten, laengst abgelaufenen Link.
+ *
+ * Der Link kommt aus dem geteilten `buildWelcomeConfirmLink`-Helper (wie alle
+ * Welcome-Magic-Links): generateLink({type:'recovery'}) -> hashed_token ->
+ * /api/auth/confirm, das verifyOtp SERVERSEITIG aufruft und die Session als
+ * COOKIE etabliert. Dadurch funktioniert der Reset auch geraeteuebergreifend
+ * (kein PKCE-code_verifier im Browser noetig) und /passwort-zuruecksetzen findet
+ * die Session direkt.
  */
 export async function requestPasswordReset(
   email: string,
@@ -23,24 +36,59 @@ export async function requestPasswordReset(
   const trimmed = (email ?? '').trim().toLowerCase()
   if (!trimmed) return { success: true }
 
-  const supabase = await createClient()
-
-  // Origin aus Request-Headern bauen, damit lokale Dev-Sessions den
-  // localhost-Link bekommen und Production den app.claimondo.de-Link.
-  const h = await headers()
-  const proto = h.get('x-forwarded-proto') ?? 'https'
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'app.claimondo.de'
-  const origin = `${proto}://${host}`
-
   try {
-    await supabase.auth.resetPasswordForEmail(trimmed, {
-      redirectTo: `${origin}/passwort-zuruecksetzen`,
-    })
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const admin = createAdminClient()
+
+    // ANTI-BOMBING: Supabases Built-in-Mailer hatte ein (grobes) projektweites Rate-Limit,
+    // das mit dem Wechsel auf die App-Pipeline wegfaellt. /passwort-vergessen ist oeffentlich
+    // + unauthentifiziert -> ohne Drossel koennte jemand ein fremdes Postfach zumuellen.
+    // Deshalb explizit: max. MAX_RESET_MAILS_PRO_STUNDE pro Empfaenger.
+    // FAIL-OPEN: ein DB-Hiccup im Check darf einen legitimen Reset niemals blockieren.
+    let gedrosselt = false
+    try {
+      const seit = new Date(Date.now() - 60 * 60_000).toISOString()
+      const { count } = await admin
+        .from('email_log')
+        .select('id', { count: 'exact', head: true })
+        .eq('template', 'passwort_reset')
+        .eq('empfaenger', trimmed)
+        .gte('created_at', seit)
+      gedrosselt = (count ?? 0) >= MAX_RESET_MAILS_PRO_STUNDE
+    } catch (err) {
+      console.error('[requestPasswordReset] Rate-Limit-Check fehlgeschlagen (fail-open):', err)
+    }
+    if (gedrosselt) {
+      // Nach aussen ununterscheidbar von einem Versand (Enumeration-/Abuse-Schutz).
+      console.warn('[requestPasswordReset] Rate-Limit erreicht — kein weiterer Versand')
+      return { success: true }
+    }
+
+    // Unbekannte Email -> generateLink schlaegt fehl -> null -> wir senden nichts,
+    // returnen aber trotzdem success (Enumeration-Schutz bleibt gewahrt).
+    const actionUrl = await buildWelcomeConfirmLink(trimmed, 'recovery', '/passwort-zuruecksetzen')
+    if (actionUrl) {
+      // Vorname nur fuer die Anrede (best-effort). Das Ergebnis verlaesst die
+      // Funktion nie -> kein Existenz-Leak an den Caller.
+      const { data: profil } = await admin
+        .from('profiles')
+        .select('vorname')
+        .eq('email', trimmed)
+        .maybeSingle()
+
+      const { sendPasswortReset } = await import('@/lib/email/google/flows')
+      const res = await sendPasswortReset({
+        to: trimmed,
+        vorname: (profil?.vorname as string | null) ?? null,
+        actionUrl,
+      })
+      if (!res.success) {
+        console.error('[requestPasswordReset] Mail-Versand fehlgeschlagen:', res.error)
+      }
+    }
   } catch (err) {
-    // Auch bei Fehlern silent success — wir wollen keine Information
-    // darüber leaken, ob der Account existiert. Trotzdem in Server-Log
-    // schreiben, falls Aaron im Dashboard nachschauen will.
-    console.error('[requestPasswordReset] Supabase-Fehler:', err)
+    // Silent success — keine Information darueber leaken, ob der Account existiert.
+    console.error('[requestPasswordReset] Fehler:', err)
   }
 
   return { success: true }
