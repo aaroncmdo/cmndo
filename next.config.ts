@@ -21,7 +21,12 @@ const nextConfig: NextConfig = {
   // virtuellen /ROOT-Pfad statt das echte node_modules auf -> "Cannot find
   // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
   // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
-  serverExternalPackages: ['pdf-parse'],
+  // Remotion (Marketing-Content-Studio): @remotion/renderer + @remotion/bundler laden
+  // native Binaries (Chromium-Compositor, esbuild) via runtime-require. Turbopack darf sie
+  // NICHT in den Route-Chunk bundlen (analog pdf-parse) -> als serverExternalPackages laufen
+  // sie als echte node_modules. Der Render-Orchestrator (src/lib/marketing/render-clip.ts)
+  // buendelt src/remotion/ separat, ausserhalb von Next.
+  serverExternalPackages: ['pdf-parse', '@remotion/renderer', '@remotion/bundler'],
   // SV-Onboarding-Doku-Upload (uploadSvPflichtdokument / uploadSaVorlage) erlaubt
   // 15 MB PDFs/Scans. Server-Actions capen den Request-Body per Default bei 1 MB
   // -> jede Datei > 1 MB warf einen Framework-Fehler VOR dem Action-Code, der
