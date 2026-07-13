@@ -33,3 +33,17 @@ export function buildImageBlocks(
     source: { type: 'url' as const, url },
   }))
 }
+
+export function buildImageBlocksBase64(
+  images: readonly { data: string; media_type: string }[],
+  limit = 8,
+): Anthropic.Messages.ImageBlockParam[] {
+  return images.slice(0, limit).map((img) => ({
+    type: 'image' as const,
+    source: {
+      type: 'base64' as const,
+      media_type: img.media_type as 'image/jpeg' | 'image/png' | 'image/webp',
+      data: img.data,
+    },
+  }))
+}

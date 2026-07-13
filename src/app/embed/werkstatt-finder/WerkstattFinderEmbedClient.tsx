@@ -1,27 +1,33 @@
 'use client'
 
 // Oeffentlicher Werkstatt-Embed-Finder (Client). Flow: initiale Suche (lat/lng/plz aus
-// der iframe-URL) -> echte Partner-Werkstaetten in der Naehe -> Pick + Kurz-Kontakt ->
+// der iframe-URL) -> echte Partner-Werkstaetten in der Naehe -> (optional) Schadenfoto
+// hochladen -> Bedarf ableiten -> qualifizierte Werkstaetten -> Pick + Kurz-Kontakt ->
 // erstelleWerkstattFinderLead legt einen Lead an (Reparateur-Zuweisung nur wenn gewaehlt
 // UND Test-Guard passt) und liefert einen FlowLink-Token -> Redirect in den bestehenden
 // /flow (der die Strecke Haftpflicht/Selbstzahler verzweigt). Supply-Gate: 0 Treffer ->
 // Absenden ohne Werkstatt erlaubt (Dispatcher matcht).
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/primitives/Button'
 import { TextField } from '@/components/shared/forms/TextField'
 import { WerkstattFinderMap } from '@/components/kunde/WerkstattFinderMap'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import type { Fit, Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
+import type { EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import {
   sucheEchteWerkstaetten,
   sucheWerkstaettenNachOrt,
   erstelleWerkstattFinderLead,
+  klassifiziereSchadenfotoEmbed,
 } from './actions'
 
 type Props = { initialLat?: number; initialLng?: number; initialPlz?: string }
 
+const MAX_FOTOS = 3
+
 export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz }: Props) {
-  const [rows, setRows] = useState<WerkstattFinderRow[]>([])
+  const [rows, setRows] = useState<(WerkstattFinderRow & { fit?: Fit })[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(
@@ -30,19 +36,33 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
   const [ort, setOrt] = useState(initialPlz ?? '')
   const [suchLauft, setSuchLauft] = useState(false)
   const [ortNichtGefunden, setOrtNichtGefunden] = useState(false)
+  const [keineSpezialisierte, setKeineSpezialisierte] = useState(false)
   const [form, setForm] = useState({ vorname: '', nachname: '', email: '', telefon: '' })
   const [sending, setSending] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
 
+  // Foto-Funnel-State
+  const [fotos, setFotos] = useState<EmbedFoto[]>([])
+  const [bedarf, setBedarf] = useState<Reparaturbedarf | null>(null)
+  const [klassifiziert, setKlassifiziert] = useState(false)
+  const [klassifiziereLaeuft, setKlassifiziereLaeuft] = useState(false)
+  const fotoInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     let aktiv = true
     setLoading(true)
-    sucheEchteWerkstaetten({ lat: initialLat, lng: initialLng, plz: initialPlz })
+    sucheEchteWerkstaetten({ lat: initialLat, lng: initialLng, plz: initialPlz, bedarf: bedarf ?? undefined })
       .then((r) => {
-        if (aktiv) setRows(r)
+        if (aktiv) {
+          setRows(r.werkstaetten)
+          setKeineSpezialisierte(r.keineSpezialisierte)
+        }
       })
       .catch(() => {
-        if (aktiv) setRows([])
+        if (aktiv) {
+          setRows([])
+          setKeineSpezialisierte(false)
+        }
       })
       .finally(() => {
         if (aktiv) setLoading(false)
@@ -50,6 +70,9 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     return () => {
       aktiv = false
     }
+    // bedarf ist bewusst nicht in den Dependencies — initiale Suche ohne Bedarf;
+    // Re-Suche mit Bedarf geschieht explizit nach Klassifizierung (handleFotoUpload).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialLat, initialLng, initialPlz])
 
   async function sucheOrt(e: React.FormEvent) {
@@ -60,16 +83,70 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     setOrtNichtGefunden(false)
     setSelectedId(null)
     try {
-      const res = await sucheWerkstaettenNachOrt(q)
-      setRows(res.rows)
+      const res = await sucheWerkstaettenNachOrt(q, bedarf ?? undefined)
+      setRows(res.werkstaetten)
       setCenter(res.center)
-      if (res.center == null && res.rows.length === 0) setOrtNichtGefunden(true)
+      setKeineSpezialisierte(res.keineSpezialisierte)
+      if (res.center == null && res.werkstaetten.length === 0) setOrtNichtGefunden(true)
     } catch {
       setRows([])
       setCenter(null)
+      setKeineSpezialisierte(false)
       setOrtNichtGefunden(true)
     } finally {
       setSuchLauft(false)
+    }
+  }
+
+  /** Liest Dateien als base64-EmbedFoto (max MAX_FOTOS), klassifiziert, sucht neu. */
+  async function handleFotoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const dateien = Array.from(e.target.files ?? []).slice(0, MAX_FOTOS)
+    if (dateien.length === 0) return
+
+    // Dateien zu base64 konvertieren (FileReader). Leere Fotos ({data:''}) werden
+    // vom Guard/sanitize server-seitig ohnehin verworfen — hier nur Robustheit,
+    // damit ein Lese-/Format-Fehler das Promise.all nicht haengen laesst (Spinner).
+    const neueFotos = await Promise.all(
+      dateien.map(
+        (datei) =>
+          new Promise<EmbedFoto>((resolve) => {
+            const reader = new FileReader()
+            reader.onerror = () => resolve({ media_type: '', data: '' })
+            reader.onload = (ev) => {
+              const dataUrl = ev.target?.result as string
+              // data-URL Format: "data:<media_type>;base64,<data>"
+              if (!dataUrl?.includes(',')) return resolve({ media_type: '', data: '' })
+              const [header, data] = dataUrl.split(',')
+              const media_type = header.replace('data:', '').replace(';base64', '')
+              resolve({ media_type, data })
+            }
+            reader.readAsDataURL(datei)
+          }),
+      ),
+    )
+
+    setFotos(neueFotos)
+    setKlassifiziereLaeuft(true)
+    try {
+      const neuerBedarf = await klassifiziereSchadenfotoEmbed(neueFotos)
+      setBedarf(neuerBedarf)
+      setKlassifiziert(true)
+
+      // Re-Suche mit Bedarf
+      const sucheInput = {
+        lat: center?.lat ?? initialLat,
+        lng: center?.lng ?? initialLng,
+        plz: center ? undefined : initialPlz,
+        bedarf: neuerBedarf,
+      }
+      const r = await sucheEchteWerkstaetten(sucheInput)
+      setRows(r.werkstaetten)
+      setKeineSpezialisierte(r.keineSpezialisierte)
+    } catch {
+      // Fail-safe: Klassifizierung schlaegt fehl → unbeeintraechtigte Suche
+      console.error('[WerkstattFinderEmbedClient] Klassifizierung fehlgeschlagen (non-fatal)')
+    } finally {
+      setKlassifiziereLaeuft(false)
     }
   }
 
@@ -91,6 +168,8 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
       lat: center?.lat ?? null,
       lng: center?.lng ?? null,
       ort: gewaehlt?.adresse_ort ?? (ort.trim() || null),
+      fotos: fotos.length > 0 ? fotos : undefined,
+      bedarf: bedarf ?? undefined,
     })
     setSending(false)
     if (res.ok) {
@@ -120,12 +199,63 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
           Ort nicht gefunden — bitte PLZ oder Stadt prüfen.
         </p>
       )}
+
+      {/* Foto-Zone: optionales Schadenfoto für Werkstatt-Empfehlung */}
+      <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4 space-y-2">
+        <p className="text-body-sm font-medium text-claimondo-navy">
+          Schadenfoto hochladen (optional)
+        </p>
+        <p className="text-body-xs text-claimondo-slate">
+          Lade bis zu 3 Fotos deines Schadens hoch — wir empfehlen dir dann Werkstätten mit den
+          passenden Spezialisierungen.
+        </p>
+        <p className="text-body-xs text-claimondo-slate">
+          Datenschutz-Hinweis: Das Foto wird nur zur Werkstatt-Zuordnung analysiert und erst beim
+          Absenden gespeichert.
+        </p>
+        <input
+          ref={fotoInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          capture="environment"
+          multiple
+          className="hidden"
+          onChange={handleFotoUpload}
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={() => fotoInputRef.current?.click()}
+          loading={klassifiziereLaeuft}
+        >
+          {fotos.length > 0 ? `${fotos.length} Foto${fotos.length > 1 ? 's' : ''} ausgewählt` : 'Fotos auswählen'}
+        </Button>
+        {klassifiziert && bedarf && bedarf.kategorien.length > 0 && (
+          <p className="text-body-xs text-success-strong">
+            Erkannte Gewerke: {bedarf.kategorien.join(', ')} — Liste wurde angepasst.
+          </p>
+        )}
+        {klassifiziert && bedarf && bedarf.kategorien.length === 0 && (
+          <p className="text-body-xs text-claimondo-slate">
+            Gewerke konnten nicht erkannt werden — alle Werkstätten werden angezeigt.
+          </p>
+        )}
+      </div>
+
+      {keineSpezialisierte && (
+        <p className="text-body-sm text-warning-strong">
+          Keine spezialisierte Werkstatt in deiner Nähe gefunden — wir zeigen dir alle verfügbaren
+          Werkstätten.
+        </p>
+      )}
+
       <WerkstattFinderMap
         werkstaetten={rows}
         center={center}
         onSelect={setSelectedId}
         selectedId={selectedId}
         loading={loading}
+        keineSpezialisierte={keineSpezialisierte}
       />
       {!loading && rows.length === 0 && (
         <p className="text-body-sm text-claimondo-slate">
