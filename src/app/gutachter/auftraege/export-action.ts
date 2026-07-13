@@ -109,7 +109,9 @@ export async function exportTagesvorbereitung({
     .select('id, fall_id, start_zeit, status')
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
-    .in('status', ['bestaetigt', 'reserviert', 'durchgefuehrt'])
+    // 'durchgefuehrt' aus dem gutachter_termine-CHECK entfernt (Completion = durchgefuehrt_am);
+    // toter Filterwert. Abgeschlossene Termine sind fuer die Tagesvorbereitung ohnehin irrelevant.
+    .in('status', ['bestaetigt', 'reserviert'])
     .gte('start_zeit', vonDate.toISOString())
     .lt('start_zeit', bisDate.toISOString())
     .order('start_zeit', { ascending: true })

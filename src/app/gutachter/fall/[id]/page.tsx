@@ -293,7 +293,9 @@ export default async function GutachterFallPage({
     // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Filter)
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt', 'verlegung_pending'])
+    // 'durchgefuehrt' aus dem gutachter_termine-CHECK entfernt (Completion = durchgefuehrt_am);
+    // toter Filterwert. Abgeschlossene Termine sind kein "aktiver" Termin (waren nie im Filter).
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'verlegung_pending'])
     .order('created_at', { ascending: false })
 
   // Priorität wie in v_faelle_mit_aktuellem_termin:

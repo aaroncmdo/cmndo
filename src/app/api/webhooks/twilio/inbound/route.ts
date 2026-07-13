@@ -300,7 +300,8 @@ export async function POST(req: NextRequest) {
     await db.from('gutachter_termine')
       .update({ status: 'bestaetigt' })
       .eq('id', matchedTerminId)
-      .in('status', ['reserviert', 'angefragt'])
+      // 'angefragt' ist ein reparatur_termine-Wert (nicht im gutachter_termine-CHECK) — toter Filter.
+      .in('status', ['reserviert'])
 
     await db.from('timeline').insert({
       fall_id: matchedFallId,
