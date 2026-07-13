@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { KanzleiPaketPDF, type KanzleiPaketData } from '@/lib/pdf/kanzlei-paket'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -14,6 +15,25 @@ export async function GET(
 
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
+
+  // Storage-RLS-Rest: Die Doku-URLs im PDF werden unten mit dem Service-Client
+  // signiert — der private Bucket 'fall-dokumente' laesst den User-Client nicht
+  // signieren (createSignedUrl -> null), das PDF ging bisher komplett OHNE
+  // Doku-Links raus. Der Service-Client bypassed Storage-RLS, deshalb hier ein
+  // explizites Rollen-Gate (deny-by-default) auf die vier internen Rollen —
+  // spiegelt src/app/faelle/layout.tsx:47. Die Route hatte bisher NUR einen
+  // Login-Check: sie ist an keine UI gebunden, sondern wird per Email-Link
+  // geoeffnet. Das Fall-Scoping bleibt bei RLS (faelle_claim_bridge +
+  // fall_dokumente laufen weiter auf dem User-Client).
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .maybeSingle()
+  const rolle = profile?.rolle as string | undefined
+  if (!rolle || !['admin', 'kundenbetreuer', 'kanzlei', 'dispatch'].includes(rolle)) {
+    return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
+  }
 
   // Load fall — CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge (RLS spiegelt faelle) statt
   // .from('faelle'). Nur 6 Felder wurden real genutzt (select('*') war vestigial): claim_id (bridge)
@@ -115,11 +135,15 @@ export async function GET(
   // Tage haltbar sein. TTL = 7d über STORAGE_TTL.email. Sobald
   // STORAGE_USE_SIGNED_URLS=true gilt, sind die URLs Zugriffs-geschützt;
   // davor liefert getStorageUrl die heutige public-URL (kein Behavior-Change).
+  // Signieren mit dem Service-Client. Sicher, weil `dokumente` oben aus einer
+  // RLS-gescopten Query auf dem User-Client stammt — wir signieren also nur
+  // Pfade, die dieser User ohnehin sehen darf. Rollen-Gate steht am Routen-Kopf.
+  const adminStorage = createAdminClient()
   const dokumenteMapped = await Promise.all(
     (dokumente ?? []).map(async d => ({
       typ: d.dokument_typ as string | null,
       datei_url: d.storage_path
-        ? await getStorageUrl(supabase, 'fall-dokumente', d.storage_path as string, { context: 'email' })
+        ? await getStorageUrl(adminStorage, 'fall-dokumente', d.storage_path as string, { context: 'email' })
         : null,
       datei_name: (d.original_filename as string | null) ?? null,
     })),

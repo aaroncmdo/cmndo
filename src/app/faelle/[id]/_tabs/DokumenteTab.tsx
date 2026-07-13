@@ -21,9 +21,15 @@ import {
   CheckCircle2Icon,
   ClockIcon,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { getStorageUrl } from '@/lib/storage/url'
-import { uploadPflichtdokument } from '../_actions'
+// Storage-RLS-Rest: Upload laeuft ueber den kanonischen Server-Helper
+// (Storage + fall_dokumente + OCR + pflichtdokumente-Sync in einem Schritt).
+// Der fruehere Browser-Upload signte anschliessend selbst eine URL — auf dem
+// privaten Bucket liefert createSignedUrl im Browser aber `null`, der Upload
+// brach danach still ab. Ausserdem reichte er die URL als String an die
+// Action weiter, die sie in `pflichtdokumente.dokument_url` schrieb; alle
+// anderen Writer legen dort den storage_path ab (upload-dokument.ts:76,
+// zuordnung.ts:107). uploadDokumentToOutbox macht beides richtig.
+import { uploadDokumentToOutbox } from '@/lib/fall/upload-dokument'
 import {
   markDokumentNachgereicht,
   syncPflichtdokumenteForFall,
@@ -209,26 +215,24 @@ export default function DokumenteTab({
 
   async function handleFileUpload(file: File, pflichtdokId: string) {
     setUploading(pflichtdokId)
-    const supabase = createClient()
-    const ext = file.name.split('.').pop() ?? 'pdf'
-    const path = `faelle/${fallId}/${pflichtdokId}_${Date.now()}.${ext}`
-    const { error: upErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
-    if (upErr) {
+    try {
+      const slot = pflichtdokumente.find((d) => d.id === pflichtdokId)
+      const r = await uploadDokumentToOutbox(
+        fallId,
+        pflichtdokId,
+        file,
+        slot?.dokument_typ ?? 'sonstiges',
+        { istPflicht: slot?.pflicht ?? true },
+      )
+      if (!r.ok) {
+        toast.error(r.error)
+        return
+      }
+      toast.success('Dokument hochgeladen')
+      router.refresh()
+    } finally {
       setUploading(null)
-      return
     }
-    const url = await getStorageUrl(supabase, 'fall-dokumente', path)
-    if (!url) {
-      setUploading(null)
-      toast.error('URL-Generierung fehlgeschlagen')
-      return
-    }
-    const r = await uploadPflichtdokument(fallId, pflichtdokId, url)
-    if (!r.success) {
-      console.error('[DokumenteTab] uploadPflichtdokument:', r.error)
-    }
-    router.refresh()
-    setUploading(null)
   }
 
   const pflichtCount = pflichtdokumente.length
