@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme, type BrandThemeV2 } from './theme'
+import { svEigenBrandingErlaubt } from './gate'
 
 // AAR-424: Theme-Resolver für Server-Components.
 //
@@ -41,7 +42,7 @@ export async function resolveBrandTheme(
       .eq('id', sv.organisation_id)
       .maybeSingle()
 
-    if (org?.use_custom_branding && (org.brand_primary || org.brand_theme)) {
+    if (org && svEigenBrandingErlaubt(org) && (org.brand_primary || org.brand_theme)) {
       return {
         theme: hydrateTheme(
           org.brand_theme as Parameters<typeof hydrateTheme>[0],
@@ -56,7 +57,7 @@ export async function resolveBrandTheme(
     }
   }
 
-  if (sv.use_custom_branding && (sv.brand_primary || sv.brand_theme)) {
+  if (svEigenBrandingErlaubt(sv) && (sv.brand_primary || sv.brand_theme)) {
     return {
       theme: hydrateTheme(
         sv.brand_theme as Parameters<typeof hydrateTheme>[0],

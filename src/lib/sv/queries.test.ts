@@ -26,6 +26,10 @@ function makeBuilder() {
       calls.push(['not', col, val])
       return b
     },
+    or: (expr: string) => {
+      calls.push(['or', expr, undefined])
+      return b
+    },
     calls,
   }
   return b
@@ -51,5 +55,16 @@ describe('applyDispatchableFilter', () => {
     expect(b.calls).toContainEqual(['eq', 'portal_zugang_freigeschaltet', true])
     expect(b.calls).toContainEqual(['is', 'gesperrt_seit', null])
     expect(b.calls).toContainEqual(['is', 'geloescht_am', null])
+  })
+
+  it('schliesst frist_ueberschritten NULL-safe aus (FG3 decision A)', () => {
+    const b = makeBuilder()
+    applyDispatchableFilter(b)
+    // NULL-safe: NULL/ausstehend/geprueft passen; nur frist_ueberschritten faellt raus.
+    expect(b.calls).toContainEqual([
+      'or',
+      'verifizierung_status.is.null,verifizierung_status.neq.frist_ueberschritten',
+      undefined,
+    ])
   })
 })
