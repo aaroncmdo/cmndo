@@ -11,8 +11,7 @@
 
 'use client'
 
-import { syncOutbox } from './sync-outbox'
-import { syncGpsOutbox } from './sync-gps-outbox'
+import { drainOutbox } from './sync'
 
 let registered = false
 
@@ -28,8 +27,7 @@ export async function registerServiceWorker(): Promise<void> {
     navigator.serviceWorker.addEventListener('message', (event) => {
       const data = (event as MessageEvent).data as { type?: string } | null
       if (data?.type === 'OUTBOX_SYNC') {
-        void syncOutbox().catch(() => {})
-        void syncGpsOutbox().catch(() => {})
+        void drainOutbox().catch(() => {})
       }
     })
 
