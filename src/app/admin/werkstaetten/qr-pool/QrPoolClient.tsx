@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
+import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
 import { QrCodeDownloads, BulkDownloads } from '@/components/werkstatt/QrPoolDownload'
@@ -85,16 +86,21 @@ export function QrPoolClient({
   return (
     <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-5">
       <header>
-        <h1 className="text-heading-md text-claimondo-navy font-bold">QR-Code-Pool</h1>
-        <p className="text-body text-claimondo-ondo mt-0.5">
-          Erzeuge vorgedruckte QR-Codes zum Mitnehmen. Bei der Werkstatt-Registrierung
-          weist du einen davon zu — statt pro Werkstatt einen zu generieren.
-        </p>
-        <p className="text-body-sm text-claimondo-navy mt-2">
-          <strong className="tabular-nums">{frei}</strong> frei ·{' '}
-          <strong className="tabular-nums">{zugewiesen}</strong> zugewiesen ·{' '}
-          <span className="tabular-nums">{codes.length}</span> gesamt
-        </p>
+        <PageHeader
+          title="QR-Code-Pool"
+          description={
+            <>
+              Erzeuge vorgedruckte QR-Codes zum Mitnehmen. Bei der Werkstatt-Registrierung
+              weist du einen davon zu — statt pro Werkstatt einen zu generieren.
+              <span className="mt-2 block text-claimondo-navy">
+                <strong className="tabular-nums">{frei}</strong> frei ·{' '}
+                <strong className="tabular-nums">{zugewiesen}</strong> zugewiesen ·{' '}
+                <span className="tabular-nums">{codes.length}</span> gesamt
+              </span>
+            </>
+          }
+          size="lg"
+        />
       </header>
 
       <SectionCard title="Neue Charge erzeugen">

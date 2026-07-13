@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
+import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
@@ -81,23 +82,24 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Versicherer</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${filtered.length} von ${versicherungen.length}`}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-                className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
+        <PageHeader
+          title="Versicherer"
+          description={`${filtered.length} von ${versicherungen.length}`}
+          size="lg"
+          actions={
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
+                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
+              </div>
+              <button onClick={() => { setCreating(true); setForm({}) }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-ios-lg text-body-xs font-medium hover:bg-claimondo-shield transition-colors">
+                <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
+              </button>
             </div>
-            <button onClick={() => { setCreating(true); setForm({}) }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-ios-lg text-body-xs font-medium hover:bg-claimondo-shield transition-colors">
-              <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
-            </button>
-          </div>
-        </div>
+          }
+        />
       </div>
 
       {/* Tabelle */}

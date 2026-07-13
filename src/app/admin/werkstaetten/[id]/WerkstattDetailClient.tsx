@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { toast } from 'sonner'
 import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon, MessageSquareIcon, ShieldCheckIcon, ShieldOffIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
+import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
@@ -323,15 +324,19 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
         >
           <ArrowLeftIcon className="w-4 h-4" /> Alle Werkstätten
         </Link>
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">{w.name}</h1>
-            <StatusBadge tone={STATUS_TON[w.status ?? ''] ?? 'neutral'} size="xs">
-              {w.status ?? 'unbekannt'}
-            </StatusBadge>
-          </div>
-          <div className="flex items-center gap-2">
-            {w.status === 'aktiv' ? (
+        <PageHeader
+          title={w.name}
+          size="lg"
+          description={
+            <span className="flex items-center gap-2 flex-wrap">
+              <StatusBadge tone={STATUS_TON[w.status ?? ''] ?? 'neutral'} size="xs">
+                {w.status ?? 'unbekannt'}
+              </StatusBadge>
+              <span>Aktiviert am {datum(w.aktiviert_am)}</span>
+            </span>
+          }
+          actions={
+            w.status === 'aktiv' ? (
               <>
                 <Button variant="ghost" size="sm" loading={statusBusy} onClick={() => statusAendern('inaktiv')}>
                   Deaktivieren
@@ -356,10 +361,9 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
               >
                 Aktivieren
               </Button>
-            )}
-          </div>
-        </div>
-        <p className="text-body-sm text-claimondo-ondo mt-1">Aktiviert am {datum(w.aktiviert_am)}</p>
+            )
+          }
+        />
       </div>
 
       {/* Leistung — abgeleitet aus den Auftraegen (berechneWerkstattLeistung, pure+getestet) */}

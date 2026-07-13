@@ -3,6 +3,7 @@
 
 import { listVertragsVorlagen } from './actions'
 import VertragseditorClient from './VertragseditorClient'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,18 +13,11 @@ export default async function VertraegePage() {
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="px-4 py-3 border-b border-claimondo-border flex-shrink-0">
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">
-              Vertragseditor
-            </h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-              PDF-Vorlagen für Sicherungsabtretung, Honorarvereinbarung,
-              Datenschutz und Widerruf — mit Klick auf das PDF die
-              Unterschriftsposition setzen.
-            </p>
-          </div>
-        </div>
+        <PageHeader
+          title="Vertragseditor"
+          description="PDF-Vorlagen für Sicherungsabtretung, Honorarvereinbarung, Datenschutz und Widerruf — mit Klick auf das PDF die Unterschriftsposition setzen."
+          size="lg"
+        />
       </div>
       <div className="flex-1 overflow-y-auto">
         <VertragseditorClient
