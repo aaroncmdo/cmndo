@@ -34,7 +34,7 @@ describe('tracker.ts — checkAndEscalateBreaches completion re-check (source-gu
   })
 
   it('ordering guard: completion re-check precedes task insert', () => {
-    const derivationIdx = src.indexOf('deriveSvSlaCompletion')
+    const derivationIdx = src.indexOf('deriveSvSlaCompletion(typ')
     const taskInsertIdx = src.indexOf("typ: 'sla_breach'")
     expect(derivationIdx).toBeGreaterThan(0)
     expect(taskInsertIdx).toBeGreaterThan(0)

@@ -155,7 +155,7 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
 
     // Completion re-check (FG7 Task 4): qc_filmcheck behaelt generische Eskalation (kein re-check).
     // Das typ !== 'qc_filmcheck' narrowt SlaTyp (5 Mitglieder) auf SvSlaTyp (4) → type-safe.
-    if (typ !== 'qc_filmcheck' && deriveSvSlaCompletion(typ as SvSlaTyp, { operativeStatus, hasConfirmedTermin })) {
+    if (typ !== 'qc_filmcheck' && deriveSvSlaCompletion(typ, { operativeStatus, hasConfirmedTermin })) {
       await completeSla(fallId, typ)
       autoCompleted++
       continue
