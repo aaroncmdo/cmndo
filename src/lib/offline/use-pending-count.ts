@@ -1,17 +1,14 @@
-// AAR-388: Shared Hook für Live-Zahl der pending/dead Outbox-Items.
-// Pollt alle 5s sowohl upload_outbox als auch gps_outbox und liefert
-// Counts plus Einzelstatus für UI-Badges (PendingBadge).
+// AAR-388: Shared Hook fuer Live-Zahl der pending/dead Outbox-Items.
+// Liest counts via getPendingCount/getGpsPendingCount/getDeadCount (./outbox)
+// -- alle delegieren an die generalisierte mutation_outbox-Schicht (db.ts).
+// useSlotPending fragt mutation_outbox direkt per idempotency_key ab.
 
 'use client'
 
 import { useEffect, useState } from 'react'
-import {
-  getDeadCount,
-  getPendingCount,
-  offlineDB,
-  type OutboxStatus,
-} from './outbox'
-import { getGpsPendingCount } from './sync-gps-outbox'
+import { getDeadCount, getPendingCount, getGpsPendingCount } from './outbox'
+import { offlineDB } from './db'
+import type { OutboxStatus } from './ops'
 
 export type PendingCounts = {
   uploadPending: number
@@ -66,7 +63,7 @@ export function useSlotPending(idempotencyKey: string | null, intervalMs = 3000)
     let cancelled = false
     const poll = async () => {
       try {
-        const item = await offlineDB.upload_outbox
+        const item = await offlineDB.mutation_outbox
           .where('idempotency_key')
           .equals(idempotencyKey)
           .first()
