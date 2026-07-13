@@ -12,6 +12,11 @@
 // SP3 Task 2 — oeffneGutachtenPdf: signed URL fuer das Gutachten-PDF.
 // Access-Gate: v_werkstatt_auftrag (RLS: is_werkstatt_for_claim). Danach
 // Service-Client-Read des bericht_pdf_url + signed-URL-Generierung via Storage-Helper.
+//
+// SP Task 7 — schlageWerkstattTerminVor: Werkstatt schlaegt (entkoppelt vom KVA-Upload)
+// einen Reparaturtermin vor (status='werkstatt_vorschlag'). Gemeinsamer modul-lokaler
+// Helper upsertWerkstattVorschlag wird von schlageWerkstattTerminVor UND erstelleKvaFuerAuftrag
+// genutzt — keine Duplizierung der Write-Logik.
 
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
@@ -22,6 +27,94 @@ import { extrahiereKvaAusBase64 } from '@/lib/ai/kostenvoranschlag-ocr'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { resolveWunschterminIso } from '@/app/flow/[token]/wunschtermin'
+
+// ─────────────────────────────────────────────────────────────────────────────
+// upsertWerkstattVorschlag (modul-lokal, NICHT exportiert)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Legt einen Werkstatt-Terminvorschlag an oder hebt einen bestehenden aktiven Termin
+// darauf. status='werkstatt_vorschlag' -> der Kunde muss bestaetigen (bzw. reagiert).
+// Admin-Client, weil die Werkstatt in reparatur_termine nur UPDATE (RLS) darf, aber ggf.
+// INSERT noetig ist (kein aktiver Termin). Ownership ist VOR dem Aufruf via
+// getWerkstattAuftrag geprueft.
+async function upsertWerkstattVorschlag(
+  admin: ReturnType<typeof createAdminClient>,
+  claimId: string,
+  werkstattId: string,
+  terminUtc: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { data: aktiv } = await admin
+    .from('reparatur_termine')
+    .select('id')
+    .eq('claim_id', claimId)
+    .in('status', ['angefragt', 'werkstatt_vorschlag', 'anruf_erbeten'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+  const bestehend = (aktiv as { id: string }[] | null)?.[0]?.id ?? null
+
+  if (bestehend) {
+    const { error } = await admin
+      .from('reparatur_termine')
+      .update({ status: 'werkstatt_vorschlag', bestaetigter_termin: terminUtc, updated_at: new Date().toISOString() } as never)
+      .eq('id', bestehend)
+    if (error) return { ok: false, error: error.message }
+    return { ok: true }
+  }
+  const { error } = await admin.from('reparatur_termine').insert({
+    claim_id: claimId,
+    werkstatt_id: werkstattId,
+    // kein Kunde-Wunsch -> wunschtermin auf den Werkstatt-Termin setzen (NOT NULL-Spalte),
+    // bestaetigter_termin traegt den Vorschlag.
+    wunschtermin: terminUtc,
+    bestaetigter_termin: terminUtc,
+    status: 'werkstatt_vorschlag',
+  } as never)
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// schlageWerkstattTerminVor
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Werkstatt schlaegt (jederzeit, entkoppelt vom KVA) einen Reparaturtermin vor.
+ * Weicht er vom Kunde-Wunsch ab bzw. gibt es keinen Wunsch -> status='werkstatt_vorschlag',
+ * der Kunde bestaetigt ("Passt") oder reagiert ("Passt nicht").
+ * @param terminLokal Berlin-Wandzeit "YYYY-MM-DDTHH:mm" (WunschterminPicker).
+ */
+export async function schlageWerkstattTerminVor(
+  claimId: string,
+  terminLokal: string,
+): Promise<{ ok: boolean; error?: string }> {
+  await requirePortalAccess(['werkstatt'])
+  if (!claimId || !terminLokal) return { ok: false, error: 'Auftrag und Termin sind erforderlich.' }
+
+  // Ownership-Gate via RLS-View (Werkstatt sieht nur ihre eigenen Auftraege).
+  const auftrag = await getWerkstattAuftrag(claimId)
+  if (!auftrag) return { ok: false, error: 'Kein Zugriff auf diesen Auftrag.' }
+  const werkstattId = auftrag.reparatur_werkstatt_id
+  if (!werkstattId) return { ok: false, error: 'Keine Reparatur-Werkstatt gesetzt.' }
+
+  const utc = resolveWunschterminIso(terminLokal)
+  if (!utc) return { ok: false, error: 'Ungültiger Termin.' }
+
+  const admin = createAdminClient()
+  const res = await upsertWerkstattVorschlag(admin, claimId, werkstattId, utc)
+  if (!res.ok) return { ok: false, error: res.error }
+
+  revalidatePath(`/werkstatt/auftraege/${claimId}`)
+  revalidatePath('/werkstatt/auftraege')
+
+  // Kunde informieren (non-fatal) — bitte um Bestaetigung.
+  try {
+    const svc = createServiceClient()
+    await notifyKundeReparaturtermin({ claimId, ereignis: 'werkstatt_vorschlag', bestaetigterTermin: utc, svc })
+  } catch (err) {
+    console.warn('[schlageWerkstattTerminVor] Kunden-Notify (non-fatal):', err)
+  }
+  return { ok: true }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // bestaetigeReparaturtermin
@@ -348,29 +441,17 @@ export async function erstelleKvaFuerAuftrag(
     console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload/-Zeile fehlgeschlagen (nicht kritisch):', e)
   }
 
-  // AV5: die Werkstatt schlaegt beim KVA-Upload einen Reparaturtermin vor (non-fatal). Nur wenn
-  // ein Termin angegeben wurde UND noch kein aktiver reparatur_termine existiert (kein Doppel).
-  // Der Kunde bestaetigt ihn spaeter (bzw. gibt den Reparaturauftrag frei, AV6).
+  // Die Werkstatt schlaegt beim KVA-Upload einen Reparaturtermin vor (non-fatal).
+  // Neu: als werkstatt_vorschlag (der Kunde bestaetigt), nicht mehr als Kunde-Wunsch 'angefragt'.
   if (input.reparaturWunschterminLokal) {
     try {
       const utc = resolveWunschterminIso(input.reparaturWunschterminLokal)
       const werkstattId = auftrag.reparatur_werkstatt_id
       if (utc && werkstattId) {
-        const { data: aktiv } = await admin
-          .from('reparatur_termine')
-          .select('id')
-          .eq('claim_id', claimId)
-          .in('status', ['angefragt', 'anruf_erbeten', 'bestaetigt'])
-          .limit(1)
-        if (!aktiv || aktiv.length === 0) {
-          const actorId = (await (await createClient()).auth.getUser()).data.user?.id ?? null
-          await admin.from('reparatur_termine').insert({
-            claim_id: claimId,
-            werkstatt_id: werkstattId,
-            wunschtermin: utc,
-            status: 'angefragt',
-            erstellt_von: actorId,
-          } as never)
+        const res = await upsertWerkstattVorschlag(admin, claimId, werkstattId, utc)
+        if (res.ok) {
+          const svc = createServiceClient()
+          await notifyKundeReparaturtermin({ claimId, ereignis: 'werkstatt_vorschlag', bestaetigterTermin: utc, svc })
         }
       }
     } catch (e) {

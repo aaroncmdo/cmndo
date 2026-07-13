@@ -269,6 +269,8 @@ export type WerkstattAuftrag = {
   unfallart: string | null
   reparaturdauer_tage: number | null
   reparaturdauer_tage_kva: number | null
+  // SP Task 10 — Rückruf-Wunschzeit (additiv, aus v_werkstatt_auftrag via reparatur_termine).
+  reparatur_rueckruf_wunschzeit: string | null
 }
 
 // Gemeinsame Spalten-Auswahl + Row-Mapping (DRY: Liste + Einzel-Loader).
@@ -285,7 +287,8 @@ const AUFTRAG_SELECT = `
   gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
   gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden,
   kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am,
-  unfallart, reparaturdauer_tage, reparaturdauer_tage_kva
+  unfallart, reparaturdauer_tage, reparaturdauer_tage_kva,
+  reparatur_rueckruf_wunschzeit
 `
 
 function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
@@ -335,6 +338,8 @@ function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
     unfallart: (r.unfallart as string | null) ?? null,
     reparaturdauer_tage: r.reparaturdauer_tage != null ? Number(r.reparaturdauer_tage) : null,
     reparaturdauer_tage_kva: r.reparaturdauer_tage_kva != null ? Number(r.reparaturdauer_tage_kva) : null,
+    // SP Task 10
+    reparatur_rueckruf_wunschzeit: (r.reparatur_rueckruf_wunschzeit as string | null) ?? null,
   }
 }
 
