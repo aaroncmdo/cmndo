@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-13T15:30:08.412Z",
+  "generatedAt": "2026-07-13T18:51:55.344Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 56,
+  "fileCount": 59,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
@@ -10,6 +10,9 @@
     "src/app/gutachter/feldmodus/RerouteToast.tsx",
     "src/app/gutachter/profil/actions.ts",
     "src/app/kunde/_components/KundeMobileDrawer.tsx",
+    "src/app/schaden/[token]/SchadenGegnerWizard.tsx",
+    "src/app/schaden/[token]/actions.ts",
+    "src/app/schaden/[token]/gegner-form-types.ts",
     "src/components/Footer.tsx",
     "src/components/WeatherWidget.tsx",
     "src/components/faelle/FallActivityFeed.tsx",
