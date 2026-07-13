@@ -11,6 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { KB_BERATUNG_DURATION_MIN } from '@/lib/termine/constants'
 import { pruefeKbBelegt } from '@/lib/termine/kb-belegung'
+import { syncKbTerminOut } from '@/lib/termine/kb-termin-sync'
 
 export async function createKbVideoterminByKb(
   fallId: string,
@@ -94,6 +95,9 @@ export async function createKbVideoterminByKb(
     }
     return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
   }
+
+  // SP2c: KB-Termin in den externen Kalender syncen (Jitsi -> beide Provider). Fail-soft.
+  await syncKbTerminOut(termin.id as string)
 
   await db.from('timeline').insert({
     fall_id: fallId,

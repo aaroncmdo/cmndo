@@ -7,12 +7,19 @@ import { revalidatePath } from 'next/cache'
 // status='erledigt'). leads.rueckruf_erledigt wurde gedroppt.
 
 async function closeOpenRueckrufTermin(leadId: string, supabase: Awaited<ReturnType<typeof createClient>>) {
-  await supabase
+  // SP2d: die geschlossenen Rueckruf-Events aus Google + CalDAV entfernen (sonst verwaist).
+  const { data: closed } = await supabase
     .from('admin_termine')
     .update({ status: 'erledigt', updated_at: new Date().toISOString() })
     .eq('lead_id', leadId)
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
+    .select('id')
+  for (const c of closed ?? []) {
+    import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
+      syncAdminTerminCalendarEvent(c.id as string).catch(() => {}),
+    )
+  }
 }
 
 function revalidateRueckrufPaths(leadId: string) {

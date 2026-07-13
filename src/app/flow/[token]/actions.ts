@@ -1004,6 +1004,13 @@ export async function signSAandCreateFall(
           console.warn('[signSAandCreateFall] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
         )
       }
+      // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+      const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
+      for (const t of caldavTermine ?? []) {
+        await syncSvTerminToOutlook(t.id as string).catch((err) =>
+          console.warn('[signSAandCreateFall] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
+        )
+      }
     })().catch((err) =>
       console.warn('[signSAandCreateFall] CalDAV-Sync:', err instanceof Error ? err.message : err),
     )

@@ -1,6 +1,6 @@
 // Render-Loader fuer den sv-onboarding-Flow (Basic-SV-Self-Service).
 // Laedt die DB-Phasen fuer flow_key='sv-onboarding', bestimmt den
-// Prefill-Status aus sachverstaendige + profiles + sv_kalender_verbindungen
+// Prefill-Status aus sachverstaendige + profiles + kalender_verbindungen
 // und filtert bereits vollstaendig gefuellte Pflicht-Phasen heraus (Skip-logic).
 // Reiner Server-Loader (kein 'use server') -- wird aus /gutachter/willkommen/page.tsx
 // aufgerufen (der frueher hier genannte Pfad /sv/onboarding existiert nicht).
@@ -94,9 +94,10 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
 
   // ─── 4. Kalender-Verbindungen pruefen ────────────────────────────────
   const { data: caldav } = await admin
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('id')
-    .eq('sv_id', (sv as unknown as Record<string, unknown>).id as string)
+    .eq('profile_id', user.id)
+    .eq('provider', 'caldav')
     .limit(1)
 
   const gcal = !!profileRec?.google_connected_at

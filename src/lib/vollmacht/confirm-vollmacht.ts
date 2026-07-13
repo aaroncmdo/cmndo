@@ -97,4 +97,11 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
       console.warn('[confirmVollmacht] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
     ),
   )
+
+  // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+  import('@/lib/microsoft/sv-termin-sync').then(({ syncSvTerminToOutlook }) =>
+    syncSvTerminToOutlook(termin.id).catch((err) =>
+      console.warn('[confirmVollmacht] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
+    ),
+  )
 }

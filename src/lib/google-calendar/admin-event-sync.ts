@@ -1,6 +1,10 @@
 // AAR-698: Google-Calendar-Sync für admin_termine (Rückrufe + KB-Termine).
 // Schreibt das Event im persönlichen Kalender des `zugewiesen_an`-Users.
 // Fail-silent bei fehlendem Token / API-Fehler.
+//
+// SP2d: Titel/Beschreibung/Zeiten kommen jetzt aus dem geteilten buildAdminEventContent
+// (auch vom CalDAV-Zweig genutzt). Zusaetzlich wird der CalDAV-Sync fail-soft mitgetriggert
+// -> jede Call-Site bekommt Google + CalDAV, ohne die Call-Sites zu aendern.
 
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
@@ -8,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // AAR-956 TZ-Fix: Google-Payload braucht Berlin-Wall-Clock (ohne Offset) statt
 // UTC-toISOString() + timeZone — sonst 2h-Sommer-Versatz (siehe timezone.ts).
 import { toBerlinWallClock, GOOGLE_CALENDAR_TIMEZONE } from '@/lib/google-calendar/timezone'
+import { buildAdminEventContent } from '@/lib/kalender/admin-event-content'
 
 type AdminTerminShape = {
   id: string
@@ -25,13 +30,6 @@ type AdminTerminShape = {
   google_calendar_id: string | null
 }
 
-const TYP_LABEL: Record<string, string> = {
-  rueckruf: 'Rückruf',
-  kunde: 'Kundentermin',
-  intern: 'Intern',
-  kb_beratung: 'KB-Beratung',
-}
-
 export async function syncAdminTerminCalendarEvent(terminId: string): Promise<void> {
   const db = createAdminClient()
   const { data: termin } = await db
@@ -44,6 +42,16 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
 
   if (!termin) return
   const t = termin as unknown as AdminTerminShape
+
+  // SP2d: CalDAV parallel (eigenes Modul, owner-gated + fail-soft, laeuft auch bei delete/skip).
+  await import('@/lib/kalender/caldav/admin-event-sync')
+    .then((m) => m.syncAdminTerminToCalDav(terminId))
+    .catch(() => {})
+
+  // SP5d: Outlook (Graph) parallel — owner-gated + fail-soft, dormant bis Azure.
+  await import('@/lib/microsoft/admin-event-sync')
+    .then((m) => m.syncAdminTerminToOutlook(terminId))
+    .catch(() => {})
 
   const shouldDelete =
     t.status === 'erledigt' || t.status === 'abgesagt' || t.status === 'storniert'
@@ -69,39 +77,7 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
   const auth = await getGoogleOAuthClientForUser(t.zugewiesen_an)
   if (!auth) return // Fail-silent: User hat keinen Google-Token
 
-  // Lead-Daten optional für mehr Kontext im Event
-  let leadInfo = ''
-  let leadTel = ''
-  if (t.lead_id) {
-    const { data: lead } = await db
-      .from('leads')
-      .select('vorname, nachname, telefon')
-      .eq('id', t.lead_id)
-      .maybeSingle()
-    if (lead) {
-      leadInfo = [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-      leadTel = lead.telefon ?? ''
-    }
-  }
-
-  const typLabel = TYP_LABEL[t.typ] ?? t.typ
-  const title = `Claimondo · ${typLabel}${t.titel && t.titel !== leadInfo ? ` · ${t.titel}` : leadInfo ? ` · ${leadInfo}` : ''}`
-
-  const descLines = [
-    t.beschreibung,
-    leadInfo ? `Kunde: ${leadInfo}` : null,
-    leadTel ? `Telefon: ${leadTel}` : null,
-    t.notizen ? `Notiz: ${t.notizen}` : null,
-    t.lead_id
-      ? `Lead: ${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/dispatch/leads/${t.lead_id}`
-      : null,
-    t.fall_id
-      ? `Fall: ${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/faelle/${t.fall_id}`
-      : null,
-  ].filter(Boolean) as string[]
-
-  const startDate = new Date(t.start_zeit)
-  const endDate = t.end_zeit ? new Date(t.end_zeit) : new Date(startDate.getTime() + 15 * 60 * 1000)
+  const { title, description, startIso, endIso } = await buildAdminEventContent(t, db)
 
   const calendar = google.calendar({ version: 'v3', auth })
 
@@ -113,9 +89,9 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
         sendUpdates: 'none',
         requestBody: {
           summary: title,
-          description: descLines.join('\n'),
-          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
-          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          description,
+          start: { dateTime: toBerlinWallClock(startIso), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          end: { dateTime: toBerlinWallClock(endIso), timeZone: GOOGLE_CALENDAR_TIMEZONE },
         },
       })
       await db
@@ -128,9 +104,9 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
         sendUpdates: 'none',
         requestBody: {
           summary: title,
-          description: descLines.join('\n'),
-          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
-          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          description,
+          start: { dateTime: toBerlinWallClock(startIso), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          end: { dateTime: toBerlinWallClock(endIso), timeZone: GOOGLE_CALENDAR_TIMEZONE },
           reminders: {
             useDefault: false,
             overrides: [
