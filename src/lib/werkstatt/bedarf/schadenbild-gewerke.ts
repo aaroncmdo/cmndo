@@ -2,11 +2,15 @@
 // Schadensfotos via Claude Vision (Haiku 4.5, gleiche Konstante wie
 // analyze-unfallfotos.ts). Fail-safe: Client null / keine URLs / Parse-Fehler
 // / leere Kategorien -> { kategorien: [], confidence: 0 } (nie falsch-positiv filtern).
+//
+// klassifiziereSchadenbild(urls) — URL-basiert (bestehende Signatur, unveraendert)
+// klassifiziereSchadenbildBase64(images) — transiente base64-Variante fuer Embed-Funnel
 
 import type { Gewerk } from './types'
 import { istGewerk } from './types'
-import { getAnthropicVisionClient, buildImageBlocks } from '@/lib/ai/vision/client'
+import { getAnthropicVisionClient, buildImageBlocks, buildImageBlocksBase64 } from '@/lib/ai/vision/client'
 import { AI_MODELS } from '@/lib/ai/models'
+import type Anthropic from '@anthropic-ai/sdk'
 
 const MODEL = AI_MODELS.vision_schadenbeschreibung
 
@@ -25,14 +29,13 @@ function parseJson(text: string): { kategorien?: unknown; confidence?: unknown }
   }
 }
 
-export async function klassifiziereSchadenbild(
-  urls: string[],
+/** Gemeinsamer Kern: nimmt fertige ImageBlockParam[], ruft Vision-Client, parst + fail-safe. */
+async function klassifiziereAusBlocks(
+  blocks: Anthropic.Messages.ImageBlockParam[],
 ): Promise<{ kategorien: Gewerk[]; confidence: number }> {
   const client = getAnthropicVisionClient()
-  if (!client || urls.length === 0) return { kategorien: [], confidence: 0 }
+  if (!client || blocks.length === 0) return { kategorien: [], confidence: 0 }
   try {
-    const blocks = buildImageBlocks(urls, 8)
-    if (blocks.length === 0) return { kategorien: [], confidence: 0 }
     const res = await client.messages.create({
       model: MODEL,
       max_tokens: 300,
@@ -59,4 +62,20 @@ export async function klassifiziereSchadenbild(
   } catch {
     return { kategorien: [], confidence: 0 }
   }
+}
+
+/** URL-basierte Klassifizierung. Externe Signatur unveraendert (Bestands-Tests bleiben gruen). */
+export async function klassifiziereSchadenbild(
+  urls: string[],
+): Promise<{ kategorien: Gewerk[]; confidence: number }> {
+  if (urls.length === 0) return { kategorien: [], confidence: 0 }
+  return klassifiziereAusBlocks(buildImageBlocks(urls, 8))
+}
+
+/** Base64-Variante fuer transiente Embed-Fotos (kein Storage, kein Upload vor Conversion). */
+export async function klassifiziereSchadenbildBase64(
+  images: { data: string; media_type: string }[],
+): Promise<{ kategorien: Gewerk[]; confidence: number }> {
+  if (images.length === 0) return { kategorien: [], confidence: 0 }
+  return klassifiziereAusBlocks(buildImageBlocksBase64(images, 8))
 }
