@@ -5,6 +5,7 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { entferneKbTerminOut } from '@/lib/termine/kb-termin-sync'
 
 export async function POST(req: Request) {
   try {
@@ -97,6 +98,10 @@ export async function POST(req: Request) {
         { status: 500 },
       )
     }
+
+    // SP2c: abgesagtes KB-Beratungs-Event aus Google + CalDAV entfernen. SV-Termine
+    // bleiben unberuehrt (eigener Lifecycle). Fail-soft.
+    if (termin.typ === 'kb_beratung') await entferneKbTerminOut(termin.id)
 
     const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'
     const fallNr = claim?.claim_nummer ?? fall.id.slice(0, 8)

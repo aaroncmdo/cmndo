@@ -87,6 +87,14 @@ export async function setTermin(
           console.error('[sv-termin-sync] CalDAV SV-Selbst-Eintrag:', err)
         }
       })(),
+      (async () => {
+        try {
+          const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
+          await syncSvTerminToOutlook(tid, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] Outlook SV-Selbst-Eintrag:', err)
+        }
+      })(),
     ])
   }
 

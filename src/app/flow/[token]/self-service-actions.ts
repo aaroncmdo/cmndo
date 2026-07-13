@@ -12,6 +12,7 @@ import { qualiFlowOutcome } from '@/lib/self-service/quali-flow-outcome'
 import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
+import { syncKbTerminOut } from '@/lib/termine/kb-termin-sync'
 import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
@@ -737,6 +738,8 @@ export async function bestaetigeBeratungsterminFlow(
     .update({ status: 'bestaetigt' })
     .eq('id', termin.id)
   if (updErr) return { ok: false, error: updErr.message }
+  // SP2c: bestaetigter Beratungstermin in den externen KB-Kalender syncen. Fail-soft.
+  await syncKbTerminOut(termin.id)
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }
@@ -764,6 +767,8 @@ export async function verschiebeBeratungsterminFlow(
     })
     .eq('id', termin.id)
   if (updErr) return { ok: false, error: updErr.message }
+  // SP2c: verschobenen Beratungstermin im externen KB-Kalender nachziehen. Fail-soft.
+  await syncKbTerminOut(termin.id)
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }

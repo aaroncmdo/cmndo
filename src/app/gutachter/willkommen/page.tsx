@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import WillkommenClient from './WillkommenClient'
 import WillkommenWaiting from './WillkommenWaiting'
@@ -140,10 +141,12 @@ export default async function GutachterWillkommenPage({
   // AAR-717: CalDAV-Verbindungs-Status abfragen — zusätzlich zum Google-
   // Connect-Flag gcal_connected auf sachverstaendige. Entweder ein Google-
   // OAuth-Link oder eine CalDAV-Verbindung reicht als „Kalender verbunden".
-  const { data: caldavRow } = await supabase
-    .from('sv_kalender_verbindungen')
+  // kalender_verbindungen ist RLS-locked (server-only) — User-Kontext liefe leer. Admin-Client
+  // + expliziter profile_id-Self-Filter (einzige Zugriffsgrenze, MUSS bleiben).
+  const { data: caldavRow } = await createAdminClient()
+    .from('kalender_verbindungen')
     .select('id')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .eq('provider', 'caldav')
     .maybeSingle()
   const caldavConnected = !!caldavRow

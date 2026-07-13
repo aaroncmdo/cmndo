@@ -689,6 +689,12 @@ export async function terminAnnehmen({
       console.warn('[terminAnnehmen] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
     ),
   )
+  // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+  import('@/lib/microsoft/sv-termin-sync').then(({ syncSvTerminToOutlook }) =>
+    syncSvTerminToOutlook(tId, fId).catch((err) =>
+      console.warn('[terminAnnehmen] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
+    ),
+  )
 
   // KFZ-137: SV Auftragszusammenfassung Email
   try {
@@ -862,6 +868,12 @@ export async function terminBuchen({
   import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
     syncSvTerminToCalDav(termin.id, fId).catch((err) =>
       console.warn('[terminBuchen] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
+    ),
+  )
+  // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+  import('@/lib/microsoft/sv-termin-sync').then(({ syncSvTerminToOutlook }) =>
+    syncSvTerminToOutlook(termin.id, fId).catch((err) =>
+      console.warn('[terminBuchen] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
     ),
   )
 

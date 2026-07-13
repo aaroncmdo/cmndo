@@ -12,6 +12,7 @@ import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { google } from 'googleapis'
 import { listAllCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/caldav/client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
+import { getMicrosoftAccessTokenForUser } from '@/lib/microsoft/graph-client'
 
 // 2026-07-08 (Aaron): grosszuegiges festes Fenster [-90d, +365d] — Busy-Blocking + juengste
 // Historie sichtbar. DB-driven: der Cron haelt sv_kalender_events_cache aktuell (SSoT), die UI
@@ -24,7 +25,7 @@ const GOOGLE_TIMEOUT_MS = 8000
 
 type CacheRow = {
   profile_id: string
-  source: 'google' | 'caldav'
+  source: 'google' | 'caldav' | 'outlook'
   external_event_id: string
   start_zeit: string
   end_zeit: string
@@ -133,6 +134,72 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
   })))
 }
 
+// ─── Microsoft Outlook (Graph calendarView) ─────────────────────────────────
+// SP5c: cached die Outlook-Belegung der naechsten SYNC_HORIZON_DAYS via Graph calendarView.
+// Env-gated ueber getMicrosoftAccessTokenForUser (kein Token -> skip, dormant). Prefer UTC ->
+// dateTime ohne Offset; normalizeGraphUtc kappt die 7-stellige Fraktion + normalisiert zu ISO-Z.
+export function normalizeGraphUtc(dt: string | null | undefined): string {
+  if (!dt) return ''
+  const capped = dt.replace(/(\.\d{3})\d+/, '$1')
+  const hasTz = /[zZ]$|[+-]\d{2}:?\d{2}$/.test(capped)
+  const d = new Date(hasTz ? capped : capped + 'Z')
+  return isNaN(d.getTime()) ? '' : d.toISOString()
+}
+
+async function syncOutlook(
+  profileId: string,
+  db: ReturnType<typeof createAdminClient>,
+): Promise<{ inserted: number; deleted: number }> {
+  const token = await getMicrosoftAccessTokenForUser(profileId)
+  if (!token) return { inserted: 0, deleted: 0 }
+
+  const now = new Date()
+  const fromIso = now.toISOString()
+  const toIso = new Date(now.getTime() + SYNC_HORIZON_DAYS * 86400_000).toISOString()
+
+  let events: Array<{ id: string; subject: string; start: string; end: string }> = []
+  try {
+    const url =
+      `https://graph.microsoft.com/v1.0/me/calendarView?startDateTime=${encodeURIComponent(fromIso)}` +
+      `&endDateTime=${encodeURIComponent(toIso)}&$select=id,subject,start,end&$top=100`
+    const resp = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Prefer: 'outlook.timezone="UTC"' },
+    })
+    if (!resp.ok) {
+      console.warn('[sync-calendars] Outlook calendarView', resp.status)
+      return { inserted: 0, deleted: 0 }
+    }
+    const data = (await resp.json()) as {
+      value?: Array<{ id?: string; subject?: string; start?: { dateTime?: string }; end?: { dateTime?: string } }>
+    }
+    events = (data.value ?? [])
+      .map((e) => ({
+        id: e.id ?? '',
+        subject: e.subject ?? '',
+        start: normalizeGraphUtc(e.start?.dateTime),
+        end: normalizeGraphUtc(e.end?.dateTime),
+      }))
+      .filter((e) => e.id && e.start && e.end)
+  } catch (err) {
+    console.warn('[sync-calendars] Outlook fuer Profil', profileId, err instanceof Error ? err.message : err)
+    return { inserted: 0, deleted: 0 }
+  }
+
+  return diffAndApply(
+    db,
+    profileId,
+    'outlook',
+    events.map((e) => ({
+      profile_id: profileId,
+      source: 'outlook' as const,
+      external_event_id: e.id,
+      start_zeit: e.start,
+      end_zeit: e.end,
+      titel: e.subject || null,
+    })),
+  )
+}
+
 // ─── Retention (permanente externe Belegung) ────────────────────────────────
 
 const RETENTION_DAYS = 90
@@ -140,7 +207,7 @@ const RETENTION_DAYS = 90
 export async function pruneStaleExternalEvents(
   db: ReturnType<typeof createAdminClient>,
   profileId: string,
-  source: 'google' | 'caldav',
+  source: 'google' | 'caldav' | 'outlook',
 ): Promise<void> {
   const cutoffIso = new Date(Date.now() - RETENTION_DAYS * 86400_000).toISOString()
   const { error } = await db
@@ -157,7 +224,7 @@ export async function pruneStaleExternalEvents(
 async function diffAndApply(
   db: ReturnType<typeof createAdminClient>,
   profileId: string,
-  source: 'google' | 'caldav',
+  source: 'google' | 'caldav' | 'outlook',
   incoming: CacheRow[],
 ): Promise<{ inserted: number; deleted: number }> {
   const now = new Date()
@@ -210,7 +277,7 @@ async function diffAndApply(
 
 export type SyncResult = {
   profileId: string
-  source: 'google' | 'caldav'
+  source: 'google' | 'caldav' | 'outlook'
   inserted: number
   deleted: number
   error?: string
@@ -236,42 +303,38 @@ export async function syncAllExternalCalendars(): Promise<SyncResult[]> {
     }
   }
 
-  // ── CalDAV: kanonisch aus sv_kalender_verbindungen (dort schreibt der Connect-Flow +
-  // liest die gesamte UI). Die frühere kalender_verbindungen-Quelle wurde nur per Einmal-
-  // Backfill befüllt (kein Mirror-Trigger, DB-verifiziert 2026-07-08) -> NEUE Verbindungen
-  // landeten nie im Sync. profile_id via sachverstaendige aufgelöst (Cache bleibt profil-gekeyed).
+  // ── CalDAV: alle aktiven Verbindungen aus der universellen SSoT kalender_verbindungen
+  // (profile_id). Der Connect-Write-Pfad (lib/kalender/connect/caldav-connect-actions.ts)
+  // schreibt ebenfalls hierher + die gesamte UI liest hier -> Read+Write konsistent, kein
+  // sv_id-Umweg mehr (kalender_verbindungen hat keine sv_id-Spalte). Cache bleibt profil-gekeyed.
   const { data: verbindungen } = await db
-    .from('sv_kalender_verbindungen')
-    .select('id, sv_id, server_url, username, password_encrypted, calendar_url')
+    .from('kalender_verbindungen')
+    .select('id, profile_id, server_url, username, password_encrypted, calendar_url')
     .eq('provider', 'caldav')
     .is('last_error', null)
 
-  const svIds = [...new Set((verbindungen ?? []).map((r) => r.sv_id).filter(Boolean) as string[])]
-  const svToProfile = new Map<string, string>()
-  if (svIds.length) {
-    const { data: svs } = await db.from('sachverstaendige').select('id, profile_id').in('id', svIds)
-    for (const s of (svs ?? []) as Array<{ id: string; profile_id: string | null }>) {
-      if (s.profile_id) svToProfile.set(s.id, s.profile_id)
+  for (const row of (verbindungen ?? []) as VerbindungRow[]) {
+    try {
+      const { inserted, deleted } = await syncCalDav(row, db)
+      results.push({ profileId: row.profile_id, source: 'caldav', inserted, deleted })
+    } catch (err) {
+      results.push({ profileId: row.profile_id, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
     }
   }
 
-  for (const raw of (verbindungen ?? []) as Array<Record<string, unknown>>) {
-    const svId = raw.sv_id as string | null
-    const profileId = svId ? svToProfile.get(svId) : undefined
-    if (!profileId) continue
-    const row: VerbindungRow = {
-      id: raw.id as string,
-      profile_id: profileId,
-      server_url: raw.server_url as string,
-      username: raw.username as string,
-      password_encrypted: raw.password_encrypted as string,
-      calendar_url: (raw.calendar_url as string | null) ?? null,
-    }
+  // ── Outlook: alle Profile mit ms_refresh_token (SP5c, dormant bis Azure) ──
+  const { data: msProfiles } = await db
+    .from('profiles')
+    .select('id')
+    .not('ms_refresh_token', 'is', null)
+
+  for (const p of msProfiles ?? []) {
+    if (!p?.id) continue
     try {
-      const { inserted, deleted } = await syncCalDav(row, db)
-      results.push({ profileId, source: 'caldav', inserted, deleted })
+      const { inserted, deleted } = await syncOutlook(p.id as string, db)
+      results.push({ profileId: p.id as string, source: 'outlook', inserted, deleted })
     } catch (err) {
-      results.push({ profileId, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
+      results.push({ profileId: p.id as string, source: 'outlook', inserted: 0, deleted: 0, error: String(err) })
     }
   }
 
