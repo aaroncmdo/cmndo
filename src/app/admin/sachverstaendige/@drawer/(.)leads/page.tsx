@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getSvLeads } from '@/app/admin/sv-leads/actions'
 import SvLeadsClient from '@/app/admin/sv-leads/SvLeadsClient'
-import DrawerShell from '../DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedLeadsPage() {
   const supabase = await createClient()

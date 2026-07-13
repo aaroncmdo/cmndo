@@ -4,7 +4,7 @@
 // /admin/vertrieb/sachverstaendige/[id]). Externe Links zeigen weiter auf
 // /admin/sachverstaendige/<uuid> (Full-Page) und bleiben unberuehrt.
 import SvDetailPage from '@/app/admin/sachverstaendige/[id]/page'
-import DrawerShell from '@/app/admin/sachverstaendige/@drawer/DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedCockpitSvDetail({
   params,

@@ -4,7 +4,7 @@
 // Intercept NICHT — stattdessen rendert Next.js die Full-Page `[id]/page.tsx`.
 
 import SvDetailPage from '../../[id]/page'
-import DrawerShell from '../DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 type SvSearchParams = { tab?: string }
 
