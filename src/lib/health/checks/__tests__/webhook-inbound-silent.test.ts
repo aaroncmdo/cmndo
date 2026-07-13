@@ -71,21 +71,58 @@ describe('evaluateWebhookSilence (rein)', () => {
 })
 
 // ── run() gegen Multi-Table-Stub ────────────────────────────────────────────
-function makeCtx(perTable: Record<string, number | null>, errorMessage?: string): CheckCtx {
+// Der Stub modelliert die Kette .select().eq?().order().limit() FAITHFUL: `eq` filtert
+// wirklich, `order` sortiert wirklich. Nur so faellt es ueberhaupt auf, wenn der Check
+// den source-Filter verliert (B7: sonst wuerden manual_admin-Zeilen wieder als Inbound
+// zaehlen und ein toter Rueckkanal bliebe unentdeckt).
+type StubRow = { created_at: string; source?: string }
+
+/** Zahl = Tage seit dem letzten ECHTEN Inbound; Array = explizite Rows (Source-Mix). */
+type TableSpec = number | null | StubRow[]
+
+// Inbound-source je Landing-Tabelle — muss zu CHANNELS.inboundSource passen.
+const INBOUND_SOURCE: Record<string, string> = { webhook_events: 'lexdrive' }
+
+// Explizite Chain-Typisierung: ein selbstreferenzierendes Objekt-Literal (chain -> chain)
+// waere sonst ein TS-Zirkelschluss ("implicitly has type any ... referenced in its own
+// initializer") und wuerde tsc brechen.
+type StubResult = Promise<{ data: StubRow[] | null; error: { message: string } | null }>
+type StubChain = {
+  select: (c: string) => StubChain
+  eq: (col: string, val: string) => StubChain
+  order: (col: string, o?: { ascending?: boolean }) => StubChain
+  limit: (n: number) => StubResult
+}
+
+function makeCtx(perTable: Record<string, TableSpec>, errorMessage?: string): CheckCtx {
   const supabase = {
     from(table: string) {
-      const build = (rows: unknown[]) => ({
-        select: (_c: string) => ({
-          order: (_col: string, _o: unknown) => ({
-            limit: (_n: number) =>
-              errorMessage
-                ? Promise.resolve({ data: null, error: { message: errorMessage } })
-                : Promise.resolve({ data: rows, error: null }),
-          }),
-        }),
-      })
-      const tage = perTable[table]
-      return build(tage == null ? [] : [{ created_at: daysAgoIso(tage) }])
+      const spec = perTable[table]
+      let rows: StubRow[]
+      if (Array.isArray(spec)) rows = [...spec]
+      else if (spec == null) rows = []
+      else rows = [{ created_at: daysAgoIso(spec), source: INBOUND_SOURCE[table] }]
+
+      const chain: StubChain = {
+        select: () => chain,
+        eq: (col, val) => {
+          rows = rows.filter((r) => (r as unknown as Record<string, unknown>)[col] === val)
+          return chain
+        },
+        order: (_col, o) => {
+          rows = [...rows].sort((a, b) => {
+            const av = new Date(a.created_at).getTime()
+            const bv = new Date(b.created_at).getTime()
+            return o?.ascending ? av - bv : bv - av
+          })
+          return chain
+        },
+        limit: (n) =>
+          errorMessage
+            ? Promise.resolve({ data: null, error: { message: errorMessage } })
+            : Promise.resolve({ data: rows.slice(0, n), error: null }),
+      }
+      return chain
     },
   } as unknown as CheckCtx['supabase']
   return { supabase } as unknown as CheckCtx
@@ -117,5 +154,50 @@ describe('webhookInboundSilentCheck.run', () => {
     const r = await webhookInboundSilentCheck.run(makeCtx({}, 'connection refused'))
     expect(r.status).toBe('error')
     expect(r.detail).toContain('connection refused')
+  })
+
+  // ── B7-Regressions-Pins: interne manual_admin-Zeilen sind KEIN Inbound ──────────
+  // `webhook_events` wird auch von processLexDriveEvent(source='manual') beschrieben
+  // (Admin-UI: manueller Status-Override / LexDrive-Trigger-Panel) -> source='manual_admin'
+  // (process-event.ts:735). Ohne source-Filter setzt eine ganz normale Admin-Aktion die
+  // Inbound-Uhr auf 0 und MASKIERT einen toten Rueckkanal — eine falsche Entwarnung in
+  // genau dem Check, der den toten Kanal finden soll. Diese Pins halten den Filter fest.
+
+  it('B7-PIN: frische manual_admin-Zeile maskiert NICHT den toten LexDrive-Inbound', async () => {
+    const r = await webhookInboundSilentCheck.run(
+      makeCtx({
+        webhook_events: [
+          { created_at: daysAgoIso(0), source: 'manual_admin' }, // Admin-Override HEUTE
+          { created_at: daysAgoIso(40), source: 'lexdrive' }, // letztes ECHTES Inbound
+        ],
+        matelso_calls: 1,
+        aircall_calls: 1,
+      }),
+    )
+    expect(r.status).toBe('crit') // 40 > critTage(30) -> der tote Rueckkanal MUSS auffallen
+    expect(r.detail).toContain('LexDrive')
+  })
+
+  it('B7-PIN: NUR manual_admin-Zeilen => LexDrive gilt als "nie empfangen" (warn), nicht ok', async () => {
+    const r = await webhookInboundSilentCheck.run(
+      makeCtx({
+        webhook_events: [{ created_at: daysAgoIso(0), source: 'manual_admin' }],
+        matelso_calls: 1,
+        aircall_calls: 1,
+      }),
+    )
+    expect(r.status).toBe('warn')
+    expect(r.detail).toMatch(/nie/i)
+  })
+
+  it('B7: echte lexdrive-Inbound-Zeilen zaehlen weiterhin normal', async () => {
+    const r = await webhookInboundSilentCheck.run(
+      makeCtx({
+        webhook_events: [{ created_at: daysAgoIso(1), source: 'lexdrive' }],
+        matelso_calls: 1,
+        aircall_calls: 1,
+      }),
+    )
+    expect(r.status).toBe('ok')
   })
 })
