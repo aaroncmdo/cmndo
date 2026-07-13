@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-13T14:57:33.485Z",
+  "generatedAt": "2026-07-13T15:30:08.412Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 57,
+  "fileCount": 56,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
@@ -15,7 +15,6 @@
     "src/components/faelle/FallActivityFeed.tsx",
     "src/components/fall/DokumentenListe.tsx",
     "src/components/fall/TerminVorschlagModal.tsx",
-    "src/components/flotte/FahrzeugSchaedenSection.tsx",
     "src/components/gutachter/AuftragDokumenteBanner.tsx",
     "src/components/gutachter/GeoPermissionPrompt.tsx",
     "src/components/gutachter/SvHonorarCard.tsx",

@@ -8,6 +8,13 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
 import type { FahrzeugSchaeden, ClaimMini, DraftMini } from '@/lib/flotte/fahrzeug-schaeden'
 
+// Pill-Label fuer Draft-Leads (kein Status-Registry-Code — fester Text).
+const DraftPill = () => (
+  <span className="bg-warning-soft text-warning-strong rounded-ios-sm px-2 py-0.5 text-body-xs shrink-0">
+    In Bearbeitung
+  </span>
+)
+
 // Datum-Hilfsfunktion — identisches Pattern wie in den Fahrzeug-Detail-Pages.
 function formatDatum(iso: string | null): string {
   if (!iso) return '—'
@@ -37,10 +44,11 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId }: Props) {
         />
       ) : (
         <ul className="divide-y divide-claimondo-border">
-          {/* Drafts zuerst */}
+          {/* Drafts zuerst — kein StatusBadge, da lead-workflow die raw-Status-Codes
+              (quali-offen/flow-gesendet) nicht abdeckt; stattdessen fester Text-Pill. */}
           {drafts.map((d: DraftMini) => (
             <li key={d.leadId} className="flex items-center gap-3 py-3">
-              <StatusBadge domain="lead-workflow" code={d.status} />
+              <DraftPill />
               <span className="flex-1 min-w-0 text-sm text-claimondo-navy truncate">
                 In Bearbeitung
               </span>
