@@ -27,6 +27,10 @@ export type MaklerAnfrageInput = {
   email?: string | null
   standortPlz?: string | null
   standortOrt?: string | null
+  /** Makler-Anfrage: Standort mit Koordinaten (Place-Picker) -> Kunde-Flow-Prefill + SV-Matching. */
+  standortLat?: number | null
+  standortLng?: number | null
+  standortPlaceId?: string | null
   notiz?: string | null
   /** Makler bestaetigt, dass der Kunde mit der Kontaktaufnahme einverstanden ist (DSGVO-Basis). */
   kundeEinwilligung: boolean
@@ -92,6 +96,11 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   const email = input.email?.trim() || null
   const standortPlz = input.standortPlz?.trim() || null
   const standortOrt = input.standortOrt?.trim() || null
+  const standortLat = typeof input.standortLat === 'number' && Number.isFinite(input.standortLat) ? input.standortLat : null
+  const standortLng = typeof input.standortLng === 'number' && Number.isFinite(input.standortLng) ? input.standortLng : null
+  const standortPlaceId = input.standortPlaceId?.trim() || null
+  // Koordinaten nur als Paar schreiben (Prefill + SV-Matching brauchen beide).
+  const hatKoords = standortLat != null && standortLng != null
   const notiz = input.notiz?.trim() || null
   if (vorname.length < 1 || nachname.length < 1) return { ok: false, error: 'Vor- und Nachname erforderlich.' }
   if (telefon.length < 5) return { ok: false, error: 'Telefonnummer erforderlich.' }
@@ -167,6 +176,8 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       ...(notiz ? { notiz } : {}),
       ...(standortPlz ? { fahrzeug_standort_plz: standortPlz } : {}),
       ...(standortOrt ? { fahrzeug_standort_adresse: standortOrt } : {}),
+      ...(hatKoords ? { fahrzeug_standort_lat: standortLat, fahrzeug_standort_lng: standortLng } : {}),
+      ...(standortPlaceId ? { fahrzeug_standort_place_id: standortPlaceId } : {}),
     },
   )
   if (!created.ok) return { ok: false, error: created.error }
