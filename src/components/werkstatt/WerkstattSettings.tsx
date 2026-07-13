@@ -12,12 +12,15 @@ import {
   LogOutIcon,
   AlertTriangleIcon,
   CheckCircle2Icon,
+  WrenchIcon,
 } from 'lucide-react'
 import {
   updateWerkstattProfil,
   updateWerkstattBank,
   changeWerkstattPasswort,
+  setMeineFaehigkeiten,
 } from '@/lib/actions/werkstatt-settings'
+import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 import { TextField } from '@/components/shared/forms'
 import { Button } from '@/components/primitives/Button'
@@ -38,6 +41,7 @@ export type WerkstattSettingsProps = {
   bank_iban: string | null
   bank_bic: string | null
   bank_kontoinhaber: string | null
+  faehigkeiten?: string[] | null
 }
 
 type SaveState = {
@@ -60,6 +64,7 @@ export function WerkstattSettings(props: WerkstattSettingsProps) {
       </header>
 
       <ProfilCard {...props} />
+      <LeistungenCard faehigkeiten={props.faehigkeiten ?? null} />
       <BankCard {...props} />
       <PasswortCard />
       <LogoutCard />
@@ -394,6 +399,72 @@ function PasswortCard() {
           <SaveFeedback state={state} />
         </div>
       </form>
+    </SettingsSectionCard>
+  )
+}
+
+// ── 4. Meine Leistungen ───────────────────────────────────────────────────────
+
+const GEWERK_LABELS: Record<string, string> = {
+  karosserie: 'Karosserie',
+  lackierung: 'Lackierung',
+  mechanik: 'Mechanik',
+  glas: 'Glas',
+  smart_repair: 'Smart-Repair',
+}
+
+function LeistungenCard({ faehigkeiten }: { faehigkeiten: string[] | null }) {
+  const [sel, setSel] = useState<string[]>(faehigkeiten ?? [])
+  const [state, setState] = useState<SaveState>({ status: 'idle' })
+  const [isPending, startTransition] = useTransition()
+
+  function toggleGewerk(v: string) {
+    setSel((prev) => (prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]))
+  }
+
+  function handleSave() {
+    setState({ status: 'saving' })
+    startTransition(async () => {
+      const res = await setMeineFaehigkeiten(sel)
+      if (res.ok) {
+        setState({ status: 'success' })
+        setTimeout(() => setState({ status: 'idle' }), 2500)
+      } else {
+        setState({ status: 'error', msg: res.error })
+      }
+    })
+  }
+
+  return (
+    <SettingsSectionCard
+      icon={<WrenchIcon width={16} height={16} />}
+      title="Meine Leistungen"
+      subtitle="Welche Schadensarten führen Sie durch?"
+    >
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {(GEWERKE as readonly string[]).map((g) => (
+            <Button
+              key={g}
+              variant={sel.includes(g) ? 'navy' : 'ghost'}
+              size="sm"
+              onClick={() => toggleGewerk(g)}
+              type="button"
+            >
+              {GEWERK_LABELS[g] ?? g}
+            </Button>
+          ))}
+        </div>
+        <p className="text-xs text-claimondo-ondo">
+          Nichts gewählt = Vollservice (keine Einschränkung).
+        </p>
+        <div className="flex items-center gap-2 pt-1">
+          <Button variant="navy" size="sm" loading={isPending} onClick={handleSave} type="button">
+            Speichern
+          </Button>
+          <SaveFeedback state={state} />
+        </div>
+      </div>
     </SettingsSectionCard>
   )
 }

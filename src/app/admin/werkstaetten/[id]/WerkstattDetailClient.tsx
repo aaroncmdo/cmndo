@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon, MessageSquareIcon } from 'lucide-react'
+import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon, MessageSquareIcon, ShieldCheckIcon, ShieldOffIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { sendWerkstattLoginMail } from '../actions'
+import { sendWerkstattLoginMail, setWerkstattVerifiziert } from '../actions'
 import {
   aktualisiereWerkstattStammdaten,
   setzeWerkstattStatus,
@@ -117,6 +117,8 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
   const [chatThreadId, setChatThreadId] = useState<string | null>(null)
   const [chatClaimNummer, setChatClaimNummer] = useState<string | null>(null)
   const [chatBusyClaimId, setChatBusyClaimId] = useState<string | null>(null)
+  const [verifyBusy, setVerifyBusy] = useState(false)
+  const [verifyNotiz, setVerifyNotiz] = useState('')
   const [form, setForm] = useState({
     name: w.name ?? '',
     telefon: w.telefon ?? '',
@@ -191,6 +193,22 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
       router.refresh()
     } finally {
       setStatusBusy(false)
+    }
+  }
+
+  async function verifizierungToggle() {
+    const neuVerifiziert = !w.verifiziert
+    setVerifyBusy(true)
+    try {
+      const res = await setWerkstattVerifiziert(w.id, neuVerifiziert, verifyNotiz || undefined)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success(neuVerifiziert ? 'Werkstatt verifiziert' : 'Verifizierung aufgehoben')
+      router.refresh()
+    } finally {
+      setVerifyBusy(false)
     }
   }
 
@@ -637,6 +655,49 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
       {/* Fähigkeiten & Staffelung (inline editierbar) */}
       <SectionCard title="Fähigkeiten & Staffelung">
         <FaehigkeitenStaffelEditor werkstattId={w.id} faehigkeiten={w.faehigkeiten ?? []} staffel={staffel} />
+      </SectionCard>
+
+      {/* Verifizierung — Trust-Marker + Vorreihung im Finder */}
+      <SectionCard title="Verifizierung">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            {w.verifiziert ? (
+              <StatusBadge tone="success" size="xs">
+                ✓ Verifizierter Partner
+              </StatusBadge>
+            ) : (
+              <StatusBadge tone="neutral" size="xs">
+                Nicht verifiziert
+              </StatusBadge>
+            )}
+            {w.verifiziert && w.verifiziert_am ? (
+              <span className="text-body-xs text-claimondo-ondo">
+                verifiziert am {datum(w.verifiziert_am)}
+              </span>
+            ) : null}
+          </div>
+          <div className="space-y-2">
+            <label className="block text-body-xs font-medium text-claimondo-navy">
+              Notiz (optional)
+            </label>
+            <input
+              type="text"
+              value={verifyNotiz}
+              onChange={(e) => setVerifyNotiz(e.target.value)}
+              placeholder="z. B. Vor-Ort-Prüfung am 11.07.2026"
+              className={INPUT_CLS}
+            />
+          </div>
+          <Button
+            variant={w.verifiziert ? 'ghost' : 'navy'}
+            size="sm"
+            loading={verifyBusy}
+            onClick={verifizierungToggle}
+            iconLeft={w.verifiziert ? <ShieldOffIcon className="w-4 h-4" /> : <ShieldCheckIcon className="w-4 h-4" />}
+          >
+            {w.verifiziert ? 'Verifizierung aufheben' : 'Verifizieren'}
+          </Button>
+        </div>
       </SectionCard>
 
       {/* Stammdaten-Bearbeiten-Modal */}

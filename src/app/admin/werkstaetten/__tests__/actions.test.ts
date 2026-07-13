@@ -280,6 +280,30 @@ describe('setWerkstattFaehigkeiten', () => {
   })
 })
 
+describe('setWerkstattVerifiziert', () => {
+  it('gibt ok:false wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }; mockConfig.profileRolle = 'dispatch'
+    const { setWerkstattVerifiziert } = await import('../actions')
+    const res = await setWerkstattVerifiziert('w-1', true)
+    expect(res.ok).toBe(false)
+    if (!res.ok) expect(res.error).toContain('Admin')
+  })
+
+  it('Admin + verifiziert=true -> ok:true (setzt am + von)', async () => {
+    mockConfig.authUser = { id: 'admin-id' }; mockConfig.profileRolle = 'admin'
+    const { setWerkstattVerifiziert } = await import('../actions')
+    const res = await setWerkstattVerifiziert('w-1', true, 'Vor-Ort-Prüfung')
+    expect(res.ok).toBe(true)
+  })
+
+  it('Admin + verifiziert=false -> ok:true (löscht am + von)', async () => {
+    mockConfig.authUser = { id: 'admin-id' }; mockConfig.profileRolle = 'admin'
+    const { setWerkstattVerifiziert } = await import('../actions')
+    const res = await setWerkstattVerifiziert('w-1', false)
+    expect(res.ok).toBe(true)
+  })
+})
+
 describe('sendWerkstattLoginMail', () => {
   it('gibt ok:false zurück wenn nicht Admin', async () => {
     mockConfig.authUser = { id: 'u' }
