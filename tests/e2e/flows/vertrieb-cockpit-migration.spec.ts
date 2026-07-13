@@ -169,3 +169,30 @@ test('6) Scrapen oeffnet als Drawer im Cockpit', async ({ page }) => {
 
   await page.screenshot({ path: 'test-results/vertrieb-cockpit-6-scrape.png', fullPage: true }).catch(() => {})
 })
+
+// ---------------------------------------------------------------------------
+// 7 — Basis-Freigaben oeffnet als Drawer im Cockpit (kein Full-Page-Weg).
+// ---------------------------------------------------------------------------
+test('7) Basis-Freigaben oeffnet als Drawer im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Sachverstaendige-Pill aktivieren damit die Basis-Freigaben-Aktion erscheint
+  await page.getByRole('button', { name: 'Sachverständige' }).first().click()
+
+  // Basis-Freigaben-Aktion im Cockpit ausloesen
+  await page.getByRole('button', { name: 'Basis-Freigaben' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen — heading aus BasisFreigabenDrawerContent,
+  // NICHT der gleichlautende Aktions-Button (Strict-Mode-Ambiguitaet vermieden).
+  await expect(page.getByRole('heading', { name: 'Basis-Freigaben' })).toBeVisible({ timeout: 60_000 })
+
+  // URL darf NICHT auf /admin/sachverstaendige/basic-freigaben navigiert haben
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-7-freigaben.png', fullPage: true }).catch(() => {})
+})
