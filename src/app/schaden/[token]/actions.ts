@@ -13,10 +13,16 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { createLead } from '@/lib/leads/create-lead'
+import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
+import {
+  phoneWriteCapExceeded,
+  globalWriteCapExceeded,
+  recordGlobalWrite,
+} from '@/lib/api-v1/write-abuse-guard'
 import type { GegnerFormData } from './gegner-form-types'
 
 type SubmitResult =
-  | { ok: true; leadId: string; vehicleId: string }
+  | { ok: true; leadId: string; vehicleId: string; claimId?: string }
   | { ok: false; error: string }
 
 /**
@@ -54,6 +60,24 @@ export async function submitSchadenGegner(
     }
   }
 
+  // 3b. Abuse-Cap (public unauth Write-Pfad). Reuse der melde-schaden-Backstops:
+  //   Per-Telefon-Velocity (nur wenn der Gegner eine Nummer angab) + globaler
+  //   Circuit-Breaker. Best-effort/fail-open in phoneWriteCapExceeded (DB-Fehler
+  //   -> durchlassen; der globale Breaker faengt Massen-Missbrauch).
+  const telefon = data.telefon?.trim()
+  if (telefon && (await phoneWriteCapExceeded(telefon))) {
+    return {
+      ok: false,
+      error: 'Von dieser Telefonnummer wurden zu viele Meldungen erfasst. Bitte später erneut versuchen.',
+    }
+  }
+  if (globalWriteCapExceeded()) {
+    return {
+      ok: false,
+      error: 'Der Dienst ist aktuell stark ausgelastet. Bitte in einigen Minuten erneut versuchen.',
+    }
+  }
+
   // 4. Draft-Lead anlegen
   // source_channel: 'schaden-karte' — neuer Kanal fuer NFC-Schadenkarten-Flows;
   //   source_channel ist typed as string (open union), kein Closed-Union-Fallback noetig.
@@ -87,8 +111,36 @@ export async function submitSchadenGegner(
     return { ok: false, error: res.error ?? 'Fehler beim Speichern.' }
   }
 
-  // 5. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Draft
+  // Write akzeptiert -> globalen Rolling-Counter zaehlen (nur tatsaechlich erfolgte Writes).
+  recordGlobalWrite()
+
+  // 5. Claim-first: Lead sofort zu einem echten Claim konvertieren.
+  //   convertLeadToClaim ist idempotent + kanonisch: mappt den Gegner-Lead auf
+  //   claims + claim_parties (geschaedigter = Flotten-Fahrzeug via vehicle_id/firma_name,
+  //   verursacher = Gegner via gegner_* — data-driven). Kein triggerByUserId (anon Gegner-Flow).
+  //   FAIL-SOFT: schlaegt der Convert fehl, bleibt der Draft-Lead am Fahrzeug sichtbar und
+  //   der Convert ist spaeter idempotent nachholbar — der Gegner-Submit darf deshalb NICHT
+  //   hart fehlschlagen (seine Daten sind erfasst).
+  //   HINWEIS (a6c863e2-koordiniert): der Gegner-Unfallhergang landet aktuell via Pipeline in
+  //   claims.hergang_kunde_text; die saubere Trennung (claims.hergang_gegner_text) folgt, sobald
+  //   die claim-dokumente-kanon-Lane die claims-DDL freigibt.
+  let claimId: string | undefined
+  try {
+    const conv = await convertLeadToClaim({ leadId: res.leadId })
+    if (conv.ok) {
+      claimId = conv.claimId
+    } else {
+      console.error(
+        '[schaden-gegner] convertLeadToClaim fehlgeschlagen (Draft bleibt, idempotent nachholbar):',
+        conv.error,
+      )
+    }
+  } catch (err) {
+    console.error('[schaden-gegner] convertLeadToClaim warf (Draft bleibt):', err)
+  }
+
+  // 6. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
   revalidatePath('/flotte/fahrzeug/' + ctx.context.fahrzeugId)
 
-  return { ok: true, leadId: res.leadId, vehicleId: ctx.context.fahrzeugId }
+  return { ok: true, leadId: res.leadId, vehicleId: ctx.context.fahrzeugId, claimId }
 }
