@@ -52,6 +52,33 @@ git status                # Working-Tree clean?
 git stash list            # Leer oder alte persistente Stashes dokumentiert?
 git log --branches --not --remotes   # Alle lokalen Commits auf Remote gepusht?
 ```
+
+## Regel 4 — Nach jedem PR ein vollständiger Prod-Playwright-Smoke
+
+Eine Aufgabe ist erst **abgeschlossen**, wenn ihre betroffenen Nutzer-Flows auf **Prod** (`https://app.claimondo.de`) per Playwright end-to-end durchgespielt wurden. Build-, `tsc`- und CI-grün beweisen **Kompilierbarkeit, nicht Verhalten** — nur der Prod-Smoke beweist, dass das Feature für echte Nutzer live funktioniert. „Build grün" reicht **nicht** als Abschluss-Kriterium.
+
+**Geltungsbereich:** Änderungen mit nutzersichtbarem/verhaltensrelevantem Impact (UI, Route, Server-Action, DB-Write-Pfad, Cron). Reine Docs-/Scripts-/Config-Änderungen ohne Runtime-Flow-Impact sind ausgenommen (im PR kurz vermerken — dieser Regel-PR selbst ist so ein Fall).
+
+**Pflicht:** Sobald die Änderung auf Prod deployed ist, einen **vollständigen** Playwright-Smoke gegen Prod fahren, der **jeden** betroffenen Flow end-to-end abdeckt:
+
+```
+PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # oder das webapp-testing-Skill
+```
+
+**Ablauf:**
+
+1. **Im PR/Marker:** Smoke-Plan benennen — welche Flows, welche Specs, welche Test-Konten.
+2. **Nach Prod-Deploy:** vollständigen Smoke fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren.
+3. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
+4. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+
+**Sicherheit — kein Kollateralschaden auf Prod:**
+
+* Immer **Test-Konten** nutzen (`telefon = NULL`) → es gehen **keine** echten SMS/WhatsApp/Emails an reale Kunden raus.
+* Flows, die zwingend echte Kunden-Comms oder destruktive/irreversible Writes auslösen würden: über Test-Lead/Test-Konto fahren; wenn technisch unmöglich, per Read-Surface + Live-DB-Verifikation absichern und **im Marker begründen**, warum der UI-Trigger nicht lief.
+* **Niemals** Prod-Daten echter Kunden mutieren oder löschen.
+
+Begründung: Wiederholt war „build grün" ≠ „live nutzbar" (Feature nie erreichbar, Route 500, Silent-DB-CHECK-Reject, den kein Build/`tsc` fängt). Der Prod-Smoke ist die einzige Instanz, die echtes Nutzerverhalten prüft. Codifiziert den Broadcast-Mandat (11.07., Aaron) als harte Regel.
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
