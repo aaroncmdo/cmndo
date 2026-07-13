@@ -106,10 +106,13 @@ export default function SvFallakteView({
     setLoading(false)
   }, [fallId, snapKey])
 
+  // Reload on mount, on fall change, AND on connectivity change: when the SV
+  // comes back online after a dead zone, re-fetch fresh data + clear the
+  // "Offline - Stand X" strip (reload() internally reads navigator.onLine).
   useEffect(() => {
     void reload()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fallId])
+  }, [fallId, online])
 
   // AAR-386 Nachzug: Realtime-Subscription auf pflichtdokumente für diesen Fall.
   // Wenn ein Upload hochläuft (z. B. durch Kunden-Upload-Portal oder Admin-
