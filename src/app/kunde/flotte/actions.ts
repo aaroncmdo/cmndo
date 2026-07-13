@@ -9,8 +9,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
-import { createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { getKundeFirma, type FirmaForm, type FahrzeugForm } from '@/lib/kunde/firma-flotte'
+import { addFahrzeugToFlotte, removeFahrzeugFromFlotte } from '@/lib/flotte/mutate-flotte'
 
 /** Firma anlegen/aktualisieren + mit dem Konto verknuepfen (personen.firma_id). */
 export async function speichereFirma(
@@ -52,23 +52,9 @@ export async function fuegeFahrzeugHinzu(form: FahrzeugForm): Promise<{ ok: bool
   const db = createAdminClient()
   const firma = await getKundeFirma(db, user.id)
   if (!firma) return { ok: false, error: 'Kein Firmen-Konto — bitte zuerst die Firma anlegen.' }
-  const veh = await createVehicleStub({
-    snapshot: { kennzeichen, hersteller: form.hersteller?.trim() || null, modell: form.modell?.trim() || null },
-    db,
-  })
-  if (!veh.ok) return { ok: false, error: veh.error }
-  const { error } = await db.from('flotten_fahrzeuge').insert({
-    firma_id: firma.id,
-    vehicle_id: veh.vehicleId,
-    added_by_user_id: user.id,
-    notiz: form.notiz?.trim() || null,
-  })
-  if (error) {
-    if (error.code === '23505') return { ok: false, error: 'Dieses Fahrzeug ist bereits in der Flotte.' }
-    return { ok: false, error: error.message }
-  }
-  revalidatePath('/kunde/flotte')
-  return { ok: true }
+  const res = await addFahrzeugToFlotte(db, firma.id, form, user.id)
+  if (res.ok) revalidatePath('/kunde/flotte')
+  return res
 }
 
 /** Fahrzeug aus der Flotte entfernen (nur Eintraege der eigenen Firma). */
@@ -77,12 +63,7 @@ export async function entferneFahrzeug(flottenId: string): Promise<{ ok: boolean
   const db = createAdminClient()
   const firma = await getKundeFirma(db, user.id)
   if (!firma) return { ok: false, error: 'Kein Firmen-Konto.' }
-  const { error } = await db
-    .from('flotten_fahrzeuge')
-    .delete()
-    .eq('id', flottenId)
-    .eq('firma_id', firma.id)
-  if (error) return { ok: false, error: error.message }
-  revalidatePath('/kunde/flotte')
-  return { ok: true }
+  const res = await removeFahrzeugFromFlotte(db, flottenId, firma.id)
+  if (res.ok) revalidatePath('/kunde/flotte')
+  return res
 }

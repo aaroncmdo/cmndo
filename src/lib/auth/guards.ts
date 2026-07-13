@@ -31,6 +31,7 @@ export type UserRolle =
   | 'kunde'
   | 'makler'
   | 'werkstatt'
+  | 'flottenmanager'
 
 export type AuthedUser = {
   id: string
