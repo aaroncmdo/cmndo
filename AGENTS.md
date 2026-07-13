@@ -319,6 +319,16 @@ Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
 <!-- END:redirect-stub-gate -->
 
+# Flag-Drift-Gate (Ratchet)
+
+CHECK-invalide Status-Literale in Supabase-Writes/Filtern sind verboten. Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).
+
+CI fährt `npm run check:flag-drift -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/flag-drift-baseline.json`. Der Scanner (`scripts/lib/flag-drift-scan.mjs`, unit-getestet) fängt `col: 'literal'` in `.update/.insert/.upsert({...})` + `.eq/.neq/.in('col', …)`, löst die Tabelle über das `.from('<table>')` der Kette auf und prüft gegen den DB-CHECK-Snapshot `scripts/lib/status-check-constraints.json`. Bewusst hoch-präzise (nur String-Literale, nur bekannte CHECK-Spalten) → 0 False-Positives. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Constraint-Snapshot regenerieren** (bei jedem neuen status-Wert): das SQL im Header von `scripts/check-flag-drift.mjs` gegen die Live-DB laufen (MCP `execute_sql`, READ) + die `columns`-Map in `status-check-constraints.json` aktualisieren. Ein NEUER Status-Wert MUSS zuerst per MCP-Migration in den CHECK, DANN in den Snapshot — nie umgekehrt.
+
+**Baseline (6 grandfathered)** sind ECHTE Drift-Funde (kein akzeptables Muster) — per Boy-Scout fixen + Baseline senken (`-- --update-baseline`): `beleg-review/actions.ts` (`ocr_status: 'approved'/'rejected'` auf fall_dokumente → approve/reject bricht), `dokumente/ad-hoc-anforderung.ts` (`status: pending/ausstehend/cancelled` auf dokument_upload_anfragen → Enum-Vokabular-Mismatch), `twilio/inbound` + `inbound/process-inbound-text` (`.in('status',[…'angefragt'])` auf gutachter_termine → toter Filterwert), `gutachter/auftraege/export-action` + `gutachter/fall/[id]/page` (`.in('status',[…'durchgefuehrt'])` → toter Filterwert). Teil des interaction-flags-Audits (`docs/superpowers/specs/2026-07-11-interaction-flags-db-driven-audit-design.md` §8, Detektor #5). Folge-Detektoren (#1 Direkt-status-Writes ausserhalb der Engine, #4 inline-Branding-Gates) sind dokumentierte spätere Phasen.
+
 <!-- BEGIN:branding-rules -->
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 

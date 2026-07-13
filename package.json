@@ -19,6 +19,7 @@
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "check:token-audit": "node scripts/check-token-audit.mjs",
     "check:redirect-stubs": "node scripts/check-redirect-stubs.mjs",
+    "check:flag-drift": "node scripts/check-flag-drift.mjs",
     "check:migration-utf8": "node scripts/check-migration-utf8.mjs",
     "check:rls-grants": "node --env-file=.env.local scripts/check-rls-function-grants.mjs",
     "check:claim-view-rls": "node --env-file=.env.local scripts/check-claim-view-rls.mjs",
