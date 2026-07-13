@@ -1,0 +1,17 @@
+{
+  "name": "marketing-poc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen": "node run.mjs",
+    "render": "remotion render remotion/index.jsx ContentClip out.mp4 --props=./.work/props.json --public-dir=./.work"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": ">=0.30.0",
+    "@remotion/cli": "4.0.*",
+    "dotenv": "^16.4.5",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "4.0.*"
+  }
+}
