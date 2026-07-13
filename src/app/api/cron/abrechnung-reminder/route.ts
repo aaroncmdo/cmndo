@@ -20,9 +20,8 @@ type ReminderTier = 'reminder_7d' | 'reminder_3d' | 'reminder_1d'
  * Posten ab. Pro (abrechnung_id, reminder_typ) wird dank UNIQUE-Index nur einmal
  * gemailt — auch wenn der Cron versehentlich mehrfach laeuft.
  *
- * Idempotenz-Spalte abrechnungen.reminder_gesendet_am wird zusaetzlich auf
- * den juengsten Versand gesetzt fuer schnelle 'wann zuletzt erinnert' Filter
- * im Admin-Listing (legacy Pfad — die Tier-History lebt in abrechnung_reminders).
+ * Reminder-History liegt ausschliesslich in abrechnung_reminders (SSoT).
+ * FG5 C5c: abrechnungen.reminder_gesendet_am wird nicht mehr geschrieben (Duplikat).
  *
  * Auth: Authorization: Bearer ${CRON_SECRET}.
  */
@@ -119,7 +118,8 @@ export async function GET(request: Request) {
       continue  // kein Insert, naechster Cron-Lauf retried
     }
 
-    // Audit-Trail: Tier in abrechnung_reminders + legacy reminder_gesendet_am setzen
+    // Audit-Trail: Tier in abrechnung_reminders persistieren (SSoT fuer Recency).
+    // FG5 C5c: kein doppelter Write mehr auf abrechnungen.reminder_gesendet_am.
     const versendetAm = new Date().toISOString()
     await db.from('abrechnung_reminders').insert({
       abrechnung_id: abr.id,
@@ -127,9 +127,6 @@ export async function GET(request: Request) {
       versendet_am: versendetAm,
       details: { tage_bis_faellig: tageBisFaellig, summe_brutto: Number(abr.summe_brutto ?? 0) },
     })
-    await db.from('abrechnungen').update({
-      reminder_gesendet_am: versendetAm,
-    }).eq('id', abr.id)
 
     counts[tier]++
   }
