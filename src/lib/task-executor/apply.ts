@@ -43,7 +43,8 @@ export async function applySendeKommunikation(draft: ActionDraft, ctx: ExecCtx):
   if (!ctx.fallId) return { ok: false, error: 'Kein fall_id fuer Kommunikation' }
   if (!trigger) return { ok: false, error: 'Kein Trigger' }
   try {
-    await sendFallCommunication(ctx.fallId, trigger, variablen)
+    const res = await sendFallCommunication(ctx.fallId, trigger, variablen)
+    if (!res.sent) return { ok: false, error: `Nicht gesendet: ${res.reason ?? 'unbekannt'}` }
     return { ok: true, detail: `Kommunikation gesendet: ${trigger}` }
   } catch (err) {
     return { ok: false, error: errMsg(err, 'Send fehlgeschlagen') }
