@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('@/lib/fall/log-event', () => ({ logFallEvent: vi.fn().mockResolvedValue(undefined) }))
 vi.mock('@/lib/tasks/update-status-core', () => ({ updateTaskStatusCore: vi.fn().mockResolvedValue({}) }))
-vi.mock('@/lib/communications/send-fall', () => ({ sendFallCommunication: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/communications/send-fall', () => ({ sendFallCommunication: vi.fn().mockResolvedValue({ sent: true }) }))
 vi.mock('@/lib/faelle/state-machine', () => ({
   transitionFallStatus: vi.fn().mockResolvedValue(undefined),
   FALL_STATUS_TRANSITIONS: { 'ersterfassung': ['sv-gesucht'], 'sv-gesucht': [] },
@@ -55,5 +55,11 @@ describe('apply-wrapper', () => {
     const r = await applySendeKommunikation({ verb: 'sende_kommunikation', args: { trigger: 'dokumente_nachreichen', variablen: {} } }, { ...ctx, fallId: null })
     expect(r.ok).toBe(false)
     expect(sendFallCommunication).not.toHaveBeenCalled()
+  })
+  it('sende_kommunikation mit sent:false → ok:false + reason im error (Audit-Fidelity)', async () => {
+    ;(sendFallCommunication as unknown as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ sent: false, reason: 'kein Empfaenger (Telefon/Email)' })
+    const r = await applySendeKommunikation({ verb: 'sende_kommunikation', args: { trigger: 'dokumente_nachreichen', variablen: {} } }, ctx)
+    expect(r.ok).toBe(false)
+    expect(r.error).toContain('kein Empfaenger')
   })
 })
