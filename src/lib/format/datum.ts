@@ -17,11 +17,11 @@ function toDate(iso: string | null | undefined): Date | null {
  * Formatiert ein ISO-Datum nach deutschem Standard.
  *
  * @param iso    ISO-String oder null
- * @param style  'kurz' (17.04.26) · 'lang' (17. April 2026) · 'relative' (vor 3 Tagen / heute / morgen)
+ * @param style  'kurz' (17.04.26) · 'numerisch' (17.04.2026) · 'lang' (17. April 2026) · 'relative' (vor 3 Tagen / heute / morgen)
  */
 export function formatDatum(
   iso: string | null | undefined,
-  style: 'kurz' | 'lang' | 'relative' = 'kurz',
+  style: 'kurz' | 'numerisch' | 'lang' | 'relative' = 'kurz',
 ): string {
   const d = toDate(iso)
   if (!d) return ''
@@ -29,6 +29,13 @@ export function formatDatum(
   if (style === 'kurz') {
     return d.toLocaleDateString('de-DE', {
       day: '2-digit', month: '2-digit', year: '2-digit', timeZone: TZ,
+    })
+  }
+  if (style === 'numerisch') {
+    // Redundanz-Phase-0: 4-stelliges Jahr OHNE Zeit (17.04.2026) — der fehlende
+    // Drop-in fuer die ~145 Inline-`toLocaleDateString('de-DE', {day,month,year:'numeric'})`.
+    return d.toLocaleDateString('de-DE', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: TZ,
     })
   }
   if (style === 'lang') {

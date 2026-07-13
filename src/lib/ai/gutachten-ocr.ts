@@ -18,6 +18,8 @@
 // NULL-Felder gefuellt — bestehende Werte bleiben.
 
 import Anthropic from '@anthropic-ai/sdk'
+import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
+import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from './models'
 
@@ -66,6 +68,48 @@ type GutachtenOcrResult = {
   kalkulationssystem?: 'audatex' | 'dat' | 'autoixpert' | 'sonstiges' | null
   seitenzahl?: number | null
 }
+
+// Structured-outputs-Schema (spiegelt GutachtenOcrResult). Opus 4.8 fuellt es via
+// messages.parse() -> erzwingt valides JSON statt fragilem raw.match(/{...}/).
+const GutachtenSchema = z.object({
+  reparaturkosten_netto: z.number().nullable(),
+  reparaturkosten_brutto: z.number().nullable(),
+  minderwert: z.number().nullable(),
+  restwert: z.number().nullable(),
+  wiederbeschaffungswert: z.number().nullable(),
+  wiederbeschaffungsdauer_tage: z.number().nullable(),
+  nutzungsausfall_tage: z.number().nullable(),
+  totalschaden: z.boolean().nullable(),
+  gutachten_datum: z.string().nullable(),
+  fin: z.string().nullable(),
+  kennzeichen: z.string().nullable(),
+  erstzulassung: z.string().nullable(),
+  laufleistung_km: z.number().nullable(),
+  tuv_bis: z.string().nullable(),
+  fahrzeug_typ: z.string().nullable(),
+  farbe: z.string().nullable(),
+  farbcode: z.string().nullable(),
+  kraftstoff: z.enum(['benzin', 'diesel', 'hybrid', 'elektro', 'gas', 'sonstiges']).nullable(),
+  vorschaeden_text: z.string().nullable(),
+  lackmesswert_max_my: z.number().nullable(),
+  karosseriezustand: z.enum(['makellos', 'gebrauchsspuren', 'unfallbeschaedigt', 'sonstiges']).nullable(),
+  zeit_ak_std: z.number().nullable(),
+  zeit_kar_std: z.number().nullable(),
+  zeit_lack_std: z.number().nullable(),
+  lohnsatz_ak_eur: z.number().nullable(),
+  lohnsatz_kar_eur: z.number().nullable(),
+  lohnsatz_lack_eur: z.number().nullable(),
+  materialkosten_eur: z.number().nullable(),
+  lackmaterial_eur: z.number().nullable(),
+  verbringung_eur: z.number().nullable(),
+  mietwagen_klasse: z.string().nullable(),
+  mietwagen_tagessatz_eur: z.number().nullable(),
+  nutzungsausfall_tagessatz_eur: z.number().nullable(),
+  sv_honorar_netto: z.number().nullable(),
+  sv_honorar_brutto: z.number().nullable(),
+  kalkulationssystem: z.enum(['audatex', 'dat', 'autoixpert', 'sonstiges']).nullable(),
+  seitenzahl: z.number().nullable(),
+})
 
 const SYSTEM_PROMPT =
   'Du bist ein OCR-Assistent fuer deutsche Kfz-Gutachten. Deine Aufgabe: aus dem ' +
@@ -249,8 +293,8 @@ export async function extractGutachtenAndSaveToClaim(
 
   try {
     const client = new Anthropic({ apiKey })
-    const response = await client.messages.create({
-      model: AI_MODELS.ocr,
+    const response = await client.messages.parse({
+      model: AI_MODELS.doc_ocr,
       max_tokens: 2048,
       system: SYSTEM_PROMPT,
       messages: [
@@ -277,23 +321,21 @@ export async function extractGutachtenAndSaveToClaim(
           ],
         },
       ],
+      output_config: { format: zodOutputFormat(GutachtenSchema) },
     })
 
-    const textBlock = response.content.find((b) => b.type === 'text')
-    const raw = textBlock?.type === 'text' ? textBlock.text : ''
-    const match = raw.match(/\{[\s\S]*\}/)
-    if (!match) {
+    const parsed = response.parsed_output as GutachtenOcrResult | null
+    if (!parsed) {
       // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
       await admin.rpc('apply_gutachten_ocr', {
         p_claim_id: claimId,
         p_values: {
           gutachten_ocr_processed_at: new Date().toISOString(),
-          gutachten_ocr_error: 'Kein JSON in Claude-Antwort gefunden',
+          gutachten_ocr_error: 'Keine strukturierte OCR-Antwort',
         },
       })
-      return { ok: false, error: 'Kein JSON in Antwort' }
+      return { ok: false, error: 'Keine strukturierte Antwort' }
     }
-    const parsed = JSON.parse(match[0]) as GutachtenOcrResult
 
     // Update claim — ueber FIELD_MAP iterieren. Bei manuell-ueberschriebenen
     // Claims nur leere DB-Felder fuellen.

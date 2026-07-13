@@ -123,21 +123,6 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
     scrollToBottom()
   }, [messages, scrollToBottom])
 
-  // Beim Mount: Nachrichten als gelesen markieren (Fire-and-forget).
-  useEffect(() => {
-    const supabase = createClient()
-    supabase
-      .from('nachrichten')
-      .update({ gelesen: true })
-      .eq('fall_id', fallId)
-      .in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
-      .eq('gelesen', false)
-      .neq('sender_id', currentUserId)
-      .then(() => {
-        /* noop */
-      })
-  }, [fallId, currentUserId])
-
   // Realtime-Subscription auf neue Nachrichten fuer diesen Fall.
   useEffect(() => {
     const supabase = createClient()
