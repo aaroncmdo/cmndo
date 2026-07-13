@@ -4,9 +4,13 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CheckIcon } from 'lucide-react'
-import { getStorageUrl } from '@/lib/storage/url'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { getPaket } from '@/lib/pakete'
+// Storage-RLS-Rest: Unterschrift-Upload + Vertrags-Flip laufen server-seitig.
+// Der Browser kann den privaten Bucket nicht signieren (createSignedUrl ->
+// null) — vorher wurde der unterschrift_url-Write deshalb still uebersprungen
+// und der Vertrag trotzdem als unterschrieben markiert.
+import { signVertragUnterschrift } from './actions'
 
 export default function VertragPage() {
   const router = useRouter()
@@ -19,6 +23,9 @@ export default function VertragPage() {
   // AAR-258: Spinner-Timeout — wenn nach 5s weder svData noch alreadySigned
   // vorhanden sind, zeigen wir einen Fehler-State statt endless Spinner.
   const [loadError, setLoadError] = useState<string | null>(null)
+  // Speicher-Fehler getrennt von loadError: loadError ersetzt die ganze Seite,
+  // ein fehlgeschlagenes Unterschreiben soll das Formular aber stehen lassen.
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [alreadySigned, setAlreadySigned] = useState(false)
   const [drawing, setDrawing] = useState(false)
 
@@ -82,31 +89,29 @@ export default function VertragPage() {
   async function handleSign() {
     if (!accepted || !signed || !svData) return
     setSaving(true)
+    setSaveError(null)
     try {
-      // Save signature as PNG
       const canvas = canvasRef.current
-      if (canvas) {
-        const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/png'))
-        if (blob) {
-          const path = `gutachter/${svData.id}/vertrag_unterschrift_${Date.now()}.png`
-          await supabase.storage.from('fall-dokumente').upload(path, blob, { contentType: 'image/png' })
-          const publicUrl = await getStorageUrl(supabase, 'fall-dokumente', path)
-          if (publicUrl) {
-            await supabase.from('sachverstaendige').update({ unterschrift_url: publicUrl }).eq('id', svData.id)
-          }
-        }
+      const dataUrl = canvas?.toDataURL('image/png')
+      if (!dataUrl) {
+        setSaveError('Unterschrift konnte nicht gelesen werden')
+        return
       }
 
-      // Mark contract as signed
-      await supabase.from('sachverstaendige').update({
-        vertrag_unterschrieben: true,
-        vertrag_unterschrieben_am: new Date().toISOString(),
-      }).eq('id', svData.id)
+      // Server-Action: Upload (Service-Client) + Vertrags-Flip in einem Schritt.
+      // Die sv-ID leitet die Action aus der Session ab — sie wird bewusst NICHT
+      // vom Client uebergeben.
+      const res = await signVertragUnterschrift(dataUrl)
+      if (!res.ok) {
+        setSaveError(res.error ?? 'Vertrag konnte nicht unterzeichnet werden')
+        return
+      }
 
       router.push('/gutachter')
       router.refresh()
-    } catch { /* */ }
-    setSaving(false)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const PAKET_LABEL: Record<string, string> = { standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)', pro: 'Pro (25 Fälle/Monat)', 'standard-25': 'Pro (25 Fälle/Monat)', premium: 'Premium (50 Fälle/Monat)', 'premium-50': 'Premium (50 Fälle/Monat)' }
@@ -192,6 +197,10 @@ export default function VertragPage() {
             <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-ios-xl bg-claimondo-bg cursor-crosshair" />
             {signed && <p className="text-[10px] text-success mt-1">Unterschrift erfasst</p>}
           </div>
+
+          {saveError && (
+            <p className="text-body-xs text-danger-strong" role="alert">{saveError}</p>
+          )}
 
           <Button variant="navy" size="lg" fullWidth onClick={handleSign} disabled={saving || !accepted || !signed}>
             {saving ? 'Wird gespeichert...' : <><CheckIcon className="w-4 h-4" /> Vertrag unterzeichnen</>}

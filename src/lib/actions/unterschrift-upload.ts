@@ -17,6 +17,8 @@
 // generiert und Flag-off Public-URLs zurückgibt (heute-Verhalten).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { getStorageUrl } from '@/lib/storage/url'
 
 type UploadResult =
@@ -78,16 +80,36 @@ export async function uploadFlowSignatur(
 }
 
 /**
- * Persistiert die vom Gutachter im Onboarding gezeichnete Unterschrift als seine
+ * Persistiert die vom Gutachter gezeichnete Unterschrift als seine
  * wiederverwendbare Signatur (`sachverstaendige.unterschrift_url`).
- * Pfad: `sv/{svId}/unterschrift_{ts}.png`. Kein Fall-/Token-Kontext noetig — der
- * Aufrufer (signSvVertrag) hat den eingeloggten SV bereits verifiziert.
+ * Pfad: `sv/{svId}/unterschrift_{ts}.png`.
+ *
+ * Ownership-Check (Haertung): Dieses File traegt 'use server' — jeder Export
+ * ist damit ein eigenstaendig aufrufbarer POST-Endpunkt, nicht bloss ein
+ * interner Helper. Ohne Check konnte ein beliebiger Aufrufer Bilder unter
+ * `sv/<fremde-id>/` ablegen und sich eine signierte URL darauf zurueckgeben
+ * lassen (OWASP A01 — user-manipulierbare Objekt-Referenz). Der fruehere
+ * Docstring verliess sich darauf, dass "der Aufrufer den SV bereits
+ * verifiziert hat" — das gilt fuer unsere Caller, aber ein Server-Action-
+ * Endpunkt hat keine Garantie darueber, wer ihn aufruft.
+ *
+ * Verhaltensneutral: beide Caller (signSvVertrag, signVertragUnterschrift)
+ * leiten die svId ohnehin per getGutachterForUser aus der Session ab.
  */
 export async function uploadSvUnterschrift(
   svId: string,
   base64DataUrl: string,
 ): Promise<UploadResult> {
   if (!svId) return { ok: false, error: 'SV-ID fehlt' }
+
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const eigenerSv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!eigenerSv || eigenerSv.id !== svId) {
+    return { ok: false, error: 'Nicht berechtigt' }
+  }
+
   const decoded = decodeDataUrl(base64DataUrl)
   if (!decoded) return { ok: false, error: 'Ungültige oder zu große Bilddaten' }
 
