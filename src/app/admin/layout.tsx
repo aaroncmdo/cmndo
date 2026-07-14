@@ -1,6 +1,6 @@
 ﻿import AdminNav from './_components/AdminNav'
 import UpdatesNav from '@/components/shared/updates'
-import Spotlight from '@/components/Spotlight'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
@@ -38,8 +38,8 @@ export default async function AdminLayout({
           ].join(', '),
         }} />
       </div>
-      {/* Spotlight search (Cmd+K) */}
-      <Spotlight />
+      {/* Globale Suche (Cmd+K) */}
+      <GlobalSearch rolle="admin" />
 
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />
