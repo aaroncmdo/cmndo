@@ -30,10 +30,20 @@
 export const Z_SIDEBAR_VEIL = 30
 
 /**
- * Basis-Ebene der Portal-Sidebars: PortalNav (`z-40`, Admin/Dispatch/Kanzlei/
- * Mitarbeiter/Makler) und die Kunde-Sidebar (`z-40`). Die SV-Sidebar liegt mit
- * `lg:z-[1100]` hoeher — unkritisch, denn die Invariante, auf die es ankommt,
- * ist "Schleier UNTER jeder Sidebar", und 30 < 40 < 1100.
+ * Basis-Ebene der Portal-Sidebars. Wird von den Sidebars TATSAECHLICH konsumiert
+ * (`style={{ zIndex: Z_SIDEBAR }}`), nicht nur dokumentiert — sonst koennte der
+ * Test die Invariante nicht durchsetzen:
+ *
+ *   - PortalNav, beide Varianten  (Admin/Dispatch/Kanzlei/Mitarbeiter/Makler/
+ *     Werkstatt/Flotte). Die `light`-Variante braucht dafuer zwingend
+ *     `position: relative` — ein nicht-positioniertes Element wuerde vom
+ *     positionierten Schleier UEBERDECKT.
+ *   - Kunde-Sidebar (src/app/kunde/layout.tsx)
+ *
+ * Einzige Ausnahme: die SV-Sidebar (GutachterShell) traegt eigene, HOEHERE Werte
+ * (`z-50` mobil, `lg:z-[1100]`), weil sie ueber der Mapbox-Karte im Feldmodus
+ * liegen muss. Unkritisch — worauf es ankommt, ist "Schleier UNTER jeder
+ * Sidebar", und 30 < 40 < 1100.
  */
 export const Z_SIDEBAR = 40
 
