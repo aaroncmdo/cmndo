@@ -274,6 +274,11 @@ function isPublicPath(pathname: string): boolean {
     // Link waere weiterhin tot (der proxy.ts-Fix allein reicht NICHT).
     // startsWith-Radius geprueft: unter /abmelden liegt nur [token] — kein Auth-Bypass.
     '/abmelden',
+    // Cold-Mail Opt-out (public, HMAC-Token in der URL) — Ziel des Pflicht-
+    // Abmeldelinks + des List-Unsubscribe-Headers. Bewusst EIGENER Pfad neben
+    // '/abmelden': andere Suppression-Semantik (cold_mail_suppression vs.
+    // leads.winback_opt_out) und eigener Token-Typ (HMAC statt reminder_token).
+    '/partner-abmelden',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
     // hinter den Auth-Guard rutscht:
     '/vorteile',
