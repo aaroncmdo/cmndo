@@ -275,7 +275,7 @@ export default async function FlowPage({
   // flow_szenario_steps; hier wird sie geladen und gegen den Lead-Zustand ausgewertet. Ein neuer Weg
   // oder eine neue Weiche ist damit eine ZEILE, kein Deploy.
   // Der Lead kommt via select('*') -> alle Felder liegen vor (auch die, die frueher nie an den Client gingen).
-  const { weichen } = await ladeFlowWeichen(
+  const { config: flowConfig, weichen } = await ladeFlowWeichen(
     lead as unknown as LeadFuerKontext,
     Boolean(terminMitSv) || terminPending,
   )
@@ -525,6 +525,11 @@ export default async function FlowPage({
           needsBooking={needsBooking}
           needsWerkstatt={needsWerkstatt}
           weichen={weichen}
+          // Die Matrix mitgeben: waehlt der Kunde die Schuldfrage erst im Quali-Step, wechselt das
+          // Szenario (unqualifiziert -> kasko/haftpflicht/teilschuld) und der Wizard muss die
+          // Step-Sequenz neu berechnen — ohne Server-Roundtrip.
+          flowConfig={flowConfig}
+          hatSvTermin={Boolean(terminMitSv) || terminPending}
           terminPending={terminPending}
           besichtigungsAdresse={besichtigungsAdresse}
           feststellungPhasen={feststellungPhasen}

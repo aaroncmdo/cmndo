@@ -71,6 +71,11 @@ vi.mock('@/lib/self-service/flow-resolver', () => ({
   resolveFlowTerminState: vi.fn(),
 }))
 vi.mock('@/lib/termine/engine', () => ({ planeTermin: vi.fn() }))
+// Aaron 14.07. (Teilschuld-Rueckruf): self-service-actions importiert jetzt upsertReservierungsRueckruf.
+// Das Modul zieht den Server-Client (server-only) — im Test als No-Op mocken wie die uebrigen Deps.
+vi.mock('@/lib/embed/reservierungs-rueckruf', () => ({
+  upsertReservierungsRueckruf: vi.fn(async () => ({ ok: true })),
+}))
 vi.mock('@/lib/ocr/apply-zb1-to-lead', () => ({ buildZb1LeadUpdate: vi.fn() }))
 vi.mock('@/lib/mapbox/geocode', () => ({ geocodeAdresse: vi.fn() }))
 vi.mock('../werkstatt-geo-fallback', () => ({ resolveWerkstattFallbackGeo: vi.fn() }))
