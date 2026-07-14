@@ -38,7 +38,11 @@ export async function resolveBrandTheme(
   if (sv.organisation_id) {
     const { data: org } = await supabase
       .from('organisationen')
-      .select('logo_url, firmenname, brand_primary, brand_secondary, brand_theme, use_custom_branding')
+      // Prod-Fix 14.07.: organisationen hat KEINE Spalte `firmenname` — sie heisst `name`
+      // (verifiziert). Der frühere Select warf 42703 -> die ganze Org-Branding-Query lief ins
+      // Leere -> Whitelabel-Theme fiel still auf Claimondo zurück. (sachverstaendige.firmenname
+      // existiert dagegen -> die :30-Query oben bleibt.)
+      .select('logo_url, name, brand_primary, brand_secondary, brand_theme, use_custom_branding')
       .eq('id', sv.organisation_id)
       .maybeSingle()
 
@@ -50,7 +54,7 @@ export async function resolveBrandTheme(
           (org.brand_secondary as string | null) ?? null,
         ),
         logoUrl: (org.logo_url as string | null) ?? null,
-        firmenname: (org.firmenname as string | null) ?? null,
+        firmenname: (org.name as string | null) ?? null,
         useCustom: true,
         source: 'org',
       }
