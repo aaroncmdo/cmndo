@@ -45,7 +45,7 @@ import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import SaSignaturStep from './SaSignaturStep'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
 import { FlowWerkstattHinweisHaftpflicht } from './FlowWerkstattHinweisHaftpflicht'
-import { resolveAbrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
+import type { FlowWeichen } from '@/lib/self-service/flow-weichen'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -136,6 +136,7 @@ export default function FlowWizardKfz({
   gutachter,
   needsBooking,
   needsWerkstatt,
+  weichen,
   terminPending,
   besichtigungsAdresse,
   feststellungPhasen,
@@ -156,6 +157,10 @@ export default function FlowWizardKfz({
   // Reparaturwunsch/Werkstatt: server-gegated (CANONICAL_FLOWLINK_ENABLED + brauchtWerkstatt-
   // Vermittlung am Lead). Beim Mount gecappt (initialNeedsWerkstatt) wie needsBooking/hatFeststellung.
   needsWerkstatt?: boolean
+  // Spec A (Aaron 14.07.): die EINE DB-getriebene Weiche, SERVERSEITIG aufgeloest — sie kennt
+  // eigene_versicherung/freie_werkstattwahl, die der Client nie zu sehen bekam. Ersetzt die frueher
+  // lossy Client-Rekonstruktion des Abrechnungswegs.
+  weichen: FlowWeichen
   // AAR-956 16.06. (Aaron Wunschtermin-Modell): kein harter Termin, aber gewählter SV +
   // Wunschtermin → Gutachter-Step zeigt den Wunschtermin als "wird bestätigt" (kein Re-Pick).
   terminPending?: boolean
@@ -284,9 +289,13 @@ export default function FlowWizardKfz({
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
   // Task 12: Haftpflicht (schuldfrage='gegner') erreicht den Werkstatt-Step nie
   // (quali-flow-outcome: reparaturwunsch=null) — read-only Reparatur-nach-Gutachten-Hinweis am SA-Step.
-  const istHaftpflicht =
-    resolveAbrechnungsweg({ schuldfrage: schuldfrageWahl, ueberEigeneVersicherung: null }) ===
-    'haftpflicht'
+  //
+  // Spec A (14.07.): die SERVER-Weiche hat Vorrang — sie kennt eigene_versicherung, der Client nicht.
+  // Vorher stand hier resolveAbrechnungsweg({ …, ueberEigeneVersicherung: null }) mit HARDCODIERTEM
+  // null: der Client konnte kasko/selbstzahler gar nicht unterscheiden. Waehlt der Kunde die
+  // Schuldfrage erst jetzt im Quali-Step, faellt er auf die lokale Wahl zurueck — bei 'gegner' ist
+  // das eindeutig (die Versicherungsfrage ist dann irrelevant, 'gegner' dominiert).
+  const istHaftpflicht = weichen.abrechnungsweg === 'haftpflicht' || schuldfrageWahl === 'gegner'
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
   // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
   const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
