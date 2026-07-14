@@ -22,7 +22,7 @@ async function getServeUrl(): Promise<string> {
   return cachedServeUrl
 }
 
-export async function renderClip(props: ContentClipProps): Promise<Buffer> {
+export async function renderClip(props: ContentClipProps, onProgress?: (frac: number) => void): Promise<Buffer> {
   // RAM-Gate: der Render (rspack-bundle + Chromium) darf keinen Nachbar-Prozess OOM-killen.
   // Wartet auf ein sicheres RAM-Fenster; bricht mit klarer Meldung ab statt zu crashen.
   // Schwelle via ENV tunebar (VPS ohne Redeploy). Nicht-Linux -> Gate inaktiv.
@@ -41,7 +41,15 @@ export async function renderClip(props: ContentClipProps): Promise<Buffer> {
   const outputLocation = join(tmpdir(), `mkclip-${randomUUID()}.mp4`)
   try {
     // concurrency: 1 -> nur EIN Chromium-Tab gleichzeitig, deckelt die Render-RAM-Spitze.
-    await renderMedia({ composition, serveUrl, codec: 'h264', outputLocation, inputProps, concurrency: 1 })
+    await renderMedia({
+      composition,
+      serveUrl,
+      codec: 'h264',
+      outputLocation,
+      inputProps,
+      concurrency: 1,
+      onProgress: onProgress ? ({ progress }) => onProgress(progress) : undefined,
+    })
     return await readFile(outputLocation)
   } finally {
     await unlink(outputLocation).catch(() => {})

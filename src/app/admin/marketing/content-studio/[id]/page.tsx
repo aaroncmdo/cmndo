@@ -8,6 +8,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { STATUS_LABEL, STATUS_TONE } from '../status-display'
 import { RetryButton } from '../RetryButton'
 import { ScriptEditor } from '../ScriptEditor'
+import { RenderProgress } from '../RenderProgress'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,12 +95,8 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
 
       {job.status === 'render_queued' || job.status === 'audio_erzeugt' ? (
         <SectionCard>
-          <p className="text-body-sm text-claimondo-slate">
-            {job.status === 'render_queued'
-              ? 'In der Render-Warteschlange … der Worker rendert den Clip automatisch, sobald genügend RAM frei ist. Seite neu laden für den aktuellen Stand.'
-              : 'Wird gerendert (Voiceover → Video) … Seite neu laden für den aktuellen Stand.'}
-          </p>
-          <p className="mt-3 mb-2 text-body-xs text-claimondo-shield">
+          <RenderProgress jobId={job.id} initialStatus={job.status} />
+          <p className="mt-4 mb-2 text-body-xs text-claimondo-shield">
             Hängt es zu lange (z.B. nach einem Server-Neustart)?
           </p>
           <RetryButton jobId={job.id} label="Render neu starten" />
