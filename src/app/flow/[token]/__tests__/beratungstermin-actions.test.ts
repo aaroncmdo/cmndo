@@ -155,7 +155,12 @@ describe('verschiebeBeratungsterminFlow', () => {
       { data: [{ id: 't1', start_zeit: '2026-06-24T08:00:00.000Z', status: 'reserviert', assignee_id: null }] }, // legacy-Lookup
       { data: null, error: null },                                                                           // update terminal
     ])
-    const neuStart = '2026-06-25T13:00:00.000Z'
+    // ZEITBOMBE gefixt (14.07.): hier stand '2026-06-25T13:00:00.000Z' — ein hardcodiertes Datum.
+    // Ab dem 25.06. lag es in der VERGANGENHEIT, verschiebeBeratungsterminFlow lehnte den Termin
+    // korrekt ab (ok:false, "Termin liegt in der Vergangenheit" — die Regel, die der Test zwei Cases
+    // weiter unten selbst prueft) und dieser Test kippte. Der Code war immer richtig, der Test falsch.
+    // Datum daher relativ zu jetzt.
+    const neuStart = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     const r = await verschiebeBeratungsterminFlow('tok', neuStart)
     expect(r.ok).toBe(true)
 
