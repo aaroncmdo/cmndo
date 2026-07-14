@@ -9,7 +9,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMakler } from '@/lib/makler/queries'
 import { getOrCreateMaklerPromoCode } from '@/lib/makler/promo-code'
-import { createLead } from '@/lib/leads/create-lead'
+import { createLead, type LeadExtra } from '@/lib/leads/create-lead'
 import { pickRoundRobinDispatcher } from '@/lib/start-link/pick-dispatcher'
 import { sendFlowLinkMultiChannelCore } from '@/lib/start-link/send-flowlink-multichannel'
 import { toE164 } from '@/lib/format/telefon'
@@ -25,17 +25,24 @@ export type MaklerAnfrageInput = {
   nachname: string
   telefon: string
   email?: string | null
+  /** Kennzeichen des Kundenfahrzeugs -> leads.kennzeichen (Convert clampt varchar(20)). */
+  kennzeichen?: string | null
   standortPlz?: string | null
   standortOrt?: string | null
-  /** Makler-Anfrage: Standort mit Koordinaten (Place-Picker) -> Kunde-Flow-Prefill + SV-Matching. */
+  /** Makler-Anfrage: Ort mit Koordinaten (Place-Picker) -> Besichtigungsort + Kunde-Flow-Prefill + SV-Matching. */
   standortLat?: number | null
   standortLng?: number | null
   standortPlaceId?: string | null
+  /** Verschulden -> leads.schuldfrage. Entscheidet Haftpflicht/Kasko (der FlowLink haengt daran). */
+  schuldfrage?: 'gegner' | 'unklar' | 'eigenverantwortung' | null
+  /** Kasko-Folgefrage bei Eigenverschulden -> leads.eigene_versicherung ('ja'/'nein'). Pflicht wenn
+   *  schuldfrage='eigenverantwortung' (sonst disqualifiziert das Flow-Quali-Gate den Lead still). */
+  eigeneVersicherung?: 'ja' | 'nein' | null
+  /** Polizei vor Ort -> leads.polizei_vor_ort. */
+  polizeiVorOrt?: boolean | null
   notiz?: string | null
   /** Makler bestaetigt, dass der Kunde mit der Kontaktaufnahme einverstanden ist (DSGVO-Basis). */
   kundeEinwilligung: boolean
-  /** Paket — default 'komplett' (LexDrive/abrechnungsstaerker). Kunde/Flow kann verfeinern. */
-  serviceTyp?: 'komplett' | 'nur_gutachter'
   ausgang: MaklerAnfrageAusgang
   rueckrufStartZeit?: string | null
 }
@@ -102,11 +109,33 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   // Koordinaten nur als Paar schreiben (Prefill + SV-Matching brauchen beide).
   const hatKoords = standortLat != null && standortLng != null
   const notiz = input.notiz?.trim() || null
+  const kennzeichen = input.kennzeichen?.trim() || null
+  const schuldfrage = input.schuldfrage ?? null
+  const eigeneVersicherung = input.eigeneVersicherung ?? null
+  const polizeiVorOrt = typeof input.polizeiVorOrt === 'boolean' ? input.polizeiVorOrt : null
   if (vorname.length < 1 || nachname.length < 1) return { ok: false, error: 'Vor- und Nachname erforderlich.' }
   if (telefon.length < 5) return { ok: false, error: 'Telefonnummer erforderlich.' }
   if (input.ausgang === 'flowlink' && !telefon && !email) {
     return { ok: false, error: 'Fuer den Link-Versand wird Telefon oder Email benoetigt.' }
   }
+  // Kasko/Haftpflicht-Qualifizierung (Trust-Boundary, spiegelt den Client-Guard): Eigenverschulden
+  // OHNE VS-Antwort wuerde im Flow-Quali still disqualifizieren (qualiFlowOutcome -> Abbruch).
+  if (schuldfrage === 'eigenverantwortung' && eigeneVersicherung == null) {
+    return { ok: false, error: 'Bei Eigenverschulden bitte angeben, ob der Kunde kaskoversichert ist.' }
+  }
+
+  // Qualifikation + Besichtigungsort — an BEIDE Zweige. besichtigungsort_* speist die SV-/faelle-
+  // Seite (1:1-Kopierliste -> Navigation/ICS/Reminder); fahrzeug_standort_* (unten, nur flowlink/
+  // rueckruf-Basis) speist den Kunde-Flow-Prefill (FlowWizardKfz liest fahrzeug_standort_*). Beide
+  // bewusst gesetzt — sonst bricht entweder der Prefill oder der Besichtigungsort bleibt null.
+  const zusatzFelder: LeadExtra = {}
+  if (kennzeichen) zusatzFelder.kennzeichen = kennzeichen
+  if (schuldfrage) zusatzFelder.schuldfrage = schuldfrage
+  if (eigeneVersicherung) zusatzFelder.eigene_versicherung = eigeneVersicherung
+  if (polizeiVorOrt != null) zusatzFelder.polizei_vor_ort = polizeiVorOrt
+  if (standortOrt) zusatzFelder.besichtigungsort_adresse = standortOrt
+  if (hatKoords) { zusatzFelder.besichtigungsort_lat = standortLat; zusatzFelder.besichtigungsort_lng = standortLng }
+  if (standortPlaceId) zusatzFelder.besichtigungsort_place_id = standortPlaceId
 
   const admin = createAdminClient()
 
@@ -157,10 +186,17 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       standortLng,
       standortPlaceId,
       notiz,
-      serviceTyp: input.serviceTyp ?? 'komplett',
+      serviceTyp: 'komplett',
       zugewiesenAn: dispatcherId,
     })
     if (!res.ok) return { ok: false, error: res.error }
+    // Qualifikation + Besichtigungsort nachziehen (erstelleOeffentlichenRueckruf kennt diese Felder
+    // nicht — geteilte Funktion bewusst schlank). Non-critical: der Rueckruf steht, ein Enrichment-
+    // Fehler darf ihn nicht kippen (der Dispatcher qualifiziert sonst manuell nach).
+    if (Object.keys(zusatzFelder).length > 0) {
+      const { error: enrichErr } = await admin.from('leads').update(zusatzFelder).eq('id', res.leadId)
+      if (enrichErr) console.error('[erstelleMaklerAnfrage] Rueckruf-Enrichment:', enrichErr.message)
+    }
     await protokolliereEinwilligung(res.leadId)
     revalidatePath('/makler/leads')
     return { ok: true, leadId: res.leadId, ausgang: 'rueckruf', terminId: res.terminId }
@@ -172,15 +208,18 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
     { source_channel: 'makler-anfrage-flowlink', status: 'neu', vorname, nachname, telefon, email },
     {
       promotion_code_id: promo.id,
-      service_typ: input.serviceTyp ?? 'komplett',
+      service_typ: 'komplett',
       qualifizierungs_phase: 'erstkontakt',
       zugewiesen_an: dispatcherId,
       sprache: await getLocaleCookie(),
       ...(notiz ? { notiz } : {}),
+      // fahrzeug_standort_* speist den Kunde-Flow-Prefill (FlowWizardKfz); besichtigungsort_*
+      // (in zusatzFelder) speist die SV-/faelle-Seite. Beide bewusst gesetzt.
       ...(standortPlz ? { fahrzeug_standort_plz: standortPlz } : {}),
       ...(standortOrt ? { fahrzeug_standort_adresse: standortOrt } : {}),
       ...(hatKoords ? { fahrzeug_standort_lat: standortLat, fahrzeug_standort_lng: standortLng } : {}),
       ...(standortPlaceId ? { fahrzeug_standort_place_id: standortPlaceId } : {}),
+      ...zusatzFelder,
     },
   )
   if (!created.ok) return { ok: false, error: created.error }
