@@ -7,6 +7,7 @@ import {
   erstelleStornoGutschrift,
 } from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
+import { partnerTabelleFuer, type PartnerTyp } from './partner-tabellen'
 
 // Nach der Provisions-Unifikation: EINE Provisions- + EINE Staffel-Tabelle (partner_typ-Union),
 // maik separat. Die Alt-Tabellen sind aus dem View + allen Readern raus (Phase 2); v_partner_billing
@@ -33,7 +34,7 @@ type LedgerMeta = {
   fk: string
   partnerFlag: string
   partner?: string          // nur non-Union (maik): Embed-Partner-Tabelle
-  partnerTyp?: 'makler' | 'werkstatt' | 'marketing'  // nur non-Union (maik): statischer Typ
+  partnerTyp?: PartnerTyp  // nur non-Union (maik): statischer Typ
   partnerTypCol?: string    // Union: Spalte mit partner_typ (dynamisch aufgeloest)
   paidStatus: string
   paidCol?: string
@@ -220,11 +221,13 @@ export async function auszahlenProvision(
 
   // partner_typ + ist_kleinunternehmer aufloesen. Union: partner_typ aus der Row -> passende
   // Partner-Tabelle separat lesen. Non-Union (maik): statischer partnerTyp + FK-Embed normalisieren.
-  let partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+  let partnerTyp: PartnerTyp
   let istKleinunternehmer: boolean | null
   if (isUnion) {
-    partnerTyp = (data as any)[meta.partnerTypCol as string] as 'makler' | 'werkstatt'
-    const partnerTable = partnerTyp === 'makler' ? 'makler' : 'werkstaetten'
+    partnerTyp = (data as any)[meta.partnerTypCol as string] as PartnerTyp
+    // firmen_flotte -> firmen (Aaron 14.07.); unbekannter Typ -> null (kein stiller Fallback).
+    const partnerTable = partnerTabelleFuer(partnerTyp)
+    if (!partnerTable) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
     const { data: pRow } = await db
       .from(partnerTable)
       .select(meta.partnerFlag)
@@ -232,7 +235,7 @@ export async function auszahlenProvision(
       .maybeSingle()
     istKleinunternehmer = (pRow as any)?.[meta.partnerFlag] ?? null
   } else {
-    partnerTyp = meta.partnerTyp as 'makler' | 'werkstatt' | 'marketing'
+    partnerTyp = meta.partnerTyp as PartnerTyp
     // Supabase select('a(b)') liefert je nach Cardinality Array oder Objekt -- immer normalisieren.
     const partnerRaw = (data as any)[meta.partner as string]
     const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
@@ -376,7 +379,7 @@ export async function resolveLedgerKontext(
       ctx: {
         nettoEur: number
         partnerId: string
-        partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+        partnerTyp: PartnerTyp
         istKleinunternehmer: boolean | null
         leistungsDatum: string | null
         leistungText: string
@@ -397,15 +400,17 @@ export async function resolveLedgerKontext(
   if (!partnerId) return { ok: false, error: 'Partner-Zuordnung fehlt' }
   const leistungsDatum: string | null = (data as any)[meta.leistungDatumCol] ?? null
 
-  let partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+  let partnerTyp: PartnerTyp
   let istKleinunternehmer: boolean | null
   if (isUnion) {
-    partnerTyp = (data as any)[meta.partnerTypCol as string] as 'makler' | 'werkstatt'
-    const partnerTable = partnerTyp === 'makler' ? 'makler' : 'werkstaetten'
+    partnerTyp = (data as any)[meta.partnerTypCol as string] as PartnerTyp
+    // firmen_flotte -> firmen (Aaron 14.07.); unbekannter Typ -> null (kein stiller Fallback).
+    const partnerTable = partnerTabelleFuer(partnerTyp)
+    if (!partnerTable) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
     const { data: pRow } = await db.from(partnerTable).select(meta.partnerFlag).eq('id', partnerId).maybeSingle()
     istKleinunternehmer = (pRow as any)?.[meta.partnerFlag] ?? null
   } else {
-    partnerTyp = meta.partnerTyp as 'makler' | 'werkstatt' | 'marketing'
+    partnerTyp = meta.partnerTyp as PartnerTyp
     const partnerRaw = (data as any)[meta.partner as string]
     const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
     istKleinunternehmer = partner?.[meta.partnerFlag] ?? null

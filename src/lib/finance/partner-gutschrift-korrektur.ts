@@ -7,6 +7,7 @@ import {
 } from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 import { resolveLedgerKontext, type ProvisionTabelle } from './provision-status'
+import { partnerTabelleFuer, type PartnerTyp } from './partner-tabellen'
 
 export type KorrekturBetraege = {
   nettoCent: number
@@ -55,11 +56,11 @@ export function computeKorrekturBetraege(input: {
  */
 async function pruefePartnerSteuerdaten(
   db: SupabaseClient<any>,
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerTyp: PartnerTyp,
   partnerId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const table =
-    partnerTyp === 'makler' ? 'makler' : partnerTyp === 'werkstatt' ? 'werkstaetten' : 'marketing_partner'
+  const table = partnerTabelleFuer(partnerTyp)
+  if (!table) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
   const { data: partner, error } = await db.from(table).select('*').eq('id', partnerId).single()
   if (error || !partner) return { ok: false, error: 'Partner nicht gefunden' }
   const p = partner as Record<string, any>

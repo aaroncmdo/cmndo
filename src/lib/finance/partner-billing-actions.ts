@@ -14,6 +14,7 @@ import {
   korrigierePartnerGutschrift,
   computeKorrekturBetraege,
 } from '@/lib/finance/partner-gutschrift-korrektur'
+import { partnerTabelleFuer } from '@/lib/finance/partner-tabellen'
 import {
   markBezahlt,
   retryEinzug,
@@ -160,18 +161,12 @@ export async function storniere(
  * Payload daher als `never` gecastet.
  */
 export async function setzePartnerSteuerdaten(
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing',
   partnerId: string,
   daten: { ust_id?: string; adresse_strasse?: string; adresse_plz?: string; adresse_ort?: string },
 ): Promise<{ ok: boolean; error?: string }> {
   const auth = await requireAdmin()
   if (!auth.ok) return auth
-
-  const TABLE_MAP = {
-    makler: 'makler',
-    werkstatt: 'werkstaetten',
-    marketing: 'marketing_partner',
-  } as const
 
   const updateObj: Record<string, string | null> = {}
   if ('ust_id' in daten) updateObj.ust_id = daten.ust_id?.trim() || null
@@ -183,7 +178,8 @@ export async function setzePartnerSteuerdaten(
     return { ok: false, error: 'Keine Daten' }
   }
 
-  const table = TABLE_MAP[partnerTyp]
+  const table = partnerTabelleFuer(partnerTyp)
+  if (!table) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
   const admin = createAdminClient()
 
   const { error } = await admin
@@ -207,20 +203,15 @@ export async function setzePartnerSteuerdaten(
  * folgen beim Merge-Regen (Regel 2). Payload daher als `never` gecastet.
  */
 export async function setzePartnerUstStatus(
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing',
   partnerId: string,
   istKleinunternehmer: boolean,
 ): Promise<{ ok: boolean; error?: string }> {
   const auth = await requireAdmin()
   if (!auth.ok) return auth
 
-  const TABLE_MAP = {
-    makler: 'makler',
-    werkstatt: 'werkstaetten',
-    marketing: 'marketing_partner',
-  } as const
-
-  const table = TABLE_MAP[partnerTyp]
+  const table = partnerTabelleFuer(partnerTyp)
+  if (!table) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
   const admin = createAdminClient()
 
   // ist_kleinunternehmer: Spalte per Migration in Branch angelegt, Typen noch nicht regeneriert.
@@ -284,7 +275,7 @@ export async function getPartnerGutschriftDownloadUrl(
  * Fuer alle anderen Typen: gibt zusaetzlich gutschriftDocsByLedger (Original + Storno je Ledger) zurueck.
  */
 export async function ladePartnerBilling(
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing' | 'kanzlei',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing' | 'kanzlei',
   partnerId: string,
 ): Promise<
   | {
@@ -306,13 +297,8 @@ export async function ladePartnerBilling(
 
   // Kanzlei ist Forderungs-Partner ohne Steuerdaten-Spalten → skip
   if (partnerTyp !== 'kanzlei') {
-    const TABLE_MAP = {
-      makler: 'makler',
-      werkstatt: 'werkstaetten',
-      marketing: 'marketing_partner',
-    } as const
-
-    const table = TABLE_MAP[partnerTyp]
+    const table = partnerTabelleFuer(partnerTyp)
+    if (!table) return { ok: false, error: `Unbekannter partner_typ '${partnerTyp}'` }
     const admin = createAdminClient()
 
     // Spalten per Migration in Branch angelegt — Typen folgen beim Merge-Regen
