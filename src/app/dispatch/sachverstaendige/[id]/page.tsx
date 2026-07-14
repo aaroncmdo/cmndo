@@ -3,16 +3,15 @@
 // Keine Admin-Actions (Bearbeiten, Löschen, Deaktivieren).
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import {
-  ArrowLeftIcon, MapPinIcon, PhoneIcon, MailIcon, PackageIcon,
-  AlertTriangleIcon, UserIcon, CheckCircleIcon,
+  MapPinIcon, PhoneIcon, MailIcon, PackageIcon,
+  AlertTriangleIcon, CheckCircleIcon,
 } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
 import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import PageHeader from '@/components/shared/PageHeader'
+import EntityDetailShell from '@/components/shared/detail/EntityDetailShell'
 import EmptyState from '@/components/shared/EmptyState'
 import { CheckCircle2Icon } from 'lucide-react'
 
@@ -61,26 +60,19 @@ export default async function DispatchSvDetailPage({
     : false
 
   return (
-    <div className="py-6 space-y-6">
-      {/* Back + Header */}
-      <PageHeader
-        title={name}
-        size="lg"
-        icon={UserIcon}
-        leadingSlot={
-          <Link href="/dispatch/sachverstaendige" className="text-claimondo-ondo/70 hover:text-claimondo-ondo shrink-0">
-            <ArrowLeftIcon className="w-5 h-5" />
-          </Link>
-        }
-        description={
-          <span className="flex items-center gap-2">
-            <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
-            {istUrlaub && <StatusBadge tone="warning">Urlaub</StatusBadge>}
-          </span>
-        }
-      />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <EntityDetailShell
+      title={name}
+      backHref="/dispatch/sachverstaendige"
+      backLabel="Sachverständige"
+      description={
+        <span className="flex items-center gap-2">
+          <StatusBadge colorCls={`${status.bg} ${status.text}`}>{status.label}</StatusBadge>
+          {istUrlaub && <StatusBadge tone="warning">Urlaub</StatusBadge>}
+        </span>
+      }
+    >
+      <div className="flex-1 overflow-y-auto p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
         {/* Profil + Standort + Auslastung */}
         <div className="lg:col-span-2 space-y-4">
           {/* Kontakt */}
@@ -222,6 +214,7 @@ export default async function DispatchSvDetailPage({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </EntityDetailShell>
   )
 }
