@@ -218,7 +218,23 @@ export async function scrapeGooglePlaces(params: {
     if (data.status === 'ZERO_RESULTS') break
     if (data.status !== 'OK') {
       console.error('[scraping] textsearch status:', data.status, data.error_message)
-      return { ok: false, error: `Google Places: ${data.status ?? 'Fehler'}.` }
+      // ERSTE Seite kaputt -> echter Fehler, wir haben nichts.
+      // FOLGEseite kaputt -> die bereits geholten Treffer BEHALTEN statt sie wegzuwerfen.
+      //
+      // Warum das noetig ist: Googles Legacy-Pagination (next_page_token) liefert seit dem
+      // Places-Legacy-Sunset zuverlaessig INVALID_REQUEST — auch nach 10s Reifezeit
+      // (live gegen die echte API verifiziert 14.07., die 2100ms unten reichen NICHT und
+      // laengeres Warten hilft auch nicht). Vorher hat dieser eine kaputte Folge-Call die
+      // 20 guten Treffer von Seite 1 verworfen -> JEDE stadtweite Suche schlug fehl und es
+      // wurde nie ein Lead importiert (prod: 0 Leads mit source_channel='scraping').
+      //
+      // Folge: pro Suche gibt es aktuell max. 1 Seite (~20 Treffer). Mehr braucht die
+      // NEUE Places API (places.googleapis.com/v1) — die ist fuer unseren Key noch nicht
+      // freigeschaltet (PERMISSION_DENIED, verifiziert). -> Aaron/Google-Cloud.
+      if (results.length === 0) {
+        return { ok: false, error: `Google Places: ${data.status ?? 'Fehler'}.` }
+      }
+      break
     }
     results.push(...(data.results ?? []))
     if (!data.next_page_token) break
