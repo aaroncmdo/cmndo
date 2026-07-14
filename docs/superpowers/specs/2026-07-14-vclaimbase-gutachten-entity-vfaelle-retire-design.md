@@ -82,7 +82,7 @@ Die große **Detail-View-Zerlegung** (`v_claim_summary` / `v_claim_opponent` / `
 - **Phase 1 zuerst**, vollständig (mergen → deployen → Prod-Smoke), bevor Phase 2 beginnt. Sie steht für sich und liefert die Gutachten-Konsistenz sofort für alle Consumer.
 - **Phase 2 in Wellen**, jede mit eigenem Prod-Smoke (Regel 4).
 - **Regel 2:** jede DDL via `apply_migration`, File-Name == getrackte Version (kein Twin-Drift), volle `CREATE OR REPLACE`.
-- **Koordination:** Session `a6c863e2` hängt ein `dokumente`-jsonb-Aggregat an `v_claim_full`. Phase 1 fasst `v_claim_full` **nicht** an (es erbt via Passthrough). Phase 2 Schritt 2a fasst `v_claim_full` an → **vor jedem v_claim_full-Replace a6c863e2 pingen** und auf deren Live-Def aufbauen (nie gleichzeitig `CREATE OR REPLACE v_claim_full`).
+- **Koordination (v_claim_full = geteilte Fläche):** mehrere Lanes fassen `v_claim_full` an — `a6c863e2` (dokumente-jsonb-Aggregat) und die **Detail-View-Zerlegungs-Lane(s)** (`7572149e` / `detail-view-*`, Aaron 14.07.: „aktuell wird daran gearbeitet"). **Phase 1 fasst `v_claim_full` NICHT an** (es erbt via Passthrough) → **kein Clobber, sicher parallel baubar**. **Phase 2 Schritt 2a fasst `v_claim_full` an** → vor jedem `CREATE OR REPLACE v_claim_full` mit a6c863e2 **und** der Detail-View-Lane koordinieren, auf deren Live-Def aufbauen, nie gleichzeitig replacen. Wenn die Detail-View-Zerlegung `v_claim_full` bis dahin schon zerlegt hat, ist Phase-2-Schritt-2a ggf. hinfällig (die genutzten Spalten leben dann in Detail-Views) → Reihenfolge vor Phase-2-Start mit Aaron + der Lane klären.
 
 ## 7. Risiken
 
