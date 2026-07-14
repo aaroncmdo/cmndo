@@ -51,13 +51,36 @@ async function hatThreadZugriff(supabase: Awaited<ReturnType<typeof createClient
   return data as { id: string; claim_id: string; art: string } | null
 }
 
+/**
+ * Prueft ueber die claims-RLS (staff/kunde/sv/dispatch), ob der aktuelle User den Claim sehen
+ * darf. Gate fuer die authed Thread-Wrapper: die Thread-Inserts/Teilnehmer-Syncs laufen ueber den
+ * Service-Client (RLS-Bypass), also MUSS der Claim-Zugriff vorher explizit auf dem User-Client
+ * geprueft werden — sonst IDOR (beliebiger Claim/User).
+ */
+async function darfClaimSehen(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  claimId: string,
+): Promise<boolean> {
+  if (!claimId) return false
+  const { data } = await (supabase as unknown as SupabaseClient)
+    .from('claims')
+    .select('id')
+    .eq('id', claimId)
+    .maybeSingle()
+  return !!data
+}
+
 /** Get-or-create kunde_gruppe/team_intern-Thread + Teilnehmer-Sync (authed Wrapper -> Service). */
 export async function holeOderErstelleGruppenThread(
   claimId: string,
   art: 'kunde_gruppe' | 'team_intern',
 ): Promise<Ergebnis<string>> {
-  const { user } = await aktuellerUser()
+  const { supabase, user } = await aktuellerUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+  // SICHERHEIT: Claim-Zugriff des Aufrufers verifizieren (der Service-Pfad unten bypasst RLS).
+  // Fuer Gruppen weniger kritisch (der Teilnehmer-Sync fuegt nur echte Claim-Parteien hinzu),
+  // aber konsistent + defense-in-depth.
+  if (!(await darfClaimSehen(supabase, claimId))) return { ok: false, error: 'Kein Zugriff auf diesen Claim.' }
   const admin = createAdminClient() as unknown as SupabaseClient
   const threadId = await holeOderErstelleGruppenThreadService(admin, claimId, art)
   if (!threadId) return { ok: false, error: 'Claim nicht gefunden oder Thread konnte nicht angelegt werden.' }
@@ -66,9 +89,14 @@ export async function holeOderErstelleGruppenThread(
 
 /** Get-or-create Direkt-Thread zwischen aktuellem User und einer anderen Person (on-demand, inkl. Werkstatt/Makler). */
 export async function holeOderErstelleDirektThread(claimId: string, andereUserId: string): Promise<Ergebnis<string>> {
-  const { user } = await aktuellerUser()
+  const { supabase, user } = await aktuellerUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
   if (!andereUserId || andereUserId === user.id) return { ok: false, error: 'Ungueltiger DM-Partner.' }
+  // SICHERHEIT (IDOR): Ohne diesen Check konnte JEDER eingeloggte User einen DM-Thread an einem
+  // BELIEBIGEN Claim mit einem BELIEBIGEN User anlegen und sich selbst als Teilnehmer eintragen
+  // (Insert + Sync laufen unten ueber den Service-Client = RLS-Bypass) -> Lesen/Senden im
+  // fremden Claim-Chat. Der User-Client-Read ist RLS-gescoped (claims-Policies).
+  if (!(await darfClaimSehen(supabase, claimId))) return { ok: false, error: 'Kein Zugriff auf diesen Claim.' }
   const admin = createAdminClient() as unknown as SupabaseClient
 
   const [a, b] = sortiereDirektPaar(user.id, andereUserId)
