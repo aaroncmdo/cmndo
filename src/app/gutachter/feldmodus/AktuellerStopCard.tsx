@@ -286,6 +286,19 @@ export default function AktuellerStopCard({
 
   function onAbschliessen() {
     startTransition(async () => {
+      // Slice 1b: offline -> Abschluss in die Outbox; UI schaltet optimistisch
+      // weiter. Der Handler replayed completeAndAdvance mit terminId als CAS-Guard.
+      if (!navigator.onLine) {
+        void enqueueOp({
+          kind: 'sv_complete_advance',
+          replay_class: 'C',
+          payload: { sessionId, terminId: stop.termin_id },
+          entity_ref: { scope: 'feldmodus-session', id: sessionId },
+        }).catch(() => {})
+        toast.success('Abschluss offline gespeichert — wird synchronisiert')
+        onAdvanced(null)
+        return
+      }
       const res = await completeAndAdvance(sessionId, stop.termin_id)
       if (res.success) {
         toast.success(
