@@ -12,7 +12,9 @@ const ORG_COLUMNS =
   'steuernummer, ust_id, created_at, updated_at, parent_stripe_customer_id, ' +
   'parent_stripe_default_pm_id, vertrag_unterzeichnet_id, akademie_erst_anzahlung_eur, ' +
   'akademie_max_faelle_monat, akademie_radius_km, use_custom_branding, brand_primary, ' +
-  'brand_secondary, brand_accent, brand_extracted_at, logo_url, hauptansprechpartner_user_id'
+  'brand_secondary, brand_accent, brand_extracted_at, logo_url, hauptansprechpartner_user_id, ' +
+  // Communities sind organisationen mit typ='community' — es gibt KEINE communities-Tabelle.
+  'community_exklusiv, community_max_faelle_monat, community_leaderboard_aktiv, einsatzgebiet_radius_km'
 
 export type OrganisationVerwalter = {
   id: string
@@ -42,6 +44,11 @@ export type OrganisationDetail = {
   akademieErstAnzahlungEur: number | null
   akademieMaxFaelleMonat: number | null
   akademieRadiusKm: number | null
+  // Community-spezifisch (typ='community')
+  communityExklusiv: boolean
+  communityMaxFaelleMonat: number | null
+  communityLeaderboardAktiv: boolean
+  einsatzgebietRadiusKm: number | null
   // Whitelabel-Branding
   useCustomBranding: boolean
   brandPrimary: string | null
@@ -71,6 +78,10 @@ type OrgRow = {
   akademie_erst_anzahlung_eur: number | null
   akademie_max_faelle_monat: number | null
   akademie_radius_km: number | null
+  community_exklusiv: boolean | null
+  community_max_faelle_monat: number | null
+  community_leaderboard_aktiv: boolean | null
+  einsatzgebiet_radius_km: number | null
   use_custom_branding: boolean
   brand_primary: string | null
   brand_secondary: string | null
@@ -129,6 +140,10 @@ export async function getOrganisationDetail(
       akademieErstAnzahlungEur: org.akademie_erst_anzahlung_eur,
       akademieMaxFaelleMonat: org.akademie_max_faelle_monat,
       akademieRadiusKm: org.akademie_radius_km,
+      communityExklusiv: org.community_exklusiv ?? false,
+      communityMaxFaelleMonat: org.community_max_faelle_monat,
+      communityLeaderboardAktiv: org.community_leaderboard_aktiv ?? false,
+      einsatzgebietRadiusKm: org.einsatzgebiet_radius_km,
       useCustomBranding: org.use_custom_branding,
       brandPrimary: org.brand_primary,
       brandSecondary: org.brand_secondary,

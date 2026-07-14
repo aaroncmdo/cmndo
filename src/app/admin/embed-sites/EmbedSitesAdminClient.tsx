@@ -6,7 +6,8 @@ import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
-import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+// Tr = Kopfzeile/Leerzeile, ClickableTr = drillbare Body-Zeilen.
+import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 import { setEmbedFunnelModus } from './actions'
 
 interface SiteRow {
@@ -68,7 +69,8 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
             </Thead>
             <Tbody>
               {sites.map((s) => (
-                <Tr key={s.id}>
+                // P1: Zeile drillbar — Soft-Nav oeffnet den Drawer, Deep-Link die Full-Page.
+                <ClickableTr key={s.id} onClick={() => router.push(`/admin/embed-sites/${s.id}`)}>
                   <Td>
                     {s.name}
                     {!s.aktiv && <span className="ml-2 text-xs text-claimondo-ondo">(pausiert)</span>}
@@ -78,7 +80,13 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
                   <Td>{s.variante}</Td>
                   <Td>{s.anfragen_gesamt}</Td>
                   <Td>
-                    <div className="flex items-center gap-3">
+                    {/* Aktions-Zelle: stopPropagation, sonst navigiert der Funnel-Toggle
+                        die Zeile mit weg. Das Button-Primitive reicht kein Event durch
+                        (onClick: () => void), also faengt der Wrapper den Bubble ab. */}
+                    <div
+                      className="flex items-center gap-3"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <span
                         className={
                           s.funnel_modus === 'flowlink'
@@ -98,7 +106,7 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
                       </Button>
                     </div>
                   </Td>
-                </Tr>
+                </ClickableTr>
               ))}
               {sites.length === 0 && (
                 <Tr>
