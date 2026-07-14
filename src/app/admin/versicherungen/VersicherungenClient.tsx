@@ -1,12 +1,20 @@
-﻿'use client'
+'use client'
 
-import { useState } from 'react'
+// P1 (Detail-View-Konsistenz): Die Liste ist jetzt drillbar.
+// Vorher oeffnete ein Klick ein 512px-Modal (Detail + Edit) — jetzt navigiert er
+// auf /admin/versicherungen/[id]: Soft-Nav zeigt den Drawer, Deep-Link die
+// Full-Page. Das Detail-Modal ist damit ersatzlos entfallen.
+// Die Writes laufen ueber Server-Actions (vorher: direkt aus dem Browser in die DB).
+
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
+import { SearchIcon, MailIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
+import { createVersicherung, type VersicherungInput } from './actions'
 
 type Versicherung = {
   id: string
@@ -22,59 +30,55 @@ type Versicherung = {
   ist_aktiv: boolean
 }
 
+const CREATE_FELDER = [
+  'name',
+  'schaden_telefon',
+  'schaden_email',
+  'hotline_telefon',
+  'webseite',
+  'adresse',
+  'plz',
+  'stadt',
+  'bafin_nummer',
+] as const
+
+const LEER: VersicherungInput = {
+  name: '',
+  schaden_telefon: null,
+  schaden_email: null,
+  hotline_telefon: null,
+  webseite: null,
+  adresse: null,
+  plz: null,
+  stadt: null,
+  bafin_nummer: null,
+}
+
 export default function VersicherungenClient({ versicherungen }: { versicherungen: Versicherung[] }) {
   const router = useRouter()
   const [search, setSearch] = useState('')
-  const [selected, setSelected] = useState<Versicherung | null>(null)
-  const [editing, setEditing] = useState(false)
   const [creating, setCreating] = useState(false)
-  const [form, setForm] = useState<Partial<Versicherung>>({})
-  const [saving, setSaving] = useState(false)
+  const [form, setForm] = useState<VersicherungInput>(LEER)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
 
   const filtered = versicherungen.filter(v => {
     const q = search.toLowerCase()
     return v.name.toLowerCase().includes(q) || (v.stadt ?? '').toLowerCase().includes(q)
   })
 
-  async function handleSave() {
-    if (!selected) return
-    setSaving(true)
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-    await supabase.from('versicherungen').update(form).eq('id', selected.id)
-    setSaving(false)
-    setEditing(false)
-    setSelected(null)
-    router.refresh()
-  }
-
-  async function handleCreate() {
-    if (!form.name?.trim()) return
-    setSaving(true)
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-    await supabase.from('versicherungen').insert({
-      name: form.name.trim(),
-      schaden_telefon: form.schaden_telefon || null,
-      schaden_email: form.schaden_email || null,
-      hotline_telefon: form.hotline_telefon || null,
-      webseite: form.webseite || null,
-      adresse: form.adresse || null,
-      plz: form.plz || null,
-      stadt: form.stadt || null,
-      bafin_nummer: form.bafin_nummer || null,
+  function handleCreate() {
+    setError(null)
+    startTransition(async () => {
+      const res = await createVersicherung(form)
+      if (!res.ok) {
+        setError(res.error ?? 'Anlegen fehlgeschlagen.')
+        return
+      }
+      setCreating(false)
+      setForm(LEER)
+      router.refresh()
     })
-    setSaving(false)
-    setCreating(false)
-    setForm({})
-    router.refresh()
-  }
-
-  async function handleToggleActive(v: Versicherung) {
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-    await supabase.from('versicherungen').update({ ist_aktiv: !v.ist_aktiv }).eq('id', v.id)
-    router.refresh()
   }
 
   return (
@@ -92,15 +96,14 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
                 className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
             </div>
-            <button onClick={() => { setCreating(true); setForm({}) }}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-ios-lg text-body-xs font-medium hover:bg-claimondo-shield transition-colors">
+            <Button variant="ondo" size="sm" onClick={() => { setCreating(true); setForm(LEER); setError(null) }}>
               <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
-            </button>
+            </Button>
           </div>
         </div>
       </div>
 
-      {/* Tabelle */}
+      {/* Tabelle — Zeile fuehrt in die Detail-View */}
       <div className="flex-1 overflow-y-auto">
         <Table>
           <Thead className="sticky top-0 z-10 bg-white! text-body-sm! normal-case! tracking-normal! border-b border-claimondo-border">
@@ -114,7 +117,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
           </Thead>
           <Tbody className="divide-y-0!">
             {filtered.map(v => (
-              <ClickableTr key={v.id} onClick={() => { setSelected(v); setForm(v); setEditing(false) }}
+              <ClickableTr key={v.id} onClick={() => router.push(`/admin/versicherungen/${v.id}`)}
                 className={`border-b border-claimondo-border ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
                 <Td className="py-2.5! font-medium text-body-xs">{v.name}</Td>
                 <Td className="py-2.5! text-body-xs">
@@ -141,108 +144,37 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
         </Table>
       </div>
 
-      {/* Create-Modal */}
+      {/* Create-Modal (bleibt ein Modal — Anlegen ist ein kurzer Flow, kein Detail) */}
       <Modal open={creating} onClose={() => setCreating(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Versicherung">
         <div className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
             <h2 className="text-body font-semibold text-claimondo-navy">Neue Versicherung</h2>
-            <button onClick={() => setCreating(false)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
+            <button type="button" onClick={() => setCreating(false)} aria-label="Schließen"
+              className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
           </div>
           <div className="p-5 space-y-3">
-            {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
+            {CREATE_FELDER.map(key => (
               <div key={key}>
-                <label className="text-body-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
-                <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
+                <label htmlFor={`neu-${key}`} className="text-body-xs text-claimondo-ondo mb-0.5 block">
+                  {key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}
+                </label>
+                <input id={`neu-${key}`} value={form[key] ?? ''}
+                  onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value === '' ? null : e.target.value }))}
                   className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
               </div>
             ))}
+            {error && (
+              <p className="text-body-sm text-danger-strong bg-danger-soft rounded-ios-sm px-3 py-2">{error}</p>
+            )}
             <div className="flex gap-2 pt-2">
-              <button onClick={handleCreate} disabled={saving || !form.name?.trim()}
-                className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
-                {saving ? 'Speichert...' : 'Erstellen'}
-              </button>
-              <button onClick={() => setCreating(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-body-sm">Abbrechen</button>
+              <Button variant="ondo" loading={pending} disabled={!form.name.trim()} onClick={handleCreate} className="flex-1">
+                Erstellen
+              </Button>
+              <Button variant="ghost" onClick={() => setCreating(false)}>Abbrechen</Button>
             </div>
           </div>
         </div>
       </Modal>
-
-      {/* Detail-Panel */}
-      <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={512} ariaLabel="Versicherer-Detail">
-        {selected && (
-          <div className="max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
-              <h2 className="text-body font-semibold text-claimondo-navy">{selected.name}</h2>
-              <button onClick={() => setSelected(null)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
-            </div>
-            <div className="p-5 space-y-3">
-              {editing ? (
-                <>
-                  {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
-                    <div key={key}>
-                      <label className="text-body-xs text-claimondo-ondo mb-0.5 block">{key.replace(/_/g, ' ')}</label>
-                      <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                        className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
-                    </div>
-                  ))}
-                  <div className="flex gap-2 pt-2">
-                    <button onClick={handleSave} disabled={saving}
-                      className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
-                      {saving ? 'Speichert...' : 'Speichern'}
-                    </button>
-                    <button onClick={() => setEditing(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-body-sm">Abbrechen</button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Row label="Schadentelefon" value={selected.schaden_telefon} type="tel" />
-                  <Row label="Schaden-Email" value={selected.schaden_email} type="email" />
-                  <Row label="Hotline" value={selected.hotline_telefon} type="tel" />
-                  <Row label="Webseite" value={selected.webseite} type="link" />
-                  <Row label="Adresse" value={selected.adresse} />
-                  <Row label="PLZ / Stadt" value={[selected.plz, selected.stadt].filter(Boolean).join(' ')} />
-                  <Row label="BaFin-Nr." value={selected.bafin_nummer} />
-                  <div className="flex gap-2 pt-3">
-                    <button onClick={() => setEditing(true)} className="flex-1 py-2 bg-claimondo-navy text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield">Bearbeiten</button>
-                    <button onClick={() => handleToggleActive(selected)}
-                      className={`px-4 py-2 rounded-ios-lg text-body-sm font-medium ${selected.ist_aktiv ? 'bg-danger-soft text-danger-strong hover:bg-danger/15' : 'bg-success-soft text-success-strong hover:bg-success/15'}`}>
-                      {selected.ist_aktiv ? 'Deaktivieren' : 'Aktivieren'}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </Modal>
-    </div>
-  )
-}
-
-function Row({ label, value, type }: { label: string; value: string | null; type?: 'tel' | 'email' | 'link' }) {
-  if (!value) return (
-    <div className="flex justify-between py-1.5 border-b border-claimondo-border">
-      <span className="text-body-xs text-claimondo-ondo/70">{label}</span>
-      <span className="text-body-xs text-claimondo-ondo/50">—</span>
-    </div>
-  )
-
-  return (
-    <div className="flex justify-between items-center py-1.5 border-b border-claimondo-border">
-      <span className="text-body-xs text-claimondo-ondo/70">{label}</span>
-      {type === 'tel' ? (
-        <PhoneButton nummer={value} variant="inline" label={value} className="text-body-xs" />
-      ) : type === 'email' ? (
-        <a href={`mailto:${value}`} className="text-body-xs text-claimondo-ondo hover:underline flex items-center gap-1">
-          <MailIcon className="w-3 h-3" /> {value}
-        </a>
-      ) : type === 'link' ? (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-body-xs text-claimondo-ondo hover:underline flex items-center gap-1">
-          <GlobeIcon className="w-3 h-3" /> Webseite
-        </a>
-      ) : (
-        <span className="text-body-xs text-claimondo-navy">{value}</span>
-      )}
     </div>
   )
 }
