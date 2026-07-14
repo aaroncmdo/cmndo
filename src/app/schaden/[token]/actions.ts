@@ -12,10 +12,14 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
+import { inviteGegnerViaAirdrop } from '@/lib/airdrop/gegner-invite'
+import { erstelleVsDispatchTask } from '@/lib/vs-meldung/dispatch-task'
+import { normalizeE164 } from '@/lib/whatsapp/send-sms-plain'
+import { findRecentGegnerLead } from '@/lib/api-v1/recent-lead-dedup'
 import { createLead } from '@/lib/leads/create-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import {
-  phoneWriteCapExceeded,
+  gegnerPhoneWriteCapExceeded,
   globalWriteCapExceeded,
   recordGlobalWrite,
 } from '@/lib/api-v1/write-abuse-guard'
@@ -64,12 +68,15 @@ export async function submitSchadenGegner(
     }
   }
 
-  // 3b. Abuse-Cap (public unauth Write-Pfad). Reuse der melde-schaden-Backstops:
-  //   Per-Telefon-Velocity (nur wenn der Gegner eine Nummer angab) + globaler
-  //   Circuit-Breaker. Best-effort/fail-open in phoneWriteCapExceeded (DB-Fehler
-  //   -> durchlassen; der globale Breaker faengt Massen-Missbrauch).
-  const telefon = data.telefon?.trim()
-  if (telefon && (await phoneWriteCapExceeded(telefon))) {
+  // 3b. Abuse-Cap: Per-Telefon-Velocity (3/24h gegen leads.gegner_telefon + source_channel=
+  // 'schaden-karte' — die MCP-Variante filtert auf telefon/'mcp' und greift hier NICHT)
+  // + globaler Circuit-Breaker. Scharf, weil dieser Endpunkt oeffentlich + unauthentifiziert
+  // ist UND (Slice 2c) eine SMS an eine frei waehlbare Nummer ausloest.
+  // WICHTIG: auf E.164 normalisieren BEVOR wir cappen UND speichern — sonst umgeht ein
+  // Angreifer den Cap trivial ueber Format-Varianten derselben Nummer (0170.../+49170...
+  // /"0170 ..."), die alle zu getrennten Count-Buckets werden, aber dieselbe SMS ausloesen.
+  const telefon = data.telefon?.trim() ? normalizeE164(data.telefon.trim()) : undefined
+  if (telefon && (await gegnerPhoneWriteCapExceeded(telefon))) {
     return {
       ok: false,
       error: 'Von dieser Telefonnummer wurden zu viele Meldungen erfasst. Bitte später erneut versuchen.',
@@ -79,6 +86,18 @@ export async function submitSchadenGegner(
     return {
       ok: false,
       error: 'Der Dienst ist aktuell stark ausgelastet. Bitte in einigen Minuten erneut versuchen.',
+    }
+  }
+
+  // 3c. Doppel-Submit-Dedup: der Submit-Button ist gegen Doppelklick geschuetzt, NICHT gegen
+  //   Reload+Resubmit. Ohne diesen Guard entstuende ein zweiter Claim -> eine zweite
+  //   Unfallmeldung an denselben Versicherer fuer denselben Unfall. Ein frischer Lead
+  //   (gleiche Nummer, gleiches Fahrzeug, < 10 min) gilt als derselbe Vorgang -> idempotent
+  //   zurueckgeben, KEIN neuer Claim, KEIN zweiter Invite.
+  if (telefon) {
+    const dup = await findRecentGegnerLead(ctx.context.fahrzeugId, telefon)
+    if (dup) {
+      return { ok: true, leadId: dup.leadId, vehicleId: ctx.context.fahrzeugId, claimId: dup.claimId ?? undefined }
     }
   }
 
@@ -108,7 +127,7 @@ export async function submitSchadenGegner(
       //   Wichtig fuer Task C (VS-Meldung braucht eine identifizierte geschaedigte Seite).
       gewerbe_flag: true,
       gegner_name: data.name.trim(),
-      gegner_telefon: data.telefon || null,
+      gegner_telefon: telefon ?? null,
       gegner_email: data.email || null,
       gegner_kennzeichen: data.kennzeichen || null,
       gegner_fahrzeugtyp: data.fahrzeugtyp || null,
@@ -182,7 +201,28 @@ export async function submitSchadenGegner(
     }
   }
 
-  // 6. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
+  // 6. Slice 2c: Der Gegner bestaetigt seine Handynummer per SMS-Magic-Link. Erst diese
+  //    Bestaetigung loest die Unfallmeldung an seine Haftpflicht aus (Fraud-Gate). Ohne
+  //    Nummer ist das unmoeglich -> Dispatch uebernimmt manuell.
+  //    Fail-soft wie der Convert darueber: ein Fehler hier darf den Gegner-Submit nie brechen.
+  if (claimId) {
+    try {
+      // telefon ist hier bereits E.164-normalisiert (s.o.) — inviteGegnerViaAirdrop
+      // normalisiert idempotent nochmal, aber wir uebergeben den kanonischen Wert.
+      if (telefon) {
+        const invite = await inviteGegnerViaAirdrop(claimId, telefon)
+        if (!invite.ok) {
+          await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: invite.error })
+        }
+      } else {
+        await erstelleVsDispatchTask({ claimId, grund: 'kein_telefon' })
+      }
+    } catch (err) {
+      console.error('[schaden-gegner] Airdrop-Invite fehlgeschlagen:', err)
+    }
+  }
+
+  // 7. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
   revalidatePath('/flotte/fahrzeug/' + ctx.context.fahrzeugId)
 
   return { ok: true, leadId: res.leadId, vehicleId: ctx.context.fahrzeugId, claimId }

@@ -16,6 +16,7 @@ import type { ReactNode } from 'react'
 import { MobileNav } from '@/components/shared/mobile-nav'
 import { MobileUpdatesDot } from '@/components/shared/updates/MobileUpdatesDot'
 import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
+import { Z_SIDEBAR } from '@/components/primitives/overlay/overlay-layers'
 
 // Breite des Sidebar-Streifens: 8px Margin + w-52 (208px) + 8px Margin = 224px.
 // Die Sidebar ist ein EINGERUECKTES Panel (top-2/left-2/bottom-2) — der Streifen
@@ -146,7 +147,12 @@ export function PortalNav({
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
           data-sidebar-mode="bar"
-          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg ${className}`}
+          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 rounded-ios-lg bg-claimondo-navy shadow-ios-lg ${className}`}
+          // z-index NICHT als Tailwind-Klasse: der Overlay-Schleier liegt per
+          // Konstante darunter (Z_SIDEBAR_VEIL < Z_SIDEBAR). Nur wenn die
+          // Sidebar dieselbe Konstante konsumiert, kann der Test die Invariante
+          // wirklich durchsetzen. Siehe primitives/overlay/overlay-layers.ts.
+          style={{ zIndex: Z_SIDEBAR }}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
@@ -192,7 +198,12 @@ export function PortalNav({
         role="navigation"
         aria-label={ariaLabel ?? 'Portal-Navigation'}
         data-sidebar-mode="bar"
-        className={`w-52 shrink-0 m-2 rounded-ios-lg overflow-hidden bg-claimondo-navy shadow-ios-lg ${className}`}
+        // `relative` + z-index ist hier PFLICHT, nicht Kosmetik: ohne Positionierung
+        // ist das aside nicht-positioniert und wuerde vom fixed/positionierten
+        // Overlay-Schleier (z 30) UEBERDECKT — die Umkehrung der Invariante.
+        // (Heute nutzt kein Consumer variant="light"; die Mine bleibt trotzdem entschaerft.)
+        className={`relative w-52 shrink-0 m-2 rounded-ios-lg overflow-hidden bg-claimondo-navy shadow-ios-lg ${className}`}
+        style={{ zIndex: Z_SIDEBAR }}
       >
         <div className="flex flex-col gap-0.5 p-3 overflow-y-auto">
           {sections.map((section, i) => (

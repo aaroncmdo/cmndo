@@ -29,6 +29,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 0    * * * *  cron-call.sh /api/cron/termin-erinnerungen       # nur noch 48h-Pflichtdokumente-Check ab 2026-07-03 (s.u.)
 0    * * * *  cron-call.sh /api/cron/re-termin-eskalation
 0    8 * * *  cron-call.sh /api/cron/vs-timer
+0    7 * * *  cron-call.sh /api/cron/gegner-invite-nachfassen   # Slice 2c: Gegner hat SMS-Link nicht bestaetigt -> Dispatch
 0  */6 * * *  cron-call.sh /api/cron/fall-abschluss
 0  */6 * * *  cron-call.sh /api/cron/task-eskalation
 15  17 * * *  cron-call.sh /api/cron/no-show-timeout
