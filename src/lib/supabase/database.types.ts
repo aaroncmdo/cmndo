@@ -3555,6 +3555,51 @@ export type Database = {
           },
         ]
       }
+      cold_mail_enrollments: {
+        Row: {
+          aktueller_step: number
+          erstellt_am: string
+          id: string
+          lead_id: string
+          next_send_at: string | null
+          sequenz_id: string
+          status: string
+        }
+        Insert: {
+          aktueller_step?: number
+          erstellt_am?: string
+          id?: string
+          lead_id: string
+          next_send_at?: string | null
+          sequenz_id: string
+          status?: string
+        }
+        Update: {
+          aktueller_step?: number
+          erstellt_am?: string
+          id?: string
+          lead_id?: string
+          next_send_at?: string | null
+          sequenz_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cold_mail_enrollments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "partner_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cold_mail_enrollments_sequenz_id_fkey"
+            columns: ["sequenz_id"]
+            isOneToOne: false
+            referencedRelation: "cold_mail_sequenzen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cold_mail_sends: {
         Row: {
           betreff: string
@@ -3611,6 +3656,75 @@ export type Database = {
           },
         ]
       }
+      cold_mail_sequenzen: {
+        Row: {
+          aktiv: boolean
+          auto_enroll: boolean
+          erstellt_am: string
+          id: string
+          name: string
+          rolle: string
+        }
+        Insert: {
+          aktiv?: boolean
+          auto_enroll?: boolean
+          erstellt_am?: string
+          id?: string
+          name: string
+          rolle: string
+        }
+        Update: {
+          aktiv?: boolean
+          auto_enroll?: boolean
+          erstellt_am?: string
+          id?: string
+          name?: string
+          rolle?: string
+        }
+        Relationships: []
+      }
+      cold_mail_steps: {
+        Row: {
+          bedingung: string
+          delay_tage: number
+          id: string
+          position: number
+          sequenz_id: string
+          vorlage_id: string
+        }
+        Insert: {
+          bedingung?: string
+          delay_tage?: number
+          id?: string
+          position: number
+          sequenz_id: string
+          vorlage_id: string
+        }
+        Update: {
+          bedingung?: string
+          delay_tage?: number
+          id?: string
+          position?: number
+          sequenz_id?: string
+          vorlage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cold_mail_steps_sequenz_id_fkey"
+            columns: ["sequenz_id"]
+            isOneToOne: false
+            referencedRelation: "cold_mail_sequenzen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cold_mail_steps_vorlage_id_fkey"
+            columns: ["vorlage_id"]
+            isOneToOne: false
+            referencedRelation: "cold_mail_vorlagen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cold_mail_suppression: {
         Row: {
           email: string
@@ -3639,6 +3753,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cold_mail_vorlagen: {
+        Row: {
+          aktualisiert_am: string
+          betreff: string
+          body_html: string
+          erstellt_am: string
+          erstellt_von: string | null
+          id: string
+          name: string
+          rolle: string | null
+        }
+        Insert: {
+          aktualisiert_am?: string
+          betreff: string
+          body_html: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          name: string
+          rolle?: string | null
+        }
+        Update: {
+          aktualisiert_am?: string
+          betreff?: string
+          body_html?: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          name?: string
+          rolle?: string | null
+        }
+        Relationships: []
       }
       community_memberships: {
         Row: {

@@ -13,6 +13,7 @@ import CsvImportPanel from '@/app/admin/partner-leads/CsvImportPanel'
 import ScrapePanel from '@/app/admin/partner-leads/ScrapePanel'
 import WerkstattAnlegenForm from '@/app/admin/werkstaetten/WerkstattAnlegenForm'
 import MaklerAnlegenDrawerContent from './wizards/MaklerAnlegenDrawerContent'
+import SequenzenDrawerContent from './wizards/SequenzenDrawerContent'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
 import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
@@ -29,6 +30,7 @@ export default function VertriebAktionsleiste({
   const [freigabenDrawer, setFreigabenDrawer] = useState(false)
   const [csvDrawer, setCsvDrawer] = useState(false)
   const [scrapeDrawer, setScrapeDrawer] = useState(false)
+  const [sequenzenDrawer, setSequenzenDrawer] = useState(false)
   const [wsAnlegen, setWsAnlegen] = useState(false)
   const [maklerAnlegen, setMaklerAnlegen] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
@@ -53,6 +55,10 @@ export default function VertriebAktionsleiste({
     }
     if (a.key === 'scrape') {
       setScrapeDrawer(true)
+      return
+    }
+    if (a.key === 'sequenzen') {
+      setSequenzenDrawer(true)
       return
     }
     if (a.key === 'anlegen-werkstatt') {
@@ -135,6 +141,15 @@ export default function VertriebAktionsleiste({
           onClose={() => setScrapeDrawer(false)}
           onImported={() => { setScrapeDrawer(false); router.refresh() }}
         />
+      </Drawer>
+
+      <Drawer
+        open={sequenzenDrawer}
+        onClose={() => setSequenzenDrawer(false)}
+        width={720}
+        ariaLabel="Cold-Mail-Sequenzen"
+      >
+        <SequenzenDrawerContent />
       </Drawer>
 
       <Drawer
