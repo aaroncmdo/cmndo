@@ -25,7 +25,10 @@ export function MaklerHubLanding({
 }) {
   return (
     <div className="min-h-screen bg-claimondo-bg">
-      <LandingTopbar authenticatedUser={null} />
+      {/* finderHref an ALLE Finder-CTAs der Seite durchreichen (Header, Sticky-Bar, Service-
+          Sektion, Footer). Sonst zeigen die auf den generischen /gutachter-finden und die
+          Makler-Attribution (promotion_code_id -> Provision) geht verloren. */}
+      <LandingTopbar authenticatedUser={null} finderHref={finderHref} />
 
       {/* ─── HERO — cinematic navy, Makler als Partner ─── */}
       <section className="relative isolate flex min-h-[38rem] items-center overflow-hidden bg-claimondo-navy text-white md:min-h-[min(80vh,46rem)]">
@@ -62,12 +65,14 @@ export function MaklerHubLanding({
             — § 249 BGB.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            {/* Primaer-CTA: bewusst Weiss-auf-Navy (max. Kontrast) + groesser/fetter — er muss
+                den dunklen Header-CTA visuell schlagen, sonst klickt der Kunde den Header. */}
             <a
               href={finderHref}
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-light-blue px-6 py-3 text-sm font-semibold text-claimondo-navy shadow-lg transition hover:brightness-105"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-base font-bold text-claimondo-navy shadow-[0_10px_32px_rgba(0,0,0,0.32)] transition-all duration-200 hover:brightness-95 hover:shadow-[0_14px_40px_rgba(0,0,0,0.42)] active:scale-[0.97]"
             >
-              <MapPin className="h-4 w-4" aria-hidden /> Gutachter finden
-              <ChevronRight className="h-4 w-4" aria-hidden />
+              <MapPin className="h-5 w-5" aria-hidden /> Gutachter finden
+              <ChevronRight className="h-5 w-5" aria-hidden />
             </a>
             <Link
               href={anspruchHref}
@@ -181,7 +186,7 @@ export function MaklerHubLanding({
       />
 
       {/* ─── Service: was Claimondo für Sie übernimmt ─── */}
-      <ServiceRealitaetSection />
+      <ServiceRealitaetSection finderHref={finderHref} />
 
       {/* ─── Trust: anerkannte Partner ─── */}
       <TrustBlock heading="Mit anerkannten Partnern" />
@@ -218,8 +223,8 @@ export function MaklerHubLanding({
         </div>
       </section>
 
-      <LandingFooter />
-      <StickyCallBar quelle="Makler-Empfehlung (/m)" whatsappHref={WHATSAPP_HREF} />
+      <LandingFooter finderHref={finderHref} />
+      <StickyCallBar quelle="Makler-Empfehlung (/m)" whatsappHref={WHATSAPP_HREF} finderHref={finderHref} />
     </div>
   )
 }

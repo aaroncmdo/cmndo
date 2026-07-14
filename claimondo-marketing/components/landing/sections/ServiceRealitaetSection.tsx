@@ -10,7 +10,10 @@ import {
   SERVICE_PITCH_CTAS,
 } from '@/lib/brand/service-pitch'
 
-export function ServiceRealitaetSection() {
+// `finderHref`: Ziel des Sektions-CTAs. Default = generischer Finder. Der Makler-Hub
+// (/m/[code]) uebergibt den ATTRIBUIERTEN Einstieg (/start/makler/<id>) — sonst geht
+// ueber diesen CTA die Makler-Attribution (Provision) verloren.
+export function ServiceRealitaetSection({ finderHref = '/gutachter-finden' }: { finderHref?: string }) {
   return (
     <section
       className="bg-claimondo-bg py-16 sm:py-24"
@@ -48,7 +51,7 @@ export function ServiceRealitaetSection() {
 
         <div className="mt-10 text-center">
           <Link
-            href="/gutachter-finden"
+            href={finderHref}
             data-tracking="service-realitaet-cta"
             className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-7 py-4 text-base font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
           >
