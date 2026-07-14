@@ -258,6 +258,33 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige/leads',
         permanent: true,
       },
+      // P4a (Detail-View-Konsistenz / Faelle-Hub-Konvergenz F2): die 4 Hub-Tools
+      // leben kanonisch als Tabs unter /admin/faelle (Hub-Shell + shared Header, F0).
+      // Die alten Standalone-Routen (= Doppel-Routen: gleicher *Content, nur eigener
+      // Header) -> 308-Redirect in die Hub-Tab, ihre page.tsx wurde geloescht (KEIN
+      // redirect()-Stub in page.tsx, s. AGENTS.md Redirect-Stub-Gate). Die *Content-
+      // Components bleiben (Hub-Tabs importieren sie). EXAKT-Match, damit Sub-Routen
+      // wie /admin/statistiken/ki-usage weiter erreichbar bleiben.
+      {
+        source: '/admin/sla',
+        destination: '/admin/faelle/sla',
+        permanent: true,
+      },
+      {
+        source: '/admin/reklamationen',
+        destination: '/admin/faelle/reklamationen',
+        permanent: true,
+      },
+      {
+        source: '/admin/statistiken',
+        destination: '/admin/faelle/statistiken',
+        permanent: true,
+      },
+      {
+        source: '/admin/kanzlei-board',
+        destination: '/admin/faelle/kanzlei',
+        permanent: true,
+      },
       // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
