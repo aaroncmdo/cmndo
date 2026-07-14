@@ -9,19 +9,31 @@
 // Siehe memory/HANDOFF-vercel-cleanup-remaining.md.
 //
 // ─── Go-Live-Sweep B7 (14.07.2026): ALARM-MASKIERUNG GEFIXT ─────────────────────
-// `webhook_events` ist KEINE reine Inbound-Tabelle. `processLexDriveEvent` schreibt dort
-// auch INTERNE Admin-Aktionen (manueller Status-Override, LexDrive-Trigger-Panel):
+// `webhook_events` ist KEINE reine Inbound-Tabelle. Drei Writer, zwei Bedeutungen:
 //
-//   process-event.ts:735 → const source = input.source === 'manual' ? 'manual_admin' : 'lexdrive'
+//   ECHTER Inbound (der Partner ruft UNS):
+//     • source='lexdrive'      — /api/webhooks/lexdrive
+//                                (process-event.ts:735 mappt source='webhook' → 'lexdrive';
+//                                 + Direkt-Insert im Fall-nicht-gefunden-Branch)
+//     • source='lexdrive_bot'  — /api/lexdrive/bot-callback (route.ts:62)
 //
-// Der Check las die Tabelle bisher UNGEFILTERT (nur order(created_at).limit(1)). Folge:
-// jede ganz normale Admin-Aktion schrieb eine frische `manual_admin`-Zeile und setzte damit
-// die „Inbound"-Uhr auf 0 — ein TOTER Rückkanal wurde als gesund gemeldet. Also eine
-// FALSCHE ENTWARNUNG in genau dem Check, der den toten Kanal finden soll.
+//   INTERN (wir schreiben selbst — KEIN Inbound):
+//     • source='manual_admin'  — processLexDriveEvent(source='manual') aus der Admin-UI
+//                                (manueller Status-Override / LexDrive-Trigger-Panel)
+//
+// Der Check las die Tabelle bisher UNGEFILTERT (nur order(created_at).limit(1)). Folge: jede
+// ganz normale Admin-Aktion schrieb eine frische `manual_admin`-Zeile und setzte damit die
+// „Inbound"-Uhr auf 0 — ein TOTER Rückkanal wurde als gesund gemeldet. FALSCHE ENTWARNUNG in
+// genau dem Check, der den toten Kanal finden soll. Doppelt bitter: gehäufte Hand-Einträge
+// sind oft das SYMPTOM eines toten Webhooks — der Check wurde also ausgerechnet durch die
+// FOLGE des Ausfalls blind für den Ausfall.
 // (Schwesterfall B6/PR #4218: dort ein Fehlalarm, hier das Gegenteil — beide Male war die
 // Check-Spezifikation der Bug, nicht die Integration.)
 //
-// Fix: pro Kanal optional auf die echte Inbound-Quelle filtern (`source='lexdrive'`).
+// Fix: pro Kanal eine ALLOWLIST echter Inbound-Sources. Bewusst Allowlist statt Denylist
+// (`!= 'manual_admin'`): eine vergessene INBOUND-Source erzeugt nur einen Fehlalarm (harmlos —
+// man schaut nach und findet nichts), eine vergessene INTERNE Source erzeugt wieder eine
+// falsche Entwarnung (gefährlich). Die Allowlist versagt also in die sichere Richtung.
 // Matelso/Aircall haben dedizierte Landing-Tabellen ohne Fremd-Writer → kein Filter nötig.
 //
 // WICHTIG: Kein roh-SQL im .select() — max(created_at) via .order+.limit(1),
@@ -46,16 +58,22 @@ const CHANNELS: ReadonlyArray<{
   label: string
   table: string
   /**
-   * Nur ECHTE Inbound-Zeilen zählen. Zu setzen, wenn die Landing-Tabelle AUCH von internen
-   * Pfaden beschrieben wird — sonst maskiert interne Aktivität einen toten Rückkanal.
-   * `webhook_events` teilt sich die Tabelle mit `source='manual_admin'` (Admin-UI);
-   * echter Inbound ist ausschließlich `source='lexdrive'`.
+   * ALLOWLIST der echten Inbound-Sources. Zu setzen, wenn die Landing-Tabelle AUCH von
+   * internen Pfaden beschrieben wird — sonst maskiert interne Aktivität einen toten
+   * Rückkanal. `webhook_events` teilt sich die Tabelle mit `manual_admin` (Admin-UI).
    */
-  inboundSource?: string
+  inboundSources?: readonly string[]
   warnTage: number
   critTage: number
 }> = [
-  { id: 'lexdrive', label: 'LexDrive', table: 'webhook_events', inboundSource: 'lexdrive', warnTage: 7, critTage: 30 },
+  {
+    id: 'lexdrive',
+    label: 'LexDrive',
+    table: 'webhook_events',
+    inboundSources: ['lexdrive', 'lexdrive_bot'],
+    warnTage: 7,
+    critTage: 30,
+  },
   { id: 'matelso', label: 'Matelso', table: 'matelso_calls', warnTage: 14, critTage: 45 },
   { id: 'aircall', label: 'Aircall', table: 'aircall_calls', warnTage: 14, critTage: 45 },
 ]
@@ -107,8 +125,8 @@ export const webhookInboundSilentCheck: HealthCheck = {
     const channels: ChannelSilence[] = []
     for (const k of CHANNELS) {
       const base = ctx.supabase.from(k.table).select('created_at')
-      // B7: nur echte Inbound-Zeilen — interne `manual_admin`-Writes dürfen die Uhr NICHT stellen.
-      const query = k.inboundSource ? base.eq('source', k.inboundSource) : base
+      // B7: nur ECHTE Inbound-Zeilen — interne `manual_admin`-Writes dürfen die Uhr NICHT stellen.
+      const query = k.inboundSources ? base.in('source', [...k.inboundSources]) : base
 
       const { data, error } = await query.order('created_at', { ascending: false }).limit(1)
 
