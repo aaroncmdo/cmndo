@@ -1135,6 +1135,24 @@ export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> 
   })
 }
 
+/**
+ * Resolviert den `kunde_gruppe`-Thread eines Falls — fuer die MaklerChatTab-Realtime-
+ * Subscription auf v2-Nachrichten (Kunde/KB/SV tragen kein kanal='gruppenchat', nur
+ * thread_id). null wenn noch kein Gruppen-Thread existiert.
+ */
+export async function getFallGruppeThreadId(fallId: string): Promise<string | null> {
+  const admin = createAdminClient()
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return null
+  const { data } = await admin
+    .from('chat_threads')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('art', 'kunde_gruppe')
+    .maybeSingle()
+  return (data as { id: string } | null)?.id ?? null
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // AAR-491 (M9) — Promo & QR-Code: Stats + Code-Lookup
 // ─────────────────────────────────────────────────────────────────────────────
