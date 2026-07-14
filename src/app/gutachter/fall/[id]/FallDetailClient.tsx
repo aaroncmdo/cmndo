@@ -116,6 +116,9 @@ type Props = {
   timeline: TimelineEvent[]
   nachrichten: Record<string, unknown>[]
   kundenbetreuer?: Kundenbetreuer
+  /** AAR-405 Phase 5: Kanzlei-Ansprechpartner (sobald der Fall an eine Kanzlei
+      uebergeben ist). Firma + Kontakt aus `kanzleien` via `kanzlei_faelle`. */
+  kanzlei?: { name: string | null; email: string | null; ansprechpartner: string | null } | null
   aktiverTermin?: TerminInfo | null
   fallDokumente?: FallDokumentRow[]
   /** AAR-289: Abrechnungs-Snippet für Subphase-Ableitung (ausgezahlt_am). */
@@ -164,6 +167,7 @@ export default function FallDetailClient(props: Props) {
     timeline,
     nachrichten,
     kundenbetreuer,
+    kanzlei,
     abrechnungAusgezahltAm,
   } = props
 
@@ -215,8 +219,7 @@ export default function FallDetailClient(props: Props) {
       .filter(Boolean)
       .join(' ') || null
 
-  // AAR-405: Team-Tab befüllen — Kundenbetreuer + Kunde; Kanzlei folgt mit
-  // eigener Daten-Ladung, sobald Phase 5 (Kanzlei-Integration) live ist.
+  // AAR-405: Team-Tab befüllen — Kundenbetreuer, Kanzlei (sobald uebergeben) + Kunde.
   const team: TeamMitglied[] = []
   if (kundenbetreuer) {
     const kbName =
@@ -227,6 +230,14 @@ export default function FallDetailClient(props: Props) {
       name: kbName,
       email: kundenbetreuer.email,
       telefon: kundenbetreuer.telefon,
+    })
+  }
+  if (kanzlei && (kanzlei.name || kanzlei.ansprechpartner || kanzlei.email)) {
+    team.push({
+      rolle: 'kanzlei',
+      name: kanzlei.name?.trim() || kanzlei.ansprechpartner?.trim() || 'Kanzlei',
+      email: kanzlei.email,
+      telefon: null,
     })
   }
   if (lead && (lead.vorname || lead.nachname || lead.email || lead.telefon)) {
