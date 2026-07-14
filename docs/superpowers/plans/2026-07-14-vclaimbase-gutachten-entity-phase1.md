@@ -72,11 +72,16 @@ Volle Def in scratchpad `vclaimbase-live-def.sql` speichern — Basis für die T
 
 - [ ] **Step 1: v_gutachten_werte-Erweiterung bauen**
 
-Volle `CREATE OR REPLACE VIEW public.v_gutachten_werte AS` (Live-Def aus Task 1) mit 5 Feldern **am Ende** der SELECT-Liste, vor dem `FROM`:
+Volle `CREATE OR REPLACE VIEW public.v_gutachten_werte AS` (Live-Def aus Task 1) mit **10** Feldern **am Ende** der SELECT-Liste, vor dem `FROM` (v_claim_base holt 18 g-Felder; 8 trägt die Entity schon):
 ```sql
     -- ... alle bestehenden 46 Spalten unveraendert ...
     g.gesamt_schadensbetrag,
     g.fertiggestellt_am,
+    g.ocr_finished_at,
+    g.ki_kalkulation,
+    g.ki_kalkulation_am,
+    g.ki_geschaetzte_kosten_min,
+    g.ki_geschaetzte_kosten_max,
     g.pdf_uploaded_at,
     g.positionen,
     g.auftragsnummer
@@ -84,7 +89,7 @@ Volle `CREATE OR REPLACE VIEW public.v_gutachten_werte AS` (Live-Def aus Task 1)
      LEFT JOIN gutachten g ON g.claim_id = c.id
   WHERE claim_sichtbar_fuer_aktuellen_user(c.id);
 ```
-(Die bestehenden 46 Spalten byte-identisch übernehmen; nur die 5 additiv anhängen.)
+(Die bestehenden 46 Spalten byte-identisch übernehmen; nur die 10 additiv anhängen. `g.wiederbeschaffungsdauer_tage` trägt die Entity bereits.)
 
 - [ ] **Step 2: v_claim_base-Gutachten-Subquery umstellen**
 
@@ -103,8 +108,14 @@ In der Live-Def von `v_claim_base` (Task 1 Step 3) im inneren Subquery `sub`:
   - `g.reparaturkosten_netto AS reparaturkosten` → `vgw.reparaturkosten_netto AS reparaturkosten`
   - `g.minderwert AS wertminderung` → `vgw.minderwert AS wertminderung`
   - `(g.gutachten_nutzungsausfall_tagessatz_eur * g.nutzungsausfall_tage::numeric)::numeric(10,2) AS nutzungsausfall_gesamt` → `(vgw.gutachten_nutzungsausfall_tagessatz_eur * vgw.nutzungsausfall_tage::numeric)::numeric(10,2) AS nutzungsausfall_gesamt`
+  - `g.wiederbeschaffungsdauer_tage AS reparaturdauer_tage` → `vgw.wiederbeschaffungsdauer_tage AS reparaturdauer_tage`
+  - `g.ocr_finished_at AS ocr_extrahiert_am` → `vgw.ocr_finished_at AS ocr_extrahiert_am`
+  - `g.ki_kalkulation` → `vgw.ki_kalkulation`
+  - `g.ki_kalkulation_am` → `vgw.ki_kalkulation_am`
+  - `g.ki_geschaetzte_kosten_min::numeric(10,2) AS ki_geschaetzte_kosten_min` → `vgw.ki_geschaetzte_kosten_min::numeric(10,2) AS ki_geschaetzte_kosten_min`
+  - `g.ki_geschaetzte_kosten_max::numeric(10,2) AS ki_geschaetzte_kosten_max` → `vgw.ki_geschaetzte_kosten_max::numeric(10,2) AS ki_geschaetzte_kosten_max`
 
-**Alles außerhalb des Gutachten-Subquerys byte-identisch lassen** (die anderen ~360 Spalten, alle Joins inkl. `v_claim_phase`, das `WHERE claim_sichtbar_fuer_aktuellen_user`).
+**Alles außerhalb des Gutachten-Subquerys byte-identisch lassen** (die anderen ~360 Spalten, alle Joins inkl. `v_claim_phase`, das `WHERE claim_sichtbar_fuer_aktuellen_user`). **Verifizieren, dass `g.` NUR im Gutachten-Subquery vorkommt** (live: 19 Zeilen, alle im sub) — sonst würde eine `g.`-Referenz ausserhalb ins Leere zeigen.
 
 - [ ] **Step 3: EINE atomare Migration applizieren**
 
@@ -144,7 +155,7 @@ Erwartung: **byte-identisch zur Task-1-Baseline** (370/166/339, gleiche Namen/Ty
 ```sql
 select count(*) from information_schema.columns where table_schema='public' and table_name='v_gutachten_werte';
 ```
-Erwartung: **51** (46 + 5).
+Erwartung: **56** (46 + 10).
 
 - [ ] **Step 3: v_claim_base joint jetzt die Entity, nicht mehr roh**
 

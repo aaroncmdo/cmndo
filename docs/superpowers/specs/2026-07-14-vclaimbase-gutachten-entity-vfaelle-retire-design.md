@@ -26,17 +26,22 @@ Jede abgeleitete View mappt jedes Feld **einmal aus einer Quelle**: pro Konzept 
 ## 3. Phase 1 — Base-Gutachten aus der Entity (wertneutral)
 
 ### 3.1 `v_gutachten_werte` erweitern (additiv)
-Fünf Felder anhängen (am Ende der Spaltenliste → kein Consumer-Bruch), die `v_claim_base` heute roh aus `g` holt und die die Entity noch nicht trägt:
+`v_claim_base` holt **18** Felder aus `g` (live verifiziert). Davon trägt die Entity 8 bereits (`reparaturkosten_netto`, `minderwert`, `nutzungsausfall_tage`, `gutachten_nutzungsausfall_tagessatz_eur`, `gutachten_sv_honorar_netto`, `gutachten_ocr_raw`, `wiederbeschaffungsdauer_tage`; `g.id` als `gutachten_id`). **Zehn** Felder fehlen und werden am Ende der SELECT-Liste angehängt (additiv → kein Consumer-Bruch):
 
 | Neu in v_gutachten_werte | Quelle |
 |---|---|
 | `gesamt_schadensbetrag` | `g.gesamt_schadensbetrag` |
 | `fertiggestellt_am` | `g.fertiggestellt_am` |
+| `ocr_finished_at` | `g.ocr_finished_at` |
+| `ki_kalkulation` | `g.ki_kalkulation` |
+| `ki_kalkulation_am` | `g.ki_kalkulation_am` |
+| `ki_geschaetzte_kosten_min` | `g.ki_geschaetzte_kosten_min` |
+| `ki_geschaetzte_kosten_max` | `g.ki_geschaetzte_kosten_max` |
 | `pdf_uploaded_at` | `g.pdf_uploaded_at` |
 | `positionen` | `g.positionen` |
 | `auftragsnummer` | `g.auftragsnummer` |
 
-(`g.id` ist bereits als `gutachten_id` vorhanden → base nutzt künftig `vgw.gutachten_id IS NOT NULL` für `gutachten_vorhanden`.)
+(`g.id` ist bereits als `gutachten_id` vorhanden → base nutzt künftig `vgw.gutachten_id IS NOT NULL` für `gutachten_vorhanden`. Ergebnis: `v_gutachten_werte` 46 → **56** Spalten.)
 
 ### 3.2 `v_claim_base` umstellen
 Im Gutachten-Subquery die `g.*`-Referenzen auf `vgw.*` umschreiben und `LEFT JOIN gutachten g ON g.claim_id = c.id` durch `LEFT JOIN v_gutachten_werte vgw ON vgw.claim_id = c.id` ersetzen. Abgeleitete Ausdrücke bleiben (z. B. `nutzungsausfall_gesamt = gutachten_nutzungsausfall_tagessatz_eur * nutzungsausfall_tage`), lesen dann `vgw`-Felder.
