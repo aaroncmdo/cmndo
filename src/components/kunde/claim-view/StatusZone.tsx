@@ -21,6 +21,7 @@ import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
+import { RegulierungsVerlaufCard } from './RegulierungsVerlaufCard'
 
 export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
   const t = await getTranslations('kunde.fall')
@@ -184,6 +185,9 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
           <p className="text-body-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
         </NoticeBox>
       )}
+
+      {/* Item 7: Regulierungs-Verlauf (Kanzlei-/VS-Ereignisse) — unter dem Phasen-Stepper. */}
+      <RegulierungsVerlaufCard vm={vm} />
     </div>
   )
 }

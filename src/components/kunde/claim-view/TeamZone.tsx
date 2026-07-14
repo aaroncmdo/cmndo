@@ -53,7 +53,12 @@ function KontaktRow({ name, rolle, telefon, avatarUrl, verifiziert, beschreibung
 export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
   const { kb, sv } = vm.team
   const werkstatt = vm.werkstatt.data
-  if (!kb && !sv && !werkstatt) return null
+  // Item 7: Kanzlei als Team-Kontakt, sobald der Fall an sie uebergeben ist.
+  const kanzlei =
+    vm.kanzlei.uebergebenAm && (vm.kanzlei.row?.name || vm.kanzlei.ansprechpartnerName)
+      ? vm.kanzlei
+      : null
+  if (!kb && !sv && !werkstatt && !kanzlei) return null
 
   // #4b: vermittelte Werkstatt-Adresse als Kontakt-Beschreibung (analog SV-Profilbeschreibung).
   const werkstattAdresse = werkstatt
@@ -92,6 +97,20 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
           telefon={werkstatt.telefon}
           avatarUrl={null}
           beschreibung={werkstattAdresse}
+        />
+      )}
+      {/* Item 7: Kanzlei-Kontakt (sobald an die Kanzlei uebergeben). */}
+      {kanzlei && (
+        <KontaktRow
+          name={kanzlei.row?.name || kanzlei.ansprechpartnerName || 'Kanzlei'}
+          rolle="Deine Kanzlei"
+          telefon={kanzlei.ansprechpartnerTelefon}
+          avatarUrl={null}
+          beschreibung={
+            kanzlei.row?.name && kanzlei.ansprechpartnerName
+              ? `Ansprechpartner: ${kanzlei.ansprechpartnerName}`
+              : null
+          }
         />
       )}
     </Card>

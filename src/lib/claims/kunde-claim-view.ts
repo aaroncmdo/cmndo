@@ -124,6 +124,19 @@ export type KundeKanzlei = {
   uebergebenAm: string | null
   vollmachtSigniertAm: string | null
   gutachtenUrlRaw: string | null
+  /** Item 7: Regulierungs-Verlauf (Ereignis-Zeitleiste aus kanzlei_faelle) fuer die Kunde-Sicht. */
+  verlauf: {
+    anschlussschreibenAm: string | null
+    vsKontaktAm: string | null
+    vsReaktionAm: string | null
+    vsReaktionTyp: string | null
+    regulierungAngekuendigtAm: string | null
+    regulierungAm: string | null
+    ausgezahltAm: string | null
+    kuerzungsBetrag: number | null
+    vsKuerzungGrund: string | null
+    klageUebergebenAm: string | null
+  } | null
 }
 
 // P4 (GeldZone-Completion): Werkstatt-/Reparatur-Karten-Daten (SchadensfotoUploadCard +
@@ -216,7 +229,9 @@ export async function getKundeClaimView(
       // (Aaron 02.07.); nur_gutachter/direkt-Zahlung -> keine kanzlei_faelle-Row -> null.
       admin
         .from('kanzlei_faelle')
-        .select('vs_quote_betrag_ausgezahlt, ausgezahlt_am')
+        .select(
+          'vs_quote_betrag_ausgezahlt, ausgezahlt_am, anschlussschreiben_am, anschlussschreiben_sendedatum, vs_kontakt_am, vs_reaktion_am, vs_reaktion_typ, regulierung_angekuendigt_am, regulierung_am, kuerzungs_betrag, vs_kuerzung_grund, klage_uebergeben_am',
+        )
         .eq('fall_id', fallId)
         .maybeSingle(),
       // Gutachten-F+G-Werte aus der Dual-Source-View v_gutachten_werte (P3: +ocr/tagessaetze fuer GeldZone).
@@ -377,7 +392,20 @@ export async function getKundeClaimView(
     null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
 
-  const payout = payoutRes.data as { vs_quote_betrag_ausgezahlt: number | null; ausgezahlt_am: string | null } | null
+  const payout = payoutRes.data as {
+    vs_quote_betrag_ausgezahlt: number | null
+    ausgezahlt_am: string | null
+    anschlussschreiben_am: string | null
+    anschlussschreiben_sendedatum: string | null
+    vs_kontakt_am: string | null
+    vs_reaktion_am: string | null
+    vs_reaktion_typ: string | null
+    regulierung_angekuendigt_am: string | null
+    regulierung_am: string | null
+    kuerzungs_betrag: number | null
+    vs_kuerzung_grund: string | null
+    klage_uebergeben_am: string | null
+  } | null
   const kundeView = kundeViewRes.data as { auszahlung_zahlungsweg: string | null } | null
   const claimExtra = claimExtraRes.data as Record<string, unknown> | null
 
@@ -434,6 +462,20 @@ export async function getKundeClaimView(
     uebergebenAm: (claimExtra?.kanzlei_uebergeben_am as string | null) ?? null,
     vollmachtSigniertAm: (fall.vollmacht_signiert_am as string | null) ?? null,
     gutachtenUrlRaw,
+    verlauf: payout
+      ? {
+          anschlussschreibenAm: payout.anschlussschreiben_am ?? payout.anschlussschreiben_sendedatum ?? null,
+          vsKontaktAm: payout.vs_kontakt_am ?? null,
+          vsReaktionAm: payout.vs_reaktion_am ?? null,
+          vsReaktionTyp: payout.vs_reaktion_typ ?? null,
+          regulierungAngekuendigtAm: payout.regulierung_angekuendigt_am ?? null,
+          regulierungAm: payout.regulierung_am ?? null,
+          ausgezahltAm: payout.ausgezahlt_am ?? null,
+          kuerzungsBetrag: payout.kuerzungs_betrag ?? null,
+          vsKuerzungGrund: payout.vs_kuerzung_grund ?? null,
+          klageUebergebenAm: payout.klage_uebergeben_am ?? null,
+        }
+      : null,
   }
   // kanzleiSichtbar: „wuerde MeineKanzleiCard ODER KanzleiPfadCard etwas rendern?" — treibt die
   // GeldZone-Sichtbarkeit auch in fruehen Phasen (preserve-all). MeineKanzlei zeigt bei Kanzlei-/
