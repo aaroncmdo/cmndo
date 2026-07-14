@@ -1,5 +1,22 @@
 # HANDOFF — Portal-Header Phase 2: hand-gerollte Header → shared `PageHeader`
 
+> ## ✅ STATUS 14.07.: AUSGEFÜHRT — dieses Dokument ist ein Archiv, keine Anleitung mehr.
+> Umgesetzt auf `kitta/portal-header-phase2-handrolled` (40 Files). **Zwei Angaben unten waren beim
+> Ausführen bereits falsch — nicht mehr befolgen:**
+>
+> 1. **§3 „KRITISCHE Abhängigkeit — Phase 1 zuerst" (Rebase auf `origin/kitta/pageheader-floating-card`) ist OBSOLET und wäre SCHÄDLICH.**
+>    PR #4149 wurde inzwischen nach staging gemergt (Squash `87bb038de`). Der Branch hat den
+>    Card-Default also längst über staging; ein Rebase auf den alten, ungesquashten Phase-1-Branch
+>    hätte ~55 Commits dorthin repliziert (Konflikte + doppelte PageHeader-Änderung).
+>    Richtig war der im selben §3 genannte Alternativpfad: **auf `origin/staging` rebasen.**
+> 2. **§8 behauptet, `tests/e2e/flows/portal-header-phase2.spec.ts` existiere — tat es nicht.**
+>    Der Spec wurde im Zuge der Ausführung neu geschrieben (kb/admin/dispatch + 375px-Kalender-
+>    Overflow-Regression) und liegt jetzt tatsächlich dort.
+>
+> Ebenfalls überholt: die Kandidatenliste (§6) war weder vollständig noch überall korrekt — die
+> tatsächlich migrierte/ausgeschlossene Menge steht im PR + im Memory-Marker
+> `COORDINATION-portal-header-phase2`. Genau dafür stand „RE-VERIFY jeden File" da.
+
 > **Für eine FRISCHE Session ohne Vorkontext.** Dieses Dokument ist selbst-enthaltend. Lies es ganz, dann führe die Tasks (§7) mit `superpowers:subagent-driven-development` aus. RE-VERIFY jeden File gegen aktuellen Code.
 
 ---
