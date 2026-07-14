@@ -34,7 +34,10 @@ const FOOTER_STANDORTE = [
   { name: 'Leipzig', slug: 'leipzig' },
 ] as const
 
-export function LandingFooter() {
+// `finderHref`: Ziel des "Gutachter finden"-Footer-Links. Default = generischer Finder.
+// Der Makler-Hub (/m/[code]) uebergibt den ATTRIBUIERTEN Einstieg (/start/makler/<id>),
+// sonst geht ueber den Footer die Makler-Attribution (Provision) verloren.
+export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref?: string }) {
   const t = useTranslations('landing.footer')
   const year = new Date().getFullYear()
 
@@ -70,7 +73,7 @@ export function LandingFooter() {
             </h4>
             <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li>
-                <Link href="/gutachter-finden" className="transition-colors hover:text-white">
+                <Link href={finderHref} className="transition-colors hover:text-white">
                   Gutachter finden
                 </Link>
               </li>
