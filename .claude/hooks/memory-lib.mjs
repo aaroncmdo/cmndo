@@ -38,29 +38,66 @@ const MIN_IDF = 0.7          // Allerwelts-Tokens (df > ~N/2) raus
 // matchte einen Lead-Workflow-Marker mit idf 6.3. Haeufige Fachwoerter (`prod`, `claim`) filtert
 // IDF automatisch raus; gegen seltene ALLTAGSWOERTER hilft nur diese Liste. Daher bewusst
 // ausfuehrlich bei Verben/Partikeln, sparsam bei Fachbegriffen.
+// ALLE Eintraege in NORMALISIERTER (ASCII-)Form — tokenize() normalisiert VOR dem Lookup,
+// d.h. `für` kommt hier als `fuer` an, `können` als `koennen`. Deutsche Funktionswoerter sind
+// eine GESCHLOSSENE Klasse — deshalb einmal systematisch statt ad-hoc nachpflegen.
 const STOP = new Set([
-  'der','die','das','den','dem','des','ein','eine','einen','einem','einer','eines','dies','diese','dieser','dieses',
-  'und','oder','aber','doch','denn','weil','dass','wenn','als','wie','was','wer','wann','warum','wieso','weshalb',
-  'welche','welcher','welches','wohin','woher','damit','also','quasi','sowie','etc','bzw','usw',
-  'ich','er','sie','wir','ihr','mir','mich','dir','dich','uns','euch','man','mein','dein','sein','ihre',
-  'nicht','kein','keine','nur','noch','schon','auch','mal','bitte','danke','ja','nein','okay','sehr','gut','neu',
-  'auf','mit','von','zur','zum','bei','aus','nach','ueber','unter','fuer','vor','durch','ohne','gegen','alle','alles',
-  'eigentlich','vielleicht','wirklich','einfach','gerade','immer','irgendwie','evtl','ggf','halt','eben','etwas',
-  // DE Verben — hier liegt der IDF-Fallstrick (selten im Index -> faelschlich hohes Gewicht)
-  'ist','sind','war','waren','hat','habe','haben','hatte','wird','werden','wurde','wurden','kann','koennen','konnte',
-  'steht','stehen','geht','gehen','kommt','kommen','liegt','liegen','laeuft','laufen','sieht','sehen','bleibt','bleiben',
-  'heisst','heissen','passiert','funktioniert','klappt','braucht','brauchen','will','willst','wollen','moechte',
-  'denke','meine','glaube','weiss','wissen','sagt','sagen','findet','finden','gibt','gib','sag','zeig','zeige',
-  'mach','machen','macht','bau','bauen','nimm','lass','soll','sollen','muss','muessen','schau','schaue','pruef','pruefe',
-  'kaputt','fertig',
+  // Artikel / Negation
+  'der','die','das','den','dem','des','ein','eine','einen','einem','einer','eines',
+  'kein','keine','keinen','keinem','keiner','keines','nicht','nichts',
+  // Pronomen + Possessiva (alle Flexionen — `deine` hat live einen Fehltreffer erzeugt)
+  'ich','due','sie','wir','ihr','mich','dich','sich','uns','euch','mir','dir','ihm','ihnen','man',
+  'mein','meine','meinen','meinem','meiner','meines','dein','deine','deinen','deinem','deiner','deines',
+  'sein','seine','seinen','seinem','seiner','seines','ihre','ihren','ihrem','ihrer','ihres',
+  'unser','unsere','unseren','euer','eure','dies','diese','dieser','dieses','diesen','diesem','jede','jeder','jedes',
+  // Frage- / Relativwoerter
+  'was','wer','wie','wann','warum','wieso','weshalb','welche','welcher','welches','wem','wen','wohin','woher',
+  // Praepositionen / Konjunktionen
+  'auf','aus','bei','bis','durch','fuer','gegen','hinter','mit','nach','neben','ohne','seit','ueber','unter','vor',
+  'waehrend','wegen','zur','zum','zwischen','von','und','oder','aber','denn','weil','dass','wenn','als','sondern',
+  'sowie','also','damit','obwohl','quasi','etc','bzw','usw','doch',
+  // Hilfs- / Modalverben + hochfrequente Verben (der IDF-Fallstrick: selten im Index -> hohes Gewicht)
+  'ist','sind','war','waren','bin','sein','gewesen','hat','habe','haben','hatte','hatten',
+  'wird','werden','wurde','wurden','worden','kann','koennen','koennte','konnte','muss','muessen','muesste','musste',
+  'soll','sollen','sollte','will','willst','wollen','wollte','darf','duerfen','duerfte','mag','moegen','moechte',
+  'wuerde','waere','haette',
+  'mach','mache','machen','macht','gemacht','geht','gehen','kommt','kommen','steht','stehen','sieht','sehen',
+  'gibt','geben','nimm','nehmen','sagt','sagen','findet','finden','bleibt','bleiben','laeuft','laufen','liegt','liegen',
+  'heisst','passiert','funktioniert','klappt','braucht','brauchen','weiss','wissen','denke','denken','glaube',
+  'meine','schau','schaue','pruef','pruefe','pruefen','zeig','zeige','zeigen','lass','lassen','bau','bauen',
+  // Imperative (kurz + selten im Index -> sonst hohes IDF; `gib` hat live geleakt)
+  'gib','sag','geh','komm','lies','hol','stell','setz','nenn','erklaer','erklaere',
+  // Adverbien / Partikeln / Zeit
+  'hier','dort','jetzt','dann','heute','morgen','gestern','immer','nie','oft','manchmal','schon','noch','wieder',
+  'nochmal','mehr','weniger','sehr','gut','besser','schlecht','viel','wenig','etwas','alle','alles','mal','eben',
+  'halt','gerade','eigentlich','vielleicht','wirklich','einfach','irgendwie','irgendwas','evtl','ggf','weiter','zurueck',
+  'tag','tage','woche','wochen','monat','jahr','zeit','neu','alt','richtig','falsch','fertig','kaputt','offen','offene',
+  // generische Nomen (tragen kein Domaenen-Signal)
+  'aufgabe','aufgaben','liste','punkt','punkte','sache','sachen','ding','dinge','frage','fragen','antwort',
+  // Hoeflichkeit / Fuellwoerter
+  'ja','nein','okay','bitte','danke','los','auch','nur','groesser','kleiner',
+  // EN
   'the','and','but','are','was','were','has','have','had','will','would','can','could','this','that','these','those',
   'with','from','for','into','about','what','how','why','when','where','you','your','our','its','they','their',
   'not','only','also','just','make','build','show','please','yes','does','did','get','got','need','want','see','look',
-  'ultrathink','claude','session','weiter','los','dann','jetzt','nochmal','wieder',
+  // Prompt-Rauschen
+  'ultrathink','claude','session',
 ])
 
+// UMLAUT-NORMALISIERUNG — zwei Gruende, beide real:
+//  1) BUG (live gefunden): der Tokenizer behielt Umlaute, die STOP-Liste hat aber nur
+//     ASCII-Formen (`fuer`, `ueber`, `koennen`). Damit rutschte JEDES deutsche Funktionswort
+//     MIT Umlaut durch den Filter, war im technischen Index selten -> hohes IDF -> Fehltreffer.
+//     Aarons Prompt "...für dich... ist deine Aufgabenliste..." matchte so ueber `für`/`deine`
+//     vier voellig irrelevante Marker. Normalisieren statt 30 Umlaut-Varianten nachpflegen.
+//  2) BONUS: der Codebase mischt beide Schreibweisen (AGENTS.md — Backend/Docs ASCII, Frontend
+//     Umlaute). Nach der Normalisierung matcht ein Prompt "Vergütung" auch einen Marker, der
+//     "Verguetung" schreibt.
+const norm = (s) =>
+  String(s).toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+
 export const tokenize = (s) =>
-  String(s).toLowerCase().split(/[^a-z0-9äöüß_]+/).filter((t) => t.length >= 3 && !STOP.has(t) && !/^\d+$/.test(t))
+  norm(s).split(/[^a-z0-9_]+/).filter((t) => t.length >= 3 && !STOP.has(t) && !/^\d+$/.test(t))
 
 const snip = (s, n) => (s.length > n ? s.slice(0, n) + '…' : s)
 
@@ -91,8 +128,8 @@ export function buildDigest(entries, branch) {
   const tokens = tokenize(String(branch).replace(/[/_-]+/g, ' ')).filter((t) => !['kitta', 'aar', 'embed'].includes(t))
 
   const scored = entries.map((e) => {
-    const hay = (e.file + ' ' + e.desc).toLowerCase()
-    const matched = tokens.filter((t) => hay.includes(t))
+    const hay = norm(e.file + ' ' + e.desc)   // gleiche Normalisierung wie die Tokens (sonst
+    const matched = tokens.filter((t) => hay.includes(t))  // matcht `fuer` kein `für` im Index)
     let score = Math.min(matched.length, 3) * 300          // Lane-Relevanz = staerkster Hebel
     score += Math.max(0, 200 * (1 - e.idx / total))        // Index-Position = Recency-Proxy
     if (e.isBroadcast) score += e.resolved ? 40 : 200      // offene Mandate hoch, erledigte verblassen
