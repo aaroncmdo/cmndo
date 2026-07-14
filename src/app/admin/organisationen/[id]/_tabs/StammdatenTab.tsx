@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Building2Icon, UserIcon, CreditCardIcon, GraduationCapIcon } from 'lucide-react'
+import { Building2Icon, UserIcon, CreditCardIcon, GraduationCapIcon, UsersIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import type { OrganisationDetail } from '@/lib/organisationen/queries'
 import { orgOnboardingBadge } from '@/lib/organisationen/onboarding-status'
@@ -15,8 +15,16 @@ function Feld({ label, value }: { label: string; value: ReactNode }) {
 
 const GRID = 'grid grid-cols-1 sm:grid-cols-2 gap-4'
 
+const TYP_LABEL: Record<string, string> = {
+  akademie: 'Akademie',
+  buero: 'Büro',
+  community: 'Community',
+}
+
 export default function StammdatenTab({ org }: { org: OrganisationDetail }) {
   const istAkademie = org.typ === 'akademie'
+  // Communities sind organisationen mit typ='community' — eigene Tabelle gibt es nicht.
+  const istCommunity = org.typ === 'community'
 
   return (
     <div className="space-y-4">
@@ -26,7 +34,7 @@ export default function StammdatenTab({ org }: { org: OrganisationDetail }) {
         bodyClassName={GRID}
       >
         <Feld label="Name" value={org.name} />
-        <Feld label="Typ" value={istAkademie ? 'Akademie' : org.typ === 'buero' ? 'Büro' : org.typ} />
+        <Feld label="Typ" value={org.typ ? (TYP_LABEL[org.typ] ?? org.typ) : null} />
         <Feld label="Rechtsform" value={org.rechtsform} />
         <Feld label="Onboarding-Status" value={orgOnboardingBadge(org.onboardingStatus).label} />
         <Feld label="Anschrift" value={org.anschrift} />
@@ -97,6 +105,27 @@ export default function StammdatenTab({ org }: { org: OrganisationDetail }) {
           <Feld
             label="Radius"
             value={org.akademieRadiusKm != null ? `${org.akademieRadiusKm} km` : null}
+          />
+        </SectionCard>
+      )}
+
+      {istCommunity && (
+        <SectionCard
+          title="Community-Konditionen"
+          icon={<UsersIcon className="w-4 h-4 text-claimondo-ondo" />}
+          bodyClassName={GRID}
+        >
+          <Feld label="Exklusives Gebiet" value={org.communityExklusiv ? 'Ja' : 'Nein'} />
+          <Feld label="Max. Fälle / Monat" value={org.communityMaxFaelleMonat} />
+          <Feld
+            label="Leaderboard"
+            value={org.communityLeaderboardAktiv ? 'Aktiv' : 'Inaktiv'}
+          />
+          <Feld
+            label="Einsatzgebiet-Radius"
+            value={
+              org.einsatzgebietRadiusKm != null ? `${org.einsatzgebietRadiusKm} km` : null
+            }
           />
         </SectionCard>
       )}
