@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
@@ -349,6 +350,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   return (
     <>
+    {/* Sidebar-Streifen = 8px Margin + w-60 (240px) + 8px Margin = 256px
+        (deckungsgleich mit dem lg:ml-64 des <main> unten). Trennlinie zwischen
+        den beiden Haelften des Overlay-Schleiers — ohne sie bliebe bei offenem
+        Modal ein heller, ungedimmter Rahmen um die Sidebar stehen.
+        Siehe src/components/primitives/overlay/overlay-layers.ts. */}
+    <SidebarWidthVar width="256px" breakpoint="(min-width: 1024px)" />
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
       {/* Freischwebende Kunde-Sidebar auf der grauen Vollflaeche: solides Brand-BG,
           Margin ringsum + Rundung + Schatten. KEIN overflow-hidden — sonst clippt

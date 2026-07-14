@@ -1,12 +1,5 @@
 {
-  "generatedAt": "2026-07-13T12:52:05.340Z",
-  "count": 6,
-  "files": [
-    "src/app/api/webhooks/twilio/inbound/route.ts",
-    "src/app/gutachter/auftraege/export-action.ts",
-    "src/app/gutachter/fall/[id]/page.tsx",
-    "src/lib/beleg-review/actions.ts",
-    "src/lib/dokumente/ad-hoc-anforderung.ts",
-    "src/lib/inbound/process-inbound-text.ts"
-  ]
+  "generatedAt": "2026-07-13T23:46:27.252Z",
+  "count": 0,
+  "files": []
 }
