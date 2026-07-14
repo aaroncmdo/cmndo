@@ -1,22 +1,41 @@
 import type { UpdateItem } from './types'
+import { splitActionItemsBySeen } from './seen-split'
 
 export type SplitUpdates = {
   actionItems: UpdateItem[]
   infoItems: UpdateItem[]
   actionCount: number
+  /** A2: gesehen-aber-offene Action-Item-IDs -> grau/gedimmt gerendert, NICHT in der roten Zahl. */
+  seenActionIds: Set<string>
   newInfoCount: number
 }
 
-// #updates-rebuild Phase 3: teilt das gemergte Item[] in die zwei UI-Sektionen.
-// Badge = actionCount (NUR offene Actions). newInfoCount = Info seit last_seen
-// (dezenter Indikator, treibt NICHT den Badge -> keine Unread-Katastrophe).
-export function splitUpdates(items: UpdateItem[], lastSeen: string | null): SplitUpdates {
+// #updates-rebuild Phase 3 + A2: teilt das gemergte Item[] in die zwei UI-Sektionen.
+// Badge = actionCount = UNGESEHENE offene Actions (Timestamp > actionsLastSeen). Gesehen-offene
+// Actions -> seenActionIds (grau). newInfoCount = Info seit lastSeen (dezenter Indikator, treibt
+// NICHT den Badge). actionsLastSeen weggelassen/null -> alle Actions ungesehen (Alt-Verhalten,
+// backward-compatible fuer bestehende 2-arg-Caller bis useUpdates den Cursor durchreicht).
+export function splitUpdates(
+  items: UpdateItem[],
+  lastSeen: string | null,
+  actionsLastSeen: string | null = null,
+): SplitUpdates {
   const actionItems = items.filter(i => i.modus === 'action')
   const infoItems = items.filter(i => i.modus === 'info')
+  const { unseenCount, seenIds } = splitActionItemsBySeen(
+    actionItems.map(i => ({ id: i.id, timestamp: i.createdAt })),
+    actionsLastSeen,
+  )
   const newInfoCount = lastSeen
     ? infoItems.filter(i => i.createdAt > lastSeen).length
     : infoItems.length
-  return { actionItems, infoItems, actionCount: actionItems.length, newInfoCount }
+  return {
+    actionItems,
+    infoItems,
+    actionCount: unseenCount,
+    seenActionIds: new Set(seenIds),
+    newInfoCount,
+  }
 }
 
 // Typ-Filter fuer die UI-Chips (Alle / Aktivitaet / Nachrichten / Anrufe / Aufgaben).
