@@ -73,3 +73,64 @@ export async function countRecentMcpLeadsByPhone(telefon: string, hours: number)
   }
   return count ?? 0
 }
+
+/**
+ * Wie countRecentMcpLeadsByPhone, aber fuer den oeffentlichen Gegner-Flow der NFC-
+ * Schadenkarte (/schaden/[token]). Der schreibt source_channel='schaden-karte' und legt
+ * die Nummer in leads.gegner_telefon ab (leads.telefon bleibt NULL) — die MCP-Variante
+ * filtert auf telefon + 'mcp' und greift hier deshalb NIE. Ohne diesen Cap waere der
+ * SMS-Versand (Slice 2c) ein Bombing-Vektor auf beliebige fremde Nummern.
+ * Best-effort: bei DB-Fehler 0 (der globale Circuit-Breaker faengt Massen-Missbrauch).
+ */
+/**
+ * Retry-/Doppel-Submit-Dedup fuer den oeffentlichen NFC-Gegner-Flow. Findet einen frischen
+ * Lead (source_channel='schaden-karte') mit DERSELBEN Nummer AM SELBEN Fahrzeug innerhalb des
+ * Fensters. Ohne diesen Guard erzeugt ein Reload+Resubmit (der Submit-Button ist nur gegen
+ * Doppelklick, nicht gegen Reload geschuetzt) einen ZWEITEN Claim -> eine ZWEITE Unfallmeldung
+ * an denselben Versicherer fuer denselben Unfall (nicht zurueckholbar). Der Cap allein liesse
+ * bis zu 3 zu. Gibt die schon konvertierte claim_id mit zurueck (falls vorhanden), damit der
+ * Caller den bestehenden Vorgang wiederverwenden kann.
+ * Best-effort: bei DB-Fehler null -> lieber neu anlegen als den Flow brechen.
+ */
+export async function findRecentGegnerLead(
+  vehicleId: string,
+  gegnerTelefon: string,
+): Promise<{ leadId: string; claimId: string | null } | null> {
+  const tel = gegnerTelefon.trim()
+  if (!vehicleId || !tel) return null
+  const sinceIso = new Date(Date.now() - DEDUP_WINDOW_MS).toISOString()
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('leads')
+    .select('id, konvertiert_zu_claim_id')
+    .eq('vehicle_id', vehicleId)
+    .eq('gegner_telefon', tel)
+    .eq('source_channel', 'schaden-karte')
+    .gt('created_at', sinceIso)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) {
+    console.error('[api-v1/dedup] findRecentGegnerLead fehlgeschlagen:', error.message)
+    return null
+  }
+  return data ? { leadId: data.id as string, claimId: (data.konvertiert_zu_claim_id as string | null) ?? null } : null
+}
+
+export async function countRecentGegnerLeadsByPhone(telefon: string, hours: number): Promise<number> {
+  const tel = telefon.trim()
+  if (!tel) return 0
+  const sinceIso = new Date(Date.now() - hours * 60 * 60_000).toISOString()
+  const admin = createAdminClient()
+  const { count, error } = await admin
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('gegner_telefon', tel)
+    .eq('source_channel', 'schaden-karte')
+    .gt('created_at', sinceIso)
+  if (error) {
+    console.error('[api-v1/dedup] countRecentGegnerLeadsByPhone fehlgeschlagen:', error.message)
+    return 0
+  }
+  return count ?? 0
+}
