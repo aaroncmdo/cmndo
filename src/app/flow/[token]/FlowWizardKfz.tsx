@@ -46,6 +46,7 @@ import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import SaSignaturStep from './SaSignaturStep'
+import SaOfflineHinweis from './SaOfflineHinweis'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
 import { FlowWerkstattHinweisHaftpflicht } from './FlowWerkstattHinweisHaftpflicht'
 import { resolveFlowWeichen, type FlowWeichen } from '@/lib/self-service/flow-weichen'
@@ -951,18 +952,25 @@ export default function FlowWizardKfz({
                     onSubmittingChange spiegelt submittingSA für das service_typ-Feld-Lock
                     (Parität zum früheren disabled={submittingSA} oben). onSigned setzt fallId +
                     springt zum Account-Step. */}
-                <SaSignaturStep
-                  token={token}
-                  leadId={lead.id}
-                  flowLinkId={flowLinkId ?? null}
-                  gutachterAnzeige={gutachterAnzeige}
-                  legalDocs={legalDocs}
-                  onSubmittingChange={setSaSubmitting}
-                  onSigned={(fid) => {
-                    setFallId(fid)
-                    setStepIndex(stepIndexById('account'))
-                  }}
-                />
+                {/* Slice 2-write-3: SA-Beauftragung ist online-only (FENCE) — offline
+                    ein Hinweis statt des Sign-Formulars. Summary + Service-Wahl bleiben
+                    sichtbar (offline via write-1-Autosave erfasst). */}
+                {!isOnline ? (
+                  <SaOfflineHinweis />
+                ) : (
+                  <SaSignaturStep
+                    token={token}
+                    leadId={lead.id}
+                    flowLinkId={flowLinkId ?? null}
+                    gutachterAnzeige={gutachterAnzeige}
+                    legalDocs={legalDocs}
+                    onSubmittingChange={setSaSubmitting}
+                    onSigned={(fid) => {
+                      setFallId(fid)
+                      setStepIndex(stepIndexById('account'))
+                    }}
+                  />
+                )}
               </div>
             )}
 

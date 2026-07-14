@@ -47,9 +47,16 @@ export async function drainOutbox(opts?: { kinds?: string[] }): Promise<{ synced
           if (!op.id) continue
           await markOp(op.id, 'uploading')
           const result = await handler.replay(op)
-          if (result.outcome === 'done' || result.outcome === 'conflict') {
+          if (result.outcome === 'done') {
             await removeOp(op.id)
             synced++
+          } else if (result.outcome === 'conflict') {
+            // Token-TTL-Dead-Letter: ein nicht-transienter conflict (z.B. Flow-Token
+            // abgelaufen) darf NICHT still gedroppt + faelschlich als synced gezaehlt
+            // werden. Als Dead-Letter behalten (inspizierbar, vom kuenftigen All-Kinds-
+            // Dead-Letter-UI surfac-/dismissbar) + ehrlich als failed melden.
+            await markOp(op.id, 'dead', result.error)
+            failed++
           } else {
             await markOp(op.id, 'failed', result.error)
             failed++
