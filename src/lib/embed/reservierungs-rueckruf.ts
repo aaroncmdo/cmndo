@@ -14,6 +14,7 @@ import 'server-only'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildReservierungsRueckruf } from './reservierungs-rueckruf-columns'
+import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 
 export async function upsertReservierungsRueckruf(input: {
   leadId: string
@@ -73,6 +74,26 @@ export async function upsertReservierungsRueckruf(input: {
     const { data, error } = await admin.from('admin_termine').insert(columns).select('id').single()
     if (error || !data) return { ok: false, error: error?.message ?? 'Rueckruf konnte nicht angelegt werden' }
     terminId = data.id as string
+
+    // ⚠ Aaron 15.07. — Glocke fuer den Dispatcher (fehlte bisher in BEIDEN Pfaden, die hier
+    // reinlaufen: Teilschuld-Rueckruf aus dem /flow UND der Gutachter-Embed-Reservierungs-Rueckruf).
+    // Ohne sie sah der Dispatcher den Rueckruf nur, wenn er aktiv /dispatch/rueckrufe oeffnete — keine
+    // Benachrichtigung. NUR beim Insert (ein neuer Rueckruf); das Wunschzeit-Update des Kunden feuert
+    // keine zweite Glocke. Non-critical: ein Mitteilungs-Fehler nimmt den Rueckruf nicht zurueck.
+    try {
+      await createMitteilung({
+        empfaenger_id: dispId,
+        empfaenger_rolle: 'admin', // Dispatch teilt die admin-Empfaenger-Rolle (wie public-rueckruf)
+        kategorie: 'anruf', // CHECK: update|task|nachricht|anruf — ein Rueckruf ist ein anzurufender Kontakt
+        titel: 'Neuer Rückruf angefordert',
+        inhalt: name,
+        kontext_typ: 'lead',
+        kontext_id: leadId,
+        route_url: `/dispatch/rueckrufe?open=${terminId}`,
+      })
+    } catch (err) {
+      console.error('[upsertReservierungsRueckruf] Dispatcher-Mitteilung fehlgeschlagen (non-fatal):', err)
+    }
   }
 
   revalidatePath('/dispatch/rueckrufe')
