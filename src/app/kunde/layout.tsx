@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
+import { Z_SIDEBAR } from '@/components/primitives/overlay/overlay-layers'
 import Image from 'next/image'
 import Link from 'next/link'
 import { LogOutIcon } from 'lucide-react'
@@ -361,9 +362,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           Margin ringsum + Rundung + Schatten. KEIN overflow-hidden — sonst clippt
           die Panel-Kante das Updates-/Outbox-Popover unten (Aaron 10.07.). */}
       <aside
-        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg"
+        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 rounded-ios-lg shadow-ios-lg"
         style={{
           backgroundColor: sidebarBg,
+          // Konstante statt z-40-Klasse, damit die Overlay-Invariante
+          // (Z_SIDEBAR_VEIL < Z_SIDEBAR) vom Test durchgesetzt werden kann.
+          zIndex: Z_SIDEBAR,
         }}
       >
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
