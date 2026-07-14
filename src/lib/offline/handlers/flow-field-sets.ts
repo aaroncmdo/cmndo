@@ -4,9 +4,13 @@ import { speichereFeststellungFlow } from '@/app/flow/[token]/self-service-fests
 import { registerHandler } from '../registry'
 import type { OfflineHandler, OutboxOp, ReplayResult } from '../ops'
 
+// An die echte Action-Signatur gebunden (statt nachgebaut): so kann der Outbox-Payload
+// nicht von dem wegdriften, was der Flow online schreibt — z.B. der Besichtigungsort
+// (fahrzeug_standort_*, AAR-956), der sonst beim Replay stillschweigend verschwaende.
+type StammdatenData = Parameters<typeof updateLeadStammdaten>[1]
 interface StammdatenPayload {
   leadId: string
-  data: { vorname?: string; nachname?: string; telefon?: string; email?: string }
+  data: StammdatenData
   token: string
 }
 interface FeststellungPayload { token: string; values: Record<string, unknown> }
