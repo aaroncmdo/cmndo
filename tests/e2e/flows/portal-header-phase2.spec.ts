@@ -35,7 +35,16 @@ async function expectFloatingCard(card: Locator, path: string): Promise<void> {
 const PAGES_BY_ROLE = {
   // KB = der Kern-Gap (nutzte vorher PageHeader 0x).
   kb: ['/mitarbeiter/faelle', '/mitarbeiter/tasks', '/mitarbeiter/termine', '/mitarbeiter/reklamationen'],
-  admin: ['/admin/einstellungen', '/admin/team', '/admin/organisationen', '/admin/sla'],
+  // versicherungen + vertraege: dort sass die Card zuerst noch IN einem border-b-Band
+  // (harte Kante direkt unter der weichen Card) — mitgesmoked, damit das nicht zurueckkommt.
+  admin: [
+    '/admin/einstellungen',
+    '/admin/team',
+    '/admin/organisationen',
+    '/admin/sla',
+    '/admin/versicherungen',
+    '/admin/vertraege',
+  ],
   dispatch: ['/dispatch/rueckrufe', '/dispatch/kalender', '/dispatch/gutachter-finder'],
 } as const
 

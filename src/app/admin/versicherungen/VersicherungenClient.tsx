@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
+import { SearchIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
@@ -81,7 +81,8 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
+      {/* kein border-b: die PageHeader-Floating-Card ersetzt das frühere eckige Band */}
+      <div className="px-4 py-3 shrink-0">
         <PageHeader
           title="Versicherer"
           description={`${filtered.length} von ${versicherungen.length}`}

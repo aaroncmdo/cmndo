@@ -12,7 +12,6 @@ import EmptyState from '@/components/shared/EmptyState'
 import PageHeader from '@/components/shared/PageHeader'
 import { ActivityIcon } from 'lucide-react'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
-import type { HealthStatus } from '@/lib/health/types'
 
 export const dynamic = 'force-dynamic'
 

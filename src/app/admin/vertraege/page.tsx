@@ -12,7 +12,8 @@ export default async function VertraegePage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="px-4 py-3 border-b border-claimondo-border flex-shrink-0">
+      {/* kein border-b: die PageHeader-Floating-Card ersetzt das frühere eckige Band */}
+      <div className="px-4 py-3 flex-shrink-0">
         <PageHeader
           title="Vertragseditor"
           description="PDF-Vorlagen für Sicherungsabtretung, Honorarvereinbarung, Datenschutz und Widerruf — mit Klick auf das PDF die Unterschriftsposition setzen."
