@@ -170,6 +170,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Query-Parse-Drift-Bremse (14.07.2026): faengt tote PostgREST-Queries, die still HTTP 300/400
+      # liefern (tote Spalte / fehlende Relation / mehrdeutiger Embed / fehlende Tabelle) und deren
+      # Fehler im Code verschluckt wird (`const { data } = await …`). Ausloeser: ein FK machte einen
+      # Embed mehrdeutig -> 6+ Surfaces 6 Tage still tot (Makler-Leads, SV-Zuweisung-404, Finance …).
+      # Jede statische Query wird per select&limit=1 gegen die DB "trockengeschossen" (PostgREST als
+      # Orakel, 0 FP). Blockt NEUE gg. scripts/query-parse-baseline.json; Boy-Scout senkt.
+      # Ohne DB-Keys skippt das Script (exit 0). Siehe scripts/check-query-parse.mjs.
+      - name: Query-Parse-Guard
+        run: node scripts/check-query-parse.mjs --ratchet
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
