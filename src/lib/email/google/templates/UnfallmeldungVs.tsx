@@ -82,5 +82,3 @@ export function UnfallmeldungVsEmail(d: VsMeldungDaten & { absender: string }) {
     </EmailShell>
   )
 }
-
-export default UnfallmeldungVsEmail
