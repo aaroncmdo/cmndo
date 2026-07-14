@@ -49,6 +49,11 @@ export const SCENARIOS: Scenario[] = [
   { key: 'regulierung-vs-kontakt', label: 'Regulierung · VS-Kontakt', expected: 'kanzlei_faelle versicherungskontakt — Stepper "regulierung"' },
   { key: 'regulierung-auszahlung', label: 'Regulierung · Auszahlung läuft', expected: 'kanzlei_faelle auszahlung, ausgezahlt_am' },
   { key: 'abschluss', label: 'Abschluss · alles fertig', expected: 'Alle auftraege abgeschlossen, kanzlei_faelle ausgezahlt' },
+  // B4-slice-2a-i: Klage-Terminal ueber die state-machine-Konvergenz (operative_status=
+  // 'klage_rechtsstreit', wie uebergebeFallKlage es nach dem Fix schreibt). Beweist: View-m_sub
+  // (status) UND getClaimLifecycle-milestone leiten BEIDE abschluss/klage_rechtsstreit ab
+  // (Anzeige-Neutralitaet der Konvergenz).
+  { key: 'abschluss-klage', label: 'Abschluss · Klage/Rechtsstreit', expected: 'Klage-Terminal — Stepper "abschluss/klage_rechtsstreit" aus operative_status UND status' },
 ]
 
 export type SeededRow = {
@@ -222,6 +227,11 @@ function derivePhaseStatus(key: string): { phase: string; status: string | null;
       // Terminal: post-B2 traegt operative_status den feinen Outcome direkt (statt coarse 'abgeschlossen')
       // -> testet zugleich die #4285-Output-Neutralitaet (fine Terminal in operative_status).
       return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'reguliert_vollstaendig', operative_status: 'reguliert_vollstaendig' }
+    case 'abschluss-klage':
+      // B4-slice-2a-i: Klage-Terminal nach der state-machine-Konvergenz — operative_status traegt
+      // 'klage_rechtsstreit' (statt des groben 'klage'), status ebenfalls. Beide Read-Engines
+      // muessen abschluss/klage_rechtsstreit liefern.
+      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'klage_rechtsstreit', operative_status: 'klage_rechtsstreit' }
     default:
       return { phase: '1_neu', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
   }
@@ -246,7 +256,7 @@ async function seedAuftragArtefakte(
   const finalFreigegeben =
     scenarioKey === 'regulierung-vs-kontakt' ||
     scenarioKey === 'regulierung-auszahlung' ||
-    scenarioKey === 'abschluss'
+    scenarioKey.startsWith('abschluss')
 
   const gutachtenUrl =
     scenarioKey === 'begutachtung-gutachten-qc' ||
@@ -271,7 +281,7 @@ async function seedAuftragArtefakte(
     grundhonorar_brutto: finalFreigegeben ? 642.6 : null,
     zurueckgewiesen_am: zurueckgewiesenAm,
     zurueckweisung_grund: zurueckweisungGrund,
-    abgeschlossen_am: scenarioKey === 'abschluss' ? new Date().toISOString() : null,
+    abgeschlossen_am: scenarioKey.startsWith('abschluss') ? new Date().toISOString() : null,
   }).select('id').single()
   const auftragId = (auftrag?.id as string | undefined) ?? null
 
@@ -299,7 +309,7 @@ async function seedAuftragArtefakte(
   if (
     scenarioKey === 'regulierung-vs-kontakt' ||
     scenarioKey === 'regulierung-auszahlung' ||
-    scenarioKey === 'abschluss'
+    scenarioKey.startsWith('abschluss')
   ) {
     const ausgezahlt = scenarioKey !== 'regulierung-vs-kontakt'
     await db.from('kanzlei_faelle').insert({
