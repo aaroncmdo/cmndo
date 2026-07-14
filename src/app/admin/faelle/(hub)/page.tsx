@@ -3,6 +3,12 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import FaelleKanban from './FaelleKanban'
 import KanbanUploadsRealtime from './KanbanUploadsRealtime'
+// P4c (E1): Ops-Cockpit aus /admin hierher gezogen — /admin/faelle ist die
+// Case-Arbeitsflaeche. Koexistiert vorerst mit der FaelleKanban (Transitions-
+// Slice; das volle Board-Merge = F1, eigener fokussierter Effort).
+import { getOpsRollup } from '@/lib/ops/get-ops-rollup'
+import { getMyClaimWorkItems } from '@/lib/ops/get-claim-workitems'
+import AdminOpsCockpit from '@/components/admin/AdminOpsCockpit'
 
 // CMM-Strecke: Primary-Read wechselt von `faelle` auf `v_claim_listing`
 // (claims-SSoT). Felder die noch nicht in der View aggregiert sind (status-
@@ -83,6 +89,16 @@ export default async function AdminFaellePage() {
 
   const { data: listing } = await listingQuery
   const rows = (listing ?? []) as ListingRow[]
+
+  // P4c (E1): Ops-Cockpit-Daten (Rollup-Matrix + Attention/Drill-in). /admin/faelle
+  // ist admin-guarded (admin/layout requirePortalAccess) -> Admin-Kontext, Gate
+  // liefert alle Claims.
+  const [rollupRes, itemsRes] = await Promise.all([
+    getOpsRollup(supabase),
+    getMyClaimWorkItems(supabase, {}),
+  ])
+  const opsRollup = rollupRes.ok ? rollupRes.rollup : null
+  const opsItems = itemsRes.ok ? itemsRes.items : []
 
   // AAR-611: Batch-Lookups parallel. CMM-49: Supplement (fall_typ/ist_aktiv/
   // deaktiviert_grund/abgeschlossen_am/mandatsnummer) jetzt claims-zentrisch
@@ -296,6 +312,13 @@ export default async function AdminFaellePage() {
     <>
       {/* CMM-33: Live-Aktualisierung der KB-Upload-Badge ohne manuellen Reload */}
       <KanbanUploadsRealtime fallIds={renderedFallIds} />
+      {/* P4c (E1): Ops-Cockpit (Rollup-Matrix Phase×Owner + Ueberfaellig-Drill-in) —
+          aus /admin hierher. Ueber der FaelleKanban (Transitions-Koexistenz, s.o.). */}
+      {opsRollup && (
+        <div className="px-4 md:px-6 pt-4 pb-1">
+          <AdminOpsCockpit rollup={opsRollup} items={opsItems} />
+        </div>
+      )}
       {/* Route-Reachability-Audit 06.07.: /admin/faelle/anlegen war gebaut, aber ohne
           jeden UI-Einstieg (kein Button/Link) -> Admin konnte per UI keinen Fall anlegen. */}
       <div className="mb-3 flex justify-end">
