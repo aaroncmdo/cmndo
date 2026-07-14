@@ -12,6 +12,8 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
+import { inviteGegnerViaAirdrop } from '@/lib/airdrop/gegner-invite'
+import { erstelleVsDispatchTask } from '@/lib/vs-meldung/dispatch-task'
 import { createLead } from '@/lib/leads/create-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import {
@@ -182,7 +184,27 @@ export async function submitSchadenGegner(
     }
   }
 
-  // 6. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
+  // 6. Slice 2c: Der Gegner bestaetigt seine Handynummer per SMS-Magic-Link. Erst diese
+  //    Bestaetigung loest die Unfallmeldung an seine Haftpflicht aus (Fraud-Gate). Ohne
+  //    Nummer ist das unmoeglich -> Dispatch uebernimmt manuell.
+  //    Fail-soft wie der Convert darueber: ein Fehler hier darf den Gegner-Submit nie brechen.
+  if (claimId) {
+    try {
+      const gegnerTelefon = data.telefon?.trim()
+      if (gegnerTelefon) {
+        const invite = await inviteGegnerViaAirdrop(claimId, gegnerTelefon)
+        if (!invite.ok) {
+          await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: invite.error })
+        }
+      } else {
+        await erstelleVsDispatchTask({ claimId, grund: 'kein_telefon' })
+      }
+    } catch (err) {
+      console.error('[schaden-gegner] Airdrop-Invite fehlgeschlagen:', err)
+    }
+  }
+
+  // 7. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
   revalidatePath('/flotte/fahrzeug/' + ctx.context.fahrzeugId)
 
   return { ok: true, leadId: res.leadId, vehicleId: ctx.context.fahrzeugId, claimId }
