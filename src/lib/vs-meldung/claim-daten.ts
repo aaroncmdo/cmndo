@@ -45,7 +45,7 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
 
   const { data: claim, error } = await admin
     .from('claims')
-    .select('id, claim_nummer, unfall_datum, hergang_kunde_text, gegner_versicherung_id')
+    .select('id, claim_nummer, schadentag, hergang_kunde_text, gegner_versicherung_id')
     .eq('id', claimId)
     .maybeSingle()
 
@@ -54,10 +54,12 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
     return null
   }
 
+  // Expliziter FK-Name bei personen: claim_parties hat mehr als einen FK dorthin
+  // (person_id + previous_person_id) -> PostgREST braucht die Disambiguierung, sonst PGRST201.
   const { data: parties, error: partiesError } = await admin
     .from('claim_parties')
     .select(
-      'rolle, kennzeichen, versicherungsnummer, versicherungs_aktenzeichen, firmen(name), vehicles(hersteller, modell_haupttyp, kennzeichen_aktuell), personen(vorname, nachname)',
+      'rolle, kennzeichen, versicherungsnummer, versicherungs_aktenzeichen, firmen(name), vehicles(hersteller, modell_haupttyp, kennzeichen_aktuell), personen!claim_parties_person_id_fkey(vorname, nachname)',
     )
     .eq('claim_id', claimId)
 
@@ -84,7 +86,7 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
   return {
     claimId: claim.id as string,
     claimNummer: (claim.claim_nummer as string | null) ?? null,
-    unfallDatum: (claim.unfall_datum as string | null) ?? null,
+    unfallDatum: (claim.schadentag as string | null) ?? null,
     gegnerVersicherungId: (claim.gegner_versicherung_id as string | null) ?? null,
     // Der Gegner-Hergang landet heute in hergang_kunde_text (semantisch unsauber; die
     // saubere Spalte hergang_gegner_text ist auf die claims-DDL-Lane gegated).

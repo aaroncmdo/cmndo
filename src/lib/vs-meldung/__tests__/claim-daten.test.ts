@@ -37,7 +37,7 @@ describe('ladeVsMeldungDaten', () => {
     db.claim = {
       id: 'c1',
       claim_nummer: 'CLM-2026-00635',
-      unfall_datum: '2026-07-13',
+      schadentag: '2026-07-13',
       hergang_kunde_text: 'Gegner fuhr auf.',
       gegner_versicherung_id: 'v1',
     }
@@ -75,7 +75,7 @@ describe('ladeVsMeldungDaten', () => {
   })
 
   it('normalisiert eingebettete Relationen, die als Array kommen (Supabase-Cardinality)', async () => {
-    db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
+    db.claim = { id: 'c1', claim_nummer: null, schadentag: null, hergang_kunde_text: null, gegner_versicherung_id: null }
     db.parties = [
       { rolle: 'geschaedigter', firmen: [{ name: 'Array-Firma GmbH' }], vehicles: [{ hersteller: 'VW', modell_haupttyp: 'Golf' }] },
       { rolle: 'verursacher', personen: [{ vorname: 'Erika', nachname: 'Musterfrau' }] },
@@ -90,7 +90,7 @@ describe('ladeVsMeldungDaten', () => {
   })
 
   it('Platzhalter-Hersteller "Unbekannt" wird nicht als Fahrzeugname ausgegeben', async () => {
-    db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
+    db.claim = { id: 'c1', claim_nummer: null, schadentag: null, hergang_kunde_text: null, gegner_versicherung_id: null }
     db.parties = [{ rolle: 'geschaedigter', vehicles: { hersteller: 'Unbekannt', modell_haupttyp: null } }]
 
     const { ladeVsMeldungDaten } = await import('../claim-daten')
@@ -99,7 +99,7 @@ describe('ladeVsMeldungDaten', () => {
   })
 
   it('nutzt kennzeichen_aktuell des Fahrzeugs, wenn claim_parties.kennzeichen NULL ist', async () => {
-    db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
+    db.claim = { id: 'c1', claim_nummer: null, schadentag: null, hergang_kunde_text: null, gegner_versicherung_id: null }
     db.parties = [{ rolle: 'geschaedigter', kennzeichen: null, vehicles: { kennzeichen_aktuell: 'B-FL 202' } }]
 
     const { ladeVsMeldungDaten } = await import('../claim-daten')
@@ -108,7 +108,7 @@ describe('ladeVsMeldungDaten', () => {
   })
 
   it('bei einem Parteien-Query-Fehler -> null (NIE mit leeren Parteien senden)', async () => {
-    db.claim = { id: 'c1', claim_nummer: 'CLM-1', unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: 'v1' }
+    db.claim = { id: 'c1', claim_nummer: 'CLM-1', schadentag: null, hergang_kunde_text: null, gegner_versicherung_id: 'v1' }
     db.partiesError = { message: 'column vehicles.modell does not exist' }
 
     const { ladeVsMeldungDaten } = await import('../claim-daten')
