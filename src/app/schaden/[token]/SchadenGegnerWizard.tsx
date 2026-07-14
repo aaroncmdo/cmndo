@@ -165,8 +165,20 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
               <h1 className="text-heading-md text-claimondo-navy">
                 Vielen Dank — Ihre Angaben wurden übermittelt.
               </h1>
-              <p className="text-body-sm text-claimondo-ondo">
-                Der Schaden wird bearbeitet. Sie erhalten bei Bedarf Rückmeldung.
+              {data.telefon?.trim() ? (
+                <p className="text-body-sm text-claimondo-ondo">
+                  Wir haben Ihnen eine SMS geschickt. Bitte tippen Sie den Link darin an und
+                  bestätigen Sie Ihre Angaben — erst dann melden wir den Schaden Ihrer
+                  Haftpflichtversicherung.
+                </p>
+              ) : (
+                <p className="text-body-sm text-claimondo-ondo">
+                  Der Schaden wird bearbeitet. Sie erhalten bei Bedarf Rückmeldung.
+                </p>
+              )}
+              <p className="text-body-xs text-claimondo-ondo/80">
+                Hinweis: Sie sind unabhängig davon verpflichtet, den Schaden auch selbst Ihrer
+                Haftpflichtversicherung zu melden.
               </p>
             </div>
           </SectionCard>
