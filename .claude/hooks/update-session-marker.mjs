@@ -24,6 +24,20 @@ import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import os from 'node:os'
+// Prompt-Recall faehrt bewusst IN diesem Prozess mit (statt als eigener UserPromptSubmit-Hook):
+// ein node-Start kostet hier ~2.2 s (Defender scannt node.exe), dieser Hook laeuft bei jedem
+// Prompt ohnehin -> +0.15 s CPU statt +2.2 s Prozess-Start. recallForPrompt wirft nie.
+//
+// GUARDED DYNAMIC IMPORT (kein statisches `import`): dieser Hook ist LASTTRAGEND — er blockt in
+// `pre-edit` Datei-Kollisionen zwischen parallelen Sessions. Ein statischer Import wuerde bei
+// fehlender/kaputter memory-lib.mjs den GESAMTEN Hook hart crashen und damit den Kollisions-
+// Schutz still abschalten. Faellt der Recall aus, laeuft alles andere unveraendert weiter.
+let recallForPrompt = () => ''
+try {
+  ({ recallForPrompt } = await import('./memory-lib.mjs'))
+} catch {
+  // memory-lib fehlt/kaputt -> Recall stumm, Session-Marker + Kollisions-Guard bleiben intakt
+}
 
 const MODE = process.argv[2] || 'unknown'
 const HOME = os.homedir()
@@ -160,9 +174,18 @@ function listActiveOtherMarkers() {
 
 mkdirSync(MEMORY_DIR, { recursive: true })
 
-function emitAdditionalContext(hookEventName) {
+// extraCtx = optionaler Zusatz-Block (Prompt-Recall). Wird angehaengt; es wird auch dann
+// emittiert, wenn KEINE anderen Sessions laufen (sonst ginge der Recall verloren).
+function emitAdditionalContext(hookEventName, extraCtx = '') {
   const others = listActiveOtherMarkers().filter((o) => o.ageOk && o.state !== 'inactive')
-  if (others.length === 0) return
+  if (others.length === 0) {
+    if (extraCtx) {
+      process.stdout.write(
+        JSON.stringify({ hookSpecificOutput: { hookEventName, additionalContext: extraCtx } }),
+      )
+    }
+    return
+  }
   const lines = others.map(
     (o) => `- Session \`${o.sid}\` on branch \`${o.branch}\` — ${o.task || '(idle)'} (last update ${o.lastUpdate})`,
   )
@@ -182,7 +205,8 @@ function emitAdditionalContext(hookEventName) {
     `# Andere aktive Claude-Code-Sessions (${others.length})\n\n` +
     lines.join('\n') +
     warning +
-    `\n\nKoordiniere Branches/Files/Merges damit ihr euch nicht trampelt. Volle Marker mit File-Touch + Git-Activity unter ${MEMORY_DIR}.\n`
+    `\n\nKoordiniere Branches/Files/Merges damit ihr euch nicht trampelt. Volle Marker mit File-Touch + Git-Activity unter ${MEMORY_DIR}.\n` +
+    (extraCtx ? `\n---\n\n${extraCtx}` : '')
   process.stdout.write(
     JSON.stringify({
       hookSpecificOutput: { hookEventName, additionalContext: ctx },
@@ -208,7 +232,8 @@ if (MODE === 'start') {
     buildMarker({ state: 'active', currentTask: promptSnippet || '(no prompt)', startedAt, touchedFiles: touched }),
   )
   // KONTINUIERLICHE Awareness: bei jedem User-Prompt sehen wir andere Sessions
-  emitAdditionalContext('UserPromptSubmit')
+  // + IDF-Recall: Memory-Marker, die zum PROMPT passen (Stille wenn kein echter Treffer).
+  emitAdditionalContext('UserPromptSubmit', recallForPrompt(stdinJson.prompt || '', sessionId))
 } else if (MODE === 'edit') {
   // PostToolUse Edit|Write: File-Touch loggen, currentTask + startedAt erhalten
   const filePath =

@@ -18,6 +18,12 @@
             "type": "command",
             "command": "node .claude/hooks/update-session-marker.mjs start",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/load-memory-digest.mjs",
+            "timeout": 15,
+            "statusMessage": "Lade relevante Memory-Eintraege..."
           }
         ]
       }
