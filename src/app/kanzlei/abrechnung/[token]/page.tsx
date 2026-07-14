@@ -51,8 +51,8 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
       <main className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link ungueltig</h1>
-          <p className="text-claimondo-ondo">Dieser Abrechnungslink ist nicht gueltig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>.</p>
+          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link ungültig</h1>
+          <p className="text-claimondo-ondo">Dieser Abrechnungslink ist nicht gültig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>.</p>
         </div>
       </main>
     )
@@ -67,7 +67,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⏳</div>
           <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
-          <p className="text-claimondo-ondo">Dieser Link ist nicht mehr gueltig. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a> fuer einen neuen Link.</p>
+          <p className="text-claimondo-ondo">Dieser Link ist nicht mehr gültig. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a> für einen neuen Link.</p>
         </div>
       </main>
     )
@@ -146,7 +146,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
 
         {payment === 'success' && (
           <div className="bg-success-soft border border-success/30 rounded-2xl p-4 text-success-strong">
-            ✅ Zahlung eingegangen! Vielen Dank. Die Bestaetigung erhalten Sie per Email.
+            ✅ Zahlung eingegangen! Vielen Dank. Die Bestätigung erhalten Sie per E-Mail.
           </div>
         )}
 
