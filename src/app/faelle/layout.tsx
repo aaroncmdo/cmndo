@@ -19,7 +19,7 @@ import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
 import UpdatesNav from '@/components/shared/updates'
-import Spotlight from '@/components/Spotlight'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 
@@ -101,7 +101,7 @@ export default async function FaelleLayout({
   return (
     <>
     <div className="h-screen bg-claimondo-bg relative overflow-hidden">
-      <Spotlight />
+      <GlobalSearch rolle="admin" />
       <AdminNav
         email={user.email ?? ''}
         initials={initials}
