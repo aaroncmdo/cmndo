@@ -10,34 +10,19 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect } from 'react'
 import { ExternalLinkIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { MobileNav } from '@/components/shared/mobile-nav'
 import { MobileUpdatesDot } from '@/components/shared/updates/MobileUpdatesDot'
+import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
 
-// CMM-32 P2: --app-sidebar-width auf <html> setzen, damit Portal-rendered
-// Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
-// und die Sidebar nicht einschließen. PortalNav nutzt w-56 = 224px ab md+.
-function useSidebarWidthVar(width: string, breakpoint: string = '(min-width: 768px)') {
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const mql = window.matchMedia(breakpoint)
-    const apply = () => {
-      document.documentElement.style.setProperty(
-        '--app-sidebar-width',
-        mql.matches ? width : '0px',
-      )
-    }
-    apply()
-    mql.addEventListener('change', apply)
-    return () => {
-      mql.removeEventListener('change', apply)
-      document.documentElement.style.removeProperty('--app-sidebar-width')
-    }
-  }, [width, breakpoint])
-}
+// Breite des Sidebar-Streifens: 8px Margin + w-52 (208px) + 8px Margin = 224px.
+// Die Sidebar ist ein EINGERUECKTES Panel (top-2/left-2/bottom-2) — der Streifen
+// muss die Margins mit abdecken, sonst bleibt bei offenem Overlay ein heller,
+// ungedimmter Rahmen um die Sidebar stehen (der Dim waere nicht durchgaengig).
+// Siehe src/components/primitives/overlay/overlay-layers.ts.
+const SIDEBAR_STRIP_WIDTH = '224px'
 
 export type PortalNavItem = {
   href: string
@@ -84,8 +69,6 @@ export function PortalNav({
   className = '',
 }: Props) {
   const pathname = usePathname()
-  // Sidebar bleibt w-56 (224 px) in beiden Modi — kein Layout-Offset nötig.
-  useSidebarWidthVar('224px')
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
@@ -153,6 +136,8 @@ export function PortalNav({
   if (variant === 'dark') {
     return (
       <>
+        <SidebarWidthVar width={SIDEBAR_STRIP_WIDTH} />
+
         {/* Freischwebende Sidebar auf der grauen Vollflaeche (bg-claimondo-bg):
             solides Navy-Panel, Margin ringsum + Rundung + Schatten. KEIN
             overflow-hidden — sonst clippt die Panel-Kante das Updates-/Support-
@@ -201,6 +186,8 @@ export function PortalNav({
   // Content-Fläche. Detached Navy-Panel (in-flow, m-2 statt fixed).
   return (
     <>
+      <SidebarWidthVar width={SIDEBAR_STRIP_WIDTH} />
+
       <aside
         role="navigation"
         aria-label={ariaLabel ?? 'Portal-Navigation'}
