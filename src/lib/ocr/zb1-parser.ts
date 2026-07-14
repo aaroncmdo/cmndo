@@ -5,6 +5,26 @@
 const FIN_REGEX = /\b([A-HJ-NPR-Z0-9]{17})\b/gi
 const DATE_REGEX = /\b(\d{2}\.\d{2}\.\d{4})\b/
 const PLZ_ORT_REGEX = /\b(\d{5})\s+(.+)/
+// Spec B (Aaron 14.07.): ZB1-Feld J = EU-/KBA-Fahrzeugklasse. Der HARTE Filter fuers Werkstatt-Matching
+// (eine PKW-Werkstatt repariert keinen LKW) — und sie steht in JEDEM Schein, wir haben sie nur nie
+// gelesen. M1=PKW · N1=Transporter · N2/N3=LKW · M2/M3=Bus · L3e/L4e=Motorrad · L1e/L2e/L5e-L7e=
+// Leichtfahrzeug · O1-O4=Anhaenger · T/C/R/S=Land-/Forst. Kein KI, keine Schwacke-Lizenz noetig.
+const FAHRZEUGKLASSE_REGEX = /\b(M[123]|N[123]|L[1-7]e|O[1-4]|[TCRS][1-4]?)\b/i
+
+/**
+ * Normalisiert die OCR-Ausgabe auf das Vokabular der `fahrzeugklassen`-Tabelle:
+ *   'm1'   -> 'M1'      (Uppercase)
+ *   'L3E'  -> 'L3e'     (das Suffix-e ist im EU-Vokabular klein)
+ *   'T1'   -> 'T'       (die Tabelle fuehrt T/C/R/S; die Reparatur-Gruppe land_forst ist fuer
+ *                        T1..T4 ohnehin dieselbe)
+ */
+function normalisiereFahrzeugklasse(roh: string): string {
+  const k = roh.trim().toUpperCase()
+  if (/^[TCRS]\d?$/.test(k)) return k[0]
+  if (/^L[1-7]E$/.test(k)) return `${k[0]}${k[1]}e`
+  return k
+}
+
 const HSN_REGEX = /\b(\d{4})\b/
 const TSN_REGEX = /\b([A-Z0-9]{3})\b/i
 
@@ -57,6 +77,8 @@ export interface ZB1ExtractedData {
   hsn: string | null
   tsn: string | null
   brn: string | null
+  /** Spec B: EU-/KBA-Fahrzeugklasse aus Feld J (M1 | N1 | L3e | ...) -> Werkstatt-Matching. */
+  fahrzeugklasse: string | null
 }
 
 // AAR-CMM: ZB1-Feld R = Farbe des Fahrzeugs. Vision-OCR liefert die Farbe
@@ -73,7 +95,7 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
     halter_nachname: null, halter_vorname: null,
     halter_strasse: null, halter_plz: null, halter_stadt: null,
     fahrzeug_hersteller: null, fahrzeug_modell: null, fahrzeug_farbe: null,
-    fin_vin: null, hsn: null, tsn: null, brn: null,
+    fin_vin: null, hsn: null, tsn: null, brn: null, fahrzeugklasse: null,
   }
 
   const lines = fullText.split('\n').map(l => l.trim()).filter(Boolean)
@@ -128,6 +150,11 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
     // R = Farbe des Fahrzeugs
     if (/^R$/i.test(trimmed) && nextLine && !result.fahrzeug_farbe) {
       result.fahrzeug_farbe = nextLine.trim()
+    }
+    // J = EU-/KBA-Fahrzeugklasse (Spec B): der harte Filter fuers Werkstatt-Matching.
+    if (/^J$/i.test(trimmed) && nextLine && !result.fahrzeugklasse) {
+      const klasseMatch = nextLine.match(FAHRZEUGKLASSE_REGEX)
+      if (klasseMatch) result.fahrzeugklasse = normalisiereFahrzeugklasse(klasseMatch[1])
     }
     if (/^2\.?1$/i.test(trimmed) && nextLine) {
       const hsnMatch = nextLine.match(HSN_REGEX)

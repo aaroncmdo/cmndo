@@ -45,7 +45,11 @@ import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import SaSignaturStep from './SaSignaturStep'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
 import { FlowWerkstattHinweisHaftpflicht } from './FlowWerkstattHinweisHaftpflicht'
-import { resolveAbrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
+import { resolveFlowWeichen, type FlowWeichen } from '@/lib/self-service/flow-weichen'
+import { bauFlowKontext, type LeadFuerKontext } from '@/lib/self-service/flow-kontext'
+import type { FlowConfig } from '@/lib/self-service/lade-flow-szenarien'
+import { FlowOrtStep } from './FlowOrtStep'
+import { FlowRueckrufStep } from './FlowRueckrufStep'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -113,7 +117,35 @@ export type GutachterInfo = {
 // wurde rausgenommen — Foto-Upload + Werkstatt-Erfassung gehören ins
 // Onboarding nach Magic-Link-Login, nicht in den FlowLink.
 // AAR-956 §3a: quali + termin nur im incomplete-Pfad (termin-loser Lead).
-type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'werkstatt' | 'termin' | 'gutachter' | 'sa' | 'account'
+// Aaron 14.07.: Die Step-Sequenz kommt jetzt aus der DB (flow_szenario_steps) — diese Union ist nur
+// noch der Vertrag darueber, welche step_id die UI rendern KANN. Ein neuer Step braucht damit genau
+// zwei Dinge: eine Zeile in der Config und einen Render-Block hier.
+type StepId =
+  | 'zusammenfassung'
+  | 'quali'
+  | 'feststellung'
+  | 'ort_besichtigung'
+  | 'ort_fahrzeug'
+  | 'werkstatt'
+  | 'termin'
+  | 'gutachter'
+  | 'rueckruf'
+  | 'sa'
+  | 'account'
+
+const STEP_LABELS: Record<StepId, string> = {
+  zusammenfassung: 'Zusammenfassung',
+  quali: 'Schuldfrage',
+  feststellung: 'Angaben',
+  ort_besichtigung: 'Besichtigungsort',
+  ort_fahrzeug: 'Fahrzeugstandort',
+  werkstatt: 'Werkstatt',
+  termin: 'Termin',
+  gutachter: 'Ihr Gutachter',
+  rueckruf: 'Rückruf',
+  sa: 'Beauftragung',
+  account: 'Konto',
+}
 
 // STEPS + stepIndexById sind jetzt komponenten-lokal (dynamisch je needsBooking).
 
@@ -136,6 +168,9 @@ export default function FlowWizardKfz({
   gutachter,
   needsBooking,
   needsWerkstatt,
+  weichen,
+  flowConfig,
+  hatSvTermin,
   terminPending,
   besichtigungsAdresse,
   feststellungPhasen,
@@ -156,6 +191,16 @@ export default function FlowWizardKfz({
   // Reparaturwunsch/Werkstatt: server-gegated (CANONICAL_FLOWLINK_ENABLED + brauchtWerkstatt-
   // Vermittlung am Lead). Beim Mount gecappt (initialNeedsWerkstatt) wie needsBooking/hatFeststellung.
   needsWerkstatt?: boolean
+  // Spec A (Aaron 14.07.): die EINE DB-getriebene Weiche, SERVERSEITIG aufgeloest — sie kennt
+  // eigene_versicherung/freie_werkstattwahl, die der Client nie zu sehen bekam. Ersetzt die frueher
+  // lossy Client-Rekonstruktion des Abrechnungswegs.
+  weichen: FlowWeichen
+  // Die Szenario-Matrix (flow_szenarien + flow_szenario_steps). Waehlt der Kunde die Schuldfrage erst
+  // im Quali-Step, wechselt das Szenario — dann berechnet der Wizard die Step-Sequenz hiermit neu,
+  // ohne Server-Roundtrip.
+  flowConfig?: FlowConfig
+  /** Ist bereits ein SV/Termin zugeordnet? (fuer die Neuberechnung nach dem Quali) */
+  hatSvTermin?: boolean
   // AAR-956 16.06. (Aaron Wunschtermin-Modell): kein harter Termin, aber gewählter SV +
   // Wunschtermin → Gutachter-Step zeigt den Wunschtermin als "wird bestätigt" (kein Re-Pick).
   terminPending?: boolean
@@ -284,9 +329,13 @@ export default function FlowWizardKfz({
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
   // Task 12: Haftpflicht (schuldfrage='gegner') erreicht den Werkstatt-Step nie
   // (quali-flow-outcome: reparaturwunsch=null) — read-only Reparatur-nach-Gutachten-Hinweis am SA-Step.
-  const istHaftpflicht =
-    resolveAbrechnungsweg({ schuldfrage: schuldfrageWahl, ueberEigeneVersicherung: null }) ===
-    'haftpflicht'
+  //
+  // Spec A (14.07.): die SERVER-Weiche hat Vorrang — sie kennt eigene_versicherung, der Client nicht.
+  // Vorher stand hier resolveAbrechnungsweg({ …, ueberEigeneVersicherung: null }) mit HARDCODIERTEM
+  // null: der Client konnte kasko/selbstzahler gar nicht unterscheiden. Waehlt der Kunde die
+  // Schuldfrage erst jetzt im Quali-Step, faellt er auf die lokale Wahl zurueck — bei 'gegner' ist
+  // das eindeutig (die Versicherungsfrage ist dann irrelevant, 'gegner' dominiert).
+  const istHaftpflicht = weichen.abrechnungsweg === 'haftpflicht' || schuldfrageWahl === 'gegner'
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
   // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
   const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
@@ -297,29 +346,75 @@ export default function FlowWizardKfz({
   // Werkstatt-Step-Praesenz beim Mount cappen (wie initialNeedsBooking/initialHatFeststellung),
   // damit STEPS mid-Flow nicht schrumpft/waechst -> keine Stale-Step-Index-Spruenge.
   const [initialNeedsWerkstatt] = useState(needsWerkstatt === true)
-  const STEPS: { id: StepId; label: string }[] = istIncomplete
+  // ─── Die Step-Sequenz kommt aus der DB-Config (Aaron 14.07.) ───────────────────────────────────
+  // flow_szenario_steps liefert sie inklusive Bedingungen ({"sv_id": null}, {"reparatur_werkstatt_id":
+  // null}, ...). Ein neuer Weg oder eine neue Weiche ist damit eine ZEILE in der DB, kein Deploy.
+  //
+  // Fallback (legacySteps): greift nur, wenn die Config leer ist (Flag aus / Matrix nicht geseedet).
+  const legacySteps: StepId[] = istIncomplete
     ? [
-        { id: 'zusammenfassung', label: 'Zusammenfassung' },
-        ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
-        ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
-        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
-        { id: 'termin', label: 'Termin' },
-        { id: 'gutachter', label: 'Ihr Gutachter' },
-        { id: 'sa', label: 'Beauftragung' },
-        { id: 'account', label: 'Konto' },
+        'zusammenfassung',
+        ...(qualiPending ? (['quali'] as StepId[]) : []),
+        ...(initialHatFeststellung ? (['feststellung'] as StepId[]) : []),
+        ...(initialNeedsWerkstatt ? (['werkstatt'] as StepId[]) : []),
+        'termin',
+        'gutachter',
+        'sa',
+        'account',
       ]
     : [
-        // AAR-956 self-service (Aaron 14.06.): Embed-Lead hat einen Termin, ① Feststellung muss
-        // aber trotzdem laufen (Hergang/Fahrzeug/Gegner) — wenn die Config sie liefert (s. page.tsx
-        // feststellungNeeded). ②Quali+③Slot bleiben weg (Termin steht).
-        { id: 'zusammenfassung', label: 'Zusammenfassung' },
-        ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
-        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
-        { id: 'gutachter', label: 'Ihr Gutachter' },
-        { id: 'sa', label: 'Beauftragung' },
-        { id: 'account', label: 'Konto' },
+        'zusammenfassung',
+        ...(initialHatFeststellung ? (['feststellung'] as StepId[]) : []),
+        ...(initialNeedsWerkstatt ? (['werkstatt'] as StepId[]) : []),
+        'gutachter',
+        'sa',
+        'account',
       ]
+
+  // Die Config-Bedingung kennt die Feststellungs-FELDER nicht (die kommen aus onboarding_felder) —
+  // liefert die Config dort nichts Sichtbares, faellt der Step raus.
+  const nurVorhandeneFeststellung = (ids: StepId[]) =>
+    ids.filter((id) => id !== 'feststellung' || initialHatFeststellung)
+
+  // Beim Mount fixiert: sonst schrumpft/waechst die Sequenz mid-flow durch einen RSC-Re-Render
+  // (LeadRealtimeRefresh) und der numerische stepIndex zeigt auf den falschen Step.
+  const [steps, setSteps] = useState<StepId[]>(() => {
+    const ausConfig = nurVorhandeneFeststellung((weichen.steps ?? []) as StepId[])
+    return ausConfig.length > 0 ? ausConfig : legacySteps
+  })
+
+  const STEPS: { id: StepId; label: string }[] = steps.map((id) => ({ id, label: STEP_LABELS[id] }))
   const stepIndexById = (id: StepId): number => STEPS.findIndex((s) => s.id === id)
+
+  /**
+   * Nach dem Quali-Step wechselt das Szenario (unqualifiziert -> haftpflicht / kasko / selbstzahler /
+   * teilschuld). Die Sequenz wird dann NEU aus der Config berechnet — Steps UND Index zusammen, nie
+   * einzeln: ein alter numerischer Index in einer neuen Sequenz ueberspringt oder wiederholt Steps
+   * (die Stale-Index-Falle, die hier schon zweimal zugeschlagen hat).
+   */
+  function uebernimmSzenario(schuldfrage: string, ueberEigeneVersicherung: boolean | null) {
+    if (!flowConfig || flowConfig.szenarien.length === 0) {
+      setStepIndex((i) => i + 1) // ohne Config: Legacy-Pfad, einfach weiter
+      return
+    }
+    const kontext = bauFlowKontext(
+      {
+        ...(lead as unknown as LeadFuerKontext),
+        schuldfrage,
+        eigene_versicherung:
+          ueberEigeneVersicherung === true ? 'ja' : ueberEigeneVersicherung === false ? 'nein' : null,
+      },
+      hatSvTermin === true,
+    )
+    const neu = resolveFlowWeichen(flowConfig.szenarien, flowConfig.steps, kontext)
+    const neueSteps = nurVorhandeneFeststellung(neu.steps as StepId[])
+    if (neueSteps.length === 0) {
+      setStepIndex((i) => i + 1)
+      return
+    }
+    setSteps(neueSteps)
+    setStepIndex(1) // direkt hinter die Zusammenfassung — der Quali ist beantwortet
+  }
 
   // gutachter-Anzeige: server-Prop (Dispatcher-Pfad) ODER die frisch gebuchte
   // Auswahl (incomplete-Pfad, vor Page-Reload).
@@ -555,11 +650,15 @@ export default function FlowWizardKfz({
                 token={token}
                 vorname={editVorname || lead.vorname || null}
                 onSchuldfrage={setSchuldfrageWahl}
+                // Aaron 14.07.: Nach der Quali wechselt das Szenario -> die Step-Sequenz wird aus der
+                // DB-Config NEU berechnet. Frueher sprang Kasko/Selbstzahler hier direkt auf 'account'
+                // und sah damit WEDER Feststellung NOCH Werkstatt — genau das soll jetzt laufen.
+                onSzenario={uebernimmSzenario}
                 onWeiter={() => setStepIndex(stepIndex + 1)}
                 onSelbstzahler={(claimId) => {
-                  // SP-B2: partieller Selbstzahler-Claim existiert -> wie SA-Pfad in den Account-Step.
+                  // SP-B2: der partielle Selbstzahler-Claim wird weiterhin angelegt (das Portal braucht
+                  // ihn) — aber wir springen NICHT mehr weg; uebernimmSzenario routet weiter.
                   setFallId(claimId)
-                  setStepIndex(stepIndexById('account'))
                 }}
               />
             )}
@@ -769,6 +868,27 @@ export default function FlowWizardKfz({
                 Ueberspringbar; onWeiter -> naechster Step (termin/gutachter/sa je nach Pfad). */}
             {currentStep.id === 'werkstatt' && (
               <FlowWerkstattStep token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
+
+            {/* ═══ ORT-ABFRAGEN (Aaron 14.07.) — zwei VERSCHIEDENE Orte ═══════════════════════
+                besichtigungsort = wo der SV besichtigt  -> Anker fuer den GUTACHTER-Finder
+                fahrzeug_standort = wo das Auto steht    -> Anker fuer den WERKSTATT-Finder
+                Jeder Step erscheint nur, wenn sein Ort in der DB fehlt (Bedingung in der Config). */}
+            {currentStep.id === 'ort_besichtigung' && (
+              <FlowOrtStep
+                token={token}
+                art="besichtigung"
+                onWeiter={() => setStepIndex(stepIndex + 1)}
+              />
+            )}
+
+            {currentStep.id === 'ort_fahrzeug' && (
+              <FlowOrtStep token={token} art="fahrzeug" onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
+
+            {/* ═══ TEILSCHULD: Rueckruf beim Dispatch statt Gutachter-Buchung ══════════════════ */}
+            {currentStep.id === 'rueckruf' && (
+              <FlowRueckrufStep token={token} vorname={editVorname || lead.vorname || null} />
             )}
 
             {/* ═══ SCHRITT 4: SA UNTERSCHREIBEN ═══ */}

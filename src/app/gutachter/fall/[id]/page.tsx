@@ -716,6 +716,7 @@ export default async function GutachterFallPage({
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
       kanzlei={kanzlei}
+      currentUserId={user.id}
       aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}

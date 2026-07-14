@@ -3,6 +3,8 @@ import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
 import WerkstattIntakeSignatur from './WerkstattIntakeSignatur'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import { ladeFlowWeichen } from '@/lib/self-service/lade-flow-szenarien'
+import type { LeadFuerKontext } from '@/lib/self-service/flow-kontext'
 import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
@@ -268,22 +270,39 @@ export default async function FlowPage({
   }
   const terminPending = !terminMitSv && chosenSvId != null && wunschterminIso != null
 
-  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-Pfad
-  // (Quali+Slot), flag-gegatet. Dispatcher-Lead (Termin) ODER Wunschtermin-Pending → kein Slot-Step.
-  const needsBooking =
-    !terminMitSv && !terminPending && process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  // Die DB-getriebene Weiche (Aaron 14.07.: "komplett db driven, damit es wiederverwendbar ist").
+  // Die Matrix (welche Szenarien, welche Steps, welche Bedingungen) liegt in flow_szenarien +
+  // flow_szenario_steps; hier wird sie geladen und gegen den Lead-Zustand ausgewertet. Ein neuer Weg
+  // oder eine neue Weiche ist damit eine ZEILE, kein Deploy.
+  // Der Lead kommt via select('*') -> alle Felder liegen vor (auch die, die frueher nie an den Client gingen).
+  const { config: flowConfig, weichen } = await ladeFlowWeichen(
+    lead as unknown as LeadFuerKontext,
+    Boolean(terminMitSv) || terminPending,
+  )
+
+  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-Pfad, flag-gegatet.
+  //
+  // Aaron 14.07.: Die Gates FOLGEN jetzt der DB-Config — `weichen.steps` ist die Wahrheit. Vorher war
+  // needsBooking REIN terminzustands-gegatet und fragte nie nach dem Abrechnungsweg; Kasko/Selbstzahler
+  // fielen nur zufaellig heraus (ueber den Quali-Short-Circuit, der NICHT greift, wenn die schuldfrage
+  // schon gesetzt hereinkommt). Ergebnis: ein Kasko-Kunde sah den Gutachter-Finder ("loses Ende").
+  // Jetzt: steht 'termin' in der Step-Sequenz des Szenarios, braucht der Kunde einen Gutachter — sonst nicht.
+  // Die Termin-/Werkstatt-Zustandsfilter stecken als Bedingungen IN der Config ({"sv_id": null} usw.).
+  const flowConfigAktiv = process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  const needsBooking = flowConfigAktiv && weichen.brauchtGutachter
   // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
   // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung
-  // soll laufen (da kommen Hergang/Fahrzeug/Gegner/Vorschäden rein). Sobald unfallhergang gefüllt
-  // ist, fällt sie weg. ②Quali+③Slot bleiben termin-gegatet (needsBooking).
-  const feststellungNeeded =
-    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' && !lead.unfallhergang
+  // soll laufen. Die Bedingung dafuer steht jetzt ebenfalls in der Config und ist PRO SZENARIO
+  // unterschiedlich: Haftpflicht prueft `unfallhergang`, Kasko/Selbstzahler `fahrzeugschaden_beschreibung`
+  // (dort gibt es keinen Unfall — die Feststellung fragt den Schaden fuers Werkstatt-Matching ab).
+  const feststellungNeeded = flowConfigAktiv && weichen.steps.includes('feststellung')
 
-  // Reparaturwunsch/Werkstatt: Picker-Step nur wenn Reparatur gewuenscht + noch KEINE
-  // Werkstatt hinterlegt (brauchtWerkstattVermittlung). lead via select('*') -> Felder zur
-  // Laufzeit da (Type-Lag: as unknown as BedarfRow). Der Wizard capped es beim Mount.
+  // Werkstatt-Picker: die Config sagt, ob der Weg ueberhaupt eine Werkstatt vorsieht (kasko/selbstzahler
+  // sofort, haftpflicht nach dem Gutachten, nie bei nur_gutachter/Teilschuld) — brauchtWerkstattVermittlung
+  // bleibt als fachlicher Zusatz-Check (Reparaturwunsch gesetzt, Vermittlung noch offen).
   const needsWerkstatt =
-    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' &&
+    flowConfigAktiv &&
+    weichen.brauchtWerkstatt &&
     brauchtWerkstattVermittlung(lead as unknown as BedarfRow)
 
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
@@ -505,6 +524,12 @@ export default async function FlowPage({
           gutachter={gutachter}
           needsBooking={needsBooking}
           needsWerkstatt={needsWerkstatt}
+          weichen={weichen}
+          // Die Matrix mitgeben: waehlt der Kunde die Schuldfrage erst im Quali-Step, wechselt das
+          // Szenario (unqualifiziert -> kasko/haftpflicht/teilschuld) und der Wizard muss die
+          // Step-Sequenz neu berechnen — ohne Server-Roundtrip.
+          flowConfig={flowConfig}
+          hatSvTermin={Boolean(terminMitSv) || terminPending}
           terminPending={terminPending}
           besichtigungsAdresse={besichtigungsAdresse}
           feststellungPhasen={feststellungPhasen}

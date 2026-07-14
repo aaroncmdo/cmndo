@@ -20,6 +20,18 @@ const FahrzeugscheinSchema = z.object({
   erstzulassung: z.string().nullable().describe('Erstzulassung als ISO YYYY-MM-DD (Feld B)'),
   hersteller: z.string().nullable().describe('Hersteller/Marke (Feld D.1)'),
   modell: z.string().nullable().describe('Handelsbezeichnung/Modell (Feld D.2/D.3)'),
+  // Spec B (Aaron 14.07.): das Werkstatt-Matching braucht Fahrzeugklasse + Marke. Die Klasse steht in
+  // JEDEM Schein (Feld J) — bisher fragte das Schema sie schlicht nicht ab. Kein KI-Zusatzaufwand:
+  // dasselbe Vision-Call, drei Felder mehr.
+  fahrzeugklasse: z
+    .string()
+    .nullable()
+    .describe(
+      'EU-/KBA-Fahrzeugklasse (Feld J), exakt wie im Schein: M1 (PKW), N1 (Transporter), N2/N3 (LKW), ' +
+        'M2/M3 (Bus), L1e-L7e (Krafträder/Quads), O1-O4 (Anhänger), T/C/R/S (Land-/Forstwirtschaft)',
+    ),
+  hsn: z.string().nullable().describe('Herstellerschlüsselnummer, 4 Ziffern (Feld 2.1)'),
+  tsn: z.string().nullable().describe('Typschlüsselnummer, 3 Zeichen (Feld 2.2)'),
 })
 
 const VersicherungsscheinSchema = z.object({
