@@ -3,7 +3,7 @@
 // der Karte gerendert. Full-Page-Fallback bleibt für Deep-Links.
 
 import AnlegenPage from '../../anlegen/page'
-import DrawerShell from '../DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedAnlegenPage() {
   return (

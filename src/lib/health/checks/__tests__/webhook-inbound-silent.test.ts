@@ -89,7 +89,7 @@ const INBOUND_SOURCE: Record<string, string> = { webhook_events: 'lexdrive' }
 type StubResult = Promise<{ data: StubRow[] | null; error: { message: string } | null }>
 type StubChain = {
   select: (c: string) => StubChain
-  eq: (col: string, val: string) => StubChain
+  in: (col: string, vals: string[]) => StubChain
   order: (col: string, o?: { ascending?: boolean }) => StubChain
   limit: (n: number) => StubResult
 }
@@ -105,8 +105,8 @@ function makeCtx(perTable: Record<string, TableSpec>, errorMessage?: string): Ch
 
       const chain: StubChain = {
         select: () => chain,
-        eq: (col, val) => {
-          rows = rows.filter((r) => (r as unknown as Record<string, unknown>)[col] === val)
+        in: (col, vals) => {
+          rows = rows.filter((r) => vals.includes(String((r as unknown as Record<string, unknown>)[col])))
           return chain
         },
         order: (_col, o) => {
@@ -194,6 +194,35 @@ describe('webhookInboundSilentCheck.run', () => {
     const r = await webhookInboundSilentCheck.run(
       makeCtx({
         webhook_events: [{ created_at: daysAgoIso(1), source: 'lexdrive' }],
+        matelso_calls: 1,
+        aircall_calls: 1,
+      }),
+    )
+    expect(r.status).toBe('ok')
+  })
+
+  it('B7-PIN: lexdrive_bot (Bot-Callback) zaehlt als ECHTER Inbound', async () => {
+    // /api/lexdrive/bot-callback:62 schreibt source='lexdrive_bot' — ebenfalls ein echter
+    // Partner-Inbound. Erlaubte der Filter nur 'lexdrive', meldete der Check einen LEBENDEN
+    // Kanal als still (Fehlalarm). Die Allowlist MUSS beide Inbound-Sources kennen.
+    const r = await webhookInboundSilentCheck.run(
+      makeCtx({
+        webhook_events: [{ created_at: daysAgoIso(1), source: 'lexdrive_bot' }],
+        matelso_calls: 1,
+        aircall_calls: 1,
+      }),
+    )
+    expect(r.status).toBe('ok')
+  })
+
+  it('B7-PIN: lexdrive_bot rettet den Kanal auch, wenn der Haupt-Webhook lange still ist', async () => {
+    const r = await webhookInboundSilentCheck.run(
+      makeCtx({
+        webhook_events: [
+          { created_at: daysAgoIso(2), source: 'lexdrive_bot' }, // Bot liefert -> Kanal lebt
+          { created_at: daysAgoIso(60), source: 'lexdrive' },
+          { created_at: daysAgoIso(0), source: 'manual_admin' }, // intern, irrelevant
+        ],
         matelso_calls: 1,
         aircall_calls: 1,
       }),

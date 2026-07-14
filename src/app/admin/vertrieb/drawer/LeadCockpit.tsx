@@ -30,6 +30,13 @@ export default function LeadCockpit({
   const [fehler, setFehler] = useState<string | null>(null)
   const [notiz, setNotiz] = useState(detail.notiz ?? '')
   const [composerTyp, setComposerTyp] = useState<VorlageTyp | null>(null)
+  const [apForm, setApForm] = useState({
+    vorname: detail.ansprechpartner.vorname ?? '',
+    nachname: detail.ansprechpartner.nachname ?? '',
+    position: detail.ansprechpartner.position ?? '',
+    email: detail.ansprechpartner.email ?? '',
+    telefon: detail.ansprechpartner.telefon ?? '',
+  })
 
   async function patch(p: Parameters<typeof updatePartnerLead>[1]) {
     setBusy(true)
@@ -41,6 +48,16 @@ export default function LeadCockpit({
       return
     }
     onChanged()
+  }
+
+  async function speichereAnsprechpartner() {
+    await patch({
+      ansprechpartner_vorname: apForm.vorname.trim() || null,
+      ansprechpartner_nachname: apForm.nachname.trim() || null,
+      ansprechpartner_position: apForm.position.trim() || null,
+      ansprechpartner_email: apForm.email.trim() || null,
+      ansprechpartner_telefon: apForm.telefon.trim() || null,
+    })
   }
 
   async function convert() {
@@ -59,23 +76,38 @@ export default function LeadCockpit({
 
   const ap = detail.ansprechpartner
   const apName = [ap.vorname, ap.nachname].filter(Boolean).join(' ')
-  const hatAp = apName || ap.position || ap.email || ap.telefon
+  const apDirty =
+    apForm.vorname !== (ap.vorname ?? '') ||
+    apForm.nachname !== (ap.nachname ?? '') ||
+    apForm.position !== (ap.position ?? '') ||
+    apForm.email !== (ap.email ?? '') ||
+    apForm.telefon !== (ap.telefon ?? '')
 
   return (
     <div className="space-y-4">
       <div className={CARD_CLS}>
         <p className={LABEL_CLS}>Ansprechpartner</p>
-        {hatAp ? (
-          <p className="text-sm text-claimondo-navy">
-            {apName && <span className="font-medium">{apName}</span>}
-            {ap.position && <span className="text-claimondo-ondo/70"> · {ap.position}</span>}
-            {(ap.telefon || ap.email) && <br />}
-            {ap.telefon && <span>{ap.telefon}</span>}
-            {ap.telefon && ap.email && <span> · </span>}
-            {ap.email && <span>{ap.email}</span>}
+        {/* Editierbar (Aaron): Name/Position + E-Mail und Telefon einzeln. Speichern via
+            updatePartnerLead (ansprechpartner_*-Felder existieren bereits auf partner_leads). */}
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <input value={apForm.vorname} onChange={(e) => setApForm({ ...apForm, vorname: e.target.value })} placeholder="Vorname" className={FELD_CLS} />
+          <input value={apForm.nachname} onChange={(e) => setApForm({ ...apForm, nachname: e.target.value })} placeholder="Nachname" className={FELD_CLS} />
+          <input value={apForm.position} onChange={(e) => setApForm({ ...apForm, position: e.target.value })} placeholder="Position (z.B. Geschäftsführer)" className={`${FELD_CLS} col-span-2`} />
+          <input type="email" value={apForm.email} onChange={(e) => setApForm({ ...apForm, email: e.target.value })} placeholder="E-Mail" className={FELD_CLS} />
+          <input value={apForm.telefon} onChange={(e) => setApForm({ ...apForm, telefon: e.target.value })} placeholder="Telefon" className={FELD_CLS} />
+        </div>
+        {apDirty && (
+          <div className="mt-2">
+            <Button variant="navy" size="sm" loading={busy} onClick={speichereAnsprechpartner}>
+              Ansprechpartner speichern
+            </Button>
+          </div>
+        )}
+        {(kontakt.email || kontakt.telefon) && (
+          <p className="mt-2 text-caption text-claimondo-ondo/50">
+            Firma-Kontakt: {kontakt.email ?? '—'}
+            {kontakt.telefon ? ` · ${kontakt.telefon}` : ''}
           </p>
-        ) : (
-          <p className="text-caption text-claimondo-ondo/50">Noch kein Ansprechpartner hinterlegt.</p>
         )}
       </div>
 
