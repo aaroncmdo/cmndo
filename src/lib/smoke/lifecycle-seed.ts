@@ -213,7 +213,9 @@ function derivePhaseStatus(key: string): { phase: string; status: string | null;
     case 'begutachtung-reject':
       return { phase: '4_gutachten_fertig', work_state: 'in_bearbeitung', status: null, operative_status: 'gutachten-eingegangen' }
     case 'regulierung-vs-kontakt':
-      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs', operative_status: 'regulierung' }
+      // B4-Slice-1: operative_status traegt den Non-Terminal-Outcome direkt (post-write-flip-Zustand)
+      // -> testet die neue o_sub-Ergaenzung 'in_kommunikation_vs' -> versicherungskontakt.
+      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs', operative_status: 'in_kommunikation_vs' }
     case 'regulierung-auszahlung':
       return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: null, operative_status: 'zahlung-eingegangen' }
     case 'abschluss':
