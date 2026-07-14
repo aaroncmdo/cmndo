@@ -95,10 +95,21 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
   }
 
-  // Onboarding-Redirect pro Fall: sobald ein owned Fall onboarding_complete=false hat.
-  // CMM-63 PR3: aus navFaelle (claims.onboarding_complete, SSoT) statt faelle.kunde_id-Read.
+  // Onboarding-Redirect — NUR beim Erst-Onboarding global erzwingen.
+  // Multi-Claim-Fix (Aaron 15.07.): Vorher sperrte `some(false)` das GANZE Portal, sobald IRGENDEIN
+  // owned Fall onboarding_complete=false hatte. Das brach zwei Wege, sobald ein Kunde einen ZWEITEN
+  // Claim bekam (z.B. den partiellen Kasko-/Selbstzahler-Claim aus erzeugeSelbstzahlerClaim, der mit
+  // onboarding_complete=false startet):
+  //   A1 — Total-Sperre: Bestandskunde mit fertigem Fall + neuem offenen Fall kam an seine alten
+  //        Faelle (Detail/Chat/Termine/Profil) nicht mehr ran, bis der neue durch-onboardet war.
+  //   A2 — Endlos-Redirect: neuester Fall fertig, ein aelterer offen -> /kunde (Layout: some=true ->
+  //        /onboarding) -> /onboarding (laedt NUR den neuesten = fertig -> zurueck /kunde) -> ∞.
+  // Fix: nur erzwingen, wenn der Kunde NOCH KEINEN fertigen Fall hat (Erst-User). Ein neuer offener
+  // Fall bei einem Bestandskunden wird claim-spezifisch in SEINER Detail-View gefuehrt, nicht global.
   if (!pathname.includes('/onboarding') && !pathname.includes('/passwort-aendern')) {
-    if (navFaelle.some((f) => f.onboarding_complete === false)) redirect('/kunde/onboarding')
+    if (navFaelle.length > 0 && navFaelle.every((f) => f.onboarding_complete === false)) {
+      redirect('/kunde/onboarding')
+    }
   }
 
   const displayName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email?.split('@')[0] || 'Kunde'
@@ -130,6 +141,15 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // CMM-28/CMM-63: Single-Fall-Nav. navFaelle ist oben (vor dem Onboarding-Check)
   // bereits via getKundeFaelle geladen (claim_parties-Ownership, einmalige Wahrheit).
   const singleFallId = navFaelle.length === 1 ? navFaelle[0].id : null
+
+  // Multi-Claim-Fix (Aaron 15.07.): Die Sidebar-Kontakt-Cards (SV/KB/Admin/LexDrive) sind kunden-GLOBAL
+  // (auf jeder /kunde/*-Seite sichtbar), aber SV/KB/Vollmacht sind PRO FALL verschieden. Bei mehreren
+  // Faellen liess `navFaelle.find(...)` / `.some(...)` einen BELIEBIGEN Fall durchscheinen — auf der
+  // Kasko-Detailseite rendete die GutachterCard den SV des HAFTPFLICHT-Falls, obwohl der Kasko-Fall gar
+  // keinen SV hat. Darum die einfaerbenden Cards NUR bei genau EINEM Fall ableiten; bei mehreren
+  // uebernehmen die claim-scoped Detail-View-Zonen (TeamZone/GeldZone). Die Chat-Fall-Liste
+  // (fallOptionsForChat) bleibt bewusst vollstaendig — dort SOLL der Kunde den Fall waehlen koennen.
+  const eindeutigerFall = navFaelle.length === 1
   // CMM-63 Route-Key-Switch: der Nav-Link „Mein Fall" zeigt auf die claim_id
   // (neuer Route-Key). Der faelle.id-Wert (singleFallId) bleibt für die
   // Kontakt-Cards (Chat-Default → nachrichten.fall_id) erhalten.
@@ -145,7 +165,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     avatarUrl: string | null
     rolle: string | null
   } | null = null
-  if (adminForNav && navFaelle.length > 0) {
+  if (adminForNav && eindeutigerFall) {
     // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
     // → über den claims-Embed lesen + filtern (SSoT). !inner erzwingt, dass
     // nur Faelle mit verknuepftem Claim und gesetztem KB zurueckkommen.
@@ -178,7 +198,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     nachname: string | null
     avatarUrl: string | null
   } | null = null
-  if (adminForNav && navFaelle.length > 0) {
+  if (adminForNav && eindeutigerFall) {
     // CMM-44 SP-B PR2a: eskaliert_an_admin_id lebt auf claims (SSoT) — via
     // claims!inner-Join lesen + auf der claims-Seite filtern.
     // CMM-63 PR3: eskaliert_an_admin_id aus claims (SSoT) via owned claim_ids
@@ -229,7 +249,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
   } | null = null
-  if (adminForNav && navFaelle.length > 0) {
+  if (adminForNav && eindeutigerFall) {
     // CMM-63 PR3: SV des neuesten owned Falls aus navFaelle (sv_id) statt faelle.kunde_id-Read.
     const svId = (navFaelle.find((f) => f.sv_id)?.sv_id as string | null) ?? null
     if (svId) {
@@ -267,11 +287,12 @@ export default async function KundeLayout({ children }: { children: React.ReactN
     }
   }
 
-  // LexDrive-Card
+  // LexDrive-Card — nur bei genau EINEM Fall (Multi-Claim-Fix, s.o.): sonst erschien der LexDrive-QR
+  // auf dem Kasko-Fall, nur weil ein ANDERER Fall des Kunden eine Vollmacht hatte.
   let lexdriveQr: { qrSvg: string; qrUrl: string } | null = null
-  const hatVollmachtSigniertenFall = navFaelle.some(
-    (f) => !!(f as { vollmacht_signiert_am?: string | null }).vollmacht_signiert_am,
-  )
+  const hatVollmachtSigniertenFall =
+    eindeutigerFall &&
+    navFaelle.some((f) => !!(f as { vollmacht_signiert_am?: string | null }).vollmacht_signiert_am)
   if (hatVollmachtSigniertenFall) {
     const LEXDRIVE_WA = 'https://wa.me/4932221096850?text=' +
       encodeURIComponent('Hallo, ich habe eine Frage zu meinem Fall.')
