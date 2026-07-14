@@ -28,10 +28,15 @@ sonst Next.js-Bundle-False-Positive). `domcontentloaded`+Settle statt `networkid
 **Nicht abgedeckt:** Detail-Views nur teilweise (prod hatte 0 Claims — 1 Test-Claim gebaut+geräumt) ·
 Portale kanzlei/makler/werkstatt/kunde/flottenmanager (keine Test-Zugangsdaten).
 
-## Health-Zusammenfassung (nach Harness-Korrektur)
+## Health-Zusammenfassung (voller Re-Sweep mit gefixtem Harness)
 
-Mit akkuratem Harness (httpOnly:false) nachgeprüft: **App gesund.** admin ~41/41 · KB 11/11 ·
-SV 11/13 · public 5/6 · Detail-Views (Fallakte, Claim-Chat) OK.
+Alle ~71 Routen mit akkuratem Harness (httpOnly:false) neu gefahren: **App gesund.**
+**admin 41/41 · KB 11/11 · SV 11/13 · public: keine echten Bugs** · Detail-Views (Fallakte,
+Claim-Chat) OK. Ein KB-`kundentermine`-„Failed to fetch" war **transient** (Re-Check OK).
+Public-„Funde" sind alle erwartet/Rauschen: `home`→`/login` (App-Subdomain), `register` 404
+(kein Public-Registration), `faq`/`schaden-melden` = CORS-RSC-Prefetch über die
+App→Marketing-Domaingrenze (Navigation funktioniert). Der Sweep filtert dieses Mapbox-/CORS-
+Rauschen inzwischen aus.
 
 ## Echte Funde (reproduzierbar, überleben den Harness-Fix)
 

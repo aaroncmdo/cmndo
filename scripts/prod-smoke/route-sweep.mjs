@@ -28,14 +28,19 @@ const ctx = await browser.newContext({ baseURL: APP, viewport: { width: 1440, he
 await ctx.addCookies(sessionToCookies(session, { projectRef, cookieDomain: '.claimondo.de' }))
 const page = await ctx.newPage()
 
+// Bekanntes NICHT-App-Rauschen ausfiltern (sonst False-Positive-Verdicts):
+//  - api.mapbox.com — Karten-Kacheln/Styles (externe Ressource, Rate-Limit/Netz)
+//  - _rsc=…-CORS — Next.js-RSC-Prefetch über die App→Marketing-Domaingrenze
+//    (Navigation funktioniert trotzdem; der Prefetch scheitert still)
+const NOISE = /api\.mapbox\.com|_rsc=|mapbox-gl|favicon|\.map(\?|$)/
 // Fehler-Kollektoren pro Route (via cur-Ref getaggt)
 let cur = { consoleErrors: [], failed: [] }
-page.on('console', (m) => { if (m.type() === 'error') cur.consoleErrors.push(m.text().slice(0, 160)) })
+page.on('console', (m) => { if (m.type() === 'error') { const t = m.text(); if (!NOISE.test(t)) cur.consoleErrors.push(t.slice(0, 160)) } })
 page.on('response', (r) => {
   const s = r.status()
-  if (s >= 400) { const u = r.url(); if (!/favicon|\.map$/.test(u)) cur.failed.push(`${s} ${u.replace(APP, '').replace(supabaseUrl, 'SB').slice(0, 90)}`) }
+  if (s >= 400) { const u = r.url(); if (!NOISE.test(u)) cur.failed.push(`${s} ${u.replace(APP, '').replace(supabaseUrl, 'SB').slice(0, 90)}`) }
 })
-page.on('pageerror', (e) => { cur.consoleErrors.push('PAGEERROR: ' + String(e.message).slice(0, 140)) })
+page.on('pageerror', (e) => { const t = String(e.message); if (!NOISE.test(t)) cur.consoleErrors.push('PAGEERROR: ' + t.slice(0, 140)) })
 
 const ERR_MARKERS = ['Application error', 'Etwas ist schiefgelaufen', 'Ein Fehler ist aufgetreten', 'client-side exception', 'Internal Server Error']
 const results = []
