@@ -102,10 +102,12 @@ export default function SequenzenDrawerContent() {
   async function sequenzPatch(s: SequenzMitSteps, p: Partial<SequenzMitSteps>) {
     setBusy(true)
     setFehler(null)
+    // NUR das getoggelte Flag durchreichen — nicht beide aus dem (evtl. veralteten)
+    // Client-State, sonst ueberschreibt ein Toggle das andere (Clobbering-Race).
     const res = await speichereSequenz({
       id: s.id, rolle: s.rolle, name: s.name,
-      aktiv: p.aktiv ?? s.aktiv,
-      auto_enroll: p.auto_enroll ?? s.auto_enroll,
+      ...(p.aktiv !== undefined ? { aktiv: p.aktiv } : {}),
+      ...(p.auto_enroll !== undefined ? { auto_enroll: p.auto_enroll } : {}),
     })
     setBusy(false)
     if (!res.ok) {
