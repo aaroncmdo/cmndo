@@ -19,6 +19,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
+import TerminOfflineHinweis from './TerminOfflineHinweis'
 import { aendereTerminFlow } from './self-service-actions'
 import { BeratungsterminCard } from './BeratungsterminCard'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
@@ -29,6 +30,8 @@ import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/ty
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { meetsCondition } from './feststellung-steps'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
+import { useOnlineStatus } from '@/lib/offline/use-online-status'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import {
   CheckIcon,
   CarIcon,
@@ -273,10 +276,17 @@ export default function FlowWizardKfz({
   // Autosave bei jeder Aenderung (speichereFeststellungFlow), damit signSAandCreateFall den
   // gewaehlten Service/Kanzlei vom Lead liest.
   const [serviceValues, setServiceValues] = useState<Record<string, unknown>>(serviceWerte ?? {})
+  // Slice 2-write-1: debounced Online-Status fuer den Termin-Gate (Task 3) + die
+  // Offline-Enqueue-Zweige. Enqueue-Entscheidung nutzt raw navigator.onLine (instant).
+  const isOnline = useOnlineStatus()
   function setServiceFeld(key: string, val: unknown) {
     setServiceValues((v) => {
       const next = { ...v, [key]: val }
-      void speichereFeststellungFlow(token, next).catch(() => {})
+      if (!navigator.onLine) {
+        void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values: next } }).catch(() => {})
+      } else {
+        void speichereFeststellungFlow(token, next).catch(() => {})
+      }
       return next
     })
   }
@@ -681,17 +691,26 @@ export default function FlowWizardKfz({
 
             {/* ═══ AAR-956 §3a: TERMIN (Slot-Picker, nur incomplete-Pfad) ═══ */}
             {currentStep.id === 'termin' && (
-              <FlowSlotStep
-                token={token}
-                onGebucht={(t) => {
-                  setGebuchterTermin(t)
-                  setStepIndex(stepIndexById('gutachter'))
-                }}
-                onOhneTermin={() => {
-                  setOhneTermin(true)
-                  setStepIndex(stepIndexById('sa'))
-                }}
-              />
+              !isOnline ? (
+                <TerminOfflineHinweis
+                  onSkip={() => {
+                    setOhneTermin(true)
+                    setStepIndex(stepIndexById('sa'))
+                  }}
+                />
+              ) : (
+                <FlowSlotStep
+                  token={token}
+                  onGebucht={(t) => {
+                    setGebuchterTermin(t)
+                    setStepIndex(stepIndexById('gutachter'))
+                  }}
+                  onOhneTermin={() => {
+                    setOhneTermin(true)
+                    setStepIndex(stepIndexById('sa'))
+                  }}
+                />
+              )
             )}
 
             {/* ═══ SCHRITT 2: GUTACHTER-ANZEIGE (AAR-99) ═══ */}
@@ -1035,23 +1054,33 @@ export default function FlowWizardKfz({
                 // AAR-956: Besichtigungsort geaendert? Neue Place-Auswahl ODER Adress-Text abweichend vom Prefill.
                 const standortChanged = editStandortPlace != null || editStandortText !== standortPrefill
                 if (stammChanged || standortChanged) {
-                  try {
-                    await updateLeadStammdaten(lead.id, {
-                      vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail,
-                      // Koordinaten NUR bei Dropdown-Auswahl (editStandortPlace) schreiben — reiner
-                      // Freitext aktualisiert nur die Adresse, die Makler-Koordinaten bleiben erhalten.
-                      ...(standortChanged ? {
-                        fahrzeug_standort_adresse: editStandortPlace?.adresse ?? editStandortText,
-                        ...(editStandortPlace ? {
-                          fahrzeug_standort_plz: editStandortPlace.plz,
-                          fahrzeug_standort_lat: editStandortPlace.lat,
-                          fahrzeug_standort_lng: editStandortPlace.lng,
-                          fahrzeug_standort_place_id: editStandortPlace.place_id,
-                        } : {}),
+                  // Ein Payload fuer beide Pfade: was online geschrieben wird, replayed offline identisch
+                  // (sonst verlöre der Outbox-Replay den Besichtigungsort aus AAR-956).
+                  const data = {
+                    vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail,
+                    // Koordinaten NUR bei Dropdown-Auswahl (editStandortPlace) schreiben — reiner
+                    // Freitext aktualisiert nur die Adresse, die Makler-Koordinaten bleiben erhalten.
+                    ...(standortChanged ? {
+                      fahrzeug_standort_adresse: editStandortPlace?.adresse ?? editStandortText,
+                      ...(editStandortPlace ? {
+                        fahrzeug_standort_plz: editStandortPlace.plz,
+                        fahrzeug_standort_lat: editStandortPlace.lat,
+                        fahrzeug_standort_lng: editStandortPlace.lng,
+                        fahrzeug_standort_place_id: editStandortPlace.place_id,
                       } : {}),
-                    }, token)
+                    } : {}),
+                  }
+                  // Slice 2-write-1: offline -> Stammdaten in die Outbox (class B, LWW),
+                  // Wizard schaltet optimistisch weiter. Der Handler replayed bei Reconnect.
+                  if (!navigator.onLine) {
+                    void enqueueOp({ kind: 'flow_stammdaten', replay_class: 'B', payload: { leadId: lead.id, data, token }, entity_ref: { scope: 'lead', id: lead.id } }).catch(() => {})
                     setAccountEmail(editEmail)
-                  } catch { /* weiter trotzdem */ }
+                  } else {
+                    try {
+                      await updateLeadStammdaten(lead.id, data, token)
+                      setAccountEmail(editEmail)
+                    } catch { /* weiter trotzdem */ }
+                  }
                 }
                 setStepIndex(stepIndex + 1) // → nächster Step (quali/termin/gutachter je nach Pfad)
               }}

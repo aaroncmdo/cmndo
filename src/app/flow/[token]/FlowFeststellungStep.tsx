@@ -16,6 +16,7 @@ import { useTranslations } from 'next-intl'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld, istDokumentManuellFeld } from '@/lib/self-service/feststellung-felder'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { FlowZb1Upload, type Zb1FlowExtracted } from './FlowZb1Upload'
 import { FlowPolizeiberichtUpload } from './FlowPolizeiberichtUpload'
@@ -145,9 +146,20 @@ export function FlowFeststellungStep({
   async function handleWeiter() {
     if (!isLast) {
       // Hintergrund-Autosave (best effort): Resume + Realtime, nicht blockierend.
-      void speichereFeststellungFlow(token, values).catch(() => {})
+      // Slice 2-write-1: offline -> Outbox (class B), online -> wie bisher.
+      if (!navigator.onLine) {
+        void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values } }).catch(() => {})
+      } else {
+        void speichereFeststellungFlow(token, values).catch(() => {})
+      }
       setError(null)
       gotoIdx(idx + 1)
+      return
+    }
+    // Slice 2-write-1: letzter Schritt — offline enqueue + optimistisch weiter (Handler replayed).
+    if (!navigator.onLine) {
+      void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values } }).catch(() => {})
+      onWeiter()
       return
     }
     setSaving(true)
@@ -166,7 +178,12 @@ export function FlowFeststellungStep({
   // aus dem Block. Hält die Conversion frei; die Fakten kommen via Dispatch oder später
   // im Kunde-Onboarding nach (DB-vorbefüllt → kein Doppel-Tippen).
   function handleSkipAll() {
-    void speichereFeststellungFlow(token, values).catch(() => {})
+    // Slice 2-write-1: offline -> Outbox (class B), online -> wie bisher.
+    if (!navigator.onLine) {
+      void enqueueOp({ kind: 'flow_feststellung', replay_class: 'B', payload: { token, values } }).catch(() => {})
+    } else {
+      void speichereFeststellungFlow(token, values).catch(() => {})
+    }
     setError(null)
     onWeiter()
   }
