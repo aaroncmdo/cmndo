@@ -11,7 +11,7 @@ import type { Rolle } from '@/lib/claims/types'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
-import { getStorageUrl } from '@/lib/storage/url'
+import { getStorageUrl, resignStorageUrl } from '@/lib/storage/url'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 
@@ -85,35 +85,44 @@ export async function getPflichtdokumenteForFall(
 
     // Filter wie getPflichtdokumenteStand (AAR-362): nur Slots wo Kunde
     // uploaden kann; Legacy-Slots ohne Katalog-Eintrag durchlassen.
-    const kundeRelevante: PflichtdokumentStand[] = pflichtRows
-      .filter((r) => {
-        const slot = r.dokument_typ ?? ''
-        const k = katalogMap.get(slot)
-        if (!k) return true
-        return k.uploadbar_von.includes('kunde')
-      })
-      .map((r) => {
-        const k = katalogMap.get(r.dokument_typ ?? '')
-        return {
-          id: r.id,
-          slot_id: r.dokument_typ ?? '',
-          label: k?.label ?? r.dokument_typ ?? '',
-          beschreibung: k?.beschreibung ?? null,
-          status: r.status ?? 'ausstehend',
-          pflicht: !!r.pflicht,
-          dokument_url: r.dokument_url ?? null,
-          hochgeladen_am: r.hochgeladen_am ?? null,
-          frist: r.frist ?? null,
-          begruendung: r.begruendung ?? null,
-          angefordert_von_rolle: r.angefordert_von_rolle ?? null,
-          angefordert_am: r.angefordert_am ?? null,
-          multi_file: false,
-          max_mb: 10,
-          akzeptierte_mime_types: [],
-          sort_order: r.sort_order ?? 999,
-          hochgeladene_anzahl: 0,
-        }
-      })
+    // `pflichtdokumente` hat KEINEN storage_path — die gespeicherte `dokument_url` ist die
+    // EINZIGE Referenz auf die Datei. Sie ist aber kein dauerhafter Zugriff: `fall-dokumente`
+    // ist ein PRIVATER Bucket, d.h. eine getPublicUrl darauf liefert HTTP 400, und mit
+    // STORAGE_USE_SIGNED_URLS=true laeuft die signierte URL nach ihrer TTL ab. Beim Rendern
+    // (DokumenteTab -> href) muss sie daher aus sich selbst heraus FRISCH signiert werden:
+    // resignStorageUrl parst Bucket+Pfad aus der URL. Nicht-Storage-URLs parsen nicht und
+    // fallen unveraendert durch (graceful).
+    const kundeRelevante: PflichtdokumentStand[] = await Promise.all(
+      pflichtRows
+        .filter((r) => {
+          const slot = r.dokument_typ ?? ''
+          const k = katalogMap.get(slot)
+          if (!k) return true
+          return k.uploadbar_von.includes('kunde')
+        })
+        .map(async (r) => {
+          const k = katalogMap.get(r.dokument_typ ?? '')
+          return {
+            id: r.id,
+            slot_id: r.dokument_typ ?? '',
+            label: k?.label ?? r.dokument_typ ?? '',
+            beschreibung: k?.beschreibung ?? null,
+            status: r.status ?? 'ausstehend',
+            pflicht: !!r.pflicht,
+            dokument_url: (await resignStorageUrl(admin, r.dokument_url)) ?? r.dokument_url ?? null,
+            hochgeladen_am: r.hochgeladen_am ?? null,
+            frist: r.frist ?? null,
+            begruendung: r.begruendung ?? null,
+            angefordert_von_rolle: r.angefordert_von_rolle ?? null,
+            angefordert_am: r.angefordert_am ?? null,
+            multi_file: false,
+            max_mb: 10,
+            akzeptierte_mime_types: [],
+            sort_order: r.sort_order ?? 999,
+            hochgeladene_anzahl: 0,
+          }
+        }),
+    )
 
     // Smart-Filter conditions: polizei_vor_ort, hat_personenschaden, etc.
     // FIX: Lead vollstaendig laden damit konditionale Katalog-Slots korrekt evaluieren
