@@ -18,6 +18,8 @@ import LexDriveCard from './_components/LexDriveCard'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
 import OutboxBadge from '@/components/offline/OutboxBadge'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
+import { SearchTriggerButton } from '@/components/shared/search/SearchTriggerButton'
 // AAR-316 W3: Sprach-Banner mit Google-Translate-Fallback
 import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
@@ -422,6 +424,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
               </div>
             </Link>
             {/* Sidebar-Fuß sitzt unten-links → Popover nach oben-rechts. */}
+            <SearchTriggerButton />
             <OutboxBadge />
             <UpdatesNav variant="dark" placement="up-right" />
           </div>
@@ -468,6 +471,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         }
         sheetTop={
           <div className="flex items-center gap-2 px-1 pb-1">
+            <SearchTriggerButton />
             <LanguageSwitcher locale={activeLocale} variant="compact" />
             <OutboxBadge />
             <UpdatesNav variant="dark" />
@@ -481,6 +485,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </form>
         }
       />
+      <GlobalSearch rolle="kunde" />
     </div>
     </>
   )
