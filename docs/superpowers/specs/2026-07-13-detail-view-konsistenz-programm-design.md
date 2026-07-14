@@ -165,14 +165,14 @@ Die 4 Files sind Boilerplate → Doku unter `docs/` + ein Skeleton-Snippet. (Ein
 | `kunde/faelle/[id]` | Claim (Kunde) | 970-Z, kein Shell | → Shell/Provider (Kunde-Linse) | P3 | — |
 | `makler/akten/[id]` | Claim (Makler) | `MaklerAkteDetail` | Facade → `getClaimDetail` | P3 | — |
 | `kanzlei/fall/[id]` | Claim (Kanzlei) | **fehlt (tot)** | **NEU** auf `FallakteShell` | P3 | — |
-| `admin/organisationen` | Organisation | NONE | **NEU** `/[id]` + Drawer + Shell | P1 | — |
-| `admin/versicherungen` | Versicherer | MODAL 512 | Modal → Route+Drawer+Shell | P1 | — |
-| `admin/partner` | Partner | NONE | **NEU** `/[id]` | P1 | — |
-| `admin/communities` | Community | NONE | **NEU** `/[id]` | P1 | — |
-| `admin/vertraege` | Vertrag | NONE | **NEU** `/[id]` | P1 | — |
-| `admin/abrechnungen` | Abrechnung | MODAL 672 | Modal → Route+Drawer | P1 | — |
-| `admin/embed-sites` | Embed-Site | NONE | **NEU** `/[id]` | P1 | — |
-| `gutachter/team` | Sub-SV | NONE | **NEU** `/[id]` | P1/P2 | — |
+| `admin/organisationen` | Organisation | NONE | **NEU** `/[id]` + Drawer + Shell | P1 | ✅ **gebaut** |
+| `admin/versicherungen` | Versicherer | MODAL 512 | Modal → Route+Drawer+Shell | P1 | ✅ **gebaut** |
+| `admin/embed-sites` | Embed-Site | NONE | **NEU** `/[id]` | P1 | ✅ **gebaut** |
+| `admin/communities` | ~~Community~~ → **Organisation** (`typ='community'`) | NONE | ~~NEU `/[id]`~~ → **auf `/admin/organisationen/[id]` drillen** (keine eigene Tabelle!) | P1 | ✅ **gebaut** |
+| ~~`admin/partner`~~ | ~~Partner~~ | — | ❌ **GESTRICHEN — keine Entität.** Hub aus 5 Tabs; `page.tsx` ist ein Re-Export von `organisationen`. Es gibt **keine `partner`-Tabelle** und keine `partner_id`-FK. | — | — |
+| ~~`admin/vertraege`~~ | ~~Vertrag~~ | — | ❌ **GESTRICHEN — keine Entität.** Der „Vertragseditor": Backing-Store ist Supabase **Storage**, die „Zeilen" sind ein `const SLOT_IDS`-Array. **Keine ID zum Routen.** | — | — |
+| `admin/abrechnungen` | Abrechnung | MODAL 672 | ⏭ **eigener PR** — s. `docs/superpowers/2026-07-14-HANDOFF-abrechnungen-konsolidierung.md` (geldkritisch + doppelte Oberfläche) | P1b | — |
+| `gutachter/team` | Sub-SV | NONE | **NEU** `/[id]` | P2 | — |
 | `admin/team/[id]` | Mitarbeiter | bespoke | → Shell | P2 | — |
 | `dispatch/sachverstaendige/[id]` | SV | kein Wrapper | → Shell | P2 | — |
 | `dispatch/gutachter-finder/[id]` | Finder-Anfrage | bespoke | → Shell | P2 | — |
