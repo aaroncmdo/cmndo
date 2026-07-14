@@ -11,6 +11,7 @@
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { uploadZb1Flow, speichereZb1KorrekturFlow } from './self-service-actions'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export type Zb1FlowExtracted = {
@@ -39,9 +40,9 @@ export function FlowZb1Upload({
   onExtracted?: (ex: Zb1FlowExtracted) => void
 }) {
   const t = useTranslations('selfService')
-  const [status, setStatus] = useState<'idle' | 'laden' | 'fertig' | 'bestaetigt' | 'fehler' | 'skip'>(
-    'idle',
-  )
+  const [status, setStatus] = useState<
+    'idle' | 'laden' | 'fertig' | 'bestaetigt' | 'fehler' | 'skip' | 'gespeichert'
+  >('idle')
   const [extracted, setExtracted] = useState<Zb1FlowExtracted | null>(null)
   const [edit, setEdit] = useState({ kennzeichen: '', fahrzeug_hersteller: '', fahrzeug_modell: '' })
   const [fehler, setFehler] = useState<string | null>(null)
@@ -55,6 +56,14 @@ export function FlowZb1Upload({
     if (!base64) {
       setStatus('fehler')
       setFehler(t('zb1.fehler_lesen'))
+      return
+    }
+    // Slice 2-write-2: offline -> Foto in die Outbox (class B). KEIN Live-OCR offline —
+    // der Replay ruft uploadZb1Flow (Server-OCR + H6-Fill der leeren Lead-Felder). Nur
+    // die synchrone Prefill-UX degradiert; das ZB1-Foto ist erfasst.
+    if (!navigator.onLine) {
+      void enqueueOp({ kind: 'flow_zb1_upload', replay_class: 'B', payload: { token, base64, contentType: file.type || 'image/jpeg' } }).catch(() => {})
+      setStatus('gespeichert')
       return
     }
     const r = await uploadZb1Flow(token, base64, file.type || 'image/jpeg')
@@ -133,6 +142,14 @@ export function FlowZb1Upload({
           data-testid="flow-zb1-bestaetigt"
         >
           <p className="font-medium">{t('zb1.uebernommen')} ✓</p>
+        </div>
+      ) : status === 'gespeichert' ? (
+        <div
+          className="rounded-ios-sm bg-success-soft border border-success/30 p-3 text-sm text-success-strong"
+          data-testid="flow-zb1-gespeichert"
+        >
+          <p className="font-medium">Foto gespeichert ✓</p>
+          <p className="text-xs mt-1">Es wird automatisch ausgelesen, sobald Sie wieder online sind.</p>
         </div>
       ) : status === 'fertig' && extracted ? (
         <div

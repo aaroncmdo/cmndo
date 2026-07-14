@@ -9,6 +9,7 @@
 import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { uploadZeugenaussageFlow } from './self-service-actions'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export function FlowZeugenaussageUpload({
@@ -36,6 +37,12 @@ export function FlowZeugenaussageUpload({
     if (!base64) {
       setStatus('fehler')
       setFehler(t('polizeibericht.fehler_lesen'))
+      return
+    }
+    // Slice 2-write-2: offline -> Outbox (class B), optimistisch bestätigt.
+    if (!navigator.onLine) {
+      void enqueueOp({ kind: 'flow_zeugenaussage_upload', replay_class: 'B', payload: { token, base64, contentType: file.type || 'image/jpeg' } }).catch(() => {})
+      setStatus('bestaetigt')
       return
     }
     const r = await uploadZeugenaussageFlow(token, base64, file.type || 'image/jpeg')

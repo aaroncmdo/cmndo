@@ -6,8 +6,12 @@
 import { offlineDB } from './db'
 import { enqueueOp, getPendingCountByKind, markOp, removeOp, resetDeadLetter as resetDeadLetterNew, recoverOutbox as recoverOutboxNew } from './enqueue'
 import type { OutboxStatus } from './ops'
+import { offlineKindLabel } from './kind-labels'
 export { offlineDB } from './db'
 export { generateUuid, MAX_RETRIES, type OutboxStatus } from './ops'
+// All-kinds Dead-Count (write-4) — bewusst getrennt vom upload-only getDeadCount unten,
+// das die Foto-Semantik von OutboxBadge/getOutboxItems spiegelt.
+export { getDeadCount as getDeadCountAll } from './enqueue'
 
 // Legacy shapes kept for consumers that render them (OutboxBadge/DeadLetterDialog).
 export interface OutboxItem {
@@ -101,6 +105,29 @@ export async function getOutboxItems(): Promise<OutboxItem[]> {
       last_error: op.last_error,
     }
   })
+}
+
+// write-4: All-Kinds-Dead-View (kind-aware Label) fürs generalisierte DeadLetterDialog.
+// Anders als getOutboxItems (upload-only, Foto-Shape) deckt das ALLE Kinds ab
+// (flow_*, werkstatt_lead_edit, gps_position, …) und ist crash-safe (kein fall_id/file_name-Zugriff).
+export interface DeadLetterView {
+  id?: number
+  kind: string
+  label: string
+  detail: string
+  retry_count: number
+  last_error?: string
+}
+export async function getDeadItemsAll(): Promise<DeadLetterView[]> {
+  const rows = await offlineDB.mutation_outbox.where('status').equals('dead').sortBy('created_at')
+  return rows.map((op) => ({
+    id: op.id,
+    kind: op.kind,
+    label: offlineKindLabel(op.kind),
+    detail: op.blob_meta?.file_name ?? '',
+    retry_count: op.retry_count,
+    last_error: op.last_error,
+  }))
 }
 
 export async function updateOutboxStatus(id: number, status: OutboxStatus, error?: string): Promise<void> {

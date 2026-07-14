@@ -6,7 +6,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getDeadCount, getPendingCount, getGpsPendingCount } from './outbox'
+import { getDeadCountAll, getPendingCount, getGpsPendingCount } from './outbox'
 import { offlineDB } from './db'
 import type { OutboxStatus } from './ops'
 
@@ -28,7 +28,7 @@ export function usePendingCount(intervalMs = 5000): PendingCounts {
         const [uploadPending, gpsPending, dead] = await Promise.all([
           getPendingCount(),
           getGpsPendingCount(),
-          getDeadCount(),
+          getDeadCountAll(),
         ])
         if (!cancelled) setCounts({ uploadPending, gpsPending, dead })
       } catch {

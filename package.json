@@ -8,6 +8,7 @@
     "build:embed:login": "node scripts/build-login-embed.mjs",
     "check:claim-table-rls": "node --env-file=.env.local scripts/check-claim-table-rls.mjs",
     "check:claim-view-rls": "node --env-file=.env.local scripts/check-claim-view-rls.mjs",
+    "check:claims-column-grants": "node --env-file=.env.local scripts/check-claims-column-grants.mjs",
     "check:component-set": "node scripts/check-component-set.mjs",
     "check:flag-drift": "node scripts/check-flag-drift.mjs",
     "check:i18n": "node scripts/i18n/check-complete.mjs",
