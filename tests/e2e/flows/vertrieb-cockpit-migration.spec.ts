@@ -264,8 +264,8 @@ test('10) Firmen-Flotten oeffnet als Drawer im Cockpit', async ({ page }) => {
   // Warten bis Cockpit bereit ist
   await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
 
-  // Firmen-Flotten ist ein globaler Einstieg — kein Pill noetig, immer sichtbar.
-  await page.getByRole('button', { name: 'Firmen-Flotten' }).first().click()
+  // 'Firmen-Flotte anlegen' — globaler Einstieg (kein Pill), oeffnet den Anlage-Drawer.
+  await page.getByRole('button', { name: 'Firmen-Flotte anlegen' }).first().click()
 
   // Drawer muss sich IM Cockpit oeffnen — PageHeader-Titel aus FirmenFlotteAdminClient.
   // exact:true trennt "Firmen-Flotten-Konten" (Drawer-Titel) vom Button "Firmen-Flotten".
@@ -275,4 +275,33 @@ test('10) Firmen-Flotten oeffnet als Drawer im Cockpit', async ({ page }) => {
   expect(page.url()).toContain('/admin/vertrieb')
 
   await page.screenshot({ path: 'test-results/vertrieb-cockpit-10-firmen-flotte.png', fullPage: true }).catch(() => {})
+})
+
+// ---------------------------------------------------------------------------
+// 11 — Firmen-Flotten als voller Partner-Typ: Pill -> Roster -> volle Akte im Cockpit.
+// ---------------------------------------------------------------------------
+test('11) Firmen-Flotten-Pill + volle Akte im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Firmen-Flotten-Pill (Rollen-Chip) aktivieren — exact:true trennt vom Button 'Firmen-Flotte anlegen'.
+  const pill = page.getByRole('button', { name: 'Firmen-Flotten', exact: true })
+  await expect(pill.first(), 'Firmen-Flotten-Pill muss existieren').toBeVisible({ timeout: 15_000 })
+  await pill.first().click()
+
+  // Falls Flotten existieren: erste Zeile -> PartnerCockpit -> Vollstaendige Akte -> Sektionen.
+  await page.waitForTimeout(2500)
+  const rows = page.locator('table tbody tr')
+  const n = await rows.count()
+  test.skip(n === 0, 'keine Firmen-Flotten im Roster — Akte-Pfad nicht testbar')
+  await rows.first().click()
+  const akteBtn = page.getByRole('button', { name: 'Vollständige Akte öffnen' })
+  await expect(akteBtn).toBeVisible({ timeout: 15_000 })
+  await akteBtn.click()
+  // Akte-Sektion im @drawer-Intercept ('Schaden-Karten' ist eindeutig zur Akte).
+  await expect(page.getByText('Schaden-Karten', { exact: false })).toBeVisible({ timeout: 30_000 })
+  expect(page.url(), 'Akte bleibt im Cockpit-Segment').toContain('/admin/vertrieb/firmen-flotte/')
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-11-firmen-flotte-akte.png', fullPage: true }).catch(() => {})
 })

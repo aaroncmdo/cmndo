@@ -78,9 +78,9 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
     setAddFehler(null)
     const res = await fuegeFahrzeugZuFlotteHinzu(firma.id, {
       kennzeichen: kennzeichen.trim(),
-      hersteller: hersteller.trim() || null,
-      modell: modell.trim() || null,
-      notiz: fzNotiz.trim() || null,
+      hersteller: hersteller.trim() || undefined,
+      modell: modell.trim() || undefined,
+      notiz: fzNotiz.trim() || undefined,
     })
     setAddBusy(false)
     if (!res.ok) return setAddFehler(res.error ?? 'Anlegen fehlgeschlagen.')

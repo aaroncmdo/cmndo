@@ -21,13 +21,13 @@ export default function FirmenFlottenCockpitEntry() {
         onClick={() => setOpen(true)}
         iconLeft={<BuildingIcon className="w-4 h-4" />}
       >
-        Firmen-Flotten
+        Firmen-Flotte anlegen
       </Button>
       <Drawer
         open={open}
         onClose={() => setOpen(false)}
         width={860}
-        ariaLabel="Firmen-Flotten verwalten"
+        ariaLabel="Firmen-Flotte anlegen"
       >
         <FirmenFlottenDrawerContent />
       </Drawer>
