@@ -13,6 +13,7 @@ export const VERTRIEB_EDIT_TARGET: Partial<
   'partner-lead': { table: 'partner_leads', columns: { notizen: 'notiz' } },
   makler: { table: 'makler', columns: { notizen: 'notizen' } },
   werkstatt: { table: 'werkstaetten', columns: { notizen: 'notizen' } },
+  'firmen-flotte': { table: 'firmen', columns: { notizen: 'notiz' } },
 }
 
 /** Loest den API-Feldnamen auf die reale DB-Spalte je kind auf (oder null, wenn nicht editierbar). */

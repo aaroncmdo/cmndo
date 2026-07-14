@@ -198,9 +198,15 @@ export async function runReparaturWorkstateChecks(
 
   // ── Check 2: keine_werkstatt_zugewiesen ─────────────────────────────────
   {
+    // #2 abrechnungsweg-Drop: claims.abrechnungsweg (Cache) wird gedroppt. Diese Reconciliation
+    // laeuft auch im Cron (Service-Kontext) und MUSS RLS bypassen (admin auf claims, alle Zeilen) —
+    // ein derived View (v_claim_workstate/full) hat claim_sichtbar_fuer_aktuellen_user (SECDEF) und
+    // kaeme im Cron leer zurueck. Daher auf die STORED szenario-Spalte filtern: der Convert setzt
+    // szenario=selbstzahler/kasko fuer Reparatur-Claims (= derselbe Marker). Via PostgREST-Alias
+    // unter dem Key 'abrechnungsweg' geliefert -> istKeineWerkstattZugewiesen + Test unveraendert.
     const { data: claims, error: claimErr } = await from('claims')
-      .select('id, operative_status, abrechnungsweg, reparatur_werkstatt_id, konvertiert_am')
-      .in('abrechnungsweg', ['selbstzahler', 'kasko'])
+      .select('id, operative_status, abrechnungsweg:szenario, reparatur_werkstatt_id, konvertiert_am')
+      .in('szenario', ['selbstzahler', 'kasko'])
       .is('reparatur_werkstatt_id', null)
 
     if (claimErr) {

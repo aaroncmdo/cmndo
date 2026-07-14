@@ -5,6 +5,15 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+// Lead x Claim x Consent — pure + unit-getestet (siehe lead-consent.ts fuer das Warum).
+import {
+  joinLeadsMitConsent,
+  type ConsentLabel,
+  type LeadBasis,
+  type ClaimRef,
+  type ConsentRef,
+  type LeadMitConsent,
+} from './lead-consent'
 // CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code/Status-Label.
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
@@ -16,14 +25,8 @@ import {
   svDisplayName,
   mergeKundeIdentity,
 } from './kontakte'
-// Gutachten-Werte kanonisch aus v_gutachten_werte (geteilt mit dem Copilot).
-import {
-  type GutachtenWerte,
-  type GutachtenWerteRow,
-  GUTACHTEN_WERTE_COLUMNS,
-  EMPTY_GUTACHTEN_WERTE,
-  mapGutachtenWerte,
-} from './gutachten-werte'
+// Gutachten-Werte direkt aus dem Claim-View (seit #4159 fuer Makler ungegatet — s. Mapper-Doku).
+import { type GutachtenWerte, mapGutachtenWerteAusClaimView } from './gutachten-werte'
 
 export type MaklerRow = {
   id: string
@@ -53,64 +56,21 @@ export async function getCurrentMakler(): Promise<MaklerRow | null> {
 // AAR-485 (M3) — Leads mit Consent-Status
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type ConsentLabel = 'kein_account' | 'minimal' | 'vollzugriff' | 'widerrufen'
-
-export type MaklerLeadRow = {
-  id: string
-  vorname: string | null
-  nachname: string | null
-  fahrzeug_hersteller: string | null
-  fahrzeug_modell: string | null
-  unfalldatum: string | null
-  status: string
-  created_at: string
-  disqualifiziert: boolean | null
-  fall_id: string | null
-  fall_service_typ: string | null
-  consent_label: ConsentLabel
-}
-
-type LeadRowRaw = {
-  id: string
-  vorname: string | null
-  nachname: string | null
-  fahrzeug_hersteller: string | null
-  fahrzeug_modell: string | null
-  unfalldatum: string | null
-  status: string
-  created_at: string
-  disqualifiziert: boolean | null
-  // CMM-44 SP-B PR2a: service_typ liegt im verschachtelten claims-Embed (SSoT).
-  fall:
-    | {
-        id: string
-        claims:
-          | { service_typ: string | null }[]
-          | { service_typ: string | null }
-          | null
-        makler_consent:
-          | { consent_scope: string; widerrufen_am: string | null }[]
-          | { consent_scope: string; widerrufen_am: string | null }
-          | null
-      }[]
-    | {
-        id: string
-        claims:
-          | { service_typ: string | null }[]
-          | { service_typ: string | null }
-          | null
-        makler_consent:
-          | { consent_scope: string; widerrufen_am: string | null }[]
-          | { consent_scope: string; widerrufen_am: string | null }
-          | null
-      }
-    | null
-}
+// SSoT der Typen ist ./lead-consent (dort liegt auch der Join) — hier nur re-exportiert,
+// damit die Consumer (MaklerLeadsTable) ihre Imports behalten.
+export type { ConsentLabel }
+export type MaklerLeadRow = LeadMitConsent
 
 /**
- * AAR-485: Leads des Maklers + verknüpfte Fall + makler_fall_consent Scope.
- * Supabase Cardinality kann Arrays oder Objects zurückgeben — beides
- * normalisieren.
+ * AAR-485: Leads des Maklers + verknüpfter Fall + makler_fall_consent-Scope.
+ *
+ * Prod-Fix 14.07.: der frühere Embed `leads -> faelle_claim_bridge -> claims` lieferte
+ * HTTP 300 (PGRST201) — `claim_id` ist als Embed-Ziel mehrdeutig, seit
+ * partner_provisionen per FK ebenfalls auf faelle_claim_bridge(claim_id) zeigt
+ * (Migration 20260708071538). Der Fehler wurde verschluckt (`const { data }`) ->
+ * die Lead-Liste war für JEDEN Makler dauerhaft leer. Ausserdem hätte der Embed
+ * ohnehin nie aufgelöst: die Bridge hat gar keinen Lead-Bezug.
+ * Daher: drei getrennte Reads + Join in JS (siehe ./lead-consent).
  */
 export async function getMaklerLeadsWithConsent(maklerId: string): Promise<MaklerLeadRow[]> {
   const supabase = await createClient()
@@ -122,59 +82,42 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
   const promoIds = (promoRows ?? []).map((p) => p.id)
   if (promoIds.length === 0) return []
 
-  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — doppelt-genesteter
-  // Embed leads -> faelle -> claims (PostgREST kann das).
-  const { data } = await supabase
+  const { data: leadRows, error: leadsErr } = await supabase
     .from('leads')
-    .select(`
-      id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell,
-      unfalldatum, status, created_at, disqualifiziert,
-      fall:faelle_claim_bridge(
-        id:fall_id,
-        claims:claim_id(service_typ),
-        makler_consent:makler_fall_consent(consent_scope, widerrufen_am)
-      )
-    `)
+    .select(
+      'id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell, unfalldatum, status, created_at, disqualifiziert',
+    )
     .in('promotion_code_id', promoIds)
     .order('created_at', { ascending: false })
+  if (leadsErr) {
+    console.error('[getMaklerLeadsWithConsent] leads:', leadsErr.message)
+    return []
+  }
+  const leads = (leadRows ?? []) as LeadBasis[]
+  if (leads.length === 0) return []
 
-  return ((data ?? []) as LeadRowRaw[]).map((lead) => {
-    const fall = Array.isArray(lead.fall) ? lead.fall[0] : lead.fall
-    const rawConsent = fall?.makler_consent
-    const consent = rawConsent
-      ? Array.isArray(rawConsent)
-        ? rawConsent[0]
-        : rawConsent
-      : null
-    // CMM-44 SP-B PR2a: claims-Embed normalisieren (Array|Objekt je Cardinality).
-    const fallClaim = fall
-      ? Array.isArray(fall.claims)
-        ? fall.claims[0]
-        : fall.claims
-      : null
+  // lead -> claim: `claims` ist für den Makler RLS-gesperrt (live verifiziert: 0 Zeilen), daher
+  // Admin-Client — aber strikt gescoped auf die Leads der EIGENEN Promo-Codes (kein Fremdzugriff)
+  // und nur ids/service_typ. Der Consent bleibt auf dem USER-Client: RLS bleibt das Gate.
+  const admin = createAdminClient()
+  const [claimsRes, consentsRes] = await Promise.all([
+    admin
+      .from('claims')
+      .select('id, lead_id, service_typ')
+      .in('lead_id', leads.map((l) => l.id)),
+    supabase
+      .from('makler_fall_consent')
+      .select('claim_id, fall_id, consent_scope, widerrufen_am')
+      .eq('makler_id', maklerId),
+  ])
+  if (claimsRes.error) console.error('[getMaklerLeadsWithConsent] claims:', claimsRes.error.message)
+  if (consentsRes.error) console.error('[getMaklerLeadsWithConsent] consents:', consentsRes.error.message)
 
-    let consent_label: ConsentLabel = 'kein_account'
-    if (!fall) consent_label = 'kein_account'
-    else if (consent?.widerrufen_am) consent_label = 'widerrufen'
-    else if (consent?.consent_scope === 'minimal') consent_label = 'minimal'
-    else if (consent?.consent_scope === 'vollzugriff') consent_label = 'vollzugriff'
-
-    return {
-      id: lead.id,
-      vorname: lead.vorname,
-      nachname: lead.nachname,
-      fahrzeug_hersteller: lead.fahrzeug_hersteller,
-      fahrzeug_modell: lead.fahrzeug_modell,
-      unfalldatum: lead.unfalldatum,
-      status: lead.status,
-      created_at: lead.created_at,
-      disqualifiziert: lead.disqualifiziert,
-      fall_id: fall?.id ?? null,
-      // CMM-44 SP-B PR2a: service_typ aus dem claims-Embed (SSoT).
-      fall_service_typ: (fallClaim?.service_typ as string | null) ?? null,
-      consent_label,
-    }
-  })
+  return joinLeadsMitConsent(
+    leads,
+    (claimsRes.data ?? []) as ClaimRef[],
+    (consentsRes.data ?? []) as ConsentRef[],
+  )
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -314,7 +257,9 @@ export async function getMaklerFallDetail(
   const full = consent.consent_scope === 'vollzugriff'
   let kunde: FallDetailKunde | null = null
   let kontakte: MaklerFallKontakte = { kundenbetreuer: null, sv: null, kanzlei: null }
-  let gutachtenWerte: GutachtenWerte = EMPTY_GUTACHTEN_WERTE
+  // Gutachten-Werte kommen aus dem bereits gelesenen View-Row — kein zweiter (service-role-)Read
+  // mehr noetig, seit #4159 das rolle_sieht_gutachtenwerte()-Gate entfernt hat (live verifiziert).
+  const gutachtenWerte: GutachtenWerte = mapGutachtenWerteAusClaimView(fallRow)
 
   if (detailClaimId) {
     const admin = createAdminClient()
@@ -330,8 +275,8 @@ export async function getMaklerFallDetail(
     const kbId = (fallRow.kundenbetreuer_id as string | null) ?? null
     const svId = (fallRow.sv_id as string | null) ?? null
 
-    // Kunde-Profil, Lead (Fallback), KB-Profil, SV-Row und Gutachten-Werte parallel.
-    const [kProfilRes, leadRes, kbRes, svRowRes, gwRes] = await Promise.all([
+    // Kunde-Profil, Lead (Fallback), KB-Profil und SV-Row parallel.
+    const [kProfilRes, leadRes, kbRes, svRowRes] = await Promise.all([
       geschaedigterId
         ? admin.from('profiles').select('id, vorname, nachname, email, telefon, adresse, plz, ort').eq('id', geschaedigterId).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -344,13 +289,7 @@ export async function getMaklerFallDetail(
       svId
         ? admin.from('sachverstaendige').select('profile_id, verifiziert').eq('id', svId).maybeSingle()
         : Promise.resolve({ data: null }),
-      // Gutachten-Werte aus der kanonischen Entity (claim_id-keyed). Die v_claim_base-Spalten
-      // reparaturkosten/wertminderung sind fuer Makler rolle-gegatet -> hier ungated via admin.
-      admin.from('v_gutachten_werte').select(GUTACHTEN_WERTE_COLUMNS).eq('claim_id', detailClaimId).maybeSingle(),
     ])
-
-    // F3-Fix (Audit 2026-07-11): kanonische Gutachten-Werte (wie der Copilot) — konsistent + korrekt.
-    gutachtenWerte = mapGutachtenWerte(gwRes.data as GutachtenWerteRow)
 
     // Kunde: Profil bevorzugt, Lead-Fallback (Feld-Audit-Fix — Detail == Liste). full -> Kontakt.
     kunde = mergeKundeIdentity(
@@ -435,8 +374,7 @@ export async function getMaklerFallDetail(
     consent_scope: consent.consent_scope,
     fall: {
       ...(fall as Record<string, unknown>),
-      // F3-Fix: Gutachten-Werte aus v_gutachten_werte ueberschreiben die fuer Makler
-      // rolle-gegateten / toten v_claim_base-Spalten (reparaturkosten/wertminderung/etc.).
+      // Gutachten-Werte numerisch normalisiert (der View liefert numeric teils als String).
       ...gutachtenWerte,
       mainPhase: phaseCell?.mainPhase ?? 'erfassung',
       subPhase: phaseCell?.subPhase ?? 'sa_offen',
@@ -813,7 +751,7 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       .select(`
         id, betrag_netto_eur, status, trigger_at, fall_id,
         fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
-          claims:claim_id(
+          claims:claims!fk_bridge_claim(
             leads:lead_id(vorname, nachname),
             kunde:geschaedigter_user_id(vorname, nachname)
           )
@@ -1008,7 +946,7 @@ export async function getMaklerAbrechnungsData(
         trigger_at, hold_until, storniert_am, storno_grund,
         fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
           id:fall_id,
-          claims:claim_id(
+          claims:claims!fk_bridge_claim(
             claim_nummer,
             leads:lead_id(vorname, nachname),
             kunde:geschaedigter_user_id(vorname, nachname)
@@ -1021,6 +959,10 @@ export async function getMaklerAbrechnungsData(
       .order('trigger_at', { ascending: false, nullsFirst: false })
       .limit(200),
   ])
+
+  // Fehler NICHT verschlucken: genau das hat den PGRST201-Bruch (s.o.) 6 Tage lang versteckt —
+  // die Tabelle war leer, die KPI-Summen darüber zeigten trotzdem Betraege.
+  if (rowsRes.error) console.error('[getMaklerAbrechnungsData] provisionen:', rowsRes.error.message)
 
   const provisionen: MaklerProvisionRow[] = (rowsRes.data ?? []).map((row) => {
     const fallRaw = (row as { fall?: unknown }).fall
@@ -1363,7 +1305,7 @@ export async function getMaklerAktiveConsents(
       id, consent_scope, consent_gegeben_am,
       fall:faelle_claim_bridge!makler_fall_consent_fall_id_fkey(
         id:fall_id,
-        claims:claim_id(
+        claims:claims!fk_bridge_claim(
           claim_nummer,
           leads:lead_id(vorname, nachname),
           kunde:geschaedigter_user_id(vorname, nachname)
@@ -1503,7 +1445,7 @@ export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRec
     .select(`
       id, betrag_netto_eur, trigger_at,
       fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
-        claims:claim_id(
+        claims:claims!fk_bridge_claim(
           claim_nummer,
           leads:lead_id(vorname, nachname),
           kunde:geschaedigter_user_id(vorname, nachname)

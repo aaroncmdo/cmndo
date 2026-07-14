@@ -17,7 +17,7 @@ const TOOL: Anthropic.Tool = {
     type: 'object',
     required: ['hook', 'segmente', 'caption', 'hashtags'],
     properties: {
-      hook: { type: 'string', description: 'Aufmerksamkeits-Hook, 1 Satz.' },
+      hook: { type: 'string', description: 'Der Hook-Satz - identisch zum Text des ERSTEN Segments (wird zuerst gesprochen).' },
       segmente: {
         type: 'array',
         minItems: 3,
@@ -43,21 +43,31 @@ const TOOL: Anthropic.Tool = {
       caption: { type: 'string' },
       hashtags: { type: 'array', items: { type: 'string' } },
       disclaimer: { type: 'string' },
+      musik_stimmung: {
+        type: 'string',
+        enum: ['ruhig', 'dringlich', 'aufbauend', 'serioes'],
+        description: 'Stimmung des Hintergrund-Musikbetts, passend zum Clip (ruhig=informativ, dringlich=Warnung/Zeitdruck, aufbauend=Loesung/Hoffnung, serioes=sachlich).',
+      },
     },
   },
 }
 
 const SYSTEM = `Du schreibst deutsche Kurzvideo-Skripte fuer Claimondo (KFZ-Gutachter / Unfallschaden-Abwicklung).
+Aufbau (Pflicht):
+- Das ERSTE Segment ist der Hook: ein Scroll-Stopper fuer die ersten 2 Sekunden (Frage oder starke, konkrete Aussage), der genau dieses Video verspricht. Er wird zuerst gesprochen; das Feld "hook" wiederholt exakt diesen Satz.
+- Mittelteil: 2-4 Segmente, je GENAU EINE Aussage bzw. ein Tipp, 6-14 Woerter, punchy - keine Schachtelsaetze (die Captions zeigen immer nur eine kurze Phrase).
+- Das LETZTE Segment schliesst ab - die Format-Vorgabe dazu steht in der Nutzer-Nachricht.
 Regeln:
-- Ziel-Dauer 30-60s: 3-6 kurze, gesprochene Saetze.
+- Ziel-Dauer 30-60s: insgesamt 3-6 gesprochene Saetze.
 - ECHTE deutsche Umlaute: alle Texte (text, on_screen_text, caption, hashtags) IMMER mit ä/ö/ü/ß, NIEMALS ae/oe/ue/ss. Richtig: "Schäden", "größeren", "unabhängiger", "Überblick". Pflicht - auch fuer die gesprochenen Saetze (sonst spricht die Stimme falsch).
 - KEINE Rechtsberatung. Bei Versicherungs-/Rechtsthemen vorsichtig-allgemein formulieren + kurzen Disclaimer setzen.
-- Vertrauensvoller, klarer Ton (kein Clickbait-Trash).
+- Ton: vertrauensvoll und klar (kein Clickbait-Trash) - der Hook darf zuspitzen, der Rest bleibt serioes.
 - Visual-Plan pro Segment - BEVORZUGE 'stock', fast alles laesst sich bebildern:
   * typ 'stock' + 3 konkrete ENGLISCHE, visuell eindeutige queries. Bsp: "Unfallstelle sichern" -> ["hazard warning triangle on road","car hazard lights flashing","breakdown roadside safety"]; "Fotos machen" -> ["person photographing car damage with smartphone","documenting car accident on phone"].
   * typ 'grafik' NUR fuer voellig abstrakte Begriffe ohne moegliches Bild (Frist, Prozent, Anspruch).
   * typ 'marke' fuer ikonisch/gebrandet (Warndreieck, Kennzeichen, Logo) mit tags.
-- on_screen_text: knackiges Overlay, max 5 Woerter, mit echten Umlauten.`
+- on_screen_text: knackiges Overlay, max 5 Woerter, echte Umlaute - eine VERSTAERKUNG, nicht wortgleich zum gesprochenen Satz.
+- musik_stimmung: waehle die zum Clip passende Stimmung fuers leise Hintergrund-Bett (ruhig / dringlich / aufbauend / serioes).`
 
 export async function generiereSkript(
   thema: string,
@@ -67,8 +77,8 @@ export async function generiereSkript(
   const anthropic = client ?? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const modus =
     format === 'ad'
-      ? 'Werbeclip mit klarem Call-to-Action am Ende.'
-      : 'Ratgeber-Clip, aufklaerend, Mehrwert zuerst.'
+      ? 'Werbeclip. Bogen: Hook (Problem/Schmerzpunkt) -> warum das teuer oder riskant wird -> wie Claimondo es loest. LETZTES Segment = klarer Call-to-Action (z.B. "Jetzt kostenlos pruefen lassen").'
+      : 'Ratgeber-Clip, aufklaerend, Mehrwert zuerst. Bogen: Hook (Frage oder haeufiger Fehler) -> 2-3 konkrete Schritte/Tipps. LETZTES Segment = praegnantes Fazit. Kein harter Verkauf.'
   const res = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 1500,

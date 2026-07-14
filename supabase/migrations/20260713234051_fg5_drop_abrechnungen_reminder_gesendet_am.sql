@@ -1,0 +1,13 @@
+-- FG5 C5d: drop the derivable-duplicate column abrechnungen.reminder_gesendet_am.
+--
+-- Reader-first (AAR-599 landmine avoided): the sole reader was repointed to
+-- abrechnung_reminders(versendet_am) via letzterReminderAm() and the reminder-cron
+-- stopped writing this column (FG5 C5, PR #4191 -> staging -> main, on prod).
+-- Pre-drop verification on origin/main: 0 runtime SELECTs of abrechnungen.reminder_gesendet_am
+-- remain (only a derived-prop assignment from the new source, comments, client render of that
+-- derived prop, and generated types in database.types.ts which do not execute). The unrelated
+-- column gutachter_termine.sv_termin_dokument_reminder_gesendet_am is untouched.
+--
+-- Applied to prod via apply_migration (Regel 2); this file carries the tracked version
+-- 20260713234051 so a future db reset replays identical DDL (no Twin-Drift).
+ALTER TABLE public.abrechnungen DROP COLUMN IF EXISTS reminder_gesendet_am;

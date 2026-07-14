@@ -41,7 +41,8 @@ export async function GET(
   // Alle SSoT; lead_id/sv_id/mandatsnummer div=0 vs faelle live verifiziert; status->operative_status SSoT.
   const { data: fall } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id(claim_nummer, lead_id, sv_id, operative_status, gutachten(gesamt_schadensbetrag, fertiggestellt_am), kanzlei_faelle(mandatsnummer))')
+    // FK-Hint Pflicht (PGRST201, s. Mig 20260708071538) — sonst HTTP 300 statt Fall-Daten.
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim(claim_nummer, lead_id, sv_id, operative_status, gutachten(gesamt_schadensbetrag, fertiggestellt_am), kanzlei_faelle(mandatsnummer))')
     .eq('fall_id', id)
     .maybeSingle()
 
