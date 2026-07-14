@@ -108,6 +108,8 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(res).toMatchObject({ ok: true, gesendet: true, empfaenger: 'sachschaden@allianz.de' })
     expect(sent).toHaveLength(1)
     expect(sent[0].to).toBe('sachschaden@allianz.de')
+    // Idempotency-Key gegen Doppelversand bei Resend-Retry-Race:
+    expect(sent[0].idempotencyKey).toBe('vs_meldung:c1')
 
     expect(korrespondenz).toHaveLength(1)
     const k = korrespondenz[0]
@@ -118,21 +120,24 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(k.versicherung_id).toBe('v1')
   })
 
-  it('haengt Schadenfotos an — mit Dateiendung, weil der Resend-Pfad contentType droppt', async () => {
+  it('haengt Schadenfotos an und ERGAENZT die fehlende Endung (Produktion: <typ>_upload)', async () => {
+    // gegner-dokumente.ts schreibt original_filename IMMER als "<typ>_upload" — ohne Endung.
+    // Der Resend-Pfad droppt contentType und leitet den MIME aus dem Namen ab -> ohne
+    // Endung kommen die Fotos als octet-stream an und sind nicht anzeigbar.
     state.dokumente = [
       {
         id: 'd1',
         dokument_typ: 'gegner_fahrzeug_foto',
         storage_path: 'claims/c1/a.jpg',
-        original_filename: 'a.jpg',
+        original_filename: 'gegner_fahrzeug_foto_upload',
         mime_type: 'image/jpeg',
       },
       {
         id: 'd2',
         dokument_typ: 'unfallort_foto',
-        storage_path: 'claims/c1/b.jpg',
-        original_filename: 'b.jpg',
-        mime_type: 'image/jpeg',
+        storage_path: 'claims/c1/b.png',
+        original_filename: 'unfallort_foto_upload',
+        mime_type: 'image/png',
       },
     ]
     const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
@@ -141,7 +146,8 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(res).toMatchObject({ gesendet: true, anhaenge: 2 })
     const att = sent[0].attachments as Array<{ filename: string; contentType?: string }>
     expect(att).toHaveLength(2)
-    expect(att[0].filename).toMatch(/\.jpg$/)
+    expect(att[0].filename).toBe('gegner_fahrzeug_foto_upload.jpg') // jpeg -> jpg
+    expect(att[1].filename).toBe('unfallort_foto_upload.png')
     expect(att[0].contentType).toBe('image/jpeg')
   })
 
@@ -185,6 +191,24 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(String(korrespondenz[0].notiz)).toContain('sachschaden@allianz.de')
   })
 
+  it('KILL-SWITCH: leerer Wert zaehlt als AUS (kopierte .env darf nicht senden)', async () => {
+    process.env.VS_MELDUNG_ENABLED = '' // leer, nicht 'false'
+    const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
+    const res = await sendeUnfallmeldungAnGegnerVs('c1')
+
+    expect(res).toMatchObject({ gesendet: false, grund: 'kill_switch' })
+    expect(sent).toHaveLength(0)
+  })
+
+  it('KILL-SWITCH: gross geschriebenes/verschmutztes FALSE zaehlt als AUS', async () => {
+    process.env.VS_MELDUNG_ENABLED = '  False '
+    const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
+    const res = await sendeUnfallmeldungAnGegnerVs('c1')
+
+    expect(res).toMatchObject({ gesendet: false, grund: 'kill_switch' })
+    expect(sent).toHaveLength(0)
+  })
+
   it('keine Versicherung -> Dispatch-Task, kein Send', async () => {
     state.empfaenger = { kann: false, grund: 'keine_versicherung' }
     const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
@@ -215,12 +239,33 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(korrespondenz).toHaveLength(0) // nichts als "gesendet" protokollieren, was nie ankam
   })
 
-  it('unbekannter Claim -> Fehler, kein Send', async () => {
+  it('unbekannter/unladbarer Claim -> Fehler + Dispatch-Task, kein Send', async () => {
     state.claimVorhanden = false
     const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
     const res = await sendeUnfallmeldungAnGegnerVs('gibts-nicht')
 
     expect(res).toEqual({ ok: false, error: 'Claim nicht gefunden' })
     expect(sent).toHaveLength(0)
+    // Der Aufrufer hat den CAS bereits gewonnen -> ohne Task versandet der Claim still:
+    expect(tasks[0]).toMatchObject({ claimId: 'gibts-nicht', grund: 'send_fehler' })
+  })
+})
+
+describe('anhangDateiname', () => {
+  it('ergaenzt die aus dem MIME abgeleitete Endung, wenn keine da ist', async () => {
+    const { anhangDateiname } = await import('../sende-unfallmeldung')
+    expect(anhangDateiname('gegner_fahrzeug_foto_upload', 'gegner_fahrzeug_foto', 'image/jpeg')).toBe('gegner_fahrzeug_foto_upload.jpg')
+    expect(anhangDateiname('x_upload', 'x', 'image/png')).toBe('x_upload.png')
+    expect(anhangDateiname('x_upload', 'x', 'image/webp')).toBe('x_upload.webp')
+  })
+
+  it('laesst eine bereits vorhandene Endung unveraendert', async () => {
+    const { anhangDateiname } = await import('../sende-unfallmeldung')
+    expect(anhangDateiname('foto.jpeg', 'x', 'image/jpeg')).toBe('foto.jpeg')
+  })
+
+  it('faellt bei unbekanntem/fehlendem MIME auf jpg zurueck', async () => {
+    const { anhangDateiname } = await import('../sende-unfallmeldung')
+    expect(anhangDateiname(null, 'gegner_fahrzeug_foto', null)).toBe('gegner_fahrzeug_foto.jpg')
   })
 })

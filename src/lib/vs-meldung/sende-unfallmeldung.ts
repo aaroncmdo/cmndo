@@ -24,11 +24,35 @@ export type SendeErgebnis =
   | { ok: true; gesendet: false; grund: 'kill_switch' | 'dispatch_task' }
   | { ok: false; error: string }
 
+// Grosszuegig ausgelegt: zwischen staging und einer echten Versicherer-Mail darf nicht
+// eine einzige exakte Zeichenkette stehen. Ein leerer Wert (kopierte .env) zaehlt als AUS.
 function sendAktiv(): boolean {
-  return (process.env.VS_MELDUNG_ENABLED ?? 'true') !== 'false'
+  const v = (process.env.VS_MELDUNG_ENABLED ?? 'true').trim().toLowerCase()
+  return !(v === '' || v === 'false' || v === '0' || v === 'off' || v === 'no')
 }
 
 type Anhang = { filename: string; content: Buffer; contentType?: string }
+
+const MIME_ENDUNG: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'application/pdf': 'pdf',
+}
+
+/**
+ * Der Resend-Pfad in sendEmail (client.ts:140) reicht contentType NICHT durch und leitet
+ * den MIME-Typ aus dem Dateinamen ab. Der Upload speichert original_filename aber immer als
+ * "<typ>_upload" — ohne Endung (gegner-dokumente.ts:123). Ohne die Endung kommen die Fotos
+ * beim Versicherer als application/octet-stream an und sind nicht anzeigbar.
+ */
+export function anhangDateiname(basis: string | null, dokumentTyp: string, mimeType: string | null): string {
+  const name = basis?.trim() || dokumentTyp
+  if (/\.[a-z0-9]{2,4}$/i.test(name)) return name
+  const endung = MIME_ENDUNG[(mimeType ?? '').toLowerCase()] ?? 'jpg'
+  return `${name}.${endung}`
+}
 
 async function ladeFotoAnhaenge(claimId: string): Promise<Anhang[]> {
   const admin = createAdminClient()
@@ -64,9 +88,7 @@ async function ladeFotoAnhaenge(claimId: string): Promise<Anhang[]> {
       }
       summe += buf.byteLength
       anhaenge.push({
-        // Der Dateiname MUSS die Endung tragen: der Resend-Pfad in sendEmail reicht
-        // contentType nicht durch (client.ts:140) und leitet den MIME-Typ aus dem Namen ab.
-        filename: (d.original_filename as string) ?? `${d.dokument_typ}-${d.id}.jpg`,
+        filename: anhangDateiname(d.original_filename as string | null, d.dokument_typ as string, d.mime_type as string | null),
         content: buf,
         contentType: (d.mime_type as string) ?? 'image/jpeg',
       })
@@ -111,7 +133,14 @@ async function protokolliere(
  */
 export async function sendeUnfallmeldungAnGegnerVs(claimId: string): Promise<SendeErgebnis> {
   const daten = await ladeVsMeldungDaten(claimId)
-  if (!daten) return { ok: false, error: 'Claim nicht gefunden' }
+  if (!daten) {
+    // ladeVsMeldungDaten liefert null nicht nur bei "gibt's nicht", sondern bei JEDEM
+    // DB-Fehler (inkl. kaputter Parteien-Query). Der Aufrufer hat den CAS bereits gewonnen
+    // -> responded_at ist gesetzt -> der Nachfass-Cron greift den Invite NIE mehr auf.
+    // Ohne diesen Task wuerde der Claim also still nie gemeldet. -> Mensch uebernimmt.
+    await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: 'Claim-/Parteien-Daten nicht ladbar' })
+    return { ok: false, error: 'Claim nicht gefunden' }
+  }
 
   const empfaenger = await resolveVsEmpfaenger(daten.gegnerVersicherungId)
 
@@ -150,6 +179,10 @@ export async function sendeUnfallmeldungAnGegnerVs(claimId: string): Promise<Sen
       attachments: anhaenge.length > 0 ? anhaenge : undefined,
       fallId: claimId,
       template: 'unfallmeldung_vs',
+      // Schuetzt gegen den zweiten Send, falls Resend nach Annahme timeoutet und die
+      // 3x-Retry-Schleife erneut feuert — eine Dublette an einen Versicherer ist nicht
+      // zurueckholbar. Der CAS des Aufrufers schuetzt nur VOR dieser Funktion.
+      idempotencyKey: `vs_meldung:${claimId}`,
     })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)

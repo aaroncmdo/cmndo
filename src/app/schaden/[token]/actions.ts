@@ -14,6 +14,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { inviteGegnerViaAirdrop } from '@/lib/airdrop/gegner-invite'
 import { erstelleVsDispatchTask } from '@/lib/vs-meldung/dispatch-task'
+import { normalizeE164 } from '@/lib/whatsapp/send-sms-plain'
+import { findRecentGegnerLead } from '@/lib/api-v1/recent-lead-dedup'
 import { createLead } from '@/lib/leads/create-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import {
@@ -70,7 +72,10 @@ export async function submitSchadenGegner(
   // 'schaden-karte' — die MCP-Variante filtert auf telefon/'mcp' und greift hier NICHT)
   // + globaler Circuit-Breaker. Scharf, weil dieser Endpunkt oeffentlich + unauthentifiziert
   // ist UND (Slice 2c) eine SMS an eine frei waehlbare Nummer ausloest.
-  const telefon = data.telefon?.trim()
+  // WICHTIG: auf E.164 normalisieren BEVOR wir cappen UND speichern — sonst umgeht ein
+  // Angreifer den Cap trivial ueber Format-Varianten derselben Nummer (0170.../+49170...
+  // /"0170 ..."), die alle zu getrennten Count-Buckets werden, aber dieselbe SMS ausloesen.
+  const telefon = data.telefon?.trim() ? normalizeE164(data.telefon.trim()) : undefined
   if (telefon && (await gegnerPhoneWriteCapExceeded(telefon))) {
     return {
       ok: false,
@@ -81,6 +86,18 @@ export async function submitSchadenGegner(
     return {
       ok: false,
       error: 'Der Dienst ist aktuell stark ausgelastet. Bitte in einigen Minuten erneut versuchen.',
+    }
+  }
+
+  // 3c. Doppel-Submit-Dedup: der Submit-Button ist gegen Doppelklick geschuetzt, NICHT gegen
+  //   Reload+Resubmit. Ohne diesen Guard entstuende ein zweiter Claim -> eine zweite
+  //   Unfallmeldung an denselben Versicherer fuer denselben Unfall. Ein frischer Lead
+  //   (gleiche Nummer, gleiches Fahrzeug, < 10 min) gilt als derselbe Vorgang -> idempotent
+  //   zurueckgeben, KEIN neuer Claim, KEIN zweiter Invite.
+  if (telefon) {
+    const dup = await findRecentGegnerLead(ctx.context.fahrzeugId, telefon)
+    if (dup) {
+      return { ok: true, leadId: dup.leadId, vehicleId: ctx.context.fahrzeugId, claimId: dup.claimId ?? undefined }
     }
   }
 
@@ -110,7 +127,7 @@ export async function submitSchadenGegner(
       //   Wichtig fuer Task C (VS-Meldung braucht eine identifizierte geschaedigte Seite).
       gewerbe_flag: true,
       gegner_name: data.name.trim(),
-      gegner_telefon: data.telefon || null,
+      gegner_telefon: telefon ?? null,
       gegner_email: data.email || null,
       gegner_kennzeichen: data.kennzeichen || null,
       gegner_fahrzeugtyp: data.fahrzeugtyp || null,
@@ -190,9 +207,10 @@ export async function submitSchadenGegner(
   //    Fail-soft wie der Convert darueber: ein Fehler hier darf den Gegner-Submit nie brechen.
   if (claimId) {
     try {
-      const gegnerTelefon = data.telefon?.trim()
-      if (gegnerTelefon) {
-        const invite = await inviteGegnerViaAirdrop(claimId, gegnerTelefon)
+      // telefon ist hier bereits E.164-normalisiert (s.o.) — inviteGegnerViaAirdrop
+      // normalisiert idempotent nochmal, aber wir uebergeben den kanonischen Wert.
+      if (telefon) {
+        const invite = await inviteGegnerViaAirdrop(claimId, telefon)
         if (!invite.ok) {
           await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: invite.error })
         }

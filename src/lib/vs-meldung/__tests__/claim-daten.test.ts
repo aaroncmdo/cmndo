@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const db = {
   claim: null as Record<string, unknown> | null,
   parties: [] as Array<Record<string, unknown>>,
+  partiesError: null as { message: string } | null,
 }
 
 vi.mock('@/lib/supabase/admin', () => ({
@@ -18,7 +19,7 @@ vi.mock('@/lib/supabase/admin', () => ({
       // claim_parties: .select(...).eq(...) ist direkt awaitable (Liste)
       return {
         select: () => ({
-          eq: async () => ({ data: db.parties, error: null }),
+          eq: async () => ({ data: db.parties, error: db.partiesError }),
         }),
       }
     },
@@ -28,6 +29,7 @@ vi.mock('@/lib/supabase/admin', () => ({
 beforeEach(() => {
   db.claim = null
   db.parties = []
+  db.partiesError = null
 })
 
 describe('ladeVsMeldungDaten', () => {
@@ -39,12 +41,13 @@ describe('ladeVsMeldungDaten', () => {
       hergang_kunde_text: 'Gegner fuhr auf.',
       gegner_versicherung_id: 'v1',
     }
+    // ECHTE Spaltennamen: vehicles hat modell_haupttyp (kein 'modell') + kennzeichen_aktuell.
     db.parties = [
       {
         rolle: 'geschaedigter',
         kennzeichen: 'B-FL 202',
         firmen: { name: 'Test-Flotte GmbH' },
-        vehicles: { hersteller: 'BMW', modell: '320d' },
+        vehicles: { hersteller: 'BMW', modell_haupttyp: '320d', kennzeichen_aktuell: 'B-FL 202' },
       },
       {
         rolle: 'verursacher',
@@ -74,7 +77,7 @@ describe('ladeVsMeldungDaten', () => {
   it('normalisiert eingebettete Relationen, die als Array kommen (Supabase-Cardinality)', async () => {
     db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
     db.parties = [
-      { rolle: 'geschaedigter', firmen: [{ name: 'Array-Firma GmbH' }], vehicles: [{ hersteller: 'VW', modell: 'Golf' }] },
+      { rolle: 'geschaedigter', firmen: [{ name: 'Array-Firma GmbH' }], vehicles: [{ hersteller: 'VW', modell_haupttyp: 'Golf' }] },
       { rolle: 'verursacher', personen: [{ vorname: 'Erika', nachname: 'Musterfrau' }] },
     ]
 
@@ -88,11 +91,29 @@ describe('ladeVsMeldungDaten', () => {
 
   it('Platzhalter-Hersteller "Unbekannt" wird nicht als Fahrzeugname ausgegeben', async () => {
     db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
-    db.parties = [{ rolle: 'geschaedigter', vehicles: { hersteller: 'Unbekannt', modell: null } }]
+    db.parties = [{ rolle: 'geschaedigter', vehicles: { hersteller: 'Unbekannt', modell_haupttyp: null } }]
 
     const { ladeVsMeldungDaten } = await import('../claim-daten')
     const d = await ladeVsMeldungDaten('c1')
     expect(d!.geschaedigt.fahrzeug).toBeNull()
+  })
+
+  it('nutzt kennzeichen_aktuell des Fahrzeugs, wenn claim_parties.kennzeichen NULL ist', async () => {
+    db.claim = { id: 'c1', claim_nummer: null, unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: null }
+    db.parties = [{ rolle: 'geschaedigter', kennzeichen: null, vehicles: { kennzeichen_aktuell: 'B-FL 202' } }]
+
+    const { ladeVsMeldungDaten } = await import('../claim-daten')
+    const d = await ladeVsMeldungDaten('c1')
+    expect(d!.geschaedigt.kennzeichen).toBe('B-FL 202')
+  })
+
+  it('bei einem Parteien-Query-Fehler -> null (NIE mit leeren Parteien senden)', async () => {
+    db.claim = { id: 'c1', claim_nummer: 'CLM-1', unfall_datum: null, hergang_kunde_text: null, gegner_versicherung_id: 'v1' }
+    db.partiesError = { message: 'column vehicles.modell does not exist' }
+
+    const { ladeVsMeldungDaten } = await import('../claim-daten')
+    // Der Claim existiert, aber ohne Parteien darf keine Meldung entstehen:
+    expect(await ladeVsMeldungDaten('c1')).toBeNull()
   })
 
   it('unbekannter Claim -> null', async () => {

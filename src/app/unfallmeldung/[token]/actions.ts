@@ -3,6 +3,7 @@
 // Slice 2c — der Gegner bestaetigt per SMS-Magic-Link seine Angaben. Das ist der Trigger
 // fuer die Unfallmeldung an seine Haftpflicht (Fraud-Gate: nur wer die Nummer wirklich
 // besitzt, kann bestaetigen).
+import { revalidatePath } from 'next/cache'
 import { bestaetigeInvite, resolveInviteToken } from '@/lib/airdrop/gegner-invite'
 import { sendeUnfallmeldungAnGegnerVs } from '@/lib/vs-meldung/sende-unfallmeldung'
 
@@ -26,6 +27,11 @@ export async function bestaetigeGegnerMeldung(token: string): Promise<{ ok: bool
   } catch (err) {
     console.error('[unfallmeldung] VS-Meldung nach Bestaetigung fehlgeschlagen:', err)
   }
+
+  // vs_korrespondenz-Zeile / evtl. Dispatch-Task sollen ohne Verzoegerung in den
+  // internen Portalen auftauchen.
+  revalidatePath('/admin/faelle')
+  revalidatePath('/dispatch/dashboard')
 
   return { ok: true }
 }

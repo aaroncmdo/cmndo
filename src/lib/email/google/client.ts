@@ -32,6 +32,13 @@ type SendEmailOpts = {
   /** One-Click-Abmelde-URL → List-Unsubscribe-Header (UWG/Gmail-Bulk-Anforderung). */
   listUnsubscribe?: string
   /**
+   * Resend-Idempotency-Key. Verhindert, dass die 3x-Retry-Schleife bei einem Timeout NACH
+   * Annahme (Antwort verloren) eine zweite echte Mail schickt. Pflicht fuer Sends, deren
+   * Duplikat nicht zurueckholbar ist (z.B. Unfallmeldung an einen fremden Versicherer).
+   * Nur der Resend-Pfad wertet ihn aus (SMTP kennt keine Idempotenz).
+   */
+  idempotencyKey?: string
+  /**
    * Umgeht die Send-Isolation fuer interne/Test-Adressen (@claimondo.de etc.). NUR fuer
    * explizit admin-ausgeloeste, transaktionale 1:1-Mails setzen, deren interner Empfaenger
    * die GEWOLLTE Zielperson ist (z.B. Werkstatt-/Partner-Login-Zugang) — NICHT fuer Funnel-/
@@ -147,7 +154,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
                 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
               }
             : undefined,
-        })
+        }, opts.idempotencyKey ? { idempotencyKey: opts.idempotencyKey } : undefined)
 
         const messageId = result.data?.id ?? `resend-${Date.now()}`
 

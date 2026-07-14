@@ -25,9 +25,18 @@ function eins<T>(x: T | T[] | null | undefined): T | null {
   return Array.isArray(x) ? (x[0] ?? null) : x
 }
 
-function fahrzeugName(v: { hersteller?: string | null; modell?: string | null } | null): string | null {
+type FahrzeugRow = {
+  hersteller?: string | null
+  modell_haupttyp?: string | null
+  kennzeichen_aktuell?: string | null
+}
+
+// ACHTUNG: die Spalte heisst modell_haupttyp — ein 'modell' gibt es auf vehicles NICHT.
+// Ein falscher Spaltenname im Embed laesst PostgREST die GANZE Query mit 400 scheitern
+// (nicht nur das Feld), und supabase-js wirft dabei nicht, sondern liefert data=null.
+function fahrzeugName(v: FahrzeugRow | null): string | null {
   if (!v) return null
-  const teile = [v.hersteller, v.modell].filter((t): t is string => Boolean(t && t !== 'Unbekannt'))
+  const teile = [v.hersteller, v.modell_haupttyp].filter((t): t is string => Boolean(t && t !== 'Unbekannt'))
   return teile.length ? teile.join(' ') : null
 }
 
@@ -45,12 +54,20 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
     return null
   }
 
-  const { data: parties } = await admin
+  const { data: parties, error: partiesError } = await admin
     .from('claim_parties')
     .select(
-      'rolle, kennzeichen, versicherungsnummer, versicherungs_aktenzeichen, firmen(name), vehicles(hersteller, modell), personen(vorname, nachname)',
+      'rolle, kennzeichen, versicherungsnummer, versicherungs_aktenzeichen, firmen(name), vehicles(hersteller, modell_haupttyp, kennzeichen_aktuell), personen(vorname, nachname)',
     )
     .eq('claim_id', claimId)
+
+  // NIEMALS mit leeren Parteien weitermachen: der Caller wuerde sonst eine Schadenanzeige
+  // ohne Versicherungsnehmer, Kennzeichen und Police an einen fremden Versicherer schicken.
+  // null hier => der Caller macht daraus einen Dispatch-Task statt einer Mail.
+  if (partiesError) {
+    console.error('[vs-meldung] Parteien-Load fehlgeschlagen:', partiesError.message)
+    return null
+  }
 
   const rows = (parties ?? []) as Array<Record<string, unknown>>
   const g = rows.find((p) => p.rolle === 'geschaedigter') ?? null
@@ -60,6 +77,9 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
   const gegnerName = gegnerPerson
     ? [gegnerPerson.vorname, gegnerPerson.nachname].filter(Boolean).join(' ').trim() || null
     : null
+
+  const gFahrzeug = eins(g?.vehicles as FahrzeugRow | null)
+  const vFahrzeug = eins(v?.vehicles as FahrzeugRow | null)
 
   return {
     claimId: claim.id as string,
@@ -71,12 +91,15 @@ export async function ladeVsMeldungDaten(claimId: string): Promise<VsMeldungDate
     hergang: (claim.hergang_kunde_text as string | null) ?? null,
     geschaedigt: {
       firmaName: eins(g?.firmen as { name?: string } | null)?.name ?? null,
-      kennzeichen: (g?.kennzeichen as string | null) ?? null,
-      fahrzeug: fahrzeugName(eins(g?.vehicles as { hersteller?: string | null; modell?: string | null } | null)),
+      // Fallback aufs Fahrzeug: claim_parties.kennzeichen bleibt beim Gegner-Flow NULL
+      // (createLead reicht kein Kennzeichen der eigenen Seite durch). Fuer eine
+      // Haftpflicht-Anzeige ist das amtliche Kennzeichen der zentrale Identifikator.
+      kennzeichen: (g?.kennzeichen as string | null) ?? gFahrzeug?.kennzeichen_aktuell ?? null,
+      fahrzeug: fahrzeugName(gFahrzeug),
     },
     gegner: {
       name: gegnerName,
-      kennzeichen: (v?.kennzeichen as string | null) ?? null,
+      kennzeichen: (v?.kennzeichen as string | null) ?? vFahrzeug?.kennzeichen_aktuell ?? null,
       versicherungsnummer: (v?.versicherungsnummer as string | null) ?? null,
       versicherungsAktenzeichen: (v?.versicherungs_aktenzeichen as string | null) ?? null,
     },
