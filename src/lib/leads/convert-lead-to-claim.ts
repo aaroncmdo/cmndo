@@ -674,8 +674,20 @@ export async function convertLeadToClaim(
       vehicle_id: gegnerVehicleId,
       // CMM-49 Tier-2: Schadennummer (UI: gegner_schadennummer) lebt jetzt als
       // versicherungs_aktenzeichen in der verursacher-Party (SSoT), nicht mehr auf
-      // claims.gegner_aktenzeichen. versicherungsnummer: Lead hat keine Quelle -> null.
+      // claims.gegner_aktenzeichen.
       versicherungs_aktenzeichen: (lead.gegner_schadennummer as string | null) ?? null,
+      // Policennummer (Mig 20260714144318, Aaron 14.07.). Hier stand vorher "versicherungs-
+      // nummer: Lead hat keine Quelle -> null" — die Spalte gab es nicht, das Feld fehlte im
+      // Insert, die DB setzte NULL. Folge: claim_parties.versicherungsnummer war IMMER leer,
+      // und damit auch die vier Views, die es ableiten (v_claim_base/-full/-sv/
+      // v_faelle_mit_aktuellem_termin) sowie der Vers.-Nr.-Platz in der Unfallmeldung an die
+      // Gegner-Haftpflicht (UnfallmeldungVs: Betreff UND Body). Die Lesekette war komplett,
+      // nur der Schreiber fehlte. Quelle ist jetzt der NFC-Gegner-Wizard (optionales Feld).
+      // Bewusst HIER und nicht im Caller: der Convert ist der eine deterministische
+      // Lead->Party-Mapper und laut submitSchadenGegner fail-soft spaeter nachholbar — ein
+      // Patch im Caller wuerde auf genau diesem Recovery-Pfad still verloren gehen.
+      // Andere Lead-Quellen lassen die Spalte leer -> unveraendert null, kein Verhaltensbruch.
+      versicherungsnummer: (lead.gegner_versicherungsnummer as string | null) ?? null,
       adresse_land: 'DE',
       ist_halter: false,
       ist_fahrer: false,

@@ -68,6 +68,7 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
     kennzeichen: '',
     fahrzeugtyp: '',
     versicherungId: undefined,
+    versicherungsnummer: '',
     schadennummer: '',
     hergang: '',
     consent: false,
@@ -297,11 +298,22 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                   placeholder="Versicherung auswählen …"
                 />
               </div>
+              {/* Versicherungsnummer VOR Schadennummer: erst die Police, dann ein evtl.
+                  schon laufender Vorgang. Beide optional — am Unfallort kennt kaum jemand
+                  seine Policennummer auswendig, deshalb der Fundort-Hinweis statt Pflicht. */}
+              <TextField
+                label="Versicherungsnummer (optional)"
+                value={data.versicherungsnummer ?? ''}
+                onChange={(e) => set('versicherungsnummer', e.target.value)}
+                placeholder="z. B. AH-1234567890"
+                hint="Steht auf Ihrer Versicherungskarte oder im Versicherungsschein. Damit kann Ihre Versicherung den Vorgang sofort Ihrer Police zuordnen."
+              />
               <TextField
                 label="Schadennummer (optional)"
                 value={data.schadennummer ?? ''}
                 onChange={(e) => set('schadennummer', e.target.value)}
                 placeholder="Ihre Schadennummer bei der Versicherung"
+                hint="Nur falls Ihre Versicherung den Unfall bereits kennt und Ihnen eine Schadennummer genannt hat."
               />
             </div>
           )}
@@ -407,6 +419,9 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                       data.versicherungId
                     }
                   />
+                ) : null}
+                {data.versicherungsnummer ? (
+                  <SummaryRow label="Versicherungsnummer" value={data.versicherungsnummer} />
                 ) : null}
                 {data.schadennummer ? (
                   <SummaryRow label="Schadennummer" value={data.schadennummer} />
