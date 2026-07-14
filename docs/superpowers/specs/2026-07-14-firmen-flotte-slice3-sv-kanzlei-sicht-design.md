@@ -2,8 +2,26 @@
 
 **Datum:** 2026-07-14
 **Branch:** `kitta/firmen-flotte-slice3` (off origin/staging)
-**Status:** Design — bereit für Review
+**Status:** ⚠️ **TEILWEISE ÜBERHOLT — Teil B (Kanzlei-Detail-View) ist GESTRICHEN.** Nur Teil A wird gebaut.
 **Vorgänger:** Slice 2c (SMS-Verify + VS-Meldung, PR #4247). Baut auf den Gegner-Flow-Daten auf, die Slice 2a/2b/2c erzeugen.
+
+---
+
+## 0 · ⛔ KORREKTUR 14.07. (Session b0e963b6) — Teil B ist tote Arbeit
+
+**Diese Spec wurde gegen einen veralteten Codestand geschrieben.** Sie begründet Teil B mit „`/kanzlei/fall/[id]` ist toter Link (`mandate/page.tsx:10` ‚kommt in PR 2b')". Der **aktuelle** Stand auf `origin/staging` sagt an genau dieser Stelle das Gegenteil:
+
+> „Read-only Liste — keine Detail-Navigation. Das `/kanzlei/fall/[id]`-Portal wurde **bewusst NICHT gebaut** (In-House-Modell, keine Kanzlei-Login-Detailseite — siehe Kanzlei-Strecke-Investigation 28.06.). Zeilen sind daher nicht klickbar; sonst liefen alle Klicks ins 404."
+
+Bestätigt durch `git ls-tree -r origin/staging -- src/app/kanzlei` (keine `fall/[id]`-Route, kein Platzhalter) **und** durch den von Aaron am 14.07. bestätigten P3-ACK der Lane `4e5ef052`: „⛔ **Kanzlei-Detail NICHT bauen** (bewusst nie gebaut, In-House-Modell) — **korrigiert das alte ‚toter Link, Route bauen'-Audit**." → [[coordination-claim-detail-p3-ack]]
+
+**Folgen:**
+- **Teil B (§ Kanzlei-Detailseite) — GESTRICHEN.** Nicht bauen. Die Kanzlei arbeitet in-house; eine Login-Detailseite ist ein bewusster Nicht-Bau, kein Gap. Damit entfällt auch der als „der Wert" bezeichnete Teil dieses Slices.
+- **Teil A — gebaut (Aaron-Entscheid 14.07. „Rest-A bauen, Galerie abstimmen"):** `flottenmanager` in die `Rolle`-Union von `sichtbarkeit.ts` (schließt zugleich TODO-5) + die vier Gegner-Dokument-Typen in `DOKUMENT_SICHTBAR_FUER`. Beide additiv, kein DDL.
+- **`GegnerFotoGalerie` — NICHT hier gebaut.** Sie säße auf der SV-Detailfläche (`gutachter/fall/[id]` / `StammdatenDetail`), die seit dem P3-ACK der Lane **`4e5ef052`** gehört (sie konvertiert `FallDetailClient` → `FallakteShell`). In deren offene Baustelle zu bauen erzeugt Konflikt und evtl. Wegwerf-Code. → per Marker abgestimmt, nicht unilateral gebaut.
+- **§2 „aar-956-Territorium wird NICHT berührt" gilt für Slice 3 weiter.** Der separate Versicherungsnummer-Fix (Aaron 14.07.) berührt `convert-lead-to-claim.ts` bewusst mit **einer** additiven Zeile — das ist NICHT Teil dieses Slices und ist eigens koordiniert.
+
+Alles darunter ist der ursprüngliche Entwurf und **nur für Teil A verbindlich**.
 
 ---
 
