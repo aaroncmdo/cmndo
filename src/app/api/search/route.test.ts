@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const rpc = vi.fn()
-const getUser = vi.fn(async () => ({ data: { user: { id: 'u1' } } }))
+const getUser = vi.fn(
+  async (): Promise<{ data: { user: { id: string } | null } }> => ({ data: { user: { id: 'u1' } } }),
+)
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(async () => ({ auth: { getUser }, rpc })),
