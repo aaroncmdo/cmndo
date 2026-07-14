@@ -7,6 +7,7 @@
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMakler } from '@/lib/makler/queries'
 
 const schema = z.object({
@@ -60,7 +61,17 @@ export async function maklerSendMessage(
     }
   }
 
-  const { data: inserted, error } = await supabase
+  // Insert via Admin-Client (RLS-Bypass) NACH dem Consent-Gate oben.
+  // Der Makler hat KEINE permissive nachrichten-INSERT-Policy: can_access_claim()
+  // kennt nur admin/dispatch/kundenbetreuer (nicht makler), und die anderen
+  // permissiven Policies greifen nur fuer portal-kunde-Kanaele bzw. Admins.
+  // Der RLS-scoped User-Client wird daher vom RLS abgewiesen
+  // ("new row violates row-level security policy") -> jede Makler-Nachricht
+  // scheiterte still. Das Vollzugriff-Consent oben IST die Sicherheitsgrenze;
+  // danach mit Service-Role schreiben (analog sendeThreadNachricht in
+  // lib/chat/thread-actions.ts, das nach hatThreadZugriff ebenfalls admin nutzt).
+  const admin = createAdminClient()
+  const { data: inserted, error } = await admin
     .from('nachrichten')
     .insert({
       fall_id: parsed.data.fallId,
