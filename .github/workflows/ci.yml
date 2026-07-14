@@ -260,8 +260,18 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          # Interne Rollen (admin/kb/dispatch/sv) brauchen ein TOTP-Secret fuer aal2 (2FA #3745).
+          # Fehlt es, bleibt der Login aal1 -> skipIfAuthWall ueberspringt den Test (kein Fehler,
+          # aber auch KEIN gruener Smoke). Passthrough hier ist no-op solange das Secret unbesetzt
+          # ist. Setup (Secrets + Prod-Test-Accounts): docs/2026-07-14-regel4-e2e-totp-secrets-setup.md
+          TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
+          TEST_KB_PASSWORD: ${{ secrets.TEST_KB_PASSWORD }}
+          TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
+          TEST_DISPATCH_PASSWORD: ${{ secrets.TEST_DISPATCH_PASSWORD }}
+          TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
           TEST_SV_EMAIL: ${{ secrets.TEST_SV_EMAIL }}
           TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+          TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           # CalDAV-Smoke (smoke-caldav-*.spec.ts) — ohne diese ENVs werden die
           # Specs via test.skip() übersprungen statt den Worker zu crashen.
