@@ -1,11 +1,11 @@
-﻿'use client'
+'use client'
 
-// AAR-691: Drawer-Wrapper für Intercepting-Routes unter
-// /admin/sachverstaendige. Rendert ein Fixed-Positioned Overlay-Drawer
-// rechts, schließt via ESC / Backdrop / Close-Button über router.back().
+// P0 (Detail-View-Konsistenz): Drawer-Huelle fuer Intercepting-Routes.
+// Vorher SV-lokal (admin/sachverstaendige/@drawer/DrawerShell.tsx, AAR-691 /
+// AAR-803), jetzt geteilt — jede drillbare Liste nutzt dieselbe Huelle.
+// Schliesst via ESC / Backdrop / Close-Button ueber router.back().
 //
-// AAR-803: Auf Drawer-Primitive umgestellt. width-Prop ist jetzt numerisch
-// (statt Tailwind-Klasse) — Consumer mappen 'sm:w-[920px]' → 920 etc.
+// Rezept fuer neue Detail-Views: docs/superpowers/detail-view-recipe.md
 
 import { useEffect, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
@@ -24,7 +24,7 @@ export default function DrawerShell({ children, title, width = 720 }: Props) {
 
   const close = () => router.back()
 
-  // Scroll-Lock auf Body während Drawer offen
+  // Scroll-Lock auf Body waehrend Drawer offen
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'

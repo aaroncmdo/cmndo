@@ -4,7 +4,7 @@
 // /admin/vertrieb/sachverstaendige/[id]). Externe Links zeigen weiter auf
 // /admin/sachverstaendige/<uuid> (Full-Page) und bleiben unberuehrt.
 import SvDetailPage from '@/app/admin/sachverstaendige/[id]/page'
-import DrawerShell from '@/app/admin/sachverstaendige/@drawer/DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedCockpitSvDetail({
   params,
@@ -16,7 +16,8 @@ export default async function InterceptedCockpitSvDetail({
   return (
     <DrawerShell title="Sachverständigen-Profil" width={860}>
       <div className="px-6 py-6">
-        <SvDetailPage params={params} searchParams={searchParams} />
+        {/* variant="drawer": kein Zurueck-Link (der Drawer liegt ueber dem Cockpit). */}
+        <SvDetailPage params={params} searchParams={searchParams} variant="drawer" />
       </div>
     </DrawerShell>
   )

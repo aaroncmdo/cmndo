@@ -1,9 +1,14 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Building2Icon, GraduationCapIcon, CreditCardIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+// Tr = Kopfzeile, ClickableTr = drillbare Body-Zeilen.
+import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
+// P1: Label+Farbe des onboarding_status kommen aus EINER Quelle — die Detail-View
+// nutzt dieselbe, sonst laufen Liste und Detail auseinander.
+import { orgOnboardingBadge } from '@/lib/organisationen/onboarding-status'
 
 type OrgRow = {
   id: string
@@ -17,15 +22,8 @@ type OrgRow = {
   created_at: string
 }
 
-const STATUS_BADGE: Record<string, { label: string; cls: string; Icon: typeof CheckCircleIcon }> = {
-  aktiv: { label: 'Aktiv', cls: 'bg-success-soft text-success-strong', Icon: CheckCircleIcon },
-  pending: { label: 'Pending', cls: 'bg-warning-soft text-warning-strong', Icon: ClockIcon },
-  vertrag_unterzeichnet: { label: 'Vertrag', cls: 'bg-claimondo-bg text-claimondo-ondo', Icon: ClockIcon },
-  anzahlung_offen: { label: 'Anzahlung offen', cls: 'bg-warning-soft text-warning-strong', Icon: AlertCircleIcon },
-  blockiert: { label: 'Blockiert', cls: 'bg-danger-soft text-danger-strong', Icon: AlertCircleIcon },
-}
-
 export default function OrganisationenClient({ organisationen }: { organisationen: OrgRow[] }) {
+  const router = useRouter()
   const [filter, setFilter] = useState<'alle' | 'buero' | 'akademie'>('alle')
 
   const filtered = filter === 'alle' ? organisationen : organisationen.filter(o => o.typ === filter)
@@ -70,10 +68,15 @@ export default function OrganisationenClient({ organisationen }: { organisatione
             </Thead>
             <Tbody>
               {filtered.map(o => {
-                const badge = STATUS_BADGE[o.onboarding_status] ?? STATUS_BADGE.pending
+                const badge = orgOnboardingBadge(o.onboarding_status)
                 const TypeIcon = o.typ === 'akademie' ? GraduationCapIcon : Building2Icon
                 return (
-                  <Tr key={o.id} className="hover:bg-claimondo-bg/50">
+                  // P1: Zeile drillbar — Soft-Nav oeffnet den Drawer (Intercepting-Route),
+                  // ein Deep-Link auf dieselbe URL rendert die Full-Page.
+                  <ClickableTr
+                    key={o.id}
+                    onClick={() => router.push(`/admin/organisationen/${o.id}`)}
+                  >
                     <Td>
                       <div className="flex items-center gap-2">
                         <TypeIcon className="w-4 h-4 text-claimondo-ondo flex-shrink-0" />
@@ -97,7 +100,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     </Td>
                     <Td className="text-right font-medium">{o.member_count}</Td>
                     <Td>
-                      <StatusBadge colorCls={badge.cls}>
+                      <StatusBadge colorCls={badge.colorCls}>
                         <badge.Icon className="w-3 h-3" /> {badge.label}
                       </StatusBadge>
                     </Td>
@@ -111,7 +114,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     <Td className="text-body-xs text-claimondo-ondo!">
                       {new Date(o.created_at).toLocaleDateString('de-DE')}
                     </Td>
-                  </Tr>
+                  </ClickableTr>
                 )
               })}
             </Tbody>
