@@ -2,7 +2,7 @@
 // als Drawer ueber dem Cockpit (Reuse des Full-Page-RSC, kein Rewrite). Direkter URL-Aufruf /
 // Hard-Nav matcht NICHT -> Next rendert die Full-Page. Muster: (.)sachverstaendige/[id].
 import FirmenFlotteDetailPage from '@/app/admin/vertrieb/firmen-flotte/[id]/page'
-import DrawerShell from '@/app/admin/sachverstaendige/@drawer/DrawerShell'
+import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedFirmenFlotteDetail({
   params,
