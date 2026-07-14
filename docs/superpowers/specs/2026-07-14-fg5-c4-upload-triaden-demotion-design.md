@@ -90,12 +90,39 @@ bleibt leer → `inferBkat` überspringt die Vision-OCR-Analyse (Aktenzeichen/TB
 Polizeibericht-Bildern) und fällt auf den reinen Text-Fallback zurück. Das BKat-Feature ist damit
 seit dem Spaltennamen-Drift halb kaputt.
 
-**Fix:** die bereits vorhandene `leads.polizeibericht_url` nutzen. Sie wird beim Upload und beim
-Twilio-Inbound als **public-URL** (`getPublicUrl`) gespeichert → direkt fetchbar, **kein Signieren
-nötig**. Der Lead wird in `bkat-inference.ts` ohnehin schon geladen; die SELECT-Liste wird um
-`polizeibericht_url` erweitert und `polizeibericht_urls` daraus gebildet. Der tote
-`fall_dokumente`-Block entfällt. Konsistent mit der won't-demote-Entscheidung: der Lead ist die
-Quelle.
+**Fix:** die bereits vorhandene `leads.polizeibericht_url` nutzen. Der Lead wird in
+`bkat-inference.ts` ohnehin schon geladen; die SELECT-Liste wird um `polizeibericht_url` erweitert
+und `polizeibericht_urls` daraus gebildet. Der tote `fall_dokumente`-Block entfällt. Konsistent mit
+der won't-demote-Entscheidung: der Lead ist die Quelle.
+
+> ### ⚠ Korrektur nach dem Prod-Smoke (Regel 4) — die erste Fassung dieses Fixes war unvollständig
+>
+> Die ursprüngliche Fassung (PR #4279, bereits auf prod) behauptete hier: „die URL wird als
+> **public-URL** (`getPublicUrl`) gespeichert → direkt fetchbar, **kein Signieren nötig**". **Das ist
+> falsch.** Es war aus dem Variablennamen `publicUrl` geschlossen, nicht verifiziert. Der
+> Prod-Smoke hat es aufgedeckt:
+>
+> * **`fall-dokumente` ist ein PRIVATER Bucket** (`public=false`). Eine `getPublicUrl` darauf liefert
+>   **HTTP 400** — empirisch gegen prod gemessen.
+> * `getStorageUrl` liefert je nach ENV-Flag `STORAGE_USE_SIGNED_URLS` entweder genau diese tote
+>   public-URL **oder** eine signed-URL, die nach ihrer **TTL (1h, `ui`-Default)** abläuft.
+> * Anthropic-Vision holt das Bild **ohne Auth** (`source.type='url'`). Eine gespeicherte URL ist
+>   damit in **beiden** Flag-Stellungen ungeeignet: entweder tot (400) oder abgelaufen.
+>
+> **Korrigierter Fix (diese Fassung):** die gespeicherte URL in Bucket + Pfad zerlegen
+> (`parseStorageUrl`) und **frisch signieren** (`resignStorageUrl`, beide neu in
+> `src/lib/storage/url.ts`, unit-getestet). Empirisch gegen prod verifiziert:
+> gespeicherte URL → **400**, frisch signiert → **200**. Das heilt beide Flag-Stellungen und ist
+> unabhängig davon, wie das Flag auf prod steht.
+>
+> **Derselbe Fehler steckte im Nachbar-Pfad:** `triggerAutoBkatOcr` (`lib/bkat/auto-trigger.ts`)
+> reicht die Upload-URL direkt an Vision weiter und wird aus **vier** Flows aufgerufen (Web-Upload,
+> WhatsApp-Inbound, Kunde-Onboarding, SV-Vor-Ort). Er nutzt jetzt denselben Helper; Nicht-Storage-URLs
+> (z.B. Twilio-Media) parsen nicht und fallen unverändert durch.
+>
+> **Lehre:** „`publicUrl`" ist ein Variablenname, kein Beweis. Bucket-Sichtbarkeit und
+> URL-Lebensdauer gehören verifiziert, bevor man eine gespeicherte URL an einen fremden Dienst gibt.
+> Genau dafür existiert Regel 4 — tsc, vitest und CI waren alle grün.
 
 Der alte (tote) Pfad selektierte potenziell mehrere `fall_dokumente`-Rows; die Lead-Spalte hält
 eine primäre URL → `polizeibericht_urls` ist `[url]` oder `[]`. Das ist bewusst: BKat braucht für

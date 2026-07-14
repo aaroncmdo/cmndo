@@ -181,6 +181,12 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   anschlussschreiben: { main: 'regulierung', sub: 'anschlussschreiben' },
   regulierung: { main: 'regulierung', sub: 'versicherungskontakt' },
   'regulierung-laeuft': { main: 'regulierung', sub: 'versicherungskontakt' },
+  // B4-Slice-1: Non-Terminal-Outcomes (endzustand markClaimAsInKommunikationVs/Abgelehnt) auch
+  // operative_status-nativ ableiten (bit-gleich zur v_claim_phase-o_sub-Ergaenzung). Damit bleibt
+  // die Phase korrekt, wenn operative_status diese Werte traegt (write-flip) UND wenn status
+  // spaeter derived/gedroppt wird (B4-slice-2) — nicht mehr auf den milestone(status)-Fallback angewiesen.
+  in_kommunikation_vs: { main: 'regulierung', sub: 'versicherungskontakt' },
+  abgelehnt: { main: 'regulierung', sub: 'nachforderung' },
   'vs-kuerzt': { main: 'regulierung', sub: 'vs-kuerzt' },
   'nachbesichtigung-laeuft': { main: 'regulierung', sub: 'nachbesichtigung-laeuft' },
   'vs-abgelehnt': { main: 'regulierung', sub: 'nachforderung' },
