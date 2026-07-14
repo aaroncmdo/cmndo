@@ -9,6 +9,7 @@ import { STATUS_LABEL, STATUS_TONE } from '../status-display'
 import { RetryButton } from '../RetryButton'
 import { ScriptEditor } from '../ScriptEditor'
 import { RenderProgress } from '../RenderProgress'
+import { PublishPanel } from '../PublishPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -112,17 +113,16 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
         </SectionCard>
       ) : null}
 
-      {job.status === 'video_fertig' && job.caption ? (
+      {job.status === 'video_fertig' ? (
         <SectionCard>
-          <h2 className="mb-2 text-heading-sm font-semibold text-claimondo-navy">
-            Caption &amp; Hashtags
-          </h2>
-          <p className="whitespace-pre-wrap text-body-sm text-claimondo-navy">{job.caption}</p>
-          {hashtags.length ? (
-            <p className="mt-2 text-body-sm text-claimondo-ondo">
-              {hashtags.map((h) => (h.startsWith('#') ? h : `#${h}`)).join(' ')}
-            </p>
-          ) : null}
+          <h2 className="mb-3 text-heading-sm font-semibold text-claimondo-navy">Veröffentlichen</h2>
+          <PublishPanel
+            jobId={job.id}
+            caption={job.caption ?? ''}
+            hashtags={hashtags}
+            publishStatus={job.publish_status ?? 'entwurf'}
+            gepostetAm={job.gepostet_am ?? null}
+          />
         </SectionCard>
       ) : null}
     </div>
