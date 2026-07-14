@@ -6,6 +6,7 @@ import { Building2Icon, GraduationCapIcon, CreditCardIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 // Tr = Kopfzeile, ClickableTr = drillbare Body-Zeilen.
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
+import PageHeader from '@/components/shared/PageHeader'
 // P1: Label+Farbe des onboarding_status kommen aus EINER Quelle — die Detail-View
 // nutzt dieselbe, sonst laufen Liste und Detail auseinander.
 import { orgOnboardingBadge } from '@/lib/organisationen/onboarding-status'
@@ -30,22 +31,23 @@ export default function OrganisationenClient({ organisationen }: { organisatione
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Organisationen</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Alle Büros und Akademien. Communities haben einen eigenen Bereich.</p>
-        </div>
-        <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium">
-          {(['alle', 'buero', 'akademie'] as const).map(f => (
-            <button key={f} type="button" onClick={() => setFilter(f)}
-              className={`px-3 py-1.5 rounded-ios-lg transition-colors capitalize ${
-                filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
-              }`}>
-              {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
-            </button>
-          ))}
-        </div>
-      </div>
+      <PageHeader
+        title="Organisationen"
+        description="Alle Büros und Akademien. Communities haben einen eigenen Bereich."
+        size="lg"
+        actions={
+          <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium">
+            {(['alle', 'buero', 'akademie'] as const).map(f => (
+              <button key={f} type="button" onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-ios-lg transition-colors capitalize ${
+                  filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
+                }`}>
+                {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
+              </button>
+            ))}
+          </div>
+        }
+      />
 
       <div className="bg-white border border-claimondo-border rounded-ios-lg overflow-hidden">
         {filtered.length === 0 ? (

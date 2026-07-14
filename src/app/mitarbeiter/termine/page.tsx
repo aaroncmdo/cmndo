@@ -9,6 +9,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -242,12 +243,11 @@ export default async function MitarbeiterTermine() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Zeitplan</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          {termine.length === 0 ? 'Rückrufe und Kundentermine, die dir zugewiesen sind.' : summaryParts.join(' · ')}
-        </p>
-      </div>
+      <PageHeader
+        title="Zeitplan"
+        description={termine.length === 0 ? 'Rückrufe und Kundentermine, die dir zugewiesen sind.' : summaryParts.join(' · ')}
+        size="lg"
+      />
 
       {termine.length === 0 && (
         <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">

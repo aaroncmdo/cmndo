@@ -1,7 +1,7 @@
 'use client'
 // Vertrieb-CRM P2: das CRM-Cockpit fuer einen Lead. Alle Mutationen ueber bestehende
 // partner-leads-Actions (updatePartnerLead / konvertierePartnerLead / protokolliereAktivitaet).
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { updatePartnerLead, konvertierePartnerLead } from '@/app/admin/partner-leads/actions'
@@ -11,6 +11,7 @@ import { LEAD_STATUS_OPTIONS, LEAD_EINSTUFUNG_OPTIONS } from '../_lib/lead-statu
 import type { VorlageTyp } from '../_lib/mail-vorlagen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebLeadDetail } from '../_lib/lead-detail'
+import { reichereLeadAusWebsite } from '../_actions/reichere-lead-website'
 
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
@@ -37,6 +38,25 @@ export default function LeadCockpit({
     email: detail.ansprechpartner.email ?? '',
     telefon: detail.ansprechpartner.telefon ?? '',
   })
+  const [enrichBusy, setEnrichBusy] = useState(false)
+  const [enrichMsg, setEnrichMsg] = useState<string | null>(null)
+
+  // apForm folgt dem Server-Stand: nach Enrichment/Refresh die editierbaren Felder aktualisieren.
+  useEffect(() => {
+    setApForm({
+      vorname: detail.ansprechpartner.vorname ?? '',
+      nachname: detail.ansprechpartner.nachname ?? '',
+      position: detail.ansprechpartner.position ?? '',
+      email: detail.ansprechpartner.email ?? '',
+      telefon: detail.ansprechpartner.telefon ?? '',
+    })
+  }, [
+    detail.ansprechpartner.vorname,
+    detail.ansprechpartner.nachname,
+    detail.ansprechpartner.position,
+    detail.ansprechpartner.email,
+    detail.ansprechpartner.telefon,
+  ])
 
   async function patch(p: Parameters<typeof updatePartnerLead>[1]) {
     setBusy(true)
@@ -58,6 +78,19 @@ export default function LeadCockpit({
       ansprechpartner_email: apForm.email.trim() || null,
       ansprechpartner_telefon: apForm.telefon.trim() || null,
     })
+  }
+
+  async function anreichern() {
+    setEnrichBusy(true)
+    setEnrichMsg(null)
+    const res = await reichereLeadAusWebsite(kontakt.id)
+    setEnrichBusy(false)
+    if (!res.ok) {
+      setEnrichMsg(res.error ?? 'Anreicherung fehlgeschlagen.')
+      return
+    }
+    setEnrichMsg('Von Website übernommen.')
+    onChanged()
   }
 
   async function convert() {
@@ -86,7 +119,13 @@ export default function LeadCockpit({
   return (
     <div className="space-y-4">
       <div className={CARD_CLS}>
-        <p className={LABEL_CLS}>Ansprechpartner</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className={LABEL_CLS}>Ansprechpartner</p>
+          <Button variant="ghost" size="sm" loading={enrichBusy} onClick={anreichern}>
+            🔍 Von Website anreichern
+          </Button>
+        </div>
+        {enrichMsg && <p className="mt-1 text-caption text-claimondo-ondo/60">{enrichMsg}</p>}
         {/* Editierbar (Aaron): Name/Position + E-Mail und Telefon einzeln. Speichern via
             updatePartnerLead (ansprechpartner_*-Felder existieren bereits auf partner_leads). */}
         <div className="mt-2 grid grid-cols-2 gap-2">

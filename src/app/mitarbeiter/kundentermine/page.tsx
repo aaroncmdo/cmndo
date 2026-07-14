@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { UsersIcon, MapPinIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -201,14 +202,15 @@ export default async function MitarbeiterKundentermine() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Kundentermine</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          {termine.length === 0
+      <PageHeader
+        title="Kundentermine"
+        description={
+          termine.length === 0
             ? 'SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Änderungen erfolgen im Fall.'
-            : summaryParts.join(' · ')}
-        </p>
-      </div>
+            : summaryParts.join(' · ')
+        }
+        size="lg"
+      />
 
       {termine.length === 0 && (
         <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">

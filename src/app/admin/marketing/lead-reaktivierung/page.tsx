@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { SectionCard } from '@/components/shared/SectionCard'
+import PageHeader from '@/components/shared/PageHeader'
 import { getWinbackCandidates } from '@/lib/leads/winback'
 import { WinbackClient } from './WinbackClient'
 
@@ -14,13 +15,11 @@ export default async function LeadReaktivierungPage() {
 
   return (
     <div className="space-y-6 py-6">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Lead-Reaktivierung</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          Einmalige Reaktivierungs-Mail an erreichbare, kalt gewordene Leads, die eine Schadenmeldung
-          begonnen, aber nie abgeschlossen haben.
-        </p>
-      </div>
+      <PageHeader
+        title="Lead-Reaktivierung"
+        description="Einmalige Reaktivierungs-Mail an erreichbare, kalt gewordene Leads, die eine Schadenmeldung begonnen, aber nie abgeschlossen haben."
+        size="lg"
+      />
 
       <SectionCard>
         <div className="flex items-baseline gap-3">

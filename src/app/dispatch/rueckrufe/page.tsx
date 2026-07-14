@@ -5,6 +5,7 @@ import { RueckrufeRealtimeRefresher } from './RueckrufeRealtimeRefresher'
 import { RueckrufDeepLinkScroll } from './RueckrufDeepLinkScroll'
 import PhoneButton from '@/components/shared/PhoneButton'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { PhoneOffIcon, PhoneCallIcon } from 'lucide-react'
@@ -211,12 +212,11 @@ export default async function DispatchRueckrufe({
       <RueckrufeRealtimeRefresher />
       {openId && <RueckrufDeepLinkScroll targetId={openId} />}
 
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Rückrufe</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          Rückrufe, die auf einen Anruf warten — überfällige zuerst.
-        </p>
-      </div>
+      <PageHeader
+        title="Rückrufe"
+        description="Rückrufe, die auf einen Anruf warten — überfällige zuerst."
+        size="lg"
+      />
 
       {rows.length > 0 && <StatBar items={stats} />}
 

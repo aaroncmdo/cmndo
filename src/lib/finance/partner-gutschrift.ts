@@ -1,12 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 import { getAktuelleRechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
-
-const PARTNER_TABLE: Record<string, string> = {
-  makler: 'makler',
-  werkstatt: 'werkstaetten',
-  marketing: 'marketing_partner',
-}
+import { partnerTabelleFuer, type PartnerTyp } from './partner-tabellen'
 
 /**
  * Laedt die Gutschrift-Zeile, downloadet das PDF aus Storage, versendet es als
@@ -42,7 +37,8 @@ export async function versendePartnerGutschrift(
     }
 
     // Step 4 — Empfaenger-Email aus Partner-Tabelle laden
-    const partnerTable = PARTNER_TABLE[row.partner_typ as string]
+    const partnerTable = partnerTabelleFuer(row.partner_typ as string)
+    if (!partnerTable) return { ok: false, error: `Unbekannter partner_typ '${row.partner_typ}'` }
     const { data: partnerData, error: partnerErr } = await db
       .from(partnerTable)
       .select('email')
@@ -85,8 +81,8 @@ export async function versendePartnerGutschrift(
     }
     const html = await render(PartnerGutschriftEmail(props))
     const { sendEmail } = await import('@/lib/email/google/client')
-    const empfTyp = ({ makler: 'makler', werkstatt: 'werkstatt', marketing: 'admin' } as const)[
-      row.partner_typ as 'makler' | 'werkstatt' | 'marketing'
+    const empfTyp = ({ makler: 'makler', werkstatt: 'werkstatt', firmen_flotte: 'admin', marketing: 'admin' } as const)[
+      row.partner_typ as PartnerTyp
     ]
     try {
       await sendEmail({
@@ -210,7 +206,7 @@ export async function erstellePartnerGutschrift(
   p: {
     tabelle: string
     ledgerId: string
-    partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+    partnerTyp: PartnerTyp
     partnerId: string
     betraege: {
       nettoCent: number
@@ -224,7 +220,8 @@ export async function erstellePartnerGutschrift(
 ): Promise<{ ok: true; gutschriftId: string; nummer: string } | { ok: false; error: string }> {
   try {
     // 1. Load partner tax data
-    const table = PARTNER_TABLE[p.partnerTyp]
+    const table = partnerTabelleFuer(p.partnerTyp)
+    if (!table) return { ok: false, error: `Unbekannter partner_typ '${p.partnerTyp}'` }
     const { data: partner, error: partnerError } = await db
       .from(table)
       .select('*')

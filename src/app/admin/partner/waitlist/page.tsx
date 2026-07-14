@@ -4,6 +4,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import PageHeader from '@/components/shared/PageHeader'
 import WaitlistTable from './WaitlistTable'
 
 export const dynamic = 'force-dynamic'
@@ -34,11 +35,16 @@ export default async function WaitlistPage() {
   return (
     <div className="p-4 md:p-6">
       <header className="mb-6">
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Gutachter-Warteliste</h1>
-        <p className="mt-1 text-body-sm text-claimondo-ondo">
-          Eingehende Bewerbungen über gutachter.claimondo.de —{' '}
-          <span className="font-semibold text-claimondo-navy">{list.length}</span> Einträge.
-        </p>
+        <PageHeader
+          title="Gutachter-Warteliste"
+          description={
+            <>
+              Eingehende Bewerbungen über gutachter.claimondo.de —{' '}
+              <span className="font-semibold text-claimondo-navy">{list.length}</span> Einträge.
+            </>
+          }
+          size="lg"
+        />
       </header>
 
       <WaitlistTable eintraege={list} />

@@ -18,19 +18,28 @@ export function useUpdates() {
   const [items, setItems] = useState<UpdateItem[]>([])
   const [rolle, setRolle] = useState('')
   const [lastSeen, setLastSeen] = useState<string | null>(null)
+  const [actionsSeen, setActionsSeen] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     const user = (await supabase.auth.getUser())?.data?.user
     if (!user) { setLoading(false); return }
-    const { data: profile } = await supabase
+    const { data: profileRaw } = await supabase
       .from('profiles')
-      .select('rolle, updates_last_seen_at')
+      .select('rolle, updates_last_seen_at, actions_last_seen_at')
       .eq('id', user.id)
       .single()
-    const rolle = (profile?.rolle as string) ?? ''
+    // A2: actions_last_seen_at frisch via Migration 20260713234336; database.types.ts hinkt
+    // hinterher (Regen = Follow-up) -> Cast-Bridge fuer die gelesenen Profil-Felder.
+    const profile = profileRaw as unknown as {
+      rolle: string | null
+      updates_last_seen_at: string | null
+      actions_last_seen_at: string | null
+    } | null
+    const rolle = profile?.rolle ?? ''
     setRolle(rolle)
-    setLastSeen((profile?.updates_last_seen_at as string | null) ?? null)
+    setLastSeen(profile?.updates_last_seen_at ?? null)
+    setActionsSeen(profile?.actions_last_seen_at ?? null)
     const result = await getUpdates(supabase, user.id, rolle)
     // Action-Items kriegen ihre Route rollen-bewusst aus dem Kontext.
     setItems(result.map(i =>
@@ -62,11 +71,17 @@ export function useUpdates() {
 
   const markSeen = useCallback(async () => {
     const r = await markAllUpdatesSeen()
-    if (r.ok) { setLastSeen(new Date().toISOString()); load() }
+    if (r.ok) {
+      // A2: beide Cursor lokal vorschieben -> rote Zahl faellt sofort, gesehene Actions grau.
+      const now = new Date().toISOString()
+      setLastSeen(now)
+      setActionsSeen(now)
+      load()
+    }
     return r
   }, [load])
 
-  const split = useMemo(() => splitUpdates(items, lastSeen), [items, lastSeen])
+  const split = useMemo(() => splitUpdates(items, lastSeen, actionsSeen), [items, lastSeen, actionsSeen])
 
   return { ...split, items, rolle, lastSeen, loading, reload: load, markSeen }
 }

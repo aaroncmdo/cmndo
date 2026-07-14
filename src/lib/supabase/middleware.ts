@@ -206,6 +206,11 @@ function isPublicPath(pathname: string): boolean {
     '/passwort-aendern',
     '/passwort-vergessen',
     '/passwort-zuruecksetzen',
+    // Prefetch-gehaerteter Klick-Gate fuer Magic-Links/Reset (buildWelcomeConfirmLink zeigt
+    // hierher). Empfaenger ist per Definition noch nicht eingeloggt -> muss public sein,
+    // sonst schickt die Middleware ihn auf /login und der Flow ist tot. Exakter Pfad
+    // '/auth/bestaetigen' (NICHT '/auth' — das oeffnete via startsWith fremde /auth/*).
+    '/auth/bestaetigen',
     '/sv',
     // AAR-939 Part B2: Claimondo-Hosted-Widget-Seiten /g/[slug] (SVs ohne eigene
     // Website). Public/anon — traegt nur das Monika-Widget. WICHTIG: '/g/' MIT

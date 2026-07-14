@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { UserPlusIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
 import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import { Button, Modal } from '@/components/primitives'
+import PageHeader from '@/components/shared/PageHeader'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 
 const ROLLE_LABELS: Record<string, string> = { admin: 'Admin', kundenbetreuer: 'Kundenbetreuer', dispatch: 'Dispatcher', kanzlei: 'Kanzlei' }
@@ -60,18 +61,21 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
 
   return (
     <div className="h-full overflow-y-auto py-8"><div>
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Personal</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">{mitarbeiter.length} Mitarbeiter · {monatLabel}</p>
-        </div>
-        <Button
-          variant="navy"
-          onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }}
-          iconLeft={<UserPlusIcon className="w-4 h-4" />}
-        >
-          Neuer Mitarbeiter
-        </Button>
+      <div className="mb-6">
+        <PageHeader
+          title="Personal"
+          description={<>{mitarbeiter.length} Mitarbeiter · {monatLabel}</>}
+          size="lg"
+          actions={
+            <Button
+              variant="navy"
+              onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }}
+              iconLeft={<UserPlusIcon className="w-4 h-4" />}
+            >
+              Neuer Mitarbeiter
+            </Button>
+          }
+        />
       </div>
 
       <div className="flex gap-2 mb-4 overflow-x-auto pb-1">

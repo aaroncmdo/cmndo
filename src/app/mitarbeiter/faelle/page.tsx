@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,12 +24,11 @@ export default async function MitarbeiterFaelle() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Fälle</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          {list.length} {list.length === 1 ? 'zugewiesener Fall' : 'zugewiesene Fälle'}, neueste zuerst
-        </p>
-      </div>
+      <PageHeader
+        title="Meine Fälle"
+        description={`${list.length} ${list.length === 1 ? 'zugewiesener Fall' : 'zugewiesene Fälle'}, neueste zuerst`}
+        size="lg"
+      />
 
       <div className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
         {list.length === 0 ? (

@@ -28,6 +28,7 @@ import {
   ClockIcon,
 } from 'lucide-react'
 import { TerminStatusBadge } from '@/components/shared/TerminStatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Termin = {
   id: string
@@ -204,24 +205,27 @@ export default function KundeTerminDetailClient({
         >
           <ArrowLeftIcon className="w-3 h-3" /> {t('detail.backLink')}
         </Link>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-              {t('detail.gutachterTermin')}
-            </p>
-            <h1 className="text-xl md:text-2xl font-bold text-claimondo-navy mt-1">{datum}</h1>
-            <p className="text-sm text-claimondo-ondo mt-0.5">
+        <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1">
+          {t('detail.gutachterTermin')}
+        </p>
+        <PageHeader
+          title={datum}
+          description={
+            <>
               <CalendarIcon className="w-3.5 h-3.5 inline-block mr-1 -mt-0.5 text-claimondo-ondo" />
               {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} {t('detail.uhrSuffix')}
-            </p>
-          </div>
-          <TerminStatusBadge
-            status={termin.status}
-            label={statusLabel}
-            icon={<StatusIcon className="w-3 h-3" />}
-            className="shrink-0"
-          />
-        </div>
+            </>
+          }
+          actions={
+            <TerminStatusBadge
+              status={termin.status}
+              label={statusLabel}
+              icon={<StatusIcon className="w-3 h-3" />}
+              className="shrink-0"
+            />
+          }
+          size="lg"
+        />
 
         {fall.claim_nummer && (
           <p className="text-xs text-claimondo-ondo mt-2">

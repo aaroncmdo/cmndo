@@ -140,6 +140,12 @@ export const AI_MODELS = {
    * bestaetigen, anwenden). Judgment ueber Risikostufen > Speed → Sonnet 4.6.
    */
   task_executor: 'claude-sonnet-4-6',
+  /**
+   * Vertrieb Lead-Website-Enrichment: extrahiert den Ansprechpartner + Kontakt (Email/Telefon)
+   * aus Impressum/Kontakt der Firmen-Website. Einfache strukturierte Extraktion aus kurzem
+   * Text, kostensensitiv (per-Lead, ggf. Batch) → Haiku 4.5.
+   */
+  lead_enrichment: 'claude-haiku-4-5-20251001',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

@@ -6,6 +6,7 @@ import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-re
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Button } from '@/components/primitives/Button'
 import { Modal } from '@/components/primitives/Modal'
+import PageHeader from '@/components/shared/PageHeader'
 import { TextField as SharedTextField } from '@/components/shared/forms'
 import {
   createVertragsvorlage,
@@ -65,18 +66,21 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
     <div className="h-full overflow-y-auto py-8">
       <div>
         {/* Header */}
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Vertragsvorlagen</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren.</p>
-          </div>
-          <Button
-            variant="navy"
-            onClick={() => setCreateOpen(true)}
-            iconLeft={<PlusIcon className="w-4 h-4" />}
-          >
-            Neue Vorlage
-          </Button>
+        <div className="mb-6">
+          <PageHeader
+            title="Vertragsvorlagen"
+            description="Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren."
+            size="lg"
+            actions={
+              <Button
+                variant="navy"
+                onClick={() => setCreateOpen(true)}
+                iconLeft={<PlusIcon className="w-4 h-4" />}
+              >
+                Neue Vorlage
+              </Button>
+            }
+          />
         </div>
 
         {error && (

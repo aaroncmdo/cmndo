@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { entscheideReklamation } from '@/lib/actions/storno-actions'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Reklamation = {
   id: string; fall_id: string; sv_id: string; grund: string
@@ -50,11 +51,12 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
     <div className="h-full overflow-y-auto py-6">
       <div>
         {!embedded && (
-          <div className="mb-4 flex items-start justify-between gap-3">
-            <div>
-              <h1 className="text-heading-lg font-bold text-claimondo-navy">Reklamationen</h1>
-              <p className="mt-0.5 text-body-sm text-claimondo-ondo">SV-Reklamationen prüfen und entscheiden</p>
-            </div>
+          <div className="mb-4">
+            <PageHeader
+              title="Reklamationen"
+              description="SV-Reklamationen prüfen und entscheiden"
+              size="lg"
+            />
           </div>
         )}
 
