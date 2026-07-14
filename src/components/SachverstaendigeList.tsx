@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { SearchIcon, HardHatIcon, MapPinIcon } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
+import { getPaketLabel } from '@/lib/pakete'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { useDensityPreference } from '@/hooks/useDensityPreference'
@@ -47,11 +48,6 @@ const TYP_BADGE: Record<string, { label: string; cls: string }> = {
   gutachterbuero: { label: 'Büro', cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy' },
 }
 
-const PAKET_BADGE: Record<string, string> = {
-  'starter-10': 'Standard', standard: 'Standard',
-  'standard-25': 'Pro', pro: 'Pro',
-  'premium-50': 'Premium', premium: 'Premium',
-}
 
 // AAR-112: basePath erlaubt Wiederverwendung unter /dispatch/sachverstaendige
 export default function SachverstaendigeList({
@@ -164,9 +160,10 @@ export default function SachverstaendigeList({
                 portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
                 vertrag_unterschrieben: sv.vertragUnterschrieben,
                 gesperrt_seit: sv.gesperrtSeit,
+                paket: sv.paket,
               })
               const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-claimondo-bg text-claimondo-ondo' }
-              const paket = PAKET_BADGE[sv.paket] ?? sv.paket
+              const paket = getPaketLabel(sv.paket)
               const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
 
               return (
@@ -216,9 +213,10 @@ export default function SachverstaendigeList({
               portal_zugang_freigeschaltet: sv.portalZugangFreigeschaltet,
               vertrag_unterschrieben: sv.vertragUnterschrieben,
               gesperrt_seit: sv.gesperrtSeit,
+              paket: sv.paket,
             })
             const typ = TYP_BADGE[sv.gutachterTyp] ?? { label: sv.gutachterTyp, cls: 'bg-claimondo-bg text-claimondo-ondo' }
-            const paket = PAKET_BADGE[sv.paket] ?? sv.paket
+            const paket = getPaketLabel(sv.paket)
             const stadt = sv.standortAdresse ? sv.standortAdresse.split(',').slice(-2, -1)[0]?.trim() || sv.standortAdresse : '—'
             const auslastungTone = sv.offeneFaelle >= sv.maxFaelleMonat ? 'text-red-600 font-semibold' : 'text-claimondo-ondo'
             return (
