@@ -3,7 +3,8 @@
 // Kein echter DB-Zugriff — Fake-CheckCtx mit Supabase-Stub.
 //
 // Der Check liest gutachter_finder_anfragen:
-//   reservierter_slot_von IS NOT NULL AND < now() - interval '24 hours'
+//   status='entwurf' AND reservierter_slot_von IS NOT NULL AND < now() - interval '24 hours'
+//   (nur entwurf-Holds — bestaetigte Buchungen behalten reservierter_slot_von legitim)
 // und aggregiert in JS: nStale=rows.length, aeltesterH=max(now-reservierter_slot_von in h).
 // Schwellen: 0 -> ok; >0 -> warn; aeltesterH > 168 (7 Tage) -> crit.
 
@@ -26,7 +27,11 @@ function hoursAgoIso(ageH: number): string {
 //   nStale    — Anzahl der zurueckgelieferten Zeilen (= Anzahl staler Reservierungen)
 //   aeltesterH — Alter der aeltesten Zeile in Stunden (restliche Zeilen 1h juenger gesetzt)
 // ---------------------------------------------------------------------------
-function makeCtx(nStale: number, aeltesterH: number | null): CheckCtx {
+function makeCtx(
+  nStale: number,
+  aeltesterH: number | null,
+  eqCalls?: Array<{ col: string; val: unknown }>,
+): CheckCtx {
   // Rows so bauen, dass JS-Aggregat nStale und aeltesterH exakt trifft.
   const rows: { reservierter_slot_von: string }[] =
     nStale === 0
@@ -41,13 +46,18 @@ function makeCtx(nStale: number, aeltesterH: number | null): CheckCtx {
       if (table !== 'gutachter_finder_anfragen') {
         throw new Error(`unerwartete Tabelle: ${table}`)
       }
-      // Simuliert: .select('reservierter_slot_von').not(...).lt(...) -> Array
+      // Simuliert: .select('reservierter_slot_von').eq(...).not(...).lt(...) -> Array
       return {
         select: (_cols: string) => ({
-          not: (_col: string, _op: string, _val: unknown) => ({
-            lt: (_col2: string, _cutoff: string) =>
-              Promise.resolve({ data: rows, error: null }),
-          }),
+          eq: (col: string, val: unknown) => {
+            eqCalls?.push({ col, val })
+            return {
+              not: (_col: string, _op: string, _val: unknown) => ({
+                lt: (_col2: string, _cutoff: string) =>
+                  Promise.resolve({ data: rows, error: null }),
+              }),
+            }
+          },
         }),
       }
     },
@@ -60,9 +70,11 @@ function makeErrCtx(errorMessage: string): CheckCtx {
     from(_table: string) {
       return {
         select: (_cols: string) => ({
-          not: (_col: string, _op: string, _val: unknown) => ({
-            lt: (_col2: string, _cutoff: string) =>
-              Promise.resolve({ data: null, error: { message: errorMessage } }),
+          eq: (_col: string, _val: unknown) => ({
+            not: (_col2: string, _op: string, _val2: unknown) => ({
+              lt: (_col3: string, _cutoff: string) =>
+                Promise.resolve({ data: null, error: { message: errorMessage } }),
+            }),
           }),
         }),
       }
@@ -139,5 +151,15 @@ describe('slotsStaleReservationsCheck', () => {
     const result = await slotsStaleReservationsCheck.run(ctx)
     expect(result.status).toBe('error')
     expect(result.detail).toContain('connection refused')
+  })
+
+  it('scopet die Query auf status=entwurf (bestaetigte/aktive Buchungen NICHT als stale flaggen)', async () => {
+    // Regression-Pin: onboarding/slots.ts liest reservierter_slot_von bestaetigter
+    // Buchungen als aktive SV-Belegung -> der Check darf NUR entwurf-Holds zaehlen,
+    // sonst false-positiven alte bestaetigte Buchungen (das waren die 62d-"stale"-Reste).
+    const eqCalls: Array<{ col: string; val: unknown }> = []
+    const ctx = makeCtx(2, 30, eqCalls)
+    await slotsStaleReservationsCheck.run(ctx)
+    expect(eqCalls).toContainEqual({ col: 'status', val: 'entwurf' })
   })
 })

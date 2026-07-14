@@ -107,3 +107,19 @@ export function maskKennzeichen(raw: string | null | undefined): string {
   const shortZahl = zahl.length > 2 ? zahl.slice(-2) : zahl
   return `${stadt}-${letters} ${shortZahl}`
 }
+
+/**
+ * Kuerzt ein Kennzeichen defensiv auf die DB-Spaltenlaenge, damit ein zu langer
+ * Freitext-/Paste-Wert einen Insert nicht mit "value too long for type character
+ * varying(20)" abbricht. Betrifft claim_parties.kennzeichen und
+ * vehicles.kennzeichen_aktuell (beide varchar(20)). Echte KFZ-Kennzeichen sind
+ * <= 11 Zeichen -> bei validem Input kein Datenverlust; leer/whitespace -> null.
+ */
+export function clampKennzeichenForDb(
+  raw: string | null | undefined,
+  maxLen = 20,
+): string | null {
+  if (!raw) return null
+  const trimmed = raw.trim()
+  return trimmed ? trimmed.slice(0, maxLen) : null
+}
