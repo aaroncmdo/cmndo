@@ -2,6 +2,7 @@ import DispatchNav from './_components/DispatchNav'
 import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
 import UpdatesNav from '@/components/shared/updates'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function DispatchLayout({
@@ -17,6 +18,7 @@ export default async function DispatchLayout({
     <>
     <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <RealtimeLeadAlert />
+      <GlobalSearch rolle="dispatch" />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 
       {/* Content full-bleed (PageContainer fullBleed); md:pl-56 raeumt das fixe
