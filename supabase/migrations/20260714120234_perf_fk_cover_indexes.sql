@@ -1,0 +1,43 @@
+-- perf: covering indexes for the 40 unindexed foreign keys flagged by the
+-- Supabase performance advisor (unindexed_foreign_keys). Additive + IF NOT EXISTS
+-- (idempotent). No behavior/RLS change — pure join + parent-delete/cascade performance.
+CREATE INDEX IF NOT EXISTS idx_ai_claim_proposals_entschieden_von ON public.ai_claim_proposals (entschieden_von);
+CREATE INDEX IF NOT EXISTS idx_ai_task_executions_bestaetigt_von ON public.ai_task_executions (bestaetigt_von);
+CREATE INDEX IF NOT EXISTS idx_ai_task_executions_gestartet_von ON public.ai_task_executions (gestartet_von);
+CREATE INDEX IF NOT EXISTS idx_anfragen_disqualifiziert_durch ON public.anfragen (disqualifiziert_durch);
+CREATE INDEX IF NOT EXISTS idx_article_comments_moderated_by ON public.article_comments (moderated_by);
+CREATE INDEX IF NOT EXISTS idx_article_comments_parent_id ON public.article_comments (parent_id);
+CREATE INDEX IF NOT EXISTS idx_claim_mietwagen_mietwagenunternehmen_id ON public.claim_mietwagen (mietwagenunternehmen_id);
+CREATE INDEX IF NOT EXISTS idx_claim_mietwagen_vehicle_id ON public.claim_mietwagen (vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_claim_parties_previous_person_id ON public.claim_parties (previous_person_id);
+CREATE INDEX IF NOT EXISTS idx_claims_kanzlei_abrechnung_id ON public.claims (kanzlei_abrechnung_id);
+CREATE INDEX IF NOT EXISTS idx_claims_reparatur_werkstatt_id ON public.claims (reparatur_werkstatt_id);
+CREATE INDEX IF NOT EXISTS idx_community_comments_author_id ON public.community_comments (author_id);
+CREATE INDEX IF NOT EXISTS idx_community_posts_author_id ON public.community_posts (author_id);
+CREATE INDEX IF NOT EXISTS idx_embed_abrechnung_positionen_termin_id ON public.embed_abrechnung_positionen (termin_id);
+CREATE INDEX IF NOT EXISTS idx_firmen_ansprechpartner_person_id ON public.firmen (ansprechpartner_person_id);
+CREATE INDEX IF NOT EXISTS idx_firmen_flotten_konten_aktiviert_von ON public.firmen_flotten_konten (aktiviert_von);
+CREATE INDEX IF NOT EXISTS idx_flotten_fahrzeuge_added_by_user_id ON public.flotten_fahrzeuge (added_by_user_id);
+CREATE INDEX IF NOT EXISTS idx_gutachter_finder_anfragen_abrechnung_storno_durch_user_id ON public.gutachter_finder_anfragen (abrechnung_storno_durch_user_id);
+CREATE INDEX IF NOT EXISTS idx_gutachter_finder_anfragen_abrechnung_sv_id ON public.gutachter_finder_anfragen (abrechnung_sv_id);
+CREATE INDEX IF NOT EXISTS idx_gutachter_finder_anfragen_schaetzung_session_id ON public.gutachter_finder_anfragen (schaetzung_session_id);
+CREATE INDEX IF NOT EXISTS idx_gutachter_finder_anfragen_werkstatt_id ON public.gutachter_finder_anfragen (werkstatt_id);
+CREATE INDEX IF NOT EXISTS idx_leads_reparatur_werkstatt_id ON public.leads (reparatur_werkstatt_id);
+CREATE INDEX IF NOT EXISTS idx_leads_werkstatt_id ON public.leads (werkstatt_id);
+CREATE INDEX IF NOT EXISTS idx_linkedin_oauth_tokens_connected_by ON public.linkedin_oauth_tokens (connected_by);
+CREATE INDEX IF NOT EXISTS idx_linkedin_posts_freigegeben_von ON public.linkedin_posts (freigegeben_von);
+CREATE INDEX IF NOT EXISTS idx_makler_maklerpool_id ON public.makler (maklerpool_id);
+CREATE INDEX IF NOT EXISTS idx_makler_versicherung_id ON public.makler (versicherung_id);
+CREATE INDEX IF NOT EXISTS idx_marketing_content_jobs_erstellt_von ON public.marketing_content_jobs (erstellt_von);
+CREATE INDEX IF NOT EXISTS idx_orchestrator_auto_policy_geflippt_von ON public.orchestrator_auto_policy (geflippt_von);
+CREATE INDEX IF NOT EXISTS idx_partner_gutschriften_bezug_gutschrift_id ON public.partner_gutschriften (bezug_gutschrift_id);
+CREATE INDEX IF NOT EXISTS idx_partner_lead_aktivitaeten_erstellt_von ON public.partner_lead_aktivitaeten (erstellt_von);
+CREATE INDEX IF NOT EXISTS idx_partner_leads_konvertiert_durch ON public.partner_leads (konvertiert_durch);
+CREATE INDEX IF NOT EXISTS idx_partner_provisionen_claim_id ON public.partner_provisionen (claim_id);
+CREATE INDEX IF NOT EXISTS idx_provisionen_maik_marketing_partner_id ON public.provisionen_maik (marketing_partner_id);
+CREATE INDEX IF NOT EXISTS idx_repairs_vehicle_id ON public.repairs (vehicle_id);
+CREATE INDEX IF NOT EXISTS idx_schadenkarten_gebunden_von ON public.schadenkarten (gebunden_von);
+CREATE INDEX IF NOT EXISTS idx_sv_leads_konvertiert_zu_sv_id ON public.sv_leads (konvertiert_zu_sv_id);
+CREATE INDEX IF NOT EXISTS idx_werkstaetten_aktiviert_von ON public.werkstaetten (aktiviert_von);
+CREATE INDEX IF NOT EXISTS idx_werkstaetten_ansprechpartner_person_id ON public.werkstaetten (ansprechpartner_person_id);
+CREATE INDEX IF NOT EXISTS idx_werkstatt_notizen_autor_user_id ON public.werkstatt_notizen (autor_user_id);
