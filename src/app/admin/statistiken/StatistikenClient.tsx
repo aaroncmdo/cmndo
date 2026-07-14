@@ -12,12 +12,14 @@ import {
 } from '@/components/shared/DataTable'
 import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
 import type { DrillDownItem } from '@/lib/analytics'
+// P4a: Typen direkt aus der Quelle (StatistikenContent) statt via die geloeschte
+// Standalone-Route ./page (die sie nur re-exportierte).
 import type {
   UserStatistikRolle,
   StatistikFall,
   StatistikKlassifizierung,
   Benchmark,
-} from './page'
+} from './StatistikenContent'
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
