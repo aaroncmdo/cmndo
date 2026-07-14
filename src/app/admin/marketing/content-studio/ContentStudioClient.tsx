@@ -83,8 +83,9 @@ export default function ContentStudioClient({ jobs }: { jobs: Job[] }) {
           </Button>
         </div>
         <p className="mt-2 text-body-xs text-claimondo-shield">
-          Skript, Voiceover, Untertitel und Render laufen automatisch im Hintergrund — der Clip
-          erscheint anschließend als „Fertig".
+          Das Skript wird generiert und wartet dann auf deine Freigabe („Review nötig“). Nach dem
+          Prüfen/Editieren startest du den Render — Voiceover, Untertitel und Video laufen dann
+          automatisch.
         </p>
       </SectionCard>
 

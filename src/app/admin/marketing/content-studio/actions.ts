@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { verarbeiteJob } from '@/lib/marketing/orchestrator'
+import { generiereJobSkript, rendereJob } from '@/lib/marketing/orchestrator'
 import { checkGuardrails } from '@/lib/marketing/guardrails'
-import type { ContentFormat } from '@/lib/marketing/schema'
+import { ContentScriptSchema, type ContentFormat } from '@/lib/marketing/schema'
 
 async function ensureAdmin(): Promise<{ ok: boolean; error?: string; userId?: string }> {
   const supabase = await createClient()
@@ -15,6 +15,9 @@ async function ensureAdmin(): Promise<{ ok: boolean; error?: string; userId?: st
   if (profile?.rolle !== 'admin') return { ok: false, error: 'Nur Admins.' }
   return { ok: true, userId: user.id }
 }
+
+const LIST_PATH = '/admin/marketing/content-studio'
+const detailPath = (id: string) => `/admin/marketing/content-studio/${id}`
 
 export async function erstelleClip(
   thema: string,
@@ -43,24 +46,72 @@ export async function erstelleClip(
     .single()
   if (error || !job) return { ok: false, error: error?.message ?? 'Job konnte nicht angelegt werden.' }
 
-  // Hintergrund-Verarbeitung: der App-Server laeuft persistent (output:standalone + PM2 auf VPS),
-  // daher ueberlebt fire-and-forget den Request. Robuster Follow-up: Cron-Worker (Slice 3).
-  void verarbeiteJob(job.id, db).catch((e) => console.error('[marketing] verarbeiteJob failed', e))
+  // Nur Phase A (Skript). Der Admin prueft/editiert im Studio + gibt frei -> dann rendert Phase B.
+  // Fire-and-forget: App-Server laeuft persistent (output:standalone + PM2). Robuster: Cron (Slice 3).
+  void generiereJobSkript(job.id, db).catch((e) => console.error('[marketing] generiereJobSkript failed', e))
 
-  revalidatePath('/admin/marketing/content-studio')
+  revalidatePath(LIST_PATH)
   return { ok: true }
 }
 
-/**
- * Wiederholt einen fehlgeschlagenen oder haengengebliebenen Job (Fire-and-Forget-Verlust
- * bei Prozess-Crash mitten im Render, oder transienter ElevenLabs-/Pexels-Fehler).
- * Setzt den Status zurueck und startet die Pipeline erneut auf demselben Job (Cap-neutral:
- * verarbeiteJob schliesst den eigenen Job vom Wochen-Cap aus).
- */
-export async function wiederholeJob(jobId: string): Promise<{ ok: boolean; error?: string }> {
+/** Speichert das im Editor bearbeitete Skript nach Server-Validierung (skript + caption/hashtags-Spalten). */
+export async function speichereSkript(
+  jobId: string,
+  skript: unknown,
+): Promise<{ ok: boolean; error?: string }> {
   const auth = await ensureAdmin()
   if (!auth.ok) return { ok: false, error: auth.error }
+  const parsed = ContentScriptSchema.safeParse(skript)
+  if (!parsed.success) {
+    return { ok: false, error: 'Skript ungültig: ' + parsed.error.issues.map((i) => i.message).join('; ') }
+  }
+  const db = createAdminClient()
+  const { error } = await db
+    .from('marketing_content_jobs')
+    .update({
+      skript: parsed.data,
+      caption: parsed.data.caption,
+      hashtags: parsed.data.hashtags,
+      aktualisiert_am: new Date().toISOString(),
+    })
+    .eq('id', jobId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath(detailPath(jobId))
+  return { ok: true }
+}
 
+/** Gibt das gepruefte Skript frei und startet die Render-Phase (Phase B). */
+export async function freigebenUndRendern(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const db = createAdminClient()
+  const { data: job, error } = await db
+    .from('marketing_content_jobs')
+    .select('id, status, skript')
+    .eq('id', jobId)
+    .single()
+  if (error || !job) return { ok: false, error: 'Job nicht gefunden.' }
+  if (job.status !== 'skript_generiert' && job.status !== 'fehler')
+    return { ok: false, error: 'Freigabe nur aus dem Skript-Review möglich.' }
+  if (!ContentScriptSchema.safeParse(job.skript).success)
+    return { ok: false, error: 'Kein gültiges Skript — erst generieren/speichern.' }
+
+  // Optimistisch auf audio_erzeugt (= in Produktion) -> UI zeigt "wird gerendert", kein Doppel-Trigger.
+  await db
+    .from('marketing_content_jobs')
+    .update({ status: 'audio_erzeugt', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+    .eq('id', jobId)
+  void rendereJob(jobId, db).catch((e) => console.error('[marketing] rendereJob failed', e))
+
+  revalidatePath(LIST_PATH)
+  revalidatePath(detailPath(jobId))
+  return { ok: true }
+}
+
+/** Verwirft das aktuelle Skript und generiert ein neues (Phase A). */
+export async function regeneriereSkript(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
   const db = createAdminClient()
   const { data: job, error } = await db
     .from('marketing_content_jobs')
@@ -70,16 +121,46 @@ export async function wiederholeJob(jobId: string): Promise<{ ok: boolean; error
   if (error || !job) return { ok: false, error: 'Job nicht gefunden.' }
   if (job.status === 'video_fertig') return { ok: false, error: 'Job ist bereits fertig.' }
 
-  // Status zuruecksetzen -> UI zeigt wieder "wird generiert", alter Fehlertext weg.
-  const { error: resetErr } = await db
+  await db
     .from('marketing_content_jobs')
     .update({ status: 'entwurf', fehler_text: null, aktualisiert_am: new Date().toISOString() })
     .eq('id', jobId)
-  if (resetErr) return { ok: false, error: resetErr.message }
+  void generiereJobSkript(jobId, db).catch((e) => console.error('[marketing] regeneriereSkript failed', e))
 
-  void verarbeiteJob(jobId, db).catch((e) => console.error('[marketing] wiederholeJob failed', e))
+  revalidatePath(detailPath(jobId))
+  return { ok: true }
+}
 
-  revalidatePath('/admin/marketing/content-studio')
-  revalidatePath(`/admin/marketing/content-studio/${jobId}`)
+/** Startet einen haengengebliebenen/fehlgeschlagenen Job neu — routet nach Skript-Stand. */
+export async function wiederholeJob(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const db = createAdminClient()
+  const { data: job, error } = await db
+    .from('marketing_content_jobs')
+    .select('id, status, skript')
+    .eq('id', jobId)
+    .single()
+  if (error || !job) return { ok: false, error: 'Job nicht gefunden.' }
+  if (job.status === 'video_fertig') return { ok: false, error: 'Job ist bereits fertig.' }
+
+  if (ContentScriptSchema.safeParse(job.skript).success) {
+    // Skript vorhanden -> Render-Phase wiederholen.
+    await db
+      .from('marketing_content_jobs')
+      .update({ status: 'audio_erzeugt', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+      .eq('id', jobId)
+    void rendereJob(jobId, db).catch((e) => console.error('[marketing] wiederholeJob(render) failed', e))
+  } else {
+    // Kein Skript -> Skript-Phase wiederholen.
+    await db
+      .from('marketing_content_jobs')
+      .update({ status: 'entwurf', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+      .eq('id', jobId)
+    void generiereJobSkript(jobId, db).catch((e) => console.error('[marketing] wiederholeJob(skript) failed', e))
+  }
+
+  revalidatePath(LIST_PATH)
+  revalidatePath(detailPath(jobId))
   return { ok: true }
 }
