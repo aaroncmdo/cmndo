@@ -43,5 +43,8 @@ export function buildZb1LeadUpdate(
   setIfEmpty('tsn', extracted.tsn)
   setIfEmpty('fahrzeug_farbe', extracted.fahrzeug_farbe)
   setIfEmpty('brn', extracted.brn)
+  // Spec B (Aaron 14.07.): EU-/KBA-Fahrzeugklasse aus Feld J — der harte Filter fuers Werkstatt-
+  // Matching (eine PKW-Werkstatt repariert keinen LKW). Steht in jedem Schein; wurde nie ausgelesen.
+  setIfEmpty('fahrzeugklasse', extracted.fahrzeugklasse)
   return update
 }

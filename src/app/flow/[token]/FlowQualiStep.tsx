@@ -21,12 +21,20 @@ export function FlowQualiStep({
   onWeiter,
   onSchuldfrage,
   onSelbstzahler,
+  onSzenario,
 }: {
   token: string
   vorname: string | null
   onWeiter: () => void
   onSchuldfrage?: (v: string) => void
   onSelbstzahler?: (claimId: string) => void
+  /**
+   * Aaron 14.07.: Nach der Quali wechselt das Szenario (unqualifiziert -> haftpflicht / kasko /
+   * selbstzahler / teilschuld). Der Wizard berechnet die Step-Sequenz dann neu aus der DB-Config.
+   * Die Versicherungsantwort muss mit, weil sie kasko von selbstzahler unterscheidet — und weil
+   * 'eigenverantwortung' OHNE sie den Lead still disqualifizieren wuerde.
+   */
+  onSzenario?: (schuldfrage: string, ueberEigeneVersicherung: boolean | null) => void
 }) {
   const t = useTranslations('selfService')
   const [phase, setPhase] = useState<Phase>('frage')
@@ -49,10 +57,12 @@ export function FlowQualiStep({
         setPhase('abbruch')
         return
       }
+      // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden.
+      onSchuldfrage?.(schuldfrage)
+
       if (r.abrechnungsweg === 'selbstzahler' || r.abrechnungsweg === 'kasko') {
-        // SP-B2 + Aaron 08.07.: Selbstzahler UND Kasko(freie Wahl) = Direct-Reparatur — partiellen
-        // Claim erzeugen, dann via onSelbstzahler in den Account-Step (Portal). Werkstatt-Strecke,
-        // kein SV-Gutachten.
+        // SP-B2 + Aaron 08.07.: Selbstzahler UND Kasko(freie Wahl) = Direct-Reparatur — der partielle
+        // Claim wird angelegt (das Kunde-Portal braucht ihn). Kein SV-Gutachten.
         setPhase('selbstzahler')
         const claimRes = await erzeugeSelbstzahlerClaim(token)
         if (!claimRes.ok) {
@@ -61,10 +71,20 @@ export function FlowQualiStep({
           return
         }
         onSelbstzahler?.(claimRes.claimId)
+        // Aaron 14.07.: FRUEHER sprang der Flow hier direkt in den Account-Step — Kasko/Selbstzahler
+        // sahen damit WEDER die Feststellung NOCH den Werkstatt-Finder. Jetzt uebernimmt der Wizard das
+        // neue Szenario aus der DB-Config und routet weiter: Feststellung(Schaden) -> Fahrzeugstandort
+        // -> Werkstatt -> Konto.
+        onSzenario?.(schuldfrage, ueberEigeneVersicherung ?? null)
         return
       }
-      // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden.
-      onSchuldfrage?.(schuldfrage)
+
+      // Aaron 14.07.: Das Szenario wechselt (unqualifiziert -> haftpflicht / teilschuld) -> der Wizard
+      // berechnet die Step-Sequenz neu aus der Config. onWeiter bleibt der Legacy-Fallback.
+      if (onSzenario) {
+        onSzenario(schuldfrage, ueberEigeneVersicherung ?? null)
+        return
+      }
       onWeiter()
     } catch {
       setPhase('fehler')

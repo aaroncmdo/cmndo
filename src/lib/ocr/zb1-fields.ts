@@ -14,8 +14,14 @@ export const ZB1_FIELDS = {
   'D.2': { label: 'Typ/Variante/Version', dbField: 'fahrzeug_modell' },
   'D.3': { label: 'Handelsbezeichnung', dbField: 'fahrzeug_modell' },
   E: { label: 'Fahrzeug-Identifizierungsnummer (FIN)', dbField: 'fin_vin' },
-  '2.1': { label: 'HSN (Herstellerschlüsselnummer)', dbField: null },
-  '2.2': { label: 'TSN (Typschlüsselnummer)', dbField: null },
+  // Spec B (Aaron 14.07.): Feld J = EU-/KBA-Fahrzeugklasse (M1 = PKW, N1 = Transporter, N2/N3 = LKW,
+  // L3e = Motorrad, O1-O4 = Anhaenger, T/C/R/S = Land-/Forst). Der HARTE Filter fuers Werkstatt-
+  // Matching — eine PKW-Werkstatt repariert keinen LKW. Steht in jedem Schein; wurde nie ausgelesen.
+  J: { label: 'Fahrzeugklasse (EU/KBA)', dbField: 'fahrzeugklasse' },
+  // dbField war null, obwohl buildZb1LeadUpdate hsn/tsn laengst schreibt (die Spalten existieren auf
+  // leads UND vehicles) — die Metadaten waren schlicht falsch.
+  '2.1': { label: 'HSN (Herstellerschlüsselnummer)', dbField: 'hsn' },
+  '2.2': { label: 'TSN (Typschlüsselnummer)', dbField: 'tsn' },
 } as const
 
 export type ZB1FieldCode = keyof typeof ZB1_FIELDS

@@ -26,6 +26,44 @@ R
 SCHWARZ
 WVWZZZ1KZAW123456`
 
+// Spec B (Aaron 14.07.): ZB1-Feld J = EU-/KBA-Fahrzeugklasse. Sie ist der HARTE Filter fuers
+// Werkstatt-Matching (eine PKW-Werkstatt repariert keinen LKW) und steht in JEDEM Fahrzeugschein —
+// wir haben sie nur nie ausgelesen. Kein KI noetig, keine Schwacke-Lizenz.
+describe('parseZB1Fields — Feld J (EU-Fahrzeugklasse, Werkstatt-Matching)', () => {
+  it('extrahiert M1 (PKW)', () => {
+    expect(parseZB1Fields('A\nK-AB 1234\nJ\nM1\nD.1\nBMW').fahrzeugklasse).toBe('M1')
+  })
+
+  it('extrahiert N1 (Transporter) und N2 (LKW)', () => {
+    expect(parseZB1Fields('J\nN1').fahrzeugklasse).toBe('N1')
+    expect(parseZB1Fields('J\nN2').fahrzeugklasse).toBe('N2')
+  })
+
+  it('extrahiert L3e (Motorrad) — das kleine e bleibt erhalten', () => {
+    expect(parseZB1Fields('J\nL3e').fahrzeugklasse).toBe('L3e')
+    // OCR liefert oft Grossbuchstaben -> auf das Tabellen-Vokabular normalisieren.
+    expect(parseZB1Fields('J\nL3E').fahrzeugklasse).toBe('L3e')
+  })
+
+  it('extrahiert Anhaenger-Klassen (O1-O4)', () => {
+    expect(parseZB1Fields('J\nO2').fahrzeugklasse).toBe('O2')
+  })
+
+  // fahrzeugklassen kennt T/C/R/S — die Reparatur-Gruppe (land_forst) ist fuer T1..T4 dieselbe.
+  it('normalisiert Land-/Forst-Klassen auf den Buchstaben (T1 -> T)', () => {
+    expect(parseZB1Fields('J\nT1').fahrzeugklasse).toBe('T')
+    expect(parseZB1Fields('J\nC3').fahrzeugklasse).toBe('C')
+  })
+
+  it('ohne gueltige Klasse hinter J -> null (kein Muell in die DB)', () => {
+    expect(parseZB1Fields('J\nirgendwas').fahrzeugklasse).toBeNull()
+  })
+
+  it('ohne Feld J -> null (aeltere Scheine / schlechter Scan)', () => {
+    expect(parseZB1Fields(ZB1_SAMPLE).fahrzeugklasse).toBeNull()
+  })
+})
+
 describe('parseZB1Fields (OCR-Smoke)', () => {
   it('extrahiert alle Kernfelder aus realistischem ZB1-Vision-Text', () => {
     const r = parseZB1Fields(ZB1_SAMPLE)

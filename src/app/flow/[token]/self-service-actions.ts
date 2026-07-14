@@ -24,6 +24,7 @@ import {
 } from '@/lib/werkstatt/vermittlung-server'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -49,6 +50,101 @@ async function resolveFlowLead(token: string): Promise<{
   }
   // Backward-compat: Token ist evtl. direkt die lead_id (wie /flow/page.tsx).
   return { admin, leadId: token }
+}
+
+/**
+ * Teilschuld-Zweig (Aaron 14.07.): Bei ungeklärter Haftung buchen wir keinen Gutachter, sondern
+ * einen RÜCKRUF BEIM DISPATCH — die Schuldfrage muss persönlich geklärt werden.
+ *
+ * Nutzt den bestehenden idempotenten Upsert (genau EIN offener Rückruf pro Lead) → schreibt
+ * admin_termine (typ='rueckruf', status='offen') und weist dem Lead-Dispatcher zu. Die Dispatch-Queue
+ * (/dispatch/rueckrufe) liest genau das.
+ *
+ * WICHTIG: Der bisherige Flow-Pfad (aendereTerminFlow) setzte nur `leads.status='rueckruf'` und legte
+ * KEINEN admin_termine-Eintrag an — so ein "Rückruf" tauchte in der Dispatch-Queue nie auf.
+ */
+export async function fordereRueckrufAn(
+  token: string,
+  wunschzeitIso?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { leadId, error } = await resolveFlowLead(token)
+  if (!leadId) return { ok: false, error: error ?? 'Link ungültig.' }
+
+  const res = await upsertReservierungsRueckruf({
+    leadId,
+    startIso: wunschzeitIso ?? new Date().toISOString(),
+    vonKunde: true,
+  })
+  if (!res.ok) return { ok: false, error: res.error ?? 'Rückruf konnte nicht angelegt werden.' }
+
+  revalidatePath('/dispatch/rueckrufe')
+  revalidatePath(`/flow/${token}`)
+  return { ok: true }
+}
+
+/**
+ * Ort-Abfrage im Flow (Aaron 14.07.) — ZWEI VERSCHIEDENE Orte:
+ *   'fahrzeug'     → wo steht das Auto?    → Geo-Anker für den WERKSTATT-Finder
+ *   'besichtigung' → wo besichtigt der SV? → Geo-Anker für den GUTACHTER-Finder
+ *
+ * Sie werden nur abgefragt, wenn sie in der DB noch nicht bekannt sind (Step-Bedingung in
+ * flow_szenario_steps). Fehlen Koordinaten (Freitext statt Places-Pick), geocoden wir nach — ohne
+ * lat/lng ist der Ort als Matching-Anker wertlos.
+ */
+export async function speichereOrtFlow(
+  token: string,
+  art: 'fahrzeug' | 'besichtigung',
+  ort: {
+    adresse: string
+    lat?: number | null
+    lng?: number | null
+    placeId?: string | null
+    plz?: string | null
+  },
+): Promise<{ ok: boolean; error?: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Link ungültig.' }
+
+  const adresse = (ort.adresse ?? '').trim()
+  if (!adresse) return { ok: false, error: 'Bitte eine Adresse angeben.' }
+
+  let lat = ort.lat ?? null
+  let lng = ort.lng ?? null
+  if (lat == null || lng == null) {
+    try {
+      const geo = await geocodeAdresse(adresse)
+      lat = geo?.lat ?? null
+      lng = geo?.lng ?? null
+    } catch (err) {
+      // Non-critical: die Adresse wird trotzdem gespeichert, das Matching faellt dann auf PLZ zurueck.
+      console.error('[speichereOrtFlow] geocode:', err)
+    }
+  }
+
+  const patch =
+    art === 'fahrzeug'
+      ? {
+          fahrzeug_standort_adresse: adresse,
+          fahrzeug_standort_lat: lat,
+          fahrzeug_standort_lng: lng,
+          fahrzeug_standort_place_id: ort.placeId ?? null,
+          fahrzeug_standort_plz: ort.plz ?? null,
+        }
+      : {
+          besichtigungsort_adresse: adresse,
+          besichtigungsort_lat: lat,
+          besichtigungsort_lng: lng,
+          besichtigungsort_place_id: ort.placeId ?? null,
+        }
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({ ...patch, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+
+  revalidatePath(`/flow/${token}`)
+  return { ok: true }
 }
 
 /**
