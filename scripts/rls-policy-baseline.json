@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-14T21:42:39.103Z",
+  "count": 20,
+  "statements": 169,
+  "files": [
+    "00000000000000_baseline_public_schema.sql",
+    "20260530233705_cmm64_pr1_vorschaeden_cardentity_homes.sql",
+    "20260531152923_rls_hygiene_dedup_and_initplan.sql",
+    "20260531194425_fix_sv_buero_memberships_rls_recursion.sql",
+    "20260602213715_cmm49_call_logs_drop_fall_id.sql",
+    "20260622130623_werkstatt_entity.sql",
+    "20260622151819_werkstatt_self_rls.sql",
+    "20260626135720_werkstatt_staffelung.sql",
+    "20260627173613_rls_haertung_falldok_kbtermine.sql",
+    "20260629112322_health_check_runs.sql",
+    "20260629153932_community_comments_foundation.sql",
+    "20260702174748_fix_fall_dokumente_kanzlei_sv_rls_definer.sql",
+    "20260703203257_create_twilio_status_events.sql",
+    "20260704085120_makler_staffelung.sql",
+    "20260707225349_partner_provisionen_union_table.sql",
+    "20260707225415_partner_staffel_bonus_union_table.sql",
+    "20260708000904_partner_rang.sql",
+    "20260713171125_marketing_content_jobs.sql",
+    "20260714144452_cold_mail_s0_suppression_sends.sql",
+    "20260714193517_cold_mail_s1_s2_vorlagen_sequenzen_enrollments.sql"
+  ]
+}

@@ -87,6 +87,19 @@ jobs:
       - name: Termin-Engine-Contract-Ratchet
         run: npm run check:termin-engine-contract -- --ratchet
 
+      # RLS-Policy-Ratchet: blockt NEUE permissive CREATE POLICY ohne explizite Rollen-Klausel
+      # ggue. scripts/rls-policy-baseline.json. Ohne `TO` ist der Postgres-Default `TO public` —
+      # die Policy gilt dann auch fuer authenticator/cli_login_postgres/dashboard_user/
+      # supabase_privileged_role (0 App-Traffic, 0 Grants). Der Supabase-Advisor zaehlt
+      # `multiple_permissive_policies` je (Tabelle x ROLLE x Action) -> jeder Overlap wird 4x
+      # doppelt gezaehlt. Genau das war das 49-%-Rauschen (313 Findings), das B2a
+      # (Migration 20260714171501) rausgeraeumt hat; ohne Gate kommt es zurueck.
+      # AUSNAHMEN: `AS RESTRICTIVE` (dort ist TO public korrekt) + dynamisches SQL (%I/%s).
+      # Reiner File-Scan — kein DB-/Netz-Zugriff (CI hat keine DB-Creds).
+      # Siehe AGENTS.md §rls-policy-gate.
+      - name: RLS-Policy-Ratchet
+        run: npm run check:rls-policies -- --ratchet
+
       # Dead-Code-Drift-Bremse (knip, Ratchet): blockt NEUE ungenutzte Files +
       # NEUE unused/unlisted Dependencies ggue. scripts/knip-baseline.json.
       # Exports/Types laufen NUR --warn (FP-behaftet: Barrel-Re-Exports +
