@@ -4,7 +4,7 @@ import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
 import { getPaket } from '@/lib/pakete'
-import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
+import { CLOSED_OPERATIVE_STATUS_PG, COMPLETED_OPERATIVE_STATUS_VALUES } from '@/lib/claims/terminal-status'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -491,11 +491,10 @@ export default async function FinancePage() {
   // claim-ID-Set-Filterung reproduziert exakt dieselben Zeilen (verhaltensneutral).
   const [{ data: offeneClaimIds }, { data: abgeschlossenClaimIds }] = await Promise.all([
     supabase.from('claims').select('id').not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG),
-    // B2b-2 TODO (Provision-Semantik, Aaron): 'abgeschlossen'-Count zaehlt nach dem endzustand-Flip
-    // nur noch state-machine/werkstatt-Closes — KB-Closes tragen dann feine Terminals. Welche
-    // Terminals als "abgeschlossen fuer Provision" zaehlen (nur reguliert_vollstaendig, oder alle?)
-    // = Provision-Entscheidung -> bewusst noch nicht angefasst (heute verhaltensneutral).
-    supabase.from('claims').select('id').eq('operative_status', 'abgeschlossen'),
+    // B2b: 'abgeschlossen'-Count = alle nicht-stornierten Terminals (COMPLETED). Vor der Konsolidierung
+    // kollabierten alle Endzustaende auf coarse 'abgeschlossen'; nach dem endzustand-Flip tragen
+    // KB-Closes feine Terminals -> COMPLETED zaehlt exakt dieselbe Fallmenge (verhaltensneutral).
+    supabase.from('claims').select('id').in('operative_status', COMPLETED_OPERATIVE_STATUS_VALUES),
   ])
   const offeneClaimIdList = (offeneClaimIds ?? []).map((c) => c.id)
   const abgeschlossenClaimIdList = (abgeschlossenClaimIds ?? []).map((c) => c.id)

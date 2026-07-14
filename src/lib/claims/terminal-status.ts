@@ -42,6 +42,14 @@ export const CLOSED_OPERATIVE_STATUS: ReadonlySet<string> = new Set(CLOSED_OPERA
  *  Single source of truth — loest die verstreuten Inline-`'("abgeschlossen","storniert")'` ab. */
 export const CLOSED_OPERATIVE_STATUS_PG = `(${CLOSED_OPERATIVE_STATUS_VALUES.map((s) => `"${s}"`).join(',')})`
 
+/** "Abgeschlossene" (nicht-stornierte) operative_status-Terminals — exakt die Menge, die vor der
+ *  Achsen-Konsolidierung alle auf coarse 'abgeschlossen' kollabierte. Fuer "completed"-Counts
+ *  (z.B. Provision/abgeschlossene Faelle), die 'storniert' ausschliessen. Behavior-preserving zum
+ *  frueheren `.eq('operative_status','abgeschlossen')`, sobald endzustand die feinen Werte schreibt. */
+export const COMPLETED_OPERATIVE_STATUS_VALUES: string[] = CLOSED_OPERATIVE_STATUS_VALUES.filter(
+  (s) => s !== 'storniert',
+)
+
 /**
  * Returns true if the claim is in a closed/terminal state by ANY of the three axes:
  *   - status: terminal claims.status (ABSCHLUSS_SUBSTATE key)
