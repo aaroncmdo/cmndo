@@ -9,8 +9,9 @@
 // Action-Serialisierungs-Overhead importieren kann — der `SupabaseClient`-
 // Parameter wäre für ein Server-Action-Wrapping nicht zulässig.
 //
-// Externer Caller-Pfad: `updateLeadStatus(...,'umgewandelt')` in
-// `dispatch-fall-actions.ts`. Test-Pfad: `/api/admin/test/cmm48-smoke`.
+// Caller-Pfad: `meldeNeuenSchaden` (`kunde/schaden-melden`) + Test
+// `/api/admin/test/cmm48-smoke`. (Der frühere Dispatcher-Wrapper
+// `updateLeadStatus` wurde als verwaister Dead-Code entfernt.)
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/server'

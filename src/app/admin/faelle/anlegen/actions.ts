@@ -43,8 +43,8 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     .select('rolle')
     .eq('id', user.id)
     .single()
-  if (profile?.rolle !== 'admin' && profile?.rolle !== 'mitarbeiter') {
-    return { success: false, error: 'Nur Admins und Mitarbeiter koennen Faelle anlegen' }
+  if (profile?.rolle !== 'admin') {
+    return { success: false, error: 'Nur Admins können Fälle anlegen' }
   }
 
   if (!data.vorname?.trim() || !data.nachname?.trim() || !data.telefon?.trim() || !data.schadens_plz?.trim()) {
