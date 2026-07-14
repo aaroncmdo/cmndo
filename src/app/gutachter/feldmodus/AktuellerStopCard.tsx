@@ -26,6 +26,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
 import { completeAndAdvance, markSvVorOrt, markBesichtigungGestartet } from './actions'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export interface AktuellerStopCardProps {
@@ -171,14 +172,30 @@ export default function AktuellerStopCard({
     if (svIstDa || svVorOrtFiredRef.current) return
     if (!svInGeofence) return
     svVorOrtFiredRef.current = true
-    void markSvVorOrt(
-      stop.termin_id,
-      svPosition?.lat ?? stop.lat ?? 0,
-      svPosition?.lng ?? stop.lng ?? 0,
-      'geofence',
-    ).catch(() => {
-      svVorOrtFiredRef.current = false
-    })
+    if (!navigator.onLine) {
+      void enqueueOp({
+        kind: 'sv_vor_ort',
+        replay_class: 'C',
+        payload: {
+          terminId: stop.termin_id,
+          lat: svPosition?.lat ?? stop.lat ?? 0,
+          lng: svPosition?.lng ?? stop.lng ?? 0,
+          via: 'geofence',
+        },
+        entity_ref: { scope: 'feldmodus-termin', id: stop.termin_id },
+      }).catch(() => {
+        svVorOrtFiredRef.current = false
+      })
+    } else {
+      void markSvVorOrt(
+        stop.termin_id,
+        svPosition?.lat ?? stop.lat ?? 0,
+        svPosition?.lng ?? stop.lng ?? 0,
+        'geofence',
+      ).catch(() => {
+        svVorOrtFiredRef.current = false
+      })
+    }
   }, [svIstDa, svInGeofence, stop.termin_id, svPosition, stop.lat, stop.lng])
 
   // Phase 2: Beide vor Ort → besichtigung_gestartet_am
@@ -187,21 +204,37 @@ export default function AktuellerStopCard({
     if (!svIstDa) return
     if (kundeTracking.aktiviert && !kundeTracking.angekommenAm) return
     besichtigungFiredRef.current = true
-    void markBesichtigungGestartet(sessionId, stop.termin_id, 'beide_angekommen')
-      .then((res) => {
-        if (res.success) {
-          onArrived(
-            svPosition?.lat ?? stop.lat ?? 0,
-            svPosition?.lng ?? stop.lng ?? 0,
-            'geofence',
-          )
-        } else {
-          besichtigungFiredRef.current = false
-        }
-      })
-      .catch(() => {
+    if (!navigator.onLine) {
+      void enqueueOp({
+        kind: 'besichtigung_gestartet',
+        replay_class: 'C',
+        payload: { terminId: stop.termin_id, sessionId, via: 'beide_angekommen' },
+        entity_ref: { scope: 'feldmodus-termin', id: stop.termin_id },
+      }).catch(() => {
         besichtigungFiredRef.current = false
       })
+      onArrived(
+        svPosition?.lat ?? stop.lat ?? 0,
+        svPosition?.lng ?? stop.lng ?? 0,
+        'geofence',
+      )
+    } else {
+      void markBesichtigungGestartet(sessionId, stop.termin_id, 'beide_angekommen')
+        .then((res) => {
+          if (res.success) {
+            onArrived(
+              svPosition?.lat ?? stop.lat ?? 0,
+              svPosition?.lng ?? stop.lng ?? 0,
+              'geofence',
+            )
+          } else {
+            besichtigungFiredRef.current = false
+          }
+        })
+        .catch(() => {
+          besichtigungFiredRef.current = false
+        })
+    }
   }, [
     besichtigungLaeuft,
     svIstDa,
@@ -227,6 +260,19 @@ export default function AktuellerStopCard({
   function onManuellAngekommen() {
     if (besichtigungFiredRef.current) return
     besichtigungFiredRef.current = true
+    if (!navigator.onLine) {
+      void enqueueOp({
+        kind: 'besichtigung_gestartet',
+        replay_class: 'C',
+        payload: { terminId: stop.termin_id, sessionId, via: 'manuell' },
+        entity_ref: { scope: 'feldmodus-termin', id: stop.termin_id },
+      }).catch(() => {
+        besichtigungFiredRef.current = false
+      })
+      onArrived(svPosition?.lat ?? stop.lat ?? 0, svPosition?.lng ?? stop.lng ?? 0, 'manuell')
+      toast.success('Angekommen — wird synchronisiert sobald du online bist')
+      return
+    }
     startTransition(async () => {
       const res = await markBesichtigungGestartet(sessionId, stop.termin_id, 'manuell')
       if (res.success) {
