@@ -34,13 +34,13 @@ const ENDZUSTAENDE = [
 ] as const
 
 async function loadClaimContext(claimId: string): Promise<
-  | { ok: true; fallId: string; status: string | null; work_state: string | null; kbId: string | null }
+  | { ok: true; fallId: string; status: string | null; kbId: string | null }
   | { ok: false; error: string }
 > {
   const admin = createAdminClient()
   const { data: claim, error: claimErr } = await admin
     .from('claims')
-    .select('id, status, work_state, kundenbetreuer_id')
+    .select('id, status, kundenbetreuer_id')
     .eq('id', claimId)
     .maybeSingle()
 
@@ -59,7 +59,6 @@ async function loadClaimContext(claimId: string): Promise<
     ok: true,
     fallId: fall.fall_id as string,
     status: (claim.status as string | null) ?? null,
-    work_state: (claim.work_state as string | null) ?? null,
     kbId: (claim.kundenbetreuer_id as string | null) ?? null,
   }
 }
@@ -155,11 +154,10 @@ export async function markClaimAsInKommunikationVs(input: {
     return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
   }
 
-  // Validierung: KB muss den Fall tragen (work_state=in_bearbeitung), bevor er in
-  // die VS-Kommunikation geht. D2/T1.1b: Dispatch/Processing lebt auf work_state.
-  if (ctx.work_state !== 'in_bearbeitung') {
-    return { ok: false, error: `Übergang ${ctx.work_state ?? 'null'} → in_kommunikation_vs nicht erlaubt (work_state muss in_bearbeitung sein)` }
-  }
+  // (14.07.) Das fruehere work_state='in_bearbeitung'-Gate war redundant + kaputt: KB-Ownership
+  // erzwingt bereits authorizedForClaim() oben, und der Vorwaertsfluss setzt work_state NIE auf
+  // 'in_bearbeitung' (nur convert->dispatch_done; sonst Reset/smoke) -> das Gate blockte JEDEN
+  // normalen Claim. Entfernt -> konsistent mit den Geschwister-Endzustand-Aktionen.
 
   const set = await setEndzustandFields(
     input.claim_id,
