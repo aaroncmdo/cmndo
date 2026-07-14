@@ -19,25 +19,38 @@ export function NeueAnfrageDrawer() {
   const [nachname, setNachname] = useState('')
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
+  const [kennzeichen, setKennzeichen] = useState('')
   const [standortOffen, setStandortOffen] = useState(false)
-  // Place-Picker: strukturierte Auswahl (mit Koordinaten) ODER Freitext-Fallback (nur Text).
+  // Besichtigungsort-Picker: strukturierte Auswahl (mit Koordinaten) ODER Freitext-Fallback (nur Text).
   const [standortText, setStandortText] = useState('')
   const [standortPlace, setStandortPlace] = useState<PlaceResult | null>(null)
+  // Unfall-Qualifizierung: Verschulden entscheidet Haftpflicht vs. Kasko (der FlowLink haengt daran).
+  // 'eigenverantwortung' braucht die Kasko-Folgefrage — sonst disqualifiziert das Flow-Quali-Gate
+  // den Lead still (qualiFlowOutcome: eigenverantwortung + offene VS-Frage -> Abbruch).
+  const [schuldfrage, setSchuldfrage] = useState<'' | 'gegner' | 'unklar' | 'eigenverantwortung'>('')
+  const [eigeneVersicherung, setEigeneVersicherung] = useState<'' | 'ja' | 'nein'>('')
+  const [polizei, setPolizei] = useState<'' | 'ja' | 'nein'>('')
   const [ausgang, setAusgang] = useState<MaklerAnfrageAusgang>('rueckruf') // Default = Rueckruf
   const [rueckrufZeit, setRueckrufZeit] = useState('')
   const [notiz, setNotiz] = useState('')
   const [consent, setConsent] = useState(false)
-  const [serviceTyp, setServiceTyp] = useState<'komplett' | 'nur_gutachter'>('komplett')
 
   function reset() {
-    setVorname(''); setNachname(''); setTelefon(''); setEmail('')
-    setStandortText(''); setStandortPlace(null); setStandortOffen(false); setAusgang('rueckruf'); setRueckrufZeit('')
-    setNotiz(''); setConsent(false); setServiceTyp('komplett')
+    setVorname(''); setNachname(''); setTelefon(''); setEmail(''); setKennzeichen('')
+    setStandortText(''); setStandortPlace(null); setStandortOffen(false)
+    setSchuldfrage(''); setEigeneVersicherung(''); setPolizei('')
+    setAusgang('rueckruf'); setRueckrufZeit('')
+    setNotiz(''); setConsent(false)
   }
 
   function submit() {
     if (!vorname.trim() || !nachname.trim()) { toast.error('Vor- und Nachname erforderlich'); return }
     if (telefon.trim().length < 5) { toast.error('Telefonnummer erforderlich'); return }
+    // Kasko/Haftpflicht-Qualifizierung: 'Der Kunde selbst' ohne Kasko-Antwort wuerde den Lead
+    // im Flow still disqualifizieren -> Folgefrage hier erzwingen.
+    if (schuldfrage === 'eigenverantwortung' && !eigeneVersicherung) {
+      toast.error('Bitte angeben, ob der Kunde kaskoversichert ist.'); return
+    }
     if (!consent) { toast.error('Bitte die Einwilligung des Kunden bestätigen'); return }
     startTransition(async () => {
       const res = await erstelleMaklerAnfrage({
@@ -45,14 +58,17 @@ export function NeueAnfrageDrawer() {
         nachname,
         telefon,
         email: email || null,
+        kennzeichen: kennzeichen.trim() || null,
         standortPlz: standortPlace?.plz || null,
         standortOrt: standortPlace?.adresse || standortText.trim() || null,
         standortLat: standortPlace?.lat ?? null,
         standortLng: standortPlace?.lng ?? null,
         standortPlaceId: standortPlace?.place_id || null,
+        schuldfrage: schuldfrage || null,
+        eigeneVersicherung: eigeneVersicherung || null,
+        polizeiVorOrt: polizei === 'ja' ? true : polizei === 'nein' ? false : null,
         notiz: notiz || null,
         kundeEinwilligung: consent,
-        serviceTyp,
         ausgang,
         rueckrufStartZeit: ausgang === 'rueckruf' && rueckrufZeit ? new Date(rueckrufZeit).toISOString() : null,
       })
@@ -63,7 +79,7 @@ export function NeueAnfrageDrawer() {
     })
   }
 
-  const selectCard = (selected: boolean, onSelect: () => void, titel: string, sub: string, group: string) => (
+  const selectCard = (selected: boolean, onSelect: () => void, titel: string, sub: string | null, group: string) => (
     <label
       className={`flex cursor-pointer flex-col rounded-ios-md border p-3 text-sm transition ${
         selected ? 'border-claimondo-ondo bg-claimondo-ondo/10' : 'border-claimondo-border'
@@ -71,7 +87,7 @@ export function NeueAnfrageDrawer() {
     >
       <input type="radio" name={group} className="sr-only" checked={selected} onChange={onSelect} />
       <span className="font-semibold text-claimondo-navy">{titel}</span>
-      <span className="mt-0.5 text-xs text-claimondo-shield">{sub}</span>
+      {sub ? <span className="mt-0.5 text-xs text-claimondo-shield">{sub}</span> : null}
     </label>
   )
 
@@ -94,18 +110,19 @@ export function NeueAnfrageDrawer() {
           </div>
           <TextField label="Telefon" value={telefon} onChange={(e) => setTelefon(e.target.value)} placeholder="+49 …" />
           <TextField label="Email (optional)" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          <TextField label="Kennzeichen (optional)" value={kennzeichen} onChange={(e) => setKennzeichen(e.target.value)} placeholder="z. B. K-AB 1234" />
 
           <button
             type="button"
             className="text-sm font-medium text-claimondo-ondo underline-offset-2 hover:underline"
             onClick={() => setStandortOffen((v) => !v)}
           >
-            {standortOffen ? '− Standort ausblenden' : '+ Standort hinzufügen (optional)'}
+            {standortOffen ? '− Besichtigungsort ausblenden' : '+ Besichtigungsort hinzufügen (optional)'}
           </button>
           {standortOffen ? (
             <div className="space-y-1">
               <label className="block text-xs font-semibold text-claimondo-shield">
-                Standort des Fahrzeugs
+                Besichtigungsort (wo steht das Fahrzeug?)
               </label>
               <GooglePlaceAutocomplete
                 types={['address']}
@@ -116,10 +133,38 @@ export function NeueAnfrageDrawer() {
                 scrollIntoViewOnFocus
               />
               <p className="text-[11px] text-claimondo-shield">
-                Adresse aus der Liste wählen — dann kommt der Kunde bereits mit dem Standort vorausgefüllt in seine Anfrage.
+                Adresse aus der Liste wählen — dann kommt der Kunde bereits mit dem Besichtigungsort vorausgefüllt in seine Anfrage.
               </p>
             </div>
           ) : null}
+
+          {/* Verschulden — Haftpflicht vs. Kasko. Optional; 'Der Kunde selbst' erzwingt die Kasko-Folgefrage. */}
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-claimondo-shield">Wer hat den Unfall verursacht? (optional)</span>
+            <div className="grid grid-cols-1 gap-2">
+              {selectCard(schuldfrage === 'gegner', () => { setSchuldfrage('gegner'); setEigeneVersicherung('') }, 'Der Unfallgegner', 'Ideal — die Gegnerseite reguliert (Haftpflicht).', 'makler-anfrage-schuld')}
+              {selectCard(schuldfrage === 'eigenverantwortung', () => setSchuldfrage('eigenverantwortung'), 'Der Kunde selbst', 'Regulierung läuft über die Kaskoversicherung.', 'makler-anfrage-schuld')}
+              {selectCard(schuldfrage === 'unklar', () => { setSchuldfrage('unklar'); setEigeneVersicherung('') }, 'Noch unklar', 'Klären wir gemeinsam.', 'makler-anfrage-schuld')}
+            </div>
+            {schuldfrage === 'eigenverantwortung' ? (
+              <div className="space-y-1 rounded-ios-md bg-claimondo-bg p-3">
+                <span className="text-xs font-semibold text-claimondo-shield">Hat der Kunde eine Kaskoversicherung? *</span>
+                <div className="grid grid-cols-2 gap-3">
+                  {selectCard(eigeneVersicherung === 'ja', () => setEigeneVersicherung('ja'), 'Ja', null, 'makler-anfrage-kasko')}
+                  {selectCard(eigeneVersicherung === 'nein', () => setEigeneVersicherung('nein'), 'Nein', null, 'makler-anfrage-kasko')}
+                </div>
+              </div>
+            ) : null}
+          </div>
+
+          {/* Polizeibeteiligung */}
+          <div className="space-y-2">
+            <span className="text-xs font-semibold text-claimondo-shield">War die Polizei vor Ort? (optional)</span>
+            <div className="grid grid-cols-2 gap-3">
+              {selectCard(polizei === 'ja', () => setPolizei('ja'), 'Ja', null, 'makler-anfrage-polizei')}
+              {selectCard(polizei === 'nein', () => setPolizei('nein'), 'Nein', null, 'makler-anfrage-polizei')}
+            </div>
+          </div>
 
           <TextField
             label="Notiz für den Berater (optional)"
@@ -127,14 +172,6 @@ export function NeueAnfrageDrawer() {
             onChange={(e) => setNotiz(e.target.value)}
             placeholder="z. B. Parkschaden, möchte schnell, spricht wenig Deutsch …"
           />
-
-          <div className="space-y-2">
-            <span className="text-xs font-semibold text-claimondo-shield">Paket</span>
-            <div className="grid grid-cols-2 gap-3">
-              {selectCard(serviceTyp === 'komplett', () => setServiceTyp('komplett'), 'Komplett', 'Anwalt + Gutachten', 'makler-anfrage-paket')}
-              {selectCard(serviceTyp === 'nur_gutachter', () => setServiceTyp('nur_gutachter'), 'Nur Gutachten', 'Ohne Anwalt', 'makler-anfrage-paket')}
-            </div>
-          </div>
 
           <div className="space-y-2">
             <span className="text-xs font-semibold text-claimondo-shield">Wie soll es weitergehen?</span>
