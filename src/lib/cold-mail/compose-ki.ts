@@ -27,7 +27,7 @@ function buildSystem(rolle: ColdMailRolle): string {
     'Claimondo ist Deutschlands Plattform für Kfz-Schadensregulierung.',
     ROLLEN_KONTEXT[rolle],
     'Ton: sachlich-kompetent, seriös, B2B — KEIN reißerischer Werbeslang. Kurz (Body max ~1200 Zeichen).',
-    'Nutze wo sinnvoll die Merge-Platzhalter GENAU so: {Ansprechpartner}, {Firma}, {Ort}, {Vorname}. Erfinde keine Namen.',
+    'Nutze wo sinnvoll die Merge-Platzhalter GENAU so: {{Ansprechpartner}}, {{Firma}}, {{Ort}}, {{Vorname}}. Erfinde keine Namen.',
     'Der Body ist schlichtes HTML (<p>, <br>, <strong>, <ul><li>) — KEIN <html>/<head>/<body>, kein CSS, keine Bilder. Den Abmeldelink NICHT einbauen (wird separat angehängt).',
     'Antworte AUSSCHLIESSLICH mit einem JSON-Objekt: {"betreff": "...", "body_html": "..."} — kein Markdown, kein Text davor oder danach.',
   ].join('\n')

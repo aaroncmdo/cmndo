@@ -3,9 +3,9 @@ import { generiereColdMailVorlage } from '../compose-ki'
 
 describe('generiereColdMailVorlage', () => {
   it('parst JSON aus der KI-Antwort', async () => {
-    const generate = async () => '{"betreff":"Partnerschaft","body_html":"<p>Hallo {Ansprechpartner}</p>"}'
+    const generate = async () => '{"betreff":"Partnerschaft","body_html":"<p>Hallo {{Ansprechpartner}}</p>"}'
     const res = await generiereColdMailVorlage({ rolle: 'makler', ziel: 'Termin' }, { generate })
-    expect(res).toEqual({ ok: true, betreff: 'Partnerschaft', body_html: '<p>Hallo {Ansprechpartner}</p>' })
+    expect(res).toEqual({ ok: true, betreff: 'Partnerschaft', body_html: '<p>Hallo {{Ansprechpartner}}</p>' })
   })
   it('toleriert Prosa um das JSON herum', async () => {
     const generate = async () => 'Klar!\n{"betreff":"X","body_html":"<p>Y</p>"}\nViel Erfolg.'
