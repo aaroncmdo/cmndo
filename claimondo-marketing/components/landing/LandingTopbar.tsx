@@ -23,6 +23,13 @@ export type AuthenticatedUser = {
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
+  /**
+   * Ziel aller "Gutachter finden"-CTAs. Default = generischer Finder.
+   * Der Makler-Hub (/m/[code]) uebergibt hier den ATTRIBUIERTEN Einstieg
+   * (/start/makler/<id>) — sonst klaut der Header-CTA die Makler-Attribution
+   * (kein promotion_code_id -> keine Provision).
+   */
+  finderHref?: string
 }
 
 const PILL =
@@ -75,7 +82,7 @@ function NavDropdown({
 // Header eine Server-Komponente. Der Trigger ist ein echter Link zum Hub: Touch/
 // Klick navigiert zum Hub (graceful), Panel öffnet zusätzlich bei Maus-Hover und
 // bei Keyboard-Fokus (focus-within → tab-bar in die Items).
-export function LandingTopbar({ authenticatedUser }: Props) {
+export function LandingTopbar({ authenticatedUser, finderHref = '/gutachter-finden' }: Props) {
   const t = useTranslations('nav')
 
   // Menu-Arrays: hrefs kommen aus de.json, bleiben 1:1 übernommen.
@@ -151,7 +158,7 @@ export function LandingTopbar({ authenticatedUser }: Props) {
               sichtbarer Header-CTA. md+ (Desktop); auf Mobile uebernehmen das
               Hamburger-Menue (MobileNav) + der StickyCallBar-Finder-Button. */}
           <Link
-            href="/gutachter-finden"
+            href={finderHref}
             className="hidden items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97] md:inline-flex"
           >
             {t('gutachter_finden')}
@@ -177,7 +184,7 @@ export function LandingTopbar({ authenticatedUser }: Props) {
             ]}
             ratgeber={{ hubHref: '/ratgeber', label: t('ratgeber'), items: ratgeberMenu }}
             gutachter={{ hubHref: '/kfz-gutachter', label: t('gutachter'), items: gutachterMenu }}
-            finder={{ href: '/gutachter-finden', label: t('gutachter_finden') }}
+            finder={{ href: finderHref, label: t('gutachter_finden') }}
             menuLabel="Menü"
             closeLabel="Schließen"
           />

@@ -128,6 +128,9 @@ export const OPERATIVE_STATUS_LABEL: Record<string, string> = {
   'nachbesichtigung-laeuft': 'Nachbesichtigung läuft',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   'vs-abgelehnt': 'Versicherung abgelehnt',
+  // B4-slice-1b: sonst greift der Slug-Fallback unten und die Werkstatt liest „In kommunikation vs".
+  in_kommunikation_vs: 'Regulierung läuft',
+  abgelehnt: 'Versicherung hat abgelehnt',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
 }

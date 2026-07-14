@@ -4,6 +4,8 @@
 // direktem operative_status-Write (Praezedenz: endzustand-actions.ts). Diese Datei kapselt nur
 // die Vorbedingung + die Ziel-Konstanten; der Write lebt in der Server-Action (Task 4).
 
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
+
 export type ReparaturTerminLike = { status: string | null }
 export type ClaimCloseLike = { operative_status: string | null }
 
@@ -11,7 +13,12 @@ export const REPARATUR_CLOSE_STATUS = 'abgeschlossen' as const
 export const REPARATUR_CLOSE_GRUND = 'reparatur_erledigt' as const
 
 // Terminal-Zustaende, aus denen NICHT mehr geschlossen wird (idempotent + kein Reopen).
-const CLAIM_TERMINAL = new Set(['abgeschlossen', 'storniert', 'abgelehnt', 'verjaehrt'])
+// B4-slice-1b: war ein handgerolltes Set mit ZWEI Fehlern — (a) 'abgelehnt' ist NICHT terminal
+// (einfache, nachforderbare Ablehnung; der Fall laeuft weiter) und haette nach dem endzustand-
+// Write-Flip die Werkstatt daran gehindert, ihre Reparatur abzuschliessen; (b) die FEINEN
+// Terminals aus B2 (reguliert_vollstaendig etc.) fehlten → ein KB-geschlossener Claim galt hier
+// als offen. Beides faellt weg, indem wir die SSoT nutzen.
+const CLAIM_TERMINAL = CLOSED_OPERATIVE_STATUS
 
 /**
  * Darf die Werkstatt diese Reparatur jetzt abschließen? Nur wenn der Termin bestätigt ist

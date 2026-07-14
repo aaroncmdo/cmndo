@@ -15,9 +15,16 @@ export const ALLOWED_STATUS_VALUES = [
   // NUR fall_status-Enum-gueltige Werte: der Override schreibt claims.operative_status, und
   // v_claim_base castet ::fall_status -> ein enum-fremder Wert wirft bei JEDEM Read
   // 'invalid input value for enum fall_status' und reisst die ganze Akte + alle Portale runter.
-  // Die frueheren claims.status-Namen (in_bearbeitung/vs_kontakt/reguliert/abgelehnt/kanzlei) sind
-  // KEINE fall_status-Enum-Werte -> entfernt. Terminale claims.status-Aenderungen laufen ueber die
-  // Endzustand-Actions (markClaimAsReguliert etc.), nicht ueber den operative_status-Override.
+  // Die frueheren claims.status-Namen (in_bearbeitung/vs_kontakt/reguliert/kanzlei) sind KEINE
+  // fall_status-Enum-Werte -> entfernt.
+  //
+  // B4-slice-1b: 'in_kommunikation_vs'/'abgelehnt' SIND seit der Enum-Erweiterung (#4269) gueltig
+  // und stehen seit dem Write-Flip auch im Cursor — sie bleiben hier trotzdem BEWUSST DRAUSSEN.
+  // Grund: dieser Override schreibt NUR operative_status. Die zwei Outcomes muessen aber beide
+  // Achsen konsistent setzen (claims.status + operative_status) — das tun ausschliesslich die
+  // Endzustand-Actions (markClaimAsInKommunikationVs / markClaimAsAbgelehnt). Ein Override auf sie
+  // wuerde claims.status stehenlassen = Achsen-Drift. Korrigieren laesst sich ein solcher Claim
+  // weiterhin, indem man ihn per Override auf 'regulierung' zurueckstellt.
   'onboarding',
   'storniert',
   // Welle-6 Werte (Backward-Compat für ältere Fälle)

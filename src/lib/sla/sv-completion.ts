@@ -25,9 +25,16 @@ export const OPERATIVE_STATUS_ORDER: readonly string[] = [
   'anschlussschreiben',
   'regulierung',
   'regulierung-laeuft',
+  // B4-slice-1b: die zwei Non-Terminal-Outcomes. Sie MUESSEN hier stehen — `indexOf` liefert
+  // sonst -1 und deriveSvSlaCompletion meldet fuer ALLE vier SV-SLA-Typen "nicht erfuellt".
+  // Folge waere ein kritischer Eskalations-Task ("SLA-Verletzung: Gutachten-Upload") fuer einen
+  // Fall, dessen Gutachten laengst da ist und der schon bei der Versicherung verhandelt wird.
+  // Rang analog zu ihren Vorgaengern: in_kommunikation_vs == regulierung(-laeuft), abgelehnt == vs-abgelehnt.
+  'in_kommunikation_vs',
   'vs-kuerzt',
   'nachbesichtigung-laeuft',
   'vs-abgelehnt',
+  'abgelehnt',
   'klage',
   'zahlung-eingegangen',
   'abgeschlossen',

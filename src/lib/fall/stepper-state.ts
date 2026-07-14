@@ -64,7 +64,19 @@ function fallStatusToPhaseIndex(status: string): number {
     'kanzlei-uebergeben': 3,
     'anschlussschreiben': 4,
     'regulierung': 5,
+    // B4-slice-1b: die zwei Non-Terminal-Outcomes stehen operativ auf derselben Stufe wie
+    // 'regulierung' (VS-Verhandlung / Nachforderung).
+    'in_kommunikation_vs': 5,
+    'abgelehnt': 5,
     'abgeschlossen': 6,
+    // B2-Nachzug: seit der Achsen-Konsolidierung tragen KB-Closes die FEINEN Terminals direkt in
+    // operative_status (statt coarse 'abgeschlossen'). Ohne sie greift der `?? 0`-Fallback unten
+    // und der 7-Phasen-Stepper springt fuer einen ABGESCHLOSSENEN Fall zurueck auf "Besichtigung".
+    'reguliert_vollstaendig': 6,
+    'klage_rechtsstreit': 6,
+    'verjaehrt': 6,
+    'abgelehnt_final': 6,
+    'an_externe_kanzlei_uebergeben': 6,
     'storniert': -1,
   }
   return map[status] ?? 0

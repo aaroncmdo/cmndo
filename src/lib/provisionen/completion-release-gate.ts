@@ -21,11 +21,20 @@ export type ClaimCompletionInput = {
 export const RELEASE_HOLD_MS = 7 * 24 * 60 * 60 * 1000
 
 /**
- * Storniert/abgelehnt? → Provision wird storniert, nie freigegeben. Vereinheitlicht die frueher
+ * Storniert? → Provision wird storniert, nie freigegeben. Vereinheitlicht die frueher
  * uneinheitlichen Checks (makler: nur 'storniert'; werkstatt: 'storniert'|'abgelehnt').
+ *
+ * B4-slice-1b: `operativeStatus === 'abgelehnt'` ENTFERNT. Der Zweig war bisher TOT (die
+ * operative_status-Achse trug den Wert nie — 'abgelehnt' ist ein claims.status-Wert), waere aber
+ * mit dem endzustand-Write-Flip schlagartig LIVE geworden — und dann falsch: eine EINFACHE
+ * Ablehnung ist NICHT terminal (der Fall ist nachforderbar/eskalierbar und laeuft weiter, siehe
+ * NONTERMINAL_OPERATIVE_OUTCOME). Die Provision haette der Release-Runner auf 'storniert' gesetzt
+ * UND dem Partner "Der vermittelte Fall wurde storniert" gemailt — geldrelevant + kaum rueckholbar.
+ * Eine FINALE Ablehnung heisst 'abgelehnt_final' und wird hier bewusst nicht als Storno behandelt
+ * (unveraendertes Verhalten: sie laeuft ueber deriveCompletionTs).
  */
 export function istClaimStorniert(operativeStatus: string | null): boolean {
-  return operativeStatus === 'storniert' || operativeStatus === 'abgelehnt'
+  return operativeStatus === 'storniert'
 }
 
 /**
