@@ -25,9 +25,24 @@ Credentials-Seite komplett erledigt. Was noch fehlt, steht unten.
   `TEST_SV_PASSWORD`, `TEST_SV_EMAIL`. (`kb`/`dispatch` brauchen **kein** Passwort-Secret — sie fallen in
   `_golden-path-lib` sauber auf den Default `Test1234!` zurück. Ein Passwort-**Passthrough** wäre hier sogar
   schädlich: ein unbesetztes Secret rendert als `''`, und `?? 'Test1234!'` fängt `''` **nicht** ab.)
-- **Beweis erbracht:** exakt der `_golden-path-lib`-Flow (password-grant → Challenge → TOTP-Verify) liefert
-  für **4/4 Rollen** eine **`aal2`**-Session. Damit ist die Skip-Ursache beseitigt.
+- **`force_password_change=false`** gesetzt (der Spalten-Default ist `true` → sonst redirect auf
+  `/passwort-aendern` **vor** jeder Portal-Seite → Test scheitert). ⚠ Bei künftiger Account-Anlage mit setzen.
 - **`ci.yml`-Passthrough** der 4 TOTP-Secrets ergänzt (in diesem PR).
+
+### ✅✅ Empirisch bewiesen (End-to-End gegen Prod, nicht nur Auth-API)
+`npx playwright test tests/e2e/flows/portal-header-phase2.spec.ts` gegen `app.claimondo.de` mit den
+frischen Credentials (CI=1, damit kein lokaler webServer startet):
+
+```
+passed=3  failed=1  skipped=0
+```
+
+- **0 Skips** = die Skip-Ursache ist WEG. `loginContextOrSkip` hätte bei kaputtem Login geskippt; stattdessen
+  liefen die Tests, der Browser erreichte auth-gegatete Seiten (`/admin/versicherungen`) → **Login + TOTP +
+  Cookie-Injection funktionieren für alle Rollen.** (Das ist mehr als der aal2-Auth-API-Beweis: hier lief der
+  ganze Playwright-Login inkl. `sessionToCookies`/`addCookies`.)
+- **1 failed = `admin › /admin/versicherungen`** (`[data-page-header-card]` not found) → genau der Prod-Lag:
+  diese von #4230 migrierte Seite ist noch nicht auf Prod. **Kein Bug — der Test sagt jetzt die Wahrheit.**
 
 ## ⚠ Was noch fehlt — und warum der Smoke trotzdem erst mal ROT wird
 
