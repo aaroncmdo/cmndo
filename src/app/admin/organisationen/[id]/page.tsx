@@ -60,6 +60,20 @@ export default async function OrganisationDetailPage({
   // Status-Text/-Farbe als die Zeile, aus der man gerade geklickt hat.
   const statusBadge = orgOnboardingBadge(org.onboardingStatus)
 
+  // Communities sind organisationen mit typ='community' (keine eigene Tabelle),
+  // haben aber eine EIGENE Liste. Der Zurueck-Link muss dorthin fuehren, wo der
+  // Nutzer hergekommen ist — sonst landet er auf einer fremden Liste.
+  const istCommunity = org.typ === 'community'
+  const backHref = istCommunity ? '/admin/communities' : '/admin/organisationen'
+  const backLabel = istCommunity ? 'Communities' : 'Organisationen'
+  const typLabel = istCommunity
+    ? 'Community'
+    : org.typ === 'akademie'
+      ? 'Akademie'
+      : org.typ === 'buero'
+        ? 'Büro'
+        : (org.typ ?? '—')
+
   const base = `/admin/organisationen/${id}`
   const tabs: DetailTab[] = [
     { key: 'stammdaten', label: 'Stammdaten', href: base },
@@ -71,15 +85,13 @@ export default async function OrganisationDetailPage({
     <EntityDetailShell
       variant={variant}
       title={org.name}
-      backHref="/admin/organisationen"
-      backLabel="Organisationen"
+      backHref={backHref}
+      backLabel={backLabel}
       tabs={tabs}
       activeTab={activeTab}
       description={
         <span className="flex items-center gap-2 flex-wrap">
-          <StatusBadge colorCls="bg-claimondo-bg text-claimondo-ondo">
-            {org.typ === 'akademie' ? 'Akademie' : org.typ === 'buero' ? 'Büro' : (org.typ ?? '—')}
-          </StatusBadge>
+          <StatusBadge colorCls="bg-claimondo-bg text-claimondo-ondo">{typLabel}</StatusBadge>
           <StatusBadge colorCls={statusBadge.colorCls}>
             <statusBadge.Icon className="w-3 h-3" /> {statusBadge.label}
           </StatusBadge>

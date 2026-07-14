@@ -2,10 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
+import { SaveIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
 import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser, clearTwoFaForUser, setPhoneLoginNummer } from '../actions'
-import PageHeader from '@/components/shared/PageHeader'
+import EntityDetailShell from '@/components/shared/detail/EntityDetailShell'
 import { Button } from '@/components/primitives'
 import { TextField as SharedTextField } from '@/components/shared/forms'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -50,22 +49,14 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
   const name = [m.vorname, m.nachname].filter(Boolean).join(' ') || '—'
 
   return (
-    <div className="py-8"><div>
-      <Link href="/admin/team" className="text-claimondo-ondo hover:text-claimondo-navy text-sm transition-colors flex items-center gap-1 mb-4"><ArrowLeftIcon className="w-4 h-4" />Zurück</Link>
-
-      <div className="mb-6">
-        <PageHeader
-          title={name}
-          description={`${m.email as string} · ${m.rolle as string}`}
-          size="lg"
-          leadingSlot={
-            <div className="w-14 h-14 bg-claimondo-bg rounded-full flex items-center justify-center shrink-0">
-              <UserIcon className="w-7 h-7 text-claimondo-ondo" />
-            </div>
-          }
-        />
-      </div>
-
+    <EntityDetailShell
+      title={name}
+      description={`${m.email as string} · ${m.rolle as string}`}
+      backHref="/admin/team"
+      backLabel="Personal"
+    >
+      <div className="flex-1 overflow-y-auto p-4">
+      <div className="max-w-5xl mx-auto">
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {stats.isDispatch ? (<>
@@ -357,6 +348,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
         </div>
       </div>
     </div></div>
+    </EntityDetailShell>
   )
 }
 
