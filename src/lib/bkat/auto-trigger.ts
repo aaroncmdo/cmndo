@@ -23,6 +23,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { after } from 'next/server'
 import { inferBkatFromPolizeibericht } from './inference'
+import { resignStorageUrl } from '@/lib/storage/url'
 import { bkatToLegacySchadentyp } from './lookup'
 
 /**
@@ -36,7 +37,12 @@ export async function triggerAutoBkatOcr(
   bildUrl: string,
 ): Promise<void> {
   try {
-    const result = await inferBkatFromPolizeibericht([bildUrl])
+    // Die uebergebene URL ist nicht zwingend abrufbar: `fall-dokumente` ist ein PRIVATER
+    // Bucket → eine getPublicUrl liefert HTTP 400, eine signed-URL laeuft nach ihrer TTL ab.
+    // Anthropic-Vision holt das Bild OHNE Auth (source.type='url') → frisch signieren.
+    // Nicht-Storage-URLs (z.B. Twilio-Media) parsen nicht und fallen unveraendert durch.
+    const fetchbareUrl = (await resignStorageUrl(supabase, bildUrl)) ?? bildUrl
+    const result = await inferBkatFromPolizeibericht([fetchbareUrl])
     if (result.source !== 'ocr' || !result.unfallart) {
       // OCR lief, fand aber keine verwertbare TBNR oder Claude hat keine
       // Unfallart zugeordnet. Kein Fehler — Dispatcher wird später via
