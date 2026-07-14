@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import PageHeader from '@/components/shared/PageHeader'
 import { ModerationActions } from './ModerationActions'
 
 export const dynamic = 'force-dynamic'
@@ -36,10 +37,11 @@ export default async function KommentarModerationPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-claimondo-navy">Kommentar-Moderation</h1>
-      <p className="mt-1 text-sm text-claimondo-shield">
-        {rows.length} ausstehende{reported.length > 0 ? ` · ${reported.length} gemeldete` : ''} Kommentare.
-      </p>
+      <PageHeader
+        title="Kommentar-Moderation"
+        description={<>{rows.length} ausstehende{reported.length > 0 ? ` · ${reported.length} gemeldete` : ''} Kommentare.</>}
+        size="lg"
+      />
 
       <details className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-4 text-sm text-claimondo-shield">
         <summary className="cursor-pointer font-semibold text-claimondo-navy">Moderations-Leitfaden — wann ablehnen?</summary>

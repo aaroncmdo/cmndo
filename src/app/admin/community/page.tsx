@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { requireRole } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import PageHeader from '@/components/shared/PageHeader'
 import { ModActions } from './ModActions'
 
 export const dynamic = 'force-dynamic'
@@ -72,10 +73,11 @@ export default async function CommunityModerationPage() {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-claimondo-navy">Community-Moderation</h1>
-      <p className="mt-1 text-sm text-claimondo-shield">
-        {posts.length} gemeldete/versteckte Beiträge · {comments.length} gemeldete/versteckte Kommentare
-      </p>
+      <PageHeader
+        title="Community-Moderation"
+        description={<>{posts.length} gemeldete/versteckte Beiträge · {comments.length} gemeldete/versteckte Kommentare</>}
+        size="lg"
+      />
 
       {/* Beiträge */}
       <section className="mt-6">

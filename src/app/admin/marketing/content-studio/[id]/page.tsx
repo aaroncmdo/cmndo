@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { ContentScriptSchema } from '@/lib/marketing/schema'
+import PageHeader from '@/components/shared/PageHeader'
 import { STATUS_LABEL, STATUS_TONE } from '../status-display'
 import { RetryButton } from '../RetryButton'
 import { ScriptEditor } from '../ScriptEditor'
@@ -30,17 +31,16 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
         ← Zurück zum Content-Studio
       </Link>
 
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">{job.thema}</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-            {job.format === 'ad' ? 'Ad / Werbung' : 'Ratgeber'}
-          </p>
-        </div>
-        <StatusBadge tone={STATUS_TONE[job.status] ?? 'neutral'}>
-          {STATUS_LABEL[job.status] ?? job.status}
-        </StatusBadge>
-      </div>
+      <PageHeader
+        title={job.thema}
+        description={job.format === 'ad' ? 'Ad / Werbung' : 'Ratgeber'}
+        size="lg"
+        actions={
+          <StatusBadge tone={STATUS_TONE[job.status] ?? 'neutral'}>
+            {STATUS_LABEL[job.status] ?? job.status}
+          </StatusBadge>
+        }
+      />
 
       {job.status === 'fehler' && job.fehler_text ? (
         <SectionCard>

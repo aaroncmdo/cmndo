@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon } from 'lucide-react'
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { KiExecuteButton } from '@/components/shared/KiExecuteButton'
 
@@ -52,12 +53,11 @@ export default function MyTasksClient({
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto space-y-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Tasks</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${assigned.length} offen zugewiesen, ${created.length} von dir erstellt`}</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Meine Tasks"
+        description={`${assigned.length} offen zugewiesen, ${created.length} von dir erstellt`}
+        size="lg"
+      />
 
       <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium">
         <button onClick={() => setTab('assigned')}

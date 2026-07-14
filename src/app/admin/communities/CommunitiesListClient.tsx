@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
 import CommunityAnlegenWizard from './CommunityAnlegenWizard'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Community = {
   id: string
@@ -20,18 +21,19 @@ export default function CommunitiesListClient({ communities }: { communities: Co
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Communities</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Einkaufsgemeinschaften mit gemeinsamem Einsatzgebiet, eigenem Pool und Leaderboard.</p>
-        </div>
-        <button
-          onClick={() => setShowWizard(true)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-body-sm font-semibold"
-        >
-          <PlusIcon className="w-4 h-4" /> Neue Community
-        </button>
-      </div>
+      <PageHeader
+        title="Communities"
+        description="Einkaufsgemeinschaften mit gemeinsamem Einsatzgebiet, eigenem Pool und Leaderboard."
+        size="lg"
+        actions={
+          <button
+            onClick={() => setShowWizard(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-body-sm font-semibold"
+          >
+            <PlusIcon className="w-4 h-4" /> Neue Community
+          </button>
+        }
+      />
 
       {showWizard ? (
         <div className="glass-light border border-claimondo-border rounded-ios-md p-6">
