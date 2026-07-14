@@ -8,8 +8,10 @@ import { sendColdMail, coldMailFromAddress } from '../send'
 beforeEach(() => { sendMock.mockReset(); delete process.env.COLD_MAIL_FROM_DOMAIN })
 
 describe('coldMailFromAddress', () => {
-  it('nutzt Default-Subdomain', () => {
-    expect(coldMailFromAddress()).toBe('Claimondo Partnernetzwerk <partner@mail.claimondo.de>')
+  // Default = die einzige bei Resend verifizierte Domain. 'mail.claimondo.de' existiert
+  // im DNS nicht -> waere "domain not verified" bei JEDEM Send.
+  it('nutzt die verifizierte Default-Domain', () => {
+    expect(coldMailFromAddress()).toBe('Claimondo Partnernetzwerk <partner@claimondo.de>')
   })
   it('respektiert COLD_MAIL_FROM_DOMAIN', () => {
     process.env.COLD_MAIL_FROM_DOMAIN = 'post.example.de'
