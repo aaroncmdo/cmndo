@@ -26,6 +26,7 @@ import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/ver
 import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
 import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -231,6 +232,33 @@ export async function erzeugeSelbstzahlerClaim(
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
   const conv = await convertLeadToClaim({ leadId })
   if (!conv.ok) return { ok: false, error: conv.error }
+
+  // ⚠ Aaron 15.07. — Sichtbarkeit fuer den Dispatch (bisher entstand der Kasko/Selbstzahler-Claim
+  // KOMPLETT STILL: nur revalidatePath, keine Mitteilung). Der Dispatcher muss nichts tun — der Kunde
+  // geht direkt zur Werkstatt — aber ein neuer Fall soll nicht unsichtbar entstehen.
+  // NUR bei frischer Konversion: convertLeadToClaim ist idempotent und liefert bei einem bereits
+  // konvertierten Lead claimNummer=null (gleiche Antwort wie beim ersten Mal, aber ohne Nummer). So
+  // feuert eine Quali-Wiederholung keine zweite Mitteilung. Non-critical.
+  if (conv.claimNummer != null) {
+    try {
+      const dispId = (leadRow as Record<string, unknown> | null)?.zugewiesen_an as string | null
+      if (dispId) {
+        await createMitteilung({
+          empfaenger_id: dispId,
+          empfaenger_rolle: 'admin',
+          kategorie: 'update',
+          titel:
+            abrechnungsweg === 'kasko' ? 'Neuer Kasko-Fall' : 'Neuer Selbstzahler-Fall',
+          inhalt: 'Kunde regelt direkt über die Werkstatt (kein Gutachter).',
+          kontext_typ: 'fall',
+          kontext_id: conv.claimId,
+        })
+      }
+    } catch (err) {
+      console.error('[erzeugeSelbstzahlerClaim] Dispatch-Mitteilung fehlgeschlagen (non-fatal):', err)
+    }
+  }
+
   revalidatePath('/dispatch/leads')
   return { ok: true, claimId: conv.claimId }
 }
