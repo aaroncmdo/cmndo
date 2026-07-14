@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKartenFuerFirma } from '@/lib/schadenkarte/schadenkarte'
 import KartenClient from './KartenClient'
-import { identifiziereKarte, baueKartenQrPdf } from './actions'
+import { identifiziereKarte, baueKartenQrPdf, sperreKarte, entsperreKarte, entbindeKarte } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,7 +24,14 @@ export default async function KartenPage() {
           Schadenkarten scannen und Fahrzeuge identifizieren.
         </p>
       </div>
-      <KartenClient karten={karten} onIdentify={identifiziereKarte} onQrPdf={baueKartenQrPdf} />
+      <KartenClient
+        karten={karten}
+        onIdentify={identifiziereKarte}
+        onQrPdf={baueKartenQrPdf}
+        onSperren={sperreKarte}
+        onEntsperren={entsperreKarte}
+        onEntbinden={entbindeKarte}
+      />
     </div>
   )
 }
