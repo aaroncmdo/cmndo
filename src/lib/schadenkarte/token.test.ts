@@ -8,6 +8,10 @@ describe('schadenkarte token', () => {
     expect(generateSchadenkarteToken()).not.toBe(t)
   })
   it('extracts token from a full /schaden URL', () => {
+    // Host-agnostisch (der Parser matcht nur auf /schaden/<token>) -- aber der KANONISCHE
+    // Host ist app.claimondo.de. claimondo.de ist die Marketing-Seite und liefert 404;
+    // siehe lib/schadenkarte/url.ts.
+    expect(extractSchadenkarteToken('https://app.claimondo.de/schaden/SKT-ABCDEFGH23456789')).toBe('SKT-ABCDEFGH23456789')
     expect(extractSchadenkarteToken('https://claimondo.de/schaden/SKT-ABCDEFGH23456789')).toBe('SKT-ABCDEFGH23456789')
   })
   it('extracts a bare token (normalises case)', () => {

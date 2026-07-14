@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { resolveSchadenkarteToFahrzeug, getKartenFuerFirma } from '@/lib/schadenkarte/schadenkarte'
+import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { buildQrGridPdf } from '@/lib/werkstatt/flyer/build-qr-grid'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +54,7 @@ export async function baueKartenQrPdf(): Promise<
   try {
     const entries = karten.map((k) => ({
       token: k.token,
-      url: `https://claimondo.de/schaden/${k.token}`,
+      url: buildSchadenkarteUrl(k.token),
     }))
     const bytes = await buildQrGridPdf(entries)
     return { ok: true, base64: Buffer.from(bytes).toString('base64') }
