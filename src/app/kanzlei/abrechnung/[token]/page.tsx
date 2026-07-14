@@ -51,8 +51,8 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
       <main className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">🔒</div>
-          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link ungueltig</h1>
-          <p className="text-claimondo-ondo">Dieser Abrechnungslink ist nicht gueltig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>.</p>
+          <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link ungültig</h1>
+          <p className="text-claimondo-ondo">Dieser Abrechnungslink ist nicht gültig oder wurde bereits verwendet. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a>.</p>
         </div>
       </main>
     )
@@ -67,7 +67,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         <div className="bg-white rounded-2xl shadow p-8 max-w-md w-full text-center">
           <div className="text-4xl mb-4">⏳</div>
           <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
-          <p className="text-claimondo-ondo">Dieser Link ist nicht mehr gueltig. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a> fuer einen neuen Link.</p>
+          <p className="text-claimondo-ondo">Dieser Link ist nicht mehr gültig. Bitte kontaktieren Sie uns unter <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline">aaron.sprafke@claimondo.de</a> für einen neuen Link.</p>
         </div>
       </main>
     )
@@ -136,7 +136,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         {/* Empfaenger */}
         {kanzlei && (
           <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-3">Rechnungsempfaenger</h2>
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-3">Rechnungsempfänger</h2>
             <p className="font-bold text-claimondo-navy">{kanzlei.name}</p>
             {kanzlei.ansprechpartner && <p className="text-claimondo-ondo">{kanzlei.ansprechpartner}</p>}
             {kanzlei.adresse && <p className="text-claimondo-ondo text-sm">{kanzlei.adresse}</p>}
@@ -146,7 +146,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
 
         {payment === 'success' && (
           <div className="bg-success-soft border border-success/30 rounded-2xl p-4 text-success-strong">
-            ✅ Zahlung eingegangen! Vielen Dank. Die Bestaetigung erhalten Sie per Email.
+            ✅ Zahlung eingegangen! Vielen Dank. Die Bestätigung erhalten Sie per E-Mail.
           </div>
         )}
 
@@ -201,7 +201,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</span>
             </div>
             <p className="text-xs text-claimondo-ondo/70 pt-1">
-              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
+              Fällig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
             </p>
           </div>
         </div>
