@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildKennzeichen, buildKennzeichenFields, parseKennzeichen } from './kennzeichen'
+import { buildKennzeichen, buildKennzeichenFields, parseKennzeichen, clampKennzeichenForDb } from './kennzeichen'
 
 describe('buildKennzeichen', () => {
   it('baut die kombinierte Form mit Suffix', () => {
@@ -74,5 +74,26 @@ describe('parseKennzeichen (round-trip-Sanity)', () => {
       zahl: '1234',
       suffix: 'E',
     })
+  })
+})
+
+describe('clampKennzeichenForDb (F5 - varchar(20)-Overflow-Schutz)', () => {
+  it('null/undefined/leer/whitespace -> null', () => {
+    expect(clampKennzeichenForDb(null)).toBeNull()
+    expect(clampKennzeichenForDb(undefined)).toBeNull()
+    expect(clampKennzeichenForDb('')).toBeNull()
+    expect(clampKennzeichenForDb('   ')).toBeNull()
+  })
+  it('valides Kennzeichen bleibt unveraendert (<= 20)', () => {
+    expect(clampKennzeichenForDb('B-TE 9999')).toBe('B-TE 9999')
+    expect(clampKennzeichenForDb('  M-XY 1234  ')).toBe('M-XY 1234')
+  })
+  it('ueberlanger Freitext wird auf 20 Zeichen gekuerzt (B1-Repro, kein Crash)', () => {
+    const clamped = clampKennzeichenForDb('Berlin Teststrasse 1 - Auffahrunfall Test')
+    expect(clamped).toHaveLength(20)
+    expect(clamped).toBe('Berlin Teststrasse 1')
+  })
+  it('genau 20 Zeichen bleibt 20', () => {
+    expect(clampKennzeichenForDb('12345678901234567890')).toBe('12345678901234567890')
   })
 })

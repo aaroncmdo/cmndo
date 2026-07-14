@@ -8,6 +8,22 @@
 // beim Partner konfiguriert). Ein toter Kanal soll automatisch auffallen.
 // Siehe memory/HANDOFF-vercel-cleanup-remaining.md.
 //
+// ─── Go-Live-Sweep B7 (14.07.2026): ALARM-MASKIERUNG GEFIXT ─────────────────────
+// `webhook_events` ist KEINE reine Inbound-Tabelle. `processLexDriveEvent` schreibt dort
+// auch INTERNE Admin-Aktionen (manueller Status-Override, LexDrive-Trigger-Panel):
+//
+//   process-event.ts:735 → const source = input.source === 'manual' ? 'manual_admin' : 'lexdrive'
+//
+// Der Check las die Tabelle bisher UNGEFILTERT (nur order(created_at).limit(1)). Folge:
+// jede ganz normale Admin-Aktion schrieb eine frische `manual_admin`-Zeile und setzte damit
+// die „Inbound"-Uhr auf 0 — ein TOTER Rückkanal wurde als gesund gemeldet. Also eine
+// FALSCHE ENTWARNUNG in genau dem Check, der den toten Kanal finden soll.
+// (Schwesterfall B6/PR #4218: dort ein Fehlalarm, hier das Gegenteil — beide Male war die
+// Check-Spezifikation der Bug, nicht die Integration.)
+//
+// Fix: pro Kanal optional auf die echte Inbound-Quelle filtern (`source='lexdrive'`).
+// Matelso/Aircall haben dedizierte Landing-Tabellen ohne Fremd-Writer → kein Filter nötig.
+//
 // WICHTIG: Kein roh-SQL im .select() — max(created_at) via .order+.limit(1),
 // Altersberechnung in JS. Jede Landing-Tabelle ist der natürliche Empfangs-
 // Nachweis → kein Route-Change / Heartbeat nötig.
@@ -25,8 +41,21 @@ export type ChannelSilence = {
 
 // Kanäle + dedizierte Landing-Tabelle (created_at = letztes Inbound-Event).
 // LexDrive: enger Takt (Kanzlei-Status). Matelso/Aircall: Call-Kanäle, gröberer Takt.
-const CHANNELS: ReadonlyArray<{ id: string; label: string; table: string; warnTage: number; critTage: number }> = [
-  { id: 'lexdrive', label: 'LexDrive', table: 'webhook_events', warnTage: 7, critTage: 30 },
+const CHANNELS: ReadonlyArray<{
+  id: string
+  label: string
+  table: string
+  /**
+   * Nur ECHTE Inbound-Zeilen zählen. Zu setzen, wenn die Landing-Tabelle AUCH von internen
+   * Pfaden beschrieben wird — sonst maskiert interne Aktivität einen toten Rückkanal.
+   * `webhook_events` teilt sich die Tabelle mit `source='manual_admin'` (Admin-UI);
+   * echter Inbound ist ausschließlich `source='lexdrive'`.
+   */
+  inboundSource?: string
+  warnTage: number
+  critTage: number
+}> = [
+  { id: 'lexdrive', label: 'LexDrive', table: 'webhook_events', inboundSource: 'lexdrive', warnTage: 7, critTage: 30 },
   { id: 'matelso', label: 'Matelso', table: 'matelso_calls', warnTage: 14, critTage: 45 },
   { id: 'aircall', label: 'Aircall', table: 'aircall_calls', warnTage: 14, critTage: 45 },
 ]
@@ -77,11 +106,11 @@ export const webhookInboundSilentCheck: HealthCheck = {
   async run(ctx): Promise<CheckResult> {
     const channels: ChannelSilence[] = []
     for (const k of CHANNELS) {
-      const { data, error } = await ctx.supabase
-        .from(k.table)
-        .select('created_at')
-        .order('created_at', { ascending: false })
-        .limit(1)
+      const base = ctx.supabase.from(k.table).select('created_at')
+      // B7: nur echte Inbound-Zeilen — interne `manual_admin`-Writes dürfen die Uhr NICHT stellen.
+      const query = k.inboundSource ? base.eq('source', k.inboundSource) : base
+
+      const { data, error } = await query.order('created_at', { ascending: false }).limit(1)
 
       if (error) {
         return { status: 'error', detail: `${k.label}: DB-Fehler beim Prüfen — ${error.message}` }

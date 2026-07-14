@@ -41,6 +41,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { parseUhrzeit } from '@/lib/format/zeit'
+import { clampKennzeichenForDb } from '@/lib/format/kennzeichen'
 import type { ClaimInsert } from '@/lib/claims/types'
 import { emitEvent } from '@/lib/notifications/emit'
 
@@ -122,7 +123,7 @@ export async function convertLeadToClaim(
     const veh = await ensureVehicleFromFin({
       fin: lead.fin as string,
       snapshot: {
-        kennzeichen: (lead.kennzeichen as string | null) ?? null,
+        kennzeichen: clampKennzeichenForDb(lead.kennzeichen as string | null),
         hersteller: (lead.fahrzeug_hersteller as string | null) ?? null,
         modell: (lead.fahrzeug_modell as string | null) ?? null,
         hsn: (lead.hsn as string | null) ?? null,
@@ -161,7 +162,7 @@ export async function convertLeadToClaim(
     // kommt spaeter (ZB1) und dedupliziert via ensureVehicleFromFin (ein Fahrzeug, mehrere Claims).
     const veh = await createVehicleStub({
       snapshot: {
-        kennzeichen: (lead.kennzeichen as string | null) ?? null,
+        kennzeichen: clampKennzeichenForDb(lead.kennzeichen as string | null),
         hersteller: (lead.fahrzeug_hersteller as string | null) ?? null,
         modell: (lead.fahrzeug_modell as string | null) ?? null,
         hsn: (lead.hsn as string | null) ?? null,
@@ -617,7 +618,7 @@ export async function convertLeadToClaim(
       ist_eingeladen_via_airdrop: false,
       hat_personenschaden: Boolean(lead.personenschaden_flag ?? false),
       vehicle_id: resolvedVehicleId,
-      kennzeichen: (lead.kennzeichen as string | null) ?? null,
+      kennzeichen: clampKennzeichenForDb(lead.kennzeichen as string | null),
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
     },
@@ -662,7 +663,7 @@ export async function convertLeadToClaim(
       // gegner_name ist freitext — wir packen den ganzen String in nachname.
       // Kann null sein, wenn der Gegner nur per KZ/Versicherung erfasst wurde.
       nachname: (lead.gegner_name as string | null) ?? null,
-      kennzeichen: (lead.gegner_kennzeichen as string | null) ?? null,
+      kennzeichen: clampKennzeichenForDb(lead.gegner_kennzeichen as string | null),
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
       // CMM-Entity Follow-up (B): Fuzzy-Fallback analog claims.gegner_versicherung_id —
       // sonst hat claims den VS-Entity-Link, die verursacher-Party aber nicht.
@@ -722,7 +723,7 @@ export async function convertLeadToClaim(
       ist_eingeladen_via_airdrop: false,
       hat_personenschaden: false,
       vehicle_id: resolvedVehicleId,
-      kennzeichen: (lead.kennzeichen as string | null) ?? null,
+      kennzeichen: clampKennzeichenForDb(lead.kennzeichen as string | null),
       quelle: 'lead_konvertierung',
       created_by_user_id: input.triggerByUserId ?? null,
     })
