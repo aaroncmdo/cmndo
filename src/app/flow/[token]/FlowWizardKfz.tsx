@@ -19,6 +19,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
+import TerminOfflineHinweis from './TerminOfflineHinweis'
 import { aendereTerminFlow } from './self-service-actions'
 import { BeratungsterminCard } from './BeratungsterminCard'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
@@ -690,17 +691,26 @@ export default function FlowWizardKfz({
 
             {/* ═══ AAR-956 §3a: TERMIN (Slot-Picker, nur incomplete-Pfad) ═══ */}
             {currentStep.id === 'termin' && (
-              <FlowSlotStep
-                token={token}
-                onGebucht={(t) => {
-                  setGebuchterTermin(t)
-                  setStepIndex(stepIndexById('gutachter'))
-                }}
-                onOhneTermin={() => {
-                  setOhneTermin(true)
-                  setStepIndex(stepIndexById('sa'))
-                }}
-              />
+              !isOnline ? (
+                <TerminOfflineHinweis
+                  onSkip={() => {
+                    setOhneTermin(true)
+                    setStepIndex(stepIndexById('sa'))
+                  }}
+                />
+              ) : (
+                <FlowSlotStep
+                  token={token}
+                  onGebucht={(t) => {
+                    setGebuchterTermin(t)
+                    setStepIndex(stepIndexById('gutachter'))
+                  }}
+                  onOhneTermin={() => {
+                    setOhneTermin(true)
+                    setStepIndex(stepIndexById('sa'))
+                  }}
+                />
+              )
             )}
 
             {/* ═══ SCHRITT 2: GUTACHTER-ANZEIGE (AAR-99) ═══ */}
