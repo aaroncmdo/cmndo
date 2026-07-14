@@ -273,8 +273,11 @@ export async function convertLeadToClaim(
       (lead.unfallort as string | null) ??
       (lead.fahrzeug_standort_adresse as string | null) ??
       null,
-    schadenort_plz: (lead.fahrzeug_standort_plz as string | null) ?? null,
-    schadenort_ort: null,
+    // F6 (Aaron 14.07.): Schadensort-plz/ort aus dem STRUKTURIERTEN Unfallort (leads.unfallort_plz/ort,
+    // Google-Places — Form-Wiring folgt) statt aus der Fahrzeug-Standort-PLZ (falsches Orts-Konzept).
+    // Bis das Formular unfallort_plz/ort befuellt = null (besser als die falsche Fahrzeug-PLZ).
+    schadenort_plz: (lead.unfallort_plz as string | null) ?? null,
+    schadenort_ort: (lead.unfallort_ort as string | null) ?? null,
     // CMM-44 SP-A2: unfallort_lat/lng (spezifische Unfallort-Koordinaten) hat
     // Vorrang vor kunde_lat/lng — vorher lief die Unfallort-Koordinate nur
     // ueber die faelle-COPY-Liste, die SP-A2 jetzt entfernt.
@@ -544,6 +547,16 @@ export async function convertLeadToClaim(
             : null,
     })
   ;(claimsInsert as Record<string, unknown>).abrechnungsweg = resolvedAbrechnungsweg
+  // Convert-Mapping (Aaron 14.07.) — Record-Cast wg. Type-Lag (Spalten additiv via #4238):
+  //   F2: interne_notizen = Dispatcher-Notiz (leads.notiz) — wird vom AI-Briefing gelesen
+  //       (briefing-prompt.ts); bisher verwaist (nie nach claims gemappt).
+  //   F1-core: schadens_kind = physische Schadens-KIND (Karosserie/Glas/...) aus leads.schadens_art.
+  //       schadenart (= Abrechnungs-Typ) bleibt vorerst separat — schadenart-Derive aus abrechnungsweg
+  //       ist Follow-up (Redundanz-Klaerung, s. Marker COORDINATION-convert-mapping-live-confirmed-fixes).
+  //   F6: schadenort_place_id = Google-Places place_id des Unfallorts (Form-Wiring folgt).
+  ;(claimsInsert as Record<string, unknown>).interne_notizen = (lead.notiz as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).schadens_kind = (lead.schadens_art as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).schadenort_place_id = (lead.unfallort_place_id as string | null) ?? null
   // WS5b (Reduced-Repair): Reparatur-only-Claims (selbstzahler / kasko-freie Wahl) bekommen das
   // reduzierte Pflichtdok-Szenario (nur Fahrzeugschein statt vollmacht/gutachten/versicherer;
   // Fotos+KVA laufen ueber eigene Kunde-Cards). Haftpflicht bleibt szenario=null (Dispatch/SV
