@@ -8,8 +8,6 @@ import {
   interpolate,
   spring,
   staticFile,
-  delayRender,
-  continueRender,
 } from 'remotion'
 import { ClaimondoShield, ClaimondoWordmark } from './ClaimondoLogo'
 
@@ -17,19 +15,8 @@ import { ClaimondoShield, ClaimondoWordmark } from './ClaimondoLogo'
 const NAVY = '#0D1B3E'
 const ACCENT = '#4573A2'
 const CREAM = '#F5F1E8'
+// Montserrat als Fallback-Kette (delayRender-Font-Load entfernt — haengte headless, s. App).
 const FONT = 'Montserrat, Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
-if (typeof document !== 'undefined') {
-  const handle = delayRender('montserrat')
-  let done = false
-  const finish = () => { if (!done) { done = true; continueRender(handle) } }
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap'
-  link.onload = () => document.fonts.load('700 40px Montserrat').then(finish, finish)
-  link.onerror = finish
-  document.head.appendChild(link)
-  setTimeout(finish, 8000)
-}
 
 function AnimatedBg() {
   const f = useCurrentFrame()
