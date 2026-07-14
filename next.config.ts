@@ -260,6 +260,21 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige/leads',
         permanent: true,
       },
+      // P4b (Aufgaben-Hub-Konsolidierung): der Aufgaben-Hub /admin/aufgaben (Nav)
+      // ist kanonisch (Tabs: KI-Vorschlaege/Alle/Meine). Die alten Standalone-
+      // Routen /admin/tasks + /admin/meine-tasks (die die Tabs nur re-exportierten)
+      // -> 308-Redirect in die Hub-Tab, ihre page.tsx wurde in den Tab gemoved.
+      // KEIN redirect()-Stub (s. Redirect-Stub-Gate). Exakt-Match.
+      {
+        source: '/admin/tasks',
+        destination: '/admin/aufgaben/alle',
+        permanent: true,
+      },
+      {
+        source: '/admin/meine-tasks',
+        destination: '/admin/aufgaben/meine',
+        permanent: true,
+      },
       // P4a (Detail-View-Konsistenz / Faelle-Hub-Konvergenz F2): die 4 Hub-Tools
       // leben kanonisch als Tabs unter /admin/faelle (Hub-Shell + shared Header, F0).
       // Die alten Standalone-Routen (= Doppel-Routen: gleicher *Content, nur eigener
