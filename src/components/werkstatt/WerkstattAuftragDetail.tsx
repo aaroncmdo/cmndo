@@ -489,7 +489,7 @@ export function WerkstattAuftragDetail({
     !auftrag.gutachten_fertiggestellt_am
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+    <div className="p-4 md:p-6 max-w-3xl lg:max-w-5xl mx-auto space-y-4">
       <header className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-heading-md text-claimondo-navy font-bold">
@@ -520,6 +520,12 @@ export function WerkstattAuftragDetail({
           </p>
         </div>
       )}
+
+      {/* Display-Info-Karten: auf Desktop 2-spaltig (CSS-Columns, Single-Render).
+          Das interaktive Segment (KVA/Reparaturtermin/Modals) + Copilot + Chat bleiben
+          full-width DARUNTER. [&>*] targetet die 4 SectionCards (Fragment flacht ab) ->
+          break-inside-avoid haelt jede Karte zusammen, mb-4 ersetzt space-y-4 hier. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:mb-4 [&>*]:break-inside-avoid">
 
       <SectionCard title="Fall">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
@@ -654,6 +660,7 @@ export function WerkstattAuftragDetail({
           </SectionCard>
         </>
       )}
+      </div>
 
       {segment === 'reparatur' ? (
         <>
