@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,10 +28,7 @@ export default async function MitarbeiterReklamationen() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Reklamationen</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Reklamationen zu Ihren Fällen, neueste zuerst.</p>
-      </div>
+      <PageHeader title="Reklamationen" description="Reklamationen zu Ihren Fällen, neueste zuerst." size="lg" />
 
       <div className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
         {list.length === 0 ? (

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { aggregiereSlaLage, ladeSlaRows } from '@/lib/aufsicht/sla-rollen'
+import PageHeader from '@/components/shared/PageHeader'
 import { KiAufsichtPanel } from './_components/KiAufsichtPanel'
 
 export const dynamic = 'force-dynamic'
@@ -37,12 +38,11 @@ export default async function KiAufsichtPage() {
   // Content-return (kein reiner redirect-Stub — Redirect-Stub-Gate erfuellt)
   return (
     <div className="max-w-4xl mx-auto px-5 pb-8 pt-6 space-y-6">
-      <div>
-        <h1 className="text-heading-lg text-claimondo-navy">KI-Aufsicht</h1>
-        <p className="text-body-sm text-claimondo-ondo mt-1">
-          SLA-Fristen-Lage pro Rolle · freigabepflichtige Remediations
-        </p>
-      </div>
+      <PageHeader
+        title="KI-Aufsicht"
+        description="SLA-Fristen-Lage pro Rolle · freigabepflichtige Remediations"
+        size="lg"
+      />
       <KiAufsichtPanel lage={lage} vorschlaege={vorschlaege ?? []} />
     </div>
   )

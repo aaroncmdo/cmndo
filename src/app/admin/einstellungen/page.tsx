@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, UsersIcon, Trash2Icon, SparklesIcon, CoinsIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 // Fix: /admin/einstellungen hatte keine page.tsx, nur Sub-Ordner → 404.
 // Jetzt Landing-Page mit Kacheln zu den existierenden Unter-Bereichen.
@@ -80,12 +81,7 @@ export default async function EinstellungenPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 space-y-6">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Einstellungen</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">System-Konfiguration und Integrationen.</p>
-        </div>
-      </div>
+      <PageHeader title="Einstellungen" description="System-Konfiguration und Integrationen." size="lg" />
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((s) => {

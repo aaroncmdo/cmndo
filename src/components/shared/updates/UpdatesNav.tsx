@@ -1,9 +1,9 @@
 'use client'
 
-// AAR-725 / #updates-rebuild Phase 3: Globale Updates-Nav.
-// DB-getriebenes Modell (useUpdates): Badge = offene Action-Items; Popover trennt
-// "Braucht dich" (Action) von "Verlauf" (Info) + Typ-Filter. "Alles gesehen" setzt
-// NUR den Info-Read-Marker — Action-Items loesen sich ueber ihren DB-State auf.
+// AAR-725 / #updates-rebuild Phase 3 + A2: Globale Updates-Nav.
+// DB-getriebenes Modell (useUpdates). A2 Zwei-Stufen: die rote Zahl = UNGESEHENE offene Actions;
+// Oeffnen ("gesehen") schiebt den Action-Cursor vor -> Zahl faellt, Items werden grau, bleiben aber
+// bis erledigt (DB-State). Popover trennt "Braucht dich" (Action) von "Verlauf" (Info) + Typ-Filter.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
@@ -26,7 +26,7 @@ export default function UpdatesNav({
   variant?: Variant
   placement?: PopoverPlacement
 }) {
-  const { actionItems, infoItems, actionCount, newInfoCount, markSeen, rolle } = useUpdates()
+  const { actionItems, infoItems, actionCount, seenActionIds, newInfoCount, markSeen, rolle } = useUpdates()
   const [open, setOpen] = useState(false)
   const [typFilter, setTypFilter] = useState<TypFilter>('alle')
   const [showVerlauf, setShowVerlauf] = useState(false)
@@ -37,7 +37,8 @@ export default function UpdatesNav({
   const pathname = usePathname()
   const router = useRouter()
 
-  const hasKritisch = actionItems.some(i => i.prioritaet === 'dringend')
+  // A2: nur UNGESEHENE dringende Actions faerben die Glocke rot — gesehene sind bereits quittiert.
+  const hasKritisch = actionItems.some(i => i.prioritaet === 'dringend' && !seenActionIds.has(i.id))
 
   // Flash nur bei ECHTEM Anstieg der offenen Action-Items.
   useEffect(() => {
@@ -76,8 +77,9 @@ export default function UpdatesNav({
   function toggle() {
     const next = !open
     setOpen(next)
-    // Beim Oeffnen Info als gesehen markieren (Action-Items bleiben unberuehrt).
-    if (next && newInfoCount > 0) void markSeen()
+    // A2: Beim Oeffnen ALLES als gesehen markieren (Info-Punkt UND Action-Zahl). markAllUpdatesSeen
+    // schiebt beide Cursor vor -> die rote Zahl faellt, die offenen Actions bleiben (grau) bis erledigt.
+    if (next && (actionCount > 0 || newInfoCount > 0)) void markSeen()
   }
 
   function jumpTo(m: UpdateItem) {
@@ -191,7 +193,7 @@ export default function UpdatesNav({
                 <div className="px-4 pb-3 text-xs text-claimondo-ondo/70">Nichts offen — alles erledigt. ✓</div>
               ) : (
                 filteredAction.map(m => (
-                  <UpdateItemRow key={`a-${m.id}`} item={m} variant="action" onClick={jumpTo} />
+                  <UpdateItemRow key={`a-${m.id}`} item={m} variant="action" seen={seenActionIds.has(m.id)} onClick={jumpTo} />
                 ))
               )}
 

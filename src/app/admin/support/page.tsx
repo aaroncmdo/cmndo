@@ -1,5 +1,6 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 const STATUS_COLOR: Record<string, string> = {
@@ -28,11 +29,12 @@ export default async function SupportPage() {
   return (
     <div className="py-6 overflow-y-auto" style={{ height: '100%' }}>
       <div>
-        <div className="mb-6 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Support-Tickets</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${(probleme ?? []).length} gemeldete Probleme`}</p>
-          </div>
+        <div className="mb-6">
+          <PageHeader
+            title="Support-Tickets"
+            description={`${(probleme ?? []).length} gemeldete Probleme`}
+            size="lg"
+          />
         </div>
 
         {(probleme ?? []).length === 0 ? (

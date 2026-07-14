@@ -10,6 +10,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { ChevronLeftIcon, ChevronRightIcon, FilterIcon, PlusIcon, UserXIcon } from 'lucide-react'
 import SpontanTerminModal from './SpontanTerminModal'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export type KalenderSv = {
@@ -211,15 +212,20 @@ export default function KalenderClient({
 
   return (
     <div className="py-4 px-4 md:px-6 space-y-4">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Kalender</h1>
-          {/* suppressHydrationWarning: fmtDateLabel nutzt toLocaleDateString — UTC vs. Berlin → #418 */}
-          <p className="text-body-xs text-claimondo-ondo" suppressHydrationWarning>
+      {/* suppressHydrationWarning (im description-Span): fmtDateLabel nutzt toLocaleDateString — UTC vs. Berlin → #418 */}
+      <PageHeader
+        title="Kalender"
+        description={
+          <span suppressHydrationWarning>
             KW {getWeekNumber(weekStart)} · {fmtDateLabel(weekStart)} – {fmtDateLabel(addDays(weekStart, 4))}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+          </span>
+        }
+        size="lg"
+      >
+        {/* Toolbar bewusst in children statt actions: der actions-Slot ist
+            `shrink-0` ohne flex-wrap -> die 5 Controls (~450px) wuerden auf dem
+            Handy horizontal ueberlaufen. children ist volle Breite + darf umbrechen. */}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => goWeek(-7)}
@@ -267,7 +273,7 @@ export default function KalenderClient({
             Spontan-Termin
           </Button>
         </div>
-      </div>
+      </PageHeader>
 
       {filterOpen && (
         <div className="rounded-ios-xl border border-claimondo-border bg-white p-3 space-y-2">

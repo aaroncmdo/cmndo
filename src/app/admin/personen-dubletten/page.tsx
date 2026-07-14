@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { UsersIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { getPersonDupeCandidates, type PersonDupeSignal } from '@/lib/personen/dupe-candidates'
 
@@ -33,14 +34,11 @@ export default async function PersonenDublettenPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4 space-y-6">
-      <div className="mb-6 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Personen-Dubletten</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-            Mögliche Dubletten-Kandidaten aus dem Personen-Register — nur zur Ansicht (kein Zusammenführen).
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Personen-Dubletten"
+        description="Mögliche Dubletten-Kandidaten aus dem Personen-Register — nur zur Ansicht (kein Zusammenführen)."
+        size="lg"
+      />
 
       {candidates.length === 0 ? (
         <EmptyState

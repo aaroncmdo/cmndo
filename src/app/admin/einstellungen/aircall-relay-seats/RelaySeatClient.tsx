@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PlusIcon, Trash2Icon, PhoneIcon } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
+import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
 type Seat = {
@@ -53,15 +54,18 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
   return (
     <div className="h-full overflow-y-auto py-6">
       <div>
-        <div className="mb-5 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Aircall Relay-Seats</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)</p>
-          </div>
-          <button onClick={() => setShowAdd(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-body-xs font-medium rounded-ios-lg hover:bg-claimondo-shield transition-colors">
-            <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
-          </button>
+        <div className="mb-5">
+          <PageHeader
+            title="Aircall Relay-Seats"
+            description="Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)"
+            size="lg"
+            actions={
+              <button onClick={() => setShowAdd(true)}
+                className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-body-xs font-medium rounded-ios-lg hover:bg-claimondo-shield transition-colors">
+                <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
+              </button>
+            }
+          />
         </div>
 
         <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 mb-5">
