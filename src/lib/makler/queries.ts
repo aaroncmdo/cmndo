@@ -751,7 +751,7 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       .select(`
         id, betrag_netto_eur, status, trigger_at, fall_id,
         fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
-          claims:claim_id(
+          claims:claims!fk_bridge_claim(
             leads:lead_id(vorname, nachname),
             kunde:geschaedigter_user_id(vorname, nachname)
           )
@@ -1305,7 +1305,7 @@ export async function getMaklerAktiveConsents(
       id, consent_scope, consent_gegeben_am,
       fall:faelle_claim_bridge!makler_fall_consent_fall_id_fkey(
         id:fall_id,
-        claims:claim_id(
+        claims:claims!fk_bridge_claim(
           claim_nummer,
           leads:lead_id(vorname, nachname),
           kunde:geschaedigter_user_id(vorname, nachname)
@@ -1445,7 +1445,7 @@ export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRec
     .select(`
       id, betrag_netto_eur, trigger_at,
       fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
-        claims:claim_id(
+        claims:claims!fk_bridge_claim(
           claim_nummer,
           leads:lead_id(vorname, nachname),
           kunde:geschaedigter_user_id(vorname, nachname)
