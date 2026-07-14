@@ -24,8 +24,22 @@ function makeDb(overrides: {
   insertResult?: { error: { code: string; message: string } | null }
   updateResult?: { data: unknown; error: { code: string; message: string } | null }
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return {
+  // Erfasst die Update-Payload per vi.fn(), damit Tests pruefen koennen WAS geschrieben wird
+  // (nicht nur res.ok) -- Code-Review-Fund: die vorherige Version ignorierte das Argument von
+  // .update(...) komplett, wodurch z.B. ein versehentliches status:'gebunden' in
+  // entsperreSchadenkarte unbemerkt geblieben waere.
+  const updateMock = vi.fn(() => ({
+    eq: () => ({
+      eq: () => ({
+        select: () => ({
+          maybeSingle: async () =>
+            overrides.updateResult ?? { data: { id: 'u1' }, error: null },
+        }),
+      }),
+    }),
+  }))
+
+  const db = {
     from: () => ({
       select: () => ({
         eq: () => ({
@@ -38,19 +52,12 @@ function makeDb(overrides: {
         maybeSingle: async () => overrides.selectResult ?? { data: null },
       }),
       insert: async () => overrides.insertResult ?? { error: null },
-      update: () => ({
-        eq: () => ({
-          eq: () => ({
-            select: () => ({
-              maybeSingle: async () =>
-                overrides.updateResult ?? { data: { id: 'u1' }, error: null },
-            }),
-          }),
-        }),
-      }),
+      update: updateMock,
     }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
+
+  return { db, updateMock }
 }
 
 // ---------------------------------------------------------------------------
@@ -344,25 +351,29 @@ describe('getKartenFuerFirma', () => {
 
 describe('sperreSchadenkarte', () => {
   it('sperrt eine gebundene Karte', async () => {
-    const db = makeDb({
+    const { db, updateMock } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
       updateResult: { data: { id: 'k1' }, error: null },
     })
     const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(true)
+    // Beweist, WAS geschrieben wird -- nicht nur dass res.ok true ist.
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'gesperrt' }))
   })
 
   it('ist IDEMPOTENT: eine bereits gesperrte Karte erneut zu sperren ist ok', async () => {
     // Notfall-Pfad (Karte verloren) -- muss Doppelklick/Retry ueberstehen.
-    const db = makeDb({
+    const { db, updateMock } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
     })
     const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(true)
+    // Idempotenz heisst: gar KEIN Update wird abgesetzt, nicht nur "irgendein Update ok".
+    expect(updateMock).not.toHaveBeenCalled()
   })
 
   it('weist eine Karte einer FREMDEN Firma ab', async () => {
-    const db = makeDb({
+    const { db } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'ANDERE', fahrzeug_id: 'v1' } },
     })
     const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
@@ -373,7 +384,7 @@ describe('sperreSchadenkarte', () => {
   })
 
   it('weist eine unbekannte Karte ab', async () => {
-    const db = makeDb({ selectResult: { data: null } })
+    const { db } = makeDb({ selectResult: { data: null } })
     const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(false)
     expect(res.error).toMatch(/nicht gefunden/i)
@@ -385,16 +396,21 @@ describe('entsperreSchadenkarte', () => {
     // Bewusst 'frei': das Fahrzeug hat evtl. schon eine Ersatzkarte -- ein automatisches
     // Zurueck-auf-gebunden wuerde den Partial-Unique verletzen bzw. zwei gueltige Karten
     // erzeugen. Die Karte muss BEWUSST neu gebunden werden.
-    const db = makeDb({
+    const { db, updateMock } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
       updateResult: { data: { id: 'k1' }, error: null },
     })
     const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(true)
+    // Sicherheitskritisch: muss 'frei' schreiben, NICHT 'gebunden' -- sonst wird eine als
+    // verloren gemeldete Karte stillschweigend wieder scharf (s. setzeStatus-Aufruf oben).
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'frei', fahrzeug_id: null }),
+    )
   })
 
   it('weist eine NICHT gesperrte Karte ab (kein stiller No-op)', async () => {
-    const db = makeDb({
+    const { db } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
     })
     const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
@@ -405,16 +421,19 @@ describe('entsperreSchadenkarte', () => {
 
 describe('entbindeSchadenkarte', () => {
   it('loest eine gebundene Karte vom Fahrzeug (-> frei)', async () => {
-    const db = makeDb({
+    const { db, updateMock } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
       updateResult: { data: { id: 'k1' }, error: null },
     })
     const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(true)
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'frei', fahrzeug_id: null }),
+    )
   })
 
   it('weist eine NICHT gebundene Karte ab', async () => {
-    const db = makeDb({
+    const { db } = makeDb({
       selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'f1', fahrzeug_id: null } },
     })
     const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
@@ -424,7 +443,7 @@ describe('entbindeSchadenkarte', () => {
 
   it('meldet einen Race (Karte wurde zwischenzeitlich geaendert)', async () => {
     // Optimistic-Guard .eq('status', alterStatus) matcht nicht mehr -> data === null
-    const db = makeDb({
+    const { db } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
       updateResult: { data: null, error: null },
     })
