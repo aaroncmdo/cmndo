@@ -20,18 +20,15 @@ export const dynamic = 'force-dynamic'
 
 type OrgSearchParams = { tab?: string }
 
+// Full-Page-only: der Drawer-Intercept wurde entfernt (die Liste lebt seit der
+// Partner-Hub-Konsolidierung cross-segment unter /admin/partner -> der Intercept
+// konnte nie feuern). Daher kein `variant`-Prop mehr.
 export default async function OrganisationDetailPage({
   params,
   searchParams,
-  variant = 'page',
 }: {
   params: Promise<{ id: string }>
   searchParams?: Promise<OrgSearchParams>
-  /**
-   * "drawer" wenn die Intercepting-Route diese Page im DrawerShell rendert.
-   * Next uebergibt der echten Route nur params/searchParams -> Default "page".
-   */
-  variant?: 'page' | 'drawer'
 }) {
   const { id } = await params
   const sp = (await searchParams) ?? {}
@@ -83,7 +80,6 @@ export default async function OrganisationDetailPage({
 
   return (
     <EntityDetailShell
-      variant={variant}
       title={org.name}
       backHref={backHref}
       backLabel={backLabel}
