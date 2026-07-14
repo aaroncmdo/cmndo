@@ -3,6 +3,7 @@
 // (rank-vorschlaege.ts). Diese Datei ist die einzige Stelle, die beides zusammenbringt.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import {
   rankeWerkstattVorschlaege,
   type MatchingKontext,
@@ -77,4 +78,93 @@ export async function ladeWerkstattVorschlaege(input: {
     kontext,
     input.limit,
   )
+}
+
+/**
+ * Der bequeme Einstieg fuer Lead/Claim: laedt Anker + Fahrzeug + Bedarf und liefert die 5 Vorschlaege.
+ *
+ * ⚠ ANKER-FIX (Aaron 14.07.): Der Geo-Anker ist der FAHRZEUGSTANDORT — wo das Auto steht. Das
+ * bestehende findReparaturWerkstaettenForTarget ankert auf besichtigungsort -> unfallort -> plz, also
+ * auf dem BESICHTIGUNGSort. Das ist falsch: der Besichtigungsort sagt, wo der Gutachter hinkommt; die
+ * Werkstatt muss nah am FAHRZEUG sein. Die beiden Orte koennen weit auseinanderliegen (das Auto steht
+ * laengst in einer Halle, waehrend der SV beim Kunden besichtigt).
+ * Reihenfolge: fahrzeug_standort -> besichtigungsort -> unfallort (dort steht das Auto evtl. noch).
+ */
+export async function findWerkstattVorschlaegeFuer(
+  target: { target: 'lead' | 'claim'; id: string },
+  limit?: number,
+): Promise<WerkstattVorschlag[]> {
+  const admin = createAdminClient()
+
+  let anker: { lat: number; lng: number } | null = null
+  let marke: string | null = null
+  let fahrzeugklasse: string | null = null
+
+  if (target.target === 'lead') {
+    // ⚠ Select gegen die prod-DB geprobt (ungetypter Admin-Client).
+    const { data, error } = await admin
+      .from('leads')
+      .select(
+        'fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, fahrzeug_hersteller, fahrzeugklasse',
+      )
+      .eq('id', target.id)
+      .maybeSingle()
+    if (error) console.error('[werkstatt-matching] lead:', error.message)
+    const l = data as Record<string, unknown> | null
+    if (l) {
+      anker = ersterAnker([
+        [l.fahrzeug_standort_lat, l.fahrzeug_standort_lng],
+        [l.besichtigungsort_lat, l.besichtigungsort_lng],
+        [l.unfallort_lat, l.unfallort_lng],
+      ])
+      marke = (l.fahrzeug_hersteller as string | null) ?? null
+      fahrzeugklasse = (l.fahrzeugklasse as string | null) ?? null
+    }
+  } else {
+    const { data, error } = await admin
+      .from('claims')
+      .select('schadenort_lat, schadenort_lng, vehicle_id')
+      .eq('id', target.id)
+      .maybeSingle()
+    if (error) console.error('[werkstatt-matching] claim:', error.message)
+    const c = data as Record<string, unknown> | null
+    if (c) {
+      anker = ersterAnker([[c.schadenort_lat, c.schadenort_lng]])
+      // Fahrzeugdaten haengen am vehicle (SSoT nach dem Convert).
+      const vehicleId = (c.vehicle_id as string | null) ?? null
+      if (vehicleId) {
+        const { data: v } = await admin
+          .from('vehicles')
+          .select('hersteller, fahrzeugklasse')
+          .eq('id', vehicleId)
+          .maybeSingle()
+        marke = ((v as Record<string, unknown> | null)?.hersteller as string | null) ?? null
+        fahrzeugklasse =
+          ((v as Record<string, unknown> | null)?.fahrzeugklasse as string | null) ?? null
+      }
+    }
+  }
+
+  // Bedarf: Gutachten (conf 100) > Foto-KI > manuell (40) > unbekannt — bestehende Evidenz-Eskalation.
+  const bedarf = await ermittleReparaturbedarf(admin, {
+    claimId: target.target === 'claim' ? target.id : undefined,
+    leadId: target.target === 'lead' ? target.id : undefined,
+  })
+
+  return ladeWerkstattVorschlaege({
+    fahrzeugklasse,
+    marke,
+    bedarf: bedarf.kategorien,
+    bedarfConfidence: bedarf.confidence,
+    anker,
+    limit,
+  })
+}
+
+/** Erster Eintrag mit beiden Koordinaten (Fallback-Kette). */
+function ersterAnker(kandidaten: Array<[unknown, unknown]>): { lat: number; lng: number } | null {
+  for (const [lat, lng] of kandidaten) {
+    if (typeof lat === 'number' && typeof lng === 'number') return { lat, lng }
+  }
+  return null
 }
