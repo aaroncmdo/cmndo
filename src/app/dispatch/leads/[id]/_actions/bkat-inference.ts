@@ -11,9 +11,9 @@
 //    TBNRs werden weiterhin NICHT persistiert.
 
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { inferBkat, type BkatInferenzErgebnis } from '@/lib/bkat/inference'
+import { polizeiberichtUrlsFromLead } from '@/lib/bkat/lead-polizeibericht-urls'
 import type { Database } from '@/lib/supabase/database.types'
 
 type BkatUnfallart = Database['public']['Enums']['bkat_unfallart']
@@ -27,7 +27,7 @@ export async function analyzeBkatForLead(
 
   const { data: lead } = await supabase
     .from('leads')
-    .select('id, unfallhergang, schadens_hergang, polizei_vor_ort, polizei_aktenzeichen')
+    .select('id, unfallhergang, schadens_hergang, polizei_vor_ort, polizei_aktenzeichen, polizeibericht_url')
     .eq('id', leadId)
     .single()
 
@@ -40,30 +40,11 @@ export async function analyzeBkatForLead(
   const stext = (lead.schadens_hergang as string | null) ?? ''
   const unfallhergang = ltext.length >= stext.length ? ltext : stext
 
-  // Polizeibericht-URLs aus fall_dokumente (wenn Fall bereits existiert)
-  // oder direkt aus Flow-Upload-Bucket suchen. Minimal-Scope fuer jetzt:
-  // nur fall_dokumente via Admin-Client.
-  let polizeibericht_urls: string[] = []
-  try {
-    const admin = createAdminClient()
-    // CMM-47 D.2: faelle → v_claim_full (PostgREST-Alias id:fall_id = faelle.id).
-    const { data: fall } = await admin
-      .from('v_claim_full')
-      .select('id:fall_id')
-      .eq('lead_id', leadId)
-      .maybeSingle()
-    if (fall?.id) {
-      const { data: docs } = await admin
-        .from('fall_dokumente')
-        .select('dokument_url')
-        .eq('fall_id', fall.id)
-        .eq('dokument_typ', 'polizeibericht')
-        .is('geloescht_am' as never, null)
-      polizeibericht_urls = (docs ?? [])
-        .map((d) => d.dokument_url as string | null)
-        .filter((u): u is string => !!u)
-    }
-  } catch { /* non-critical */ }
+  // Polizeibericht-Bilder für die Vision-OCR aus der Lead-Präsenz-URL (public-URL,
+  // direkt fetchbar). Früher aus fall_dokumente.dokument_url — die Spalte existiert
+  // nicht (heißt storage_path), die Query schlug still fehl → BKat bekam nie Bilder.
+  // Der Lead ist die Ingest-Quelle (FG5-C4: won't-demote, Lead = SSoT der Präsenz).
+  const polizeibericht_urls = polizeiberichtUrlsFromLead(lead)
 
   const result = await inferBkat({
     polizeibericht_urls,
