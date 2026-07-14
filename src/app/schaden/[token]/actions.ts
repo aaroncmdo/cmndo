@@ -15,7 +15,7 @@ import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { createLead } from '@/lib/leads/create-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import {
-  phoneWriteCapExceeded,
+  gegnerPhoneWriteCapExceeded,
   globalWriteCapExceeded,
   recordGlobalWrite,
 } from '@/lib/api-v1/write-abuse-guard'
@@ -64,12 +64,12 @@ export async function submitSchadenGegner(
     }
   }
 
-  // 3b. Abuse-Cap (public unauth Write-Pfad). Reuse der melde-schaden-Backstops:
-  //   Per-Telefon-Velocity (nur wenn der Gegner eine Nummer angab) + globaler
-  //   Circuit-Breaker. Best-effort/fail-open in phoneWriteCapExceeded (DB-Fehler
-  //   -> durchlassen; der globale Breaker faengt Massen-Missbrauch).
+  // 3b. Abuse-Cap: Per-Telefon-Velocity (3/24h gegen leads.gegner_telefon + source_channel=
+  // 'schaden-karte' — die MCP-Variante filtert auf telefon/'mcp' und greift hier NICHT)
+  // + globaler Circuit-Breaker. Scharf, weil dieser Endpunkt oeffentlich + unauthentifiziert
+  // ist UND (Slice 2c) eine SMS an eine frei waehlbare Nummer ausloest.
   const telefon = data.telefon?.trim()
-  if (telefon && (await phoneWriteCapExceeded(telefon))) {
+  if (telefon && (await gegnerPhoneWriteCapExceeded(telefon))) {
     return {
       ok: false,
       error: 'Von dieser Telefonnummer wurden zu viele Meldungen erfasst. Bitte später erneut versuchen.',

@@ -1,5 +1,5 @@
 import 'server-only'
-import { countRecentMcpLeadsByPhone } from './recent-lead-dedup'
+import { countRecentMcpLeadsByPhone, countRecentGegnerLeadsByPhone } from './recent-lead-dedup'
 
 // Abuse-Haertung fuer die oeffentliche Write-API (POST /api/v1/melde-schaden + /rueckruf),
 // sobald sie breit an externe KI-Assistenten (ChatGPT/Claude/Gemini) geht.
@@ -71,4 +71,16 @@ export function recordGlobalWrite(): void {
 export async function phoneWriteCapExceeded(telefon: string): Promise<boolean> {
   const count = await countRecentMcpLeadsByPhone(telefon, 24)
   return count >= phoneCap()
+}
+
+/**
+ * Per-Telefon-Velocity fuer den oeffentlichen NFC-Gegner-Flow. Dasselbe Limit wie die
+ * MCP-Variante, aber gegen die Spalten, die dieser Flow tatsaechlich schreibt.
+ * Ohne Nummer: false — es gibt nichts zu limitieren; der Flow faellt stattdessen in den
+ * Dispatch-Task-Pfad (keine SMS, kein Auto-Send).
+ */
+export async function gegnerPhoneWriteCapExceeded(telefon: string): Promise<boolean> {
+  const tel = telefon.trim()
+  if (!tel) return false
+  return (await countRecentGegnerLeadsByPhone(tel, 24)) >= phoneCap()
 }

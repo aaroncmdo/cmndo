@@ -73,3 +73,29 @@ export async function countRecentMcpLeadsByPhone(telefon: string, hours: number)
   }
   return count ?? 0
 }
+
+/**
+ * Wie countRecentMcpLeadsByPhone, aber fuer den oeffentlichen Gegner-Flow der NFC-
+ * Schadenkarte (/schaden/[token]). Der schreibt source_channel='schaden-karte' und legt
+ * die Nummer in leads.gegner_telefon ab (leads.telefon bleibt NULL) — die MCP-Variante
+ * filtert auf telefon + 'mcp' und greift hier deshalb NIE. Ohne diesen Cap waere der
+ * SMS-Versand (Slice 2c) ein Bombing-Vektor auf beliebige fremde Nummern.
+ * Best-effort: bei DB-Fehler 0 (der globale Circuit-Breaker faengt Massen-Missbrauch).
+ */
+export async function countRecentGegnerLeadsByPhone(telefon: string, hours: number): Promise<number> {
+  const tel = telefon.trim()
+  if (!tel) return 0
+  const sinceIso = new Date(Date.now() - hours * 60 * 60_000).toISOString()
+  const admin = createAdminClient()
+  const { count, error } = await admin
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('gegner_telefon', tel)
+    .eq('source_channel', 'schaden-karte')
+    .gt('created_at', sinceIso)
+  if (error) {
+    console.error('[api-v1/dedup] countRecentGegnerLeadsByPhone fehlgeschlagen:', error.message)
+    return 0
+  }
+  return count ?? 0
+}
