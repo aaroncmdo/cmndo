@@ -17,6 +17,7 @@ describe('deriveVertriebState — typ×rolle (P1)', () => {
     expect(deriveVertriebState({ ...base, kind: 'sv' }).typ).toBe('partner')
     expect(deriveVertriebState({ ...base, kind: 'makler' }).typ).toBe('partner')
     expect(deriveVertriebState({ ...base, kind: 'werkstatt' }).typ).toBe('partner')
+    expect(deriveVertriebState({ ...base, kind: 'firmen-flotte' }).typ).toBe('partner')
   })
   it('rolle: aus der View-Spalte, Fallback sv', () => {
     expect(deriveVertriebState({ ...base, kind: 'makler', rolle: 'makler' }).rolle).toBe('makler')
@@ -49,6 +50,7 @@ describe('deriveVertriebState — makler/werkstatt', () => {
   it('onboarding offen = onboarding (trotz status aktiv)', () => expect(makler({ roh_status: 'aktiv', roh_onboarding_offen: true })).toBe('onboarding'))
   it('status pending = kontaktiert', () => expect(makler({ roh_status: 'pending' })).toBe('kontaktiert'))
   it('werkstatt teilt die Logik', () => expect(deriveVertriebState({ ...base, kind: 'werkstatt', roh_status: 'aktiv' }).stufe).toBe('aktiv'))
+  it('firmen-flotte teilt die Logik', () => expect(deriveVertriebState({ ...base, kind: 'firmen-flotte', roh_status: 'aktiv' }).stufe).toBe('aktiv'))
 })
 
 const pl = (o: Partial<VertriebKontaktRow>) => deriveVertriebState({ ...base, kind: 'partner-lead', ...o }).stufe

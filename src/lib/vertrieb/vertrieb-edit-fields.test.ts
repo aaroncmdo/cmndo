@@ -15,8 +15,12 @@ describe('resolveEditColumn', () => {
     expect(resolveEditColumn('makler', 'status')).toBeNull()
   })
 
-  it('alle 5 kinds haben ein editierbares notizen-Target', () => {
-    for (const kind of ['sv', 'partner-lead', 'makler', 'werkstatt'] as const) {
+  it('firmen-flotte mappt notizen auf firmen.notiz', () => {
+    expect(resolveEditColumn('firmen-flotte', 'notizen')).toEqual({ table: 'firmen', column: 'notiz' })
+  })
+
+  it('alle 6 kinds haben ein editierbares notizen-Target', () => {
+    for (const kind of ['sv', 'partner-lead', 'makler', 'werkstatt', 'firmen-flotte'] as const) {
       expect(resolveEditColumn(kind, 'notizen')).not.toBeNull()
     }
   })
