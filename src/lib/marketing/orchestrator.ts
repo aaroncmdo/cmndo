@@ -8,6 +8,7 @@ import type { ContentClipProps } from '../../remotion/types'
 import { generiereSkript } from './generate-script'
 import { synthesize } from './tts'
 import { resolveVisual, pexelsStockFetcher } from './visual-resolver'
+import { resolveMusik } from './music-resolver'
 import { brandLibrary } from '../../remotion/brand-library/registry'
 import { buildRenderProps } from './build-render-props'
 import { checkGuardrails } from './guardrails'
@@ -90,6 +91,14 @@ export async function verarbeiteJob(
     if (audioUpErr) throw new Error(`Audio-Upload fehlgeschlagen: ${audioUpErr.message}`)
     const audioUrl = supabase.storage.from(BUCKET).getPublicUrl(audioKey).data.publicUrl
     props.audioSrc = audioUrl
+
+    // 6b. Musik-Bett (optional, non-critical): passenden cleared Track als leisen 2. Audio-Layer
+    // mitsenden. Fehlt der Track / faellt der Resolve aus -> kein Bett, Render laeuft weiter.
+    try {
+      props.musicSrc = await resolveMusik(script.musik_stimmung, supabase)
+    } catch (e) {
+      console.error('[marketing] Musik-Bett uebersprungen', e)
+    }
 
     // 7. Render -> Storage
     const videoBuf = await deps.renderClip(props)
