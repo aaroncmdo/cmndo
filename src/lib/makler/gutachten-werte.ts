@@ -41,6 +41,32 @@ export const EMPTY_GUTACHTEN_WERTE: GutachtenWerte = {
   gutachter_honorar: null,
 }
 
+/** Die 4 Gutachten-Spalten, wie sie der Claim-View (v_faelle_mit_aktuellem_termin) liefert. */
+export type GutachtenWerteClaimViewRow = {
+  reparaturkosten?: unknown
+  wertminderung?: unknown
+  nutzungsausfall_gesamt?: unknown
+  gutachter_honorar?: unknown
+} | null | undefined
+
+/**
+ * Mappt die Gutachten-Spalten des Claim-Views auf die 4 Anzeige-Werte.
+ *
+ * Seit #4159 sind sie in v_claim_base NICHT mehr rolle-gegatet (`rolle_sieht_gutachtenwerte()`
+ * ist raus) und stammen aus denselben `gutachten`-Spalten wie v_gutachten_werte — inklusive
+ * derselben Formel fuer nutzungsausfall_gesamt (Tagessatz x Tage). Am 14.07. mit einem echten
+ * Makler-JWT gegen prod verifiziert (2500 / 300 / 590 / 800; kanzlei_honorar bleibt NULL, das
+ * Margen-Gate greift also weiterhin). Damit ist ein separater service-role-Read ueberfluessig.
+ */
+export function mapGutachtenWerteAusClaimView(row: GutachtenWerteClaimViewRow): GutachtenWerte {
+  return {
+    reparaturkosten: numOrNull(row?.reparaturkosten),
+    wertminderung: numOrNull(row?.wertminderung),
+    nutzungsausfall_gesamt: numOrNull(row?.nutzungsausfall_gesamt),
+    gutachter_honorar: numOrNull(row?.gutachter_honorar),
+  }
+}
+
 /** Mappt eine v_gutachten_werte-Zeile auf die 4 Anzeige-Werte. nutzungsausfall_gesamt = Tage x Tagessatz. */
 export function mapGutachtenWerte(row: GutachtenWerteRow): GutachtenWerte {
   const tage = numOrNull(row?.nutzungsausfall_tage)
