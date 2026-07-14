@@ -9,8 +9,6 @@ import {
   useVideoConfig,
   interpolate,
   spring,
-  delayRender,
-  continueRender,
 } from 'remotion'
 import type { WordTiming } from '../lib/marketing/tts'
 import type { ContentClipProps, RenderSegment } from './types'
@@ -20,25 +18,12 @@ import { ClaimondoShield, ClaimondoWordmark } from './brand-library/ClaimondoLog
 const NAVY = '#0D1B3E'
 const ACCENT = '#4573A2'
 const CREAM = '#F5F1E8'
-// Marken-Font Montserrat (claimondo-marketing nutzt sie fuer Headings). Ohne neue Dependency:
-// per Google-Fonts-Link laden + delayRender bis geladen (timeout-gesichert, blockt den Render nie).
+// Montserrat = Marken-Font (claimondo-marketing), als Fallback-Kette vorangestellt.
+// Der fruehere delayRender-basierte Google-Fonts-Load HAENGTE im headless-Render
+// (Remotion mockt setTimeout -> 8s-Fallback feuerte nie; delayRender ungecleared ->
+// 28s-Timeout, Render-Fehler prod 14.07.) -> ENTFERNT. Echtes Montserrat-Laden folgt
+// via @remotion/google-fonts (Follow-up, headless-sicher). Bis dahin System-Sans-Fallback.
 const FONT = 'Montserrat, Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
-if (typeof document !== 'undefined') {
-  const handle = delayRender('montserrat')
-  let done = false
-  const finish = () => {
-    if (done) return
-    done = true
-    continueRender(handle)
-  }
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap'
-  link.onload = () => document.fonts.load('700 40px Montserrat').then(finish, finish)
-  link.onerror = finish
-  document.head.appendChild(link)
-  setTimeout(finish, 8000) // Fallback: nie blockieren, notfalls Inter/System-Fallback
-}
 
 function AnimatedBg() {
   const f = useCurrentFrame()
