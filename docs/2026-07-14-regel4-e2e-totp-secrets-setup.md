@@ -1,74 +1,74 @@
-# Regel-4 E2E-/Prod-Smoke grün bekommen — TOTP-Secrets + Test-Accounts
+# Regel-4 E2E-/Prod-Smoke: warum er skippte, was jetzt erledigt ist, was noch fehlt
 
-**Status 14.07.2026:** Der post-merge-E2E-Job **läuft**, aber **alle Tests mit internen Rollen
-(admin/kb/dispatch/sv) SKIPPEN** — es fehlen die TOTP-Secrets. Das ist der Grund, warum „Regel 4"
-(grüner Prod-Playwright-Smoke) aktuell für keine interne-Rollen-Seite erfüllbar ist. Diese Checkliste
-schließt die Lücke. **Nur Aaron kann Schritt 1 + 3 machen** (Secrets/Accounts); Schritt 2 (CI-Wiring)
-ist bereits erledigt.
+**Stand 14.07.2026 (nach Umsetzung).** Der post-merge-E2E-Job lief zwar, aber **alle Tests mit internen
+Rollen (admin/kb/dispatch/sv) SKIPPTEN** — er war *vakuum-grün*: 0 echte Assertions. Ursache gefunden,
+Credentials-Seite komplett erledigt. Was noch fehlt, steht unten.
 
-## Warum es skippt (Ursache)
+## Die Ursache (zwei unabhängige Defekte, beide bestätigt)
 
-1. Interne Rollen haben seit #3745 **2FA-Pflicht**. `_golden-path-lib.ts` macht Password-Grant → aal1,
-   und schließt MFA **nur** ab, wenn ein `TEST_<ROLE>_TOTP_SECRET` (base32) im Env liegt
-   (`completeMfa()` → challenge → verify mit frisch gerechnetem TOTP-Code → aal2).
-2. Ohne das Secret bleibt die Session **aal1** → die Seite zeigt die Auth-Wall → `skipIfAuthWall()`
-   ruft `test.skip()`. Ergebnis: **grün-aussehender Run, aber 0 echte Assertions** = kein Smoke.
-3. Der E2E-Job läuft bewusst **nur post-merge** (`ci.yml`: `if: github.event_name != 'pull_request'`),
-   gegen den **deployten** Stand (`PLAYWRIGHT_BASE_URL: https://app.claimondo.de`). Auf PRs skippt er
-   per Design (sonst dauerrot bei 13 Parallel-Sessions).
+1. **`ci.yml` reichte die TOTP-Secrets nie durch.** Die Secrets `TEST_{ADMIN,KB,DISPATCH,SV}_TOTP_SECRET`
+   **existierten** im Repo (gesetzt 07.–08.07.), waren aber **nicht** im `env:`-Block des E2E-Jobs. Ohne sie
+   bleibt der Login **aal1** → interne 2FA-Pflicht (#3745) → Auth-Wall → `skipIfAuthWall()` → `test.skip()`.
+2. **Die Prod-Test-Accounts existierten nicht mehr.** Der Go-Live-Cleanup vom **13.07.** hat sie gelöscht
+   (157 Test-Accounts via `auth.admin.deleteUser`). Damit waren die vorhandenen TOTP-Secrets **verwaist** —
+   sie zeigten auf MFA-Faktoren gelöschter User.
 
-## Was der E2E-Job VORHER hatte vs. jetzt
+## ✅ Erledigt (14.07.)
 
-`.github/workflows/ci.yml` (E2E-Job `env:`) hatte nur `TEST_ADMIN_PASSWORD` + `TEST_SV_*` — **kein
-TOTP, nichts für KB/Dispatch**. Dieser PR ergänzt das **TOTP-Passthrough** (echter no-op solange die
-Secrets leer sind — `undefined` → MFA-Skip):
+- **Accounts neu angelegt** auf Prod (`paizkjajbuxxksdoycev`): `test-admin@`, `test-kb@`, `test-dispatch@`,
+  `test-sv@claimondo.de` — Passwort `Test1234!`, `email_confirm` (⇒ **keine** Mail verschickt),
+  **`telefon = NULL`** (⇒ keine echten SMS/WhatsApp), Rollen `admin` / `kundenbetreuer` / `dispatch` /
+  `sachverstaendiger`. SV zusätzlich mit `sachverstaendige`-Row (`ist_testaccount=true`,
+  `portal_zugang_freigeschaltet=true`, **ohne Geo/Isochrone** ⇒ bleibt aus dem Live-Dispatch raus).
+- **TOTP-Faktoren frisch enrollt + verifiziert** (je genau 1 `totp:verified` pro Account).
+- **GitHub-Secrets neu gesetzt**: `TEST_{ADMIN,KB,DISPATCH,SV}_TOTP_SECRET` + `TEST_ADMIN_PASSWORD`,
+  `TEST_SV_PASSWORD`, `TEST_SV_EMAIL`. (`kb`/`dispatch` brauchen **kein** Passwort-Secret — sie fallen in
+  `_golden-path-lib` sauber auf den Default `Test1234!` zurück. Ein Passwort-**Passthrough** wäre hier sogar
+  schädlich: ein unbesetztes Secret rendert als `''`, und `?? 'Test1234!'` fängt `''` **nicht** ab.)
+- **`force_password_change=false`** gesetzt (der Spalten-Default ist `true` → sonst redirect auf
+  `/passwort-aendern` **vor** jeder Portal-Seite → Test scheitert). ⚠ Bei künftiger Account-Anlage mit setzen.
+- **`ci.yml`-Passthrough** der 4 TOTP-Secrets ergänzt (in diesem PR).
+
+### ✅✅ Empirisch bewiesen (End-to-End gegen Prod, nicht nur Auth-API)
+`npx playwright test tests/e2e/flows/portal-header-phase2.spec.ts` gegen `app.claimondo.de` mit den
+frischen Credentials (CI=1, damit kein lokaler webServer startet):
 
 ```
-TEST_ADMIN_TOTP_SECRET, TEST_KB_TOTP_SECRET, TEST_DISPATCH_TOTP_SECRET, TEST_SV_TOTP_SECRET
+passed=3  failed=1  skipped=0
 ```
 
-## Checkliste zum Grün-Schalten
+- **0 Skips** = die Skip-Ursache ist WEG. `loginContextOrSkip` hätte bei kaputtem Login geskippt; stattdessen
+  liefen die Tests, der Browser erreichte auth-gegatete Seiten (`/admin/versicherungen`) → **Login + TOTP +
+  Cookie-Injection funktionieren für alle Rollen.** (Das ist mehr als der aal2-Auth-API-Beweis: hier lief der
+  ganze Playwright-Login inkl. `sessionToCookies`/`addCookies`.)
+- **1 failed = `admin › /admin/versicherungen`** (`[data-page-header-card]` not found) → genau der Prod-Lag:
+  diese von #4230 migrierte Seite ist noch nicht auf Prod. **Kein Bug — der Test sagt jetzt die Wahrheit.**
 
-### Schritt 1 — GitHub-Repo-Secrets setzen (nur Aaron)
-`Repo → Settings → Secrets and variables → Actions → New repository secret`. Pro interner Rolle das
-**base32-TOTP-Secret** des verifizierten Authenticator-Faktors des Test-Accounts:
+## ⚠ Was noch fehlt — und warum der Smoke trotzdem erst mal ROT wird
 
-| Secret | für |
-|---|---|
-| `TEST_ADMIN_TOTP_SECRET` | test-admin@claimondo.de |
-| `TEST_KB_TOTP_SECRET` | test-kb@claimondo.de |
-| `TEST_DISPATCH_TOTP_SECRET` | test-dispatch@claimondo.de |
-| `TEST_SV_TOTP_SECRET` | test-sv@claimondo.de |
+Der E2E-Job testet gegen **`PLAYWRIGHT_BASE_URL: https://app.claimondo.de` = PROD**. Aber:
 
-**Nur die TOTP-Secrets** — die Passwörter werden für KB/Dispatch **bewusst NICHT** durchgereicht.
-Grund: ein unbesetztes GitHub-Secret rendert als leerer String `''`, und `_golden-path-lib.ts` nutzt
-`?? 'Test1234!'` (nullish) — das fängt `''` **nicht** ab, würde den Default also überschreiben und den
-Login trotz gesetztem TOTP scheitern lassen. Ohne Passthrough greift der grandfatherte Default
-`Test1234!`. → **Die Prod-Test-Accounts müssen das Passwort `Test1234!` haben** (admin/sv nutzen die schon
-oben in ci.yml verdrahteten `TEST_ADMIN_PASSWORD`/`TEST_SV_PASSWORD`). Weicht ein KB/Dispatch-Passwort ab,
-sag mir Bescheid — dann verdrahte ich es sauber mit `|| 'Test1234!'`-Fallback statt `??`.
-E-Mails sind in `ROLES` hardcodet (`test-<rolle>@claimondo.de`).
+> **`main` (= Prod) hängt ~983 Commits hinter `staging`.**
 
-### Schritt 2 — CI-Passthrough (✅ erledigt in diesem PR)
-`ci.yml` reicht die Secrets jetzt an den E2E-Job durch. Sobald Schritt 1 gesetzt ist, greift es
-automatisch — **kein weiterer Code-Change nötig.**
+Heißt: Die Features der letzten Wochen — inklusive der Portal-Header-Migration (#4230) — sind **nicht live**.
+Sobald der TOTP-Passthrough greift, **laufen** die bisher skippenden Tests endlich wirklich — und melden dann
+korrekt **ROT**, weil das getestete Prod die Features noch nicht hat.
 
-### Schritt 3 — Prod-Test-Accounts + TOTP-Faktoren verifizieren (nur Aaron)
-⚠ Der **Prod-Go-Live-Cleanup vom 13.07.** hat 157 Test-Accounts gelöscht. Vor dem Grün-Schalten prüfen,
-dass es auf **Prod** noch gibt:
-- `test-admin@ / test-kb@ / test-dispatch@ / test-sv@claimondo.de` (in `auth.users`),
-- je einen **verifizierten TOTP-Faktor** (`auth.mfa_factors`, `status='verified'`), dessen base32-Secret
-  == das GitHub-Secret aus Schritt 1,
-- die passenden `profiles.rolle` + Portalzugang.
-Fehlt ein Account/Faktor → neu anlegen + Authenticator einrichten, dann das base32-Secret als GitHub-Secret
-hinterlegen. **Test-Accounts immer `telefon = NULL`** (keine echten SMS/WA/Mails).
+**Das ist kein Regress, sondern die Wahrheit, die die Skips bisher verdeckt haben.** Vorher war der Smoke
+grün, weil er nichts tat. Jetzt tut er was — und sagt, dass Prod hinterherhängt.
 
-### Schritt 4 — verifizieren
-Nach dem nächsten Merge auf staging/main den E2E-Job in Actions öffnen → die
-`portal-header-phase2.spec.ts`-Zeilen dürfen **nicht** mehr „skipped" sein, sondern **passed**. Erst dann
-ist Regel 4 für die migrierten admin/kb/dispatch-Seiten wirklich erfüllt.
+**Damit Regel 4 wirklich grün wird, braucht es beides:**
+1. ✅ funktionierende Credentials (erledigt, s. o.) **und**
+2. ⬜ **den Code auf Prod** → `staging` → `main` promoten (Release-Lane). Das ist eine Release-Entscheidung
+   (983 Commits), keine Session-Aufgabe.
 
-## Betroffene Specs (profitieren sofort)
-Alle internen-Rollen-Smokes, u.a.: `portal-header-phase2.spec.ts` (dieser Portal-Header-Sweep),
-`pageheader-floating-card.spec.ts`, `2fa-*.spec.ts`, `admin-nachrichten.spec.ts`, `lead-to-fall.spec.ts` …
-— sie alle skippen heute an derselben Wurzel.
+## Konsequenz-Warnung für die Release-/CI-Lane
+Nach dem Merge dieses PRs werden **~dutzende bisher skippende E2E-Tests aktiv** und laufen gegen das alte
+Prod. Rechne mit roten post-merge-E2E-Runs, bis Prod nachgezogen ist. Der E2E-Job ist laut `ci.yml` bewusst
+**informativ** (`gated NICHT den Deploy`) — es blockt also nichts, es ist nur endlich ehrlich.
+
+## Wartung
+Die TOTP-Secrets sind an die **konkreten MFA-Faktoren** dieser vier Prod-User gebunden. Wird ein Account
+gelöscht (z. B. beim nächsten Go-Live-Cleanup) oder sein Faktor entfernt, **verwaisen die Secrets erneut** und
+alles skippt wieder still. Test-Accounts also von künftigen Cleanups **ausnehmen** — oder danach neu
+provisionieren (Faktor löschen → neu enrollen → Secret neu setzen).
