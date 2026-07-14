@@ -1,8 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
-import { ArrowLeftIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
+import EntityDetailShell from '@/components/shared/detail/EntityDetailShell'
 import GutachterFinderDetailClient from './GutachterFinderDetailClient'
 
 type RawAnfrage = {
@@ -74,21 +72,17 @@ export default async function GutachterFinderDetailPage({
   }
 
   return (
-    <div className="py-6 space-y-4">
-      <Link
-        href="/dispatch/gutachter-finder"
-        className="inline-flex items-center gap-1.5 text-sm text-claimondo-ondo hover:text-claimondo-navy transition-colors"
-      >
-        <ArrowLeftIcon className="w-4 h-4" />
-        Zurück zur Übersicht
-      </Link>
-      <PageHeader
-        title={`${anfrage.vorname} ${anfrage.nachname}`}
-        actions={
-          <span className="text-sm text-claimondo-ondo">{anfrage.schadentyp}</span>
-        }
-      />
-      <GutachterFinderDetailClient anfrage={anfrage} />
-    </div>
+    <EntityDetailShell
+      title={`${anfrage.vorname} ${anfrage.nachname}`}
+      backHref="/dispatch/gutachter-finder"
+      backLabel="Übersicht"
+      description={<span className="text-claimondo-ondo">{anfrage.schadentyp}</span>}
+    >
+      {/* Die Status-Workflow-Buttons leben bewusst im Body (Status-Card, rechts),
+          nicht im Header-actions-Slot — 4 Aktionen sind zu viel fuer den Header. */}
+      <div className="flex-1 overflow-y-auto p-4">
+        <GutachterFinderDetailClient anfrage={anfrage} />
+      </div>
+    </EntityDetailShell>
   )
 }
