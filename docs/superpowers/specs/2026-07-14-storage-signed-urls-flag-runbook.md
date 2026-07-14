@@ -1,11 +1,31 @@
 # Storage-URLs: Prod-Befund + Runbook für den `STORAGE_USE_SIGNED_URLS`-Flip
 
 **Datum:** 2026-07-14 · **Session:** f48be874
-**Status:** Befund verifiziert (prod), Klasse-B-Fixes geliefert, **Flip noch nicht erfolgt**
+**Status:** ✅ **Flip ist erfolgt und aktiv** (per SSH verifiziert 15.07.). Klasse-B-Fixes geliefert (#4332/#4336).
 
-## 1 · Der Befund (prod, empirisch)
+> ## ⚠️ KORREKTUR (15.07.) — dieses Dokument entstand auf einer falschen Prämisse
+> Der ursprüngliche Befund („Flag ist AUS") **war ein Fehlschluss** und ist hiermit richtiggestellt.
+> **Das Flag `STORAGE_USE_SIGNED_URLS` ist auf prod `true` und aktiv** — dreifach verifiziert:
+> (a) direkt auf dem VPS (`/etc/claimondo/.env.local` = `true`; die App liest es über den Symlink
+> `.env.local`; `@next/env`-Ladung ergibt `"true"`; der App-Prozess startete nachweislich **nach** der
+> env-Änderung); (b) **Goldstandard-HTTP-Test gegen die laufende App**: `GET` der Gutachten-Magic-Route
+> (ruft intern `getStorageUrl` für den privaten Bucket `fall-dokumente` auf **und fetcht die URL selbst**)
+> lieferte **HTTP 200 + PDF** — auf einem privaten Bucket nur mit einer signierten URL möglich, eine
+> public-URL hätte 400/410 ergeben.
+>
+> Der „Beweis ohne SSH" unten (Abschnitt 1) stützte sich auf `profiles.avatar_url` (public-Form) als
+> Flag-Indikator. **Das ist ungültig:** der Avatar-Upload ruft `getPublicUrl` **direkt** auf
+> (`src/lib/profile/avatar.ts:39`), nicht `getStorageUrl` → die URL sagt nichts über das Flag. Eine
+> gespeicherte URL belegt den Flag-Zustand **nur**, wenn sie nachweislich über `getStorageUrl` entstand.
+>
+> **Was gültig bleibt:** die Consumer-Klassifikation (Abschnitt 3) und die Klasse-B-Fixes — aus dem
+> **TTL-Grund**, nicht dem Breaker-Grund: bei aktivem Flag speichert `getStorageUrl` eine signierte URL
+> mit TTL, deren spätere Wiederverwendung `resignStorageUrl` braucht. Belegt durch den BKat-Prod-Smoke.
+> Abschnitt 4 (Runbook-Schritte) ist damit **erledigt** — der Flip ist nicht mehr durchzuführen.
 
-**`STORAGE_USE_SIGNED_URLS` ist auf prod AUS.**
+## 1 · Der (überholte) Befund — siehe Korrektur oben
+
+**Ursprünglich behauptet: `STORAGE_USE_SIGNED_URLS` ist auf prod AUS.** — Widerlegt, siehe Korrektur.
 
 Beweis ohne SSH-Zugang: `getStorageUrl` prüft **nur** das Flag, **nicht** den Bucket-Status. Wäre das
 Flag an, wäre **jede** erzeugte URL signiert — auch für *public* Buckets. Die zuletzt gespeicherten
