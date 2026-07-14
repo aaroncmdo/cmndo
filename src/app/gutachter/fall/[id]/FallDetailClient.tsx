@@ -50,6 +50,7 @@ import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
 import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
+import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
@@ -119,6 +120,8 @@ type Props = {
   /** AAR-405 Phase 5: Kanzlei-Ansprechpartner (sobald der Fall an eine Kanzlei
       uebergeben ist). Firma + Kontakt aus `kanzleien` via `kanzlei_faelle`. */
   kanzlei?: { name: string | null; email: string | null; ansprechpartner: string | null } | null
+  /** currentUserId fuer den eingebetteten Fall-Chat (ClaimChatPanel). */
+  currentUserId?: string | null
   aktiverTermin?: TerminInfo | null
   fallDokumente?: FallDokumentRow[]
   /** AAR-289: Abrechnungs-Snippet für Subphase-Ableitung (ausgezahlt_am). */
@@ -168,6 +171,7 @@ export default function FallDetailClient(props: Props) {
     nachrichten,
     kundenbetreuer,
     kanzlei,
+    currentUserId,
     abrechnungAusgezahltAm,
   } = props
 
@@ -453,6 +457,25 @@ export default function FallDetailClient(props: Props) {
           }
           extracted={props.gutachtenWerte ?? null}
         />
+
+        {/* Fall-Chat: kanonischer Gruppen-Thread (ClaimChatPanel — dieselbe
+            Komponente wie der /faelle/[id] Kommunikation-Tab). istStaff=false ->
+            der SV sieht die Kunde-Gruppe + DMs, NICHT den team_intern-Thread.
+            claimId = fall.claim_id (Threads haengen an claims.id), Fallback fall.id. */}
+        {currentUserId && (
+          <div>
+            <h3 className="text-heading-sm font-semibold text-claimondo-navy mb-2 px-1">
+              Fall-Chat
+            </h3>
+            <div className="h-[60vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
+              <ClaimChatPanel
+                claimId={(fall.claim_id as string | null) ?? (fall.id as string)}
+                currentUserId={currentUserId}
+                istStaff={false}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* CMM-32: Vor-Ort-Trigger ganz unten */}

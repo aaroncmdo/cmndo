@@ -71,6 +71,11 @@ vi.mock('@/lib/self-service/flow-resolver', () => ({
   resolveFlowTerminState: vi.fn(),
 }))
 vi.mock('@/lib/termine/engine', () => ({ planeTermin: vi.fn() }))
+// Aaron 14.07. (Teilschuld-Rueckruf): self-service-actions importiert jetzt upsertReservierungsRueckruf.
+// Das Modul zieht den Server-Client (server-only) — im Test als No-Op mocken wie die uebrigen Deps.
+vi.mock('@/lib/embed/reservierungs-rueckruf', () => ({
+  upsertReservierungsRueckruf: vi.fn(async () => ({ ok: true })),
+}))
 vi.mock('@/lib/ocr/apply-zb1-to-lead', () => ({ buildZb1LeadUpdate: vi.fn() }))
 vi.mock('@/lib/mapbox/geocode', () => ({ geocodeAdresse: vi.fn() }))
 vi.mock('../werkstatt-geo-fallback', () => ({ resolveWerkstattFallbackGeo: vi.fn() }))
@@ -150,7 +155,12 @@ describe('verschiebeBeratungsterminFlow', () => {
       { data: [{ id: 't1', start_zeit: '2026-06-24T08:00:00.000Z', status: 'reserviert', assignee_id: null }] }, // legacy-Lookup
       { data: null, error: null },                                                                           // update terminal
     ])
-    const neuStart = '2026-06-25T13:00:00.000Z'
+    // ZEITBOMBE gefixt (14.07.): hier stand '2026-06-25T13:00:00.000Z' — ein hardcodiertes Datum.
+    // Ab dem 25.06. lag es in der VERGANGENHEIT, verschiebeBeratungsterminFlow lehnte den Termin
+    // korrekt ab (ok:false, "Termin liegt in der Vergangenheit" — die Regel, die der Test zwei Cases
+    // weiter unten selbst prueft) und dieser Test kippte. Der Code war immer richtig, der Test falsch.
+    // Datum daher relativ zu jetzt.
+    const neuStart = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
     const r = await verschiebeBeratungsterminFlow('tok', neuStart)
     expect(r.ok).toBe(true)
 
