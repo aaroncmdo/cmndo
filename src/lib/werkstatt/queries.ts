@@ -13,6 +13,7 @@
 // Kundenname wird NICHT auf die werkstatt_provisionen-Queries ausgeweitet.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export type WerkstattRow = {
   id: string
@@ -371,4 +372,79 @@ export async function getWerkstattAuftrag(claimId: string): Promise<WerkstattAuf
     return null
   }
   return data ? mapWerkstattAuftragRow(data as unknown as Record<string, unknown>) : null
+}
+
+/**
+ * Zusatz-Kontext fuer die Werkstatt-Detailseite (Fahrzeug-Detail, Vorschaeden,
+ * Ansprechpartner), der NICHT in v_werkstatt_auftrag steckt. Liest v_claim_full
+ * + das Kundenbetreuer-Profil via ADMIN-Client — der Caller MUSS vorher via
+ * getWerkstattAuftrag (RLS-Gate) die Fall-Zugehoerigkeit bewiesen haben
+ * (Defense-in-Depth, analog zur SV-Fallakte-Page). null = nichts gefunden.
+ * v_claim_full-Spalten prod-verifiziert (ungetypter Admin-Client -> kein silent-400).
+ */
+export type WerkstattAuftragExtra = {
+  fahrzeug_baujahr: string | number | null
+  fahrzeug_farbe: string | null
+  erstzulassung: string | null
+  kilometerstand: string | number | null
+  hergang: string | null
+  hat_vorschaeden: boolean | null
+  vorschaden_anzahl: number | null
+  vorschaden_erkannt: string | null
+  vorschaden_letzter_datum: string | null
+  kunde_vorname: string | null
+  kunde_nachname: string | null
+  kunde_telefon: string | null
+  kunde_email: string | null
+  betreuer: { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null
+}
+
+export async function getWerkstattAuftragExtra(claimId: string): Promise<WerkstattAuftragExtra | null> {
+  if (!claimId) return null
+  const admin = createAdminClient()
+  const { data: vcf } = await admin
+    .from('v_claim_full')
+    .select(
+      'fahrzeug_baujahr, fahrzeug_farbe, erstzulassung, kilometerstand, hergang_kunde_text, hat_vorschaeden, vorschaden_anzahl, vorschaden_erkannt, vorschaden_letzter_datum, kunde_vorname, kunde_nachname, kunde_telefon, kunde_email, kundenbetreuer_id',
+    )
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!vcf) return null
+  const row = vcf as Record<string, unknown>
+
+  let betreuer: WerkstattAuftragExtra['betreuer'] = null
+  const kbId = (row.kundenbetreuer_id as string | null) ?? null
+  if (kbId) {
+    const { data: kb } = await admin
+      .from('profiles')
+      .select('vorname, nachname, telefon, email')
+      .eq('id', kbId)
+      .maybeSingle()
+    if (kb) {
+      const k = kb as Record<string, unknown>
+      betreuer = {
+        vorname: (k.vorname as string | null) ?? null,
+        nachname: (k.nachname as string | null) ?? null,
+        telefon: (k.telefon as string | null) ?? null,
+        email: (k.email as string | null) ?? null,
+      }
+    }
+  }
+
+  return {
+    fahrzeug_baujahr: (row.fahrzeug_baujahr as string | number | null) ?? null,
+    fahrzeug_farbe: (row.fahrzeug_farbe as string | null) ?? null,
+    erstzulassung: (row.erstzulassung as string | null) ?? null,
+    kilometerstand: (row.kilometerstand as string | number | null) ?? null,
+    hergang: (row.hergang_kunde_text as string | null) ?? null,
+    hat_vorschaeden: (row.hat_vorschaeden as boolean | null) ?? null,
+    vorschaden_anzahl: (row.vorschaden_anzahl as number | null) ?? null,
+    vorschaden_erkannt: (row.vorschaden_erkannt as string | null) ?? null,
+    vorschaden_letzter_datum: (row.vorschaden_letzter_datum as string | null) ?? null,
+    kunde_vorname: (row.kunde_vorname as string | null) ?? null,
+    kunde_nachname: (row.kunde_nachname as string | null) ?? null,
+    kunde_telefon: (row.kunde_telefon as string | null) ?? null,
+    kunde_email: (row.kunde_email as string | null) ?? null,
+    betreuer,
+  }
 }
