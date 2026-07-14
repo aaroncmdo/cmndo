@@ -1,6 +1,6 @@
 ﻿// AAR-484 (M2): Makler-Dashboard-Komponente. Server-Component-kompatibel
 // (keine Client-State-Abhängigkeit), rendert Greeting, Stat-Grid, Activity-
-// Feed, Schnellaktionen und Tipp-des-Monats.
+// Feed und Schnellaktionen.
 
 import Link from 'next/link'
 import {
@@ -119,25 +119,7 @@ export function MaklerDashboard({
       {/* Partner-Rang — Selbstansicht (Badge + Fortschritt zur naechsten Stufe) */}
       {partnerRang && <PartnerRangSelfCard rang={partnerRang} />}
 
-      {/* Tipp des Monats — direkt unter den KPIs (Anordnung Aaron 07.07.) */}
-      <section aria-label="Tipp des Monats">
-        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
-            Tipp des Monats
-          </p>
-          <h3 className="text-lg font-semibold mb-2">
-            QR-Code auf dem Beratungsgespräch zeigen
-          </h3>
-          <p className="text-sm text-claimondo-ondo leading-relaxed">
-            Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
-            direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
-            Leads wie Makler die nur per E-Mail verteilen. Der QR führt
-            direkt zum Schadenformular — Ihr Kontakt bleibt nachvollziehbar.
-          </p>
-        </div>
-      </section>
-
-      {/* Staffelung — direkt unter dem Tipp (rendert null ohne konfigurierte Stufen) */}
+      {/* Staffelung (rendert null ohne konfigurierte Stufen) */}
       <MaklerStaffelCard
         settledCount={staffelSettled}
         pendingCount={staffelPending}

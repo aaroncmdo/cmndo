@@ -8,6 +8,7 @@ import {
   AlertTriangleIcon, CheckCircleIcon,
 } from 'lucide-react'
 import { getSvStatus } from '@/lib/sv-status'
+import { getPaket } from '@/lib/pakete'
 import PhoneButton from '@/components/shared/PhoneButton'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -51,6 +52,7 @@ export default async function DispatchSvDetailPage({
     portal_zugang_freigeschaltet: svRec.portal_zugang_freigeschaltet as boolean | null,
     vertrag_unterschrieben: svRec.vertrag_unterschrieben as boolean | null,
     gesperrt_seit: svRec.gesperrt_seit as string | null,
+    paket: svRec.paket as string | null,
   })
   const paketFaelleGesamt = Number(svRec.paket_faelle_gesamt) || 10
   const paketFaelleGenutzt = Number(svRec.paket_faelle_genutzt) || Number(svRec.offene_faelle) || 0
@@ -207,9 +209,12 @@ export default async function DispatchSvDetailPage({
                 )}
                 <span className="text-claimondo-navy">Portal-Zugang {svRec.portal_zugang_freigeschaltet ? 'frei' : 'gesperrt'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo">Anzahlung: {(svRec.anzahlung_status as string) ?? '—'}</span>
-              </div>
+              {/* Anzahlung nur fuer Pakete mit Anzahlung — Basic (preis=0) zahlt keine. */}
+              {getPaket(svRec.paket as string).anzahlung > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo">Anzahlung: {(svRec.anzahlung_status as string) ?? '—'}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
