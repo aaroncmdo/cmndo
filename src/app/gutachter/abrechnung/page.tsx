@@ -1,6 +1,7 @@
 ﻿import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
@@ -67,7 +68,13 @@ export default async function AbrechnungPage() {
   // CMM-49 Reader-Sweep: claims-direkt (faelle-frei). sv_id = claims.sv_id (CMM-60, 0-diff);
   // created_at/claim_nummer/gutachten direkt am claims-Anker (frueher via faelle->claims-!inner).
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
-  const { data: completedFaelleRaw } = await supabase
+  // Service-Role statt User-Client: lead_preis_netto/-typ sind auf claims per Column-GRANT
+  // fuer `authenticated` gesperrt (Spalten-Exposure-Fix — sonst laese jeder Kunde den Lead-
+  // Einkaufspreis seines eigenen Falls, und jeder SV den fremder Faelle). Der SV DARF seinen
+  // eigenen Leadpreis sehen (das ist seine Abrechnung) — die Autorisierung dafuer liegt im
+  // .eq('sv_id', sv.id): sv stammt aus getGutachterForUser(user.id), also nur eigene Faelle.
+  const adminDb = createAdminClient()
+  const { data: completedFaelleRaw } = await adminDb
     .from('claims')
     .select('id, lead_id, created_at, claim_nummer, lead_preis_netto, lead_preis_typ, gutachten(gesamt_schadensbetrag, fertiggestellt_am, gutachten_sv_honorar_netto)')
     .eq('sv_id', sv.id)

@@ -170,6 +170,22 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Claims-Spalten-Cap (14.07.2026): SPALTEN-Schicht. Die beiden Checks oben pruefen, ob
+      # jemand ZEILEN sieht, die er nicht darf — nie, ob er von einer erlaubten Zeile ZU VIELE
+      # SPALTEN sieht. Genau da lag der Bug: `authenticated` hatte table-weites SELECT auf
+      # claims, also las jeder Kunde/SV/Kanzlei die internen Spalten seines eigenen Falls
+      # (interne_notizen, lead_preis_netto = Lead-Einkaufspreis, marketing_provision,
+      # kanzlei_honorar) per PostgREST direkt aus. Dieser Check haelt beide Schutzschichten
+      # stabil: Column-GRANT-Cap (Mig 20260714220455) + CASE-Maskierung in v_claim_base
+      # (Mig 20260714215721) — und blockt neue claims-Spalten, die weder gegrantet noch als
+      # intern deklariert sind (die waeren fuer User-Clients still unsichtbar).
+      # Backing-RPC audit_claims_column_grants(). Siehe scripts/check-claims-column-grants.mjs.
+      - name: Claims-Column-Grants
+        run: node scripts/check-claims-column-grants.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Fundament-Haertung (Audit 2026-07-07): systematischer anon-Exposure-Guard.
       # Schliesst die Luecke der claim-zentrierten View-Guards (die security_invoker +
       # matviews + Views-ohne-claim_id ausschliessen — genau der v_partner_billing-Pfad).
