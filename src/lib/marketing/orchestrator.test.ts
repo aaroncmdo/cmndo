@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { writeFile, unlink } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { verarbeiteJob, type OrchestratorDeps } from './orchestrator'
+import { verarbeiteJob, generiereJobSkript, rendereJob, type OrchestratorDeps } from './orchestrator'
 import type { ContentScript } from './schema'
 
 afterEach(() => {
@@ -39,6 +39,7 @@ function mockSupabase(opts: { count?: number; job?: unknown } = {}) {
           return { error: null }
         }),
         getPublicUrl: vi.fn((k: string) => ({ data: { publicUrl: `https://cdn/${k}` } })),
+        list: vi.fn().mockResolvedValue({ data: [], error: null }),
       })),
     },
   }
@@ -87,7 +88,7 @@ describe('verarbeiteJob', () => {
     try {
       const { client, updates, uploads } = mockSupabase({
         count: 0,
-        job: { id: 'j1', thema: 'T', format: 'ratgeber' },
+        job: { id: 'j1', thema: 'T', format: 'ratgeber', skript: script },
       })
       const r = await verarbeiteJob('j1', client, happyDeps(audioPath))
       expect(r).toEqual({ ok: true })
@@ -104,11 +105,43 @@ describe('verarbeiteJob', () => {
   })
 
   it('setzt status=fehler wenn eine Stufe wirft', async () => {
-    const { client, updates } = mockSupabase({ count: 0, job: { id: 'j1', thema: 'T', format: 'ratgeber' } })
+    const { client, updates } = mockSupabase({ count: 0, job: { id: 'j1', thema: 'T', format: 'ratgeber', skript: script } })
     const deps = happyDeps('/nonexistent')
     ;(deps.synthesize as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('TTS kaputt'))
     const r = await verarbeiteJob('j1', client, deps)
     expect(r.ok).toBe(false)
     expect(updates.some((u) => u.status === 'fehler' && String(u.fehler_text).includes('TTS'))).toBe(true)
+  })
+})
+
+describe('Phasen-Split (Script-Review-Gate)', () => {
+  it('generiereJobSkript stoppt bei skript_generiert (kein Render/Upload)', async () => {
+    const { client, updates, uploads } = mockSupabase({
+      count: 0,
+      job: { id: 'j1', thema: 'T', format: 'ratgeber' },
+    })
+    const r = await generiereJobSkript('j1', client, happyDeps('/x'))
+    expect(r).toEqual({ ok: true })
+    expect(updates.map((u) => u.status).filter(Boolean)).toEqual(['skript_generiert'])
+    expect(uploads).toHaveLength(0)
+  })
+
+  it('rendereJob rendert aus gespeichertem Skript -> video_fertig', async () => {
+    const audioPath = join(tmpdir(), `mkot-r-${Date.now()}.wav`)
+    await writeFile(audioPath, Buffer.from('audio'))
+    try {
+      const { client, updates, uploads } = mockSupabase({ job: { id: 'j1', skript: script } })
+      const r = await rendereJob('j1', client, happyDeps(audioPath))
+      expect(r).toEqual({ ok: true })
+      expect(updates.map((u) => u.status).filter(Boolean)).toEqual(['audio_erzeugt', 'video_fertig'])
+      expect(uploads.some((k) => k.includes('video.mp4'))).toBe(true)
+    } finally {
+      await unlink(audioPath).catch(() => {})
+    }
+  })
+
+  it('rendereJob meldet Fehler ohne gueltiges Skript', async () => {
+    const { client } = mockSupabase({ job: { id: 'j1', skript: null } })
+    expect((await rendereJob('j1', client, happyDeps('/x'))).ok).toBe(false)
   })
 })

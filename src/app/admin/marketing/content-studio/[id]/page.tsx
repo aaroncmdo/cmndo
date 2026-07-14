@@ -3,7 +3,10 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { ContentScriptSchema } from '@/lib/marketing/schema'
 import { STATUS_LABEL, STATUS_TONE } from '../status-display'
+import { RetryButton } from '../RetryButton'
+import { ScriptEditor } from '../ScriptEditor'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +17,9 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
   if (!job) notFound()
 
   const hashtags: string[] = Array.isArray(job.hashtags) ? job.hashtags : []
+  const parsedSkript = ContentScriptSchema.safeParse(job.skript)
+  const showEditor =
+    parsedSkript.success && (job.status === 'skript_generiert' || job.status === 'fehler')
 
   return (
     <div className="space-y-6 py-6">
@@ -63,15 +69,51 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
             </a>
           </div>
         </SectionCard>
-      ) : job.status !== 'fehler' ? (
+      ) : null}
+
+      {showEditor && parsedSkript.success ? (
+        <SectionCard>
+          <h2 className="mb-1 text-heading-sm font-semibold text-claimondo-navy">
+            Skript prüfen &amp; freigeben
+          </h2>
+          <p className="mb-3 text-body-xs text-claimondo-shield">
+            Alles editierbar. „Freigeben &amp; Rendern“ speichert und startet den Render (Voiceover
+            → Untertitel → Video).
+          </p>
+          <ScriptEditor jobId={job.id} skript={parsedSkript.data} />
+        </SectionCard>
+      ) : null}
+
+      {job.status === 'entwurf' ? (
         <SectionCard>
           <p className="text-body-sm text-claimondo-slate">
-            Wird generiert … (Skript → Voiceover → Render). Seite neu laden für den aktuellen Stand.
+            Skript wird generiert … Seite neu laden für den aktuellen Stand.
           </p>
         </SectionCard>
       ) : null}
 
-      {job.caption ? (
+      {job.status === 'audio_erzeugt' ? (
+        <SectionCard>
+          <p className="text-body-sm text-claimondo-slate">
+            Wird gerendert (Voiceover → Video) … Seite neu laden für den aktuellen Stand.
+          </p>
+          <p className="mt-3 mb-2 text-body-xs text-claimondo-shield">
+            Hängt es zu lange (z.B. nach einem Server-Neustart)?
+          </p>
+          <RetryButton jobId={job.id} label="Render neu starten" />
+        </SectionCard>
+      ) : null}
+
+      {job.status === 'fehler' && !parsedSkript.success ? (
+        <SectionCard>
+          <p className="mb-2 text-body-sm text-claimondo-slate">
+            Kein Skript vorhanden — neu generieren:
+          </p>
+          <RetryButton jobId={job.id} label="Neues Skript generieren" />
+        </SectionCard>
+      ) : null}
+
+      {job.status === 'video_fertig' && job.caption ? (
         <SectionCard>
           <h2 className="mb-2 text-heading-sm font-semibold text-claimondo-navy">
             Caption &amp; Hashtags
@@ -82,15 +124,6 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
               {hashtags.map((h) => (h.startsWith('#') ? h : `#${h}`)).join(' ')}
             </p>
           ) : null}
-        </SectionCard>
-      ) : null}
-
-      {job.skript ? (
-        <SectionCard>
-          <h2 className="mb-2 text-heading-sm font-semibold text-claimondo-navy">Skript</h2>
-          <pre className="overflow-x-auto whitespace-pre-wrap text-body-xs text-claimondo-slate">
-            {JSON.stringify(job.skript, null, 2)}
-          </pre>
         </SectionCard>
       ) : null}
     </div>

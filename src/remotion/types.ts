@@ -16,5 +16,6 @@ export interface RenderSegment {
 export interface ContentClipProps extends Record<string, unknown> {
   segments: RenderSegment[]
   audioSrc: string | null
+  musicSrc: string | null
   durationInFrames: number
 }
