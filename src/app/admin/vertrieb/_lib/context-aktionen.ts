@@ -5,7 +5,7 @@ export type VertriebAktion = {
   key: string
   label: string
   href?: string
-  kind: 'scrape' | 'csv' | 'anlegen' | 'freigaben' | 'qrpool'
+  kind: 'scrape' | 'csv' | 'anlegen' | 'freigaben' | 'qrpool' | 'sequenzen'
 }
 
 const ROLLE_TO_PL: Record<VertriebRolle, string> = { sv: 'sachverstaendiger', makler: 'makler', werkstatt: 'werkstatt', 'firmen-flotte': 'firmen-flotte' }
@@ -30,6 +30,9 @@ export function contextAktionen(rolle: VertriebRolle | 'alle', typ: VertriebTyp 
       label: 'CSV importieren',
       href: `/admin/vertrieb/partner-leads?aktion=csv${rolleQuery ? '&' + rolleQuery : ''}`,
     })
+    // Cold-Mailer S4: Vorlagen + Sequenzen konfigurieren. Neben der Akquise, weil genau
+    // dort entschieden wird, was mit den frisch gescrapten Leads passiert.
+    out.push({ key: 'sequenzen', kind: 'sequenzen', label: '📨 Cold-Mail-Sequenzen' })
   }
   // Anlegen je Rolle
   if (rolle === 'sv') {
