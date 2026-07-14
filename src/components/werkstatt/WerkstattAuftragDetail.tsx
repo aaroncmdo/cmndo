@@ -11,6 +11,7 @@ import { toast } from 'sonner'
 
 import type { WerkstattAuftrag, WerkstattAuftragExtra, WerkstattChatMessage } from '@/lib/werkstatt/queries'
 import { WerkstattChatTab } from '@/components/werkstatt/WerkstattChatTab'
+import { WerkstattCopilotPanel } from '@/components/werkstatt/WerkstattCopilotPanel'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
 import {
   werkstattAuftragSegment,
@@ -703,6 +704,9 @@ export function WerkstattAuftragDetail({
           </div>
         </SectionCard>
       )}
+
+      {/* KI-Copilot: Reparatur/Abrechnung/KVA/Totalschaden — Streaming via /api/werkstatt/copilot. */}
+      <WerkstattCopilotPanel claimId={auftrag.claim_id} />
 
       {/* Fall-Chat (Gruppenchat, kanal-basiert wie der Makler-Chat) — ganz unten. */}
       <WerkstattChatTab
