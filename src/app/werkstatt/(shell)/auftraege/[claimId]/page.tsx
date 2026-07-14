@@ -3,7 +3,13 @@
 // ein Fremd-Auftrag liefert null -> notFound() (kein IDOR).
 
 import { redirect, notFound } from 'next/navigation'
-import { getWerkstattByUserId, getWerkstattAuftrag, getWerkstattAuftragExtra } from '@/lib/werkstatt/queries'
+import { createClient } from '@/lib/supabase/server'
+import {
+  getWerkstattByUserId,
+  getWerkstattAuftrag,
+  getWerkstattAuftragExtra,
+  getWerkstattFallChat,
+} from '@/lib/werkstatt/queries'
 import { WerkstattAuftragDetail } from '@/components/werkstatt/WerkstattAuftragDetail'
 
 export const dynamic = 'force-dynamic'
@@ -21,9 +27,23 @@ export default async function WerkstattAuftragDetailPage({
   const auftrag = await getWerkstattAuftrag(claimId)
   if (!auftrag) notFound()
 
-  // Zusatz-Kontext (Fahrzeug-Detail / Vorschaeden / Ansprechpartner) NACH dem
-  // RLS-Gate oben (auftrag != null == Fall-Zugehoerigkeit bewiesen) via Admin-Client.
-  const extra = await getWerkstattAuftragExtra(claimId)
+  // Zusatz-Kontext (Fahrzeug-Detail / Vorschaeden / Ansprechpartner) + Fall-Chat
+  // NACH dem RLS-Gate oben (auftrag != null == Fall-Zugehoerigkeit bewiesen), via
+  // Admin-Client (Defense-in-Depth).
+  const supabase = await createClient()
+  const [extra, chatMessages, userRes] = await Promise.all([
+    getWerkstattAuftragExtra(claimId),
+    getWerkstattFallChat(claimId),
+    supabase.auth.getUser(),
+  ])
+  const currentUserId = userRes.data.user?.id ?? null
 
-  return <WerkstattAuftragDetail auftrag={auftrag} extra={extra} />
+  return (
+    <WerkstattAuftragDetail
+      auftrag={auftrag}
+      extra={extra}
+      chatMessages={chatMessages}
+      currentUserId={currentUserId}
+    />
+  )
 }
