@@ -1,6 +1,8 @@
 // Regressions-Guard fuer den token_hash-Welcome-Link-Helper. Fixiert das URL-Format
-// (/api/auth/confirm?token_hash=…&type=…&next=…) und die null-Faelle (Caller schickt dann
+// (/auth/bestaetigen?token_hash=…&type=…&next=…) und die null-Faelle (Caller schickt dann
 // die Mail ohne Magic-Link-Button / mit Einmalpasswort-Fallback).
+// PREFETCH-HAERTUNG (2026-07-14): der Link zeigt auf die KLICK-Seite /auth/bestaetigen
+// (nicht mehr /api/auth/confirm, das verifyOtp schon beim GET ausfuehrte).
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -15,10 +17,12 @@ import { buildWelcomeConfirmLink } from './welcome-link'
 describe('buildWelcomeConfirmLink', () => {
   beforeEach(() => generateLinkMock.mockReset())
 
-  it('baut eine /api/auth/confirm-URL mit token_hash + type + encoded next', async () => {
+  it('baut eine /auth/bestaetigen-URL mit token_hash + type + encoded next', async () => {
     generateLinkMock.mockResolvedValue({ data: { properties: { hashed_token: 'abc123' } }, error: null })
     const link = await buildWelcomeConfirmLink('x@y.de', 'recovery', '/passwort-zuruecksetzen')
-    expect(link).toContain('/api/auth/confirm')
+    expect(link).toContain('/auth/bestaetigen')
+    // darf NICHT mehr auf die alte GET-verifyOtp-Route zeigen (Prefetch-Falle)
+    expect(link).not.toContain('/api/auth/confirm')
     expect(link).toContain('token_hash=abc123')
     expect(link).toContain('type=recovery')
     expect(link).toContain('next=%2Fpasswort-zuruecksetzen')
