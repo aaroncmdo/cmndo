@@ -264,11 +264,16 @@ function isPublicPath(pathname: string): boolean {
     // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
     // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).
     '/makler/registrieren',
-    // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). BEWUSST
-    // NICHT unter '/abmelden' — app.claimondo.de/abmelden/* wird auf Infra-Ebene
-    // per 301 auf claimondo.de (Marketing) umgeleitet, wo es 404t (tote Zone, trifft
-    // auch den Winback-Link). Darum ein eigener App-Pfad, der nicht wegge-301't wird.
+    // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). Eigener
+    // App-Pfad statt '/abmelden' — historisch, weil '/abmelden' in MARKETING_PREFIXES
+    // stand und weg-301't wurde (tote Zone). Der Pfad bleibt wie er ist: die Links
+    // sind bereits raus, ein Wechsel wuerde sie brechen.
     '/wochenreport-abmelden',
+    // Win-back-Opt-out (public, Token in der URL) — Pflicht-Abmeldelink der
+    // Reaktivierungs-Mails. Ohne diesen Eintrag 307't die Route auf /login und der
+    // Link waere weiterhin tot (der proxy.ts-Fix allein reicht NICHT).
+    // startsWith-Radius geprueft: unter /abmelden liegt nur [token] — kein Auth-Bypass.
+    '/abmelden',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
     // hinter den Auth-Guard rutscht:
     '/vorteile',
