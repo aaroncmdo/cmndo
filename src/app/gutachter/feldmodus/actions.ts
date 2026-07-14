@@ -15,6 +15,7 @@ import {
   advanceToNextTermin,
   pauseTagesSession,
 } from '@/lib/sv/tages-session'
+import { shouldSkipAdvance } from '@/lib/sv/should-skip-advance'
 
 type Result = { success: boolean; error?: string }
 
@@ -204,10 +205,14 @@ export async function markArrived(
 export async function completeAndAdvance(
   sessionId: string,
   terminId: string,
-): Promise<Result & { nextTerminId?: string | null }> {
+  expectedAktuellerTerminId?: string,
+): Promise<Result & { nextTerminId?: string | null; skipped?: boolean }> {
   const guard = await assertSvOwnsTermin(terminId)
   if (!guard.ok) return { success: false, error: guard.error }
   const admin = createAdminClient()
+  // Slice 1b: IF-NULL-Guard macht den durablen Abschluss-Write idempotent —
+  // ein Offline-Doppel-Replay überschreibt abschluss_zeit nicht mit einem
+  // späteren Zeitstempel.
   await admin
     .from('gutachter_termine')
     .update({
@@ -215,6 +220,24 @@ export async function completeAndAdvance(
       status: 'abgeschlossen',
     })
     .eq('id', terminId)
+    .is('abschluss_zeit', null)
+
+  // Slice 1b: Compare-and-Set. Beim Offline-Replay wird terminId als
+  // expectedAktuellerTerminId uebergeben. Steht die Session nicht mehr auf
+  // diesem Termin (bereits weitergeschaltet / finished), wird der Advance
+  // uebersprungen — sonst wuerde ein Doppel-Replay einen Stop ueberspringen.
+  // Online-Caller uebergeben den Param nicht -> shouldSkipAdvance=false ->
+  // Advance laeuft unveraendert.
+  if (expectedAktuellerTerminId !== undefined) {
+    const { data: sess } = await admin
+      .from('sv_tages_session')
+      .select('aktueller_termin_id')
+      .eq('id', sessionId)
+      .maybeSingle()
+    if (shouldSkipAdvance(sess?.aktueller_termin_id ?? null, expectedAktuellerTerminId)) {
+      return { success: true, nextTerminId: null, skipped: true }
+    }
+  }
 
   // Zwischen-State 'completing' damit Timeline/Reporting es erkennt.
   await transitionTagesSession(sessionId, 'completing')
