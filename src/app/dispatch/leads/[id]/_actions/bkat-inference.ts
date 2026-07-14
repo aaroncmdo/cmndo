@@ -11,9 +11,11 @@
 //    TBNRs werden weiterhin NICHT persistiert.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { inferBkat, type BkatInferenzErgebnis } from '@/lib/bkat/inference'
 import { polizeiberichtUrlsFromLead } from '@/lib/bkat/lead-polizeibericht-urls'
+import { resignStorageUrl } from '@/lib/storage/url'
 import type { Database } from '@/lib/supabase/database.types'
 
 type BkatUnfallart = Database['public']['Enums']['bkat_unfallart']
@@ -40,11 +42,20 @@ export async function analyzeBkatForLead(
   const stext = (lead.schadens_hergang as string | null) ?? ''
   const unfallhergang = ltext.length >= stext.length ? ltext : stext
 
-  // Polizeibericht-Bilder für die Vision-OCR aus der Lead-Präsenz-URL (public-URL,
-  // direkt fetchbar). Früher aus fall_dokumente.dokument_url — die Spalte existiert
-  // nicht (heißt storage_path), die Query schlug still fehl → BKat bekam nie Bilder.
-  // Der Lead ist die Ingest-Quelle (FG5-C4: won't-demote, Lead = SSoT der Präsenz).
-  const polizeibericht_urls = polizeiberichtUrlsFromLead(lead)
+  // Polizeibericht-Bilder für die Vision-OCR. Quelle ist die Lead-Präsenz-URL — der Lead
+  // ist die Ingest-Quelle (FG5-C4: won't-demote). Früher las das hier
+  // fall_dokumente.dokument_url: die Spalte existiert nicht (heisst storage_path), die
+  // Query schlug still fehl → BKat bekam nie Bilder.
+  //
+  // Die GESPEICHERTE URL ist aber NICHT dauerhaft abrufbar: `fall-dokumente` ist ein
+  // PRIVATER Bucket → eine getPublicUrl liefert HTTP 400, eine signed-URL läuft nach
+  // ihrer TTL (1h) ab. Anthropic-Vision holt das Bild OHNE Auth (source.type='url') →
+  // die URL muss FRISCH signiert werden, sonst sieht Claude nur einen Fehler.
+  const admin = createAdminClient()
+  const signedUrls = await Promise.all(
+    polizeiberichtUrlsFromLead(lead).map((url) => resignStorageUrl(admin, url)),
+  )
+  const polizeibericht_urls = signedUrls.filter((u): u is string => !!u)
 
   const result = await inferBkat({
     polizeibericht_urls,
