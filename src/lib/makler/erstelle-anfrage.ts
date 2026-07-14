@@ -93,7 +93,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   // 2. Einwilligung (DSGVO-Basis fuer die Kontaktaufnahme des Dritten — der Makler
   //    initiiert, der Kunde hat selbst nichts angeklickt).
   if (input.kundeEinwilligung !== true) {
-    return { ok: false, error: 'Bitte die Einwilligung des Kunden zur Kontaktaufnahme bestaetigen.' }
+    return { ok: false, error: 'Bitte die Einwilligung des Kunden zur Kontaktaufnahme bestätigen.' }
   }
 
   // 3. Validierung.
@@ -116,7 +116,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   if (vorname.length < 1 || nachname.length < 1) return { ok: false, error: 'Vor- und Nachname erforderlich.' }
   if (telefon.length < 5) return { ok: false, error: 'Telefonnummer erforderlich.' }
   if (input.ausgang === 'flowlink' && !telefon && !email) {
-    return { ok: false, error: 'Fuer den Link-Versand wird Telefon oder Email benoetigt.' }
+    return { ok: false, error: 'Für den Link-Versand wird Telefon oder Email benötigt.' }
   }
   // Kasko/Haftpflicht-Qualifizierung (Trust-Boundary, spiegelt den Client-Guard): Eigenverschulden
   // OHNE VS-Antwort wuerde im Flow-Quali still disqualifizieren (qualiFlowOutcome -> Abbruch).
