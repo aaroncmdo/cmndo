@@ -5,4 +5,5 @@ import './gps-position'
 import './sv-notizen'
 import './sv-vor-ort'
 import './besichtigung-gestartet'
+import './sv-complete-advance'
 export {}
