@@ -57,7 +57,7 @@ export default function PageHeader({
           <p className="text-sm text-claimondo-ondo max-w-prose">{description}</p>
         ) : null}
         {actions ? (
-          <div className="flex items-center gap-3 mt-2">{actions}</div>
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-2">{actions}</div>
         ) : null}
       </div>
     )
@@ -82,7 +82,11 @@ export default function PageHeader({
         </div>
       </div>
       {actions ? (
-        <div className="flex items-center gap-3 shrink-0">{actions}</div>
+        // flex-wrap: bei breiter actions-Payload (Toolbar mit mehreren Buttons) auf schmalen
+        // Viewports umbrechen statt horizontal ueberlaufen. shrink-0 haelt die Actions auf
+        // Desktop neben dem Titel; auf Mobile stapelt der titleRow (flex-col) -> die Actions
+        // bekommen eine volle Zeile, in der die Buttons dann umbrechen. (Portal-Header-Fund.)
+        <div className="flex flex-wrap items-center gap-3 shrink-0">{actions}</div>
       ) : null}
     </div>
   )
