@@ -77,6 +77,14 @@ export function Spotlight({
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  // Sichtbarer Trigger (mobil/Kunde ohne Tastatur): ein globales Event oeffnet die Palette,
+  // entkoppelt vom Mount-Ort — ein SearchTriggerButton irgendwo im Header dispatcht es.
+  useEffect(() => {
+    function openHandler() { setOpen(true) }
+    window.addEventListener('claimondo:open-search', openHandler)
+    return () => window.removeEventListener('claimondo:open-search', openHandler)
+  }, [])
+
   // Auf Open: Reset + Fokus.
   useEffect(() => {
     if (open) {
