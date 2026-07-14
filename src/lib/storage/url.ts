@@ -77,6 +77,56 @@ export async function getStorageUrl(
 }
 
 /**
+ * Zerlegt eine GESPEICHERTE Storage-URL wieder in Bucket + Pfad.
+ *
+ * Erkennt alle drei Supabase-Formen (`/object/public|sign|authenticated/<bucket>/<pfad>`),
+ * wirft den `?token=`-Query weg und dekodiert prozent-kodierte Pfadsegmente.
+ * Liefert `null` für Nicht-Storage-URLs (z.B. `/claimondo-logo.svg`) und Leerwerte.
+ */
+export function parseStorageUrl(
+  url: string | null | undefined,
+): { bucket: string; path: string } | null {
+  if (!url) return null
+  const m = url.match(/\/storage\/v1\/object\/(?:public|sign|authenticated)\/([^/?#]+)\/([^?#]+)/)
+  if (!m) return null
+  const bucket = m[1]
+  let path = m[2]
+  if (!bucket || !path) return null
+  try {
+    path = decodeURIComponent(path)
+  } catch {
+    /* kaputte %-Sequenz: roh weiterreichen */
+  }
+  return path ? { bucket, path } : null
+}
+
+/**
+ * Macht eine GESPEICHERTE Storage-URL wieder abrufbar, indem sie FRISCH signiert wird.
+ *
+ * Warum nötig: eine einmal in der DB abgelegte Storage-URL ist kein dauerhafter Zugriff.
+ * Bei `STORAGE_USE_SIGNED_URLS=true` läuft sie nach ihrer TTL ab; ist das Flag aus, ist es
+ * eine `getPublicUrl` — die auf einem PRIVATEN Bucket (z.B. `fall-dokumente`) HTTP 400
+ * liefert. Wer so eine URL später wiederverwendet — insbesondere wenn ein FREMDER Dienst
+ * sie ohne Auth fetcht (Anthropic-Vision holt Bilder per `source.type='url'`) — muss sie
+ * neu signieren. `supabase` sollte daher ein Client mit Storage-Rechten sein (Admin).
+ *
+ * Liefert `null`, wenn die URL keine Storage-URL ist oder das Signieren fehlschlägt.
+ */
+export async function resignStorageUrl(
+  supabase: SupabaseClient,
+  storedUrl: string | null | undefined,
+  ttl: number = STORAGE_TTL.ui,
+): Promise<string | null> {
+  const parsed = parseStorageUrl(storedUrl)
+  if (!parsed) return null
+  const { data, error } = await supabase.storage
+    .from(parsed.bucket)
+    .createSignedUrl(parsed.path, ttl)
+  if (error || !data?.signedUrl) return null
+  return data.signedUrl
+}
+
+/**
  * Bulk-Variante für Listen-Views — generiert N URLs parallel.
  * Items mit leerem Pfad → null im selben Index.
  *
