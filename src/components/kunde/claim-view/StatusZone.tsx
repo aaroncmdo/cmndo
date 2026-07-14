@@ -34,7 +34,11 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
   // Rügefall-Ableitung (page.tsx-Logik).
   let szenario = (fall.szenario as string | null) ?? 'normalfall'
   if (fallStatus === 'klage') szenario = 'klagefall'
-  else if (['vs-kuerzt', 'vs-abgelehnt', 'nachbesichtigung-laeuft'].includes(fallStatus) && szenario === 'normalfall') {
+  // B4-slice-1b: 'abgelehnt' ergaenzt — seit dem endzustand-Write-Flip traegt operative_status
+  // die einfache Ablehnung direkt. Sie ist semantisch dasselbe wie 'vs-abgelehnt' (VS hat
+  // abgelehnt, nachforderbar); ohne den Eintrag bliebe der Fall 'normalfall' und der Kunde
+  // bekaeme den Ablehnungs-Hinweis unten NIE zu sehen.
+  else if (['vs-kuerzt', 'vs-abgelehnt', 'abgelehnt', 'nachbesichtigung-laeuft'].includes(fallStatus) && szenario === 'normalfall') {
     szenario = 'ruegefall'
   }
 
@@ -168,7 +172,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
           <p className="text-body-xs text-warning-strong">{t('vsKuerzt.hinweis')}</p>
         </NoticeBox>
       )}
-      {fallStatus === 'vs-abgelehnt' && (
+      {(fallStatus === 'vs-abgelehnt' || fallStatus === 'abgelehnt') && (
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('vsAbgelehnt.titel')}</p>
           <p className="text-body-xs text-danger-strong">{t('vsAbgelehnt.text')}</p>

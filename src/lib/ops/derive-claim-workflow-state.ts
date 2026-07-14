@@ -1,13 +1,18 @@
 // src/lib/ops/derive-claim-workflow-state.ts
 // Reine Ableitung: v_claim_workstate-Zeile -> ClaimWorkItem. Kein I/O, testbar.
 import { toClaimMainPhase, toClaimSubPhase, type ClaimSubPhase } from '@/lib/claims/lifecycle'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 import { CLAIM_WORKFLOW_META, CLAIM_SLA_DAYS } from './claim-workflow-meta'
 import type { ClaimWorkItem, ClaimWorkstateRow } from './claim-workstate.types'
 
 const MS_PER_DAY = 86_400_000
 
-/** Terminale operative_status-Werte — Reparatur-Lane ueberspringen. */
-const TERMINAL_OPERATIVE = new Set(['abgeschlossen', 'storniert', 'abgelehnt', 'verjaehrt'])
+/** Terminale operative_status-Werte — Reparatur-Lane ueberspringen.
+ *  B4-slice-1b: nutzt die SSoT statt eines handgerollten Sets. Vorher stand hier faelschlich
+ *  'abgelehnt' (= NICHT terminal, einfache nachforderbare Ablehnung) und die feinen B2-Terminals
+ *  fehlten — nach dem endzustand-Write-Flip haette das Cockpit-Count (SQL) und Drill-In (TS)
+ *  divergieren lassen, was der Kommentar unten ausdruecklich verbietet. */
+const TERMINAL_OPERATIVE = CLOSED_OPERATIVE_STATUS
 
 /** Abrechnungswege die eine Reparatur-Lane haben (kein Kanzlei-/Gutachten-Tail). */
 const REPARATUR_ABRECHNUNGSWEGE = new Set(['selbstzahler', 'kasko'])

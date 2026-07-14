@@ -20,6 +20,11 @@ export const PHASE_SLA_TAGE: Record<string, number> = {
   anschlussschreiben: 30,
   regulierung: 30,
   'regulierung-laeuft': 30,
+  // B4-slice-1b: gleiche 30 Tage wie 'regulierung' — eine VS-Antwortzeit von 20+ Tagen ist normal.
+  // Ohne Eintrag greift der 14-Tage-Fallback und der Health-Check wirft dauerhaft WARN/CRIT auf
+  // voellig normale Versicherungs-Verhandlungen.
+  in_kommunikation_vs: 30,
+  abgelehnt: 30,
   'zahlung-eingegangen': 14,
 }
 

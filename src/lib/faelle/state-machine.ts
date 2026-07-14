@@ -49,6 +49,21 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'anschlussschreiben': ['regulierung-laeuft', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'vs-kuerzt', 'regulierung', 'klage', 'storniert'],
   'regulierung': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'abgeschlossen', 'storniert'],
   'regulierung-laeuft': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'vs-kuerzt', 'klage', 'storniert'],
+  // Status-Achsen-Konsolidierung B4-slice-1b: die zwei NICHT-terminalen Endzustand-Outcomes
+  // (endzustand-actions: markClaimAsInKommunikationVs / markClaimAsAbgelehnt(final=false))
+  // schreiben ab jetzt operative_status DIREKT — sie sind damit CURSOR-Werte und brauchen
+  // eigene Ausgaenge. Ohne sie waere der Claim ein Dead-End: transitionFallStatus WIRFT bei
+  // unbekanntem Key (:120) und der LexDrive-fall_geschlossen-Guard (process-event.ts:725,
+  // via istGueltigerFallUebergang) lehnte JEDEN Abschluss ab — und zwar genau im Normalfall
+  // "KB setzt VS-Kommunikation -> LexDrive schliesst den Fall".
+  //
+  // Die Mengen sind behavior-preserving: sie sind die Vereinigung der Ausgaenge der Cursor-
+  // Werte, die diese Outcomes semantisch ERSETZEN (mapFallStatusToClaimStatus: regulierung +
+  // regulierung-laeuft -> in_kommunikation_vs; vs-abgelehnt -> abgelehnt). Ein Claim kann nach
+  // dem Flip also nichts weniger als vorher. 'abgelehnt' ist bewusst nicht terminal
+  // (nachforderbar/eskalierbar) -> behaelt Zahlung/Klage/Nachbesichtigung/Abschluss.
+  'in_kommunikation_vs': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'vs-abgelehnt', 'vs-kuerzt', 'klage', 'abgeschlossen', 'storniert'],
+  'abgelehnt': ['zahlung-eingegangen', 'nachbesichtigung-laeuft', 'vs-kuerzt', 'klage', 'abgeschlossen', 'storniert'],
   'vs-kuerzt': ['nachbesichtigung-laeuft', 'regulierung-laeuft', 'vs-abgelehnt', 'klage', 'storniert'],
   'nachbesichtigung-laeuft': ['regulierung-laeuft', 'vs-abgelehnt', 'klage', 'storniert'],
   'vs-abgelehnt': ['klage', 'storniert'],

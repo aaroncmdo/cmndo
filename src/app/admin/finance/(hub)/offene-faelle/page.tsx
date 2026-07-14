@@ -9,31 +9,11 @@ import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
+// B4-slice-1b: war eine wortgleiche Kopie der Liste aus dem case-billing-batch-Cron. Zwei Kopien
+// derselben Abrechnungs-Menge driften garantiert auseinander → jetzt EINE SSoT.
+import { BILLABLE_OPERATIVE_STATUS_VALUES as BILLABLE_STATUSES } from '@/lib/claims/terminal-status'
 
 export const dynamic = 'force-dynamic'
-
-const BILLABLE_STATUSES = [
-  'gutachten-eingegangen',
-  'filmcheck',
-  'qc-pruefung',
-  'kanzlei-uebergeben',
-  'anschlussschreiben',
-  'regulierung',
-  'regulierung-laeuft',
-  'vs-kuerzt',
-  'nachbesichtigung-laeuft',
-  'vs-abgelehnt',
-  'klage',
-  'zahlung-eingegangen',
-  'abgeschlossen',
-  // B2b: KB-Closes tragen jetzt feine Terminals in operative_status (statt coarse 'abgeschlossen').
-  // Alle sind >= gutachten-eingegangen = billable (Finder-Fee unabhaengig vom Claim-Outcome).
-  'reguliert_vollstaendig',
-  'klage_rechtsstreit',
-  'verjaehrt',
-  'abgelehnt_final',
-  'an_externe_kanzlei_uebergeben',
-]
 
 function formatDate(iso: string | null): string {
   if (!iso) return '–'

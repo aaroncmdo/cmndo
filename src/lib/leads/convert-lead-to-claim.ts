@@ -36,6 +36,7 @@ import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
 import { deriveVermittler } from '@/lib/leads/vermittler'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
@@ -1019,11 +1020,16 @@ async function pickKundenbetreuerRoundRobin(
     // CMM-74 b2 reader-fallback-drop: aktive Faelle pro KB via claims.operative_status zaehlen
     // (claims=SSoT; kundenbetreuer_id + operative_status leben auf claims, 1:1 zu faelle, gleiches
     // Status-Vokabular) — entkoppelt vom faelle.status-Read (Drop-Runway).
+    // B4-slice-1b: war ein handgerolltes Literal mit zwei TOTEN Filterwerten ('reguliert' gibt es
+    // im operative_status-Vokabular gar nicht; 'abgelehnt' ist NICHT terminal — der Fall laeuft
+    // weiter und muss zur KB-Auslastung zaehlen, sonst sieht ein KB mit vielen abgelehnt-aber-
+    // laufenden Faellen "frei" aus und wird ueberladen). Zugleich fehlten die feinen B2-Terminals
+    // (reguliert_vollstaendig etc.) -> geschlossene Faelle zaehlten als aktiv. Jetzt die SSoT.
     const { count } = await admin
       .from('claims')
       .select('id', { count: 'exact', head: true })
       .eq('kundenbetreuer_id', b.id as string)
-      .not('operative_status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
+      .not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG)
     counts[b.id as string] = count ?? 0
   }
 

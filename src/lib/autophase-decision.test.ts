@@ -63,6 +63,19 @@ describe('computeNextOperativePhase', () => {
     expect(computeNextOperativePhase('regulierung', sig({ zahlungEingegangen: true }))).toBe('abgeschlossen')
   })
 
+  // B4-slice-1b (Status-Achsen-Konsolidierung): endzustand schreibt die zwei NICHT-terminalen
+  // Outcomes jetzt in operative_status. Sie stehen operativ an derselben Stelle wie 'regulierung'
+  // (vorher trug der Cursor dort 'regulierung') -> selbe Auto-Advance-Regel, sonst faellt der
+  // Claim in `default: null` = Auto-Advance-Engine steht fuer ihn still.
+  it('B4-slice-1b: in_kommunikation_vs + Zahlung -> abgeschlossen (wie regulierung)', () => {
+    expect(computeNextOperativePhase('in_kommunikation_vs', sig({ zahlungEingegangen: true }))).toBe('abgeschlossen')
+    expect(computeNextOperativePhase('in_kommunikation_vs', sig())).toBeNull()
+  })
+  it('B4-slice-1b: abgelehnt (einfach, nachforderbar) + Zahlung -> abgeschlossen', () => {
+    expect(computeNextOperativePhase('abgelehnt', sig({ zahlungEingegangen: true }))).toBe('abgeschlossen')
+    expect(computeNextOperativePhase('abgelehnt', sig())).toBeNull()
+  })
+
   it('terminale/unbekannte Status -> null', () => {
     expect(computeNextOperativePhase('abgeschlossen', sig({ zahlungEingegangen: true }))).toBeNull()
     expect(computeNextOperativePhase('storniert', sig())).toBeNull()

@@ -11,6 +11,12 @@ export const BANKDATEN_SHOW_STATUSES = [
   'anschlussschreiben',
   'regulierung-laeuft',
   'regulierung',
+  // B4-slice-1b: die zwei Non-Terminal-Outcomes. Vor dem endzustand-Write-Flip trug der Cursor
+  // hier 'regulierung' — ohne sie verschwinden der BankdatenBanner UND die "Bankdaten
+  // hinterlegen"-Aufgabe genau in der Phase, in der die Auszahlung verhandelt wird: der Kunde
+  // koennte seine IBAN nicht mehr abgeben.
+  'in_kommunikation_vs',
+  'abgelehnt',
 ] as const
 
 /** True, wenn der Fall-Status in einer Phase ist, in der die Bankdaten-Abfrage erscheint. */

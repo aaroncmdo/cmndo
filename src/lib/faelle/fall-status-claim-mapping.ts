@@ -77,6 +77,13 @@ const FALL_STATUS_TO_CLAIM_STATUS: Readonly<Record<string, string | null>> = {
   'vs-abgelehnt': 'abgelehnt', // NICHT abgelehnt_final — kann noch -> klage eskalieren
   klage: 'klage_rechtsstreit',
   storniert: 'storniert',
+  // B4-slice-1b: die zwei Non-Terminal-Outcomes tragen jetzt selbst operative_status. Identitaets-
+  // Mapping, damit die beiden Achsen kohaerent bleiben, EGAL welcher Writer gewinnt: endzustand-
+  // actions schreibt beide Spalten direkt, aber wenn ein Pfad den Wert je ueber transitionFallStatus
+  // routet, liefe er sonst in den `!(x in FALL_STATUS_TO_CLAIM_STATUS)`-Zweig -> claims.status
+  // bliebe stehen und die Achsen drifteten auseinander.
+  in_kommunikation_vs: 'in_kommunikation_vs',
+  abgelehnt: 'abgelehnt',
 }
 
 export interface ClaimStatusMapping {
