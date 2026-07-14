@@ -117,6 +117,17 @@ export async function getAccessToken(): Promise<string> {
 
   if (!res.ok) {
     const txt = await res.text().catch(() => '')
+    // 401 = Cardentity lehnt die Zugangsdaten ab (rotiertes Secret oder gesperrter
+    // Account). Fuer die Person am Button zaehlen zwei Dinge: es liegt nicht an ihr,
+    // und es wurde NICHTS abgerufen -> also auch nichts berechnet (der kostenpflichtige
+    // Report-Call kommt ohne Token nie zustande). Das gehoert in den Klartext, sonst
+    // steht ein Dispatcher vor einem rohen OAuth-Dump und weiss nicht, ob 15 EUR liefen.
+    if (res.status === 401) {
+      throw new CardentityError(
+        401,
+        'Cardentity-Zugang ungültig — die Zugangsdaten werden abgelehnt (401). Es wurde nichts abgerufen und nichts berechnet. Bitte einen Admin informieren.',
+      )
+    }
     throw new CardentityError(res.status, `OAuth-Fehler ${res.status}: ${txt}`)
   }
 

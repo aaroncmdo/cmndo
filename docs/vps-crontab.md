@@ -72,7 +72,6 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 0    4 * * *  cron-call.sh /api/cron/community-leaderboard-update
 0    3 * * *  cron-call.sh /api/cron/google-bewertungen
 0    4 * * *  cron-call.sh /api/cron/isochrone-backfill
-0    6 * * *  cron-call.sh /api/cron/cardentity-recheck
 */5  * * * *  cron-call.sh /api/cron/sync-external-calendars
 25   5 * * *  cron-call.sh /api/indexnow
 17   * * * *  cron-call.sh /api/cron/embed-b-termin-resolution
