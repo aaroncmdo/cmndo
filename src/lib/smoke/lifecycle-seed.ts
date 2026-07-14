@@ -11,9 +11,12 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // Fixe IDs aus der Production-DB (CMM-37 Audit, 2026-05-02)
-const KUNDE_ID = '879b4b31-eeb4-47a1-add5-531898874a7c' // aaron.sprafke+kunde15@claimondo.de
-const KB_ID = 'aa000001-0000-0000-0000-000000000001' // Anna Weber (kb@claimondo.de)
-const SV_ID = '677400bf-dd31-4581-a645-07a7d624c190' // Test-Aaron / aaron.sprafke@claimondo.de
+// B4-Harness/Go-Live-Cleanup (13.07., kunde=0): die alten Test-Konten wurden gepurged.
+// geschaedigter_user_id + kundenbetreuer_id FK -> profiles; Parity braucht nur FK-Gueltigkeit
+// (geschaedigter beeinflusst die Phasen-Ableitung nicht). Aktuelle valide Prod-IDs:
+const KUNDE_ID = '22b65fa0-4bcf-4c4c-8ab9-f119670c7db0' // valides Staff-Profil (kunde=0 nach Cleanup)
+const KB_ID = 'aa000001-0000-0000-0000-000000000001' // Anna Weber (kundenbetreuer, ueberlebte den Cleanup)
+const SV_ID = '523b21c5-06a4-47c0-b0c5-9b61d5e2804c' // valider Sachverstaendiger (alter 677400bf gecleant)
 
 // SMOKE_TAG_PREFIX wird in claims.fall_typ gespeichert — pro Szenario mit
 // Index-Suffix (SMOKE-LC-01 … SMOKE-LC-10). Doppelfunktion:
@@ -87,8 +90,9 @@ export async function resetAllScenarios(): Promise<{ ok: boolean; geloescht: num
 type Db = ReturnType<typeof createAdminClient>
 
 async function deleteAllSmoke(db: Db): Promise<number> {
-  // Cascade an claims → faelle → auftraege/kanzlei_faelle/gutachter_termine.
-  // Leads müssen wir explizit aufräumen.
+  // FK-geordnet loeschen: die Child-Rows (auftraege/gutachter_termine/kanzlei_faelle/
+  // faelle_claim_bridge) blocken sonst den claims-Delete (kein DELETE-CASCADE). gutachter_termine
+  // haelt zudem einen lead_id-FK (Trigger-Backfill) -> blockt den leads-Delete. Beides hier aufloesen.
   const { data: smokeClaims } = await db
     .from('claims').select('id, lead_id').like('fall_typ', `${SMOKE_TAG_PREFIX}%`)
   const claimIds = (smokeClaims ?? []).map((c) => c.id as string)
@@ -96,9 +100,16 @@ async function deleteAllSmoke(db: Db): Promise<number> {
     .map((c) => c.lead_id as string | null).filter(Boolean) as string[]
 
   if (claimIds.length > 0) {
+    for (const [t, col] of [
+      ['gutachter_termine', 'claim_id'], ['kanzlei_faelle', 'claim_id'],
+      ['auftraege', 'fall_id'], ['faelle_claim_bridge', 'claim_id'],
+    ] as const) {
+      await db.from(t).delete().in(col, claimIds)
+    }
     await db.from('claims').delete().in('id', claimIds)
   }
   if (leadIds.length > 0) {
+    await db.from('gutachter_termine').delete().in('lead_id', leadIds)
     await db.from('leads').delete().in('id', leadIds)
   }
   return claimIds.length
@@ -125,7 +136,7 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     telefon: '+4917620289514',
     sa_unterschrieben,
     vollmacht_signiert_am,
-    onboarding_complete: !isErfassung || sceneIsErfassungOnboardingOffen ? false : false,
+    // SP-B PR2a: onboarding_complete lebt auf claims (SSoT) — NICHT mehr auf leads.
   }).select('id').single()
   if (leadErr || !lead) throw new Error(`lead insert: ${leadErr?.message ?? 'kein lead'}`)
   const leadId = lead.id as string
@@ -148,6 +159,13 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
     work_state: phaseStatus.work_state,
     status: phaseStatus.status,
+    operative_status: phaseStatus.operative_status,
+    // FG6: SA/Vollmacht sind post-conversion auf dem CLAIM kanonisch (getClaimLifecycle liest
+    // die Claim-Copy via readClaimSigningState) -> synchron zum Lead setzen, sonst driftet
+    // getClaimLifecycle(claim) vs v_claim_phase(liest l.sa_unterschrieben) auf den Erfassungs-Subs.
+    sa_unterschrieben,
+    sa_unterschrieben_am: sa_unterschrieben ? new Date(Date.now() - 2 * 86400_000).toISOString() : null,
+    vollmacht_signiert_am,
     geschaedigter_user_id: KUNDE_ID,
     kundenbetreuer_id: KB_ID,
     lead_id: leadId,
@@ -176,25 +194,34 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
 
 // D2/T1.1b: work_state (Dispatch/Processing) getrennt von status (Lifecycle/Terminal).
 // Aktive Szenarien -> work_state gesetzt, status NULL; Lifecycle-Szenarien -> status gesetzt.
-function derivePhaseStatus(key: string): { phase: string; status: string | null; work_state: string | null } {
+// B4/CMM-74: operative_status ist die SSoT-Phasen-Achse -> MUSS gesetzt sein, sonst
+// liefert v_claim_phase (o_sub) NULL und gewinnt den SUB_ORDER-Tie -> falsche Parity-Fails.
+// Der operative_status je Szenario ist mit dem Lead-/Auftrag-/Kanzleifall-Zustand konsistent,
+// sodass v_claim_phase (SQL) und getClaimLifecycle (TS) bit-gleich dieselbe (main, sub) liefern.
+function derivePhaseStatus(key: string): { phase: string; status: string | null; work_state: string | null; operative_status: string } {
   switch (key) {
     case 'erfassung-sa-offen':
     case 'erfassung-vollmacht-offen':
     case 'erfassung-onboarding-offen':
-      return { phase: '0_lead', work_state: 'dispatch_done', status: null }
+      // Erfassungs-Sub kommt aus den Lead-Feldern (leadSubphase / o_sub-Lead-CASE) -> 'ersterfassung' reicht.
+      return { phase: '0_lead', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
     case 'begutachtung-termin':
+      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null, operative_status: 'sv-termin' }
     case 'begutachtung-besichtigung':
-      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null }
+      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null, operative_status: 'besichtigung' }
     case 'begutachtung-gutachten-qc':
     case 'begutachtung-reject':
-      return { phase: '4_gutachten_fertig', work_state: 'in_bearbeitung', status: null }
+      return { phase: '4_gutachten_fertig', work_state: 'in_bearbeitung', status: null, operative_status: 'gutachten-eingegangen' }
     case 'regulierung-vs-kontakt':
-      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs' }
+      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs', operative_status: 'regulierung' }
     case 'regulierung-auszahlung':
+      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: null, operative_status: 'zahlung-eingegangen' }
     case 'abschluss':
-      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'reguliert' }
+      // Terminal: post-B2 traegt operative_status den feinen Outcome direkt (statt coarse 'abgeschlossen')
+      // -> testet zugleich die #4285-Output-Neutralitaet (fine Terminal in operative_status).
+      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'reguliert_vollstaendig', operative_status: 'reguliert_vollstaendig' }
     default:
-      return { phase: '1_neu', work_state: 'dispatch_done', status: null }
+      return { phase: '1_neu', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
   }
 }
 
