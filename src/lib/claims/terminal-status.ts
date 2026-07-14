@@ -18,13 +18,29 @@ export const TERMINAL_CLAIM_STATUS: ReadonlySet<string> = new Set([
   'termin_durchgefuehrt',
 ])
 
-/** Closed values on the operative_status axis (claims.operative_status / faelle.status mirror).
- *  operative_status collapses the full terminal set into two: 'abgeschlossen' (normal flow)
- *  and 'storniert' (endzustand-actions). */
-export const CLOSED_OPERATIVE_STATUS: ReadonlySet<string> = new Set([
+/** Closed/terminal values on the operative_status axis (claims.operative_status / faelle.status mirror).
+ *  Status-Achsen-Konsolidierung B2: operative_status traegt jetzt die feinen Terminal-Outcomes
+ *  DIREKT (reguliert_vollstaendig etc.), nicht mehr nur die coarse 'abgeschlossen'. 'abgeschlossen'
+ *  bleibt gueltig (state-machine-Auto-Close + werkstatt-close schreiben es weiter), 'storniert'
+ *  ebenso. Die 5 feinen Terminals kommen ueber endzustand-actions (die manuellen KB/Admin-Setter).
+ *  Behavior-preserving bis endzustand-actions die feinen Werte tatsaechlich schreibt (B2b-2) —
+ *  bis dahin haelt operative_status nie einen feinen Terminal, die 5 Extra-Werte matchen 0 Rows. */
+export const CLOSED_OPERATIVE_STATUS_VALUES = [
   'abgeschlossen',
   'storniert',
-])
+  'reguliert_vollstaendig',
+  'klage_rechtsstreit',
+  'verjaehrt',
+  'abgelehnt_final',
+  'an_externe_kanzlei_uebergeben',
+] as const
+
+export const CLOSED_OPERATIVE_STATUS: ReadonlySet<string> = new Set(CLOSED_OPERATIVE_STATUS_VALUES)
+
+/** PostgREST-`in`-Listen-Literal fuer Negativ-/Positiv-Filter auf `operative_status`:
+ *  `.not('operative_status','in', CLOSED_OPERATIVE_STATUS_PG)` = "nur aktive Faelle".
+ *  Single source of truth — loest die verstreuten Inline-`'("abgeschlossen","storniert")'` ab. */
+export const CLOSED_OPERATIVE_STATUS_PG = `(${CLOSED_OPERATIVE_STATUS_VALUES.map((s) => `"${s}"`).join(',')})`
 
 /**
  * Returns true if the claim is in a closed/terminal state by ANY of the three axes:

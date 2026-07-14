@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 import { AlertTriangleIcon, CheckCircle2Icon, ArrowRightIcon } from 'lucide-react'
 
 // KFZ-155: Kritische Updates Widget — rote Box mit allem was Aaron sofort
@@ -123,7 +124,7 @@ async function loadAlerts(): Promise<Alert[]> {
     const { data: assignedSvs } = await admin
       .from('claims')
       .select('sv_id')
-      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+      .not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG)
       .not('sv_id', 'is', null)
     const svIds = Array.from(new Set((assignedSvs ?? []).map(r => r.sv_id).filter(Boolean) as string[]))
     if (svIds.length > 0) {
