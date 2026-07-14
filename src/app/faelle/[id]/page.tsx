@@ -52,6 +52,7 @@ import { listBelegeZumReview } from '@/lib/beleg-review/actions'
 import { getFallById } from '@/lib/fall/queries'
 // AAR-843: Timeline-Queries für den Verlaufs-Tab
 import { getClaimTimeline } from '@/lib/claims/timeline-queries'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 // CMM-44 MP-4b: 4-Phasen-Lifecycle für die Phasen-Anzeige (FallPhasenPanel aside)
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
@@ -583,7 +584,7 @@ export default async function FallaktePage({
     const { data: offeneClaims } = await supabase
       .from('claims')
       .select('id')
-      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+      .not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG)
     const offeneClaimIds = (offeneClaims ?? []).map((c) => c.id as string)
     // CMM-49/CMM-50 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). offeneClaimIds ist
     // bereits via claims-RLS gescoped -> vcf.in('id', …) ist leak-sicher (Prescope). kennzeichen kommt

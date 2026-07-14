@@ -10,6 +10,7 @@ import {
 import { de } from 'date-fns/locale'
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClipboardListIcon, PhoneIcon, UsersIcon, CoffeeIcon, XIcon, CheckIcon, SearchIcon } from 'lucide-react'
 import { getKalenderTermine } from '@/lib/actions/admin-kalender'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 import { createAdminTermin, updateAdminTermin, deleteAdminTermin } from '@/lib/actions/admin-termine-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
@@ -129,7 +130,9 @@ export default function KalenderClient({
           gutachterId: f.sv_id ?? undefined, gutachterName: f.sv_id ? svMap[f.sv_id] : undefined,
           fallId: f.id, fallNummer: f.claim_nummer ?? undefined,
           link: `/faelle/${f.id}`, status: f.status,
-          overdue: isBefore(new Date(f.sv_termin), now) && f.status !== 'abgeschlossen',
+          // B2b: geschlossene Faelle tragen jetzt feine Terminals in operative_status (nicht mehr
+          // nur 'abgeschlossen') -> gegen die volle Closed-Menge pruefen, sonst faelschlich overdue.
+          overdue: isBefore(new Date(f.sv_termin), now) && !CLOSED_OPERATIVE_STATUS.has(f.status),
         })
       }
     }

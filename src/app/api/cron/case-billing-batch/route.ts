@@ -35,6 +35,13 @@ const BILLABLE_STATUSES = [
   'klage',
   'zahlung-eingegangen',
   'abgeschlossen',
+  // B2b: KB-Closes tragen jetzt feine Terminals in operative_status (statt coarse 'abgeschlossen').
+  // Alle sind >= gutachten-eingegangen = billable (Finder-Fee unabhaengig vom Claim-Outcome).
+  'reguliert_vollstaendig',
+  'klage_rechtsstreit',
+  'verjaehrt',
+  'abgelehnt_final',
+  'an_externe_kanzlei_uebergeben',
 ]
 
 export async function GET(request: Request) {
