@@ -13,6 +13,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole, type AuthedUser } from '@/lib/auth/guards'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import { emitEvent } from '@/lib/notifications/emit'
@@ -113,7 +114,13 @@ async function setEndzustandFields(
   const neuerStatus = fields.status
   const abschluss: Record<string, unknown> =
     typeof neuerStatus === 'string' && (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
-      ? { operative_status: neuerStatus === 'storniert' ? 'storniert' : 'abgeschlossen', abgeschlossen_am: now }
+      // B2b (Achsen-Konsolidierung): den FEINEN Terminal direkt in operative_status schreiben
+      // (reguliert_vollstaendig/klage_rechtsstreit/verjaehrt/abgelehnt_final/an_externe_kanzlei_
+      // uebergeben/storniert) statt coarse 'abgeschlossen' — aber NUR wenn er ein gueltiger
+      // operative_status-Wert ist (in CLOSED_OPERATIVE_STATUS = fall_status-enum-gedeckt, kein
+      // Cast-Bruch). termin_durchgefuehrt (∈ ENDZUSTAENDE, aber ∉ operative_status-Vokabular)
+      // faellt sicher auf 'abgeschlossen' zurueck. abgeschlossen_am bleibt der robuste Close-Marker.
+      ? { operative_status: CLOSED_OPERATIVE_STATUS.has(neuerStatus) ? neuerStatus : 'abgeschlossen', abgeschlossen_am: now }
       : {}
   // Atomar: nur updaten wenn aktueller Status nicht bereits final
   const { data, error } = await admin

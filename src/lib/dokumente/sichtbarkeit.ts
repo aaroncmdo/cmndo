@@ -16,6 +16,11 @@ export type Rolle =
   | 'sachverstaendiger'
   | 'kunde'
   | 'kanzlei'
+  // Firmen-Flotte (Layer 0): fehlte hier, obwohl der Gegner-Flow 'flottenmanager' laengst
+  // in fall_dokumente.sichtbar_fuer schreibt (gegner-dokumente.ts). Das blieb unbemerkt,
+  // weil sichtbar_fuer text[] ist und ungetypt geschrieben wird — der Wert war real,
+  // der Typ kannte ihn nicht.
+  | 'flottenmanager'
 
 /**
  * Welche Rolle darf welchen Dokument-Typ sehen?
@@ -107,6 +112,16 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // 'zeugenaussage' als Alias fuer Alt-Daten + den Request-Slot-Namen.
   zeugenbericht: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   zeugenaussage: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  // Firmen-Flotte Slice 2a/2b: was der Unfallgegner ueber die NFC-Schadenkarte selbst
+  // erfasst (src/lib/schadenkarte/gegner-dokumente.ts). Defense-in-Depth: der Flow setzt
+  // sichtbar_fuer beim Insert explizit, und das DB-Array gewinnt (s. WithTypKategorie
+  // unten) — diese Eintraege greifen nur, falls das Array mal fehlt. Sie spiegeln den
+  // Flow daher EXAKT und weiten NICHT: kein 'kunde' (bewusst, gegner-dokumente.ts:70 —
+  // es sind Fremddaten) und kein 'dispatch' (so schreibt es der Flow heute).
+  gegner_fahrzeug_foto:  ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'flottenmanager'],
+  eigenes_fahrzeug_foto: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'flottenmanager'],
+  unfallort_foto:        ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'flottenmanager'],
+  gegner_unterschrift:   ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'flottenmanager'],
 }
 
 type WithTypKategorie = {

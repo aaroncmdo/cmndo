@@ -73,6 +73,15 @@ export async function getFallById(
     .select(select)
     .eq('id', fallId)
     .maybeSingle()
-  if (!data) return null
-  return data as unknown as Record<string, unknown>
+  if (data) return data as unknown as Record<string, unknown>
+  // CMM-63 accept-both: der Route-/Such-Param kann auch die claim_id sein (die Global-Suche
+  // liefert claim_id als kanonischen Key; kunde/SV-Routen akzeptieren beides bereits). Fallback
+  // per claim_id, damit /faelle/[claim_id] aufloest (fixt zugleich den latenten
+  // routeForKontext-Admin-Nav, der claim_id an /faelle/[id] schickt).
+  const { data: byClaim } = await supabase
+    .from('v_faelle_mit_aktuellem_termin')
+    .select(select)
+    .eq('claim_id', fallId)
+    .maybeSingle()
+  return byClaim ? (byClaim as unknown as Record<string, unknown>) : null
 }

@@ -19,6 +19,10 @@ const REMOTION_TRACE_INCLUDES = [
   'node_modules/@rspack/**/*',
   'node_modules/ws/**/*',
   'node_modules/@jridgewell/**/*',
+  // mediabunny (+ @mediabunny/*-Encoder) = Media-Toolchain, die @remotion/studio im
+  // Render-bundle() importiert; ebenfalls ESM-gestrippt vom Standalone-Trace (prod 14.07.).
+  'node_modules/mediabunny/**/*',
+  'node_modules/@mediabunny/**/*',
 ];
 
 const nextConfig: NextConfig = {

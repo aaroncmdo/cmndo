@@ -2,6 +2,7 @@
 // Liefert den aktuellsten offenen Fall + Liste aller Kandidaten fuer manuelles Switching.
 
 import type { createAdminClient } from '@/lib/supabase/admin'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -22,8 +23,6 @@ export type MatchResult = {
   multipleCandidates: boolean
   candidates: MatchedFall[]
 }
-
-const CLOSED_STATUSES = ['abgeschlossen', 'storniert']
 
 /**
  * Matcht eingehende Telefonnummer auf den aktuell wahrscheinlichsten Fall.
@@ -73,7 +72,7 @@ export async function matchInboundToFall(
   const { data: openClaims } = await admin
     .from('claims')
     .select('id')
-    .not('operative_status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
+    .not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG)
   const openClaimIds = (openClaims ?? []).map((c) => c.id as string)
 
   // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner statt .from('faelle').

@@ -18,6 +18,9 @@ export type GegnerFormData = {
   kennzeichen?: string
   fahrzeugtyp?: string
   versicherungId?: string // Gegner-Haftpflicht (versicherungen.id)
+  /** Policennummer beim eigenen Haftpflichtversicherer. NICHT schadennummer (s.u.). */
+  versicherungsnummer?: string
+  /** Aktenzeichen/Schadennummer eines bereits laufenden Vorgangs beim Versicherer. */
   schadennummer?: string
   hergang?: string // Unfallhergang-Text (evtl. Groq-diktiert)
   consent: boolean // DPIA-Consent-Checkbox

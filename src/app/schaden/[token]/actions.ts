@@ -132,6 +132,10 @@ export async function submitSchadenGegner(
       gegner_kennzeichen: data.kennzeichen || null,
       gegner_fahrzeugtyp: data.fahrzeugtyp || null,
       gegner_versicherung_id: data.versicherungId || null,
+      // Policennummer (Mig 20260714144318) -> beim Convert in claim_parties.versicherungsnummer
+      // -> Betreff + Body der Unfallmeldung an die Gegner-Haftpflicht. Vorher hatte der Lead
+      // dafuer keine Quelle, der Platz im Mail-Template blieb strukturell leer.
+      gegner_versicherungsnummer: data.versicherungsnummer || null,
       gegner_schadennummer: data.schadennummer || null,
       unfallhergang: data.hergang || null,
     },

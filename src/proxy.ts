@@ -30,6 +30,12 @@ const APP_PREFIXES = [
   '/admin', '/dispatch', '/gutachter/', '/kunde', '/faelle', '/flow',
   '/upload', '/sv', '/kunde-termin', '/ablehnen', '/makler',
   '/login', '/passwort-vergessen', '/passwort-zuruecksetzen', '/passwort-aendern',
+  // Win-back-Opt-out (/abmelden/[token]) — oeffentlicher Pflicht-Abmeldelink aus den
+  // Reaktivierungs-Mails, kein Auth (Token = Geheimnis). Gehoert hierher, nicht in
+  // MARKETING_PREFIXES: die Route liegt in der App. HIER, damit auch
+  // claimondo.de/abmelden/<token> auf die App umgeleitet wird statt zu 404en —
+  // winbackOptOutUrl() faellt ohne NEXT_PUBLIC_APP_URL auf die Marketing-Domain zurueck.
+  '/abmelden',
 ]
 
 // Öffentliche Marketing-/Funnel-Routen — bleiben auf claimondo.de.
@@ -38,9 +44,12 @@ const MARKETING_PREFIXES = [
   '/vorteile', '/wie-es-funktioniert', '/faq', '/kfz-gutachter',
   '/gutachter-finden', '/ueber-uns',
   '/schaden-melden', '/ersteinschaetzung', '/beratung-anfragen', '/sa-volltext',
-  // 2026-07-03: Win-back-Opt-out (/abmelden/[token]) — öffentlicher Abmelde-Link
-  // in Reaktivierungs-Mails, kein Auth (Lead ist nicht eingeloggt).
-  '/abmelden',
+  // 2026-07-14: '/abmelden' war hier FALSCH einsortiert (seit 2026-07-03). Diese Liste
+  // bedeutet "lebt auf claimondo.de" -> app.claimondo.de/<pfad> wird per 301 dorthin
+  // geschickt. Die Route liegt aber in der APP (src/app/abmelden/[token]) und Marketing
+  // hat keine /abmelden-Seite -> der Pflicht-Abmeldelink der Win-back-Mails lief in einen
+  // 301 -> 404 (tote Zone, per curl auf prod verifiziert; von PR #3660 geflaggt).
+  // Jetzt in APP_PREFIXES, wo er hingehoert.
   '/impressum', '/datenschutz', '/agb', '/nutzungsbedingungen',
   '/schadensreport-2026',
   // 2026-05-22: Doc-16 Content-Render-Routen — bleiben auf claimondo.de,
