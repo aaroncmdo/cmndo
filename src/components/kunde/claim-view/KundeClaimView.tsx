@@ -30,12 +30,12 @@ export async function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
   const title = `${(fall.claim_nummer as string | null) ?? t('detail.schadensfall')}${kennzeichen ? ` · ${kennzeichen}` : ''}${fahrzeug ? ` — ${fahrzeug}` : ''}`
 
   return (
-    <div className="space-y-4 max-w-xl mx-auto px-4 pt-5 pb-8">
+    <div className="mx-auto px-4 pt-5 pb-8 max-w-xl lg:max-w-5xl">
       {/* Live-Aktualisierung: abonniert gutachter_termine/auftraege/faelle des Falls und
           refresht die server-gerenderten Zonen bei jedem Event (AAR-864-Muster). */}
       <FallRealtimeRefresh fallId={vm.fallId} claimId={vm.claimId} />
 
-      <div>
+      <div className="mb-4">
         {vm.hatMehrereFaelle && (
           <Link href="/kunde" className="text-body-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-2 inline-block">
             &larr; {t('detail.meineFaelle')}
@@ -44,42 +44,48 @@ export async function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
         <PageHeader title={title} description={adresse || undefined} />
       </div>
 
-      {zonen.map((z) => {
-        switch (z) {
-          case 'status':
-            return (
-              <div id="zone-status" key={z}>
-                <StatusZone vm={vm} />
-              </div>
-            )
-          case 'aufgaben':
-            return (
-              <div id="zone-aufgaben" key={z}>
-                <AufgabenZone vm={vm} />
-              </div>
-            )
-          case 'team':
-            return (
-              <div id="zone-team" key={z}>
-                <TeamZone vm={vm} />
-              </div>
-            )
-          case 'geld':
-            return (
-              <div id="zone-geld" key={z}>
-                <GeldZone vm={vm} />
-              </div>
-            )
-          case 'doksTermine':
-            return (
-              <div id="zone-doksTermine" key={z}>
-                <DoksTermineZone vm={vm} />
-              </div>
-            )
-          default:
-            return null
-        }
-      })}
+      {/* Mobile: fokussierte Single-Column in deriveKundeZonen-Reihenfolge.
+          Desktop (lg): dieselben Zonen in 2 Spalten (CSS-Columns) — Single-Render,
+          daher bleiben die id-Anker (AufgabenZone-CTA-Sprungziele) + die Reihenfolge
+          erhalten; break-inside-avoid haelt jede Zone zusammen. */}
+      <div className="lg:columns-2 lg:gap-6">
+        {zonen.map((z) => {
+          switch (z) {
+            case 'status':
+              return (
+                <div id="zone-status" key={z} className="mb-4 break-inside-avoid">
+                  <StatusZone vm={vm} />
+                </div>
+              )
+            case 'aufgaben':
+              return (
+                <div id="zone-aufgaben" key={z} className="mb-4 break-inside-avoid">
+                  <AufgabenZone vm={vm} />
+                </div>
+              )
+            case 'team':
+              return (
+                <div id="zone-team" key={z} className="mb-4 break-inside-avoid">
+                  <TeamZone vm={vm} />
+                </div>
+              )
+            case 'geld':
+              return (
+                <div id="zone-geld" key={z} className="mb-4 break-inside-avoid">
+                  <GeldZone vm={vm} />
+                </div>
+              )
+            case 'doksTermine':
+              return (
+                <div id="zone-doksTermine" key={z} className="mb-4 break-inside-avoid">
+                  <DoksTermineZone vm={vm} />
+                </div>
+              )
+            default:
+              return null
+          }
+        })}
+      </div>
     </div>
   )
 }
