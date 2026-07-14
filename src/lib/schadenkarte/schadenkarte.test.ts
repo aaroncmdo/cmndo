@@ -10,6 +10,9 @@ import {
   bindeSchadenkarteAnFahrzeug,
   resolveSchadenkarteToFahrzeug,
   getKartenFuerFirma,
+  sperreSchadenkarte,
+  entsperreSchadenkarte,
+  entbindeSchadenkarte,
 } from './schadenkarte'
 
 // ---------------------------------------------------------------------------
@@ -332,5 +335,101 @@ describe('getKartenFuerFirma', () => {
       { id: 'k1', token: 'SKT-AAA', status: 'frei', fahrzeugId: null },
       { id: 'k2', token: 'SKT-BBB', status: 'gebunden', fahrzeugId: 'v1' },
     ])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Lebenszyklus: sperren / entsperren / entbinden
+// ---------------------------------------------------------------------------
+
+describe('sperreSchadenkarte', () => {
+  it('sperrt eine gebundene Karte', async () => {
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+  })
+
+  it('ist IDEMPOTENT: eine bereits gesperrte Karte erneut zu sperren ist ok', async () => {
+    // Notfall-Pfad (Karte verloren) -- muss Doppelklick/Retry ueberstehen.
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+  })
+
+  it('weist eine Karte einer FREMDEN Firma ab', async () => {
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'ANDERE', fahrzeug_id: 'v1' } },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    // Regex korrigiert (Brief-Typo: "andere Firma" ohne -n matcht nicht die dativische
+    // Form "anderen Firma", die bindeSchadenkarteAnFahrzeug bereits verwendet, s. Zeile 166).
+    expect(res.error).toMatch(/anderen Firma/i)
+  })
+
+  it('weist eine unbekannte Karte ab', async () => {
+    const db = makeDb({ selectResult: { data: null } })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gefunden/i)
+  })
+})
+
+describe('entsperreSchadenkarte', () => {
+  it('setzt eine gesperrte Karte auf FREI (nicht zurueck auf gebunden)', async () => {
+    // Bewusst 'frei': das Fahrzeug hat evtl. schon eine Ersatzkarte -- ein automatisches
+    // Zurueck-auf-gebunden wuerde den Partial-Unique verletzen bzw. zwei gueltige Karten
+    // erzeugen. Die Karte muss BEWUSST neu gebunden werden.
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+  })
+
+  it('weist eine NICHT gesperrte Karte ab (kein stiller No-op)', async () => {
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+    })
+    const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gesperrt/i)
+  })
+})
+
+describe('entbindeSchadenkarte', () => {
+  it('loest eine gebundene Karte vom Fahrzeug (-> frei)', async () => {
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+  })
+
+  it('weist eine NICHT gebundene Karte ab', async () => {
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'f1', fahrzeug_id: null } },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gebunden/i)
+  })
+
+  it('meldet einen Race (Karte wurde zwischenzeitlich geaendert)', async () => {
+    // Optimistic-Guard .eq('status', alterStatus) matcht nicht mehr -> data === null
+    const db = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: null, error: null },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/zwischenzeitlich/i)
   })
 })
