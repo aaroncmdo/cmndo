@@ -49,3 +49,19 @@ App-Domain), `--headed`. Passwort auch via `$SMOKE_PASSWORD`.
 Das Harness deckt Render-Smoke ab. Für Formular-Interaktion + DB-Delta die
 `sessionToCookies()`-Funktion (`cookie.mjs`) in einem eigenen Playwright-Script
 wiederverwenden und danach den DB-Zustand prüfen — Muster siehe Memory-Rezept.
+
+## Weitere Harness-Scripts (2026-07)
+
+Alle nutzen dasselbe `cookie.mjs`-Login und lesen Creds aus `$SMOKE_EMAIL`/`$SMOKE_PASSWORD`
+(keine hardcoded Secrets). Aufruf: `MSYS_NO_PATHCONV=1 SMOKE_EMAIL=… SMOKE_PASSWORD=… node --env-file=.env.local scripts/prod-smoke/<script>`.
+
+- **`route-sweep.mjs`** — Route-Health-Sweep über eine Liste (`--checks @datei.json`, `--role <name>`).
+  Erfasst Status/Redirect/console-error/API-4xx-5xx/Error-Boundary (sichtbarer Body, nicht HTML).
+  `domcontentloaded` + Settle statt `networkidle` (Realtime-Websockets). Basis der Error-Bestandsaufnahme
+  `docs/2026-07-14-prod-error-inventory.md`.
+- **`chat-smoke.mjs`** — sendet eine Chat-Nachricht (`--claim --path [--tab] --text [--expect]`), prüft
+  Ankunft + Persistenz-nach-Reload + Cross-User. Sendet per Enter-Keystroke (React-State-safe).
+- **`chat-verify.mjs`** — read-only: misst, WANN erwartete Marker sichtbar werden (Realtime vs. Reload).
+- **`copilot-smoke.mjs`** — Claim-AI-Panel: Frage stellen, Streaming-Antwort + Persistenz prüfen.
+- **`create-testfall.mjs`** — legt via `/admin/faelle/anlegen` (Admin-UI) einen Testfall an
+  (Test-Email `@claimondo.test` → istTestKunde-Guard unterdrückt Zustellung).
