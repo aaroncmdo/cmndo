@@ -88,7 +88,9 @@ export async function POST(request: Request) {
   // (SSoT, div=0 vs faelle.sv_id).
   const { data: fall, error: fallErr } = await db
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id(sv_id, spezifikation, schadenort_plz, schadenart)')
+    // FK-Hint Pflicht (PGRST201, s. Mig 20260708071538): ohne ihn liefert die Query HTTP 300,
+    // `fallErr` greift und die Route antwortete IMMER 404 "Fall nicht gefunden".
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim(sv_id, spezifikation, schadenort_plz, schadenart)')
     .eq('fall_id', fallId)
     .single()
 
