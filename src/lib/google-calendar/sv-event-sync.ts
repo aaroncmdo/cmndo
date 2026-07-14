@@ -49,7 +49,10 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   const { data: termin } = await db
     .from('gutachter_termine')
     .select(
-      'id, assignee_id, fall_id, start_zeit, end_zeit, typ, kanal, adresse, status, cancelled_at, google_event_id, google_calendar_id',
+      // Prod-Fix 14.07.: gutachter_termine hat keine Spalte `adresse` — sie heisst
+      // `besichtigungsort_adresse` (verifiziert). Der frühere Select warf 42703 -> der
+      // Kalender-Sync brach still (Event ohne location, bzw. gar kein Sync).
+      'id, assignee_id, fall_id, start_zeit, end_zeit, typ, kanal, besichtigungsort_adresse, status, cancelled_at, google_event_id, google_calendar_id',
     )
     .eq('id', terminId)
     .maybeSingle()
@@ -193,7 +196,7 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
           description: descriptionLines.join('\n'),
           start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
           end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
-          location: t.adresse ?? undefined,
+          location: t.besichtigungsort_adresse ?? undefined,
         },
       })
       await db
@@ -210,7 +213,7 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
           description: descriptionLines.join('\n'),
           start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
           end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
-          location: t.adresse ?? undefined,
+          location: t.besichtigungsort_adresse ?? undefined,
           reminders: {
             useDefault: false,
             overrides: [
