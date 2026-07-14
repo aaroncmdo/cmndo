@@ -50,3 +50,36 @@ export async function erstelleClip(
   revalidatePath('/admin/marketing/content-studio')
   return { ok: true }
 }
+
+/**
+ * Wiederholt einen fehlgeschlagenen oder haengengebliebenen Job (Fire-and-Forget-Verlust
+ * bei Prozess-Crash mitten im Render, oder transienter ElevenLabs-/Pexels-Fehler).
+ * Setzt den Status zurueck und startet die Pipeline erneut auf demselben Job (Cap-neutral:
+ * verarbeiteJob schliesst den eigenen Job vom Wochen-Cap aus).
+ */
+export async function wiederholeJob(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+
+  const db = createAdminClient()
+  const { data: job, error } = await db
+    .from('marketing_content_jobs')
+    .select('id, status')
+    .eq('id', jobId)
+    .single()
+  if (error || !job) return { ok: false, error: 'Job nicht gefunden.' }
+  if (job.status === 'video_fertig') return { ok: false, error: 'Job ist bereits fertig.' }
+
+  // Status zuruecksetzen -> UI zeigt wieder "wird generiert", alter Fehlertext weg.
+  const { error: resetErr } = await db
+    .from('marketing_content_jobs')
+    .update({ status: 'entwurf', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+    .eq('id', jobId)
+  if (resetErr) return { ok: false, error: resetErr.message }
+
+  void verarbeiteJob(jobId, db).catch((e) => console.error('[marketing] wiederholeJob failed', e))
+
+  revalidatePath('/admin/marketing/content-studio')
+  revalidatePath(`/admin/marketing/content-studio/${jobId}`)
+  return { ok: true }
+}
