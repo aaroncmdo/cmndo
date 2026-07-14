@@ -17,7 +17,6 @@ import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUpl
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { aktuellerTerminFuerFall } from '@/lib/termine/aktueller-termin-fuer-fall'
-import { convertLeadToFall, type ConvertResult } from '@/lib/leads/convert-lead-to-fall'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { staffMayMutateClaim } from './_helpers/staff-claim-scope'
 
@@ -360,110 +359,6 @@ export async function createLead(data: {
   return { ok: true }
 }
 
-// Valid qualification phases (BUG-27 new + old for backward compat)
-const QUALI_PHASES = new Set([
-  'neu', 'nicht-erreicht', 'rueckruf', 'in-qualifizierung',
-  'flow-versendet', 'sa-ausstehend', 'konvertiert',
-  // old phases still valid
-  'erstkontakt', 'schadentyp-erfasst', 'konstellation-erfasst',
-  'gegner-daten', 'gutachtertermin', 'sa-unterschrieben', 'flow-gesendet', 'abgeschlossen',
-])
-
-type UpdateLeadStatusResult =
-  | { ok: true; converted: true; fallId: string; linked: ConvertResult['linked'] }
-  | { ok: true; converted: false }
-  | { ok: false; error: string }
-
-export async function updateLeadStatus(
-  leadId: string,
-  newStatus: string,
-): Promise<UpdateLeadStatusResult> {
-  const supabase = await createClient()
-  const svc = createServiceClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
-
-  // Write-Path-Audit (28.06.): Rollen-Guard — triggert Lead→Fall-Konversion, Staff-Aktion.
-  {
-    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-    if (!['admin', 'dispatch', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
-      return { ok: false, error: 'Nicht berechtigt' }
-    }
-  }
-  // Write-Path-Audit F6 (01.07.): BEWUSST kein per-Lead-Ownership-Scoping. Leads sind ein
-  // geteilter Dispatch-Pool (round-robin, unassigned pickup) — ein zugewiesen_an-Guard wuerde den
-  // Pool-Workflow brechen. Das per-KB-Ownership-Scoping gilt nur fuer claims (updateFallStatus).
-
-  const now = new Date().toISOString()
-
-  // Konversion triggers
-  if (newStatus === 'umgewandelt' || newStatus === 'abgeschlossen' || newStatus === 'konvertiert') {
-    let result: ConvertResult
-    try {
-      result = await convertLeadToFall(svc, leadId, user.id)
-    } catch (err) {
-      return { ok: false, error: err instanceof Error ? err.message : 'Konversion fehlgeschlagen' }
-    }
-    await svc.from('leads').update({
-      qualifizierungs_phase: 'konvertiert',
-      status: 'umgewandelt',
-      updated_at: now,
-    }).eq('id', leadId)
-    // KFZ-151: Auto-Resolve aller offenen Lead-Tasks
-    try {
-      const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
-      await resolveTasksForEntity('lead', leadId, 'Lead konvertiert')
-    } catch (err) { console.error('[KFZ-151] resolveTasks lead konvertiert:', err) }
-    revalidatePath('/dispatch/dashboard')
-    return { ok: true, converted: true, fallId: result.fallId, linked: result.linked }
-  }
-
-  const updateData: Record<string, unknown> = { updated_at: now }
-
-  if (QUALI_PHASES.has(newStatus)) {
-    updateData.qualifizierungs_phase = newStatus
-
-    // Phase-specific side effects
-    if (newStatus === 'nicht-erreicht') {
-      // Increment anruf_versuche
-      const { data: lead } = await supabase.from('leads').select('anruf_versuche').eq('id', leadId).single()
-      updateData.anruf_versuche = ((lead?.anruf_versuche as number) ?? 0) + 1
-      updateData.letzter_anruf_am = now
-      updateData.letzter_anruf_status = 'nicht-erreicht'
-    } else if (newStatus === 'in-qualifizierung') {
-      updateData.letzter_anruf_am = now
-      updateData.letzter_anruf_status = 'erreicht'
-    } else if (newStatus === 'flow-versendet' || newStatus === 'flow-gesendet') {
-      updateData.status = 'flow-gesendet'
-      updateData.wa_gesendet = true
-    }
-  } else {
-    // Terminal statuses (disqualifiziert, kalt)
-    updateData.status = newStatus
-  }
-
-  const { error } = await svc
-    .from('leads')
-    .update(updateData)
-    .eq('id', leadId)
-
-  if (error) return { ok: false, error: error.message }
-
-  // AAR-92: Maik-Provision reversen bei Disqualifikation/Kalt
-  if (newStatus === 'disqualifiziert' || newStatus === 'kalt') {
-    await svc.from('provisionen_maik').update({
-      status: 'reversed',
-      reversed_grund: `Lead status: ${newStatus}`,
-      updated_at: now,
-    }).eq('lead_id', leadId).neq('status', 'paid').then(({ error: revErr }) => {
-      if (revErr) console.error('[AAR-92] Provision-Reverse:', revErr.message)
-    })
-  }
-
-  revalidatePath('/dispatch/dashboard')
-  return { ok: true, converted: false }
-}
-
 // ─── KFZ-192: Service-Typ setzen ────────────────────────────────────────────
 
 export async function updateServiceTyp(
@@ -620,9 +515,10 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────
-// convertLeadToFall lebt jetzt in `@/lib/leads/convert-lead-to-fall` (oben
-// importiert) — wegen Server-Action-Serialisierungs-Konflikt mit der
-// `'use server'`-Direktive dieser Datei.
+// convertLeadToFall lebt in `@/lib/leads/convert-lead-to-fall` und wird hier
+// NICHT mehr aufgerufen: der verwaiste Dispatcher-Wrapper `updateLeadStatus`
+// (0 Caller) wurde entfernt. Konversion laeuft ueber den Kunde-Flow
+// (`meldeNeuenSchaden`) bzw. die SA-Signatur im Flow — nicht ueber Dispatch.
 
 // ─── E-Mail Notifications ───────────────────────────────────────────────────
 
