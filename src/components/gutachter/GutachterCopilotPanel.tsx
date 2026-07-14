@@ -20,7 +20,7 @@ import {
   UserIcon,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { Button } from '@/components/primitives'
+import { Button, Card } from '@/components/primitives'
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
@@ -147,7 +147,7 @@ export function GutachterCopilotPanel({ fallId }: Props) {
   }
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col">
+    <Card p={0} className="overflow-hidden flex flex-col">
       {/* Header */}
       <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-claimondo-shield text-white">
         <span className="shrink-0 w-10 h-10 rounded-ios-xl bg-white/10 flex items-center justify-center text-white">
@@ -249,7 +249,7 @@ export function GutachterCopilotPanel({ fallId }: Props) {
           Fragen
         </Button>
       </form>
-    </div>
+    </Card>
   )
 }
 
