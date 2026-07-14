@@ -1027,10 +1027,13 @@ export async function speichereNfcUid(
   const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
   if ('error' in row) return { ok: false, error: row.error }
 
+  // firma_id wird BEIM UPDATE erneut geprueft, nicht nur beim Lesen: schliesst die
+  // TOCTOU-Luecke zwischen ladeKarteFuerFirma und dem Write.
   const { error } = await db
     .from('schadenkarten')
     .update({ nfc_uid: params.nfcUid })
     .eq('id', row.id)
+    .eq('firma_id', params.firmaId)
     .select('id')
     .maybeSingle()
 
