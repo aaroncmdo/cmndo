@@ -116,11 +116,14 @@ export default function ScrapePanel({
         toast.error(res.error)
         return
       }
-      const nachricht =
-        res.uebersprungen > 0
-          ? `${res.angelegt} Lead${res.angelegt === 1 ? '' : 's'} angelegt (${res.uebersprungen} Dublette${res.uebersprungen === 1 ? '' : 'n'} übersprungen).`
-          : `${res.angelegt} Lead${res.angelegt === 1 ? '' : 's'} angelegt.`
-      toast.success(nachricht)
+      const teile = [`${res.angelegt} Lead${res.angelegt === 1 ? '' : 's'} angelegt`]
+      // Die Leads kommen bereits mit Ansprechpartner (aus dem Impressum) — das ist die
+      // Zahl, die zaehlt: nur diese sind sofort anschreibbar.
+      if (res.angereichert > 0) teile.push(`${res.angereichert} mit Ansprechpartner`)
+      if (res.uebersprungen > 0) {
+        teile.push(`${res.uebersprungen} Dublette${res.uebersprungen === 1 ? '' : 'n'} übersprungen`)
+      }
+      toast.success(`${teile.join(' · ')}.`)
       reset()
       setRegion('')
       onImported?.(res.angelegt)

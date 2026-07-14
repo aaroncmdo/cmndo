@@ -21,6 +21,7 @@ import {
   type BestandsLead,
 } from '@/lib/partner/scraping'
 import { ladeBestandsPartner } from '@/lib/partner/bestands-partner'
+import { reichereAusWebsite, type LeadEnrichment } from '@/lib/vertrieb/lead-website-enrichment'
 import {
   sendMaklerWelcome,
   sendWillkommenWerkstatt,
@@ -585,7 +586,10 @@ export async function scrapePartnerLeadsVorschau(
 export async function importScrapedLeads(
   rolle: string,
   kandidaten: ScrapeKandidat[],
-): Promise<{ ok: true; angelegt: number; uebersprungen: number } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; angelegt: number; uebersprungen: number; angereichert: number }
+  | { ok: false; error: string }
+> {
   const staff = await requireVertriebStaff()
   if (!staff) return { ok: false, error: 'Nur das Vertriebs-Team darf importieren.' }
 
@@ -634,6 +638,35 @@ export async function importScrapedLeads(
     })
   }
 
+  // Auto-Anreicherung (Aaron: "ich moechte dass die Leads angereichert ankommen ... ich
+  // moechte sie nicht manuell anreichern muessen"): Ansprechpartner + Kontakt aus dem
+  // Impressum/Kontakt der Firmen-Website ziehen, damit ein frisch gescrapter Lead SOFORT
+  // anschreibbar ist. Ohne das hat kein Lead eine ansprechpartner_email -> der Cold-Mailer
+  // haette niemanden zum Anschreiben (auf prod belegt: 0 von 63 Leads hatten eine).
+  //
+  // Best-effort, exakt wie das Geocoding daneben: schlaegt die Anreicherung fehl (keine
+  // Website, Timeout, kein Impressum), wird der Lead TROTZDEM angelegt — nur ohne
+  // Ansprechpartner. Der manuelle "Von Website anreichern"-Button bleibt als Fallback.
+  const anreicherungen: Array<LeadEnrichment | null> = new Array(zuAnlegen.length).fill(null)
+  for (let i = 0; i < zuAnlegen.length; i += SCRAPE_CONCURRENCY) {
+    const batch = zuAnlegen.slice(i, i + SCRAPE_CONCURRENCY)
+    const batchEnr = await Promise.all(
+      batch.map(async (k) => {
+        if (!k.website) return null // ohne Website kein Impressum
+        try {
+          return await reichereAusWebsite(k.website, k.firma)
+        } catch (enrErr) {
+          console.error('[importScrapedLeads] Anreicherung fehlgeschlagen (non-critical):', enrErr)
+          return null
+        }
+      }),
+    )
+    batchEnr.forEach((e, j) => {
+      anreicherungen[i + j] = e
+    })
+  }
+  const angereichert = anreicherungen.filter((e) => e?.email || e?.vorname || e?.nachname).length
+
   const rows = zuAnlegen.map((k, idx) => ({
     rolle: r,
     status: 'neu',
@@ -644,6 +677,12 @@ export async function importScrapedLeads(
     plz: (k.plz ?? '').trim() || null,
     ort: (k.ort ?? '').trim() || null,
     strasse: k.strasse ?? null,
+    // Aus dem Impressum gezogen (best-effort) — leer, wenn keine Website/kein Treffer.
+    ansprechpartner_vorname: anreicherungen[idx]?.vorname ?? null,
+    ansprechpartner_nachname: anreicherungen[idx]?.nachname ?? null,
+    ansprechpartner_position: anreicherungen[idx]?.position ?? null,
+    ansprechpartner_email: anreicherungen[idx]?.email ?? null,
+    ansprechpartner_telefon: anreicherungen[idx]?.telefon ?? null,
     rollen_details: {
       google_place_id: k.google_place_id,
       website: k.website ?? null,
@@ -659,7 +698,7 @@ export async function importScrapedLeads(
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/admin/partner-leads')
-  return { ok: true, angelegt: data?.length ?? rows.length, uebersprungen }
+  return { ok: true, angelegt: data?.length ?? rows.length, uebersprungen, angereichert }
 }
 
 export async function legePartnerOnboardingTermin(
