@@ -110,6 +110,31 @@ export async function freigebenUndRendern(jobId: string): Promise<{ ok: boolean;
   return { ok: true }
 }
 
+/** Liest Status + Render-Fortschritt fuer den Live-Balken auf der Detailseite (read-only). */
+export async function getRenderStatus(jobId: string): Promise<{
+  ok: boolean
+  status?: string
+  fortschritt?: number | null
+  phase?: string | null
+  error?: string
+}> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const db = createAdminClient()
+  const { data, error } = await db
+    .from('marketing_content_jobs')
+    .select('status, render_fortschritt, render_phase')
+    .eq('id', jobId)
+    .single()
+  if (error || !data) return { ok: false, error: 'Job nicht gefunden.' }
+  return {
+    ok: true,
+    status: data.status as string,
+    fortschritt: (data.render_fortschritt as number | null) ?? null,
+    phase: (data.render_phase as string | null) ?? null,
+  }
+}
+
 /** Verwirft das aktuelle Skript und generiert ein neues (Phase A). */
 export async function regeneriereSkript(jobId: string): Promise<{ ok: boolean; error?: string }> {
   const auth = await ensureAdmin()

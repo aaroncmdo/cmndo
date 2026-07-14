@@ -3,7 +3,7 @@
 // ein Fremd-Auftrag liefert null -> notFound() (kein IDOR).
 
 import { redirect, notFound } from 'next/navigation'
-import { getWerkstattByUserId, getWerkstattAuftrag } from '@/lib/werkstatt/queries'
+import { getWerkstattByUserId, getWerkstattAuftrag, getWerkstattAuftragExtra } from '@/lib/werkstatt/queries'
 import { WerkstattAuftragDetail } from '@/components/werkstatt/WerkstattAuftragDetail'
 
 export const dynamic = 'force-dynamic'
@@ -21,5 +21,9 @@ export default async function WerkstattAuftragDetailPage({
   const auftrag = await getWerkstattAuftrag(claimId)
   if (!auftrag) notFound()
 
-  return <WerkstattAuftragDetail auftrag={auftrag} />
+  // Zusatz-Kontext (Fahrzeug-Detail / Vorschaeden / Ansprechpartner) NACH dem
+  // RLS-Gate oben (auftrag != null == Fall-Zugehoerigkeit bewiesen) via Admin-Client.
+  const extra = await getWerkstattAuftragExtra(claimId)
+
+  return <WerkstattAuftragDetail auftrag={auftrag} extra={extra} />
 }

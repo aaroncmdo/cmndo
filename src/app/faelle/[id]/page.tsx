@@ -830,9 +830,14 @@ export default async function FallaktePage({
         kunde_email: string | null
         kunde_telefon: string | null
         besichtigungsort_adresse: string | null
-        vorschaden_geprueft: boolean | null
       }
       let vcfQc: VcfQcRow | null = null
+      // vorschaden_geprueft liegt auf claims und wird von v_claim_full NICHT
+      // durchgereicht (live geprueft). Stand vorher mit in der vcf-Select-Liste
+      // -> PostgREST warf 400 fuer die GANZE Query -> vcfQc war immer null ->
+      // die QC-Auto-Checks bekamen FIN/Kundendaten/Besichtigungsort als null und
+      // wurden nie vorbefuellt. Darum separat aus claims lesen.
+      let vorschadenGeprueft: boolean | null = null
       // Filmcheck Phase 3 (P3a/P3b): flache OCR-Kern-Werte + gutachten.positionen (jsonb)
       // aus der ALTEN/kanonischen Pipeline (gutachten claim-keyed) + Anzahl der
       // schadenspositionen-Zeilen — beides via adminCli, analog den Doc-Reads hier.
@@ -851,11 +856,17 @@ export default async function FallaktePage({
         const { data: vcfQcData } = await adminCli
           .from('v_claim_full')
           .select(
-            'fin_vin, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, besichtigungsort_adresse, vorschaden_geprueft',
+            'fin_vin, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, besichtigungsort_adresse',
           )
           .eq('id', claimId)
           .maybeSingle<VcfQcRow>()
         vcfQc = vcfQcData ?? null
+        const { data: claimVsData } = await adminCli
+          .from('claims')
+          .select('vorschaden_geprueft')
+          .eq('id', claimId)
+          .maybeSingle<{ vorschaden_geprueft: boolean | null }>()
+        vorschadenGeprueft = claimVsData?.vorschaden_geprueft ?? null
         const { data: gutOcrData } = await adminCli
           .from('gutachten')
           .select(
@@ -872,7 +883,7 @@ export default async function FallaktePage({
       }
       qcAutoChecks = berechneQcAutoChecks({
         gutachtenUrlVorhanden: !!erstgutachten.gutachten_url,
-        vorschaedenGeprueft: vcfQc?.vorschaden_geprueft ?? null,
+        vorschaedenGeprueft: vorschadenGeprueft,
         pflichtItems: pflichtItemsList,
         finVin: vcfQc?.fin_vin ?? null,
         kundendaten: {

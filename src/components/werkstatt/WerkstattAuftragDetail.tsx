@@ -9,7 +9,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-import type { WerkstattAuftrag } from '@/lib/werkstatt/queries'
+import type { WerkstattAuftrag, WerkstattAuftragExtra } from '@/lib/werkstatt/queries'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
 import {
   werkstattAuftragSegment,
@@ -461,10 +461,18 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 // WerkstattAuftragDetail — Haupt-Komponente
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag }) {
+export function WerkstattAuftragDetail({
+  auftrag,
+  extra,
+}: {
+  auftrag: WerkstattAuftrag
+  extra?: WerkstattAuftragExtra | null
+}) {
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
   const kundeName = auftrag.kunde_name ?? '–'
+  const fmtDatum = (iso: string | null): string =>
+    iso ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '–'
 
   // Früh-Zustand: der Kunde ist noch mitten in der Ersterfassung — es gibt noch
   // kein Fahrzeug, keinen Reparaturtermin und kein Gutachten. Statt einer nackten
@@ -523,6 +531,123 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
           </div>
         </dl>
       </SectionCard>
+
+      {/* Zusatz-Kontext (extra aus v_claim_full nach RLS-Gate): Fahrzeug-Detail,
+          Vorschaeden, Ansprechpartner — fuer die Reparatur-Einordnung + Koordination. */}
+      {extra && (
+        <>
+          {(extra.fahrzeug_baujahr != null ||
+            extra.erstzulassung ||
+            extra.kilometerstand != null ||
+            extra.fahrzeug_farbe ||
+            extra.hergang) && (
+            <SectionCard title="Fahrzeug & Unfall">
+              <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
+                {extra.fahrzeug_baujahr != null && (
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Baujahr</dt>
+                    <dd className="text-claimondo-navy">{String(extra.fahrzeug_baujahr)}</dd>
+                  </div>
+                )}
+                {extra.erstzulassung && (
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Erstzulassung</dt>
+                    <dd className="text-claimondo-navy">{fmtDatum(extra.erstzulassung)}</dd>
+                  </div>
+                )}
+                {extra.kilometerstand != null && (
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Kilometerstand</dt>
+                    <dd className="text-claimondo-navy">{String(extra.kilometerstand)} km</dd>
+                  </div>
+                )}
+                {extra.fahrzeug_farbe && (
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Farbe</dt>
+                    <dd className="text-claimondo-navy">{extra.fahrzeug_farbe}</dd>
+                  </div>
+                )}
+              </dl>
+              {extra.hergang && (
+                <div className="mt-2">
+                  <p className="text-body-xs text-claimondo-ondo">Unfallhergang</p>
+                  <p className="text-body-sm text-claimondo-navy">{extra.hergang}</p>
+                </div>
+              )}
+            </SectionCard>
+          )}
+
+          <SectionCard title="Vorschäden">
+            {extra.hat_vorschaeden || extra.vorschaden_anzahl ? (
+              <div className="text-body-sm text-claimondo-navy space-y-1">
+                <p className="font-medium text-warning-strong">
+                  Vorschäden gemeldet{extra.vorschaden_anzahl ? ` (${extra.vorschaden_anzahl})` : ''}
+                </p>
+                {extra.vorschaden_erkannt && <p>Erkannt/dokumentiert: {extra.vorschaden_erkannt}</p>}
+                {extra.vorschaden_letzter_datum && (
+                  <p>Letzter Vorschaden: {fmtDatum(extra.vorschaden_letzter_datum)}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-body-sm text-claimondo-ondo">Keine Vorschäden gemeldet.</p>
+            )}
+          </SectionCard>
+
+          <SectionCard title="Ansprechpartner">
+            <div className="space-y-3 text-body-sm">
+              <div>
+                <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">Kunde</p>
+                <p className="text-claimondo-navy font-medium">
+                  {[extra.kunde_vorname, extra.kunde_nachname].filter(Boolean).join(' ') || kundeName}
+                </p>
+                {extra.kunde_telefon && (
+                  <a
+                    href={`tel:${extra.kunde_telefon}`}
+                    className="text-claimondo-ondo hover:text-claimondo-navy"
+                  >
+                    {extra.kunde_telefon}
+                  </a>
+                )}
+                {extra.kunde_email && (
+                  <a
+                    href={`mailto:${extra.kunde_email}`}
+                    className="block text-claimondo-ondo hover:text-claimondo-navy truncate"
+                  >
+                    {extra.kunde_email}
+                  </a>
+                )}
+              </div>
+              {extra.betreuer && (
+                <div>
+                  <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">
+                    Claimondo-Betreuer
+                  </p>
+                  <p className="text-claimondo-navy font-medium">
+                    {[extra.betreuer.vorname, extra.betreuer.nachname].filter(Boolean).join(' ') ||
+                      'Betreuer'}
+                  </p>
+                  {extra.betreuer.telefon && (
+                    <a
+                      href={`tel:${extra.betreuer.telefon}`}
+                      className="text-claimondo-ondo hover:text-claimondo-navy"
+                    >
+                      {extra.betreuer.telefon}
+                    </a>
+                  )}
+                </div>
+              )}
+              {auftrag.gutachter_firmenname && (
+                <div>
+                  <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">
+                    Gutachter
+                  </p>
+                  <p className="text-claimondo-navy font-medium">{auftrag.gutachter_firmenname}</p>
+                </div>
+              )}
+            </div>
+          </SectionCard>
+        </>
+      )}
 
       {segment === 'reparatur' ? (
         <>

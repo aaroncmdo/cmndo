@@ -13,6 +13,7 @@ import { brandLibrary } from '../../remotion/brand-library/registry'
 import { buildRenderProps } from './build-render-props'
 import { checkGuardrails } from './guardrails'
 import { renderClip as defaultRenderClip } from './render-clip'
+import { RENDER_PHASES, videoRenderPct } from './render-progress'
 
 /**
  * Render-Orchestrator, ZWEIPHASIG fuer das Script-Review-Gate:
@@ -28,7 +29,7 @@ export interface OrchestratorDeps {
   generiereSkript: typeof generiereSkript
   synthesize: typeof synthesize
   resolveVisualsFor: (script: ContentScript) => Promise<ResolvedVisual[]>
-  renderClip: (props: ContentClipProps) => Promise<Buffer>
+  renderClip: (props: ContentClipProps, onProgress?: (frac: number) => void) => Promise<Buffer>
 }
 
 const realDeps: OrchestratorDeps = {
@@ -108,14 +109,37 @@ export async function rendereJob(
   const script = parsed.data
 
   const set = setter(supabase, jobId)
+  // Fortschritt schreiben (kosmetisch fuer den Balken -> darf den Render NIE brechen).
+  // aktualisiert_am mit -> dient zugleich als Heartbeat gegen das Reap-Timeout.
+  const setProgress = (render_fortschritt: number, render_phase: string) =>
+    supabase
+      .from('marketing_content_jobs')
+      .update({ render_fortschritt, render_phase, aktualisiert_am: new Date().toISOString() })
+      .eq('id', jobId)
+      .then(
+        () => {},
+        () => {},
+      )
+  // Live-Render-% gedrosselt: nur bei >=3% Zuwachs schreiben (~18 Writes/Render statt pro Frame).
+  let lastVideoPct: number = RENDER_PHASES.video.pct
+  const onRenderProgress = (frac: number) => {
+    const pct = videoRenderPct(frac)
+    if (pct - lastVideoPct >= 3) {
+      lastVideoPct = pct
+      void setProgress(pct, 'video')
+    }
+  }
   try {
+    void setProgress(RENDER_PHASES.vorbereitung.pct, 'vorbereitung')
     // 4. Voiceover (ElevenLabs -> Piper Fallback)
     const fullText = script.segmente.map((s) => s.text).join(' ')
     const { audioPath, words } = await deps.synthesize(fullText, join(tmpdir(), `mkjob-${jobId}`))
     await set({ status: 'audio_erzeugt' })
+    void setProgress(RENDER_PHASES.voiceover.pct, 'voiceover')
 
     // 5. Visuals aufloesen (Marke -> Stock -> Grafik)
     const visuals = await deps.resolveVisualsFor(script)
+    void setProgress(RENDER_PHASES.visuals.pct, 'visuals')
 
     // 6. Props + Audio nach Storage (Remotion laedt es beim Render per oeffentlicher URL)
     const props = buildRenderProps(script, words, visuals)
@@ -137,8 +161,9 @@ export async function rendereJob(
       console.error('[marketing] Musik-Bett uebersprungen', e)
     }
 
-    // 7. Render -> Storage
-    const videoBuf = await deps.renderClip(props)
+    // 7. Render -> Storage (Live-% via onRenderProgress; 35->90 pro Frame)
+    const videoBuf = await deps.renderClip(props, onRenderProgress)
+    void setProgress(RENDER_PHASES.upload.pct, 'upload')
     const videoKey = `${jobId}/video.mp4`
     const { error: videoUpErr } = await supabase.storage
       .from(BUCKET)
@@ -153,6 +178,8 @@ export async function rendereJob(
       video_url: videoUrl,
       dauer_sekunden: Math.round(props.durationInFrames / 30),
       kosten_cents: fullText.length, // TTS-Zeichen als Kosten-/Nutzungs-Proxy
+      render_fortschritt: RENDER_PHASES.fertig.pct,
+      render_phase: 'fertig',
     })
     return { ok: true }
   } catch (err) {
