@@ -4,6 +4,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
+import { filterEchteWerkstaetten } from '@/lib/werkstatt/finder'
 import {
   rankeWerkstattVorschlaege,
   type MatchingKontext,
@@ -14,8 +15,9 @@ import {
 // ⚠ createAdminClient() ist UNGETYPT -> tsc prueft diesen String NICHT. Er wurde am 14.07. gegen die
 // prod-DB geprobt (Regel aus reference-supabase-select-strings-untyped-admin-client): ein falscher
 // Spaltenname liefert einen STILLEN PostgREST-400 mit data=null, den kein Test faengt.
+// `email` NUR fuer den Test-Werkstatt-Filter (istInterneEmail) — nie an den Client.
 const SELECT_COLS =
-  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert,marken,ist_freie_werkstatt,fahrzeug_gruppen'
+  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert,marken,ist_freie_werkstatt,fahrzeug_gruppen,email'
 
 /**
  * EU-/KBA-Fahrzeugklasse (Feld J: M1, N1, L3e, ...) -> Reparatur-Gruppe (pkw, transporter, lkw, ...).
@@ -52,6 +54,13 @@ export async function ladeWerkstattVorschlaege(input: {
   /** Geo-Anker = FAHRZEUGSTANDORT (wo das Auto steht), NICHT der Besichtigungsort. */
   anker: { lat: number; lng: number } | null
   limit?: number
+  /**
+   * Kunden-/Flow-Surfaces MUESSEN nurEchte=true setzen: sonst sieht ein echter Kunde die
+   * Test-/internen Werkstaetten (email-basiert, SSoT interne-identitaet.ts). Dispatch/Admin rufen
+   * ohne den Filter und sehen alle. Das muss zwischen "anbieten" und "Auswahl validieren"
+   * DECKUNGSGLEICH sein — sonst wird eine angebotene Werkstatt beim Auswaehlen abgelehnt.
+   */
+  nurEchte?: boolean
 }): Promise<WerkstattVorschlag[]> {
   const admin = createAdminClient()
 
@@ -65,6 +74,11 @@ export async function ladeWerkstattVorschlaege(input: {
     return []
   }
 
+  const rows = (werkstaettenRes.data ?? []) as unknown as Array<
+    WerkstattKandidat & { email: string | null }
+  >
+  const kandidaten = input.nurEchte ? filterEchteWerkstaetten(rows) : rows
+
   const kontext: MatchingKontext = {
     fahrzeugGruppe,
     marke: input.marke,
@@ -73,11 +87,7 @@ export async function ladeWerkstattVorschlaege(input: {
     anker: input.anker,
   }
 
-  return rankeWerkstattVorschlaege(
-    (werkstaettenRes.data ?? []) as unknown as WerkstattKandidat[],
-    kontext,
-    input.limit,
-  )
+  return rankeWerkstattVorschlaege(kandidaten, kontext, input.limit)
 }
 
 /**
@@ -91,7 +101,7 @@ export async function ladeWerkstattVorschlaege(input: {
  * Reihenfolge: fahrzeug_standort -> besichtigungsort -> unfallort (dort steht das Auto evtl. noch).
  */
 export async function findWerkstattVorschlaegeFuer(
-  target: { target: 'lead' | 'claim'; id: string },
+  target: { target: 'lead' | 'claim'; id: string; nurEchte?: boolean },
   limit?: number,
 ): Promise<WerkstattVorschlag[]> {
   const admin = createAdminClient()
@@ -158,6 +168,7 @@ export async function findWerkstattVorschlaegeFuer(
     bedarfConfidence: bedarf.confidence,
     anker,
     limit,
+    nurEchte: target.nurEchte,
   })
 }
 

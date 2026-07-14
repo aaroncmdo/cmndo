@@ -23,8 +23,9 @@ import {
   findReparaturWerkstaettenForTarget,
 } from '@/lib/werkstatt/vermittlung-server'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
-import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
+import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
+import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -566,15 +567,28 @@ export async function speichereBesichtigungsortFlow(
 }
 
 /**
- * Reparaturwunsch/Werkstatt: die 5 naechsten Partner-Werkstaetten zum Flow-Lead laden.
+ * Reparaturwunsch/Werkstatt: die bis zu 5 PASSENDSTEN Partner-Werkstaetten zum Flow-Lead laden.
  * Token-scoped (resolveFlowLead) — kein Client-leadId.
+ *
+ * Spec B/C (Aaron 14.07.): nicht mehr nur "die 5 naechsten", sondern gerankt nach
+ *   Marke ("BMW markengebunden schlaegt freie Werkstatt") > Gewerke-Fit > Fahrzeug-Gruppe >
+ *   verifiziert > Entfernung zum FAHRZEUGSTANDORT
+ * mit sichtbaren Gruenden je Vorschlag (vorschlag.gruende). Harte Filter: Fahrzeug-Gruppe (eine
+ * PKW-Werkstatt taucht bei einem LKW nicht auf) + Gewerke (ab bedarf_confidence 60).
+ *
+ * ⚠ Der Anker ist der FAHRZEUGSTANDORT (wo das Auto steht) — vorher wurde am BESICHTIGUNGSort
+ * gesucht (dort kommt der Gutachter hin, nicht die Werkstatt).
  */
 export async function ladeWerkstaettenFlow(
   token: string,
-): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
+): Promise<{ ok: true; werkstaetten: WerkstattVorschlag[] } | { ok: false; error: string }> {
   const { leadId, error } = await resolveFlowLead(token)
   if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
-  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId, nurEchte: true })
+  const werkstaetten = await findWerkstattVorschlaegeFuer({
+    target: 'lead',
+    id: leadId,
+    nurEchte: true,
+  })
   return { ok: true, werkstaetten }
 }
 
@@ -603,11 +617,11 @@ export async function waehleWerkstattFlow(
     return { ok: false, error: 'Für diesen Vorgang ist keine Werkstatt-Auswahl möglich.' }
   }
 
-  // Nur eine der tatsächlich angebotenen (5 nächsten aktiven Partner) zulassen — ein
-  // manipulierter Request darf keine beliebige Werkstatt setzen.
-  // nurEchte muss mit ladeWerkstaettenFlow matchen — sonst zeigt der Finder echte-only,
-  // aber die Validierung liesse Test-Werkstaetten zu (offered-set-Konsistenz).
-  const angeboten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId, nurEchte: true })
+  // Nur eine der tatsächlich angebotenen zulassen — ein manipulierter Request darf keine beliebige
+  // Werkstatt setzen. Die Quelle MUSS deckungsgleich mit ladeWerkstaettenFlow sein (gleiche Funktion,
+  // gleiches nurEchte) — sonst wird eine angebotene Werkstatt beim Auswählen abgelehnt (oder eine
+  // nicht angebotene durchgelassen). Beide gehen daher über findWerkstattVorschlaegeFuer.
+  const angeboten = await findWerkstattVorschlaegeFuer({ target: 'lead', id: leadId, nurEchte: true })
   if (!angeboten.some((w) => w.id === werkstattId)) {
     return { ok: false, error: 'Bitte wählen Sie eine der angebotenen Werkstätten.' }
   }

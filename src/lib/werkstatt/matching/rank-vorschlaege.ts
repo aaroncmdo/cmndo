@@ -45,12 +45,20 @@ export type WerkstattKandidat = {
   fahrzeug_gruppen: string[] | null
 }
 
-export type WerkstattVorschlag = WerkstattKandidat & {
+export type WerkstattVorschlag = Omit<WerkstattKandidat, 'verifiziert'> & {
+  /** Normalisiert (null -> false), damit der Vorschlag ein Superset der alten WerkstattFinderRow ist. */
+  verifiziert: boolean
   distanz_km: number
   markenMatch: MarkenMatch
   gewerkeFit: Fit
   gruppenFit: Fit
   gruende: MatchGrund[]
+  /**
+   * Backward-compat fuer die bestehende WerkstattFinder-UI (sie prueft auf `passt`). So laeuft sie
+   * unveraendert weiter, waehrend die neuen Felder (gruende/markenMatch/...) fuer die Chips
+   * bereitstehen — kein Big-Bang-Umbau der UI noetig.
+   */
+  passt: boolean
 }
 
 export type MatchingKontext = {
@@ -171,10 +179,14 @@ function bewerte(w: WerkstattKandidat, k: MatchingKontext): WerkstattVorschlag {
 
   return {
     ...w,
+    verifiziert: w.verifiziert === true,
     distanz_km,
     markenMatch,
     gewerkeFit,
     gruppenFit,
+    // 'passt' = der Gewerke-Fit (so hat die alte UI es interpretiert). 'unbekannt' zaehlt bewusst
+    // NICHT als passt — sonst wirkt eine ungepflegte Werkstatt so sicher wie eine geprüfte.
+    passt: gewerkeFit === 'passt',
     gruende: baueGruende(w, k, markenMatch, gewerkeFit, gruppenFit, distanz_km),
   }
 }
