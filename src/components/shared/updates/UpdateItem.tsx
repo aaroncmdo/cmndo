@@ -8,19 +8,24 @@ import { fmtRelative, typIcon } from './update-item-shared'
 export function UpdateItem({
   item,
   variant,
+  seen = false,
   onClick,
 }: {
   item: TUpdateItem
   variant: 'action' | 'info'
+  seen?: boolean
   onClick: (item: TUpdateItem) => void
 }) {
   const isAction = variant === 'action'
+  // A2: gesehene (aber offene) Action-Items werden gedimmt — sie bleiben in der Liste bis erledigt,
+  // zaehlen aber nicht mehr in der roten Zahl.
+  const dimmed = isAction && seen
   return (
     <button
       onClick={() => onClick(item)}
       className={`w-full text-left border-b border-claimondo-border px-4 py-2.5 transition-colors ${
         isAction ? 'hover:bg-claimondo-ondo/5' : 'bg-white hover:bg-claimondo-bg'
-      }`}
+      }${dimmed ? ' opacity-60' : ''}`}
     >
       <div className="flex items-start gap-2.5">
         <span className={`text-base shrink-0${isAction ? '' : ' opacity-70'}`}>{typIcon(item.typ)}</span>
