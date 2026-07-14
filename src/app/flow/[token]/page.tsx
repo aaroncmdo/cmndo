@@ -3,7 +3,8 @@ import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
 import WerkstattIntakeSignatur from './WerkstattIntakeSignatur'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
-import { resolveFlowWeichen } from '@/lib/self-service/flow-weichen'
+import { ladeFlowWeichen } from '@/lib/self-service/lade-flow-szenarien'
+import type { LeadFuerKontext } from '@/lib/self-service/flow-kontext'
 import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
@@ -269,50 +270,40 @@ export default async function FlowPage({
   }
   const terminPending = !terminMitSv && chosenSvId != null && wunschterminIso != null
 
-  // Die EINE DB-getriebene Weiche (Spec A, 14.07.). Der Lead kommt via select('*') -> alle Felder
-  // liegen hier vor (auch die, die frueher nie an den Client gingen). eigene_versicherung ist TEXT
-  // ('ja'|'nein') und wird hier EINMAL nach boolean normalisiert.
-  const weichen = resolveFlowWeichen({
-    schuldfrage: (lead.schuldfrage as string | null) ?? null,
-    ueberEigeneVersicherung:
-      lead.eigene_versicherung === 'ja' ? true : lead.eigene_versicherung === 'nein' ? false : null,
-    freieWerkstattwahl: (lead.freie_werkstattwahl as boolean | null) ?? null,
-    serviceTyp: (lead.service_typ as string | null) ?? null,
-    hatSvTermin: Boolean(terminMitSv) || terminPending,
-    hatWerkstatt: Boolean(lead.reparatur_werkstatt_id ?? lead.werkstatt_id),
-  })
+  // Die DB-getriebene Weiche (Aaron 14.07.: "komplett db driven, damit es wiederverwendbar ist").
+  // Die Matrix (welche Szenarien, welche Steps, welche Bedingungen) liegt in flow_szenarien +
+  // flow_szenario_steps; hier wird sie geladen und gegen den Lead-Zustand ausgewertet. Ein neuer Weg
+  // oder eine neue Weiche ist damit eine ZEILE, kein Deploy.
+  // Der Lead kommt via select('*') -> alle Felder liegen vor (auch die, die frueher nie an den Client gingen).
+  const { weichen } = await ladeFlowWeichen(
+    lead as unknown as LeadFuerKontext,
+    Boolean(terminMitSv) || terminPending,
+  )
 
-  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-Pfad
-  // (Quali+Slot), flag-gegatet. Dispatcher-Lead (Termin) ODER Wunschtermin-Pending → kein Slot-Step.
+  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-Pfad, flag-gegatet.
   //
-  // Spec A (Aaron 14.07.): ZUSAETZLICH abrechnungsweg-gegatet. Vorher war das Gate REIN
-  // terminzustands-basiert — Kasko/Selbstzahler fielen nur zufaellig heraus, naemlich ueber den
-  // Quali-Short-Circuit. Der greift aber NICHT, wenn die schuldfrage schon gesetzt hereinkommt
-  // (dann entfaellt der Quali-Step) → ein Kasko-Kunde sah den Gutachter-Finder. Das ist Aarons
-  // „loses Ende". Escape: ist die schuldfrage noch offen, darf die Weiche nichts erzwingen — dann
-  // holt der Quali-Step die Frage nach und routet selbst.
-  const schuldfrageBekannt = lead.schuldfrage != null
-  const needsBooking =
-    !terminMitSv &&
-    !terminPending &&
-    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' &&
-    (!schuldfrageBekannt || weichen.brauchtGutachter)
+  // Aaron 14.07.: Die Gates FOLGEN jetzt der DB-Config — `weichen.steps` ist die Wahrheit. Vorher war
+  // needsBooking REIN terminzustands-gegatet und fragte nie nach dem Abrechnungsweg; Kasko/Selbstzahler
+  // fielen nur zufaellig heraus (ueber den Quali-Short-Circuit, der NICHT greift, wenn die schuldfrage
+  // schon gesetzt hereinkommt). Ergebnis: ein Kasko-Kunde sah den Gutachter-Finder ("loses Ende").
+  // Jetzt: steht 'termin' in der Step-Sequenz des Szenarios, braucht der Kunde einen Gutachter — sonst nicht.
+  // Die Termin-/Werkstatt-Zustandsfilter stecken als Bedingungen IN der Config ({"sv_id": null} usw.).
+  const flowConfigAktiv = process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  const needsBooking = flowConfigAktiv && weichen.brauchtGutachter
   // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
   // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung
-  // soll laufen (da kommen Hergang/Fahrzeug/Gegner/Vorschäden rein). Sobald unfallhergang gefüllt
-  // ist, fällt sie weg. ②Quali+③Slot bleiben termin-gegatet (needsBooking).
-  const feststellungNeeded =
-    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' && !lead.unfallhergang
+  // soll laufen. Die Bedingung dafuer steht jetzt ebenfalls in der Config und ist PRO SZENARIO
+  // unterschiedlich: Haftpflicht prueft `unfallhergang`, Kasko/Selbstzahler `fahrzeugschaden_beschreibung`
+  // (dort gibt es keinen Unfall — die Feststellung fragt den Schaden fuers Werkstatt-Matching ab).
+  const feststellungNeeded = flowConfigAktiv && weichen.steps.includes('feststellung')
 
-  // Reparaturwunsch/Werkstatt: Picker-Step nur wenn Reparatur gewuenscht + noch KEINE
-  // Werkstatt hinterlegt (brauchtWerkstattVermittlung). lead via select('*') -> Felder zur
-  // Laufzeit da (Type-Lag: as unknown as BedarfRow). Der Wizard capped es beim Mount.
-  // Spec A: ebenfalls weichen-gegatet — bei Teilschuld (erst Rueckruf) und nur_gutachter keine
-  // Werkstatt-Vermittlung.
+  // Werkstatt-Picker: die Config sagt, ob der Weg ueberhaupt eine Werkstatt vorsieht (kasko/selbstzahler
+  // sofort, haftpflicht nach dem Gutachten, nie bei nur_gutachter/Teilschuld) — brauchtWerkstattVermittlung
+  // bleibt als fachlicher Zusatz-Check (Reparaturwunsch gesetzt, Vermittlung noch offen).
   const needsWerkstatt =
-    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' &&
-    brauchtWerkstattVermittlung(lead as unknown as BedarfRow) &&
-    (!schuldfrageBekannt || weichen.brauchtWerkstatt)
+    flowConfigAktiv &&
+    weichen.brauchtWerkstatt &&
+    brauchtWerkstattVermittlung(lead as unknown as BedarfRow)
 
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
   // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,

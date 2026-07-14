@@ -1,97 +1,78 @@
-// Die EINE Weiche des kanonischen FlowLinks — reine, client-safe Logik (keine Server-/DB-Imports),
-// analog zu werkstatt/abrechnungsweg.ts. Bisher war der Flow terminzustands-gesteuert: `needsBooking`
-// fragte nur "gibt es schon einen Termin?" und NIE "welcher Abrechnungsweg ist das?". Kasko/Selbstzahler
-// fielen nur zufaellig heraus — ueber den Quali-Short-Circuit, der aber NICHT greift, wenn die
-// schuldfrage schon gesetzt hereinkommt (dann entfaellt der Quali-Step). Ergebnis: ein Kasko-Kunde sah
-// den Gutachter-Finder. Diese Funktion macht die Verzweigung DB-getrieben und deckungsgleich mit dem
-// Kunde-Portal (das istWerkstattReparaturWeg bereits nutzt).
+// Die FlowLink-Weiche — jetzt DB-getrieben (Aaron 14.07.).
 //
-// Alles haengt an der schuldfrage:
-//   'gegner'             -> Haftpflicht: Gutachter + Werkstatt, volle Unfall-Feststellung
-//   'unklar'             -> Teilschuld: NUR Rueckruf beim Dispatch (Haftung erst klaeren)
-//   'eigenverantwortung' -> Kasko/Selbstzahler: KEIN Gutachter, Werkstatt anbieten, nur Schaden-Feststellung
+// VORHER war hier eine if/else-Kette: jede neue Weiche und jeder neue Step brauchten einen Deploy.
+// JETZT liegt die Matrix als Daten in `flow_szenarien` + `flow_szenario_steps`; diese Datei ist nur
+// noch der duenne, getestete Wrapper, der die Config in das umrechnet, was die UI braucht.
+//
+// Die Weichen-Flags werden aus den STEPS abgeleitet, nicht separat gepflegt — die Step-Sequenz ist
+// die SSoT. Steht 'termin' in der Sequenz, braucht der Kunde einen Gutachter-Termin. Punkt.
 
+import { resolveAbrechnungsweg, type Abrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
 import {
-  resolveAbrechnungsweg,
-  istWerkstattReparaturWeg,
-  type Abrechnungsweg,
-} from '@/lib/werkstatt/abrechnungsweg'
+  matcheSzenario,
+  berechneAktiveSteps,
+  type FlowSzenario,
+  type FlowSzenarioStep,
+  type FlowKontext,
+} from './flow-szenarien'
 
-/** Welche Feststellungs-Felder der Kunde sieht. */
-export type FeststellungZweig =
-  /** Haftpflicht/Teilschuld: volle Unfall-Aufnahme (Hergang, Ort/Zeit, Polizei, Zeugen, Gegner). */
-  | 'unfall'
-  /** Kasko/Selbstzahler: kein Unfallgegner -> nur Schaden + Fahrzeug (fuer die Werkstatt-Vermittlung). */
-  | 'schaden'
+export type FeststellungZweig = 'unfall' | 'schaden'
 
 export type FlowWeichen = {
+  /** Welches Szenario greift (flow_szenarien.id). */
+  szenarioId: string
+  /** Die aktiven Steps in Reihenfolge — nach Auswertung der Bedingungen. */
+  steps: string[]
   abrechnungsweg: Abrechnungsweg | null
-  /** Gutachter-Finder / Termin-Step zeigen? */
+  /** Abgeleitet aus den Steps: steht 'termin' drin, braucht der Kunde einen Gutachter. */
   brauchtGutachter: boolean
-  /** Werkstatt-Finder zeigen? */
   brauchtWerkstatt: boolean
-  /** Teilschuld -> Rueckruf beim Dispatch statt Gutachter-Buchung. */
   brauchtRueckruf: boolean
+  /** 'unfall' = volle Unfall-Aufnahme; 'schaden' = nur Schaden+Fahrzeug (Kasko/Selbstzahler). */
   feststellungZweig: FeststellungZweig
 }
 
-export type FlowWeichenInput = {
-  /** leads.schuldfrage: 'gegner' | 'unklar' | 'eigenverantwortung' */
-  schuldfrage: string | null
-  /** leads.eigene_versicherung ('ja'|'nein') — vom Caller bereits nach boolean normalisiert. */
-  ueberEigeneVersicherung: boolean | null
-  /** leads.freie_werkstattwahl — nur bei Kasko relevant (gebunden => kein freier Weg). */
-  freieWerkstattwahl: boolean | null
-  /** leads.service_typ: 'komplett' | 'nur_gutachter' */
-  serviceTyp: string | null
-  /** Ist bereits ein SV/Termin zugeordnet? (terminMitSv || terminPending) */
-  hatSvTermin: boolean
-  /** Haengt bereits eine Werkstatt am Lead? (reparatur_werkstatt_id || werkstatt_id) */
-  hatWerkstatt: boolean
+const LEER: FlowWeichen = {
+  szenarioId: 'unbekannt',
+  steps: [],
+  abrechnungsweg: null,
+  brauchtGutachter: false,
+  brauchtWerkstatt: false,
+  brauchtRueckruf: false,
+  feststellungZweig: 'unfall',
 }
 
 /**
- * Leitet alle FlowLink-Weichen aus den Lead-Feldern ab.
+ * Loest die Weichen fuer einen Lead auf: welches Szenario, welche Steps, welche Feststellung.
  *
- * Anzeige-Regel (durchgaengig fuer beide Vermittlungen): ist der SV bzw. die Werkstatt bereits
- * zugeordnet, wird sie ANGEZEIGT statt gesucht — der jeweilige Finder verschwindet.
- *
- * Ist die schuldfrage (oder bei Eigenverschulden die Versicherungsfrage) noch offen, erzwingt die
- * Weiche NICHTS: dann laeuft der Kunde durch den Quali-Step, der die Frage nachholt. Das ist wichtig,
- * weil `schuldfrage='eigenverantwortung'` OHNE `eigene_versicherung` den Lead sonst still toetet.
+ * @param szenarien   aus `flow_szenarien` (aktiv)
+ * @param szenarioSteps aus `flow_szenario_steps` (aktiv)
+ * @param kontext     der Lead-Zustand inkl. abgeleiteter Felder (sv_id, *_effektiv, ...)
  */
-export function resolveFlowWeichen(input: FlowWeichenInput): FlowWeichen {
-  const {
-    schuldfrage,
-    ueberEigeneVersicherung,
-    freieWerkstattwahl,
-    serviceTyp,
-    hatSvTermin,
-    hatWerkstatt,
-  } = input
+export function resolveFlowWeichen(
+  szenarien: FlowSzenario[],
+  szenarioSteps: FlowSzenarioStep[],
+  kontext: FlowKontext,
+): FlowWeichen {
+  const szenario = matcheSzenario(szenarien, kontext)
+  if (!szenario) return LEER
 
-  const abrechnungsweg = resolveAbrechnungsweg({ schuldfrage, ueberEigeneVersicherung })
-
-  const istTeilschuld = schuldfrage === 'unklar'
-  const istEigenverantwortung = schuldfrage === 'eigenverantwortung'
-  const istNurGutachter = serviceTyp === 'nur_gutachter'
-  const istHaftpflicht = abrechnungsweg === 'haftpflicht'
-  // Kanonische Weiche — dieselbe, die das Kunde-Portal nutzt (GeldZone/StatusZone):
-  // Selbstzahler immer; Kasko nur bei freier Werkstattwahl (gebunden => im Quali disqualifiziert).
-  const istReparaturWeg = istWerkstattReparaturWeg(abrechnungsweg, freieWerkstattwahl)
+  const steps = berechneAktiveSteps(szenarioSteps, szenario.id, kontext)
+  const eigeneVersicherung = kontext.eigene_versicherung
 
   return {
-    abrechnungsweg,
-    // Ein SV-Gutachten gibt es nur auf dem Haftpflicht-Weg. Kasko/Selbstzahler reparieren direkt,
-    // Teilschuld wird erst telefonisch geklaert.
-    brauchtGutachter: !hatSvTermin && !istTeilschuld && istHaftpflicht,
-    // Werkstatt: auf dem Reparatur-Weg sofort, bei Haftpflicht nach dem Gutachten.
-    // Nie bei 'nur_gutachter' (reiner Gutachten-Auftrag) und nie bei ungeklaerter Teilschuld.
-    brauchtWerkstatt:
-      !hatWerkstatt && !istTeilschuld && !istNurGutachter && (istReparaturWeg || istHaftpflicht),
-    brauchtRueckruf: istTeilschuld,
-    // Eigenverschulden hat keinen Unfallgegner -> Polizei/Zeugen/Gegner-Felder entfallen; wir fragen
-    // nur noch, was kaputt ist und welches Fahrzeug es ist (das braucht die Werkstatt-Vermittlung).
-    feststellungZweig: istEigenverantwortung ? 'schaden' : 'unfall',
+    szenarioId: szenario.id,
+    steps,
+    // Der abrechnungsweg selbst bleibt die kanonische DB-Ableitung (derive_abrechnungsweg spiegelt
+    // dieselbe Regel serverseitig). Die UI braucht ihn fuer den Haftpflicht-Hinweis am SA-Step.
+    abrechnungsweg: resolveAbrechnungsweg({
+      schuldfrage: (kontext.schuldfrage as string | null) ?? null,
+      ueberEigeneVersicherung:
+        eigeneVersicherung === 'ja' ? true : eigeneVersicherung === 'nein' ? false : null,
+    }),
+    brauchtGutachter: steps.includes('termin'),
+    brauchtWerkstatt: steps.includes('werkstatt'),
+    brauchtRueckruf: steps.includes('rueckruf'),
+    feststellungZweig: szenario.feststellung_zweig,
   }
 }
