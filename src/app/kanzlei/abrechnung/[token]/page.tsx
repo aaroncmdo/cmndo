@@ -136,7 +136,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         {/* Empfaenger */}
         {kanzlei && (
           <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-3">Rechnungsempfaenger</h2>
+            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-3">Rechnungsempfänger</h2>
             <p className="font-bold text-claimondo-navy">{kanzlei.name}</p>
             {kanzlei.ansprechpartner && <p className="text-claimondo-ondo">{kanzlei.ansprechpartner}</p>}
             {kanzlei.adresse && <p className="text-claimondo-ondo text-sm">{kanzlei.adresse}</p>}
@@ -201,7 +201,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</span>
             </div>
             <p className="text-xs text-claimondo-ondo/70 pt-1">
-              Faellig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
+              Fällig am: {abrechnung.faelligkeitsdatum ? new Date(abrechnung.faelligkeitsdatum as string).toLocaleDateString('de-DE') : '—'}
             </p>
           </div>
         </div>

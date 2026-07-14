@@ -20,12 +20,11 @@ ist bereits erledigt.
 ## Was der E2E-Job VORHER hatte vs. jetzt
 
 `.github/workflows/ci.yml` (E2E-Job `env:`) hatte nur `TEST_ADMIN_PASSWORD` + `TEST_SV_*` — **kein
-TOTP, nichts für KB/Dispatch**. Dieser PR ergänzt das **Passthrough** (no-op solange die Secrets leer
-sind):
+TOTP, nichts für KB/Dispatch**. Dieser PR ergänzt das **TOTP-Passthrough** (echter no-op solange die
+Secrets leer sind — `undefined` → MFA-Skip):
 
 ```
-TEST_ADMIN_TOTP_SECRET, TEST_KB_PASSWORD, TEST_KB_TOTP_SECRET,
-TEST_DISPATCH_PASSWORD, TEST_DISPATCH_TOTP_SECRET, TEST_SV_TOTP_SECRET
+TEST_ADMIN_TOTP_SECRET, TEST_KB_TOTP_SECRET, TEST_DISPATCH_TOTP_SECRET, TEST_SV_TOTP_SECRET
 ```
 
 ## Checkliste zum Grün-Schalten
@@ -37,12 +36,18 @@ TEST_DISPATCH_PASSWORD, TEST_DISPATCH_TOTP_SECRET, TEST_SV_TOTP_SECRET
 | Secret | für |
 |---|---|
 | `TEST_ADMIN_TOTP_SECRET` | test-admin@claimondo.de |
-| `TEST_KB_TOTP_SECRET` (+ ggf. `TEST_KB_PASSWORD`) | test-kb@claimondo.de |
-| `TEST_DISPATCH_TOTP_SECRET` (+ ggf. `TEST_DISPATCH_PASSWORD`) | test-dispatch@claimondo.de |
+| `TEST_KB_TOTP_SECRET` | test-kb@claimondo.de |
+| `TEST_DISPATCH_TOTP_SECRET` | test-dispatch@claimondo.de |
 | `TEST_SV_TOTP_SECRET` | test-sv@claimondo.de |
 
-(E-Mails sind in `_golden-path-lib.ts` `ROLES` hardcodet; Passwörter defaulten auf `Test1234!`,
-falls kein `TEST_<ROLE>_PASSWORD`-Secret existiert.)
+**Nur die TOTP-Secrets** — die Passwörter werden für KB/Dispatch **bewusst NICHT** durchgereicht.
+Grund: ein unbesetztes GitHub-Secret rendert als leerer String `''`, und `_golden-path-lib.ts` nutzt
+`?? 'Test1234!'` (nullish) — das fängt `''` **nicht** ab, würde den Default also überschreiben und den
+Login trotz gesetztem TOTP scheitern lassen. Ohne Passthrough greift der grandfatherte Default
+`Test1234!`. → **Die Prod-Test-Accounts müssen das Passwort `Test1234!` haben** (admin/sv nutzen die schon
+oben in ci.yml verdrahteten `TEST_ADMIN_PASSWORD`/`TEST_SV_PASSWORD`). Weicht ein KB/Dispatch-Passwort ab,
+sag mir Bescheid — dann verdrahte ich es sauber mit `|| 'Test1234!'`-Fallback statt `??`.
+E-Mails sind in `ROLES` hardcodet (`test-<rolle>@claimondo.de`).
 
 ### Schritt 2 — CI-Passthrough (✅ erledigt in diesem PR)
 `ci.yml` reicht die Secrets jetzt an den E2E-Job durch. Sobald Schritt 1 gesetzt ist, greift es
