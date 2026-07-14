@@ -253,7 +253,10 @@ export async function updateFallStatus(
     }
 
     // Phase 2c: Kanzlei-Email wenn schon übergeben
-    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'kanzlei', 'vs_kontakt']
+    // B4-slice-1b: 'in_kommunikation_vs'/'abgelehnt' ergaenzt — sie liegen strikt NACH der
+    // Kanzlei-Uebergabe. Ohne sie erfaehrt die Partnerkanzlei nichts vom Storno und arbeitet
+    // an einem stornierten Fall weiter.
+    const KANZLEI_RELEVANT = ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'regulierung-laeuft', 'in_kommunikation_vs', 'abgelehnt', 'kanzlei', 'vs_kontakt']
     if (fallInfoStatus && KANZLEI_RELEVANT.includes(fallInfoStatus)) {
       const { data: kanzleiUsers } = await serviceClient.from('profiles').select('email').eq('rolle', 'kanzlei')
       for (const k of kanzleiUsers ?? []) {

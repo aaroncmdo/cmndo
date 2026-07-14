@@ -12,6 +12,7 @@
 // Graceful: ein Query-Fehler wird zu einem 'warning'-Finding, nie zum Crash.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 
 export type ReparaturWorkstateCheck =
   | 'erledigt_nicht_geschlossen'
@@ -54,7 +55,11 @@ export type ClaimReparaturRow = {
 
 // ── Terminale Claim-Zustaende ────────────────────────────────────────────────
 
-const CLAIM_TERMINAL = new Set(['abgeschlossen', 'storniert', 'abgelehnt', 'verjaehrt'])
+// B4-slice-1b: SSoT statt handgerolltem Set. 'abgelehnt' war hier falsch (NICHT terminal —
+// einfache, nachforderbare Ablehnung) und waere nach dem endzustand-Write-Flip live geworden:
+// steckengebliebene Reparaturen solcher Claims wuerden der Reconciliation-Lens entgehen.
+// Zugleich fehlten die feinen B2-Terminals (reguliert_vollstaendig etc.).
+const CLAIM_TERMINAL = CLOSED_OPERATIVE_STATUS
 
 // ── Reine Detektions-Helfer (testbar ohne DB) ────────────────────────────────
 

@@ -42,6 +42,47 @@ export const CLOSED_OPERATIVE_STATUS: ReadonlySet<string> = new Set(CLOSED_OPERA
  *  Single source of truth — loest die verstreuten Inline-`'("abgeschlossen","storniert")'` ab. */
 export const CLOSED_OPERATIVE_STATUS_PG = `(${CLOSED_OPERATIVE_STATUS_VALUES.map((s) => `"${s}"`).join(',')})`
 
+/** NICHT-terminale Endzustand-Outcomes auf der operative_status-Achse (B4-slice-1b).
+ *  endzustand-actions setzt sie via markClaimAsInKommunikationVs / markClaimAsAbgelehnt(final=false).
+ *  Sie sind bewusst NICHT in CLOSED_OPERATIVE_STATUS: der Claim laeuft weiter (nachforderbar/
+ *  eskalierbar) und bleibt in allen "aktive Faelle"-Filtern sichtbar. Als Cursor-Werte haben sie
+ *  eigene Ausgaenge in FALL_STATUS_TRANSITIONS (state-machine.ts) — sonst Dead-End. */
+export const NONTERMINAL_OPERATIVE_OUTCOME_VALUES = ['in_kommunikation_vs', 'abgelehnt'] as const
+
+export const NONTERMINAL_OPERATIVE_OUTCOME: ReadonlySet<string> = new Set(
+  NONTERMINAL_OPERATIVE_OUTCOME_VALUES,
+)
+
+/** operative_status-Werte, ab denen die SV-Lead-Gebuehr faellig ist (>= gutachten-eingegangen —
+ *  die Finder-Fee haengt NICHT am Claim-Outcome). Konsumenten: der case-billing-batch-Cron und
+ *  die Finance-Liste "offene Faelle". Beide trugen bis B4-slice-1b eine eigene, wortgleiche Kopie
+ *  — divergiert eine, wird still falsch (oder gar nicht) abgerechnet. Daher hier als SSoT. */
+export const BILLABLE_OPERATIVE_STATUS_VALUES: readonly string[] = [
+  'gutachten-eingegangen',
+  'filmcheck',
+  'qc-pruefung',
+  'kanzlei-uebergeben',
+  'anschlussschreiben',
+  'regulierung',
+  'regulierung-laeuft',
+  'vs-kuerzt',
+  'nachbesichtigung-laeuft',
+  'vs-abgelehnt',
+  'klage',
+  'zahlung-eingegangen',
+  'abgeschlossen',
+  // B2: KB-Closes tragen die feinen Terminals direkt in operative_status.
+  'reguliert_vollstaendig',
+  'klage_rechtsstreit',
+  'verjaehrt',
+  'abgelehnt_final',
+  'an_externe_kanzlei_uebergeben',
+  // B4-slice-1b: die zwei Non-Terminal-Outcomes. Sie stehen operativ NACH gutachten-eingegangen
+  // (VS-Verhandlung / Nachforderung) — ohne sie faellt die Lead-Gebuehr fuer jeden Claim aus, den
+  // ein KB auf "in Kommunikation mit VS" gesetzt hat. Stiller Umsatzverlust.
+  ...NONTERMINAL_OPERATIVE_OUTCOME_VALUES,
+]
+
 /** "Abgeschlossene" (nicht-stornierte) operative_status-Terminals — exakt die Menge, die vor der
  *  Achsen-Konsolidierung alle auf coarse 'abgeschlossen' kollabierte. Fuer "completed"-Counts
  *  (z.B. Provision/abgeschlossene Faelle), die 'storniert' ausschliessen. Behavior-preserving zum

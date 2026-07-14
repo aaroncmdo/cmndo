@@ -7,6 +7,8 @@
 // Fall tauchte in den operative_status-gegateten Kanzlei-Portalen nie auf. Beide loesen
 // jetzt denselben Handoff aus; dieser Guard verhindert den Doppel-Handoff (idempotent).
 
+import { NONTERMINAL_OPERATIVE_OUTCOME_VALUES } from '@/lib/claims/terminal-status'
+
 // Status ab/nach dem Handoff + Terminal-Zustaende: kein (weiterer) Handoff noetig.
 const HANDOFF_ERLEDIGT_ODER_TERMINAL = new Set<string>([
   'kanzlei-uebergeben',
@@ -20,6 +22,11 @@ const HANDOFF_ERLEDIGT_ODER_TERMINAL = new Set<string>([
   'zahlung-eingegangen',
   'abgeschlossen',
   'storniert',
+  // B4-slice-1b: die zwei Non-Terminal-Outcomes liegen strikt NACH dem Kanzlei-Handoff
+  // (VS-Verhandlung / Nachforderung). Ohne sie meldet brauchtKanzleiHandoff() faelschlich
+  // "true" -> gibKanzleipaketFrei triggert den Handoff ein zweites Mal, und der Filmcheck
+  // zeigt "Der Fall ist noch nicht im Filmcheck" fuer einen Fall, der schon bei der VS liegt.
+  ...NONTERMINAL_OPERATIVE_OUTCOME_VALUES,
 ])
 
 /** True nur fuer komplett-Claims, die noch VOR dem Kanzlei-Handoff stehen. */

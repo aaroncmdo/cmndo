@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { processCaseBilling } from '@/lib/abrechnung/process-case-billing'
+import { BILLABLE_OPERATIVE_STATUS_VALUES } from '@/lib/claims/terminal-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,28 +22,10 @@ export const dynamic = 'force-dynamic'
  * eigentliche Rechnung erstellt).
  */
 
-const BILLABLE_STATUSES = [
-  'gutachten-eingegangen',
-  'filmcheck',
-  'qc-pruefung',
-  'kanzlei-uebergeben',
-  'anschlussschreiben',
-  'regulierung',
-  'regulierung-laeuft',
-  'vs-kuerzt',
-  'nachbesichtigung-laeuft',
-  'vs-abgelehnt',
-  'klage',
-  'zahlung-eingegangen',
-  'abgeschlossen',
-  // B2b: KB-Closes tragen jetzt feine Terminals in operative_status (statt coarse 'abgeschlossen').
-  // Alle sind >= gutachten-eingegangen = billable (Finder-Fee unabhaengig vom Claim-Outcome).
-  'reguliert_vollstaendig',
-  'klage_rechtsstreit',
-  'verjaehrt',
-  'abgelehnt_final',
-  'an_externe_kanzlei_uebergeben',
-]
+// B4-slice-1b: die Liste lag hier UND wortgleich in admin/finance/(hub)/offene-faelle/page.tsx.
+// Zwei Kopien derselben Abrechnungs-Menge driften garantiert auseinander (und ein vergessener
+// Wert = still nicht abgerechneter Umsatz) → jetzt EINE SSoT in claims/terminal-status.ts.
+const BILLABLE_STATUSES = BILLABLE_OPERATIVE_STATUS_VALUES
 
 export async function GET(request: Request) {
   if (!assertCronAuth(request)) {

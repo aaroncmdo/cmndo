@@ -62,6 +62,13 @@ export function computeNextOperativePhase(status: string, s: OperativeSignals): 
       return s.anschlussschreibenVorhanden ? 'anschlussschreiben' : null
     case 'anschlussschreiben':
     case 'regulierung':
+    // Status-Achsen-Konsolidierung B4-slice-1b: die beiden Non-Terminal-Outcomes stehen
+    // operativ an genau derselben Stelle wie 'regulierung' (VS-Verhandlung laeuft bzw.
+    // Nachforderung nach einfacher Ablehnung) — vor dem Write-Flip trug der Cursor hier
+    // 'regulierung' und bekam exakt diese Regel. Ohne die beiden cases faellt der Claim in
+    // `default: null` = kein Auto-Advance mehr (stiller Stillstand statt Auto-Close).
+    case 'in_kommunikation_vs':
+    case 'abgelehnt':
       return s.zahlungEingegangen ? 'abgeschlossen' : null
     default:
       return null

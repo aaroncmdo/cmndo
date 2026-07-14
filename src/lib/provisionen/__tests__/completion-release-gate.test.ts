@@ -10,13 +10,25 @@ const NOW = '2026-07-13T12:00:00.000Z'
 const vorTagen = (n: number) => new Date(new Date(NOW).getTime() - n * 24 * 60 * 60 * 1000).toISOString()
 
 describe('istClaimStorniert', () => {
-  it('storniert + abgelehnt = true (einheitlich)', () => {
+  it('storniert = true', () => {
     expect(istClaimStorniert('storniert')).toBe(true)
-    expect(istClaimStorniert('abgelehnt')).toBe(true)
   })
+
+  // B4-slice-1b: frueher hielt dieser Test `istClaimStorniert('abgelehnt') === true` fest
+  // ("storniert + abgelehnt = einheitlich"). Der Zweig war jedoch TOT — 'abgelehnt' ist ein
+  // claims.status-Wert und stand nie in operative_status, das diese Funktion liest. Mit dem
+  // endzustand-Write-Flip wuerde er LIVE und waere dann falsch: eine EINFACHE Ablehnung ist
+  // nicht terminal (nachforderbar/eskalierbar, der Fall laeuft weiter). Der Release-Runner haette
+  // die Partner-Provision auf 'storniert' gesetzt und dem Partner "Der vermittelte Fall wurde
+  // storniert" gemailt — fuer einen laufenden Fall. Die FINALE Ablehnung heisst 'abgelehnt_final'.
+  it('abgelehnt (einfach, nicht-terminal) = false — Provision NICHT stornieren', () => {
+    expect(istClaimStorniert('abgelehnt')).toBe(false)
+  })
+
   it('aktive/null = false', () => {
     expect(istClaimStorniert('sv-termin')).toBe(false)
     expect(istClaimStorniert('abgeschlossen')).toBe(false)
+    expect(istClaimStorniert('in_kommunikation_vs')).toBe(false)
     expect(istClaimStorniert(null)).toBe(false)
   })
 })

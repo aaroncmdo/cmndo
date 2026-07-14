@@ -44,7 +44,10 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
 
   const gefordert = schadens_hoehe_netto ?? 0
   const showGefordert = !!schadens_hoehe_netto
-  const showZahlungswegWahl = ['regulierung-laeuft', 'regulierung', 'zahlung-eingegangen'].includes(status) && !saved && onZahlungswegSave
+  // B4-slice-1b: 'in_kommunikation_vs'/'abgelehnt' ergaenzt. Vor dem endzustand-Write-Flip trug
+  // der Cursor in dieser Phase 'regulierung' — ohne die zwei Werte verschwaende die Zahlungsweg-
+  // Wahl genau dann, wenn sie gebraucht wird (VS-Verhandlung / Nachforderung laeuft).
+  const showZahlungswegWahl = ['regulierung-laeuft', 'regulierung', 'in_kommunikation_vs', 'abgelehnt', 'zahlung-eingegangen'].includes(status) && !saved && onZahlungswegSave
 
   function handleSaveWeg(selected: string) {
     if (!onZahlungswegSave) return

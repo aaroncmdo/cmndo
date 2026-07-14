@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 
 // WS6c (Reduced-Repair-Onboarding): Repair-Nudge-Cron.
 //
@@ -32,7 +33,14 @@ type NudgeState = 'keine-werkstatt' | 'termin-unbestaetigt' | 'termin-ueberfaell
 
 // Terminale operative_status-Werte (state-machine.ts: leere Transition + faktisch erledigt).
 // Fuer diese Claims ist kein Nudge sinnvoll.
-const TERMINAL_STATUS = new Set(['abgeschlossen', 'storniert', 'vs-abgelehnt', 'abgelehnt'])
+//
+// B4-slice-1b: Basis ist jetzt die SSoT CLOSED_OPERATIVE_STATUS. Das behebt zwei Fehler des
+// handgerollten Sets: (a) 'abgelehnt' ist NICHT terminal (einfache, nachforderbare Ablehnung —
+// der Fall laeuft weiter) und haette nach dem endzustand-Write-Flip die Reparatur-Nudges still
+// abgewuergt; (b) die feinen B2-Terminals (reguliert_vollstaendig etc.) fehlten → ein per
+// endzustand geschlossener Reparatur-Claim bekam weiter Nudges. 'vs-abgelehnt' bleibt bewusst
+// zusaetzlich drin (VS hat abgelehnt → Nudge sinnlos), es ist kein CLOSED_*-Wert.
+const TERMINAL_STATUS = new Set([...CLOSED_OPERATIVE_STATUS, 'vs-abgelehnt'])
 
 type ReparaturClaim = {
   id: string
