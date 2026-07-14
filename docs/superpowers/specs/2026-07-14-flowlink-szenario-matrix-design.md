@@ -68,6 +68,16 @@ Werkstatt:  reparatur_werkstatt_id NULL  → Werkstatt-Finder zeigen (Follow-up-
 
 Kein Doppel, kein „loses Ende". Diese Regel ersetzt das heutige rein terminzustands-gegatete `needsBooking`.
 
+### Je Vermittlung existieren ZWEI Finder (Aaron) — symmetrisch
+
+| | **Embed = Einstieg** (anonym, noch kein Lead) | **Im FlowLink** (Lead existiert) |
+|---|---|---|
+| **Gutachter** | `embed/gutachter-finder` (FinderMap + Wizard) → **legt Lead an** → FlowLink | `FlowSlotStep` — nur wenn **`sv_id` leer** |
+| **Werkstatt** | `embed/werkstatt-finder` → **legt Lead an** → FlowLink | `FlowWerkstattStep` — nur wenn **`reparatur_werkstatt_id` leer** |
+
+Gleiche Matching-Engine, gleiche Begründungen — Unterschied ist **nur die Persistenz** (Embed legt einen Lead **an**, der FlowLink-Finder ordnet dem **bestehenden** Lead zu).
+⚠️ **Doppel-Lead-Falle** (im Makler-Audit beim Gutachter-Finder real): Ein Embed-Finder, der `INSERT`t, obwohl schon ein Lead existiert, erzeugt einen zweiten. Der Embed muss einen optionalen `leadId`/Token annehmen → **UPDATE statt INSERT**.
+
 ## 5. Die Feststellung wird zweigeteilt
 
 Die Feststellungs-Felder existieren bereits; sie werden **zweig-abhängig** gezeigt:
@@ -81,15 +91,15 @@ Die Feststellungs-Felder existieren bereits; sie werden **zweig-abhängig** geze
 
 Kasko/Selbstzahler-Feststellung fokussiert also auf **„was ist kaputt + welches Auto"** — genau die Signale, die die passende Werkstatt bestimmen.
 
-## 6. Werkstatt-Matching (DB-driven) — braucht DDL (Folge-Spec)
+## 6. Werkstatt-Matching (DB-driven) → eigener Spec B
 
-Damit **genau eine** passende Werkstatt vermittelt wird, brauchen `werkstaetten` neue Attribute + eine Matching-Logik:
+**→ `2026-07-14-werkstatt-matching-foundation-design.md`** (Ranking, DDL, OCR, zwei Finder-Surfaces).
 
-* **Marken-Bindung:** welche Marke(n) die Werkstatt bedient — oder Flag **„freie Werkstatt"** (alle Marken). Marke ist die primäre Matching-Achse.
-* **Fahrzeugklassen:** welche **Schwacke-Klassen** die Werkstatt reparieren kann (nicht jede kann LKW/Transporter/Motorrad). Aaron: „es gibt klare Klassen laut Schwacke — die verwenden wir; Ausreißer als Vorschlag."
-* **Matching:** `Fahrzeugklasse (Schwacke) × Marke × Schaden-Art` → Kandidaten-Werkstätten, dann Geo/Verfügbarkeit (wie beim SV-Finder).
-
-*(Die konkrete Schwacke-Klassen-Taxonomie + das Werkstatt-Datenmodell = eigener Folge-Spec „Werkstatt-Matching-Foundation".)*
+Kurzfassung: **bis zu 5 Vorschläge**, gerankt, jeder mit **sichtbarem Grund**, im FlowLink auswählbar (kein Auto-Assign).
+* **Harte Filter:** Fahrzeug-Gruppe (kann die Werkstatt das Fahrzeug?) + Gewerke (kann sie den Schaden? — confidence-gated).
+* **Ranking:** Marken-Match („BMW markengebunden schlägt freie Werkstatt") > Gewerke-Fit > verifiziert > **Entfernung zum Fahrzeugstandort**.
+* **Fahrzeugklasse = EU-/KBA-Klasse aus dem Fahrzeugschein (Feld J)** — NICHT die Schwacke-Nutzungsausfall-Klassen (die gibt es separat für Tagessätze). ⇒ **deterministisch, kein KI**: der ZB1-OCR liest HSN/TSN heute schon aus und **wirft sie weg** (`dbField: null`), und Feld J liest er gar nicht.
+* Die **Schaden→Gewerke-KI** (`klassifiziereSchadenbild`, Confidence-gated) **existiert bereits produktiv** und bleibt.
 
 ## 7. Werkstatt-Auftrags-Steuerung (ergibt sich aus dem Weg)
 
