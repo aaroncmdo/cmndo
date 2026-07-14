@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { STATUS_LABEL, STATUS_TONE } from '../status-display'
+import { RetryButton } from '../RetryButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,9 +37,12 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
         </StatusBadge>
       </div>
 
-      {job.status === 'fehler' && job.fehler_text ? (
+      {job.status === 'fehler' ? (
         <SectionCard>
-          <p className="text-body-sm text-danger-strong">Fehler: {job.fehler_text}</p>
+          {job.fehler_text ? (
+            <p className="mb-3 text-body-sm text-danger-strong">Fehler: {job.fehler_text}</p>
+          ) : null}
+          <RetryButton jobId={job.id} />
         </SectionCard>
       ) : null}
 
@@ -68,6 +72,10 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
           <p className="text-body-sm text-claimondo-slate">
             Wird generiert … (Skript → Voiceover → Render). Seite neu laden für den aktuellen Stand.
           </p>
+          <p className="mt-3 mb-2 text-body-xs text-claimondo-shield">
+            Hängt es zu lange (z.B. nach einem Server-Neustart)? Pipeline neu starten:
+          </p>
+          <RetryButton jobId={job.id} label="Neu starten" />
         </SectionCard>
       ) : null}
 
