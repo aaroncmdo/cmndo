@@ -9,15 +9,36 @@ import {
   useVideoConfig,
   interpolate,
   spring,
+  delayRender,
+  continueRender,
 } from 'remotion'
 import type { WordTiming } from '../lib/marketing/tts'
 import type { ContentClipProps, RenderSegment } from './types'
 import { BrandVisual } from './brand-library/BrandVisual'
+import { ClaimondoShield, ClaimondoWordmark } from './brand-library/ClaimondoLogo'
 
 const NAVY = '#0D1B3E'
 const ACCENT = '#4573A2'
 const CREAM = '#F5F1E8'
-const FONT = 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
+// Marken-Font Montserrat (claimondo-marketing nutzt sie fuer Headings). Ohne neue Dependency:
+// per Google-Fonts-Link laden + delayRender bis geladen (timeout-gesichert, blockt den Render nie).
+const FONT = 'Montserrat, Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
+if (typeof document !== 'undefined') {
+  const handle = delayRender('montserrat')
+  let done = false
+  const finish = () => {
+    if (done) return
+    done = true
+    continueRender(handle)
+  }
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = 'https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap'
+  link.onload = () => document.fonts.load('700 40px Montserrat').then(finish, finish)
+  link.onerror = finish
+  document.head.appendChild(link)
+  setTimeout(finish, 8000) // Fallback: nie blockieren, notfalls Inter/System-Fallback
+}
 
 function AnimatedBg() {
   const f = useCurrentFrame()
@@ -157,10 +178,12 @@ function KineticCaption({ words }: { words: WordTiming[] }) {
 }
 
 function BrandWatermark() {
+  // Echtes Claimondo-Logo (Schild + Wortmarke) in Cream, dezent. Quelle: claimondo-marketing.
   return (
-    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'flex-start', padding: 46 }}>
-      <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 30, color: CREAM, opacity: 0.82, letterSpacing: 0.5 }}>
-        claimondo
+    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'flex-start', padding: 44 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, opacity: 0.85 }}>
+        <ClaimondoShield size={30} color={CREAM} />
+        <ClaimondoWordmark height={16} color={CREAM} />
       </div>
     </AbsoluteFill>
   )
@@ -178,9 +201,10 @@ function Outro({ total }: { total: number }) {
     .padStart(2, '0')
   return (
     <AbsoluteFill style={{ background: `${NAVY}${alpha}`, justifyContent: 'center', alignItems: 'center' }}>
-      <div style={{ opacity: p, transform: `scale(${0.9 + p * 0.1})`, textAlign: 'center' }}>
-        <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 76, color: CREAM }}>claimondo</div>
-        <div style={{ fontFamily: FONT, fontWeight: 600, fontSize: 34, color: ACCENT, marginTop: 10 }}>Mehr auf claimondo.de</div>
+      <div style={{ opacity: p, transform: `scale(${0.9 + p * 0.1})`, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18 }}>
+        <ClaimondoShield size={92} color={CREAM} />
+        <ClaimondoWordmark height={52} color={CREAM} />
+        <div style={{ fontFamily: FONT, fontWeight: 600, fontSize: 34, color: ACCENT, marginTop: 4 }}>Mehr auf claimondo.de</div>
       </div>
     </AbsoluteFill>
   )
