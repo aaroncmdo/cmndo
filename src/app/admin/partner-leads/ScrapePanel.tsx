@@ -120,6 +120,9 @@ export default function ScrapePanel({
       // Die Leads kommen bereits mit Ansprechpartner (aus dem Impressum) — das ist die
       // Zahl, die zaehlt: nur diese sind sofort anschreibbar.
       if (res.angereichert > 0) teile.push(`${res.angereichert} mit Ansprechpartner`)
+      // Gibt es eine aktive Auto-Aufnahme-Sequenz fuer diese Rolle, laufen die Leads
+      // ab jetzt von allein an (der stuendliche CRON-Advancer sendet Schritt 1).
+      if (res.aufgenommen > 0) teile.push(`${res.aufgenommen} in Sequenz aufgenommen`)
       if (res.uebersprungen > 0) {
         teile.push(`${res.uebersprungen} Dublette${res.uebersprungen === 1 ? '' : 'n'} übersprungen`)
       }

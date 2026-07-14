@@ -22,6 +22,7 @@ import {
 } from '@/lib/partner/scraping'
 import { ladeBestandsPartner } from '@/lib/partner/bestands-partner'
 import { reichereAusWebsite, type LeadEnrichment } from '@/lib/vertrieb/lead-website-enrichment'
+import { enrolleLeads } from '@/app/admin/vertrieb/_actions/cold-mail-sequenzen'
 import {
   sendMaklerWelcome,
   sendWillkommenWerkstatt,
@@ -587,7 +588,7 @@ export async function importScrapedLeads(
   rolle: string,
   kandidaten: ScrapeKandidat[],
 ): Promise<
-  | { ok: true; angelegt: number; uebersprungen: number; angereichert: number }
+  | { ok: true; angelegt: number; uebersprungen: number; angereichert: number; aufgenommen: number }
   | { ok: false; error: string }
 > {
   const staff = await requireVertriebStaff()
@@ -697,8 +698,42 @@ export async function importScrapedLeads(
   const { data, error } = await admin.from('partner_leads').insert(rows).select('id')
   if (error) return { ok: false, error: error.message }
 
+  // Auto-Aufnahme in die Sequenz (Spec §6): existiert fuer diese Rolle eine AKTIVE
+  // Sequenz mit auto_enroll, landen die frisch importierten Leads sofort darin — sonst
+  // muesste man jeden Lead von Hand aufnehmen und der Cold-Mailer liefe faktisch nie an.
+  // Damit schliesst sich die Kette: scrapen -> anreichern -> aufnehmen -> Sequenz sendet.
+  //
+  // Bewusst ueber enrolleLeads() statt eigener Insert-Logik: dort haengen die Gates
+  // (keine Email / abgemeldet / schon drin) — die duerfen hier nicht umgangen werden.
+  // Best-effort: scheitert die Aufnahme, sind die Leads trotzdem angelegt.
+  let aufgenommen = 0
+  const neueIds = (data ?? []).map((z) => z.id as string)
+  if (neueIds.length > 0) {
+    try {
+      const { data: seq } = await admin
+        .from('cold_mail_sequenzen')
+        .select('id')
+        .eq('rolle', r)
+        .eq('aktiv', true)
+        .eq('auto_enroll', true)
+        .maybeSingle()
+      if (seq) {
+        const enr = await enrolleLeads(neueIds, seq.id as string)
+        if (enr.ok) aufgenommen = enr.aufgenommen
+      }
+    } catch (enrErr) {
+      console.error('[importScrapedLeads] Auto-Aufnahme fehlgeschlagen (non-critical):', enrErr)
+    }
+  }
+
   revalidatePath('/admin/partner-leads')
-  return { ok: true, angelegt: data?.length ?? rows.length, uebersprungen, angereichert }
+  return {
+    ok: true,
+    angelegt: data?.length ?? rows.length,
+    uebersprungen,
+    angereichert,
+    aufgenommen,
+  }
 }
 
 export async function legePartnerOnboardingTermin(
