@@ -357,6 +357,32 @@ CI fährt `npm run check:flag-drift -- --ratchet`. Es blockt **NEUE** Verletzer-
 **Baseline (6 grandfathered)** sind ECHTE Drift-Funde (kein akzeptables Muster) — per Boy-Scout fixen + Baseline senken (`-- --update-baseline`): `beleg-review/actions.ts` (`ocr_status: 'approved'/'rejected'` auf fall_dokumente → approve/reject bricht), `dokumente/ad-hoc-anforderung.ts` (`status: pending/ausstehend/cancelled` auf dokument_upload_anfragen → Enum-Vokabular-Mismatch), `twilio/inbound` + `inbound/process-inbound-text` (`.in('status',[…'angefragt'])` auf gutachter_termine → toter Filterwert), `gutachter/auftraege/export-action` + `gutachter/fall/[id]/page` (`.in('status',[…'durchgefuehrt'])` → toter Filterwert). Teil des interaction-flags-Audits (`docs/superpowers/specs/2026-07-11-interaction-flags-db-driven-audit-design.md` §8, Detektor #5). Folge-Detektoren (#1 Direkt-status-Writes ausserhalb der Engine, #4 inline-Branding-Gates) sind dokumentierte spätere Phasen.
 
 <!-- BEGIN:branding-rules -->
+# RLS-Policy-Gate (Ratchet)
+
+**Eine PERMISSIVE `CREATE POLICY` braucht eine explizite `TO <rolle>`-Klausel — nie `TO public`, nie weglassen.**
+
+Lässt man `TO` weg, ist der **Postgres-Default `TO public`** — die Policy gilt dann auch für `authenticator` / `cli_login_postgres` / `dashboard_user` / `supabase_privileged_role`. Diese 4 Rollen haben **null App-Traffic und null Grants** auf den betroffenen Tabellen, aber der Supabase-Advisor zählt `multiple_permissive_policies` je **(Tabelle × ROLLE × Action)** — jeder Overlap wird dadurch **4× doppelt gezählt**. Genau das war das **49-%-Rauschen** (313 Findings), das B2a (Migration `20260714171501`) rausgeräumt hat: `TO public → TO anon, authenticated` auf 138 Policies, Policy-Fingerprint byte-identisch (reiner No-op).
+
+Ohne Gate kommt es zurück — man fängt sich `TO public` schlicht ein, wenn man die Klausel **vergisst**. Binnen Stunden nach B2a war es 4× passiert (`cold_mail_*`).
+
+CI fährt `npm run check:rls-policies -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/rls-policy-baseline.json`. Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/rls-policy-scan.mjs` (unit-getestet, 13 Fälle).
+
+**Richtig:**
+```sql
+CREATE POLICY x ON public.t FOR SELECT TO anon, authenticated USING (…);
+```
+
+**Zwei Ausnahmen (werden NIE geflaggt — die einzigen False-Positive-Quellen):**
+
+1. **`AS RESTRICTIVE`** — dort ist `TO public` **korrekt**: die Restriktion gilt dann für alle Rollen = maximale Abdeckung. Ein Verengen auf `TO authenticated` würde die Restriktion für `anon` **aufheben**, also **lockern**. (Real: `nachrichten_thread_insert_member_only` ist die einzige RESTRICTIVE-Policy im Schema.)
+2. **Dynamisches SQL** mit `%I`/`%s`-Platzhaltern (`EXECUTE format('CREATE POLICY %I … TO %s …')`) — die Rollen kommen zur Laufzeit, die Klausel **ist** explizit. (Real: die B1-Konsolidierungs-Migrationen erzeugen so 320 Policies.) Ein dynamisches `EXECUTE 'CREATE POLICY x ON t USING (true)'` **ohne** Platzhalter wird weiterhin geflaggt.
+
+**Kein DB-/Netz-Zugriff** — reiner Scan von `supabase/migrations/*.sql` (CI hat keine DB-Creds; deshalb läuft `check:rls-grants` auch nicht in CI).
+
+**Baseline = eingefrorene Historie, KEIN Schuldenabbau.** Anders als bei component-set/knip dürfen die Baseline-Files **nicht** nachträglich editiert werden — applizierte Migrationen sind unveränderlich (Regel 2). Der DB-Zustand dieser alten Policies wurde bereits von B2a korrigiert. Die Baseline sagt nur: „diese historischen Files sind bekannt". `--update-baseline` ist der begründete Ausnahmefall, nicht der Normalpfad.
+
+Kontext: `COORDINATION-rls-perf-b1-fullpass` (Memory) — der Pass brachte den Advisor von **313 → 0**.
+
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 
 Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=true` brandet sein eigenes Portal **und** die Sicht seiner Kunden (Kunde-Portal, Magic-Links `/flow/[token]`, `/upload/zb1/[token]`, `/upload/dokumente/[token]`, Kunden-gerichtete Emails). Das funktioniert über CSS-Custom-Properties, die auf einem Wrapper-Element gesetzt werden (`generateCssVars(theme, 'full')` aus `src/lib/branding/css-vars.ts`).
