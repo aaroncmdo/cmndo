@@ -9,6 +9,16 @@ import path from "path";
 // geführt, damit `/`, `/flow/...`, `/schaden-melden` unverändert bleiben.
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+// Marketing-Content-Studio Standalone-Trace-Fix: die kompletten Remotion-Runtime-Trees.
+// @vercel/nft (output:standalone) traced die runtime-required/nativen Files NICHT
+// (renderer/dist/index.js CJS-Entry, @rspack/binding native, ws) -> force-include.
+const REMOTION_TRACE_INCLUDES = [
+  'node_modules/@remotion/**/*',
+  'node_modules/remotion/**/*',
+  'node_modules/@rspack/**/*',
+  'node_modules/ws/**/*',
+];
+
 const nextConfig: NextConfig = {
   // VPS-Deploy: `output: 'standalone'` erzeugt .next/standalone/ mit server.js
   // + minimal node_modules — der deploy-vps.yml-Workflow tart das in /var/www
@@ -70,6 +80,15 @@ const nextConfig: NextConfig = {
     // Standalone-Output (analog OCR-Force-Include oben).
     '/admin/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
     '/admin/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    // Marketing-Content-Studio: der Render-Orchestrator (src/lib/marketing/render-clip.ts)
+    // laedt @remotion/renderer + @remotion/bundler via runtime-require (serverExternalPackages,
+    // s.o.). @vercel/nft traced deren CJS-Entry (renderer/dist/index.js), das native
+    // @rspack/binding (bundler nutzt rspack) und ws (Browser-Protokoll) NICHT -> fehlten im
+    // Standalone-node_modules -> Server-Component-500 beim Laden der Marketing-Route (prod
+    // 14.07.: "Cannot find module '@rspack/binding'" / renderer/dist/index.js / ws). Komplette
+    // Trees force-includen (analog OCR/pdf-parse oben) -> deterministischer, deploy-fester Fix.
+    '/admin/marketing/content-studio': REMOTION_TRACE_INCLUDES,
+    '/admin/marketing/content-studio/[id]': REMOTION_TRACE_INCLUDES,
   },
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
