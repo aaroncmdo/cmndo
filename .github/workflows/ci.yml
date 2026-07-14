@@ -177,8 +177,14 @@ jobs:
       # Jede statische Query wird per select&limit=1 gegen die DB "trockengeschossen" (PostgREST als
       # Orakel, 0 FP). Blockt NEUE gg. scripts/query-parse-baseline.json; Boy-Scout senkt.
       # Ohne DB-Keys skippt das Script (exit 0). Siehe scripts/check-query-parse.mjs.
+      # NEU (14.07.) → erster Rollout mit continue-on-error: der Guard LÄUFT + meldet, blockt aber
+      # noch nicht. Grund: er trockenschiesst gegen die CI-DB; sollte deren Schema (Preview-Branch)
+      # von prod abweichen, wuerde die prod-generierte Baseline nicht matchen und ALLE PRs faelsch-
+      # lich roten. Sobald ein grüner Lauf bestaetigt, dass CI-DB == Baseline-DB: continue-on-error
+      # entfernen (dann blockt er wie claim-view-rls/anon-exposure).
       - name: Query-Parse-Guard
         run: node scripts/check-query-parse.mjs --ratchet
+        continue-on-error: true
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

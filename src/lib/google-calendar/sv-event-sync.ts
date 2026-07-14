@@ -24,7 +24,7 @@ type TerminShape = {
   end_zeit: string | null
   typ: string | null
   kanal: string | null
-  adresse: string | null
+  besichtigungsort_adresse: string | null
   status: string | null
   cancelled_at: string | null
   google_event_id: string | null
@@ -124,10 +124,7 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
     fahrzeug: '',
   }
   if (t.fall_id) {
-    // CMM-44 SP-A2 (Cluster 1): schadens_adresse aus dem Select entfernt — war
-    // ungenutzt (location nutzt t.adresse), Spalte wandert nach claims.
-    // CMM-44 SP-D PR2a: besichtigungsort_adresse aus dem Select entfernt — war
-    // ungenutzt (location kommt aus t.adresse = gutachter_termine.adresse).
+    // location kommt aus t.besichtigungsort_adresse (gutachter_termine hat keine `adresse`-Spalte).
     // CMM-49 (Entity-Sweep): faelle -> v_claim_full. fahrzeug_*/kennzeichen flach
     // (value-identisch, div=0); claim_nummer flach statt claims-Embed.
     const { data: fall } = await db
