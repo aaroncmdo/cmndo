@@ -224,6 +224,31 @@ export default async function GutachterFallPage({
     kundenbetreuer = kbProfile
   }
 
+  // AAR-405 Phase 5: Kanzlei-Ansprechpartner — sobald der Fall an eine Kanzlei
+  // uebergeben ist (kanzlei_faelle-Row existiert). 2-Step statt Embed, weil der
+  // Admin-Client ungetypt ist (Embed = stiller PostgREST-400-Vektor). Admin-Client
+  // wie kundenbetreuer/lead NACH dem getClaimDetail-sv_id-Gate (Defense-in-Depth).
+  let kanzlei: { name: string | null; email: string | null; ansprechpartner: string | null } | null = null
+  const { data: kanzleiFall } = await admin
+    .from('kanzlei_faelle')
+    .select('kanzlei_id')
+    .eq('fall_id', id)
+    .maybeSingle()
+  if (kanzleiFall?.kanzlei_id) {
+    const { data: kanzleiRow } = await admin
+      .from('kanzleien')
+      .select('name, email, ansprechpartner')
+      .eq('id', kanzleiFall.kanzlei_id as string)
+      .maybeSingle()
+    if (kanzleiRow) {
+      kanzlei = {
+        name: (kanzleiRow.name as string | null) ?? null,
+        email: (kanzleiRow.email as string | null) ?? null,
+        ansprechpartner: (kanzleiRow.ansprechpartner as string | null) ?? null,
+      }
+    }
+  }
+
   // Attach leadpreis to fall object for display.
   const fallWithAbrechnung = {
     ...fall,
@@ -690,6 +715,7 @@ export default async function GutachterFallPage({
       timeline={(timeline ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['timeline']}
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
+      kanzlei={kanzlei}
       aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}

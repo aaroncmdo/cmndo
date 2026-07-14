@@ -7,6 +7,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { updatePartnerLead, konvertierePartnerLead } from '@/app/admin/partner-leads/actions'
 import AktivitaetLog from './AktivitaetLog'
 import MailComposer from './MailComposer'
+import ColdMailComposer from './ColdMailComposer'
 import { LEAD_STATUS_OPTIONS, LEAD_EINSTUFUNG_OPTIONS } from '../_lib/lead-status-labels'
 import type { VorlageTyp } from '../_lib/mail-vorlagen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
@@ -31,6 +32,7 @@ export default function LeadCockpit({
   const [fehler, setFehler] = useState<string | null>(null)
   const [notiz, setNotiz] = useState(detail.notiz ?? '')
   const [composerTyp, setComposerTyp] = useState<VorlageTyp | null>(null)
+  const [coldMailOffen, setColdMailOffen] = useState(false)
   const [apForm, setApForm] = useState({
     vorname: detail.ansprechpartner.vorname ?? '',
     nachname: detail.ansprechpartner.nachname ?? '',
@@ -187,6 +189,9 @@ export default function LeadCockpit({
         <Button variant="ghost" size="sm" onClick={() => setComposerTyp('terminbestaetigung')}>
           📅 Terminbestätigung
         </Button>
+        <Button variant="ghost" size="sm" onClick={() => setColdMailOffen(true)}>
+          📨 Cold-Mail
+        </Button>
         <Button variant="navy" size="sm" loading={busy} onClick={convert}>
           → In Partner umwandeln
         </Button>
@@ -200,6 +205,15 @@ export default function LeadCockpit({
           merge={{ Ansprechpartner: apName || (kontakt.name ?? ''), Firma: kontakt.name ?? '', Termin: '' }}
           startTyp={composerTyp}
           onClose={() => setComposerTyp(null)}
+          onSent={onChanged}
+        />
+      )}
+
+      {coldMailOffen && (
+        <ColdMailComposer
+          leadId={kontakt.id}
+          empfaenger={detail.ansprechpartner.email ?? kontakt.email}
+          onClose={() => setColdMailOffen(false)}
           onSent={onChanged}
         />
       )}

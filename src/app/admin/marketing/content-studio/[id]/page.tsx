@@ -92,10 +92,12 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
         </SectionCard>
       ) : null}
 
-      {job.status === 'audio_erzeugt' ? (
+      {job.status === 'render_queued' || job.status === 'audio_erzeugt' ? (
         <SectionCard>
           <p className="text-body-sm text-claimondo-slate">
-            Wird gerendert (Voiceover → Video) … Seite neu laden für den aktuellen Stand.
+            {job.status === 'render_queued'
+              ? 'In der Render-Warteschlange … der Worker rendert den Clip automatisch, sobald genügend RAM frei ist. Seite neu laden für den aktuellen Stand.'
+              : 'Wird gerendert (Voiceover → Video) … Seite neu laden für den aktuellen Stand.'}
           </p>
           <p className="mt-3 mb-2 text-body-xs text-claimondo-shield">
             Hängt es zu lange (z.B. nach einem Server-Neustart)?
