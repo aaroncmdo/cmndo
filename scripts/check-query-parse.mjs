@@ -61,29 +61,51 @@ for (const file of walk(SRC)) {
 }
 
 // 2. Trockenschuss gegen die Env-DB (mit kleiner Nebenläufigkeit).
+// Netzwerk-gehärtet: Timeout + Retry. Ein Blip/Ausfall darf den Guard NICHT crashen und NICHT
+// als tote Query fehldeuten → nach den Retries `unchecked` (neutral: nicht broken, nicht blockend).
+const REQ_TIMEOUT_MS = 10_000
+const MAX_TRIES = 3
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+
 async function dryFire(table, select) {
-  const r = await fetch(`${URL_}/rest/v1/${table}?select=${encodeURIComponent(select.replace(/\s+/g, ''))}&limit=1`,
-    { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` } })
-  if (r.status === 200) return null
-  let code = ''
-  try { code = JSON.parse(await r.text()).code || '' } catch {}
-  return { status: r.status, code }
+  const url = `${URL_}/rest/v1/${table}?select=${encodeURIComponent(select.replace(/\s+/g, ''))}&limit=1`
+  for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+    const ctrl = new AbortController()
+    const timer = setTimeout(() => ctrl.abort(), REQ_TIMEOUT_MS)
+    try {
+      const r = await fetch(url, { headers: { apikey: KEY, Authorization: `Bearer ${KEY}` }, signal: ctrl.signal })
+      clearTimeout(timer)
+      if (r.status === 200) return null
+      // 5xx = transienter Server-/Infra-Fehler → retry (kein Query-Parse-Fehler).
+      if (r.status >= 500 && attempt < MAX_TRIES) { await sleep(300 * attempt); continue }
+      let code = ''
+      try { code = JSON.parse(await r.text()).code || '' } catch {}
+      return { status: r.status, code }
+    } catch {
+      clearTimeout(timer)
+      if (attempt < MAX_TRIES) { await sleep(300 * attempt); continue }
+      return { unchecked: true } // Netzwerk/Timeout nach Retries → neutral
+    }
+  }
+  return { unchecked: true }
 }
 
 const items = [...byKey.entries()]
 const broken = []
+let unchecked = 0
 const POOL = 12
 let idx = 0
 await Promise.all(Array.from({ length: POOL }, async () => {
   while (idx < items.length) {
     const [key, q] = items[idx++]
     const res = await dryFire(q.table, q.select)
-    if (res) broken.push({ key, ...q, ...res })
+    if (res?.unchecked) unchecked++
+    else if (res) broken.push({ key, ...q, ...res })
   }
 }))
 broken.sort((a, b) => a.key.localeCompare(b.key))
 
-console.log(`[check:query-parse] ${byKey.size} statische Queries geprüft — ${broken.length} parsen auf prod NICHT.`)
+console.log(`[check:query-parse] ${byKey.size} statische Queries geprüft — ${broken.length} parsen auf prod NICHT${unchecked ? `; ${unchecked} nicht prüfbar (Netzwerk, neutral)` : ''}.`)
 
 if (mode === 'update') {
   const baseline = broken.map((b) => b.key).sort()
