@@ -1,9 +1,11 @@
 ﻿'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { UsersIcon, PlusIcon, ShieldCheckIcon } from 'lucide-react'
 import CommunityAnlegenWizard from './CommunityAnlegenWizard'
-import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+// Tr = Kopfzeile, ClickableTr = drillbare Body-Zeilen.
+import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 import PageHeader from '@/components/shared/PageHeader'
 
 type Community = {
@@ -17,6 +19,7 @@ type Community = {
 }
 
 export default function CommunitiesListClient({ communities }: { communities: Community[] }) {
+  const router = useRouter()
   const [showWizard, setShowWizard] = useState(false)
 
   return (
@@ -61,7 +64,13 @@ export default function CommunitiesListClient({ communities }: { communities: Co
             </Thead>
             <Tbody>
               {communities.map(c => (
-                <Tr key={c.id} className="hover:bg-claimondo-bg/50">
+                // P1: Eine Community IST eine organisation (typ='community') — sie hat
+                // keine eigene Tabelle und braucht daher auch keine eigene Detail-View.
+                // Wir drillen auf die bestehende Org-Detail-Route.
+                <ClickableTr
+                  key={c.id}
+                  onClick={() => router.push(`/admin/organisationen/${c.id}`)}
+                >
                   <Td className="font-medium">{c.name}</Td>
                   <Td>{c.member_count}</Td>
                   <Td>{c.radius_km ? `${c.radius_km} km` : '—'}</Td>
@@ -78,7 +87,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                   <Td className="text-body-xs text-claimondo-ondo!">
                     {new Date(c.created_at).toLocaleDateString('de-DE')}
                   </Td>
-                </Tr>
+                </ClickableTr>
               ))}
             </Tbody>
           </Table>
