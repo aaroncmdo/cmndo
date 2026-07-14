@@ -9,7 +9,8 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-import type { WerkstattAuftrag, WerkstattAuftragExtra } from '@/lib/werkstatt/queries'
+import type { WerkstattAuftrag, WerkstattAuftragExtra, WerkstattChatMessage } from '@/lib/werkstatt/queries'
+import { WerkstattChatTab } from '@/components/werkstatt/WerkstattChatTab'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
 import {
   werkstattAuftragSegment,
@@ -464,9 +465,13 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 export function WerkstattAuftragDetail({
   auftrag,
   extra,
+  chatMessages,
+  currentUserId,
 }: {
   auftrag: WerkstattAuftrag
   extra?: WerkstattAuftragExtra | null
+  chatMessages?: WerkstattChatMessage[]
+  currentUserId?: string | null
 }) {
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
@@ -698,6 +703,13 @@ export function WerkstattAuftragDetail({
           </div>
         </SectionCard>
       )}
+
+      {/* Fall-Chat (Gruppenchat, kanal-basiert wie der Makler-Chat) — ganz unten. */}
+      <WerkstattChatTab
+        claimId={auftrag.claim_id}
+        currentUserId={currentUserId ?? null}
+        initialMessages={chatMessages ?? []}
+      />
     </div>
   )
 }
