@@ -4,9 +4,10 @@
 //
 // Kein 'use server' — das ist eine Lib, kein Action-Modul (Konstanten-Export waere sonst
 // im Client-Bundle undefined, s. AGENTS.md/AAR-664).
+import { timingSafeEqual } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { normalizeE164, sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
-import { generateAirdropToken } from './token'
+import { airdropLookupPrefix, generateAirdropToken, hashAirdropToken } from './token'
 
 export const INVITE_TTL_STUNDEN = 72
 
@@ -73,4 +74,74 @@ export async function inviteGegnerViaAirdrop(
   }
 
   return { ok: true, inviteId: data.id as string, smsSent }
+}
+
+export type InviteKontext = {
+  inviteId: string
+  claimId: string
+  status: string
+  abgelaufen: boolean
+  bereitsBestaetigt: boolean
+}
+
+function hashGleich(a: string, b: string): boolean {
+  const ba = Buffer.from(a, 'utf8')
+  const bb = Buffer.from(b, 'utf8')
+  return ba.length === bb.length && timingSafeEqual(ba, bb)
+}
+
+/** Loest den Klartext-Token aus der SMS auf: Lookup ueber den Prefix, Verifikation ueber den Hash. */
+export async function resolveInviteToken(token: string): Promise<InviteKontext | null> {
+  const t = token?.trim()
+  if (!t) return null
+
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('airdrop_invitations')
+    .select('id, claim_id, status, responded_at, expires_at, token_hash')
+    .eq('token_lookup_prefix', airdropLookupPrefix(t))
+    .maybeSingle()
+
+  if (error || !data) return null
+  if (!hashGleich(data.token_hash as string, hashAirdropToken(t))) return null
+
+  return {
+    inviteId: data.id as string,
+    claimId: data.claim_id as string,
+    status: data.status as string,
+    abgelaufen: new Date(data.expires_at as string).getTime() < Date.now(),
+    bereitsBestaetigt: data.responded_at !== null,
+  }
+}
+
+/** opened_at nur beim ERSTEN Oeffnen setzen (chk_airdrop_responded_after_opened). */
+export async function markiereInviteGeoeffnet(inviteId: string): Promise<void> {
+  const admin = createAdminClient()
+  await admin
+    .from('airdrop_invitations')
+    .update({ status: 'geoeffnet', opened_at: new Date().toISOString() })
+    .eq('id', inviteId)
+    .is('opened_at', null)
+}
+
+/**
+ * Compare-and-Swap: setzt responded_at NUR, wenn es noch NULL ist. Genau ein Aufrufer
+ * gewinnt — er (und nur er) loest die Unfallmeldung an die Versicherung aus. Doppelklick,
+ * erneutes Oeffnen des Links oder ein Retry koennen die Meldung damit nicht doppelt
+ * verschicken; eine zweite Mail an einen Versicherer waere nicht zurueckholbar.
+ */
+export async function bestaetigeInvite(inviteId: string): Promise<{ gewonnen: boolean }> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('airdrop_invitations')
+    .update({ responded_at: new Date().toISOString(), status: 'daten_eingegeben' })
+    .eq('id', inviteId)
+    .is('responded_at', null)
+    .select('id')
+
+  if (error) {
+    console.error('[airdrop] Bestaetigung fehlgeschlagen:', error.message)
+    return { gewonnen: false }
+  }
+  return { gewonnen: (data?.length ?? 0) > 0 }
 }

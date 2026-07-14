@@ -49,6 +49,12 @@ async function ladeFotoAnhaenge(claimId: string): Promise<Anhang[]> {
       const url = await getStorageUrl(admin, 'fall-dokumente', d.storage_path as string, {
         ttl: STORAGE_TTL.download,
       })
+      // getStorageUrl liefert null, wenn das Signieren scheitert — dann gibt es nichts
+      // anzuhaengen. Lieber ein Foto weniger als eine Meldung, die gar nicht rausgeht.
+      if (!url) {
+        console.error('[vs-meldung] Keine Storage-URL fuer', d.storage_path)
+        continue
+      }
       const res = await fetch(url)
       if (!res.ok) continue
       const buf = Buffer.from(await res.arrayBuffer())

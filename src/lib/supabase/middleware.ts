@@ -315,6 +315,11 @@ function isPublicPath(pathname: string): boolean {
     // PUBLIC/anon — Gegner hat keinen Account; der Token ist die Berechtigung
     // (analog /flow und /upload). Ohne diesen Eintrag → 307 → /login.
     '/schaden',
+    // Slice 2c: Bestaetigungs-Link aus der SMS an den Unfallgegner
+    // (/unfallmeldung/[token]). Ebenfalls PUBLIC/anon — derselbe Gegner, dasselbe
+    // Token-ist-die-Berechtigung-Muster. Ohne diesen Eintrag landet er auf /login
+    // und die Unfallmeldung an seine Haftpflicht wird nie ausgeloest.
+    '/unfallmeldung',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }

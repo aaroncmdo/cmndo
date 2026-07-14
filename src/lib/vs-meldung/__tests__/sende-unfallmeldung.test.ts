@@ -54,8 +54,9 @@ vi.mock('@/lib/email/google/client', () => ({
 
 vi.mock('@react-email/render', () => ({ render: async () => '<html>x</html>' }))
 
+const storageUrl = { value: 'https://storage.example/foto.jpg' as string | null }
 vi.mock('@/lib/storage/url', () => ({
-  getStorageUrl: async () => 'https://storage.example/foto.jpg',
+  getStorageUrl: async () => storageUrl.value,
   STORAGE_TTL: { download: 300 },
 }))
 
@@ -95,6 +96,7 @@ beforeEach(() => {
   state.dokumente = []
   state.sendThrows = false
   state.claimVorhanden = true
+  storageUrl.value = 'https://storage.example/foto.jpg'
   process.env.VS_MELDUNG_ENABLED = 'true'
 })
 
@@ -155,6 +157,19 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(res).toMatchObject({ anhaenge: 1 })
     const att = sent[0].attachments as Array<{ filename: string }>
     expect(att.map((a) => a.filename)).toEqual(['a.jpg'])
+  })
+
+  it('nicht signierbares Foto wird uebersprungen — die Meldung geht trotzdem raus', async () => {
+    storageUrl.value = null // getStorageUrl scheitert
+    state.dokumente = [
+      { id: 'd1', dokument_typ: 'gegner_fahrzeug_foto', storage_path: 'p/a.jpg', original_filename: 'a.jpg', mime_type: 'image/jpeg' },
+    ]
+    const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
+    const res = await sendeUnfallmeldungAnGegnerVs('c1')
+
+    // Lieber ein Foto weniger als gar keine Meldung an die Versicherung:
+    expect(res).toMatchObject({ ok: true, gesendet: true, anhaenge: 0 })
+    expect(sent).toHaveLength(1)
   })
 
   it('KILL-SWITCH aus: kein Send, aber ehrliche Tracking-Zeile mit Dry-Run-Marker', async () => {
