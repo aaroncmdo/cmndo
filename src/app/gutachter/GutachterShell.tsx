@@ -38,7 +38,7 @@ import { FONT_PAIRS, CLAIMONDO_DEFAULT_FONT_PAIR_ID, buildGoogleFontsUrl } from 
 import { useFloatingSidebar } from '@/lib/branding/use-floating-sidebar'
 import { MobileNav, type MobileNavItem, type MobileNavSection } from '@/components/shared/mobile-nav'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
-import SVSpotlight from './_components/SVSpotlight'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
 import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
 import { SvPageChromeProvider } from './_shell/page-chrome-context'
@@ -669,7 +669,7 @@ export default function GutachterShell({
         <SidebarWidthVar width="272px" breakpoint="(min-width: 1024px)" />
       )}
       {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
-      {!isFeldmodus && <SVSpotlight />}
+      {!isFeldmodus && <GlobalSearch rolle="sachverstaendiger" />}
     </div>
     </>
   )

@@ -8,8 +8,8 @@
 //   - parseResponse:   wandelt Server-Response in Gruppen
 //   - navigate:        callback pro Treffer
 //
-// Beispiel siehe components/Spotlight.tsx (Admin) und
-// app/gutachter/_components/SVSpotlight.tsx (Gutachter).
+// Rollen-agnostischer Wrapper: components/shared/search/GlobalSearch.tsx
+// (unified, nutzt den search_global-RPC via /api/search).
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { type LucideIcon, SearchIcon } from 'lucide-react'

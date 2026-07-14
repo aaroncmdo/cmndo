@@ -9548,6 +9548,7 @@ export type Database = {
           gegner_versicherung: string | null
           gegner_versicherung_anfrage_datum: string | null
           gegner_versicherung_id: string | null
+          gegner_versicherungsnummer: string | null
           gespraech_beendet_am: string | null
           gespraech_dauer_sekunden: number | null
           gespraech_gestartet_am: string | null
@@ -9765,6 +9766,7 @@ export type Database = {
           gegner_versicherung?: string | null
           gegner_versicherung_anfrage_datum?: string | null
           gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
           gespraech_beendet_am?: string | null
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null
@@ -9982,6 +9984,7 @@ export type Database = {
           gegner_versicherung?: string | null
           gegner_versicherung_anfrage_datum?: string | null
           gegner_versicherung_id?: string | null
+          gegner_versicherungsnummer?: string | null
           gespraech_beendet_am?: string | null
           gespraech_dauer_sekunden?: number | null
           gespraech_gestartet_am?: string | null

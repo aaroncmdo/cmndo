@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
 import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -86,7 +87,7 @@ export async function POST(req: Request) {
     // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
     const { data: aktiveClaims } = await db.from('claims')
       .select('id')
-      .not('operative_status', 'in', '("abgeschlossen","storniert")')
+      .not('operative_status', 'in', CLOSED_OPERATIVE_STATUS_PG)
     const aktiveClaimIds = (aktiveClaims ?? []).map((c) => c.id as string)
     // CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge statt .from('faelle')
     // (gleiche RLS-Sichtbarkeit; Output fall_id == faelle.id). Filter claims-zentrisch.
