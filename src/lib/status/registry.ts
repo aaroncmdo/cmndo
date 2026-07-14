@@ -6,6 +6,7 @@ import { CLAIM_MAIN_PHASE_DEFS } from './domains/claim-main-phase'
 import { CLAIMS_STATUS_DEFS } from './domains/claims-status'
 import { LEAD_WORKFLOW_DEFS } from './domains/lead-workflow'
 import { VERTRIEB_WORKFLOW_DEFS } from './domains/vertrieb-workflow'
+import { COLD_MAIL_DEFS } from './domains/cold-mail'
 
 export const DOMAINS: Record<DomainName, Record<string, StatusDef>> = {
   'fall-status': FALL_STATUS_DEFS,
@@ -14,4 +15,5 @@ export const DOMAINS: Record<DomainName, Record<string, StatusDef>> = {
   'claims-status': CLAIMS_STATUS_DEFS,
   'lead-workflow': LEAD_WORKFLOW_DEFS,
   'vertrieb-workflow': VERTRIEB_WORKFLOW_DEFS,
+  'cold-mail': COLD_MAIL_DEFS,
 }

@@ -8,6 +8,7 @@ import { updatePartnerLead, konvertierePartnerLead } from '@/app/admin/partner-l
 import AktivitaetLog from './AktivitaetLog'
 import MailComposer from './MailComposer'
 import ColdMailComposer from './ColdMailComposer'
+import ColdMailVerlauf from './ColdMailVerlauf'
 import { LEAD_STATUS_OPTIONS, LEAD_EINSTUFUNG_OPTIONS } from '../_lib/lead-status-labels'
 import type { VorlageTyp } from '../_lib/mail-vorlagen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
@@ -33,6 +34,8 @@ export default function LeadCockpit({
   const [notiz, setNotiz] = useState(detail.notiz ?? '')
   const [composerTyp, setComposerTyp] = useState<VorlageTyp | null>(null)
   const [coldMailOffen, setColdMailOffen] = useState(false)
+  // Nach einem Send den Verlauf neu laden (der Send-Status kommt danach per Webhook nach).
+  const [verlaufToken, setVerlaufToken] = useState(0)
   const [apForm, setApForm] = useState({
     vorname: detail.ansprechpartner.vorname ?? '',
     nachname: detail.ansprechpartner.nachname ?? '',
@@ -214,9 +217,16 @@ export default function LeadCockpit({
           leadId={kontakt.id}
           empfaenger={detail.ansprechpartner.email ?? kontakt.email}
           onClose={() => setColdMailOffen(false)}
-          onSent={onChanged}
+          onSent={() => {
+            setVerlaufToken((t) => t + 1)
+            onChanged()
+          }}
         />
       )}
+
+      {/* S3: Sende-Verlauf inkl. Zustell-/Oeffnungs-Status (Resend-Webhook).
+          Rendert sich selbst weg, wenn noch nichts gesendet wurde. */}
+      <ColdMailVerlauf leadId={kontakt.id} reloadToken={verlaufToken} />
 
       <div>
         <p className={`${LABEL_CLS} mb-2`}>Aktivität</p>
