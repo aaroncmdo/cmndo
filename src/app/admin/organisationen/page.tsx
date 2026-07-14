@@ -29,13 +29,16 @@ export default async function OrganisationenPage() {
   const verwalterMap = new Map<string, { vorname: string | null; nachname: string | null; email: string | null }>()
 
   if (orgIds.length) {
-    // Count members per org
-    for (const orgId of orgIds) {
-      const { count } = await supabase
-        .from('sachverstaendige')
-        .select('id', { count: 'exact', head: true })
-        .eq('organisation_id', orgId)
-      memberCounts.set(orgId, count ?? 0)
+    // P1 Boy-Scout: war ein N+1 (eine COUNT-Query PRO Org in einer for-Schleife).
+    // Jetzt EINE Query fuer alle Orgs, Zaehlen in JS.
+    const { data: svRows } = await supabase
+      .from('sachverstaendige')
+      .select('organisation_id')
+      .in('organisation_id', orgIds)
+    for (const row of svRows ?? []) {
+      const oid = row.organisation_id as string | null
+      if (!oid) continue
+      memberCounts.set(oid, (memberCounts.get(oid) ?? 0) + 1)
     }
 
     // Verwalter-Profile laden
