@@ -11,7 +11,7 @@ import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import EntityDetailShell, { type DetailTab } from '@/components/shared/detail/EntityDetailShell'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
-import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
@@ -99,16 +99,6 @@ export default async function SvDetailPage({
     vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; google_place_id: string | null
   } | null
 
-  // Google-Bewertung aus Cache laden (profile_id = sv.profile_id)
-  const { data: bewertungRow } = sv.profile_id
-    ? await supabase
-        .from('google_bewertungen_cache')
-        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
-        .eq('profile_id', sv.profile_id)
-        .maybeSingle()
-    : { data: null }
-  const bewertung = bewertungRow ?? null
-
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
     supabase.from('v_faelle_mit_aktuellem_termin')
@@ -155,6 +145,7 @@ export default async function SvDetailPage({
     portal_zugang_freigeschaltet: sv.portal_zugang_freigeschaltet,
     vertrag_unterschrieben: sv.vertrag_unterschrieben,
     gesperrt_seit: sv.gesperrt_seit,
+    paket: sv.paket,
   })
 
   // AAR-359 W6: Verifizierungs-Tab-Daten (nur wenn aktiv — spart Queries sonst)
@@ -342,11 +333,11 @@ export default async function SvDetailPage({
                       style={{ width: `${Math.min(100, pct)}%` }} />
                   </div>
                 </div>
-                {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge */}
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium ${onboardingStatus.bg} ${onboardingStatus.text}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${onboardingStatus.dot}`} />
+                {/* ARCH-1 POLISH Befund 1: Onboarding-Status-Badge — shared StatusBadge
+                    (colorCls-Escape-Hatch), identisch zur Dispatch-Detailsicht. */}
+                <StatusBadge colorCls={`${onboardingStatus.bg} ${onboardingStatus.text}`}>
                   {onboardingStatus.label}
-                </span>
+                </StatusBadge>
                 {/* AAR-425: Manueller Verifizierungs-Toggle (Whitelabel-Gate) */}
                 <VerifizierungsToggle
                   svId={sv.id}

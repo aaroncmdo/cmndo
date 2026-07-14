@@ -2,12 +2,20 @@
 // Wird sowohl im Listing (KarteClient Sidebar) als auch im Detail-View
 // verwendet, damit die Logik nicht zweimal driftet.
 
-export type SvStatusKey = 'wartet_auf_vertrag' | 'wartet_auf_anzahlung' | 'aktiv' | 'gesperrt'
+export type SvStatusKey =
+  | 'wartet_auf_vertrag'
+  | 'wartet_auf_anzahlung'
+  | 'wartet_auf_freigabe'
+  | 'aktiv'
+  | 'gesperrt'
 
 export type SvStatusInputs = {
   portal_zugang_freigeschaltet: boolean | null | undefined
   vertrag_unterschrieben: boolean | null | undefined
   gesperrt_seit: string | null | undefined
+  // paket='basic' zahlt keine Anzahlung — einziges Gate ist die Team-Freigabe.
+  // Optional, damit Alt-Aufrufer (ohne paket) sich weiter wie bezahlt verhalten.
+  paket?: string | null | undefined
 }
 
 export type SvStatusBadge = {
@@ -34,6 +42,15 @@ export const SV_STATUS_BADGES: Record<SvStatusKey, SvStatusBadge> = {
     text: 'text-orange-700',
     dot: 'bg-orange-400',
   },
+  // Basic-Tier: kein Anzahlungs-Schritt, wartet nur auf die manuelle Team-Freigabe.
+  // Token-Klassen (info) statt roher Scale — Status-Ratchet-safe (src/** wird gescannt).
+  wartet_auf_freigabe: {
+    key: 'wartet_auf_freigabe',
+    label: 'Wartet auf Freigabe',
+    bg: 'bg-info-soft',
+    text: 'text-info-strong',
+    dot: 'bg-info',
+  },
   aktiv: {
     key: 'aktiv',
     label: 'Aktiv',
@@ -55,14 +72,21 @@ export const SV_STATUS_BADGES: Record<SvStatusKey, SvStatusBadge> = {
  * unterschieden zwischen 'noch kein Vertrag' und 'Vertrag da, aber Anzahlung offen'.
  *
  * Quelle: ARCH-1 POLISH Befund 1
- *  - portal_zugang_freigeschaltet=false UND vertrag_unterschrieben=false → Wartet auf Vertrag
- *  - portal_zugang_freigeschaltet=false UND vertrag_unterschrieben=true  → Wartet auf Anzahlung
- *  - portal_zugang_freigeschaltet=true                                  → Aktiv
  *  - gesperrt_seit IS NOT NULL                                          → Gesperrt
+ *  - portal_zugang_freigeschaltet=true                                  → Aktiv
+ *  - paket='basic' (Portal noch zu)                                     → Wartet auf Freigabe
+ *  - portal_zugang_freigeschaltet=false UND vertrag_unterschrieben=true → Wartet auf Anzahlung
+ *  - portal_zugang_freigeschaltet=false UND vertrag_unterschrieben=false → Wartet auf Vertrag
+ *
+ * Basic-Sonderfall vor der Vertrag/Anzahlung-Weiche: paket='basic' kennt keine
+ * Anzahlung (preis=0, siehe BASIC_PAKET in lib/pakete.ts). Solange das Portal
+ * nicht freigeschaltet ist, ist das einzige Gate die manuelle Team-Freigabe —
+ * unabhaengig davon, ob der Basic-SV den Vertrag schon signiert hat.
  */
 export function getSvStatus(input: SvStatusInputs): SvStatusBadge {
   if (input.gesperrt_seit) return SV_STATUS_BADGES.gesperrt
   if (input.portal_zugang_freigeschaltet) return SV_STATUS_BADGES.aktiv
+  if (input.paket === 'basic') return SV_STATUS_BADGES.wartet_auf_freigabe
   if (input.vertrag_unterschrieben) return SV_STATUS_BADGES.wartet_auf_anzahlung
   return SV_STATUS_BADGES.wartet_auf_vertrag
 }
@@ -71,6 +95,7 @@ export const SV_STATUS_FILTER_OPTIONS: ReadonlyArray<{ value: SvStatusKey | 'all
   { value: 'alle', label: 'Alle' },
   { value: 'wartet_auf_vertrag', label: 'Wartet auf Vertrag' },
   { value: 'wartet_auf_anzahlung', label: 'Wartet auf Anzahlung' },
+  { value: 'wartet_auf_freigabe', label: 'Wartet auf Freigabe' },
   { value: 'aktiv', label: 'Aktiv' },
   { value: 'gesperrt', label: 'Gesperrt' },
 ]

@@ -133,12 +133,50 @@ describe('erstelleMaklerAnfrage', () => {
     expect('fahrzeug_standort_lng' in extra).toBe(false)
   })
 
-  it('service_typ default komplett, nur_gutachter wird durchgereicht', async () => {
+  it('service_typ ist immer komplett (Paket-Wahl entfernt; RLS/Provision haengt an der Spalte)', async () => {
     await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).service_typ).toBe('komplett')
-    createLeadMock.mockClear()
-    await erstelleMaklerAnfrage({ ...baseInput, serviceTyp: 'nur_gutachter', ausgang: 'flowlink' })
-    expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).service_typ).toBe('nur_gutachter')
+  })
+
+  it('Verschulden gegner -> schuldfrage=gegner auf dem Lead', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', schuldfrage: 'gegner' })
+    expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).schuldfrage).toBe('gegner')
+  })
+
+  it('Eigenverschulden + Kasko -> schuldfrage + eigene_versicherung=ja auf dem Lead', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja' })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.schuldfrage).toBe('eigenverantwortung')
+    expect(extra.eigene_versicherung).toBe('ja')
+  })
+
+  it('Eigenverschulden OHNE Kasko-Antwort -> Fehler, kein Lead (kein stiller Flow-Disqualify)', async () => {
+    const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', schuldfrage: 'eigenverantwortung' })
+    expect(res.ok).toBe(false)
+    expect(createLeadMock).not.toHaveBeenCalled()
+  })
+
+  it('Kennzeichen + Polizeibeteiligung landen auf dem Lead', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', kennzeichen: 'K-AB 1234', polizeiVorOrt: true })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.kennzeichen).toBe('K-AB 1234')
+    expect(extra.polizei_vor_ort).toBe(true)
+  })
+
+  it('Besichtigungsort schreibt BEIDE Familien (besichtigungsort_* + fahrzeug_standort_*, Prefill-Schutz)', async () => {
+    await erstelleMaklerAnfrage({
+      ...baseInput,
+      ausgang: 'flowlink',
+      standortOrt: 'Hauptstraße 5, 50667 Köln',
+      standortLat: 50.9384,
+      standortLng: 6.9601,
+      standortPlaceId: 'ChIJ-test',
+    })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.besichtigungsort_adresse).toBe('Hauptstraße 5, 50667 Köln')
+    expect(extra.besichtigungsort_lat).toBe(50.9384)
+    expect(extra.besichtigungsort_place_id).toBe('ChIJ-test')
+    expect(extra.fahrzeug_standort_adresse).toBe('Hauptstraße 5, 50667 Köln')
   })
 
   it('Dedup: offene Anfrage mit gleicher Nummer (formatierungs-tolerant) -> Fehler, kein Lead', async () => {
