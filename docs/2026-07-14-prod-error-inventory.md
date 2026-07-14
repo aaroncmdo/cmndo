@@ -2,99 +2,87 @@
 
 Punkt-in-Zeit-Snapshot der App-Gesundheit auf `https://app.claimondo.de`, erhoben per
 authentifiziertem Chromium-Route-Sweep. **Read-only** (nur Navigation, keine Action-Klicks →
-keine Writes/Comms). Reproduzierbarkeit: jeder Fund 2× bestaetigt bevor er als "echt" gilt.
+keine Writes/Comms).
+
+> **⚠ Harness-Bug unterwegs gefunden & gefixt (wichtig für die Interpretation).**
+> Der geteilte `cookie.mjs`-Login setzte den Supabase-Auth-Cookie mit `httpOnly:true`. SSR liest
+> den, der **Browser-Supabase-Client** (`@supabase/ssr` liest aus `document.cookie`) aber NICHT →
+> jede **client-seitige** REST/Realtime-Query lief unauthentifiziert und lieferte **401 / 500 /
+> „Failed to fetch"**. Das ist ein **Harness-Artefakt**, das echte Nutzer (JS-lesbarer Cookie aus
+> normalem Login) NICHT haben. Fix: `httpOnly:false` (spiegelt das reale App-Verhalten; SSR liest
+> den non-httpOnly-Cookie weiter). **Zwei ursprünglich gemeldete Funde stellten sich damit als
+> Artefakte heraus (s.u. „Zurückgezogen").** Erkannt, weil 401 ein *Auth*-Fehler ist, RLS-Denial
+> aber 200+`[]` liefern würde.
 
 ## Methode & Harness
 
-`scripts/prod-smoke/route-sweep.mjs` — loggt via GoTrue password-grant + Cookie-Injection ein
-(umgeht die 2FA-UI), besucht eine Routen-Liste und erfasst pro Route:
-
-- HTTP-Status des Dokuments · Redirect (→ /login = Zugriffsproblem)
-- `console.error` + `pageerror` (React-Fehler)
-- fehlgeschlagene API-Calls (Response ≥ 400), 401/403 und 5xx getrennt
-- Error-Boundary-Text im **sichtbaren** Body (`document.body.innerText`), NICHT im HTML —
-  sonst matcht Next.js' ins Client-Bundle eingebetteter Fallback-String auf *jeder* Seite
-  (dieser False-Positive ist beim ersten Lauf aufgetreten und wurde gefixt).
-
-Wichtig: `waitUntil: 'domcontentloaded'` + feste Settle-Zeit statt `networkidle` — die App haelt
-Supabase-Realtime-Websockets offen, `networkidle` feuert nie → Timeout.
+`scripts/prod-smoke/route-sweep.mjs` — Cookie-Injection-Login (umgeht 2FA-UI), besucht eine
+Routen-Liste, erfasst pro Route: HTTP-Status · Redirect · `console.error`/`pageerror` ·
+API-Calls ≥400 (401/403 vs 5xx getrennt) · Error-Boundary im **sichtbaren** Body (nicht im HTML —
+sonst Next.js-Bundle-False-Positive). `domcontentloaded`+Settle statt `networkidle`
+(Realtime-Websockets). **Nur die httpOnly:false-Läufe testen client-seitige Queries akkurat.**
 
 ## Abdeckung
 
-| Kontext | Routen | Quelle |
-|---|---|---|
-| admin | 41 (Nav 21 + Sub-Tools 20) | AdminNav + `src/app/admin/**/page.tsx` |
-| kundenbetreuer | 11 | MitarbeiterNav |
-| sachverstaendiger | 13 | GutachterShell-Nav |
-| public/auth | 6 | manuell |
+~70 Routen: **admin** (41), **kundenbetreuer** (11), **sachverstaendiger** (13), public (6).
+**Nicht abgedeckt:** Detail-Views nur teilweise (prod hatte 0 Claims — 1 Test-Claim gebaut+geräumt) ·
+Portale kanzlei/makler/werkstatt/kunde/flottenmanager (keine Test-Zugangsdaten).
 
-**Nicht abgedeckt (Luecken):** Detail-Views (Claim-/Lead-/Auftrag-Detail — prod hatte 0 Claims,
-s.u.) · Portale kanzlei/makler/werkstatt/kunde/flottenmanager (keine Test-Zugangsdaten).
+## Health-Zusammenfassung (nach Harness-Korrektur)
 
-## Health-Zusammenfassung
+Mit akkuratem Harness (httpOnly:false) nachgeprüft: **App gesund.** admin ~41/41 · KB 11/11 ·
+SV 11/13 · public 5/6 · Detail-Views (Fallakte, Claim-Chat) OK.
 
-| Rolle | OK | Funde |
-|---|---|---|
-| admin | 40/41 | content-studio 500 |
-| kundenbetreuer | 11/11 | — |
-| sachverstaendiger | 11/13 | community/team #310 (verifizierung = Mapbox, kein Bug) |
-| public | 5/6 | /register 404 (vermutlich gewollt) |
+## Echte Funde (reproduzierbar, überleben den Harness-Fix)
 
-## Echte Funde (reproduzierbar)
+1. **`/gutachter/community` + `/gutachter/team` → React #310** für SV ohne Mitgliedschaft/Org
+   (2× reproduziert, auch mit gefixtem Cookie). Der Guard-Redirect landet korrekt auf
+   `/gutachter/heute?error=…` (Toast), wirft dabei aber #310. Hängt an der bekannten
+   „`/gutachter/heute`-Chunk dynamic-import #310"-Tech-Debt (`next.config.ts:96`). Kein sichtbarer
+   Breakage. **Severity: Low (kosmetisch).**
+2. **`holeOderErstelleDirektThread` (`src/lib/chat/thread-actions.ts:68`) ungated** — kein
+   Claim-Zugriffs-Check (anders als die Geschwister-Actions). Jeder eingeloggte User kann einen
+   DM-Thread an einem beliebigen Claim mit einem beliebigen User anlegen (Spam-/Social-Engineering-
+   Vektor, kein Daten-Leak). Code-Level-Fund (nicht sweep-abhängig). **Severity: Medium (Security).**
 
-1. **`/admin/marketing/content-studio` → 500** (2/2). Dokument lädt (200), der Seiten-Daten-Fetch
-   liefert 500. Root-Cause = VPS-Server-Logs. *(Parallele Session arbeitete zeitgleich an einem
-   Server-Components-Render-Error auf marketing — sehr wahrscheinlich dieselbe Ursache.)*
-   **Severity: Medium.**
-2. **`/gutachter/community` + `/gutachter/team` → React #310** für SV ohne Mitgliedschaft/Org.
-   Der Guard-Redirect landet korrekt auf `/gutachter/heute?error=…` (Toast), wirft dabei aber #310.
-   Hängt an der bekannten „`/gutachter/heute`-Chunk dynamic-import #310"-Tech-Debt
-   (`next.config.ts:96`). Kein sichtbarer Breakage. **Severity: Low (kosmetisch).**
-3. **`GET /rest/v1/gutachter_termine` → 401** in der Fallakte-Detail (admin+KB, ausserhalb des
-   Sweeps beobachtet). Sweep-untestbar, weil Detail-Views einen Claim brauchen (0 Claims).
-   **Severity: Low–Med.**
-4. **`holeOderErstelleDirektThread` (`src/lib/chat/thread-actions.ts:68`) ungated** — kein
-   Claim-Zugriffs-Check (anders als die Geschwister-Actions `sendeThreadNachricht`/
-   `ladeThreadNachrichten`). Jeder eingeloggte User kann einen DM-Thread an einem beliebigen
-   Claim mit einem beliebigen User anlegen (Spam-/Social-Engineering-Vektor, kein Daten-Leak).
-   **Severity: Medium (Security).**
+## Zurückgezogen (Harness-Artefakte des httpOnly-Cookies — KEINE App-Bugs)
+
+- ~~`/admin/marketing/content-studio` → 500~~ — mit httpOnly:false OK. Der 500 kam von einem
+  client-seitigen Fetch, der bei fehlender Browser-Session server-seitig scheiterte. *(Eine
+  Parallel-Session debuggte zeitgleich einen marketing-Render-Error — evtl. verwandt, aber der
+  hier gemessene 500 war das Harness-Artefakt.)*
+- ~~`GET /rest/v1/gutachter_termine` → 401 (Fallakte-Detail)~~ — Quelle:
+  `TerminListeClient.tsx:105` (Client-Query via Browser-Supabase, gerendert in
+  `faelle/[id]/_sidebar/FallSidebar.tsx`). Mit httpOnly:false → 200/OK. RLS auf gutachter_termine
+  ist intakt (`staff_fall_scoped` etc.); 401 war reine fehlende Browser-Auth im Harness.
 
 ## Kein Bug / Kontext
 
-- `/gutachter/verifizierung` „Failed to fetch" = **Mapbox-Satellitenkachel** (externe Ressource).
-- `/gutachter` direkt → **502** = Deploy-in-progress (Release-Session redeployte prod während des
-  Sweeps). Test-Caveat: der Sweep rennt gegen laufende Deploys → einzelne 502 sind transient.
-- `/register` → **404** (kein Public-Self-Registration; nur relevant falls irgendwo verlinkt).
-- App-Root `/` → `/login` (App-Subdomain-Verhalten; Marketing lebt auf `claimondo.de`).
-- Viele Alt-Tool-Routen redirecten sauber (200) unter die Hub-Routen (sachverstaendige→
-  /admin/vertrieb, sla→/admin/faelle/sla, kanzlei-board→/admin/faelle/kanzlei, …).
+- `/gutachter/verifizierung` „Failed to fetch" = **Mapbox-Satellitenkachel** (extern).
+- `/gutachter` direkt → **502** = Deploy-in-progress (Release-Session redeployte prod).
+- `/register` → **404** (kein Public-Self-Registration). App-Root `/` → `/login` (App-Subdomain).
+- Viele Alt-Tool-Routen redirecten sauber (200) unter die Hub-Routen.
 
 ## `anlegeFall`-Audit (Zusatzfrage: vollständig + operativ sinnvoll?)
 
 `/admin/faelle/anlegen` legt strukturell vollständig an: `claim` + `faelle_claim_bridge` +
 `claim_party` (geschädigter, mit `person_id`) + `lead`, via kanonischem `convertLeadToClaim`.
-**Operativ sichtbar** im Admin-Fälle-Board (Phase Erfassung, Name/KB/SV korrekt gerendert).
+**Operativ sichtbar** im Admin-Fälle-Board (Phase Erfassung, Name/KB/SV korrekt). ABER „dünn":
+**kein Kunden-Auth-Account** (`geschaedigter_user_id=NULL`), kein Vehicle (ohne Kennzeichen),
+**0 pflichtdokumente, 0 tasks**, `schadenart='unbekannt'` (wenn ungesetzt). Für „telefonisch
+reingekommen" plausibel by-design; pflichtdok/tasks evtl. später generiert (nicht gegenprüfbar,
+0 andere Claims). **`v_claim_full`-„0-Zeilen"-Verdacht war falsch** — View-Gate
+`WHERE claim_sichtbar_fuer_aktuellen_user(sub.id)` + MCP-postgres (`auth.uid()=null`); echter
+Admin sieht den Fall (app-verifiziert).
 
-ABER "dünn": **kein Kunden-Auth-Account** (`geschaedigter_user_id=NULL` → Kunde kann sich nicht
-einloggen, ist kein Chat-Teilnehmer), kein Vehicle (ohne Kennzeichen), **0 pflichtdokumente,
-0 tasks**, `schadenart='unbekannt'` (wenn nicht im Formular gesetzt → Dispatcher-Match-Filter
-läuft ohne Filter). Für den beworbenen Use-Case „telefonisch reingekommen" plausibel by-design;
-ob pflichtdok/tasks später generiert werden, war **nicht gegenprüfbar** (0 andere Claims).
+## ⚠ Daten-Zustand
 
-**Methodische Korrektur:** Der Verdacht „Claim fehlt in `v_claim_full`" (dem Betriebs-View mit
-142+ Consumern) war **falsch** — der View endet auf `WHERE claim_sichtbar_fuer_aktuellen_user(sub.id)`.
-Die MCP-Query läuft als `postgres` mit `auth.uid()=null` → das Gate liefert für *jeden* Claim
-`false` → 0 Zeilen. Ein echter eingeloggter Admin sieht den Fall (app-seitig verifiziert).
-
-## ⚠ Daten-Zustand zum Zeitpunkt der Erhebung
-
-Prod hatte **0 Claims / 0 Leads** — parallele „Purge"-Sessions hatten alle Test-Claims/Leads
-gelöscht (Profile 35 + SVs 9 intakt). Das ist die Ursache der Detail-View-Abdeckungslücke und
-sollte auf „keine echten Fälle verloren" verifiziert werden.
+Prod hatte **0 Claims / 0 Leads** (Purge-Sessions; Profile 35 + SVs 9 intakt) — auf „keine echten
+Fälle verloren" verifizieren.
 
 ## Follow-ups
 
-- Detail-Views + die `gutachter_termine`-401 nachziehen (braucht einen stabilen Test-Claim:
-  `create-testfall.mjs` + reversibler `sv_id`-Write).
 - kanzlei/makler/werkstatt/kunde/flotte-Portale (brauchen Test-Zugangsdaten).
-- Funde 1–4 in die zuständigen Lanes routen (s. Memory `coordination-prod-error-inventory-2026-07-14`).
+- Vollständiger Re-Sweep aller ~70 Routen mit dem **gefixten** Harness (httpOnly:false) für
+  akkurate client-seitige Abdeckung — der erste Durchlauf war für SSR-Render verlässlich, für
+  client-seitige Queries nicht.

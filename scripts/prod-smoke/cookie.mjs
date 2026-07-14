@@ -27,7 +27,13 @@ export function sessionToCookies(session, { projectRef, cookieDomain }) {
     value: c.value,
     domain: cookieDomain,
     path: '/',
-    httpOnly: true,
+    // httpOnly:false — der @supabase/ssr BROWSER-Client liest die Session aus
+    // document.cookie (JS). Bei httpOnly:true sieht SSR den Cookie, der Browser-
+    // Client aber NICHT -> alle client-seitigen REST/Realtime-Queries laufen
+    // unauthentifiziert (401) = Harness-Artefakt. Der echte App-Cookie ist
+    // ebenfalls JS-lesbar; false spiegelt also das reale Verhalten + macht
+    // client-seitige Smokes akkurat. SSR liest den non-httpOnly-Cookie weiter.
+    httpOnly: false,
     secure: true,
     sameSite: 'Lax',
   }))
