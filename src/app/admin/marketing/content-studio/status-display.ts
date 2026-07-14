@@ -3,6 +3,7 @@
 export const STATUS_LABEL: Record<string, string> = {
   entwurf: 'Wird erstellt',
   skript_generiert: 'Review nötig',
+  render_queued: 'In Warteschlange',
   audio_erzeugt: 'Wird gerendert',
   video_fertig: 'Fertig',
   fehler: 'Fehler',
@@ -13,6 +14,7 @@ export type BadgeTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
 export const STATUS_TONE: Record<string, BadgeTone> = {
   entwurf: 'neutral',
   skript_generiert: 'warning', // Review nötig -> hebt sich als To-do ab
+  render_queued: 'info',
   audio_erzeugt: 'info',
   video_fertig: 'success',
   fehler: 'danger',

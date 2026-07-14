@@ -3,7 +3,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { generiereJobSkript, rendereJob } from '@/lib/marketing/orchestrator'
+import { generiereJobSkript } from '@/lib/marketing/orchestrator'
+import { verarbeiteRenderQueue } from '@/lib/marketing/render-worker'
 import { checkGuardrails } from '@/lib/marketing/guardrails'
 import { ContentScriptSchema, type ContentFormat } from '@/lib/marketing/schema'
 
@@ -96,12 +97,13 @@ export async function freigebenUndRendern(jobId: string): Promise<{ ok: boolean;
   if (!ContentScriptSchema.safeParse(job.skript).success)
     return { ok: false, error: 'Kein gültiges Skript — erst generieren/speichern.' }
 
-  // Optimistisch auf audio_erzeugt (= in Produktion) -> UI zeigt "wird gerendert", kein Doppel-Trigger.
+  // In die Render-Queue stellen (Slice 3). Der Worker (Fast-Path hier + Cron-Backstop) rendert
+  // serialisiert + RAM-gegated. UI zeigt "In Warteschlange" -> kein Doppel-Trigger.
   await db
     .from('marketing_content_jobs')
-    .update({ status: 'audio_erzeugt', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+    .update({ status: 'render_queued', fehler_text: null, aktualisiert_am: new Date().toISOString() })
     .eq('id', jobId)
-  void rendereJob(jobId, db).catch((e) => console.error('[marketing] rendereJob failed', e))
+  void verarbeiteRenderQueue(db).catch((e) => console.error('[marketing] verarbeiteRenderQueue failed', e))
 
   revalidatePath(LIST_PATH)
   revalidatePath(detailPath(jobId))
@@ -145,12 +147,12 @@ export async function wiederholeJob(jobId: string): Promise<{ ok: boolean; error
   if (job.status === 'video_fertig') return { ok: false, error: 'Job ist bereits fertig.' }
 
   if (ContentScriptSchema.safeParse(job.skript).success) {
-    // Skript vorhanden -> Render-Phase wiederholen.
+    // Skript vorhanden -> zurueck in die Render-Queue (Slice 3).
     await db
       .from('marketing_content_jobs')
-      .update({ status: 'audio_erzeugt', fehler_text: null, aktualisiert_am: new Date().toISOString() })
+      .update({ status: 'render_queued', fehler_text: null, aktualisiert_am: new Date().toISOString() })
       .eq('id', jobId)
-    void rendereJob(jobId, db).catch((e) => console.error('[marketing] wiederholeJob(render) failed', e))
+    void verarbeiteRenderQueue(db).catch((e) => console.error('[marketing] wiederholeJob(render) failed', e))
   } else {
     // Kein Skript -> Skript-Phase wiederholen.
     await db

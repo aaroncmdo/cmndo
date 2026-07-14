@@ -3555,6 +3555,91 @@ export type Database = {
           },
         ]
       }
+      cold_mail_sends: {
+        Row: {
+          betreff: string
+          body_snapshot: string | null
+          empfaenger_email: string
+          enrollment_id: string | null
+          geklickt_am: string | null
+          geoeffnet_am: string | null
+          gesendet_am: string
+          id: string
+          lead_id: string
+          resend_message_id: string | null
+          status: string
+          step_id: string | null
+          vorlage_id: string | null
+        }
+        Insert: {
+          betreff: string
+          body_snapshot?: string | null
+          empfaenger_email: string
+          enrollment_id?: string | null
+          geklickt_am?: string | null
+          geoeffnet_am?: string | null
+          gesendet_am?: string
+          id?: string
+          lead_id: string
+          resend_message_id?: string | null
+          status?: string
+          step_id?: string | null
+          vorlage_id?: string | null
+        }
+        Update: {
+          betreff?: string
+          body_snapshot?: string | null
+          empfaenger_email?: string
+          enrollment_id?: string | null
+          geklickt_am?: string | null
+          geoeffnet_am?: string | null
+          gesendet_am?: string
+          id?: string
+          lead_id?: string
+          resend_message_id?: string | null
+          status?: string
+          step_id?: string | null
+          vorlage_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cold_mail_sends_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "partner_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cold_mail_suppression: {
+        Row: {
+          email: string
+          erstellt_am: string
+          grund: string
+          lead_id: string | null
+        }
+        Insert: {
+          email: string
+          erstellt_am?: string
+          grund: string
+          lead_id?: string | null
+        }
+        Update: {
+          email?: string
+          erstellt_am?: string
+          grund?: string
+          lead_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cold_mail_suppression_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "partner_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_memberships: {
         Row: {
           beigetreten_am: string

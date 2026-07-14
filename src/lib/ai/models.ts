@@ -146,6 +146,11 @@ export const AI_MODELS = {
    * Text, kostensensitiv (per-Lead, ggf. Batch) → Haiku 4.5.
    */
   lead_enrichment: 'claude-haiku-4-5-20251001',
+  /**
+   * Cold-Mailer S1: KI-Generierung von Cold-Mail-Vorlagen (Betreff + HTML-Body) je
+   * Lead-Rolle. Deutsche B2B-Vertriebstexte, Qualität > Speed → Sonnet 4.6.
+   */
+  cold_mail_compose: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
