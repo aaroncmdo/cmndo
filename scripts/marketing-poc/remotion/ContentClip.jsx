@@ -128,7 +128,7 @@ function Outro({ total }) {
   )
 }
 
-export function ContentClip({ segments = [], audioPath, durationInFrames = 900 }) {
+export function ContentClip({ segments = [], audioPath, musicPath, durationInFrames = 900 }) {
   return (
     <AbsoluteFill style={{ backgroundColor: NAVY }}>
       <AnimatedBg />
@@ -144,6 +144,7 @@ export function ContentClip({ segments = [], audioPath, durationInFrames = 900 }
       })}
       <BrandWatermark />
       <Outro total={durationInFrames} />
+      {musicPath ? <Audio src={staticFile(musicPath)} volume={0.14} loop /> : null}
       {audioPath ? <Audio src={staticFile(audioPath)} /> : null}
     </AbsoluteFill>
   )

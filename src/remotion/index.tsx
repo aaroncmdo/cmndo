@@ -2,7 +2,7 @@ import { registerRoot, Composition } from 'remotion'
 import { ContentClip } from './ContentClip'
 import type { ContentClipProps } from './types'
 
-const DEFAULT_PROPS: ContentClipProps = { segments: [], audioSrc: null, durationInFrames: 900 }
+const DEFAULT_PROPS: ContentClipProps = { segments: [], audioSrc: null, musicSrc: null, durationInFrames: 900 }
 
 const RemotionRoot = () => (
   <Composition

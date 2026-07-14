@@ -43,6 +43,11 @@ const TOOL: Anthropic.Tool = {
       caption: { type: 'string' },
       hashtags: { type: 'array', items: { type: 'string' } },
       disclaimer: { type: 'string' },
+      musik_stimmung: {
+        type: 'string',
+        enum: ['ruhig', 'dringlich', 'aufbauend', 'serioes'],
+        description: 'Stimmung des Hintergrund-Musikbetts, passend zum Clip (ruhig=informativ, dringlich=Warnung/Zeitdruck, aufbauend=Loesung/Hoffnung, serioes=sachlich).',
+      },
     },
   },
 }
@@ -61,7 +66,8 @@ Regeln:
   * typ 'stock' + 3 konkrete ENGLISCHE, visuell eindeutige queries. Bsp: "Unfallstelle sichern" -> ["hazard warning triangle on road","car hazard lights flashing","breakdown roadside safety"]; "Fotos machen" -> ["person photographing car damage with smartphone","documenting car accident on phone"].
   * typ 'grafik' NUR fuer voellig abstrakte Begriffe ohne moegliches Bild (Frist, Prozent, Anspruch).
   * typ 'marke' fuer ikonisch/gebrandet (Warndreieck, Kennzeichen, Logo) mit tags.
-- on_screen_text: knackiges Overlay, max 5 Woerter, echte Umlaute - eine VERSTAERKUNG, nicht wortgleich zum gesprochenen Satz.`
+- on_screen_text: knackiges Overlay, max 5 Woerter, echte Umlaute - eine VERSTAERKUNG, nicht wortgleich zum gesprochenen Satz.
+- musik_stimmung: waehle die zum Clip passende Stimmung fuers leise Hintergrund-Bett (ruhig / dringlich / aufbauend / serioes).`
 
 export async function generiereSkript(
   thema: string,

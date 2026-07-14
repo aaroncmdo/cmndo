@@ -186,7 +186,7 @@ function Outro({ total }: { total: number }) {
   )
 }
 
-export function ContentClip({ segments, audioSrc, durationInFrames }: ContentClipProps) {
+export function ContentClip({ segments, audioSrc, musicSrc, durationInFrames }: ContentClipProps) {
   return (
     <AbsoluteFill style={{ backgroundColor: NAVY }}>
       <AnimatedBg />
@@ -202,6 +202,7 @@ export function ContentClip({ segments, audioSrc, durationInFrames }: ContentCli
       })}
       <BrandWatermark />
       <Outro total={durationInFrames} />
+      {musicSrc ? <Audio src={musicSrc} volume={0.14} loop /> : null}
       {audioSrc ? <Audio src={audioSrc} /> : null}
     </AbsoluteFill>
   )

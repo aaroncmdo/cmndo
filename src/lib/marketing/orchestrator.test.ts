@@ -39,6 +39,7 @@ function mockSupabase(opts: { count?: number; job?: unknown } = {}) {
           return { error: null }
         }),
         getPublicUrl: vi.fn((k: string) => ({ data: { publicUrl: `https://cdn/${k}` } })),
+        list: vi.fn().mockResolvedValue({ data: [], error: null }),
       })),
     },
   }
