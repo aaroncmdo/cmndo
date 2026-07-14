@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
 import { createClient } from '@/lib/supabase/client'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { serverSignOut } from '@/lib/auth/logout'
@@ -225,27 +226,6 @@ export default function GutachterShell({
       } as React.CSSProperties)
     : {}
   const fontHref = fontPair ? buildGoogleFontsUrl(fontPair) : null
-
-  // CMM-32 P2 / AAR-864: --app-sidebar-width = Sidebar-Breite + lg-Padding
-  // (256px Sidebar + 16px pl-4 = 272px). Damit startet ein portal-rendered
-  // Modal (Modal.web.tsx) bündig am inneren Wrapper-Rand und überdeckt nur
-  // den Content-Bereich rechts. Auf Mobile (< lg) ist die Sidebar weg → 0.
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const mql = window.matchMedia('(min-width: 1024px)')
-    const apply = () => {
-      document.documentElement.style.setProperty(
-        '--app-sidebar-width',
-        mql.matches ? '272px' : '0px',
-      )
-    }
-    apply()
-    mql.addEventListener('change', apply)
-    return () => {
-      mql.removeEventListener('change', apply)
-      document.documentElement.style.removeProperty('--app-sidebar-width')
-    }
-  }, [])
 
   // AAR-220 Fix 5 / 2026-05-14: Einmalige 1.2s-Transition nach Logo-Upload.
   // Statt einzelner inline-transitions auf Wrapper-divs jetzt globales
@@ -681,20 +661,12 @@ export default function GutachterShell({
         )}
       </div>
       </SvPageChromeProvider>
-      {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
-          left=256px (Sidebar-Breite) damit der Backdrop nur den Content-
-          Bereich überdeckt und die Sidebar nie einschließt. Modals
-          portalieren hierhin (absolute inset-0) statt nach document.body —
-          zuverlässiger als das CSS-Var-Pattern. pointer-events-none damit
-          das leere Div keine Klicks abfängt; Backdrop-Kinder überschreiben
-          das mit pointer-events-auto. */}
+      {/* Sidebar-Streifen = 256px Sidebar (w-64) + 16px lg:pl-4 = 272px.
+          Trennlinie zwischen den beiden Haelften des Overlay-Schleiers
+          (src/components/primitives/overlay/overlay-layers.ts). Im Feldmodus
+          gibt es keine Sidebar -> Var bleibt ungesetzt -> Overlay vollflaechig. */}
       {!isFeldmodus && (
-        <div
-          id="sv-modal-root"
-          aria-hidden="true"
-          className="fixed inset-y-0 right-0 z-[1000] pointer-events-none"
-          style={{ left: '256px' }}
-        />
+        <SidebarWidthVar width="272px" breakpoint="(min-width: 1024px)" />
       )}
       {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
       {!isFeldmodus && <SVSpotlight />}
