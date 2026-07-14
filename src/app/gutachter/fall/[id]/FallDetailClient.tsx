@@ -51,6 +51,7 @@ import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
 import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
 import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
+import { GutachterCopilotPanel } from '@/components/gutachter/GutachterCopilotPanel'
 import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
@@ -457,6 +458,11 @@ export default function FallDetailClient(props: Props) {
           }
           extracted={props.gutachtenWerte ?? null}
         />
+
+        {/* KI-Copilot: technisch-fachlicher Assistent (Kalkulation, Wertminderung,
+            Vorschaeden, Nutzungsausfall, Totalschaden/Restwert, BVSK). Streaming via
+            /api/gutachter/copilot mit Fall-Kontext (v_claim_full/v_gutachten_werte). */}
+        <GutachterCopilotPanel fallId={fall.id as string} />
 
         {/* Fall-Chat: kanonischer Gruppen-Thread (ClaimChatPanel — dieselbe
             Komponente wie der /faelle/[id] Kommunikation-Tab). istStaff=false ->
