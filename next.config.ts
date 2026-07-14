@@ -10,13 +10,15 @@ import path from "path";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 // Marketing-Content-Studio Standalone-Trace-Fix: die kompletten Remotion-Runtime-Trees.
-// @vercel/nft (output:standalone) traced die runtime-required/nativen Files NICHT
-// (renderer/dist/index.js CJS-Entry, @rspack/binding native, ws) -> force-include.
+// @vercel/nft (output:standalone) traced die runtime-required/nativen/ESM-Files NICHT
+// (renderer/dist/index.js CJS-Entry, @rspack/binding native, ws, @jridgewell ESM-Sourcemap-
+// Toolchain die Remotions Render-bundle() zur Laufzeit braucht) -> ganze Trees force-includen.
 const REMOTION_TRACE_INCLUDES = [
   'node_modules/@remotion/**/*',
   'node_modules/remotion/**/*',
   'node_modules/@rspack/**/*',
   'node_modules/ws/**/*',
+  'node_modules/@jridgewell/**/*',
 ];
 
 const nextConfig: NextConfig = {
