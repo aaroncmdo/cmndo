@@ -32,5 +32,6 @@ export function buildRenderProps(
     })
   })
   const totalSecs = (words.at(-1)?.end ?? 30) + 0.8
-  return { segments, audioSrc: null, durationInFrames: Math.ceil(totalSecs * fps) }
+  // audioSrc + musicSrc setzt der Orchestrator nach Storage-Upload/Resolve.
+  return { segments, audioSrc: null, musicSrc: null, durationInFrames: Math.ceil(totalSecs * fps) }
 }

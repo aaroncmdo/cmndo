@@ -7,10 +7,10 @@ import type { VertriebStufe } from '@/lib/status/domains/vertrieb-workflow'
 
 // P1: sv-lead entfällt — Leads kommen nur noch aus partner_leads (role-getaggt).
 // sv_leads (Dead-Pins) bleiben nur in der getDeadPins-Karte, nicht in dieser View.
-export type VertriebKind = 'partner-lead' | 'sv' | 'makler' | 'werkstatt'
+export type VertriebKind = 'partner-lead' | 'sv' | 'makler' | 'werkstatt' | 'firmen-flotte'
 
 /** P1 Typ×Rolle-Modell: die zwei UI-Achsen. */
-export type VertriebRolle = 'sv' | 'makler' | 'werkstatt'
+export type VertriebRolle = 'sv' | 'makler' | 'werkstatt' | 'firmen-flotte'
 export type VertriebTyp = 'partner' | 'lead'
 
 /** Rohzeile aus v_vertrieb_kontakt (Task 3) — Spalten == diese Felder. */

@@ -21,6 +21,7 @@ function stufeFuer(row: VertriebKontaktRow): VertriebStufe {
       return 'onboarding'
     case 'makler':
     case 'werkstatt':
+    case 'firmen-flotte':
       if (row.roh_status === 'aktiv' && row.roh_onboarding_offen !== true) return 'aktiv'
       if (row.roh_onboarding_offen === true) return 'onboarding'
       if (row.roh_status === 'pending' || row.roh_status === 'inaktiv') return 'kontaktiert'
@@ -39,7 +40,8 @@ function typFuer(kind: VertriebKontaktRow['kind']): VertriebTyp {
   return kind === 'partner-lead' ? 'lead' : 'partner'
 }
 function rolleFuer(row: VertriebKontaktRow): VertriebRolle {
-  return row.rolle === 'makler' || row.rolle === 'werkstatt' ? row.rolle : 'sv'
+  if (row.rolle === 'makler' || row.rolle === 'werkstatt' || row.rolle === 'firmen-flotte') return row.rolle
+  return 'sv'
 }
 
 export function deriveVertriebState(row: VertriebKontaktRow): VertriebKontakt {

@@ -3,8 +3,18 @@ import { getVertriebRollup } from './get-vertrieb-rollup'
 import type { VertriebKontaktRow } from './vertrieb-kontakt.types'
 
 function mockClient(rows: VertriebKontaktRow[]) {
+  const flotteBuilder = {
+    select: vi.fn().mockReturnThis(),
+    order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+    in: vi.fn(() => Promise.resolve({ data: [], error: null })),
+  }
   const builder = { select: vi.fn(() => builder), order: vi.fn(() => Promise.resolve({ data: rows, error: null })) }
-  return { from: vi.fn(() => builder) } as unknown as Parameters<typeof getVertriebRollup>[0]
+  return {
+    from: vi.fn((table: string) => {
+      if (table === 'firmen_flotten_konten' || table === 'firmen') return flotteBuilder
+      return builder
+    }),
+  } as unknown as Parameters<typeof getVertriebRollup>[0]
 }
 const row = (id: string, o: Partial<VertriebKontaktRow>): VertriebKontaktRow => ({
   id, kind: 'sv', name: null, email: null, telefon: null, plz: null, ort: null,
@@ -29,8 +39,18 @@ describe('getVertriebRollup', () => {
     }
   })
   it('reicht Loader-Fehler durch', async () => {
-    const builder = { select: vi.fn(() => builder), order: vi.fn(() => Promise.resolve({ data: null, error: { message: 'x' } })) }
-    const client = { from: vi.fn(() => builder) } as unknown as Parameters<typeof getVertriebRollup>[0]
+    const flotteBuilder = {
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+      in: vi.fn(() => Promise.resolve({ data: [], error: null })),
+    }
+    const errBuilder = { select: vi.fn(() => errBuilder), order: vi.fn(() => Promise.resolve({ data: null, error: { message: 'x' } })) }
+    const client = {
+      from: vi.fn((table: string) => {
+        if (table === 'firmen_flotten_konten' || table === 'firmen') return flotteBuilder
+        return errBuilder
+      }),
+    } as unknown as Parameters<typeof getVertriebRollup>[0]
     const res = await getVertriebRollup(client)
     expect(res).toEqual({ ok: false, error: 'x' })
   })

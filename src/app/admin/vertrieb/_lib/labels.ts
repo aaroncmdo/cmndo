@@ -8,6 +8,7 @@ export const KIND_LABEL: Record<VertriebKind, string> = {
   makler: 'Makler',
   werkstatt: 'Werkstatt',
   'partner-lead': 'Partner-Lead',
+  'firmen-flotte': 'Firmen-Flotte',
 }
 
 /** P2 Switch-Modell: Rolle- und Typ-Labels. */
@@ -15,6 +16,7 @@ export const ROLLE_LABEL: Record<VertriebRolle, string> = {
   sv: 'Sachverständige',
   makler: 'Makler',
   werkstatt: 'Werkstätten',
+  'firmen-flotte': 'Firmen-Flotten',
 }
 
 export const TYP_LABEL: Record<VertriebTyp, string> = {
@@ -28,6 +30,7 @@ export const ROLLE_VERWALTUNG_HINT: Record<VertriebRolle, string> = {
   sv: 'Verifizierung (DAT/BVSK/ÖbUV), Portal-Freischaltung, Vertrag & Qualifikation.',
   makler: 'Gesellschaft/Versicherung, Maklerpool, Provisionsmodell (komplett/nur Gutachter).',
   werkstatt: 'QR-Codes, Fähigkeiten & Ausstattung, Vermittlungs-Konditionen.',
+  'firmen-flotte': 'Flottenmanager-Konten, Fahrzeuge, Claimondo-Karten, Schadenverlauf.',
 }
 
 /** Was ist bei dieser Stufe der nächste Schritt? (workflow-getriebener Hinweis fürs Detail) */

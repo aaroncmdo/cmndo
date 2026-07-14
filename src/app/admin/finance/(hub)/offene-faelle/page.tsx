@@ -58,7 +58,9 @@ export default async function OffeneFaellePage() {
   //   created_at/gutachten leben auf claims (SSoT). Sort+Limit clientseitig (s.u.).
   const { data: faelle } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claims:claim_id!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, operative_status, sv_id, vehicles:vehicle_id(kennzeichen_aktuell), gutachten(gesamt_schadensbetrag))')
+    // FK-Hint Pflicht: `claim_id` ist als Embed-Ziel mehrdeutig (partner_provisionen zeigt seit
+    // Mig 20260708071538 ebenfalls auf faelle_claim_bridge(claim_id)) -> sonst PGRST201/HTTP 300.
+    .select('fall_id, claims:claims!fk_bridge_claim!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, operative_status, sv_id, vehicles:vehicle_id(kennzeichen_aktuell), gutachten(gesamt_schadensbetrag))')
     .not('claims.sv_id', 'is', null)
     .is('claims.lead_preis_netto', null)
     .in('claim_id', (billableClaimIds ?? []).map((c) => c.id))

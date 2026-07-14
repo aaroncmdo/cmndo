@@ -11,6 +11,7 @@ const ROLLE_PILLS: { key: VertriebRolle | 'alle'; label: string }[] = [
   { key: 'sv', label: 'Sachverständige' },
   { key: 'makler', label: 'Makler' },
   { key: 'werkstatt', label: 'Werkstätten' },
+  { key: 'firmen-flotte', label: 'Firmen-Flotten' },
 ]
 const TYP_PILLS: { key: VertriebTyp | 'alle'; label: string }[] = [
   { key: 'alle', label: 'Alle' },

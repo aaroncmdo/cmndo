@@ -16,5 +16,7 @@ export function detailLink(kind: VertriebKind, id: string): { href: string; labe
       return { href: '/admin/vertrieb/makler', label: 'In der Makler-Liste öffnen' }
     case 'partner-lead':
       return { href: '/admin/vertrieb/partner-leads', label: 'In der Partner-Leads-Liste öffnen' }
+    case 'firmen-flotte':
+      return { href: `/admin/vertrieb/firmen-flotte/${id}`, label: 'Vollständige Akte öffnen' }
   }
 }
