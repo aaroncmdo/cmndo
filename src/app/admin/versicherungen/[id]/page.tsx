@@ -23,15 +23,15 @@ export const dynamic = 'force-dynamic'
 
 type VsSearchParams = { tab?: string }
 
+// Full-Page-only: der Drawer-Intercept wurde entfernt (die Liste lebt seit der
+// Partner-Hub-Konsolidierung cross-segment unter /admin/partner/versicherer ->
+// der Intercept konnte nie feuern). Daher kein `variant`-Prop mehr.
 export default async function VersichererDetailPage({
   params,
   searchParams,
-  variant = 'page',
 }: {
   params: Promise<{ id: string }>
   searchParams?: Promise<VsSearchParams>
-  /** "drawer" wenn die Intercepting-Route diese Page im DrawerShell rendert. */
-  variant?: 'page' | 'drawer'
 }) {
   const { id } = await params
   const sp = (await searchParams) ?? {}
@@ -67,7 +67,6 @@ export default async function VersichererDetailPage({
 
   return (
     <EntityDetailShell
-      variant={variant}
       title={versicherer.name}
       backHref="/admin/versicherungen"
       backLabel="Versicherer"
