@@ -46,11 +46,10 @@ export default async function InterceptedDetail({
   params, searchParams,
 }: { params: Promise<{ id: string }>; searchParams?: Promise<{ tab?: string }> }) {
   return (
-    <DrawerShell title="Organisation" width={860}>
-      <div className="px-6 py-6">
-        {/* variant="drawer" => kein Zurueck-Link (der Drawer hat Close). */}
-        <DetailPage params={params} searchParams={searchParams} variant="drawer" />
-      </div>
+    <DrawerShell title="Organisation" width={900}>
+      {/* Kein zusaetzliches Padding-Div — EntityDetailShell bringt sein Padding mit. */}
+      {/* variant="drawer" => kein Zurueck-Link (der Drawer hat Close). */}
+      <DetailPage params={params} searchParams={searchParams} variant="drawer" />
     </DrawerShell>
   )
 }
