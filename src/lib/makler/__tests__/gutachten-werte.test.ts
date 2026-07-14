@@ -1,5 +1,32 @@
 import { describe, it, expect } from 'vitest'
-import { mapGutachtenWerte, EMPTY_GUTACHTEN_WERTE } from '../gutachten-werte'
+import { mapGutachtenWerte, mapGutachtenWerteAusClaimView, EMPTY_GUTACHTEN_WERTE } from '../gutachten-werte'
+
+describe('mapGutachtenWerteAusClaimView', () => {
+  it('liefert dieselben Werte wie der frühere v_gutachten_werte-Read (numerisch)', () => {
+    expect(
+      mapGutachtenWerteAusClaimView({
+        reparaturkosten: 2500,
+        wertminderung: 300,
+        nutzungsausfall_gesamt: 590, // View rechnet Tagessatz x Tage — wie mapGutachtenWerte
+        gutachter_honorar: 800,
+      }),
+    ).toEqual({ reparaturkosten: 2500, wertminderung: 300, nutzungsausfall_gesamt: 590, gutachter_honorar: 800 })
+  })
+
+  it('coerct numeric-as-String und behandelt fehlende Werte als null', () => {
+    expect(mapGutachtenWerteAusClaimView({ reparaturkosten: '2500.50', wertminderung: null })).toMatchObject({
+      reparaturkosten: 2500.5,
+      wertminderung: null,
+      nutzungsausfall_gesamt: null,
+      gutachter_honorar: null,
+    })
+  })
+
+  it('null/undefined → leere Werte', () => {
+    expect(mapGutachtenWerteAusClaimView(null)).toEqual(EMPTY_GUTACHTEN_WERTE)
+    expect(mapGutachtenWerteAusClaimView(undefined)).toEqual(EMPTY_GUTACHTEN_WERTE)
+  })
+})
 
 describe('mapGutachtenWerte', () => {
   it('maps entity fields + reconstructs nutzungsausfall = tage * satz', () => {

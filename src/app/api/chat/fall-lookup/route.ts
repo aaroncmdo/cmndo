@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   // faelle_claim_bridge spiegelt faelle-Case-Access -> gleiche Sicht. Value-neutral (SET EQUAL probed).
   const { data: byFallNr } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id!inner(claim_nummer, lead_id)')
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(claim_nummer, lead_id)')
     .ilike('claims.claim_nummer', pattern)
     .in('claim_id', nichtStornierteClaimIds)
     .limit(5)
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
   const { data: byLeadRaw } = leadIdsByName.size > 0
     ? await supabase
         .from('faelle_claim_bridge')
-        .select('fall_id, claim_id, claims:claim_id!inner(claim_nummer, lead_id)')
+        .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(claim_nummer, lead_id)')
         .in('claims.lead_id', [...leadIdsByName])
         .in('claim_id', nichtStornierteClaimIds)
         .limit(10)
