@@ -16,12 +16,18 @@ type Props = {
   quelle?: string
   /** Wenn gesetzt: persistenter WhatsApp-Button in der Sticky-Bar (Content-Pages). */
   whatsappHref?: string
+  /**
+   * Ziel des mobilen "Gutachter finden"-Primaer-CTAs. Default = generischer Finder.
+   * Der Makler-Hub (/m/[code]) uebergibt den ATTRIBUIERTEN Einstieg (/start/makler/<id>).
+   * Ohne das klaut der auffaelligste Mobile-CTA die Makler-Attribution.
+   */
+  finderHref?: string
 }
 
 // 2026-05-09 Frontend-Audit: iOS-Glass-Pass — Sticky-Pill mit backdrop-blur,
 // rounded-full Buttons, weichen 28-32px Schatten, active:scale Tap-Feedback.
 // Modal mit Glass-Backdrop + rounded-Inputs.
-export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
+export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref = '/gutachter-finden' }: Props) {
   const t = useTranslations('home')
   const tNav = useTranslations('nav')
 
@@ -57,7 +63,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
       <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 sm:left-auto sm:right-6 sm:translate-x-0">
         {/* Gutachter finden — Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
         <Link
-          href="/gutachter-finden"
+          href={finderHref}
           data-tracking="finder-sticky"
           className="flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.32)] transition-all duration-200 hover:bg-claimondo-shield active:scale-[0.97] md:hidden"
         >

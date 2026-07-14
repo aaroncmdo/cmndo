@@ -13,7 +13,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole, type AuthedUser } from '@/lib/auth/guards'
-import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
+import { CLOSED_OPERATIVE_STATUS, NONTERMINAL_OPERATIVE_OUTCOME } from '@/lib/claims/terminal-status'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import { emitEvent } from '@/lib/notifications/emit'
@@ -113,7 +113,9 @@ async function setEndzustandFields(
   // 'abgeschlossen'/'storniert' sind fall_status-enum-gueltig (kein v_claim_base-Cast-Bruch).
   const neuerStatus = fields.status
   const abschluss: Record<string, unknown> =
-    typeof neuerStatus === 'string' && (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
+    typeof neuerStatus !== 'string'
+      ? {}
+      : (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
       // B2b (Achsen-Konsolidierung): den FEINEN Terminal direkt in operative_status schreiben
       // (reguliert_vollstaendig/klage_rechtsstreit/verjaehrt/abgelehnt_final/an_externe_kanzlei_
       // uebergeben/storniert) statt coarse 'abgeschlossen' — aber NUR wenn er ein gueltiger
@@ -121,6 +123,15 @@ async function setEndzustandFields(
       // Cast-Bruch). termin_durchgefuehrt (∈ ENDZUSTAENDE, aber ∉ operative_status-Vokabular)
       // faellt sicher auf 'abgeschlossen' zurueck. abgeschlossen_am bleibt der robuste Close-Marker.
       ? { operative_status: CLOSED_OPERATIVE_STATUS.has(neuerStatus) ? neuerStatus : 'abgeschlossen', abgeschlossen_am: now }
+      // B4-slice-1b: dasselbe fuer die zwei NICHT-terminalen Outcomes (in_kommunikation_vs /
+      // abgelehnt-einfach). Sie sind seit B1b-1 gueltiges operative_status-Vokabular (Enum+CHECK)
+      // und werden seit slice-1 von v_claim_phase.o_sub + getClaimLifecycle.OPERATIVE_PHASE
+      // erkannt. Damit traegt operative_status auch DIESE Information — die Voraussetzung dafuer,
+      // dass claims.status derived/gedroppt werden kann (slice-2). KEIN abgeschlossen_am: der
+      // Claim laeuft weiter und bleibt in allen "aktive Faelle"-Filtern (nicht in CLOSED_*).
+      // Cursor-Ausgaenge fuer beide Werte: FALL_STATUS_TRANSITIONS (state-machine.ts).
+      : NONTERMINAL_OPERATIVE_OUTCOME.has(neuerStatus)
+      ? { operative_status: neuerStatus }
       : {}
   // Atomar: nur updaten wenn aktueller Status nicht bereits final
   const { data, error } = await admin

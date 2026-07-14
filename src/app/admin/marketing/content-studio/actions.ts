@@ -135,6 +135,40 @@ export async function getRenderStatus(jobId: string): Promise<{
   }
 }
 
+/** Markiert einen fertigen Clip als gepostet (manuelles Posten, Slice 2a). */
+export async function markiereAlsGepostet(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const db = createAdminClient()
+  const { error } = await db
+    .from('marketing_content_jobs')
+    .update({
+      publish_status: 'gepostet',
+      gepostet_am: new Date().toISOString(),
+      aktualisiert_am: new Date().toISOString(),
+    })
+    .eq('id', jobId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath(LIST_PATH)
+  revalidatePath(detailPath(jobId))
+  return { ok: true }
+}
+
+/** Setzt einen Clip zurueck auf „nicht gepostet". */
+export async function zuruecksetzenPublishStatus(jobId: string): Promise<{ ok: boolean; error?: string }> {
+  const auth = await ensureAdmin()
+  if (!auth.ok) return { ok: false, error: auth.error }
+  const db = createAdminClient()
+  const { error } = await db
+    .from('marketing_content_jobs')
+    .update({ publish_status: 'entwurf', gepostet_am: null, aktualisiert_am: new Date().toISOString() })
+    .eq('id', jobId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath(LIST_PATH)
+  revalidatePath(detailPath(jobId))
+  return { ok: true }
+}
+
 /** Verwirft das aktuelle Skript und generiert ein neues (Phase A). */
 export async function regeneriereSkript(jobId: string): Promise<{ ok: boolean; error?: string }> {
   const auth = await ensureAdmin()

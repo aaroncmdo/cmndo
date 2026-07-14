@@ -38,6 +38,10 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
   'nachbesichtigung-laeuft': 'Nachbesichtigung läuft',
   'vs-regulierung': 'Regulierung läuft',
   'vs-abgelehnt': 'VS hat abgelehnt',
+  // B4-slice-1b: endzustand schreibt diesen Outcome jetzt in operative_status. Ohne Label baut
+  // FALL_STATUS_DEFS (status/domains/fall-status.ts) keinen Eintrag -> resolveStatus faellt auf
+  // { label: code } zurueck und der FallStatusBadge zeigt den rohen Slug "in_kommunikation_vs".
+  in_kommunikation_vs: 'Kommunikation mit VS',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
@@ -69,6 +73,8 @@ export const FALL_STATUS_LABELS_SHORT: Record<string, string> = {
   'regulierung-laeuft': 'Regulierung',
   'nachbesichtigung-laeuft': 'Nachbesichtigung',
   'vs-abgelehnt': 'VS abgelehnt',
+  in_kommunikation_vs: 'VS-Kontakt',
+  abgelehnt: 'Abgelehnt',
   'zahlung-eingegangen': 'Zahlung da',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
@@ -126,6 +132,8 @@ const FALL_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
   'nachbesichtigung-laeuft': 'active',
   'vs-regulierung':        'success',
   'vs-abgelehnt':          'danger',
+  // B4-slice-1b: aktive VS-Verhandlung — kein Endzustand, daher 'active' (nicht 'success').
+  in_kommunikation_vs:     'active',
   'zahlung-eingegangen':   'success',
   abgeschlossen:           'success',
   storniert:               'danger',
