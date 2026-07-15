@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-15T14:56:07.649Z",
-  "count": 24,
+  "generatedAt": "2026-07-15T15:39:43.000Z",
+  "count": 21,
   "keys": [
     "admin_termine.notizen",
     "aircall_relay_seats.notiz",
@@ -12,8 +12,6 @@
     "calls.notiz",
     "embed_sites.tracking_webhook_secret",
     "gutachter_waitlist.notizen_admin",
-    "linkedin_oauth_tokens.access_token",
-    "linkedin_oauth_tokens.refresh_token",
     "makler.notizen",
     "personenschaden_personen.notizen",
     "profiles.google_access_token",
@@ -21,7 +19,6 @@
     "profiles.ms_access_token",
     "profiles.ms_refresh_token",
     "sv_buero.notiz",
-    "sv_kalender_verbindungen.password_encrypted",
     "termine.ergebnis_notiz",
     "termine.notiz",
     "vehicle_ownership_history.notiz",
