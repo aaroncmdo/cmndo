@@ -101,6 +101,40 @@ const NO_WRITE: ClaimStatusMapping = { setClaimStatus: false, value: null }
  *                       transitionFallStatus uebergeben).
  * @param currentClaimStatus  aktueller claims.status (fuer den abgeschlossen-Guard).
  */
+/**
+ * B4-slice-2a-i (Klage-Terminal-Konvergenz): welchen operative_status schreibt ein
+ * state-machine-Uebergang? Normalfall = der (grobe) `newStatus`. AUSNAHME: fuehrt der Uebergang
+ * dazu, dass `claims.status = 'klage_rechtsstreit'` ist, traegt `operative_status` DENSELBEN
+ * feinen Terminal.
+ *
+ * Warum nur Klage: das ist der einzige state-machine-Terminal, bei dem der grobe operative_status
+ * und der feine claims.status zu UNTERSCHIEDLICHEN Phasen fuehren:
+ *   - `uebergebeFallKlage` -> transitionFallStatus(_, 'klage') -> status='klage_rechtsstreit'
+ *     (terminal), aber operative_status schriebe 'klage' (OPERATIVE_PHASE['klage']=nachforderung).
+ *   - klage -> abgeschlossen behaelt status='klage_rechtsstreit' (Guard), op schriebe 'abgeschlossen'
+ *     (OPERATIVE_PHASE['abgeschlossen']=erfolgreich_reguliert).
+ * In BEIDEN Faellen kennt die operative_status-Achse den Klage-Terminal nicht -> sobald die
+ * Abschluss-Sub-Phase nur noch aus operative_status abgeleitet wird (slice-2a-ii), ginge die
+ * Klage-Info verloren (Regression abschluss/klage_rechtsstreit -> regulierung/erfolgreich_reguliert).
+ * Die anderen Terminals sind unproblematisch: 'abgeschlossen'/reguliert_vollstaendig,
+ * 'storniert'/storniert, 'vs-abgelehnt'/abgelehnt leiten aus op UND status dieselbe Phase ab.
+ *
+ * Konvergiert die state-machine mit endzustand `markClaimAsKlage` (schreibt schon
+ * 'klage_rechtsstreit'). Behavior-preserving: solange claims.status noch gelesen wird, liefert die
+ * milestone-Kaskade (lifecycle.ts) + View-m_sub dieselbe Phase -> A1-Parity gruen.
+ *
+ * @param newStatus  Ziel-fall_status des Uebergangs (was transitionFallStatus erhaelt).
+ * @param resultingClaimStatus  claims.status NACH dem Uebergang (gemappter Wert, oder bei NO_WRITE
+ *   der bestehende) — traegt die feine Terminal-Info.
+ */
+export function resolveCursorOperativeStatus(
+  newStatus: string,
+  resultingClaimStatus: string | null,
+): string {
+  if (resultingClaimStatus === 'klage_rechtsstreit') return 'klage_rechtsstreit'
+  return newStatus
+}
+
 export function mapFallStatusToClaimStatus(
   newFallStatus: string,
   currentClaimStatus: string | null,
