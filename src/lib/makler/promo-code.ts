@@ -10,12 +10,18 @@ import type { Database } from '@/lib/supabase/database.types'
 
 const PROMO_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // ohne I/O/0/1 (Verwechslungsschutz)
 
-/** Generiert einen Makler-Promo-Code 'MK-XXXXXXXX'. */
+// Code-Laenge: MK- + 4 Zeichen (kurz + teilbar; kanonisches Format, Aaron 15.07.).
+// Kollisionsraum 31^4 ≈ 923k — alle Insert-Pfade (anlege-makler/anlege-partner/getOrCreate)
+// retryen 3x gegen die Unique-Constraint, daher bei realistischer Makler-Zahl unkritisch.
+// Die Validatoren erwarten teils exakt {4} (schaden-melden/mini-wizard) -> 4 haelt sie alle ein.
+const PROMO_CODE_LEN = 4
+
+/** Generiert einen Makler-Promo-Code 'MK-XXXX' (4 Zeichen aus dem verwechslungsarmen Alphabet). */
 export function generatePromoCode(): string {
   let s = ''
-  const array = new Uint8Array(8)
+  const array = new Uint8Array(PROMO_CODE_LEN)
   crypto.getRandomValues(array)
-  for (let i = 0; i < 8; i++) s += PROMO_CHARS[array[i] % PROMO_CHARS.length]
+  for (let i = 0; i < PROMO_CODE_LEN; i++) s += PROMO_CHARS[array[i] % PROMO_CHARS.length]
   return 'MK-' + s
 }
 
