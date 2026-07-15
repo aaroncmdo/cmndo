@@ -10,10 +10,13 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CarIcon, Trash2Icon, ChevronRightIcon } from 'lucide-react'
+import { CarIcon, Trash2Icon, ChevronRightIcon, CameraIcon } from 'lucide-react'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
+import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
+import type { ScanErgebnis } from '@/lib/flotte/zb1-scan'
+import type { BatchAnlageZeile, BatchAnlageErgebnis } from '@/lib/flotte/zb1-batch-anlage'
 import type { KundeFirma, FlottenFahrzeug, FirmaForm, FahrzeugForm } from '@/lib/kunde/firma-flotte'
 
 type Props = {
@@ -24,10 +27,15 @@ type Props = {
   onEntferne: (flottenId: string) => Promise<{ ok: boolean; error?: string }>
   /** Wenn gesetzt: Fahrzeug-Zeilen verlinken auf `${detailBasePath}/${vehicleId}` (nur flottenmanager-Portal; Kunde laesst es weg). */
   detailBasePath?: string
+  /** ZB1-Batch-Scan (nur flottenmanager-Portal — beide zusammen gesetzt; Kunde laesst sie weg). */
+  onScanZb1?: (base64: string) => Promise<{ ok: true; ergebnis: ScanErgebnis } | { ok: false; error: string }>
+  onLegeZb1?: (zeilen: BatchAnlageZeile[]) => Promise<BatchAnlageErgebnis[]>
 }
 
-export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne, detailBasePath }: Props) {
+export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne, detailBasePath, onScanZb1, onLegeZb1 }: Props) {
   const router = useRouter()
+  const [zb1Offen, setZb1Offen] = useState(false)
+  const zb1Verfuegbar = !!onScanZb1 && !!onLegeZb1
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -150,6 +158,19 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
       </SectionCard>
 
       <SectionCard title="Fahrzeug hinzufügen">
+        {zb1Verfuegbar ? (
+          <div className="mb-4 space-y-2">
+            <Button
+              variant="ondo"
+              fullWidth
+              iconLeft={<CameraIcon className="h-4 w-4" />}
+              onClick={() => setZb1Offen(true)}
+            >
+              Mehrere Fahrzeuge per ZB1 scannen
+            </Button>
+            <p className="text-xs text-claimondo-shield">Oder einzeln erfassen:</p>
+          </div>
+        ) : null}
         <form onSubmit={handleFuegeHinzu} className="space-y-4">
           <TextField
             label="Kennzeichen"
@@ -168,6 +189,17 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
           </Button>
         </form>
       </SectionCard>
+
+      {zb1Offen && onScanZb1 && onLegeZb1 ? (
+        <Zb1BatchScanner
+          onScan={onScanZb1}
+          onAnlegen={onLegeZb1}
+          onFertig={() => {
+            setZb1Offen(false)
+            router.refresh()
+          }}
+        />
+      ) : null}
     </div>
   )
 }
