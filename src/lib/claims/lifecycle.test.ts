@@ -175,31 +175,32 @@ describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3
     expect(r.subPhase).toBe('auszahlung')
   })
 
-  it('abschluss/erfolgreich_reguliert bei claimStatus=reguliert_vollstaendig (B-11), ueberschreibt Auszahlung', () => {
+  // B4-slice-2a-ii: die Abschluss-Sub-Phase kommt jetzt aus operative_status (nicht mehr claims.status).
+  it('abschluss/erfolgreich_reguliert bei operativeStatus=reguliert_vollstaendig (B-11), ueberschreibt Auszahlung', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
       kanzleiFall: mkKanzlei({ status: 'auszahlung', ausgezahlt_am: TS, lexdrive_case_id: 'LX-1' }),
-      claimStatus: 'reguliert_vollstaendig',
+      operativeStatus: 'reguliert_vollstaendig',
     })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('erfolgreich_reguliert')
   })
 
-  it('abschluss/storniert bei claimStatus=storniert (B-7) — terminal ueberschreibt alles', () => {
+  it('abschluss/storniert bei operativeStatus=storniert (B-7) — terminal ueberschreibt alles', () => {
     const r = getClaimLifecycle({
       lead: { sa_unterschrieben: false, vollmacht_signiert_am: null, onboarding_complete: null },
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
       kanzleiFall: null,
-      claimStatus: 'storniert',
+      operativeStatus: 'storniert',
     })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('storniert')
   })
 
   it('terminale Substates klage_rechtsstreit + verjaehrt (B-5)', () => {
-    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'klage_rechtsstreit' }).subPhase).toBe('klage_rechtsstreit')
-    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'verjaehrt' }).subPhase).toBe('verjaehrt')
+    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'klage_rechtsstreit' }).subPhase).toBe('klage_rechtsstreit')
+    expect(getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'verjaehrt' }).subPhase).toBe('verjaehrt')
   })
 
   it('aktiver claimStatus=null (Dispatch lebt auf work_state) loest KEIN abschluss aus', () => {
@@ -227,66 +228,68 @@ describe('getClaimLifecycle — Kanzlei-Uebergabe, Regulierung & Abschluss (MP-3
   })
 })
 
+// B4-slice-2a-ii: Terminal- + Regulierungs-Outcomes werden aus operative_status abgeleitet
+// (nicht mehr claims.status). endzustand/state-machine/closeNurGutachter tragen sie dort.
 describe('getClaimLifecycle — MP-8 Terminal-Vokabular & Status-Regulierung', () => {
-  it('abschluss/abgelehnt_final bei claimStatus=abgelehnt_final (finale Ablehnung)', () => {
-    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt_final' })
+  it('abschluss/abgelehnt_final bei operativeStatus=abgelehnt_final (finale Ablehnung)', () => {
+    const r = getClaimLifecycle({ ...noLead, operativeStatus: 'abgelehnt_final' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('abgelehnt_final')
   })
 
-  it('abschluss/an_externe_kanzlei bei claimStatus=an_externe_kanzlei_uebergeben', () => {
-    const r = getClaimLifecycle({ ...noLead, claimStatus: 'an_externe_kanzlei_uebergeben' })
+  it('abschluss/an_externe_kanzlei bei operativeStatus=an_externe_kanzlei_uebergeben', () => {
+    const r = getClaimLifecycle({ ...noLead, operativeStatus: 'an_externe_kanzlei_uebergeben' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('an_externe_kanzlei')
   })
 
-  it('regulierung/versicherungskontakt bei claimStatus=in_kommunikation_vs (ohne Kanzleifall)', () => {
-    const r = getClaimLifecycle({ ...noLead, claimStatus: 'in_kommunikation_vs' })
+  it('regulierung/versicherungskontakt bei operativeStatus=in_kommunikation_vs (ohne Kanzleifall)', () => {
+    const r = getClaimLifecycle({ ...noLead, operativeStatus: 'in_kommunikation_vs' })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
 
-  it('regulierung/nachforderung bei einfacher Ablehnung (claimStatus=abgelehnt)', () => {
-    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt' })
+  it('regulierung/nachforderung bei einfacher Ablehnung (operativeStatus=abgelehnt)', () => {
+    const r = getClaimLifecycle({ ...noLead, operativeStatus: 'abgelehnt' })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('nachforderung')
   })
 
-  it('lexdrive-Regulierung hat Vorrang vor Status-Regulierung (auszahlung schlaegt nachforderung)', () => {
+  it('lexdrive-Regulierung (auszahlung, ord14) schlaegt operative nachforderung (ord13)', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [],
       kanzleiFall: mkKanzlei({ status: 'auszahlung', lexdrive_case_id: 'LX-1' }),
-      claimStatus: 'abgelehnt',
+      operativeStatus: 'abgelehnt',
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('auszahlung')
   })
 
-  it('Status-Regulierung hat Vorrang vor Kanzlei-Uebergabe-Interim', () => {
+  it('operative Regulierung hat Vorrang vor Kanzlei-Uebergabe-Interim', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
       kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
-      claimStatus: 'in_kommunikation_vs',
+      operativeStatus: 'in_kommunikation_vs',
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
 
-  it('Status-Regulierung hat Vorrang vor aktivem Erstgutachten (begutachtung)', () => {
+  it('operative Regulierung hat Vorrang vor aktivem Erstgutachten (begutachtung)', () => {
     const r = getClaimLifecycle({
       lead: { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true },
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
       kanzleiFall: null,
-      claimStatus: 'in_kommunikation_vs',
+      operativeStatus: 'in_kommunikation_vs',
     })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
 
-  it('finale Ablehnung (terminal) schlaegt die Status-Regulierung der einfachen Ablehnung', () => {
-    const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt_final' })
+  it('finale Ablehnung (terminal) schlaegt die operative Regulierung der einfachen Ablehnung', () => {
+    const r = getClaimLifecycle({ ...noLead, operativeStatus: 'abgelehnt_final' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('abgelehnt_final')
   })
@@ -378,12 +381,12 @@ describe('getClaimLifecycle — CMM-74 b2: operative Sub-Phasen (+5, v_claim_pha
     expect(r.subPhase).toBe('gutachten')
   })
 
-  it('terminal schlaegt nachbesichtigung-laeuft (Abschluss-Vorrang bleibt)', () => {
+  it('terminal (operativeStatus) schlaegt nachbesichtigung-laeuft (Abschluss-Vorrang bleibt)', () => {
     const r = getClaimLifecycle({
       lead: null,
       auftraege: [mkAuftrag({ typ: 'nachbesichtigung', status: 'termin' })],
       kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
-      claimStatus: 'reguliert_vollstaendig',
+      operativeStatus: 'reguliert_vollstaendig',
     })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('erfolgreich_reguliert')
@@ -501,23 +504,26 @@ describe('getClaimLifecycle — Unified Stepper (furthest-signal-wins)', () => {
   it('operative Erfassung-Bucket -> Lead-Sub (ersterfassung + Vollmacht signiert -> onboarding_offen)', () => {
     expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'ersterfassung' }).subPhase).toBe('onboarding_offen')
   })
-  it('operative=abgeschlossen + claimStatus reguliert_vollstaendig -> abschluss/erfolgreich_reguliert', () => {
-    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'abgeschlossen', claimStatus: 'reguliert_vollstaendig' })
+  it('operativeStatus=reguliert_vollstaendig -> abschluss/erfolgreich_reguliert', () => {
+    // B4-slice-2a-ii: der Terminal kommt aus operative_status (claims.status wird nicht mehr gelesen).
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'reguliert_vollstaendig' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('erfolgreich_reguliert')
   })
-  it('terminal claimStatus schlaegt operative_status (storniert ueberschreibt sv-termin)', () => {
-    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'storniert' })
+  it('terminal operativeStatus=storniert -> abschluss/storniert (op ist die Quelle)', () => {
+    // B4-slice-2a-ii: frueher testete dies "claimStatus schlaegt operative_status". Jetzt traegt
+    // operative_status selbst den Terminal (state-machine-Konvergenz) -> op=storniert ist der Zustand.
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'storniert' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('storniert')
   })
-  it('reg-signal (in_kommunikation_vs) hebt operative=sv-termin auf Regulierung', () => {
-    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'in_kommunikation_vs' })
+  it('operativeStatus=in_kommunikation_vs -> Regulierung/versicherungskontakt', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'in_kommunikation_vs' })
     expect(r.mainPhase).toBe('regulierung')
     expect(r.subPhase).toBe('versicherungskontakt')
   })
-  it('reg-signal greift NICHT zurueck wenn operative bereits >= regulierung (auszahlung bleibt)', () => {
-    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen', claimStatus: 'abgelehnt' })
+  it('weiter fortgeschrittener operative_status bleibt (zahlung-eingegangen -> auszahlung)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen' })
     expect(r.subPhase).toBe('auszahlung')
   })
   it('operativeStatus NULL -> bestehende Milestone-Kaskade (Backward-Compat: aktiver Erstgutachten -> begutachtung)', () => {
@@ -591,8 +597,8 @@ describe('getVisibleMainPhases (AAR-939: nur_gutachter ohne Regulierung)', () =>
 // sein (gleiche Migration 20260530221245). Beweist, dass der Auto-Close-Status den
 // Claim in die Abschluss-Phase hebt.
 describe('getClaimLifecycle — AAR-939 Terminal termin_durchgefuehrt', () => {
-  it('claimStatus termin_durchgefuehrt -> abschluss/termin_durchgefuehrt (nur_gutachter-Endzustand)', () => {
-    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, claimStatus: 'termin_durchgefuehrt' })
+  it('operativeStatus termin_durchgefuehrt -> abschluss/termin_durchgefuehrt (nur_gutachter-Endzustand)', () => {
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'termin_durchgefuehrt' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('termin_durchgefuehrt')
   })
@@ -601,7 +607,7 @@ describe('getClaimLifecycle — AAR-939 Terminal termin_durchgefuehrt', () => {
       lead: null,
       auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })],
       kanzleiFall: null,
-      claimStatus: 'termin_durchgefuehrt',
+      operativeStatus: 'termin_durchgefuehrt',
     })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('termin_durchgefuehrt')
