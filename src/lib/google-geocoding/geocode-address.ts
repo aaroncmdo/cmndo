@@ -56,3 +56,36 @@ export async function geocodeAddress(rawAddress: string): Promise<GeocodeReturn>
     return { ok: false, error: err instanceof Error ? err.message : 'Geocoding-Exception' }
   }
 }
+
+// Reverse-Geocoding: Koordinaten → formatierte Adresse (für „Aktuellen Standort verwenden" im
+// Werkstatt-Finder). Spiegelt geocodeAddress, nur mit latlng-Param + language=de. Server-Key bevorzugt.
+export async function reverseGeocodeAddress(lat: number, lng: number): Promise<GeocodeReturn> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return { ok: false, error: 'Ungültige Koordinaten' }
+  const key = process.env.GOOGLE_MAPS_SERVER_KEY ?? process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
+  if (!key) return { ok: false, error: 'Google Maps API Key fehlt' }
+  try {
+    const url =
+      `https://maps.googleapis.com/maps/api/geocode/json` +
+      `?latlng=${lat},${lng}&region=de&language=de&key=${key}`
+    const resp = await fetch(url, { cache: 'no-store' })
+    const data = (await resp.json()) as {
+      status: string
+      results?: Array<{ formatted_address?: string; place_id?: string }>
+    }
+    if (data.status !== 'OK' || !data.results?.length) {
+      return { ok: false, error: `Reverse-Geocoding fehlgeschlagen: ${data.status}` }
+    }
+    const first = data.results[0]
+    return {
+      ok: true,
+      data: {
+        lat,
+        lng,
+        formatted_address: first.formatted_address ?? '',
+        place_id: first.place_id ?? null,
+      },
+    }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Reverse-Geocoding-Exception' }
+  }
+}
