@@ -4,6 +4,8 @@
 // hier wird sie nur konfiguriert. Der stuendliche CRON-Advancer fuehrt sie dann aus.
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/primitives'
+import MergeVarPalette from '../drawer/MergeVarPalette'
+import { useMergeVarInsert } from '../drawer/useMergeVarInsert'
 import {
   ladeVorlagen, speichereVorlage, generiereVorlage,
   ladeSequenzen, speichereSequenz, speichereStep, loescheStep,
@@ -38,6 +40,7 @@ export default function SequenzenDrawerContent() {
   const [vRolle, setVRolle] = useState<string>('werkstatt')
   const [vBetreff, setVBetreff] = useState('')
   const [vBody, setVBody] = useState('')
+  const vInsert = useMergeVarInsert({ betreff: vBetreff, setBetreff: setVBetreff, body: vBody, setBody: setVBody })
   const [vZiel, setVZiel] = useState('')
   const [kiBusy, setKiBusy] = useState(false)
 
@@ -179,14 +182,24 @@ export default function SequenzenDrawerContent() {
               ✨ KI-Entwurf
             </Button>
           </div>
-          <input value={vBetreff} onChange={(e) => setVBetreff(e.target.value)} placeholder="Betreff" className={`${FELD} w-full`} />
+          <input
+            ref={vInsert.betreffRef}
+            value={vBetreff}
+            onChange={(e) => setVBetreff(e.target.value)}
+            onFocus={() => vInsert.setAktivesFeld('betreff')}
+            placeholder="Betreff"
+            className={`${FELD} w-full`}
+          />
           <textarea
+            ref={vInsert.bodyRef}
             value={vBody}
             onChange={(e) => setVBody(e.target.value)}
+            onFocus={() => vInsert.setAktivesFeld('body')}
             rows={6}
-            placeholder="Text (HTML). Platzhalter: {{Ansprechpartner}} · {{Firma}} · {{Ort}} · {{Vorname}}"
+            placeholder="Text (HTML) — Variablen/Aktionen unten per Klick einfügen"
             className={`${FELD} w-full resize-y`}
           />
+          <MergeVarPalette onInsert={vInsert.einfuegen} />
           <Button variant="navy" size="sm" loading={busy} disabled={!vName.trim() || !vBetreff.trim() || !vBody.trim()} onClick={vorlageSpeichern}>
             Vorlage speichern
           </Button>
