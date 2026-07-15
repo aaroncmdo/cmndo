@@ -19,7 +19,7 @@ import {
   UserIcon,
 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
-import { Button } from '@/components/primitives'
+import { Button, Card } from '@/components/primitives'
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string }
 
@@ -129,7 +129,7 @@ export function WerkstattCopilotPanel({ claimId }: { claimId: string }) {
   )
 
   return (
-    <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden flex flex-col mt-3">
+    <Card p={0} className="overflow-hidden flex flex-col mt-3">
       <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-claimondo-shield text-white">
         <span className="shrink-0 w-10 h-10 rounded-ios-xl bg-white/10 flex items-center justify-center text-white">
           <SparklesIcon width={20} height={20} />
@@ -229,7 +229,7 @@ export function WerkstattCopilotPanel({ claimId }: { claimId: string }) {
           Fragen
         </Button>
       </form>
-    </div>
+    </Card>
   )
 }
 
