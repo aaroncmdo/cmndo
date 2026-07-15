@@ -63,7 +63,7 @@ export async function triggerKonfrontationsDispatch(
   // claim_nummer im alten Select war ungenutzt; id == input.fallId. Admin-Client -> RLS-neutral.
   const { data: bridgeRow } = await db
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id(sv_id, claim_nummer)')
+    .select('claim_id, claims:claims!fk_bridge_claim(sv_id, claim_nummer)')
     .eq('fall_id', input.fallId)
     .maybeSingle()
   const bridgeClaim = Array.isArray(bridgeRow?.claims) ? bridgeRow?.claims[0] : bridgeRow?.claims

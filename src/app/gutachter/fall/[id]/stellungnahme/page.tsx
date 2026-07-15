@@ -34,7 +34,7 @@ export default async function StellungnahmePage({
   const { data: fallRaw } = await supabase
     .from('faelle_claim_bridge')
     .select(
-      'claims:claim_id!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
+      'claims:claims!fk_bridge_claim!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
     )
     .eq('fall_id', id)
     .eq('claims.sv_id', sv.id)

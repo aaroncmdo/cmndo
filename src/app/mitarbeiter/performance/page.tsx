@@ -70,7 +70,7 @@ export default async function MitarbeiterPerformancePage() {
     supabase.from('termine')
       // CMM-49 #2688-Fix: termine.fall_id-FK zeigt jetzt auf bridge → faelle-Embed über bridge,
       // Kunde-Name via bridge→claims→leads (claims_lead_id_fkey, fk_bridge_claim #2719).
-      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle:faelle_claim_bridge!termine_fall_id_fkey(claims:claim_id(leads:lead_id(vorname, nachname)))')
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle:faelle_claim_bridge!termine_fall_id_fkey(claims:claims!fk_bridge_claim(leads:lead_id(vorname, nachname)))')
       .eq('betreuer_user_id', user.id)
       .gte('datum', todayStart)
       .lt('datum', todayEnd)
@@ -86,7 +86,7 @@ export default async function MitarbeiterPerformancePage() {
     supabase.from('gutachter_termine')
       // CMM-49 #2688-Fix: faelle-Embed über bridge; nur claim_nummer wird gelesen (sv_id/sachverstaendige
       // waren toter Over-Fetch, daher entfernt).
-      .select('id, fall_id, start_zeit, end_zeit, status, faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))')
+      .select('id, fall_id, start_zeit, end_zeit, status, faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claims!fk_bridge_claim(claim_nummer))')
       .gte('start_zeit', todayStart)
       .lt('start_zeit', todayEnd)
       .in('status', ['bestaetigt'])

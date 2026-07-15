@@ -47,7 +47,7 @@ export default async function MitarbeiterTermine() {
       .select(
         'id, typ, titel, start_zeit, end_zeit, status, notizen, lead_id, fall_id, ' +
           'lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), ' +
-          'fall:faelle_claim_bridge!admin_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))',
+          'fall:faelle_claim_bridge!admin_termine_fall_id_fkey(id:fall_id, claims:claims!fk_bridge_claim(claim_nummer))',
       )
       .eq('zugewiesen_an', user.id)
       .eq('status', 'offen')
@@ -58,7 +58,7 @@ export default async function MitarbeiterTermine() {
       .from('gutachter_termine')
       .select(
         'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, notiz_intern, ' +
-          'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, lead_id))',
+          'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claims!fk_bridge_claim(claim_nummer, lead_id))',
       )
       .eq('typ', 'kb_beratung')
       .eq('kb_id', user.id)

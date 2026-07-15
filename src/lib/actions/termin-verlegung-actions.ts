@@ -167,7 +167,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // schadenort_* via claims-Embed, SSoT). faelle.id war ungenutzt.
   const { data: fallRaw } = await admin
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('claim_id, claims:claims!fk_bridge_claim(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('fall_id', fallId)
     .maybeSingle()
   type VerlClaim = { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }
@@ -382,7 +382,7 @@ export async function getKundeTerminVorschlaegeAction(
   // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge (claim_id nativ; schadenort_* via Embed).
   const { data: fallRaw } = await admin
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .select('claim_id, claims:claims!fk_bridge_claim(schadenort_adresse, schadenort_plz, schadenort_ort)')
     .eq('fall_id', termin.fall_id as string)
     .maybeSingle()
   const fall = fallRaw as unknown as { claim_id: string | null; claims: { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null } | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }[] | null } | null

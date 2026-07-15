@@ -92,7 +92,7 @@ export async function POST(req: Request) {
     // CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge statt .from('faelle')
     // (gleiche RLS-Sichtbarkeit; Output fall_id == faelle.id). Filter claims-zentrisch.
     const { data: faelleRaw } = await db.from('faelle_claim_bridge')
-      .select('fall_id, claim_id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
+      .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(kundenbetreuer_id, created_at)')
       .eq('claims.kundenbetreuer_id', kb.id)
       .in('claim_id', aktiveClaimIds)
     const faelle = (faelleRaw ?? [])
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
       // Try matching by lead telefon
       if (lead) {
         const { data: matchedRaw } = await db.from('faelle_claim_bridge')
-          .select('fall_id, claim_id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
+          .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(kundenbetreuer_id, created_at)')
           .eq('claims.kundenbetreuer_id', kb.id)
           .eq('claims.lead_id', lead.id)
           .in('claim_id', aktiveClaimIds)

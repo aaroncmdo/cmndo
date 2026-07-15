@@ -712,7 +712,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
   if (input.eventType === 'fall_geschlossen' && input.fallId) {
     const { data: opRow } = await db
       .from('faelle_claim_bridge')
-      .select('claims:claim_id(operative_status)')
+      .select('claims:claims!fk_bridge_claim(operative_status)')
       .eq('fall_id', input.fallId)
       .maybeSingle()
     const opRel = (opRow as {

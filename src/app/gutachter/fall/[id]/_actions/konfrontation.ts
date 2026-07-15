@@ -37,7 +37,7 @@ async function loadFallFuerSv(
   // sv-Filter via embedded claims.sv_id (SSoT div=0); claim_nummer via claims.
   const { data: fallRaw } = await db
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(sv_id, claim_nummer)')
+    .select('claim_id, claims:claims!fk_bridge_claim!inner(sv_id, claim_nummer)')
     .eq('fall_id', fallId)
     .eq('claims.sv_id', sv.id)
     .maybeSingle()

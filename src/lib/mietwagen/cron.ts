@@ -54,7 +54,7 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
   const { data: faelle, error } = await db
     .from('faelle_claim_bridge')
     .select(
-      'fall_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
+      'fall_id, claims:claims!fk_bridge_claim!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
     )
     .eq('claims.hat_mietwagen', true)
     .is('claims.abgeschlossen_am', null)
