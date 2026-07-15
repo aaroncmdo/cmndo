@@ -6,15 +6,18 @@
 // via kanonischer schadenkarte-Lib (89f501f6), Fahrzeuge via mutate-flotte.
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { BuildingIcon } from 'lucide-react'
+import { BuildingIcon, CameraIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
+import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
   fuegeFahrzeugZuFlotteHinzu,
   entferneFahrzeugAusFlotte,
+  scanZb1KarteFuerFlotte,
+  legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
 import { minteKartenFuerFlotte, bindeKarteAnFahrzeug } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus } from '../../_actions/firmen-flotte-konto'
@@ -44,6 +47,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const dirty = notiz !== (firma.notiz ?? '')
 
   const [showAdd, setShowAdd] = useState(false)
+  const [zb1Offen, setZb1Offen] = useState(false)
   const [kennzeichen, setKennzeichen] = useState('')
   const [hersteller, setHersteller] = useState('')
   const [modell, setModell] = useState('')
@@ -191,9 +195,19 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
         )}
         <div className="mt-3">
           {!showAdd ? (
-            <Button variant="ondo" size="sm" onClick={() => setShowAdd(true)}>
-              + Fahrzeug hinzufügen
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="ondo" size="sm" onClick={() => setShowAdd(true)}>
+                + Fahrzeug hinzufügen
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                iconLeft={<CameraIcon className="h-4 w-4" />}
+                onClick={() => setZb1Offen(true)}
+              >
+                Mehrere per ZB1 scannen
+              </Button>
+            </div>
           ) : (
             <div className="space-y-2 rounded-ios-lg border border-claimondo-border p-3">
               <div className="grid grid-cols-2 gap-2">
@@ -344,6 +358,17 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
           </div>
         )}
       </SectionCard>
+
+      {zb1Offen ? (
+        <Zb1BatchScanner
+          onScan={(base64) => scanZb1KarteFuerFlotte(firma.id, base64)}
+          onAnlegen={(zeilen) => legeZb1FahrzeugeFuerFlotte(firma.id, zeilen)}
+          onFertig={() => {
+            setZb1Offen(false)
+            router.refresh()
+          }}
+        />
+      ) : null}
     </div>
   )
 }
