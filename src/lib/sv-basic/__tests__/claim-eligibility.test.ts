@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istClaimbar, buildSvInsertAusLead, normalisiereSuche, BASIC_DEFAULT_RADIUS_KM } from '../claim-eligibility'
+import { istClaimbar, buildSvInsertAusLead, normalisiereSuche, BASIC_DEFAULT_RADIUS_KM, istErlaubtesPaket, SELF_SERVICE_PAKETE } from '../claim-eligibility'
 
 describe('istClaimbar', () => {
   it('offen + nicht konvertiert => true', () => {
@@ -44,5 +44,43 @@ describe('buildSvInsertAusLead', () => {
     const ins = buildSvInsertAusLead(baseLead, 'p')
     expect('fachschwerpunkte' in ins).toBe(false)
     expect('partner_seit' in ins).toBe(false)
+  })
+
+  // Option A (Self-Service Paketauswahl): paket-Param + bezahlte Tiers.
+  it('basic (default) hat KEIN Anzahlungs-Feld (Pay-per-Lead)', () => {
+    const ins = buildSvInsertAusLead(baseLead, 'p')
+    expect(ins.paket_faelle_gesamt).toBe(0)
+    expect('anzahlung_status' in ins).toBe(false)
+    expect('onboarding_anzahlung_betrag' in ins).toBe(false)
+  })
+  it('standard = 10 Faelle / 15km / 1500 EUR + anzahlung_status offen (portal bleibt gated)', () => {
+    const ins = buildSvInsertAusLead(baseLead, 'p', 'standard') as Record<string, unknown>
+    expect(ins.paket).toBe('standard')
+    expect(ins.paket_faelle_gesamt).toBe(10)
+    expect(ins.paket_umkreis_km).toBe(15)
+    expect(ins.onboarding_anzahlung_betrag).toBe(1500)
+    expect(ins.anzahlung_status).toBe('offen')
+    expect(ins.portal_zugang_freigeschaltet).toBe(false)
+  })
+  it('pro/premium ziehen Kontingent/Radius/Preis aus PAKETE', () => {
+    const pro = buildSvInsertAusLead(baseLead, 'p', 'pro') as Record<string, unknown>
+    expect([pro.paket_faelle_gesamt, pro.paket_umkreis_km, pro.onboarding_anzahlung_betrag]).toEqual([25, 40, 3750])
+    const prem = buildSvInsertAusLead(baseLead, 'p', 'premium') as Record<string, unknown>
+    expect([prem.paket_faelle_gesamt, prem.paket_umkreis_km, prem.onboarding_anzahlung_betrag]).toEqual([50, 70, 7500])
+  })
+  it('SICHERHEIT: ungueltiges Paket faellt hart auf basic (kein Self-Escalation)', () => {
+    const ins = buildSvInsertAusLead(baseLead, 'p', 'individuell') as Record<string, unknown>
+    expect(ins.paket).toBe('basic')
+    expect(ins.paket_faelle_gesamt).toBe(0)
+    expect('anzahlung_status' in ins).toBe(false)
+  })
+})
+
+describe('istErlaubtesPaket — Self-Service-Whitelist', () => {
+  it('nur basic + 3 kaufbare Pakete erlaubt', () => {
+    expect(SELF_SERVICE_PAKETE).toEqual(['basic', 'standard', 'pro', 'premium'])
+    for (const p of SELF_SERVICE_PAKETE) expect(istErlaubtesPaket(p)).toBe(true)
+    expect(istErlaubtesPaket('admin')).toBe(false)
+    expect(istErlaubtesPaket('individuell')).toBe(false)
   })
 })

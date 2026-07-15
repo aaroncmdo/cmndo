@@ -150,6 +150,7 @@ export async function beanspracheSvLead(input: {
   svLeadId: string
   email: string
   telefon: string
+  paket?: string
 }): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -264,7 +265,7 @@ export async function beanspracheSvLead(input: {
   // -> faelschlich "Verifizierung ueberfaellig"-Mail + frist_ueberschritten-Flip + kritisch-
   // Admin-Task + Tier-2-Countdown auf der SV-Seite. Die 48h-Team-Review-SLA fuer Basic
   // gehoert in P3 (Freigabe-Queue), nicht in dieses Tier-2-Feld. (Review-Finding H1.)
-  const svInsert = buildSvInsertAusLead(lead as SvLeadRow, userId)
+  const svInsert = buildSvInsertAusLead(lead as SvLeadRow, userId, input.paket ?? 'basic')
 
   const { data: svRow, error: svErr } = await adminDb
     .from('sachverstaendige')
@@ -397,6 +398,7 @@ export async function registriereSvBasicNeu(input: {
   adresse: string
   plz?: string
   datNr?: string
+  paket?: string
 }): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -538,7 +540,7 @@ export async function registriereSvBasicNeu(input: {
   // (ueberfaellig-Mail + frist_ueberschritten-Flip + kritisch-Task + Tier-2-Countdown).
   // Die 48h-Team-Review-SLA fuer Basic gehoert in P3 (Freigabe-Queue). (Review-Finding H1.)
   const svInsert = {
-    ...buildSvInsertAusLead(synthetic, userId),
+    ...buildSvInsertAusLead(synthetic, userId, input.paket ?? 'basic'),
     // Quellen-Override: buildSvInsertAusLead hardcodet 'self_service_claim',
     // fuer Frisch-Registrierung ist 'self_service_neu' korrekt.
     onboarding_quelle: 'self_service_neu',
