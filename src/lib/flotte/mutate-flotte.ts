@@ -7,6 +7,22 @@ import type { FahrzeugForm } from '@/lib/kunde/firma-flotte'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = SupabaseClient<any, any, any>
 
+/** Reiner flotten_fahrzeuge-N:M-Insert. 23505 (UNIQUE firma_id,vehicle_id) = "schon gebunden",
+ *  NICHT als Fehler, sondern als bereitsVorhanden. */
+export async function bindeVehicleAnFlotte(
+  db: AnyDb,
+  p: { firmaId: string; vehicleId: string; userId: string; notiz?: string | null },
+): Promise<{ ok: boolean; bereitsVorhanden?: boolean; error?: string }> {
+  const { error } = await db.from('flotten_fahrzeuge').insert({
+    firma_id: p.firmaId, vehicle_id: p.vehicleId, added_by_user_id: p.userId, notiz: p.notiz?.trim() || null,
+  })
+  if (error) {
+    if (error.code === '23505') return { ok: false, bereitsVorhanden: true }
+    return { ok: false, error: error.message }
+  }
+  return { ok: true }
+}
+
 /** Stub-Fahrzeug anlegen + N:M-Zuordnung zur firma. */
 export async function addFahrzeugToFlotte(
   db: AnyDb, firmaId: string, form: FahrzeugForm, userId: string,
@@ -18,13 +34,8 @@ export async function addFahrzeugToFlotte(
     db,
   })
   if (!veh.ok) return { ok: false, error: veh.error }
-  const { error } = await db.from('flotten_fahrzeuge').insert({
-    firma_id: firmaId, vehicle_id: veh.vehicleId, added_by_user_id: userId, notiz: form.notiz?.trim() || null,
-  })
-  if (error) {
-    if (error.code === '23505') return { ok: false, error: 'Dieses Fahrzeug ist bereits in der Flotte.' }
-    return { ok: false, error: error.message }
-  }
+  const bind = await bindeVehicleAnFlotte(db, { firmaId, vehicleId: veh.vehicleId, userId, notiz: form.notiz })
+  if (!bind.ok) return { ok: false, error: bind.bereitsVorhanden ? 'Dieses Fahrzeug ist bereits in der Flotte.' : bind.error }
   return { ok: true }
 }
 
