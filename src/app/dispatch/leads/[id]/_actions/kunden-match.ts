@@ -147,7 +147,7 @@ export async function findKundenMatches(
     if (svIds.length > 0) {
       const { data: svRows } = await admin
         .from('sachverstaendige')
-        .select('id, profiles(vorname, nachname)')
+        .select('id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
         .in('id', svIds)
       for (const sv of (svRows ?? []) as Array<{ id: string; profiles?: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] }>) {
         const p = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
