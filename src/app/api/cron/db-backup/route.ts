@@ -158,11 +158,18 @@ export async function GET(request: Request) {
       const { sendCommunication } = await import('@/lib/communications/send')
       const backupProps = { datum: dateStr, fehler: message }
       const html = await render(AdminBackupFehlgeschlagenEmail(backupProps))
-      await sendCommunication('admin_backup_failed', {
-        email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
-        subject: backupSubject(backupProps),
-        html,
-      })
+      await sendCommunication(
+        'admin_backup_failed',
+        {
+          email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+          subject: backupSubject(backupProps),
+          html,
+        },
+        // Alert geht an die interne @claimondo.de-Admin-Adresse — ohne dieses Flag
+        // verschluckt die Send-Isolation (#3537) die Mail, und Backup-Fehler bleiben
+        // unbemerkt (4 stille Fehltage 07-11/12/13/15 im Go-Live-Log gefunden).
+        { allowInternalRecipient: true },
+      )
     } catch (mailErr) {
       console.error('Failed to send backup error notification:', mailErr)
     }
