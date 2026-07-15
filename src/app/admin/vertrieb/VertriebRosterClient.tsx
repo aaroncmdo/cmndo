@@ -14,7 +14,6 @@ import { computeContextKpis } from './_lib/context-kpis'
 import { ROLLE_LABEL, TYP_LABEL } from './_lib/labels'
 import VertriebPillBar from './VertriebPillBar'
 import VertriebAktionsleiste from './VertriebAktionsleiste'
-import FirmenFlottenCockpitEntry from './FirmenFlottenCockpitEntry'
 import VertriebDetailDrawer from './VertriebDetailDrawer'
 import VertriebKarteClient from './karte/VertriebKarteClient'
 import VertriebLiveOpsListe from './live-ops/VertriebLiveOpsListe'
@@ -80,10 +79,6 @@ export default function VertriebRosterClient({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <VertriebPillBar rolle={rolle} setRolle={setRolle} typ={typ} setTyp={setTyp} />
         <div className="flex items-center gap-2">
-          {/* Globaler B2B-Einstieg (kein Pill, immer sichtbar) — durch einen Teiler von den
-              Ansichts-Togglern getrennt, damit er nicht wie ein 4. View-Modus wirkt. */}
-          <FirmenFlottenCockpitEntry />
-          <span className="w-px h-5 bg-claimondo-border" aria-hidden />
           <Button variant={effAnsicht === 'liste' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('liste')}>
             Liste
           </Button>

@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { generiereColdMailVorlage } from '@/lib/cold-mail/compose-ki'
 import { ersteFaelligkeit, type ColdMailStep } from '@/lib/cold-mail/advance'
+import { bauePatchFelder } from '@/lib/cold-mail/sequenz-patch'
 
 type Result<T> = { ok: true; data: T } | { ok: false; error: string }
 
@@ -118,17 +119,33 @@ export async function speichereSequenz(input: {
   id?: string
   rolle: string
   name: string
-  aktiv: boolean
-  auto_enroll: boolean
+  // Beim UPDATE optional: nur was gesetzt ist, wird geschrieben. Das verhindert das
+  // Clobbering-Race — sonst wuerde ein "Auto-Aufnahme"-Toggle das kurz zuvor gesetzte
+  // aktiv=true aus dem (veralteten) Client-State wieder ueberschreiben (live im Smoke
+  // beobachtet: aktiv sprang still auf false zurueck -> Sequenz sendet nie).
+  aktiv?: boolean
+  auto_enroll?: boolean
 }): Promise<{ ok: boolean; error?: string }> {
   const guard = await requireRole(['admin', 'dispatch'])
   if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
   if (!input.name.trim()) return { ok: false, error: 'Bitte einen Namen angeben.' }
 
-  const zeile = { rolle: input.rolle, name: input.name.trim(), aktiv: input.aktiv, auto_enroll: input.auto_enroll }
-  const { error } = input.id
-    ? await guard.supabase.from('cold_mail_sequenzen').update(zeile).eq('id', input.id)
-    : await guard.supabase.from('cold_mail_sequenzen').insert(zeile)
+  let error
+  if (input.id) {
+    // Partielles Update (bauePatchFelder = reine, getestete Logik): nur explizit
+    // uebergebene Flags anfassen -> kein Clobbering-Race zwischen den Toggles.
+    ;({ error } = await guard.supabase
+      .from('cold_mail_sequenzen')
+      .update(bauePatchFelder(input))
+      .eq('id', input.id))
+  } else {
+    ;({ error } = await guard.supabase.from('cold_mail_sequenzen').insert({
+      rolle: input.rolle,
+      name: input.name.trim(),
+      aktiv: input.aktiv ?? false,
+      auto_enroll: input.auto_enroll ?? false,
+    }))
+  }
   if (error) {
     // Partial-unique: hoechstens EINE aktive Auto-Enroll-Sequenz je Rolle (DDL-Constraint).
     if (error.message.includes('cms_seq_one_autoenroll_per_rolle')) {
