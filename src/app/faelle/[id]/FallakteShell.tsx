@@ -30,7 +30,9 @@ import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
 import { FallActionBar } from '@/components/admin/fallakte/FallActionBar'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 // AAR-840: Endzustand-Dropdown + Claim-Status-Badge im Header
-import { EndzustandDropdown, ClaimStatusBadge, KanzleiWunschDropdown } from '@/components/shared/claims'
+import { EndzustandDropdown, KanzleiWunschDropdown } from '@/components/shared/claims'
+// B3/T4: der Fallakte-Badge zeigt operative_status (fall-status-Domain) statt claims.status ?? work_state.
+import FallStatusBadge from '@/components/shared/FallStatusBadge'
 // AAR-843: Timeline-View für den Verlaufs-Tab
 import { TimelineView } from '@/components/shared/claims'
 import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
@@ -197,7 +199,7 @@ export default function FallakteShell({
                 Sichtbar für Admin (immer) und KB (durch EndzustandDropdown
                 rolle-intern guarded). claimId-Guard: ohne Claim kein Dropdown. */}
             {claimStatus && (
-              <ClaimStatusBadge status={claimStatus} viewerRole="admin" size="sm" withIcon />
+              <FallStatusBadge status={claimStatus} size="sm" />
             )}
             {claimId && (
               <EndzustandDropdown

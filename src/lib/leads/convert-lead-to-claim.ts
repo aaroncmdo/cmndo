@@ -388,9 +388,8 @@ export async function convertLeadToClaim(
     // CMM-44 MP-6c: claims.phase gedroppt (tote 10-Code-Spalte, abgeleitet aus
     // v_claim_phase). Kein phase-Write mehr beim Claim-Insert — main/sub_phase
     // ergeben sich aus status + Sub-Entity-Zustand.
-    // D2/T1.1b: Dispatch/Processing-Achse lebt auf work_state; claims.status =
-    // reine Lifecycle/Terminal-Achse (NULL bis ein Terminal/VS-Event es setzt).
-    work_state: 'dispatch_done',
+    // B3/T4 (Status-Achsen-Konsolidierung): work_state-Write entfernt — die Dispatch/Processing-
+    // Achse ist eliminiert, operative_status (unten gesetzt) ist die eine Status-Achse.
     kundenbetreuer_id: kundenbetreuerId,
     // CMM-60 Schritt 3: SV-Zuweisung claim-nativ. faelle bekommt sv_id
     // weiterhin ueber fallComputedFields (gleicher Wert) — Ordering-Schutz,
