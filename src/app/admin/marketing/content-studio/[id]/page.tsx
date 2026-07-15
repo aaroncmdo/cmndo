@@ -10,6 +10,7 @@ import { RetryButton } from '../RetryButton'
 import { ScriptEditor } from '../ScriptEditor'
 import { RenderProgress } from '../RenderProgress'
 import { PublishPanel } from '../PublishPanel'
+import { AutoRefresh } from '../AutoRefresh'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,8 +90,9 @@ export default async function ClipDetailPage({ params }: { params: Promise<{ id:
       {job.status === 'entwurf' ? (
         <SectionCard>
           <p className="text-body-sm text-claimondo-slate">
-            Skript wird generiert … Seite neu laden für den aktuellen Stand.
+            Skript wird generiert … die Seite aktualisiert sich automatisch, sobald es bereit ist.
           </p>
+          <AutoRefresh active intervalMs={2500} />
         </SectionCard>
       ) : null}
 

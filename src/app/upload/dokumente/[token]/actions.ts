@@ -305,9 +305,11 @@ async function syncPflichtdokument(
   if (!pd) return
   await db
     .from('pflichtdokumente')
+    // CMM-49 Schema-Drift-Fix (15.07.): dokument_url statt datei_url (existiert nicht ->
+    // der Update schlug fehl, der Magic-Link-Upload markierte den Slot nie 'hochgeladen').
     .update({
       status: 'hochgeladen',
-      datei_url: dateiUrl,
+      dokument_url: dateiUrl,
       hochgeladen_am: new Date().toISOString(),
     })
     .eq('id', pd.id)

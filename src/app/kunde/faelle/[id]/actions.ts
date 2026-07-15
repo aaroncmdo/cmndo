@@ -80,24 +80,29 @@ export async function uploadPflichtdokumentKunde(
 
   const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
   if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
+  // CMM-49 Schema-Drift-Fix (15.07.): pflichtdokumente hat kein 'titel' (nur dokument_typ)
+  // -> select('titel, dokument_typ') warf PostgREST-400, pd blieb null, dokument_typ fiel
+  // faelschlich auf 'kundendokument' zurueck.
   const { data: pd } = await supabase
     .from('pflichtdokumente')
-    .select('titel, dokument_typ')
+    .select('dokument_typ')
     .eq('id', pflichtdokumentId)
     .single()
 
   const now = new Date().toISOString()
+  // CMM-49 Schema-Drift-Fix (15.07.): pflichtdokumente hat dokument_url (nicht datei_url)
+  // und KEIN datei_name -> der Update schlug bisher komplett fehl, der Pflicht-Slot wurde
+  // nie auf 'hochgeladen' gesetzt. Dateiname lebt in fall_dokumente.original_filename (s.u.).
   await supabase.from('pflichtdokumente').update({
     status: 'hochgeladen',
-    datei_url: publicUrl,
-    datei_name: file.name,
+    dokument_url: publicUrl,
     hochgeladen_am: now,
   }).eq('id', pflichtdokumentId)
 
   // AAR-553: fall_dokumente statt dokumente
   await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
-    dokument_typ: pd?.dokument_typ ?? pd?.titel ?? 'kundendokument',
+    dokument_typ: pd?.dokument_typ ?? 'kundendokument',
     storage_path: path,
     original_filename: file.name,
     groesse_bytes: file.size,
