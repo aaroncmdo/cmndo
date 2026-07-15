@@ -54,6 +54,10 @@ export const SCENARIOS: Scenario[] = [
   // (status) UND getClaimLifecycle-milestone leiten BEIDE abschluss/klage_rechtsstreit ab
   // (Anzeige-Neutralitaet der Konvergenz).
   { key: 'abschluss-klage', label: 'Abschluss · Klage/Rechtsstreit', expected: 'Klage-Terminal — Stepper "abschluss/klage_rechtsstreit" aus operative_status UND status' },
+  // B4-slice-2a-i-b: nur_gutachter-Terminal nach der Konvergenz — operative_status='termin_durchgefuehrt'
+  // (statt gar nicht). Beweist Anzeige-Neutralitaet: View-m_sub (status) UND getClaimLifecycle
+  // (OPERATIVE_PHASE) liefern beide abschluss/termin_durchgefuehrt.
+  { key: 'abschluss-termin-durchgefuehrt', label: 'Abschluss · Termin durchgeführt (nur_gutachter)', expected: 'nur_gutachter-Terminal — Stepper "abschluss/termin_durchgefuehrt"' },
 ]
 
 export type SeededRow = {
@@ -70,10 +74,10 @@ export async function seedAllScenarios(): Promise<{ ok: boolean; rows: SeededRow
     // Erst löschen, falls schon was da ist
     await deleteAllSmoke(db)
 
-    for (const sc of SCENARIOS) {
-      const seeded = await seedOne(db, sc.key)
-      rows.push(seeded)
-    }
+    // Szenarien sind unabhaengig (eigener Lead+Claim+Kinder je SMOKE-LC-<idx>) -> parallel seeden.
+    // Sequenziell (for-await) sprengte gegen die prod-Latenz das beforeAll-Timeout ab ~12 Szenarien.
+    const seededRows = await Promise.all(SCENARIOS.map((sc) => seedOne(db, sc.key)))
+    rows.push(...seededRows)
     return { ok: true, rows }
   } catch (err) {
     return { ok: false, rows, error: err instanceof Error ? err.message : String(err) }
@@ -232,6 +236,11 @@ function derivePhaseStatus(key: string): { phase: string; status: string | null;
       // 'klage_rechtsstreit' (statt des groben 'klage'), status ebenfalls. Beide Read-Engines
       // muessen abschluss/klage_rechtsstreit liefern.
       return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'klage_rechtsstreit', operative_status: 'klage_rechtsstreit' }
+    case 'abschluss-termin-durchgefuehrt':
+      // B4-slice-2a-i-b: nur_gutachter-Terminal nach der Konvergenz — closeNurGutachter schreibt
+      // operative_status='termin_durchgefuehrt' (statt gar nicht) + status ebenfalls. Beide
+      // Read-Engines muessen abschluss/termin_durchgefuehrt liefern.
+      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'termin_durchgefuehrt', operative_status: 'termin_durchgefuehrt' }
     default:
       return { phase: '1_neu', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
   }

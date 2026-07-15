@@ -194,6 +194,11 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   'zahlung-eingegangen': { main: 'regulierung', sub: 'auszahlung' },
   abgeschlossen: { main: 'abschluss', sub: 'erfolgreich_reguliert' },
   storniert: { main: 'abschluss', sub: 'storniert' },
+  // B4-slice-2a-i-b: der nur_gutachter-Terminal traegt seit dieser Slice operative_status DIREKT
+  // (closeNurGutachterTerminAlsDurchgefuehrt). Damit ist die Abschluss-Phase aus operative_status
+  // ableitbar (Voraussetzung fuer den status-Read-Drop slice-2a-ii). Deckungsgleich mit
+  // ABSCHLUSS_SUBSTATE['termin_durchgefuehrt'] (Anzeige-neutral, A1-Parity).
+  termin_durchgefuehrt: { main: 'abschluss', sub: 'termin_durchgefuehrt' },
 }
 
 function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {

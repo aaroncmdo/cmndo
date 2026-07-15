@@ -71,10 +71,22 @@ export async function closeNurGutachterTerminAlsDurchgefuehrt(
   }
 
   // 2) Claim terminal schliessen — guarded gegen bereits terminale Stati.
+  // B4-slice-2a-i-b (Status-Achsen-Konsolidierung): operative_status='termin_durchgefuehrt' +
+  // abgeschlossen_am MITSCHREIBEN. Vorher blieb operative_status auf dem letzten aktiven Wert
+  // (sv-termin/besichtigung) -> (a) der abgeschlossene nur_gutachter-Fall zaehlte in ALLEN
+  // CLOSED_OPERATIVE_STATUS_PG-Aktiv-Filtern faelschlich als aktiv (latenter Bug); (b) die
+  // Abschluss-Sub-Phase war nur aus claims.status ableitbar (blockte den status-Read-Drop
+  // slice-2a-ii). Konvergiert die op-Achse mit dem Terminal (wie Klage in slice-2a-i).
+  // 'termin_durchgefuehrt' ist seit dieser Slice gueltiges operative_status-Vokabular
+  // (fall_status-enum + claims_operative_status_check erweitert). abgeschlossen_am = robuster
+  // Close-Marker (istClaimGeschlossen/deriveCompletionTs). Billing bleibt am durchgefuehrt_am-
+  // Anker (unveraendert). Nur bei NICHT bereits terminalem Claim (Guard unten).
   const { error: claimErr } = await db
     .from('claims')
     .update({
       status: 'termin_durchgefuehrt',
+      operative_status: 'termin_durchgefuehrt',
+      abgeschlossen_am: now,
       endzustand_gesetzt_durch_user_id: byUserId,
       endzustand_gesetzt_am: now,
       endzustand_grund: grund,
