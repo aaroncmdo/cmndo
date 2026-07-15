@@ -565,10 +565,8 @@ export async function smokeResetAufKanzleiWunsch(
       kanzlei_ansprechpartner_name: null,
       kanzlei_ansprechpartner_email: null,
       kanzlei_ansprechpartner_telefon: null,
-      // D2/T1.1b: work_state statt status (Dispatch/Processing-Achse). `phase`
-      // entfernt — claims.phase ist seit MP-6c gedroppt (abgeleitet via v_claim_phase),
-      // der Write lief ins Leere.
-      work_state: 'in_bearbeitung' as const,
+      // B3/T4: work_state-Write entfernt — die Dispatch/Processing-Achse ist eliminiert,
+      // operative_status ist die eine Status-Achse.
       vollmacht_signiert_am: null,
     }
     // CMM-74: operative_status (Engine-Cursor/SSoT) ersetzt den retired faelle.status-Write.
