@@ -16,9 +16,10 @@ import {
   extractTrustChips,
   extractCitations,
   readingTimeMin,
+  extractFaqPairs,
 } from '@/lib/content/claimondo-mdx'
 import { getPublishedArtikelBySlug } from '@/lib/wissen/db-articles'
-import { SITE_URL, WHATSAPP_HREF, articleSchema } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, articleSchema, autoSchemaGraph } from '@/lib/seo/jsonld'
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { ArticleComments } from '@/components/community/ArticleComments'
 
@@ -81,22 +82,20 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
     (a.excerpt ? metaDescriptionFromSnippet(a.excerpt) : null) ||
     a.title
 
-  // Article-Schema mit Aaron Sprafke als Person-Autor (Plan Task 6 Pflicht).
-  // Wir bauen das JSON selbst und übergeben es als schemaJson, damit ContentJsonLd
-  // es als Hand-Schema (Priorität 1) behandelt. Breadcrumbs emittiert ContentJsonLd
-  // separat; FAQ-Auto-Graph wird hier bewusst nicht benötigt (body enthält ggf. FAQ,
-  // aber das schemaJson übernimmt Artikel-Knoten).
-  const articleJsonLd = JSON.stringify(
-    articleSchema({
-      headline: a.title,
-      description: description ?? a.title,
-      datePublished: dateIso,
-      dateModified: dateIso,
-      url: `${SITE_URL}/wissen/${slug}`,
-      citation: extractCitations(a.body),
-      authorName: FOUNDER_AARON_NAME,
-    }),
-  )
+  // Article (Person=Aaron) + citation + speakable + FAQPage (aus der "## Häufige Fragen"-
+  // Sektion des Bodys). autoSchemaGraph gibt null ohne FAQ-Paare -> Fallback aufs reine
+  // articleSchema. FAQPage ist der GEO-Hebel, den die KI-Artikel bisher verschenkt haben.
+  const articleArgs = {
+    headline: a.title,
+    description: description ?? a.title,
+    datePublished: dateIso,
+    dateModified: dateIso,
+    url: `${SITE_URL}/wissen/${slug}`,
+    citation: extractCitations(a.body),
+    authorName: FOUNDER_AARON_NAME,
+  }
+  const articleJsonLd =
+    autoSchemaGraph(articleArgs, extractFaqPairs(a.body)) ?? JSON.stringify(articleSchema(articleArgs))
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
