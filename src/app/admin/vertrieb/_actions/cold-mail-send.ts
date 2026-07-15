@@ -27,7 +27,7 @@ export async function sendeColdMailAnLead(
   // Select-Strings NICHT; ein Tippfehler waere ein stiller 400).
   const { data: lead, error: leadErr } = await supabase
     .from('partner_leads')
-    .select('id, email, ansprechpartner_email, ansprechpartner_vorname, ansprechpartner_nachname, firma, ort')
+    .select('id, email, ansprechpartner_email, ansprechpartner_vorname, ansprechpartner_nachname, ansprechpartner_position, firma, ort, rolle')
     .eq('id', leadId)
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden.' }

@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { Button } from '@/components/primitives'
 import { textToHtml } from '@/lib/cold-mail/text-to-html'
 import { sendeColdMailAnLead } from '../_actions/cold-mail-send'
+import MergeVarPalette from './MergeVarPalette'
+import { useMergeVarInsert } from './useMergeVarInsert'
 
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
@@ -27,6 +29,10 @@ export default function ColdMailComposer({
   const [body, setBody] = useState('')
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+
+  const { betreffRef, bodyRef, setAktivesFeld, einfuegen } = useMergeVarInsert({
+    betreff, setBetreff, body, setBody,
+  })
 
   async function senden() {
     if (!empfaenger) {
@@ -57,22 +63,27 @@ export default function ColdMailComposer({
         An: {empfaenger ?? '— (kein Kontakt hinterlegt)'} · über die Partner-Sendedomain
       </div>
       <input
+        ref={betreffRef}
         value={betreff}
         onChange={(e) => setBetreff(e.target.value)}
+        onFocus={() => setAktivesFeld('betreff')}
         aria-label="Betreff"
         placeholder="Betreff"
         className={`${FELD_CLS} w-full`}
       />
       <textarea
+        ref={bodyRef}
         value={body}
         onChange={(e) => setBody(e.target.value)}
+        onFocus={() => setAktivesFeld('body')}
         rows={8}
         aria-label="Nachricht"
         placeholder="Guten Tag {{Ansprechpartner}}, …"
         className={`${FELD_CLS} w-full resize-y`}
       />
+      <MergeVarPalette onInsert={einfuegen} />
       <p className="text-caption text-claimondo-ondo/50">
-        Platzhalter: {'{{Ansprechpartner}}'} · {'{{Firma}}'} · {'{{Ort}}'} · {'{{Vorname}}'} — Abmeldelink wird
+        Klick fügt an der Cursor-Position ein. Aktionen landen als Button im Text. Der Abmeldelink wird
         automatisch angehängt.
       </p>
       {fehler && <p className="text-sm text-danger">{fehler}</p>}

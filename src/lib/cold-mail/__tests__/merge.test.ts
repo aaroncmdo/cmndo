@@ -19,12 +19,39 @@ describe('renderMerge', () => {
 })
 
 describe('buildMergeVars', () => {
-  it('baut vollen Namen und Fallbacks', () => {
-    expect(buildMergeVars({ ansprechpartner_vorname: 'Anna', ansprechpartner_nachname: 'Meier', firma: 'Autohaus', ort: 'Berlin' }))
-      .toEqual({ Ansprechpartner: 'Anna Meier', Firma: 'Autohaus', Ort: 'Berlin', Vorname: 'Anna' })
+  const werkstatt = {
+    ansprechpartner_vorname: 'Anna',
+    ansprechpartner_nachname: 'Meier',
+    ansprechpartner_position: 'Geschäftsführerin',
+    firma: 'Autohaus',
+    ort: 'Berlin',
+    rolle: 'werkstatt',
+  }
+
+  it('baut die Datenvariablen inkl. Nachname/Position', () => {
+    const v = buildMergeVars(werkstatt)
+    expect(v.Ansprechpartner).toBe('Anna Meier')
+    expect(v.Vorname).toBe('Anna')
+    expect(v.Nachname).toBe('Meier')
+    expect(v.Position).toBe('Geschäftsführerin')
+    expect(v.Firma).toBe('Autohaus')
+    expect(v.Ort).toBe('Berlin')
   })
+
+  it('loest die Aktions-Tokens rollenabhaengig mit auf', () => {
+    const v = buildMergeVars(werkstatt)
+    expect(v.Registrierungslink).toContain('/werkstatt-partner-werden')
+    expect(v.Beratungslink).toContain('beratung-anfragen')
+  })
+
   it('nutzt Fallbacks bei fehlenden Feldern', () => {
-    expect(buildMergeVars({ ansprechpartner_vorname: null, ansprechpartner_nachname: null, firma: null, ort: null }))
-      .toEqual({ Ansprechpartner: '', Firma: 'Ihr Unternehmen', Ort: '', Vorname: '' })
+    const v = buildMergeVars({
+      ansprechpartner_vorname: null, ansprechpartner_nachname: null,
+      ansprechpartner_position: null, firma: null, ort: null, rolle: null,
+    })
+    expect(v.Firma).toBe('Ihr Unternehmen')
+    expect(v.Vorname).toBe('')
+    expect(v.Nachname).toBe('')
+    expect(v.Position).toBe('')
   })
 })
