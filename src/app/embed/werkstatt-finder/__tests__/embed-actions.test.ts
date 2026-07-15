@@ -12,6 +12,11 @@ vi.mock('@/lib/werkstatt/bedarf/schadenbild-gewerke', () => ({
   klassifiziereSchadenbildBase64: vi.fn(),
 }))
 
+// ─── Mock: klassifiziereSchadenbeschreibung (Text-KI, Phase 1) ───────────────
+vi.mock('@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke', () => ({
+  klassifiziereSchadenbeschreibung: vi.fn(),
+}))
+
 // ─── Mock: ladeWerkstattVorschlaege (gerankte Matching-Engine, #4359) ────────
 vi.mock('@/lib/werkstatt/matching/lade-vorschlaege', () => ({
   ladeWerkstattVorschlaege: vi.fn(),
@@ -67,6 +72,7 @@ vi.mock('@/lib/storage/url', () => ({
 }))
 
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
+import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createLead } from '@/lib/leads/create-lead'
@@ -74,12 +80,14 @@ import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink
 import { getStorageUrl } from '@/lib/storage/url'
 import {
   klassifiziereSchadenfotoEmbed,
+  klassifiziereSchadenbeschreibungEmbed,
   sucheEchteWerkstaetten,
   sucheWerkstaettenNachOrt,
   erstelleWerkstattFinderLead,
 } from '../actions'
 
 const mockKlassifiziere = vi.mocked(klassifiziereSchadenbildBase64)
+const mockKlassBeschreibung = vi.mocked(klassifiziereSchadenbeschreibung)
 const mockLadeWerkstattVorschlaege = vi.mocked(ladeWerkstattVorschlaege)
 const mockGeocodeAdresse = vi.mocked(geocodeAdresse)
 const mockCreateLead = vi.mocked(createLead)
@@ -280,6 +288,21 @@ describe('sucheEchteWerkstaetten — Marke + Fahrzeugklasse durchreichen', () =>
     expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
       expect.objectContaining({ marke: null, fahrzeugklasse: null }),
     )
+  })
+})
+
+describe('klassifiziereSchadenbeschreibungEmbed', () => {
+  it('mappt Klassifikator-Output auf quelle=schadenbeschreibung', async () => {
+    mockKlassBeschreibung.mockReset()
+    mockKlassBeschreibung.mockResolvedValue({ kategorien: ['karosserie'], confidence: 75 })
+    const r = await klassifiziereSchadenbeschreibungEmbed('Stoßstange eingedrückt')
+    expect(r).toEqual({ kategorien: ['karosserie'], quelle: 'schadenbeschreibung', confidence: 75 })
+  })
+  it('leere Kategorien → unbekannt', async () => {
+    mockKlassBeschreibung.mockReset()
+    mockKlassBeschreibung.mockResolvedValue({ kategorien: [], confidence: 0 })
+    const r = await klassifiziereSchadenbeschreibungEmbed('unklar')
+    expect(r).toEqual({ kategorien: [], quelle: 'unbekannt', confidence: 0 })
   })
 })
 

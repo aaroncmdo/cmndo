@@ -9,6 +9,7 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { reverseGeocodeAddress } from '@/lib/google-geocoding/geocode-address'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
+import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { HART_SCHWELLE, type WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
@@ -42,6 +43,16 @@ export async function klassifiziereSchadenfotoEmbed(images: EmbedFoto[]): Promis
   const { kategorien, confidence } = await klassifiziereSchadenbildBase64(guard.images)
   if (kategorien.length === 0) return { kategorien: [], quelle: 'unbekannt', confidence: 0 }
   return { kategorien, quelle: 'schadenbild', confidence }
+}
+
+// Text-KI-Weg fürs Embed: Freitext-Schadenbeschreibung → Gewerke-Bedarf (Phase-1-Klassifikator,
+// fail-safe). Gleiche Output-Form wie klassifiziereSchadenfotoEmbed, quelle='schadenbeschreibung'.
+export async function klassifiziereSchadenbeschreibungEmbed(beschreibung: string): Promise<Reparaturbedarf> {
+  const text = beschreibung?.trim()
+  if (!text) return { kategorien: [], quelle: 'unbekannt', confidence: 0 }
+  const { kategorien, confidence } = await klassifiziereSchadenbeschreibung(text)
+  if (kategorien.length === 0) return { kategorien: [], quelle: 'unbekannt', confidence: 0 }
+  return { kategorien, quelle: 'schadenbeschreibung', confidence }
 }
 
 /**
