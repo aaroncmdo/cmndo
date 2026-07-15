@@ -448,3 +448,74 @@ export async function getWerkstattAuftragExtra(claimId: string): Promise<Werksta
     betreuer,
   }
 }
+
+export type WerkstattChatMessage = {
+  id: string
+  nachricht: string
+  created_at: string
+  sender_id: string | null
+  sender_rolle: string | null
+  is_system: boolean
+  sender_vorname: string | null
+  sender_nachname: string | null
+}
+
+/**
+ * Fall-Gruppenchat fuer die Werkstatt-Sicht. Liest den geteilten `gruppenchat`-Kanal
+ * (wie der Makler-Chat, kanal-basiert) via ADMIN-Client — der Caller MUSS vorher via
+ * getWerkstattAuftrag (RLS-Gate) die Fall-Zugehoerigkeit bewiesen haben (Defense-in-Depth).
+ * fall_id via Bridge aufgeloest (nachrichten sind fall_id-gekeyt wie beim Makler; claim-first:
+ * fall_id == claim_id). Sender-Namen 2-Step statt Embed (ungetypter Admin-Client -> kein
+ * silent-400). Kein Realtime in v1 (Load-on-mount + optimistic nach Send).
+ */
+export async function getWerkstattFallChat(claimId: string): Promise<WerkstattChatMessage[]> {
+  if (!claimId) return []
+  const admin = createAdminClient()
+  const { data: bridge } = await admin
+    .from('faelle_claim_bridge')
+    .select('fall_id')
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  const fallId = ((bridge as { fall_id?: string } | null)?.fall_id) ?? claimId
+
+  const { data, error } = await admin
+    .from('nachrichten')
+    .select('id, nachricht, created_at, sender_id, sender_rolle, is_system')
+    .eq('fall_id', fallId)
+    .eq('kanal', 'gruppenchat')
+    .order('created_at', { ascending: true })
+  if (error || !data) return []
+
+  const rows = data as Array<Record<string, unknown>>
+  const senderIds = [
+    ...new Set(rows.map((r) => r.sender_id as string | null).filter(Boolean) as string[]),
+  ]
+  const namen = new Map<string, { vorname: string | null; nachname: string | null }>()
+  if (senderIds.length) {
+    const { data: profile } = await admin
+      .from('profiles')
+      .select('id, vorname, nachname')
+      .in('id', senderIds)
+    for (const p of (profile ?? []) as Array<Record<string, unknown>>) {
+      namen.set(p.id as string, {
+        vorname: (p.vorname as string | null) ?? null,
+        nachname: (p.nachname as string | null) ?? null,
+      })
+    }
+  }
+
+  return rows.map((r) => {
+    const sid = (r.sender_id as string | null) ?? null
+    const n = sid ? namen.get(sid) : null
+    return {
+      id: r.id as string,
+      nachricht: (r.nachricht as string) ?? '',
+      created_at: (r.created_at as string) ?? '',
+      sender_id: sid,
+      sender_rolle: (r.sender_rolle as string | null) ?? null,
+      is_system: (r.is_system as boolean) ?? false,
+      sender_vorname: n?.vorname ?? null,
+      sender_nachname: n?.nachname ?? null,
+    }
+  })
+}

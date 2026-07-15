@@ -189,16 +189,16 @@ export async function convertLeadToClaim(
   // NICHT als KB durchschlagen. Gegate auf source_channel (nicht service_typ),
   // damit NATIVE nur_gutachter-Faelle ihren KB wie gehabt behalten.
   const istEmbedB = (lead.source_channel as string | null) === 'monika_embed'
-  // Selbstzahler (abrechnungsweg='selbstzahler'): reiner Self-Service-Reparatur-
-  // Vorgang OHNE SV/Gutachten/Regulierung -> kein Kundenbetreuer noetig (analog
-  // embed-B; Aaron 06.07.). Sonst bindet der Round-Robin KB-Kapazitaet fuer einen
+  // Selbstzahler UND Kasko (abrechnungsweg): reiner Self-Service-Reparatur-Vorgang OHNE
+  // SV/Gutachten/Regulierung -> kein Kundenbetreuer noetig (analog embed-B; Selbstzahler
+  // Aaron 06.07., Kasko 15.07.). Sonst bindet der Round-Robin KB-Kapazitaet fuer einen
   // Fall ohne KB-Arbeit. Null-KB ist downstream-safe: das Kunde-Portal gatet die
   // KB-Anzeige auf fall.kundenbetreuer_id, embed-B liefert bereits KB-lose Claims.
   // abrechnungsweg ist type-lagged -> Record-Cast (AGENTS.md §6).
-  const istSelbstzahler =
-    ((lead as Record<string, unknown>).abrechnungsweg as string | null) === 'selbstzahler'
+  const abrechnungsweg = (lead as Record<string, unknown>).abrechnungsweg as string | null
+  const istDirektReparatur = abrechnungsweg === 'selbstzahler' || abrechnungsweg === 'kasko'
   let kundenbetreuerId: string | null = input.kundenbetreuerId ?? null
-  if (!istEmbedB && !istSelbstzahler && !kundenbetreuerId) {
+  if (!istEmbedB && !istDirektReparatur && !kundenbetreuerId) {
     // AAR-956: lead.zugewiesen_an NUR als KB uebernehmen, wenn die Rolle KB-faehig
     // ist. Beim kanonischen Self-Service-Lead (/start) ist zugewiesen_an der
     // DISPATCHER (pickRoundRobinDispatcher) — der claims-Trigger
@@ -834,14 +834,19 @@ export async function convertLeadToClaim(
   }
 
   // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
-  // Bedingung: Lead hat sowohl eine Reparatur-Werkstatt (reparatur_werkstatt_id)
-  // als auch einen Wunschtermin (reparatur_wunschtermin, im Flow gesetzt, Task 3).
-  // status='angefragt' — die Werkstatt bestaetigt/ruft an/lehnt ab im naechsten Schritt.
+  // Bedingung: Lead hat eine Reparatur-Werkstatt (reparatur_werkstatt_id). Der Wunschtermin
+  // (reparatur_wunschtermin) ist im Flow OPTIONAL — fehlt er, entsteht die Row TROTZDEM
+  // (wunschtermin nullable seit Mig 20260715005517), damit die Werkstatt den Auftrag sieht
+  // und selbst einen Termin vorschlagen kann. Frueher war die Row an BEIDE Werte gekoppelt
+  // -> ohne Wunschtermin keine Row -> WerkstattAuftragDetail blendete die ganze Sektion aus
+  // = toter Auftrag (b1).
+  // status='angefragt' — die Werkstatt bestaetigt (bei Wunschtermin) bzw. schlaegt selbst
+  // einen Termin vor (ohne Wunschtermin) / ruft an / lehnt ab im naechsten Schritt.
   // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
   {
     const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
     const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
-    if (rwtWerkstattId && rwtWunschtermin) {
+    if (rwtWerkstattId) {
       const { error: rtErr } = await admin
         .from('reparatur_termine')
         .insert({

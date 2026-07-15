@@ -157,3 +157,146 @@ export async function getKartenFuerFirma(
     }),
   )
 }
+
+// ─── Lebenszyklus: sperren · entsperren · entbinden ─────────────────────────
+//
+// Der Gegner-Flow oeffnet NUR bei status='gebunden' (lib/schadenkarte/gegner-flow.ts).
+// Ein Statuswechsel weg von 'gebunden' toetet den Token daher SOFORT -- das ist das
+// gesamte Sicherheitsfundament fuer "Karte verloren".
+
+type KarteRow = { id: string; status: string; firma_id: string; fahrzeug_id: string | null }
+
+/** Laedt die Karte und prueft die Firma-Zugehoerigkeit. Muster wie bindeSchadenkarteAnFahrzeug. */
+async function ladeKarteFuerFirma(
+  db: AnyDb,
+  token: string,
+  firmaId: string,
+): Promise<KarteRow | { error: string }> {
+  const { data } = await db
+    .from('schadenkarten')
+    .select('id, status, firma_id, fahrzeug_id')
+    .eq('karten_token', token)
+    .maybeSingle()
+
+  const row = data as KarteRow | null
+  if (!row) return { error: 'Karte nicht gefunden.' }
+  if (row.firma_id !== firmaId) return { error: 'Karte gehört zu einer anderen Firma.' }
+  return row
+}
+
+/** Setzt den Status mit Optimistic-Guard auf den Ausgangsstatus (Race-Schutz). */
+async function setzeStatus(
+  db: AnyDb,
+  row: KarteRow,
+  patch: Record<string, unknown>,
+): Promise<{ ok: boolean; error?: string }> {
+  const { data, error } = await db
+    .from('schadenkarten')
+    .update(patch)
+    .eq('id', row.id)
+    .eq('status', row.status)
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { ok: false, error: error.message }
+  if (!data) return { ok: false, error: 'Karte wurde zwischenzeitlich geändert.' }
+  return { ok: true }
+}
+
+/**
+ * Karte sperren (verloren/gestohlen). Der Token ist danach SOFORT tot.
+ *
+ * fahrzeug_id bleibt bewusst stehen (Historie: "diese Karte sass auf Fahrzeug X").
+ * Der Partial-Unique greift nur WHERE status='gebunden' -> das Fahrzeug kann sofort eine
+ * Ersatzkarte bekommen, ohne dass wir die Historie verlieren.
+ *
+ * IDEMPOTENT: eine bereits gesperrte Karte erneut zu sperren liefert ok:true. Das ist der
+ * Notfall-Pfad -- er muss Doppelklick und Retry ueberstehen, statt einen Fehler zu werfen.
+ */
+export async function sperreSchadenkarte(
+  db: AnyDb,
+  params: { token: string; firmaId: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
+  if ('error' in row) return { ok: false, error: row.error }
+  if (row.status === 'gesperrt') return { ok: true } // idempotent
+  return setzeStatus(db, row, { status: 'gesperrt' })
+}
+
+/**
+ * Karte entsperren -> 'frei', NICHT zurueck auf 'gebunden'.
+ *
+ * Grund: das Fahrzeug hat inzwischen evtl. eine Ersatzkarte. Ein automatisches
+ * Zurueck-auf-gebunden wuerde entweder den Partial-Unique verletzen oder zwei gueltige
+ * Karten fuer ein Fahrzeug erzeugen. Die wiedergefundene Karte muss BEWUSST neu gebunden
+ * werden.
+ */
+export async function entsperreSchadenkarte(
+  db: AnyDb,
+  params: { token: string; firmaId: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
+  if ('error' in row) return { ok: false, error: row.error }
+  if (row.status !== 'gesperrt') return { ok: false, error: 'Karte ist nicht gesperrt.' }
+  return setzeStatus(db, row, {
+    status: 'frei',
+    fahrzeug_id: null,
+    gebunden_am: null,
+    gebunden_von: null,
+  })
+}
+
+/** Karte vom Fahrzeug loesen (Fahrzeug verkauft / Karte umziehen) -> 'frei'. */
+export async function entbindeSchadenkarte(
+  db: AnyDb,
+  params: { token: string; firmaId: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
+  if ('error' in row) return { ok: false, error: row.error }
+  if (row.status !== 'gebunden') return { ok: false, error: 'Karte ist nicht gebunden.' }
+  return setzeStatus(db, row, {
+    status: 'frei',
+    fahrzeug_id: null,
+    gebunden_am: null,
+    gebunden_von: null,
+  })
+}
+
+/**
+ * Chip-Seriennummer an der Karte vermerken (nach erfolgreichem + VERIFIZIERTEM Beschreiben).
+ *
+ * Zweck: Nachweis "dieser Token sitzt auf diesem physischen Chip" + die Ops-Frage
+ * "welche Karten sind noch nicht beschrieben?" (nfc_uid IS NULL).
+ *
+ * ⚠ KEIN Anti-Clone-Merkmal: beim Antippen uebergibt das Betriebssystem nur die URL,
+ * nicht die Chip-UID -- eine Klon-Erkennung zur Tap-Zeit ist mit einem reinen URI-Tag
+ * technisch nicht moeglich. Die Spalte ist Inventar, nicht Sicherheit.
+ *
+ * Bewusst OHNE Status-Guard: das Beschreiben ist unabhaengig davon, ob die Karte gerade
+ * bestellt/frei/gebunden ist.
+ */
+export async function speichereNfcUid(
+  db: AnyDb,
+  params: { token: string; firmaId: string; nfcUid: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
+  if ('error' in row) return { ok: false, error: row.error }
+
+  // firma_id wird BEIM UPDATE erneut geprueft, nicht nur beim Lesen: schliesst die
+  // TOCTOU-Luecke zwischen ladeKarteFuerFirma und dem Write.
+  const { data, error } = await db
+    .from('schadenkarten')
+    .update({ nfc_uid: params.nfcUid })
+    .eq('id', row.id)
+    .eq('firma_id', params.firmaId)
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { ok: false, error: error.message }
+  // Matcht der firma_id-Guard beim Write keine Zeile (genau die TOCTOU-Luecke von oben --
+  // z.B. firma_id wurde zwischen Read und Write per ON DELETE SET NULL auf NULL gesetzt),
+  // liefert PostgREST data: null, error: null. Ohne diesen Check waere das faelschlich
+  // ok:true, obwohl nichts geschrieben wurde (analog setzeStatus oben).
+  if (!data) return { ok: false, error: 'Karte wurde zwischenzeitlich geändert.' }
+  return { ok: true }
+}

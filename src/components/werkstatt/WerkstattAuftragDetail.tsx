@@ -9,7 +9,9 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-import type { WerkstattAuftrag, WerkstattAuftragExtra } from '@/lib/werkstatt/queries'
+import type { WerkstattAuftrag, WerkstattAuftragExtra, WerkstattChatMessage } from '@/lib/werkstatt/queries'
+import { WerkstattChatTab } from '@/components/werkstatt/WerkstattChatTab'
+import { WerkstattCopilotPanel } from '@/components/werkstatt/WerkstattCopilotPanel'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
 import {
   werkstattAuftragSegment,
@@ -84,6 +86,13 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
     : null
 
   const aktionOffen = status === 'angefragt' || status === 'anruf_erbeten' || status === 'werkstatt_vorschlag'
+  // b1: Ein Auftrag ohne Kunden-Wunschtermin (Kunde waehlte nur die Werkstatt) hat keinen
+  // Termin zum Bestaetigen — die Werkstatt schlaegt dann selbst einen vor. hatWunschtermin
+  // steuert, ob "Termin bestaetigen" ueberhaupt angeboten wird.
+  const hatWunschtermin = Boolean(auftrag.reparatur_wunschtermin)
+  // Der 'angefragt'-Default-Badge ("Wunschtermin angefragt") ist ohne Wunschtermin
+  // irrefuehrend — dann liegt der Ball bei der Werkstatt, einen Termin vorzuschlagen.
+  const badgeLabel = status === 'angefragt' && !hatWunschtermin ? 'Terminvorschlag offen' : phase.label
 
   async function handleVorschlag() {
     if (!neuerTermin) return
@@ -140,11 +149,17 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
       <SectionCard title="Reparaturtermin" className="mt-3">
         <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <StatusBadge tone={badgeTone} size="xs">{phase.label}</StatusBadge>
+            <StatusBadge tone={badgeTone} size="xs">{badgeLabel}</StatusBadge>
             {terminAnzeige && (
               <span className="text-body-sm text-claimondo-navy">{terminAnzeige}</span>
             )}
           </div>
+
+          {status === 'angefragt' && !terminAnzeige && (
+            <p className="text-body-sm text-claimondo-ondo">
+              Der Kunde hat keinen Wunschtermin angegeben — bitte schlagen Sie unten einen Termin vor.
+            </p>
+          )}
 
           {status === 'abgelehnt' && auftrag.reparatur_absage_grund && (
             <p className="text-body-sm text-claimondo-ondo">
@@ -163,15 +178,17 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 
           {aktionOffen && (
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                variant="navy"
-                size="sm"
-                loading={bestätigenLaden || isPending}
-                disabled={anrufLaden || ablehnenLaden}
-                onClick={handleBestaetigen}
-              >
-                Termin bestätigen
-              </Button>
+              {hatWunschtermin && (
+                <Button
+                  variant="navy"
+                  size="sm"
+                  loading={bestätigenLaden || isPending}
+                  disabled={anrufLaden || ablehnenLaden}
+                  onClick={handleBestaetigen}
+                >
+                  Termin bestätigen
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -182,7 +199,7 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
                 Anrufen / telefonisch klären
               </Button>
               <Button variant="ghost" size="sm" disabled={bestätigenLaden || anrufLaden || ablehnenLaden} onClick={() => setVorschlagOffen((v) => !v)}>
-                Anderen Termin vorschlagen
+                {hatWunschtermin ? 'Anderen Termin vorschlagen' : 'Termin vorschlagen'}
               </Button>
               <Button
                 variant="danger"
@@ -464,9 +481,13 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 export function WerkstattAuftragDetail({
   auftrag,
   extra,
+  chatMessages,
+  currentUserId,
 }: {
   auftrag: WerkstattAuftrag
   extra?: WerkstattAuftragExtra | null
+  chatMessages?: WerkstattChatMessage[]
+  currentUserId?: string | null
 }) {
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
@@ -483,7 +504,7 @@ export function WerkstattAuftragDetail({
     !auftrag.gutachten_fertiggestellt_am
 
   return (
-    <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
+    <div className="p-4 md:p-6 max-w-3xl lg:max-w-5xl mx-auto space-y-4">
       <header className="space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-heading-md text-claimondo-navy font-bold">
@@ -514,6 +535,12 @@ export function WerkstattAuftragDetail({
           </p>
         </div>
       )}
+
+      {/* Display-Info-Karten: auf Desktop 2-spaltig (CSS-Columns, Single-Render).
+          Das interaktive Segment (KVA/Reparaturtermin/Modals) + Copilot + Chat bleiben
+          full-width DARUNTER. [&>*] targetet die 4 SectionCards (Fragment flacht ab) ->
+          break-inside-avoid haelt jede Karte zusammen, mb-4 ersetzt space-y-4 hier. */}
+      <div className="lg:columns-2 lg:gap-4 [&>*]:mb-4 [&>*]:break-inside-avoid">
 
       <SectionCard title="Fall">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
@@ -648,6 +675,7 @@ export function WerkstattAuftragDetail({
           </SectionCard>
         </>
       )}
+      </div>
 
       {segment === 'reparatur' ? (
         <>
@@ -698,6 +726,16 @@ export function WerkstattAuftragDetail({
           </div>
         </SectionCard>
       )}
+
+      {/* KI-Copilot: Reparatur/Abrechnung/KVA/Totalschaden — Streaming via /api/werkstatt/copilot. */}
+      <WerkstattCopilotPanel claimId={auftrag.claim_id} />
+
+      {/* Fall-Chat (Gruppenchat, kanal-basiert wie der Makler-Chat) — ganz unten. */}
+      <WerkstattChatTab
+        claimId={auftrag.claim_id}
+        currentUserId={currentUserId ?? null}
+        initialMessages={chatMessages ?? []}
+      />
     </div>
   )
 }

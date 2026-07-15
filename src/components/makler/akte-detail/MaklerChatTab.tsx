@@ -25,6 +25,7 @@ type Props = {
   fallId: string
   currentUserId: string
   initialMessages: MaklerChatMessage[]
+  gruppeThreadId?: string | null
 }
 
 type Bubble =
@@ -103,7 +104,7 @@ function buildBubbles(messages: MaklerChatMessage[]): Bubble[] {
   return out
 }
 
-export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props) {
+export function MaklerChatTab({ fallId, currentUserId, initialMessages, gruppeThreadId }: Props) {
   const [messages, setMessages] = useState<MaklerChatMessage[]>(initialMessages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -123,69 +124,71 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
     scrollToBottom()
   }, [messages, scrollToBottom])
 
-  // Realtime-Subscription auf neue Nachrichten fuer diesen Fall.
+  // Realtime: neue Nachrichten des Falls. v1-Kanal (`gruppenchat`) via fall_id-Filter
+  // (Legacy + eigene Makler-Zeilen); v2-`kunde_gruppe`-Thread via thread_id-Filter
+  // (Kunde/KB/SV tragen kein kanal='gruppenchat', kommen NUR ueber den Thread rein).
+  // Dedup per id (eigene Makler-Zeile matcht beide Filter). Kein team_intern (eigener Thread).
   useEffect(() => {
     const supabase = createClient()
-    const channel = supabase
-      .channel(`fall-chat-${fallId}`)
-      .on(
+    type RawRow = {
+      id: string
+      fall_id: string
+      kanal: string | null
+      nachricht: string
+      created_at: string
+      sender_id: string | null
+      sender_rolle: string | null
+      is_system: boolean | null
+    }
+    const addFromRow = (raw: RawRow) => {
+      // Sender-Profil per Query nachladen (Payload enthaelt kein Join).
+      void (async () => {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('id, vorname, nachname, avatar_url')
+          .eq('id', raw.sender_id ?? '')
+          .maybeSingle()
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === raw.id)) return prev
+          const next: MaklerChatMessage = {
+            id: raw.id,
+            fall_id: raw.fall_id,
+            kanal: raw.kanal ?? '',
+            nachricht: raw.nachricht,
+            created_at: raw.created_at,
+            sender_id: raw.sender_id,
+            sender_rolle: raw.sender_rolle as MaklerChatMessage['sender_rolle'],
+            is_system: Boolean(raw.is_system),
+            sender_vorname: prof?.vorname ?? null,
+            sender_nachname: prof?.nachname ?? null,
+            sender_avatar_url: prof?.avatar_url ?? null,
+          }
+          return [...prev, next]
+        })
+      })()
+    }
+    let channel = supabase.channel(`fall-chat-${fallId}`).on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'nachrichten', filter: `fall_id=eq.${fallId}` },
+      (payload) => {
+        const raw = payload.new as RawRow
+        if (raw.kanal !== 'gruppenchat' && raw.kanal !== 'chat_gruppe_mit_makler') return
+        addFromRow(raw)
+      },
+    )
+    if (gruppeThreadId) {
+      channel = channel.on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'nachrichten',
-          filter: `fall_id=eq.${fallId}`,
-        },
-        (payload) => {
-          const raw = payload.new as {
-            id: string
-            fall_id: string
-            kanal: string
-            nachricht: string
-            created_at: string
-            sender_id: string | null
-            sender_rolle: string | null
-            is_system: boolean | null
-          }
-          if (
-            raw.kanal !== 'gruppenchat' &&
-            raw.kanal !== 'chat_gruppe_mit_makler'
-          ) {
-            return
-          }
-          // Sender-Profil per Query nachladen (Payload enthaelt kein Join).
-          void (async () => {
-            const { data: prof } = await supabase
-              .from('profiles')
-              .select('id, vorname, nachname, avatar_url')
-              .eq('id', raw.sender_id ?? '')
-              .maybeSingle()
-            setMessages((prev) => {
-              if (prev.some((m) => m.id === raw.id)) return prev
-              const next: MaklerChatMessage = {
-                id: raw.id,
-                fall_id: raw.fall_id,
-                kanal: raw.kanal,
-                nachricht: raw.nachricht,
-                created_at: raw.created_at,
-                sender_id: raw.sender_id,
-                sender_rolle: raw.sender_rolle,
-                is_system: Boolean(raw.is_system),
-                sender_vorname: prof?.vorname ?? null,
-                sender_nachname: prof?.nachname ?? null,
-                sender_avatar_url: prof?.avatar_url ?? null,
-              }
-              return [...prev, next]
-            })
-          })()
-        },
+        { event: 'INSERT', schema: 'public', table: 'nachrichten', filter: `thread_id=eq.${gruppeThreadId}` },
+        (payload) => addFromRow(payload.new as RawRow),
       )
-      .subscribe()
+    }
+    channel.subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [fallId])
+  }, [fallId, gruppeThreadId])
 
   const bubbles = useMemo(() => buildBubbles(messages), [messages])
 

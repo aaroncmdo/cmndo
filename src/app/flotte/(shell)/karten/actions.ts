@@ -1,9 +1,18 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
-import { resolveSchadenkarteToFahrzeug, getKartenFuerFirma } from '@/lib/schadenkarte/schadenkarte'
+import {
+  resolveSchadenkarteToFahrzeug,
+  getKartenFuerFirma,
+  sperreSchadenkarte,
+  entsperreSchadenkarte,
+  entbindeSchadenkarte,
+  speichereNfcUid,
+} from '@/lib/schadenkarte/schadenkarte'
+import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { buildQrGridPdf } from '@/lib/werkstatt/flyer/build-qr-grid'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +62,7 @@ export async function baueKartenQrPdf(): Promise<
   try {
     const entries = karten.map((k) => ({
       token: k.token,
-      url: `https://claimondo.de/schaden/${k.token}`,
+      url: buildSchadenkarteUrl(k.token),
     }))
     const bytes = await buildQrGridPdf(entries)
     return { ok: true, base64: Buffer.from(bytes).toString('base64') }
@@ -61,4 +70,64 @@ export async function baueKartenQrPdf(): Promise<
     console.error('[baueKartenQrPdf]', err)
     return { ok: false, error: 'QR-PDF-Erzeugung fehlgeschlagen.' }
   }
+}
+
+/** Karte sperren (verloren/gestohlen) — der Token ist danach sofort tot. */
+export async function sperreKarte(token: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await sperreSchadenkarte(db, { token, firmaId: firma.id })
+  if (res.ok) {
+    revalidatePath('/flotte/karten')
+    revalidatePath('/flotte/flotte')
+  }
+  return res
+}
+
+/** Gesperrte Karte wieder freigeben — sie landet auf 'frei' und muss neu gebunden werden. */
+export async function entsperreKarte(token: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await entsperreSchadenkarte(db, { token, firmaId: firma.id })
+  if (res.ok) {
+    revalidatePath('/flotte/karten')
+    revalidatePath('/flotte/flotte')
+  }
+  return res
+}
+
+/** Karte vom Fahrzeug lösen (Fahrzeug verkauft) — sie wird wiederverwendbar. */
+export async function entbindeKarte(token: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await entbindeSchadenkarte(db, { token, firmaId: firma.id })
+  if (res.ok) {
+    revalidatePath('/flotte/karten')
+    revalidatePath('/flotte/flotte')
+  }
+  return res
+}
+
+/** Nach erfolgreichem + verifiziertem NFC-Schreiben: Chip-Seriennummer vermerken. */
+export async function merkeNfcUid(
+  token: string,
+  nfcUid: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await speichereNfcUid(db, { token, firmaId: firma.id, nfcUid })
+  if (res.ok) revalidatePath('/flotte/karten')
+  return res
 }

@@ -139,6 +139,34 @@ export async function assignReparaturWerkstatt(
   const { error } = await admin.from(table).update(patch as never).eq('id', input.id)
   if (error) return { ok: false, error: error.message }
 
+  // ⚠ Aaron 15.07. — LEAD-CLAIM-SYNC (Regression aus dem neuen Kasko/Selbstzahler-Flow):
+  // Beim target='lead' kann BEREITS ein Claim existieren. Genau das ist bei Kasko/Selbstzahler der
+  // Normalfall: erzeugeSelbstzahlerClaim legt den (partiellen) Claim schon im QUALI-Step an — also
+  // VOR der Werkstatt-Wahl. Ohne diesen Sync bekaeme nur der Lead die Werkstatt, der Claim bliebe
+  // leer, und das Kunde-Portal wuerde dem Kunden den Werkstatt-FINDER zeigen: er soll die Werkstatt
+  // ein zweites Mal waehlen, obwohl er sie im FlowLink laengst gewaehlt hat.
+  // (Frueher fiel das nicht auf, weil Kasko/Selbstzahler den Werkstatt-Step im Flow nie erreichten.)
+  //
+  // Nebenwirkung, die das mitrepariert: die Werkstatt-Mitteilung verlinkt auf /werkstatt/auftraege,
+  // und v_werkstatt_auftrag ist CLAIM-gekeyt — ohne die Zuordnung am Claim landete die Werkstatt auf
+  // einer leeren Liste.
+  if (input.target === 'lead') {
+    const { data: claim } = await admin
+      .from('claims')
+      .select('id')
+      .eq('lead_id', input.id)
+      .maybeSingle()
+    const claimId = (claim?.id as string | undefined) ?? null
+    if (claimId) {
+      const { error: syncErr } = await admin
+        .from('claims')
+        .update(patch as never)
+        .eq('id', claimId)
+      // Non-critical: die Lead-Zuweisung steht bereits; ein Sync-Fehler darf sie nicht zuruecknehmen.
+      if (syncErr) console.error('[assignReparaturWerkstatt] Claim-Sync fehlgeschlagen:', syncErr.message)
+    }
+  }
+
   // Non-critical: Benachrichtigungen. Ein Send-Fehler nimmt die Zuweisung NICHT zurueck.
   try {
     await notifyAfterAssign(admin, input)

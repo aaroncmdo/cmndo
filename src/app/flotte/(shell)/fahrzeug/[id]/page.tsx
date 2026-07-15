@@ -4,6 +4,7 @@ import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
 import { getFahrzeugSchaeden } from '@/lib/flotte/fahrzeug-schaeden'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
+import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 import EmptyState from '@/components/shared/EmptyState'
@@ -66,7 +67,7 @@ export default async function FahrzeugDetailPage({
   const karte = kartenData as KartenRow | null
 
   const qrSvg = karte
-    ? await generateQrCodeSvg(`https://claimondo.de/schaden/${karte.karten_token}`, 160)
+    ? await generateQrCodeSvg(buildSchadenkarteUrl(karte.karten_token), 160)
     : null
 
   const sanitizedKennzeichen = (fahrzeug.kennzeichen ?? 'fahrzeug').replace(/[^a-zA-Z0-9]/g, '-')
