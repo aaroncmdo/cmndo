@@ -84,6 +84,13 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
     : null
 
   const aktionOffen = status === 'angefragt' || status === 'anruf_erbeten' || status === 'werkstatt_vorschlag'
+  // b1: Ein Auftrag ohne Kunden-Wunschtermin (Kunde waehlte nur die Werkstatt) hat keinen
+  // Termin zum Bestaetigen — die Werkstatt schlaegt dann selbst einen vor. hatWunschtermin
+  // steuert, ob "Termin bestaetigen" ueberhaupt angeboten wird.
+  const hatWunschtermin = Boolean(auftrag.reparatur_wunschtermin)
+  // Der 'angefragt'-Default-Badge ("Wunschtermin angefragt") ist ohne Wunschtermin
+  // irrefuehrend — dann liegt der Ball bei der Werkstatt, einen Termin vorzuschlagen.
+  const badgeLabel = status === 'angefragt' && !hatWunschtermin ? 'Terminvorschlag offen' : phase.label
 
   async function handleVorschlag() {
     if (!neuerTermin) return
@@ -140,11 +147,17 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
       <SectionCard title="Reparaturtermin" className="mt-3">
         <div className="space-y-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <StatusBadge tone={badgeTone} size="xs">{phase.label}</StatusBadge>
+            <StatusBadge tone={badgeTone} size="xs">{badgeLabel}</StatusBadge>
             {terminAnzeige && (
               <span className="text-body-sm text-claimondo-navy">{terminAnzeige}</span>
             )}
           </div>
+
+          {status === 'angefragt' && !terminAnzeige && (
+            <p className="text-body-sm text-claimondo-ondo">
+              Der Kunde hat keinen Wunschtermin angegeben — bitte schlagen Sie unten einen Termin vor.
+            </p>
+          )}
 
           {status === 'abgelehnt' && auftrag.reparatur_absage_grund && (
             <p className="text-body-sm text-claimondo-ondo">
@@ -163,15 +176,17 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 
           {aktionOffen && (
             <div className="flex flex-wrap gap-2 pt-1">
-              <Button
-                variant="navy"
-                size="sm"
-                loading={bestätigenLaden || isPending}
-                disabled={anrufLaden || ablehnenLaden}
-                onClick={handleBestaetigen}
-              >
-                Termin bestätigen
-              </Button>
+              {hatWunschtermin && (
+                <Button
+                  variant="navy"
+                  size="sm"
+                  loading={bestätigenLaden || isPending}
+                  disabled={anrufLaden || ablehnenLaden}
+                  onClick={handleBestaetigen}
+                >
+                  Termin bestätigen
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -182,7 +197,7 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
                 Anrufen / telefonisch klären
               </Button>
               <Button variant="ghost" size="sm" disabled={bestätigenLaden || anrufLaden || ablehnenLaden} onClick={() => setVorschlagOffen((v) => !v)}>
-                Anderen Termin vorschlagen
+                {hatWunschtermin ? 'Anderen Termin vorschlagen' : 'Termin vorschlagen'}
               </Button>
               <Button
                 variant="danger"
