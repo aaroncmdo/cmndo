@@ -26,6 +26,16 @@ export function coldMailFromAddress(): string {
   return `Claimondo Partnernetzwerk <partner@${domain}>`
 }
 
+/**
+ * Reply-To. Der Absender ist partner@<domain>, aber dahinter liegt kein Postfach —
+ * antwortet ein angeschriebener Betrieb direkt auf die Mail, liefe die Antwort ins
+ * Leere. Reply-To lenkt sie auf ein ueberwachtes Postfach (Default info@claimondo.de,
+ * per COLD_MAIL_REPLY_TO ueberschreibbar).
+ */
+export function coldMailReplyTo(): string {
+  return process.env.COLD_MAIL_REPLY_TO || 'info@claimondo.de'
+}
+
 export async function sendColdMail(opts: {
   to: string
   subject: string
@@ -38,6 +48,7 @@ export async function sendColdMail(opts: {
     const res = await resend.emails.send({
       from: coldMailFromAddress(),
       to: opts.to,
+      replyTo: coldMailReplyTo(),
       subject: opts.subject,
       html: opts.html,
       headers: {
