@@ -38,6 +38,7 @@ const SLOT: Record<string, StatusSlot> = {
   'vs-abgelehnt': 'danger',
   // B4-slice-1b: aktive VS-Verhandlung — kein Endzustand, daher 'active'.
   in_kommunikation_vs: 'active',
+  termin_durchgefuehrt: 'success',
   'zahlung-eingegangen': 'success',
   abgeschlossen: 'success',
   storniert: 'danger',

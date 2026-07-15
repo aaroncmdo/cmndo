@@ -42,6 +42,8 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
   // FALL_STATUS_DEFS (status/domains/fall-status.ts) keinen Eintrag -> resolveStatus faellt auf
   // { label: code } zurueck und der FallStatusBadge zeigt den rohen Slug "in_kommunikation_vs".
   in_kommunikation_vs: 'Kommunikation mit VS',
+  // B4-slice-2a-i-b: nur_gutachter-Terminal als operative_status-Wert (sonst roher Slug im Badge).
+  termin_durchgefuehrt: 'Termin durchgeführt',
   'zahlung-eingegangen': 'Zahlung eingegangen',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
@@ -134,6 +136,7 @@ const FALL_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
   'vs-abgelehnt':          'danger',
   // B4-slice-1b: aktive VS-Verhandlung — kein Endzustand, daher 'active' (nicht 'success').
   in_kommunikation_vs:     'active',
+  termin_durchgefuehrt:    'success',
   'zahlung-eingegangen':   'success',
   abgeschlossen:           'success',
   storniert:               'danger',

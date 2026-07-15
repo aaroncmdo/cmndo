@@ -131,6 +131,8 @@ export const OPERATIVE_STATUS_LABEL: Record<string, string> = {
   // B4-slice-1b: sonst greift der Slug-Fallback unten und die Werkstatt liest „In kommunikation vs".
   in_kommunikation_vs: 'Regulierung läuft',
   abgelehnt: 'Versicherung hat abgelehnt',
+  // B4-slice-2a-i-b: nur_gutachter-Terminal traegt jetzt operative_status direkt.
+  termin_durchgefuehrt: 'Termin durchgeführt',
   abgeschlossen: 'Abgeschlossen',
   storniert: 'Storniert',
 }
