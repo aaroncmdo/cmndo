@@ -20,6 +20,7 @@ export const MERGE_VARS: readonly PaletteEintrag[] = [
 
 /** Aktionen (loesen zu Button-CTAs auf). Erweiterbar: neuer Eintrag + Resolver-Zweig unten. */
 export const ACTION_VARS: readonly PaletteEintrag[] = [
+  { token: 'Partnerlink', label: 'Partner werden' },
   { token: 'Beratungslink', label: 'Beratungsgespräch buchen' },
   { token: 'Registrierungslink', label: 'Registrierungslink' },
 ]
@@ -45,6 +46,26 @@ export function registrierungsUrl(rolle: string | null): string {
   }
 }
 
+/**
+ * Rollenbewusste Partner-Landing = Cold-Mail-CTA-Ziel je Sequenz-Rolle.
+ * makler/SV haben eigene verkaufswirksame Landing-Subdomains; werkstatt.claimondo.de
+ * existiert noch nicht (Task #4) -> bis dahin der funktionierende App-Pfad statt NXDOMAIN.
+ */
+export function partnerLandingUrl(rolle: string | null): string {
+  switch (rolle) {
+    case 'makler':
+      return 'https://makler.claimondo.de'
+    case 'sachverstaendiger':
+      return 'https://gutachter.claimondo.de'
+    case 'werkstatt':
+      // TODO(Task #4): auf 'https://werkstatt.claimondo.de' umstellen, sobald die
+      //   Subdomain live serviert (aktuell HTTP 000). App-Pfad liefert 200.
+      return `${appBase()}/werkstatt-partner-werden`
+    default:
+      return 'https://claimondo.de'
+  }
+}
+
 /** Email-sicheres Button-`<a>` (Inline-Styles; Claimondo-Navy). */
 export function actionButton(url: string, label: string): string {
   const style =
@@ -56,6 +77,7 @@ export function actionButton(url: string, label: string): string {
 /** Aktions-Tokens -> aufgeloestes Button-HTML fuer einen konkreten Lead. */
 export function resolveActionVars(lead: { rolle: string | null }): Record<string, string> {
   return {
+    Partnerlink: actionButton(partnerLandingUrl(lead.rolle), 'Jetzt Partner werden'),
     Beratungslink: actionButton(BERATUNG_URL, 'Beratungsgespräch buchen'),
     Registrierungslink: actionButton(registrierungsUrl(lead.rolle), 'Jetzt registrieren'),
   }
