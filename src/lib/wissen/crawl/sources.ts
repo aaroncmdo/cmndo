@@ -15,6 +15,16 @@ export type CrawlSource = {
 // (allg. Rechtsnews, Versicherungsmarkt) drankommen -> hoehere Relevanz-Trefferquote
 // bei der Generierung (E2E-Smoke 02.07.: noisy-Feeds vorn -> 7/8 nicht_relevant).
 export const B2B_CRAWL_SOURCES: CrawlSource[] = [
+  // recht — spezialisierter Kfz-Schaden-/SV-Rechtsprechungs-Blog (Totalschaden, Restwert, Grundhonorar,
+  // Sachverstaendigen-Recht — sehr hohe Kfz-Schaden-Trefferquote; 2026-07-06 live verifiziert, 12 Items on-topic).
+  // Gold-Quelle -> zuerst.
+  {
+    name: 'Captain-HUK',
+    category: 'recht',
+    kind: 'rss',
+    url: 'https://www.captain-huk.de/feed/',
+  },
+
   // werkstatt — Kfz-Betrieb / Werkstatt-Fachpresse (Kfz-nah)
   {
     name: 'kfz-betrieb',
@@ -31,24 +41,7 @@ export const B2B_CRAWL_SOURCES: CrawlSource[] = [
     url: 'https://www.kues.de/rss',
   },
 
-  // recht — Rechtsprechung / Urteilsnachrichten (Verkehrs-/Schadenrecht; breiter, teils off-topic)
-  {
-    name: 'Rechtslupe',
-    category: 'recht',
-    kind: 'rss',
-    url: 'https://www.rechtslupe.de/feed',
-  },
-
-  // recht — spezialisierter Kfz-Schaden-/SV-Rechtsprechungs-Blog (Totalschaden, Restwert, Grundhonorar,
-  // Sachverstaendigen-Recht — sehr hohe Kfz-Schaden-Trefferquote; 2026-07-06 live verifiziert, 12 Items on-topic).
-  {
-    name: 'Captain-HUK',
-    category: 'recht',
-    kind: 'rss',
-    url: 'https://www.captain-huk.de/feed/',
-  },
-
-  // versicherung — Versicherungs- und Makler-Branchennews (breit; KI-Backstop filtert Nicht-Kfz)
+  // versicherung — Versicherungs-/Makler-News (breit; KI-Backstop filtert Nicht-Kfz). Nachrangig.
   {
     name: 'Versicherungsbote',
     category: 'versicherung',
@@ -61,10 +54,9 @@ export const B2B_CRAWL_SOURCES: CrawlSource[] = [
     kind: 'rss',
     url: 'https://www.asscompact.de/rss.xml',
   },
-  {
-    name: 'Pfefferminzia',
-    category: 'versicherung',
-    kind: 'rss',
-    url: 'https://www.pfefferminzia.de/feed/',
-  },
+
+  // Entfernt 2026-07-15 (Quellen-Schaerfung, ~78% Reject-Rauschen): Rechtslupe (allg. Rechtsnews,
+  // niedrigste Kfz-Schaden-Quote) + Pfefferminzia (Leben/Rente-lastig). Echte Kfz-Kasko-/Haftpflicht-
+  // Schaeden matchen weiter via kfz/kasko/unfall/schaden-Komposita. Neue verifizierte Kfz-Schaden-/
+  // SV-Recht-Feeds hier ergaenzen (Reihenfolge = Prioritaet).
 ]
