@@ -10,6 +10,7 @@ import { istGewerk, type BedarfQuelle, type Gewerk, type Reparaturbedarf } from 
 const ERLAUBTE_QUELLEN: readonly BedarfQuelle[] = [
   'gutachten',
   'schadenbild',
+  'schadenbeschreibung',
   'kva',
   'manuell',
   'unbekannt',
