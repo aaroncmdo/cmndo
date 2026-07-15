@@ -20,6 +20,7 @@ import { TextField } from '@/components/shared/forms/TextField'
 import { SelectField } from '@/components/shared/forms/SelectField'
 import { erstelleClip } from './actions'
 import { STATUS_LABEL, STATUS_TONE } from './status-display'
+import { AutoRefresh } from './AutoRefresh'
 
 export interface Job {
   id: string
@@ -53,6 +54,13 @@ export default function ContentStudioClient({ jobs }: { jobs: Job[] }) {
 
   return (
     <div className="space-y-6 py-6">
+      {/* Liste live halten, solange ein Job in Arbeit ist (generiert/gequeued/rendert) */}
+      <AutoRefresh
+        active={jobs.some(
+          (j) => j.status === 'entwurf' || j.status === 'render_queued' || j.status === 'audio_erzeugt',
+        )}
+        intervalMs={3000}
+      />
       <PageHeader
         title="Content-Studio"
         description="KI-generierte Kurzvideos (Ratgeber & Ads) für TikTok & Meta"
