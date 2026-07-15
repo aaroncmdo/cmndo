@@ -5,7 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getStorageUrlBulk } from '@/lib/storage/url'
+import { getStorageUrlBulk, resignStorageUrl } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 import { NoticeBox } from '@/components/shared/NoticeBox'
@@ -95,11 +95,10 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
+      .select('operative_status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
       .eq('id', claimId)
       .maybeSingle<{
-        status: string | null
-        work_state: string | null
+        operative_status: string | null
         kanzlei_wunsch: string | null
         schadenort_adresse: string | null
         schadenort_plz: string | null
@@ -117,9 +116,9 @@ export default async function FallaktePage({
       .select('gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{ gegner_aktenzeichen: string | null }>()
-    // D2/T1.1b: Badge zeigt die Lifecycle/Terminal-Achse (status); fällt für aktive
-    // Claims (status NULL) auf die Dispatch/Processing-Achse (work_state) zurück.
-    claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
+    // B3/T4 (Status-Achsen-Konsolidierung, Aaron 15.07.): der Fallakte-Badge zeigt jetzt
+    // operative_status = die EINE Status-Achse (aktive Phasen + jeder Terminal seit slice-2a).
+    claimStatus        = claimRow?.operative_status ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {
@@ -1103,7 +1102,18 @@ export default async function FallaktePage({
           // Rolle bestimmt Permission (Admin/KB upload, SV/Kanzlei read-only).
           pflichtSlots: await getPflichtdokumenteForFall(supabase, id, viewerRoleForTimeline),
           viewerRolle: viewerRoleForTimeline,
-          pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
+          // #4336-Follow-up (UI-Smoke-Fund): DokumenteTab rendert pflichtdokumente.dokument_url
+          // roh als href. `fall-dokumente` ist ein PRIVATER Bucket → die gespeicherte URL ist tot
+          // (public → HTTP 400) bzw. abgelaufen (signed-TTL). Frisch signieren. Der Kunde-Pfad lief
+          // schon über getPflichtdokumenteForFall; dieser rohe Admin-Read wurde im Sweep übersehen.
+          pflichtdokumente: (await Promise.all(
+            ((pflichtdokumente ?? []) as Array<{ dokument_url: string | null }>).map(async (p) => ({
+              ...p,
+              dokument_url: p.dokument_url
+                ? ((await resignStorageUrl(adminStorage, p.dokument_url)) ?? p.dokument_url)
+                : null,
+            })),
+          )) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
           dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {
             anschlussschreiben_url: (fall.anschlussschreiben_url as string | null) ?? null,
