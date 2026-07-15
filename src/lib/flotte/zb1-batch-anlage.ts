@@ -56,31 +56,34 @@ export async function legeFlottenFahrzeugeAn(
 ): Promise<BatchAnlageErgebnis[]> {
   const out: BatchAnlageErgebnis[] = []
   for (let i = 0; i < zeilen.length; i++) {
-    const { felder, bereitsInFlotte } = zeilen[i]
+    const { felder } = zeilen[i]
     const kennzeichen = felder.kennzeichen
     try {
       const fin = felder.fin?.trim().toUpperCase() || null
       const hatFin = !!fin && FIN_REGEX.test(fin)
 
-      if (hatFin) {
-        const veh = await ensureVehicleFromFin({ fin, snapshot: felderToSnapshot(felder), db })
-        if (!veh.ok) { out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: veh.error }); continue }
-        await persistiereFahrzeugklasse(db, veh.vehicleId, felder.fahrzeugklasse)
-        if (bereitsInFlotte) { out.push({ zeileIndex: i, kennzeichen, status: 'aktualisiert' }); continue }
-        const bind = await bindeVehicleAnFlotte(db, { firmaId, vehicleId: veh.vehicleId, userId })
-        if (bind.bereitsVorhanden) { out.push({ zeileIndex: i, kennzeichen, status: 'aktualisiert' }); continue }
-        if (!bind.ok) { out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: bind.error }); continue }
-        out.push({ zeileIndex: i, kennzeichen, status: 'angelegt' })
-      } else {
-        // Kein/ungueltiges FIN -> Stub (kein FIN-Dedup, aber fahrzeugklasse wird nachgezogen).
-        const veh = await createVehicleStub({ snapshot: felderToSnapshot(felder), db })
-        if (!veh.ok) { out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: veh.error }); continue }
-        await persistiereFahrzeugklasse(db, veh.vehicleId, felder.fahrzeugklasse)
-        const bind = await bindeVehicleAnFlotte(db, { firmaId, vehicleId: veh.vehicleId, userId })
-        if (bind.bereitsVorhanden) { out.push({ zeileIndex: i, kennzeichen, status: 'aktualisiert' }); continue }
-        if (!bind.ok) { out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: bind.error }); continue }
-        out.push({ zeileIndex: i, kennzeichen, status: 'stub' })
+      // Vehicle anlegen/finden: mit FIN dedupliziert ensureVehicleFromFin, ohne FIN entsteht ein Stub.
+      const veh = hatFin
+        ? await ensureVehicleFromFin({ fin, snapshot: felderToSnapshot(felder), db })
+        : await createVehicleStub({ snapshot: felderToSnapshot(felder), db })
+      if (!veh.ok) { out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: veh.error }); continue }
+
+      // IMMER binden lassen -- ob das Fahrzeug schon in der Flotte ist, entscheidet der UNIQUE-
+      // Constraint (23505 -> bereitsVorhanden), NICHT das clientseitige `bereitsInFlotte` aus dem
+      // Scan: das waere nach einem FIN-Edit im Review stale und wuerde den Bind still ueberspringen.
+      const bind = await bindeVehicleAnFlotte(db, { firmaId, vehicleId: veh.vehicleId, userId })
+      if (!bind.ok && !bind.bereitsVorhanden) {
+        out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: bind.error }); continue
       }
+      // fahrzeugklasse erst nach erfolgreichem Bind nachziehen (best-effort, bricht die Zeile nicht).
+      await persistiereFahrzeugklasse(db, veh.vehicleId, felder.fahrzeugklasse)
+
+      const status: BatchAnlageErgebnis['status'] = bind.bereitsVorhanden
+        ? 'aktualisiert'
+        : hatFin
+          ? 'angelegt'
+          : 'stub'
+      out.push({ zeileIndex: i, kennzeichen, status })
     } catch (err) {
       out.push({ zeileIndex: i, kennzeichen, status: 'fehler', error: err instanceof Error ? err.message : 'Unbekannter Fehler' })
     }

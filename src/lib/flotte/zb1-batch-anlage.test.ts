@@ -33,11 +33,24 @@ describe('legeFlottenFahrzeugeAn', () => {
     const r = await legeFlottenFahrzeugeAn(db, [{ felder: felder('WBA12345678901234'), bereitsInFlotte: false }], 'f1', 'u1')
     expect(r[0].status).toBe('angelegt')
   })
-  it('bereitsInFlotte -> vehicle refresht, KEIN bind -> aktualisiert', async () => {
+  it('FIN schon in Flotte -> bind meldet bereitsVorhanden (23505) -> aktualisiert', async () => {
     ensureMock.mockResolvedValue({ ok: true, vehicleId: 'v1' })
+    bindeMock.mockResolvedValue({ ok: false, bereitsVorhanden: true })
     const r = await legeFlottenFahrzeugeAn(db, [{ felder: felder('WBA12345678901234'), bereitsInFlotte: true }], 'f1', 'u1')
     expect(r[0].status).toBe('aktualisiert')
-    expect(bindeMock).not.toHaveBeenCalled()
+    // Der Status kommt aus der DB (23505), NICHT aus dem Client-Flag -> bind MUSS laufen.
+    expect(bindeMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('REGRESSION: bereitsInFlotte:true, aber FIN im Review editiert -> bindet TROTZDEM (kein stiller Skip)', async () => {
+    // `bereitsInFlotte` stammt vom Scan der URSPRUENGLICHEN FIN. Korrigiert der Nutzer die FIN
+    // auf ein noch-nicht-registriertes Fahrzeug, darf der Bind NICHT uebersprungen werden --
+    // sonst landet das Fahrzeug nie in der Flotte, wird aber als Erfolg gemeldet.
+    ensureMock.mockResolvedValue({ ok: true, vehicleId: 'v-neu' })
+    bindeMock.mockResolvedValue({ ok: true })
+    const r = await legeFlottenFahrzeugeAn(db, [{ felder: felder('WBA99999999999999'), bereitsInFlotte: true }], 'f1', 'u1')
+    expect(bindeMock).toHaveBeenCalledWith(db, { firmaId: 'f1', vehicleId: 'v-neu', userId: 'u1' })
+    expect(r[0].status).toBe('angelegt')
   })
   it('keine FIN -> createVehicleStub -> stub', async () => {
     stubMock.mockResolvedValue({ ok: true, vehicleId: 'v2' })
@@ -113,11 +126,21 @@ describe('legeFlottenFahrzeugeAn', () => {
     expect(r[0].status).toBe('angelegt')
   })
 
-  it('Task 6: bereitsInFlotte -> fahrzeugklasse wird trotzdem aktualisiert', async () => {
+  it('Task 6: bereits gebunden (23505) -> fahrzeugklasse wird trotzdem aktualisiert', async () => {
     ensureMock.mockResolvedValue({ ok: true, vehicleId: 'v1' })
+    bindeMock.mockResolvedValue({ ok: false, bereitsVorhanden: true })
     const { db: dbm, updateMock } = makeDbMock()
     const r = await legeFlottenFahrzeugeAn(dbm, [{ felder: felder('WBA12345678901234', 'K-AA 1', 'N1'), bereitsInFlotte: true }], 'f1', 'u1')
     expect(r[0].status).toBe('aktualisiert')
     expect(updateMock).toHaveBeenCalledWith({ fahrzeugklasse: 'N1' })
+  })
+
+  it('Task 6: echter Bind-Fehler -> fahrzeugklasse wird NICHT geschrieben (Zeile ist fehler)', async () => {
+    ensureMock.mockResolvedValue({ ok: true, vehicleId: 'v1' })
+    bindeMock.mockResolvedValue({ ok: false, error: 'DB weg' })
+    const { db: dbm, fromMock } = makeDbMock()
+    const r = await legeFlottenFahrzeugeAn(dbm, [{ felder: felder('WBA12345678901234', 'K-AA 1', 'M1'), bereitsInFlotte: false }], 'f1', 'u1')
+    expect(r[0].status).toBe('fehler')
+    expect(fromMock).not.toHaveBeenCalled()
   })
 })
