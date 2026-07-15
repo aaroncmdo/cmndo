@@ -4,7 +4,7 @@ import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
 import FlotteClient from '@/components/flotte/FlotteClient'
 import { SchadenkarteBindenSection } from '@/components/flotte/SchadenkarteBindenSection'
-import { fuegeFahrzeugHinzu, entferneFahrzeug } from './actions'
+import { fuegeFahrzeugHinzu, entferneFahrzeug, scanZb1Karte, legeZb1Fahrzeuge } from './actions'
 import { bindeKarte } from './schadenkarte-actions'
 
 export const dynamic = 'force-dynamic'
@@ -21,7 +21,7 @@ export default async function FlottePage() {
         <p className="mt-1 text-sm text-claimondo-shield">Ihre Firmenfahrzeuge — Grundlage für die Schadenkarten.</p>
       </div>
       {/* onSpeichereFirma bewusst weggelassen: firma ist admin-provisioniert, kein Setup-Formular. */}
-      <FlotteClient firma={firma} flotte={flotte} onFuegeHinzu={fuegeFahrzeugHinzu} onEntferne={entferneFahrzeug} detailBasePath="/flotte/fahrzeug" />
+      <FlotteClient firma={firma} flotte={flotte} onFuegeHinzu={fuegeFahrzeugHinzu} onEntferne={entferneFahrzeug} detailBasePath="/flotte/fahrzeug" onScanZb1={scanZb1Karte} onLegeZb1={legeZb1Fahrzeuge} />
       <SchadenkarteBindenSection flotte={flotte} onBinde={bindeKarte} />
     </div>
   )
