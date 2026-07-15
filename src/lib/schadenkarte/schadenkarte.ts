@@ -284,7 +284,7 @@ export async function speichereNfcUid(
 
   // firma_id wird BEIM UPDATE erneut geprueft, nicht nur beim Lesen: schliesst die
   // TOCTOU-Luecke zwischen ladeKarteFuerFirma und dem Write.
-  const { error } = await db
+  const { data, error } = await db
     .from('schadenkarten')
     .update({ nfc_uid: params.nfcUid })
     .eq('id', row.id)
@@ -293,5 +293,10 @@ export async function speichereNfcUid(
     .maybeSingle()
 
   if (error) return { ok: false, error: error.message }
+  // Matcht der firma_id-Guard beim Write keine Zeile (genau die TOCTOU-Luecke von oben --
+  // z.B. firma_id wurde zwischen Read und Write per ON DELETE SET NULL auf NULL gesetzt),
+  // liefert PostgREST data: null, error: null. Ohne diesen Check waere das faelschlich
+  // ok:true, obwohl nichts geschrieben wurde (analog setzeStatus oben).
+  if (!data) return { ok: false, error: 'Karte wurde zwischenzeitlich geändert.' }
   return { ok: true }
 }

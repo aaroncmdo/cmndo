@@ -462,7 +462,7 @@ describe('speichereNfcUid', () => {
   it('speichert die Chip-Seriennummer an der Karte', async () => {
     // makeDb gibt seit 9f13b1430 { db, updateMock } zurueck (nicht mehr db direkt) --
     // destrukturieren wie bei allen anderen Tests in dieser Datei.
-    const { db } = makeDb({
+    const { db, updateMock } = makeDb({
       selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
       updateResult: { data: { id: 'k1' }, error: null },
     })
@@ -470,6 +470,10 @@ describe('speichereNfcUid', () => {
       token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
     })
     expect(res.ok).toBe(true)
+    // Beweist, WAS geschrieben wird -- nicht nur dass res.ok true ist. Code-Review-Fund:
+    // ein Tippfehler wie { status: params.nfcUid } statt { nfc_uid: params.nfcUid } waere
+    // sonst unbemerkt gruen geblieben (s. Lifecycle-Tests oben, gleiches Muster).
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ nfc_uid: '04:a2:24:bb' }))
   })
 
   it('weist eine Karte einer fremden Firma ab', async () => {
@@ -480,5 +484,21 @@ describe('speichereNfcUid', () => {
       token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
     })
     expect(res.ok).toBe(false)
+  })
+
+  it('meldet einen Race, wenn der firma_id-Guard beim Write keine Zeile matcht (TOCTOU)', async () => {
+    // Der zweite .eq('firma_id', ...) beim Write matcht keine Zeile mehr (z.B. firma_id
+    // wurde zwischen Read und Write per ON DELETE SET NULL auf NULL gesetzt) -> PostgREST
+    // liefert data: null, error: null. Ohne den !data-Check (analog setzeStatus) wuerde
+    // das faelschlich ok:true melden, obwohl nichts geschrieben wurde.
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: null, error: null },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/zwischenzeitlich/i)
   })
 })
