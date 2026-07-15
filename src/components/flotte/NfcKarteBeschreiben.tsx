@@ -42,6 +42,22 @@ export function NfcKarteBeschreiben({ onNfcUid }: Props) {
     setUnterstuetzt(nfcVerfuegbar())
   }, [])
 
+  /**
+   * Bei JEDEM Fehlschlag im Schreib-/Verifikationspfad zurueck auf 'scannen' UND token=null.
+   *
+   * Sicherheitsgrund: ein Retry mit dem ALTEN Token wuerde den naechsten (physisch ANDEREN)
+   * Chip aus dem Stapel gegen den vorherigen Token verifizieren -- genau die Zwei-Identitaeten-
+   * Katastrophe, die scan-first verhindern soll (siehe Datei-Kopfkommentar), nur durch die
+   * Retry-Hintertuer. Ein erneuter Versuch erzwingt so zwingend einen frischen QR-Scan.
+   * `fehler` wird bewusst NICHT geloescht (sondern neu gesetzt), damit der Operator sieht,
+   * was schiefging.
+   */
+  function zurueckAufScannen(nachricht: string) {
+    setFehler(nachricht)
+    setPhase('scannen')
+    setToken(null)
+  }
+
   async function beschreibe(t: string) {
     setFehler(null)
     setLaeuft(true)
@@ -75,12 +91,21 @@ export function NfcKarteBeschreiben({ onNfcUid }: Props) {
           controller.abort()
           resolve({ url: null, uid: null })
         }
-        void reader.scan({ signal: controller.signal })
+        // scan() selbst kann ablehnen (NotAllowedError, InvalidStateError bei ueberlappender
+        // Session, NFC hardwareseitig aus) -- das landet NICHT in onreading/onreadingerror und
+        // wuerde ohne dieses .catch() als unhandled Rejection im Log liegen, waehrend die Promise
+        // bis zum 10s-Timeout haengt. Aufloesen wie ein fehlgeschlagenes Auslesen: chipTraegtToken
+        // gegen null ist immer false -> sauberer "nicht verifiziert"-Pfad, kein Falsch-Erfolg.
+        reader.scan({ signal: controller.signal }).catch(() => {
+          clearTimeout(timeout)
+          controller.abort()
+          resolve({ url: null, uid: null })
+        })
       })
 
       if (!chipTraegtToken(gelesen.url, t)) {
-        setFehler(
-          'Die Karte konnte nicht verifiziert werden. Bitte erneut auflegen — sie gilt als nicht beschrieben.',
+        zurueckAufScannen(
+          'Die Karte konnte nicht verifiziert werden — sie gilt als nicht beschrieben. Bitte die Karte erneut scannen.',
         )
         return
       }
@@ -89,17 +114,19 @@ export function NfcKarteBeschreiben({ onNfcUid }: Props) {
       if (gelesen.uid) {
         const res = await onNfcUid(t, gelesen.uid)
         if (!res.ok) {
-          setFehler(res.error ?? 'Chip-Kennung konnte nicht gespeichert werden.')
+          zurueckAufScannen(
+            `${res.error ?? 'Chip-Kennung konnte nicht gespeichert werden.'} Bitte die Karte erneut scannen.`,
+          )
           return
         }
       }
 
       setPhase('fertig')
     } catch (err) {
-      setFehler(
+      zurueckAufScannen(
         err instanceof Error && err.name === 'NotAllowedError'
-          ? 'NFC-Zugriff wurde abgelehnt. Bitte erlauben und erneut versuchen.'
-          : 'Beschreiben fehlgeschlagen. Karte länger auflegen und erneut versuchen.',
+          ? 'NFC-Zugriff wurde abgelehnt. Bitte erlauben und die Karte erneut scannen.'
+          : 'Beschreiben fehlgeschlagen. Bitte die Karte erneut scannen.',
       )
     } finally {
       setLaeuft(false)
