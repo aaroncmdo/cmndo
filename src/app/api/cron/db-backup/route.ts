@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { gzipSync } from 'node:zlib'
 
 // 2026-06-20: Tabellenliste auf den kanonischen Satz korrigiert (Notification/Cron-Audit).
 // Vorher kaputt: 'gutachter_organisationen' + 'rechnungen' existieren NICHT (heissen
@@ -73,7 +74,7 @@ export async function GET(request: Request) {
   const supabase = createAdminClient()
   const now = new Date()
   const dateStr = now.toISOString().split('T')[0] // YYYY-MM-DD
-  const filePath = `daily/${dateStr}.json`
+  const filePath = `daily/${dateStr}.json.gz`
 
   try {
     // 1) Export tables
@@ -105,15 +106,18 @@ export async function GET(request: Request) {
       totalRows += rows.length
     }
 
-    // 2) Upload to Storage
-    const jsonBlob = new Blob(
-      [JSON.stringify({ created_at: now.toISOString(), tables: backup }, null, 2)],
-      { type: 'application/json' },
+    // 2) Upload to Storage — gzip-komprimiert. Roh-JSON kann >50 MB werden und
+    // schlaegt dann am (projekt-globalen) Upload-Limit fehl (400); gzip bringt
+    // ~50 MB auf ~5 MB, dauerhaft unter dem Limit. Restore: gunzip -> JSON.parse.
+    const jsonBuf = Buffer.from(
+      JSON.stringify({ created_at: now.toISOString(), tables: backup }),
+      'utf-8',
     )
+    const gzBlob = new Blob([gzipSync(jsonBuf)], { type: 'application/gzip' })
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(filePath, jsonBlob, { upsert: true })
+      .upload(filePath, gzBlob, { upsert: true, contentType: 'application/gzip' })
 
     if (uploadError) {
       throw new Error(`Storage upload failed: ${uploadError.message}`)
@@ -125,7 +129,7 @@ export async function GET(request: Request) {
     if (existingFiles) {
       const cutoff = new Date(now.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000)
       const oldFiles = existingFiles.filter((f) => {
-        const dateMatch = f.name.match(/^(\d{4}-\d{2}-\d{2})\.json$/)
+        const dateMatch = f.name.match(/^(\d{4}-\d{2}-\d{2})\.json(\.gz)?$/)
         if (!dateMatch) return false
         return new Date(dateMatch[1]) < cutoff
       })
@@ -143,7 +147,7 @@ export async function GET(request: Request) {
       file_path: filePath,
       cleaned_up: existingFiles
         ? existingFiles.filter((f) => {
-            const m = f.name.match(/^(\d{4}-\d{2}-\d{2})\.json$/)
+            const m = f.name.match(/^(\d{4}-\d{2}-\d{2})\.json(\.gz)?$/)
             return m && new Date(m[1]) < new Date(now.getTime() - RETENTION_DAYS * 24 * 60 * 60 * 1000)
           }).length
         : 0,
