@@ -16,10 +16,11 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const db = createAdminClient()
-  // CMM-40: re_termin_token_eingelaufen_am mitlesen — wenn der Kunde ueber
-  // den Re-Termin-Link einen neuen Slot vorgeschlagen hat, kein Storno.
+  // CMM-44 SP-D: re_termin_token_eingelaufen_am liegt auf gutachter_termine (aktueller
+  // Termin, SSoT) — NICHT in v_faelle_mit_aktuellem_termin. Pro Fall unten separat lesen.
+  // (Der frühere View-Select brach still: PostgREST-400 → faelle=null → 0 Stornos.)
   const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
-    .select('id, no_show_gemeldet_am, re_termin_token_eingelaufen_am')
+    .select('id, no_show_gemeldet_am')
     .not('no_show_gemeldet_am', 'is', null)
     .is('storniert_am', null)
 
@@ -43,8 +44,16 @@ export async function GET(request: Request) {
 
       if (new Date() < check) continue // Frist noch nicht um
 
-      // CMM-40: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno
-      if (fall.re_termin_token_eingelaufen_am) continue
+      // CMM-44 SP-D: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno.
+      // re_termin_token_eingelaufen_am liegt auf gutachter_termine (aktueller Termin, SSoT).
+      const { data: aktTermin } = await db
+        .from('gutachter_termine')
+        .select('re_termin_token_eingelaufen_am')
+        .eq('fall_id', fall.id)
+        .order('start_zeit', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (aktTermin?.re_termin_token_eingelaufen_am) continue
 
       // Kanonisch: neuer Termin? -> gutachter_termine (nicht stale View.sv_termin).
       const { data: neuerTermin } = await db

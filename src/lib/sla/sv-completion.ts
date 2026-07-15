@@ -1,5 +1,6 @@
 // FG7: Pure SV-SLA completion derivation.
 // No DB, no side effects — safe to call from cron without any supabase context.
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 
 export type SvSlaTyp =
   | 'gutachter_zuweisung'
@@ -63,10 +64,13 @@ export function deriveSvSlaCompletion(typ: SvSlaTyp, inputs: SvCompletionInputs)
   const { operativeStatus, hasConfirmedTermin } = inputs
 
   // Terminal statuses: claim is done, nothing left to escalate.
-  // NOTE: 'storniert' is NOT in OPERATIVE_STATUS_ORDER (indexOf -> -1), so we MUST check
-  // it here explicitly before the rank comparison. 'abgeschlossen' IS in the array but
-  // is included here too for uniform terminal handling.
-  if (operativeStatus === 'abgeschlossen' || operativeStatus === 'storniert') {
+  // B4-slice-2a-i-b: gegen die SSoT CLOSED_OPERATIVE_STATUS pruefen statt nur abgeschlossen/
+  // storniert. Sonst liefern die FEINEN Terminals (reguliert_vollstaendig/klage_rechtsstreit/
+  // verjaehrt/abgelehnt_final/an_externe_kanzlei_uebergeben — seit B2 direkt in operative_status —
+  // UND termin_durchgefuehrt seit dieser Slice) rank -1 und deriveSvSlaCompletion meldet fuer
+  // einen ABGESCHLOSSENEN Claim faelschlich "nicht erfuellt" -> Falsch-Eskalation. Ein
+  // geschlossener Claim hat nichts mehr zu eskalieren, egal welcher Terminal.
+  if (operativeStatus !== null && CLOSED_OPERATIVE_STATUS.has(operativeStatus)) {
     return true
   }
 

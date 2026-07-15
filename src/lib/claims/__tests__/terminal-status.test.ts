@@ -42,7 +42,7 @@ describe('CLOSED_OPERATIVE_STATUS', () => {
   // auf coarse 'abgeschlossen' zu kollabieren) — der FG5-Test wurde dabei nicht nachgezogen und
   // war seither rot (CI faehrt nur `build`, kein vitest). Statt einer nackten Zahl jetzt die
   // Menge selbst pruefen: das faengt sowohl ein fehlendes als auch ein zuviel-eingetragenes Element.
-  it('enthaelt die 7 operative_status-Terminals (B2: feine Outcomes direkt im Cursor)', () => {
+  it('enthaelt die 8 operative_status-Terminals (B2 feine Outcomes + B4-slice-2a-i-b termin_durchgefuehrt)', () => {
     const expected = [
       'abgeschlossen',
       'storniert',
@@ -51,6 +51,8 @@ describe('CLOSED_OPERATIVE_STATUS', () => {
       'verjaehrt',
       'abgelehnt_final',
       'an_externe_kanzlei_uebergeben',
+      // B4-slice-2a-i-b: nur_gutachter-Terminal traegt jetzt operative_status direkt.
+      'termin_durchgefuehrt',
     ]
     for (const k of expected) {
       expect(CLOSED_OPERATIVE_STATUS.has(k), `CLOSED_OPERATIVE_STATUS fehlt ${k}`).toBe(true)

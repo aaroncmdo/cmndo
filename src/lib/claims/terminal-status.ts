@@ -33,6 +33,12 @@ export const CLOSED_OPERATIVE_STATUS_VALUES = [
   'verjaehrt',
   'abgelehnt_final',
   'an_externe_kanzlei_uebergeben',
+  // B4-slice-2a-i-b: der nur_gutachter-Terminal. closeNurGutachterTerminAlsDurchgefuehrt schreibt
+  // ihn seit dieser Slice direkt in operative_status -> der abgeschlossene nur_gutachter-Fall
+  // faellt aus allen Aktiv-Filtern (behebt den latenten "zaehlt-aktiv"-Bug). Ueber COMPLETED_*
+  // (= CLOSED minus storniert) zaehlt er auch als abgeschlossener Fall — konsistent mit dem
+  // durchgefuehrt_am-Close-Marker.
+  'termin_durchgefuehrt',
 ] as const
 
 export const CLOSED_OPERATIVE_STATUS: ReadonlySet<string> = new Set(CLOSED_OPERATIVE_STATUS_VALUES)
