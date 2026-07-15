@@ -29,7 +29,8 @@
 // @/lib/ocr/zb1-parser
 runZB1Ocr(base64: string): Promise<{ fullText: string; extracted: ZB1ExtractedData } | { error: string; status?: number }>
 type ZB1ExtractedData = { kennzeichen, erstzulassung, fahrzeug_baujahr: number|null, halter_nachname, halter_vorname,
-  halter_strasse, halter_plz, halter_stadt, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_farbe, fin_vin, hsn, tsn, brn }  // Rest string|null
+  halter_strasse, halter_plz, halter_stadt, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_farbe, fin_vin, hsn, tsn, brn,
+  fahrzeugklasse }  // Rest string|null. ⚠ fahrzeugklasse ist PFLICHTFELD (Spec B, 14.07.) -> in JEDE Test-Fixture!
 // @/lib/vehicles/ensure-vehicle
 type VehicleSnapshot = { kennzeichen?, hersteller?, modell?, hsn?, tsn?, kilometerstand?, kennzeichenBuchstaben?, farbe?, farbcode?, baujahr?: number|null, erstzulassung?, finQuelle? }  // string|null
 type EnsureVehicleResult = { ok: true; vehicleId: string } | { ok: false; error: string }
@@ -68,7 +69,7 @@ const leer: ZB1ExtractedData = {
   kennzeichen: null, erstzulassung: null, fahrzeug_baujahr: null,
   halter_nachname: null, halter_vorname: null, halter_strasse: null, halter_plz: null, halter_stadt: null,
   fahrzeug_hersteller: null, fahrzeug_modell: null, fahrzeug_farbe: null,
-  fin_vin: null, hsn: null, tsn: null, brn: null,
+  fin_vin: null, hsn: null, tsn: null, brn: null, fahrzeugklasse: null,
 }
 
 describe('zb1ToVehicleSnapshot', () => {
@@ -124,6 +125,10 @@ export type EditierbareFahrzeugFelder = {
   farbe: string | null
   erstzulassung: string | null
   baujahr: number | null
+  // fahrzeugklasse (ZB1 Feld J, z.B. "M1"/"N1") = harter Werkstatt-Matching-Filter
+  // (PKW-Werkstatt repariert keinen LKW). vehicles.fahrzeugklasse existiert; der Write-Path
+  // (VehicleSnapshot) kennt es NICHT -> in Task 6 per best-effort vehicles.update persistiert.
+  fahrzeugklasse: string | null
 }
 
 export function zb1ToVehicleSnapshot(e: ZB1ExtractedData): VehicleSnapshot {
@@ -145,7 +150,7 @@ export function zb1ToFelder(e: ZB1ExtractedData): EditierbareFahrzeugFelder {
   return {
     fin: e.fin_vin, kennzeichen: e.kennzeichen, hersteller: e.fahrzeug_hersteller,
     modell: e.fahrzeug_modell, hsn: e.hsn, tsn: e.tsn, farbe: e.fahrzeug_farbe,
-    erstzulassung: e.erstzulassung, baujahr: e.fahrzeug_baujahr,
+    erstzulassung: e.erstzulassung, baujahr: e.fahrzeug_baujahr, fahrzeugklasse: e.fahrzeugklasse,
   }
 }
 
@@ -416,7 +421,7 @@ function makeDb(finVorhanden: boolean, firmaName: string | null) {
 const extracted = (fin: string | null, halter = 'Schmidt Logistik') => ({
   kennzeichen: 'K-AA 1', erstzulassung: null, fahrzeug_baujahr: null, halter_nachname: halter, halter_vorname: null,
   halter_strasse: null, halter_plz: null, halter_stadt: null, fahrzeug_hersteller: 'BMW', fahrzeug_modell: '320d',
-  fahrzeug_farbe: null, fin_vin: fin, hsn: '0005', tsn: 'ABC', brn: null,
+  fahrzeug_farbe: null, fin_vin: fin, hsn: '0005', tsn: 'ABC', brn: null, fahrzeugklasse: null,
 })
 
 describe('scanZb1FuerFlotte', () => {
@@ -502,19 +507,26 @@ Verhalten:
 
 # SLICE C — Einstiege + ZB1-Bild (Task 6–8)
 
-### Task 6: ZB1-Bild-Ablage (fall_dokumente + zb1_dokument_id, best-effort)
+### Task 6: Post-Anlage-Anreicherung — `fahrzeugklasse` + ZB1-Bild (beide best-effort)
+
+Zwei Felder, die der Write-Path (`ensureVehicleFromFin`/`VehicleSnapshot`) **nicht** kennt, aber
+die `vehicles`-Tabelle hat: `fahrzeugklasse` (Werkstatt-Matching-Filter) und `zb1_dokument_id`
+(das gescannte Bild). Beide werden nach erfolgreicher vehicle-Erstellung per **best-effort**
+`vehicles.update` nachgezogen — **ohne `ensure-vehicle.ts` anzufassen** (geteiltes Territorium).
 
 **Files:**
 - Modify: `src/lib/flotte/zb1-batch-anlage.ts` (+ Test)
 
 **Interfaces:**
-- `legeFlottenFahrzeugeAn` bekommt `base64?: string` je Zeile (`BatchAnlageZeile`) und legt nach erfolgreicher vehicle-Erstellung das Bild ab.
+- `legeFlottenFahrzeugeAn` bekommt `base64?: string` je Zeile (`BatchAnlageZeile`). Nach erfolgreicher vehicle-Erstellung (Status angelegt/aktualisiert/stub): (a) `fahrzeugklasse` aus `felder.fahrzeugklasse` → `vehicles.update({ fahrzeugklasse })` (best-effort); (b) das Bild ablegen.
 
-- [ ] **Step 1: Test** — neue Zeile mit `base64` gesetzt → `db.storage.upload` + `fall_dokumente.insert` + `vehicles.update({ zb1_dokument_id })` werden aufgerufen; ein Storage-Fehler bricht die Zeile **nicht** (Status bleibt `angelegt`). Mock `db.storage.from().upload` + die Inserts.
+- [ ] **Step 1: Test** — (a) Zeile mit gesetzter `felder.fahrzeugklasse` → `vehicles.update({ fahrzeugklasse })` wird für die neue vehicleId aufgerufen; ein Fehler dabei bricht die Zeile **nicht** (Status bleibt `angelegt`). (b) Zeile mit `base64` → `db.storage.upload` + `fall_dokumente.insert` + `vehicles.update({ zb1_dokument_id })`; Storage-Fehler bricht die Zeile **nicht**. Mock `db.storage.from().upload` + die Inserts/Updates.
 
 - [ ] **Step 2: Run — fails**
 
-- [ ] **Step 3: Implement** — `BatchAnlageZeile` um `base64?: string` erweitern. Nach erfolgreichem `veh.ok` (angelegt/stub/aktualisiert) eine `try/catch`-Hilfsfunktion `hinterlegeZb1Bild(db, vehicleId, base64)`:
+- [ ] **Step 3: Implement** — `BatchAnlageZeile` um `base64?: string` erweitern. Nach erfolgreicher vehicle-Erstellung (Status angelegt/aktualisiert/stub, `vehicleId` bekannt), **best-effort** (try/catch, nur `console.error`, kein throw, bricht die Zeile nicht):
+  - **`fahrzeugklasse`**: wenn `felder.fahrzeugklasse` gesetzt → `db.from('vehicles').update({ fahrzeugklasse: felder.fahrzeugklasse }).eq('id', vehicleId)`. (Der Write-Path kennt das Feld nicht; `vehicles.fahrzeugklasse` existiert — prod-verifiziert.)
+  - **ZB1-Bild** via Hilfsfunktion `hinterlegeZb1Bild(db, vehicleId, base64)`:
   - `db.storage.from('fall-dokumente').upload('vehicles/{vehicleId}/zb1/{uuid}.jpg', buffer, ...)`
   - `db.from('fall_dokumente').insert({ ..., dokument_typ: 'zb1_fahrzeugschein', storage_path, sichtbar_fuer: ['admin','kundenbetreuer','sachverstaendiger','flottenmanager'] })` → id
   - `db.from('vehicles').update({ zb1_dokument_id: id }).eq('id', vehicleId)`
