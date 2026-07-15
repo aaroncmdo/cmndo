@@ -6,6 +6,7 @@ import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { reverseGeocodeAddress } from '@/lib/google-geocoding/geocode-address'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
@@ -246,4 +247,15 @@ export async function erstelleWerkstattFinderLead(
     console.error('[werkstatt-finder] FlowLink fehlgeschlagen', err)
     return { ok: false, error: 'Flow-Link konnte nicht erstellt werden' }
   }
+}
+
+// „Aktuellen Standort verwenden": Client liefert Browser-Koordinaten, wir liefern die Adresse zurück.
+// Fällt Reverse-Geocoding aus, reichen dem Anker die Koordinaten (Client zeigt „Aktueller Standort").
+export async function holeAdresseFuerStandort(
+  lat: number,
+  lng: number,
+): Promise<{ ok: true; adresse: string; lat: number; lng: number } | { ok: false; error: string }> {
+  const r = await reverseGeocodeAddress(lat, lng)
+  if (!r.ok) return { ok: false, error: r.error }
+  return { ok: true, adresse: r.data.formatted_address, lat, lng }
 }
