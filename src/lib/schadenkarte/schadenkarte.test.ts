@@ -10,6 +10,10 @@ import {
   bindeSchadenkarteAnFahrzeug,
   resolveSchadenkarteToFahrzeug,
   getKartenFuerFirma,
+  sperreSchadenkarte,
+  entsperreSchadenkarte,
+  entbindeSchadenkarte,
+  speichereNfcUid,
 } from './schadenkarte'
 
 // ---------------------------------------------------------------------------
@@ -21,8 +25,22 @@ function makeDb(overrides: {
   insertResult?: { error: { code: string; message: string } | null }
   updateResult?: { data: unknown; error: { code: string; message: string } | null }
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return {
+  // Erfasst die Update-Payload per vi.fn(), damit Tests pruefen koennen WAS geschrieben wird
+  // (nicht nur res.ok) -- Code-Review-Fund: die vorherige Version ignorierte das Argument von
+  // .update(...) komplett, wodurch z.B. ein versehentliches status:'gebunden' in
+  // entsperreSchadenkarte unbemerkt geblieben waere.
+  const updateMock = vi.fn(() => ({
+    eq: () => ({
+      eq: () => ({
+        select: () => ({
+          maybeSingle: async () =>
+            overrides.updateResult ?? { data: { id: 'u1' }, error: null },
+        }),
+      }),
+    }),
+  }))
+
+  const db = {
     from: () => ({
       select: () => ({
         eq: () => ({
@@ -35,19 +53,12 @@ function makeDb(overrides: {
         maybeSingle: async () => overrides.selectResult ?? { data: null },
       }),
       insert: async () => overrides.insertResult ?? { error: null },
-      update: () => ({
-        eq: () => ({
-          eq: () => ({
-            select: () => ({
-              maybeSingle: async () =>
-                overrides.updateResult ?? { data: { id: 'u1' }, error: null },
-            }),
-          }),
-        }),
-      }),
+      update: updateMock,
     }),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any
+
+  return { db, updateMock }
 }
 
 // ---------------------------------------------------------------------------
@@ -332,5 +343,162 @@ describe('getKartenFuerFirma', () => {
       { id: 'k1', token: 'SKT-AAA', status: 'frei', fahrzeugId: null },
       { id: 'k2', token: 'SKT-BBB', status: 'gebunden', fahrzeugId: 'v1' },
     ])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Lebenszyklus: sperren / entsperren / entbinden
+// ---------------------------------------------------------------------------
+
+describe('sperreSchadenkarte', () => {
+  it('sperrt eine gebundene Karte', async () => {
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+    // Beweist, WAS geschrieben wird -- nicht nur dass res.ok true ist.
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'gesperrt' }))
+  })
+
+  it('ist IDEMPOTENT: eine bereits gesperrte Karte erneut zu sperren ist ok', async () => {
+    // Notfall-Pfad (Karte verloren) -- muss Doppelklick/Retry ueberstehen.
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+    // Idempotenz heisst: gar KEIN Update wird abgesetzt, nicht nur "irgendein Update ok".
+    expect(updateMock).not.toHaveBeenCalled()
+  })
+
+  it('weist eine Karte einer FREMDEN Firma ab', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'ANDERE', fahrzeug_id: 'v1' } },
+    })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    // Regex korrigiert (Brief-Typo: "andere Firma" ohne -n matcht nicht die dativische
+    // Form "anderen Firma", die bindeSchadenkarteAnFahrzeug bereits verwendet, s. Zeile 166).
+    expect(res.error).toMatch(/anderen Firma/i)
+  })
+
+  it('weist eine unbekannte Karte ab', async () => {
+    const { db } = makeDb({ selectResult: { data: null } })
+    const res = await sperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gefunden/i)
+  })
+})
+
+describe('entsperreSchadenkarte', () => {
+  it('setzt eine gesperrte Karte auf FREI (nicht zurueck auf gebunden)', async () => {
+    // Bewusst 'frei': das Fahrzeug hat evtl. schon eine Ersatzkarte -- ein automatisches
+    // Zurueck-auf-gebunden wuerde den Partial-Unique verletzen bzw. zwei gueltige Karten
+    // erzeugen. Die Karte muss BEWUSST neu gebunden werden.
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gesperrt', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+    // Sicherheitskritisch: muss 'frei' schreiben, NICHT 'gebunden' -- sonst wird eine als
+    // verloren gemeldete Karte stillschweigend wieder scharf (s. setzeStatus-Aufruf oben).
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'frei', fahrzeug_id: null }),
+    )
+  })
+
+  it('weist eine NICHT gesperrte Karte ab (kein stiller No-op)', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+    })
+    const res = await entsperreSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gesperrt/i)
+  })
+})
+
+describe('entbindeSchadenkarte', () => {
+  it('loest eine gebundene Karte vom Fahrzeug (-> frei)', async () => {
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(true)
+    expect(updateMock).toHaveBeenCalledWith(
+      expect.objectContaining({ status: 'frei', fahrzeug_id: null }),
+    )
+  })
+
+  it('weist eine NICHT gebundene Karte ab', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'f1', fahrzeug_id: null } },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht gebunden/i)
+  })
+
+  it('meldet einen Race (Karte wurde zwischenzeitlich geaendert)', async () => {
+    // Optimistic-Guard .eq('status', alterStatus) matcht nicht mehr -> data === null
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: null, error: null },
+    })
+    const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/zwischenzeitlich/i)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// speichereNfcUid
+// ---------------------------------------------------------------------------
+
+describe('speichereNfcUid', () => {
+  it('speichert die Chip-Seriennummer an der Karte', async () => {
+    // makeDb gibt seit 9f13b1430 { db, updateMock } zurueck (nicht mehr db direkt) --
+    // destrukturieren wie bei allen anderen Tests in dieser Datei.
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(true)
+    // Beweist, WAS geschrieben wird -- nicht nur dass res.ok true ist. Code-Review-Fund:
+    // ein Tippfehler wie { status: params.nfcUid } statt { nfc_uid: params.nfcUid } waere
+    // sonst unbemerkt gruen geblieben (s. Lifecycle-Tests oben, gleiches Muster).
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ nfc_uid: '04:a2:24:bb' }))
+  })
+
+  it('weist eine Karte einer fremden Firma ab', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'ANDERE', fahrzeug_id: null } },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(false)
+  })
+
+  it('meldet einen Race, wenn der firma_id-Guard beim Write keine Zeile matcht (TOCTOU)', async () => {
+    // Der zweite .eq('firma_id', ...) beim Write matcht keine Zeile mehr (z.B. firma_id
+    // wurde zwischen Read und Write per ON DELETE SET NULL auf NULL gesetzt) -> PostgREST
+    // liefert data: null, error: null. Ohne den !data-Check (analog setzeStatus) wuerde
+    // das faelschlich ok:true melden, obwohl nichts geschrieben wurde.
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: null, error: null },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/zwischenzeitlich/i)
   })
 })
