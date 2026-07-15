@@ -1,31 +1,14 @@
 'use client'
 
-// Werkstatt-Copilot Panel — Claude-Sonnet-4.6, reparatur-/abwicklungs-fokussiert
-// (Abrechnungsweg, KVA, Gutachten-Abweichung, Totalschaden). Streaming via
-// /api/werkstatt/copilot. Greeting + 4 Vorschlaege initial.
-//
-// TODO(DRY): 3. Streaming-Chat-Shell (Makler/SV/Werkstatt) — nach Merge aller drei
-// PRs in ein gemeinsames <CopilotChat endpoint suggestions greeting/> extrahieren.
+// Werkstatt-Copilot — duenner Wrapper ueber die geteilte CopilotChat-Shell
+// (DRY 3/3, 2026-07-15). Reparatur-/abwicklungs-fokussiert (Abrechnungsweg,
+// KVA, Gutachten-Abweichung, Totalschaden). Streaming via /api/werkstatt/copilot.
+// Prop-API unveraendert ({ claimId }) — Consumer (WerkstattAuftragDetail) unberuehrt.
 
-import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  SparklesIcon,
-  SendIcon,
-  Loader2Icon,
-  EuroIcon,
-  FileTextIcon,
-  AlertTriangleIcon,
-  WrenchIcon,
-  UserIcon,
-} from 'lucide-react'
-import ReactMarkdown from 'react-markdown'
-import { Button, Card } from '@/components/primitives'
+import { EuroIcon, FileTextIcon, AlertTriangleIcon, WrenchIcon } from 'lucide-react'
+import { CopilotChat, type CopilotSuggestion } from '@/components/shared/CopilotChat'
 
-type ChatMessage = { role: 'user' | 'assistant'; content: string }
-
-type SuggestionChip = { icon: React.ReactNode; label: string; query: string }
-
-const SUGGESTIONS: SuggestionChip[] = [
+const SUGGESTIONS: CopilotSuggestion[] = [
   {
     icon: <EuroIcon width={14} height={14} />,
     label: 'Wie läuft die Abrechnung?',
@@ -53,252 +36,29 @@ const SUGGESTIONS: SuggestionChip[] = [
 ]
 
 export function WerkstattCopilotPanel({ claimId }: { claimId: string }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [input, setInput] = useState('')
-  const [streaming, setStreaming] = useState(false)
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
-  const scrollRef = useRef<HTMLDivElement>(null)
-
-  const scrollToBottom = useCallback(() => {
-    requestAnimationFrame(() => {
-      const el = scrollRef.current
-      if (el) el.scrollTop = el.scrollHeight
-    })
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages, scrollToBottom])
-
-  const ask = useCallback(
-    async (userText: string) => {
-      const frage = userText.trim()
-      if (!frage || streaming) return
-      setErrorMsg(null)
-      const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: frage }]
-      setMessages(nextMessages)
-      setInput('')
-      setStreaming(true)
-      setMessages((prev) => [...prev, { role: 'assistant', content: '' }])
-
-      try {
-        const res = await fetch('/api/werkstatt/copilot', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ claimId, messages: nextMessages }),
-        })
-        if (!res.ok) {
-          const text = await res.text().catch(() => '')
-          setErrorMsg(
-            res.status === 403
-              ? 'Kein Zugriff auf diesen Auftrag.'
-              : `Copilot nicht erreichbar (${res.status}).${text ? ` ${text}` : ''}`,
-          )
-          setMessages((prev) => prev.slice(0, -1))
-          setStreaming(false)
-          return
+  return (
+    <div className="mt-3">
+      <CopilotChat
+        endpoint="/api/werkstatt/copilot"
+        body={{ claimId }}
+        title="Werkstatt-Copilot"
+        subtitle="KI-Assistent für Reparatur & Abwicklung — mit Auftrags-Kontext"
+        greeting={
+          <>
+            <p>
+              Hallo, ich bin dein <strong>Werkstatt-Copilot</strong>. Ich kenne den
+              Auftrag — Fahrzeug, Abrechnungsweg, Gutachten-Werte, deinen KVA und den
+              Reparaturtermin. Frag mich zu Abrechnung, Kalkulation oder dem Umgang mit
+              dem Gutachten.
+            </p>
+            <p className="mt-2 text-[13px] text-claimondo-ondo">
+              Keine Rechtsberatung — das klärt die Kanzlei/Claimondo.
+            </p>
+          </>
         }
-        const reader = res.body?.getReader()
-        if (!reader) {
-          setErrorMsg('Keine Antwort-Stream erhalten.')
-          setMessages((prev) => prev.slice(0, -1))
-          setStreaming(false)
-          return
-        }
-        const decoder = new TextDecoder()
-        let full = ''
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          full += decoder.decode(value, { stream: true })
-          setMessages((prev) => {
-            const copy = prev.slice()
-            copy[copy.length - 1] = { role: 'assistant', content: full }
-            return copy
-          })
-        }
-      } catch (err) {
-        console.error('[WerkstattCopilot] Fetch-Fehler:', err)
-        setErrorMsg(err instanceof Error ? err.message : 'Netzwerk-Fehler beim Copilot.')
-        setMessages((prev) => prev.slice(0, -1))
-      } finally {
-        setStreaming(false)
-      }
-    },
-    [claimId, messages, streaming],
-  )
-
-  return (
-    <Card p={0} className="overflow-hidden flex flex-col mt-3">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-claimondo-border bg-gradient-to-br from-claimondo-navy to-claimondo-shield text-white">
-        <span className="shrink-0 w-10 h-10 rounded-ios-xl bg-white/10 flex items-center justify-center text-white">
-          <SparklesIcon width={20} height={20} />
-        </span>
-        <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold">Werkstatt-Copilot</h2>
-          <p className="text-xs text-claimondo-light-blue mt-0.5">
-            KI-Assistent für Reparatur &amp; Abwicklung — mit Auftrags-Kontext
-          </p>
-        </div>
-      </div>
-
-      <div
-        ref={scrollRef}
-        className="overflow-y-auto p-4 space-y-4 bg-claimondo-bg min-h-[320px] max-h-[60vh]"
-      >
-        {messages.length === 0 ? (
-          <div className="space-y-4">
-            <AssistantBubble>
-              <p>
-                Hallo, ich bin dein <strong>Werkstatt-Copilot</strong>. Ich kenne den
-                Auftrag — Fahrzeug, Abrechnungsweg, Gutachten-Werte, deinen KVA und den
-                Reparaturtermin. Frag mich zu Abrechnung, Kalkulation oder dem Umgang mit
-                dem Gutachten.
-              </p>
-              <p className="mt-2 text-[13px] text-claimondo-ondo">
-                Keine Rechtsberatung — das klärt die Kanzlei/Claimondo.
-              </p>
-            </AssistantBubble>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-11">
-              {SUGGESTIONS.map((s) => (
-                <button
-                  key={s.label}
-                  type="button"
-                  onClick={() => void ask(s.query)}
-                  disabled={streaming}
-                  className="text-left px-3 py-2.5 rounded-ios-xl border border-claimondo-border bg-white hover:border-claimondo-ondo hover:bg-claimondo-ondo/5 text-sm text-claimondo-navy inline-flex items-center gap-2 disabled:opacity-50"
-                >
-                  <span className="text-claimondo-ondo">{s.icon}</span>
-                  <span className="flex-1">{s.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        {messages.map((m, i) => (
-          <MessageRow
-            key={i}
-            message={m}
-            isLastAssistant={streaming && i === messages.length - 1 && m.role === 'assistant'}
-          />
-        ))}
-      </div>
-
-      {errorMsg ? (
-        <div className="px-4 py-2 bg-danger-soft border-t border-danger/30 text-xs text-danger-strong">
-          {errorMsg}
-        </div>
-      ) : null}
-
-      <form
-        onSubmit={(e) => {
-          e.preventDefault()
-          void ask(input)
-        }}
-        className="flex items-end gap-2 p-3 border-t border-claimondo-border bg-white"
-      >
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              void ask(input)
-            }
-          }}
-          rows={1}
-          maxLength={2000}
-          placeholder="Frag den Copilot …"
-          className="flex-1 resize-none rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-light-blue focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 min-h-[40px] max-h-32"
-          disabled={streaming}
-        />
-        <Button
-          type="submit"
-          variant="navy"
-          disabled={!input.trim() || streaming}
-          className="shrink-0"
-          iconLeft={
-            streaming ? (
-              <Loader2Icon width={14} height={14} className="animate-spin" />
-            ) : (
-              <SendIcon width={14} height={14} />
-            )
-          }
-        >
-          Fragen
-        </Button>
-      </form>
-    </Card>
-  )
-}
-
-function AssistantBubble({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div
-        className="shrink-0 w-8 h-8 rounded-full bg-claimondo-ondo text-white flex items-center justify-center"
-        aria-hidden
-      >
-        <SparklesIcon width={16} height={16} />
-      </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function MessageRow({
-  message,
-  isLastAssistant,
-}: {
-  message: ChatMessage
-  isLastAssistant: boolean
-}) {
-  if (message.role === 'user') {
-    return (
-      <div className="flex items-start gap-3 flex-row-reverse">
-        <div
-          className="shrink-0 w-8 h-8 rounded-full bg-claimondo-navy text-white flex items-center justify-center"
-          aria-hidden
-        >
-          <UserIcon width={14} height={14} />
-        </div>
-        <div className="max-w-[85%] bg-claimondo-navy text-white rounded-2xl rounded-br-md px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap">
-          {message.content}
-        </div>
-      </div>
-    )
-  }
-
-  const empty = message.content.length === 0
-  return (
-    <div className="flex items-start gap-3">
-      <div
-        className="shrink-0 w-8 h-8 rounded-full bg-claimondo-ondo text-white flex items-center justify-center"
-        aria-hidden
-      >
-        <SparklesIcon width={16} height={16} />
-      </div>
-      <div className="flex-1 max-w-[85%] bg-white border border-claimondo-border rounded-2xl rounded-bl-md px-4 py-3 text-sm text-claimondo-navy leading-relaxed">
-        {empty && isLastAssistant ? (
-          <span className="inline-flex items-center gap-2 text-claimondo-ondo">
-            <Loader2Icon width={14} height={14} className="animate-spin" />
-            Copilot denkt nach …
-          </span>
-        ) : (
-          <MarkdownBlock>{message.content}</MarkdownBlock>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function MarkdownBlock({ children }: { children: string }) {
-  return (
-    <div className="prose prose-sm max-w-none prose-headings:text-claimondo-navy prose-p:text-claimondo-navy prose-strong:text-claimondo-navy prose-ul:text-claimondo-navy prose-ol:text-claimondo-navy prose-li:my-0.5 prose-p:my-1.5">
-      <ReactMarkdown>{children}</ReactMarkdown>
+        suggestions={SUGGESTIONS}
+        accessDeniedText="Kein Zugriff auf diesen Auftrag."
+      />
     </div>
   )
 }
