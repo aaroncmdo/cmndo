@@ -249,6 +249,40 @@ describe('sucheEchteWerkstaetten — gerankte Engine', () => {
   })
 })
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 2 Task 2: sucheEchteWerkstaetten reicht Marke + Fahrzeugklasse an die Engine durch
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('sucheEchteWerkstaetten — Marke + Fahrzeugklasse durchreichen', () => {
+  it('reicht marke + fahrzeugklasse an die Engine', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([])
+
+    await sucheEchteWerkstaetten({
+      lat: 50.9,
+      lng: 6.9,
+      marke: 'BMW',
+      fahrzeugklasse: 'M1',
+      bedarf: { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 80 },
+    })
+
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({ marke: 'BMW', fahrzeugklasse: 'M1', anker: { lat: 50.9, lng: 6.9 }, nurEchte: true }),
+    )
+  })
+
+  it('ohne marke/fahrzeugklasse → null (Rückwärtskompatibel)', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([])
+
+    await sucheEchteWerkstaetten({ lat: 50.9, lng: 6.9 })
+
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({ marke: null, fahrzeugklasse: null }),
+    )
+  })
+})
+
 describe('sucheWerkstaettenNachOrt — gerankte Engine', () => {
   it('ohne bedarf → geocodiert, ruft ladeWerkstattVorschlaege mit anker aus dem Geocode-Treffer + nurEchte=true, center gesetzt', async () => {
     mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Berlin', placeId: null })

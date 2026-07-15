@@ -62,20 +62,22 @@ function keineSpezialisierteGefunden(
 /**
  * T4 (Phase 1 Task 4, #4359): Werkstatt-Suche auf die gerankte Matching-Engine umgestellt
  * (Marke → Gewerke → Fahrzeug-Gruppe → verifiziert → Distanz zum FAHRZEUGSTANDORT).
- * Marke/Fahrzeugklasse bleiben in Phase 1 null — der Wizard liefert sie erst in Phase 2, die
- * Engine rankt bis dahin nach Gewerke+Distanz (alle Werkstaetten markenMatch='frei'/'unbekannt').
+ * Phase 2 Task 2: Marke/Fahrzeugklasse kommen jetzt vom Wizard durch (wizardStateZuSuche) —
+ * die Engine rankt scharf nach Marke/Fahrzeug-Gruppe statt nur nach Gewerke+Distanz.
  */
 export async function sucheEchteWerkstaetten(input: {
   lat?: number
   lng?: number
   plz?: string
   bedarf?: Reparaturbedarf
+  marke?: string | null
+  fahrzeugklasse?: string | null
 }): Promise<{ werkstaetten: WerkstattVorschlag[]; keineSpezialisierte: boolean }> {
   const anker = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null
   const b = sanitizeBedarf(input.bedarf)
   const werkstaetten = await ladeWerkstattVorschlaege({
-    fahrzeugklasse: null, // Phase 2: aus dem Wizard (Fahrzeugtyp)
-    marke: null, // Phase 2: aus dem Wizard (Hersteller)
+    fahrzeugklasse: input.fahrzeugklasse ?? null,
+    marke: input.marke ?? null,
     bedarf: b.kategorien,
     bedarfConfidence: b.confidence,
     anker,
