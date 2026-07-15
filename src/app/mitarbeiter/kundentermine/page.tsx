@@ -46,7 +46,7 @@ export default async function MitarbeiterKundentermine() {
     .from('gutachter_termine')
     .select(
       'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
-        'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, kundenbetreuer_id, lead_id))',
+        'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claims!fk_bridge_claim(claim_nummer, kundenbetreuer_id, lead_id))',
     )
     .neq('typ', 'kb_beratung')
     .in('status', ['reserviert', 'bestaetigt'])

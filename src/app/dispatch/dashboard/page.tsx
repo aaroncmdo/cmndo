@@ -88,7 +88,7 @@ export default async function DispatchDashboard() {
     // lead_id lebt auf claims (SSoT, Divergenz=0); jede faelle hat Bridge-Row (0 missing, live verifiziert).
     const { data: faelleRows } = await supabase
       .from('faelle_claim_bridge')
-      .select('fall_id, claims:claim_id!inner(lead_id)')
+      .select('fall_id, claims:claims!fk_bridge_claim!inner(lead_id)')
       .in('fall_id', fallIds)
     for (const f of (faelleRows ?? []) as Array<{ fall_id: string; claims: { lead_id: string | null } | { lead_id: string | null }[] | null }>) {
       const c = Array.isArray(f.claims) ? f.claims[0] : f.claims

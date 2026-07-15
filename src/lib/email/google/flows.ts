@@ -444,7 +444,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   }
   const { data: fallBr } = await db
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id(lead_id, claim_nummer, schadentag, schadenort_ort, vehicle_id, kanzlei_uebergeben_am)')
+    .select('claim_id, claims:claims!fk_bridge_claim(lead_id, claim_nummer, schadentag, schadenort_ort, vehicle_id, kanzlei_uebergeben_am)')
     .eq('fall_id', fallId)
     .maybeSingle()
   if (!fallBr) return

@@ -64,7 +64,7 @@ export default async function DispatchKalenderPage({
         // CMM-49 #2688-Fix: faelle-Embed über bridge (FK admin/gutachter_termine→bridge repointet);
         // nested claims via fk_bridge_claim (#2719). kennzeichen wohnt auf faelle/leads, nicht claims
         // → fällt weg, lead.kennzeichen deckt es ab (s.u.).
-        'leads(vorname, nachname, kennzeichen), faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))',
+        'leads(vorname, nachname, kennzeichen), faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claims!fk_bridge_claim(claim_nummer))',
     )
     .gte('start_zeit', weekStart.toISOString())
     .lt('start_zeit', weekEnd.toISOString())

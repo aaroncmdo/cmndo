@@ -1301,7 +1301,7 @@ export async function signSAandCreateFall(
 
       if (terminRow?.assignee_id) {
         const { data: svData } = await admin.from('sachverstaendige')
-          .select('profile_id, profiles(telefon, vorname, nachname)')
+          .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon, vorname, nachname)')
           .eq('id', terminRow.assignee_id)
           .single()
 

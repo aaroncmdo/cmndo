@@ -435,7 +435,7 @@ export async function saveFinVinGutachter(
   // faelle.sv_id). Bridge-RLS spiegelt SV-Case-Access; !inner + .eq doppelt-gaten.
   const { data: fall } = await supabase
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(sv_id)')
+    .select('claim_id, claims:claims!fk_bridge_claim!inner(sv_id)')
     .eq('fall_id', fallId)
     .eq('claims.sv_id', sv.id)
     .single()

@@ -57,7 +57,7 @@ export async function assertKundeOwnsFall(
   // der verlaessliche Ownership-SSoT als Safety-Net. lead_id/sv_id/kundenbetreuer_id claims-nativ.
   const { data: fall } = await admin
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id(geschaedigter_user_id, lead_id, sv_id, kundenbetreuer_id)')
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim(geschaedigter_user_id, lead_id, sv_id, kundenbetreuer_id)')
     .eq('fall_id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'not_found' }

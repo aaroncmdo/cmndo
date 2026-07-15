@@ -3,6 +3,7 @@ import {
   MERGE_VARS,
   ACTION_VARS,
   registrierungsUrl,
+  partnerLandingUrl,
   actionButton,
   resolveActionVars,
 } from '../merge-vars'
@@ -19,6 +20,7 @@ describe('Palette-Definitionen', () => {
 
   it('ACTION_VARS listet die einfuegbaren CTAs', () => {
     const tokens = ACTION_VARS.map((a) => a.token)
+    expect(tokens).toContain('Partnerlink')
     expect(tokens).toContain('Beratungslink')
     expect(tokens).toContain('Registrierungslink')
   })
@@ -36,6 +38,20 @@ describe('registrierungsUrl — rollenbewusst', () => {
   it('unbekannte Rolle -> harmloser Fallback auf die App-Basis (kein kaputter Link)', () => {
     expect(registrierungsUrl(null)).toBe('https://app.claimondo.de')
     expect(registrierungsUrl('quatsch')).toBe('https://app.claimondo.de')
+  })
+})
+
+describe('partnerLandingUrl — rollenbewusstes Cold-Mail-CTA-Ziel', () => {
+  it('makler + SV zeigen auf ihre verkaufswirksamen Landing-Subdomains', () => {
+    expect(partnerLandingUrl('makler')).toBe('https://makler.claimondo.de')
+    expect(partnerLandingUrl('sachverstaendiger')).toBe('https://gutachter.claimondo.de')
+  })
+  it('werkstatt nutzt (bis Subdomain live) den funktionierenden App-Pfad, nie einen toten Host', () => {
+    expect(partnerLandingUrl('werkstatt')).toBe('https://app.claimondo.de/werkstatt-partner-werden')
+  })
+  it('unbekannte Rolle -> harmloser Fallback (kein NXDOMAIN)', () => {
+    expect(partnerLandingUrl(null)).toBe('https://claimondo.de')
+    expect(partnerLandingUrl('quatsch')).toBe('https://claimondo.de')
   })
 })
 
@@ -61,5 +77,14 @@ describe('resolveActionVars — Tokens -> Button-HTML pro Lead', () => {
   })
   it('makler bekommt die Makler-Registrierung', () => {
     expect(resolveActionVars({ rolle: 'makler' }).Registrierungslink).toContain('/makler/registrieren')
+  })
+  it('Partnerlink zeigt rollenbewusst auf die Landing (als Button)', () => {
+    const makler = resolveActionVars({ rolle: 'makler' })
+    expect(makler.Partnerlink).toContain('href="https://makler.claimondo.de"')
+    expect(makler.Partnerlink).toContain('Jetzt Partner werden')
+    expect(makler.Partnerlink).toContain('display:inline-block')
+    expect(resolveActionVars({ rolle: 'sachverstaendiger' }).Partnerlink).toContain(
+      'href="https://gutachter.claimondo.de"',
+    )
   })
 })
