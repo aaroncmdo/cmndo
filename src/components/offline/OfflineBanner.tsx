@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useOnlineStatus } from '@/lib/offline/use-online-status'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { getPendingCount } from '@/lib/offline/outbox'
-import { WifiOffIcon, CloudUploadIcon, CheckCircle2Icon } from 'lucide-react'
+import { usePendingCount } from '@/lib/offline/use-pending-count'
+import DeadLetterDialog from './DeadLetterDialog'
+import { WifiOffIcon, CloudUploadIcon, CheckCircle2Icon, AlertTriangleIcon } from 'lucide-react'
 
 // KFZ-180: Offline-Banner am oberen Rand wenn kein Internet.
 // AAR-363: Zusätzlich Wieder-Online-Banner — zeigt Sync-Fortschritt und
@@ -21,6 +23,9 @@ export default function OfflineBanner() {
   const prevOnlineRef = useRef<boolean>(isOnline)
   const [reconnect, setReconnect] = useState<ReconnectState>({ phase: 'idle' })
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // write-4: all-kinds Dead-Letter-Count für den persistenten globalen Hinweis.
+  const counts = usePendingCount()
+  const [deadDialogOpen, setDeadDialogOpen] = useState(false)
 
   // Register auto-sync listener once
   useEffect(() => {
@@ -102,6 +107,28 @@ export default function OfflineBanner() {
         Verbindung wiederhergestellt — {reconnect.pending}{' '}
         {reconnect.pending === 1 ? 'Upload wird' : 'Uploads werden'} synchronisiert...
       </div>
+    )
+  }
+
+  // write-4: persistenter Dead-Letter-Hinweis (all-kinds) — sichtbar auf JEDER Route
+  // (Root-Layout), also auch /flow + /werkstatt, die keine eigene Dead-Letter-Fläche haben.
+  // Öffnet das generalisierte DeadLetterDialog (Erneut versuchen / Verwerfen).
+  if (isOnline && counts.dead > 0) {
+    return (
+      <>
+        <div className="fixed top-0 inset-x-0 z-[60] bg-danger text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
+          <AlertTriangleIcon className="w-4 h-4 flex-shrink-0" />
+          {counts.dead} {counts.dead === 1 ? 'Eintrag konnte' : 'Einträge konnten'} nicht synchronisiert werden.
+          <button
+            type="button"
+            onClick={() => setDeadDialogOpen(true)}
+            className="underline underline-offset-2 hover:text-white/90"
+          >
+            Details
+          </button>
+        </div>
+        <DeadLetterDialog open={deadDialogOpen} onClose={() => setDeadDialogOpen(false)} />
+      </>
     )
   }
 

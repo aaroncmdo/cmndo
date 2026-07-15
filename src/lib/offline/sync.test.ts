@@ -27,6 +27,18 @@ describe('drainOutbox — single replay', () => {
     expect(res.failed).toBe(1)
     expect((await offlineDB.mutation_outbox.get(id))?.status).toBe('failed')
   })
+  it('dead-letters an op whose handler returns conflict (persist + count failed, not synced)', async () => {
+    // Token-TTL: nicht-transienter conflict (z.B. Flow-Token abgelaufen) darf NICHT still
+    // gedroppt + als synced gezählt werden — als Dead-Letter behalten + ehrlich als failed.
+    registerHandler({ kind: 'conf', replay: async () => ({ outcome: 'conflict', error: 'Link abgelaufen' }) })
+    const { id } = await enqueueOp({ kind: 'conf', replay_class: 'B', payload: {} })
+    const res = await drainOutbox()
+    expect(res.synced).toBe(0)
+    expect(res.failed).toBe(1)
+    const op = await offlineDB.mutation_outbox.get(id)
+    expect(op?.status).toBe('dead')
+    expect(op?.last_error).toBe('Link abgelaufen')
+  })
 })
 
 describe('drainOutbox — batch replay', () => {

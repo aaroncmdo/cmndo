@@ -10,6 +10,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { CheckCircle2Icon, Loader2Icon } from 'lucide-react'
 import { completeAndAdvance } from './actions'
+import { enqueueOp } from '@/lib/offline/enqueue'
 
 interface Props {
   sessionId: string
@@ -35,6 +36,19 @@ export default function BesichtigungAbschliessenButton({
       return
     }
     startTransition(async () => {
+      // Slice 1b: offline -> Abschluss in die Outbox; UI schaltet optimistisch
+      // weiter. Der Handler replayed completeAndAdvance mit terminId als CAS-Guard.
+      if (!navigator.onLine) {
+        void enqueueOp({
+          kind: 'sv_complete_advance',
+          replay_class: 'C',
+          payload: { sessionId, terminId },
+          entity_ref: { scope: 'feldmodus-session', id: sessionId },
+        }).catch(() => {})
+        toast.success('Abschluss offline gespeichert — wird synchronisiert')
+        onAdvanced(null)
+        return
+      }
       const res = await completeAndAdvance(sessionId, terminId)
       if (res.success) {
         toast.success(

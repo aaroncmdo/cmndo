@@ -98,6 +98,13 @@ export default function SaSignaturStep({
 
   async function handleSignSA() {
     if (!signatureBlob) return
+    // Slice 2-write-3: FENCE (Defense-in-Depth) — die Fall-Erstellung ist online-only.
+    // Fängt die useOnlineStatus-Debounce-Race (Gate zeigt evtl. noch das Formular) und
+    // schützt den geteilten Werkstatt-Intake-Kontext (kein Render-Gate).
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      setError('Die Beauftragung benötigt eine Internetverbindung. Bitte verbinden Sie sich und versuchen Sie es erneut.')
+      return
+    }
     setSubmittingSA(true)
     onSubmittingChange?.(true)
     setError(null)

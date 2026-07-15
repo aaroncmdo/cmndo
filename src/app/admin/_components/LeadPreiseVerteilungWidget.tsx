@@ -1,4 +1,4 @@
-﻿import { createClient } from '@/lib/supabase/server'
+﻿import { createAdminClient } from '@/lib/supabase/admin'
 import { BarChart3Icon } from 'lucide-react'
 import { Table, Thead, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
@@ -24,7 +24,12 @@ const BUCKETS: Omit<Bucket, 'anzahl' | 'summe'>[] = [
 ]
 
 async function loadVerteilung() {
-  const supabase = await createClient()
+  // Service-Role statt User-Client: lead_preis_* sind auf claims per Column-GRANT fuer
+  // `authenticated` gesperrt (Spalten-Exposure-Fix — sonst laese jeder Kunde den Lead-
+  // Einkaufspreis seines eigenen Falls). Autorisierung haengt am Portal-Guard: dieses
+  // Widget rendert ausschliesslich unter /admin/finance, und admin/layout.tsx faehrt
+  // requirePortalAccess(['admin']).
+  const supabase = createAdminClient()
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: rows } = await supabase

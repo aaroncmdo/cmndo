@@ -14,6 +14,7 @@ import {
   starteUnterschriftAmGeraet,
   sendeUnterschriftLink,
 } from '@/app/werkstatt/(shell)/anfragen/actions'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
 import { SCHADENTYP_OPTIONS, schadentypLabel } from '@/lib/werkstatt/schadentyp-options'
@@ -88,6 +89,19 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
 
   async function speichern() {
     if (!editLead) return
+    // Slice 3: offline -> Outbox (class B), optimistisch schließen. KEIN router.refresh
+    // (RSC-Refetch hängt offline); die Liste zieht beim Reconnect + Refresh nach.
+    if (!navigator.onLine) {
+      void enqueueOp({
+        kind: 'werkstatt_lead_edit',
+        replay_class: 'B',
+        payload: { leadId: editLead.id, patch: form },
+        entity_ref: { scope: 'lead', id: editLead.id },
+      }).catch(() => {})
+      toast.success('Offline gespeichert — wird synchronisiert, sobald Sie wieder online sind.')
+      setEditLead(null)
+      return
+    }
     setSaving(true)
     const r = await bearbeiteWerkstattLead(editLead.id, form)
     setSaving(false)
@@ -102,6 +116,11 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
 
   // Werkstatt-Intake-Signatur: PRIMAER am Werkstatt-Geraet (Kunde vor Ort), SEKUNDAER per Link.
   async function handleGeraet(lead: WerkstattLead) {
+    // Online-only: braucht frischen Flow-Token + öffnet /flow/<token>.
+    if (!navigator.onLine) {
+      toast.error('Die Unterschrift am Gerät benötigt eine Internetverbindung.')
+      return
+    }
     setBusy(`${lead.id}:geraet`)
     const r = await starteUnterschriftAmGeraet(lead.id)
     setBusy(null)
@@ -114,6 +133,11 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
   }
 
   async function handleLink(lead: WerkstattLead) {
+    // Online-only: setzt Intake-Flag + Token + versendet (WhatsApp/Email).
+    if (!navigator.onLine) {
+      toast.error('Der Link-Versand benötigt eine Internetverbindung.')
+      return
+    }
     setBusy(`${lead.id}:link`)
     const r = await sendeUnterschriftLink(lead.id)
     setBusy(null)
