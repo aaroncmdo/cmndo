@@ -383,6 +383,18 @@ CREATE POLICY x ON public.t FOR SELECT TO anon, authenticated USING (…);
 
 Kontext: `COORDINATION-rls-perf-b1-fullpass` (Memory) — der Pass brachte den Advisor von **313 → 0**.
 
+# Anon-Grant-Gate (Ratchet)
+
+**`anon` darf keinen SELECT-Grant auf Spalten mit sensiblem Namensmuster haben** — `iban`/`steuernummer`/`geburtsdatum`/`fuehrerschein`/`kontonummer`/`access|refresh|session_token`/`secret`/`password_encrypted`/`passwort`/`_encrypted`/`provision`/`honorar`/`notiz` — ausser der dokumentierten Allowlist.
+
+RLS schuetzt nur **ZEILEN**. Ein table-weiter `anon`-SELECT-Grant ist latent, solange keine anon-Policy Zeilen durchlaesst — aber ein spaeterer anon-Policy-Zweig (oder `DISABLE ROW LEVEL SECURITY`) legt die Spalte sofort offen. Genau diese Klasse fanden claims (#4352), auftraege (#4379), die anon-7 (#4383) und leads (#4389) — jeweils **nach Go-Live scharf**. Dieser Ratchet haelt die ganze Klasse dauerhaft zu und verallgemeinert das claims-spezifische `check:claims-column-grants` auf alle anon-Grants. Er **ergaenzt** den Anon-Exposure-Guard (`check-anon-exposure.mjs`), der die andere Achse faengt: anon-lesbare **Views** (Row-Exposure), nicht Spalten-Grants auf Basistabellen.
+
+CI faehrt `npm run check:anon-sensitive-grants -- --ratchet`. Es blockt **NEUE** anon-lesbare sensible Spalten gegen `scripts/anon-sensitive-grants-baseline.json`. Lokal (ohne Flag) `--warn` (exit 0); `--update-baseline` senkt nach Boy-Scout-Fixes. Backing-RPC `audit_anon_sensitive_grants()` (service_role-only, read-only, `pg_catalog` + `has_column_privilege`, Mig `20260715144704`). Pure Diff-/Allowlist-Logik: `scripts/lib/anon-grant-scan.mjs` (unit-getestet). Nur bei SQL-Diff aktiv (Prod-Pool-Schonung, Muster wie `check:claims-column-grants`).
+
+**Fix bei rotem Ratchet:** in der Migration den table-weiten `anon`-Grant entziehen + nur benigne Spalten neu granten (`revoke select on <t> from anon; grant select (<benigne>) on <t> to anon;` — Muster Mig `20260715120651`). ⚠ **Falle:** ein blosses `REVOKE SELECT (<col>)` greift NICHT, solange ein TABLE-Grant existiert (`has_column_privilege` bleibt true) — der Table-Grant muss weg. Echter Nicht-Geheimnis-Fall (Timestamp/Zaehler) → `SEMANTIC_ALLOWLIST` in `scripts/lib/anon-grant-scan.mjs` mit Begruendung, **nicht** die Baseline aufblaehen.
+
+**Baseline = 24 grandfatherte Bestands-Verletzer** (systematischer Grant-Audit 15.07.) — allesamt **latent** (RLS blockt Zeilen), aber echte Grant-Gaps: u.a. `linkedin_oauth_tokens`/`profiles`-OAuth-Tokens, `sv_kalender_verbindungen.password_encrypted`, `embed_sites.tracking_webhook_secret` + ~14 interne `notiz`-Spalten (`makler`/`werkstaetten` haben eine anon-Public-Landing → dort `notizen` zuerst kappen). Per Boy-Scout kappen; die Cap-Migration ist ein Follow-up — Details in `COORDINATION-systematic-grant-audit` / `HANDOFF-session-end-15-07-grant-audit-und-suche` (Memory).
+
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 
 Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=true` brandet sein eigenes Portal **und** die Sicht seiner Kunden (Kunde-Portal, Magic-Links `/flow/[token]`, `/upload/zb1/[token]`, `/upload/dokumente/[token]`, Kunden-gerichtete Emails). Das funktioniert über CSS-Custom-Properties, die auf einem Wrapper-Element gesetzt werden (`generateCssVars(theme, 'full')` aus `src/lib/branding/css-vars.ts`).
