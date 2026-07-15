@@ -3,9 +3,23 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const sendMock = vi.fn()
 vi.mock('@/lib/email/resend-client', () => ({ resend: { emails: { send: (...a: unknown[]) => sendMock(...a) } } }))
 
-import { sendColdMail, coldMailFromAddress } from '../send'
+import { sendColdMail, coldMailFromAddress, coldMailReplyTo } from '../send'
 
-beforeEach(() => { sendMock.mockReset(); delete process.env.COLD_MAIL_FROM_DOMAIN })
+beforeEach(() => {
+  sendMock.mockReset()
+  delete process.env.COLD_MAIL_FROM_DOMAIN
+  delete process.env.COLD_MAIL_REPLY_TO
+})
+
+describe('coldMailReplyTo', () => {
+  it('Default = info@ (partner@ hat kein Postfach)', () => {
+    expect(coldMailReplyTo()).toBe('info@claimondo.de')
+  })
+  it('respektiert COLD_MAIL_REPLY_TO', () => {
+    process.env.COLD_MAIL_REPLY_TO = 'vertrieb@example.de'
+    expect(coldMailReplyTo()).toBe('vertrieb@example.de')
+  })
+})
 
 describe('coldMailFromAddress', () => {
   // Default = die einzige bei Resend verifizierte Domain. 'mail.claimondo.de' existiert
@@ -25,6 +39,7 @@ describe('sendColdMail', () => {
     const res = await sendColdMail({ to: 'a@b.de', subject: 'Hi', html: '<p>x</p>', abmeldeUrl: 'https://app.claimondo.de/abmelden/tok', leadId: 'lead-1' })
     expect(res).toEqual({ ok: true, messageId: 'msg_123' })
     const arg = sendMock.mock.calls[0][0]
+    expect(arg.replyTo).toBe('info@claimondo.de') // Antworten landen auf einem echten Postfach
     expect(arg.headers['List-Unsubscribe']).toBe('<https://app.claimondo.de/abmelden/tok>')
     expect(arg.tags).toEqual([{ name: 'typ', value: 'cold_mail' }, { name: 'lead', value: 'lead-1' }])
   })
