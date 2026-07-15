@@ -56,10 +56,11 @@ export async function getClaimLifecycleForClaim(
   if (claimId) {
     const { data: claim } = await admin
       .from('claims')
-      .select('status, lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am')
+      // T3-slice-2a: claims.status raus — getClaimLifecycle liest seit slice-2a-ii nur operative_status.
+      .select('lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am')
       .eq('id', claimId)
       .maybeSingle()
-    claimStatus = (claim?.status as string | null) ?? null
+    claimStatus = null // T3-slice-2a: claims.status wird nicht mehr gelesen (dead read seit slice-2a-ii)
     serviceTyp = (claim?.service_typ as string | null) ?? null
     operativeStatus = (claim?.operative_status as string | null) ?? null
     // FG6 (dual-SSoT collapse): SA/Vollmacht liegen auf claims UND leads. Kanonisch ist

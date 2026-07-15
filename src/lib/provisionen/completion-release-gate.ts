@@ -9,8 +9,6 @@
 export type ClaimCompletionInput = {
   serviceTyp: 'komplett' | 'nur_gutachter' | string | null
   operativeStatus: string | null
-  /** claims.status (Lifecycle-Terminal) — 'reguliert_vollstaendig' = Voll-Claim abgeschlossen. */
-  claimStatus: string | null
   /** claims.abgeschlossen_am — Completion-Timestamp fuer Voll-Claims. */
   abgeschlossenAm: string | null
   /** gutachter_termine.durchgefuehrt_am (juengster durchgefuehrter Termin) — Completion fuer nur_gutachter. */
@@ -41,15 +39,16 @@ export function istClaimStorniert(operativeStatus: string | null): boolean {
  * Completion-Timestamp des Claims — der Zeitpunkt, ab dem der 7-Tage-Hold laeuft.
  * - nur_gutachter: der Gutachter-Termin ist durchgefuehrt (durchgefuehrt_am). nur_gutachter erreicht
  *   kein operative_status='abgeschlossen' → termin-basiert.
- * - Voll-Claim (komplett/sonst): abgeschlossen (operative_status='abgeschlossen') ODER reguliert
- *   (status='reguliert_vollstaendig') → abgeschlossen_am.
+ * - Voll-Claim (komplett/sonst): abgeschlossen ODER reguliert → abgeschlossen_am. Beide Terminals
+ *   leben auf operative_status: state-machine 'abgeschlossen' schreibt 'abgeschlossen', endzustand
+ *   markClaimAsReguliert schreibt den feinen 'reguliert_vollstaendig' direkt (T3: claims.status weg).
  * null = noch nicht abgeschlossen → HOLD.
  */
 export function deriveCompletionTs(c: ClaimCompletionInput): string | null {
   if (c.serviceTyp === 'nur_gutachter') {
     return c.terminDurchgefuehrtAm ?? null
   }
-  if (c.operativeStatus === 'abgeschlossen' || c.claimStatus === 'reguliert_vollstaendig') {
+  if (c.operativeStatus === 'abgeschlossen' || c.operativeStatus === 'reguliert_vollstaendig') {
     return c.abgeschlossenAm ?? null
   }
   return null

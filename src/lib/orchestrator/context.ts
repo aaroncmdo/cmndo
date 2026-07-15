@@ -68,7 +68,8 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
   const { data: claim } = await db
     .from('claims')
     .select(
-      'id, status, operative_status, ist_aktiv, abgeschlossen_am, updated_at, vehicle_id, fahrzeugschaden_beschreibung, hergang_kunde_text',
+      // T3-slice-2a: claims.status raus — operative_status ist die SSoT-Achse (phase + status-Feld unten).
+      'id, operative_status, ist_aktiv, abgeschlossen_am, updated_at, vehicle_id, fahrzeugschaden_beschreibung, hergang_kunde_text',
     )
     .eq('id', claimId)
     .maybeSingle()
@@ -149,7 +150,7 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
   }))
 
   // --- abgeleitete Felder ---
-  const phase = (claim.operative_status as string | null) ?? (claim.status as string | null) ?? null
+  const phase = (claim.operative_status as string | null) ?? null
   const tageInaktiv = letzteAktivitaetAm
     ? Math.floor((Date.now() - new Date(letzteAktivitaetAm).getTime()) / 86400000)
     : 999
@@ -157,7 +158,8 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
   return {
     claimId,
     fallId,
-    status: (claim.status as string | null) ?? null,
+    // T3-slice-2a: status-Feld traegt jetzt operative_status (SSoT); status-Spalte wird gedroppt.
+    status: (claim.operative_status as string | null) ?? null,
     phase,
     letzteAktivitaetAm,
     tageInaktiv,
