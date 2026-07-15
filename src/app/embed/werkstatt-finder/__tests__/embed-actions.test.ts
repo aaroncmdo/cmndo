@@ -12,9 +12,9 @@ vi.mock('@/lib/werkstatt/bedarf/schadenbild-gewerke', () => ({
   klassifiziereSchadenbildBase64: vi.fn(),
 }))
 
-// ─── Mock: findWerkstaetten ──────────────────────────────────────────────────
-vi.mock('@/lib/werkstatt/finder', () => ({
-  findWerkstaetten: vi.fn(),
+// ─── Mock: ladeWerkstattVorschlaege (gerankte Matching-Engine, #4359) ────────
+vi.mock('@/lib/werkstatt/matching/lade-vorschlaege', () => ({
+  ladeWerkstattVorschlaege: vi.fn(),
 }))
 
 // ─── Mock: geocodeAdresse ────────────────────────────────────────────────────
@@ -67,7 +67,7 @@ vi.mock('@/lib/storage/url', () => ({
 }))
 
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
-import { findWerkstaetten } from '@/lib/werkstatt/finder'
+import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createLead } from '@/lib/leads/create-lead'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
@@ -80,7 +80,7 @@ import {
 } from '../actions'
 
 const mockKlassifiziere = vi.mocked(klassifiziereSchadenbildBase64)
-const mockFindWerkstaetten = vi.mocked(findWerkstaetten)
+const mockLadeWerkstattVorschlaege = vi.mocked(ladeWerkstattVorschlaege)
 const mockGeocodeAdresse = vi.mocked(geocodeAdresse)
 const mockCreateLead = vi.mocked(createLead)
 const mockEnsureFlowLink = vi.mocked(ensureCanonicalFlowLinkForLead)
@@ -146,93 +146,175 @@ describe('klassifiziereSchadenfotoEmbed', () => {
 })
 
 // ─────────────────────────────────────────────────────────────────────────────
-// T4: sucheEchteWerkstaetten mit bedarf
+// T4 (Phase 1 Task 4): sucheEchteWerkstaetten auf die gerankte Engine umgestellt
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe('sucheEchteWerkstaetten', () => {
-  const baseRows = [
-    { id: '1', name: 'Werkstatt A', faehigkeiten: ['karosserie', 'lackierung'], lat: 51.0, lng: 7.0, distanz_km: 1 },
-    { id: '2', name: 'Werkstatt B', faehigkeiten: ['mechanik'], lat: 51.1, lng: 7.1, distanz_km: 2 },
-    { id: '3', name: 'Werkstatt C', faehigkeiten: null, lat: 51.2, lng: 7.2, distanz_km: 3 },
-  ] as never[]
+describe('sucheEchteWerkstaetten — gerankte Engine', () => {
+  it('ruft ladeWerkstattVorschlaege mit anker aus lat/lng, nurEchte=true', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: 'w1', name: 'A', passt: true, gruende: [], gewerkeFit: 'passt' },
+    ] as never)
 
-  it('ohne bedarf → alle rows, keineSpezialisierte:false, kein fit-Feld (Regress)', async () => {
-    mockFindWerkstaetten.mockResolvedValue(baseRows)
+    const r = await sucheEchteWerkstaetten({
+      lat: 50.9,
+      lng: 6.9,
+      bedarf: { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 70 },
+    })
+
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({
+        anker: { lat: 50.9, lng: 6.9 },
+        bedarf: ['karosserie'],
+        bedarfConfidence: 70,
+        nurEchte: true,
+      }),
+    )
+    expect(r.werkstaetten[0].id).toBe('w1')
+  })
+
+  it('ruft die Engine mit fahrzeugklasse:null und marke:null (Phase 1 — Wizard liefert sie erst Phase 2)', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([])
+
+    await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0 })
+
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({ fahrzeugklasse: null, marke: null, limit: 5 }),
+    )
+  })
+
+  it('ohne lat/lng (nur plz) → anker:null, bedarf/bedarfConfidence leer (Regress, kein Crash)', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([])
+
+    const result = await sucheEchteWerkstaetten({ plz: '50667' })
+
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({ anker: null, bedarf: [], bedarfConfidence: 0 }),
+    )
+    expect(result.keineSpezialisierte).toBe(false)
+  })
+
+  it('ohne bedarf → keineSpezialisierte:false, unabhaengig vom Engine-Ergebnis (Regress)', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt A', gewerkeFit: 'passt_nicht' },
+      { id: '2', name: 'Werkstatt B', gewerkeFit: 'passt_nicht' },
+    ] as never)
 
     const result = await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0 })
 
-    expect(result.werkstaetten).toHaveLength(3)
+    expect(result.werkstaetten).toHaveLength(2)
     expect(result.keineSpezialisierte).toBe(false)
-    // Ohne bedarf kein fit-Annotation
-    expect((result.werkstaetten[0] as Record<string, unknown>).fit).toBeUndefined()
   })
 
-  it('mit bedarf (hohe confidence) → rows haben fit, passt_nicht gefiltert, keineSpezialisierte korrekt', async () => {
-    mockFindWerkstaetten.mockResolvedValue(baseRows)
-
-    const bedarf: Reparaturbedarf = { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 80 }
-    const result = await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0, bedarf })
-
-    // Werkstatt A hat karosserie → passt; Werkstatt B hat nur mechanik → passt_nicht (gefiltert bei confidence>=60)
-    // Werkstatt C hat null faehigkeiten → unbekannt (nicht gefiltert)
-    expect(result.werkstaetten.length).toBeGreaterThan(0)
-    expect(result.keineSpezialisierte).toBe(false)
-    const fits = result.werkstaetten.map((w) => (w as Record<string, unknown>).fit)
-    expect(fits).not.toContain('passt_nicht') // hart-gefiltert
-  })
-
-  it('mit bedarf, aber keine Werkstatt passt → keineSpezialisierte:true + alle gezeigt (Fallback)', async () => {
-    const nurMechanik = [
-      { id: '1', name: 'Werkstatt M', faehigkeiten: ['mechanik'], lat: 51.0, lng: 7.0, distanz_km: 1 },
-    ] as never[]
-    mockFindWerkstaetten.mockResolvedValue(nurMechanik)
+  it('mit bedarf (confidence>=HART_SCHWELLE) + ALLE gewerkeFit passt_nicht → keineSpezialisierte:true, Engine-Fallback-Liste bleibt sichtbar', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt M', gewerkeFit: 'passt_nicht' },
+    ] as never)
 
     const bedarf: Reparaturbedarf = { kategorien: ['glas'], quelle: 'schadenbild', confidence: 90 }
     const result = await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0, bedarf })
 
-    // glas nicht vorhanden → keineSpezialisierte:true, Fallback = alle gezeigt
+    // glas passt bei keiner Werkstatt → keineSpezialisierte:true; die Engine liefert (Fallback) trotzdem alle.
     expect(result.keineSpezialisierte).toBe(true)
     expect(result.werkstaetten).toHaveLength(1)
   })
+
+  it('mit bedarf (confidence>=HART_SCHWELLE), mindestens eine passt → keineSpezialisierte:false', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt A', gewerkeFit: 'passt' },
+      { id: '2', name: 'Werkstatt B', gewerkeFit: 'passt_nicht' },
+    ] as never)
+
+    const bedarf: Reparaturbedarf = { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 80 }
+    const result = await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0, bedarf })
+
+    expect(result.keineSpezialisierte).toBe(false)
+  })
+
+  it('mit bedarf, aber confidence < HART_SCHWELLE → keineSpezialisierte:false trotz 100% passt_nicht (zu unsicher zum Ausschliessen)', async () => {
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt M', gewerkeFit: 'passt_nicht' },
+    ] as never)
+
+    const bedarf: Reparaturbedarf = { kategorien: ['glas'], quelle: 'manuell', confidence: 40 }
+    const result = await sucheEchteWerkstaetten({ lat: 51.0, lng: 7.0, bedarf })
+
+    expect(result.keineSpezialisierte).toBe(false)
+  })
 })
 
-describe('sucheWerkstaettenNachOrt', () => {
-  const baseRows = [
-    { id: '1', name: 'Werkstatt A', faehigkeiten: ['karosserie'], lat: 51.0, lng: 7.0, distanz_km: 1 },
-  ] as never[]
-
-  it('ohne bedarf → werkstaetten + center, keineSpezialisierte:false', async () => {
+describe('sucheWerkstaettenNachOrt — gerankte Engine', () => {
+  it('ohne bedarf → geocodiert, ruft ladeWerkstattVorschlaege mit anker aus dem Geocode-Treffer + nurEchte=true, center gesetzt', async () => {
     mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Berlin', placeId: null })
-    mockFindWerkstaetten.mockResolvedValue(baseRows)
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt A', gewerkeFit: 'passt' },
+    ] as never)
 
     const result = await sucheWerkstaettenNachOrt('Berlin')
 
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fahrzeugklasse: null,
+        marke: null,
+        anker: { lat: 51.0, lng: 7.0 },
+        bedarf: [],
+        bedarfConfidence: 0,
+        nurEchte: true,
+      }),
+    )
     expect(result.werkstaetten).toHaveLength(1)
     expect(result.center).toEqual({ lat: 51.0, lng: 7.0 })
     expect(result.keineSpezialisierte).toBe(false)
   })
 
-  it('mit bedarf → werkstaetten qualifiziert, center durchgereicht', async () => {
+  it('mit bedarf → bedarf/bedarfConfidence an die Engine durchgereicht, center bleibt der Geocode-Treffer', async () => {
     mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Köln', placeId: null })
-    mockFindWerkstaetten.mockResolvedValue(baseRows)
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt A', gewerkeFit: 'passt' },
+    ] as never)
 
     const bedarf: Reparaturbedarf = { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 75 }
     const result = await sucheWerkstaettenNachOrt('Köln', bedarf)
 
+    expect(mockLadeWerkstattVorschlaege).toHaveBeenCalledWith(
+      expect.objectContaining({ bedarf: ['karosserie'], bedarfConfidence: 75 }),
+    )
     expect(result.center).toEqual({ lat: 51.0, lng: 7.0 })
     expect(result.keineSpezialisierte).toBe(false)
-    const fits = result.werkstaetten.map((w) => (w as Record<string, unknown>).fit)
-    expect(fits).toContain('passt')
   })
 
-  it('Ort nicht gefunden → leere werkstaetten, center:null, keineSpezialisierte:false', async () => {
+  it('mit bedarf, aber keine Werkstatt passt (confidence>=HART_SCHWELLE) → keineSpezialisierte:true', async () => {
+    mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Berlin', placeId: null })
+    mockLadeWerkstattVorschlaege.mockReset()
+    mockLadeWerkstattVorschlaege.mockResolvedValue([
+      { id: '1', name: 'Werkstatt M', gewerkeFit: 'passt_nicht' },
+    ] as never)
+
+    const bedarf: Reparaturbedarf = { kategorien: ['glas'], quelle: 'schadenbild', confidence: 90 }
+    const result = await sucheWerkstaettenNachOrt('Berlin', bedarf)
+
+    expect(result.keineSpezialisierte).toBe(true)
+    expect(result.werkstaetten).toHaveLength(1)
+  })
+
+  it('Ort nicht gefunden → leere werkstaetten, center:null, keineSpezialisierte:false, Engine NICHT aufgerufen', async () => {
     mockGeocodeAdresse.mockResolvedValue(null)
+    mockLadeWerkstattVorschlaege.mockReset()
 
     const result = await sucheWerkstaettenNachOrt('Unbekannter Ort')
 
     expect(result.werkstaetten).toEqual([])
     expect(result.center).toBeNull()
     expect(result.keineSpezialisierte).toBe(false)
+    expect(mockLadeWerkstattVorschlaege).not.toHaveBeenCalled()
   })
 })
 

@@ -56,3 +56,10 @@ describe('sanitizeBedarf', () => {
     expect(result.kategorien).toEqual([])
   })
 })
+
+describe('sanitizeBedarf — schadenbeschreibung-Quelle', () => {
+  it('erhaelt quelle=schadenbeschreibung', () => {
+    const r = sanitizeBedarf({ kategorien: ['karosserie'], quelle: 'schadenbeschreibung', confidence: 70 })
+    expect(r.quelle).toBe('schadenbeschreibung')
+  })
+})

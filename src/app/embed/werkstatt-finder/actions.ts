@@ -5,11 +5,11 @@ import { createLead } from '@/lib/leads/create-lead'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
-import { findWerkstaetten, type WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
-import { qualifiziereWerkstaetten } from '@/lib/werkstatt/bedarf/qualifiziere'
+import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
+import { HART_SCHWELLE, type WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
 import { getStorageUrl } from '@/lib/storage/url'
 import type { Reparaturbedarf, Fit } from '@/lib/werkstatt/bedarf/types'
@@ -44,48 +44,76 @@ export async function klassifiziereSchadenfotoEmbed(images: EmbedFoto[]): Promis
 }
 
 /**
- * T4: Werkstatt-Suche optional mit Bedarfs-Qualifizierung.
- * Ohne bedarf: heutiges Verhalten (kein Regress).
- * Mit bedarf: qualifiziereWerkstaetten → Fit-Chips + hart-Filter.
+ * Ab HART_SCHWELLE gilt der Bedarf als sicher genug, um bei 0 Treffern eine
+ * "keine Spezialisierte gefunden"-Warnung zu zeigen (Fallback zeigt trotzdem alle — die Engine
+ * liefert bei komplett weggefilterten Kriterien lieber die Geo-naechsten als eine leere Liste).
+ */
+function keineSpezialisierteGefunden(
+  werkstaetten: WerkstattVorschlag[],
+  bedarf: { kategorien: string[]; confidence: number },
+): boolean {
+  return (
+    bedarf.confidence >= HART_SCHWELLE &&
+    bedarf.kategorien.length > 0 &&
+    werkstaetten.every((w) => w.gewerkeFit === 'passt_nicht')
+  )
+}
+
+/**
+ * T4 (Phase 1 Task 4, #4359): Werkstatt-Suche auf die gerankte Matching-Engine umgestellt
+ * (Marke → Gewerke → Fahrzeug-Gruppe → verifiziert → Distanz zum FAHRZEUGSTANDORT).
+ * Marke/Fahrzeugklasse bleiben in Phase 1 null — der Wizard liefert sie erst in Phase 2, die
+ * Engine rankt bis dahin nach Gewerke+Distanz (alle Werkstaetten markenMatch='frei'/'unbekannt').
  */
 export async function sucheEchteWerkstaetten(input: {
   lat?: number
   lng?: number
   plz?: string
   bedarf?: Reparaturbedarf
-}): Promise<{ werkstaetten: (WerkstattFinderRow & { fit?: Fit })[]; keineSpezialisierte: boolean }> {
-  const rows = await findWerkstaetten({ lat: input.lat, lng: input.lng, plz: input.plz, nurEchte: true, limit: 10 })
-  if (!input.bedarf) {
-    return { werkstaetten: rows, keineSpezialisierte: false }
-  }
-  const q = qualifiziereWerkstaetten(rows, sanitizeBedarf(input.bedarf))
-  return { werkstaetten: q.werkstaetten, keineSpezialisierte: q.keineSpezialisierte }
+}): Promise<{ werkstaetten: WerkstattVorschlag[]; keineSpezialisierte: boolean }> {
+  const anker = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null
+  const b = sanitizeBedarf(input.bedarf)
+  const werkstaetten = await ladeWerkstattVorschlaege({
+    fahrzeugklasse: null, // Phase 2: aus dem Wizard (Fahrzeugtyp)
+    marke: null, // Phase 2: aus dem Wizard (Hersteller)
+    bedarf: b.kategorien,
+    bedarfConfidence: b.confidence,
+    anker,
+    limit: 5,
+    nurEchte: true,
+  })
+  return { werkstaetten, keineSpezialisierte: keineSpezialisierteGefunden(werkstaetten, b) }
 }
 
 /**
- * T4: Standalone-Finder-Suche nach freiem Ort/PLZ-String, optional mit Bedarfs-Qualifizierung.
- * Geocodiert die Eingabe (Mapbox, DE-scoped) und liefert qualifizierte Werkstaetten + Karten-Zentrum.
- * center=null => Ort nicht gefunden.
+ * T4: Standalone-Finder-Suche nach freiem Ort/PLZ-String, ebenfalls auf die gerankte Engine
+ * umgestellt. Geocodiert die Eingabe (Mapbox, DE-scoped) weiterhin unveraendert; der Geocode-Treffer
+ * wird als Anker (Fahrzeugstandort-Proxy) an die Engine gereicht. center=null => Ort nicht gefunden.
  */
 export async function sucheWerkstaettenNachOrt(
   query: string,
   bedarf?: Reparaturbedarf,
 ): Promise<{
-  werkstaetten: (WerkstattFinderRow & { fit?: Fit })[]
+  werkstaetten: WerkstattVorschlag[]
   center: { lat: number; lng: number } | null
   keineSpezialisierte: boolean
 }> {
   const geo = await geocodeAdresse(query)
   if (!geo) return { werkstaetten: [], center: null, keineSpezialisierte: false }
-  const rows = await findWerkstaetten({ lat: geo.lat, lng: geo.lng, nurEchte: true, limit: 10 })
-  if (!bedarf) {
-    return { werkstaetten: rows, center: { lat: geo.lat, lng: geo.lng }, keineSpezialisierte: false }
-  }
-  const q = qualifiziereWerkstaetten(rows, sanitizeBedarf(bedarf))
+  const b = sanitizeBedarf(bedarf)
+  const werkstaetten = await ladeWerkstattVorschlaege({
+    fahrzeugklasse: null,
+    marke: null,
+    bedarf: b.kategorien,
+    bedarfConfidence: b.confidence,
+    anker: { lat: geo.lat, lng: geo.lng },
+    limit: 5,
+    nurEchte: true,
+  })
   return {
-    werkstaetten: q.werkstaetten,
+    werkstaetten,
     center: { lat: geo.lat, lng: geo.lng },
-    keineSpezialisierte: q.keineSpezialisierte,
+    keineSpezialisierte: keineSpezialisierteGefunden(werkstaetten, b),
   }
 }
 
