@@ -834,14 +834,19 @@ export async function convertLeadToClaim(
   }
 
   // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
-  // Bedingung: Lead hat sowohl eine Reparatur-Werkstatt (reparatur_werkstatt_id)
-  // als auch einen Wunschtermin (reparatur_wunschtermin, im Flow gesetzt, Task 3).
-  // status='angefragt' — die Werkstatt bestaetigt/ruft an/lehnt ab im naechsten Schritt.
+  // Bedingung: Lead hat eine Reparatur-Werkstatt (reparatur_werkstatt_id). Der Wunschtermin
+  // (reparatur_wunschtermin) ist im Flow OPTIONAL — fehlt er, entsteht die Row TROTZDEM
+  // (wunschtermin nullable seit Mig 20260715005517), damit die Werkstatt den Auftrag sieht
+  // und selbst einen Termin vorschlagen kann. Frueher war die Row an BEIDE Werte gekoppelt
+  // -> ohne Wunschtermin keine Row -> WerkstattAuftragDetail blendete die ganze Sektion aus
+  // = toter Auftrag (b1).
+  // status='angefragt' — die Werkstatt bestaetigt (bei Wunschtermin) bzw. schlaegt selbst
+  // einen Termin vor (ohne Wunschtermin) / ruft an / lehnt ab im naechsten Schritt.
   // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
   {
     const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
     const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
-    if (rwtWerkstattId && rwtWunschtermin) {
+    if (rwtWerkstattId) {
       const { error: rtErr } = await admin
         .from('reparatur_termine')
         .insert({
