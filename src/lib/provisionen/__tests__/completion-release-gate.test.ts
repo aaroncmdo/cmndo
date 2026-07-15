@@ -35,19 +35,19 @@ describe('istClaimStorniert', () => {
 
 describe('deriveCompletionTs', () => {
   it('nur_gutachter: termin durchgefuehrt = completion', () => {
-    expect(deriveCompletionTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', claimStatus: null, abgeschlossenAm: null, terminDurchgefuehrtAm: vorTagen(3) })).toBe(vorTagen(3))
+    expect(deriveCompletionTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: vorTagen(3) })).toBe(vorTagen(3))
   })
   it('nur_gutachter ohne durchgefuehrten Termin = null (HOLD)', () => {
-    expect(deriveCompletionTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', claimStatus: null, abgeschlossenAm: null, terminDurchgefuehrtAm: null })).toBeNull()
+    expect(deriveCompletionTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: null })).toBeNull()
   })
   it('Voll-Claim abgeschlossen = abgeschlossen_am', () => {
-    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: 'abgeschlossen', claimStatus: null, abgeschlossenAm: vorTagen(10), terminDurchgefuehrtAm: null })).toBe(vorTagen(10))
+    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: 'abgeschlossen', abgeschlossenAm: vorTagen(10), terminDurchgefuehrtAm: null })).toBe(vorTagen(10))
   })
   it('Voll-Claim reguliert_vollstaendig = abgeschlossen_am', () => {
-    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: null, claimStatus: 'reguliert_vollstaendig', abgeschlossenAm: vorTagen(10), terminDurchgefuehrtAm: null })).toBe(vorTagen(10))
+    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: 'reguliert_vollstaendig', abgeschlossenAm: vorTagen(10), terminDurchgefuehrtAm: null })).toBe(vorTagen(10))
   })
   it('Voll-Claim NICHT abgeschlossen (sv-termin) = null (HOLD — der Prod-Bug)', () => {
-    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: 'sv-termin', claimStatus: null, abgeschlossenAm: null, terminDurchgefuehrtAm: null })).toBeNull()
+    expect(deriveCompletionTs({ serviceTyp: 'komplett', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: null })).toBeNull()
   })
 })
 

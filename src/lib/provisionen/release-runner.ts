@@ -51,7 +51,6 @@ export type RunProvisionsReleaseOpts = {
 
 type CompletionEntry = {
   operativeStatus: string | null
-  claimStatus: string | null
   serviceTyp: string | null
   abgeschlossenAm: string | null
   terminDurchgefuehrtAm: string | null
@@ -86,14 +85,14 @@ export async function runProvisionsRelease(
   if (claimIds.length > 0) {
     const { data: claims, error: claimsErr } = await db
       .from('claims')
-      .select('id, operative_status, status, service_typ, abgeschlossen_am')
+      // T3-slice-2a: claims.status raus — deriveCompletionTs prueft jetzt operative_status (abgeschlossen|reguliert_vollstaendig).
+      .select('id, operative_status, service_typ, abgeschlossen_am')
       .in('id', claimIds)
     if (claimsErr) return { ok: false, error: claimsErr.message }
 
     for (const c of (claims ?? []) as Record<string, unknown>[]) {
       completionMap.set(c.id as string, {
         operativeStatus: (c.operative_status as string | null) ?? null,
-        claimStatus: (c.status as string | null) ?? null,
         serviceTyp: (c.service_typ as string | null) ?? null,
         abgeschlossenAm: (c.abgeschlossen_am as string | null) ?? null,
         terminDurchgefuehrtAm: null,
@@ -156,7 +155,6 @@ export async function runProvisionsRelease(
       deriveCompletionTs({
         serviceTyp: c.serviceTyp,
         operativeStatus: c.operativeStatus,
-        claimStatus: c.claimStatus,
         abgeschlossenAm: c.abgeschlossenAm,
         terminDurchgefuehrtAm: c.terminDurchgefuehrtAm,
       }),
