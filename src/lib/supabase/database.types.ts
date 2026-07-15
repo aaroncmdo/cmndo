@@ -2959,7 +2959,6 @@ export type Database = {
           vs_ablehnungs_grund: string | null
           werkstatt_id: string | null
           werkstatt_seit_datum: string | null
-          work_state: string | null
           zahlungsweg: string | null
           zb1_status: string | null
           zeugen_kontakte: Json | null
@@ -3146,7 +3145,6 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           werkstatt_id?: string | null
           werkstatt_seit_datum?: string | null
-          work_state?: string | null
           zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
@@ -3333,7 +3331,6 @@ export type Database = {
           vs_ablehnungs_grund?: string | null
           werkstatt_id?: string | null
           werkstatt_seit_datum?: string | null
-          work_state?: string | null
           zahlungsweg?: string | null
           zb1_status?: string | null
           zeugen_kontakte?: Json | null
