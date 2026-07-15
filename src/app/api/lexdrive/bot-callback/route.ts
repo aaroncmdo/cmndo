@@ -84,12 +84,17 @@ export async function POST(req: NextRequest) {
   // Anhaenge in fall_dokumente persistieren
   for (const att of body.attachments ?? []) {
     if (att.url) {
+      // CMM-49 Schema-Drift-Fix (15.07.): fall_dokumente hat dokument_typ/storage_path/
+      // original_filename (nicht typ/datei_url/datei_name) -> INSERT schlug bisher fehl.
+      // att.url ist eine EXTERNE Bot-URL (kein interner Storage-Pfad); als Referenz in
+      // storage_path. Generische Signed-URL-Reader muessen lexdrive-Rows
+      // (quelle='lexdrive_bot') ueberspringen. (Endpunkt aktuell inaktiv: LexDrive-Inbound "nie".)
       await db.from('fall_dokumente').insert({
         fall_id: fallId,
-        typ: 'lexdrive_bot_output',
+        dokument_typ: 'lexdrive_bot_output',
         kategorie: 'lexdrive',
-        datei_url: att.url,
-        datei_name: att.name,
+        storage_path: att.url,
+        original_filename: att.name,
         quelle: 'lexdrive_bot',
       })
     }

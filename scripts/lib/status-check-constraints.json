@@ -23,7 +23,6 @@
     "claims.phase_override": ["erfassung", "begutachtung", "regulierung", "abschluss"],
     "claims.reparatur_vermittlung_status": ["offen", "eigene", "vermittelt", "abgelehnt"],
     "claims.status": ["dispatch_done", "in_bearbeitung", "in_kommunikation_vs", "reguliert", "abgelehnt", "an_externe_kanzlei_uebergeben", "storniert", "reguliert_vollstaendig", "klage_rechtsstreit", "verjaehrt", "abgelehnt_final", "termin_durchgefuehrt"],
-    "claims.work_state": ["dispatch_done", "in_bearbeitung"],
     "community_comments.status": ["sichtbar", "versteckt", "geloescht"],
     "community_posts.status": ["sichtbar", "versteckt", "geloescht"],
     "cron_jobs_audit.status": ["running", "success", "error", "timeout"],
