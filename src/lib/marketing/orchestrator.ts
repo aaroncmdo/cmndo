@@ -1,7 +1,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { readFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 import { join, extname } from 'node:path'
 import { tmpdir } from 'node:os'
+import { randomUUID } from 'node:crypto'
 import { ContentScriptSchema, type ContentScript } from './schema'
 import type { ResolvedVisual } from './visual-resolver'
 import type { ContentClipProps } from '../../remotion/types'
@@ -161,7 +163,25 @@ export async function rendereJob(
       console.error('[marketing] Musik-Bett uebersprungen', e)
     }
 
-    // 7. Render -> Storage (Live-% via onRenderProgress; 35->90 pro Frame)
+    // 7. Render -> Storage. Zwei Wege:
+    //   DETACHED (MARKETING_RENDER_DETACHED=true, prod): der lange Render laeuft in einem
+    //   eigenen Prozess, der einen Deploy-Restart des Web-Apps ueberlebt. Der Web-Prozess
+    //   macht nur die (schnelle) Vorbereitung oben + spawnt; video_fertig + Video-Upload
+    //   uebernimmt der Child (scripts/render-detached.mjs, Supabase via REST).
+    if (process.env.MARKETING_RENDER_DETACHED === 'true') {
+      void set({ audio_url: audioUrl, kosten_cents: fullText.length }) // Felder, die der Child nicht kennt
+      const propsFile = join(tmpdir(), `mkprops-${jobId}-${randomUUID()}.json`)
+      await writeFile(propsFile, JSON.stringify(props))
+      const child = spawn(
+        process.execPath,
+        [join(process.cwd(), 'scripts', 'render-detached.mjs'), jobId, propsFile],
+        { detached: true, stdio: 'ignore', cwd: process.cwd() },
+      )
+      child.unref()
+      return { ok: true } // Render + video_fertig macht der detached Prozess
+    }
+
+    // INLINE (Default / Tests): renderClip im Web-Prozess (stirbt bei Deploy-Restart -> Reap).
     const videoBuf = await deps.renderClip(props, onRenderProgress)
     void setProgress(RENDER_PHASES.upload.pct, 'upload')
     const videoKey = `${jobId}/video.mp4`
