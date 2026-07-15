@@ -43,6 +43,8 @@ export default function SequenzenDrawerContent() {
   const vInsert = useMergeVarInsert({ betreff: vBetreff, setBetreff: setVBetreff, body: vBody, setBody: setVBody })
   const [vZiel, setVZiel] = useState('')
   const [kiBusy, setKiBusy] = useState(false)
+  // null = neue Vorlage; sonst wird die Vorlage mit dieser id bearbeitet.
+  const [vEditId, setVEditId] = useState<string | null>(null)
 
   // Sequenz-Formular
   const [sName, setSName] = useState('')
@@ -76,16 +78,34 @@ export default function SequenzenDrawerContent() {
     setVBody(res.data.body_html)
   }
 
+  function vorlageFormularZuruecksetzen() {
+    setVEditId(null)
+    setVName(''); setVBetreff(''); setVBody(''); setVZiel('')
+    setVRolle('werkstatt')
+  }
+
+  function vorlageBearbeiten(v: Vorlage) {
+    setVEditId(v.id)
+    setVName(v.name)
+    setVRolle(v.rolle ?? 'werkstatt')
+    setVBetreff(v.betreff)
+    setVBody(v.body_html)
+  }
+
   async function vorlageSpeichern() {
     setBusy(true)
     setFehler(null)
-    const res = await speichereVorlage({ name: vName, rolle: vRolle, betreff: vBetreff, body_html: vBody })
+    // id gesetzt -> Update, sonst Insert (speichereVorlage entscheidet).
+    const res = await speichereVorlage({
+      id: vEditId ?? undefined,
+      name: vName, rolle: vRolle, betreff: vBetreff, body_html: vBody,
+    })
     setBusy(false)
     if (!res.ok) {
       setFehler(res.error ?? 'Speichern fehlgeschlagen.')
       return
     }
-    setVName(''); setVBetreff(''); setVBody(''); setVZiel('')
+    vorlageFormularZuruecksetzen()
     await laden()
   }
 
@@ -153,18 +173,37 @@ export default function SequenzenDrawerContent() {
         {vorlagen.length > 0 && (
           <ul className="space-y-1">
             {vorlagen.map((v) => (
-              <li key={v.id} className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/40 px-3 py-2">
-                <p className="text-body-sm text-claimondo-navy">{v.name}</p>
-                <p className="text-caption text-claimondo-ondo/60">
-                  {v.rolle ?? 'alle Rollen'} · {v.betreff}
-                </p>
+              <li
+                key={v.id}
+                className={`rounded-ios-md border px-3 py-2 ${vEditId === v.id ? 'border-claimondo-ondo bg-claimondo-ondo/5' : 'border-claimondo-border bg-claimondo-bg/40'}`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-body-sm text-claimondo-navy">{v.name}</p>
+                    <p className="text-caption text-claimondo-ondo/60 truncate">
+                      {v.rolle ?? 'alle Rollen'} · {v.betreff}
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => vorlageBearbeiten(v)}>
+                    Bearbeiten
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>
         )}
 
         <div className="rounded-ios-md border border-claimondo-border bg-white p-3 space-y-2">
-          <p className="text-body-sm font-medium text-claimondo-navy">Neue Vorlage</p>
+          <div className="flex items-center justify-between">
+            <p className="text-body-sm font-medium text-claimondo-navy">
+              {vEditId ? 'Vorlage bearbeiten' : 'Neue Vorlage'}
+            </p>
+            {vEditId && (
+              <Button variant="ghost" size="sm" onClick={vorlageFormularZuruecksetzen}>
+                + Neue Vorlage
+              </Button>
+            )}
+          </div>
           <div className="grid grid-cols-2 gap-2">
             <input value={vName} onChange={(e) => setVName(e.target.value)} placeholder="Name (intern)" className={FELD} />
             <select value={vRolle} onChange={(e) => setVRolle(e.target.value)} aria-label="Rolle" className={FELD}>
@@ -201,7 +240,7 @@ export default function SequenzenDrawerContent() {
           />
           <MergeVarPalette onInsert={vInsert.einfuegen} />
           <Button variant="navy" size="sm" loading={busy} disabled={!vName.trim() || !vBetreff.trim() || !vBody.trim()} onClick={vorlageSpeichern}>
-            Vorlage speichern
+            {vEditId ? 'Änderungen speichern' : 'Vorlage speichern'}
           </Button>
         </div>
       </section>

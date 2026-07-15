@@ -66,17 +66,18 @@ export async function speichereVorlage(input: {
   if (!input.name.trim() || !input.betreff.trim() || !input.body_html.trim()) {
     return { ok: false, error: 'Name, Betreff und Text dürfen nicht leer sein.' }
   }
-  const zeile = {
+  const felder = {
     name: input.name.trim(),
     rolle: input.rolle,
     betreff: input.betreff.trim(),
     body_html: input.body_html,
-    erstellt_von: guard.user.id,
     aktualisiert_am: new Date().toISOString(),
   }
+  // Beim UPDATE erstellt_von NICHT anfassen (sonst wird der urspruengliche Ersteller
+  // beim Bearbeiten ueberschrieben) — nur beim INSERT setzen.
   const { error } = input.id
-    ? await guard.supabase.from('cold_mail_vorlagen').update(zeile).eq('id', input.id)
-    : await guard.supabase.from('cold_mail_vorlagen').insert(zeile)
+    ? await guard.supabase.from('cold_mail_vorlagen').update(felder).eq('id', input.id)
+    : await guard.supabase.from('cold_mail_vorlagen').insert({ ...felder, erstellt_von: guard.user.id })
   if (error) return { ok: false, error: error.message }
   revalidatePath('/admin/vertrieb')
   return { ok: true }
