@@ -170,7 +170,7 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
         console.error('[KFZ-149 retry] Bezahlt-Mail fehlgeschlagen:', mailErr)
       }
 
-      revalidatePath('/admin/finance/abrechnungen', 'page')
+      revalidatePath('/admin/finance', 'page')
       return { success: true, payment_intent_id: pi.id }
     }
 
@@ -183,7 +183,7 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
         status: 'im_einzug',
         updated_at: nowIso,
       }).eq('id', abr.id)
-      revalidatePath('/admin/finance/abrechnungen', 'page')
+      revalidatePath('/admin/finance', 'page')
       return { success: true, payment_intent_id: pi.id }
     }
 
@@ -194,7 +194,7 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
       status: 'fehlgeschlagen',
       updated_at: new Date().toISOString(),
     }).eq('id', abr.id)
-    revalidatePath('/admin/finance/abrechnungen', 'page')
+    revalidatePath('/admin/finance', 'page')
     return { success: false, error: `PaymentIntent ist im Status '${pi.status}' (kein 'succeeded'). PaymentIntent-ID: ${pi.id}` }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
@@ -204,7 +204,7 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
       status: 'fehlgeschlagen',
       updated_at: new Date().toISOString(),
     }).eq('id', abr.id)
-    revalidatePath('/admin/finance/abrechnungen', 'page')
+    revalidatePath('/admin/finance', 'page')
     return { success: false, error: msg }
   }
 }
@@ -238,7 +238,7 @@ export async function markBezahlt(abrechnung_id: string, notiz?: string): Promis
 
   if (error) return { success: false, error: error.message }
 
-  revalidatePath('/admin/finance/abrechnungen', 'page')
+  revalidatePath('/admin/finance', 'page')
   return { success: true }
 }
 
@@ -358,7 +358,7 @@ export async function stornoAbrechnung(
     })
   }
 
-  revalidatePath('/admin/finance/abrechnungen', 'page')
+  revalidatePath('/admin/finance', 'page')
   return { success: true }
 }
 
@@ -404,7 +404,7 @@ export async function reIssueAbrechnung(
   const { reissueAbrechnung } = await import('@/lib/abrechnung/reissue-abrechnung')
   const result = await reissueAbrechnung(abrechnung_id)
 
-  revalidatePath('/admin/finance/abrechnungen', 'page')
+  revalidatePath('/admin/finance', 'page')
 
   if (!result.neue_abrechnung_id) {
     return { success: true, error: 'Keine verbleibenden Fälle — keine neue Abrechnung erstellt' }

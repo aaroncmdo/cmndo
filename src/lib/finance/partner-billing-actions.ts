@@ -53,7 +53,7 @@ export async function markiereAlsBezahlt(
   }
 
   const r = await markBezahlt(id)
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   return r.success ? { ok: true } : { ok: false, error: r.error }
 }
 
@@ -73,7 +73,7 @@ export async function loeseEinzugErneutAus(
   }
 
   const r = await retryEinzug(id)
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   return r.success ? { ok: true } : { ok: false, error: r.error }
 }
 
@@ -94,7 +94,7 @@ export async function gebeProvisionFrei(
 
   const admin = createAdminClient()
   const r = await freigebenProvision(admin, quelle as (typeof PROVISION_TABELLEN)[number], id)
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   return r
 }
 
@@ -115,7 +115,7 @@ export async function zahleProvisionAus(
 
   const admin = createAdminClient()
   const r = await auszahlenProvision(admin, quelle as (typeof PROVISION_TABELLEN)[number], id)
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   return r
 }
 
@@ -134,7 +134,7 @@ export async function storniere(
 
   if (quelle === 'abrechnungen') {
     const r = await stornoAbrechnung(id, grund)
-    revalidatePath('/admin/finance/partner-abrechnungen')
+    revalidatePath('/admin/finance')
     return r.success ? { ok: true } : { ok: false, error: r.error }
   }
 
@@ -146,7 +146,7 @@ export async function storniere(
       id,
       grund,
     )
-    revalidatePath('/admin/finance/partner-abrechnungen')
+    revalidatePath('/admin/finance')
     return r
   }
 
@@ -189,9 +189,9 @@ export async function setzePartnerSteuerdaten(
 
   if (error) return { ok: false, error: error.message }
 
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   revalidatePath('/admin/werkstaetten')
-  revalidatePath('/admin/finance/provisionen')
+  revalidatePath('/admin/finance')
   return { ok: true }
 }
 
@@ -222,7 +222,7 @@ export async function setzePartnerUstStatus(
 
   if (error) return { ok: false, error: error.message }
 
-  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance')
   return { ok: true }
 }
 
@@ -426,8 +426,8 @@ export async function korrigierePartnerGutschriftAction(
   const admin = createAdminClient()
   const r = await korrigierePartnerGutschrift(admin, ledgerTabelle, ledgerId, grund.trim(), override)
 
-  revalidatePath('/admin/finance/partner-abrechnungen')
-  revalidatePath('/admin/finance/provisionen')
+  revalidatePath('/admin/finance')
+  revalidatePath('/admin/finance')
   revalidatePath('/admin/werkstaetten')
   revalidatePath('/admin/makler')
   return r

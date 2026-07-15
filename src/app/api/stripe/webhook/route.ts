@@ -421,7 +421,7 @@ export async function POST(request: Request) {
           }
 
           try {
-            revalidatePath('/admin/finance/kanzlei', 'page')
+            revalidatePath('/admin/finance', 'page')
           } catch { /* */ }
 
           break
