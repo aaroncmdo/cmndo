@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { chipTraegtToken, nfcVerfuegbar } from './nfc'
 
 describe('chipTraegtToken', () => {
@@ -35,7 +35,31 @@ describe('chipTraegtToken', () => {
 })
 
 describe('nfcVerfuegbar', () => {
-  it('meldet false ohne NDEFReader (jsdom == iPhone/Desktop)', () => {
+  // vitest.config.ts setzt environment:'node' GLOBAL -> window ist hier kein jsdom-Stub,
+  // sondern komplett undefined. Ein simples "erwarte false ohne Setup" wuerde also nur den
+  // typeof-window-Kurzschluss im ersten && -Operanden treffen -- die eigentliche
+  // Feature-Detection ('NDEFReader' in window) wuerde NIE ausgefuehrt und ein Tippfehler
+  // genau dort bliebe unbemerkt gruen. vi.stubGlobal zwingt beide Branches echt durch die
+  // Funktion (Vorbild: src/lib/offline/handlers/gps-position.test.ts).
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('meldet true wenn window.NDEFReader existiert (Chrome/Android)', () => {
+    vi.stubGlobal('window', { NDEFReader: class {} })
+    expect(nfcVerfuegbar()).toBe(true)
+  })
+
+  it('meldet false wenn window existiert, aber OHNE NDEFReader (echtes iPhone/Desktop)', () => {
+    // DER Kern-Fall: window ist ein echtes Objekt, der typeof-Kurzschluss greift NICHT --
+    // 'NDEFReader' in window muss also wirklich ausgewertet werden und false liefern.
+    vi.stubGlobal('window', {})
+    expect(nfcVerfuegbar()).toBe(false)
+  })
+
+  it('meldet false wenn window komplett undefined ist (SSR/Node), ohne zu crashen', () => {
+    vi.stubGlobal('window', undefined)
+    expect(() => nfcVerfuegbar()).not.toThrow()
     expect(nfcVerfuegbar()).toBe(false)
   })
 })
