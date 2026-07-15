@@ -3,6 +3,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
+import { getStorageUrl } from '@/lib/storage/url'
 
 const LEXDRIVE_EMAIL = process.env.LEXDRIVE_KANZLEI_EMAIL ?? 'aaron.sprafke@claimondo.de'
 
@@ -77,17 +78,23 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
     }
   }
 
-  // Pflichtdokumente laden — Gutachten, Vollmacht, Sicherungsabtretung, Polizeibericht
+  // Pflichtdokumente laden — Gutachten, Vollmacht, Sicherungsabtretung, Polizeibericht.
+  // CMM-49 Schema-Drift-Fix (15.07.): fall_dokumente hat dokument_typ/storage_path/
+  // original_filename (nicht typ/datei_url/datei_name). storage_path ist ein INTERNER
+  // Storage-Pfad -> vor dem Fetch eine Signed-URL erzeugen (getStorageUrl). Bisher warf
+  // der Select PostgREST-400 -> 0 Dokumente -> Kanzlei-Email ging OHNE Anhaenge raus.
   const { data: dokumente } = await db
     .from('fall_dokumente')
-    .select('typ, kategorie, datei_url, datei_name')
+    .select('dokument_typ, kategorie, storage_path, original_filename')
     .eq('fall_id', fallId)
-    .in('typ', ['gutachten', 'vollmacht', 'sicherungsabtretung', 'polizeibericht'])
+    .in('dokument_typ', ['gutachten', 'vollmacht', 'sicherungsabtretung', 'polizeibericht'])
 
-  const attachmentsToFetch = (dokumente ?? []).filter(d => d.datei_url)
+  const attachmentsToFetch = (dokumente ?? []).filter((d) => d.storage_path)
   const attachments: Anhang[] = []
   for (const d of attachmentsToFetch) {
-    const att = await fetchPdfFromUrl(d.datei_url as string, (d.datei_name as string) ?? `${d.typ}.pdf`)
+    const url = await getStorageUrl(db, 'fall-dokumente', d.storage_path as string, { context: 'email' })
+    if (!url) continue
+    const att = await fetchPdfFromUrl(url, (d.original_filename as string) ?? `${d.dokument_typ}.pdf`)
     if (att) attachments.push(att)
   }
 
