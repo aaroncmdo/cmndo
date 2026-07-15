@@ -14,6 +14,7 @@ import ScrapePanel from '@/app/admin/partner-leads/ScrapePanel'
 import WerkstattAnlegenForm from '@/app/admin/werkstaetten/WerkstattAnlegenForm'
 import MaklerAnlegenDrawerContent from './wizards/MaklerAnlegenDrawerContent'
 import SequenzenDrawerContent from './wizards/SequenzenDrawerContent'
+import FirmenFlottenDrawerContent from './wizards/FirmenFlottenDrawerContent'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
 import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
@@ -33,6 +34,7 @@ export default function VertriebAktionsleiste({
   const [sequenzenDrawer, setSequenzenDrawer] = useState(false)
   const [wsAnlegen, setWsAnlegen] = useState(false)
   const [maklerAnlegen, setMaklerAnlegen] = useState(false)
+  const [flotteAnlegen, setFlotteAnlegen] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
   if (aktionen.length === 0) return null
 
@@ -67,6 +69,10 @@ export default function VertriebAktionsleiste({
     }
     if (a.key === 'anlegen-makler') {
       setMaklerAnlegen(true)
+      return
+    }
+    if (a.key === 'anlegen-flotte') {
+      setFlotteAnlegen(true)
       return
     }
     if (a.href) router.push(a.href)
@@ -174,6 +180,18 @@ export default function VertriebAktionsleiste({
           onClose={() => setMaklerAnlegen(false)}
           onCreated={() => { setMaklerAnlegen(false); router.refresh() }}
         />
+      </Drawer>
+
+      {/* Firmen-Flotte: der EINE Einstieg (Pill "Firmen-Flotte anlegen"). Vorher fiel der key
+          durch ausloesen() hindurch auf router.push('/admin/firmen-flotte') -- der redundante
+          Cockpit-oben-rechts-Button (FirmenFlottenCockpitEntry) oeffnete denselben Drawer. */}
+      <Drawer
+        open={flotteAnlegen}
+        onClose={() => { setFlotteAnlegen(false); router.refresh() }}
+        width={860}
+        ariaLabel="Firmen-Flotte anlegen"
+      >
+        <FirmenFlottenDrawerContent />
       </Drawer>
     </>
   )
