@@ -1,19 +1,14 @@
 {
-  "generatedAt": "2026-07-15T15:39:43.000Z",
-  "count": 21,
+  "generatedAt": "2026-07-15T16:06:37.000Z",
+  "count": 15,
   "keys": [
     "admin_termine.notizen",
     "aircall_relay_seats.notiz",
     "anruf_log.notiz",
     "anspruch_schaetzungen.session_token",
-    "auftraege.filmcheck_notizen",
-    "auftraege.sv_notizen_vor_ort",
-    "auftraege.technische_stellungnahme_notiz_sv",
     "calls.notiz",
     "embed_sites.tracking_webhook_secret",
     "gutachter_waitlist.notizen_admin",
-    "makler.notizen",
-    "personenschaden_personen.notizen",
     "profiles.google_access_token",
     "profiles.google_refresh_token",
     "profiles.ms_access_token",
@@ -21,7 +16,6 @@
     "sv_buero.notiz",
     "termine.ergebnis_notiz",
     "termine.notiz",
-    "vehicle_ownership_history.notiz",
-    "werkstaetten.notizen"
+    "vehicle_ownership_history.notiz"
   ]
 }
