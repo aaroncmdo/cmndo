@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 // Lead x Claim x Consent — pure + unit-getestet (siehe lead-consent.ts fuer das Warum).
 import {
   joinLeadsMitConsent,
@@ -1068,11 +1069,25 @@ export type MaklerChatMessage = {
  * Consent-Gate läuft in der Detail-Route; diese Funktion liest nur.
  */
 export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('nachrichten')
-    .select(
-      `
+  // v2-Cutover: via Admin lesen (das Vollzugriff-Consent-Gate laeuft in der Detail-Route,
+  // page.tsx). Union aus dem v1-Kanal `gruppenchat` UND dem v2-`kunde_gruppe`-Thread des
+  // Falls — sonst saehe der Makler die Nachrichten von Kunde/KB/SV NICHT (die sind
+  // thread-nativ mit kanal=null). Der Thread wird per thread_id gematcht (nicht fall_id),
+  // weil v2-Zeilen fall_id=claim_id tragen (CMM-49), das vom faelle-fall_id abweichen kann.
+  const admin = createAdminClient()
+  const claimId = await resolveClaimId(admin, fallId)
+  let gruppeThreadId: string | null = null
+  if (claimId) {
+    const { data: thr } = await admin
+      .from('chat_threads')
+      .select('id')
+      .eq('claim_id', claimId)
+      .eq('art', 'kunde_gruppe')
+      .maybeSingle()
+    gruppeThreadId = (thr as { id: string } | null)?.id ?? null
+  }
+
+  const selectCols = `
       id,
       fall_id,
       kanal,
@@ -1084,11 +1099,14 @@ export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> 
       sender:profiles!nachrichten_sender_id_fkey(
         id, vorname, nachname, avatar_url
       )
-    `,
-    )
-    .eq('fall_id', fallId)
-    .in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
-    .order('created_at', { ascending: true })
+    `
+  let query = admin.from('nachrichten').select(selectCols).order('created_at', { ascending: true })
+  query = gruppeThreadId
+    ? query.or(
+        `and(fall_id.eq.${fallId},kanal.in.(gruppenchat,chat_gruppe_mit_makler)),thread_id.eq.${gruppeThreadId}`,
+      )
+    : query.eq('fall_id', fallId).in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
+  const { data, error } = await query
 
   if (error) {
     console.error('[getFallChat]', error.message)
@@ -1115,6 +1133,24 @@ export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> 
       sender_avatar_url: s?.avatar_url ?? null,
     }
   })
+}
+
+/**
+ * Resolviert den `kunde_gruppe`-Thread eines Falls — fuer die MaklerChatTab-Realtime-
+ * Subscription auf v2-Nachrichten (Kunde/KB/SV tragen kein kanal='gruppenchat', nur
+ * thread_id). null wenn noch kein Gruppen-Thread existiert.
+ */
+export async function getFallGruppeThreadId(fallId: string): Promise<string | null> {
+  const admin = createAdminClient()
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return null
+  const { data } = await admin
+    .from('chat_threads')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('art', 'kunde_gruppe')
+    .maybeSingle()
+  return (data as { id: string } | null)?.id ?? null
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

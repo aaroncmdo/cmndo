@@ -6,9 +6,12 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMakler } from '@/lib/makler/queries'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { holeOderErstelleGruppenThreadService } from '@/lib/chat/thread-service'
 
 const schema = z.object({
   fallId: z.string().uuid(),
@@ -71,10 +74,28 @@ export async function maklerSendMessage(
   // danach mit Service-Role schreiben (analog sendeThreadNachricht in
   // lib/chat/thread-actions.ts, das nach hatThreadZugriff ebenfalls admin nutzt).
   const admin = createAdminClient()
+
+  // v2-Cutover: die Makler-Nachricht in den `kunde_gruppe`-THREAD schreiben (thread_id),
+  // damit Kunde/KB/SV sie in ihren v2-Thread-Surfaces (ClaimChatInbox/ClaimChatPanel,
+  // die per thread_id lesen) sehen. Ohne thread_id (nur kanal='gruppenchat', v1) sah die
+  // Makler-Nachricht KEINER der v2-Surfaces — der Makler-Chat war end-to-end tot.
+  // kanal='gruppenchat' bleibt zusaetzlich fuer den v1-Makler-Realtime (MaklerChatTab).
+  // Thread get-or-create (syncGruppenTeilnehmer haengt kunde/KB/SV an); der Makler liest
+  // via Admin (getFallChat), braucht also selbst keine Teilnehmer-Zeile.
+  const claimId = await resolveClaimId(admin, parsed.data.fallId)
+  const threadId = claimId
+    ? await holeOderErstelleGruppenThreadService(
+        admin as unknown as SupabaseClient,
+        claimId,
+        'kunde_gruppe',
+      )
+    : null
+
   const { data: inserted, error } = await admin
     .from('nachrichten')
     .insert({
       fall_id: parsed.data.fallId,
+      thread_id: threadId,
       kanal: 'gruppenchat',
       sender_id: user.id,
       sender_rolle: 'makler',
