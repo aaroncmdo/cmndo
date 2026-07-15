@@ -6,6 +6,7 @@ import {
   wizardStateZuSuche,
   WIZARD_INITIAL,
   FAHRZEUGTYP_OPTIONEN,
+  type WerkstattWizardState,
 } from '../wizard-logic'
 
 describe('fahrzeugtypZuEuKlasse', () => {
@@ -52,12 +53,12 @@ describe('kannWeiter', () => {
 
 describe('wizardStateZuSuche', () => {
   it('setzt lat/lng aus standort, marke aus hersteller, fahrzeugklasse aus typ', () => {
-    const s = {
+    const s: WerkstattWizardState = {
       ...WIZARD_INITIAL,
       standort: { adresse: 'Köln', lat: 50.9, lng: 6.9 },
       hersteller: '  BMW  ',
-      fahrzeugtyp: 'motorrad' as const,
-      bedarf: { kategorien: ['mechanik'] as const, quelle: 'manuell' as const, confidence: 70 },
+      fahrzeugtyp: 'motorrad',
+      bedarf: { kategorien: ['mechanik'], quelle: 'manuell', confidence: 70 },
     }
     const r = wizardStateZuSuche(s)
     expect(r.lat).toBe(50.9)
