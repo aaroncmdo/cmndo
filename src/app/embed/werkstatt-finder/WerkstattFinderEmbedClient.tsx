@@ -12,8 +12,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/primitives/Button'
 import { TextField } from '@/components/shared/forms/TextField'
 import { WerkstattFinderMap } from '@/components/kunde/WerkstattFinderMap'
-import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
-import type { Fit, Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
+import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 import type { EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import {
   sucheEchteWerkstaetten,
@@ -26,8 +26,20 @@ type Props = { initialLat?: number; initialLng?: number; initialPlz?: string }
 
 const MAX_FOTOS = 3
 
+/**
+ * Phase 1 (Task 4, #4359): die Engine liefert bereits `gruende` (Marke-/Gewerke-/Klasse-Chips) mit
+ * jedem Vorschlag — die geteilte WerkstattFinder-Karte rendert sie automatisch, sobald sie befuellt
+ * sind. Im Embed sind sie erst ab Phase 2 sinnvoll (Marke/Fahrzeugklasse kommen erst mit dem Wizard;
+ * bis dahin waeren die Chips groesstenteils nur "Freie Werkstatt (alle Marken)"). Deshalb hier bewusst
+ * geleert — WerkstattFinder faellt dann auf ihre bisherige passt-Heuristik zurueck (kein Verhaltens-
+ * Sprung fuer die oeffentliche Embed-Seite). Phase 2: diese Funktion einfach entfernen.
+ */
+function ohneChipsFuerPhase1(vorschlaege: WerkstattVorschlag[]): WerkstattVorschlag[] {
+  return vorschlaege.map((w) => ({ ...w, gruende: [] }))
+}
+
 export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz }: Props) {
-  const [rows, setRows] = useState<(WerkstattFinderRow & { fit?: Fit })[]>([])
+  const [rows, setRows] = useState<WerkstattVorschlag[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(
@@ -54,7 +66,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     sucheEchteWerkstaetten({ lat: initialLat, lng: initialLng, plz: initialPlz, bedarf: bedarf ?? undefined })
       .then((r) => {
         if (aktiv) {
-          setRows(r.werkstaetten)
+          setRows(ohneChipsFuerPhase1(r.werkstaetten))
           setKeineSpezialisierte(r.keineSpezialisierte)
         }
       })
@@ -84,7 +96,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     setSelectedId(null)
     try {
       const res = await sucheWerkstaettenNachOrt(q, bedarf ?? undefined)
-      setRows(res.werkstaetten)
+      setRows(ohneChipsFuerPhase1(res.werkstaetten))
       setCenter(res.center)
       setKeineSpezialisierte(res.keineSpezialisierte)
       if (res.center == null && res.werkstaetten.length === 0) setOrtNichtGefunden(true)
@@ -140,7 +152,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
         bedarf: neuerBedarf,
       }
       const r = await sucheEchteWerkstaetten(sucheInput)
-      setRows(r.werkstaetten)
+      setRows(ohneChipsFuerPhase1(r.werkstaetten))
       setKeineSpezialisierte(r.keineSpezialisierte)
     } catch {
       // Fail-safe: Klassifizierung schlaegt fehl → unbeeintraechtigte Suche
