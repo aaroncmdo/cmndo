@@ -1,24 +1,28 @@
 // Reine Merge-Var-Ersetzung für Cold-Mails. Wiederverwendet von Single-Send (S0) + CRON (S2).
-export type ColdMailMergeVars = {
-  Ansprechpartner: string
-  Firma: string
-  Ort: string
-  Vorname: string
-}
+import { resolveActionVars } from './merge-vars'
+
+// Daten-getriebene Var-Menge (Palette-definiert) + aufgeloeste Aktions-Tokens.
+export type ColdMailMergeVars = Record<string, string>
 
 export function buildMergeVars(lead: {
   ansprechpartner_vorname: string | null
   ansprechpartner_nachname: string | null
+  ansprechpartner_position?: string | null
   firma: string | null
   ort: string | null
+  rolle?: string | null
 }): ColdMailMergeVars {
   const vorname = lead.ansprechpartner_vorname?.trim() ?? ''
   const nachname = lead.ansprechpartner_nachname?.trim() ?? ''
   return {
     Ansprechpartner: [vorname, nachname].filter(Boolean).join(' '),
+    Vorname: vorname,
+    Nachname: nachname,
+    Position: lead.ansprechpartner_position?.trim() ?? '',
     Firma: lead.firma?.trim() || 'Ihr Unternehmen',
     Ort: lead.ort?.trim() ?? '',
-    Vorname: vorname,
+    // Aktions-Tokens (Beratungs-/Registrierungs-Button) rollenbewusst aufloesen.
+    ...resolveActionVars({ rolle: lead.rolle ?? null }),
   }
 }
 

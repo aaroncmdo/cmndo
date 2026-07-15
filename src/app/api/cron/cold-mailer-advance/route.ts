@@ -94,7 +94,7 @@ export async function GET(request: Request) {
       // 3) Lead + Vorlage laden
       const { data: lead } = await db
         .from('partner_leads')
-        .select('id, email, ansprechpartner_email, ansprechpartner_vorname, ansprechpartner_nachname, firma, ort')
+        .select('id, email, ansprechpartner_email, ansprechpartner_vorname, ansprechpartner_nachname, ansprechpartner_position, firma, ort, rolle')
         .eq('id', e.lead_id)
         .maybeSingle()
       const empfaenger = (lead?.ansprechpartner_email?.trim() || lead?.email?.trim() || '').toLowerCase()
