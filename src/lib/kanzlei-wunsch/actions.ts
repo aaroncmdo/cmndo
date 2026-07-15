@@ -338,6 +338,11 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     .update({
       kanzlei_uebergeben_am: now,
       status: 'an_externe_kanzlei_uebergeben',
+      // T3-Harden (Achsen-Konsolidierung): operative_status traegt den Terminal mit + abgeschlossen_am
+      // als Close-Marker, damit Badge/Phase/aktive-Faelle-Filter den Uebergang sehen. status wird in
+      // slice-2b gedroppt; operative_status ist dann die einzige Achse.
+      operative_status: 'an_externe_kanzlei_uebergeben',
+      abgeschlossen_am: now,
     })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
@@ -406,6 +411,9 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
     .update({
       kanzlei_uebergeben_am: now,
       status: 'an_externe_kanzlei_uebergeben',
+      // T3-Harden: operative_status + abgeschlossen_am mitschreiben (analog versendeKanzleiPaket).
+      operative_status: 'an_externe_kanzlei_uebergeben',
+      abgeschlossen_am: now,
     })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
@@ -644,6 +652,8 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     claim_nummer: 'CLM-2026-00043',
     phase: '6_kommunikation_versicherung',
     status: 'in_kommunikation_vs',
+    // T3-Harden: operative_status traegt den Non-Terminal-Outcome mit (status wird slice-2b gedroppt).
+    operative_status: 'in_kommunikation_vs',
     vollmacht_signiert_am: nowIso,
   }).eq('id', claimId)
 
