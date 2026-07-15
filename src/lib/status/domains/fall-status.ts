@@ -47,6 +47,17 @@ const SLOT: Record<string, StatusSlot> = {
   reguliert: 'success',
   abgelehnt: 'danger',
   kanzlei: 'active',
+  // B4/T4-Followup: operative_status-Terminals + Reparatur-Lane (sonst 'neutral'-Default).
+  // Terminal-Slots bit-gleich zur claims-status-Domain (CLAIMS_STATUS_DEFS).
+  reguliert_vollstaendig: 'success',
+  klage_rechtsstreit: 'warning',
+  verjaehrt: 'neutral',
+  abgelehnt_final: 'danger',
+  an_externe_kanzlei_uebergeben: 'done',
+  'reparatur-werkstatt-suche': 'active',
+  'reparatur-angefragt': 'pending',
+  'reparatur-laeuft': 'active',
+  'reparatur-erledigt': 'done',
 }
 
 export const FALL_STATUS_DEFS: Record<string, StatusDef> = Object.fromEntries(

@@ -54,6 +54,19 @@ export const FALL_STATUS_LABELS: Record<string, string> = {
   reguliert: 'Reguliert',
   abgelehnt: 'Abgelehnt',
   kanzlei: 'An Kanzlei',
+  // B4/T4-Followup: operative_status-Werte, die die Fallakte-Badge (FallStatusBadge, fall-status-Domain)
+  // sonst als rohen Slug zeigt. Feine Abschluss-Terminals (endzustand schreibt sie direkt in
+  // operative_status) — Labels bit-gleich zur claims-status-Domain (CLAIMS_STATUS_DEFS).
+  reguliert_vollstaendig: 'Erfolgreich reguliert',
+  klage_rechtsstreit: 'Klage / Rechtsstreit',
+  verjaehrt: 'Verjährt',
+  abgelehnt_final: 'Abgelehnt (final)',
+  an_externe_kanzlei_uebergeben: 'An externe Kanzlei',
+  // Reparatur-Lane — operative_status-Transitionen aus state-machine.ts (WS6).
+  'reparatur-werkstatt-suche': 'Werkstatt wird gesucht',
+  'reparatur-angefragt': 'Reparatur angefragt',
+  'reparatur-laeuft': 'Reparatur läuft',
+  'reparatur-erledigt': 'Reparatur erledigt',
 }
 
 // AAR-frontend-konsolidierung-p1: Kurzlabels (Tabellen-Spalten / Makler-Sicht)
@@ -146,6 +159,17 @@ const FALL_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
   reguliert:               'success',
   abgelehnt:               'danger',
   kanzlei:                 'active',
+  // B4/T4-Followup: operative_status-Terminals + Reparatur-Lane. Slots identisch zu
+  // status/domains/fall-status.ts (Registry) — der Parity-Test erzwingt Gleichheit.
+  reguliert_vollstaendig:  'success',
+  klage_rechtsstreit:      'warning',
+  verjaehrt:               'neutral',
+  abgelehnt_final:         'danger',
+  an_externe_kanzlei_uebergeben: 'done',
+  'reparatur-werkstatt-suche': 'active',
+  'reparatur-angefragt':   'pending',
+  'reparatur-laeuft':      'active',
+  'reparatur-erledigt':    'done',
 }
 
 export const FALL_STATUS_COLORS: Record<string, string> = Object.fromEntries(
