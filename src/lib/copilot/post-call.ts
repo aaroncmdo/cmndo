@@ -31,7 +31,7 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   // + lead_id aus claims (SSoT, div=0). fallId nur noch fuer logAiUsage gebraucht.
   let fallIdForLog: string | null = null
   if (call.claim_id) {
-    const { data: fallRaw } = await db.from('faelle_claim_bridge').select('fall_id, claims:claim_id(claim_nummer, lead_id)').eq('claim_id', call.claim_id).maybeSingle()
+    const { data: fallRaw } = await db.from('faelle_claim_bridge').select('fall_id, claims:claims!fk_bridge_claim(claim_nummer, lead_id)').eq('claim_id', call.claim_id).maybeSingle()
     const fall = fallRaw as unknown as { fall_id: string; claims?: { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null } | null
     const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
     fallIdForLog = fall?.fall_id ?? null

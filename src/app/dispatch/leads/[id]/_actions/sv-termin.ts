@@ -33,7 +33,7 @@ async function findStickySvForLead(
     // (=kunde_id, div=0) + created_at claims-SSoT. faelle ⊊ claims -> Anchor bridge erhaelt Zeilenmenge.
     const { data: kundeFaelle } = await supabase
       .from('faelle_claim_bridge')
-      .select('claims:claim_id!inner(sv_id, created_at)')
+      .select('claims:claims!fk_bridge_claim!inner(sv_id, created_at)')
       .eq('claims.geschaedigter_user_id', kundeId)
       .not('claims.sv_id', 'is', null)
     const svId =
@@ -83,7 +83,7 @@ async function findStickySvForLead(
   // sv_id + created_at claims-SSoT (sv_id div=0). claimIds bereits via claim_parties-RLS gescoped.
   const { data: faelle } = await supabase
     .from('faelle_claim_bridge')
-    .select('claims:claim_id!inner(sv_id, created_at)')
+    .select('claims:claims!fk_bridge_claim!inner(sv_id, created_at)')
     .in('claim_id', claimIds)
     .not('claims.sv_id', 'is', null)
   const faelleSorted = ((faelle ?? []) as Array<{ claims: { sv_id: string | null; created_at: string | null } | { sv_id: string | null; created_at: string | null }[] | null }>)

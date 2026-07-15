@@ -213,7 +213,7 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   // zeugen_vorhanden claim-owned (schon claims-Read). vcf hier nicht (RLS-Client -> Leak).
   const { data: fallRow } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id!inner(geschaedigter_user_id, lead_id, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(geschaedigter_user_id, lead_id, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
     .eq('fall_id', fallId)
     .single()
   const fallClaim = Array.isArray(fallRow?.claims) ? fallRow.claims[0] : fallRow?.claims
@@ -546,7 +546,7 @@ export async function completeOnboarding(
     // onboarding_complete claim-owned (schon claims-Read), created_at claims-SSoT.
     const { data: faelleRowsRaw } = await admin
       .from('faelle_claim_bridge')
-      .select('fall_id, claim_id, claims:claim_id!inner(onboarding_complete, created_at)')
+      .select('fall_id, claim_id, claims:claims!fk_bridge_claim!inner(onboarding_complete, created_at)')
       .in('claim_id', ownedClaimIds)
       .eq('claims.onboarding_complete', false)
     const faelleRows = (faelleRowsRaw ?? [])

@@ -50,7 +50,7 @@ export async function ladeNoetigePhasen(
   // inert → Anker auf faelle_claim_bridge; lead_id aus claims (SSoT, div=0).
   const { data: fall } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id(lead_id)')
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim(lead_id)')
     .eq('fall_id', fallId)
     .maybeSingle()
 

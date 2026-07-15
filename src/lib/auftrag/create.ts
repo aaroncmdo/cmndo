@@ -70,7 +70,7 @@ export async function createSideQuestAuftrag(
   // bridge.fall_id == faelle.id; sv_id -> claims.sv_id (div=0).
   const { data: fallBr } = await admin
     .from('faelle_claim_bridge')
-    .select('fall_id, claims:claim_id(sv_id)')
+    .select('fall_id, claims:claims!fk_bridge_claim(sv_id)')
     .eq('claim_id', claimId)
     .maybeSingle()
 

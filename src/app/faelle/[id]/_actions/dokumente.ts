@@ -115,7 +115,7 @@ export async function syncPflichtdokumenteForFall(
   // id=bridge.fall_id. zeugen_vorhanden/auftraege wie bisher unter claims.
   const { data: fallRow } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claims:claim_id!inner(lead_id, vorschaden_erkannt, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
+    .select('fall_id, claims:claims!fk_bridge_claim!inner(lead_id, vorschaden_erkannt, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
     .eq('fall_id', fallId)
     .single()
   if (!fallRow) return { success: false, error: 'Fall nicht gefunden' }

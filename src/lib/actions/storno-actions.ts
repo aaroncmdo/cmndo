@@ -109,7 +109,7 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   // ist NICHT in v_claim_full -> Embed). claim_id = bridge nativ; sv-Filter via embedded
   // claims.sv_id (== faelle.sv_id, div=0); lead_id war vestigial -> raus.
   const { data: fallRaw } = await db.from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(sv_id, lead_id, kunde_no_show_count)')
+    .select('claim_id, claims:claims!fk_bridge_claim!inner(sv_id, lead_id, kunde_no_show_count)')
     .eq('fall_id', fallId)
     .eq('claims.sv_id', sv.id)
     .single()

@@ -142,7 +142,7 @@ async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
     // == faelle.lead_id, div=0) statt .from('faelle'). Nested-Embed liefert denselben Lead.
     admin
       .from('faelle_claim_bridge')
-      .select('claims:claim_id(leads:lead_id(vorname, nachname, email, telefon, unfallhergang, schadentyp))')
+      .select('claims:claims!fk_bridge_claim(leads:lead_id(vorname, nachname, email, telefon, unfallhergang, schadentyp))')
       .eq('fall_id', fallId)
       .maybeSingle(),
     timelineQueryScoped,

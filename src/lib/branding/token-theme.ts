@@ -144,7 +144,7 @@ export async function resolveEmailBranding(
     // CMM-49 (faelle-Drop-Runway): sv_id via Bridge->claims statt .from('faelle'). sv_id 0-diff.
     const { data: bridgeRow } = await db
       .from('faelle_claim_bridge')
-      .select('claims:claim_id(sv_id)')
+      .select('claims:claims!fk_bridge_claim(sv_id)')
       .eq('fall_id', opts.fallId)
       .maybeSingle()
     const cRaw = (bridgeRow as { claims?: unknown } | null)?.claims

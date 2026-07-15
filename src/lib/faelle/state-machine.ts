@@ -109,7 +109,7 @@ export async function transitionFallStatus(
   // verifiziert 0 faelle ohne Bridge-Row).
   const { data: bridge, error: fetchErr } = await db
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id(status, operative_status)')
+    .select('claim_id, claims:claims!fk_bridge_claim(status, operative_status)')
     .eq('fall_id', fallId)
     .maybeSingle()
 
@@ -490,7 +490,7 @@ export async function transitionFallStatus(
       // claims-Embed gelesen.
       const { data: details } = await db
         .from('faelle_claim_bridge')
-        .select('claim_id, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
+        .select('claim_id, claims:claims!fk_bridge_claim(hat_mietwagen, hat_nutzungsausfall)')
         .eq('fall_id', fallId)
         .maybeSingle()
       const detailClaim = details
