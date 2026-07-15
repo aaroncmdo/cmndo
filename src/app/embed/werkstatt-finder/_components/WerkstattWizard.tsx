@@ -5,11 +5,12 @@
 // die Ergebnisse (rows) kommen als Props zurück und werden im Schaden-/Kontakt-Schritt als
 // WerkstattFinder-Liste (mit Begründungs-Chips) gezeigt. Submit nutzt die bestehende Lead-Action
 // (Phase 3 erweitert sie um die db-driven Übergabe der neuen Felder).
-import { useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { WerkstattFinder } from '@/components/werkstatt/finder/WerkstattFinder'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import type { EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { GlassSurface } from './GlassSurface'
 import { StandortStep } from './StandortStep'
 import { FahrzeugStep } from './FahrzeugStep'
@@ -49,16 +50,35 @@ export function WerkstattWizard({
   const [nachname, setNachname] = useState('')
   const [telefon, setTelefon] = useState('')
   const [fehler, setFehler] = useState<string | null>(null)
+  const [fotos, setFotos] = useState<EmbedFoto[]>([])
   const [pending, startTransition] = useTransition()
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const lastSucheRef = useRef<string>('')
   const step: WizardStep = WIZARD_STEPS[stepIdx]
 
-  // State ändern + Suche neu auslösen, sobald Standort/Marke/Typ/Bedarf sich ändert.
+  // Debounce-Timer beim Unmount räumen.
+  useEffect(() => () => { if (debounceRef.current) clearTimeout(debounceRef.current) }, [])
+
+  // State ändern + Suche NUR neu auslösen, wenn sich die Engine-Projektion (Standort/Marke/Klasse/
+  // Bedarf) ändert (Modell/gewerbe fließen NICHT in die Suche → keine Redundanz-Calls), debounced
+  // (Hersteller-Tastatureingabe). onSuche läuft AUSSERHALB des setState-Updaters (kein Cross-Component-
+  // setState-im-Render / StrictMode-Doppelfeuer — I1/I2 aus dem Whole-Branch-Review).
   function patch(p: Partial<WerkstattWizardState>) {
-    setState((prev) => {
-      const next = { ...prev, ...p }
-      onSuche(wizardStateZuSuche(next))
-      return next
-    })
+    const next = { ...state, ...p }
+    setState(next)
+    const proj = wizardStateZuSuche(next)
+    const key = JSON.stringify([
+      proj.lat ?? null,
+      proj.lng ?? null,
+      proj.marke,
+      proj.fahrzeugklasse,
+      proj.bedarf?.kategorien ?? null,
+      proj.bedarf?.confidence ?? null,
+    ])
+    if (key === lastSucheRef.current) return
+    lastSucheRef.current = key
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => onSuche(proj), 350)
   }
 
   function weiter() {
@@ -86,6 +106,7 @@ export function WerkstattWizard({
         lng: state.standort?.lng ?? null,
         ort: state.standort?.adresse ?? null,
         bedarf: state.bedarf ?? undefined,
+        fotos: fotos.length > 0 ? fotos : undefined,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)
@@ -115,7 +136,7 @@ export function WerkstattWizard({
       )}
       {step === 'schaden' && (
         <>
-          <SchadenStep bedarf={state.bedarf} onBedarf={(b) => patch({ bedarf: b })} />
+          <SchadenStep bedarf={state.bedarf} onBedarf={(b) => patch({ bedarf: b })} onFotos={setFotos} />
           {/* Live-Ergebnisse mit Begründungs-Chips (gruende), sobald es Treffer gibt. */}
           {(loading || rows.length > 0) && (
             <WerkstattFinder

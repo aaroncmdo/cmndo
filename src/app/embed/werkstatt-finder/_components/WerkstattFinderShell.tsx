@@ -19,6 +19,25 @@ const COL_ONDO = '#4573A2'
 const DEFAULT_CENTER: [number, number] = [7.0, 51.0] // NRW
 const DEFAULT_ZOOM = 8.5
 
+function pinStyle(isSel: boolean): string {
+  return [
+    'width:30px',
+    'height:30px',
+    'border-radius:9999px',
+    `background:${isSel ? COL_ONDO : COL_NAVY}`,
+    'border:3px solid #fff',
+    'box-shadow:0 3px 8px rgba(0,0,0,0.3)',
+    'display:flex',
+    'align-items:center',
+    'justify-content:center',
+    'color:#fff',
+    'font-weight:700',
+    'font-size:12px',
+    'cursor:pointer',
+    isSel ? 'transform:scale(1.15)' : 'transform:scale(1)',
+  ].join(';')
+}
+
 type Props = {
   rows: WerkstattVorschlag[]
   center: { lat: number; lng: number } | null
@@ -30,8 +49,9 @@ type Props = {
 export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wizardSlot }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
-  const markersRef = useRef<MapboxMarker[]>([])
+  const markersRef = useRef<Array<{ id: string; el: HTMLDivElement; marker: MapboxMarker }>>([])
   const ankerRef = useRef<MapboxMarker | null>(null)
+  const selectedIdRef = useRef<string | null>(selectedId)
   const [sheetOffen, setSheetOffen] = useState(true)
   const dragStartRef = useRef<number | null>(null)
   const [dragY, setDragY] = useState(0)
@@ -60,42 +80,27 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Werkstatt-Pins bei jeder rows/selectedId-Änderung neu setzen + fitBounds.
+  // I4 (Review): Marker neu bauen + fitBounds NUR bei rows/center — NICHT bei selectedId
+  // (sonst re-framet ein Pin-/Listen-Klick die ganze Karte). Farbe initial aus selectedIdRef.
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
     const apply = () => {
-      markersRef.current.forEach((m) => m.remove())
+      markersRef.current.forEach((e) => e.marker.remove())
       markersRef.current = []
       const bounds = new mapboxgl.LngLatBounds()
       if (center) bounds.extend([center.lng, center.lat])
       rows.forEach((w, i) => {
         if (w.lat == null || w.lng == null) return
-        const isSel = w.id === selectedId
         const el = document.createElement('div')
-        el.style.cssText = [
-          'width:30px',
-          'height:30px',
-          'border-radius:9999px',
-          `background:${isSel ? COL_ONDO : COL_NAVY}`,
-          'border:3px solid #fff',
-          'box-shadow:0 3px 8px rgba(0,0,0,0.3)',
-          'display:flex',
-          'align-items:center',
-          'justify-content:center',
-          'color:#fff',
-          'font-weight:700',
-          'font-size:12px',
-          'cursor:pointer',
-          isSel ? 'transform:scale(1.15)' : 'transform:scale(1)',
-        ].join(';')
+        el.style.cssText = pinStyle(w.id === selectedIdRef.current)
         el.textContent = String(i + 1)
         el.addEventListener('click', () => onSelectPin(w.id))
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([w.lng, w.lat])
           .setPopup(new mapboxgl.Popup({ offset: 18 }).setText(w.name))
           .addTo(map)
-        markersRef.current.push(marker)
+        markersRef.current.push({ id: w.id, el, marker })
         bounds.extend([w.lng, w.lat])
       })
       if (!bounds.isEmpty()) {
@@ -108,7 +113,15 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     }
     if (map.loaded()) apply()
     else map.once('load', apply)
-  }, [rows, center, selectedId, onSelectPin])
+  }, [rows, center, onSelectPin])
+
+  // I4: Auswahl-Highlight OHNE Kamera-Bewegung — restylt nur die vorhandenen Marker-Elemente.
+  useEffect(() => {
+    selectedIdRef.current = selectedId
+    markersRef.current.forEach((e) => {
+      e.el.style.cssText = pinStyle(e.id === selectedId)
+    })
+  }, [selectedId])
 
   // Fahrzeug-Anker-Pin auf center.
   useEffect(() => {

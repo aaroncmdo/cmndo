@@ -21,17 +21,21 @@ const GEWERK_LABEL: Record<Gewerk, string> = {
 type Props = {
   bedarf: Reparaturbedarf | null
   onBedarf: (b: Reparaturbedarf | null) => void
+  // I5 (Review): die Roh-Fotos hoch an den Wizard reichen — sonst gehen sie beim Absenden verloren.
+  onFotos?: (fotos: EmbedFoto[]) => void
 }
 
-export function SchadenStep({ bedarf, onBedarf }: Props) {
+export function SchadenStep({ bedarf, onBedarf, onFotos }: Props) {
   const [beschreibung, setBeschreibung] = useState('')
   const [fotoLaeuft, setFotoLaeuft] = useState(false)
   const [textLaeuft, setTextLaeuft] = useState(false)
   const [fotoAnzahl, setFotoAnzahl] = useState(0)
   const fotoInputRef = useRef<HTMLInputElement>(null)
-  const manuell = new Set<Gewerk>(bedarf?.quelle === 'manuell' ? bedarf.kategorien : [])
+  // Manuelle Chips aus dem AKTUELLEN Bedarf vorbelegen (egal welche Quelle) — sonst verliert ein Klick
+  // nach Foto-/Text-Erkennung die erkannten Gewerke (Review-Minor). Manuell augmentiert die Erkennung.
+  const manuell = new Set<Gewerk>(bedarf?.kategorien ?? [])
 
-  async function onFotos(e: React.ChangeEvent<HTMLInputElement>) {
+  async function verarbeiteFotos(e: React.ChangeEvent<HTMLInputElement>) {
     const dateien = Array.from(e.target.files ?? []).slice(0, MAX_FOTOS)
     if (dateien.length === 0) return
     const fotos = await Promise.all(
@@ -51,6 +55,7 @@ export function SchadenStep({ bedarf, onBedarf }: Props) {
       ),
     )
     setFotoAnzahl(fotos.length)
+    onFotos?.(fotos) // I5: Roh-Fotos an den Wizard (fürs Lead-Absenden)
     setFotoLaeuft(true)
     try {
       const b = await klassifiziereSchadenfotoEmbed(fotos)
@@ -97,11 +102,14 @@ export function SchadenStep({ bedarf, onBedarf }: Props) {
           capture="environment"
           multiple
           className="hidden"
-          onChange={onFotos}
+          onChange={verarbeiteFotos}
         />
         <Button type="button" variant="ghost" onClick={() => fotoInputRef.current?.click()} loading={fotoLaeuft}>
           {fotoAnzahl > 0 ? `${fotoAnzahl} Foto${fotoAnzahl > 1 ? 's' : ''} ausgewählt` : 'Fotos auswählen'}
         </Button>
+        <p className="mt-1 text-body-xs text-claimondo-shield/70">
+          Fotos werden nur zur Werkstatt-Zuordnung analysiert und erst beim Absenden gespeichert.
+        </p>
       </div>
 
       {/* Beschreibung */}

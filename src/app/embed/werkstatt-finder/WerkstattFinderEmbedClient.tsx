@@ -26,7 +26,13 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
   const reqRef = useRef(0)
 
   const runSuche = useCallback(async (input: ReturnType<typeof wizardStateZuSuche>) => {
-    if (input.lat != null && input.lng != null) setCenter({ lat: input.lat, lng: input.lng })
+    const lat = input.lat
+    const lng = input.lng
+    // I3 (Review): center-Identität bewahren, wenn die Koordinaten gleich bleiben — sonst re-feuern die
+    // [center]-Karten-Effekte (flyTo/fitBounds) bei jeder Marke/Modell-Eingabe → Kamera-Jitter.
+    if (lat != null && lng != null) {
+      setCenter((prev) => (prev && prev.lat === lat && prev.lng === lng ? prev : { lat, lng }))
+    }
     const req = ++reqRef.current
     setLoading(true)
     try {
