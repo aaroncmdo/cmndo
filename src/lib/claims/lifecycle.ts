@@ -142,26 +142,11 @@ export const SUBPHASE_LABEL: Record<ClaimSubPhase, string> = {
   reparatur_fertig: 'Reparatur abgeschlossen — Abschluss ausstehend',
 }
 
-/** CMM-44 MP-3 (B-11) / MP-8: terminale claims.status-Werte → abschluss-Substate.
- *  Writer = endzustand-actions (MP-8). `storniert` war schon vor MP-8 gueltig. */
-const ABSCHLUSS_SUBSTATE: Record<string, ClaimSubPhase> = {
-  reguliert_vollstaendig: 'erfolgreich_reguliert',
-  storniert: 'storniert',
-  klage_rechtsstreit: 'klage_rechtsstreit',
-  verjaehrt: 'verjaehrt',
-  abgelehnt_final: 'abgelehnt_final',
-  an_externe_kanzlei_uebergeben: 'an_externe_kanzlei',
-  // AAR-939: nur_gutachter/embed-B — Termin durchgeführt → terminal (kein Regulierungs-Tail)
-  termin_durchgefuehrt: 'termin_durchgefuehrt',
-}
-
-/** CMM-44 MP-8: nicht-terminale claims.status, die Regulierung signalisieren —
- *  auch ohne uebernommenen Kanzleifall (lexdrive_case_id). in_kommunikation_vs =
- *  KB im VS-Kontakt; abgelehnt = einfache Ablehnung (nachforderbar). */
-const REGULIERUNG_STATUS_SUBSTATE: Record<string, ClaimSubPhase> = {
-  in_kommunikation_vs: 'versicherungskontakt',
-  abgelehnt: 'nachforderung',
-}
+// B4-slice-2a-ii: ABSCHLUSS_SUBSTATE + REGULIERUNG_STATUS_SUBSTATE (die claims.status→Sub-Phase-
+// Maps) sind ENTFERNT — die Phasen-Ableitung liest claims.status nicht mehr (weder terminal noch
+// non-terminal). operative_status trägt jetzt JEDEN Terminal (endzustand B2 + state-machine-
+// Konvergenz Klage + closeNurGutachter termin_durchgefuehrt) und die Non-Terminals (slice-1b) —
+// OPERATIVE_PHASE unten ist die einzige Read-Quelle. claims.status = Read-tot (Drop/Derive = T3).
 
 // Unified Stepper: operative_status (claims-Engine-Cursor) -> (main, sub). Kanonische
 // Phasen-Quelle. Erfassung-Sub kommt aus Lead-Feldern, Abschluss-Sub aus claims.status,
@@ -195,10 +180,16 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   abgeschlossen: { main: 'abschluss', sub: 'erfolgreich_reguliert' },
   storniert: { main: 'abschluss', sub: 'storniert' },
   // B4-slice-2a-i-b: der nur_gutachter-Terminal traegt seit dieser Slice operative_status DIREKT
-  // (closeNurGutachterTerminAlsDurchgefuehrt). Damit ist die Abschluss-Phase aus operative_status
-  // ableitbar (Voraussetzung fuer den status-Read-Drop slice-2a-ii). Deckungsgleich mit
-  // ABSCHLUSS_SUBSTATE['termin_durchgefuehrt'] (Anzeige-neutral, A1-Parity).
+  // (closeNurGutachterTerminAlsDurchgefuehrt).
   termin_durchgefuehrt: { main: 'abschluss', sub: 'termin_durchgefuehrt' },
+  // B4-slice-2a-ii: die FEINEN Terminals, die endzustand (B2) direkt in operative_status schreibt.
+  // Seit dieser Slice ist OPERATIVE_PHASE die EINZIGE Read-Quelle fuer die Abschluss-Sub-Phase
+  // (der fruehere claims.status-Read via ABSCHLUSS_SUBSTATE ist entfernt) -> claims.status Read-tot.
+  reguliert_vollstaendig: { main: 'abschluss', sub: 'erfolgreich_reguliert' },
+  klage_rechtsstreit: { main: 'abschluss', sub: 'klage_rechtsstreit' },
+  verjaehrt: { main: 'abschluss', sub: 'verjaehrt' },
+  abgelehnt_final: { main: 'abschluss', sub: 'abgelehnt_final' },
+  an_externe_kanzlei_uebergeben: { main: 'abschluss', sub: 'an_externe_kanzlei' },
 }
 
 function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {
@@ -259,20 +250,23 @@ const SUB_ORDER: Record<ClaimSubPhase, number> = {
 // Status-Regulierung > Kanzlei-Uebergabe-Interim > Erstgutachten > Lead). Bleibt als EIN
 // Kandidat von getClaimLifecycle erhalten — bit-gleich zur SQL-View (Parity-Gate).
 function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  const { lead, auftraege, kanzleiFall, claimStatus } = input
+  // B4-slice-2a-ii: claimStatus wird NICHT mehr gelesen (die Terminal-/Regulierungs-status-Reads
+  // sind entfernt). Das Feld bleibt im Input-Contract (Caller setzt es), bis T3 status ganz droppt.
+  const { lead, auftraege, kanzleiFall } = input
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
     (a) => (a.typ === 'nachbesichtigung' || a.typ === 'stellungnahme') && a.status !== 'abgeschlossen',
   )
 
-  // ── Abschluss ── B-11/B-12: ausschliesslich aus terminalem claims.status
-  // (KB/Kanzlei-Urteil). Auszahlung ist regulierung-intern und kippt NICHT selbst
-  // in abschluss. Terminal ueberschreibt alle anderen Phasen.
-  const terminal = claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined
-  if (terminal) {
-    return { mainPhase: 'abschluss', subPhase: terminal, aktiveSideQuests: [], aktiverAuftrag: null }
-  }
+  // ── Abschluss ── B4-slice-2a-ii: der terminale claims.status-Read ist ENTFERNT. Die
+  // Abschluss-Sub-Phase (erfolgreich_reguliert/klage_rechtsstreit/verjaehrt/abgelehnt_final/
+  // an_externe_kanzlei/termin_durchgefuehrt/storniert) wird jetzt AUSSCHLIESSLICH aus
+  // operative_status abgeleitet (OPERATIVE_PHASE, operativeLifecycle) — beide Terminal-Writer
+  // (endzustand B2 + state-machine-Konvergenz Klage/#4358 + closeNurGutachter/#4370) tragen den
+  // feinen Terminal in operative_status. getClaimLifecycle nimmt den WEITESTEN Kandidaten (SUB_ORDER
+  // 15 = terminal), der operative Kandidat gewinnt also ueber die milestone-Kaskade. Bit-gleich zur
+  // v_claim_phase (m_sub-status-Terminals ebenfalls gedroppt). claims.status = Read-tot -> derivable/drop (T3).
 
   // ── CMM-74 b2 (v_claim_phase-Parity) ── operative Regulierungs-Sub-Phasen, die VOR
   // dem lexdrive-Eintritt greifen. Reihenfolge bitgleich zur View: nb.active > vs-kuerzt >
@@ -314,17 +308,10 @@ function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     }
   }
 
-  // ── Regulierung (Status-getrieben) ── CMM-44 MP-8: in_kommunikation_vs /
-  // einfache abgelehnt signalisieren Regulierung auch ohne uebernommenen Kanzleifall.
-  const regSub = claimStatus ? REGULIERUNG_STATUS_SUBSTATE[claimStatus] : undefined
-  if (regSub) {
-    return {
-      mainPhase: 'regulierung',
-      subPhase: regSub,
-      aktiveSideQuests: sideQuests,
-      aktiverAuftrag: sideQuests[0] ?? null,
-    }
-  }
+  // ── Regulierung (operativ-getrieben) ── B4-slice-2a-ii: der frühere claims.status-Read
+  // (REGULIERUNG_STATUS_SUBSTATE: in_kommunikation_vs/abgelehnt) ist ENTFERNT. Diese Non-Terminal-
+  // Outcomes trägt seit slice-1b operative_status → OPERATIVE_PHASE liefert versicherungskontakt/
+  // nachforderung über den operativen Kandidaten (getClaimLifecycle). Kein status-Fallback mehr.
 
   // ── Kanzlei-Uebergabe-Interim ── B-10: kanzlei_faelle existiert, aber noch kein
   // lexdrive_case_id → "Kanzlei-Uebergabe laeuft" (begutachtung-Tail), nicht regulierung.
@@ -388,16 +375,16 @@ function operativeLifecycle(
   input: ClaimLifecycleInput,
   opPhase: { main: ClaimMainPhase; sub: ClaimSubPhase },
 ): ClaimLifecycle {
-  const { lead, auftraege, claimStatus, operativeStatus } = input
+  const { lead, auftraege } = input
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
     (a) => (a.typ === 'nachbesichtigung' || a.typ === 'stellungnahme') && a.status !== 'abgeschlossen',
   )
+  // B4-slice-2a-ii: `resolved` bleibt opPhase.sub — die Abschluss-Sub-Phase kommt jetzt aus
+  // operative_status (OPERATIVE_PHASE trägt den feinen Terminal), NICHT mehr aus claims.status.
   let resolved: ClaimSubPhase = opPhase.sub
   if (opPhase.main === 'erfassung') {
     resolved = leadSubphase(lead)
-  } else if (opPhase.main === 'abschluss' && operativeStatus !== 'storniert') {
-    resolved = (claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined) ?? 'erfolgreich_reguliert'
   } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
     if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
     else if (erstgutachten.gutachten_url) resolved = 'filmcheck'
