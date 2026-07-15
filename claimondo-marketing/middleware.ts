@@ -25,6 +25,7 @@ const ONE_YEAR = 60 * 60 * 24 * 365
 const SUBDOMAIN_LANDING: Record<string, string> = {
   'gutachter.claimondo.de': '/gutachter-partner',
   'makler.claimondo.de': '/makler/partner-werden',
+  'werkstatt.claimondo.de': '/werkstatt/partner-werden',
   'kfzgutachter.claimondo.de': '/kfzgutachter-lp',
 }
 
