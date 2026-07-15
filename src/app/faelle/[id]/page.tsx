@@ -95,11 +95,10 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
+      .select('operative_status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
       .eq('id', claimId)
       .maybeSingle<{
-        status: string | null
-        work_state: string | null
+        operative_status: string | null
         kanzlei_wunsch: string | null
         schadenort_adresse: string | null
         schadenort_plz: string | null
@@ -117,9 +116,9 @@ export default async function FallaktePage({
       .select('gegner_aktenzeichen')
       .eq('id', claimId)
       .maybeSingle<{ gegner_aktenzeichen: string | null }>()
-    // D2/T1.1b: Badge zeigt die Lifecycle/Terminal-Achse (status); fällt für aktive
-    // Claims (status NULL) auf die Dispatch/Processing-Achse (work_state) zurück.
-    claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
+    // B3/T4 (Status-Achsen-Konsolidierung, Aaron 15.07.): der Fallakte-Badge zeigt jetzt
+    // operative_status = die EINE Status-Achse (aktive Phasen + jeder Terminal seit slice-2a).
+    claimStatus        = claimRow?.operative_status ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {

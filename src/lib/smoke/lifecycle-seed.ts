@@ -166,7 +166,6 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     fall_typ: smokeTagForScenario(idx),
     // CMM-44 MP-6c: claims.phase gedroppt — kein phase-Write mehr. Die Phase
     // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
-    work_state: phaseStatus.work_state,
     status: phaseStatus.status,
     operative_status: phaseStatus.operative_status,
     // FG6: SA/Vollmacht sind post-conversion auf dem CLAIM kanonisch (getClaimLifecycle liest
@@ -201,48 +200,48 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   return { scenarioKey, claimId, fallId, fallNummer }
 }
 
-// D2/T1.1b: work_state (Dispatch/Processing) getrennt von status (Lifecycle/Terminal).
-// Aktive Szenarien -> work_state gesetzt, status NULL; Lifecycle-Szenarien -> status gesetzt.
+// B3/T4: work_state (die alte Dispatch/Processing-Achse) ist eliminiert — der Seed setzt nur noch
+// status + operative_status. operative_status ist die eine Status-/Phasen-Achse.
 // B4/CMM-74: operative_status ist die SSoT-Phasen-Achse -> MUSS gesetzt sein, sonst
 // liefert v_claim_phase (o_sub) NULL und gewinnt den SUB_ORDER-Tie -> falsche Parity-Fails.
 // Der operative_status je Szenario ist mit dem Lead-/Auftrag-/Kanzleifall-Zustand konsistent,
 // sodass v_claim_phase (SQL) und getClaimLifecycle (TS) bit-gleich dieselbe (main, sub) liefern.
-function derivePhaseStatus(key: string): { phase: string; status: string | null; work_state: string | null; operative_status: string } {
+function derivePhaseStatus(key: string): { phase: string; status: string | null; operative_status: string } {
   switch (key) {
     case 'erfassung-sa-offen':
     case 'erfassung-vollmacht-offen':
     case 'erfassung-onboarding-offen':
       // Erfassungs-Sub kommt aus den Lead-Feldern (leadSubphase / o_sub-Lead-CASE) -> 'ersterfassung' reicht.
-      return { phase: '0_lead', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
+      return { phase: '0_lead', status: null, operative_status: 'ersterfassung' }
     case 'begutachtung-termin':
-      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null, operative_status: 'sv-termin' }
+      return { phase: '3_gutachter_unterwegs', status: null, operative_status: 'sv-termin' }
     case 'begutachtung-besichtigung':
-      return { phase: '3_gutachter_unterwegs', work_state: 'in_bearbeitung', status: null, operative_status: 'besichtigung' }
+      return { phase: '3_gutachter_unterwegs', status: null, operative_status: 'besichtigung' }
     case 'begutachtung-gutachten-qc':
     case 'begutachtung-reject':
-      return { phase: '4_gutachten_fertig', work_state: 'in_bearbeitung', status: null, operative_status: 'gutachten-eingegangen' }
+      return { phase: '4_gutachten_fertig', status: null, operative_status: 'gutachten-eingegangen' }
     case 'regulierung-vs-kontakt':
       // B4-Slice-1: operative_status traegt den Non-Terminal-Outcome direkt (post-write-flip-Zustand)
       // -> testet die neue o_sub-Ergaenzung 'in_kommunikation_vs' -> versicherungskontakt.
-      return { phase: '6_kommunikation_versicherung', work_state: 'in_bearbeitung', status: 'in_kommunikation_vs', operative_status: 'in_kommunikation_vs' }
+      return { phase: '6_kommunikation_versicherung', status: 'in_kommunikation_vs', operative_status: 'in_kommunikation_vs' }
     case 'regulierung-auszahlung':
-      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: null, operative_status: 'zahlung-eingegangen' }
+      return { phase: '9_reguliert', status: null, operative_status: 'zahlung-eingegangen' }
     case 'abschluss':
       // Terminal: post-B2 traegt operative_status den feinen Outcome direkt (statt coarse 'abgeschlossen')
       // -> testet zugleich die #4285-Output-Neutralitaet (fine Terminal in operative_status).
-      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'reguliert_vollstaendig', operative_status: 'reguliert_vollstaendig' }
+      return { phase: '9_reguliert', status: 'reguliert_vollstaendig', operative_status: 'reguliert_vollstaendig' }
     case 'abschluss-klage':
       // B4-slice-2a-i: Klage-Terminal nach der state-machine-Konvergenz — operative_status traegt
       // 'klage_rechtsstreit' (statt des groben 'klage'), status ebenfalls. Beide Read-Engines
       // muessen abschluss/klage_rechtsstreit liefern.
-      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'klage_rechtsstreit', operative_status: 'klage_rechtsstreit' }
+      return { phase: '9_reguliert', status: 'klage_rechtsstreit', operative_status: 'klage_rechtsstreit' }
     case 'abschluss-termin-durchgefuehrt':
       // B4-slice-2a-i-b: nur_gutachter-Terminal nach der Konvergenz — closeNurGutachter schreibt
       // operative_status='termin_durchgefuehrt' (statt gar nicht) + status ebenfalls. Beide
       // Read-Engines muessen abschluss/termin_durchgefuehrt liefern.
-      return { phase: '9_reguliert', work_state: 'in_bearbeitung', status: 'termin_durchgefuehrt', operative_status: 'termin_durchgefuehrt' }
+      return { phase: '9_reguliert', status: 'termin_durchgefuehrt', operative_status: 'termin_durchgefuehrt' }
     default:
-      return { phase: '1_neu', work_state: 'dispatch_done', status: null, operative_status: 'ersterfassung' }
+      return { phase: '1_neu', status: null, operative_status: 'ersterfassung' }
   }
 }
 
