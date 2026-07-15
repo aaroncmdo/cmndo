@@ -7,7 +7,7 @@ const leer: ZB1ExtractedData = {
   kennzeichen: null, erstzulassung: null, fahrzeug_baujahr: null,
   halter_nachname: null, halter_vorname: null, halter_strasse: null, halter_plz: null, halter_stadt: null,
   fahrzeug_hersteller: null, fahrzeug_modell: null, fahrzeug_farbe: null,
-  fin_vin: null, hsn: null, tsn: null, brn: null,
+  fin_vin: null, hsn: null, tsn: null, brn: null, fahrzeugklasse: null,
 }
 
 describe('zb1ToVehicleSnapshot', () => {
@@ -50,6 +50,16 @@ describe('zb1ToFelder', () => {
       hsn: '0005', tsn: 'ABC', farbe: 'Schwarz', baujahr: 2020, erstzulassung: '2020-03-01',
     })
   })
+
+  it('fuehrt fahrzeugklasse mit (Spec B: harter Werkstatt-Matching-Filter, ZB1-Feld J)', () => {
+    const felder = zb1ToFelder({ ...leer, fahrzeugklasse: 'M1' })
+    expect(felder.fahrzeugklasse).toBe('M1')
+  })
+
+  it('leere fahrzeugklasse bleibt null', () => {
+    const felder = zb1ToFelder(leer)
+    expect(felder.fahrzeugklasse).toBeNull()
+  })
 })
 
 describe('felderToSnapshot', () => {
@@ -58,6 +68,7 @@ describe('felderToSnapshot', () => {
       fin: 'WBA12345678901234',
       kennzeichen: 'K-AB 1234', hersteller: 'BMW', modell: '320d',
       hsn: '0005', tsn: 'ABC', farbe: 'Schwarz', baujahr: 2020, erstzulassung: '2020-03-01',
+      fahrzeugklasse: 'M1',
     }
     const snap = felderToSnapshot(felder)
     expect(snap).toMatchObject({
@@ -72,9 +83,21 @@ describe('felderToSnapshot', () => {
       fin: 'WBA12345678901234',
       kennzeichen: 'K-AB 1234', hersteller: 'BMW', modell: '320d',
       hsn: '0005', tsn: 'ABC', farbe: 'Schwarz', baujahr: 2020, erstzulassung: '2020-03-01',
+      fahrzeugklasse: 'M1',
     }
     const snap = felderToSnapshot(felder)
     expect(snap).not.toHaveProperty('fin')
+  })
+
+  it('die fahrzeugklasse wandert NICHT in den Snapshot (Write-Path kennt sie noch nicht, s. zb1-vehicle.ts)', () => {
+    const felder: EditierbareFahrzeugFelder = {
+      fin: 'WBA12345678901234',
+      kennzeichen: 'K-AB 1234', hersteller: 'BMW', modell: '320d',
+      hsn: '0005', tsn: 'ABC', farbe: 'Schwarz', baujahr: 2020, erstzulassung: '2020-03-01',
+      fahrzeugklasse: 'M1',
+    }
+    const snap = felderToSnapshot(felder)
+    expect(snap).not.toHaveProperty('fahrzeugklasse')
   })
 
   it('leere Felder → Snapshot mit nur finQuelle', () => {
@@ -82,6 +105,7 @@ describe('felderToSnapshot', () => {
       fin: null,
       kennzeichen: null, hersteller: null, modell: null,
       hsn: null, tsn: null, farbe: null, baujahr: null, erstzulassung: null,
+      fahrzeugklasse: null,
     }
     const snap = felderToSnapshot(felder)
     expect(snap.finQuelle).toBe('zb1_ocr')

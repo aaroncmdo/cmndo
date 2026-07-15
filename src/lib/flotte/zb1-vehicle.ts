@@ -15,6 +15,10 @@ export type EditierbareFahrzeugFelder = {
   farbe: string | null
   erstzulassung: string | null
   baujahr: number | null
+  /** Spec B: EU-/KBA-Fahrzeugklasse (M1 | N1 | L3e | ...) -> harter Werkstatt-Matching-Filter.
+   *  Bewusst NICHT Teil von VehicleSnapshot: der Write-Path kennt das Feld noch nicht -
+   *  wird in einem spaeteren Task per separatem vehicles.update persistiert. */
+  fahrzeugklasse: string | null
 }
 
 export function zb1ToVehicleSnapshot(e: ZB1ExtractedData): VehicleSnapshot {
@@ -36,7 +40,7 @@ export function zb1ToFelder(e: ZB1ExtractedData): EditierbareFahrzeugFelder {
   return {
     fin: e.fin_vin, kennzeichen: e.kennzeichen, hersteller: e.fahrzeug_hersteller,
     modell: e.fahrzeug_modell, hsn: e.hsn, tsn: e.tsn, farbe: e.fahrzeug_farbe,
-    erstzulassung: e.erstzulassung, baujahr: e.fahrzeug_baujahr,
+    erstzulassung: e.erstzulassung, baujahr: e.fahrzeug_baujahr, fahrzeugklasse: e.fahrzeugklasse,
   }
 }
 
