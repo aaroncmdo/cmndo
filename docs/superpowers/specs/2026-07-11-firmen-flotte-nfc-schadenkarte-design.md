@@ -68,6 +68,10 @@ LAYER 1 — KARTE
      id, vehicle_id->vehicles,                <- die fixe Bindung
      nfc_uid, karten_token_hash, karten_token_prefix, status, ausgestellt_fuer_firma_id->firmen
      NDEF-URL:  https://claimondo.de/schaden/{karten_token}
+     -- ⚠ VERALTET (2026-07-14): claimondo.de liefert /schaden/... als 404 (Marketing-Seite).
+     --   Die korrekte Domain ist app.claimondo.de. NIE die URL von Hand bauen ->
+     --   buildSchadenkarteUrl() aus src/lib/schadenkarte/url.ts nutzen (Regressionssperre).
+     --   Siehe docs/superpowers/specs/2026-07-14-schadenkarte-nfc-sperren-zb1-design.md
 
 LAYER 2 — HAFTPFLICHT-SCHADEN (aus NFC-Tap)
   claims  (bestehend)  id, gegner_versicherung_id->versicherungen, gegner_versicherungsnummer, ...
