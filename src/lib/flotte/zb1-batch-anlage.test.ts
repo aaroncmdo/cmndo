@@ -38,6 +38,15 @@ describe('legeFlottenFahrzeugeAn', () => {
     expect(r[0].status).toBe('stub')
     expect(ensureMock).not.toHaveBeenCalled()
   })
+  it('falsch formatierte FIN (zu kurz) -> Stub-Pfad statt ensureVehicleFromFin -> stub', async () => {
+    stubMock.mockResolvedValue({ ok: true, vehicleId: 'v5' })
+    bindeMock.mockResolvedValue({ ok: true })
+    const r = await legeFlottenFahrzeugeAn(db, [{ felder: felder('ABC12'), bereitsInFlotte: false }], 'f1', 'u1')
+    expect(r[0].status).toBe('stub')
+    expect(ensureMock).not.toHaveBeenCalled()
+    expect(stubMock).toHaveBeenCalledTimes(1)
+    expect(bindeMock).toHaveBeenCalledTimes(1)
+  })
   it('NON-ATOMAR: Zeile 2 scheitert, Zeile 1+3 laufen durch', async () => {
     ensureMock
       .mockResolvedValueOnce({ ok: true, vehicleId: 'v1' })
@@ -50,5 +59,22 @@ describe('legeFlottenFahrzeugeAn', () => {
       { felder: felder('WBA00000000000003'), bereitsInFlotte: false },
     ], 'f1', 'u1')
     expect(r.map((x) => x.status)).toEqual(['angelegt', 'fehler', 'angelegt'])
+  })
+  it('NON-ATOMAR (echte Exception): Zeile 2 wirft, Zeile 1+3 laufen trotzdem durch', async () => {
+    // Anders als der Test oben (der einen `{ ok:false }`-Rueckgabewert simuliert und damit
+    // nur den if(!veh.ok)-Zweig prueft) wirft ensureVehicleFromFin hier eine ECHTE Exception.
+    // Das beweist, dass das try/catch PRO ZEILE sitzt -- nicht um die ganze Schleife.
+    ensureMock
+      .mockResolvedValueOnce({ ok: true, vehicleId: 'v1' })
+      .mockRejectedValueOnce(new Error('DB-Verbindung weg'))
+      .mockResolvedValueOnce({ ok: true, vehicleId: 'v3' })
+    bindeMock.mockResolvedValue({ ok: true })
+    const r = await legeFlottenFahrzeugeAn(db, [
+      { felder: felder('WBA00000000000001'), bereitsInFlotte: false },
+      { felder: felder('WBA00000000000002'), bereitsInFlotte: false },
+      { felder: felder('WBA00000000000003'), bereitsInFlotte: false },
+    ], 'f1', 'u1')
+    expect(r.map((x) => x.status)).toEqual(['angelegt', 'fehler', 'angelegt'])
+    expect(r[1].error).toBe('DB-Verbindung weg')
   })
 })
