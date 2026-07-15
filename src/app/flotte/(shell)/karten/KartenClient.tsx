@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { DownloadIcon } from 'lucide-react'
 import { SchadenkarteScanner } from '@/components/flotte/SchadenkarteScanner'
+import { NfcKarteBeschreiben } from '@/components/flotte/NfcKarteBeschreiben'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 
@@ -23,6 +24,7 @@ type Props = {
   onSperren: Aktion
   onEntsperren: Aktion
   onEntbinden: Aktion
+  onNfcUid: (token: string, nfcUid: string) => Promise<{ ok: boolean; error?: string }>
 }
 
 /** Reine Label-Map ohne Farbe — vom status-registry-Ratchet ausdrücklich erlaubt. */
@@ -35,7 +37,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function KartenClient({
-  karten, onIdentify, onQrPdf, onSperren, onEntsperren, onEntbinden,
+  karten, onIdentify, onQrPdf, onSperren, onEntsperren, onEntbinden, onNfcUid,
 }: Props) {
   const router = useRouter()
   const [fehler, setFehler] = useState<string | null>(null)
@@ -104,6 +106,8 @@ export default function KartenClient({
           <p className="mt-3 text-sm text-danger-strong">{fehler}</p>
         )}
       </SectionCard>
+
+      <NfcKarteBeschreiben onNfcUid={onNfcUid} />
 
       <SectionCard title="Ihre Schadenkarten">
         {karten.length === 0 ? (
