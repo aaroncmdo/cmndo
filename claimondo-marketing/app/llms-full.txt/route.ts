@@ -28,6 +28,12 @@ import {
   ANSPRUECHE_REFRAMED,
   SERVICE_PITCH_USPS,
 } from '@/lib/brand/service-pitch'
+import { getPublishedArtikel, groupByAudience } from '@/lib/wissen/db-articles'
+import { renderArtikelFullSection } from '@/lib/wissen/llms-render'
+
+// Voll-Dump-Deckel: alle consumer (wenige, evergreen) + neueste N b2b (news-y, zeitgebunden),
+// damit die Datei ueber Monate nicht durch taegliche B2B-News explodiert.
+const MAX_FULL_B2B = 40
 
 /**
  * llms-full.txt — komplette Page-Bodies als Markdown.
@@ -640,6 +646,8 @@ Vollständige Einordnung mit Checkliste, Erlaubt-vs-Verboten-Übersicht und FAQ:
 `
 
 export async function GET() {
+  const { consumer, b2b } = groupByAudience(await getPublishedArtikel())
+  const artikelFull = renderArtikelFullSection(consumer, b2b.slice(0, MAX_FULL_B2B))
   const content = [
     HEADER,
     AI_DIREKTIVE,
@@ -652,6 +660,7 @@ export async function GET() {
     renderSpokesByCluster(),
     renderDecoder(),
     renderSachverstaendige(),
+    artikelFull,
     KONVERSIONS_SEITEN_KERN,
     renderFaq(),
     renderHubCities(),
