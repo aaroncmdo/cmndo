@@ -18,12 +18,25 @@ import PartnerAbrechnungenView from './_views/PartnerAbrechnungenView'
 
 export const dynamic = 'force-dynamic'
 
-export default async function FinancePage() {
+const TAB_IDS = [
+  'uebersicht', 'abrechnungen', 'saeumige-svs', 'offene-faelle',
+  'per-sv-balance', 'kanzlei', 'provisionen', 'partner-abrechnungen',
+] as const
+
+export default async function FinancePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') redirect('/admin')
+
+  // Deep-Link / Redirect-Stub-Einstieg: ?tab= bestimmt den Start-Tab (Client-Switch danach).
+  const { tab } = await searchParams
+  const initialTab = (TAB_IDS as readonly string[]).includes(tab ?? '') ? (tab as string) : 'uebersicht'
 
   const { mrr, svCount, mandateMonat } = await ladeFinanceHeaderStats()
   const eur = (v: number) =>
@@ -37,6 +50,7 @@ export default async function FinancePage() {
   return (
     <FinanceHubShell
       defaultTab="uebersicht"
+      initialTab={initialTab}
       title="Finanzen"
       description="Umsatz, Provision & Kennzahlen"
       actions={

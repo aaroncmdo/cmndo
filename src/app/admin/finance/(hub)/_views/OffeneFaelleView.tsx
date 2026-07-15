@@ -12,7 +12,6 @@ import EmptyState from '@/components/shared/EmptyState'
 // derselben Abrechnungs-Menge driften garantiert auseinander → jetzt EINE SSoT.
 import { BILLABLE_OPERATIVE_STATUS_VALUES as BILLABLE_STATUSES } from '@/lib/claims/terminal-status'
 
-export const dynamic = 'force-dynamic'
 
 function formatDate(iso: string | null): string {
   if (!iso) return '–'

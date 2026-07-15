@@ -9,7 +9,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ProvisionenClient from '../provisionen/ProvisionenClient'
 
-export const dynamic = 'force-dynamic'
 
 export default async function ProvisionenView() {
   const aktMonat = new Date().toISOString().slice(0, 7)

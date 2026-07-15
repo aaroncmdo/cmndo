@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation'
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 
-export const dynamic = 'force-dynamic'
 
 const PARTNER_TYP_LABEL: Record<string, string> = {
   sv: 'SV / Gutachter',

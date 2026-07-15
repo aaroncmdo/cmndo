@@ -8,7 +8,6 @@ import Link from 'next/link'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
 
-export const dynamic = 'force-dynamic'
 
 function eur(val: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)
