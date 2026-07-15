@@ -6,8 +6,10 @@ import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { reverseGeocodeAddress } from '@/lib/google-geocoding/geocode-address'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
+import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { HART_SCHWELLE, type WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
@@ -43,6 +45,16 @@ export async function klassifiziereSchadenfotoEmbed(images: EmbedFoto[]): Promis
   return { kategorien, quelle: 'schadenbild', confidence }
 }
 
+// Text-KI-Weg fürs Embed: Freitext-Schadenbeschreibung → Gewerke-Bedarf (Phase-1-Klassifikator,
+// fail-safe). Gleiche Output-Form wie klassifiziereSchadenfotoEmbed, quelle='schadenbeschreibung'.
+export async function klassifiziereSchadenbeschreibungEmbed(beschreibung: string): Promise<Reparaturbedarf> {
+  const text = beschreibung?.trim()
+  if (!text) return { kategorien: [], quelle: 'unbekannt', confidence: 0 }
+  const { kategorien, confidence } = await klassifiziereSchadenbeschreibung(text)
+  if (kategorien.length === 0) return { kategorien: [], quelle: 'unbekannt', confidence: 0 }
+  return { kategorien, quelle: 'schadenbeschreibung', confidence }
+}
+
 /**
  * Ab HART_SCHWELLE gilt der Bedarf als sicher genug, um bei 0 Treffern eine
  * "keine Spezialisierte gefunden"-Warnung zu zeigen (Fallback zeigt trotzdem alle — die Engine
@@ -62,20 +74,22 @@ function keineSpezialisierteGefunden(
 /**
  * T4 (Phase 1 Task 4, #4359): Werkstatt-Suche auf die gerankte Matching-Engine umgestellt
  * (Marke → Gewerke → Fahrzeug-Gruppe → verifiziert → Distanz zum FAHRZEUGSTANDORT).
- * Marke/Fahrzeugklasse bleiben in Phase 1 null — der Wizard liefert sie erst in Phase 2, die
- * Engine rankt bis dahin nach Gewerke+Distanz (alle Werkstaetten markenMatch='frei'/'unbekannt').
+ * Phase 2 Task 2: Marke/Fahrzeugklasse kommen jetzt vom Wizard durch (wizardStateZuSuche) —
+ * die Engine rankt scharf nach Marke/Fahrzeug-Gruppe statt nur nach Gewerke+Distanz.
  */
 export async function sucheEchteWerkstaetten(input: {
   lat?: number
   lng?: number
   plz?: string
   bedarf?: Reparaturbedarf
+  marke?: string | null
+  fahrzeugklasse?: string | null
 }): Promise<{ werkstaetten: WerkstattVorschlag[]; keineSpezialisierte: boolean }> {
   const anker = input.lat != null && input.lng != null ? { lat: input.lat, lng: input.lng } : null
   const b = sanitizeBedarf(input.bedarf)
   const werkstaetten = await ladeWerkstattVorschlaege({
-    fahrzeugklasse: null, // Phase 2: aus dem Wizard (Fahrzeugtyp)
-    marke: null, // Phase 2: aus dem Wizard (Hersteller)
+    fahrzeugklasse: input.fahrzeugklasse ?? null,
+    marke: input.marke ?? null,
     bedarf: b.kategorien,
     bedarfConfidence: b.confidence,
     anker,
@@ -244,4 +258,15 @@ export async function erstelleWerkstattFinderLead(
     console.error('[werkstatt-finder] FlowLink fehlgeschlagen', err)
     return { ok: false, error: 'Flow-Link konnte nicht erstellt werden' }
   }
+}
+
+// „Aktuellen Standort verwenden": Client liefert Browser-Koordinaten, wir liefern die Adresse zurück.
+// Fällt Reverse-Geocoding aus, reichen dem Anker die Koordinaten (Client zeigt „Aktueller Standort").
+export async function holeAdresseFuerStandort(
+  lat: number,
+  lng: number,
+): Promise<{ ok: true; adresse: string; lat: number; lng: number } | { ok: false; error: string }> {
+  const r = await reverseGeocodeAddress(lat, lng)
+  if (!r.ok) return { ok: false, error: r.error }
+  return { ok: true, adresse: r.data.formatted_address, lat, lng }
 }
