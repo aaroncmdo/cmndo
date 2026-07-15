@@ -5,7 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getStorageUrlBulk } from '@/lib/storage/url'
+import { getStorageUrlBulk, resignStorageUrl } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
 import { NoticeBox } from '@/components/shared/NoticeBox'
@@ -1103,7 +1103,18 @@ export default async function FallaktePage({
           // Rolle bestimmt Permission (Admin/KB upload, SV/Kanzlei read-only).
           pflichtSlots: await getPflichtdokumenteForFall(supabase, id, viewerRoleForTimeline),
           viewerRolle: viewerRoleForTimeline,
-          pflichtdokumente: (pflichtdokumente ?? []) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
+          // #4336-Follow-up (UI-Smoke-Fund): DokumenteTab rendert pflichtdokumente.dokument_url
+          // roh als href. `fall-dokumente` ist ein PRIVATER Bucket → die gespeicherte URL ist tot
+          // (public → HTTP 400) bzw. abgelaufen (signed-TTL). Frisch signieren. Der Kunde-Pfad lief
+          // schon über getPflichtdokumenteForFall; dieser rohe Admin-Read wurde im Sweep übersehen.
+          pflichtdokumente: (await Promise.all(
+            ((pflichtdokumente ?? []) as Array<{ dokument_url: string | null }>).map(async (p) => ({
+              ...p,
+              dokument_url: p.dokument_url
+                ? ((await resignStorageUrl(adminStorage, p.dokument_url)) ?? p.dokument_url)
+                : null,
+            })),
+          )) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['pflichtdokumente'],
           dokumente: dokumenteLegacy as unknown as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['dokumente'],
           fallAS: {
             anschlussschreiben_url: (fall.anschlussschreiben_url as string | null) ?? null,
