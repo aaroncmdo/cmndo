@@ -1,30 +1,21 @@
 {
-  "generatedAt": "2026-07-15T14:56:07.649Z",
-  "count": 24,
+  "generatedAt": "2026-07-15T16:06:37.000Z",
+  "count": 15,
   "keys": [
     "admin_termine.notizen",
     "aircall_relay_seats.notiz",
     "anruf_log.notiz",
     "anspruch_schaetzungen.session_token",
-    "auftraege.filmcheck_notizen",
-    "auftraege.sv_notizen_vor_ort",
-    "auftraege.technische_stellungnahme_notiz_sv",
     "calls.notiz",
     "embed_sites.tracking_webhook_secret",
     "gutachter_waitlist.notizen_admin",
-    "linkedin_oauth_tokens.access_token",
-    "linkedin_oauth_tokens.refresh_token",
-    "makler.notizen",
-    "personenschaden_personen.notizen",
     "profiles.google_access_token",
     "profiles.google_refresh_token",
     "profiles.ms_access_token",
     "profiles.ms_refresh_token",
     "sv_buero.notiz",
-    "sv_kalender_verbindungen.password_encrypted",
     "termine.ergebnis_notiz",
     "termine.notiz",
-    "vehicle_ownership_history.notiz",
-    "werkstaetten.notizen"
+    "vehicle_ownership_history.notiz"
   ]
 }
