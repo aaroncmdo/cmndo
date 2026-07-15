@@ -98,7 +98,8 @@ export async function getVersichererFaelle(versicherungId: string): Promise<Vers
 
   const { data, error } = await supabase
     .from('claims')
-    .select('id, claim_nummer, status, created_at')
+    // T3-slice-2b: claims.status -> operative_status
+    .select('id, claim_nummer, operative_status, created_at')
     .eq('gegner_versicherung_id', versicherungId)
     .order('created_at', { ascending: false })
 
@@ -110,12 +111,12 @@ export async function getVersichererFaelle(versicherungId: string): Promise<Vers
   return ((data ?? []) as unknown as Array<{
     id: string
     claim_nummer: string | null
-    status: string | null
+    operative_status: string | null
     created_at: string
   }>).map((c) => ({
     id: c.id,
     claimNummer: c.claim_nummer,
-    status: c.status,
+    status: c.operative_status,
     createdAt: c.created_at,
   }))
 }

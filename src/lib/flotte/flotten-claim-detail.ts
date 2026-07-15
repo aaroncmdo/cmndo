@@ -39,7 +39,8 @@ export async function getFlottenClaimDetail(
   // Gate 2: Claim gehoert GENAU zu diesem Fahrzeug?
   const { data: claim } = await db
     .from('claims')
-    .select('id,claim_nummer,status,schadentag,schadens_hoehe_netto,vehicle_id')
+    // T3-slice-2b: claims.status -> operative_status
+    .select('id,claim_nummer,operative_status,schadentag,schadens_hoehe_netto,vehicle_id')
     .eq('id', claimId)
     .maybeSingle()
   if (!claim || (claim as Record<string, unknown>).vehicle_id !== vehicleId) return null
@@ -55,7 +56,7 @@ export async function getFlottenClaimDetail(
   return {
     claimId: c.id as string,
     claimNummer: (c.claim_nummer as string | null) ?? null,
-    status: (c.status as string | null) ?? null,
+    status: (c.operative_status as string | null) ?? null,
     schadentag: (c.schadentag as string | null) ?? null,
     schadensHoeheNetto: (c.schadens_hoehe_netto as number | null) ?? null,
     kennzeichen: (v.kennzeichen_aktuell as string | null) ?? null,
