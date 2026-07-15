@@ -57,7 +57,7 @@ export async function lehneLeadAb(
   // Fallback ist tot (0 claim-lose faelle).
   const { data: fall } = await db
     .from('faelle_claim_bridge')
-    .select('fall_id, claim_id, claims:claim_id(claim_nummer, operative_status, lead_preis_netto, sv_id)')
+    .select('fall_id, claim_id, claims:claims!fk_bridge_claim(claim_nummer, operative_status, lead_preis_netto, sv_id)')
     .eq('fall_id', fallId)
     .single()
 

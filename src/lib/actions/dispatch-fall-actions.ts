@@ -203,7 +203,7 @@ export async function updateFallStatus(
     // claim_nummer aus claims SSoT; auftraege.storno_grund via claims->auftraege). faelle.status-Fallback
     // entfaellt (faelle-Drop; operative_status ist SSoT, 1:1-Mirror).
     const { data: fallInfo } = await serviceClient.from('faelle_claim_bridge')
-      .select('claims:claim_id(sv_id, claim_nummer, operative_status, auftraege(storno_grund))')
+      .select('claims:claims!fk_bridge_claim(sv_id, claim_nummer, operative_status, auftraege(storno_grund))')
       .eq('fall_id', fallId).single()
     const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
     const stornoSvId = (fallInfoClaim as { sv_id?: string | null } | null)?.sv_id ?? null

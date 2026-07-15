@@ -7,7 +7,9 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+// AAR-892 / f99fdb10: shared createClient (verdrahtet realtime.setAuth) statt direktem
+// createBrowserClient — Konsistenz + kein anon-Realtime bei spaeteren Subs.
+import { createClient } from '@/lib/supabase/client'
 import { PhoneCallIcon, CheckCircle2Icon } from 'lucide-react'
 import { saveFallRueckruf, markFallRueckrufErledigt } from './rueckruf-actions'
 
@@ -27,10 +29,7 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   const load = useCallback(async () => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    )
+    const supabase = createClient()
     const { data } = await supabase
       .from('admin_termine')
       .select('id, start_zeit, notizen, status')

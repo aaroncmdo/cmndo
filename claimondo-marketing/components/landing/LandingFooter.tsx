@@ -156,7 +156,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                 </Link>
               </li>
               <li>
-                <Link href="https://app.claimondo.de/werkstatt-partner-werden" className="transition-colors hover:text-white">
+                <Link href="https://werkstatt.claimondo.de" className="transition-colors hover:text-white">
                   Werkstatt werden
                 </Link>
               </li>

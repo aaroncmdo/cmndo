@@ -156,7 +156,7 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     if (!fallSpezifikation) {
       const { data: bridge } = await db
         .from('faelle_claim_bridge')
-        .select('claims:claim_id(spezifikation)')
+        .select('claims:claims!fk_bridge_claim(spezifikation)')
         .eq('fall_id', bezug.id)
         .maybeSingle()
       const c = Array.isArray(bridge?.claims) ? bridge?.claims[0] : bridge?.claims

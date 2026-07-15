@@ -358,7 +358,7 @@ export async function erstelleGutachterFinderAnfrage(
     if (payload.zugeordneter_sv_id) {
       const { data: sv } = await admin
         .from('sachverstaendige')
-        .select('firmenname, profiles(anzeigename, telefon)')
+        .select('firmenname, profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)')
         .eq('id', payload.zugeordneter_sv_id)
         .single()
       if (sv) {

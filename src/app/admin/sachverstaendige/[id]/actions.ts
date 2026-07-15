@@ -204,7 +204,7 @@ export async function resendWelcomeMail(
   const adminDb = createAdminClient()
   const { data: sv, error: svErr } = await adminDb
     .from('sachverstaendige')
-    .select('id, profile_id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles(email, vorname, nachname, anrede, titel)')
+    .select('id, profile_id, paket, paket_faelle_gesamt, paket_umkreis_km, onboarding_anzahlung_betrag, anzahlung_faellig, organisation_id, profiles!sachverstaendige_profile_id_fkey(email, vorname, nachname, anrede, titel)')
     .eq('id', svId)
     .maybeSingle()
 

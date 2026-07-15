@@ -84,7 +84,7 @@ export default async function OnboardingDetailsPage({
     // faelle.lead_id == claims.lead_id (Divergenz=0 live verifiziert).
     const { data: fallBridge } = await adminDb
       .from('faelle_claim_bridge')
-      .select('claims:claim_id(lead_id)')
+      .select('claims:claims!fk_bridge_claim(lead_id)')
       .eq('fall_id', fallId)
       .maybeSingle()
     const fcRaw = (fallBridge as { claims?: unknown } | null)?.claims

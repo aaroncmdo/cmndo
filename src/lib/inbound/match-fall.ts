@@ -83,7 +83,7 @@ export async function matchInboundToFall(
   // Migration auf VERSCHIEDENEN Tabellen -> ein gemeinsames .or() geht nicht. Stattdessen je
   // Quelle eine Query + Merge/Dedupe nach fall_id (orParts war ohnehin max. 2 Teile).
   const SELECT =
-    'fall_id, claim_id, claims:claim_id!inner(claim_nummer, operative_status, created_at, geschaedigter_user_id, vehicle_id, vehicles:vehicle_id(kennzeichen_aktuell, hersteller, modell_haupttyp))'
+    'fall_id, claim_id, claims:claims!fk_bridge_claim!inner(claim_nummer, operative_status, created_at, geschaedigter_user_id, vehicle_id, vehicles:vehicle_id(kennzeichen_aktuell, hersteller, modell_haupttyp))'
   const bridgeQueries = []
   if (kundeIds.length) {
     bridgeQueries.push(

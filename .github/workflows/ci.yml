@@ -199,6 +199,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Anon-Grant-Ratchet (Grant-Audit 15.07.2026): blockt NEUE anon-SELECT-Grants auf sensible
+      # Spalten-MUSTER (iban/steuer/geburtsdatum/OAuth-Token/secret/passwort/provision/honorar/notiz)
+      # in public-Basistabellen. Ergaenzt den Anon-Exposure-Guard (der ZEILEN via anon-lesbare Views
+      # faengt): RLS schuetzt nur Zeilen — ein table-weiter anon-Grant + ein spaeterer anon-Policy-Zweig
+      # legt die Spalte offen (latent). Verallgemeinert audit_claims_column_grants auf die ganze anon-
+      # Klasse. Baseline+Boy-Scout. Backing-RPC audit_anon_sensitive_grants(). Nur bei SQL-Diff aktiv.
+      # Siehe scripts/check-anon-sensitive-grants.mjs + AGENTS.md §Anon-Grant-Gate.
+      - name: Anon-Grant-Ratchet
+        run: node scripts/check-anon-sensitive-grants.mjs --ratchet
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Query-Parse-Drift-Bremse (14.07.2026): faengt tote PostgREST-Queries, die still HTTP 300/400
       # liefern (tote Spalte / fehlende Relation / mehrdeutiger Embed / fehlende Tabelle) und deren
       # Fehler im Code verschluckt wird (`const { data } = await …`). Ausloeser: ein FK machte einen

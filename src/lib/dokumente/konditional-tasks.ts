@@ -79,7 +79,7 @@ export async function triggerKonditionaleDokumentTasks(
     // CMM-49 Display-Sweep: kunde_id via Bridge+claims (faelle-frei). kunde_id==claims.geschaedigter_user_id (divergence=0).
     const { data: bridgeRow } = await supabase
       .from('faelle_claim_bridge')
-      .select('claims:claim_id!inner(geschaedigter_user_id)')
+      .select('claims:claims!fk_bridge_claim!inner(geschaedigter_user_id)')
       .eq('fall_id', fallId)
       .single()
     const claimEmbed = Array.isArray(bridgeRow?.claims) ? bridgeRow?.claims[0] : bridgeRow?.claims

@@ -7,7 +7,9 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { createBrowserClient } from '@supabase/ssr'
+// AAR-892 / f99fdb10: shared createClient (verdrahtet realtime.setAuth) statt direktem
+// createBrowserClient — sonst laueft eine spaeter ergaenzte Realtime-Sub hier als anon.
+import { createClient } from '@/lib/supabase/client'
 import { PhoneCallIcon, UsersIcon, CalendarIcon, HardHatIcon, VideoIcon } from 'lucide-react'
 
 export type TerminTyp = 'rueckruf' | 'kunde' | 'intern' | 'gutachter' | 'kb_beratung'
@@ -67,10 +69,7 @@ export default function TerminListeClient({
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const supabase = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      )
+      const supabase = createClient()
       const out: Normalized[] = []
 
       // admin_termine

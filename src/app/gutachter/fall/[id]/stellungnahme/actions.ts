@@ -46,7 +46,7 @@ export async function submitStellungnahme(
   // claims.sv_id (SSoT div=0). claim_nummer + auftraege.technische_stellungnahme_status via claims.
   const { data: fallRaw } = await db
     .from('faelle_claim_bridge')
-    .select('claims:claim_id!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status))')
+    .select('claims:claims!fk_bridge_claim!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status))')
     .eq('fall_id', input.fallId)
     .eq('claims.sv_id', sv.id)
     .maybeSingle()
