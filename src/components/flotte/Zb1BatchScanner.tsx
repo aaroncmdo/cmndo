@@ -83,10 +83,10 @@ function parseBaujahr(raw: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-/** Eine Zeile in der Batch-Liste: der Scan-Treffer + das Bild + ein reiner UI-Key
+/** Eine Zeile in der Batch-Liste: der Scan-Treffer + ein reiner UI-Key
  *  (React-Listen-Identitaet -- unabhaengig vom Array-Index, damit ein Entfernen mitten in der
  *  Liste nicht die Eingabefokus-Identitaet einer anderen Zeile durcheinanderbringt). */
-type Zeile = ScanErgebnis & { base64: string; key: string }
+type Zeile = ScanErgebnis & { key: string }
 
 type Phase = 'scannen' | 'review' | 'ergebnis'
 
@@ -118,12 +118,10 @@ const PHASE_SUBTITLE: Record<Phase, string> = {
 }
 
 type Props = {
-  /** Teil des Props-Vertrags (identisch fuer beide Caller, Task 7/8) -- wird hier nicht
-   *  destrukturiert/verwendet, weil onScan/onAnlegen die Firma bereits serverseitig gebunden
-   *  reinreichen. Bewusst kein ungenutzter lokaler Binding (kein Dead-Code-Fund). */
-  firmaId: string
+  // onScan/onAnlegen binden die Firma serverseitig (Flottenmanager holt sie aus dem Konto, Admin
+  // schliesst die firmaId in die Action ein) -- die Komponente kennt die Firma nicht und braucht sie nicht.
   onScan: (base64: string) => Promise<{ ok: true; ergebnis: ScanErgebnis } | { ok: false; error: string }>
-  onAnlegen: (zeilen: (BatchAnlageZeile & { base64: string })[]) => Promise<BatchAnlageErgebnis[]>
+  onAnlegen: (zeilen: BatchAnlageZeile[]) => Promise<BatchAnlageErgebnis[]>
   onFertig: () => void
 }
 
@@ -164,7 +162,7 @@ export default function Zb1BatchScanner({ onScan, onAnlegen, onFertig }: Props) 
         setDedupHinweis('Diese Karte ist bereits in der Liste.')
         return
       }
-      setZeilen((prev) => [...prev, { ...result.ergebnis, base64, key: crypto.randomUUID() }])
+      setZeilen((prev) => [...prev, { ...result.ergebnis, key: crypto.randomUUID() }])
     } catch (err) {
       setScanFehler(err instanceof Error ? err.message : 'Bild konnte nicht verarbeitet werden.')
     } finally {
@@ -191,10 +189,9 @@ export default function Zb1BatchScanner({ onScan, onAnlegen, onFertig }: Props) 
     setAnlegenFehler(null)
     setAnlegenLaeuft(true)
     try {
-      const payload: (BatchAnlageZeile & { base64: string })[] = zeilen.map((z) => ({
+      const payload: BatchAnlageZeile[] = zeilen.map((z) => ({
         felder: z.felder,
         bereitsInFlotte: z.bereitsInFlotte,
-        base64: z.base64,
       }))
       const res = await onAnlegen(payload)
       setErgebnis(res)
