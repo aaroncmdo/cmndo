@@ -10,6 +10,7 @@ import {
   sperreSchadenkarte,
   entsperreSchadenkarte,
   entbindeSchadenkarte,
+  speichereNfcUid,
 } from '@/lib/schadenkarte/schadenkarte'
 import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { buildQrGridPdf } from '@/lib/werkstatt/flyer/build-qr-grid'
@@ -113,5 +114,20 @@ export async function entbindeKarte(token: string): Promise<{ ok: boolean; error
     revalidatePath('/flotte/karten')
     revalidatePath('/flotte/flotte')
   }
+  return res
+}
+
+/** Nach erfolgreichem + verifiziertem NFC-Schreiben: Chip-Seriennummer vermerken. */
+export async function merkeNfcUid(
+  token: string,
+  nfcUid: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await speichereNfcUid(db, { token, firmaId: firma.id, nfcUid })
+  if (res.ok) revalidatePath('/flotte/karten')
   return res
 }

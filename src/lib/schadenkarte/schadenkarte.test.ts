@@ -13,6 +13,7 @@ import {
   sperreSchadenkarte,
   entsperreSchadenkarte,
   entbindeSchadenkarte,
+  speichereNfcUid,
 } from './schadenkarte'
 
 // ---------------------------------------------------------------------------
@@ -450,5 +451,34 @@ describe('entbindeSchadenkarte', () => {
     const res = await entbindeSchadenkarte(db, { token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1' })
     expect(res.ok).toBe(false)
     expect(res.error).toMatch(/zwischenzeitlich/i)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// speichereNfcUid
+// ---------------------------------------------------------------------------
+
+describe('speichereNfcUid', () => {
+  it('speichert die Chip-Seriennummer an der Karte', async () => {
+    // makeDb gibt seit 9f13b1430 { db, updateMock } zurueck (nicht mehr db direkt) --
+    // destrukturieren wie bei allen anderen Tests in dieser Datei.
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'gebunden', firma_id: 'f1', fahrzeug_id: 'v1' } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(true)
+  })
+
+  it('weist eine Karte einer fremden Firma ab', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'ANDERE', fahrzeug_id: null } },
+    })
+    const res = await speichereNfcUid(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', nfcUid: '04:a2:24:bb',
+    })
+    expect(res.ok).toBe(false)
   })
 })

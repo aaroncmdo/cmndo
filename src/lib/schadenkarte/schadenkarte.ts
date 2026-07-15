@@ -261,3 +261,37 @@ export async function entbindeSchadenkarte(
     gebunden_von: null,
   })
 }
+
+/**
+ * Chip-Seriennummer an der Karte vermerken (nach erfolgreichem + VERIFIZIERTEM Beschreiben).
+ *
+ * Zweck: Nachweis "dieser Token sitzt auf diesem physischen Chip" + die Ops-Frage
+ * "welche Karten sind noch nicht beschrieben?" (nfc_uid IS NULL).
+ *
+ * ⚠ KEIN Anti-Clone-Merkmal: beim Antippen uebergibt das Betriebssystem nur die URL,
+ * nicht die Chip-UID -- eine Klon-Erkennung zur Tap-Zeit ist mit einem reinen URI-Tag
+ * technisch nicht moeglich. Die Spalte ist Inventar, nicht Sicherheit.
+ *
+ * Bewusst OHNE Status-Guard: das Beschreiben ist unabhaengig davon, ob die Karte gerade
+ * bestellt/frei/gebunden ist.
+ */
+export async function speichereNfcUid(
+  db: AnyDb,
+  params: { token: string; firmaId: string; nfcUid: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const row = await ladeKarteFuerFirma(db, params.token, params.firmaId)
+  if ('error' in row) return { ok: false, error: row.error }
+
+  // firma_id wird BEIM UPDATE erneut geprueft, nicht nur beim Lesen: schliesst die
+  // TOCTOU-Luecke zwischen ladeKarteFuerFirma und dem Write.
+  const { error } = await db
+    .from('schadenkarten')
+    .update({ nfc_uid: params.nfcUid })
+    .eq('id', row.id)
+    .eq('firma_id', params.firmaId)
+    .select('id')
+    .maybeSingle()
+
+  if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
