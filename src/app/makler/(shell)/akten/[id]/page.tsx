@@ -7,6 +7,7 @@ import {
   getCurrentMakler,
   getMaklerFallDetail,
   getFallChat,
+  getFallGruppeThreadId,
 } from '@/lib/makler/queries'
 import { createClient } from '@/lib/supabase/server'
 import { MaklerAkteDetail } from '@/components/makler/akte-detail/MaklerAkteDetail'
@@ -43,6 +44,7 @@ export default async function MaklerAkteDetailPage({
   } = await supabase.auth.getUser()
 
   const chatMessages = await getFallChat(id)
+  const gruppeThreadId = await getFallGruppeThreadId(id)
 
   return (
     <MaklerAkteDetail
@@ -51,6 +53,7 @@ export default async function MaklerAkteDetailPage({
       makler={makler}
       currentUserId={user?.id ?? ''}
       initialChatMessages={chatMessages}
+      gruppeThreadId={gruppeThreadId}
     />
   )
 }

@@ -3,7 +3,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
-import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mapping'
+import { mapFallStatusToClaimStatus, resolveCursorOperativeStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer den operativen Status (claims.operative_status, SSoT).
@@ -68,6 +68,11 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'nachbesichtigung-laeuft': ['regulierung-laeuft', 'vs-abgelehnt', 'klage', 'storniert'],
   'vs-abgelehnt': ['klage', 'storniert'],
   'klage': ['abgeschlossen', 'storniert'],
+  // B4-slice-2a-i: seit der Klage-Terminal-Konvergenz traegt der Cursor 'klage_rechtsstreit'
+  // (statt des groben 'klage') — er ist damit ein CURSOR-Wert und braucht dieselben Ausgaenge
+  // wie 'klage' (sonst Dead-End: transitionFallStatus wirft bei unbekanntem Cursor, vgl.
+  // slice-1b in_kommunikation_vs). 'klage' bleibt als Ziel/Key erhalten (Alt-Daten, Robustheit).
+  'klage_rechtsstreit': ['abgeschlossen', 'storniert'],
   'zahlung-eingegangen': ['abgeschlossen'],
   'abgeschlossen': [],
   'storniert': [],
@@ -229,10 +234,16 @@ export async function transitionFallStatus(
     if (claimStatusMapping.setClaimStatus) {
       claimsUpdate.status = claimStatusMapping.value
     }
-    // CMM-74 b'' (Variante A): operative_status = newStatus — die Cursor-Senke auf claims.
-    // Voller 19-Wert-Operativ-Status (NICHT der gemappte Lifecycle-claims.status). Additiv
-    // zum faelle.status-Write (A1 dual-write); harter faelle.status-Write-Stopp = A3.
-    claimsUpdate.operative_status = newStatus
+    // CMM-74 b'' (Variante A): operative_status = die Cursor-Senke auf claims (voller Operativ-
+    // Status, NICHT der gemappte Lifecycle-claims.status). Additiv zum faelle.status-Write.
+    // B4-slice-2a-i: Klage-Terminal-Konvergenz — beim Klage-Terminal traegt operative_status
+    // 'klage_rechtsstreit' (statt des groben 'klage'/'abgeschlossen'), damit die Achse den
+    // Outcome kennt, sobald die Abschluss-Sub-Phase nur noch aus operative_status abgeleitet wird
+    // (slice-2a-ii). Behavior-preserving (A1-Parity): milestone(status) liefert dieselbe Phase.
+    const resultingClaimStatus = claimStatusMapping.setClaimStatus
+      ? claimStatusMapping.value
+      : currentClaimStatus
+    claimsUpdate.operative_status = resolveCursorOperativeStatus(newStatus, resultingClaimStatus)
   }
 
   // AAR-939: KEIN faelle-Write mehr. Nach peelKanzlei + peelAuftraege + split bleibt in

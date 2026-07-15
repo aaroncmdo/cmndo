@@ -196,6 +196,13 @@ const nextConfig: NextConfig = {
         source: '/embed/sounds/:path*',
         headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
       },
+      {
+        // Slice 2 (Offline-Read): der Service-Worker darf nicht HTTP-gecacht werden,
+        // sonst greifen SW-Updates verzoegert. no-store => Browser holt sw.js bei jedem
+        // Load neu (zusammen mit updateViaCache:'none' in register-sw.ts).
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }],
+      },
     ]
   },
   async redirects() {

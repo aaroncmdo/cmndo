@@ -50,6 +50,7 @@ type Props = {
   makler: MaklerRow
   currentUserId: string
   initialChatMessages: MaklerChatMessage[]
+  gruppeThreadId: string | null
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -99,6 +100,7 @@ export function MaklerAkteDetail({
   initialTab,
   currentUserId,
   initialChatMessages,
+  gruppeThreadId,
 }: Props) {
   const copilotVerfuegbar = istVollzugriff(detail.consent_scope)
   // Copilot arbeitet nur bei Vollzugriff (API 403t sonst). Deep-Link ?tab=copilot
@@ -255,6 +257,7 @@ export function MaklerAkteDetail({
             fallId={fall.id}
             currentUserId={currentUserId}
             initialMessages={initialChatMessages}
+            gruppeThreadId={gruppeThreadId}
           />
         </div>
       ) : null}

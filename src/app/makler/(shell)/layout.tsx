@@ -5,6 +5,7 @@
 import { redirect } from 'next/navigation'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { MaklerShell } from '@/components/makler/MaklerShell'
+import GlobalSearch from '@/components/shared/search/GlobalSearch'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,8 +27,12 @@ export default async function MaklerLayout({
   if (makler.status !== 'aktiv') redirect('/makler/pending')
 
   return (
-    <MaklerShell makler={makler} email={user.email ?? ''} userId={user.id}>
-      {children}
-    </MaklerShell>
+    <>
+      {/* Cmd+K / Trigger-Event: consent-gegatete Makler-Suche (search_makler, id=fall_id). */}
+      <GlobalSearch rolle="makler" />
+      <MaklerShell makler={makler} email={user.email ?? ''} userId={user.id}>
+        {children}
+      </MaklerShell>
+    </>
   )
 }

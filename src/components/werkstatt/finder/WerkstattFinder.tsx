@@ -9,13 +9,27 @@ import EmptyState from '@/components/shared/EmptyState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import type { Fit } from '@/lib/werkstatt/bedarf/types'
+import type { MatchGrund, MatchGrundTyp } from '@/lib/werkstatt/matching/rank-vorschlaege'
 
 type Props = {
-  werkstaetten: (WerkstattFinderRow & { fit?: Fit })[]
+  // Spec B (Aaron 14.07.): `gruende` kommt aus der Matching-Engine — "mit wirklichem Grund warum das
+  // passt". Optional, damit die aelteren Consumer (Dispatch/Embed) unveraendert weiterlaufen; ohne
+  // Gruende faellt die Card auf den bisherigen fit-Chip zurueck.
+  werkstaetten: (WerkstattFinderRow & { fit?: Fit; gruende?: MatchGrund[] })[]
   onSelect: (id: string) => void
   selectedId?: string | null
   loading?: boolean
   keineSpezialisierte?: boolean
+}
+
+// Nur Toene, die StatusBadge kennt (success/neutral/warning — wie die bestehenden Fit-Chips).
+// Der Marken-Treffer hebt sich ohnehin ab: die Engine sortiert ihn IMMER als ersten Grund ein.
+const GRUND_TONE: Record<MatchGrundTyp, 'success' | 'neutral'> = {
+  marke: 'success',
+  gewerk: 'success',
+  klasse: 'success',
+  trust: 'success',
+  distanz: 'neutral',
 }
 
 function adresseZeile(w: WerkstattFinderRow): string {
@@ -23,9 +37,11 @@ function adresseZeile(w: WerkstattFinderRow): string {
   return [w.adresse_strasse, plzOrt].filter(Boolean).join(', ')
 }
 
+// Aaron 14.07.: der Anker ist der FAHRZEUGSTANDORT (wo das Auto steht), nicht der Besichtigungsort —
+// das sagen wir dem Kunden auch, sonst wundert er sich ueber die Entfernung.
 function distanzLabel(distanz_km: number): string | null {
   if (!Number.isFinite(distanz_km)) return null
-  return `${distanz_km.toFixed(1)} km entfernt`
+  return `${distanz_km.toFixed(1).replace('.', ',')} km vom Fahrzeugstandort`
 }
 
 export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, keineSpezialisierte }: Props) {
@@ -68,6 +84,16 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, k
           const isSelected = selectedId === w.id
           const adresse = adresseZeile(w)
           const distanz = distanzLabel(w.distanz_km)
+          // Spec B (Aaron 14.07.): Die Matching-Engine liefert die GRÜNDE mit ("BMW-Vertragswerkstatt",
+          // "Repariert Karosserie + Lackierung", "Kann PKW", "Verifizierter Partner"). Der Kunde sieht
+          // damit, WARUM gerade diese Werkstatt vorgeschlagen wird — statt einer anonymen Distanzliste.
+          // 'distanz' und 'trust' lassen wir aus den Chips raus — beide stehen bereits in der Card
+          // (Distanz-Zeile unten, "✓ Verifizierter Partner" neben dem Namen). Bleibt: WARUM diese
+          // Werkstatt fachlich passt (Marke, Gewerke, Fahrzeugklasse).
+          const grundChips = (w.gruende ?? []).filter(
+            (g) => g.typ !== 'distanz' && g.typ !== 'trust',
+          )
+
           // Fit-Chip: wenn fit vorhanden (claim-Kontext) → 3-Zustand; sonst altes passt-Heuristik.
           const fitChip: React.ReactNode =
             w.fit != null ? (
@@ -116,7 +142,17 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, k
                         <StatusBadge tone="success" size="xs">✓ Verifizierter Partner</StatusBadge>
                       ) : null}
                     </div>
-                    {fitChip}
+                    {grundChips.length > 0 ? (
+                      <div className="mt-1 flex flex-wrap gap-1.5">
+                        {grundChips.map((g, i) => (
+                          <StatusBadge key={`${g.typ}-${i}`} tone={GRUND_TONE[g.typ]} size="xs">
+                            {g.text}
+                          </StatusBadge>
+                        ))}
+                      </div>
+                    ) : (
+                      fitChip
+                    )}
                     {adresse ? (
                       <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
                         {adresse}

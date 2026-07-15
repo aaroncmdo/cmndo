@@ -22,7 +22,12 @@ export async function registerServiceWorker(): Promise<void> {
   registered = true
 
   try {
-    const reg = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    // Slice 2: updateViaCache 'none' -> der Browser HTTP-cached sw.js nicht,
+    // SW-Updates greifen zeitnah (zusammen mit dem no-store-Header in next.config.ts).
+    const reg = await navigator.serviceWorker.register('/sw.js', {
+      scope: '/',
+      updateViaCache: 'none',
+    })
 
     navigator.serviceWorker.addEventListener('message', (event) => {
       const data = (event as MessageEvent).data as { type?: string } | null
