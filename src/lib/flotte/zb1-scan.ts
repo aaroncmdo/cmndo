@@ -19,7 +19,16 @@ const RECHTSFORM_REGEX = /\b(gmbh|ag|kg|ohg|ug|mbh|gbr)\b/g
 const EK_REGEX = /\be\.\s*k\.?/g
 const CO_REGEX = /&\s*co\.?/g
 
-/** lowercase, Rechtsform-Suffixe + "& Co." raus, Satzzeichen weg, Whitespace kollabiert. */
+/**
+ * lowercase, Rechtsform-Suffixe + "& Co." raus, Satzzeichen weg, Whitespace kollabiert.
+ *
+ * Bewusst NICHT normalizeName() aus src/lib/entities/normalize.ts wiederverwendet: der
+ * Entity-Resolver dort strippt bewusst KEINE Rechtsform-Suffixe (siehe Kommentar dort -- das
+ * wuerde verschiedene Firmen ueber-mergen, z.B. "Schmidt GmbH" und "Schmidt AG"). Hier ist das
+ * Stripping aber gerade der Zweck: ein Leasing-Halter ("Otto Leasing GmbH") soll trotz
+ * abweichendem Rechtsform-Suffix mit dem Firmennamen ("Otto Spedition GmbH") verglichen werden
+ * koennen -- zwei verschiedene Normalisierungs-Ziele, daher zwei verschiedene Funktionen.
+ */
 function normalisiereHaltername(raw: string): string {
   return raw
     .toLowerCase()
@@ -60,25 +69,42 @@ export async function scanZb1FuerFlotte(
   const fin = felder.fin?.trim().toUpperCase() || null
   let bereitsInFlotte = false
   if (fin && FIN_REGEX.test(fin)) {
-    const { data: dup } = await db
-      .from('flotten_fahrzeuge')
-      .select('vehicle_id, vehicles!inner(fin)')
-      .eq('firma_id', firmaId)
-      .eq('vehicles.fin', fin)
-      .maybeSingle()
-    bereitsInFlotte = !!dup
+    try {
+      const { data: dup } = await db
+        .from('flotten_fahrzeuge')
+        .select('vehicle_id, vehicles!inner(fin)')
+        .eq('firma_id', firmaId)
+        .eq('vehicles.fin', fin)
+        .maybeSingle()
+      bereitsInFlotte = !!dup
+    } catch (err) {
+      // Fail-open (Review-Befund 3): ein geworfener Fetch-Reject (Netzwerk) darf den
+      // {ok}-Vertrag nicht brechen -- ohne Antwort einfach nicht als "schon in der Flotte" werten.
+      console.error('[scanZb1FuerFlotte] FIN-Dup-Check fehlgeschlagen, fail-open:', err)
+    }
   }
 
   // Halter-Fuzzy-Vergleich gegen den Firmennamen (Leasing/Finanzierung weicht legitim ab).
   const halterZb1 = extracted.halter_nachname ?? extracted.halter_vorname
-  const { data: firma } = await db.from('firmen').select('name').eq('id', firmaId).maybeSingle()
-  const firmaName = (firma as { name: string | null } | null)?.name ?? null
+  let firmaName: string | null = null
+  try {
+    const { data: firma } = await db.from('firmen').select('name').eq('id', firmaId).maybeSingle()
+    firmaName = (firma as { name: string | null } | null)?.name ?? null
+  } catch (err) {
+    // Fail-open (Review-Befund 3): ohne Firmennamen einfach keine Halter-Warnung ausgeben,
+    // statt den geworfenen Fetch-Reject zum Aufrufer durchschlagen zu lassen.
+    console.error('[scanZb1FuerFlotte] Firmenname-Lookup fehlgeschlagen, fail-open:', err)
+  }
 
+  // Token-basiert (ganze Woerter), NICHT rohes Substring-includes() (Review-Befund 1): sonst
+  // matcht z.B. "otto spedition".includes("ott") => true und die Ott-vs-Otto-Diskrepanz
+  // (Halter "Ott" != Firma "Otto Spedition") wuerde faelschlich KEINE Warnung ausloesen.
   let halterWarnung = false
   if (halterZb1 && firmaName) {
-    const halterNorm = normalisiereHaltername(halterZb1)
-    const firmaNorm = normalisiereHaltername(firmaName)
-    halterWarnung = !firmaNorm.includes(halterNorm)
+    const halterTokens = normalisiereHaltername(halterZb1).split(' ').filter(Boolean)
+    const firmaTokens = normalisiereHaltername(firmaName).split(' ').filter(Boolean)
+    const passt = halterTokens.length > 0 && halterTokens.every((t) => firmaTokens.includes(t))
+    halterWarnung = !passt
   }
 
   return { ok: true, ergebnis: { felder, confidence, bereitsInFlotte, halterWarnung, halterZb1 } }
