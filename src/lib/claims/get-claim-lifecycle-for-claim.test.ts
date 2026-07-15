@@ -121,10 +121,11 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
     expect(r.lifecycle.mainPhase).toBe('regulierung')
   })
 
-  it('claims.status terminal (storniert) -> abschluss (Loader liest Status aus dem Claim)', async () => {
+  it('operative_status terminal (storniert) -> abschluss (Loader liest die Achse aus dem Claim)', async () => {
+    // B4-slice-2a-ii: die Terminal-Phase kommt aus operative_status (claims.status wird nicht mehr gelesen).
     const admin = fakeAdmin({
       faelle_claim_bridge: { claim_id: 'claim-1' },
-      claims: { status: 'storniert', lead_id: 'lead-1' },
+      claims: { status: 'storniert', operative_status: 'storniert', lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
