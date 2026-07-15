@@ -27,6 +27,12 @@ export type WerkstattFinderLeadPayload = {
   ort?: string | null
   fotos?: EmbedFoto[]
   bedarf?: Reparaturbedarf
+  // Phase 3: db-driven Übergabe der Wizard-Felder
+  hersteller?: string | null
+  fahrzeugklasse?: string | null
+  gewerbe?: boolean | null
+  modell?: string | null
+  beschreibung?: string | null
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
@@ -176,6 +182,11 @@ export async function erstelleWerkstattFinderLead(
     lat: payload.lat ?? null,
     lng: payload.lng ?? null,
     ort: payload.ort ?? null,
+    hersteller: payload.hersteller ?? null,
+    fahrzeugklasse: payload.fahrzeugklasse ?? null,
+    gewerbe: payload.gewerbe ?? null,
+    modell: payload.modell ?? null,
+    beschreibung: payload.beschreibung ?? null,
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
 

@@ -44,4 +44,40 @@ describe('buildWerkstattFinderLeadExtra', () => {
     })
     expect(extra.reparatur_werkstatt_id).toBeUndefined()
   })
+
+  // Phase 3: Contract-Felder (fließen via convert-lead-to-claim in Claim/Feststellung/Firma)
+  it('schreibt hersteller/klasse/modell/gewerbe/beschreibung + Standort in den extra', () => {
+    const e = buildWerkstattFinderLeadExtra({
+      werkstattId: null,
+      werkstattEmail: null,
+      kundeEmail: 'a@b.de',
+      lat: 50.9,
+      lng: 6.9,
+      ort: 'Köln',
+      hersteller: 'BMW',
+      fahrzeugklasse: 'M1',
+      gewerbe: true,
+      modell: '3er',
+      beschreibung: 'Kratzer im Lack',
+    })
+    expect(e.fahrzeug_hersteller).toBe('BMW')
+    expect(e.fahrzeugklasse).toBe('M1')
+    expect(e.fahrzeug_modell).toBe('3er')
+    expect(e.gewerbe_flag).toBe(true)
+    expect(e.fahrzeugschaden_beschreibung).toBe('Kratzer im Lack')
+    expect(e.fahrzeug_standort_adresse).toBe('Köln')
+  })
+  it('Phase 3: leere/fehlende Strings -> null; gewerbe default false', () => {
+    const e = buildWerkstattFinderLeadExtra({
+      werkstattId: null,
+      werkstattEmail: null,
+      kundeEmail: 'a@b.de',
+      hersteller: '   ',
+      modell: '',
+    })
+    expect(e.fahrzeug_hersteller).toBeNull()
+    expect(e.fahrzeug_modell).toBeNull()
+    expect(e.fahrzeugschaden_beschreibung).toBeNull()
+    expect(e.gewerbe_flag).toBe(false)
+  })
 })
