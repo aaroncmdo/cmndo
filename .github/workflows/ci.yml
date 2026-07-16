@@ -212,6 +212,20 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Reachability-Ratchet (Reachability-Audit 16.07.2026): blockt NEUE anon-SELECT-Policies
+      # mit einem OR-Zweig OHNE auth.uid() (true-anon liest echte Zeilen) auf Tabellen mit
+      # Kontakt-PII (email/telefon/kennzeichen/geburt/iban/…). Ergaenzt den Anon-Grant-Ratchet
+      # (Spalten-NAMEN-Achse) um die Policy-REACHABILITY-Achse — die claims/auftraege/leads-Klasse
+      # war Grant-basiert, gutachter_finder_anfragen (Mig 20260716200848) war Policy-basiert und
+      # der Grant-Ratchet fing es nicht (telefon/email nicht im Namensmuster). Baseline+Boy-Scout.
+      # Backing-RPC audit_anon_reachable_pii(). Nur bei SQL-Diff aktiv. Siehe
+      # scripts/check-anon-reachability.mjs + AGENTS.md §Reachability-Gate.
+      - name: Reachability-Ratchet
+        run: node scripts/check-anon-reachability.mjs --ratchet
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Query-Parse-Drift-Bremse (14.07.2026): faengt tote PostgREST-Queries, die still HTTP 300/400
       # liefern (tote Spalte / fehlende Relation / mehrdeutiger Embed / fehlende Tabelle) und deren
       # Fehler im Code verschluckt wird (`const { data } = await …`). Ausloeser: ein FK machte einen
