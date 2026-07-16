@@ -25,7 +25,7 @@ ist aber nur ein Wrapper um den zentralen Writer (`insertLeadRow`-Alias) — kei
 | T3 | matelso-Inbound-Webhook | `src/app/api/webhooks/matelso/inbound/route.ts:118` | `matelso-call` | Webhook; nur ohne Lead/Fall-Match |
 | T4 | Dispatch-Spontan-Termin | `src/app/dispatch/kalender/_actions/spontan.ts:57` | `dispatch_spontan` | eingeloggt (Zod-validiert) |
 | T5 | Dispatch-Quick-Create | `src/app/dispatch/leads/actions.ts:95` | frei (Feld) | rolle ∈ admin/kb/dispatch |
-| T6 | **Werkstatt-Embed** | `src/app/embed/werkstatt-finder/actions.ts:196` | `werkstatt-embed` | public + Consent; Doppel-Lead-Guard via `?token=` (UPDATE statt INSERT, #4462) |
+| T6 | **Werkstatt-Embed** | `src/app/embed/werkstatt-finder/actions.ts:196` | `werkstatt_finder` | public + Consent; Doppel-Lead-Guard via `?token=` (UPDATE statt INSERT, #4462) |
 | T7 | Kunde-Portal Schadenmeldung | `src/app/kunde/schaden-melden/actions.ts:40` → `src/lib/kunde/schaden-melden.ts:89` | `kunde_portal` | eingeloggter Kunde |
 | T8 | NFC-Schadenkarte (Gegner-Flow) | `src/app/schaden/[token]/actions.ts:113` | `schaden-karte` | Karten-Token; Dedup `findRecentGegnerLead` |
 | T9 | App-Rueckruf (werkstatt-LP, Makler-Rueckruf-Zweig) | `src/lib/actions/public-rueckruf.ts:74` | `input.quelle` \|\| `rueckruf` | public + Consent |
@@ -53,25 +53,32 @@ Legende: ✓ = gesetzt · (P) = Pflicht/validiert · — = nicht erhoben (by des
 | Fahrzeug | kennzeichen | — | — | hersteller/modell/kennzeichen/lackfarbe/farbe | hersteller/klasse/modell (seit #4412) | kennzeichen/hersteller/modell | vehicle_id (Flotte) + gegner_kennzeichen/-typ | — | — | fin/kennzeichen/hsn/tsn/hersteller/modell/baujahr | — | — |
 | service_typ / abrechnungsweg-Vorstufe | — ⚠E4 | — | nur_gutachter | — (Flow setzt) | quelle='schadenbeschreibung' (+Flow) | — (convert klassisch) | — | service_typ ○ | komplett | — | — | — |
 | **Attribution: promotion_code_id** | — | — | — | — | **✗ E1** | — | — | ✓ ○ | ✓(P) | — | ✓ ○ | **—** E2 |
-| **Attribution: ga_client_id** | — | — | — | — | **✗ E1** | — | — | — E2 | — | ✓ | ✓ (Consent) | — E2 |
+| **Attribution: ga_client_id** | — | — | — | — | ✓ (Consent, seit #4412) | — | — | — E2 | — | ✓ | ✓ (Consent) | — E2 |
 | sprache | — | — | — | — | — (de-only) | ✓ | — | Cookie | Cookie | — ⚠E6 | locale | Cookie |
 | Routing (zugewiesen_an) | admin selbst | — (Notif. an alle) | Dispatcher | Dispatcher | — (KB-Trigger) | — | — | Dispatch/param | Dispatcher | Dispatcher (round-robin) | round-robin | Dispatch[0] |
 | Sonstiges | notiz; sofort-convert | Auto-notiz | + SV-Termin-Reservierung | anrede, kk-01, notiz | werkstatt_id, fotos, gewerbe_flag | kunde_id, gegner_bekannt, ist_fahrzeughalter; sofort-convert | firma_name, gewerbe_flag=true, gegner_versicherung(snr)/schadennr | notiz | notiz, Promo-Pflicht | wunschtermin, werkstatt_id, kva netto/brutto, Anspruch-Carry-over (Fotos+Schaetzung) | disqualifiziert-Trio | nachricht → nur admin_termine.beschreibung |
 
 ## 3 · Befunde (priorisiert)
 
-### E1 — Werkstatt-Embed ohne Conversion-Attribution (P1, Ads-relevant)
-**T6 persistiert weder `ga_client_id` noch `promotion_code_id`** — im direkten Kontrast zum
-Gutachter-Pendant (T11 traegt `gfa.ga_client_id` auf den Lead; T12 setzt beides).
-Verschaerfung: `EmbedFinderSection` (der generische iframe-Wrapper aus #4450, den
-`/werkstatt-finden` nutzt) traegt Click-IDs (gclid & Co.) per Allowlist **bis ins iframe** und
-bridged Consent per postMessage — dort **versanden sie**. Sobald Ads/Cold-Mailer-Kampagnen
-auf `claimondo.de/werkstatt-finden` bzw. `werkstatt.claimondo.de` zeigen (value-based-bidding
-ist geplant, `docs/value-based-bidding-strategie.md`; Cold-Mailer `{{Partnerlink}}` live),
-ist die Conversion nicht attribuierbar und ein Partner-Promo-Link verliert seine Provision-Spur.
-**Empfehlung:** Gutachter-Mechanik spiegeln — Embed-Client liest Consent-gegatete
-`_ga`-Client-ID + `?promo=`, Payload-Felder `gaClientId`/`promotionCode` → actions.ts →
-`extra.ga_client_id` / `promotion_code_id`-Lookup. Kleiner Eingriff, Heimat: werkstatt-embed-Lane.
+### E1 — Werkstatt-Embed: Partner-/Click-Attribution unvollstaendig (P2, Ads-relevant)
+*(Korrigiert am 17.07. — die Erstfassung behauptete faelschlich auch fehlende `ga_client_id`;
+der Zweig existiert seit #4412: `getConsentedGaClientId()` + ConsentBridge, actions.ts:179.
+gfa-Vergleich prod: 2/5 Gutachter-Anfragen tragen ga_client_id — Mechanik liefert.)*
+
+Was WIRKLICH fehlt:
+1. **`promotion_code_id`** — T6 kennt kein `?promo=`. Der Cold-Mailer-`{{Partnerlink}}` und
+   kuenftige Partner-Links auf `werkstatt.claimondo.de` / `/werkstatt-finden` verlieren ihre
+   Provision-Spur am Lead. Fix: `?promo=` → iframe-Param (EmbedFinderSection) → Payload →
+   `resolvePromoCodeToId` (`src/lib/makler/resolve-promo-code.ts`) → `extra.promotion_code_id`.
+2. **gclid/Ads-Offline-Sync**: Die #4450-Allowlist traegt gclid/gbraid/wbraid/gclsrc bis ins
+   iframe, aber der Werkstatt-Embed konsumiert sie nicht — strukturell: der Google-Ads-
+   Conversion-Sync (`src/lib/embed/tracking-webhook*.ts`) haengt an `gutachter_finder_anfragen`
+   (gclid/utm-Spalten), der Werkstatt-Funnel schreibt keine gfa-Zeile und hat auf `leads` keine
+   gclid-Heimat. Werkstatt-Conversions koennen darum NIE in den Ads-Sync. Follow-up mit
+   Produktentscheidung (leads-Spalten vs. Funnel-Tabelle), Ads-/Tracking-Lane.
+3. **Wirksamkeits-Check ga_client_id im iframe** offen: erst 1 werkstatt_finder-Lead auf prod
+   (Smoke, ohne _ga erwartbar 0) — nach echtem Traffic Quote pruefen (Cookie-Domain
+   `.claimondo.de` sollte same-site im iframe mitgehen).
 
 ### E2 — Rueckruf-Zwillinge divergiert: Marketing-Variante magerer (P2)
 T9 (App) und T13 (Marketing) sind kopierte Zwillinge; T9 wurde weiterentwickelt
@@ -117,7 +124,8 @@ ergaenzen), sonst Spalte + Durchreichung. T6 ist bewusst de-only (kein Befund).
 
 | Befund | Lane | Aufwand |
 |---|---|---|
-| E1 ga_client_id+promo im Werkstatt-Embed | werkstatt-embed (diese) | S — Payload+2 extra-Felder, Mechanik von T11/T12 kopieren |
+| E1.1 promo im Werkstatt-Embed | werkstatt-embed (diese) | S — ?promo= → Payload → resolvePromoCodeToId |
+| E1.2 Werkstatt-Funnel an Ads-Offline-Sync | Ads-/Tracking-Lane (Produktentscheidung) | M |
 | E2 T13-Paritaet | marketing/subdomain-Lane | S–M |
 | E5 „Hallo Unbekannt" | aar-956 (Marker folgt) | XS |
 | E6 sprache gfa→Lead | self-service/flow-Lane | XS–S nach Spalten-Check |
