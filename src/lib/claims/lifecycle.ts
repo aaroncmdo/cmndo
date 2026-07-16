@@ -94,6 +94,14 @@ export type ClaimLifecycleInput = {
   kanzleiFall: KanzleiFallRow | null
   /** Unified Stepper: claims.operative_status — kanonische Phasen-Quelle (T3-S5: einzige Achse). */
   operativeStatus?: string | null
+  /** WS6/Kasko-Fix: claims.abrechnungsweg. Direct-Reparatur-Wege (kasko/selbstzahler) haben
+   *  KEINE SA/Vollmacht-Strecke — die Erfassungs-Sub kommt dann aus der Reparatur-Lane
+   *  (reparaturSubphase) statt aus leadSubphase. Optional: nur Loader-Pfade setzen sie. */
+  abrechnungsweg?: string | null
+  /** claims.reparatur_werkstatt_id — Werkstatt gewaehlt => mind. reparatur_terminfindung. */
+  reparaturWerkstattId?: string | null
+  /** Juengster reparatur_termine.status (angefragt|bestaetigt|erledigt|…), wie v_claim_phase rt. */
+  reparaturTerminStatus?: string | null
 }
 
 const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
@@ -188,12 +196,46 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   verjaehrt: { main: 'abschluss', sub: 'verjaehrt' },
   abgelehnt_final: { main: 'abschluss', sub: 'abgelehnt_final' },
   an_externe_kanzlei_uebergeben: { main: 'abschluss', sub: 'an_externe_kanzlei' },
+  // WS6/Kasko-Fix (17.07.): die 4 Reparatur-Cursor (CHECK + state-machine-Transitions +
+  // v_claim_phase-Selbstzahler-CASE) waren hier NICHT gemappt -> opPhase=undefined ->
+  // kompletter milestone-Fallback (dieselbe Luecken-Klasse wie der kasko-abrechnungsweg-Bug,
+  // eine Ebene tiefer). main='erfassung' wie alle reparatur_-Subs (mainPhaseOf).
+  'reparatur-werkstatt-suche': { main: 'erfassung', sub: 'reparatur_werkstattwahl' },
+  'reparatur-angefragt': { main: 'erfassung', sub: 'reparatur_terminfindung' },
+  'reparatur-laeuft': { main: 'erfassung', sub: 'reparatur_laeuft' },
+  'reparatur-erledigt': { main: 'erfassung', sub: 'reparatur_fertig' },
 }
 
 function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {
   if (lead?.vollmacht_signiert_am) return 'onboarding_offen'
   if (lead?.sa_unterschrieben) return 'vollmacht_offen'
   return 'sa_offen'
+}
+
+// WS6/Kasko-Fix (17.07.): Direct-Reparatur-Wege — eigene Versicherung (kasko) oder Kunde
+// (selbstzahler) zahlt die Reparatur. Kein Gegner-VS-Prozess, keine SA/Vollmacht by design →
+// die leadSubphase-Kaskade zeigte dauerhaft irrefuehrend "SA-Unterschrift offen".
+const DIRECT_REPARATUR_WEGE: ReadonlySet<string> = new Set(['kasko', 'selbstzahler'])
+
+function istDirectReparatur(input: ClaimLifecycleInput): boolean {
+  return !!input.abrechnungsweg && DIRECT_REPARATUR_WEGE.has(input.abrechnungsweg)
+}
+
+/** Reparatur-Lane-Leiter — spiegelt die rt-Kaskade des v_claim_phase-Selbstzahler-Zweigs
+ *  (rt=erledigt → fertig; rt=bestaetigt → laeuft; rt=angefragt ODER Werkstatt gewaehlt →
+ *  terminfindung; sonst Werkstattwahl). */
+function reparaturSubphase(input: ClaimLifecycleInput): ClaimSubPhase {
+  if (input.reparaturTerminStatus === 'erledigt') return 'reparatur_fertig'
+  if (input.reparaturTerminStatus === 'bestaetigt') return 'reparatur_laeuft'
+  if (input.reparaturTerminStatus === 'angefragt' || input.reparaturWerkstattId) return 'reparatur_terminfindung'
+  return 'reparatur_werkstattwahl'
+}
+
+/** Erfassungs-Sub-Weiche: Direct-Reparatur → Reparatur-Lane, sonst SA/Vollmacht-Kaskade.
+ *  An BEIDEN Kandidaten-Quellen (operative + milestone) — sonst kann die SA-Kaskade bei
+ *  SUB_ORDER-Gleichstand (z.B. vollmacht_offen=1 vs reparatur_werkstattwahl=1) zurueckgewinnen. */
+function erfassungsSubphase(input: ClaimLifecycleInput): ClaimSubPhase {
+  return istDirectReparatur(input) ? reparaturSubphase(input) : leadSubphase(input.lead)
 }
 
 /** Innerhalb welcher Hauptphase lebt diese Subphase? */
@@ -344,6 +386,18 @@ function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     }
   }
 
+  // ── Erfassung (Direct-Reparatur) ── WS6/Kasko-Fix: kasko/selbstzahler haben keine
+  // SA/Vollmacht-Strecke — Reparatur-Lane statt Lead-Kaskade (auch im milestone-Kandidaten,
+  // damit die SA-Kaskade nicht per SUB_ORDER-Gleichstand zurueckgewinnt).
+  if (istDirectReparatur(input)) {
+    return {
+      mainPhase: 'erfassung',
+      subPhase: reparaturSubphase(input),
+      aktiveSideQuests: [],
+      aktiverAuftrag: null,
+    }
+  }
+
   // ── Erfassung ── Lead nicht durch + kein Auftrag.
   if (lead) {
     let sub: ClaimSubPhase = 'sa_offen'
@@ -381,8 +435,13 @@ function operativeLifecycle(
   // B4-slice-2a-ii: `resolved` bleibt opPhase.sub — die Abschluss-Sub-Phase kommt jetzt aus
   // operative_status (OPERATIVE_PHASE trägt den feinen Terminal), NICHT mehr aus claims.status.
   let resolved: ClaimSubPhase = opPhase.sub
-  if (opPhase.main === 'erfassung') {
-    resolved = leadSubphase(lead)
+  if (opPhase.main === 'erfassung' && !opPhase.sub.startsWith('reparatur_')) {
+    // WS6/Kasko-Fix: Direct-Reparatur-Wege bekommen die Reparatur-Lane statt der SA-Kaskade.
+    // Traegt der Cursor bereits eine SPEZIFISCHE reparatur_-Sub (reparatur-laeuft etc.), bleibt
+    // sie stehen — die Signal-Leiter darf einen weiteren Cursor nicht downgraden (z.B.
+    // 'reparatur-laeuft' ohne rt-Row -> Leiter saehe nur 'werkstattwahl'). Den Hochweg
+    // uebernimmt der SUB_ORDER-max-Vergleich in getClaimLifecycle.
+    resolved = erfassungsSubphase(input)
   } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
     if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
     else if (erstgutachten.gutachten_url) resolved = 'filmcheck'
@@ -441,7 +500,18 @@ export function toClaimMainPhase(value: string | null | undefined): ClaimMainPha
   return value && MAIN_PHASES.has(value as ClaimMainPhase) ? (value as ClaimMainPhase) : 'erfassung'
 }
 
+// WS6/Kasko-Fix: v_claim_phase spricht fuer die Reparatur-Lane ein eigenes sub-Vokabular
+// (Selbstzahler-CASE) — ohne Alias fiele jeder View-sub-Konsument auf 'sa_offen' zurueck
+// (gleiche Anzeige-Luecke wie der kasko-Bug, ueber den View-Pfad).
+const VIEW_SUBPHASE_ALIAS: Record<string, ClaimSubPhase> = {
+  'reparatur-werkstatt-suche': 'reparatur_werkstattwahl',
+  'reparatur-angefragt': 'reparatur_terminfindung',
+  'reparatur-laeuft': 'reparatur_laeuft',
+  'reparatur-erledigt': 'reparatur_fertig',
+}
+
 export function toClaimSubPhase(value: string | null | undefined): ClaimSubPhase {
+  if (value && value in VIEW_SUBPHASE_ALIAS) return VIEW_SUBPHASE_ALIAS[value]
   return value && value in SUBPHASE_LABEL ? (value as ClaimSubPhase) : 'sa_offen'
 }
 

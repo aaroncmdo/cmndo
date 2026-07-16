@@ -612,3 +612,95 @@ describe('getClaimLifecycle — AAR-939 Terminal termin_durchgefuehrt', () => {
     expect(r.subPhase).toBe('termin_durchgefuehrt')
   })
 })
+
+// WS6/Kasko-Fix (17.07.): Direct-Reparatur-Wege (abrechnungsweg kasko/selbstzahler) haben
+// keine SA/Vollmacht-Strecke — Erfassungs-Sub kommt aus der Reparatur-Lane, nie aus leadSubphase.
+describe('Direct-Reparatur (kasko/selbstzahler) — Reparatur-Lane statt SA-Kaskade', () => {
+  const base = {
+    lead: { sa_unterschrieben: false, vollmacht_signiert_am: null, onboarding_complete: false },
+    auftraege: [],
+    kanzleiFall: null,
+    operativeStatus: 'ersterfassung',
+  }
+
+  it('kasko + ersterfassung ohne Werkstatt -> reparatur_werkstattwahl (NICHT sa_offen)', () => {
+    const r = getClaimLifecycle({ ...base, abrechnungsweg: 'kasko' })
+    expect(r.subPhase).toBe('reparatur_werkstattwahl')
+    expect(r.mainPhase).toBe('erfassung')
+  })
+
+  it('selbstzahler + Werkstatt gewaehlt -> reparatur_terminfindung', () => {
+    const r = getClaimLifecycle({ ...base, abrechnungsweg: 'selbstzahler', reparaturWerkstattId: 'w-1' })
+    expect(r.subPhase).toBe('reparatur_terminfindung')
+  })
+
+  it('kasko + rt=angefragt -> reparatur_terminfindung; rt=bestaetigt -> reparatur_laeuft; rt=erledigt -> reparatur_fertig', () => {
+    expect(getClaimLifecycle({ ...base, abrechnungsweg: 'kasko', reparaturTerminStatus: 'angefragt' }).subPhase).toBe('reparatur_terminfindung')
+    expect(getClaimLifecycle({ ...base, abrechnungsweg: 'kasko', reparaturWerkstattId: 'w-1', reparaturTerminStatus: 'bestaetigt' }).subPhase).toBe('reparatur_laeuft')
+    expect(getClaimLifecycle({ ...base, abrechnungsweg: 'kasko', reparaturWerkstattId: 'w-1', reparaturTerminStatus: 'erledigt' }).subPhase).toBe('reparatur_fertig')
+  })
+
+  it('Gleichstand-Falle: sa_unterschrieben=true (vollmacht_offen=1) darf reparatur_werkstattwahl (1) NICHT verdraengen', () => {
+    const r = getClaimLifecycle({
+      ...base,
+      lead: { sa_unterschrieben: true, vollmacht_signiert_am: null, onboarding_complete: false },
+      abrechnungsweg: 'kasko',
+    })
+    expect(r.subPhase).toBe('reparatur_werkstattwahl')
+  })
+
+  it('haftpflicht bleibt auf der SA-Kaskade (kein Verhaltens-Change)', () => {
+    const r = getClaimLifecycle({ ...base, abrechnungsweg: 'haftpflicht' })
+    expect(r.subPhase).toBe('sa_offen')
+  })
+
+  it('ohne abrechnungsweg (Alt-Claims) bleibt die SA-Kaskade', () => {
+    expect(getClaimLifecycle(base).subPhase).toBe('sa_offen')
+  })
+})
+
+// WS6/Kasko-Fix Teil 2: die 4 Reparatur-CURSOR (operative_status) waren nicht in OPERATIVE_PHASE
+// gemappt -> milestone-Fallback. Jetzt gemappt + Downgrade-Schutz (spezifischer Cursor gewinnt
+// gegen eine duennere Signal-Leiter; weitere Signale liften via SUB_ORDER-max).
+describe('Reparatur-Cursor (operative_status reparatur-*)', () => {
+  const base = {
+    lead: { sa_unterschrieben: false, vollmacht_signiert_am: null, onboarding_complete: false },
+    auftraege: [],
+    kanzleiFall: null,
+  }
+
+  it('Cursor reparatur-laeuft OHNE rt-Row/abrechnungsweg -> reparatur_laeuft (kein sa_offen, kein Downgrade)', () => {
+    const r = getClaimLifecycle({ ...base, operativeStatus: 'reparatur-laeuft' })
+    expect(r.subPhase).toBe('reparatur_laeuft')
+    expect(r.mainPhase).toBe('erfassung')
+  })
+
+  it('Cursor reparatur-angefragt + Signal erledigt -> Signal liftet auf reparatur_fertig', () => {
+    const r = getClaimLifecycle({
+      ...base,
+      operativeStatus: 'reparatur-angefragt',
+      abrechnungsweg: 'kasko',
+      reparaturWerkstattId: 'w-1',
+      reparaturTerminStatus: 'erledigt',
+    })
+    expect(r.subPhase).toBe('reparatur_fertig')
+  })
+
+  it('alle 4 Cursor mappen auf ihre Lane-Subs', () => {
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-werkstatt-suche' }).subPhase).toBe('reparatur_werkstattwahl')
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-angefragt' }).subPhase).toBe('reparatur_terminfindung')
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-erledigt' }).subPhase).toBe('reparatur_fertig')
+  })
+})
+
+describe('toClaimSubPhase — View-Vokabular-Aliasse der Reparatur-Lane', () => {
+  it('mappt die 4 v_claim_phase-Reparatur-subs auf die TS-Lane (kein sa_offen-Fallback)', () => {
+    expect(toClaimSubPhase('reparatur-werkstatt-suche')).toBe('reparatur_werkstattwahl')
+    expect(toClaimSubPhase('reparatur-angefragt')).toBe('reparatur_terminfindung')
+    expect(toClaimSubPhase('reparatur-laeuft')).toBe('reparatur_laeuft')
+    expect(toClaimSubPhase('reparatur-erledigt')).toBe('reparatur_fertig')
+  })
+  it('unbekannt faellt weiter auf sa_offen', () => {
+    expect(toClaimSubPhase('voellig-unbekannt')).toBe('sa_offen')
+  })
+})
