@@ -4,16 +4,19 @@
 // Zeigt den statischen QR-Code (werkstattStartUrl) zum Aushaengen.
 // Download SVG + PNG, URL kopieren. Gespiegelt nach MaklerPromo.
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import {
   QrCodeIcon,
   CopyIcon,
   CheckIcon,
   ExternalLinkIcon,
+  PrinterIcon,
+  BadgeCheckIcon,
 } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { Card } from '@/components/primitives'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
+import { generiereMeinAufstellerPdf } from '@/app/werkstatt/(shell)/promo/aufsteller-actions'
 
 type Props = {
   startUrl: string
@@ -21,8 +24,34 @@ type Props = {
   werkstattName: string
 }
 
+// Base64-PDF (Server-Action-Result) als Datei-Download ausloesen.
+function downloadBase64Pdf(base64: string, filename: string) {
+  const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0))
+  const blob = new Blob([bytes], { type: 'application/pdf' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
 export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
   const [copied, setCopied] = useState<string | null>(null)
+  const [pdfFehler, setPdfFehler] = useState<string | null>(null)
+  const [pdfPending, startPdf] = useTransition()
+
+  function handleAufsteller() {
+    setPdfFehler(null)
+    startPdf(async () => {
+      const res = await generiereMeinAufstellerPdf()
+      if (!res.ok) {
+        setPdfFehler(res.error)
+        return
+      }
+      downloadBase64Pdf(res.base64, res.filename)
+    })
+  }
 
   function copy(text: string, key: string) {
     void navigator.clipboard.writeText(text).then(() => {
@@ -92,6 +121,36 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
             />
             <p className="mt-2 text-body-xs text-claimondo-shield text-center">
               Scan führt Ihre Kunden direkt zur Schadensmeldung — ohne manuelle Eingabe.
+            </p>
+          </div>
+
+          {/* Aushang-Material: Self-Print-Aufsteller (A5) + Partner-Badge (Task #5) */}
+          <div className="border-t border-claimondo-border pt-5">
+            <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
+              Aushang-Material
+            </p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+              <Button
+                variant="navy"
+                size="sm"
+                onClick={handleAufsteller}
+                loading={pdfPending}
+                iconLeft={<PrinterIcon width={14} height={14} />}
+              >
+                Aufsteller (A5) als PDF
+              </Button>
+              <a
+                href="/partner-badges/claimondo-partner.svg"
+                download="claimondo-partner-badge.svg"
+                className="inline-flex items-center justify-center gap-1.5 rounded-ios-lg border border-claimondo-border px-3 py-2 text-sm font-medium text-claimondo-navy hover:border-claimondo-ondo"
+              >
+                <BadgeCheckIcon width={14} height={14} />
+                Partner-Badge (SVG)
+              </a>
+            </div>
+            {pdfFehler ? <p className="mt-2 text-sm text-danger-strong">{pdfFehler}</p> : null}
+            <p className="mt-2 text-body-xs text-claimondo-shield">
+              Druckfertiges A5-PDF für Theke &amp; Schaufenster — mit Ihrem persönlichen QR-Code.
             </p>
           </div>
         </div>
