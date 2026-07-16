@@ -23,6 +23,7 @@ import {
   type WerkstattWizardState,
   kannWeiter,
   wizardStateZuSuche,
+  fahrzeugtypZuEuKlasse,
 } from './wizard-logic'
 
 export type WerkstattWizardProps = {
@@ -51,6 +52,7 @@ export function WerkstattWizard({
   const [telefon, setTelefon] = useState('')
   const [fehler, setFehler] = useState<string | null>(null)
   const [fotos, setFotos] = useState<EmbedFoto[]>([])
+  const [beschreibung, setBeschreibung] = useState('')
   const [pending, startTransition] = useTransition()
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastSucheRef = useRef<string>('')
@@ -107,6 +109,12 @@ export function WerkstattWizard({
         ort: state.standort?.adresse ?? null,
         bedarf: state.bedarf ?? undefined,
         fotos: fotos.length > 0 ? fotos : undefined,
+        // Phase 3: db-driven Übergabe der gesammelten Wizard-Felder
+        hersteller: state.hersteller.trim() || null,
+        fahrzeugklasse: fahrzeugtypZuEuKlasse(state.fahrzeugtyp),
+        gewerbe: state.gewerbe,
+        modell: state.modell.trim() || null,
+        beschreibung: beschreibung.trim() || null,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)
@@ -136,7 +144,12 @@ export function WerkstattWizard({
       )}
       {step === 'schaden' && (
         <>
-          <SchadenStep bedarf={state.bedarf} onBedarf={(b) => patch({ bedarf: b })} onFotos={setFotos} />
+          <SchadenStep
+            bedarf={state.bedarf}
+            onBedarf={(b) => patch({ bedarf: b })}
+            onFotos={setFotos}
+            onBeschreibung={setBeschreibung}
+          />
           {/* Live-Ergebnisse mit Begründungs-Chips (gruende), sobald es Treffer gibt. */}
           {(loading || rows.length > 0) && (
             <WerkstattFinder

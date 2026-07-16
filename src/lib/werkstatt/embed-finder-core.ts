@@ -11,6 +11,12 @@ export type WerkstattFinderLeadInput = {
   lat?: number | null
   lng?: number | null
   ort?: string | null
+  // Phase 3: db-driven Übergabe der Wizard-Felder (alle Spalten prod-verifiziert, kein DDL).
+  hersteller?: string | null
+  fahrzeugklasse?: string | null
+  gewerbe?: boolean | null
+  modell?: string | null
+  beschreibung?: string | null
 }
 
 /**
@@ -35,6 +41,12 @@ export function buildWerkstattFinderLeadExtra(input: WerkstattFinderLeadInput): 
     fahrzeug_standort_lat: input.lat ?? null,
     fahrzeug_standort_lng: input.lng ?? null,
     fahrzeug_standort_adresse: input.ort ?? null,
+    // Phase 3: Contract-Felder (fließen via convert-lead-to-claim in Claim/Feststellung/Firma).
+    fahrzeug_hersteller: input.hersteller?.trim() || null,
+    fahrzeugklasse: input.fahrzeugklasse ?? null,
+    fahrzeug_modell: input.modell?.trim() || null,
+    gewerbe_flag: input.gewerbe ?? false,
+    fahrzeugschaden_beschreibung: input.beschreibung?.trim() || null,
   }
   if (input.werkstattId && darfWerkstattZuweisen(input.kundeEmail, input.werkstattEmail)) {
     Object.assign(extra, buildZuweisungPatch(input.werkstattId, null, 'embed'), {
