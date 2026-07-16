@@ -6,6 +6,7 @@ describe('AAR-903 getOnboardingSteps', () => {
     const steps = getOnboardingSteps({
       hatTerminGebucht: false,
       offenePflichtdokumente: 3,
+      brauchtGutachter: true,
     })
     expect(steps.map((s) => s.id)).toEqual([
       'welcome',
@@ -20,6 +21,7 @@ describe('AAR-903 getOnboardingSteps', () => {
     const steps = getOnboardingSteps({
       hatTerminGebucht: true,
       offenePflichtdokumente: 2,
+      brauchtGutachter: true,
     })
     expect(steps.map((s) => s.id)).toEqual([
       'welcome',
@@ -33,6 +35,7 @@ describe('AAR-903 getOnboardingSteps', () => {
     const steps = getOnboardingSteps({
       hatTerminGebucht: false,
       offenePflichtdokumente: 0,
+      brauchtGutachter: true,
     })
     expect(steps.map((s) => s.id)).toEqual(['welcome', 'fall', 'termin', 'fertig'])
   })
@@ -41,16 +44,17 @@ describe('AAR-903 getOnboardingSteps', () => {
     const steps = getOnboardingSteps({
       hatTerminGebucht: true,
       offenePflichtdokumente: 0,
+      brauchtGutachter: true,
     })
     expect(steps.map((s) => s.id)).toEqual(['welcome', 'fall', 'fertig'])
   })
 
   it('Reihenfolge bleibt immer stabil', () => {
     const allCombos = [
-      { hatTerminGebucht: false, offenePflichtdokumente: 0 },
-      { hatTerminGebucht: true, offenePflichtdokumente: 5 },
-      { hatTerminGebucht: true, offenePflichtdokumente: 0 },
-      { hatTerminGebucht: false, offenePflichtdokumente: 1 },
+      { hatTerminGebucht: false, offenePflichtdokumente: 0, brauchtGutachter: true },
+      { hatTerminGebucht: true, offenePflichtdokumente: 5, brauchtGutachter: true },
+      { hatTerminGebucht: true, offenePflichtdokumente: 0, brauchtGutachter: true },
+      { hatTerminGebucht: false, offenePflichtdokumente: 1, brauchtGutachter: true },
     ]
     const expected: Record<string, number> = {
       welcome: 0,
@@ -89,5 +93,32 @@ describe('AAR-903 buildOnboardingContext', () => {
     })
     expect(ctx.hatTerminGebucht).toBe(false)
     expect(ctx.offenePflichtdokumente).toBe(1)
+  })
+})
+
+// Audit-Bug D (Kasko-Audit 15.07.): Kasko/Selbstzahler = Werkstatt-Reparatur-Weg OHNE SV
+// -> der SV-Termin-Step entfaellt komplett (nicht nur "schon gebucht").
+describe('Audit-Bug D — abrechnungsweg-aware Termin-Step', () => {
+  it('brauchtGutachter=false -> KEIN termin-Step, auch ohne gebuchten Termin', () => {
+    const steps = getOnboardingSteps({
+      hatTerminGebucht: false,
+      offenePflichtdokumente: 2,
+      brauchtGutachter: false,
+    })
+    expect(steps.map((s) => s.id)).toEqual(['welcome', 'fall', 'dokumente', 'fertig'])
+  })
+
+  it('buildOnboardingContext: kasko/selbstzahler -> brauchtGutachter=false', () => {
+    for (const weg of ['kasko', 'selbstzahler']) {
+      const ctx = buildOnboardingContext({ termin: null, pflichtDocs: [], abrechnungsweg: weg })
+      expect(ctx.brauchtGutachter).toBe(false)
+    }
+  })
+
+  it('buildOnboardingContext: haftpflicht / unbekannt / fehlend -> brauchtGutachter=true (sicherer Default)', () => {
+    for (const weg of ['haftpflicht', null, undefined] as const) {
+      const ctx = buildOnboardingContext({ termin: null, pflichtDocs: [], abrechnungsweg: weg })
+      expect(ctx.brauchtGutachter).toBe(true)
+    }
   })
 })
