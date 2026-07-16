@@ -36,7 +36,10 @@ export type WerkstattFinderLeadPayload = {
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
-export type { EmbedFoto, Reparaturbedarf, Fit }
+// KEINE Type-Re-Exports aus dieser 'use server'-Datei (AAR-664-Klasse): der Server-Actions-Loader
+// macht aus JEDEM Export ein Action-Binding -> zur Laufzeit "EmbedFoto is not defined" -> ALLE
+// Actions der Datei 500en (prod-Incident 16.07., Embed seit P1-Deploy tot). Types direkt aus
+// @/lib/werkstatt/bedarf/{embed-foto-guard,types} importieren.
 
 /**
  * T3: Transiente Schadenfoto-Klassifizierung fuer den Embed-Funnel.

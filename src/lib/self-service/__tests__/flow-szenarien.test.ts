@@ -110,11 +110,22 @@ describe('berechneAktiveSteps', () => {
   })
 
   it('Werkstatt schon zugeordnet -> Werkstatt-Step faellt weg', () => {
+    // hat_vorschaeden=false = beantwortet (false ist ein WERT, kein Leerwert) -> Feststellung skipped.
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
-      fahrzeugschaden_beschreibung: 'Stossstange', fahrzeug_standort_effektiv: 'Koeln',
+      hat_vorschaeden: false, fahrzeug_standort_effektiv: 'Koeln',
       reparatur_werkstatt_id: 'w-1',
     })
     expect(steps).toEqual(['zusammenfassung', 'account'])
+  })
+
+  // Mig 20260716155354: beschreibung kommt seit Werkstatt-Embed Phase 3 (#4412) schon aus dem Embed —
+  // sie darf die Feststellung NICHT skippen (Kennzeichen/ZB1/Halter/Vorschaeden kommen ERST dort, Spec §3).
+  it('REGRESSION: Embed-beschreibung skippt die Feststellung NICHT (Marker = hat_vorschaeden)', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', {
+      fahrzeugschaden_beschreibung: 'Kratzer im Lack (aus dem Embed)',
+      fahrzeug_standort_effektiv: 'Koeln', reparatur_werkstatt_id: 'w-1',
+    })
+    expect(steps).toContain('feststellung')
   })
 
   // DER Kern-Bug (Aarons "loses Ende"): Kasko sieht NIE einen Termin-/Gutachter-Step.
