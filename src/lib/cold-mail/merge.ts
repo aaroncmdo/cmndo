@@ -1,10 +1,14 @@
 // Reine Merge-Var-Ersetzung für Cold-Mails. Wiederverwendet von Single-Send (S0) + CRON (S2).
+// SERVER-ONLY Konsumenten (Cron + Send-Action) — beratung-sig zieht node:crypto,
+// darum lebt der Link-Bau HIER und nicht im client-safen merge-vars (Editor-Palette).
 import { resolveActionVars } from './merge-vars'
+import { beratungsUrl } from '@/lib/start-link/beratung-sig'
 
 // Daten-getriebene Var-Menge (Palette-definiert) + aufgeloeste Aktions-Tokens.
 export type ColdMailMergeVars = Record<string, string>
 
 export function buildMergeVars(lead: {
+  id?: string | null
   ansprechpartner_vorname: string | null
   ansprechpartner_nachname: string | null
   ansprechpartner_position?: string | null
@@ -22,7 +26,12 @@ export function buildMergeVars(lead: {
     Firma: lead.firma?.trim() || 'Ihr Unternehmen',
     Ort: lead.ort?.trim() ?? '',
     // Aktions-Tokens (Beratungs-/Registrierungs-Button) rollenbewusst aufloesen.
-    ...resolveActionVars({ rolle: lead.rolle ?? null }),
+    // Beratungslink: tokenisierte Selbstbuchung (/beratung/<leadId>?exp&sig, 30d TTL);
+    // ohne lead.id/Secret faellt merge-vars auf den Marketing-Link zurueck.
+    ...resolveActionVars({
+      rolle: lead.rolle ?? null,
+      beratungsUrl: lead.id ? beratungsUrl(lead.id) : null,
+    }),
   }
 }
 

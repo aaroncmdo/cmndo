@@ -31,11 +31,8 @@ import {
 } from '@/lib/email/google/flows'
 import { createMeetEvent } from '@/lib/google-calendar/events'
 import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
-import {
-  baueTerminTitel, berechneEndzeit, baueTerminBeschreibung,
-  baueTerminAktivitaetText, ONBOARDING_TERMIN_DAUER_MIN,
-  type OnboardingTerminInput,
-} from '@/lib/partner/onboarding-termin'
+import type { OnboardingTerminInput } from '@/lib/partner/onboarding-termin'
+import { erstellePartnerOnboardingTermin } from '@/lib/partner/beratungs-booking'
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
@@ -747,138 +744,20 @@ export async function legePartnerOnboardingTermin(
   if (kanal !== 'online' && kanal !== 'vor_ort') {
     return { ok: false, error: 'Bitte einen Kanal wählen (online oder vor Ort).' }
   }
-  const start = new Date(input.startIso)
-  if (Number.isNaN(start.getTime())) return { ok: false, error: 'Bitte ein gültiges Datum wählen.' }
-  if (start.getTime() < Date.now() - 60_000) return { ok: false, error: 'Der Termin liegt in der Vergangenheit.' }
 
-  const admin = createAdminClient()
-  const { data: lead } = await admin
-    .from('partner_leads')
-    .select('id, firma, email, ansprechpartner_vorname, ansprechpartner_nachname')
-    .eq('id', leadId)
-    .maybeSingle()
-  if (!lead) return { ok: false, error: 'Prospect nicht gefunden.' }
-
-  const firma = (lead.firma as string | null) ?? null
-  const leadEmail = ((lead.email as string | null) ?? '').trim() || null
-  const ansprechpartner =
-    [lead.ansprechpartner_vorname, lead.ansprechpartner_nachname].filter(Boolean).join(' ') || null
-  const titel = baueTerminTitel(firma)
-  const endIso = berechneEndzeit(input.startIso)
-  const treffpunktAdresse =
-    kanal === 'vor_ort' ? (input.treffpunktAdresse ?? '').trim() || null : null
-
-  // Basis-Insert (Kanal-Felder folgen per Update, sobald Meet/Geocode da ist).
-  const { data: inserted, error: insErr } = await admin
-    .from('admin_termine')
-    .insert({
-      typ: 'partner_onboarding',
-      titel,
-      beschreibung: baueTerminBeschreibung({ kanal, treffpunktAdresse }),
-      start_zeit: input.startIso,
-      end_zeit: endIso,
-      status: 'offen',
-      kanal,
-      partner_lead_id: leadId,
-      treffpunkt_adresse: treffpunktAdresse,
-      zugewiesen_an: staff.id,
-      erstellt_von: staff.id,
-      erinnerung_min_vorher: 60,
-    } as never)
-    .select('id')
-    .single()
-  if (insErr || !inserted) {
-    return { ok: false, error: insErr?.message ?? 'Termin konnte nicht angelegt werden.' }
-  }
-  const terminId = (inserted as { id: string }).id
-
-  let warnung: string | undefined
-  let videoLink: string | null = null
-
-  if (kanal === 'online') {
-    try {
-      const { data: staffProfile } = await admin
-        .from('profiles').select('email').eq('id', staff.id).maybeSingle()
-      const staffEmail = (staffProfile?.email as string | null)?.trim() || null
-      if (!staffEmail) throw new Error('Kein Bearbeiter-Postfach hinterlegt.')
-      const attendees: Array<{ email: string; displayName?: string }> = [{ email: staffEmail }]
-      if (leadEmail) attendees.push({ email: leadEmail, displayName: ansprechpartner ?? undefined })
-
-      const meet = await createMeetEvent({
-        ownerUserId: staff.id,
-        attendees,
-        title: titel,
-        description: `Onboarding-Gespräch mit ${firma ?? 'dem Partner'}.`,
-        startISO: input.startIso,
-        dauerMinuten: ONBOARDING_TERMIN_DAUER_MIN,
-        withMeet: true,
-        idempotencyKey: terminId,
-      })
-      videoLink = meet.meetLink
-      await admin.from('admin_termine').update({
-        video_link: meet.meetLink,
-        beschreibung: baueTerminBeschreibung({ kanal, videoLink: meet.meetLink }),
-        google_event_id: meet.eventId,
-        google_calendar_id: meet.calendarId,
-        google_event_synced_at: new Date().toISOString(),
-      } as never).eq('id', terminId)
-    } catch (err) {
-      console.error('[legePartnerOnboardingTermin] Meet (non-critical):', err)
-      warnung =
-        'Termin angelegt, aber kein Google-Meet-Link — Bearbeiter ist nicht mit Google verbunden (/admin/einstellungen/google).'
-    }
-  } else {
-    if (treffpunktAdresse) {
-      try {
-        const geo = await geocodeMitFallback(treffpunktAdresse)
-        if (geo) {
-          await admin.from('admin_termine').update({
-            treffpunkt_adresse: geo.adresse ?? treffpunktAdresse,
-            treffpunkt_lat: geo.lat,
-            treffpunkt_lng: geo.lng,
-          } as never).eq('id', terminId)
-        }
-      } catch (err) {
-        console.error('[legePartnerOnboardingTermin] Geocode (non-critical):', err)
-      }
-    }
-    try {
-      const { syncAdminTerminCalendarEvent } = await import('@/lib/google-calendar/admin-event-sync')
-      await syncAdminTerminCalendarEvent(terminId)
-    } catch (err) {
-      console.error('[legePartnerOnboardingTermin] Kalender-Sync (non-critical):', err)
-    }
-  }
-
-  // Auto-Log als Aktivitaet (typ='sonstiges' ist in partner_lead_aktivitaeten_typ_check erlaubt).
-  try {
-    await admin.from('partner_lead_aktivitaeten').insert({
-      partner_lead_id: leadId,
-      typ: 'sonstiges',
-      text: baueTerminAktivitaetText(input.startIso, kanal),
-      erstellt_von: staff.id,
-    })
-  } catch (err) {
-    console.error('[legePartnerOnboardingTermin] Aktivitaets-Log (non-critical):', err)
-  }
-
-  // Einladung an den Prospect (best-effort).
-  try {
-    await sendePartnerOnboardingEinladung({
-      empfaengerEmail: leadEmail,
-      firma,
-      ansprechpartner,
-      kanal,
-      startIso: input.startIso,
-      endIso,
-      videoLink,
-      treffpunktAdresse,
-      terminId,
-    })
-  } catch (err) {
-    console.error('[legePartnerOnboardingTermin] Einladung (non-critical):', err)
-  }
+  // Kern (Termin + Meet + Einladung + Log) ist nach lib/partner/beratungs-booking
+  // extrahiert — geteilt mit der Prospect-Selbstbuchung (/beratung/[leadId]).
+  // Host = Bearbeiter (Meet aus SEINEM verbundenen Google-Konto, wie bisher).
+  const res = await erstellePartnerOnboardingTermin(createAdminClient(), {
+    leadId,
+    hostId: staff.id,
+    erstelltVon: staff.id,
+    startIso: input.startIso,
+    kanal,
+    treffpunktAdresse: input.treffpunktAdresse,
+  })
+  if (!res.ok) return res
 
   revalidatePath('/admin/partner-leads')
-  return warnung ? { ok: true, warnung } : { ok: true }
+  return res.warnung ? { ok: true, warnung: res.warnung } : { ok: true }
 }
