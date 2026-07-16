@@ -62,6 +62,9 @@ export type ClaimTriggers = {
   kanzlei_uebergeben_am?: string | null
   dokumente_reminder_whatsapp_letzte_sendung?: string | null
   abgeschlossen_am?: string | null
+  // WS6/Kasko-Fix: Direct-Reparatur-Gate (kasko/selbstzahler -> Reparatur-Lane statt §8-SV-Strecke).
+  abrechnungsweg?: string | null
+  reparatur_werkstatt_id?: string | null
   google_review_gesendet?: boolean | null
   kanzlei_provision_status?: string | null
   // Phase 8 (Auszahlungs-Split). DE-4-pending: der Loader lässt regulierung_betrag
@@ -146,6 +149,8 @@ export type ResolverInput = {
   gutachten?: GutachtenTriggers[]
   gutachter_termine?: GutachterTerminRow[]
   webhook_events?: WebhookEventRow[]
+  /** WS6/Kasko-Fix: juengster reparatur_termine-Eintrag (Loader: limit 1, updated_at desc). */
+  reparatur_termine?: { status?: string | null }[]
   now?: Date // injectable für Tests
 }
 
@@ -210,6 +215,14 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
     .filter((t) => !['storniert', 'verlegt', 'verschoben'].includes(t.status ?? ''))
     .sort((a, b) => ((b.durchgefuehrt_am ?? b.sv_angekommen_am ?? b.sv_unterwegs_seit ?? '') > (a.durchgefuehrt_am ?? a.sv_angekommen_am ?? a.sv_unterwegs_seit ?? '') ? 1 : -1))[0]
 
+  // ══ Reparatur-Lane (Direct-Reparatur: kasko/selbstzahler — WS6/Kasko-Fix 17.07.) ══
+  // Diese Wege haben keinen SV-/Kanzlei-Prozess — die §8-SV-Strecke unten zeigte SA-/
+  // Termin-Phasen, die es hier nie gibt. Owning: claims.abrechnungsweg +
+  // reparatur_werkstatt_id + juengster reparatur_termine.status (Loader liefert limit 1).
+  // Bewusst NACH Phase 9 platziert (Deklaration hier, Check unten nach dem Abschluss-Gate).
+  const abrechnungsweg = (claim?.abrechnungsweg as string | null | undefined) ?? null
+  const istDirectReparatur = abrechnungsweg === 'kasko' || abrechnungsweg === 'selbstzahler'
+
   // ══ Phase 9 — Abschluss (top-priorisiert, Abschluss überschreibt alles) ══
   // Owning: claims (abgeschlossen_am / google_review_gesendet / kanzlei_provision_status).
   if (claim?.abgeschlossen_am) {
@@ -222,6 +235,26 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
       return build(9, '9.2', 'Feedback ausstehend', szenario, triggers)
     }
     return build(9, '9.1', 'Geschlossen', szenario, triggers)
+  }
+
+  // ══ Reparatur-Lane-Gate (Direct-Reparatur, s. Deklaration oben) ══
+  if (istDirectReparatur) {
+    pushTrigger(triggers, 'abrechnungsweg', abrechnungsweg, null)
+    const rt = (input.reparatur_termine ?? [])[0] ?? null
+    const rtStatus = (rt?.status as string | null | undefined) ?? null
+    if (rtStatus === 'erledigt') {
+      pushTrigger(triggers, 'reparatur_termin.status', rtStatus, null)
+      return build(1, 'r.4', 'Reparatur erledigt — Abschluss offen', szenario, triggers)
+    }
+    if (rtStatus === 'bestaetigt') {
+      pushTrigger(triggers, 'reparatur_termin.status', rtStatus, null)
+      return build(1, 'r.3', 'Reparatur läuft', szenario, triggers)
+    }
+    if (rtStatus === 'angefragt' || claim?.reparatur_werkstatt_id) {
+      pushTrigger(triggers, 'reparatur_werkstatt_id', claim?.reparatur_werkstatt_id ?? null, null)
+      return build(1, 'r.2', 'Reparaturtermin in Abstimmung', szenario, triggers)
+    }
+    return build(1, 'r.1', 'Werkstattwahl offen', szenario, triggers)
   }
 
   // ══ Phase 8 — Auszahlung (Split Kunde/SV — Erweiterung 5) ══
