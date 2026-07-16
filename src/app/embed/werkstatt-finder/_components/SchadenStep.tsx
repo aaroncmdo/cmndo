@@ -23,9 +23,11 @@ type Props = {
   onBedarf: (b: Reparaturbedarf | null) => void
   // I5 (Review): die Roh-Fotos hoch an den Wizard reichen — sonst gehen sie beim Absenden verloren.
   onFotos?: (fotos: EmbedFoto[]) => void
+  // Phase 3: den Roh-Freitext hochreichen (wird IMMER persistiert, unabhängig vom KI-Ergebnis).
+  onBeschreibung?: (text: string) => void
 }
 
-export function SchadenStep({ bedarf, onBedarf, onFotos }: Props) {
+export function SchadenStep({ bedarf, onBedarf, onFotos, onBeschreibung }: Props) {
   const [beschreibung, setBeschreibung] = useState('')
   const [fotoLaeuft, setFotoLaeuft] = useState(false)
   const [textLaeuft, setTextLaeuft] = useState(false)
@@ -117,7 +119,10 @@ export function SchadenStep({ bedarf, onBedarf, onFotos }: Props) {
         <p className="mb-1 text-body-sm font-semibold text-claimondo-navy">Kurze Beschreibung</p>
         <textarea
           value={beschreibung}
-          onChange={(e) => setBeschreibung(e.target.value)}
+          onChange={(e) => {
+            setBeschreibung(e.target.value)
+            onBeschreibung?.(e.target.value)
+          }}
           onBlur={analysiereText}
           rows={2}
           placeholder="z. B. Stoßstange eingedrückt, Kratzer im Lack"
