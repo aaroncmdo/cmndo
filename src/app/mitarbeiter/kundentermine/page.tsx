@@ -45,7 +45,11 @@ export default async function MitarbeiterKundentermine() {
   const { data: termineRaw } = await supabase
     .from('gutachter_termine')
     .select(
-      'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
+      // CMM-Drift-Fix (16.07.): gutachter_termine hat besichtigungsort_adresse, KEIN adresse
+      // (gleiche Spalte wie #4251/sv-event-sync — diese Stelle wurde dort verpasst). Der
+      // Select warf PostgREST-400 -> die KB-Kundentermine-Seite lud NIE Termine. Alias haelt
+      // Typ + UI (t.adresse) stabil.
+      'id, start_zeit, end_zeit, status, kanal, adresse:besichtigungsort_adresse, fall_id, assignee_id, assignee_typ, ' +
         'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claims!fk_bridge_claim(claim_nummer, kundenbetreuer_id, lead_id))',
     )
     .neq('typ', 'kb_beratung')
