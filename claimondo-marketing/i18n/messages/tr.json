@@ -1459,6 +1459,7 @@
     "wie_es_funktioniert": "Nasıl Çalışır",
     "ueber_uns": "Hakkımızda",
     "gutachter_finden": "Uzman Bul",
+    "werkstatt_finden": "Servis bul",
     "zu_meinem_portal": "Portalıma Git",
     "portal": "Portal",
     "ratgeber": "Rehber",
@@ -2210,6 +2211,9 @@
       "sv_popup_cta": "Wizard ile Talep Oluştur →",
       "beratung_label": "Danışmanlık"
     }
+  },
+  "werkstatt_finden": {
+    "sr_h1": "Yakınınızda oto tamir servisi bulun — onaylı partner servislerin interaktif haritası"
   },
   "beratung_anfragen": {
     "badge": "0 € · Çağrı merkezi yok · Doğrudan iletişim",
@@ -4035,6 +4039,14 @@
       "og_description": "Almanya'daki tüm uygun DAT bilirkişilerinin etkileşimli haritası. 48 saat altında randevu. Suçsuz zarar görenler için §249 BGB uyarınca ücretsiz.",
       "twitter_title": "Araç bilirkişisi bulun — DAT bilirkişileriyle harita",
       "twitter_description": "Almanya'daki tüm uygun bilirkişilerin haritası. 48 saat altında randevu."
+    },
+    "werkstatt_finden": {
+      "title": "Yakınınızda oto tamir servisi bulun — harita, uygun servis ve randevu",
+      "description": "Onaylı partner servislerin interaktif haritası: marka, hasar türü ve mesafeye göre sıralanır. Dakikalar içinde talep — kaporta, boya, smart repair, mekanik, cam.",
+      "og_title": "Oto servis bulun — onaylı partner servisler haritası",
+      "og_description": "Yakınınızda uygun servis: marka, hasar ve mesafeye göre. Dakikalar içinde talep.",
+      "twitter_title": "Oto servis bulun — onaylı partner servisler haritası",
+      "twitter_description": "Yakınınızda uygun servis: marka, hasar ve mesafeye göre. Dakikalar içinde talep."
     },
     "beratung_anfragen": {
       "title": "Ücretsiz danışmanlık talep edin — Araç kaza hasarı",
