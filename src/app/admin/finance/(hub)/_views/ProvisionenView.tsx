@@ -1,17 +1,17 @@
 // AAR-92: Maik-Provisionen Admin-UI
 // Task-11: marketing_partner Maik-Zeile server-seitig laden, USt-Toggle an Client weitergeben.
+// Task-2 (finance-hub-Extraktion): View-Interface ist parameterlos (Slot statt Route) —
+// die vorherige ?monat=-Route-Param-Steuerung faellt hier auf den aktuellen Monat zurueck.
+// ProvisionenClient-Monatswechsel-Links zeigen weiterhin auf die alte Standalone-Route;
+// das ist ein Task-3+-Verdrahtungsthema (Hub-Tab-State statt Route-Query), nicht Teil dieser Extraktion.
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
-import ProvisionenClient from './ProvisionenClient'
+import ProvisionenClient from '../provisionen/ProvisionenClient'
 
-export const dynamic = 'force-dynamic'
 
-export default async function ProvisionenMaikPage({ searchParams }: {
-  searchParams: Promise<{ monat?: string }>
-}) {
-  const { monat } = await searchParams
-  const aktMonat = monat ?? new Date().toISOString().slice(0, 7)
+export default async function ProvisionenView() {
+  const aktMonat = new Date().toISOString().slice(0, 7)
 
   const db = await createClient()
   // Dashboard-Audit (29.06.): Page hatte keinen Rollen-Guard (anders als die Schwester-Seiten).

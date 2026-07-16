@@ -6,21 +6,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
 // B4-slice-1b: war eine wortgleiche Kopie der Liste aus dem case-billing-batch-Cron. Zwei Kopien
 // derselben Abrechnungs-Menge driften garantiert auseinander → jetzt EINE SSoT.
 import { BILLABLE_OPERATIVE_STATUS_VALUES as BILLABLE_STATUSES } from '@/lib/claims/terminal-status'
 
-export const dynamic = 'force-dynamic'
 
 function formatDate(iso: string | null): string {
   if (!iso) return '–'
   return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export default async function OffeneFaellePage() {
+export default async function OffeneFaelleView() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -83,12 +81,7 @@ export default async function OffeneFaellePage() {
   }))
 
   return (
-    <div className="p-4 md:p-6">
-      <PageHeader
-        title="Offene Berechnungen"
-        description={`${rows.length} Fall/Fälle ohne Lead-Preis-Berechnung (lead_preis_netto IS NULL bei billable Status)`}
-      />
-
+    <>
       {rows.length === 0 ? (
         <EmptyState
           title="Alle Fälle berechnet"
@@ -149,6 +142,6 @@ export default async function OffeneFaellePage() {
       <p className="mt-4 text-xs text-claimondo-ondo">
         Backstop-Cron <code>cron/case-billing-batch</code> (AAR-924) ruft <code>processCaseBilling()</code> für diese Fälle täglich. Manueller curl-Trigger möglich.
       </p>
-    </div>
+    </>
   )
 }

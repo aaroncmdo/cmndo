@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-07-11T10:21:22.613Z",
+  "generatedAt": "2026-07-15T16:28:20.378Z",
   "count": 40,
   "files": [
     "src/app/admin/_components/KritischeUpdatesWidget.tsx",
     "src/app/admin/_components/TageskalenderWidget.tsx",
-    "src/app/admin/finance/(hub)/page.tsx",
-    "src/app/admin/finance/(hub)/saeumige-svs/page.tsx",
+    "src/app/admin/finance/(hub)/_views/SaeumigeSvsView.tsx",
+    "src/app/admin/finance/(hub)/_views/UebersichtView.tsx",
     "src/app/admin/kanzlei-board/KanzleiBoardContent.tsx",
     "src/app/admin/makler/MaklerAdminClient.tsx",
     "src/app/admin/meine-tasks/MyTasksClient.tsx",
