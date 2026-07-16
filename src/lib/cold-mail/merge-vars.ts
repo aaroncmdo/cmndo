@@ -48,8 +48,8 @@ export function registrierungsUrl(rolle: string | null): string {
 
 /**
  * Rollenbewusste Partner-Landing = Cold-Mail-CTA-Ziel je Sequenz-Rolle.
- * makler/SV haben eigene verkaufswirksame Landing-Subdomains; werkstatt.claimondo.de
- * existiert noch nicht (Task #4) -> bis dahin der funktionierende App-Pfad statt NXDOMAIN.
+ * Alle drei Partner-Rollen haben eigene verkaufswirksame Landing-Subdomains
+ * (werkstatt.claimondo.de seit 16.07. live mit der Partner-Landing).
  */
 export function partnerLandingUrl(rolle: string | null): string {
   switch (rolle) {
@@ -58,9 +58,7 @@ export function partnerLandingUrl(rolle: string | null): string {
     case 'sachverstaendiger':
       return 'https://gutachter.claimondo.de'
     case 'werkstatt':
-      // TODO(Task #4): auf 'https://werkstatt.claimondo.de' umstellen, sobald die
-      //   Subdomain live serviert (aktuell HTTP 000). App-Pfad liefert 200.
-      return `${appBase()}/werkstatt-partner-werden`
+      return 'https://werkstatt.claimondo.de'
     default:
       return 'https://claimondo.de'
   }
