@@ -25,6 +25,7 @@
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "check:termin-engine-contract": "node scripts/check-termin-engine-contract.mjs",
     "check:token-audit": "node scripts/check-token-audit.mjs",
+    "check:use-server-exports": "node scripts/check-use-server-exports.mjs",
     "dev": "next dev",
     "email:dev": "email dev -p 3001 -d src/lib/email/google/templates",
     "email:preview": "vitest run -c email-preview/vitest.preview.ts",
