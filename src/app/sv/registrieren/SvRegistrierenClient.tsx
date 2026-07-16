@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react'
 import { Button, Card } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
+import { SelectField } from '@/components/shared/forms/SelectField'
+import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 import {
   sucheSvLeadKandidaten,
   beanspracheSvLead,
@@ -83,6 +85,63 @@ function PaketPicker({ paket, onChange }: { paket: string; onChange: (p: string)
           Vertrag + Anzahlung schließt du nach der Registrierung im Portal ab.
         </p>
       )}
+    </div>
+  )
+}
+
+// ─── Firmen-/Steuerdaten (nur bezahlte Pakete) ───────────────────────────────
+// Fuellen die Stammdaten-Card im Vertrag-Step des WillkommenClient + die Abrechnung.
+// Basic bleibt schlank (keine Firmendaten noetig — Pay-per-Lead).
+
+type BusinessDaten = { firmenname: string; rechtsform: string; steuernummer: string; ustId: string }
+
+const BUSINESS_LEER: BusinessDaten = { firmenname: '', rechtsform: '', steuernummer: '', ustId: '' }
+
+function validiereBusinessClient(b: BusinessDaten): string | null {
+  if (!b.firmenname.trim()) return 'Firmenname ist bei bezahlten Paketen ein Pflichtfeld.'
+  if (!b.rechtsform.trim()) return 'Bitte wähle deine Rechtsform.'
+  if (!b.steuernummer.trim()) return 'Steuernummer ist bei bezahlten Paketen ein Pflichtfeld.'
+  return null
+}
+
+function BusinessDatenFelder({
+  business,
+  onChange,
+}: {
+  business: BusinessDaten
+  onChange: (b: BusinessDaten) => void
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <p className="text-sm font-semibold text-claimondo-navy">
+        Firmendaten (für Vertrag + Abrechnung)
+      </p>
+      <TextField
+        label="Firmenname *"
+        placeholder="KFZ-Sachverständigenbüro Muster GmbH"
+        value={business.firmenname}
+        onChange={(e) => onChange({ ...business, firmenname: e.target.value })}
+      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <SelectField
+          label="Rechtsform *"
+          value={business.rechtsform}
+          onChange={(e) => onChange({ ...business, rechtsform: e.target.value })}
+          options={RECHTSFORM_OPTIONEN.map((o) => ({ value: o, label: o || '— wählen —' }))}
+        />
+        <TextField
+          label="Steuernummer *"
+          placeholder="123/456/78901"
+          value={business.steuernummer}
+          onChange={(e) => onChange({ ...business, steuernummer: e.target.value })}
+        />
+      </div>
+      <TextField
+        label="USt-IdNr. (optional)"
+        placeholder="DE123456789"
+        value={business.ustId}
+        onChange={(e) => onChange({ ...business, ustId: e.target.value })}
+      />
     </div>
   )
 }
@@ -219,6 +278,7 @@ function BeanspruchenSchritt({
   const [email, setEmail] = useState('')
   const [telefon, setTelefon] = useState('')
   const [paket, setPaket] = useState('basic')
+  const [business, setBusiness] = useState<BusinessDaten>(BUSINESS_LEER)
   const [fehler, setFehler] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -232,12 +292,24 @@ function BeanspruchenSchritt({
       setFehler('Bitte eine gültige Telefonnummer eingeben.')
       return
     }
+    if (paket !== 'basic') {
+      const bErr = validiereBusinessClient(business)
+      if (bErr) { setFehler(bErr); return }
+    }
     startTransition(async () => {
       const res = await beanspracheSvLead({
         svLeadId: kandidat.id,
         email: email.trim(),
         telefon: telefon.trim(),
         paket,
+        ...(paket !== 'basic'
+          ? {
+              firmenname: business.firmenname.trim(),
+              rechtsform: business.rechtsform,
+              steuernummer: business.steuernummer.trim(),
+              ustId: business.ustId.trim() || undefined,
+            }
+          : {}),
       })
       if (!res.ok) {
         setFehler(res.error)
@@ -280,6 +352,12 @@ function BeanspruchenSchritt({
       <div className="mb-5">
         <PaketPicker paket={paket} onChange={setPaket} />
       </div>
+
+      {paket !== 'basic' && (
+        <div className="mb-5">
+          <BusinessDatenFelder business={business} onChange={setBusiness} />
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         <TextField
@@ -335,6 +413,7 @@ function NeuSchritt({
   const [plz, setPlz] = useState('')
   const [datNr, setDatNr] = useState('')
   const [paket, setPaket] = useState('basic')
+  const [business, setBusiness] = useState<BusinessDaten>(BUSINESS_LEER)
   const [fehler, setFehler] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -350,6 +429,10 @@ function NeuSchritt({
       setFehler('Bitte eine gültige Telefonnummer eingeben.'); return
     }
     if (!adresse.trim()) { setFehler('Adresse ist ein Pflichtfeld.'); return }
+    if (paket !== 'basic') {
+      const bErr = validiereBusinessClient(business)
+      if (bErr) { setFehler(bErr); return }
+    }
 
     startTransition(async () => {
       const res = await registriereSvBasicNeu({
@@ -361,6 +444,14 @@ function NeuSchritt({
         plz: plz.trim() || undefined,
         datNr: datNr.trim() || undefined,
         paket,
+        ...(paket !== 'basic'
+          ? {
+              firmenname: business.firmenname.trim(),
+              rechtsform: business.rechtsform,
+              steuernummer: business.steuernummer.trim(),
+              ustId: business.ustId.trim() || undefined,
+            }
+          : {}),
       })
       if (!res.ok) {
         setFehler(res.error)
@@ -389,6 +480,7 @@ function NeuSchritt({
 
       <div className="flex flex-col gap-4">
         <PaketPicker paket={paket} onChange={setPaket} />
+        {paket !== 'basic' && <BusinessDatenFelder business={business} onChange={setBusiness} />}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label="Vorname *"
