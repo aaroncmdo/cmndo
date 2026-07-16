@@ -1,0 +1,9257 @@
+{
+ "_regen": "SQL im Header von scripts/check-query-parse.mjs gegen die Live-DB (MCP execute_sql, READ) laufen lassen und dieses File neu schreiben.",
+ "generatedAt": "2026-07-16T15:09:12.625Z",
+ "project": "paizkjajbuxxksdoycev",
+ "tables": {
+  "abrechnung_positionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "abrechnung_id",
+    "fall_id",
+    "fall_datum",
+    "kennzeichen",
+    "schadenhoehe_netto",
+    "lead_preis_netto",
+    "lead_preis_typ",
+    "guthaben_verrechnet_netto",
+    "sv_nachzahlung_netto",
+    "position_nr",
+    "claim_id"
+   ]
+  },
+  "abrechnung_reminders": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "abrechnung_id",
+    "reminder_typ",
+    "versendet_am",
+    "details"
+   ]
+  },
+  "abrechnungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "empfaenger_typ",
+    "empfaenger_id",
+    "empfaenger_email",
+    "empfaenger_name",
+    "abrechnungs_nr",
+    "abrechnungs_zeitraum_start",
+    "abrechnungs_zeitraum_ende",
+    "positionen",
+    "summe_netto",
+    "ust_satz",
+    "ust_betrag",
+    "summe_brutto",
+    "versand_datum",
+    "faellig_am",
+    "status",
+    "bezahlt_am",
+    "bezahlt_betrag",
+    "pdf_path",
+    "email_log_id",
+    "notiz",
+    "created_at",
+    "updated_at",
+    "storniert_am",
+    "storniert_grund",
+    "ersetzt_durch_abrechnung_id",
+    "einzug_versucht_am",
+    "einzug_fehler",
+    "stripe_payment_intent_id",
+    "whatsapp_gesendet_am"
+   ]
+  },
+  "admin_termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "typ",
+    "titel",
+    "beschreibung",
+    "start_zeit",
+    "end_zeit",
+    "fall_id",
+    "kunde_id",
+    "erstellt_von",
+    "zugewiesen_an",
+    "status",
+    "erinnerung_min_vorher",
+    "notizen",
+    "created_at",
+    "updated_at",
+    "lead_id",
+    "google_event_id",
+    "google_calendar_id",
+    "google_event_synced_at",
+    "gesehen_am",
+    "claim_id",
+    "caldav_object_url",
+    "caldav_event_uid",
+    "caldav_synced_at",
+    "ms_event_id",
+    "partner_lead_id",
+    "kanal",
+    "video_link",
+    "treffpunkt_adresse",
+    "treffpunkt_lat",
+    "treffpunkt_lng"
+   ]
+  },
+  "ai_claim_proposals": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "erstellt_am",
+    "vorschlag_typ",
+    "ziel_rolle",
+    "payload",
+    "begruendung",
+    "modell",
+    "dedupe_key",
+    "status",
+    "entschieden_von",
+    "entschieden_am",
+    "feedback",
+    "auto_ausgefuehrt",
+    "erzeugte_task_id",
+    "quelle",
+    "ausfuehrung_ergebnis"
+   ]
+  },
+  "ai_task_executions": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "task_id",
+    "claim_id",
+    "typ",
+    "status",
+    "plan",
+    "begruendung",
+    "modell",
+    "gestartet_von",
+    "bestaetigt_von",
+    "erstellt_am",
+    "abgeschlossen_am",
+    "fehler"
+   ]
+  },
+  "ai_usage_log": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "endpoint",
+    "model",
+    "input_tokens",
+    "output_tokens",
+    "cache_creation_input_tokens",
+    "cache_read_input_tokens",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "aircall_calls": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "aircall_id",
+    "direction",
+    "status",
+    "started_at",
+    "answered_at",
+    "ended_at",
+    "duration",
+    "from_number",
+    "to_number",
+    "aircall_user_id",
+    "aircall_user_email",
+    "lead_id",
+    "initiated_by_profile_id",
+    "recording_url",
+    "voicemail_url",
+    "comments",
+    "tags",
+    "raw_event",
+    "created_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "aircall_relay_seats": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "aircall_user_id",
+    "aircall_user_email",
+    "aircall_number_id",
+    "bezeichnung",
+    "aktiv",
+    "zuletzt_verwendet",
+    "belegt",
+    "belegt_seit",
+    "belegt_call_id",
+    "notiz",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "airdrop_invitations": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "invited_by_user_id",
+    "invited_by_party_id",
+    "token_hash",
+    "token_lookup_prefix",
+    "invited_via",
+    "invited_at",
+    "expires_at",
+    "opened_at",
+    "responded_at",
+    "withdrawn_at",
+    "withdrawn_by_user_id",
+    "withdrawn_grund",
+    "status",
+    "resulting_party_id",
+    "resulting_user_id",
+    "konvertiert_zu_voll_am",
+    "created_at",
+    "updated_at",
+    "ip_address_open",
+    "user_agent_open",
+    "abgelaufen_am"
+   ]
+  },
+  "anfragen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "created_at",
+    "quelle",
+    "quelle_variant",
+    "quelle_url",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "kontakt_name",
+    "kontakt_telefon",
+    "kontakt_email",
+    "kontakt_plz_oder_stadt",
+    "payload",
+    "client_ip",
+    "user_agent",
+    "lead_id",
+    "konvertiert_am",
+    "konvertier_status",
+    "konvertier_fehler",
+    "disqualifiziert_grund",
+    "disqualifiziert_am",
+    "disqualifiziert_durch",
+    "dsgvo_zustimmung_am"
+   ]
+  },
+  "anruf_log": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "zeitpunkt",
+    "status",
+    "notiz",
+    "erstellt_von",
+    "created_at"
+   ]
+  },
+  "anspruch_config": {
+   "kind": "t",
+   "columns": [
+    "key",
+    "wert",
+    "created_at"
+   ]
+  },
+  "anspruch_schaetzungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "session_token",
+    "foto_pfade",
+    "erkanntes_segment",
+    "schweregrad",
+    "fahrbereit",
+    "ez_jahr",
+    "vision_result",
+    "positionen",
+    "lead_id",
+    "erstellt_am",
+    "totalschaden",
+    "schuld"
+   ]
+  },
+  "article_comments": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "author_id",
+    "article_slug",
+    "body",
+    "status",
+    "parent_id",
+    "created_at",
+    "edited_at",
+    "moderated_by",
+    "moderated_at",
+    "report_count",
+    "author_display"
+   ]
+  },
+  "auftraege": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "sv_id",
+    "typ",
+    "status",
+    "reihenfolge",
+    "vorheriger_auftrag_id",
+    "gutachten_url",
+    "gutachten_final_freigegeben",
+    "abgeschlossen_am",
+    "erstellt_am",
+    "updated_at",
+    "zurueckweisung_grund",
+    "zurueckgewiesen_am",
+    "grundhonorar_netto",
+    "grundhonorar_brutto",
+    "claim_id",
+    "filmcheck_ok",
+    "filmcheck_am",
+    "filmcheck_notizen",
+    "storniert_am",
+    "storno_grund",
+    "storno_durch_user_id",
+    "besichtigung_gestartet_am",
+    "sv_briefing_text",
+    "sv_briefing_generated_at",
+    "sv_briefing_model",
+    "sv_briefing_version",
+    "sv_briefing_struktur",
+    "sv_notizen_vor_ort",
+    "technische_stellungnahme_status",
+    "technische_stellungnahme_notiz_sv",
+    "technische_stellungnahme_beauftragt_am",
+    "technische_stellungnahme_hochgeladen_am",
+    "technische_stellungnahme_freigabe_am"
+   ]
+  },
+  "auth_2fa_attempts": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "failed_count",
+    "window_started_at",
+    "locked_until",
+    "updated_at"
+   ]
+  },
+  "auth_remember_tokens": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "token_hash",
+    "user_agent",
+    "ip_address",
+    "device_name",
+    "expires_at",
+    "last_used_at",
+    "revoked_am",
+    "created_at"
+   ]
+  },
+  "benachrichtigungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "titel",
+    "nachricht",
+    "gelesen",
+    "link",
+    "created_at",
+    "typ",
+    "beschreibung",
+    "erstellt_am"
+   ]
+  },
+  "bkat_tatbestaende": {
+   "kind": "t",
+   "columns": [
+    "tbnr",
+    "vorschrift",
+    "paragraph",
+    "paragraph_num",
+    "bezeichnung",
+    "kurzform",
+    "unfallart",
+    "schuldindiz",
+    "mit_gefaehrdung",
+    "mit_sachbeschaedigung",
+    "mit_unfall",
+    "bussgeld_cent",
+    "punkte",
+    "fahrverbot_monate",
+    "bkat_version",
+    "erstellt_am",
+    "aktualisiert_am"
+   ]
+  },
+  "branchen_benchmarks": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "metrik",
+    "beschreibung",
+    "branchen_wert",
+    "einheit",
+    "quelle",
+    "gueltig_ab",
+    "created_at"
+   ]
+  },
+  "call_copilot_suggestions": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "call_id",
+    "zeitpunkt_offset_sek",
+    "ausloeser",
+    "vorschlag",
+    "kategorie",
+    "created_at"
+   ]
+  },
+  "call_transcription_utterances": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "call_id",
+    "aircall_call_id",
+    "speaker",
+    "text",
+    "start_time",
+    "end_time",
+    "empfangen_am",
+    "verarbeitet"
+   ]
+  },
+  "calls": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "aircall_call_id",
+    "lead_id",
+    "initiator_user_id",
+    "richtung",
+    "status",
+    "von_nummer",
+    "zu_nummer",
+    "gestartet_am",
+    "beantwortet_am",
+    "beendet_am",
+    "dauer_sekunden",
+    "recording_url",
+    "transkript",
+    "transkript_text",
+    "sentiment",
+    "ki_zusammenfassung",
+    "ki_naechste_schritte",
+    "notiz",
+    "created_at",
+    "updated_at",
+    "bridge",
+    "claim_id"
+   ]
+  },
+  "chat_thread_teilnehmer": {
+   "kind": "t",
+   "columns": [
+    "thread_id",
+    "user_id",
+    "rolle",
+    "zuletzt_gelesen_am",
+    "hinzugefuegt_am"
+   ]
+  },
+  "chat_threads": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "art",
+    "direkt_user_a",
+    "direkt_user_b",
+    "erstellt_am"
+   ]
+  },
+  "claim_mietwagen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "status",
+    "fahrzeugklasse",
+    "anbieter",
+    "mietvertrag_nr",
+    "beginn_datum",
+    "ende_datum",
+    "tatsaechliches_ende",
+    "tagespreis_netto",
+    "tage_gesamt",
+    "gesamtkosten_netto",
+    "erstattet_durch_vs",
+    "erstattungsbetrag",
+    "erstattung_am",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "notiz",
+    "erstattbar_max_tage",
+    "rechnung_url",
+    "vehicle_id",
+    "mietwagenunternehmen_id"
+   ]
+  },
+  "claim_parties": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "rolle",
+    "reihenfolge",
+    "user_id",
+    "ist_halter",
+    "ist_fahrer",
+    "kennzeichen",
+    "fahrzeugtyp_klartext",
+    "vehicle_id",
+    "versicherung_id",
+    "versicherung_klartext",
+    "versicherungsnummer",
+    "versicherungs_aktenzeichen",
+    "hat_personenschaden",
+    "verletzungsart",
+    "krankenhaus_name",
+    "arbeitsunfaehig_seit",
+    "arbeitsunfaehig_bis",
+    "ist_fahrzeuginsasse",
+    "ist_eingeladen_via_airdrop",
+    "airdrop_token",
+    "airdrop_eingeladen_am",
+    "airdrop_response_am",
+    "ist_aktiv",
+    "ist_anonymisiert",
+    "anonymisiert_am",
+    "quelle",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "notiz",
+    "beziehung_zum_halter",
+    "kennzeichen_kreis",
+    "kennzeichen_buchstaben",
+    "kennzeichen_zahl",
+    "kennzeichen_suffix",
+    "person_id",
+    "previous_person_id",
+    "firma_id"
+   ]
+  },
+  "claim_payments": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "status",
+    "forderungsbetrag",
+    "erhaltener_betrag",
+    "differenz_betrag",
+    "zahlungseingang_am",
+    "zahlungsweg",
+    "zahlungsreferenz",
+    "notiz",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "empfaenger",
+    "partei",
+    "richtung"
+   ]
+  },
+  "claim_recency": {
+   "kind": "t",
+   "columns": [
+    "claim_id",
+    "last_activity_at"
+   ]
+  },
+  "claim_vehicle_involvements": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "vehicle_id",
+    "rolle",
+    "beschaedigung_grad",
+    "reihenfolge",
+    "notiz",
+    "created_at"
+   ]
+  },
+  "claims": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "schadentag",
+    "schadenzeit",
+    "entdeckt_am",
+    "schadenort_adresse",
+    "schadenort_plz",
+    "schadenort_ort",
+    "schadenort_land",
+    "schadenort_lat",
+    "schadenort_lng",
+    "schadenort_kategorie",
+    "hergang_kunde_text",
+    "hergang_sv_text",
+    "schadenart",
+    "fall_typ",
+    "unfall_konstellation",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "polizei_vor_ort",
+    "polizeibericht_status",
+    "geschaedigter_user_id",
+    "gegner_versicherung_id",
+    "gegner_bekannt",
+    "anzahl_beteiligte_total",
+    "hat_personenschaden",
+    "hat_mietwagen",
+    "hat_nutzungsausfall",
+    "hat_sachschaden",
+    "hat_abschleppung",
+    "sachschaden_beschreibung",
+    "halter_ungleich_fahrer",
+    "kunden_konstellation",
+    "unfallskizze_url",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "status",
+    "abgeschlossen_am",
+    "verjaehrt_am",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "created_via",
+    "claim_nummer",
+    "lead_id",
+    "kundenbetreuer_id",
+    "vs_ablehnungs_grund",
+    "endzustand_gesetzt_durch_user_id",
+    "endzustand_gesetzt_am",
+    "endzustand_grund",
+    "kanzlei_wunsch",
+    "kanzlei_wunsch_gefragt_am",
+    "kanzlei_wunsch_gefragt_in_phase",
+    "kunde_no_show_count",
+    "sv_no_show_count",
+    "kanzlei_uebergeben_am",
+    "kanzlei_ansprechpartner_name",
+    "kanzlei_ansprechpartner_email",
+    "kanzlei_ansprechpartner_telefon",
+    "gewerbe_flag",
+    "vorsteuerabzugsberechtigt",
+    "finanzierung_leasing",
+    "finanzierungsgeber_name",
+    "finanzierungsgeber_adresse",
+    "finanzierungsgeber_vertragsnr",
+    "brn",
+    "zeugen_kontakte",
+    "spezifikation",
+    "vorschaden_mit_vs_abgerechnet",
+    "sv_id",
+    "makler_id",
+    "betreuungspaket",
+    "notizen",
+    "prioritaet",
+    "onboarding_complete",
+    "status_changed_at",
+    "google_review_gesendet",
+    "datenschutz_akzeptiert",
+    "datenschutz_akzeptiert_am",
+    "interne_notizen",
+    "ist_aktiv",
+    "deaktiviert_am",
+    "deaktiviert_grund",
+    "deaktiviert_notiz",
+    "szenario",
+    "service_typ",
+    "geschlossen_grund",
+    "bevorzugter_kanal",
+    "sprache",
+    "fallakte_angelegt_am",
+    "google_review_prompt_gezeigt_am",
+    "sv_zugewiesen_am",
+    "kundenbetreuer_fallback_flag",
+    "kundenbetreuer_zugewiesen_am",
+    "eskaliert_an_admin_id",
+    "eskaliert_am",
+    "eskaliert_grund",
+    "abtretung_pdf",
+    "vollmacht_pdf",
+    "abtretung_signiert_am",
+    "vollmacht_signiert_am",
+    "sa_unterschrieben",
+    "sa_unterschrieben_am",
+    "sa_pdf_url",
+    "sa_unterschrift_url",
+    "vollmacht_status",
+    "vollmacht_geprueft_am",
+    "vollmacht_geprueft_von",
+    "vollmacht_pruefung_status",
+    "vollmacht_pruefung_begruendung",
+    "mietwagen_seit_datum",
+    "mietwagen_limit_tage",
+    "mietwagen_limit_grund",
+    "mietwagen_rechnung_vorhanden",
+    "mietwagen_rechnung_url",
+    "mietwagen_argumentations_puffer",
+    "mietwagen_vermieter",
+    "schadens_hoehe_netto",
+    "schadens_ursache",
+    "zeugen_vorhanden",
+    "bkat_unfallart",
+    "werkstatt_seit_datum",
+    "fahrzeug_fahrbereit",
+    "fahrzeugschaden_beschreibung",
+    "abrechnungsart_besprochen",
+    "abrechnungsart_notiz",
+    "abrechnungsart_besprochen_am",
+    "unfallmitteilung_status",
+    "dokumente_vollstaendig_fuer_phase",
+    "dokumente_vollstaendig_am_phase",
+    "dokumente_reminder_whatsapp_letzte_sendung",
+    "zb1_status",
+    "kanzlei_ansprechpartner_position",
+    "leasinggeber_informiert",
+    "guthaben_verrechnet_netto",
+    "schlussabrechnung_am",
+    "auszahlung_zahlungsweg",
+    "sv_nachzahlung_netto",
+    "abrechnung_id",
+    "kanzlei_abrechnung_id",
+    "marketing_provision",
+    "zahlungsweg",
+    "kanzlei_honorar",
+    "kanzlei_provision_status",
+    "kanzlei_provision_ausgezahlt_am",
+    "iban",
+    "bic",
+    "kontoinhaber",
+    "bankdaten_hinterlegt_am",
+    "lead_preis_netto",
+    "lead_preis_typ",
+    "lead_preis_berechnet_am",
+    "leasinggeber_name",
+    "finanzierung_bank",
+    "hat_vorschaeden",
+    "vorschaden_geprueft",
+    "vorschaden_erkannt",
+    "vorschaeden_beschreibung",
+    "operative_status",
+    "mietwagen_kanzlei_informiert",
+    "mietwagen_kanzlei_informiert_am",
+    "konvertiert_am",
+    "werkstatt_id",
+    "sv_datenschutz_widerruf_zugestimmt_am",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "reparatur_freigegeben_am",
+    "reparatur_freigegeben_von",
+    "reparatur_werkstatt_id",
+    "reparatur_werkstatt_zugewiesen_am",
+    "reparatur_werkstatt_zugewiesen_von",
+    "reparatur_werkstatt_quelle",
+    "reparaturwunsch",
+    "reparatur_vermittlung_status",
+    "reparatur_werkstatt_extern",
+    "schadenskategorie",
+    "abrechnungsweg",
+    "phase_override",
+    "phase_override_grund",
+    "phase_override_von",
+    "phase_override_am",
+    "reparaturdauer_tage_kva",
+    "bedarf_kategorien",
+    "bedarf_quelle",
+    "bedarf_confidence",
+    "bedarf_ermittelt_am",
+    "freie_werkstattwahl",
+    "vermittler_typ",
+    "vermittler_id",
+    "schadens_kind",
+    "schadenort_place_id"
+   ]
+  },
+  "client_error_log": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "created_at",
+    "boundary",
+    "digest",
+    "name",
+    "message",
+    "stack",
+    "pathname",
+    "user_agent",
+    "user_id",
+    "rolle"
+   ]
+  },
+  "cold_mail_enrollments": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "sequenz_id",
+    "aktueller_step",
+    "status",
+    "next_send_at",
+    "erstellt_am"
+   ]
+  },
+  "cold_mail_sends": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "enrollment_id",
+    "step_id",
+    "vorlage_id",
+    "empfaenger_email",
+    "betreff",
+    "body_snapshot",
+    "resend_message_id",
+    "status",
+    "gesendet_am",
+    "geoeffnet_am",
+    "geklickt_am"
+   ]
+  },
+  "cold_mail_sequenzen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "rolle",
+    "name",
+    "aktiv",
+    "auto_enroll",
+    "erstellt_am"
+   ]
+  },
+  "cold_mail_steps": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sequenz_id",
+    "position",
+    "vorlage_id",
+    "delay_tage",
+    "bedingung"
+   ]
+  },
+  "cold_mail_suppression": {
+   "kind": "t",
+   "columns": [
+    "email",
+    "grund",
+    "lead_id",
+    "erstellt_am"
+   ]
+  },
+  "cold_mail_vorlagen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "rolle",
+    "betreff",
+    "body_html",
+    "erstellt_von",
+    "erstellt_am",
+    "aktualisiert_am"
+   ]
+  },
+  "communities": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "beschreibung",
+    "zentrum_lat",
+    "zentrum_lng",
+    "zentrum_adresse",
+    "zentrum_plz",
+    "radius_km",
+    "polygon",
+    "faelle_pro_monat",
+    "faelle_genutzt_aktueller_monat",
+    "budget_verteilung",
+    "exklusiv",
+    "ist_aktiv",
+    "erstellt_am",
+    "erstellt_von",
+    "updated_at"
+   ]
+  },
+  "community_comments": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "target_kind",
+    "target_id",
+    "author_id",
+    "author_kind",
+    "author_display",
+    "body",
+    "parent_id",
+    "status",
+    "report_count",
+    "created_at",
+    "edited_at",
+    "moderated_von",
+    "moderated_am"
+   ]
+  },
+  "community_leaderboard": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "organisation_id",
+    "sv_id",
+    "zeitraum_monat",
+    "zeitraum_jahr",
+    "faelle_count",
+    "umsatz_netto",
+    "durchschnitt_bearbeitungsdauer_h",
+    "rang",
+    "letzte_aktualisierung"
+   ]
+  },
+  "community_likes": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "target_kind",
+    "target_id",
+    "created_at"
+   ]
+  },
+  "community_memberships": {
+   "kind": "t",
+   "columns": [
+    "community_id",
+    "profile_id",
+    "rolle_in_community",
+    "beigetreten_am"
+   ]
+  },
+  "community_posts": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "author_id",
+    "author_kind",
+    "author_display",
+    "body",
+    "tags",
+    "status",
+    "report_count",
+    "created_at",
+    "edited_at",
+    "moderated_von",
+    "moderated_am"
+   ]
+  },
+  "community_profiles": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "username",
+    "consent_at",
+    "created_at",
+    "is_blocked",
+    "trusted"
+   ]
+  },
+  "consent_records": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "categories",
+    "policy_version",
+    "user_agent",
+    "created_at"
+   ]
+  },
+  "content_translations": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "source_hash",
+    "target_locale",
+    "translated_text",
+    "provider",
+    "model",
+    "source_table",
+    "source_id",
+    "field",
+    "erstellt_am"
+   ]
+  },
+  "conversion_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "flow_key",
+    "phase_key",
+    "event_type",
+    "anfrage_id",
+    "service_typ",
+    "kanzlei_wunsch",
+    "session_id",
+    "user_agent",
+    "ts"
+   ]
+  },
+  "cron_jobs_audit": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "job_name",
+    "started_at",
+    "ended_at",
+    "status",
+    "rows_processed",
+    "error_message",
+    "duration_ms",
+    "metadata_jsonb"
+   ]
+  },
+  "dokument_katalog": {
+   "kind": "t",
+   "columns": [
+    "slot_id",
+    "label",
+    "beschreibung",
+    "kategorie",
+    "freigeschaltet_wenn",
+    "pflicht_wenn",
+    "sichtbar_fuer",
+    "anforderbar_von",
+    "uploadbar_von",
+    "multi_file",
+    "akzeptierte_mime_types",
+    "max_mb",
+    "sort_order",
+    "aktiv",
+    "created_at",
+    "updated_at",
+    "maps_to_qualifikation",
+    "steuert_kundensichtbarkeit"
+   ]
+  },
+  "dokument_upload_anfragen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "token",
+    "slots",
+    "kanal",
+    "status",
+    "gesendet_am",
+    "expires_at",
+    "erstellt_von",
+    "erstellt_am",
+    "updated_at"
+   ]
+  },
+  "dsgvo_loeschauftraege": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "email",
+    "status",
+    "grund",
+    "eingereicht_am",
+    "eingereicht_von",
+    "bestaetigt_am",
+    "bestaetigt_von_user_id",
+    "ausgefuehrt_am",
+    "abgelehnt_grund",
+    "audit_payload"
+   ]
+  },
+  "email_log": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "empfaenger",
+    "empfaenger_typ",
+    "template",
+    "subject",
+    "status",
+    "message_id",
+    "fehler",
+    "versuche",
+    "attachments",
+    "gesendet_am",
+    "created_at",
+    "lead_id",
+    "richtung",
+    "gesendet_von_user_id",
+    "provider",
+    "claim_id"
+   ]
+  },
+  "embed_abrechnung_positionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "abrechnung_id",
+    "embed_site_id",
+    "anfrage_id",
+    "termin_id",
+    "einzelpreis_eur",
+    "leistung_text",
+    "erstellt_am",
+    "updated_at"
+   ]
+  },
+  "embed_sites": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "slug",
+    "inhaber_profile_id",
+    "sv_id",
+    "name",
+    "variante",
+    "einzelpreis_eur",
+    "brand_primary_override",
+    "brand_secondary_override",
+    "brand_accent_override",
+    "brand_logo_url_override",
+    "empfaenger_email",
+    "cc_email",
+    "baileys_routing_nummer",
+    "erlaubte_domains",
+    "max_anfragen_pro_h",
+    "aktiv",
+    "paused_grund",
+    "agb_akzeptiert_am",
+    "agb_version",
+    "tracking_webhook_url",
+    "tracking_webhook_secret",
+    "tracking_ga4_measurement_id",
+    "tracking_gads_customer_id",
+    "anfragen_gesamt",
+    "letzte_anfrage_am",
+    "erstellt_am",
+    "updated_at",
+    "tracking_webhook_last_status",
+    "tracking_webhook_last_at",
+    "tracking_webhook_last_error",
+    "tracking_gads_conversion_id",
+    "tracking_gads_conversion_label",
+    "funnel_modus",
+    "sv_telefon"
+   ]
+  },
+  "faelle_claim_bridge": {
+   "kind": "t",
+   "columns": [
+    "fall_id",
+    "claim_id",
+    "created_at",
+    "fall_created_at"
+   ]
+  },
+  "faelle_kunde_view": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "status",
+    "schadens_beschreibung",
+    "schadens_datum",
+    "schadens_adresse",
+    "schadens_plz",
+    "schadens_ort",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_baujahr",
+    "auszahlung_kunde_betrag",
+    "auszahlung_kunde_eingegangen_am",
+    "auszahlung_zahlungsweg",
+    "eskalation_tag_14_ergebnis",
+    "eskalation_tag_14_ergebnis_am",
+    "eskalation_tag_21_ergebnis",
+    "eskalation_tag_21_ergebnis_am",
+    "eskalation_tag_28_ergebnis",
+    "eskalation_tag_28_ergebnis_am",
+    "nachbesichtigung_status",
+    "nachbesichtigung_termin_datum",
+    "nachbesichtigung_kunde_termin_vorschlaege",
+    "nachbesichtigung_kunde_termin_eingereicht_am",
+    "nachbesichtigung_sv_konfrontation_gewuenscht",
+    "vs_quote_prozent",
+    "vs_quote_grund",
+    "vs_quote_akzeptiert_am",
+    "vs_quote_betrag_ausgezahlt",
+    "vs_reaktion_typ",
+    "vs_reaktion_am",
+    "besichtigungsort_adresse",
+    "abgeschlossen_am",
+    "kunde_id",
+    "sv_id",
+    "claim_nummer",
+    "main_phase",
+    "sub_phase"
+   ]
+  },
+  "faelle_sv_view": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "status",
+    "schadens_beschreibung",
+    "schadens_datum",
+    "schadens_adresse",
+    "schadens_plz",
+    "schadens_ort",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_baujahr",
+    "gutachter_honorar",
+    "auszahlung_gutachter_eingegangen_am",
+    "eskalation_tag_14_ergebnis",
+    "eskalation_tag_14_ergebnis_am",
+    "eskalation_tag_21_ergebnis",
+    "eskalation_tag_21_ergebnis_am",
+    "eskalation_tag_28_ergebnis",
+    "eskalation_tag_28_ergebnis_am",
+    "technische_stellungnahme_status",
+    "technische_stellungnahme_beauftragt_am",
+    "technische_stellungnahme_hochgeladen_am",
+    "technische_stellungnahme_freigabe_am",
+    "vs_kuerzung_grund",
+    "vs_kuerzungs_typ",
+    "kuerzungs_betrag",
+    "nachbesichtigung_status",
+    "nachbesichtigung_termin_datum",
+    "nachbesichtigung_sv_konfrontation_gewuenscht",
+    "nachbesichtigung_sv_termin_vereinbart_am",
+    "vs_reaktion_typ",
+    "vs_reaktion_am",
+    "besichtigungsort_adresse",
+    "sv_id",
+    "kunde_id",
+    "claim_nummer",
+    "mandatsnummer",
+    "lexdrive_case_id",
+    "main_phase",
+    "sub_phase",
+    "auszahlung_gutachter_betrag",
+    "nachbesichtigung_kunde_termin_vorschlaege"
+   ]
+  },
+  "fahrzeugklassen": {
+   "kind": "t",
+   "columns": [
+    "eu_klasse",
+    "bezeichnung",
+    "reparatur_gruppe",
+    "sortierung"
+   ]
+  },
+  "failed_async_operations": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "operation_type",
+    "dedup_key",
+    "entity_type",
+    "entity_id",
+    "payload",
+    "last_error",
+    "status",
+    "attempts",
+    "escalate_after",
+    "escalated_at",
+    "resolved_at",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "fall_dokumente": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "dokument_typ",
+    "ist_pflicht",
+    "ab_phase",
+    "storage_path",
+    "original_filename",
+    "mime_type",
+    "groesse_bytes",
+    "ocr_status",
+    "ocr_extracted_data",
+    "ocr_processed_at",
+    "hochgeladen_von_user_id",
+    "hochgeladen_am",
+    "geloescht_am",
+    "lead_id",
+    "discrepancy_flag",
+    "ocr_result",
+    "uploaded_by_sv",
+    "uploaded_by_kunde",
+    "schaden_position",
+    "beschreibung",
+    "idempotency_key",
+    "kategorie",
+    "quelle",
+    "sichtbar_fuer",
+    "position_id",
+    "pflichtdokument_id",
+    "abgelehnt_am",
+    "zurueckweisung_kommentar",
+    "kb_gesehen_am",
+    "claim_id"
+   ]
+  },
+  "fall_read_state": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "fall_id",
+    "last_read_chat_at",
+    "last_read_update_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "fall_summaries": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kunden_anliegen",
+    "zusammenfassung",
+    "empfohlene_naechste_schritte",
+    "ai_modell",
+    "prompt_tokens",
+    "completion_tokens",
+    "generated_by_user_id",
+    "generated_at",
+    "fall_status_at_generation",
+    "anzahl_dokumente_at_generation",
+    "anzahl_nachrichten_at_generation",
+    "letzte_timeline_event_at_generation",
+    "claim_id"
+   ]
+  },
+  "finance_eintraege": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "typ",
+    "betrag",
+    "status",
+    "beschreibung",
+    "referenz_id",
+    "referenz_typ",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "finance_monatsberichte": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "monat",
+    "jahr",
+    "neue_faelle",
+    "aktive_faelle",
+    "einzelabverkauf_faelle",
+    "vollmacht_faelle",
+    "aktive_vm_faelle",
+    "leads_gesamt",
+    "lead_conversion_rate",
+    "vollmacht_quote",
+    "delta_paket_einnahmen",
+    "delta_einzel_einnahmen",
+    "kanzlei_provision",
+    "gesamt_einnahmen",
+    "fixkosten",
+    "betreuungskosten",
+    "db_ii",
+    "kum_db_ii",
+    "claimondo_gewinn_75",
+    "kanzlei_gewinn_25",
+    "marketing_budget_netto",
+    "marketing_budget_brutto",
+    "maik_google_cpl",
+    "maik_cpa_fix",
+    "maik_provision",
+    "kontingent_gutachter",
+    "gutachter_anzahlungen_gesamt",
+    "created_at"
+   ]
+  },
+  "firmen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "rechtsform",
+    "ust_id",
+    "steuernummer",
+    "handelsregister",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "adresse_land",
+    "telefon",
+    "email",
+    "webseite",
+    "organisation_id",
+    "ist_anonymisiert",
+    "anonymisiert_am",
+    "notiz",
+    "quelle",
+    "created_at",
+    "updated_at",
+    "normalized_name",
+    "ansprechpartner_person_id",
+    "ist_kleinunternehmer"
+   ]
+  },
+  "firmen_flotten_konten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "firma_id",
+    "user_id",
+    "status",
+    "aktiviert_am",
+    "aktiviert_von",
+    "created_at"
+   ]
+  },
+  "flotten_fahrzeuge": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "firma_id",
+    "vehicle_id",
+    "added_by_user_id",
+    "notiz",
+    "created_at"
+   ]
+  },
+  "flow_links": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "token",
+    "erstellt_am",
+    "geoeffnet_am",
+    "abgeschlossen_am",
+    "status",
+    "fall_id",
+    "expires_at",
+    "service_typ",
+    "sprache",
+    "claim_id",
+    "gesendet_am",
+    "gesendet_kanal",
+    "gesendet_anzahl"
+   ]
+  },
+  "flow_szenarien": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "bezeichnung",
+    "schuldfrage",
+    "eigene_versicherung",
+    "service_typ",
+    "feststellung_zweig",
+    "prioritaet",
+    "aktiv",
+    "erstellt_am",
+    "aktualisiert_am"
+   ]
+  },
+  "flow_szenario_steps": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "szenario_id",
+    "step_id",
+    "reihenfolge",
+    "bedingung",
+    "aktiv",
+    "erstellt_am"
+   ]
+  },
+  "forderungspositionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "typ",
+    "bezeichnung",
+    "betrag_gefordert",
+    "betrag_reguliert",
+    "betrag_gekuerzt",
+    "quelle",
+    "dokument_id",
+    "erstellt_am",
+    "claim_id"
+   ]
+  },
+  "gebiet_exklusivitaeten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "organisation_id",
+    "isochron_geojson",
+    "aktiv_seit",
+    "aktiv_bis",
+    "created_at"
+   ]
+  },
+  "gfa_rate_limit": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "ip_hash",
+    "created_at"
+   ]
+  },
+  "google_bewertungen_cache": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "profile_id",
+    "durchschnitt",
+    "anzahl_bewertungen",
+    "zuletzt_aktualisiert_am",
+    "created_at",
+    "photo_reference"
+   ]
+  },
+  "gutachten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "sv_id",
+    "status",
+    "auftragsnummer",
+    "besichtigungstermin",
+    "besichtigt_am",
+    "fertiggestellt_am",
+    "unterschrieben_am",
+    "gesamt_schadensbetrag",
+    "unterschrift_sv_url",
+    "bericht_pdf_url",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "notiz",
+    "pdf_uploaded_at",
+    "pdf_uploaded_by_user_id",
+    "pdf_size_bytes",
+    "ocr_status",
+    "ocr_engine",
+    "ocr_engine_version",
+    "ocr_started_at",
+    "ocr_finished_at",
+    "ocr_run_id",
+    "ocr_confidence",
+    "ocr_error_jsonb",
+    "gutachter_anbieter",
+    "felder_quelle_jsonb",
+    "editable_for_sv",
+    "editable_for_kb",
+    "gutachten_datum",
+    "gutachten_ocr_processed_at",
+    "gutachten_ocr_raw",
+    "gutachten_ocr_error",
+    "gutachten_ocr_manuell_ueberschrieben",
+    "gutachten_fin",
+    "gutachten_kennzeichen",
+    "gutachten_erstzulassung",
+    "gutachten_laufleistung_km",
+    "gutachten_tuv_bis",
+    "gutachten_fahrzeug_typ",
+    "gutachten_farbe",
+    "gutachten_farbcode",
+    "gutachten_kraftstoff",
+    "gutachten_vorschaeden_text",
+    "gutachten_lackmesswert_max_my",
+    "gutachten_karosseriezustand",
+    "gutachten_zeit_ak_std",
+    "gutachten_zeit_kar_std",
+    "gutachten_zeit_lack_std",
+    "gutachten_lohnsatz_ak_eur",
+    "gutachten_lohnsatz_kar_eur",
+    "gutachten_lohnsatz_lack_eur",
+    "gutachten_materialkosten_eur",
+    "gutachten_lackmaterial_eur",
+    "gutachten_verbringung_eur",
+    "gutachten_mietwagen_klasse",
+    "gutachten_mietwagen_tagessatz_eur",
+    "gutachten_nutzungsausfall_tagessatz_eur",
+    "gutachten_sv_honorar_netto",
+    "gutachten_sv_honorar_brutto",
+    "gutachten_kalkulationssystem",
+    "gutachten_seitenzahl",
+    "reparaturkosten_netto",
+    "reparaturkosten_brutto",
+    "minderwert",
+    "restwert",
+    "wiederbeschaffungswert",
+    "wiederbeschaffungsdauer_tage",
+    "nutzungsausfall_tage",
+    "totalschaden",
+    "ki_kalkulation",
+    "ki_kalkulation_am",
+    "ki_geschaetzte_kosten_min",
+    "ki_geschaetzte_kosten_max",
+    "positionen"
+   ]
+  },
+  "gutachten_fotos": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "gutachten_id",
+    "claim_id",
+    "upload_quelle",
+    "uploaded_by",
+    "storage_path",
+    "original_filename",
+    "mime_type",
+    "file_size_bytes",
+    "aufnahme_zeitpunkt",
+    "beschreibung",
+    "position_nr",
+    "created_at",
+    "exif_processed",
+    "kategorie"
+   ]
+  },
+  "gutachten_positionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "gutachten_id",
+    "claim_id",
+    "position_nr",
+    "bezeichnung",
+    "kategorie",
+    "schadensbetrag_netto",
+    "schadensbetrag_brutto",
+    "mwst_satz",
+    "reparaturart",
+    "ersatzteil_nr",
+    "arbeitszeit_aw",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "gutachter_abrechnungspositionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "abrechnung_id",
+    "fall_id",
+    "kunde_name",
+    "kennzeichen",
+    "schadenshoehe",
+    "leadpreis",
+    "leadpreis_typ",
+    "termin_datum",
+    "erstellt_am",
+    "claim_id"
+   ]
+  },
+  "gutachter_einzahlungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "betrag",
+    "typ",
+    "beschreibung",
+    "eingezahlt_am"
+   ]
+  },
+  "gutachter_finder_anfragen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "email",
+    "telefon",
+    "kennzeichen",
+    "fahrzeug_beschreibung",
+    "schadentyp",
+    "schadenort",
+    "schadenort_lat",
+    "schadenort_lng",
+    "wunschtermin",
+    "zugeordneter_sv_id",
+    "zugeordneter_sv_lead_id",
+    "matching_typ",
+    "sa_signatur_data_url",
+    "sa_unterzeichnet_am",
+    "status",
+    "bestaetigung_gesendet_am",
+    "fall_id",
+    "erstellt_am",
+    "abgebrochen_am",
+    "abbruch_phase",
+    "regulierungs_modus",
+    "fin_vin",
+    "hsn",
+    "tsn",
+    "erstzulassung",
+    "fahrzeug_baujahr",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_farbe",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "ocr_extrahiert_am",
+    "ocr_rohdaten",
+    "imagin_url",
+    "vorschaden_check_status",
+    "vorschaden_check_payload",
+    "konvertiert_zu_user_id",
+    "konvertiert_zu_lead_id",
+    "konvertiert_zu_fall_id",
+    "konvertiert_am",
+    "magic_link_gesendet_am",
+    "konvertierung_fehler",
+    "am_unfallort_flag",
+    "aufnahme_fotos",
+    "aufgenommen_am",
+    "whatsapp_verfuegbar",
+    "whatsapp_geprueft_am",
+    "schuldfrage",
+    "fahrzeug_fahrbereit",
+    "schadens_kurzbeschreibung",
+    "fahrzeugtyp",
+    "wunschtermin_wann",
+    "bevorzugter_kanal",
+    "dsgvo_zustimmung_am",
+    "reservierter_slot_von",
+    "reservierter_slot_bis",
+    "reservierter_sv_id",
+    "unterschrift_data_url",
+    "kanzlei_wunsch",
+    "besichtigungsort_adresse",
+    "ga_client_id",
+    "embed_site_id",
+    "source",
+    "variante",
+    "cluster",
+    "stadt_slug",
+    "gclid",
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "page_url",
+    "origin_domain",
+    "termin_id",
+    "abrechnungs_relevant",
+    "abrechnungs_betrag_eur",
+    "abrechnung_id",
+    "abgerechnet_am",
+    "abrechnung_storniert_am",
+    "abrechnung_storno_grund",
+    "abrechnung_storno_durch_user_id",
+    "billing_review_status",
+    "billing_review_grund",
+    "billing_review_erstellt_am",
+    "abrechnung_sv_id",
+    "anliegen",
+    "unfalltyp",
+    "schuld_einschaetzung",
+    "bewertungsgrund",
+    "wunsch_tag",
+    "wunsch_zeit",
+    "werkstatt_id",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "schaetzung_session_id",
+    "abrechnungsweg"
+   ]
+  },
+  "gutachter_monatsabrechnungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "monat",
+    "faelle_im_paket",
+    "faelle_einzel",
+    "summe_paket",
+    "summe_einzel",
+    "gesamtbetrag",
+    "status",
+    "faellig_am",
+    "bezahlt_am",
+    "erstellt_am"
+   ]
+  },
+  "gutachter_termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "start_zeit",
+    "end_zeit",
+    "status",
+    "externer_kalender_id",
+    "ablehnungsgrund",
+    "gegenvorschlag_zeit",
+    "created_at",
+    "erinnerung_24h_gesendet",
+    "erinnerung_2h_gesendet",
+    "erinnerung_48h_docs_gesendet",
+    "ankunft_zeit",
+    "abschluss_zeit",
+    "uebersprungen",
+    "uebersprung_grund",
+    "notizen_vor_ort",
+    "gps_lat_ankunft",
+    "gps_lng_ankunft",
+    "lead_id",
+    "ablehnen_token",
+    "abgelehnt_am",
+    "abgelehnt_grund",
+    "vorgeschlagenes_datum",
+    "gegenvorschlag_grund",
+    "gegenvorschlag_von",
+    "ankunft_via",
+    "verspaetung_minuten",
+    "losgefahren_am",
+    "kunden_tracking_token",
+    "notification_losgefahren_gesendet_am",
+    "notification_5min_gesendet_am",
+    "notification_angekommen_gesendet_am",
+    "ablehnen_token_expires_at",
+    "final_verbindlich_ab",
+    "sv_ablehnung_grund",
+    "sv_ablehnung_am",
+    "sv_vorgeschlagene_slots",
+    "typ",
+    "kanal",
+    "video_link",
+    "kb_id",
+    "notiz_kunde",
+    "notiz_intern",
+    "reminder_sent_at",
+    "reminder_1h_sent_at",
+    "cancelled_at",
+    "navigation_started_at",
+    "sv_unterwegs_seit",
+    "sv_eta_minuten",
+    "sv_eta_letzte_berechnung",
+    "sv_angekommen_am",
+    "reminder_15min_sent_at",
+    "reminder_5min_sent_at",
+    "durchgefuehrt_am",
+    "kunde_tracking_aktiviert",
+    "kunde_losgefahren_am",
+    "kunde_eta_minuten",
+    "kunde_eta_letzte_berechnung",
+    "kunde_angekommen_am",
+    "kunde_verspaetung_gemeldet_am",
+    "bezahlt",
+    "honorar_betrag",
+    "google_event_id",
+    "google_calendar_id",
+    "google_event_synced_at",
+    "kunde_response_token",
+    "kunde_response_token_expires_at",
+    "gesehen_am",
+    "geschaetzte_fahrtzeit_min",
+    "auftrag_id",
+    "verlegung_quelle_id",
+    "verlegung_grund",
+    "verlegung_kunde_benachrichtigt_an",
+    "verlegung_eskalation_an_kb_an",
+    "verlegung_initiator_kunde",
+    "besichtigung_gestartet_am",
+    "caldav_object_url",
+    "caldav_event_uid",
+    "caldav_synced_at",
+    "erinnerung_morgen_gesendet",
+    "sv_lead_id",
+    "claim_id",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_place_id",
+    "besichtigungsort_notiz",
+    "geschaetzte_fahrdistanz_km",
+    "termin_erinnerung_5min_gesendet",
+    "losfahren_erinnerung_gesendet",
+    "sv_termin_dokument_reminder_gesendet_am",
+    "wunschtermin",
+    "no_show_gemeldet_am",
+    "re_termin_token",
+    "re_termin_token_eingelaufen_am",
+    "re_termin_eskalation_an_kb_am",
+    "nachbesichtigung_status",
+    "nachbesichtigung_angefordert_am",
+    "nachbesichtigung_termin_datum",
+    "nachbesichtigung_konfrontation",
+    "nachbesichtigung_ergebnis",
+    "nachbesichtigung_kunde_termin_vorschlaege",
+    "nachbesichtigung_kunde_termin_eingereicht_am",
+    "nachbesichtigung_sv_konfrontation_gewuenscht",
+    "nachbesichtigung_sv_termin_vereinbart_am",
+    "updated_at",
+    "sv_no_show_am",
+    "assignee_typ",
+    "assignee_id",
+    "quelle",
+    "bezug_typ",
+    "bezug_id",
+    "reserviert_bis",
+    "besichtigungsort_bestaetigt_am",
+    "besichtigungsort_bestaetigt_von",
+    "anlage_benachrichtigt_at",
+    "ms_event_id"
+   ]
+  },
+  "gutachter_waitlist": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "email",
+    "telefon",
+    "plz",
+    "ort",
+    "standort_lat",
+    "standort_lng",
+    "dat_expert_nummer",
+    "bvsk_mitgliedsnummer",
+    "ihk_zertifikat_nummer",
+    "oebuv_bestellungsnummer",
+    "unternehmen",
+    "jahre_erfahrung",
+    "aktuelle_auftraege_pro_monat",
+    "schwerpunkte",
+    "status",
+    "notizen_admin",
+    "konvertiert_zu_sv_id",
+    "quelle",
+    "user_agent",
+    "ip_hash",
+    "erstellt_am",
+    "zuletzt_geaendert_am",
+    "bearbeitet_von_user_id"
+   ]
+  },
+  "gutschriften": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "betrag_netto",
+    "mwst_betrag",
+    "betrag_brutto",
+    "grund",
+    "referenz_fall_id",
+    "referenz_abrechnung_id",
+    "status",
+    "verrechnet_in_abrechnung_id",
+    "ausgezahlt_am",
+    "stripe_refund_id",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "health_check_runs": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "check_id",
+    "category",
+    "status",
+    "metric",
+    "detail",
+    "sample_ids",
+    "alerted_at",
+    "run_at"
+   ]
+  },
+  "incentive_auszahlungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "incentive_id",
+    "mitarbeiter_id",
+    "monat",
+    "betrag",
+    "status",
+    "created_at"
+   ]
+  },
+  "incentives": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "titel",
+    "beschreibung",
+    "kategorie",
+    "typ",
+    "bedingung",
+    "wert",
+    "aktiv",
+    "gueltig_ab",
+    "gueltig_bis",
+    "created_at"
+   ]
+  },
+  "individuelle_anfragen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "gewuenschte_faelle",
+    "gewuenschter_radius_km",
+    "nachricht",
+    "status",
+    "erstellt_am"
+   ]
+  },
+  "kalender_verbindungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "profile_id",
+    "provider",
+    "server_url",
+    "username",
+    "password_encrypted",
+    "calendar_url",
+    "last_error",
+    "last_error_at",
+    "erstellt_am",
+    "calendar_display_name",
+    "provider_label",
+    "connected_at",
+    "last_sync_at",
+    "fehler_task_id"
+   ]
+  },
+  "kanzlei_abrechnung_positionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kanzlei_abrechnung_id",
+    "fall_id",
+    "fall_nr",
+    "kunde_name",
+    "vollmacht_unterschrieben_am",
+    "betrag_netto",
+    "position_nr",
+    "claim_id"
+   ]
+  },
+  "kanzlei_abrechnung_reminders": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kanzlei_abrechnung_id",
+    "reminder_typ",
+    "gesendet_am"
+   ]
+  },
+  "kanzlei_abrechnungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kanzlei_id",
+    "abrechnungsmonat",
+    "abrechnungsjahr",
+    "rechnungsnummer",
+    "anzahl_vollmachten",
+    "betrag_pro_vollmacht_netto",
+    "endbetrag_netto",
+    "mwst_betrag",
+    "endbetrag_brutto",
+    "pdf_storage_path",
+    "magic_link_token",
+    "magic_link_expires_at",
+    "status",
+    "faelligkeitsdatum",
+    "stripe_payment_intent_id",
+    "stripe_checkout_session_id",
+    "versendet_am",
+    "bezahlt_am",
+    "fehlgeschlagen_am",
+    "fehlgeschlagen_grund",
+    "created_at"
+   ]
+  },
+  "kanzlei_admin_termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kanzlei_user_id",
+    "admin_user_id",
+    "fall_id",
+    "start_zeit",
+    "end_zeit",
+    "typ",
+    "titel",
+    "beschreibung",
+    "status",
+    "google_event_id",
+    "google_meet_link",
+    "created_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "kanzlei_faelle": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "status",
+    "vs_kontakt_am",
+    "ausgezahlt_am",
+    "erstellt_am",
+    "updated_at",
+    "claim_id",
+    "lexdrive_case_id",
+    "lexdrive_ocr_data",
+    "lexdrive_ocr_received_at",
+    "klage_uebergeben_am",
+    "anschlussschreiben_am",
+    "anschlussschreiben_url",
+    "anschlussschreiben_sendedatum",
+    "anschlussschreiben_unterschrift",
+    "anschlussschreiben_ocr_am",
+    "as_geforderte_summe",
+    "as_frist",
+    "as_vs_reaktion_text",
+    "as_salesforce_id",
+    "as_zuletzt_synced_am",
+    "mandatsnummer",
+    "regulierung_am",
+    "regulierung_angekuendigt_am",
+    "vs_eskalationsstufe",
+    "regulierungsweise",
+    "vs_reaktion_typ",
+    "vs_reaktion_am",
+    "kuerzungs_betrag",
+    "vs_frist_bis",
+    "vs_kuerzung_grund",
+    "vs_quote_prozent",
+    "vs_quote_grund",
+    "vs_quote_akzeptiert_am",
+    "vs_quote_betrag_ausgezahlt",
+    "vs_kuerzungs_typ",
+    "eskalation_tag_14_am",
+    "eskalation_tag_14_ergebnis",
+    "eskalation_tag_14_ergebnis_am",
+    "eskalation_tag_14_ergebnis_von",
+    "eskalation_tag_21_am",
+    "eskalation_tag_21_ergebnis",
+    "eskalation_tag_21_ergebnis_am",
+    "eskalation_tag_21_ergebnis_von",
+    "eskalation_tag_28_am",
+    "eskalation_tag_28_ergebnis",
+    "eskalation_tag_28_ergebnis_am",
+    "eskalation_tag_28_ergebnis_von",
+    "ruege_erhalten_am",
+    "ruege_grund",
+    "ruege_gesendet_am",
+    "ruege_betrag",
+    "ruege_counter",
+    "ruege_frist_tage",
+    "kanzlei_id"
+   ]
+  },
+  "kanzlei_pakete": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "empfaenger_typ",
+    "empfaenger_kanzlei_name",
+    "empfaenger_kanzlei_email",
+    "empfaenger_kanzlei_telefon",
+    "empfaenger_kanzlei_kontaktperson",
+    "inhalt_dokumente_jsonb",
+    "status",
+    "versendet_am",
+    "versendet_durch_user_id",
+    "versand_methode",
+    "versand_external_id",
+    "bestaetigt_am",
+    "created_at",
+    "updated_at",
+    "notiz"
+   ]
+  },
+  "kanzleien": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "email",
+    "adresse",
+    "ust_id",
+    "iban",
+    "ansprechpartner",
+    "aktiv",
+    "created_at"
+   ]
+  },
+  "ki_gespraeche": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "rolle",
+    "user_id",
+    "nachrichten",
+    "created_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "kunde_gutachten_requests": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "empfaenger_email",
+    "magic_link_token",
+    "expires_at",
+    "accessed_at",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "kunde_live_position": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kunde_id",
+    "termin_id",
+    "lat",
+    "lng",
+    "accuracy_m",
+    "speed_kmh",
+    "distance_to_target_meters",
+    "updated_at"
+   ]
+  },
+  "lead_historie": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "feld",
+    "alter_wert",
+    "neuer_wert",
+    "geaendert_von",
+    "geaendert_am"
+   ]
+  },
+  "leadpreise_tabelle": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "schadenhoehe_bis_netto",
+    "paketpreis_netto",
+    "einzelpreis_netto",
+    "version",
+    "aktiv",
+    "created_at"
+   ]
+  },
+  "leads": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "email",
+    "telefon",
+    "status",
+    "source_channel",
+    "source_domain",
+    "kontaktversuche",
+    "verpasste_anrufe",
+    "timeline",
+    "wa_gesendet",
+    "notiz",
+    "zugewiesen_an",
+    "created_at",
+    "updated_at",
+    "schadens_fall_typ",
+    "kunden_konstellation",
+    "personenschaden_flag",
+    "mietwagen_flag",
+    "gewerbe_flag",
+    "halter_ungleich_fahrer_flag",
+    "gegner_bekannt",
+    "polizeibericht_pflicht",
+    "gutachter_termin",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "wunschtermin",
+    "fahrzeug_standort_adresse",
+    "fahrzeug_standort_plz",
+    "sa_unterschrieben",
+    "sa_unterschrieben_am",
+    "qualifizierungs_phase",
+    "gegner_name",
+    "gegner_versicherung",
+    "gegner_kennzeichen",
+    "eigene_versicherung",
+    "eigene_policennr",
+    "polizei_aktenzeichen",
+    "leasing_geber",
+    "finanzierung_bank",
+    "firma_name",
+    "halter_name",
+    "vollmacht_datum",
+    "mandatstyp",
+    "anruf_versuche",
+    "letzter_anruf_am",
+    "letzter_anruf_status",
+    "flow_link_geoeffnet",
+    "flow_link_abgeschlossen",
+    "disqualifiziert",
+    "disqualifiziert_grund",
+    "disqualifiziert_notiz",
+    "disqualifiziert_am",
+    "unfallhergang",
+    "polizei_vor_ort",
+    "fahrzeug_farbe",
+    "erstzulassung",
+    "fin",
+    "kilometerstand",
+    "unfallort",
+    "unfallort_lat",
+    "unfallort_lng",
+    "unfalldatum",
+    "kunde_adresse",
+    "kunde_lat",
+    "kunde_lng",
+    "konvertiert_zu_fall_id",
+    "spezifikation",
+    "schadens_art",
+    "unfall_konstellation",
+    "gegner_anzahl_beteiligte",
+    "gegner_fahrzeugtyp",
+    "service_typ",
+    "ist_fahrzeughalter",
+    "finanzierung_leasing",
+    "vorsteuerabzugsberechtigt",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "halter_telefon",
+    "halter_email",
+    "finanzierungsgeber_name",
+    "finanzierungsgeber_adresse",
+    "finanzierungsgeber_vertragsnr",
+    "kunde_strasse",
+    "kunde_plz",
+    "kunde_stadt",
+    "schadens_hergang",
+    "hat_vorschaeden",
+    "vorschaeden_beschreibung",
+    "schuldfrage",
+    "aufklaerung_teilschuld_bestaetigt",
+    "schaden_sichtbar",
+    "nutzungsausfall",
+    "hat_haftpflicht",
+    "schadentyp",
+    "schadentyp_freitext",
+    "parkplatz_kamera",
+    "unfallort_kategorie",
+    "unfallskizze_url",
+    "fahrzeug_ausstattung",
+    "cardentity_enriched_at",
+    "cardentity_report",
+    "gespraech_gestartet_am",
+    "gespraech_beendet_am",
+    "gespraech_dauer_sekunden",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "zeugen",
+    "gegner_schadennummer",
+    "unfall_uhrzeit",
+    "fahrzeug_fahrbereit",
+    "fahrzeug_baujahr",
+    "zb1_token",
+    "zb1_status",
+    "zb1_url",
+    "zb1_ocr_daten",
+    "zb1_gesendet_am",
+    "zb1_hochgeladen_am",
+    "bevorzugter_kanal",
+    "hsn",
+    "tsn",
+    "gegner_versicherung_id",
+    "polizeibericht_token",
+    "polizeibericht_status",
+    "polizeibericht_gesendet_am",
+    "polizeibericht_hochgeladen_am",
+    "polizeibericht_url",
+    "wunschtermin_wochentage",
+    "zb1_token_expires_at",
+    "zb1_upload_versuche",
+    "zeugen_kontakte",
+    "werkstatt_seit_datum",
+    "halter_geburtsdatum",
+    "gegner_versicherung_anfrage_datum",
+    "sprache",
+    "schadensfoto_urls",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "zeugen_vorhanden",
+    "promotion_code_id",
+    "reminder_token",
+    "reminder_1_sent_at",
+    "reminder_2_sent_at",
+    "reminder_3_sent_at",
+    "sachschaden_flag",
+    "sachschaden_beschreibung",
+    "disqualifiziert_grund_key",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_place_id",
+    "vollmacht_signiert_am",
+    "bkat_unfallart",
+    "fahrzeug_standort_lat",
+    "fahrzeug_standort_lng",
+    "fahrzeug_standort_place_id",
+    "fahrzeugschaden_beschreibung",
+    "vehicle_id",
+    "lead_nummer",
+    "konvertiert_zu_claim_id",
+    "konvertiert_am",
+    "konvertiert_durch_user_id",
+    "fehlende_felder_jsonb",
+    "anrede",
+    "lackfarbe_code",
+    "rueckruf_geplant_am",
+    "kunde_id",
+    "kennzeichen_kreis",
+    "kennzeichen_buchstaben",
+    "kennzeichen_zahl",
+    "kennzeichen_suffix",
+    "besichtigungsort_notiz",
+    "brn",
+    "whatsapp_verfuegbar",
+    "whatsapp_geprueft_am",
+    "hat_whatsapp",
+    "ga_client_id",
+    "kanzlei_wunsch",
+    "gegner_telefon",
+    "gegner_email",
+    "zeugenaussage_url",
+    "zeugenaussage_status",
+    "zeugenaussage_hochgeladen_am",
+    "werkstatt_id",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "reparatur_werkstatt_id",
+    "reparatur_werkstatt_zugewiesen_am",
+    "reparatur_werkstatt_zugewiesen_von",
+    "reparatur_werkstatt_quelle",
+    "reparaturwunsch",
+    "reparatur_vermittlung_status",
+    "reparatur_werkstatt_extern",
+    "winback_sent_at",
+    "winback_opt_out",
+    "reminder_4_sent_at",
+    "schadenskategorie",
+    "reparatur_wunschtermin",
+    "dsgvo_zustimmung_am",
+    "abrechnungsweg",
+    "werkstatt_intake_am",
+    "werkstatt_intake_von",
+    "freie_werkstattwahl",
+    "bedarf_kategorien",
+    "bedarf_quelle",
+    "bedarf_confidence",
+    "bedarf_ermittelt_am",
+    "unfallort_plz",
+    "unfallort_ort",
+    "unfallort_place_id",
+    "gegner_versicherungsnummer",
+    "fahrzeugklasse"
+   ]
+  },
+  "linkedin_oauth_tokens": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "organization_urn",
+    "access_token",
+    "refresh_token",
+    "expires_at",
+    "scope",
+    "connected_by",
+    "erstellt_am",
+    "aktualisiert_am"
+   ]
+  },
+  "linkedin_posts": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "feed_guid",
+    "feed_url",
+    "title",
+    "excerpt",
+    "composed_text",
+    "status",
+    "author_urn",
+    "linkedin_post_urn",
+    "scheduled_for",
+    "published_at",
+    "freigegeben_von",
+    "freigegeben_am",
+    "fehler",
+    "erstellt_am"
+   ]
+  },
+  "makler": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "firma",
+    "ansprechpartner_vorname",
+    "ansprechpartner_nachname",
+    "ihk_nummer",
+    "email",
+    "telefon",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "bank_iban",
+    "bank_bic",
+    "bank_kontoinhaber",
+    "provision_betrag_komplett_netto",
+    "provision_betrag_nur_gutachter_netto",
+    "provision_aktiv",
+    "status",
+    "aktiviert_am",
+    "aktiviert_von",
+    "gesperrt_am",
+    "gesperrt_grund",
+    "erstellt_am",
+    "aktualisiert_am",
+    "notification_preferences",
+    "onboarding_abgeschlossen",
+    "versicherung_id",
+    "maklerpool_id",
+    "vermittlung_prompt_gesehen",
+    "ust_id",
+    "wochenreport_abgemeldet_am",
+    "ist_kleinunternehmer",
+    "notizen"
+   ]
+  },
+  "makler_fall_consent": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "makler_id",
+    "consent_scope",
+    "consent_gegeben_am",
+    "widerrufen_am",
+    "widerrufen_von",
+    "claim_id"
+   ]
+  },
+  "makler_staffel_stufen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "makler_id",
+    "schwelle",
+    "bonus_betrag_netto",
+    "created_at"
+   ]
+  },
+  "maklerpools": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "aktiv",
+    "erstellt_am"
+   ]
+  },
+  "marketing_content_jobs": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "thema",
+    "format",
+    "status",
+    "skript",
+    "caption",
+    "hashtags",
+    "audio_url",
+    "video_url",
+    "dauer_sekunden",
+    "ist_ki_generiert",
+    "kosten_cents",
+    "fehler_text",
+    "erstellt_von",
+    "erstellt_am",
+    "aktualisiert_am",
+    "render_fortschritt",
+    "render_phase",
+    "publish_status",
+    "gepostet_am"
+   ]
+  },
+  "marketing_partner": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "email",
+    "ist_kleinunternehmer",
+    "erstellt_am",
+    "ust_id",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort"
+   ]
+  },
+  "matelso_calls": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "external_call_id",
+    "direction",
+    "status",
+    "status_raw",
+    "from_number",
+    "to_number",
+    "duration",
+    "quelle",
+    "started_at",
+    "lead_id",
+    "raw_payload",
+    "created_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "mietwagenunternehmen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "telefon",
+    "email",
+    "website",
+    "partner",
+    "lat",
+    "lng",
+    "created_at",
+    "updated_at",
+    "normalized_name"
+   ]
+  },
+  "mitarbeiter_performance": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "mitarbeiter_id",
+    "monat",
+    "jahr",
+    "leads_qualifiziert",
+    "leads_konvertiert",
+    "faelle_abgeschlossen",
+    "aktive_faelle",
+    "durchschnittliche_bearbeitungszeit_tage",
+    "kundenzufriedenheit",
+    "umsatz_generiert",
+    "created_at"
+   ]
+  },
+  "mitarbeiter_verguetung": {
+   "kind": "t",
+   "columns": [
+    "profile_id",
+    "gehalt_brutto",
+    "gehaltsstufe",
+    "position",
+    "eingestellt_am",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "mitteilungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "empfaenger_id",
+    "empfaenger_rolle",
+    "kategorie",
+    "titel",
+    "inhalt",
+    "kontext_typ",
+    "kontext_id",
+    "route_url",
+    "gelesen",
+    "gelesen_am",
+    "absender_id",
+    "absender_name",
+    "icon",
+    "prioritaet",
+    "created_at"
+   ]
+  },
+  "nachrichten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "kanal",
+    "sender_id",
+    "sender_rolle",
+    "nachricht",
+    "hat_anhang",
+    "anhang_url",
+    "anhang_typ",
+    "gelesen",
+    "created_at",
+    "empfaenger_id",
+    "is_system",
+    "system_event",
+    "lead_id",
+    "kb_empfaenger_id",
+    "external_id",
+    "richtung",
+    "external_message_id",
+    "empfaenger_kontakt",
+    "template_key",
+    "fehlermeldung",
+    "status",
+    "claim_id",
+    "template_params",
+    "uebersetzungen",
+    "thread_id"
+   ]
+  },
+  "notification_deliveries": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "event_id",
+    "recipient_user_id",
+    "recipient_role",
+    "channel",
+    "status",
+    "skip_reason",
+    "external_id",
+    "sent_at",
+    "error_message",
+    "created_at"
+   ]
+  },
+  "notification_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "event_type",
+    "payload",
+    "fall_id",
+    "triggered_by_user_id",
+    "created_at",
+    "processed_at",
+    "status",
+    "error_message",
+    "retry_count",
+    "next_retry_at",
+    "claim_id"
+   ]
+  },
+  "notification_preferences": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "quiet_hours_start",
+    "quiet_hours_end",
+    "timezone",
+    "channel_opt_outs",
+    "event_opt_outs",
+    "updated_at"
+   ]
+  },
+  "nutzungsausfall_klasse_saetze": {
+   "kind": "t",
+   "columns": [
+    "klasse",
+    "euro_pro_tag",
+    "bezeichnung",
+    "beispiele"
+   ]
+  },
+  "nutzungsausfall_segment_saetze": {
+   "kind": "t",
+   "columns": [
+    "segment",
+    "tagessatz_min_eur",
+    "tagessatz_max_eur",
+    "created_at",
+    "mietwagen_min_eur",
+    "mietwagen_max_eur"
+   ]
+  },
+  "ocr_runs": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "gutachten_id",
+    "run_nummer",
+    "engine",
+    "engine_version",
+    "prompt_hash",
+    "started_at",
+    "finished_at",
+    "raw_response_jsonb",
+    "parsed_fields_jsonb",
+    "confidence_per_field_jsonb",
+    "overall_confidence",
+    "validation_errors_jsonb",
+    "validation_passed",
+    "ai_usage_log_id",
+    "cost_usd",
+    "status",
+    "error_jsonb",
+    "triggered_by",
+    "triggered_by_user_id",
+    "created_at"
+   ]
+  },
+  "onboarding_felder": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "phase_id",
+    "reihenfolge",
+    "feld_key",
+    "typ",
+    "label",
+    "hint",
+    "placeholder",
+    "pflicht",
+    "optionen",
+    "validation",
+    "db_target",
+    "conditional_on",
+    "erstellt_am",
+    "i18n",
+    "audience",
+    "sektion"
+   ]
+  },
+  "onboarding_phasen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "flow_key",
+    "reihenfolge",
+    "phase_key",
+    "titel",
+    "eyebrow",
+    "beschreibung",
+    "conditional_on",
+    "erstellt_am",
+    "i18n"
+   ]
+  },
+  "orchestrator_auto_policy": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vorschlag_typ",
+    "ziel_rolle",
+    "mode",
+    "geflippt_von",
+    "geflippt_am",
+    "auto_revert_grund",
+    "aktualisiert_am"
+   ]
+  },
+  "organisationen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "parent_user_id",
+    "created_at",
+    "typ",
+    "rechtsform",
+    "anschrift",
+    "steuernummer",
+    "ust_id",
+    "hauptansprechpartner_user_id",
+    "parent_stripe_customer_id",
+    "parent_stripe_default_pm_id",
+    "einsatzgebiet_isochron_geojson",
+    "einsatzgebiet_radius_km",
+    "einsatzgebiet_zentrum_lat",
+    "einsatzgebiet_zentrum_lng",
+    "akademie_max_faelle_monat",
+    "community_exklusiv",
+    "community_max_faelle_monat",
+    "community_leaderboard_aktiv",
+    "onboarding_status",
+    "vertrag_unterzeichnet_id",
+    "updated_at",
+    "logo_url",
+    "brand_primary",
+    "brand_secondary",
+    "brand_accent",
+    "brand_extracted_at",
+    "use_custom_branding",
+    "akademie_erst_anzahlung_eur",
+    "akademie_radius_km",
+    "standort_lat",
+    "standort_lng",
+    "standort_adresse",
+    "standort_plz",
+    "standort_place_id",
+    "einsatzgebiet_km",
+    "isochrone_polygon",
+    "brand_theme"
+   ]
+  },
+  "paket_upgrades": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "altes_paket",
+    "neues_paket",
+    "differenz_anzahlung",
+    "status",
+    "angefragt_am",
+    "bezahlt_am",
+    "aktiviert_am"
+   ]
+  },
+  "parteien": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "rolle",
+    "name",
+    "adresse",
+    "plz",
+    "ort",
+    "telefon",
+    "email",
+    "versicherung_name",
+    "versicherung_nr",
+    "vertrag_typ",
+    "vertrag_details",
+    "created_at",
+    "anrede",
+    "claim_id"
+   ]
+  },
+  "partner_gutschriften": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_typ",
+    "partner_id",
+    "gutschrift_nr",
+    "ledger_tabelle",
+    "ledger_id",
+    "betrag_netto",
+    "ust_satz",
+    "ust_betrag",
+    "betrag_brutto",
+    "empfaenger_snapshot",
+    "aussteller_snapshot",
+    "leistung_text",
+    "status",
+    "pdf_storage_path",
+    "erstellt_am",
+    "versendet_am",
+    "leistung_datum",
+    "typ",
+    "bezug_gutschrift_id",
+    "storno_grund"
+   ]
+  },
+  "partner_lead_aktivitaeten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_lead_id",
+    "typ",
+    "text",
+    "erstellt_von",
+    "erstellt_am"
+   ]
+  },
+  "partner_leads": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "rolle",
+    "status",
+    "firma",
+    "ansprechpartner_vorname",
+    "ansprechpartner_nachname",
+    "email",
+    "telefon",
+    "plz",
+    "ort",
+    "source_channel",
+    "rollen_details",
+    "zugewiesen_an",
+    "konvertiert_zu_user_id",
+    "konvertiert_zu_partner_id",
+    "konvertiert_am",
+    "konvertiert_durch",
+    "notiz",
+    "erstellt_am",
+    "aktualisiert_am",
+    "einstufung",
+    "lat",
+    "lng",
+    "strasse",
+    "google_place_id",
+    "ansprechpartner_position",
+    "ansprechpartner_email",
+    "ansprechpartner_telefon"
+   ]
+  },
+  "partner_provisionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_typ",
+    "partner_id",
+    "claim_id",
+    "fall_id",
+    "lead_id",
+    "promotion_code_id",
+    "service_typ",
+    "abrechnung_id",
+    "claim_nummer",
+    "ausgezahlt_am",
+    "betrag_netto_eur",
+    "ust_satz",
+    "ust_betrag",
+    "betrag_brutto",
+    "trigger_event",
+    "trigger_at",
+    "hold_until",
+    "status",
+    "storniert_am",
+    "storno_grund",
+    "erstellt_am"
+   ]
+  },
+  "partner_rang": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_typ",
+    "partner_id",
+    "volumen",
+    "score",
+    "credential_score",
+    "rating_score",
+    "gate_ok",
+    "gate_cap",
+    "rang",
+    "sinnsatz",
+    "stand"
+   ]
+  },
+  "partner_rang_config": {
+   "kind": "t",
+   "columns": [
+    "schluessel",
+    "wert",
+    "beschreibung",
+    "updated_at"
+   ]
+  },
+  "partner_rollen_policy": {
+   "kind": "t",
+   "columns": [
+    "rolle",
+    "self_signup_erlaubt",
+    "braucht_review",
+    "braucht_zahlung",
+    "auto_konvertieren",
+    "aktualisiert_am"
+   ]
+  },
+  "partner_staffel_bonus": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_typ",
+    "partner_id",
+    "stufe_id",
+    "schwelle",
+    "bonus_betrag_netto",
+    "ust_satz",
+    "ust_betrag",
+    "betrag_brutto",
+    "status",
+    "erstellt_am"
+   ]
+  },
+  "personen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "anrede",
+    "titel",
+    "vorname",
+    "nachname",
+    "firma",
+    "ist_gewerbe",
+    "geburtsdatum",
+    "email",
+    "telefon",
+    "mobil",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "adresse_land",
+    "fuehrerscheinnummer",
+    "fuehrerscheinklassen",
+    "ust_id",
+    "ist_anonymisiert",
+    "anonymisiert_am",
+    "notiz",
+    "created_at",
+    "updated_at",
+    "canonical_person_id",
+    "firma_id"
+   ]
+  },
+  "personenschaden_personen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "fall_id",
+    "vorname",
+    "nachname",
+    "geburtsdatum",
+    "verletzungsart",
+    "ist_fahrzeuginsasse",
+    "notizen",
+    "created_at",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "pflichtdokumente": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "dokument_typ",
+    "status",
+    "pflicht",
+    "quelle",
+    "dokument_url",
+    "hochgeladen_am",
+    "created_at",
+    "angefordert_von_rolle",
+    "angefordert_von_user_id",
+    "angefordert_am",
+    "begruendung",
+    "frist",
+    "sort_order",
+    "spaeter_nachreichen_markiert_am",
+    "sv_id",
+    "gueltig_bis",
+    "person_id",
+    "claim_id"
+   ]
+  },
+  "phase_transitions": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "from_phase",
+    "to_phase",
+    "transition_at",
+    "transitioned_by",
+    "actor_rolle",
+    "trigger_type",
+    "grund",
+    "payload",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "plz_geo": {
+   "kind": "t",
+   "columns": [
+    "plz",
+    "lat",
+    "lng",
+    "ort",
+    "created_at"
+   ]
+  },
+  "profiles": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "email",
+    "rolle",
+    "vorname",
+    "nachname",
+    "telefon",
+    "firma",
+    "adresse",
+    "plz",
+    "ort",
+    "avatar_url",
+    "created_at",
+    "updated_at",
+    "force_password_change",
+    "auth_provider",
+    "kategorie",
+    "kapazitaet_max",
+    "aktiv",
+    "audio_settings",
+    "anrede",
+    "titel",
+    "twilio_whatsapp_nummer",
+    "twilio_phone_sid",
+    "twilio_nummer_provisioned_am",
+    "twofa_aktiviert",
+    "twofa_telefon",
+    "twofa_telefon_verifiziert_am",
+    "working_hours",
+    "google_refresh_token",
+    "google_access_token",
+    "google_token_expires_at",
+    "google_email",
+    "google_connected_at",
+    "onboarding_completed_at",
+    "aircall_user_id",
+    "aircall_email",
+    "anzeigename",
+    "profilbeschreibung",
+    "twofa_email_aktiviert",
+    "twofa_email_verifiziert_am",
+    "zweit_email",
+    "sv_paket",
+    "community_id",
+    "account_typ",
+    "entstanden_via",
+    "entstanden_aus_claim_id",
+    "upgrade_to_voll_at",
+    "entstanden_aus_airdrop_id",
+    "google_place_id",
+    "whatsapp_verfuegbar",
+    "whatsapp_geprueft_am",
+    "sprache",
+    "updates_last_seen_at",
+    "ms_refresh_token",
+    "ms_access_token",
+    "ms_token_expires_at",
+    "ms_email",
+    "ms_connected_at",
+    "actions_last_seen_at"
+   ]
+  },
+  "promo_clicks": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "promotion_code_id",
+    "clicked_at",
+    "user_agent",
+    "referer",
+    "ip_hash"
+   ]
+  },
+  "promotion_codes": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "code",
+    "makler_id",
+    "aktiv",
+    "erstellt_am"
+   ]
+  },
+  "provisionen_maik": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lead_id",
+    "monat",
+    "basis_provision",
+    "cpl_actual",
+    "netto_provision",
+    "status",
+    "source_channel",
+    "reversed_grund",
+    "created_at",
+    "updated_at",
+    "paid_at",
+    "marketing_partner_id",
+    "ust_satz",
+    "ust_betrag",
+    "betrag_brutto"
+   ]
+  },
+  "push_subscriptions": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "endpoint",
+    "p256dh_key",
+    "auth_key",
+    "user_agent",
+    "platform",
+    "created_at",
+    "last_used_at",
+    "expired_at"
+   ]
+  },
+  "qc_checkliste": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "gutachten_vorhanden",
+    "gutachten_vollstaendig",
+    "fin_17_zeichen",
+    "schadenspositionen_erfasst",
+    "fotos_ausreichend",
+    "sa_vorhanden",
+    "vollmacht_vorhanden",
+    "kundendaten_vollstaendig",
+    "vorschaeden_beruecksichtigt",
+    "kommentar",
+    "geprueft_von",
+    "geprueft_am",
+    "status",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "rechnungs_konfiguration": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "gueltig_ab",
+    "gueltig_bis",
+    "rechnungssteller",
+    "firmenname",
+    "strasse",
+    "plz",
+    "ort",
+    "steuernummer",
+    "ust_id",
+    "hrb",
+    "geschaeftsfuehrer",
+    "zahlungsempfaenger_name",
+    "zahlungsempfaenger_iban",
+    "zahlungsempfaenger_bic",
+    "zahlungsempfaenger_bank",
+    "zahlungsempfaenger_hinweis",
+    "version",
+    "created_at"
+   ]
+  },
+  "rechnungs_nr_counter": {
+   "kind": "t",
+   "columns": [
+    "serie",
+    "jahr",
+    "laufende_nr",
+    "updated_at"
+   ]
+  },
+  "regulierungs_klassifizierung": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "regulierungs_status",
+    "kuerzungsgrund",
+    "kuerzung_betrag_netto",
+    "reguliert_betrag_netto",
+    "geltend_gemacht_netto",
+    "versicherer",
+    "begruendung_versicherer",
+    "notiz_intern",
+    "erfasst_von",
+    "erfasst_am",
+    "updated_am",
+    "claim_id"
+   ]
+  },
+  "reklamationen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "sv_id",
+    "grund",
+    "begruendung",
+    "nachweis_storage_path",
+    "eingereicht_am",
+    "bearbeitet_am",
+    "bearbeitet_von",
+    "status",
+    "admin_begruendung",
+    "frist_bis",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "repairs": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "werkstatt_id",
+    "status",
+    "auftragsnummer",
+    "geplanter_beginn",
+    "tatsaechlicher_beginn",
+    "abgeschlossen_am",
+    "kostenvoranschlag",
+    "tatsaechliche_kosten",
+    "gutachten_id",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "notiz",
+    "vehicle_id"
+   ]
+  },
+  "reparatur_termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "werkstatt_id",
+    "wunschtermin",
+    "bestaetigter_termin",
+    "status",
+    "absage_grund",
+    "erstellt_von",
+    "created_at",
+    "updated_at",
+    "rueckruf_wunschzeit",
+    "erledigt_am"
+   ]
+  },
+  "routing_cache": {
+   "kind": "t",
+   "columns": [
+    "von_hash",
+    "nach_hash",
+    "fahrtzeit_sek",
+    "cached_at"
+   ]
+  },
+  "sachverstaendige": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "profile_id",
+    "gebiet_plz",
+    "paket",
+    "offene_faelle",
+    "partner_seit",
+    "ist_aktiv",
+    "notizen",
+    "created_at",
+    "updated_at",
+    "paket_faelle_gesamt",
+    "paket_faelle_genutzt",
+    "paket_umkreis_km",
+    "anzahlung_betrag",
+    "standort_adresse",
+    "standort_plz",
+    "standort_lat",
+    "standort_lng",
+    "standort_place_id",
+    "organisation_id",
+    "ist_parent_account",
+    "kalender_typ",
+    "kalender_sync_aktiv",
+    "kalender_sync_letzte",
+    "gutachter_typ",
+    "anzahlung_faellig",
+    "anzahlung_status",
+    "isochrone_polygon",
+    "urlaub_von",
+    "urlaub_bis",
+    "logo_url",
+    "brand_primary",
+    "brand_secondary",
+    "gcal_access_token",
+    "gcal_refresh_token",
+    "gcal_token_expiry",
+    "gcal_connected",
+    "gcal_calendar_id",
+    "vertrag_unterschrieben",
+    "vertrag_unterschrieben_am",
+    "vertrag_pdf_url",
+    "unterschrift_url",
+    "geloescht_am",
+    "deaktiviert_grund",
+    "deaktiviert_am",
+    "paket_preis",
+    "use_custom_branding",
+    "onboarding_status",
+    "onboarding_anzahlung_betrag",
+    "onboarding_anzahlung_faellig_am",
+    "stripe_customer_id",
+    "stripe_anzahlung_payment_intent_id",
+    "stripe_anzahlung_bezahlt_am",
+    "portal_zugang_freigeschaltet",
+    "werbebudget_guthaben_netto",
+    "stripe_default_payment_method_id",
+    "gesperrt_grund",
+    "gesperrt_seit",
+    "rolle_in_organisation",
+    "firmenname",
+    "rechtsform",
+    "steuernummer",
+    "ust_id",
+    "hrb",
+    "brand_accent",
+    "brand_extracted_at",
+    "qualifikationen_neu",
+    "spezifikationen",
+    "schadenarten",
+    "community_anonym",
+    "live_tracking_enabled",
+    "ablehnungen_30_tage",
+    "brand_theme",
+    "verifizierung_status",
+    "verifizierung_frist_bis",
+    "verifiziert_am",
+    "verifizierung_admin_notiz",
+    "gesperrt_von_user_id",
+    "dat_nummer",
+    "verifizierung_reminder_7d_gesendet_am",
+    "verifizierung_frist_ueberschritten_am",
+    "verifiziert",
+    "verifiziert_von",
+    "bvsk_mitgliedsnummer",
+    "ihk_zertifikat_nummer",
+    "oebuv_bestellungsnummer",
+    "oeffentlich_bestellt",
+    "bestellungs_kammer",
+    "arbeitet_eigenstaendig",
+    "kapazitaeten_jsonb",
+    "blockierte_wochentage",
+    "arbeitszeiten",
+    "stripe_einzug_fehlgeschlagen_am",
+    "onboarding_quelle",
+    "basic_onboarding_abgeschlossen_am",
+    "ist_testaccount"
+   ]
+  },
+  "schadenkarten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "karten_token",
+    "status",
+    "fahrzeug_id",
+    "firma_id",
+    "nfc_uid",
+    "charge",
+    "gebunden_am",
+    "gebunden_von",
+    "erstellt_am"
+   ]
+  },
+  "schadenspositionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "kategorie",
+    "bezeichnung",
+    "beschreibung",
+    "alter_jahre",
+    "zustand_vorher",
+    "geschaetzter_wert",
+    "reparaturkosten",
+    "sort_order",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "settings": {
+   "kind": "t",
+   "columns": [
+    "key",
+    "value",
+    "updated_at"
+   ]
+  },
+  "sla_tracking": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "sla_typ",
+    "started_at",
+    "breach_at",
+    "completed_at",
+    "status",
+    "eskalation_task_id",
+    "created_at",
+    "target_rolle",
+    "blocker_rolle",
+    "blocker_grund",
+    "phase",
+    "n_mahnungen",
+    "letzte_mahnung_am",
+    "claim_id"
+   ]
+  },
+  "stripe_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "stripe_event_id",
+    "event_type",
+    "sv_id",
+    "payload",
+    "verarbeitet",
+    "fehler",
+    "empfangen_am"
+   ]
+  },
+  "support_rate_limits": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "hour_bucket",
+    "count"
+   ]
+  },
+  "support_ticket_log": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "linear_issue_id",
+    "action_type",
+    "page_url",
+    "turn_count",
+    "has_screenshot",
+    "has_voice",
+    "created_at",
+    "ticket_typ"
+   ]
+  },
+  "sv_buero": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "rechtsform",
+    "ust_id",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "adresse_land",
+    "telefon",
+    "email",
+    "geo_lat",
+    "geo_lng",
+    "aggregierte_rechnungsstellung",
+    "status",
+    "created_at",
+    "updated_at",
+    "notiz"
+   ]
+  },
+  "sv_buero_memberships": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "buero_id",
+    "rolle",
+    "start_date",
+    "end_date",
+    "created_at"
+   ]
+  },
+  "sv_community": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "beschreibung",
+    "status",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "sv_kalender_events_cache": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "source",
+    "external_event_id",
+    "start_zeit",
+    "end_zeit",
+    "titel",
+    "last_synced_at",
+    "profile_id"
+   ]
+  },
+  "sv_kalender_verbindungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "provider",
+    "server_url",
+    "username",
+    "password_encrypted",
+    "calendar_url",
+    "calendar_display_name",
+    "provider_label",
+    "connected_at",
+    "last_sync_at",
+    "last_error",
+    "last_error_at",
+    "fehler_task_id",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "sv_leads": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "firma",
+    "adresse",
+    "plz",
+    "ort",
+    "lat",
+    "lng",
+    "telefon",
+    "email",
+    "dat_id",
+    "dat_url",
+    "quelle",
+    "ist_aktiv",
+    "erstellt_am",
+    "aktualisiert_am",
+    "vorname",
+    "nachname",
+    "qualifikationen",
+    "dat_expert_nr",
+    "bvsk_nr",
+    "ihk_zertifikat",
+    "oebuv_nr",
+    "jahre_erfahrung",
+    "auftraege_monat",
+    "fachschwerpunkte",
+    "radius_km",
+    "warteliste_status",
+    "warteliste_am",
+    "isochrone_polygon",
+    "paket_umkreis_km",
+    "konvertiert_zu_sv_id",
+    "konvertiert_am",
+    "claim_status",
+    "normalized_name",
+    "notizen"
+   ]
+  },
+  "sv_live_location": {
+   "kind": "t",
+   "columns": [
+    "sv_id",
+    "fall_id",
+    "lat",
+    "lng",
+    "accuracy",
+    "eta_minuten",
+    "updated_at",
+    "claim_id"
+   ]
+  },
+  "sv_live_position": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "lat",
+    "lng",
+    "accuracy_m",
+    "heading",
+    "speed_kmh",
+    "updated_at",
+    "route_polyline",
+    "distance_to_target_meters",
+    "captured_at"
+   ]
+  },
+  "sv_onboarding_rechnungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "organisation_id",
+    "rechnungs_nr",
+    "rechnungs_datum",
+    "leistungs_datum",
+    "paket",
+    "netto_cent",
+    "ust_cent",
+    "brutto_cent",
+    "ust_satz_pct",
+    "stripe_payment_intent_id",
+    "stripe_session_id",
+    "pdf_storage_path",
+    "kv_pdf_storage_path",
+    "nb_pdf_storage_path",
+    "versendet_am",
+    "typ",
+    "rechnungssteller",
+    "rechnungs_konfiguration_id",
+    "konfig_version",
+    "created_at"
+   ]
+  },
+  "sv_payment_reminders": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "reminder_typ",
+    "versendet_am"
+   ]
+  },
+  "sv_private_stops": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "datum",
+    "source",
+    "external_event_id",
+    "titel",
+    "start_zeit",
+    "end_zeit",
+    "address",
+    "place_id",
+    "lat",
+    "lng",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "sv_tages_session": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "datum",
+    "status",
+    "aktueller_termin_id",
+    "reihenfolge_termin_ids",
+    "started_at",
+    "completed_at",
+    "paused_at",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "task_reminders": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "task_id",
+    "reminder_typ",
+    "geplant_fuer",
+    "empfaenger_rolle",
+    "kanal",
+    "status",
+    "versendet_am",
+    "versuche",
+    "fehler",
+    "created_at"
+   ]
+  },
+  "tasks": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "typ",
+    "titel",
+    "beschreibung",
+    "status",
+    "zugewiesen_an",
+    "faellig_am",
+    "erledigt_am",
+    "sort_order",
+    "created_at",
+    "updated_at",
+    "task_typ",
+    "deadline",
+    "auto_erstellt",
+    "erinnerung_gesendet",
+    "prioritaet",
+    "lead_id",
+    "empfaenger_rolle",
+    "empfaenger_user_id",
+    "phase",
+    "task_code",
+    "trigger_event",
+    "gate_task_id",
+    "entity_type",
+    "entity_id",
+    "auto_resolved_am",
+    "auto_resolved_grund",
+    "erstellt_von_id",
+    "eskaliert_am",
+    "claim_id"
+   ]
+  },
+  "technische_probleme": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "user_id",
+    "kategorie",
+    "beschreibung",
+    "screenshot_url",
+    "browser",
+    "aktuelle_url",
+    "status",
+    "antwort",
+    "erstellt_am",
+    "claim_id"
+   ]
+  },
+  "termin_reminders": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "termin_id",
+    "empfaenger",
+    "reminder_typ",
+    "geplant_fuer",
+    "versendet_am",
+    "status",
+    "fehler",
+    "versuche",
+    "created_at"
+   ]
+  },
+  "termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "kunde_user_id",
+    "betreuer_user_id",
+    "typ",
+    "datum",
+    "dauer_minuten",
+    "betreff",
+    "notiz",
+    "meet_link",
+    "status",
+    "ergebnis_notiz",
+    "erstellt_am",
+    "verschiebung_grund",
+    "google_event_id",
+    "google_calendar_id",
+    "event_synced_at",
+    "event_sync_status",
+    "claim_id"
+   ]
+  },
+  "timeline": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "lead_id",
+    "typ",
+    "titel",
+    "beschreibung",
+    "erstellt_von",
+    "metadata",
+    "created_at",
+    "claim_id"
+   ]
+  },
+  "twilio_status_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "message_sid",
+    "status",
+    "error_code",
+    "to_phone",
+    "was_whatsapp",
+    "raw",
+    "created_at"
+   ]
+  },
+  "v_belegung": {
+   "kind": "v",
+   "columns": [
+    "assignee_typ",
+    "assignee_id",
+    "start_zeit",
+    "end_zeit",
+    "belegung_typ",
+    "status",
+    "termin_typ",
+    "bezug_typ",
+    "bezug_id",
+    "standort_lat",
+    "standort_lng",
+    "quelle_id"
+   ]
+  },
+  "v_claim_base": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "schadentag",
+    "schadenzeit",
+    "entdeckt_am",
+    "schadenort_adresse",
+    "schadenort_plz",
+    "schadenort_ort",
+    "schadenort_land",
+    "schadenort_lat",
+    "schadenort_lng",
+    "schadenort_kategorie",
+    "hergang_kunde_text",
+    "hergang_sv_text",
+    "schadenart",
+    "fall_typ",
+    "unfall_konstellation",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "polizei_vor_ort",
+    "polizeibericht_status",
+    "geschaedigter_user_id",
+    "gegnerisches_vehicle_id",
+    "gegner_versicherung_id",
+    "gegner_versicherungsnummer",
+    "gegner_aktenzeichen",
+    "gegner_bekannt",
+    "anzahl_beteiligte_total",
+    "hat_personenschaden",
+    "hat_mietwagen",
+    "hat_nutzungsausfall",
+    "hat_sachschaden",
+    "hat_abschleppung",
+    "sachschaden_beschreibung",
+    "halter_ungleich_fahrer",
+    "kunden_konstellation",
+    "unfallskizze_url",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "status",
+    "abgeschlossen_am",
+    "verjaehrt_am",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "created_via",
+    "claim_nummer",
+    "lead_id",
+    "kundenbetreuer_id",
+    "vs_ablehnungs_grund",
+    "regulierungs_betrag",
+    "endzustand_gesetzt_durch_user_id",
+    "endzustand_gesetzt_am",
+    "endzustand_grund",
+    "kanzlei_wunsch",
+    "kanzlei_wunsch_gefragt_am",
+    "kanzlei_wunsch_gefragt_in_phase",
+    "fall_id",
+    "sv_id",
+    "service_typ",
+    "fall_status",
+    "fall_created_at",
+    "fall_updated_at",
+    "kundenbetreuer_fallback_flag",
+    "szenario",
+    "dokumente_vollstaendig_fuer_phase",
+    "dokumente_reminder_whatsapp_letzte_sendung",
+    "no_show_gemeldet_am",
+    "re_termin_token",
+    "sa_unterschrieben_am",
+    "vollmacht_signiert_am",
+    "mandatsnummer",
+    "re_termin_token_eingelaufen_am",
+    "re_termin_eskalation_an_kb_am",
+    "storniert_am",
+    "anschlussschreiben_am",
+    "vs_eskalationsstufe",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_typ",
+    "sa_unterschrieben",
+    "regulierung_am",
+    "regulierung_betrag",
+    "gutachten_betrag",
+    "gutachten_eingegangen_am",
+    "sv_zugewiesen_am",
+    "schadens_ursache",
+    "schadens_plz",
+    "schadens_ort",
+    "schadens_fall_typ",
+    "gegner_anzahl_beteiligte",
+    "gegner_fahrzeugtyp",
+    "organisation_id",
+    "dispatch_id",
+    "kunde_id",
+    "ist_aktiv",
+    "deaktiviert_grund",
+    "hat_vorschaeden",
+    "vorschaden_anzahl",
+    "vorschaden_letzter_datum",
+    "vorschaden_typ_b_bericht",
+    "cardentity_abfrage_am",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_notiz",
+    "besichtigungsort_place_id",
+    "main_phase",
+    "sub_phase",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "halter_telefon",
+    "halter_email",
+    "halter_geburtsdatum",
+    "halter_name",
+    "gegner_name",
+    "gegner_versicherung_name",
+    "gegner_kennzeichen",
+    "fin_vin",
+    "lackfarbe_code",
+    "fahrzeug_baujahr",
+    "fahrzeug_farbe",
+    "fahrzeug_ausstattung",
+    "hsn",
+    "tsn",
+    "kilometerstand",
+    "erstzulassung",
+    "kennzeichen_buchstaben",
+    "fin_quelle",
+    "fin_extrahiert_am",
+    "vorschaden_erkannt",
+    "notizen",
+    "zeugen_kontakte",
+    "kunde_email",
+    "vorsteuerabzugsberechtigt",
+    "kunde_vorname",
+    "kunde_nachname",
+    "kunde_telefon",
+    "kunde_strasse",
+    "kunde_plz",
+    "kunde_stadt",
+    "firma_name",
+    "ist_fahrzeughalter",
+    "fahrzeug_fahrbereit",
+    "fahrzeugschaden_beschreibung",
+    "fahrzeug_aufbau",
+    "gegner_versicherung",
+    "operative_status",
+    "spezifikation",
+    "zeugen_vorhanden",
+    "sprache",
+    "betreuungspaket",
+    "abtretung_pdf",
+    "vollmacht_pdf",
+    "abtretung_signiert_am",
+    "kanzlei_uebergeben_am",
+    "filmcheck_ok",
+    "filmcheck_am",
+    "filmcheck_notizen",
+    "gewerbe_flag",
+    "leasinggeber_name",
+    "leasinggeber_informiert",
+    "prioritaet",
+    "onboarding_complete",
+    "konvertiert_am",
+    "status_changed_at",
+    "regulierung_angekuendigt_am",
+    "google_review_gesendet",
+    "vorschaden_geprueft",
+    "vorschaden_typ_a_ergebnis",
+    "vorschaden_typ_b_pdf_url",
+    "schadens_hoehe_netto",
+    "nutzungsausfall_tagessatz",
+    "reparaturdauer_tage",
+    "gutachter_honorar",
+    "ocr_extrahiert_am",
+    "ocr_rohdaten",
+    "ki_kalkulation",
+    "kanzlei_honorar",
+    "ki_kalkulation_am",
+    "ki_geschaetzte_kosten_min",
+    "ki_geschaetzte_kosten_max",
+    "kanzlei_ansprechpartner_name",
+    "kanzlei_ansprechpartner_email",
+    "kanzlei_ansprechpartner_telefon",
+    "kanzlei_ansprechpartner_position",
+    "losfahren_erinnerung_gesendet",
+    "termin_erinnerung_5min_gesendet",
+    "geschaetzte_fahrzeit_min",
+    "geschaetzte_fahrdistanz_km",
+    "gcal_event_id",
+    "gutachten_vorhanden",
+    "gutachten_hochgeladen_am",
+    "gutachten_positionen",
+    "gutachten_nummer",
+    "reparaturkosten",
+    "wertminderung",
+    "nutzungsausfall_gesamt",
+    "regulierungsweise",
+    "sa_pdf_url",
+    "sa_unterschrift_url",
+    "datenschutz_akzeptiert",
+    "datenschutz_akzeptiert_am",
+    "vollmacht_status",
+    "unfallmitteilung_status",
+    "interne_notizen",
+    "anschlussschreiben_url",
+    "anschlussschreiben_sendedatum",
+    "anschlussschreiben_unterschrift",
+    "anschlussschreiben_ocr_am",
+    "deaktiviert_am",
+    "deaktiviert_notiz",
+    "ruege_erhalten_am",
+    "ruege_grund",
+    "marketing_quelle",
+    "marketing_provision",
+    "marketing_provision_status",
+    "kanzlei_id",
+    "lead_preis_netto",
+    "lead_preis_typ",
+    "lead_preis_berechnet_am",
+    "guthaben_verrechnet_netto",
+    "sv_nachzahlung_netto",
+    "abrechnung_id",
+    "storno_grund",
+    "storno_durch_user_id",
+    "schadens_art",
+    "dokumente_vollstaendig_am_phase",
+    "kanzlei_abrechnung_id",
+    "kanzlei_provision_status",
+    "kanzlei_provision_ausgezahlt_am",
+    "vs_reaktion_typ",
+    "vs_reaktion_am",
+    "vs_ablehnungsgrund",
+    "ruege_gesendet_am",
+    "ruege_betrag",
+    "no_show_count",
+    "kuerzungs_betrag",
+    "vs_frist_bis",
+    "ruege_counter",
+    "schlussabrechnung_am",
+    "iban",
+    "bic",
+    "kontoinhaber",
+    "bankdaten_hinterlegt_am",
+    "finanzierung_leasing",
+    "finanzierungsgeber_name",
+    "finanzierungsgeber_adresse",
+    "finanzierungsgeber_vertragsnr",
+    "zahlungsweg",
+    "vorschaeden_beschreibung",
+    "technische_stellungnahme_status",
+    "technische_stellungnahme_beauftragt_am",
+    "technische_stellungnahme_hochgeladen_am",
+    "technische_stellungnahme_freigabe_am",
+    "nachbesichtigung_status",
+    "nachbesichtigung_angefordert_am",
+    "nachbesichtigung_termin_datum",
+    "nachbesichtigung_konfrontation",
+    "as_geforderte_summe",
+    "as_frist",
+    "as_vs_reaktion_text",
+    "as_salesforce_id",
+    "as_zuletzt_synced_am",
+    "lexdrive_case_id",
+    "eskalation_tag_14_am",
+    "eskalation_tag_21_am",
+    "eskalation_tag_28_am",
+    "cardentity_enriched_at",
+    "cardentity_report",
+    "vollmacht_geprueft_am",
+    "vollmacht_geprueft_von",
+    "vollmacht_pruefung_status",
+    "vollmacht_pruefung_begruendung",
+    "lexdrive_ocr_data",
+    "lexdrive_ocr_received_at",
+    "vs_kuerzung_grund",
+    "geschlossen_grund",
+    "nachbesichtigung_ergebnis",
+    "bevorzugter_kanal",
+    "werkstatt_seit_datum",
+    "nutzungsausfall",
+    "mietwagen_kanzlei_informiert",
+    "mietwagen_kanzlei_informiert_am",
+    "abrechnungsart_besprochen",
+    "abrechnungsart_notiz",
+    "abrechnungsart_besprochen_am",
+    "kundenbetreuer_zugewiesen_am",
+    "sv_briefing_text",
+    "sv_briefing_generated_at",
+    "sv_briefing_model",
+    "sv_briefing_version",
+    "sv_briefing_struktur",
+    "sv_notizen_vor_ort",
+    "makler_id",
+    "gegner_schadennummer",
+    "wunschtermin",
+    "vs_quote_prozent",
+    "vs_quote_grund",
+    "vs_quote_akzeptiert_am",
+    "vs_quote_betrag_ausgezahlt",
+    "vs_kuerzungs_typ",
+    "auszahlung_gutachter_eingegangen_am",
+    "auszahlung_zahlungsweg",
+    "eskalation_tag_14_ergebnis",
+    "eskalation_tag_14_ergebnis_am",
+    "eskalation_tag_14_ergebnis_von",
+    "eskalation_tag_21_ergebnis",
+    "eskalation_tag_21_ergebnis_am",
+    "eskalation_tag_21_ergebnis_von",
+    "eskalation_tag_28_ergebnis",
+    "eskalation_tag_28_ergebnis_am",
+    "eskalation_tag_28_ergebnis_von",
+    "nachbesichtigung_kunde_termin_vorschlaege",
+    "nachbesichtigung_kunde_termin_eingereicht_am",
+    "nachbesichtigung_sv_konfrontation_gewuenscht",
+    "nachbesichtigung_sv_termin_vereinbart_am",
+    "auszahlung_gutachter_betrag",
+    "ruege_frist_tage",
+    "klage_uebergeben_am",
+    "fallakte_angelegt_am",
+    "kunde_adresse",
+    "kunde_lat",
+    "kunde_lng",
+    "technische_stellungnahme_notiz_sv",
+    "zb1_status",
+    "unfall_uhrzeit",
+    "unfallort_lat",
+    "unfallort_lng",
+    "bkat_unfallart",
+    "mietwagen_hat",
+    "mietwagen_seit_datum",
+    "mietwagen_limit_tage",
+    "mietwagen_limit_grund",
+    "mietwagen_rechnung_vorhanden",
+    "mietwagen_rechnung_url",
+    "mietwagen_argumentations_puffer",
+    "mietwagen_vermieter",
+    "aktueller_termin_id",
+    "aktueller_termin_start",
+    "aktueller_termin_end",
+    "aktueller_termin_status",
+    "aktueller_termin_sv_id",
+    "aktueller_termin_kanal",
+    "aktueller_termin_typ",
+    "aktueller_termin_final_verbindlich_ab",
+    "sv_termin",
+    "gutachter_termin_status",
+    "gutachter_termin_bestaetigt",
+    "gutachter_gegenvorschlag_datum",
+    "gutachter_gegenvorschlag_grund",
+    "personenschaden_flag",
+    "mietwagen_flag",
+    "halter_ungleich_fahrer_flag",
+    "sachschaden_flag",
+    "claim_id",
+    "sv_termin_dokument_reminder_gesendet_am",
+    "unfallort_kategorie",
+    "fahrzeug_hersteller_raw",
+    "auszahlung_kunde_betrag",
+    "auszahlung_kunde_eingegangen_am",
+    "abrechnungsweg"
+   ]
+  },
+  "v_claim_dokumente": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "slot_id",
+    "label",
+    "kategorie",
+    "beschreibung",
+    "freigeschaltet",
+    "pflicht",
+    "status",
+    "storage_path",
+    "original_filename",
+    "dokument_id",
+    "hochgeladen_am",
+    "sichtbar_fuer",
+    "uploadbar_von",
+    "frist",
+    "quelle",
+    "angefordert_von_rolle",
+    "pflicht_row_id",
+    "sort_order"
+   ]
+  },
+  "v_claim_for_gast": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "schadentag",
+    "schadenzeit",
+    "schadenort_ort",
+    "schadenort_plz",
+    "schadenort_land",
+    "schadenort_kategorie",
+    "hergang_kunde_text",
+    "schadenart",
+    "unfall_konstellation",
+    "fahrerflucht",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "gegner_versicherung_id",
+    "hat_personenschaden",
+    "hat_mietwagen",
+    "unfallskizze_url",
+    "unfallskizze_svg",
+    "status",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "v_claim_full": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "schadentag",
+    "schadenzeit",
+    "entdeckt_am",
+    "schadenort_adresse",
+    "schadenort_plz",
+    "schadenort_ort",
+    "schadenort_land",
+    "schadenort_lat",
+    "schadenort_lng",
+    "schadenort_kategorie",
+    "hergang_kunde_text",
+    "hergang_sv_text",
+    "schadenart",
+    "fall_typ",
+    "unfall_konstellation",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "polizei_vor_ort",
+    "polizeibericht_status",
+    "geschaedigter_user_id",
+    "gegnerisches_vehicle_id",
+    "gegner_versicherung_id",
+    "gegner_versicherungsnummer",
+    "gegner_aktenzeichen",
+    "gegner_bekannt",
+    "anzahl_beteiligte_total",
+    "hat_personenschaden",
+    "hat_mietwagen",
+    "hat_nutzungsausfall",
+    "hat_sachschaden",
+    "hat_abschleppung",
+    "sachschaden_beschreibung",
+    "halter_ungleich_fahrer",
+    "kunden_konstellation",
+    "unfallskizze_url",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "status",
+    "abgeschlossen_am",
+    "verjaehrt_am",
+    "created_at",
+    "updated_at",
+    "created_by_user_id",
+    "created_via",
+    "claim_nummer",
+    "lead_id",
+    "kundenbetreuer_id",
+    "vs_ablehnungs_grund",
+    "regulierungs_betrag",
+    "endzustand_gesetzt_durch_user_id",
+    "endzustand_gesetzt_am",
+    "endzustand_grund",
+    "kanzlei_wunsch",
+    "kanzlei_wunsch_gefragt_am",
+    "kanzlei_wunsch_gefragt_in_phase",
+    "fall_id",
+    "sv_id",
+    "service_typ",
+    "fall_status",
+    "fall_created_at",
+    "fall_updated_at",
+    "kundenbetreuer_fallback_flag",
+    "szenario",
+    "dokumente_vollstaendig_fuer_phase",
+    "dokumente_reminder_whatsapp_letzte_sendung",
+    "no_show_gemeldet_am",
+    "re_termin_token",
+    "sa_unterschrieben_am",
+    "vollmacht_signiert_am",
+    "mandatsnummer",
+    "re_termin_token_eingelaufen_am",
+    "re_termin_eskalation_an_kb_am",
+    "storniert_am",
+    "anschlussschreiben_am",
+    "vs_eskalationsstufe",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_typ",
+    "sa_unterschrieben",
+    "regulierung_am",
+    "regulierung_betrag",
+    "gutachten_betrag",
+    "gutachten_eingegangen_am",
+    "sv_zugewiesen_am",
+    "schadens_ursache",
+    "schadens_plz",
+    "schadens_ort",
+    "schadens_fall_typ",
+    "gegner_anzahl_beteiligte",
+    "gegner_fahrzeugtyp",
+    "organisation_id",
+    "dispatch_id",
+    "kunde_id",
+    "ist_aktiv",
+    "deaktiviert_grund",
+    "hat_vorschaeden",
+    "vorschaden_anzahl",
+    "vorschaden_letzter_datum",
+    "vorschaden_typ_b_bericht",
+    "cardentity_abfrage_am",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_notiz",
+    "besichtigungsort_place_id",
+    "parties",
+    "vehicle_involvements",
+    "payments",
+    "mietwagen",
+    "vs_korrespondenz",
+    "repairs",
+    "main_phase",
+    "sub_phase",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "halter_telefon",
+    "halter_email",
+    "halter_geburtsdatum",
+    "halter_name",
+    "gegner_name",
+    "gegner_versicherung_name",
+    "gegner_kennzeichen",
+    "fin_vin",
+    "lackfarbe_code",
+    "fahrzeug_baujahr",
+    "fahrzeug_farbe",
+    "fahrzeug_ausstattung",
+    "hsn",
+    "tsn",
+    "kilometerstand",
+    "erstzulassung",
+    "kennzeichen_buchstaben",
+    "fin_quelle",
+    "fin_extrahiert_am",
+    "vorschaden_erkannt",
+    "notizen",
+    "zeugen_kontakte",
+    "kunde_email",
+    "vorsteuerabzugsberechtigt",
+    "kunde_vorname",
+    "kunde_nachname",
+    "kunde_telefon",
+    "kunde_strasse",
+    "kunde_plz",
+    "kunde_stadt",
+    "firma_name",
+    "ist_fahrzeughalter",
+    "fahrzeug_fahrbereit",
+    "fahrzeugschaden_beschreibung",
+    "fahrzeug_aufbau",
+    "gegner_versicherung",
+    "operative_status",
+    "spezifikation",
+    "zeugen_vorhanden",
+    "sprache",
+    "abrechnungsweg"
+   ]
+  },
+  "v_claim_kunde_name": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "kunde_vorname",
+    "kunde_nachname",
+    "kunde_anzeigename"
+   ]
+  },
+  "v_claim_listing": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "claim_nummer",
+    "status",
+    "schadentag",
+    "kunden_konstellation",
+    "created_at",
+    "updated_at",
+    "fall_id",
+    "sv_id",
+    "faelle_kundenbetreuer_id",
+    "claim_kundenbetreuer_id",
+    "service_typ",
+    "kunde_anzeigename",
+    "kunde_vorname",
+    "kunde_nachname",
+    "kennzeichen",
+    "main_phase",
+    "sub_phase"
+   ]
+  },
+  "v_claim_parties_safe": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "claim_id",
+    "rolle",
+    "reihenfolge",
+    "user_id",
+    "vorname",
+    "nachname",
+    "firma",
+    "ist_gewerbe",
+    "telefon",
+    "email",
+    "adresse_strasse",
+    "geburtsdatum",
+    "ist_halter",
+    "ist_fahrer",
+    "kennzeichen",
+    "fahrzeugtyp_klartext",
+    "vehicle_id",
+    "versicherungsnummer",
+    "versicherung_id",
+    "ist_aktiv",
+    "ist_anonymisiert",
+    "quelle",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "v_claim_payments": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "vs_soll",
+    "vs_ist",
+    "vs_am",
+    "vs_status",
+    "vs_zahlungsweg",
+    "kunde_soll",
+    "kunde_ist",
+    "kunde_am",
+    "kunde_status",
+    "sv_soll",
+    "sv_ist",
+    "sv_am",
+    "sv_status"
+   ]
+  },
+  "v_claim_phase": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "main_phase",
+    "sub_phase"
+   ]
+  },
+  "v_claim_sv": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "claim_nummer",
+    "status",
+    "fall_typ",
+    "abgeschlossen_am",
+    "anzahl_beteiligte_total",
+    "auslandskennzeichen",
+    "brn",
+    "created_at",
+    "entdeckt_am",
+    "fahrerflucht",
+    "finanzierung_leasing",
+    "gegner_aktenzeichen",
+    "gegner_bekannt",
+    "gegner_versicherung_id",
+    "gegner_versicherungsnummer",
+    "gegnerisches_vehicle_id",
+    "gewerbe_flag",
+    "halter_ungleich_fahrer",
+    "hat_abschleppung",
+    "hat_mietwagen",
+    "hat_nutzungsausfall",
+    "hat_personenschaden",
+    "hat_sachschaden",
+    "hergang_kunde_text",
+    "hergang_sv_text",
+    "kunde_no_show_count",
+    "kunden_konstellation",
+    "kundenbetreuer_id",
+    "letzter_no_show_am",
+    "letzter_sv_no_show_am",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "polizei_vor_ort",
+    "polizeibericht_status",
+    "sachschaden_beschreibung",
+    "schadenart",
+    "schadenort_adresse",
+    "schadenort_kategorie",
+    "schadenort_land",
+    "schadenort_lat",
+    "schadenort_lng",
+    "schadenort_ort",
+    "schadenort_plz",
+    "schadentag",
+    "schadenzeit",
+    "spezifikation",
+    "sv_id",
+    "sv_no_show_count",
+    "unfall_konstellation",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_generiert_am",
+    "unfallskizze_svg",
+    "unfallskizze_url",
+    "updated_at",
+    "vehicle_id",
+    "vorschaden_mit_vs_abgerechnet",
+    "vorsteuerabzugsberechtigt",
+    "zeugen_kontakte"
+   ]
+  },
+  "v_claim_timeline": {
+   "kind": "v",
+   "columns": [
+    "event_id",
+    "claim_id",
+    "fall_id",
+    "event_at",
+    "event_typ",
+    "event_kategorie",
+    "actor_user_id",
+    "actor_rolle",
+    "payload_jsonb",
+    "sichtbar_fuer_kunde",
+    "sichtbar_fuer_sv",
+    "detail_url_path"
+   ]
+  },
+  "v_claim_timeline_ungated_internal": {
+   "kind": "v",
+   "columns": [
+    "event_id",
+    "claim_id",
+    "fall_id",
+    "event_at",
+    "event_typ",
+    "event_kategorie",
+    "actor_user_id",
+    "actor_rolle",
+    "payload_jsonb",
+    "sichtbar_fuer_kunde",
+    "sichtbar_fuer_sv",
+    "detail_url_path"
+   ]
+  },
+  "v_claim_workstate": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "claim_nummer",
+    "lead_id",
+    "kundenbetreuer_id",
+    "sv_id",
+    "main_phase",
+    "sub_phase",
+    "status",
+    "operative_status",
+    "ist_aktiv",
+    "kennzeichen",
+    "kunde_name",
+    "schadenhoehe",
+    "sa_unterschrieben",
+    "sv_zugewiesen_am",
+    "gutachten_eingegangen_am",
+    "anschlussschreiben_am",
+    "regulierung_am",
+    "abgeschlossen_am",
+    "storniert_am",
+    "updated_at",
+    "created_at",
+    "dokumente_vollstaendig_fuer_phase",
+    "vs_eskalationsstufe",
+    "fall_id",
+    "edit_notizen",
+    "edit_interne_notizen",
+    "edit_schadens_hoehe_netto",
+    "override_phase",
+    "abrechnungsweg",
+    "reparatur_werkstatt_id",
+    "reparatur_status",
+    "reparatur_erledigt_am"
+   ]
+  },
+  "v_embed_billing_faellig": {
+   "kind": "v",
+   "columns": [
+    "anfrage_id",
+    "vorname",
+    "nachname",
+    "schadentyp",
+    "erstellt_am",
+    "embed_site_id",
+    "sv_id",
+    "betrag_netto",
+    "site_name",
+    "termin_id",
+    "termin_end_zeit"
+   ]
+  },
+  "v_faelle_mit_aktuellem_termin": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "lead_id",
+    "kunde_id",
+    "status",
+    "betreuungspaket",
+    "schadens_beschreibung",
+    "schadens_datum",
+    "schadens_entdeckt_am",
+    "schadens_adresse",
+    "schadens_plz",
+    "schadens_ort",
+    "abtretung_pdf",
+    "vollmacht_pdf",
+    "abtretung_signiert_am",
+    "vollmacht_signiert_am",
+    "sv_id",
+    "sv_zugewiesen_am",
+    "gutachten_eingegangen_am",
+    "gutachten_betrag",
+    "kanzlei_uebergeben_am",
+    "anschlussschreiben_am",
+    "regulierung_betrag",
+    "regulierung_am",
+    "filmcheck_ok",
+    "filmcheck_am",
+    "filmcheck_notizen",
+    "notizen",
+    "created_at",
+    "updated_at",
+    "schadens_fall_typ",
+    "kunden_konstellation",
+    "kennzeichen",
+    "fahrzeug_typ",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "fahrzeug_baujahr",
+    "gegner_name",
+    "gegner_versicherung",
+    "gegner_kennzeichen",
+    "gegner_bekannt",
+    "polizei_aktenzeichen",
+    "polizei_bericht_vorhanden",
+    "personenschaden_flag",
+    "mietwagen_flag",
+    "gewerbe_flag",
+    "halter_ungleich_fahrer_flag",
+    "ust_id",
+    "leasinggeber_name",
+    "leasinggeber_informiert",
+    "bank_name",
+    "prioritaet",
+    "onboarding_complete",
+    "dispatch_id",
+    "kundenbetreuer_id",
+    "konvertiert_am",
+    "konvertiert_von_lead",
+    "status_changed_at",
+    "regulierung_angekuendigt_am",
+    "zahlung_eingegangen_am",
+    "abgeschlossen_am",
+    "google_review_gesendet",
+    "vs_eskalationsstufe",
+    "fin_quelle",
+    "fin_extrahiert_am",
+    "vorschaden_geprueft",
+    "vorschaden_anzahl",
+    "vorschaden_letzter_datum",
+    "vorschaden_typ_a_ergebnis",
+    "vorschaden_typ_b_bericht",
+    "vorschaden_typ_b_pdf_url",
+    "cardentity_abfrage_am",
+    "schadens_hoehe_netto",
+    "nutzungsausfall_tagessatz",
+    "reparaturdauer_tage",
+    "gutachter_honorar",
+    "ocr_extrahiert_am",
+    "ocr_rohdaten",
+    "ki_kalkulation",
+    "ki_kalkulation_am",
+    "ki_geschaetzte_kosten_min",
+    "ki_geschaetzte_kosten_max",
+    "kanzlei_ansprechpartner_name",
+    "kanzlei_ansprechpartner_email",
+    "kanzlei_ansprechpartner_telefon",
+    "kanzlei_ansprechpartner_position",
+    "mandatsnummer",
+    "losfahren_erinnerung_gesendet",
+    "termin_erinnerung_5min_gesendet",
+    "geschaetzte_fahrzeit_min",
+    "geschaetzte_fahrdistanz_km",
+    "gcal_event_id",
+    "gutachten_vorhanden",
+    "gutachten_hochgeladen_am",
+    "gutachten_positionen",
+    "gutachten_nummer",
+    "reparaturkosten",
+    "wertminderung",
+    "nutzungsausfall_gesamt",
+    "regulierungsweise",
+    "gegner_versicherungsnummer",
+    "sa_unterschrieben",
+    "sa_unterschrieben_am",
+    "sa_pdf_url",
+    "sa_unterschrift_url",
+    "datenschutz_akzeptiert",
+    "datenschutz_akzeptiert_am",
+    "vollmacht_status",
+    "polizei_vor_ort",
+    "unfallhergang",
+    "unfallmitteilung_status",
+    "unfallort",
+    "unfalldatum",
+    "interne_notizen",
+    "anschlussschreiben_url",
+    "anschlussschreiben_sendedatum",
+    "anschlussschreiben_unterschrift",
+    "anschlussschreiben_ocr_am",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_place_id",
+    "ist_aktiv",
+    "deaktiviert_am",
+    "deaktiviert_grund",
+    "deaktiviert_notiz",
+    "szenario",
+    "ruege_erhalten_am",
+    "ruege_grund",
+    "fahrzeug_farbe",
+    "erstzulassung",
+    "kilometerstand",
+    "firma_name",
+    "marketing_quelle",
+    "marketing_provision",
+    "marketing_provision_status",
+    "gutachten_stundensatz",
+    "kanzlei_id",
+    "kanzlei_honorar",
+    "zahlung_erwartet_am",
+    "zahlung_betrag",
+    "lead_preis_netto",
+    "lead_preis_typ",
+    "lead_preis_berechnet_am",
+    "guthaben_verrechnet_netto",
+    "sv_nachzahlung_netto",
+    "abrechnung_id",
+    "storniert_am",
+    "storno_grund",
+    "storno_durch_user_id",
+    "no_show_gemeldet_am",
+    "spezifikation",
+    "schadens_art",
+    "organisation_id",
+    "dokumente_vollstaendig_fuer_phase",
+    "dokumente_vollstaendig_am_phase",
+    "unfall_konstellation",
+    "gegner_anzahl_beteiligte",
+    "gegner_fahrzeugtyp",
+    "dokumente_reminder_whatsapp_letzte_sendung",
+    "fin_vin",
+    "source_channel",
+    "source_domain",
+    "schadens_ursache",
+    "kanzlei_abrechnung_id",
+    "kanzlei_provision_status",
+    "kanzlei_provision_ausgezahlt_am",
+    "service_typ",
+    "vs_reaktion_typ",
+    "vs_reaktion_am",
+    "vs_ablehnungsgrund",
+    "ruege_gesendet_am",
+    "ruege_betrag",
+    "no_show_count",
+    "kuerzungs_betrag",
+    "vs_frist_bis",
+    "ruege_counter",
+    "schlussabrechnung_am",
+    "iban",
+    "bic",
+    "kontoinhaber",
+    "bankdaten_hinterlegt_am",
+    "ist_fahrzeughalter",
+    "finanzierung_leasing",
+    "vorsteuerabzugsberechtigt",
+    "schadens_hergang",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "halter_telefon",
+    "halter_email",
+    "finanzierungsgeber_name",
+    "finanzierungsgeber_adresse",
+    "finanzierungsgeber_vertragsnr",
+    "zahlungsweg",
+    "hat_vorschaeden",
+    "vorschaeden_beschreibung",
+    "technische_stellungnahme_status",
+    "technische_stellungnahme_beauftragt_am",
+    "technische_stellungnahme_hochgeladen_am",
+    "technische_stellungnahme_freigabe_am",
+    "nachbesichtigung_status",
+    "nachbesichtigung_angefordert_am",
+    "nachbesichtigung_termin_datum",
+    "nachbesichtigung_konfrontation",
+    "as_geforderte_summe",
+    "as_frist",
+    "as_vs_reaktion_text",
+    "as_salesforce_id",
+    "as_zuletzt_synced_am",
+    "lexdrive_case_id",
+    "eskalation_tag_14_am",
+    "eskalation_tag_21_am",
+    "eskalation_tag_28_am",
+    "unfallort_kategorie",
+    "unfallskizze_url",
+    "fahrzeug_ausstattung",
+    "cardentity_enriched_at",
+    "cardentity_report",
+    "vollmacht_geprueft_am",
+    "vollmacht_geprueft_von",
+    "vollmacht_pruefung_status",
+    "vollmacht_pruefung_begruendung",
+    "lexdrive_ocr_data",
+    "lexdrive_ocr_received_at",
+    "vs_kuerzung_grund",
+    "geschlossen_grund",
+    "nachbesichtigung_ergebnis",
+    "bevorzugter_kanal",
+    "gegner_versicherung_id",
+    "zeugen_kontakte",
+    "werkstatt_seit_datum",
+    "fahrzeug_fahrbereit",
+    "nutzungsausfall",
+    "mietwagen_kanzlei_informiert",
+    "mietwagen_kanzlei_informiert_am",
+    "halter_geburtsdatum",
+    "abrechnungsart_besprochen",
+    "abrechnungsart_notiz",
+    "abrechnungsart_besprochen_am",
+    "gegner_versicherung_anfrage_datum",
+    "sprache",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "zeugen_vorhanden",
+    "vorschaden_erkannt",
+    "sv_termin_dokument_reminder_gesendet_am",
+    "kundenbetreuer_fallback_flag",
+    "kundenbetreuer_zugewiesen_am",
+    "sv_briefing_text",
+    "sv_briefing_generated_at",
+    "sv_briefing_model",
+    "sv_briefing_version",
+    "sv_briefing_struktur",
+    "sv_notizen_vor_ort",
+    "makler_id",
+    "sachschaden_flag",
+    "sachschaden_beschreibung",
+    "gegner_schadennummer",
+    "halter_name",
+    "wunschtermin",
+    "vs_quote_prozent",
+    "vs_quote_grund",
+    "vs_quote_akzeptiert_am",
+    "vs_quote_betrag_ausgezahlt",
+    "vs_kuerzungs_typ",
+    "auszahlung_kunde_betrag",
+    "auszahlung_kunde_eingegangen_am",
+    "auszahlung_gutachter_eingegangen_am",
+    "auszahlung_zahlungsweg",
+    "eskalation_tag_14_ergebnis",
+    "eskalation_tag_14_ergebnis_am",
+    "eskalation_tag_14_ergebnis_von",
+    "eskalation_tag_21_ergebnis",
+    "eskalation_tag_21_ergebnis_am",
+    "eskalation_tag_21_ergebnis_von",
+    "eskalation_tag_28_ergebnis",
+    "eskalation_tag_28_ergebnis_am",
+    "eskalation_tag_28_ergebnis_von",
+    "nachbesichtigung_kunde_termin_vorschlaege",
+    "nachbesichtigung_kunde_termin_eingereicht_am",
+    "nachbesichtigung_sv_konfrontation_gewuenscht",
+    "nachbesichtigung_sv_termin_vereinbart_am",
+    "auszahlung_gutachter_betrag",
+    "ruege_frist_tage",
+    "klage_uebergeben_am",
+    "fallakte_angelegt_am",
+    "kunde_vorname",
+    "kunde_nachname",
+    "kunde_telefon",
+    "kunde_email",
+    "kunde_strasse",
+    "kunde_plz",
+    "kunde_stadt",
+    "kunde_adresse",
+    "kunde_lat",
+    "kunde_lng",
+    "hsn",
+    "tsn",
+    "technische_stellungnahme_notiz_sv",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "polizeibericht_status",
+    "zb1_status",
+    "unfall_uhrzeit",
+    "unfallort_lat",
+    "unfallort_lng",
+    "bkat_unfallart",
+    "fahrzeugschaden_beschreibung",
+    "mietwagen_hat",
+    "mietwagen_seit_datum",
+    "mietwagen_limit_tage",
+    "mietwagen_limit_grund",
+    "mietwagen_rechnung_vorhanden",
+    "mietwagen_rechnung_url",
+    "mietwagen_argumentations_puffer",
+    "mietwagen_vermieter",
+    "vehicle_id",
+    "claim_id",
+    "lackfarbe_code",
+    "aktueller_termin_id",
+    "aktueller_termin_start",
+    "aktueller_termin_end",
+    "aktueller_termin_status",
+    "aktueller_termin_sv_id",
+    "aktueller_termin_kanal",
+    "aktueller_termin_typ",
+    "aktueller_termin_final_verbindlich_ab",
+    "sv_termin",
+    "gutachter_termin_status",
+    "gutachter_termin_bestaetigt",
+    "gutachter_gegenvorschlag_datum",
+    "gutachter_gegenvorschlag_grund",
+    "claim_nummer",
+    "main_phase",
+    "sub_phase"
+   ]
+  },
+  "v_funnel_real": {
+   "kind": "v",
+   "columns": [
+    "externe_leads",
+    "konvertiert",
+    "echte_claims",
+    "claims_mit_sv",
+    "gutachten",
+    "abgeschlossen"
+   ]
+  },
+  "v_gutachten_werte": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "lead_id",
+    "gutachten_id",
+    "sv_id",
+    "gutachten_status",
+    "gutachten_datum",
+    "gutachten_ocr_processed_at",
+    "gutachten_ocr_raw",
+    "gutachten_ocr_error",
+    "gutachten_ocr_manuell_ueberschrieben",
+    "gutachten_fin",
+    "gutachten_kennzeichen",
+    "gutachten_erstzulassung",
+    "gutachten_laufleistung_km",
+    "gutachten_tuv_bis",
+    "gutachten_fahrzeug_typ",
+    "gutachten_farbe",
+    "gutachten_farbcode",
+    "gutachten_kraftstoff",
+    "gutachten_vorschaeden_text",
+    "gutachten_lackmesswert_max_my",
+    "gutachten_karosseriezustand",
+    "gutachten_zeit_ak_std",
+    "gutachten_zeit_kar_std",
+    "gutachten_zeit_lack_std",
+    "gutachten_lohnsatz_ak_eur",
+    "gutachten_lohnsatz_kar_eur",
+    "gutachten_lohnsatz_lack_eur",
+    "gutachten_materialkosten_eur",
+    "gutachten_lackmaterial_eur",
+    "gutachten_verbringung_eur",
+    "gutachten_mietwagen_klasse",
+    "gutachten_mietwagen_tagessatz_eur",
+    "gutachten_nutzungsausfall_tagessatz_eur",
+    "gutachten_sv_honorar_netto",
+    "gutachten_sv_honorar_brutto",
+    "gutachten_kalkulationssystem",
+    "gutachten_seitenzahl",
+    "reparaturkosten_netto",
+    "reparaturkosten_brutto",
+    "minderwert",
+    "restwert",
+    "wiederbeschaffungswert",
+    "wiederbeschaffungsdauer_tage",
+    "nutzungsausfall_tage",
+    "totalschaden",
+    "gesamt_schadensbetrag",
+    "fertiggestellt_am",
+    "ocr_finished_at",
+    "ki_kalkulation",
+    "ki_kalkulation_am",
+    "ki_geschaetzte_kosten_min",
+    "ki_geschaetzte_kosten_max",
+    "pdf_uploaded_at",
+    "positionen",
+    "auftragsnummer"
+   ]
+  },
+  "v_lead_termin_gutachter": {
+   "kind": "v",
+   "columns": [
+    "lead_id",
+    "termin_id",
+    "hat_termin",
+    "termin_start",
+    "termin_status",
+    "gutachter_typ",
+    "gutachter_quelle",
+    "gutachter_id",
+    "hat_gutachter",
+    "gutachter_name",
+    "kunden_pick_name",
+    "gutachter_divergiert"
+   ]
+  },
+  "v_lead_workstate": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "email",
+    "telefon",
+    "status",
+    "source_channel",
+    "source_domain",
+    "kontaktversuche",
+    "verpasste_anrufe",
+    "missed_call_times",
+    "qualifizierung_data",
+    "aircall_contact_id",
+    "timeline",
+    "wa_gesendet",
+    "kanzlei_triggered",
+    "notiz",
+    "zugewiesen_an",
+    "created_at",
+    "updated_at",
+    "schadens_fall_typ",
+    "kunden_konstellation",
+    "personenschaden_flag",
+    "mietwagen_flag",
+    "gewerbe_flag",
+    "halter_ungleich_fahrer_flag",
+    "gegner_bekannt",
+    "polizeibericht_pflicht",
+    "gutachter_termin",
+    "kennzeichen",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "wunschtermin",
+    "fahrzeug_standort_adresse",
+    "fahrzeug_standort_plz",
+    "sa_unterschrieben",
+    "sa_unterschrieben_am",
+    "qualifizierungs_phase",
+    "sf_variante",
+    "gegner_name",
+    "gegner_versicherung",
+    "gegner_kennzeichen",
+    "eigene_versicherung",
+    "eigene_policennr",
+    "polizei_aktenzeichen",
+    "leasing_geber",
+    "finanzierung_bank",
+    "firma_name",
+    "halter_name",
+    "sa_datum",
+    "vollmacht_datum",
+    "mandatstyp",
+    "anruf_versuche",
+    "letzter_anruf_am",
+    "letzter_anruf_status",
+    "flow_link_geoeffnet",
+    "flow_link_abgeschlossen",
+    "disqualifiziert",
+    "disqualifiziert_grund",
+    "disqualifiziert_notiz",
+    "disqualifiziert_am",
+    "unfallhergang",
+    "polizei_vor_ort",
+    "unfallmitteilung_hochgeladen",
+    "fahrzeug_farbe",
+    "erstzulassung",
+    "fin",
+    "kilometerstand",
+    "unfallort",
+    "unfallort_lat",
+    "unfallort_lng",
+    "unfalldatum",
+    "kunde_adresse",
+    "kunde_lat",
+    "kunde_lng",
+    "konvertiert_zu_fall_id",
+    "spezifikation",
+    "schadens_art",
+    "unfall_konstellation",
+    "gegner_anzahl_beteiligte",
+    "gegner_fahrzeugtyp",
+    "service_typ",
+    "ist_fahrzeughalter",
+    "finanzierung_leasing",
+    "vorsteuerabzugsberechtigt",
+    "halter_vorname",
+    "halter_nachname",
+    "halter_strasse",
+    "halter_plz",
+    "halter_stadt",
+    "halter_telefon",
+    "halter_email",
+    "finanzierungsgeber_name",
+    "finanzierungsgeber_adresse",
+    "finanzierungsgeber_vertragsnr",
+    "kunde_strasse",
+    "kunde_plz",
+    "kunde_stadt",
+    "schadens_hergang",
+    "hat_vorschaeden",
+    "vorschaeden_beschreibung",
+    "schuldfrage",
+    "aufklaerung_teilschuld_bestaetigt",
+    "schaden_sichtbar",
+    "nutzungsausfall",
+    "hat_haftpflicht",
+    "schadentyp",
+    "schadentyp_freitext",
+    "parkplatz_kamera",
+    "unfallort_kategorie",
+    "unfallskizze_url",
+    "zeuge_name",
+    "zeuge_anschrift",
+    "zeuge_telefon",
+    "zeuge_email",
+    "fahrzeug_ausstattung",
+    "cardentity_enriched_at",
+    "cardentity_report",
+    "gespraech_gestartet_am",
+    "gespraech_beendet_am",
+    "gespraech_dauer_sekunden",
+    "fahrerflucht",
+    "auslandskennzeichen",
+    "zeugen",
+    "gegner_schadennummer",
+    "unfall_uhrzeit",
+    "fahrzeug_fahrbereit",
+    "fahrzeug_baujahr",
+    "zb1_token",
+    "zb1_status",
+    "zb1_url",
+    "zb1_ocr_daten",
+    "zb1_gesendet_am",
+    "zb1_hochgeladen_am",
+    "bevorzugter_kanal",
+    "hsn",
+    "tsn",
+    "gegner_versicherung_id",
+    "polizeibericht_token",
+    "polizeibericht_status",
+    "polizeibericht_gesendet_am",
+    "polizeibericht_hochgeladen_am",
+    "polizeibericht_url",
+    "polizeibericht_ocr_daten",
+    "wunschtermin_wochentage",
+    "zb1_token_expires_at",
+    "zb1_upload_versuche",
+    "zeugen_kontakte",
+    "werkstatt_seit_datum",
+    "halter_geburtsdatum",
+    "gegner_versicherung_anfrage_datum",
+    "sprache",
+    "schadensfoto_urls",
+    "unfallskizze_svg",
+    "unfallskizze_bestaetigt",
+    "unfallskizze_ablehnung_grund",
+    "unfallskizze_generiert_am",
+    "zeugen_vorhanden",
+    "promotion_code_id",
+    "claude_vision_analyse",
+    "dat_einschaetzung",
+    "dat_pdf_url",
+    "voice_input_quelle",
+    "reminder_token",
+    "reminder_1_sent_at",
+    "reminder_2_sent_at",
+    "reminder_3_sent_at",
+    "sachschaden_flag",
+    "sachschaden_beschreibung",
+    "disqualifiziert_grund_key",
+    "besichtigungsort_adresse",
+    "besichtigungsort_lat",
+    "besichtigungsort_lng",
+    "besichtigungsort_place_id",
+    "vollmacht_signiert_am",
+    "bkat_unfallart",
+    "fahrzeug_standort_lat",
+    "fahrzeug_standort_lng",
+    "fahrzeug_standort_place_id",
+    "fahrzeugschaden_beschreibung",
+    "vehicle_id",
+    "lead_nummer",
+    "konvertiert_zu_claim_id",
+    "konvertiert_am",
+    "konvertiert_durch_user_id",
+    "fehlende_felder_jsonb",
+    "anrede",
+    "lackfarbe_code",
+    "rueckruf_geplant_am",
+    "ansprechpartner_beziehung",
+    "kunde_id",
+    "kennzeichen_kreis",
+    "kennzeichen_buchstaben",
+    "kennzeichen_zahl",
+    "kennzeichen_suffix",
+    "fahrzeug_aufbau",
+    "besichtigungsort_notiz",
+    "brn",
+    "whatsapp_verfuegbar",
+    "whatsapp_geprueft_am",
+    "hat_whatsapp",
+    "ga_client_id",
+    "kanzlei_wunsch",
+    "gegner_telefon",
+    "gegner_email",
+    "zeugenaussage_url",
+    "zeugenaussage_status",
+    "zeugenaussage_hochgeladen_am",
+    "werkstatt_id",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "reparatur_werkstatt_id",
+    "reparatur_werkstatt_zugewiesen_am",
+    "reparatur_werkstatt_zugewiesen_von",
+    "reparatur_werkstatt_quelle",
+    "reparaturwunsch",
+    "reparatur_vermittlung_status",
+    "reparatur_werkstatt_extern",
+    "winback_sent_at",
+    "winback_opt_out",
+    "reminder_4_sent_at",
+    "schadenskategorie",
+    "reparatur_wunschtermin",
+    "dsgvo_zustimmung_am",
+    "abrechnungsweg",
+    "termin_status",
+    "fl_gesendet_am",
+    "fl_geoeffnet_am",
+    "fl_abgeschlossen_am",
+    "fl_fall_id"
+   ]
+  },
+  "v_live_ops_sv": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "gutachter_typ",
+    "verifiziert",
+    "paket",
+    "paket_faelle_genutzt",
+    "paket_faelle_gesamt",
+    "standort_lat",
+    "standort_lng",
+    "isochrone_polygon",
+    "portal_zugang_freigeschaltet",
+    "gesperrt_seit",
+    "urlaub_von",
+    "urlaub_bis",
+    "live_tracking_enabled",
+    "vorname",
+    "nachname",
+    "avatar_url",
+    "live_lat",
+    "live_lng",
+    "live_updated_at",
+    "live_heading"
+   ]
+  },
+  "v_offene_anfragen": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "email",
+    "telefon",
+    "kennzeichen",
+    "schadentyp",
+    "schadenort",
+    "wunschtermin",
+    "bevorzugter_kanal",
+    "sa_unterzeichnet_am",
+    "status",
+    "erstellt_am",
+    "source",
+    "variante",
+    "embed_site_id",
+    "konvertiert_zu_lead_id",
+    "herkunft",
+    "sa_vorhanden"
+   ]
+  },
+  "v_ops_rollup": {
+   "kind": "v",
+   "columns": [
+    "main_phase",
+    "kundenbetreuer_id",
+    "anzahl",
+    "stale_anzahl"
+   ]
+  },
+  "v_partner_billing": {
+   "kind": "v",
+   "columns": [
+    "quelle_tabelle",
+    "quelle_id",
+    "partner_typ",
+    "partner_id",
+    "partner_name",
+    "richtung",
+    "dokument_typ",
+    "referenz_nr",
+    "betrag_netto",
+    "ust_satz",
+    "ust_betrag",
+    "betrag_brutto",
+    "ust_status_bekannt",
+    "status_norm",
+    "status_roh",
+    "datum",
+    "faellig_am",
+    "erledigt_am",
+    "claim_id",
+    "fall_id"
+   ]
+  },
+  "v_sv_inbox": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "vorname",
+    "nachname",
+    "telefon",
+    "email",
+    "schadentyp",
+    "schadens_kurzbeschreibung",
+    "schadenort",
+    "wunschtermin_wann",
+    "bevorzugter_kanal",
+    "status",
+    "variante",
+    "embed_site_id",
+    "termin_id",
+    "konvertiert_zu_lead_id",
+    "abrechnungs_relevant",
+    "abrechnungs_betrag_eur",
+    "erstellt_am",
+    "site_name",
+    "site_slug"
+   ]
+  },
+  "v_vertrieb_kontakt": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "kind",
+    "name",
+    "email",
+    "telefon",
+    "plz",
+    "ort",
+    "lat",
+    "lng",
+    "owner_id",
+    "quelle",
+    "erstellt_am",
+    "roh_status",
+    "roh_ist_aktiv",
+    "roh_gesperrt",
+    "roh_verifiziert",
+    "roh_portal_zugang",
+    "roh_onboarding_offen",
+    "roh_warteliste",
+    "notizen",
+    "rolle"
+   ]
+  },
+  "v_werkstatt_auftrag": {
+   "kind": "v",
+   "columns": [
+    "claim_id",
+    "vermittlung_status",
+    "quelle",
+    "zugewiesen_am",
+    "richtung",
+    "claim_nummer",
+    "schadenart",
+    "reparaturwunsch",
+    "operative_status",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "kennzeichen",
+    "fin",
+    "besichtigung_start",
+    "besichtigung_ort",
+    "besichtigung_status",
+    "gutachter_firmenname",
+    "kunde_name",
+    "werkstatt_id",
+    "werkstatt_name",
+    "werkstatt_ansprechpartner",
+    "provision_betrag_netto",
+    "provision_status",
+    "reparatur_termin_id",
+    "reparatur_termin_status",
+    "reparatur_wunschtermin",
+    "reparatur_bestaetigter_termin",
+    "reparatur_absage_grund",
+    "gutachten_bericht_pdf_url",
+    "gutachten_reparaturkosten_netto",
+    "gutachten_reparaturkosten_brutto",
+    "gutachten_minderwert",
+    "gutachten_restwert",
+    "gutachten_wiederbeschaffungswert",
+    "gutachten_totalschaden",
+    "gutachten_fertiggestellt_am",
+    "abrechnungsweg",
+    "vermittler_werkstatt_id",
+    "reparatur_werkstatt_id",
+    "meine_rolle",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "reparatur_freigegeben_am",
+    "reparaturdauer_tage",
+    "unfallart",
+    "reparaturdauer_tage_kva",
+    "reparatur_rueckruf_wunschzeit"
+   ]
+  },
+  "v_werkstatt_lead": {
+   "kind": "v",
+   "columns": [
+    "id",
+    "werkstatt_id",
+    "vorname",
+    "nachname",
+    "telefon",
+    "email",
+    "fahrzeug_hersteller",
+    "fahrzeug_modell",
+    "kennzeichen",
+    "fin",
+    "erstzulassung",
+    "schadens_art",
+    "schadens_hergang",
+    "unfalldatum",
+    "unfallort",
+    "kostenvoranschlag_netto",
+    "kostenvoranschlag_brutto",
+    "status",
+    "created_at",
+    "schadentyp",
+    "gegner_name",
+    "gegner_versicherung",
+    "gegner_kennzeichen",
+    "gegner_telefon",
+    "gegner_email",
+    "gegner_bekannt",
+    "unfallhergang",
+    "unfall_konstellation",
+    "fahrzeug_standort_adresse",
+    "fahrzeug_standort_plz",
+    "werkstatt_intake_am"
+   ]
+  },
+  "vehicle_ownership_history": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "user_id",
+    "halter_label_anon",
+    "von",
+    "bis",
+    "erwerbsart",
+    "kilometerstand_bei_uebernahme",
+    "quelle",
+    "notiz",
+    "created_at"
+   ]
+  },
+  "vehicle_vorschaeden": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "schaden_datum",
+    "art",
+    "schwere",
+    "quelle",
+    "beschreibung",
+    "rohdaten",
+    "created_at",
+    "updated_at",
+    "claim_id",
+    "state"
+   ]
+  },
+  "vehicles": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fin",
+    "kennzeichen_aktuell",
+    "hsn",
+    "tsn",
+    "hersteller",
+    "modell_haupttyp",
+    "modell_untertyp",
+    "variante",
+    "bauart",
+    "aufbau",
+    "farbe_klartext",
+    "farbcode",
+    "ist_metallic",
+    "kraftstoff",
+    "leistung_kw",
+    "hubraum_ccm",
+    "zylinder",
+    "getriebe",
+    "antriebsart",
+    "co2_g_km",
+    "abgasnorm",
+    "tuerzahl",
+    "achsen",
+    "sitze",
+    "erstzulassung",
+    "baujahr_monat",
+    "produktionszeit_von",
+    "produktionszeit_bis",
+    "laenge_mm",
+    "breite_mm",
+    "hoehe_mm",
+    "radstand_mm",
+    "leermasse_kg",
+    "zul_gesamtmasse_kg",
+    "tankvolumen_l",
+    "aktueller_kilometerstand",
+    "aktueller_kilometerstand_at",
+    "status",
+    "current_owner_id",
+    "zb1_dokument_id",
+    "cardentity_letzter_pull",
+    "data_completeness_score",
+    "created_at",
+    "updated_at",
+    "kennzeichen_buchstaben",
+    "fahrzeug_ausstattung",
+    "fin_quelle",
+    "fin_extrahiert_am",
+    "cardentity_report",
+    "kennzeichen_normalized",
+    "fahrzeugklasse"
+   ]
+  },
+  "verfuegbarkeits_ausnahmen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "assignee_typ",
+    "assignee_id",
+    "von",
+    "bis",
+    "typ",
+    "grund",
+    "erstellt_am"
+   ]
+  },
+  "verified_contacts": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "person_id",
+    "kind",
+    "value",
+    "source",
+    "source_ref",
+    "verified_at",
+    "created_at"
+   ]
+  },
+  "versicherungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "schaden_telefon",
+    "schaden_email",
+    "hotline_telefon",
+    "webseite",
+    "adresse",
+    "plz",
+    "stadt",
+    "bafin_nummer",
+    "logo_url",
+    "ist_aktiv",
+    "erstellt_am",
+    "aktualisiert_am",
+    "normalized_name"
+   ]
+  },
+  "vertraege_unterzeichnet": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "vorlage_id",
+    "vorlage_typ",
+    "vorlage_version",
+    "unterschrift_name",
+    "unterschrift_datum",
+    "unterschrift_ip",
+    "unterschrift_user_agent",
+    "pdf_storage_path",
+    "email_log_id",
+    "created_at",
+    "organisation_id",
+    "pdf_generiert_am"
+   ]
+  },
+  "vertragsvorlagen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "typ",
+    "version",
+    "titel",
+    "inhalt_html",
+    "pflicht_unterschrift",
+    "aktiv",
+    "gueltig_ab",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "vertrieb_mail_vorlagen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "typ",
+    "betreff",
+    "body",
+    "aktiv",
+    "aktualisiert_am"
+   ]
+  },
+  "vs_korrespondenz": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "richtung",
+    "kanal",
+    "betreff",
+    "versicherung",
+    "aktenzeichen",
+    "notiz",
+    "attachment_url",
+    "datum",
+    "created_at",
+    "created_by_user_id",
+    "status",
+    "wartet_auf_antwort_bis",
+    "typ",
+    "naechste_frist",
+    "versicherung_id"
+   ]
+  },
+  "wbw_segment_alter": {
+   "kind": "t",
+   "columns": [
+    "segment",
+    "alter_bis_jahre",
+    "wbw_min_eur",
+    "wbw_max_eur",
+    "restwert_faktor",
+    "created_at"
+   ]
+  },
+  "webhook_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "event_id",
+    "event_type",
+    "fall_id",
+    "fall_nr",
+    "payload",
+    "status",
+    "error_message",
+    "source",
+    "processed_at",
+    "created_at",
+    "user_id",
+    "claim_id"
+   ]
+  },
+  "werkstaetten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "adresse_strasse",
+    "adresse_plz",
+    "adresse_ort",
+    "telefon",
+    "email",
+    "website",
+    "partner",
+    "created_at",
+    "updated_at",
+    "lat",
+    "lng",
+    "isochrone",
+    "ansprechpartner_person_id",
+    "normalized_name",
+    "user_id",
+    "provision_betrag_netto",
+    "provision_aktiv",
+    "status",
+    "aktiviert_am",
+    "aktiviert_von",
+    "gesperrt_am",
+    "gesperrt_grund",
+    "bank_iban",
+    "bank_bic",
+    "bank_kontoinhaber",
+    "ansprechpartner_name",
+    "faehigkeiten",
+    "ist_kleinunternehmer",
+    "ust_id",
+    "notizen",
+    "verifiziert",
+    "verifiziert_am",
+    "verifiziert_von",
+    "verifizierung_notiz",
+    "marken",
+    "ist_freie_werkstatt",
+    "fahrzeug_gruppen",
+    "google_place_id",
+    "google_rating",
+    "google_review_count",
+    "google_rating_am"
+   ]
+  },
+  "werkstatt_notizen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "werkstatt_id",
+    "autor_user_id",
+    "autor_name",
+    "text",
+    "created_at"
+   ]
+  },
+  "werkstatt_qr_pool": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "token",
+    "werkstatt_id",
+    "status",
+    "charge",
+    "zugewiesen_am",
+    "zugewiesen_von",
+    "created_at",
+    "created_by"
+   ]
+  },
+  "werkstatt_staffel_stufen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "werkstatt_id",
+    "schwelle",
+    "bonus_betrag_netto",
+    "created_at"
+   ]
+  },
+  "wertminderung_alter_faktoren": {
+   "kind": "t",
+   "columns": [
+    "alter_bis_jahre",
+    "faktor_min",
+    "faktor_max",
+    "created_at"
+   ]
+  },
+  "whatsapp_inbound_messages": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "twilio_message_sid",
+    "from_phone",
+    "to_phone",
+    "body",
+    "media_urls",
+    "num_media",
+    "matched_lead_id",
+    "matched_fall_id",
+    "matched_termin_id",
+    "intent",
+    "processed",
+    "processed_at",
+    "raw_payload",
+    "created_at"
+   ]
+  },
+  "wissen_artikel": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "thema_id",
+    "slug",
+    "title",
+    "body",
+    "excerpt",
+    "key_facts",
+    "meta_description",
+    "primary_keyword",
+    "cluster",
+    "artikel_typ",
+    "status",
+    "author",
+    "ai_generated",
+    "ai_model",
+    "reviewed_von",
+    "reviewed_am",
+    "veroeffentlicht_am",
+    "last_modified",
+    "created_at",
+    "updated_at",
+    "audience",
+    "quelle",
+    "tags",
+    "source_url"
+   ]
+  },
+  "wissen_themen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "titel",
+    "kurzbrief",
+    "begruendung",
+    "primary_keyword",
+    "cluster",
+    "artikel_typ",
+    "status",
+    "quelle",
+    "entschieden_von",
+    "entschieden_am",
+    "created_at",
+    "audience",
+    "source_url",
+    "source_name",
+    "source_hash"
+   ]
+  },
+  "zahlungseingaenge": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "zahlungsdatum",
+    "gesamtbetrag",
+    "referenz",
+    "erfasst_von",
+    "erstellt_am",
+    "claim_id"
+   ]
+  },
+  "zahlungspositionen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "zahlung_id",
+    "fall_id",
+    "position",
+    "gefordert",
+    "gezahlt",
+    "notiz",
+    "erstellt_am",
+    "claim_id"
+   ]
+  }
+ },
+ "fks": [
+  {
+   "name": "abrechnung_positionen_abrechnung_id_fkey",
+   "table": "abrechnung_positionen",
+   "columns": [
+    "abrechnung_id"
+   ],
+   "target": "abrechnungen"
+  },
+  {
+   "name": "abrechnung_positionen_claim_id_fkey",
+   "table": "abrechnung_positionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "abrechnung_positionen_fall_id_fkey",
+   "table": "abrechnung_positionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "abrechnung_reminders_abrechnung_id_fkey",
+   "table": "abrechnung_reminders",
+   "columns": [
+    "abrechnung_id"
+   ],
+   "target": "abrechnungen"
+  },
+  {
+   "name": "admin_termine_claim_id_fkey",
+   "table": "admin_termine",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "admin_termine_fall_id_fkey",
+   "table": "admin_termine",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "admin_termine_lead_id_fkey",
+   "table": "admin_termine",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "admin_termine_partner_lead_id_fkey",
+   "table": "admin_termine",
+   "columns": [
+    "partner_lead_id"
+   ],
+   "target": "partner_leads"
+  },
+  {
+   "name": "ai_claim_proposals_claim_id_fkey",
+   "table": "ai_claim_proposals",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "ai_claim_proposals_entschieden_von_fkey",
+   "table": "ai_claim_proposals",
+   "columns": [
+    "entschieden_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "ai_task_executions_bestaetigt_von_fkey",
+   "table": "ai_task_executions",
+   "columns": [
+    "bestaetigt_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "ai_task_executions_claim_id_fkey",
+   "table": "ai_task_executions",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "ai_task_executions_gestartet_von_fkey",
+   "table": "ai_task_executions",
+   "columns": [
+    "gestartet_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "ai_task_executions_task_id_fkey",
+   "table": "ai_task_executions",
+   "columns": [
+    "task_id"
+   ],
+   "target": "tasks"
+  },
+  {
+   "name": "ai_usage_log_claim_id_fkey",
+   "table": "ai_usage_log",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "aircall_calls_claim_id_fkey",
+   "table": "aircall_calls",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "aircall_calls_initiated_by_profile_id_fkey",
+   "table": "aircall_calls",
+   "columns": [
+    "initiated_by_profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "aircall_calls_lead_id_fkey",
+   "table": "aircall_calls",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "aircall_relay_seats_belegt_call_id_fkey",
+   "table": "aircall_relay_seats",
+   "columns": [
+    "belegt_call_id"
+   ],
+   "target": "calls"
+  },
+  {
+   "name": "airdrop_invitations_claim_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "airdrop_invitations_invited_by_party_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "invited_by_party_id"
+   ],
+   "target": "claim_parties"
+  },
+  {
+   "name": "airdrop_invitations_invited_by_user_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "invited_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "airdrop_invitations_resulting_party_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "resulting_party_id"
+   ],
+   "target": "claim_parties"
+  },
+  {
+   "name": "airdrop_invitations_resulting_user_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "resulting_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "airdrop_invitations_withdrawn_by_user_id_fkey",
+   "table": "airdrop_invitations",
+   "columns": [
+    "withdrawn_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "anfragen_disqualifiziert_durch_fkey",
+   "table": "anfragen",
+   "columns": [
+    "disqualifiziert_durch"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "anfragen_lead_id_fkey",
+   "table": "anfragen",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "anruf_log_erstellt_von_fkey",
+   "table": "anruf_log",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "anruf_log_lead_id_fkey",
+   "table": "anruf_log",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "anspruch_schaetzungen_lead_id_fkey",
+   "table": "anspruch_schaetzungen",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "article_comments_author_id_fkey",
+   "table": "article_comments",
+   "columns": [
+    "author_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "article_comments_moderated_by_fkey",
+   "table": "article_comments",
+   "columns": [
+    "moderated_by"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "article_comments_parent_id_fkey",
+   "table": "article_comments",
+   "columns": [
+    "parent_id"
+   ],
+   "target": "article_comments"
+  },
+  {
+   "name": "auftraege_claim_id_fkey",
+   "table": "auftraege",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "auftraege_fall_id_fkey",
+   "table": "auftraege",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "auftraege_sv_id_fkey",
+   "table": "auftraege",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "auftraege_vorheriger_auftrag_id_fkey",
+   "table": "auftraege",
+   "columns": [
+    "vorheriger_auftrag_id"
+   ],
+   "target": "auftraege"
+  },
+  {
+   "name": "auth_2fa_attempts_user_id_fkey",
+   "table": "auth_2fa_attempts",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "auth_remember_tokens_user_id_fkey",
+   "table": "auth_remember_tokens",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "benachrichtigungen_user_id_fkey",
+   "table": "benachrichtigungen",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "call_copilot_suggestions_call_id_fkey",
+   "table": "call_copilot_suggestions",
+   "columns": [
+    "call_id"
+   ],
+   "target": "calls"
+  },
+  {
+   "name": "call_transcription_utterances_call_id_fkey",
+   "table": "call_transcription_utterances",
+   "columns": [
+    "call_id"
+   ],
+   "target": "calls"
+  },
+  {
+   "name": "calls_claim_id_fkey",
+   "table": "calls",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "calls_lead_id_fkey",
+   "table": "calls",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "chat_thread_teilnehmer_thread_id_fkey",
+   "table": "chat_thread_teilnehmer",
+   "columns": [
+    "thread_id"
+   ],
+   "target": "chat_threads"
+  },
+  {
+   "name": "chat_thread_teilnehmer_user_id_fkey",
+   "table": "chat_thread_teilnehmer",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "chat_threads_claim_id_fkey",
+   "table": "chat_threads",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_mietwagen_claim_id_fkey",
+   "table": "claim_mietwagen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_mietwagen_created_by_user_id_fkey",
+   "table": "claim_mietwagen",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claim_mietwagen_mietwagenunternehmen_id_fkey",
+   "table": "claim_mietwagen",
+   "columns": [
+    "mietwagenunternehmen_id"
+   ],
+   "target": "mietwagenunternehmen"
+  },
+  {
+   "name": "claim_mietwagen_vehicle_id_fkey",
+   "table": "claim_mietwagen",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "claim_parties_claim_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_parties_created_by_user_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claim_parties_firma_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "firma_id"
+   ],
+   "target": "firmen"
+  },
+  {
+   "name": "claim_parties_person_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "claim_parties_previous_person_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "previous_person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "claim_parties_user_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claim_parties_vehicle_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "claim_parties_versicherung_id_fkey",
+   "table": "claim_parties",
+   "columns": [
+    "versicherung_id"
+   ],
+   "target": "versicherungen"
+  },
+  {
+   "name": "claim_payments_claim_id_fkey",
+   "table": "claim_payments",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_payments_created_by_user_id_fkey",
+   "table": "claim_payments",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claim_recency_claim_id_fkey",
+   "table": "claim_recency",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_vehicle_involvements_claim_id_fkey",
+   "table": "claim_vehicle_involvements",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "claim_vehicle_involvements_vehicle_id_fkey",
+   "table": "claim_vehicle_involvements",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "claims_created_by_user_id_fkey",
+   "table": "claims",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claims_endzustand_gesetzt_durch_user_id_fkey",
+   "table": "claims",
+   "columns": [
+    "endzustand_gesetzt_durch_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claims_gegner_versicherung_id_fkey",
+   "table": "claims",
+   "columns": [
+    "gegner_versicherung_id"
+   ],
+   "target": "versicherungen"
+  },
+  {
+   "name": "claims_geschaedigter_user_id_fkey",
+   "table": "claims",
+   "columns": [
+    "geschaedigter_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claims_kanzlei_abrechnung_id_fkey",
+   "table": "claims",
+   "columns": [
+    "kanzlei_abrechnung_id"
+   ],
+   "target": "kanzlei_abrechnungen"
+  },
+  {
+   "name": "claims_kundenbetreuer_id_fkey",
+   "table": "claims",
+   "columns": [
+    "kundenbetreuer_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "claims_lead_id_fkey",
+   "table": "claims",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "claims_reparatur_werkstatt_id_fkey",
+   "table": "claims",
+   "columns": [
+    "reparatur_werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "claims_sv_id_fkey",
+   "table": "claims",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "claims_vehicle_id_fkey",
+   "table": "claims",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "claims_werkstatt_id_fkey",
+   "table": "claims",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "cold_mail_enrollments_lead_id_fkey",
+   "table": "cold_mail_enrollments",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "partner_leads"
+  },
+  {
+   "name": "cold_mail_enrollments_sequenz_id_fkey",
+   "table": "cold_mail_enrollments",
+   "columns": [
+    "sequenz_id"
+   ],
+   "target": "cold_mail_sequenzen"
+  },
+  {
+   "name": "cold_mail_sends_enrollment_id_fkey",
+   "table": "cold_mail_sends",
+   "columns": [
+    "enrollment_id"
+   ],
+   "target": "cold_mail_enrollments"
+  },
+  {
+   "name": "cold_mail_sends_lead_id_fkey",
+   "table": "cold_mail_sends",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "partner_leads"
+  },
+  {
+   "name": "cold_mail_sends_step_id_fkey",
+   "table": "cold_mail_sends",
+   "columns": [
+    "step_id"
+   ],
+   "target": "cold_mail_steps"
+  },
+  {
+   "name": "cold_mail_sends_vorlage_id_fkey",
+   "table": "cold_mail_sends",
+   "columns": [
+    "vorlage_id"
+   ],
+   "target": "cold_mail_vorlagen"
+  },
+  {
+   "name": "cold_mail_steps_sequenz_id_fkey",
+   "table": "cold_mail_steps",
+   "columns": [
+    "sequenz_id"
+   ],
+   "target": "cold_mail_sequenzen"
+  },
+  {
+   "name": "cold_mail_steps_vorlage_id_fkey",
+   "table": "cold_mail_steps",
+   "columns": [
+    "vorlage_id"
+   ],
+   "target": "cold_mail_vorlagen"
+  },
+  {
+   "name": "cold_mail_suppression_lead_id_fkey",
+   "table": "cold_mail_suppression",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "partner_leads"
+  },
+  {
+   "name": "cold_mail_vorlagen_erstellt_von_fkey",
+   "table": "cold_mail_vorlagen",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "communities_erstellt_von_fkey",
+   "table": "communities",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "community_comments_author_id_fkey",
+   "table": "community_comments",
+   "columns": [
+    "author_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "community_comments_parent_id_fkey",
+   "table": "community_comments",
+   "columns": [
+    "parent_id"
+   ],
+   "target": "community_comments"
+  },
+  {
+   "name": "community_leaderboard_organisation_id_fkey",
+   "table": "community_leaderboard",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "community_leaderboard_sv_id_fkey",
+   "table": "community_leaderboard",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "community_likes_user_id_fkey",
+   "table": "community_likes",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "community_memberships_community_id_fkey",
+   "table": "community_memberships",
+   "columns": [
+    "community_id"
+   ],
+   "target": "communities"
+  },
+  {
+   "name": "community_memberships_profile_id_fkey",
+   "table": "community_memberships",
+   "columns": [
+    "profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "community_posts_author_id_fkey",
+   "table": "community_posts",
+   "columns": [
+    "author_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "community_profiles_user_id_fkey",
+   "table": "community_profiles",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "dokument_upload_anfragen_erstellt_von_fkey",
+   "table": "dokument_upload_anfragen",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "dokument_upload_anfragen_lead_id_fkey",
+   "table": "dokument_upload_anfragen",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "dsgvo_loeschauftraege_bestaetigt_von_user_id_fkey",
+   "table": "dsgvo_loeschauftraege",
+   "columns": [
+    "bestaetigt_von_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "dsgvo_loeschauftraege_user_id_fkey",
+   "table": "dsgvo_loeschauftraege",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "email_log_claim_id_fkey",
+   "table": "email_log",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "email_log_fall_id_fkey",
+   "table": "email_log",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "email_log_lead_id_fkey",
+   "table": "email_log",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "embed_abrechnung_positionen_abrechnung_id_fkey",
+   "table": "embed_abrechnung_positionen",
+   "columns": [
+    "abrechnung_id"
+   ],
+   "target": "abrechnungen"
+  },
+  {
+   "name": "embed_abrechnung_positionen_anfrage_id_fkey",
+   "table": "embed_abrechnung_positionen",
+   "columns": [
+    "anfrage_id"
+   ],
+   "target": "gutachter_finder_anfragen"
+  },
+  {
+   "name": "embed_abrechnung_positionen_embed_site_id_fkey",
+   "table": "embed_abrechnung_positionen",
+   "columns": [
+    "embed_site_id"
+   ],
+   "target": "embed_sites"
+  },
+  {
+   "name": "embed_abrechnung_positionen_termin_id_fkey",
+   "table": "embed_abrechnung_positionen",
+   "columns": [
+    "termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "embed_sites_inhaber_profile_id_fkey",
+   "table": "embed_sites",
+   "columns": [
+    "inhaber_profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "embed_sites_sv_id_fkey",
+   "table": "embed_sites",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "fk_bridge_claim",
+   "table": "faelle_claim_bridge",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "fall_dokumente_claim_id_fkey",
+   "table": "fall_dokumente",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "fall_dokumente_fall_id_fkey",
+   "table": "fall_dokumente",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "fall_dokumente_lead_id_fkey",
+   "table": "fall_dokumente",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "fall_dokumente_pflichtdokument_id_fkey",
+   "table": "fall_dokumente",
+   "columns": [
+    "pflichtdokument_id"
+   ],
+   "target": "pflichtdokumente"
+  },
+  {
+   "name": "fall_dokumente_position_id_fkey",
+   "table": "fall_dokumente",
+   "columns": [
+    "position_id"
+   ],
+   "target": "schadenspositionen"
+  },
+  {
+   "name": "fall_read_state_claim_id_fkey",
+   "table": "fall_read_state",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "fall_read_state_fall_id_fkey",
+   "table": "fall_read_state",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "fall_read_state_user_id_fkey",
+   "table": "fall_read_state",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "fall_summaries_claim_id_fkey",
+   "table": "fall_summaries",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "fall_summaries_generated_by_user_id_fkey",
+   "table": "fall_summaries",
+   "columns": [
+    "generated_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "firmen_flotten_konten_aktiviert_von_fkey",
+   "table": "firmen_flotten_konten",
+   "columns": [
+    "aktiviert_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "firmen_flotten_konten_firma_id_fkey",
+   "table": "firmen_flotten_konten",
+   "columns": [
+    "firma_id"
+   ],
+   "target": "firmen"
+  },
+  {
+   "name": "firmen_flotten_konten_user_id_fkey",
+   "table": "firmen_flotten_konten",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "firmen_ansprechpartner_person_id_fkey",
+   "table": "firmen",
+   "columns": [
+    "ansprechpartner_person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "firmen_organisation_id_fkey",
+   "table": "firmen",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "flotten_fahrzeuge_added_by_user_id_fkey",
+   "table": "flotten_fahrzeuge",
+   "columns": [
+    "added_by_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "flotten_fahrzeuge_firma_id_fkey",
+   "table": "flotten_fahrzeuge",
+   "columns": [
+    "firma_id"
+   ],
+   "target": "firmen"
+  },
+  {
+   "name": "flotten_fahrzeuge_vehicle_id_fkey",
+   "table": "flotten_fahrzeuge",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "flow_links_claim_id_fkey",
+   "table": "flow_links",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "flow_links_fall_id_fkey",
+   "table": "flow_links",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "flow_links_lead_id_fkey",
+   "table": "flow_links",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "flow_szenario_steps_szenario_id_fkey",
+   "table": "flow_szenario_steps",
+   "columns": [
+    "szenario_id"
+   ],
+   "target": "flow_szenarien"
+  },
+  {
+   "name": "forderungspositionen_claim_id_fkey",
+   "table": "forderungspositionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "forderungspositionen_fall_id_fkey",
+   "table": "forderungspositionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gebiet_exklusivitaeten_organisation_id_fkey",
+   "table": "gebiet_exklusivitaeten",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "google_bewertungen_cache_profile_id_fkey",
+   "table": "google_bewertungen_cache",
+   "columns": [
+    "profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachten_fotos_claim_id_fkey",
+   "table": "gutachten_fotos",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "gutachten_fotos_gutachten_id_fkey",
+   "table": "gutachten_fotos",
+   "columns": [
+    "gutachten_id"
+   ],
+   "target": "gutachten"
+  },
+  {
+   "name": "gutachten_fotos_uploaded_by_fkey",
+   "table": "gutachten_fotos",
+   "columns": [
+    "uploaded_by"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachten_positionen_claim_id_fkey",
+   "table": "gutachten_positionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "gutachten_positionen_gutachten_id_fkey",
+   "table": "gutachten_positionen",
+   "columns": [
+    "gutachten_id"
+   ],
+   "target": "gutachten"
+  },
+  {
+   "name": "fk_gutachten_ocr_run",
+   "table": "gutachten",
+   "columns": [
+    "ocr_run_id"
+   ],
+   "target": "ocr_runs"
+  },
+  {
+   "name": "gutachten_claim_id_fkey",
+   "table": "gutachten",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "gutachten_created_by_user_id_fkey",
+   "table": "gutachten",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachten_pdf_uploaded_by_user_id_fkey",
+   "table": "gutachten",
+   "columns": [
+    "pdf_uploaded_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachten_sv_id_fkey",
+   "table": "gutachten",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_abrechnungspositionen_abrechnung_id_fkey",
+   "table": "gutachter_abrechnungspositionen",
+   "columns": [
+    "abrechnung_id"
+   ],
+   "target": "gutachter_monatsabrechnungen"
+  },
+  {
+   "name": "gutachter_abrechnungspositionen_claim_id_fkey",
+   "table": "gutachter_abrechnungspositionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "gutachter_abrechnungspositionen_fall_id_fkey",
+   "table": "gutachter_abrechnungspositionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gutachter_einzahlungen_sv_id_fkey",
+   "table": "gutachter_einzahlungen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_finder_anfragen_abrechnung_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "abrechnung_id"
+   ],
+   "target": "abrechnungen"
+  },
+  {
+   "name": "gutachter_finder_anfragen_abrechnung_storno_durch_user_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "abrechnung_storno_durch_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachter_finder_anfragen_abrechnung_sv_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "abrechnung_sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_finder_anfragen_embed_site_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "embed_site_id"
+   ],
+   "target": "embed_sites"
+  },
+  {
+   "name": "gutachter_finder_anfragen_konvertiert_zu_fall_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "konvertiert_zu_fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gutachter_finder_anfragen_konvertiert_zu_lead_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "konvertiert_zu_lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "gutachter_finder_anfragen_konvertiert_zu_user_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "konvertiert_zu_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "gutachter_finder_anfragen_reservierter_sv_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "reservierter_sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_finder_anfragen_schaetzung_session_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "schaetzung_session_id"
+   ],
+   "target": "anspruch_schaetzungen"
+  },
+  {
+   "name": "gutachter_finder_anfragen_termin_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "gutachter_finder_anfragen_werkstatt_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "gutachter_finder_anfragen_zugeordneter_sv_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "zugeordneter_sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_finder_anfragen_zugeordneter_sv_lead_id_fkey",
+   "table": "gutachter_finder_anfragen",
+   "columns": [
+    "zugeordneter_sv_lead_id"
+   ],
+   "target": "sv_leads"
+  },
+  {
+   "name": "gutachter_monatsabrechnungen_sv_id_fkey",
+   "table": "gutachter_monatsabrechnungen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutachter_termine_auftrag_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "auftrag_id"
+   ],
+   "target": "auftraege"
+  },
+  {
+   "name": "gutachter_termine_claim_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "gutachter_termine_fall_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gutachter_termine_kb_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "kb_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "gutachter_termine_lead_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "gutachter_termine_sv_lead_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "sv_lead_id"
+   ],
+   "target": "sv_leads"
+  },
+  {
+   "name": "gutachter_termine_verlegung_quelle_id_fkey",
+   "table": "gutachter_termine",
+   "columns": [
+    "verlegung_quelle_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "gutachter_waitlist_bearbeitet_von_user_id_fkey",
+   "table": "gutachter_waitlist",
+   "columns": [
+    "bearbeitet_von_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "gutachter_waitlist_konvertiert_zu_sv_id_fkey",
+   "table": "gutachter_waitlist",
+   "columns": [
+    "konvertiert_zu_sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "gutschriften_referenz_abrechnung_id_fkey",
+   "table": "gutschriften",
+   "columns": [
+    "referenz_abrechnung_id"
+   ],
+   "target": "abrechnungen"
+  },
+  {
+   "name": "gutschriften_referenz_fall_id_fkey",
+   "table": "gutschriften",
+   "columns": [
+    "referenz_fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gutschriften_sv_id_fkey",
+   "table": "gutschriften",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "incentive_auszahlungen_incentive_id_fkey",
+   "table": "incentive_auszahlungen",
+   "columns": [
+    "incentive_id"
+   ],
+   "target": "incentives"
+  },
+  {
+   "name": "incentive_auszahlungen_mitarbeiter_id_fkey",
+   "table": "incentive_auszahlungen",
+   "columns": [
+    "mitarbeiter_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "individuelle_anfragen_sv_id_fkey",
+   "table": "individuelle_anfragen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "kalender_verbindungen_profile_id_fkey",
+   "table": "kalender_verbindungen",
+   "columns": [
+    "profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "kanzlei_abrechnung_positionen_claim_id_fkey",
+   "table": "kanzlei_abrechnung_positionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "kanzlei_abrechnung_positionen_fall_id_fkey",
+   "table": "kanzlei_abrechnung_positionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "kanzlei_abrechnung_positionen_kanzlei_abrechnung_id_fkey",
+   "table": "kanzlei_abrechnung_positionen",
+   "columns": [
+    "kanzlei_abrechnung_id"
+   ],
+   "target": "kanzlei_abrechnungen"
+  },
+  {
+   "name": "kanzlei_abrechnung_reminders_kanzlei_abrechnung_id_fkey",
+   "table": "kanzlei_abrechnung_reminders",
+   "columns": [
+    "kanzlei_abrechnung_id"
+   ],
+   "target": "kanzlei_abrechnungen"
+  },
+  {
+   "name": "kanzlei_abrechnungen_kanzlei_id_fkey",
+   "table": "kanzlei_abrechnungen",
+   "columns": [
+    "kanzlei_id"
+   ],
+   "target": "kanzleien"
+  },
+  {
+   "name": "kanzlei_admin_termine_admin_user_id_fkey",
+   "table": "kanzlei_admin_termine",
+   "columns": [
+    "admin_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "kanzlei_admin_termine_claim_id_fkey",
+   "table": "kanzlei_admin_termine",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "kanzlei_admin_termine_fall_id_fkey",
+   "table": "kanzlei_admin_termine",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "kanzlei_admin_termine_kanzlei_user_id_fkey",
+   "table": "kanzlei_admin_termine",
+   "columns": [
+    "kanzlei_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "kanzlei_faelle_claim_id_fkey",
+   "table": "kanzlei_faelle",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "kanzlei_faelle_fall_id_fkey",
+   "table": "kanzlei_faelle",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "kanzlei_pakete_claim_id_fkey",
+   "table": "kanzlei_pakete",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "kanzlei_pakete_versendet_durch_user_id_fkey",
+   "table": "kanzlei_pakete",
+   "columns": [
+    "versendet_durch_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "ki_gespraeche_claim_id_fkey",
+   "table": "ki_gespraeche",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "ki_gespraeche_user_id_fkey",
+   "table": "ki_gespraeche",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "kunde_gutachten_requests_claim_id_fkey",
+   "table": "kunde_gutachten_requests",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "kunde_gutachten_requests_fall_id_fkey",
+   "table": "kunde_gutachten_requests",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "kunde_live_position_kunde_id_fkey",
+   "table": "kunde_live_position",
+   "columns": [
+    "kunde_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "kunde_live_position_termin_id_fkey",
+   "table": "kunde_live_position",
+   "columns": [
+    "termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "lead_historie_lead_id_fkey",
+   "table": "lead_historie",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "leads_gegner_versicherung_id_fkey",
+   "table": "leads",
+   "columns": [
+    "gegner_versicherung_id"
+   ],
+   "target": "versicherungen"
+  },
+  {
+   "name": "leads_konvertiert_durch_user_id_fkey",
+   "table": "leads",
+   "columns": [
+    "konvertiert_durch_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "leads_konvertiert_zu_claim_id_fkey",
+   "table": "leads",
+   "columns": [
+    "konvertiert_zu_claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "leads_konvertiert_zu_fall_id_fkey",
+   "table": "leads",
+   "columns": [
+    "konvertiert_zu_fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "leads_kunde_id_fkey",
+   "table": "leads",
+   "columns": [
+    "kunde_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "leads_promotion_code_id_fkey",
+   "table": "leads",
+   "columns": [
+    "promotion_code_id"
+   ],
+   "target": "promotion_codes"
+  },
+  {
+   "name": "leads_reparatur_werkstatt_id_fkey",
+   "table": "leads",
+   "columns": [
+    "reparatur_werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "leads_vehicle_id_fkey",
+   "table": "leads",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "leads_werkstatt_id_fkey",
+   "table": "leads",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "leads_zugewiesen_an_fk",
+   "table": "leads",
+   "columns": [
+    "zugewiesen_an"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "linkedin_oauth_tokens_connected_by_fkey",
+   "table": "linkedin_oauth_tokens",
+   "columns": [
+    "connected_by"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "linkedin_posts_freigegeben_von_fkey",
+   "table": "linkedin_posts",
+   "columns": [
+    "freigegeben_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "makler_fall_consent_claim_id_fkey",
+   "table": "makler_fall_consent",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "makler_fall_consent_fall_id_fkey",
+   "table": "makler_fall_consent",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "makler_fall_consent_makler_id_fkey",
+   "table": "makler_fall_consent",
+   "columns": [
+    "makler_id"
+   ],
+   "target": "makler"
+  },
+  {
+   "name": "makler_fall_consent_widerrufen_von_fkey",
+   "table": "makler_fall_consent",
+   "columns": [
+    "widerrufen_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "makler_staffel_stufen_makler_id_fkey",
+   "table": "makler_staffel_stufen",
+   "columns": [
+    "makler_id"
+   ],
+   "target": "makler"
+  },
+  {
+   "name": "makler_aktiviert_von_fkey",
+   "table": "makler",
+   "columns": [
+    "aktiviert_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "makler_maklerpool_id_fkey",
+   "table": "makler",
+   "columns": [
+    "maklerpool_id"
+   ],
+   "target": "maklerpools"
+  },
+  {
+   "name": "makler_user_id_fkey",
+   "table": "makler",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "makler_versicherung_id_fkey",
+   "table": "makler",
+   "columns": [
+    "versicherung_id"
+   ],
+   "target": "versicherungen"
+  },
+  {
+   "name": "marketing_content_jobs_erstellt_von_fkey",
+   "table": "marketing_content_jobs",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "matelso_calls_claim_id_fkey",
+   "table": "matelso_calls",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "matelso_calls_lead_id_fkey",
+   "table": "matelso_calls",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "mitarbeiter_performance_mitarbeiter_id_fkey",
+   "table": "mitarbeiter_performance",
+   "columns": [
+    "mitarbeiter_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "mitarbeiter_verguetung_profile_id_fkey",
+   "table": "mitarbeiter_verguetung",
+   "columns": [
+    "profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "mitteilungen_absender_id_fkey",
+   "table": "mitteilungen",
+   "columns": [
+    "absender_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "mitteilungen_empfaenger_id_fkey",
+   "table": "mitteilungen",
+   "columns": [
+    "empfaenger_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "nachrichten_claim_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "nachrichten_empfaenger_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "empfaenger_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "nachrichten_fall_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "nachrichten_kb_empfaenger_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "kb_empfaenger_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "nachrichten_lead_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "nachrichten_sender_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "sender_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "nachrichten_thread_id_fkey",
+   "table": "nachrichten",
+   "columns": [
+    "thread_id"
+   ],
+   "target": "chat_threads"
+  },
+  {
+   "name": "notification_deliveries_event_id_fkey",
+   "table": "notification_deliveries",
+   "columns": [
+    "event_id"
+   ],
+   "target": "notification_events"
+  },
+  {
+   "name": "notification_deliveries_recipient_user_id_fkey",
+   "table": "notification_deliveries",
+   "columns": [
+    "recipient_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "notification_events_claim_id_fkey",
+   "table": "notification_events",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "notification_events_fall_id_fkey",
+   "table": "notification_events",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "notification_events_triggered_by_user_id_fkey",
+   "table": "notification_events",
+   "columns": [
+    "triggered_by_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "notification_preferences_user_id_fkey",
+   "table": "notification_preferences",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "ocr_runs_gutachten_id_fkey",
+   "table": "ocr_runs",
+   "columns": [
+    "gutachten_id"
+   ],
+   "target": "gutachten"
+  },
+  {
+   "name": "ocr_runs_triggered_by_user_id_fkey",
+   "table": "ocr_runs",
+   "columns": [
+    "triggered_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "onboarding_felder_phase_id_fkey",
+   "table": "onboarding_felder",
+   "columns": [
+    "phase_id"
+   ],
+   "target": "onboarding_phasen"
+  },
+  {
+   "name": "orchestrator_auto_policy_geflippt_von_fkey",
+   "table": "orchestrator_auto_policy",
+   "columns": [
+    "geflippt_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "organisationen_parent_user_id_fkey",
+   "table": "organisationen",
+   "columns": [
+    "parent_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "organisationen_vertrag_unterzeichnet_id_fkey",
+   "table": "organisationen",
+   "columns": [
+    "vertrag_unterzeichnet_id"
+   ],
+   "target": "vertraege_unterzeichnet"
+  },
+  {
+   "name": "paket_upgrades_sv_id_fkey",
+   "table": "paket_upgrades",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "parteien_claim_id_fkey",
+   "table": "parteien",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "parteien_fall_id_fkey",
+   "table": "parteien",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "partner_gutschriften_bezug_gutschrift_id_fkey",
+   "table": "partner_gutschriften",
+   "columns": [
+    "bezug_gutschrift_id"
+   ],
+   "target": "partner_gutschriften"
+  },
+  {
+   "name": "partner_lead_aktivitaeten_erstellt_von_fkey",
+   "table": "partner_lead_aktivitaeten",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "partner_lead_aktivitaeten_partner_lead_id_fkey",
+   "table": "partner_lead_aktivitaeten",
+   "columns": [
+    "partner_lead_id"
+   ],
+   "target": "partner_leads"
+  },
+  {
+   "name": "partner_leads_konvertiert_durch_fkey",
+   "table": "partner_leads",
+   "columns": [
+    "konvertiert_durch"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "partner_leads_zugewiesen_an_fkey",
+   "table": "partner_leads",
+   "columns": [
+    "zugewiesen_an"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "partner_provisionen_claim_bridge_fkey",
+   "table": "partner_provisionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "personen_canonical_person_id_fkey",
+   "table": "personen",
+   "columns": [
+    "canonical_person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "personen_firma_id_fkey",
+   "table": "personen",
+   "columns": [
+    "firma_id"
+   ],
+   "target": "firmen"
+  },
+  {
+   "name": "personenschaden_personen_claim_id_fkey",
+   "table": "personenschaden_personen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "personenschaden_personen_fall_id_fkey",
+   "table": "personenschaden_personen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "personenschaden_personen_lead_id_fkey",
+   "table": "personenschaden_personen",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "pflichtdokumente_angefordert_von_user_id_fkey",
+   "table": "pflichtdokumente",
+   "columns": [
+    "angefordert_von_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "pflichtdokumente_claim_id_fkey",
+   "table": "pflichtdokumente",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "pflichtdokumente_fall_id_fkey",
+   "table": "pflichtdokumente",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "pflichtdokumente_person_id_fkey",
+   "table": "pflichtdokumente",
+   "columns": [
+    "person_id"
+   ],
+   "target": "personenschaden_personen"
+  },
+  {
+   "name": "pflichtdokumente_sv_id_fkey",
+   "table": "pflichtdokumente",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "phase_transitions_claim_id_fkey",
+   "table": "phase_transitions",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "phase_transitions_fall_id_fkey",
+   "table": "phase_transitions",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "phase_transitions_transitioned_by_fkey",
+   "table": "phase_transitions",
+   "columns": [
+    "transitioned_by"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "profiles_community_id_fkey",
+   "table": "profiles",
+   "columns": [
+    "community_id"
+   ],
+   "target": "communities"
+  },
+  {
+   "name": "profiles_entstanden_aus_airdrop_id_fkey",
+   "table": "profiles",
+   "columns": [
+    "entstanden_aus_airdrop_id"
+   ],
+   "target": "airdrop_invitations"
+  },
+  {
+   "name": "profiles_entstanden_aus_claim_id_fkey",
+   "table": "profiles",
+   "columns": [
+    "entstanden_aus_claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "profiles_id_fkey",
+   "table": "profiles",
+   "columns": [
+    "id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "promo_clicks_promotion_code_id_fkey",
+   "table": "promo_clicks",
+   "columns": [
+    "promotion_code_id"
+   ],
+   "target": "promotion_codes"
+  },
+  {
+   "name": "promotion_codes_makler_id_fkey",
+   "table": "promotion_codes",
+   "columns": [
+    "makler_id"
+   ],
+   "target": "makler"
+  },
+  {
+   "name": "provisionen_maik_lead_id_fkey",
+   "table": "provisionen_maik",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "provisionen_maik_marketing_partner_id_fkey",
+   "table": "provisionen_maik",
+   "columns": [
+    "marketing_partner_id"
+   ],
+   "target": "marketing_partner"
+  },
+  {
+   "name": "push_subscriptions_user_id_fkey",
+   "table": "push_subscriptions",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "qc_checkliste_claim_id_fkey",
+   "table": "qc_checkliste",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "qc_checkliste_fall_id_fkey",
+   "table": "qc_checkliste",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "qc_checkliste_geprueft_von_fkey",
+   "table": "qc_checkliste",
+   "columns": [
+    "geprueft_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "regulierungs_klassifizierung_claim_id_fkey",
+   "table": "regulierungs_klassifizierung",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "regulierungs_klassifizierung_erfasst_von_fkey",
+   "table": "regulierungs_klassifizierung",
+   "columns": [
+    "erfasst_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "regulierungs_klassifizierung_fall_id_fkey",
+   "table": "regulierungs_klassifizierung",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "reklamationen_claim_id_fkey",
+   "table": "reklamationen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "reklamationen_fall_id_fkey",
+   "table": "reklamationen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "reklamationen_sv_id_fkey",
+   "table": "reklamationen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "repairs_claim_id_fkey",
+   "table": "repairs",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "repairs_created_by_user_id_fkey",
+   "table": "repairs",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "repairs_gutachten_id_fkey",
+   "table": "repairs",
+   "columns": [
+    "gutachten_id"
+   ],
+   "target": "gutachten"
+  },
+  {
+   "name": "repairs_vehicle_id_fkey",
+   "table": "repairs",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "repairs_werkstatt_id_fkey",
+   "table": "repairs",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "reparatur_termine_claim_id_fkey",
+   "table": "reparatur_termine",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "reparatur_termine_werkstatt_id_fkey",
+   "table": "reparatur_termine",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "fk_organisation",
+   "table": "sachverstaendige",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "sachverstaendige_gesperrt_von_user_id_fkey",
+   "table": "sachverstaendige",
+   "columns": [
+    "gesperrt_von_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "sachverstaendige_profile_id_fkey",
+   "table": "sachverstaendige",
+   "columns": [
+    "profile_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "sachverstaendige_verifiziert_von_fkey",
+   "table": "sachverstaendige",
+   "columns": [
+    "verifiziert_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "schadenkarten_fahrzeug_id_fkey",
+   "table": "schadenkarten",
+   "columns": [
+    "fahrzeug_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "schadenkarten_firma_id_fkey",
+   "table": "schadenkarten",
+   "columns": [
+    "firma_id"
+   ],
+   "target": "firmen"
+  },
+  {
+   "name": "schadenkarten_gebunden_von_fkey",
+   "table": "schadenkarten",
+   "columns": [
+    "gebunden_von"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "schadenspositionen_claim_id_fkey",
+   "table": "schadenspositionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "schadenspositionen_fall_id_fkey",
+   "table": "schadenspositionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "sla_tracking_claim_id_fkey",
+   "table": "sla_tracking",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "sla_tracking_eskalation_task_id_fkey",
+   "table": "sla_tracking",
+   "columns": [
+    "eskalation_task_id"
+   ],
+   "target": "tasks"
+  },
+  {
+   "name": "sla_tracking_fall_id_fkey",
+   "table": "sla_tracking",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "stripe_events_sv_id_fkey",
+   "table": "stripe_events",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "support_rate_limits_user_id_fkey",
+   "table": "support_rate_limits",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "support_ticket_log_user_id_fkey",
+   "table": "support_ticket_log",
+   "columns": [
+    "user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "sv_buero_memberships_buero_id_fkey",
+   "table": "sv_buero_memberships",
+   "columns": [
+    "buero_id"
+   ],
+   "target": "sv_buero"
+  },
+  {
+   "name": "sv_buero_memberships_sv_id_fkey",
+   "table": "sv_buero_memberships",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_kalender_events_cache_sv_id_fkey",
+   "table": "sv_kalender_events_cache",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_kalender_verbindungen_fehler_task_id_fkey",
+   "table": "sv_kalender_verbindungen",
+   "columns": [
+    "fehler_task_id"
+   ],
+   "target": "tasks"
+  },
+  {
+   "name": "sv_kalender_verbindungen_sv_id_fkey",
+   "table": "sv_kalender_verbindungen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_leads_konvertiert_zu_sv_id_fkey",
+   "table": "sv_leads",
+   "columns": [
+    "konvertiert_zu_sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_live_location_claim_id_fkey",
+   "table": "sv_live_location",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "sv_live_location_fall_id_fkey",
+   "table": "sv_live_location",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "sv_live_location_sv_id_fkey",
+   "table": "sv_live_location",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_live_position_sv_id_fkey",
+   "table": "sv_live_position",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_onboarding_rechnungen_organisation_id_fkey",
+   "table": "sv_onboarding_rechnungen",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "sv_onboarding_rechnungen_rechnungs_konfiguration_id_fkey",
+   "table": "sv_onboarding_rechnungen",
+   "columns": [
+    "rechnungs_konfiguration_id"
+   ],
+   "target": "rechnungs_konfiguration"
+  },
+  {
+   "name": "sv_onboarding_rechnungen_sv_id_fkey",
+   "table": "sv_onboarding_rechnungen",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_payment_reminders_sv_id_fkey",
+   "table": "sv_payment_reminders",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_private_stops_sv_id_fkey",
+   "table": "sv_private_stops",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "sv_tages_session_aktueller_termin_id_fkey",
+   "table": "sv_tages_session",
+   "columns": [
+    "aktueller_termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "sv_tages_session_sv_id_fkey",
+   "table": "sv_tages_session",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "task_reminders_task_id_fkey",
+   "table": "task_reminders",
+   "columns": [
+    "task_id"
+   ],
+   "target": "tasks"
+  },
+  {
+   "name": "tasks_claim_id_fkey",
+   "table": "tasks",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "tasks_erstellt_von_id_fkey",
+   "table": "tasks",
+   "columns": [
+    "erstellt_von_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "tasks_fall_id_fkey",
+   "table": "tasks",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "tasks_gate_task_id_fkey",
+   "table": "tasks",
+   "columns": [
+    "gate_task_id"
+   ],
+   "target": "tasks"
+  },
+  {
+   "name": "tasks_lead_id_fkey",
+   "table": "tasks",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "tasks_zugewiesen_an_fkey",
+   "table": "tasks",
+   "columns": [
+    "zugewiesen_an"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "technische_probleme_claim_id_fkey",
+   "table": "technische_probleme",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "termin_reminders_termin_id_fkey",
+   "table": "termin_reminders",
+   "columns": [
+    "termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "termine_claim_id_fkey",
+   "table": "termine",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "termine_fall_id_fkey",
+   "table": "termine",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "timeline_claim_id_fkey",
+   "table": "timeline",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "timeline_erstellt_von_fkey",
+   "table": "timeline",
+   "columns": [
+    "erstellt_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "timeline_fall_id_fkey",
+   "table": "timeline",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "timeline_lead_id_fkey",
+   "table": "timeline",
+   "columns": [
+    "lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "vehicle_ownership_history_user_id_fkey",
+   "table": "vehicle_ownership_history",
+   "columns": [
+    "user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "vehicle_ownership_history_vehicle_id_fkey",
+   "table": "vehicle_ownership_history",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "vehicle_vorschaeden_claim_id_fkey",
+   "table": "vehicle_vorschaeden",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "vehicle_vorschaeden_vehicle_id_fkey",
+   "table": "vehicle_vorschaeden",
+   "columns": [
+    "vehicle_id"
+   ],
+   "target": "vehicles"
+  },
+  {
+   "name": "vehicles_current_owner_id_fkey",
+   "table": "vehicles",
+   "columns": [
+    "current_owner_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "vehicles_zb1_dokument_id_fkey",
+   "table": "vehicles",
+   "columns": [
+    "zb1_dokument_id"
+   ],
+   "target": "fall_dokumente"
+  },
+  {
+   "name": "verified_contacts_person_id_fkey",
+   "table": "verified_contacts",
+   "columns": [
+    "person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "vertraege_unterzeichnet_organisation_id_fkey",
+   "table": "vertraege_unterzeichnet",
+   "columns": [
+    "organisation_id"
+   ],
+   "target": "organisationen"
+  },
+  {
+   "name": "vertraege_unterzeichnet_sv_id_fkey",
+   "table": "vertraege_unterzeichnet",
+   "columns": [
+    "sv_id"
+   ],
+   "target": "sachverstaendige"
+  },
+  {
+   "name": "vertraege_unterzeichnet_vorlage_id_fkey",
+   "table": "vertraege_unterzeichnet",
+   "columns": [
+    "vorlage_id"
+   ],
+   "target": "vertragsvorlagen"
+  },
+  {
+   "name": "vs_korrespondenz_claim_id_fkey",
+   "table": "vs_korrespondenz",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "vs_korrespondenz_created_by_user_id_fkey",
+   "table": "vs_korrespondenz",
+   "columns": [
+    "created_by_user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "vs_korrespondenz_versicherung_id_fkey",
+   "table": "vs_korrespondenz",
+   "columns": [
+    "versicherung_id"
+   ],
+   "target": "versicherungen"
+  },
+  {
+   "name": "webhook_events_claim_id_fkey",
+   "table": "webhook_events",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "webhook_events_fall_id_fkey",
+   "table": "webhook_events",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "webhook_events_user_id_fkey",
+   "table": "webhook_events",
+   "columns": [
+    "user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "werkstaetten_aktiviert_von_fkey",
+   "table": "werkstaetten",
+   "columns": [
+    "aktiviert_von"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "werkstaetten_ansprechpartner_person_id_fkey",
+   "table": "werkstaetten",
+   "columns": [
+    "ansprechpartner_person_id"
+   ],
+   "target": "personen"
+  },
+  {
+   "name": "werkstaetten_user_id_fkey",
+   "table": "werkstaetten",
+   "columns": [
+    "user_id"
+   ],
+   "target": "profiles"
+  },
+  {
+   "name": "werkstatt_notizen_autor_user_id_fkey",
+   "table": "werkstatt_notizen",
+   "columns": [
+    "autor_user_id"
+   ],
+   "target": "users"
+  },
+  {
+   "name": "werkstatt_notizen_werkstatt_id_fkey",
+   "table": "werkstatt_notizen",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "werkstatt_qr_pool_werkstatt_id_fkey",
+   "table": "werkstatt_qr_pool",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "werkstatt_staffel_stufen_werkstatt_id_fkey",
+   "table": "werkstatt_staffel_stufen",
+   "columns": [
+    "werkstatt_id"
+   ],
+   "target": "werkstaetten"
+  },
+  {
+   "name": "whatsapp_inbound_messages_matched_fall_id_fkey",
+   "table": "whatsapp_inbound_messages",
+   "columns": [
+    "matched_fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "whatsapp_inbound_messages_matched_lead_id_fkey",
+   "table": "whatsapp_inbound_messages",
+   "columns": [
+    "matched_lead_id"
+   ],
+   "target": "leads"
+  },
+  {
+   "name": "whatsapp_inbound_messages_matched_termin_id_fkey",
+   "table": "whatsapp_inbound_messages",
+   "columns": [
+    "matched_termin_id"
+   ],
+   "target": "gutachter_termine"
+  },
+  {
+   "name": "wissen_artikel_thema_id_fkey",
+   "table": "wissen_artikel",
+   "columns": [
+    "thema_id"
+   ],
+   "target": "wissen_themen"
+  },
+  {
+   "name": "zahlungseingaenge_claim_id_fkey",
+   "table": "zahlungseingaenge",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "zahlungseingaenge_fall_id_fkey",
+   "table": "zahlungseingaenge",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "zahlungspositionen_claim_id_fkey",
+   "table": "zahlungspositionen",
+   "columns": [
+    "claim_id"
+   ],
+   "target": "claims"
+  },
+  {
+   "name": "zahlungspositionen_fall_id_fkey",
+   "table": "zahlungspositionen",
+   "columns": [
+    "fall_id"
+   ],
+   "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "zahlungspositionen_zahlung_id_fkey",
+   "table": "zahlungspositionen",
+   "columns": [
+    "zahlung_id"
+   ],
+   "target": "zahlungseingaenge"
+  }
+ ]
+}
