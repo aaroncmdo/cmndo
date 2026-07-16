@@ -1253,7 +1253,9 @@ export async function signSAandCreateFall(
         empfaenger_rolle: 'kundenbetreuer',
         empfaenger_user_id: kundenbetreuerId,
         auto_erstellt: true,
-        prioritaet: 'hoch',
+        // tasks_prioritaet_check erlaubt nur normal|dringend|kritisch — 'hoch' liess den Insert
+        // still scheitern (der Versicherung-anrufen-Task wurde NIE erstellt; Prod-Log 16.07.).
+        prioritaet: 'dringend',
         phase: 'fallakten-start',
       })
     }
