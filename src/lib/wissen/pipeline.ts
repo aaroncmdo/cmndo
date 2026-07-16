@@ -29,12 +29,12 @@ import {
   type PlanThema,
 } from '@/lib/wissen/pipeline-plan'
 
-const CRAWL_CAP = 12 // Maximale neue Themen pro Lauf (global)
-const PER_SOURCE_CAP = 3 // Maximale neue Themen pro Quelle/Lauf — verhindert, dass eine
+const CRAWL_CAP = 16 // Maximale neue Themen pro Lauf (global) — hoch fuer mehr frische News
+const PER_SOURCE_CAP = 5 // Maximale neue Themen pro Quelle/Lauf — Gold-Quellen (Captain-HUK) nicht aushungern; verhindert, dass eine
 // breite Quelle (z.B. allg. Rechtsnews) das Crawl-Budget frisst und Kfz-Feeds verhungern.
-const DAILY_MAX = 3 // Maximale PUBLIZIERTE Artikel pro Lauf (Deckel)
+const DAILY_MAX = 5 // Maximale PUBLIZIERTE Artikel pro Lauf (Deckel) — Crawl-Prioritaet hoch
 const DAILY_MIN = 2 // Garantierter Tages-Boden — via Evergreen aufgefuellt, falls Crawl/Manuell nicht reichen.
-const CRAWL_ATTEMPT_CAP = 6 // KI-Versuche fuer tagesaktuelle Crawl+Manuell-Themen (Kosten-/Zeitgrenze).
+const CRAWL_ATTEMPT_CAP = 10 // KI-Versuche fuer tagesaktuelle Crawl+Manuell-Themen (Kosten-/Zeitgrenze).
 const EVERGREEN_ATTEMPT_CAP = 6 // Eigenes KI-Budget fuer den Evergreen-Boden — unabhaengig von Phase 2a,
 // damit in_review-Artikel aus 2a den garantierten Boden nicht aushungern (Gesamt-Budget = 12, wie zuvor).
 const EVERGREEN_TARGET = 6 // Vorrats-Queue voraus (>= DAILY_MIN) — haelt das Veto-Fenster im Admin offen.
@@ -160,6 +160,7 @@ async function generiereUndSpeichere(
       ai_generated: true,
       status: artikelStatus,
       veroeffentlicht_am: v.autopublish ? now : null,
+      last_modified: v.autopublish ? now.slice(0, 10) : null,
     })
   }
 
