@@ -77,6 +77,14 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                   Gutachter finden
                 </Link>
               </li>
+              {/* #18 Phase 4 (#4450): Endkunden-Werkstatt-Finder — Footer-Link kam
+                  bewusst aus dieser Lane nach dem LandingFooter-Merge (Marker
+                  coordination-an-werkstatt-subdomain-lane-footer-link). */}
+              <li>
+                <Link href="/werkstatt-finden" className="transition-colors hover:text-white">
+                  Werkstatt finden
+                </Link>
+              </li>
               <li>
                 <Link href="/check" className="transition-colors hover:text-white">
                   {t('product.check')}
