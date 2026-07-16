@@ -692,6 +692,14 @@
       "description": "In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, DAT-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.",
       "og_description": "In 5 Schritten zum vollen Schadensersatz — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h."
     },
+    "werkstatt_finden": {
+      "title": "Kfz-Werkstatt finden in Ihrer Nähe — Karte, passende Werkstatt & Termin",
+      "description": "Interaktive Karte mit geprüften Partner-Werkstätten: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten — Karosserie, Lack, Smart Repair, Mechanik, Glas.",
+      "og_title": "Kfz-Werkstatt finden — Karte mit geprüften Partner-Werkstätten",
+      "og_description": "Passende Werkstatt in der Nähe: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten.",
+      "twitter_title": "Kfz-Werkstatt finden — Karte mit geprüften Partner-Werkstätten",
+      "twitter_description": "Passende Werkstatt in der Nähe: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten."
+    },
     "gutachter_finden": {
       "title": "Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h",
       "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
@@ -1598,6 +1606,7 @@
     "wie_es_funktioniert": "Wie es funktioniert",
     "ueber_uns": "Über uns",
     "gutachter_finden": "Gutachter finden",
+    "werkstatt_finden": "Werkstatt finden",
     "zu_meinem_portal": "Zu meinem Portal",
     "portal": "Portal",
     "ratgeber": "Ratgeber",
@@ -1990,6 +1999,9 @@
       "p2_suf": "erst Monate später zerstören. Bei einem Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht — sonst droht ein versteckter Totalschaden.",
       "quelle": "Quelle: Bernd Hertfelder (öffentlich bestellter Kfz-Sachverständiger, HWK Stuttgart)"
     }
+  },
+  "werkstatt_finden": {
+    "sr_h1": "Kfz-Werkstatt in Ihrer Nähe finden — interaktive Karte mit geprüften Partner-Werkstätten, gerankt nach Marke und Schadensbild"
   },
   "gutachter_finden": {
     "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB",

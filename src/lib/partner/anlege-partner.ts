@@ -52,6 +52,12 @@ function detailNumber(details: Record<string, unknown>, key: string): number | n
   return typeof v === 'number' && Number.isFinite(v) ? v : null
 }
 
+/** Liest ein optionales Boolean-Feld aus rollenDetails (sonst null). */
+function detailBoolean(details: Record<string, unknown>, key: string): boolean | null {
+  const v = details[key]
+  return typeof v === 'boolean' ? v : null
+}
+
 export async function anlegePartnerKern(
   admin: AdminClient,
   rolle: PartnerRolle,
@@ -202,25 +208,33 @@ export async function anlegePartnerKern(
       // Insert-Spalten aus createWerkstatt (admin/werkstaetten/actions). status='aktiv'.
       // lat/lng aus input (von geocodePartnerLead via Convert-Pfad geliefert).
       const normalized_name = input.firma.toLowerCase().replace(/\s+/g, ' ').trim()
+      const werkstattInsert: Record<string, unknown> = {
+        name: input.firma,
+        normalized_name,
+        adresse_plz: input.plz,
+        adresse_ort: input.ort,
+        lat: input.lat ?? null,
+        lng: input.lng ?? null,
+        telefon: input.telefon,
+        ansprechpartner_name:
+          `${input.ansprechpartnerVorname} ${input.ansprechpartnerNachname}`.trim() || null,
+        email: input.email,
+        user_id: userId,
+        provision_aktiv: true,
+        status: 'aktiv',
+        aktiviert_am: new Date().toISOString(),
+        aktiviert_von: input.aktiviertVon,
+      }
+      // Self-Signup-Optionalfelder: nur setzen wenn vorhanden, damit der Convert-Pfad
+      // (ohne diese Details) die DB-Defaults behaelt (Muster wie im makler-Case).
+      const wStrasse = detailString(input.rollenDetails, 'adresse_strasse')
+      if (wStrasse) werkstattInsert.adresse_strasse = wStrasse
+      const wKleinunternehmer = detailBoolean(input.rollenDetails, 'ist_kleinunternehmer')
+      if (wKleinunternehmer !== null) werkstattInsert.ist_kleinunternehmer = wKleinunternehmer
+
       const { data: w, error: wErr } = await admin
         .from('werkstaetten')
-        .insert({
-          name: input.firma,
-          normalized_name,
-          adresse_plz: input.plz,
-          adresse_ort: input.ort,
-          lat: input.lat ?? null,
-          lng: input.lng ?? null,
-          telefon: input.telefon,
-          ansprechpartner_name:
-            `${input.ansprechpartnerVorname} ${input.ansprechpartnerNachname}`.trim() || null,
-          email: input.email,
-          user_id: userId,
-          provision_aktiv: true,
-          status: 'aktiv',
-          aktiviert_am: new Date().toISOString(),
-          aktiviert_von: input.aktiviertVon,
-        })
+        .insert(werkstattInsert)
         .select('id')
         .single()
       if (wErr || !w) {
