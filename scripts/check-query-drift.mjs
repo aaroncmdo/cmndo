@@ -77,6 +77,14 @@ function skipString(src, i) {
   return i
 }
 
+/** Ueberspringt ab src[i] einen Kommentar (// bis \n bzw. /* bis Ende); sonst i. */
+function skipComment(src, i) {
+  if (src[i] !== '/') return i
+  if (src[i + 1] === '/') { const nl = src.indexOf('\n', i); return nl === -1 ? src.length : nl + 1 }
+  if (src[i + 1] === '*') { const end = src.indexOf('*/', i + 2); return end === -1 ? src.length : end + 2 }
+  return i
+}
+
 /**
  * Liest ab offset (zeigt auf '(') den kompletten Argument-Block der Methode —
  * string-aware Klammerzaehler. Liefert { args, end } (end = Index NACH ')').
@@ -88,6 +96,7 @@ function readArgs(src, offset) {
   while (i < src.length) {
     const c = src[i]
     if (c === "'" || c === '"' || c === '`') { i = skipString(src, i); continue }
+    if (c === '/') { const j = skipComment(src, i); if (j !== i) { i = j; continue } }
     if (c === '(' || c === '{' || c === '[') depth++
     else if (c === ')' || c === '}' || c === ']') {
       depth--
@@ -98,19 +107,30 @@ function readArgs(src, offset) {
   return { args: src.slice(start), end: src.length }
 }
 
-/** Top-Level-Keys eines Objekt-Literals (string-aware, Tiefe 1). */
+/**
+ * Top-Level-Keys eines Objekt-Literals (string-/kommentar-aware, Tiefe 1).
+ * expectKey-Logik: nach einem Key wird der WERT bis zum Tiefe-1-Komma konsumiert —
+ * sonst wuerden Ternary-Doppelpunkte in Werten (`x ? fall.sv_id : y`) als Keys gelesen.
+ */
 function topLevelKeys(objSrc) {
   const keys = []
   let depth = 0
   let i = 0
+  let expectKey = true
   while (i < objSrc.length) {
     const c = objSrc[i]
     if (c === "'" || c === '"' || c === '`') { i = skipString(objSrc, i); continue }
+    if (c === '/') { const j = skipComment(objSrc, i); if (j !== i) { i = j; continue } }
     if (c === '{' || c === '[' || c === '(') { depth++; i++; continue }
     if (c === '}' || c === ']' || c === ')') { depth--; i++; if (depth <= 0) break; continue }
     if (depth === 1) {
-      const m = objSrc.slice(i).match(/^[\s,]*(\w+)\s*:/)
-      if (m) { keys.push(m[1]); i += m[0].length; continue }
+      if (c === ',') { expectKey = true; i++; continue }
+      if (expectKey) {
+        const m = objSrc.slice(i).match(/^\s*(\w+)\s*:/)
+        if (m) { keys.push(m[1]); i += m[0].length; expectKey = false; continue }
+        // Spread/Shorthand/Whitespace: bis zum naechsten Komma ist das kein Key
+        if (!/\s/.test(c)) expectKey = false
+      }
     }
     i++
   }
