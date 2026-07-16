@@ -1436,7 +1436,11 @@
     "maik_provision",
     "kontingent_gutachter",
     "gutachter_anzahlungen_gesamt",
-    "created_at"
+    "created_at",
+    "google_ads_kosten_eur",
+    "google_ads_leads",
+    "google_ads_cpl_eur",
+    "google_ads_sync_am"
    ]
   },
   "firmen": {
