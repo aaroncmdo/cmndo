@@ -1,16 +1,12 @@
 {
-  "generatedAt": "2026-07-16T15:26:22.058Z",
-  "count": 10,
+  "generatedAt": "2026-07-16T15:42:08.208Z",
+  "count": 6,
   "keys": [
-    "anruf_log.notiz",
     "anspruch_schaetzungen.session_token",
-    "calls.notiz",
     "embed_sites.tracking_webhook_secret",
     "profiles.google_access_token",
     "profiles.google_refresh_token",
     "profiles.ms_access_token",
-    "profiles.ms_refresh_token",
-    "termine.ergebnis_notiz",
-    "termine.notiz"
+    "profiles.ms_refresh_token"
   ]
 }
