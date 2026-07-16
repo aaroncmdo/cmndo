@@ -1,9 +1,7 @@
 {
-  "generatedAt": "2026-07-16T15:42:08.208Z",
-  "count": 6,
+  "generatedAt": "2026-07-16T15:54:53.106Z",
+  "count": 4,
   "keys": [
-    "anspruch_schaetzungen.session_token",
-    "embed_sites.tracking_webhook_secret",
     "profiles.google_access_token",
     "profiles.google_refresh_token",
     "profiles.ms_access_token",
