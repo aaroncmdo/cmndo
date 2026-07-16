@@ -32,12 +32,21 @@ export function FlowZb1Upload({
   token,
   bereitsErfasst,
   onExtracted,
+  onSkip,
 }: {
   token: string
   bereitsErfasst?: boolean
   // AAR-956 15.06.: OCR-Ergebnis in den Eltern-Stepper hochreichen (Halter/Fahrzeug
   // in die Formular-values mergen) — statt der bisherigen Nur-Anzeige.
   onExtracted?: (ex: Zb1FlowExtracted) => void
+  // AAR-956 17.07. (Smoke-Befund 1, werkstatt-embed-E2E): „überspringen" heißt
+  // „ohne Foto weiter zur nächsten Frage" — NICHT „Box einklappen". Ohne onSkip
+  // kollabierte die Box zu null und ließ einen leeren Schritt zurück, auf dem
+  // manuell_toggle und der Skip-ALL-Link („vorerst überspringen") zum Verwechseln
+  // beieinander lagen → Kunde beendete versehentlich die GANZE Feststellung bei
+  // 7/10 (Kennzeichen/Halter/Vorschäden nie gestellt). Der Parent reicht hier
+  // sein „Weiter" rein; der null-Kollaps bleibt nur als Fallback ohne Prop.
+  onSkip?: () => void
 }) {
   const t = useTranslations('selfService')
   const [status, setStatus] = useState<
@@ -186,8 +195,9 @@ export function FlowZb1Upload({
           </Button>
           <button
             type="button"
-            onClick={() => setStatus('skip')}
+            onClick={() => (onSkip ? onSkip() : setStatus('skip'))}
             className="text-sm text-claimondo-ondo/80 underline"
+            data-testid="flow-zb1-skip"
           >
             {t('zb1.ueberspringen')}
           </button>
