@@ -11,9 +11,9 @@ import { sucheEchteWerkstaetten, sucheWerkstaettenNachOrt } from './actions'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { wizardStateZuSuche } from './_components/wizard-logic'
 
-type Props = { initialLat?: number; initialLng?: number; initialPlz?: string }
+type Props = { initialLat?: number; initialLng?: number; initialPlz?: string; flowToken?: string }
 
-export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz }: Props) {
+export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz, flowToken }: Props) {
   const [rows, setRows] = useState<WerkstattVorschlag[]>([])
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(
     initialLat != null && initialLng != null ? { lat: initialLat, lng: initialLng } : null,
@@ -97,6 +97,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
           keineSpezialisierte={keineSpezialisierte}
           onSelectWerkstatt={setSelectedId}
           onSuche={runSuche}
+          flowToken={flowToken}
         />
       }
     />
