@@ -5,7 +5,11 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+
+// Seit #4451 live: oeffentliche Werkstatt-Selbstregistrierung in der App —
+// die CTAs zeigen dorthin statt auf mailto (sofort aktives Konto statt Mail-Pingpong).
+const REGISTRIEREN_URL = 'https://app.claimondo.de/werkstatt/registrieren'
 
 export const metadata: Metadata = {
   title: 'Werkstatt Partner werden — Reparaturaufträge über Claimondo',
@@ -137,10 +141,10 @@ export default function WerkstattPartnerWerdenPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Werkstatt-Partnerschaft%20anfragen`}
+              href={REGISTRIEREN_URL}
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
-              Partner-Werkstatt werden
+              Jetzt kostenlos registrieren
               <ChevronRight className="h-5 w-5" />
             </a>
             <a
@@ -333,15 +337,15 @@ export default function WerkstattPartnerWerdenPage() {
             Partner-Werkstatt werden.
           </h2>
           <p className="mt-3 text-lg text-white/65">
-            Kostenlos. Unverbindlich. In 24 Stunden Rückmeldung.
+            Kostenlos. Unverbindlich. Sofort startklar.
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Werkstatt-Partnerschaft%20anfragen`}
+              href={REGISTRIEREN_URL}
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Wrench className="h-5 w-5" />
-              {CONTACT_EMAIL}
+              Kostenlos registrieren
             </a>
             <a
               href="tel:+4922125906530"
