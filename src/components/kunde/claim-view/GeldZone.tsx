@@ -61,6 +61,10 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
       )}
 
       {/* ── Geld ─────────────────────────────────────────────────────────────────────────────── */}
+      {/* Audit-Fund b2: bei der Reparatur-Route (Kasko/Selbstzahler) gibt es NIE ein Gutachten —
+          die Säule zeigte dort „sobald das Gutachten vorliegt…" (falsche Botschaft). Die Geld-Story
+          der Reparatur-Route erzählen KostenvoranschlagCard/WerkstattCard. */}
+      {!vm.flags.istReparaturRoute && (
       <SaeuleMeinGeld
         fallId={vm.fallId}
         status={(vm.fall.status as string | null) ?? ''}
@@ -80,6 +84,7 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
             : null
         }
       />
+      )}
 
       {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil (faelle_kunde_view-Row existiert). */}
       {geld.auszahlungCardSichtbar && (

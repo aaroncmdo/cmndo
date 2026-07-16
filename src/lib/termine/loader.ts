@@ -12,6 +12,7 @@
 // oder explizit gepflegt). Wird nicht automatisch eingebunden bis geklärt.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { ladeInterneTerminNotizen } from './intern-notizen'
 
 export type TerminQuelle = 'admin_termine' | 'gutachter_termine'
 
@@ -122,7 +123,7 @@ export async function loadTermine(
   {
     let gtQuery = supabase
       .from('gutachter_termine')
-      .select('id, typ, start_zeit, end_zeit, status, fall_id, lead_id, assignee_id, assignee_typ, kb_id, kanal, notiz_intern')
+      .select('id, typ, start_zeit, end_zeit, status, fall_id, lead_id, assignee_id, assignee_typ, kb_id, kanal')
       .is('cancelled_at', null)
 
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL, bezug_typ='lead') ->
@@ -149,8 +150,10 @@ export async function loadTermine(
       assignee_typ: string | null
       kb_id: string | null
       kanal: string | null
-      notiz_intern: string | null
     }>
+
+    // notiz_intern lebt jetzt in gutachter_termine_intern (Staff-only, Kunde-Leak-Fix).
+    const internNotizen = await ladeInterneTerminNotizen(supabase, rows.map(r => r.id))
 
     // SV-Namen via profiles
     const svIds = [...new Set(rows.filter(r => r.assignee_typ === 'sachverstaendiger').map(r => r.assignee_id).filter(Boolean) as string[])]
@@ -191,7 +194,7 @@ export async function loadTermine(
         start: r.start_zeit,
         end: r.end_zeit,
         status: r.status as TerminStatus,
-        notizen: r.notiz_intern,
+        notizen: internNotizen[r.id] ?? null,
         fallId: r.fall_id,
         leadId: r.lead_id,
         verantwortlichName: isKb

@@ -52,15 +52,34 @@ export async function getClaimLifecycleForClaim(
   let serviceTyp: string | null = null
   // Unified Stepper: operative_status ist die kanonische Phasen-Quelle fuer getClaimLifecycle.
   let operativeStatus: string | null = null
+  // WS6/Kasko-Fix: Direct-Reparatur-Signale (kasko/selbstzahler -> Reparatur-Lane statt SA-Kaskade).
+  let abrechnungsweg: string | null = null
+  let reparaturWerkstattId: string | null = null
+  let reparaturTerminStatus: string | null = null
   if (claimId) {
     const { data: claim } = await admin
       .from('claims')
       // T3-slice-2a: claims.status raus — getClaimLifecycle liest seit slice-2a-ii nur operative_status.
-      .select('lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am')
+      .select('lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am, abrechnungsweg, reparatur_werkstatt_id')
       .eq('id', claimId)
       .maybeSingle()
     serviceTyp = (claim?.service_typ as string | null) ?? null
     operativeStatus = (claim?.operative_status as string | null) ?? null
+    abrechnungsweg = (claim?.abrechnungsweg as string | null) ?? null
+    reparaturWerkstattId = (claim?.reparatur_werkstatt_id as string | null) ?? null
+    // Nur fuer Direct-Reparatur-Wege relevant -> Query nur dann (juengster Termin, wie
+    // v_claim_phase rt: updated_at DESC NULLS LAST, created_at DESC).
+    if (abrechnungsweg === 'kasko' || abrechnungsweg === 'selbstzahler') {
+      const { data: rt } = await admin
+        .from('reparatur_termine')
+        .select('status')
+        .eq('claim_id', claimId)
+        .order('updated_at', { ascending: false, nullsFirst: false })
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      reparaturTerminStatus = (rt?.status as string | null) ?? null
+    }
     // FG6 (dual-SSoT collapse): SA/Vollmacht liegen auf claims UND leads. Kanonisch ist
     // die CLAIM-Copy post-conversion (readClaimSigningState); leads nur als
     // pre-conversion-Fallback. Fixt die Divergenz getClaimLifecycle(las lead-copy) vs
@@ -103,7 +122,7 @@ export async function getClaimLifecycleForClaim(
   return {
     // AAR-939: serviceTyp anhaengen (getClaimLifecycle bleibt rein -> Parity zu
     // v_claim_phase unberuehrt; nur ein Render-Sicht-Filter fuer die Phasen).
-    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, operativeStatus }), serviceTyp },
+    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, operativeStatus, abrechnungsweg, reparaturWerkstattId, reparaturTerminStatus }), serviceTyp },
     auftraege,
     kanzleiFall,
   }

@@ -10,6 +10,7 @@ import Link from 'next/link'
 // AAR-892 / f99fdb10: shared createClient (verdrahtet realtime.setAuth) statt direktem
 // createBrowserClient — sonst laueft eine spaeter ergaenzte Realtime-Sub hier als anon.
 import { createClient } from '@/lib/supabase/client'
+import { ladeInterneTerminNotizen } from '@/lib/termine/intern-notizen'
 import { PhoneCallIcon, UsersIcon, CalendarIcon, HardHatIcon, VideoIcon } from 'lucide-react'
 
 export type TerminTyp = 'rueckruf' | 'kunde' | 'intern' | 'gutachter' | 'kb_beratung'
@@ -101,13 +102,14 @@ export default function TerminListeClient({
       {
         let q = supabase
           .from('gutachter_termine')
-          .select('id, typ, start_zeit, status, fall_id, lead_id, kb_id, kanal, notiz_intern')
+          .select('id, typ, start_zeit, status, fall_id, lead_id, kb_id, kanal')
           .is('cancelled_at', null)
         // AAR-956: bezug-native Self-Service-Termine (lead_id NULL, bezug_typ='lead') mitfinden.
         if (fallId && leadId) q = q.or(`fall_id.eq.${fallId},lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
         else if (fallId) q = q.eq('fall_id', fallId)
         else if (leadId) q = q.or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
         const { data } = await q.order('start_zeit', { ascending: false })
+        const internNotizen = await ladeInterneTerminNotizen(supabase, (data ?? []).map(r => r.id))
         for (const r of data ?? []) {
           const isKb = r.typ === 'kb_beratung'
           out.push({
@@ -117,7 +119,7 @@ export default function TerminListeClient({
             titel: isKb ? 'KB-Beratung' : 'Gutachter-Termin',
             start: r.start_zeit,
             status: r.status,
-            notizen: r.notiz_intern,
+            notizen: internNotizen[r.id] ?? null,
             fallId: r.fall_id,
             leadId: r.lead_id,
             verantwortlich: null,

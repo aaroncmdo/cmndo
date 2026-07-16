@@ -334,6 +334,7 @@
     },
     "step_summary": {
       "heading": "Witaj, {name}!",
+      "heading_ohne_name": "Witaj!",
       "sub": "Proszę sprawdzić i poprawić swoje dane.",
       "fields": {
         "vorname": "Imię",

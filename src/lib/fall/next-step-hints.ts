@@ -65,6 +65,12 @@ const HINTS: Record<string, string> = {
   '9.1': 'Fall geschlossen',
   '9.2': 'Feedback / Google-Bewertung anfordern',
   '9.3': 'Kanzlei-Abrechnung abgeschlossen',
+
+  // Reparatur-Lane (Direct-Reparatur kasko/selbstzahler — kein SV-/Kanzlei-Prozess, WS6)
+  'r.1': 'Werkstatt wählen bzw. Kunde bei der Werkstattwahl unterstützen',
+  'r.2': 'Reparaturtermin mit der Werkstatt abstimmen',
+  'r.3': 'Reparatur läuft — auf Fertigmeldung der Werkstatt warten',
+  'r.4': 'Reparatur erledigt — Abschluss und Abrechnung anstoßen',
 }
 
 export function getNextStepHint(subphase: string): string {

@@ -1,16 +1,21 @@
 // Stabile Test-UUIDs (Prefix fb… = fixture) + bekannte Account-IDs.
 // Single-Source-of-Truth für Idempotenz; auch von der SP2-Harness importierbar.
+// 17.07.: 5 der 7 UUIDs auf die HEUTIGEN Konten remappt — der Prod-Golive-Accounts-Cleanup
+// (13.07.) hat die alten Fixture-User geloescht/neu angelegt (provision.ts scheiterte mit
+// 15 FK-Kaskaden auf die toten IDs). kunde = smoke-kunde@ (dediziertes Smoke-Konto,
+// f99fdb10 17.07. mit Aaron-Go). Quelle der Wahrheit fuer Logins/PWs:
+// Memory reference-internal-test-account-logins (die README-PW-Tabelle ist teils stale).
 export const ACCOUNTS = {
-  admin: 'bdfe432b-250e-4dec-8bdd-f5d6ac04d910',
-  dispatch: '7b0787fb-2da1-4f61-aa79-1e56a6d32bf2',
+  admin: 'd8a2606d-4551-451d-b145-270d94eff1a8',
+  dispatch: '7b604e30-8308-4948-964c-6eec0540a42b',
   kanzlei: 'bbbb1111-0000-4000-8000-000000000010',
-  kb: '59bdb155-e283-4fd1-a4ca-222f924a0efa',
-  kunde: '113aebe5-0630-4753-809a-6756df5ba432',
+  kb: '60eff43e-bece-4553-bd8c-cc1f948e913f',
+  kunde: 'd63661dd-40cf-4654-97f7-03fcd1f35429',
   makler: 'bbbb2222-0000-4000-8000-000000000020',
-  sv: '25a8c28e-b85a-4769-94d4-920e47f64079',
+  sv: '41ebb10a-053b-4295-8a9d-057b95f2e692',
 } as const
 
-export const SV_SACHVERSTAENDIGE_ID = '1da11741-a406-45ce-a27b-c041576cccbb'
+export const SV_SACHVERSTAENDIGE_ID = '0469524f-0547-4979-8068-a2d00b7fdaec'
 
 export const CLAIMS = {
   c1: 'fbc10001-0000-4000-8000-000000000001',

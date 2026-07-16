@@ -72,3 +72,38 @@ describe('deriveKundeZonen', () => {
     expect(z).toContain('doksTermine')
   })
 })
+
+// Audit-Funde b3/b4 (Kasko-Audit 15.07., gefixt 17.07.):
+// b4: werkstatt_vorschlag fehlte in TERMIN_OFFEN — der handlungspflichtigste Status
+//     (Werkstatt schlaegt Termin vor, Kunde muss Passt/Passt-nicht) erzeugte KEINE Aufgabe.
+// b3: der CTA verlinkte pauschal nach doksTermine — der Reparaturtermin lebt aber in der
+//     GeldZone (WerkstattCard) -> zone ist jetzt termin-art-abhaengig.
+describe('deriveKundeAufgaben — Termin-Bestaetigung (Audit b3/b4)', () => {
+  it('b4: werkstatt_vorschlag erzeugt die Termin-Aufgabe', () => {
+    const r = deriveKundeAufgaben(
+      vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status: 'werkstatt_vorschlag', claim_id: null }] }),
+    )
+    expect(r.map((a) => a.id)).toContain('termin_bestaetigen')
+  })
+
+  it('b3: Reparaturtermin verlinkt in die GeldZone, SV-Termin nach DoksTermine', () => {
+    const rep = deriveKundeAufgaben(
+      vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status: 'angefragt', claim_id: null }] }),
+    )
+    expect(rep.find((a) => a.id === 'termin_bestaetigen')?.zone).toBe('geld')
+
+    const sv = deriveKundeAufgaben(
+      vm({ termine: [{ id: 't2', art: 'sv', start: null, status: 'reserviert', claim_id: null }] }),
+    )
+    expect(sv.find((a) => a.id === 'termin_bestaetigen')?.zone).toBe('doksTermine')
+  })
+
+  it('bestaetigt/erledigt/storniert/abgelehnt erzeugen KEINE Termin-Aufgabe', () => {
+    for (const status of ['bestaetigt', 'erledigt', 'storniert', 'abgelehnt']) {
+      const r = deriveKundeAufgaben(
+        vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status, claim_id: null }] }),
+      )
+      expect(r.map((a) => a.id)).not.toContain('termin_bestaetigen')
+    }
+  })
+})

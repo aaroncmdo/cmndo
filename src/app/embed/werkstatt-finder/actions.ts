@@ -33,6 +33,9 @@ export type WerkstattFinderLeadPayload = {
   gewerbe?: boolean | null
   modell?: string | null
   beschreibung?: string | null
+  // §10 Doppel-Lead-Falle: bestehender Flow-Token (Re-Entry) -> UPDATE statt INSERT.
+  // Der Token ist die Capability; er wird server-seitig zu lead_id aufgeloest (nie roher leadId).
+  flowToken?: string | null
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
@@ -193,21 +196,53 @@ export async function erstelleWerkstattFinderLead(
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
 
-  const result = await createLead(
-    admin,
-    {
-      vorname: payload.vorname ?? null,
-      nachname: payload.nachname ?? null,
-      email: payload.email,
-      telefon: payload.telefon ?? null,
-      source_channel: 'werkstatt_finder',
-      status: 'neu',
-    },
-    extra,
-  )
-  if (!result.ok) return { ok: false, error: result.error }
+  // §10 Doppel-Lead-Falle (Mirror des Gutachter-Musters, gutachter-finder/actions.ts:248ff):
+  // Kommt der Embed mit einem bestehenden Flow-Token (Re-Entry), wird der BESTEHENDE Lead
+  // aktualisiert statt ein zweiter angelegt. Ungueltiger/abgelaufener Token = "Entry ohne
+  // Lead" -> normaler INSERT (robuster als eine Sackgasse; genau die Spec-§10-Semantik).
+  let leadId: string | null = null
+  const flowToken = payload.flowToken?.trim()
+  if (flowToken) {
+    const { data: fl } = await admin
+      .from('flow_links')
+      .select('lead_id')
+      .eq('token', flowToken)
+      .maybeSingle()
+    const bestehend = (fl?.lead_id as string | null) ?? null
+    if (bestehend) {
+      // Nur BELEGTE Werte uebernehmen: null/undefined strippen (ein Re-Entry darf vorhandene
+      // Lead-Daten nicht mit Luecken ueberschreiben) — false/0 sind WERTE und bleiben
+      // (gewerbe_flag=false = "privat", eine echte Antwort).
+      const update: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(extra)) {
+        if (v !== null && v !== undefined) update[k] = v
+      }
+      if (payload.vorname?.trim()) update.vorname = payload.vorname.trim()
+      if (payload.nachname?.trim()) update.nachname = payload.nachname.trim()
+      if (payload.telefon?.trim()) update.telefon = payload.telefon.trim()
+      update.email = payload.email.trim()
+      const { error: updErr } = await admin.from('leads').update(update).eq('id', bestehend)
+      if (updErr) return { ok: false, error: updErr.message }
+      leadId = bestehend
+    }
+  }
 
-  const leadId = result.leadId
+  if (!leadId) {
+    const result = await createLead(
+      admin,
+      {
+        vorname: payload.vorname ?? null,
+        nachname: payload.nachname ?? null,
+        email: payload.email,
+        telefon: payload.telefon ?? null,
+        source_channel: 'werkstatt_finder',
+        status: 'neu',
+      },
+      extra,
+    )
+    if (!result.ok) return { ok: false, error: result.error }
+    leadId = result.leadId
+  }
 
   // T5: Foto + Bedarf nicht-kritisch persistieren (vor FlowLink-Return).
   // Ein Fehler hier bricht den Lead-Anlage-Return NICHT.

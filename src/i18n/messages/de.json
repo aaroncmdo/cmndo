@@ -474,6 +474,7 @@
     },
     "step_summary": {
       "heading": "Hallo {name}!",
+      "heading_ohne_name": "Hallo!",
       "sub": "Bitte prüfen und korrigieren Sie Ihre Daten.",
       "fields": {
         "vorname": "Vorname",

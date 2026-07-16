@@ -17,12 +17,15 @@ export const metadata: Metadata = {
 export default async function WerkstattFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; plz?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; plz?: string; token?: string }>
 }) {
   const sp = await searchParams
   const lat = sp.lat ? Number(sp.lat) : undefined
   const lng = sp.lng ? Number(sp.lng) : undefined
   const plz = sp.plz?.trim() || undefined
+  // §10 Doppel-Lead-Falle: Re-Entry mit bestehendem Flow-Token -> die Lead-Anlage UPDATED
+  // den bestehenden Lead statt einen zweiten anzulegen (server-seitig aufgeloest).
+  const flowToken = sp.token?.trim() || undefined
 
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -30,6 +33,7 @@ export default async function WerkstattFinderEmbedPage({
       <WerkstattFinderEmbedClient
         initialLat={lat !== undefined && Number.isFinite(lat) ? lat : undefined}
         initialLng={lng !== undefined && Number.isFinite(lng) ? lng : undefined}
+        flowToken={flowToken}
         initialPlz={plz}
       />
     </div>
