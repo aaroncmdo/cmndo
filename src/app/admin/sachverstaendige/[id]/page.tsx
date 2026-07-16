@@ -102,7 +102,7 @@ export default async function SvDetailPage({
   // Fälle + Tasks parallel laden
   const [faelleRes, tasksRes] = await Promise.all([
     supabase.from('v_faelle_mit_aktuellem_termin')
-      .select('id, claim_nummer, status, schadens_ursache, schadens_ort, sv_termin, created_at, lead_id, leads(vorname, nachname)')
+      .select('id, claim_nummer, status, schadens_ursache, schadens_ort, sv_termin, created_at, lead_id, leads!lead_id(vorname, nachname)')
       .eq('sv_id', id)
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false }),
