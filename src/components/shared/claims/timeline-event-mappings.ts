@@ -103,7 +103,10 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
     labelInternal: (p) => `Status auf "in Kommunikation mit VS"${p.endzustand_grund ? ` — ${s(p.endzustand_grund)}` : ''}`,
     labelKunde:    () => 'Wir verhandeln mit der Versicherung',
   },
-  'claim.reguliert': {
+  // T3-slice-3: Event-Typen kommen jetzt aus operative_status — 'claim.reguliert' (Wert existierte
+  // auf der Achse nie) -> 'claim.reguliert_vollstaendig'; die feinen Terminals (klage_rechtsstreit/
+  // verjaehrt/abgelehnt_final) sind neu sichtbar (der alte c.status-Filter zeigte sie nie).
+  'claim.reguliert_vollstaendig': {
     icon: CheckCircleIcon, tone: 'success', kategorie: 'phase',
     labelInternal: (p) => {
       const betrag = n(p.regulierungs_betrag)
@@ -113,6 +116,21 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
       const betrag = n(p.regulierungs_betrag)
       return betrag ? `Erfolgreich reguliert: ${formatEURausEuro(betrag)}` : 'Erfolgreich reguliert'
     },
+  },
+  'claim.klage_rechtsstreit': {
+    icon: ScaleIcon, tone: 'brand', kategorie: 'phase',
+    labelInternal: (p) => `Klage/Rechtsstreit${p.endzustand_grund ? ` — ${s(p.endzustand_grund)}` : ''}`,
+    labelKunde:    () => 'Dein Fall ist im gerichtlichen Verfahren',
+  },
+  'claim.verjaehrt': {
+    icon: XCircleIcon, tone: 'danger', kategorie: 'phase',
+    labelInternal: (p) => `Verjährt${p.endzustand_grund ? ` — ${s(p.endzustand_grund)}` : ''}`,
+    labelKunde:    () => 'Anspruch verjährt',
+  },
+  'claim.abgelehnt_final': {
+    icon: XCircleIcon, tone: 'danger', kategorie: 'phase',
+    labelInternal: (p) => `Endgültig abgelehnt${p.endzustand_grund ? ` — ${s(p.endzustand_grund)}` : ''}`,
+    labelKunde:    () => 'Versicherung hat endgültig abgelehnt',
   },
   'claim.abgelehnt': {
     icon: XCircleIcon, tone: 'danger', kategorie: 'phase',
