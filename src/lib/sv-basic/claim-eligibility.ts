@@ -13,6 +13,15 @@ export function istErlaubtesPaket(paket: string): paket is SelfServicePaket {
   return (SELF_SERVICE_PAKETE as readonly string[]).includes(paket)
 }
 
+// Firmen-/Steuerdaten fuer BEZAHLTE Self-Service-Registrierungen (Vertrag-Stammdaten-Card
+// im WillkommenClient + Abrechnung). Basic erhebt sie nicht (Funnel bleibt schlank).
+export type SvBusinessDaten = {
+  firmenname?: string | null
+  rechtsform?: string | null
+  steuernummer?: string | null
+  ustId?: string | null
+}
+
 export type SvLeadRow = {
   vorname: string | null; name: string | null; nachname: string | null; firma: string | null
   telefon: string | null; email: string | null; adresse: string | null
@@ -30,7 +39,7 @@ export function normalisiereSuche(s: string): string {
   return s.trim().toLowerCase()
 }
 
-export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string, paket: string = 'basic') {
+export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string, paket: string = 'basic', business?: SvBusinessDaten) {
   // Whitelist-Gate: ungueltiges/unbekanntes Paket faellt hart auf 'basic' (kein Self-Escalation).
   const p: SelfServicePaket = istErlaubtesPaket(paket) ? paket : 'basic'
   const konfig = getPaket(p) // basic → 0 Faelle / 25km / 0 EUR; paid → Kontingent / Radius / Preis
@@ -41,7 +50,11 @@ export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string, paket: 
     verifizierung_status: 'ausstehend' as const,
     ist_aktiv: false,
     portal_zugang_freigeschaltet: false,
-    firmenname: lead.firma ?? null,
+    // business.firmenname (paid Self-Reg) hat Vorrang vor dem Cold-Pin-Firmennamen.
+    firmenname: business?.firmenname ?? lead.firma ?? null,
+    rechtsform: business?.rechtsform ?? null,
+    steuernummer: business?.steuernummer ?? null,
+    ust_id: business?.ustId ?? null,
     standort_adresse: lead.adresse ?? null,
     standort_plz: lead.plz ?? null,
     standort_lat: lead.lat ?? null,
