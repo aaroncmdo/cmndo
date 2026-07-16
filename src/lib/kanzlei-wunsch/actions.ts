@@ -298,12 +298,15 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
   if (!fall?.id) return { ok: false, error: 'Kein Fall am Claim' }
 
+  // CMM-Drift-Fix (16.07.): auftraege hat erstellt_am, NICHT created_at — der Order warf
+  // PostgREST-400 -> erstgutachten=null -> Sanity-Check blockierte den Kanzlei-Wunsch-Flow
+  // faelschlich mit "Gutachten ist noch nicht freigegeben". (4 Stellen in dieser Datei.)
   const { data: erstgutachten } = await admin
     .from('auftraege')
     .select('id, gutachten_url, gutachten_final_freigegeben')
     .eq('fall_id', fall.id)
     .eq('typ', 'erstgutachten')
-    .order('created_at', { ascending: false })
+    .order('erstellt_am', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (!erstgutachten?.gutachten_final_freigegeben) {
@@ -396,7 +399,7 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
     .select('gutachten_final_freigegeben')
     .eq('fall_id', fall.id)
     .eq('typ', 'erstgutachten')
-    .order('created_at', { ascending: false })
+    .order('erstellt_am', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (!erstgutachten?.gutachten_final_freigegeben) {
@@ -590,7 +593,7 @@ export async function smokeResetAufKanzleiWunsch(
     .select('id')
     .eq('fall_id', fallId)
     .eq('typ', 'erstgutachten')
-    .order('created_at', { ascending: false })
+    .order('erstellt_am', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (erstgutachten?.id) {
@@ -673,7 +676,7 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     .select('id')
     .eq('fall_id', fallId)
     .eq('typ', 'erstgutachten')
-    .order('created_at', { ascending: false })
+    .order('erstellt_am', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (erstgutachten?.id) {

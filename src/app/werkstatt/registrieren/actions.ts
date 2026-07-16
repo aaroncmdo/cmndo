@@ -1,0 +1,144 @@
+'use server'
+
+import { createAdminClient } from '@/lib/supabase/admin'
+import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
+import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
+import { sendWillkommenWerkstatt } from '@/lib/email/google/flows'
+
+// Offener Self-Signup einer Werkstatt (CTA der werkstatt.claimondo.de-Landing).
+// Erzeugt SOFORT eine aktive Werkstatt (status='aktiv') + Portal-Zugang (QR-Seite,
+// Self-Print-Aufsteller, Vermittlungen) — Modell wie der Makler-Self-Signup:
+// KEIN Admin-Gate; Leitplanken = Validierung + Email-Dedupe + Rate-Limit +
+// Deaktivierbarkeit (werkstaetten.status='gesperrt'). Result-Object, kein throw.
+// Keine rohen DB-Fehler an den oeffentlichen Client (M1-Muster).
+
+const EMAIL_RX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+export async function registriereWerkstattSelf(
+  formData: FormData,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  // 1. Parse + Validierung
+  const firma = String(formData.get('firma') ?? '').trim()
+  const vorname = String(formData.get('ansprechpartner_vorname') ?? '').trim()
+  const nachname = String(formData.get('ansprechpartner_nachname') ?? '').trim()
+  const email = String(formData.get('email') ?? '').trim().toLowerCase()
+  const telefon = String(formData.get('telefon') ?? '').trim() || null
+  const adresseStrasse = String(formData.get('adresse_strasse') ?? '').trim()
+  const adressePlz = String(formData.get('adresse_plz') ?? '').trim()
+  const adresseOrt = String(formData.get('adresse_ort') ?? '').trim()
+  // Checkbox: nicht angehakt -> false (= regelbesteuert). Bewusst IMMER boolean (nie null),
+  // damit partner-billing-ust die USt der Provisionsgutschriften sofort berechnen kann.
+  const istKleinunternehmer =
+    formData.get('kleinunternehmer') === 'true' || formData.get('kleinunternehmer') === 'on'
+  const einwilligung =
+    formData.get('einwilligung') === 'on' || formData.get('einwilligung') === 'true'
+
+  if (!firma) return { ok: false, error: 'Werkstatt-Name ist ein Pflichtfeld.' }
+  if (!vorname || !nachname) {
+    return { ok: false, error: 'Vor- und Nachname des Ansprechpartners sind Pflicht.' }
+  }
+  if (!EMAIL_RX.test(email)) {
+    return { ok: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
+  }
+  if (!telefon || telefon.length < 5) {
+    return { ok: false, error: 'Telefonnummer ist ein Pflichtfeld.' }
+  }
+  if (!adresseStrasse) {
+    return { ok: false, error: 'Straße und Hausnummer sind ein Pflichtfeld.' }
+  }
+  if (!adressePlz || !adresseOrt) {
+    return { ok: false, error: 'PLZ und Ort sind Pflichtfelder.' }
+  }
+  if (!einwilligung) {
+    return { ok: false, error: 'Bitte bestätigen Sie die Einwilligung, um fortzufahren.' }
+  }
+
+  // 2. Rate-Limit — fail-CLOSED (Account-Anlage ist sicherheitsrelevant)
+  const rl = await checkIpRateLimit('werkstatt-self-signup', { failClosed: true })
+  if (!rl.allowed) return { ok: false, error: 'Zu viele Anfragen, bitte kurz warten.' }
+
+  const admin = createAdminClient()
+
+  // 3. Email-Dedupe: kein zweiter Account auf dieselbe Adresse
+  const { data: existing } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('email', email)
+    .maybeSingle()
+  if (existing) {
+    return { ok: false, error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.' }
+  }
+
+  // 4. Geocoding — best-effort (Finder-Pin + Start-Karte), blockiert NICHT bei Fehler.
+  let lat: number | null = null
+  let lng: number | null = null
+  try {
+    const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
+    const geo = await geocodeAdresse(`${adresseStrasse}, ${adressePlz} ${adresseOrt}`)
+    if (geo) {
+      lat = geo.lat
+      lng = geo.lng
+    }
+  } catch (err) {
+    console.error('[registriereWerkstattSelf] Geocoding fehlgeschlagen (non-blocking):', err)
+  }
+
+  // 5. Anlage (Auth + profiles[rolle=werkstatt] + werkstaetten[status=aktiv] + Staffel).
+  //    aktiviertVon=null = Self-Signup. Strasse + Kleinunternehmer via rollenDetails
+  //    (additiv im Kern — Convert-Pfad unveraendert).
+  const result = await anlegePartnerKern(admin, 'werkstatt', {
+    firma,
+    ansprechpartnerVorname: vorname,
+    ansprechpartnerNachname: nachname,
+    email,
+    telefon,
+    plz: adressePlz,
+    ort: adresseOrt,
+    lat,
+    lng,
+    aktiviertVon: null,
+    rollenDetails: {
+      adresse_strasse: adresseStrasse,
+      ist_kleinunternehmer: istKleinunternehmer,
+      quelle: 'self_signup',
+    },
+  })
+  if (!result.ok) {
+    // M1: keine rohen DB-Fehler an den oeffentlichen Client.
+    console.error('[registriereWerkstattSelf] Anlage fehlgeschlagen:', result.error)
+    return {
+      ok: false,
+      error: 'Registrierung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
+    }
+  }
+
+  // 6. Willkommens-Mail mit Magic-Link zum Passwort-Setzen (non-critical — Konto ist aktiv;
+  //    sendWillkommenWerkstatt wirft hart, wenn kein Link erzeugbar ist -> try/catch).
+  try {
+    await sendWillkommenWerkstatt({ to: email, werkstattName: firma })
+  } catch (err) {
+    console.error('[registriereWerkstattSelf] Willkommens-Mail fehlgeschlagen (non-critical):', err)
+  }
+
+  // 7. Awareness-Notification an Admins — KEIN Gate, nur Sichtbarkeit/Missbrauchs-Monitoring.
+  try {
+    const { data: admins } = await admin.from('profiles').select('id').eq('rolle', 'admin')
+    if (admins && admins.length > 0) {
+      await Promise.all(
+        admins.map((a) =>
+          admin.from('benachrichtigungen').insert({
+            user_id: a.id as string,
+            typ: 'werkstatt_self_signup',
+            titel: `Neuer Werkstatt-Self-Signup: ${firma}`,
+            beschreibung: `${firma} (${email}) hat sich selbst registriert. QR-Pool-Token kann bei Bedarf zugewiesen werden.`,
+            link: '/admin/werkstaetten',
+          }),
+        ),
+      )
+    }
+  } catch (err) {
+    console.error('[registriereWerkstattSelf] Admin-Notify fehlgeschlagen (non-critical):', err)
+  }
+
+  return { ok: true }
+}

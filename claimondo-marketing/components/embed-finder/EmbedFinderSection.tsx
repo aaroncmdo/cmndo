@@ -1,0 +1,115 @@
+'use client'
+
+// Generischer iframe-Wrapper für die App-Embed-Finder (Gutachter UND Werkstatt, #18 P4).
+// Extrahiert aus GutachterFindenSection (AAR-956 WS6), damit die Consent-Bridge + die
+// Click-ID-Durchreiche nicht dupliziert werden — die beiden Finder unterscheiden sich
+// nur in Pfad + Titel. Konsumenten nutzen die dünnen Wrapper (GutachterFindenSection /
+// WerkstattFindenSection), nicht diese Datei direkt.
+//
+// Der interaktive Finder ist als <iframe> auf den Haupt-App-Embed eingebettet
+// (app.claimondo.de/embed/<finder>). Höhe via `height` (default '100dvh').
+// EMBED_ORIGIN pro Env via NEXT_PUBLIC_EMBED_ORIGIN.
+//
+// AAR-956 Consent-Bridge: 'use client', weil der Embed-iframe (cross-origin) den Consent der
+// Parent-Seite nicht automatisch erbt. Wir reichen den GCM-v2-State per postMessage durch
+// (Handshake + CONSENT_CHANGED_EVENT) → der iframe-Container hebt von default=denied an.
+//
+// ⚠ allow="geolocation" ist PFLICHT am iframe — sonst ist „Aktuellen Standort verwenden"
+// im Embed tot (Permissions-Policy blockt Geolocation in cross-origin-iframes).
+
+import { useEffect, useRef } from 'react'
+import {
+  CONSENT_COOKIE_NAME,
+  CONSENT_CHANGED_EVENT,
+  parseConsent,
+  categoriesToGcm,
+} from '@/lib/analytics/consent'
+
+const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
+
+export type EmbedFinderSectionProps = {
+  /** Embed-Pfad in der Haupt-App, z.B. '/embed/gutachter-finder' oder '/embed/werkstatt-finder'. */
+  embedPath: string
+  /** iframe-title (a11y). */
+  title: string
+  /** Start-Zentrum (z.B. aus ?plz/?stadt server-geocodet). */
+  initialCenter?: { lat: number; lng: number } | null
+  initialZoom?: number
+  /** Container-Höhe (default '100dvh' = Vollseite; In-Page z.B. '70vh'). */
+  height?: string
+  /**
+   * AAR-956: Google-Ads-Click-IDs (gclid/gbraid/wbraid/gclsrc) aus der Parent-URL → an die
+   * iframe-`src`, damit der Conversion-Linker im iframe-Container `_gcl_aw` schreibt (Attribution).
+   */
+  clickIds?: { gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string }
+}
+
+/** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
+function currentGcm(): Record<string, 'granted' | 'denied'> {
+  if (typeof document === 'undefined') return categoriesToGcm({ statistics: false, marketing: false })
+  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
+  return categoriesToGcm(parseConsent(m?.[1]))
+}
+
+export function EmbedFinderSection({
+  embedPath,
+  title,
+  initialCenter = null,
+  initialZoom,
+  height = '100dvh',
+  clickIds,
+}: EmbedFinderSectionProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Das server-geocodete Start-Zentrum als ?lat&lng[&zoom] an den Embed durchreichen.
+  const params = new URLSearchParams()
+  if (initialCenter) {
+    params.set('lat', String(initialCenter.lat))
+    params.set('lng', String(initialCenter.lng))
+    if (initialZoom) params.set('zoom', String(initialZoom))
+  }
+  // Ads-Click-IDs in die iframe-URL durchreichen (Allowlist — keine beliebigen Params).
+  for (const key of ['gclid', 'gbraid', 'wbraid', 'gclsrc'] as const) {
+    const v = clickIds?.[key]
+    if (v) params.set(key, v)
+  }
+  const qs = params.toString()
+  const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
+
+  // Consent-Propagation: GCM-State per postMessage an den iframe — getriggert durch (a) den
+  // „ready"-Handshake des iframe (ConsentBridge meldet sich, wenn ihr Listener steht → löst die
+  // Race „Parent sendet zu früh") und (b) jede Consent-Änderung (CONSENT_CHANGED_EVENT vom CMP).
+  useEffect(() => {
+    function sendConsent() {
+      const win = iframeRef.current?.contentWindow
+      if (!win) return
+      try {
+        win.postMessage({ type: 'claimondo-consent', gcm: currentGcm() }, EMBED_ORIGIN)
+      } catch {
+        /* iframe weg / cross-origin-Block → no-op */
+      }
+    }
+    function onIframeReady(e: MessageEvent) {
+      if (e.origin === EMBED_ORIGIN && (e.data as { type?: string } | null)?.type === 'claimondo-consent-ready') {
+        sendConsent()
+      }
+    }
+    window.addEventListener(CONSENT_CHANGED_EVENT, sendConsent)
+    window.addEventListener('message', onIframeReady)
+    return () => {
+      window.removeEventListener(CONSENT_CHANGED_EVENT, sendConsent)
+      window.removeEventListener('message', onIframeReady)
+    }
+  }, [])
+
+  return (
+    <iframe
+      ref={iframeRef}
+      src={src}
+      title={title}
+      loading="lazy"
+      allow="geolocation"
+      style={{ width: '100%', height, border: 'none', display: 'block' }}
+    />
+  )
+}

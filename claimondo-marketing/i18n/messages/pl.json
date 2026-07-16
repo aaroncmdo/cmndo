@@ -1453,6 +1453,7 @@
     "wie_es_funktioniert": "Jak to działa",
     "ueber_uns": "O nas",
     "gutachter_finden": "Znajdź rzeczoznawcę",
+    "werkstatt_finden": "Znajdź warsztat",
     "zu_meinem_portal": "Do mojego portalu",
     "portal": "Portal",
     "ratgeber": "Poradniki",
@@ -2204,6 +2205,9 @@
       "sv_popup_cta": "Wyślij zapytanie przez Wizard →",
       "beratung_label": "Doradztwo"
     }
+  },
+  "werkstatt_finden": {
+    "sr_h1": "Znajdź warsztat samochodowy w pobliżu — interaktywna mapa sprawdzonych warsztatów partnerskich"
   },
   "beratung_anfragen": {
     "badge": "0 € · Brak infolinii · Bezpośredni kontakt",
@@ -4029,6 +4033,14 @@
       "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców DAT w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
       "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami DAT",
       "twitter_description": "Mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h."
+    },
+    "werkstatt_finden": {
+      "title": "Znajdź warsztat samochodowy w pobliżu — mapa, dopasowany warsztat i termin",
+      "description": "Interaktywna mapa sprawdzonych warsztatów partnerskich — ranking według marki, rodzaju szkody i odległości. Zapytanie w kilka minut: blacharstwo, lakier, smart repair, mechanika, szyby.",
+      "og_title": "Znajdź warsztat — mapa sprawdzonych warsztatów partnerskich",
+      "og_description": "Dopasowany warsztat w pobliżu: według marki, szkody i odległości. Zapytanie w kilka minut.",
+      "twitter_title": "Znajdź warsztat — mapa sprawdzonych warsztatów partnerskich",
+      "twitter_description": "Dopasowany warsztat w pobliżu: według marki, szkody i odległości. Zapytanie w kilka minut."
     },
     "beratung_anfragen": {
       "title": "Bezpłatna porada — szkoda powypadkowa Kfz",

@@ -163,6 +163,14 @@ export function LandingTopbar({ authenticatedUser, finderHref = '/gutachter-find
           >
             {t('gutachter_finden')}
           </Link>
+          {/* #18 P4: Sekundär-Finder „Werkstatt finden" — dezenter Outline-Stil, erst ab lg
+              (Header-Platz); Mobile übernimmt das Hamburger-Menü (finder2). */}
+          <Link
+            href="/werkstatt-finden"
+            className="hidden items-center gap-1.5 rounded-full border border-claimondo-navy/20 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/40 hover:bg-white active:scale-[0.97] lg:inline-flex"
+          >
+            {t('werkstatt_finden')}
+          </Link>
           {/* Marketing-Login-Persistenz: CTA hydratisiert den Login-Status client-
               seitig (Content-Seiten uebergeben authenticatedUser=null → SSR bleibt
               anonym/Crawler-neutral, Client schaltet Eingeloggte auf „Zu meinem
@@ -185,6 +193,7 @@ export function LandingTopbar({ authenticatedUser, finderHref = '/gutachter-find
             ratgeber={{ hubHref: '/ratgeber', label: t('ratgeber'), items: ratgeberMenu }}
             gutachter={{ hubHref: '/kfz-gutachter', label: t('gutachter'), items: gutachterMenu }}
             finder={{ href: finderHref, label: t('gutachter_finden') }}
+            finder2={{ href: '/werkstatt-finden', label: t('werkstatt_finden') }}
             menuLabel="Menü"
             closeLabel="Schließen"
           />

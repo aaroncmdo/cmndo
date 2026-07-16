@@ -18,11 +18,13 @@ type Props = {
   ratgeber: Cluster
   gutachter: Cluster
   finder: NavItem
+  /** #18 P4: optionaler zweiter Finder (Werkstatt finden) — dezenter unter dem Primär-CTA. */
+  finder2?: NavItem
   menuLabel: string
   closeLabel: string
 }
 
-export function MobileNav({ links, ratgeber, gutachter, finder, menuLabel, closeLabel }: Props) {
+export function MobileNav({ links, ratgeber, gutachter, finder, finder2, menuLabel, closeLabel }: Props) {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
@@ -88,6 +90,18 @@ export function MobileNav({ links, ratgeber, gutachter, finder, menuLabel, close
               <Search className="h-5 w-5" aria-hidden />
               {finder.label}
             </Link>
+
+            {/* Sekundär-CTA: Werkstatt finden (#18 P4) — dezenter Outline-Stil */}
+            {finder2 && (
+              <Link
+                href={finder2.href}
+                onClick={() => setOpen(false)}
+                className="mb-3 flex items-center justify-center gap-2 rounded-full border border-claimondo-navy/20 bg-white px-5 py-3 text-base font-bold text-claimondo-navy transition-all duration-200 hover:border-claimondo-navy/40 hover:bg-claimondo-bg active:scale-[0.98]"
+              >
+                <Search className="h-5 w-5" aria-hidden />
+                {finder2.label}
+              </Link>
+            )}
 
             {/* Einfache Links */}
             <div className="space-y-0.5">

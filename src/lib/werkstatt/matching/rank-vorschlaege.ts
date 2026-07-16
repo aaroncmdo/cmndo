@@ -43,6 +43,10 @@ export type WerkstattKandidat = {
   marken: string[] | null
   ist_freie_werkstatt: boolean | null
   fahrzeug_gruppen: string[] | null
+  // #18 Datenpflege (Spec §5/§6): GBP-Trust — gecachte Google-Bewertung (scripts/werkstatt-gbp-pull.mjs).
+  // Optional, damit bestehende Kandidat-Konstruktionen (Tests/Alt-Caller) unveraendert kompilieren.
+  google_rating?: number | null
+  google_review_count?: number | null
 }
 
 export type WerkstattVorschlag = Omit<WerkstattKandidat, 'verifiziert'> & {
@@ -162,6 +166,18 @@ function baueGruende(
 
   if (w.verifiziert === true) {
     gruende.push({ typ: 'trust', text: 'Verifizierter Partner' })
+  }
+
+  // GBP-Trust-Chip (Spec §5): nur bei belastbarem Rating (>= 4,0 UND >= 5 Bewertungen) —
+  // ein 3-Sterne-Profil ist kein Vertrauens-Argument. Reine ANZEIGE, kein Ranking-Einfluss
+  // (Sortierung bleibt Marke→Gewerke→Gruppe→verifiziert→Distanz; Umbau = Produktentscheidung).
+  const rating = w.google_rating ?? null
+  const anzahl = w.google_review_count ?? 0
+  if (rating !== null && rating >= 4 && anzahl >= 5) {
+    gruende.push({
+      typ: 'trust',
+      text: `★ ${rating.toFixed(1).replace('.', ',')} bei Google (${anzahl} Bewertungen)`,
+    })
   }
 
   return gruende
