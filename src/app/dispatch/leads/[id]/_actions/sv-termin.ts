@@ -13,6 +13,7 @@ import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { checkSvReachability, precomputeSvSlotEtas, isSlotReachable } from '@/lib/dispatch/reachability'
 import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import { pruefeBelegungStrict } from '@/lib/termine/engine'
+import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
 
 /**
  * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
@@ -545,19 +546,18 @@ export async function acceptGegenvorschlag(
         const slotStart = new Date(slot.start)
         const datumUhrzeit = `${slotStart.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${slotStart.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
 
-        // SV-Name aus Termin nachladen (wenn Typ-Relations unterstützt)
+        // SV-Name aus Termin nachladen — Zwei-Schritt ueber die assignee-Achse.
+        // AAR-956 17.07.: das fruehere sachverstaendige(...)-Embed hat auf
+        // gutachter_termine KEINEN FK (PGRST200) → die Query starb still und der
+        // Fallback 'Ihrem Gutachter' griff immer.
         let svName = 'Ihrem Gutachter'
-        const { data: svRow } = await supabase
+        const { data: svRowRaw } = await supabase
           .from('gutachter_termine')
-          .select('sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+          .select('assignee_typ, assignee_id')
           .eq('id', terminId)
           .single()
-        const svRel = (svRow as { sachverstaendige: unknown } | null)?.sachverstaendige
-        const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-        const profileRel = sv?.profiles
-        const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-          | { vorname: string | null; nachname: string | null }
-          | null
+        const svRow = svRowRaw as { assignee_typ: string | null; assignee_id: string | null } | null
+        const profile = await ladeSvAssigneeName(supabase, svRow?.assignee_typ ?? null, svRow?.assignee_id ?? null)
         const zusammen = `${profile?.vorname ?? ''} ${profile?.nachname ?? ''}`.trim()
         if (zusammen) svName = zusammen
 

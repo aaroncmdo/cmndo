@@ -13,6 +13,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { persistFlowLinkVersand } from '@/lib/start-link/persist-flowlink-versand'
 import { toE164 } from '@/lib/format/telefon'
+import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
 
 type DbClient = SupabaseClient<Database>
 
@@ -46,19 +47,17 @@ export async function sendFlowLinkMultiChannelCore(
 
   const { data: terminRaw } = await db
     .from('gutachter_termine')
-    .select('start_zeit, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+    // AAR-956 17.07.: SV-Name via Zwei-Schritt (assignee-Achse) — das sachverstaendige-Embed
+    // hat auf gutachter_termine keinen FK (PGRST200), die Query starb still → FlowLink ging
+    // immer OHNE Termin-Text raus.
+    .select('start_zeit, assignee_typ, assignee_id')
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: true })
     .limit(1)
     .maybeSingle()
-  const termin = terminRaw as { start_zeit: string; sachverstaendige: unknown } | null
-  const svRel = termin?.sachverstaendige
-  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-  const profileRel = sv?.profiles
-  const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-    | { vorname: string | null; nachname: string | null }
-    | null
+  const termin = terminRaw as { start_zeit: string; assignee_typ: string | null; assignee_id: string | null } | null
+  const profile = await ladeSvAssigneeName(db, termin?.assignee_typ ?? null, termin?.assignee_id ?? null)
   const svVorname = profile?.vorname ?? ''
   const svNachname = profile?.nachname ?? ''
   const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null

@@ -18,6 +18,7 @@ import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
+import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
 
 export const dynamic = 'force-dynamic'
 
@@ -127,9 +128,12 @@ export default async function OnboardingPage({
   let terminDatum: string | null = null
   if (fall?.id) {
     try {
+      // AAR-956 17.07.: SV-Name via Zwei-Schritt ueber die assignee-Achse — das fruehere
+      // sachverstaendige(...)-Embed hat auf gutachter_termine keinen FK (PGRST200), die
+      // Query starb still und das Onboarding zeigte nie SV/Termin.
       const { data: termin } = await supabase
         .from('gutachter_termine')
-        .select('start_zeit, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname))')
+        .select('start_zeit, assignee_typ, assignee_id')
         .eq('fall_id', fall.id)
         .in('status', ['reserviert', 'bestaetigt'])
         .order('start_zeit', { ascending: false })
@@ -137,11 +141,9 @@ export default async function OnboardingPage({
         .maybeSingle()
       if (termin) {
         terminDatum = (termin.start_zeit as string | null) ?? null
-        const svJoin = termin.sachverstaendige as unknown
-        const svRow = Array.isArray(svJoin) ? svJoin[0] : svJoin
-        const p = (svRow as { profiles?: { vorname?: string | null } | { vorname?: string | null }[] } | null)?.profiles
-        const pRow = Array.isArray(p) ? p[0] : p
-        svName = pRow?.vorname ?? null
+        const t = termin as { assignee_typ?: string | null; assignee_id?: string | null }
+        const name = await ladeSvAssigneeName(supabase, t.assignee_typ ?? null, t.assignee_id ?? null)
+        svName = name?.vorname ?? null
       }
     } catch (err) {
       return <DiagPage stage="termin-load" error={err} />
