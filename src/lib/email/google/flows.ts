@@ -17,7 +17,6 @@ import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/K
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
 import { SvAbrechnungEmail, subject as svAbrechnungSubject } from './templates/SvAbrechnung'
 import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject } from './templates/KanzleiAuftragszusammenfassung'
-import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
 import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
 import { SvTerminBestaetigungEmail, subject as svTerminBestaetigungSubject } from './templates/SvTerminBestaetigung'
 import { DispatcherTerminAbgelehntEmail, subject as dispatcherAbgelehntSubject } from './templates/DispatcherTerminAbgelehnt'
@@ -584,56 +583,11 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   })
 }
 
-// ─── 6. Kanzlei Abrechnung + Rechnung (mit PDF) ────────────────────────────
-
-export async function sendKanzleiAbrechnungRechnung(abrechnungId: string): Promise<void> {
-  const db = admin()
-  // Annahme: Tabelle kanzlei_abrechnungen
-  const { data: abr } = await db.from('kanzlei_abrechnungen').select('fall_id, kanzlei_email, rechnungs_nr, datum, positionen, gesamtbetrag, pdf_url').eq('id', abrechnungId).single()
-  if (!abr) return
-
-  // CMM-49: claim_nummer claims-direkt (faelle-frei).
-  const claimId = await resolveClaimId(db, abr.fall_id)
-  const { data: fallClaim } = claimId
-    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
-    : { data: null }
-
-  const positionen = Array.isArray(abr.positionen)
-    ? abr.positionen.map((p: { bezeichnung?: string; betrag?: number }) => ({ bezeichnung: p.bezeichnung ?? '—', betrag: fmtCurrency(p.betrag ?? 0) }))
-    : []
-
-  const props = {
-    fallNummer: fallClaim?.claim_nummer ?? '—',
-    rechnungsNr: abr.rechnungs_nr ?? abrechnungId.slice(0, 8),
-    rechnungsDatum: fmtDate(abr.datum),
-    positionen,
-    gesamtbetrag: fmtCurrency(Number(abr.gesamtbetrag)),
-    fallId: abr.fall_id,
-  }
-
-  // PDF laden
-  const attachments: Array<{ filename: string; content: Buffer | string; contentType: string }> = []
-  if (abr.pdf_url) {
-    try {
-      const res = await fetch(abr.pdf_url)
-      if (res.ok) {
-        const buf = Buffer.from(await res.arrayBuffer())
-        attachments.push({ filename: `Kanzlei_Rechnung_${props.rechnungsNr}.pdf`, content: buf, contentType: 'application/pdf' })
-      }
-    } catch { console.error('[KFZ-137] Kanzlei PDF-Download fehlgeschlagen:', abr.pdf_url) }
-  }
-
-  const html = await render(KanzleiAbrechnungRechnungEmail(props))
-  await sendEmail({
-    to: abr.kanzlei_email,
-    subject: kanzleiAbrechnungSubject(props),
-    html,
-    attachments,
-    fallId: abr.fall_id,
-    empfaengerTyp: 'kanzlei',
-    template: 'kanzlei_abrechnung',
-  })
-}
+// (Ex-Abschnitt 6 "Kanzlei Abrechnung + Rechnung" entfernt 17.07.: sendKanzleiAbrechnungRechnung
+// las kanzlei_abrechnungen mit einem NIE existenten per-Fall-Schema (fall_id/rechnungs_nr/
+// positionen/... — echtes Schema ist Monats-Vollmachten-Billing; eigener Kommentar: "Annahme:
+// Tabelle kanzlei_abrechnungen"). Einziger Consumer war /api/dev/test-email. Gleiche Klasse
+// wie sendSvRechnung (#4443).)
 
 // ─── 7. Marketing Monats-Abrechnung (KFZ-141) ─────────────────────────────
 
