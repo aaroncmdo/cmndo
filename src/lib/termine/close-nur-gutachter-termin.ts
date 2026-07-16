@@ -8,23 +8,15 @@
 // Hier nur die beiden atomaren Writes. revalidate ebenfalls Caller-Sache (die
 // betroffenen Routen unterscheiden sich je Portal).
 //
-// Bewusst KEIN 'use server'-File: so ist CLAIM_TERMINAL_STATUSES importierbar
-// (AGENTS.md §use-server-Konstanten — Export aus 'use server' wird im
-// Client-Bundle zu undefined).
+// Bewusst KEIN 'use server'-File (Shared-Kernlogik fuer zwei owner-unterschiedliche Caller).
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
-// T3-S4: der interne Terminal-Guard laeuft jetzt auf operative_status (CLOSED_OPERATIVE_STATUS_PG).
-// CLAIM_TERMINAL_STATUSES bleibt VORERST exportiert — die Reader-Repoints #4417/#4418 (noch
-// unmerged) entfernen die letzten externen Importe; die Konstante faellt dann in T3-S5.
-export const CLAIM_TERMINAL_STATUSES = [
-  'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
-  'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
-  'termin_durchgefuehrt',
-] as const
+// T3-S5: CLAIM_TERMINAL_STATUSES ist ENTFERNT (claims.status gedroppt; letzte Importer in
+// #4417/#4418 auf istClaimGeschlossen umgestellt). Terminal-SSoT = CLOSED_OPERATIVE_STATUS.
 
 /**
  * Verankert den Termin als durchgefuehrt + schliesst den nur_gutachter-Claim

@@ -1,34 +1,12 @@
-// FG5 Cluster 1, Task 1a: Unit-Tests fuer istClaimGeschlossen + die beiden Sets.
+// FG5 Cluster 1, Task 1a: Unit-Tests fuer istClaimGeschlossen + die Sets.
+// T3-S5: TERMINAL_CLAIM_STATUS + der status-Arm sind entfernt (claims.status gedroppt) —
+// die feinen Terminals leben vollstaendig in CLOSED_OPERATIVE_STATUS.
 import { describe, expect, it } from 'vitest'
 import {
   istClaimGeschlossen,
-  TERMINAL_CLAIM_STATUS,
   CLOSED_OPERATIVE_STATUS,
   NONTERMINAL_OPERATIVE_OUTCOME,
 } from '../terminal-status'
-
-describe('TERMINAL_CLAIM_STATUS', () => {
-  it('enthaelt reguliert_vollstaendig', () => {
-    expect(TERMINAL_CLAIM_STATUS.has('reguliert_vollstaendig')).toBe(true)
-  })
-  it('enthaelt storniert', () => {
-    expect(TERMINAL_CLAIM_STATUS.has('storniert')).toBe(true)
-  })
-  it('enthaelt alle 7 ABSCHLUSS_SUBSTATE-Keys', () => {
-    const expected = [
-      'reguliert_vollstaendig',
-      'storniert',
-      'klage_rechtsstreit',
-      'verjaehrt',
-      'abgelehnt_final',
-      'an_externe_kanzlei_uebergeben',
-      'termin_durchgefuehrt',
-    ]
-    for (const k of expected) {
-      expect(TERMINAL_CLAIM_STATUS.has(k)).toBe(true)
-    }
-  })
-})
 
 describe('CLOSED_OPERATIVE_STATUS', () => {
   it('enthaelt abgeschlossen', () => {
@@ -87,9 +65,9 @@ describe('NONTERMINAL_OPERATIVE_OUTCOME', () => {
 })
 
 describe('istClaimGeschlossen', () => {
-  // --- Bug-Repro: storniert claim mit abgeschlossen_am=null ---
-  it('storniert (terminal status) ohne abgeschlossen_am → true (bug-repro)', () => {
-    expect(istClaimGeschlossen({ status: 'storniert' })).toBe(true)
+  // --- Bug-Repro (FG5): storniert claim mit abgeschlossen_am=null ---
+  it('storniert (terminal) ohne abgeschlossen_am → true (bug-repro)', () => {
+    expect(istClaimGeschlossen({ operativeStatus: 'storniert' })).toBe(true)
   })
 
   it('operative status abgeschlossen → true', () => {
@@ -104,8 +82,8 @@ describe('istClaimGeschlossen', () => {
     expect(istClaimGeschlossen({ abgeschlossenAm: '2026-01-01T00:00:00Z' })).toBe(true)
   })
 
-  it('status in_bearbeitung → false', () => {
-    expect(istClaimGeschlossen({ status: 'in_bearbeitung' })).toBe(false)
+  it('aktiver Cursor (in_kommunikation_vs) → false', () => {
+    expect(istClaimGeschlossen({ operativeStatus: 'in_kommunikation_vs' })).toBe(false)
   })
 
   it('leere Args → false', () => {
@@ -113,18 +91,18 @@ describe('istClaimGeschlossen', () => {
   })
 
   it('null-Werte ueberall → false', () => {
-    expect(istClaimGeschlossen({ status: null, operativeStatus: null, abgeschlossenAm: null })).toBe(false)
+    expect(istClaimGeschlossen({ operativeStatus: null, abgeschlossenAm: null })).toBe(false)
   })
 
-  it('reguliert_vollstaendig (terminaler claims.status) → true', () => {
-    expect(istClaimGeschlossen({ status: 'reguliert_vollstaendig' })).toBe(true)
+  it('reguliert_vollstaendig (feiner Terminal) → true', () => {
+    expect(istClaimGeschlossen({ operativeStatus: 'reguliert_vollstaendig' })).toBe(true)
   })
 
   it('verjaehrt → true', () => {
-    expect(istClaimGeschlossen({ status: 'verjaehrt' })).toBe(true)
+    expect(istClaimGeschlossen({ operativeStatus: 'verjaehrt' })).toBe(true)
   })
 
-  it('sv-zugewiesen → false', () => {
-    expect(istClaimGeschlossen({ status: 'sv-zugewiesen' })).toBe(false)
+  it('sv-zugewiesen (aktiver Cursor) → false', () => {
+    expect(istClaimGeschlossen({ operativeStatus: 'sv-zugewiesen' })).toBe(false)
   })
 })

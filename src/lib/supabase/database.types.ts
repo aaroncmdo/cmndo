@@ -2926,7 +2926,6 @@ export type Database = {
           service_typ: string
           spezifikation: string | null
           sprache: string | null
-          status: string | null
           status_changed_at: string | null
           sv_datenschutz_widerruf_zugestimmt_am: string | null
           sv_id: string | null
@@ -3112,7 +3111,6 @@ export type Database = {
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
-          status?: string | null
           status_changed_at?: string | null
           sv_datenschutz_widerruf_zugestimmt_am?: string | null
           sv_id?: string | null
@@ -3298,7 +3296,6 @@ export type Database = {
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
-          status?: string | null
           status_changed_at?: string | null
           sv_datenschutz_widerruf_zugestimmt_am?: string | null
           sv_id?: string | null

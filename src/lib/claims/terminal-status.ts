@@ -1,22 +1,10 @@
 // FG5 Cluster 1: Shared terminal-status helper.
 // Pure, no 'use server' imports — safe to use in Client-Components and libs.
 //
-// keep in sync with lifecycle.ts ABSCHLUSS_SUBSTATE keys.
-// Writer = endzustand-actions.ts (operative_status) + state-machine.ts (abgeschlossen_am).
-// Note: operative_status uses { abgeschlossen, storniert }; terminal claims.status uses
-// the full ABSCHLUSS_SUBSTATE set. istClaimGeschlossen accepts BOTH axes.
-
-/** Terminal claims.status values that mark an abschluss-Substate.
- *  Mirrors ABSCHLUSS_SUBSTATE keys from lifecycle.ts (keep in sync). */
-export const TERMINAL_CLAIM_STATUS: ReadonlySet<string> = new Set([
-  'reguliert_vollstaendig',
-  'storniert',
-  'klage_rechtsstreit',
-  'verjaehrt',
-  'abgelehnt_final',
-  'an_externe_kanzlei_uebergeben',
-  'termin_durchgefuehrt',
-])
+// T3-S5: claims.status ist GEDROPPT — operative_status ist die einzige Status-Achse.
+// Writer = endzustand-actions.ts + state-machine.ts (+ abgeschlossen_am als Close-Marker).
+// TERMINAL_CLAIM_STATUS (die alte status-Achsen-Terminal-Menge) ist entfernt; die feinen
+// Terminals leben in CLOSED_OPERATIVE_STATUS_VALUES.
 
 /** Closed/terminal values on the operative_status axis (claims.operative_status / faelle.status mirror).
  *  Status-Achsen-Konsolidierung B2: operative_status traegt jetzt die feinen Terminal-Outcomes
@@ -98,22 +86,19 @@ export const COMPLETED_OPERATIVE_STATUS_VALUES: string[] = CLOSED_OPERATIVE_STAT
 )
 
 /**
- * Returns true if the claim is in a closed/terminal state by ANY of the three axes:
- *   - status: terminal claims.status (ABSCHLUSS_SUBSTATE key)
- *   - operativeStatus: claims.operative_status / faelle.status mirror ({ abgeschlossen, storniert })
- *   - abgeschlossenAm: claims.abgeschlossen_am timestamp (set by state-machine on normal close)
+ * Returns true if the claim is in a closed/terminal state by EITHER axis:
+ *   - operativeStatus: claims.operative_status (CLOSED_OPERATIVE_STATUS — coarse 'abgeschlossen'/
+ *     'storniert' + die feinen Terminals)
+ *   - abgeschlossenAm: claims.abgeschlossen_am timestamp (robuster Close-Marker)
  *
- * FG5 fix: storniert claims set via endzustand-actions never set abgeschlossen_am,
- * so the old boolean-closed check (abgeschlossen_am || status==='abgeschlossen') was
- * insufficient. This helper treats any terminal status as closed, regardless of the timestamp.
+ * T3-S5: der fruehere status-Arm (TERMINAL_CLAIM_STATUS auf claims.status) ist entfernt —
+ * die Spalte existiert nicht mehr. FG5-Semantik bleibt: terminal zaehlt auch ohne Timestamp.
  */
 export function istClaimGeschlossen(args: {
-  status?: string | null
   operativeStatus?: string | null
   abgeschlossenAm?: string | null
 }): boolean {
   if (args.abgeschlossenAm) return true
-  if (args.status && TERMINAL_CLAIM_STATUS.has(args.status)) return true
   if (args.operativeStatus && CLOSED_OPERATIVE_STATUS.has(args.operativeStatus)) return true
   return false
 }

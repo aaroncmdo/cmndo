@@ -3,7 +3,7 @@
 // wiederverwendbares Lib-Modul, das von beliebigen Inbound-Routen gerufen wird.
 //
 // KEIN 'use server' — wird von API-Routen (nicht Client) genutzt und muss
-// Konstanten (CLAIM_TERMINAL_STATUSES etc.) korrekt exportieren koennen.
+// Konstanten korrekt exportieren koennen.
 
 import type { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
