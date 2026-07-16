@@ -482,11 +482,13 @@ export function WerkstattAuftragDetail({
   auftrag,
   extra,
   chatMessages,
+  chatRealtime,
   currentUserId,
 }: {
   auftrag: WerkstattAuftrag
   extra?: WerkstattAuftragExtra | null
   chatMessages?: WerkstattChatMessage[]
+  chatRealtime?: { fallId: string; gruppeThreadId: string | null }
   currentUserId?: string | null
 }) {
   const segment = werkstattAuftragSegment(auftrag)
@@ -730,9 +732,11 @@ export function WerkstattAuftragDetail({
       {/* KI-Copilot: Reparatur/Abrechnung/KVA/Totalschaden — Streaming via /api/werkstatt/copilot. */}
       <WerkstattCopilotPanel claimId={auftrag.claim_id} />
 
-      {/* Fall-Chat (Gruppenchat, kanal-basiert wie der Makler-Chat) — ganz unten. */}
+      {/* Fall-Chat (v2-Thread kunde_gruppe + v1-kanal, analog Makler #4349) — ganz unten. */}
       <WerkstattChatTab
         claimId={auftrag.claim_id}
+        fallId={chatRealtime?.fallId ?? auftrag.claim_id}
+        gruppeThreadId={chatRealtime?.gruppeThreadId ?? null}
         currentUserId={currentUserId ?? null}
         initialMessages={chatMessages ?? []}
       />

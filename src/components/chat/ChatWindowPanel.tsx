@@ -54,7 +54,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9980] backdrop-blur-sm bg-black/10 pointer-events-none"
+            className="fixed inset-0 z-[940] backdrop-blur-sm bg-black/10 pointer-events-none"
             aria-hidden
           />
 
@@ -66,7 +66,7 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
             animate={{ opacity: 1, scale: 1, y: 0, clipPath: 'ellipse(200% 200% at 85% 100%)' }}
             exit={{ opacity: 0, scale: 0.92, y: 12, clipPath: 'ellipse(60% 20% at 85% 100%)' }}
             transition={{ duration: 0.28, ease: [0.34, 1.2, 0.64, 1] }}
-            className="fixed bottom-20 right-4 w-80 sm:w-96 h-[480px] max-h-[calc(100vh-120px)] glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg flex flex-col overflow-hidden z-[9995]"
+            className="fixed bottom-20 right-4 w-80 sm:w-96 h-[480px] max-h-[calc(100vh-120px)] glass-light border border-claimondo-border rounded-ios-lg shadow-ios-lg flex flex-col overflow-hidden z-[955]"
             role="dialog"
             aria-label={`Chat mit ${chat.kundeName}`}
           >
