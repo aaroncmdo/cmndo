@@ -658,3 +658,49 @@ describe('Direct-Reparatur (kasko/selbstzahler) — Reparatur-Lane statt SA-Kask
     expect(getClaimLifecycle(base).subPhase).toBe('sa_offen')
   })
 })
+
+// WS6/Kasko-Fix Teil 2: die 4 Reparatur-CURSOR (operative_status) waren nicht in OPERATIVE_PHASE
+// gemappt -> milestone-Fallback. Jetzt gemappt + Downgrade-Schutz (spezifischer Cursor gewinnt
+// gegen eine duennere Signal-Leiter; weitere Signale liften via SUB_ORDER-max).
+describe('Reparatur-Cursor (operative_status reparatur-*)', () => {
+  const base = {
+    lead: { sa_unterschrieben: false, vollmacht_signiert_am: null, onboarding_complete: false },
+    auftraege: [],
+    kanzleiFall: null,
+  }
+
+  it('Cursor reparatur-laeuft OHNE rt-Row/abrechnungsweg -> reparatur_laeuft (kein sa_offen, kein Downgrade)', () => {
+    const r = getClaimLifecycle({ ...base, operativeStatus: 'reparatur-laeuft' })
+    expect(r.subPhase).toBe('reparatur_laeuft')
+    expect(r.mainPhase).toBe('erfassung')
+  })
+
+  it('Cursor reparatur-angefragt + Signal erledigt -> Signal liftet auf reparatur_fertig', () => {
+    const r = getClaimLifecycle({
+      ...base,
+      operativeStatus: 'reparatur-angefragt',
+      abrechnungsweg: 'kasko',
+      reparaturWerkstattId: 'w-1',
+      reparaturTerminStatus: 'erledigt',
+    })
+    expect(r.subPhase).toBe('reparatur_fertig')
+  })
+
+  it('alle 4 Cursor mappen auf ihre Lane-Subs', () => {
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-werkstatt-suche' }).subPhase).toBe('reparatur_werkstattwahl')
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-angefragt' }).subPhase).toBe('reparatur_terminfindung')
+    expect(getClaimLifecycle({ ...base, operativeStatus: 'reparatur-erledigt' }).subPhase).toBe('reparatur_fertig')
+  })
+})
+
+describe('toClaimSubPhase — View-Vokabular-Aliasse der Reparatur-Lane', () => {
+  it('mappt die 4 v_claim_phase-Reparatur-subs auf die TS-Lane (kein sa_offen-Fallback)', () => {
+    expect(toClaimSubPhase('reparatur-werkstatt-suche')).toBe('reparatur_werkstattwahl')
+    expect(toClaimSubPhase('reparatur-angefragt')).toBe('reparatur_terminfindung')
+    expect(toClaimSubPhase('reparatur-laeuft')).toBe('reparatur_laeuft')
+    expect(toClaimSubPhase('reparatur-erledigt')).toBe('reparatur_fertig')
+  })
+  it('unbekannt faellt weiter auf sa_offen', () => {
+    expect(toClaimSubPhase('voellig-unbekannt')).toBe('sa_offen')
+  })
+})

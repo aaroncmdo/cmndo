@@ -196,6 +196,14 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   verjaehrt: { main: 'abschluss', sub: 'verjaehrt' },
   abgelehnt_final: { main: 'abschluss', sub: 'abgelehnt_final' },
   an_externe_kanzlei_uebergeben: { main: 'abschluss', sub: 'an_externe_kanzlei' },
+  // WS6/Kasko-Fix (17.07.): die 4 Reparatur-Cursor (CHECK + state-machine-Transitions +
+  // v_claim_phase-Selbstzahler-CASE) waren hier NICHT gemappt -> opPhase=undefined ->
+  // kompletter milestone-Fallback (dieselbe Luecken-Klasse wie der kasko-abrechnungsweg-Bug,
+  // eine Ebene tiefer). main='erfassung' wie alle reparatur_-Subs (mainPhaseOf).
+  'reparatur-werkstatt-suche': { main: 'erfassung', sub: 'reparatur_werkstattwahl' },
+  'reparatur-angefragt': { main: 'erfassung', sub: 'reparatur_terminfindung' },
+  'reparatur-laeuft': { main: 'erfassung', sub: 'reparatur_laeuft' },
+  'reparatur-erledigt': { main: 'erfassung', sub: 'reparatur_fertig' },
 }
 
 function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {
@@ -427,8 +435,12 @@ function operativeLifecycle(
   // B4-slice-2a-ii: `resolved` bleibt opPhase.sub — die Abschluss-Sub-Phase kommt jetzt aus
   // operative_status (OPERATIVE_PHASE trägt den feinen Terminal), NICHT mehr aus claims.status.
   let resolved: ClaimSubPhase = opPhase.sub
-  if (opPhase.main === 'erfassung') {
+  if (opPhase.main === 'erfassung' && !opPhase.sub.startsWith('reparatur_')) {
     // WS6/Kasko-Fix: Direct-Reparatur-Wege bekommen die Reparatur-Lane statt der SA-Kaskade.
+    // Traegt der Cursor bereits eine SPEZIFISCHE reparatur_-Sub (reparatur-laeuft etc.), bleibt
+    // sie stehen — die Signal-Leiter darf einen weiteren Cursor nicht downgraden (z.B.
+    // 'reparatur-laeuft' ohne rt-Row -> Leiter saehe nur 'werkstattwahl'). Den Hochweg
+    // uebernimmt der SUB_ORDER-max-Vergleich in getClaimLifecycle.
     resolved = erfassungsSubphase(input)
   } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
     if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
@@ -488,7 +500,18 @@ export function toClaimMainPhase(value: string | null | undefined): ClaimMainPha
   return value && MAIN_PHASES.has(value as ClaimMainPhase) ? (value as ClaimMainPhase) : 'erfassung'
 }
 
+// WS6/Kasko-Fix: v_claim_phase spricht fuer die Reparatur-Lane ein eigenes sub-Vokabular
+// (Selbstzahler-CASE) — ohne Alias fiele jeder View-sub-Konsument auf 'sa_offen' zurueck
+// (gleiche Anzeige-Luecke wie der kasko-Bug, ueber den View-Pfad).
+const VIEW_SUBPHASE_ALIAS: Record<string, ClaimSubPhase> = {
+  'reparatur-werkstatt-suche': 'reparatur_werkstattwahl',
+  'reparatur-angefragt': 'reparatur_terminfindung',
+  'reparatur-laeuft': 'reparatur_laeuft',
+  'reparatur-erledigt': 'reparatur_fertig',
+}
+
 export function toClaimSubPhase(value: string | null | undefined): ClaimSubPhase {
+  if (value && value in VIEW_SUBPHASE_ALIAS) return VIEW_SUBPHASE_ALIAS[value]
   return value && value in SUBPHASE_LABEL ? (value as ClaimSubPhase) : 'sa_offen'
 }
 
