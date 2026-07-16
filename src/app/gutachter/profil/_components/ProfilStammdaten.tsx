@@ -20,20 +20,8 @@ import {
   type SV,
 } from './fields'
 
-// BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
-// fuer Solo-SVs ohne eigene GmbH/UG.
-const RECHTSFORM_OPTIONEN = [
-  '',
-  'Einzelunternehmen',
-  'Freiberufler',
-  'GbR',
-  'OHG',
-  'KG',
-  'GmbH',
-  'GmbH & Co. KG',
-  'UG (haftungsbeschränkt)',
-  'AG',
-] as const
+// BUG-91-Liste — jetzt shared in @/lib/rechtsformen (auch makler/registrieren nutzt sie).
+import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 
 export function ProfilStammdaten({
   email,

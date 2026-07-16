@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegeMaklerKern } from '@/lib/makler/anlege-makler'
+import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 
 // Offener Self-Signup eines Maklers (Saeule B). Erzeugt SOFORT einen aktiven Makler +
 // Promo-Code -> seine claimondo.de/m/[code]-Landeseite ist sofort live. KEIN Admin-Gate
@@ -26,6 +27,11 @@ export async function registriereMaklerSelf(
   const adresseOrt = String(formData.get('adresse_ort') ?? '').trim() || null
   const versicherungId = String(formData.get('versicherung_id') ?? '').trim() || null
   const maklerpoolId = String(formData.get('maklerpool_id') ?? '').trim() || null
+  const rechtsform = String(formData.get('rechtsform') ?? '').trim()
+  // Checkbox: nicht angehakt -> false (= regelbesteuert). Bewusst IMMER boolean (nie null),
+  // damit partner-billing-ust die USt sofort berechnen kann (null = "unbekannt" blockiert).
+  const istKleinunternehmer =
+    formData.get('kleinunternehmer') === 'true' || formData.get('kleinunternehmer') === 'on'
   const einwilligung =
     formData.get('einwilligung') === 'on' || formData.get('einwilligung') === 'true'
 
@@ -38,6 +44,12 @@ export async function registriereMaklerSelf(
   }
   if (!telefon || telefon.length < 5) {
     return { ok: false, error: 'Telefonnummer ist ein Pflichtfeld.' }
+  }
+  if (!rechtsform) {
+    return { ok: false, error: 'Bitte wählen Sie Ihre Rechtsform.' }
+  }
+  if (!istErlaubteRechtsform(rechtsform)) {
+    return { ok: false, error: 'Bitte wählen Sie eine gültige Rechtsform.' }
   }
   if (!einwilligung) {
     return { ok: false, error: 'Bitte bestätigen Sie die Einwilligung, um fortzufahren.' }
@@ -74,6 +86,8 @@ export async function registriereMaklerSelf(
     aktiviertVon: null,
     versicherungId,
     maklerpoolId,
+    rechtsform,
+    istKleinunternehmer,
   })
   if (!result.ok) {
     // M1: keine rohen DB-Fehler an den oeffentlichen Client.
