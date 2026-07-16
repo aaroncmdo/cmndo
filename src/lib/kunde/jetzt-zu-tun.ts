@@ -146,7 +146,8 @@ export function getKundenJetztZuTun(
 
   // 10. Fall-Abschluss: permanent-minimalisiert nach 30 Tagen. Höchster Vorrang
   // vor allem anderen, weil ein abgeschlossener Fall nichts mehr auslöst.
-  if (istClaimGeschlossen({ status: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) {
+  // T3-S5: fall.status (faelle-View) traegt die operative Achse -> operativeStatus-Arm.
+  if (istClaimGeschlossen({ operativeStatus: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) {
     const abgeschlossenAm = fall.abgeschlossen_am ? new Date(fall.abgeschlossen_am).getTime() : now
     const alterTage = (now - abgeschlossenAm) / (1000 * 60 * 60 * 24)
     if (alterTage > FALL_ABGESCHLOSSEN_MINIMAL_NACH_TAGEN) return null

@@ -92,9 +92,7 @@ export type ClaimLifecycleInput = {
   } | null
   auftraege: AuftragRow[]
   kanzleiFall: KanzleiFallRow | null
-  /** CMM-44 MP-3 (B-11): claims.status — Quelle der terminalen abschluss-Substates. */
-  claimStatus?: string | null
-  /** Unified Stepper: claims.operative_status — kanonische Phasen-Quelle (wenn befuellt). */
+  /** Unified Stepper: claims.operative_status — kanonische Phasen-Quelle (T3-S5: einzige Achse). */
   operativeStatus?: string | null
 }
 
@@ -250,8 +248,8 @@ const SUB_ORDER: Record<ClaimSubPhase, number> = {
 // Status-Regulierung > Kanzlei-Uebergabe-Interim > Erstgutachten > Lead). Bleibt als EIN
 // Kandidat von getClaimLifecycle erhalten — bit-gleich zur SQL-View (Parity-Gate).
 function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  // B4-slice-2a-ii: claimStatus wird NICHT mehr gelesen (die Terminal-/Regulierungs-status-Reads
-  // sind entfernt). Das Feld bleibt im Input-Contract (Caller setzt es), bis T3 status ganz droppt.
+  // T3-S5: claimStatus ist aus dem Contract entfernt (claims.status gedroppt) — die Phase
+  // kommt vollstaendig aus operativeStatus + Sub-Entities.
   const { lead, auftraege, kanzleiFall } = input
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null

@@ -81,7 +81,7 @@ export function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
   // Pass it as BOTH axes so the helper catches both operative closed values (abgeschlossen/storniert)
   // AND terminal claims.status values (reguliert_vollstaendig, verjaehrt, etc.) — the loader
   // may expose either depending on which DB column is populated.
-  if (istClaimGeschlossen({ status: fall.status, operativeStatus: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) return 'abschluss'
+  if (istClaimGeschlossen({ operativeStatus: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) return 'abschluss'
   if (fall.gutachten_eingegangen_am || fall.regulierung_am)      return 'regulierung'
   if (fall.sa_unterschrieben)                                    return 'begutachtung'
   return 'erfassung'
