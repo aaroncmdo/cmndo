@@ -23,7 +23,8 @@ import type {
 const CLAIM_SELECT =
   'operative_status, szenario, service_typ, sa_unterschrieben_am, vollmacht_status, vollmacht_geprueft_am, ' +
   'kanzlei_uebergeben_am, dokumente_reminder_whatsapp_letzte_sendung, abgeschlossen_am, ' +
-  'google_review_gesendet, kanzlei_provision_status'
+  // WS6/Kasko-Fix: Direct-Reparatur-Gate im Resolver (kasko/selbstzahler -> Reparatur-Lane).
+  'google_review_gesendet, kanzlei_provision_status, abrechnungsweg, reparatur_werkstatt_id'
 
 // gutachter_termine: erweitert um start_zeit (2.6) + termin_erinnerung_5min_gesendet (2.6)
 // + nachbesichtigung_status (6e), die der re-basete Resolver jetzt von der
@@ -43,7 +44,7 @@ export async function getSubphaseResolverInput(
 ): Promise<Omit<ResolverInput, 'now'>> {
   const { fallId, claimId, leadId } = args
 
-  const [claimRes, leadRes, auftraege, kanzleiFall, gutachtenRes, termineRes, webhookRes, svLedgerRes] = await Promise.all([
+  const [claimRes, leadRes, auftraege, kanzleiFall, gutachtenRes, termineRes, webhookRes, svLedgerRes, reparaturTerminRes] = await Promise.all([
     claimId
       ? admin.from('claims').select(CLAIM_SELECT).eq('id', claimId).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -67,6 +68,14 @@ export async function getSubphaseResolverInput(
     claimId
       ? admin.from('claim_payments').select('zahlungseingang_am').eq('claim_id', claimId).eq('partei', 'sv').maybeSingle()
       : Promise.resolve({ data: null }),
+    // WS6/Kasko-Fix: juengster Reparatur-Termin fuer das Direct-Reparatur-Gate
+    // (kasko/selbstzahler); Sortierung wie v_claim_phase rt (updated_at desc, created_at desc).
+    claimId
+      ? admin.from('reparatur_termine').select('status').eq('claim_id', claimId)
+          .order('updated_at', { ascending: false, nullsFirst: false })
+          .order('created_at', { ascending: false })
+          .limit(1)
+      : Promise.resolve({ data: [] }),
   ])
 
   const svAm = (svLedgerRes.data as { zahlungseingang_am: string | null } | null)?.zahlungseingang_am ?? null
@@ -80,5 +89,6 @@ export async function getSubphaseResolverInput(
     gutachten: (gutachtenRes.data ?? []) as GutachtenTriggers[],
     gutachter_termine: (termineRes.data ?? []) as unknown as GutachterTerminRow[],
     webhook_events: (webhookRes.data ?? []) as unknown as WebhookEventRow[],
+    reparatur_termine: (reparaturTerminRes.data ?? []) as { status?: string | null }[],
   }
 }

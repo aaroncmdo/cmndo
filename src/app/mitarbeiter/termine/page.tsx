@@ -10,6 +10,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { ladeInterneTerminNotizen } from '@/lib/termine/intern-notizen'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,7 +58,7 @@ export default async function MitarbeiterTermine() {
     supabase
       .from('gutachter_termine')
       .select(
-        'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, notiz_intern, ' +
+        'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, ' +
           'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claims!fk_bridge_claim(claim_nummer, lead_id))',
       )
       .eq('typ', 'kb_beratung')
@@ -92,10 +93,11 @@ export default async function MitarbeiterTermine() {
     fall_id: string | null
     lead_id: string | null
     kanal: string | null
-    notiz_intern: string | null
     fall: { id: string; claims: ClaimNrLeadJoin } | { id: string; claims: ClaimNrLeadJoin }[] | null
   }
   const kbTermineRaw = (kbR.data ?? []) as unknown as KbRow[]
+  // notiz_intern lebt jetzt in gutachter_termine_intern (Staff-only, Kunde-Leak-Fix).
+  const kbInternNotizen = await ladeInterneTerminNotizen(supabase, kbTermineRaw.map(k => k.id))
 
   // Namen für KB-Leads laden (via fall.lead_id oder direkt kb.lead_id)
   const kbLeadIds = [
@@ -129,7 +131,7 @@ export default async function MitarbeiterTermine() {
       start_zeit: k.start_zeit,
       end_zeit: k.end_zeit,
       status: k.status,
-      notizen: k.notiz_intern,
+      notizen: kbInternNotizen[k.id] ?? null,
       lead_id: k.lead_id,
       fall_id: k.fall_id,
       lead: null,

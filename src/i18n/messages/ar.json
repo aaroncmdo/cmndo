@@ -334,6 +334,7 @@
     },
     "step_summary": {
       "heading": "مرحباً {name}!",
+      "heading_ohne_name": "مرحباً!",
       "sub": "يرجى مراجعة بياناتك وتصحيحها.",
       "fields": {
         "vorname": "الاسم الأول",

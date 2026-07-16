@@ -60,7 +60,7 @@ export default async function DispatchKalenderPage({
   const { data: terminRows } = await supabase
     .from('gutachter_termine')
     .select(
-      'id, assignee_id, assignee_typ, lead_id, fall_id, start_zeit, end_zeit, status, typ, notiz_intern, ' +
+      'id, assignee_id, assignee_typ, lead_id, fall_id, start_zeit, end_zeit, status, typ, ' +
         // CMM-49 #2688-Fix: faelle-Embed über bridge (FK admin/gutachter_termine→bridge repointet);
         // nested claims via fk_bridge_claim (#2719). kennzeichen wohnt auf faelle/leads, nicht claims
         // → fällt weg, lead.kennzeichen deckt es ab (s.u.).
@@ -82,7 +82,6 @@ export default async function DispatchKalenderPage({
     end_zeit: string
     status: string | null
     typ: string
-    notiz_intern: string | null
     leads: { vorname: string | null; nachname: string | null; kennzeichen: string | null } | Array<{ vorname: string | null; nachname: string | null; kennzeichen: string | null }> | null
     faelle: { claims: ClaimNrJoin } | Array<{ claims: ClaimNrJoin }> | null
   }>).map((t) => {

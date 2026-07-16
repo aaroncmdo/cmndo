@@ -34,6 +34,8 @@ export type WerkstattWizardProps = {
   onSelectWerkstatt: (id: string) => void
   // Vom Root: führt die Suche aus + hebt center; Wizard ruft es bei Standort/Marke/Typ/Bedarf-Änderung.
   onSuche: (input: ReturnType<typeof wizardStateZuSuche>) => void
+  // §10 Doppel-Lead-Falle: Re-Entry-Token (aus ?token=) — absenden UPDATED dann den bestehenden Lead.
+  flowToken?: string
 }
 
 export function WerkstattWizard({
@@ -43,6 +45,7 @@ export function WerkstattWizard({
   keineSpezialisierte,
   onSelectWerkstatt,
   onSuche,
+  flowToken,
 }: WerkstattWizardProps) {
   const [state, setState] = useState<WerkstattWizardState>(WIZARD_INITIAL)
   const [stepIdx, setStepIdx] = useState(0)
@@ -115,6 +118,7 @@ export function WerkstattWizard({
         gewerbe: state.gewerbe,
         modell: state.modell.trim() || null,
         beschreibung: beschreibung.trim() || null,
+        flowToken: flowToken ?? null,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)

@@ -258,7 +258,17 @@ export function FlowFeststellungStep({
 
       {currentStep.kind === 'zb1' && (
         <div className="flex flex-col gap-4" data-testid="feststellung-step-zb1">
-          <FlowZb1Upload token={token} bereitsErfasst={fahrzeugErfasst} onExtracted={handleZb1Extracted} />
+          {/* AAR-956 17.07. (Smoke-Befund 1): Box-„überspringen" == „Weiter ohne Foto" —
+              exakt die handleWeiter-Semantik (Autosave + nächster Schritt 8/10 bzw.
+              Abschluss nur, wenn zb1 wirklich der letzte aktive Schritt ist). Vorher
+              kollabierte die Box zu null → leerer Schritt, auf dem der Skip-ALL-Link
+              wie „Foto überspringen" aussah und die Feststellung bei 7/10 beendete. */}
+          <FlowZb1Upload
+            token={token}
+            bereitsErfasst={fahrzeugErfasst}
+            onExtracted={handleZb1Extracted}
+            onSkip={() => void handleWeiter()}
+          />
           {dokumentFelder.length > 0 &&
             (!showManuell ? (
               <button

@@ -23,7 +23,13 @@ Ablauf:
 3. list_migrations   → die vom Plugin vergebene Version <V> ablesen (es setzt einen EIGENEN Timestamp — nicht den, den du raten würdest).
 4. Migration-File committen als supabase/migrations/<V>_<name>.sql   → Dateiname == getrackte Version <V>.
 5. execute_sql (READ) zum Verifizieren der Spalte/Constraint.
-6. Typen via generate_typescript_types regenerieren — oder aufschieben bis ein Consumer die Spalte nutzt (Types dürfen der DB hinterherhinken, solange kein Code sie referenziert).
+6. Typen regenerieren + MIT committen (src/lib/supabase/database.types.ts) — kein Aufschieben mehr:
+   die Datei ist die Referenz des check:query-drift-Ratchets; Types-Lag erzeugt dort Baseline-
+   Rauschen, das echte Drift-Bugs maskiert (16.07. empirisch: 130 aufgelaufene stale-Eintraege
+   verdeckten 2 echte Silent-Bugs). Bei grossem Schema truncatet der MCP-Output → CLI nutzen:
+   `SUPABASE_ACCESS_TOKEN=<aus .env.local> npx supabase gen types typescript --project-id paizkjajbuxxksdoycev --schema public`
+   (reine LESE-Generierung — faellt NICHT unter das CLI-DDL-Verbot unten). Danach
+   `npm run check:query-drift -- --update-baseline`, wenn die Baseline schrumpft.
 ```
 
 **Pflicht: Schritt 3+4** — die getrackte Version ablesen und das committete File exakt danach benennen. Sonst **Twin-Drift** (File-Timestamp ≠ getrackte Version): `db reset` bzw. ein künftiges CLI-`db push` sähe das File als „nicht appliziert" und führte die DDL erneut aus → Fehler.

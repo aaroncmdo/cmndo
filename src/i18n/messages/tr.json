@@ -334,6 +334,7 @@
     },
     "step_summary": {
       "heading": "Merhaba {name}!",
+      "heading_ohne_name": "Merhaba!",
       "sub": "Lütfen bilgilerinizi kontrol edip düzeltin.",
       "fields": {
         "vorname": "Ad",

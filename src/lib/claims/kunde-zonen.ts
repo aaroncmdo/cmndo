@@ -9,11 +9,18 @@ export type ZoneId = 'status' | 'aufgaben' | 'team' | 'geld' | 'doksTermine'
 export type KundeAufgabe = {
   id: 'bankdaten' | 'kva_freigabe' | 'pflichtdok' | 'termin_bestaetigen' | 'sa_vollmacht'
   label: string
+  /** Audit-Fund b3: Ziel-Zone des CTA, wenn sie vom Fall-Zustand abhängt — der
+   *  Reparaturtermin lebt in der GeldZone (WerkstattCard), der SV-Termin in
+   *  DoksTermine. Fehlt zone, greift die statische Anchor-Map der AufgabenZone. */
+  zone?: ZoneId
 }
 
 // Termin-Status, die eine Kunden-Bestätigung erwarten (SV: reserviert/gegenvorschlag;
-// Reparatur: angefragt/anruf_erbeten).
-const TERMIN_OFFEN = new Set(['reserviert', 'gegenvorschlag', 'angefragt', 'anruf_erbeten'])
+// Reparatur: angefragt/werkstatt_vorschlag/anruf_erbeten). Audit-Fund b4:
+// werkstatt_vorschlag ist der handlungspflichtigste Status — die Werkstatt hat einen
+// Termin VORGESCHLAGEN, der Kunde muss „Passt/Passt nicht" antworten (CHECK-Constraint
+// prod-verifiziert 17.07.).
+const TERMIN_OFFEN = new Set(['reserviert', 'gegenvorschlag', 'angefragt', 'werkstatt_vorschlag', 'anruf_erbeten'])
 
 /**
  * Offene Kunde-To-dos aus dem Fall-Zustand (reine Ableitung). Leeres Array = nichts zu tun
@@ -33,8 +40,14 @@ export function deriveKundeAufgaben(vm: KundeClaimViewModel): KundeAufgabe[] {
   if (vm.pflichtdokumente.offen > 0) {
     aufgaben.push({ id: 'pflichtdok', label: 'Dokumente nachreichen' })
   }
-  if (vm.termine.some((t) => TERMIN_OFFEN.has(t.status ?? ''))) {
-    aufgaben.push({ id: 'termin_bestaetigen', label: 'Termin bestätigen' })
+  const offenerTermin = vm.termine.find((t) => TERMIN_OFFEN.has(t.status ?? ''))
+  if (offenerTermin) {
+    aufgaben.push({
+      id: 'termin_bestaetigen',
+      label: 'Termin bestätigen',
+      // b3: Reparaturtermin -> GeldZone (WerkstattCard); SV-Termin -> DoksTermine.
+      zone: offenerTermin.art === 'reparatur' ? 'geld' : 'doksTermine',
+    })
   }
   if (vm.fall.sa_unterschrieben === false) {
     aufgaben.push({ id: 'sa_vollmacht', label: 'Unterschrift ausstehend' })

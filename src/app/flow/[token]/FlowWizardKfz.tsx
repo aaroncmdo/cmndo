@@ -568,8 +568,10 @@ export default function FlowWizardKfz({
             {/* ═══ SCHRITT 1: ZUSAMMENFASSUNG + DATENSCHUTZ ═══ */}
             {currentStep.id === 'zusammenfassung' && (
               <div>
+                {/* AAR-956 17.07. (Smoke-Befund 3): vorname=NULL hieß „Hallo dort!" —
+                    wörtliches „Hello there". Ohne Namen den namenlosen Gruß-Key nutzen. */}
                 <StepHeader
-                  question={t('step_summary.heading', { name: editVorname || 'dort' })}
+                  question={editVorname ? t('step_summary.heading', { name: editVorname }) : t('step_summary.heading_ohne_name')}
                   sub={t('step_summary.sub')}
                   icon={<CarIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />

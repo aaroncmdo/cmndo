@@ -280,3 +280,34 @@ describe('resolveSubphase — Trigger-Fields + next_hint', () => {
     expect(r.next_hint).toContain('Quote')
   })
 })
+
+// WS6/Kasko-Fix (17.07.): Direct-Reparatur-Gate — kasko/selbstzahler haben keinen
+// SV-/Kanzlei-Prozess; der Resolver zeigte die §8-SA-/Termin-Strecke. Phase 9 gewinnt weiter.
+describe('resolveSubphase — Direct-Reparatur (kasko/selbstzahler)', () => {
+  it('kasko ohne Werkstatt -> r.1 Werkstattwahl offen', () => {
+    const r = resolveSubphase({ claim: claim({ abrechnungsweg: 'kasko' }), now: NOW })
+    expect(r.phase).toBe(1)
+    expect(r.subphase).toBe('r.1')
+    expect(r.label).toContain('Werkstattwahl')
+  })
+
+  it('selbstzahler + Werkstatt -> r.2; rt angefragt -> r.2; bestaetigt -> r.3; erledigt -> r.4', () => {
+    expect(resolveSubphase({ claim: claim({ abrechnungsweg: 'selbstzahler', reparatur_werkstatt_id: 'w-1' }), now: NOW }).subphase).toBe('r.2')
+    expect(resolveSubphase({ claim: claim({ abrechnungsweg: 'kasko' }), reparatur_termine: [{ status: 'angefragt' }], now: NOW }).subphase).toBe('r.2')
+    expect(resolveSubphase({ claim: claim({ abrechnungsweg: 'kasko' }), reparatur_termine: [{ status: 'bestaetigt' }], now: NOW }).subphase).toBe('r.3')
+    expect(resolveSubphase({ claim: claim({ abrechnungsweg: 'kasko' }), reparatur_termine: [{ status: 'erledigt' }], now: NOW }).subphase).toBe('r.4')
+  })
+
+  it('abgeschlossen_am gewinnt weiter (Phase 9 vor R-Gate)', () => {
+    const r = resolveSubphase({
+      claim: claim({ abrechnungsweg: 'kasko', abgeschlossen_am: '2026-04-01T00:00:00Z', google_review_gesendet: true }),
+      now: NOW,
+    })
+    expect(r.phase).toBe(9)
+  })
+
+  it('haftpflicht bleibt auf der §8-Strecke (kein R-Gate)', () => {
+    const r = resolveSubphase({ claim: claim({ abrechnungsweg: 'haftpflicht' }), now: NOW })
+    expect(r.subphase).not.toMatch(/^r\./)
+  })
+})
