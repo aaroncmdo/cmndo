@@ -9,9 +9,11 @@
 
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getWerkstattByUserId, getWerkstattAuftrag } from '@/lib/werkstatt/queries'
+import { holeOderErstelleGruppenThreadService } from '@/lib/chat/thread-service'
 
 const schema = z.object({
   claimId: z.string().uuid(),
@@ -50,11 +52,24 @@ export async function werkstattSendMessage(input: {
     .maybeSingle()
   const fallId = ((bridge as { fall_id?: string } | null)?.fall_id) ?? parsed.data.claimId
 
+  // v2-Cutover (analog maklerSendMessage / #4349): die Werkstatt-Nachricht zusaetzlich in den
+  // `kunde_gruppe`-THREAD schreiben (thread_id), damit Kunde/KB/SV sie in ihren v2-Thread-
+  // Surfaces (ClaimChatInbox/ClaimChatPanel, die per thread_id lesen) sehen. Ohne thread_id
+  // (nur kanal='gruppenchat', v1) sah die Werkstatt-Nachricht KEINE v2-Surface — der Werkstatt-
+  // Chat war end-to-end tot (gleicher Bug wie Makler vor #4349). kanal='gruppenchat' bleibt fuer
+  // v1-Kompat + Werkstatt-Realtime. Thread get-or-create haengt Kunde/KB/SV als Teilnehmer an.
+  const threadId = await holeOderErstelleGruppenThreadService(
+    admin as unknown as SupabaseClient,
+    parsed.data.claimId,
+    'kunde_gruppe',
+  )
+
   const { data: inserted, error } = await admin
     .from('nachrichten')
     .insert({
       fall_id: fallId,
       claim_id: parsed.data.claimId,
+      thread_id: threadId,
       kanal: 'gruppenchat',
       sender_id: user.id,
       sender_rolle: 'werkstatt',

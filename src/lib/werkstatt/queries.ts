@@ -464,9 +464,10 @@ export type WerkstattChatMessage = {
  * Fall-Gruppenchat fuer die Werkstatt-Sicht. Liest den geteilten `gruppenchat`-Kanal
  * (wie der Makler-Chat, kanal-basiert) via ADMIN-Client — der Caller MUSS vorher via
  * getWerkstattAuftrag (RLS-Gate) die Fall-Zugehoerigkeit bewiesen haben (Defense-in-Depth).
- * fall_id via Bridge aufgeloest (nachrichten sind fall_id-gekeyt wie beim Makler; claim-first:
- * fall_id == claim_id). Sender-Namen 2-Step statt Embed (ungetypter Admin-Client -> kein
- * silent-400). Kein Realtime in v1 (Load-on-mount + optimistic nach Send).
+ * v2-Cutover (analog getFallChat/#4349): Union aus dem v1-Kanal `gruppenchat` (fall_id) UND
+ * dem v2-`kunde_gruppe`-THREAD (thread_id) des Falls — sonst saehe die Werkstatt die Nachrichten
+ * von Kunde/KB/SV NICHT (die sind thread-nativ mit kanal=null). Thread per claim_id resolved.
+ * Sender-Namen 2-Step statt Embed (ungetypter Admin-Client -> kein silent-400).
  */
 export async function getWerkstattFallChat(claimId: string): Promise<WerkstattChatMessage[]> {
   if (!claimId) return []
@@ -478,12 +479,22 @@ export async function getWerkstattFallChat(claimId: string): Promise<WerkstattCh
     .maybeSingle()
   const fallId = ((bridge as { fall_id?: string } | null)?.fall_id) ?? claimId
 
-  const { data, error } = await admin
+  const { data: thr } = await admin
+    .from('chat_threads')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('art', 'kunde_gruppe')
+    .maybeSingle()
+  const gruppeThreadId = (thr as { id: string } | null)?.id ?? null
+
+  let query = admin
     .from('nachrichten')
     .select('id, nachricht, created_at, sender_id, sender_rolle, is_system')
-    .eq('fall_id', fallId)
-    .eq('kanal', 'gruppenchat')
     .order('created_at', { ascending: true })
+  query = gruppeThreadId
+    ? query.or(`and(fall_id.eq.${fallId},kanal.eq.gruppenchat),thread_id.eq.${gruppeThreadId}`)
+    : query.eq('fall_id', fallId).eq('kanal', 'gruppenchat')
+  const { data, error } = await query
   if (error || !data) return []
 
   const rows = data as Array<Record<string, unknown>>
@@ -518,4 +529,30 @@ export async function getWerkstattFallChat(claimId: string): Promise<WerkstattCh
       sender_nachname: n?.nachname ?? null,
     }
   })
+}
+
+/**
+ * Ids fuer die WerkstattChatTab-Realtime-Subscription: `fallId` (v1-kanal-Filter, fall_id)
+ * + `gruppeThreadId` (v2-`kunde_gruppe`-Thread-Filter — Kunde/KB/SV tragen kein
+ * kanal='gruppenchat', kommen nur ueber den Thread rein). Analog getFallGruppeThreadId
+ * (Makler), aber claim-first (die Werkstatt-Route hat claimId). gruppeThreadId=null solange
+ * noch kein Gruppen-Thread existiert (erste Nachricht legt ihn lazy an).
+ */
+export async function getWerkstattChatRealtimeIds(
+  claimId: string,
+): Promise<{ fallId: string; gruppeThreadId: string | null }> {
+  const admin = createAdminClient()
+  const { data: bridge } = await admin
+    .from('faelle_claim_bridge')
+    .select('fall_id')
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  const fallId = ((bridge as { fall_id?: string } | null)?.fall_id) ?? claimId
+  const { data: thr } = await admin
+    .from('chat_threads')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('art', 'kunde_gruppe')
+    .maybeSingle()
+  return { fallId, gruppeThreadId: (thr as { id: string } | null)?.id ?? null }
 }
