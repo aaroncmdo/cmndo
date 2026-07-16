@@ -268,6 +268,9 @@ function isPublicPath(pathname: string): boolean {
     // SPEZIFISCHER Pfad, NICHT '/werkstatt' (startsWith wuerde das ganze
     // Werkstatt-Portal oeffnen = Auth-Bypass).
     '/werkstatt/registrieren',
+    // Prospect-Selbstbuchung Beratungsgespraech ({{Beratungslink}} aus Cold-Mails).
+    // Links sind HMAC-signiert (exp+sig); Verify passiert in Route UND Action.
+    '/beratung',
     // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). Eigener
     // App-Pfad statt '/abmelden' — historisch, weil '/abmelden' in MARKETING_PREFIXES
     // stand und weg-301't wurde (tote Zone). Der Pfad bleibt wie er ist: die Links

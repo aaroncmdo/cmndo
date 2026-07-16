@@ -7,12 +7,6 @@ export const dynamic = 'force-dynamic'
 
 type Row = {
   id: string; body: string; article_slug: string; created_at: string; author_id: string; report_count?: number
-  community_profiles: { username?: string } | { username?: string }[] | null
-}
-
-function username(r: Row): string {
-  const p = Array.isArray(r.community_profiles) ? r.community_profiles[0] : r.community_profiles
-  return p?.username ?? 'unbekannt'
 }
 
 export default async function KommentarModerationPage() {
@@ -20,13 +14,13 @@ export default async function KommentarModerationPage() {
   const [{ data: pendingData }, { data: reportedData }] = await Promise.all([
     db
       .from('article_comments')
-      .select('id, body, article_slug, created_at, author_id, community_profiles(username)')
+      .select('id, body, article_slug, created_at, author_id')
       .eq('status', 'pending')
       .order('created_at', { ascending: false })
       .limit(100),
     db
       .from('article_comments')
-      .select('id, body, article_slug, created_at, author_id, report_count, community_profiles(username)')
+      .select('id, body, article_slug, created_at, author_id, report_count')
       .eq('status', 'approved')
       .gt('report_count', 0)
       .order('report_count', { ascending: false })
@@ -34,6 +28,18 @@ export default async function KommentarModerationPage() {
   ])
   const rows = (pendingData ?? []) as Row[]
   const reported = (reportedData ?? []) as Row[]
+
+  // Usernames separat laden: article_comments hat KEINE FK auf community_profiles
+  // (author_id -> users; ein Community-Profil ist optional) -> ein PostgREST-Embed
+  // ist unaufloesbar (PGRST200, Query-Parse-Sweep). Zwei-Schritt statt FK-Zwang.
+  const authorIds = [...new Set([...rows, ...reported].map((r) => r.author_id).filter(Boolean))]
+  const { data: profileData } = authorIds.length
+    ? await db.from('community_profiles').select('user_id, username').in('user_id', authorIds)
+    : { data: [] as Array<{ user_id: string; username: string | null }> }
+  const nameByAuthor = new Map(
+    ((profileData ?? []) as Array<{ user_id: string; username: string | null }>).map((p) => [p.user_id, p.username]),
+  )
+  const usernameVon = (authorId: string) => nameByAuthor.get(authorId) ?? 'unbekannt'
 
   return (
     <div className="p-6">
@@ -68,7 +74,7 @@ export default async function KommentarModerationPage() {
               <Tbody>
                 {reported.map((r) => (
                   <Tr key={r.id}>
-                    <Td className="font-medium">{username(r)}</Td>
+                    <Td className="font-medium">{usernameVon(r.author_id)}</Td>
                     <Td className="font-mono text-xs">{r.article_slug}</Td>
                     <Td className="max-w-md whitespace-pre-wrap">{r.body}</Td>
                     <Td className="text-center font-semibold text-danger-strong">{r.report_count ?? 0}</Td>
@@ -94,7 +100,7 @@ export default async function KommentarModerationPage() {
               <Tbody>
                 {rows.map((r) => (
                   <Tr key={r.id}>
-                    <Td className="font-medium">{username(r)}</Td>
+                    <Td className="font-medium">{usernameVon(r.author_id)}</Td>
                     <Td className="font-mono text-xs">{r.article_slug}</Td>
                     <Td className="max-w-md whitespace-pre-wrap">{r.body}</Td>
                     <Td><ModerationActions id={r.id} authorId={r.author_id} /></Td>

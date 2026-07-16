@@ -275,18 +275,25 @@ export default function FeldmodusClient({
   // 2026-07-08: Index-basierter Advance über das gemischte stops-Array (Termine + Privat-Wegpunkte).
   // Für termin-only-Routen identisch zum alten findIndex(nextTerminId), weil index+1 = nächster Termin.
   // router.refresh() setzt useState NICHT zurück -> der lokale Index bleibt stabil.
+  //
+  // 2026-07-16 (Regel-4-Prod-Smoke der Offline-Kette): refresh nur ONLINE — beim
+  // Offline-CAS-Advance (sv_complete_advance in der Outbox) schlug der RSC-Refetch
+  // fehl und warf einen Server-Components-pageerror in die Error-Boundary. Offline
+  // traegt der lokale State (Index/Status) die UI; der Server-Stand kommt nach dem
+  // Reconnect-Drain ohnehin. Gleiches Muster wie WerkstattAnfragen (Slice 3,
+  // "kein router.refresh offline").
   const goToStopIndex = useCallback(
     (nextIdx: number) => {
       if (nextIdx >= stops.length) {
         setSessionStatus('finished')
-        router.refresh()
+        if (navigator.onLine) router.refresh()
         return
       }
       setAktuellerStopIndex(nextIdx)
       setSvInGeofence(false)
       arrivedFiredRef.current = false
       setSessionStatus('idle')
-      router.refresh()
+      if (navigator.onLine) router.refresh()
     },
     [stops.length, router],
   )
