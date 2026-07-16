@@ -1,37 +1,11 @@
 {
   "note": "Tote PostgREST-Queries (grandfathered). keys = SELECT-Trockenschuss, writeKeys = statische Write-Achse. Boy-Scout senkt.",
   "keys": [
-    "article_comments::id,body,article_slug,created_at,author_id,community_profiles(username)",
-    "article_comments::id,body,article_slug,created_at,author_id,report_count,community_profiles(username)",
-    "claims::lead_id,leads(email,telefon,vorname)",
-    "claims::lead_id,leads(telefon,vorname)",
     "email_log::id,empfaenger,subject,status,gesendet_am,richtung,body_html,body_text,empfaenger_array,attachments,template,lead_id,created_at",
-    "fall_documents::typ,slot_id",
-    "gutachter_finder_anfragen::id,vorname,nachname,email,telefon,kennzeichen,fahrzeug_beschreibung,schadentyp,schadenort,schadenort_lat,schadenort_lng,wunschtermin,matching_typ,sa_signatur_data_url,sa_unterzeichnet_am,status,erstellt_am,konvertiert_zu_lead_id,zugeordneter_sv:sachverstaendige(id,firmenname,profiles!sachverstaendige_profile_id_fkey(anzeigename,telefon)),sv_lead:sv_leads(id,name,telefon,email)",
-    "gutachter_finder_anfragen::id,vorname,nachname,email,telefon,kennzeichen,schadentyp,schadenort,wunschtermin,matching_typ,schuldfrage,fahrzeug_hersteller,fahrzeug_modell,fahrzeug_baujahr,bevorzugter_kanal,sa_unterzeichnet_am,status,erstellt_am,source,zugeordneter_sv:sachverstaendige(firmenname,profiles!sachverstaendige_profile_id_fkey(anzeigename,telefon)),sv_lead:sv_leads(name,telefon)",
-    "gutachter_rechnungen::sv_id,fall_id,rechnungs_nr,datum,betrag,pdf_url",
     "gutachter_termine::sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname,nachname))",
     "gutachter_termine::start_zeit,sachverstaendige(profile_id,profiles!sachverstaendige_profile_id_fkey(vorname))",
     "gutachter_termine::start_zeit,sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname,nachname))",
-    "kanzlei_abrechnungen::fall_id,kanzlei_email,rechnungs_nr,datum,positionen,gesamtbetrag,pdf_url",
-    "technische_probleme::id,user_id,kategorie,beschreibung,browser,aktuelle_url,status,antwort,erstellt_am,profiles(vorname,nachname,email)",
-    "v_faelle_mit_aktuellem_termin::id,claim_nummer,status,schadens_ursache,schadens_ort,sv_termin,created_at,lead_id,leads(vorname,nachname)",
-    "v_faelle_mit_aktuellem_termin::id,claim_nummer,status,schadens_ursache,sv_termin,created_at,leads(vorname,nachname)"
+    "kanzlei_abrechnungen::fall_id,kanzlei_email,rechnungs_nr,datum,positionen,gesamtbetrag,pdf_url"
   ],
-  "writeKeys": [
-    "write::abrechnungen::storno_grund",
-    "write::admin_tasks::(unknown table)",
-    "write::benachrichtigungen::empfaenger_rolle",
-    "write::benachrichtigungen::text",
-    "write::claims::phase",
-    "write::fall_dokumente::dateiname",
-    "write::fall_dokumente::url",
-    "write::finance_monatsberichte::google_ads_cpl_eur",
-    "write::finance_monatsberichte::google_ads_kosten_eur",
-    "write::finance_monatsberichte::google_ads_leads",
-    "write::finance_monatsberichte::google_ads_sync_am",
-    "write::kanzlei_abrechnungen::pdf_path",
-    "write::leads::onboarding_complete",
-    "write::pflichtdokumente::updated_at"
-  ]
+  "writeKeys": []
 }
