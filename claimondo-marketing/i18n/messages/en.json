@@ -1459,6 +1459,7 @@
     "wie_es_funktioniert": "How It Works",
     "ueber_uns": "About Us",
     "gutachter_finden": "Find an Expert",
+    "werkstatt_finden": "Find a workshop",
     "zu_meinem_portal": "Go to My Portal",
     "portal": "Portal",
     "ratgeber": "Guides",
@@ -2210,6 +2211,9 @@
       "sv_popup_cta": "Request via Wizard →",
       "beratung_label": "Consultation"
     }
+  },
+  "werkstatt_finden": {
+    "sr_h1": "Find a car repair shop near you — interactive map of vetted partner workshops, ranked by brand and damage type"
   },
   "beratung_anfragen": {
     "badge": "0 € · No call centre · Direct contact",
@@ -4035,6 +4039,14 @@
       "og_description": "Interactive map of all available DAT assessors in Germany. Appointment within 48 h. Free of charge for those not at fault under §249 BGB.",
       "twitter_title": "Find a car assessor — map of DAT assessors",
       "twitter_description": "Map of all available assessors in Germany. Appointment within 48h."
+    },
+    "werkstatt_finden": {
+      "title": "Find a car repair shop near you — map, matching workshop & appointment",
+      "description": "Interactive map of vetted partner workshops, ranked by brand, damage type and distance. Request in minutes — body, paint, smart repair, mechanics, glass.",
+      "og_title": "Find a car workshop — map of vetted partner shops",
+      "og_description": "The right workshop nearby: ranked by brand, damage and distance. Request in minutes.",
+      "twitter_title": "Find a car workshop — map of vetted partner shops",
+      "twitter_description": "The right workshop nearby: ranked by brand, damage and distance. Request in minutes."
     },
     "beratung_anfragen": {
       "title": "Request a free consultation — car accident damage",
