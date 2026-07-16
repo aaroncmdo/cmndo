@@ -169,7 +169,7 @@ const STATUS_PHASES = [
 ]
 
 export default function OnboardingWizard({
-  vorname, fall, claim, termin, pflichtDocs, pflichtSlots = [], freieSlots,
+  vorname, fall, claim, termin, pflichtDocs, abrechnungsweg, pflichtSlots = [], freieSlots,
   dokAnforderungen: dokAnforderungenProp = [],
 }: {
   vorname: string
@@ -177,6 +177,8 @@ export default function OnboardingWizard({
   claim: ClaimFull | null
   termin: Termin | null
   pflichtDocs: PflichtDoc[]
+  /** Audit-Bug D: claims.abrechnungsweg — Kasko/Selbstzahler skippen den SV-Termin-Step. */
+  abrechnungsweg: string | null
   /** CMM-33: Slot-Sicht (PflichtSlotForView[]) — wird für die zentrale
    *  PflichtdokumenteSection genutzt. */
   pflichtSlots?: PflichtSlotForView[]
@@ -199,9 +201,9 @@ export default function OnboardingWizard({
   const visibleSteps = useMemo(
     () =>
       getOnboardingSteps(
-        buildOnboardingContext({ termin, pflichtDocs }),
+        buildOnboardingContext({ termin, pflichtDocs, abrechnungsweg }),
       ),
-    [termin, pflichtDocs],
+    [termin, pflichtDocs, abrechnungsweg],
   )
 
   const initialStepIndex = (() => {

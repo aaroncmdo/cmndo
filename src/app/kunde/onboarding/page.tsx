@@ -214,6 +214,23 @@ export default async function OnboardingPage({
     }
   }
 
+  // Audit-Bug D: abrechnungsweg liegt weder in v_faelle_mit_aktuellem_termin noch in ClaimFull
+  // -> gezielter Read (adminClient ist untyped; Spalte type-lagged, prod-verifiziert im
+  // self-service-Pfad). Fehler/null = SV-Weg annehmen (sicherer Default: Termin-Step zeigen).
+  let abrechnungsweg: string | null = null
+  if (claim) {
+    try {
+      const { data } = await createAdminClient()
+        .from('claims')
+        .select('abrechnungsweg')
+        .eq('id', claim.id)
+        .maybeSingle()
+      abrechnungsweg = ((data as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null
+    } catch (err) {
+      console.error('[OnboardingPage] abrechnungsweg-Read failed (non-fatal):', err)
+    }
+  }
+
   try {
     return (
       <OnboardingWizard
@@ -222,6 +239,7 @@ export default async function OnboardingPage({
         claim={claim}
         termin={terminDatum ? { datum: terminDatum, svName, ort: fall?.besichtigungsort_adresse ?? null } : null}
         pflichtDocs={pflichtDocs}
+        abrechnungsweg={abrechnungsweg}
         pflichtSlots={pflichtSlots}
         freieSlots={freieSlots}
         dokAnforderungen={dokAnforderungen}

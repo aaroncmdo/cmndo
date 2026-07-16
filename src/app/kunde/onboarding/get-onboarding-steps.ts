@@ -19,6 +19,7 @@
 // Volle Spec: docs/14.05.2026/mini-wizard-magic-link-konzept.md §Phase 3.
 
 import type { PflichtdokumentStand } from './actions'
+import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 
 export type OnboardingStepId = 'welcome' | 'fall' | 'termin' | 'dokumente' | 'fertig'
 
@@ -42,13 +43,17 @@ export type OnboardingContext = {
   /** Anzahl offener Pflichtdokument-Slots. Wenn 0, ueberspringen wir den
    *  Dokumente-Step. */
   offenePflichtdokumente: number
+  /** Audit-Bug D (Kasko-Audit 15.07.): Kasko/Selbstzahler sind reine Werkstatt-
+   *  Reparatur-Wege OHNE SV/Gutachten — der SV-Termin-Step entfaellt komplett
+   *  (nicht nur "schon gebucht"). false = Werkstatt-Weg, true = SV-Weg/unbekannt. */
+  brauchtGutachter: boolean
 }
 
 /** Reine Funktion: gibt die fuer diesen Kunden sichtbaren Steps zurueck.
  *  Ordnung bleibt stabil (welcome → fall → termin → dokumente → fertig). */
 export function getOnboardingSteps(ctx: OnboardingContext): OnboardingStep[] {
   return ALL_STEPS.filter((step) => {
-    if (step.id === 'termin') return !ctx.hatTerminGebucht
+    if (step.id === 'termin') return ctx.brauchtGutachter && !ctx.hatTerminGebucht
     if (step.id === 'dokumente') return ctx.offenePflichtdokumente > 0
     return true
   })
@@ -58,11 +63,16 @@ export function getOnboardingSteps(ctx: OnboardingContext): OnboardingStep[] {
 export function buildOnboardingContext(input: {
   termin: { datum: string | null } | null
   pflichtDocs: PflichtdokumentStand[]
+  /** claims.abrechnungsweg (type-lagged -> Read in page.tsx). null/fehlend = SV-Weg
+   *  annehmen (sicherer Default: Termin-Step lieber zeigen als ihn Haftpflicht-Kunden
+   *  zu nehmen). */
+  abrechnungsweg?: string | null
 }): OnboardingContext {
   return {
     hatTerminGebucht: !!input.termin?.datum,
     offenePflichtdokumente: input.pflichtDocs.filter(
       (d) => d.status !== 'hochgeladen',
     ).length,
+    brauchtGutachter: !istWerkstattReparaturWeg(input.abrechnungsweg ?? null),
   }
 }
