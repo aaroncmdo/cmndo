@@ -36,6 +36,10 @@ export type MaklerAnlageInput = {
   // Der Typ wird aus dem gesetzten FK abgeleitet; beide null = (noch) nicht zugeordnet.
   versicherungId?: string | null
   maklerpoolId?: string | null
+  // USt-/Abrechnungs-relevant (partner-billing-ust: null = "unbekannt" -> keine USt-Berechnung
+  // moeglich). Self-Signup erhebt beide; Admin-Pfad darf sie (noch) weglassen.
+  rechtsform?: string | null
+  istKleinunternehmer?: boolean | null
 }
 
 export type MaklerAnlageResult =
@@ -80,6 +84,8 @@ export async function anlegeMaklerKern(
     .from('makler')
     .insert({
       firma: input.firma,
+      rechtsform: input.rechtsform ?? null,
+      ist_kleinunternehmer: input.istKleinunternehmer ?? null,
       ansprechpartner_vorname: input.ansprechpartnerVorname,
       ansprechpartner_nachname: input.ansprechpartnerNachname,
       email: input.email,

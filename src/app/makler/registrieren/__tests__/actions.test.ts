@@ -50,6 +50,7 @@ import { registriereMaklerSelf } from '../actions'
 function fd(overrides: Record<string, string> = {}): FormData {
   const base: Record<string, string> = {
     firma: 'Muster GmbH',
+    rechtsform: 'GmbH',
     ansprechpartner_vorname: 'Max',
     ansprechpartner_nachname: 'Mustermann',
     email: 'max@muster.de',
@@ -90,6 +91,18 @@ describe('registriereMaklerSelf', () => {
     expect(anlegeMock).not.toHaveBeenCalled()
   })
 
+  it('fehlende Rechtsform -> Fehler, keine Anlage', async () => {
+    const res = await registriereMaklerSelf(fd({ rechtsform: '' }))
+    expect(res.ok).toBe(false)
+    expect(anlegeMock).not.toHaveBeenCalled()
+  })
+
+  it('ungueltige Rechtsform (nicht in Whitelist) -> Fehler, keine Anlage', async () => {
+    const res = await registriereMaklerSelf(fd({ rechtsform: 'Piratenschiff' }))
+    expect(res.ok).toBe(false)
+    expect(anlegeMock).not.toHaveBeenCalled()
+  })
+
   it('Rate-Limit -> Fehler, keine Anlage', async () => {
     rateLimitMock.mockResolvedValue({ allowed: false, noIp: false })
     const res = await registriereMaklerSelf(fd())
@@ -112,5 +125,16 @@ describe('registriereMaklerSelf', () => {
     expect(arg.aktiviertVon).toBeNull()
     expect(arg.provisionKomplett).toBe(100)
     expect(arg.firma).toBe('Muster GmbH')
+    // USt-relevante Felder werden durchgereicht; Checkbox nicht gesetzt -> explizit false
+    // (= regelbesteuert), NICHT null ("unbekannt" wuerde die USt-Berechnung blockieren).
+    expect(arg.rechtsform).toBe('GmbH')
+    expect(arg.istKleinunternehmer).toBe(false)
+  })
+
+  it('Kleinunternehmer-Checkbox angehakt -> istKleinunternehmer=true', async () => {
+    const res = await registriereMaklerSelf(fd({ kleinunternehmer: 'true' }))
+    expect(res.ok).toBe(true)
+    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
+    expect(arg.istKleinunternehmer).toBe(true)
   })
 })
