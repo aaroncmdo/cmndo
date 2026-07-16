@@ -4,11 +4,9 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import PageHeader from '@/components/shared/PageHeader'
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 
-export const dynamic = 'force-dynamic'
 
 const PARTNER_TYP_LABEL: Record<string, string> = {
   sv: 'SV / Gutachter',
@@ -22,7 +20,7 @@ function formatEur(betrag: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(betrag)
 }
 
-export default async function PartnerAbrechnungenPage() {
+export default async function PartnerAbrechnungenView() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -38,16 +36,10 @@ export default async function PartnerAbrechnungenPage() {
 
   const typEntries = Object.entries(aggregat.perPartnerTyp)
 
-  const totalBrutto = typEntries.reduce((sum, [, v]) => sum + v.brutto, 0)
-  const totalAnzahl = typEntries.reduce((sum, [, v]) => sum + v.anzahl, 0)
-
   return (
-    <div className="p-4 md:p-6 flex flex-col gap-6">
-      <PageHeader
-        title="Partner-Abrechnungen"
-        description={`${totalAnzahl} Positionen gesamt — Brutto ${formatEur(totalBrutto)}`}
-      />
-
+    // Layout-Wrapper (nicht Seiten-Chrome): gap-6 haelt den Abstand zwischen Aggregat-Grid
+    // und Positionstabelle. Nur das Padding (p-4 md:p-6) faellt mit dem Header weg.
+    <div className="flex flex-col gap-6">
       {/* Per-Rolle Aggregat-Breakdown */}
       {typEntries.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

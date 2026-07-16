@@ -32,7 +32,7 @@ export default async function SmokeLifecyclePage() {
     id: string
     fall_typ: string | null
     claim_nummer: string | null
-    status: string | null
+    operative_status: string | null
     // CMM-49 DROP-Prep: faelle.id via bridge.fall_id (Reverse-Embed faelle:faelle(...) braeche
     // bei DROP TABLE faelle). faelle.status war toter Over-Fetch (nur f.id konsumiert).
     bridge: { fall_id: string } | Array<{ fall_id: string }> | null
@@ -43,7 +43,8 @@ export default async function SmokeLifecyclePage() {
     const admin = createAdminClient()
     const { data: smokeClaims, error } = await admin
       .from('claims')
-      .select('id, fall_typ, claim_nummer, status, bridge:faelle_claim_bridge!fk_bridge_claim(fall_id)')
+      // T3-slice-2b: claims.status -> operative_status
+      .select('id, fall_typ, claim_nummer, operative_status, bridge:faelle_claim_bridge!fk_bridge_claim(fall_id)')
       .like('fall_typ', 'SMOKE-LC%')
       .order('id')
     if (error) {

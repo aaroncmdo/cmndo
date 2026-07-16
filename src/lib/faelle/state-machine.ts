@@ -526,7 +526,9 @@ export async function transitionFallStatus(
             beschreibung:
               'Fahrzeug fahrbereit? Wenn nein: Kanzlei informieren für Versicherungsanfrage Mietwagen. Reparaturnachweis einfordern sobald Reparatur abgeschlossen.',
             status: 'offen',
-            prioritaet: 'hoch',
+            // tasks_prioritaet_check: 'hoch' existiert nicht (normal|dringend|kritisch) -> dringend.
+            // Vorher scheiterte der mietwagen-klaeren-Task-Insert still (Prod-Log 16.07.).
+            prioritaet: 'dringend',
             empfaenger_rolle: 'kundenbetreuer',
             empfaenger_user_id: kundenbetreuerId,
             zugewiesen_an: kundenbetreuerId,

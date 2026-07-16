@@ -18,7 +18,7 @@ import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
-import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
 import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 
 export type KundeGutachtenWerte = {
@@ -250,7 +250,7 @@ export async function getKundeClaimView(
       // Ausfall-Card + P4: Kanzlei-Ansprechpartner/Uebergabe + Werkstatt-Vermittlung-Gate).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, operative_status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -573,7 +573,8 @@ export async function getKundeClaimView(
 
   // Edge-Banner: „kam dein Gutachter?" — nur_gutachter (oben berechnet) + ueberfaelliger
   // ungeklaerter Termin + kein offener Klaerungs-Task.
-  const claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes((claimExtra?.status as string | null) ?? '')
+  // T3-slice-2c: Terminal-Gate auf operative_status (istClaimGeschlossen prueft CLOSED_OPERATIVE_STATUS).
+  const claimTerminal = istClaimGeschlossen({ operativeStatus: (claimExtra?.operative_status as string | null) ?? null })
   let terminCheck: KundeTerminCheck | null = null
   if (istNurGutachter && !claimTerminal) {
     const { data: staleTermin } = await admin

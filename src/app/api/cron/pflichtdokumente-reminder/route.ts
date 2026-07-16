@@ -105,7 +105,9 @@ export async function GET(request: Request) {
             task_code: 'dokument-hochladen',
             phase,
             auto_erstellt: true,
-            prioritaet: 'mittel',
+            // tasks_prioritaet_check erlaubt nur normal|dringend|kritisch — 'mittel' liess den
+            // Insert still scheitern (Reminder-Task wurde NIE erstellt; Prod-Log 16.07.).
+            prioritaet: 'normal',
             faellig_am: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
             empfaenger_rolle: phase === 'termin' ? 'sachverstaendiger' : 'kundenbetreuer',
             empfaenger_user_id: phase === 'termin' ? fall.sv_id : fall.kundenbetreuer_id,
@@ -190,7 +192,8 @@ export async function GET(request: Request) {
               task_code: folge.task_code,
               phase,
               auto_erstellt: true,
-              prioritaet: 'hoch',
+              // tasks_prioritaet_check: 'hoch' existiert nicht (normal|dringend|kritisch) -> dringend.
+              prioritaet: 'dringend',
               faellig_am: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
               empfaenger_rolle: folge.empfaenger_rolle,
               empfaenger_user_id: folge.empfaenger_rolle === 'sachverstaendiger' ? fall.sv_id : fall.kundenbetreuer_id,

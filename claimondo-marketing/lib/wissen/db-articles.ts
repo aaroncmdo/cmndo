@@ -61,10 +61,12 @@ export type WissenArtikel = {
   last_modified: string | null // date column -> YYYY-MM-DD string
   veroeffentlicht_am: string | null // timestamptz -> ISO string
   author: string
+  audience: string
+  quelle: string
 }
 
 const SELECT_COLUMNS =
-  'id,slug,title,body,excerpt,key_facts,meta_description,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author'
+  'id,slug,title,body,excerpt,key_facts,meta_description,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle'
 
 /**
  * Einen veroeffentlichten Artikel per Slug laden (anon-Client, RLS-gated).
@@ -137,4 +139,23 @@ export function mapArtikelToFeedItem(a: WissenArtikel): FeedItem {
     keyFacts: a.key_facts ?? [],
     sortKey,
   }
+}
+
+/**
+ * Teilt veroeffentlichte Artikel nach Zielgruppe auf. Pure — kein DB-Call.
+ * consumer = Geschaedigten-Ratgeber, b2b = Fachartikel (SV/Kanzlei/Werkstatt).
+ * Nicht-'b2b' faellt bewusst auf consumer (sichere Default fuer die Geschaedigten-Surface).
+ * Reihenfolge bleibt erhalten (getPublishedArtikel liefert newest-first).
+ */
+export function groupByAudience(items: WissenArtikel[]): {
+  consumer: WissenArtikel[]
+  b2b: WissenArtikel[]
+} {
+  const consumer: WissenArtikel[] = []
+  const b2b: WissenArtikel[] = []
+  for (const a of items) {
+    if (a.audience === 'b2b') b2b.push(a)
+    else consumer.push(a)
+  }
+  return { consumer, b2b }
 }

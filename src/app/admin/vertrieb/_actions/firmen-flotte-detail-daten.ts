@@ -154,7 +154,8 @@ export async function getFirmenFlotteDetail(
   if (vehicleIds.length > 0) {
     const { data: schadenRaw, error: schadenErr } = await admin
       .from('claims')
-      .select('id, claim_nummer, vehicle_id, status, schadentag, schadens_hoehe_netto')
+      // T3-slice-2b: claims.status -> operative_status
+      .select('id, claim_nummer, vehicle_id, operative_status, schadentag, schadens_hoehe_netto')
       .in('vehicle_id', vehicleIds)
       .order('schadentag', { ascending: false })
 
@@ -164,7 +165,7 @@ export async function getFirmenFlotteDetail(
       id: string
       claim_nummer: string | null
       vehicle_id: string
-      status: string | null
+      operative_status: string | null
       schadentag: string | null
       schadens_hoehe_netto: number | null
     }>).map((row) => ({
@@ -172,7 +173,7 @@ export async function getFirmenFlotteDetail(
       claim_nummer: row.claim_nummer,
       vehicle_id: row.vehicle_id,
       kennzeichen: kennzeichenByVehicleId[row.vehicle_id] ?? null,
-      status: row.status,
+      status: row.operative_status,
       schadentag: row.schadentag,
       schadens_hoehe_netto: row.schadens_hoehe_netto,
     }))

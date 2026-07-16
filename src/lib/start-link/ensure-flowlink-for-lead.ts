@@ -34,7 +34,9 @@ export async function ensureCanonicalFlowLinkForLead(
     .from('flow_links')
     .select('token, expires_at')
     .eq('lead_id', leadId)
-    .order('created_at', { ascending: false })
+    // CMM-Drift-Fix (16.07.): flow_links hat erstellt_am, NICHT created_at — der Order warf
+    // PostgREST-400 -> vorhanden=null -> die Idempotenz griff NIE (jeder Aufruf neuer Link).
+    .order('erstellt_am', { ascending: false })
     .limit(1)
     .maybeSingle()
   if (
