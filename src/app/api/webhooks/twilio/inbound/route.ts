@@ -10,7 +10,8 @@ import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validat
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 // AAR-939 (embed-B WA-Inbound): geteilte Resolution-Kernlogik + Stale-Gate-
 // Konstanten (identisch zu Resolution-Cron + Kunde-Banner). Siehe Block in POST().
-import { closeNurGutachterTerminAlsDurchgefuehrt, CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
+import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
 import { createEmbedBKlaerungTask, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 
 export const dynamic = 'force-dynamic'
@@ -196,7 +197,8 @@ export async function POST(req: NextRequest) {
         // WA-Reply existiert der Task also erwartungsgemaess (= positives Signal).
         const { data: staleKandidaten } = await db
           .from('gutachter_termine')
-          .select('id, claim_id, fall_id, lead_id, claims:claim_id(service_typ, status)')
+          // T3-slice-2c: claims.status -> operative_status (Terminal-Gate via istClaimGeschlossen).
+          .select('id, claim_id, fall_id, lead_id, claims:claim_id(service_typ, operative_status)')
           .or(orParts.join(','))
           .lt('end_zeit', new Date().toISOString())
           .is('durchgefuehrt_am', null)
@@ -210,8 +212,8 @@ export async function POST(req: NextRequest) {
         const staleTermin = (staleKandidaten ?? []).find((t) => {
           const claim = Array.isArray(t.claims) ? t.claims[0] : t.claims
           const svc = (claim?.service_typ as string | null) ?? null
-          const st = (claim?.status as string | null) ?? null
-          return svc === 'nur_gutachter' && !(CLAIM_TERMINAL_STATUSES as readonly string[]).includes(st ?? '')
+          const opSt = (claim?.operative_status as string | null) ?? null
+          return svc === 'nur_gutachter' && !istClaimGeschlossen({ operativeStatus: opSt })
         })
 
         if (staleTermin?.claim_id) {

@@ -5,7 +5,7 @@ import {
   createEmbedBKlaerungTask,
   TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE,
 } from '@/lib/termine/embed-b-klaerung-task'
-import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
 
 export const dynamic = 'force-dynamic'
 
@@ -63,7 +63,8 @@ export async function GET(request: Request) {
 
   const { data: termine, error } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, claim_id, claims:claim_id(service_typ, status)')
+    // T3-slice-2c: claims.status -> operative_status (Terminal-Gate via istClaimGeschlossen).
+    .select('id, fall_id, lead_id, claim_id, claims:claim_id(service_typ, operative_status)')
     .not('claim_id', 'is', null)
     .lt('end_zeit', karenzCutoff)
     .is('durchgefuehrt_am', null)
@@ -83,9 +84,9 @@ export async function GET(request: Request) {
     // kann Array oder Objekt sein — normalisieren).
     const claim = Array.isArray(t.claims) ? t.claims[0] : t.claims
     const svcTyp = (claim?.service_typ as string | null) ?? null
-    const status = (claim?.status as string | null) ?? null
+    const opStatus = (claim?.operative_status as string | null) ?? null
     if (svcTyp !== 'nur_gutachter') continue
-    if (status && (CLAIM_TERMINAL_STATUSES as readonly string[]).includes(status)) continue
+    if (istClaimGeschlossen({ operativeStatus: opStatus })) continue
 
     geprueft++
     const res = await createEmbedBKlaerungTask(db, {
