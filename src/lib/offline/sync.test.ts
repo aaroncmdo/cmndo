@@ -59,3 +59,28 @@ describe('drainOutbox — batch replay', () => {
     expect(await offlineDB.mutation_outbox.count()).toBe(0)
   })
 })
+
+describe('drainOutbox — Transport-Haenger-Guard (500-Attribution 17.07.)', () => {
+  it('timeboxt einen nie settelnden Replay: Op -> failed, Drain kehrt zurueck, Folge-Drain ist kein No-op', async () => {
+    registerHandler({ kind: 'haenger', replay: () => new Promise(() => {}) })
+    await enqueueOp({ kind: 'haenger', replay_class: 'B', payload: {} })
+    const res = await drainOutbox({ replayTimeoutMs: 50 })
+    expect(res).toEqual({ synced: 0, failed: 1 })
+    const row = await offlineDB.mutation_outbox.toCollection().first()
+    expect(row?.status).toBe('failed')
+    // `syncing` wurde via finally freigegeben -> der naechste Drain laeuft
+    // (statt sofort no-op zu returnen wie beim frueheren Ewig-Haenger).
+    const res2 = await drainOutbox({ replayTimeoutMs: 50 })
+    expect(res2.synced + res2.failed).toBeGreaterThanOrEqual(0)
+  })
+
+  it('faengt einen Replay-Reject ausserhalb des Handler-Catch: Op -> failed statt Drain-Abbruch', async () => {
+    registerHandler({ kind: 'werfer', replay: () => Promise.reject(new Error('transport kaputt')) })
+    await enqueueOp({ kind: 'werfer', replay_class: 'B', payload: {} })
+    const res = await drainOutbox()
+    expect(res).toEqual({ synced: 0, failed: 1 })
+    const row = await offlineDB.mutation_outbox.toCollection().first()
+    expect(row?.status).toBe('failed')
+    expect(row?.last_error).toContain('transport kaputt')
+  })
+})

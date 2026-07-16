@@ -242,7 +242,15 @@ export async function completeAndAdvance(
   // Zwischen-State 'completing' damit Timeline/Reporting es erkennt.
   await transitionTagesSession(sessionId, 'completing')
   const nextId = await advanceToNextTermin(sessionId)
-  revalidatePath('/gutachter/feldmodus')
+  // 2026-07-17 (500-Attribution der Regel-4-Abnahme): die eigene Route nur
+  // revalidieren, wenn es einen NAECHSTEN Stop gibt. Im finished-Fall (nextId
+  // null) triggerte revalidatePath('/gutachter/feldmodus') den Re-Render der
+  // Route IN der Action-Response — der wirft im frisch-beendeten Zustand
+  // transient (POST=500, RSC-pageerror, Outbox-Op haengt). Die Route wird im
+  // finished-Fall ohnehin verlassen (online via router.refresh -> Server-
+  // Redirect nach /heute; Replay braucht gar keinen Render). /heute bleibt
+  // immer revalidiert.
+  if (nextId) revalidatePath('/gutachter/feldmodus')
   revalidatePath('/gutachter/heute')
   return { success: true, nextTerminId: nextId }
 }
