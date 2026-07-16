@@ -6,6 +6,7 @@
 // NICHT die Glass-Variante (shared/glass/GlassInput, onboarding/fields/TextField)
 // — die bleibt für die Glass-Flows unangetastet.
 
+import { useId } from 'react'
 import type { InputHTMLAttributes, ReactNode } from 'react'
 
 const INPUT_CLS =
@@ -28,8 +29,12 @@ export function TextField({
   id,
   ...inputProps
 }: TextFieldProps) {
-  const fieldId =
-    id ?? (typeof label === 'string' ? `tf-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined)
+  // Instanz-eindeutig via useId (SSR-stabil) statt Label-Slug: `tf-kennzeichen` stand doppelt im
+  // DOM, sobald dasselbe Label zweimal gerendert wird (z.B. Drawer-Review ueber dem Seiten-Formular
+  // -- ZB1-Prod-Smoke-Befund 16.07.). Duplikat-IDs brechen htmlFor-Zuordnung + a11y. Explizite
+  // id-Prop behaelt Vorrang; ReactNode-Labels bekommen jetzt ebenfalls eine htmlFor-Bindung.
+  const generatedId = useId()
+  const fieldId = id ?? generatedId
   return (
     <div className={`flex flex-col gap-1.5 ${className ?? ''}`}>
       {label ? (
