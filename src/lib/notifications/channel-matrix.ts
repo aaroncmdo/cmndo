@@ -379,6 +379,10 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     priority: 'normal',
     channels: {
       kunde: ['in_app'],
+      // P0.5 (Operativ-Audit 17.07.): Die Eskalation "Kanzlei-Rueckfrage ueberfaellig" ging
+      // NUR an den Kunden -- die antwort-pflichtigen Rollen (KB/Admin) erfuhren nichts.
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
     },
   },
   // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844) — KB-only, keine Kunde-Notification
