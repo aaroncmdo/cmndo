@@ -22,9 +22,73 @@ function flatKeys(obj, prefix = '') {
   return keys
 }
 
+// Marketing hat einen EIGENEN i18n-Baum (eigener Top-Level-Build) — der Duplikat-Guard
+// unten prueft beide. Der Completeness-Check bleibt bewusst App-only (Marketing pflegt
+// seine Locales unabhaengig).
+const MARKETING_DIR = path.resolve(__dirname, '../../claimondo-marketing/i18n/messages')
+
+/**
+ * Findet Duplikat-Keys auf ALLEN Objekt-Ebenen im ROHTEXT. JSON.parse verschluckt
+ * Duplikate still (der letzte gewinnt) — genau deshalb braucht es einen Raw-Scan.
+ * String-bewusst: ICU-Platzhalter-Klammern ("Hallo {name}") verfaelschen nichts.
+ * Anlass: de.json (Marketing) trug 3 tote Duplikat-Bloecke; jeder maschinelle
+ * JSON-Roundtrip dedupliziert still und patcht sonst den falschen Block (16.07.).
+ */
+function findDuplicateKeys(raw) {
+  const dups = []
+  const stack = [] // pro Objekt: { counts: Map<key,n>, at: string }
+  let inStr = false
+  let esc = false
+  let str = ''
+  let lastStr = null
+  let lastKey = '' // Key, unter dem das naechste Objekt haengt (fuer den Pfad)
+  const pathOf = () => stack.map((s) => s.at).filter(Boolean).join('.') || '(root)'
+  for (const ch of raw) {
+    if (inStr) {
+      if (esc) { esc = false; str += ch; continue }
+      if (ch === '\\') { esc = true; continue }
+      if (ch === '"') { inStr = false; lastStr = str; continue }
+      str += ch
+      continue
+    }
+    if (ch === '"') { inStr = true; str = ''; continue }
+    if (ch === ':') { // lastStr war ein KEY des aktuellen Objekts
+      if (lastStr !== null && stack.length) {
+        const top = stack[stack.length - 1]
+        top.counts.set(lastStr, (top.counts.get(lastStr) ?? 0) + 1)
+        lastKey = lastStr
+        lastStr = null
+      }
+      continue
+    }
+    if (ch === '{') { stack.push({ counts: new Map(), at: stack.length ? lastKey : '' }); continue }
+    if (ch === '}') {
+      const top = stack.pop()
+      for (const [k, n] of top.counts) if (n > 1) dups.push({ key: k, n, at: pathOf() ? `${pathOf()}.${top.at}`.replace(/^\(root\)\.?/, '') || '(top-level)' : top.at })
+    }
+  }
+  return dups
+}
+
+let failed = false
+for (const [label, dir] of [['app', DIR], ['marketing', MARKETING_DIR]]) {
+  for (const file of fs.readdirSync(dir).filter((f) => f.endsWith('.json'))) {
+    const dups = findDuplicateKeys(fs.readFileSync(path.join(dir, file), 'utf8'))
+    if (dups.length) {
+      failed = true
+      console.error(`[i18n] ${label}/${file}: ${dups.length} Duplikat-Key(s)`)
+      for (const d of dups.slice(0, 10)) console.error(`  "${d.key}" ${d.n}x (in ${d.at || '(top-level)'})`)
+    }
+  }
+}
+if (failed) {
+  console.error('[i18n] Duplikat-Guard FEHLGESCHLAGEN — JSON.parse nimmt still den letzten Block; tote Bloecke sind Merge-/Tooling-Fallen.')
+  process.exit(1)
+}
+console.log('[i18n] Duplikat-Guard: alle Locales (app + marketing) duplikatfrei.')
+
 const load = (loc) => JSON.parse(fs.readFileSync(path.join(DIR, `${loc}.json`), 'utf8'))
 const sourceKeys = new Set(flatKeys(load(SOURCE)))
-let failed = false
 
 for (const loc of TARGETS) {
   const locKeys = new Set(flatKeys(load(loc)))
