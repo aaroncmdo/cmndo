@@ -137,9 +137,8 @@ export async function POST(req: NextRequest) {
       .insert({
         fall_id: fallId,
         dokument_typ: dokumentTyp,
-        dateiname: file.name,
+        original_filename: file.name,
         storage_path: storagePath,
-        url: publicUrl,
         uploaded_by_sv: true,
         uploaded_by_kunde: false,
         ocr_result: ocrResult,

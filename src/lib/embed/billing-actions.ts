@@ -210,7 +210,7 @@ export async function stornoEmbedBilling(
         .update({
           status: 'storniert',
           storniert_am: new Date().toISOString(),
-          storno_grund: `Monika-Embed-Storno: ${grund.trim()}`,
+          storniert_grund: `Monika-Embed-Storno: ${grund.trim()}`,
         })
         .eq('id', row.abrechnung_id)
       if (abrErr) warnung = `gfa storniert, aber Rechnung ${row.abrechnung_id} nicht: ${abrErr.message}`

@@ -44,7 +44,7 @@ export async function ladeGutachterFinderAnfragen(): Promise<{
       schadentyp, schadenort, wunschtermin, matching_typ,
       schuldfrage, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, bevorzugter_kanal,
       sa_unterzeichnet_am, status, erstellt_am, source,
-      zugeordneter_sv:sachverstaendige(
+      zugeordneter_sv:sachverstaendige!gutachter_finder_anfragen_zugeordneter_sv_id_fkey(
         firmenname,
         profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
       ),

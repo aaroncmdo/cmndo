@@ -170,7 +170,7 @@ export async function POST(req: Request) {
           user_id: k.id,
           typ: 'unbekannte-nachricht',
           titel: `Unbekannte Nummer: ${kundenNummer}`,
-          text: msgBody?.slice(0, 100) || 'Medien-Nachricht',
+          nachricht: msgBody?.slice(0, 100) || 'Medien-Nachricht',
           link: '/admin/nachrichten',
         })
       } catch { /* fire-and-forget */ }
