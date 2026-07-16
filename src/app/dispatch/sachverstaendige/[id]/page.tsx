@@ -41,7 +41,7 @@ export default async function DispatchSvDetailPage({
 
   const { data: faelle } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
-    .select('id, claim_nummer, status, schadens_ursache, sv_termin, created_at, leads(vorname, nachname)')
+    .select('id, claim_nummer, status, schadens_ursache, sv_termin, created_at, leads!lead_id(vorname, nachname)')
     .eq('sv_id', id)
     .not('status', 'in', '("abgeschlossen","storniert")')
     .order('created_at', { ascending: false })

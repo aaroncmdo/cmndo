@@ -208,14 +208,14 @@ export async function requestMaklerAccountDeletion(): Promise<ActionResult> {
 
   const admin = createAdminClient()
   try {
-    await admin.from('admin_tasks').insert({
+    await admin.from('tasks').insert({
       typ: 'makler_account_deletion',
       titel: `Makler-Account-Löschung angefragt: ${makler.firma}`,
       beschreibung: `makler_id=${makler.id}`,
       status: 'offen',
     })
   } catch {
-    // admin_tasks existiert ggf. nicht — Fehler nicht blocken,
+    // Task-Anlage best-effort — Fehler nicht blocken,
     // UI hat weiterhin mailto:-Fallback
   }
   return { success: true }

@@ -44,7 +44,7 @@ export default async function GutachterFinderDetailPage({
       id, vorname, nachname, email, telefon, kennzeichen, fahrzeug_beschreibung,
       schadentyp, schadenort, schadenort_lat, schadenort_lng, wunschtermin, matching_typ,
       sa_signatur_data_url, sa_unterzeichnet_am, status, erstellt_am, konvertiert_zu_lead_id,
-      zugeordneter_sv:sachverstaendige(
+      zugeordneter_sv:sachverstaendige!gutachter_finder_anfragen_zugeordneter_sv_id_fkey(
         id, firmenname,
         profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
       ),

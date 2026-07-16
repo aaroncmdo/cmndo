@@ -125,17 +125,26 @@ export async function stelleWaitlistAnfrage(input: SubmitInput): Promise<Result>
     return { ok: false, error: 'Speichern fehlgeschlagen — bitte erneut versuchen.' }
   }
 
-  // Admin-Benachrichtigung (best-effort, blockt nicht den Erfolgsfall)
+  // Admin-Benachrichtigung (best-effort, blockt nicht den Erfolgsfall).
+  // benachrichtigungen ist user_id-gebunden (kein empfaenger_rolle) -> eine Row je Admin,
+  // gleiches Muster wie werkstatt-partner-werden/actions.ts.
   try {
-    await admin.from('benachrichtigungen').insert({
-      typ: 'update',
-      titel: 'Neue Gutachter-Bewerbung',
-      nachricht: `${input.vorname} ${input.nachname} (${input.plz}${geo?.ort ? ' ' + geo.ort : ''}) hat sich auf gutachter.claimondo.de eingetragen.`,
-      link: `/admin/partner/waitlist/${data.id}`,
-      empfaenger_rolle: 'admin',
-    })
+    const { data: admins } = await admin.from('profiles').select('id').eq('rolle', 'admin')
+    if (admins && admins.length > 0) {
+      await Promise.all(
+        admins.map((a) =>
+          admin.from('benachrichtigungen').insert({
+            user_id: a.id as string,
+            typ: 'update',
+            titel: 'Neue Gutachter-Bewerbung',
+            nachricht: `${input.vorname} ${input.nachname} (${input.plz}${geo?.ort ? ' ' + geo.ort : ''}) hat sich auf gutachter.claimondo.de eingetragen.`,
+            link: `/admin/partner/waitlist/${data.id}`,
+          }),
+        ),
+      )
+    }
   } catch {
-    // benachrichtigungen-Tabelle nicht kritisch
+    // benachrichtigungen nicht kritisch
   }
 
   revalidatePath('/admin/partner/waitlist')

@@ -164,7 +164,7 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
   if (zustellungAktiv && staffInGruppe) {
     const { data: claim } = await admin
       .from('claims')
-      .select('lead_id, leads(email, telefon, vorname)')
+      .select('lead_id, leads!claims_lead_id_fkey(email, telefon, vorname)')
       .eq('id', thread.claim_id)
       .maybeSingle()
     const leadJoin = (claim as { leads?: unknown } | null)?.leads

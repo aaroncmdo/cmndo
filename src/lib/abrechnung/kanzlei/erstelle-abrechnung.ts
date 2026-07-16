@@ -249,7 +249,7 @@ export async function erstelleKanzleiAbrechnung(
         if (pdfStoragePath) {
           await db
             .from('kanzlei_abrechnungen')
-            .update({ pdf_path: pdfStoragePath })
+            .update({ pdf_storage_path: pdfStoragePath })
             .eq('id', abrechnungId)
         }
       } catch (pdfErr) {
