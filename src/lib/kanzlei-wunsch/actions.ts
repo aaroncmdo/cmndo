@@ -550,7 +550,7 @@ export async function smokeResetAufKanzleiWunsch(
     await admin.from('leads').update({
       sa_unterschrieben: true,
       vollmacht_signiert_am: null,
-      onboarding_complete: true,
+      // onboarding_complete lebt auf claims (SP-B SSoT) — leads hat die Spalte nicht.
     }).eq('id', claim.lead_id as string)
   }
 
@@ -647,8 +647,8 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: nowIso,
     claim_nummer: 'CLM-2026-00043',
-    phase: '6_kommunikation_versicherung',
     // T3-S4: operative_status traegt den Non-Terminal-Outcome (einzige Achse).
+    // phase ist derived-first (Engine) — claims hat keine phase-Spalte (prod-verifiziert); status-Writes retired (T3-S4).
     operative_status: 'in_kommunikation_vs',
     vollmacht_signiert_am: nowIso,
   }).eq('id', claimId)

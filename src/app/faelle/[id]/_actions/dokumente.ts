@@ -73,7 +73,7 @@ export async function markDokumentNachgereicht(
     .from('pflichtdokumente')
     .update({
       status: 'nachgereicht_angefordert',
-      updated_at: new Date().toISOString(),
+      // pflichtdokumente hat keine updated_at-Spalte.
     })
     .eq('id', pflichtdokId)
 

@@ -63,7 +63,7 @@ export async function sendChatMessage(params: {
       const { data: fall } = chatClaimId
         ? await supabase
             .from('claims')
-            .select('lead_id, leads(telefon, vorname)')
+            .select('lead_id, leads!claims_lead_id_fkey(telefon, vorname)')
             .eq('id', chatClaimId)
             .single()
         : { data: null }
