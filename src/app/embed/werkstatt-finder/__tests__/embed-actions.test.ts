@@ -76,6 +76,7 @@ import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schaden
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createLead } from '@/lib/leads/create-lead'
+import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getStorageUrl } from '@/lib/storage/url'
 import {
@@ -91,6 +92,7 @@ const mockKlassBeschreibung = vi.mocked(klassifiziereSchadenbeschreibung)
 const mockLadeWerkstattVorschlaege = vi.mocked(ladeWerkstattVorschlaege)
 const mockGeocodeAdresse = vi.mocked(geocodeAdresse)
 const mockCreateLead = vi.mocked(createLead)
+const mockBuildExtra = vi.mocked(buildWerkstattFinderLeadExtra)
 const mockEnsureFlowLink = vi.mocked(ensureCanonicalFlowLinkForLead)
 const mockGetStorageUrl = vi.mocked(getStorageUrl)
 
@@ -526,5 +528,76 @@ describe('erstelleWerkstattFinderLead', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toBe('DB-Fehler')
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// §10 Doppel-Lead-Falle: flowToken -> UPDATE des bestehenden Leads statt INSERT
+// (Mirror des Gutachter-Musters: Token = Capability, server-seitig aufgeloest)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', () => {
+  const token = 'flow-token-bestand'
+
+  function setupTokenMocks(leadIdAusToken: string | null, updates: Array<Record<string, unknown>>) {
+    mockEnsureFlowLink.mockResolvedValue({ ok: true, token, wiederverwendet: true })
+    mockCreateLead.mockResolvedValue({ ok: true, leadId: 'lead-NEU' })
+    mockFrom.mockImplementation((table: string) => {
+      if (table === 'flow_links') {
+        return {
+          select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockResolvedValue({ data: leadIdAusToken ? { lead_id: leadIdAusToken } : null }),
+        }
+      }
+      if (table === 'leads') {
+        const chain = {
+          update: vi.fn((payload: Record<string, unknown>) => {
+            updates.push(payload)
+            return chain
+          }),
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }
+        return { update: chain.update, eq: chain.eq }
+      }
+      return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), maybeSingle: vi.fn().mockResolvedValue({ data: null }) }
+    })
+  }
+
+  it('gueltiger Token -> UPDATE des bestehenden Leads (kein createLead); null gestrippt, false bleibt', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    setupTokenMocks('lead-bestand-77', updates)
+    mockBuildExtra.mockReturnValueOnce({ fahrzeug_hersteller: 'BMW', fahrzeug_modell: null, gewerbe_flag: false })
+
+    const result = await erstelleWerkstattFinderLead({
+      email: 'kunde@example.com',
+      vorname: 'Max',
+      flowToken: 'tok-77',
+    })
+
+    expect(result.ok).toBe(true)
+    if (result.ok) expect(result.token).toBe(token)
+    expect(mockCreateLead).not.toHaveBeenCalled()
+    expect(mockEnsureFlowLink.mock.calls[0][0]).toBe('lead-bestand-77')
+    expect(updates[0]).toMatchObject({
+      email: 'kunde@example.com',
+      vorname: 'Max',
+      fahrzeug_hersteller: 'BMW',
+      gewerbe_flag: false, // false ist ein WERT (privat) — darf NICHT gestrippt werden
+    })
+    expect(updates[0]).not.toHaveProperty('fahrzeug_modell') // null -> gestrippt (keine Luecken-Ueberschreibung)
+    expect(updates[0]).not.toHaveProperty('nachname') // leer -> nicht angefasst
+  })
+
+  it('unbekannter/abgelaufener Token -> Fallback-INSERT (Spec §10: "Entry ohne Lead")', async () => {
+    const updates: Array<Record<string, unknown>> = []
+    setupTokenMocks(null, updates)
+    mockBuildExtra.mockReturnValueOnce({})
+
+    const result = await erstelleWerkstattFinderLead({ email: 'kunde@example.com', flowToken: 'tok-tot' })
+
+    expect(result.ok).toBe(true)
+    expect(mockCreateLead).toHaveBeenCalledOnce()
+    expect(mockEnsureFlowLink.mock.calls[0][0]).toBe('lead-NEU')
   })
 })
