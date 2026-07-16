@@ -642,7 +642,9 @@ export default async function FallaktePage({
       .select('id')
       .eq('fall_id', id)
       .eq('typ', 'erstgutachten')
-      .order('created_at', { ascending: false })
+      // CMM-Drift-Fix (16.07.): auftraege.erstellt_am statt created_at (existiert nicht ->
+      // 400 -> erstgutachtenAuftragId blieb null; 3x im Prod-Log je Fallakte-Load).
+      .order('erstellt_am', { ascending: false })
       .limit(1)
       .maybeSingle()
     erstgutachtenAuftragId = (erstgutachtenRow?.id as string | null) ?? null
