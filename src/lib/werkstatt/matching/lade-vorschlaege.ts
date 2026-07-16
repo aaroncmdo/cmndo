@@ -17,7 +17,7 @@ import {
 // Spaltenname liefert einen STILLEN PostgREST-400 mit data=null, den kein Test faengt.
 // `email` NUR fuer den Test-Werkstatt-Filter (istInterneEmail) — nie an den Client.
 const SELECT_COLS =
-  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert,marken,ist_freie_werkstatt,fahrzeug_gruppen,email'
+  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert,marken,ist_freie_werkstatt,fahrzeug_gruppen,google_rating,google_review_count,email'
 
 /**
  * EU-/KBA-Fahrzeugklasse (Feld J: M1, N1, L3e, ...) -> Reparatur-Gruppe (pkw, transporter, lkw, ...).
