@@ -70,7 +70,8 @@ export async function ladeNoetigePhasen(
     lead_id
       ? supabase.from('leads').select('*').eq('id', lead_id).maybeSingle()
       : Promise.resolve({ data: null }),
-    supabase.from('fall_documents').select('typ, slot_id').eq('fall_id', fallId),
+    // fall_dokumente (nicht fall_documents); Slot-Bezug = pflichtdokument_id, Typ = dokument_typ.
+    supabase.from('fall_dokumente').select('dokument_typ, pflichtdokument_id').eq('fall_id', fallId),
   ])
 
   // Vehicle ueber claim_vehicle_involvements + vehicles
@@ -100,10 +101,10 @@ export async function ladeNoetigePhasen(
     ...flachKopie((leadRes.data ?? {}) as Record<string, unknown>),
     ...flachKopie(vehicle ?? {}),
   }
-  // Documents: pro slot_id ein Flag setzen
-  for (const d of ((docsRes.data ?? []) as Array<{ typ: string; slot_id: string | null }>)) {
-    if (d.slot_id) prefilled[`doc_${d.slot_id}`] = true
-    if (d.typ) prefilled[`doc_typ_${d.typ}`] = true
+  // Documents: pro Pflichtdokument-Slot + Dokument-Typ ein Flag setzen
+  for (const d of ((docsRes.data ?? []) as Array<{ dokument_typ: string | null; pflichtdokument_id: string | null }>)) {
+    if (d.pflichtdokument_id) prefilled[`doc_${d.pflichtdokument_id}`] = true
+    if (d.dokument_typ) prefilled[`doc_typ_${d.dokument_typ}`] = true
   }
 
   // ─── 3. Phasen + Felder aus DB laden ────────────────────────────────
