@@ -286,6 +286,18 @@ const nextConfig: NextConfig = {
         destination: '/admin/aufgaben/meine',
         permanent: true,
       },
+      // Portal-Header P1 (Finance-Hub-Konvergenz): die 7 Finance-Sub-Routen leben jetzt
+      // als Client-State-Tabs im Hub (?tab=). Alte Routen -> Redirect auf den Hub-Tab
+      // (KEIN redirect()-Stub in page.tsx, s. Redirect-Stub-Gate; Content lebt in _views/).
+      // permanent:false (307): ?tab= ist Client-State + die Tab-Struktur evolviert noch
+      // (Param-Forwarding ?monat=/?nr= = Follow-up), daher kein gecachter 308.
+      { source: '/admin/finance/abrechnungen', destination: '/admin/finance?tab=abrechnungen', permanent: false },
+      { source: '/admin/finance/saeumige-svs', destination: '/admin/finance?tab=saeumige-svs', permanent: false },
+      { source: '/admin/finance/offene-faelle', destination: '/admin/finance?tab=offene-faelle', permanent: false },
+      { source: '/admin/finance/per-sv-balance', destination: '/admin/finance?tab=per-sv-balance', permanent: false },
+      { source: '/admin/finance/kanzlei', destination: '/admin/finance?tab=kanzlei', permanent: false },
+      { source: '/admin/finance/provisionen', destination: '/admin/finance?tab=provisionen', permanent: false },
+      { source: '/admin/finance/partner-abrechnungen', destination: '/admin/finance?tab=partner-abrechnungen', permanent: false },
       // P4a (Detail-View-Konsistenz / Faelle-Hub-Konvergenz F2): die 4 Hub-Tools
       // leben kanonisch als Tabs unter /admin/faelle (Hub-Shell + shared Header, F0).
       // Die alten Standalone-Routen (= Doppel-Routen: gleicher *Content, nur eigener

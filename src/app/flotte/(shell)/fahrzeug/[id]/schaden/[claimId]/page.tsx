@@ -55,7 +55,7 @@ export default async function FlottenClaimDetailPage({
           <div className="flex items-center justify-between gap-3">
             <dt className="text-claimondo-ondo">Status</dt>
             <dd>
-              <StatusBadge domain="claims-status" code={claim.status} />
+              <StatusBadge domain="fall-status" code={claim.status} />
             </dd>
           </div>
           <div className="flex items-center justify-between gap-3">

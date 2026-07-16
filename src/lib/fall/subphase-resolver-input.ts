@@ -19,8 +19,9 @@ import type {
 
 // Normalisierung Slice 4: auszahlung_gutachter_eingegangen_am NICHT mehr aus dem claims-Cache
 // (wird retired), sondern aus dem (claim,'sv')-Ledger (claim_payments.zahlungseingang_am, s.u.).
+// T3-slice-2b: claims.status -> operative_status
 const CLAIM_SELECT =
-  'status, szenario, service_typ, sa_unterschrieben_am, vollmacht_status, vollmacht_geprueft_am, ' +
+  'operative_status, szenario, service_typ, sa_unterschrieben_am, vollmacht_status, vollmacht_geprueft_am, ' +
   'kanzlei_uebergeben_am, dokumente_reminder_whatsapp_letzte_sendung, abgeschlossen_am, ' +
   'google_review_gesendet, kanzlei_provision_status'
 

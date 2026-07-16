@@ -10,6 +10,7 @@ import {
   getVersicherer,
 } from '@/lib/content/claimondo-mdx'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { getPublishedArtikel } from '@/lib/wissen/db-articles'
 
 // Echte Locale-URLs pro Pfad (de prefix-frei, en/tr/ar/ru/pl praefixiert) —
 // zentral aus lib/seo/alternates, identisch zur hreflang-Logik der Pages
@@ -18,8 +19,9 @@ function langAlternates(path: string): Record<string, string> {
   return buildLanguageAlternates(path).languages
 }
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date()
+  const wissenArtikel = await getPublishedArtikel()
 
   return [
     {
@@ -391,6 +393,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: a.lastModified,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
+    })),
+    // KI-Wissensartikel (DB) — einzelne /wissen/<slug>-URLs mit per-Artikel-Freshness.
+    ...wissenArtikel.map((a) => ({
+      url: `${SITE_URL}/wissen/${a.slug}`,
+      lastModified: a.last_modified
+        ? new Date(a.last_modified)
+        : a.veroeffentlicht_am
+          ? new Date(a.veroeffentlicht_am)
+          : now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
     })),
   ]
 }

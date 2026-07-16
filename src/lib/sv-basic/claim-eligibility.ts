@@ -1,6 +1,17 @@
 // src/lib/sv-basic/claim-eligibility.ts
 // Pure Helpers fuer den SV-Basic-Claim. KEINE 'use server'-Direktive hier.
+import { getPaket } from '@/lib/pakete'
+
 export const BASIC_DEFAULT_RADIUS_KM = 25
+
+// Server-seitige Whitelist: welche Pakete aus dem Self-Service kommen duerfen.
+// Der Paket-Wert kommt aus dem Client -> NIE roh uebernehmen (kein Self-Escalation
+// auf pro/premium). Ungueltiges faellt hart auf 'basic'.
+export const SELF_SERVICE_PAKETE = ['basic', 'standard', 'pro', 'premium'] as const
+export type SelfServicePaket = (typeof SELF_SERVICE_PAKETE)[number]
+export function istErlaubtesPaket(paket: string): paket is SelfServicePaket {
+  return (SELF_SERVICE_PAKETE as readonly string[]).includes(paket)
+}
 
 export type SvLeadRow = {
   vorname: string | null; name: string | null; nachname: string | null; firma: string | null
@@ -19,10 +30,13 @@ export function normalisiereSuche(s: string): string {
   return s.trim().toLowerCase()
 }
 
-export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string) {
-  return {
+export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string, paket: string = 'basic') {
+  // Whitelist-Gate: ungueltiges/unbekanntes Paket faellt hart auf 'basic' (kein Self-Escalation).
+  const p: SelfServicePaket = istErlaubtesPaket(paket) ? paket : 'basic'
+  const konfig = getPaket(p) // basic → 0 Faelle / 25km / 0 EUR; paid → Kontingent / Radius / Preis
+  const base = {
     profile_id: profileId,
-    paket: 'basic',
+    paket: p,
     onboarding_quelle: 'self_service_claim',
     verifizierung_status: 'ausstehend' as const,
     ist_aktiv: false,
@@ -33,8 +47,8 @@ export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string) {
     standort_lat: lead.lat ?? null,
     standort_lng: lead.lng ?? null,
     gebiet_plz: lead.plz ? [lead.plz] : [],
-    paket_umkreis_km: lead.paket_umkreis_km ?? BASIC_DEFAULT_RADIUS_KM,
-    paket_faelle_gesamt: 0,            // 0 Inklusivfaelle (Pro-Lead-Billing, P5)
+    paket_umkreis_km: lead.paket_umkreis_km ?? konfig.radius_km,
+    paket_faelle_gesamt: konfig.faelle, // basic 0 (Pro-Lead-Billing, P5), paid = Kontingent
     paket_faelle_genutzt: 0,
     isochrone_polygon: lead.isochrone_polygon ?? null,
     bvsk_mitgliedsnummer: lead.bvsk_nr ?? null,
@@ -44,4 +58,11 @@ export function buildSvInsertAusLead(lead: SvLeadRow, profileId: string) {
     // KEIN partner_seit: ist NOT NULL DEFAULT CURRENT_DATE -> Spalte weglassen, DB-Default greift
     //   (explizites null wuerde den NOT-NULL-Constraint brechen).
   }
+  // Basic bleibt byte-identisch zum Alt-Verhalten (kein Anzahlungs-Feld, Pay-per-Lead).
+  // Bezahltes Paket: Onboarding-Anzahlung = voller Paketpreis (PAKETE-SSoT) + anzahlung_status
+  // 'offen' (admin-bewaehrter CHECK-Wert) -> der reiche WillkommenClient laedt Stripe mit diesem
+  // Betrag; portal_zugang bleibt false bis der willkommen/actions-Zahlungspfad ihn flippt.
+  return p === 'basic'
+    ? base
+    : { ...base, onboarding_anzahlung_betrag: konfig.anzahlung, anzahlung_status: 'offen' as const }
 }

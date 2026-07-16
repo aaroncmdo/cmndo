@@ -19,7 +19,7 @@ import {
 const NOW = new Date('2026-04-19T12:00:00Z')
 
 // ─── Sub-Entity-Factories (nur Trigger-Felder; alles andere default null) ─────
-const claim = (o: Partial<ClaimTriggers> = {}): ClaimTriggers => ({ status: 'in_bearbeitung', ...o })
+const claim = (o: Partial<ClaimTriggers> = {}): ClaimTriggers => ({ operative_status: 'in_bearbeitung', ...o })
 const lead = (o: Partial<LeadTriggers> = {}): LeadTriggers => ({ ...o })
 const kf = (o: Partial<KanzleiFallTriggers> = {}): KanzleiFallTriggers => ({ status: 'versicherungskontakt', ...o })
 const auftrag = (o: Partial<AuftragTriggers> = {}): AuftragTriggers => ({ typ: 'erstgutachten', status: 'gutachten', ...o })

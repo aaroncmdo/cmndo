@@ -8,6 +8,7 @@ import {
   beanspracheSvLead,
   registriereSvBasicNeu,
 } from '@/lib/sv-basic/claim-actions'
+import { PAKETE, BASIC_PAKET } from '@/lib/pakete'
 
 // ─── lokale Typen (NICHT aus 'use server'-File re-exportiert — AAR-664) ──────
 
@@ -33,6 +34,57 @@ function kandidatLabel(k: Kandidat): string {
 function kandidatOrt(k: Kandidat): string {
   const teile = [k.plz, k.ort].filter(Boolean)
   return teile.join(' ')
+}
+
+// ─── Paket-Picker (Self-Service Paketauswahl) ────────────────────────────────
+// Basic = gratis/Pay-per-Lead (sofort ins Onboarding). Bezahlte Pakete ziehen
+// Preis/Faelle/Radius aus der SSoT (@/lib/pakete) — nach der Registrierung
+// laeuft der SV in den reichen Vertrag+Anzahlung-Flow (willkommen).
+
+const PAKET_OPTIONEN = [
+  { key: BASIC_PAKET.key, name: BASIC_PAKET.name, preis: BASIC_PAKET.preis, untertitel: 'Pay-per-Lead · keine Grundgebühr' },
+  { key: PAKETE.standard.key, name: PAKETE.standard.name, preis: PAKETE.standard.preis, untertitel: `${PAKETE.standard.faelle} Fälle/Monat · ${PAKETE.standard.radius_km} km Umkreis` },
+  { key: PAKETE.pro.key, name: PAKETE.pro.name, preis: PAKETE.pro.preis, untertitel: `${PAKETE.pro.faelle} Fälle/Monat · ${PAKETE.pro.radius_km} km Umkreis` },
+  { key: PAKETE.premium.key, name: PAKETE.premium.name, preis: PAKETE.premium.preis, untertitel: `${PAKETE.premium.faelle} Fälle/Monat · ${PAKETE.premium.radius_km} km Umkreis` },
+] as const
+
+function PaketPicker({ paket, onChange }: { paket: string; onChange: (p: string) => void }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-claimondo-navy">Paket wählen</p>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        {PAKET_OPTIONEN.map((opt) => {
+          const aktiv = paket === opt.key
+          return (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => onChange(opt.key)}
+              aria-pressed={aktiv}
+              className={`rounded-ios-md border p-3 text-left transition-colors ${
+                aktiv
+                  ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+                  : 'border-claimondo-border bg-white hover:border-claimondo-ondo/50'
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-semibold text-claimondo-navy">{opt.name}</span>
+                <span className="text-sm font-bold text-claimondo-ondo">
+                  {opt.preis === 0 ? 'gratis' : `${opt.preis.toLocaleString('de-DE')} €`}
+                </span>
+              </div>
+              <p className="mt-0.5 text-xs text-claimondo-shield">{opt.untertitel}</p>
+            </button>
+          )
+        })}
+      </div>
+      {paket !== 'basic' && (
+        <p className="text-xs text-claimondo-shield">
+          Vertrag + Anzahlung schließt du nach der Registrierung im Portal ab.
+        </p>
+      )}
+    </div>
+  )
 }
 
 // ─── Schritt 1: Suche ────────────────────────────────────────────────────────
@@ -166,6 +218,7 @@ function BeanspruchenSchritt({
 }) {
   const [email, setEmail] = useState('')
   const [telefon, setTelefon] = useState('')
+  const [paket, setPaket] = useState('basic')
   const [fehler, setFehler] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -184,6 +237,7 @@ function BeanspruchenSchritt({
         svLeadId: kandidat.id,
         email: email.trim(),
         telefon: telefon.trim(),
+        paket,
       })
       if (!res.ok) {
         setFehler(res.error)
@@ -221,6 +275,10 @@ function BeanspruchenSchritt({
         {kandidatOrt(kandidat) && (
           <p className="text-xs text-claimondo-shield mt-0.5">{kandidatOrt(kandidat)}</p>
         )}
+      </div>
+
+      <div className="mb-5">
+        <PaketPicker paket={paket} onChange={setPaket} />
       </div>
 
       <div className="flex flex-col gap-4">
@@ -276,6 +334,7 @@ function NeuSchritt({
   const [adresse, setAdresse] = useState('')
   const [plz, setPlz] = useState('')
   const [datNr, setDatNr] = useState('')
+  const [paket, setPaket] = useState('basic')
   const [fehler, setFehler] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -301,6 +360,7 @@ function NeuSchritt({
         adresse: adresse.trim(),
         plz: plz.trim() || undefined,
         datNr: datNr.trim() || undefined,
+        paket,
       })
       if (!res.ok) {
         setFehler(res.error)
@@ -328,6 +388,7 @@ function NeuSchritt({
       </p>
 
       <div className="flex flex-col gap-4">
+        <PaketPicker paket={paket} onChange={setPaket} />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <TextField
             label="Vorname *"

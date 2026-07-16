@@ -5,17 +5,15 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
 
-export const dynamic = 'force-dynamic'
 
 function eur(val: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)
 }
 
-export default async function PerSvBalancePage() {
+export default async function PerSvBalanceView() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -31,12 +29,7 @@ export default async function PerSvBalancePage() {
 
   const svIds = (svs ?? []).map(s => s.id)
   if (svIds.length === 0) {
-    return (
-      <div className="p-4 md:p-6">
-        <PageHeader title="Per-SV Balance" description="Keine aktiven SVs" />
-        <EmptyState title="Keine aktiven SVs" description="" />
-      </div>
-    )
+    return <EmptyState title="Keine aktiven SVs" description="" />
   }
 
   // Profil-Namen
@@ -98,17 +91,8 @@ export default async function PerSvBalancePage() {
   }).filter(r => r.offen > 0 || r.bezahlt > 0 || r.guthaben !== 0)
     .sort((a, b) => b.offen - a.offen)
 
-  const totalOffen = rows.reduce((s, r) => s + r.offen, 0)
-  const totalBezahlt = rows.reduce((s, r) => s + r.bezahlt, 0)
-  const totalGuthaben = rows.reduce((s, r) => s + r.guthaben, 0)
-
   return (
-    <div className="p-4 md:p-6">
-      <PageHeader
-        title="Per-SV Balance"
-        description={`${rows.length} SVs mit Aktivität — offen ${eur(totalOffen)}, bezahlt ${eur(totalBezahlt)} (90 Tage), Werbebudget-Summe ${eur(totalGuthaben)}`}
-      />
-
+    <>
       {rows.length === 0 ? (
         <EmptyState title="Keine SV-Aktivität in den letzten 90 Tagen" description="" />
       ) : (
@@ -163,6 +147,6 @@ export default async function PerSvBalancePage() {
       <p className="mt-4 text-xs text-claimondo-ondo">
         Snapshot der letzten 90 Tage. 3-Monats-Trend-Chart kommt als separates Folge-Ticket.
       </p>
-    </div>
+    </>
   )
 }

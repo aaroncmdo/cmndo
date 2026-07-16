@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapArtikelToFeedItem, mergeAndSortItems, type WissenArtikel } from './db-articles'
+import { mapArtikelToFeedItem, mergeAndSortItems, groupByAudience, type WissenArtikel } from './db-articles'
 import type { FeedItem } from '@/lib/feed/types'
 
 function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
@@ -17,6 +17,8 @@ function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
     last_modified: '2026-06-15',
     veroeffentlicht_am: '2026-06-01T10:00:00Z',
     author: 'aaron-sprafke',
+    audience: 'consumer',
+    quelle: 'redaktion',
     ...overrides,
   }
 }
@@ -134,5 +136,31 @@ describe('mergeAndSortItems', () => {
     const result = mergeAndSortItems([a], [b, c])
     expect(result).toHaveLength(3)
     expect(result.map((x) => x.guid)).toEqual(['/b', '/a', '/c'])
+  })
+})
+
+// ----- groupByAudience -----
+
+describe('groupByAudience', () => {
+  it('teilt nach audience in consumer und b2b', () => {
+    const c = makeArtikel({ slug: 'c1', audience: 'consumer' })
+    const b = makeArtikel({ slug: 'b1', audience: 'b2b' })
+    const { consumer, b2b } = groupByAudience([c, b])
+    expect(consumer.map((x) => x.slug)).toEqual(['c1'])
+    expect(b2b.map((x) => x.slug)).toEqual(['b1'])
+  })
+
+  it('unbekannte/leere audience faellt auf consumer', () => {
+    const x = makeArtikel({ slug: 'x', audience: '' })
+    const { consumer, b2b } = groupByAudience([x])
+    expect(consumer).toHaveLength(1)
+    expect(b2b).toHaveLength(0)
+  })
+
+  it('erhaelt die Reihenfolge (newest-first bleibt)', () => {
+    const a = makeArtikel({ slug: 'a', audience: 'b2b' })
+    const b = makeArtikel({ slug: 'b', audience: 'b2b' })
+    const { b2b } = groupByAudience([a, b])
+    expect(b2b.map((x) => x.slug)).toEqual(['a', 'b'])
   })
 })

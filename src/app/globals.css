@@ -158,6 +158,7 @@ p, li, blockquote, article, .prose {
   --shadow-cta-ondo-hover: var(--shadow-cta-ondo-hover);
   --shadow-sheet: var(--shadow-sheet);
   --shadow-glass-card: var(--shadow-glass-card);
+  --shadow-header: var(--shadow-header);
   --shadow-glass-pill: var(--shadow-glass-pill);
   --font-apple: var(--font-apple);
   --ease-ios: var(--ease-ios);
@@ -316,6 +317,8 @@ p, li, blockquote, article, .prose {
   --shadow-cta-ondo-hover: 0 8px 22px rgba(69, 115, 162, 0.36), 0 2px 4px rgba(69, 115, 162, 0.20);
   --shadow-sheet: 0 6px 18px rgba(15, 30, 68, 0.07), 0 24px 48px rgba(15, 30, 68, 0.06);
   --shadow-glass-card: 0 4px 20px rgba(13, 27, 62, 0.06);
+  /* Header-Elevation: eine weiche Stufe ueber shadow-ios-sm-Cards. War 0 8px 24px/8% (zu stark, #4149). */
+  --shadow-header: 0 4px 16px rgba(13, 27, 62, 0.05);
   --shadow-glass-pill: 0 2px 12px rgba(13, 27, 62, 0.06);
 
   /* AAR-727: iOS-inspirierte Design-Tokens.
@@ -648,9 +651,7 @@ p, li, blockquote, article, .prose {
   backdrop-filter: saturate(160%) blur(16px);
   -webkit-backdrop-filter: saturate(160%) blur(16px);
   border: 1px solid color-mix(in srgb, var(--brand-primary, #0D1B3E) 8%, transparent);
-  box-shadow:
-    0 8px 24px color-mix(in srgb, #0D1B3E 8%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: var(--shadow-header), inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 /* 2026-05-14: Floating-Sidebar-Pilot. Wenn `data-sidebar-mode="floating"` auf

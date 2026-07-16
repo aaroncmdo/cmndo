@@ -52,7 +52,8 @@ export type SubphaseResult = {
 
 /** claims-getriebene Trigger: abschluss + claim-globale Lifecycle-Milestones. */
 export type ClaimTriggers = {
-  status?: string | null
+  // T3-slice-2b: claims.status -> operative_status (der einzige Consumer ist der Diagnose-Fallback unten)
+  operative_status?: string | null
   szenario?: string | null
   service_typ?: string | null
   sa_unterschrieben_am?: string | null
@@ -425,7 +426,7 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
   }
 
   // ══ Fallback: Phase 1 Ersterfassung ══
-  return build(1, '1', `Phase unbekannt — status: ${claim?.status ?? '—'}`, szenario, triggers)
+  return build(1, '1', `Phase unbekannt — status: ${claim?.operative_status ?? '—'}`, szenario, triggers)
 }
 
 function build(phase: number, subphase: string, label: string, szenario: Szenario | null, triggers: TriggerField[]): SubphaseResult {

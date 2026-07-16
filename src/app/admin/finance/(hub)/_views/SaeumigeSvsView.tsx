@@ -5,11 +5,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import EmptyState from '@/components/shared/EmptyState'
 
-export const dynamic = 'force-dynamic'
 
 function eur(val: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(val)
@@ -48,7 +46,7 @@ function tageZwischen(vonIsoDate: string, bisIsoDate: string): number {
   return Math.round((bis - von) / (24 * 60 * 60 * 1000))
 }
 
-export default async function SaeumigeSvsPage() {
+export default async function SaeumigeSvsView() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -81,15 +79,8 @@ export default async function SaeumigeSvsPage() {
     return { ...a, tage_ueberfaellig: tageUeberfaellig }
   })
 
-  const totalOpen = rows.reduce((s, r) => s + Number(r.summe_brutto ?? 0), 0)
-
   return (
-    <div className="p-4 md:p-6">
-      <PageHeader
-        title="Säumige SVs"
-        description={`${rows.length} offene Abrechnung(en) — ${eur(totalOpen)} ausstehend`}
-      />
-
+    <>
       {rows.length === 0 ? (
         <EmptyState
           title="Keine säumigen SVs"
@@ -142,6 +133,6 @@ export default async function SaeumigeSvsPage() {
       <p className="mt-4 text-xs text-claimondo-ondo">
         Mahnungs-Trigger läuft via Cron <code>cron/sv-mahnung-saeumnis</code> (AAR-927) — manueller curl-Aufruf möglich, kein VPS-Crontab-Eintrag.
       </p>
-    </div>
+    </>
   )
 }
