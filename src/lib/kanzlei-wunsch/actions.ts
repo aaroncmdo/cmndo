@@ -278,7 +278,7 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
   const { data: claim } = await admin
     .from('claims')
     .select(
-      'id, status, kanzlei_wunsch, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_uebergeben_am',
+      'id, kanzlei_wunsch, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_name, kanzlei_uebergeben_am',
     )
     .eq('id', claimId)
     .maybeSingle()
@@ -337,10 +337,8 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     .from('claims')
     .update({
       kanzlei_uebergeben_am: now,
-      status: 'an_externe_kanzlei_uebergeben',
-      // T3-Harden (Achsen-Konsolidierung): operative_status traegt den Terminal mit + abgeschlossen_am
-      // als Close-Marker, damit Badge/Phase/aktive-Faelle-Filter den Uebergang sehen. status wird in
-      // slice-2b gedroppt; operative_status ist dann die einzige Achse.
+      // T3-S4: operative_status ist die einzige Achse (Terminal + abgeschlossen_am als
+      // Close-Marker, damit Badge/Phase/aktive-Faelle-Filter den Uebergang sehen).
       operative_status: 'an_externe_kanzlei_uebergeben',
       abgeschlossen_am: now,
     })
@@ -379,7 +377,7 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
 
   const { data: claim } = await admin
     .from('claims')
-    .select('id, status, kanzlei_wunsch, kanzlei_uebergeben_am')
+    .select('id, kanzlei_wunsch, kanzlei_uebergeben_am')
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
@@ -410,8 +408,7 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
     .from('claims')
     .update({
       kanzlei_uebergeben_am: now,
-      status: 'an_externe_kanzlei_uebergeben',
-      // T3-Harden: operative_status + abgeschlossen_am mitschreiben (analog versendeKanzleiPaket).
+      // T3-S4: operative_status + abgeschlossen_am (analog versendeKanzleiPaket) — einzige Achse.
       operative_status: 'an_externe_kanzlei_uebergeben',
       abgeschlossen_am: now,
     })
@@ -650,9 +647,8 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     kanzlei_wunsch: 'partnerkanzlei',
     kanzlei_wunsch_gefragt_am: nowIso,
     claim_nummer: 'CLM-2026-00043',
-    // phase ist derived-first (Engine) — claims hat keine phase-Spalte; operative_status traegt den Zustand.
-    status: 'in_kommunikation_vs',
-    // T3-Harden: operative_status traegt den Non-Terminal-Outcome mit (status wird slice-2b gedroppt).
+    // T3-S4: operative_status traegt den Non-Terminal-Outcome (einzige Achse).
+    // phase ist derived-first (Engine) — claims hat keine phase-Spalte (prod-verifiziert); status-Writes retired (T3-S4).
     operative_status: 'in_kommunikation_vs',
     vollmacht_signiert_am: nowIso,
   }).eq('id', claimId)

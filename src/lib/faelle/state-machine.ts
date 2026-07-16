@@ -3,7 +3,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
-import { mapFallStatusToClaimStatus, resolveCursorOperativeStatus } from '@/lib/faelle/fall-status-claim-mapping'
+import { resolveCursorOperativeStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer den operativen Status (claims.operative_status, SSoT).
@@ -109,7 +109,9 @@ export async function transitionFallStatus(
   // verifiziert 0 faelle ohne Bridge-Row).
   const { data: bridge, error: fetchErr } = await db
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claims!fk_bridge_claim(status, operative_status)')
+    // T3-S4: claims.status raus — der Terminal-Clobber-Guard laeuft jetzt auf operative_status
+    // (resolveCursorOperativeStatus), claims.status wird nicht mehr geschrieben.
+    .select('claim_id, claims:claims!fk_bridge_claim(operative_status)')
     .eq('fall_id', fallId)
     .maybeSingle()
 
@@ -117,15 +119,13 @@ export async function transitionFallStatus(
 
   const claimId = (bridge as { claim_id?: string | null }).claim_id ?? null
 
-  // T1.2-b: aktueller claims.status (fuer den abgeschlossen-Terminal-Guard im Mapping).
   const claimRel = (bridge as {
     claims?:
-      | { status?: string | null; operative_status?: string | null }
-      | { status?: string | null; operative_status?: string | null }[]
+      | { operative_status?: string | null }
+      | { operative_status?: string | null }[]
       | null
   }).claims
   const claimRow = (Array.isArray(claimRel) ? claimRel[0] : claimRel) ?? null
-  const currentClaimStatus = claimRow?.status ?? null
   // AAR-939: Transition-Cursor = claims.operative_status (vollstaendiger SSoT seit #2884:
   // alle Creator setzen ihn bei Anlage + Backfill). KEIN faelle.status-Fallback mehr —
   // entkoppelt die Engine von faelle (D2-Gate). NULL = Cursor nicht lesbar -> harter Bruch.
@@ -224,26 +224,14 @@ export async function transitionFallStatus(
     delete faelleUpdate.vs_ablehnungsgrund
   }
 
-  // T1.2-b (Dual-Write-Bridge, CMM-49 §D3): claims.status additiv aus dem faelle-Status
-  // ableiten. Der faelle.status-Write BLEIBT vorerst (Reader-Repoint = T1.2-d) -> kein
-  // Reader bricht. Map + abgeschlossen-Guard (ueberschreibt einen bestehenden haerteren
-  // Terminal NICHT) in fall-status-claim-mapping.ts. Nur bei verknuepftem Claim — Legacy-
-  // Faelle ohne claim_id bekommen (wie der restliche claims-Write) keinen Update.
+  // T3-S4: claims.status-Write RETIRED (das fruehere mapFallStatusToClaimStatus-Dual-Write ist
+  // weg — operative_status ist die einzige Achse). resolveCursorOperativeStatus traegt weiterhin
+  // die Klage-Feinterminal-Konvergenz (klage -> 'klage_rechtsstreit') + den Terminal-Clobber-
+  // Guard (abgeschlossen ueberschreibt einen bestehenden feinen Terminal wie klage_rechtsstreit/
+  // storniert NICHT — frueher lief dieser Guard ueber claims.status, jetzt ueber den gelesenen
+  // operative-Cursor). Nur bei verknuepftem Claim — Legacy-Faelle ohne claim_id unveraendert.
   if (claimId) {
-    const claimStatusMapping = mapFallStatusToClaimStatus(newStatus, currentClaimStatus)
-    if (claimStatusMapping.setClaimStatus) {
-      claimsUpdate.status = claimStatusMapping.value
-    }
-    // CMM-74 b'' (Variante A): operative_status = die Cursor-Senke auf claims (voller Operativ-
-    // Status, NICHT der gemappte Lifecycle-claims.status). Additiv zum faelle.status-Write.
-    // B4-slice-2a-i: Klage-Terminal-Konvergenz — beim Klage-Terminal traegt operative_status
-    // 'klage_rechtsstreit' (statt des groben 'klage'/'abgeschlossen'), damit die Achse den
-    // Outcome kennt, sobald die Abschluss-Sub-Phase nur noch aus operative_status abgeleitet wird
-    // (slice-2a-ii). Behavior-preserving (A1-Parity): milestone(status) liefert dieselbe Phase.
-    const resultingClaimStatus = claimStatusMapping.setClaimStatus
-      ? claimStatusMapping.value
-      : currentClaimStatus
-    claimsUpdate.operative_status = resolveCursorOperativeStatus(newStatus, resultingClaimStatus)
+    claimsUpdate.operative_status = resolveCursorOperativeStatus(newStatus, currentStatus)
   }
 
   // AAR-939: KEIN faelle-Write mehr. Nach peelKanzlei + peelAuftraege + split bleibt in

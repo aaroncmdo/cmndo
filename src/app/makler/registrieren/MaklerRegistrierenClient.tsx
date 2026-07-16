@@ -6,11 +6,13 @@ import { Button } from '@/components/primitives'
 import { registriereMaklerSelf } from './actions'
 import { ShareTools } from '@/components/makler/ShareTools'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
+import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 
 type GesellschaftOption = { id: string; name: string }
 
 type FormState = {
   firma: string
+  rechtsform: string
   ansprechpartner_vorname: string
   ansprechpartner_nachname: string
   email: string
@@ -21,6 +23,7 @@ type FormState = {
 
 const EMPTY: FormState = {
   firma: '',
+  rechtsform: '',
   ansprechpartner_vorname: '',
   ansprechpartner_nachname: '',
   email: '',
@@ -44,6 +47,7 @@ export function MaklerRegistrierenClient({
   const [success, setSuccess] = useState<{ code: string | null } | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY)
   const [einwilligung, setEinwilligung] = useState(false)
+  const [kleinunternehmer, setKleinunternehmer] = useState(false)
   const [versicherungId, setVersicherungId] = useState<string | null>(null)
   const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
 
@@ -57,6 +61,7 @@ export function MaklerRegistrierenClient({
     const fd = new FormData()
     for (const [k, v] of Object.entries(form)) fd.set(k, v)
     fd.set('einwilligung', einwilligung ? 'true' : 'false')
+    fd.set('kleinunternehmer', kleinunternehmer ? 'true' : 'false')
     if (versicherungId) fd.set('versicherung_id', versicherungId)
     if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
     startTransition(async () => {
@@ -133,6 +138,19 @@ export function MaklerRegistrierenClient({
         <Field label="Ort">
           <input className={inputClass} value={form.adresse_ort} onChange={set('adresse_ort')} placeholder="Köln" />
         </Field>
+        <Field label="Rechtsform *" className="sm:col-span-2">
+          <select
+            className={inputClass}
+            value={form.rechtsform}
+            onChange={(e) => setForm((f) => ({ ...f, rechtsform: e.target.value }))}
+          >
+            {RECHTSFORM_OPTIONEN.map((o) => (
+              <option key={o} value={o}>
+                {o || '— wählen —'}
+              </option>
+            ))}
+          </select>
+        </Field>
       </div>
 
       <div className="mt-5">
@@ -148,6 +166,19 @@ export function MaklerRegistrierenClient({
           }}
         />
       </div>
+
+      <label className="mt-4 flex items-start gap-3 text-sm text-claimondo-shield">
+        <input
+          type="checkbox"
+          checked={kleinunternehmer}
+          onChange={(e) => setKleinunternehmer(e.target.checked)}
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-claimondo-border"
+        />
+        <span>
+          Ich bin Kleinunternehmer nach §19 UStG — Provisionsgutschriften werden ohne
+          Umsatzsteuer ausgestellt.
+        </span>
+      </label>
 
       <label className="mt-5 flex items-start gap-3 text-sm text-claimondo-shield">
         <input

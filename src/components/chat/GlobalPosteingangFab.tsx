@@ -188,7 +188,10 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
         data-chat-outside-ok
         /* Ziel-A Mobile-Nav: der Posteingang-FAB ist auf Mobile ausgeblendet
            (bottom-only Nav via geteilter MobileNav). Nur Desktop (lg+) zeigt ihn. */
-        className="hidden lg:flex fixed right-4 bottom-4 z-[9990] items-end gap-2"
+        // Chat-Band 940-955: bewusst UNTER primitives/Drawer+Modal (z-[1000]) -- der FAB ist ein
+        // Seiten-Element, modale Overlays gewinnen. Frueher z-[9990]: der FAB schwebte ueber jedem
+        // Drawer-Backdrop und fing Klicks auf die Footer-Ecke ab (ZB1-Prod-Smoke-Befund 16.07.).
+        className="hidden lg:flex fixed right-4 bottom-4 z-[950] items-end gap-2"
       >
         {/* Angeheftete Chat-Bubbles links neben dem FAB */}
         {pinned.length > 0 && (
@@ -210,7 +213,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.18 }}
-                className="fixed inset-0 z-[9985] backdrop-blur-sm bg-black/10 pointer-events-none"
+                className="fixed inset-0 z-[945] backdrop-blur-sm bg-black/10 pointer-events-none"
                 aria-hidden
               />
             )}
@@ -228,7 +231,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                 onDragOver={handlePopoverDragOver}
                 onDragLeave={handlePopoverDragLeave}
                 onDrop={handlePopoverDrop}
-                className={`absolute bottom-14 right-0 w-80 glass-light border rounded-ios-lg shadow-ios-lg overflow-hidden flex flex-col z-[9995] transition-[box-shadow,border-color] ${
+                className={`absolute bottom-14 right-0 w-80 glass-light border rounded-ios-lg shadow-ios-lg overflow-hidden flex flex-col z-[955] transition-[box-shadow,border-color] ${
                   dragOver
                     ? 'border-claimondo-ondo ring-4 ring-claimondo-ondo/30'
                     : 'border-claimondo-border'

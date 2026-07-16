@@ -43,13 +43,16 @@ export const STEPS_FIXTURE: FlowSzenarioStep[] = [
   { szenario_id: 'teilschuld', step_id: 'rueckruf', reihenfolge: 2, bedingung: null },
 
   { szenario_id: 'kasko', step_id: 'zusammenfassung', reihenfolge: 1, bedingung: null },
-  { szenario_id: 'kasko', step_id: 'feststellung', reihenfolge: 2, bedingung: { fahrzeugschaden_beschreibung: null } },
+  // Skip-Marker = hat_vorschaeden (Mig 20260716155354): fahrzeugschaden_beschreibung wird seit dem
+  // Werkstatt-Embed Phase 3 (#4412) im Embed vorbelegt -> haette die Feststellung faelschlich geskippt.
+  // hat_vorschaeden ist der LETZTE Feststellung-Micro-Step und wird von keinem Vor-Flow-Writer gesetzt.
+  { szenario_id: 'kasko', step_id: 'feststellung', reihenfolge: 2, bedingung: { hat_vorschaeden: null } },
   { szenario_id: 'kasko', step_id: 'ort_fahrzeug', reihenfolge: 3, bedingung: { fahrzeug_standort_effektiv: null } },
   { szenario_id: 'kasko', step_id: 'werkstatt', reihenfolge: 4, bedingung: { reparatur_werkstatt_id: null } },
   { szenario_id: 'kasko', step_id: 'account', reihenfolge: 5, bedingung: null },
 
   { szenario_id: 'selbstzahler', step_id: 'zusammenfassung', reihenfolge: 1, bedingung: null },
-  { szenario_id: 'selbstzahler', step_id: 'feststellung', reihenfolge: 2, bedingung: { fahrzeugschaden_beschreibung: null } },
+  { szenario_id: 'selbstzahler', step_id: 'feststellung', reihenfolge: 2, bedingung: { hat_vorschaeden: null } },
   { szenario_id: 'selbstzahler', step_id: 'ort_fahrzeug', reihenfolge: 3, bedingung: { fahrzeug_standort_effektiv: null } },
   { szenario_id: 'selbstzahler', step_id: 'werkstatt', reihenfolge: 4, bedingung: { reparatur_werkstatt_id: null } },
   { szenario_id: 'selbstzahler', step_id: 'account', reihenfolge: 5, bedingung: null },

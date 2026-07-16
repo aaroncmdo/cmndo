@@ -27,10 +27,19 @@ export type WerkstattFinderLeadPayload = {
   ort?: string | null
   fotos?: EmbedFoto[]
   bedarf?: Reparaturbedarf
+  // Phase 3: db-driven Übergabe der Wizard-Felder
+  hersteller?: string | null
+  fahrzeugklasse?: string | null
+  gewerbe?: boolean | null
+  modell?: string | null
+  beschreibung?: string | null
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
-export type { EmbedFoto, Reparaturbedarf, Fit }
+// KEINE Type-Re-Exports aus dieser 'use server'-Datei (AAR-664-Klasse): der Server-Actions-Loader
+// macht aus JEDEM Export ein Action-Binding -> zur Laufzeit "EmbedFoto is not defined" -> ALLE
+// Actions der Datei 500en (prod-Incident 16.07., Embed seit P1-Deploy tot). Types direkt aus
+// @/lib/werkstatt/bedarf/{embed-foto-guard,types} importieren.
 
 /**
  * T3: Transiente Schadenfoto-Klassifizierung fuer den Embed-Funnel.
@@ -176,6 +185,11 @@ export async function erstelleWerkstattFinderLead(
     lat: payload.lat ?? null,
     lng: payload.lng ?? null,
     ort: payload.ort ?? null,
+    hersteller: payload.hersteller ?? null,
+    fahrzeugklasse: payload.fahrzeugklasse ?? null,
+    gewerbe: payload.gewerbe ?? null,
+    modell: payload.modell ?? null,
+    beschreibung: payload.beschreibung ?? null,
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
 

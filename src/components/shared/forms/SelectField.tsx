@@ -2,6 +2,7 @@
 // <select> + optionaler Error/Hint). Pendant zu shared/forms/TextField.
 // `options` als {value,label}[] ODER children (eigene <option>s). Token-gebunden.
 
+import { useId } from 'react'
 import type { SelectHTMLAttributes, ReactNode } from 'react'
 
 const SELECT_CLS =
@@ -27,8 +28,10 @@ export function SelectField({
   id,
   ...rest
 }: SelectFieldProps) {
-  const fieldId =
-    id ?? (typeof label === 'string' ? `sf-${label.replace(/\s+/g, '-').toLowerCase()}` : undefined)
+  // Instanz-eindeutig via useId statt Label-Slug -- gleiche Duplikat-ID-Falle wie TextField
+  // (ZB1-Prod-Smoke-Befund 16.07., siehe dort). Explizite id-Prop behaelt Vorrang.
+  const generatedId = useId()
+  const fieldId = id ?? generatedId
   return (
     <div className={`flex flex-col gap-1.5 ${className ?? ''}`}>
       {label ? (

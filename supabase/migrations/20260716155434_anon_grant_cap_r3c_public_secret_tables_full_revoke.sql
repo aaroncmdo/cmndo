@@ -1,0 +1,28 @@
+-- Anon-Grant-Cap Runde 3c (Task C): embed_sites + anspruch_schaetzungen - anon-SELECT Full-Revoke.
+--
+-- Kontext: systematischer Grant-Audit 15./16.07. (AGENTS.md Anon-Grant-Gate,
+-- Baseline 6 -> 4: embed_sites.tracking_webhook_secret, anspruch_schaetzungen.session_token).
+-- Beide latent: anspruch_schaetzungen ist RLS-deny-all (KEINE SELECT-Policy, nicht mal
+-- authenticated); embed_sites hat nur embed_sites__b1sel_au ({authenticated}: is_admin
+-- oder Owner) - anon las immer 0 Zeilen.
+--
+-- Consumer-Audit 16.07. (staging, nach #4426):
+--   embed_sites: public Flows lesen via createAdminClient - api/embed/config (selektiert
+--     das Secret NICHT mal), app/g/[slug], lib/embed/{tracking-webhook,anfrage,billing-actions},
+--     lib/onboarding. SV-Settings (gutachter/einstellungen/embed, lib/embed-sites/queries
+--     getEmbedSiteDetail inkl. Secret-Anzeige) = authenticated Owner via RLS - unberuehrt,
+--     der SV soll sein eigenes Webhook-Secret sehen.
+--   anspruch_schaetzungen: lib/anspruch/session.ts komplett createAdminClient (inkl.
+--     session_token-Insert/Lookups), embed/gutachter-finder + anspruch-pruefen actions,
+--     issue-canonical-flowlink, crons - alles service_role. Kein einziger anon-Read.
+--   convert_embed_anfrage_zu_lead = SECURITY DEFINER (laeuft als Owner).
+--
+-- Hinweis Views: v_sv_inbox + v_embed_billing_faellig (security_invoker=true, referenzieren
+-- embed_sites) sind fuer anon grantbar, haben aber 0 anon-Consumer (SV-Settings-Page bzw.
+-- Cron/Admin-UI). Ein anon-View-Read wuerde nach diesem Cap 42501 statt 0 Zeilen liefern -
+-- kein realer Pfad; anon-Grant-Entzug auf den Views selbst = dokumentiertes Follow-up
+-- (Anon-Exposure-Guard-Achse), bewusst nicht in diesem Scope.
+--
+-- authenticated + service_role behalten ihre Grants unveraendert.
+revoke select on public.embed_sites from anon;
+revoke select on public.anspruch_schaetzungen from anon;

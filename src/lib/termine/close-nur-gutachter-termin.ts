@@ -13,12 +13,13 @@
 // Client-Bundle zu undefined).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
-// Terminale claims.status — aus diesen heraus NICHT mehr ueberschreiben
-// (Guard analog endzustand-actions setEndzustandFields). Kanonischer Ort;
-// frueher lokal in termine/actions.ts dupliziert.
+// T3-S4: der interne Terminal-Guard laeuft jetzt auf operative_status (CLOSED_OPERATIVE_STATUS_PG).
+// CLAIM_TERMINAL_STATUSES bleibt VORERST exportiert — die Reader-Repoints #4417/#4418 (noch
+// unmerged) entfernen die letzten externen Importe; die Konstante faellt dann in T3-S5.
 export const CLAIM_TERMINAL_STATUSES = [
   'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
   'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
@@ -81,10 +82,12 @@ export async function closeNurGutachterTerminAlsDurchgefuehrt(
   // (fall_status-enum + claims_operative_status_check erweitert). abgeschlossen_am = robuster
   // Close-Marker (istClaimGeschlossen/deriveCompletionTs). Billing bleibt am durchgefuehrt_am-
   // Anker (unveraendert). Nur bei NICHT bereits terminalem Claim (Guard unten).
+  // T3-S4: claims.status wird nicht mehr geschrieben; Guard auf operative_status + NULL-safe
+  // (der alte `.not('status','in',...)`-Guard schloss status=NULL-Rows aus -> das Update matchte
+  // 0 Rows OHNE Error = silent-no-close; gleiche Bug-Klasse wie endzustand/verjaehrungs-cron).
   const { error: claimErr } = await db
     .from('claims')
     .update({
-      status: 'termin_durchgefuehrt',
       operative_status: 'termin_durchgefuehrt',
       abgeschlossen_am: now,
       endzustand_gesetzt_durch_user_id: byUserId,
@@ -92,7 +95,7 @@ export async function closeNurGutachterTerminAlsDurchgefuehrt(
       endzustand_grund: grund,
     })
     .eq('id', claimId)
-    .not('status', 'in', `(${CLAIM_TERMINAL_STATUSES.map((s) => `"${s}"`).join(',')})`)
+    .or(`operative_status.is.null,operative_status.not.in.${CLOSED_OPERATIVE_STATUS_PG}`)
   if (claimErr) {
     console.error('[AAR-939] claim terminal close failed:', claimErr.message)
   }

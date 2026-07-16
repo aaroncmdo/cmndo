@@ -2,9 +2,10 @@
 
 // AAR-840 / CMM-44 MP-8: Manuelle Endzustand-Server-Actions.
 //
-// KB/Admin triggern diese in der Fallakte. Sie setzen claims.status; die Phase
-// wird daraus via v_claim_phase / getClaimLifecycle ABGELEITET (kein Trigger mehr —
-// trg_claims_set_phase in MP-6c gedroppt). Hier setzen wir nur status +
+// KB/Admin triggern diese in der Fallakte. Sie setzen claims.operative_status (T3-S4:
+// claims.status wird NICHT mehr geschrieben — die Spalte faellt in S5); die Phase wird
+// daraus via v_claim_phase / getClaimLifecycle ABGELEITET (kein Trigger mehr —
+// trg_claims_set_phase in MP-6c gedroppt). Hier setzen wir nur operative_status +
 // Endzustand-Audit-Felder.
 //
 // Terminal (Abschluss):  reguliert_vollstaendig / abgelehnt_final / storniert /
@@ -13,7 +14,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { requireRole, type AuthedUser } from '@/lib/auth/guards'
-import { CLOSED_OPERATIVE_STATUS, NONTERMINAL_OPERATIVE_OUTCOME } from '@/lib/claims/terminal-status'
+import { CLOSED_OPERATIVE_STATUS, CLOSED_OPERATIVE_STATUS_PG, NONTERMINAL_OPERATIVE_OUTCOME } from '@/lib/claims/terminal-status'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import { emitEvent } from '@/lib/notifications/emit'
@@ -35,13 +36,14 @@ const ENDZUSTAENDE = [
 ] as const
 
 async function loadClaimContext(claimId: string): Promise<
-  | { ok: true; fallId: string; status: string | null; kbId: string | null }
+  | { ok: true; fallId: string; kbId: string | null }
   | { ok: false; error: string }
 > {
   const admin = createAdminClient()
   const { data: claim, error: claimErr } = await admin
     .from('claims')
-    .select('id, status, kundenbetreuer_id')
+    // T3-S4: claims.status raus (war dead read — kein Consumer von ctx.status).
+    .select('id, kundenbetreuer_id')
     .eq('id', claimId)
     .maybeSingle()
 
@@ -59,7 +61,6 @@ async function loadClaimContext(claimId: string): Promise<
   return {
     ok: true,
     fallId: fall.fall_id as string,
-    status: (claim.status as string | null) ?? null,
     kbId: (claim.kundenbetreuer_id as string | null) ?? null,
   }
 }
@@ -95,56 +96,43 @@ async function writeAudit(
 
 async function setEndzustandFields(
   claimId: string,
-  fields: Record<string, unknown>,
+  neuerStatus: string,
+  extraFields: Record<string, unknown>,
   user: AuthedUser,
   grund: string,
-  guardStatus: readonly string[],
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
   const now = new Date().toISOString()
-  // Abschluss-Konvergenz: bei einem TERMINALEN Endzustand (in ENDZUSTAENDE) zusaetzlich
-  // operative_status + abgeschlossen_am (beide auf claims) mitschreiben. Sonst divergieren die
-  // zwei Phasen-Engines: v_claim_phase leitet "abschluss" aus claims.status-terminal ab (zeigt
-  // geschlossen), aber der subphase-resolver (FallActionBar) gatet Phase 9 auf abgeschlossen_am
-  // (resolver.ts:214) = NULL -> aktive Phase, UND der "aktive Faelle"-Filter (operative_status
-  // NOT IN abgeschlossen/storniert) zeigt den Fall weiter als aktiv. Der Endzustand-Grund bleibt in
-  // claims.status erhalten (reguliert_vollstaendig/abgelehnt_final/klage_rechtsstreit/...). Nicht-
-  // terminale (in_kommunikation_vs, abgelehnt einfach) sind NICHT in ENDZUSTAENDE -> bleiben aktiv.
-  // 'abgeschlossen'/'storniert' sind fall_status-enum-gueltig (kein v_claim_base-Cast-Bruch).
-  const neuerStatus = fields.status
+  // T3-S4: claims.status wird NICHT mehr geschrieben — operative_status ist die einzige Achse.
+  // TERMINALE Endzustaende (in ENDZUSTAENDE): der FEINE Terminal geht direkt in operative_status
+  // (reguliert_vollstaendig/klage_rechtsstreit/verjaehrt/abgelehnt_final/an_externe_kanzlei_
+  // uebergeben/storniert — alle CLOSED_OPERATIVE_STATUS-gedeckt, kein v_claim_base-Cast-Bruch);
+  // abgeschlossen_am = robuster Close-Marker (istClaimGeschlossen/deriveCompletionTs).
+  // NICHT-terminale Outcomes (in_kommunikation_vs / abgelehnt-einfach): nur operative_status,
+  // KEIN abgeschlossen_am — der Claim laeuft weiter (nachforderbar/eskalierbar) und bleibt in
+  // allen "aktive Faelle"-Filtern. Cursor-Ausgaenge: FALL_STATUS_TRANSITIONS (state-machine.ts).
   const abschluss: Record<string, unknown> =
-    typeof neuerStatus !== 'string'
-      ? {}
-      : (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
-      // B2b (Achsen-Konsolidierung): den FEINEN Terminal direkt in operative_status schreiben
-      // (reguliert_vollstaendig/klage_rechtsstreit/verjaehrt/abgelehnt_final/an_externe_kanzlei_
-      // uebergeben/storniert) statt coarse 'abgeschlossen' — aber NUR wenn er ein gueltiger
-      // operative_status-Wert ist (in CLOSED_OPERATIVE_STATUS = fall_status-enum-gedeckt, kein
-      // Cast-Bruch). termin_durchgefuehrt (∈ ENDZUSTAENDE, aber ∉ operative_status-Vokabular)
-      // faellt sicher auf 'abgeschlossen' zurueck. abgeschlossen_am bleibt der robuste Close-Marker.
+    (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
       ? { operative_status: CLOSED_OPERATIVE_STATUS.has(neuerStatus) ? neuerStatus : 'abgeschlossen', abgeschlossen_am: now }
-      // B4-slice-1b: dasselbe fuer die zwei NICHT-terminalen Outcomes (in_kommunikation_vs /
-      // abgelehnt-einfach). Sie sind seit B1b-1 gueltiges operative_status-Vokabular (Enum+CHECK)
-      // und werden seit slice-1 von v_claim_phase.o_sub + getClaimLifecycle.OPERATIVE_PHASE
-      // erkannt. Damit traegt operative_status auch DIESE Information — die Voraussetzung dafuer,
-      // dass claims.status derived/gedroppt werden kann (slice-2). KEIN abgeschlossen_am: der
-      // Claim laeuft weiter und bleibt in allen "aktive Faelle"-Filtern (nicht in CLOSED_*).
-      // Cursor-Ausgaenge fuer beide Werte: FALL_STATUS_TRANSITIONS (state-machine.ts).
       : NONTERMINAL_OPERATIVE_OUTCOME.has(neuerStatus)
       ? { operative_status: neuerStatus }
       : {}
-  // Atomar: nur updaten wenn aktueller Status nicht bereits final
+  // Atomar: nur updaten wenn der Claim nicht bereits terminal ist. Guard jetzt auf der
+  // operative-Achse und NULL-SAFE: der alte `.not('status','in',...)`-Guard schloss
+  // status=NULL-Rows (= jeden aktiven Claim, status war seit slice-1b fuer Non-Terminals
+  // nie mehr gesetzt) mit aus -> JEDE Endzustand-Action schlug mit "bereits in einem
+  // Endzustand" fehl (Live-Bug, empirisch 16.07.: 0/2 prod-Claims passierten den Guard).
   const { data, error } = await admin
     .from('claims')
     .update({
-      ...fields,
+      ...extraFields,
       ...abschluss,
       endzustand_gesetzt_durch_user_id: user.id,
       endzustand_gesetzt_am:            now,
       endzustand_grund:                 grund,
     })
     .eq('id', claimId)
-    .not('status', 'in', `(${guardStatus.map((s) => `"${s}"`).join(',')})`)
+    .or(`operative_status.is.null,operative_status.not.in.${CLOSED_OPERATIVE_STATUS_PG}`)
     .select('id')
     .maybeSingle()
 
@@ -177,13 +165,7 @@ export async function markClaimAsInKommunikationVs(input: {
   // 'in_bearbeitung' (nur convert->dispatch_done; sonst Reset/smoke) -> das Gate blockte JEDEN
   // normalen Claim. Entfernt -> konsistent mit den Geschwister-Endzustand-Aktionen.
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'in_kommunikation_vs' },
-    auth.user,
-    input.grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'in_kommunikation_vs', {}, auth.user, input.grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   await writeAudit(ctx.fallId, null, 'regulierung:versicherungskontakt', auth.user, input.grund)
@@ -227,13 +209,7 @@ export async function markClaimAsReguliert(input: {
 
   const grund = input.grund ?? `Regulierung ${input.regulierungs_betrag.toFixed(2)} EUR akzeptiert`
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'reguliert_vollstaendig' },
-    auth.user,
-    grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'reguliert_vollstaendig', {}, auth.user, grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   // Payment-Ledger Phase 3 (Collapse): VS-Soll geht NUR noch in den (claim,'vs')-Ledger
@@ -293,10 +269,10 @@ export async function markClaimAsAbgelehnt(input: {
 
   const set = await setEndzustandFields(
     input.claim_id,
-    { status: input.final ? 'abgelehnt_final' : 'abgelehnt', vs_ablehnungs_grund: input.vs_ablehnungs_grund },
+    input.final ? 'abgelehnt_final' : 'abgelehnt',
+    { vs_ablehnungs_grund: input.vs_ablehnungs_grund },
     auth.user,
     grund,
-    ENDZUSTAENDE,
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
@@ -346,13 +322,7 @@ export async function markClaimAsStorniert(input: {
     return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
   }
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'storniert' },
-    auth.user,
-    input.grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'storniert', {}, auth.user, input.grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   await writeAudit(ctx.fallId, null, 'abschluss:storniert', auth.user, input.grund)
@@ -399,13 +369,7 @@ export async function markClaimAsAnExterneKanzlei(input: {
   const grund =
     input.grund ?? `Übergabe an ${input.kanzlei_name} am ${input.uebergabe_datum}`
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'an_externe_kanzlei_uebergeben' },
-    auth.user,
-    grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'an_externe_kanzlei_uebergeben', {}, auth.user, grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   await writeAudit(ctx.fallId, null, 'abschluss:an_externe_kanzlei', auth.user, grund)
@@ -452,13 +416,7 @@ export async function markClaimAsKlage(input: {
     return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
   }
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'klage_rechtsstreit' },
-    auth.user,
-    input.grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'klage_rechtsstreit', {}, auth.user, input.grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   await writeAudit(ctx.fallId, null, 'abschluss:klage_rechtsstreit', auth.user, input.grund)
@@ -500,13 +458,7 @@ export async function markClaimAsVerjaehrt(input: {
     return { ok: false, error: 'Nicht berechtigt für diesen Claim' }
   }
 
-  const set = await setEndzustandFields(
-    input.claim_id,
-    { status: 'verjaehrt' },
-    auth.user,
-    input.grund,
-    ENDZUSTAENDE,
-  )
+  const set = await setEndzustandFields(input.claim_id, 'verjaehrt', {}, auth.user, input.grund)
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
   await writeAudit(ctx.fallId, null, 'abschluss:verjaehrt', auth.user, input.grund)
