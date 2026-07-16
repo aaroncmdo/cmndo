@@ -40,7 +40,8 @@ async function loadClaimContext(claimId: string): Promise<
   const admin = createAdminClient()
   const { data: claim, error } = await admin
     .from('claims')
-    .select('id, status')
+    // T3-slice-2b: claims.status -> operative_status
+    .select('id, operative_status')
     .eq('id', claimId)
     .maybeSingle()
   if (error || !claim) return { ok: false, error: 'Claim nicht gefunden' }
@@ -62,7 +63,7 @@ async function loadClaimContext(claimId: string): Promise<
     ok: true,
     fallId: fall.id as string,
     mainPhase,
-    status: claim.status as string,
+    status: claim.operative_status as string,
   }
 }
 

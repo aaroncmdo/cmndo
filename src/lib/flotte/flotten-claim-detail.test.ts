@@ -63,7 +63,7 @@ describe('getFlottenClaimDetail', () => {
       claim: {
         id: 'c1',
         claim_nummer: 'CL-100',
-        status: 'in_bearbeitung',
+        operative_status: 'in_bearbeitung',
         schadentag: '2026-07-01',
         schadens_hoehe_netto: 1234.5,
         vehicle_id: 'v1',

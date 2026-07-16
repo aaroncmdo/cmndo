@@ -164,7 +164,7 @@ describe('getFahrzeugSchaeden', () => {
       {
         id: 'c2',
         claim_nummer: 'CLM-002',
-        status: 'abgeschlossen',
+        operative_status: 'abgeschlossen',
         schadentag: '2026-06-01',
         schadens_hoehe_netto: 4200.5,
         created_at: '2026-06-15T10:00:00Z',
@@ -172,7 +172,7 @@ describe('getFahrzeugSchaeden', () => {
       {
         id: 'c1',
         claim_nummer: 'CLM-001',
-        status: 'in-bearbeitung',
+        operative_status: 'in-bearbeitung',
         schadentag: '2026-03-01',
         schadens_hoehe_netto: 1500.0,
         created_at: '2026-03-20T08:00:00Z',
@@ -257,7 +257,7 @@ describe('getFahrzeugSchaeden', () => {
       {
         id: 'c3',
         claim_nummer: null,
-        status: null,
+        operative_status: null,
         schadentag: null,
         schadens_hoehe_netto: null,
         created_at: null,

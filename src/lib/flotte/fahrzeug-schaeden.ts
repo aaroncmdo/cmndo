@@ -56,7 +56,8 @@ export async function getFahrzeugSchaeden(
   // 2) Claims — absteigend nach Erstelldatum
   const { data: claimsRaw, error: claimsError } = await db
     .from('claims')
-    .select('id,claim_nummer,status,schadentag,schadens_hoehe_netto,created_at')
+    // T3-slice-2b: claims.status -> operative_status
+    .select('id,claim_nummer,operative_status,schadentag,schadens_hoehe_netto,created_at')
     .eq('vehicle_id', vehicleId)
     .order('created_at', { ascending: false })
 
@@ -68,7 +69,7 @@ export async function getFahrzeugSchaeden(
     (row) => ({
       claimId: row.id as string,
       claimNummer: (row.claim_nummer as string | null) ?? null,
-      status: (row.status as string | null) ?? null,
+      status: (row.operative_status as string | null) ?? null,
       schadentag: (row.schadentag as string | null) ?? null,
       schadensHoeheNetto: (row.schadens_hoehe_netto as number | null) ?? null,
       createdAt: (row.created_at as string | null) ?? null,
