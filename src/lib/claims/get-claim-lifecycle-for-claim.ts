@@ -47,7 +47,6 @@ export async function getClaimLifecycleForClaim(
   const claimId = await resolveClaimId(admin, fallId)
 
   let lead: ClaimLifecycleInput['lead'] = null
-  let claimStatus: string | null = null
   // AAR-939: service_typ -> ClaimLifecycle.serviceTyp, damit Stepper/Pipeline die
   // Regulierungs-Phase fuer nur_gutachter ausblenden (kein Regulierungs-Tail).
   let serviceTyp: string | null = null
@@ -60,7 +59,6 @@ export async function getClaimLifecycleForClaim(
       .select('lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am')
       .eq('id', claimId)
       .maybeSingle()
-    claimStatus = null // T3-slice-2a: claims.status wird nicht mehr gelesen (dead read seit slice-2a-ii)
     serviceTyp = (claim?.service_typ as string | null) ?? null
     operativeStatus = (claim?.operative_status as string | null) ?? null
     // FG6 (dual-SSoT collapse): SA/Vollmacht liegen auf claims UND leads. Kanonisch ist
@@ -105,7 +103,7 @@ export async function getClaimLifecycleForClaim(
   return {
     // AAR-939: serviceTyp anhaengen (getClaimLifecycle bleibt rein -> Parity zu
     // v_claim_phase unberuehrt; nur ein Render-Sicht-Filter fuer die Phasen).
-    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, claimStatus, operativeStatus }), serviceTyp },
+    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, operativeStatus }), serviceTyp },
     auftraege,
     kanzleiFall,
   }
