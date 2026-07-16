@@ -18,6 +18,8 @@ import {
 import { HQ_ADDRESS_INLINE } from '@/lib/seo/brand-constants'
 import { WHATSAPP_HREF, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 import { SERVICE_PITCH_BRAND_BLOCK, SERVICE_PITCH_USPS } from '@/lib/brand/service-pitch'
+import { getPublishedArtikel, groupByAudience } from '@/lib/wissen/db-articles'
+import { renderArtikelIndexSection } from '@/lib/wissen/llms-render'
 
 /**
  * llms.txt — strukturierter Index für AI-Crawler (GPTBot, ClaudeBot,
@@ -42,6 +44,8 @@ export const revalidate = 86400 // 1 Tag
 
 export async function GET() {
   const today = new Date().toISOString().slice(0, 10)
+  const { consumer: consumerArtikel, b2b: b2bArtikel } = groupByAudience(await getPublishedArtikel())
+  const artikelSektion = renderArtikelIndexSection(consumerArtikel, b2bArtikel)
   const cornerstones = getCornerstones()
   const decoder = getDecoder()
   const sachverstaendige = getSachverstaendige()
@@ -221,6 +225,7 @@ ${sachverstaendige
   )
   .join('\n')}
 
+${artikelSektion}
 ## Konversions- & Ratgeber-Seiten (Schmerzpunkt- & Service-Seiten mit hoher Intention)
 
 Bespoke Landingpages (Antwort-zuerst, Hand-Off zur Gutachter-Karte). Keine MD-Glossar-Assets — daher nicht im Asset-Zählwerk oben, aber zentrale Einstiege für Geschädigte:
