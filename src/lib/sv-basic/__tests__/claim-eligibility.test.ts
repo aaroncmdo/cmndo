@@ -74,6 +74,24 @@ describe('buildSvInsertAusLead', () => {
     expect(ins.paket_faelle_gesamt).toBe(0)
     expect('anzahlung_status' in ins).toBe(false)
   })
+
+  // Firmen-/Steuerdaten (paid Self-Reg): business-Param fuellt die Vertrag-Stammdaten.
+  it('business-Daten: firmenname ueberschreibt lead.firma; Steuerfelder gesetzt', () => {
+    const ins = buildSvInsertAusLead(baseLead, 'p', 'standard', {
+      firmenname: 'SV-Buero Neu GmbH', rechtsform: 'GmbH', steuernummer: '123/456/78901', ustId: 'DE123456789',
+    }) as Record<string, unknown>
+    expect(ins.firmenname).toBe('SV-Buero Neu GmbH')
+    expect(ins.rechtsform).toBe('GmbH')
+    expect(ins.steuernummer).toBe('123/456/78901')
+    expect(ins.ust_id).toBe('DE123456789')
+  })
+  it('ohne business-Daten: firmenname faellt auf lead.firma, Steuerfelder null', () => {
+    const ins = buildSvInsertAusLead(baseLead, 'p') as Record<string, unknown>
+    expect(ins.firmenname).toBe('KFZ Muster')
+    expect(ins.rechtsform).toBeNull()
+    expect(ins.steuernummer).toBeNull()
+    expect(ins.ust_id).toBeNull()
+  })
 })
 
 describe('istErlaubtesPaket — Self-Service-Whitelist', () => {

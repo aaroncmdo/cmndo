@@ -15,9 +15,12 @@ import { headers } from 'next/headers'
 import {
   istClaimbar,
   buildSvInsertAusLead,
+  istErlaubtesPaket,
   normalisiereSuche,
   type SvLeadRow,
+  type SvBusinessDaten,
 } from './claim-eligibility'
+import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 
 // ─── Helpers (modul-private, nicht exportiert) ─────────────────────────────
 
@@ -65,6 +68,35 @@ async function checkRateLimit(
     return { allowed: !failClosed, noIp: false }
   }
   return { allowed: allowed !== false, noIp: false }
+}
+
+// Firmen-/Steuerdaten: bei BEZAHLTEN Paketen Pflicht (Vertrag-Stammdaten-Card im
+// WillkommenClient + Abrechnung), bei Basic optional/ungenutzt. Rechtsform wird —
+// wenn gesetzt — immer gegen die Whitelist geprueft (kein Freitext).
+function validiereBusinessDaten(input: {
+  paket?: string
+  firmenname?: string
+  rechtsform?: string
+  steuernummer?: string
+  ustId?: string
+}): { ok: true; business: SvBusinessDaten | undefined } | { ok: false; error: string } {
+  const p = istErlaubtesPaket(input.paket ?? 'basic') ? (input.paket ?? 'basic') : 'basic'
+  const firmenname = input.firmenname?.trim() || null
+  const rechtsform = input.rechtsform?.trim() || null
+  const steuernummer = input.steuernummer?.trim() || null
+  const ustId = input.ustId?.trim() || null
+  if (rechtsform && !istErlaubteRechtsform(rechtsform)) {
+    return { ok: false, error: 'Bitte wähle eine gültige Rechtsform.' }
+  }
+  if (p !== 'basic') {
+    if (!firmenname) return { ok: false, error: 'Firmenname ist bei bezahlten Paketen ein Pflichtfeld.' }
+    if (!rechtsform) return { ok: false, error: 'Bitte wähle deine Rechtsform.' }
+    if (!steuernummer) return { ok: false, error: 'Steuernummer ist bei bezahlten Paketen ein Pflichtfeld.' }
+  }
+  if (!firmenname && !rechtsform && !steuernummer && !ustId) {
+    return { ok: true, business: undefined }
+  }
+  return { ok: true, business: { firmenname, rechtsform, steuernummer, ustId } }
 }
 
 // ─── Action 1: sucheSvLeadKandidaten ──────────────────────────────────────
@@ -151,6 +183,10 @@ export async function beanspracheSvLead(input: {
   email: string
   telefon: string
   paket?: string
+  firmenname?: string
+  rechtsform?: string
+  steuernummer?: string
+  ustId?: string
 }): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -160,6 +196,8 @@ export async function beanspracheSvLead(input: {
   if (!input.telefon || input.telefon.trim().length < 5) {
     return { ok: false, error: 'Telefonnummer ist ein Pflichtfeld.' }
   }
+  const bd = validiereBusinessDaten(input)
+  if (!bd.ok) return { ok: false, error: bd.error }
 
   // Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant;
   // transiente RPC-Fehler = ablehnen, IP-fehlt = ablehnen).
@@ -265,7 +303,7 @@ export async function beanspracheSvLead(input: {
   // -> faelschlich "Verifizierung ueberfaellig"-Mail + frist_ueberschritten-Flip + kritisch-
   // Admin-Task + Tier-2-Countdown auf der SV-Seite. Die 48h-Team-Review-SLA fuer Basic
   // gehoert in P3 (Freigabe-Queue), nicht in dieses Tier-2-Feld. (Review-Finding H1.)
-  const svInsert = buildSvInsertAusLead(lead as SvLeadRow, userId, input.paket ?? 'basic')
+  const svInsert = buildSvInsertAusLead(lead as SvLeadRow, userId, input.paket ?? 'basic', bd.business)
 
   const { data: svRow, error: svErr } = await adminDb
     .from('sachverstaendige')
@@ -399,6 +437,10 @@ export async function registriereSvBasicNeu(input: {
   plz?: string
   datNr?: string
   paket?: string
+  firmenname?: string
+  rechtsform?: string
+  steuernummer?: string
+  ustId?: string
 }): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -417,6 +459,8 @@ export async function registriereSvBasicNeu(input: {
   if (!input.adresse?.trim()) {
     return { ok: false, error: 'Adresse ist ein Pflichtfeld.' }
   }
+  const bd = validiereBusinessDaten(input)
+  if (!bd.ok) return { ok: false, error: bd.error }
 
   // 2. Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant)
   const rl = await checkRateLimit(true, 'sv-basic-neu')
@@ -540,7 +584,7 @@ export async function registriereSvBasicNeu(input: {
   // (ueberfaellig-Mail + frist_ueberschritten-Flip + kritisch-Task + Tier-2-Countdown).
   // Die 48h-Team-Review-SLA fuer Basic gehoert in P3 (Freigabe-Queue). (Review-Finding H1.)
   const svInsert = {
-    ...buildSvInsertAusLead(synthetic, userId, input.paket ?? 'basic'),
+    ...buildSvInsertAusLead(synthetic, userId, input.paket ?? 'basic', bd.business),
     // Quellen-Override: buildSvInsertAusLead hardcodet 'self_service_claim',
     // fuer Frisch-Registrierung ist 'self_service_neu' korrekt.
     onboarding_quelle: 'self_service_neu',
