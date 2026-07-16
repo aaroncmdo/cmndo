@@ -85,7 +85,8 @@ export async function ablehnTermin(terminId: string, grund: string) {
       await db.from('tasks').insert({
         titel: 'SV hat hohe Ablehnquote — Klärung empfohlen',
         beschreibung: `Ablehnquote: ${quote.toFixed(1)}% (${neueAnzahl}/${termineCount}).`,
-        typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'mittel', auto_erstellt: true,
+        // tasks_prioritaet_check: 'mittel' existiert nicht (normal|dringend|kritisch) -> normal.
+        typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'normal', auto_erstellt: true,
       })
     }
   }
