@@ -46,8 +46,8 @@ describe('partnerLandingUrl — rollenbewusstes Cold-Mail-CTA-Ziel', () => {
     expect(partnerLandingUrl('makler')).toBe('https://makler.claimondo.de')
     expect(partnerLandingUrl('sachverstaendiger')).toBe('https://gutachter.claimondo.de')
   })
-  it('werkstatt nutzt (bis Subdomain live) den funktionierenden App-Pfad, nie einen toten Host', () => {
-    expect(partnerLandingUrl('werkstatt')).toBe('https://app.claimondo.de/werkstatt-partner-werden')
+  it('werkstatt zeigt auf die live Landing-Subdomain', () => {
+    expect(partnerLandingUrl('werkstatt')).toBe('https://werkstatt.claimondo.de')
   })
   it('unbekannte Rolle -> harmloser Fallback (kein NXDOMAIN)', () => {
     expect(partnerLandingUrl(null)).toBe('https://claimondo.de')
