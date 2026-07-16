@@ -1,14 +1,15 @@
 'use client'
 
-// Werkstatt-Chat: geteilter Fall-Gruppenchat (kanal 'gruppenchat', wie der
-// Makler-Chat). Lean v1: Load-on-mount (initialMessages von der Server-Component)
-// + optimistic nach Send. KEIN Realtime — das braucht eine Werkstatt-RLS-Read-
-// Policy auf nachrichten (Follow-up); v1 aktualisiert bei Reload + nach Senden.
+// Werkstatt-Chat: geteilter Fall-Gruppenchat (v2-Thread `kunde_gruppe` + v1-Kanal
+// 'gruppenchat', analog Makler #4349). Send schreibt in den Thread (Kunde/KB/SV
+// sehen die Werkstatt), Read = Union v1∪Thread, Realtime = 2 Subs (fall_id + thread_id,
+// best-effort — Werkstatt-Live-Empfang Eingehender ist RLS-blockiert, s.u.).
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { SendIcon, Loader2Icon, InfoIcon } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { createClient } from '@/lib/supabase/client'
 import { werkstattSendMessage } from '@/lib/actions/werkstatt-send-message'
 import type { WerkstattChatMessage } from '@/lib/werkstatt/queries'
 
@@ -26,10 +27,14 @@ type LocalMessage = WerkstattChatMessage & { pending?: boolean }
 
 export function WerkstattChatTab({
   claimId,
+  fallId,
+  gruppeThreadId,
   currentUserId,
   initialMessages,
 }: {
   claimId: string
+  fallId: string
+  gruppeThreadId: string | null
   currentUserId: string | null
   initialMessages: WerkstattChatMessage[]
 }) {
@@ -43,6 +48,77 @@ export function WerkstattChatTab({
     const el = scrollRef.current
     if (el) el.scrollTop = el.scrollHeight
   }, [messages])
+
+  // Realtime (analog MaklerChatTab / #4349, best-effort): neue Nachrichten des Falls.
+  // v1-Kanal `gruppenchat` via fall_id-Filter (Legacy); v2-`kunde_gruppe`-Thread via
+  // thread_id-Filter (Kunde/KB/SV tragen kein kanal='gruppenchat', kommen NUR ueber den
+  // Thread rein). Eigene Werkstatt-Zeilen laufen ueber die optimistic-Anzeige -> in
+  // addFromRow uebersprungen (kein Echo-Dup). Der Werkstatt-Live-Empfang EINGEHENDER
+  // Kunde/KB/SV-Zeilen ist RLS-blockiert (keine Werkstatt-nachrichten-SELECT-Policy) ->
+  // die thread_id-Sub liefert fuer die Werkstatt aktuell nichts = harmloser No-op;
+  // Eingehende erscheinen per Reload (getWerkstattFallChat via Admin). Aktiviert sich
+  // automatisch, falls je eine Werkstatt-SELECT-Policy dazukommt (wie beim Makler).
+  useEffect(() => {
+    const supabase = createClient()
+    type RawRow = {
+      id: string
+      kanal: string | null
+      nachricht: string
+      created_at: string
+      sender_id: string | null
+      sender_rolle: string | null
+      is_system: boolean | null
+    }
+    const addFromRow = (raw: RawRow) => {
+      if (raw.sender_id && raw.sender_id === currentUserId) return // eigene via optimistic
+      void (async () => {
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('vorname, nachname')
+          .eq('id', raw.sender_id ?? '')
+          .maybeSingle()
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === raw.id)) return prev
+          const next: LocalMessage = {
+            id: raw.id,
+            nachricht: raw.nachricht,
+            created_at: raw.created_at,
+            sender_id: raw.sender_id,
+            sender_rolle: raw.sender_rolle,
+            is_system: Boolean(raw.is_system),
+            sender_vorname: (prof?.vorname as string | null) ?? null,
+            sender_nachname: (prof?.nachname as string | null) ?? null,
+          }
+          return [...prev, next]
+        })
+      })()
+    }
+    let channel = supabase.channel(`werkstatt-chat-${claimId}`).on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'nachrichten', filter: `fall_id=eq.${fallId}` },
+      (payload) => {
+        const raw = payload.new as RawRow
+        if (raw.kanal !== 'gruppenchat') return
+        addFromRow(raw)
+      },
+    )
+    if (gruppeThreadId) {
+      channel = channel.on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'nachrichten',
+          filter: `thread_id=eq.${gruppeThreadId}`,
+        },
+        (payload) => addFromRow(payload.new as RawRow),
+      )
+    }
+    channel.subscribe()
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [claimId, fallId, gruppeThreadId, currentUserId])
 
   const send = useCallback(async () => {
     const text = input.trim()
