@@ -26,7 +26,7 @@ export function AufgabenZone({ vm }: { vm: KundeClaimViewModel }) {
         {aufgaben.map((a) => (
           <li key={a.id}>
             <a
-              href={AUFGABE_ANCHOR[a.id]}
+              href={a.zone ? `#zone-${a.zone}` : AUFGABE_ANCHOR[a.id]}
               className="flex items-center justify-between gap-2 rounded-ios-sm bg-claimondo-bg px-3 py-2 text-body-sm text-claimondo-navy hover:bg-claimondo-border/40 transition-colors"
             >
               <span>{a.label}</span>
