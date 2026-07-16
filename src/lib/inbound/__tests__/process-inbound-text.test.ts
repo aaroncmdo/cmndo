@@ -63,11 +63,6 @@ vi.mock('@/lib/supabase/admin', () => ({
 const closeNurGutachterSpy = vi.fn().mockResolvedValue({ ok: true })
 vi.mock('@/lib/termine/close-nur-gutachter-termin', () => ({
   closeNurGutachterTerminAlsDurchgefuehrt: (...args: unknown[]) => closeNurGutachterSpy(...args),
-  CLAIM_TERMINAL_STATUSES: [
-    'reguliert_vollstaendig', 'storniert', 'klage_rechtsstreit',
-    'verjaehrt', 'abgelehnt_final', 'an_externe_kanzlei_uebergeben',
-    'termin_durchgefuehrt',
-  ],
 }))
 
 const createEmbedBKlaerungSpy = vi.fn().mockResolvedValue({ ok: true, created: true })
@@ -178,7 +173,7 @@ describe('processInboundText', () => {
           claim_id: 'claim-1',
           fall_id: 'fall-1',
           lead_id: null,
-          claims: { service_typ: 'nur_gutachter', status: 'aktiv' },
+          claims: { service_typ: 'nur_gutachter', operative_status: 'sv-termin' },
         },
       ],
       error: null,
@@ -219,7 +214,7 @@ describe('processInboundText', () => {
           claim_id: 'claim-2',
           fall_id: 'fall-1',
           lead_id: 'lead-1',
-          claims: [{ service_typ: 'nur_gutachter', status: 'aktiv' }],
+          claims: [{ service_typ: 'nur_gutachter', operative_status: 'sv-termin' }],
         },
       ],
       error: null,

@@ -16,7 +16,6 @@ import { getOrCreateHeroImageUrl } from '../hero-image/store'
 import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from './templates/KundeWelcome'
 import { SvAuftragszusammenfassungEmail, subject as svAuftragSubject } from './templates/SvAuftragszusammenfassung'
 import { SvAbrechnungEmail, subject as svAbrechnungSubject } from './templates/SvAbrechnung'
-import { SvRechnungEmail, subject as svRechnungSubject } from './templates/SvRechnung'
 import { KanzleiAuftragszusammenfassungEmail, subject as kanzleiAuftragSubject } from './templates/KanzleiAuftragszusammenfassung'
 import { KanzleiAbrechnungRechnungEmail, subject as kanzleiAbrechnungSubject } from './templates/KanzleiAbrechnungRechnung'
 import { MarketingAbrechnungEmail, subject as marketingAbrechnungSubject } from './templates/MarketingAbrechnung'
@@ -368,58 +367,9 @@ export async function sendSvAbrechnung(fallId: string): Promise<void> {
   })
 }
 
-// ─── 4. SV Rechnung (mit PDF-Anhang) ───────────────────────────────────────
-
-export async function sendSvRechnung(rechnungId: string): Promise<void> {
-  const db = admin()
-  // Annahme: Es gibt eine Tabelle gutachter_rechnungen oder rechnungen
-  // Falls nicht: die Logik ist vorbereitet, greift aber ins Leere
-  const { data: rechnung } = await db.from('gutachter_rechnungen').select('sv_id, fall_id, rechnungs_nr, datum, betrag, pdf_url').eq('id', rechnungId).single()
-  if (!rechnung) return
-
-  // CMM-49: claim_nummer claims-direkt (faelle-frei).
-  const claimId = await resolveClaimId(db, rechnung.fall_id)
-  const { data: fallClaim } = claimId
-    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
-    : { data: null }
-
-  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', rechnung.sv_id).single()
-  if (!sv?.profile_id) return
-  const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
-  if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
-
-  const props = {
-    svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fallClaim?.claim_nummer ?? '—',
-    rechnungsNr: rechnung.rechnungs_nr ?? rechnungId.slice(0, 8),
-    rechnungsDatum: fmtDate(rechnung.datum),
-    betrag: fmtCurrency(Number(rechnung.betrag)),
-    rechnungId,
-  }
-
-  // PDF laden falls vorhanden
-  const attachments: Array<{ filename: string; content: Buffer | string; contentType: string }> = []
-  if (rechnung.pdf_url) {
-    try {
-      const res = await fetch(rechnung.pdf_url)
-      if (res.ok) {
-        const buf = Buffer.from(await res.arrayBuffer())
-        attachments.push({ filename: `Rechnung_${props.rechnungsNr}.pdf`, content: buf, contentType: 'application/pdf' })
-      }
-    } catch { console.error('[KFZ-137] PDF-Download fehlgeschlagen:', rechnung.pdf_url) }
-  }
-
-  const html = await render(SvRechnungEmail(props))
-  await sendEmail({
-    to: svProfile.email,
-    subject: svRechnungSubject(props),
-    html,
-    attachments,
-    fallId: rechnung.fall_id,
-    empfaengerTyp: 'sv',
-    template: 'sv_rechnung',
-  })
-}
+// (Ex-Abschnitt 4 "SV Rechnung" entfernt 16.07.: sendSvRechnung las die NIE existente
+// Tabelle gutachter_rechnungen — spekulativ gebaut (der eigene Kommentar: "Falls nicht:
+// die Logik ... greift ins Leere"), einziger Consumer war /api/dev/test-email.)
 
 // ─── 5. Kanzlei Auftragszusammenfassung ────────────────────────────────────
 

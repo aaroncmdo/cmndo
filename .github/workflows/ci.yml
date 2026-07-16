@@ -55,6 +55,13 @@ jobs:
       - name: Token-Audit
         run: npm run check:token-audit
 
+      # use-server-Export-Guard (PR #4439-Nachwehe, 16.07.): 'use server'-Dateien duerfen NUR
+      # async functions + type/interface-DEKLARATIONEN exportieren. Ein `export type { X }`-
+      # RE-Export liess den Server-Actions-Loader crashen -> ALLE Actions der Datei 500ten
+      # (Werkstatt-Embed war seit Deploy tot). tsc/build/vitest sind fuer die Klasse blind.
+      - name: use-server-Export-Guard
+        run: npm run check:use-server-exports
+
       # Migration-UTF8 (2026-05-29): jede supabase/migrations/*.sql muss valides UTF-8 sein
       # (verhindert Latin-1-Stubs, die die Supabase-Preview brechen). scripts/check-migration-utf8.mjs.
       - name: Migration-UTF8
@@ -208,6 +215,20 @@ jobs:
       # Siehe scripts/check-anon-sensitive-grants.mjs + AGENTS.md §Anon-Grant-Gate.
       - name: Anon-Grant-Ratchet
         run: node scripts/check-anon-sensitive-grants.mjs --ratchet
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Reachability-Ratchet (Reachability-Audit 16.07.2026): blockt NEUE anon-SELECT-Policies
+      # mit einem OR-Zweig OHNE auth.uid() (true-anon liest echte Zeilen) auf Tabellen mit
+      # Kontakt-PII (email/telefon/kennzeichen/geburt/iban/…). Ergaenzt den Anon-Grant-Ratchet
+      # (Spalten-NAMEN-Achse) um die Policy-REACHABILITY-Achse — die claims/auftraege/leads-Klasse
+      # war Grant-basiert, gutachter_finder_anfragen (Mig 20260716200848) war Policy-basiert und
+      # der Grant-Ratchet fing es nicht (telefon/email nicht im Namensmuster). Baseline+Boy-Scout.
+      # Backing-RPC audit_anon_reachable_pii(). Nur bei SQL-Diff aktiv. Siehe
+      # scripts/check-anon-reachability.mjs + AGENTS.md §Reachability-Gate.
+      - name: Reachability-Ratchet
+        run: node scripts/check-anon-reachability.mjs --ratchet
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

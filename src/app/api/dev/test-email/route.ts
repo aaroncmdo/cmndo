@@ -3,7 +3,6 @@ import {
   sendKundeWelcome,
   sendSvAuftragszusammenfassung,
   sendSvAbrechnung,
-  sendSvRechnung,
   sendKanzleiAuftragszusammenfassung,
   sendKanzleiAbrechnungRechnung,
 } from '@/lib/email/google/flows'
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { template, fallId, gutachterId, kanzleiEmail, abrechnungId, rechnungId } = body
+  const { template, fallId, gutachterId, kanzleiEmail, abrechnungId } = body
 
   try {
     switch (template) {
@@ -37,10 +36,6 @@ export async function POST(request: Request) {
         if (!fallId) return NextResponse.json({ error: 'fallId fehlt' }, { status: 400 })
         await sendSvAbrechnung(fallId)
         break
-      case 'sv_rechnung':
-        if (!rechnungId) return NextResponse.json({ error: 'rechnungId fehlt' }, { status: 400 })
-        await sendSvRechnung(rechnungId)
-        break
       case 'kanzlei_auftrag':
         if (!fallId || !kanzleiEmail) return NextResponse.json({ error: 'fallId + kanzleiEmail fehlen' }, { status: 400 })
         await sendKanzleiAuftragszusammenfassung(fallId, kanzleiEmail)
@@ -50,7 +45,7 @@ export async function POST(request: Request) {
         await sendKanzleiAbrechnungRechnung(abrechnungId)
         break
       default:
-        return NextResponse.json({ error: `Unbekanntes Template: ${template}. Erlaubt: kunde_welcome, sv_auftrag, sv_abrechnung, sv_rechnung, kanzlei_auftrag, kanzlei_abrechnung` }, { status: 400 })
+        return NextResponse.json({ error: `Unbekanntes Template: ${template}. Erlaubt: kunde_welcome, sv_auftrag, sv_abrechnung, kanzlei_auftrag, kanzlei_abrechnung` }, { status: 400 })
     }
 
     return NextResponse.json({ ok: true, template })

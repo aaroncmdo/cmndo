@@ -1,7 +1,9 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { tokens } from '@/lib/design-tokens'
 import { CloseButton } from '../CloseButton/CloseButton.web'
+import { Z_OVERLAY } from '../overlay/overlay-layers'
 import type { DrawerProps } from './Drawer.types'
 
 export function Drawer({
@@ -17,6 +19,20 @@ export function Drawer({
   mobileFullscreen = true,
   ariaLabel,
 }: DrawerProps) {
+  // SSR-safe: Portal-Target erst nach Mount setzen (Muster: Modal.web.tsx).
+  //
+  // WARUM Portal (nicht nur z-index): Inline gerendert sitzt der Drawer im Stacking
+  // Context irgendeines transform-/filter-/backdrop-Vorfahren der Seite -- dann ist
+  // sein z-[1000] nur INNERHALB dieses Kontexts wirksam und verliert auf Root-Ebene
+  // gegen body-nahe fixed-Elemente. Prod-Playwright-belegt (16.07.): der Chat-FAB
+  // fing mit z-950 weiterhin Klicks auf die Drawer-Footer-Ecke ab, OBWOHL der Drawer
+  // z-1000 traegt. Das Portal hebt den Drawer in den Root-Kontext -- exakt wie das
+  // Schwester-Primitive Modal.web.tsx es seit jeher macht.
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   useEffect(() => {
     if (!open || !closeOnEsc) return
     function onKey(e: KeyboardEvent) {
@@ -26,7 +42,7 @@ export function Drawer({
     return () => document.removeEventListener('keydown', onKey)
   }, [open, closeOnEsc, onClose])
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
   // Tailwind-Klassen für mobile-fullscreen + Slide-Animation. width-Style
   // wird ab md+ angewandt (max-w override über Tailwind-Klassen).
@@ -34,9 +50,10 @@ export function Drawer({
     side === 'right' ? 'animate-in slide-in-from-right' : 'animate-in slide-in-from-left'
   const widthClass = mobileFullscreen ? 'w-full md:w-[var(--drawer-w)]' : ''
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[1000]"
+      className="fixed inset-0"
+      style={{ zIndex: Z_OVERLAY }}
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
@@ -74,6 +91,7 @@ export function Drawer({
         {!hideCloseButton && <CloseButton onPress={onClose} offset={12} />}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
