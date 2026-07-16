@@ -51,14 +51,16 @@ test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async
   //    Hydration-Race (17.07.): setInputFiles VOR attach des React-onChange -> file-State
   //    bleibt still null, Submit-Button dauerhaft [disabled]. Fix: nach dem Setzen auf die
   //    Dateinamen-Anzeige warten (beweist den State) + einmal re-tryen.
-  const fileInput = page.locator('input[type="file"]')
+  //    17.07. Wurzelbefund: setInputFiles aufs hidden input verpufft auf dieser Seite
+  //    (synthetisches change erreicht Reacts Handler nicht — Fiber vorhanden, onClick lebt).
+  //    Der ECHTE User-Pfad funktioniert bewiesenermassen: Dropzone-Klick -> FileChooser.
+  //    Also genau den fahren (realistischer UND robust):
   const dateiAngezeigt = page.getByText('test-upload.pdf', { exact: false })
-  // toPass-Loop: setInputFiles wiederholen, bis der React-State beweisbar ankommt
-  // (die SV-Fallseite hydratisiert langsam; ein einzelner Schuss verpufft pre-Attach).
-  await expect(async () => {
-    await fileInput.setInputFiles('tests/e2e/fixtures/test-upload.pdf')
-    await expect(dateiAngezeigt).toBeVisible({ timeout: 2_000 })
-  }, 'Datei-State in React angekommen').toPass({ timeout: 30_000, intervals: [2_500] })
+  const chooserPromise = page.waitForEvent('filechooser', { timeout: 15_000 })
+  await page.getByRole('button', { name: /Datei auswählen|max\. 20 MB/i }).first().click()
+  const chooser = await chooserPromise
+  await chooser.setFiles('tests/e2e/fixtures/test-upload.pdf')
+  await expect(dateiAngezeigt, 'Datei-State in React angekommen').toBeVisible({ timeout: 10_000 })
   await page.locator('input[type="checkbox"]').first().check()
   const submit = page.getByRole('button', { name: 'Stellungnahme einreichen' })
   await expect(submit, 'Submit-CTA enabled (file+bestaetigt)').toBeEnabled({ timeout: 10_000 })
