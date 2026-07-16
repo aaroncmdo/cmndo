@@ -2631,7 +2631,8 @@
     "ust_id",
     "wochenreport_abgemeldet_am",
     "ist_kleinunternehmer",
-    "notizen"
+    "notizen",
+    "rechtsform"
    ]
   },
   "makler_fall_consent": {

@@ -73,10 +73,16 @@ export function actionButton(url: string, label: string): string {
 }
 
 /** Aktions-Tokens -> aufgeloestes Button-HTML fuer einen konkreten Lead. */
-export function resolveActionVars(lead: { rolle: string | null }): Record<string, string> {
+export function resolveActionVars(lead: {
+  rolle: string | null
+  // Tokenisierter Self-Booking-Link (Task #9), vom SERVER-Sendepfad gebaut
+  // (merge.ts + lib/start-link/beratung-sig — node:crypto bleibt dort, dieses
+  // Modul bleibt client-safe fuer die Editor-Palette). Ohne Link -> Marketing-Fallback.
+  beratungsUrl?: string | null
+}): Record<string, string> {
   return {
     Partnerlink: actionButton(partnerLandingUrl(lead.rolle), 'Jetzt Partner werden'),
-    Beratungslink: actionButton(BERATUNG_URL, 'Beratungsgespräch buchen'),
+    Beratungslink: actionButton(lead.beratungsUrl || BERATUNG_URL, 'Beratungsgespräch buchen'),
     Registrierungslink: actionButton(registrierungsUrl(lead.rolle), 'Jetzt registrieren'),
   }
 }

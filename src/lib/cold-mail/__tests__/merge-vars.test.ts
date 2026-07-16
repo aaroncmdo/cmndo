@@ -66,7 +66,7 @@ describe('actionButton — email-sicheres Button-HTML', () => {
 })
 
 describe('resolveActionVars — Tokens -> Button-HTML pro Lead', () => {
-  it('Beratungslink ist statisch, Registrierungslink rollenabhaengig', () => {
+  it('Beratungslink faellt ohne beratungsUrl auf den Marketing-Link zurueck', () => {
     const vars = resolveActionVars({ rolle: 'werkstatt' })
     expect(vars.Beratungslink).toContain('claimondo.de/beratung-anfragen')
     expect(vars.Beratungslink).toContain('Beratungsgespräch buchen')
@@ -77,6 +77,14 @@ describe('resolveActionVars — Tokens -> Button-HTML pro Lead', () => {
   })
   it('makler bekommt die Makler-Registrierung', () => {
     expect(resolveActionVars({ rolle: 'makler' }).Registrierungslink).toContain('/makler/registrieren')
+  })
+  it('Beratungslink nutzt den tokenisierten Self-Booking-Link, wenn der Server ihn baut', () => {
+    const vars = resolveActionVars({
+      rolle: 'makler',
+      beratungsUrl: 'https://app.claimondo.de/beratung/lead-1?exp=1&sig=ab',
+    })
+    expect(vars.Beratungslink).toContain('href="https://app.claimondo.de/beratung/lead-1?exp=1&sig=ab"')
+    expect(vars.Beratungslink).toContain('Beratungsgespräch buchen')
   })
   it('Partnerlink zeigt rollenbewusst auf die Landing (als Button)', () => {
     const makler = resolveActionVars({ rolle: 'makler' })
