@@ -166,7 +166,7 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     fall_typ: smokeTagForScenario(idx),
     // CMM-44 MP-6c: claims.phase gedroppt — kein phase-Write mehr. Die Phase
     // leitet sich aus status + Sub-Entity-Zustand ab (v_claim_phase).
-    status: phaseStatus.status,
+    // T3-S4: claims.status wird nicht mehr geseedet — operative_status ist die einzige Achse.
     operative_status: phaseStatus.operative_status,
     // FG6: SA/Vollmacht sind post-conversion auf dem CLAIM kanonisch (getClaimLifecycle liest
     // die Claim-Copy via readClaimSigningState) -> synchron zum Lead setzen, sonst driftet
