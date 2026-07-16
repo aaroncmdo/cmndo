@@ -123,6 +123,18 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
+      # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
+      # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts
+      # + scripts/query-drift-baseline.json. Solche Queries werfen PostgREST-400, der Caller
+      # verschluckt den Fehler -> stiller Feature-Ausfall (belegt 15./16.07.: LexDrive-Anhaenge,
+      # Pflicht-Slots nie 'hochgeladen', Kanzlei-Wunsch blockiert, KB-Kundentermine leer,
+      # Abrechnung 'Unbekannt' — #4396/#4420/#4452/#4455). Types koennen der DB nachhinken:
+      # Finding = Query fixen ODER Types regenerieren ODER bewusst --update-baseline.
+      # DB-seitiges Pendant fuer Embed-Hints: check:query-parse (braucht .env.local, nicht CI).
+      - name: Query-Drift-Ratchet
+        run: npm run check:query-drift -- --ratchet
+
       # Flag-Drift-Bremse (Ratchet): blockt NEUE CHECK-invalide Status-Literale in
       # Supabase-Writes/Filtern (z.B. .update({status:'geplant'}) auf gutachter_termine)
       # ggue. scripts/flag-drift-baseline.json. Postgres verwirft solche Writes -> stiller
