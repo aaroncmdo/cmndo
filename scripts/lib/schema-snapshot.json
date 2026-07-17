@@ -1,6 +1,5 @@
 {
- "_regen": "SQL im Header von scripts/check-query-parse.mjs gegen die Live-DB (MCP execute_sql, READ) laufen lassen und dieses File neu schreiben.",
- "generatedAt": "2026-07-16T15:09:12.625Z",
+ "_regen": "Automatisch regeneriert via scripts/build-schema-snapshot.mjs (Cron: .github/workflows/schema-snapshot-regen.yml). NICHT manuell editieren — bei Schema-Aenderung Script laufen lassen. fks: eingefroren/unused.",
  "project": "paizkjajbuxxksdoycev",
  "tables": {
   "abrechnung_positionen": {
@@ -1388,20 +1387,6 @@
     "anzahl_nachrichten_at_generation",
     "letzte_timeline_event_at_generation",
     "claim_id"
-   ]
-  },
-  "finance_eintraege": {
-   "kind": "t",
-   "columns": [
-    "id",
-    "typ",
-    "betrag",
-    "status",
-    "beschreibung",
-    "referenz_id",
-    "referenz_typ",
-    "created_at",
-    "updated_at"
    ]
   },
   "finance_monatsberichte": {
@@ -3365,6 +3350,19 @@
     "ms_email",
     "ms_connected_at",
     "actions_last_seen_at"
+   ]
+  },
+  "profiles_oauth_secrets": {
+   "kind": "t",
+   "columns": [
+    "user_id",
+    "google_access_token",
+    "google_refresh_token",
+    "google_token_expires_at",
+    "ms_access_token",
+    "ms_refresh_token",
+    "ms_token_expires_at",
+    "updated_at"
    ]
   },
   "promo_clicks": {

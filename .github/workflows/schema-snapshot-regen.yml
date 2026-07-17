@@ -1,0 +1,67 @@
+# Naechtlicher Regen der Write-Achsen-Ground-Truth (scripts/lib/schema-snapshot.json) aus prod.
+# Motivation: der Snapshot driftete 2x in 12h still (claims.status/finance_eintraege-Drops), weil
+# "jede Migration zieht den Snapshot nach" im Multi-Session-Betrieb nicht haelt. Dieser Job faengt
+# Drift automatisch + oeffnet EINEN rollierenden PR gegen staging.
+#
+# ⚙️ SETUP (einmalig, Aaron): zwei Repo-Secrets setzen —
+#   NEXT_PUBLIC_SUPABASE_URL   = die prod-REST-URL (https://paizkjajbuxxksdoycev.supabase.co)
+#   SUPABASE_SERVICE_ROLE_KEY  = prod service-role key (READ-only genutzt: nur OpenAPI-Schema-Fetch)
+# Ohne die Secrets skippt der Regen sichtbar (kein rotes Failing). Bewusste Policy-Ausnahme
+# (sonst "keine DB-Creds in CI") — Aaron 17.07. freigegeben, minimaler Scope: nur dieser Job liest
+# das Schema (keine Daten-Reads, kein Write auf die DB).
+name: schema-snapshot-regen
+
+on:
+  schedule:
+    - cron: '17 3 * * *' # taeglich 03:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: schema-snapshot-regen
+  cancel-in-progress: false
+
+jobs:
+  regen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      # Kein npm ci noetig — das Script nutzt nur Node-Builtins (fs/path/url/fetch).
+      - name: Snapshot aus prod regenerieren
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/build-schema-snapshot.mjs
+      - name: Bei Drift rollierenden PR gegen staging
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- scripts/lib/schema-snapshot.json; then
+            echo "Kein Drift — nichts zu tun."
+            exit 0
+          fi
+          echo "Drift erkannt — rollierender PR."
+          BRANCH=chore/schema-snapshot-regen
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add scripts/lib/schema-snapshot.json
+          git commit -m "chore(query-parse): schema-snapshot regen (auto — Drift erkannt)"
+          git push -f -u origin "$BRANCH"
+          OPEN=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
+          if [ "$OPEN" = "0" ]; then
+            gh pr create --base staging --head "$BRANCH" \
+              --title "chore(query-parse): schema-snapshot regen (auto)" \
+              --body "Automatischer Regen von \`scripts/lib/schema-snapshot.json\` aus prod (Cron \`schema-snapshot-regen\`). Drift zur committeten Write-Achsen-Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). **Review:** die gelisteten Tabellen/Spalten gegen die zugehoerige Migration pruefen; NEUE Relationen kommen mit default \`kind=t\` (falls View → manuell auf \`v\` korrigieren)."
+          else
+            echo "Rollierender PR existiert bereits → per force-push aktualisiert."
+          fi
