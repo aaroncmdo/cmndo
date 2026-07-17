@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import type { TagesRoute, LiveOpsScope } from './types'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 type StopRow = {
   id: string
@@ -51,7 +52,7 @@ export async function getTagesrouten(scope: LiveOpsScope): Promise<TagesRoute[]>
   // KB: nur Termine aus eigenen Faellen — verhindert, dass geteilte SVs Tagesrouten anderer KBs zeigen
   if (scope.fallIds !== 'all') {
     if (scope.fallIds.length === 0) return []
-    query = query.in('fall_id', scope.fallIds)
+    query = query.or(bezugInExpr('fall', scope.fallIds))
   }
 
   const { data, error } = await query
