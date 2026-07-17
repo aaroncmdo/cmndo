@@ -3,6 +3,7 @@
 // getMicrosoftAccessTokenForUser liefert ein gueltiges Access-Token (mit Refresh) oder
 // null; SP5b nutzt es fuer Graph-Calendar-Calls.
 import { createAdminClient } from '@/lib/supabase/admin'
+import { readOAuthTokens, upsertOAuthTokens } from '@/lib/oauth/secrets'
 
 // 'common' = persoenliche (outlook.com) UND work/school (M365) Accounts.
 export const MS_AUTHORIZE_ENDPOINT = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
@@ -22,15 +23,11 @@ export async function getMicrosoftAccessTokenForUser(userId: string): Promise<st
   if (!clientId || !clientSecret) return null
 
   const db = createAdminClient()
-  const { data: p } = await db
-    .from('profiles')
-    .select('ms_refresh_token, ms_access_token, ms_token_expires_at')
-    .eq('id', userId)
-    .single()
-  if (!p?.ms_refresh_token) return null
+  const secret = await readOAuthTokens(db, userId, 'ms')
+  if (!secret?.refreshToken) return null
 
-  if (p.ms_access_token && !msTokenNeedsRefresh((p.ms_token_expires_at as string | null) ?? null, Date.now())) {
-    return p.ms_access_token as string
+  if (secret.accessToken && !msTokenNeedsRefresh(secret.expiresAt, Date.now())) {
+    return secret.accessToken
   }
 
   try {
@@ -38,7 +35,7 @@ export async function getMicrosoftAccessTokenForUser(userId: string): Promise<st
       client_id: clientId,
       client_secret: clientSecret,
       grant_type: 'refresh_token',
-      refresh_token: p.ms_refresh_token as string,
+      refresh_token: secret.refreshToken,
       scope: MS_SCOPES,
     })
     const resp = await fetch(MS_TOKEN_ENDPOINT, {
@@ -52,14 +49,11 @@ export async function getMicrosoftAccessTokenForUser(userId: string): Promise<st
     }
     const tok = (await resp.json()) as { access_token?: string; refresh_token?: string; expires_in?: number }
     if (!tok.access_token) return null
-    await db
-      .from('profiles')
-      .update({
-        ms_access_token: tok.access_token,
-        ms_token_expires_at: tok.expires_in ? new Date(Date.now() + tok.expires_in * 1000).toISOString() : null,
-        ...(tok.refresh_token ? { ms_refresh_token: tok.refresh_token } : {}),
-      })
-      .eq('id', userId)
+    await upsertOAuthTokens(db, userId, 'ms', {
+      accessToken: tok.access_token,
+      expiresAt: tok.expires_in ? new Date(Date.now() + tok.expires_in * 1000).toISOString() : null,
+      ...(tok.refresh_token ? { refreshToken: tok.refresh_token } : {}),
+    })
     return tok.access_token
   } catch (err) {
     console.warn('[ms-graph] refresh error:', err instanceof Error ? err.message : err)
@@ -69,6 +63,6 @@ export async function getMicrosoftAccessTokenForUser(userId: string): Promise<st
 
 export async function isMicrosoftConnected(userId: string): Promise<boolean> {
   const db = createAdminClient()
-  const { data } = await db.from('profiles').select('ms_refresh_token').eq('id', userId).single()
-  return !!data?.ms_refresh_token
+  const secret = await readOAuthTokens(db, userId, 'ms')
+  return !!secret?.refreshToken
 }

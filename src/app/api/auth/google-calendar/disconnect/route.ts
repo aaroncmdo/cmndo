@@ -4,6 +4,7 @@
 
 import { NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { clearOAuthTokens } from '@/lib/oauth/secrets'
 
 export async function POST() {
   const supabase = await createClient()
@@ -12,11 +13,9 @@ export async function POST() {
 
   const svc = createServiceClient()
 
-  // Kanonische Token-Quelle nullen
+  // Tokens in der Secret-Tabelle nullen; benige Presence-Marke (connected_at) auf profiles clearen.
+  await clearOAuthTokens(svc, user.id, 'google')
   await svc.from('profiles').update({
-    google_refresh_token: null,
-    google_access_token: null,
-    google_token_expires_at: null,
     google_connected_at: null,
   }).eq('id', user.id)
 
