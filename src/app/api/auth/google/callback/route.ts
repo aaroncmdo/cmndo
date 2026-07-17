@@ -4,6 +4,7 @@ import { google } from 'googleapis'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { externalUrl, externalOrigin } from '@/lib/external-url'
+import { upsertOAuthTokens } from '@/lib/oauth/secrets'
 
 export const dynamic = 'force-dynamic'
 
@@ -67,10 +68,14 @@ export async function GET(req: NextRequest) {
   }
 
   const adminDb = createAdminClient()
+  // Tokens in die service-role-only Secret-Tabelle (Leak-Fix); benige Presence-/Anzeige-Felder
+  // (email, connected_at) bleiben auf profiles.
+  await upsertOAuthTokens(adminDb, user.id, 'google', {
+    refreshToken: tokens.refresh_token,
+    accessToken: tokens.access_token ?? null,
+    expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+  })
   await adminDb.from('profiles').update({
-    google_refresh_token: tokens.refresh_token,
-    google_access_token: tokens.access_token ?? null,
-    google_token_expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
     google_email: googleEmail ?? null,
     google_connected_at: new Date().toISOString(),
   }).eq('id', user.id)

@@ -287,10 +287,11 @@ export async function syncAllExternalCalendars(): Promise<SyncResult[]> {
   const db = createAdminClient()
   const results: SyncResult[] = []
 
-  // ── Google: ALLE Profile mit aktivem refresh_token (nicht mehr nur SV) ────
+  // ── Google: ALLE Profile mit aktivem refresh_token (Tokens leben in profiles_oauth_secrets,
+  //    service-role-only Leak-Fix; user_id -> id aliasen, damit die Loop unveraendert bleibt) ──
   const { data: googleProfiles } = await db
-    .from('profiles')
-    .select('id')
+    .from('profiles_oauth_secrets')
+    .select('id:user_id')
     .not('google_refresh_token', 'is', null)
 
   for (const p of googleProfiles ?? []) {
@@ -322,10 +323,11 @@ export async function syncAllExternalCalendars(): Promise<SyncResult[]> {
     }
   }
 
-  // ── Outlook: alle Profile mit ms_refresh_token (SP5c, dormant bis Azure) ──
+  // ── Outlook: alle Profile mit ms_refresh_token (SP5c, dormant bis Azure); Tokens aus
+  //    profiles_oauth_secrets (user_id -> id aliasen). ──
   const { data: msProfiles } = await db
-    .from('profiles')
-    .select('id')
+    .from('profiles_oauth_secrets')
+    .select('id:user_id')
     .not('ms_refresh_token', 'is', null)
 
   for (const p of msProfiles ?? []) {

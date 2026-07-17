@@ -26,12 +26,12 @@ export default async function KanzleiTerminPage() {
   if (!user) return null
 
   // Admins laden — Service-Key, weil die RLS für profiles streng ist.
-  // Wir filtern auf rolle='admin' und zusätzlich auf google_access_token
-  // NOT NULL (nur Admins mit verbundener Calendar-API buchbar).
+  // Presence via benignes google_connected_at (Token lebt in profiles_oauth_secrets,
+  // service-role-only Leak-Fix; connected_at wird im Callback gesetzt + Disconnect gecleart).
   const admin = createAdminClient()
   const { data: adminRows } = await admin
     .from('profiles')
-    .select('id, vorname, nachname, email, google_access_token')
+    .select('id, vorname, nachname, email, google_connected_at')
     .eq('rolle', 'admin')
     .order('vorname', { ascending: true })
   const alleAdmins: AdminAuswahl[] = (adminRows ?? []).map((a) => ({
@@ -41,7 +41,7 @@ export default async function KanzleiTerminPage() {
       (a.email as string | null) ||
       'Admin',
     email: (a.email as string | null) ?? null,
-    google_verbunden: !!a.google_access_token,
+    google_verbunden: !!a.google_connected_at,
   }))
   const verfuegbareAdmins = alleAdmins.filter((a) => a.google_verbunden)
 
