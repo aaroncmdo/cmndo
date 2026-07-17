@@ -74,8 +74,10 @@ export async function POST(req: NextRequest) {
         {
           source_channel: 'aircall-inbound',
           status: 'neu',
-          vorname: 'Unbekannt',
-          nachname: 'Anrufer',
+          // AAR-956 17.07. (Befund 4, PR #4473/E5): KEINE Platzhalter-Strings mehr —
+          // vorname=NULL ist die Wahrheit ("Name unbekannt"). Kundensichtbare Flaechen
+          // (FlowLink-Gruss #4469 heading_ohne_name) und Staff-UIs (Render-Fallback
+          // `|| 'Unbekannt'`) behandeln NULL korrekt; 'Hallo Unbekannt!' entfaellt.
           telefon: fromNumber,
         },
         {

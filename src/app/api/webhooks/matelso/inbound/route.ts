@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
       const nowBerlin = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })
       const created = await createLead(
         admin,
-        { source_channel: 'matelso-call', status: 'neu', telefon: fromNumber, vorname: 'Unbekannt', nachname: 'Anrufer' },
+        // AAR-956 17.07. (Befund 4): keine 'Unbekannt'/'Anrufer'-Platzhalter — NULL laesst
+        // Gruss-Fallbacks (#4469) und Staff-Render-Fallbacks korrekt greifen.
+        { source_channel: 'matelso-call', status: 'neu', telefon: fromNumber },
         {
           qualifizierungs_phase: 'neu',
           notiz: `Auto-erstellt durch matelso-Anruf am ${nowBerlin} · Quelle: ${quelle ?? 'unbekannt'} · Status: ${status} · Dauer: ${duration ?? 0}s`,

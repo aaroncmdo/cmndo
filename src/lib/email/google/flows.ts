@@ -35,6 +35,7 @@ import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
 import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
 import { PartnerOnboardingEinladung } from './templates/PartnerOnboardingEinladung'
 import { baueOnboardingIcs, formatTerminZeitpunkt, type OnboardingTerminKanal } from '@/lib/partner/onboarding-termin'
+import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
 import { FlottenmanagerWelcomeEmail, subject as flottenmanagerWelcomeSubject } from './templates/FlottenmanagerWelcome'
 
 const admin = () => createAdminClient()
@@ -1227,20 +1228,17 @@ export async function sendFlowLinkVersand(
     .from('gutachter_termine')
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden
     // (Email-Zwilling von flowlink.ts; FlowLink-Versand laeuft pre-Conversion, #8 greift hier nicht).
-    .select('start_zeit, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+    // AAR-956 17.07.: SV-Name via Zwei-Schritt (assignee-Achse) — das sachverstaendige-Embed
+    // hat auf gutachter_termine keinen FK (PGRST200), die Query starb still.
+    .select('start_zeit, assignee_typ, assignee_id')
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: true })
     .limit(1)
     .maybeSingle()
 
-  const termin = terminRaw as { start_zeit: string; sachverstaendige: unknown } | null
-  const svRel = termin?.sachverstaendige
-  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-  const profileRel = sv?.profiles
-  const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-    | { vorname: string | null; nachname: string | null }
-    | null
+  const termin = terminRaw as { start_zeit: string; assignee_typ: string | null; assignee_id: string | null } | null
+  const profile = await ladeSvAssigneeName(db, termin?.assignee_typ ?? null, termin?.assignee_id ?? null)
 
   const props = {
     locale,
