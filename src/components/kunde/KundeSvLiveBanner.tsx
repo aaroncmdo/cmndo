@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { NavigationIcon, MapPinCheckIcon, FileTextIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 
 type Props = {
   terminId: string
@@ -34,30 +35,28 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
 
   useEffect(() => {
     const supabase = createClient()
-    const channel = supabase
-      .channel(`kunde-live-${terminId}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${terminId}` },
-        (payload) => {
-          const row = payload.new as {
-            sv_unterwegs_seit: string | null
-            sv_angekommen_am: string | null
-            sv_eta_minuten: number | null
-            durchgefuehrt_am: string | null
-          }
-          setState({
-            sv_unterwegs_seit: row.sv_unterwegs_seit,
-            sv_angekommen_am: row.sv_angekommen_am,
-            sv_eta_minuten: row.sv_eta_minuten,
-            durchgefuehrt_am: row.durchgefuehrt_am,
-          })
-        },
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`kunde-live-${terminId}`)
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${terminId}` },
+          (payload) => {
+            const row = payload.new as {
+              sv_unterwegs_seit: string | null
+              sv_angekommen_am: string | null
+              sv_eta_minuten: number | null
+              durchgefuehrt_am: string | null
+            }
+            setState({
+              sv_unterwegs_seit: row.sv_unterwegs_seit,
+              sv_angekommen_am: row.sv_angekommen_am,
+              sv_eta_minuten: row.sv_eta_minuten,
+              durchgefuehrt_am: row.durchgefuehrt_am,
+            })
+          },
+        ),
+    )
   }, [terminId])
 
   // QC freigegeben — Banner verschwindet, ClaimStepper übernimmt (Regulierung).

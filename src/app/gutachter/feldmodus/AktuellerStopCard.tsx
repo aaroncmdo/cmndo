@@ -23,6 +23,7 @@ import {
 } from 'lucide-react'
 import { formatUhrzeit } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
 import { completeAndAdvance, markSvVorOrt, markBesichtigungGestartet } from './actions'
@@ -134,37 +135,38 @@ export default function AktuellerStopCard({
         setSvAngekommenAm((data.sv_angekommen_am as string | null) ?? null)
         setBesichtigungGestartetAm((data.besichtigung_gestartet_am as string | null) ?? null)
       })
-    const channel = supabase
-      .channel(`sv-termin-state-${stop.termin_id}-${channelSuffix}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${stop.termin_id}`,
-        },
-        (payload) => {
-          const row = payload.new as {
-            kunde_tracking_aktiviert: boolean | null
-            kunde_eta_minuten: number | null
-            kunde_angekommen_am: string | null
-            sv_angekommen_am: string | null
-            besichtigung_gestartet_am: string | null
-          }
-          setKundeTracking({
-            aktiviert: !!row.kunde_tracking_aktiviert,
-            etaMinutes: row.kunde_eta_minuten ?? null,
-            angekommenAm: row.kunde_angekommen_am ?? null,
-          })
-          setSvAngekommenAm(row.sv_angekommen_am ?? null)
-          setBesichtigungGestartetAm(row.besichtigung_gestartet_am ?? null)
-        },
-      )
-      .subscribe()
+    const cleanupChannel = subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`sv-termin-state-${stop.termin_id}-${channelSuffix}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${stop.termin_id}`,
+          },
+          (payload) => {
+            const row = payload.new as {
+              kunde_tracking_aktiviert: boolean | null
+              kunde_eta_minuten: number | null
+              kunde_angekommen_am: string | null
+              sv_angekommen_am: string | null
+              besichtigung_gestartet_am: string | null
+            }
+            setKundeTracking({
+              aktiviert: !!row.kunde_tracking_aktiviert,
+              etaMinutes: row.kunde_eta_minuten ?? null,
+              angekommenAm: row.kunde_angekommen_am ?? null,
+            })
+            setSvAngekommenAm(row.sv_angekommen_am ?? null)
+            setBesichtigungGestartetAm(row.besichtigung_gestartet_am ?? null)
+          },
+        ),
+    )
     return () => {
       cancelled = true
-      void supabase.removeChannel(channel)
+      cleanupChannel()
     }
   }, [supabase, stop.termin_id, channelSuffix])
 

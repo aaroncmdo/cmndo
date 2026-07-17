@@ -9,6 +9,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import type { SvTagesSession } from '@/lib/types/field-modus'
 import type { FeldmodusStop, FeldmodusSV } from './page'
 import FeldmodusMap from './FeldmodusMap'
@@ -230,31 +231,29 @@ export default function FeldmodusClient({
     const terminId = aktuellerStop?.kind === 'termin' ? aktuellerStop.termin_id : null
     if (!terminId) return
     const supabase = createClient()
-    const channel = supabase
-      .channel(`feldmodus-termin-${terminId}-${feldmodusTerminChannelSuffix}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${terminId}`,
-        },
-        (payload) => {
-          const row = payload.new as {
-            besichtigung_gestartet_am: string | null
-            sv_angekommen_am: string | null
-          }
-          if (row.besichtigung_gestartet_am || row.sv_angekommen_am) {
-            arrivedFiredRef.current = true
-            setSessionStatus((prev) => (prev === 'arrived' ? prev : 'arrived'))
-          }
-        },
-      )
-      .subscribe()
-    return () => {
-      void supabase.removeChannel(channel)
-    }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`feldmodus-termin-${terminId}-${feldmodusTerminChannelSuffix}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${terminId}`,
+          },
+          (payload) => {
+            const row = payload.new as {
+              besichtigung_gestartet_am: string | null
+              sv_angekommen_am: string | null
+            }
+            if (row.besichtigung_gestartet_am || row.sv_angekommen_am) {
+              arrivedFiredRef.current = true
+              setSessionStatus((prev) => (prev === 'arrived' ? prev : 'arrived'))
+            }
+          },
+        ),
+    )
   }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix, online])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
