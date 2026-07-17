@@ -20,7 +20,13 @@ BEGIN
   SELECT id INTO v_phase_id FROM onboarding_phasen
    WHERE flow_key = 'kunde-onboarding' AND phase_key = 'hergang';
   IF v_phase_id IS NULL THEN
-    RAISE EXCEPTION 'kunde-onboarding hergang-Phase nicht gefunden — Seed abgebrochen';
+    -- Replay-Toleranz (Preview-Chain-Fix 17.07.): die kunde-onboarding/hergang-Phase wird NICHT in
+    -- der Migrations-Kette erzeugt (auf prod vorhanden, aber es existiert kein Phasen-Seed im Chain)
+    -- -> auf der Blank-Replay-DB der Supabase-Preview fehlt sie. Statt hart RAISE (killt den Replay
+    -- fuer alle folgenden Migrationen) hier sauber ueberspringen. Auf prod existiert die Phase
+    -- (verifiziert: target_phase_exists=1) -> dieser Zweig wird nie erreicht = reines No-op.
+    RAISE NOTICE 'kunde-onboarding hergang-Phase nicht gefunden — Seed uebersprungen (Replay-Toleranz)';
+    RETURN;
   END IF;
 
   INSERT INTO onboarding_felder
