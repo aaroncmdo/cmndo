@@ -162,6 +162,11 @@ export async function transitionFallStatus(
   }
   if (newStatus === 'abgeschlossen') {
     update.abgeschlossen_am = now
+    // Reparatur-Funnel (17.07.): ein Abschluss-Grund (z.B. 'reparatur_erledigt' beim
+    // Werkstatt-Close via closeReparaturClaimViaEngine) wird — analog zu 'klage' — auf
+    // geschlossen_grund persistiert. Andere abgeschlossen-Caller (Cron fall-abschluss)
+    // uebergeben keinen grund -> Verhalten unveraendert.
+    if (metadata?.grund) update.geschlossen_grund = metadata.grund
   }
   if (newStatus === 'kanzlei-uebergeben') {
     update.kanzlei_uebergeben_am = now
