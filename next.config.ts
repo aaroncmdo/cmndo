@@ -421,6 +421,13 @@ const nextConfig: NextConfig = {
       // Nav-Punkt entfernt) -> Einstellungen (dort lebt der Gebiets-Polygon-Toggle). Bookmarks safe.
       { source: '/gutachter/gebiet', destination: '/gutachter/einstellungen', permanent: true },
       { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
+      // W1 Quick-Wins (Routen-Cleanup, docs/2026-07-17-routen-cleanup-detail-view-audit.md):
+      // Funktion/Information in bestehende Flaechen migriert — Alt-Routen 308
+      // (Bookmarks, Vertrags-Anhang-Links aus OrderSummaryCard, historische Direkt-URLs).
+      { source: '/gutachter/leadpreise', destination: '/gutachter/abrechnung', permanent: true },
+      { source: '/gutachter/statistiken', destination: '/gutachter/abrechnung', permanent: true },
+      { source: '/gutachter/onboarding/buero', destination: '/gutachter/willkommen', permanent: true },
+      { source: '/gutachter/einstellungen/embed/:id/tracking-anleitung', destination: '/gutachter/einstellungen/embed/:id', permanent: true },
       { source: '/kanzlei', destination: '/kanzlei/mandate', permanent: true },
       // 15.05.2026: Mandate-Route umbenannt — vorher /kanzlei/dashboard,
       // jetzt /kanzlei/mandate (passend zum Page-Titel und Nav-Label
