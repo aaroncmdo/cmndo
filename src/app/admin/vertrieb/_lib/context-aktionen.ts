@@ -16,6 +16,15 @@ export function contextAktionen(rolle: VertriebRolle | 'alle', typ: VertriebTyp 
   const out: VertriebAktion[] = []
   const rolleQuery = rolle !== 'alle' ? `rolle=${ROLLE_TO_PL[rolle]}` : ''
 
+  // Discoverability-Fix (UI-Audit 17.07.): in der "Alle"-Pill-Ansicht — der Default beim
+  // Cockpit-Aufruf — gab es SONST KEINEN Anlege-Einstieg (die rollen-spezifischen "X anlegen"-
+  // Buttons unten erscheinen erst nach Pill-Wahl; im reinen Partner-Modus rendert die Leiste
+  // sogar null). Ein prominenter "Partner anlegen"-Picker macht das Onboarding aus jeder
+  // Cockpit-Sicht erreichbar und oeffnet dieselben (bereits verdrahteten) Anlage-Drawer.
+  if (rolle === 'alle') {
+    out.push({ key: 'anlegen-picker', kind: 'anlegen', label: 'Partner anlegen' })
+  }
+
   // Akquise nur im Lead-Modus (nicht im reinen Partner-Modus)
   if (typ !== 'partner') {
     out.push({
