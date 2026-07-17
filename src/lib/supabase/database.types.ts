@@ -3721,6 +3721,9 @@ export type Database = {
           kundenbetreuer_fallback_flag: boolean
           kundenbetreuer_id: string | null
           kundenbetreuer_zugewiesen_am: string | null
+          kva_abgelehnt_am: string | null
+          kva_abgelehnt_grund: string | null
+          kva_quelle: string | null
           lead_id: string | null
           lead_preis_berechnet_am: string | null
           lead_preis_netto: number | null
@@ -3750,6 +3753,9 @@ export type Database = {
           polizei_vor_ort: boolean
           polizeibericht_status: string | null
           prioritaet: string | null
+          reparatur_auftrag_modus: string
+          reparatur_auftrag_modus_gesetzt_am: string | null
+          reparatur_auftrag_modus_gesetzt_von: string | null
           reparatur_freigegeben_am: string | null
           reparatur_freigegeben_von: string | null
           reparatur_vermittlung_status: string
@@ -3919,6 +3925,9 @@ export type Database = {
           kundenbetreuer_fallback_flag?: boolean
           kundenbetreuer_id?: string | null
           kundenbetreuer_zugewiesen_am?: string | null
+          kva_abgelehnt_am?: string | null
+          kva_abgelehnt_grund?: string | null
+          kva_quelle?: string | null
           lead_id?: string | null
           lead_preis_berechnet_am?: string | null
           lead_preis_netto?: number | null
@@ -3948,6 +3957,9 @@ export type Database = {
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          reparatur_auftrag_modus?: string
+          reparatur_auftrag_modus_gesetzt_am?: string | null
+          reparatur_auftrag_modus_gesetzt_von?: string | null
           reparatur_freigegeben_am?: string | null
           reparatur_freigegeben_von?: string | null
           reparatur_vermittlung_status?: string
@@ -4117,6 +4129,9 @@ export type Database = {
           kundenbetreuer_fallback_flag?: boolean
           kundenbetreuer_id?: string | null
           kundenbetreuer_zugewiesen_am?: string | null
+          kva_abgelehnt_am?: string | null
+          kva_abgelehnt_grund?: string | null
+          kva_quelle?: string | null
           lead_id?: string | null
           lead_preis_berechnet_am?: string | null
           lead_preis_netto?: number | null
@@ -4146,6 +4161,9 @@ export type Database = {
           polizei_vor_ort?: boolean
           polizeibericht_status?: string | null
           prioritaet?: string | null
+          reparatur_auftrag_modus?: string
+          reparatur_auftrag_modus_gesetzt_am?: string | null
+          reparatur_auftrag_modus_gesetzt_von?: string | null
           reparatur_freigegeben_am?: string | null
           reparatur_freigegeben_von?: string | null
           reparatur_vermittlung_status?: string
