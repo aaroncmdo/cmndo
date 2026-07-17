@@ -42,6 +42,11 @@ export type EmbedFinderSectionProps = {
    * iframe-`src`, damit der Conversion-Linker im iframe-Container `_gcl_aw` schreibt (Attribution).
    */
   clickIds?: { gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string }
+  /**
+   * Partner-/Makler-Promo-Code (?promo=MK-…) aus der Parent-URL → an die iframe-`src`,
+   * damit der Embed ihn am Lead attribuiert (promotion_code_id, Provision-Spur).
+   */
+  promoCode?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -58,6 +63,7 @@ export function EmbedFinderSection({
   initialZoom,
   height = '100dvh',
   clickIds,
+  promoCode,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -73,6 +79,8 @@ export function EmbedFinderSection({
     const v = clickIds?.[key]
     if (v) params.set(key, v)
   }
+  // Promo-Code (Makler-/Partner-Attribution) — der Embed resolved + persistiert ihn am Lead.
+  if (promoCode) params.set('promo', promoCode)
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 

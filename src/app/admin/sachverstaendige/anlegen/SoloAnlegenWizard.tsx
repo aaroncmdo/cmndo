@@ -106,9 +106,17 @@ export default function SoloAnlegenWizard({ onSuccess, onCancel }: {
     }
     setEmailChecking(true)
     const handle = setTimeout(async () => {
-      const r = await checkEmailExists(email)
-      setEmailCheck(r)
-      setEmailChecking(false)
+      // UI-Audit 17.07.: ohne try/catch blieb bei "Failed to fetch" ewig "Pruefe, ob Email
+      // bereits vorhanden..." stehen. Der Duplikat-Check ist nur ein Hinweis (blockt die Anlage
+      // nicht) -> bei Fehler still zuruecksetzen.
+      try {
+        const r = await checkEmailExists(email)
+        setEmailCheck(r)
+      } catch {
+        setEmailCheck(null)
+      } finally {
+        setEmailChecking(false)
+      }
     }, 500)
     return () => clearTimeout(handle)
   }, [data.email])
