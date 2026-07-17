@@ -5,6 +5,7 @@ import { createLead } from '@/lib/leads/create-lead'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
+import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { reverseGeocodeAddress } from '@/lib/google-geocoding/geocode-address'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
@@ -36,6 +37,9 @@ export type WerkstattFinderLeadPayload = {
   // §10 Doppel-Lead-Falle: bestehender Flow-Token (Re-Entry) -> UPDATE statt INSERT.
   // Der Token ist die Capability; er wird server-seitig zu lead_id aufgeloest (nie roher leadId).
   flowToken?: string | null
+  // E1.1 (Entry-Point-Matrix-Audit): Makler-/Partner-Promo-Code aus ?promo= — wird server-
+  // seitig via resolvePromoCodeToId (Format-Guard + aktiv-Gate) zu promotion_code_id aufgeloest.
+  promoCode?: string | null
 }
 
 // Re-export fuer den Client (damit er keine extra imports braucht)
@@ -195,6 +199,11 @@ export async function erstelleWerkstattFinderLead(
     beschreibung: payload.beschreibung ?? null,
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
+  // E1.1: Promo-Attribution (Provision-Spur). resolver liefert nur fuer gueltige AKTIVE
+  // MK-Codes eine id — Muell/inaktiv -> null -> Feld bleibt weg (auch im UPDATE-Pfad, der
+  // null-Werte strippt: eine bestehende Attribution wird nie durch Re-Entry geloescht).
+  const promotionCodeId = await resolvePromoCodeToId(payload.promoCode)
+  if (promotionCodeId) (extra as Record<string, unknown>).promotion_code_id = promotionCodeId
 
   // §10 Doppel-Lead-Falle (Mirror des Gutachter-Musters, gutachter-finder/actions.ts:248ff):
   // Kommt der Embed mit einem bestehenden Flow-Token (Re-Entry), wird der BESTEHENDE Lead

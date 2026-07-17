@@ -53,6 +53,9 @@ export default async function WerkstattFindenPage({
     // Google-Ads-Click-IDs (Ad-Klick landet auf dieser Parent-URL) → an den Embed-iframe
     // weiterreichen, damit der Conversion-Linker im Container _gcl_aw schreibt.
     gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+    // Makler-/Partner-Promo-Code → Provision-Attribution am entstehenden Lead (Entry-Point-
+    // Matrix-Audit E1.1); gleiches ?promo=-Muster wie Mini-Wizard/Rueckruf.
+    promo?: string
   }>
 }) {
   const t = await getTranslations('werkstatt_finden')
@@ -98,6 +101,7 @@ export default async function WerkstattFindenPage({
         height="100dvh"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+        promoCode={sp.promo?.trim() || undefined}
       />
     </>
   )

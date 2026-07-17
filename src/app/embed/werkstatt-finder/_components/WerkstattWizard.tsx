@@ -36,6 +36,8 @@ export type WerkstattWizardProps = {
   onSuche: (input: ReturnType<typeof wizardStateZuSuche>) => void
   // §10 Doppel-Lead-Falle: Re-Entry-Token (aus ?token=) — absenden UPDATED dann den bestehenden Lead.
   flowToken?: string
+  // E1.1: Makler-/Partner-Promo-Code (aus ?promo=) — absenden attribuiert ihn am Lead.
+  promoCode?: string
 }
 
 export function WerkstattWizard({
@@ -46,6 +48,7 @@ export function WerkstattWizard({
   onSelectWerkstatt,
   onSuche,
   flowToken,
+  promoCode,
 }: WerkstattWizardProps) {
   const [state, setState] = useState<WerkstattWizardState>(WIZARD_INITIAL)
   const [stepIdx, setStepIdx] = useState(0)
@@ -119,6 +122,7 @@ export function WerkstattWizard({
         modell: state.modell.trim() || null,
         beschreibung: beschreibung.trim() || null,
         flowToken: flowToken ?? null,
+        promoCode: promoCode ?? null,
       })
       if (res.ok) window.location.href = `/flow/${res.token}`
       else setFehler(res.error)
