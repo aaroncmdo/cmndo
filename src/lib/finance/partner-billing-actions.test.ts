@@ -46,7 +46,7 @@ vi.mock('@/lib/finance/provision-status', () => ({
     ok: true,
     ctx: { nettoEur: 100, partnerId: 'p1', partnerTyp: 'makler', istKleinunternehmer: false, leistungsDatum: null, leistungText: 'x' },
   })),
-  PROVISION_TABELLEN: ['partner_provisionen', 'partner_staffel_bonus', 'provisionen_maik'],
+  PROVISION_TABELLEN: ['partner_provisionen', 'partner_staffel_bonus'],
 }))
 vi.mock('@/lib/finance/partner-gutschrift-korrektur', () => ({
   korrigierePartnerGutschrift: vi.fn(async () => ({ ok: true, stornoNummer: 'S', korrekturNummer: 'K' })),

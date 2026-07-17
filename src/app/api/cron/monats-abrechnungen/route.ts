@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
-import { generiereMarketingAbrechnung, generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
+import { generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
 import { generateAbrechnungPDF } from '@/lib/finance/abrechnung-pdf'
-import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
+import { sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,23 +22,8 @@ export async function GET(request: Request) {
   }
 
   const monat = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}`
-  let marketingCount = 0
   let kanzleiCount = 0
   const errors: string[] = []
-
-  // ─── Marketing (Maik) ────────────────────────────────────────────────
-  try {
-    const marketing = await generiereMarketingAbrechnung(monat)
-    if (marketing) {
-      await generateAbrechnungPDF(marketing.abrechnungId)
-      await sendMarketingAbrechnung(marketing.abrechnungId)
-      marketingCount = 1
-    }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unbekannter Fehler'
-    console.error('[monats-abrechnungen] Marketing-Fehler:', msg)
-    errors.push(`Marketing: ${msg}`)
-  }
 
   // ─── Kanzleien ───────────────────────────────────────────────────────
   try {
@@ -60,11 +45,10 @@ export async function GET(request: Request) {
     errors.push(`Kanzlei-Generator: ${msg}`)
   }
 
-  console.log(`[monats-abrechnungen] monat=${monat} marketing=${marketingCount} kanzlei=${kanzleiCount} errors=${errors.length}`)
+  console.log(`[monats-abrechnungen] monat=${monat} kanzlei=${kanzleiCount} errors=${errors.length}`)
 
   return NextResponse.json({
     monat,
-    marketing: marketingCount,
     kanzlei: kanzleiCount,
     errors: errors.length > 0 ? errors : undefined,
   })
