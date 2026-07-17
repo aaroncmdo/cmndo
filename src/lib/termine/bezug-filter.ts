@@ -36,3 +36,19 @@ export type BezugAchse = 'fall' | 'lead' | 'claim'
 export function bezugOrExpr(achse: BezugAchse, id: string): string {
   return `${achse}_id.eq.${id},and(bezug_typ.eq.${achse},bezug_id.eq.${id})`
 }
+
+/**
+ * .in-Variante von bezugOrExpr: bezug-aware Filterung von gutachter_termine mit einer ID-LISTE.
+ * Ersetzt `.in('${achse}_id', ids)` durch `.or(bezugInExpr(achse, ids))` — matcht die Legacy-Spalte
+ * ODER die kanonische bezug-Achse (Superset). PostgREST-`in.(…)`-Syntax INNERHALB `.or()`; die inneren
+ * Kommas sind klammer-sicher (PostgREST parst klammer-aware). PROD-VERIFIZIERT 2026-07-17 via echtem
+ * supabase-js-Call: Syntax gueltig, Superset findet den bezug-nativen Termin (naive .in=15 → .or=16),
+ * leere Liste → `in.()` matcht nichts OHNE Error → KEIN Guard noetig (wie `.in(col, [])`).
+ * @param achse 'fall' | 'lead' | 'claim' — die Legacy-Spalte heisst `${achse}_id`.
+ * @param ids   Ziel-UUIDs (fall_id/lead_id/claim_id-PKs). MUESSEN UUIDs sein — der Wert wird in den
+ *              or-String interpoliert; Sonderzeichen (Komma/Klammer) wuerden den Filter brechen.
+ */
+export function bezugInExpr(achse: BezugAchse, ids: string[]): string {
+  const list = ids.join(',')
+  return `${achse}_id.in.(${list}),and(bezug_typ.eq.${achse},bezug_id.in.(${list}))`
+}

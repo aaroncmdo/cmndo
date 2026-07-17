@@ -26,7 +26,6 @@ export type ReleasePendingRow = {
   claim_id: string | null
   betrag_netto_eur: number | string
   service_typ: string | null
-  hold_until: string
   partner_id: string
 }
 
@@ -66,7 +65,7 @@ export async function runProvisionsRelease(
   // der Hold-Periode, aber vor dem Cron-Run storniert wurden.
   const { data: pendingRaw, error: pendingErr } = await db
     .from('partner_provisionen')
-    .select('id, partner_typ, fall_id, claim_id, betrag_netto_eur, service_typ, hold_until, partner_id')
+    .select('id, partner_typ, fall_id, claim_id, betrag_netto_eur, service_typ, partner_id')
     .in('partner_typ', partnerTypen)
     .eq('status', 'pending')
     .limit(limit)

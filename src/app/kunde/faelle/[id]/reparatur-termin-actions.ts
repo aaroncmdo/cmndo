@@ -11,6 +11,7 @@ import { createNotification } from '@/lib/notifications'
 import { resolveWunschterminIso } from '@/app/flow/[token]/wunschtermin'
 import { revalidatePath } from 'next/cache'
 import { notifyWerkstattKundenreaktion } from '@/lib/werkstatt/notify-werkstatt-kundenreaktion'
+import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
 
 export async function schlageReparaturTerminVorPortal(
   claimId: string,
@@ -113,6 +114,16 @@ export async function akzeptiereWerkstattTermin(
     await notifyWerkstattKundenreaktion({ werkstattId: row.werkstatt_id, ereignis: 'bestaetigt', svc })
   } catch (err) {
     console.error('[akzeptiereWerkstattTermin] Werkstatt-Notify (non-fatal):', err)
+  }
+
+  // Reparatur-Cursor: Kunde bestaetigt den Werkstatt-Termin -> reparatur-laeuft
+  // (nur reduced-repair, non-fatal, forward-only — Gate im Helper).
+  const fid = await fallIdForClaim(row.claim_id)
+  if (fid) {
+    await advanceReparaturCursorTo(fid, 'reparatur-laeuft', {
+      user_id: user.id,
+      grund: 'reparaturtermin_bestaetigt',
+    })
   }
   return { ok: true }
 }

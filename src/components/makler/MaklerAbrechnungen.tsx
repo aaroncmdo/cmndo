@@ -119,11 +119,12 @@ function statusVisual(row: MaklerProvisionRow): {
       tooltip: row.storno_grund ?? undefined,
     }
   }
-  // pending
-  const rest = daysUntil(row.hold_until)
+  // pending — Freigabe-Frist = Fall-Completion + 7 Tage (FG4-A). release_deadline null = Fall noch
+  // nicht abgeschlossen → Freigabe erst nach Fallabschluss (frueher: hold_until = Erstellung+7d).
+  const rest = daysUntil(row.release_deadline)
   const label =
     rest === null
-      ? 'Ausstehend'
+      ? 'Ausstehend (Freigabe nach Fallabschluss)'
       : rest === 0
         ? 'Freigabe in Kürze'
         : `Ausstehend (noch ${rest} ${rest === 1 ? 'Tag' : 'Tage'})`

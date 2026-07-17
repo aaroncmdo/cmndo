@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
 import type { LatLng } from '@/lib/mapbox/matrix'
 import type { TerminPin, LiveOpsScope } from './types'
@@ -87,7 +88,7 @@ export async function getOffeneTermine(scope: LiveOpsScope): Promise<TerminPin[]
   // KB: nur Termine aus eigenen Faellen — verhindert, dass geteilte SVs Termine anderer KBs zeigen
   if (scope.fallIds !== 'all') {
     if (scope.fallIds.length === 0) return []
-    query = query.in('fall_id', scope.fallIds)
+    query = query.or(bezugInExpr('fall', scope.fallIds))
   }
 
   const { data, error } = await query
