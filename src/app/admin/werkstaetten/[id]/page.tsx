@@ -3,7 +3,14 @@ import { redirect, notFound } from 'next/navigation'
 import { ladeWerkstattDetail } from './detail-data'
 import WerkstattDetailClient from './WerkstattDetailClient'
 
-export default async function WerkstattDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function WerkstattDetailPage({
+  params,
+  variant = 'page',
+}: {
+  params: Promise<{ id: string }>
+  /** "drawer" wenn eine Intercepting-Route die Page im DrawerShell rendert (Rezept-Muster). */
+  variant?: 'page' | 'drawer'
+}) {
   const { id } = await params
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -15,5 +22,5 @@ export default async function WerkstattDetailPage({ params }: { params: Promise<
   const detail = await ladeWerkstattDetail(id)
   if (!detail) notFound()
 
-  return <WerkstattDetailClient detail={detail} currentUserId={user.id} />
+  return <WerkstattDetailClient detail={detail} currentUserId={user.id} variant={variant} />
 }

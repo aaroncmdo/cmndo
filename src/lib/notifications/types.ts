@@ -9,7 +9,9 @@ export type Channel =
   | 'native_push'
   | 'in_app'
 
-export type Role = 'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin'
+// P1.1 (Operativ-Audit 17.07.): + flottenmanager — die Rolle war strukturell taub
+// (kein Fan-Out-Pfad), obwohl ihr Portal eine Update-Glocke rendert.
+export type Role = 'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin' | 'flottenmanager'
 
 export type Priority = 'low' | 'normal' | 'urgent'
 

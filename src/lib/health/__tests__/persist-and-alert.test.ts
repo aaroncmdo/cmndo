@@ -86,14 +86,10 @@ function makeSupabaseStub(opts: {
 describe('persistAndAlert', () => {
   let sendEmail: ReturnType<typeof vi.fn>
   let createMitteilungMulti: ReturnType<typeof vi.fn>
-  let recordFailedOperation: ReturnType<typeof vi.fn>
-  let markOperationResolved: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     sendEmail = vi.fn().mockResolvedValue({ messageId: 'msg-1' })
     createMitteilungMulti = vi.fn().mockResolvedValue(undefined)
-    recordFailedOperation = vi.fn().mockResolvedValue(undefined)
-    markOperationResolved = vi.fn().mockResolvedValue(undefined)
   })
 
   // Casts benoetigt weil vi.fn() nicht den exakten Funktionstyp traegt.
@@ -101,14 +97,12 @@ describe('persistAndAlert', () => {
     ({
       sendEmail,
       createMitteilungMulti,
-      recordFailedOperation,
-      markOperationResolved,
     }) as unknown as AlertDeps
 
   // -------------------------------------------------------------------------
-  // 1. ok → crit: alle drei Alert-Pfade + alerted_at gesetzt
+  // 1. ok → crit: Email + In-App + alerted_at gesetzt (KEIN Dead-Letter mehr)
   // -------------------------------------------------------------------------
-  it('ok→crit: alle drei Alert-Pfade gerufen + insert mit alerted_at', async () => {
+  it('ok→crit: Email + In-App gerufen + insert mit alerted_at', async () => {
     const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
     const supabase = makeSupabaseStub({ lastRun: { status: 'ok', alerted_at: null }, insertSpy })
     const check = makeCheck('funnel-stuck-claims')
@@ -133,18 +127,7 @@ describe('persistAndAlert', () => {
     expect(empfaenger).toEqual([{ id: 'admin-1', rolle: 'admin' }])
     expect(base.route_url).toBe('/admin/health')
     expect(base.kategorie).toBe('update')
-
-    // Dead-Letter (crit)
-    expect(recordFailedOperation).toHaveBeenCalledOnce()
-    expect(recordFailedOperation.mock.calls[0][0]).toMatchObject({
-      operationType: 'pipeline_health',
-      dedupKey: 'health-funnel-stuck-claims',
-      entityType: 'health_check',
-      entityId: 'funnel-stuck-claims',
-    })
-
-    // markOperationResolved NICHT gerufen (kein recovery)
-    expect(markOperationResolved).not.toHaveBeenCalled()
+    expect(base.prioritaet).toBe('dringend')
   })
 
   // -------------------------------------------------------------------------
@@ -170,8 +153,6 @@ describe('persistAndAlert', () => {
 
     expect(sendEmail).not.toHaveBeenCalled()
     expect(createMitteilungMulti).not.toHaveBeenCalled()
-    expect(recordFailedOperation).not.toHaveBeenCalled()
-    expect(markOperationResolved).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -196,8 +177,6 @@ describe('persistAndAlert', () => {
 
     expect(sendEmail).toHaveBeenCalledOnce()
     expect(createMitteilungMulti).toHaveBeenCalledOnce()
-    expect(recordFailedOperation).toHaveBeenCalledOnce()
-    expect(markOperationResolved).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -224,13 +203,12 @@ describe('persistAndAlert', () => {
     expect(insertArg.alerted_at).toBeNull()
     expect(sendEmail).not.toHaveBeenCalled()
     expect(createMitteilungMulti).not.toHaveBeenCalled()
-    expect(recordFailedOperation).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
-  // 4. crit → ok: markOperationResolved + Recovery-Mitteilung
+  // 4. crit → ok (Vorlauf wurde alarmiert): Recovery-Mitteilung, kein Alert
   // -------------------------------------------------------------------------
-  it('crit→ok: markOperationResolved + Recovery-Mitteilung, kein Alert', async () => {
+  it('crit→ok (Vorlauf alarmiert): Recovery-Mitteilung, kein Alert', async () => {
     const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
     const supabase = makeSupabaseStub({
       lastRun: { status: 'crit', alerted_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() },
@@ -241,9 +219,6 @@ describe('persistAndAlert', () => {
 
     await persistAndAlert({ supabase }, [{ check, result }], deps())
 
-    expect(markOperationResolved).toHaveBeenCalledOnce()
-    expect(markOperationResolved).toHaveBeenCalledWith('health-webhook-inbound-silent')
-
     // Recovery-Mitteilung
     expect(createMitteilungMulti).toHaveBeenCalledOnce()
     const [, base] = createMitteilungMulti.mock.calls[0]
@@ -252,7 +227,6 @@ describe('persistAndAlert', () => {
 
     // Kein Alert (nicht verschlechtert)
     expect(sendEmail).not.toHaveBeenCalled()
-    expect(recordFailedOperation).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -271,9 +245,8 @@ describe('persistAndAlert', () => {
 
     // Insert trotzdem ausgefuehrt
     expect(insertSpy).toHaveBeenCalledOnce()
-    // Die anderen Pfade wurden noch versucht (nicht blockiert durch Email-Fehler)
+    // Der In-App-Pfad wurde noch versucht (nicht blockiert durch Email-Fehler)
     expect(createMitteilungMulti).toHaveBeenCalled()
-    expect(recordFailedOperation).toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -293,8 +266,8 @@ describe('persistAndAlert', () => {
 
     expect(sendEmail).toHaveBeenCalledOnce()
     expect(createMitteilungMulti).toHaveBeenCalledOnce()
-    // warn: kein Dead-Letter
-    expect(recordFailedOperation).not.toHaveBeenCalled()
+    // warn → In-App-Prioritaet 'hoch'
+    expect(createMitteilungMulti.mock.calls[0][1].prioritaet).toBe('hoch')
   })
 
   // -------------------------------------------------------------------------
@@ -314,8 +287,6 @@ describe('persistAndAlert', () => {
 
     expect(sendEmail).not.toHaveBeenCalled()
     expect(createMitteilungMulti).not.toHaveBeenCalled()
-    expect(recordFailedOperation).not.toHaveBeenCalled()
-    expect(markOperationResolved).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -376,5 +347,116 @@ describe('persistAndAlert', () => {
 
     // Beide Inserts wurden versucht (check-1 fehlgeschlagen, check-2 ok)
     expect(insertSpy).toHaveBeenCalledTimes(2)
+  })
+
+  // -------------------------------------------------------------------------
+  // 9. ok → error (transienter Infra-Blip): KEIN Alert (nur Dashboard).
+  //    Kern-Fix: ein einzelner Supabase-/Cloudflare-Hiccup (error.message = HTML)
+  //    darf NICHT wie ein echter kritischer Fund alarmieren.
+  // -------------------------------------------------------------------------
+  it('ok→error (transienter Blip): KEIN Alert, insert ohne alerted_at', async () => {
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({ lastRun: { status: 'ok', alerted_at: null }, insertSpy })
+    const check = makeCheck('twilio-send-failures')
+    const result = makeResult('error', 'DB-Fehler beim Laden: <!DOCTYPE html> ... Cloudflare')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    // Persistiert (Dashboard zeigt den Fehler), aber STILL — kein Alert.
+    expect(insertSpy).toHaveBeenCalledOnce()
+    const insertArg = insertSpy.mock.calls[0][0]
+    expect(insertArg.status).toBe('error')
+    expect(insertArg.alerted_at).toBeNull()
+
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(createMitteilungMulti).not.toHaveBeenCalled()
+  })
+
+  // -------------------------------------------------------------------------
+  // 10. error → error (anhaltend, noch nie alarmiert): Alert (echte Stoerung).
+  // -------------------------------------------------------------------------
+  it('error→error (anhaltend, nie alarmiert): Alert mit FEHLER-Label', async () => {
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({
+      lastRun: { status: 'error', alerted_at: null },
+      // lastAlertedAt undefined -> noch nie alarmiert
+      insertSpy,
+    })
+    const check = makeCheck('webhook-inbound-silent')
+    const result = makeResult('error', 'DB-Fehler dauerhaft')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    const insertArg = insertSpy.mock.calls[0][0]
+    expect(insertArg.alerted_at).toBeTruthy()
+
+    expect(sendEmail).toHaveBeenCalledOnce()
+    expect(sendEmail.mock.calls[0][0].subject).toContain('FEHLER')
+    expect(createMitteilungMulti).toHaveBeenCalledOnce()
+    expect(createMitteilungMulti.mock.calls[0][1].prioritaet).toBe('dringend')
+  })
+
+  // -------------------------------------------------------------------------
+  // 11. error → error, aber juengster Alert <24h: KEIN Re-Alert (Tages-Throttle).
+  // -------------------------------------------------------------------------
+  it('error→error mit Alert <24h: KEIN Re-Alert', async () => {
+    const recentAlerted = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({
+      lastRun: { status: 'error', alerted_at: recentAlerted },
+      lastAlertedAt: recentAlerted,
+      insertSpy,
+    })
+    const check = makeCheck('webhook-inbound-silent')
+    const result = makeResult('error', 'DB-Fehler weiterhin')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    const insertArg = insertSpy.mock.calls[0][0]
+    expect(insertArg.alerted_at).toBeNull()
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(createMitteilungMulti).not.toHaveBeenCalled()
+  })
+
+  // -------------------------------------------------------------------------
+  // 12. error → ok, aber der Fehler-Vorlauf war STILL (nie alarmiert):
+  //     KEINE Recovery-Notiz (sonst "wieder ok"-Spam nach transientem Blip).
+  // -------------------------------------------------------------------------
+  it('error→ok mit stillem Fehler-Vorlauf: KEINE Recovery-Notiz', async () => {
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({
+      lastRun: { status: 'error', alerted_at: null }, // Fehler war still
+      insertSpy,
+    })
+    const check = makeCheck('twilio-send-failures')
+    const result = makeResult('ok', 'wieder erreichbar')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    expect(insertSpy).toHaveBeenCalledOnce()
+    expect(createMitteilungMulti).not.toHaveBeenCalled()
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
+
+  // -------------------------------------------------------------------------
+  // 13. error → crit: der echte Fund demaskiert (error-Vorlauf zaehlt fuer den
+  //     Fund-Vergleich wie 'ok', sonst wuerde 2==2 den crit-Alert unterdruecken).
+  // -------------------------------------------------------------------------
+  it('error→crit: echter Fund alarmiert (error-Vorlauf maskiert crit nicht)', async () => {
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({
+      lastRun: { status: 'error', alerted_at: null },
+      insertSpy,
+    })
+    const check = makeCheck('funnel-stuck-claims')
+    const result = makeResult('crit', '17 Claims über SLA')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    const insertArg = insertSpy.mock.calls[0][0]
+    expect(insertArg.alerted_at).toBeTruthy()
+    expect(sendEmail).toHaveBeenCalledOnce()
+    expect(sendEmail.mock.calls[0][0].subject).toContain('KRITISCH')
+    expect(createMitteilungMulti).toHaveBeenCalledOnce()
   })
 })

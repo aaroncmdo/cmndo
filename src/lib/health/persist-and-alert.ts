@@ -2,16 +2,22 @@
 // Spec: docs/superpowers/specs/2026-06-29-pipeline-observability-design.md §5
 //
 // persistAndAlert() schreibt Ergebnisse in health_check_runs, vergleicht mit
-// dem letzten Status und alarmiert (Email + In-App + Dead-Letter) bei Verschlechterung
-// oder anhaltendem CRIT (taeglich). Alle Sends sind best-effort (try/catch) —
-// kein Fehler darf den Lauf oder andere Checks unterbrechen. Wirft nie.
+// dem letzten Status und alarmiert (Email + In-App) bei Verschlechterung eines
+// ECHTEN Fundes (warn/crit) oder anhaltendem CRIT (taeglich).
+//
+// Ein 'error'-Status bedeutet: der Check selbst konnte NICHT laufen (Infra/Exception,
+// z.B. Supabase-API kurz challenged -> error.message = Cloudflare-HTML-Fehlerseite) —
+// das ist KEIN Daten-Fund. Ein einzelner Blip bleibt STILL (nur Dashboard); erst ein
+// ANHALTENDER Fehler (auch der Vorlauf war 'error') alarmiert. Health-Funde laufen NICHT
+// mehr ins Dead-Letter/Recovery-Monitor (kein "Async-Op gescheitert"-Task) — das
+// dedizierte Health-Alerting (Email + In-App + /admin/health) deckt sie ab; die
+// Doppel-Eskalation war redundanter Jargon-Spam.
+//
+// Alle Sends sind best-effort (try/catch) — kein Fehler darf den Lauf oder andere
+// Checks unterbrechen. Wirft nie.
 
 import { sendEmail as defaultSendEmail } from '@/lib/email/google/client'
 import { createMitteilungMulti as defaultCreateMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
-import {
-  recordFailedOperation as defaultRecordFailedOperation,
-  markOperationResolved as defaultMarkOperationResolved,
-} from '@/lib/reliability/dead-letter'
 import { buildHealthAlertEmailHtml } from './alert-email'
 import { STATUS_RANK } from './types'
 import type { CheckCtx, CheckResult, HealthCheck } from './types'
@@ -21,8 +27,6 @@ const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000
 export type AlertDeps = {
   sendEmail: typeof defaultSendEmail
   createMitteilungMulti: typeof defaultCreateMitteilungMulti
-  recordFailedOperation: typeof defaultRecordFailedOperation
-  markOperationResolved: typeof defaultMarkOperationResolved
 }
 
 export async function persistAndAlert(
@@ -32,8 +36,6 @@ export async function persistAndAlert(
 ): Promise<void> {
   const sendEmail = deps?.sendEmail ?? defaultSendEmail
   const createMitteilungMulti = deps?.createMitteilungMulti ?? defaultCreateMitteilungMulti
-  const recordFailedOperation = deps?.recordFailedOperation ?? defaultRecordFailedOperation
-  const markOperationResolved = deps?.markOperationResolved ?? defaultMarkOperationResolved
 
   for (const { check, result } of results) {
     try {
@@ -61,26 +63,47 @@ export async function persistAndAlert(
         .limit(1)
       const lastAlertedAt = (lastAlertRows?.[0]?.alerted_at as string | null | undefined) ?? null
 
-      // 2. Verschlechterung pruefen.
-      const lastStatusRank = STATUS_RANK[(last?.status as keyof typeof STATUS_RANK) ?? 'ok'] ?? 0
-      const currentRank = STATUS_RANK[result.status]
-      const worse = currentRank > lastStatusRank
+      // 2. Verschlechterung eines ECHTEN Fundes (warn/crit) pruefen. Ein 'error'-Vorlauf
+      // (Check lief nicht) traegt keine Fund-Info -> fuer den Vergleich wie 'ok' behandeln,
+      // sonst wuerde ein error->crit-Uebergang faelschlich unterdrueckt (Rank 2 == 2).
+      const isFinding = result.status === 'crit' || result.status === 'warn'
+      const lastFindingStatus = (
+        last?.status === 'error' ? 'ok' : (last?.status ?? 'ok')
+      ) as keyof typeof STATUS_RANK
+      const findingWorse =
+        isFinding && STATUS_RANK[result.status] > (STATUS_RANK[lastFindingStatus] ?? 0)
 
       // 3. Anhaltend CRIT (hoechstens taeglich re-alertieren). Der erste Alert einer
-      // CRIT-Phase kommt aus `worse` (ok/warn -> crit); dieser Zweig ist NUR die
+      // CRIT-Phase kommt aus `findingWorse` (ok/warn -> crit); dieser Zweig ist NUR die
       // Tages-Erinnerung: re-alertieren, wenn der letzte echte Alert > 24h her ist.
       // Nie alarmiert (lastAlertedAt == null) -> hier NICHT alarmieren (das erledigt
-      // `worse` beim Statuswechsel).
+      // `findingWorse` beim Statuswechsel).
       const sustainedCrit =
         result.status === 'crit' &&
         last?.status === 'crit' &&
         lastAlertedAt != null &&
         Date.now() - new Date(lastAlertedAt).getTime() > TWENTY_FOUR_HOURS_MS
 
-      const shouldAlert = worse || sustainedCrit
+      // 3b. 'error' = der Check konnte NICHT laufen (Infra/Exception), KEIN Daten-Fund.
+      // Ein einzelner Blip (haeufig: Supabase-API kurz challenged -> error.message = HTML)
+      // bleibt STILL (nur Dashboard). Erst wenn der Fehler ANHAELT (auch der Vorlauf war
+      // 'error') alarmieren wir -> echte, dauerhafte Stoerung. Re-Alert hoechstens taeglich.
+      const sustainedError =
+        result.status === 'error' &&
+        last?.status === 'error' &&
+        (lastAlertedAt == null ||
+          Date.now() - new Date(lastAlertedAt).getTime() > TWENTY_FOUR_HOURS_MS)
 
-      // 4. Recovery (crit/warn → ok).
-      const recovered = result.status === 'ok' && last != null && last.status !== 'ok'
+      const shouldAlert = findingWorse || sustainedCrit || sustainedError
+
+      // 4. Recovery (warn/crit/anhaltender error -> ok). NUR benachrichtigen, wenn der
+      // degradierte Vorlauf tatsaechlich alarmiert wurde (last.alerted_at gesetzt) — ein
+      // still geschluckter transienter Blip darf keine irrefuehrende "wieder ok"-Notiz erzeugen.
+      const recovered =
+        result.status === 'ok' &&
+        last != null &&
+        last.status !== 'ok' &&
+        last.alerted_at != null
 
       // 5. Neue Zeile einfuegen.
       const alerted_at = shouldAlert ? new Date().toISOString() : null
@@ -156,31 +179,10 @@ export async function persistAndAlert(
           }
         }
 
-        // 6c. Dead-Letter bei crit/error.
-        if (result.status === 'crit' || result.status === 'error') {
-          try {
-            await recordFailedOperation({
-              operationType: 'pipeline_health',
-              dedupKey: `health-${check.id}`,
-              entityType: 'health_check',
-              entityId: check.id,
-              error: result.detail,
-            })
-          } catch (dlErr) {
-            console.error('[health] recordFailedOperation fehlgeschlagen (geschluckt):', dlErr)
-          }
-        }
       }
 
-      // 7. Recovery-Pfad.
+      // 7. Recovery-Pfad — kurze In-App-Notiz an Admins.
       if (recovered) {
-        try {
-          await markOperationResolved(`health-${check.id}`)
-        } catch (resolveErr) {
-          console.error('[health] markOperationResolved fehlgeschlagen (geschluckt):', resolveErr)
-        }
-
-        // Kurze In-App-Notiz an Admins.
         try {
           const { data: admins } = await ctx.supabase
             .from('profiles')
