@@ -13,6 +13,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
 import { createEmbedBKlaerungTask, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -130,7 +131,7 @@ export async function POST(req: NextRequest) {
     const { data: termin } = await db
       .from('gutachter_termine')
       .select('id')
-      .eq('fall_id', matchedFallId)
+      .or(bezugOrExpr('fall', matchedFallId))
       .gte('start_zeit', new Date().toISOString())
       .order('start_zeit', { ascending: true })
       .limit(1)

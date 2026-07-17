@@ -99,7 +99,9 @@ export async function getCommunicationTimeline(
     // um Merge-Konflikt mit der calls-Repoint-PR #2290 zu vermeiden; P4-TODO: zusammenfuehren).
     const emailClaimId = await resolveClaimId(db, fallId)
     let q = db.from('email_log')
-      .select('id, empfaenger, subject, status, gesendet_am, richtung, body_html, body_text, empfaenger_array, attachments, template, lead_id, created_at')
+      // email_log speichert NUR Metadaten (kein body_html/body_text/empfaenger_array —
+      // die Spalten existieren nicht; früher gewählt → PostgREST-400 → Email-Leg lud nie).
+      .select('id, empfaenger, subject, status, gesendet_am, richtung, attachments, template, lead_id, created_at')
       .eq('claim_id', emailClaimId ?? '00000000-0000-0000-0000-000000000000')
       .order('created_at', { ascending: false })
       .limit(perSource)
@@ -115,10 +117,10 @@ export async function getCommunicationTimeline(
         richtung: (e.richtung as 'inbound' | 'outbound') ?? 'outbound',
         initiatorName: e.richtung === 'inbound' ? (e.empfaenger ?? '—') : 'Claimondo',
         empfaengerName: e.richtung === 'outbound' ? (e.empfaenger ?? '—') : 'Claimondo',
-        preview: e.subject ?? e.body_text?.slice(0, 150) ?? '—',
+        preview: e.subject ?? '—',
         status: e.status,
         emailSubject: e.subject,
-        emailBodyHtml: e.body_html,
+        emailBodyHtml: null, // email_log hält keinen Body — Feld bleibt im Typ, ist aber leer
         emailAttachments: e.attachments as unknown[] | null,
         emailRichtung: e.richtung,
         ausLeadPhase: isLeadPhase,

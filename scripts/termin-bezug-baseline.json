@@ -1,14 +1,8 @@
 {
-  "generatedAt": "2026-07-17T17:05:53.629Z",
-  "count": 43,
+  "generatedAt": "2026-07-17T17:43:07.856Z",
+  "count": 30,
   "files": [
-    "src/app/api/cron/no-show-timeout/route.ts",
-    "src/app/api/cron/re-termin-eskalation/route.ts",
-    "src/app/api/cron/send-reminders/route.ts",
     "src/app/api/cron/vollmacht-reminder/route.ts",
-    "src/app/api/kunde/termin/ics/[id]/route.ts",
-    "src/app/api/sv-zuweisung/route.ts",
-    "src/app/api/webhooks/twilio/inbound/route.ts",
     "src/app/flow/[token]/actions.ts",
     "src/app/gutachter/auftraege/export-action.ts",
     "src/app/gutachter/auftraege/page.tsx",
@@ -29,21 +23,14 @@
     "src/lib/actions/storno-actions.ts",
     "src/lib/actions/termin-actions.ts",
     "src/lib/actions/termin-verlegung-actions.ts",
-    "src/lib/claims/get-kunde-faelle.ts",
-    "src/lib/claims/kunde-claim-view.ts",
     "src/lib/claims/kunde-termine.ts",
-    "src/lib/dispatch/konfrontations-dispatch-lite.ts",
     "src/lib/email/google/flows.ts",
-    "src/lib/inbound/process-inbound-text.ts",
     "src/lib/kunde/fall-karte-loader.ts",
-    "src/lib/lexdrive/process-event.ts",
     "src/lib/live-ops/get-leads.ts",
     "src/lib/live-ops/get-offene-termine.ts",
     "src/lib/live-ops/get-tagesrouten.ts",
     "src/lib/provisionen/release-runner.ts",
     "src/lib/sla/festgefahrene-faelle.ts",
-    "src/lib/smoke/lifecycle-seed.ts",
-    "src/lib/termine/kb-booking.ts",
-    "src/lib/termine/loader.ts"
+    "src/lib/smoke/lifecycle-seed.ts"
   ]
 }
