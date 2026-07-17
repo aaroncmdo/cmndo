@@ -171,6 +171,6 @@ export async function setzeWaitlistStatus(
 
   if (error) return { ok: false, error: error.message }
   revalidatePath('/admin/partner/waitlist')
-  revalidatePath(`/admin/partner/waitlist/${id}`)
+  // W1.8: /admin/partner/waitlist/[id] existiert nicht (Waitlist ist ein Hub-Tab ohne Detail-Route).
   return { ok: true }
 }

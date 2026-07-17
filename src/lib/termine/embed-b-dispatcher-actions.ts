@@ -34,7 +34,7 @@ async function resolveKlaerungsTask(db: AdminClient, terminId: string, grund: st
 
 function revalidate() {
   revalidatePath('/dispatch/dashboard')
-  revalidatePath('/admin/tasks')
+  revalidatePath('/admin/aufgaben/alle') // W1.8: /admin/tasks 308t -> kanonischer Pfad
 }
 
 /**
