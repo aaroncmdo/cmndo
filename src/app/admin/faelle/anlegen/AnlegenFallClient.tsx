@@ -107,7 +107,7 @@ export default function AnlegenFallClient() {
   return (
     <div className="px-8 py-8 max-w-3xl mx-auto">
       <Link href="/admin/faelle" className="inline-flex items-center gap-1 text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4">
-        <ArrowLeftIcon className="w-3 h-3" /> Zurueck zu Faelle
+        <ArrowLeftIcon className="w-3 h-3" /> Zurück zu Fällen
       </Link>
       <div className="mb-6">
         <PageHeader
