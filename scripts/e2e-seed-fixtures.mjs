@@ -350,24 +350,6 @@ async function seedLeadMaik(kundeId, maikMaklerId) {
   }
   log(`Lead B (Maik-Partner) erstellt: ${data.id}`)
 
-  // Provisions-Eintrag in provisionen_maik anlegen (Smoke-Prüfpunkt Phase 11)
-  if (maikMaklerId) {
-    const heute = new Date()
-    const monat = `${heute.getFullYear()}-${String(heute.getMonth() + 1).padStart(2, '0')}-01`
-    const { error: provErr } = await db
-      .from('provisionen_maik')
-      .insert({
-        lead_id: data.id,
-        monat,
-        basis_provision: 150,
-        source_channel: 'maik_partner',
-        // Gültige Werte laut DB-Constraint: 'pending' | 'paid' | 'reversed'
-        status: 'pending',
-      })
-    if (provErr) log(`WARNUNG provisionen_maik Insert: ${provErr.message}`)
-    else log(`Provisions-Eintrag (Maik, 150 EUR) für Lead B angelegt`)
-  }
-
   return data.id
 }
 
