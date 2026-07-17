@@ -25,6 +25,25 @@ const ONE_YEAR_SECONDS = 60 * 60 * 24 * 365
 // synchron in useEffect subscribten Legs werden authenticated. createBrowserClient ist ein
 // Browser-Singleton -> genau EINMAL verdrahten (Guard), sonst Listener-Leak.
 let realtimeAuthWired = false
+let realtimeAuthReady: Promise<unknown> = Promise.resolve()
+
+/**
+ * Resolves, sobald der Realtime-Socket seinen initialen Access-Token via
+ * `setAuth` bekommen hat (bzw. `null` gesetzt wurde, falls keine Session).
+ *
+ * Realtime-Subscriber auf anon-gesperrten Tabellen (claims / gutachter_termine /
+ * auftraege / flow_links — PII-Haertung) MUESSEN darauf warten, BEVOR sie
+ * `.subscribe()` aufrufen. Der Grund: das `setAuth` unten laeuft async
+ * (`getSession().then(...)`), waehrend die Komponenten den Channel synchron im
+ * useEffect joinen. Ohne Gate joint der Channel als `anon`, bevor der Token
+ * gesetzt ist → walrus wirft `permission denied for table <t>` beim ersten
+ * WAL-Poll (haeufigster Prod-Error, 15.–17.07.). Das nachtraegliche Re-Key durch
+ * `setAuth` heilt zwar folgende Events, aber der initiale anon-Join-Fehler ist
+ * dann schon geloggt. `await whenRealtimeAuthReady()` schliesst dieses Fenster.
+ */
+export function whenRealtimeAuthReady(): Promise<unknown> {
+  return realtimeAuthReady
+}
 
 export function createClient(options: { remember?: boolean } = {}) {
   const remember = options.remember !== false
@@ -40,8 +59,8 @@ export function createClient(options: { remember?: boolean } = {}) {
 
   if (!realtimeAuthWired && typeof window !== 'undefined') {
     realtimeAuthWired = true
-    void client.auth.getSession().then(({ data }) => {
-      void client.realtime.setAuth(data.session?.access_token ?? null)
+    realtimeAuthReady = client.auth.getSession().then(({ data }) => {
+      return client.realtime.setAuth(data.session?.access_token ?? null)
     })
     client.auth.onAuthStateChange((_event, session) => {
       void client.realtime.setAuth(session?.access_token ?? null)
