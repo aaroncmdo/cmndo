@@ -92,7 +92,7 @@ export async function erstelleKanzleiAbrechnung(
       // fall_id aus kanzlei_faelle (native, fuer positionen + leads-Lookup).
       const { data: claimsRaw, error: claimsErr } = await db
         .from('claims')
-        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(partei, zahlungseingang_am, status)')
+        .select('id, claim_nummer, lead_id, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(partei, zahlungseingang_am, status)')
         .eq('service_typ', 'komplett')
         .is('kanzlei_abrechnung_id', null)
 
@@ -140,14 +140,14 @@ export async function erstelleKanzleiAbrechnung(
           : (claim as { kanzlei_faelle?: unknown }).kanzlei_faelle
         const fallId = (claimKf as { fall_id?: string | null } | null)?.fall_id as string
 
-        // Kundenname aus leads Tabelle
+        // Kundenname aus leads — CMM-Drift-Fix (16.07.): leads hat KEIN fall_id (der Filter
+        // warf PostgREST-400 -> lead=null -> JEDE Abrechnungsposition hiess "Unbekannt").
+        // Der Lead haengt am Claim: claims.lead_id (oben ins Select aufgenommen).
         let kundeName = 'Unbekannt'
-        const { data: lead } = await db
-          .from('leads')
-          .select('vorname, nachname')
-          .eq('fall_id', fallId)
-          .limit(1)
-          .maybeSingle()
+        const claimLeadId = ((claim as { lead_id?: string | null }).lead_id as string | null) ?? null
+        const { data: lead } = claimLeadId
+          ? await db.from('leads').select('vorname, nachname').eq('id', claimLeadId).maybeSingle()
+          : { data: null }
         if (lead) {
           kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
         }
