@@ -152,6 +152,14 @@ jobs:
       - name: Flag-Drift-Ratchet
         run: npm run check:flag-drift -- --ratchet
 
+      # FG1-Ratchet: blockt NEUE direkte claims.operative_status-Writes ausserhalb der
+      # State-Machine-Engine (.from('claims').update({operative_status})) ggue.
+      # scripts/operative-status-writes-baseline.json. Solche Direkt-Writes umgehen
+      # transitionFallStatus -> kein fall.status_changed-Event/Timeline/phase_transitions
+      # (Werkstatt-Abschluss-Bypass 17.07.). Siehe AGENTS.md Paragraph Operative-Status-Write-Gate.
+      - name: Operative-Status-Write-Ratchet
+        run: npm run check:operative-status-writes -- --ratchet
+
       # i18n-Drift-Bremse (Strategie B): erzwingt identische Key-Sets ueber alle
       # 6 Locales. Verhindert, dass untersetzte i18n-Keys live gehen — next-intl
       # rendert sonst den Key-Pfad statt eines Textes. Siehe scripts/i18n/check-complete.mjs.
