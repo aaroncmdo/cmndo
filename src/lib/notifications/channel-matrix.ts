@@ -21,6 +21,8 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      // P1.1 (Operativ-Audit 17.07.): neuer Schaden am Flottenfahrzeug -> Flottenmanager.
+      flottenmanager: ['in_app'],
     },
   },
   'fall.sv_assigned': {
@@ -39,6 +41,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   'fall.storniert': {
@@ -48,6 +51,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   // 5.2 SA
@@ -319,6 +323,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       // Makler-Value-Loop: der Vermittler will das Ergebnis seines Falls wissen (gegated durch
       // makler_fall_consent im fan-out -> nur eigene Faelle). reguliert = wichtigstes Outcome -> + email.
       makler: ['in_app', 'email'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.abgelehnt': {
@@ -328,6 +333,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
       makler: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.storniert': {
@@ -337,6 +343,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
       makler: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.an_externe_kanzlei_uebergeben': {

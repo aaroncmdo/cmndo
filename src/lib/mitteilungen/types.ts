@@ -17,6 +17,9 @@ export type EmpfaengerRolle =
   | 'kunde'
   | 'makler'
   | 'werkstatt'
+  // P1.1 (Operativ-Audit 17.07.): Flottenmanager hat ein eigenes Portal (/flotte) mit
+  // Update-Glocke, war aber als Empfaenger nirgends adressierbar.
+  | 'flottenmanager'
 
 export interface Mitteilung {
   id: string
