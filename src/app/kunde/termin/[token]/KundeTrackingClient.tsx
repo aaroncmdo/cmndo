@@ -132,36 +132,49 @@ export default function KundeTrackingClient({
   // sieht der Kunde dieselbe "Besichtigung läuft"-Meldung wie der SV.
   useEffect(() => {
     let cancelled = false
-    void supabase
-      .from('gutachter_termine')
-      .select('besichtigung_gestartet_am')
-      .eq('id', terminId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return
-        if ((data as { besichtigung_gestartet_am: string | null } | null)?.besichtigung_gestartet_am) {
-          setBesichtigungLaeuft(true)
-        }
-      })
-    const ch = supabase
-      .channel(`kunde-besichtigung-${terminId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${terminId}`,
-        },
-        (payload) => {
-          const row = payload.new as { besichtigung_gestartet_am: string | null }
-          if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
-        },
-      )
-      .subscribe()
+    let ch: ReturnType<typeof supabase.channel> | null = null
+    // gutachter_termine ist fuer `anon` RLS-gesperrt (5f603aa7 PII-Haertung). Diese Seite
+    // (/kunde/termin/[token]) laeuft SESSION-LOS -> als anon liefern Select + Realtime nichts
+    // (RLS-tot) und wuerfen nur walrus `permission denied` + einen toten WS-Channel (Prod-
+    // Log-Spam). Fix A (client.ts realtime.setAuth) hebt den Socket nur MIT Session auf
+    // `authenticated`; hier gibt es keine. Also nur mit authed Session subscriben: ein
+    // eingeloggter Besucher des Tracking-Links -> funktioniert; session-los -> sauber
+    // uebersprungen (verlustfrei ggue. dem toten Ist-Zustand). Live-"Besichtigung laeuft"
+    // fuer den anon-Kunden = separater Follow-up (token-scoped anon-RLS auf gutachter_termine
+    // ODER server-Prop) — siehe Marker coordination-realtime-claims-permission-denied.
+    void supabase.auth.getSession().then(({ data: { session } }) => {
+      if (cancelled || !session) return
+      void supabase
+        .from('gutachter_termine')
+        .select('besichtigung_gestartet_am')
+        .eq('id', terminId)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (cancelled) return
+          if ((data as { besichtigung_gestartet_am: string | null } | null)?.besichtigung_gestartet_am) {
+            setBesichtigungLaeuft(true)
+          }
+        })
+      ch = supabase
+        .channel(`kunde-besichtigung-${terminId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${terminId}`,
+          },
+          (payload) => {
+            const row = payload.new as { besichtigung_gestartet_am: string | null }
+            if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+          },
+        )
+        .subscribe()
+    })
     return () => {
       cancelled = true
-      void supabase.removeChannel(ch)
+      if (ch) void supabase.removeChannel(ch)
     }
   }, [supabase, terminId])
 

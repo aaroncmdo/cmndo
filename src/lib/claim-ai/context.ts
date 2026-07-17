@@ -2,6 +2,7 @@
 // Spiegelt den Promise.all-Loader aus src/app/faelle/[id]/ai-actions.ts (staging).
 // Keine 'use server'-Direktive — nur pure Funktionen + Async-Loader. KEIN 'use server'.
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export type ClaimAiContext = {
   claimNummer: string | null
@@ -120,7 +121,7 @@ export async function buildClaimAiContext(fallId: string): Promise<ClaimAiContex
     admin
       .from('gutachter_termine')
       .select('*')
-      .eq('fall_id', fallId)
+      .or(bezugOrExpr('fall', fallId))
       .then((r) => r.data ?? []),
     admin
       .from('pflichtdokumente')

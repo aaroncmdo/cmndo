@@ -11,6 +11,7 @@
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 // AAR-956 TZ-Fix: Google-Payload braucht Berlin-Wall-Clock (ohne Offset) statt
 // UTC-toISOString() + timeZone — sonst 2h-Sommer-Versatz (siehe timezone.ts).
 import { toBerlinWallClock, GOOGLE_CALENDAR_TIMEZONE } from '@/lib/google-calendar/timezone'
@@ -251,7 +252,7 @@ export async function syncSvCalendarEventsForFall(fallId: string): Promise<void>
   const { data: termine } = await db
     .from('gutachter_termine')
     .select('id')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .in('status', ['reserviert', 'bestaetigt'])
     .is('cancelled_at', null)
   for (const t of termine ?? []) {
