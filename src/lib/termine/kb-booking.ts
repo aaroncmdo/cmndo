@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { KB_BERATUNG_DURATION_MIN, KB_BERATUNG_VORLAUF_H } from './constants'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { bezugOrExpr } from './bezug-filter'
 import { pruefeKbBelegt } from './kb-belegung'
 import { syncKbTerminOut, entferneKbTerminOut } from './kb-termin-sync'
 
@@ -69,7 +70,7 @@ export async function bookKbTermin(
   const { data: existing, error: existErr } = await db
     .from('gutachter_termine')
     .select('id')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .eq('typ', 'kb_beratung')
     .in('status', ['bestaetigt', 'reserviert'])
     .is('cancelled_at', null)

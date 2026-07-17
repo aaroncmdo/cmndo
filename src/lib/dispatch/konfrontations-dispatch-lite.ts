@@ -11,6 +11,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
 import { pruefeBelegungStrict } from '@/lib/termine/engine'
 import { checkSvReachability } from '@/lib/dispatch/reachability'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export interface TriggerKonfrontationsDispatchInput {
   fallId: string
@@ -90,7 +91,7 @@ export async function triggerKonfrontationsDispatch(
     const { data: at } = await db
       .from('gutachter_termine')
       .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, besichtigungsort_lat, besichtigungsort_lng')
-      .eq('claim_id', fall.claim_id as string)
+      .or(bezugOrExpr('claim', fall.claim_id as string))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -132,7 +133,7 @@ export async function triggerKonfrontationsDispatch(
   const { data: existingOffen } = await db
     .from('gutachter_termine')
     .select('id')
-    .eq('fall_id', input.fallId)
+    .or(bezugOrExpr('fall', input.fallId))
     .eq('typ', 'konfrontation')
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
     .limit(1)
