@@ -14,7 +14,7 @@ import UpdatesNav from '@/components/shared/updates'
 
 const ITEMS: PortalNavItem[] = [
   { href: '/mitarbeiter', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
-  { href: '/mitarbeiter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
+  { href: '/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
   { href: '/mitarbeiter/tasks', label: 'Tasks', icon: CheckSquareIcon },
   { href: '/mitarbeiter/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/mitarbeiter/kundentermine', label: 'Kundentermine', icon: UsersRoundIcon },
@@ -27,7 +27,7 @@ const ITEMS: PortalNavItem[] = [
 ]
 
 // Primaer-Items fuer die Mobile-Bottom-Nav (4 + "Mehr" -> volle ITEMS-Liste im Sheet).
-const MOBILE_HREFS = ['/mitarbeiter', '/mitarbeiter/faelle', '/mitarbeiter/termine', '/mitarbeiter/nachrichten']
+const MOBILE_HREFS = ['/mitarbeiter', '/faelle', '/mitarbeiter/termine', '/mitarbeiter/nachrichten']
 const MOBILE_ITEMS = MOBILE_HREFS.map((h) => ITEMS.find((i) => i.href === h)!).filter(Boolean)
 
 export default function MitarbeiterNav({

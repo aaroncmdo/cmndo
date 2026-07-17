@@ -346,6 +346,10 @@ const nextConfig: NextConfig = {
       { source: '/admin/statistiken', destination: '/admin/faelle/statistiken', permanent: true },
       { source: '/admin/kanzlei-board', destination: '/admin/faelle/kanzlei', permanent: true },
       { source: '/admin/reklamationen', destination: '/admin/faelle/reklamationen', permanent: true },
+      // E1 (Routen-Cleanup, docs/2026-07-17-routen-cleanup-detail-view-audit.md): /mitarbeiter/faelle
+      // war ein Scope-Duplikat der rollen-adaptiven /faelle-Liste (KB → eigene Fälle, MitarbeiterNav-
+      // Shell via faelle/layout.tsx AAR-628). EXAKT-Match — /faelle/[id]-Detail bleibt.
+      { source: '/mitarbeiter/faelle', destination: '/faelle', permanent: true },
       // Partner-Hub (AAR-527):
       { source: '/admin/organisationen', destination: '/admin/partner', permanent: true },
       { source: '/admin/versicherungen', destination: '/admin/partner/versicherer', permanent: true },
