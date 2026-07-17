@@ -1984,6 +1984,15 @@
     "ms_event_id"
    ]
   },
+  "gutachter_termine_intern": {
+   "kind": "t",
+   "columns": [
+    "termin_id",
+    "honorar_betrag",
+    "notiz_intern",
+    "updated_at"
+   ]
+  },
   "gutachter_waitlist": {
    "kind": "t",
    "columns": [
@@ -7609,6 +7618,14 @@
     "fall_id"
    ],
    "target": "faelle_claim_bridge"
+  },
+  {
+   "name": "gutachter_termine_intern_termin_id_fkey",
+   "table": "gutachter_termine_intern",
+   "columns": [
+    "termin_id"
+   ],
+   "target": "gutachter_termine"
   },
   {
    "name": "gutachter_termine_kb_id_fkey",

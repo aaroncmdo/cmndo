@@ -20,7 +20,7 @@ async function ladeEigenenKbTermin(terminId: string, userId: string) {
   const admin = createAdminClient()
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, typ, kb_id, lead_id, start_zeit, status, notiz_intern')
+    .select('id, typ, kb_id, lead_id, start_zeit, status')
     .eq('id', terminId)
     .maybeSingle()
   if (!termin || termin.typ !== 'kb_beratung' || termin.kb_id !== userId) return null
@@ -68,9 +68,8 @@ export async function protokolliereKonsultation(
     : 'Verschoben'
   const stamp = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })
   const neueZeile = `[${stamp}] ${dispoLabel}${trimmedNotiz ? ': ' + trimmedNotiz : ''}`
-  const notizIntern = ctx.termin.notiz_intern ? `${ctx.termin.notiz_intern}\n${neueZeile}` : neueZeile
 
-  const update: Record<string, unknown> = { notiz_intern: notizIntern }
+  const update: Record<string, unknown> = {}
 
   if (disposition === 'durchgefuehrt') {
     update.durchgefuehrt_am = now
@@ -85,11 +84,34 @@ export async function protokolliereKonsultation(
     update.verlegung_initiator_kunde = false // KB-initiiert
   }
 
-  const { error } = await ctx.admin.from('gutachter_termine').update(update).eq('id', terminId)
-  if (error) return { ok: false, error: error.message }
+  // gt-Update nur wenn es Status-/Zeit-Felder gibt (bei nicht_erreicht ist nur die Notiz dran).
+  if (Object.keys(update).length > 0) {
+    const { error } = await ctx.admin.from('gutachter_termine').update(update).eq('id', terminId)
+    if (error) return { ok: false, error: error.message }
+  }
 
   // SP2c: bei Verlegung (Zeitaenderung) den externen KB-Kalender nachziehen. Fail-soft.
   if (disposition === 'verschoben') await syncKbTerminOut(terminId)
+
+  // Protokoll-Notiz in die Staff-only Intern-Tabelle (honorar/notiz-Auslagerung,
+  // Kunde-Leak-Fix; service_role — authenticated hat dort bewusst keinen Write-Grant,
+  // Mig 20260716215805). Read-Modify-Write mit EXPLIZITEM Error-Check statt
+  // ladeInterneTerminNotizen: der Helper verschluckt Read-Fehler (fuer Anzeige ok),
+  // hier wuerde ein verschluckter Fehler die bestehende Protokoll-Historie
+  // beim Upsert ueberschreiben.
+  const { data: internRow, error: internReadError } = await ctx.admin
+    .from('gutachter_termine_intern')
+    .select('notiz_intern')
+    .eq('termin_id', terminId)
+    .maybeSingle()
+  if (internReadError) return { ok: false, error: internReadError.message }
+  const bisherige = (internRow?.notiz_intern as string | null) ?? null
+  const notizIntern = bisherige ? `${bisherige}\n${neueZeile}` : neueZeile
+
+  const { error: internError } = await ctx.admin
+    .from('gutachter_termine_intern')
+    .upsert({ termin_id: terminId, notiz_intern: notizIntern, updated_at: now }, { onConflict: 'termin_id' })
+  if (internError) return { ok: false, error: internError.message }
 
   if (ctx.leadId) {
     try {
