@@ -6,6 +6,7 @@
 // (24h-Frist) + dispatch-fall-actions (termin_bestaetigt-Datum). Spec:
 // docs/superpowers/specs/2026-07-07-sv-termine-canonical-source-design.md
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { bezugOrExpr } from './bezug-filter'
 
 export type FallTerminRow = {
   id: string
@@ -43,7 +44,8 @@ export async function aktuellerTerminFuerFall(
   const { data, error } = await db
     .from('gutachter_termine')
     .select('id, start_zeit, end_zeit, status, assignee_id')
-    .eq('fall_id', fallId)
+    // P3.3: bezug-aware statt naivem .eq('fall_id') -> matcht auch bezug-native Termine.
+    .or(bezugOrExpr('fall', fallId))
     .eq('assignee_typ', 'sachverstaendiger')
   if (error) {
     console.error('[aktueller-termin-fuer-fall] query:', error.message)

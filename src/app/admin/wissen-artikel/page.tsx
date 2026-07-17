@@ -8,7 +8,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import ThemaForm from './ThemaForm'
-import DraftEditor from './DraftEditor'
+import Link from 'next/link'
 import ThemaActions from './ThemaActions'
 import GenerateDraftButton from './GenerateDraftButton'
 import CrawlArtikelActions from './CrawlArtikelActions'
@@ -36,7 +36,9 @@ export default async function WissenArtikelPage() {
   // Drafts in Review laden, neueste zuerst
   const { data: draftsRaw } = await admin
     .from('wissen_artikel')
-    .select('id, title, slug, excerpt, body, meta_description, primary_keyword, cluster, status, created_at')
+    // W2.1: Liste zeigt nur noch Metadaten je Draft (der Volleditor lebt in [id]) —
+    // kein body/excerpt/meta mehr hier laden.
+    .select('id, title, primary_keyword, cluster, created_at')
     .eq('status', 'in_review')
     .order('created_at', { ascending: false })
     .limit(20)
@@ -65,13 +67,8 @@ export default async function WissenArtikelPage() {
   const drafts = (draftsRaw ?? []) as Array<{
     id: string
     title: string
-    slug: string
-    excerpt: string | null
-    body: string
-    meta_description: string | null
     primary_keyword: string | null
     cluster: string | null
-    status: string
     created_at: string
   }>
 
@@ -193,11 +190,37 @@ export default async function WissenArtikelPage() {
             Keine Drafts zur Review. Generiere einen Draft aus einem freigegebenen Thema.
           </p>
         ) : (
-          <div className="space-y-6">
-            {drafts.map(draft => (
-              <DraftEditor key={draft.id} draft={draft} />
-            ))}
-          </div>
+          <DataTableContainer>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Titel</Th>
+                  <Th>Keyword</Th>
+                  <Th>Cluster</Th>
+                  <Th>Eingereicht</Th>
+                  <Th>Aktion</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {drafts.map(draft => (
+                  <Tr key={draft.id}>
+                    <Td><p className="font-medium">{draft.title}</p></Td>
+                    <Td>{draft.primary_keyword ?? '—'}</Td>
+                    <Td>{draft.cluster ?? '—'}</Td>
+                    <Td className="text-xs">{new Date(draft.created_at).toLocaleDateString('de-DE')}</Td>
+                    <Td>
+                      <Link
+                        href={`/admin/wissen-artikel/${draft.id}`}
+                        className="text-claimondo-navy font-medium hover:underline text-sm whitespace-nowrap"
+                      >
+                        Bearbeiten &amp; Freigeben →
+                      </Link>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </SectionCard>
 
