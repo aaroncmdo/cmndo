@@ -133,3 +133,38 @@ export async function beauftrageOhneKva(
   revalidatePath(`/kunde/faelle/${claimId}`)
   return { ok: true }
 }
+
+/**
+ * Der Kunde LEHNT den Werkstatt-Kostenvoranschlag ab (setzt kva_abgelehnt_am + Grund) → das
+ * Termin-Gate bleibt/wird zu (grund='abgelehnt'), die Werkstatt muss einen neuen KVA einreichen
+ * (erstelleKvaFuerAuftrag kippt kva_quelle→'werkstatt' + nullt abgelehnt/freigegeben). Eine evtl.
+ * frühere Freigabe wird zurückgenommen (Ablehnung gewinnt). Komplettiert die Gate-State-Machine —
+ * ohne diese Action ist der 'abgelehnt'-Zustand unerreichbar.
+ */
+export async function lehneKvaAb(
+  claimId: string,
+  grund?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!claimId) return { ok: false, error: 'Keine Fall-ID.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const { data: claim } = await supabase.from('claims').select('id').eq('id', claimId).maybeSingle()
+  if (!claim) return { ok: false, error: 'Kein Zugriff auf diesen Fall.' }
+
+  const svc = createServiceClient()
+  const { error: updErr } = await svc
+    .from('claims')
+    .update({
+      kva_abgelehnt_am: new Date().toISOString(),
+      kva_abgelehnt_grund: grund?.trim() || null,
+      reparatur_freigegeben_am: null,
+    } as never)
+    .eq('id', claimId)
+  if (updErr) return { ok: false, error: updErr.message }
+
+  revalidatePath(`/kunde/faelle/${claimId}`)
+  return { ok: true }
+}

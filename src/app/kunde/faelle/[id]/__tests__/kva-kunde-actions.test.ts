@@ -120,3 +120,31 @@ describe('beauftrageOhneKva', () => {
     expect(typeof (h.updateArg as Record<string, unknown>).reparatur_auftrag_modus_gesetzt_am).toBe('string')
   })
 })
+
+describe('lehneKvaAb', () => {
+  it('nicht angemeldet -> ok:false', async () => {
+    h.user = null
+    const { lehneKvaAb } = await import('../kva-kunde-actions')
+    expect((await lehneKvaAb('c1', 'zu teuer')).ok).toBe(false)
+  })
+
+  it('kein Ownership -> ok:false', async () => {
+    h.claim = null
+    const { lehneKvaAb } = await import('../kva-kunde-actions')
+    expect((await lehneKvaAb('fremd')).ok).toBe(false)
+  })
+
+  it('Erfolg -> ok:true + kva_abgelehnt_am/grund gesetzt + Freigabe genullt', async () => {
+    const { lehneKvaAb } = await import('../kva-kunde-actions')
+    const r = await lehneKvaAb('c1', '  zu teuer  ')
+    expect(r.ok).toBe(true)
+    expect(h.updateArg).toMatchObject({ kva_abgelehnt_grund: 'zu teuer', reparatur_freigegeben_am: null })
+    expect(typeof (h.updateArg as Record<string, unknown>).kva_abgelehnt_am).toBe('string')
+  })
+
+  it('leerer Grund -> null', async () => {
+    const { lehneKvaAb } = await import('../kva-kunde-actions')
+    await lehneKvaAb('c1', '   ')
+    expect((h.updateArg as Record<string, unknown>).kva_abgelehnt_grund).toBeNull()
+  })
+})
