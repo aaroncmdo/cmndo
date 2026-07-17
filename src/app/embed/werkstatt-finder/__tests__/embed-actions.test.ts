@@ -66,6 +66,11 @@ vi.mock('@/lib/analytics/ga4-conversions', () => ({
   getConsentedGaClientId: vi.fn(() => null),
 }))
 
+// ─── Mock: resolvePromoCodeToId (E1.1 Promo-Attribution) ────────────────────
+vi.mock('@/lib/makler/resolve-promo-code', () => ({
+  resolvePromoCodeToId: vi.fn(async () => null),
+}))
+
 // ─── Mock: getStorageUrl ─────────────────────────────────────────────────────
 vi.mock('@/lib/storage/url', () => ({
   getStorageUrl: vi.fn(),
@@ -78,6 +83,7 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createLead } from '@/lib/leads/create-lead'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
+import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
 import { getStorageUrl } from '@/lib/storage/url'
 import {
   klassifiziereSchadenfotoEmbed,
@@ -94,6 +100,7 @@ const mockGeocodeAdresse = vi.mocked(geocodeAdresse)
 const mockCreateLead = vi.mocked(createLead)
 const mockBuildExtra = vi.mocked(buildWerkstattFinderLeadExtra)
 const mockEnsureFlowLink = vi.mocked(ensureCanonicalFlowLinkForLead)
+const mockResolvePromo = vi.mocked(resolvePromoCodeToId)
 const mockGetStorageUrl = vi.mocked(getStorageUrl)
 
 beforeEach(() => {
@@ -428,6 +435,30 @@ describe('erstelleWerkstattFinderLead', () => {
 
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.token).toBe(token)
+  })
+
+  // E1.1 (Entry-Point-Matrix-Audit): Promo-Attribution — ?promo= wird resolved + persistiert.
+  it('promoCode gueltig (Resolver liefert id) → promotion_code_id im createLead-extra', async () => {
+    setupMocks()
+    mockResolvePromo.mockResolvedValue('promo-uuid-1')
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', promoCode: 'MK-TEST' })
+
+    expect(result.ok).toBe(true)
+    expect(mockResolvePromo).toHaveBeenCalledWith('MK-TEST')
+    const extraArg = mockCreateLead.mock.calls[0][2] as Record<string, unknown>
+    expect(extraArg).toMatchObject({ promotion_code_id: 'promo-uuid-1' })
+  })
+
+  it('promoCode ungueltig/inaktiv (Resolver null) → KEIN promotion_code_id im extra', async () => {
+    setupMocks()
+    mockResolvePromo.mockResolvedValue(null)
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', promoCode: 'QUATSCH' })
+
+    expect(result.ok).toBe(true)
+    const extraArg = mockCreateLead.mock.calls[0][2] as Record<string, unknown>
+    expect(extraArg).not.toHaveProperty('promotion_code_id')
   })
 
   it('Fotos hochgeladen + leads.schadensfoto_urls + bedarf_* gesetzt', async () => {

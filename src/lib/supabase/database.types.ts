@@ -6595,42 +6595,6 @@ export type Database = {
           },
         ]
       }
-      finance_eintraege: {
-        Row: {
-          beschreibung: string | null
-          betrag: number | null
-          created_at: string | null
-          id: string
-          referenz_id: string | null
-          referenz_typ: string | null
-          status: string | null
-          typ: string
-          updated_at: string | null
-        }
-        Insert: {
-          beschreibung?: string | null
-          betrag?: number | null
-          created_at?: string | null
-          id?: string
-          referenz_id?: string | null
-          referenz_typ?: string | null
-          status?: string | null
-          typ: string
-          updated_at?: string | null
-        }
-        Update: {
-          beschreibung?: string | null
-          betrag?: number | null
-          created_at?: string | null
-          id?: string
-          referenz_id?: string | null
-          referenz_typ?: string | null
-          status?: string | null
-          typ?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       finance_monatsberichte: {
         Row: {
           aktive_faelle: number | null
