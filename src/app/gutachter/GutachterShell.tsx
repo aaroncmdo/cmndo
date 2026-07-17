@@ -212,6 +212,16 @@ export default function GutachterShell({
     return { ...sec, items: [...before, ...sec.items, ...after] }
   })
 
+  // Mobile-Nav im Onboarding: dieselbe Option-B-Sperre wie die Desktop-Sidebar, via ADDITIVEM
+  // `locked`-Feld (MobileNavItem) — freigeschaltete SVs (onboardingModus=false) + alle anderen
+  // Portale bleiben unveraendert (operativ null Impact). Aktiv: ONBOARDING_ACTIVE_HREFS.
+  const mobilePrimary = onboardingModus
+    ? SV_MOBILE_PRIMARY.map((it) => ({ ...it, locked: !ONBOARDING_ACTIVE_HREFS.has(it.href) }))
+    : SV_MOBILE_PRIMARY
+  const mobileSections = onboardingModus
+    ? SV_MOBILE_SECTIONS.map((s) => ({ ...s, items: s.items.map((it) => ({ ...it, locked: !ONBOARDING_ACTIVE_HREFS.has(it.href) })) }))
+    : SV_MOBILE_SECTIONS
+
   // AAR-220: Vollständiges Theme via CSS-Vars + EINMALIGE 2s-Transition.
   // Die Transition wird NUR aktiv wenn der User gerade ein neues Logo
   // hochgeladen hat (localStorage-Flag 'brand-just-changed'). Bei normalem
@@ -663,8 +673,8 @@ export default function GutachterShell({
           <MobileNav
             hideBreakpoint="lg"
             ariaLabel="SV-Navigation"
-            primary={SV_MOBILE_PRIMARY}
-            sections={SV_MOBILE_SECTIONS}
+            primary={mobilePrimary}
+            sections={mobileSections}
             brand={{
               logo: logoUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element

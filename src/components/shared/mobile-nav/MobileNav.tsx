@@ -63,6 +63,21 @@ export function MobileNav({
 
   function renderTab(item: MobileNavItem) {
     const active = isNavItemActive(item, pathname)
+    // Additiv: gesperrte Items (nur wenn ein Caller `locked` setzt) rendern grau + 🔒, nicht klickbar.
+    if (item.locked) {
+      return (
+        <div
+          key={item.href}
+          aria-disabled="true"
+          title="Erst nach Freischaltung verfügbar"
+          className={`${tabClass(false)} opacity-40 cursor-not-allowed select-none`}
+        >
+          <item.icon style={{ width: 22, height: 22 }} />
+          <span className="text-[10px] font-semibold tracking-wide">{item.label}</span>
+          <span className="absolute top-1 right-1.5 text-[9px]" aria-hidden>🔒</span>
+        </div>
+      )
+    }
     return (
       <Link
         key={item.href}
@@ -148,6 +163,20 @@ export function MobileNav({
                   <div className="space-y-0.5">
                     {section.items.map((item) => {
                       const active = isNavItemActive(item, pathname)
+                      if (item.locked) {
+                        return (
+                          <div
+                            key={item.href}
+                            aria-disabled="true"
+                            title="Erst nach Freischaltung verfügbar"
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm text-claimondo-light-blue opacity-40 cursor-not-allowed select-none"
+                          >
+                            <item.icon style={{ width: 18, height: 18 }} />
+                            <span className="flex-1">{item.label}</span>
+                            <span className="text-[11px]" aria-hidden>🔒</span>
+                          </div>
+                        )
+                      }
                       return (
                         <Link
                           key={item.href}

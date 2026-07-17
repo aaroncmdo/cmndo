@@ -7,6 +7,9 @@ export type MobileNavItem = {
   icon: LucideIcon
   exact?: boolean
   external?: boolean
+  /** Onboarding/Gating: Item sichtbar, aber GESPERRT (grau + 🔒, nicht navigierend).
+   *  ADDITIV — bestehende Caller ohne dieses Feld rendern unveraendert (operativ null Impact). */
+  locked?: boolean
 }
 
 export type MobileNavSection = {
