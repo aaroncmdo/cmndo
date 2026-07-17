@@ -11,6 +11,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export type FallEventSource =
   | 'timeline'
@@ -394,7 +395,7 @@ export async function getFallEventStream(
       supabase
         .from('gutachter_termine')
         .select('*')
-        .eq('fall_id', fall_id)
+        .or(bezugOrExpr('fall', fall_id))
         .order('created_at', { ascending: false })
         .limit(50),
     ])

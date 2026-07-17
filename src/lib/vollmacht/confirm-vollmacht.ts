@@ -12,6 +12,7 @@
 // unabhaengig von Tree-Shaking). Verhalten unveraendert.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export async function confirmVollmacht(fallId: string): Promise<void> {
   const admin = createAdminClient()
@@ -36,7 +37,7 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
     .select('id')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .eq('status', 'reserviert')
     .order('created_at', { ascending: false })
     .limit(1)
