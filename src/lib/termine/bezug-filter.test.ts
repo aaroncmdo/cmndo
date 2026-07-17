@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { bezugOrExpr } from './bezug-filter'
+import { bezugOrExpr, bezugInExpr } from './bezug-filter'
 
 // P3.3: bezugOrExpr baut den PostgREST-or-Ausdruck, der Legacy-Achse ODER bezug-native Achse
 // matcht (Superset des naiven .eq). Reiner String-Builder -> deterministisch pruefbar.
@@ -23,5 +23,26 @@ describe('bezugOrExpr (P3.3 Legacy-Retire)', () => {
     expect(expr).toContain(`fall_id.eq.${id}`)
     expect(expr).toContain(`bezug_id.eq.${id}`)
     expect(expr).toContain('bezug_typ.eq.fall')
+  })
+})
+
+// P3.3 .in-Variante: bezugInExpr ersetzt `.in('${achse}_id', ids)` (ID-Liste). Superset via
+// col.in.(…) in beiden Zweigen. Syntax prod-verifiziert 17.07. (kein Guard bei leerer Liste).
+describe('bezugInExpr (P3.3 .in-Superset)', () => {
+  it('fall: .in(fall_id) ODER bezug-nativ (bezug_typ=fall + bezug_id.in)', () => {
+    expect(bezugInExpr('fall', ['a', 'b'])).toBe(
+      'fall_id.in.(a,b),and(bezug_typ.eq.fall,bezug_id.in.(a,b))',
+    )
+  })
+  it('lead (eine id)', () => {
+    expect(bezugInExpr('lead', ['L1'])).toBe('lead_id.in.(L1),and(bezug_typ.eq.lead,bezug_id.in.(L1))')
+  })
+  it('claim (mehrere ids)', () => {
+    expect(bezugInExpr('claim', ['c1', 'c2', 'c3'])).toBe(
+      'claim_id.in.(c1,c2,c3),and(bezug_typ.eq.claim,bezug_id.in.(c1,c2,c3))',
+    )
+  })
+  it('leere Liste → in.() (matcht nichts, kein Error — prod-verifiziert, kein Guard)', () => {
+    expect(bezugInExpr('fall', [])).toBe('fall_id.in.(),and(bezug_typ.eq.fall,bezug_id.in.())')
   })
 })

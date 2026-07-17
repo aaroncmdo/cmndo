@@ -5,6 +5,7 @@
 // per `art`; nach `start` absteigend sortiert. Nur READS (Termin-Lifecycle bleibt 6c630247).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 export type KundeTermin = {
   id: string
@@ -37,7 +38,7 @@ export async function getKundeTermine(
       ? admin
           .from('gutachter_termine')
           .select('id, start_zeit, status, typ, kanal, fall_id, claim_id')
-          .in('fall_id', fallIds)
+          .or(bezugInExpr('fall', fallIds))
           .is('cancelled_at', null)
           .not('status', 'in', SV_AUSGESCHLOSSEN)
           .order('start_zeit', { ascending: false })
