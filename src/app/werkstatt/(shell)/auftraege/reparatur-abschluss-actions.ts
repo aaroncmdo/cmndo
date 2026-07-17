@@ -15,6 +15,7 @@ import {
   REPARATUR_CLOSE_GRUND,
 } from '@/lib/werkstatt/repair-closure'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
+import { emitEvent } from '@/lib/notifications/emit'
 
 export async function markiereReparaturErledigt(
   terminId: string,
@@ -92,12 +93,60 @@ export async function markiereReparaturErledigt(
   //    Scheitert der Close, bleibt status='bestaetigt' → Werkstatt kann sauber
   //    nochmal einreichen (istReparaturClaimAbschliessbar-Guard greift).
   //    Guard gegen Re-Close via .neq (idempotent).
-  const { error: closeErr } = await admin
+  // P1.4 (Operativ-Audit 17.07.): oldStatus fuer Timeline/Event vorab lesen.
+  const { data: claimVorher } = await admin
+    .from('claims')
+    .select('operative_status')
+    .eq('id', claimId)
+    .maybeSingle()
+  const oldStatus = (claimVorher as { operative_status?: string | null } | null)?.operative_status ?? 'unbekannt'
+
+  const { data: closedRows, error: closeErr } = await admin
     .from('claims')
     .update({ operative_status: REPARATUR_CLOSE_STATUS, abgeschlossen_am: nowIso, geschlossen_grund: REPARATUR_CLOSE_GRUND } as never)
     .eq('id', claimId)
     .neq('operative_status', REPARATUR_CLOSE_STATUS)
+    .select('id')
   if (closeErr) return { ok: false, error: closeErr.message }
+
+  // P1.4-light (Operativ-Audit 17.07.): Der Direkt-Close umging Timeline + phase_transitions +
+  // fall.status_changed — der Reparatur-Abschluss war fuer KB/Admin/Flottenmanager/Makler
+  // UNSICHTBAR, auch rueckwirkend in der Fallakte. Nachzug der drei State-Machine-Artefakte
+  // (exakt deren Shapes), NUR wenn der Close JETZT traf (idempotent — kein Doppel-Event bei
+  // Re-Submit). Der volle Funnel-Umbau auf transitionFallStatus (Bridge-Lookup +
+  // Transition-Validierung) liegt bei der Status-Achsen-Lane — Marker
+  // coordination-an-status-achsen-lane-werkstatt-abschluss-bypass. Non-fatal: Sichtbarkeits-
+  // Nachzug darf den committeten Close nicht brechen.
+  if ((closedRows ?? []).length > 0) {
+    try {
+      const { data: auth } = await supabase.auth.getUser()
+      const userId = auth?.user?.id ?? null
+      await admin.from('timeline').insert({
+        fall_id: fallId,
+        typ: 'status-change',
+        titel: `Status: ${oldStatus} → ${REPARATUR_CLOSE_STATUS}`,
+        beschreibung: REPARATUR_CLOSE_GRUND,
+        erstellt_von: userId,
+      } as never)
+      await admin.from('phase_transitions').insert({
+        fall_id: fallId,
+        from_phase: oldStatus,
+        to_phase: REPARATUR_CLOSE_STATUS,
+        trigger_type: 'auto',
+        transitioned_by: userId,
+        actor_rolle: 'werkstatt',
+        grund: REPARATUR_CLOSE_GRUND,
+        payload: { via: 'reparatur-abschluss' },
+      } as never)
+      await emitEvent(
+        'fall.status_changed',
+        { fallId, oldStatus, newStatus: REPARATUR_CLOSE_STATUS },
+        { fallId, triggeredBy: userId ?? undefined },
+      )
+    } catch (err) {
+      console.error('[P1.4] Abschluss-Sichtbarkeits-Nachzug fehlgeschlagen (non-fatal):', err)
+    }
+  }
 
   // 3) Werkstatt-Provision freigeben (pending -> freigegeben), an die Fertigstellung gekoppelt.
   //    Non-critical: Cron heilt spaeter nach (Praematur-Release-Vermeidung = 457ab612-Naht).
