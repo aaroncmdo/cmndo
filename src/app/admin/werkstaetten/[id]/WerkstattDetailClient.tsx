@@ -23,6 +23,7 @@ import { leiteOnboardingStatus } from '@/lib/werkstatt/onboarding-status'
 import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import type { WerkstattDetail } from './detail-data'
 import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
+import { MarkenGruppenEditor } from './MarkenGruppenEditor'
 import { NotizenSection } from './NotizenSection'
 import { WerkstattKarte } from './WerkstattKarte'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
@@ -670,6 +671,15 @@ export default function WerkstattDetailClient({
       {/* Fähigkeiten & Staffelung (inline editierbar) */}
       <SectionCard title="Fähigkeiten & Staffelung">
         <FaehigkeitenStaffelEditor werkstattId={w.id} faehigkeiten={w.faehigkeiten ?? []} staffel={staffel} />
+      </SectionCard>
+
+      {/* Marken & Fahrzeug-Gruppen (inline editierbar) — die stärksten Ranking-Achsen, Task #5 */}
+      <SectionCard title="Marken & Fahrzeug-Gruppen">
+        <MarkenGruppenEditor
+          werkstattId={w.id}
+          marken={w.marken ?? []}
+          fahrzeugGruppen={w.fahrzeug_gruppen ?? []}
+        />
       </SectionCard>
 
       {/* Verifizierung — Trust-Marker + Vorreihung im Finder */}
