@@ -8,15 +8,26 @@ import EntityDetailShell from '@/components/shared/detail/EntityDetailShell'
 import { Button } from '@/components/primitives'
 import { TextField as SharedTextField } from '@/components/shared/forms'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
-export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHistory, loginPhone }: {
+// W1.4 Part B: Incentive-Auszahlung dieses Mitarbeiters (incentive_auszahlungen + incentives.titel).
+type Auszahlung = { id: string; monat: string; betrag: number | null; status: string; incentive_titel: string | null }
+
+// Reine Label-Map (KEIN Farb-Mapping) — der status-registry-Ratchet erlaubt reine Labels.
+const AUSZ_LABEL: Record<string, string> = {
+  offen: 'Offen', beantragt: 'Beantragt', genehmigt: 'Genehmigt', ausgezahlt: 'Ausgezahlt', abgelehnt: 'Abgelehnt',
+}
+
+export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHistory, loginPhone, auszahlungen }: {
   mitarbeiter: Record<string, unknown>
   stats: { leadsTotal: number; leadsKonvertiert: number; aktiveFaelle: number; abgeschlossen: number; avgDays: number; isDispatch: boolean }
   performanceHistory: Perf[]
   /** Task B: aktuelle Handy-LOGIN-Nummer (auth.users.phone), getrennt von 2FA. */
   loginPhone: string | null
+  /** W1.4 Part B: Incentive-Auszahlungs-Historie dieses Mitarbeiters. */
+  auszahlungen: Auszahlung[]
 }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -101,6 +112,46 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
           </DataTableContainer>
         </div>
       )}
+
+      {/* W1.4 Part B (Routen-Cleanup): Incentive-Auszahlungen dieses Mitarbeiters — vorher
+          nur global im team/incentives-Tab, jetzt pro Person in der Detail-View.
+          shared/SectionCard (nicht hand-rolled bg-white-Card) = component-set-safe;
+          Status als neutrales Badge (kein Farb-Ternary) = status-registry-safe. */}
+      <div className="mb-6">
+        <SectionCard className="rounded-2xl">
+          <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Incentive-Auszahlungen</h3>
+          {auszahlungen.length > 0 ? (
+            <DataTableContainer variant="plain">
+              <Table>
+                <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
+                  <Tr className="border-b border-claimondo-border">
+                    <Th className="text-left px-3! py-2! text-claimondo-ondo!">Monat</Th>
+                    <Th className="text-left px-3! py-2! text-claimondo-ondo!">Incentive</Th>
+                    <Th className="text-right px-3! py-2! text-claimondo-ondo!">Betrag</Th>
+                    <Th className="text-left px-3! py-2! text-claimondo-ondo!">Status</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="divide-y-0!">
+                  {auszahlungen.map((a) => (
+                    <Tr key={a.id} className="border-b border-claimondo-border/50">
+                      <Td className="px-3! py-2!">{a.monat}</Td>
+                      <Td className="px-3! py-2!">{a.incentive_titel ?? '—'}</Td>
+                      <Td className="px-3! py-2! text-right tabular-nums">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(a.betrag ?? 0)}</Td>
+                      <Td className="px-3! py-2!">
+                        <span className="inline-block px-2 py-0.5 rounded-ios-sm text-[11px] font-medium bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
+                          {AUSZ_LABEL[a.status] ?? a.status}
+                        </span>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </DataTableContainer>
+          ) : (
+            <p className="text-sm text-claimondo-ondo/70">Noch keine Incentive-Auszahlungen erfasst.</p>
+          )}
+        </SectionCard>
+      </div>
 
       {/* Edit Form */}
       <div className="bg-white rounded-2xl border border-claimondo-border p-5">
