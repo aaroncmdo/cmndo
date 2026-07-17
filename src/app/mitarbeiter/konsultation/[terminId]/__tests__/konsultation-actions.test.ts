@@ -5,16 +5,30 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({ auth: { getUser: async () => ({ data: { user: authUser } }) } }),
 }))
 
+// Termin-Row lebt auf gutachter_termine; die interne Notiz (Kunde-Leak-Fix) auf
+// gutachter_termine_intern (Staff-only) -> table-aware Mock.
 let terminRow: Record<string, unknown> | null = null
+let internRow: { notiz_intern: string | null } | null = null
 const updateCalls: unknown[] = []
 const insertCalls: unknown[] = []
+const upsertCalls: Array<{ table: string; payload: Record<string, unknown> }> = []
 let updateError: unknown = null
+let upsertError: unknown = null
+let internReadError: unknown = null
 function makeAdmin() {
   return {
-    from: (_t: string) => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: terminRow }) }) }),
+    from: (t: string) => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () =>
+            t === 'gutachter_termine_intern'
+              ? { data: internRow, error: internReadError }
+              : { data: terminRow, error: null },
+        }),
+      }),
       update: (p: unknown) => { updateCalls.push(p); return { eq: async () => ({ error: updateError }) } },
       insert: async (p: unknown) => { insertCalls.push(p); return { error: null } },
+      upsert: async (p: Record<string, unknown>) => { upsertCalls.push({ table: t, payload: p }); return { error: upsertError } },
     }),
   }
 }
@@ -27,11 +41,12 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 import { sendeKonsultationsFlowLink, protokolliereKonsultation } from '../actions'
 
 beforeEach(() => {
-  authUser = { id: 'kb-1' }; terminRow = null; updateError = null
-  updateCalls.length = 0; insertCalls.length = 0; coreMock.mockClear()
+  authUser = { id: 'kb-1' }; terminRow = null; internRow = null
+  updateError = null; upsertError = null; internReadError = null
+  updateCalls.length = 0; insertCalls.length = 0; upsertCalls.length = 0; coreMock.mockClear()
 })
 
-const eigenerTermin = { id: 't1', typ: 'kb_beratung', kb_id: 'kb-1', lead_id: 'lead-1', start_zeit: '2026-06-25T08:00:00Z', status: 'reserviert', notiz_intern: null }
+const eigenerTermin = { id: 't1', typ: 'kb_beratung', kb_id: 'kb-1', lead_id: 'lead-1', start_zeit: '2026-06-25T08:00:00Z', status: 'reserviert' }
 
 describe('Ownership-Gate', () => {
   it('sendeKonsultationsFlowLink lehnt fremden kb_id ab', async () => {
@@ -46,6 +61,7 @@ describe('Ownership-Gate', () => {
     const r = await protokolliereKonsultation('t1', 'durchgefuehrt')
     expect(r.ok).toBe(false)
     expect(updateCalls.length).toBe(0)
+    expect(upsertCalls.length).toBe(0)
   })
 })
 
@@ -59,14 +75,48 @@ describe('sendeKonsultationsFlowLink', () => {
 })
 
 describe('protokolliereKonsultation', () => {
-  it('durchgefuehrt setzt durchgefuehrt_am + notiz_intern + timeline', async () => {
+  it('durchgefuehrt setzt durchgefuehrt_am (gt) + Notiz via intern-Upsert + timeline', async () => {
     terminRow = eigenerTermin
     const r = await protokolliereKonsultation('t1', 'durchgefuehrt', 'Kunde will weitermachen')
     expect(r.ok).toBe(true)
     const upd = updateCalls.at(-1) as Record<string, unknown>
     expect(upd.durchgefuehrt_am).toBeTruthy()
-    expect(upd.notiz_intern).toContain('Durchgeführt')
+    // notiz_intern geht NICHT mehr auf gutachter_termine (Spalte ausgelagert) ...
+    expect(upd.notiz_intern).toBeUndefined()
+    // ... sondern per Upsert in gutachter_termine_intern
+    const ups = upsertCalls.at(-1)
+    expect(ups?.table).toBe('gutachter_termine_intern')
+    expect(ups?.payload.termin_id).toBe('t1')
+    expect(String(ups?.payload.notiz_intern)).toContain('Durchgeführt')
+    expect(String(ups?.payload.notiz_intern)).toContain('Kunde will weitermachen')
     expect(insertCalls.at(-1)).toMatchObject({ titel: 'KB-Beratung: Durchgeführt', lead_id: 'lead-1' })
+  })
+  it('nicht_erreicht schreibt NUR die intern-Notiz, kein gt-Update', async () => {
+    terminRow = eigenerTermin
+    const r = await protokolliereKonsultation('t1', 'nicht_erreicht')
+    expect(r.ok).toBe(true)
+    expect(updateCalls.length).toBe(0)
+    const ups = upsertCalls.at(-1)
+    expect(ups?.table).toBe('gutachter_termine_intern')
+    expect(String(ups?.payload.notiz_intern)).toContain('Nicht erreicht')
+  })
+  it('haengt an bestehende intern-Notiz an (Append-Semantik)', async () => {
+    terminRow = eigenerTermin
+    internRow = { notiz_intern: 'Alte Zeile' }
+    const r = await protokolliereKonsultation('t1', 'nicht_erreicht')
+    expect(r.ok).toBe(true)
+    const notiz = String(upsertCalls.at(-1)?.payload.notiz_intern)
+    expect(notiz.startsWith('Alte Zeile\n')).toBe(true)
+    expect(notiz).toContain('Nicht erreicht')
+  })
+  it('intern-READ-Fehler → ok:false OHNE Upsert (kein Historien-Overwrite)', async () => {
+    terminRow = eigenerTermin
+    internRow = { notiz_intern: 'Alte Zeile' }
+    internReadError = { message: 'read kaputt' }
+    const r = await protokolliereKonsultation('t1', 'nicht_erreicht')
+    expect(r.ok).toBe(false)
+    expect(r.error).toBe('read kaputt')
+    expect(upsertCalls.length).toBe(0)
   })
   it('verschoben ohne neuStartIso → Fehler', async () => {
     terminRow = eigenerTermin
@@ -92,10 +142,17 @@ describe('protokolliereKonsultation', () => {
     const diff = new Date(upd.end_zeit as string).getTime() - new Date(upd.start_zeit as string).getTime()
     expect(diff).toBe(30 * 60 * 1000)
   })
-  it('DB-Update-Fehler → ok:false', async () => {
+  it('gt-Update-Fehler → ok:false (kein intern-Upsert danach)', async () => {
     terminRow = eigenerTermin; updateError = { message: 'DB kaputt' }
-    const r = await protokolliereKonsultation('t1', 'nicht_erreicht')
+    const r = await protokolliereKonsultation('t1', 'durchgefuehrt')
     expect(r.ok).toBe(false)
     expect(r.error).toBe('DB kaputt')
+    expect(upsertCalls.length).toBe(0)
+  })
+  it('intern-Upsert-Fehler → ok:false', async () => {
+    terminRow = eigenerTermin; upsertError = { message: 'intern kaputt' }
+    const r = await protokolliereKonsultation('t1', 'nicht_erreicht')
+    expect(r.ok).toBe(false)
+    expect(r.error).toBe('intern kaputt')
   })
 })

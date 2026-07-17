@@ -11,7 +11,16 @@ export type Channel =
 
 // P1.1 (Operativ-Audit 17.07.): + flottenmanager — die Rolle war strukturell taub
 // (kein Fan-Out-Pfad), obwohl ihr Portal eine Update-Glocke rendert.
-export type Role = 'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin' | 'flottenmanager'
+// P1.2: + kanzlei — Typ existierte in EmpfaengerRolle/ROLE_MAP, aber kein einziger
+// Call-Site befuellte sie; die Kanzlei-Portal-Glocke war strukturell leer.
+export type Role =
+  | 'kunde'
+  | 'sachverstaendiger'
+  | 'makler'
+  | 'kundenbetreuer'
+  | 'admin'
+  | 'flottenmanager'
+  | 'kanzlei'
 
 export type Priority = 'low' | 'normal' | 'urgent'
 
