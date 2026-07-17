@@ -15,6 +15,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { createClient } from '@supabase/supabase-js'
 import { seedAllScenarios, resetAllScenarios, type SeededRow } from '@/lib/smoke/lifecycle-seed'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
+import { toClaimMainPhase, toClaimSubPhase } from '@/lib/claims/lifecycle'
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
@@ -46,9 +47,13 @@ describe.skipIf(!RUN)('claim-phase parity (seeded, getClaimLifecycle <-> v_claim
     const mismatches: { claim_id: string; sql: string; ts: string }[] = []
     for (const r of rows ?? []) {
       const { lifecycle } = await getClaimLifecycleForClaim(admin, r.claim_id as string)
-      const sql = `${r.main_phase}/${r.sub_phase}`
+      // WS6/Kasko (17.07.): NORMALISIERTER Vergleich — die Reparatur-Lane hat ein View-eigenes
+      // Vokabular (main 'reparatur', subs 'reparatur-werkstatt-suche'…), das toClaimMainPhase/
+      // toClaimSubPhase kanonisch auf die TS-Taxonomie uebersetzen. Fuer alle uebrigen Szenarien
+      // sind die Normalisierer identitiv -> weiterhin bit-gleiche Parity.
+      const sql = `${toClaimMainPhase(r.main_phase as string | null)}/${toClaimSubPhase(r.sub_phase as string | null)}`
       const ts = `${lifecycle.mainPhase}/${lifecycle.subPhase}`
-      if (sql !== ts) mismatches.push({ claim_id: r.claim_id as string, sql, ts })
+      if (sql !== ts) mismatches.push({ claim_id: r.claim_id as string, sql: `${r.main_phase}/${r.sub_phase}`, ts })
     }
     // process.stdout.write ist NICHT von vitest abgefangen -> Summary immer sichtbar.
     process.stdout.write(`\n[parity-seeded] seeded=${seeded.length} checked=${rows?.length ?? 0} mismatches=${mismatches.length}\n`)

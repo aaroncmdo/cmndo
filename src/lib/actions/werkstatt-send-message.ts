@@ -63,6 +63,14 @@ export async function werkstattSendMessage(input: {
     parsed.data.claimId,
     'kunde_gruppe',
   )
+  if (!threadId) {
+    // Cross-Vis-Verlust: ohne Thread landet die Nachricht nur im v1-Kanal (gruppenchat),
+    // Kunde/KB/SV (v2-Thread-Surfaces) saehen sie NICHT. Best-effort-Send bleibt (kanal deckt
+    // Werkstatt-Realtime), aber der Fehler muss sichtbar sein statt still zu verpuffen.
+    console.error(
+      `[werkstattSendMessage] kunde_gruppe-Thread nicht aufloesbar fuer claim ${parsed.data.claimId} — Nachricht nur v1-sichtbar (Cross-Vis-Verlust).`,
+    )
+  }
 
   const { data: inserted, error } = await admin
     .from('nachrichten')
