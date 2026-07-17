@@ -166,4 +166,36 @@ describe('createPflichtdokumenteFromKatalog', () => {
       ._pflichdokChain.insert.mock.calls
     expect(insertCalls).toHaveLength(0)
   })
+
+  it('Insert-Fehler -> loggt console.error, wirft nicht (stiller Slot-Init-Fehler sichtbar)', async () => {
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    // eigener Mock: pflichtdokumente.insert liefert einen DB-Fehler
+    const pflichdokChain = {
+      select: vi.fn(() => pflichdokChain),
+      eq: vi.fn(() => Promise.resolve({ data: [], error: null })),
+      insert: vi.fn(() => Promise.resolve({ data: null, error: { message: 'permission denied' } })),
+    }
+    const katalogChain = {
+      select: vi.fn(() => katalogChain),
+      eq: vi.fn(() => katalogChain),
+      order: vi.fn(() => Promise.resolve({ data: [SLOT_FREIGABE_BANK], error: null })),
+    }
+    const mock = {
+      from: vi.fn((table: string) => (table === 'dokument_katalog' ? katalogChain : pflichdokChain)),
+    } as unknown as SupabaseClient
+
+    // Lead mit leasing -> freigabe_bank ist Pflicht -> 1 Slot -> insert wird versucht
+    const lead = { finanzierung_leasing: 'leasing' }
+
+    // Wirft NICHT (best-effort) trotz Insert-Fehler
+    await expect(
+      createPflichtdokumenteFromKatalog(mock, 'fall-err', lead),
+    ).resolves.toBeUndefined()
+
+    expect(pflichdokChain.insert).toHaveBeenCalledOnce()
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('pflichtdokumente-insert fehlgeschlagen fuer fall fall-err'),
+    )
+    errorSpy.mockRestore()
+  })
 })
