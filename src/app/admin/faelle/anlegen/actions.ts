@@ -120,6 +120,28 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
       const veh = await ensureVehicleForClaim({ claimId: conv.claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
       if (!veh.ok) console.warn('[CMM-68] vehicles-Stub bei manueller Anlage:', veh.error)
     }
+    // Pflichtdok-Slots nachziehen: convertLeadToClaim legt selbst KEINE Slots an (bewusst —
+    // jeder Caller ergaenzt sie, s. finalizeKundeSetup/flow[token]:550). anlegeFall hatte diesen
+    // Schritt vergessen -> admin-angelegte Faelle blieben ohne Pflichtdokument-Slots, der Kunde
+    // konnte keine Pflicht-Doku hochladen (Health-Fund claims-missing-pflichtdokumente). Non-fatal:
+    // der Fall ist bereits angelegt; ein Slot-Fehler darf die Anlage nicht ruecknehmen.
+    try {
+      const { data: leadDocs } = await db
+        .from('leads')
+        .select(
+          'polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall',
+        )
+        .eq('id', lead.id)
+        .maybeSingle()
+      const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
+      await createPflichtdokumenteFromKatalog(
+        db as unknown as Parameters<typeof createPflichtdokumenteFromKatalog>[0],
+        conv.fallId,
+        leadDocs as Record<string, unknown> | null,
+      )
+    } catch (err) {
+      console.warn('[anlegeFall] Pflichtdok-Slot-Init non-fatal:', err)
+    }
     revalidatePath('/admin/faelle', 'page')
     revalidatePath('/dispatch/dashboard', 'page')
     return { success: true, fall_id: conv.fallId, claim_nummer: conv.claimNummer }
