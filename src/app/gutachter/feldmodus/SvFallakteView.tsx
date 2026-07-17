@@ -2,36 +2,31 @@
 
 // AAR-386: Fokus-Modus-Fallakte im arrived-State.
 // Ersetzt die RouteSidebar sobald der SV angekommen ist. Zeigt kompakte
-// Kopfzeile (Kunde, Kennzeichen, Fahrzeug), Pflichtdokumente-Upload
-// (FeldmodusDokumentSlot mit in-app KameraModal + Datei-Fallback),
-// Vor-Ort-Notizen (Textarea mit Auto-Save via Blur + Save-Button) auf
-// `faelle.sv_notizen_vor_ort` und den Besichtigung-abschliessen-Button.
-// Realtime-Subscription auf pflichtdokumente + faelle hält die Ansicht
+// Kopfzeile (Kunde, Kennzeichen, Fahrzeug), das Briefing (read-only) und den
+// Besichtigung-abschliessen-Button.
+// 2026-07-17: Vor-Ort-Erfassung (Pflichtdokumente-Upload via KameraModal +
+// Vor-Ort-Notizen) vorerst entfernt (Aaron "erstmal raus"). Reaktivierung =
+// PR-Revert (dieser PR); FeldmodusDokumentSlot + KameraModal wurden als dadurch
+// verwaiste Files mitgeloescht und kommen per Revert zurueck.
+// Realtime-Subscription auf claims/claim_recency haelt Fall-Info + Briefing
 // ohne manuellen Reload aktuell.
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState, useTransition } from 'react'
-import { toast } from 'sonner'
+import { useCallback, useEffect, useId, useMemo, useState } from 'react'
 import {
   ArrowLeftIcon,
   Loader2Icon,
   PhoneIcon,
   RefreshCwIcon,
-  SaveIcon,
   XIcon,
 } from 'lucide-react'
 import { createClient, whenRealtimeAuthReady } from '@/lib/supabase/client'
-import { Button } from '@/components/primitives/Button/Button.web'
 import {
   loadFeldmodusFallakteData,
-  saveFeldmodusNotizen,
   type FeldmodusFallakteFall,
-  type FeldmodusSlot,
 } from './_fallakte/actions'
 import { useOnlineStatus } from '@/lib/offline/use-online-status'
 import { saveSnapshot, readSnapshot } from '@/lib/offline/snapshot'
-import { enqueueOp } from '@/lib/offline/enqueue'
 import BesichtigungAbschliessenButton from './BesichtigungAbschliessenButton'
-import FeldmodusDokumentSlot from './FeldmodusDokumentSlot'
 
 export interface SvFallakteViewProps {
   fallId: string
@@ -53,12 +48,7 @@ export default function SvFallakteView({
 }: SvFallakteViewProps) {
   const [loading, setLoading] = useState(true)
   const [fall, setFall] = useState<FeldmodusFallakteFall | null>(null)
-  const [slots, setSlots] = useState<FeldmodusSlot[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
-  const [notizen, setNotizen] = useState('')
-  const [notizenDirty, setNotizenDirty] = useState(false)
-  const [savingNotizen, startSavingNotizen] = useTransition()
-  const notizenDirtyRef = useRef(false)
 
   const online = useOnlineStatus()
   const snapKey = `feldmodus-fallakte:${fallId}`
@@ -76,13 +66,9 @@ export default function SvFallakteView({
     if (!navigator.onLine) {
       const snap = await readSnapshot(snapKey)
       if (snap) {
-        const d = snap.data as { fall: FeldmodusFallakteFall; slots: FeldmodusSlot[] }
+        const d = snap.data as { fall: FeldmodusFallakteFall }
         setFall(d.fall)
-        setSlots(d.slots)
         setStaleSince(snap.saved_at)
-        if (!notizenDirtyRef.current) {
-          setNotizen(d.fall.sv_notizen_vor_ort ?? '')
-        }
       }
       setLoading(false)
       return
@@ -92,14 +78,8 @@ export default function SvFallakteView({
     const res = await loadFeldmodusFallakteData(fallId)
     if (res.success) {
       setFall(res.fall)
-      setSlots(res.slots)
-      // Notizen nur setzen wenn User gerade nicht selbst getippt hat — sonst
-      // würde eine Realtime-Update-Schleife die Eingabe überschreiben.
-      if (!notizenDirtyRef.current) {
-        setNotizen(res.fall.sv_notizen_vor_ort ?? '')
-      }
       setStaleSince(null)
-      void saveSnapshot({ key: snapKey, scope: 'feldmodus', role: 'sv', data: { fall: res.fall, slots: res.slots } })
+      void saveSnapshot({ key: snapKey, scope: 'feldmodus', role: 'sv', data: { fall: res.fall } })
     } else {
       setLoadError(res.error)
     }
@@ -114,10 +94,8 @@ export default function SvFallakteView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fallId, online])
 
-  // AAR-386 Nachzug: Realtime-Subscription auf pflichtdokumente für diesen Fall.
-  // Wenn ein Upload hochläuft (z. B. durch Kunden-Upload-Portal oder Admin-
-  // Rückmeldung) und der Status sich ändert, wird der Slot-State refresht
-  // ohne dass der SV manuell neu laden muss.
+  // Realtime-Subscription auf claims/claim_recency für diesen Fall: wenn Dispatch
+  // z. B. das Briefing anpasst, refresht die Fall-Info ohne manuellen Reload.
   // CMM-65: Der faelle-Leg ist auf claims (SSoT) migriert — die Fall-Touch-
   // Writer schreiben jetzt claims.updated_at. claimId kommt aus dem geladenen
   // fall-State; der Effect re-subscribed einmalig sobald er verfuegbar ist.
@@ -125,6 +103,8 @@ export default function SvFallakteView({
   useEffect(() => {
     // Offline: do not open Realtime channels (no network, channels will fail)
     if (!online) return
+    // Ohne Claim-Bezug gibt es keinen Live-Refresh-Kanal.
+    if (!fallClaimId) return
     let cancelled = false
     let channel: ReturnType<typeof supabase.channel> | null = null
 
@@ -134,22 +114,9 @@ export default function SvFallakteView({
     void whenRealtimeAuthReady().then(() => {
       if (cancelled) return
 
-      let ch = supabase
+      const ch = supabase
         .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
         .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'pflichtdokumente',
-            filter: `fall_id=eq.${fallId}`,
-          },
-          () => {
-            void reload()
-          },
-        )
-      if (fallClaimId) {
-        ch = ch.on(
           'postgres_changes',
           {
             event: 'UPDATE',
@@ -164,7 +131,7 @@ export default function SvFallakteView({
         // CMM-66: claim_recency-Leg (leak-freie Recency-SSoT, SV-lesbar). Der
         // claims-Leg darueber ist fuer den SV RLS-tot (CMM-60 Phase 4) — dieser
         // Leg liefert dem SV im Feldmodus den Live-Refresh. Additiv.
-        ch = ch.on(
+        .on(
           'postgres_changes',
           {
             event: '*',
@@ -176,7 +143,6 @@ export default function SvFallakteView({
             void reload()
           },
         )
-      }
       ch.subscribe()
       channel = ch
     })
@@ -186,37 +152,6 @@ export default function SvFallakteView({
       if (channel) void supabase.removeChannel(channel)
     }
   }, [supabase, fallId, channelSuffix, reload, fallClaimId, online])
-
-  const pflichtOffen = slots.filter(
-    (s) => s.istPflicht && s.status !== 'hochgeladen' && s.status !== 'geprueft',
-  ).length
-
-  const handleSaveNotizen = () => {
-    if (!notizenDirty || savingNotizen) return
-    startSavingNotizen(async () => {
-      // Offline branch: enqueue for replay on reconnect
-      if (!navigator.onLine) {
-        await enqueueOp({
-          kind: 'sv_notizen_vor_ort',
-          replay_class: 'B',
-          payload: { fallId, notizen },
-          entity_ref: { scope: 'feldmodus-fallakte', id: fallId },
-        })
-        setNotizenDirty(false)
-        notizenDirtyRef.current = false
-        toast.success('Notizen offline gespeichert — wird synchronisiert')
-        return
-      }
-      const res = await saveFeldmodusNotizen(fallId, notizen)
-      if (res.success) {
-        setNotizenDirty(false)
-        notizenDirtyRef.current = false
-        toast.success('Notizen gespeichert')
-      } else {
-        toast.error(res.error ?? 'Speichern fehlgeschlagen')
-      }
-    })
-  }
 
   return (
     <div className="h-full flex flex-col bg-[var(--brand-primary)]/95 backdrop-blur-md text-white">
@@ -332,99 +267,18 @@ export default function SvFallakteView({
                 </p>
               </div>
             )}
-
-            {/* Dokumente (shared DokumentenListe) */}
-            <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)]">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                  Dokumente
-                </p>
-                {pflichtOffen > 0 ? (
-                  <span className="text-[10px] font-medium text-warning-strong">
-                    {pflichtOffen} Pflicht offen
-                  </span>
-                ) : slots.some((s) => s.istPflicht) ? (
-                  <span className="text-[10px] font-medium text-success-strong">
-                    Alle Pflicht erledigt
-                  </span>
-                ) : null}
-              </div>
-              {slots.length === 0 ? (
-                <p className="text-xs text-claimondo-ondo italic">
-                  Keine Dokumente angefordert.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {slots.map((s) => (
-                    <FeldmodusDokumentSlot
-                      key={`${s.slotId}-${s.id ?? 'new'}`}
-                      fallId={fall.id}
-                      slotId={s.id}
-                      slotLabel={s.label}
-                      beschreibung={s.beschreibung}
-                      dokumentTyp={s.slotId}
-                      istPflicht={s.istPflicht}
-                      status={s.status}
-                      currentFile={s.currentFile}
-                      onUploaded={() => void reload()}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Notizen */}
-            <div className="bg-white rounded-2xl p-4 text-[var(--brand-primary)]">
-              <div className="flex items-center justify-between mb-2">
-                <label
-                  htmlFor="sv-feldmodus-notizen"
-                  className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo"
-                >
-                  Vor-Ort-Notizen
-                </label>
-                {notizenDirty && (
-                  <span className="text-[10px] text-warning-strong">
-                    Ungesichert
-                  </span>
-                )}
-              </div>
-              <textarea
-                id="sv-feldmodus-notizen"
-                value={notizen}
-                onChange={(e) => {
-                  setNotizen(e.target.value)
-                  setNotizenDirty(true)
-                  notizenDirtyRef.current = true
-                }}
-                onBlur={handleSaveNotizen}
-                rows={5}
-                placeholder="Was ist bei der Besichtigung aufgefallen?"
-                className="w-full text-xs text-[var(--brand-primary)] border border-claimondo-border rounded-ios-lg p-2.5 focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)] resize-none"
-              />
-              <Button
-                type="button"
-                variant="ondo"
-                size="sm"
-                fullWidth
-                onClick={handleSaveNotizen}
-                disabled={!notizenDirty || savingNotizen}
-                loading={savingNotizen}
-                iconLeft={<SaveIcon className="w-3.5 h-3.5" />}
-                className="mt-2"
-              >
-                Notizen speichern
-              </Button>
-            </div>
           </div>
         ) : null}
       </div>
 
-      {/* Sticky Footer mit Abschluss-Button */}
+      {/* Sticky Footer mit Abschluss-Button.
+          2026-07-17: pflichtOffen fest 0 — die Pflichtdokument-Erfassung ist
+          vorerst raus, also kein Abschluss-Gate mehr. */}
       <div className="px-4 py-3 border-t border-white/10 bg-[var(--brand-primary)]">
         <BesichtigungAbschliessenButton
           sessionId={sessionId}
           terminId={terminId}
-          pflichtOffen={pflichtOffen}
+          pflichtOffen={0}
           onAdvanced={onAdvanced}
         />
       </div>

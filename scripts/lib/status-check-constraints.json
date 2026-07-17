@@ -58,7 +58,6 @@
     "paket_upgrades.status": ["angefragt", "bezahlt", "aktiv", "abgelehnt"],
     "partner_leads.status": ["neu", "kontaktiert", "qualifiziert", "onboarding", "aktiv", "abgelehnt", "kein_interesse"],
     "pflichtdokumente.status": ["ausstehend", "hochgeladen", "geprueft", "abgelehnt", "nachgereicht_angefordert"],
-    "provisionen_maik.status": ["pending", "confirmed", "paid", "reversed"],
     "qc_checkliste.status": ["offen", "bestanden", "nachbesserung"],
     "regulierungs_klassifizierung.regulierungs_status": ["voll_reguliert", "teilweise_reguliert", "abgelehnt", "ausstehend"],
     "repairs.status": ["geplant", "in_arbeit", "abgeschlossen", "storniert"],
