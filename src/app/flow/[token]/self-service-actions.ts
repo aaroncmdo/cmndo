@@ -257,6 +257,37 @@ export async function erzeugeSelbstzahlerClaim(
     } catch (err) {
       console.error('[erzeugeSelbstzahlerClaim] Dispatch-Mitteilung fehlgeschlagen (non-fatal):', err)
     }
+
+    // AAR-956 17.07. (Befund 5, Benachrichtigungs-Matrix PR #4490): "Tab zu = Fall weg" —
+    // Kasko/Selbstzahler bekam nach dem convert keinerlei Send (account-Step wurde real
+    // nie erreicht, s. #4469). Minimal-Netz: Bestaetigungs-Mail mit Flow-Link, non-critical.
+    // Interne/Test-Identitaeten werden nicht angemailt (Smoke-Rauschen).
+    try {
+      const kundenEmail = (leadRow as Record<string, unknown> | null)?.email as string | null | undefined
+      const kundenVorname = (leadRow as Record<string, unknown> | null)?.vorname as string | null | undefined
+      const { istInterneEmail } = await import('@/lib/testdaten/interne-identitaet')
+      if (kundenEmail && !istInterneEmail(kundenEmail)) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+        const flowUrl = `${baseUrl}/flow/${token}`
+        const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const anrede = kundenVorname ? `Hallo ${esc(kundenVorname)},` : 'Hallo,'
+        const { sendEmail } = await import('@/lib/email/google/client')
+        await sendEmail({
+          to: kundenEmail,
+          subject: 'Ihr Fall bei Claimondo ist angelegt',
+          html: `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; line-height: 1.5;">
+  <p>${anrede}</p>
+  <p>Ihr Fall wurde erfolgreich angelegt. Über den folgenden Link kommen Sie jederzeit zurück zu Ihrem Vorgang — auch wenn Sie den Browser-Tab schließen:</p>
+  <p style="margin: 20px 0;"><a href="${flowUrl}" style="background: #4573A2; color: #ffffff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: bold;">Zu meinem Vorgang</a></p>
+  <p style="font-size: 13px; color: #555;">Oder direkt: <a href="${flowUrl}">${flowUrl}</a></p>
+  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.</p>
+  <p>Mit freundlichen Grüßen<br>Ihr Claimondo-Team</p>
+</div>`,
+        })
+      }
+    } catch (err) {
+      console.error('[erzeugeSelbstzahlerClaim] Bestaetigungs-Mail fehlgeschlagen (non-fatal):', err)
+    }
   }
 
   revalidatePath('/dispatch/leads')
