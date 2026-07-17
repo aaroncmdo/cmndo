@@ -98,9 +98,9 @@ export async function updateOwnProfile(
     return { success: false, error: `SV-Update fehlgeschlagen: ${svErr.message}` }
   }
 
-  // BUG-90: Wenn der SV seinen Standort geaendert hat, Isochrone neu
-  // berechnen damit /gutachter/gebiet die richtige Karte zeigt. Defensive
-  // try/catch — Profil-Update klappt auch wenn die Berechnung failt.
+  // BUG-90: Wenn der SV seinen Standort geaendert hat, Isochrone neu berechnen
+  // (fuettert die Dispatch-/Mitarbeiter-Umkreis-Views + die Termin-Engine).
+  // Defensive try/catch — Profil-Update klappt auch wenn die Berechnung failt.
   if (input.standort_lat != null && input.standort_lng != null) {
     try {
       const { data: svRow } = await supabase
@@ -129,6 +129,6 @@ export async function updateOwnProfile(
   }
 
   revalidatePath('/gutachter/profil')
-  revalidatePath('/gutachter/gebiet')
+  // E2: /gutachter/gebiet-Route entfernt (308 -> einstellungen); Isochrone feeds jetzt Dispatch/Finder.
   return { success: true }
 }

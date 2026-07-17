@@ -26,6 +26,9 @@ import { useEffect, useRef, useState } from 'react'
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+// Route-Feature (Aaron 17.07., werkstatt-embed-Lane): gerichteter Puls auf der bestehenden
+// embed-route — hier REVERSE = fließt SV → Kunde (Geometrie ist Kunde→SV geordnet).
+import { addPulsingFlow, type PulsingFlowHandle } from '@/lib/mapbox/pulsing-route'
 import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
@@ -224,6 +227,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
   const popupRootRef = useRef<Root | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
   const carMarkerRef = useRef<Marker | null>(null)
+  const routePulseRef = useRef<PulsingFlowHandle | null>(null)
   // AAR-956 (Aaron 12.06.): die im Fallback gematchten Dead-Pins (15-km-Ghost-Isochrone) als
   // dynamische Pins — getrennt von markersRef (Partner), damit ich sie pro Ort neu setzen kann.
   const deadPinMarkersRef = useRef<Marker[]>([])
@@ -621,6 +625,16 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
             },
           })
         }
+        // Gerichteter heller Puls OBEN auf der Route — REVERSE = fließt Ziel→Origin = SV→Kunde.
+        // Alten Puls-rAF zuerst stoppen (Re-Route ruft routeToTarget erneut) → kein rAF-Leak.
+        routePulseRef.current?.remove()
+        routePulseRef.current = addPulsingFlow(map, {
+          sourceId: 'embed-route',
+          layerId: 'embed-route-pulse',
+          color: '#ffffff',
+          direction: 'reverse',
+          width: ['interpolate', ['linear'], ['zoom'], 9, 3, 13, 5, 16, 7],
+        })
         const bounds = new mapboxgl.LngLatBounds([originLng, originLat], [originLng, originLat]).extend([zielLng, zielLat])
         const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
         map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
@@ -734,6 +748,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
       deadPinElsRef.current.clear()
       userMarkerRef.current?.remove()
       carMarkerRef.current?.remove()
+      routePulseRef.current?.remove()
       popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()

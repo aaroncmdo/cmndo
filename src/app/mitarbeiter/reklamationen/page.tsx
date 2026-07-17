@@ -8,6 +8,17 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
+// E3 (Aaron 17.07.): reklamationen.status ist eingereicht/pruefung/berechtigt/abgelehnt/
+// auto_abgelehnt_frist (KFZ-150 storno-actions) — NICHT offen/erledigt. Vorher zeigte der
+// Badge daher immer den grauen Fallback + den rohen Status-String.
+const REKL_LABEL: Record<string, string> = {
+  eingereicht: 'Eingereicht',
+  pruefung: 'In Prüfung',
+  berechtigt: 'Berechtigt',
+  abgelehnt: 'Abgelehnt',
+  auto_abgelehnt_frist: 'Fristablauf',
+}
+
 export default async function MitarbeiterReklamationen() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -53,14 +64,16 @@ export default async function MitarbeiterReklamationen() {
                     <span
                       className={cn(
                         'shrink-0 rounded-full px-2.5 py-0.5 text-body-xs font-medium',
-                        r.status === 'offen'
+                        r.status === 'eingereicht' || r.status === 'pruefung'
                           ? 'bg-warning-soft text-warning-strong'
-                          : r.status === 'erledigt'
+                          : r.status === 'berechtigt'
                             ? 'bg-success-soft text-success-strong'
-                            : 'bg-claimondo-bg text-claimondo-ondo',
+                            : r.status === 'abgelehnt' || r.status === 'auto_abgelehnt_frist'
+                              ? 'bg-danger-soft text-danger-strong'
+                              : 'bg-claimondo-bg text-claimondo-ondo',
                       )}
                     >
-                      {r.status ?? '—'}
+                      {REKL_LABEL[r.status as string] ?? (r.status ?? '—')}
                     </span>
                     <span className="shrink-0 whitespace-nowrap text-body-xs tabular-nums text-claimondo-ondo/70">
                       {r.eingereicht_am ? new Date(r.eingereicht_am as string).toLocaleDateString('de-DE') : '—'}

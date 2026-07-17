@@ -11,6 +11,8 @@ import { effektiveBezugIds, type TerminBezugRow } from '@/lib/termine/effektive-
 import { weavePrivatStops } from '@/lib/feldmodus/weave-privat-stops'
 import FeldmodusClient from './FeldmodusClient'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
+import EmptyState from '@/components/shared/EmptyState'
+import { CheckCircle2 } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -107,8 +109,29 @@ export default async function FeldmodusPage() {
   // getTagesSession leitet den Berliner Kalendertag intern ab (berlinIsoDate),
   // daher den rohen Instant durchreichen statt server-lokale Mitternacht.
   const session = await getTagesSession(sv.id, new Date())
-  if (!session || session.status === 'finished') {
+  // Ohne Session gibt es keinen Fokus-Modus -> zurueck zur Tagesuebersicht.
+  if (!session) {
     redirect('/gutachter/heute?info=Keine+aktive+Tages-Session')
+  }
+  // 2026-07-17 (Feldmodus-Operativ-Audit): Tag abgeschlossen -> CONTENT statt
+  // redirect(). Grund: nach dem letzten Stop setzt completeAndAdvance die Session
+  // auf 'finished'; Next re-rendert die Action-Ursprungs-Route automatisch nach
+  // JEDER Server-Action -> ein redirect() in diesem Re-Render wirft (POST=500 im
+  // Reconnect-Drain, belegt im Prod-Nachsmoke). Ein Content-Return rendert sauber
+  // -> kein 500. Zugleich UX-Plus: klare Abschluss-Bestaetigung statt stillem
+  // Bounce nach /heute. Gilt fuer online-Abschluss + Offline-Reconnect (selber
+  // Render-Pfad). Guard-Redirect oben bleibt = kein Redirect-Stub (Content-return).
+  if (session.status === 'finished') {
+    return (
+      <div className="h-full flex flex-col">
+        <EmptyState
+          icon={CheckCircle2}
+          title="Tagesmodus abgeschlossen"
+          description="Alle Besichtigungen für heute sind erledigt. Gut gemacht!"
+          action={{ label: 'Zur Tagesübersicht', href: '/gutachter/heute' }}
+        />
+      </div>
+    )
   }
 
   const terminIds = session.reihenfolge_termin_ids ?? []

@@ -417,6 +417,9 @@ const nextConfig: NextConfig = {
       { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
       { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
+      // E2 (Routen-Cleanup, Aaron 17.07.): verwaiste /gutachter/gebiet-Route (CMM-17 hatte den
+      // Nav-Punkt entfernt) -> Einstellungen (dort lebt der Gebiets-Polygon-Toggle). Bookmarks safe.
+      { source: '/gutachter/gebiet', destination: '/gutachter/einstellungen', permanent: true },
       { source: '/gutachter/termine', destination: '/gutachter/kalender?view=liste', permanent: true },
       { source: '/kanzlei', destination: '/kanzlei/mandate', permanent: true },
       // 15.05.2026: Mandate-Route umbenannt — vorher /kanzlei/dashboard,

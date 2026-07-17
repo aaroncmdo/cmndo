@@ -362,6 +362,16 @@ CI fährt `npm run check:flag-drift -- --ratchet`. Es blockt **NEUE** Verletzer-
 
 **Baseline (6 grandfathered)** sind ECHTE Drift-Funde (kein akzeptables Muster) — per Boy-Scout fixen + Baseline senken (`-- --update-baseline`): `beleg-review/actions.ts` (`ocr_status: 'approved'/'rejected'` auf fall_dokumente → approve/reject bricht), `dokumente/ad-hoc-anforderung.ts` (`status: pending/ausstehend/cancelled` auf dokument_upload_anfragen → Enum-Vokabular-Mismatch), `twilio/inbound` + `inbound/process-inbound-text` (`.in('status',[…'angefragt'])` auf gutachter_termine → toter Filterwert), `gutachter/auftraege/export-action` + `gutachter/fall/[id]/page` (`.in('status',[…'durchgefuehrt'])` → toter Filterwert). Teil des interaction-flags-Audits (`docs/superpowers/specs/2026-07-11-interaction-flags-db-driven-audit-design.md` §8, Detektor #5). Folge-Detektoren (#1 Direkt-status-Writes ausserhalb der Engine, #4 inline-Branding-Gates) sind dokumentierte spätere Phasen.
 
+# Termin-Bezug-Gate (Ratchet)
+
+**Naive Legacy-Bezug-Filter auf `gutachter_termine` sind verboten** — `.eq/.neq/.in('fall_id'|'claim_id'|'lead_id')` **übersehen bezug-native Termine**. `gutachter_termine` trägt den Termin-Auftrag („WOFÜR") auf zwei Achsen: Legacy (`fall_id`/`lead_id`/`claim_id`) + kanonisch (`bezug_typ`+`bezug_id`). Die Termin-Engine schreibt NEUE Termine **bezug-nativ** (nur `bezug_typ`+`bezug_id`, Legacy-Spalte NULL — ein Validate-Trigger lehnt doppelten Legacy-Bezug ab). Ein `.eq('fall_id', X)` findet solche Termine nie → verwaiste Auftrags-/Reminder-/Kalender-Logik (dieselbe Bug-Klasse wie der lead_id-Reader #2580).
+
+**Fix:** `.or(bezugOrExpr(achse, id))` aus `@/lib/termine/bezug-filter` — der PostgREST-`or`-Ausdruck matcht beide Achsen (Superset: findet nie weniger, dank `bezug_id.eq` nie einen fremden Termin). Weitere Top-level-Filter (`.eq('status', …)`) bleiben daneben (AND-verknüpft). Gegenstück zu `effektiveBezugIds()` (das die Achsen beim **READ** auflöst; `bezugOrExpr` ist für **FILTER**).
+
+CI fährt `npm run check:termin-bezug -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/termin-bezug-baseline.json` (Baseline **51** grandfathered, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline` → dann sind die Legacy-Spalten droppbar = der eigentliche Retire-Abschluss). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/termin-bezug-scan.mjs` (unit-getestet, 14 Fälle); block-aware über das `.from('gutachter_termine')`-Segment → 0 False-Positives. **WRITES** (`.insert/.update({ fall_id: … })`) sind erlaubt (Legacy-Spalte schreiben ist legitim, solange sie existiert) — nur FILTER übersehen Zeilen. Bewusst Legacy-only? → `// termin-bezug-skip: <grund>`-Header.
+
+**Abgrenzung zu `check:termin-engine-contract`:** Der Contract-Ratchet gatet `.eq('lead_id')`/`.eq('sv_id')` = **Engine-API-Disziplin** (nutze `findeTerminFuerLead`/`assignee_id`), hard-0. Dieses Gate gatet die **Bezug-Filter-Korrektheit** (`fall_id`/`claim_id` voll + `lead_id` jenseits `.eq`). Komplementär, keine funktionale Überlappung (die einzigen `.eq('lead_id')` liegen im ausgenommenen `finde-termin-fuer-lead.ts`). Ausnahmen identisch: `engine/*` + `finde-termin-fuer-lead.ts` dürfen die Achsen direkt anfassen. Marker: `coordination-p33-gutachter-termine-legacy-retire`.
+
 <!-- BEGIN:branding-rules -->
 # RLS-Policy-Gate (Ratchet)
 
