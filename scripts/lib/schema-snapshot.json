@@ -2683,20 +2683,6 @@
     "gepostet_am"
    ]
   },
-  "marketing_partner": {
-   "kind": "t",
-   "columns": [
-    "id",
-    "name",
-    "email",
-    "ist_kleinunternehmer",
-    "erstellt_am",
-    "ust_id",
-    "adresse_strasse",
-    "adresse_plz",
-    "adresse_ort"
-   ]
-  },
   "matelso_calls": {
    "kind": "t",
    "columns": [
@@ -3384,27 +3370,6 @@
     "makler_id",
     "aktiv",
     "erstellt_am"
-   ]
-  },
-  "provisionen_maik": {
-   "kind": "t",
-   "columns": [
-    "id",
-    "lead_id",
-    "monat",
-    "basis_provision",
-    "cpl_actual",
-    "netto_provision",
-    "status",
-    "source_channel",
-    "reversed_grund",
-    "created_at",
-    "updated_at",
-    "paid_at",
-    "marketing_partner_id",
-    "ust_satz",
-    "ust_betrag",
-    "betrag_brutto"
    ]
   },
   "push_subscriptions": {
