@@ -352,11 +352,13 @@ export default async function SvDetailPage({
                     {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
                   </span>
                 )}
-                {sv.ist_aktiv ? (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-success-soft text-success">Aktiv</span>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-danger-soft text-danger">Inaktiv</span>
-                )}
+                {/* Audit Slice 2 (Badge-Dedup): der rohe ist_aktiv-Chip ("Aktiv"/"Inaktiv")
+                    wurde entfernt — er duplizierte bzw. WIDERSPRACH dem Lifecycle-Badge oben
+                    (getSvStatus: portal_zugang=true => "Aktiv"; gesperrt_seit => "Gesperrt").
+                    getSvStatus ist die EINE Lifecycle-Achse; ist_aktiv=false ohne Sperre ist ein
+                    Vor-Freischaltungs-Zustand ("Wartet auf ..."), den zusaetzlich das
+                    FinderVisibilityBadge ("nicht aktiv") traegt. Prod-verifiziert 17.07.:
+                    0 SVs sind portal-frei + ist_aktiv=false => kein "live-aber-inaktiv"-Verlust. */}
                 {/* Aaron 07.07.: Finder-Sichtbarkeit — zeigt WARUM ein SV (nicht) im oeffentlichen Finder auftaucht */}
                 <FinderVisibilityBadge
                   sv={{
