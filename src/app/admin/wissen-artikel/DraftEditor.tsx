@@ -1,12 +1,14 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { updateArtikel, publishArtikel, rejectArtikel } from './actions'
 
-type DraftRow = {
+// Exportiert fuer die Detail-View /admin/wissen-artikel/[id] (W2.1).
+export type DraftRow = {
   id: string
   title: string
   slug: string
@@ -20,6 +22,7 @@ type DraftRow = {
 }
 
 export default function DraftEditor({ draft }: { draft: DraftRow }) {
+  const router = useRouter()
   const [title, setTitle] = useState(draft.title)
   const [slug, setSlug] = useState(draft.slug)
   const [excerpt, setExcerpt] = useState(draft.excerpt ?? '')
@@ -57,6 +60,8 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
         return
       }
       toast.success('Artikel veröffentlicht.')
+      // Draft verlaesst in_review -> zurueck zur Liste (Action revalidiert /admin/wissen-artikel).
+      router.push('/admin/wissen-artikel')
     })
   }
 
@@ -68,14 +73,12 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
         return
       }
       toast.success('Draft abgelehnt.')
+      router.push('/admin/wissen-artikel')
     })
   }
 
   return (
-    <SectionCard
-      title={draft.title}
-      hint={`Eingereicht: ${new Date(draft.created_at).toLocaleDateString('de-DE')}`}
-    >
+    <SectionCard title="Entwurf bearbeiten">{/* Titel/Datum stehen im Detail-View-Header (EntityDetailShell). */}
       <div className="space-y-4">
         {/* Titel */}
         <div>
