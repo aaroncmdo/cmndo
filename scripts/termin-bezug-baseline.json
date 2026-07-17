@@ -1,14 +1,8 @@
 {
-  "generatedAt": "2026-07-17T17:27:40.294Z",
-  "count": 36,
+  "generatedAt": "2026-07-17T17:43:07.856Z",
+  "count": 30,
   "files": [
-    "src/app/api/cron/no-show-timeout/route.ts",
-    "src/app/api/cron/re-termin-eskalation/route.ts",
-    "src/app/api/cron/send-reminders/route.ts",
     "src/app/api/cron/vollmacht-reminder/route.ts",
-    "src/app/api/kunde/termin/ics/[id]/route.ts",
-    "src/app/api/sv-zuweisung/route.ts",
-    "src/app/api/webhooks/twilio/inbound/route.ts",
     "src/app/flow/[token]/actions.ts",
     "src/app/gutachter/auftraege/export-action.ts",
     "src/app/gutachter/auftraege/page.tsx",
