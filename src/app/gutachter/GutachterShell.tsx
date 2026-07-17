@@ -13,7 +13,6 @@ import {
   FolderOpenIcon,
   CalendarIcon,
   ReceiptIcon,
-  BarChart3Icon,
   UserIcon,
   SettingsIcon,
   LogOutIcon,
@@ -91,8 +90,8 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Finanzen',
     items: [
-      // AAR-244: Lead-Preise als Tab in Abrechnung integriert (kein eigener
-      // Nav-Punkt mehr). Route /gutachter/leadpreise bleibt für Bookmarks.
+      // W1.1 (vorher AAR-244 nur behauptet): Lead-Preise sind jetzt WIRKLICH als
+      // Section in der Abrechnung integriert; Alt-Route -> 308 (next.config).
       { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
     ],
   },
@@ -102,7 +101,6 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
-      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
   },
