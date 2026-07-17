@@ -9,7 +9,6 @@ loadEnv()
 
 const { createAdminClient } = await import('@/lib/supabase/admin')
 const db = createAdminClient()
-const MARK = 'VERIFY-P2-2'
 const ids: string[] = []
 
 // Jahr 2099 -> kollidiert mit keiner realen Buchung.
@@ -22,7 +21,7 @@ type Row = Record<string, unknown>
 // { error }-Objekt zurueck (KEIN throw) -> der try-Body laeuft weiter, finally raeumt auf.
 // Geblockte Inserts liefern data=null -> werden NICHT in ids gepusht (nichts zu loeschen).
 async function ins(row: Row) {
-  const r = await db.from('gutachter_termine').insert({ ...row, notiz_intern: MARK }).select('id').single()
+  const r = await db.from('gutachter_termine').insert(row).select('id').single()
   if (r.data?.id) ids.push(r.data.id as string)
   return r
 }
@@ -68,6 +67,8 @@ try {
   }
 } finally {
   if (ids.length) await db.from('gutachter_termine').delete().in('id', ids)
-  await db.from('gutachter_termine').delete().eq('notiz_intern', MARK) // Guertel + Hosentraeger
+  // Guertel + Hosentraeger: Reste abgestuerzter Vorlaeufe. notiz_intern ist aus gutachter_termine
+  // ausgelagert (Kunde-Leak-Fix) -> stattdessen ueber das 2099-Testfenster raeumen (keine reale Buchung).
+  await db.from('gutachter_termine').delete().gte('start_zeit', '2099-03-01').lt('start_zeit', '2099-03-02')
 }
 console.log(JSON.stringify(res, null, 2))
