@@ -46,6 +46,15 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
     e.preventDefault(); setError(null); setSuccess(null); setLoading(true)
     try {
       const fd = new FormData(e.currentTarget)
+      // Deutsche App-Validierung statt der englischen Browser-Bubble ("Please fill out this
+      // field.") — die native required-Meldung ist im deutschen Produkt ein Sprachbruch (UI-Audit 17.07.).
+      const vorname = String(fd.get('vorname') ?? '').trim()
+      const nachname = String(fd.get('nachname') ?? '').trim()
+      const email = String(fd.get('email') ?? '').trim()
+      if (!vorname || !nachname || !email) {
+        setError('Bitte Vorname, Nachname und E-Mail ausfüllen.')
+        return
+      }
       const r = await createMitarbeiter(fd)
       if (!r.success) {
         setError(r.error)
@@ -162,15 +171,15 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         <h2 className="text-claimondo-navy font-semibold text-heading-sm mb-4">Neuer Mitarbeiter</h2>
         <form onSubmit={handleCreate} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Vorname</label><input name="vorname" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+            <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Nachname</label><input name="nachname" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          <div><label className="text-body-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-body-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           <div className="grid grid-cols-2 gap-3">
             <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Rolle</label><select name="rolle" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="kundenbetreuer">Kundenbetreuer</option><option value="dispatch">Dispatcher</option><option value="admin">Admin</option><option value="kanzlei">Kanzlei</option></select></div>
             <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
           </div>
-          <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
+          <div><label className="text-body-sm text-claimondo-ondo mb-1 block">Kapazität (max. Fälle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-body-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           {error && <p className="text-body-sm text-danger bg-danger-soft border border-danger/30 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
