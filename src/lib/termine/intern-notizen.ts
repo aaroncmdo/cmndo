@@ -10,8 +10,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * (can_read_gutachter_termin_intern). Die Staff-Anzeige-Reader holen die Notiz jetzt hierueber;
  * ein Kunde bekommt eine leere Map (RLS filtert).
  *
- * gutachter_termine_intern ist (noch) nicht in database.types.ts -> as-any wie bei anderen
- * jungen Tabellen (embed_sites-Muster).
+ * Nimmt bewusst den generischen SupabaseClient: Caller reichen sowohl typisierte
+ * (Browser-Client) als auch untypisierte Clients (createAdminClient) rein.
  */
 export async function ladeInterneTerminNotizen(
   supabase: SupabaseClient,
@@ -19,8 +19,7 @@ export async function ladeInterneTerminNotizen(
 ): Promise<Record<string, string | null>> {
   const ids = [...new Set(terminIds.filter((x): x is string => Boolean(x)))]
   if (ids.length === 0) return {}
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const { data } = await supabase
     .from('gutachter_termine_intern')
     .select('termin_id, notiz_intern')
     .in('termin_id', ids)

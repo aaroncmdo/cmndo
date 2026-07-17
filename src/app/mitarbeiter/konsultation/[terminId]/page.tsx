@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { KonsultationCockpit, type Lead, type FlowLink } from './KonsultationCockpit'
+import { ladeInterneTerminNotizen } from '@/lib/termine/intern-notizen'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,10 +17,13 @@ export default async function KonsultationPage({ params }: { params: Promise<{ t
   const admin = createAdminClient()
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, typ, kb_id, lead_id, start_zeit, end_zeit, status, kanal, notiz_intern, durchgefuehrt_am')
+    .select('id, typ, kb_id, lead_id, start_zeit, end_zeit, status, kanal, durchgefuehrt_am')
     .eq('id', terminId)
     .maybeSingle()
   if (!termin || termin.typ !== 'kb_beratung' || termin.kb_id !== user.id) notFound()
+
+  // notiz_intern lebt in gutachter_termine_intern (Staff-only, Kunde-Leak-Fix).
+  const interneNotizen = await ladeInterneTerminNotizen(admin, [termin.id])
 
   const { data: lead } = termin.lead_id
     ? await admin
@@ -51,7 +55,7 @@ export default async function KonsultationPage({ params }: { params: Promise<{ t
         startZeit: termin.start_zeit,
         status: termin.status,
         kanal: termin.kanal,
-        notizIntern: termin.notiz_intern,
+        notizIntern: interneNotizen[termin.id] ?? null,
         durchgefuehrtAm: termin.durchgefuehrt_am,
       }}
       lead={lead as unknown as Lead}
