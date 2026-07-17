@@ -94,6 +94,15 @@ jobs:
       - name: Termin-Engine-Contract-Ratchet
         run: npm run check:termin-engine-contract -- --ratchet
 
+      # Termin-Bezug-Drift-Bremse (Ratchet): blockt NEUE naive Legacy-Bezug-Filter
+      # (.eq/.neq/.in('fall_id'|'claim_id'|'lead_id')) auf gutachter_termine ggue.
+      # scripts/termin-bezug-baseline.json — die uebersehen bezug-native Termine
+      # (bezug_typ+bezug_id, Legacy-Spalte NULL). Fix: .or(bezugOrExpr(achse,id)) aus
+      # @/lib/termine/bezug-filter. Ergaenzt den Contract-Ratchet (der nur .eq('lead_id')/
+      # .eq('sv_id') = Engine-API-Disziplin gatet). Siehe AGENTS.md Paragraph Termin-Bezug-Gate.
+      - name: Termin-Bezug-Ratchet
+        run: npm run check:termin-bezug -- --ratchet
+
       # RLS-Policy-Ratchet: blockt NEUE permissive CREATE POLICY ohne explizite Rollen-Klausel
       # ggue. scripts/rls-policy-baseline.json. Ohne `TO` ist der Postgres-Default `TO public` —
       # die Policy gilt dann auch fuer authenticator/cli_login_postgres/dashboard_user/
