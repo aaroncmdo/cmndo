@@ -1,17 +1,13 @@
-﻿// Mitarbeiter-Kundentermine. Zeigt SV-Besichtigungen der Fälle die ich
-// als KB/LB betreue (faelle.kundenbetreuer_id = user.id). Unterschied zu
-// /mitarbeiter/termine: dort sind MEINE Termine (Rückrufe etc., bei denen
-// ich anwesend bin). Hier sind Kunden-Termine meiner Fälle (SV-Besich-
-// tigung beim Kunden — ich bin nicht vor Ort, aber muss den Ablauf
-// kennen).
-
+// Mitarbeiter-Kundentermine — jetzt ?view=kundentermine der /mitarbeiter/termine-Seite
+// (W2.8 Routen-Cleanup: vorher eigene Route /mitarbeiter/kundentermine, 1:1 dasselbe
+// Zeit-Rail/Tag-Gruppen-Layout wie „Meine Termine", nur andere Datenquelle).
+// Zeigt SV-Besichtigungen der Fälle die ich als KB/LB betreue
+// (claims.kundenbetreuer_id = user.id) — nur lesend, ich bin nicht vor Ort.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { UsersIcon, MapPinIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
-
-export const dynamic = 'force-dynamic'
 
 // CMM-49 #2688-Fix: faelle-Embed laeuft jetzt ueber faelle_claim_bridge (die fall_id-FKs
 // zeigen nach #2688 auf bridge). kundenbetreuer_id + lead_id wandern in den nested
@@ -34,7 +30,7 @@ type GutachterTerminRow = {
     | null
 }
 
-export default async function MitarbeiterKundentermine() {
+export default async function KundentermineView() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -205,7 +201,7 @@ export default async function MitarbeiterKundentermine() {
   }
 
   return (
-    <div className="space-y-5">
+    <>
       <PageHeader
         title="Kundentermine"
         description={
@@ -238,6 +234,6 @@ export default async function MitarbeiterKundentermine() {
           </section>
         )
       })}
-    </div>
+    </>
   )
 }

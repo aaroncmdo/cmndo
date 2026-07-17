@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { ladeInterneTerminNotizen } from '@/lib/termine/intern-notizen'
+import KundentermineView from './_views/KundentermineView'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,10 +22,45 @@ const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls:
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
 }
 
-export default async function MitarbeiterTermine() {
+// W2.8: Toggle „Meine Termine" / „Kundentermine" — kundentermine ist ?view= dieser Seite
+// (vorher eigene Route /mitarbeiter/kundentermine).
+function TermineTabs({ active }: { active: 'meine' | 'kundentermine' }) {
+  const base = 'flex items-center gap-1.5 rounded-ios-lg px-3 py-1.5 text-body-xs font-medium whitespace-nowrap shrink-0 transition-colors'
+  const on = 'bg-claimondo-shield text-white'
+  const off = 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1">
+      <Link href="/mitarbeiter/termine" className={`${base} ${active === 'meine' ? on : off}`}>
+        <CalendarIcon className="h-3.5 w-3.5" />Meine Termine
+      </Link>
+      <Link href="/mitarbeiter/termine?view=kundentermine" className={`${base} ${active === 'kundentermine' ? on : off}`}>
+        <UsersIcon className="h-3.5 w-3.5" />Kundentermine
+      </Link>
+    </div>
+  )
+}
+
+export default async function MitarbeiterTermine({
+  searchParams,
+}: {
+  searchParams?: Promise<{ view?: string }>
+}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
+
+  // W2.8 (Routen-Cleanup): Kundentermine ist ein ?view= dieser Seite statt eigener Route.
+  // Pro Tab nur dessen Daten laden — die admin_termine/KB-Queries unten laufen nur im
+  // Default-View.
+  const view = (await searchParams)?.view === 'kundentermine' ? 'kundentermine' : 'meine'
+  if (view === 'kundentermine') {
+    return (
+      <div className="space-y-5">
+        <TermineTabs active="kundentermine" />
+        <KundentermineView />
+      </div>
+    )
+  }
 
   type TerminRow = {
     id: string
@@ -245,6 +281,7 @@ export default async function MitarbeiterTermine() {
 
   return (
     <div className="space-y-5">
+      <TermineTabs active="meine" />
       <PageHeader
         title="Zeitplan"
         description={termine.length === 0 ? 'Rückrufe und Kundentermine, die dir zugewiesen sind.' : summaryParts.join(' · ')}

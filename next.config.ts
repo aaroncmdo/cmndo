@@ -350,6 +350,8 @@ const nextConfig: NextConfig = {
       // war ein Scope-Duplikat der rollen-adaptiven /faelle-Liste (KB → eigene Fälle, MitarbeiterNav-
       // Shell via faelle/layout.tsx AAR-628). EXAKT-Match — /faelle/[id]-Detail bleibt.
       { source: '/mitarbeiter/faelle', destination: '/faelle', permanent: true },
+      // W2.8 (Routen-Cleanup): Kundentermine ist ein ?view= von /mitarbeiter/termine.
+      { source: '/mitarbeiter/kundentermine', destination: '/mitarbeiter/termine?view=kundentermine', permanent: true },
       // Partner-Hub (AAR-527):
       { source: '/admin/organisationen', destination: '/admin/partner', permanent: true },
       { source: '/admin/versicherungen', destination: '/admin/partner/versicherer', permanent: true },
