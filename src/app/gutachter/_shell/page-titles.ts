@@ -22,7 +22,6 @@ export const SV_PAGE_TITLES: Array<{ prefix: string; title: string }> = [
   { prefix: '/gutachter/team', title: 'Team' },
   { prefix: '/gutachter/community', title: 'Community' },
   { prefix: '/gutachter/tasks', title: 'Meine Tasks' },
-  { prefix: '/gutachter/gebiet', title: 'Mein Gebiet' },
   { prefix: '/gutachter/profil', title: 'Mein Profil' },
   { prefix: '/gutachter/termine', title: 'Termine' },
   { prefix: '/gutachter', title: 'Heute' }, // Index

@@ -19,7 +19,7 @@ import {
   SaveIcon,
   XIcon,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, whenRealtimeAuthReady } from '@/lib/supabase/client'
 import { Button } from '@/components/primitives/Button/Button.web'
 import {
   loadFeldmodusFallakteData,
@@ -125,52 +125,65 @@ export default function SvFallakteView({
   useEffect(() => {
     // Offline: do not open Realtime channels (no network, channels will fail)
     if (!online) return
-    let channel = supabase
-      .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pflichtdokumente',
-          filter: `fall_id=eq.${fallId}`,
-        },
-        () => {
-          void reload()
-        },
-      )
-    if (fallClaimId) {
-      channel = channel.on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'claims',
-          filter: `id=eq.${fallClaimId}`,
-        },
-        () => {
-          void reload()
-        },
-      )
-      // CMM-66: claim_recency-Leg (leak-freie Recency-SSoT, SV-lesbar). Der
-      // claims-Leg darueber ist fuer den SV RLS-tot (CMM-60 Phase 4) — dieser
-      // Leg liefert dem SV im Feldmodus den Live-Refresh. Additiv.
-      channel = channel.on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'claim_recency',
-          filter: `claim_id=eq.${fallClaimId}`,
-        },
-        () => {
-          void reload()
-        },
-      )
-    }
-    channel.subscribe()
+    let cancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    // Erst auf den Realtime-Auth-Token warten (setAuth ist async in client.ts),
+    // DANN joinen — sonst joint der claims-Leg als `anon` (Race) und walrus wirft
+    // `permission denied`. Siehe whenRealtimeAuthReady() in client.ts.
+    void whenRealtimeAuthReady().then(() => {
+      if (cancelled) return
+
+      let ch = supabase
+        .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'pflichtdokumente',
+            filter: `fall_id=eq.${fallId}`,
+          },
+          () => {
+            void reload()
+          },
+        )
+      if (fallClaimId) {
+        ch = ch.on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'claims',
+            filter: `id=eq.${fallClaimId}`,
+          },
+          () => {
+            void reload()
+          },
+        )
+        // CMM-66: claim_recency-Leg (leak-freie Recency-SSoT, SV-lesbar). Der
+        // claims-Leg darueber ist fuer den SV RLS-tot (CMM-60 Phase 4) — dieser
+        // Leg liefert dem SV im Feldmodus den Live-Refresh. Additiv.
+        ch = ch.on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'claim_recency',
+            filter: `claim_id=eq.${fallClaimId}`,
+          },
+          () => {
+            void reload()
+          },
+        )
+      }
+      ch.subscribe()
+      channel = ch
+    })
+
     return () => {
-      void supabase.removeChannel(channel)
+      cancelled = true
+      if (channel) void supabase.removeChannel(channel)
     }
   }, [supabase, fallId, channelSuffix, reload, fallClaimId, online])
 

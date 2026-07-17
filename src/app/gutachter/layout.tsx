@@ -105,6 +105,7 @@ export default async function GutachterLayout({
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
       svId={sv?.id ? String(sv.id) : null}
+      onboardingModus={sv?.portal_zugang_freigeschaltet === false}
     >
       {/* Deaktiviert-Banner */}
       {isDeactivated && (
