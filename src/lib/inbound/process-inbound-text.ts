@@ -7,6 +7,7 @@
 
 import type { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import type { MatchResult } from '@/lib/inbound/match-fall'
 import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
@@ -194,7 +195,7 @@ export async function processInboundText(
     const { data: naechsterTermin } = await db
       .from('gutachter_termine')
       .select('id')
-      .eq('fall_id', matchedFallId)
+      .or(bezugOrExpr('fall', matchedFallId))
       .gte('start_zeit', new Date().toISOString())
       .order('start_zeit', { ascending: true })
       .limit(1)

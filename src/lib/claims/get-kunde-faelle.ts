@@ -25,6 +25,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 import { getClaimPayments, type ClaimPaymentRow } from '@/lib/faelle/claim-payments'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 type DbClient = SupabaseClient<Database>
 
@@ -597,7 +598,7 @@ export async function getKundeFallDetailRecord(
     .select(
       'id, status, start_zeit, end_zeit, kanal, typ, final_verbindlich_ab, besichtigungsort_adresse, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
     .order('created_at', { ascending: false })
     .limit(1)
