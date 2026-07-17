@@ -150,6 +150,6 @@ export async function reassignTask(taskId: string, neuerUserId: string) {
   }
 
   revalidatePath('/admin/aufgaben/alle')
-  revalidatePath('/admin/meine-tasks')
+  revalidatePath('/admin/aufgaben/meine') // W1.8: kanonisch statt redirectetem /admin/meine-tasks
   return { success: true }
 }

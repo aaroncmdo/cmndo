@@ -205,7 +205,7 @@ export async function GET(request: Request) {
           inhalt: werkstattInhalt,
           kontext_typ: 'fall',
           kontext_id: claim.id,
-          route_url: '/werkstatt/auftraege',
+          route_url: `/werkstatt/auftraege/${claim.id}`, // W1.7: Deep-Link statt Liste
           prioritaet: 'hoch',
         })
         return !!created
