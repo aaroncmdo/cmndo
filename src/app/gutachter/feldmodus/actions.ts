@@ -242,16 +242,24 @@ export async function completeAndAdvance(
   // Zwischen-State 'completing' damit Timeline/Reporting es erkennt.
   await transitionTagesSession(sessionId, 'completing')
   const nextId = await advanceToNextTermin(sessionId)
-  // 2026-07-17 (500-Attribution der Regel-4-Abnahme): die eigene Route nur
-  // revalidieren, wenn es einen NAECHSTEN Stop gibt. Im finished-Fall (nextId
-  // null) triggerte revalidatePath('/gutachter/feldmodus') den Re-Render der
-  // Route IN der Action-Response — der wirft im frisch-beendeten Zustand
-  // transient (POST=500, RSC-pageerror, Outbox-Op haengt). Die Route wird im
-  // finished-Fall ohnehin verlassen (online via router.refresh -> Server-
-  // Redirect nach /heute; Replay braucht gar keinen Render). /heute bleibt
-  // immer revalidiert.
-  if (nextId) revalidatePath('/gutachter/feldmodus')
-  revalidatePath('/gutachter/heute')
+  // 2026-07-17 (500-Attribution der Regel-4-Abnahme, verfeinert nach Prod-Nachsmoke):
+  // Im OFFLINE-REPLAY (expectedAktuellerTerminId gesetzt) GAR NICHT revalidieren.
+  // Ein Replay ist ein Background-Sync — der Client hat offline bereits optimistisch
+  // weitergeschaltet und refresht bei der naechsten Navigation. Ein revalidatePath
+  // hier laesst Next die Route IN der Action-Response re-rendern; im Reconnect-Fenster
+  // wirft dieser Re-Render transient -> POST /gutachter/feldmodus = 500, die Op landet
+  // (dank Drain-Guard) auf 'failed' + braucht einen Retry-Zyklus. Der Prod-Nachsmoke
+  // zeigte: der erste Fix (nur feldmodus im finished-Fall auslassen) reichte NICHT —
+  // der 500 kam vom /heute-Revalidate-Re-Render. Replay = null Revalidate schliesst
+  // die ganze Klasse. Der DB-Write ist da bereits committed (Termin abgeschlossen).
+  //
+  // ONLINE (kein expectedAktuellerTerminId): normal revalidieren. feldmodus nur mit
+  // Folge-Stop (finished-Fall verlaesst die Route ohnehin), /heute immer.
+  const istReplay = expectedAktuellerTerminId !== undefined
+  if (!istReplay) {
+    if (nextId) revalidatePath('/gutachter/feldmodus')
+    revalidatePath('/gutachter/heute')
+  }
   return { success: true, nextTerminId: nextId }
 }
 
