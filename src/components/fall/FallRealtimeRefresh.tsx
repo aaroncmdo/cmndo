@@ -18,7 +18,7 @@
 
 import { useEffect, useId, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, whenRealtimeAuthReady } from '@/lib/supabase/client'
 
 type Props = {
   fallId: string
@@ -36,6 +36,8 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
   useEffect(() => {
     if (!fallId) return
     const supabase = createClient()
+    let cancelled = false
+    let channel: ReturnType<typeof supabase.channel> | null = null
 
     function scheduleRefresh() {
       if (timerRef.current) clearTimeout(timerRef.current)
@@ -45,67 +47,79 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
       }, debounceMs)
     }
 
-    let channel = supabase
-      .channel(`fall-rt-${fallId}-${channelId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `fall_id=eq.${fallId}`,
-        },
-        scheduleRefresh,
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'auftraege',
-          filter: `fall_id=eq.${fallId}`,
-        },
-        scheduleRefresh,
-      )
+    // Erst auf den Realtime-Auth-Token warten (setAuth ist async in client.ts),
+    // DANN joinen. Sonst joint der gutachter_termine/auftraege/claims-Leg als
+    // `anon` (Race gegen das async setAuth) → walrus `permission denied`. Der
+    // claim_recency-Leg ist zwar anon-lesbar, aber wir gaten den GANZEN Channel,
+    // da die anon-gesperrten Legs sonst den WAL-Poll fuer den ganzen Channel
+    // brechen. Siehe whenRealtimeAuthReady() in client.ts.
+    void whenRealtimeAuthReady().then(() => {
+      if (cancelled) return
 
-    // CMM-65: Recency-Leg auf claims (SSoT) statt faelle. Nur wenn claimId
-    // vorhanden (faelle.claim_id ist NOT NULL — Guard ist defensiv).
-    // Kunde/Admin koennen claims lesen -> dieser Leg faengt JEDE claims-Aenderung
-    // (status, sv_id, …) via moddatetime. Fuer den SV ist er RLS-tot (CMM-60 Phase 4
-    // entzog dem SV claims-SELECT) -> der SV bekommt seinen Live-Refresh ueber den
-    // claim_recency-Leg unten.
-    if (claimId) {
-      channel = channel.on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'claims',
-          filter: `id=eq.${claimId}`,
-        },
-        scheduleRefresh,
-      )
-      // CMM-66: zusaetzlicher Leg auf die leak-freie Recency-SSoT claim_recency
-      // (claim_id + last_activity_at, KEINE sensiblen Spalten) — die auch der SV
-      // lesen darf. Bumps via touch_claim_recency()/transitionFallStatus. Additiv
-      // (kein Removal des claims-Legs) -> keine Regression fuer Kunde/Admin.
-      channel = channel.on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'claim_recency',
-          filter: `claim_id=eq.${claimId}`,
-        },
-        scheduleRefresh,
-      )
-    }
+      let ch = supabase
+        .channel(`fall-rt-${fallId}-${channelId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `fall_id=eq.${fallId}`,
+          },
+          scheduleRefresh,
+        )
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'auftraege',
+            filter: `fall_id=eq.${fallId}`,
+          },
+          scheduleRefresh,
+        )
 
-    channel.subscribe()
+      // CMM-65: Recency-Leg auf claims (SSoT) statt faelle. Nur wenn claimId
+      // vorhanden (faelle.claim_id ist NOT NULL — Guard ist defensiv).
+      // Kunde/Admin koennen claims lesen -> dieser Leg faengt JEDE claims-Aenderung
+      // (status, sv_id, …) via moddatetime. Fuer den SV ist er RLS-tot (CMM-60 Phase 4
+      // entzog dem SV claims-SELECT) -> der SV bekommt seinen Live-Refresh ueber den
+      // claim_recency-Leg unten.
+      if (claimId) {
+        ch = ch.on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'claims',
+            filter: `id=eq.${claimId}`,
+          },
+          scheduleRefresh,
+        )
+        // CMM-66: zusaetzlicher Leg auf die leak-freie Recency-SSoT claim_recency
+        // (claim_id + last_activity_at, KEINE sensiblen Spalten) — die auch der SV
+        // lesen darf. Bumps via touch_claim_recency()/transitionFallStatus. Additiv
+        // (kein Removal des claims-Legs) -> keine Regression fuer Kunde/Admin.
+        ch = ch.on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'claim_recency',
+            filter: `claim_id=eq.${claimId}`,
+          },
+          scheduleRefresh,
+        )
+      }
+
+      ch.subscribe()
+      channel = ch
+    })
 
     return () => {
+      cancelled = true
       if (timerRef.current) clearTimeout(timerRef.current)
-      supabase.removeChannel(channel)
+      if (channel) supabase.removeChannel(channel)
     }
   }, [fallId, claimId, channelId, router, debounceMs])
 
