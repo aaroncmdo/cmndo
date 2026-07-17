@@ -3,8 +3,9 @@
 // Nachbesichtigung. KEIN SV-Match (fix der SV der bereits auf fall.sv_id
 // liegt), KEIN Lead-Preis, KEIN Stripe-Checkout, KEIN SA-Versand.
 // Erstellt nur eine neue gutachter_termine-Row mit typ='konfrontation',
-// bezahlt=false, honorar_betrag=0 und triggert danach das
-// sv_konfrontation_anfrage_versendet-Event (Mitteilung + Audit via C3).
+// bezahlt=false (+ honorar_betrag=0 in gutachter_termine_intern, s. Auslagerung)
+// und triggert danach das sv_konfrontation_anfrage_versendet-Event
+// (Mitteilung + Audit via C3).
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
@@ -199,7 +200,6 @@ export async function triggerKonfrontationsDispatch(
       typ: 'konfrontation',
       status: 'reserviert',
       bezahlt: false,
-      honorar_betrag: 0,
     })
     .select('id')
     .single()
@@ -217,6 +217,14 @@ export async function triggerKonfrontationsDispatch(
       error: insertError?.message ?? 'gutachter_termine-Insert fehlgeschlagen',
     }
   }
+
+  // honorar_betrag=0-Initialisierung in der Staff-only Intern-Tabelle (honorar/notiz-
+  // Auslagerung, Kunde-Leak-Fix — die Spalte lebt nicht mehr auf gutachter_termine).
+  // Fail-soft: Termin-Row + Event sind der kritische Pfad.
+  const { error: internError } = await db
+    .from('gutachter_termine_intern')
+    .upsert({ termin_id: inserted.id as string, honorar_betrag: 0 }, { onConflict: 'termin_id' })
+  if (internError) console.error('[konfrontations-dispatch-lite] intern honorar-init:', internError)
 
   // Event-System für Mitteilung (+ später WA-Template) + Audit.
   // Schlägt der Event-Trigger fehl, bleibt die Row erhalten — KB kann den

@@ -84,7 +84,6 @@ export async function createKbVideoterminByKb(
       start_zeit: startZeit.toISOString(),
       end_zeit: endZeit.toISOString(),
       status: 'bestaetigt',
-      notiz_intern: notiz ?? null,
     })
     .select('id')
     .single()
@@ -94,6 +93,17 @@ export async function createKbVideoterminByKb(
       return { success: false, error: 'Slot bereits belegt' }
     }
     return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  }
+
+  // Interne Buchungs-Notiz in die Staff-only Intern-Tabelle (honorar/notiz-Auslagerung,
+  // Kunde-Leak-Fix — notiz_intern lebt nicht mehr auf gutachter_termine). Fail-soft:
+  // die Buchung ist durch, eine fehlgeschlagene Notiz darf den Flow nicht brechen
+  // (Muster wie Timeline/WA unten).
+  if (notiz) {
+    const { error: internError } = await db
+      .from('gutachter_termine_intern')
+      .upsert({ termin_id: termin.id as string, notiz_intern: notiz }, { onConflict: 'termin_id' })
+    if (internError) console.error('[createKbVideoterminByKb] intern-notiz:', internError)
   }
 
   // SP2c: KB-Termin in den externen Kalender syncen (Jitsi -> beide Provider). Fail-soft.
