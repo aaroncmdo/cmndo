@@ -21,6 +21,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { SlaTyp } from '@/lib/sla/tracker'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 export type FestgefahrenerFallKind = 'kein_gutachter' | 'termin_unbestaetigt'
 
@@ -133,19 +134,21 @@ export async function ladeFestgefahreneFaelle(): Promise<FestgefahrenerFall[]> {
   {
     const { data: byClaim } = await db
       .from('gutachter_termine')
-      .select('claim_id')
+      .select('claim_id, bezug_id, bezug_typ')
       .eq('status', 'bestaetigt')
-      .in('claim_id', claimIds)
-    for (const t of (byClaim ?? []) as Array<{ claim_id: string | null }>) {
-      if (t.claim_id) confirmedClaimIds.add(t.claim_id)
+      .or(bezugInExpr('claim', claimIds))
+    for (const t of (byClaim ?? []) as Array<{ claim_id: string | null; bezug_id: string | null; bezug_typ: string | null }>) {
+      const cid = t.claim_id ?? (t.bezug_typ === 'claim' ? t.bezug_id : null)
+      if (cid) confirmedClaimIds.add(cid)
     }
     const { data: byFall } = await db
       .from('gutachter_termine')
-      .select('fall_id')
+      .select('fall_id, bezug_id, bezug_typ')
       .eq('status', 'bestaetigt')
-      .in('fall_id', fallIds)
-    for (const t of (byFall ?? []) as Array<{ fall_id: string | null }>) {
-      if (t.fall_id) confirmedFallIds.add(t.fall_id)
+      .or(bezugInExpr('fall', fallIds))
+    for (const t of (byFall ?? []) as Array<{ fall_id: string | null; bezug_id: string | null; bezug_typ: string | null }>) {
+      const fid = t.fall_id ?? (t.bezug_typ === 'fall' ? t.bezug_id : null)
+      if (fid) confirmedFallIds.add(fid)
     }
   }
 
