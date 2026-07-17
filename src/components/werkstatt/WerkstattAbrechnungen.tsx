@@ -89,16 +89,22 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
       tooltip: row.storno_grund ?? undefined,
     }
   }
-  // pending
-  const days = daysUntil(row.hold_until)
+  // pending — Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). release_deadline null =
+  // Fall noch nicht abgeschlossen → Freigabe erst nach Fallabschluss (frueher: hold_until = Erstellung+7d).
+  const days = daysUntil(row.release_deadline)
   return {
-    label: days !== null && days > 0 ? `fällig in ${days} T.` : 'fällig',
+    label:
+      row.release_deadline === null
+        ? 'nach Fallabschluss'
+        : days !== null && days > 0
+          ? `fällig in ${days} T.`
+          : 'fällig',
     className: 'bg-warning-soft text-warning-strong border border-warning/20',
     icon: <ClockIcon width={12} height={12} />,
     tooltip:
-      row.hold_until
-        ? `Clawback-Frist bis ${fmtDate(row.hold_until)}`
-        : undefined,
+      row.release_deadline
+        ? `Clawback-Frist bis ${fmtDate(row.release_deadline)}`
+        : 'Freigabe erst nach Fallabschluss + 7 Tage',
   }
 }
 
@@ -213,7 +219,7 @@ export function WerkstattAbrechnungen({
                       {fmtDate(row.erstellt_am)}
                     </Td>
                     <Td className="text-body-sm">
-                      {fmtDate(row.hold_until)}
+                      {fmtDate(row.release_deadline)}
                     </Td>
                   </Tr>
                 )

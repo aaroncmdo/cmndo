@@ -64,3 +64,21 @@ export function istReleaseBerechtigt(completionTs: string | null, nowIso: string
   if (Number.isNaN(completionMs)) return false
   return new Date(nowIso).getTime() >= completionMs + RELEASE_HOLD_MS
 }
+
+/**
+ * Freigabe-/Clawback-Stichtag einer pending Provision = Completion + 7 Tage. Der Zeitpunkt, zu dem
+ * die Provision (falls der Fall nicht storniert wird) freigegeben wird und ab dem sie nicht mehr
+ * zurueckgeholt werden kann. `null` = Fall noch nicht abgeschlossen → der Hold hat noch nicht
+ * begonnen (Freigabe erst nach Fallabschluss).
+ *
+ * Ersetzt die frueheren Partner-Portal-Anzeigen, die `partner_provisionen.hold_until` (= Erstellung
+ * +7d) zeigten — seit FG4-A falsch, weil der Release auf Completion+7d umgestellt wurde (das
+ * hold_until-Datum lief ab, waehrend die Provision korrekt weiter pending blieb).
+ */
+export function releaseDeadlineTs(c: ClaimCompletionInput): string | null {
+  const completionTs = deriveCompletionTs(c)
+  if (!completionTs) return null
+  const completionMs = new Date(completionTs).getTime()
+  if (Number.isNaN(completionMs)) return null
+  return new Date(completionMs + RELEASE_HOLD_MS).toISOString()
+}
