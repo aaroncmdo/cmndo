@@ -16221,6 +16221,47 @@ export type Database = {
           },
         ]
       }
+      profiles_oauth_secrets: {
+        Row: {
+          google_access_token: string | null
+          google_refresh_token: string | null
+          google_token_expires_at: string | null
+          ms_access_token: string | null
+          ms_refresh_token: string | null
+          ms_token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
+          ms_access_token?: string | null
+          ms_refresh_token?: string | null
+          ms_token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
+          ms_access_token?: string | null
+          ms_refresh_token?: string | null
+          ms_token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_oauth_secrets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       promo_clicks: {
         Row: {
           clicked_at: string
