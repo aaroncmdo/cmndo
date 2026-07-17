@@ -4629,7 +4629,8 @@
         "empty": "Brak zaplanowanych terminów",
         "kommend": "Nadchodzące",
         "verlauf": "Historia",
-        "reparatur": "Terminy naprawy"
+        "reparatur": "Terminy naprawy",
+        "offen": "Trwa ustalanie terminu"
       },
       "toggle": {
         "liste": "Lista",
@@ -4701,6 +4702,17 @@
         "gegenvorschlagAntworten": "Rzeczoznawca zaproponował nowy termin — odpowiedz teraz →",
         "terminVerwalten": "Zarządzaj terminem lub przesuń →",
         "zurFallakte": "Do akt sprawy"
+      },
+      "typ": {
+        "besichtigung": "Oględziny",
+        "nachbesichtigung": "Ponowne oględziny",
+        "reparatur": "Naprawa",
+        "beratung": "Konsultacja",
+        "konfrontation": "Konfrontacja"
+      },
+      "actions": {
+        "verschieben": "Przełóż",
+        "absagen": "Anuluj"
       }
     },
     "tracking": {
