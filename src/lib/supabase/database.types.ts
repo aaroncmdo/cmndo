@@ -6595,42 +6595,6 @@ export type Database = {
           },
         ]
       }
-      finance_eintraege: {
-        Row: {
-          beschreibung: string | null
-          betrag: number | null
-          created_at: string | null
-          id: string
-          referenz_id: string | null
-          referenz_typ: string | null
-          status: string | null
-          typ: string
-          updated_at: string | null
-        }
-        Insert: {
-          beschreibung?: string | null
-          betrag?: number | null
-          created_at?: string | null
-          id?: string
-          referenz_id?: string | null
-          referenz_typ?: string | null
-          status?: string | null
-          typ: string
-          updated_at?: string | null
-        }
-        Update: {
-          beschreibung?: string | null
-          betrag?: number | null
-          created_at?: string | null
-          id?: string
-          referenz_id?: string | null
-          referenz_typ?: string | null
-          status?: string | null
-          typ?: string
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       finance_monatsberichte: {
         Row: {
           aktive_faelle: number | null
@@ -16254,6 +16218,47 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_werkstatt_auftrag"
             referencedColumns: ["claim_id"]
+          },
+        ]
+      }
+      profiles_oauth_secrets: {
+        Row: {
+          google_access_token: string | null
+          google_refresh_token: string | null
+          google_token_expires_at: string | null
+          ms_access_token: string | null
+          ms_refresh_token: string | null
+          ms_token_expires_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
+          ms_access_token?: string | null
+          ms_refresh_token?: string | null
+          ms_token_expires_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          google_access_token?: string | null
+          google_refresh_token?: string | null
+          google_token_expires_at?: string | null
+          ms_access_token?: string | null
+          ms_refresh_token?: string | null
+          ms_token_expires_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_oauth_secrets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
         ]
       }
