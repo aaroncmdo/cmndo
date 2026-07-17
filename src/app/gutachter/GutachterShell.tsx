@@ -125,6 +125,16 @@ const SV_MOBILE_PRIMARY: MobileNavItem[] = [
 
 // AAR-809: Wetter-Logik raus in components/shared/WeatherBanner.
 
+// Onboarding-Nav (Aaron-Entscheidung 17.07., Option B): ein noch NICHT freigeschalteter SV
+// (portal_zugang_freigeschaltet=false) sieht die volle Nav, aber die OPERATIVEN Portal-Items
+// sind gesperrt (grau + 🔒, nicht klickbar) — sonst bouncte jeder Klick auf /gutachter/willkommen
+// (tote Links, UI-Audit 17.07.). Aktiv bleiben nur onboarding-/finanz-relevante Routen.
+const ONBOARDING_ACTIVE_HREFS = new Set<string>([
+  '/gutachter/vertrag',
+  '/gutachter/abrechnung',
+  '/gutachter/verifizierung',
+])
+
 export default function GutachterShell({
   displayName,
   userId,
@@ -138,6 +148,7 @@ export default function GutachterShell({
   showCommunity,
   showVerifizierung,
   svId,
+  onboardingModus,
 }: {
   displayName: string
   userId: string
@@ -157,6 +168,8 @@ export default function GutachterShell({
   showVerifizierung?: boolean
   // CMM-36: SV-ID für Geo-Tracking
   svId?: string | null
+  // Onboarding-Modus (Option B, 17.07.): SV noch nicht freigeschaltet -> operative Nav gesperrt.
+  onboardingModus?: boolean
 }) {
   const pathname = usePathname()
   // Feldmodus übernimmt den vollen Viewport — Sidebar + FAB ausblenden damit
@@ -448,6 +461,23 @@ export default function GutachterShell({
                 {section.items.map(({ href, label, icon: Icon, badgeKey, beta }) => {
                   const active = isActive(href)
                   const badge = badgeKey ? badgeCounts[badgeKey] : 0
+                  // Option B (Onboarding): operative Portal-Items sperren (kein toter Link-Bounce).
+                  const locked = !!onboardingModus && !ONBOARDING_ACTIVE_HREFS.has(href)
+                  if (locked) {
+                    return (
+                      <div
+                        key={href}
+                        aria-disabled="true"
+                        title="Erst nach Freischaltung verfügbar"
+                        className="flex items-center gap-3 px-3 py-2 rounded-ios-xl text-[13px] font-medium opacity-40 cursor-not-allowed select-none"
+                        style={{ color: 'var(--brand-sidebar-text)', fontFamily: 'var(--brand-font-heading, inherit)' }}
+                      >
+                        <Icon className="w-5 h-5 shrink-0" />
+                        <span className="flex-1 truncate">{label}</span>
+                        <span className="text-[11px]" aria-hidden>🔒</span>
+                      </div>
+                    )
+                  }
                   return (
                     <Link
                       key={href}
@@ -487,6 +517,14 @@ export default function GutachterShell({
               </div>
             </div>
           ))}
+          {onboardingModus && (
+            <p
+              className="px-3 pt-3 text-[11px] leading-snug"
+              style={{ color: 'var(--brand-sidebar-text)', opacity: 0.55 }}
+            >
+              🔒 Die weiteren Bereiche werden nach deiner Freischaltung sichtbar. Schließe zuerst dein Onboarding ab.
+            </p>
+          )}
         </nav>
 
         {/* Hilfe & Support — Inline-Panel ersetzt Sidebar-Inhalt (gleiche Breite, kein Drawer) */}
