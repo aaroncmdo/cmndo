@@ -11,8 +11,10 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronUp } from 'lucide-react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import type { Map as MapboxMap, Marker as MapboxMarker } from 'mapbox-gl'
+import type { Map as MapboxMap, Marker as MapboxMarker, GeoJSONSource } from 'mapbox-gl'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+import { addPulsingFlow, type PulsingFlowHandle } from '@/lib/mapbox/pulsing-route'
 
 const COL_NAVY = '#0D1B3E'
 const COL_ONDO = '#4573A2'
@@ -51,6 +53,7 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
   const mapRef = useRef<MapboxMap | null>(null)
   const markersRef = useRef<Array<{ id: string; el: HTMLDivElement; marker: MapboxMarker }>>([])
   const ankerRef = useRef<MapboxMarker | null>(null)
+  const routePulseRef = useRef<PulsingFlowHandle | null>(null)
   const selectedIdRef = useRef<string | null>(selectedId)
   const [sheetOffen, setSheetOffen] = useState(true)
   const dragStartRef = useRef<number | null>(null)
@@ -134,6 +137,105 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     ankerRef.current = new mapboxgl.Marker({ element: el, anchor: 'center' }).setLngLat([center.lng, center.lat]).addTo(map)
     map.flyTo({ center: [center.lng, center.lat], zoom: 12, duration: 800, essential: true })
   }, [center])
+
+  // Aaron 17.07.: Route zur AUSGEWÄHLTEN Werkstatt + gerichteter Puls VOM Kunden ZUR Werkstatt
+  // (direction:'forward' — die Geometrie ist center→Werkstatt geordnet). Kein fitBounds/Kamera-
+  // Move (respektiert die I4-Regel: Auswahl bewegt die Karte nicht). fetchDrivingRoute hat einen
+  // Luftlinien-Fallback → die Route erscheint auch ohne Directions-Quote.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+    const ziel = selectedId ? rows.find((r) => r.id === selectedId) : null
+
+    const removeRoute = () => {
+      routePulseRef.current?.remove()
+      routePulseRef.current = null
+      for (const id of ['wf-route-line', 'wf-route-casing']) {
+        if (map.getLayer(id)) {
+          try {
+            map.removeLayer(id)
+          } catch {
+            /* schon weg */
+          }
+        }
+      }
+      if (map.getSource('wf-route')) {
+        try {
+          map.removeSource('wf-route')
+        } catch {
+          /* schon weg */
+        }
+      }
+    }
+
+    if (!ziel || ziel.lat == null || ziel.lng == null || !center) {
+      removeRoute()
+      return
+    }
+
+    let cancelled = false
+    const ctrl = new AbortController()
+    const zielLng = ziel.lng
+    const zielLat = ziel.lat
+
+    const draw = () => {
+      void fetchDrivingRoute([center.lng, center.lat], [zielLng, zielLat], { signal: ctrl.signal }).then(({ primary }) => {
+        if (cancelled || !mapRef.current) return
+        const data: GeoJSON.Feature = {
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+          properties: {},
+        }
+        const src = map.getSource('wf-route') as GeoJSONSource | undefined
+        if (src) {
+          src.setData(data)
+        } else {
+          map.addSource('wf-route', { type: 'geojson', data })
+          // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+          map.addLayer({
+            id: 'wf-route-casing',
+            type: 'line',
+            source: 'wf-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': '#ffffff', 'line-width': 10, 'line-opacity': 0.9 },
+          })
+          map.addLayer({
+            id: 'wf-route-line',
+            type: 'line',
+            source: 'wf-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: {
+              'line-color': COL_ONDO,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+              'line-opacity': 0.95,
+            },
+          })
+        }
+        // Gerichteter heller Puls OBEN — fließt Kunde → Werkstatt.
+        routePulseRef.current?.remove()
+        routePulseRef.current = addPulsingFlow(map, {
+          sourceId: 'wf-route',
+          layerId: 'wf-route-pulse',
+          color: '#ffffff',
+          direction: 'forward',
+          width: ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 5],
+        })
+      })
+    }
+
+    if (map.loaded()) draw()
+    else map.once('load', draw)
+
+    // Deps-Wechsel/Unmount: Fetch abbrechen + Puls-rAF stoppen. Source/Layer bleiben bei
+    // Auswahl-Wechsel bestehen (nächster Lauf macht setData → kein Flicker); Voll-Abbau nur
+    // beim Deselect (oben removeRoute) bzw. via map.remove() beim Unmount.
+    return () => {
+      cancelled = true
+      ctrl.abort()
+      routePulseRef.current?.remove()
+      routePulseRef.current = null
+    }
+  }, [selectedId, rows, center])
 
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
