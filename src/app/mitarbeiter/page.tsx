@@ -209,7 +209,7 @@ export default async function MitarbeiterDashboard() {
       {/* Metrik-Leiste */}
       <StatBar
         items={[
-          { label: 'Aktive Fälle', value: faelleCount ?? 0, icon: FolderOpenIcon, href: '/mitarbeiter/faelle' },
+          { label: 'Aktive Fälle', value: faelleCount ?? 0, icon: FolderOpenIcon, href: '/faelle' },
           { label: 'Offene Tasks', value: tasksCount ?? 0, icon: CheckSquareIcon, href: '/mitarbeiter/tasks' },
           { label: 'Rückrufe', value: meineRueckrufe.length, icon: PhoneCallIcon, href: '/mitarbeiter/termine', tone: overdueRueckrufe ? 'warning' : 'default' },
           { label: 'Termine', value: meineTermineAnzahl, icon: CalendarIcon, href: '/mitarbeiter/termine' },
@@ -260,7 +260,7 @@ export default async function MitarbeiterDashboard() {
 
         {/* Arbeit — Fälle + Tasks */}
         <div className="space-y-5 lg:order-1">
-          <Panel title="Meine Fälle" count={faelleCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/mitarbeiter/faelle">
+          <Panel title="Meine Fälle" count={faelleCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/faelle">
             <div className="p-3">
               <MeineArbeitBoard items={workItems} />
             </div>
