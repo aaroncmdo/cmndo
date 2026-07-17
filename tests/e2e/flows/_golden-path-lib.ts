@@ -16,7 +16,9 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 export const ROLES = {
   sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
   dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!' },
-  kunde: { email: 'test-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!' },
+  // 17.07.: test-kunde@ existiert seit dem Golive-Accounts-Cleanup nicht mehr; dediziertes
+  // Smoke-Konto = smoke-kunde@ (reference-internal-test-account-logins, Aaron-Go).
+  kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!' },
   kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Test1234!' },
   kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!' },
   admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!' },
