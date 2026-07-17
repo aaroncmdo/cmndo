@@ -20,8 +20,14 @@ describe('detailLink (P3: gemountete Routen unter dem Dach)', () => {
     })
   })
 
-  it('Makler/Partner-Lead → gemountete Liste', () => {
-    expect(detailLink('makler', 'm1').href).toBe('/admin/vertrieb/makler')
+  it('Makler → Einzel-Akte mit id (B3)', () => {
+    expect(detailLink('makler', 'm1')).toEqual({
+      href: '/admin/vertrieb/makler/m1',
+      label: 'Vollständige Akte öffnen',
+    })
+  })
+
+  it('Partner-Lead → gemountete Liste', () => {
     expect(detailLink('partner-lead', 'p1').href).toBe('/admin/vertrieb/partner-leads')
   })
 
