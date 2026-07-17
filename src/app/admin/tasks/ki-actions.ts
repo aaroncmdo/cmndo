@@ -20,9 +20,10 @@ import type { TaskRow, PlanStep, ExecCtx, ExecutionPlan } from '@/lib/task-execu
 const TASK_COLS = 'id, typ, titel, beschreibung, status, claim_id, fall_id, empfaenger_rolle'
 
 function revalidateTasks() {
-  revalidatePath('/admin/tasks')
+  // W1.8: /admin/tasks + /admin/meine-tasks 308en auf /admin/aufgaben/* — die kanonischen
+  // Pfade revalidieren (sonst refresht der "meine"-Tab nach KI-Ausfuehrung nie).
   revalidatePath('/admin/aufgaben/alle')
-  revalidatePath('/admin/meine-tasks')
+  revalidatePath('/admin/aufgaben/meine')
   revalidatePath('/mitarbeiter/tasks')
 }
 

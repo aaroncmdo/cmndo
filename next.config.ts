@@ -359,6 +359,9 @@ const nextConfig: NextConfig = {
       { source: '/admin/tasks', destination: '/admin/aufgaben/alle', permanent: true },
       { source: '/admin/ai-vorschlaege', destination: '/admin/aufgaben/vorschlaege', permanent: true },
       { source: '/admin/aufgaben', destination: '/admin/aufgaben/alle', permanent: true },
+      // W1.5 (Routen-Cleanup): Kunde-Fälle-Liste -> Hub (rendert dasselbe FallKarten-Grid +
+      // Jetzt-zu-tun + Übersicht). EXAKT-Match, damit /kunde/faelle/[id] (Detail-View) bleibt.
+      { source: '/kunde/faelle', destination: '/kunde', permanent: true },
       // Vertrieb-Konsolidierung: Alt-Listen-Routen -> Cockpit (/admin/vertrieb).
       // EXAKT-Match (kein :path*) -> Sub-Routen (sachverstaendige/[id], /anlegen,
       // /basic-freigaben, werkstaetten/[id], /qr-pool) bleiben erreichbar. Die
@@ -399,8 +402,9 @@ const nextConfig: NextConfig = {
       // /gutachter/termine/[id]/vor-ort, /admin/aufgaben/meine,
       // /admin/aufgaben/alle, /kanzlei/dashboard, …).
       //
-      // Static (7):
-      { source: '/admin/aufgaben', destination: '/admin/aufgaben/meine', permanent: true },
+      // Static:
+      // W1.8: /admin/aufgaben-Doppel-Redirect entfernt — der Aufgaben-Hub-Eintrag oben (→alle)
+      // gewinnt per first-match; dieser (→meine) war toter Config-Code.
       { source: '/admin/sachverstaendige/neu', destination: '/admin/sachverstaendige/anlegen', permanent: true },
       { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },

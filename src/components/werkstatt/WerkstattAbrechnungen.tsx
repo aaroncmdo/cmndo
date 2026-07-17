@@ -189,6 +189,9 @@ export function WerkstattAbrechnungen({
                 return (
                   <Tr key={row.id}>
                     <Td className="font-mono text-xs">
+                      {/* W1.7-Follow-up: Deep-Link auf /werkstatt/auftraege/[claimId] blockiert —
+                          WerkstattProvisionRow hat nur claim_nummer, kein claim_id. Braucht
+                          claim_id im partner_provisionen-Select (queries.ts). Separat. */}
                       {row.claim_nummer ?? '–'}
                     </Td>
                     <Td className="font-semibold tabular-nums">
