@@ -24,14 +24,11 @@
 // Env (nur SELECT-Achse): NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (read-only).
 // Ohne Keys skippt NUR der Trockenschuss; die Write-Achse laeuft und gatet weiter.
 //
-// SCHEMA-SNAPSHOT REGENERIEREN (bei jeder Migration mit neuen/entfernten Spalten — im selben PR):
-//   MCP execute_sql (READ) gegen die Live-DB:
-//   SELECT c.relname || '|' || CASE c.relkind WHEN 'v' THEN 'v' WHEN 'm' THEN 'v' ELSE 't' END
-//     || '|' || string_agg(a.attname, ',' ORDER BY a.attnum) AS row
-//   FROM pg_class c JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum > 0 AND NOT a.attisdropped
-//   WHERE c.relnamespace = 'public'::regnamespace AND c.relkind IN ('r','v','m','p','f')
-//   GROUP BY c.relname, c.relkind ORDER BY c.relname;
-//   -> Zeilen "name|kind|col1,col2,…" in tables{name:{kind,columns}} von schema-snapshot.json.
+// SCHEMA-SNAPSHOT REGENERIEREN: `node --env-file=.env.local scripts/build-schema-snapshot.mjs`
+//   (REST-only, deterministisch). Laeuft naechtlich als Cron (.github/workflows/schema-snapshot-regen.yml)
+//   + oeffnet bei Drift automatisch einen PR — die frueher noetige manuelle "jede Migration zieht den
+//   Snapshot nach"-Disziplin ist damit abgeloest. Bei einer Migration mit Schema-Aenderung kann man
+//   das Script auch sofort im selben PR laufen lassen (statt auf den Cron zu warten).
 
 import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
