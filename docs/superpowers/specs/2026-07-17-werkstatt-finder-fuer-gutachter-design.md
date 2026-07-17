@@ -75,6 +75,8 @@ create table public.werkstatt_empfehlungen (
   werkstatt_id uuid not null references public.werkstaetten(id),
   rang         smallint not null default 1,     -- 1..3 Reihenfolge
   begruendung  text,                            -- optionaler SV-Kommentar
+  distanz_km   numeric,                         -- Snapshot: Distanz Fall->Werkstatt zum Empfehlungszeitpunkt
+  match_snapshot jsonb,                         -- Snapshot: Warum empfohlen (abgedeckte faehigkeiten, rating, marke_match) fuers Kunden-Frontend
   status       text not null default 'empfohlen'
                check (status in ('empfohlen','bestaetigt','abgelehnt')),
   created_at   timestamptz not null default now()
@@ -119,12 +121,15 @@ create table public.werkstatt_empfehlungen (
 
 **Graceful Degradation:** läuft OCR noch, entfällt die Fähigkeits-Ableitung → Ranking auf Distanz + bekannte Fahrzeugdaten, mit Hinweis „Gutachten wird noch ausgewertet". **Totalschaden:** Hinweis „wirtschaftlicher Totalschaden — Reparatur ggf. unwirtschaftlich", Liste bleibt sichtbar (Präzedenz: `fiktiv` zeigt Finder trotzdem).
 
+**Finder-Logik ≠ Empfehlungen (Trennung der Zuständigkeiten):** Das Ranking ist ein eigenständiges, wiederverwendbares Server-Modul (`src/lib/werkstatt/finder.ts`), das **live** läuft und **nichts** persistiert. Erst bei „Empfehlen" wird das Ergebnis der SV-Auswahl (Werkstatt-IDs, Rang, `distanz_km`, `match_snapshot`) in `werkstatt_empfehlungen` eingefroren. So bleibt das Ranking Single-Source und ist mit einem künftigen kunden-/flow-seitigen Finder teilbar; der Snapshot hält die dem Kunden gezeigte Begründung stabil, auch wenn sich Werkstatt-Stammdaten später ändern.
+
 ## 7. Oberflächen
 
 ### 7.1 SV — `WerkstattFinderCard`
 - Ort: `src/app/gutachter/fall/[id]/_components/WerkstattFinderCard.tsx` (client), Props aus `page.tsx`, gerendert in `FallDetailClient.tsx`.
 - Gate: erscheint, sobald Gutachten vorhanden (`auftraege.gutachten_url` / `gutachten`-Row).
-- Inhalt: gerankte Kartenliste (Name, Distanz, Google-Bewertung, Match-Begründung „deckt Lack+Karosserie ab"), Mehrfach-Auswahl 1–3, optional Begründung, „Empfehlen"-Button.
+- Inhalt: gerankte Kartenliste (Top ~8: Name, Distanz, Google-Bewertung, Match-Badge „deckt Lack+Karosserie ab").
+- Auswahl (so wählt der SV): antippen von bis zu **3** Karten → Rang 1/2/3 in Auswahl-Reihenfolge, optional je kurze Begründung; „Empfehlung senden" (min 1, max 3). Zusätzlich: Suche über **alle** Werkstätten (falls SV eine bestimmte im Kopf hat) + „externe Werkstatt eintragen". Liste-first; Map = optionale Ausbaustufe.
 - Action: `src/app/gutachter/fall/[id]/_actions/werkstatt-empfehlung.ts` (`{ ok, error? }`-Pattern) → legt Batch + Zeilen an, triggert Kunden-Benachrichtigung, `revalidatePath('/gutachter/fall/${id}')`.
 - Matching-Query als Server-Action, Analog zu `src/lib/actions/gutachter-finder-actions.ts`.
 - Karte statt handgerolltem Markup: `primitives`/`shared` gemäß Komponenten-Set-Policy.
