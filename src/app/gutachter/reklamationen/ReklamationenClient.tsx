@@ -10,6 +10,17 @@ import { REKLAMATIONS_GRUENDE } from './constants'
 import { Modal } from '@/components/primitives/Modal'
 import { liquidField } from '@/lib/styles/liquid-field'
 
+// E3-Follow-up: reklamationen.status ist eingereicht/pruefung/berechtigt/abgelehnt/
+// auto_abgelehnt_frist (KFZ-150 storno-actions) — NICHT offen/in-bearbeitung/erledigt.
+// Vorher fiel JEDER echte Status in den danger-Fallback (alles rot) + zeigte den rohen Enum.
+const REKL_LABEL: Record<string, string> = {
+  eingereicht: 'Eingereicht',
+  pruefung: 'In Prüfung',
+  berechtigt: 'Berechtigt',
+  abgelehnt: 'Abgelehnt',
+  auto_abgelehnt_frist: 'Fristablauf',
+}
+
 // CMM-44 SP-A3: claim_nummer ist die Aktennummer aus claims (SSoT) — bei
 // reklamationen ist sie doppelt-nested (faelle → claims via claim_id).
 type ClaimEmbed = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
@@ -100,11 +111,11 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                   </p>
                 </div>
                 <span className={`text-xs font-semibold tracking-[-.005em] px-2.5 py-1 rounded-full flex-shrink-0 ${
-                  r.status === 'offen' ? 'bg-warning-soft text-warning-strong border border-warning/30' :
-                  r.status === 'in-bearbeitung' ? 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border' :
-                  r.status === 'erledigt' ? 'bg-success-soft text-success-strong border border-success/30' :
-                  'bg-danger-soft text-danger-strong border border-danger/30'
-                }`}>{r.status}</span>
+                  r.status === 'eingereicht' || r.status === 'pruefung' ? 'bg-warning-soft text-warning-strong border border-warning/30' :
+                  r.status === 'berechtigt' ? 'bg-success-soft text-success-strong border border-success/30' :
+                  r.status === 'abgelehnt' || r.status === 'auto_abgelehnt_frist' ? 'bg-danger-soft text-danger-strong border border-danger/30' :
+                  'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border'
+                }`}>{REKL_LABEL[r.status] ?? r.status}</span>
               </div>
               <p className="text-sm text-claimondo-navy">{r.begruendung}</p>
               {r.admin_begruendung && (
