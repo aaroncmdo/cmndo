@@ -65,17 +65,38 @@ export async function GET(request: Request) {
       if (kb?.vorname) kbVorname = kb.vorname as string
     }
 
+    const startDate = new Date(termin.start_zeit as string)
+    const datum = startDate.toLocaleDateString('de-DE', {
+      timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
+    })
+    const uhrzeit = startDate.toLocaleTimeString('de-DE', {
+      timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit',
+    })
+    const kanalText = termin.kanal === 'video' ? 'per Video-Call' : 'telefonisch'
+    const vorname = (lead?.vorname as string | null) ?? null
+
+    // AAR-956 17.07. (Befund 6, Benachrichtigungs-Matrix PR #4490): der KB erfuhr vom
+    // Auto-Beratungstermin NUR per Kalender-Blick — jetzt Mitteilung an den assignee.
+    // Non-critical: Fehler blockiert weder Kunden-Email noch das Flag.
+    if (termin.assignee_id) {
+      try {
+        const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
+        await createMitteilung({
+          empfaenger_id: termin.assignee_id as string,
+          empfaenger_rolle: 'kundenbetreuer',
+          kategorie: 'update',
+          titel: 'Neuer Auto-Beratungstermin',
+          inhalt: `${datum} um ${uhrzeit} Uhr (${kanalText})${vorname ? ` — Kunde: ${vorname}` : ''} — automatisch vorgemerkt.`,
+          kontext_typ: 'lead',
+          kontext_id: (termin.lead_id as string) ?? undefined,
+        })
+      } catch (err) {
+        console.error(`[kb-beratung-anlage-notify] KB-Mitteilung-Fehler für Termin ${termin.id}:`, err)
+      }
+    }
+
     const email = (lead?.email as string | null) ?? null
     if (email) {
-      const startDate = new Date(termin.start_zeit as string)
-      const datum = startDate.toLocaleDateString('de-DE', {
-        timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
-      })
-      const uhrzeit = startDate.toLocaleTimeString('de-DE', {
-        timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit',
-      })
-      const kanalText = termin.kanal === 'video' ? 'per Video-Call' : 'telefonisch'
-      const vorname = (lead?.vorname as string | null) ?? null
       const anrede = vorname ? `Hallo ${esc(vorname)},` : 'Hallo,'
 
       try {

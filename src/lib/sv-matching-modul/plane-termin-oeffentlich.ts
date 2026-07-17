@@ -24,6 +24,7 @@ import { toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import { rankSlots } from './ranking'
 import { toOeffentlichesSvProfil } from './projection'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { istTestSvAngebotBlockiert } from '@/lib/testdaten/test-sv-guard'
 import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder } from './types'
 
 const SLOT_FENSTER_TAGE = 14
@@ -41,6 +42,13 @@ export type PlaneTerminOeffentlichInput = {
   wunschterminIso?: string | null
   /** SV-Embed: gesetzt → genau dieser SV (kein globales Matching, bis FIXER_MAX_SLOTS, immer gezeigt). */
   fixerSvId?: string | null
+  /**
+   * AAR-956 17.07. (Follow-up 3): Kunden-Identitaet des Betrachters (Lead-Email/-Name),
+   * NUR fuer den Fixer-Pfad relevant — ein TEST-SV-Embed bietet nur INTERNEN Identitaeten
+   * Slots an (istTestSvAngebotBlockiert; der globale Pool filtert Test-SVs laengst via
+   * applyDispatchableFilter). Fehlend/unbekannt = fail-closed (Test-SV wird nicht angeboten).
+   */
+  kundenIdentitaet?: { email?: string | null; name?: string | null } | null
 }
 
 /**
@@ -98,13 +106,18 @@ async function ladeFixenSvKandidat(
   svId: string,
   lat: number,
   lng: number,
+  kundenIdentitaet?: { email?: string | null; name?: string | null } | null,
 ): Promise<SvMatchCandidate[]> {
   const { data: sv } = await admin
     .from('sachverstaendige')
-    .select('id, profile_id, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet')
+    .select('id, profile_id, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, ist_testaccount')
     .eq('id', svId)
     .maybeSingle()
   if (!sv || sv.ist_aktiv === false) return []
+  // AAR-956 17.07. (Follow-up 3): Test-SV-Embed nur fuer interne Identitaeten —
+  // Angebots-Spiegel der Guard-Matrix (sonst laeuft der echte Kunde erst an der
+  // Buchung in den Guard = degradierte UX). Verhalten wie "SV nicht gefunden".
+  if (istTestSvAngebotBlockiert(sv.ist_testaccount === true, kundenIdentitaet)) return []
   const distanzKm =
     sv.standort_lat != null && sv.standort_lng != null
       ? haversineKm(Number(sv.standort_lat), Number(sv.standort_lng), lat, lng)
@@ -172,7 +185,7 @@ async function ladeProfilUndBewertung(
 export async function planeTerminOeffentlich(
   input: PlaneTerminOeffentlichInput,
 ): Promise<OeffentlichesSvProfil[]> {
-  const { lat, lng, wunschterminIso = null, fixerSvId = null } = input
+  const { lat, lng, wunschterminIso = null, fixerSvId = null, kundenIdentitaet = null } = input
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return []
 
   const admin = createAdminClient()
@@ -196,7 +209,7 @@ export async function planeTerminOeffentlich(
 
   // ── SV-EMBED (Fixer): genau dieser SV, bis FIXER_MAX_SLOTS, IMMER gezeigt ──
   if (fixerSvId) {
-    const candidates = await ladeFixenSvKandidat(admin, fixerSvId, lat, lng)
+    const candidates = await ladeFixenSvKandidat(admin, fixerSvId, lat, lng, kundenIdentitaet)
     if (candidates.length === 0) return []
     const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
     const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))

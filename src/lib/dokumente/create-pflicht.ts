@@ -58,8 +58,31 @@ export async function createPflichtdokumenteFromKatalog(
     seen.add(slot.slot_id)
   }
 
-  if (docs.length === 0) return
-  await supabase.from('pflichtdokumente').insert(docs)
+  if (docs.length === 0) {
+    // Beobachtbarkeit: docs.length===0 heisst normalerweise "alle Slots existieren schon"
+    // (idempotenter Re-Run). Wenn der Katalog aber GAR KEINE Pflicht-Slots liefert
+    // (pflichtSlots leer), ist das fuer einen realen Claim ungewoehnlich und eine moegliche
+    // Ursache des "Claim ohne Pflichtdokument-Slots"-Health-Funds (evtl. unvollstaendiger
+    // Lead-/Fall-Kontext). Loggen, damit der stille Fall diagnostizierbar ist.
+    if (pflichtSlots.length === 0) {
+      console.warn(
+        `[create-pflicht] Katalog lieferte 0 Pflicht-Slots fuer fall ${fallId} — kein Slot angelegt (Lead-/Fall-Kontext evtl. unvollstaendig).`,
+      )
+    }
+    return
+  }
+
+  const { error: insertError } = await supabase.from('pflichtdokumente').insert(docs)
+  if (insertError) {
+    // Stiller Slot-Init-Fehler = genau die Ursache des "Claim ohne Pflichtdokument-Slots"-
+    // Health-Funds. NICHT werfen (wuerde die Lead-Konvertierung / den Erstell-Pfad brechen),
+    // aber sichtbar loggen statt still verpuffen zu lassen.
+    console.error(
+      `[create-pflicht] pflichtdokumente-insert fehlgeschlagen fuer fall ${fallId} ` +
+        `(${docs.length} Slots: ${docs.map((d) => d.dokument_typ).join(', ')}): ${insertError.message}`,
+    )
+    return
+  }
 
   // AAR-623: Konditionale WA-Tasks fuer freigabe_bank + zeugenbericht
   // triggern — nur fuer Slots die gerade frisch angelegt wurden.

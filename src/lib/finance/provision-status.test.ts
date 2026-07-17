@@ -61,7 +61,7 @@ function stornoFakeDb(opts: { origData: Record<string, unknown> | null; stornoRo
 
 // ─── Rich fakeDb for auszahlenProvision tests ─────────────────────────────────
 // Dispatches by table name.
-// - ledger table (partner_provisionen / partner_staffel_bonus / provisionen_maik):
+// - ledger table (partner_provisionen / partner_staffel_bonus):
 //     from(tabelle).select(...).eq().single() → ledger row
 //     from(tabelle).update(patch).eq() → { error: null }
 // - makler / werkstaetten (Union-Steuer-Read, seit der Provisions-Unifikation):
@@ -402,33 +402,6 @@ describe('auszahlenProvision', () => {
     expect(callArg.leistungsDatum).toBe('2026-06-30T08:00:00.000Z')
   })
 
-  it('(Datum-c) provisionen_maik: created_at wird als leistungsDatum uebergeben (Embed-Pfad, partnerTyp=marketing)', async () => {
-    vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
-      ok: true,
-      gutschriftId: 'gs-id-3',
-      nummer: 'CMNDO-GS-2026-00003',
-    })
-    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p3.pdf' })
-
-    // maik ist non-Union: FK-Embed marketing_partner(ist_kleinunternehmer) bleibt in der Ledger-Row.
-    const db = richFakeDb({
-      ledgerRow: {
-        netto_provision: 75,
-        marketing_partner_id: 'mp-1',
-        marketing_partner: { ist_kleinunternehmer: true },
-        created_at: '2026-05-10T12:00:00.000Z',
-      },
-      gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
-    })
-
-    const r = await auszahlenProvision(db, 'provisionen_maik', 'maik-1')
-    expect(r.ok).toBe(true)
-
-    const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
-    expect(callArg.partnerTyp).toBe('marketing')
-    expect(callArg.leistungsDatum).toBe('2026-05-10T12:00:00.000Z')
-  })
-
   it('(Datum-d) PDF-Input-Konstruktion enthaelt leistung_datum aus re-fetchter Gutschrift-Row', async () => {
     vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
       ok: true,
@@ -498,23 +471,6 @@ describe('storniereProvision', () => {
     expect(patch.status).toBe('storniert')
     expect(patch.storniert_am).toBeUndefined()
     expect(patch.storno_grund).toBeUndefined()
-  })
-
-  it('(b) freigebenProvision fuer provisionen_maik schreibt status:confirmed', async () => {
-    const db = fakeDb({})
-    const r = await freigebenProvision(db, 'provisionen_maik', 'x')
-    expect(r.ok).toBe(true)
-    expect(db._upd).toHaveBeenCalledWith({ status: 'confirmed' })
-  })
-
-  it('(c) storniereProvision fuer provisionen_maik schreibt status:reversed + reversed_grund (kein storniert_am)', async () => {
-    const db = fakeDb({})
-    const r = await storniereProvision(db, 'provisionen_maik', 'x', 'Rueckbuchung')
-    expect(r.ok).toBe(true)
-    const patch = db._upd.mock.calls[0][0] as Record<string, unknown>
-    expect(patch.status).toBe('reversed')
-    expect(patch.reversed_grund).toBe('Rueckbuchung')
-    expect(patch.storniert_am).toBeUndefined()
   })
 })
 

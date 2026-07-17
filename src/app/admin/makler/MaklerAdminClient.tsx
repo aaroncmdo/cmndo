@@ -5,6 +5,7 @@
 // dual-rate, und handleCreate MIT try/catch (WerkstaettenClient hat hier einen Silent-Swallow-Bug).
 // Formular-Inhalt ist nach MaklerAnlegenForm ausgelagert — diese Datei haelt nur noch Liste + Modal-Shell.
 
+import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -191,7 +192,13 @@ export default function MaklerAdminClient({
               {maklers.map(m => (
                 <Tr key={m.id} className="border-b border-claimondo-border/50">
                   <Td>
-                    <div className="text-claimondo-navy font-medium">{m.firma}</div>
+                    {/* B3: Firma drillt in die Makler-Akte (unterm Vertrieb-Dach; Soft-Nav dort = Drawer-Intercept). */}
+                    <Link
+                      href={`/admin/vertrieb/makler/${m.id}`}
+                      className="text-claimondo-navy font-medium hover:text-claimondo-ondo transition-colors"
+                    >
+                      {m.firma}
+                    </Link>
                     <div className="text-claimondo-ondo text-xs">{m.email ?? '—'}</div>
                   </Td>
                   <Td>

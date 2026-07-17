@@ -83,7 +83,6 @@ const UST_TABELLEN: ReadonlyArray<{ tabelle: string; netto: string; ust: string;
   { tabelle: 'partner_provisionen', netto: 'betrag_netto_eur', ust: 'ust_betrag', brutto: 'betrag_brutto' },
   { tabelle: 'partner_gutschriften', netto: 'betrag_netto', ust: 'ust_betrag', brutto: 'betrag_brutto' },
   { tabelle: 'gutschriften', netto: 'betrag_netto', ust: 'mwst_betrag', brutto: 'betrag_brutto' },
-  { tabelle: 'provisionen_maik', netto: 'netto_provision', ust: 'ust_betrag', brutto: 'betrag_brutto' },
 ]
 
 // Ledger-Cache-Regression (Check 3) entfernt (Normalisierung Slice 4): die geprueften Cache-Spalten

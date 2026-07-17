@@ -28,6 +28,28 @@ export function entscheideTestSvGuard(leadIstIntern: boolean, svIstTest: boolean
   return { blockieren: false }
 }
 
+/**
+ * AAR-956 17.07. (Attestation-Follow-up 3): Angebots-Spiegel der Matrix fuer den
+ * FIXER-Pfad (SV-Embed, planeTerminOeffentlich fixerSvId). Der globale Pool filtert
+ * Test-SVs laengst (applyDispatchableFilter/ist_testaccount=false, auch Finder-Karte
+ * + LP seit #3438) — nur das Embed eines TEST-SVs bot bisher JEDEM Besucher Slots an;
+ * ein echter Kunde lief dann an der Buchung in den Guard (degradierte UX).
+ *
+ * Regel: ein Test-SV wird nur INTERNEN Identitaeten (istInterneIdentitaet) angeboten —
+ * genau denen, die ihn per Matrix auch buchen duerfen (Smoke-Strecken bleiben voll
+ * funktionsfaehig). Unbekannte Identitaet = fail-closed Richtung Kundenschutz.
+ * Echte SVs sind hier NIE blockiert (die intern→echt-Sperre bleibt Sache des
+ * Buchungs-Chokepoints — ein interner Betrachter DARF echte Profile sehen).
+ */
+export function istTestSvAngebotBlockiert(
+  svIstTest: boolean,
+  identitaet?: { email?: string | null; name?: string | null } | null,
+): boolean {
+  if (!svIstTest) return false
+  const intern = istInterneIdentitaet(identitaet?.email ?? null, identitaet?.name ?? null)
+  return entscheideTestSvGuard(intern, true).blockieren
+}
+
 /** Loest die Kunden-Email/Name hinter einem bezug (lead direkt, claim/fall ueber lead_id) auf. */
 async function ladeIdentitaet(
   db: SupabaseClient,
