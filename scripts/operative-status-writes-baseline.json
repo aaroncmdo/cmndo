@@ -1,0 +1,10 @@
+{
+  "generatedAt": "2026-07-17T18:23:49.956Z",
+  "count": 4,
+  "files": [
+    "src/app/gutachter/team/actions.ts",
+    "src/lib/kanzlei-wunsch/actions.ts",
+    "src/lib/lexdrive/process-event.ts",
+    "src/lib/termine/close-nur-gutachter-termin.ts"
+  ]
+}
