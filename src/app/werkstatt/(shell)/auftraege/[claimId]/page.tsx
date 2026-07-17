@@ -9,7 +9,6 @@ import {
   getWerkstattAuftrag,
   getWerkstattAuftragExtra,
   getWerkstattFallChat,
-  getWerkstattChatRealtimeIds,
 } from '@/lib/werkstatt/queries'
 import { WerkstattAuftragDetail } from '@/components/werkstatt/WerkstattAuftragDetail'
 
@@ -32,10 +31,9 @@ export default async function WerkstattAuftragDetailPage({
   // NACH dem RLS-Gate oben (auftrag != null == Fall-Zugehoerigkeit bewiesen), via
   // Admin-Client (Defense-in-Depth).
   const supabase = await createClient()
-  const [extra, chatMessages, chatRealtime, userRes] = await Promise.all([
+  const [extra, chat, userRes] = await Promise.all([
     getWerkstattAuftragExtra(claimId),
     getWerkstattFallChat(claimId),
-    getWerkstattChatRealtimeIds(claimId),
     supabase.auth.getUser(),
   ])
   const currentUserId = userRes.data.user?.id ?? null
@@ -44,8 +42,8 @@ export default async function WerkstattAuftragDetailPage({
     <WerkstattAuftragDetail
       auftrag={auftrag}
       extra={extra}
-      chatMessages={chatMessages}
-      chatRealtime={chatRealtime}
+      chatMessages={chat.messages}
+      chatRealtime={{ fallId: chat.fallId, gruppeThreadId: chat.gruppeThreadId }}
       currentUserId={currentUserId}
     />
   )
