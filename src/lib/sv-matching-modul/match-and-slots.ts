@@ -20,6 +20,8 @@ export type MatchAndSlotsInput = {
   wunschterminIso?: string | null
   /** SV-Weiche: gesetzt = SV-Embed → nur dieser SV. */
   fixerSvId?: string | null
+  /** AAR-956 17.07.: Betrachter-Identitaet fuer den Test-SV-Angebots-Guard (Fixer-Pfad). */
+  kundenIdentitaet?: { email?: string | null; name?: string | null } | null
   /** @deprecated ungenutzt seit Engine-Cutover (global = 2+1, fixer = 1 SV). */
   topN?: number
 }
@@ -34,5 +36,6 @@ export async function matchAndSlots(input: MatchAndSlotsInput): Promise<Oeffentl
     lng: input.lng,
     wunschterminIso: input.wunschterminIso ?? null,
     fixerSvId: input.fixerSvId ?? null,
+    kundenIdentitaet: input.kundenIdentitaet ?? null,
   })
 }

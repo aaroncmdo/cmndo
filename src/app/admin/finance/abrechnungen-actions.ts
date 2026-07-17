@@ -2,9 +2,9 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRole } from '@/lib/auth/guards'
-import { generiereMarketingAbrechnung, generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
+import { generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
 import { generateAbrechnungPDF } from '@/lib/finance/abrechnung-pdf'
-import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
+import { sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 
@@ -82,9 +82,7 @@ export async function manuellVersenden(
     await generateAbrechnungPDF(abrechnungId)
   }
 
-  if (abr.empfaenger_typ === 'marketing') {
-    await sendMarketingAbrechnung(abrechnungId)
-  } else if (abr.empfaenger_typ === 'kanzlei') {
+  if (abr.empfaenger_typ === 'kanzlei') {
     await sendKanzleiMonatsAbrechnung(abrechnungId)
   }
 
@@ -94,22 +92,15 @@ export async function manuellVersenden(
 
 export async function manuellGenerieren(
   monat: string,
-  typ: 'marketing' | 'kanzlei',
+  _typ: 'kanzlei' = 'kanzlei',
 ): Promise<{ ok: boolean; error?: string }> {
   const guard = await requireRole(['admin'])
   if (!guard.success) return { ok: false, error: guard.error ?? 'Nicht berechtigt' }
 
   try {
-    if (typ === 'marketing') {
-      const result = await generiereMarketingAbrechnung(monat)
-      if (result) {
-        await generateAbrechnungPDF(result.abrechnungId)
-      }
-    } else {
-      const results = await generiereKanzleiAbrechnungen(monat)
-      for (const r of results) {
-        await generateAbrechnungPDF(r.abrechnungId)
-      }
+    const results = await generiereKanzleiAbrechnungen(monat)
+    for (const r of results) {
+      await generateAbrechnungPDF(r.abrechnungId)
     }
     revalidatePath('/admin/finance')
     return { ok: true }

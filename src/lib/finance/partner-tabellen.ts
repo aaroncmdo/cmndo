@@ -12,12 +12,11 @@
 //   firmen_flotten_konten — das ist ein reiner Zugangs-Link (unique(user_id), keine
 //   Rechnungsdaten); `firmen` traegt name/ust_id/steuernummer/adresse_* + ist_kleinunternehmer.
 
-/** partner_typ -> Empfaenger-Tabelle. Deckt beide Ledger ab (partner_provisionen + provisionen_maik). */
+/** partner_typ -> Empfaenger-Tabelle (partner_provisionen + partner_staffel_bonus). */
 export const PARTNER_TABELLE = {
   makler: 'makler',
   werkstatt: 'werkstaetten',
   firmen_flotte: 'firmen',
-  marketing: 'marketing_partner',
 } as const
 
 export type PartnerTyp = keyof typeof PARTNER_TABELLE

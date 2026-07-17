@@ -1,10 +1,7 @@
 {
   "note": "Tote PostgREST-Queries (grandfathered). keys = SELECT-Trockenschuss, writeKeys = statische Write-Achse. Boy-Scout senkt.",
   "keys": [
-    "email_log::id,empfaenger,subject,status,gesendet_am,richtung,body_html,body_text,empfaenger_array,attachments,template,lead_id,created_at",
-    "gutachter_termine::sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname,nachname))",
-    "gutachter_termine::start_zeit,sachverstaendige(profile_id,profiles!sachverstaendige_profile_id_fkey(vorname))",
-    "gutachter_termine::start_zeit,sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname,nachname))"
+    "email_log::id,empfaenger,subject,status,gesendet_am,richtung,body_html,body_text,empfaenger_array,attachments,template,lead_id,created_at"
   ],
   "writeKeys": []
 }

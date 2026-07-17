@@ -2,7 +2,6 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { FINANCE } from '@/lib/finance/constants'
 // Alias: die exportierte Server-Action in dieser Datei heißt selbst `createLead`.
 import { createLead as insertLeadRow } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
@@ -345,18 +344,6 @@ export async function createLead(data: {
   // Cardentity-Anreicherung feuert NICHT mehr automatisch bei Lead-Anlage —
   // kostenpflichtiger Abruf ist manuell ueber den Cardentity-Button abrufbar
   // (2026-05-31, Aaron-Entscheidung).
-
-  // AAR-92: Maik-Provision tracken bei Google-Ads/SEA Leads
-  if (data.source_channel === 'google-ads' || data.source_channel === 'sea') {
-    const monat = new Date().toISOString().slice(0, 7)
-    await supabase.from('provisionen_maik').insert({
-      lead_id: leadId,
-      monat,
-      basis_provision: FINANCE.CPA_MARKETING_NETTO,
-      source_channel: data.source_channel,
-      status: 'pending',
-    }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })
-  }
 
   revalidatePath('/dispatch/dashboard')
   return { ok: true }

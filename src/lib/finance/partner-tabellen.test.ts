@@ -17,10 +17,6 @@ describe('partnerTabelleFuer — Empfaenger-Tabelle je partner_typ', () => {
     expect(partnerTabelleFuer('firmen_flotte')).toBe('firmen')
   })
 
-  it('marketing -> marketing_partner (eigener Ledger provisionen_maik)', () => {
-    expect(partnerTabelleFuer('marketing')).toBe('marketing_partner')
-  })
-
   it('unbekannter Typ -> null (KEIN stiller Fallback auf werkstaetten)', () => {
     // Der alte Ternary (partnerTyp === 'makler' ? 'makler' : 'werkstaetten') liess jeden
     // unbekannten Typ still gegen werkstaetten laufen — der Grund, warum firmen_flotte

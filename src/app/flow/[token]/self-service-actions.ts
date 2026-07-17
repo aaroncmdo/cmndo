@@ -257,6 +257,37 @@ export async function erzeugeSelbstzahlerClaim(
     } catch (err) {
       console.error('[erzeugeSelbstzahlerClaim] Dispatch-Mitteilung fehlgeschlagen (non-fatal):', err)
     }
+
+    // AAR-956 17.07. (Befund 5, Benachrichtigungs-Matrix PR #4490): "Tab zu = Fall weg" —
+    // Kasko/Selbstzahler bekam nach dem convert keinerlei Send (account-Step wurde real
+    // nie erreicht, s. #4469). Minimal-Netz: Bestaetigungs-Mail mit Flow-Link, non-critical.
+    // Interne/Test-Identitaeten werden nicht angemailt (Smoke-Rauschen).
+    try {
+      const kundenEmail = (leadRow as Record<string, unknown> | null)?.email as string | null | undefined
+      const kundenVorname = (leadRow as Record<string, unknown> | null)?.vorname as string | null | undefined
+      const { istInterneEmail } = await import('@/lib/testdaten/interne-identitaet')
+      if (kundenEmail && !istInterneEmail(kundenEmail)) {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+        const flowUrl = `${baseUrl}/flow/${token}`
+        const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        const anrede = kundenVorname ? `Hallo ${esc(kundenVorname)},` : 'Hallo,'
+        const { sendEmail } = await import('@/lib/email/google/client')
+        await sendEmail({
+          to: kundenEmail,
+          subject: 'Ihr Fall bei Claimondo ist angelegt',
+          html: `<div style="font-family: Arial, sans-serif; max-width: 560px; margin: 0 auto; line-height: 1.5;">
+  <p>${anrede}</p>
+  <p>Ihr Fall wurde erfolgreich angelegt. Über den folgenden Link kommen Sie jederzeit zurück zu Ihrem Vorgang — auch wenn Sie den Browser-Tab schließen:</p>
+  <p style="margin: 20px 0;"><a href="${flowUrl}" style="background: #4573A2; color: #ffffff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: bold;">Zu meinem Vorgang</a></p>
+  <p style="font-size: 13px; color: #555;">Oder direkt: <a href="${flowUrl}">${flowUrl}</a></p>
+  <p>Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.</p>
+  <p>Mit freundlichen Grüßen<br>Ihr Claimondo-Team</p>
+</div>`,
+        })
+      }
+    } catch (err) {
+      console.error('[erzeugeSelbstzahlerClaim] Bestaetigungs-Mail fehlgeschlagen (non-fatal):', err)
+    }
   }
 
   revalidatePath('/dispatch/leads')
@@ -291,7 +322,9 @@ export async function ladeMatchingFlow(
   const { data: lead } = await admin
     .from('leads')
     .select(
-      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, unfallort, unfallort_lat, unfallort_lng, wunschtermin, disqualifiziert, werkstatt_id',
+      // AAR-956 17.07. (Follow-up 3): + email/vorname/nachname — Betrachter-Identitaet
+      // fuer den Test-SV-Angebots-Guard im Fixer-Pfad (istTestSvAngebotBlockiert).
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, unfallort, unfallort_lat, unfallort_lng, wunschtermin, disqualifiziert, werkstatt_id, email, vorname, nachname',
     )
     .eq('id', leadId)
     .maybeSingle()
@@ -427,17 +460,26 @@ export async function ladeMatchingFlow(
   }
 
   const wunschterminIso = (lead.wunschtermin as string | null) ?? null
+  // AAR-956 17.07. (Follow-up 3): Lead-Identitaet fuer den Test-SV-Angebots-Guard —
+  // nur der Fixer-Pfad wertet sie aus (Test-SV-Embed bietet nur intern Slots an).
+  const kundenIdentitaet = {
+    email: (lead as { email?: string | null }).email ?? null,
+    name: [
+      (lead as { vorname?: string | null }).vorname,
+      (lead as { nachname?: string | null }).nachname,
+    ].filter(Boolean).join(' ') || null,
+  }
   if (state.kind === 'buchen_fixer') {
     // Fixer zuerst + Alternativen (global), Fixer aus den Alternativen rausdedupen.
     const [fixerList, globalList] = await Promise.all([
-      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId }),
-      planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
+      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId, kundenIdentitaet }),
+      planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso, kundenIdentitaet }),
     ])
     return { ok: true, svs: mergeFixerUndAlternativen(fixerList, globalList, state.fixerSvId) }
   }
 
   // 'buchen_global' (zeige_termin ist hier unerreichbar: hatTerminMitSv=false).
-  const svs = await planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso })
+  const svs = await planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso, kundenIdentitaet })
   return { ok: true, svs }
 }
 
