@@ -291,7 +291,9 @@ export async function ladeMatchingFlow(
   const { data: lead } = await admin
     .from('leads')
     .select(
-      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, unfallort, unfallort_lat, unfallort_lng, wunschtermin, disqualifiziert, werkstatt_id',
+      // AAR-956 17.07. (Follow-up 3): + email/vorname/nachname — Betrachter-Identitaet
+      // fuer den Test-SV-Angebots-Guard im Fixer-Pfad (istTestSvAngebotBlockiert).
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, unfallort, unfallort_lat, unfallort_lng, wunschtermin, disqualifiziert, werkstatt_id, email, vorname, nachname',
     )
     .eq('id', leadId)
     .maybeSingle()
@@ -427,17 +429,26 @@ export async function ladeMatchingFlow(
   }
 
   const wunschterminIso = (lead.wunschtermin as string | null) ?? null
+  // AAR-956 17.07. (Follow-up 3): Lead-Identitaet fuer den Test-SV-Angebots-Guard —
+  // nur der Fixer-Pfad wertet sie aus (Test-SV-Embed bietet nur intern Slots an).
+  const kundenIdentitaet = {
+    email: (lead as { email?: string | null }).email ?? null,
+    name: [
+      (lead as { vorname?: string | null }).vorname,
+      (lead as { nachname?: string | null }).nachname,
+    ].filter(Boolean).join(' ') || null,
+  }
   if (state.kind === 'buchen_fixer') {
     // Fixer zuerst + Alternativen (global), Fixer aus den Alternativen rausdedupen.
     const [fixerList, globalList] = await Promise.all([
-      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId }),
-      planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
+      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId, kundenIdentitaet }),
+      planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso, kundenIdentitaet }),
     ])
     return { ok: true, svs: mergeFixerUndAlternativen(fixerList, globalList, state.fixerSvId) }
   }
 
   // 'buchen_global' (zeige_termin ist hier unerreichbar: hatTerminMitSv=false).
-  const svs = await planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso })
+  const svs = await planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso, kundenIdentitaet })
   return { ok: true, svs }
 }
 
