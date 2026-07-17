@@ -21,6 +21,8 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      // P1.1 (Operativ-Audit 17.07.): neuer Schaden am Flottenfahrzeug -> Flottenmanager.
+      flottenmanager: ['in_app'],
     },
   },
   'fall.sv_assigned': {
@@ -30,6 +32,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'whatsapp', 'email', 'in_app'],
       makler: ['in_app'],
       admin: ['in_app'],
+      // P1.3 (Operativ-Audit 17.07.): KB-Rueckport — der betreuende KB erfuhr von der
+      // SV-Zuweisung nur durch aktives Nachschauen in der Fallakte.
+      kundenbetreuer: ['in_app'],
     },
   },
   'fall.status_changed': {
@@ -39,6 +44,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      flottenmanager: ['in_app'],
+      // P1.3: KB-Rueckport — dieses Event feuert bei ~14 operativen Uebergaengen.
+      kundenbetreuer: ['in_app'],
     },
   },
   'fall.storniert': {
@@ -48,6 +56,10 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
+      flottenmanager: ['in_app'],
+      // P1.3: KB-Rueckport — das neuere claim.storniert hatte KB, dieser aeltere
+      // Standard-Storno-Pfad (5 Trigger) nicht.
+      kundenbetreuer: ['in_app'],
     },
   },
   // 5.2 SA
@@ -71,6 +83,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       sachverstaendiger: ['web_push', 'in_app'],
       makler: ['in_app'],
       admin: ['in_app'],
+      // P1.3: KB-Rueckport auf die klassische Termin-Familie (die neuere
+      // Verlegungs-Familie AAR-864 hatte KB bereits).
+      kundenbetreuer: ['in_app'],
     },
   },
   'termin.sv_abgelehnt': {
@@ -78,6 +93,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     channels: {
       kunde: ['whatsapp', 'web_push', 'in_app'],
       admin: ['web_push', 'in_app'],
+      kundenbetreuer: ['in_app'],
     },
   },
   'termin.sv_gegenvorschlag': {
@@ -85,6 +101,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     channels: {
       kunde: ['whatsapp', 'web_push', 'in_app'],
       admin: ['web_push', 'in_app'],
+      kundenbetreuer: ['in_app'],
     },
   },
   'termin.sv_storniert': {
@@ -93,6 +110,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'web_push', 'in_app'],
       sachverstaendiger: ['web_push', 'whatsapp', 'in_app'],
       admin: ['in_app'],
+      kundenbetreuer: ['in_app'],
     },
   },
   'termin.erinnerung': {
@@ -319,6 +337,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       // Makler-Value-Loop: der Vermittler will das Ergebnis seines Falls wissen (gegated durch
       // makler_fall_consent im fan-out -> nur eigene Faelle). reguliert = wichtigstes Outcome -> + email.
       makler: ['in_app', 'email'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.abgelehnt': {
@@ -328,6 +347,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
       makler: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.storniert': {
@@ -337,6 +357,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
       makler: ['in_app'],
+      flottenmanager: ['in_app'],
     },
   },
   'claim.an_externe_kanzlei_uebergeben': {
@@ -379,6 +400,10 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     priority: 'normal',
     channels: {
       kunde: ['in_app'],
+      // P0.5 (Operativ-Audit 17.07.): Die Eskalation "Kanzlei-Rueckfrage ueberfaellig" ging
+      // NUR an den Kunden -- die antwort-pflichtigen Rollen (KB/Admin) erfuhren nichts.
+      kundenbetreuer: ['in_app'],
+      admin: ['in_app'],
     },
   },
   // 5.16 Kanzlei-Auto-Paket-Trigger (AAR-844) — KB-only, keine Kunde-Notification

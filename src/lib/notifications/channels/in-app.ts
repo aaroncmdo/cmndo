@@ -37,6 +37,7 @@ export const ROLE_MAP: Record<string, EmpfaengerRolle> = {
   kanzlei: 'kanzlei',
   werkstatt: 'werkstatt',
   leadbearbeiter: 'dispatch',
+  flottenmanager: 'flottenmanager',
 }
 
 const PRIO_MAP: Record<string, MitteilungPrioritaet> = {

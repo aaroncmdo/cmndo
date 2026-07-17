@@ -18,6 +18,7 @@ type FallParticipants = {
   kundenbetreuerUserId: string | null
   maklerUserIds: string[]
   adminUserIds: string[]
+  flottenmanagerUserIds: string[]
 }
 
 async function loadClaimParticipants(claimId: string): Promise<FallParticipants> {
@@ -27,7 +28,7 @@ async function loadClaimParticipants(claimId: string): Promise<FallParticipants>
   // resolveClaimId-fall_id-Umweg mehr; computeRecipients gatet jetzt auf event.claim_id).
   const { data: fallClaim } = await supabase
     .from('claims')
-    .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+    .select('geschaedigter_user_id, sv_id, kundenbetreuer_id, vehicle_id')
     .eq('id', claimId)
     .maybeSingle()
 
@@ -62,12 +63,36 @@ async function loadClaimParticipants(claimId: string): Promise<FallParticipants>
     .eq('rolle', 'admin')
   const adminUserIds = (admins ?? []).map((a) => a.id as string)
 
+  // P1.1 (Operativ-Audit 17.07.): Flottenmanager der Firmen-Flotte(n), zu denen das
+  // Claim-Fahrzeug gehoert (nur aktive Konten). Kette: claims.vehicle_id ->
+  // flotten_fahrzeuge.firma_id -> firmen_flotten_konten.user_id. Defensiv ueber ALLE
+  // Binds (UNIQUE ist (firma_id, vehicle_id) -- ein Vehicle koennte in >1 Flotte stehen).
+  let flottenmanagerUserIds: string[] = []
+  if (fallClaim?.vehicle_id) {
+    const { data: binds } = await supabase
+      .from('flotten_fahrzeuge')
+      .select('firma_id')
+      .eq('vehicle_id', fallClaim.vehicle_id)
+    const firmaIds = [...new Set((binds ?? []).map((b) => b.firma_id as string).filter(Boolean))]
+    if (firmaIds.length) {
+      const { data: konten } = await supabase
+        .from('firmen_flotten_konten')
+        .select('user_id')
+        .in('firma_id', firmaIds)
+        .eq('status', 'aktiv')
+      flottenmanagerUserIds = [
+        ...new Set((konten ?? []).map((k) => k.user_id as string).filter(Boolean)),
+      ]
+    }
+  }
+
   return {
     kundeUserId: fallClaim?.geschaedigter_user_id ?? null,
     svUserId,
     kundenbetreuerUserId: fallClaim?.kundenbetreuer_id ?? null,
     maklerUserIds,
     adminUserIds,
+    flottenmanagerUserIds,
   }
 }
 
@@ -207,6 +232,11 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
   if (config.channels.admin?.length) {
     for (const adminId of p.adminUserIds) {
       addRecipient(map, adminId, 'admin', config.channels.admin)
+    }
+  }
+  if (config.channels.flottenmanager?.length) {
+    for (const fmUserId of p.flottenmanagerUserIds) {
+      addRecipient(map, fmUserId, 'flottenmanager', config.channels.flottenmanager)
     }
   }
 
