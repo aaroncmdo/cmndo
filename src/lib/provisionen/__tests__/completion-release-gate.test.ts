@@ -3,6 +3,7 @@ import {
   istClaimStorniert,
   deriveCompletionTs,
   istReleaseBerechtigt,
+  releaseDeadlineTs,
   RELEASE_HOLD_MS,
 } from '../completion-release-gate'
 
@@ -63,5 +64,28 @@ describe('istReleaseBerechtigt', () => {
   })
   it('keine completion (null) = HOLD', () => {
     expect(istReleaseBerechtigt(null, NOW)).toBe(false)
+  })
+})
+
+describe('releaseDeadlineTs', () => {
+  it('Voll-Claim abgeschlossen = abgeschlossen_am + 7 Tage', () => {
+    expect(
+      releaseDeadlineTs({ serviceTyp: 'komplett', operativeStatus: 'abgeschlossen', abgeschlossenAm: vorTagen(10), terminDurchgefuehrtAm: null }),
+    ).toBe(vorTagen(3))
+  })
+  it('nur_gutachter durchgefuehrt = durchgefuehrt_am + 7 Tage', () => {
+    expect(
+      releaseDeadlineTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: vorTagen(2) }),
+    ).toBe(new Date(new Date(vorTagen(2)).getTime() + RELEASE_HOLD_MS).toISOString())
+  })
+  it('Fall noch nicht abgeschlossen = null (Freigabe nach Fallabschluss)', () => {
+    expect(
+      releaseDeadlineTs({ serviceTyp: 'komplett', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: null }),
+    ).toBeNull()
+  })
+  it('nur_gutachter ohne durchgefuehrten Termin = null', () => {
+    expect(
+      releaseDeadlineTs({ serviceTyp: 'nur_gutachter', operativeStatus: 'sv-termin', abgeschlossenAm: null, terminDurchgefuehrtAm: null }),
+    ).toBeNull()
   })
 })

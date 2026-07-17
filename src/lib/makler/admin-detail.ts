@@ -24,7 +24,6 @@ export type MaklerProvisionRow = {
   status: string | null
   trigger_event: string | null
   trigger_at: string | null
-  hold_until: string | null
   storniert_am: string | null
   storno_grund: string | null
   erstellt_am: string | null
@@ -52,7 +51,7 @@ export async function getMaklerProvisionen(
   const { data, error } = await admin
     .from('partner_provisionen')
     .select(
-      'id, betrag_netto_eur, status, trigger_event, trigger_at, hold_until, storniert_am, storno_grund, erstellt_am, claim_nummer',
+      'id, betrag_netto_eur, status, trigger_event, trigger_at, storniert_am, storno_grund, erstellt_am, claim_nummer',
     )
     .eq('partner_typ', 'makler')
     .eq('partner_id', maklerId)

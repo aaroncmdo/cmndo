@@ -13,7 +13,6 @@ const row = (over: Partial<ReleasePendingRow> = {}): ReleasePendingRow => ({
   claim_id: 'c1',
   betrag_netto_eur: '100.00',
   service_typ: 'komplett',
-  hold_until: '2026-07-07T00:00:00.000Z',
   partner_id: 'makler-1',
   ...over,
 })
