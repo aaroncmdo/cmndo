@@ -27,6 +27,7 @@ import type { FeldmodusStop } from './page'
 import type { SessionStatus } from '@/lib/types/field-modus'
 import { completeAndAdvance, markSvVorOrt, markBesichtigungGestartet } from './actions'
 import { enqueueOp } from '@/lib/offline/enqueue'
+import { shouldAutoCollapseStopCard } from '@/lib/sv/should-auto-collapse'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 export interface AktuellerStopCardProps {
@@ -79,10 +80,19 @@ export default function AktuellerStopCard({
   // Fahrzeugdaten aus dem Claim hat — der SV sieht die Lücke statt stiller leerer Felder und weiß,
   // dass er sie vor Ort erfassen muss. Claimlose SV-Eigentermine (kein fall_id) triggern es NICHT.
   const claimFahrzeugFehlt = !!stop.fall_id && !stop.kennzeichen && !stop.fahrzeug
-  // 2026-05-08 (C1) Smart-Collapse: bei null oder > 500 m Distanz → Card kompakt
+  // 2026-05-08 (C1) Smart-Collapse: bei > 500 m Distanz → Card kompakt
   // (Briefing/Pflichtdoku/Aktionen nehmen sonst 80 % des Viewports beim Fahren).
   // Tap expandiert. manualMode überschreibt die Auto-Heuristik in beide Richtungen.
-  const autoCompact = distanceMeters == null || distanceMeters > COMPACT_DISTANCE_THRESHOLD_M
+  //
+  // 2026-07-17 (Feldmodus-Operativ-Audit): `distanceMeters == null` bedeutet NICHT
+  // „weit weg", sondern „UNBEKANNT" (kein Geofence: fehlende Schadenort-Koords, GPS
+  // verweigert, Tiefgarage). Frueher kollabierte das die Card PERMANENT → die
+  // Primaeraktion „Ich bin angekommen" war versteckt, der SV konnte die Besichtigung
+  // nie manuell starten. Deshalb: Unbekannt = ZEIGEN (expanded), nur echte grosse
+  // Distanz kollabiert. (Macht auch den statusHinweis „…bestaetige deine Ankunft
+  // unten…" wahr — der zeigte vorher auf einen ausgeblendeten Button.) Pure Regel +
+  // Tests: src/lib/sv/should-auto-collapse.ts.
+  const autoCompact = shouldAutoCollapseStopCard(distanceMeters, COMPACT_DISTANCE_THRESHOLD_M)
   const [manualMode, setManualMode] = useState<'compact' | 'expanded' | null>(null)
   const isCompact = manualMode != null ? manualMode === 'compact' : autoCompact
   // C1: Briefing default collapsed (200–400-Wörter-Output) — SV öffnet gezielt.
