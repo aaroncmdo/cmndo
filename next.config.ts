@@ -350,6 +350,10 @@ const nextConfig: NextConfig = {
       { source: '/admin/organisationen', destination: '/admin/partner', permanent: true },
       { source: '/admin/versicherungen', destination: '/admin/partner/versicherer', permanent: true },
       { source: '/admin/communities', destination: '/admin/partner/communities', permanent: true },
+      // Team-Hub (W1.4, Routen-Cleanup): Leaderboard + Incentives sind ?tab=-Views des
+      // Team-Hubs statt eigener Routen. EXAKT-Match -> /admin/team/[id] (Detail) bleibt.
+      { source: '/admin/team/leaderboard', destination: '/admin/team?tab=leaderboard', permanent: true },
+      { source: '/admin/team/incentives', destination: '/admin/team?tab=incentives', permanent: true },
       // Finanzen-Hub (AAR-528):
       { source: '/admin/abrechnungen', destination: '/admin/finance/abrechnungen', permanent: true },
       { source: '/admin/kanzlei-abrechnungen', destination: '/admin/finance/kanzlei', permanent: true },
