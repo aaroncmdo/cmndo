@@ -17,7 +17,7 @@ let callLog: { table: string; method: string; args: unknown[] }[] = []
 function makeBuilder(table: string) {
   const data = currentResults[table] ?? null
   const builder: Record<string, unknown> = {}
-  for (const m of ['select', 'eq', 'is', 'in']) {
+  for (const m of ['select', 'eq', 'is', 'in', 'limit']) {
     builder[m] = (...args: unknown[]) => {
       callLog.push({ table, method: m, args })
       return builder
