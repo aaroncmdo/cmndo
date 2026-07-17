@@ -1,5 +1,5 @@
 // AAR-956: Zentraler Partner-Abrechnungen Hub-Tab — zeigt alle Partner-Typen
-// aggregiert (SV, Kanzlei, Makler, Werkstatt, Marketing) + vollstaendige
+// aggregiert (SV, Kanzlei, Makler, Werkstatt) + vollstaendige
 // Positionstabelle via PartnerBillingPanel.
 
 import { createClient } from '@/lib/supabase/server'
@@ -13,7 +13,6 @@ const PARTNER_TYP_LABEL: Record<string, string> = {
   kanzlei: 'Kanzlei',
   makler: 'Makler',
   werkstatt: 'Werkstatt',
-  marketing: 'Marketing/Maik',
 }
 
 function formatEur(betrag: number): string {

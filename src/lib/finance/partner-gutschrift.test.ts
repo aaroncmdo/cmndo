@@ -408,11 +408,11 @@ describe('erstellePartnerGutschrift', () => {
     expect(snap.bank_iban).toBe('DE12345678901234567890')
   })
 
-  // (bank_iban-b) marketing partner without bank_iban → empfaenger_snapshot.bank_iban is null
+  // (bank_iban-b) partner without bank_iban → empfaenger_snapshot.bank_iban is null
   it('(bank_iban-b) empfaenger_snapshot.bank_iban is null for partner without bank_iban', async () => {
     const db = makeDb({
       partnerData: {
-        name: 'Marketing Partner ohne IBAN',
+        firma: 'Makler ohne IBAN',
         adresse_strasse: 'Str. 2',
         adresse_plz: '10115',
         adresse_ort: 'Berlin',
@@ -421,7 +421,7 @@ describe('erstellePartnerGutschrift', () => {
         // no bank_iban field
       },
     })
-    const result = await erstellePartnerGutschrift(db, { ...BASE_PARAMS, partnerTyp: 'marketing' })
+    const result = await erstellePartnerGutschrift(db, BASE_PARAMS)
     expect(result.ok).toBe(true)
     const row = db._insertedRows[0] as Record<string, unknown>
     const snap = row.empfaenger_snapshot as Record<string, unknown>

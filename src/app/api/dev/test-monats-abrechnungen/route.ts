@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generiereMarketingAbrechnung, generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
+import { generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
 import { generateAbrechnungPDF } from '@/lib/finance/abrechnung-pdf'
-import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
+import { sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nur in Development verfuegbar' }, { status: 403 })
   }
 
-  let body: { monat?: string; empfaenger?: 'marketing' | 'kanzlei'; senden?: boolean } = {}
+  let body: { monat?: string; empfaenger?: 'kanzlei'; senden?: boolean } = {}
   try {
     body = await request.json()
   } catch { /* */ }
@@ -19,18 +19,6 @@ export async function POST(request: Request) {
   const monat = body.monat || new Date().toISOString().slice(0, 7)
   const senden = body.senden ?? false
   const results: Array<{ typ: string; abrechnungId: string; sent: boolean }> = []
-
-  // Marketing
-  if (!body.empfaenger || body.empfaenger === 'marketing') {
-    const marketing = await generiereMarketingAbrechnung(monat)
-    if (marketing) {
-      await generateAbrechnungPDF(marketing.abrechnungId)
-      if (senden) {
-        await sendMarketingAbrechnung(marketing.abrechnungId)
-      }
-      results.push({ typ: 'marketing', abrechnungId: marketing.abrechnungId, sent: senden })
-    }
-  }
 
   // Kanzlei
   if (!body.empfaenger || body.empfaenger === 'kanzlei') {

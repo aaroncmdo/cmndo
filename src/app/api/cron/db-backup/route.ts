@@ -42,7 +42,6 @@ const BACKUP_TABLES = [
   'partner_provisionen',
   'partner_gutschriften',
   'gutschriften',
-  'provisionen_maik',
   'gutachter_einzahlungen',
   'gutachter_monatsabrechnungen',
   'kanzlei_faelle',

@@ -42,7 +42,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
   const [bezahltBetrag, setBezahltBetrag] = useState('')
   const [loading, setLoading] = useState<string | null>(null)
   const [genMonat, setGenMonat] = useState('')
-  const [genTyp, setGenTyp] = useState<'marketing' | 'kanzlei'>('marketing')
+  const [genTyp, setGenTyp] = useState<'kanzlei'>('kanzlei')
 
   const filtered = abrechnungen.filter(a => {
     if (filterTyp !== 'alle' && a.empfaenger_typ !== filterTyp) return false
@@ -100,7 +100,6 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                 className="border border-claimondo-border rounded-ios-lg px-2 py-1 text-claimondo-navy"
               >
                 <option value="alle">Alle Typen</option>
-                <option value="marketing">Marketing</option>
                 <option value="kanzlei">Kanzlei</option>
               </select>
               <select
@@ -129,10 +128,9 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
             />
             <select
               value={genTyp}
-              onChange={e => setGenTyp(e.target.value as 'marketing' | 'kanzlei')}
+              onChange={e => setGenTyp(e.target.value as 'kanzlei')}
               className="border border-claimondo-border rounded-ios-lg px-2 py-1"
             >
-              <option value="marketing">Marketing</option>
               <option value="kanzlei">Kanzlei</option>
             </select>
             <button

@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { eurToCent } from '@/lib/billing/calculate-ust'
 import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
-import { MARKETING_DESCRIPTOR, KANZLEI_A_DESCRIPTOR } from '@/lib/abrechnung/descriptors/marketing'
+import { KANZLEI_A_DESCRIPTOR } from '@/lib/abrechnung/descriptors/marketing'
 
 // ─── Zeitraum Helpers ──────────────────────────────────────────────────────
 
@@ -15,98 +15,13 @@ function monatRange(monat: string): { start: string; ende: string } {
   }
 }
 
-// ─── Marketing-Abrechnung (Maik) ──────────────────────────────────────────
+// ─── Position (shared: Kanzlei-Abrechnung) ────────────────────────────────
 
 type Position = {
   fall_id: string | null
   beschreibung: string
   betrag_netto: number
   betrag_brutto: number
-}
-
-export async function generiereMarketingAbrechnung(monat: string): Promise<{ abrechnungId: string } | null> {
-  const supabase = createAdminClient()
-  const { start, ende } = monatRange(monat)
-
-  const maikEmail = process.env.MARKETING_MAIK_EMAIL
-  const maikName = process.env.MARKETING_MAIK_NAME || 'Maik (Marketing)'
-
-  if (!maikEmail) {
-    console.warn('[abrechnungen] MARKETING_MAIK_EMAIL nicht gesetzt — Marketing-Abrechnung uebersprungen')
-    return null
-  }
-
-  // Alle Leads mit unterschriebener Vollmacht im Monat.
-  // AAR-583 (N6): leads.vollmacht_unterschrieben gedroppt — filter auf _am.
-  const { data: leads } = await supabase
-    .from('leads')
-    .select('id, vorname, nachname, vollmacht_datum')
-    .not('vollmacht_signiert_am', 'is', null)
-    .gte('vollmacht_datum', `${start}T00:00:00`)
-    .lte('vollmacht_datum', `${ende}T23:59:59`)
-
-  if (!leads?.length) {
-    console.log(`[abrechnungen] Keine signierten SAs im Monat ${monat} — keine Marketing-Abrechnung`)
-    return null
-  }
-
-  // Fuer jeden Lead: Fall laden (claim_nummer fuer die Positions-Beschreibung).
-  const positionen_jsonb: Position[] = []
-  const { FINANCE } = await import('@/lib/finance/constants')
-  const CPA = FINANCE.CPA_MARKETING_NETTO
-
-  for (const lead of leads) {
-    // CMM-49 P1: Anker faelle -> claims geflippt. claims hat lead_id + claim_nummer direkt
-    // (kein faelle-Umweg/Embed mehr). fall.id ist jetzt die claim.id.
-    const { data: fall } = await supabase
-      .from('claims')
-      .select('id, claim_nummer')
-      .eq('lead_id', lead.id)
-      .limit(1)
-      .maybeSingle()
-
-    const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-    const fallNr = fall?.claim_nummer || '—'
-
-    positionen_jsonb.push({
-      fall_id: fall?.id ?? null,
-      beschreibung: `CPA fuer Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })})`,
-      betrag_netto: CPA,
-      betrag_brutto: Math.round(CPA * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
-    })
-  }
-
-  if (positionen_jsonb.length === 0) return null
-
-  // createAbrechnung-Positionen: jede Position hat betrag_netto_cent fuer den Cent-Pfad.
-  const positionen = positionen_jsonb.map(() => ({
-    betrag_netto_cent: eurToCent(CPA),
-  }))
-
-  const kontext: Record<string, unknown> = {
-    monat,
-    empfaenger_email: maikEmail,
-    empfaenger_name: maikName,
-    abrechnungs_zeitraum_start: start,
-    abrechnungs_zeitraum_ende: ende,
-    // JSONB Display-Detail unveraendert mitgeben
-    positionen_jsonb,
-  }
-
-  const result = await createAbrechnung(supabase, MARKETING_DESCRIPTOR, { positionen, kontext })
-
-  if (!result.ok) {
-    console.error('[abrechnungen] Marketing-Insert fehlgeschlagen:', result.error)
-    return null
-  }
-
-  if (!result.erstellt) {
-    console.log(`[abrechnungen] Marketing-Abrechnung fuer ${monat} existiert bereits: ${result.bestehendeId}`)
-    return { abrechnungId: result.bestehendeId }
-  }
-
-  console.log(`[abrechnungen] Marketing-Abrechnung ${result.nummer} generiert: ${positionen.length} Positionen`)
-  return { abrechnungId: result.id }
 }
 
 // ─── Kanzlei-Abrechnungen ─────────────────────────────────────────────────

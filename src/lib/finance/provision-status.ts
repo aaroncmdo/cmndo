@@ -16,7 +16,6 @@ import { partnerTabelleFuer, type PartnerTyp } from './partner-tabellen'
 export const PROVISION_TABELLEN = [
   LEDGER_TABELLEN.PARTNER_PROVISIONEN,
   LEDGER_TABELLEN.PARTNER_STAFFEL_BONUS,
-  LEDGER_TABELLEN.PROVISIONEN_MAIK,
 ] as const
 
 export type ProvisionTabelle = (typeof PROVISION_TABELLEN)[number]
@@ -25,10 +24,8 @@ export type ProvisionTabelle = (typeof PROVISION_TABELLEN)[number]
 //   partner_provisionen   → status: freigegeben/ausgezahlt/storniert; HAS storniert_am + storno_grund
 //                           + ausgezahlt_am (paidCol, fuer makler+werkstatt vereinheitlicht)
 //   partner_staffel_bonus → status: freigegeben/ausgezahlt/storniert; NO storniert_am/storno_grund/ausgezahlt_am
-//   provisionen_maik      → status: pending/confirmed/paid/reversed; HAS reversed_grund (NO storniert_am)
-// Union-Tabellen tragen partner_typ als Spalte (partnerTypCol) -> Partner-Tabelle + Steuer-Status
+// Beide sind Union-Tabellen: partner_typ als Spalte (partnerTypCol) -> Partner-Tabelle + Steuer-Status
 // werden pro Row aufgeloest (partner_provisionen ist FK-los zu makler/werkstaetten -> kein Embed).
-// maik bleibt statisch (fixer partner/partnerTyp).
 type LedgerMeta = {
   betrag: string
   fk: string
@@ -72,21 +69,6 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     // no stornoCol/grundCol — partner_staffel_bonus has no storno timestamp/reason cols
     leistungText: 'Staffel-Bonus',
     leistungDatumCol: 'erstellt_am',
-  },
-  provisionen_maik: {
-    betrag: 'netto_provision',
-    fk: 'marketing_partner_id',
-    partnerFlag: 'ist_kleinunternehmer',
-    partner: 'marketing_partner',
-    partnerTyp: 'marketing',
-    paidStatus: 'paid',
-    paidCol: 'paid_at',
-    releaseStatus: 'confirmed',
-    stornoStatus: 'reversed',
-    // no stornoCol — provisionen_maik has no storniert_am equivalent
-    grundCol: 'reversed_grund',
-    leistungText: 'Vermittlungsprovision',
-    leistungDatumCol: 'created_at',
   },
 } as const
 

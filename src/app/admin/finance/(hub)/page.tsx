@@ -13,14 +13,13 @@ import SaeumigeSvsView from './_views/SaeumigeSvsView'
 import OffeneFaelleView from './_views/OffeneFaelleView'
 import PerSvBalanceView from './_views/PerSvBalanceView'
 import KanzleiView from './_views/KanzleiView'
-import ProvisionenView from './_views/ProvisionenView'
 import PartnerAbrechnungenView from './_views/PartnerAbrechnungenView'
 
 export const dynamic = 'force-dynamic'
 
 const TAB_IDS = [
   'uebersicht', 'abrechnungen', 'saeumige-svs', 'offene-faelle',
-  'per-sv-balance', 'kanzlei', 'provisionen', 'partner-abrechnungen',
+  'per-sv-balance', 'kanzlei', 'partner-abrechnungen',
 ] as const
 
 export default async function FinancePage({
@@ -75,7 +74,6 @@ export default async function FinancePage({
         { id: 'offene-faelle', label: 'Offene Berechnungen' },
         { id: 'per-sv-balance', label: 'Per-SV Balance' },
         { id: 'kanzlei', label: 'Kanzlei-Abr.' },
-        { id: 'provisionen', label: 'Provisionen' },
         { id: 'partner-abrechnungen', label: 'Partner-Abr.' },
       ]}
       views={{
@@ -85,7 +83,6 @@ export default async function FinancePage({
         'offene-faelle': view(<OffeneFaelleView />),
         'per-sv-balance': view(<PerSvBalanceView />),
         kanzlei: view(<KanzleiView />),
-        provisionen: view(<ProvisionenView />),
         'partner-abrechnungen': view(<PartnerAbrechnungenView />),
       }}
     />
