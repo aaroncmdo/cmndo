@@ -18,6 +18,10 @@ import {
 // CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code/Status-Label.
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
+// FG4-A: Provisions-Freigabe = Fall-Completion + 7 Tage. Die pending-Frist wird daraus abgeleitet
+// (nicht mehr aus hold_until = Erstellung+7d, seit FG4-A falsch).
+import { releaseDeadlineTs } from '@/lib/provisionen/completion-release-gate'
+import { loadCompletionMap } from '@/lib/provisionen/completion-fetch'
 // Ansprechpartner-Mapping (KB/SV/Kanzlei) + robuste Kunden-Identitaet (Lead-Fallback).
 import {
   type MaklerFallKontakte,
@@ -140,7 +144,6 @@ export type FallDetailProvision = {
   status: string
   service_typ: string | null
   trigger_at: string | null
-  hold_until: string | null
 }
 
 // Kunden-Identitaet = KundeIdentity (Lead-Fallback-Shape aus kontakte.ts). id ist
@@ -340,7 +343,7 @@ export async function getMaklerFallDetail(
 
   const { data: provisionRows } = await supabase
     .from('partner_provisionen')
-    .select('id, betrag_netto_eur, status, service_typ, trigger_at, hold_until')
+    .select('id, betrag_netto_eur, status, service_typ, trigger_at')
     .eq('partner_typ', 'makler')
     .eq('partner_id', maklerId)
     .eq('fall_id', fallId)
@@ -353,7 +356,6 @@ export async function getMaklerFallDetail(
         status: provisionRows[0].status,
         service_typ: provisionRows[0].service_typ ?? null,
         trigger_at: provisionRows[0].trigger_at ?? null,
-        hold_until: provisionRows[0].hold_until ?? null,
       }
     : null
 
@@ -856,7 +858,8 @@ export type MaklerProvisionRow = {
   service_typ: string | null
   trigger_event: string | null
   trigger_at: string | null
-  hold_until: string | null
+  /** Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). null = Fall noch nicht abgeschlossen. */
+  release_deadline: string | null
   storniert_am: string | null
   storno_grund: string | null
   fall_id: string | null
@@ -944,7 +947,7 @@ export async function getMaklerAbrechnungsData(
       .select(
         `
         id, betrag_netto_eur, status, service_typ, trigger_event,
-        trigger_at, hold_until, storniert_am, storno_grund,
+        trigger_at, claim_id, storniert_am, storno_grund,
         fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
           id:fall_id,
           claims:claims!fk_bridge_claim(
@@ -965,7 +968,21 @@ export async function getMaklerAbrechnungsData(
   // die Tabelle war leer, die KPI-Summen darüber zeigten trotzdem Betraege.
   if (rowsRes.error) console.error('[getMaklerAbrechnungsData] provisionen:', rowsRes.error.message)
 
-  const provisionen: MaklerProvisionRow[] = (rowsRes.data ?? []).map((row) => {
+  // Freigabe-/Clawback-Frist der pending Provisionen = Fall-Completion + 7 Tage (FG4-A-Gate), NICHT
+  // mehr hold_until (Erstellung+7d, seit FG4-A falsch). Service-role, da Completion (claims/termine)
+  // unter Makler-RLS nicht voll lesbar ist; nur EIGENE pending-claim_ids -> kein Cross-Tenant-Read.
+  const rawRows = rowsRes.data ?? []
+  const completionMap = await loadCompletionMap(
+    createAdminClient(),
+    rawRows
+      .filter((r) => (r as { status?: string }).status === 'pending')
+      .map((r) => (r as { claim_id?: string | null }).claim_id ?? null),
+  )
+
+  const provisionen: MaklerProvisionRow[] = rawRows.map((row) => {
+    const claimId = (row as { claim_id?: string | null }).claim_id ?? null
+    const completion =
+      (row as { status?: string }).status === 'pending' && claimId ? completionMap.get(claimId) : undefined
     const fallRaw = (row as { fall?: unknown }).fall
     // CMM-49 Regression-Fix (#2688): FK->bridge-Repoint. leads/kunde haengen jetzt
     // unter claims (bridge hat keine lead_id/kunde_id) -> ueber fallClaim lesen.
@@ -1015,7 +1032,7 @@ export async function getMaklerAbrechnungsData(
       service_typ: (row.service_typ as string | null) ?? null,
       trigger_event: (row.trigger_event as string | null) ?? null,
       trigger_at: (row.trigger_at as string | null) ?? null,
-      hold_until: (row.hold_until as string | null) ?? null,
+      release_deadline: completion ? releaseDeadlineTs(completion) : null,
       storniert_am: (row.storniert_am as string | null) ?? null,
       storno_grund: (row.storno_grund as string | null) ?? null,
       fall_id: fall?.id ?? null,

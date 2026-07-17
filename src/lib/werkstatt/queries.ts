@@ -14,6 +14,10 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+// FG4-A: Provisions-Freigabe = Fall-Completion + 7 Tage. Die pending-Frist wird daraus abgeleitet
+// (nicht mehr aus hold_until = Erstellung+7d, seit FG4-A falsch).
+import { releaseDeadlineTs } from '@/lib/provisionen/completion-release-gate'
+import { loadCompletionMap } from '@/lib/provisionen/completion-fetch'
 
 export type WerkstattRow = {
   id: string
@@ -120,7 +124,8 @@ export type WerkstattProvisionRow = {
   status: WerkstattProvisionStatus
   trigger_event: string | null
   trigger_at: string | null
-  hold_until: string | null
+  /** Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). null = Fall noch nicht abgeschlossen. */
+  release_deadline: string | null
   storniert_am: string | null
   storno_grund: string | null
   erstellt_am: string
@@ -141,7 +146,7 @@ export async function getWerkstattProvisionen(werkstattId: string): Promise<Werk
     .from('partner_provisionen')
     .select(`
       id, betrag_netto_eur, status, trigger_event,
-      trigger_at, hold_until, storniert_am, storno_grund, erstellt_am,
+      trigger_at, claim_id, storniert_am, storno_grund, erstellt_am,
       claim_nummer
     `)
     .eq('partner_typ', 'werkstatt')
@@ -149,14 +154,28 @@ export async function getWerkstattProvisionen(werkstattId: string): Promise<Werk
     .order('erstellt_am', { ascending: false, nullsFirst: false })
     .limit(200)
 
-  return (data ?? []).map((row) => {
+  // Freigabe-/Clawback-Frist der pending Provisionen = Fall-Completion + 7 Tage (FG4-A-Gate), NICHT
+  // mehr hold_until (Erstellung+7d, seit FG4-A falsch). Service-role, weil das Werkstatt-Portal
+  // KEINE claims-RLS hat (der User-Client liest claims sonst 0); nur EIGENE pending-claim_ids.
+  const rows = data ?? []
+  const completionMap = await loadCompletionMap(
+    createAdminClient(),
+    rows
+      .filter((r) => (r as unknown as { status?: string }).status === 'pending')
+      .map((r) => (r as unknown as { claim_id?: string | null }).claim_id ?? null),
+  )
+
+  return rows.map((row) => {
+    const claimId = (row as unknown as { claim_id?: string | null }).claim_id ?? null
+    const completion =
+      (row as unknown as { status?: string }).status === 'pending' && claimId ? completionMap.get(claimId) : undefined
     return {
       id: row.id as string,
       betrag_netto_eur: Number((row as unknown as { betrag_netto_eur: number | null }).betrag_netto_eur ?? 0),
       status: ((row as unknown as { status: string }).status ?? 'pending') as WerkstattProvisionStatus,
       trigger_event: ((row as unknown as { trigger_event: string | null }).trigger_event) ?? null,
       trigger_at: ((row as unknown as { trigger_at: string | null }).trigger_at) ?? null,
-      hold_until: ((row as unknown as { hold_until: string | null }).hold_until) ?? null,
+      release_deadline: completion ? releaseDeadlineTs(completion) : null,
       storniert_am: ((row as unknown as { storniert_am: string | null }).storniert_am) ?? null,
       storno_grund: ((row as unknown as { storno_grund: string | null }).storno_grund) ?? null,
       erstellt_am: (row as unknown as { erstellt_am: string }).erstellt_am,

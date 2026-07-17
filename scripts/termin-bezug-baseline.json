@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-17T17:43:07.856Z",
-  "count": 30,
+  "generatedAt": "2026-07-17T18:03:36.641Z",
+  "count": 26,
   "files": [
     "src/app/api/cron/vollmacht-reminder/route.ts",
     "src/app/flow/[token]/actions.ts",
@@ -23,12 +23,8 @@
     "src/lib/actions/storno-actions.ts",
     "src/lib/actions/termin-actions.ts",
     "src/lib/actions/termin-verlegung-actions.ts",
-    "src/lib/claims/kunde-termine.ts",
     "src/lib/email/google/flows.ts",
     "src/lib/kunde/fall-karte-loader.ts",
-    "src/lib/live-ops/get-leads.ts",
-    "src/lib/live-ops/get-offene-termine.ts",
-    "src/lib/live-ops/get-tagesrouten.ts",
     "src/lib/provisionen/release-runner.ts",
     "src/lib/sla/festgefahrene-faelle.ts",
     "src/lib/smoke/lifecycle-seed.ts"

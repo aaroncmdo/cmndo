@@ -63,7 +63,6 @@ const pendingRow = (over: Partial<ReleasePendingRow> = {}): FakeRow => ({
   claim_id: 'c1',
   betrag_netto_eur: 150,
   service_typ: 'komplett',
-  hold_until: vorTagen(1),
   partner_id: 'konto-1',
   ...over,
 })

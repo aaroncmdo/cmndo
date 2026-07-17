@@ -15,6 +15,7 @@ import {
 import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
 import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
+import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -150,6 +151,7 @@ export async function assignReparaturWerkstatt(
   // Nebenwirkung, die das mitrepariert: die Werkstatt-Mitteilung verlinkt auf /werkstatt/auftraege,
   // und v_werkstatt_auftrag ist CLAIM-gekeyt — ohne die Zuordnung am Claim landete die Werkstatt auf
   // einer leeren Liste.
+  let effectiveClaimId: string | null = input.target === 'claim' ? input.id : null
   if (input.target === 'lead') {
     const { data: claim } = await admin
       .from('claims')
@@ -157,6 +159,7 @@ export async function assignReparaturWerkstatt(
       .eq('lead_id', input.id)
       .maybeSingle()
     const claimId = (claim?.id as string | undefined) ?? null
+    effectiveClaimId = claimId
     if (claimId) {
       const { error: syncErr } = await admin
         .from('claims')
@@ -164,6 +167,19 @@ export async function assignReparaturWerkstatt(
         .eq('id', claimId)
       // Non-critical: die Lead-Zuweisung steht bereits; ein Sync-Fehler darf sie nicht zuruecknehmen.
       if (syncErr) console.error('[assignReparaturWerkstatt] Claim-Sync fehlgeschlagen:', syncErr.message)
+    }
+  }
+
+  // Reparatur-Cursor: Werkstatt zugewiesen -> reparatur-angefragt (nur reduced-repair,
+  // non-fatal, forward-only; abrechnungsweg-Gate + Bridge-Resolve im Helper). Vor den
+  // Benachrichtigungen, damit die Timeline-Reihenfolge stimmt (Zuweisung -> Info).
+  if (effectiveClaimId) {
+    const fid = await fallIdForClaim(effectiveClaimId)
+    if (fid) {
+      await advanceReparaturCursorTo(fid, 'reparatur-angefragt', {
+        user_id: input.actorUserId,
+        grund: 'werkstatt_vermittelt',
+      })
     }
   }
 
