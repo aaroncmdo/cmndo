@@ -305,7 +305,8 @@ async function notifyAfterAssign(
     await notifyWerkstattNeuerAuftrag({
       werkstatt: { email: werkstattEmail, name: w.name },
       kunde: { name: kundeKontakt.vorname },
-      portalUrl: `${appUrl}/werkstatt/auftraege`,
+      // W1.7: Deep-Link in die Auftrag-Detail-View wenn ein Claim vorliegt (sonst Liste).
+      portalUrl: `${appUrl}/werkstatt/auftraege${input.target === 'claim' ? `/${input.id}` : ''}`,
       fallId: input.target === 'claim' ? input.id : null,
     })
   }

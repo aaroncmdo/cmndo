@@ -24,6 +24,7 @@ import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt
 
 // Aktions-Keys, die einen Cockpit-Drawer oeffnen (Rest faellt auf a.href zurueck).
 const DRAWER_KEYS = new Set([
+  'anlegen-picker',
   'anlegen-sv',
   'qrpool',
   'freigaben',
@@ -75,6 +76,38 @@ export default function VertriebAktionsleiste({
           </Button>
         ))}
       </div>
+
+      {/* Onboarding-Entsperrer (UI-Audit 17.07.): EIN prominenter "Partner anlegen"-Einstieg
+          in der Alle-Ansicht. Jede Wahl schaltet ?aktion auf den Ziel-Drawer um (schliesst den
+          Picker + oeffnet den bereits verdrahteten Anlage-Assistenten in einem Schritt). */}
+      <Drawer open={offen === 'anlegen-picker'} onClose={schliessen} width={480} ariaLabel="Partner anlegen">
+        <div className="space-y-4">
+          <div>
+            <h2 className="text-heading-md text-claimondo-navy">Partner anlegen</h2>
+            <p className="text-body-sm text-claimondo-ondo mt-1">
+              Wähle den Partner-Typ — der passende Anlage-Assistent öffnet sich.
+            </p>
+          </div>
+          {/* Button-Primitive ist strikt einzeilig (inline height/lineHeight) — daher
+              Emoji-markierte Einzeiler (Pattern wie "📨 Cold-Mail-Sequenzen"), die Sub-
+              Beschreibung steht als muted Zeile darunter (ausserhalb des Klick-Targets). */}
+          <div className="grid gap-3">
+            {([
+              { key: 'anlegen-sv', label: '🔎  Sachverständiger', sub: 'Solo · Büro · Akademie · Community' },
+              { key: 'anlegen-makler', label: '🤝  Makler', sub: 'Vermittler-Account + Provisionsmodell' },
+              { key: 'anlegen-werkstatt', label: '🔧  Werkstatt', sub: 'Reparatur-Partner + QR-Pool' },
+              { key: 'anlegen-flotte', label: '🚗  Firmen-Flotte', sub: 'Flottenmanager + Fuhrpark' },
+            ] as const).map((c) => (
+              <div key={c.key} className="space-y-1">
+                <Button variant="ondo" size="lg" fullWidth onClick={() => aktionDrawer.open(c.key)}>
+                  {c.label}
+                </Button>
+                <p className="text-body-xs text-claimondo-ondo px-1">{c.sub}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Drawer>
 
       <Drawer open={offen === 'anlegen-sv'} onClose={schliessen} width={720} ariaLabel="Sachverständigen anlegen">
         <div className="space-y-4">
