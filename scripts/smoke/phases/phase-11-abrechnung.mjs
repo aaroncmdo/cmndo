@@ -275,32 +275,6 @@ export async function runPhase11(adminContext, prevResult = { notes: [] }) {
     result = result === 'hard' ? 'hard' : 'soft'
   }
 
-  // Partner-Provision prüfen (falls Maik-Lead)
-  if (leadId) {
-    const { data: lead } = await db.from('leads').select('source_channel').eq('id', leadId).maybeSingle()
-    if (lead?.source_channel === 'maik_partner') {
-      // Tabelle heißt provisionen_maik (nicht partner_provisionen)
-      const { data: provision } = await db
-        .from('provisionen_maik')
-        .select('id, status, betrag')
-        .eq('lead_id', leadId)
-        .maybeSingle()
-
-      if (!provision) {
-        notes.push('SOFT: Maik-Lead erkannt, aber partner_provisionen Row fehlt — Provisions-Trigger wurde nicht ausgelöst. Prüfe: lib/finance/abrechnungen-generator.ts → partner_provisionen Insert')
-        result = result === 'hard' ? 'hard' : 'soft'
-      } else {
-        logPhase(11, `partner_provisionen: id=${provision.id}, status=${provision.status}, betrag=${provision.betrag}`)
-        if (provision.status !== 'paid') {
-          notes.push(`SOFT: partner_provisionen.status=${provision.status} (erwartet: paid) — Provisions-Status-Transition fehlt`)
-          result = result === 'hard' ? 'hard' : 'soft'
-        }
-      }
-    } else {
-      logPhase(11, `Lead-Quelle: ${lead?.source_channel} — kein Maik-Lead, Provision-Assert übersprungen`)
-    }
-  }
-
   logPhase(11, `Phase 11 abgeschlossen: ${result.toUpperCase()}`)
   return { phase: 11, result, notes, abrechnungId }
 }

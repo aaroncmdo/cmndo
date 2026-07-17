@@ -227,7 +227,6 @@ async function main() {
     await leereTabellePerFallIds('gutachter_termine', 'lead_id', leadIds)
     await leereTabellePerFallIds('nachrichten', 'lead_id', leadIds)
     await leereTabellePerFallIds('email_log', 'lead_id', leadIds)
-    await leereTabellePerFallIds('provisionen_maik', 'lead_id', leadIds)
     await leereTabellePerFallIds('makler_provisionen', 'lead_id', leadIds)
     const { error, count } = await db
       .from('leads')

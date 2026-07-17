@@ -155,13 +155,13 @@ export async function storniere(
 
 /**
  * Speichert Steuerdaten eines Partners (ust_id + Adresse) fuer die Gutschrift-Erstellung.
- * Schreibt auf makler / werkstaetten / marketing_partner.
+ * Schreibt auf makler / werkstaetten / firmen.
  *
  * Neue Spalten via Migration in diesem Branch — Typen folgen beim Merge-Regen (Regel 2).
  * Payload daher als `never` gecastet.
  */
 export async function setzePartnerSteuerdaten(
-  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte',
   partnerId: string,
   daten: { ust_id?: string; adresse_strasse?: string; adresse_plz?: string; adresse_ort?: string },
 ): Promise<{ ok: boolean; error?: string }> {
@@ -197,13 +197,13 @@ export async function setzePartnerSteuerdaten(
 
 /**
  * Setzt den USt-Status eines Partners (Kleinunternehmer ja/nein).
- * Schreibt ist_kleinunternehmer auf makler / werkstaetten / marketing_partner.
+ * Schreibt ist_kleinunternehmer auf makler / werkstaetten / firmen.
  *
  * Hinweis: ist_kleinunternehmer ist via Migration in diesem Branch neu — Typen
  * folgen beim Merge-Regen (Regel 2). Payload daher als `never` gecastet.
  */
 export async function setzePartnerUstStatus(
-  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte',
   partnerId: string,
   istKleinunternehmer: boolean,
 ): Promise<{ ok: boolean; error?: string }> {
@@ -269,13 +269,13 @@ export async function getPartnerGutschriftDownloadUrl(
 
 /**
  * Laedt alle Billing-Zeilen + Aggregat + USt-Flag eines einzelnen Partners.
- * Wird vom Admin-Drawer in Makler-, Werkstatt-, Marketing- und Kanzlei-Listen on-demand aufgerufen.
+ * Wird vom Admin-Drawer in Makler-, Werkstatt-, Firmen-Flotten- und Kanzlei-Listen on-demand aufgerufen.
  *
  * Fuer 'kanzlei': kein ist_kleinunternehmer (Forderungs-Partner, immer 19% USt) → null.
  * Fuer alle anderen Typen: gibt zusaetzlich gutschriftDocsByLedger (Original + Storno je Ledger) zurueck.
  */
 export async function ladePartnerBilling(
-  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'marketing' | 'kanzlei',
+  partnerTyp: 'makler' | 'werkstatt' | 'firmen_flotte' | 'kanzlei',
   partnerId: string,
 ): Promise<
   | {

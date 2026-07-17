@@ -92,7 +92,6 @@ const TABELLEN = [
   'profiles',
   'sachverstaendige',
   'partner_provisionen',
-  'provisionen_maik',
   'makler_provisionen',
   'timeline',
   'pflicht_kategorien',
@@ -194,14 +193,6 @@ const ERWARTUNGS_MATRIX = {
     kb:       'null',
   },
   partner_provisionen: {
-    kunde:    'null',
-    sv:       'null',
-    dispatch: 'null',
-    admin:    'alle',
-    kb:       'null',
-  },
-  provisionen_maik: {
-    // Alias / separate Tabelle für Maik-spezifische Provisionen
     kunde:    'null',
     sv:       'null',
     dispatch: 'null',
