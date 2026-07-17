@@ -331,7 +331,6 @@ async function seedSVTestFall() {
       end_zeit:     terminEnde.toISOString(),
       status:       'bestaetigt',
       typ:          'sv_begutachtung',
-      notiz_intern: SMOKE_MARKER,
     }, { onConflict: 'id' })
 
   if (terminErr) {
