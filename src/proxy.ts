@@ -72,6 +72,14 @@ const MARKETING_PREFIXES = [
   '/unfall-was-tun-als-geschaedigter',
 ]
 
+// AAR-477 P1 (17.07.26): Fortsetzen-Deeplink aus den Lead-Nurture-Mails. Lebt als
+// Route in der APP (reminder_token -> kanonischer FlowLink -> /flow), obwohl
+// /schaden-melden sonst Marketing-Territorium ist. Sub-Pfad-Ausnahme in BEIDEN
+// Host-Branches: app.* darf ihn nicht per 301 zur Hauptdomain schicken (Loop mit
+// deren 307 zurueck zur App); claimondo.de-Traffic geht zur App (defensiv — live
+// bedient die Marketing-Vercel diese Domain, ihr next.config-Redirect greift dort).
+const FORTSETZEN_PREFIX = '/schaden-melden/fortsetzen'
+
 // Marketing-Landingpages mit eigener Subdomain.
 // claimondo.de/<pfad> → 301 auf <host>/   ·   <host>/ → rewrite intern auf <pfad>.
 const SUBDOMAIN_LANDINGPAGES: Record<string, string> = {
@@ -186,8 +194,9 @@ export async function proxy(request: NextRequest) {
     // Marketing-Landingpage versehentlich auf app.* → auf ihre eigene Subdomain.
     const landingHost = SUBDOMAIN_LANDINGPAGES[pathname]
     if (landingHost) return redirectToHost(request, landingHost, '/')
-    // Sonstige Marketing-/Funnel-Routen → zurück auf die Hauptdomain.
-    if (matchesAnyPrefix(pathname, MARKETING_PREFIXES)) {
+    // Sonstige Marketing-/Funnel-Routen → zurück auf die Hauptdomain
+    // (ausser Fortsetzen-Deeplink — echte App-Route, s. FORTSETZEN_PREFIX oben).
+    if (!pathname.startsWith(FORTSETZEN_PREFIX) && matchesAnyPrefix(pathname, MARKETING_PREFIXES)) {
       return redirectToHost(request, HOST_MARKETING)
     }
     // Echte App-Route (oder Unbekanntes): Session-Refresh + noindex (außer Login/Passwort).
@@ -211,8 +220,8 @@ export async function proxy(request: NextRequest) {
     // sonst das /makler-App-Prefix und ginge fälschlich auf app.claimondo.de.
     const landingHost = SUBDOMAIN_LANDINGPAGES[pathname]
     if (landingHost) return redirectToHost(request, landingHost, '/')
-    // App-/Portal-Routen → app.claimondo.de.
-    if (!isApi && matchesAnyPrefix(pathname, APP_PREFIXES)) {
+    // App-/Portal-Routen → app.claimondo.de (inkl. Fortsetzen-Deeplink, s. FORTSETZEN_PREFIX).
+    if (!isApi && (pathname.startsWith(FORTSETZEN_PREFIX) || matchesAnyPrefix(pathname, APP_PREFIXES))) {
       return redirectToHost(request, HOST_APP)
     }
     return await updateSession(request)

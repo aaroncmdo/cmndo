@@ -33,6 +33,13 @@ export async function GET(request: Request) {
   const h24 = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const h72 = new Date(now.getTime() - 72 * 60 * 60 * 1000)
   const h168 = new Date(now.getTime() - 168 * 60 * 60 * 1000)
+  // Kaskaden-Gate (17.07.26): Mindestabstand zwischen zwei Stufen. Die Normalfall-
+  // Kadenz (2h/24h/72h/168h ab created_at) bleibt unveraendert — die Original-
+  // Abstaende sind alle >= 22h. Greift nur bei Nachzuegern (Bestands-Leads der
+  // verbreiterten Kanaele, nie genurtured): statt alle faelligen Stufen im selben
+  // Tick zu bekommen (bis zu 4 Mails auf einmal), steigen sie mit r1 ein und
+  // laufen eine 20h-Treppe.
+  const MIN_STUFEN_ABSTAND_MS = 20 * 60 * 60 * 1000
 
   // Kohorten-Helper: Lädt Kandidaten für ein bestimmtes Reminder-Fenster.
   // Filter:
@@ -40,12 +47,14 @@ export async function GET(request: Request) {
   //   - source_channel NOT IN (makler-anfrage,manuell) - alle Akquise-Channels nurtueren, nur menschl.-betreute raus
   //   - reminder_N_sent_at IS NULL (nicht schon versendet)
   //   - created_at <= before (alt genug für diese Stufe)
+  //   - prevField gesendet + >= MIN_STUFEN_ABSTAND_MS her (Kaskaden-Gate, nur Stufe 2-4)
   //   - keine Faelle mit lead_id = lead.id (nicht konvertiert)
   async function candidates(
     before: Date,
     reminderField: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at' | 'reminder_4_sent_at',
+    prevField?: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at',
   ): Promise<Candidate[]> {
-    const { data, error } = await supabase
+    let query = supabase
       .from('leads')
       .select('id, email, vorname, reminder_token, source_channel')
       .eq('status', 'neu')
@@ -54,7 +63,11 @@ export async function GET(request: Request) {
       .is(reminderField, null)
       .lte('created_at', before.toISOString())
       .not('email', 'is', null)
-      .limit(50)
+    if (prevField) {
+      const spaetestens = new Date(now.getTime() - MIN_STUFEN_ABSTAND_MS).toISOString()
+      query = query.not(prevField, 'is', null).lte(prevField, spaetestens)
+    }
+    const { data, error } = await query.limit(50)
     if (error) {
       console.error('[AAR-477] Kandidaten-Query fehlgeschlagen:', reminderField, error.message)
       return []
@@ -98,9 +111,9 @@ export async function GET(request: Request) {
 
   const [cohort1, cohort2, cohort3, cohort4] = await Promise.all([
     candidates(h2, 'reminder_1_sent_at'),
-    candidates(h24, 'reminder_2_sent_at'),
-    candidates(h72, 'reminder_3_sent_at'),
-    candidates(h168, 'reminder_4_sent_at'),
+    candidates(h24, 'reminder_2_sent_at', 'reminder_1_sent_at'),
+    candidates(h72, 'reminder_3_sent_at', 'reminder_2_sent_at'),
+    candidates(h168, 'reminder_4_sent_at', 'reminder_3_sent_at'),
   ])
 
   let sent = 0
