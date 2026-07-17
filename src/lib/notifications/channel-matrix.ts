@@ -338,6 +338,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       // makler_fall_consent im fan-out -> nur eigene Faelle). reguliert = wichtigstes Outcome -> + email.
       makler: ['in_app', 'email'],
       flottenmanager: ['in_app'],
+      // P1.2: Das Regulierungs-Ergebnis ist der Abschluss des Kanzlei-Mandats (gegated im
+      // fan-out auf kanzlei_faelle-Existenz — Claims ohne Kanzlei-Uebergabe bleiben stumm).
+      kanzlei: ['in_app'],
     },
   },
   'claim.abgelehnt': {
@@ -367,6 +370,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
       makler: ['in_app'],
+      // P1.2 (Operativ-Audit 17.07.): Die Kanzlei-Glocke war strukturell leer — ausgerechnet
+      // die UEBERGABE an die Kanzlei erreichte sie nicht (nur Fehlschlaege gingen an KB/Admin).
+      kanzlei: ['in_app'],
     },
   },
   // CMM-44 MP-8: weitere terminale Endzustände
@@ -394,6 +400,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      kanzlei: ['in_app'],
     },
   },
   'claim.kanzlei_re_frage_due': {

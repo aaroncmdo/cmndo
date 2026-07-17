@@ -19,6 +19,7 @@ type FallParticipants = {
   maklerUserIds: string[]
   adminUserIds: string[]
   flottenmanagerUserIds: string[]
+  kanzleiUserIds: string[]
 }
 
 async function loadClaimParticipants(claimId: string): Promise<FallParticipants> {
@@ -86,6 +87,25 @@ async function loadClaimParticipants(claimId: string): Promise<FallParticipants>
     }
   }
 
+  // P1.2 (Operativ-Audit 17.07.): Kanzlei-User, WENN der Claim eine kanzlei_faelle-Row hat
+  // (= an eine Kanzlei uebergeben). Empfaenger = alle rolle='kanzlei'-Profile: das Schema hat
+  // heute KEINE User<->Kanzlei-Bruecke (profiles ohne kanzlei-Spalte, kanzleien ohne user_id;
+  // live 1 Kanzlei / 2 User = Single-Kanzlei-Realitaet). TODO Multi-Kanzlei: Bruecke einziehen
+  // und hier ueber kanzlei_faelle.kanzlei_id filtern.
+  let kanzleiUserIds: string[] = []
+  const { data: kanzleiFall } = await supabase
+    .from('kanzlei_faelle')
+    .select('id')
+    .eq('claim_id', claimId)
+    .limit(1)
+  if ((kanzleiFall ?? []).length > 0) {
+    const { data: kanzleiUsers } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('rolle', 'kanzlei')
+    kanzleiUserIds = (kanzleiUsers ?? []).map((u) => u.id as string)
+  }
+
   return {
     kundeUserId: fallClaim?.geschaedigter_user_id ?? null,
     svUserId,
@@ -93,6 +113,7 @@ async function loadClaimParticipants(claimId: string): Promise<FallParticipants>
     maklerUserIds,
     adminUserIds,
     flottenmanagerUserIds,
+    kanzleiUserIds,
   }
 }
 
@@ -237,6 +258,11 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
   if (config.channels.flottenmanager?.length) {
     for (const fmUserId of p.flottenmanagerUserIds) {
       addRecipient(map, fmUserId, 'flottenmanager', config.channels.flottenmanager)
+    }
+  }
+  if (config.channels.kanzlei?.length) {
+    for (const kUserId of p.kanzleiUserIds) {
+      addRecipient(map, kUserId, 'kanzlei', config.channels.kanzlei)
     }
   }
 
