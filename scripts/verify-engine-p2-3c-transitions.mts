@@ -15,7 +15,7 @@ const ids: string[] = []
 async function insBestaetigt(svId: string, von: string, bis: string): Promise<string> {
   const { data, error } = await db.from('gutachter_termine').insert({
     assignee_typ: 'sachverstaendiger', assignee_id: svId, sv_id: svId,
-    typ: 'sv_begutachtung', status: 'bestaetigt', start_zeit: von, end_zeit: bis, notiz_intern: 'VERIFY-P23C',
+    typ: 'sv_begutachtung', status: 'bestaetigt', start_zeit: von, end_zeit: bis,
   }).select('id').single()
   if (error) throw new Error('insert: ' + error.message)
   ids.push(data!.id as string)
@@ -65,6 +65,7 @@ try {
   }
 } finally {
   if (ids.length) await db.from('gutachter_termine').delete().in('id', ids)
-  await db.from('gutachter_termine').delete().eq('notiz_intern', 'VERIFY-P23C')
+  // Reste abgestuerzter Vorlaeufe ueber das 2099-Testfenster (notiz_intern ausgelagert, Kunde-Leak-Fix).
+  await db.from('gutachter_termine').delete().gte('start_zeit', '2099-07-01').lt('start_zeit', '2099-07-02')
 }
 console.log(JSON.stringify(res, null, 2))

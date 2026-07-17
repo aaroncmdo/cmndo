@@ -1,13 +1,4 @@
 [
-  "src/app/mitarbeiter/kundentermine/page.tsx|gutachter_termine.adresse|select",
-  "src/lib/abrechnung/kanzlei/erstelle-abrechnung.ts|leads.fall_id|eq",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.datum|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.fall_id|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.gesamtbetrag|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.kanzlei_email|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.pdf_url|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.positionen|select",
-  "src/lib/email/google/flows.ts|kanzlei_abrechnungen.rechnungs_nr|select",
   "src/lib/fall/communication-timeline.ts|email_log.body_html|select",
   "src/lib/fall/communication-timeline.ts|email_log.body_text|select",
   "src/lib/fall/communication-timeline.ts|email_log.empfaenger_array|select"
