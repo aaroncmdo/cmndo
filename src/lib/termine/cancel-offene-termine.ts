@@ -2,6 +2,7 @@
 // Non-critical: ein fehlgeschlagener Termin-Cancel darf den Fall-Storno nicht brechen.
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sageAb } from '@/lib/termine/engine'
+import { bezugOrExpr } from './bezug-filter'
 
 const AKTIV = ['bestaetigt', 'reserviert', 'verlegt', 'verlegung_pending']
 
@@ -15,7 +16,8 @@ export async function cancelOffeneTermineFuerFall(
     const { data: termine } = await db
       .from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallId)
+      // P3.3: bezug-aware statt naivem .eq('fall_id') -> matcht auch bezug-native Termine.
+      .or(bezugOrExpr('fall', fallId))
       .in('status', AKTIV)
     for (const t of (termine ?? []) as { id: string }[]) {
       const r = await sageAb(t.id, { status: 'storniert', grund, db })
