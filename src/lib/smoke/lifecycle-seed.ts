@@ -58,6 +58,14 @@ export const SCENARIOS: Scenario[] = [
   // (statt gar nicht). Beweist Anzeige-Neutralitaet: View-m_sub (status) UND getClaimLifecycle
   // (OPERATIVE_PHASE) liefern beide abschluss/termin_durchgefuehrt.
   { key: 'abschluss-termin-durchgefuehrt', label: 'Abschluss · Termin durchgeführt (nur_gutachter)', expected: 'nur_gutachter-Terminal — Stepper "abschluss/termin_durchgefuehrt"' },
+  // WS6/Kasko-Fix (17.07.): Direct-Reparatur-Lane. Parity laeuft NORMALISIERT
+  // (toClaimMainPhase/toClaimSubPhase): View sagt reparatur/reparatur-werkstatt-suche…,
+  // TS sagt erfassung/reparatur_werkstattwahl… — semantisch identisch (Alias-Map).
+  // Beide Quellen muessen konsistent geseedet werden: View DERIVED den Weg aus
+  // lead.schuldfrage/eigene_versicherung+schadenart, TS liest claims.abrechnungsweg.
+  { key: 'reparatur-werkstattwahl', label: 'Reparatur · Werkstattwahl (kasko)', expected: 'kasko + ersterfassung, keine Werkstatt — Reparatur-Lane statt SA-Kaskade (der 39734007-Bug)' },
+  { key: 'reparatur-terminfindung', label: 'Reparatur · Terminfindung', expected: 'Werkstatt gewählt — terminfindung/angefragt' },
+  { key: 'reparatur-laeuft', label: 'Reparatur · läuft', expected: 'reparatur_termine bestätigt — läuft' },
 ]
 
 export type SeededRow = {
@@ -112,10 +120,14 @@ async function deleteAllSmoke(db: Db): Promise<number> {
     for (const [t, col] of [
       ['gutachter_termine', 'claim_id'], ['kanzlei_faelle', 'claim_id'],
       ['auftraege', 'fall_id'], ['faelle_claim_bridge', 'claim_id'],
+      // WS6/Kasko: Reparatur-Szenarien (FK claim_id -> vor claims loeschen).
+      ['reparatur_termine', 'claim_id'],
     ] as const) {
       await db.from(t).delete().in(col, claimIds)
     }
     await db.from('claims').delete().in('id', claimIds)
+    // WS6/Kasko: SMOKE-Werkstaetten NACH claims (FK claims.reparatur_werkstatt_id).
+    await db.from('werkstaetten').delete().like('name', 'SMOKE-LC-Werkstatt%')
   }
   if (leadIds.length > 0) {
     await db.from('gutachter_termine').delete().in('lead_id', leadIds)
@@ -132,9 +144,11 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   const sceneIsErfassungOnboardingOffen = scenarioKey === 'erfassung-onboarding-offen'
   const sceneNeedsLeadOnly = scenarioKey === 'erfassung-sa-offen'
   const isErfassung = sceneNeedsLeadOnly || sceneIsErfassungVollmachtOffen || sceneIsErfassungOnboardingOffen
+  // WS6/Kasko: Direct-Reparatur — keine SA/Vollmacht by design (wie erzeugeSelbstzahlerClaim).
+  const isReparatur = scenarioKey.startsWith('reparatur')
 
-  const sa_unterschrieben = !sceneNeedsLeadOnly
-  const vollmacht_signiert_am = sceneIsErfassungOnboardingOffen || !isErfassung
+  const sa_unterschrieben = !sceneNeedsLeadOnly && !isReparatur
+  const vollmacht_signiert_am = (sceneIsErfassungOnboardingOffen || !isErfassung) && !isReparatur
     ? new Date(Date.now() - 86400_000).toISOString()
     : null
 
@@ -145,6 +159,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     telefon: '+4917620289514',
     sa_unterschrieben,
     vollmacht_signiert_am,
+    // WS6/Kasko: derive_abrechnungsweg (View-Seite) braucht die Lead-Quali-Felder,
+    // damit die View 'kasko' derived (TS liest die claims-Spalte unten).
+    ...(isReparatur ? { schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' } : {}),
     // SP-B PR2a: onboarding_complete lebt auf claims (SSoT) — NICHT mehr auf leads.
   }).select('id').single()
   if (leadErr || !lead) throw new Error(`lead insert: ${leadErr?.message ?? 'kein lead'}`)
@@ -157,7 +174,9 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
     schadenort_adresse: 'Teststraße 12',
     schadenort_plz: '10115',
     schadenort_ort: 'Berlin',
-    schadenart: 'haftpflicht',
+    // WS6/Kasko: 'haftpflicht'-schadenart wuerde derive_abrechnungsweg auf haftpflicht ziehen.
+    schadenart: isReparatur ? 'unbekannt' : 'haftpflicht',
+    ...(isReparatur ? { abrechnungsweg: 'kasko', reparaturwunsch: 'reparatur' } : {}),
     // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — aus dem
     // faelle-INSERT hierher verschoben.
     schadens_ursache: 'unfall',
@@ -226,6 +245,12 @@ function derivePhaseStatus(key: string): { phase: string; status: string | null;
       return { phase: '6_kommunikation_versicherung', status: 'in_kommunikation_vs', operative_status: 'in_kommunikation_vs' }
     case 'regulierung-auszahlung':
       return { phase: '9_reguliert', status: null, operative_status: 'zahlung-eingegangen' }
+    case 'reparatur-werkstattwahl':
+    case 'reparatur-terminfindung':
+    case 'reparatur-laeuft':
+      // WS6 6a: der Cursor bleibt (noch) ersterfassung — die Lane-Sub kommt aus
+      // abrechnungsweg + Werkstatt-/rt-Signalen (exakt der Live-Bug-Zustand 39734007).
+      return { phase: '0_lead', status: null, operative_status: 'ersterfassung' }
     case 'abschluss':
       // Terminal: post-B2 traegt operative_status den feinen Outcome direkt (statt coarse 'abgeschlossen')
       // -> testet zugleich die #4285-Output-Neutralitaet (fine Terminal in operative_status).
@@ -252,6 +277,24 @@ async function seedAuftragArtefakte(
   claimId: string,
 ): Promise<void> {
   if (scenarioKey.startsWith('erfassung')) return
+
+  // WS6/Kasko: Reparatur-Szenarien — SMOKE-Werkstatt + optional Reparatur-Termin;
+  // bewusst KEIN auftrag/kanzlei_faelle (sonst gewaenne die milestone-Begutachtung).
+  if (scenarioKey.startsWith('reparatur')) {
+    if (scenarioKey === 'reparatur-terminfindung' || scenarioKey === 'reparatur-laeuft') {
+      const { data: ws, error: wsErr } = await db
+        .from('werkstaetten').insert({ name: `SMOKE-LC-Werkstatt ${scenarioKey}` }).select('id').single()
+      if (wsErr || !ws) throw new Error(`werkstatt insert: ${wsErr?.message ?? 'keine werkstatt'}`)
+      await db.from('claims').update({ reparatur_werkstatt_id: ws.id }).eq('id', claimId)
+      if (scenarioKey === 'reparatur-laeuft') {
+        const { error: rtErr } = await db
+          .from('reparatur_termine')
+          .insert({ claim_id: claimId, werkstatt_id: ws.id, status: 'bestaetigt' })
+        if (rtErr) throw new Error(`reparatur_termin insert: ${rtErr.message}`)
+      }
+    }
+    return
+  }
 
   // Auftrag-Status pro Szenario
   const auftragStatus =
