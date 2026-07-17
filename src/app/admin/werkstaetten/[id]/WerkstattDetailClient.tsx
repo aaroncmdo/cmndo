@@ -102,7 +102,16 @@ function EditFeld({
   )
 }
 
-export default function WerkstattDetailClient({ detail, currentUserId }: { detail: WerkstattDetail; currentUserId: string }) {
+export default function WerkstattDetailClient({
+  detail,
+  currentUserId,
+  variant = 'page',
+}: {
+  detail: WerkstattDetail
+  currentUserId: string
+  /** "drawer": kein Zurueck-Link (der Drawer liegt ueber Liste/Cockpit und hat Close). */
+  variant?: 'page' | 'drawer'
+}) {
   const router = useRouter()
   const { werkstatt: w, staffel, auftraege, lastSignInAt, forcePasswordChange, billing, leistung } = detail
   const [mailLoading, setMailLoading] = useState(false)
@@ -318,12 +327,14 @@ export default function WerkstattDetailClient({ detail, currentUserId }: { detai
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
       {/* Header */}
       <div>
-        <Link
-          href="/admin/werkstaetten"
-          className="inline-flex items-center gap-1 text-body-sm text-claimondo-ondo hover:text-claimondo-navy mb-3 transition-colors"
-        >
-          <ArrowLeftIcon className="w-4 h-4" /> Alle Werkstätten
-        </Link>
+        {variant !== 'drawer' && (
+          <Link
+            href="/admin/werkstaetten"
+            className="inline-flex items-center gap-1 text-body-sm text-claimondo-ondo hover:text-claimondo-navy mb-3 transition-colors"
+          >
+            <ArrowLeftIcon className="w-4 h-4" /> Alle Werkstätten
+          </Link>
+        )}
         <PageHeader
           title={w.name}
           size="lg"
