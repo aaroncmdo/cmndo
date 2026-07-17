@@ -57,11 +57,18 @@ jobs:
           git add scripts/lib/schema-snapshot.json
           git commit -m "chore(query-parse): schema-snapshot regen (auto — Drift erkannt)"
           git push -f -u origin "$BRANCH"
-          OPEN=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length')
-          if [ "$OPEN" = "0" ]; then
-            gh pr create --base staging --head "$BRANCH" \
-              --title "chore(query-parse): schema-snapshot regen (auto)" \
-              --body "Automatischer Regen von \`scripts/lib/schema-snapshot.json\` aus prod (Cron \`schema-snapshot-regen\`). Drift zur committeten Write-Achsen-Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). **Review:** die gelisteten Tabellen/Spalten gegen die zugehoerige Migration pruefen; NEUE Relationen kommen mit default \`kind=t\` (falls View → manuell auf \`v\` korrigieren)."
+          # PR-Auto-Erstellung ist OPTIONAL: braucht das Repo-Setting "Allow GitHub Actions to
+          # create and approve pull requests" (Settings → Actions → General). Ist es aus, failt
+          # `gh pr create` mit "GitHub Actions is not permitted to create pull requests" — dann
+          # NICHT den Job rot faerben: der Branch ist gepusht (= Drift erfasst), PR wird manuell
+          # via 1-Klick-Link geoeffnet. Mit Setting an: PR entsteht automatisch.
+          echo "### 🔁 Schema-Snapshot-Drift — Branch \`$BRANCH\` gepusht" >> "$GITHUB_STEP_SUMMARY"
+          BODY="Automatischer Regen von scripts/lib/schema-snapshot.json aus prod (Cron). Drift zur committeten Write-Achsen-Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). Review: gelistete Tabellen/Spalten gegen die zugehoerige Migration; NEUE Relationen default kind=t (falls View -> manuell v)."
+          OPEN=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo 0)
+          if [ "$OPEN" != "0" ]; then
+            echo "Rollierender PR existiert bereits → per force-push aktualisiert." | tee -a "$GITHUB_STEP_SUMMARY"
+          elif gh pr create --base staging --head "$BRANCH" --title "chore(query-parse): schema-snapshot regen (auto)" --body "$BODY"; then
+            echo "✅ PR automatisch erstellt." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "Rollierender PR existiert bereits → per force-push aktualisiert."
+            echo "⚠️ Auto-PR nicht erlaubt (Repo-Setting aus). Branch gepusht — PR manuell oeffnen: https://github.com/${GITHUB_REPOSITORY}/pull/new/$BRANCH" | tee -a "$GITHUB_STEP_SUMMARY"
           fi
