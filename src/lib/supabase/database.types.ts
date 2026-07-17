@@ -4235,6 +4235,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "claims_eskaliert_an_admin_id_fkey"
+            columns: ["eskaliert_an_admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "claims_gegner_versicherung_id_fkey"
             columns: ["gegner_versicherung_id"]
             isOneToOne: false
@@ -6203,6 +6210,13 @@ export type Database = {
             columns: ["fall_id"]
             isOneToOne: false
             referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fall_dokumente_hochgeladen_von_user_id_fkey"
+            columns: ["hochgeladen_von_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -9056,7 +9070,6 @@ export type Database = {
           google_event_synced_at: string | null
           gps_lat_ankunft: number | null
           gps_lng_ankunft: number | null
-          honorar_betrag: number | null
           id: string
           kanal: string | null
           kb_id: string | null
@@ -9087,7 +9100,6 @@ export type Database = {
           notification_5min_gesendet_am: string | null
           notification_angekommen_gesendet_am: string | null
           notification_losgefahren_gesendet_am: string | null
-          notiz_intern: string | null
           notiz_kunde: string | null
           notizen_vor_ort: string | null
           quelle: string | null
@@ -9176,7 +9188,6 @@ export type Database = {
           google_event_synced_at?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
-          honorar_betrag?: number | null
           id?: string
           kanal?: string | null
           kb_id?: string | null
@@ -9207,7 +9218,6 @@ export type Database = {
           notification_5min_gesendet_am?: string | null
           notification_angekommen_gesendet_am?: string | null
           notification_losgefahren_gesendet_am?: string | null
-          notiz_intern?: string | null
           notiz_kunde?: string | null
           notizen_vor_ort?: string | null
           quelle?: string | null
@@ -9296,7 +9306,6 @@ export type Database = {
           google_event_synced_at?: string | null
           gps_lat_ankunft?: number | null
           gps_lng_ankunft?: number | null
-          honorar_betrag?: number | null
           id?: string
           kanal?: string | null
           kb_id?: string | null
@@ -9327,7 +9336,6 @@ export type Database = {
           notification_5min_gesendet_am?: string | null
           notification_angekommen_gesendet_am?: string | null
           notification_losgefahren_gesendet_am?: string | null
-          notiz_intern?: string | null
           notiz_kunde?: string | null
           notizen_vor_ort?: string | null
           quelle?: string | null
@@ -15000,6 +15008,34 @@ export type Database = {
             referencedRelation: "faelle_claim_bridge"
             referencedColumns: ["claim_id"]
           },
+          {
+            foreignKeyName: "partner_provisionen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_provisionen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_lead_termin_gutachter"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "partner_provisionen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_lead_workstate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_provisionen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_lead"
+            referencedColumns: ["id"]
+          },
         ]
       }
       partner_rang: {
@@ -15235,6 +15271,13 @@ export type Database = {
             columns: ["firma_id"]
             isOneToOne: false
             referencedRelation: "firmen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "personen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -19590,6 +19633,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_werkstatt_auftrag"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "tasks_empfaenger_user_id_fkey"
+            columns: ["empfaenger_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "tasks_fall_id_fkey"

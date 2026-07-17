@@ -119,8 +119,9 @@ async function findStaleTermin(candidateFallIds, leadId) {
 }
 
 async function deleteMarkerTermine() {
-  const { data: tm } = await db.from('gutachter_termine').select('id').eq('notiz_intern', MARKER)
-  const ids = (tm ?? []).map((x) => x.id)
+  // Marker lebt in gutachter_termine_intern (notiz_intern aus gutachter_termine ausgelagert, Kunde-Leak-Fix).
+  const { data: marked } = await db.from('gutachter_termine_intern').select('termin_id').eq('notiz_intern', MARKER)
+  const ids = (marked ?? []).map((x) => x.termin_id)
   if (ids.length) {
     await db.from('tasks').delete().eq('entity_type', 'termin').in('entity_id', ids)
     await db.from('gutachter_termine').delete().in('id', ids)
@@ -144,11 +145,14 @@ async function run() {
     const end = new Date(Date.now() - 48 * 3600 * 1000).toISOString()
     const { data: t, error: tErr } = await db
       .from('gutachter_termine')
-      .insert({ claim_id: TEST.claimId, fall_id: TEST.fallId, lead_id: TEST.leadId, status: 'bestaetigt', typ: 'sv_begutachtung', start_zeit: start, end_zeit: end, notiz_intern: MARKER })
+      .insert({ claim_id: TEST.claimId, fall_id: TEST.fallId, lead_id: TEST.leadId, status: 'bestaetigt', typ: 'sv_begutachtung', start_zeit: start, end_zeit: end })
       .select('id')
       .single()
     if (tErr) throw new Error('seed termin: ' + tErr.message)
     terminId = t.id
+    // Marker in die Intern-Tabelle (notiz_intern aus gutachter_termine ausgelagert, Kunde-Leak-Fix).
+    const { error: mErr } = await db.from('gutachter_termine_intern').upsert({ termin_id: terminId, notiz_intern: MARKER }, { onConflict: 'termin_id' })
+    if (mErr) throw new Error('seed marker: ' + mErr.message)
     console.log('  seeded termin ' + terminId)
 
     // --- MATCH (novel: phone -> stale nur_gutachter termin) ---

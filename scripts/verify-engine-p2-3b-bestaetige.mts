@@ -14,7 +14,7 @@ const ids: string[] = []
 
 async function insTermin(extra: Record<string, unknown>): Promise<string> {
   const { data, error } = await db.from('gutachter_termine')
-    .insert({ assignee_typ: 'sachverstaendiger', typ: 'sv_begutachtung', status: 'reserviert', notiz_intern: 'VERIFY-P23B', ...extra })
+    .insert({ assignee_typ: 'sachverstaendiger', typ: 'sv_begutachtung', status: 'reserviert', ...extra })
     .select('id').single()
   if (error) throw new Error('insert: ' + error.message)
   ids.push(data!.id as string)
@@ -56,6 +56,7 @@ try {
   }
 } finally {
   if (ids.length) await db.from('gutachter_termine').delete().in('id', ids)
-  await db.from('gutachter_termine').delete().eq('notiz_intern', 'VERIFY-P23B')
+  // Reste abgestuerzter Vorlaeufe ueber das 2099-Testfenster (notiz_intern ausgelagert, Kunde-Leak-Fix).
+  await db.from('gutachter_termine').delete().gte('start_zeit', '2099-06-01').lt('start_zeit', '2099-06-02')
 }
 console.log(JSON.stringify(res, null, 2))

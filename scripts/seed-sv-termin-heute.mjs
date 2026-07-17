@@ -53,10 +53,20 @@ const db = createClient(url, key, { auth: { autoRefreshToken: false, persistSess
 const clean = process.argv.includes('--clean')
 const svId = process.argv.slice(2).find((a) => /^[0-9a-f-]{36}$/i.test(a)) ?? DEFAULT_SV
 
-const del = await db.from('gutachter_termine').delete().eq('assignee_id', svId).eq('notiz_intern', MARKER)
-if (del.error) {
-  console.error('Cleanup-Fehler:', del.error.message)
+// Marker lebt in gutachter_termine_intern (notiz_intern aus gutachter_termine ausgelagert, Kunde-Leak-Fix).
+const { data: markedRows, error: markSelErr } = await db
+  .from('gutachter_termine_intern').select('termin_id').eq('notiz_intern', MARKER)
+if (markSelErr) {
+  console.error('Cleanup-Lookup-Fehler:', markSelErr.message)
   process.exit(1)
+}
+const markedIds = (markedRows ?? []).map((r) => r.termin_id)
+if (markedIds.length) {
+  const del = await db.from('gutachter_termine').delete().eq('assignee_id', svId).in('id', markedIds)
+  if (del.error) {
+    console.error('Cleanup-Fehler:', del.error.message)
+    process.exit(1)
+  }
 }
 console.log(`Alte Seed-Termine fuer SV ${svId} entfernt.`)
 if (clean) {
@@ -78,13 +88,20 @@ const { data, error } = await db
     besichtigungsort_lat: 50.865654,
     besichtigungsort_lng: 7.016278,
     besichtigungsort_place_id: 'address.7751896168812646',
-    notiz_intern: MARKER,
   })
   .select('id, start_zeit')
   .single()
 
 if (error) {
   console.error('Insert-Fehler:', error.message)
+  process.exit(1)
+}
+
+// Seed-Marker in die Intern-Tabelle (notiz_intern aus gutachter_termine ausgelagert, Kunde-Leak-Fix).
+const { error: markErr } = await db.from('gutachter_termine_intern')
+  .upsert({ termin_id: data.id, notiz_intern: MARKER }, { onConflict: 'termin_id' })
+if (markErr) {
+  console.error('Marker-Insert-Fehler:', markErr.message)
   process.exit(1)
 }
 
