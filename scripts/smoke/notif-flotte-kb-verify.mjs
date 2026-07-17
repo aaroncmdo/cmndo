@@ -48,11 +48,26 @@ async function cleanup() {
   const { data: claims } = vehIds.length
     ? await db.from('claims').select('id, vehicle_id').in('vehicle_id', vehIds)
     : { data: [] }
+  const claimIds = (claims ?? []).map((c) => c.id)
+  // Bridge -> fall_id: der 'Reguliert'-Trigger erzeugt partner_provisionen, die via
+  // partner_provisionen_claim_bridge_fkey auf faelle_claim_bridge zeigen. Reihenfolge zwingend:
+  // partner_provisionen (claim_id UND fall_id) VOR bridge VOR claim, sonst FK-Block.
+  const { data: bridges } = claimIds.length
+    ? await db.from('faelle_claim_bridge').select('fall_id, claim_id').in('claim_id', claimIds)
+    : { data: [] }
+  const fallIds = (bridges ?? []).map((b) => b.fall_id).filter(Boolean)
+  // Alle claim_id-Kinder, die die Endzustand-/Provisions-Flows real erzeugen (best-effort).
+  const KINDER = ['timeline', 'phase_transitions', 'notification_events', 'kanzlei_faelle', 'claim_parties', 'sla_tracking', 'claim_recency', 'fall_read_state', 'regulierungs_klassifizierung']
   for (const c of claims ?? []) {
+    await db.from('partner_provisionen').delete().eq('claim_id', c.id)
     await db.from('mitteilungen').delete().eq('kontext_id', c.id)
-    await db.from('notification_events').delete().eq('claim_id', c.id)
-    await db.from('kanzlei_faelle').delete().eq('claim_id', c.id)
-    await db.from('claims').delete().eq('id', c.id)
+    for (const t of KINDER) await db.from(t).delete().eq('claim_id', c.id)
+  }
+  for (const fid of fallIds) await db.from('partner_provisionen').delete().eq('fall_id', fid)
+  for (const c of claims ?? []) {
+    await db.from('faelle_claim_bridge').delete().eq('claim_id', c.id)
+    const { error: cErr } = await db.from('claims').delete().eq('id', c.id)
+    if (cErr) { log('  ⚠ claim', c.id.slice(0, 8), 'nicht loeschbar:', cErr.message); continue }
     if (c.vehicle_id) {
       await db.from('flotten_fahrzeuge').delete().eq('vehicle_id', c.vehicle_id)
       await db.from('vehicles').delete().eq('id', c.vehicle_id)
