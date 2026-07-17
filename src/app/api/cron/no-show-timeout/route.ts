@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
       const { data: aktTermin } = await db
         .from('gutachter_termine')
         .select('re_termin_token_eingelaufen_am')
-        .eq('fall_id', fall.id)
+        .or(bezugOrExpr('fall', fall.id))
         .order('start_zeit', { ascending: false })
         .limit(1)
         .maybeSingle()
@@ -59,7 +60,7 @@ export async function GET(request: Request) {
       const { data: neuerTermin } = await db
         .from('gutachter_termine')
         .select('start_zeit')
-        .eq('fall_id', fall.id)
+        .or(bezugOrExpr('fall', fall.id))
         .in('status', ['reserviert', 'bestaetigt', 'verlegung_pending', 'verlegt'])
         .gt('start_zeit', gemeldet.toISOString())
         .limit(1)

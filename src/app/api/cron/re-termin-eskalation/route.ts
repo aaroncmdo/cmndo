@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
 
 export const dynamic = 'force-dynamic'
@@ -99,7 +100,7 @@ export async function GET(request: Request) {
     let markerWritten = false
     if (reTerminClaimId) {
       const { data: t } = await db.from('gutachter_termine').select('id')
-        .eq('claim_id', reTerminClaimId)
+        .or(bezugOrExpr('claim', reTerminClaimId))
         .order('start_zeit', { ascending: false })
         .limit(1)
         .maybeSingle()

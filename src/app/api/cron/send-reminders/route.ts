@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -102,7 +103,7 @@ export async function GET(request: Request) {
         const { data: at } = await supabase
           .from('gutachter_termine')
           .select('besichtigungsort_adresse')
-          .eq('claim_id', terminClaimId)
+          .or(bezugOrExpr('claim', terminClaimId))
           .order('start_zeit', { ascending: false })
           .limit(1)
           .maybeSingle()

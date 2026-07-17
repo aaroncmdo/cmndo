@@ -9,6 +9,7 @@ import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import { LeadpreiseSection } from './LeadpreiseSection'
 
 const PAKET_LABELS: Record<string, string> = {
   standard: 'Standard (10 Fälle/Monat)', 'starter-10': 'Standard (10 Fälle/Monat)',
@@ -207,7 +208,7 @@ export default async function AbrechnungPage() {
         title="Abrechnung"
         actions={
           <Link
-            href="/gutachter/leadpreise"
+            href="#leadpreise"
             className="text-xs font-medium text-[var(--brand-text-on-primary,#FFFFFF)] hover:opacity-75 underline underline-offset-2 whitespace-nowrap"
           >
             Aktuelle Lead-Preis-Tabelle einsehen
@@ -613,6 +614,9 @@ export default async function AbrechnungPage() {
           </div>
           <p className="text-claimondo-ondo/70 text-xs mt-3">Coming soon — PDF-Abrechnungen werden in Kürze verfügbar sein.</p>
         </SectionCard>
+
+        {/* W1.1: Lead-Preis-Tabelle (vorher eigene Route /gutachter/leadpreise -> 308 hierher). */}
+        <LeadpreiseSection userId={user.id} />
       </div>
     </div>
   )
