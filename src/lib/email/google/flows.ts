@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { buildWelcomeConfirmLink } from '@/lib/auth/welcome-link'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
@@ -153,7 +154,7 @@ export async function sendKundeWelcome(
   const { data: termin } = await db.from('gutachter_termine')
     // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
     .select('start_zeit, assignee_id, fall_id, besichtigungsort_adresse')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .in('status', ['reserviert', 'bestaetigt'])
     .gte('start_zeit', new Date().toISOString())
     .order('start_zeit', { ascending: true })
@@ -186,7 +187,7 @@ export async function sendKundeWelcome(
     const { data: aktTerminEmail } = await db
       .from('gutachter_termine')
       .select('besichtigungsort_adresse')
-      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .or(bezugOrExpr('claim', (fall as { claim_id: string }).claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -198,7 +199,7 @@ export async function sendKundeWelcome(
   let terminVergangen = false
   {
     const { data: pastTermin } = await db.from('gutachter_termine')
-      .select('id').eq('fall_id', fallId).eq('status', 'bestaetigt')
+      .select('id').or(bezugOrExpr('fall', fallId)).eq('status', 'bestaetigt')
       .lt('start_zeit', new Date().toISOString()).limit(1).maybeSingle()
     terminVergangen = !!pastTermin
   }
@@ -417,7 +418,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     const { data: aktTerminKanzlei } = await db
       .from('gutachter_termine')
       .select('besichtigungsort_adresse')
-      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .or(bezugOrExpr('claim', (fall as { claim_id: string }).claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

@@ -13,6 +13,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
 import { verlege, entscheideVerlegung } from '@/lib/termine/engine'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 // Datum/Uhrzeit-Formatter für Notifikations-Payloads (de-DE)
 function fmtDatum(iso: string): string {
@@ -180,7 +181,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
     const { data: at } = await admin
       .from('gutachter_termine')
       .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
-      .eq('claim_id', fall.claim_id as string)
+      .or(bezugOrExpr('claim', fall.claim_id as string))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -394,7 +395,7 @@ export async function getKundeTerminVorschlaegeAction(
     const { data: at } = await admin
       .from('gutachter_termine')
       .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
-      .eq('claim_id', fall.claim_id as string)
+      .or(bezugOrExpr('claim', fall.claim_id as string))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
