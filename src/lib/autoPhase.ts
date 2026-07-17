@@ -3,6 +3,7 @@ import { triggerGutachterTerminTask, triggerQcTask, triggerArchivierungTask } fr
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { getClaimPayments } from '@/lib/faelle/claim-payments'
 import { computeNextOperativePhase, type OperativeSignals } from '@/lib/autophase-decision'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 /**
  * Check if a lead should automatically move to a new phase based on its data.
@@ -67,7 +68,7 @@ export async function checkFallAutoPhase(fallId: string) {
   const [gutachtenRes, terminRes, kanzleiRes, payments] = await Promise.all([
     svc.from('gutachten').select('fertiggestellt_am').eq('claim_id', claimId)
       .not('fertiggestellt_am', 'is', null).limit(1).maybeSingle(),
-    svc.from('gutachter_termine').select('id').eq('claim_id', claimId)
+    svc.from('gutachter_termine').select('id').or(bezugOrExpr('claim', claimId))
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt']).limit(1).maybeSingle(),
     svc.from('kanzlei_faelle').select('anschlussschreiben_am').eq('claim_id', claimId).maybeSingle(),
     getClaimPayments(svc, claimId),

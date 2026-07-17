@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 // ─── Phase + Subprozess Definitionen ────────────────────────────────────────
 // Basierend auf Miro Process-Flowchart + bestehendem Status-System
@@ -102,7 +103,7 @@ export async function getStepperState(fallId: string): Promise<StepperState> {
   // Termin-Status laden
   const { data: termin } = await admin.from('gutachter_termine')
     .select('status, gegenvorschlag_von')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
     .order('created_at', { ascending: false })
     .limit(1)
