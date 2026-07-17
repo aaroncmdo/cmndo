@@ -10,6 +10,7 @@ import { detailLink } from '../_lib/detail-link'
 import { updateVertriebFeld } from '../_actions/update-vertrieb-feld'
 import { resendWerkstattWelcome } from '../_actions/resend-werkstatt-welcome'
 import { resendMaklerWelcome } from '@/app/admin/makler/actions'
+import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 const FELD_CLS =
@@ -32,6 +33,7 @@ export default function PartnerCockpit({
   onChanged: () => void
 }) {
   const router = useRouter()
+  const aktionDrawer = useUrlDrawerParam('aktion')
   const [notiz, setNotiz] = useState(kontakt.notizen ?? '')
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -88,7 +90,13 @@ export default function PartnerCockpit({
             ✉️ Login-Mail neu senden
           </Button>
           {kontakt.rolle === 'werkstatt' && (
-            <Button variant="ghost" size="sm" onClick={() => router.push('/admin/vertrieb/werkstaetten/qr-pool')}>
+            // B1/a4: QR-Pool als Cockpit-Drawer statt Full-Page-Absprung. Ein History-Schritt:
+            // ?aktion=qrpool ersetzt ?kontakt=… -> Back fuehrt zurueck zum Kontakt-Drawer.
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => aktionDrawer.open('qrpool', { alsoRemove: ['kontakt'] })}
+            >
               🔳 QR-Codes
             </Button>
           )}

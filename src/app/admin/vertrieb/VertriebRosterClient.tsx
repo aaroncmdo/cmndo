@@ -25,6 +25,8 @@ import {
   VERTRIEB_WORKFLOW_DEFS,
   type VertriebStufe,
 } from '@/lib/status/domains/vertrieb-workflow'
+import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
+import { parseKontaktParam, buildKontaktParam } from '@/lib/navigation/url-drawer'
 import type { VertriebKontakt, VertriebTyp, VertriebRolle } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
@@ -50,7 +52,15 @@ export default function VertriebRosterClient({
   const [ansicht, setAnsicht] = useState<'liste' | 'karte' | 'liveops'>('liste')
   const [search, setSearch] = useState('')
   const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
-  const [selected, setSelected] = useState<VertriebKontakt | null>(null)
+  // B1: Detail-Drawer haengt am ?kontakt=<kind>:<id>-Param (Deep-Link + Back schliesst).
+  // Aufgeloest wird gegen die UNGEFILTERTE Roster-Liste, damit Deep-Links unabhaengig
+  // von der aktiven Pill funktionieren; unbekannte Params rendern schlicht keinen Drawer.
+  const kontaktDrawer = useUrlDrawerParam('kontakt')
+  const selected = useMemo<VertriebKontakt | null>(() => {
+    const p = parseKontaktParam(kontaktDrawer.value)
+    if (!p) return null
+    return kontakte.find((k) => k.kind === p.kind && k.id === p.id) ?? null
+  }, [kontakte, kontaktDrawer.value])
 
   const gefiltert = useMemo(
     () => filterKontakte(kontakte, { typ, rolle, search, stufe }),
@@ -143,7 +153,7 @@ export default function VertriebRosterClient({
             </Thead>
             <Tbody>
               {angezeigt.map((k) => (
-                <ClickableTr key={`${k.kind}-${k.id}`} onClick={() => setSelected(k)}>
+                <ClickableTr key={`${k.kind}-${k.id}`} onClick={() => kontaktDrawer.open(buildKontaktParam(k.kind, k.id))}>
                   <Td>
                     {k.name ?? '—'}
                     {k.typ === 'lead' && (
@@ -191,7 +201,7 @@ export default function VertriebRosterClient({
         <VertriebLiveOpsListe svs={liveOps.svs} termine={liveOps.termine} />
       )}
 
-      <VertriebDetailDrawer kontakt={selected} onClose={() => setSelected(null)} />
+      <VertriebDetailDrawer kontakt={selected} onClose={kontaktDrawer.close} />
     </div>
   )
 }

@@ -8,6 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
 import { toast } from 'sonner'
 import {
   PlusIcon,
@@ -151,7 +152,10 @@ export default function PartnerLeadsClient({
   const [showCreate, setShowCreate] = useState(false)
   const [showImport, setShowImport] = useState(false)
   const [showScrape, setShowScrape] = useState(false)
-  const [detailId, setDetailId] = useState<string | null>(null)
+  // B1: Lead-Drawer haengt am ?lead=<id>-Param (Deep-Link oeffnet direkt, Browser-Back
+  // schliesst, Filter/Scroll bleiben). Abgeleitet statt useState — die URL ist die Quelle.
+  const leadDrawer = useUrlDrawerParam('lead')
+  const detailId = leadDrawer.value
 
   // P3b (Vertrieb-Umbrella): role-aware Prefill aus der Vertrieb-Leads-Ansicht.
   // ?rolle=<sachverstaendiger|makler|werkstatt> setzt den Rolle-Filter; ?aktion=
@@ -302,7 +306,7 @@ export default function PartnerLeadsClient({
             </div>
           ) : (
             filtered.map((lead) => (
-              <DataTableMobileCard key={lead.id} onClick={() => setDetailId(lead.id)}>
+              <DataTableMobileCard key={lead.id} onClick={() => leadDrawer.open(lead.id)}>
                 <div className="flex items-start justify-between gap-2 mb-1.5">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-claimondo-navy truncate">{lead.firma ?? '—'}</p>
@@ -345,7 +349,7 @@ export default function PartnerLeadsClient({
             {filtered.map((lead) => (
               <ClickableTr
                 key={lead.id}
-                onClick={() => setDetailId(lead.id)}
+                onClick={() => leadDrawer.open(lead.id)}
                 className="border-b border-claimondo-border/50"
               >
                 <Td>
@@ -430,7 +434,7 @@ export default function PartnerLeadsClient({
         staff={staff}
         aktivitaeten={detailAktivitaeten}
         termine={detailTermine}
-        onClose={() => setDetailId(null)}
+        onClose={leadDrawer.close}
         onChanged={() => router.refresh()}
       />
     </div>
