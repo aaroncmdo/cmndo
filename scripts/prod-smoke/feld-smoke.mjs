@@ -156,7 +156,9 @@ async function main() {
 
   // ===== #4551: arrived -> SvFallakteView OHNE Dokumente/Notizen =====
   let resp = await page.goto('/gutachter/feldmodus', { waitUntil: 'domcontentloaded', timeout: 45000 })
-  await page.waitForTimeout(6000)
+  // Auf den SvFallakteView-Abschluss-Button warten (immer im Footer) statt fixem Timeout — deterministisch.
+  await page.getByRole('button', { name: /Besichtigung abschließen/ }).first().waitFor({ timeout: 20000 }).catch(() => {})
+  await page.waitForTimeout(1500)
   const body1 = await page.evaluate(() => document.body?.innerText || '')
   const fileInputs = await page.locator('input[type=file]').count().catch(() => -1)
   results.p4551 = {
@@ -164,7 +166,7 @@ async function main() {
     fallakteRendered: /Besichtigung abschließen/.test(body1) && /Vor Ort · Besichtigung/.test(body1),
     hasNotizen: /Vor-Ort-Notizen|Was ist bei der Besichtigung aufgefallen|Notizen speichern/.test(body1),
     hasDokumentUpload: fileInputs > 0,
-    bodyLen: body1.length,
+    bodyLen: body1.length, bodySnippet: body1.slice(0, 220),
   }
   log('\n#4551', JSON.stringify(results.p4551))
 
@@ -172,14 +174,16 @@ async function main() {
   const up = await rest(`sv_tages_session?id=eq.${ids.sessionId}`, 'PATCH', { status: 'finished', completed_at: new Date().toISOString() })
   if (!up.ok) throw new Error('session->finished fail: ' + up.status + ' ' + (await up.text()))
   resp = await page.goto('/gutachter/feldmodus', { waitUntil: 'domcontentloaded', timeout: 45000 })
-  await page.waitForTimeout(4000)
+  // Auf den Finished-Screen-Text warten statt fixem Timeout.
+  await page.getByText(/Tagesmodus abgeschlossen/).first().waitFor({ timeout: 20000 }).catch(() => {})
+  await page.waitForTimeout(1000)
   const body2 = await page.evaluate(() => document.body?.innerText || '')
   results.p4534 = {
     http: resp?.status(), url: page.url(),
     onFeldmodus: /\/gutachter\/feldmodus/.test(page.url()),
     finishedScreen: /Tagesmodus abgeschlossen/.test(body2),
     hasCta: /Zur Tagesübersicht/.test(body2),
-    bodyLen: body2.length,
+    bodyLen: body2.length, bodySnippet: body2.slice(0, 220),
   }
   log('#4534', JSON.stringify(results.p4534))
 
