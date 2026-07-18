@@ -158,17 +158,17 @@ export async function waehleWerkstattAusEmpfehlung(
   if (!cand) return { ok: false, error: 'Diese Werkstatt gehört nicht zur Empfehlung.' }
 
   // Batch schliessen (guard status='offen' -> verhindert Doppel-Assign bei Reload).
-  const { error: uErr, count } = await admin
+  // Auf die zurueckgegebenen Rows (data) pruefen, NICHT auf count: count kann je nach
+  // Content-Range-Header null sein und wuerde dann einen erfolgreichen Update faelschlich
+  // als „nichts geaendert" werten -> der Assign wuerde uebersprungen.
+  const { error: uErr, data: geschlossen } = await admin
     .from('werkstatt_empfehlung_batches')
-    .update(
-      { status: 'entschieden', gewaehlte_werkstatt_id: werkstattId, entschieden_am: new Date().toISOString(), updated_at: new Date().toISOString() },
-      { count: 'exact' },
-    )
+    .update({ status: 'entschieden', gewaehlte_werkstatt_id: werkstattId, entschieden_am: new Date().toISOString(), updated_at: new Date().toISOString() })
     .eq('id', batch.id)
     .eq('status', 'offen')
     .select('id')
   if (uErr) return { ok: false, error: uErr.message }
-  if (!count) return { ok: true } // parallele Wahl hat gewonnen -> idempotent
+  if (!geschlossen || geschlossen.length === 0) return { ok: true } // schon entschieden / parallele Wahl -> idempotent
 
   // BESTAND: setzt reparatur_werkstatt_*, benachrichtigt Kunde + Werkstatt, Provisions-Trigger.
   const res = await assignReparaturWerkstatt({ target: 'claim', id: batch.claim_id, werkstattId, quelle: 'gutachter', actorUserId: null })
