@@ -49,4 +49,15 @@ END $$;
 
 REVOKE ALL ON FUNCTION public.cron_reparatur_freigabe_eskalation() FROM PUBLIC, anon, authenticated;
 
-SELECT cron.schedule('reparatur_freigabe_eskalation', '0 9 * * *', $$SELECT public.cron_reparatur_freigabe_eskalation()$$);
+-- Replay-Toleranz (Preview-Chain-Fix 17.07.): pg_cron ist cluster-weit nur auf Prod/Staging
+-- installiert, NICHT in Supabase-Preview-Branches/From-Scratch-Replays -> Schema "cron" fehlt dort
+-- -> ungeguardetes cron.schedule bricht den Replay (SQLSTATE 3F000). Guard-Muster wie
+-- 20260529212846_schedule_connection_snapshot_cron. Auf Prod (cron vorhanden) 1:1 unveraendert.
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    PERFORM cron.schedule('reparatur_freigabe_eskalation', '0 9 * * *', $cron$SELECT public.cron_reparatur_freigabe_eskalation()$cron$);
+  ELSE
+    RAISE NOTICE 'pg_cron nicht installiert - Cron-Job reparatur_freigabe_eskalation uebersprungen (Preview/lokal)';
+  END IF;
+END $$;
