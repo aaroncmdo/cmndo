@@ -125,6 +125,12 @@ export async function anlegePartnerKern(
       if (provKomplett !== null) maklerInsert.provision_betrag_komplett_netto = provKomplett
       const provGutachter = detailNumber(input.rollenDetails, 'provision_betrag_nur_gutachter_netto')
       if (provGutachter !== null) maklerInsert.provision_betrag_nur_gutachter_netto = provGutachter
+      // AAR-empfehlung: Rechtsform + Kleinunternehmer (Abrechnung). Nur setzen wenn geliefert,
+      // damit convertPartnerLead-Makler (ohne diese Details) die DB-Defaults behaelt.
+      const maklerRechtsform = detailString(input.rollenDetails, 'rechtsform')
+      if (maklerRechtsform) maklerInsert.rechtsform = maklerRechtsform
+      const maklerKleinunternehmer = detailBoolean(input.rollenDetails, 'ist_kleinunternehmer')
+      if (maklerKleinunternehmer !== null) maklerInsert.ist_kleinunternehmer = maklerKleinunternehmer
 
       const { data: m, error: mErr } = await admin
         .from('makler')
