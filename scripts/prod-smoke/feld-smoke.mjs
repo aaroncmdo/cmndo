@@ -93,7 +93,7 @@ async function main() {
   // 4) claim (nur schadentag pflicht; Rest defaulted)
   r = await rest('claims', 'POST', {
     schadentag: berlinToday, sv_id: ids.svId, claim_nummer: `CLM-SMOKE-${TS}`,
-    szenario: 'normalfall', schadenart: 'Frontschaden', created_via: 'manuell_admin',
+    szenario: 'normalfall', created_via: 'manuell_admin',
     hergang_sv_text: 'Smoke-Fixture Feldmodus', onboarding_complete: true,
   })
   if (!r.ok) throw new Error('claim insert fail: ' + r.status + ' ' + (await r.text()))
@@ -158,15 +158,19 @@ async function main() {
   let resp = await page.goto('/gutachter/feldmodus', { waitUntil: 'domcontentloaded', timeout: 45000 })
   // Auf den SvFallakteView-Abschluss-Button warten (immer im Footer) statt fixem Timeout — deterministisch.
   await page.getByRole('button', { name: /Besichtigung abschließen/ }).first().waitFor({ timeout: 20000 }).catch(() => {})
-  await page.waitForTimeout(1500)
+  // Auf die GELADENE Fallakte warten (Fall-Card) — im "Lade Fallakte…"-State zeigt
+  // weder alte noch neue Version die Sektionen -> Negativ-Assertion waere vacuous.
+  await page.getByText(/Fall #/i).first().waitFor({ timeout: 20000 }).catch(() => {})
+  await page.waitForTimeout(1000)
   const body1 = await page.evaluate(() => document.body?.innerText || '')
   const fileInputs = await page.locator('input[type=file]').count().catch(() => -1)
   results.p4551 = {
     http: resp?.status(), url: page.url(),
-    fallakteRendered: /Besichtigung abschließen/.test(body1) && /Vor Ort · Besichtigung/.test(body1),
+    fallLoaded: /Fall #/i.test(body1),
+    fallakteRendered: /Besichtigung abschließen/i.test(body1) && /Vor Ort · Besichtigung/i.test(body1),
     hasNotizen: /Vor-Ort-Notizen|Was ist bei der Besichtigung aufgefallen|Notizen speichern/.test(body1),
     hasDokumentUpload: fileInputs > 0,
-    bodyLen: body1.length, bodySnippet: body1.slice(0, 220),
+    bodyLen: body1.length, bodySnippet: body1.slice(0, 260),
   }
   log('\n#4551', JSON.stringify(results.p4551))
 
@@ -187,7 +191,7 @@ async function main() {
   }
   log('#4534', JSON.stringify(results.p4534))
 
-  const pass4551 = results.p4551.fallakteRendered && !results.p4551.hasNotizen && !results.p4551.hasDokumentUpload
+  const pass4551 = results.p4551.fallLoaded && results.p4551.fallakteRendered && !results.p4551.hasNotizen && !results.p4551.hasDokumentUpload
   const pass4534 = results.p4534.finishedScreen && results.p4534.hasCta && results.p4534.onFeldmodus && results.p4534.http === 200
   const noCrash = badErrors.length === 0
   log('\n=== VERDICT ===')
