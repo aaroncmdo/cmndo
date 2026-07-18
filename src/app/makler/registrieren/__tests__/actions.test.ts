@@ -4,6 +4,8 @@ const rateLimitMock = vi.fn()
 const anlegeMock = vi.fn()
 const resetPwMock = vi.fn()
 let dedupeRow: unknown = null // Ergebnis des profiles-Email-Dedupe
+let promoMaklerId: string | null = null // Werber-Aufloesung: promotion_codes.makler_id
+let sponsorRow: unknown = null // Werber-Aufloesung: makler-Sponsor-Row
 
 vi.mock('@/lib/rate-limit/ip-rate-limit', () => ({
   checkIpRateLimit: (...a: unknown[]) => rateLimitMock(...a),
@@ -37,8 +39,15 @@ function makeAdmin() {
         chain.eq = () => chain
         chain.order = () => chain
         chain.limit = () => chain
-        chain.maybeSingle = () => Promise.resolve({ data: { code: 'MK-X' } })
+        chain.maybeSingle = () => Promise.resolve({ data: { code: 'MK-X', makler_id: promoMaklerId } })
         return chain
+      }
+      if (table === 'makler') {
+        return {
+          select: () => ({
+            eq: () => ({ maybeSingle: () => Promise.resolve({ data: sponsorRow }) }),
+          }),
+        }
       }
       return { insert: () => Promise.resolve({ error: null }) }
     },
@@ -70,6 +79,8 @@ beforeEach(() => {
   anlegeMock.mockReset().mockResolvedValue({ ok: true, userId: 'u1', maklerId: 'm1', password: 'pw' })
   resetPwMock.mockReset().mockResolvedValue({})
   dedupeRow = null
+  promoMaklerId = null
+  sponsorRow = null
 })
 
 describe('registriereMaklerSelf', () => {
@@ -136,5 +147,46 @@ describe('registriereMaklerSelf', () => {
     expect(res.ok).toBe(true)
     const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
     expect(arg.istKleinunternehmer).toBe(true)
+  })
+
+  it('werber = aktiver Promo-Code -> sponsorMaklerId + geerbte Saetze', async () => {
+    promoMaklerId = 'sponsor-1'
+    sponsorRow = {
+      id: 'sponsor-1',
+      provision_betrag_komplett_netto: 120,
+      provision_betrag_nur_gutachter_netto: 70,
+      provision_aktiv: true,
+      status: 'aktiv',
+    }
+    const res = await registriereMaklerSelf(fd({ werber: 'MK-WERB' }))
+    expect(res.ok).toBe(true)
+    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
+    expect(arg.sponsorMaklerId).toBe('sponsor-1')
+    expect(arg.provisionKomplett).toBe(120)
+    expect(arg.provisionGutachter).toBe(70)
+  })
+
+  it('werber inaktiv (provision_aktiv=false) -> kein Sponsor, Default 100/50', async () => {
+    promoMaklerId = 'sponsor-2'
+    sponsorRow = {
+      id: 'sponsor-2',
+      provision_betrag_komplett_netto: 120,
+      provision_betrag_nur_gutachter_netto: 70,
+      provision_aktiv: false,
+      status: 'aktiv',
+    }
+    const res = await registriereMaklerSelf(fd({ werber: 'MK-WERB' }))
+    expect(res.ok).toBe(true)
+    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
+    expect(arg.sponsorMaklerId).toBeNull()
+    expect(arg.provisionKomplett).toBe(100)
+  })
+
+  it('kein werber -> kein Sponsor, Default 100/50', async () => {
+    const res = await registriereMaklerSelf(fd())
+    expect(res.ok).toBe(true)
+    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
+    expect(arg.sponsorMaklerId).toBeNull()
+    expect(arg.provisionKomplett).toBe(100)
   })
 })

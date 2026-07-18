@@ -38,9 +38,13 @@ const inputClass =
 export function MaklerRegistrierenClient({
   versicherungen,
   maklerpools,
+  werber = null,
+  werberFirma = null,
 }: {
   versicherungen: GesellschaftOption[]
   maklerpools: GesellschaftOption[]
+  werber?: string | null
+  werberFirma?: string | null
 }) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -64,6 +68,7 @@ export function MaklerRegistrierenClient({
     fd.set('kleinunternehmer', kleinunternehmer ? 'true' : 'false')
     if (versicherungId) fd.set('versicherung_id', versicherungId)
     if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
+    if (werber) fd.set('werber', werber)
     startTransition(async () => {
       const res = await registriereMaklerSelf(fd)
       if (res.ok) setSuccess({ code: res.code })
@@ -116,6 +121,11 @@ export function MaklerRegistrierenClient({
 
   return (
     <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 sm:p-8">
+      {werberFirma ? (
+        <div className="mb-4 rounded-ios-md bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy">
+          Eingeladen von <span className="font-semibold">{werberFirma}</span>
+        </div>
+      ) : null}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Field label="Firma *" className="sm:col-span-2">
           <input className={inputClass} value={form.firma} onChange={set('firma')} placeholder="Mustermakler GmbH" />
