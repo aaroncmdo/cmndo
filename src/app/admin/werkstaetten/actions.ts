@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
+import { FAHRZEUG_GRUPPEN_VALUES } from '@/lib/werkstatt/fahrzeug-gruppen'
 import { revalidatePath } from 'next/cache'
 
 // Reuse the same generatePassword helper as in src/app/admin/team/actions.ts.
@@ -40,6 +41,39 @@ export async function setWerkstattFaehigkeiten(
   const clean = faehigkeiten.filter((f) => (FAEHIGKEITEN_VALUES as readonly string[]).includes(f))
   const admin = createAdminClient()
   const { error } = await admin.from('werkstaetten').update({ faehigkeiten: clean }).eq('id', werkstattId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
+}
+
+// Task #5: Werkstatt-MARKEN pflegen (Array-Spalte werkstaetten.marken) — die STÄRKSTE Ranking-Achse
+// (markengebunden schlägt frei). Marken sind freier Text (kein CHECK); die Engine matcht
+// case-insensitiv. Normalisiert: trim, non-empty, dedupe. Vorher gab es KEINE UI dafür.
+export async function setWerkstattMarken(
+  werkstattId: string,
+  marken: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Marken setzen.' }
+  const clean = Array.from(new Set(marken.map((m) => m.trim()).filter((m) => m.length > 0)))
+  const admin = createAdminClient()
+  const { error } = await admin.from('werkstaetten').update({ marken: clean }).eq('id', werkstattId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
+}
+
+// Task #5: FAHRZEUG-GRUPPEN pflegen (Array-Spalte werkstaetten.fahrzeug_gruppen) — Ranking-Achse.
+// Fixe Werte-Liste (FAHRZEUG_GRUPPEN_VALUES); Unbekanntes wird gefiltert.
+export async function setWerkstattFahrzeugGruppen(
+  werkstattId: string,
+  gruppen: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Fahrzeug-Gruppen setzen.' }
+  const clean = gruppen.filter((g) => (FAHRZEUG_GRUPPEN_VALUES as readonly string[]).includes(g))
+  const admin = createAdminClient()
+  const { error } = await admin.from('werkstaetten').update({ fahrzeug_gruppen: clean }).eq('id', werkstattId)
   if (error) return { ok: false, error: error.message }
   revalidatePath('/admin/werkstaetten')
   return { ok: true }

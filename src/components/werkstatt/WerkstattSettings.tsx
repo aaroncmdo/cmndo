@@ -13,17 +13,27 @@ import {
   AlertTriangleIcon,
   CheckCircle2Icon,
   WrenchIcon,
+  TagIcon,
+  CarIcon,
+  PlusIcon,
 } from 'lucide-react'
 import {
   updateWerkstattProfil,
   updateWerkstattBank,
   changeWerkstattPasswort,
   setMeineFaehigkeiten,
+  setMeineMarken,
+  setMeineFahrzeugGruppen,
 } from '@/lib/actions/werkstatt-settings'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
+import { HAEUFIGE_HERSTELLER } from '@/app/embed/werkstatt-finder/_components/wizard-logic'
+import { FAHRZEUG_GRUPPEN } from '@/lib/werkstatt/fahrzeug-gruppen'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 import { TextField } from '@/components/shared/forms'
 import { Button } from '@/components/primitives/Button'
+
+const MARKEN_INPUT_CLS =
+  'flex-1 px-3 py-2 rounded-ios-md border border-claimondo-border bg-white text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/20'
 
 // ── Typen ───────────────────────────────────────────────────────────────────
 
@@ -42,6 +52,8 @@ export type WerkstattSettingsProps = {
   bank_bic: string | null
   bank_kontoinhaber: string | null
   faehigkeiten?: string[] | null
+  marken?: string[] | null
+  fahrzeug_gruppen?: string[] | null
 }
 
 type SaveState = {
@@ -65,6 +77,8 @@ export function WerkstattSettings(props: WerkstattSettingsProps) {
 
       <ProfilCard {...props} />
       <LeistungenCard faehigkeiten={props.faehigkeiten ?? null} />
+      <MarkenCard marken={props.marken ?? null} />
+      <FahrzeugGruppenCard fahrzeugGruppen={props.fahrzeug_gruppen ?? null} />
       <BankCard {...props} />
       <PasswortCard />
       <LogoutCard />
@@ -458,6 +472,145 @@ function LeistungenCard({ faehigkeiten }: { faehigkeiten: string[] | null }) {
         <p className="text-xs text-claimondo-ondo">
           Nichts gewählt = Vollservice (keine Einschränkung).
         </p>
+        <div className="flex items-center gap-2 pt-1">
+          <Button variant="navy" size="sm" loading={isPending} onClick={handleSave} type="button">
+            Speichern
+          </Button>
+          <SaveFeedback state={state} />
+        </div>
+      </div>
+    </SettingsSectionCard>
+  )
+}
+
+// ── 5. Meine Marken ───────────────────────────────────────────────────────────
+
+function MarkenCard({ marken }: { marken: string[] | null }) {
+  const [sel, setSel] = useState<string[]>(marken ?? [])
+  const [input, setInput] = useState('')
+  const [state, setState] = useState<SaveState>({ status: 'idle' })
+  const [isPending, startTransition] = useTransition()
+
+  const hat = (m: string) => sel.some((x) => x.toLowerCase() === m.toLowerCase())
+  function toggle(m: string) {
+    setSel((prev) => (hat(m) ? prev.filter((x) => x.toLowerCase() !== m.toLowerCase()) : [...prev, m]))
+  }
+  function addCustom() {
+    const m = input.trim()
+    if (m && !hat(m)) setSel((prev) => [...prev, m])
+    setInput('')
+  }
+  function handleSave() {
+    setState({ status: 'saving' })
+    startTransition(async () => {
+      const res = await setMeineMarken(sel)
+      if (res.ok) {
+        setState({ status: 'success' })
+        setTimeout(() => setState({ status: 'idle' }), 2500)
+      } else {
+        setState({ status: 'error', msg: res.error })
+      }
+    })
+  }
+
+  // Custom-Marken (nicht in der Häufig-Liste) zuerst zeigen, dann die Häufig-Liste —
+  // so bleiben eigene Brands sichtbar + abwählbar, ohne separaten Entfernen-Button.
+  const customSel = sel.filter((m) => !HAEUFIGE_HERSTELLER.some((h) => h.toLowerCase() === m.toLowerCase()))
+  const chips = [...customSel, ...HAEUFIGE_HERSTELLER]
+
+  return (
+    <SettingsSectionCard
+      icon={<TagIcon width={16} height={16} />}
+      title="Meine Marken"
+      subtitle="Welche Fahrzeug-Marken reparieren Sie? Stärkt Ihre Platzierung im Finder."
+    >
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {chips.map((m) => (
+            <Button
+              key={m}
+              variant={hat(m) ? 'navy' : 'ghost'}
+              size="sm"
+              onClick={() => toggle(m)}
+              type="button"
+            >
+              {m}
+            </Button>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                addCustom()
+              }
+            }}
+            placeholder="Weitere Marke hinzufügen…"
+            className={MARKEN_INPUT_CLS}
+          />
+          <Button variant="ghost" size="sm" onClick={addCustom} type="button">
+            <PlusIcon width={16} height={16} />
+          </Button>
+        </div>
+        <p className="text-xs text-claimondo-ondo">Nichts gewählt = markenoffen (alle Marken).</p>
+        <div className="flex items-center gap-2 pt-1">
+          <Button variant="navy" size="sm" loading={isPending} onClick={handleSave} type="button">
+            Speichern
+          </Button>
+          <SaveFeedback state={state} />
+        </div>
+      </div>
+    </SettingsSectionCard>
+  )
+}
+
+// ── 6. Fahrzeug-Gruppen ───────────────────────────────────────────────────────
+
+function FahrzeugGruppenCard({ fahrzeugGruppen }: { fahrzeugGruppen: string[] | null }) {
+  const [sel, setSel] = useState<string[]>(fahrzeugGruppen ?? [])
+  const [state, setState] = useState<SaveState>({ status: 'idle' })
+  const [isPending, startTransition] = useTransition()
+
+  function toggle(g: string) {
+    setSel((prev) => (prev.includes(g) ? prev.filter((x) => x !== g) : [...prev, g]))
+  }
+  function handleSave() {
+    setState({ status: 'saving' })
+    startTransition(async () => {
+      const res = await setMeineFahrzeugGruppen(sel)
+      if (res.ok) {
+        setState({ status: 'success' })
+        setTimeout(() => setState({ status: 'idle' }), 2500)
+      } else {
+        setState({ status: 'error', msg: res.error })
+      }
+    })
+  }
+
+  return (
+    <SettingsSectionCard
+      icon={<CarIcon width={16} height={16} />}
+      title="Fahrzeug-Gruppen"
+      subtitle="Welche Fahrzeugklassen bedienen Sie?"
+    >
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {FAHRZEUG_GRUPPEN.map((g) => (
+            <Button
+              key={g.value}
+              variant={sel.includes(g.value) ? 'navy' : 'ghost'}
+              size="sm"
+              onClick={() => toggle(g.value)}
+              type="button"
+            >
+              {g.label}
+            </Button>
+          ))}
+        </div>
+        <p className="text-xs text-claimondo-ondo">Nichts gewählt = keine Einschränkung.</p>
         <div className="flex items-center gap-2 pt-1">
           <Button variant="navy" size="sm" loading={isPending} onClick={handleSave} type="button">
             Speichern
