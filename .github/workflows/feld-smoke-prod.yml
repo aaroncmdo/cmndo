@@ -1,0 +1,43 @@
+name: Feldmodus Prod-Smoke (Regel-4)
+
+# Regel-4 Prod-Smoke fuer Feldmodus #4534 (Finished-Screen) + #4551 (Vor-Ort-Erfassung raus).
+# NUR manuell (workflow_dispatch) — laeuft NIE automatisch.
+# Grund fuer den CI-Job: der GitHub-Runner erreicht den Supabase-Edge frei; die lokale
+# Entwickler-Maschine war durchgehend per Cloudflare-522/Timeout geblockt (Egress-Wall),
+# konnte also den Fixture-Smoke nicht fahren. Script: scripts/prod-smoke/feld-smoke.mjs
+# (seedet Wegwerf-SV @claimondo.test + telefon NULL, assert-t die zwei Render-Pfade,
+# finally-Teardown loescht alles wieder).
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  feld-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Playwright + Chromium
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Run Feldmodus Prod-Smoke
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+        run: node scripts/prod-smoke/feld-smoke.mjs
