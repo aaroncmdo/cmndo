@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { serverSignOut } from '@/lib/auth/logout'
 import {
@@ -322,14 +323,14 @@ export default function GutachterShell({
   useEffect(() => {
     loadBadges()
     const supabase = createClient()
-    const channel = supabase
-      .channel('gutachter-sidebar-badges')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel('gutachter-sidebar-badges')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges()),
+    )
   }, [loadBadges])
 
   async function handleLogout() {

@@ -15,6 +15,7 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { useTranslations, useFormatter } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import {
   CalendarIcon,
   MapPinIcon,
@@ -149,31 +150,29 @@ export default function KundeTerminDetailClient({
         if (row?.sv_angekommen_am) setSvAngekommenAm(row.sv_angekommen_am)
         if (row?.sv_unterwegs_seit) setSvUnterwegsSeit(row.sv_unterwegs_seit)
       })
-    const channel = supabase
-      .channel(`kunde-termin-detail-${termin.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${termin.id}`,
-        },
-        (payload) => {
-          const row = payload.new as {
-            besichtigung_gestartet_am: string | null
-            sv_angekommen_am: string | null
-            sv_unterwegs_seit: string | null
-          }
-          if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
-          setSvAngekommenAm(row.sv_angekommen_am)
-          setSvUnterwegsSeit(row.sv_unterwegs_seit)
-        },
-      )
-      .subscribe()
-    return () => {
-      void supabase.removeChannel(channel)
-    }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`kunde-termin-detail-${termin.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${termin.id}`,
+          },
+          (payload) => {
+            const row = payload.new as {
+              besichtigung_gestartet_am: string | null
+              sv_angekommen_am: string | null
+              sv_unterwegs_seit: string | null
+            }
+            if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+            setSvAngekommenAm(row.sv_angekommen_am)
+            setSvUnterwegsSeit(row.sv_unterwegs_seit)
+          },
+        ),
+    )
   }, [termin.id])
 
   const isUnterwegs = !!svUnterwegsSeit && !svAngekommenAm
