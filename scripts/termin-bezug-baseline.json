@@ -1,8 +1,7 @@
 {
-  "generatedAt": "2026-07-17T18:03:36.641Z",
-  "count": 26,
+  "generatedAt": "2026-07-17T20:23:28.062Z",
+  "count": 17,
   "files": [
-    "src/app/api/cron/vollmacht-reminder/route.ts",
     "src/app/flow/[token]/actions.ts",
     "src/app/gutachter/auftraege/export-action.ts",
     "src/app/gutachter/auftraege/page.tsx",
@@ -12,7 +11,6 @@
     "src/app/gutachter/feldmodus/_fallakte/actions.ts",
     "src/app/gutachter/feldmodus/page.tsx",
     "src/app/gutachter/heute/page.tsx",
-    "src/app/gutachter/kalender/actions.ts",
     "src/app/gutachter/termine/[id]/actions.ts",
     "src/app/kunde/nachbesichtigung/page.tsx",
     "src/app/kunde/onboarding/actions.ts",
@@ -20,13 +18,6 @@
     "src/app/kunde/re-termin/[token]/actions.ts",
     "src/app/kunde/re-termin/[token]/page.tsx",
     "src/components/termine/TerminListeClient.tsx",
-    "src/lib/actions/storno-actions.ts",
-    "src/lib/actions/termin-actions.ts",
-    "src/lib/actions/termin-verlegung-actions.ts",
-    "src/lib/email/google/flows.ts",
-    "src/lib/kunde/fall-karte-loader.ts",
-    "src/lib/provisionen/release-runner.ts",
-    "src/lib/sla/festgefahrene-faelle.ts",
-    "src/lib/smoke/lifecycle-seed.ts"
+    "src/lib/actions/termin-actions.ts"
   ]
 }

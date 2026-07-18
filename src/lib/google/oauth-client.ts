@@ -4,6 +4,7 @@
 import { google } from 'googleapis'
 import type { OAuth2Client } from 'google-auth-library'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { readOAuthTokens, upsertOAuthTokens } from '@/lib/oauth/secrets'
 
 export async function getGoogleOAuthClientForUser(userId: string): Promise<OAuth2Client | null> {
   const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID
@@ -11,28 +12,23 @@ export async function getGoogleOAuthClientForUser(userId: string): Promise<OAuth
   if (!clientId || !clientSecret) return null
 
   const db = createAdminClient()
-  const { data: profile } = await db
-    .from('profiles')
-    .select('google_refresh_token, google_access_token, google_token_expires_at')
-    .eq('id', userId)
-    .single()
-
-  if (!profile?.google_refresh_token) return null
+  const secret = await readOAuthTokens(db, userId, 'google')
+  if (!secret?.refreshToken) return null
 
   const client = new google.auth.OAuth2(clientId, clientSecret)
   client.setCredentials({
-    refresh_token: profile.google_refresh_token,
-    access_token: profile.google_access_token ?? undefined,
-    expiry_date: profile.google_token_expires_at ? new Date(profile.google_token_expires_at).getTime() : undefined,
+    refresh_token: secret.refreshToken,
+    access_token: secret.accessToken ?? undefined,
+    expiry_date: secret.expiresAt ? new Date(secret.expiresAt).getTime() : undefined,
   })
 
-  // Auto-Refresh bei abgelaufenem access_token
+  // Auto-Refresh bei abgelaufenem access_token -> zurueck in die Secret-Tabelle.
   client.on('tokens', async (tokens) => {
     if (tokens.access_token) {
-      await db.from('profiles').update({
-        google_access_token: tokens.access_token,
-        google_token_expires_at: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
-      }).eq('id', userId)
+      await upsertOAuthTokens(db, userId, 'google', {
+        accessToken: tokens.access_token,
+        expiresAt: tokens.expiry_date ? new Date(tokens.expiry_date).toISOString() : null,
+      })
     }
   })
 
@@ -41,10 +37,6 @@ export async function getGoogleOAuthClientForUser(userId: string): Promise<OAuth
 
 export async function isGoogleConnected(userId: string): Promise<boolean> {
   const db = createAdminClient()
-  const { data } = await db
-    .from('profiles')
-    .select('google_refresh_token')
-    .eq('id', userId)
-    .single()
-  return !!data?.google_refresh_token
+  const secret = await readOAuthTokens(db, userId, 'google')
+  return !!secret?.refreshToken
 }

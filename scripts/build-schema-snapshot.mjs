@@ -40,6 +40,11 @@ if (!URL_ || !KEY) {
 }
 
 async function fetchOpenApi() {
+  // Exit-Policy fuer den unbeaufsichtigten Cron:
+  //  - 4xx (Auth/Config, persistent) -> exit 2 (rot = braucht Aufmerksamkeit, z.B. falsches Secret).
+  //  - 5xx/522/Netzwerk (transient, z.B. Cloudflare-522 bei Supabase-Blip) -> nach Retries exit 0
+  //    (SKIP, nicht naechtlich rot spammen; der naechste Lauf holt die Drift nach).
+  let lastErr = 'unbekannt'
   for (let attempt = 1; attempt <= 3; attempt++) {
     const ctrl = new AbortController()
     const timer = setTimeout(() => ctrl.abort(), 30_000)
@@ -49,14 +54,21 @@ async function fetchOpenApi() {
         signal: ctrl.signal,
       })
       clearTimeout(timer)
-      if (!r.ok) throw new Error(`HTTP ${r.status}`)
-      return await r.json()
+      if (r.ok) return await r.json()
+      lastErr = `HTTP ${r.status}`
+      if (r.status >= 400 && r.status < 500) {
+        console.error(`[snapshot-regen] OpenAPI-Fetch ${lastErr} (Auth/Config?) — Job failt bewusst (fixen: Secret/URL pruefen).`)
+        process.exit(2)
+      }
+      // 5xx/522 -> transient, weiter retrien.
     } catch (e) {
       clearTimeout(timer)
-      if (attempt === 3) { console.error(`[snapshot-regen] OpenAPI-Fetch fehlgeschlagen: ${e}`); process.exit(2) }
-      await new Promise((res) => setTimeout(res, 500 * attempt))
+      lastErr = String(e).slice(0, 120)
     }
+    if (attempt < 3) await new Promise((res) => setTimeout(res, 1000 * attempt))
   }
+  console.log(`[snapshot-regen] OpenAPI transient nicht erreichbar (${lastErr}) nach 3 Versuchen → skip (exit 0; naechster Lauf holt nach).`)
+  process.exit(0)
 }
 
 const openapi = await fetchOpenApi()

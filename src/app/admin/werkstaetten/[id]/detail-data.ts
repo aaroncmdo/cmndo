@@ -43,6 +43,8 @@ export interface WerkstattDetailStammdaten {
   provision_betrag_netto: number | null
   provision_aktiv: boolean | null
   faehigkeiten: string[] | null
+  marken: string[] | null
+  fahrzeug_gruppen: string[] | null
   bank_iban: string | null
   bank_bic: string | null
   bank_kontoinhaber: string | null
@@ -96,7 +98,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
   const { data: w } = await supabase
     .from('werkstaetten')
     .select(
-      'id, name, status, adresse_strasse, adresse_plz, adresse_ort, email, telefon, website, ansprechpartner_name, provision_betrag_netto, provision_aktiv, faehigkeiten, bank_iban, bank_bic, bank_kontoinhaber, ist_kleinunternehmer, ust_id, aktiviert_am, created_at, user_id, lat, lng, isochrone, verifiziert, verifiziert_am',
+      'id, name, status, adresse_strasse, adresse_plz, adresse_ort, email, telefon, website, ansprechpartner_name, provision_betrag_netto, provision_aktiv, faehigkeiten, marken, fahrzeug_gruppen, bank_iban, bank_bic, bank_kontoinhaber, ist_kleinunternehmer, ust_id, aktiviert_am, created_at, user_id, lat, lng, isochrone, verifiziert, verifiziert_am',
     )
     .eq('id', id)
     .maybeSingle()

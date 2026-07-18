@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 
 export type GeoTrackingState = {
   isTracking: boolean
@@ -130,7 +131,7 @@ export function useGeoTracking(opts: {
           setState((s) => ({ ...s, isTracking: fensterAktiv(), lat: row.lat, lng: row.lng }))
         },
       )
-      .subscribe()
+    const cleanupChannel = subscribeWhenAuthed(supabase, () => channel)
 
     // Fenster-Status alle 30 s neu evaluieren
     fensterTimerRef.current = setInterval(() => {
@@ -171,12 +172,12 @@ export function useGeoTracking(opts: {
               }
             },
           )
-          .subscribe()
       : null
+    const cleanupTermin = terminChannel ? subscribeWhenAuthed(supabase, () => terminChannel) : null
 
     return () => {
-      supabase.removeChannel(channel)
-      if (terminChannel) supabase.removeChannel(terminChannel)
+      cleanupChannel()
+      cleanupTermin?.()
       if (fensterTimerRef.current) clearInterval(fensterTimerRef.current)
     }
   }, [svId, terminId, terminStartIso, geschaetzteFahrtzeitMin, kundeAngekommenAm]) // eslint-disable-line react-hooks/exhaustive-deps

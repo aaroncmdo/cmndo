@@ -24,6 +24,7 @@
 import { useEffect, useId, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 
 type Props = {
   leadId: string
@@ -51,35 +52,37 @@ export default function LeadRealtimeRefresh({ leadId, watchTermine = false, debo
       }, debounceMs)
     }
 
-    let channel = supabase
-      .channel(`lead-rt-${leadId}-${channelId}`)
-      // Kern: leads-Row aendert sich (Kunde fuellt /flow, Dispatcher editiert, …).
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'leads', filter: `id=eq.${leadId}` },
-        scheduleRefresh,
-      )
+    const cleanupChannel = subscribeWhenAuthed(supabase, () => {
+      let channel = supabase
+        .channel(`lead-rt-${leadId}-${channelId}`)
+        // Kern: leads-Row aendert sich (Kunde fuellt /flow, Dispatcher editiert, …).
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'leads', filter: `id=eq.${leadId}` },
+          scheduleRefresh,
+        )
 
-    if (watchTermine) {
-      // Klassisch gebundene Termine (lead_id gesetzt).
-      channel = channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'gutachter_termine', filter: `lead_id=eq.${leadId}` },
-        scheduleRefresh,
-      )
-      // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL, bezug_id=lead).
-      channel = channel.on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'gutachter_termine', filter: `bezug_id=eq.${leadId}` },
-        scheduleRefresh,
-      )
-    }
+      if (watchTermine) {
+        // Klassisch gebundene Termine (lead_id gesetzt).
+        channel = channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'gutachter_termine', filter: `lead_id=eq.${leadId}` },
+          scheduleRefresh,
+        )
+        // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL, bezug_id=lead).
+        channel = channel.on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'gutachter_termine', filter: `bezug_id=eq.${leadId}` },
+          scheduleRefresh,
+        )
+      }
 
-    channel.subscribe()
+      return channel
+    })
 
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
-      supabase.removeChannel(channel)
+      cleanupChannel()
     }
   }, [leadId, watchTermine, channelId, router, debounceMs])
 

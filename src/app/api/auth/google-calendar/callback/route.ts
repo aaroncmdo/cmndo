@@ -18,6 +18,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 // externalOrigin: hinter dem nginx/PM2-Proxy ist req.url-origin die interne
 // Bind-Adresse (0.0.0.0:3000) → der SV-Kalender-OAuth-Ruecksprung lief ins Leere.
 import { externalOrigin } from '@/lib/external-url'
+import { upsertOAuthTokens } from '@/lib/oauth/secrets'
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code')
@@ -61,20 +62,19 @@ export async function GET(req: NextRequest) {
 
     const svc = createServiceClient()
 
-    // Tokens in profiles.google_* speichern — kanonische Quelle für alle
-    // Sync-Reader (oauth-client.ts, sv-termin-sync, busy-slots, FreeBusy).
-    // Wenn refresh_token nicht mitkommt (Re-Connect ohne prompt=consent),
-    // bestehenden Wert behalten.
-    const profileUpdate: Record<string, unknown> = {
-      google_access_token: tokens.access_token,
-      google_token_expires_at: new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString(),
+    // Tokens in die service-role-only Secret-Tabelle (Leak-Fix); Sync-Reader (oauth-client.ts,
+    // sv-termin-sync, busy-slots, FreeBusy) lesen von dort. Wenn refresh_token nicht mitkommt
+    // (Re-Connect ohne prompt=consent), bleibt der bestehende erhalten (upsert setzt nur Payload).
+    // Benige Anzeige-Felder (email, connected_at) bleiben auf profiles.
+    await upsertOAuthTokens(svc, user.id, 'google', {
+      accessToken: tokens.access_token,
+      expiresAt: new Date(Date.now() + (tokens.expires_in ?? 3600) * 1000).toISOString(),
+      ...(tokens.refresh_token ? { refreshToken: tokens.refresh_token } : {}),
+    })
+    await svc.from('profiles').update({
       google_email: googleEmail,
       google_connected_at: new Date().toISOString(),
-    }
-    if (tokens.refresh_token) {
-      profileUpdate.google_refresh_token = tokens.refresh_token
-    }
-    await svc.from('profiles').update(profileUpdate).eq('id', user.id)
+    }).eq('id', user.id)
 
     // sachverstaendige.gcal_connected als UI-Flag-Mirror — wird vom Profil
     // und Einstellungen-Tab gelesen. Die _token-Spalten werden bewusst NICHT

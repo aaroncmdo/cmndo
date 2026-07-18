@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { clearOAuthTokens } from '@/lib/oauth/secrets'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,12 +12,10 @@ export async function POST() {
   if (!user) return NextResponse.json({ success: false, error: 'Nicht angemeldet' }, { status: 401 })
 
   const db = createAdminClient()
+  await clearOAuthTokens(db, user.id, 'ms')
   const { error } = await db
     .from('profiles')
     .update({
-      ms_refresh_token: null,
-      ms_access_token: null,
-      ms_token_expires_at: null,
       ms_email: null,
       ms_connected_at: null,
     })

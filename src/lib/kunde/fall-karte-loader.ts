@@ -9,6 +9,7 @@
 // gegen den User gelaufen ist.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 import {
   getKundenJetztZuTun,
   type KundeAktion,
@@ -66,8 +67,8 @@ export async function ladeFallKartenMeta(
   const [{ data: termine }, { data: timelineEvents }, { data: pflichtDocs }, { data: slaData }] = await Promise.all([
     admin
       .from('gutachter_termine')
-      .select('id, fall_id, typ, status, start_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten')
-      .in('fall_id', fallIds)
+      .select('id, fall_id, bezug_id, bezug_typ, typ, status, start_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten')
+      .or(bezugInExpr('fall', fallIds))
       .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
       .is('durchgefuehrt_am', null)
       .order('start_zeit', { ascending: true }),
@@ -91,7 +92,8 @@ export async function ladeFallKartenMeta(
   // Pro Fall den nächsten Termin (erster nach Start-Zeit) speichern.
   const nextTerminByFall = new Map<string, FallKarteTermin>()
   for (const t of termine ?? []) {
-    const fid = t.fall_id as string
+    // bezug-aware: native Termine haben fall_id NULL, tragen den Fall in bezug_id.
+    const fid = (t.fall_id as string | null) ?? (t.bezug_typ === 'fall' ? (t.bezug_id as string | null) : null)
     if (!fid || nextTerminByFall.has(fid)) continue
     if (!t.start_zeit) continue
     nextTerminByFall.set(fid, {

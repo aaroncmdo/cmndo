@@ -2,7 +2,7 @@
 //
 // Aaron-Modell (16.07.): "wir als dedizierte Hosts, immer aus dem verbundenen
 // Google-Konto, 30 Minuten" — buchbare Hosts = Vertriebs-Staff MIT verbundenem
-// Google-Konto (profiles.google_refresh_token). Der Meet-Link entsteht IMMER
+// Google-Konto (Token in profiles_oauth_secrets; Presence via profiles.google_connected_at). Der Meet-Link entsteht IMMER
 // ueber das verbundene Konto des gewaehlten Hosts (createMeetEvent ownerUserId).
 //
 // Dieses Modul buendelt:
@@ -51,11 +51,13 @@ export type BeratungsHost = { id: string; email: string | null; name: string | n
 
 /** Buchbare Hosts = Vertriebs-Staff mit verbundenem Google-Konto. */
 export async function ladeBeratungsHosts(db: Db): Promise<BeratungsHost[]> {
+  // Presence via benignes google_connected_at (Token lebt in profiles_oauth_secrets, nicht
+  // authenticated-lesbar; connected_at wird im Callback gesetzt + Disconnect gecleart = aequivalent).
   const { data } = await db
     .from('profiles')
     .select('id, email, vorname, nachname')
     .in('rolle', VERTRIEB_HOST_ROLLEN)
-    .not('google_refresh_token', 'is', null)
+    .not('google_connected_at', 'is', null)
   return ((data ?? []) as Array<{ id: string; email: string | null; vorname: string | null; nachname: string | null }>)
     .map((p) => ({
       id: p.id,
