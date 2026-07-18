@@ -32,6 +32,11 @@ const BASELINE_PATH = join(__dirname, 'operative-status-writes-baseline.json')
 const ALLOWLIST = new Set([
   'src/lib/faelle/state-machine.ts',
   'src/lib/claims/endzustand-actions.ts',
+  // lexdrive/process-event.ts: der manual_status_override-Pfad (:823) ist BEWUSST
+  // validierungs-frei (Admin forciert per VS-Webhook-Override einen Status, nur gegen
+  // ALLOWED_STATUS_VALUES gefiltert). Durch transitionFallStatus funneln wuerde den Zweck
+  // brechen (Override = Matrix-Bypass by design) -> sanktioniert, kein Boy-Scout-Kandidat.
+  'src/lib/lexdrive/process-event.ts',
 ])
 
 const mode = process.argv.includes('--ratchet')
