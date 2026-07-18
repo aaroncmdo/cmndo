@@ -14,7 +14,7 @@ function eur(n: number): string {
 
 export default async function EmpfehlungenPage() {
   const makler = await getCurrentMakler()
-  if (!makler) redirect('/makler')
+  if (!makler) return redirect('/makler')
 
   const [promo, uebersicht] = await Promise.all([
     getMaklerPrimaryPromoCode(makler.id),
