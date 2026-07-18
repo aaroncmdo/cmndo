@@ -131,6 +131,9 @@ export type WerkstattProvisionRow = {
   erstellt_am: string
   // Claim-Nummer zum Zuordnen (kein PII)
   claim_nummer: string | null
+  // W1.7: claim_id fuer Deep-Link auf /werkstatt/auftraege/[claimId] — liegt direkt
+  // auf partner_provisionen (UNIQUE partner_typ,claim_id), RLS-sicher, kein claims-Join.
+  claim_id: string | null
 }
 
 /**
@@ -180,6 +183,7 @@ export async function getWerkstattProvisionen(werkstattId: string): Promise<Werk
       storno_grund: ((row as unknown as { storno_grund: string | null }).storno_grund) ?? null,
       erstellt_am: (row as unknown as { erstellt_am: string }).erstellt_am,
       claim_nummer: ((row as unknown as { claim_nummer: string | null }).claim_nummer) ?? null,
+      claim_id: claimId,
     }
   })
 }
