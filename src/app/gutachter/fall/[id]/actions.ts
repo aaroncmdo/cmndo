@@ -14,46 +14,8 @@ import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
-import { assignReparaturWerkstatt } from '@/lib/werkstatt/vermittlung-server'
 
 type ActionResult = { success?: boolean; error?: string }
-
-// Gutachter vermittelt IM AUFTRAG des Kunden eine Partner-Werkstatt (quelle='gutachter').
-// Ownership: der Claim muss diesem SV zugewiesen sein (sv_id, CMM-49-Muster). Waehlt
-// ausschliesslich aus unserem aktiven Partner-Pool (findWerkstaetten). Neuer ok-Result-Shape
-// (AGENTS.md: neue Code-Pfade nutzen ok, auch wenn diese Datei sonst success verwendet).
-export async function vermittleWerkstattAlsGutachter(
-  input: { fallId: string; werkstattId: string },
-): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
-
-  const sv = await getGutachterForUser(supabase, user.id, 'id')
-  if (!sv) return { ok: false, error: 'Kein Sachverständigen-Profil gefunden' }
-
-  const claimId = await resolveClaimId(supabase, input.fallId)
-  const { data: fall } = claimId
-    ? await supabase
-        .from('claims')
-        .select('id')
-        .eq('id', claimId)
-        .eq('sv_id', (sv as { id: string }).id)
-        .maybeSingle()
-    : { data: null }
-  if (!fall || !claimId) return { ok: false, error: 'Fall nicht gefunden oder kein Zugriff.' }
-
-  const res = await assignReparaturWerkstatt({
-    target: 'claim',
-    id: claimId,
-    werkstattId: input.werkstattId,
-    quelle: 'gutachter',
-    actorUserId: user.id,
-  })
-  if (!res.ok) return res
-  revalidatePath(`/gutachter/fall/${input.fallId}`)
-  return { ok: true }
-}
 
 export async function uploadGutachten(
   fallId: string,

@@ -17,9 +17,9 @@ import FallDetailClient from './FallDetailClient'
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import { reparaturPhaseErreicht } from '@/lib/werkstatt/reparatur-phase-erreicht'
-import { findReparaturWerkstaettenForTarget } from '@/lib/werkstatt/vermittlung-server'
+import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
-import { WerkstattVermittelnCard } from './_components/WerkstattVermittelnCard'
+import { WerkstattEmpfehlenCard } from './_components/WerkstattEmpfehlenCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
@@ -439,7 +439,7 @@ export default async function GutachterFallPage({
     ) {
       werkstattVermittlung = {
         fallId: id,
-        werkstaetten: await findReparaturWerkstaettenForTarget({ target: 'claim', id: noShowClaimId }),
+        werkstaetten: await findWerkstattVorschlaegeFuer({ target: 'claim', id: noShowClaimId, nurEchte: true }),
       }
     }
   }
@@ -682,7 +682,7 @@ export default async function GutachterFallPage({
         />
       )}
       {werkstattVermittlung && (
-        <WerkstattVermittelnCard
+        <WerkstattEmpfehlenCard
           fallId={werkstattVermittlung.fallId}
           werkstaetten={werkstattVermittlung.werkstaetten}
         />

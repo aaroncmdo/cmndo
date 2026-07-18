@@ -18,6 +18,8 @@ type Props = {
   werkstaetten: (WerkstattFinderRow & { fit?: Fit; gruende?: MatchGrund[] })[]
   onSelect: (id: string) => void
   selectedId?: string | null
+  /** Mehrfach-Auswahl (SV-Empfehlung 1-3): wenn gesetzt, gewinnt es ueber selectedId. */
+  selectedIds?: string[]
   loading?: boolean
   keineSpezialisierte?: boolean
 }
@@ -44,7 +46,7 @@ function distanzLabel(distanz_km: number): string | null {
   return `${distanz_km.toFixed(1).replace('.', ',')} km vom Fahrzeugstandort`
 }
 
-export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, keineSpezialisierte }: Props) {
+export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedIds, loading, keineSpezialisierte }: Props) {
   if (loading) {
     return (
       <div className="space-y-3" aria-busy>
@@ -81,7 +83,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, k
       )}
       <ul className="space-y-3">
         {werkstaetten.map((w) => {
-          const isSelected = selectedId === w.id
+          const isSelected = selectedIds ? selectedIds.includes(w.id) : selectedId === w.id
           const adresse = adresseZeile(w)
           const distanz = distanzLabel(w.distanz_km)
           // Spec B (Aaron 14.07.): Die Matching-Engine liefert die GRÜNDE mit ("BMW-Vertragswerkstatt",
