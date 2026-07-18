@@ -18,15 +18,10 @@ export default async function GoogleSettingsPage({ searchParams }: {
     .eq('id', user.id)
     .single()
 
-  // Booleansigner check via separate admin-fetch fuer refresh_token (nie an Frontend exposed)
-  const { createAdminClient } = await import('@/lib/supabase/admin')
-  const adminDb = createAdminClient()
-  const { data: tokenCheck } = await adminDb
-    .from('profiles')
-    .select('google_refresh_token')
-    .eq('id', user.id)
-    .single()
-  const isConnected = !!tokenCheck?.google_refresh_token
+  // Presence via benignes connected_at — der Refresh-Token lebt jetzt in profiles_oauth_secrets
+  // (service-role-only Leak-Fix, nie an Frontend exposed); connected_at wird im Callback gesetzt +
+  // Disconnect gecleart, ist also aequivalent zur Token-Praesenz.
+  const isConnected = !!profile?.google_connected_at
 
   const params = await searchParams
 

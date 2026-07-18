@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { externalUrl, externalOrigin } from '@/lib/external-url'
 import { MS_TOKEN_ENDPOINT, MS_SCOPES } from '@/lib/microsoft/graph-client'
+import { upsertOAuthTokens } from '@/lib/oauth/secrets'
 
 export const dynamic = 'force-dynamic'
 
@@ -80,16 +81,16 @@ export async function GET(req: NextRequest) {
   }
 
   const adminDb = createAdminClient()
-  await adminDb
-    .from('profiles')
-    .update({
-      ms_refresh_token: tok.refresh_token,
-      ms_access_token: tok.access_token ?? null,
-      ms_token_expires_at: tok.expires_in ? new Date(Date.now() + tok.expires_in * 1000).toISOString() : null,
-      ms_email: msEmail,
-      ms_connected_at: new Date().toISOString(),
-    })
-    .eq('id', user.id)
+  // Tokens in die service-role-only Secret-Tabelle (Leak-Fix); email/connected_at bleiben benign auf profiles.
+  await upsertOAuthTokens(adminDb, user.id, 'ms', {
+    refreshToken: tok.refresh_token,
+    accessToken: tok.access_token ?? null,
+    expiresAt: tok.expires_in ? new Date(Date.now() + tok.expires_in * 1000).toISOString() : null,
+  })
+  await adminDb.from('profiles').update({
+    ms_email: msEmail,
+    ms_connected_at: new Date().toISOString(),
+  }).eq('id', user.id)
 
   return NextResponse.redirect(externalUrl(req, safeReturn))
 }

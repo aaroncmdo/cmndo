@@ -12,6 +12,7 @@ import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { cancelOffeneTermineFuerFall } from '@/lib/termine/cancel-offene-termine'
 import { aktuellerTerminFuerFall } from '@/lib/termine/aktueller-termin-fuer-fall'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 /**
  * KFZ-150: SV storniert einen Termin/Fall.
@@ -128,7 +129,7 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
     const { data: at } = await db
       .from('gutachter_termine')
       .select('re_termin_token')
-      .eq('claim_id', claimId)
+      .or(bezugOrExpr('claim', claimId))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -142,7 +143,7 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   let aktTerminStornoId: string | null = null
   if (claimId) {
     const { data: atId } = await db.from('gutachter_termine').select('id')
-      .eq('claim_id', claimId)
+      .or(bezugOrExpr('claim', claimId))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

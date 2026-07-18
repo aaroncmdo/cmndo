@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { CheckCircle2Icon, MapPinCheckIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 
 type Props = {
   terminId: string
@@ -46,33 +47,34 @@ export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: 
           kundeAngekommenAm: (data.kunde_angekommen_am as string | null) ?? null,
         })
       })
-    const channel = supabase
-      .channel(`termin-live-status-${terminId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${terminId}`,
-        },
-        (payload) => {
-          const row = payload.new as {
-            besichtigung_gestartet_am: string | null
-            sv_angekommen_am: string | null
-            kunde_angekommen_am: string | null
-          }
-          setState({
-            besichtigungGestartetAm: row.besichtigung_gestartet_am,
-            svAngekommenAm: row.sv_angekommen_am,
-            kundeAngekommenAm: row.kunde_angekommen_am,
-          })
-        },
-      )
-      .subscribe()
+    const cleanupChannel = subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`termin-live-status-${terminId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${terminId}`,
+          },
+          (payload) => {
+            const row = payload.new as {
+              besichtigung_gestartet_am: string | null
+              sv_angekommen_am: string | null
+              kunde_angekommen_am: string | null
+            }
+            setState({
+              besichtigungGestartetAm: row.besichtigung_gestartet_am,
+              svAngekommenAm: row.sv_angekommen_am,
+              kundeAngekommenAm: row.kunde_angekommen_am,
+            })
+          },
+        ),
+    )
     return () => {
       cancelled = true
-      void supabase.removeChannel(channel)
+      cleanupChannel()
     }
   }, [terminId])
 

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { reminderStufeNachAlter } from '@/lib/cron/reminder-stufe'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 /**
  * KFZ-192: Vollmacht-Reminder Cron.
@@ -49,15 +50,19 @@ export async function GET(request: Request) {
   const fallIds = faelle.map(f => f.fall_id as string)
   const { data: reservierteTermine, error: termineErr } = await db
     .from('gutachter_termine')
-    .select('fall_id')
-    .in('fall_id', fallIds)
+    .select('fall_id, bezug_id, bezug_typ')
+    .or(bezugInExpr('fall', fallIds))
     .eq('status', 'reserviert')
 
   if (termineErr) {
     console.error('[vollmacht-reminder] termine query:', termineErr.message)
   }
 
-  const fallsWithTermin = new Set((reservierteTermine ?? []).map(t => t.fall_id as string))
+  const fallsWithTermin = new Set(
+    (reservierteTermine ?? [])
+      .map((t) => (t.fall_id as string | null) ?? (t.bezug_typ === 'fall' ? (t.bezug_id as string | null) : null))
+      .filter((x): x is string => !!x),
+  )
 
   let reminders = 0
   let tasks = 0
