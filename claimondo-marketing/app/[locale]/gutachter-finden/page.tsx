@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Gutachter finden',
       'Sachverständiger in der Nähe',
       'Unfallgutachter',
-      'DAT-Experte Karte',
+      'Kfz-Sachverständiger Karte',
       'Kfz-Sachverständiger Köln',
       'Kfz-Sachverständiger Düsseldorf',
       'Kfz-Sachverständiger NRW',
@@ -84,7 +84,7 @@ export default async function GutachterFindenPage({
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung über interaktive Karte',
             description:
-              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+              'Sofort-Vermittlung an einen unabhängigen Kfz-Sachverständigen über interaktive Karte. Geprüfte, unabhängige Kfz-Sachverständige, Termin in unter 48 Stunden, kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
             url: `${SITE_URL}/gutachter-finden`,
           }),
           breadcrumbsSchema([

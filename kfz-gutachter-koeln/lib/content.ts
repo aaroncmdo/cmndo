@@ -122,7 +122,7 @@ export const NETZWERK_PERSONEN: NetzwerkPerson[] = [
     avatar: 'sv',
     name: '{sv}',
     funktion: 'Kfz-Sachverständiger',
-    zitat: 'Ich bin in 60 Minuten bei Ihnen und dokumentiere Ihren Schaden gerichtsfest — nach DAT/BVSK.',
+    zitat: 'Ich bin in 60 Minuten bei Ihnen und dokumentiere Ihren Schaden gerichtsfest — nach BVSK.',
   },
   {
     avatar: 'monika',
@@ -313,7 +313,7 @@ export const COMPARISON: CompareRow[] = [
   // 08k A4.5 Copy-Fix (Aaron): "Gegengutachten" raus aus DIESER Zelle (Zeile
   // "eigenes Gutachten vorlegt" + Fussnote behalten den Begriff).
   { feat: 'Was, wenn die Versicherung Ihr Gutachten kürzt?', normal: 'Niemand widerspricht.', us: '**Anwalt widerspricht und setzt die volle Summe durch**', highlight: true },
-  { feat: 'Wenn die Versicherung ihr eigenes Gutachten vorlegt?', normal: 'Sie stehen allein da.', normalLink: { href: 'https://autounfall.io/controlexpert-versicherer-pruefdienst/', label: 'Prüfdienste →' }, us: 'Wir prüfen es **fachlich gegen** (DAT-/BVSK-Standard)', highlight: true },
+  { feat: 'Wenn die Versicherung ihr eigenes Gutachten vorlegt?', normal: 'Sie stehen allein da.', normalLink: { href: 'https://autounfall.io/controlexpert-versicherer-pruefdienst/', label: 'Prüfdienste →' }, us: 'Wir prüfen es **fachlich gegen** (BVSK-Standard)', highlight: true },
   { feat: 'Wer ist Ihr Ansprechpartner?', normal: 'Wechselnd / keiner', us: 'Fester persönlicher Schadensbetreuer' },
   { feat: 'Sehen Sie den Stand Ihres Falls?', normal: 'Nachfragen per Telefon', us: 'Jederzeit im eigenen Online-Portal' },
   { feat: 'Wer organisiert den Mietwagen?', normal: 'Sie selbst.', normalLink: { href: 'https://autounfall.io/mietwagen-anspruch/', label: 'Mietwagen-Anspruch →' }, us: 'Wir — steht vor Ihrer Tür' },
@@ -422,7 +422,7 @@ export const FAQ: FaqEntry[] = [
     intro:
       'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles komplett koordiniert**:',
     bullets: [
-      { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
+      { strong: 'Kfz-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
       { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },
       { strong: 'Mietwagen', rest: 'solange Ihr Auto ausfällt' },
       { strong: 'Live-Tracking', rest: 'jeder Schritt im Portal sichtbar' },

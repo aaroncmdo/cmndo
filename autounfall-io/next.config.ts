@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
     }
   },
 
-  // AAR 08.07.2026: Artikel /gutachter-dat-expert entfernt (DAT-Expert-
+  // AAR 08.07.2026: Artikel /gutachter-dat-expert entfernt (Marken-
   // Zertifizierungs-Claim) -> 301 auf den Gutachter-Ratgeber-Pillar (kein 404,
   // Link-Equity bleibt).
   async redirects() {

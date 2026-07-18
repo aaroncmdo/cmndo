@@ -67,11 +67,11 @@ Bei einem wirtschaftlichen Totalschaden — Reparaturkosten überschreiten den W
 
 Der Wiederbeschaffungswert ist **kein** statisch berechneter Wert. Er bezieht sich auf den **konkreten Markt-Preis** eines vergleichbaren Fahrzeugs zum Schadens-Zeitpunkt. Ein qualifizierter Kfz-Sachverständiger (BVSK-Mitglied oder vergleichbar) kombiniert dabei drei Quellen:
 
-### 1. DAT (Deutsche Automobil-Treuhand)
-DAT-Marktanalyse liefert statistische Vergleichswerte aus tatsächlichen Markt-Transaktionen, segmentiert nach Marke/Modell/Baujahr/Ausstattung. Wichtigster Standard.
+### 1. Marktanalyse-Datenbanken
+Liefern statistische Vergleichswerte aus tatsächlichen Markt-Transaktionen, segmentiert nach Marke/Modell/Baujahr/Ausstattung. Wichtigster Standard.
 
 ### 2. Schwacke-Liste (Eurotax)
-Zweite Datenbasis, die parallel zur DAT herangezogen wird — abweichende Werte erlauben Plausibilitätsprüfung.
+Zweite Datenbasis, die parallel zur Marktanalyse herangezogen wird — abweichende Werte erlauben Plausibilitätsprüfung.
 
 ### 3. Marktrecherche
 Aktuelle Angebote auf mobile.de, autoscout24, dealer-direkt zum Zeitpunkt der Bewertung. Der SV vergleicht 5–10 konkrete Angebote vergleichbarer Fahrzeuge.
@@ -189,7 +189,7 @@ Bei Privatpersonen ohne Vorsteuer-Abzug: rechtlich nicht haltbar. BGH-Linie zur 
 Der Marktwert eines vergleichbaren Fahrzeugs zum Schadens-Zeitpunkt. Grundlage der Erstattung bei wirtschaftlichem Totalschaden (Reparatur > 130 % WBW).
 
 **Wie wird der Wiederbeschaffungswert berechnet?**
-Durch einen Kfz-Sachverständigen anhand von DAT-Marktanalyse, Schwacke-Liste und konkreter Markt-Recherche (mobile.de, autoscout24). Der Gutachter berücksichtigt Marke, Modell, Alter, Kilometerstand, Ausstattung und Zustand vor Unfall.
+Durch einen Kfz-Sachverständigen anhand von Marktanalyse, Schwacke-Liste und konkreter Markt-Recherche (mobile.de, autoscout24). Der Gutachter berücksichtigt Marke, Modell, Alter, Kilometerstand, Ausstattung und Zustand vor Unfall.
 
 **Brutto oder Netto erstattet die Versicherung?**
 Bei Privatpersonen brutto (mit Mehrwertsteuer) nach BGH-Linie. Begründung: Privatpersonen zahlen am Markt den vollen Bruttopreis, ohne Vorsteuerabzug.
@@ -230,7 +230,7 @@ Totalschaden-Fälle sind eines der ergebnisreichsten Felder der Schadensregulier
 - Versicherungsvertragsgesetz § 115 — Direktanspruch
 - BGH, Urteil vom 29.04.2003, VI ZR 393/02 (Restwert, regionale Erzielbarkeit)
 - BGH-Rechtsprechung zur Brutto-WBW bei Privatpersonen, ständige Rechtsprechung
-- DAT Marktinformationen — [dat.de](https://www.dat.de)
+- Marktinformationen
 - BVSK Sachverständigen-Verband — [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 

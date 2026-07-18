@@ -90,7 +90,7 @@ export const CLUSTER: ClusterConfig = {
   imgPath: '/assets/img/duesseldorf/',
   logoExt: 'svg', // Düsseldorf: logo-duesseldorf-dark.svg vorhanden — TODO Aaron: logo-duesseldorf-white.svg fehlt noch (Header-transparent + Footer)
   assetVersion: '1',
-  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
+  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach BVSK-Standard.',
   teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp?v=1',
   svName: 'Tobias', // Düsseldorf-Cluster Persona (Vorname)
   svSurname: 'Vogt', // Persona-Nachname (Tobias Vogt)
@@ -176,7 +176,7 @@ export interface SeoAbsatz {
 
 export const SEO_BODY: Record<string, SeoAbsatz[]> = {
   duesseldorf: [
-    { text: `Nach einem Verkehrsunfall in Düsseldorf (40210) zählt jede Stunde: Als unabhängiger Kfz-Gutachter vor Ort dokumentieren wir den Schaden zeitnah und neutral nach DAT- und BVSK-Standard. Die Landeshauptstadt im Herzen des Rheinlands ist über die A57, A52 und A46 erreichbar, und auch Anfragen aus den Nachbarorten Neuss und Meerbusch bearbeiten wir kurzfristig.` },
+    { text: `Nach einem Verkehrsunfall in Düsseldorf (40210) zählt jede Stunde: Als unabhängiger Kfz-Gutachter vor Ort dokumentieren wir den Schaden zeitnah und neutral nach BVSK-Standard. Die Landeshauptstadt im Herzen des Rheinlands ist über die A57, A52 und A46 erreichbar, und auch Anfragen aus den Nachbarorten Neuss und Meerbusch bearbeiten wir kurzfristig.` },
     { vorort: true, text: `War der Unfall unverschuldet, trägt die gegnerische Versicherung die Kosten des Gutachtens für Sie. Über unser Netzwerk vermitteln wir bei Bedarf zusätzlich einen Anwalt und einen Mietwagen.` },
   ],
   neuss: [
@@ -184,7 +184,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Nach einem unverschuldeten Unfall zahlt die Versicherung der Gegenseite, für Sie entstehen 0 Euro. Auch Einsätze in den benachbarten Städten Grevenbroich und Meerbusch koordinieren wir zügig. Bei Bedarf stellen wir über unser Netzwerk Kontakt zu einem Anwalt und einem Mietwagenangebot her.` },
   ],
   hilden: [
-    { text: `Hilden (40721) liegt verkehrsgünstig im Kreis Mettmann am Autobahnkreuz von A3 und A46. Diese Knotenlage bringt viel Durchgangsverkehr mit sich, und genau hier sind wir als unabhängiger Kfz-Gutachter Hilden für Sie da: schnelle Vor-Ort-Begutachtung, neutrale Bewertung nach DAT- und BVSK-Standard und eine klare Dokumentation für die Schadensregulierung.` },
+    { text: `Hilden (40721) liegt verkehrsgünstig im Kreis Mettmann am Autobahnkreuz von A3 und A46. Diese Knotenlage bringt viel Durchgangsverkehr mit sich, und genau hier sind wir als unabhängiger Kfz-Gutachter Hilden für Sie da: schnelle Vor-Ort-Begutachtung, neutrale Bewertung nach BVSK-Standard und eine klare Dokumentation für die Schadensregulierung.` },
     { vorort: true, text: `Bei einem unverschuldeten Unfall übernimmt die gegnerische Versicherung die Gutachterkosten. Anfragen aus Erkrath und Langenfeld bedienen wir ebenso, und über unser Netzwerk vermitteln wir Anwalt sowie Mietwagen.` },
   ],
   erkrath: [
@@ -192,7 +192,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Bei unverschuldeten Unfällen rechnen wir direkt mit der gegnerischen Versicherung ab, sodass für Sie keine Kosten anfallen. Wir sind auch in den Nachbarstädten Hilden und Ratingen tätig. Auf Wunsch organisieren wir über unser Netzwerk anwaltliche Unterstützung und einen Mietwagen.` },
   ],
   langenfeld: [
-    { text: `Zwischen Düsseldorf und Köln im südlichen Rheinland gelegen, ist Langenfeld (40764) über die A3 und A542 angebunden. Als Kfz-Gutachter Langenfeld kommen wir kurzfristig zu Ihnen, begutachten das Unfallfahrzeug und erstellen ein unabhängiges, gerichtsfestes Gutachten nach DAT-Kalkulation.` },
+    { text: `Zwischen Düsseldorf und Köln im südlichen Rheinland gelegen, ist Langenfeld (40764) über die A3 und A542 angebunden. Als Kfz-Gutachter Langenfeld kommen wir kurzfristig zu Ihnen, begutachten das Unfallfahrzeug und erstellen ein unabhängiges, gerichtsfestes Gutachten nach marktübliche Kalkulation.` },
     { vorort: true, text: `Nach einem unverschuldeten Unfall trägt die Versicherung des Verursachers sämtliche Kosten, für Sie bleibt es bei 0 Euro. Einsätze in Monheim und Hilden gehören ebenfalls zu unserem Gebiet. Bei Bedarf vermitteln wir über unser Netzwerk einen passenden Anwalt und einen Mietwagen.` },
   ],
   monheim: [
@@ -200,7 +200,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Ist die Schuldfrage zu Ihren Gunsten geklärt, zahlt die gegnerische Versicherung das Gutachten. Wir betreuen auch die angrenzenden Städte Langenfeld und Düsseldorf. Über unser Netzwerk stellen wir Ihnen auf Wunsch einen Anwalt sowie einen Mietwagen zur Seite.` },
   ],
   ratingen: [
-    { text: `Nördlich von Düsseldorf im Kreis Mettmann gelegen, ist Ratingen (40878) über die A3, A44 und A52 hervorragend erreichbar. Diese Lage am Autobahndreieck sorgt für dichten Verkehr, und nach einem Unfall begutachten wir Ihr Fahrzeug als unabhängiger Kfz-Gutachter Ratingen schnell und neutral. Die Bewertung erfolgt nach DAT- und BVSK-Standard, das Ergebnis ist für die Regulierung verwertbar.` },
+    { text: `Nördlich von Düsseldorf im Kreis Mettmann gelegen, ist Ratingen (40878) über die A3, A44 und A52 hervorragend erreichbar. Diese Lage am Autobahndreieck sorgt für dichten Verkehr, und nach einem Unfall begutachten wir Ihr Fahrzeug als unabhängiger Kfz-Gutachter Ratingen schnell und neutral. Die Bewertung erfolgt nach BVSK-Standard, das Ergebnis ist für die Regulierung verwertbar.` },
     { vorort: true, text: `Bei unverschuldeten Unfällen zahlt die Gegenseite. Auch in Meerbusch und Erkrath sind wir im Einsatz, und über unser Netzwerk vermitteln wir Anwalt und Mietwagen.` },
   ],
   meerbusch: [
@@ -208,7 +208,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Trifft Sie keine Schuld, übernimmt die Versicherung des Unfallgegners die Kosten vollständig. Wir sind ebenso in den Nachbarstädten Ratingen und Neuss unterwegs. Auf Wunsch organisieren wir über unser Netzwerk die passende anwaltliche Begleitung und einen Mietwagen.` },
   ],
   grevenbroich: [
-    { text: `Im Rhein-Kreis Neuss am westlichen Rand des Rheinlands gelegen, ist Grevenbroich (41515) über die A540 und A46 erschlossen. Nach einem Unfall begutachten wir Ihr beschädigtes Fahrzeug als unabhängiger Kfz-Gutachter Grevenbroich direkt vor Ort und dokumentieren Reparaturkosten und Wertminderung nach DAT- und BVSK-Standard.` },
+    { text: `Im Rhein-Kreis Neuss am westlichen Rand des Rheinlands gelegen, ist Grevenbroich (41515) über die A540 und A46 erschlossen. Nach einem Unfall begutachten wir Ihr beschädigtes Fahrzeug als unabhängiger Kfz-Gutachter Grevenbroich direkt vor Ort und dokumentieren Reparaturkosten und Wertminderung nach BVSK-Standard.` },
     { vorort: true, text: `War der Unfall unverschuldet, rechnen wir mit der gegnerischen Versicherung ab, für Sie entstehen 0 Euro. Wir betreuen auch Neuss und Langenfeld in der Umgebung. Bei Bedarf vermitteln wir über unser Netzwerk einen Anwalt und einen Mietwagen.` },
   ],
 }

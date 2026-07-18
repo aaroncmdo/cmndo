@@ -84,7 +84,7 @@ export default function ErsteinschaetzungPage() {
               },
               {
                 name: 'KI analysiert den Schaden',
-                text: 'Unsere KI analysiert Fotos und Beschreibung und liefert in Sekunden eine Kostenindikation sowie die Einschätzung ob ein DAT-Gutachten sinnvoll ist.',
+                text: 'Unsere KI analysiert Fotos und Beschreibung und liefert in Sekunden eine Kostenindikation sowie die Einschätzung ob ein Kfz-Gutachten sinnvoll ist.',
               },
               {
                 name: 'Ersteinschätzung und Handlungsempfehlung erhalten',

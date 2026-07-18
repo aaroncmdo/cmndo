@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Sachverständiger werden',
       'SV-Netzwerk beitreten',
       'Gutachter Aufträge',
-      'DAT-Experte Partner',
+      'Kfz-Gutachter Partner',
       'BVSK Partner',
       'Claimondo SV-Partner',
       'Kfz-Gutachter selbstständig',

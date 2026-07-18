@@ -162,9 +162,9 @@ Allgemeine Information zur Schadensregulierung, KEINE individuelle Rechtsberatun
 
 - [Hauptseite](https://claimondo.de/): Service-Pitch „Sie reden mit niemandem. Wir mit allen.", 5 Service-Realität-Bullets (Fall in der Tasche / persönlicher Berater / Live-Brief-Anruf-Cent / 32 Tage statt 4 Monate / 0 € § 249 BGB), ANSPRUECHE-Section „Vier Gespräche — wir führen sie" (4 Cards mit BGH-Belegen), Service-Realität-Section (6 Cards: Tasche / Push / Berater / Info-Vorsprung / Digital / Speed), Berater-Section (persönlich, mit Foto + Direktwahl), Plattform-Mechanik-Section „Uber-Prinzip" (3 Steps: Disponiert / In der Tasche / Kürzungs-Alarm + Speed-Vergleich 32 Tage vs 4–6 Monate), Misstrauens-Trio, 8 BGH-Urteile (VI ZR 38/22 ff., 65/18, 174/24, 53/09, 119/04, 357/03, 67/91, 280/22), Versicherer-Taktiken (HUK, LVM, AXA + ControlExpert, K-Expert, DEKRA), Wertminderungs-Tabelle (Sanden/Danner), bundesweites Einsatzgebiet, Founders, FAQ.
 - [Vorteile](https://claimondo.de/vorteile): 6 USPs warum Claimondo bei Versicherer-Kürzungen (typischerweise 30–40 % laut NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) die BGH-konformen Maximalansprüche durchsetzt. Quotenvorrecht-Erklärung, BGH-Belege je Kürzungsposition.
-- [Wie es funktioniert](https://claimondo.de/wie-es-funktioniert): 5-Schritt-Prozess vom Unfall bis Auszahlung in Ø 32 Tagen. Berater-Rückruf < 15 Min, DAT-Gutachter < 48 h vor Ort (bundesweit).
+- [Wie es funktioniert](https://claimondo.de/wie-es-funktioniert): 5-Schritt-Prozess vom Unfall bis Auszahlung in Ø 32 Tagen. Berater-Rückruf < 15 Min, Kfz-Gutachter < 48 h vor Ort (bundesweit).
 - [FAQ](https://claimondo.de/faq): 14 Themen-Gruppen, 45+ Q&As — Kosten, Versicherer-Kürzungen, Gutachter, Wertminderung, typische Fehler, Anwalt, Quotenvorrecht, Restwert, Datenschutz, Spezialfälle (Tesla, Firmenfahrzeug, Personenschaden).
-- [Über uns](https://claimondo.de/ueber-uns): Brand, Gründer Nicolas Kitta (Geschäftsführer & CEO) + Aaron Sprafke (Geschäftsführer & COO), Mission, Origin-Story, DAT-Partnerschaft.
+- [Über uns](https://claimondo.de/ueber-uns): Brand, Gründer Nicolas Kitta (Geschäftsführer & CEO) + Aaron Sprafke (Geschäftsführer & COO), Mission, Origin-Story, Partnerschaft.
 - [Schadensreport 2026](https://claimondo.de/schadensreport-2026): Originaldaten-Publikation zur Kfz-Schadensregulierung in Deutschland.
 - [KI-Ersteinschätzung](https://claimondo.de/ersteinschaetzung): Kostenlose KI-Bewertung in < 15 Min. 3 Fotos + Beschreibung reichen.
 - [Schaden melden](https://claimondo.de/schaden-melden): 4-Schritt-Online-Wizard.
@@ -257,7 +257,7 @@ Claimondo arbeitet mit hunderten zertifizierten Sachverständigen in **ganz Deut
 ${topCities
   .map(
     (s) =>
-      `- [Kfz-Gutachter ${s.name}](https://claimondo.de/kfz-gutachter/${s.slug}): DAT-Partner, ${s.lokal.landgericht}, BVSK ${s.bvskHonorarSpanne}, PLZ ${s.plzPrefix} (${s.bevoelkerung} Einw., ${s.bundesland}).`,
+      `- [Kfz-Gutachter ${s.name}](https://claimondo.de/kfz-gutachter/${s.slug}): Partner, ${s.lokal.landgericht}, BVSK ${s.bvskHonorarSpanne}, PLZ ${s.plzPrefix} (${s.bevoelkerung} Einw., ${s.bundesland}).`,
   )
   .join('\n')}
 
@@ -368,7 +368,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - **8 Mio. €+ durchgesetzter Schadensersatz**
 - **32 Tage Ø** bis zur Auszahlung
 - **< 15 Min** bis zum ersten Berater-Rückruf
-- **< 48 h** bis zum DAT-Gutachter vor Ort (bundesweit)
+- **< 48 h** bis zum Kfz-Gutachter vor Ort (bundesweit)
 - **Hunderte zertifizierte Partner-Sachverständige** in ganz Deutschland
 - Versicherer-Prüfdienste kürzen typischerweise **30–40 %** der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24)
 
@@ -379,7 +379,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - **BVSK Honorartabelle 2026** — Sachverständigen-Honorare
 - **Schulz-Borck/Hofmann** Haushaltsführungs-Tabellen
 - **Schwacke-Liste** (Eurotax) + **Fraunhofer-Mietpreisspiegel** — Mietwagen
-- **DAT Marktinformationen** ([dat.de](https://www.dat.de))
+- **Marktinformationen**
 - **Düsseldorfer Tabelle** (Unterhalt Kinder)
 - **ADAC Quotenkatalog** (Mitverschuldens-Spannen)
 - **BGH-Rechtsprechungs-Datenbank** ([juris.bundesgerichtshof.de](https://juris.bundesgerichtshof.de))
@@ -397,7 +397,7 @@ Insgesamt **${STAEDTE.length} indexierte Stadt-Pages** — vollständige Liste i
 - **Gründer**: Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
 - **Gründungsjahr**: 2025
 - **Einsatzgebiet**: bundesweit (Sachverständigen-Netz in allen 16 Bundesländern)
-- **Partner**: DAT (Deutsche Automobil Treuhand) Sachverständigen-Netzwerk · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
+- **Partner**: Sachverständigen-Netzwerk · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 
 ## robots.txt & sitemap.xml
 

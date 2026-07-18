@@ -721,7 +721,7 @@
     },
     "vorteile": {
       "title": "Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo",
-      "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
+      "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger Kfz-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
       "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück."
     },
     "faq": {
@@ -733,15 +733,15 @@
     },
     "wie_es_funktioniert": {
       "title": "Wie es funktioniert — Vom Unfall zur Auszahlung in 5 Schritten · Claimondo",
-      "description": "In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, DAT-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.",
-      "og_description": "In 5 Schritten zum vollen Schadensersatz — Ø 32 Tage. Berater-Rückruf <15 Min, DAT-Gutachter <48 h."
+      "description": "In 5 Schritten von der Unfallmeldung zur Auszahlung — Ø 32 Tage. Rückruf unter 15 Min, Kfz-Gutachter unter 48 h vor Ort. Live im Portal verfolgbar.",
+      "og_description": "In 5 Schritten zum vollen Schadensersatz — Ø 32 Tage. Berater-Rückruf <15 Min, Kfz-Gutachter <48 h."
     },
     "gutachter_finden": {
       "title": "Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h",
       "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
-      "og_title": "Kfz-Gutachter finden — Karte mit DAT-Sachverständigen",
-      "og_description": "Interaktive Karte aller verfügbaren DAT-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
-      "twitter_title": "Kfz-Gutachter finden — Karte mit DAT-SVs",
+      "og_title": "Kfz-Gutachter finden — Karte mit Kfz-Sachverständigen",
+      "og_description": "Interaktive Karte aller verfügbaren Kfz-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
+      "twitter_title": "Kfz-Gutachter finden — Karte mit Kfz-SVs",
       "twitter_description": "Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h."
     },
     "beratung_anfragen": {
@@ -839,8 +839,8 @@
     },
     "kfz_gutachter": {
       "title": "Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei",
-      "description": "Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. DAT-Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).",
-      "og_description": "DAT-Expert-Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB"
+      "description": "Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).",
+      "og_description": "Geprüfte Kfz-Sachverständige · Termin <48h · 0 € für Geschädigte nach §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt erklärt",
@@ -880,7 +880,7 @@
     },
     "kfz_gutachter_gutachten_service": {
       "title": "Kfz-Gutachten-Service — unabhängig, schnell, 0 € bei Fremdverschulden",
-      "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (DAT/Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
+      "description": "Kfz-Gutachten-Service: unabhängiges Schadengutachten (Audatex) plus Koordination von Werkstatt, Mietwagen und Anwalt. Termin in unter 48 h. Bei Fremdverschulden 0 € (§249 BGB).",
       "og_title": "Kfz-Gutachten-Service — alles aus einer Hand",
       "og_description": "Unabhängiges Gutachten + Koordination der ganzen Regulierung — bei Fremdverschulden kostenfrei."
     },
@@ -923,7 +923,7 @@
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
       "p2": "Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
-      "p3": "Das Partner-Netzwerk besteht aus zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p3": "Das Partner-Netzwerk besteht aus zertifizierten Sachverständigen aus dem öffentlichen Sachverständigen-Verzeichnis mit Schwerpunkt Nordrhein-Westfalen und bundesweiter Erreichbarkeit. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
       "eyebrow": "Was wir glauben",
@@ -960,8 +960,8 @@
       "heading": "Vertrauenssignale, jedes mit Quelle",
       "items": [
         {
-          "titel": "DAT Expert Partner-Netzwerk",
-          "text": "Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.",
+          "titel": "Partner-Netzwerk",
+          "text": "Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen Sachverständigen-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.",
           "quelle": "dat.de/sachverstaendige"
         },
         {
@@ -997,7 +997,7 @@
           "label": "Termin mit Gutachter vor Ort"
         },
         {
-          "kpi": "DAT",
+          "kpi": "BVSK",
           "label": "zertifiziertes Partner-Netzwerk"
         },
         {
@@ -1019,7 +1019,7 @@
           "rolle": "Geschäftsführer, CEO & Mitgründer",
           "foto_label": "rechts im Bild",
           "bio_kurz": "Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.",
-          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus DAT-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
+          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus Kfz-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
           "quote": "„Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -1166,7 +1166,7 @@
       "quote_accent": "Anspruch bleibt."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
+      "trust_badge": "Sachverständigen-Netzwerk · bundesweit erreichbar",
       "h1_plain": "Sie reden mit niemandem.",
       "h1_accent": "Wir mit allen.",
       "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — und führen die Verhandlung mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
@@ -1296,7 +1296,7 @@
     },
     "einsatzgebiet": {
       "eyebrow": "Vor Ort — bundesweit",
-      "heading": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit",
+      "heading": "Sachverständigen-Netzwerk · Schwerpunkt NRW · Top-Städte deutschlandweit",
       "map_alt": "Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte",
       "city_intro": "Direkt zur Stadt-Page (regionaler Landgericht, Anwaltskammer, BVSK-Honorar):",
       "alle_staedte_cta": "Alle Einsatz-Städte ansehen →"
@@ -1343,7 +1343,7 @@
         },
         {
           "frage": "Werden Tesla- und E-Auto-Schäden gleich behandelt?",
-          "antwort": "Nicht ganz. Bei Tesla und anderen E-Fahrzeugen liegen Steuergeräte unter Schwellerblenden — Spätfolgen tauchen oft erst nach Monaten auf. DAT/Audatex haben oft keine korrekten Verbundzeiten für US-Fahrzeuge: ein Standardgutachten von 22.000 € entpuppt sich mit Tesla-Originaldaten als 48.000 €. Wir vermitteln gezielt E-Auto-Spezialgutachter."
+          "antwort": "Nicht ganz. Bei Tesla und anderen E-Fahrzeugen liegen Steuergeräte unter Schwellerblenden — Spätfolgen tauchen oft erst nach Monaten auf. Audatex haben oft keine korrekten Verbundzeiten für US-Fahrzeuge: ein Standardgutachten von 22.000 € entpuppt sich mit Tesla-Originaldaten als 48.000 €. Wir vermitteln gezielt E-Auto-Spezialgutachter."
         }
       ]
     },
@@ -1707,7 +1707,7 @@
     },
     "detail": {
       "entfernt": "{km} km entfernt",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Zertifizierte Sachverständige",
       "freie_termine": "Freie Termine",
       "termin_reservieren": "Termin reservieren →",
       "legal": "Kostenlos für unverschuldet Geschädigte · 0 € Eigenanteil",
@@ -1772,7 +1772,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kürzungen zurückgeholt",
       "h1_suffix": " — ohne Eigenanteil.",
-      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem DAT-Gutachter, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.",
+      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.",
       "cta_primary": "Schaden online melden",
       "cta_call_aria": "Claimondo Hotline anrufen",
       "trust_footer": "Anonyme Beratung · Antwort <15 Min · DSGVO-konform"
@@ -1814,11 +1814,11 @@
         ]
       },
       {
-        "titel": "Unabhängige DAT-Gutachter",
+        "titel": "Unabhängige Kfz-Gutachter",
         "sub": "Nur Ihrem Interesse verpflichtet",
-        "text": "Unsere Partner-Gutachter arbeiten unabhängig — nicht im Dienst einer Versicherung. Ihr Schaden wird vollständig und nach DAT-Standard bewertet, nicht über ControlExpert oder K-Expert kleingerechnet.",
+        "text": "Unsere Partner-Gutachter arbeiten unabhängig — nicht im Dienst einer Versicherung. Ihr Schaden wird vollständig und nach BVSK-Standard bewertet, nicht über ControlExpert oder K-Expert kleingerechnet.",
         "punkte": [
-          "Zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis",
+          "Zertifizierte Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis",
           "Keine Schadensteuerung — keine Versicherungsbindung",
           "Vollständige Schadensbewertung inkl. Wertminderung",
           "Gutachten in 5 Werktagen, Besichtigung in 48 h"
@@ -1860,9 +1860,9 @@
       {
         "titel": "Deutschlandweit verfügbar",
         "sub": "Schwerpunkt NRW · bundesweit",
-        "text": "Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt deutsche Großstädte ab. Der nächste DAT-Gutachter aus dem Netzwerk ist meist wenige Kilometer entfernt.",
+        "text": "Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt deutsche Großstädte ab. Der nächste Kfz-Gutachter aus dem Netzwerk ist meist wenige Kilometer entfernt.",
         "punkte": [
-          "DAT-Sachverständige aus dem öffentlichen DAT-Verzeichnis",
+          "Kfz-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis",
           "Indexierte Stadt-Pages für lokales SEO",
           "Standortbasierte Zuweisung",
           "Ortskundige Experten in jeder Region"
@@ -1948,7 +1948,7 @@
       "eyebrow": "Spezialfall E-Auto",
       "heading_line1": "Tesla, Polestar, Lucid?",
       "heading_line2": "Wir kennen die Fallstricke.",
-      "p1_pre": "DAT und Audatex haben für US-Fahrzeuge oft",
+      "p1_pre": "Standardsysteme haben für US-Fahrzeuge oft",
       "p1_strong": "keine korrekten Verbundzeiten",
       "p1_mid": "hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten",
       "p1_betrag": "48.000 €",
@@ -1960,10 +1960,10 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB",
+    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit Kfz-Sachverständigen, kostenfrei nach §249 BGB",
     "kpis": [
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "zertifiziertes Partner-Netzwerk"
       },
       {
@@ -1987,7 +1987,7 @@
       },
       {
         "frage": "Sind die angezeigten Sachverständigen unabhängig?",
-        "antwort": "Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches DAT-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle."
+        "antwort": "Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches Sachverständigen-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle."
       },
       {
         "frage": "Was kostet mich die Vermittlung über die Karte?",
@@ -2112,7 +2112,7 @@
         "label": "Erstberatung"
       },
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "zertifiziertes Netzwerk"
       },
       {
@@ -2190,7 +2190,7 @@
           },
           {
             "frage": "Ich habe ein Tesla oder E-Auto. Gibt es Besonderheiten?",
-            "antwort": "Ja — und die sind erheblich. Standardprogramme (DAT/Audatex) enthalten oft keine korrekten Verbundzeiten für US-Fahrzeuge. Reales Beispiel: Deutsches Standard-Gutachten 22.000 € → mit Tesla-Originaldaten: 48.000 €. Steuergeräte unter Schwellerblenden werden oft erst Monate später zum Problem. Bei Tesla und E-Autos: immer Spezialgutachter."
+            "antwort": "Ja — und die sind erheblich. Standardprogramme (Audatex) enthalten oft keine korrekten Verbundzeiten für US-Fahrzeuge. Reales Beispiel: Deutsches Standard-Gutachten 22.000 € → mit Tesla-Originaldaten: 48.000 €. Steuergeräte unter Schwellerblenden werden oft erst Monate später zum Problem. Bei Tesla und E-Autos: immer Spezialgutachter."
           },
           {
             "frage": "Was ist die 130%-Regel?",
@@ -2261,8 +2261,8 @@
         "gruppe": "Sachverständige & Zertifizierung",
         "fragen": [
           {
-            "frage": "Was ist DAT-Expert und warum ist das wichtig?",
-            "antwort": "DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl."
+            "frage": "Nach welchem Standard wird mein Schaden kalkuliert?",
+            "antwort": "Unsere Sachverständigen kalkulieren nach anerkannten, marktüblichen Systemen (z. B. Audatex) — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Entscheidend ist die Unabhängigkeit und Qualifikation des Sachverständigen, nicht die eingesetzte Software."
           },
           {
             "frage": "Was unterscheidet einen Claimondo-Gutachter von einer DEKRA?",
@@ -2270,7 +2270,7 @@
           },
           {
             "frage": "Können Sie auch bei Tesla, Polestar oder anderen E-Autos helfen?",
-            "antwort": "Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-DAT-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr."
+            "antwort": "Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr."
           },
           {
             "frage": "Mein Auto ist älter als 10 Jahre — bekomme ich noch ein Gutachten?",
@@ -2396,7 +2396,7 @@
       "badge": "In 32 Tagen zum Geld · Live im Portal",
       "h1_plain": "Vom Unfall zur Auszahlung —",
       "h1_accent": "in 5 Schritten.",
-      "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, DAT-Gutachter vor Ort in unter 48 Stunden, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
+      "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter vor Ort in unter 48 Stunden, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
       "cta_primary": "Schaden online melden"
     },
     "kpis": [
@@ -2433,7 +2433,7 @@
         "detail": "Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
       },
       {
-        "titel": "DAT-Gutachter besichtigt Ihr Fahrzeug",
+        "titel": "Kfz-Gutachter besichtigt Ihr Fahrzeug",
         "text": "Vor Ort in unter 48 Stunden — meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung.",
         "detail": "Termin bei Ihnen, in der Werkstatt oder beim Berater. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), und Reparaturkalkulation nach BGH-Markenwerkstatt-Linie."
       },
@@ -2542,7 +2542,7 @@
       "headline": "Werden Sie Claimondo-Partner in Ihrer Region",
       "subheadline": "Wir nehmen Partner regional gestaffelt auf — sobald Ihre Region dran ist, melden wir uns. Kein Marketing, kein Spam.",
       "feature_auftraege": "Aufträge direkt aus der Plattform",
-      "feature_verifiziert": "DAT + BVSK verifiziert",
+      "feature_verifiziert": "BVSK verifiziert",
       "feature_radius": "Ihr Gebiet, Ihr Radius"
     },
     "success": {
@@ -2644,7 +2644,7 @@
         },
         {
           "frage": "Welche Software ist im Einsatz?",
-          "antwort": "Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). DAT-SilverDAT-Integration ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) können Sie parallel weiter nutzen — wir importieren das fertige PDF."
+          "antwort": "Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). Kalkulations-Integration ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) können Sie parallel weiter nutzen — wir importieren das fertige PDF."
         },
         {
           "frage": "Wie werden Rechnung und Zahlung abgewickelt?",
@@ -3189,7 +3189,7 @@
       {
         "titel": "Online-Präsenz",
         "kicker": "Website & Referenzen",
-        "text": "Eine klare Website mit Leistungen, Qualifikationen (DAT, BVSK, öffentliche Bestellung) und Referenzen schafft Vertrauen. Sie ist die Landeseite für jede Marketing-Maßnahme — ohne sie verpufft Reichweite."
+        "text": "Eine klare Website mit Leistungen, Qualifikationen (BVSK, öffentliche Bestellung) und Referenzen schafft Vertrauen. Sie ist die Landeseite für jede Marketing-Maßnahme — ohne sie verpufft Reichweite."
       },
       {
         "titel": "Plattform-Distribution",
@@ -3231,7 +3231,7 @@
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
     "hero_h1_line1": "Kfz-Gutachter finden —",
     "hero_h1_line2": "unabhängig & kostenfrei.",
-    "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
+    "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
     "hero_cta_schaden": "Schaden melden",
     "trust_kpi_dat_label": "zertifiziertes Netzwerk",
@@ -3285,7 +3285,7 @@
     "staedte_eyebrow": "Lokal verfügbar",
     "staedte_h2": "Gutachter in Ihrer Stadt",
     "staedte_p": "Wählen Sie Ihre Stadt für regionale Informationen, Honorar-Spannen und das zuständige Landgericht.",
-    "staedte_dat_prefix": "DAT-Partner-Netzwerk · PLZ",
+    "staedte_dat_prefix": "Partner-Netzwerk · PLZ",
     "staedte_weitere": "Weitere Städte folgen — bundesweit verfügbar",
     "spezial_eyebrow": "Spezialfälle",
     "spezial_h2": "Gutachter nach Fahrzeugtyp & Kosten",
@@ -3403,7 +3403,7 @@
       {
         "titel": "Gutachten + Anwalt",
         "dauer": "Termin <48 h, Bericht 48 h später",
-        "text": "DAT-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
+        "text": "Kfz-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
       },
       {
         "titel": "Auszahlung",
@@ -3891,7 +3891,7 @@
   "kfz_gutachter_stadt": {
     "hero_band_eyebrow": "Sofort nach dem Unfall {ort}",
     "hero_band_quote": "„Ihr erster Anruf nach dem Unfall? <hl>Der richtige.</hl>“",
-    "hero_badge": "DAT-Sachverständige aktuell {ort} verfügbar",
+    "hero_badge": "Kfz-Sachverständige aktuell {ort} verfügbar",
     "hero_h1_line1": "Unfall gehabt?",
     "hero_h1_city": "Ihr Kfz-Gutachter {ort}.",
     "hero_subheadline": "Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch. 0 € für Sie.",
@@ -3982,7 +3982,7 @@
         "text": "Persönlicher Rückruf in unter 15 Minuten."
       },
       {
-        "titel": "DAT-Gutachter vor Ort",
+        "titel": "Kfz-Gutachter vor Ort",
         "text": "In unter 48 Stunden besichtigt — meist am Folgetag."
       },
       {
@@ -3995,7 +3995,7 @@
       }
     ],
     "einsatz_eyebrow": "Vor Ort — bundesweit",
-    "einsatz_h2": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
+    "einsatz_h2": "Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
     "einsatz_verfuegbar": "Auch verfügbar in:",
     "einsatz_alle": "Alle Einsatz-Städte →",
     "faq_eyebrow": "Häufige Fragen — Kfz-Gutachter {ort}",
@@ -4003,7 +4003,7 @@
     "faq_kosten_frage": "Was kostet ein Kfz-Gutachter {ort}?",
     "faq_kosten_antwort": "Bei einem unverschuldeten Unfall {ort} mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen in {stadt} zwischen {bvskSpanne}.",
     "faq_finden_frage": "Wo finde ich einen unabhängigen Kfz-Sachverständigen {ort}?",
-    "faq_finden_antwort": "Claimondo vermittelt {ort} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem DAT-Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in {stadt} (PLZ {plz}) und im umliegenden {bundesland}.",
+    "faq_finden_antwort": "Claimondo vermittelt {ort} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in {stadt} (PLZ {plz}) und im umliegenden {bundesland}.",
     "faq_gericht_frage": "Welches Gericht ist bei Streitigkeiten zuständig {ort}?",
     "faq_gericht_antwort": "Für Schadensregulierungs-Streitigkeiten {ort} ist erstinstanzlich das {landgericht} zuständig. Geht eine Versicherung gerichtlich gegen ein Gutachten vor oder kürzt unrechtmäßig, klagt unsere Partnerkanzlei für Verkehrsrecht in der Regel vor diesem Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
     "faq_kuerzung_frage": "Was passiert, wenn die Versicherung das Gutachten kürzt?",
@@ -4015,7 +4015,7 @@
     "faq_130_frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
     "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.",
     "cta_h2": "Schaden {ort}? Wir regeln das.",
-    "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien DAT-Sachverständigen {ort} in unter 48 h.",
+    "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien Kfz-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen"
   },
   "onboarding_wizard": {
@@ -4146,7 +4146,7 @@
     "kuerzungen_quelle": "Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-Branchenstatistik. Stand 05/2026.",
     "markt_label": "Tabelle 2",
     "markt_h2": "Der Markt für Kfz-Schadensregulierung in NRW 2026",
-    "markt_p": "Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). Stand April 2026.",
+    "markt_p": "Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). Stand April 2026.",
     "markt_kpis": [
       {
         "wert": "23",
@@ -4155,7 +4155,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert-Partner NRW",
+        "label": "Kfz-Sachverständige NRW",
         "sub": "Claimondo-Netzwerk"
       },
       {
@@ -4191,7 +4191,7 @@
     ],
     "markt_erkenntnis_h": "Schlüssel-Erkenntnis:",
     "markt_erkenntnis_p": "hat seit dem Google Helpful Content Update (Januar 2025) etwa 30 % seines organischen Traffics verloren — von 2.784 auf 1.668 Visits/Monat. Bei gleichzeitig 0 % AI-Search-Sichtbarkeit aller 23 NRW-Wettbewerber öffnet sich ein einmaliges Zeitfenster für strukturierte Daten + Schema-Markup + Answer-Capsule-Content.",
-    "markt_quelle": "Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, DAT-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.",
+    "markt_quelle": "Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, Kalkulations-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.",
     "honorare_label": "Tabelle 3",
     "honorare_h2": "Was kostet ein Kfz-Sachverständigen-Gutachten?",
     "honorare_p_pre": "Honorare folgen der ",
@@ -4239,7 +4239,7 @@
       "Unverschuldeter Unfall: deine Rechte im Überblick"
     ],
     "final_h2": "Ihre Versicherung hat gekürzt? Wir holen es zurück.",
-    "final_p": "Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
+    "final_p": "Unabhängiger Kfz-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
     "final_cta_gutachter": "Gutachter finden",
     "markt_erkenntnis_pre": "Der Marktführer"
   },
@@ -4261,7 +4261,7 @@
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "ab 750 € Gutachten-Anspruch",
     "antwort_capsule_quelle": "KI-Analyse · < 15 Min · 0 € Kosten",
-    "antwort_p": "<strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung ob ein unabhängiges DAT-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich — sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten richtigen Schritt zu entscheiden.",
+    "antwort_p": "<strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung ob ein unabhängiges Kfz-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich — sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten richtigen Schritt zu entscheiden.",
     "ergebnis_h2": "Das bekommen Sie — kostenlos",
     "ergebnis_punkte": [
       "Geschätzte Reparaturkosten auf Basis Ihrer Fotos",
@@ -4299,7 +4299,7 @@
     "trust_stat_1_label": "KI-Check",
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Anspruchs-Basis",
-    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_wert": "BVSK",
     "trust_stat_3_label": "zertifiziertes Netzwerk"
   },
   "unfallskizze": {
@@ -4369,11 +4369,11 @@
     "breadcrumb_current": "Gutachten-Service",
     "hero_h1": "Kfz-Gutachten-Service — unabhängig, schnell, kostenfrei",
     "hero_intro": "Vom unabhängigen Schadengutachten bis zur Auszahlung — <strong>ein Service, der alles koordiniert</strong>.",
-    "antwort_capsule": "<strong>Ein Kfz-Gutachten-Service erstellt ein neutrales Schadengutachten und koordiniert die gesamte Regulierung.</strong> Das Gutachten dokumentiert Reparaturkosten, merkantile Wertminderung, Wiederbeschaffungs- und Restwert nach DAT/Audatex. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB) — über eine Sicherungsabtretung (§ 398 BGB) rechnet der Sachverständige direkt mit ihr ab, für Sie 0 €. Claimondo verbindet das Gutachten mit Terminierung in unter 48 Stunden, Werkstatt-Koordination und anwaltlicher Durchsetzung.",
+    "antwort_capsule": "<strong>Ein Kfz-Gutachten-Service erstellt ein neutrales Schadengutachten und koordiniert die gesamte Regulierung.</strong> Das Gutachten dokumentiert Reparaturkosten, merkantile Wertminderung, Wiederbeschaffungs- und Restwert nach Audatex. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB) — über eine Sicherungsabtretung (§ 398 BGB) rechnet der Sachverständige direkt mit ihr ab, für Sie 0 €. Claimondo verbindet das Gutachten mit Terminierung in unter 48 Stunden, Werkstatt-Koordination und anwaltlicher Durchsetzung.",
     "aspekte": [
       {
         "titel": "Unabhängiges Schadengutachten",
-        "kicker": "DAT & Audatex",
+        "kicker": "Kalkulationssysteme",
         "text": "Ein zertifizierter, unabhängiger Sachverständiger dokumentiert Schadenhöhe, Reparaturweg, merkantile Wertminderung sowie Wiederbeschaffungs- und Restwert — gerichtsfest und neutral, nicht im Interesse der Versicherung."
       },
       {
@@ -4396,7 +4396,7 @@
     "faqs": [
       {
         "frage": "Was umfasst ein Kfz-Gutachten?",
-        "antwort": "Reparaturkosten-Kalkulation (DAT/Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung."
+        "antwort": "Reparaturkosten-Kalkulation (Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung."
       },
       {
         "frage": "Was kostet der Gutachten-Service?",
@@ -4501,8 +4501,8 @@
       },
       {
         "titel": "Die Qualifikation",
-        "kicker": "DAT, BVSK, ISO 17024",
-        "text": "Seriöse Kfz-Sachverständige sind nach DIN EN ISO 17024 zertifiziert (DEKRA, KÜS, TÜV, DAT) oder im BVSK organisiert. Die höchste Stufe ist die öffentliche Bestellung und Vereidigung durch die IHK (§ 36 GewO) — geprüfte, besondere Sachkunde."
+        "kicker": "BVSK, ISO 17024",
+        "text": "Seriöse Kfz-Sachverständige sind nach DIN EN ISO 17024 zertifiziert (DEKRA, KÜS, TÜV) oder im BVSK organisiert. Die höchste Stufe ist die öffentliche Bestellung und Vereidigung durch die IHK (§ 36 GewO) — geprüfte, besondere Sachkunde."
       },
       {
         "titel": "Die Unabhängigkeit",
@@ -4527,7 +4527,7 @@
       },
       {
         "frage": "Was bedeutet »öffentlich bestellt und vereidigt«?",
-        "antwort": "Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale."
+        "antwort": "Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale."
       },
       {
         "frage": "Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?",
@@ -4535,7 +4535,7 @@
       },
       {
         "frage": "Worauf sollte ich bei der Auswahl achten?",
-        "antwort": "Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (DAT/Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden."
+        "antwort": "Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden."
       }
     ],
     "crosslinks_h2": "Mehr zum Thema",

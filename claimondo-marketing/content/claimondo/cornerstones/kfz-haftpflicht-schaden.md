@@ -415,7 +415,7 @@ Pauschale Entschädigung 5.000–15.000 € für nahe Angehörige bei tödlichem
 - **BVSK Honorartabelle** (Sachverständigen-Honorare)
 - **Schulz-Borck/Hofmann** Haushaltsführungs-Tabellen
 - **Schwacke-Liste / Fraunhofer-Mietpreisspiegel** (Mietwagen)
-- **DAT** Marktinformationen — [dat.de](https://www.dat.de)
+- **Marktinformationen**
 - **Düsseldorfer Tabelle** (Unterhalt)
 - **ADAC Quotenkatalog** (Mitverschuldens-Spannen)
 

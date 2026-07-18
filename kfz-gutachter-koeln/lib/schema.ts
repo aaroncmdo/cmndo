@@ -110,7 +110,7 @@ export function personSchema() {
       name: 'Claimondo Partner-Netzwerk',
       url: 'https://app.claimondo.de',
     },
-    knowsAbout: ['Kfz-Schadengutachten', 'Unfallgutachten', 'Wertgutachten', 'BVSK', 'DAT-Standard'],
+    knowsAbout: ['Kfz-Schadengutachten', 'Unfallgutachten', 'Wertgutachten', 'BVSK', 'BVSK-Standard'],
     areaServed: { '@type': 'AdministrativeArea', name: CLUSTER.region },
   }
 }

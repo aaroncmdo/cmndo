@@ -54,7 +54,7 @@ const FAQS = [
   {
     frage: 'Was bedeutet »öffentlich bestellt und vereidigt«?',
     antwort:
-      'Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale.',
+      'Diese Sachverständigen haben vor der Industrie- und Handelskammer eine Prüfung über besondere Sachkunde abgelegt (§ 36 GewO) und sind zur Unparteilichkeit vereidigt. Es ist die höchste Qualifikationsstufe und hat vor Gericht besonderes Gewicht. Daneben sind Zertifizierungen nach DIN EN ISO 17024 (DEKRA, KÜS, TÜV) sowie die BVSK-Mitgliedschaft anerkannte Qualitätsmerkmale.',
   },
   {
     frage: 'Darf die gegnerische Versicherung mir einen Gutachter vorschreiben?',
@@ -64,7 +64,7 @@ const FAQS = [
   {
     frage: 'Worauf sollte ich bei der Auswahl achten?',
     antwort:
-      'Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (DAT/Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden.',
+      'Auf Unabhängigkeit (kein Vertrag mit der gegnerischen Versicherung), eine anerkannte Zertifizierung oder öffentliche Bestellung, kalkulationssichere Software (Audatex) sowie schnelle regionale Verfügbarkeit. Claimondo vermittelt ausschließlich unabhängige, qualifizierte Sachverständige in Ihrer Nähe — Termin in der Regel unter 48 Stunden.',
   },
 ]
 

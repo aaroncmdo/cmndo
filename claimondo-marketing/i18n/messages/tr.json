@@ -599,7 +599,7 @@
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
       "p2": "Claimondo, tüm hasar tazminatı sürecini koordine eder: sertifikalı bilirkişiler tarafından bağımsız bilirkişi raporu, trafik hukukunda uzmanlaşmış ortak hukuk bürosu LexDrive aracılığıyla hukuki takip ve §249 BGB kapsamında hak edilen tüm taleplerin eksiksiz ödenmesi — onarım, değer kaybı, kullanım kaybı, kiralık araç, manevi tazminat. Kazada kusuru bulunmayan mağdurlar için hizmet ücretsizdir (karşı tarafın sorumluluk sigortacısının onayına tabi).",
-      "p3": "Ortak ağı, kamuya açık DAT dizinindeki sertifikalı bilirkişilerden oluşur; Kuzey Ren-Westfalya odaklı olup ülke genelinde ulaşılabilir. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p3": "Ortak ağı, kamuya açık dizindeki sertifikalı bilirkişilerden oluşur; Kuzey Ren-Westfalya odaklı olup ülke genelinde ulaşılabilir. Randevular genellikle 48 saat içinde alınabilmektedir. Bağımsız bilirkişi talep hakkının yasal dayanağı §249 BGB ve süregelen BGH içtihadıdır (özellikle VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
       "eyebrow": "Ne İnandığımız",
@@ -636,8 +636,8 @@
       "heading": "Her biri kaynaklı güven sinyalleri",
       "items": [
         {
-          "titel": "DAT Expert İş Ortağı Ağı",
-          "text": "Claimondo, yalnızca DAT'ın kamuya açık dizinindeki sertifikalı bilirkişilerle çalışır. Ağırlıklı olarak NRW, tüm Almanya'da ulaşılabilir.",
+          "titel": "İş Ortağı Ağı",
+          "text": "Claimondo, yalnızca kamuya açık dizindeki sertifikalı bilirkişilerle çalışır. Ağırlıklı olarak NRW, tüm Almanya'da ulaşılabilir.",
           "quelle": "dat.de/sachverstaendige"
         },
         {
@@ -673,7 +673,7 @@
           "label": "Yerinde bilirkişi randevusu"
         },
         {
-          "kpi": "DAT",
+          "kpi": "BVSK",
           "label": "Expert Partner ağı"
         },
         {
@@ -695,7 +695,7 @@
           "rolle": "Geschäftsführer, CEO & Kurucu Ortak",
           "foto_label": "fotoğrafta sağda",
           "bio_kurz": "Nicolas, Claimondo'yu stratejik olarak yönetiyor; iş ortağı ağı ve yatırımcı ilişkilerinden sorumlu.",
-          "bio_lang": "Nicolas, Claimondo'yu basit bir gözlemden yola çıkarak kurdu: Almanya'da trafik kazasına karışan çok sayıda mağdur, yasal haklarının üçte birini kaybettiklerini bilmeden ibraname imzalıyor. Claimondo'da DAT bilirkişilerinden ve uzman avukatlardan oluşan iş ortağı ağının kurulumunu yönetiyor — ve her müvekkile, sigorta şirketlerinin kendi büyük müşterileri için çoktan oluşturduğu standardın aynısını sunuyor.",
+          "bio_lang": "Nicolas, Claimondo'yu basit bir gözlemden yola çıkarak kurdu: Almanya'da trafik kazasına karışan çok sayıda mağdur, yasal haklarının üçte birini kaybettiklerini bilmeden ibraname imzalıyor. Claimondo'da bilirkişilerden ve uzman avukatlardan oluşan iş ortağı ağının kurulumunu yönetiyor — ve her müvekkile, sigorta şirketlerinin kendi büyük müşterileri için çoktan oluşturduğu standardın aynısını sunuyor.",
           "quote": "\"Önemli olan kim olduğum değil, ne yaptığım. Ölçüt bu.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -812,7 +812,7 @@
     },
     "detail": {
       "entfernt": "{km} km uzaklıkta",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Zertifizierte Sachverständige",
       "freie_termine": "Uygun Randevular",
       "termin_reservieren": "Randevu rezerve et →",
       "legal": "Kusursuz mağdurlar için ücretsiz · 0 € katkı payı",
@@ -989,7 +989,7 @@
       "quote_accent": "Hak kalır."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
+      "trust_badge": "Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
       "h1_plain": "Kazada kusurunuz yok mu?",
       "h1_accent": "Biz hallederiz.",
       "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
@@ -1148,7 +1148,7 @@
     "einsatzgebiet": {
       "sub": "Haritayı hareket ettirin veya tam aramayı açın — bölgenizdeki bağımsız eksperler. Ağırlık NRW, ülke genelinde bağlantı.",
       "finder_cta": "Yakınınızda eksper bulun",
-      "eyebrow": "DAT bilirkişi ağı",
+      "eyebrow": "Bilirkişi ağı",
       "heading": "Bağımsız bilirkişiler — ülke genelinde, ağırlıklı olarak NRW.",
       "map_alt": "Claimondo faaliyet alanı — Ağırlıklı olarak Kuzey Ren-Vestfalya, diğer büyük Alman şehirlerine bağlantılı",
       "city_intro": "Şehir sayfasına doğrudan gidin (bölgesel mahkeme, baro, BVSK-Honorartabelle):",
@@ -1196,7 +1196,7 @@
         },
         {
           "frage": "Tesla ve elektrikli araç hasarları aynı şekilde mi değerlendiriliyor?",
-          "antwort": "Tam olarak değil. Tesla ve diğer elektrikli araçlarda kontrol üniteleri eşik kaplamalarının altında yer alır — geç ortaya çıkan hasarlar çoğunlukla ancak aylarca sonra fark edilir. DAT/Audatex sistemleri genellikle ABD araçları için doğru birleşik sürelere sahip değildir: 22.000 €'luk standart bir bilirkişi raporu, Tesla orijinal verileriyle 48.000 €'ya çıkabilir. Uzman elektrikli araç bilirkişileriyle sizi özel olarak buluşturuyoruz."
+          "antwort": "Tam olarak değil. Tesla ve diğer elektrikli araçlarda kontrol üniteleri eşik kaplamalarının altında yer alır — geç ortaya çıkan hasarlar çoğunlukla ancak aylarca sonra fark edilir. Audatex sistemleri genellikle ABD araçları için doğru birleşik sürelere sahip değildir: 22.000 €'luk standart bir bilirkişi raporu, Tesla orijinal verileriyle 48.000 €'ya çıkabilir. Uzman elektrikli araç bilirkişileriyle sizi özel olarak buluşturuyoruz."
         }
       ]
     },
@@ -1515,7 +1515,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kesintiler Geri Alındı",
       "h1_suffix": "— katkı payı olmadan.",
-      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Trafik hukuku alanında uzman ortak hukuk büromuz bunları geri alır — bağımsız DAT bilirkişi ve BGH-Rechtsprechung desteğiyle.",
+      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Trafik hukuku alanında uzman ortak hukuk büromuz bunları geri alır — bağımsız bilirkişi ve BGH-Rechtsprechung desteğiyle.",
       "cta_primary": "Hasarı Çevrimiçi Bildir",
       "cta_call_aria": "Claimondo Hattını Ara",
       "trust_footer": "Anonim danışmanlık · 15 dak. içinde yanıt · DSGVO uyumlu"
@@ -1557,11 +1557,11 @@
         ]
       },
       {
-        "titel": "Bağımsız DAT Bilirkişileri",
+        "titel": "Bağımsız Bilirkişiler",
         "sub": "Yalnızca sizin çıkarlarınız için",
-        "text": "Ortak bilirkişilerimiz bağımsız çalışır — hiçbir sigortanın hizmetinde değil. Hasarınız, ControlExpert veya K-Expert tarafından küçük hesaplanmadan, tam olarak ve DAT standardına göre değerlendirilir.",
+        "text": "Ortak bilirkişilerimiz bağımsız çalışır — hiçbir sigortanın hizmetinde değil. Hasarınız, ControlExpert veya K-Expert tarafından küçük hesaplanmadan, tam olarak ve recognised standardına göre değerlendirilir.",
         "punkte": [
-          "Kamuya açık DAT listesinden sertifikalı ortak bilirkişiler",
+          "Kamuya açık listeden sertifikalı ortak bilirkişiler",
           "Hasar yönlendirmesi yok — sigorta bağımlılığı yok",
           "Değer kaybı dahil eksiksiz hasar değerlendirmesi",
           "5 iş günü içinde rapor, 48 saat içinde ekspertiz"
@@ -1603,9 +1603,9 @@
       {
         "titel": "Tüm Almanya'da Geçerli",
         "sub": "Odak: NRW · Almanya geneli",
-        "text": "Köln, Münih, Berlin veya Schwerin fark etmez: iş ortağı ağı Almanya'nın büyük şehirlerini kapsıyor. Ağdaki en yakın DAT-Sachverständiger genellikle yalnızca birkaç kilometre uzakta.",
+        "text": "Köln, Münih, Berlin veya Schwerin fark etmez: iş ortağı ağı Almanya'nın büyük şehirlerini kapsıyor. Ağdaki en yakın Kfz-Sachverständiger genellikle yalnızca birkaç kilometre uzakta.",
         "punkte": [
-          "Kamuya açık DAT dizininden DAT-Sachverständige",
+          "Kamuya açık dizinden Kfz-Sachverständige",
           "Yerel SEO için Dizine Eklenmiş Şehir Sayfaları",
           "Konuma Dayalı Atama",
           "Her Bölgede Yerel Uzmanlar"
@@ -1691,7 +1691,7 @@
       "eyebrow": "Özel durum: Elektrikli araç",
       "heading_line1": "Tesla, Polestar, Lucid?",
       "heading_line2": "Tuzakları iyi biliriz.",
-      "p1_pre": "DAT ve Audatex, ABD araçları için çoğunlukla",
+      "p1_pre": "Audatex, ABD araçları için çoğunlukla",
       "p1_strong": "doğru bağlantı süreleri yok",
       "p1_mid": "kayıtlı. Gerçek örnek: standart ekspertiz 22.000 € → Tesla orijinal verileriyle",
       "p1_betrag": "48.000 €",
@@ -1771,7 +1771,7 @@
           },
           {
             "frage": "Tesla veya elektrikli araç sahibiyim. Özel bir durum var mı?",
-            "antwort": "Evet — ve bunlar oldukça önemli. Standart programlar (DAT/Audatex) genellikle ABD araçları için doğru birleşik işçilik sürelerini içermez. Gerçek örnek: Standart Almanya bilirkişi raporu 22.000 € → Tesla orijinal verileriyle: 48.000 €. Eşik kaplamalarının altındaki kontrol üniteleri çoğu zaman aylarca sonra sorun çıkarmaktadır. Tesla ve elektrikli araçlarda: mutlaka uzman bilirkişi."
+            "antwort": "Evet — ve bunlar oldukça önemli. Standart programlar (Audatex) genellikle ABD araçları için doğru birleşik işçilik sürelerini içermez. Gerçek örnek: Standart Almanya bilirkişi raporu 22.000 € → Tesla orijinal verileriyle: 48.000 €. Eşik kaplamalarının altındaki kontrol üniteleri çoğu zaman aylarca sonra sorun çıkarmaktadır. Tesla ve elektrikli araçlarda: mutlaka uzman bilirkişi."
           },
           {
             "frage": "%130 kuralı nedir?",
@@ -1842,8 +1842,8 @@
         "gruppe": "Bilirkişiler ve Sertifikasyon",
         "fragen": [
           {
-            "frage": "DAT-Expert nedir ve neden önemlidir?",
-            "antwort": "DAT (Deutsche Automobil Treuhand), Almanya'nın önde gelen araç değerleme veri tabanıdır. Bilirkişilerimiz DAT hesaplama sistemini kullanır — sigortalar bu raporları temel veriler üzerinde tartışmaya açmadan kabul eder. Audatex gibi diğer programlar da geçerlidir; ancak DAT pazar lideridir ve bizim standart tercihimizdir."
+            "frage": "Hasarım hangi standarda göre hesaplanır?",
+            "antwort": "Bilirkişilerimiz, tanınmış ve piyasada yaygın sistemlerle (ör. Audatex) hesaplama yapar — sigortalar bu raporları temel veriler üzerinde tartışmadan kabul eder. Önemli olan, kullanılan yazılım değil, bilirkişinin bağımsızlığı ve yeterliliğidir."
           },
           {
             "frage": "Claimondo bilirkişisini DEKRA'dan ayıran nedir?",
@@ -1851,7 +1851,7 @@
           },
           {
             "frage": "Tesla, Polestar veya diğer elektrikli araçlarda da yardımcı olabilir misiniz?",
-            "antwort": "Evet; ancak Tesla ve elektrikli araç ekspertizleri özel uzmanlık gerektirir. Bu tür vakaları, Tesla/Polestar tanı erişimine sahip bilirkişilere yönlendiriyoruz. Önemli: Tesla'da standart DAT hesaplama şemasını kabul etmeyin — birleşik süreler ve orijinal parça fiyatları Tesla Service Plus üzerinden hesaplanmalıdır; aksi takdirde 20.000 € veya daha fazlasını kaybedebilirsiniz."
+            "antwort": "Evet; ancak Tesla ve elektrikli araç ekspertizleri özel uzmanlık gerektirir. Bu tür vakaları, Tesla/Polestar tanı erişimine sahip bilirkişilere yönlendiriyoruz. Önemli: Tesla'da standart hesaplama şemasını kabul etmeyin — birleşik süreler ve orijinal parça fiyatları Tesla Service Plus üzerinden hesaplanmalıdır; aksi takdirde 20.000 € veya daha fazlasını kaybedebilirsiniz."
           },
           {
             "frage": "Arabam 10 yaşından büyük — yine de ekspertiz yaptırabilir miyim?",
@@ -1977,7 +1977,7 @@
       "badge": "32 Günde Ödemeye · Portalda Canlı Takip",
       "h1_plain": "Kazadan ödemeye —",
       "h1_accent": "5 adımda.",
-      "sub": "Siz 1. adımı yapın. Gerisini biz hallederiz. 15 dakika içinde danışman geri araması, 48 saat içinde DAT bilirkişi yerinde inceleme, avukat her hakkınızı takip eder. Portaldan canlı olarak takip edilebilir.",
+      "sub": "Siz 1. adımı yapın. Gerisini biz hallederiz. 15 dakika içinde danışman geri araması, 48 saat içinde bilirkişi yerinde inceleme, avukat her hakkınızı takip eder. Portaldan canlı olarak takip edilebilir.",
       "cta_primary": "Hasarı çevrimiçi bildir"
     },
     "kpis": [
@@ -2014,7 +2014,7 @@
         "detail": "Danışmanınız sizinle tazminat haklarınızı görüşür: onarım, değer kaybı, kiralık araç, kullanım kaybı, avukatlık ücretleri. Karşı tarafın sigortasıyla doğrudan konuşmazsınız — bu, tipik %30–40 inceleme servisi kesintilerini önler (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.)."
       },
       {
-        "titel": "DAT bilirkişi aracınızı inceler",
+        "titel": "Bilirkişi aracınızı inceler",
         "text": "48 saat içinde yerinde — genellikle ertesi gün. Bağımsız, sertifikalı, eksiksiz delil tespiti.",
         "detail": "Uzman, size gider, tamirciye ya da danışmana gelir. Bilirkişi raporu 5 iş gününde — Sanden/Danner yöntemine göre merkantil değer kaybı, (bölgesel) hurda değeri ve BGH-marka atölyesi çizgisinde onarım hesabı dahil."
       },
@@ -2116,10 +2116,10 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — DAT-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
+    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — Kfz-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
     "kpis": [
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "Expert Partner ağı"
       },
       {
@@ -2143,7 +2143,7 @@
       },
       {
         "frage": "Gösterilen bilirkişiler bağımsız mı?",
-        "antwort": "Evet. Tüm ortak bilirkişiler sertifikalıdır (kamuya açık DAT dizini: dat.de/sachverstaendige) ve bağımsız çalışır — hiçbiri bir sigorta şirketinin hizmetinde değildir. Onarım bedeli, değer kaybı, ikame değeri ve hurda değerini BGH içtihadına ve BVSK-Honorartabelle'ye göre hesaplarlar."
+        "antwort": "Evet. Tüm ortak bilirkişiler sertifikalıdır (kamuya açık dizin: dat.de/sachverstaendige) ve bağımsız çalışır — hiçbiri bir sigorta şirketinin hizmetinde değildir. Onarım bedeli, değer kaybı, ikame değeri ve hurda değerini BGH içtihadına ve BVSK-Honorartabelle'ye göre hesaplarlar."
       },
       {
         "frage": "Harita üzerinden yönlendirme bana ne kadara mal olur?",
@@ -2271,7 +2271,7 @@
         "label": "İlk danışma"
       },
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "Expert Partner ağı"
       },
       {
@@ -2288,7 +2288,7 @@
       "headline": "Bölgenizdeki Claimondo iş ortağı olun",
       "subheadline": "İş ortaklarını bölgesel olarak aşamalı biçimde alıyoruz — bölgeniz sıraya geldiğinde sizi bizzat bilgilendiririz. Pazarlama yok, spam yok.",
       "feature_auftraege": "Doğrudan platformdan iş emirleri",
-      "feature_verifiziert": "DAT + BVSK doğrulamalı",
+      "feature_verifiziert": "BVSK doğrulamalı",
       "feature_radius": "Sizin bölgeniz, sizin yarıçapınız"
     },
     "success": {
@@ -2386,7 +2386,7 @@
         },
         {
           "frage": "Hangi yazılımlar kullanılıyor?",
-          "antwort": "Siparişler, randevular, kanıt fotoğrafları ve bilirkişi raporu gönderimi Claimondo-SV-Portal üzerinden yürütülür (Web + Native-App). DAT-SilverDAT entegrasyonu hazır durumda beklemektedir. Kendi bilirkişi yazılımınızı (Audatex, Combiplus) paralel olarak kullanmaya devam edebilirsiniz — hazır PDF'i biz içe aktarıyoruz."
+          "antwort": "Siparişler, randevular, kanıt fotoğrafları ve bilirkişi raporu gönderimi Claimondo-SV-Portal üzerinden yürütülür (Web + Native-App). Audatex entegrasyonu hazır durumda beklemektedir. Kendi bilirkişi yazılımınızı (Audatex, Combiplus) paralel olarak kullanmaya devam edebilirsiniz — hazır PDF'i biz içe aktarıyoruz."
         },
         {
           "frage": "Fatura ve ödeme nasıl işleniyor?",
@@ -2861,10 +2861,10 @@
     "hero_eyebrow": "Bağımsız Kfz Bilirkişileri",
     "hero_h1_line1": "Kfz Bilirkişi Bul —",
     "hero_h1_line2": "bağımsız & ücretsiz.",
-    "hero_intro": "DAT bilirkişi dizininden (dat.de/sachverstaendige) sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
+    "hero_intro": "Bilirkişi dizininden (dat.de/sachverstaendige) sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
     "hero_cta_karte": "Haritada Görüntüle",
     "hero_cta_schaden": "Hasar Bildir",
-    "trust_kpi_dat_label": "Expert Partner ağı",
+    "trust_kpi_dat_label": "sertifikalı iş ortağı ağı",
     "trust_kpi_termin_label": "Randevu",
     "trust_kpi_eigenanteil_label": "Öz Katkı¹",
     "trust_kpi_recht_label": "Hukuki Dayanak",
@@ -2903,7 +2903,7 @@
     "staedte_eyebrow": "Yerel olarak mevcut",
     "staedte_h2": "Şehrinizdeki bilirkişiler",
     "staedte_p": "Bölgesel bilgiler, ücret aralıkları ve yetkili Landgericht için şehrinizi seçin.",
-    "staedte_dat_prefix": "DAT-Partner-Netzwerk · PLZ",
+    "staedte_dat_prefix": "Partner-Netzwerk · PLZ",
     "staedte_weitere": "Diğer şehirler eklenecek — Almanya genelinde mevcut",
     "spezial_eyebrow": "Özel durumlar",
     "spezial_h2": "Araç tipine ve maliyete göre bilirkişi",
@@ -2974,7 +2974,7 @@
       {
         "titel": "Ekspertiz + Avukat",
         "dauer": "Randevu <48 s, Rapor 48 s sonra",
-        "text": "DAT-Sachverständiger aracı yerinde inceler — evinizde, serviste veya iş yerinizde. Rapor; onarım masrafları, değer kaybı (Wertminderung), hurda değeri (tam hasar durumunda) ve yeniden edinim değerini içerir. Ardından avukat karşı tarafın sigortasından (gegnerische Versicherung) talepte bulunur."
+        "text": "Kfz-Sachverständiger aracı yerinde inceler — evinizde, serviste veya iş yerinizde. Rapor; onarım masrafları, değer kaybı (Wertminderung), hurda değeri (tam hasar durumunda) ve yeniden edinim değerini içerir. Ardından avukat karşı tarafın sigortasından (gegnerische Versicherung) talepte bulunur."
       },
       {
         "titel": "Ödeme",
@@ -3520,7 +3520,7 @@
     "kuerzungen_quelle": "Kaynaklar: BGH karar veritabanı (bundesgerichtshof.de), BVSK e.V., ControlExpert sektör istatistikleri. Güncelleme 05/2026.",
     "markt_label": "Tablo 2",
     "markt_h2": "NRW'de Kfz Hasar Tazminat Piyasası 2026",
-    "markt_p": "10 doğrulanmış veri kaynağıyla (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center) yapılan bağımsız rekabet analizi. Güncelleme Nisan 2026.",
+    "markt_p": "10 doğrulanmış veri kaynağıyla (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center) yapılan bağımsız rekabet analizi. Güncelleme Nisan 2026.",
     "markt_kpis": [
       {
         "wert": "23",
@@ -3529,7 +3529,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert-Partner NRW",
+        "label": "NRW’deki bilirkişiler",
         "sub": "Claimondo ağı"
       },
       {
@@ -3565,7 +3565,7 @@
     ],
     "markt_erkenntnis_h": "Temel Bulgu:",
     "markt_erkenntnis_p": "Google Helpful Content Güncellemesi'nden (Ocak 2025) bu yana organik trafiğinin yaklaşık %30'unu yitirdi — aylık 2.784'ten 1.668 ziyarete geriledi. Aynı zamanda 23 NRW rakibinin tamamında AI arama görünürlüğünün sıfır olmasıyla birlikte yapılandırılmış veri, Schema-Markup ve Answer-Capsule içeriği için eşsiz bir zaman penceresi açılmaktadır.",
-    "markt_quelle": "Kaynaklar: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, DAT-API Partner Ağı, SerpApi Google Maps, Rakip Funnel Denetimi Q1/2026.",
+    "markt_quelle": "Kaynaklar: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, Kalkulations-API Partner Ağı, SerpApi Google Maps, Rakip Funnel Denetimi Q1/2026.",
     "honorare_label": "Tablo 3",
     "honorare_h2": "Kfz bilirkişi ekspertizi ne kadar tutar?",
     "honorare_p_pre": "Ücretler ",
@@ -3613,7 +3613,7 @@
       "Kusursuz kaza: haklarınıza genel bakış"
     ],
     "final_h2": "Sigortanız kesinti yaptı mı? Ortak hukuk büromuz geri alır.",
-    "final_p": "Bağımsız DAT bilirkişisi ve ortak hukuk bürosu. §249 BGB uyarınca 0 € kişisel pay.",
+    "final_p": "Bağımsız bilirkişi ve ortak hukuk bürosu. §249 BGB uyarınca 0 € kişisel pay.",
     "final_cta_gutachter": "Bilirkişi bul",
     "markt_erkenntnis_pre": "Pazar lideri"
   },
@@ -3635,7 +3635,7 @@
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "750 € üstünde ekspertiz hakkı",
     "antwort_capsule_quelle": "Yapay Zekâ Analizi · < 15 Dak. · 0 € Maliyet",
-    "antwort_p": "<strong>Claimondo'nun ücretsiz yapay zekâ ön değerlendirmesi</strong>, araç hasarınızın fotoğraf ve açıklamasını analiz eder; 15 dakika içinde şunları sunar: onarım maliyeti tahmini, beklenen yeniden edinme değeri ve bağımsız DAT ekspertizinin gerekip gerekmediğine dair öneri (yaklaşık 750 € üstündeki hasarlarda §249 BGB uyarınca bu hakkınız bulunmaktadır). Ön değerlendirme ücretsiz ve bağlayıcı değildir — resmi bir ekspertizin yerini tutmaz, ancak bir sonraki doğru adımı hemen belirlemenize yardımcı olur.",
+    "antwort_p": "<strong>Claimondo'nun ücretsiz yapay zekâ ön değerlendirmesi</strong>, araç hasarınızın fotoğraf ve açıklamasını analiz eder; 15 dakika içinde şunları sunar: onarım maliyeti tahmini, beklenen yeniden edinme değeri ve bağımsız ekspertizin gerekip gerekmediğine dair öneri (yaklaşık 750 € üstündeki hasarlarda §249 BGB uyarınca bu hakkınız bulunmaktadır). Ön değerlendirme ücretsiz ve bağlayıcı değildir — resmi bir ekspertizin yerini tutmaz, ancak bir sonraki doğru adımı hemen belirlemenize yardımcı olur.",
     "ergebnis_h2": "Ücretsiz olarak bunları alırsınız",
     "ergebnis_punkte": [
       "Masrafınız: kusurunuz yoksa 0 € (§ 249 BGB)",
@@ -3673,7 +3673,7 @@
     "trust_stat_1_label": "Yapay Zekâ Kontrolü",
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Hak Dayanağı",
-    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_wert": "BVSK",
     "trust_stat_3_label": "Expert Partner ağı"
   },
   "unfallskizze": {
@@ -3741,7 +3741,7 @@
   "kfz_gutachter_stadt": {
     "hero_band_eyebrow": "Kazanın hemen ardından {ort}",
     "hero_band_quote": "\"İlk aramanız kazadan sonra mı? <hl>Doğru karar.</hl>\"",
-    "hero_badge": "DAT bilirkişileri şu anda {ort} hizmetinizde",
+    "hero_badge": "Bilirkişiler şu anda {ort} hizmetinizde",
     "hero_h1_line1": "Kaza mı geçirdiniz?",
     "hero_h1_city": "Kfz bilirkişiniz {ort}.",
     "hero_subheadline": "Bilirkişinizi koordine ediyoruz (< 48 saat), sigorta görüşmelerini yürütüyoruz ve talebinizi BGH uyumlu biçimde sonuçlandırıyoruz. Sizin için 0 €.",
@@ -3832,7 +3832,7 @@
         "text": "15 dakika içinde kişisel geri dönüş."
       },
       {
-        "titel": "DAT bilirkişi yerinde",
+        "titel": "Bilirkişi yerinde",
         "text": "48 saat içinde inceleme — genellikle ertesi gün."
       },
       {
@@ -3845,7 +3845,7 @@
       }
     ],
     "einsatz_eyebrow": "Yerinde — Almanya genelinde",
-    "einsatz_h2": "DAT bilirkişi ağı · NRW ağırlıklı · Almanya genelinde",
+    "einsatz_h2": "Bilirkişi ağı · NRW ağırlıklı · Almanya genelinde",
     "einsatz_verfuegbar": "Aynı zamanda şuralarda da:",
     "einsatz_alle": "Tüm hizmet şehirleri →",
     "faq_eyebrow": "Sık sorulan sorular — Kfz bilirkişi {ort}",
@@ -3853,7 +3853,7 @@
     "faq_kosten_frage": "{ort} bir Kfz bilirkişisi ne kadara mal olur?",
     "faq_kosten_antwort": "{ort} suçsuz geçirilen ve 750 € üzerinde hasarın söz konusu olduğu bir kazada 0 € ödersiniz. Karşı tarafın zorunlu mali sorumluluk sigortası §249 BGB uyarınca tüm masrafları karşılar. BVSK-Honorartabelle kapsamındaki onur miktarları {stadt} için {bvskSpanne} arasında değişmektedir.",
     "faq_finden_frage": "{ort} bağımsız bir Kfz bilirkişisi nereden bulurum?",
-    "faq_finden_antwort": "Claimondo, {ort} yerel uzmanlığa sahip sertifikalı partner bilirkişilerle sizi buluşturur. Hasarı çevrimiçi bildirirsiniz (5 dk, kayıt olmadan) — sizi DAT partner ağından en yakın müsait bilirkişiyle eşleştiririz. 48 saat içinde yerinde randevu. {stadt} (posta kodu {plz}) ve çevresindeki {bundesland} genelinde hizmet verilmektedir.",
+    "faq_finden_antwort": "Claimondo, {ort} yerel uzmanlığa sahip sertifikalı partner bilirkişilerle sizi buluşturur. Hasarı çevrimiçi bildirirsiniz (5 dk, kayıt olmadan) — sizi partner ağından en yakın müsait bilirkişiyle eşleştiririz. 48 saat içinde yerinde randevu. {stadt} (posta kodu {plz}) ve çevresindeki {bundesland} genelinde hizmet verilmektedir.",
     "faq_gericht_frage": "{ort} anlaşmazlıklarda hangi mahkeme yetkilidir?",
     "faq_gericht_antwort": "{ort} hasar tazminatı anlaşmazlıklarında ilk derece mahkemesi olarak {landgericht} yetkilidir. Bir sigorta şirketi bilirkişi raporuna itiraz eder veya haksız biçimde kesinti yaparsa partner trafik hukuku büromuz davayı kural olarak bu mahkemede açmaktadır. Başarı halinde karşı taraf avukatlık ve yargılama masraflarını üstlenir. Siz 0 € ödersiniz (§249 BGB uyarınca, karşı tarafın zorunlu sorumluluk sigortasının kabulü kaydıyla).",
     "faq_kuerzung_frage": "Sigorta bilirkişi raporunu keserse ne olur?",
@@ -3865,7 +3865,7 @@
     "faq_130_frage": "Toplam hasar durumunda %130 kuralı ne anlama gelir?",
     "faq_130_antwort": "%130 kuralı (BGH VI ZR 67/91), tamir maliyetlerinin yeniden temin değerinin %130'una kadar çıkmasına izin vermektedir — bilirkişi raporuna göre usulüne uygun tamir yapılmış olması ve aracın 6 ay daha kullanılması koşuluyla.",
     "cta_h2": "{ort} kaza mı? Biz hallederiz.",
-    "cta_p": "5 dakikada çevrimiçi bildirin — 48 saat içinde {ort} için serbest bir DAT bilirkişisiyle sizi buluşturalım.",
+    "cta_p": "5 dakikada çevrimiçi bildirin — 48 saat içinde {ort} için serbest bir bilirkişiyle sizi buluşturalım.",
     "cta_karte": "Haritada görüntüle"
   },
   "onboarding_wizard": {
@@ -4017,7 +4017,7 @@
     },
     "vorteile": {
       "title": "Avantajlar — Sigortacı kesintileri geri alındı · Claimondo",
-      "description": "Suçsuz kazada 0 € masraf payı (§249 BGB). Denetim hizmeti kesintisi yerine bağımsız DAT bilirkişisi. Size gerçekte neyin hak edildiğini görün.",
+      "description": "Suçsuz kazada 0 € masraf payı (§249 BGB). Denetim hizmeti kesintisi yerine bağımsız bilirkişi. Size gerçekte neyin hak edildiğini görün.",
       "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (NDR/BGH'a göre tipik olarak %30–40) geri alıyoruz."
     },
     "faq": {
@@ -4029,15 +4029,15 @@
     },
     "wie_es_funktioniert": {
       "title": "Nasıl çalışır — Kazadan ödemeye 5 adımda · Claimondo",
-      "description": "Kaza bildiriminden ödemeye 5 adımda — ort. 32 gün. 15 dk altında geri arama, DAT bilirkişisi 48 saat altında yerinde. Portalda canlı takip edilebilir.",
-      "og_description": "5 adımda tam tazminata — ort. 32 gün. Danışman geri araması <15 dk, DAT bilirkişisi <48 saat."
+      "description": "Kaza bildiriminden ödemeye 5 adımda — ort. 32 gün. 15 dk altında geri arama, bilirkişi 48 saat altında yerinde. Portalda canlı takip edilebilir.",
+      "og_description": "5 adımda tam tazminata — ort. 32 gün. Danışman geri araması <15 dk, bilirkişi <48 saat."
     },
     "gutachter_finden": {
       "title": "Yakınınızda araç bilirkişisi bulun — Harita & 48 saat altında randevu",
       "description": "Ülke genelinde sertifikalı partner bilirkişilerle etkileşimli harita. Randevuyu görün, 48 saat altında yerinde. Suçsuz kazada 0 € (§249 BGB).",
-      "og_title": "Araç bilirkişisi bulun — DAT bilirkişileriyle harita",
-      "og_description": "Almanya'daki tüm uygun DAT bilirkişilerinin etkileşimli haritası. 48 saat altında randevu. Suçsuz zarar görenler için §249 BGB uyarınca ücretsiz.",
-      "twitter_title": "Araç bilirkişisi bulun — DAT bilirkişileriyle harita",
+      "og_title": "Araç bilirkişisi bulun — bilirkişilerle harita",
+      "og_description": "Almanya'daki tüm uygun bilirkişilerin etkileşimli haritası. 48 saat altında randevu. Suçsuz zarar görenler için §249 BGB uyarınca ücretsiz.",
+      "twitter_title": "Araç bilirkişisi bulun — bilirkişilerle harita",
       "twitter_description": "Almanya'daki tüm uygun bilirkişilerin haritası. 48 saat altında randevu."
     },
     "werkstatt_finden": {
@@ -4131,8 +4131,8 @@
     },
     "kfz_gutachter": {
       "title": "Araç bilirkişisi bulun — Bağımsız, hızlı, ücretsiz",
-      "description": "Ülke genelinde kaza hasarları için bağımsız sertifikalı araç bilirkişileri. DAT partneri, 48 saat altında randevu, suçsuz zarar görenler için 0 € (§249 BGB).",
-      "og_description": "Kamuya açık DAT dizininden DAT-Expert partnerleri · randevu <48 saat · §249 BGB uyarınca zarar görenler için 0 €"
+      "description": "Ülke genelinde kaza hasarları için bağımsız sertifikalı araç bilirkişileri. Sertifikalı partner, 48 saat altında randevu, suçsuz zarar görenler için 0 € (§249 BGB).",
+      "og_description": "Sertifikalı bilirkişiler · randevu <48 saat · §249 BGB uyarınca zarar görenler için 0 €"
     },
     "kfz_gutachter_ablauf": {
       "title": "Araç hasar tazminatı süreci — adım adım açıklandı",
@@ -4206,7 +4206,7 @@
     },
     "kfz_gutachter_gutachten_service": {
       "title": "Araç Ekspertiz Hizmeti — bağımsız, hızlı, karşı tarafın kusurunda 0 €",
-      "description": "Araç ekspertiz hizmeti: bağımsız hasar raporu (DAT/Audatex) artı servis, kiralık araç ve avukat koordinasyonu. 48 saatin altında randevu. Karşı tarafın kusurunda 0 € (§ 249 BGB).",
+      "description": "Araç ekspertiz hizmeti: bağımsız hasar raporu (Audatex) artı servis, kiralık araç ve avukat koordinasyonu. 48 saatin altında randevu. Karşı tarafın kusurunda 0 € (§ 249 BGB).",
       "og_title": "Araç Ekspertiz Hizmeti — tek elden koordineli",
       "og_description": "Bağımsız rapor + tüm tazminin koordinasyonu — karşı tarafın kusurunda ücretsiz."
     },
@@ -4301,7 +4301,7 @@
       {
         "titel": "Çevrimiçi varlık",
         "kicker": "Web sitesi & referanslar",
-        "text": "Hizmetleri, nitelikleri (DAT, BVSK, kamuca atanma) ve referansları gösteren net bir web sitesi güven yaratır. Her pazarlama önleminin açılış sayfasıdır — onsuz erişim boşa gider."
+        "text": "Hizmetleri, nitelikleri (BVSK, kamuca atanma) ve referansları gösteren net bir web sitesi güven yaratır. Her pazarlama önleminin açılış sayfasıdır — onsuz erişim boşa gider."
       },
       {
         "titel": "Platform dağıtımı",
@@ -4391,11 +4391,11 @@
     "breadcrumb_current": "Ekspertiz Hizmeti",
     "hero_h1": "Araç Ekspertiz Hizmeti — bağımsız, hızlı, ücretsiz",
     "hero_intro": "Bağımsız hasar raporundan ödemeye kadar — <strong>her şeyi koordine eden tek hizmet</strong>.",
-    "antwort_capsule": "<strong>Bir araç ekspertiz hizmeti tarafsız bir hasar raporu hazırlar ve tüm tazmin sürecini koordine eder.</strong> Rapor; onarım masraflarını, ticari değer kaybını, yeniden edinme ve sovtaj değerini DAT/Audatex’e göre belgeler. Kusuru olmayan bir kazada masrafı karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB) — bir teminat temliki (§ 398 BGB) yoluyla bilirkişi doğrudan onunla hesaplaşır, sizin için 0 €. Claimondo raporu, 48 saatin altında randevu, servis koordinasyonu ve hukuki takip ile birleştirir.",
+    "antwort_capsule": "<strong>Bir araç ekspertiz hizmeti tarafsız bir hasar raporu hazırlar ve tüm tazmin sürecini koordine eder.</strong> Rapor; onarım masraflarını, ticari değer kaybını, yeniden edinme ve sovtaj değerini Audatex’e göre belgeler. Kusuru olmayan bir kazada masrafı karşı tarafın mali sorumluluk sigortası üstlenir (§ 249 BGB) — bir teminat temliki (§ 398 BGB) yoluyla bilirkişi doğrudan onunla hesaplaşır, sizin için 0 €. Claimondo raporu, 48 saatin altında randevu, servis koordinasyonu ve hukuki takip ile birleştirir.",
     "aspekte": [
       {
         "titel": "Bağımsız hasar raporu",
-        "kicker": "DAT & Audatex",
+        "kicker": "Kalkulationssysteme",
         "text": "Sertifikalı, bağımsız bir bilirkişi hasar tutarını, onarım yolunu, ticari değer kaybını ayrıca yeniden edinme ve sovtaj değerini belgeler — mahkemede geçerli ve tarafsız, sigortanın çıkarına değil."
       },
       {
@@ -4418,7 +4418,7 @@
     "faqs": [
       {
         "frage": "Bir araç ekspertizi neleri kapsar?",
-        "antwort": "Onarım masrafı hesabı (DAT/Audatex), ticari değer kaybı, yeniden edinme değeri, pert halinde sovtaj değeri, fotoğraf belgelemesi, onarım yolu ve hasarın oluş şekli. Rapor, tüm hasar tazmininin temelidir."
+        "antwort": "Onarım masrafı hesabı (Audatex), ticari değer kaybı, yeniden edinme değeri, pert halinde sovtaj değeri, fotoğraf belgelemesi, onarım yolu ve hasarın oluş şekli. Rapor, tüm hasar tazmininin temelidir."
       },
       {
         "frage": "Ekspertiz hizmeti ne kadar tutar?",
@@ -4523,8 +4523,8 @@
       },
       {
         "titel": "Nitelik",
-        "kicker": "DAT, BVSK, ISO 17024",
-        "text": "Ciddi araç bilirkişileri DIN EN ISO 17024’e göre sertifikalıdır (DEKRA, KÜS, TÜV, DAT) ya da BVSK’da örgütlüdür. En yüksek seviye, IHK tarafından kamuca atanma ve yeminli kılınmadır (§ 36 GewO) — sınanmış, özel uzmanlık."
+        "kicker": "BVSK, ISO 17024",
+        "text": "Ciddi araç bilirkişileri DIN EN ISO 17024’e göre sertifikalıdır (DEKRA, KÜS, TÜV) ya da BVSK’da örgütlüdür. En yüksek seviye, IHK tarafından kamuca atanma ve yeminli kılınmadır (§ 36 GewO) — sınanmış, özel uzmanlık."
       },
       {
         "titel": "Bağımsızlık",
@@ -4549,7 +4549,7 @@
       },
       {
         "frage": "“Kamuca atanmış ve yeminli” ne demektir?",
-        "antwort": "Bu bilirkişiler, Sanayi ve Ticaret Odası (IHK) önünde özel uzmanlık sınavını geçmiş (§ 36 GewO) ve tarafsızlığa yemin etmiştir. En yüksek nitelik seviyesidir ve mahkemede özel bir ağırlığı vardır. Bunun yanında DIN EN ISO 17024 sertifikaları (DEKRA, KÜS, TÜV, DAT) ve BVSK üyeliği tanınmış kalite işaretleridir."
+        "antwort": "Bu bilirkişiler, Sanayi ve Ticaret Odası (IHK) önünde özel uzmanlık sınavını geçmiş (§ 36 GewO) ve tarafsızlığa yemin etmiştir. En yüksek nitelik seviyesidir ve mahkemede özel bir ağırlığı vardır. Bunun yanında DIN EN ISO 17024 sertifikaları (DEKRA, KÜS, TÜV) ve BVSK üyeliği tanınmış kalite işaretleridir."
       },
       {
         "frage": "Karşı tarafın sigortacısı bana bir eksper dayatabilir mi?",
@@ -4557,7 +4557,7 @@
       },
       {
         "frage": "Seçim yaparken nelere dikkat etmeliyim?",
-        "antwort": "Bağımsızlığa (karşı tarafın sigortacısıyla sözleşme olmaması), tanınmış bir sertifikaya ya da kamuca atanmaya, hesaplama güvenli yazılıma (DAT/Audatex) ve hızlı bölgesel erişilebilirliğe. Claimondo yalnızca yakınınızdaki bağımsız, nitelikli bilirkişileri yönlendirir — randevu genelde 48 saatin altında."
+        "antwort": "Bağımsızlığa (karşı tarafın sigortacısıyla sözleşme olmaması), tanınmış bir sertifikaya ya da kamuca atanmaya, hesaplama güvenli yazılıma (Audatex) ve hızlı bölgesel erişilebilirliğe. Claimondo yalnızca yakınınızdaki bağımsız, nitelikli bilirkişileri yönlendirir — randevu genelde 48 saatin altında."
       }
     ],
     "crosslinks_h2": "Konuyla ilgili daha fazlası",

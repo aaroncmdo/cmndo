@@ -107,20 +107,12 @@ export function organizationSchema(opts?: {
       'Wertminderung',
       'BVSK-Honorartabelle',
       'Sicherungsabtretung §398 BGB',
-      'DAT-Expert-Sachverständige',
+      'Kfz-Sachverständige',
       'Verkehrsrecht',
       'Haftpflichtschaden',
       'Nutzungsausfall',
       'Mietwagen-Anspruch',
       'BGH-Rechtsprechung Verkehrsunfall',
-    ],
-    // Vertrauenssignale: bekannte Partner als Schema-Verknüpfung
-    memberOf: [
-      {
-        '@type': 'Organization',
-        name: 'DAT Expert Partner Netzwerk',
-        url: 'https://www.dat.de/sachverstaendige/',
-      },
     ],
     // sameAs: externe verifizierbare Profile für GEO/Knowledge-Graph-Linkage.
     // Wikidata-Item Q139954250 verankert die Entität für AI/Knowledge-Graph
@@ -211,7 +203,7 @@ export function stadtLegalServiceSchema(
     telephone: PHONE_E164,
     priceRange: '€€',
     serviceType: 'Kfz-Schadensgutachten',
-    description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+    description: `Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden ${s.h1Anker}. Partner-Gutachter aus dem Netzwerk, Termin in unter 48 Stunden, 0 € für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
     areaServed,
     geo: { '@type': 'GeoCoordinates', latitude: s.lat, longitude: s.lng },
     hasOfferCatalog: {

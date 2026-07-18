@@ -1,7 +1,7 @@
 import { ShieldCheck, Award, Scale } from 'lucide-react'
 
 // AAR-883: Shared Trust-Block für Conversion-Pages. Drei Partner-Pillars
-// (DAT, BVSK, Partnerkanzlei für Verkehrsrecht) + optionale Stat-Strip. Schließt CORE-EEAT-R-
+// (Sachverständige, BVSK, Partnerkanzlei für Verkehrsrecht) + optionale Stat-Strip. Schließt CORE-EEAT-R-
 // Dimension auf Pages mit Trust-Lücke (vorher unter 70 im 13.05.2026-Audit).
 //
 // Bewusst kein aggregateRating — wird erst hinzugefügt wenn echte
@@ -13,7 +13,7 @@ import { ShieldCheck, Award, Scale } from 'lucide-react'
 type Stat = { wert: string; label: string }
 
 type Props = {
-  /** Optionale Stat-Zeile unter den Partner-Pills (z. B. „DAT-Partner-Netzwerk"). */
+  /** Optionale Stat-Zeile unter den Partner-Pills (z. B. „Partner-Netzwerk"). */
   stats?: Stat[]
   /** Heading über dem Block. Default: „Mit anerkannten Partnern". */
   heading?: string
@@ -22,9 +22,9 @@ type Props = {
 const PARTNER = [
   {
     icon: ShieldCheck,
-    title: 'DAT Expert Partner',
-    subtitle: 'Sachverständigen-Netzwerk',
-    url: 'https://www.dat.de/sachverstaendige/',
+    title: 'Zertifizierte Sachverständige',
+    subtitle: 'Unabhängig & gerichtsfest',
+    url: 'https://claimondo.de/gutachter-finden',
   },
   {
     icon: Award,
