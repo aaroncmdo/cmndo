@@ -30,7 +30,6 @@
     "src/app/gutachter/reklamationen/ReklamationenClient.tsx",
     "src/app/gutachter/tasks/page.tsx",
     "src/app/kanzlei/termin/TerminBuchungClient.tsx",
-    "src/app/kunde/termine/KundeTermineClient.tsx",
     "src/app/mitarbeiter/page.tsx",
     "src/app/mitarbeiter/reklamationen/page.tsx",
     "src/app/mitarbeiter/tasks/page.tsx",
@@ -41,6 +40,7 @@
     "src/components/kunde/KundeJetztZuTunCard.tsx",
     "src/components/live-ops/DeadPinDrawer.tsx",
     "src/components/offline/OutboxBadge.tsx",
-    "src/components/termine/TerminListeClient.tsx"
+    "src/components/termine/TerminListeClient.tsx",
+    "src/components/termine/TermineHub.tsx"
   ]
 }
