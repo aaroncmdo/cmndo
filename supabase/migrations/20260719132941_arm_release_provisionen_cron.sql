@@ -39,11 +39,19 @@ EXCEPTION WHEN OTHERS THEN
 END
 $fn$;
 
+-- Replay-Toleranz (Preview-Chain-Fix 17.07., Muster wie 20260628195809 / 20260529212846):
+-- pg_cron ist cluster-weit nur auf Prod/Staging installiert, NICHT in Supabase-Preview-Branches /
+-- From-Scratch-Replays -> Schema "cron" fehlt dort -> ungeguardetes cron.job/cron.schedule bricht
+-- den Replay (SQLSTATE 3F000). Auf Prod (cron vorhanden) 1:1 unveraendert -- der applizierte
+-- Zustand (jobid 22, '0 2 * * *') ist identisch, der Guard ist dort ein No-op.
 DO $$
 BEGIN
-  IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'release_provisionen') THEN
-    PERFORM cron.unschedule('release_provisionen');
+  IF EXISTS (SELECT 1 FROM pg_namespace WHERE nspname = 'cron') THEN
+    IF EXISTS (SELECT 1 FROM cron.job WHERE jobname = 'release_provisionen') THEN
+      PERFORM cron.unschedule('release_provisionen');
+    END IF;
+    PERFORM cron.schedule('release_provisionen', '0 2 * * *', $cron$SELECT public.cron_trigger_release_provisionen()$cron$);
+  ELSE
+    RAISE NOTICE 'pg_cron nicht installiert - Cron-Job release_provisionen uebersprungen (Preview/lokal)';
   END IF;
 END $$;
-
-SELECT cron.schedule('release_provisionen', '0 2 * * *', 'SELECT public.cron_trigger_release_provisionen()');
