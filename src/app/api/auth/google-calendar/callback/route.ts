@@ -10,8 +10,9 @@
 //
 // sachverstaendige.gcal_connected wird weiter gesetzt — als UI-Mirror-Flag
 // für die einstellungen-Seite. Die Token-Spalten gcal_access_token,
-// gcal_refresh_token, gcal_token_expiry werden NICHT mehr beschrieben und
-// können später per Migration gedroppt werden.
+// gcal_refresh_token, gcal_token_expiry sind per Mig 20260719205103 GEDROPPT
+// (dormant + authenticated-lesbar = Leak-Klasse); die OAuth-Tokens leben in
+// profiles_oauth_secrets (service-role-only).
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'

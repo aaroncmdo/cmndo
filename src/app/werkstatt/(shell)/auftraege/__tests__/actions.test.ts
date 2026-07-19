@@ -21,6 +21,11 @@ const h = vi.hoisted(() => ({
     claim_id: 'c1',
     reparatur_werkstatt_id: 'ws1',
   } as { claim_id: string; reparatur_werkstatt_id: string | null } | null,
+  // Spec E 1a: claims-Gate-Read (schlageWerkstattTerminVor). Default OFFEN (direkt).
+  gateRow: {
+    data: { reparatur_auftrag_modus: 'direkt', kva_quelle: null, reparatur_freigegeben_am: null, kva_abgelehnt_am: null } as Record<string, unknown> | null,
+    error: null as { message: string } | null,
+  },
 }))
 
 vi.mock('@/lib/auth/portal-guard', () => ({
@@ -54,6 +59,8 @@ vi.mock('@/lib/supabase/admin', () => ({
               limit: vi.fn().mockImplementation(async () => h.adminSelectResult),
             })),
           })),
+          // Spec E 1a: Gate-Read select('...').eq('id').maybeSingle()
+          maybeSingle: vi.fn().mockImplementation(async () => h.gateRow),
         })),
       })),
       update: vi.fn(() => ({
@@ -77,6 +84,7 @@ beforeEach(() => {
   h.adminUpdateResult = { error: null }
   h.adminInsertResult = { error: null }
   h.werkstattAuftrag = { claim_id: 'c1', reparatur_werkstatt_id: 'ws1' }
+  h.gateRow = { data: { reparatur_auftrag_modus: 'direkt', kva_quelle: null, reparatur_freigegeben_am: null, kva_abgelehnt_am: null }, error: null }
 })
 
 describe('bestaetigeReparaturtermin', () => {
@@ -155,6 +163,34 @@ describe('schlageWerkstattTerminVor', () => {
     expect(r.ok).toBe(true)
     expect(h.notify).toHaveBeenCalledTimes(1)
     expect(h.notify.mock.calls[0][0].ereignis).toBe('werkstatt_vorschlag')
+  })
+
+  // Spec E 1a: Termin-Gate ZU → kein Vorschlag, kein Notify.
+  it('Gate ZU (kva_erst ohne KVA) -> ok:false (kva_ausstehend), kein Notify', async () => {
+    h.gateRow = { data: { reparatur_auftrag_modus: 'kva_erst', kva_quelle: null, reparatur_freigegeben_am: null, kva_abgelehnt_am: null }, error: null }
+    const { schlageWerkstattTerminVor } = await import('../actions')
+    const r = await schlageWerkstattTerminVor('c1', '2026-07-20T10:00')
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/kostenvoranschlag ausstehend/i)
+    expect(h.notify).not.toHaveBeenCalled()
+  })
+
+  it('Gate ZU (Werkstatt-KVA ohne Freigabe) -> ok:false (wartet_freigabe)', async () => {
+    h.gateRow = { data: { reparatur_auftrag_modus: 'kva_erst', kva_quelle: 'werkstatt', reparatur_freigegeben_am: null, kva_abgelehnt_am: null }, error: null }
+    const { schlageWerkstattTerminVor } = await import('../actions')
+    const r = await schlageWerkstattTerminVor('c1', '2026-07-20T10:00')
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/freigabe/i)
+    expect(h.notify).not.toHaveBeenCalled()
+  })
+
+  it('Gate OFFEN (Kunde-KVA) -> ok:true', async () => {
+    h.gateRow = { data: { reparatur_auftrag_modus: 'kva_erst', kva_quelle: 'kunde', reparatur_freigegeben_am: null, kva_abgelehnt_am: null }, error: null }
+    h.adminSelectResult = { data: [], error: null }
+    const { schlageWerkstattTerminVor } = await import('../actions')
+    const r = await schlageWerkstattTerminVor('c1', '2026-07-20T10:00')
+    expect(r.ok).toBe(true)
+    expect(h.notify).toHaveBeenCalledTimes(1)
   })
 
   it('kein claimId -> ok:false, kein Notify', async () => {
