@@ -6,7 +6,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // loginAt          -> userId -> last_sign_in_at (fehlt = nie eingeloggt)
 const h = vi.hoisted(() => ({
   assertCronAuth: vi.fn(() => true),
-  createLinkedTask: vi.fn(async () => ({ task_id: 't-neu' })),
+  // Parameter-Typ explizit: sonst ist mock.calls ein leeres Tupel und calls[0][0]
+  // existiert typ-seitig nicht (TS2493/TS2352 im CI-Typecheck).
+  createLinkedTask: vi.fn(async (_params: Record<string, unknown>) => ({ task_id: 't-neu' })),
   findStuckPartnerAccounts: vi.fn(),
   adminState: {
     vorhandeneCodes: [] as string[],
@@ -102,7 +104,7 @@ describe('cron partner-aktivierung-nachfassen', () => {
     const body = await res.json()
     expect(body).toMatchObject({ geprueft: 1, tasks_erstellt: 1, uebersprungen_cap: 0 })
     expect(h.createLinkedTask).toHaveBeenCalledTimes(1)
-    const arg = h.createLinkedTask.mock.calls[0][0] as Record<string, unknown>
+    const arg = h.createLinkedTask.mock.calls[0][0]
     expect(arg.task_code).toBe('partner-aktivierung:u1')
     expect(arg.empfaenger_rolle).toBe('admin')
     expect(arg.prioritaet).toBe('normal')
