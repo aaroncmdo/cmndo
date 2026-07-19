@@ -27,6 +27,7 @@ import { extrahiereKvaAusBase64 } from '@/lib/ai/kostenvoranschlag-ocr'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { resolveWunschterminIso } from '@/app/flow/[token]/wunschtermin'
+import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // upsertWerkstattVorschlag (modul-lokal, NICHT exportiert)
@@ -167,6 +168,14 @@ export async function bestaetigeReparaturtermin(
     })
   } catch (err) {
     console.warn('[SP2 T5] Kunden-Notify bestaetigt fehlgeschlagen (non-fatal):', err)
+  }
+
+  // Reparatur-Cursor: Werkstatt bestaetigt den Termin -> reparatur-laeuft (reduced-repair, non-fatal,
+  // forward-only, abrechnungsweg-gegated im Helper). Gegenstueck zum Kunde-akzeptiereWerkstattTermin
+  // (#4567): so zieht der Cursor auch bei werkstatt-seitiger Bestaetigung mit, nicht erst beim Abschluss-Walk.
+  const cursorFallId = await fallIdForClaim((data as unknown as { claim_id: string }).claim_id)
+  if (cursorFallId) {
+    await advanceReparaturCursorTo(cursorFallId, 'reparatur-laeuft', { grund: 'reparaturtermin_bestaetigt' })
   }
 
   return { ok: true }

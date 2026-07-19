@@ -51,7 +51,14 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   const hEarly = await headers()
   const pathnameEarly = hEarly.get('x-pathname') ?? hEarly.get('x-next-url') ?? hEarly.get('x-invoke-path') ?? ''
   const isPublicReTermin = pathnameEarly.includes('/kunde/re-termin/')
-  if (isPublicReTermin) {
+  // KFZ-179: /kunde/termin/[token] (SV-Live-Tracking) ist ebenfalls eine oeffentliche
+  // Magic-Link-Seite — proxy.ts allowlistet '/kunde/termin' als isPublicPath, der
+  // Empfaenger (SMS/WhatsApp beim Losfahren) hat keinen Login. Ohne diesen Bypass fing
+  // requirePortalAccess den anon-Request ab → /login (Smoke f99, 19.07.). Trailing-Slash
+  // ist wichtig: '/kunde/termin/' matcht NICHT '/kunde/re-termin/' (anderer Praefix) und
+  // NICHT '/kunde/termine' (Listen-Page, endet auf 'e' statt '/').
+  const isPublicTermin = pathnameEarly.includes('/kunde/termin/')
+  if (isPublicReTermin || isPublicTermin) {
     return <>{children}</>
   }
 
