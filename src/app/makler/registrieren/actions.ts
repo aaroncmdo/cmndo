@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
-import { anlegeMaklerKern } from '@/lib/makler/anlege-makler'
+import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
 import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 
 // Offener Self-Signup eines Maklers (Saeule B). Erzeugt SOFORT einen aktiven Makler +
@@ -99,24 +99,27 @@ export async function registriereMaklerSelf(
     }
   }
 
-  // 4. Anlage (Auth + profiles[rolle=makler] + makler[status=aktiv] + Promo). aktiviertVon=null = Self-Signup.
-  const result = await anlegeMaklerKern(admin, {
+  // 4. Anlage (Auth + profiles[rolle=makler] + makler[status=aktiv] + Promo + Staffel + Phone-Login).
+  //    EIN Anlage-Kern fuer alle Partner-Rollen (anlegePartnerKern) — der frueher separate
+  //    anlegeMaklerKern war ein Spiegel davon und ist aufgeloest. aktiviertVon=null = Self-Signup.
+  const result = await anlegePartnerKern(admin, 'makler', {
     firma,
     ansprechpartnerVorname: vorname,
     ansprechpartnerNachname: nachname,
     email,
     telefon,
-    adresseStrasse: null,
-    adressePlz,
-    adresseOrt,
-    provisionKomplett,
-    provisionGutachter,
-    sponsorMaklerId,
+    plz: adressePlz,
+    ort: adresseOrt,
     aktiviertVon: null,
-    versicherungId,
-    maklerpoolId,
-    rechtsform,
-    istKleinunternehmer,
+    rollenDetails: {
+      provision_betrag_komplett_netto: provisionKomplett,
+      provision_betrag_nur_gutachter_netto: provisionGutachter,
+      versicherung_id: versicherungId,
+      maklerpool_id: maklerpoolId,
+      rechtsform,
+      ist_kleinunternehmer: istKleinunternehmer,
+      sponsor_makler_id: sponsorMaklerId,
+    },
   })
   if (!result.ok) {
     // M1: keine rohen DB-Fehler an den oeffentlichen Client.
@@ -133,7 +136,7 @@ export async function registriereMaklerSelf(
     const { data: pc } = await admin
       .from('promotion_codes')
       .select('code')
-      .eq('makler_id', result.maklerId)
+      .eq('makler_id', result.partnerId)
       .eq('aktiv', true)
       .order('erstellt_am', { ascending: true })
       .limit(1)
