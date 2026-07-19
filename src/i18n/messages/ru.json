@@ -4629,7 +4629,8 @@
         "empty": "Запланированных встреч нет",
         "kommend": "Предстоящие",
         "verlauf": "История",
-        "reparatur": "Записи на ремонт"
+        "reparatur": "Записи на ремонт",
+        "offen": "Идёт согласование даты"
       },
       "toggle": {
         "liste": "Список",
@@ -4701,6 +4702,17 @@
         "gegenvorschlagAntworten": "Эксперт предложил новое время — ответить →",
         "terminVerwalten": "Управлять встречей или перенести →",
         "zurFallakte": "К делу"
+      },
+      "typ": {
+        "besichtigung": "Осмотр",
+        "nachbesichtigung": "Повторный осмотр",
+        "reparatur": "Ремонт",
+        "beratung": "Консультация",
+        "konfrontation": "Очная ставка"
+      },
+      "actions": {
+        "verschieben": "Перенести",
+        "absagen": "Отменить"
       }
     },
     "tracking": {
