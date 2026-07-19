@@ -340,6 +340,18 @@ CI fährt `npm run check:knip -- --ratchet`. Die Drift-Bremse blockt **NEUE** un
 Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 <!-- END:dead-code-gate -->
 
+<!-- BEGIN:test-gate -->
+# Test-Gate (vitest Ratchet)
+
+CI (`ci.yml`) faehrt `build` + ~20 Checks (typecheck/lint/alle Ratchets), aber **NIE `vitest run`** — das Script `test = vitest run` existiert, wird in CI nur nie aufgerufen. Dadurch sammelt `staging` **still Test-Breakage** an (15.07.: 15 rote Files; 19.07. gemessen: 19 Files / 31 Tests — wachsend), die <30 Min spaeter auf prod steht. `build`/`tsc` fangen das nicht (rote Unit-Tests brechen den Next-Build nicht).
+
+CI faehrt jetzt einen **parallelen `vitest`-Job** (`npm run check:vitest -- --ratchet`, auf PRs + push, **kein `needs`** → laeuft parallel zum `build`, verlaengert die CI-Wall-Clock also nicht). Er blockt **NEUE** rot fehlschlagende Test-**Files** gegen `scripts/vitest-baseline.json`. **File-level** (nicht Test-level) = robust gegen per-Test-Flakiness; der Lauf nutzt `--retry=2` gegen transiente Flakes. Lokal (ohne Flag) `--warn` (exit 0, listet alle roten Files).
+
+**Bestand (grandfathered)** wird per **Boy-Scout** abgebaut: wer ein rotes File gruen macht, senkt die Baseline mit `npm run check:vitest -- --update-baseline`. Ein **echter Flake** (nicht reproduzierbar rot) bleibt in der Baseline **mit Begruendung im PR** — nicht die Baseline fuer echte Regressions aufblaehen.
+
+Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB-Zugriff** — die vitest-Suite ist Unit/pure (kein `--env-file`), der Job braucht keine DB-Secrets und saettigt daher **nicht** den prod-Pool (anders als die `check:rls-*`-Checks).
+<!-- END:test-gate -->
+
 <!-- BEGIN:redirect-stub-gate -->
 # Redirect-Stub-Gate (Ratchet)
 
