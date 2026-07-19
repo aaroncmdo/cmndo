@@ -5,7 +5,9 @@ import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 import { enablePhoneLogin } from '@/lib/auth/phone-login'
 
 // Konsolidierter Kern der Partner-Account-Anlage (makler | sachverstaendiger | werkstatt).
-// Spiegelt anlegeMaklerKern: Auth-User (Random-PW + force_password_change) ->
+// EINZIGER Anlage-Kern aller Partner-Rollen — der frueher parallele, gespiegelte
+// anlegeMaklerKern (nur makler) ist aufgeloest, der Self-Signup laeuft jetzt hierueber.
+// Ablauf: Auth-User (Random-PW + force_password_change) ->
 // profiles(rolle=<rolle>) -> Rollen-Row per switch(rolle) -> Rollback-Cascade bei Fehler.
 // KEIN 'use server' (AAR-664: importierbar von Server-Actions UND convertPartnerLead).
 // Caller-Verantwortung: Validierung, Email-Dedupe, Rate-Limit, Magic-Link/Notify.
@@ -131,6 +133,10 @@ export async function anlegePartnerKern(
       if (maklerRechtsform) maklerInsert.rechtsform = maklerRechtsform
       const maklerKleinunternehmer = detailBoolean(input.rollenDetails, 'ist_kleinunternehmer')
       if (maklerKleinunternehmer !== null) maklerInsert.ist_kleinunternehmer = maklerKleinunternehmer
+      // AAR-empfehlung: direkter Werber (Empfehlungsstruktur). Nur beim Referral-Signup gesetzt;
+      // ohne Werber bleibt die Spalte NULL (= kein Sponsor, kein Override).
+      const maklerSponsor = detailString(input.rollenDetails, 'sponsor_makler_id')
+      if (maklerSponsor) maklerInsert.sponsor_makler_id = maklerSponsor
 
       const { data: m, error: mErr } = await admin
         .from('makler')

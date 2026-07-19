@@ -10,8 +10,9 @@ let sponsorRow: unknown = null // Werber-Aufloesung: makler-Sponsor-Row
 vi.mock('@/lib/rate-limit/ip-rate-limit', () => ({
   checkIpRateLimit: (...a: unknown[]) => rateLimitMock(...a),
 }))
-vi.mock('@/lib/makler/anlege-makler', () => ({
-  anlegeMaklerKern: (...a: unknown[]) => anlegeMock(...a),
+// EIN Anlage-Kern fuer alle Partner-Rollen — der frueher separate anlegeMaklerKern ist aufgeloest.
+vi.mock('@/lib/partner/anlege-partner', () => ({
+  anlegePartnerKern: (...a: unknown[]) => anlegeMock(...a),
 }))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({ auth: { resetPasswordForEmail: resetPwMock } }),
@@ -74,9 +75,18 @@ function fd(overrides: Record<string, string> = {}): FormData {
   return f
 }
 
+// anlegePartnerKern(admin, rolle, input) -> input ist arg[2]; makler-spezifische
+// Felder liegen in input.rollenDetails (snake_case = DB-Spaltennamen).
+function anlageInput(): Record<string, unknown> {
+  return anlegeMock.mock.calls[0][2] as Record<string, unknown>
+}
+function anlageDetails(): Record<string, unknown> {
+  return (anlageInput().rollenDetails ?? {}) as Record<string, unknown>
+}
+
 beforeEach(() => {
   rateLimitMock.mockReset().mockResolvedValue({ allowed: true, noIp: false })
-  anlegeMock.mockReset().mockResolvedValue({ ok: true, userId: 'u1', maklerId: 'm1', password: 'pw' })
+  anlegeMock.mockReset().mockResolvedValue({ ok: true, userId: 'u1', partnerId: 'm1', password: 'pw' })
   resetPwMock.mockReset().mockResolvedValue({})
   dedupeRow = null
   promoMaklerId = null
@@ -128,25 +138,27 @@ describe('registriereMaklerSelf', () => {
     expect(anlegeMock).not.toHaveBeenCalled()
   })
 
-  it('Happy-Path: anlegeMaklerKern mit aktiviertVon=null + Default-Provision; ok + code', async () => {
+  it('Happy-Path: anlegePartnerKern(rolle=makler), aktiviertVon=null + Default-Provision; ok + code', async () => {
     const res = await registriereMaklerSelf(fd())
     expect(res.ok).toBe(true)
     if (res.ok) expect(res.code).toBe('MK-X')
-    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
-    expect(arg.aktiviertVon).toBeNull()
-    expect(arg.provisionKomplett).toBe(100)
-    expect(arg.firma).toBe('Muster GmbH')
+    // Rolle explizit — der Kern ist rollen-generisch.
+    expect(anlegeMock.mock.calls[0][1]).toBe('makler')
+    expect(anlageInput().aktiviertVon).toBeNull()
+    expect(anlageInput().firma).toBe('Muster GmbH')
+    expect(anlageInput().plz).toBe('50667')
+    expect(anlageDetails().provision_betrag_komplett_netto).toBe(100)
+    expect(anlageDetails().provision_betrag_nur_gutachter_netto).toBe(50)
     // USt-relevante Felder werden durchgereicht; Checkbox nicht gesetzt -> explizit false
     // (= regelbesteuert), NICHT null ("unbekannt" wuerde die USt-Berechnung blockieren).
-    expect(arg.rechtsform).toBe('GmbH')
-    expect(arg.istKleinunternehmer).toBe(false)
+    expect(anlageDetails().rechtsform).toBe('GmbH')
+    expect(anlageDetails().ist_kleinunternehmer).toBe(false)
   })
 
-  it('Kleinunternehmer-Checkbox angehakt -> istKleinunternehmer=true', async () => {
+  it('Kleinunternehmer-Checkbox angehakt -> ist_kleinunternehmer=true', async () => {
     const res = await registriereMaklerSelf(fd({ kleinunternehmer: 'true' }))
     expect(res.ok).toBe(true)
-    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
-    expect(arg.istKleinunternehmer).toBe(true)
+    expect(anlageDetails().ist_kleinunternehmer).toBe(true)
   })
 
   it('werber = aktiver Promo-Code -> sponsorMaklerId + geerbte Saetze', async () => {
@@ -160,10 +172,9 @@ describe('registriereMaklerSelf', () => {
     }
     const res = await registriereMaklerSelf(fd({ werber: 'MK-WERB' }))
     expect(res.ok).toBe(true)
-    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
-    expect(arg.sponsorMaklerId).toBe('sponsor-1')
-    expect(arg.provisionKomplett).toBe(120)
-    expect(arg.provisionGutachter).toBe(70)
+    expect(anlageDetails().sponsor_makler_id).toBe('sponsor-1')
+    expect(anlageDetails().provision_betrag_komplett_netto).toBe(120)
+    expect(anlageDetails().provision_betrag_nur_gutachter_netto).toBe(70)
   })
 
   it('werber inaktiv (provision_aktiv=false) -> kein Sponsor, Default 100/50', async () => {
@@ -177,16 +188,14 @@ describe('registriereMaklerSelf', () => {
     }
     const res = await registriereMaklerSelf(fd({ werber: 'MK-WERB' }))
     expect(res.ok).toBe(true)
-    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
-    expect(arg.sponsorMaklerId).toBeNull()
-    expect(arg.provisionKomplett).toBe(100)
+    expect(anlageDetails().sponsor_makler_id).toBeNull()
+    expect(anlageDetails().provision_betrag_komplett_netto).toBe(100)
   })
 
   it('kein werber -> kein Sponsor, Default 100/50', async () => {
     const res = await registriereMaklerSelf(fd())
     expect(res.ok).toBe(true)
-    const arg = anlegeMock.mock.calls[0][1] as Record<string, unknown>
-    expect(arg.sponsorMaklerId).toBeNull()
-    expect(arg.provisionKomplett).toBe(100)
+    expect(anlageDetails().sponsor_makler_id).toBeNull()
+    expect(anlageDetails().provision_betrag_komplett_netto).toBe(100)
   })
 })
