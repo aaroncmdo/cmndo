@@ -340,6 +340,18 @@ CI fährt `npm run check:knip -- --ratchet`. Die Drift-Bremse blockt **NEUE** un
 Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 <!-- END:dead-code-gate -->
 
+<!-- BEGIN:test-gate -->
+# Test-Gate (vitest Ratchet)
+
+CI (`ci.yml`) faehrt `build` + ~20 Checks (typecheck/lint/alle Ratchets), aber **NIE `vitest run`** — das Script `test = vitest run` existiert, wird in CI nur nie aufgerufen. Dadurch sammelt `staging` **still Test-Breakage** an (15.07.: 15 rote Files; 19.07. gemessen: 19 Files / 31 Tests — wachsend), die <30 Min spaeter auf prod steht. `build`/`tsc` fangen das nicht (rote Unit-Tests brechen den Next-Build nicht).
+
+CI faehrt jetzt einen **parallelen `vitest`-Job** (`npm run check:vitest -- --ratchet`, auf PRs + push, **kein `needs`** → laeuft parallel zum `build`, verlaengert die CI-Wall-Clock also nicht). Er blockt **NEUE** rot fehlschlagende Test-**Files** gegen `scripts/vitest-baseline.json`. **File-level** (nicht Test-level) = robust gegen per-Test-Flakiness; der Lauf nutzt `--retry=2` gegen transiente Flakes. Lokal (ohne Flag) `--warn` (exit 0, listet alle roten Files).
+
+**Bestand (grandfathered)** wird per **Boy-Scout** abgebaut: wer ein rotes File gruen macht, senkt die Baseline mit `npm run check:vitest -- --update-baseline`. Ein **echter Flake** (nicht reproduzierbar rot) bleibt in der Baseline **mit Begruendung im PR** — nicht die Baseline fuer echte Regressions aufblaehen.
+
+Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB-Zugriff** — die vitest-Suite ist Unit/pure (kein `--env-file`), der Job braucht keine DB-Secrets und saettigt daher **nicht** den prod-Pool (anders als die `check:rls-*`-Checks).
+<!-- END:test-gate -->
+
 <!-- BEGIN:redirect-stub-gate -->
 # Redirect-Stub-Gate (Ratchet)
 
@@ -432,6 +444,20 @@ CI faehrt `npm run check:anon-reachability -- --ratchet`. Es blockt **NEUE** ano
 **Fix bei rotem Ratchet:** den offenen Zweig an `auth.uid()`/einen `is_*()`-Helper binden ODER — wenn kein anon-Consumer existiert (Consumer-Grep: alle Zugriffe `createAdminClient`/service_role?) — den anon-SELECT-Grant der Tabelle entziehen **und** die leaky Policy droppen (Defense-in-Depth, Muster Mig `20260716200848`). Neuer legitimer uid-Helper fehlt in der Token-Liste → `UID_GATE_TOKENS` ergaenzen (mit Begruendung), nicht die Baseline aufblaehen.
 
 **Baseline = 0** (nach dem gfa-Fix ist keine anon-Policy mehr reachable-ohne-uid auf einer PII-Tabelle; die 5 verbleibenden PII-Tabellen mit anon-Grant — aircall_calls/cold_mail_*/twilio_status_events/vehicles — sind alle `auth.uid()`/`is_staff()`-gated). Vollstaendige Enumeration + Fund: `COORDINATION-anon-pii-leak-gutachter-finder-anfragen` (Memory).
+
+# Write-Reachability-Gate (Ratchet)
+
+**Eine PERMISSIVE `authenticated`-WRITE-Policy (INSERT/UPDATE/DELETE) darf keinen top-level-OR-Zweig haben, der OHNE `auth.uid()`/Scoping-Helper erfuellbar ist — sonst kann JEDER eingeloggte User fremde/beliebige Zeilen schreiben (cross-user/cross-tenant Write).**
+
+Das WRITE-Gegenstueck zum `check:anon-reachability` (SELECT/true-anon-Achse). Zwei orthogonale Write-Achsen: die WURZEL (#4555) macht authenticated-Write per **Default-Privileg** default-closed (GRANT-Achse — neue Tabellen granten authenticated kein Write). Diese Achse ist die **POLICY-Reachability**: eine EXPLIZIT gegrantete Tabelle mit einer ungescopten Write-Policy laesst jeden authenticated-User schreiben. Read-seitig ist die Klasse durch `kanzlei_faelle` belegt (jeder `kanzlei`-User liest alle Faelle — [[audit-kanzlei-cross-tenant-scoping-2026-07-19]]); write-seitig aktuell **0 echte Lecks** (alle 245 authenticated-Write-Policies sind uid-/rollen-/firma-gescopt oder bewusst broad).
+
+CI faehrt `npm run check:auth-write-reachability -- --ratchet`. Es blockt **NEUE** reachable authenticated-Write-Policies gegen `scripts/authenticated-write-reachability-baseline.json`. Lokal (ohne Flag) `--warn`; `--update-baseline` senkt nach Boy-Scout. Backing-RPC `audit_authenticated_write_reachable()` (service_role-only, read-only, Mig `20260719132920`) liefert alle PERMISSIVE authenticated-Write-Policies + den reachability-relevanten Ausdruck (INSERT→with_check der die neue Zeile gatet; UPDATE/DELETE→qual der gatet WELCHE Zeilen). Pure Heuristik: `scripts/lib/authenticated-write-scan.mjs` (unit-getestet), reuse `topLevelOrBranches` + `UID_GATE_TOKENS` aus `anon-reachability-scan.mjs`. Nur bei SQL-Diff aktiv (Prod-Pool-Schonung).
+
+**⚠ Wichtiger Unterschied zum anon-Scanner:** KEIN anon-Anti-Pattern `auth.uid() IS NULL`. Das ist ein ANON-Konzept (Zweig oeffnet fuer true-anon) und wuerde beim authenticated-Fall greedy fehlmatchen, sobald ein Zweig `auth.uid()` … `<spalte> IS NULL` enthaelt (`kundenbetreuer_id IS NULL`, `fall_id IS NULL`) → massenhaft FP auf real gescopten claims/tasks-Policies. Fuer authenticated zaehlt nur: enthaelt der Zweig einen Gate-Token? `WRITE_GATE_TOKENS` = anon-`UID_GATE_TOKENS` + `is_kundenbetreuer`/`is_sv`/`auth_flottenmanager_firma_id`/`auth_user_firma_id`.
+
+**Baseline = 2** (bewusste oeffentliche Broad-Writes, KEIN Leck): `gutachter_finder_anfragen__b1ins` (`source IS NULL` = nativer anonymer Finder-Submit) + `__b1upd_au` (`source IS NULL AND status='entwurf'` = anonymer Entwurf-Edit). Beide sind public-Submit-Flows ohne eingeloggten Owner.
+
+**Fix bei rotem Ratchet:** den offenen Zweig an `auth.uid()`/einen Scoping-Helper binden (Muster: `makler.user_id = auth.uid()` bzw. `firma_id = auth_user_firma_id()`) ODER den authenticated-Write-Grant der Tabelle entziehen. Bewusster oeffentlicher Broad-Write → Baseline via `--update-baseline`. Neuer legitimer Scoping-Helper fehlt → `WRITE_GATE_TOKENS` in `scripts/lib/authenticated-write-scan.mjs` ergaenzen (mit Begruendung), nicht die Baseline aufblaehen.
 
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 
