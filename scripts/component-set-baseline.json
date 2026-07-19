@@ -66,7 +66,6 @@
     "src/app/kunde/profil/page.tsx",
     "src/app/kunde/re-termin/[token]/page.tsx",
     "src/app/kunde/termin/[token]/KundeAnfahrtCard.tsx",
-    "src/app/kunde/termine/KundeTermineClient.tsx",
     "src/app/login/2fa/TotpChallengeClient.tsx",
     "src/app/login/2fa/TwoFaClient.tsx",
     "src/app/login/LoginClient.tsx",
@@ -127,6 +126,7 @@
     "src/components/offline/DeadLetterDialog.tsx",
     "src/components/support/SupportChat.tsx",
     "src/components/tasks/TaskAnlegenModal.tsx",
-    "src/components/termine/TerminListeClient.tsx"
+    "src/components/termine/TerminListeClient.tsx",
+    "src/components/termine/TermineHub.tsx"
   ]
 }

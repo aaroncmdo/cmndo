@@ -4629,7 +4629,8 @@
         "empty": "Şu an planlanmış randevu yok",
         "kommend": "Yaklaşan",
         "verlauf": "Geçmiş",
-        "reparatur": "Onarım randevuları"
+        "reparatur": "Onarım randevuları",
+        "offen": "Randevu ayarlanıyor"
       },
       "toggle": {
         "liste": "Liste",
@@ -4701,6 +4702,17 @@
         "gegenvorschlagAntworten": "Bilirkişi yeni bir randevu önerdi — şimdi yanıtla →",
         "terminVerwalten": "Randevuyu yönet veya ertele →",
         "zurFallakte": "Dosyaya git"
+      },
+      "typ": {
+        "besichtigung": "Ekspertiz",
+        "nachbesichtigung": "Yeniden ekspertiz",
+        "reparatur": "Onarım",
+        "beratung": "Danışma",
+        "konfrontation": "Yüzleştirme"
+      },
+      "actions": {
+        "verschieben": "Ertele",
+        "absagen": "İptal et"
       }
     },
     "tracking": {

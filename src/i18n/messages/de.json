@@ -4769,7 +4769,8 @@
         "empty": "Aktuell keine Termine geplant",
         "kommend": "Kommend",
         "verlauf": "Verlauf",
-        "reparatur": "Reparaturtermine"
+        "reparatur": "Reparaturtermine",
+        "offen": "Terminvereinbarung läuft"
       },
       "toggle": {
         "liste": "Liste",
@@ -4841,6 +4842,17 @@
         "gegenvorschlagAntworten": "Der Sachverständige hat einen neuen Termin vorgeschlagen — jetzt antworten →",
         "terminVerwalten": "Termin verwalten oder verschieben →",
         "zurFallakte": "Zur Fallakte"
+      },
+      "typ": {
+        "besichtigung": "Besichtigung",
+        "nachbesichtigung": "Nachbesichtigung",
+        "reparatur": "Reparatur",
+        "beratung": "Beratung",
+        "konfrontation": "Konfrontation"
+      },
+      "actions": {
+        "verschieben": "Verschieben",
+        "absagen": "Absagen"
       }
     },
     "tracking": {

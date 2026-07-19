@@ -4629,7 +4629,8 @@
         "empty": "No appointments scheduled at the moment",
         "kommend": "Upcoming",
         "verlauf": "History",
-        "reparatur": "Repair appointments"
+        "reparatur": "Repair appointments",
+        "offen": "Scheduling in progress"
       },
       "toggle": {
         "liste": "List",
@@ -4701,6 +4702,17 @@
         "gegenvorschlagAntworten": "The expert has proposed a new appointment — respond now →",
         "terminVerwalten": "Manage or reschedule appointment →",
         "zurFallakte": "To Case File"
+      },
+      "typ": {
+        "besichtigung": "Inspection",
+        "nachbesichtigung": "Re-inspection",
+        "reparatur": "Repair",
+        "beratung": "Consultation",
+        "konfrontation": "Confrontation"
+      },
+      "actions": {
+        "verschieben": "Reschedule",
+        "absagen": "Cancel"
       }
     },
     "tracking": {
