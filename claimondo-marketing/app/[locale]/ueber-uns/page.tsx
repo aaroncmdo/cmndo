@@ -27,7 +27,7 @@ import { TrustStripSection } from '@/components/landing/sections/TrustStripSecti
 //    konsistent (Tagline "Vollständige Schadensregulierung — auf Augenhöhe").
 // 4) Origin-Story mit konkreten Daten (Gründung 2025, Köln, eigener Sitz).
 // 5) Founders mit Person-Schema + verifiable Daten (LinkedIn-Profile).
-// 6) Trust-Beweise: DAT-Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
+// 6) Trust-Beweise: Partnerschaft, Hansaring-Sitz, BVSK-Honorartabelle,
 //    Partnerkanzlei für Verkehrsrecht im Anwalt-Netzwerk — jeder Claim mit Quelle.
 
 // 2026-05-10 i18n Phase 1B Beispiel: Metadata wird via generateMetadata async
@@ -162,7 +162,7 @@ export default async function UeberUnsPage() {
             ariaLabel="Brand-Kennzahlen"
             kpis={[
               { wert: '2025',    label: stripLabels[0] ?? '' },
-              { wert: 'DAT',     label: stripLabels[1] ?? '' },
+              { wert: 'BVSK',     label: stripLabels[1] ?? '' },
               { wert: 'NRW+',    label: stripLabels[2] ?? '' },
               { wert: '30–40 %', label: stripLabels[3] ?? '' },
             ]}

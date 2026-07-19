@@ -66,7 +66,7 @@ export default async function WieEsFunktioniertPage() {
           serviceSchema({
             name: 'Vollständige Kfz-Schadensregulierung in 5 Schritten',
             description:
-              'Vom unverschuldeten Unfall zur Auszahlung in durchschnittlich 32 Tagen. Berater-Rückruf <15 Min, DAT-Gutachter <48 h, Partnerkanzlei für Verkehrsrecht-Anwalt setzt Ansprüche durch. Live verfolgbar im Portal.',
+              'Vom unverschuldeten Unfall zur Auszahlung in durchschnittlich 32 Tagen. Berater-Rückruf <15 Min, Kfz-Gutachter <48 h, Partnerkanzlei für Verkehrsrecht-Anwalt setzt Ansprüche durch. Live verfolgbar im Portal.',
             url: `${SITE_URL}/wie-es-funktioniert`,
           }),
           {

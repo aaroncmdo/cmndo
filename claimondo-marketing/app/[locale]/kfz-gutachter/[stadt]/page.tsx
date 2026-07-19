@@ -59,7 +59,7 @@ export const revalidate = 3600
 const PROZESS_STEPS = [
   { nr: 1, titel: 'Schaden melden',         text: '3 Felder, ohne Anmeldung. Online oder telefonisch.' },
   { nr: 2, titel: 'Berater meldet sich',    text: 'Persönlicher Rückruf in unter 15 Minuten.' },
-  { nr: 3, titel: 'DAT-Gutachter vor Ort',  text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
+  { nr: 3, titel: 'Kfz-Gutachter vor Ort',  text: 'In unter 48 Stunden besichtigt — meist am Folgetag.' },
   { nr: 4, titel: 'Anwalt aktiv',           text: 'Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch — auch gegen Kürzungen.' },
   { nr: 5, titel: 'Geld auf dem Konto',     text: 'Ø 32 Tage. Live im Portal verfolgbar.' },
 ] as const
@@ -85,7 +85,7 @@ export async function generateMetadata({
       `Unfallgutachter ${s.name}`,
       `Schadensgutachten ${s.name}`,
       `unabhängiger Gutachter ${s.name}`,
-      'DAT-Experte', 'Wertminderung berechnen',
+      'zertifizierter Kfz-Gutachter', 'Wertminderung berechnen',
       '§249 BGB', 'BVSK-Honorartabelle',
     ],
     alternates: await localeAlternates(`/kfz-gutachter/${s.slug}`),
@@ -109,7 +109,7 @@ function buildStadtFaq(s: Stadt) {
     },
     {
       frage: `Wo finde ich einen unabhängigen Kfz-Sachverständigen ${s.h1Anker}?`,
-      antwort: `Claimondo vermittelt ${s.h1Anker} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem DAT-Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
+      antwort: `Claimondo vermittelt ${s.h1Anker} an zertifizierte Partner-Gutachter mit lokaler Expertise. Sie melden den Schaden online (5 Min, ohne Anmeldung) — wir matchen Sie mit dem nächstgelegenen freien Sachverständigen aus dem Partner-Netzwerk. Termin vor Ort in unter 48 Stunden. Verfügbar in ${s.name} (PLZ ${s.plzPrefix}) und im umliegenden ${s.bundesland}.`,
     },
     {
       frage: `Welches Gericht ist bei Streitigkeiten zuständig ${s.h1Anker}?`,
@@ -205,7 +205,7 @@ export default async function KfzGutachterStadtPage({
           stadtLegalServiceSchema(s, areaServed),
           serviceSchema({
             name: `Kfz-Gutachter-Vermittlung ${s.name}`,
-            description: `Vermittlung an unabhängige zertifizierte Kfz-Sachverständige ${s.h1Anker}. DAT-Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,
+            description: `Vermittlung an unabhängige zertifizierte Kfz-Sachverständige ${s.h1Anker}. Partner-Gutachter aus dem Netzwerk, Termin <48 h, 0 € für unverschuldet Geschädigte nach §249 BGB.`,
             url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
           }),
           {

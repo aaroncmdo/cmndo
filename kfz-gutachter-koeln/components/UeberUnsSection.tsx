@@ -6,7 +6,7 @@ import { ClaimondoLink } from '@/lib/text'
 // SERVER-Component. Founder / Ueber-uns-Block.
 // MOBILE (sm:hidden, #ueberUnsMobile, v3): heller bg-paper-Abschnitt mit
 // uu-quote-card (Quote + Signatur-Zeile avatar-tobias + svName + Siegel-v3) +
-// Trust-Pill-Row (DAT/BVSK/10+J[accent]/90+Netz). svName = CLUSTER.svName (Persona
+// Trust-Pill-Row (BVSK/10+J[accent]/90+Netz). svName = CLUSTER.svName (Persona
 // "Tobias", Aaron 04.06.). DESKTOP/TABLET (hidden sm:grid): Original (dunkel,
 // Team-Foto + Text + Siegel + Quote). Farben/Radien nur ueber Tokens.
 export function UeberUnsSection({ city }: { city: City }) {
@@ -53,11 +53,6 @@ export function UeberUnsSection({ city }: { city: City }) {
           </div>
           <div className="uu-pillrow" role="list" aria-label="Qualifikationen">
             <div className="uu-pill" role="listitem">
-              <span className="uu-pill-key">DAT</span>
-              <span className="uu-pill-sub">Zugang</span>
-            </div>
-            <span className="uu-pill-sep" aria-hidden="true" />
-            <div className="uu-pill" role="listitem">
               <span className="uu-pill-key">BVSK</span>
               <span className="uu-pill-sub">geprüft</span>
             </div>
@@ -91,7 +86,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               <img
                 id="teamPhoto"
                 src={`${CLUSTER.imgPath}team-${CLUSTER.key}.webp?v=${CLUSTER.assetVersion}`}
-                alt={`Kfz-Sachverständigen-Team in ${city.name} — nach DAT-/BVSK-Standard, Claimondo-Partner`}
+                alt={`Kfz-Sachverständigen-Team in ${city.name} — nach BVSK-Standard, Claimondo-Partner`}
                 loading="lazy"
                 data-placeholder="true"
                 width={600}
@@ -134,10 +129,10 @@ export function UeberUnsSection({ city }: { city: City }) {
               Ihr Kfz-Sachverständigenbüro in <span className="text-amber">{city.name}</span>
             </h2>
             <div className="text-white/[.85] text-sm font-semibold mb-4">
-              DAT-Standard · BVSK · 10+ Jahre · 2.500+ Schäden
+              Zertifiziert · BVSK · 10+ Jahre · 2.500+ Schäden
             </div>
             <p className="text-white/[.84] text-base mb-3 leading-relaxed">
-              Zertifiziert, ingenieurbasiert, gerichtsfest — mit Zugang zum DAT Expert Partner-Netzwerk. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
+              Zertifiziert, ingenieurbasiert, gerichtsfest. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
               die komplette Abwicklung — Gutachten, Anwalt, Mietwagen/Nutzungsausfall und
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>

@@ -88,7 +88,7 @@ export const CLUSTER: ClusterConfig = {
   imgPath: '/assets/img/wuppertal/',
   logoExt: 'svg', // Wuppertal: logo-wuppertal-dark.svg vorhanden — TODO Aaron: logo-wuppertal-white.svg fehlt noch
   assetVersion: '1',
-  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
+  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach BVSK-Standard.',
   teamImg: '/assets/img/wuppertal/team-wuppertal.webp?v=1',
   svName: 'Amet',
   svSurname: 'Egetürk', // Persona-Nachname (Amet Egetürk)
@@ -172,7 +172,7 @@ export interface SeoAbsatz {
 
 export const SEO_BODY: Record<string, SeoAbsatz[]> = {
   wuppertal: [
-    { text: `Mitten im Bergischen Land gelegen, ist Wuppertal (42103) mit seinen engen Tallagen und dem dichten Verkehr entlang der A46 ein anspruchsvolles Pflaster für Autofahrer. Nach einem Unfall verschafft Ihnen ein unabhängiger Kfz-Gutachter in Wuppertal zügig Klarheit über den Schaden. Bei einem unverschuldeten Zusammenstoß übernimmt die gegnerische Versicherung in der Regel die Gutachterkosten, sodass für Sie 0 € bleiben. Wir begutachten Ihr Fahrzeug vor Ort und arbeiten nach DAT- und BVSK-Standard.` },
+    { text: `Mitten im Bergischen Land gelegen, ist Wuppertal (42103) mit seinen engen Tallagen und dem dichten Verkehr entlang der A46 ein anspruchsvolles Pflaster für Autofahrer. Nach einem Unfall verschafft Ihnen ein unabhängiger Kfz-Gutachter in Wuppertal zügig Klarheit über den Schaden. Bei einem unverschuldeten Zusammenstoß übernimmt die gegnerische Versicherung in der Regel die Gutachterkosten, sodass für Sie 0 € bleiben. Wir begutachten Ihr Fahrzeug vor Ort und arbeiten nach BVSK-Standard.` },
     { vorort: true, text: `Auch im benachbarten Solingen und Remscheid sind wir kurzfristig erreichbar.` },
   ],
   solingen: [
@@ -188,7 +188,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Anwalt und Mietwagen organisieren wir über unser Partnernetzwerk.` },
   ],
   wuelfrath: [
-    { text: `Im Kreis Mettmann gelegen, ist Wülfrath (42489) eine ruhige Kalkstadt am Rand des Bergischen Landes. Doch auch hier passieren auf dem Weg nach Velbert oder Mettmann täglich Unfälle. Wer unverschuldet in einen Zusammenstoß gerät, hat das Recht, einen eigenen Gutachter zu beauftragen, dessen Kosten die gegnerische Versicherung trägt. Als unabhängiger Kfz-Gutachter in Wülfrath begutachten wir Ihr Fahrzeug zeitnah vor Ort und dokumentieren den Schaden nach DAT-Standard.` },
+    { text: `Im Kreis Mettmann gelegen, ist Wülfrath (42489) eine ruhige Kalkstadt am Rand des Bergischen Landes. Doch auch hier passieren auf dem Weg nach Velbert oder Mettmann täglich Unfälle. Wer unverschuldet in einen Zusammenstoß gerät, hat das Recht, einen eigenen Gutachter zu beauftragen, dessen Kosten die gegnerische Versicherung trägt. Als unabhängiger Kfz-Gutachter in Wülfrath begutachten wir Ihr Fahrzeug zeitnah vor Ort und dokumentieren den Schaden nach BVSK-Standard.` },
     { vorort: true, text: `So sichern Sie sich eine faire Regulierung und behalten alle Ansprüche im Blick.` },
   ],
   mettmann: [
@@ -204,7 +204,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Wir kommen zur Begutachtung vor Ort und sind auch in Ennepetal und Sprockhövel schnell zur Stelle.` },
   ],
   sprockhoevel: [
-    { text: `Sprockhövel (45549) erstreckt sich am Nordrand des Bergischen Landes im Ennepe-Ruhr-Kreis, zwischen Hattingen und Schwelm. Die ländliche Lage mit vielen Landstraßen birgt eigene Unfallrisiken, gerade bei Wildwechsel oder Glätte. Nach einem unverschuldeten Schaden haben Sie Anspruch auf ein eigenes, neutrales Gutachten, bezahlt von der gegnerischen Haftpflicht. Als unabhängiger Kfz-Gutachter in Sprockhövel begutachten wir Ihr Fahrzeug zeitnah direkt vor Ort und arbeiten nach DAT- und BVSK-Standard.` },
+    { text: `Sprockhövel (45549) erstreckt sich am Nordrand des Bergischen Landes im Ennepe-Ruhr-Kreis, zwischen Hattingen und Schwelm. Die ländliche Lage mit vielen Landstraßen birgt eigene Unfallrisiken, gerade bei Wildwechsel oder Glätte. Nach einem unverschuldeten Schaden haben Sie Anspruch auf ein eigenes, neutrales Gutachten, bezahlt von der gegnerischen Haftpflicht. Als unabhängiger Kfz-Gutachter in Sprockhövel begutachten wir Ihr Fahrzeug zeitnah direkt vor Ort und arbeiten nach BVSK-Standard.` },
     { vorort: true, text: `Auf Wunsch organisieren wir zusätzlich Anwalt und Mietwagen über unser Partnernetzwerk.` },
   ],
   remscheid: [
@@ -216,7 +216,7 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
     { vorort: true, text: `Termine sind auch im benachbarten Schwelm und Hattingen kurzfristig möglich.` },
   ],
   hattingen: [
-    { text: `Hattingen (45525) mit seiner historischen Altstadt liegt am nördlichen Rand des Bergischen Landes an der Ruhr, gut erreichbar über die A43. Nach einem Verkehrsunfall sollten Sie den Schaden von einem neutralen Fachmann statt vom Versicherer des Unfallgegners bewerten lassen. Unser Kfz-Sachverständiger in Hattingen kommt zur Begutachtung zu Ihnen und ermittelt Reparaturkosten sowie eine mögliche Wertminderung nach DAT-Standard. War der Unfall unverschuldet, trägt die Gegenseite die Kosten.` },
+    { text: `Hattingen (45525) mit seiner historischen Altstadt liegt am nördlichen Rand des Bergischen Landes an der Ruhr, gut erreichbar über die A43. Nach einem Verkehrsunfall sollten Sie den Schaden von einem neutralen Fachmann statt vom Versicherer des Unfallgegners bewerten lassen. Unser Kfz-Sachverständiger in Hattingen kommt zur Begutachtung zu Ihnen und ermittelt Reparaturkosten sowie eine mögliche Wertminderung nach BVSK-Standard. War der Unfall unverschuldet, trägt die Gegenseite die Kosten.` },
     { vorort: true, text: `Bei Bedarf vermitteln wir über unser Netzwerk einen Anwalt für Verkehrsrecht und einen Mietwagen.` },
   ],
 }

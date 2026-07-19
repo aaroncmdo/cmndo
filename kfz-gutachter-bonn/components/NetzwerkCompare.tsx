@@ -190,7 +190,7 @@ export function NetzwerkCompare() {
           fachlichen Widerlegung; unter dem CTA bleibt nichts. */}
       <p className={`mt-3 text-[12px] text-white/[.55] leading-relaxed ${open ? '' : 'hidden'}`}>
         „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts/Versicherergutachtens
-        nach DAT/BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
+        nach BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
       </p>
     </div>
   )
