@@ -40,6 +40,8 @@ export type MaklerAnlageInput = {
   // moeglich). Self-Signup erhebt beide; Admin-Pfad darf sie (noch) weglassen.
   rechtsform?: string | null
   istKleinunternehmer?: boolean | null
+  /** Direkter Werber (Empfehlungsstruktur) — nur beim Referral-Signup via ?werber=<promo_code> gesetzt. */
+  sponsorMaklerId?: string | null
 }
 
 export type MaklerAnlageResult =
@@ -86,6 +88,7 @@ export async function anlegeMaklerKern(
       firma: input.firma,
       rechtsform: input.rechtsform ?? null,
       ist_kleinunternehmer: input.istKleinunternehmer ?? null,
+      sponsor_makler_id: input.sponsorMaklerId ?? null,
       ansprechpartner_vorname: input.ansprechpartnerVorname,
       ansprechpartner_nachname: input.ansprechpartnerNachname,
       email: input.email,

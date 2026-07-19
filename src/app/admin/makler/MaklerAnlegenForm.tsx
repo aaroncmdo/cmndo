@@ -13,6 +13,8 @@ import { createMakler } from './actions'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
 import { Button } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
+import { SelectField } from '@/components/shared/forms/SelectField'
+import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 
 // Typ lokal definiert — NICHT aus 'use server'-Files importieren (AAR-664: Client-Bundle
 // macht importierte Konstanten/Typen aus Server-Files zu undefined).
@@ -98,6 +100,13 @@ export default function MaklerAnlegenForm({
       <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Makler anlegen</h2>
       <form onSubmit={handleCreate} className="space-y-3">
         <TextField label="Firma" name="firma" required placeholder="z.B. Müller Versicherungsmakler GmbH" />
+        <SelectField
+          label="Rechtsform *"
+          name="rechtsform"
+          required
+          defaultValue=""
+          options={RECHTSFORM_OPTIONEN.map((o) => ({ value: o, label: o || '— wählen —' }))}
+        />
         <TextField label="E-Mail (Login)" name="email" type="email" required placeholder="makler@beispiel.de" />
         <div className="grid grid-cols-2 gap-3">
           <TextField label="Ansprechpartner Vorname" name="ansprechpartner_vorname" required placeholder="Max" />
@@ -126,6 +135,10 @@ export default function MaklerAnlegenForm({
             }}
           />
         </div>
+        <label className="flex items-start gap-2 text-sm text-claimondo-shield">
+          <input type="checkbox" name="kleinunternehmer" className="mt-0.5 h-4 w-4 rounded border-claimondo-border" />
+          <span>Kleinunternehmer nach §19 UStG (Provisionsgutschrift ohne Umsatzsteuer)</span>
+        </label>
         <div className="flex gap-3 pt-2">
           <Button variant="ghost" fullWidth onClick={onClose} type="button">Abbrechen</Button>
           <Button variant="navy" fullWidth type="submit" loading={loading} disabled={loading}>Anlegen</Button>

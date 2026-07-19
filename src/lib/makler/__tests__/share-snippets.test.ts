@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildShareSnippets } from '../share-snippets'
+import { buildShareSnippets, buildMaklerReferralSnippets } from '../share-snippets'
 
 describe('buildShareSnippets', () => {
   const s = buildShareSnippets('MK-ABC', 'Muster Makler GmbH', 'https://claimondo.de/')
@@ -24,5 +24,23 @@ describe('buildShareSnippets', () => {
     expect(s.embed).toContain('href="https://claimondo.de/m/MK-ABC"')
     expect(s.embed).toContain('Muster Makler GmbH')
     expect(s.embed).toContain('<a ')
+  })
+})
+
+describe('buildMaklerReferralSnippets', () => {
+  const s = buildMaklerReferralSnippets('MK-ABC', 'Muster Makler GmbH', 'https://claimondo.de/')
+
+  it('url = base/makler/registrieren?werber=code, ohne doppelten Slash', () => {
+    expect(s.url).toBe('https://claimondo.de/makler/registrieren?werber=MK-ABC')
+  })
+
+  it('whatsappHref = wa.me-Link mit encodierter Referral-url', () => {
+    expect(s.whatsappHref.startsWith('https://wa.me/?text=')).toBe(true)
+    expect(decodeURIComponent(s.whatsappHref)).toContain(s.url)
+  })
+
+  it('mailtoHref = mailto mit subject + encodierter url', () => {
+    expect(s.mailtoHref.startsWith('mailto:?subject=')).toBe(true)
+    expect(decodeURIComponent(s.mailtoHref)).toContain(s.url)
   })
 })

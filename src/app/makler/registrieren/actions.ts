@@ -28,6 +28,8 @@ export async function registriereMaklerSelf(
   const versicherungId = String(formData.get('versicherung_id') ?? '').trim() || null
   const maklerpoolId = String(formData.get('maklerpool_id') ?? '').trim() || null
   const rechtsform = String(formData.get('rechtsform') ?? '').trim()
+  // Empfehlungsstruktur: optionaler Werber-Bezug aus dem Registrier-Link (?werber=<promo_code>).
+  const werber = String(formData.get('werber') ?? '').trim() || null
   // Checkbox: nicht angehakt -> false (= regelbesteuert). Bewusst IMMER boolean (nie null),
   // damit partner-billing-ust die USt sofort berechnen kann (null = "unbekannt" blockiert).
   const istKleinunternehmer =
@@ -71,6 +73,32 @@ export async function registriereMaklerSelf(
     return { ok: false, error: 'Zu dieser E-Mail existiert bereits ein Konto. Bitte melden Sie sich an.' }
   }
 
+  // 3b. Werber-Auflösung: Promo-Code -> aktiver Sponsor-Makler -> dessen Sätze erben + sponsor setzen.
+  //     Ungültiger/inaktiver Werber -> normaler offener Signup (kein Sponsor, Default 100/50).
+  let sponsorMaklerId: string | null = null
+  let provisionKomplett = 100
+  let provisionGutachter = 50
+  if (werber) {
+    const { data: pc } = await admin
+      .from('promotion_codes')
+      .select('makler_id')
+      .eq('code', werber)
+      .eq('aktiv', true)
+      .maybeSingle()
+    if (pc?.makler_id) {
+      const { data: sponsor } = await admin
+        .from('makler')
+        .select('id, provision_betrag_komplett_netto, provision_betrag_nur_gutachter_netto, provision_aktiv, status')
+        .eq('id', pc.makler_id)
+        .maybeSingle()
+      if (sponsor && sponsor.provision_aktiv && sponsor.status === 'aktiv') {
+        sponsorMaklerId = sponsor.id as string
+        provisionKomplett = Number(sponsor.provision_betrag_komplett_netto ?? 100)
+        provisionGutachter = Number(sponsor.provision_betrag_nur_gutachter_netto ?? 50)
+      }
+    }
+  }
+
   // 4. Anlage (Auth + profiles[rolle=makler] + makler[status=aktiv] + Promo). aktiviertVon=null = Self-Signup.
   const result = await anlegeMaklerKern(admin, {
     firma,
@@ -81,8 +109,9 @@ export async function registriereMaklerSelf(
     adresseStrasse: null,
     adressePlz,
     adresseOrt,
-    provisionKomplett: 100,
-    provisionGutachter: 50,
+    provisionKomplett,
+    provisionGutachter,
+    sponsorMaklerId,
     aktiviertVon: null,
     versicherungId,
     maklerpoolId,

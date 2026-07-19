@@ -22,4 +22,7 @@ export const FINANCE = {
   MWST_PROZENT: 19,
   /** Anzahlung pro Kontingent-Stelle (EUR) */
   ANZAHLUNG_PRO_KONTINGENT: 150,
+  /** Empfehlungs-Override an den direkten Werber pro vermitteltem Gutachten (netto).
+   *  Muss synchron zum Literal 10 im DB-Trigger create_makler_provision() bleiben. */
+  MAKLER_EMPFEHLUNG_OVERRIDE_NETTO: 10,
 } as const
