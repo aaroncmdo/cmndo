@@ -89,6 +89,10 @@
       "abschluss": "Abschluss"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "Werkstatt wird ausgewählt",
+      "reparatur_terminfindung": "Reparatur-Termin wird abgestimmt",
+      "reparatur_laeuft": "Reparatur läuft",
+      "reparatur_fertig": "Reparatur abgeschlossen",
       "sa_offen": "Schaden wird erfasst",
       "vollmacht_offen": "Unterlagen werden vorbereitet",
       "onboarding_offen": "Letzte Angaben ausstehend",
@@ -109,6 +113,10 @@
       "termin_durchgefuehrt": "Termin durchgeführt"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "Werkstattwahl",
+      "reparatur_terminfindung": "Terminfindung",
+      "reparatur_laeuft": "Reparatur läuft",
+      "reparatur_fertig": "Reparatur fertig",
       "sa_offen": "SA-Unterschrift offen",
       "vollmacht_offen": "Vollmacht offen",
       "onboarding_offen": "Onboarding offen",

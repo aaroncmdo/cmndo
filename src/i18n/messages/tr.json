@@ -4968,6 +4968,10 @@
       "abschluss": "Tamamlanma"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "Servis seçiliyor",
+      "reparatur_terminfindung": "Onarım randevusu ayarlanıyor",
+      "reparatur_laeuft": "Onarım devam ediyor",
+      "reparatur_fertig": "Onarım tamamlandı",
       "sa_offen": "Hasar kaydediliyor",
       "vollmacht_offen": "Belgeler hazırlanıyor",
       "onboarding_offen": "Son bilgiler bekleniyor",
@@ -4988,6 +4992,10 @@
       "termin_durchgefuehrt": "Randevu gerçekleştirildi"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "Servis seçimi",
+      "reparatur_terminfindung": "Randevu planlama",
+      "reparatur_laeuft": "Onarım devam ediyor",
+      "reparatur_fertig": "Onarım tamamlandı",
       "sa_offen": "Temlik imzası bekleniyor",
       "vollmacht_offen": "Vekâletname bekleniyor",
       "onboarding_offen": "Kayıt süreci bekleniyor",

@@ -4968,6 +4968,10 @@
       "abschluss": "Completion"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "Workshop is being selected",
+      "reparatur_terminfindung": "Repair appointment is being scheduled",
+      "reparatur_laeuft": "Repair in progress",
+      "reparatur_fertig": "Repair completed",
       "sa_offen": "Recording your claim",
       "vollmacht_offen": "Preparing documents",
       "onboarding_offen": "Final details pending",
@@ -4988,6 +4992,10 @@
       "termin_durchgefuehrt": "Appointment completed"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "Workshop selection",
+      "reparatur_terminfindung": "Scheduling",
+      "reparatur_laeuft": "Repair in progress",
+      "reparatur_fertig": "Repair done",
       "sa_offen": "Assignment signature pending",
       "vollmacht_offen": "Power of attorney pending",
       "onboarding_offen": "Onboarding pending",

@@ -4968,6 +4968,10 @@
       "abschluss": "Завершение"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "Выбирается сервис",
+      "reparatur_terminfindung": "Согласуется дата ремонта",
+      "reparatur_laeuft": "Ремонт выполняется",
+      "reparatur_fertig": "Ремонт завершён",
       "sa_offen": "Регистрируем ущерб",
       "vollmacht_offen": "Готовим документы",
       "onboarding_offen": "Ожидаются последние данные",
@@ -4988,6 +4992,10 @@
       "termin_durchgefuehrt": "Встреча проведена"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "Выбор сервиса",
+      "reparatur_terminfindung": "Согласование даты",
+      "reparatur_laeuft": "Ремонт выполняется",
+      "reparatur_fertig": "Ремонт завершён",
       "sa_offen": "Ожидается подпись цессии",
       "vollmacht_offen": "Ожидается доверенность",
       "onboarding_offen": "Ожидается онбординг",
