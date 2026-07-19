@@ -31,6 +31,7 @@ const GRUND_TONE: Record<MatchGrundTyp, 'success' | 'neutral'> = {
   gewerk: 'success',
   klasse: 'success',
   trust: 'success',
+  rating: 'success',
   distanz: 'neutral',
 }
 
@@ -91,7 +92,11 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
           // damit, WARUM gerade diese Werkstatt vorgeschlagen wird — statt einer anonymen Distanzliste.
           // 'distanz' und 'trust' lassen wir aus den Chips raus — beide stehen bereits in der Card
           // (Distanz-Zeile unten, "✓ Verifizierter Partner" neben dem Namen). Bleibt: WARUM diese
-          // Werkstatt fachlich passt (Marke, Gewerke, Fahrzeugklasse).
+          // Werkstatt fachlich passt (Marke, Gewerke, Fahrzeugklasse) — PLUS 'rating'.
+          // ⚠ 'rating' (GBP-★-Chip) MUSS durchkommen: er hat keine separate Render-Stelle in der
+          // Card. Er lief bis 19.07. als typ 'trust' und wurde hier still verschluckt — deshalb war
+          // der ★-Chip auf prod unsichtbar, obwohl 13 Werkstaetten chip-faehige GBP-Daten hatten.
+          // Wer diesen Filter erweitert: nur Typen ausschliessen, die WOANDERS gerendert werden.
           const grundChips = (w.gruende ?? []).filter(
             (g) => g.typ !== 'distanz' && g.typ !== 'trust',
           )
