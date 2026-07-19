@@ -15932,20 +15932,14 @@ export type Database = {
           entstanden_via: string | null
           firma: string | null
           force_password_change: boolean | null
-          google_access_token: string | null
           google_connected_at: string | null
           google_email: string | null
           google_place_id: string | null
-          google_refresh_token: string | null
-          google_token_expires_at: string | null
           id: string
           kapazitaet_max: number | null
           kategorie: string | null
-          ms_access_token: string | null
           ms_connected_at: string | null
           ms_email: string | null
-          ms_refresh_token: string | null
-          ms_token_expires_at: string | null
           nachname: string | null
           onboarding_completed_at: string | null
           ort: string | null
@@ -15993,20 +15987,14 @@ export type Database = {
           entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
-          google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
           google_place_id?: string | null
-          google_refresh_token?: string | null
-          google_token_expires_at?: string | null
           id: string
           kapazitaet_max?: number | null
           kategorie?: string | null
-          ms_access_token?: string | null
           ms_connected_at?: string | null
           ms_email?: string | null
-          ms_refresh_token?: string | null
-          ms_token_expires_at?: string | null
           nachname?: string | null
           onboarding_completed_at?: string | null
           ort?: string | null
@@ -16054,20 +16042,14 @@ export type Database = {
           entstanden_via?: string | null
           firma?: string | null
           force_password_change?: boolean | null
-          google_access_token?: string | null
           google_connected_at?: string | null
           google_email?: string | null
           google_place_id?: string | null
-          google_refresh_token?: string | null
-          google_token_expires_at?: string | null
           id?: string
           kapazitaet_max?: number | null
           kategorie?: string | null
-          ms_access_token?: string | null
           ms_connected_at?: string | null
           ms_email?: string | null
-          ms_refresh_token?: string | null
-          ms_token_expires_at?: string | null
           nachname?: string | null
           onboarding_completed_at?: string | null
           ort?: string | null
