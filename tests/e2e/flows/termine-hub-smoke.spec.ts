@@ -104,7 +104,7 @@ test.describe('Termine-Hub Smoke', () => {
     await page.goto(`${BASE}/flotte/termine`)
     await page.waitForLoadState('networkidle').catch(() => {})
     await page.waitForTimeout(2000)
-    await expect(page.getByText('Meine Termine').first()).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText('Flotten-Termine').first()).toBeVisible({ timeout: 15_000 })
     console.log(`[Flotte] Typ-Badges sichtbar: ${await page.getByText(TYP_BADGES).count()} (0 ok bei Flotte ohne Claims)`)
 
     expect(errors, `Console/Page-Errors:\n${errors.join('\n')}`).toEqual([])
