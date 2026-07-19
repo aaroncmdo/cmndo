@@ -445,6 +445,20 @@ CI faehrt `npm run check:anon-reachability -- --ratchet`. Es blockt **NEUE** ano
 
 **Baseline = 0** (nach dem gfa-Fix ist keine anon-Policy mehr reachable-ohne-uid auf einer PII-Tabelle; die 5 verbleibenden PII-Tabellen mit anon-Grant — aircall_calls/cold_mail_*/twilio_status_events/vehicles — sind alle `auth.uid()`/`is_staff()`-gated). Vollstaendige Enumeration + Fund: `COORDINATION-anon-pii-leak-gutachter-finder-anfragen` (Memory).
 
+# Write-Reachability-Gate (Ratchet)
+
+**Eine PERMISSIVE `authenticated`-WRITE-Policy (INSERT/UPDATE/DELETE) darf keinen top-level-OR-Zweig haben, der OHNE `auth.uid()`/Scoping-Helper erfuellbar ist — sonst kann JEDER eingeloggte User fremde/beliebige Zeilen schreiben (cross-user/cross-tenant Write).**
+
+Das WRITE-Gegenstueck zum `check:anon-reachability` (SELECT/true-anon-Achse). Zwei orthogonale Write-Achsen: die WURZEL (#4555) macht authenticated-Write per **Default-Privileg** default-closed (GRANT-Achse — neue Tabellen granten authenticated kein Write). Diese Achse ist die **POLICY-Reachability**: eine EXPLIZIT gegrantete Tabelle mit einer ungescopten Write-Policy laesst jeden authenticated-User schreiben. Read-seitig ist die Klasse durch `kanzlei_faelle` belegt (jeder `kanzlei`-User liest alle Faelle — [[audit-kanzlei-cross-tenant-scoping-2026-07-19]]); write-seitig aktuell **0 echte Lecks** (alle 245 authenticated-Write-Policies sind uid-/rollen-/firma-gescopt oder bewusst broad).
+
+CI faehrt `npm run check:auth-write-reachability -- --ratchet`. Es blockt **NEUE** reachable authenticated-Write-Policies gegen `scripts/authenticated-write-reachability-baseline.json`. Lokal (ohne Flag) `--warn`; `--update-baseline` senkt nach Boy-Scout. Backing-RPC `audit_authenticated_write_reachable()` (service_role-only, read-only, Mig `20260719132920`) liefert alle PERMISSIVE authenticated-Write-Policies + den reachability-relevanten Ausdruck (INSERT→with_check der die neue Zeile gatet; UPDATE/DELETE→qual der gatet WELCHE Zeilen). Pure Heuristik: `scripts/lib/authenticated-write-scan.mjs` (unit-getestet), reuse `topLevelOrBranches` + `UID_GATE_TOKENS` aus `anon-reachability-scan.mjs`. Nur bei SQL-Diff aktiv (Prod-Pool-Schonung).
+
+**⚠ Wichtiger Unterschied zum anon-Scanner:** KEIN anon-Anti-Pattern `auth.uid() IS NULL`. Das ist ein ANON-Konzept (Zweig oeffnet fuer true-anon) und wuerde beim authenticated-Fall greedy fehlmatchen, sobald ein Zweig `auth.uid()` … `<spalte> IS NULL` enthaelt (`kundenbetreuer_id IS NULL`, `fall_id IS NULL`) → massenhaft FP auf real gescopten claims/tasks-Policies. Fuer authenticated zaehlt nur: enthaelt der Zweig einen Gate-Token? `WRITE_GATE_TOKENS` = anon-`UID_GATE_TOKENS` + `is_kundenbetreuer`/`is_sv`/`auth_flottenmanager_firma_id`/`auth_user_firma_id`.
+
+**Baseline = 2** (bewusste oeffentliche Broad-Writes, KEIN Leck): `gutachter_finder_anfragen__b1ins` (`source IS NULL` = nativer anonymer Finder-Submit) + `__b1upd_au` (`source IS NULL AND status='entwurf'` = anonymer Entwurf-Edit). Beide sind public-Submit-Flows ohne eingeloggten Owner.
+
+**Fix bei rotem Ratchet:** den offenen Zweig an `auth.uid()`/einen Scoping-Helper binden (Muster: `makler.user_id = auth.uid()` bzw. `firma_id = auth_user_firma_id()`) ODER den authenticated-Write-Grant der Tabelle entziehen. Bewusster oeffentlicher Broad-Write → Baseline via `--update-baseline`. Neuer legitimer Scoping-Helper fehlt → `WRITE_GATE_TOKENS` in `scripts/lib/authenticated-write-scan.mjs` ergaenzen (mit Begruendung), nicht die Baseline aufblaehen.
+
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 
 Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=true` brandet sein eigenes Portal **und** die Sicht seiner Kunden (Kunde-Portal, Magic-Links `/flow/[token]`, `/upload/zb1/[token]`, `/upload/dokumente/[token]`, Kunden-gerichtete Emails). Das funktioniert über CSS-Custom-Properties, die auf einem Wrapper-Element gesetzt werden (`generateCssVars(theme, 'full')` aus `src/lib/branding/css-vars.ts`).

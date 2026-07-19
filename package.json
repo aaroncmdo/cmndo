@@ -7,6 +7,7 @@
     "build:embed": "node scripts/build-monika.mjs",
     "build:embed:login": "node scripts/build-login-embed.mjs",
     "check:anon-reachability": "node --env-file=.env.local scripts/check-anon-reachability.mjs",
+    "check:auth-write-reachability": "node --env-file=.env.local scripts/check-authenticated-write-reachability.mjs",
     "check:anon-sensitive-grants": "node --env-file=.env.local scripts/check-anon-sensitive-grants.mjs",
     "check:claim-table-rls": "node --env-file=.env.local scripts/check-claim-table-rls.mjs",
     "check:claim-view-rls": "node --env-file=.env.local scripts/check-claim-view-rls.mjs",
