@@ -52,7 +52,7 @@ type Props = {
   className?: string
   /**
    * AAR-213: Callback um das Lead-Preis-Tabelle-Overlay im Parent zu öffnen.
-   * Wenn nicht gesetzt fällt das Link-Verhalten auf /gutachter/leadpreise zurück.
+   * Wenn nicht gesetzt fällt das Link-Verhalten auf die Lead-Preis-Tabelle in der Abrechnung zurück (W1.1).
    */
   onShowLeadPreise?: () => void
 }
@@ -163,7 +163,7 @@ export default function OrderSummaryCard({
             </button>
           ) : (
             <Link
-              href="/gutachter/leadpreise"
+              href="/gutachter/abrechnung#leadpreise"
               target="_blank"
               className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium"
             >
@@ -208,7 +208,7 @@ export default function OrderSummaryCard({
           </button>
         ) : (
           <Link
-            href="/gutachter/leadpreise"
+            href="/gutachter/abrechnung#leadpreise"
             target="_blank"
             className="text-[var(--brand-primary)] underline hover:text-[var(--brand-secondary)] font-medium ml-3 flex-shrink-0"
           >

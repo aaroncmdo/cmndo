@@ -4,7 +4,7 @@ import { syncAllExternalCalendars } from '@/lib/kalender/sync-to-cache'
 
 // Cron: alle 5 Minuten (vercel.json)
 // Sync externer Kalender-Events in sv_kalender_events_cache:
-//   - Google FreeBusy (alle SVs mit google_refresh_token)
+//   - Google FreeBusy (alle Profile mit Google-Verbindung; Token in profiles_oauth_secrets)
 //   - CalDAV Events (alle aktiven sv_kalender_verbindungen)
 
 export const dynamic = 'force-dynamic'

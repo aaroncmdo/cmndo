@@ -12,6 +12,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 import { istClaimStorniert, deriveCompletionTs, istReleaseBerechtigt } from './completion-release-gate'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 /** partner_provisionen.partner_typ — DB-CHECK seit Mig 20260713181418. */
 export type ProvisionPartnerTyp = 'makler' | 'werkstatt' | 'firmen_flotte'
@@ -26,7 +27,6 @@ export type ReleasePendingRow = {
   claim_id: string | null
   betrag_netto_eur: number | string
   service_typ: string | null
-  hold_until: string
   partner_id: string
 }
 
@@ -66,7 +66,7 @@ export async function runProvisionsRelease(
   // der Hold-Periode, aber vor dem Cron-Run storniert wurden.
   const { data: pendingRaw, error: pendingErr } = await db
     .from('partner_provisionen')
-    .select('id, partner_typ, fall_id, claim_id, betrag_netto_eur, service_typ, hold_until, partner_id')
+    .select('id, partner_typ, fall_id, claim_id, betrag_netto_eur, service_typ, partner_id')
     .in('partner_typ', partnerTypen)
     .eq('status', 'pending')
     .limit(limit)
@@ -105,12 +105,13 @@ export async function runProvisionsRelease(
     if (nurGutachterIds.length > 0) {
       const { data: termine } = await db
         .from('gutachter_termine')
-        .select('claim_id, durchgefuehrt_am')
-        .in('claim_id', nurGutachterIds)
+        .select('claim_id, bezug_id, bezug_typ, durchgefuehrt_am')
+        .or(bezugInExpr('claim', nurGutachterIds))
         .not('durchgefuehrt_am', 'is', null)
         .order('durchgefuehrt_am', { ascending: false })
       for (const t of (termine ?? []) as Record<string, unknown>[]) {
-        const cid = t.claim_id as string | null
+        // bezug-aware: native Claim-Termine haben claim_id NULL, tragen den Claim in bezug_id.
+        const cid = (t.claim_id as string | null) ?? (t.bezug_typ === 'claim' ? (t.bezug_id as string | null) : null)
         if (!cid) continue
         const e = completionMap.get(cid)
         if (e && !e.terminDurchgefuehrtAm) e.terminDurchgefuehrtAm = (t.durchgefuehrt_am as string | null) ?? null

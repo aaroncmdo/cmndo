@@ -180,11 +180,11 @@ export async function createTermin(
   if (data.typ === 'video-call') {
     const { data: kbProfile } = await supabase
       .from('profiles')
-      .select('email, google_refresh_token')
+      .select('email, google_connected_at')
       .eq('id', kbUserId)
       .single()
     if (!kbProfile?.email) return { success: false, error: 'KB-Email fehlt' }
-    if (!kbProfile.google_refresh_token) {
+    if (!kbProfile.google_connected_at) {
       return {
         success: false,
         error: 'Du musst zuerst dein Google Konto unter /admin/einstellungen/google verbinden, um Videotermine zu buchen.',

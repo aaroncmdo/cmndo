@@ -4,6 +4,7 @@
 // Gespiegelt nach MaklerAbrechnungen — DataTable-Set, Status-Badges mit
 // semantischen Token-Klassen (bg-success-soft etc.), keine PII.
 
+import Link from 'next/link'
 import {
   CheckCircle2Icon,
   ClockIcon,
@@ -89,16 +90,22 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
       tooltip: row.storno_grund ?? undefined,
     }
   }
-  // pending
-  const days = daysUntil(row.hold_until)
+  // pending — Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). release_deadline null =
+  // Fall noch nicht abgeschlossen → Freigabe erst nach Fallabschluss (frueher: hold_until = Erstellung+7d).
+  const days = daysUntil(row.release_deadline)
   return {
-    label: days !== null && days > 0 ? `fällig in ${days} T.` : 'fällig',
+    label:
+      row.release_deadline === null
+        ? 'nach Fallabschluss'
+        : days !== null && days > 0
+          ? `fällig in ${days} T.`
+          : 'fällig',
     className: 'bg-warning-soft text-warning-strong border border-warning/20',
     icon: <ClockIcon width={12} height={12} />,
     tooltip:
-      row.hold_until
-        ? `Clawback-Frist bis ${fmtDate(row.hold_until)}`
-        : undefined,
+      row.release_deadline
+        ? `Clawback-Frist bis ${fmtDate(row.release_deadline)}`
+        : 'Freigabe erst nach Fallabschluss + 7 Tage',
   }
 }
 
@@ -189,10 +196,18 @@ export function WerkstattAbrechnungen({
                 return (
                   <Tr key={row.id}>
                     <Td className="font-mono text-xs">
-                      {/* W1.7-Follow-up: Deep-Link auf /werkstatt/auftraege/[claimId] blockiert —
-                          WerkstattProvisionRow hat nur claim_nummer, kein claim_id. Braucht
-                          claim_id im partner_provisionen-Select (queries.ts). Separat. */}
-                      {row.claim_nummer ?? '–'}
+                      {/* W1.7: claim_nummer -> Deep-Link auf den Werkstatt-Auftrag (claim_id jetzt
+                          im partner_provisionen-Select). Fallback: Plain-Text ohne claim_id. */}
+                      {row.claim_id && row.claim_nummer ? (
+                        <Link
+                          href={`/werkstatt/auftraege/${row.claim_id}`}
+                          className="text-claimondo-navy underline underline-offset-2 hover:text-claimondo-light-blue"
+                        >
+                          {row.claim_nummer}
+                        </Link>
+                      ) : (
+                        row.claim_nummer ?? '–'
+                      )}
                     </Td>
                     <Td className="font-semibold tabular-nums">
                       {EUR.format(row.betrag_netto_eur)}
@@ -213,7 +228,7 @@ export function WerkstattAbrechnungen({
                       {fmtDate(row.erstellt_am)}
                     </Td>
                     <Td className="text-body-sm">
-                      {fmtDate(row.hold_until)}
+                      {fmtDate(row.release_deadline)}
                     </Td>
                   </Tr>
                 )

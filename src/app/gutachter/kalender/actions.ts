@@ -6,6 +6,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { ablehnTermin } from '@/lib/termine/sv-ablehnung'
 import { gegenvorschlagTermin } from '@/lib/termine/sv-gegenvorschlag'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export async function setTermin(
   fallId: string,
@@ -34,7 +35,7 @@ export async function setTermin(
   const { data: aktiveTermine } = await supabase
     .from('gutachter_termine')
     .select('id, created_at')
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])

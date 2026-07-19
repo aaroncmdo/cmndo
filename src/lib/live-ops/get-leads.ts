@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { LiveOpsScope, LeadPin } from './types'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 // Geo-Aufloesungs-Hilfsfunktion:
 // Leads haben besichtigungsort_lat/lng (Wunschort), unfallort_lat/lng,
@@ -133,10 +134,15 @@ export async function getLeads(scope: LiveOpsScope): Promise<LeadPin[]> {
   if (leadIds.length > 0) {
     const { data: termine } = await supabase
       .from('gutachter_termine')
-      .select('lead_id, status')
-      .in('lead_id', leadIds)
+      .select('lead_id, bezug_id, bezug_typ, status')
+      // P3.3: bezug-aware — findet auch bezug-native Lead-Termine (lead_id NULL, bezug_typ='lead').
+      .or(bezugInExpr('lead', leadIds))
       .not('status', 'in', TERMINAL_STATUS)
-    for (const t of termine ?? []) if (t.lead_id) activeLeadIds.add(t.lead_id as string)
+    for (const t of termine ?? []) {
+      // native Lead-Termine tragen den Lead in bezug_id (lead_id ist dort NULL).
+      const lid = (t.lead_id as string | null) ?? (t.bezug_typ === 'lead' ? (t.bezug_id as string | null) : null)
+      if (lid) activeLeadIds.add(lid)
+    }
   }
   return applyHasActiveTermin(pins, activeLeadIds)
 }

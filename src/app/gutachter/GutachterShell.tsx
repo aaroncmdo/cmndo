@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { SidebarWidthVar } from '@/components/shared/SidebarWidthVar'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { serverSignOut } from '@/lib/auth/logout'
 import {
@@ -13,7 +14,6 @@ import {
   FolderOpenIcon,
   CalendarIcon,
   ReceiptIcon,
-  BarChart3Icon,
   UserIcon,
   SettingsIcon,
   LogOutIcon,
@@ -91,8 +91,8 @@ const NAV_SECTIONS_BASE: NavSection[] = [
   {
     title: 'Finanzen',
     items: [
-      // AAR-244: Lead-Preise als Tab in Abrechnung integriert (kein eigener
-      // Nav-Punkt mehr). Route /gutachter/leadpreise bleibt für Bookmarks.
+      // W1.1 (vorher AAR-244 nur behauptet): Lead-Preise sind jetzt WIRKLICH als
+      // Section in der Abrechnung integriert; Alt-Route -> 308 (next.config).
       { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
     ],
   },
@@ -102,7 +102,6 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
-      { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
   },
@@ -324,14 +323,14 @@ export default function GutachterShell({
   useEffect(() => {
     loadBadges()
     const supabase = createClient()
-    const channel = supabase
-      .channel('gutachter-sidebar-badges')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel('gutachter-sidebar-badges')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges()),
+    )
   }, [loadBadges])
 
   async function handleLogout() {

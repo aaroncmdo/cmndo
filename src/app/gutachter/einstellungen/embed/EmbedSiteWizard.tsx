@@ -24,6 +24,7 @@ import {
 import { createEmbedSite, updateEmbedSite, sendTestTrackingWebhook } from './actions'
 import DomainListInput from './DomainListInput'
 import ThemePreview from './ThemePreview'
+import { TrackingAnleitungContent } from './TrackingAnleitungContent'
 
 const STEPS = ['Basis & Domains', 'Variante & Branding', 'Tracking', 'Zusammenfassung'] as const
 
@@ -370,14 +371,19 @@ export default function EmbedSiteWizard({
                 >
                   Test-Webhook senden
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => router.push(`/gutachter/einstellungen/embed/${siteId}/tracking-anleitung`)}
-                >
-                  Einrichtungs-Anleitung
-                </Button>
               </div>
+              {/* W1.2: Anleitung in-place statt Routen-Absprung (alte Route -> 308 auf den Editor). */}
+              <details className="pt-2">
+                <summary className="cursor-pointer text-sm text-claimondo-ondo hover:text-claimondo-navy underline underline-offset-2">
+                  Einrichtungs-Anleitung (GA4, Google Ads, Webhook)
+                </summary>
+                <div className="pt-3">
+                  <TrackingAnleitungContent
+                    slug={form.slug}
+                    ga4={form.tracking_ga4_measurement_id.trim() || 'G-XXXXXXX'}
+                  />
+                </div>
+              </details>
             </div>
           ) : (
             <div className="rounded-ios-lg bg-claimondo-bg border border-claimondo-border px-4 py-3 text-xs text-claimondo-ondo">

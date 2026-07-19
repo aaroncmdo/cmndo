@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useTranslations, useFormatter } from 'next-intl'
 import { MapPinIcon, ClockIcon, CheckCircleIcon, CarIcon, RefreshCwIcon, XCircleIcon, CalendarIcon, MapIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { createClient, whenRealtimeAuthReady } from '@/lib/supabase/client'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import LiveTrackingMap from '@/components/maps/LiveTrackingMap'
 import { haversineKm } from '@/lib/gps/geofence'
@@ -132,36 +132,54 @@ export default function KundeTrackingClient({
   // sieht der Kunde dieselbe "Besichtigung läuft"-Meldung wie der SV.
   useEffect(() => {
     let cancelled = false
-    void supabase
-      .from('gutachter_termine')
-      .select('besichtigung_gestartet_am')
-      .eq('id', terminId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return
-        if ((data as { besichtigung_gestartet_am: string | null } | null)?.besichtigung_gestartet_am) {
-          setBesichtigungLaeuft(true)
-        }
-      })
-    const ch = supabase
-      .channel(`kunde-besichtigung-${terminId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'gutachter_termine',
-          filter: `id=eq.${terminId}`,
-        },
-        (payload) => {
-          const row = payload.new as { besichtigung_gestartet_am: string | null }
-          if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
-        },
-      )
-      .subscribe()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+
+    // `gutachter_termine` ist anon-gesperrt (PII-Haertung, 5f603aa7). Im Magic-Link-
+    // Kontext OHNE Login (echt-anon) wuerden sowohl der SELECT als auch der Realtime-Sub
+    // mit `permission denied` brechen (RLS-tot + walrus-Spam + toter WS-Channel). Daher:
+    // nur mit Session ausfuehren. Das SV-Live-Tracking (sv_live_position, anon-lesbar)
+    // laeuft im eigenen Effect weiter — der anon-Kunde verliert nichts (der Sub lieferte
+    // als anon eh nichts). whenRealtimeAuthReady() schliesst zusaetzlich den Init-Race
+    // fuer eingeloggte Kunden (setAuth ist async, s. client.ts). Live-"Besichtigung
+    // laeuft" fuer den anon-Kunden = separater Follow-up (token-scoped anon-RLS ODER
+    // server-Prop) — siehe Marker coordination-realtime-claims-permission-denied.
+    void (async () => {
+      await whenRealtimeAuthReady()
+      if (cancelled) return
+      const { data: { session } } = await supabase.auth.getSession()
+      if (cancelled || !session) return
+
+      const { data } = await supabase
+        .from('gutachter_termine')
+        .select('besichtigung_gestartet_am')
+        .eq('id', terminId)
+        .maybeSingle()
+      if (cancelled) return
+      if ((data as { besichtigung_gestartet_am: string | null } | null)?.besichtigung_gestartet_am) {
+        setBesichtigungLaeuft(true)
+      }
+
+      channel = supabase
+        .channel(`kunde-besichtigung-${terminId}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'gutachter_termine',
+            filter: `id=eq.${terminId}`,
+          },
+          (payload) => {
+            const row = payload.new as { besichtigung_gestartet_am: string | null }
+            if (row.besichtigung_gestartet_am) setBesichtigungLaeuft(true)
+          },
+        )
+        .subscribe()
+    })()
+
     return () => {
       cancelled = true
-      void supabase.removeChannel(ch)
+      if (channel) void supabase.removeChannel(channel)
     }
   }, [supabase, terminId])
 

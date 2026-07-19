@@ -16,6 +16,7 @@ import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { istBankdatenPhase } from '@/lib/kunde/bankdaten-status'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
 import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
@@ -265,7 +266,7 @@ export async function getKundeClaimView(
       admin
         .from('gutachter_termine')
         .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id:assignee_id, sv_vorgeschlagene_slots')
-        .eq('fall_id', fallId)
+        .or(bezugOrExpr('fall', fallId))
         .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
         .order('created_at', { ascending: false })
         .limit(1)
@@ -274,7 +275,7 @@ export async function getKundeClaimView(
       admin
         .from('gutachter_termine')
         .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, kb_id')
-        .eq('fall_id', fallId)
+        .or(bezugOrExpr('fall', fallId))
         .eq('typ', 'kb_beratung')
         .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
         .is('cancelled_at', null)
@@ -287,7 +288,7 @@ export async function getKundeClaimView(
       admin
         .from('gutachter_termine')
         .select('id, status, start_zeit, kanal, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
-        .eq('fall_id', fallId)
+        .or(bezugOrExpr('fall', fallId))
         .eq('typ', 'sv_begutachtung')
         .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
         .is('cancelled_at', null)
@@ -298,7 +299,7 @@ export async function getKundeClaimView(
       admin
         .from('gutachter_termine')
         .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, assignee_id')
-        .eq('fall_id', fallId)
+        .or(bezugOrExpr('fall', fallId))
         .eq('status', 'verlegung_pending')
         .gt('start_zeit', new Date().toISOString())
         .order('created_at', { ascending: false })
@@ -580,7 +581,7 @@ export async function getKundeClaimView(
     const { data: staleTermin } = await admin
       .from('gutachter_termine')
       .select('id, start_zeit')
-      .eq('fall_id', fallId)
+      .or(bezugOrExpr('fall', fallId))
       .lt('end_zeit', new Date().toISOString())
       .is('durchgefuehrt_am', null)
       .is('sv_no_show_am', null)

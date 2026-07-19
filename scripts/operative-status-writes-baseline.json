@@ -1,0 +1,8 @@
+{
+  "generatedAt": "2026-07-18T20:04:31.114Z",
+  "count": 2,
+  "files": [
+    "src/lib/kanzlei-wunsch/actions.ts",
+    "src/lib/termine/close-nur-gutachter-termin.ts"
+  ]
+}

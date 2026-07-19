@@ -12,6 +12,11 @@ SELECT gen_random_uuid(),
 FROM onboarding_felder src
 WHERE src.feld_key='schadensfotos'
   AND src.phase_id = (SELECT id FROM onboarding_phasen WHERE flow_key='lead-erfassung' AND phase_key='schaden')
+  -- Replay-Toleranz (Preview-Chain-Fix 17.07.): nur seeden, wenn die Ziel-Phase kunde-onboarding/hergang
+  -- existiert. Fehlt sie (Blank-Replay der Supabase-Preview-Kette), projiziert der SELECT sonst NULL in die
+  -- NOT-NULL-Spalte phase_id -> Replay-Crash, der die ~450 folgenden Migrationen nie erreicht. Auf prod
+  -- existiert die Phase (verifiziert: target_phase_exists=1, Feld bereits geseedet) -> reines No-op.
+  AND EXISTS (SELECT 1 FROM onboarding_phasen WHERE flow_key='kunde-onboarding' AND phase_key='hergang')
   AND NOT EXISTS (
     SELECT 1 FROM onboarding_felder x
     WHERE x.phase_id = (SELECT id FROM onboarding_phasen WHERE flow_key='kunde-onboarding' AND phase_key='hergang')

@@ -21,6 +21,7 @@ import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/component
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 import {
   type TerminGutachterInfo,
   TONE_BADGE,
@@ -264,11 +265,8 @@ export default function LeadsViewToggle({
           }, 12000)
         },
       )
-      .subscribe()
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return subscribeWhenAuthed(supabase, () => channel)
   }, [channelInstanceId])
 
   // AAR-956 #4: Termin/Gutachter live in der Liste. Die "Termin · Gutachter"-Spalte
@@ -294,11 +292,11 @@ export default function LeadsViewToggle({
           }, 600)
         },
       )
-      .subscribe()
 
+    const cleanupChannel = subscribeWhenAuthed(supabase, () => channel)
     return () => {
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
-      supabase.removeChannel(channel)
+      cleanupChannel()
     }
   }, [channelInstanceId, router])
 

@@ -39,6 +39,13 @@ export default function PartnerCockpit({
   const [fehler, setFehler] = useState<string | null>(null)
   const dirty = notiz !== (kontakt.notizen ?? '')
   const link = detailLink(kontakt.kind, kontakt.id)
+  // Audit Slice 2 (Onboarding): Ein SV, der noch nicht ins Portal freigeschaltet und
+  // nicht gesperrt ist, braucht als naechsten Schritt Verifizierung/Freischaltung —
+  // bisher NANNTE der Hinweis (STUFE_HINT) die drei Schritte nur, ohne einen Weg dorthin
+  // ("der Admin muss den Weg raten"). Deep-Link auf den Verifizierungs-Tab der Akte, wo
+  // Dokument-Review + Freischaltung (gibBasicSvFrei) tatsaechlich leben.
+  const svBrauchtFreischaltung =
+    kontakt.kind === 'sv' && !kontakt.roh_portal_zugang && !kontakt.roh_gesperrt
   const [mailBusy, setMailBusy] = useState(false)
   const [mailStatus, setMailStatus] = useState<string | null>(null)
 
@@ -70,6 +77,19 @@ export default function PartnerCockpit({
       <Card p={4} radius="lg">
         <p className="text-caption text-claimondo-ondo/60 mb-1">Nächster Schritt</p>
         <p className="text-sm text-claimondo-navy">{STUFE_HINT[kontakt.stufe]}</p>
+        {svBrauchtFreischaltung && (
+          <div className="mt-3">
+            <Button
+              variant="navy"
+              size="sm"
+              onClick={() =>
+                router.push(`/admin/vertrieb/sachverstaendige/${kontakt.id}?tab=verifizierung`)
+              }
+            >
+              Verifizierung & Freischaltung öffnen
+            </Button>
+          </div>
+        )}
       </Card>
 
       <div className="grid grid-cols-2 gap-4">

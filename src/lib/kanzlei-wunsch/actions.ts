@@ -519,34 +519,43 @@ export async function bestaetigeVollmachtKunde(
  *  - auftraege.gutachten_final_freigegeben=true (latest erstgutachten)
  *  - loescht kanzlei_faelle Eintraege
  *
- * Auth: Geschaedigter, Admin oder KB.
+ * Auth: Admin oder KB (Security-Haertung 18.07. — Kunden-Zweig entfernt).
  */
-export async function smokeResetAufKanzleiWunsch(
-  fallId: string,
-): Promise<{ ok: boolean; error?: string }> {
+// Security-Haertung (18.07., coordination-an-security-sweep-smoke-actions-in-prod-src):
+// Die smoke*-Helper unten sind exportierte Server-Actions, die ECHTE Claims mutieren
+// (Vollmacht-Reset, operative_status-Sprung, claim_nummer-Overwrite, Fake-OCR). Frueher
+// erlaubte das Gate "der Kunde selbst ODER admin/kb" — ein Endkunde haette (per Action-ID-
+// Discovery) seinen EIGENEN Claim korrumpieren koennen. Jetzt admin/kb-only; die Konsole-
+// Smokes laufen ohnehin als Admin. (Fixture-Only-Guard = dokumentierter Follow-up: der naive
+// 'CLM-2026-000%'-Vorschlag ist UNSICHER, weil echte fruehe Prod-Claims ihn matchen.)
+async function assertSmokeAdminOrKb(): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const { data: profile } = await supabase
+    .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
+    return { ok: false, error: 'Nur Admin/KB (Smoke-Helper)' }
+  }
+  return { ok: true }
+}
+
+export async function smokeResetAufKanzleiWunsch(
+  fallId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const gate = await assertSmokeAdminOrKb()
+  if (!gate.ok) return { ok: false, error: gate.error }
 
   const admin = createAdminClient()
-  // CMM-49: faelle-frei (Read) — claims = SSoT (geschaedigter_user_id==kunde_id + lead_id, 0-diff).
+  // CMM-49: faelle-frei (Read) — claims = SSoT (lead_id, 0-diff).
   const claimId = await resolveClaimId(admin, fallId)
   if (!claimId) return { ok: false, error: 'Fall nicht gefunden' }
   const { data: claim } = await admin
     .from('claims')
-    .select('geschaedigter_user_id, lead_id')
+    .select('lead_id')
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Fall nicht gefunden' }
-
-  const istKunde = claim.geschaedigter_user_id === user.id
-  if (!istKunde) {
-    const { data: profile } = await supabase
-      .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
-    if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
-      return { ok: false, error: 'Nur der Kunde oder Admin/KB' }
-    }
-  }
 
   // 1) Lead — SA bleibt, Vollmacht raus, Onboarding bleibt komplett.
   if (claim.lead_id) {
@@ -699,9 +708,11 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
 export async function smokePflichtdokumenteAnlegen(
   fallId: string,
 ): Promise<{ ok: boolean; error?: string; angelegt: number }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet', angelegt: 0 }
+  // Security-Haertung (18.07.): admin/kb-only. Vorher NUR "angemeldet" -> jeder eingeloggte
+  // User konnte auf beliebigen Faellen Pflichtdokumente anlegen (schwaecher als die anderen
+  // smoke*-Gates). Marker: coordination-an-security-sweep-smoke-actions-in-prod-src.
+  const gate = await assertSmokeAdminOrKb()
+  if (!gate.ok) return { ok: false, error: gate.error, angelegt: 0 }
 
   const admin = createAdminClient()
   // CMM-49 Reader-Sweep: claimId via resolveClaimId (faelle-frei), lead_id aus claims (0-diff).
@@ -761,7 +772,7 @@ export async function smokePflichtdokumenteAnlegen(
  * "LexDrive gewaehlt, Vollmacht ausstehend" — der blaue Vollmacht-Gate
  * ist sichtbar, der Kunde kann hier oder via WhatsApp bestaetigen.
  *
- * Auth: Geschaedigter, Admin oder KB.
+ * Auth: Admin oder KB (Security-Haertung 18.07. — Kunden-Zweig entfernt).
  */
 export async function smokeResetAufLexDriveVollmachtOffen(
   fallId: string,

@@ -72,7 +72,10 @@ export default function PageHeader({
             {LucideIconRef ? (
               <LucideIconRef className="w-5 h-5 text-claimondo-ondo shrink-0" />
             ) : null}
-            <h1 className={`${titleSize} font-semibold ${titleColor} truncate`}>
+            {/* title-Attr: bei langen Namen schneidet `truncate` hart ab (Audit Slice 2,
+                z.B. lange Test-Account-Namen) — der native Hover-Tooltip macht den vollen
+                Titel wieder lesbar, ohne das Layout (Overflow-Schutz) zu aendern. */}
+            <h1 className={`${titleSize} font-semibold ${titleColor} truncate`} title={title}>
               {title}
             </h1>
           </div>

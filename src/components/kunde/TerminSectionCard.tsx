@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 import TerminReschedulingModal from './TerminReschedulingModal'
 import { toInitials } from '@/components/shared/KundeAvatar'
 import { createClient } from '@/lib/supabase/client'
+import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
 
 // Portal-i18n: Übersetzer-Typ für die modul-lokalen Helfer (fmtZeitRange/
 // fmtRelativ/getStatusConfig). useTranslations liefert genau diese Aufruf-Form.
@@ -136,28 +137,26 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
   useEffect(() => {
     if (termin.typ !== 'sv_begutachtung') return
     const supabase = createClient()
-    const channel = supabase
-      .channel(`termin-live-${termin.id}`)
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${termin.id}` },
-        (payload) => {
-          const row = payload.new as {
-            sv_unterwegs_seit: string | null
-            sv_angekommen_am: string | null
-            sv_eta_minuten: number | null
-          }
-          setLiveTracking({
-            sv_unterwegs_seit: row.sv_unterwegs_seit,
-            sv_angekommen_am: row.sv_angekommen_am,
-            sv_eta_minuten: row.sv_eta_minuten,
-          })
-        },
-      )
-      .subscribe()
-    return () => {
-      supabase.removeChannel(channel)
-    }
+    return subscribeWhenAuthed(supabase, () =>
+      supabase
+        .channel(`termin-live-${termin.id}`)
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'gutachter_termine', filter: `id=eq.${termin.id}` },
+          (payload) => {
+            const row = payload.new as {
+              sv_unterwegs_seit: string | null
+              sv_angekommen_am: string | null
+              sv_eta_minuten: number | null
+            }
+            setLiveTracking({
+              sv_unterwegs_seit: row.sv_unterwegs_seit,
+              sv_angekommen_am: row.sv_angekommen_am,
+              sv_eta_minuten: row.sv_eta_minuten,
+            })
+          },
+        ),
+    )
   }, [termin.id, termin.typ])
 
   const liveTermin = { ...termin, ...liveTracking }

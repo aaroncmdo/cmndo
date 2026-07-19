@@ -7,6 +7,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { getKanzleiFall } from '@/lib/kanzlei-fall/queries'
 import type {
   ResolverInput,
@@ -56,7 +57,7 @@ export async function getSubphaseResolverInput(
     claimId
       ? admin.from('gutachten').select('ocr_status, pdf_uploaded_at').eq('claim_id', claimId)
       : Promise.resolve({ data: [] }),
-    admin.from('gutachter_termine').select(TERMIN_SELECT).eq('fall_id', fallId),
+    admin.from('gutachter_termine').select(TERMIN_SELECT).or(bezugOrExpr('fall', fallId)),
     admin
       .from('webhook_events')
       // CMM-49: webhook_events claim-gekeyt; claimId ist in scope (Z.41). Resolver liest nur event_type/processed_at.

@@ -4,6 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSlaBreachTaskCancel } from './task-resolution'
 import { deriveSvSlaCompletion } from './sv-completion'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export type SlaTyp =
   | 'gutachter_zuweisung'
@@ -147,7 +148,7 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
         ? await db
             .from('gutachter_termine')
             .select('id', { count: 'exact', head: true })
-            .eq('fall_id', fallId)
+            .or(bezugOrExpr('fall', fallId))
             .in('status', ['bestaetigt', 'abgeschlossen'])
             .then(({ count }) => (count ?? 0) > 0)
         : false

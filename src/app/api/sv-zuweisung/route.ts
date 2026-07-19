@@ -12,6 +12,7 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -358,7 +359,7 @@ export async function POST(request: Request) {
         const { data: neuestTermin } = await db
           .from('gutachter_termine')
           .select('wunschtermin')
-          .eq('claim_id', fallFull.claim_id)
+          .or(bezugOrExpr('claim', fallFull.claim_id))
           .order('start_zeit', { ascending: false })
           .limit(1)
           .maybeSingle()

@@ -7,6 +7,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildIcs } from '@/lib/ical'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export async function GET(
   _req: Request,
@@ -59,7 +60,7 @@ export async function GET(
     const { data: at } = await admin
       .from('gutachter_termine')
       .select('besichtigungsort_adresse')
-      .eq('claim_id', fall.claim_id)
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

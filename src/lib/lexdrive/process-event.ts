@@ -5,6 +5,7 @@
 // Auszahlungs-Mitteilungen.
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
@@ -552,7 +553,7 @@ async function syncKonfrontationsTerminBestaetigt(
   await db
     .from('gutachter_termine')
     .update({ status: 'bestaetigt' })
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .eq('typ', 'konfrontation')
     .in('status', ['reserviert', 'gegenvorschlag'])
 }
@@ -583,7 +584,7 @@ async function sendKundeKonfrontationBestaetigt(
     const { data: at } = await db
       .from('gutachter_termine')
       .select('nachbesichtigung_sv_termin_vereinbart_am')
-      .eq('claim_id', claimId)
+      .or(bezugOrExpr('claim', claimId))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

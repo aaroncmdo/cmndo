@@ -12,7 +12,7 @@ export interface PartnerBillingPanelProps {
    * am unteren Ende des Panels, der setzePartnerUstStatus aufruft.
    */
   ustToggle?: {
-    partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+    partnerTyp: 'makler' | 'werkstatt'
     partnerId: string
     /** Aktueller Wert: true = USt-pflichtig, false = Kleinunternehmer, null = unbekannt */
     current: boolean | null
@@ -28,7 +28,7 @@ export interface PartnerBillingPanelProps {
    * makler ist bereits vollstaendig → readOnly=true zeigt Felder nur an.
    */
   steuerdaten?: {
-    partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+    partnerTyp: 'makler' | 'werkstatt'
     partnerId: string
     current: {
       ust_id: string | null

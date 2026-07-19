@@ -13,6 +13,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { ladeInterneTerminNotizen } from './intern-notizen'
+import { bezugOrExpr } from './bezug-filter'
 
 export type TerminQuelle = 'admin_termine' | 'gutachter_termine'
 
@@ -131,7 +132,7 @@ export async function loadTermine(
     if (scope.fallId && scope.leadId) {
       gtQuery = gtQuery.or(`fall_id.eq.${scope.fallId},lead_id.eq.${scope.leadId},and(bezug_typ.eq.lead,bezug_id.eq.${scope.leadId})`)
     } else if (scope.fallId) {
-      gtQuery = gtQuery.eq('fall_id', scope.fallId)
+      gtQuery = gtQuery.or(bezugOrExpr('fall', scope.fallId))
     } else {
       gtQuery = gtQuery.or(`lead_id.eq.${scope.leadId},and(bezug_typ.eq.lead,bezug_id.eq.${scope.leadId})`)
     }

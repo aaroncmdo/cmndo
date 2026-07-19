@@ -9,6 +9,7 @@
 // faelle, auftraege, gutachter_termine, kanzlei_faelle, leads.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
 // Fixe IDs aus der Production-DB (CMM-37 Audit, 2026-05-02)
 // B4-Harness/Go-Live-Cleanup (13.07., kunde=0): die alten Test-Konten wurden gepurged.
@@ -130,7 +131,7 @@ async function deleteAllSmoke(db: Db): Promise<number> {
     await db.from('werkstaetten').delete().like('name', 'SMOKE-LC-Werkstatt%')
   }
   if (leadIds.length > 0) {
-    await db.from('gutachter_termine').delete().in('lead_id', leadIds)
+    await db.from('gutachter_termine').delete().or(bezugInExpr('lead', leadIds))
     await db.from('leads').delete().in('id', leadIds)
   }
   return claimIds.length

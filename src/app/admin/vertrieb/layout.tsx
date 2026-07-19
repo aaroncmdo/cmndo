@@ -3,6 +3,7 @@
 // Seiten (Sachverständige-Karte, eigene Karte) bringen ihren eigenen Full-Bleed-Escape
 // mit — ein zweiter Escape hier würde doppelt greifen und überlaufen.
 import Link from 'next/link'
+import VorlagenDrawerHost from './VorlagenDrawerHost'
 
 export default function VertriebKonsoleLayout({
   children,
@@ -21,8 +22,10 @@ export default function VertriebKonsoleLayout({
             Partner &amp; Leads — Akquise, Bestand und Karte in einer Übersicht.
           </p>
         </div>
+        {/* B4: oeffnet den Vorlagen-Drawer in-place (?aktion=vorlagen, VorlagenDrawerHost unten).
+            Die Route /admin/vertrieb/vorlagen bleibt als Deep-Link-/Full-Page-Fallback. */}
         <Link
-          href="/admin/vertrieb/vorlagen"
+          href="?aktion=vorlagen"
           className="shrink-0 mt-1 text-caption text-claimondo-ondo/70 underline hover:text-claimondo-navy"
         >
           Mail-Vorlagen
@@ -30,6 +33,7 @@ export default function VertriebKonsoleLayout({
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
       {drawer}
+      <VorlagenDrawerHost />
     </div>
   )
 }

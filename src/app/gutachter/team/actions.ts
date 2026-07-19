@@ -63,19 +63,34 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
     return { success: false, error: 'Ziel-SV hat sein Monats-Kontingent erreicht' }
   }
 
-  // CMM-49 faelle-DROP: Zuweisung kanonisch auf claims (sv_id + operative_status + sv_zugewiesen_am),
-  // NICHT mehr faelle.{sv_id,status} (reader-frei: v_claim_full liest claims.sv_id/operative_status).
+  // CMM-49 faelle-DROP: Zuweisung kanonisch auf claims (sv_id + sv_zugewiesen_am), NICHT mehr
+  // faelle.{sv_id,status} (reader-frei: v_claim_full liest claims.sv_id/operative_status).
   // Der faelle->claims sv_id-Sync-Trigger wird fuer diesen Writer damit unnoetig. vcf.id == claim_id.
   const now = new Date().toISOString()
   const claimId = (fall.id as string | null) ?? null
   if (!claimId) return { success: false, error: 'Kein Claim am Fall' }
+  // FG1-Boy-Scout (17.07.): sv_id + sv_zugewiesen_am direkt (keine Status-Felder). Der
+  // operative_status-Uebergang (-> sv-zugewiesen) laeuft NICHT mehr per Direkt-Write, sondern
+  // durch die Engine (s.u.). Der fruehere Direkt-Write umging fall.status_changed + Timeline +
+  // phase_transitions UND den completeSla('gutachter_zuweisung')-Hook (state-machine.ts) — die
+  // Team-Zuweisung war fuer KB/Admin unsichtbar und schloss die Zuweisungs-SLA nie. Jetzt alle mit.
   const claimUpdate: Record<string, unknown> = {
     sv_id: target_sv_id,
-    operative_status: 'sv-zugewiesen',
     sv_zugewiesen_am: now,
   }
   const { error: updErr } = await db.from('claims').update(claimUpdate as never).eq('id', claimId)
   if (updErr) return { success: false, error: `Zuweisung fehlgeschlagen: ${updErr.message}` }
+
+  // operative_status -> sv-zugewiesen durch die State-Machine. Der Fall ist hier garantiert noch
+  // NICHT zugewiesen (Guard oben: fall.sv_id muss NULL sein) -> aus ersterfassung bzw. sv-gesucht
+  // ist sv-zugewiesen ein gueltiger Uebergang. Non-fatal: die Zuweisung (sv_id) steht bereits;
+  // ein Cursor-Fehler darf sie nicht zuruecknehmen (die Phase leitet die Engine aus dem Cursor ab).
+  try {
+    const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+    await transitionFallStatus(fall_id, 'sv-zugewiesen', { user_id: auth.userId, grund: 'team_zuweisung' })
+  } catch (err) {
+    console.error('[assignPoolLead] transitionFallStatus(sv-zugewiesen) fehlgeschlagen (non-fatal):', err)
+  }
 
   // Counter erhoehen
   await db.from('sachverstaendige').update({

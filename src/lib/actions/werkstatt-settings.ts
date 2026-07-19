@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
+import { FAHRZEUG_GRUPPEN_VALUES } from '@/lib/werkstatt/fahrzeug-gruppen'
 
 export type WerkstattActionResult = { ok: true } | { ok: false; error: string }
 
@@ -200,6 +201,53 @@ export async function setMeineFaehigkeiten(
   const clean = (faehigkeiten ?? []).filter((f) => (GEWERKE as readonly string[]).includes(f))
 
   const { error } = await supabase.from('werkstaetten').update({ faehigkeiten: clean }).eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/werkstatt/einstellungen')
+  return { ok: true }
+}
+
+// ── Marken ────────────────────────────────────────────────────────────────────
+
+/**
+ * Self-Service: Werkstatt pflegt eigene Marken — die STAERKSTE Finder-Ranking-Achse
+ * (markengebunden schlaegt frei). Freier Text (kein CHECK; Engine matcht case-insensitiv),
+ * nur trim + dedupe + non-empty. user_id-scoped (kein IDOR); SSR-Client -> RLS-Backstop
+ * werkstaetten_self_update (user_id = auth.uid()), wie die Geschwister-Actions.
+ */
+export async function setMeineMarken(
+  marken: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const clean = Array.from(new Set((marken ?? []).map((m) => m.trim()).filter((m) => m.length > 0)))
+
+  const { error } = await supabase.from('werkstaetten').update({ marken: clean }).eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/werkstatt/einstellungen')
+  return { ok: true }
+}
+
+// ── Fahrzeug-Gruppen ──────────────────────────────────────────────────────────
+
+/**
+ * Self-Service: Werkstatt pflegt eigene Fahrzeug-Gruppen (Finder-Ranking-Achse).
+ * Fixe Werte-Liste (FAHRZEUG_GRUPPEN_VALUES); Unbekanntes wird gefiltert.
+ * user_id-scoped (kein IDOR); RLS-Backstop wie die Geschwister-Actions.
+ */
+export async function setMeineFahrzeugGruppen(
+  gruppen: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const clean = (gruppen ?? []).filter((g) => (FAHRZEUG_GRUPPEN_VALUES as readonly string[]).includes(g))
+
+  const { error } = await supabase.from('werkstaetten').update({ fahrzeug_gruppen: clean }).eq('user_id', user.id)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/werkstatt/einstellungen')
