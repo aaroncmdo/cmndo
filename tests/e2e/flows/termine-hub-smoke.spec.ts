@@ -10,10 +10,12 @@ import { test, expect, type Page } from '@playwright/test'
 //   npx playwright test tests/e2e/flows/termine-hub-smoke.spec.ts --project=chromium --reporter=list
 // Run (staging): zusaetzlich STAGING_BASIC=1 STAGING_BASIC_PASS=... und PLAYWRIGHT_BASE_URL=https://app.staging.claimondo.de
 //
-// ⚠ Datenlage prod (18.07. verifiziert): fleet_claims_via_vehicle_id=0, nachbesichtigung_mit_datum=0.
-//   -> Flotte + Nachbesichtigung sind aktuell RENDER-/Empty-State-Checks (kein Daten-Assert moeglich,
-//      bis ein Seed existiert: Firma + Fahrzeug + Claim + Termin). Der 403-Guard-Negativtest braucht
-//      ein FOREIGN_TERMIN_ID (ein Termin, der NICHT zur Flotten-Firma gehoert).
+// ✅ SEED STEHT (19.07., prod, via Gegner-Flow angelegt): Test-Flotte GmbH (Smoke) /
+//   flotte.test@claimondo.de hat Fahrzeug B-FL 101 + Claim CLM-2026-00935 + Termin am
+//   27.07.2026 10:00 (kb_beratung, bestaetigt) -> /flotte/termine zeigt eine "Beratung"-Zeile
+//   im Kommend-Block. FLOTTE_PASS kommt aus env (Passwort im Coordination-Marker, nicht im Repo).
+// ⚠ nachbesichtigung_mit_datum = 0 -> der Nachbesichtigung-Badge bleibt vorerst nicht daten-testbar.
+//   Der 403-Guard-Negativtest braucht ein FOREIGN_TERMIN_ID (Termin, der NICHT zur Flotten-Firma gehoert).
 // ⚠ Erstlauf gegen STAGING fahren — die Selektoren sind aus dem Komponenten-Markup abgeleitet, aber
 //   ungetestet gegen die Live-App; Screenshots pruefen, dann prod.
 
@@ -23,7 +25,7 @@ const BASIC_AUTH = process.env.STAGING_BASIC
   : undefined
 
 const KUNDE = { email: process.env.KUNDE_EMAIL ?? 'test-kunde@claimondo.de', pass: process.env.KUNDE_PASS ?? '' }
-const FLOTTE = { email: process.env.FLOTTE_EMAIL ?? '', pass: process.env.FLOTTE_PASS ?? '' }
+const FLOTTE = { email: process.env.FLOTTE_EMAIL ?? 'flotte.test@claimondo.de', pass: process.env.FLOTTE_PASS ?? '' }
 
 // Labels aus src/lib/termine/termin-typ.ts (i18n kunde.termine.typ.*) — de.
 const TYP_BADGES = /Besichtigung|Nachbesichtigung|Reparatur|Beratung|Konfrontation/
