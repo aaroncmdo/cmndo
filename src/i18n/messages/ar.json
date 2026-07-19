@@ -4968,6 +4968,10 @@
       "abschluss": "الإنهاء"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "يتم اختيار الورشة",
+      "reparatur_terminfindung": "يتم تحديد موعد الإصلاح",
+      "reparatur_laeuft": "الإصلاح قيد التنفيذ",
+      "reparatur_fertig": "اكتمل الإصلاح",
       "sa_offen": "جارٍ تسجيل الضرر",
       "vollmacht_offen": "جارٍ تجهيز المستندات",
       "onboarding_offen": "بانتظار البيانات الأخيرة",
@@ -4988,6 +4992,10 @@
       "termin_durchgefuehrt": "تم تنفيذ الموعد"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "اختيار الورشة",
+      "reparatur_terminfindung": "تحديد الموعد",
+      "reparatur_laeuft": "الإصلاح قيد التنفيذ",
+      "reparatur_fertig": "اكتمل الإصلاح",
       "sa_offen": "بانتظار توقيع التنازل",
       "vollmacht_offen": "بانتظار التوكيل",
       "onboarding_offen": "بانتظار إكمال التسجيل",

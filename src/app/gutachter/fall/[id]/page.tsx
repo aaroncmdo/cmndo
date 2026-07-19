@@ -422,7 +422,11 @@ export default async function GutachterFallPage({
 
   // Reparatur-Werkstatt-Vermittlung (Gutachter im Auftrag): Gate + 5 naechste Partner.
   // Nur wenn Reparatur gewuenscht + noch keine Werkstatt hinterlegt (brauchtWerkstattVermittlung).
-  let werkstattVermittlung: { fallId: string; werkstaetten: WerkstattFinderRow[] } | null = null
+  let werkstattVermittlung: {
+    fallId: string
+    werkstaetten: WerkstattFinderRow[]
+    offeneEmpfehlung: { anzahl: number; gesendetAm: string; werkstattNamen: string[] } | null
+  } | null = null
   if (noShowClaimId) {
     const { data: rwGate } = await admin
       .from('claims')
@@ -437,9 +441,42 @@ export default async function GutachterFallPage({
         { gutachtenAbgeschlossen: !!erstgutachtenAuftrag?.gutachten_final_freigegeben, totalschaden: null },
       )
     ) {
+      // Laeuft bereits eine Empfehlung? Dann zeigt die Card statt des Finders den
+      // „laeuft"-Zustand + Zurueckziehen (Spec §11) — DB-driven, kein lokaler UI-State.
+      const { data: offenerBatch } = await admin
+        .from('werkstatt_empfehlung_batches')
+        .select('id, created_at')
+        .eq('claim_id', noShowClaimId)
+        .eq('status', 'offen')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      let offeneEmpfehlung: { anzahl: number; gesendetAm: string; werkstattNamen: string[] } | null = null
+      if (offenerBatch) {
+        const batch = offenerBatch as { id: string; created_at: string }
+        const { data: eRows } = await admin
+          .from('werkstatt_empfehlungen')
+          .select('werkstatt_id')
+          .eq('batch_id', batch.id)
+        const ids = ((eRows ?? []) as Array<{ werkstatt_id: string }>).map((e) => e.werkstatt_id)
+        const { data: wRows } = ids.length
+          ? await admin.from('werkstaetten').select('name').in('id', ids)
+          : { data: [] }
+        offeneEmpfehlung = {
+          anzahl: ids.length,
+          gesendetAm: batch.created_at,
+          werkstattNamen: ((wRows ?? []) as Array<{ name: string | null }>)
+            .map((w) => w.name)
+            .filter((n): n is string => !!n),
+        }
+      }
       werkstattVermittlung = {
         fallId: id,
-        werkstaetten: await findWerkstattVorschlaegeFuer({ target: 'claim', id: noShowClaimId, nurEchte: true }),
+        // Bei laufender Empfehlung braucht die Card den Finder nicht -> Query sparen.
+        werkstaetten: offeneEmpfehlung
+          ? []
+          : await findWerkstattVorschlaegeFuer({ target: 'claim', id: noShowClaimId, nurEchte: true }),
+        offeneEmpfehlung,
       }
     }
   }
@@ -685,6 +722,7 @@ export default async function GutachterFallPage({
         <WerkstattEmpfehlenCard
           fallId={werkstattVermittlung.fallId}
           werkstaetten={werkstattVermittlung.werkstaetten}
+          offeneEmpfehlung={werkstattVermittlung.offeneEmpfehlung}
         />
       )}
       {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}
