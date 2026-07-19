@@ -86,7 +86,7 @@ const ABLAUF = [
 
 // AAR-UWG-Fix 14.05.2026: '89+' und '97 %'-Phantom-Zahlen entfernt.
 const ZAHLEN = [
-  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+  { wert: 'BVSK', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '< 48h', label: 'Ø Gutachten-Termin' },
   { wert: 'BGH', label: 'konforme Durchsetzung' },
   { wert: '0 €', label: 'Kosten für Makler' },

@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Gutachter',
       'Unfallgutachter',
       'unabhängiger Sachverständiger',
-      'DAT-Experte',
+      'zertifizierter Kfz-Gutachter',
       'Schadensgutachten',
       'BVSK-Honorartabelle',
       'Wertminderung berechnen',
@@ -98,7 +98,7 @@ export default function KfzGutachterPillarPage() {
   const faqs = t.raw('faqs') as Array<{ frage: string; antwort: string }>
 
   const TRUST_KPIS = [
-    { kpi: 'DAT', label: t('trust_kpi_dat_label') },
+    { kpi: 'BVSK', label: t('trust_kpi_dat_label') },
     { kpi: '<48h', label: t('trust_kpi_termin_label') },
     { kpi: '0 €', label: t('trust_kpi_eigenanteil_label') },
     { kpi: '§249 BGB', label: t('trust_kpi_recht_label') },
@@ -112,7 +112,7 @@ export default function KfzGutachterPillarPage() {
           serviceSchema({
             name: 'Kfz-Gutachter-Vermittlung Deutschland',
             description:
-              'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, Termin in unter 48 Stunden.',
+              'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis, Termin in unter 48 Stunden.',
             url: `${SITE_URL}/kfz-gutachter`,
           }),
           faqPageSchema(TOP_FAQ),

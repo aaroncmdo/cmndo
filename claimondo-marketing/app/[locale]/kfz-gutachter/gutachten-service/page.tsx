@@ -44,7 +44,7 @@ const FAQS = [
   {
     frage: 'Was umfasst ein Kfz-Gutachten?',
     antwort:
-      'Reparaturkosten-Kalkulation (DAT/Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung.',
+      'Reparaturkosten-Kalkulation (Audatex), merkantile Wertminderung, Wiederbeschaffungswert, Restwert bei Totalschaden, Lichtbilddokumentation, Reparaturweg und Schadenhergang. Das Gutachten ist die Grundlage für die gesamte Schadensregulierung.',
   },
   {
     frage: 'Was kostet der Gutachten-Service?',
@@ -119,7 +119,7 @@ export default function GutachtenServicePage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <AnswerCapsule quelle="§ 249 BGB · § 398 BGB · DAT/Audatex">
+          <AnswerCapsule quelle="§ 249 BGB · § 398 BGB · Audatex">
             {t.rich('antwort_capsule', {
               strong: (chunks) => <strong>{chunks}</strong>,
             })}

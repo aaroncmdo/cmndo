@@ -206,7 +206,7 @@ export const SERVICE_PITCH_USPS: ServicePitchUsp[] = [
     cluster: 5,
     titel: 'Vertrauen / Authority',
     beschreibung:
-      'Hunderte DAT-/BVSK-zertifizierte Sachverständige. Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk). 2025 in Köln gegründet. Founder Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).',
+      'Hunderte BVSK-zertifizierte Sachverständige. Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk). 2025 in Köln gegründet. Founder Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).',
   },
   {
     cluster: 6,

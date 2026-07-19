@@ -48,7 +48,7 @@ function featureText(text: string, cityName: string) {
 // HeroSection — Server-Component (kein 'use client').
 // Mock-Quelle: MASTER_preview-complete_v3-praxis-v2.html Z.4252-4383 (v14b/v15).
 // Mobile (<640): Editorial-Header (★ 5,0 + Tagline) -> H1 -> 0€-Anker-Block (3-zeilig)
-//   -> kompakte USPs -> CTA -> Trust-Stripe (★5,0 Google · DAT · BVSK) -> Brand-Anker
+//   -> kompakte USPs -> CTA -> Trust-Stripe (★5,0 Google · BVSK) -> Brand-Anker
 //   -> Scroll-Chevron (verschwindet bei Scroll via SiteScripts).
 // Desktop/Tablet (>=640, BRIEF 08h Editorial-Port): H1+Sub (15/400 italic, Indent) ->
 //   0€-GEORGIA-ANKER (3-zeilig, ohne Glas-Box; SUPERSEDE 08-A0.3/08e-A2.1) -> USPs
@@ -183,7 +183,7 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="text-[14px] text-white/90 font-medium">Google-Bewertungen</span>
                 </div>
                 <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[14px] leading-tight">
-                  <span className="text-white/85"><strong className="text-white font-semibold">DAT-Standard</strong></span>
+                  <span className="text-white/85"><strong className="text-white font-semibold">Zertifiziert</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white/85"><strong className="text-white font-semibold">BVSK</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
@@ -207,14 +207,14 @@ export function HeroSection({ city }: { city: City }) {
                 </div>
               </div>
 
-              {/* Trust-Block: MOBILE — ★ 5,0 Google · DAT · BVSK + zentraler Brand-Anker. */}
+              {/* Trust-Block: MOBILE — ★ 5,0 Google · BVSK + zentraler Brand-Anker. */}
               <div className="flex sm:hidden flex-col">
                 <div className="flex items-center justify-center gap-x-2 leading-tight hero-text-shadow flex-wrap">
                   <span className="text-[#FCD34D] text-[12.5px] tracking-[1.2px] flex-none" aria-hidden="true">★★★★★</span>
                   <span className="font-mono font-bold text-white text-[12.5px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
                   <span className="text-[11.5px] text-white/70 font-medium">Google</span>
                   <span className="text-white/40" aria-hidden="true">·</span>
-                  <span className="text-[12px] text-white/85 font-semibold">DAT-Standard</span>
+                  <span className="text-[12px] text-white/85 font-semibold">Zertifiziert</span>
                   <span className="text-white/40" aria-hidden="true">·</span>
                   <span className="text-[12px] text-white/85 font-semibold">BVSK</span>
                 </div>

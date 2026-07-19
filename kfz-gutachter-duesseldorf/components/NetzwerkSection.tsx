@@ -41,7 +41,7 @@ export function NetzwerkSection() {
               <span className="loc-text-uc">{MAIN_CITY.name}</span>
             </span>
             <div className="netzwerk-team-bottom">
-              <div className="netzwerk-team-credentials">10+ Jahre · DAT/BVSK · <ClaimondoLink>Claimondo-Partner</ClaimondoLink></div>
+              <div className="netzwerk-team-credentials">10+ Jahre · BVSK · <ClaimondoLink>Claimondo-Partner</ClaimondoLink></div>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ export function NetzwerkSection() {
               </div>
             ))}
             <p className="cmp-mobile-footnote">
-              „Gegengutachten“ = fachliche Widerlegung eines Prüfberichts nach DAT/BVSK-Standard. Auszahlung
+              „Gegengutachten“ = fachliche Widerlegung eines Prüfberichts nach BVSK-Standard. Auszahlung
               einzelfallabhängig.
             </p>
           </div>
@@ -133,13 +133,13 @@ export function NetzwerkSection() {
                 id="netzwerkAvatarTobias"
                 className="cta-v8-role-img"
                 src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
-                alt={`${CLUSTER.svName} ${CLUSTER.svSurname}, DAT-Gutachter vor Ort`}
+                alt={`${CLUSTER.svName} ${CLUSTER.svSurname}, Kfz-Gutachter vor Ort`}
                 loading="lazy"
                 width={56}
                 height={56}
               />
               <p className="cta-v8-role-name">{CLUSTER.svName}</p>
-              <p className="cta-v8-role-sub">DAT-Gutachter</p>
+              <p className="cta-v8-role-sub">Kfz-Gutachter</p>
               <p className="cta-v8-role-action">gerichtsfest</p>
             </div>
             <div className="cta-v8-role">
@@ -193,7 +193,7 @@ export function NetzwerkSection() {
 
           {/* Mobile-Footnote */}
           <p className="mt-3 text-[11.5px] text-white/55 leading-relaxed text-center">
-            „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts nach DAT/BVSK-Standard.
+            „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts nach BVSK-Standard.
             Auszahlung einzelfallabhängig.
           </p>
         </div>

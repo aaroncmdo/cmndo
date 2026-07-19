@@ -16,7 +16,7 @@ export function GET() {
   const body = `# ${SITE.name}
 
 > Unabhängige Kfz-Sachverständige für ${MAIN_CITY.name} und Umgebung (${CLUSTER.region}).
-> Gerichtsfeste Unfallgutachten nach DAT-/BVSK-Standard, Vor-Ort-Begutachtung in
+> Gerichtsfeste Unfallgutachten nach BVSK-Standard, Vor-Ort-Begutachtung in
 > der Regel binnen 60 Minuten, 24/7 erreichbar. Bei unverschuldetem Unfall zahlt
 > die gegnerische Versicherung das Gutachten (§ 249 BGB) — 0 € für Geschädigte.
 > Teil des Claimondo-Partnernetzwerks: Gutachten, Mietwagen, Schadensbetreuung

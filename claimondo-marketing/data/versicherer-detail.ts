@@ -67,7 +67,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
       pruefdienste: ['DEKRA', 'Innovation Group', 'ControlExpert (sekundär)'],
       restwertboerse: 'CarTV / AUTOonline',
       werkstattnetz: 'Schadensteuerung HUK (intern)',
-      kalkulationssoftware: ['DAT', 'Audatex'],
+      kalkulationssoftware: ['Audatex'],
     },
     sentiment: {
       trustpilot: 1.8,
@@ -156,7 +156,7 @@ export const VERSICHERER_DETAIL: Partial<Record<string, VersichererDetail>> = {
       pruefdienste: ['DEKRA', 'ControlExpert'],
       restwertboerse: 'CarTV / AUTOonline',
       werkstattnetz: 'HUK-Gruppenapparat (Coburg)',
-      kalkulationssoftware: ['DAT', 'Audatex'],
+      kalkulationssoftware: ['Audatex'],
     },
     sentiment: {
       topBeschwerden: [

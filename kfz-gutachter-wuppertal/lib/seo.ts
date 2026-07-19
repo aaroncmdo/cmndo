@@ -13,8 +13,8 @@ export function canonicalPath(city: City, route: 'hub' | 'spoke'): string {
 }
 
 export function metadataForCity(city: City, route: 'hub' | 'spoke'): Metadata {
-  const title = `Kfz-Gutachter ${city.name} · bei Unschuld 0 € · DAT`
-  const description = `Kfz-Gutachter ${city.name}: ${META_HOOKS[city.slug] ?? city.h1Sub}. Gerichtsfest nach DAT/BVSK, bei Unschuld 0 €. Anwalt & Mietwagen inklusive.`
+  const title = `Kfz-Gutachter ${city.name} · bei Unschuld 0 €`
+  const description = `Kfz-Gutachter ${city.name}: ${META_HOOKS[city.slug] ?? city.h1Sub}. Gerichtsfest nach BVSK, bei Unschuld 0 €. Anwalt & Mietwagen inklusive.`
   const canonical = canonicalPath(city, route)
   const ogImage = `${CLUSTER.imgPath}og-${CLUSTER.key}.png`
 
