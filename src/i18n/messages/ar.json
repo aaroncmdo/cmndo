@@ -4629,7 +4629,8 @@
         "empty": "لا توجد مواعيد مجدولة حالياً",
         "kommend": "القادمة",
         "verlauf": "السابقة",
-        "reparatur": "مواعيد الإصلاح"
+        "reparatur": "مواعيد الإصلاح",
+        "offen": "يجري تحديد الموعد"
       },
       "toggle": {
         "liste": "قائمة",
@@ -4701,6 +4702,17 @@
         "gegenvorschlagAntworten": "اقترح الخبير موعداً جديداً — أجب الآن ←",
         "terminVerwalten": "إدارة الموعد أو تغيير وقته ←",
         "zurFallakte": "إلى ملف القضية"
+      },
+      "typ": {
+        "besichtigung": "معاينة",
+        "nachbesichtigung": "إعادة المعاينة",
+        "reparatur": "إصلاح",
+        "beratung": "استشارة",
+        "konfrontation": "مواجهة"
+      },
+      "actions": {
+        "verschieben": "تأجيل",
+        "absagen": "إلغاء"
       }
     },
     "tracking": {

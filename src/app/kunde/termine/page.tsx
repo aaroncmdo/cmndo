@@ -6,7 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { getKundeTermine } from '@/lib/claims/kunde-termine'
-import KundeTermineClient, { type TerminRow, type ReparaturTerminRow, type FallInfo } from './KundeTermineClient'
+import KundeTermineClient, { type FallInfo } from './KundeTermineClient'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,34 +57,12 @@ export default async function KundeTermine() {
   // AAR (Kunde-Detail-Rebuild): geteilter Loader — SV-Begutachtungstermine (gutachter_termine,
   // fall_id) UND Werkstatt-Reparaturtermine (reparatur_termine, claim_id). Behebt den Gap, dass
   // Selbstzahler/Kasko-Kunden ihren Reparaturtermin hier nicht sahen (nur gutachter_termine gelesen).
-  const alleTermine =
+  // Termine-Hub: ein vereinter Loader (SV + Reparatur, mit terminTyp + Nachbesichtigung-Split)
+  // -> eine Timeline mit Typ-Badges. Kein SV/Reparatur-Split mehr auf Page-Ebene.
+  const termine =
     fallIds.length > 0 || claimIds.length > 0
       ? await getKundeTermine(adminT, { fallIds, claimIds })
       : []
 
-  // SV/KB-Termine (mit Datum — Kalender + Liste brauchen ein start_zeit) -> bestehende Ansicht.
-  const termine: TerminRow[] = alleTermine
-    .filter((x) => x.art === 'sv' && x.start)
-    .map((x) => ({
-      id: x.id,
-      start_zeit: x.start as string,
-      status: x.status ?? '',
-      typ: x.typ ?? null,
-      kanal: x.kanal ?? null,
-      fall_id: (x.fall_id as string | null) ?? '',
-    }))
-
-  // Reparaturtermine -> eigene Sektion (Werkstatt statt SV; verlinkt in die Fallakte, wo die
-  // WerkstattCard sie interaktiv managt). Das Datum kann noch offen sein (angefragt/anruf_erbeten).
-  const reparaturTermine: ReparaturTerminRow[] = alleTermine
-    .filter((x) => x.art === 'reparatur')
-    .map((x) => ({
-      id: x.id,
-      start: x.start,
-      status: x.status ?? '',
-      claim_id: x.claim_id,
-      werkstatt_id: x.werkstatt_id ?? null,
-    }))
-
-  return <KundeTermineClient termine={termine} reparaturTermine={reparaturTermine} fallMap={fallMap} />
+  return <KundeTermineClient termine={termine} fallMap={fallMap} />
 }
