@@ -32,7 +32,7 @@ export default async function KundeTerminPage({
   // eigene sv_id-Spalte) + den HMAC-Channel-Namen — beide value-identisch (gleiche UUID).
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, assignee_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_bestaetigt_am, besichtigungsort_bestaetigt_von, kanal')
+    .select('id, fall_id, assignee_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_bestaetigt_am, besichtigungsort_bestaetigt_von, kanal, besichtigung_gestartet_am')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -220,6 +220,12 @@ export default async function KundeTerminPage({
             besichtigungsortAdresse={(termin as { besichtigungsort_adresse?: string | null }).besichtigungsort_adresse ?? null}
             besichtigungsortBestaetigtVon={(termin as { besichtigungsort_bestaetigt_von?: string | null }).besichtigungsort_bestaetigt_von ?? null}
             kanal={(termin as { kanal?: string | null }).kanal ?? null}
+            // Der anon-Empfaenger (Magic-Link, kein Login) kann `gutachter_termine`
+            // nicht selbst lesen (anon-RLS-gehaertet) — der Client-Leg ist deshalb
+            // session-gated (#4543). Den Status liefert daher der Server mit, sonst
+            // saehe der anon-Kunde "Besichtigung laeuft" nie. Kein RLS-Change noetig:
+            // der Token autorisiert genau diesen Termin bereits.
+            besichtigungGestartet={!!(termin as { besichtigung_gestartet_am?: string | null }).besichtigung_gestartet_am}
           />
         </div>
       </div>
