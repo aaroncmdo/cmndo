@@ -21,7 +21,7 @@ meta_description: "Ratgeber nach dem Unfall: Wem vertrauen, was der Versicherung
 
 # Was du nach einem Verkehrsunfall wirklich wissen willst — der Ratgeber
 
-> **Kurz erklärt:** Ein unverschuldeter Verkehrsunfall wirft nicht nur juristische Fragen auf, sondern auch ganz menschliche: Wem darf ich vertrauen? Was sage ich der Versicherung? Bilde ich mir die Beschwerden ein? Muss ich überhaupt einen Anwalt nehmen? Dieser Ratgeber sammelt die Fragen, die uns echte Geschädigte stellen — vom frischen Auffahrunfall bis zum schweren Schockschaden — und gibt klare, ehrliche Antworten. Ohne Druck, ohne Verkaufs-Trick, ohne juristisches Imponieren. Wir sind dein unabhängiger Gutachter (Kalkulation: DAT/SilverDAT III), arbeiten mit einer spezialisierten Verkehrsrechts-Kanzlei zusammen, und wir kennen die Muster der Versicherer aus tausend ähnlichen Fällen.
+> **Kurz erklärt:** Ein unverschuldeter Verkehrsunfall wirft nicht nur juristische Fragen auf, sondern auch ganz menschliche: Wem darf ich vertrauen? Was sage ich der Versicherung? Bilde ich mir die Beschwerden ein? Muss ich überhaupt einen Anwalt nehmen? Dieser Ratgeber sammelt die Fragen, die uns echte Geschädigte stellen — vom frischen Auffahrunfall bis zum schweren Schockschaden — und gibt klare, ehrliche Antworten. Ohne Druck, ohne Verkaufs-Trick, ohne juristisches Imponieren. Wir sind dein unabhängiger Gutachter (Kalkulation: Audatex III), arbeiten mit einer spezialisierten Verkehrsrechts-Kanzlei zusammen, und wir kennen die Muster der Versicherer aus tausend ähnlichen Fällen.
 
 ---
 
@@ -245,7 +245,7 @@ Vor zwei Tagen: Unfall. Dein Auto ist abgeschleppt, vielleicht ein Totalschaden.
 Ja, als Geschädigter hast du Anspruch auf einen Mietwagen in der **Klasse deines eigenen Fahrzeugs** — nicht in der billigsten, die die Versicherung gern vorschlägt. Eine Klasse darunter ist Schadensminderungs-zumutbar, mehrere nicht. Bei Partner-Mietwagen-Vorschlag der Versicherung: vorsichtig — siehe [Decoder „Mietwagen zu hoch"](/decoder/mietwagen-zu-hoch) und [Mietwagen-Erstattung](/haftpflicht/mietwagen).
 
 **„Ist mein Auto jetzt Totalschaden — ab wann ist das einer?"**
-Wir rechnen das mit **DAT/SilverDAT III** durch. Vereinfacht: Wirtschaftlicher Totalschaden, wenn die Reparatur teurer wäre als der [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) minus Restwert. **Aber:** Du kannst auch eine teurere Reparatur durchsetzen, wenn du das Auto behältst und sach-/fachgerecht reparieren lässt — die **130 %-Regel** (BGH VI ZR 70/04). Details: [Decoder „Reparatur unwirtschaftlich"](/decoder/reparatur-unwirtschaftlich).
+Wir rechnen das mit **Audatex III** durch. Vereinfacht: Wirtschaftlicher Totalschaden, wenn die Reparatur teurer wäre als der [Wiederbeschaffungswert](/haftpflicht/wiederbeschaffungswert) minus Restwert. **Aber:** Du kannst auch eine teurere Reparatur durchsetzen, wenn du das Auto behältst und sach-/fachgerecht reparieren lässt — die **130 %-Regel** (BGH VI ZR 70/04). Details: [Decoder „Reparatur unwirtschaftlich"](/decoder/reparatur-unwirtschaftlich).
 
 **„Was ist mein Auto noch wert?"**
 Der **Wiederbeschaffungswert** — was du für ein gleichwertiges Fahrzeug am regionalen Markt zahlen müsstest. Wir ermitteln das anhand Zustand, Laufleistung, Ausstattung und vergleichbarer Angebote. Bei **Privatpersonen brutto** (mit MwSt) nach BGH-Linie.
@@ -274,7 +274,7 @@ Nach so einem Erlebnis ist das nachvollziehbar. Wenn das Unbehagen bleibt oder s
 ### Was du als nächstes tust
 
 1. **Mietwagen** — gleichwertige Klasse, kein Partner-Vorschlag der Versicherung
-2. **Eigenes Sachverständigen-Gutachten** mit DAT/SilverDAT III
+2. **Eigenes Sachverständigen-Gutachten** mit Audatex III
 3. **Restwert-Angebot** der Versicherung **nicht** annehmen ohne Gegen-Check
 4. **Restschuld-Klärung** mit deiner Bank parallel
 5. **Anwalt** über unsere Partnerkanzlei
@@ -316,7 +316,7 @@ Solange die gegnerische Haftpflicht reguliert, bleibt deine eigene Versicherung 
 ## <a name="rollen"></a>7. Was wir machen — und was wir bewusst nicht machen
 
 ### Was Claimondo macht
-- **Unabhängige Schadensgutachten** für dein Fahrzeug, kalkuliert mit **DAT/SilverDAT III**
+- **Unabhängige Schadensgutachten** für dein Fahrzeug, kalkuliert mit **Audatex III**
 - **Wertminderungs-Bezifferung** nach anerkannten Methoden
 - **Restwert-Ermittlung** regional realistisch (nicht überregional)
 - **Sachverständigen-Vermittlung** in Dortmund, Düsseldorf, Ruhrgebiet und Rheinland binnen 24–48 h
@@ -446,7 +446,7 @@ Hansaring 10, 50670 Köln · 0221 25906530
 
 ## Rollen-Hinweis
 
-Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt unsere mandatierte Partnerkanzlei für Verkehrsrecht. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzte, Psychotherapeuten, Krisendienste. Kalkulationsgrundlage: DAT/SilverDAT III.
+Claimondo ist unabhängiger Kfz-Gutachter — keine Rechtsberatung, keine ärztliche oder therapeutische Beratung. Rechtliche Schritte (Forderungsschreiben, Klage, Anspruchs-Vorbehalte) übernimmt unsere mandatierte Partnerkanzlei für Verkehrsrecht. Diagnostik und Therapie körperlicher oder seelischer Folgen → Ärzte, Psychotherapeuten, Krisendienste. Kalkulationsgrundlage: Audatex III.
 
 Bei akuten Krisen ist die **Telefonseelsorge 0800 111 0 111** (kostenlos, anonym, 24/7) verfügbar, im Notfall **112**.
 

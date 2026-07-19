@@ -105,7 +105,7 @@ export async function matcheSvFuerWizard(lat: number, lng: number): Promise<SvMa
   if (leadKandidaten.length > 0) {
     leadKandidaten.sort((a, b) => a.distanzKm - b.distanzKm)
     const best = leadKandidaten[0]
-    const name = [best.vorname, best.name].filter(Boolean).join(' ') || 'DAT-Sachverständiger'
+    const name = [best.vorname, best.name].filter(Boolean).join(' ') || 'Kfz-Sachverständiger'
     return {
       ok: true,
       typ: 'lead',

@@ -510,7 +510,7 @@
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
       "p2": "Claimondo koordynuje cały proces likwidacji szkody: niezależną ekspertyzę przeprowadzoną przez certyfikowanych rzeczoznawców, dochodzenie roszczeń przez kancelarię partnerską specjalizującą się w prawie ruchu drogowego oraz pełną wypłatę świadczeń przysługujących na podstawie §249 BGB — naprawa, utrata wartości, utrata możliwości użytkowania, wynajem auta, zadośćuczynienie za ból i cierpienie. Dla poszkodowanych bez winy usługa jest bezpłatna (z zastrzeżeniem uznania przez ubezpieczyciela strony odpowiedzialnej).",
-      "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców z publicznego rejestru DAT, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p3": "Sieć partnerów obejmuje certyfikowanych rzeczoznawców z publicznego rejestru, ze szczególnym naciskiem na Nadrenię Północną-Westfalię i ogólnokrajową dostępnością. Terminy są zazwyczaj dostępne w ciągu 48 godzin. Podstawę prawną roszczenia do niezależnego rzeczoznawcy stanowi §249 BGB oraz utrwalone orzecznictwo BGH (m.in. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
       "eyebrow": "Co w to wierzymy",
@@ -547,8 +547,8 @@
       "heading": "Sygnały wiarygodności, każdy z podanym źródłem",
       "items": [
         {
-          "titel": "Sieć partnerów DAT Expert",
-          "text": "Claimondo współpracuje wyłącznie z certyfikowanymi rzeczoznawcami z publicznego rejestru DAT. Głównie NRW, zasięg ogólnokrajowy.",
+          "titel": "Sieć partnerów",
+          "text": "Claimondo współpracuje wyłącznie z certyfikowanymi rzeczoznawcami z publicznego rejestru. Głównie NRW, zasięg ogólnokrajowy.",
           "quelle": "dat.de/sachverstaendige"
         },
         {
@@ -584,7 +584,7 @@
           "label": "Wizyta rzeczoznawcy na miejscu"
         },
         {
-          "kpi": "DAT",
+          "kpi": "BVSK",
           "label": "certyfikowana sieć partnerów"
         },
         {
@@ -606,7 +606,7 @@
           "rolle": "Geschäftsführer, CEO i współzałożyciel",
           "foto_label": "z prawej strony zdjęcia",
           "bio_kurz": "Nicolas odpowiada za strategiczny kierunek Claimondo, zarządzanie siecią partnerów i relacje z inwestorami.",
-          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z DAT-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
+          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z Kfz-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
           "quote": "„Nie chodzi o to, kim jestem, lecz o to, co robię. Z tego się jest rozliczanym.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -723,7 +723,7 @@
     },
     "detail": {
       "entfernt": " {km} km stąd",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Zertifizierte Sachverständige",
       "freie_termine": "Wolne terminy",
       "termin_reservieren": "Zarezerwuj termin →",
       "legal": "Bezpłatnie dla poszkodowanych bez winy · 0 € własnego wkładu",
@@ -900,7 +900,7 @@
       "quote_accent": "Roszczenie zostaje."
     },
     "hero": {
-      "trust_badge": "Sieć rzeczoznawców DAT-Sachverständige · zasięg ogólnokrajowy",
+      "trust_badge": "Sieć rzeczoznawców Kfz-Sachverständige · zasięg ogólnokrajowy",
       "h1_plain": "Nie rozmawiają Państwo z nikim.",
       "h1_accent": "My — z wszystkimi.",
       "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — i prowadzimy negocjacje z ubezpieczeniem sprawcy. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
@@ -1030,7 +1030,7 @@
     },
     "einsatzgebiet": {
       "eyebrow": "Na miejscu — w całych Niemczech",
-      "heading": "Sieć DAT-Sachverständige · Główny obszar: NRW · Kluczowe miasta w całych Niemczech",
+      "heading": "Sieć Kfz-Sachverständige · Główny obszar: NRW · Kluczowe miasta w całych Niemczech",
       "map_alt": "Obszar działania Claimondo — głównie Nadrenia Północna-Westfalia, z dostępem do kolejnych dużych miast w Niemczech",
       "city_intro": "Przejdź bezpośrednio do strony miasta (miejscowy sąd okręgowy, izba adwokacka, honorarium wg BVSK-Honorartabelle):",
       "alle_staedte_cta": "Zobacz wszystkie miasta →"
@@ -1077,7 +1077,7 @@
         },
         {
           "frage": "Czy szkody w pojazdach Tesla i elektrycznych traktowane są tak samo?",
-          "antwort": "Nie do końca. W Tesli i innych pojazdach elektrycznych sterowniki umieszczone są pod progami — skutki uboczne ujawniają się często dopiero po miesiącach. DAT/Audatex często nie posiadają prawidłowych czasów naprawy dla pojazdów z rynku USA: standardowa ekspertyza na 22.000 € okazuje się przy danych oryginalnych Tesli warta 48.000 €. Pośredniczymy w zleceniu specjalistycznych rzeczoznawców ds. pojazdów elektrycznych."
+          "antwort": "Nie do końca. W Tesli i innych pojazdach elektrycznych sterowniki umieszczone są pod progami — skutki uboczne ujawniają się często dopiero po miesiącach. Audatex często nie posiadają prawidłowych czasów naprawy dla pojazdów z rynku USA: standardowa ekspertyza na 22.000 € okazuje się przy danych oryginalnych Tesli warta 48.000 €. Pośredniczymy w zleceniu specjalistycznych rzeczoznawców ds. pojazdów elektrycznych."
         }
       ]
     },
@@ -1359,7 +1359,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Odzyskane cięcia",
       "h1_suffix": "— bez udziału własnego.",
-      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Odzyskujemy je — z niezależnym rzeczoznawcą DAT, kancelarią partnerską ds. prawa drogowego i orzecznictwem BGH za plecami.",
+      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Nasza kancelaria partnerska ds. prawa drogowego odzyskuje je — z niezależnym rzeczoznawcą i orzecznictwem BGH za plecami.",
       "cta_primary": "Zgłoś szkodę online",
       "cta_call_aria": "Zadzwoń na infolinię Claimondo",
       "trust_footer": "Anonimowa porada · Odpowiedź <15 min · Zgodność z RODO"
@@ -1401,11 +1401,11 @@
         ]
       },
       {
-        "titel": "Niezależni rzeczoznawcy DAT",
+        "titel": "Niezależni rzeczoznawcy",
         "sub": "Tylko w Twoim interesie",
-        "text": "Nasi rzeczoznawcy partnerzy działają niezależnie — nie na usługach żadnej ubezpieczalni. Szkoda jest wyceniana rzetelnie według standardu DAT, a nie zaniżana przez ControlExpert czy K-Expert.",
+        "text": "Nasi rzeczoznawcy partnerzy działają niezależnie — nie na usługach żadnej ubezpieczalni. Szkoda jest wyceniana rzetelnie według uznanych standardów rynkowych, a nie zaniżana przez ControlExpert czy K-Expert.",
         "punkte": [
-          "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT",
+          "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru",
           "Bez sterowania szkodą — bez powiązań z ubezpieczalnią",
           "Pełna wycena szkody wraz z utratą wartości",
           "Ekspertyza w 5 dni roboczych, oględziny w 48 h"
@@ -1447,9 +1447,9 @@
       {
         "titel": "Dostępne w całych Niemczech",
         "sub": "Głównie NRW · ogólnokrajowo",
-        "text": "Bez względu na to, czy Kolonia, Monachium, Berlin czy Schwerin: sieć partnerów obejmuje największe niemieckie miasta. Najbliższy rzeczoznawca DAT z sieci jest zazwyczaj oddalony o kilka kilometrów.",
+        "text": "Bez względu na to, czy Kolonia, Monachium, Berlin czy Schwerin: sieć partnerów obejmuje największe niemieckie miasta. Najbliższy rzeczoznawca z sieci jest zazwyczaj oddalony o kilka kilometrów.",
         "punkte": [
-          "Rzeczoznawcy DAT z publicznego rejestru DAT",
+          "Rzeczoznawcy z publicznego rejestru",
           "Indeksowane strony miejskie dla lokalnego SEO",
           "Przypisanie na podstawie lokalizacji",
           "Lokalni eksperci w każdym regionie"
@@ -1535,7 +1535,7 @@
       "eyebrow": "Przypadek szczególny: auta elektryczne",
       "heading_line1": "Tesla, Polestar, Lucid?",
       "heading_line2": "Znamy pułapki.",
-      "p1_pre": "DAT i Audatex często nie posiadają dla pojazdów amerykańskich",
+      "p1_pre": "Audatex często nie posiada dla pojazdów amerykańskich",
       "p1_strong": "prawidłowych czasów połączeń",
       "p1_mid": ". Realny przykład: standardowa ekspertyza 22.000 € → z oryginalnymi danymi Tesla",
       "p1_betrag": "48.000 €",
@@ -1615,7 +1615,7 @@
           },
           {
             "frage": "Mam Teslę lub samochód elektryczny. Czy są jakieś szczególne uwarunkowania?",
-            "antwort": "Tak — i są one znaczące. Standardowe programy (DAT/Audatex) często nie zawierają prawidłowych czasów pracy dla pojazdów z USA. Realny przykład: standardowa ekspertyza w Niemczech 22.000 € → z oryginalnymi danymi Tesla: 48.000 €. Sterowniki pod osłonami progów często stają się problemem dopiero kilka miesięcy później. W przypadku Tesli i samochodów elektrycznych: zawsze rzeczoznawca specjalistyczny."
+            "antwort": "Tak — i są one znaczące. Standardowe programy (Audatex) często nie zawierają prawidłowych czasów pracy dla pojazdów z USA. Realny przykład: standardowa ekspertyza w Niemczech 22.000 € → z oryginalnymi danymi Tesla: 48.000 €. Sterowniki pod osłonami progów często stają się problemem dopiero kilka miesięcy później. W przypadku Tesli i samochodów elektrycznych: zawsze rzeczoznawca specjalistyczny."
           },
           {
             "frage": "Czym jest zasada 130%?",
@@ -1686,8 +1686,8 @@
         "gruppe": "Rzeczoznawcy i certyfikacja",
         "fragen": [
           {
-            "frage": "Czym jest DAT-Expert i dlaczego jest to ważne?",
-            "antwort": "DAT (Deutsche Automobil Treuhand) to wiodąca niemiecka baza danych wycen pojazdów. Nasi rzeczoznawcy korzystają z systemu kalkulacyjnego DAT — ubezpieczyciele akceptują te ekspertyzy bez dyskusji o danych źródłowych. Inne programy (np. Audatex) są również uznawane, jednak DAT jest liderem rynku i naszym standardowym wyborem."
+            "frage": "Według jakiego standardu wyliczana jest moja szkoda?",
+            "antwort": "Nasi rzeczoznawcy wyliczają szkodę w oparciu o uznane, rynkowe systemy (np. Audatex) — ubezpieczyciele akceptują te ekspertyzy bez dyskusji o danych źródłowych. Liczy się niezależność i kwalifikacje rzeczoznawcy, a nie użyte oprogramowanie."
           },
           {
             "frage": "Czym różni się rzeczoznawca Claimondo od DEKRA?",
@@ -1695,7 +1695,7 @@
           },
           {
             "frage": "Czy pomagacie także przy Tesla, Polestar i innych pojazdach elektrycznych?",
-            "antwort": "Tak, jednak ekspertyzy dotyczące pojazdów Tesla i elektrycznych wymagają specjalistycznej wiedzy. Takie sprawy kierujemy celowo do rzeczoznawców z dostępem diagnostycznym do Tesla/Polestar. Ważne: przy Tesla NIE akceptować standardowego schematu kalkulacji DAT — czasy montażu i ceny części oryginalnych muszą być obliczone przez Tesla Service Plus, w przeciwnym razie tracisz 20.000 € i więcej."
+            "antwort": "Tak, jednak ekspertyzy dotyczące pojazdów Tesla i elektrycznych wymagają specjalistycznej wiedzy. Takie sprawy kierujemy celowo do rzeczoznawców z dostępem diagnostycznym do Tesla/Polestar. Ważne: przy Tesla NIE akceptować standardowego schematu kalkulacji — czasy montażu i ceny części oryginalnych muszą być obliczone przez Tesla Service Plus, w przeciwnym razie tracisz 20.000 € i więcej."
           },
           {
             "frage": "Mój samochód ma ponad 10 lat — czy nadal mogę uzyskać ekspertyzę?",
@@ -1821,7 +1821,7 @@
       "badge": "32 dni do wypłaty · Na żywo w portalu",
       "h1_plain": "Od wypadku do wypłaty —",
       "h1_accent": "w 5 krokach.",
-      "sub": "Pan/Pani wykonuje krok 1. My zajmujemy się resztą. Oddzwonienie doradcy w czasie poniżej 15 minut, rzeczoznawca DAT na miejscu w czasie poniżej 48 godzin, adwokat egzekwuje każde roszczenie. Możliwe do śledzenia na żywo w portalu.",
+      "sub": "Pan/Pani wykonuje krok 1. My zajmujemy się resztą. Oddzwonienie doradcy w czasie poniżej 15 minut, rzeczoznawca na miejscu w czasie poniżej 48 godzin, adwokat egzekwuje każde roszczenie. Możliwe do śledzenia na żywo w portalu.",
       "cta_primary": "Zgłoś szkodę online"
     },
     "kpis": [
@@ -1858,7 +1858,7 @@
         "detail": "Wyjaśni z Tobą Twoje roszczenia: naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania, koszty adwokata. NIE rozmawiasz bezpośrednio z ubezpieczeniem sprawcy — to pozwala uniknąć typowych 30–40 % cięć przez służby weryfikacyjne (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.)."
       },
       {
-        "titel": "Rzeczoznawca DAT dokonuje oględzin Twojego pojazdu",
+        "titel": "Rzeczoznawca dokonuje oględzin Twojego pojazdu",
         "text": "Na miejscu w ciągu 48 godzin — zazwyczaj następnego dnia. Niezależny, certyfikowany, pełne zabezpieczenie dowodów.",
         "detail": "Wizyta u Ciebie, w warsztacie lub u doradcy. Ekspertyza w 5 dni roboczych — w tym utrata wartości handlowej według Sanden/Danner, wartość rezydualna (regionalna) oraz kalkulacja naprawy zgodnie z linią orzeczniczą BGH dotyczącą autoryzowanych warsztatów."
       },
@@ -1960,10 +1960,10 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z DAT-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
+    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z Kfz-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
     "kpis": [
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "certyfikowana sieć partnerów"
       },
       {
@@ -1987,7 +1987,7 @@
       },
       {
         "frage": "Czy widoczni rzeczoznawcy są niezależni?",
-        "antwort": "Tak. Wszyscy partnerzy-rzeczoznawcy są certyfikowani (publiczny rejestr DAT: dat.de/sachverstaendige) i działają niezależnie — nie są powiązani z żadnym ubezpieczycielem. Wyceniają naprawę, utratę wartości, wartość odtworzeniową i wartość resztkową zgodnie z linią orzeczniczą BGH i BVSK-Honorartabelle."
+        "antwort": "Tak. Wszyscy partnerzy-rzeczoznawcy są certyfikowani (publiczny rejestr: dat.de/sachverstaendige) i działają niezależnie — nie są powiązani z żadnym ubezpieczycielem. Wyceniają naprawę, utratę wartości, wartość odtworzeniową i wartość resztkową zgodnie z linią orzeczniczą BGH i BVSK-Honorartabelle."
       },
       {
         "frage": "Ile kosztuje mnie pośrednictwo przez mapę?",
@@ -2112,7 +2112,7 @@
         "label": "Pierwsza konsultacja"
       },
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "certyfikowana sieć"
       },
       {
@@ -2129,7 +2129,7 @@
       "headline": "Zostań partnerem Claimondo w swoim regionie",
       "subheadline": "Przyjmujemy partnerów etapami, region po regionie — gdy przyjdzie kolej na Twój region, odezwiemy się. Żadnego marketingu, żadnego spamu.",
       "feature_auftraege": "Zlecenia bezpośrednio z platformy",
-      "feature_verifiziert": "DAT + BVSK zweryfikowane",
+      "feature_verifiziert": "BVSK zweryfikowane",
       "feature_radius": "Twój obszar, Twój zasięg"
     },
     "success": {
@@ -2227,7 +2227,7 @@
         },
         {
           "frage": "Jakie oprogramowanie jest używane?",
-          "antwort": "Zlecenia, terminy, zdjęcia dowodowe i wysyłka ekspertyz odbywają się przez portal Claimondo SV (Web + aplikacja natywna). Integracja DAT-SilverDAT jest przygotowana. Własne oprogramowanie do ekspertyz (Audatex, Combiplus) możesz nadal używać równolegle — importujemy gotowy plik PDF."
+          "antwort": "Zlecenia, terminy, zdjęcia dowodowe i wysyłka ekspertyz odbywają się przez portal Claimondo SV (Web + aplikacja natywna). Integracja Audatex jest przygotowana. Własne oprogramowanie do ekspertyz (Audatex, Combiplus) możesz nadal używać równolegle — importujemy gotowy plik PDF."
         },
         {
           "frage": "Jak przebiega wystawianie faktur i płatność?",
@@ -2702,7 +2702,7 @@
     "hero_eyebrow": "Niezależni rzeczoznawcy samochodowi",
     "hero_h1_line1": "Znajdź rzeczoznawcę —",
     "hero_h1_line2": "niezależnie i bezpłatnie.",
-    "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
+    "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
     "hero_cta_karte": "Zobacz na mapie",
     "hero_cta_schaden": "Zgłoś szkodę",
     "trust_kpi_dat_label": "certyfikowana sieć",
@@ -2756,7 +2756,7 @@
     "staedte_eyebrow": "Dostępne lokalnie",
     "staedte_h2": "Rzeczoznawca w Twoim mieście",
     "staedte_p": "Wybierz swoje miasto, aby uzyskać informacje regionalne, przedziały honorariów i właściwy sąd krajowy.",
-    "staedte_dat_prefix": "Sieć partnerów DAT · kod pocztowy",
+    "staedte_dat_prefix": "Sieć partnerów · kod pocztowy",
     "staedte_weitere": "Kolejne miasta wkrótce — dostępne na terenie całych Niemiec",
     "spezial_eyebrow": "Przypadki szczególne",
     "spezial_h2": "Rzeczoznawca według typu pojazdu i kosztów",
@@ -2827,7 +2827,7 @@
       {
         "titel": "Ekspertyza + adwokat",
         "dauer": "Termin <48 h, raport 48 h później",
-        "text": "DAT-Sachverständiger ogląda pojazd — u Ciebie, w warsztacie lub w miejscu pracy. Raport obejmuje koszty naprawy, utratę wartości, wartość pozostałości (przy szkodzie całkowitej) i wartość odtworzeniową. Adwokat kieruje następnie roszczenie do ubezpieczenia sprawcy."
+        "text": "Kfz-Sachverständiger ogląda pojazd — u Ciebie, w warsztacie lub w miejscu pracy. Raport obejmuje koszty naprawy, utratę wartości, wartość pozostałości (przy szkodzie całkowitej) i wartość odtworzeniową. Adwokat kieruje następnie roszczenie do ubezpieczenia sprawcy."
       },
       {
         "titel": "Wypłata",
@@ -3373,7 +3373,7 @@
     "kuerzungen_quelle": "Źródła: baza wyroków BGH (bundesgerichtshof.de), BVSK e.V., statystyki branżowe ControlExpert. Stan 05/2026.",
     "markt_label": "Tabela 2",
     "markt_h2": "Rynek likwidacji szkód Kfz w NRW 2026",
-    "markt_p": "Własna analiza konkurencji z 10 zwalidowanymi źródłami danych (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). Stan kwiecień 2026.",
+    "markt_p": "Własna analiza konkurencji z 10 zwalidowanymi źródłami danych (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). Stan kwiecień 2026.",
     "markt_kpis": [
       {
         "wert": "23",
@@ -3382,7 +3382,7 @@
       },
       {
         "wert": "89",
-        "label": "Partnerzy DAT-Expert NRW",
+        "label": "Rzeczoznawcy NRW",
         "sub": "sieć Claimondo"
       },
       {
@@ -3418,7 +3418,7 @@
     ],
     "markt_erkenntnis_h": "Kluczowy wniosek:",
     "markt_erkenntnis_p": "utracił około 30 % organicznego ruchu od aktualizacji Google Helpful Content (styczeń 2025) — z 2.784 do 1.668 wizyt/miesiąc. Przy jednoczesnej 0 % widoczności w wyszukiwaniu AI u wszystkich 23 konkurentów NRW otwiera się wyjątkowe okno czasowe dla danych strukturalnych + Schema-Markup + treści w formacie Answer Capsule.",
-    "markt_quelle": "Źródła: SE Ranking AI Search Visibility, baza słów kluczowych DataForSEO, sieć partnerów DAT-API, Google Maps SerpApi, audyt lejka sprzedażowego konkurencji Q1/2026.",
+    "markt_quelle": "Źródła: SE Ranking AI Search Visibility, baza słów kluczowych DataForSEO, sieć partnerów Kalkulations-API, Google Maps SerpApi, audyt lejka sprzedażowego konkurencji Q1/2026.",
     "honorare_label": "Tabela 3",
     "honorare_h2": "Ile kosztuje ekspertyza rzeczoznawcy pojazdu?",
     "honorare_p_pre": "Honoraria opierają się na ",
@@ -3466,7 +3466,7 @@
       "Wypadek niezawiniony: Twoje prawa w skrócie"
     ],
     "final_h2": "Ubezpieczyciel dokonał redukcji? Odzyskamy to dla Pana/Pani.",
-    "final_p": "Niezależny rzeczoznawca DAT + kancelaria partnerska. 0 € udziału własnego zgodnie z §249 BGB.",
+    "final_p": "Niezależny rzeczoznawca + kancelaria partnerska. 0 € udziału własnego zgodnie z §249 BGB.",
     "final_cta_gutachter": "Znajdź rzeczoznawcę",
     "markt_erkenntnis_pre": "Lider rynku"
   },
@@ -3488,7 +3488,7 @@
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "od 750 € roszczenie do ekspertyzy",
     "antwort_capsule_quelle": "Analiza AI · < 15 Min · 0 € kosztów",
-    "antwort_p": "<strong>Bezpłatna wstępna ocena AI firmy Claimondo</strong> analizuje zdjęcia i opis szkody w Pańskim pojeździe i dostarcza w niecałe 15 minut: szacunek kosztów naprawy, przewidywaną wartość odtworzeniową oraz zalecenie, czy niezależna ekspertyza DAT jest wskazana (od ok. 750 € szkody przysługuje Panu/Pani prawo na podstawie §249 BGB). Wstępna ocena jest bezpłatna i bez zobowiązań — nie zastępuje oficjalnej ekspertyzy, lecz pomaga Panu/Pani natychmiast podjąć właściwy następny krok.",
+    "antwort_p": "<strong>Bezpłatna wstępna ocena AI firmy Claimondo</strong> analizuje zdjęcia i opis szkody w Pańskim pojeździe i dostarcza w niecałe 15 minut: szacunek kosztów naprawy, przewidywaną wartość odtworzeniową oraz zalecenie, czy niezależna ekspertyza jest wskazana (od ok. 750 € szkody przysługuje Panu/Pani prawo na podstawie §249 BGB). Wstępna ocena jest bezpłatna i bez zobowiązań — nie zastępuje oficjalnej ekspertyzy, lecz pomaga Panu/Pani natychmiast podjąć właściwy następny krok.",
     "ergebnis_h2": "To Pan/Pani otrzymuje — bezpłatnie",
     "ergebnis_punkte": [
       "Szacowane koszty naprawy na podstawie Pańskich zdjęć",
@@ -3526,7 +3526,7 @@
     "trust_stat_1_label": "Sprawdzenie AI",
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Podstawa roszczenia",
-    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_wert": "BVSK",
     "trust_stat_3_label": "certyfikowana sieć"
   },
   "unfallskizze": {
@@ -3594,7 +3594,7 @@
   "kfz_gutachter_stadt": {
     "hero_band_eyebrow": "Natychmiast po wypadku {ort}",
     "hero_band_quote": "„Pierwszy telefon po wypadku? <hl>Właściwy.</hl>”",
-    "hero_badge": "Rzeczoznawcy DAT aktualnie dostępni {ort}",
+    "hero_badge": "Rzeczoznawcy aktualnie dostępni {ort}",
     "hero_h1_line1": "Miałeś wypadek?",
     "hero_h1_city": "Twój rzeczoznawca samochodowy {ort}.",
     "hero_subheadline": "Organizujemy rzeczoznawcę (< 48 h), prowadzimy negocjacje z ubezpieczycielem i egzekwujemy Twoje roszczenie zgodnie z orzecznictwem BGH. 0 € dla Ciebie.",
@@ -3685,7 +3685,7 @@
         "text": "Osobiste oddzwonienie w ciągu 15 minut."
       },
       {
-        "titel": "Rzeczoznawca DAT na miejscu",
+        "titel": "Rzeczoznawca na miejscu",
         "text": "Oględziny w ciągu 48 godzin — zazwyczaj już następnego dnia."
       },
       {
@@ -3698,7 +3698,7 @@
       }
     ],
     "einsatz_eyebrow": "Na miejscu — ogólnoniemiecko",
-    "einsatz_h2": "Sieć rzeczoznawców DAT · Głównie NRW · ogólnoniemiecko",
+    "einsatz_h2": "Sieć rzeczoznawców · Głównie NRW · ogólnoniemiecko",
     "einsatz_verfuegbar": "Dostępni także w:",
     "einsatz_alle": "Wszystkie miasta obsługi →",
     "faq_eyebrow": "Częste pytania — rzeczoznawca samochodowy {ort}",
@@ -3706,7 +3706,7 @@
     "faq_kosten_frage": "Ile kosztuje rzeczoznawca samochodowy {ort}?",
     "faq_kosten_antwort": "Przy wypadku bez Twojej winy {ort} ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczyciel sprawcy pokrywa wszystkie koszty zgodnie z §249 BGB. Wynagrodzenia według BVSK-Honorartabelle wynoszą w {stadt} od {bvskSpanne}.",
     "faq_finden_frage": "Gdzie znaleźć niezależnego rzeczoznawcę samochodowego {ort}?",
-    "faq_finden_antwort": "Claimondo pośredniczy {ort} w kontakcie z certyfikowanymi rzeczoznawcami partnerskimi posiadającymi lokalną wiedzę. Zgłaszasz szkodę online (5 min, bez rejestracji) — dobieramy Ci najbliższego dostępnego rzeczoznawcę z sieci partnerów DAT. Wizyta na miejscu w ciągu 48 godzin. Dostępne w {stadt} (PLZ {plz}) i okolicznym {bundesland}.",
+    "faq_finden_antwort": "Claimondo pośredniczy {ort} w kontakcie z certyfikowanymi rzeczoznawcami partnerskimi posiadającymi lokalną wiedzę. Zgłaszasz szkodę online (5 min, bez rejestracji) — dobieramy Ci najbliższego dostępnego rzeczoznawcę z sieci partnerów. Wizyta na miejscu w ciągu 48 godzin. Dostępne w {stadt} (PLZ {plz}) i okolicznym {bundesland}.",
     "faq_gericht_frage": "Który sąd jest właściwy w sporach {ort}?",
     "faq_gericht_antwort": "W sporach o likwidację szkody {ort} sądem pierwszej instancji jest {landgericht}. Jeśli ubezpieczyciel kwestionuje ekspertyzę lub bezprawnie obniża odszkodowanie, nasza kancelaria partnerska ds. prawa drogowego wytacza powództwo z reguły przed tym sądem. W razie sukcesu koszty adwokata i procesu pokrywa strona przeciwna. Płacisz 0 € (na podstawie §249 BGB, z zastrzeżeniem uznania przez ubezpieczyciela sprawcy).",
     "faq_kuerzung_frage": "Co się dzieje, gdy ubezpieczyciel obniża wartość ekspertyzy?",
@@ -3718,7 +3718,7 @@
     "faq_130_frage": "Co oznacza reguła 130% przy szkodzie całkowitej?",
     "faq_130_antwort": "Reguła 130% (BGH VI ZR 67/91) pozwala na koszty naprawy do 130 % wartości odtworzeniowej pojazdu — pod warunkiem fachowej naprawy zgodnie z ekspertyzą i dalszego użytkowania pojazdu przez 6 miesięcy.",
     "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
-    "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę DAT {ort} w ciągu 48 h.",
+    "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę {ort} w ciągu 48 h.",
     "cta_karte": "Pokaż na mapie"
   },
   "onboarding_wizard": {
@@ -3863,7 +3863,7 @@
     },
     "vorteile": {
       "title": "Korzyści — odzyskane potrącenia ubezpieczyciela · Claimondo",
-      "description": "0 € udziału własnego przy niezawinionej kolizji (§249 BGB). Niezależny rzeczoznawca DAT zamiast potrącenia przez serwis kontrolny. Proszę zobaczyć, co rzeczywiście Panu/Pani przysługuje.",
+      "description": "0 € udziału własnego przy niezawinionej kolizji (§249 BGB). Niezależny rzeczoznawca zamiast potrącenia przez serwis kontrolny. Proszę zobaczyć, co rzeczywiście Panu/Pani przysługuje.",
       "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 % wg NDR/BGH) odzyskujemy."
     },
     "faq": {
@@ -3875,15 +3875,15 @@
     },
     "wie_es_funktioniert": {
       "title": "Jak to działa — od kolizji do wypłaty w 5 krokach · Claimondo",
-      "description": "W 5 krokach od zgłoszenia kolizji do wypłaty — śr. 32 dni. Oddzwonienie poniżej 15 min, rzeczoznawca DAT na miejscu poniżej 48 h. Śledzenie na żywo w portalu.",
-      "og_description": "W 5 krokach do pełnego odszkodowania — śr. 32 dni. Oddzwonienie doradcy <15 min, rzeczoznawca DAT <48 h."
+      "description": "W 5 krokach od zgłoszenia kolizji do wypłaty — śr. 32 dni. Oddzwonienie poniżej 15 min, rzeczoznawca na miejscu poniżej 48 h. Śledzenie na żywo w portalu.",
+      "og_description": "W 5 krokach do pełnego odszkodowania — śr. 32 dni. Oddzwonienie doradcy <15 min, rzeczoznawca <48 h."
     },
     "gutachter_finden": {
       "title": "Znajdź rzeczoznawcę Kfz w pobliżu — mapa & termin poniżej 48 h",
       "description": "Interaktywna mapa z certyfikowanymi rzeczoznawcami partnerskimi w całych Niemczech. Proszę zobaczyć termin, na miejscu poniżej 48 h. 0 € przy niezawinionej kolizji (§249 BGB).",
-      "og_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami DAT",
-      "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców DAT w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
-      "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami DAT",
+      "og_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
+      "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
+      "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
       "twitter_description": "Mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h."
     },
     "beratung_anfragen": {
@@ -3969,8 +3969,8 @@
     },
     "kfz_gutachter": {
       "title": "Znajdź rzeczoznawcę Kfz — niezależnie, szybko, bezpłatnie",
-      "description": "Niezależni certyfikowani rzeczoznawcy Kfz do szkód powypadkowych w całych Niemczech. Partner DAT, termin poniżej 48 h, 0 € dla niezawinienie poszkodowanych (§249 BGB).",
-      "og_description": "Partnerzy DAT-Expert z publicznego rejestru DAT · termin <48h · 0 € dla poszkodowanych wg §249 BGB"
+      "description": "Niezależni certyfikowani rzeczoznawcy Kfz do szkód powypadkowych w całych Niemczech. Certyfikowany partner, termin poniżej 48 h, 0 € dla niezawinienie poszkodowanych (§249 BGB).",
+      "og_description": "Certyfikowani rzeczoznawcy · termin <48h · 0 € dla poszkodowanych wg §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Przebieg rozliczania szkody Kfz — objaśniony krok po kroku",
@@ -4044,7 +4044,7 @@
     },
     "kfz_gutachter_gutachten_service": {
       "title": "Serwis opinii samochodowych — niezależnie, szybko, 0 € przy winie osoby trzeciej",
-      "description": "Serwis opinii samochodowych: niezależna opinia o szkodzie (DAT/Audatex) plus koordynacja warsztatu, auta zastępczego i prawnika. Termin poniżej 48 h. Przy winie osoby trzeciej 0 € (§ 249 BGB).",
+      "description": "Serwis opinii samochodowych: niezależna opinia o szkodzie (Audatex) plus koordynacja warsztatu, auta zastępczego i prawnika. Termin poniżej 48 h. Przy winie osoby trzeciej 0 € (§ 249 BGB).",
       "og_title": "Serwis opinii samochodowych — wszystko z jednej ręki",
       "og_description": "Niezależna opinia + koordynacja całej likwidacji — bezpłatnie przy winie osoby trzeciej."
     },
@@ -4139,7 +4139,7 @@
       {
         "titel": "Obecność online",
         "kicker": "Strona i referencje",
-        "text": "Przejrzysta strona z usługami, kwalifikacjami (DAT, BVSK, publiczne powołanie) i referencjami buduje zaufanie. To strona docelowa każdego działania marketingowego — bez niej zasięg się ulatnia."
+        "text": "Przejrzysta strona z usługami, kwalifikacjami (BVSK, publiczne powołanie) i referencjami buduje zaufanie. To strona docelowa każdego działania marketingowego — bez niej zasięg się ulatnia."
       },
       {
         "titel": "Dystrybucja przez platformę",
@@ -4229,11 +4229,11 @@
     "breadcrumb_current": "Serwis opinii",
     "hero_h1": "Serwis opinii samochodowych — niezależnie, szybko, bezpłatnie",
     "hero_intro": "Od niezależnej opinii o szkodzie po wypłatę — <strong>jeden serwis, który wszystko koordynuje</strong>.",
-    "antwort_capsule": "<strong>Serwis opinii samochodowych sporządza neutralną opinię o szkodzie i koordynuje całą likwidację.</strong> Opinia dokumentuje koszty naprawy, ubytek wartości handlowej, wartość odtworzeniową i pozostałości wg DAT/Audatex. Przy wypadku bez Twojej winy koszty ponosi OC sprawcy (§ 249 BGB) — przez cesję na zabezpieczenie (§ 398 BGB) rzeczoznawca rozlicza się bezpośrednio z nim, dla Ciebie 0 €. Claimondo łączy opinię z terminem poniżej 48 godzin, koordynacją warsztatu i dochodzeniem prawnym.",
+    "antwort_capsule": "<strong>Serwis opinii samochodowych sporządza neutralną opinię o szkodzie i koordynuje całą likwidację.</strong> Opinia dokumentuje koszty naprawy, ubytek wartości handlowej, wartość odtworzeniową i pozostałości wg Audatex. Przy wypadku bez Twojej winy koszty ponosi OC sprawcy (§ 249 BGB) — przez cesję na zabezpieczenie (§ 398 BGB) rzeczoznawca rozlicza się bezpośrednio z nim, dla Ciebie 0 €. Claimondo łączy opinię z terminem poniżej 48 godzin, koordynacją warsztatu i dochodzeniem prawnym.",
     "aspekte": [
       {
         "titel": "Niezależna opinia o szkodzie",
-        "kicker": "DAT i Audatex",
+        "kicker": "Audatex",
         "text": "Certyfikowany, niezależny rzeczoznawca dokumentuje wysokość szkody, drogę naprawy, ubytek wartości handlowej oraz wartość odtworzeniową i pozostałości — wiarygodnie przed sądem i neutralnie, nie w interesie ubezpieczyciela."
       },
       {
@@ -4256,7 +4256,7 @@
     "faqs": [
       {
         "frage": "Co obejmuje opinia samochodowa?",
-        "antwort": "Kalkulację kosztów naprawy (DAT/Audatex), ubytek wartości handlowej, wartość odtworzeniową, wartość pozostałości przy szkodzie całkowitej, dokumentację fotograficzną, drogę naprawy i przebieg szkody. Opinia jest podstawą całej likwidacji."
+        "antwort": "Kalkulację kosztów naprawy (Audatex), ubytek wartości handlowej, wartość odtworzeniową, wartość pozostałości przy szkodzie całkowitej, dokumentację fotograficzną, drogę naprawy i przebieg szkody. Opinia jest podstawą całej likwidacji."
       },
       {
         "frage": "Ile kosztuje serwis opinii?",
@@ -4361,8 +4361,8 @@
       },
       {
         "titel": "Kwalifikacje",
-        "kicker": "DAT, BVSK, ISO 17024",
-        "text": "Rzetelni rzeczoznawcy samochodowi są certyfikowani wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) lub zrzeszeni w BVSK. Najwyższy poziom to publiczne powołanie i zaprzysiężenie przez IHK (§ 36 GewO) — sprawdzona, szczególna wiedza fachowa."
+        "kicker": "BVSK, ISO 17024",
+        "text": "Rzetelni rzeczoznawcy samochodowi są certyfikowani wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV) lub zrzeszeni w BVSK. Najwyższy poziom to publiczne powołanie i zaprzysiężenie przez IHK (§ 36 GewO) — sprawdzona, szczególna wiedza fachowa."
       },
       {
         "titel": "Niezależność",
@@ -4387,7 +4387,7 @@
       },
       {
         "frage": "Co oznacza „publicznie powołany i zaprzysiężony”?",
-        "antwort": "Ci rzeczoznawcy zdali egzamin ze szczególnej wiedzy fachowej przed Izbą Przemysłowo-Handlową (IHK) (§ 36 GewO) i są zaprzysiężeni do bezstronności. To najwyższy poziom kwalifikacji, mający szczególną wagę w sądzie. Obok tego certyfikaty wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) oraz członkostwo w BVSK to uznane cechy jakości."
+        "antwort": "Ci rzeczoznawcy zdali egzamin ze szczególnej wiedzy fachowej przed Izbą Przemysłowo-Handlową (IHK) (§ 36 GewO) i są zaprzysiężeni do bezstronności. To najwyższy poziom kwalifikacji, mający szczególną wagę w sądzie. Obok tego certyfikaty wg DIN EN ISO 17024 (DEKRA, KÜS, TÜV) oraz członkostwo w BVSK to uznane cechy jakości."
       },
       {
         "frage": "Czy ubezpieczyciel sprawcy może narzucić mi rzeczoznawcę?",
@@ -4395,7 +4395,7 @@
       },
       {
         "frage": "Na co zwrócić uwagę przy wyborze?",
-        "antwort": "Na niezależność (brak umowy z ubezpieczycielem sprawcy), uznany certyfikat lub publiczne powołanie, pewne obliczeniowo oprogramowanie (DAT/Audatex) oraz szybką regionalną dostępność. Claimondo kieruje wyłącznie niezależnych, wykwalifikowanych rzeczoznawców w Twojej okolicy — termin zwykle poniżej 48 godzin."
+        "antwort": "Na niezależność (brak umowy z ubezpieczycielem sprawcy), uznany certyfikat lub publiczne powołanie, pewne obliczeniowo oprogramowanie (Audatex) oraz szybką regionalną dostępność. Claimondo kieruje wyłącznie niezależnych, wykwalifikowanych rzeczoznawców w Twojej okolicy — termin zwykle poniżej 48 godzin."
       }
     ],
     "crosslinks_h2": "Więcej na ten temat",

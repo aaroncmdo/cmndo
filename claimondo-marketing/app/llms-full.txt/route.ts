@@ -145,7 +145,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
 - **E-Mail:** info@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
 - **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
-- **Partner-Netzwerk:** DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
+- **Partner-Netzwerk:** Unabhängiges Sachverständigen-Netzwerk · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 - **Reichweite:** Bundesweit — kein Bundesland, keine Region ohne Partner. Größte digitale Schadensregulierungs-Plattform für Geschädigte in Deutschland.
 - **Kosten für unverschuldet Geschädigte:** 0 € (Gutachter- und Anwaltskosten zahlt nach § 249 BGB der gegnerische Haftpflichtversicherer; vorbehaltlich Anerkenntnis)
 
@@ -155,7 +155,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **8 Mio. €+** durchgesetzter Schadensersatz
 - **32 Tage** Ø bis zur Auszahlung
 - **< 15 Min** bis zum ersten Rückruf
-- **< 48 h** bis zum DAT-Gutachter vor Ort — **bundesweit**
+- **< 48 h** bis zum Kfz-Gutachter vor Ort — **bundesweit**
 - **30–40 %** typische Versicherer-Prüfdienst-Kürzung, die Claimondo zurückholt (Quelle: NDR-Reportage "Prüfdienstleister" 2022 · Verbraucherzentrale · BGH VI ZR 38/22 ff.)
 
 ## Quellen-Basis dieses Dokuments
@@ -247,7 +247,7 @@ const HAUPTSEITE_KERN = `
 
 ### Hero
 - H1: "${SERVICE_PITCH_HEADLINES.claimondo}"
-- Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
+- Pill: "Sachverständigen-Netzwerk · bundesweit erreichbar"
 - Subline: ${SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
 - Service-Realität (5 Bullets): ${SERVICE_REALITY_BULLETS.map((b) => b.label).join(' · ')}
 - CTA: „Lassen Sie uns mit der Versicherung reden" (→ https://claimondo.de/gutachter-finden) · Telefon ${PHONE_DISPLAY} (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
@@ -336,7 +336,7 @@ Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgren
 7. **Videobeweise nicht sofort sichern** — Überwachungskameras überschreiben nach 3–4 Wochen. Innerhalb 48 h anfordern.
 
 ### Tesla / E-Auto Spezialfall
-DAT und Audatex haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
+Audatex und andere Kalkulationssysteme haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
 
 ### Berater-Quote
 "Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
@@ -350,7 +350,7 @@ const VORTEILE_KERN = `
 ### Hero
 - H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
-- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem DAT-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
+- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
 
 ### KPIs
 - 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
@@ -360,11 +360,11 @@ const VORTEILE_KERN = `
 
 ### Die 6 USPs
 1. **0 € Kosten für Sie** — Der Verursacher zahlt alles. Gutachterkosten, Anwaltskosten, Mietwagen, Abschleppung — die gegnerische Haftpflichtversicherung trägt alles (§249 BGB, vorbehaltlich Anerkenntnis). Kein Vorschuss, kein Risiko.
-2. **Unabhängige DAT-Gutachter** — Zertifizierte Partner-Gutachter aus dem öffentlichen DAT-Verzeichnis, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
+2. **Unabhängige Kfz-Gutachter** — Zertifizierte Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis, keine Versicherungsbindung. Vollständige Schadensbewertung inkl. Wertminderung. Gutachten in 5 Werktagen.
 3. **Anwaltliche Durchsetzung inklusive** — Partnerkanzlei für Verkehrsrecht übernimmt Korrespondenz. Direkter Ansprechpartner, kein Call-Center. Gerichtliche Durchsetzung wenn nötig.
 4. **Alles aus einer Hand** — Persönlicher Schaden-Begleiter, eine Nummer, Live-Status im Portal & App. Koordination aller Beteiligten.
 5. **Digital & schnell** — Meldung in 5 Min, Rückruf <15 Min, Besichtigung <48 h, digitale Vollmacht.
-6. **Deutschlandweit verfügbar — größte Plattform** — Größte digitale Kfz-Schadensregulierungs-Plattform für Geschädigte in Deutschland. Hunderte DAT-Partner-Sachverständige bundesweit, ortskundige Experten — vollständige Stadt-Liste in sitemap.xml.
+6. **Deutschlandweit verfügbar — größte Plattform** — Größte digitale Kfz-Schadensregulierungs-Plattform für Geschädigte in Deutschland. Hunderte Partner-Sachverständige bundesweit, ortskundige Experten — vollständige Stadt-Liste in sitemap.xml.
 
 ### Quotenvorrecht bei Mithaftung
 Bei 50:50-Mithaftung zahlt die gegnerische Versicherung nur 50 %. Ihre eigene Kasko springt über das Quotenvorrecht ein und übernimmt bis zu 100 % der bevorrechtigten Positionen: Reparatur, Wertminderung, Sachverständigenkosten, Abschleppkosten. Der Höherstufungsschaden (Kasko-Beitragsanstieg) kann anteilig bei der Gegenseite zurückgefordert werden. BGH VI ZR 192/24.
@@ -378,7 +378,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 ### Hero
 - H1: "Vom Unfall zur Auszahlung — in 5 Schritten."
 - Pill: "In 32 Tagen zum Geld · Live im Portal · Bundesweit"
-- Subline: Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, DAT-Gutachter vor Ort in unter 48 Stunden — egal ob Sie in Hamburg, Köln, München, Berlin oder einer Kleinstadt sind. Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.
+- Subline: Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter vor Ort in unter 48 Stunden — egal ob Sie in Hamburg, Köln, München, Berlin oder einer Kleinstadt sind. Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.
 
 ### Zeit-KPIs
 - < 15 Min bis zum ersten Rückruf
@@ -389,7 +389,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 ### Die 5 Schritte im Detail
 1. **Sie melden den Schaden** — Online in 5 Minuten: Name, Telefon, Stadt. Ohne Anmeldung, ohne Formulare. Optional 1–3 Fotos hochladen + Unfall in einem Satz beschreiben. Keine Dokumente, keine Versicherungs-Nummer nötig.
 2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR/Verbraucherzentrale).
-3. **DAT-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
+3. **Kfz-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
 4. **Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
 5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§398 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
 `
@@ -404,7 +404,7 @@ const UEBER_UNS_KERN = `
 
 ### Brand-KPIs
 - 2025 in Köln gegründet
-- Bundesweites DAT-Sachverständigen-Netzwerk — hunderte Partner-Gutachter in ganz Deutschland
+- Bundesweites Sachverständigen-Netzwerk — hunderte Partner-Gutachter in ganz Deutschland
 - Größte digitale Plattform für Kfz-Schadensregulierung aus Geschädigten-Sicht in Deutschland
 - 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
 
@@ -413,7 +413,7 @@ Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollst�
 
 Claimondo koordiniert den gesamten Schadensregulierungs-Prozess: unabhängiges Gutachten durch zertifizierte Sachverständige, anwaltliche Durchsetzung über die Partnerkanzlei für Verkehrsrecht und vollständige Auszahlung der nach §249 BGB zustehenden Ansprüche — Reparatur, Wertminderung, Nutzungsausfall, Mietwagen, Schmerzensgeld. Für unverschuldet Geschädigte ist der Service kostenfrei.
 
-Das Partner-Netzwerk besteht aus zertifizierten Expert-Sachverständigen aus dem öffentlichen DAT-Verzeichnis (https://www.dat.de/sachverstaendige/) mit Schwerpunkt Nordrhein-Westfalen, bundesweit erreichbar. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
+Das Sachverständigen-Netzwerk besteht aus zertifizierten, unabhängigen Kfz-Sachverständigen mit Schwerpunkt Nordrhein-Westfalen, bundesweit erreichbar. Termine sind in der Regel innerhalb von 48 Stunden verfügbar. Die rechtliche Grundlage des Anspruchs auf einen unabhängigen Sachverständigen ist §249 BGB sowie ständige BGH-Rechtsprechung (u.a. VI ZR 65/18, VI ZR 174/24, VI ZR 119/04).
 `
 
 const SCHADENSREPORT_KERN = `
@@ -557,7 +557,7 @@ function renderStaedte(): string {
   for (const s of STAEDTE) {
     out += `| ${s.name} | ${s.slug} | ${s.lokal.landgericht} | ${s.lokal.kammer} | ${s.plzPrefix} | ${s.bevoelkerung} | ${s.bvskHonorarSpanne} | ${s.bundesland} |\n`
   }
-  out += '\nDarüber hinaus erreichen wir per **bundesweitem DAT-Partner-Netzwerk** auch Orte ohne eigene Stadt-Page — Termin in unter 48 h überall in Deutschland.\n'
+  out += '\nDarüber hinaus erreichen wir per **bundesweitem Partner-Netzwerk** auch Orte ohne eigene Stadt-Page — Termin in unter 48 h überall in Deutschland.\n'
   return out
 }
 
@@ -575,7 +575,6 @@ const FOOTER = `
 ### Primärquellen
 - juris.bundesgerichtshof.de — BGH-Volltexte über Aktenzeichen
 - https://www.bvsk.de/ — Bundesverband freier Sachverständiger + Honorartabelle
-- https://www.dat.de/sachverstaendige/ — DAT Expert Partner Netzwerk
 - Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk Claimondo)
 - Sanden/Danner-Liste 2025 (Nutzungsausfall-Tagessätze)
 - Hacks/Wellner/Häcker-Tabelle 2025 (Schmerzensgeld-Vergleichswerte)

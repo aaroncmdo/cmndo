@@ -65,7 +65,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Ich habe ein Tesla oder E-Auto. Gibt es Besonderheiten?',
         antwort:
-          'Ja — und die sind erheblich. Standardprogramme (DAT/Audatex) enthalten oft keine korrekten Verbundzeiten für US-Fahrzeuge. Reales Beispiel: Deutsches Standard-Gutachten 22.000 € → mit Tesla-Originaldaten: 48.000 €. Steuergeräte unter Schwellerblenden werden oft erst Monate später zum Problem. Bei Tesla und E-Autos: immer Spezialgutachter.',
+          'Ja — und die sind erheblich. Standardprogramme (Audatex) enthalten oft keine korrekten Verbundzeiten für US-Fahrzeuge. Reales Beispiel: Deutsches Standard-Gutachten 22.000 € → mit Tesla-Originaldaten: 48.000 €. Steuergeräte unter Schwellerblenden werden oft erst Monate später zum Problem. Bei Tesla und E-Autos: immer Spezialgutachter.',
       },
       {
         frage: 'Was ist die 130%-Regel?',
@@ -148,9 +148,9 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
     gruppe: 'Sachverständige & Zertifizierung',
     fragen: [
       {
-        frage: 'Was ist DAT-Expert und warum ist das wichtig?',
+        frage: 'Nach welchem Standard wird mein Schaden kalkuliert?',
         antwort:
-          'DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl.',
+          'Unsere Sachverständigen kalkulieren nach anerkannten, marktüblichen Systemen (z. B. Audatex) — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Entscheidend ist die Unabhängigkeit und Qualifikation des Sachverständigen, nicht die Software.',
       },
       {
         frage: 'Was unterscheidet einen Claimondo-Gutachter von einer DEKRA?',
@@ -160,7 +160,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
       {
         frage: 'Können Sie auch bei Tesla, Polestar oder anderen E-Autos helfen?',
         antwort:
-          'Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-DAT-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr.',
+          'Ja, aber Tesla- und E-Fahrzeug-Gutachten brauchen Spezial-Know-how. Wir routen solche Fälle gezielt an Sachverständige mit Tesla-/Polestar-Diagnose-Zugang. Wichtig: bei Tesla NICHT das Standard-Kalkulationsschema akzeptieren — die Verbundzeiten und Original-Teile-Preise müssen über Tesla Service Plus gerechnet werden, sonst entgehen Ihnen 20.000 € und mehr.',
       },
       {
         frage: 'Mein Auto ist älter als 10 Jahre — bekomme ich noch ein Gutachten?',

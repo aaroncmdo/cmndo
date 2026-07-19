@@ -599,7 +599,7 @@
       "p1_coo": "Aaron Sprafke",
       "p1_coo_role": "(COO).",
       "p2": "Claimondo coordinates the entire claim settlement process: independent expert report by certified appraisers, legal enforcement through the partner law firm LexDrive specialised in traffic law, and full payment of all entitlements under §249 BGB (German Civil Code on damage compensation) — repair costs, diminished value (Wertminderung), loss of use (Nutzungsausfall), rental car, and pain and suffering. The service is free of charge for injured parties who are not at fault (subject to acknowledgement by the opposing liability insurer).",
-      "p3": "The partner network consists of certified appraisers from the public DAT directory, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
+      "p3": "The partner network consists of certified appraisers from the public appraiser register, with a focus on North Rhine-Westphalia and nationwide reachability. Appointments are typically available within 48 hours. The legal basis for the right to an independent appraiser is §249 BGB as well as established BGH case law (including VI ZR 65/18, VI ZR 174/24, VI ZR 119/04)."
     },
     "manifesto": {
       "eyebrow": "What we believe",
@@ -636,8 +636,8 @@
       "heading": "Trust signals, each with a source",
       "items": [
         {
-          "titel": "DAT Expert Partner Network",
-          "text": "Claimondo works exclusively with certified expert appraisers listed in the public DAT directory. Primary focus on NRW, available nationwide.",
+          "titel": "Partner Network",
+          "text": "Claimondo works exclusively with certified expert appraisers listed in the public appraiser register. Primary focus on NRW, available nationwide.",
           "quelle": "dat.de/sachverstaendige"
         },
         {
@@ -673,7 +673,7 @@
           "label": "On-site appointment with expert"
         },
         {
-          "kpi": "DAT",
+          "kpi": "BVSK",
           "label": "Expert Partner network"
         },
         {
@@ -695,7 +695,7 @@
           "rolle": "Managing Director, CEO & Co-Founder",
           "foto_label": "right in photo",
           "bio_kurz": "Nicolas leads Claimondo strategically, overseeing the partner network and investor relations.",
-          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of DAT-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
+          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of Kfz-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
           "quote": "\"It's not about who I am, but what I do. That's how you're judged.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -812,7 +812,7 @@
     },
     "detail": {
       "entfernt": "{km} km away",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Zertifizierte Sachverständige",
       "freie_termine": "Available appointments",
       "termin_reservieren": "Reserve appointment →",
       "legal": "Free for injured parties with no fault · €0 out of pocket",
@@ -989,7 +989,7 @@
       "quote_accent": "Your claim doesn't."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
+      "trust_badge": "Sachverständigen-Netzwerk · nationwide coverage",
       "h1_plain": "Not your fault in the crash?",
       "h1_accent": "We've got you covered.",
       "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
@@ -1148,7 +1148,7 @@
     "einsatzgebiet": {
       "sub": "Move the map or open the full search — independent experts in your region. Focus on NRW, connected nationwide.",
       "finder_cta": "Find an expert near you",
-      "eyebrow": "DAT expert network",
+      "eyebrow": "Certified appraiser network",
       "heading": "Independent appraisers — nationwide, focused on NRW.",
       "map_alt": "Claimondo service area — focus on North Rhine-Westphalia, with coverage in major German cities",
       "city_intro": "Go directly to the city page (regional court, bar association, BVSK-Honorartabelle):",
@@ -1196,7 +1196,7 @@
         },
         {
           "frage": "Are Tesla and electric vehicle damages handled the same way?",
-          "antwort": "Not entirely. In Tesla and other electric vehicles, control units are located beneath sill covers — consequential damage often only emerges months later. DAT/Audatex frequently lack correct assembly times for US vehicles: a standard estimate of €22,000 can turn out to be €48,000 using Tesla original data. We connect you with specialist EV appraisers."
+          "antwort": "Not entirely. In Tesla and other electric vehicles, control units are located beneath sill covers — consequential damage often only emerges months later. Audatex frequently lack correct assembly times for US vehicles: a standard estimate of €22,000 can turn out to be €48,000 using Tesla original data. We connect you with specialist EV appraisers."
         }
       ]
     },
@@ -1515,7 +1515,7 @@
       "h1_plain": "Insurer audit-service",
       "h1_accent": "Reductions recovered",
       "h1_suffix": "— at no cost to you.",
-      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Our partner law firm for traffic law recovers them — backed by an independent DAT expert and BGH case law.",
+      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Our partner law firm for traffic law recovers them — backed by an independent appraiser and BGH case law.",
       "cta_primary": "Report damage online",
       "cta_call_aria": "Call the Claimondo hotline",
       "trust_footer": "Anonymous advice · Response <15 min · GDPR-compliant"
@@ -1557,11 +1557,11 @@
         ]
       },
       {
-        "titel": "Independent DAT appraisers",
+        "titel": "Independent independent appraisers",
         "sub": "Committed solely to your interests",
-        "text": "Our partner appraisers work independently — not in the service of any insurance company. Your claim is assessed in full and to DAT standard, not reduced by ControlExpert or K-Expert.",
+        "text": "Our partner appraisers work independently — not in the service of any insurance company. Your claim is assessed in full and to recognised standard, not reduced by ControlExpert or K-Expert.",
         "punkte": [
-          "Certified partner appraisers from the official DAT directory",
+          "Certified partner appraisers from the official appraiser register",
           "No claim steering — no insurance ties",
           "Full damage assessment incl. diminished value",
           "Expert report in 5 business days, inspection within 48 h"
@@ -1603,9 +1603,9 @@
       {
         "titel": "Available nationwide",
         "sub": "Focus on NRW · nationwide",
-        "text": "Whether Cologne, Munich, Berlin, or Schwerin: the partner network covers major German cities. The nearest DAT-Gutachter in the network is usually just a few kilometres away.",
+        "text": "Whether Cologne, Munich, Berlin, or Schwerin: the partner network covers major German cities. The nearest Kfz-Gutachter in the network is usually just a few kilometres away.",
         "punkte": [
-          "DAT-Sachverständige from the public DAT directory",
+          "Kfz-Sachverständige from the public appraiser register",
           "Indexed city pages for local SEO",
           "Location-based assignment",
           "Locally experienced experts in every region"
@@ -1691,7 +1691,7 @@
       "eyebrow": "Special case: electric vehicles",
       "heading_line1": "Tesla, Polestar, Lucid?",
       "heading_line2": "We know the pitfalls.",
-      "p1_pre": "DAT and Audatex often have",
+      "p1_pre": "Standard systems often have",
       "p1_strong": "no correct repair times",
       "p1_mid": "on record for US vehicles. Real example: standard expert report €22,000 → with Tesla OEM data",
       "p1_betrag": "€48,000",
@@ -1771,7 +1771,7 @@
           },
           {
             "frage": "I have a Tesla or an electric vehicle. Are there any special considerations?",
-            "antwort": "Yes — and they are significant. Standard systems (DAT/Audatex) often contain no correct assembly times for US-market vehicles. Real-world example: standard German expert report 22,000 € → with Tesla original data: 48,000 €. Control units beneath sill panels frequently only become a problem months later. For Tesla and electric vehicles: always use a specialist appraiser."
+            "antwort": "Yes — and they are significant. Standard systems (Audatex) often contain no correct assembly times for US-market vehicles. Real-world example: standard German expert report 22,000 € → with Tesla original data: 48,000 €. Control units beneath sill panels frequently only become a problem months later. For Tesla and electric vehicles: always use a specialist appraiser."
           },
           {
             "frage": "What is the 130% rule?",
@@ -1842,8 +1842,8 @@
         "gruppe": "Appraisers & Certification",
         "fragen": [
           {
-            "frage": "What is DAT-Expert and why does it matter?",
-            "antwort": "DAT (Deutsche Automobil Treuhand) is Germany's leading vehicle valuation database. Our appraisers use the DAT calculation system — insurance companies accept these reports without disputing the underlying data. Other systems (e.g. Audatex) are also recognised, but DAT is the market leader and our default choice."
+            "frage": "What standard is used to calculate my claim?",
+            "antwort": "Our appraisers calculate using recognised, market-standard systems (e.g. Audatex) — insurers accept these reports without disputing the underlying data. What matters is the appraiser's independence and qualification, not the software used."
           },
           {
             "frage": "What sets a Claimondo appraiser apart from DEKRA?",
@@ -1851,7 +1851,7 @@
           },
           {
             "frage": "Can you help with Tesla, Polestar, or other electric vehicles?",
-            "antwort": "Yes, but Tesla and electric vehicle appraisals require specialist expertise. We route such cases specifically to appraisers with Tesla/Polestar diagnostic access. Important: do not accept the standard DAT calculation schema for Tesla — labour times and original parts prices must be calculated via Tesla Service Plus; otherwise you may lose €20,000 or more."
+            "antwort": "Yes, but Tesla and electric vehicle appraisals require specialist expertise. We route such cases specifically to appraisers with Tesla/Polestar diagnostic access. Important: do not accept the standard standard calculation schema for Tesla — labour times and original parts prices must be calculated via Tesla Service Plus; otherwise you may lose €20,000 or more."
           },
           {
             "frage": "My car is over 10 years old — can I still get an appraisal?",
@@ -1977,7 +1977,7 @@
       "badge": "Settlement in 32 Days · Live in the Portal",
       "h1_plain": "From accident to payout —",
       "h1_accent": "in 5 steps.",
-      "sub": "You handle step 1. We handle the rest. Advisor callback in under 15 minutes, DAT appraiser on-site in under 48 hours, lawyer enforces every claim. Trackable live in the portal.",
+      "sub": "You handle step 1. We handle the rest. Advisor callback in under 15 minutes, independent appraiser on-site in under 48 hours, lawyer enforces every claim. Trackable live in the portal.",
       "cta_primary": "Report damage online"
     },
     "kpis": [
@@ -2014,7 +2014,7 @@
         "detail": "They clarify your claims with you: repair, diminished value (Wertminderung), rental car, loss of use (Nutzungsausfall), legal costs. You do NOT speak directly with the opposing insurance — this avoids the typical 30–40 % audit-service reductions (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
       },
       {
-        "titel": "DAT appraiser inspects your vehicle",
+        "titel": "independent appraiser inspects your vehicle",
         "text": "On-site in under 48 hours — usually the next day. Independent, certified, complete evidence documentation.",
         "detail": "Appointment at your location, at the repair shop, or at the advisor's office. Expert report within 5 business days — including commercial diminished value (merkantile Wertminderung) per Sanden/Danner, residual value (regional), and repair calculation in line with the BGH brand workshop standard."
       },
@@ -2119,7 +2119,7 @@
     "sr_h1": "Find a vehicle appraiser near you — map of qualified appraisers, no cost under §249 BGB",
     "kpis": [
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "Expert Partner network"
       },
       {
@@ -2143,7 +2143,7 @@
       },
       {
         "frage": "Are the listed appraisers independent?",
-        "antwort": "Yes. All partner appraisers are certified (public DAT directory at dat.de/sachverstaendige) and work independently — they are not employed by any insurer. They calculate repair costs, diminished value, replacement value, and residual value in line with BGH case law and the BVSK-Honorartabelle."
+        "antwort": "Yes. All partner appraisers are certified (public appraiser register at dat.de/sachverstaendige) and work independently — they are not employed by any insurer. They calculate repair costs, diminished value, replacement value, and residual value in line with BGH case law and the BVSK-Honorartabelle."
       },
       {
         "frage": "What does the referral via the map cost me?",
@@ -2271,7 +2271,7 @@
         "label": "Initial consultation"
       },
       {
-        "wert": "DAT",
+        "wert": "BVSK",
         "label": "Expert Partner network"
       },
       {
@@ -2288,7 +2288,7 @@
       "headline": "Become a Claimondo partner in your region",
       "subheadline": "We onboard partners region by region — as soon as your region is open, we'll be in touch. No marketing, no spam.",
       "feature_auftraege": "Jobs directly from the platform",
-      "feature_verifiziert": "DAT + BVSK verified",
+      "feature_verifiziert": "BVSK verified",
       "feature_radius": "Your area, your radius"
     },
     "success": {
@@ -2386,7 +2386,7 @@
         },
         {
           "frage": "What software is used?",
-          "antwort": "Orders, appointments, evidence photos, and expert report dispatch are managed via the Claimondo SV Portal (web + native app). DAT-SilverDAT integration is ready. Your own expert software (Audatex, Combiplus) can continue to run in parallel — we import the finished PDF."
+          "antwort": "Orders, appointments, evidence photos, and expert report dispatch are managed via the Claimondo SV Portal (web + native app). Audatex integration is ready. Your own expert software (Audatex, Combiplus) can continue to run in parallel — we import the finished PDF."
         },
         {
           "frage": "How are invoicing and payment handled?",
@@ -2861,10 +2861,10 @@
     "hero_eyebrow": "Independent Automotive Appraisers",
     "hero_h1_line1": "Find a certified car expert —",
     "hero_h1_line2": "independent & at no cost.",
-    "hero_intro": "Certified partner appraisers from the official DAT directory (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
+    "hero_intro": "Certified partner appraisers from the official appraiser register (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
     "hero_cta_karte": "View on map",
     "hero_cta_schaden": "Report a claim",
-    "trust_kpi_dat_label": "Expert Partner network",
+    "trust_kpi_dat_label": "certified partner network",
     "trust_kpi_termin_label": "Appointment",
     "trust_kpi_eigenanteil_label": "Out-of-pocket cost¹",
     "trust_kpi_recht_label": "Legal basis",
@@ -2903,7 +2903,7 @@
     "staedte_eyebrow": "Locally Available",
     "staedte_h2": "Expert Appraisers in Your City",
     "staedte_p": "Select your city for regional information, fee ranges and the competent regional court.",
-    "staedte_dat_prefix": "DAT Partner Network · Postcode",
+    "staedte_dat_prefix": "Partner Network · Postcode",
     "staedte_weitere": "More cities coming soon — available nationwide",
     "spezial_eyebrow": "Special Cases",
     "spezial_h2": "Expert Appraisers by Vehicle Type & Cost",
@@ -2974,7 +2974,7 @@
       {
         "titel": "Expert report + lawyer",
         "dauer": "Appointment <48 h, report 48 h later",
-        "text": "A DAT-Sachverständiger inspects the vehicle — at your home, at the workshop, or at your workplace. The report includes repair costs, diminished value, residual value (in total-loss cases), and replacement value. The lawyer then issues demands to the opposing insurance."
+        "text": "A Kfz-Sachverständiger inspects the vehicle — at your home, at the workshop, or at your workplace. The report includes repair costs, diminished value, residual value (in total-loss cases), and replacement value. The lawyer then issues demands to the opposing insurance."
       },
       {
         "titel": "Payout",
@@ -3520,7 +3520,7 @@
     "kuerzungen_quelle": "Sources: BGH judgment database (bundesgerichtshof.de), BVSK e.V., ControlExpert industry statistics. As of 05/2026.",
     "markt_label": "Table 2",
     "markt_h2": "The market for car damage settlement in NRW 2026",
-    "markt_p": "Independent competitive analysis using 10 validated data sources (DataForSEO, SE Ranking, SerpApi, DAT API, Chrome SERP, Google Maps, Ads Transparency Center). As of April 2026.",
+    "markt_p": "Independent competitive analysis using 10 validated data sources (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). As of April 2026.",
     "markt_kpis": [
       {
         "wert": "23",
@@ -3529,7 +3529,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert partners in NRW",
+        "label": "Certified appraisers in NRW",
         "sub": "Claimondo network"
       },
       {
@@ -3565,7 +3565,7 @@
     ],
     "markt_erkenntnis_h": "Key insight:",
     "markt_erkenntnis_p": "has lost approximately 30 % of its organic traffic since the Google Helpful Content Update (January 2025) — from 2,784 to 1,668 visits/month. With simultaneously 0 % AI search visibility across all 23 NRW competitors, a unique time window opens for structured data + schema markup + answer-capsule content.",
-    "markt_quelle": "Sources: SE Ranking AI Search Visibility, DataForSEO keyword database, DAT API partner network, SerpApi Google Maps, competitor funnel audit Q1/2026.",
+    "markt_quelle": "Sources: SE Ranking AI Search Visibility, DataForSEO keyword database, Kalkulations-API partner network, SerpApi Google Maps, competitor funnel audit Q1/2026.",
     "honorare_label": "Table 3",
     "honorare_h2": "What does a car appraiser’s expert report cost?",
     "honorare_p_pre": "Fees follow the ",
@@ -3613,7 +3613,7 @@
       "No-fault accident: your rights at a glance"
     ],
     "final_h2": "Your insurer made reductions? Our partner law firm recovers them.",
-    "final_p": "Independent DAT appraiser + partner law firm. 0 € out-of-pocket under § 249 BGB.",
+    "final_p": "Independent independent appraiser + partner law firm. 0 € out-of-pocket under § 249 BGB.",
     "final_cta_gutachter": "Find an appraiser",
     "markt_erkenntnis_pre": "The market leader"
   },
@@ -3635,7 +3635,7 @@
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "expert report entitlement from 750 €",
     "antwort_capsule_quelle": "AI analysis · < 15 min · 0 € cost",
-    "antwort_p": "<strong>The free AI initial assessment from Claimondo</strong> analyses photos and a description of your vehicle damage and delivers in under 15 minutes: an estimate of repair costs, the expected replacement value, and a recommendation on whether an independent DAT expert report is advisable (from approximately 750 € in damage you are entitled to one under § 249 BGB). The initial assessment is free and non-binding — it does not replace an official expert report, but helps you immediately decide the right next step.",
+    "antwort_p": "<strong>The free AI initial assessment from Claimondo</strong> analyses photos and a description of your vehicle damage and delivers in under 15 minutes: an estimate of repair costs, the expected replacement value, and a recommendation on whether an independent expert report is advisable (from approximately 750 € in damage you are entitled to one under § 249 BGB). The initial assessment is free and non-binding — it does not replace an official expert report, but helps you immediately decide the right next step.",
     "ergebnis_h2": "What you receive — for free",
     "ergebnis_punkte": [
       "Your out-of-pocket cost: 0 € if you are not at fault (§ 249 BGB)",
@@ -3673,7 +3673,7 @@
     "trust_stat_1_label": "AI check",
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Entitlement basis",
-    "trust_stat_3_wert": "DAT",
+    "trust_stat_3_wert": "BVSK",
     "trust_stat_3_label": "Expert Partner network"
   },
   "unfallskizze": {
@@ -3741,7 +3741,7 @@
   "kfz_gutachter_stadt": {
     "hero_band_eyebrow": "Right after the accident {ort}",
     "hero_band_quote": "\"Your first call after the accident? <hl>The right one.</hl>\"",
-    "hero_badge": "DAT appraisers available now {ort}",
+    "hero_badge": "independent appraisers available now {ort}",
     "hero_h1_line1": "Been in an accident?",
     "hero_h1_city": "Your car appraiser {ort}.",
     "hero_subheadline": "We dispatch your appraiser (< 48 h), handle the insurance negotiations, and enforce your claim in full — BGH-compliant. 0 € for you.",
@@ -3832,7 +3832,7 @@
         "text": "Personal callback in under 15 minutes."
       },
       {
-        "titel": "DAT appraiser on site",
+        "titel": "independent appraiser on site",
         "text": "Inspection in under 48 hours — usually the next day."
       },
       {
@@ -3845,7 +3845,7 @@
       }
     ],
     "einsatz_eyebrow": "On site — nationwide",
-    "einsatz_h2": "DAT appraiser network · Focus on NRW · nationwide",
+    "einsatz_h2": "independent appraiser network · Focus on NRW · nationwide",
     "einsatz_verfuegbar": "Also available in:",
     "einsatz_alle": "All service cities →",
     "faq_eyebrow": "Frequently asked questions — car appraiser {ort}",
@@ -3853,7 +3853,7 @@
     "faq_kosten_frage": "What does a car appraiser cost {ort}?",
     "faq_kosten_antwort": "In a no-fault accident {ort} with damage over 750 €, you pay 0 €. The opposing third-party insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle in {stadt} range between {bvskSpanne}.",
     "faq_finden_frage": "Where do I find an independent car appraiser {ort}?",
-    "faq_finden_antwort": "Claimondo refers you {ort} to certified partner appraisers with local expertise. You report the damage online (5 min, no registration) — we match you with the nearest available appraiser from the DAT partner network. On-site appointment in under 48 hours. Available in {stadt} (postcode {plz}) and the surrounding region of {bundesland}.",
+    "faq_finden_antwort": "Claimondo refers you {ort} to certified partner appraisers with local expertise. You report the damage online (5 min, no registration) — we match you with the nearest available appraiser from the partner network. On-site appointment in under 48 hours. Available in {stadt} (postcode {plz}) and the surrounding region of {bundesland}.",
     "faq_gericht_frage": "Which court is responsible for disputes {ort}?",
     "faq_gericht_antwort": "For claim settlement disputes {ort}, the court of first instance is the {landgericht}. If an insurer takes legal action against an assessment or makes unlawful reductions, our partner law firm for traffic law typically files at this court. If successful, the opposing party bears legal and court costs. You pay 0 € (under §249 BGB, subject to acknowledgement by the opposing third-party insurer).",
     "faq_kuerzung_frage": "What happens if the insurer reduces the assessment?",
@@ -3865,7 +3865,7 @@
     "faq_130_frage": "What does the 130% rule mean in a total-loss case?",
     "faq_130_antwort": "The 130% rule (BGH VI ZR 67/91) allows repair costs of up to 130 % of the replacement value — provided the vehicle is professionally repaired in accordance with the assessment and is used for at least 6 months after.",
     "cta_h2": "Accident {ort}? We take care of it.",
-    "cta_p": "Report online in 5 minutes — we refer a free DAT appraiser {ort} in under 48 h.",
+    "cta_p": "Report online in 5 minutes — we refer a free independent appraiser {ort} in under 48 h.",
     "cta_karte": "View on map"
   },
   "onboarding_wizard": {
@@ -4017,7 +4017,7 @@
     },
     "vorteile": {
       "title": "Benefits — insurer deductions recovered · Claimondo",
-      "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent DAT assessor instead of an inspection-service cut. See what you are really entitled to.",
+      "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent independent assessor instead of an inspection-service cut. See what you are really entitled to.",
       "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per NDR/BGH)."
     },
     "faq": {
@@ -4029,15 +4029,15 @@
     },
     "wie_es_funktioniert": {
       "title": "How it works — from crash to payout in 5 steps · Claimondo",
-      "description": "From reporting the crash to the payout in 5 steps — 32 days on average. Callback in under 15 min, DAT assessor on site within 48 h. Track it live in your portal.",
-      "og_description": "Full compensation in 5 steps — 32 days on average. Advisor callback <15 min, DAT assessor <48 h."
+      "description": "From reporting the crash to the payout in 5 steps — 32 days on average. Callback in under 15 min, independent assessor on site within 48 h. Track it live in your portal.",
+      "og_description": "Full compensation in 5 steps — 32 days on average. Advisor callback <15 min, independent assessor <48 h."
     },
     "gutachter_finden": {
       "title": "Find a car assessor near you — map & appointment within 48 h",
       "description": "Interactive map of certified partner assessors nationwide. See an appointment, on site within 48 h. €0 if the crash was not your fault (§249 BGB).",
-      "og_title": "Find a car assessor — map of DAT assessors",
-      "og_description": "Interactive map of all available DAT assessors in Germany. Appointment within 48 h. Free of charge for those not at fault under §249 BGB.",
-      "twitter_title": "Find a car assessor — map of DAT assessors",
+      "og_title": "Find a car assessor — map of independent assessors",
+      "og_description": "Interactive map of all available independent assessors in Germany. Appointment within 48 h. Free of charge for those not at fault under §249 BGB.",
+      "twitter_title": "Find a car assessor — map of independent assessors",
       "twitter_description": "Map of all available assessors in Germany. Appointment within 48h."
     },
     "werkstatt_finden": {
@@ -4131,8 +4131,8 @@
     },
     "kfz_gutachter": {
       "title": "Find a car assessor — independent, fast, free",
-      "description": "Independent certified car assessors for accident damage nationwide. DAT partners, appointment within 48 h, €0 for those not at fault (§249 BGB).",
-      "og_description": "DAT-Expert partners from the public DAT directory · appointment <48h · €0 for the injured party under §249 BGB"
+      "description": "Independent certified car assessors for accident damage nationwide. Certified partners, appointment within 48 h, €0 for those not at fault (§249 BGB).",
+      "og_description": "Certified appraisers · appointment <48h · €0 for the injured party under §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Car claim settlement process — explained step by step",
@@ -4206,7 +4206,7 @@
     },
     "kfz_gutachter_gutachten_service": {
       "title": "Car Appraisal Service — independent, fast, €0 in case of third-party fault",
-      "description": "Car appraisal service: independent damage appraisal (DAT/Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
+      "description": "Car appraisal service: independent damage appraisal (Audatex) plus coordination of repair shop, rental car and lawyer. Appointment in under 48 h. In case of third-party fault €0 (§ 249 BGB).",
       "og_title": "Car Appraisal Service — coordinated from a single source",
       "og_description": "Independent appraisal + coordination of the whole settlement — free of charge in case of third-party fault."
     },
@@ -4301,7 +4301,7 @@
       {
         "titel": "Online presence",
         "kicker": "Website & references",
-        "text": "A clear website with services, qualifications (DAT, BVSK, public appointment) and references builds trust. It is the landing page for every marketing measure — without it, reach fizzles out."
+        "text": "A clear website with services, qualifications (BVSK, public appointment) and references builds trust. It is the landing page for every marketing measure — without it, reach fizzles out."
       },
       {
         "titel": "Platform distribution",
@@ -4391,11 +4391,11 @@
     "breadcrumb_current": "Appraisal Service",
     "hero_h1": "Car Appraisal Service — independent, fast, free of charge",
     "hero_intro": "From the independent damage appraisal to the payout — <strong>one service that coordinates everything</strong>.",
-    "antwort_capsule": "<strong>A car appraisal service produces a neutral damage appraisal and coordinates the entire settlement.</strong> The appraisal documents repair costs, market value reduction (diminished value), replacement and residual value to DAT/Audatex. In a no-fault accident, the at-fault liability insurer bears the cost (§ 249 BGB) — via a security assignment (§ 398 BGB), the expert settles directly with it, €0 for you. Claimondo combines the appraisal with scheduling in under 48 hours, repair-shop coordination and legal enforcement.",
+    "antwort_capsule": "<strong>A car appraisal service produces a neutral damage appraisal and coordinates the entire settlement.</strong> The appraisal documents repair costs, market value reduction (diminished value), replacement and residual value to Audatex. In a no-fault accident, the at-fault liability insurer bears the cost (§ 249 BGB) — via a security assignment (§ 398 BGB), the expert settles directly with it, €0 for you. Claimondo combines the appraisal with scheduling in under 48 hours, repair-shop coordination and legal enforcement.",
     "aspekte": [
       {
         "titel": "Independent damage appraisal",
-        "kicker": "DAT & Audatex",
+        "kicker": "Kalkulationssysteme",
         "text": "A certified, independent expert documents the amount of damage, repair path, market value reduction as well as replacement and residual value — court-proof and neutral, not in the insurer’s interest."
       },
       {
@@ -4418,7 +4418,7 @@
     "faqs": [
       {
         "frage": "What does a car appraisal include?",
-        "antwort": "Repair cost calculation (DAT/Audatex), market value reduction, replacement value, residual value in case of total loss, photo documentation, repair path and course of damage. The appraisal is the basis for the entire claim settlement."
+        "antwort": "Repair cost calculation (Audatex), market value reduction, replacement value, residual value in case of total loss, photo documentation, repair path and course of damage. The appraisal is the basis for the entire claim settlement."
       },
       {
         "frage": "What does the appraisal service cost?",
@@ -4523,8 +4523,8 @@
       },
       {
         "titel": "The qualification",
-        "kicker": "DAT, BVSK, ISO 17024",
-        "text": "Reputable car experts are certified to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) or organised in the BVSK. The highest level is public appointment and swearing-in by the IHK (§ 36 GewO) — examined, special expertise."
+        "kicker": "BVSK, ISO 17024",
+        "text": "Reputable car experts are certified to DIN EN ISO 17024 (DEKRA, KÜS, TÜV) or organised in the BVSK. The highest level is public appointment and swearing-in by the IHK (§ 36 GewO) — examined, special expertise."
       },
       {
         "titel": "Independence",
@@ -4549,7 +4549,7 @@
       },
       {
         "frage": "What does “publicly appointed and sworn” mean?",
-        "antwort": "These experts have passed an examination of special expertise before the Chamber of Industry and Commerce (IHK) (§ 36 GewO) and are sworn to impartiality. It is the highest qualification level and carries particular weight in court. Alongside this, certifications to DIN EN ISO 17024 (DEKRA, KÜS, TÜV, DAT) and BVSK membership are recognised quality features."
+        "antwort": "These experts have passed an examination of special expertise before the Chamber of Industry and Commerce (IHK) (§ 36 GewO) and are sworn to impartiality. It is the highest qualification level and carries particular weight in court. Alongside this, certifications to DIN EN ISO 17024 (DEKRA, KÜS, TÜV) and BVSK membership are recognised quality features."
       },
       {
         "frage": "May the at-fault insurer prescribe an appraiser for me?",
@@ -4557,7 +4557,7 @@
       },
       {
         "frage": "What should I look for when choosing?",
-        "antwort": "Independence (no contract with the at-fault insurer), a recognised certification or public appointment, calculation-proof software (DAT/Audatex) and fast regional availability. Claimondo refers exclusively independent, qualified experts near you — an appointment usually within 48 hours."
+        "antwort": "Independence (no contract with the at-fault insurer), a recognised certification or public appointment, calculation-proof software (Audatex) and fast regional availability. Claimondo refers exclusively independent, qualified experts near you — an appointment usually within 48 hours."
       }
     ],
     "crosslinks_h2": "More on this topic",

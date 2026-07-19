@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: `${SITE.name} — Unfall-Gutachten ${CLUSTER.region}`,
     short_name: SITE.shortName,
     description:
-      'Unabhängiger Kfz-Gutachter — gerichtsfestes DAT-Gutachten, bei Unschuld 0 €. Anwalt & Mietwagen inklusive, Soforthilfe rund um die Uhr.',
+      'Unabhängiger Kfz-Gutachter — gerichtsfestes Kfz-Gutachten, bei Unschuld 0 €. Anwalt & Mietwagen inklusive, Soforthilfe rund um die Uhr.',
     start_url: '/',
     scope: '/',
     display: 'standalone',

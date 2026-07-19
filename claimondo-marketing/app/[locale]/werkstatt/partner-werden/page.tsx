@@ -87,7 +87,7 @@ const ABLAUF = [
 ]
 
 const ZAHLEN = [
-  { wert: 'DAT', label: 'zertifiziertes Partner-Netzwerk' },
+  { wert: 'BVSK', label: 'zertifiziertes Partner-Netzwerk' },
   { wert: '0 €', label: 'Aufnahme & Finder-Eintrag' },
   { wert: '§249', label: 'BGB-konforme Regulierung' },
   { wert: '< 48h', label: 'Ø Gutachten-Termin' },

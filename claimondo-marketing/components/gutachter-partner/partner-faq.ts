@@ -28,7 +28,7 @@ export const PARTNER_FAQ = [
   {
     frage: 'Welche Software ist im Einsatz?',
     antwort:
-      'Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). DAT-SilverDAT-Integration ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) kannst du parallel weiter nutzen — wir importieren das fertige PDF.',
+      'Aufträge, Termine, Beweisfotos und Gutachten-Versand laufen über das Claimondo-SV-Portal (Web + Native-App). Eine Anbindung an gängige Kalkulationssysteme ist vorbereitet. Eigene Gutachten-Software (Audatex, Combiplus) kannst du parallel weiter nutzen — wir importieren das fertige PDF.',
   },
   {
     frage: 'Wie werden Rechnung und Zahlung abgewickelt?',

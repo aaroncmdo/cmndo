@@ -47,7 +47,7 @@ export function Footer({ city }: { city: City }) {
             <p className="mt-3 text-[12.5px] text-white/55 leading-snug">
               Vermittlung an qualifizierte Kfz-Sachverständige im{' '}
               <strong className="text-white/85 font-semibold"><ClaimondoLink>Claimondo-Partnernetzwerk</ClaimondoLink></strong> ·
-              Gutachten nach DAT-/BVSK-Standard
+              Gutachten nach BVSK-Standard
             </p>
             {/* 08k A5: Ratgeber-Link aus der Ablauf-Section hierher (war dort
                 der einzige autounfall.io/gutachter/-Treffer — Strategie 27c). */}

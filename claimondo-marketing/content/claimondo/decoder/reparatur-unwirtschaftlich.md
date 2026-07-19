@@ -227,7 +227,7 @@ Reparatur-vs-Totalschaden-Streitigkeiten sind eines der ergebnisreichsten Felder
 - BGH, Urteil vom 29.04.2003, VI ZR 393/02 (Restwert, regionale Erzielbarkeit)
 - BGH, Urteil vom 14.05.2013, VI ZR 320/12 (Markenwerkstatt-Recht)
 - BVSK Honorartabelle 2024 — [bvsk.de](https://www.bvsk.de)
-- DAT Marktinformationen — [dat.de](https://www.dat.de)
+- Marktinformationen
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---
