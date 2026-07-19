@@ -43,6 +43,7 @@ export default function KundeTrackingClient({
   besichtigungsortAdresse,
   besichtigungsortBestaetigtVon,
   kanal,
+  besichtigungGestartet,
 }: {
   svId: string
   channelHash: string
@@ -68,13 +69,17 @@ export default function KundeTrackingClient({
   besichtigungsortAdresse: string | null
   besichtigungsortBestaetigtVon: string | null
   kanal: string | null
+  besichtigungGestartet: boolean
 }) {
   const t = useTranslations('kunde.tracking')
   const format = useFormatter()
   const [svPosition, setSvPosition] = useState<{ lat: number; lng: number } | null>(null)
   const [etaMinutes, setEtaMinutes] = useState<number | null>(null)
   const [isAngekommen, setIsAngekommen] = useState(angekommen)
-  const [besichtigungLaeuft, setBesichtigungLaeuft] = useState(false)
+  // Initial aus dem Server-Prop: der anon-Kunde kann gutachter_termine nicht lesen
+  // (Leg ist session-gated, #4543) — ohne den Prop bliebe der Status fuer ihn immer
+  // false. Eingeloggte Kunden bekommen zusaetzlich die Live-Updates aus dem Effect.
+  const [besichtigungLaeuft, setBesichtigungLaeuft] = useState(besichtigungGestartet)
   const [notified5min, setNotified5min] = useState(notification5minSent)
   const [showGegenvorschlag, setShowGegenvorschlag] = useState(false)
   const [gegenDatum, setGegenDatum] = useState('')
