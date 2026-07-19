@@ -23,6 +23,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { getWerkstattAuftrag } from '@/lib/werkstatt/queries'
+import { reparaturGate, gateGrundLabel } from '@/lib/werkstatt/auftrag-gate'
 import { extrahiereKvaAusBase64 } from '@/lib/ai/kostenvoranschlag-ocr'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
@@ -101,6 +102,28 @@ export async function schlageWerkstattTerminVor(
   if (!utc) return { ok: false, error: 'Ungültiger Termin.' }
 
   const admin = createAdminClient()
+
+  // Spec E 1a: Termin-Gate. Im kva_erst-Modus ohne kunde-seitigen KVA/Freigabe darf noch nicht
+  // terminiert werden (Kostenschutz). direkt / Kunde- oder Zubringer-KVA / freigegebener
+  // Werkstatt-KVA = offen. Ownership ist oben via RLS-View bereits bewiesen.
+  const { data: gateRow } = await admin
+    .from('claims')
+    .select('reparatur_auftrag_modus, kva_quelle, reparatur_freigegeben_am, kva_abgelehnt_am')
+    .eq('id', claimId)
+    .maybeSingle()
+  const gate = reparaturGate({
+    reparatur_auftrag_modus: (gateRow?.reparatur_auftrag_modus as string | null) ?? null,
+    kva_quelle: (gateRow?.kva_quelle as string | null) ?? null,
+    reparatur_freigegeben_am: (gateRow?.reparatur_freigegeben_am as string | null) ?? null,
+    kva_abgelehnt_am: (gateRow?.kva_abgelehnt_am as string | null) ?? null,
+  })
+  if (!gate.offen) {
+    return {
+      ok: false,
+      error: gateGrundLabel(gate.grund) ?? 'Der Reparaturauftrag ist noch nicht zur Terminfindung freigegeben.',
+    }
+  }
+
   const res = await upsertWerkstattVorschlag(admin, claimId, werkstattId, utc)
   if (!res.ok) return { ok: false, error: res.error }
 
@@ -400,6 +423,11 @@ export async function erstelleKvaFuerAuftrag(
     .update({
       kostenvoranschlag_netto: input.netto,
       kostenvoranschlag_brutto: input.brutto,
+      // Spec E 1a: Werkstatt-KVA → Quelle=werkstatt; ein (Gegen-)KVA nullt eine frühere
+      // Freigabe/Ablehnung → das Gate schliesst auf 'wartet_freigabe' bis zur Kundenfreigabe.
+      kva_quelle: 'werkstatt',
+      reparatur_freigegeben_am: null,
+      kva_abgelehnt_am: null,
       // AV5: geschaetzte Reparaturdauer (Tage) aus dem KVA-Upload.
       ...(input.reparaturdauerTage != null ? { reparaturdauer_tage_kva: input.reparaturdauerTage } : {}),
     } as never)
