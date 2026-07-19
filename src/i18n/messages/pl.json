@@ -4968,6 +4968,10 @@
       "abschluss": "Zakończenie"
     },
     "subKunde": {
+      "reparatur_werkstattwahl": "Wybieramy warsztat",
+      "reparatur_terminfindung": "Ustalamy termin naprawy",
+      "reparatur_laeuft": "Naprawa w toku",
+      "reparatur_fertig": "Naprawa zakończona",
       "sa_offen": "Rejestrujemy szkodę",
       "vollmacht_offen": "Przygotowujemy dokumenty",
       "onboarding_offen": "Oczekiwanie na ostatnie dane",
@@ -4988,6 +4992,10 @@
       "termin_durchgefuehrt": "Termin zrealizowany"
     },
     "subIntern": {
+      "reparatur_werkstattwahl": "Wybór warsztatu",
+      "reparatur_terminfindung": "Ustalanie terminu",
+      "reparatur_laeuft": "Naprawa w toku",
+      "reparatur_fertig": "Naprawa zakończona",
       "sa_offen": "Brak podpisu cesji",
       "vollmacht_offen": "Brak pełnomocnictwa",
       "onboarding_offen": "Onboarding w toku",
