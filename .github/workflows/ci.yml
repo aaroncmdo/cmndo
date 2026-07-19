@@ -299,6 +299,26 @@ jobs:
           NEXT_PUBLIC_CLARITY_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
+  vitest:
+    # Test-Drift-Bremse: ci.yml faehrt sonst NIE `vitest run` -> staging sammelt still
+    # Test-Breakage, die <30 Min spaeter auf prod steht (19.07. gemessen: 19 rote Files /
+    # 31 Tests, wachsend). Laeuft PARALLEL zum build (kein needs), auf PRs + push. Blockt
+    # NEUE rote Test-Files ggue. scripts/vitest-baseline.json (file-level, --retry=2 gegen
+    # Flake). Boy-Scout: File fixen + Baseline senken. Siehe AGENTS.md §test-gate.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Vitest-Test-Drift-Ratchet
+        run: npm run check:vitest -- --ratchet
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
+
   e2e:
     # E2E laeuft NUR post-merge (push auf main/staging) gegen den DEPLOYTEN Stand auf
     # app.claimondo.de — NICHT auf pull_request. Auf PRs testete der Job den Prod-Stand
