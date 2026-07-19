@@ -224,6 +224,12 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',
+    // 2026-07-19: Werkstatt-Empfehlung (/werkstatt-empfehlung/[token]) — SV empfiehlt
+    // 1-3 Werkstaetten, Kunde waehlt per Magic-Link, kein Login (Token-Validierung in
+    // der Action). Ohne diesen Eintrag 307't die Route auf /login und der Kunde erreicht
+    // die Auswahl nie (Regel-4-Prod-Render-Befund). SPEZIFISCHER Pfad — kollidiert via
+    // startsWith NICHT mit dem geschuetzten '/werkstatt/'-Portal (anderer Praefix).
+    '/werkstatt-empfehlung',
     // AAR-956 T1.1b: /anfrage-Whitelist entfernt — die Self-Service-Strecke
     // /anfrage/[token] ist retired (kanonischer Ersatz = /start → /flow). Alt-Links
     // fängt der 301-Redirect in next.config.ts ab (→ /).
