@@ -49,6 +49,19 @@ export async function empfehleWerkstaettenAlsGutachter(
   if (rows.length === 0) return { ok: false, error: 'Keine gültige Werkstatt in der Auswahl.' }
 
   const admin = createAdminClient()
+
+  // Nur EINE offene Empfehlung pro Fall. Sonst laegen zwei Magic-Links parallel und der
+  // Kunde koennte auf dem alten Link eine Werkstatt waehlen, die der SV laengst ersetzt hat.
+  // Der SV muss die laufende erst zurueckziehen (zieheWerkstattEmpfehlungZurueck).
+  const { data: bereitsOffen } = await admin
+    .from('werkstatt_empfehlung_batches')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('status', 'offen')
+    .limit(1)
+  if (bereitsOffen && (bereitsOffen as Array<{ id: string }>).length > 0)
+    return { ok: false, error: 'Es läuft bereits eine Empfehlung. Bitte zuerst zurückziehen.' }
+
   const token = `wemp-${crypto.randomUUID()}`
   const { data: batch, error: bErr } = await admin
     .from('werkstatt_empfehlung_batches')
@@ -111,6 +124,55 @@ export async function empfehleWerkstaettenAlsGutachter(
   } catch (err) {
     console.error('[werkstatt-empfehlung] notify fehlgeschlagen (non-fatal):', err)
   }
+
+  revalidatePath(`/gutachter/fall/${input.fallId}`)
+  return { ok: true }
+}
+
+/**
+ * SV zieht eine LAUFENDE Empfehlung zurueck (Spec §11): Batch -> 'zurueckgezogen'.
+ * Der Magic-Link ist damit tot — getWerkstattEmpfehlungByToken liefert dann
+ * „Diese Empfehlung ist nicht mehr aktiv."; danach kann der SV neu empfehlen.
+ * Ownership identisch zum Empfehlen (Claim muss diesem SV zugewiesen sein).
+ *
+ * Bereits ENTSCHIEDENE Batches bleiben bewusst unangetastet: dort ist
+ * assignReparaturWerkstatt schon gelaufen (Kunde hat gewaehlt, Werkstatt ist informiert) —
+ * das zurueckzunehmen waere ein Rueckbau der Zuweisung und gehoert nicht hierher.
+ */
+export async function zieheWerkstattEmpfehlungZurueck(
+  input: { fallId: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'Kein Sachverständigen-Profil gefunden' }
+
+  const claimId = await resolveClaimId(supabase, input.fallId)
+  const { data: claim } = claimId
+    ? await supabase
+        .from('claims')
+        .select('id')
+        .eq('id', claimId)
+        .eq('sv_id', (sv as { id: string }).id)
+        .maybeSingle()
+    : { data: null }
+  if (!claim || !claimId) return { ok: false, error: 'Fall nicht gefunden oder kein Zugriff.' }
+
+  // Auf die zurueckgegebenen Rows (data) pruefen, NICHT auf count — count kann je nach
+  // Content-Range-Header null sein und wuerde ein erfolgreiches Update als „nichts
+  // geaendert" werten (gleiche Falle wie im Confirm der Kunde-Route).
+  const admin = createAdminClient()
+  const { error, data: zurueckgezogen } = await admin
+    .from('werkstatt_empfehlung_batches')
+    .update({ status: 'zurueckgezogen', updated_at: new Date().toISOString() })
+    .eq('claim_id', claimId)
+    .eq('status', 'offen')
+    .select('id')
+  if (error) return { ok: false, error: error.message }
+  if (!zurueckgezogen || (zurueckgezogen as Array<{ id: string }>).length === 0)
+    return { ok: false, error: 'Keine laufende Empfehlung zum Zurückziehen.' }
 
   revalidatePath(`/gutachter/fall/${input.fallId}`)
   return { ok: true }
