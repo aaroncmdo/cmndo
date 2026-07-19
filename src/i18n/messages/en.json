@@ -549,7 +549,7 @@
         {
           "titel": "Partner Network",
           "text": "Claimondo works exclusively with certified expert appraisers listed in the public appraiser register. Primary focus on NRW, available nationwide.",
-          "quelle": "dat.de/sachverstaendige"
+          "quelle": "Öffentliches Sachverständigen-Verzeichnis"
         },
         {
           "titel": "Partner law firm for traffic law",
@@ -1987,7 +1987,7 @@
       },
       {
         "frage": "Are the listed appraisers independent?",
-        "antwort": "Yes. All partner appraisers are certified (public appraiser register at dat.de/sachverstaendige) and work independently — they are not employed by any insurer. They calculate repair costs, diminished value, replacement value, and residual value in line with BGH case law and the BVSK-Honorartabelle."
+        "antwort": "Yes. All partner appraisers are certified (public appraiser register) and work independently — they are not employed by any insurer. They calculate repair costs, diminished value, replacement value, and residual value in line with BGH case law and the BVSK-Honorartabelle."
       },
       {
         "frage": "What does the referral via the map cost me?",
@@ -2702,7 +2702,7 @@
     "hero_eyebrow": "Independent Automotive Appraisers",
     "hero_h1_line1": "Find a certified car expert —",
     "hero_h1_line2": "independent & at no cost.",
-    "hero_intro": "Certified partner appraisers from the official appraiser register (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
+    "hero_intro": "Certified partner appraisers from the official appraiser register, available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
     "hero_cta_karte": "View on map",
     "hero_cta_schaden": "Report a claim",
     "trust_kpi_dat_label": "certified network",

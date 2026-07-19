@@ -632,7 +632,7 @@
         {
           "titel": "Sieć partnerów",
           "text": "Claimondo współpracuje wyłącznie z certyfikowanymi rzeczoznawcami z publicznego rejestru. Głównie NRW, zasięg ogólnokrajowy.",
-          "quelle": "dat.de/sachverstaendige"
+          "quelle": "Öffentliches Sachverständigen-Verzeichnis"
         },
         {
           "titel": "Kancelaria partnerska prawa ruchu drogowego",
@@ -2137,7 +2137,7 @@
       },
       {
         "frage": "Czy widoczni rzeczoznawcy są niezależni?",
-        "antwort": "Tak. Wszyscy partnerzy-rzeczoznawcy są certyfikowani (publiczny rejestr: dat.de/sachverstaendige) i działają niezależnie — nie są powiązani z żadnym ubezpieczycielem. Wyceniają naprawę, utratę wartości, wartość odtworzeniową i wartość resztkową zgodnie z linią orzeczniczą BGH i BVSK-Honorartabelle."
+        "antwort": "Tak. Wszyscy partnerzy-rzeczoznawcy są certyfikowani (publiczny rejestr) i działają niezależnie — nie są powiązani z żadnym ubezpieczycielem. Wyceniają naprawę, utratę wartości, wartość odtworzeniową i wartość resztkową zgodnie z linią orzeczniczą BGH i BVSK-Honorartabelle."
       },
       {
         "frage": "Ile kosztuje mnie pośrednictwo przez mapę?",
@@ -2855,7 +2855,7 @@
     "hero_eyebrow": "Niezależni rzeczoznawcy samochodowi",
     "hero_h1_line1": "Znajdź rzeczoznawcę —",
     "hero_h1_line2": "niezależnie i bezpłatnie.",
-    "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
+    "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru, dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
     "hero_cta_karte": "Zobacz na mapie",
     "hero_cta_schaden": "Zgłoś szkodę",
     "trust_kpi_dat_label": "certyfikowana sieć partnerów",

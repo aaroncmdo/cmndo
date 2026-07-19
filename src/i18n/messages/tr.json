@@ -549,7 +549,7 @@
         {
           "titel": "İş Ortağı Ağı",
           "text": "Claimondo, yalnızca kamuya açık dizindeki sertifikalı bilirkişilerle çalışır. Ağırlıklı olarak NRW, tüm Almanya'da ulaşılabilir.",
-          "quelle": "dat.de/sachverstaendige"
+          "quelle": "Öffentliches Sachverständigen-Verzeichnis"
         },
         {
           "titel": "Trafik Hukuku Ortak Hukuk Bürosu",
@@ -1987,7 +1987,7 @@
       },
       {
         "frage": "Gösterilen bilirkişiler bağımsız mı?",
-        "antwort": "Evet. Tüm ortak bilirkişiler sertifikalıdır (kamuya açık dizin: dat.de/sachverstaendige) ve bağımsız çalışır — hiçbiri bir sigorta şirketinin hizmetinde değildir. Onarım bedeli, değer kaybı, ikame değeri ve hurda değerini BGH içtihadına ve BVSK-Honorartabelle'ye göre hesaplarlar."
+        "antwort": "Evet. Tüm ortak bilirkişiler sertifikalıdır (kamuya açık dizin) ve bağımsız çalışır — hiçbiri bir sigorta şirketinin hizmetinde değildir. Onarım bedeli, değer kaybı, ikame değeri ve hurda değerini BGH içtihadına ve BVSK-Honorartabelle'ye göre hesaplarlar."
       },
       {
         "frage": "Harita üzerinden yönlendirme bana ne kadara mal olur?",
@@ -2702,7 +2702,7 @@
     "hero_eyebrow": "Bağımsız Kfz Bilirkişileri",
     "hero_h1_line1": "Kfz Bilirkişi Bul —",
     "hero_h1_line2": "bağımsız & ücretsiz.",
-    "hero_intro": "Bilirkişi dizininden (dat.de/sachverstaendige) sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
+    "hero_intro": "Bilirkişi dizininden sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
     "hero_cta_karte": "Haritada Görüntüle",
     "hero_cta_schaden": "Hasar Bildir",
     "trust_kpi_dat_label": "sertifikalı ağ",
