@@ -262,6 +262,20 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Write-Reachability-Ratchet (Write-Reachability-Audit 19.07.2026): blockt NEUE PERMISSIVE
+      # authenticated-WRITE-Policies (INSERT/UPDATE/DELETE) mit einem OR-Zweig OHNE auth.uid()/
+      # Scoping-Helper -> jeder eingeloggte User kann fremde/beliebige Zeilen schreiben (cross-user/
+      # cross-tenant Write). Write-Gegenstueck zum Reachability-Ratchet (SELECT/true-anon-Achse).
+      # Ergaenzt die WURZEL (default-closed GRANT-Achse) um die POLICY-Reachability-Achse fuer Writes.
+      # Aktuell 0 echte Lecks (Baseline 2 = bewusste oeffentliche Finder-Submits). Backing-RPC
+      # audit_authenticated_write_reachable(). Nur bei SQL-Diff aktiv. Siehe
+      # scripts/check-authenticated-write-reachability.mjs + AGENTS.md §Write-Reachability-Gate.
+      - name: Write-Reachability-Ratchet
+        run: node scripts/check-authenticated-write-reachability.mjs --ratchet
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Query-Parse-Drift-Bremse (14.07.2026): faengt tote PostgREST-Queries, die still HTTP 300/400
       # liefern (tote Spalte / fehlende Relation / mehrdeutiger Embed / fehlende Tabelle) und deren
       # Fehler im Code verschluckt wird (`const { data } = await …`). Ausloeser: ein FK machte einen
@@ -298,6 +312,26 @@ jobs:
           NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
           NEXT_PUBLIC_CLARITY_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_ID }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+  vitest:
+    # Test-Drift-Bremse: ci.yml faehrt sonst NIE `vitest run` -> staging sammelt still
+    # Test-Breakage, die <30 Min spaeter auf prod steht (19.07. gemessen: 19 rote Files /
+    # 31 Tests, wachsend). Laeuft PARALLEL zum build (kein needs), auf PRs + push. Blockt
+    # NEUE rote Test-Files ggue. scripts/vitest-baseline.json (file-level, --retry=2 gegen
+    # Flake). Boy-Scout: File fixen + Baseline senken. Siehe AGENTS.md §test-gate.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Vitest-Test-Drift-Ratchet
+        run: npm run check:vitest -- --ratchet
+        env:
+          NODE_OPTIONS: --max-old-space-size=8192
 
   e2e:
     # E2E laeuft NUR post-merge (push auf main/staging) gegen den DEPLOYTEN Stand auf
