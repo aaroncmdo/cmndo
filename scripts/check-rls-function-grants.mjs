@@ -31,6 +31,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { execSync } from 'node:child_process'
+import { readFileSync, existsSync } from 'node:fs'
 
 // ── Relevanz-Gate (26.05.2026) ──────────────────────────────────────────────
 // Der Check trifft Supabase via PostgREST/Pooler. Bei vielen parallelen Sessions
@@ -39,31 +40,60 @@ import { execSync } from 'node:child_process'
 // PRs, die überhaupt kein SQL anfassen (am 26.05.2026: #1754, #1757, #1762).
 // Grant-Drift entsteht aber NUR durch Migrations-/Funktions-SQL. Daher: in einem
 // PR-Build (GITHUB_BASE_REF gesetzt) nur weiterlaufen, wenn die PR supabase/**
-// oder *.sql berührt — sonst Exit 0 (skip), ohne Supabase anzufassen. Bei
-// push/lokal (kein GITHUB_BASE_REF) läuft der Check immer; bei git-Fehlern
-// fail-safe weiter (lieber unnötig prüfen als Drift verpassen). Das Check-Script
+// oder *.sql berührt — sonst Exit 0 (skip), ohne Supabase anzufassen. Bei push
+// (18.07.2026) gilt DASSELBE Gate über die Push-Range (before..after aus dem Event);
+// nur lokal (kein CI-Event) läuft der Check immer; bei git-Fehlern fail-safe weiter
+// (lieber unnötig prüfen als Drift verpassen). Das Check-Script
 // selbst ist bewusst NICHT im Pathspec: reine CI-Wartung soll den fragilen
 // Live-Check nicht auslösen (Validierung via `node --check` + lokalem Lauf).
 //
 // (Bewusst im Script statt in ci.yml: workflow-ändernde PRs triggern über den
 // CI-Automations-Token keinen Actions-Run — eine Script-Datei dagegen schon.)
-function prTouchesSql() {
-  const base = process.env.GITHUB_BASE_REF
-  if (!base) return true // kein PR-Kontext (push/lokal) → immer prüfen
-  try {
-    execSync(`git fetch --no-tags --depth=1 origin ${base}`, { stdio: 'ignore' })
-    const out = execSync(
-      `git diff --name-only origin/${base} HEAD -- supabase "*.sql"`,
-      { encoding: 'utf8' },
-    )
-    return out.trim().length > 0
-  } catch {
-    return true // git-Fehler → fail-safe: Check laufen lassen
-  }
+function diffTouchesSql(range) {
+  const out = execSync(`git diff --name-only ${range} -- supabase "*.sql"`, { encoding: 'utf8' })
+  return out.trim().length > 0
 }
 
-if (!prTouchesSql()) {
-  console.log('⏭  PR berührt kein SQL/Migrations-File → RLS-Grants-Check übersprungen (Pool-Schonung).')
+function shouldRunCheck() {
+  const base = process.env.GITHUB_BASE_REF
+  // PR-Build: nur laufen, wenn die PR SQL berührt.
+  if (base) {
+    try {
+      execSync(`git fetch --no-tags --depth=1 origin ${base}`, { stdio: 'ignore' })
+      return diffTouchesSql(`origin/${base} HEAD`)
+    } catch {
+      return true // git-Fehler → fail-safe
+    }
+  }
+  // Push-Build (18.07.2026-Fix): gleiches SQL-Gate über die Push-Range (before..after aus dem
+  // GitHub-Event). Vorher lief der Check hier IMMER (`if(!base) return true`) → der ständige
+  // Release-Sweep-Push zu staging/main zog die 19-31s-prod-Audit ungegated und saturierte den
+  // prod-Connection-Pool (Go-Live 18.07., viele Parallel-Sessions).
+  if (process.env.GITHUB_EVENT_NAME === 'push') {
+    try {
+      const eventPath = process.env.GITHUB_EVENT_PATH
+      let before = null
+      let after = process.env.GITHUB_SHA ?? null
+      if (eventPath && existsSync(eventPath)) {
+        const ev = JSON.parse(readFileSync(eventPath, 'utf8'))
+        before = ev.before ?? null
+        after = ev.after ?? after
+      }
+      // Neuer Branch / erster Push: before = 0000… → keine Range diffbar → fail-safe laufen.
+      if (!before || /^0+$/.test(before) || !after) return true
+      // Shallow-Checkout hat den before-Commit evtl. nicht → gezielt fetchen (GitHub erlaubt fetch-by-SHA).
+      execSync(`git fetch --no-tags --depth=1 origin ${before}`, { stdio: 'ignore' })
+      return diffTouchesSql(`${before} ${after}`)
+    } catch {
+      return true // Event-/git-Fehler → fail-safe
+    }
+  }
+  // Lokal (kein CI-Kontext) → immer prüfen.
+  return true
+}
+
+if (!shouldRunCheck()) {
+  console.log('⏭  Push/PR berührt kein SQL/Migrations-File → RLS-Grants-Check übersprungen (Pool-Schonung).')
   process.exit(0)
 }
 
