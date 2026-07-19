@@ -17442,11 +17442,8 @@ export type Database = {
           deaktiviert_am: string | null
           deaktiviert_grund: string | null
           firmenname: string | null
-          gcal_access_token: string | null
           gcal_calendar_id: string | null
           gcal_connected: boolean | null
-          gcal_refresh_token: string | null
-          gcal_token_expiry: string | null
           gebiet_plz: string[]
           geloescht_am: string | null
           gesperrt_grund: string | null
@@ -17540,11 +17537,8 @@ export type Database = {
           deaktiviert_am?: string | null
           deaktiviert_grund?: string | null
           firmenname?: string | null
-          gcal_access_token?: string | null
           gcal_calendar_id?: string | null
           gcal_connected?: boolean | null
-          gcal_refresh_token?: string | null
-          gcal_token_expiry?: string | null
           gebiet_plz?: string[]
           geloescht_am?: string | null
           gesperrt_grund?: string | null
@@ -17638,11 +17632,8 @@ export type Database = {
           deaktiviert_am?: string | null
           deaktiviert_grund?: string | null
           firmenname?: string | null
-          gcal_access_token?: string | null
           gcal_calendar_id?: string | null
           gcal_connected?: boolean | null
-          gcal_refresh_token?: string | null
-          gcal_token_expiry?: string | null
           gebiet_plz?: string[]
           geloescht_am?: string | null
           gesperrt_grund?: string | null

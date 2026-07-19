@@ -20,8 +20,9 @@ export async function POST() {
   }).eq('id', user.id)
 
   // UI-Flag-Mirror clearen (gcal_connected). Die Legacy-Token-Spalten
-  // gcal_access_token/refresh_token/gcal_token_expiry werden nicht mehr
-  // angefasst (tot, per Migration entfernt — Tokens leben in profiles.google_*).
+  // gcal_access_token/refresh_token/gcal_token_expiry sind per Mig 20260719205103
+  // GEDROPPT; die OAuth-Tokens leben in profiles_oauth_secrets (service-role-only —
+  // profiles.google_* wurden in Mig 20260719114539 gedroppt).
   await svc.from('sachverstaendige').update({
     gcal_connected: false,
   }).eq('profile_id', user.id)
