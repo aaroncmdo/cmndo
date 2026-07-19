@@ -12616,6 +12616,7 @@ export type Database = {
           provision_betrag_komplett_netto: number
           provision_betrag_nur_gutachter_netto: number
           rechtsform: string | null
+          sponsor_makler_id: string | null
           status: string
           telefon: string | null
           user_id: string | null
@@ -12652,6 +12653,7 @@ export type Database = {
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           rechtsform?: string | null
+          sponsor_makler_id?: string | null
           status?: string
           telefon?: string | null
           user_id?: string | null
@@ -12688,6 +12690,7 @@ export type Database = {
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           rechtsform?: string | null
+          sponsor_makler_id?: string | null
           status?: string
           telefon?: string | null
           user_id?: string | null
@@ -12702,6 +12705,13 @@ export type Database = {
             columns: ["maklerpool_id"]
             isOneToOne: false
             referencedRelation: "maklerpools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "makler_sponsor_makler_id_fkey"
+            columns: ["sponsor_makler_id"]
+            isOneToOne: false
+            referencedRelation: "makler"
             referencedColumns: ["id"]
           },
           {
@@ -21520,6 +21530,203 @@ export type Database = {
           },
         ]
       }
+      werkstatt_empfehlung_batches: {
+        Row: {
+          claim_id: string
+          created_at: string
+          empfohlen_von: string
+          entschieden_am: string | null
+          expires_at: string
+          gewaehlte_werkstatt_id: string | null
+          id: string
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          claim_id: string
+          created_at?: string
+          empfohlen_von: string
+          entschieden_am?: string | null
+          expires_at: string
+          gewaehlte_werkstatt_id?: string | null
+          id?: string
+          status?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          claim_id?: string
+          created_at?: string
+          empfohlen_von?: string
+          entschieden_am?: string | null
+          expires_at?: string
+          gewaehlte_werkstatt_id?: string | null
+          id?: string
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_dokumente"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_phase"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_workstate"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_gewaehlte_werkstatt_id_fkey"
+            columns: ["gewaehlte_werkstatt_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["werkstatt_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlung_batches_gewaehlte_werkstatt_id_fkey"
+            columns: ["gewaehlte_werkstatt_id"]
+            isOneToOne: false
+            referencedRelation: "werkstaetten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      werkstatt_empfehlungen: {
+        Row: {
+          batch_id: string
+          created_at: string
+          distanz_km: number | null
+          id: string
+          match_snapshot: Json | null
+          rang: number
+          werkstatt_id: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          distanz_km?: number | null
+          id?: string
+          match_snapshot?: Json | null
+          rang?: number
+          werkstatt_id: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          distanz_km?: number | null
+          id?: string
+          match_snapshot?: Json | null
+          rang?: number
+          werkstatt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "werkstatt_empfehlungen_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "werkstatt_empfehlung_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlungen_werkstatt_id_fkey"
+            columns: ["werkstatt_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["werkstatt_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_empfehlungen_werkstatt_id_fkey"
+            columns: ["werkstatt_id"]
+            isOneToOne: false
+            referencedRelation: "werkstaetten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       werkstatt_notizen: {
         Row: {
           autor_name: string | null
@@ -24411,13 +24618,6 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
-            columns: ["konvertiert_von_lead"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
@@ -24427,8 +24627,8 @@ export type Database = {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["konvertiert_von_lead"]
             isOneToOne: false
-            referencedRelation: "v_lead_termin_gutachter"
-            referencedColumns: ["lead_id"]
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
@@ -24441,8 +24641,8 @@ export type Database = {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["konvertiert_von_lead"]
             isOneToOne: false
-            referencedRelation: "v_lead_workstate"
-            referencedColumns: ["id"]
+            referencedRelation: "v_lead_termin_gutachter"
+            referencedColumns: ["lead_id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
@@ -24454,13 +24654,20 @@ export type Database = {
           {
             foreignKeyName: "claims_lead_id_fkey"
             columns: ["konvertiert_von_lead"]
+            isOneToOne: false
+            referencedRelation: "v_lead_workstate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_lead_id_fkey"
+            columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "v_werkstatt_lead"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_lead_id_fkey"
-            columns: ["lead_id"]
+            columns: ["konvertiert_von_lead"]
             isOneToOne: false
             referencedRelation: "v_werkstatt_lead"
             referencedColumns: ["id"]
@@ -25818,6 +26025,10 @@ export type Database = {
       get_aktueller_gt_termin_id: {
         Args: { p_claim_id: string }
         Returns: string
+      }
+      get_makler_empfehlung_uebersicht: {
+        Args: { p_makler_id: string }
+        Returns: Json
       }
       get_sv_id: { Args: never; Returns: string }
       get_updates_action: {

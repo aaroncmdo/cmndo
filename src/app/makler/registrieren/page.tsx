@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { MaklerRegistrierenClient } from './MaklerRegistrierenClient'
 import { getGesellschaftOptions } from '@/lib/makler/gesellschaft'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,7 +12,38 @@ export const metadata: Metadata = {
     'Sofort startklar mit Ihrer eigenen Empfehlungs-Landeseite für Ihre Kunden.',
 }
 
-export default async function MaklerRegistrierenPage() {
+export default async function MaklerRegistrierenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ werber?: string }>
+}) {
+  const { werber } = await searchParams
+  const werberCode = (werber ?? '').trim() || null
+
+  // Optionaler Trust-Hinweis: Firma des aktiven Werbers server-seitig auflösen (non-fatal).
+  let werberFirma: string | null = null
+  if (werberCode) {
+    try {
+      const admin = createAdminClient()
+      const { data: pc } = await admin
+        .from('promotion_codes')
+        .select('makler_id')
+        .eq('code', werberCode)
+        .eq('aktiv', true)
+        .maybeSingle()
+      if (pc?.makler_id) {
+        const { data: m } = await admin
+          .from('makler')
+          .select('firma, status, provision_aktiv')
+          .eq('id', pc.makler_id)
+          .maybeSingle()
+        if (m && m.status === 'aktiv' && m.provision_aktiv) werberFirma = m.firma ?? null
+      }
+    } catch {
+      /* non-fatal */
+    }
+  }
+
   const { versicherungen, maklerpools } = await getGesellschaftOptions()
   return (
     <div className="min-h-screen bg-claimondo-bg">
@@ -30,7 +62,12 @@ export default async function MaklerRegistrierenPage() {
             Kostenlos registrieren — sofort startklar mit Ihrer eigenen Empfehlungs-Landeseite.
           </p>
         </div>
-        <MaklerRegistrierenClient versicherungen={versicherungen} maklerpools={maklerpools} />
+        <MaklerRegistrierenClient
+          versicherungen={versicherungen}
+          maklerpools={maklerpools}
+          werber={werberCode}
+          werberFirma={werberFirma}
+        />
       </div>
     </div>
   )

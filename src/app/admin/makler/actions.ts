@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
+import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 
 async function requireAdmin(): Promise<{ id: string } | null> {
   const supabase = await createClient()
@@ -39,9 +40,16 @@ export async function createMakler(
   // Makler-Gesellschaft: versicherungsgebunden (versicherung_id) ODER frei (maklerpool_id).
   const versicherung_id = String(formData.get('versicherung_id') ?? '').trim() || null
   const maklerpool_id = String(formData.get('maklerpool_id') ?? '').trim() || null
+  // AAR-empfehlung: Rechtsform Pflicht (Abrechnung) + Kleinunternehmer-Flag.
+  const rechtsform = String(formData.get('rechtsform') ?? '').trim()
+  const istKleinunternehmer =
+    formData.get('kleinunternehmer') === 'on' || formData.get('kleinunternehmer') === 'true'
 
   if (!firma || !email || !ansprechpartner_vorname || !ansprechpartner_nachname) {
     return { ok: false, error: 'Firma, E-Mail und Ansprechpartner (Vor- und Nachname) sind Pflicht.' }
+  }
+  if (!rechtsform || !istErlaubteRechtsform(rechtsform)) {
+    return { ok: false, error: 'Bitte wählen Sie eine gültige Rechtsform.' }
   }
 
   // Kern-Anlage via konsolidiertem anlegePartnerKern (Auth-User + profiles + makler-Row +
@@ -63,6 +71,8 @@ export async function createMakler(
       provision_betrag_nur_gutachter_netto: provGutachter,
       versicherung_id,
       maklerpool_id,
+      rechtsform,
+      ist_kleinunternehmer: istKleinunternehmer,
     },
   })
   if (!result.ok) return { ok: false, error: result.error }
