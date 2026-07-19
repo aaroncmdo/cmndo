@@ -366,8 +366,13 @@ describe('convertLeadToClaim', () => {
     expect(rtPayload.erstellt_von).toBe('user-dispatcher')
   })
 
-  it('SP2 T4: legt KEINE reparatur_termine-Zeile an wenn reparatur_wunschtermin fehlt', async () => {
-    // Lead hat Werkstatt-Zuweisung, aber kein Wunschtermin (Dispatcher-Vermittlung ohne Flow-Termin)
+  it('SP2 T4 (#4364): legt die reparatur_termine-Zeile AUCH ohne Wunschtermin an (wunschtermin=null)', async () => {
+    // Audit-Fund b1 "toter Reparatur-Auftrag": frueher war die Row an BEIDE Felder gekoppelt
+    // (werkstatt_id UND wunschtermin). Der Wunschtermin ist im Flow aber OPTIONAL -> ohne ihn
+    // entstand keine Row, und WerkstattAuftragDetail blendete die GANZE Termin-Sektion aus,
+    // inkl. des Buttons, mit dem die Werkstatt selbst haette vorschlagen koennen.
+    // Seit Mig 20260715005517 ist wunschtermin nullable und die Row entsteht immer, sobald
+    // eine Werkstatt gewaehlt ist. Dieser Test hielt bis 19.07. noch das ALTE Verhalten fest.
     primeResponses([
       {
         data: {
@@ -384,9 +389,9 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-no-rt', claim_nummer: 'CLM-NO-RT' } }, // 3 claims insert
       { data: { id: 'person-nrt' } },                              // 4 personen insert
       { data: null },                                              // 5 claim_parties insert
-      // KEIN reparatur_termine-Insert (Gate: beide Felder muessen gesetzt sein)
-      { data: null },                                              // 6 faelle_claim_bridge upsert
-      { data: null },                                              // 7 leads update
+      { data: null },                                              // 6 reparatur_termine insert (auch ohne Wunschtermin)
+      { data: null },                                              // 7 faelle_claim_bridge upsert
+      { data: null },                                              // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -394,7 +399,11 @@ describe('convertLeadToClaim', () => {
     expect(r.ok).toBe(true)
 
     const rtInsert = operations.find((o) => o.table === 'reparatur_termine' && o.op === 'insert')
-    expect(rtInsert).toBeUndefined()
+    expect(rtInsert).toBeTruthy()
+    const rtPayload = rtInsert!.payload as Record<string, unknown>
+    expect(rtPayload.werkstatt_id).toBe('werkstatt-rt-2')
+    expect(rtPayload.wunschtermin).toBeNull()
+    expect(rtPayload.status).toBe('angefragt')
   })
 
   // ─── KB-Skip fuer Selbstzahler (Aaron 06.07.) ────────────────────────────
@@ -445,6 +454,71 @@ describe('convertLeadToClaim', () => {
 
     // Round-Robin lief -> mindestens ein profiles-Select.
     expect(operations.filter((o) => o.table === 'profiles').length).toBeGreaterThanOrEqual(1)
+  })
+
+  // ─── Audit-Bug F (Kasko-Audit 15.07.) ─────────────────────────────────────
+  // Der Werkstatt-Reparatur-Weg (kasko/selbstzahler) hat KEIN SV-Onboarding: der Claim
+  // wird im FlowLink erfasst, es gibt weder Gutachter-Termin noch Vollmacht-Strecke.
+  // onboarding_complete blieb bisher auf dem DB-Default false -> der Kunde wurde vom
+  // Portal-Gate (kunde/layout.tsx, kunde/page.tsx) in einen Wizard gezwungen, der fuer
+  // ihn auf welcome->fall->fertig zusammenschrumpft, und sah eine "Onboarding
+  // abschliessen"-Warnkarte (lib/kunde/jetzt-zu-tun.ts). Bei der Konversion direkt auf
+  // true setzen. NICHT lifecycle-relevant: lifecycle.ts liest das Feld nicht.
+  it('Bug F: Kasko-Lead -> Claim wird mit onboarding_complete=true angelegt', async () => {
+    primeResponses([
+      { data: { id: 'lead-ka', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'kasko' } }, // 1 leads select
+      { data: { id: 'claim-ka', claim_nummer: 'CLM-KA' } }, // 2 claims insert (KB-Skip -> kein profiles-Select)
+      { data: { id: 'person-ka' } },                        // 3 personen insert
+      { data: null },                                       // 4 claim_parties insert
+      { data: null },                                       // 5 faelle_claim_bridge upsert
+      { data: null },                                       // 6 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-ka' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.onboarding_complete).toBe(true)
+  })
+
+  it('Bug F: Selbstzahler-Lead -> Claim wird mit onboarding_complete=true angelegt', async () => {
+    primeResponses([
+      { data: { id: 'lead-sz2', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'selbstzahler' } }, // 1 leads select
+      { data: { id: 'claim-sz2', claim_nummer: 'CLM-SZ2' } }, // 2 claims insert
+      { data: { id: 'person-sz2' } },                         // 3 personen insert
+      { data: null },                                         // 4 claim_parties insert
+      { data: null },                                         // 5 faelle_claim_bridge upsert
+      { data: null },                                         // 6 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-sz2' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.onboarding_complete).toBe(true)
+  })
+
+  it('Bug F: Haftpflicht-Lead behaelt das echte SV-Onboarding (onboarding_complete NICHT gesetzt)', async () => {
+    // Regressions-Guard: der Haftpflicht-Kunde MUSS weiterhin durchs Onboarding
+    // (Vollmacht, SV-Termin) -> das Flag bleibt beim DB-Default false.
+    primeResponses([
+      { data: { id: 'lead-hp2', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'haftpflicht' } }, // 1 leads select
+      { data: [] },                                           // 2 profiles select (Round-Robin)
+      { data: { id: 'claim-hp2', claim_nummer: 'CLM-HP2' } }, // 3 claims insert
+      { data: { id: 'person-hp2' } },                         // 4 personen insert
+      { data: null },                                         // 5 claim_parties insert
+      { data: null },                                         // 6 faelle_claim_bridge upsert
+      { data: null },                                         // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-hp2' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.onboarding_complete).toBeUndefined()
   })
 })
 
