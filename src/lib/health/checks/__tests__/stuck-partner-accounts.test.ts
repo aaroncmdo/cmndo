@@ -114,6 +114,13 @@ describe('stuckPartnerAccountsCheck', () => {
     expect(res.status).toBe('ok')
     expect(res.metric).toBe(0)
   })
+
+  it('schliesst interne/Test-Identitaeten aus (kb@claimondo.de zaehlt nicht als stuck)', async () => {
+    const profiles = [P('kb', 'kundenbetreuer', 'kb@claimondo.de'), P('w', 'werkstatt', 'info@echte-werkstatt.de')]
+    const res = await stuckPartnerAccountsCheck.run(mockCtx({ profiles }))
+    expect(res.metric).toBe(1)
+    expect(res.sampleIds).toEqual(['info@echte-werkstatt.de'])
+  })
 })
 
 describe('PARTNER_ROLLEN Enum-Integritaet', () => {
