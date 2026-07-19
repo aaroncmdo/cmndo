@@ -7,6 +7,8 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assignReparaturWerkstatt } from '@/lib/werkstatt/vermittlung-server'
+import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
+import type { VermittlungQuelle } from '@/lib/werkstatt/vermittlung-core'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import type { MatchGrund } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { revalidatePath } from 'next/cache'
@@ -26,6 +28,20 @@ export type EmpfehlungView = {
 // gutachter-finder-actions.ts, page.tsx v_gutachten_werte).
 const WERKSTATT_COLS =
   'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert'
+
+// „Weitere Werkstaetten in der Naehe" (Plan T5, war P-later): der Kunde darf ueber die
+// 1-3 Empfehlungen des Gutachters hinausschauen, wenn keine davon passt.
+//
+// ⚠ ANBIETEN und VALIDIEREN muessen DECKUNGSGLEICH sein (siehe lade-vorschlaege.ts):
+// gleiche Engine, gleiches nurEchte, gleiches Limit — sonst wird eine Werkstatt, die wir
+// dem Kunden angeboten haben, beim Auswaehlen abgelehnt. Genau deshalb geht BEIDES durch
+// diesen einen Helper; die Konstante wird bewusst NICHT exportiert ('use server'-File:
+// Werte-Exporte landen im Client-Bundle als undefined).
+const WEITERE_LIMIT = 12
+
+async function ladeWeitereKandidaten(claimId: string) {
+  return findWerkstattVorschlaegeFuer({ target: 'claim', id: claimId, nurEchte: true }, WEITERE_LIMIT)
+}
 
 export async function getWerkstattEmpfehlungByToken(
   token: string,
@@ -132,6 +148,39 @@ export async function getWerkstattEmpfehlungByToken(
   }
 }
 
+/**
+ * Zusaetzliche Partner-Werkstaetten in der Naehe, OHNE die bereits empfohlenen.
+ * Wird erst auf Klick geladen — der Default bleibt die kuratierte 1-3-Auswahl des
+ * Gutachters; das hier ist die Ausweichoption, wenn keine davon passt.
+ */
+export async function ladeWeitereWerkstaetten(
+  token: string,
+): Promise<{ ok: true; data: EmpfehlungWerkstatt[] } | { ok: false; error: string }> {
+  const admin = createAdminClient()
+
+  const { data: batchRow } = await admin
+    .from('werkstatt_empfehlung_batches')
+    .select('id, claim_id, status, expires_at')
+    .eq('token', token)
+    .maybeSingle()
+  const batch = batchRow as { id: string; claim_id: string; status: string; expires_at: string } | null
+  if (!batch) return { ok: false, error: 'Dieser Link ist ungültig.' }
+  if (batch.status !== 'offen' || new Date(batch.expires_at).getTime() < Date.now())
+    return { ok: false, error: 'Diese Empfehlung ist nicht mehr aktiv.' }
+
+  // Bereits empfohlene ausblenden — die stehen schon oben in der Liste.
+  const { data: empfRows } = await admin
+    .from('werkstatt_empfehlungen')
+    .select('werkstatt_id')
+    .eq('batch_id', batch.id)
+  const schonEmpfohlen = new Set(
+    ((empfRows ?? []) as Array<{ werkstatt_id: string }>).map((e) => e.werkstatt_id),
+  )
+
+  const kandidaten = await ladeWeitereKandidaten(batch.claim_id)
+  return { ok: true, data: kandidaten.filter((k) => !schonEmpfohlen.has(k.id)) }
+}
+
 export async function waehleWerkstattAusEmpfehlung(
   token: string,
   werkstattId: string,
@@ -155,7 +204,18 @@ export async function waehleWerkstattAusEmpfehlung(
     .eq('batch_id', batch.id)
     .eq('werkstatt_id', werkstattId)
     .maybeSingle()
-  if (!cand) return { ok: false, error: 'Diese Werkstatt gehört nicht zur Empfehlung.' }
+  // Der Kunde darf auch eine NICHT empfohlene Werkstatt aus der Naehe waehlen („weitere
+  // anzeigen"). Dann serverseitig gegen DIESELBE Kandidatenliste validieren, die wir ihm
+  // angeboten haben (ladeWeitereKandidaten) — der rohen ID vom Client nie vertrauen — und
+  // die Quelle ehrlich als 'kunde' fuehren: diese Werkstatt kam nicht aus der Empfehlung
+  // des Gutachters, das soll die Zuweisung auch so ausweisen.
+  let quelle: VermittlungQuelle = 'gutachter'
+  if (!cand) {
+    const kandidaten = await ladeWeitereKandidaten(batch.claim_id)
+    if (!kandidaten.some((k) => k.id === werkstattId))
+      return { ok: false, error: 'Diese Werkstatt steht für diesen Fall nicht zur Auswahl.' }
+    quelle = 'kunde'
+  }
 
   // Batch schliessen (guard status='offen' -> verhindert Doppel-Assign bei Reload).
   // Auf die zurueckgegebenen Rows (data) pruefen, NICHT auf count: count kann je nach
@@ -171,7 +231,7 @@ export async function waehleWerkstattAusEmpfehlung(
   if (!geschlossen || geschlossen.length === 0) return { ok: true } // schon entschieden / parallele Wahl -> idempotent
 
   // BESTAND: setzt reparatur_werkstatt_*, benachrichtigt Kunde + Werkstatt, Provisions-Trigger.
-  const res = await assignReparaturWerkstatt({ target: 'claim', id: batch.claim_id, werkstattId, quelle: 'gutachter', actorUserId: null })
+  const res = await assignReparaturWerkstatt({ target: 'claim', id: batch.claim_id, werkstattId, quelle, actorUserId: null })
   if (!res.ok) return res
 
   revalidatePath(`/werkstatt-empfehlung/${token}`)
