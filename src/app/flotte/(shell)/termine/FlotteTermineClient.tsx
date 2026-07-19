@@ -18,5 +18,14 @@ export default function FlotteTermineClient({
     const vehicleId = vehicleByClaim[claimId]
     return vehicleId ? `/flotte/fahrzeug/${vehicleId}/schaden/${claimId}` : null
   }
-  return <TermineHub termine={termine} fallMap={fallMap} linkFor={linkFor} showActions />
+  return (
+    <TermineHub
+      termine={termine}
+      fallMap={fallMap}
+      linkFor={linkFor}
+      showActions
+      title="Flotten-Termine"
+      description="Alle Termine Ihrer Firmenfahrzeuge."
+    />
+  )
 }

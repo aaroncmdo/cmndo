@@ -31,9 +31,12 @@ export type TermineHubProps = {
   fallMap: Record<string, FallInfo>
   linkFor: (t: KundeTerminEntry) => string | null
   showActions: boolean
+  /** Optionaler Header-Override (Default = Kunde-i18n „Meine Termine"; Flotte setzt „Flotten-Termine"). */
+  title?: string
+  description?: string
 }
 
-export function TermineHub({ termine, fallMap, linkFor, showActions }: TermineHubProps) {
+export function TermineHub({ termine, fallMap, linkFor, showActions, title, description }: TermineHubProps) {
   const t = useTranslations('kunde.termine')
   const format = useFormatter()
   const [view, setView] = useState<'liste' | 'kalender'>('liste')
@@ -96,7 +99,7 @@ export function TermineHub({ termine, fallMap, linkFor, showActions }: TermineHu
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
       <PageHeader
-        title={t('liste.title')} description={t('liste.description')} size="lg"
+        title={title ?? t('liste.title')} description={description ?? t('liste.description')} size="lg"
         actions={
           <div className="flex items-center rounded-ios-xl border border-claimondo-border bg-white p-0.5 gap-0.5 shrink-0">
             <button type="button" onClick={() => setView('liste')}
