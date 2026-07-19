@@ -962,7 +962,7 @@
         {
           "titel": "Partner-Netzwerk",
           "text": "Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen Sachverständigen-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.",
-          "quelle": "dat.de/sachverstaendige"
+          "quelle": "Öffentliches Sachverständigen-Verzeichnis"
         },
         {
           "titel": "Partnerkanzlei für Verkehrsrecht",
@@ -1987,7 +1987,7 @@
       },
       {
         "frage": "Sind die angezeigten Sachverständigen unabhängig?",
-        "antwort": "Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches Sachverständigen-Verzeichnis dat.de/sachverstaendige) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle."
+        "antwort": "Ja. Alle Partner-Sachverständigen sind zertifiziert (öffentliches Sachverständigen-Verzeichnis) und arbeiten unabhängig — sie stehen nicht im Dienst einer Versicherung. Sie berechnen Reparatur, Wertminderung, Wiederbeschaffungswert und Restwert nach BGH-Linie und BVSK-Honorartabelle."
       },
       {
         "frage": "Was kostet mich die Vermittlung über die Karte?",
@@ -3231,7 +3231,7 @@
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
     "hero_h1_line1": "Kfz-Gutachter finden —",
     "hero_h1_line2": "unabhängig & kostenfrei.",
-    "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
+    "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis, bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
     "hero_cta_schaden": "Schaden melden",
     "trust_kpi_dat_label": "zertifiziertes Netzwerk",
