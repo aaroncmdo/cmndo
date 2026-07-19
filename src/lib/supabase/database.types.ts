@@ -3706,6 +3706,7 @@ export type Database = {
           kanzlei_ansprechpartner_position: string | null
           kanzlei_ansprechpartner_telefon: string | null
           kanzlei_honorar: number | null
+          kanzlei_id: string | null
           kanzlei_provision_ausgezahlt_am: string | null
           kanzlei_provision_status: string | null
           kanzlei_uebergeben_am: string | null
@@ -3910,6 +3911,7 @@ export type Database = {
           kanzlei_ansprechpartner_position?: string | null
           kanzlei_ansprechpartner_telefon?: string | null
           kanzlei_honorar?: number | null
+          kanzlei_id?: string | null
           kanzlei_provision_ausgezahlt_am?: string | null
           kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
@@ -4114,6 +4116,7 @@ export type Database = {
           kanzlei_ansprechpartner_position?: string | null
           kanzlei_ansprechpartner_telefon?: string | null
           kanzlei_honorar?: number | null
+          kanzlei_id?: string | null
           kanzlei_provision_ausgezahlt_am?: string | null
           kanzlei_provision_status?: string | null
           kanzlei_uebergeben_am?: string | null
@@ -4278,6 +4281,13 @@ export type Database = {
             columns: ["kanzlei_abrechnung_id"]
             isOneToOne: false
             referencedRelation: "kanzlei_abrechnungen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_kanzlei_id_fkey"
+            columns: ["kanzlei_id"]
+            isOneToOne: false
+            referencedRelation: "kanzlei"
             referencedColumns: ["id"]
           },
           {
@@ -10107,6 +10117,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      kanzlei: {
+        Row: {
+          erstellt_am: string
+          id: string
+          name: string
+        }
+        Insert: {
+          erstellt_am?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          erstellt_am?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
       }
       kanzlei_abrechnung_positionen: {
         Row: {
@@ -15946,6 +15974,7 @@ export type Database = {
           google_email: string | null
           google_place_id: string | null
           id: string
+          kanzlei_id: string | null
           kapazitaet_max: number | null
           kategorie: string | null
           ms_connected_at: string | null
@@ -16001,6 +16030,7 @@ export type Database = {
           google_email?: string | null
           google_place_id?: string | null
           id: string
+          kanzlei_id?: string | null
           kapazitaet_max?: number | null
           kategorie?: string | null
           ms_connected_at?: string | null
@@ -16056,6 +16086,7 @@ export type Database = {
           google_email?: string | null
           google_place_id?: string | null
           id?: string
+          kanzlei_id?: string | null
           kapazitaet_max?: number | null
           kategorie?: string | null
           ms_connected_at?: string | null
@@ -16192,6 +16223,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_werkstatt_auftrag"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "profiles_kanzlei_id_fkey"
+            columns: ["kanzlei_id"]
+            isOneToOne: false
+            referencedRelation: "kanzlei"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -23116,14 +23154,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -25863,6 +25901,15 @@ export type Database = {
           table_name: string
         }[]
       }
+      audit_authenticated_write_reachable: {
+        Args: never
+        Returns: {
+          check_expr: string
+          cmd: string
+          policy_name: string
+          table_name: string
+        }[]
+      }
       audit_claim_view_gates: {
         Args: never
         Returns: {
@@ -25975,10 +26022,12 @@ export type Database = {
       cron_rate_limit_reset: { Args: never; Returns: undefined }
       cron_reparatur_freigabe_eskalation: { Args: never; Returns: undefined }
       cron_trigger_exif_worker: { Args: never; Returns: undefined }
+      cron_trigger_release_provisionen: { Args: never; Returns: undefined }
       cron_trigger_salesforce_sync: { Args: never; Returns: undefined }
       cron_verjaehrungs_warner: { Args: never; Returns: undefined }
       cron_vs_frist_reminder: { Args: never; Returns: undefined }
       cron_vs_frist_tick: { Args: never; Returns: undefined }
+      default_kanzlei_id: { Args: never; Returns: string }
       delete_fall_komplett:
         | { Args: { p_fall_id: string }; Returns: undefined }
         | {
@@ -26081,6 +26130,7 @@ export type Database = {
       is_claim_user_party: { Args: { p_claim_id: string }; Returns: boolean }
       is_dispatcher: { Args: never; Returns: boolean }
       is_kanzlei: { Args: never; Returns: boolean }
+      is_kanzlei_member: { Args: { p_kanzlei_id: string }; Returns: boolean }
       is_kundenbetreuer: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
       is_sv: { Args: never; Returns: boolean }
