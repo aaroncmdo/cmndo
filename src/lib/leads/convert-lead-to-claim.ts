@@ -563,6 +563,16 @@ export async function convertLeadToClaim(
   // setzt es spaeter szenario-spezifisch).
   if (istWerkstattReparaturWeg(resolvedAbrechnungsweg)) {
     ;(claimsInsert as Record<string, unknown>).szenario = resolvedAbrechnungsweg
+    // Audit-Bug F (Kasko-Audit 15.07.): der Reparatur-Weg hat KEIN SV-Onboarding —
+    // weder Gutachter-Termin noch Vollmacht-Strecke; der Fall ist im FlowLink erfasst.
+    // Ohne dieses Flag bleibt der Claim auf dem DB-Default false und der Kunde wird vom
+    // Portal-Gate (kunde/layout.tsx, kunde/page.tsx) in einen Wizard geschickt, der fuer
+    // ihn ohnehin auf welcome->fall->fertig zusammenschrumpft (Bug D), plus eine
+    // "Onboarding abschliessen"-Warnkarte (lib/kunde/jetzt-zu-tun.ts).
+    // NICHT lifecycle-relevant: lifecycle.ts fuehrt onboarding_complete nur als totes
+    // Input-Typ-Feld (get-claim-lifecycle-for-claim.ts uebergibt hart null); die Subphase
+    // onboarding_offen haengt an operative_status bzw. vollmacht_signiert_am.
+    claimsInsert.onboarding_complete = true
   }
 
   const { data: claim, error: claimErr } = await admin
