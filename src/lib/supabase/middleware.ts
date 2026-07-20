@@ -216,7 +216,17 @@ function isPublicPath(pathname: string): boolean {
     // Website). Public/anon — traegt nur das Monika-Widget. WICHTIG: '/g/' MIT
     // Slash; '/g' wuerde via startsWith auch /gutachter* oeffnen (Auth-Bypass).
     '/g/',
-    '/kunde/termin',
+    // KFZ-179: /kunde/termin/[token] = oeffentliche SV-Live-Tracking-Seite (Magic-Link per
+    // SMS/WhatsApp, der Empfaenger hat keinen Login). MIT Trailing-Slash — ohne ihn oeffnet
+    // startsWith auch '/kunde/termine' UND '/kunde/termine/[id]', die laut eigener
+    // Pfad-Konvention auth-required sind (siehe Header von kunde/termine/[id]/page.tsx).
+    // kunde/layout.tsx:60 macht es bereits richtig ('/kunde/termin/' inkl. Slash-Begruendung);
+    // hier fehlte er -> die zwei Auth-Schichten widersprachen sich. Kein Leck (beide Pages
+    // guarden sich selbst per redirect('/login')), aber die Middleware erklaerte eine
+    // geschuetzte Route zur oeffentlichen. Gleiche Klasse wie '/g/' und '/embed/' oben.
+    // Der Exakt-Pfad '/kunde/termin' braucht keinen Eintrag: next.config.ts redirectet ihn
+    // (308 -> /kunde) auf Routing-Ebene VOR der Auth-Middleware.
+    '/kunde/termin/',
     // CMM-40: Re-Termin-Slot-Picker via Magic-Link (no-show-timeout-Cron schickt
     // /kunde/re-termin/[token]). Token-Validierung passiert in der Page selbst,
     // kein Login nötig — sonst landet der Empfänger auf /login statt im Picker.
