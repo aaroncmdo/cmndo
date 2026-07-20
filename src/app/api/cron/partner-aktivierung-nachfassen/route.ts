@@ -10,7 +10,13 @@
 // den der Health-Check stuck-partner-accounts nutzt. Der Check beobachtet, dieser Cron handelt.
 //
 // Schedule (VPS-crontab, NICHT vercel.json — das existiert in diesem Repo nicht):
-//   0 7 * * *  cron-call.sh /api/cron/partner-aktivierung-nachfassen
+//   0 7 * * *  /usr/local/bin/cron-call.sh /api/cron/partner-aktivierung-nachfassen
+// GESETZT 20.07. auf 212.132.119.110 (Backup der Vorversion: /root/crontab-backup-20260720-153302.txt).
+// ACHTUNG Zeitzone: der VPS laeuft auf Etc/UTC — 07:00 UTC = 09:00 MESZ. Das gilt fuer die
+// GESAMTE crontab, nicht nur hier; der Task erscheint also zum Arbeitsbeginn, nicht um 7.
+// Bis zum Deploy liefert die Route 404; cron-call.sh nutzt `curl -sf` -> Exit 22, keine
+// Ausgabe, keine Cron-Mail (am 20.07. gegen prod verifiziert). Gleiche Uhrzeit + gleiches
+// Muster wie der Schwester-Cron gegner-invite-nachfassen.
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
