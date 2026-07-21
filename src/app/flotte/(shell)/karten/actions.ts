@@ -10,8 +10,6 @@ import {
   sperreSchadenkarte,
   entsperreSchadenkarte,
   entbindeSchadenkarte,
-  mintSchadenkarten,
-  finalisiereSchadenkarte,
 } from '@/lib/schadenkarte/schadenkarte'
 import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { buildQrGridPdf } from '@/lib/werkstatt/flyer/build-qr-grid'
@@ -118,41 +116,7 @@ export async function entbindeKarte(token: string): Promise<{ ok: boolean; error
   return res
 }
 
-/** Blanko-Provisionierung: einen frischen Karten-Token für die eigene Firma minten. */
-export async function provisioniereKarteToken(): Promise<
-  { ok: true; token: string } | { ok: false; error: string }
-> {
-  const { user } = await requirePortalAccess(['flottenmanager'])
-  const db = createAdminClient() as AnyDb
-  const firma = await getFlottenmanagerFirma(db, user.id)
-  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
-
-  const res = await mintSchadenkarten(db, { firmaId: firma.id, anzahl: 1 })
-  if (!res.ok) return { ok: false, error: res.error }
-  return { ok: true, token: res.tokens[0] }
-}
-
-/** Nach verifiziertem NFC-Schreiben: Chip-UID vermerken (falls gelesen) + optional binden. */
-export async function finalisiereKarte(
-  token: string,
-  nfcUid: string | null,
-  fahrzeugId: string | null,
-): Promise<{ ok: boolean; error?: string }> {
-  const { user } = await requirePortalAccess(['flottenmanager'])
-  const db = createAdminClient() as AnyDb
-  const firma = await getFlottenmanagerFirma(db, user.id)
-  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
-
-  const res = await finalisiereSchadenkarte(db, {
-    token,
-    firmaId: firma.id,
-    userId: user.id,
-    nfcUid,
-    fahrzeugId,
-  })
-  if (res.ok) {
-    revalidatePath('/flotte/karten')
-    revalidatePath('/flotte/flotte')
-  }
-  return res
-}
+// Karten-Schreiben (Provisionieren/Finalisieren) wurde entfernt: das Beschreiben
+// von NFC-Chips ist jetzt Admin-only (Vertriebs-CRM firmen-flotte). Der
+// Flottenmanager bindet nur noch (per Karte-antippen -> /schaden/[token] oder
+// in-app QR-Scan) und verwaltet gebundene Karten.
