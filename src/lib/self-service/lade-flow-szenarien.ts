@@ -25,7 +25,7 @@ export async function ladeFlowConfig(): Promise<FlowConfig> {
       .eq('aktiv', true),
     svc
       .from('flow_szenario_steps')
-      .select('szenario_id, step_id, reihenfolge, bedingung, aktiv')
+      .select('szenario_id, step_id, reihenfolge, bedingung, erhebt_felder, aktiv')
       .eq('aktiv', true)
       .order('reihenfolge', { ascending: true }),
   ])

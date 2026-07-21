@@ -59,11 +59,13 @@ describe('resolveFlowWeichen (DB-Config)', () => {
     expect(w.steps).not.toContain('gutachter')
   })
 
-  it('nur_gutachter ist eine Haftpflicht-Variante -> Gutachter ja, KEINE Werkstatt', () => {
+  it('service_typ=nur_gutachter matcht haftpflicht (kein eigenes Szenario) — Werkstatt bleibt angeboten', () => {
+    // Spec 2026-07-21 §2.5: nur_gutachter ist die Kanzlei-Weiche am SA-Ende (Downstream), KEIN
+    // eigener Flow. Gutachter UND Werkstatt gehoeren zum Haftpflichtanspruch; der Flow ist identisch.
     const w = weichen({ schuldfrage: 'gegner', service_typ: 'nur_gutachter' })
-    expect(w.szenarioId).toBe('nur_gutachter')
+    expect(w.szenarioId).toBe('haftpflicht')
     expect(w.brauchtGutachter).toBe(true)
-    expect(w.brauchtWerkstatt).toBe(false)
+    expect(w.brauchtWerkstatt).toBe(true)
   })
 
   it('Anzeige-Regel: SV zugeordnet -> kein Termin-Step, aber der Gutachter wird ANGEZEIGT', () => {
@@ -100,13 +102,14 @@ describe('resolveFlowWeichen (DB-Config)', () => {
 
   // Die zwei VERSCHIEDENEN Orte (Aaron 14.07.): Fahrzeugstandort = Anker fuer den Werkstatt-Finder,
   // Besichtigungsort = Anker fuer den Gutachter-Finder. Jeder wird nur abgefragt, wenn unbekannt.
-  it('Ort-Abfragen: nur wenn der jeweilige Ort unbekannt ist', () => {
+  it('Ort-Abfragen: nur wenn der jeweilige Ort (ROHSPALTE) unbekannt ist', () => {
     const ohneOrte = weichen({ schuldfrage: 'gegner' })
     expect(ohneOrte.steps).toContain('ort_besichtigung')
     expect(ohneOrte.steps).toContain('ort_fahrzeug')
 
+    // erhebt_felder liest die ROHSPALTEN (nicht *_effektiv) — nur ein echt erhobener Ort schliesst.
     const mitOrten = weichen({
-      schuldfrage: 'gegner', besichtigungsort_effektiv: 'Koeln', fahrzeug_standort_effektiv: 'Bonn',
+      schuldfrage: 'gegner', besichtigungsort_adresse: 'Koeln', fahrzeug_standort_adresse: 'Bonn',
     })
     expect(mitOrten.steps).not.toContain('ort_besichtigung')
     expect(mitOrten.steps).not.toContain('ort_fahrzeug')
