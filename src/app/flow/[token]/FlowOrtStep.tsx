@@ -30,13 +30,20 @@ export function FlowOrtStep({
   token,
   art,
   onWeiter,
+  initialAdresse,
 }: {
   token: string
   art: 'fahrzeug' | 'besichtigung'
   onWeiter: () => void
+  /**
+   * Vorbefuellung (Spec 2026-07-21): der abgeleitete *_effektiv-Wert (i.d.R. der Unfallort bzw. der
+   * andere bereits erfasste Ort). Der Kunde bestaetigt oder korrigiert — statt ein leeres Feld zu sehen.
+   * Ohne Google-Place-Auswahl wird der Freitext serverseitig geocodet (speichereOrtFlow).
+   */
+  initialAdresse?: string | null
 }) {
   const [place, setPlace] = useState<PlaceResult | null>(null)
-  const [freitext, setFreitext] = useState('')
+  const [freitext, setFreitext] = useState(initialAdresse ?? '')
   const [sendet, setSendet] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const texte = TEXTE[art]
@@ -74,6 +81,7 @@ export function FlowOrtStep({
 
       <GooglePlaceAutocomplete
         placeholder={texte.platzhalter}
+        defaultValue={initialAdresse ?? undefined}
         onSelect={(p) => {
           setPlace(p)
           setFreitext(p.adresse)
