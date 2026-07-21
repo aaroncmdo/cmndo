@@ -22,7 +22,11 @@ const MAX_VORSCHLAEGE = 5
 
 export type Fit = 'passt' | 'passt_nicht' | 'unbekannt'
 export type MarkenMatch = 'marke' | 'frei' | 'unbekannt'
-export type MatchGrundTyp = 'marke' | 'gewerk' | 'klasse' | 'distanz' | 'trust'
+// 'trust' = Chips, die die Finder-Karte SEPARAT rendert (aktuell nur "Verifizierter Partner",
+// als Badge neben dem Namen) und darum aus der Chip-Zeile filtert. 'rating' ist bewusst ein
+// EIGENER Typ: der GBP-★-Chip hat keine separate Render-Stelle und muss in der Chip-Zeile
+// landen — als 'trust' wurde er von WerkstattFinder.tsx still verschluckt (Prod-Smoke 19.07.).
+export type MatchGrundTyp = 'marke' | 'gewerk' | 'klasse' | 'distanz' | 'trust' | 'rating'
 
 /** Ein sichtbarer Grund, warum diese Werkstatt vorgeschlagen wird (die UI rendert sie als Chips). */
 export type MatchGrund = { typ: MatchGrundTyp; text: string }
@@ -175,7 +179,9 @@ function baueGruende(
   const anzahl = w.google_review_count ?? 0
   if (rating !== null && rating >= 4 && anzahl >= 5) {
     gruende.push({
-      typ: 'trust',
+      // typ 'rating', NICHT 'trust' — s. MatchGrundTyp. Als 'trust' filtert die Finder-Karte
+      // den Chip weg (dort ist 'trust' = "wird separat gerendert"), und er kam nie beim Kunden an.
+      typ: 'rating',
       text: `★ ${rating.toFixed(1).replace('.', ',')} bei Google (${anzahl} Bewertungen)`,
     })
   }
