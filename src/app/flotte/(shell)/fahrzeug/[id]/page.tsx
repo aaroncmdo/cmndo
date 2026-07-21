@@ -11,7 +11,7 @@ import EmptyState from '@/components/shared/EmptyState'
 import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSection'
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
 import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
-import { bindeKarteFuerFahrzeug } from './actions'
+import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden } from './actions'
 import { CarIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -113,7 +113,7 @@ export default async function FahrzeugDetailPage({
         </dl>
       </SectionCard>
 
-      <FahrzeugSchaedenSection schaeden={schaeden} vehicleId={id} />
+      <FahrzeugSchaedenSection schaeden={schaeden} vehicleId={id} onStorno={storniereFahrzeugSchaden} />
 
       <SectionCard title="Schadenkarte">
         {karte && qrSvg ? (

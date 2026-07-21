@@ -6,6 +6,8 @@ import { ChevronRight } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
+import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
+import { FahrzeugSchadenStornoButton } from './FahrzeugSchadenStornoButton'
 import type { FahrzeugSchaeden, ClaimMini, DraftMini } from '@/lib/flotte/fahrzeug-schaeden'
 
 // Pill-Label fuer Draft-Leads (kein Status-Registry-Code — fester Text).
@@ -28,9 +30,14 @@ function formatDatum(iso: string | null): string {
 type Props = {
   schaeden: FahrzeugSchaeden
   vehicleId: string
+  onStorno?: (
+    claimId: string,
+    vehicleId: string,
+    grund: string,
+  ) => Promise<{ ok: boolean; error?: string }>
 }
 
-export function FahrzeugSchaedenSection({ schaeden, vehicleId }: Props) {
+export function FahrzeugSchaedenSection({ schaeden, vehicleId, onStorno }: Props) {
   const { claims, drafts } = schaeden
   const hasEntries = claims.length > 0 || drafts.length > 0
 
@@ -60,10 +67,10 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId }: Props) {
 
           {/* Claims — mit Link zur Schaden-Detail-Route (Task 5) */}
           {claims.map((c: ClaimMini) => (
-            <li key={c.claimId}>
+            <li key={c.claimId} className="flex flex-wrap items-center gap-2">
               <Link
                 href={`/flotte/fahrzeug/${vehicleId}/schaden/${c.claimId}`}
-                className="flex items-center gap-3 py-3 rounded-ios-sm hover:bg-claimondo-bg transition-colors group"
+                className="flex flex-1 items-center gap-3 py-3 rounded-ios-sm hover:bg-claimondo-bg transition-colors group"
               >
                 <StatusBadge domain="claims-status" code={c.status} />
                 <span className="flex-1 min-w-0 text-sm font-medium text-claimondo-navy truncate">
@@ -85,6 +92,13 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId }: Props) {
                   aria-hidden="true"
                 />
               </Link>
+              {onStorno && fmDarfStornieren(c.status) && (
+                <FahrzeugSchadenStornoButton
+                  claimId={c.claimId}
+                  vehicleId={vehicleId}
+                  onStorno={onStorno}
+                />
+              )}
             </li>
           ))}
         </ul>
