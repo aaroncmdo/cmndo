@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { erfuelltBedingung, matcheSzenario, berechneAktiveSteps } from '../flow-szenarien'
+import { erfuelltBedingung, matcheSzenario, berechneAktiveSteps, erhebtNoch } from '../flow-szenarien'
 // Die echte Matrix (Spiegel des DB-Seeds). Zur Laufzeit kommen die Daten aus flow_szenarien +
 // flow_szenario_steps; die Fixture haelt die LOGIK testbar — das war die Bedingung fuer den DB-Umbau.
 import { SZENARIEN_FIXTURE as SZENARIEN, STEPS_FIXTURE as STEPS } from './flow-config-fixture'
@@ -153,5 +153,22 @@ describe('berechneAktiveSteps', () => {
 
   it('unbekanntes Szenario -> leer (kein Absturz)', () => {
     expect(berechneAktiveSteps(STEPS, 'gibt-es-nicht', {})).toEqual([])
+  })
+})
+
+describe('erhebtNoch (erhebt_felder — Erhebungs-Vollstaendigkeit)', () => {
+  it('leere/fehlende Liste -> kein Gate (Step bleibt sichtbar)', () => {
+    expect(erhebtNoch(null, {})).toBe(true)
+    expect(erhebtNoch([], { kennzeichen: 'B-XY-123' })).toBe(true)
+  })
+  it('sichtbar solange >=1 Feld leer', () => {
+    expect(erhebtNoch(['kennzeichen', 'unfallhergang'], { kennzeichen: 'B-XY-123', unfallhergang: null })).toBe(true)
+    expect(erhebtNoch(['kennzeichen'], { kennzeichen: '' })).toBe(true)
+  })
+  it('unsichtbar wenn ALLE gelisteten Felder gefuellt', () => {
+    expect(erhebtNoch(['kennzeichen', 'unfallhergang'], { kennzeichen: 'B-XY-123', unfallhergang: 'Auffahrunfall' })).toBe(false)
+  })
+  it('false ist ein WERT, kein Leerwert (hat_vorschaeden=false zaehlt als erhoben)', () => {
+    expect(erhebtNoch(['hat_vorschaeden'], { hat_vorschaeden: false })).toBe(false)
   })
 })

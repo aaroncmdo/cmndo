@@ -27,6 +27,13 @@ export type FlowSzenarioStep = {
   reihenfolge: number
   /** NULL = immer sichtbar. Sonst ein Praedikat auf dem Lead-Zustand (s. erfuelltBedingung). */
   bedingung: Record<string, unknown> | null
+  /**
+   * Operative Rohspalten, die dieser Step einsammelt. Der Step bleibt sichtbar, solange
+   * MINDESTENS EINE davon leer ist (s. erhebtNoch). Leer/fehlend = kein Erhebungs-Gate.
+   * NUR Rohspalten (kein DB-Default, kein *_effektiv) — der check:flow-erhebt-felder-Ratchet
+   * erzwingt das. Trennt Erhebungs-Vollstaendigkeit (hier) von Zustaendigkeit (bedingung).
+   */
+  erhebt_felder?: string[] | null
   aktiv?: boolean
 }
 
@@ -68,6 +75,16 @@ export function erfuelltBedingung(
 }
 
 /**
+ * Erhebungs-Gate: true, solange der Step noch operative Daten braucht (>=1 gelistetes Feld leer)
+ * oder gar keine erhebt_felder traegt. Gegenstueck zu erfuelltBedingung (Zustaendigkeit).
+ * `istLeer`-Semantik: false/0 sind WERTE (ein beantwortetes bool-Feld gilt als erhoben).
+ */
+export function erhebtNoch(felder: string[] | null | undefined, kontext: FlowKontext): boolean {
+  if (!felder || felder.length === 0) return true
+  return felder.some((f) => istLeer(kontext[f]))
+}
+
+/**
  * Welches Szenario greift? Ein Szenario matcht, wenn ALLE seiner gesetzten Bedingungen
  * (schuldfrage/eigene_versicherung/service_typ) zum Lead passen; NULL ist ein Wildcard.
  * Bei mehreren Treffern gewinnt die hoechste Prioritaet (= das spezifischere Szenario).
@@ -105,5 +122,6 @@ export function berechneAktiveSteps(
     .filter((s) => s.szenario_id === szenarioId && s.aktiv !== false)
     .sort((a, b) => a.reihenfolge - b.reihenfolge)
     .filter((s) => erfuelltBedingung(s.bedingung, kontext))
+    .filter((s) => erhebtNoch(s.erhebt_felder, kontext))
     .map((s) => s.step_id)
 }
