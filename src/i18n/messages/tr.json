@@ -4968,6 +4968,10 @@
       "abschluss": "Tamamlanma"
     },
     "subKunde": {
+      "filmcheck": "Rapor inceleniyor",
+      "qc-pruefung": "Kalite kontrolü sürüyor",
+      "anschlussschreiben": "Hukuk bürosu sigortayla iletişimde",
+      "nachbesichtigung-laeuft": "Yeniden ekspertiz sürüyor",
       "reparatur_werkstattwahl": "Servis seçiliyor",
       "reparatur_terminfindung": "Onarım randevusu ayarlanıyor",
       "reparatur_laeuft": "Onarım devam ediyor",
@@ -4992,6 +4996,10 @@
       "termin_durchgefuehrt": "Randevu gerçekleştirildi"
     },
     "subIntern": {
+      "filmcheck": "Film kontrolü",
+      "qc-pruefung": "Kalite kontrolü",
+      "anschlussschreiben": "Takip yazısı",
+      "nachbesichtigung-laeuft": "Yeniden ekspertiz sürüyor",
       "reparatur_werkstattwahl": "Servis seçimi",
       "reparatur_terminfindung": "Randevu planlama",
       "reparatur_laeuft": "Onarım devam ediyor",

@@ -15,6 +15,7 @@
     "check:component-set": "node scripts/check-component-set.mjs",
     "check:flag-drift": "node scripts/check-flag-drift.mjs",
     "check:i18n": "node scripts/i18n/check-complete.mjs",
+    "check:i18n-coverage": "node scripts/check-i18n-coverage.mjs",
     "check:i18n-render": "node scripts/i18n/check-render.mjs",
     "check:knip": "node scripts/check-knip.mjs",
     "check:migration-utf8": "node scripts/check-migration-utf8.mjs",

@@ -127,3 +127,7 @@ marketing-strategy/
 # Subagent-Prozess-Artefakte (SDD task-reports, werden ins .git-interne sdd/-Dir geschrieben
 # aber gelegentlich versehentlich in den Working-Tree; nie versionieren).
 /sdd/
+
+# playwright-cli-Skill: Session-Artefakte (pro Browser-Aktion Snapshot-YAML + Console-Log).
+# Entstehen bei jedem Prod-Smoke via playwright-cli; nie versionieren.
+/.playwright-cli/

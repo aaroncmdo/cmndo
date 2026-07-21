@@ -11,6 +11,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
+import { NfcKarteBeschreiben } from '@/components/flotte/NfcKarteBeschreiben'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
@@ -19,7 +20,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { minteKartenFuerFlotte, bindeKarteAnFahrzeug } from '../../_actions/firmen-flotte-karten'
+import { minteKartenFuerFlotte, bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -231,6 +232,18 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
       </SectionCard>
 
       <SectionCard title={`Schaden-Karten (${karten.length})`}>
+        <div className="mb-4">
+          <NfcKarteBeschreiben
+            fahrzeuge={fahrzeuge.map((f) => ({
+              vehicleId: f.vehicle_id,
+              label: f.kennzeichen ?? f.vehicle_id,
+            }))}
+            onMintToken={() => provisioniereKarteTokenStaff(firma.id)}
+            onFinalize={(token, nfcUid, fahrzeugId) =>
+              finalisiereKarteStaff(firma.id, token, nfcUid, fahrzeugId)
+            }
+          />
+        </div>
         <div className="flex flex-wrap items-end gap-2 mb-3">
           <label className="flex flex-col gap-1">
             <span className="text-body-xs text-claimondo-ondo">Anzahl (1–200)</span>

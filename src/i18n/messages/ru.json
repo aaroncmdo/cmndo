@@ -4968,6 +4968,10 @@
       "abschluss": "Завершение"
     },
     "subKunde": {
+      "filmcheck": "Заключение проверяется",
+      "qc-pruefung": "Идёт контроль качества",
+      "anschlussschreiben": "Юристы связываются со страховой",
+      "nachbesichtigung-laeuft": "Идёт повторный осмотр",
       "reparatur_werkstattwahl": "Выбирается сервис",
       "reparatur_terminfindung": "Согласуется дата ремонта",
       "reparatur_laeuft": "Ремонт выполняется",
@@ -4992,6 +4996,10 @@
       "termin_durchgefuehrt": "Встреча проведена"
     },
     "subIntern": {
+      "filmcheck": "Проверка видео",
+      "qc-pruefung": "Контроль качества",
+      "anschlussschreiben": "Сопроводительное письмо",
+      "nachbesichtigung-laeuft": "Идёт повторный осмотр",
       "reparatur_werkstattwahl": "Выбор сервиса",
       "reparatur_terminfindung": "Согласование даты",
       "reparatur_laeuft": "Ремонт выполняется",
