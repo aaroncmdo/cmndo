@@ -21,10 +21,15 @@
 //   sonst /var/www/claimondo-v2/.env.local (prod-VPS). Der service_role-Key wird NUR gelesen,
 //   NIE ausgegeben.
 //
-// Rollen mit vollem Portal-Satelliten: sachverstaendiger (sachverstaendige-Zeile).
-// admin/dispatch/kundenbetreuer/kanzlei brauchen keinen Satelliten (Portal gatet nur profiles.rolle).
-// kunde/makler/werkstatt/flottenmanager: v1 login-faehig (profiles), Portal-Daten leer
-//   -> fuer Route-/Auth-Gate-Smokes ausreichend; Fixture-Satellit ist erweiterbar (siehe RECIPES).
+// Portal-Erreichbarkeit ist gegen die echten Layout-Gates (origin/staging) abgeglichen:
+//   admin/dispatch/kundenbetreuer/kanzlei -> Gate = nur profiles.rolle (kein Satellit).
+//   kunde -> Gate laesst einen fall-losen Kunden aufs /kunde-Portal (Onboarding-Redirect nur bei
+//            vorhandenen, komplett un-onboardeten Faellen) -> profiles reicht.
+//   sachverstaendiger -> sachverstaendige-Zeile mit portal_zugang_freigeschaltet+ist_aktiv.
+//   makler    -> makler-Zeile (user_id) mit status='aktiv'   (sonst /makler/onboarding|/pending).
+//   werkstatt -> werkstaetten-Zeile (user_id) mit status='aktiv'  (sonst /werkstatt/pending).
+//   flottenmanager -> firmen + firmen_flotten_konten (user_id) status='aktiv' (sonst /flotte/kein-zugang).
+// D.h. ALLE Rollen erreichen jetzt ihr Portal (nicht nur „login-faehig"). Neue Gates -> RECIPES erweitern.
 import fs from 'node:fs'
 
 const ROLE_PORTAL = {
@@ -90,22 +95,81 @@ async function api(path, opts = {}) {
 
 // --- Rollen-Satelliten (erweiterbar) --------------------------------------
 // Jede Funktion legt die minimal noetige Portal-Zeile an bzw. raeumt sie weg.
+const errBody = (r) => JSON.stringify(r.body).slice(0, 200)
 const RECIPES = {
+  // Link-Spalte + Portal-Gate je Tabelle sind gegen die echten Layout-Queries abgeglichen.
   sachverstaendiger: {
     async create(uid) {
-      // Rezept aus memory/reference-internal-test-account-logins.md: Portal-Zugang + aktiv.
+      // gutachter/layout.tsx: liest ist_aktiv + portal_zugang_freigeschaltet.
       const r = await api('/rest/v1/sachverstaendige', {
-        method: 'POST',
-        headers: { Prefer: 'return=representation' },
+        method: 'POST', headers: { Prefer: 'return=minimal' },
         body: JSON.stringify({ profile_id: uid, portal_zugang_freigeschaltet: true, ist_aktiv: true }),
       })
-      if (!r.ok) throw new Error(`sachverstaendige-Insert fehlgeschlagen (${r.status}): ${JSON.stringify(r.body).slice(0, 200)}`)
+      if (!r.ok) throw new Error(`sachverstaendige-Insert (${r.status}): ${errBody(r)}`)
     },
     async cleanup(uid) {
       await api(`/rest/v1/sachverstaendige?profile_id=eq.${uid}`, { method: 'DELETE' })
     },
   },
+  makler: {
+    async create(uid, { email }) {
+      // makler/(shell)/layout.tsx: .from('makler').eq('user_id',uid) -> !makler ? /onboarding : status!='aktiv' ? /pending
+      const r = await api('/rest/v1/makler', {
+        method: 'POST', headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({
+          user_id: uid, firma: 'Throwaway GmbH', ansprechpartner_vorname: 'Test',
+          ansprechpartner_nachname: 'Makler', email, status: 'aktiv',
+        }),
+      })
+      if (!r.ok) throw new Error(`makler-Insert (${r.status}): ${errBody(r)}`)
+    },
+    async cleanup(uid) {
+      await api(`/rest/v1/makler?user_id=eq.${uid}`, { method: 'DELETE' })
+    },
+  },
+  werkstatt: {
+    async create(uid, { stamp }) {
+      // werkstatt/(shell)/layout.tsx via getWerkstattByUserId(): .eq('user_id',uid) -> status='aktiv' noetig.
+      const r = await api('/rest/v1/werkstaetten', {
+        method: 'POST', headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ user_id: uid, name: `Throwaway Werkstatt ${stamp}`, status: 'aktiv' }),
+      })
+      if (!r.ok) throw new Error(`werkstaetten-Insert (${r.status}): ${errBody(r)}`)
+    },
+    async cleanup(uid) {
+      await api(`/rest/v1/werkstaetten?user_id=eq.${uid}`, { method: 'DELETE' })
+    },
+  },
+  flottenmanager: {
+    async create(uid) {
+      // flotte/(shell)/layout.tsx via getFlottenmanagerKontoWithFirma(): firmen_flotten_konten
+      // (user_id, firma_id, status='aktiv') -> firmen(name). Zwei-Tabellen-Satellit.
+      const f = await api('/rest/v1/firmen', {
+        method: 'POST', headers: { Prefer: 'return=representation' },
+        body: JSON.stringify({ name: `Throwaway-Flotte-${uid.slice(0, 8)}` }),
+      })
+      if (!f.ok) throw new Error(`firmen-Insert (${f.status}): ${errBody(f)}`)
+      const firmaId = f.body[0].id
+      const k = await api('/rest/v1/firmen_flotten_konten', {
+        method: 'POST', headers: { Prefer: 'return=minimal' },
+        body: JSON.stringify({ user_id: uid, firma_id: firmaId, status: 'aktiv' }),
+      })
+      if (!k.ok) {
+        await api(`/rest/v1/firmen?id=eq.${firmaId}`, { method: 'DELETE' }) // Rollback der Firma
+        throw new Error(`firmen_flotten_konten-Insert (${k.status}): ${errBody(k)}`)
+      }
+    },
+    async cleanup(uid) {
+      const r = await api(`/rest/v1/firmen_flotten_konten?user_id=eq.${uid}&select=firma_id`)
+      const firmaId = Array.isArray(r.body) && r.body[0] ? r.body[0].firma_id : null
+      await api(`/rest/v1/firmen_flotten_konten?user_id=eq.${uid}`, { method: 'DELETE' })
+      // Firma nur loeschen, wenn sie eine Wegwerf-Firma ist (Name-Guard gegen echte, geteilte Firmen).
+      if (firmaId) await api(`/rest/v1/firmen?id=eq.${firmaId}&name=like.Throwaway-Flotte-*`, { method: 'DELETE' })
+    },
+  },
 }
+// Rollen, die ihr Portal OHNE Satellit erreichen (Gate = nur profiles.rolle bzw. fall-loser Kunde).
+const FULL_WITHOUT_SATELLITE = ['admin', 'dispatch', 'kundenbetreuer', 'kanzlei', 'kunde']
 
 function randId() {
   // Kein Math.random-Verbot hier (normales Node, kein Workflow-Sandbox) — trotzdem ts-basiert eindeutig.
@@ -149,19 +213,18 @@ async function create(rolle, asJson) {
     process.exit(1)
   }
 
-  // 3) Rollen-Satellit (falls Rezept vorhanden)
-  let portalReady = true
+  // 3) Rollen-Satellit (falls Rezept vorhanden) — macht das Portal ERREICHBAR (nicht nur Login).
   if (RECIPES[rolle]) {
     try {
-      await RECIPES[rolle].create(uid)
+      await RECIPES[rolle].create(uid, { email, stamp })
     } catch (err) {
       await cleanup(uid, true)
       console.error(`FEHLER Satellit: ${err.message}`)
       process.exit(1)
     }
-  } else if (!['admin', 'dispatch', 'kundenbetreuer', 'kanzlei'].includes(rolle)) {
-    portalReady = false // login-faehig, aber Portal-Daten leer
   }
+  // portalReady = erreicht das Portal ohne Onboarding-/Pending-/kein-Zugang-Redirect.
+  const portalReady = !!RECIPES[rolle] || FULL_WITHOUT_SATELLITE.includes(rolle)
 
   const out = { uid, email, password, rolle, portal: ROLE_PORTAL[rolle], portalReady }
   if (asJson) {
