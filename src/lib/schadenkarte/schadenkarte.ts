@@ -139,12 +139,15 @@ export async function resolveSchadenkarteToFahrzeug(
 export async function getKartenFuerFirma(
   db: AnyDb,
   firmaId: string,
+  opts?: { nurGebunden?: boolean },
 ): Promise<Array<{ id: string; token: string; status: string; fahrzeugId: string | null }>> {
-  const { data } = await db
+  let query = db
     .from('schadenkarten')
     .select('id, karten_token, status, fahrzeug_id')
     .eq('firma_id', firmaId)
-    .order('erstellt_am', { ascending: false })
+  // Flotten-Ansichten zeigen nur real gebundene Karten (Admin ohne Param = alle Status).
+  if (opts?.nurGebunden) query = query.eq('status', 'gebunden')
+  const { data } = await query.order('erstellt_am', { ascending: false })
 
   if (!data) return []
 
