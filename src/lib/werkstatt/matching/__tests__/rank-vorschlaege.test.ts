@@ -96,6 +96,53 @@ describe('rankeWerkstattVorschlaege — Ranking', () => {
   })
 })
 
+// Aaron 21.07.: "im Grunde ist es doch genug, wenn wir keine Marken haben, dass es eine freie
+// Werkstatt ist." Prod-Smoke 20.07.: eine aktive+verifizierte Partnerwerkstatt mit marken=null UND
+// ist_freie_werkstatt=null war im Matching UNSICHTBAR — 'unbekannt' rankt hinter JEDER 'frei'-
+// Werkstatt, das Limit schnitt sie ab (0,01 km entfernt, trotzdem nicht gelistet; 12 Betriebe aus
+// 400+ km standen davor). Keine gepflegten Marken = freie Werkstatt (alle Marken).
+describe('keine Marken = freie Werkstatt (Aaron 21.07.)', () => {
+  it('ohne gepflegte Marken zaehlt eine Werkstatt als frei (nicht unbekannt)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'ohne-marken', marken: null, ist_freie_werkstatt: null })],
+      KONTEXT,
+    )
+    expect(r[0].markenMatch).toBe('frei')
+    expect(r[0].gruende.map((g) => g.text)).toContain('Freie Werkstatt (alle Marken)')
+  })
+
+  it('leeres Marken-Array zaehlt ebenfalls als frei (auch bei ist_freie_werkstatt=false)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'leer', marken: [], ist_freie_werkstatt: false })],
+      KONTEXT,
+    )
+    expect(r[0].markenMatch).toBe('frei')
+  })
+
+  it('die markenlose Werkstatt schlaegt eine, die eine ANDERE Marke fuehrt (unbekannt)', () => {
+    // gesucht = BMW; der Mercedes-Spezialist fuehrt BMW nicht -> 'unbekannt' (Rang 2), die
+    // markenlose ist 'frei' (Rang 1) und rankt davor. Vorher war die markenlose SELBST 'unbekannt'
+    // und verschwand hinter jeder frei-Werkstatt — genau der Unsichtbar-Bug.
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'mercedes-spezi', marken: ['Mercedes'] }),
+        werkstatt({ id: 'markenlos', marken: null }),
+      ],
+      KONTEXT,
+    )
+    expect(r[0].id).toBe('markenlos')
+    expect(r[0].markenMatch).toBe('frei')
+    expect(r.find((x) => x.id === 'mercedes-spezi')?.markenMatch).toBe('unbekannt')
+  })
+
+  it('GUARD: eine gepflegte Marken-Werkstatt bleibt Spezialist — fuehrt sie die gesuchte Marke NICHT, ist sie NICHT frei', () => {
+    // Audi-Werkstatt bei BMW-Suche: sie hat eine Marken-Pflege (nur nicht BMW) -> 'unbekannt',
+    // NICHT 'frei'. Sonst wuerde die Regel jeden Spezialisten faelschlich zum Allrounder machen.
+    const r = rankeWerkstattVorschlaege([werkstatt({ id: 'audi-only', marken: ['Audi'] })], KONTEXT)
+    expect(r[0].markenMatch).toBe('unbekannt')
+  })
+})
+
 describe('rankeWerkstattVorschlaege — harte Filter', () => {
   it('FAHRZEUGKLASSE: eine PKW-Werkstatt taucht bei einem LKW NICHT auf', () => {
     const r = rankeWerkstattVorschlaege(
