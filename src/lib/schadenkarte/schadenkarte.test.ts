@@ -10,6 +10,7 @@ import {
   bindeSchadenkarteAnFahrzeug,
   resolveSchadenkarteToFahrzeug,
   getKartenFuerFirma,
+  getGebundeneFahrzeugIds,
   sperreSchadenkarte,
   entsperreSchadenkarte,
   entbindeSchadenkarte,
@@ -366,6 +367,41 @@ describe('getKartenFuerFirma', () => {
     } as never
     await getKartenFuerFirma(db, 'f1', { nurGebunden: true })
     expect(eqCalls).toContainEqual(['status', 'gebunden'])
+  })
+})
+
+// ---------------------------------------------------------------------------
+// getGebundeneFahrzeugIds
+// ---------------------------------------------------------------------------
+
+describe('getGebundeneFahrzeugIds', () => {
+  it('sammelt fahrzeug_id gebundener Karten in ein Set (null gefiltert)', async () => {
+    const db = {
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              not: () => ({
+                data: [{ fahrzeug_id: 'v1' }, { fahrzeug_id: 'v2' }, { fahrzeug_id: null }],
+              }),
+            }),
+          }),
+        }),
+      }),
+    } as never
+    const res = await getGebundeneFahrzeugIds(db, 'f1')
+    expect(res).toEqual(new Set(['v1', 'v2']))
+  })
+
+  it('kein data -> leeres Set', async () => {
+    const db = {
+      from: () => ({
+        select: () => ({
+          eq: () => ({ eq: () => ({ not: () => ({ data: null }) }) }),
+        }),
+      }),
+    } as never
+    expect(await getGebundeneFahrzeugIds(db, 'f1')).toEqual(new Set())
   })
 })
 
