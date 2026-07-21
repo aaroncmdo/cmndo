@@ -114,7 +114,12 @@ export async function POST(request: Request) {
           finExtrahiertAm: new Date().toISOString(),
         }
         if (extracted.fin_vin) {
-          const veh = await ensureVehicleFromFin({ fin: extracted.fin_vin, snapshot: vehSnapshot, db: vehDb })
+          // Vehicle-Unifikation: das aktuelle Claim-Fahrzeug (oft ein FIN-loser Stub aus Flotte/
+          // Erstanlage) VOR dem FIN-Upsert lesen und als supersedesVehicleId durchreichen -> die
+          // FIN-Row absorbiert den Stub (flotten_fahrzeuge/schadenkarten/... werden umgehaengt).
+          const { data: claimRow } = await vehDb.from('claims').select('vehicle_id').eq('id', claimId).maybeSingle()
+          const altesFahrzeug = (claimRow?.vehicle_id as string | null) ?? null
+          const veh = await ensureVehicleFromFin({ fin: extracted.fin_vin, snapshot: vehSnapshot, db: vehDb, supersedesVehicleId: altesFahrzeug ?? undefined })
           if (veh.ok) {
             await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
           } else {
