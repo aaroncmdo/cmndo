@@ -105,11 +105,22 @@ const GRUPPE_LABEL: Record<string, string> = {
 const MARKEN_RANG: Record<MarkenMatch, number> = { marke: 0, frei: 1, unbekannt: 2 }
 const FIT_RANG: Record<Fit, number> = { passt: 0, unbekannt: 1, passt_nicht: 2 }
 
-/** Führt die Werkstatt die Marke? Sonst: ist sie markenoffen? (Marke schlägt frei — Aarons Regel.) */
+/**
+ * Führt die Werkstatt die Marke? Sonst: ist sie markenoffen? (Marke schlägt frei — Aarons Regel.)
+ *
+ * Aaron 21.07.: KEINE gepflegten Marken = freie Werkstatt (alle Marken). Ohne diese Ableitung ist
+ * eine aktive Partnerwerkstatt ohne Marken-Pflege im Matching unsichtbar — 'unbekannt' rankt hinter
+ * JEDER 'frei'-Werkstatt, das Limit schneidet sie ab (Prod-Smoke 20.07.: 0,01 km entfernt, trotzdem
+ * nicht gelistet, 12 Betriebe aus 400+ km davor). Das explizite ist_freie_werkstatt-Flag bleibt als
+ * Override, ist aber nicht mehr Pflicht. Eine Werkstatt MIT Marken-Pflege, die die gesuchte Marke
+ * nicht führt, bleibt bewusst Spezialist -> 'unbekannt' (sonst würde die Regel jeden Spezialisten
+ * fälschlich zum Allrounder machen).
+ */
 function bewerteMarke(w: WerkstattKandidat, marke: string | null): MarkenMatch {
   const gesucht = marke?.trim().toUpperCase()
   if (gesucht && w.marken?.some((m) => m.trim().toUpperCase() === gesucht)) return 'marke'
-  if (w.ist_freie_werkstatt === true) return 'frei'
+  const hatMarken = (w.marken?.length ?? 0) > 0
+  if (w.ist_freie_werkstatt === true || !hatMarken) return 'frei'
   return 'unbekannt'
 }
 
