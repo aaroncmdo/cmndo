@@ -180,7 +180,9 @@ export async function updateSession(request: NextRequest) {
   return response
 }
 
-function isPublicPath(pathname: string): boolean {
+// Exportiert NUR fuer den Regressionstest (middleware.test.ts) — die Prefix-Kollisionen
+// dieser Allowlist sind Auth-Grenzen, die drei Warn-Kommentare allein nicht gehalten haben.
+export function isPublicPath(pathname: string): boolean {
   if (pathname === '/') return true
   // Marketing-Premium-Rework 13.05.2026: SEO-Crawler-Endpunkte MÜSSEN
   // unauthenticated erreichbar sein, sonst sieht Googlebot/GPTBot/ClaudeBot
@@ -216,7 +218,18 @@ function isPublicPath(pathname: string): boolean {
     // Website). Public/anon — traegt nur das Monika-Widget. WICHTIG: '/g/' MIT
     // Slash; '/g' wuerde via startsWith auch /gutachter* oeffnen (Auth-Bypass).
     '/g/',
-    '/kunde/termin',
+    // Prefix-Kollision (prod-verifiziert 20.07.2026): '/kunde/termin/' MIT Slash.
+    // Der Eintrag oeffnet die public Magic-Link-Tracking-Seite /kunde/termin/[token]
+    // (WhatsApp-Link fuer SV-Live-Tracking, kein Login noetig).
+    // OHNE Slash matchte startsWith auch '/kunde/termine' (Termin-Liste) UND
+    // '/kunde/termine/[id]' (Termin-Detail) — beide sind auth-required und laden per
+    // createAdminClient() (Service-Role, RLS-umgehend). Anon bekam dort 200-Shells
+    // statt 307 -> /login; der Schutz haengt dann allein am Page-Guard, das
+    // Middleware-Gate greift gar nicht. Gleiche Disziplin wie '/g/' oben.
+    // Der nackte Legacy-Pfad '/kunde/termin' braucht KEINEN Eintrag: next.config.ts
+    // faengt ihn per Exakt-Match-308 auf /kunde ab (Config-Redirect laeuft vor der
+    // Auth-Middleware).
+    '/kunde/termin/',
     // CMM-40: Re-Termin-Slot-Picker via Magic-Link (no-show-timeout-Cron schickt
     // /kunde/re-termin/[token]). Token-Validierung passiert in der Page selbst,
     // kein Login nötig — sonst landet der Empfänger auf /login statt im Picker.
