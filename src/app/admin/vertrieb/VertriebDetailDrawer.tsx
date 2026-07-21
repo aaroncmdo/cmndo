@@ -2,7 +2,14 @@
 // Vertrieb-CRM P2: Detail-Drawer = CRM-Cockpit. Klick auf eine Roster-Zeile öffnet je nach
 // Lifecycle: Lead -> LeadCockpit (Ansprechpartner, Stufe, Einstufung, Anruf-Log, Convert),
 // Partner -> PartnerCockpit (Profil + Notiz + Deep-Link). Lead-Detail wird on-demand geladen.
-import { useEffect, useState } from 'react'
+//
+// Realtime-Ops (Fix Doppel-Reload): Feld-Aenderungen werden OPTIMISTISCH lokal eingetragen
+// (patchDetail / appendAktivitaet) statt die ganze Seite per router.refresh() neu zu laden.
+// Der Roster-Badge folgt per onKontaktPatch. reloadDetail() ist ein STILLER Hintergrund-
+// Refetch (nur Drawer, kein Spinner, kein Remount) fuer server-berechnete Daten (Auto-Log-
+// Historie, Website-Anreicherung). Die Fetch-Effect-Deps sind bewusst kind/id (stabil) statt
+// des ganzen kontakt-Objekts — ein neues Objekt aus dem Roster-Overlay loest KEINEN Refetch aus.
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Drawer } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -10,48 +17,81 @@ import { KIND_LABEL } from './_lib/labels'
 import LeadCockpit from './drawer/LeadCockpit'
 import PartnerCockpit from './drawer/PartnerCockpit'
 import { getVertriebLeadDetail } from './_actions/get-vertrieb-lead-detail'
-import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
-import type { VertriebLeadDetail } from './_lib/lead-detail'
+import type { VertriebKontakt, VertriebKontaktRow } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { VertriebLeadDetail, LeadAktivitaet } from './_lib/lead-detail'
 
 export default function VertriebDetailDrawer({
   kontakt,
   onClose,
+  onKontaktPatch,
 }: {
   kontakt: VertriebKontakt | null
   onClose: () => void
+  onKontaktPatch: (kind: string, id: string, patch: Partial<VertriebKontaktRow>) => void
 }) {
   const router = useRouter()
   const istLead = kontakt?.kind === 'partner-lead'
   const [detail, setDetail] = useState<VertriebLeadDetail | null>(null)
   const [ladeFehler, setLadeFehler] = useState<string | null>(null)
-  const [lade, setLade] = useState(false)
   const [reloadToken, setReloadToken] = useState(0)
+  // Zuletzt geladene Entity — unterscheidet "andere Zeile geoeffnet" (Detail leeren -> Spinner)
+  // von "stiller Refetch derselben Zeile" (Detail behalten -> kein Flackern, kein Remount).
+  const letzteEntityRef = useRef<string | null>(null)
+
+  const kind = kontakt?.kind
+  const id = kontakt?.id
 
   useEffect(() => {
-    if (!kontakt || kontakt.kind !== 'partner-lead') {
+    if (!kind || kind !== 'partner-lead' || !id) {
       setDetail(null)
+      setLadeFehler(null)
+      letzteEntityRef.current = null
       return
     }
+    const key = `${kind}:${id}`
+    const istNeueEntity = letzteEntityRef.current !== key
+    letzteEntityRef.current = key
+    // Andere Zeile: alten Stand verwerfen (Spinner). Reload derselben Zeile: Stand behalten.
+    if (istNeueEntity) {
+      setDetail(null)
+      setLadeFehler(null)
+    }
     let alive = true
-    setLade(true)
-    setLadeFehler(null)
-    getVertriebLeadDetail(kontakt.id).then((res) => {
+    getVertriebLeadDetail(id).then((res) => {
       if (!alive) return
-      setLade(false)
-      if (!res.ok) {
-        setLadeFehler(res.error)
-        setDetail(null)
-      } else {
-        setDetail(res.data)
-      }
+      if (res.ok) setDetail(res.data)
+      else if (istNeueEntity) setLadeFehler(res.error)
+      // Stiller Reload-Fehler wird bewusst geschluckt — der optimistische Stand bleibt sichtbar.
     })
     return () => {
       alive = false
     }
-  }, [kontakt, reloadToken])
+    // reloadToken bewusst als Dep -> bumpen loest den stillen Hintergrund-Refetch aus.
+  }, [kind, id, reloadToken])
 
-  function onChanged() {
+  // Optimistisch: der Client kennt den neuen Wert bereits -> sofort lokal, kein Refetch.
+  function patchDetail(partial: Partial<VertriebLeadDetail>) {
+    setDetail((d) => (d ? { ...d, ...partial } : d))
+    // Status treibt die abgeleitete Roster-Stufe (Badge) — sofort durchreichen.
+    if (partial.status !== undefined && kind && id) {
+      onKontaktPatch(kind, id, { roh_status: partial.status })
+    }
+  }
+
+  // Optimistisch neue Aktivitaet oben einfuegen (Anruf/Notiz) — sofort sichtbar.
+  function appendAktivitaet(a: LeadAktivitaet) {
+    setDetail((d) => (d ? { ...d, aktivitaeten: [a, ...d.aktivitaeten] } : d))
+  }
+
+  // Stiller Hintergrund-Refetch (kein Spinner, kein Remount): holt server-berechnete Daten
+  // (Auto-Log-Eintraege, Website-Anreicherung, echte Aktivitaets-IDs) nach.
+  function reloadDetail() {
     setReloadToken((t) => t + 1)
+  }
+
+  // Convert legt einen NEUEN Partner-Account an (Identitaet wechselt Lead -> Partner): ein
+  // einmaliger Roster-Refresh ist hier gerechtfertigt (neue Zeile + Reklassifizierung).
+  function onConverted() {
     router.refresh()
   }
 
@@ -66,15 +106,25 @@ export default function VertriebDetailDrawer({
           </div>
 
           {istLead ? (
-            lade ? (
-              <p className="text-sm text-claimondo-ondo/60">Lädt…</p>
+            detail ? (
+              <LeadCockpit
+                kontakt={kontakt}
+                detail={detail}
+                onPatchDetail={patchDetail}
+                onAppendAktivitaet={appendAktivitaet}
+                onReloadDetail={reloadDetail}
+                onConverted={onConverted}
+              />
             ) : ladeFehler ? (
               <p className="text-sm text-danger">{ladeFehler}</p>
-            ) : detail ? (
-              <LeadCockpit kontakt={kontakt} detail={detail} onChanged={onChanged} />
-            ) : null
+            ) : (
+              <p className="text-sm text-claimondo-ondo/60">Lädt…</p>
+            )
           ) : (
-            <PartnerCockpit kontakt={kontakt} onChanged={onChanged} />
+            <PartnerCockpit
+              kontakt={kontakt}
+              onPatchKontakt={(patch) => onKontaktPatch(kontakt.kind, kontakt.id, patch)}
+            />
           )}
         </div>
       )}
