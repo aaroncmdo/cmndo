@@ -5,7 +5,13 @@
 // No layout.tsx needed — /flow/[token] has none either; the wizard owns its chrome.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
+import { resolveSchadenkarteToFahrzeug } from '@/lib/schadenkarte/schadenkarte'
+import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
+import { schadenZweig } from './schaden-zweig'
+import { FlottenmanagerKartePanel } from './FlottenmanagerKartePanel'
 import { SchadenGegnerWizard } from './SchadenGegnerWizard'
 import { SectionCard } from '@/components/shared/SectionCard'
 
@@ -16,11 +22,44 @@ export const dynamic = 'force-dynamic'
 
 export default async function SchadenTokenPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ token: string }>
+  searchParams: Promise<{ melden?: string }>
 }) {
   const { token } = await params
+  const { melden } = await searchParams
   const db = createAdminClient() as AnyDb
+
+  // ─── Rollen-bewusster Bind/Manage-Einstieg (Flottenmanager der Karten-Firma) ───
+  // Fremde/anonyme Besucher (auth=null) fallen durch zum Gegner-Flow (kein Regress).
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const fmFirma = user ? await getFlottenmanagerFirma(db, user.id) : null
+  const karte = await resolveSchadenkarteToFahrzeug(db, token)
+  const zweig = schadenZweig({
+    istFlottenmanager: !!fmFirma,
+    fmFirmaId: fmFirma?.id ?? null,
+    kartenFirmaId: karte?.firmaId ?? null,
+    status: karte?.status ?? null,
+  })
+
+  // Bind-Panel (ungebunden) bzw. Verwaltung (gebunden). Bei 'manage' + ?melden=1
+  // startet der Flottenmanager bewusst den Schaden-Flow -> faellt durch zum Wizard.
+  if (fmFirma && (zweig === 'bind' || (zweig === 'manage' && melden !== '1'))) {
+    const fahrzeuge = await getKundeFlotte(db, fmFirma.id)
+    return (
+      <FlottenmanagerKartePanel
+        zweig={zweig}
+        token={token}
+        firmaName={fmFirma.name}
+        fahrzeuge={fahrzeuge}
+        gebundenesFahrzeugId={karte?.fahrzeugId ?? null}
+      />
+    )
+  }
 
   const ctx = await resolveSchadenTokenContext(db, token)
 
