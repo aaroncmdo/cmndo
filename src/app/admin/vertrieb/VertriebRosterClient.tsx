@@ -3,7 +3,7 @@
 // (VertriebPillBar) ersetzen die frühere Tab-Nav; die kontextuelle Aktions-Leiste zeigt je Pill
 // die passenden Aktionen. KPIs sind rollen-gescopet (computeContextKpis, DB-Daten). Filter/Sort
 // in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -27,6 +27,12 @@ import {
 } from '@/lib/status/domains/vertrieb-workflow'
 import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
 import { parseKontaktParam, buildKontaktParam } from '@/lib/navigation/url-drawer'
+import {
+  wendeKontaktPatchesAn,
+  mergeKontaktPatch,
+  type KontaktPatch,
+  type KontaktPatchMap,
+} from './_lib/apply-kontakt-patches'
 import type { VertriebKontakt, VertriebTyp, VertriebRolle } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
@@ -56,20 +62,34 @@ export default function VertriebRosterClient({
   // Aufgeloest wird gegen die UNGEFILTERTE Roster-Liste, damit Deep-Links unabhaengig
   // von der aktiven Pill funktionieren; unbekannte Params rendern schlicht keinen Drawer.
   const kontaktDrawer = useUrlDrawerParam('kontakt')
+  // Realtime-Ops: optimistische Overlay-Patches (z.B. Lead-Status). Feld-Aenderungen im
+  // Detail-Drawer landen sofort hier -> Liste + Badge aktualisieren in Echtzeit, OHNE die
+  // Seite per router.refresh() neu zu laden (das war die Ursache des Doppel-Reloads). Die
+  // Overlays sind session-lokal und decken sich nach dem Persist mit dem Server; ein Convert
+  // (der einzige router.refresh) bzw. jede volle Navigation reconciled sie mit frischen Daten.
+  const [kontaktPatches, setKontaktPatches] = useState<KontaktPatchMap>({})
+  const kontakteEff = useMemo(
+    () => wendeKontaktPatchesAn(kontakte, kontaktPatches),
+    [kontakte, kontaktPatches],
+  )
+  const applyKontaktPatch = useCallback((kind: string, id: string, patch: KontaktPatch) => {
+    setKontaktPatches((prev) => mergeKontaktPatch(prev, kind, id, patch))
+  }, [])
+
   const selected = useMemo<VertriebKontakt | null>(() => {
     const p = parseKontaktParam(kontaktDrawer.value)
     if (!p) return null
-    return kontakte.find((k) => k.kind === p.kind && k.id === p.id) ?? null
-  }, [kontakte, kontaktDrawer.value])
+    return kontakteEff.find((k) => k.kind === p.kind && k.id === p.id) ?? null
+  }, [kontakteEff, kontaktDrawer.value])
 
   const gefiltert = useMemo(
-    () => filterKontakte(kontakte, { typ, rolle, search, stufe }),
-    [kontakte, typ, rolle, search, stufe],
+    () => filterKontakte(kontakteEff, { typ, rolle, search, stufe }),
+    [kontakteEff, typ, rolle, search, stufe],
   )
   // Liste: Mehr-Standort-Firmen zusammenfassen. Karte nutzt gefiltert (behält Filialen).
   const angezeigt = useMemo(() => collapseByFirma(gefiltert), [gefiltert])
   // KPIs rollen-gescopet auf die aktive Pill (DB-Daten, client-seitig gezählt).
-  const kpi = useMemo(() => computeContextKpis(kontakte, rolle), [kontakte, rolle])
+  const kpi = useMemo(() => computeContextKpis(kontakteEff, rolle), [kontakteEff, rolle])
   // Live-Ops-Ansicht gibt es nur fuer SV; wechselt die Rolle weg, faellt sie auf Liste zurueck
   // (rein abgeleitet, kein Effect -> kein Stuck-State).
   const effAnsicht = ansicht === 'liveops' && rolle !== 'sv' ? 'liste' : ansicht
@@ -201,7 +221,11 @@ export default function VertriebRosterClient({
         <VertriebLiveOpsListe svs={liveOps.svs} termine={liveOps.termine} />
       )}
 
-      <VertriebDetailDrawer kontakt={selected} onClose={kontaktDrawer.close} />
+      <VertriebDetailDrawer
+        kontakt={selected}
+        onClose={kontaktDrawer.close}
+        onKontaktPatch={applyKontaktPatch}
+      />
     </div>
   )
 }

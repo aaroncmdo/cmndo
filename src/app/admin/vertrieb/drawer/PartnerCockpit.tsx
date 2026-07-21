@@ -11,7 +11,7 @@ import { updateVertriebFeld } from '../_actions/update-vertrieb-feld'
 import { resendWerkstattWelcome } from '../_actions/resend-werkstatt-welcome'
 import { resendMaklerWelcome } from '@/app/admin/makler/actions'
 import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
-import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { VertriebKontakt, VertriebKontaktRow } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
@@ -27,10 +27,11 @@ function Feld({ label, wert }: { label: string; wert: string | null }) {
 
 export default function PartnerCockpit({
   kontakt,
-  onChanged,
+  onPatchKontakt,
 }: {
   kontakt: VertriebKontakt
-  onChanged: () => void
+  // Optimistisch: den Roster-Stand nachziehen (kein router.refresh -> kein Neu-Load).
+  onPatchKontakt: (patch: Partial<VertriebKontaktRow>) => void
 }) {
   const router = useRouter()
   const aktionDrawer = useUrlDrawerParam('aktion')
@@ -69,7 +70,8 @@ export default function PartnerCockpit({
       setFehler(res.error)
       return
     }
-    onChanged()
+    // Optimistisch: Roster-Notiz nachziehen -> `dirty` wird sauber false, kein Neu-Load.
+    onPatchKontakt({ notizen: notiz.trim() || null })
   }
 
   return (
