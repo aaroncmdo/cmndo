@@ -34,7 +34,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
+export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** Jahr (int) -> 'YYYY-01-01' fuer vehicles.baujahr_monat (date). Null wenn unplausibel. */
 function yearToDateStr(y?: number | null): string | null {
@@ -105,6 +105,10 @@ export async function ensureVehicleFromFin(params: {
   /** 50.1-Refinement; in 50.0 von keinem Call-Site gesetzt (s. Datei-Kommentar). */
   ownerId?: string | null
   db: SupabaseClient
+  /** Hing der aufrufende Record vorher an einem FIN-losen Stub, wird dieser nach dem FIN-Upsert
+   *  absorbiert (alle Referenzen umhaengen + Stub loeschen via merge_stub_vehicle). Contextual,
+   *  kein Fuzzy-Matching — der Caller liefert die Stub-id. */
+  supersedesVehicleId?: string
 }): Promise<EnsureVehicleResult> {
   const fin = params.fin?.trim().toUpperCase() ?? ''
   // Defensiv vorvalidieren — sonst wirft die RPC eine RAISE-Exception (ERRCODE 22023),
@@ -160,6 +164,21 @@ export async function ensureVehicleFromFin(params: {
   if (Object.keys(update).length > 0) {
     const { error: updErr } = await params.db.from('vehicles').update(update).eq('id', vehicleId)
     if (updErr) console.warn('[CMM-50.1] vehicles Snapshot-UPDATE (non-fatal):', updErr.message)
+  }
+
+  // Vehicle-Unifikation: hing der aufrufende Record vorher an einem FIN-losen Stub (!= dieser
+  // FIN-Row), alle Referenzen auf den Stub umhaengen + Stub loeschen. Non-critical (bricht die
+  // FIN-Gewinnung/OCR nie). Nur wenn supersedes wirklich ein Stub ist (fin IS NULL).
+  if (params.supersedesVehicleId && params.supersedesVehicleId !== vehicleId) {
+    const { data: alt } = await params.db
+      .from('vehicles').select('fin').eq('id', params.supersedesVehicleId).maybeSingle()
+    if (alt && (alt as { fin: string | null }).fin === null) {
+      const { error: mergeErr } = await params.db.rpc('merge_stub_vehicle', {
+        p_stub: params.supersedesVehicleId,
+        p_target: vehicleId,
+      })
+      if (mergeErr) console.warn('[vehicle-unifikation] merge_stub_vehicle:', mergeErr.message)
+    }
   }
 
   return { ok: true, vehicleId }

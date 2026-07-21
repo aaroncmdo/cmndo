@@ -733,6 +733,13 @@ export async function saveFinVin(
       .single()
     const fr = snap as Record<string, unknown> | null
     const claimId = (fr?.id as string | null) ?? null
+    // Vehicle-Unifikation: aktuelles Claim-Fahrzeug (evtl. FIN-loser Stub) vor dem FIN-Upsert lesen
+    // und als supersedesVehicleId durchreichen -> die FIN-Row absorbiert den Stub.
+    let altesFahrzeug: string | null = null
+    if (claimId) {
+      const { data: cr } = await admin.from('claims').select('vehicle_id').eq('id', claimId).maybeSingle()
+      altesFahrzeug = (cr?.vehicle_id as string | null) ?? null
+    }
     const veh = await ensureVehicleFromFin({
       fin: cleaned,
       snapshot: {
@@ -754,6 +761,7 @@ export async function saveFinVin(
         finExtrahiertAm: new Date().toISOString(),
       },
       db: admin,
+      supersedesVehicleId: altesFahrzeug ?? undefined,
     })
     if (!veh.ok) return { success: false, error: veh.error ?? 'Fahrzeug konnte nicht gespeichert werden' }
     if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)

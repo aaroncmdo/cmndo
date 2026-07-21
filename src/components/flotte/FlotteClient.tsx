@@ -40,7 +40,7 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
   const [error, setError] = useState<string | null>(null)
 
   const [firmaForm, setFirmaForm] = useState({ name: '', rechtsform: '', ustId: '', strasse: '', plz: '', ort: '' })
-  const [fzForm, setFzForm] = useState({ kennzeichen: '', hersteller: '', modell: '', notiz: '' })
+  const [fzForm, setFzForm] = useState({ kennzeichen: '', hersteller: '', modell: '', notiz: '', fin: '', hsn: '', tsn: '' })
 
   async function handleSpeichereFirma(e: FormEvent) {
     e.preventDefault()
@@ -59,7 +59,7 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
     const res = await onFuegeHinzu(fzForm)
     setBusy(false)
     if (res.ok) {
-      setFzForm({ kennzeichen: '', hersteller: '', modell: '', notiz: '' })
+      setFzForm({ kennzeichen: '', hersteller: '', modell: '', notiz: '', fin: '', hsn: '', tsn: '' })
       router.refresh()
     } else setError(res.error ?? 'Fehler')
   }
@@ -182,6 +182,11 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
           <div className="grid grid-cols-2 gap-3">
             <TextField label="Hersteller (optional)" value={fzForm.hersteller} onChange={(e) => setFzForm((p) => ({ ...p, hersteller: e.target.value }))} placeholder="VW" />
             <TextField label="Modell (optional)" value={fzForm.modell} onChange={(e) => setFzForm((p) => ({ ...p, modell: e.target.value }))} placeholder="Golf" />
+          </div>
+          <TextField label="FIN (optional)" value={fzForm.fin} onChange={(e) => setFzForm((p) => ({ ...p, fin: e.target.value }))} placeholder="17-stellig, z. B. WVWZZZ…" />
+          <div className="grid grid-cols-2 gap-3">
+            <TextField label="HSN (optional)" value={fzForm.hsn} onChange={(e) => setFzForm((p) => ({ ...p, hsn: e.target.value }))} placeholder="z. B. 0603" />
+            <TextField label="TSN (optional)" value={fzForm.tsn} onChange={(e) => setFzForm((p) => ({ ...p, tsn: e.target.value }))} placeholder="z. B. BGU" />
           </div>
           {error ? <p className="text-sm text-danger-strong">{error}</p> : null}
           <Button type="submit" variant="navy" fullWidth loading={busy}>

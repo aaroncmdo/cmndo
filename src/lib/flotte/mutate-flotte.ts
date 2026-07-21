@@ -1,7 +1,7 @@
 // Geteilte Fleet-Mutation (kunde + flottenmanager). Reuse createVehicleStub + N:M-Insert.
 // db = Admin/Service-Role (personen/firmen/flotten_fahrzeuge sind deny-all fuer Clients).
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
+import { createVehicleStub, ensureVehicleFromFin, VIN_REGEX } from '@/lib/vehicles/ensure-vehicle'
 import type { FahrzeugForm } from '@/lib/kunde/firma-flotte'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,17 +23,28 @@ export async function bindeVehicleAnFlotte(
   return { ok: true }
 }
 
-/** Stub-Fahrzeug anlegen + N:M-Zuordnung zur firma. */
+/** Fahrzeug anlegen/finden + N:M-Zuordnung zur firma. Mit gültiger FIN dedupliziert
+ *  ensureVehicleFromFin (kanonische Row), sonst FIN-loser Stub. Muster wie zb1-batch-anlage. */
 export async function addFahrzeugToFlotte(
   db: AnyDb, firmaId: string, form: FahrzeugForm, userId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const kennzeichen = (form.kennzeichen ?? '').trim()
   if (!kennzeichen) return { ok: false, error: 'Bitte ein Kennzeichen angeben.' }
-  const veh = await createVehicleStub({
-    snapshot: { kennzeichen, hersteller: form.hersteller?.trim() || null, modell: form.modell?.trim() || null },
-    db,
-  })
+
+  const fin = form.fin?.trim().toUpperCase() || null
+  const hatFin = !!fin && VIN_REGEX.test(fin)
+  const snapshot = {
+    kennzeichen,
+    hersteller: form.hersteller?.trim() || null,
+    modell: form.modell?.trim() || null,
+    hsn: form.hsn?.trim() || null,
+    tsn: form.tsn?.trim() || null,
+  }
+  const veh = hatFin
+    ? await ensureVehicleFromFin({ fin: fin as string, snapshot, db })
+    : await createVehicleStub({ snapshot, db })
   if (!veh.ok) return { ok: false, error: veh.error }
+
   const bind = await bindeVehicleAnFlotte(db, { firmaId, vehicleId: veh.vehicleId, userId, notiz: form.notiz })
   if (!bind.ok) return { ok: false, error: bind.bereitsVorhanden ? 'Dieses Fahrzeug ist bereits in der Flotte.' : bind.error }
   return { ok: true }
