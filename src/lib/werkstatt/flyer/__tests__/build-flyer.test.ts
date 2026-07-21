@@ -13,9 +13,11 @@ describe('buildWerkstattFlyerPdf', () => {
     const bytes = await buildWerkstattFlyerPdf(tpl, [entry('AAAA1111'), entry('BBBB2222')])
     const doc = await PDFDocument.load(bytes)
     expect(doc.getPageCount()).toBe(2)
-    // A5-Export-Groesse (2165x3068pt) bleibt erhalten
-    expect(Math.round(doc.getPage(0).getWidth())).toBe(2165)
-    expect(Math.round(doc.getPage(0).getHeight())).toBe(3068)
+    // Echtes A5 in pt (148x210mm @ 72dpi = 419,53x595,28 -> gerundet 420x595). build-werkstatt-flyer.ts
+    // skaliert die ~2165x3068pt-Vorlage per scaleContent auf A5 herunter (setSize(A5.w, A5.h)), damit sie
+    // direkt als A5 druckt statt ~76x108cm. Der Test hielt bis 21.07. die VOR-Skalierung fest.
+    expect(Math.round(doc.getPage(0).getWidth())).toBe(420)
+    expect(Math.round(doc.getPage(0).getHeight())).toBe(595)
   })
 
   it('dedupliziert das Vorlagen-Bild -> Bulk bleibt klein', async () => {
