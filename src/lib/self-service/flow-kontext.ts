@@ -19,6 +19,12 @@ export type LeadFuerKontext = {
   fahrzeug_standort_adresse?: string | null
   unfallort?: string | null
   disqualifiziert?: boolean | null
+  // Rohspalten fuer erhebt_felder (echte Erhebung, NICHT die *_effektiv-Fallback-Kette).
+  kennzeichen?: string | null
+  gegner_versicherung?: string | null
+  schadentyp?: string | null
+  hat_vorschaeden?: boolean | null
+  freie_werkstattwahl?: boolean | null
 }
 
 /**
@@ -43,6 +49,18 @@ export function bauFlowKontext(lead: LeadFuerKontext, svHatTermin: boolean): Flo
 
     // Werkstatt kann an zwei Feldern haengen -> eine Wahrheit fuer die Bedingung.
     reparatur_werkstatt_id: lead.reparatur_werkstatt_id ?? lead.werkstatt_id ?? null,
+
+    // Rohspalten fuer erhebt_felder — roh = echte Erhebung, NICHT die *_effektiv-Fallback-Kette
+    // darunter. So sieht der Erhebungs-Gate den unmaskierten Zustand (Symptom 2). `?? null` (nicht ||)
+    // bewahrt false bei den bool-Feldern.
+    kennzeichen: lead.kennzeichen ?? null,
+    gegner_versicherung: lead.gegner_versicherung ?? null,
+    schadentyp: lead.schadentyp ?? null,
+    hat_vorschaeden: lead.hat_vorschaeden ?? null,
+    freie_werkstattwahl: lead.freie_werkstattwahl ?? null,
+    fahrzeug_standort_adresse: lead.fahrzeug_standort_adresse ?? null,
+    besichtigungsort_adresse: lead.besichtigungsort_adresse ?? null,
+    unfallort: lead.unfallort ?? null,
 
     // Die ZWEI VERSCHIEDENEN Orte (Aaron 14.07.):
     //   besichtigungsort = wo der SV besichtigt -> Anker fuer den GUTACHTER-Finder
