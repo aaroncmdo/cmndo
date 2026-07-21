@@ -48,10 +48,11 @@ describe('matcheSzenario', () => {
     expect(matcheSzenario(SZENARIEN, { schuldfrage: 'gegner', service_typ: 'komplett' })?.id).toBe('haftpflicht')
   })
 
-  it('gegner + nur_gutachter -> das SPEZIFISCHERE Szenario gewinnt (Prioritaet)', () => {
+  it('gegner + nur_gutachter -> haftpflicht (nur_gutachter ist KEIN eigenes Szenario mehr)', () => {
+    // service_typ steuert nur noch die Kanzlei-Weiche am SA-Ende (Downstream), nicht die Flow-Struktur.
     expect(
       matcheSzenario(SZENARIEN, { schuldfrage: 'gegner', service_typ: 'nur_gutachter' })?.id,
-    ).toBe('nur_gutachter')
+    ).toBe('haftpflicht')
   })
 
   it('unklar -> teilschuld', () => {
@@ -96,10 +97,12 @@ describe('berechneAktiveSteps', () => {
   })
 
   // Anzeige-Regel: SV zugeordnet -> kein Termin-Step. Orte bekannt -> keine Ort-Abfragen.
-  it('Haftpflicht mit SV + bekannten Orten -> Termin und Ort-Steps fallen weg, Gutachter bleibt', () => {
+  it('Haftpflicht mit SV + vollstaendiger Erhebung -> Termin/Ort/Feststellung fallen weg, Gutachter bleibt', () => {
     const steps = berechneAktiveSteps(STEPS, 'haftpflicht', {
-      unfallhergang: 'Auffahrunfall', besichtigungsort_effektiv: 'Koeln', sv_id: 'sv-1',
-      fahrzeug_standort_effektiv: 'Koeln', reparatur_werkstatt_id: null,
+      // alle erhebt_felder gefuellt (Rohspalten!) -> feststellung + Orte fallen weg
+      kennzeichen: 'K-1', unfallhergang: 'Auffahrunfall', unfallort: 'Koeln', gegner_versicherung: 'HUK',
+      besichtigungsort_adresse: 'Koeln', fahrzeug_standort_adresse: 'Koeln',
+      sv_id: 'sv-1', reparatur_werkstatt_id: null,
     })
     expect(steps).not.toContain('termin')
     expect(steps).not.toContain('ort_besichtigung')
@@ -109,34 +112,32 @@ describe('berechneAktiveSteps', () => {
     expect(steps).toContain('werkstatt') // noch keine Werkstatt -> Finder
   })
 
-  it('Werkstatt schon zugeordnet -> Werkstatt-Step faellt weg', () => {
-    // hat_vorschaeden=false = beantwortet (false ist ein WERT, kein Leerwert) -> Feststellung skipped.
+  it('Werkstatt schon zugeordnet -> Picker faellt weg, werkstatt_anzeige erscheint (Symptom 4)', () => {
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
-      hat_vorschaeden: false, fahrzeug_standort_effektiv: 'Koeln',
-      reparatur_werkstatt_id: 'w-1',
+      kennzeichen: 'K-1', schadentyp: 'kollision', freie_werkstattwahl: true,
+      fahrzeug_standort_adresse: 'Koeln', reparatur_werkstatt_id: 'w-1',
     })
-    expect(steps).toEqual(['zusammenfassung', 'account'])
+    expect(steps).toEqual(['zusammenfassung', 'werkstatt_anzeige', 'account'])
   })
 
-  // Mig 20260716155354: beschreibung kommt seit Werkstatt-Embed Phase 3 (#4412) schon aus dem Embed —
-  // sie darf die Feststellung NICHT skippen (Kennzeichen/ZB1/Halter/Vorschaeden kommen ERST dort, Spec §3).
-  it('REGRESSION: Embed-beschreibung skippt die Feststellung NICHT (Marker = hat_vorschaeden)', () => {
+  // beschreibung kommt seit Werkstatt-Embed Phase 3 (#4412) schon aus dem Embed — sie darf die
+  // Feststellung NICHT skippen. Frueher Marker hat_vorschaeden; jetzt gaten erhebt_felder
+  // [kennzeichen, schadentyp] (default-frei), die der Embed NICHT vorbelegt (Spec §3).
+  it('REGRESSION: Embed-beschreibung skippt die Feststellung NICHT (erhebt_felder = kennzeichen/schadentyp)', () => {
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
       fahrzeugschaden_beschreibung: 'Kratzer im Lack (aus dem Embed)',
-      fahrzeug_standort_effektiv: 'Koeln', reparatur_werkstatt_id: 'w-1',
+      fahrzeug_standort_adresse: 'Koeln', reparatur_werkstatt_id: 'w-1',
     })
     expect(steps).toContain('feststellung')
   })
 
   // DER Kern-Bug (Aarons "loses Ende"): Kasko sieht NIE einen Termin-/Gutachter-Step.
-  it('REGRESSION: Kasko hat weder termin noch gutachter — dafuer Werkstatt + Fahrzeugort', () => {
-    const steps = berechneAktiveSteps(STEPS, 'kasko', {
-      fahrzeugschaden_beschreibung: null, fahrzeug_standort_effektiv: null, reparatur_werkstatt_id: null,
-    })
+  it('REGRESSION: Kasko hat weder termin noch gutachter — dafuer Werkstattbindung + Werkstatt + Fahrzeugort', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', {})
     expect(steps).not.toContain('termin')
     expect(steps).not.toContain('gutachter')
     expect(steps).not.toContain('sa')
-    expect(steps).toEqual(['zusammenfassung', 'feststellung', 'ort_fahrzeug', 'werkstatt', 'account'])
+    expect(steps).toEqual(['zusammenfassung', 'feststellung', 'werkstattbindung_check', 'ort_fahrzeug', 'werkstatt', 'account'])
   })
 
   it('Teilschuld -> nur Zusammenfassung + Rueckruf', () => {
@@ -170,5 +171,48 @@ describe('erhebtNoch (erhebt_felder — Erhebungs-Vollstaendigkeit)', () => {
   })
   it('false ist ein WERT, kein Leerwert (hat_vorschaeden=false zaehlt als erhoben)', () => {
     expect(erhebtNoch(['hat_vorschaeden'], { hat_vorschaeden: false })).toBe(false)
+  })
+})
+
+describe('erhebt_felder-Regression (Symptome 1/2/4 + Kasko-Gate + nur_gutachter)', () => {
+  const kasko = { schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' }
+  it('Symptom 1: Kasko-Feststellung erscheint trotz hat_vorschaeden=false, solange kennzeichen leer', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', { ...kasko, hat_vorschaeden: false, kennzeichen: null, schadentyp: null })
+    expect(steps).toContain('feststellung')
+  })
+  it('Symptom 2: ort_fahrzeug erscheint bei gesetztem unfallort aber leerer Rohspalte', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', {
+      ...kasko, kennzeichen: 'K-1', schadentyp: 'kollision',
+      fahrzeug_standort_adresse: null, fahrzeug_standort_effektiv: 'Koeln',
+    })
+    expect(steps).toContain('ort_fahrzeug')
+  })
+  it('Symptom 4: gesetzte Werkstatt -> werkstatt_anzeige sichtbar, werkstatt (Picker) nicht', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', {
+      ...kasko, kennzeichen: 'K-1', schadentyp: 'kollision',
+      fahrzeug_standort_adresse: 'Koeln', reparatur_werkstatt_id: 'w-1', freie_werkstattwahl: true,
+    })
+    expect(steps).toContain('werkstatt_anzeige')
+    expect(steps).not.toContain('werkstatt')
+  })
+  it('Kasko-Werkstattbindung-Gate: werkstattbindung_check erscheint solange freie_werkstattwahl NULL', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', { ...kasko, kennzeichen: 'K-1', schadentyp: 'kollision', fahrzeug_standort_adresse: 'Koeln', freie_werkstattwahl: null })
+    expect(steps).toContain('werkstattbindung_check')
+  })
+  it('Werkstattbindung bestaetigt (frei=true) -> Gate verschwindet', () => {
+    const steps = berechneAktiveSteps(STEPS, 'kasko', { ...kasko, kennzeichen: 'K-1', schadentyp: 'kollision', fahrzeug_standort_adresse: 'Koeln', freie_werkstattwahl: true })
+    expect(steps).not.toContain('werkstattbindung_check')
+  })
+  it('Haftpflicht: beide Ort-Steps erscheinen bei leeren Rohspalten (auch mit gesetztem unfallort)', () => {
+    const steps = berechneAktiveSteps(STEPS, 'haftpflicht', {
+      schuldfrage: 'gegner', kennzeichen: 'K-1', unfallhergang: 'x', unfallort: 'Koeln', gegner_versicherung: 'HUK',
+      besichtigungsort_adresse: null, fahrzeug_standort_adresse: null,
+    })
+    expect(steps).toContain('ort_besichtigung')
+    expect(steps).toContain('ort_fahrzeug')
+  })
+  it('nur_gutachter ist geloescht', () => {
+    expect(berechneAktiveSteps(STEPS, 'nur_gutachter', {})).toEqual([])
+    expect(SZENARIEN.find((s) => s.id === 'nur_gutachter')).toBeUndefined()
   })
 })
