@@ -300,3 +300,33 @@ export async function speichereNfcUid(
   if (!data) return { ok: false, error: 'Karte wurde zwischenzeitlich geändert.' }
   return { ok: true }
 }
+
+/**
+ * Finalisiert eine frisch beschriebene Karte in EINEM Aufruf für beide Portale:
+ * Chip-UID vermerken (falls gelesen) + optional ans Fahrzeug binden.
+ * uid zuerst, dann bind -- schlägt der Bind fehl, ist die Karte trotzdem als beschrieben
+ * markiert (der Nutzer wiederholt nur die Bindung).
+ */
+export async function finalisiereSchadenkarte(
+  db: AnyDb,
+  params: { token: string; firmaId: string; userId: string; nfcUid: string | null; fahrzeugId: string | null },
+): Promise<{ ok: boolean; error?: string }> {
+  if (params.nfcUid) {
+    const uidRes = await speichereNfcUid(db, {
+      token: params.token,
+      firmaId: params.firmaId,
+      nfcUid: params.nfcUid,
+    })
+    if (!uidRes.ok) return uidRes
+  }
+  if (params.fahrzeugId) {
+    const bindRes = await bindeSchadenkarteAnFahrzeug(db, {
+      token: params.token,
+      fahrzeugId: params.fahrzeugId,
+      firmaId: params.firmaId,
+      userId: params.userId,
+    })
+    if (!bindRes.ok) return bindRes
+  }
+  return { ok: true }
+}

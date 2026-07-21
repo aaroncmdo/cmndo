@@ -1,148 +1,147 @@
 'use client'
 
-// NFC-Karte beschreiben — SCAN-FIRST.
-//
-// Der Operator scannt ZUERST den aufgeklebten QR der Karte. Erst dann wird genau DIESER
-// Token auf den Chip geschrieben. Wuerde man stattdessen einen Token aus einer Liste waehlen
-// und auf die gerade aufliegende Karte schreiben, koennte Token X auf die Karte mit Aufkleber Y
-// landen -- die Karte haette zwei Identitaeten (Auflegen -> Fahrzeug A, Scannen -> Fahrzeug B).
-// Indem die Karte sich SELBST identifiziert, ist Chip == Aufdruck per Konstruktion.
+// Blanko-Karte per NFC beschreiben — WRITE-FIRST.
+// Leere NFC-Karte auflegen -> frischer Token wird gemintet, auf den Chip geschrieben,
+// zurueckgelesen/verifiziert und (optional) gleich ans gewaehlte Fahrzeug gebunden.
+// KEIN QR-Zwang (der war nur fuer VORBEDRUCKTE Karten noetig). Web NFC = nur Chrome/Android;
+// Desktop/iPhone bekommen die "am Handy oeffnen"-Bruecke.
 import { useEffect, useState } from 'react'
-import { SchadenkarteScanner } from '@/components/flotte/SchadenkarteScanner'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
-import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
+import { provisioniereKarte, type ProvisionEffects } from '@/lib/schadenkarte/provisioniere-karte'
 import {
   nfcVerfuegbar,
-  chipTraegtToken,
   NDEF_RECORD_TYPE,
   type NdefReaderCtor,
   type NdefReadingEventLike,
 } from '@/lib/schadenkarte/nfc'
 
 type Props = {
-  onNfcUid: (token: string, nfcUid: string) => Promise<{ ok: boolean; error?: string }>
+  fahrzeuge: Array<{ vehicleId: string; label: string }>
+  onMintToken: () => Promise<{ ok: true; token: string } | { ok: false; error: string }>
+  onFinalize: (
+    token: string,
+    nfcUid: string | null,
+    fahrzeugId: string | null,
+  ) => Promise<{ ok: boolean; error?: string }>
 }
 
-type Phase = 'scannen' | 'auflegen' | 'fertig'
-
-export function NfcKarteBeschreiben({ onNfcUid }: Props) {
-  const [phase, setPhase] = useState<Phase>('scannen')
-  const [token, setToken] = useState<string | null>(null)
-  const [fehler, setFehler] = useState<string | null>(null)
-  const [laeuft, setLaeuft] = useState(false)
-
-  // Verfuegbarkeit ERST NACH Mount pruefen (kein Hydration-Mismatch): der Server kennt kein
-  // `window` -> unterstuetzt waere dort immer false. Ein direktes nfcVerfuegbar() im Render-
-  // Body wuerde auf Android/Chrome beim Hydrieren sofort auf true kippen, waehrend das Server-
-  // HTML noch den iPhone-Hinweis zeigt -> Mismatch. Analog kameraVerfuegbar in
-  // SchadenkarteScanner.tsx (selbes Verzeichnis, exakt dasselbe Muster).
+export function NfcKarteBeschreiben({ fahrzeuge, onMintToken, onFinalize }: Props) {
   const [unterstuetzt, setUnterstuetzt] = useState(false)
+  const [bridgeQr, setBridgeQr] = useState<string | null>(null)
+  const [fahrzeugId, setFahrzeugId] = useState('')
+  const [laeuft, setLaeuft] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
+  const [erfolg, setErfolg] = useState<string | null>(null)
+  const [pendingToken, setPendingToken] = useState<string | null>(null)
+
+  // Verfuegbarkeit ERST nach Mount pruefen (kein Hydration-Mismatch, s. nfcVerfuegbar-Kommentar).
+  // Ohne NFC: QR der AKTUELLEN Seite bauen, damit der Operator sie am Android-Handy oeffnen kann.
   useEffect(() => {
-    setUnterstuetzt(nfcVerfuegbar())
+    const ok = nfcVerfuegbar()
+    setUnterstuetzt(ok)
+    if (!ok && typeof window !== 'undefined') {
+      void (async () => {
+        try {
+          const { default: QRCode } = await import('qrcode')
+          setBridgeQr(await QRCode.toDataURL(window.location.href, { margin: 1, width: 180 }))
+        } catch {
+          setBridgeQr(null)
+        }
+      })()
+    }
   }, [])
 
-  /**
-   * Bei JEDEM Fehlschlag im Schreib-/Verifikationspfad zurueck auf 'scannen' UND token=null.
-   *
-   * Sicherheitsgrund: ein Retry mit dem ALTEN Token wuerde den naechsten (physisch ANDEREN)
-   * Chip aus dem Stapel gegen den vorherigen Token verifizieren -- genau die Zwei-Identitaeten-
-   * Katastrophe, die scan-first verhindern soll (siehe Datei-Kopfkommentar), nur durch die
-   * Retry-Hintertuer. Ein erneuter Versuch erzwingt so zwingend einen frischen QR-Scan.
-   * `fehler` wird bewusst NICHT geloescht (sondern neu gesetzt), damit der Operator sieht,
-   * was schiefging.
-   */
-  function zurueckAufScannen(nachricht: string) {
-    setFehler(nachricht)
-    setPhase('scannen')
-    setToken(null)
-  }
-
-  async function beschreibe(t: string) {
-    setFehler(null)
-    setLaeuft(true)
+  // NFC-Adapter: schreibt mit overwrite:false (Clobber-Schutz), liest zurueck, liefert uid+readBack.
+  async function writeAndRead(
+    url: string,
+  ): Promise<{ ok: true; uid: string | null; readBack: string | null } | { ok: false; error: string }> {
     try {
       const Ctor = (window as unknown as { NDEFReader: NdefReaderCtor }).NDEFReader
-      const url = buildSchadenkarteUrl(t)
-
-      // 1) Schreiben
       const writer = new Ctor()
-      await writer.write({ records: [{ recordType: NDEF_RECORD_TYPE, data: url }] })
+      await writer.write({ records: [{ recordType: NDEF_RECORD_TYPE, data: url }] }, { overwrite: false })
 
-      // 2) Zurueck lesen + verifizieren. Ohne bestaetigten Rueckweg gilt die Karte als NICHT
-      //    beschrieben -- lieber einmal zu viel schreiben als eine unverifizierte Karte ausliefern.
       const reader = new Ctor()
       const controller = new AbortController()
-      const gelesen = await new Promise<{ url: string | null; uid: string | null }>((resolve) => {
+      const gelesen = await new Promise<{ uid: string | null; readBack: string | null }>((resolve) => {
         const timeout = setTimeout(() => {
           controller.abort()
-          resolve({ url: null, uid: null })
+          resolve({ uid: null, readBack: null })
         }, 10_000)
-
         reader.onreading = (ev: NdefReadingEventLike) => {
           clearTimeout(timeout)
           const rec = ev.message.records.find((r) => r.recordType === NDEF_RECORD_TYPE)
           const text = rec?.data ? new TextDecoder().decode(rec.data) : null
           controller.abort()
-          resolve({ url: text, uid: ev.serialNumber ?? null })
+          resolve({ uid: ev.serialNumber ?? null, readBack: text })
         }
         reader.onreadingerror = () => {
           clearTimeout(timeout)
           controller.abort()
-          resolve({ url: null, uid: null })
+          resolve({ uid: null, readBack: null })
         }
-        // scan() selbst kann ablehnen (NotAllowedError, InvalidStateError bei ueberlappender
-        // Session, NFC hardwareseitig aus) -- das landet NICHT in onreading/onreadingerror und
-        // wuerde ohne dieses .catch() als unhandled Rejection im Log liegen, waehrend die Promise
-        // bis zum 10s-Timeout haengt. Aufloesen wie ein fehlgeschlagenes Auslesen: chipTraegtToken
-        // gegen null ist immer false -> sauberer "nicht verifiziert"-Pfad, kein Falsch-Erfolg.
         reader.scan({ signal: controller.signal }).catch(() => {
           clearTimeout(timeout)
           controller.abort()
-          resolve({ url: null, uid: null })
+          resolve({ uid: null, readBack: null })
         })
       })
-
-      if (!chipTraegtToken(gelesen.url, t)) {
-        zurueckAufScannen(
-          'Die Karte konnte nicht verifiziert werden — sie gilt als nicht beschrieben. Bitte die Karte erneut scannen.',
-        )
-        return
-      }
-
-      // 3) Chip-Seriennummer vermerken (Nachweis „beschrieben")
-      if (gelesen.uid) {
-        const res = await onNfcUid(t, gelesen.uid)
-        if (!res.ok) {
-          zurueckAufScannen(
-            `${res.error ?? 'Chip-Kennung konnte nicht gespeichert werden.'} Bitte die Karte erneut scannen.`,
-          )
-          return
-        }
-      }
-
-      setPhase('fertig')
+      return { ok: true, uid: gelesen.uid, readBack: gelesen.readBack }
     } catch (err) {
-      zurueckAufScannen(
-        err instanceof Error && err.name === 'NotAllowedError'
-          ? 'NFC-Zugriff wurde abgelehnt. Bitte erlauben und die Karte erneut scannen.'
-          : 'Beschreiben fehlgeschlagen. Bitte die Karte erneut scannen.',
-      )
-    } finally {
-      setLaeuft(false)
+      // overwrite:false auf einer NICHT leeren Karte UND eine abgelehnte Berechtigung landen beide
+      // als NotAllowedError -> nicht sicher unterscheidbar. Ehrliche kombinierte Meldung.
+      const denied = err instanceof Error && err.name === 'NotAllowedError'
+      return {
+        ok: false,
+        error: denied
+          ? 'Beschreiben nicht möglich — entweder ist die Karte nicht leer oder der NFC-Zugriff wurde abgelehnt. Bitte eine leere Karte auflegen und den Zugriff erlauben.'
+          : 'Beschreiben fehlgeschlagen. Bitte eine leere Karte erneut auflegen.',
+      }
     }
+  }
+
+  async function beschreibe() {
+    setFehler(null)
+    setErfolg(null)
+    setLaeuft(true)
+    const effects: ProvisionEffects = { mintToken: onMintToken, writeAndRead, finalize: onFinalize }
+    const res = await provisioniereKarte(effects, { fahrzeugId: fahrzeugId || null, pendingToken })
+    if (res.ok) {
+      setPendingToken(null)
+      setErfolg(
+        fahrzeugId
+          ? 'Karte beschrieben und ans Fahrzeug gebunden.'
+          : 'Karte beschrieben. Noch keinem Fahrzeug zugewiesen — erst nach dem Binden im Ernstfall aktiv.',
+      )
+    } else {
+      setPendingToken(res.retryToken)
+      setFehler(res.error)
+    }
+    setLaeuft(false)
   }
 
   if (!unterstuetzt) {
     return (
       <SectionCard title="Karte beschreiben (NFC)">
         <p className="text-sm text-claimondo-shield">
-          NFC-Beschreiben braucht ein Android-Gerät mit Chrome. Auf dem iPhone ist das technisch
-          nicht möglich.{' '}
-          <strong className="text-claimondo-navy">
-            Die Karte funktioniert trotzdem — über den aufgeklebten QR-Code.
-          </strong>
+          NFC-Beschreiben geht nur auf einem{' '}
+          <strong className="text-claimondo-navy">Android-Gerät mit Chrome</strong>. Am Desktop und iPhone ist das
+          technisch nicht möglich.
         </p>
+        {bridgeQr && (
+          <div className="mt-3 flex items-center gap-3">
+            <img
+              src={bridgeQr}
+              alt="QR-Code: diese Seite am Android-Handy öffnen"
+              width={90}
+              height={90}
+              className="rounded-ios-sm"
+            />
+            <p className="text-sm text-claimondo-ondo">
+              Diese Seite am Android-Handy (Chrome) öffnen — QR scannen — dort die Karten beschreiben.
+            </p>
+          </div>
+        )}
       </SectionCard>
     )
   }
@@ -150,48 +149,33 @@ export function NfcKarteBeschreiben({ onNfcUid }: Props) {
   return (
     <SectionCard
       title="Karte beschreiben (NFC)"
-      subtitle="Zuerst den aufgeklebten QR-Code der Karte scannen, dann die Karte an das Gerät halten."
+      subtitle="Leere Karte auflegen — sie wird beschrieben und optional gleich ans Fahrzeug gebunden."
     >
-      {phase === 'scannen' && (
-        <SchadenkarteScanner
-          disabled={laeuft}
-          onToken={(t) => {
-            setToken(t)
-            setPhase('auflegen')
-          }}
-        />
-      )}
-
-      {phase === 'auflegen' && token && (
-        <div className="space-y-3">
-          <p className="text-sm text-claimondo-ondo">
-            Karte <span className="font-mono">{token}</span> jetzt an das Gerät halten.
-          </p>
-          <Button variant="ondo" loading={laeuft} onClick={() => beschreibe(token)}>
-            Karte beschreiben
-          </Button>
-        </div>
-      )}
-
-      {phase === 'fertig' && (
-        <div className="space-y-3">
-          <p className="text-sm text-success-strong">
-            Karte beschrieben und verifiziert.
-          </p>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setToken(null)
-              setFehler(null)
-              setPhase('scannen')
-            }}
+      <div className="space-y-3">
+        <label className="block space-y-1">
+          <span className="text-body-xs font-medium text-claimondo-navy">Fahrzeug (optional)</span>
+          <select
+            value={fahrzeugId}
+            onChange={(e) => setFahrzeugId(e.target.value)}
+            disabled={laeuft}
+            className="w-full rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30"
           >
-            Nächste Karte
-          </Button>
-        </div>
-      )}
+            <option value="">— nur beschreiben (später binden) —</option>
+            {fahrzeuge.map((f) => (
+              <option key={f.vehicleId} value={f.vehicleId}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
 
-      {fehler && <p className="mt-3 text-sm text-danger-strong">{fehler}</p>}
+        <Button variant="ondo" loading={laeuft} onClick={beschreibe}>
+          Karte auflegen &amp; beschreiben
+        </Button>
+
+        {erfolg && <p className="text-sm text-success-strong">{erfolg}</p>}
+        {fehler && <p className="text-sm text-danger-strong">{fehler}</p>}
+      </div>
     </SectionCard>
   )
 }

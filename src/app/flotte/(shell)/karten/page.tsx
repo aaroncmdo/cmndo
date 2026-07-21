@@ -2,8 +2,17 @@ import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKartenFuerFirma } from '@/lib/schadenkarte/schadenkarte'
+import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
 import KartenClient from './KartenClient'
-import { identifiziereKarte, baueKartenQrPdf, sperreKarte, entsperreKarte, entbindeKarte, merkeNfcUid } from './actions'
+import {
+  identifiziereKarte,
+  baueKartenQrPdf,
+  sperreKarte,
+  entsperreKarte,
+  entbindeKarte,
+  provisioniereKarteToken,
+  finalisiereKarte,
+} from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,23 +24,30 @@ export default async function KartenPage() {
   const db = createAdminClient() as AnyDb
   const firma = await getFlottenmanagerFirma(db, user.id)
   const karten = firma ? await getKartenFuerFirma(db, firma.id) : []
+  const flotte = firma ? await getKundeFlotte(db, firma.id) : []
+  const fahrzeuge = flotte.map((f) => ({
+    vehicleId: f.vehicleId,
+    label: [f.kennzeichen, f.hersteller, f.modell].filter(Boolean).join(' · ') || f.vehicleId,
+  }))
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-8 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-claimondo-navy">Karten</h1>
         <p className="mt-1 text-sm text-claimondo-shield">
-          Schadenkarten scannen und Fahrzeuge identifizieren.
+          Schadenkarten beschreiben, Fahrzeuge zuweisen und identifizieren.
         </p>
       </div>
       <KartenClient
         karten={karten}
+        fahrzeuge={fahrzeuge}
         onIdentify={identifiziereKarte}
         onQrPdf={baueKartenQrPdf}
         onSperren={sperreKarte}
         onEntsperren={entsperreKarte}
         onEntbinden={entbindeKarte}
-        onNfcUid={merkeNfcUid}
+        onMintToken={provisioniereKarteToken}
+        onFinalize={finalisiereKarte}
       />
     </div>
   )

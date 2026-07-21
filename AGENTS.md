@@ -384,6 +384,18 @@ CI fährt `npm run check:operative-status-writes -- --ratchet`. Es blockt **NEUE
 
 **Baseline = 2 grandfathered** (bekannte Direkt-Writer, per Boy-Scout auf den Funnel heben): `kanzlei-wunsch/actions.ts` (an_externe_kanzlei_uebergeben / in_kommunikation_vs — Nicht-Matrix-Terminals) + `termine/close-nur-gutachter-termin.ts`. Abgebaut von urspruenglich 4: `gutachter/team/actions.ts` (sv-zugewiesen) ist auf den Funnel gehoben (#4579), `lexdrive/process-event.ts` in die Allowlist (Manual-Override, s.o.). Der Reparatur-Abschluss (`reparatur-abschluss-actions.ts`) war der 5. — er ging schon mit `kitta/reparatur-cursor-funnel` aus der Baseline. Marker: `coordination-an-status-achsen-lane-werkstatt-abschluss-bypass`.
 
+# i18n-Coverage-Gate (Ratchet)
+
+**Ein dynamisch adressierter i18n-Key muss in den Messages existieren.** Baut der Code den Key zur LAUFZEIT aus einer TS-Union — z.B. `subphase-visibility.ts`: `` `${extern ? 'subKunde' : 'subIntern'}.${lifecycle.subPhase}` `` — und fehlt ein Union-Wert in den Messages, wirft next-intl `MISSING_MESSAGE` und die UI rendert den **rohen Key**: das deutsche Produkt zeigt dann wörtlich `phasen.subIntern.reparatur_terminfindung`.
+
+**Die Lücke, die dieses Gate schliesst:** `check:i18n` prüft nur die **Parität ZWISCHEN** den Locales — fehlt ein Key in **allen 6**, ist die Parität erfüllt und der Check grün. `check:i18n-render` kompiliert nur **definierte** Messages und kennt keine Code-Referenzen. Belegt 19.07. auf prod (Playwright-Console auf der Fallakte): `MISSING_MESSAGE: phasen.subIntern.reparatur_terminfindung (de)` — derselbe Scan fand zusätzlich `filmcheck`, `qc-pruefung`, `anschlussschreiben`, `nachbesichtigung-laeuft`, also **häufige** Zustände (jeder Claim im QC), die live rohe Keys zeigten.
+
+CI fährt `npm run check:i18n-coverage -- --ratchet`. Je Eintrag der `COVERAGE`-Liste (in `scripts/check-i18n-coverage.mjs`) werden die Werte einer TS-Union gegen die Keys unter einem Messages-Pfad der **Quell-Locale `de.json`** verglichen (die übrigen 5 deckt die `check:i18n`-Parität ab). Abgedeckt: `phasen.main` (`ClaimMainPhase`) + `phasen.subIntern`/`phasen.subKunde` (`ClaimSubPhase`). **Baseline 0** — keine grandfatherte Schuld, jede neue Lücke blockt. Pure Logik: `scripts/lib/i18n-coverage-scan.mjs` (unit-getestet, 10 Fälle, CRLF- + kommentar-sicher).
+
+**Neue dynamische Namespace-Familie?** → `COVERAGE`-Eintrag ergänzen (messagePath + Union-Quelle). Ein umbenannter Typ oder fehlender Namespace ist ein **harter** Fehler (sonst würde das Gate still blind).
+
+**Bewusst NICHT abgedeckt:** statisch literale `t('foo.bar')`-Referenzen — dafür bräuchte es Namespace-Scope-Tracking über `useTranslations`-Variablen (FP-anfällig, und ein FP blockt die ganze Fleet). Mögliche spätere Erweiterung; die dynamische Klasse ist die, die real geblutet hat.
+
 # Termin-Bezug-Gate (Ratchet)
 
 **Naive Legacy-Bezug-Filter auf `gutachter_termine` sind verboten** — `.eq/.neq/.in('fall_id'|'claim_id'|'lead_id')` **übersehen bezug-native Termine**. `gutachter_termine` trägt den Termin-Auftrag („WOFÜR") auf zwei Achsen: Legacy (`fall_id`/`lead_id`/`claim_id`) + kanonisch (`bezug_typ`+`bezug_id`). Die Termin-Engine schreibt NEUE Termine **bezug-nativ** (nur `bezug_typ`+`bezug_id`, Legacy-Spalte NULL — ein Validate-Trigger lehnt doppelten Legacy-Bezug ab). Ein `.eq('fall_id', X)` findet solche Termine nie → verwaiste Auftrags-/Reminder-/Kalender-Logik (dieselbe Bug-Klasse wie der lead_id-Reader #2580).
