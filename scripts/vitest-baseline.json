@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-19T21:28:50.168Z",
+  "generatedAt": "2026-07-21T17:40:39.449Z",
   "note": "Bekannte rote Test-Files (grandfathered, file-level). Der Ratchet blockt NEUE. Boy-Scout: File fixen + Baseline via `npm run check:vitest -- --update-baseline` senken. Echter Flake -> hier belassen + im PR begruenden.",
-  "fileCount": 20,
+  "fileCount": 18,
   "files": [
     "src/app/admin/makler/__tests__/actions.test.ts",
     "src/app/api/cron/reminder-dedup.regression.test.ts",
@@ -20,8 +20,6 @@
     "src/lib/inbound/__tests__/process-inbound-media.test.ts",
     "src/lib/inbound/__tests__/process-inbound-text.test.ts",
     "src/lib/termine/__tests__/cancel-offene-termine.test.ts",
-    "src/lib/versicherungen/queries.test.ts",
-    "src/lib/vs-meldung/__tests__/sende-unfallmeldung.test.ts",
-    "src/lib/werkstatt/flyer/__tests__/build-flyer.test.ts"
+    "src/lib/versicherungen/queries.test.ts"
   ]
 }
