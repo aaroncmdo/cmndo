@@ -345,6 +345,28 @@ describe('getKartenFuerFirma', () => {
       { id: 'k2', token: 'SKT-BBB', status: 'gebunden', fahrzeugId: 'v1' },
     ])
   })
+
+  it('nurGebunden=true filtert auf status=gebunden', async () => {
+    const eqCalls: Array<[string, string]> = []
+    const db = {
+      from: () => ({
+        select: () => ({
+          eq: (c: string, v: string) => {
+            eqCalls.push([c, v])
+            return {
+              eq: (c2: string, v2: string) => {
+                eqCalls.push([c2, v2])
+                return { order: () => ({ data: [] }) }
+              },
+              order: () => ({ data: [] }),
+            }
+          },
+        }),
+      }),
+    } as never
+    await getKartenFuerFirma(db, 'f1', { nurGebunden: true })
+    expect(eqCalls).toContainEqual(['status', 'gebunden'])
+  })
 })
 
 // ---------------------------------------------------------------------------
