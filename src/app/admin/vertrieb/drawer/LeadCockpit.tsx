@@ -1,6 +1,12 @@
 'use client'
 // Vertrieb-CRM P2: das CRM-Cockpit fuer einen Lead. Alle Mutationen ueber bestehende
 // partner-leads-Actions (updatePartnerLead / konvertierePartnerLead / protokolliereAktivitaet).
+//
+// Realtime-Ops (Fix Doppel-Reload): Feld-Aenderungen werden OPTIMISTISCH lokal eingetragen
+// (onPatchDetail) — der Client kennt den Wert bereits, es gibt keinen Refetch/Neu-Load. Bei
+// Server-Fehler wird der vorige Wert zurueckgerollt. onReloadDetail() ist ein STILLER
+// Hintergrund-Refetch (kein Spinner) — nur wo der Server etwas berechnet (Auto-Log-Historie
+// bei Status/Einstufung, Website-Anreicherung). onConverted() = einmaliger Roster-Refresh.
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -12,7 +18,7 @@ import ColdMailVerlauf from './ColdMailVerlauf'
 import { LEAD_STATUS_OPTIONS, LEAD_EINSTUFUNG_OPTIONS } from '../_lib/lead-status-labels'
 import type { VorlageTyp } from '../_lib/mail-vorlagen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
-import type { VertriebLeadDetail } from '../_lib/lead-detail'
+import type { VertriebLeadDetail, LeadAktivitaet } from '../_lib/lead-detail'
 import { reichereLeadAusWebsite } from '../_actions/reichere-lead-website'
 
 const FELD_CLS =
@@ -23,11 +29,21 @@ const LABEL_CLS = 'text-caption uppercase tracking-wide text-claimondo-ondo/60'
 export default function LeadCockpit({
   kontakt,
   detail,
-  onChanged,
+  onPatchDetail,
+  onAppendAktivitaet,
+  onReloadDetail,
+  onConverted,
 }: {
   kontakt: VertriebKontakt
   detail: VertriebLeadDetail
-  onChanged: () => void
+  // Optimistisch: neuen Feld-Stand sofort lokal spiegeln (kein Refetch).
+  onPatchDetail: (partial: Partial<VertriebLeadDetail>) => void
+  // Optimistisch: neue Aktivitaet oben einfuegen.
+  onAppendAktivitaet: (a: LeadAktivitaet) => void
+  // Stiller Hintergrund-Refetch fuer server-berechnete Daten.
+  onReloadDetail: () => void
+  // Nach Konvertierung: einmaliger Roster-Refresh (Identitaet wechselt).
+  onConverted: () => void
 }) {
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -63,26 +79,54 @@ export default function LeadCockpit({
     detail.ansprechpartner.telefon,
   ])
 
-  async function patch(p: Parameters<typeof updatePartnerLead>[1]) {
+  /**
+   * Speichert Feld-Aenderungen. `optimistisch` wird SOFORT lokal gespiegelt (Echtzeit,
+   * kein Refetch); schlaegt der Server-Write fehl, wird der vorige Stand zurueckgerollt.
+   * `reload` (nur Status/Einstufung) holt danach still die Auto-Log-Historie nach.
+   */
+  async function patch(
+    updates: Parameters<typeof updatePartnerLead>[1],
+    optimistisch: Partial<VertriebLeadDetail>,
+    opts?: { reload?: boolean },
+  ) {
+    // Snapshot der betroffenen Felder fuer den Rollback bei Fehler.
+    const vorher: Partial<VertriebLeadDetail> = {}
+    if ('status' in optimistisch) vorher.status = detail.status
+    if ('einstufung' in optimistisch) vorher.einstufung = detail.einstufung
+    if ('notiz' in optimistisch) vorher.notiz = detail.notiz
+    if ('ansprechpartner' in optimistisch) vorher.ansprechpartner = detail.ansprechpartner
+
+    onPatchDetail(optimistisch) // sofort sichtbar
     setBusy(true)
     setFehler(null)
-    const res = await updatePartnerLead(kontakt.id, p)
+    const res = await updatePartnerLead(kontakt.id, updates)
     setBusy(false)
     if (!res.ok) {
+      onPatchDetail(vorher) // Rollback
       setFehler(res.error ?? 'Konnte nicht gespeichert werden.')
       return
     }
-    onChanged()
+    if (opts?.reload) onReloadDetail()
   }
 
   async function speichereAnsprechpartner() {
-    await patch({
-      ansprechpartner_vorname: apForm.vorname.trim() || null,
-      ansprechpartner_nachname: apForm.nachname.trim() || null,
-      ansprechpartner_position: apForm.position.trim() || null,
-      ansprechpartner_email: apForm.email.trim() || null,
-      ansprechpartner_telefon: apForm.telefon.trim() || null,
-    })
+    const ap = {
+      vorname: apForm.vorname.trim() || null,
+      nachname: apForm.nachname.trim() || null,
+      position: apForm.position.trim() || null,
+      email: apForm.email.trim() || null,
+      telefon: apForm.telefon.trim() || null,
+    }
+    await patch(
+      {
+        ansprechpartner_vorname: ap.vorname,
+        ansprechpartner_nachname: ap.nachname,
+        ansprechpartner_position: ap.position,
+        ansprechpartner_email: ap.email,
+        ansprechpartner_telefon: ap.telefon,
+      },
+      { ansprechpartner: ap },
+    )
   }
 
   async function anreichern() {
@@ -95,7 +139,8 @@ export default function LeadCockpit({
       return
     }
     setEnrichMsg('Von Website übernommen.')
-    onChanged()
+    // Der Server hat die ansprechpartner_*-Felder berechnet -> still nachladen (kein Neu-Load).
+    onReloadDetail()
   }
 
   async function convert() {
@@ -109,7 +154,7 @@ export default function LeadCockpit({
       setFehler(res.error ?? 'Konvertierung fehlgeschlagen.')
       return
     }
-    onChanged()
+    onConverted()
   }
 
   const ap = detail.ansprechpartner
@@ -160,7 +205,7 @@ export default function LeadCockpit({
           <StatusBadge domain="vertrieb-workflow" code={kontakt.stufe} size="sm" />
           <select
             value={detail.status}
-            onChange={(e) => patch({ status: e.target.value })}
+            onChange={(e) => patch({ status: e.target.value }, { status: e.target.value }, { reload: true })}
             disabled={busy}
             aria-label="Status ändern"
             className={FELD_CLS}
@@ -174,7 +219,13 @@ export default function LeadCockpit({
         </div>
         <select
           value={detail.einstufung ?? ''}
-          onChange={(e) => patch({ einstufung: e.target.value || null })}
+          onChange={(e) =>
+            patch(
+              { einstufung: e.target.value || null },
+              { einstufung: e.target.value || null },
+              { reload: true },
+            )
+          }
           disabled={busy}
           aria-label="Einstufung"
           className={FELD_CLS}
@@ -208,7 +259,7 @@ export default function LeadCockpit({
           merge={{ Ansprechpartner: apName || (kontakt.name ?? ''), Firma: kontakt.name ?? '', Termin: '' }}
           startTyp={composerTyp}
           onClose={() => setComposerTyp(null)}
-          onSent={onChanged}
+          onSent={onReloadDetail}
         />
       )}
 
@@ -219,7 +270,7 @@ export default function LeadCockpit({
           onClose={() => setColdMailOffen(false)}
           onSent={() => {
             setVerlaufToken((t) => t + 1)
-            onChanged()
+            onReloadDetail()
           }}
         />
       )}
@@ -230,7 +281,12 @@ export default function LeadCockpit({
 
       <div>
         <p className={`${LABEL_CLS} mb-2`}>Aktivität</p>
-        <AktivitaetLog leadId={kontakt.id} aktivitaeten={detail.aktivitaeten} onChanged={onChanged} />
+        <AktivitaetLog
+          leadId={kontakt.id}
+          aktivitaeten={detail.aktivitaeten}
+          onAppend={onAppendAktivitaet}
+          onReload={onReloadDetail}
+        />
       </div>
 
       <div>
@@ -238,7 +294,7 @@ export default function LeadCockpit({
         <textarea
           value={notiz}
           onChange={(e) => setNotiz(e.target.value)}
-          onBlur={() => notiz !== (detail.notiz ?? '') && patch({ notiz })}
+          onBlur={() => notiz !== (detail.notiz ?? '') && patch({ notiz }, { notiz })}
           rows={3}
           placeholder="Interne Notiz zum Lead…"
           className={`${FELD_CLS} w-full resize-y`}
