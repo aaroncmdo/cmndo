@@ -4968,6 +4968,10 @@
       "abschluss": "Completion"
     },
     "subKunde": {
+      "filmcheck": "Report is being reviewed",
+      "qc-pruefung": "Quality check in progress",
+      "anschlussschreiben": "Law firm is contacting the insurer",
+      "nachbesichtigung-laeuft": "Re-inspection in progress",
       "reparatur_werkstattwahl": "Workshop is being selected",
       "reparatur_terminfindung": "Repair appointment is being scheduled",
       "reparatur_laeuft": "Repair in progress",
@@ -4992,6 +4996,10 @@
       "termin_durchgefuehrt": "Appointment completed"
     },
     "subIntern": {
+      "filmcheck": "Film check",
+      "qc-pruefung": "QC review",
+      "anschlussschreiben": "Follow-up letter",
+      "nachbesichtigung-laeuft": "Re-inspection in progress",
       "reparatur_werkstattwahl": "Workshop selection",
       "reparatur_terminfindung": "Scheduling",
       "reparatur_laeuft": "Repair in progress",

@@ -89,6 +89,10 @@
       "abschluss": "Abschluss"
     },
     "subKunde": {
+      "filmcheck": "Gutachten wird geprüft",
+      "qc-pruefung": "Qualitätsprüfung läuft",
+      "anschlussschreiben": "Kanzlei schreibt die Versicherung an",
+      "nachbesichtigung-laeuft": "Nachbesichtigung läuft",
       "reparatur_werkstattwahl": "Werkstatt wird ausgewählt",
       "reparatur_terminfindung": "Reparatur-Termin wird abgestimmt",
       "reparatur_laeuft": "Reparatur läuft",
@@ -113,6 +117,10 @@
       "termin_durchgefuehrt": "Termin durchgeführt"
     },
     "subIntern": {
+      "filmcheck": "Filmcheck",
+      "qc-pruefung": "QC-Prüfung",
+      "anschlussschreiben": "Anschlussschreiben",
+      "nachbesichtigung-laeuft": "Nachbesichtigung läuft",
       "reparatur_werkstattwahl": "Werkstattwahl",
       "reparatur_terminfindung": "Terminfindung",
       "reparatur_laeuft": "Reparatur läuft",

@@ -4968,6 +4968,10 @@
       "abschluss": "الإنهاء"
     },
     "subKunde": {
+      "filmcheck": "تتم مراجعة التقرير",
+      "qc-pruefung": "فحص الجودة جارٍ",
+      "anschlussschreiben": "المكتب القانوني يتواصل مع التأمين",
+      "nachbesichtigung-laeuft": "إعادة المعاينة جارية",
       "reparatur_werkstattwahl": "يتم اختيار الورشة",
       "reparatur_terminfindung": "يتم تحديد موعد الإصلاح",
       "reparatur_laeuft": "الإصلاح قيد التنفيذ",
@@ -4992,6 +4996,10 @@
       "termin_durchgefuehrt": "تم تنفيذ الموعد"
     },
     "subIntern": {
+      "filmcheck": "فحص التسجيل",
+      "qc-pruefung": "فحص الجودة",
+      "anschlussschreiben": "خطاب المتابعة",
+      "nachbesichtigung-laeuft": "إعادة المعاينة جارية",
       "reparatur_werkstattwahl": "اختيار الورشة",
       "reparatur_terminfindung": "تحديد الموعد",
       "reparatur_laeuft": "الإصلاح قيد التنفيذ",

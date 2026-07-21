@@ -173,6 +173,18 @@ jobs:
       - name: i18n-Render-Check
         run: npm run check:i18n-render
 
+      # i18n-Coverage-Gate: blockt NEUE dynamisch adressierte i18n-Keys ohne Label.
+      # Der Code baut Keys zur LAUFZEIT aus TS-Unions (subphase-visibility.ts:
+      # `${'subKunde'|'subIntern'}.${lifecycle.subPhase}`) — fehlt ein Union-Wert in den
+      # Messages, wirft next-intl MISSING_MESSAGE und die UI rendert den ROHEN KEY.
+      # check:i18n faengt das NICHT (prueft nur Paritaet ZWISCHEN Locales: fehlt der Key in
+      # ALLEN 6, ist die Paritaet erfuellt -> gruen). Prod-Beleg 19.07.:
+      # phasen.subIntern.reparatur_terminfindung, dazu filmcheck/qc-pruefung/
+      # anschlussschreiben/nachbesichtigung-laeuft. Baseline 0 (harter Gate).
+      # Siehe AGENTS.md Paragraph i18n-Coverage-Gate.
+      - name: i18n-Coverage-Ratchet
+        run: npm run check:i18n-coverage -- --ratchet
+
       # AAR-921 RLS-Drift-Bremse (15.05.2026): findet SECDEF-Functions in
       # pg_policies, denen GRANT EXECUTE TO authenticated fehlt. Drift entsteht
       # durch CREATE OR REPLACE FUNCTION ohne Grant-Wiederherstellung — Inzident
