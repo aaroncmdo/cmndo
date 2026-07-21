@@ -34,7 +34,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
+export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** Jahr (int) -> 'YYYY-01-01' fuer vehicles.baujahr_monat (date). Null wenn unplausibel. */
 function yearToDateStr(y?: number | null): string | null {
