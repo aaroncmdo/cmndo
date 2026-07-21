@@ -1,0 +1,116 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { bindeSchadenkarteAnFahrzeug } from '@/lib/schadenkarte/schadenkarte'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDb = import('@supabase/supabase-js').SupabaseClient<any, any, any>
+
+/**
+ * Bindet eine gescannte Schadenkarte an DIESES Fahrzeug (Fahrzeug-Detailseite,
+ * Flottenmanager). Ownership-Gate: das Fahrzeug muss zur Firma des FM gehoeren;
+ * bindeSchadenkarteAnFahrzeug prueft zusaetzlich firma_id + Status der Karte.
+ */
+export async function bindeKarteFuerFahrzeug(
+  token: string,
+  vehicleId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const { data: owner } = await db
+    .from('flotten_fahrzeuge')
+    .select('id')
+    .eq('firma_id', firma.id)
+    .eq('vehicle_id', vehicleId)
+    .maybeSingle()
+  if (!owner) return { ok: false, error: 'Fahrzeug gehört nicht zu Ihrer Flotte.' }
+
+  const res = await bindeSchadenkarteAnFahrzeug(db, {
+    token,
+    fahrzeugId: vehicleId,
+    firmaId: firma.id,
+    userId: user.id,
+  })
+  if (res.ok) {
+    revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
+    revalidatePath('/flotte/karten')
+  }
+  return res
+}
+
+/**
+ * Storniert einen (versehentlich, z.B. durch einen Fahrer via Schadenkarte)
+ * angelegten Schaden — Flottenmanager-Selbstbedienung, aber NUR frueh-stufig
+ * (fmDarfStornieren). Storno laeuft ausschliesslich ueber die State-Machine-Engine
+ * (transitionFallStatus -> 'storniert'), nie als direkter operative_status-Write.
+ * Ownership: der Claim muss zu einem Fahrzeug der FM-Firma gehoeren.
+ */
+export async function storniereFahrzeugSchaden(
+  claimId: string,
+  vehicleId: string,
+  grund: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+  if (!grund.trim()) return { ok: false, error: 'Bitte einen Grund angeben.' }
+
+  // Ownership: Fahrzeug muss zur Firma gehoeren.
+  const { data: owner } = await db
+    .from('flotten_fahrzeuge')
+    .select('id')
+    .eq('firma_id', firma.id)
+    .eq('vehicle_id', vehicleId)
+    .maybeSingle()
+  if (!owner) return { ok: false, error: 'Fahrzeug gehört nicht zu Ihrer Flotte.' }
+
+  // Claim muss zu genau diesem Fahrzeug gehoeren + frueh-stufig sein.
+  const { data: claimRow } = await db
+    .from('claims')
+    .select('id, vehicle_id, operative_status')
+    .eq('id', claimId)
+    .maybeSingle()
+  const claim = claimRow as
+    | { id: string; vehicle_id: string | null; operative_status: string | null }
+    | null
+  if (!claim || claim.vehicle_id !== vehicleId) {
+    return { ok: false, error: 'Schaden gehört nicht zu diesem Fahrzeug.' }
+  }
+  if (!fmDarfStornieren(claim.operative_status)) {
+    return {
+      ok: false,
+      error:
+        'Dieser Schaden ist bereits in Bearbeitung und kann nicht mehr selbst storniert werden. Bitte kontaktieren Sie den Support.',
+    }
+  }
+
+  // Engine ist fall_id-keyed -> fall_id via Bridge (jeder Claim hat eine Bridge-Row).
+  const { data: bridgeRow } = await db
+    .from('faelle_claim_bridge')
+    .select('fall_id')
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  const fallId = (bridgeRow as { fall_id?: string | null } | null)?.fall_id ?? null
+  if (!fallId) return { ok: false, error: 'Schaden konnte nicht aufgelöst werden.' }
+
+  // Storno NUR ueber die Engine (Operative-Status-Write-Gate). Sie wirft bei
+  // ungueltigem Uebergang -> in ein Result-Object fangen.
+  try {
+    await transitionFallStatus(fallId, 'storniert', { grund: grund.trim(), user_id: user.id })
+  } catch (err) {
+    console.error('[storniereFahrzeugSchaden] transition fehlgeschlagen:', err)
+    return { ok: false, error: 'Storno fehlgeschlagen. Bitte kontaktieren Sie den Support.' }
+  }
+
+  revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
+  return { ok: true }
+}

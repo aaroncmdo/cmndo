@@ -11,7 +11,13 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
+import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import {
+  resolveSchadenkarteToFahrzeug,
+  bindeSchadenkarteAnFahrzeug,
+} from '@/lib/schadenkarte/schadenkarte'
 import { inviteGegnerViaAirdrop } from '@/lib/airdrop/gegner-invite'
 import { erstelleVsDispatchTask } from '@/lib/vs-meldung/dispatch-task'
 import { normalizeE164 } from '@/lib/whatsapp/send-sms-plain'
@@ -230,4 +236,44 @@ export async function submitSchadenGegner(
   revalidatePath('/flotte/fahrzeug/' + ctx.context.fahrzeugId)
 
   return { ok: true, leadId: res.leadId, vehicleId: ctx.context.fahrzeugId, claimId }
+}
+
+/**
+ * Bindet eine (ungebundene) Schadenkarte an ein Fahrzeug — aufgerufen vom
+ * Flottenmanager, der die physische Karte antippt und ueber /schaden/[token]
+ * im Bind-Zweig landet. Auth-Grenze: nur ein eingeloggter Flottenmanager,
+ * dessen Firma die Karte gehoert, darf binden. bindeSchadenkarteAnFahrzeug
+ * prueft firma_id + Status-Guard (nur 'bestellt'/'frei') zusaetzlich.
+ */
+export async function bindeKarteAnFahrzeugPublic(
+  token: string,
+  fahrzeugId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Bitte einloggen.' }
+
+  const admin = createAdminClient()
+  const firma = await getFlottenmanagerFirma(admin, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const karte = await resolveSchadenkarteToFahrzeug(admin, token)
+  if (!karte || karte.firmaId !== firma.id) {
+    return { ok: false, error: 'Karte gehört nicht zu Ihrer Flotte.' }
+  }
+
+  const res = await bindeSchadenkarteAnFahrzeug(admin, {
+    token,
+    fahrzeugId,
+    firmaId: firma.id,
+    userId: user.id,
+  })
+  if (res.ok) {
+    revalidatePath(`/schaden/${token}`)
+    revalidatePath('/flotte/karten')
+    revalidatePath(`/flotte/fahrzeug/${fahrzeugId}`)
+  }
+  return res
 }
