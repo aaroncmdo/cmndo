@@ -20,7 +20,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { minteKartenFuerFlotte, bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff } from '../../_actions/firmen-flotte-karten'
+import { bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -56,10 +56,6 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [addBusy, setAddBusy] = useState(false)
   const [addFehler, setAddFehler] = useState<string | null>(null)
 
-  const [mintAnzahl, setMintAnzahl] = useState(10)
-  const [mintCharge, setMintCharge] = useState('')
-  const [mintBusy, setMintBusy] = useState(false)
-  const [mintFehler, setMintFehler] = useState<string | null>(null)
   const [bindFehler, setBindFehler] = useState<string | null>(null)
 
   const [kontoBusy, setKontoBusy] = useState<string | null>(null)
@@ -100,16 +96,6 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   async function fahrzeugEntfernen(flottenFahrzeugId: string) {
     const res = await entferneFahrzeugAusFlotte(firma.id, flottenFahrzeugId)
     if (res.ok) router.refresh()
-  }
-
-  async function kartenErzeugen() {
-    setMintBusy(true)
-    setMintFehler(null)
-    const res = await minteKartenFuerFlotte(firma.id, mintAnzahl, mintCharge.trim() || undefined)
-    setMintBusy(false)
-    if (!res.ok) return setMintFehler(res.error ?? 'Erzeugen fehlgeschlagen.')
-    setMintCharge('')
-    router.refresh()
   }
 
   async function karteBinden(token: string, fahrzeugId: string) {
@@ -244,23 +230,10 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
             }
           />
         </div>
-        <div className="flex flex-wrap items-end gap-2 mb-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-body-xs text-claimondo-ondo">Anzahl (1–200)</span>
-            <input type="number" min={1} max={200} value={mintAnzahl} onChange={(e) => setMintAnzahl(Number(e.target.value))} className={`${FELD_CLS} w-24`} />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-body-xs text-claimondo-ondo">Charge (optional)</span>
-            <input value={mintCharge} onChange={(e) => setMintCharge(e.target.value)} placeholder="z.B. Flotte-2026" className={`${FELD_CLS} w-44`} />
-          </label>
-          <Button variant="navy" size="sm" onClick={kartenErzeugen} loading={mintBusy} disabled={mintAnzahl < 1 || mintBusy}>
-            Karten erzeugen
-          </Button>
-        </div>
-        {mintFehler && <p className="text-caption text-danger-strong mb-2">{mintFehler}</p>}
-
         {karten.length === 0 ? (
-          <p className="text-body-sm text-claimondo-ondo/60">Noch keine Karten. Erzeuge oben eine Charge.</p>
+          <p className="text-body-sm text-claimondo-ondo/60">
+            Noch keine Karten. Nutzen Sie oben „Karte auflegen &amp; beschreiben".
+          </p>
         ) : (
           <DataTableContainer>
             <Table>

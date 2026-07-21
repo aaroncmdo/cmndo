@@ -9,19 +9,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { mintSchadenkarten, bindeSchadenkarteAnFahrzeug, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
 
-export async function minteKartenFuerFlotte(
-  firmaId: string,
-  anzahl: number,
-  charge?: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const guard = await requireRole(['admin', 'dispatch'])
-  if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
-  const admin = createAdminClient()
-  const res = await mintSchadenkarten(admin, { firmaId, anzahl, charge: charge?.trim() || null })
-  if (!res.ok) return { ok: false, error: res.error }
-  revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
-  return { ok: true }
-}
+// minteKartenFuerFlotte (Batch-Mint "Karten erzeugen") wurde entfernt: Karten
+// entstehen jetzt mint-on-tap beim Beschreiben (provisioniereKarteTokenStaff)
+// statt als Charge unbund­ener Blanko-Tokens.
 
 export async function bindeKarteAnFahrzeug(
   firmaId: string,
