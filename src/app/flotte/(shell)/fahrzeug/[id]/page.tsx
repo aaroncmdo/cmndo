@@ -10,6 +10,8 @@ import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons
 import EmptyState from '@/components/shared/EmptyState'
 import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSection'
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
+import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
+import { bindeKarteFuerFahrzeug } from './actions'
 import { CarIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -134,7 +136,7 @@ export default async function FahrzeugDetailPage({
             />
           </div>
         ) : (
-          <p className="text-sm text-claimondo-shield">Keine Karte gebunden.</p>
+          <FahrzeugKarteBindClient vehicleId={id} onBind={bindeKarteFuerFahrzeug} />
         )}
       </SectionCard>
     </div>
