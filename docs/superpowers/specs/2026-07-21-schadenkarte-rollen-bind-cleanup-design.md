@@ -46,6 +46,14 @@ Zeigt gebundene Karte + QR bereits ✓. **Neu:** wenn **keine** Karte gebunden �
 ### 6. Lib `getKartenFuerFirma`
 Optionaler zweiter Param `opts?: { nurGebunden?: boolean }` → `if (opts?.nurGebunden) query.eq('status','gebunden')`. Default (kein Param) = alle (rückwärtskompatibel für Admin).
 
+### 7. Flottenmanager: versehentlich (via Schadenkarte) angelegten Schaden stornieren
+Ein Fahrer eines Flottenfahrzeugs tippt die Karte an (Zweig 3) → ein Claim entsteht. War das versehentlich, muss der **Flottenmanager** ihn **stornieren** können.
+- **Storno statt Löschen:** `faelle.status='storniert'` (+ `storniert_am` + `storno_grund`) — **über die State-Machine-Engine** (`transitionFallStatus`, NIE ein direkter `operative_status`-Write → Operative-Status-Write-Gate). Auditierbar, kein Datenverlust.
+- **Leitplanke — nur früh-stufige Schäden:** nur solange der Claim in einem frühen Zustand ist (kein SV zugewiesen / Initial-Status = genau der „versehentlich, noch nichts passiert"-Fall). Fortgeschrittene Claims (SV/VS involviert) sind **kein** Ein-Klick-FM-Storno → Hinweis „Bitte Admin kontaktieren". Die Engine erzwingt die gültigen Quell-Zustände; die FM-Action verengt zusätzlich.
+- **Auth/Scope:** Server-Action verifiziert, dass der Claim zu einem Fahrzeug der Firma des Flottenmanagers gehört (`claims.vehicle_id → flotten_fahrzeuge → firma`). Pflicht-`storno_grund` + Bestätigungs-Dialog.
+- **UI:** „Stornieren"-Aktion pro Schaden in `FahrzeugSchaedenSection` (Fahrzeug-Detail — wo der FM die Schäden seines Fahrzeugs sieht). Optional zusätzlich im `/schaden/token`-Manage-View (Zweig 2).
+- Der Plan liest `src/lib/faelle/state-machine.ts` für die gültige Storno-Transition + prüft, ob eine FM-taugliche Storno-Action existiert (sonst dünner Wrapper um die Engine).
+
 ## Error-Handling / Konsistenz
 - Result-Object, kein `throw`. `bindeKarte`/`bindeSchadenkarteAnFahrzeug` bestehende Fehlermeldungen. `revalidatePath` der betroffenen Flotten-/Fahrzeug-/Admin-Routen.
 - `/schaden/token`-Bind/Manage: Auth-/Firma-Gate **serverseitig**; Result-Object; Fehlschlag → Meldung, kein Crash. Der **Gegner-Flow für Fremde bleibt unangetastet** (keine Regression am Ernstfall-Pfad).
@@ -53,7 +61,7 @@ Optionaler zweiter Param `opts?: { nurGebunden?: boolean }` → `if (opts?.nurGe
 
 ## Testing
 - **Unit (vitest):** `getKartenFuerFirma` mit `nurGebunden` (filtert `status='gebunden'`). Die `/schaden/token`-Verzweigungs-Logik als **pure Guard-Funktion** (Rolle × firma-Match × Karten-Status → `bind` | `manage` | `gegner`). `bindeKarte`/`bindeSchadenkarteAnFahrzeug` sind bereits getestet.
-- **Regel 4 (Prod-Smoke, nach Deploy, Test-Konto):** Admin beschreibt Karte (Android-Brücke). Flottenmanager bindet auf **zwei Wegen**: (a) Karte **antippen** → `/schaden/token` → „an Fahrzeug binden" (iPhone **und** Android), (b) in-app **QR-Scan** (Fahrzeug-Detail / „Schadenkarte binden"). Dann: **gebundene** Karte als FM antippen → **Info + „Schaden melden"** (kein Auto-Claim); als Nicht-FM/Gegner → normaler Claim-Flow. Flotten-Liste nur gebunden, Mint-Batch weg.
+- **Regel 4 (Prod-Smoke, nach Deploy, Test-Konto):** Admin beschreibt Karte (Android-Brücke). Flottenmanager bindet auf **zwei Wegen**: (a) Karte **antippen** → `/schaden/token` → „an Fahrzeug binden" (iPhone **und** Android), (b) in-app **QR-Scan** (Fahrzeug-Detail / „Schadenkarte binden"). Dann: **gebundene** Karte als FM antippen → **Info + „Schaden melden"** (kein Auto-Claim); als Nicht-FM/Gegner → normaler Claim-Flow. Flotten-Liste nur gebunden, Mint-Batch weg. **FM storniert** einen frisch (via Test-Karte) angelegten früh-stufigen Test-Schaden → Claim `storniert` (via Engine), verschwindet aus aktiven Views; fortgeschrittener Claim → Storno verweigert.
 
 ## Risiken / Abgrenzung
 - **Kollision mit A (#4657, noch offen):** beide fassen `FirmenFlotteDetailClient.tsx` + `firmen-flotte-karten.ts` an (A: FIN-Felder + staff-Actions; C: mint-Batch raus). Verschiedene Sektionen → meist auto-mergebar; bei Konflikt: A zuerst mergen, C rebasen. **Reihenfolge: #4647 (done) → A (#4657) → C.**
