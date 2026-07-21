@@ -59,3 +59,26 @@ describe('bauFlowKontext', () => {
     expect(bauFlowKontext({ schuldfrage: 'unklar' }, false).quali_offen).toBe(false)
   })
 })
+
+describe('bauFlowKontext — Rohspalten fuer erhebt_felder', () => {
+  it('traegt die operativen Rohspalten NEBEN den abgeleiteten *_effektiv-Feldern', () => {
+    const k = bauFlowKontext(
+      { schuldfrage: 'gegner', unfallort: 'Koeln', fahrzeug_standort_adresse: null, kennzeichen: 'K-AB-12', hat_vorschaeden: false },
+      false,
+    )
+    // Rohspalte leer -> erhebt_felder sieht sie als offen (Symptom 2: NICHT per unfallort-Fallback maskiert)
+    expect(k.fahrzeug_standort_adresse).toBeNull()
+    // abgeleitetes Feld bleibt fuer Prefill/bedingung (Fallback auf unfallort)
+    expect(k.fahrzeug_standort_effektiv).toBe('Koeln')
+    expect(k.kennzeichen).toBe('K-AB-12')
+    // false ist ein WERT (kein ?? null-Verlust)
+    expect(k.hat_vorschaeden).toBe(false)
+  })
+  it('leere Rohspalten sind null (nicht undefined) — istLeer greift', () => {
+    const k = bauFlowKontext({ schuldfrage: 'gegner' }, false)
+    expect(k.kennzeichen).toBeNull()
+    expect(k.gegner_versicherung).toBeNull()
+    expect(k.schadentyp).toBeNull()
+    expect(k.freie_werkstattwahl).toBeNull()
+  })
+})
