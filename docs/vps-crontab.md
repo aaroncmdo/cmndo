@@ -8,6 +8,20 @@ Alle App-Crons laufen über den Wrapper `/usr/local/bin/cron-call.sh <pfad>` (se
 Bearer $CRON_SECRET` + trifft die lokale App auf `127.0.0.1:3000`). `pg_cron` (18 DB-Jobs) und die
 GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 
+> **⚠️ Zeitzone: der VPS läuft auf `Etc/UTC`** (verifiziert 2026-07-20 per `timedatectl`). Alle
+> Uhrzeiten in dieser Datei sind UTC, **nicht** deutsche Zeit: `0 7 * * *` feuert um **09:00 MESZ**
+> (Sommer) bzw. 08:00 MEZ (Winter). Wer eine Uhrzeit hier als „morgens um 7" liest, sucht einen
+> vermeintlich ausbleibenden Lauf zwei Stunden zu früh.
+
+> **⚠️ Dieser Abzug ist vom 2026-06-20 und driftet.** Messung 2026-07-20 (`crontab -l` gegen diese
+> Datei): **72 Routen live aktiv, 58 hier dokumentiert — 19 fehlen**, u. a. `recovery-monitor`,
+> `slot-ttl-cleanup`, `golden-path`, `purge-test-data`, `stripe-reconcile`, `cold-mailer-advance`,
+> `lead-kalt-cleanup`, `case-billing-batch`. Umgekehrt nennt die Datei **3 Routen, die live nicht
+> (mehr) laufen**: `whatsapp-erinnerungen` (auf dem VPS auskommentiert, Reminder-Duplikat) sowie
+> `release-makler-provisionen` + `release-werkstatt-provisionen` (durch `release-provisionen`
+> abgelöst). **Quelle der Wahrheit ist der VPS**, nicht diese Datei. Ein vollständiger Re-Sync ist
+> eine eigene Aufgabe; am 20.07. wurde hier nur der Partner-Nudge-Eintrag nachgetragen.
+
 ## Live-Crontab (Abzug 2026-06-20)
 
 ```cron
@@ -41,6 +55,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 45  *  * * *  cron-call.sh /api/cron/send-lead-reminders
 0   7  * * *  cron-call.sh /api/cron/abrechnung-reminder
 0   7  * * *  cron-call.sh /api/cron/sv-termin-dokument-reminder
+0   7  * * *  cron-call.sh /api/cron/partner-aktivierung-nachfassen  # NACHGETRAGEN 2026-07-20 (PR #4627): Partner ohne Erst-Login -> 1 Vertriebs-Task, dedupliziert + selbstheilend
 20  8  * * *  cron-call.sh /api/cron/abrechnung-einzug
 5   10 * * *  cron-call.sh /api/cron/sa-reminder
 0   10 * * *  cron-call.sh /api/cron/vollmacht-reminder
