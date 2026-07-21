@@ -152,6 +152,13 @@ jobs:
       - name: Flag-Drift-Ratchet
         run: npm run check:flag-drift -- --ratchet
 
+      # Flow-erhebt-felder-Ratchet: jeder erhebt_felder-Eintrag der FlowLink-Matrix muss eine echte,
+      # NICHT default-behaftete, NICHT abgeleitete leads-Rohspalte sein — sonst gatet der Step nie
+      # sauber (Symptom 1 hat_vorschaeden-Default / Symptom 2 *_effektiv-Fallback). Hard-0, kein DB.
+      # Siehe docs/superpowers/specs/2026-07-21-flowlink-operative-vollstaendigkeit-design.md Paragraph 2.6.
+      - name: Flow-erhebt-felder-Ratchet
+        run: npm run check:flow-erhebt-felder -- --ratchet
+
       # FG1-Ratchet: blockt NEUE direkte claims.operative_status-Writes ausserhalb der
       # State-Machine-Engine (.from('claims').update({operative_status})) ggue.
       # scripts/operative-status-writes-baseline.json. Solche Direkt-Writes umgehen
