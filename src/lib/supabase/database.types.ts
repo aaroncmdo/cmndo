@@ -7177,6 +7177,7 @@ export type Database = {
         Row: {
           aktiv: boolean
           bedingung: Json | null
+          erhebt_felder: string[]
           erstellt_am: string
           id: string
           reihenfolge: number
@@ -7186,6 +7187,7 @@ export type Database = {
         Insert: {
           aktiv?: boolean
           bedingung?: Json | null
+          erhebt_felder?: string[]
           erstellt_am?: string
           id?: string
           reihenfolge: number
@@ -7195,6 +7197,7 @@ export type Database = {
         Update: {
           aktiv?: boolean
           bedingung?: Json | null
+          erhebt_felder?: string[]
           erstellt_am?: string
           id?: string
           reihenfolge?: number
