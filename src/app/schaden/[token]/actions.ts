@@ -220,7 +220,10 @@ export async function submitSchadenGegner(
       // telefon ist hier bereits E.164-normalisiert (s.o.) — inviteGegnerViaAirdrop
       // normalisiert idempotent nochmal, aber wir uebergeben den kanonischen Wert.
       if (telefon) {
-        const invite = await inviteGegnerViaAirdrop(claimId, telefon)
+        const invite = await inviteGegnerViaAirdrop(claimId, telefon, {
+          email: data.email || null,
+          name: data.name.trim(),
+        })
         if (!invite.ok) {
           await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: invite.error })
         }
