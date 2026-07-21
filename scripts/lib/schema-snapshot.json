@@ -812,7 +812,14 @@
     "vermittler_typ",
     "vermittler_id",
     "schadens_kind",
-    "schadenort_place_id"
+    "schadenort_place_id",
+    "reparatur_auftrag_modus",
+    "reparatur_auftrag_modus_gesetzt_von",
+    "reparatur_auftrag_modus_gesetzt_am",
+    "kva_quelle",
+    "kva_abgelehnt_am",
+    "kva_abgelehnt_grund",
+    "kanzlei_id"
    ]
   },
   "client_error_log": {
@@ -1522,7 +1529,8 @@
     "reihenfolge",
     "bedingung",
     "aktiv",
-    "erstellt_am"
+    "erstellt_am",
+    "erhebt_felder"
    ]
   },
   "forderungspositionen": {
@@ -2099,6 +2107,14 @@
     "fehler_task_id"
    ]
   },
+  "kanzlei": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "erstellt_am"
+   ]
+  },
   "kanzlei_abrechnung_positionen": {
    "kind": "t",
    "columns": [
@@ -2623,7 +2639,8 @@
     "wochenreport_abgemeldet_am",
     "ist_kleinunternehmer",
     "notizen",
-    "rechtsform"
+    "rechtsform",
+    "sponsor_makler_id"
    ]
   },
   "makler_fall_consent": {
@@ -3305,9 +3322,6 @@
     "twofa_telefon",
     "twofa_telefon_verifiziert_am",
     "working_hours",
-    "google_refresh_token",
-    "google_access_token",
-    "google_token_expires_at",
     "google_email",
     "google_connected_at",
     "onboarding_completed_at",
@@ -3330,12 +3344,10 @@
     "whatsapp_geprueft_am",
     "sprache",
     "updates_last_seen_at",
-    "ms_refresh_token",
-    "ms_access_token",
-    "ms_token_expires_at",
     "ms_email",
     "ms_connected_at",
-    "actions_last_seen_at"
+    "actions_last_seen_at",
+    "kanzlei_id"
    ]
   },
   "profiles_oauth_secrets": {
@@ -3563,9 +3575,6 @@
     "logo_url",
     "brand_primary",
     "brand_secondary",
-    "gcal_access_token",
-    "gcal_refresh_token",
-    "gcal_token_expiry",
     "gcal_connected",
     "gcal_calendar_id",
     "vertrag_unterschrieben",
@@ -6105,6 +6114,33 @@
     "google_rating",
     "google_review_count",
     "google_rating_am"
+   ]
+  },
+  "werkstatt_empfehlung_batches": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "empfohlen_von",
+    "token",
+    "status",
+    "gewaehlte_werkstatt_id",
+    "expires_at",
+    "entschieden_am",
+    "created_at",
+    "updated_at"
+   ]
+  },
+  "werkstatt_empfehlungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "batch_id",
+    "werkstatt_id",
+    "rang",
+    "distanz_km",
+    "match_snapshot",
+    "created_at"
    ]
   },
   "werkstatt_notizen": {
