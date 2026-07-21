@@ -63,7 +63,7 @@ export function SchadenkarteBindenSection({ flotte, onBinde }: Props) {
   return (
     <SectionCard
       title="Schadenkarten binden"
-      subtitle="Weisen Sie jeder Schadenkarte ein Fahrzeug zu. Scannen oder geben Sie den Code manuell ein."
+      subtitle="Weisen Sie jeder Schadenkarte ein Fahrzeug zu. QR-Code scannen, Code manuell eingeben — oder die Karte mit dem Handy antippen."
     >
       <ul className="space-y-4">
         {flotte.map((fz) => {
