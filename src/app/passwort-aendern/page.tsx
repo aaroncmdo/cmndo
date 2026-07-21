@@ -1,7 +1,8 @@
 ﻿'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { KeyIcon } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { setzeNeuesPasswort } from './actions'
@@ -11,6 +12,48 @@ export default function PasswortAendernPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // Recovery-Tokens einer nur in-memory gehaltenen Client-Session. Ein Recovery-/Welcome-
+  // Magic-Link (admin.generateLink type=recovery) etabliert die Session als IMPLICIT-Hash
+  // (#access_token) OHNE Cookie; der @supabase/ssr-Client (PKCE-Modus) verarbeitet den Hash
+  // NICHT automatisch. Ohne das folgende landet ein solcher Link hier in einer Sackgasse
+  // ("Nicht angemeldet"), das Passwort wird nie gesetzt (prod-Incident 21.07. Werkstatt-
+  // Onboarding). Wir parsen den Hash daher manuell und reichen die Tokens an die Server-Action
+  // durch. Der normale Einmalpasswort-Login (Cookie) hat KEINEN Hash -> No-op. Gleiches Muster
+  // wie /passwort-zuruecksetzen.
+  const recoveryTokensRef = useRef<{ access_token: string; refresh_token: string } | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function bootstrapSession() {
+      const supabase = createClient()
+      if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+        const params = new URLSearchParams(window.location.hash.slice(1))
+        const access_token = params.get('access_token')
+        const refresh_token = params.get('refresh_token')
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({ access_token, refresh_token })
+          // Token aus der URL entfernen — nicht im Verlauf/Referrer hinterlassen.
+          window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
+      }
+      // Tokens der aktuellen Session festhalten (Belt-and-Suspenders): die Server-Action nutzt
+      // sie als Fallback, falls das per setSession geschriebene Cookie noch nicht server-lesbar
+      // ist. Fehlt eine Session (regulaerer Cookie-Login-Race), bleibt der Ref null und die
+      // Action liest deterministisch das Cookie serverseitig.
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (cancelled) return
+      if (sessionData?.session) {
+        recoveryTokensRef.current = {
+          access_token: sessionData.session.access_token,
+          refresh_token: sessionData.session.refresh_token,
+        }
+      }
+    }
+    bootstrapSession()
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -32,7 +75,7 @@ export default function PasswortAendernPage() {
     // Server-Action: updateUser + force_password_change serverseitig. Der
     // frueher genutzte Browser-Client warf hier "Auth session missing"
     // (Cookie-Propagation-Race nach dem Login-Redirect).
-    const result = await setzeNeuesPasswort(password)
+    const result = await setzeNeuesPasswort(password, recoveryTokensRef.current ?? undefined)
     if (result.ok) {
       // Hard-Navigation vermeidet die RSC-Soft-Nav-Race mit den frisch
       // rotierten Auth-Cookies (CMM-14). Spinner bleibt bis zum Seitenwechsel.
