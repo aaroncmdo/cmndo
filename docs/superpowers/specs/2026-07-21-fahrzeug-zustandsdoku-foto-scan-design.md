@@ -86,10 +86,11 @@ Fahrzeug-Detail → [Zustand dokumentieren]
 ## Phasing
 - **v1** = alles oben (Capture + Storage + Abruf/Badge + sync KI + Human-Confirm + Vorschaden-Link).
 - **Phase 3** = 3-Monats-Reminder-Cron (nudged stale Fahrzeuge; VPS-Cron `Etc/UTC`, s. Cron-Konventionen).
+- **Phase 4 (nach/​mit dem Cron)** = **NFC-Read in der Karten-Identify-Funktion** (Aaron 21.07.): eingeloggter FM tippt eine Karte an → in-app `NDEFReader.scan()` (Web NFC, **Android-Chrome-only**) liest den Token → springt direkt zur **Fahrzeug-Detail** (wo die Zustandsdoku lebt). QR-Scan (`SchadenkarteScanner` + `identifiziereKarte`) bleibt der **geräteunabhängige Fallback**. **Ergänzt — ersetzt nicht — C's Tap→`/schaden/[token]`-Pfad** (der für **gebundene** Karten das Fahrzeug schon als leichtes Panel zeigt, iOS+Android; Phase 4 = voller In-App-Sprung zur Detail-Seite + schnellerer Weg ohne QR). Betrifft `/flotte/(shell)/karten` (Identify-Sektion) + `SchadenkarteScanner`.
 - **Später/optional** = Fahrer-via-Schadenkarte-Einstieg, Tamper-Hashing, Scan-über-Zeit-Vergleich (Diff).
 
 ## Risiken / Abgrenzung
-- **File-Kollision mit C/#4663:** beide fassen `fahrzeug/[id]/page.tsx` an (C: Bind-Widget/Storno; B: Zustandsdoku-Sektion) + die Flotten-Liste (Badge). **Merge-Reihenfolge: C/#4663 → B.** B ist auf staging-mit-A gebaut; C ist es (noch) nicht → bei B-Merge auf staging ist C evtl. schon drin, sonst rebasen.
+- **Keine File-Kollision (Update):** C/#4663 (`4ee16b698`) UND A/#4657 (`444add636`) sind **bereits auf staging** — die B-Basis enthält beide. B baut direkt auf C's Fahrzeug-Detail (Bind-Widget/Storno) auf und hängt die Zustandsdoku-Sektion **daneben**; die Flotten-Liste bekommt den Badge additiv. Kein Merge-Reihenfolgen-Zwang mehr.
 - **KI Kosten/Latenz:** sync Batch von ~6–8 Fotos = ein Multi-Image-Claude-Call, wenige Sek + Token-Kosten. Guard: Bildzahl/Auflösung begrenzen (Downscale vor Upload).
 - **False Positives:** durch Human-Confirm entschärft (kein Auto-Vorschaden).
 - **Mobile Kamera:** `capture="environment"`; iOS/Android-Unterschiede; FileChooser-Regel für Smoke ([[handoff-dedizierte-smoke-session-alle-rollen]]).
