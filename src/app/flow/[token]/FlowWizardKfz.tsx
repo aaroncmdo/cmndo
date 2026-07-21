@@ -53,6 +53,8 @@ import { resolveFlowWeichen, type FlowWeichen } from '@/lib/self-service/flow-we
 import { bauFlowKontext, type LeadFuerKontext } from '@/lib/self-service/flow-kontext'
 import type { FlowConfig } from '@/lib/self-service/lade-flow-szenarien'
 import { FlowOrtStep } from './FlowOrtStep'
+import { FlowWerkstattbindungStep } from './FlowWerkstattbindungStep'
+import { FlowWerkstattAnzeige } from './FlowWerkstattAnzeige'
 import { FlowRueckrufStep } from './FlowRueckrufStep'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -130,7 +132,9 @@ type StepId =
   | 'feststellung'
   | 'ort_besichtigung'
   | 'ort_fahrzeug'
+  | 'werkstattbindung_check'
   | 'werkstatt'
+  | 'werkstatt_anzeige'
   | 'termin'
   | 'gutachter'
   | 'rueckruf'
@@ -143,7 +147,9 @@ const STEP_LABELS: Record<StepId, string> = {
   feststellung: 'Angaben',
   ort_besichtigung: 'Besichtigungsort',
   ort_fahrzeug: 'Fahrzeugstandort',
+  werkstattbindung_check: 'Werkstattwahl',
   werkstatt: 'Werkstatt',
+  werkstatt_anzeige: 'Ihre Werkstatt',
   termin: 'Termin',
   gutachter: 'Ihr Gutachter',
   rueckruf: 'Rückruf',
@@ -886,10 +892,24 @@ export default function FlowWizardKfz({
                 Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
                 Magic-Link-Login, nicht in den FlowLink. */}
 
+            {/* Kasko-Werkstattbindungs-Gate (Spec 2026-07-21): der Kasko-Kunde bestaetigt aktiv die
+                freie Werkstattwahl, bevor die Werkstatt-Strecke laeuft (Config {"freie_werkstattwahl": null}).
+                Nur Kasko (Selbstzahler hat keine Police). "gebunden" bricht in die KaskoEndansicht ab. */}
+            {currentStep.id === 'werkstattbindung_check' && (
+              <FlowWerkstattbindungStep token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
+
             {/* Reparaturwunsch/Werkstatt: Kunde waehlt eine Partner-Werkstatt (5 naechste).
                 Ueberspringbar; onWeiter -> naechster Step (termin/gutachter/sa je nach Pfad). */}
             {currentStep.id === 'werkstatt' && (
               <FlowWerkstattStep token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
+
+            {/* Werkstatt-ANZEIGE (Spec 2026-07-21): steht eine Werkstatt fest, zeigt dieser Step sie
+                an (Config {"reparatur_werkstatt_id": "$gesetzt"}), statt dass der Picker verschwindet
+                — Muster wie der gutachter-Anzeige-Step. */}
+            {currentStep.id === 'werkstatt_anzeige' && (
+              <FlowWerkstattAnzeige token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
             )}
 
             {/* ═══ ORT-ABFRAGEN (Aaron 14.07.) — zwei VERSCHIEDENE Orte ═══════════════════════
@@ -901,11 +921,19 @@ export default function FlowWizardKfz({
                 token={token}
                 art="besichtigung"
                 onWeiter={() => setStepIndex(stepIndex + 1)}
+                initialAdresse={besichtigungsAdresse}
               />
             )}
 
             {currentStep.id === 'ort_fahrzeug' && (
-              <FlowOrtStep token={token} art="fahrzeug" onWeiter={() => setStepIndex(stepIndex + 1)} />
+              <FlowOrtStep
+                token={token}
+                art="fahrzeug"
+                onWeiter={() => setStepIndex(stepIndex + 1)}
+                // Vorbefuellung: bereits erfasster Fahrzeugstandort, sonst der effektive Ort
+                // (Besichtigungsort/Unfallort — "der SV kommt zum Auto"). Kunde bestaetigt/korrigiert.
+                initialAdresse={standortPrefill || besichtigungsAdresse}
+              />
             )}
 
             {/* ═══ TEILSCHULD: Rueckruf beim Dispatch statt Gutachter-Buchung ══════════════════ */}
