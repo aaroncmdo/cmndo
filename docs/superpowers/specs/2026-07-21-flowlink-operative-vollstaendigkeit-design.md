@@ -59,7 +59,7 @@ Für Kasko/Selbstzahler muss der Kunde **aktiv bestätigen**, dass seine Police 
 
 **Die Lücke:** Ein Lead, der bereits als Kasko klassifiziert reinkommt (`schuldfrage=eigenverantwortung`, `eigene_versicherung=ja` von der Tür), überspringt die Quali → die Werkstattbindungs-Frage wird nie gestellt → `freie_werkstattwahl` bleibt NULL → der Werkstatt-Step läuft unter falscher Annahme.
 
-**Fix:** Neuer Step `werkstattbindung_check` (kasko/selbstzahler), `bedingung {"freie_werkstattwahl": null}` → sichtbar, solange unbeantwortet; rendert die Bestätigungs-UI (Wiederverwendung der Quali-`werkstattbindung`-Phase). „Frei" → `freie_werkstattwahl=true` → weiter. „Gebunden" → `freie_werkstattwahl=false` + Disqualifikation über den bestehenden Pfad. Steht **vor** dem `werkstatt`-Step.
+**Fix:** Neuer Step `werkstattbindung_check` — **nur Kasko** (ein Selbstzahler hat keine Versicherung/Police, die eine Werkstatt vorschreiben könnte), `bedingung {"freie_werkstattwahl": null}` → sichtbar, solange unbeantwortet; rendert die Bestätigungs-UI (Wiederverwendung der Quali-`werkstattbindung`-Phase). „Frei" → `freie_werkstattwahl=true` → weiter. „Gebunden" → `freie_werkstattwahl=false` + Disqualifikation über den bestehenden Pfad. Steht **vor** dem `werkstatt`-Step.
 
 ### 2.5 · `nur_gutachter` geradeziehen — es geht nur um die Kanzlei
 
@@ -103,7 +103,7 @@ Alle DDL/Daten-Änderungen laufen über das **Supabase-Plugin** (`apply_migratio
 | M1 | `ALTER TABLE flow_szenario_steps ADD COLUMN erhebt_felder text[]` (nullable, Default `'{}'`) | additiv |
 | M2 | `erhebt_felder` je (Szenario, Step) befüllen (§4) | Daten |
 | M3 | `werkstatt_anzeige`-Step-Zeilen einfügen (haftpflicht + kasko + selbstzahler) | Daten |
-| M4 | `werkstattbindung_check`-Step-Zeilen einfügen (kasko + selbstzahler) | Daten |
+| M4 | `werkstattbindung_check`-Step-Zeile einfügen (**nur kasko**) | Daten |
 | M5 | `nur_gutachter`-Szenario + seine Steps löschen (`DELETE FROM flow_szenario_steps WHERE szenario_id='nur_gutachter'; DELETE FROM flow_szenarien WHERE id='nur_gutachter'`) | Daten |
 | M6 | *(optional, Follow-up)* `feststellung_zweig`-Spalte droppen (toter Wert) | Aufräumen |
 
@@ -125,7 +125,7 @@ Konkreter operativer Kern je (Szenario, Step). Spaltennamen sind agent-verifizie
 
 Anmerkung zu den Orten (Aaron): Haftpflicht nutzt **beide**, initial identisch → `besichtigungsort_adresse` wird aus `fahrzeug_standort_adresse` (bzw. `unfallort`) vorbefüllt, der Kunde bestätigt/ändert.
 
-### kasko / selbstzahler (Steps: zusammenfassung → feststellung → werkstattbindung_check → ort_fahrzeug → werkstatt → werkstatt_anzeige → account)
+### kasko (Steps: zusammenfassung → feststellung → werkstattbindung_check → ort_fahrzeug → werkstatt → werkstatt_anzeige → account) · selbstzahler (identisch, **ohne** werkstattbindung_check)
 
 | Step | `erhebt_felder` (Vorschlag) |
 |---|---|

@@ -259,7 +259,7 @@ Expected: FAIL (Fixture trägt noch die alten Bedingungen + nur_gutachter).
   1. `SZENARIEN_FIXTURE`: `nur_gutachter`-Zeile **entfernen**.
   2. `STEPS_FIXTURE`: alle `nur_gutachter`-Zeilen **entfernen**.
   3. `haftpflicht`: `feststellung` bedingung `null`, `erhebt_felder: ['kennzeichen','unfallhergang','unfallort','gegner_versicherung']`; `ort_besichtigung` bedingung `null`, `erhebt_felder: ['besichtigungsort_adresse']`; `ort_fahrzeug` bedingung `null`, `erhebt_felder: ['fahrzeug_standort_adresse']`; nach `werkstatt` neu `{ szenario_id:'haftpflicht', step_id:'werkstatt_anzeige', reihenfolge:7.5→neu nummerieren, bedingung:{ reparatur_werkstatt_id:'$gesetzt' } }`.
-  4. `kasko`/`selbstzahler`: `feststellung` bedingung `null`, `erhebt_felder: ['kennzeichen','schadentyp']`; NEU `werkstattbindung_check` (reihenfolge nach feststellung) `bedingung:{ freie_werkstattwahl:null }`; `ort_fahrzeug` bedingung `null`, `erhebt_felder:['fahrzeug_standort_adresse']`; nach `werkstatt` neu `werkstatt_anzeige` `bedingung:{ reparatur_werkstatt_id:'$gesetzt' }`. Reihenfolgen konsistent neu durchnummerieren.
+  4. `kasko`/`selbstzahler`: `feststellung` bedingung `null`, `erhebt_felder: ['kennzeichen','schadentyp']`; **NUR `kasko`:** NEU `werkstattbindung_check` (reihenfolge nach feststellung) `bedingung:{ freie_werkstattwahl:null }` (Selbstzahler hat keine Police → keine Bindung); `ort_fahrzeug` bedingung `null`, `erhebt_felder:['fahrzeug_standort_adresse']`; nach `werkstatt` neu `werkstatt_anzeige` `bedingung:{ reparatur_werkstatt_id:'$gesetzt' }`. Reihenfolgen konsistent neu durchnummerieren.
 
 ⚠ `hat_vorschaeden` gehört NICHT in `erhebt_felder` — es hat `column_default='false'` (Live-DB verifiziert 2026-07-21) und würde vom `check:flow-erhebt-felder`-Ratchet (Task 4) abgelehnt. Genau deshalb war es als Gate untauglich (Symptom 1). Es wird weiterhin im Feststellung-Wizard als Mikro-Step erhoben, gatet aber nicht. ⚠ Die übrigen `erhebt_felder`-Listen sind der Aaron-Reviewpunkt §8.1 der Spec — falls Aaron sie anpasst, HIER + in der Migration (Task 10) gespiegelt ändern.
 
@@ -415,7 +415,7 @@ git commit -m "feat(flow): Loader liest erhebt_felder mit"
 - [ ] **Step 3:** tsc grün + `npm run check:component-set -- --ratchet` + `check:token-audit` + `check:status-registry -- --ratchet` (Pflicht bei neuer .tsx).
 - [ ] **Step 4: Commit** `feat(flow): werkstatt_anzeige-Step (gewählte Werkstatt anzeigen statt verschwinden)`
 
-## Task 8: `werkstattbindung_check`-Gate (Kasko/Selbstzahler)
+## Task 8: `werkstattbindung_check`-Gate (nur Kasko)
 
 **Files:**
 - Create: `src/app/flow/[token]/FlowWerkstattbindungStep.tsx` (Bestätigungs-UI, Muster Quali-`werkstattbindung`-Phase `FlowQualiStep.tsx:156`)
@@ -445,7 +445,7 @@ git commit -m "feat(flow): Loader liest erhebt_felder mit"
 - [ ] **Step 1:** Eine `apply_migration` (`flow_matrix_erhebt_felder_target`) mit den Data-Statements — **exakt gespiegelt zur Fixture (Task 3)**:
   - `UPDATE flow_szenario_steps SET erhebt_felder = ARRAY[...], bedingung = NULL WHERE szenario_id='haftpflicht' AND step_id='feststellung'` (analog ort_*).
   - `UPDATE ... SET erhebt_felder = ARRAY['besichtigungsort_adresse'] WHERE ... step_id='ort_besichtigung'` usw.
-  - `INSERT INTO flow_szenario_steps (szenario_id, step_id, reihenfolge, bedingung, erhebt_felder, aktiv) VALUES (...)` für `werkstatt_anzeige` (haftpflicht/kasko/selbstzahler, bedingung `{"reparatur_werkstatt_id":"$gesetzt"}`) + `werkstattbindung_check` (kasko/selbstzahler, bedingung `{"freie_werkstattwahl":null}`).
+  - `INSERT INTO flow_szenario_steps (szenario_id, step_id, reihenfolge, bedingung, erhebt_felder, aktiv) VALUES (...)` für `werkstatt_anzeige` (haftpflicht/kasko/selbstzahler, bedingung `{"reparatur_werkstatt_id":"$gesetzt"}`) + `werkstattbindung_check` (**nur kasko**, bedingung `{"freie_werkstattwahl":null}`).
   - `DELETE FROM flow_szenario_steps WHERE szenario_id='nur_gutachter'; DELETE FROM flow_szenarien WHERE id='nur_gutachter';`
 - [ ] **Step 2:** `list_migrations` → File committen als `supabase/migrations/<V>_flow_matrix_erhebt_felder_target.sql`.
 - [ ] **Step 3:** `execute_sql` (READ) — die Live-Matrix gegen die Fixture diffen (gleiche Steps, gleiche erhebt_felder, kein nur_gutachter).
