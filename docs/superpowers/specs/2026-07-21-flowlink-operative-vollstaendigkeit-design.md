@@ -119,7 +119,7 @@ Konkreter operativer Kern je (Szenario, Step). Spaltennamen sind agent-verifizie
 
 | Step | `erhebt_felder` (Vorschlag) |
 |---|---|
-| `feststellung` | `kennzeichen` · `unfallhergang` · `unfallort` · `gegner_versicherung` · `hat_vorschaeden` |
+| `feststellung` | `kennzeichen` · `unfallhergang` · `unfallort` · `gegner_versicherung` |
 | `ort_besichtigung` | `besichtigungsort_adresse` |
 | `ort_fahrzeug` | `fahrzeug_standort_adresse` |
 
@@ -129,15 +129,17 @@ Anmerkung zu den Orten (Aaron): Haftpflicht nutzt **beide**, initial identisch �
 
 | Step | `erhebt_felder` (Vorschlag) |
 |---|---|
-| `feststellung` | `kennzeichen` · `schadentyp` · `hat_vorschaeden` |
+| `feststellung` | `kennzeichen` · `schadentyp` |
 | `ort_fahrzeug` | `fahrzeug_standort_adresse` |
 
 (`werkstattbindung_check` nutzt `bedingung {"freie_werkstattwahl": null}`, kein `erhebt_felder`.)
 
+⚠ **`hat_vorschaeden` ist bewusst NICHT in `erhebt_felder`** — Live-DB (2026-07-21): `column_default='false'`, der `check:flow-erhebt-felder`-Ratchet (§2.6) lehnt Default-Spalten ab. Genau dieser Default machte es als Gate untauglich (Symptom 1). Es wird weiterhin im Feststellung-Wizard als Mikro-Step erhoben — es gatet nur nicht mehr.
+
 ### teilschuld / unqualifiziert
 Kein `erhebt_felder` — `teilschuld` ist nur `zusammenfassung → rueckruf`, `unqualifiziert` behält `bedingung {"quali_offen": true}`.
 
-**Reviewpunkt für Aaron:** Erweitern/verschlanken? Insbesondere: gehört `hat_vorschaeden` in den harten Kern (Gutachter braucht es), oder reicht die Erhebung im Wizard, ohne den Gate offenzuhalten? Gehört `gegner_kennzeichen` / `halter_*` / `unfalldatum` mit in den Haftpflicht-Kern?
+**Reviewpunkt für Aaron:** Erweitern/verschlanken? `hat_vorschaeden` ist als Gate technisch ausgeschlossen (DB-Default, s.o.) — es wird im Wizard erhoben, gatet aber nicht. Gehört stattdessen `gegner_kennzeichen` / `halter_*` / `unfalldatum` in den Haftpflicht-Kern? (Alle drei sind default-frei und damit gate-fähig.)
 
 ---
 
