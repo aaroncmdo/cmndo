@@ -211,27 +211,51 @@ describe('rankeWerkstattVorschlaege — Begruendungen (Aaron: "mit wirklichem Gr
 })
 
 describe('GBP-Trust-Chip (Spec §5 — reine Anzeige, kein Ranking-Einfluss)', () => {
-  const trustChips = (k: WerkstattKandidat) =>
-    rankeWerkstattVorschlaege([k], KONTEXT)[0].gruende.filter((g) => g.typ === 'trust')
+  const ratingChips = (k: WerkstattKandidat) =>
+    rankeWerkstattVorschlaege([k], KONTEXT)[0].gruende.filter((g) => g.typ === 'rating')
+
+  /**
+   * Spiegelt den Chip-Filter der Finder-Karte (`WerkstattFinder.tsx`): dort werden
+   * 'distanz' und 'trust' bewusst ausgeblendet, weil beide schon anderswo in der Card
+   * stehen (Distanz-Zeile unten, "✓ Verifizierter Partner" neben dem Namen).
+   * Der GBP-Chip hat KEINE separate Render-Stelle — er MUSS diesen Filter ueberleben.
+   */
+  const sichtbareChips = (k: WerkstattKandidat) =>
+    rankeWerkstattVorschlaege([k], KONTEXT)[0].gruende.filter(
+      (g) => g.typ !== 'distanz' && g.typ !== 'trust',
+    )
 
   it('rendert ★-Chip ab 4,0 und >= 5 Bewertungen (deutsches Zahlenformat)', () => {
-    const chips = trustChips(werkstatt({ id: 'gbp', google_rating: 4.8, google_review_count: 130 }))
+    const chips = ratingChips(werkstatt({ id: 'gbp', google_rating: 4.8, google_review_count: 130 }))
     expect(chips.map((c) => c.text)).toContain('★ 4,8 bei Google (130 Bewertungen)')
   })
 
   it('kein Chip unter 4,0 Rating', () => {
-    expect(trustChips(werkstatt({ id: 'low', google_rating: 3.9, google_review_count: 50 }))).toHaveLength(0)
+    expect(ratingChips(werkstatt({ id: 'low', google_rating: 3.9, google_review_count: 50 }))).toHaveLength(0)
   })
 
   it('kein Chip unter 5 Bewertungen (nicht belastbar)', () => {
-    expect(trustChips(werkstatt({ id: 'few', google_rating: 5, google_review_count: 3 }))).toHaveLength(0)
+    expect(ratingChips(werkstatt({ id: 'few', google_rating: 5, google_review_count: 3 }))).toHaveLength(0)
   })
 
   it('ohne GBP-Daten kein Chip; verifiziert-Chip bleibt unabhaengig bestehen', () => {
-    expect(trustChips(werkstatt({ id: 'ohne' }))).toHaveLength(0)
-    const beide = trustChips(
-      werkstatt({ id: 'beide', verifiziert: true, google_rating: 4.6, google_review_count: 9 }),
+    expect(ratingChips(werkstatt({ id: 'ohne' }))).toHaveLength(0)
+    const w = werkstatt({ id: 'beide', verifiziert: true, google_rating: 4.6, google_review_count: 9 })
+    const alle = rankeWerkstattVorschlaege([w], KONTEXT)[0].gruende
+    expect(alle.filter((g) => g.typ === 'trust').map((c) => c.text)).toEqual(['Verifizierter Partner'])
+    expect(alle.filter((g) => g.typ === 'rating').map((c) => c.text)).toEqual([
+      '★ 4,6 bei Google (9 Bewertungen)',
+    ])
+  })
+
+  it('REGRESSION: der GBP-Chip ueberlebt den Chip-Filter der Finder-Karte', () => {
+    // Prod-Smoke 19.07. (#4453): 4 von 5 Treffern im Werkstatt-Embed waren chip-faehig
+    // (Picarsso 5,0/202 · Schaefer 4,9/81 · Lackprofi 4,6/51 · Suelzer 4,6/9) — sichtbar
+    // war KEINER. Ursache: der Chip wurde als typ 'trust' eingehaengt, genau die Kategorie,
+    // die die Karte ausblendet. Eigener typ 'rating' = der Chip kommt beim Kunden an.
+    const sichtbar = sichtbareChips(
+      werkstatt({ id: 'sichtbar', google_rating: 4.9, google_review_count: 81 }),
     )
-    expect(beide.map((c) => c.text)).toEqual(['Verifizierter Partner', '★ 4,6 bei Google (9 Bewertungen)'])
+    expect(sichtbar.map((c) => c.text)).toContain('★ 4,9 bei Google (81 Bewertungen)')
   })
 })
