@@ -4968,6 +4968,10 @@
       "abschluss": "Zakończenie"
     },
     "subKunde": {
+      "filmcheck": "Opinia jest sprawdzana",
+      "qc-pruefung": "Trwa kontrola jakości",
+      "anschlussschreiben": "Kancelaria kontaktuje się z ubezpieczycielem",
+      "nachbesichtigung-laeuft": "Trwają ponowne oględziny",
       "reparatur_werkstattwahl": "Wybieramy warsztat",
       "reparatur_terminfindung": "Ustalamy termin naprawy",
       "reparatur_laeuft": "Naprawa w toku",
@@ -4992,6 +4996,10 @@
       "termin_durchgefuehrt": "Termin zrealizowany"
     },
     "subIntern": {
+      "filmcheck": "Kontrola nagrania",
+      "qc-pruefung": "Kontrola jakości",
+      "anschlussschreiben": "Pismo uzupełniające",
+      "nachbesichtigung-laeuft": "Trwają ponowne oględziny",
       "reparatur_werkstattwahl": "Wybór warsztatu",
       "reparatur_terminfindung": "Ustalanie terminu",
       "reparatur_laeuft": "Naprawa w toku",
