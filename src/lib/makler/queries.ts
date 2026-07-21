@@ -1257,6 +1257,10 @@ export type MaklerFullProfile = {
   ansprechpartner_nachname: string | null
   ihk_nummer: string | null
   ust_id: string | null
+  // USt-relevante Abrechnungs-Stammdaten (§14 UStG) — Pflicht bei Anlage,
+  // hier nachpflegbar fuer Bestands-Makler (rechtsform kann NULL sein).
+  rechtsform: string | null
+  ist_kleinunternehmer: boolean
   email: string | null
   telefon: string | null
   adresse_strasse: string | null
@@ -1310,7 +1314,7 @@ export async function getMaklerFullProfile(
   const { data } = await supabase
     .from('makler')
     .select(
-      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, ust_id, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
+      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, ust_id, rechtsform, ist_kleinunternehmer, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
     )
     .eq('id', maklerId)
     .maybeSingle()
@@ -1324,6 +1328,9 @@ export async function getMaklerFullProfile(
       (data.ansprechpartner_nachname as string | null) ?? null,
     ihk_nummer: (data.ihk_nummer as string | null) ?? null,
     ust_id: (data.ust_id as string | null) ?? null,
+    rechtsform: (data.rechtsform as string | null) ?? null,
+    // NULL (Bestands-Makler vor der Pflicht) -> false in der UI = "nicht angehakt".
+    ist_kleinunternehmer: Boolean(data.ist_kleinunternehmer),
     email: (data.email as string | null) ?? null,
     telefon: (data.telefon as string | null) ?? null,
     adresse_strasse: (data.adresse_strasse as string | null) ?? null,

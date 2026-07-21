@@ -19,6 +19,16 @@ type Result =
   | { ok: true; auftragId: string }
   | { ok: false; error: string }
 
+// Die DsgvoLoeschCard haengt in VIER Portalen (Kunde/Makler/Werkstatt/SV) — jede
+// Statusaenderung muss alle vier Einstiegsseiten revalidieren, nicht nur die
+// urspruengliche Kunde-Route.
+function revalidateLoeschPfade() {
+  revalidatePath('/kunde/profil') // Sub-Projekt 4: Settings konsolidiert nach /kunde/profil
+  revalidatePath('/makler/einstellungen')
+  revalidatePath('/werkstatt/einstellungen')
+  revalidatePath('/gutachter/einstellungen')
+}
+
 // ─── Self-Service: Kunde stellt Antrag ─────────────────────────────────
 export async function stelleLoeschAntrag(grund?: string): Promise<Result> {
   const supabase = await createClient()
@@ -51,7 +61,7 @@ export async function stelleLoeschAntrag(grund?: string): Promise<Result> {
 
   if (error || !data) return { ok: false, error: error?.message ?? 'Insert fehlgeschlagen' }
 
-  revalidatePath('/kunde/profil') // Sub-Projekt 4: Settings konsolidiert nach /kunde/profil
+  revalidateLoeschPfade()
   return { ok: true, auftragId: data.id as string }
 }
 
@@ -172,14 +182,27 @@ export async function storniereLoeschAntrag(auftragId: string): Promise<Result> 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
-  const { error } = await supabase
+  // Das .select() ist hier kein Beiwerk, sondern die Fehler-ERKENNUNG: ein
+  // RLS-gefiltertes UPDATE trifft 0 Rows und meldet dafuer KEINEN Fehler. Ohne die
+  // Row-Gegenprobe meldet die Action faelschlich Erfolg, die Card ruft
+  // setAuftrag(null) und verschwindet — waehrend der Loeschantrag aktiv
+  // weiterlaeuft. Genau dieser stille Fehlschlag war bis Migration
+  // 20260719225725 (fehlende UPDATE-Policy) auf prod live.
+  const { data, error } = await supabase
     .from('dsgvo_loeschauftraege')
     .update({ status: 'storniert' })
     .eq('id', auftragId)
     .eq('user_id', user.id)
     .in('status', ['eingereicht', 'bestaetigt']) // nicht aus 'ausgefuehrt'
+    .select('id')
 
   if (error) return { ok: false, error: error.message }
-  revalidatePath('/kunde/profil') // Sub-Projekt 4: Settings konsolidiert nach /kunde/profil
+  if (!data || data.length === 0) {
+    return {
+      ok: false,
+      error: 'Antrag konnte nicht storniert werden. Bitte wenden Sie sich an den Support.',
+    }
+  }
+  revalidateLoeschPfade()
   return { ok: true, auftragId }
 }

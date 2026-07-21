@@ -68,12 +68,16 @@ export default function DispatchNav({
         </>
       }
       footerSlot={
+        // Kein profilHref: dispatch hat keine /mitarbeiter/profil-Seite (das ist
+        // die KB-Route) — der Link bouncte dispatch auf /dispatch/dashboard.
+        // Das Konto (Passwort/2FA) ist ueber die "Sicherheit"-Nav (/dispatch/konto)
+        // erreichbar; alle anderen Portale (admin/sv/kb/werkstatt) setzen ebenfalls
+        // keinen Footer-Profil-Link.
         <PortalUserFooter
           rolle="dispatch"
           supportUserName={email}
           initials={initials}
           primaryText={email}
-          profilHref="/mitarbeiter/profil"
         />
       }
     />
