@@ -42,6 +42,9 @@ export type FahrzeugForm = {
   hersteller?: string
   modell?: string
   notiz?: string
+  fin?: string
+  hsn?: string
+  tsn?: string
 }
 
 /** Firma des eingeloggten Kunden (via personen.firma_id). db = Admin/Service-Role. */
