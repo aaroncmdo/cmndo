@@ -36,6 +36,8 @@ import {
   type NotificationPreferencesFormValue,
 } from '@/components/notifications/NotificationPreferencesForm'
 import { Modal } from '@/components/primitives/Modal'
+import { SelectField } from '@/components/shared/forms/SelectField'
+import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 import {
   Table,
@@ -241,6 +243,8 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
         ansprechpartner_nachname: String(fd.get('ansprechpartner_nachname') ?? ''),
         ihk_nummer: String(fd.get('ihk_nummer') ?? ''),
         ust_id: String(fd.get('ust_id') ?? ''),
+        rechtsform: String(fd.get('rechtsform') ?? ''),
+        ist_kleinunternehmer: fd.get('kleinunternehmer') === 'on',
         telefon: String(fd.get('telefon') ?? ''),
         adresse_strasse: String(fd.get('adresse_strasse') ?? ''),
         adresse_plz: String(fd.get('adresse_plz') ?? ''),
@@ -262,11 +266,25 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
       subtitle="Firmen- und Kontaktdaten."
     >
       <form onSubmit={handleSubmit} className="space-y-3">
+        {!profile.rechtsform ? (
+          <p className="text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg px-3 py-2 inline-flex items-start gap-2">
+            <AlertTriangleIcon width={12} height={12} className="mt-0.5 shrink-0" />
+            Für Ihre Provisionsabrechnung fehlt noch Ihre Rechtsform. Bitte wählen Sie
+            sie unten aus und speichern Sie das Profil.
+          </p>
+        ) : null}
         <Input
           label="Firma"
           name="firma"
           defaultValue={profile.firma}
           required
+        />
+        <SelectField
+          label="Rechtsform"
+          name="rechtsform"
+          defaultValue={profile.rechtsform ?? ''}
+          options={RECHTSFORM_OPTIONEN.map((o) => ({ value: o, label: o || '— wählen —' }))}
+          hint="Für Ihre Provisionsabrechnung (§14 UStG)."
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <Input
@@ -293,6 +311,15 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
           defaultValue={profile.ust_id}
           placeholder="DE123456789"
         />
+        <label className="flex items-start gap-2 text-sm text-claimondo-shield">
+          <input
+            type="checkbox"
+            name="kleinunternehmer"
+            defaultChecked={profile.ist_kleinunternehmer}
+            className="mt-0.5 h-4 w-4 rounded-ios-sm border-claimondo-border"
+          />
+          <span>Kleinunternehmer nach §19 UStG (Provisionsgutschrift ohne Umsatzsteuer)</span>
+        </label>
         <Input
           label="Email"
           name="email"

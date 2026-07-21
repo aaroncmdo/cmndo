@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMakler } from '@/lib/makler/queries'
+import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 import { revalidatePath } from 'next/cache'
 
 export type ActionResult = { success: true } | { success: false; error: string }
@@ -21,6 +22,13 @@ const profilSchema = z.object({
   ansprechpartner_nachname: z.string().trim().min(1).max(50),
   ihk_nummer: z.string().trim().max(50).optional().nullable(),
   ust_id: z.string().trim().max(30).optional().nullable().or(z.literal('')),
+  // Nudge, kein Gate: leer ist erlaubt (sonst koennte ein Bestands-Makler ohne
+  // Rechtsform nicht mal seine Telefonnummer speichern). Ist ein Wert gesetzt,
+  // muss er aus der Whitelist stammen (Pruefung nach dem Parse).
+  rechtsform: z.string().trim().max(50).optional().nullable().or(z.literal('')),
+  // Checkbox -> immer boolean (nie null): null = "unbekannt" wuerde die
+  // USt-Berechnung blockieren (dieselbe Semantik wie im Self-Signup).
+  ist_kleinunternehmer: z.boolean().optional(),
   telefon: z
     .string()
     .trim()
@@ -49,13 +57,25 @@ export async function updateMaklerProfil(
       error: parsed.error.issues[0]?.message ?? 'Validierung fehlgeschlagen',
     }
   }
+  // Rechtsform: leer erlaubt (Nudge), aber ein gesetzter Wert muss valide sein.
+  if (parsed.data.rechtsform && !istErlaubteRechtsform(parsed.data.rechtsform)) {
+    return { success: false, error: 'Bitte wählen Sie eine gültige Rechtsform.' }
+  }
   const makler = await getCurrentMakler()
   if (!makler) return { success: false, error: 'Nicht angemeldet' }
 
   const supabase = await createClient()
-  const update: Record<string, string | null> = {}
-  for (const [k, v] of Object.entries(parsed.data)) {
+  // Boolean-Feld getrennt behandeln — der '' -> null-Loop ist nur fuer die
+  // String-Felder gedacht (false ist weder '' noch undefined -> bliebe sonst
+  // als Boolean im String-Record haengen).
+  const { ist_kleinunternehmer, ...stringFields } = parsed.data
+  const update: Record<string, string | boolean | null> = {}
+  for (const [k, v] of Object.entries(stringFields)) {
     update[k] = v === '' || v === undefined ? null : (v as string)
+  }
+  // Nur schreiben, wenn der Caller das Feld mitschickt (undefined = unberuehrt lassen).
+  if (ist_kleinunternehmer !== undefined) {
+    update.ist_kleinunternehmer = ist_kleinunternehmer
   }
   const { error } = await supabase
     .from('makler')
