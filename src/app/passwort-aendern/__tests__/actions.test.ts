@@ -24,6 +24,7 @@ let state: MockState
 
 const getUserMock = vi.fn()
 const updateUserMock = vi.fn()
+const setSessionMock = vi.fn()
 const profilesUpdateEq = vi.fn()
 const profilesSelectSingle = vi.fn()
 const adminUpdateSelect = vi.fn()
@@ -34,6 +35,7 @@ vi.mock('@/lib/supabase/server', () => ({
     auth: {
       getUser: () => getUserMock(),
       updateUser: (args: unknown) => updateUserMock(args),
+      setSession: (args: unknown) => setSessionMock(args),
     },
     from: () => ({
       update: (vals: unknown) => ({ eq: () => profilesUpdateEq(vals) }),
@@ -73,6 +75,7 @@ beforeEach(() => {
   updateUserMock.mockReset().mockImplementation(() =>
     Promise.resolve({ error: state.updateUserError }),
   )
+  setSessionMock.mockReset().mockResolvedValue({ data: { session: {} }, error: null })
   profilesUpdateEq.mockReset().mockImplementation(() =>
     Promise.resolve({ error: state.flagUpdateError }),
   )
@@ -152,5 +155,23 @@ describe('setzeNeuesPasswort', () => {
     const res = await setzeNeuesPasswort('einLangesSicheresPasswort')
     expect(res.ok).toBe(true)
     if (res.ok) expect(res.redirectTo).toBe(roleToPath(null))
+  })
+
+  it('reicht recoverySession serverseitig durch (Magic-Link-Implicit-Session -> keine Sackgasse)', async () => {
+    // Prod-Incident 21.07.: ein Recovery-/Welcome-Magic-Link etabliert die Session als
+    // Implicit-Hash OHNE Cookie. Ohne serverseitiges setSession saehe getUser() keine Session
+    // und der Reset schlaegt still fehl (force_password_change bleibt true).
+    const res = await setzeNeuesPasswort('einLangesSicheresPasswort', {
+      access_token: 'at-1',
+      refresh_token: 'rt-1',
+    })
+    expect(res.ok).toBe(true)
+    expect(setSessionMock).toHaveBeenCalledWith({ access_token: 'at-1', refresh_token: 'rt-1' })
+  })
+
+  it('ohne recoverySession bleibt setSession ungenutzt (regulaerer Cookie-Login unveraendert)', async () => {
+    const res = await setzeNeuesPasswort('einLangesSicheresPasswort')
+    expect(res.ok).toBe(true)
+    expect(setSessionMock).not.toHaveBeenCalled()
   })
 })
