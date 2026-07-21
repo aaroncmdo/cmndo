@@ -15,7 +15,10 @@ export interface NdefReadingEventLike {
 }
 
 export interface NdefReaderLike {
-  write(message: { records: Array<{ recordType: string; data: string }> }): Promise<void>
+  write(
+    message: { records: Array<{ recordType: string; data: string }> },
+    options?: { overwrite?: boolean; signal?: AbortSignal },
+  ): Promise<void>
   scan(options?: { signal?: AbortSignal }): Promise<void>
   onreading: ((event: NdefReadingEventLike) => void) | null
   onreadingerror: ((event: Event) => void) | null

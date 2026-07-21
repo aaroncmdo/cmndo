@@ -14,6 +14,7 @@ import {
   entsperreSchadenkarte,
   entbindeSchadenkarte,
   speichereNfcUid,
+  finalisiereSchadenkarte,
 } from './schadenkarte'
 
 // ---------------------------------------------------------------------------
@@ -500,5 +501,68 @@ describe('speichereNfcUid', () => {
     })
     expect(res.ok).toBe(false)
     expect(res.error).toMatch(/zwischenzeitlich/i)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// finalisiereSchadenkarte (uid + optional bind, ein Aufruf fuer beide Portale)
+// ---------------------------------------------------------------------------
+
+describe('finalisiereSchadenkarte', () => {
+  it('vermerkt uid UND bindet, wenn beide gegeben sind', async () => {
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'f1', fahrzeug_id: null } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await finalisiereSchadenkarte(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', userId: 'u1', nfcUid: '04:aa', fahrzeugId: 'v1',
+    })
+    expect(res.ok).toBe(true)
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ nfc_uid: '04:aa' }))
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ status: 'gebunden', fahrzeug_id: 'v1' }))
+  })
+
+  it('bindet NICHT, wenn fahrzeugId null ist (nur beschreiben)', async () => {
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'bestellt', firma_id: 'f1', fahrzeug_id: null } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await finalisiereSchadenkarte(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', userId: 'u1', nfcUid: '04:aa', fahrzeugId: null,
+    })
+    expect(res.ok).toBe(true)
+    expect(updateMock).toHaveBeenCalledWith(expect.objectContaining({ nfc_uid: '04:aa' }))
+    expect(updateMock).not.toHaveBeenCalledWith(expect.objectContaining({ status: 'gebunden' }))
+  })
+
+  it('macht KEINEN uid-Write, wenn nfcUid null ist', async () => {
+    const { db, updateMock } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'f1', fahrzeug_id: null } },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
+    const res = await finalisiereSchadenkarte(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', userId: 'u1', nfcUid: null, fahrzeugId: 'v1',
+    })
+    expect(res.ok).toBe(true)
+    expect(updateMock).not.toHaveBeenCalledWith(expect.objectContaining({ nfc_uid: expect.anything() }))
+  })
+
+  it('propagiert einen Fehler aus dem uid-Schritt (fremde Firma)', async () => {
+    const { db } = makeDb({
+      selectResult: { data: { id: 'k1', status: 'frei', firma_id: 'ANDERE', fahrzeug_id: null } },
+    })
+    const res = await finalisiereSchadenkarte(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', userId: 'u1', nfcUid: '04:aa', fahrzeugId: 'v1',
+    })
+    expect(res.ok).toBe(false)
+  })
+
+  it('ist ein No-op (ok:true) wenn weder uid noch fahrzeugId gegeben', async () => {
+    const { db, updateMock } = makeDb({})
+    const res = await finalisiereSchadenkarte(db, {
+      token: 'SKT-AAAAAAAAAAAAAAAA', firmaId: 'f1', userId: 'u1', nfcUid: null, fahrzeugId: null,
+    })
+    expect(res.ok).toBe(true)
+    expect(updateMock).not.toHaveBeenCalled()
   })
 })
