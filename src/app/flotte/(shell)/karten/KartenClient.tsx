@@ -19,12 +19,14 @@ type Aktion = (token: string) => Promise<{ ok: boolean; error?: string }>
 
 type Props = {
   karten: Karte[]
+  fahrzeuge: Array<{ vehicleId: string; label: string }>
   onIdentify: (token: string) => Promise<{ ok: true; vehicleId: string } | { ok: false; error: string }>
   onQrPdf: () => Promise<{ ok: true; base64: string } | { ok: false; error: string }>
   onSperren: Aktion
   onEntsperren: Aktion
   onEntbinden: Aktion
-  onNfcUid: (token: string, nfcUid: string) => Promise<{ ok: boolean; error?: string }>
+  onMintToken: () => Promise<{ ok: true; token: string } | { ok: false; error: string }>
+  onFinalize: (token: string, nfcUid: string | null, fahrzeugId: string | null) => Promise<{ ok: boolean; error?: string }>
 }
 
 /** Reine Label-Map ohne Farbe — vom status-registry-Ratchet ausdrücklich erlaubt. */
@@ -37,7 +39,7 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 export default function KartenClient({
-  karten, onIdentify, onQrPdf, onSperren, onEntsperren, onEntbinden, onNfcUid,
+  karten, fahrzeuge, onIdentify, onQrPdf, onSperren, onEntsperren, onEntbinden, onMintToken, onFinalize,
 }: Props) {
   const router = useRouter()
   const [fehler, setFehler] = useState<string | null>(null)
@@ -107,7 +109,7 @@ export default function KartenClient({
         )}
       </SectionCard>
 
-      <NfcKarteBeschreiben onNfcUid={onNfcUid} />
+      <NfcKarteBeschreiben fahrzeuge={fahrzeuge} onMintToken={onMintToken} onFinalize={onFinalize} />
 
       <SectionCard title="Ihre Schadenkarten">
         {karten.length === 0 ? (
