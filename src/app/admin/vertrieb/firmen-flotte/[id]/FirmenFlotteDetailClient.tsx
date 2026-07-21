@@ -53,6 +53,9 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [hersteller, setHersteller] = useState('')
   const [modell, setModell] = useState('')
   const [fzNotiz, setFzNotiz] = useState('')
+  const [fzFin, setFzFin] = useState('')
+  const [fzHsn, setFzHsn] = useState('')
+  const [fzTsn, setFzTsn] = useState('')
   const [addBusy, setAddBusy] = useState(false)
   const [addFehler, setAddFehler] = useState<string | null>(null)
 
@@ -86,6 +89,9 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
       hersteller: hersteller.trim() || undefined,
       modell: modell.trim() || undefined,
       notiz: fzNotiz.trim() || undefined,
+      fin: fzFin.trim() || undefined,
+      hsn: fzHsn.trim() || undefined,
+      tsn: fzTsn.trim() || undefined,
     })
     setAddBusy(false)
     if (!res.ok) return setAddFehler(res.error ?? 'Anlegen fehlgeschlagen.')
@@ -93,6 +99,9 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
     setHersteller('')
     setModell('')
     setFzNotiz('')
+    setFzFin('')
+    setFzHsn('')
+    setFzTsn('')
     setShowAdd(false)
     router.refresh()
   }
@@ -216,6 +225,9 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
                 <input value={hersteller} onChange={(e) => setHersteller(e.target.value)} placeholder="Hersteller" className={FELD_CLS} />
                 <input value={modell} onChange={(e) => setModell(e.target.value)} placeholder="Modell" className={FELD_CLS} />
                 <input value={fzNotiz} onChange={(e) => setFzNotiz(e.target.value)} placeholder="Notiz (optional)" className={FELD_CLS} />
+                <input value={fzFin} onChange={(e) => setFzFin(e.target.value)} placeholder="FIN (optional)" className={FELD_CLS} />
+                <input value={fzHsn} onChange={(e) => setFzHsn(e.target.value)} placeholder="HSN (optional)" className={FELD_CLS} />
+                <input value={fzTsn} onChange={(e) => setFzTsn(e.target.value)} placeholder="TSN (optional)" className={FELD_CLS} />
               </div>
               {addFehler && <p className="text-caption text-danger-strong">{addFehler}</p>}
               <div className="flex gap-2">
