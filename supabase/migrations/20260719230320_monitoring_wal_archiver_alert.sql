@@ -118,13 +118,28 @@ end;
 $function$;
 
 -- Idempotent einplanen: alle 5 Minuten.
+-- pg_cron ist cluster-weit nur auf Prod/Staging installiert, NICHT in Supabase-
+-- Preview-Branches / lokalen From-Scratch-Replays. Dort existiert das Schema "cron"
+-- nicht -> ungeguardetes cron.schedule(...) bricht den Migrations-Replay mit
+-- SQLSTATE 3F000 ab. Daher das komplette Scheduling hinter einen cron-Schema-
+-- Existenz-Check guarden. Auf Prod (cron vorhanden) bleibt das Verhalten 1:1;
+-- auf Preview/lokal wird der Job sauber uebersprungen. (Retrofit-Muster wie
+-- 20260529212846_schedule_connection_snapshot_cron / #2064.)
 do $$
 begin
-  perform cron.unschedule('wal-archiver-alert');
-exception
-  when others then null;
-end
-$$;
+  if exists (select 1 from pg_namespace where nspname = 'cron') then
+    begin
+      perform cron.unschedule('wal-archiver-alert');
+    exception when others then
+      null;
+    end;
 
-select cron.schedule('wal-archiver-alert', '*/5 * * * *',
-                     'select monitoring.snapshot_wal_archiver_if_failing();');
+    perform cron.schedule(
+      'wal-archiver-alert',
+      '*/5 * * * *',
+      $cron$select monitoring.snapshot_wal_archiver_if_failing();$cron$
+    );
+  else
+    raise notice 'pg_cron nicht installiert - Cron-Job wal-archiver-alert uebersprungen (Preview/lokal)';
+  end if;
+end $$;
