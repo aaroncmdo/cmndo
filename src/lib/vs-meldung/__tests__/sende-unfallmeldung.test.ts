@@ -209,6 +209,26 @@ describe('sendeUnfallmeldungAnGegnerVs', () => {
     expect(sent).toHaveLength(0)
   })
 
+  // ⚠ TRIPWIRE — pinnt den GEFAEHRLICHSTEN Zustand: Variable NICHT GESETZT.
+  // sendAktiv() liest (process.env.VS_MELDUNG_ENABLED ?? 'true') -> unset = AN = echter
+  // Versand an eine echte Versicherung. Das ist bewusst so (Plan 2026-07-14: "Default true,
+  // prod ist nach dem Merge live, so gewollt"), war aber als einziger Kill-Switch-Zustand
+  // UNGETESTET — 'false'/''/'  False ' sind abgedeckt, unset war es nicht.
+  //
+  // Dieser Test aendert KEIN Verhalten, er macht das Default-Risiko sichtbar und schlaegt
+  // an, sobald jemand den Default auf fail-closed dreht. Das ist dann kein Bugfix, sondern
+  // eine Aaron-Entscheidung: prod + staging teilen sich EIN env-File (Symlink), ein
+  // Default-Flip kippt daher BEIDE Umgebungen uniform und trennt sie nicht. Der eigentliche
+  // Fix ist die Entkopplung (getrennte env-Files ODER Gate nach app_config/DB).
+  it('KILL-SWITCH: NICHT GESETZT zaehlt als AN (fail-open, gewollt) — Tripwire', async () => {
+    delete process.env.VS_MELDUNG_ENABLED
+    const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
+    const res = await sendeUnfallmeldungAnGegnerVs('c1')
+
+    expect(res).toMatchObject({ ok: true, gesendet: true, empfaenger: 'sachschaden@allianz.de' })
+    expect(sent).toHaveLength(1) // unset schuetzt NICHT — es geht an einen echten Versicherer
+  })
+
   it('keine Versicherung -> Dispatch-Task, kein Send', async () => {
     state.empfaenger = { kann: false, grund: 'keine_versicherung' }
     const { sendeUnfallmeldungAnGegnerVs } = await import('../sende-unfallmeldung')
