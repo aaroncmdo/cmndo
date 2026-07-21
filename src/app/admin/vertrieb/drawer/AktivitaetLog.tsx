@@ -20,11 +20,15 @@ const FELD_CLS =
 export default function AktivitaetLog({
   leadId,
   aktivitaeten,
-  onChanged,
+  onAppend,
+  onReload,
 }: {
   leadId: string
   aktivitaeten: LeadAktivitaet[]
-  onChanged: () => void
+  // Optimistisch: neue Aktivitaet sofort oben einblenden (kein Neu-Load).
+  onAppend: (a: LeadAktivitaet) => void
+  // Still nachladen -> echte ID + Autoren-Name.
+  onReload: () => void
 }) {
   const [typ, setTyp] = useState<'anruf' | 'notiz'>('anruf')
   const [text, setText] = useState('')
@@ -32,17 +36,26 @@ export default function AktivitaetLog({
   const [fehler, setFehler] = useState<string | null>(null)
 
   async function protokollieren() {
-    if (!text.trim()) return
+    const trimmed = text.trim()
+    if (!trimmed) return
     setBusy(true)
     setFehler(null)
-    const res = await protokolliereAktivitaet(leadId, typ, text.trim())
+    const res = await protokolliereAktivitaet(leadId, typ, trimmed)
     setBusy(false)
     if (!res.ok) {
       setFehler(res.error ?? 'Konnte nicht gespeichert werden.')
       return
     }
     setText('')
-    onChanged()
+    // Sofort sichtbar (optimistisch), dann still mit echten Server-Feldern reconcilen.
+    onAppend({
+      id: `temp-${crypto.randomUUID()}`,
+      typ,
+      text: trimmed,
+      erstellt_von_name: null,
+      erstellt_am: new Date().toISOString(),
+    })
+    onReload()
   }
 
   return (
