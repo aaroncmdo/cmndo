@@ -1,11 +1,14 @@
 // AAR-448: POST /api/kunde/termin/absagen
 // Kunde sagt Termin ab — Status auf 'abgesagt' + Task für KB + Timeline.
+// Termine-Hub Phase 2: Owner-Guard generalisiert (Kunde ODER Flottenmanager-Firma);
+// bezug-native Termine (fall_id NULL) via bezug_typ/bezug_id aufgeloest.
 
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { entferneKbTerminOut } from '@/lib/termine/kb-termin-sync'
+import { kannTerminFallVerwalten } from '@/lib/termine/kann-termin-verwalten'
 
 export async function POST(req: Request) {
   try {
@@ -32,55 +35,34 @@ export async function POST(req: Request) {
     const admin = createAdminClient()
     const { data: termin } = await admin
       .from('gutachter_termine')
-      .select('id, fall_id, typ, status, start_zeit')
+      .select('id, fall_id, typ, status, start_zeit, bezug_typ, bezug_id')
       .eq('id', body.termin_id)
       .maybeSingle()
-    if (!termin || !termin.fall_id) {
+    if (!termin) {
       return NextResponse.json(
         { success: false, error: 'Termin nicht gefunden.' },
         { status: 404 },
       )
     }
-
-    // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-DUP-Spalte —
-    // wird über den claims-Embed gelesen (claims.kundenbetreuer_id ist SSoT).
-    // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-    // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.fall_id=faelle.id;
-    // kunde_id/lead_id/kundenbetreuer_id/claim_nummer div=0.
-    const { data: fallRow } = await admin
-      .from('v_claim_full')
-      .select('fall_id, kunde_id, lead_id, kundenbetreuer_id, claim_nummer')
-      .eq('fall_id', termin.fall_id)
-      .maybeSingle()
-    if (!fallRow) {
+    // Bezug-aware: bezug-native Termine haben fall_id = NULL (bezug_typ/bezug_id kanonisch).
+    const effFallId =
+      (termin.fall_id as string | null) ??
+      (termin.bezug_typ === 'fall' ? (termin.bezug_id as string | null) : null)
+    if (!effFallId) {
       return NextResponse.json(
-        { success: false, error: 'Fall nicht gefunden.' },
+        { success: false, error: 'Termin nicht gefunden.' },
         { status: 404 },
       )
     }
-    const fall = { id: fallRow.fall_id as string, kunde_id: fallRow.kunde_id, lead_id: fallRow.lead_id }
-    const claim = { kundenbetreuer_id: fallRow.kundenbetreuer_id, claim_nummer: fallRow.claim_nummer }
-    const kundenbetreuerId = (claim?.kundenbetreuer_id as string | null) ?? null
-
-    let owned = fall.kunde_id === user.id
-    if (!owned && fall.lead_id) {
-      const { data: lead } = await admin
-        .from('leads')
-        .select('email')
-        .eq('id', fall.lead_id)
-        .maybeSingle()
-      owned = !!(
-        lead?.email &&
-        user.email &&
-        lead.email.toLowerCase() === user.email.toLowerCase()
-      )
-    }
-    if (!owned) {
+    // Geteilter Owner-Guard: Kunde-Owner ODER Flottenmanager (volle Rechte im Namen der Firma).
+    const auth = await kannTerminFallVerwalten(admin, { id: user.id, email: user.email ?? null }, effFallId)
+    if (!auth.ok) {
       return NextResponse.json(
         { success: false, error: 'Keine Berechtigung.' },
         { status: 403 },
       )
     }
+    const kundenbetreuerId = auth.kundenbetreuerId
 
     const grund = body.grund ? String(body.grund).slice(0, 500) : null
 
@@ -99,12 +81,11 @@ export async function POST(req: Request) {
       )
     }
 
-    // SP2c: abgesagtes KB-Beratungs-Event aus Google + CalDAV entfernen. SV-Termine
-    // bleiben unberuehrt (eigener Lifecycle). Fail-soft.
+    // SP2c: abgesagtes KB-Beratungs-Event aus Google + CalDAV entfernen. Fail-soft.
     if (termin.typ === 'kb_beratung') await entferneKbTerminOut(termin.id)
 
     const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'
-    const fallNr = claim?.claim_nummer ?? fall.id.slice(0, 8)
+    const fallNr = auth.claimNummer ?? effFallId.slice(0, 8)
     const titel =
       termin.typ === 'kb_beratung'
         ? `Kunde hat Beratungstermin abgesagt (${fallNr})`
@@ -118,7 +99,7 @@ export async function POST(req: Request) {
 
     try {
       await admin.from('tasks').insert({
-        fall_id: fall.id,
+        fall_id: effFallId,
         titel,
         beschreibung,
         typ: 'termin_absage',
@@ -137,7 +118,7 @@ export async function POST(req: Request) {
 
     try {
       await admin.from('timeline').insert({
-        fall_id: fall.id,
+        fall_id: effFallId,
         typ: 'termin',
         titel: 'Kunde hat Termin abgesagt',
         beschreibung,
@@ -145,10 +126,10 @@ export async function POST(req: Request) {
       })
     } catch { /* non-critical */ }
 
-    revalidatePath(`/kunde/faelle/${fall.id}`)
+    revalidatePath(`/kunde/faelle/${effFallId}`)
     revalidatePath('/kunde')
     // AAR-628: KB + Admin teilen sich /faelle/[id] nach Route-Konsolidierung.
-    if (kundenbetreuerId) revalidatePath(`/faelle/${fall.id}`)
+    if (kundenbetreuerId) revalidatePath(`/faelle/${effFallId}`)
 
     return NextResponse.json({ success: true })
   } catch (err) {

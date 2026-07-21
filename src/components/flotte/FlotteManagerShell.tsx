@@ -4,7 +4,7 @@
 // variant) — identisch zum Makler-Pattern. Nav: nur "Flotte" -> /flotte/flotte
 // (Karten/Schaeden folgen in Layer 1/2).
 
-import { TruckIcon, CreditCardIcon, LogOutIcon } from 'lucide-react'
+import { TruckIcon, CreditCardIcon, CalendarIcon, LogOutIcon } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
 import TasksPill from '@/components/shared/TasksPill'
@@ -19,6 +19,7 @@ type FlotteManagerShellProps = {
 
 const FLOTTE_NAV_ITEMS: PortalNavItem[] = [
   { href: '/flotte/flotte', label: 'Flotte', icon: TruckIcon },
+  { href: '/flotte/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/flotte/karten', label: 'Karten', icon: CreditCardIcon },
 ]
 

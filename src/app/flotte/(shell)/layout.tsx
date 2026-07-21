@@ -10,8 +10,11 @@ export default async function FlotteLayout({ children }: { children: React.React
   const { user } = await requirePortalAccess(['flottenmanager'])
   const db = createAdminClient()
   const konto = await getFlottenmanagerKontoWithFirma(db, user.id)
-  if (!konto) redirect('/login?error=Kein+Flotten-Konto')
-  if (konto.status !== 'aktiv') redirect('/login?error=Konto+nicht+aktiv')
+  // Kein Konto ODER deaktiviert -> in-app Sackgassen-Seite statt /login: der User
+  // IST eingeloggt; /login zeigte ihm nur ein Anmeldeformular + eine interne
+  // Fehlermeldung ohne Ausgang, und roleToPath('flottenmanager') = /flotte warf
+  // ihn beim naechsten Login-Versuch sofort wieder raus.
+  if (!konto || konto.status !== 'aktiv') redirect('/flotte/kein-zugang')
   return (
     <FlotteManagerShell firma={{ name: konto.firmaName }} email={user.email ?? ''} userId={user.id}>
       {children}
