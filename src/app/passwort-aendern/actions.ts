@@ -20,6 +20,7 @@ import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
 
 export async function setzeNeuesPasswort(
   neuesPasswort: string,
+  recoverySession?: { access_token: string; refresh_token: string },
 ): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
   // Staerke-Pruefung (>= 12 Zeichen + HIBP-Breach-Check) an die zentrale Policy
   // delegiert — identisch zu confirmPasswordReset (reset-password.ts). Die
@@ -30,6 +31,20 @@ export async function setzeNeuesPasswort(
   }
 
   const supabase = await createClient()
+
+  // Recovery-/Welcome-Magic-Links (admin.generateLink type=recovery) etablieren die Session als
+  // IMPLICIT-Hash (#access_token) OHNE Cookie; der Browser-Client haelt sie nur in-memory und die
+  // Page reicht die Tokens durch. Ohne das serverseitige setSession sieht getUser() bei einem
+  // solchen Link KEINE Session -> der Passwort-Reset schlaegt STILL fehl (force_password_change
+  // bleibt true, Login-Sackgasse; prod-Incident 21.07. Werkstatt-Onboarding). Der normale
+  // Einmalpasswort-Login (Cookie via /api/auth/login-after-flow) uebergibt keine recoverySession
+  // -> harmlos/redundant. Identisches Muster wie confirmPasswordReset (reset-password.ts).
+  if (recoverySession?.access_token && recoverySession?.refresh_token) {
+    await supabase.auth.setSession({
+      access_token: recoverySession.access_token,
+      refresh_token: recoverySession.refresh_token,
+    })
+  }
 
   const {
     data: { user },
