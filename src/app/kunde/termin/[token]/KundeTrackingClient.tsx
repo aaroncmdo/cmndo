@@ -188,6 +188,34 @@ export default function KundeTrackingClient({
     }
   }, [supabase, terminId])
 
+  // Anon-Live-Status (Task #3): der Realtime-Leg oben ist session-gated, weil anon
+  // gutachter_termine nicht lesen darf. Damit der anon-Kunde den "Besichtigung laeuft"-
+  // Wechsel OHNE Reload sieht, pollt er den token-gates Status-Endpoint (server-seitig
+  // Admin-Client, nur Status-Timestamps, kein PII, keine anon-RLS-Aufweichung). Fuer
+  // eingeloggte Kunden redundant zum Realtime-Leg (setBesichtigungLaeuft ist idempotent)
+  // — unschaedlich. Stoppt, sobald die Besichtigung laeuft (Effect re-run -> early return).
+  useEffect(() => {
+    if (besichtigungLaeuft) return
+    let cancelled = false
+    const poll = async () => {
+      try {
+        const res = await fetch(`/api/kunde-tracking-status?token=${encodeURIComponent(token)}`, { cache: 'no-store' })
+        if (!res.ok || cancelled) return
+        const data = (await res.json()) as { besichtigungGestartet?: boolean; angekommen?: boolean }
+        if (cancelled) return
+        if (data.besichtigungGestartet) setBesichtigungLaeuft(true)
+        if (data.angekommen) setIsAngekommen(true)
+      } catch {
+        /* transient — naechster Tick */
+      }
+    }
+    const iv = setInterval(poll, 15000)
+    return () => {
+      cancelled = true
+      clearInterval(iv)
+    }
+  }, [besichtigungLaeuft, token])
+
   // ETA berechnen + 5-Min-Notification
   useEffect(() => {
     if (!svPosition) return
