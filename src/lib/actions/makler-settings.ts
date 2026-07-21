@@ -7,7 +7,6 @@
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { getCurrentMakler } from '@/lib/makler/queries'
 import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 import { revalidatePath } from 'next/cache'
@@ -217,26 +216,11 @@ export async function revokeMaklerConsent(
 // über notification_preferences (N5) via updateNotificationPreferences.)
 
 // ── Account-Löschung-Anfrage (DSGVO) ────────────────────────────────────────
-// Das tatsächliche Löschen läuft manuell durch den Admin — hier loggen wir
-// nur die Anfrage in einer Task-ähnlichen Tabelle damit der Admin sieht,
-// dass etwas zu tun ist. Fallback: mailto:-Link (Client).
-// Diese Funktion kann optional getriggert werden; für MVP bleibt es
-// beim mailto:-Link im UI.
-export async function requestMaklerAccountDeletion(): Promise<ActionResult> {
-  const makler = await getCurrentMakler()
-  if (!makler) return { success: false, error: 'Nicht angemeldet' }
-
-  const admin = createAdminClient()
-  try {
-    await admin.from('tasks').insert({
-      typ: 'makler_account_deletion',
-      titel: `Makler-Account-Löschung angefragt: ${makler.firma}`,
-      beschreibung: `makler_id=${makler.id}`,
-      status: 'offen',
-    })
-  } catch {
-    // Task-Anlage best-effort — Fehler nicht blocken,
-    // UI hat weiterhin mailto:-Fallback
-  }
-  return { success: true }
-}
+// requestMaklerAccountDeletion() ENTFERNT (19.07.). Die Funktion war seit jeher
+// ungenutzt (0 Caller, repo-weit verifiziert): sie war als optionaler Trigger
+// neben dem mailto:-Fallback gedacht, dieser mailto-Pfad (AccountLoeschenCard)
+// wurde aber durch den strukturierten DSGVO-Flow ersetzt — der Stub blieb liegen.
+// Der LEBENDE Makler-Lösch-Pfad ist <DsgvoLoeschSection /> auf
+// /makler/einstellungen -> stelleLoeschAntrag() in @/lib/actions/dsgvo-loeschung.
+// (Der #4427-Fix an dieser Funktion — admin_tasks -> tasks — konnte deshalb nie
+// wirksam werden; er reparierte einen Write, den niemand auslöst.)
