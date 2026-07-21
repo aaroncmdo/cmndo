@@ -53,31 +53,41 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
     // claim_recency-Leg ist zwar anon-lesbar, aber wir gaten den GANZEN Channel,
     // da die anon-gesperrten Legs sonst den WAL-Poll fuer den ganzen Channel
     // brechen. Siehe whenRealtimeAuthReady() in client.ts.
-    void whenRealtimeAuthReady().then(() => {
+    void whenRealtimeAuthReady().then(async () => {
+      if (cancelled) return
+      // #4543-Muster: gutachter_termine/auftraege/claims sind anon-gesperrt (PII-
+      // Haertung). Ohne Session laeuft der Realtime-Socket als anon -> walrus
+      // `permission denied` (verbliebener Rest-Race trotz whenRealtimeAuthReady;
+      // z.B. Session-Expiry-/Token-Refresh-Fenster). Deshalb diese Legs NUR mit
+      // Session joinen; claim_recency (anon-lesbar, keine sensiblen Spalten) traegt
+      // den Live-Refresh auch ohne Session -> keine Regression fuer Session-Faelle.
+      const { data: { session } } = await supabase.auth.getSession()
       if (cancelled) return
 
-      let ch = supabase
-        .channel(`fall-rt-${fallId}-${channelId}`)
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'gutachter_termine',
-            filter: `fall_id=eq.${fallId}`,
-          },
-          scheduleRefresh,
-        )
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'auftraege',
-            filter: `fall_id=eq.${fallId}`,
-          },
-          scheduleRefresh,
-        )
+      let ch = supabase.channel(`fall-rt-${fallId}-${channelId}`)
+      if (session) {
+        ch = ch
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'gutachter_termine',
+              filter: `fall_id=eq.${fallId}`,
+            },
+            scheduleRefresh,
+          )
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'auftraege',
+              filter: `fall_id=eq.${fallId}`,
+            },
+            scheduleRefresh,
+          )
+      }
 
       // CMM-65: Recency-Leg auf claims (SSoT) statt faelle. Nur wenn claimId
       // vorhanden (faelle.claim_id ist NOT NULL — Guard ist defensiv).
@@ -86,16 +96,20 @@ export default function FallRealtimeRefresh({ fallId, claimId, debounceMs = 500 
       // entzog dem SV claims-SELECT) -> der SV bekommt seinen Live-Refresh ueber den
       // claim_recency-Leg unten.
       if (claimId) {
-        ch = ch.on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'claims',
-            filter: `id=eq.${claimId}`,
-          },
-          scheduleRefresh,
-        )
+        // claims ist anon-gesperrt -> nur mit Session (s.o.). claim_recency unten
+        // ist anon-lesbar und laeuft in beiden Faellen weiter.
+        if (session) {
+          ch = ch.on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'claims',
+              filter: `id=eq.${claimId}`,
+            },
+            scheduleRefresh,
+          )
+        }
         // CMM-66: zusaetzlicher Leg auf die leak-freie Recency-SSoT claim_recency
         // (claim_id + last_activity_at, KEINE sensiblen Spalten) — die auch der SV
         // lesen darf. Bumps via touch_claim_recency()/transitionFallStatus. Additiv
