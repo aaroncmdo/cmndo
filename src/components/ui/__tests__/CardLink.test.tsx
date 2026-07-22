@@ -21,16 +21,23 @@ function collectStrings(node: ReactNode): string[] {
 }
 
 describe('CardLink', () => {
-  it('liefert ein Link-Element mit href und Default-aria-label', () => {
+  it('setzt standardmaessig KEIN aria-label — der Name kommt aus dem sichtbaren Inhalt (WCAG 2.5.3)', () => {
     const el = CardLink({ href: '/test', title: 'Test-Titel', body: 'Body-Text' })
     expect(isValidElement(el)).toBe(true)
     expect((el.props as Record<string, unknown>).href).toBe('/test')
-    expect((el.props as Record<string, unknown>)['aria-label']).toBe('Test-Titel — Mehr erfahren')
+    // Kein hardcoded aria-label -> kein Label-in-Name-Mismatch (axe
+    // label-content-name-mismatch); der Accessible-Name wird aus Titel + CTA
+    // (sichtbarer Text) berechnet.
+    expect((el.props as Record<string, unknown>)['aria-label']).toBeUndefined()
+    const strings = collectStrings(el)
+    expect(strings).toContain('Test-Titel')
+    expect(strings).toContain('Mehr erfahren') // Default-CTA, sichtbar
   })
 
-  it('nutzt ctaLabel im aria-label', () => {
+  it('rendert ctaLabel als sichtbaren CTA-Text (nicht ins aria-label gemergt)', () => {
     const el = CardLink({ href: '/x', title: 'T', ctaLabel: 'Spezial-CTA' })
-    expect((el.props as Record<string, unknown>)['aria-label']).toBe('T — Spezial-CTA')
+    expect((el.props as Record<string, unknown>)['aria-label']).toBeUndefined()
+    expect(collectStrings(el)).toContain('Spezial-CTA')
   })
 
   it('ariaLabel-Override schlaegt den Default', () => {
