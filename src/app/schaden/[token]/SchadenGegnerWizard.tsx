@@ -57,6 +57,20 @@ type FotoState = {
 
 // ─── Wizard ──────────────────────────────────────────────────────────────────
 
+// FU2: Unfallort (Schadenlocation) per Browser-Geolocation erfassen — der Gegner ist am
+// Unfallort. Best-effort: verweigert / nicht verfügbar / Timeout -> null (kein Fehler, der
+// Submit läuft trotzdem). Getrennt vom Fahrzeug-Standort (Aaron 22.07.).
+function erfasseUnfallort(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return resolve(null)
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => resolve(null),
+      { timeout: 8000, maximumAge: 60_000, enableHighAccuracy: false },
+    )
+  })
+}
+
 export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
   const [step, setStep] = useState<Step>(1)
   const [submitted, setSubmitted] = useState(false)
@@ -132,14 +146,20 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
       contentType: state.contentType,
     }))
 
+    setSubmitting(true)
+    setSubmitError(null)
+
+    // FU2: Unfallort (Schadenlocation) best-effort erfassen — blockt den Submit nicht.
+    const unfallort = await erfasseUnfallort()
+
     const submitData: GegnerFormData = {
       ...data,
       fotos: fotoArray.length > 0 ? fotoArray : undefined,
       unterschrift: unterschrift ?? undefined,
+      unfallortLat: unfallort?.lat,
+      unfallortLng: unfallort?.lng,
     }
 
-    setSubmitting(true)
-    setSubmitError(null)
     const result = await submitSchadenGegner(token, submitData)
     setSubmitting(false)
     if (!result.ok) {

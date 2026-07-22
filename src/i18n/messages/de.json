@@ -4749,6 +4749,10 @@
       "ruegefall": {
         "banner": "Die Versicherung hat Einwände erhoben. Unsere Partnerkanzlei kümmert sich darum."
       },
+      "haftpflichtReassurance": {
+        "titel": "Unverschuldeter Unfall? Sie zahlen 0 €.",
+        "text": "Trifft die Schuld die andere Seite, übernimmt deren Kfz-Haftpflicht Ihren gesamten Schaden — Gutachten, Reparatur, Wertminderung und Anwalt (§ 249 BGB). Für Sie entsteht kein Eigenanteil."
+      },
       "fehler": {
         "titel": "Fehler beim Laden",
         "text": "Bitte versuchen Sie es erneut."

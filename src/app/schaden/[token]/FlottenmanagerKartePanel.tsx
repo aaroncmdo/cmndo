@@ -24,12 +24,15 @@ export function FlottenmanagerKartePanel({
   firmaName,
   fahrzeuge,
   gebundenesFahrzeugId,
+  fortsetzenClaimId,
 }: {
   zweig: 'bind' | 'manage'
   token: string
   firmaName: string
   fahrzeuge: FlottenFahrzeug[]
   gebundenesFahrzeugId: string | null
+  /** T5-3a: existiert ein ersterfassung-Claim für das gebundene Fahrzeug → „Gutachter finden". */
+  fortsetzenClaimId?: string | null
 }) {
   const router = useRouter()
   const [selected, setSelected] = useState('')
@@ -113,6 +116,22 @@ export function FlottenmanagerKartePanel({
               <Button variant="ondo" onClick={() => router.push(`/schaden/${token}?melden=1`)}>
                 Schaden melden
               </Button>
+              {fortsetzenClaimId && (
+                <div className="flex flex-col gap-2 border-t border-claimondo-border/60 pt-3">
+                  <p className="text-body-xs text-claimondo-ondo text-center">
+                    Für dieses Fahrzeug ist bereits ein Schaden erfasst. Wählen Sie jetzt einen
+                    Gutachter für die Besichtigung.
+                  </p>
+                  <Button
+                    variant="navy"
+                    onClick={() =>
+                      router.push(`/flotte/schaden/${fortsetzenClaimId}/gutachter?typ=haftpflicht`)
+                    }
+                  >
+                    Gutachter finden
+                  </Button>
+                </div>
+              )}
             </div>
           )}
         </SectionCard>
