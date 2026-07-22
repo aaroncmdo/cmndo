@@ -7,6 +7,7 @@ import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { bindeSchadenkarteAnFahrzeug } from '@/lib/schadenkarte/schadenkarte'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
+import { updateFahrzeugStammdaten, type FahrzeugStammdatenForm } from '@/lib/flotte/mutate-flotte'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = import('@supabase/supabase-js').SupabaseClient<any, any, any>
@@ -42,6 +43,27 @@ export async function bindeKarteFuerFahrzeug(
   if (res.ok) {
     revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
     revalidatePath('/flotte/karten')
+  }
+  return res
+}
+
+/**
+ * Speichert die vom Flottenmanager bearbeiteten Fahrzeug-Stammdaten (Detailseite).
+ * Ownership + Validierung liegen in updateFahrzeugStammdaten (flotten_fahrzeuge-Gate).
+ */
+export async function speichereFahrzeugStammdaten(
+  vehicleId: string,
+  form: FahrzeugStammdatenForm,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const db = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(db, user.id)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto gefunden.' }
+
+  const res = await updateFahrzeugStammdaten(db, { firmaId: firma.id, vehicleId, form })
+  if (res.ok) {
+    revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
+    revalidatePath('/flotte')
   }
   return res
 }

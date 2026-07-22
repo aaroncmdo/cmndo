@@ -11,7 +11,8 @@ import EmptyState from '@/components/shared/EmptyState'
 import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSection'
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
 import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
-import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden } from './actions'
+import { FahrzeugStammdatenEditor } from '@/components/flotte/FahrzeugStammdatenEditor'
+import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden, speichereFahrzeugStammdaten } from './actions'
 import { starteScan, ladeFotoHoch, analysiereZustandsFotos, finalisiereScan } from './zustand-actions'
 import { getStorageUrl } from '@/lib/storage/url'
 import { PERSPEKTIVE_LABEL } from '@/lib/vehicles/zustand-perspektiven'
@@ -120,34 +121,21 @@ export default async function FahrzeugDetailPage({
         <FahrzeugMiniAktionen />
       </div>
 
-      <SectionCard title="Stammdaten">
-        <dl className="space-y-3 text-sm">
-          <div className="flex justify-between gap-4">
-            <dt className="text-claimondo-shield">Kennzeichen</dt>
-            <dd className="font-medium text-claimondo-navy text-right">
-              {fahrzeug.kennzeichen ?? '–'}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-claimondo-shield">Hersteller</dt>
-            <dd className="font-medium text-claimondo-navy text-right">
-              {fahrzeug.hersteller ?? '–'}
-            </dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="text-claimondo-shield">Modell</dt>
-            <dd className="font-medium text-claimondo-navy text-right">
-              {fahrzeug.modell ?? '–'}
-            </dd>
-          </div>
-          {fahrzeug.notiz && (
-            <div className="flex justify-between gap-4">
-              <dt className="text-claimondo-shield">Notiz</dt>
-              <dd className="font-medium text-claimondo-navy text-right">{fahrzeug.notiz}</dd>
-            </div>
-          )}
-        </dl>
-      </SectionCard>
+      <FahrzeugStammdatenEditor
+        vehicleId={id}
+        werte={{
+          kennzeichen: fahrzeug.kennzeichen,
+          hersteller: fahrzeug.hersteller,
+          modell: fahrzeug.modell,
+          fin: fahrzeug.fin,
+          hsn: fahrzeug.hsn,
+          tsn: fahrzeug.tsn,
+          farbe: fahrzeug.farbe,
+          kilometerstand: fahrzeug.kilometerstand,
+          notiz: fahrzeug.notiz,
+        }}
+        onSpeichern={speichereFahrzeugStammdaten}
+      />
 
       <FahrzeugSchaedenSection schaeden={schaeden} vehicleId={id} onStorno={storniereFahrzeugSchaden} />
 
