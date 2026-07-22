@@ -9,6 +9,17 @@
 # Ohne die Secrets skippt der Regen sichtbar (kein rotes Failing). Bewusste Policy-Ausnahme
 # (sonst "keine DB-Creds in CI") — Aaron 17.07. freigegeben, minimaler Scope: nur dieser Job liest
 # das Schema (keine Daten-Reads, kein Write auf die DB).
+#
+# ⚙️ OPTIONAL (3. Secret, beendet den manuellen-Sync-Treadmill): SNAPSHOT_REGEN_PAT —
+#   ein Fine-Grained-PAT, Scope BEWUSST minimal: NUR dieses Repo, "Contents: read/write" +
+#   "Pull requests: read/write", sonst NICHTS. Ist er gesetzt, oeffnet der Job den Drift-PR
+#   selbst (PAT-Actor triggert CI, anders als der Default-GITHUB_TOKEN). Der PR wird weiterhin
+#   VON HAND gereviewt+gemergt — nur das manuelle Anlegen entfaellt (Review-Gate bleibt).
+#   Vorteil ggue. dem Repo-Setting "Allow Actions to create and approve PRs": KEIN Self-Approve-
+#   Risiko (das Setting erlaubt Actions auch, fremde PRs zu approven — ein PAT nur PR-anlegen).
+#   Ist er NICHT gesetzt, faellt der Job auf den Default-Token zurueck = heutiges Verhalten
+#   (Branch gepusht, PR manuell via 1-Klick-Link). Der `|| secrets.GITHUB_TOKEN`-Fallback macht
+#   das Setzen zu einem risikofreien No-op bis der PAT existiert.
 name: schema-snapshot-regen
 
 on:
@@ -43,7 +54,11 @@ jobs:
         run: node scripts/build-schema-snapshot.mjs
       - name: Bei Drift rollierenden PR gegen staging
         env:
-          GH_TOKEN: ${{ github.token }}
+          # PAT wenn gesetzt (oeffnet PR + triggert CI, ohne das Self-Approve-Repo-Setting),
+          # sonst Default-Token = heutiges Verhalten (Branch-Push + manueller PR). Risikofreies No-op
+          # bis SNAPSHOT_REGEN_PAT existiert. Ein ungueltiger/abgelaufener PAT degradiert ebenfalls
+          # sauber: `gh pr create` failt -> der `else`-Zweig unten warnt (kein rotes Failing).
+          GH_TOKEN: ${{ secrets.SNAPSHOT_REGEN_PAT || secrets.GITHUB_TOKEN }}
         run: |
           if git diff --quiet -- scripts/lib/schema-snapshot.json; then
             echo "Kein Drift — nichts zu tun."
@@ -57,11 +72,14 @@ jobs:
           git add scripts/lib/schema-snapshot.json
           git commit -m "chore(query-parse): schema-snapshot regen (auto — Drift erkannt)"
           git push -f -u origin "$BRANCH"
-          # PR-Auto-Erstellung ist OPTIONAL: braucht das Repo-Setting "Allow GitHub Actions to
-          # create and approve pull requests" (Settings → Actions → General). Ist es aus, failt
-          # `gh pr create` mit "GitHub Actions is not permitted to create pull requests" — dann
-          # NICHT den Job rot faerben: der Branch ist gepusht (= Drift erfasst), PR wird manuell
-          # via 1-Klick-Link geoeffnet. Mit Setting an: PR entsteht automatisch.
+          # PR-Auto-Erstellung ist OPTIONAL. Zwei Wege sie zu aktivieren:
+          #  (a) SNAPSHOT_REGEN_PAT-Secret (EMPFOHLEN, s. Header) — der PAT-Actor legt den PR an;
+          #      kein Self-Approve-Risiko, PR triggert CI.
+          #  (b) Repo-Setting "Allow GitHub Actions to create and approve pull requests"
+          #      (Settings → Actions → General) — ⚠ erlaubt Actions auch das Approven fremder PRs.
+          # Ist KEINS aktiv, failt `gh pr create` mit "GitHub Actions is not permitted to create
+          # pull requests" — dann NICHT den Job rot faerben: der Branch ist gepusht (= Drift
+          # erfasst), PR wird manuell via 1-Klick-Link geoeffnet.
           echo "### 🔁 Schema-Snapshot-Drift — Branch \`$BRANCH\` gepusht" >> "$GITHUB_STEP_SUMMARY"
           BODY="Automatischer Regen von scripts/lib/schema-snapshot.json aus prod (Cron). Drift zur committeten Write-Achsen-Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). Review: gelistete Tabellen/Spalten gegen die zugehoerige Migration; NEUE Relationen default kind=t (falls View -> manuell v)."
           OPEN=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo 0)
