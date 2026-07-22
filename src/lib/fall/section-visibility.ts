@@ -27,7 +27,13 @@ export type FallSectionKey =
 // Auswahl an Sections — Auszahlung für die Provision-Tracking, VS-Reaktion
 // als Kontext-Info zum Kunde. Interne Prozessschritte (Kanzlei, AS, Rüge,
 // Stellungnahme, Nachbesichtigung, Klage) bleiben vorbehalten.
-export type FallVisibilityRolle = 'admin' | 'sv' | 'kunde' | 'makler'
+// 'kb' (Kundenbetreuer) fehlte hier bis 19.07. — `getVisibleFallSections(fall,
+// 'kb', …)` lief damit in `ROLLE_SECTION_WHITELIST[rolle]` === undefined und
+// warf einen TypeError. Sichtbar wurde das nie, weil der ProzessTab die Rolle
+// hart als 'admin' uebergibt; jede korrekte Durchreichung der echten Rolle
+// haette die Fallakte zerlegt. Der KB faengt den Kanzlei-Lifecycle intern ab
+// (nur eine Partner-Kanzlei) und braucht denselben Section-Umfang wie admin.
+export type FallVisibilityRolle = 'admin' | 'kb' | 'sv' | 'kunde' | 'makler'
 
 /**
  * Subphase-Input — minimiert auf das was die Visibility braucht, damit
@@ -53,6 +59,20 @@ type FallLike = Record<string, unknown>
  */
 const ROLLE_SECTION_WHITELIST: Record<FallVisibilityRolle, ReadonlySet<FallSectionKey>> = {
   admin: new Set<FallSectionKey>([
+    'kanzlei',
+    'as',
+    'vs_reaktion',
+    'stellungnahme',
+    'ruege',
+    'nachbesichtigung',
+    'klage',
+    'auszahlung',
+  ]),
+  // Kundenbetreuer = interne Rolle mit demselben Prozess-Umfang wie admin:
+  // er fuehrt den Kanzlei-Lifecycle operativ (VS-Kontakt, Anschlussschreiben,
+  // VS-Reaktion, Eskalation, Ruege, Klage, Auszahlung), weil es nur eine
+  // Partner-Kanzlei gibt und deren Schritte intern abgefangen werden.
+  kb: new Set<FallSectionKey>([
     'kanzlei',
     'as',
     'vs_reaktion',
@@ -94,6 +114,9 @@ const ROLLE_SECTION_WHITELIST: Record<FallVisibilityRolle, ReadonlySet<FallSecti
  *
  * Regeln (unverändert aus AAR-543):
  * - kanzlei      : Phase ≥ 4 ODER mandatsnummer ODER kanzlei_uebergeben_am
+ *                  ODER status='kanzlei-uebergeben' ODER
+ *                  sub_phase='kanzlei_uebergabe' (19.07.: Fall liegt fachlich
+ *                  bei der Kanzlei, bevor Mandatsnummer/Datum gesetzt sind)
  * - as           : Phase ≥ 5 ODER anschlussschreiben_am
  * - vs_reaktion  : Phase ≥ 6 ODER vs_reaktion_typ
  * - stellungnahme: kuerzungstyp in [technisch, gemischt] UND
@@ -112,7 +135,20 @@ export function getTriggeredFallSections(
   const result: FallSectionKey[] = []
   const { phase, szenario } = subphase
 
-  if (phase >= 4 || fall.mandatsnummer || fall.kanzlei_uebergeben_am) {
+  // Prod-UI-Smoke 19.07.: `mandatsnummer` und `kanzlei_uebergeben_am` werden
+  // erst von der Kanzlei bzw. beim Paket-Push gesetzt. Ein Fall kann aber
+  // fachlich laengst uebergeben sein (operative_status='kanzlei-uebergeben',
+  // kanzlei_faelle-Row vorhanden), waehrend beide Felder NULL sind — auf prod
+  // steht CLM-2026-00837 genau so. Dann blieb der Prozess-Tab leer
+  // ("0 Trigger-Felder") und der Kundenbetreuer konnte den Kanzlei-Lifecycle
+  // nicht uebernehmen. Der Fall-Status ist hier die verlaesslichere Achse.
+  if (
+    phase >= 4 ||
+    fall.mandatsnummer ||
+    fall.kanzlei_uebergeben_am ||
+    fall.status === 'kanzlei-uebergeben' ||
+    fall.sub_phase === 'kanzlei_uebergabe'
+  ) {
     result.push('kanzlei')
   }
 

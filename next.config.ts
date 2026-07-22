@@ -465,7 +465,10 @@ const nextConfig: NextConfig = {
       { source: '/schaden-melden/prototyp', destination: '/schaden-melden', permanent: true },
       { source: '/schaden-melden/prototyp/link-versendet', destination: '/schaden-melden/link-versendet', permanent: true },
       { source: '/schaden-melden/prototyp/selbstverschulden', destination: '/schaden-melden/selbstverschulden', permanent: true },
-      { source: '/schaden-melden/fortsetzen/:token', destination: '/schaden-melden', permanent: true },
+      // AAR-477 (17.07.26): Der fruehere fortsetzen-Stopgap (308 auf den Funnel-Start,
+      // Token verworfen) ist raus — der Pfad ist jetzt eine echte Route (reminder_token
+      // -> kanonischer FlowLink). Ein Redirect hier liefe VOR dem Routing und wuerde
+      // die Route ueberschatten. Siehe src/app/schaden-melden/fortsetzen/[token]/route.ts.
       // AAR-939: /sv-portal stillgelegt — Embed-Verwaltung + Anfragen ins
       // Gutachter-Cockpit gezogen (gutachter/einstellungen/embed). HTTP-308
       // statt RSC-Redirect-Stub (Memory-Lehre AAR-889) — Bookmarks/Links
