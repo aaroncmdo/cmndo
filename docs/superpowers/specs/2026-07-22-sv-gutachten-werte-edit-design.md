@@ -52,10 +52,10 @@ gewünscht.
   SV-Ownership-Gate wie `saveFinVinGutachter` (`faelle_claim_bridge` + `claims.sv_id`) → Whitelist-Filter
   (nur valuation-Subset) → `gutachten_ocr_manuell_ueberschrieben = true` → `createAdminClient()` →
   `rpc('apply_gutachten_ocr', { p_claim_id, p_values })` (**identische Schreib-Maschinerie wie die
-  Admin-Action**) → schreibt Provenance in `felder_quelle_jsonb` (`'sv_korrigiert'` je editiertem Feld,
-  read-merge-write, um andere Feld-Provenienzen nicht zu clobbern) → `timeline`-Audit-Row →
-  `revalidatePath` **SV-Fall + Kunde-Claim** (damit die Kunde-Sicht + Marker aktualisieren). Rückgabe
-  `{ ok: boolean; error?: string }` (AGENTS-Pattern).
+  Admin-Action**; `manuell_ueberschrieben=true` ist zugleich das Provenance-Signal, s.u.) →
+  `timeline`-Audit-Row → `revalidatePath` **SV-Fall + Kunde-Claim** (damit die Kunde-Sicht + Marker
+  aktualisieren). Rückgabe `ActionResult` (`{ success?: boolean; error?: string }` — Datei-Konsistenz
+  mit `saveFinVinGutachter`, NICHT der `{ ok }`-Shape der Admin-Datei).
 
 ### Datenmodell (kein Schema-Change)
 Alle Werte liegen auf `public.gutachten` (1:1 per `claim_id`), gelesen via RLS-View `v_gutachten_werte`.
@@ -73,18 +73,25 @@ Editier-Whitelist (valuation-Subset):
 | WBW-Dauer (Tage) | `wiederbeschaffungsdauer_tage` | integer |
 | Totalschaden | `totalschaden` | boolean |
 
-Provenance-Spalte `felder_quelle_jsonb` (existiert, Kommentar-Intent `'ocr'`/`'ocr_manual_korrigiert'`/
-`'manual'` — bisher **kein** Code schreibt sie; wir sind der erste Consumer, Wert `'sv_korrigiert'`).
-Schutz-Flag `gutachten_ocr_manuell_ueberschrieben` (bool) verhindert, dass der nächste OCR-Re-Run die
-SV-Werte überschreibt.
+Provenance-/Schutz-Flag `gutachten_ocr_manuell_ueberschrieben` (bool) — verhindert, dass der nächste
+OCR-Re-Run die SV-Werte überschreibt, **und** dient als Marker-Signal (s.u.). **In `v_gutachten_werte`
+projiziert** (verifiziert 22.07.), daher ohne View-Change/Migration lesbar. (`felder_quelle_jsonb`
+existiert, ist aber **nicht** in der View → in v1 nicht genutzt.)
 
-### Provenance-Marker („vom Gutachter bestätigt")
-- **Signal:** ein Bewertungs-Feld gilt als SV-bestätigt, wenn `felder_quelle_jsonb[feld]` mit `'sv'`
-  beginnt (von `updateGutachtenWerteSv` gesetzt). Card-Level-Marker = „mindestens ein Kernwert `sv*`".
-- **SV-Sicht:** Badge in `GutachtenWerteCard`.
-- **Kunde-Sicht:** dezentes Card-Level-Badge in `SaeuleMeinGeld` („vom Gutachter bestätigt"). Dafür
-  reicht der Kunde-Loader (`get-kunde-faelle.ts` `gutachtenWerte`-Block) ein abgeleitetes `sv_bestaetigt`
-  (bool, aus `felder_quelle_jsonb`) mit durch. **Keine** Brutto-Werte neu exponiert (nur ein Flag).
+### Provenance-Marker
+- **Signal:** `gutachten_ocr_manuell_ueberschrieben === true` — das Flag, das die SV-Action ohnehin setzt
+  (schützt die Werte vor dem nächsten OCR-Re-Run) und das zugleich „ein Mensch hat die Zahlen geprüft,
+  nicht nur OCR" bedeutet. **Ist bereits in `v_gutachten_werte` projiziert** (SV-Page **und**
+  Kunde-`kunde-claim-view.ts` lesen es trivial) → **kein View-Change, keine Migration.** Card-Level
+  (nicht per-Feld) — für v1 ausreichend.
+- **SV-Sicht:** „bestätigt"-Badge in `GutachtenWerteCard`, wenn `manuell_ueberschrieben`.
+- **Kunde-Sicht:** dezentes „vom Gutachter geprüft"-Badge in `SaeuleMeinGeld`; `KundeGutachtenWerte`
+  (`kunde-claim-view.ts:488`) reicht ein `manuellUeberschrieben` (bool) mit durch. **Keine** neuen
+  Brutto-Werte exponiert (nur ein Flag).
+- **Verworfen (YAGNI):** per-Feld-Provenance via `felder_quelle_jsonb` — die Spalte ist **nicht** in
+  `v_gutachten_werte` (bräuchte View-Change/Direkt-Read + read-merge-write). Card-Level via
+  `manuell_ueberschrieben` deckt den Intent (SV-geprüft sichtbar für Kunde/KB) ohne das. Per-Feld =
+  optionaler späterer Ausbau.
 
 ### Validierung (advisory, nicht blockierend)
 Die vorhandenen Regeln aus `src/lib/qc/anomalien.ts` (`berechneGutachtenAnomalien`) inline als **Hinweise**
@@ -124,8 +131,8 @@ nicht kippt. Caller (`GutachtenWerteCard`) prüft `res.ok`, zeigt `toast.error(r
   Test-Konto `telefon=NULL`. **Kein** echtes Geld bewegt (Blast-Radius s.o.).
 
 ## Offene Punkte / Risiken
-- `felder_quelle_jsonb` read-merge-write muss atomar genug sein (kurzer Read→Merge→Write mit
-  Admin-Client; kein paralleler SV-Save auf denselben Claim erwartet). Alternativ per jsonb-`||`-Merge in
-  einem `apply_gutachten_ocr`-Nachbar-RPC — **nur falls** der read-merge-write in der Praxis race-anfällig
-  ist (v1: read-merge-write, YAGNI).
-- Merge-Koordination `page.tsx`/`FallDetailClient.tsx` (s. Files) mit S1 + 63fe43f9.
+- Merge-Koordination `page.tsx`/`FallDetailClient.tsx` (s. Files) mit S1 (#4705) + 63fe43f9
+  (`zustandsdoku-sv-galerie`) — beide fassen dieselben Files an. Disjunkte Regionen halten; Merge-Reihenfolge
+  über die Merge-Session.
+- Kunde-Marker berührt den Kunde-Geld-Pfad (`kunde-claim-view.ts` → `SaeuleMeinGeld`) — separat/letzte
+  Task; falls die Durchreichung unerwartet verzweigt, als Fast-Follow-PR abtrennbar (SV-Edit ist der Kern).
