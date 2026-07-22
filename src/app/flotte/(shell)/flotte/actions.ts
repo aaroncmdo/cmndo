@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { normalizeWhatsappNummer } from '@/lib/whatsapp/whatsapp-nummer'
 import { addFahrzeugToFlotte, removeFahrzeugFromFlotte } from '@/lib/flotte/mutate-flotte'
 import { scanZb1FuerFlotte } from '@/lib/flotte/zb1-scan'
 import { legeFlottenFahrzeugeAn, type BatchAnlageZeile, type BatchAnlageErgebnis } from '@/lib/flotte/zb1-batch-anlage'
@@ -53,4 +54,22 @@ export async function legeZb1Fahrzeuge(zeilen: BatchAnlageZeile[]): Promise<Batc
   const res = await legeFlottenFahrzeugeAn(db, zeilen, firma.id, user.id)
   revalidatePath('/flotte/flotte')
   return res
+}
+
+// T2 (operativer-schaden-flow): FM setzt/aendert seine eigene WhatsApp-Kontaktnummer
+// (Self-Service, kein Onboarding-Flow). Leere Eingabe -> null. Scope: eigenes aktives Konto.
+export async function setzeMeineWhatsappNummer(nummerRaw: string): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const parsed = normalizeWhatsappNummer(nummerRaw)
+  if (!parsed.ok) return { ok: false, error: parsed.error }
+  const db = createAdminClient()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (db as any)
+    .from('firmen_flotten_konten')
+    .update({ whatsapp_nummer: parsed.value })
+    .eq('user_id', user.id)
+    .eq('status', 'aktiv')
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/flotte/flotte')
+  return { ok: true }
 }

@@ -134,6 +134,25 @@ export async function resolveSchadenkarteToFahrzeug(
 }
 
 /**
+ * Vehicle-IDs, die bereits eine gebundene Karte haben (fuer: nur ungebundene
+ * Fahrzeuge zum Binden anbieten). Firma-scoped.
+ */
+export async function getGebundeneFahrzeugIds(db: AnyDb, firmaId: string): Promise<Set<string>> {
+  const { data } = await db
+    .from('schadenkarten')
+    .select('fahrzeug_id')
+    .eq('firma_id', firmaId)
+    .eq('status', 'gebunden')
+    .not('fahrzeug_id', 'is', null)
+
+  const ids = new Set<string>()
+  for (const row of (data ?? []) as Array<{ fahrzeug_id: string | null }>) {
+    if (row.fahrzeug_id) ids.add(row.fahrzeug_id)
+  }
+  return ids
+}
+
+/**
  * Alle Karten einer Firma (fuer die Karten-Liste).
  */
 export async function getKartenFuerFirma(

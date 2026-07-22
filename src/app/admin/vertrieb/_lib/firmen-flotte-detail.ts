@@ -20,6 +20,7 @@ export type FlottenKontoInfo = {
   vorname: string | null
   nachname: string | null
   telefon: string | null
+  whatsapp_nummer: string | null
 }
 
 export type FlottenKarte = {

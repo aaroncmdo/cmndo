@@ -7,7 +7,9 @@ vi.mock('@/lib/supabase/admin', () => ({
     auth: {
       admin: {
         generateLink: vi.fn().mockResolvedValue({
-          data: { properties: { action_link: 'https://app.claimondo.de/passwort-zuruecksetzen?t=1' } },
+          // buildWelcomeConfirmLink liest data.properties.hashed_token (nicht action_link) —
+          // baut daraus /auth/bestaetigen?token_hash=…&type=recovery&next=%2Fpasswort-zuruecksetzen.
+          data: { properties: { hashed_token: 'test-token-hash-recovery' } },
           error: null,
         }),
       },
