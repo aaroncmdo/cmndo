@@ -3,84 +3,1600 @@
     "purpose": "Snapshot der Postgres-CHECK-Constraints fuer status-artige Spalten (col = ANY (ARRAY[...])). Quelle der Wahrheit fuer check:flag-drift (CHECK-invalide Status-Literale wie 'geplant'/'kunde_storniert' fangen).",
     "generatedFrom": "pg_get_constraintdef ueber pg_constraint WHERE contype='c' AND conname ~ status|work_state|_phase (Projekt paizkjajbuxxksdoycev)",
     "regenerate": "Bei jeder Aenderung eines status-CHECKs neu ziehen (SQL siehe scripts/check-flag-drift.mjs Header) + committen.",
-    "note": "Nur ENUM-artige (col = ANY ARRAY) CHECKs. Nullable-CHECKs sind identisch behandelt (NULL wird im Scanner ignoriert, nur String-Literale geprueft)."
+    "note": "Nur ENUM-artige (col = ANY ARRAY) CHECKs. Nullable-CHECKs sind identisch behandelt (NULL wird im Scanner ignoriert, nur String-Literale geprueft). [22.07. auf VOLLSTAENDIGE ANY-ARRAY-Abdeckung erweitert — nicht mehr nur status-benannt.]"
   },
   "columns": {
-    "abrechnungen.status": ["entwurf", "versendet", "bezahlt", "ueberfaellig", "storniert", "fehlgeschlagen", "im_einzug"],
-    "admin_termine.status": ["offen", "erledigt", "abgesagt"],
-    "ai_claim_proposals.status": ["offen", "angenommen", "verworfen", "bearbeitet"],
-    "ai_task_executions.status": ["geplant", "warte_bestaetigung", "ausgefuehrt", "abgebrochen", "fehler"],
-    "aircall_calls.status": ["answered", "missed", "voicemail", "failed"],
-    "airdrop_invitations.status": ["offen", "geoeffnet", "daten_eingegeben", "widerrufen", "abgelaufen", "konvertiert"],
-    "anfragen.konvertier_status": ["pending", "success", "failed", "disqualifiziert"],
-    "anruf_log.status": ["erreicht", "nicht_erreicht"],
-    "auftraege.status": ["termin", "besichtigung", "gutachten", "abgeschlossen"],
-    "calls.status": ["initiiert", "klingelt", "aktiv", "beendet", "verpasst", "abgebrochen", "failed"],
-    "claim_mietwagen.status": ["beantragt", "genehmigt", "aktiv", "beendet", "abgelehnt", "storniert"],
-    "claim_payments.status": ["ausstehend", "teilweise", "erhalten", "final", "abgelehnt"],
-    "claims.kanzlei_wunsch_gefragt_in_phase": ["lead_konvertierung", "phase_4_re_frage", "kb_override"],
-    "claims.kva_quelle": ["kunde", "werkstatt", "zubringer"],
-    "claims.operative_status": ["ersterfassung", "onboarding", "sv-gesucht", "sv-zugewiesen", "sv-termin", "besichtigung", "begutachtung-laeuft", "gutachten-eingegangen", "filmcheck", "qc-pruefung", "kanzlei-uebergeben", "anschlussschreiben", "regulierung", "regulierung-laeuft", "nachbesichtigung-laeuft", "zahlung-eingegangen", "vs-abgelehnt", "abgeschlossen", "storniert", "reparatur-werkstatt-suche", "reparatur-angefragt", "reparatur-laeuft", "reparatur-erledigt", "vs-kuerzt", "klage", "in_kommunikation_vs", "abgelehnt", "an_externe_kanzlei_uebergeben", "reguliert_vollstaendig", "klage_rechtsstreit", "verjaehrt", "abgelehnt_final", "termin_durchgefuehrt"],
-    "claims.phase_override": ["erfassung", "begutachtung", "regulierung", "abschluss"],
-    "claims.reparatur_auftrag_modus": ["kva_erst", "direkt"],
-    "claims.reparatur_vermittlung_status": ["offen", "eigene", "vermittelt", "abgelehnt"],
-    "claims.status": ["dispatch_done", "in_bearbeitung", "in_kommunikation_vs", "reguliert", "abgelehnt", "an_externe_kanzlei_uebergeben", "storniert", "reguliert_vollstaendig", "klage_rechtsstreit", "verjaehrt", "abgelehnt_final", "termin_durchgefuehrt"],
-    "community_comments.status": ["sichtbar", "versteckt", "geloescht"],
-    "community_posts.status": ["sichtbar", "versteckt", "geloescht"],
-    "cron_jobs_audit.status": ["running", "success", "error", "timeout"],
-    "dokument_upload_anfragen.status": ["gesendet", "teilweise", "komplett", "abgelaufen"],
-    "dsgvo_loeschauftraege.status": ["eingereicht", "bestaetigt", "ausgefuehrt", "abgelehnt", "storniert"],
-    "email_log.status": ["pending", "sent", "failed", "bounced"],
-    "failed_async_operations.status": ["pending", "resolved", "escalated"],
-    "fall_dokumente.ocr_status": ["pending", "processing", "done", "failed", "skipped"],
-    "firmen_flotten_konten.status": ["aktiv", "pausiert", "deaktiviert"],
-    "gutachten.ocr_status": ["nicht_gestartet", "pending", "running", "done", "failed", "manuell_uebersteuert"],
-    "gutachten.status": ["beauftragt", "besichtigt", "in_erstellung", "final", "storniert"],
-    "gutachter_finder_anfragen.billing_review_status": ["pending", "closed"],
-    "gutachter_finder_anfragen.vorschaden_check_status": ["ausstehend", "kein_vorschaden", "vorschaden_erkannt", "nicht_verfuegbar"],
-    "gutachter_termine.status": ["reserviert", "bestaetigt", "abgelehnt", "abgesagt", "storniert", "abgeschlossen", "sv_gesucht", "gegenvorschlag", "verschoben", "verlegt", "verlegung_pending", "dispatch_pending"],
-    "gutachter_waitlist.status": ["neu", "kontaktiert", "qualifiziert", "onboarding", "aktiv", "abgelehnt", "kein_interesse"],
-    "health_check_runs.status": ["ok", "warn", "crit", "error"],
-    "incentive_auszahlungen.status": ["offen", "genehmigt", "ausgezahlt"],
-    "kanzlei_abrechnungen.status": ["erstellt", "versendet", "bezahlt", "fehlgeschlagen", "storniert"],
-    "kanzlei_admin_termine.status": ["gebucht", "abgesagt", "durchgefuehrt"],
-    "kanzlei_faelle.status": ["versicherungskontakt", "auszahlung"],
-    "kanzlei_pakete.status": ["entwurf", "versendet", "bestaetigt", "fehlgeschlagen"],
-    "leads.polizeibericht_status": ["gesendet", "geoeffnet", "hochgeladen", "fehlgeschlagen", "abgelehnt"],
-    "leads.qualifizierungs_phase": ["neu", "nicht-erreicht", "rueckruf", "in-qualifizierung", "erstkontakt", "schadentyp-erfasst", "konstellation-erfasst", "gegner-daten", "gutachtertermin", "flow-versendet", "flow-gesendet", "sa-ausstehend", "sa-unterschrieben", "konvertiert", "abgeschlossen", "disqualifiziert", "kalt"],
-    "leads.reparatur_vermittlung_status": ["offen", "eigene", "vermittelt", "abgelehnt"],
-    "leads.zb1_status": ["ausstehend", "gesendet", "geoeffnet", "hochgeladen", "fehlgeschlagen", "abgelehnt"],
-    "linkedin_posts.status": ["entwurf", "veroeffentlicht", "fehlgeschlagen", "uebersprungen"],
-    "makler.status": ["pending", "aktiv", "gesperrt", "deaktiviert"],
-    "nachrichten.status": ["gesendet", "fehlgeschlagen", "zugestellt", "gelesen", "queued"],
-    "notification_deliveries.status": ["pending", "sent", "failed", "skipped"],
-    "notification_events.status": ["pending", "processing", "completed", "failed"],
-    "ocr_runs.status": ["running", "succeeded", "failed", "superseded"],
-    "organisationen.onboarding_status": ["pending", "vertrag_unterzeichnet", "anzahlung_offen", "aktiv", "blockiert"],
-    "paket_upgrades.status": ["angefragt", "bezahlt", "aktiv", "abgelehnt"],
-    "partner_leads.status": ["neu", "kontaktiert", "qualifiziert", "onboarding", "aktiv", "abgelehnt", "kein_interesse"],
-    "pflichtdokumente.status": ["ausstehend", "hochgeladen", "geprueft", "abgelehnt", "nachgereicht_angefordert"],
-    "qc_checkliste.status": ["offen", "bestanden", "nachbesserung"],
-    "regulierungs_klassifizierung.regulierungs_status": ["voll_reguliert", "teilweise_reguliert", "abgelehnt", "ausstehend"],
-    "repairs.status": ["geplant", "in_arbeit", "abgeschlossen", "storniert"],
-    "reparatur_termine.status": ["angefragt", "werkstatt_vorschlag", "bestaetigt", "anruf_erbeten", "abgelehnt", "erledigt", "storniert"],
-    "sachverstaendige.anzahlung_status": ["offen", "teilweise", "bezahlt"],
-    "sachverstaendige.verifizierung_status": ["ausstehend", "geprueft", "frist_ueberschritten", "abgelehnt"],
-    "schadenkarten.status": ["bestellt", "frei", "gebunden", "gesperrt", "ersetzt"],
-    "sla_tracking.status": ["pending", "completed", "breached"],
-    "sv_buero.status": ["aktiv", "pausiert", "deaktiviert"],
-    "sv_community.status": ["aktiv", "archiviert"],
-    "sv_leads.claim_status": ["offen", "beansprucht_pending", "konvertiert"],
-    "sv_leads.warteliste_status": ["ausstehend", "kontaktiert", "aktiv", "abgelehnt"],
-    "sv_tages_session.status": ["idle", "en_route", "arrived", "completing", "finished", "paused"],
-    "technische_probleme.status": ["neu", "in-bearbeitung", "geloest", "geschlossen"],
-    "termin_reminders.status": ["pending", "sent", "failed", "cancelled"],
-    "vehicles.status": ["aktiv", "stillgelegt", "verkauft", "totalschaden", "exportiert"],
-    "vs_korrespondenz.status": ["gesendet", "wartet_auf_antwort", "ohne_antwort_abgelaufen", "beantwortet", "archiviert"],
-    "webhook_events.status": ["pending", "processed", "failed", "skipped"],
-    "werkstaetten.status": ["aktiv", "gesperrt"],
-    "werkstatt_qr_pool.status": ["frei", "zugewiesen", "gesperrt"],
-    "wissen_artikel.status": ["entwurf", "in_review", "veroeffentlicht", "abgelehnt", "archiviert"],
-    "wissen_themen.status": ["vorgeschlagen", "freigegeben", "abgelehnt", "entwurf_erstellt"]
+    "abrechnung_reminders.reminder_typ": [
+      "einzug_fehlgeschlagen",
+      "einzug_versucht",
+      "gesperrt",
+      "reminder_10d",
+      "reminder_13d",
+      "reminder_1d",
+      "reminder_3d",
+      "reminder_5d",
+      "reminder_7d"
+    ],
+    "abrechnungen.empfaenger_typ": [
+      "kanzlei",
+      "makler",
+      "sv"
+    ],
+    "abrechnungen.status": [
+      "bezahlt",
+      "entwurf",
+      "fehlgeschlagen",
+      "im_einzug",
+      "storniert",
+      "ueberfaellig",
+      "versendet"
+    ],
+    "admin_termine.kanal": [
+      "online",
+      "vor_ort"
+    ],
+    "admin_termine.status": [
+      "abgesagt",
+      "erledigt",
+      "offen"
+    ],
+    "admin_termine.typ": [
+      "intern",
+      "kunde",
+      "partner_onboarding",
+      "rueckruf"
+    ],
+    "ai_claim_proposals.quelle": [
+      "aufsicht",
+      "copilot",
+      "orchestrator"
+    ],
+    "ai_claim_proposals.status": [
+      "angenommen",
+      "bearbeitet",
+      "offen",
+      "verworfen"
+    ],
+    "ai_claim_proposals.vorschlag_typ": [
+      "add_note",
+      "draft_message",
+      "escalation",
+      "next_step",
+      "task"
+    ],
+    "ai_claim_proposals.ziel_rolle": [
+      "admin",
+      "kundenbetreuer",
+      "sachverstaendiger"
+    ],
+    "ai_task_executions.status": [
+      "abgebrochen",
+      "ausgefuehrt",
+      "fehler",
+      "geplant",
+      "warte_bestaetigung"
+    ],
+    "aircall_calls.direction": [
+      "inbound",
+      "outbound"
+    ],
+    "aircall_calls.status": [
+      "answered",
+      "failed",
+      "missed",
+      "voicemail"
+    ],
+    "airdrop_invitations.invited_via": [
+      "airdrop",
+      "email",
+      "manual_link",
+      "qr_code",
+      "signal",
+      "sms",
+      "telegram",
+      "whatsapp"
+    ],
+    "airdrop_invitations.status": [
+      "abgelaufen",
+      "daten_eingegeben",
+      "geoeffnet",
+      "konvertiert",
+      "offen",
+      "widerrufen"
+    ],
+    "anfragen.konvertier_status": [
+      "disqualifiziert",
+      "failed",
+      "pending",
+      "success"
+    ],
+    "anruf_log.status": [
+      "erreicht",
+      "nicht_erreicht"
+    ],
+    "auftraege.status": [
+      "abgeschlossen",
+      "besichtigung",
+      "gutachten",
+      "termin"
+    ],
+    "auftraege.typ": [
+      "erstgutachten",
+      "nachbesichtigung",
+      "stellungnahme"
+    ],
+    "call_copilot_suggestions.kategorie": [
+      "closing",
+      "einwand",
+      "fachinfo",
+      "smalltalk",
+      "warnung"
+    ],
+    "calls.richtung": [
+      "bridge",
+      "inbound",
+      "outbound"
+    ],
+    "calls.status": [
+      "abgebrochen",
+      "aktiv",
+      "beendet",
+      "failed",
+      "initiiert",
+      "klingelt",
+      "verpasst"
+    ],
+    "chat_threads.art": [
+      "direkt",
+      "kunde_gruppe",
+      "team_intern"
+    ],
+    "claim_mietwagen.status": [
+      "abgelehnt",
+      "aktiv",
+      "beantragt",
+      "beendet",
+      "genehmigt",
+      "storniert"
+    ],
+    "claim_parties.quelle": [
+      "airdrop",
+      "backfill_aar810_a2",
+      "backfill_aar810_a2_personenschaden",
+      "backfill_aar810_a2_zeugen",
+      "kunde_self",
+      "lead_konvertierung",
+      "manuell_kb",
+      "sv_besichtigung"
+    ],
+    "claim_parties.rolle": [
+      "ansprechpartner",
+      "beifahrer",
+      "fahrer_nicht_halter",
+      "gegner_airdrop",
+      "geschaedigter",
+      "gutachter_gegen",
+      "halter",
+      "versicherungssachbearbeiter",
+      "verursacher",
+      "zeuge"
+    ],
+    "claim_payments.empfaenger": [
+      "kunde",
+      "sv"
+    ],
+    "claim_payments.partei": [
+      "kunde",
+      "sv",
+      "vs"
+    ],
+    "claim_payments.richtung": [
+      "auszahlung",
+      "eingang"
+    ],
+    "claim_payments.status": [
+      "abgelehnt",
+      "ausstehend",
+      "erhalten",
+      "final",
+      "teilweise"
+    ],
+    "claim_payments.zahlungsweg": [
+      "bar",
+      "scheck",
+      "überweisung",
+      "verrechnung"
+    ],
+    "claim_vehicle_involvements.beschaedigung_grad": [
+      "bagatelle",
+      "keine_beschaedigung",
+      "reparaturschaden",
+      "totalschaden"
+    ],
+    "claim_vehicle_involvements.rolle": [
+      "beteiligter",
+      "geschaedigter",
+      "mietwagen",
+      "unbekannt",
+      "verursacher"
+    ],
+    "claims.abrechnungsweg": [
+      "haftpflicht",
+      "kasko",
+      "selbstzahler"
+    ],
+    "claims.created_via": [
+      "airdrop",
+      "backfill_aar810_a1",
+      "cardentity_befund",
+      "lead_konvertierung",
+      "manuell_admin",
+      "sv_anlage"
+    ],
+    "claims.finanzierung_leasing": [
+      "finanzierung",
+      "keine",
+      "leasing"
+    ],
+    "claims.kanzlei_wunsch": [
+      "eigene_kanzlei",
+      "keine_kanzlei",
+      "nicht_gefragt",
+      "noch_unentschieden",
+      "partnerkanzlei"
+    ],
+    "claims.kanzlei_wunsch_gefragt_in_phase": [
+      "kb_override",
+      "lead_konvertierung",
+      "phase_4_re_frage"
+    ],
+    "claims.kva_quelle": [
+      "kunde",
+      "werkstatt",
+      "zubringer"
+    ],
+    "claims.operative_status": [
+      "abgelehnt",
+      "abgelehnt_final",
+      "abgeschlossen",
+      "an_externe_kanzlei_uebergeben",
+      "anschlussschreiben",
+      "begutachtung-laeuft",
+      "besichtigung",
+      "ersterfassung",
+      "filmcheck",
+      "gutachten-eingegangen",
+      "in_kommunikation_vs",
+      "kanzlei-uebergeben",
+      "klage",
+      "klage_rechtsstreit",
+      "nachbesichtigung-laeuft",
+      "onboarding",
+      "qc-pruefung",
+      "reguliert_vollstaendig",
+      "regulierung",
+      "regulierung-laeuft",
+      "reparatur-angefragt",
+      "reparatur-erledigt",
+      "reparatur-laeuft",
+      "reparatur-werkstatt-suche",
+      "storniert",
+      "sv-gesucht",
+      "sv-termin",
+      "sv-zugewiesen",
+      "termin_durchgefuehrt",
+      "verjaehrt",
+      "vs-abgelehnt",
+      "vs-kuerzt",
+      "zahlung-eingegangen"
+    ],
+    "claims.phase_override": [
+      "abschluss",
+      "begutachtung",
+      "erfassung",
+      "regulierung"
+    ],
+    "claims.reparatur_auftrag_modus": [
+      "direkt",
+      "kva_erst"
+    ],
+    "claims.reparatur_vermittlung_status": [
+      "abgelehnt",
+      "eigene",
+      "offen",
+      "vermittelt"
+    ],
+    "claims.reparatur_werkstatt_quelle": [
+      "dispatcher",
+      "embed",
+      "gutachter",
+      "kb",
+      "kunde",
+      "qr_referral"
+    ],
+    "claims.reparaturwunsch": [
+      "fiktiv",
+      "reparatur",
+      "unentschieden"
+    ],
+    "claims.schadenart": [
+      "eigenverschulden",
+      "haftpflicht",
+      "teilkasko",
+      "unbekannt",
+      "vollkasko"
+    ],
+    "claims.schadenskategorie": [
+      "glas",
+      "karosserie",
+      "lackierung",
+      "mechanik",
+      "smart_repair",
+      "unbekannt"
+    ],
+    "claims.vermittler_typ": [
+      "firmen_flotte",
+      "makler",
+      "werkstatt"
+    ],
+    "claims.vorschaden_mit_vs_abgerechnet": [
+      "ja",
+      "nein",
+      "teilweise",
+      "unbekannt"
+    ],
+    "cold_mail_enrollments.status": [
+      "aktiv",
+      "bounced",
+      "fertig",
+      "geantwortet",
+      "opt_out",
+      "pausiert"
+    ],
+    "cold_mail_sends.status": [
+      "beschwerde",
+      "bounced",
+      "geklickt",
+      "geoeffnet",
+      "gesendet",
+      "zugestellt"
+    ],
+    "cold_mail_sequenzen.rolle": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
+    "cold_mail_steps.bedingung": [
+      "immer",
+      "wenn_geoeffnet",
+      "wenn_keine_antwort",
+      "wenn_nicht_geoeffnet"
+    ],
+    "cold_mail_suppression.grund": [
+      "beschwerde",
+      "bounce",
+      "opt_out"
+    ],
+    "cold_mail_vorlagen.rolle": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
+    "communities.budget_verteilung": [
+      "fair_share",
+      "first_come",
+      "nach_naehe",
+      "round_robin"
+    ],
+    "community_comments.author_kind": [
+      "admin",
+      "partner",
+      "public"
+    ],
+    "community_comments.status": [
+      "geloescht",
+      "sichtbar",
+      "versteckt"
+    ],
+    "community_comments.target_kind": [
+      "post",
+      "wissen"
+    ],
+    "community_likes.target_kind": [
+      "comment",
+      "post",
+      "wissen"
+    ],
+    "community_memberships.rolle_in_community": [
+      "mitglied",
+      "verwalter"
+    ],
+    "community_posts.author_kind": [
+      "admin",
+      "partner",
+      "public"
+    ],
+    "community_posts.status": [
+      "geloescht",
+      "sichtbar",
+      "versteckt"
+    ],
+    "content_translations.target_locale": [
+      "ar",
+      "de",
+      "en",
+      "pl",
+      "ru",
+      "tr"
+    ],
+    "cron_jobs_audit.status": [
+      "error",
+      "running",
+      "success",
+      "timeout"
+    ],
+    "dokument_upload_anfragen.kanal": [
+      "email",
+      "onboarding-wizard",
+      "sms",
+      "whatsapp"
+    ],
+    "dokument_upload_anfragen.status": [
+      "abgelaufen",
+      "gesendet",
+      "komplett",
+      "teilweise"
+    ],
+    "dsgvo_loeschauftraege.eingereicht_von": [
+      "admin_manuell",
+      "email_anfrage",
+      "self_service"
+    ],
+    "dsgvo_loeschauftraege.status": [
+      "abgelehnt",
+      "ausgefuehrt",
+      "bestaetigt",
+      "eingereicht",
+      "storniert"
+    ],
+    "email_log.empfaenger_typ": [
+      "admin",
+      "kanzlei",
+      "kunde",
+      "makler",
+      "sv",
+      "werkstatt"
+    ],
+    "email_log.provider": [
+      "google_smtp",
+      "resend",
+      "unknown"
+    ],
+    "email_log.richtung": [
+      "inbound",
+      "outbound"
+    ],
+    "email_log.status": [
+      "bounced",
+      "failed",
+      "pending",
+      "sent"
+    ],
+    "embed_sites.funnel_modus": [
+      "callback",
+      "flowlink"
+    ],
+    "embed_sites.variante": [
+      "A",
+      "B"
+    ],
+    "fahrzeugklassen.reparatur_gruppe": [
+      "anhaenger",
+      "bus",
+      "land_forst",
+      "leichtfahrzeug",
+      "lkw",
+      "motorrad",
+      "pkw",
+      "transporter"
+    ],
+    "failed_async_operations.status": [
+      "escalated",
+      "pending",
+      "resolved"
+    ],
+    "fall_dokumente.ocr_status": [
+      "done",
+      "failed",
+      "pending",
+      "processing",
+      "skipped"
+    ],
+    "firmen_flotten_konten.status": [
+      "aktiv",
+      "deaktiviert",
+      "pausiert"
+    ],
+    "flow_links.gesendet_kanal": [
+      "email",
+      "sms",
+      "whatsapp"
+    ],
+    "flow_links.sprache": [
+      "ar",
+      "de",
+      "en",
+      "other",
+      "pl",
+      "ru",
+      "tr"
+    ],
+    "flow_szenarien.eigene_versicherung": [
+      "ja",
+      "nein"
+    ],
+    "flow_szenarien.feststellung_zweig": [
+      "schaden",
+      "unfall"
+    ],
+    "flow_szenarien.schuldfrage": [
+      "eigenverantwortung",
+      "gegner",
+      "unklar"
+    ],
+    "forderungspositionen.quelle": [
+      "anspruchsschreiben",
+      "gutachten",
+      "manuell",
+      "ruegeschreiben"
+    ],
+    "forderungspositionen.typ": [
+      "abschleppkosten",
+      "anwaltskosten",
+      "gutachterkosten",
+      "kostenpauschale",
+      "mietwagen",
+      "nutzungsausfall",
+      "reparatur",
+      "restwert",
+      "schmerzensgeld",
+      "sonstiges",
+      "wbw",
+      "wertminderung"
+    ],
+    "gutachten.gutachten_kalkulationssystem": [
+      "audatex",
+      "autoixpert",
+      "dat",
+      "sonstiges"
+    ],
+    "gutachten.gutachten_karosseriezustand": [
+      "gebrauchsspuren",
+      "makellos",
+      "sonstiges",
+      "unfallbeschaedigt"
+    ],
+    "gutachten.gutachten_kraftstoff": [
+      "benzin",
+      "diesel",
+      "elektro",
+      "gas",
+      "hybrid",
+      "sonstiges"
+    ],
+    "gutachten.gutachter_anbieter": [
+      "audatex",
+      "combiplus",
+      "dat",
+      "schwacke",
+      "solera",
+      "sonstiges",
+      "unbekannt"
+    ],
+    "gutachten.ocr_engine": [
+      "claude_vision",
+      "google_vision",
+      "manual"
+    ],
+    "gutachten.ocr_status": [
+      "done",
+      "failed",
+      "manuell_uebersteuert",
+      "nicht_gestartet",
+      "pending",
+      "running"
+    ],
+    "gutachten.status": [
+      "beauftragt",
+      "besichtigt",
+      "final",
+      "in_erstellung",
+      "storniert"
+    ],
+    "gutachten_fotos.kategorie": [
+      "innen",
+      "kennzeichen",
+      "schadenstelle",
+      "sonstiges",
+      "tacho",
+      "uebersicht",
+      "vin"
+    ],
+    "gutachten_fotos.upload_quelle": [
+      "admin",
+      "kunde",
+      "laeufer",
+      "sv"
+    ],
+    "gutachten_positionen.kategorie": [
+      "elektrik",
+      "glas",
+      "interieur",
+      "karosserie",
+      "lack",
+      "mechanik",
+      "sonstiges"
+    ],
+    "gutachten_positionen.reparaturart": [
+      "ersatz",
+      "instandsetzung",
+      "keine",
+      "lackierung"
+    ],
+    "gutachter_finder_anfragen.abrechnungsweg": [
+      "haftpflicht",
+      "kasko",
+      "selbstzahler"
+    ],
+    "gutachter_finder_anfragen.anliegen": [
+      "gegengutachten",
+      "haftpflichtgutachten",
+      "schadensberatung",
+      "wertgutachten"
+    ],
+    "gutachter_finder_anfragen.bevorzugter_kanal": [
+      "anruf",
+      "email",
+      "whatsapp"
+    ],
+    "gutachter_finder_anfragen.bewertungsgrund": [
+      "reparatur",
+      "verkauf"
+    ],
+    "gutachter_finder_anfragen.billing_review_grund": [
+      "kunde_absage",
+      "kunde_no_show"
+    ],
+    "gutachter_finder_anfragen.billing_review_status": [
+      "closed",
+      "pending"
+    ],
+    "gutachter_finder_anfragen.fahrzeugtyp": [
+      "lkw",
+      "motorrad",
+      "pkw",
+      "transporter",
+      "wohnmobil"
+    ],
+    "gutachter_finder_anfragen.kanzlei_wunsch": [
+      "eigene_kanzlei",
+      "keine_kanzlei",
+      "noch_unentschieden",
+      "partnerkanzlei"
+    ],
+    "gutachter_finder_anfragen.regulierungs_modus": [
+      "komplett",
+      "nur_gutachten",
+      "nur_gutachter",
+      "vollstaendig"
+    ],
+    "gutachter_finder_anfragen.schuld_einschaetzung": [
+      "nicht_sicher",
+      "unverschuldet"
+    ],
+    "gutachter_finder_anfragen.schuldfrage": [
+      "gegner",
+      "teilschuld",
+      "unklar"
+    ],
+    "gutachter_finder_anfragen.source": [
+      "generic_lp",
+      "kfz_gutachter_lp",
+      "mcp",
+      "sv_embed"
+    ],
+    "gutachter_finder_anfragen.unfalltyp": [
+      "auffahrunfall",
+      "parken",
+      "sonstiges",
+      "spurwechsel",
+      "vorfahrt"
+    ],
+    "gutachter_finder_anfragen.variante": [
+      "A",
+      "B"
+    ],
+    "gutachter_finder_anfragen.vorschaden_check_status": [
+      "ausstehend",
+      "kein_vorschaden",
+      "nicht_verfuegbar",
+      "vorschaden_erkannt"
+    ],
+    "gutachter_finder_anfragen.wunsch_tag": [
+      "asap",
+      "morgen",
+      "uebermorgen"
+    ],
+    "gutachter_finder_anfragen.wunsch_zeit": [
+      "abend",
+      "nachmittag",
+      "vormittag"
+    ],
+    "gutachter_finder_anfragen.wunschtermin_wann": [
+      "heute",
+      "sofort",
+      "tage"
+    ],
+    "gutachter_termine.ankunft_via": [
+      "gps",
+      "manual_swipe"
+    ],
+    "gutachter_termine.assignee_typ": [
+      "kanzlei",
+      "kundenbetreuer",
+      "sachverstaendiger",
+      "sv_lead"
+    ],
+    "gutachter_termine.besichtigungsort_bestaetigt_von": [
+      "kunde",
+      "sv"
+    ],
+    "gutachter_termine.bezug_typ": [
+      "claim",
+      "fall",
+      "lead"
+    ],
+    "gutachter_termine.gegenvorschlag_von": [
+      "kunde",
+      "sv"
+    ],
+    "gutachter_termine.kanal": [
+      "telefon",
+      "video"
+    ],
+    "gutachter_termine.quelle": [
+      "dispatch",
+      "manuell",
+      "self_service"
+    ],
+    "gutachter_termine.status": [
+      "abgelehnt",
+      "abgesagt",
+      "abgeschlossen",
+      "bestaetigt",
+      "dispatch_pending",
+      "gegenvorschlag",
+      "reserviert",
+      "storniert",
+      "sv_gesucht",
+      "verlegt",
+      "verlegung_pending",
+      "verschoben"
+    ],
+    "gutachter_termine.typ": [
+      "kb_beratung",
+      "konfrontation",
+      "sv_begutachtung"
+    ],
+    "gutachter_waitlist.status": [
+      "abgelehnt",
+      "aktiv",
+      "kein_interesse",
+      "kontaktiert",
+      "neu",
+      "onboarding",
+      "qualifiziert"
+    ],
+    "health_check_runs.status": [
+      "crit",
+      "error",
+      "ok",
+      "warn"
+    ],
+    "incentive_auszahlungen.status": [
+      "ausgezahlt",
+      "genehmigt",
+      "offen"
+    ],
+    "incentives.kategorie": [
+      "alle",
+      "dispatch",
+      "kundenbetreuer"
+    ],
+    "incentives.typ": [
+      "bonus",
+      "freizeit",
+      "provision",
+      "sachleistung"
+    ],
+    "kanzlei_abrechnungen.status": [
+      "bezahlt",
+      "erstellt",
+      "fehlgeschlagen",
+      "storniert",
+      "versendet"
+    ],
+    "kanzlei_admin_termine.status": [
+      "abgesagt",
+      "durchgefuehrt",
+      "gebucht"
+    ],
+    "kanzlei_admin_termine.typ": [
+      "video",
+      "vor_ort"
+    ],
+    "kanzlei_faelle.status": [
+      "auszahlung",
+      "versicherungskontakt"
+    ],
+    "kanzlei_pakete.empfaenger_typ": [
+      "eigene_kanzlei",
+      "partnerkanzlei"
+    ],
+    "kanzlei_pakete.status": [
+      "bestaetigt",
+      "entwurf",
+      "fehlgeschlagen",
+      "versendet"
+    ],
+    "kanzlei_pakete.versand_methode": [
+      "email",
+      "portal_lexdrive",
+      "post"
+    ],
+    "ki_gespraeche.rolle": [
+      "admin",
+      "kunde",
+      "kundenbetreuer",
+      "makler"
+    ],
+    "leads.abrechnungsweg": [
+      "haftpflicht",
+      "kasko",
+      "selbstzahler"
+    ],
+    "leads.anrede": [
+      "divers",
+      "frau",
+      "herr"
+    ],
+    "leads.bevorzugter_kanal": [
+      "email",
+      "sms",
+      "whatsapp"
+    ],
+    "leads.finanzierung_leasing": [
+      "finanzierung",
+      "keine",
+      "leasing"
+    ],
+    "leads.kanzlei_wunsch": [
+      "eigene_kanzlei",
+      "keine_kanzlei",
+      "partnerkanzlei"
+    ],
+    "leads.kennzeichen_suffix": [
+      "E",
+      "H"
+    ],
+    "leads.lackfarbe_code": [
+      "beige",
+      "blau",
+      "braun",
+      "gelb",
+      "grau",
+      "gruen",
+      "orange",
+      "rot",
+      "schwarz",
+      "silber",
+      "sonstige",
+      "weiss"
+    ],
+    "leads.polizeibericht_status": [
+      "abgelehnt",
+      "fehlgeschlagen",
+      "geoeffnet",
+      "gesendet",
+      "hochgeladen"
+    ],
+    "leads.qualifizierungs_phase": [
+      "abgeschlossen",
+      "disqualifiziert",
+      "erstkontakt",
+      "flow-gesendet",
+      "flow-versendet",
+      "gegner-daten",
+      "gutachtertermin",
+      "in-qualifizierung",
+      "kalt",
+      "konstellation-erfasst",
+      "konvertiert",
+      "neu",
+      "nicht-erreicht",
+      "rueckruf",
+      "sa-ausstehend",
+      "sa-unterschrieben",
+      "schadentyp-erfasst"
+    ],
+    "leads.reparatur_vermittlung_status": [
+      "abgelehnt",
+      "eigene",
+      "offen",
+      "vermittelt"
+    ],
+    "leads.reparatur_werkstatt_quelle": [
+      "dispatcher",
+      "embed",
+      "gutachter",
+      "kb",
+      "kunde"
+    ],
+    "leads.reparaturwunsch": [
+      "fiktiv",
+      "reparatur",
+      "unentschieden"
+    ],
+    "leads.schadenskategorie": [
+      "glas",
+      "karosserie",
+      "lackierung",
+      "mechanik",
+      "smart_repair",
+      "unbekannt"
+    ],
+    "leads.schadentyp": [
+      "auffahrunfall",
+      "parkplatz",
+      "sonstiges",
+      "spurwechsel",
+      "vorfahrtsverletzung"
+    ],
+    "leads.schuldfrage": [
+      "eigenverantwortung",
+      "gegner",
+      "unklar"
+    ],
+    "leads.service_typ": [
+      "komplett",
+      "nur_gutachter"
+    ],
+    "leads.sprache": [
+      "ar",
+      "de",
+      "en",
+      "other",
+      "pl",
+      "ru",
+      "tr"
+    ],
+    "leads.unfallort_kategorie": [
+      "autobahn",
+      "innerorts",
+      "kreuzung",
+      "landstrasse",
+      "parkluecke",
+      "sonstiges"
+    ],
+    "leads.zb1_status": [
+      "abgelehnt",
+      "ausstehend",
+      "fehlgeschlagen",
+      "geoeffnet",
+      "gesendet",
+      "hochgeladen"
+    ],
+    "linkedin_posts.status": [
+      "entwurf",
+      "fehlgeschlagen",
+      "uebersprungen",
+      "veroeffentlicht"
+    ],
+    "makler.status": [
+      "aktiv",
+      "deaktiviert",
+      "gesperrt",
+      "pending"
+    ],
+    "makler_fall_consent.consent_scope": [
+      "minimal",
+      "vollzugriff"
+    ],
+    "marketing_content_jobs.format": [
+      "ad",
+      "ratgeber"
+    ],
+    "marketing_content_jobs.publish_status": [
+      "entwurf",
+      "gepostet"
+    ],
+    "marketing_content_jobs.status": [
+      "audio_erzeugt",
+      "entwurf",
+      "fehler",
+      "render_queued",
+      "skript_generiert",
+      "video_fertig"
+    ],
+    "mitteilungen.kategorie": [
+      "anruf",
+      "nachricht",
+      "task",
+      "update"
+    ],
+    "mitteilungen.prioritaet": [
+      "dringend",
+      "hoch",
+      "normal"
+    ],
+    "nachrichten.kanal": [
+      "chat_gruppe_mit_makler",
+      "chat_kb_kunde",
+      "chat_kb_sv",
+      "chat_kunde_sv",
+      "email",
+      "gruppenchat",
+      "sms",
+      "system",
+      "whatsapp"
+    ],
+    "nachrichten.status": [
+      "fehlgeschlagen",
+      "gelesen",
+      "gesendet",
+      "queued",
+      "zugestellt"
+    ],
+    "notification_deliveries.channel": [
+      "email",
+      "in_app",
+      "native_push",
+      "web_push",
+      "whatsapp"
+    ],
+    "notification_deliveries.status": [
+      "failed",
+      "pending",
+      "sent",
+      "skipped"
+    ],
+    "notification_events.status": [
+      "completed",
+      "failed",
+      "pending",
+      "processing"
+    ],
+    "ocr_runs.engine": [
+      "claude_vision",
+      "google_vision"
+    ],
+    "ocr_runs.status": [
+      "failed",
+      "running",
+      "succeeded",
+      "superseded"
+    ],
+    "ocr_runs.triggered_by": [
+      "auto_after_upload",
+      "cron_recovery",
+      "manual_admin_retry",
+      "manual_kb_retry"
+    ],
+    "onboarding_felder.audience": [
+      "beide",
+      "dispatcher",
+      "kunde"
+    ],
+    "onboarding_felder.typ": [
+      "avatar-upload",
+      "calendar-connect",
+      "checkbox",
+      "email",
+      "file",
+      "number",
+      "phone-verify",
+      "segmented",
+      "select",
+      "signature",
+      "slot",
+      "tel",
+      "termin",
+      "text",
+      "textarea",
+      "toggle-cards",
+      "zb1-upload"
+    ],
+    "orchestrator_auto_policy.mode": [
+      "auto",
+      "manual"
+    ],
+    "organisationen.onboarding_status": [
+      "aktiv",
+      "anzahlung_offen",
+      "blockiert",
+      "pending",
+      "vertrag_unterzeichnet"
+    ],
+    "organisationen.typ": [
+      "akademie",
+      "buero",
+      "community",
+      "einzel"
+    ],
+    "paket_upgrades.status": [
+      "abgelehnt",
+      "aktiv",
+      "angefragt",
+      "bezahlt"
+    ],
+    "parteien.anrede": [
+      "divers",
+      "frau",
+      "herr"
+    ],
+    "partner_lead_aktivitaeten.typ": [
+      "anruf",
+      "einstufung",
+      "email",
+      "notiz",
+      "sonstiges",
+      "status_aenderung"
+    ],
+    "partner_leads.einstufung": [
+      "heiss",
+      "kalt",
+      "warm"
+    ],
+    "partner_leads.rolle": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
+    "partner_leads.source_channel": [
+      "admin",
+      "csv_import",
+      "dat_import",
+      "empfehlung",
+      "marketing_bewerbung",
+      "scraping",
+      "self_signup"
+    ],
+    "partner_leads.status": [
+      "abgelehnt",
+      "aktiv",
+      "kein_interesse",
+      "kontaktiert",
+      "neu",
+      "onboarding",
+      "qualifiziert"
+    ],
+    "partner_provisionen.partner_typ": [
+      "firmen_flotte",
+      "makler",
+      "makler_empfehlung",
+      "werkstatt"
+    ],
+    "partner_rang.gate_cap": [
+      "bronze",
+      "gold",
+      "silber"
+    ],
+    "partner_rang.partner_typ": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
+    "partner_rang.rang": [
+      "bronze",
+      "gold",
+      "silber"
+    ],
+    "partner_rollen_policy.rolle": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
+    "partner_staffel_bonus.partner_typ": [
+      "makler",
+      "werkstatt"
+    ],
+    "pflichtdokumente.status": [
+      "abgelehnt",
+      "ausstehend",
+      "geprueft",
+      "hochgeladen",
+      "nachgereicht_angefordert"
+    ],
+    "phase_transitions.trigger_type": [
+      "auto",
+      "manual",
+      "scheduled",
+      "webhook"
+    ],
+    "profiles.account_typ": [
+      "gast",
+      "interner_user",
+      "voll"
+    ],
+    "profiles.entstanden_via": [
+      "airdrop",
+      "kanzlei_einladung",
+      "lead_konvertierung",
+      "makler_einladung",
+      "manuelle_anlage_admin",
+      "mitarbeiter_anlage",
+      "self_signup"
+    ],
+    "profiles.sprache": [
+      "ar",
+      "de",
+      "en",
+      "pl",
+      "ru",
+      "tr"
+    ],
+    "qc_checkliste.status": [
+      "bestanden",
+      "nachbesserung",
+      "offen"
+    ],
+    "rechnungs_konfiguration.rechnungssteller": [
+      "claimondo_gmbh",
+      "claimondo_gmbh_igr",
+      "gbr"
+    ],
+    "regulierungs_klassifizierung.kuerzungsgrund": [
+      "bagatelle",
+      "gutachten_formaler_mangel",
+      "gutachten_inhaltlicher_mangel",
+      "honorarkuerzung_pauschal",
+      "mithaftung_kunde",
+      "sonstiges",
+      "verspaetete_meldung",
+      "verweigerung_versicherer"
+    ],
+    "regulierungs_klassifizierung.regulierungs_status": [
+      "abgelehnt",
+      "ausstehend",
+      "teilweise_reguliert",
+      "voll_reguliert"
+    ],
+    "repairs.status": [
+      "abgeschlossen",
+      "geplant",
+      "in_arbeit",
+      "storniert"
+    ],
+    "reparatur_termine.status": [
+      "abgelehnt",
+      "angefragt",
+      "anruf_erbeten",
+      "bestaetigt",
+      "erledigt",
+      "storniert",
+      "werkstatt_vorschlag"
+    ],
+    "sachverstaendige.anzahlung_status": [
+      "bezahlt",
+      "offen",
+      "teilweise"
+    ],
+    "sachverstaendige.gutachter_typ": [
+      "akademie",
+      "dat-gutachter",
+      "gutachterbuero",
+      "kfz-gutachter"
+    ],
+    "sachverstaendige.rolle_in_organisation": [
+      "akademie_sub",
+      "buero_admin",
+      "community_member",
+      "inhaber",
+      "mitarbeiter"
+    ],
+    "sachverstaendige.verifizierung_status": [
+      "abgelehnt",
+      "ausstehend",
+      "frist_ueberschritten",
+      "geprueft"
+    ],
+    "schadenkarten.status": [
+      "bestellt",
+      "ersetzt",
+      "frei",
+      "gebunden",
+      "gesperrt"
+    ],
+    "sla_tracking.sla_typ": [
+      "besichtigung",
+      "gutachten_upload",
+      "gutachter_zuweisung",
+      "kanzlei_uebergabe",
+      "qc_filmcheck",
+      "termin_bestaetigung",
+      "vs_antwort_14",
+      "vs_antwort_ruege1_14",
+      "vs_antwort_ruege2_7",
+      "zahlung_eingang"
+    ],
+    "sla_tracking.status": [
+      "breached",
+      "completed",
+      "pending"
+    ],
+    "support_ticket_log.action_type": [
+      "comment",
+      "new",
+      "no_action"
+    ],
+    "support_ticket_log.ticket_typ": [
+      "bug",
+      "comment",
+      "feature",
+      "no_action"
+    ],
+    "sv_buero.rechtsform": [
+      "AG",
+      "e.K.",
+      "Einzelunternehmen",
+      "GbR",
+      "GmbH",
+      "KG",
+      "OHG",
+      "UG"
+    ],
+    "sv_buero.status": [
+      "aktiv",
+      "deaktiviert",
+      "pausiert"
+    ],
+    "sv_buero_memberships.rolle": [
+      "admin",
+      "mitglied",
+      "partner"
+    ],
+    "sv_community.status": [
+      "aktiv",
+      "archiviert"
+    ],
+    "sv_kalender_events_cache.source": [
+      "caldav",
+      "google",
+      "outlook"
+    ],
+    "sv_kalender_verbindungen.provider": [
+      "caldav",
+      "outlook"
+    ],
+    "sv_leads.claim_status": [
+      "beansprucht_pending",
+      "konvertiert",
+      "offen"
+    ],
+    "sv_leads.warteliste_status": [
+      "abgelehnt",
+      "aktiv",
+      "ausstehend",
+      "kontaktiert"
+    ],
+    "sv_onboarding_rechnungen.rechnungssteller": [
+      "claimondo_gmbh",
+      "claimondo_gmbh_igr",
+      "gbr"
+    ],
+    "sv_onboarding_rechnungen.typ": [
+      "akademie",
+      "buero",
+      "solo"
+    ],
+    "sv_payment_reminders.reminder_typ": [
+      "admin_task_call_10d",
+      "admin_task_call_3d",
+      "email_14d",
+      "email_3d",
+      "email_7d",
+      "final_warnung"
+    ],
+    "sv_private_stops.source": [
+      "caldav",
+      "gcal"
+    ],
+    "sv_tages_session.status": [
+      "arrived",
+      "completing",
+      "en_route",
+      "finished",
+      "idle",
+      "paused"
+    ],
+    "tasks.entity_type": [
+      "abrechnung",
+      "case",
+      "fall",
+      "fall_dokumente",
+      "gutachter",
+      "gutschrift",
+      "kunde",
+      "lead",
+      "reklamation",
+      "sv_onboarding",
+      "termin"
+    ],
+    "tasks.prioritaet": [
+      "dringend",
+      "kritisch",
+      "normal"
+    ],
+    "technische_probleme.status": [
+      "geloest",
+      "geschlossen",
+      "in-bearbeitung",
+      "neu"
+    ],
+    "termin_reminders.empfaenger": [
+      "kunde",
+      "sv"
+    ],
+    "termin_reminders.reminder_typ": [
+      "kunde_1h",
+      "kunde_24h",
+      "kunde_morgen",
+      "sv_route"
+    ],
+    "termin_reminders.status": [
+      "cancelled",
+      "failed",
+      "pending",
+      "sent"
+    ],
+    "vehicle_ownership_history.erwerbsart": [
+      "erbe",
+      "firmen",
+      "geschenk",
+      "kauf",
+      "leasing",
+      "unbekannt"
+    ],
+    "vehicle_scan_fotos.perspektive": [
+      "ecke_hl",
+      "ecke_hr",
+      "ecke_vl",
+      "ecke_vr",
+      "front",
+      "heck",
+      "nahaufnahme",
+      "seite_links",
+      "seite_rechts",
+      "tacho"
+    ],
+    "vehicle_scans.status": [
+      "abgeschlossen",
+      "offen"
+    ],
+    "vehicle_vorschaeden.state": [
+      "aktuell",
+      "vorschaden"
+    ],
+    "vehicles.status": [
+      "aktiv",
+      "exportiert",
+      "stillgelegt",
+      "totalschaden",
+      "verkauft"
+    ],
+    "verfuegbarkeits_ausnahmen.assignee_typ": [
+      "kanzlei",
+      "kundenbetreuer",
+      "sachverstaendiger",
+      "sv_lead"
+    ],
+    "verfuegbarkeits_ausnahmen.typ": [
+      "krank",
+      "sperre",
+      "urlaub"
+    ],
+    "verified_contacts.kind": [
+      "email",
+      "phone"
+    ],
+    "verified_contacts.source": [
+      "airdrop_accept",
+      "auth_email_confirmed",
+      "auth_phone_confirmed",
+      "magic_link",
+      "otp"
+    ],
+    "vertragsvorlagen.typ": [
+      "akademie_kooperation",
+      "community_kooperation",
+      "kooperationsvertrag_muster",
+      "nutzungsbedingungen",
+      "sa_kunde",
+      "sv_basic_partnervertrag"
+    ],
+    "vertrieb_mail_vorlagen.typ": [
+      "terminbestaetigung",
+      "vorstellung"
+    ],
+    "vs_korrespondenz.kanal": [
+      "email",
+      "fax",
+      "portal",
+      "post",
+      "telefon"
+    ],
+    "vs_korrespondenz.richtung": [
+      "ausgehend",
+      "eingehend"
+    ],
+    "vs_korrespondenz.status": [
+      "archiviert",
+      "beantwortet",
+      "gesendet",
+      "ohne_antwort_abgelaufen",
+      "wartet_auf_antwort"
+    ],
+    "webhook_events.status": [
+      "failed",
+      "pending",
+      "processed",
+      "skipped"
+    ],
+    "werkstaetten.status": [
+      "aktiv",
+      "gesperrt"
+    ],
+    "werkstatt_empfehlung_batches.status": [
+      "abgelaufen",
+      "entschieden",
+      "offen",
+      "zurueckgezogen"
+    ],
+    "werkstatt_qr_pool.status": [
+      "frei",
+      "gesperrt",
+      "zugewiesen"
+    ],
+    "wissen_artikel.audience": [
+      "b2b",
+      "consumer"
+    ],
+    "wissen_artikel.quelle": [
+      "ai_gap",
+      "crawl",
+      "redaktion"
+    ],
+    "wissen_artikel.status": [
+      "abgelehnt",
+      "archiviert",
+      "entwurf",
+      "in_review",
+      "veroeffentlicht"
+    ],
+    "wissen_themen.audience": [
+      "b2b",
+      "consumer"
+    ],
+    "wissen_themen.quelle": [
+      "ai_gap",
+      "crawl",
+      "manuell"
+    ],
+    "wissen_themen.status": [
+      "abgelehnt",
+      "entwurf_erstellt",
+      "freigegeben",
+      "vorgeschlagen"
+    ]
   }
 }
