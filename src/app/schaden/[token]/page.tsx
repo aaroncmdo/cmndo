@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { resolveSchadenkarteToFahrzeug } from '@/lib/schadenkarte/schadenkarte'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { findeErsterfassungClaim } from '@/lib/flotte/schaden-fortsetzung'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
 import { schadenZweig } from './schaden-zweig'
 import { FlottenmanagerKartePanel } from './FlottenmanagerKartePanel'
@@ -50,6 +51,8 @@ export default async function SchadenTokenPage({
   // startet der Flottenmanager bewusst den Schaden-Flow -> faellt durch zum Wizard.
   if (fmFirma && (zweig === 'bind' || (zweig === 'manage' && melden !== '1'))) {
     const fahrzeuge = await getKundeFlotte(db, fmFirma.id)
+    // T5-3a: gebundenes Fahrzeug mit bestehendem ersterfassung-Claim → „Gutachter finden".
+    const fortsetzenClaimId = karte?.fahrzeugId ? await findeErsterfassungClaim(db, karte.fahrzeugId) : null
     return (
       <FlottenmanagerKartePanel
         zweig={zweig}
@@ -57,6 +60,7 @@ export default async function SchadenTokenPage({
         firmaName={fmFirma.name}
         fahrzeuge={fahrzeuge}
         gebundenesFahrzeugId={karte?.fahrzeugId ?? null}
+        fortsetzenClaimId={fortsetzenClaimId}
       />
     )
   }
