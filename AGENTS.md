@@ -392,7 +392,7 @@ CI fährt `npm run check:operative-status-writes -- --ratchet`. Es blockt **NEUE
 
 CI fährt `npm run check:i18n-coverage -- --ratchet`. Je Eintrag der `COVERAGE`-Liste (in `scripts/check-i18n-coverage.mjs`) werden die Werte einer TS-Union gegen die Keys unter einem Messages-Pfad der **Quell-Locale `de.json`** verglichen (die übrigen 5 deckt die `check:i18n`-Parität ab). Abgedeckt: `phasen.main` (`ClaimMainPhase`) + `phasen.subIntern`/`phasen.subKunde` (`ClaimSubPhase`). **Baseline 0** — keine grandfatherte Schuld, jede neue Lücke blockt. Pure Logik: `scripts/lib/i18n-coverage-scan.mjs` (unit-getestet, 10 Fälle, CRLF- + kommentar-sicher).
 
-**Neue dynamische Namespace-Familie?** → `COVERAGE`-Eintrag ergänzen (messagePath + Union-Quelle). Ein umbenannter Typ oder fehlender Namespace ist ein **harter** Fehler (sonst würde das Gate still blind).
+**Neue dynamische Namespace-Familie?** → `COVERAGE`-Eintrag ergänzen. Die Wertemenge kommt entweder aus einer TS-Union (`type: 'ClaimSubPhase'`) ODER aus einem `const NAME = [...] as const`-Array (`constName: 'QUALI_VALUES'`) — genau eins pro Eintrag. Adressiert der Key ein verschachteltes Objekt statt eines Labels direkt (z.B. `quali.optionen.<wert>.{label,hint}` in `QualiOptionen.tsx`), zusätzlich `subKeys: ['label', 'hint']` setzen — dann wird pro Wert jedes Feld einzeln geprüft. Ein umbenannter Typ/Const oder fehlender Namespace ist ein **harter** Fehler (sonst würde das Gate still blind).
 
 **Bewusst NICHT abgedeckt:** statisch literale `t('foo.bar')`-Referenzen — dafür bräuchte es Namespace-Scope-Tracking über `useTranslations`-Variablen (FP-anfällig, und ein FP blockt die ganze Fleet). Mögliche spätere Erweiterung; die dynamische Klasse ist die, die real geblutet hat.
 

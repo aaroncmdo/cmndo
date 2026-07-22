@@ -36,6 +36,24 @@ export function extractUnionValues(src, typeName) {
   return vals.length > 0 ? vals : null
 }
 
+/**
+ * Zieht die String-Literale eines `const NAME = [...] as const`-Arrays heraus (CRLF- +
+ * kommentar-sicher, wie extractUnionValues). Fuer dynamische Keys, deren Wertemenge NICHT
+ * aus einer TS-Union, sondern aus einem Const-Array kommt (z.B. QualiOptionen: QUALI_VALUES).
+ * @returns {string[]|null} Werte oder null wenn die Konstante nicht gefunden wurde
+ */
+export function extractConstArray(src, name) {
+  const code = String(src).replace(/\r/g, '')
+  const re = new RegExp(`(?:const|let|var)\\s+${name}\\s*(?::[^=\\n]+)?=\\s*\\[([\\s\\S]*?)\\]`)
+  const m = re.exec(code)
+  if (!m) return null
+  const body = m[1]
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/\/\/[^\n]*/g, ' ')
+  const vals = [...body.matchAll(/'([^'\n]+)'|"([^"\n]+)"/g)].map((x) => x[1] ?? x[2])
+  return vals.length > 0 ? vals : null
+}
+
 /** Navigiert einen Punkt-Pfad ('phasen.subIntern') in einem Messages-Objekt. */
 export function resolvePath(obj, path) {
   return String(path)
@@ -44,16 +62,27 @@ export function resolvePath(obj, path) {
 }
 
 /**
- * Welche Union-Werte haben KEINEN Key unter messagePath?
+ * Welche Werte haben KEINEN Key unter messagePath? Mit `subKeys` wird pro Wert geprueft, ob
+ * das verschachtelte Objekt `<messagePath>.<value>` ALLE subKeys traegt (z.B. label + hint);
+ * ein fehlender Sub-Key wird als "<value>.<subKey>" gemeldet.
  * @returns {{error: string|null, missing: string[]}}
  */
-export function findMissing(values, messages, messagePath) {
+export function findMissing(values, messages, messagePath, subKeys = null) {
   const node = resolvePath(messages, messagePath)
   if (!node || typeof node !== 'object' || Array.isArray(node)) {
     return { error: `Namespace "${messagePath}" fehlt in den Messages`, missing: [] }
   }
-  const have = new Set(Object.keys(node))
-  return { error: null, missing: values.filter((v) => !have.has(v)) }
+  if (!subKeys || subKeys.length === 0) {
+    const have = new Set(Object.keys(node))
+    return { error: null, missing: values.filter((v) => !have.has(v)) }
+  }
+  const missing = []
+  for (const v of values) {
+    const sub = node[v]
+    if (!sub || typeof sub !== 'object' || Array.isArray(sub)) { missing.push(v); continue }
+    for (const sk of subKeys) if (!(sk in sub)) missing.push(`${v}.${sk}`)
+  }
+  return { error: null, missing }
 }
 
 export function diffBaseline(current, baseline) {
