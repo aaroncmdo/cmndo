@@ -124,7 +124,12 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
         const el = document.createElement('div')
         el.style.cssText = pinStyle(w.id === selectedIdRef.current)
         el.textContent = String(i + 1)
-        el.addEventListener('click', () => {
+        el.addEventListener('click', (e) => {
+          // stopPropagation: sonst bubbelt der Klick zum Map-Container, Mapbox feuert map-'click'
+          // und schliesst das eben geoeffnete Popup sofort wieder (closeOnClick Default true) ->
+          // Popup flackert auf+zu, Kunde sieht nie das Profil. Exakt wie FinderMap.openSvPopup (SV).
+          // Prod-Smoke #4695 (MutationObserver): ADD wf-finder-popup ... REMOVE -> finalPopups=0.
+          e.stopPropagation()
           onSelectPin(w.id)
           openWerkstattPopup(w)
         })
