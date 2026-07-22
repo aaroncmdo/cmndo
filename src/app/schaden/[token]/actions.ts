@@ -14,6 +14,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { notifyFlottenmanagerSchadenGemeldet } from '@/lib/flotte/fm-schaden-notif'
 import {
   resolveSchadenkarteToFahrzeug,
   bindeSchadenkarteAnFahrzeug,
@@ -220,7 +221,10 @@ export async function submitSchadenGegner(
       // telefon ist hier bereits E.164-normalisiert (s.o.) — inviteGegnerViaAirdrop
       // normalisiert idempotent nochmal, aber wir uebergeben den kanonischen Wert.
       if (telefon) {
-        const invite = await inviteGegnerViaAirdrop(claimId, telefon)
+        const invite = await inviteGegnerViaAirdrop(claimId, telefon, {
+          email: data.email || null,
+          name: data.name.trim(),
+        })
         if (!invite.ok) {
           await erstelleVsDispatchTask({ claimId, grund: 'send_fehler', detail: invite.error })
         }
@@ -229,6 +233,24 @@ export async function submitSchadenGegner(
       }
     } catch (err) {
       console.error('[schaden-gegner] Airdrop-Invite fehlgeschlagen:', err)
+    }
+  }
+
+  // 6b. T4: Flottenmanager per WhatsApp ueber den via Karte gemeldeten Schaden informieren
+  //   (Link zur Fahrzeug-Detail + Eckdaten). Fail-soft — darf den Gegner-Submit nie brechen.
+  if (claimId) {
+    try {
+      const fahrzeugLabel = [ctx.context.hersteller, ctx.context.modell].filter(Boolean).join(' ') || null
+      await notifyFlottenmanagerSchadenGemeldet({
+        firmaId: ctx.context.firmaId,
+        vehicleId: ctx.context.fahrzeugId,
+        kennzeichen: ctx.context.kennzeichen,
+        fahrzeug: fahrzeugLabel,
+        gegnerName: data.name.trim(),
+        gegnerKennzeichen: data.kennzeichen || null,
+      })
+    } catch (err) {
+      console.error('[schaden-gegner] FM-WA-Notif fehlgeschlagen:', err)
     }
   }
 

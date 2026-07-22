@@ -21,7 +21,7 @@ import {
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
 import { bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff } from '../../_actions/firmen-flotte-karten'
-import { setzeFlottenKontoStatus } from '../../_actions/firmen-flotte-konto'
+import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
 const FELD_CLS =
@@ -62,6 +62,11 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [bindFehler, setBindFehler] = useState<string | null>(null)
 
   const [kontoBusy, setKontoBusy] = useState<string | null>(null)
+  const [waNummer, setWaNummer] = useState<Record<string, string>>(() =>
+    Object.fromEntries(konten.map((k) => [k.konto_id, k.whatsapp_nummer ?? ''])),
+  )
+  const [waBusy, setWaBusy] = useState<string | null>(null)
+  const [waFehler, setWaFehler] = useState<Record<string, string | null>>({})
 
   const adresse =
     [firma.adresse_strasse, [firma.adresse_plz, firma.adresse_ort].filter(Boolean).join(' ')]
@@ -120,6 +125,15 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
     const res = await setzeFlottenKontoStatus(firma.id, kontoId, status)
     setKontoBusy(null)
     if (res.ok) router.refresh()
+  }
+
+  async function whatsappSpeichern(kontoId: string) {
+    setWaBusy(kontoId)
+    setWaFehler((m) => ({ ...m, [kontoId]: null }))
+    const res = await setzeFlottenKontoWhatsapp(firma.id, kontoId, waNummer[kontoId] ?? '')
+    setWaBusy(null)
+    if (!res.ok) return setWaFehler((m) => ({ ...m, [kontoId]: res.error ?? 'Fehler' }))
+    router.refresh()
   }
 
   return (
@@ -327,32 +341,63 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
           <p className="text-body-sm text-claimondo-ondo/60">Kein Flottenmanager-Konto verknüpft.</p>
         ) : (
           <div className="space-y-3">
-            {konten.map((k) => (
-              <div key={k.konto_id} className="flex flex-wrap items-center justify-between gap-2 rounded-ios-lg border border-claimondo-border p-3">
-                <div>
-                  <p className="text-sm font-medium text-claimondo-navy">
-                    {[k.vorname, k.nachname].filter(Boolean).join(' ') || k.email || '—'}
-                  </p>
-                  <p className="text-caption text-claimondo-ondo/60">
-                    {k.email ?? '—'} · Status: {k.status}
-                  </p>
-                </div>
-                <div className="flex gap-1.5">
-                  {KONTO_STATI.map((st) => (
+            {konten.map((k) => {
+              const waDirty = (waNummer[k.konto_id] ?? '') !== (k.whatsapp_nummer ?? '')
+              return (
+                <div key={k.konto_id} className="flex flex-col gap-2 rounded-ios-lg border border-claimondo-border p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-medium text-claimondo-navy">
+                        {[k.vorname, k.nachname].filter(Boolean).join(' ') || k.email || '—'}
+                      </p>
+                      <p className="text-caption text-claimondo-ondo/60">
+                        {k.email ?? '—'} · Status: {k.status}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5">
+                      {KONTO_STATI.map((st) => (
+                        <Button
+                          key={st}
+                          variant={k.status === st ? 'navy' : 'ghost'}
+                          size="sm"
+                          loading={kontoBusy === k.konto_id}
+                          disabled={k.status === st || kontoBusy === k.konto_id}
+                          onClick={() => kontoStatusSetzen(k.konto_id, st)}
+                        >
+                          {st}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-end gap-2 border-t border-claimondo-border/60 pt-2">
+                    <div className="min-w-[12rem] flex-1">
+                      <label className="text-caption text-claimondo-ondo/60">
+                        WhatsApp-Nummer (Schaden-Benachrichtigung)
+                      </label>
+                      <input
+                        value={waNummer[k.konto_id] ?? ''}
+                        onChange={(e) => setWaNummer((m) => ({ ...m, [k.konto_id]: e.target.value }))}
+                        placeholder="z. B. +49 163 3628571"
+                        inputMode="tel"
+                        className={`${FELD_CLS} mt-0.5 w-full`}
+                      />
+                    </div>
                     <Button
-                      key={st}
-                      variant={k.status === st ? 'navy' : 'ghost'}
+                      variant="navy"
                       size="sm"
-                      loading={kontoBusy === k.konto_id}
-                      disabled={k.status === st || kontoBusy === k.konto_id}
-                      onClick={() => kontoStatusSetzen(k.konto_id, st)}
+                      loading={waBusy === k.konto_id}
+                      disabled={!waDirty || waBusy === k.konto_id}
+                      onClick={() => whatsappSpeichern(k.konto_id)}
                     >
-                      {st}
+                      Speichern
                     </Button>
-                  ))}
+                  </div>
+                  {waFehler[k.konto_id] && (
+                    <p className="text-caption text-danger-strong">{waFehler[k.konto_id]}</p>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </SectionCard>

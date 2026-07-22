@@ -50,7 +50,7 @@ export async function getFirmenFlotteDetail(
   // 2) Flotten-Konten + Profile laden
   const { data: kontenRaw, error: kontenErr } = await admin
     .from('firmen_flotten_konten')
-    .select('id, user_id, status, aktiviert_am')
+    .select('id, user_id, status, aktiviert_am, whatsapp_nummer')
     .eq('firma_id', firmaId)
     .order('aktiviert_am', { ascending: false })
 
@@ -61,6 +61,7 @@ export async function getFirmenFlotteDetail(
     user_id: string
     status: string
     aktiviert_am: string | null
+    whatsapp_nummer: string | null
   }>
 
   const konten: FlottenKontoInfo[] = []
@@ -85,6 +86,7 @@ export async function getFirmenFlotteDetail(
       vorname: prof?.vorname ?? null,
       nachname: prof?.nachname ?? null,
       telefon: prof?.telefon ?? null,
+      whatsapp_nummer: k.whatsapp_nummer ?? null,
     })
   }
 
