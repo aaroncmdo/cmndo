@@ -72,6 +72,7 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
         totalschaden={!!vm.fall.totalschaden}
         zahlungsweg={(vm.fall.zahlungsweg as string | null) ?? null}
         onZahlungswegSave={updateZahlungsweg}
+        svGeprueft={gw?.manuellUeberschrieben ?? false}
         gutachtenWerte={
           gw
             ? {
