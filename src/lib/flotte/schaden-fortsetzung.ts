@@ -13,6 +13,9 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { planeTerminMitFallback } from '@/lib/sv-matching-modul'
 import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
+import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
+import { createLead } from '@/lib/leads/create-lead'
+import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import type { OeffentlichesSvProfil } from '@/lib/sv-matching-modul/types'
 
 export type Haftungstyp = 'haftpflicht' | 'selbstverschuldet'
@@ -176,13 +179,6 @@ async function leadGfaPflichtfelder(
   }
 }
 
-function serviceTypFuer(haftungstyp: Haftungstyp): string {
-  // MVP: beide Typen → 'komplett' (Standard-/Vollservice-Flow). Der Kasko-spezifische
-  // service_typ für 'selbstverschuldet' ist ein dokumentierter Follow-up (Plan T5, offene
-  // Sub-Entscheidung) — bewusst KEIN Raten, um /flow nicht fehlzuleiten.
-  return haftungstyp === 'haftpflicht' ? 'komplett' : 'komplett'
-}
-
 /**
  * Kern: Gutachter-Wahl an den bestehenden Lead hängen + kanonischen FlowLink liefern.
  * 1) Besichtigungsort (Fahrzeug-Standort) geocoden → leads.fahrzeug_standort_* (für /flow-Matching).
@@ -201,19 +197,26 @@ export async function waehleGutachterUndStarteFlow(params: {
   if (!ctx) return { ok: false, error: 'Kein Zugriff auf diesen Schaden.' }
   const admin = createAdminClient() as AnyDb
 
-  // 1) Besichtigungsort (Fahrzeug-Standort) — Aaron 22.07.: NICHT der Unfallort.
+  // 1) Lead aktualisieren:
+  //    a) schuldfrage (FU1) = die Haftpflicht/Kasko-Weiche, die /flow auswertet
+  //       ('gegner' = Haftpflicht, 'eigenverantwortung' = selbstverschuldet/Kasko).
+  //       NICHT über service_typ (das ist Vollservice-vs-nur-Gutachten, orthogonal zur Schuld).
+  //    b) Besichtigungsort (Fahrzeug-Standort) — Aaron 22.07.: NICHT der Unfallort
+  //       (den setzt der Gegner-Flow separat auf leads.unfallort_*).
   const adresse = params.adresse.trim()
   const geo = adresse ? await geocodeMitFallback(adresse) : null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const leadPatch: Record<string, any> = {
+    schuldfrage: params.haftungstyp === 'haftpflicht' ? 'gegner' : 'eigenverantwortung',
+  }
   if (geo) {
-    const { error } = await admin
-      .from('leads')
-      .update({
-        fahrzeug_standort_lat: geo.lat,
-        fahrzeug_standort_lng: geo.lng,
-        fahrzeug_standort_adresse: geo.adresse ?? adresse,
-      })
-      .eq('id', ctx.leadId)
-    if (error) console.error('[schaden-fortsetzung] fahrzeug_standort setzen fehlgeschlagen:', error.message)
+    leadPatch.fahrzeug_standort_lat = geo.lat
+    leadPatch.fahrzeug_standort_lng = geo.lng
+    leadPatch.fahrzeug_standort_adresse = geo.adresse ?? adresse
+  }
+  {
+    const { error } = await admin.from('leads').update(leadPatch).eq('id', ctx.leadId)
+    if (error) console.error('[schaden-fortsetzung] Lead-Update fehlgeschlagen:', error.message)
   }
 
   // 2) gfa-Back-Reference (idempotent: pro Lead genau eine).
@@ -248,8 +251,50 @@ export async function waehleGutachterUndStarteFlow(params: {
     }
   }
 
-  // 3) Kanonischer FlowLink (idempotent, lead-gekeyt).
-  const fl = await ensureCanonicalFlowLinkForLead(ctx.leadId, { serviceTyp: serviceTypFuer(params.haftungstyp) })
+  // 3) Kanonischer FlowLink (idempotent, lead-gekeyt). service_typ = 'komplett' (Vollservice);
+  //    die Haftpflicht/Kasko-Weiche läuft über leads.schuldfrage (Schritt 1a), nicht hier.
+  const fl = await ensureCanonicalFlowLinkForLead(ctx.leadId, { serviceTyp: 'komplett' })
   if (!fl.ok) return { ok: false, error: fl.error }
   return { ok: true, token: fl.token }
+}
+
+/**
+ * FU3: Meldet einen NEUEN Flotten-Schaden für ein Fahrzeug OHNE bestehenden ersterfassung-Claim
+ * (v.a. selbstverschuldet — dafür gibt es keinen Gegner-Tap-Flow). Legt Lead + Claim an
+ * (geschädigter = Flotten-Fahrzeug; kein Gegner = kein verursacher — convertLeadToClaim ist
+ * datengetrieben) und liefert die claimId für den Gutachter-Picker. Auth: FM der Fahrzeug-Firma.
+ */
+export async function erstelleFlottenSchadenClaim(params: {
+  vehicleId: string
+  userId: string
+  haftungstyp: Haftungstyp
+}): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+  const admin = createAdminClient() as AnyDb
+  const firma = await getFlottenmanagerFirma(admin, params.userId)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto.' }
+
+  // Auth: gehört das Fahrzeug der Firma des eingeloggten FM?
+  const { data: ff } = await admin
+    .from('flotten_fahrzeuge')
+    .select('id')
+    .eq('firma_id', firma.id)
+    .eq('vehicle_id', params.vehicleId)
+    .maybeSingle()
+  if (!ff) return { ok: false, error: 'Fahrzeug gehört nicht zu Ihrer Flotte.' }
+
+  const created = await createLead(
+    admin,
+    { source_channel: 'flotte-manuell', status: 'neu' },
+    {
+      vehicle_id: params.vehicleId,
+      firma_name: firma.name,
+      gewerbe_flag: true,
+      schuldfrage: params.haftungstyp === 'haftpflicht' ? 'gegner' : 'eigenverantwortung',
+    },
+  )
+  if (!created.ok) return { ok: false, error: created.error }
+
+  const conv = await convertLeadToClaim({ leadId: created.leadId })
+  if (!conv.ok) return { ok: false, error: conv.error }
+  return { ok: true, claimId: conv.claimId }
 }

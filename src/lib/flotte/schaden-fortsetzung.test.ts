@@ -11,6 +11,13 @@ const state = {
     | { ok: true; token: string; wiederverwendet: boolean }
     | { ok: false; error: string },
   matching: { kind: 'fallback', deadPins: [] } as unknown,
+  // FU3
+  firma: { id: 'firma-1', name: 'ACME' } as { id: string; name: string } | null,
+  createdLead: { ok: true, leadId: 'lead-new' } as { ok: true; leadId: string } | { ok: false; error: string },
+  convertResult: { ok: true, claimId: 'claim-new', fallId: 'fall-new' } as
+    | { ok: true; claimId: string; fallId: string }
+    | { ok: false; error: string },
+  createLeadCalls: [] as Array<{ base: Record<string, unknown>; extra: Record<string, unknown> }>,
 }
 
 function builder(table: string) {
@@ -41,6 +48,14 @@ vi.mock('@/lib/start-link/ensure-flowlink-for-lead', () => ({
   ensureCanonicalFlowLinkForLead: async () => state.flowlink,
 }))
 vi.mock('@/lib/sv-matching-modul', () => ({ planeTerminMitFallback: async () => state.matching }))
+vi.mock('@/lib/flotte/konto-firma', () => ({ getFlottenmanagerFirma: async () => state.firma }))
+vi.mock('@/lib/leads/create-lead', () => ({
+  createLead: async (_db: unknown, base: Record<string, unknown>, extra: Record<string, unknown>) => {
+    state.createLeadCalls.push({ base, extra })
+    return state.createdLead
+  },
+}))
+vi.mock('@/lib/leads/convert-lead-to-claim', () => ({ convertLeadToClaim: async () => state.convertResult }))
 
 beforeEach(() => {
   state.rows = {}
@@ -49,6 +64,10 @@ beforeEach(() => {
   state.geo = { lat: 52.5, lng: 13.4, adresse: 'Weg 1, 10000 Berlin' }
   state.flowlink = { ok: true, token: 'flow-token-1', wiederverwendet: false }
   state.matching = { kind: 'fallback', deadPins: [] }
+  state.firma = { id: 'firma-1', name: 'ACME' }
+  state.createdLead = { ok: true, leadId: 'lead-new' }
+  state.convertResult = { ok: true, claimId: 'claim-new', fallId: 'fall-new' }
+  state.createLeadCalls = []
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -174,6 +193,8 @@ describe('waehleGutachterUndStarteFlow', () => {
     const leadUpd = state.updates.find((u) => u.table === 'leads')
     expect(leadUpd?.patch).toMatchObject({ fahrzeug_standort_lat: 52.5, fahrzeug_standort_lng: 13.4 })
     expect(leadUpd?.patch).not.toHaveProperty('unfallort_lat')
+    // FU1: haftpflicht -> schuldfrage 'gegner' (Haftpflicht-Weiche im /flow)
+    expect(leadUpd?.patch).toMatchObject({ schuldfrage: 'gegner' })
 
     // gfa-Back-Reference angelegt (kein bestehender -> insert)
     const gfaIns = state.inserts.find((i) => i.table === 'gutachter_finder_anfragen')
@@ -217,5 +238,56 @@ describe('waehleGutachterUndStarteFlow', () => {
     })
     expect(res).toEqual({ ok: true, token: 'flow-token-1' })
     expect(state.inserts.find((i) => i.table === 'gutachter_finder_anfragen')).toBeUndefined()
+  })
+
+  it('FU1: selbstverschuldet setzt schuldfrage = eigenverantwortung (Kasko-Weiche)', async () => {
+    seedHappyPath()
+    const { waehleGutachterUndStarteFlow } = await import('./schaden-fortsetzung')
+    await waehleGutachterUndStarteFlow({
+      claimId: 'claim-1',
+      userId: 'user-1',
+      svId: null,
+      adresse: 'Depot 1',
+      haftungstyp: 'selbstverschuldet',
+    })
+    const leadUpd = state.updates.find((u) => u.table === 'leads')
+    expect(leadUpd?.patch).toMatchObject({ schuldfrage: 'eigenverantwortung' })
+  })
+})
+
+describe('erstelleFlottenSchadenClaim (FU3 — neuer Claim)', () => {
+  it('kein Flotten-Konto -> Fehler', async () => {
+    state.firma = null
+    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'selbstverschuldet' })
+    expect(res).toEqual({ ok: false, error: 'Kein Flotten-Konto.' })
+  })
+
+  it('Fahrzeug fremd -> Fehler, kein createLead', async () => {
+    state.rows.flotten_fahrzeuge = null // Ownership faellt durch
+    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-x', userId: 'u', haftungstyp: 'haftpflicht' })
+    expect(res.ok).toBe(false)
+    expect(state.createLeadCalls).toHaveLength(0)
+  })
+
+  it('selbstverschuldet: createLead schuldfrage=eigenverantwortung, liefert claimId', async () => {
+    state.rows.flotten_fahrzeuge = { id: 'ff-1' }
+    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'selbstverschuldet' })
+    expect(res).toEqual({ ok: true, claimId: 'claim-new' })
+    expect(state.createLeadCalls[0].extra).toMatchObject({
+      vehicle_id: 'veh-1',
+      firma_name: 'ACME',
+      gewerbe_flag: true,
+      schuldfrage: 'eigenverantwortung',
+    })
+  })
+
+  it('haftpflicht: schuldfrage=gegner', async () => {
+    state.rows.flotten_fahrzeuge = { id: 'ff-1' }
+    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
+    await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'haftpflicht' })
+    expect(state.createLeadCalls[0].extra).toMatchObject({ schuldfrage: 'gegner' })
   })
 })

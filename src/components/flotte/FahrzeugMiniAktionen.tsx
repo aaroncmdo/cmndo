@@ -1,15 +1,52 @@
 'use client'
 
 // Mini-Aktionen-Zeile im Fahrzeug-Detail-Header.
-// Karte identifizieren (Link) + „Schaden melden" (T5-3b): aktiv, sobald ein ersterfassung-
-// Claim existiert → Haftpflicht/selbstverschuldet-Abfrage → Gutachter-Picker. Ohne Claim
-// bleibt der Button ein Hinweis-Stub (Meldung läuft über die getappte Schadenkarte).
+// Karte identifizieren (Link) + „Schaden melden" (T5-3b / FU3): Haftpflicht/selbstverschuldet-
+// Abfrage → Gutachter-Picker. Existiert ein ersterfassung-Claim, wird dieser fortgesetzt;
+// sonst wird ein neuer Claim angelegt (v.a. selbstverschuldet — kein Gegner-Tap-Flow).
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/primitives'
 
-export function FahrzeugMiniAktionen({ fortsetzenClaimId }: { fortsetzenClaimId?: string | null }) {
+type Haftungstyp = 'haftpflicht' | 'selbstverschuldet'
+
+export function FahrzeugMiniAktionen({
+  vehicleId,
+  fortsetzenClaimId,
+  onMelden,
+}: {
+  vehicleId: string
+  /** T5-3a/3b: bestehender ersterfassung-Claim → fortsetzen statt neu anlegen. */
+  fortsetzenClaimId?: string | null
+  /** FU3: neuen Claim anlegen (wenn kein bestehender) → liefert claimId für den Picker. */
+  onMelden: (
+    vehicleId: string,
+    haftungstyp: Haftungstyp,
+  ) => Promise<{ ok: true; claimId: string } | { ok: false; error: string }>
+}) {
+  const router = useRouter()
   const [wahlOffen, setWahlOffen] = useState(false)
+  const [busy, setBusy] = useState<Haftungstyp | null>(null)
+  const [fehler, setFehler] = useState<string | null>(null)
+
+  async function melden(haftungstyp: Haftungstyp) {
+    // Bestehender ersterfassung-Claim → direkt in den Picker (kein neuer Claim).
+    if (fortsetzenClaimId) {
+      router.push(`/flotte/schaden/${fortsetzenClaimId}/gutachter?typ=${haftungstyp}`)
+      return
+    }
+    // Sonst neuen Claim anlegen (v.a. selbstverschuldet) → Picker.
+    setBusy(haftungstyp)
+    setFehler(null)
+    const res = await onMelden(vehicleId, haftungstyp)
+    if (!res.ok) {
+      setBusy(null)
+      setFehler(res.error)
+      return
+    }
+    router.push(`/flotte/schaden/${res.claimId}/gutachter?typ=${haftungstyp}`)
+  }
 
   return (
     <div className="mt-3 space-y-2">
@@ -20,35 +57,35 @@ export function FahrzeugMiniAktionen({ fortsetzenClaimId }: { fortsetzenClaimId?
             Karte identifizieren
           </Button>
         </Link>
-
-        {fortsetzenClaimId ? (
-          <Button variant="ondo" size="sm" onClick={() => setWahlOffen((v) => !v)}>
-            Schaden melden
-          </Button>
-        ) : (
-          <span title="Schaden über die getappte Schadenkarte melden">
-            <Button variant="ghost" size="sm" disabled>
-              Schaden melden
-            </Button>
-          </span>
-        )}
+        <Button variant="ondo" size="sm" onClick={() => setWahlOffen((v) => !v)}>
+          Schaden melden
+        </Button>
       </div>
 
-      {fortsetzenClaimId && wahlOffen && (
+      {wahlOffen && (
         <div className="space-y-2 rounded-ios-lg border border-claimondo-border p-3">
           <p className="text-body-sm text-claimondo-navy">Wer hat den Schaden verursacht?</p>
           <div className="flex gap-2 flex-wrap">
-            <Link href={`/flotte/schaden/${fortsetzenClaimId}/gutachter?typ=haftpflicht`}>
-              <Button variant="navy" size="sm">
-                Unfallgegner (Haftpflicht)
-              </Button>
-            </Link>
-            <Link href={`/flotte/schaden/${fortsetzenClaimId}/gutachter?typ=selbstverschuldet`}>
-              <Button variant="ghost" size="sm">
-                Selbstverschuldet (Kasko)
-              </Button>
-            </Link>
+            <Button
+              variant="navy"
+              size="sm"
+              loading={busy === 'haftpflicht'}
+              disabled={busy !== null}
+              onClick={() => melden('haftpflicht')}
+            >
+              Unfallgegner (Haftpflicht)
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              loading={busy === 'selbstverschuldet'}
+              disabled={busy !== null}
+              onClick={() => melden('selbstverschuldet')}
+            >
+              Selbstverschuldet (Kasko)
+            </Button>
           </div>
+          {fehler && <p className="text-caption text-danger-strong">{fehler}</p>}
         </div>
       )}
     </div>

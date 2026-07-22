@@ -28,4 +28,8 @@ export type GegnerFormData = {
   fotos?: GegnerFoto[]
   /** Optional PNG signature data-URI from SignaturePadInput. */
   unterschrift?: string
+  /** FU2: Unfallort (Schadenlocation) — Browser-Geolocation am Unfallort, best-effort.
+   *  Getrennt vom Fahrzeug-Standort (Aaron 22.07.); landet auf leads.unfallort_lat/lng. */
+  unfallortLat?: number
+  unfallortLng?: number
 }

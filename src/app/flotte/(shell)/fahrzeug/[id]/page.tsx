@@ -13,7 +13,7 @@ import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSec
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
 import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
 import { FahrzeugStammdatenEditor } from '@/components/flotte/FahrzeugStammdatenEditor'
-import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden, speichereFahrzeugStammdaten } from './actions'
+import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden, speichereFahrzeugStammdaten, meldeNeuenFlottenSchaden } from './actions'
 import { starteScan, ladeFotoHoch, analysiereZustandsFotos, finalisiereScan } from './zustand-actions'
 import { getStorageUrl } from '@/lib/storage/url'
 import { PERSPEKTIVE_LABEL } from '@/lib/vehicles/zustand-perspektiven'
@@ -121,7 +121,7 @@ export default async function FahrzeugDetailPage({
           {fahrzeug.kennzeichen ?? 'Fahrzeug'}
         </h1>
         <p className="mt-1 text-sm text-claimondo-shield">Fahrzeug-Details</p>
-        <FahrzeugMiniAktionen fortsetzenClaimId={fortsetzenClaimId} />
+        <FahrzeugMiniAktionen vehicleId={id} fortsetzenClaimId={fortsetzenClaimId} onMelden={meldeNeuenFlottenSchaden} />
       </div>
 
       <FahrzeugStammdatenEditor
