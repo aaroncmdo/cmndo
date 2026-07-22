@@ -12,6 +12,11 @@ import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSec
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
 import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
 import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden } from './actions'
+import { starteScan, ladeFotoHoch, analysiereZustandsFotos, finalisiereScan } from './zustand-actions'
+import { getStorageUrl } from '@/lib/storage/url'
+import { PERSPEKTIVE_LABEL } from '@/lib/vehicles/zustand-perspektiven'
+import { ZustandsScanWizard } from '@/components/flotte/ZustandsScanWizard'
+import { ZustandAmpelBadge } from '@/components/shared/ZustandAmpelBadge'
 import { CarIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -71,6 +76,37 @@ export default async function FahrzeugDetailPage({
   const qrSvg = karte
     ? await generateQrCodeSvg(buildSchadenkarteUrl(karte.karten_token), 160)
     : null
+
+  // ─── Zustandsdoku: letzter abgeschlossener Scan + Fotos + erkannte Vorschaeden ───
+  const { data: letzterScan } = await db
+    .from('vehicle_scans')
+    .select('id, erstellt_am, kilometerstand')
+    .eq('vehicle_id', id)
+    .eq('status', 'abgeschlossen')
+    .order('erstellt_am', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const scan = letzterScan as { id: string; erstellt_am: string; kilometerstand: number | null } | null
+
+  const scanFotos: { url: string; label: string }[] = []
+  let scanVorschaeden: Array<{ art: string | null; schwere: string | null; beschreibung: string | null }> = []
+  if (scan?.id) {
+    const { data: fotos } = await db
+      .from('vehicle_scan_fotos')
+      .select('storage_path, perspektive')
+      .eq('scan_id', scan.id)
+      .eq('ist_nahaufnahme', false)
+      .limit(12)
+    for (const f of (fotos ?? []) as Array<{ storage_path: string; perspektive: string }>) {
+      const url = await getStorageUrl(db, 'fahrzeug-zustand', f.storage_path, { context: 'ui' })
+      if (url) scanFotos.push({ url, label: PERSPEKTIVE_LABEL[f.perspektive] ?? f.perspektive })
+    }
+    const { data: vs } = await db
+      .from('vehicle_vorschaeden')
+      .select('art, schwere, beschreibung')
+      .eq('scan_id', scan.id)
+    scanVorschaeden = (vs ?? []) as typeof scanVorschaeden
+  }
 
   const sanitizedKennzeichen = (fahrzeug.kennzeichen ?? 'fahrzeug').replace(/[^a-zA-Z0-9]/g, '-')
 
@@ -138,6 +174,64 @@ export default async function FahrzeugDetailPage({
         ) : (
           <FahrzeugKarteBindClient vehicleId={id} onBind={bindeKarteFuerFahrzeug} />
         )}
+      </SectionCard>
+
+      <SectionCard title="Zustandsdoku">
+        <div className="space-y-3">
+          {scan ? (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <ZustandAmpelBadge letzterScanAm={scan.erstellt_am} />
+                {scan.kilometerstand != null && (
+                  <span className="text-caption text-claimondo-ondo/60">
+                    {scan.kilometerstand.toLocaleString('de-DE')} km
+                  </span>
+                )}
+              </div>
+              {scanFotos.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {scanFotos.map((f, i) => (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={i}
+                      src={f.url}
+                      alt={f.label}
+                      className="h-16 w-16 rounded-ios-sm border border-claimondo-border object-cover"
+                    />
+                  ))}
+                </div>
+              )}
+              {scanVorschaeden.length > 0 ? (
+                <div className="space-y-1">
+                  <p className="text-caption text-claimondo-ondo/60">Erkannte Vorschäden:</p>
+                  {scanVorschaeden.map((v, i) => (
+                    <p key={i} className="text-body-sm text-claimondo-navy">
+                      • {v.art ?? 'Schaden'}
+                      {v.schwere ? ` (${v.schwere})` : ''}
+                      {v.beschreibung ? ` — ${v.beschreibung}` : ''}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-body-sm text-claimondo-ondo/60">Keine Vorschäden dokumentiert.</p>
+              )}
+            </>
+          ) : (
+            <div className="space-y-1">
+              <ZustandAmpelBadge letzterScanAm={null} />
+              <p className="text-body-sm text-claimondo-ondo">
+                Noch nicht dokumentiert. Erfassen Sie den aktuellen Fahrzeug-Zustand mit einer geführten Fotostrecke.
+              </p>
+            </div>
+          )}
+          <ZustandsScanWizard
+            vehicleId={id}
+            onStart={starteScan}
+            onFoto={ladeFotoHoch}
+            onAnalyse={analysiereZustandsFotos}
+            onFinalize={finalisiereScan}
+          />
+        </div>
       </SectionCard>
     </div>
   )
