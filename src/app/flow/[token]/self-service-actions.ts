@@ -233,6 +233,22 @@ export async function erzeugeSelbstzahlerClaim(
   const conv = await convertLeadToClaim({ leadId })
   if (!conv.ok) return { ok: false, error: conv.error }
 
+  // T2 (AAR-956 Owner-Abschluss): Pflichtdok-Slots auch fuer den Direkt-Reparatur-Weg
+  // (Selbstzahler/Kasko) anlegen. Bisher war dieser Pfad der EINZIGE Embed→Claim-Caller ohne
+  // createPflicht (Haftpflicht/Admin haben es, #4515) -> ein Selbstzahler/Kasko-Kunde landete
+  // slot-los, und der Onboarding-"Dokumente"-Step erscheint nur wenn offene Slots existieren
+  // (get-onboarding-steps.ts:57, slot-getrieben — NICHT szenario-hardcoded) -> der Kunde wurde
+  // nie nach seinen Belegen gefragt. Der Katalog gatet die Slots per Schaden-Kontext (schadensfotos/
+  // unfallfotos/fahrzeugschein + Konditionale); der SV-Termin-Step bleibt fuer den Werkstatt-Weg
+  // ausgeblendet (brauchtGutachter=false). Idempotent + non-fatal, identisches Muster wie #4515.
+  // fallId (NICHT claimId) — createPflichtdokumenteFromKatalog insertet auf fall_id.
+  try {
+    const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
+    await createPflichtdokumenteFromKatalog(admin, conv.fallId, leadRow as Record<string, unknown> | null)
+  } catch (err) {
+    console.error('[erzeugeSelbstzahlerClaim] Pflichtdok-Slots anlegen fehlgeschlagen (non-fatal):', err)
+  }
+
   // ⚠ Aaron 15.07. — Sichtbarkeit fuer den Dispatch (bisher entstand der Kasko/Selbstzahler-Claim
   // KOMPLETT STILL: nur revalidatePath, keine Mitteilung). Der Dispatcher muss nichts tun — der Kunde
   // geht direkt zur Werkstatt — aber ein neuer Fall soll nicht unsichtbar entstehen.
