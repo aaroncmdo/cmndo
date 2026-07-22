@@ -6,6 +6,7 @@
 // via kanonischer schadenkarte-Lib (89f501f6), Fahrzeuge via mutate-flotte.
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { BuildingIcon, CameraIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -20,7 +21,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff } from '../../_actions/firmen-flotte-karten'
+import { bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -60,6 +61,12 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [addFehler, setAddFehler] = useState<string | null>(null)
 
   const [bindFehler, setBindFehler] = useState<string | null>(null)
+
+  const [mintAnzahl, setMintAnzahl] = useState('10')
+  const [mintCharge, setMintCharge] = useState('')
+  const [mintBusy, setMintBusy] = useState(false)
+  const [mintFehler, setMintFehler] = useState<string | null>(null)
+  const [mintErfolg, setMintErfolg] = useState<{ anzahl: number; charge: string | null } | null>(null)
 
   const [kontoBusy, setKontoBusy] = useState<string | null>(null)
   const [waNummer, setWaNummer] = useState<Record<string, string>>(() =>
@@ -117,6 +124,23 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
     setBindFehler(null)
     const res = await bindeKarteAnFahrzeug(firma.id, token, fahrzeugId)
     if (!res.ok) return setBindFehler(res.error ?? 'Binden fehlgeschlagen.')
+    router.refresh()
+  }
+
+  async function karteBatchMinten() {
+    const n = parseInt(mintAnzahl, 10)
+    if (!Number.isInteger(n) || n < 1) {
+      setMintFehler('Bitte eine Anzahl von mindestens 1 angeben.')
+      return
+    }
+    setMintBusy(true)
+    setMintFehler(null)
+    setMintErfolg(null)
+    const res = await minteKartenBatchStaff(firma.id, n, mintCharge.trim() || null)
+    setMintBusy(false)
+    if (!res.ok) return setMintFehler(res.error)
+    setMintErfolg({ anzahl: res.anzahl, charge: res.charge })
+    setMintCharge('')
     router.refresh()
   }
 
@@ -256,6 +280,57 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
             }
           />
         </div>
+
+        <div className="mb-4 space-y-2 rounded-ios-lg border border-claimondo-border p-3">
+          <p className="text-body-sm font-medium text-claimondo-navy">Karten auf Vorrat erzeugen (vorgedruckt)</p>
+          <p className="text-caption text-claimondo-ondo/70">
+            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken, später ans Fahrzeug binden.
+          </p>
+          <div className="flex flex-wrap items-end gap-2">
+            <label className="block">
+              <span className="text-caption text-claimondo-ondo/60">Anzahl</span>
+              <input
+                type="number"
+                min={1}
+                max={200}
+                value={mintAnzahl}
+                onChange={(e) => setMintAnzahl(e.target.value)}
+                className={`${FELD_CLS} mt-0.5 w-24`}
+              />
+            </label>
+            <label className="block min-w-[10rem] flex-1">
+              <span className="text-caption text-claimondo-ondo/60">Bezeichnung (optional)</span>
+              <input
+                value={mintCharge}
+                onChange={(e) => setMintCharge(e.target.value)}
+                placeholder="z. B. Erstcharge 2026"
+                className={`${FELD_CLS} mt-0.5 w-full`}
+              />
+            </label>
+            <Button variant="ondo" size="sm" onClick={karteBatchMinten} loading={mintBusy}>
+              Karten erzeugen
+            </Button>
+            <Link href={`/admin/vertrieb/firmen-flotte/${firma.id}/karten-druck`} target="_blank">
+              <Button variant="ghost" size="sm">
+                QR-Codes drucken
+              </Button>
+            </Link>
+          </div>
+          {mintFehler && <p className="text-caption text-danger-strong">{mintFehler}</p>}
+          {mintErfolg && (
+            <p className="text-caption text-success-strong">
+              {mintErfolg.anzahl} Karten erzeugt.{' '}
+              <Link
+                href={`/admin/vertrieb/firmen-flotte/${firma.id}/karten-druck${mintErfolg.charge ? `?charge=${encodeURIComponent(mintErfolg.charge)}` : ''}`}
+                target="_blank"
+                className="underline"
+              >
+                Jetzt drucken →
+              </Link>
+            </p>
+          )}
+        </div>
+
         {karten.length === 0 ? (
           <p className="text-body-sm text-claimondo-ondo/60">
             Noch keine Karten. Nutzen Sie oben „Karte auflegen &amp; beschreiben".
