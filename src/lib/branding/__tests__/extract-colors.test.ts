@@ -37,6 +37,18 @@ vi.mock('../claude-vision', () => ({
   analyzeLogo: vi.fn(async () => currentVision),
 }))
 
+// extract-colors laedt das Logo per fetch + flattened es per sharp (AVIF/HEIC-Decode)
+// BEVOR node-vibrant die Palette zieht. node-vibrant ist gemockt (ignoriert den Buffer),
+// daher muss sharp nur irgendeinen Buffer liefern und fetch ok:true — sonst wirft der
+// Guard `Logo-Fetch fehlgeschlagen: HTTP 404` (der Test uebergibt example.com-Dummy-URLs).
+vi.mock('sharp', () => ({
+  default: vi.fn(() => ({
+    flatten: vi.fn().mockReturnThis(),
+    png: vi.fn().mockReturnThis(),
+    toBuffer: vi.fn(async () => Buffer.from([137, 80, 78, 71])),
+  })),
+}))
+
 import { extractBrandPalette } from '../extract-colors'
 
 function sw(hex: string, population: number, h: number, s: number, l: number): MockSwatch {
@@ -44,6 +56,15 @@ function sw(hex: string, population: number, h: number, s: number, l: number): M
 }
 
 beforeEach(() => {
+  // Logo-Fetch mocken (ok:true + Dummy-Buffer) — sonst reale HTTP-404 auf die Test-URLs.
+  vi.stubGlobal(
+    'fetch',
+    vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      arrayBuffer: async () => new ArrayBuffer(8),
+    })),
+  )
   currentPalette = {}
   currentVision = {
     brandMood: 'funktional',
