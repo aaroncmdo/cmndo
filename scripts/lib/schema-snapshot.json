@@ -5853,6 +5853,31 @@
     "created_at"
    ]
   },
+  "vehicle_scan_fotos": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "scan_id",
+    "storage_path",
+    "perspektive",
+    "ist_nahaufnahme",
+    "vorschaden_id",
+    "reihenfolge",
+    "erstellt_am"
+   ]
+  },
+  "vehicle_scans": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "vehicle_id",
+    "erstellt_am",
+    "erstellt_von",
+    "kilometerstand",
+    "status",
+    "notiz"
+   ]
+  },
   "vehicle_vorschaeden": {
    "kind": "t",
    "columns": [
@@ -5867,7 +5892,8 @@
     "created_at",
     "updated_at",
     "claim_id",
-    "state"
+    "state",
+    "scan_id"
    ]
   },
   "vehicles": {
