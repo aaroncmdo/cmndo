@@ -11,10 +11,12 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 import { ChevronUp } from 'lucide-react'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import type { Map as MapboxMap, Marker as MapboxMarker, GeoJSONSource } from 'mapbox-gl'
+import type { Map as MapboxMap, Marker as MapboxMarker, GeoJSONSource, Popup as MapboxPopup } from 'mapbox-gl'
 import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
 import { addPulsingFlow, type PulsingFlowHandle } from '@/lib/mapbox/pulsing-route'
+import { createRoot, type Root } from 'react-dom/client'
+import { WerkstattProfilePopup } from './WerkstattProfilePopup'
 
 const COL_NAVY = '#0D1B3E'
 const COL_ONDO = '#4573A2'
@@ -54,6 +56,8 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
   const markersRef = useRef<Array<{ id: string; el: HTMLDivElement; marker: MapboxMarker }>>([])
   const ankerRef = useRef<MapboxMarker | null>(null)
   const routePulseRef = useRef<PulsingFlowHandle | null>(null)
+  const popupRef = useRef<MapboxPopup | null>(null)
+  const popupRootRef = useRef<Root | null>(null)
   const selectedIdRef = useRef<string | null>(selectedId)
   const [sheetOffen, setSheetOffen] = useState(true)
   const dragStartRef = useRef<number | null>(null)
@@ -77,6 +81,8 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     })
     mapRef.current = map
     return () => {
+      popupRootRef.current?.unmount()
+      popupRef.current?.remove()
       map.remove()
       mapRef.current = null
     }
@@ -88,6 +94,26 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
   useEffect(() => {
     const map = mapRef.current
     if (!map) return
+    // Map-Pin-Profil (statt nacktem Namen) — createRoot/setDOMContent-Muster wie FinderMap.openSvPopup.
+    const openWerkstattPopup = (w: WerkstattVorschlag) => {
+      if (w.lat == null || w.lng == null) return
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<WerkstattProfilePopup w={w} />)
+      const popup = new mapboxgl.Popup({ offset: 22, closeButton: true, maxWidth: '330px', className: 'wf-finder-popup' })
+        .setLngLat([w.lng, w.lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
     const apply = () => {
       markersRef.current.forEach((e) => e.marker.remove())
       markersRef.current = []
@@ -98,10 +124,12 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
         const el = document.createElement('div')
         el.style.cssText = pinStyle(w.id === selectedIdRef.current)
         el.textContent = String(i + 1)
-        el.addEventListener('click', () => onSelectPin(w.id))
+        el.addEventListener('click', () => {
+          onSelectPin(w.id)
+          openWerkstattPopup(w)
+        })
         const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([w.lng, w.lat])
-          .setPopup(new mapboxgl.Popup({ offset: 18 }).setText(w.name))
           .addTo(map)
         markersRef.current.push({ id: w.id, el, marker })
         bounds.extend([w.lng, w.lat])
@@ -239,6 +267,17 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
 
   return (
     <div className="relative w-full" style={{ height: '100dvh' }}>
+      {/* wf-finder-popup: Mapbox-Popup transparent, damit die GlassSurface die Oberflaeche ist (wie sv-finder-popup). */}
+      <style>{`
+        .wf-finder-popup .mapboxgl-popup-content { background: transparent; padding: 0; box-shadow: none; }
+        .wf-finder-popup .mapboxgl-popup-tip { display: none; }
+        .wf-finder-popup.mapboxgl-popup { z-index: 12; }
+        .wf-finder-popup .mapboxgl-popup-close-button {
+          top: 10px; right: 10px; width: 24px; height: 24px; display: flex; align-items: center;
+          justify-content: center; border-radius: 9999px; color: var(--claimondo-navy, #0D1B3E);
+          font-size: 16px; line-height: 1; z-index: 3;
+        }
+      `}</style>
       {/* Karte full-bleed. position/inset MÜSSEN inline sein: mapbox-gl.css setzt .mapboxgl-map{position:relative}
           und würde eine .absolute-Utility überschreiben → Höhe kollabiert auf 0 (leerer Canvas, kein Fehler). */}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface, #FFFFFF)' }} />

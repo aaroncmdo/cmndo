@@ -7,6 +7,7 @@
 import { Card, Button } from '@/components/primitives'
 import EmptyState from '@/components/shared/EmptyState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import type { Fit } from '@/lib/werkstatt/bedarf/types'
 import type { MatchGrund, MatchGrundTyp } from '@/lib/werkstatt/matching/rank-vorschlaege'
@@ -15,7 +16,12 @@ type Props = {
   // Spec B (Aaron 14.07.): `gruende` kommt aus der Matching-Engine — "mit wirklichem Grund warum das
   // passt". Optional, damit die aelteren Consumer (Dispatch/Embed) unveraendert weiterlaufen; ohne
   // Gruende faellt die Card auf den bisherigen fit-Chip zurueck.
-  werkstaetten: (WerkstattFinderRow & { fit?: Fit; gruende?: MatchGrund[] })[]
+  werkstaetten: (WerkstattFinderRow & {
+    fit?: Fit
+    gruende?: MatchGrund[]
+    google_rating?: number | null
+    google_review_count?: number | null
+  })[]
   onSelect: (id: string) => void
   selectedId?: string | null
   /** Mehrfach-Auswahl (SV-Empfehlung 1-3): wenn gesetzt, gewinnt es ueber selectedId. */
@@ -160,6 +166,11 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
                     ) : (
                       fitChip
                     )}
+                    {w.google_rating != null && w.google_review_count != null ? (
+                      <div className="mt-1.5">
+                        <GoogleBewertungBadge durchschnitt={w.google_rating} anzahl={w.google_review_count} size="sm" />
+                      </div>
+                    ) : null}
                     {adresse ? (
                       <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
                         {adresse}
