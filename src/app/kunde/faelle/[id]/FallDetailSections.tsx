@@ -134,7 +134,7 @@ export default function FallDetailSections({
           <MietwagenStatusCard
             rolle="kunde"
             fall={{
-              mietwagen_hat: (fall.mietwagen_hat as boolean | null) ?? null,
+              mietwagen_hat: (fall.hat_mietwagen as boolean | null) ?? null,
               mietwagen_seit_datum: (fall.mietwagen_seit_datum as string | null) ?? null,
               mietwagen_limit_tage: (fall.mietwagen_limit_tage as number | null) ?? null,
               mietwagen_limit_grund: (fall.mietwagen_limit_grund as string | null) ?? null,
