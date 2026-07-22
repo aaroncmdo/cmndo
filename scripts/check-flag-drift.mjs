@@ -11,14 +11,23 @@
 //
 // Pure Logik: scripts/lib/flag-drift-scan.mjs.
 // Constraint-Snapshot: scripts/lib/status-check-constraints.json (aus der Live-DB gezogen).
-//   REGENERATION bei CHECK-Aenderung (neuer status-Wert per MCP-Migration):
-//   SELECT cls.relname, con.conname, pg_get_constraintdef(con.oid)
+//   VOLLABDECKUNG (22.07.): ALLE public ANY-ARRAY-enum-CHECKs — nicht mehr nur status-benannte.
+//   Motiv: der frühere conname-ILIKE-'%status%'-Filter deckte nur ~1/3 der enum-Spalten ab; die
+//   Lücke verbarg einen Silent-Write-Fail (nachrichten.kanal='system', Reminder-Bug). Jetzt fängt
+//   das Gate JEDEN CHECK-invaliden enum-Literal (schadenart, abrechnungsweg, kanal, …).
+//   REGENERATION (neuer/geänderter enum-CHECK per MCP-Migration; Wert IMMER zuerst in den CHECK):
+//   SELECT cls.relname AS tbl,
+//     (regexp_match(pg_get_constraintdef(con.oid), '\(([a-z_][a-z0-9_]*) = ANY'))[1] AS col,
+//     (SELECT string_agg(m[1], ',' ORDER BY m[1])
+//        FROM regexp_matches(pg_get_constraintdef(con.oid), '''([^'']+)''::', 'g') AS m) AS vals
 //   FROM pg_constraint con JOIN pg_class cls ON cls.oid=con.conrelid
 //   JOIN pg_namespace ns ON ns.oid=cls.relnamespace
 //   WHERE con.contype='c' AND ns.nspname='public'
 //     AND pg_get_constraintdef(con.oid) ILIKE '%= ANY (ARRAY[%'
-//     AND (con.conname ILIKE '%status%' OR con.conname ILIKE '%work_state%' OR con.conname ILIKE '%_phase%');
-//   -> in columns-Map "table.column": [werte] uebertragen.
+//     AND (regexp_match(pg_get_constraintdef(con.oid), '\(([a-z_][a-z0-9_]*) = ANY'))[1] IS NOT NULL
+//   ORDER BY 1,2;
+//   -> je Zeile "tbl.col": vals.split(',') in die columns-Map. (Digit-Spalten wie zb1_status
+//      brauchen [a-z0-9_] im Regex; NULL-OR-Wrapper im def stört nicht, col steht vor '= ANY'.)
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { execSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
