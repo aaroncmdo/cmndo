@@ -42,8 +42,9 @@ import { requirePortalAccess } from './portal-guard'
 
 beforeEach(() => {
   state = {
-    // Default: interne Rolle MIT verifiziertem Faktor + kein Google — damit die
-    // force_password_change-Tests nicht von der F3-2FA-Pflicht abgelenkt werden.
+    // Interne Rolle (admin), Passwort-Login. factors/app_metadata sind fuer
+    // requirePortalAccess irrelevant — das 2FA-Gate lebt seit AAR-939 in der
+    // Middleware (src/lib/supabase/middleware.ts + mfa-gate.ts), nicht hier.
     user: {
       id: 'u-1',
       email: 'a@b.de',
@@ -95,28 +96,11 @@ describe('requirePortalAccess — bestehende Guards (Regression)', () => {
   })
 })
 
-describe('requirePortalAccess — 2FA-Pflicht interne Rollen (F3)', () => {
-  it('leitet interne Rolle OHNE verifizierten Faktor auf /login/2fa', async () => {
-    state.user!.factors = []
-    await expect(requirePortalAccess(['admin'])).rejects.toThrow('REDIRECT:/login/2fa')
-  })
-
-  it('laesst interne Rolle MIT verifiziertem Faktor durch', async () => {
-    const res = await requirePortalAccess(['admin'])
-    expect(res.profile.rolle).toBe('admin')
-  })
-
-  it('Google-Auth ist befreit (kein 2FA-Redirect trotz fehlendem Faktor)', async () => {
-    state.user!.factors = []
-    state.user!.app_metadata = { provider: 'google' }
-    const res = await requirePortalAccess(['admin'])
-    expect(res.profile.rolle).toBe('admin')
-  })
-
-  it('nicht-Pflicht-Rolle (kunde) ohne Faktor wird NICHT gegated', async () => {
-    state.profile = { rolle: 'kunde', vorname: 'K', nachname: 'U', force_password_change: false, auth_provider: 'email' }
-    state.user!.factors = []
-    const res = await requirePortalAccess(['kunde'])
-    expect(res.profile.rolle).toBe('kunde')
-  })
-})
+// Die 2FA-Pflicht (F3) wird bewusst NICHT hier getestet: seit AAR-939 enforced die
+// Middleware (src/lib/supabase/middleware.ts via Supabase-MFA/AAL, Pure-Logik in
+// src/lib/auth/mfa-gate.ts, getestet in mfa-gate.test.ts) das aal2-Gate am Edge —
+// VOR jedem RSC-Render. requirePortalAccess gated absichtlich NICHT auf 2FA (das
+// waere der falsche Layer). Der frueher hier stehende F3-Block war stale: er testete
+// 2FA-Verhalten in requirePortalAccess, das dort nie existierte — 3 der 4 Tests
+// bestanden nur vacuously (requirePortalAccess liest factors/app_metadata gar nicht),
+// der negative Test schlug fehl (kein /login/2fa-Redirect, weil es hier keinen gibt).
