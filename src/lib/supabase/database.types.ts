@@ -20410,6 +20410,7 @@ export type Database = {
           id: string
           quelle: string
           rohdaten: Json | null
+          scan_id: string | null
           schaden_datum: string | null
           schwere: string | null
           state: string
@@ -20424,6 +20425,7 @@ export type Database = {
           id?: string
           quelle?: string
           rohdaten?: Json | null
+          scan_id?: string | null
           schaden_datum?: string | null
           schwere?: string | null
           state?: string
@@ -20438,6 +20440,7 @@ export type Database = {
           id?: string
           quelle?: string
           rohdaten?: Json | null
+          scan_id?: string | null
           schaden_datum?: string | null
           schwere?: string | null
           state?: string
