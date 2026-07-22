@@ -7,6 +7,7 @@ import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { bindeSchadenkarteAnFahrzeug } from '@/lib/schadenkarte/schadenkarte'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
+import { erstelleFlottenSchadenClaim, type Haftungstyp } from '@/lib/flotte/schaden-fortsetzung'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = import('@supabase/supabase-js').SupabaseClient<any, any, any>
@@ -113,4 +114,20 @@ export async function storniereFahrzeugSchaden(
 
   revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
   return { ok: true }
+}
+
+/**
+ * FU3 (operativer-schaden-flow): meldet einen NEUEN Schaden für dieses Fahrzeug, wenn noch
+ * kein ersterfassung-Claim existiert (v.a. selbstverschuldet — kein Gegner-Tap-Flow). Legt
+ * Lead + Claim an (erstelleFlottenSchadenClaim = Auth + geschädigter-Party datengetrieben) und
+ * liefert die claimId → der Client navigiert zum Gutachter-Picker.
+ */
+export async function meldeNeuenFlottenSchaden(
+  vehicleId: string,
+  haftungstyp: Haftungstyp,
+): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const res = await erstelleFlottenSchadenClaim({ vehicleId, userId: user.id, haftungstyp })
+  if (res.ok) revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
+  return res
 }

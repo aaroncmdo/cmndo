@@ -12,7 +12,7 @@ import EmptyState from '@/components/shared/EmptyState'
 import { FahrzeugSchaedenSection } from '@/components/flotte/FahrzeugSchaedenSection'
 import { FahrzeugMiniAktionen } from '@/components/flotte/FahrzeugMiniAktionen'
 import { FahrzeugKarteBindClient } from '@/components/flotte/FahrzeugKarteBindClient'
-import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden } from './actions'
+import { bindeKarteFuerFahrzeug, storniereFahrzeugSchaden, meldeNeuenFlottenSchaden } from './actions'
 import { CarIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -84,7 +84,7 @@ export default async function FahrzeugDetailPage({
           {fahrzeug.kennzeichen ?? 'Fahrzeug'}
         </h1>
         <p className="mt-1 text-sm text-claimondo-shield">Fahrzeug-Details</p>
-        <FahrzeugMiniAktionen fortsetzenClaimId={fortsetzenClaimId} />
+        <FahrzeugMiniAktionen vehicleId={id} fortsetzenClaimId={fortsetzenClaimId} onMelden={meldeNeuenFlottenSchaden} />
       </div>
 
       <SectionCard title="Stammdaten">
