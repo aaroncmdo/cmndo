@@ -503,13 +503,17 @@ export default async function GutachterFallPage({
     restwert: number | null
     nutzungsausfall_tage: number | null
     gutachten_sv_honorar_brutto: number | null
+    gutachten_nutzungsausfall_tagessatz_eur: number | null
+    wiederbeschaffungsdauer_tage: number | null
+    totalschaden: boolean | null
+    gutachten_ocr_manuell_ueberschrieben: boolean | null
   } | null = null
   if (claimIdForStorage) {
     // Cluster F+G PR-2: Reader auf v_gutachten_werte (Dual-Source-View) statt claims direkt
     const { data: cw } = await supabase
       .from('v_gutachten_werte')
       .select(
-        'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto',
+        'gutachten_datum, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, gutachten_sv_honorar_brutto, gutachten_nutzungsausfall_tagessatz_eur, wiederbeschaffungsdauer_tage, totalschaden, gutachten_ocr_manuell_ueberschrieben',
       )
       .eq('claim_id', claimIdForStorage)
       .maybeSingle()
@@ -523,6 +527,10 @@ export default async function GutachterFallPage({
         restwert: cw.restwert !== null ? Number(cw.restwert) : null,
         nutzungsausfall_tage: (cw.nutzungsausfall_tage as number | null) ?? null,
         gutachten_sv_honorar_brutto: cw.gutachten_sv_honorar_brutto !== null ? Number(cw.gutachten_sv_honorar_brutto) : null,
+        gutachten_nutzungsausfall_tagessatz_eur: cw.gutachten_nutzungsausfall_tagessatz_eur !== null ? Number(cw.gutachten_nutzungsausfall_tagessatz_eur) : null,
+        wiederbeschaffungsdauer_tage: cw.wiederbeschaffungsdauer_tage !== null ? Number(cw.wiederbeschaffungsdauer_tage) : null,
+        totalschaden: (cw.totalschaden as boolean | null) ?? null,
+        gutachten_ocr_manuell_ueberschrieben: (cw.gutachten_ocr_manuell_ueberschrieben as boolean | null) ?? null,
       }
     }
   }
