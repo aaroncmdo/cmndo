@@ -18,6 +18,7 @@ import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import type { ScanErgebnis } from '@/lib/flotte/zb1-scan'
 import type { BatchAnlageZeile, BatchAnlageErgebnis } from '@/lib/flotte/zb1-batch-anlage'
 import type { KundeFirma, FlottenFahrzeug, FirmaForm, FahrzeugForm } from '@/lib/kunde/firma-flotte'
+import { ZustandAmpelBadge } from '@/components/shared/ZustandAmpelBadge'
 
 type Props = {
   firma: KundeFirma | null
@@ -30,9 +31,11 @@ type Props = {
   /** ZB1-Batch-Scan (nur flottenmanager-Portal — beide zusammen gesetzt; Kunde laesst sie weg). */
   onScanZb1?: (base64: string) => Promise<{ ok: true; ergebnis: ScanErgebnis } | { ok: false; error: string }>
   onLegeZb1?: (zeilen: BatchAnlageZeile[]) => Promise<BatchAnlageErgebnis[]>
+  /** B (Zustandsdoku): vehicleId -> letzter abgeschlossener Scan (ISO) fuer die Ampel. Nur FM-Portal. */
+  scanAmByVehicleId?: Record<string, string | null>
 }
 
-export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne, detailBasePath, onScanZb1, onLegeZb1 }: Props) {
+export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne, detailBasePath, onScanZb1, onLegeZb1, scanAmByVehicleId }: Props) {
   const router = useRouter()
   const [zb1Offen, setZb1Offen] = useState(false)
   const zb1Verfuegbar = !!onScanZb1 && !!onLegeZb1
@@ -127,6 +130,11 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
                     <p className="truncate text-xs text-claimondo-shield">
                       {[v.hersteller, v.modell].filter(Boolean).join(' ') || 'Fahrzeug'}
                     </p>
+                    {scanAmByVehicleId ? (
+                      <div className="mt-1">
+                        <ZustandAmpelBadge letzterScanAm={scanAmByVehicleId[v.vehicleId] ?? null} />
+                      </div>
+                    ) : null}
                   </div>
                   {detailBasePath ? <ChevronRightIcon className="h-4 w-4 shrink-0 text-claimondo-ondo/60" /> : null}
                 </>
