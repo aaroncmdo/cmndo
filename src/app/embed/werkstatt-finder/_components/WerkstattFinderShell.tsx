@@ -95,6 +95,16 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     const map = mapRef.current
     if (!map) return
     // Map-Pin-Profil (statt nacktem Namen) — createRoot/setDOMContent-Muster wie FinderMap.openSvPopup.
+    // AAR-956-Muster (FinderMap.popupPlatzierung): Popup in den freien Raum oeffnen, Pin frei lassen —
+    // Pin hinter der Desktop-Wizard-Spalte (links) -> nach RECHTS; nah am oberen Rand -> nach UNTEN;
+    // sonst nach OBEN. Verhindert Wizard-Overlap + oberes Clipping (auf Mobil greift nur top/bottom).
+    const popupPlatzierung = (lng: number, lat: number): { anchor: 'left' | 'top' | 'bottom'; offset: [number, number] } => {
+      const p = map.project([lng, lat])
+      const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+      if (desktop && p.x < 640) return { anchor: 'left', offset: [26, -6] }
+      if (p.y < 300) return { anchor: 'top', offset: [0, 16] }
+      return { anchor: 'bottom', offset: [0, -46] }
+    }
     const openWerkstattPopup = (w: WerkstattVorschlag) => {
       if (w.lat == null || w.lng == null) return
       popupRef.current?.remove()
@@ -102,7 +112,8 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<WerkstattProfilePopup w={w} />)
-      const popup = new mapboxgl.Popup({ offset: 22, closeButton: true, maxWidth: '330px', className: 'wf-finder-popup' })
+      const { anchor, offset } = popupPlatzierung(w.lng, w.lat)
+      const popup = new mapboxgl.Popup({ offset, closeButton: true, maxWidth: '330px', anchor, className: 'wf-finder-popup' })
         .setLngLat([w.lng, w.lat])
         .setDOMContent(container)
         .addTo(map)
