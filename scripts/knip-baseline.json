@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-13T18:57:39.339Z",
+  "generatedAt": "2026-07-22T20:42:31.205Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
   "fileCount": 56,
   "files": [
@@ -7,6 +7,7 @@
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
     "src/app/gutachter/auftraege/AuftraegeGrid.tsx",
     "src/app/gutachter/faelle/FaelleFilterBar.tsx",
+    "src/app/gutachter/fall/[id]/cardentity-actions.ts",
     "src/app/gutachter/feldmodus/RerouteToast.tsx",
     "src/app/gutachter/profil/actions.ts",
     "src/app/kunde/_components/KundeMobileDrawer.tsx",
@@ -46,7 +47,6 @@
     "src/lib/faq-bot/ask.ts",
     "src/lib/faq-bot/off-topic-guard.ts",
     "src/lib/finance/fall-finanzen.ts",
-    "src/lib/format/anrede.ts",
     "src/lib/gps/track-position.ts",
     "src/lib/gutachter/onboarding-status.ts",
     "src/lib/gutachter/task-typen.ts",

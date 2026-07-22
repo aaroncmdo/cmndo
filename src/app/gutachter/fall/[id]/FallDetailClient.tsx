@@ -35,10 +35,10 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // CMM-23 Aaron-Layout-Spec: Sidebar links = Stepper + Stammdaten;
 // Section rechts = Termin + Gutachten + hochgeladene Dokumente. Keine
 // Briefing-Sidebar, keine JetztZuTunCard, keine Timeline-Vorschau,
-// keine SvTools (FIN/ZB1 hat der SV in seiner Gutachten-Software),
+// keine SvTools-Sammelkarte (ZB1/Gutachten/Datei-Upload sind anderswo platziert) —
+// nur die schlanke FinNachtragenCard erscheint, falls gar keine FIN hinterlegt ist (S1),
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
-import { StammdatenCard } from './_components/StammdatenCard'
 // CMM-32: Master-Detail-Stammdaten — Accordion mit Inline-Expansion.
 import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
 import { useState } from 'react'
@@ -52,11 +52,11 @@ import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
 import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
 import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
 import { GutachterCopilotPanel } from '@/components/gutachter/GutachterCopilotPanel'
-import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
-// AAR-757: FallakteVollClient aufgelöst, unique Features extrahiert
-import { SvToolsCard } from './_components/SvToolsCard'
+// AAR-757/S1: FallakteVollClient aufgeloest; von den vier SvToolsCard-Flows bleibt nur die
+// FIN-Nachtrag-Karte — die anderen drei sind korrekt anderswo platziert (s. FinNachtragenCard).
+import { FinNachtragenCard } from './_components/FinNachtragenCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
 // gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
@@ -395,6 +395,8 @@ export default function FallDetailClient(props: Props) {
             }}
           />
           <div className="space-y-4">
+            {/* S1: FIN-Nachtrag nur wenn die FIN fehlt — sonst zeigt StammdatenAccordion sie read-only. */}
+            {!fall.fin_vin && <FinNachtragenCard fallId={fall.id as string} />}
             <WeitereDokumenteCard
               fallId={fall.id as string}
               dokumente={(props.dokumente ?? []).map((d) => ({
@@ -410,11 +412,6 @@ export default function FallDetailClient(props: Props) {
             <AnsprechpartnerCard team={team} />
           </div>
         </div>
-
-        {/* CMM-32: alte StammdatenCard-Fallback — vorerst raus */}
-        {false && (
-          <StammdatenCard lead={lead} fall={fall} kundenbetreuer={kundenbetreuer ?? null} />
-        )}
 
         {!!fall.hat_vorschaeden && (
           <div className="rounded-2xl bg-warning-soft/40 border border-warning/30 p-4">
