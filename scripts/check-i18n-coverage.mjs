@@ -19,23 +19,33 @@
 //   --ratchet                    : exit 1 bei NEUEN Luecken ggue. Baseline (CI-Gate)
 //   --update-baseline            : schreibt die Baseline auf den aktuellen Stand
 //
-// NEUE dynamische Namespace-Familie? -> hier in COVERAGE eintragen (messagePath + Union-Quelle).
+// NEUE dynamische Namespace-Familie? -> hier in COVERAGE eintragen (Union-Typ ODER Const-Array,
+// optional subKeys fuer verschachtelte label/hint-Objekte).
 // Pure Logik: scripts/lib/i18n-coverage-scan.mjs (unit-getestet).
 import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
-import { extractUnionValues, findMissing, diffBaseline } from './lib/i18n-coverage-scan.mjs'
+import { extractUnionValues, extractConstArray, findMissing, diffBaseline } from './lib/i18n-coverage-scan.mjs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = join(__dirname, '..')
 const BASELINE_PATH = join(__dirname, 'i18n-coverage-baseline.json')
 const DE = join(ROOT, 'src/i18n/messages/de.json')
 
-// messagePath = Punkt-Pfad in de.json; type = TS-Union, aus der der Key dynamisch gebaut wird.
+// messagePath = Punkt-Pfad in de.json; die Wertemenge kommt entweder aus einer TS-Union (`type`)
+// ODER aus einem `const NAME = [...] as const`-Array (`constName`) — genau eins pro Eintrag setzen.
+// `subKeys` (optional): der Key ist NICHT `<messagePath>.<wert>` selbst, sondern ein Objekt
+// darunter mit diesen Feldern (z.B. QualiOptionen: `quali.optionen.<wert>.{label,hint}`).
 const COVERAGE = [
   { messagePath: 'phasen.main', file: 'src/lib/claims/lifecycle.ts', type: 'ClaimMainPhase' },
   { messagePath: 'phasen.subIntern', file: 'src/lib/claims/lifecycle.ts', type: 'ClaimSubPhase' },
   { messagePath: 'phasen.subKunde', file: 'src/lib/claims/lifecycle.ts', type: 'ClaimSubPhase' },
+  {
+    messagePath: 'selfService.quali.optionen',
+    file: 'src/components/self-service/QualiOptionen.tsx',
+    constName: 'QUALI_VALUES',
+    subKeys: ['label', 'hint'],
+  },
 ]
 
 const mode = process.argv.includes('--ratchet')
@@ -50,12 +60,16 @@ const hardErrors = []
 
 for (const entry of COVERAGE) {
   const src = readFileSync(join(ROOT, entry.file), 'utf8')
-  const values = extractUnionValues(src, entry.type)
+  const symbol = entry.type ?? entry.constName
+  const kind = entry.type ? 'Union' : 'Const-Array'
+  const values = entry.type
+    ? extractUnionValues(src, entry.type)
+    : extractConstArray(src, entry.constName)
   if (!values) {
-    hardErrors.push(`Union ${entry.type} in ${entry.file} nicht gefunden (umbenannt? -> COVERAGE anpassen)`)
+    hardErrors.push(`${kind} ${symbol} in ${entry.file} nicht gefunden (umbenannt? -> COVERAGE anpassen)`)
     continue
   }
-  const { error, missing } = findMissing(values, messages, entry.messagePath)
+  const { error, missing } = findMissing(values, messages, entry.messagePath, entry.subKeys)
   if (error) {
     hardErrors.push(`${error} (COVERAGE-Eintrag ${entry.messagePath})`)
     continue
