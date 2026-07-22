@@ -25,6 +25,11 @@ export type FlottenFahrzeug = {
   kennzeichen: string | null
   hersteller: string | null
   modell: string | null
+  fin: string | null
+  hsn: string | null
+  tsn: string | null
+  farbe: string | null
+  kilometerstand: number | null
   notiz: string | null
 }
 
@@ -73,7 +78,9 @@ export async function getKundeFirma(db: AnyDb, userId: string): Promise<KundeFir
 export async function getKundeFlotte(db: AnyDb, firmaId: string): Promise<FlottenFahrzeug[]> {
   const { data } = await db
     .from('flotten_fahrzeuge')
-    .select('id, notiz, vehicle:vehicle_id(id, kennzeichen_aktuell, hersteller, modell_haupttyp)')
+    .select(
+      'id, notiz, vehicle:vehicle_id(id, kennzeichen_aktuell, hersteller, modell_haupttyp, fin, hsn, tsn, farbe_klartext, aktueller_kilometerstand)',
+    )
     .eq('firma_id', firmaId)
     .order('created_at', { ascending: false })
   return (data ?? []).map((row: Record<string, unknown>) => {
@@ -85,6 +92,11 @@ export async function getKundeFlotte(db: AnyDb, firmaId: string): Promise<Flotte
       kennzeichen: (v?.kennzeichen_aktuell as string | null) ?? null,
       hersteller: (v?.hersteller as string | null) ?? null,
       modell: (v?.modell_haupttyp as string | null) ?? null,
+      fin: (v?.fin as string | null) ?? null,
+      hsn: (v?.hsn as string | null) ?? null,
+      tsn: (v?.tsn as string | null) ?? null,
+      farbe: (v?.farbe_klartext as string | null) ?? null,
+      kilometerstand: (v?.aktueller_kilometerstand as number | null) ?? null,
       notiz: (row.notiz as string | null) ?? null,
     }
   })
