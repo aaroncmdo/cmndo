@@ -26,6 +26,7 @@ import { WillkommenSvEmail, subject as willkommenSvSubject } from './templates/W
 import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from './templates/WillkommenSvAnBuero'
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
+import { GegnerBestaetigungEmail, subject as gegnerBestaetigungSubject } from './templates/GegnerBestaetigung'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
 import { PasswortResetEmail, subject as passwortResetSubject } from './templates/PasswortReset'
 import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
@@ -1254,6 +1255,36 @@ export async function sendMiniWizardMagicLink(
       html,
       empfaengerTyp: 'kunde',
       template: 'mini_wizard_magic_link',
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
+  }
+}
+
+// T3 (operativer-schaden-flow): Unfallgegner-Bestaetigungs-Magic-Link — Email-Tier der
+// WA->SMS->Email-Kaskade in gegner-invite.ts. Claimondo-Branding (Gegner ist Dritter).
+// Result-Object (kein throw), Non-critical Caller (fail-soft in der Kaskade).
+export async function sendGegnerBestaetigungLink(params: {
+  email: string
+  link: string
+  name?: string | null
+}): Promise<{ success: boolean; error?: string }> {
+  if (!params.email || !params.email.includes('@')) {
+    return { success: false, error: 'Keine gültige Email' }
+  }
+  const props = { name: params.name ?? '', link: params.link, locale: 'de' }
+  try {
+    const html = await render(GegnerBestaetigungEmail(props))
+    await sendEmail({
+      to: params.email,
+      subject: gegnerBestaetigungSubject(props),
+      html,
+      empfaengerTyp: 'kunde',
+      template: 'gegner_bestaetigung_magic_link',
     })
     return { success: true }
   } catch (err) {
