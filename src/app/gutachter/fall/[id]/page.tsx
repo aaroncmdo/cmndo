@@ -23,7 +23,6 @@ import { WerkstattEmpfehlenCard } from './_components/WerkstattEmpfehlenCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
-import SvEinzuholenBanner from '@/components/gutachter/SvEinzuholenBanner'
 import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
