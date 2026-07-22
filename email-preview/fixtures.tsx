@@ -6,6 +6,7 @@ import { KundeWelcomeEmail, subject as kundeWelcomeSubject } from '@/lib/email/g
 import LeadReminder1 from '@/lib/email/google/templates/LeadReminder1'
 import LeadReminder2 from '@/lib/email/google/templates/LeadReminder2'
 import LeadReminder3 from '@/lib/email/google/templates/LeadReminder3'
+import LeadReminder4 from '@/lib/email/google/templates/LeadReminder4'
 import { FlowLinkVersandEmail, subject as flowLinkSubject } from '@/lib/email/google/templates/FlowLinkVersand'
 import { KundeTerminGegenvorschlagEmail, subject as terminGegenvorschlagSubject } from '@/lib/email/google/templates/KundeTerminGegenvorschlag'
 import { MiniWizardMagicLinkEmail, subject as miniWizardSubject } from '@/lib/email/google/templates/MiniWizardMagicLink'
@@ -95,6 +96,7 @@ export const PREVIEWS: Preview[] = [
   { name: 'LeadReminder1', tier: 1, subject: 'Ihre Schadenmeldung ist fast fertig', element: LeadReminder1({ vorname: 'Max', resumeUrl: 'https://app.claimondo.de/schaden-melden/fortsetzen/cl-2026-00042-9f3a7b2c1d' }) },
   { name: 'LeadReminder2', tier: 1, subject: 'Sollen wir Ihren Schadenfall noch bearbeiten?', element: LeadReminder2({ vorname: 'Max', resumeUrl: 'https://app.claimondo.de/schaden-melden/fortsetzen/cl-2026-00042-7f3a9b2e' }) },
   { name: 'LeadReminder3', tier: 1, subject: 'Letzte Chance: Ihre Schadenmeldung läuft ab', element: LeadReminder3({ vorname: 'Max', resumeUrl: 'https://app.claimondo.de/schaden-melden/fortsetzen/cl-2026-00042-rt8f3a1c' }) },
+  { name: 'LeadReminder4', tier: 1, subject: 'Wirklich letzte Erinnerung — Ihre Schadenmeldung schließt bald', element: LeadReminder4({ vorname: 'Max', resumeUrl: 'https://app.claimondo.de/schaden-melden/fortsetzen/cl-2026-00042-9e1c7b3a' }) },
   { name: 'FlowLinkVersand', tier: 1, subject: flowLinkSubject(flowLinkProps), element: FlowLinkVersandEmail(flowLinkProps) },
   { name: 'KundeTerminGegenvorschlag', tier: 1, subject: terminGegenvorschlagSubject(terminGegenvorschlagProps), element: KundeTerminGegenvorschlagEmail(terminGegenvorschlagProps) },
   { name: 'MiniWizardMagicLink', tier: 1, subject: miniWizardSubject(miniWizardProps), element: MiniWizardMagicLinkEmail(miniWizardProps) },
