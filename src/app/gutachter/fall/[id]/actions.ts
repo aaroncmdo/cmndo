@@ -14,6 +14,7 @@ import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
+import { filterWerteFelder } from '@/lib/gutachter/gutachten-werte-felder'
 
 type ActionResult = { success?: boolean; error?: string }
 
@@ -829,5 +830,55 @@ export async function meldeVerspaetung(
   })
 
   revalidatePath(`/gutachter/fall/${termin.fall_id}`)
+  return { success: true }
+}
+
+// S2: SV editiert/korrigiert die Gutachten-Bewertungswerte. Ownership-Gate identisch zu
+// saveFinVinGutachter (faelle_claim_bridge + claims.sv_id). Schreibt über die BESTEHENDE
+// apply_gutachten_ocr-RPC (wie die Admin-Korrektur) + manuell_ueberschrieben=true (schützt vor
+// OCR-Re-Run UND ist das "vom Gutachter geprüft"-Marker-Signal; in v_gutachten_werte projiziert).
+export async function updateGutachtenWerteSv(
+  fallId: string,
+  patch: Record<string, string | number | boolean | null>,
+): Promise<ActionResult> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
+
+  const { data: fall } = await supabase
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claims!fk_bridge_claim!inner(sv_id)')
+    .eq('fall_id', fallId)
+    .eq('claims.sv_id', sv.id)
+    .single()
+  if (!fall) return { error: 'Fall nicht gefunden' }
+  const claimId = (fall.claim_id as string | null) ?? null
+  if (!claimId) return { error: 'Fall hat keinen verknüpften Claim' }
+
+  const cleaned = filterWerteFelder(patch)
+  if (Object.keys(cleaned).length === 0) return { error: 'Keine zulässigen Werte im Patch' }
+  cleaned.gutachten_ocr_manuell_ueberschrieben = true
+
+  const admin = createAdminClient()
+  const { error } = await admin.rpc('apply_gutachten_ocr', { p_claim_id: claimId, p_values: cleaned })
+  if (error) return { error: error.message }
+
+  // Non-critical: Audit-Timeline darf den Save nicht kippen.
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: 'Gutachten-Werte vom Gutachter aktualisiert',
+      erstellt_von: user.id,
+    })
+  } catch (e) {
+    console.error('[updateGutachtenWerteSv] timeline insert', e)
+  }
+
+  revalidatePath(`/gutachter/fall/${fallId}`)
+  revalidatePath(`/kunde/faelle/${claimId}`)
   return { success: true }
 }

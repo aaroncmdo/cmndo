@@ -35,6 +35,8 @@ export type KundeGutachtenWerte = {
   ocrProcessedAt: string | null
   nutzungsausfallTagessatzEur: number | null
   mietwagenTagessatzEur: number | null
+  // S2: SV-geprüft-Marker — treibt das „vom Gutachter geprüft"-Badge in SaeuleMeinGeld.
+  manuellUeberschrieben: boolean | null
 }
 
 // P3 (GeldZone): Props-Basis fuer KundeAusfallEntschaedigungCard (Nutzungsausfall/Mietwagen, XOR).
@@ -238,7 +240,7 @@ export async function getKundeClaimView(
       // Gutachten-F+G-Werte aus der Dual-Source-View v_gutachten_werte (P3: +ocr/tagessaetze fuer GeldZone).
       admin
         .from('v_gutachten_werte')
-        .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur')
+        .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, gutachten_ocr_manuell_ueberschrieben')
         .eq('claim_id', resolvedClaimId)
         .maybeSingle(),
       // P3 (GeldZone): Kunden-Zahlungsweg der Auszahlung (faelle_kunde_view) — Card-Gate = Row existiert.
@@ -498,6 +500,7 @@ export async function getKundeClaimView(
         ocrProcessedAt: (gw.gutachten_ocr_processed_at as string | null) ?? null,
         nutzungsausfallTagessatzEur: num(gw.gutachten_nutzungsausfall_tagessatz_eur),
         mietwagenTagessatzEur: num(gw.gutachten_mietwagen_tagessatz_eur),
+        manuellUeberschrieben: (gw.gutachten_ocr_manuell_ueberschrieben as boolean | null) ?? null,
       }
     : null
   // Ausfall-Card-Basis (spiegelt page.tsx `ausfallProps`): gerendert sobald claim-/gutachten-Daten
