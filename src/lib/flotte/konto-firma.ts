@@ -33,6 +33,32 @@ export async function getFlottenmanagerFirma(db: AnyDb, userId: string): Promise
   }
 }
 
+/** WhatsApp-Nummer des eingeloggten Flottenmanagers (aktives Konto). db = Admin/Service-Role.
+ *  Fuer die FM-WA-Schaden-Benachrichtigung (T2 operativer-schaden-flow) — NULL => keine WA-Notif. */
+export async function getFlottenmanagerWhatsapp(db: AnyDb, userId: string): Promise<string | null> {
+  const { data } = await db
+    .from('firmen_flotten_konten')
+    .select('whatsapp_nummer')
+    .eq('user_id', userId)
+    .eq('status', 'aktiv')
+    .maybeSingle()
+  return (data?.whatsapp_nummer as string | null) ?? null
+}
+
+/** WhatsApp-Nummern ALLER aktiven Flottenmanager einer Firma (T4 operativer-schaden-flow).
+ *  Nur nicht-leere Nummern. db = Admin/Service-Role. Fuer die FM-Schaden-Benachrichtigung. */
+export async function getFlottenmanagerWhatsappNummern(db: AnyDb, firmaId: string): Promise<string[]> {
+  const { data } = await db
+    .from('firmen_flotten_konten')
+    .select('whatsapp_nummer')
+    .eq('firma_id', firmaId)
+    .eq('status', 'aktiv')
+    .not('whatsapp_nummer', 'is', null)
+  return ((data ?? []) as Array<{ whatsapp_nummer: string | null }>)
+    .map((r) => r.whatsapp_nummer)
+    .filter((n): n is string => Boolean(n && n.trim()))
+}
+
 /** Dispatch nach Rolle: kunde -> personen.firma_id; flottenmanager -> firmen_flotten_konten. */
 export async function resolveKontoFirma(db: AnyDb, userId: string, rolle: string): Promise<KundeFirma | null> {
   if (rolle === 'flottenmanager') return getFlottenmanagerFirma(db, userId)
