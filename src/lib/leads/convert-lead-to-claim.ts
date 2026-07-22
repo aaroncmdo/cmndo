@@ -547,6 +547,13 @@ export async function convertLeadToClaim(
             : null,
     })
   ;(claimsInsert as Record<string, unknown>).abrechnungsweg = resolvedAbrechnungsweg
+  // AAR-956 T2: Roh-Inputs (schuldfrage, eigene_versicherung vom Lead) ZUSAETZLICH zum abgeleiteten
+  // abrechnungsweg am Claim persistieren — sonst bleibt nur der abgeleitete Wert, die Original-
+  // Eingaben (fuer Analyse/Audit/Re-Derive) gehen verloren. Additive nullable Spalten (Mig
+  // 20260722202021), Record-Cast wie die uebrigen type-lagged Convert-Mappings hier.
+  ;(claimsInsert as Record<string, unknown>).schuldfrage = (lead.schuldfrage as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).eigene_versicherung =
+    (lead.eigene_versicherung as string | null) ?? null
   // Convert-Mapping (Aaron 14.07.) — Record-Cast wg. Type-Lag (Spalten additiv via #4238):
   //   F2: interne_notizen = Dispatcher-Notiz (leads.notiz) — wird vom AI-Briefing gelesen
   //       (briefing-prompt.ts); bisher verwaist (nie nach claims gemappt).
