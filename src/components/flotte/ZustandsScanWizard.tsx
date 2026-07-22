@@ -92,8 +92,11 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
       }
       setPreviews((prev) => ({ ...prev, [perspektive]: dataUrl }))
       setQualitaeten((prev) => ({ ...prev, [perspektive]: res.qualitaet }))
-    } catch {
-      setFehler('Foto konnte nicht verarbeitet werden.')
+    } catch (err) {
+      // Ursache mitgeben (Grossfoto/HEIC-Diagnose) statt sie in einer generischen Meldung zu verstecken.
+      console.error('[zustandsdoku] Foto-Verarbeitung fehlgeschlagen:', err)
+      const grund = err instanceof Error && err.message ? ` (${err.message})` : ''
+      setFehler(`Foto konnte nicht verarbeitet werden${grund}. Bitte erneut versuchen.`)
     } finally {
       setBusy(null)
     }
