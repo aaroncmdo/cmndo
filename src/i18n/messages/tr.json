@@ -4556,6 +4556,10 @@
       "ruegefall": {
         "banner": "Sigorta itiraz yöneltti. Ortak hukuk büromuz bununla ilgileniyor."
       },
+      "haftpflichtReassurance": {
+        "titel": "Kusuru sizde olmayan kaza mı? 0 € ödersiniz.",
+        "text": "Kusur karşı taraftaysa, onların zorunlu trafik sigortası tüm zararınızı karşılar — ekspertiz, onarım, değer kaybı ve avukat (§ 249 BGB). Hiçbir katılım payı ödemezsiniz."
+      },
       "fehler": {
         "titel": "Yükleme hatası",
         "text": "Lütfen tekrar deneyin."

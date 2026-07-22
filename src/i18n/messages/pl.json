@@ -4556,6 +4556,10 @@
       "ruegefall": {
         "banner": "Ubezpieczenie sprawcy zgłosiło zastrzeżenia. Nasza kancelaria partnerska zajmuje się tą sprawą."
       },
+      "haftpflichtReassurance": {
+        "titel": "Wypadek nie z Twojej winy? Płacisz 0 €.",
+        "text": "Jeśli winę ponosi druga strona, jej ubezpieczenie OC pokrywa całą Twoją szkodę — ekspertyzę, naprawę, utratę wartości i adwokata (§ 249 BGB). Nie płacisz żadnego udziału własnego."
+      },
       "fehler": {
         "titel": "Błąd podczas ładowania",
         "text": "Proszę spróbować ponownie."
