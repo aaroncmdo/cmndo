@@ -11,6 +11,7 @@ import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getStorageUrl } from '@/lib/storage/url'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 import { analysiereFotos, type ZustandFund } from '@/lib/vehicles/zustand-scan-ki'
+import { bewerteFotoQualitaet, type FotoQualitaet } from '@/lib/vehicles/zustand-foto-qualitaet'
 import { PFLICHT_PERSPEKTIVEN, OPTIONALE_PERSPEKTIVEN } from '@/lib/vehicles/zustand-perspektiven'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,7 +66,7 @@ export async function ladeFotoHoch(
   dataUrl: string,
   istNahaufnahme: boolean,
   vorschadenId?: string | null,
-): Promise<{ ok: true; fotoId: string; storagePath: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; fotoId: string; storagePath: string; qualitaet: FotoQualitaet | null } | { ok: false; error: string }> {
   const { user } = await requirePortalAccess(['flottenmanager'])
   const db = createAdminClient() as AnyDb
   const vehicleId = await scanVehicleId(db, user.id, scanId)
@@ -97,7 +98,23 @@ export async function ladeFotoHoch(
     .select('id')
     .single()
   if (error || !data) return { ok: false, error: error?.message ?? 'Foto-Datensatz fehlgeschlagen.' }
-  return { ok: true, fotoId: data.id as string, storagePath }
+
+  // Z3: Live-Qualitaets-Ampel — nur fuer Perspektiv-Fotos (nicht Nahaufnahmen). Fail-soft:
+  // Vision-Fehler -> qualitaet null (Kachel ohne Badge), der Upload bleibt erfolgreich.
+  let qualitaet: FotoQualitaet | null = null
+  if (!istNahaufnahme) {
+    const url = await getStorageUrl(db, BUCKET, storagePath, { context: 'ui' })
+    if (url) {
+      qualitaet = await bewerteFotoQualitaet(url, perspektive)
+      if (qualitaet) {
+        await db
+          .from('vehicle_scan_fotos')
+          .update({ qualitaet_prozent: qualitaet.prozent, qualitaet_hinweis: qualitaet.hinweis })
+          .eq('id', data.id)
+      }
+    }
+  }
+  return { ok: true, fotoId: data.id as string, storagePath, qualitaet }
 }
 
 export async function analysiereZustandsFotos(

@@ -13,7 +13,11 @@ import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import type { MatchGrund } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { revalidatePath } from 'next/cache'
 
-export type EmpfehlungWerkstatt = WerkstattFinderRow & { gruende: MatchGrund[] }
+export type EmpfehlungWerkstatt = WerkstattFinderRow & {
+  gruende: MatchGrund[]
+  google_rating?: number | null
+  google_review_count?: number | null
+}
 
 export type EmpfehlungView = {
   status: string
@@ -27,7 +31,7 @@ export type EmpfehlungView = {
 // Spaltennamen sind gegen Bestandscode verifiziert (finder.ts SELECT_COLS,
 // gutachter-finder-actions.ts, page.tsx v_gutachten_werte).
 const WERKSTATT_COLS =
-  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert'
+  'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert,google_rating,google_review_count'
 
 // „Weitere Werkstaetten in der Naehe" (Plan T5, war P-later): der Kunde darf ueber die
 // 1-3 Empfehlungen des Gutachters hinausschauen, wenn keine davon passt.
@@ -84,7 +88,7 @@ export async function getWerkstattEmpfehlungByToken(
     .select(WERKSTATT_COLS)
     .in('id', ids.length ? ids : ['00000000-0000-0000-0000-000000000000'])
   const wById = new Map(
-    ((wRows ?? []) as unknown as Array<Omit<WerkstattFinderRow, 'distanz_km' | 'passt'> & { verifiziert: boolean | null }>).map(
+    ((wRows ?? []) as unknown as Array<Omit<WerkstattFinderRow, 'distanz_km' | 'passt'> & { verifiziert: boolean | null; google_rating?: number | null; google_review_count?: number | null }>).map(
       (w) => [w.id, w],
     ),
   )

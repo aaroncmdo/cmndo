@@ -16,12 +16,16 @@ import {
   alleErfasst,
 } from '@/lib/vehicles/zustand-perspektiven'
 import type { ZustandFund } from '@/lib/vehicles/zustand-scan-ki'
+import type { FotoQualitaet } from '@/lib/vehicles/zustand-foto-qualitaet'
+import { ZustandsQualitaetsBadge } from '@/components/shared/ZustandsQualitaetsBadge'
 
 type Phase = 'idle' | 'capturing' | 'analysing' | 'review' | 'done'
 type FundEntscheidung = { bestaetigt: boolean; nahaufnahmeFotoId: string | null }
 
 type StartResult = { ok: true; scanId: string } | { ok: false; error: string }
-type FotoResult = { ok: true; fotoId: string; storagePath: string } | { ok: false; error: string }
+type FotoResult =
+  | { ok: true; fotoId: string; storagePath: string; qualitaet: FotoQualitaet | null }
+  | { ok: false; error: string }
 type AnalyseResult = { ok: true; funde: ZustandFund[] } | { ok: false; error: string }
 type FinalResult = { ok: true; angelegt: number } | { ok: false; error: string }
 
@@ -54,7 +58,8 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
   const router = useRouter()
   const [phase, setPhase] = useState<Phase>('idle')
   const [scanId, setScanId] = useState<string | null>(null)
-  const [erfasst, setErfasst] = useState<Record<string, boolean>>({})
+  const [previews, setPreviews] = useState<Record<string, string>>({})
+  const [qualitaeten, setQualitaeten] = useState<Record<string, FotoQualitaet | null>>({})
   const [busy, setBusy] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [funde, setFunde] = useState<ZustandFund[]>([])
@@ -62,7 +67,6 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
   const [kilometerstand, setKilometerstand] = useState('')
   const [angelegt, setAngelegt] = useState(0)
 
-  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
   const nahRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
   async function starten() {
@@ -86,7 +90,8 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
         setFehler(res.error)
         return
       }
-      setErfasst((prev) => ({ ...prev, [perspektive]: true }))
+      setPreviews((prev) => ({ ...prev, [perspektive]: dataUrl }))
+      setQualitaeten((prev) => ({ ...prev, [perspektive]: res.qualitaet }))
     } catch {
       setFehler('Foto konnte nicht verarbeitet werden.')
     } finally {
@@ -259,47 +264,80 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
   }
 
   // phase === 'capturing'
-  const pflichtErfasst = alleErfasst(Object.keys(erfasst).filter((k) => erfasst[k]))
+  const pflichtErfasst = alleErfasst(Object.keys(previews))
+  const pflichtAnzahl = PFLICHT_PERSPEKTIVEN.length
+  const pflichtDa = PFLICHT_PERSPEKTIVEN.filter((p) => previews[p]).length
   return (
     <div className="space-y-3">
       <p className="text-body-sm text-claimondo-ondo">
-        Fotografieren Sie das Fahrzeug aus allen Pflicht-Perspektiven. Am Ende erkennt die KI mögliche Schäden.
+        Fotografieren Sie das Fahrzeug aus allen Pflicht-Perspektiven. Jedes Foto wird sofort auf Bild-Qualität
+        geprüft — bei Rot bitte neu aufnehmen. Am Ende erkennt die KI mögliche Schäden.
       </p>
-      <div className="space-y-2">
+      <p className="text-caption text-claimondo-ondo/60">
+        {pflichtDa}/{pflichtAnzahl} Pflicht-Fotos · Kachel antippen = neu aufnehmen
+      </p>
+      <div className="grid grid-cols-3 gap-2">
         {ALLE_PERSPEKTIVEN.map((p) => {
           const optional = (OPTIONALE_PERSPEKTIVEN as readonly string[]).includes(p)
+          const preview = previews[p]
+          const qual = qualitaeten[p]
+          const laeuft = busy === p
           return (
-            <div key={p} className="flex items-center justify-between gap-2 rounded-ios-lg border border-claimondo-border p-2.5">
-              <span className="text-body-sm text-claimondo-navy">
-                {PERSPEKTIVE_LABEL[p] ?? p}
-                {optional && <span className="text-claimondo-ondo/50"> (optional)</span>}
-              </span>
+            <label
+              key={p}
+              className={`relative block aspect-square w-full cursor-pointer overflow-hidden rounded-ios-md border ${
+                preview ? 'border-claimondo-border' : 'border-dashed border-claimondo-border bg-claimondo-bg'
+              }`}
+            >
               <input
-                ref={(el) => {
-                  fileRefs.current[p] = el
-                }}
                 type="file"
                 accept="image/*"
                 capture="environment"
                 className="hidden"
+                disabled={laeuft}
                 onChange={(ev) => fotoGewaehlt(p, ev.target.files?.[0])}
               />
-              <Button
-                variant={erfasst[p] ? 'ghost' : 'navy'}
-                size="sm"
-                loading={busy === p}
-                iconLeft={erfasst[p] ? <CheckIcon className="h-4 w-4" /> : <CameraIcon className="h-4 w-4" />}
-                onClick={() => fileRefs.current[p]?.click()}
-              >
-                {erfasst[p] ? 'Ersetzen' : 'Foto'}
-              </Button>
-            </div>
+              {preview ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={preview}
+                    alt={PERSPEKTIVE_LABEL[p] ?? p}
+                    className="absolute inset-0 h-full w-full object-cover"
+                  />
+                  {qual ? (
+                    <span className="absolute right-1 top-1">
+                      <ZustandsQualitaetsBadge prozent={qual.prozent} hinweis={qual.hinweis} />
+                    </span>
+                  ) : null}
+                  <span className="absolute left-1 top-1 grid h-6 w-6 place-items-center rounded-full bg-claimondo-navy/55 text-white">
+                    <CameraIcon className="h-3.5 w-3.5" />
+                  </span>
+                  <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/65 to-transparent px-1.5 pb-1 pt-4 text-caption font-medium text-white">
+                    {PERSPEKTIVE_LABEL[p] ?? p}
+                  </span>
+                </>
+              ) : (
+                <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center">
+                  <CameraIcon className="h-6 w-6 text-claimondo-ondo" />
+                  <span className="text-caption font-medium text-claimondo-ondo">
+                    {PERSPEKTIVE_LABEL[p] ?? p}
+                    {optional && <span className="text-claimondo-ondo/50"> (opt.)</span>}
+                  </span>
+                </span>
+              )}
+              {laeuft ? (
+                <span className="absolute inset-0 grid place-items-center bg-white/60 text-caption font-medium text-claimondo-navy">
+                  Prüfe …
+                </span>
+              ) : null}
+            </label>
           )
         })}
       </div>
       {fehler && <p className="text-caption text-danger-strong">{fehler}</p>}
       <Button variant="ondo" size="sm" disabled={!pflichtErfasst} onClick={analysieren}>
-        Fertig — Schäden erkennen
+        Fertig — Schäden erkennen{pflichtErfasst ? '' : ` (noch ${pflichtAnzahl - pflichtDa})`}
       </Button>
     </div>
   )

@@ -47,73 +47,8 @@ export async function saveBankdaten(
     beschreibung: `IBAN: ${iban.slice(0, 4)}****${iban.slice(-4)}, Kontoinhaber: ${kontoinhaber}`,
     erstellt_von: user.id,
   })
-  revalidatePath(`/kunde/faelle/${fallId}`)
-  return { success: true }
-}
-
-// KFZ-206: Pflichtdokument hochladen (Kunden-Portal)
-export async function uploadPflichtdokumentKunde(
-  fallId: string,
-  pflichtdokumentId: string,
-  formData: FormData,
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
-
-  const file = formData.get('file') as File
-  if (!file || file.size === 0) return { success: false, error: 'Keine Datei' }
-
-  const admin = createAdminClient()
-  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
-
-  // Claim-Pfad wenn claim_id vorhanden, sonst Fallback auf Legacy-Pfad
-  const claimId = await resolveClaimId(admin, fallId)
-  const ext = file.name.split('.').pop() ?? 'bin'
-  // AAR-862: claims/ (Plural) als kanonischer Pfad
-  const path = claimId
-    ? `claims/${claimId}/kunde-nachreichung/${Date.now()}.${ext}`
-    : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await admin.storage.from('fall-dokumente').upload(path, file)
-  if (uploadErr) return { success: false, error: uploadErr.message }
-
-  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
-  if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
-  // CMM-49 Schema-Drift-Fix (15.07.): pflichtdokumente hat kein 'titel' (nur dokument_typ)
-  // -> select('titel, dokument_typ') warf PostgREST-400, pd blieb null, dokument_typ fiel
-  // faelschlich auf 'kundendokument' zurueck.
-  const { data: pd } = await supabase
-    .from('pflichtdokumente')
-    .select('dokument_typ')
-    .eq('id', pflichtdokumentId)
-    .single()
-
-  const now = new Date().toISOString()
-  // CMM-49 Schema-Drift-Fix (15.07.): pflichtdokumente hat dokument_url (nicht datei_url)
-  // und KEIN datei_name -> der Update schlug bisher komplett fehl, der Pflicht-Slot wurde
-  // nie auf 'hochgeladen' gesetzt. Dateiname lebt in fall_dokumente.original_filename (s.u.).
-  await supabase.from('pflichtdokumente').update({
-    status: 'hochgeladen',
-    dokument_url: publicUrl,
-    hochgeladen_am: now,
-  }).eq('id', pflichtdokumentId)
-
-  // AAR-553: fall_dokumente statt dokumente
-  await supabase.from('fall_dokumente').insert({
-    fall_id: fallId,
-    dokument_typ: pd?.dokument_typ ?? 'kundendokument',
-    storage_path: path,
-    original_filename: file.name,
-    groesse_bytes: file.size,
-    mime_type: file.type || null,
-    kategorie: 'kundendokument',
-    quelle: 'kunde',
-    hochgeladen_von_user_id: user.id,
-    uploaded_by_kunde: true,
-    sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
-  })
-  revalidatePath(`/kunde/faelle/${fallId}`)
+  // K5: Route ist claimId-kanonisch — den claimId-Pfad revalidieren (fallId zeigt auf niemanden).
+  revalidatePath(`/kunde/faelle/${ownership.claimId ?? fallId}`)
   return { success: true }
 }
 
@@ -190,7 +125,8 @@ export async function waehleGegenvorschlagSlot(
       await generateReminderForTermin(terminId)
     } catch (err) { console.error('[KFZ-136] Reminder-Gen Gegenvorschlag:', err) }
 
-    revalidatePath(`/kunde/faelle/${fallId}`)
+    // K5: claimId-Pfad revalidieren (Route ist claimId-kanonisch).
+    revalidatePath(`/kunde/faelle/${ownership.claimId ?? fallId}`)
     return { success: true }
   } catch (err) {
     console.error('[waehleGegenvorschlagSlot]', err)
@@ -202,29 +138,38 @@ export async function waehleGegenvorschlagSlot(
 export async function updateZahlungsweg(
   fallId: string,
   zahlungsweg: string,
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false }
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const admin = createAdminClient()
   const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
-  if (!ownership.ok) return { success: false }
+  if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
   // CMM-65 Part B: zahlungsweg ({kundenkonto,werkstatt_direkt} = Auszahlungs-ZIEL
   // des Kunden) lebt jetzt claims-nativ — NICHT claim_payments.zahlungsweg
   // ({ueberweisung,scheck,bar,verrechnung} = Zahlungs-METHODE; gleicher Name,
   // andere Semantik + CHECK-Domain). assertKundeOwnsFall liefert die claimId
   // (alle faelle haben claim_id NOT NULL).
+  // K3 (b0e963b6 22.07.): Write-Fehler NICHT mehr verschlucken — sonst meldet die UI
+  // faelschlich "gespeichert", waehrend das Auszahlungsziel still falsch bleibt.
   if (ownership.claimId) {
-    await admin.from('claims').update({ zahlungsweg }).eq('id', ownership.claimId)
+    const { error } = await admin.from('claims').update({ zahlungsweg }).eq('id', ownership.claimId)
+    if (error) return { success: false, error: error.message }
   }
-  await admin.from('timeline').insert({
-    fall_id: fallId,
-    typ: 'system',
-    titel: `Zahlungsweg gewählt: ${zahlungsweg === 'kundenkonto' ? 'Kundenkonto' : 'Werkstatt direkt'}`,
-  })
+  // Timeline ist non-critical (best-effort) — ein Insert-Fail darf den Zahlungsweg-Save nicht kippen.
+  try {
+    await admin.from('timeline').insert({
+      fall_id: fallId,
+      typ: 'system',
+      titel: `Zahlungsweg gewählt: ${zahlungsweg === 'kundenkonto' ? 'Kundenkonto' : 'Werkstatt direkt'}`,
+    })
+  } catch (err) {
+    console.error('[updateZahlungsweg] timeline insert', err)
+  }
 
-  revalidatePath(`/kunde/faelle/${fallId}`)
+  // K5: Route ist claimId-kanonisch — den claimId-Pfad revalidieren (fallId zeigt auf niemanden).
+  revalidatePath(`/kunde/faelle/${ownership.claimId ?? fallId}`)
   return { success: true }
 }
