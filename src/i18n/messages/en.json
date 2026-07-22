@@ -4556,6 +4556,10 @@
       "ruegefall": {
         "banner": "The insurance has raised objections. Our partner law firm is handling this."
       },
+      "haftpflichtReassurance": {
+        "titel": "Accident that wasn't your fault? You pay €0.",
+        "text": "If the other party is at fault, their motor liability insurance covers your entire loss — appraisal, repair, diminished value and lawyer (§ 249 BGB). You pay no deductible."
+      },
       "fehler": {
         "titel": "Error loading",
         "text": "Please try again."

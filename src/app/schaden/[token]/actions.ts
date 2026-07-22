@@ -145,6 +145,14 @@ export async function submitSchadenGegner(
       gegner_versicherungsnummer: data.versicherungsnummer || null,
       gegner_schadennummer: data.schadennummer || null,
       unfallhergang: data.hergang || null,
+      // FU1 (operativer-schaden-flow): der Schadenkarte-Gegner-Flow ist per Definition
+      // Haftpflicht (der Gegner hat die Karte getappt = Gegner verursacht) -> schuldfrage
+      // 'gegner' fuer die /flow-Haftpflicht/Kasko-Weiche (leads_schuldfrage_check).
+      schuldfrage: 'gegner',
+      // FU2: Unfallort (Schadenlocation, GPS am Unfallort) — getrennt vom Fahrzeug-Standort
+      //   (Aaron 22.07.). Best-effort erfasst; null wenn der Gegner Geolocation ablehnt.
+      unfallort_lat: data.unfallortLat ?? null,
+      unfallort_lng: data.unfallortLng ?? null,
     },
   )
 
