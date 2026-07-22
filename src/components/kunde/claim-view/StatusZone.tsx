@@ -10,6 +10,7 @@
 
 import { getTranslations, getFormatter } from 'next-intl/server'
 import Link from 'next/link'
+import { ShieldCheckIcon } from 'lucide-react'
 import { NoticeBox } from '@/components/shared/NoticeBox'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
@@ -98,6 +99,23 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
           }
         />
       )}
+
+      {/* K7 (§249 BGB): Haftpflicht-Reassurance — bei gegnerischer Haftung traegt die Gegenseite alle
+          Kosten (0 EUR Eigenanteil). Gate: Haftpflicht-Weg (nicht Selbstzahler/Kasko), bekannte Gegner-
+          Versicherung, Fall noch nicht abgeschlossen. Bewusst als PRINZIP formuliert — es gibt keine
+          Schuldfrage-Spalte auf claims, daher „Trifft die Schuld die andere Seite …" statt einer Zusicherung. */}
+      {!istWerkstattReparaturWeg(vm.flags.abrechnungsweg) &&
+        !!fall.gegner_versicherung &&
+        lifecycle.mainPhase !== 'abschluss' && (
+          <NoticeBox
+            tone="info"
+            icon={<ShieldCheckIcon className="w-5 h-5 text-info shrink-0" />}
+            className="rounded-ios-xl px-4 py-3 space-y-1"
+          >
+            <p className="text-sm font-semibold text-info-strong">{t('haftpflichtReassurance.titel')}</p>
+            <p className="text-body-xs text-info-strong">{t('haftpflichtReassurance.text')}</p>
+          </NoticeBox>
+        )}
 
       {/* „Kam dein Gutachter?"-Selbstauskunft bei ueberfaelligem, ungeklaertem nur_gutachter-Termin. */}
       {status.terminCheck && (
