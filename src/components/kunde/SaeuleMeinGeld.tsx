@@ -16,7 +16,7 @@ type Props = {
   schadens_hoehe_netto: number | null
   totalschaden: boolean
   zahlungsweg: string | null
-  onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean }>
+  onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean; error?: string }>
   /**
    * AAR (14.05.2026): OCR-extrahierte Gutachten-Werte zur Kunde-Information
    * "Was steht mir zu?". Werden nur angezeigt nach ocr_processed_at.
@@ -41,6 +41,7 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
   const [saved, setSaved] = useState(!!zahlungsweg)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const gefordert = schadens_hoehe_netto ?? 0
   const showGefordert = !!schadens_hoehe_netto
@@ -51,9 +52,13 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
 
   function handleSaveWeg(selected: string) {
     if (!onZahlungswegSave) return
+    setSaveError(null)
     startTransition(async () => {
       const res = await onZahlungswegSave(fallId, selected)
+      // K3 (b0e963b6 22.07.): Write-Fehler sichtbar machen — vorher wurde ein Fehlschlag still
+      // verschluckt (kein Feedback, Auswahl klebte nicht), der Kunde glaubte gespeichert.
       if (res.success) { setWeg(selected); setSaved(true) }
+      else setSaveError(res.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.')
     })
   }
 
@@ -129,6 +134,7 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
             <button disabled={pending} onClick={() => handleSaveWeg('kundenkonto')} className="flex-1 px-3 py-2 rounded-ios-lg border border-claimondo-border text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50">{t('aufMeinKonto')}</button>
             <button disabled={pending} onClick={() => handleSaveWeg('werkstatt_direkt')} className="flex-1 px-3 py-2 rounded-ios-lg border border-claimondo-border text-xs font-medium hover:bg-claimondo-bg disabled:opacity-50">{t('direktWerkstatt')}</button>
           </div>
+          {saveError && <p className="text-xs text-danger">{saveError}</p>}
         </div>
       )}
     </div>
