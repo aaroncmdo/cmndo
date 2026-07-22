@@ -5,6 +5,7 @@ import { getFlottenClaimView } from '@/lib/flotte/flotten-claim-detail'
 import EmptyState from '@/components/shared/EmptyState'
 import { FlottenClaimDetailView } from '@/components/flotte/FlottenClaimDetailView'
 import { ladeFlottenSchadenDokumentHoch } from './actions'
+import { getLetzterScanFuerVehicle } from '@/lib/vehicles/vehicle-scan-view'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,5 +36,16 @@ export default async function FlottenClaimDetailPage({
     )
   }
 
-  return <FlottenClaimDetailView view={view} vehicleId={id} onUpload={ladeFlottenSchadenDokumentHoch} />
+  // Zustandsdoku-Vorzustand (Kandidat 3): letzter abgeschlossener Fahrzeug-Scan fuers Cockpit
+  // (Foto + Qualitaets-Ampel + Vorschaeden). db = Admin nach den getFlottenClaimView-Gates.
+  const scan = await getLetzterScanFuerVehicle(db, id)
+
+  return (
+    <FlottenClaimDetailView
+      view={view}
+      vehicleId={id}
+      scan={scan}
+      onUpload={ladeFlottenSchadenDokumentHoch}
+    />
+  )
 }
