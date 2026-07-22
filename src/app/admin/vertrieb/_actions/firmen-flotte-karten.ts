@@ -9,9 +9,29 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { mintSchadenkarten, bindeSchadenkarteAnFahrzeug, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
 
-// minteKartenFuerFlotte (Batch-Mint "Karten erzeugen") wurde entfernt: Karten
-// entstehen jetzt mint-on-tap beim Beschreiben (provisioniereKarteTokenStaff)
-// statt als Charge unbund­ener Blanko-Tokens.
+// Zwei Mint-Wege (beide reuse mintSchadenkarten, firma-gebunden):
+//   - minteKartenBatchStaff:        Batch fuer VORGEDRUCKTE Karten (N Token -> QR-Druck -> spaeter binden).
+//   - provisioniereKarteTokenStaff: mint-on-tap fuer einzelne NFC-Karten (write-first, ein Token pro Chip).
+
+/**
+ * Batch-Mint (staff): N Blanko-Karten-Token fuer die gewaehlte Firma anlegen (status='bestellt').
+ * Fuer vorgedruckte Karten: die Token werden ueber die Druckansicht als QR ausgegeben und
+ * spaeter ans Fahrzeug gebunden. Optionale charge = Batch-Bezeichnung (fuer gezieltes Nachdrucken).
+ */
+export async function minteKartenBatchStaff(
+  firmaId: string,
+  anzahl: number,
+  charge?: string | null,
+): Promise<{ ok: true; anzahl: number; charge: string | null } | { ok: false; error: string }> {
+  const guard = await requireRole(['admin', 'dispatch'])
+  if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
+  const chargeVal = charge?.trim() || null
+  const admin = createAdminClient()
+  const res = await mintSchadenkarten(admin, { firmaId, anzahl, charge: chargeVal })
+  if (!res.ok) return { ok: false, error: res.error }
+  revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
+  return { ok: true, anzahl: res.tokens.length, charge: chargeVal }
+}
 
 export async function bindeKarteAnFahrzeug(
   firmaId: string,

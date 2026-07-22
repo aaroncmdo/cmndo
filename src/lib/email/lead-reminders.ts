@@ -1,6 +1,7 @@
 import { render } from '@react-email/render'
 import { resend, isResendAvailable } from './resend-client'
 import { htmlToPlainText } from './plain-text'
+import { createAdminClient } from '@/lib/supabase/admin'
 import LeadReminder1 from './google/templates/LeadReminder1'
 import LeadReminder2 from './google/templates/LeadReminder2'
 import LeadReminder3 from './google/templates/LeadReminder3'
@@ -41,6 +42,41 @@ function resumeUrl(token: string): string {
   return `${base.replace(/\/$/, '')}/schaden-melden/fortsetzen/${token}`
 }
 
+// Nachvollziehbarkeit (17.07.2026): Jeder ECHTE Versand-Versuch landet in email_log
+// (lead_id-verknuepft) — vorher war die Nurture-Schiene dort unsichtbar (Befund
+// Benachrichtigungs-Matrix-Audit, PR #4490). Kein Log fuer Vorbedingungs-Aborts
+// (fehlender RESEND_API_KEY / fehlende Email): das sind keine Versand-Versuche,
+// der Cron holt sie im naechsten Tick nach. Non-critical: Log-Fehler duerfen den
+// Send-Erfolg nicht kippen.
+async function logReminderSend(
+  lead: ReminderLead,
+  step: ReminderStep,
+  status: 'sent' | 'failed',
+  extra?: { messageId?: string | null; fehler?: string | null },
+): Promise<void> {
+  try {
+    const admin = createAdminClient()
+    await admin.from('email_log').insert({
+      lead_id: lead.id,
+      empfaenger: lead.email,
+      empfaenger_typ: 'kunde',
+      template: `lead_reminder_${step}`,
+      subject: SUBJECTS[step],
+      status,
+      provider: 'resend',
+      message_id: extra?.messageId ?? null,
+      fehler: extra?.fehler ?? null,
+      versuche: 1,
+      gesendet_am: status === 'sent' ? new Date().toISOString() : null,
+    })
+  } catch (logErr) {
+    console.error(
+      '[AAR-477] email_log-Insert fehlgeschlagen (non-critical):',
+      logErr instanceof Error ? logErr.message : logErr,
+    )
+  }
+}
+
 export async function sendLeadReminderEmail(
   lead: ReminderLead,
   step: ReminderStep,
@@ -60,7 +96,7 @@ export async function sendLeadReminderEmail(
 
   try {
     const html = await render(Component({ vorname: lead.vorname, resumeUrl: url }))
-    const { error } = await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: FROM,
       to: lead.email,
       subject: SUBJECTS[step],
@@ -69,11 +105,16 @@ export async function sendLeadReminderEmail(
     })
     if (error) {
       console.error('[AAR-477] Resend-Fehler bei Reminder', step, 'Lead', lead.id, error)
+      await logReminderSend(lead, step, 'failed', { fehler: error.message ?? String(error) })
       return false
     }
+    await logReminderSend(lead, step, 'sent', { messageId: data?.id ?? null })
     return true
   } catch (err) {
     console.error('[AAR-477] Versand-Exception bei Reminder', step, 'Lead', lead.id, err)
+    await logReminderSend(lead, step, 'failed', {
+      fehler: err instanceof Error ? err.message : String(err),
+    })
     return false
   }
 }

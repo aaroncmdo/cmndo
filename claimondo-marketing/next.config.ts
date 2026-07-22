@@ -59,6 +59,15 @@ const nextConfig: NextConfig = {
         destination: 'https://app.claimondo.de/api/v1/openapi.json',
         permanent: true,
       },
+      {
+        // AAR-477 P1 (17.07.26): Fortsetzen-Deeplink der Lead-Nurture-Mails. Faellt die
+        // Mail-Base auf die Marketing-Domain zurueck (kein NEXT_PUBLIC_APP_URL im Cron-Env),
+        // landet der Klick hier — die Route (reminder_token -> FlowLink) lebt in der App.
+        // 307 (permanent: false), NICHT cachen: das Ziel ist ein dynamischer Resolver.
+        source: '/schaden-melden/fortsetzen/:token',
+        destination: 'https://app.claimondo.de/schaden-melden/fortsetzen/:token',
+        permanent: false,
+      },
     ]
   },
 }
