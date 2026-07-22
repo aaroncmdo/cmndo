@@ -5,7 +5,7 @@
 // optional Nahaufnahme) -> Vorschäden. Server-Actions kommen als Props von der Detail-Seite.
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CameraIcon, CheckIcon } from 'lucide-react'
+import { CameraIcon, CheckIcon, Maximize2 } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { compressImage } from '@/lib/dokumente/compress-image'
@@ -18,6 +18,7 @@ import {
 import type { ZustandFund } from '@/lib/vehicles/zustand-scan-ki'
 import type { FotoQualitaet } from '@/lib/vehicles/zustand-foto-qualitaet'
 import { ZustandsQualitaetsBadge } from '@/components/shared/ZustandsQualitaetsBadge'
+import { FotoLightbox, type FotoLightboxBild } from '@/components/shared/FotoLightbox'
 
 type Phase = 'idle' | 'capturing' | 'analysing' | 'review' | 'done'
 type FundEntscheidung = { bestaetigt: boolean; nahaufnahmeFotoId: string | null }
@@ -66,6 +67,7 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
   const [entscheidungen, setEntscheidungen] = useState<Record<number, FundEntscheidung>>({})
   const [kilometerstand, setKilometerstand] = useState('')
   const [angelegt, setAngelegt] = useState(0)
+  const [aktivBild, setAktivBild] = useState<FotoLightboxBild | null>(null)
 
   const nahRefs = useRef<Record<number, HTMLInputElement | null>>({})
 
@@ -319,6 +321,18 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
                   <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/65 to-transparent px-1.5 pb-1 pt-4 text-caption font-medium text-white">
                     {PERSPEKTIVE_LABEL[p] ?? p}
                   </span>
+                  <button
+                    type="button"
+                    onClick={(ev) => {
+                      ev.preventDefault()
+                      ev.stopPropagation()
+                      setAktivBild({ url: preview, label: PERSPEKTIVE_LABEL[p] ?? p })
+                    }}
+                    aria-label={`${PERSPEKTIVE_LABEL[p] ?? p} vergrößern`}
+                    className="absolute bottom-1 right-1 z-10 grid h-6 w-6 place-items-center rounded-full bg-claimondo-navy/55 text-white"
+                  >
+                    <Maximize2 className="h-3 w-3" />
+                  </button>
                 </>
               ) : (
                 <span className="flex h-full flex-col items-center justify-center gap-1 px-1 text-center">
@@ -342,6 +356,7 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
       <Button variant="ondo" size="sm" disabled={!pflichtErfasst} onClick={analysieren}>
         Fertig — Schäden erkennen{pflichtErfasst ? '' : ` (noch ${pflichtAnzahl - pflichtDa})`}
       </Button>
+      <FotoLightbox bild={aktivBild} onClose={() => setAktivBild(null)} />
     </div>
   )
 }

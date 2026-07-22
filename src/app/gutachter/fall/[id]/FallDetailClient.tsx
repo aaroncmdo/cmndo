@@ -43,6 +43,7 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
 import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
+import { GutachtenWerteCard } from './_components/GutachtenWerteCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 // AAR-559 (C10): SV-Konfrontations-Antwort-Card — re-wire nach CMM-66-Regression.
 import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
@@ -159,6 +160,10 @@ type Props = {
     restwert: number | null
     nutzungsausfall_tage: number | null
     gutachten_sv_honorar_brutto: number | null
+    gutachten_nutzungsausfall_tagessatz_eur: number | null
+    wiederbeschaffungsdauer_tage: number | null
+    totalschaden: boolean | null
+    gutachten_ocr_manuell_ueberschrieben: boolean | null
   } | null
 }
 
@@ -455,6 +460,24 @@ export default function FallDetailClient(props: Props) {
           }
           extracted={props.gutachtenWerte ?? null}
         />
+
+        {props.gutachtenWerte && (
+          <GutachtenWerteCard
+            fallId={fall.id as string}
+            werte={{
+              reparaturkosten_netto: props.gutachtenWerte.reparaturkosten_netto,
+              reparaturkosten_brutto: props.gutachtenWerte.reparaturkosten_brutto,
+              minderwert: props.gutachtenWerte.minderwert,
+              wiederbeschaffungswert: props.gutachtenWerte.wiederbeschaffungswert,
+              restwert: props.gutachtenWerte.restwert,
+              nutzungsausfall_tage: props.gutachtenWerte.nutzungsausfall_tage,
+              gutachten_nutzungsausfall_tagessatz_eur: props.gutachtenWerte.gutachten_nutzungsausfall_tagessatz_eur,
+              wiederbeschaffungsdauer_tage: props.gutachtenWerte.wiederbeschaffungsdauer_tage,
+              totalschaden: props.gutachtenWerte.totalschaden,
+            }}
+            manuellUeberschrieben={props.gutachtenWerte.gutachten_ocr_manuell_ueberschrieben ?? false}
+          />
+        )}
 
         {/* KI-Copilot: technisch-fachlicher Assistent (Kalkulation, Wertminderung,
             Vorschaeden, Nutzungsausfall, Totalschaden/Restwert, BVSK). Streaming via

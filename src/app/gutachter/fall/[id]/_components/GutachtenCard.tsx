@@ -80,10 +80,10 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
 
   // AAR (14.05.2026): Wenn OCR-Werte vorliegen, Card immer rendern (auch wenn
   // Subphase < 4.4), damit SV die extrahierten Werte verifizieren kann.
+  // S2: Bewertungswerte wanderten in die GutachtenWerteCard; hier bleiben nur
+  // die Gutachten-Metadaten (Datum + SV-Honorar).
   const hatExtractedWerte = !!(extracted && (
-    extracted.reparaturkosten_brutto !== null ||
-    extracted.wiederbeschaffungswert !== null ||
-    extracted.minderwert !== null ||
+    extracted.gutachten_datum !== null ||
     extracted.gutachten_sv_honorar_brutto !== null
   ))
   if (!istAbGutachtenErstellen(subphase) && !hatExtractedWerte) return null
@@ -270,52 +270,16 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
         </div>
       )}
 
-      {extracted && (extracted.reparaturkosten_brutto !== null || extracted.wiederbeschaffungswert !== null || extracted.minderwert !== null || extracted.gutachten_sv_honorar_brutto !== null) && (
+      {extracted && (extracted.gutachten_datum !== null || extracted.gutachten_sv_honorar_brutto !== null) && (
         <div className="pt-3 border-t border-claimondo-border">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
-            Aus dem Gutachten erkannt
+            Gutachten-Metadaten
           </p>
           <dl className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[12px]">
             {extracted.gutachten_datum && (
               <>
                 <dt className="text-claimondo-ondo">Datum</dt>
                 <dd className="text-claimondo-navy text-right font-medium">{fmtDate(extracted.gutachten_datum)}</dd>
-              </>
-            )}
-            {extracted.reparaturkosten_netto !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Reparatur netto</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{fmtEur(extracted.reparaturkosten_netto)}</dd>
-              </>
-            )}
-            {extracted.reparaturkosten_brutto !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Reparatur brutto</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{fmtEur(extracted.reparaturkosten_brutto)}</dd>
-              </>
-            )}
-            {extracted.minderwert !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Minderwert</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{fmtEur(extracted.minderwert)}</dd>
-              </>
-            )}
-            {extracted.wiederbeschaffungswert !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Wiederbeschaffung</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{fmtEur(extracted.wiederbeschaffungswert)}</dd>
-              </>
-            )}
-            {extracted.restwert !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Restwert</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{fmtEur(extracted.restwert)}</dd>
-              </>
-            )}
-            {extracted.nutzungsausfall_tage !== null && (
-              <>
-                <dt className="text-claimondo-ondo">Nutzungsausfall</dt>
-                <dd className="text-claimondo-navy text-right font-medium">{extracted.nutzungsausfall_tage} Tage</dd>
               </>
             )}
             {extracted.gutachten_sv_honorar_brutto !== null && (
@@ -325,9 +289,6 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
               </>
             )}
           </dl>
-          <p className="text-[10px] text-claimondo-ondo/70 mt-2 italic">
-            Aus dem hochgeladenen PDF automatisch erkannt. Falsch? Bitte über die Stellungnahme melden.
-          </p>
         </div>
       )}
     </SectionCard>

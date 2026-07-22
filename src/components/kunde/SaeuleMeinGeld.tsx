@@ -7,7 +7,7 @@
 // der Totalschaden-Badge und die Zahlungsweg-Wahl (die vor Auszahlung nötig ist).
 
 import { useState, useTransition } from 'react'
-import { BanknoteIcon, AlertTriangleIcon } from 'lucide-react'
+import { BanknoteIcon, AlertTriangleIcon, CheckIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 type Props = {
@@ -17,6 +17,8 @@ type Props = {
   totalschaden: boolean
   zahlungsweg: string | null
   onZahlungswegSave?: (fallId: string, weg: string) => Promise<{ success: boolean; error?: string }>
+  /** S2: true = ein Mensch (Gutachter/Admin) hat die Werte geprüft -> „vom Gutachter geprüft"-Badge. */
+  svGeprueft?: boolean
   /**
    * AAR (14.05.2026): OCR-extrahierte Gutachten-Werte zur Kunde-Information
    * "Was steht mir zu?". Werden nur angezeigt nach ocr_processed_at.
@@ -36,7 +38,7 @@ function fmt(n: number): string {
   return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(n)
 }
 
-export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, totalschaden, zahlungsweg, onZahlungswegSave, gutachtenWerte }: Props) {
+export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, totalschaden, zahlungsweg, onZahlungswegSave, gutachtenWerte, svGeprueft }: Props) {
   const t = useTranslations('kunde.fall.meinGeld')
   const [pending, startTransition] = useTransition()
   const [weg, setWeg] = useState<string | null>(zahlungsweg)
@@ -88,9 +90,16 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
 
         {gutachtenWerte?.ocr_processed_at && (
           <div className="border-t border-claimondo-border pt-3 space-y-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-              {t('ausGutachten')}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+                {t('ausGutachten')}
+              </p>
+              {svGeprueft && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-success-strong">
+                  <CheckIcon className="w-3 h-3" /> {t('vomGutachterGeprueft')}
+                </span>
+              )}
+            </div>
             {!totalschaden && gutachtenWerte.reparaturkosten_brutto !== null && (
               <div className="flex items-center justify-between text-sm">
                 <span className="text-claimondo-ondo">{t('reparaturkosten')}</span>
