@@ -1471,7 +1471,8 @@
     "status",
     "aktiviert_am",
     "aktiviert_von",
-    "created_at"
+    "created_at",
+    "whatsapp_nummer"
    ]
   },
   "flotten_fahrzeuge": {
