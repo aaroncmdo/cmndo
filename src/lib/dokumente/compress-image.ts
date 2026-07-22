@@ -60,11 +60,22 @@ function zeichneUndKodiere(
   })
 }
 
-/** Bevorzugter Pfad: createImageBitmap dekodiert File/Blob direkt (HEIC nativ auf iOS,
- *  speichereffizient, EXIF-orientiert). Wirft, wenn nicht verfuegbar / Format nicht dekodierbar. */
+/** Bevorzugter Pfad: createImageBitmap dekodiert File/Blob direkt UND downscalet BEIM Dekodieren
+ *  (resizeWidth) — ein Riesenfoto (48-200 MP Android/Samsung) landet damit NIE in voller Aufloesung
+ *  im Speicher (sonst OOM -> Decode wirft -> "Foto konnte nicht verarbeitet werden"; genau die
+ *  Grossfoto-Klasse, die BEIDE alten Wege — <img> UND voll-dekodierendes createImageBitmap — nicht
+ *  packten). Portrait-Ueberhang (Hoehe > MAX nach Breiten-Cap) faengt zielMasse im Canvas-Schritt.
+ *  HEIC nativ auf iOS/WebKit; EXIF-orientiert. Wirft, wenn nicht verfuegbar / Format nicht
+ *  dekodierbar (z.B. HEIC auf Android-Chrome -> Fallback viaImgElement). */
 async function viaImageBitmap(file: File): Promise<Komprimiert> {
   if (typeof createImageBitmap !== 'function') throw new Error('createImageBitmap nicht verfuegbar')
-  const bmp = await createImageBitmap(file, { imageOrientation: 'from-image' })
+  // resizeWidth deckelt die Breite proportional schon beim Dekodieren -> Speicher gebunden statt
+  // full-res. Landscape: Breite = laengste Seite (fertig). Portrait: Hoehe ggf. noch > MAX -> zielMasse.
+  const bmp = await createImageBitmap(file, {
+    resizeWidth: MAX_DIMENSION,
+    resizeQuality: 'high',
+    imageOrientation: 'from-image',
+  })
   try {
     const { width, height } = zielMasse(bmp.width, bmp.height)
     return await zeichneUndKodiere(bmp, width, height)
