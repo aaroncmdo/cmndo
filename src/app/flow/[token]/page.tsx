@@ -1,6 +1,8 @@
 ﻿import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import FokusSignaturClient from './FokusSignaturClient'
+import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import WerkstattIntakeSignatur from './WerkstattIntakeSignatur'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import { ladeFlowWeichen } from '@/lib/self-service/lade-flow-szenarien'
@@ -219,25 +221,55 @@ export default async function FlowPage({
   // direkt zum datenabhaengigen Onboarding redirecten — ersetzt den
   // 891-LOC FlowWizardKfz fuer alle Magic-Link-Logins. FlowWizardKfz
   // bleibt als Fallback fuer Token-Magic-Links ohne Login.
+  // AAR-956 (Marker #1): eingeloggter Kunde mit bestehendem Fall wird ins Portal-Onboarding
+  // geleitet — AUSSER der Fall ist ein SA-Weg und noch UNSIGNIERT (sa_unterschrieben=false).
+  // Dann fehlte bisher jeder Signier-Weg (onboarding-details enthaelt keine SA-Signatur ->
+  // Dead-End, der Portal-Task "Unterschrift ausstehend" ankerte ins Leere). Diesen Fall merken
+  // und NACH dem Auth-try den fokussierten SaSignaturStep rendern (return ausserhalb des try,
+  // damit ihn kein catch schluckt).
+  let signaturBenoetigtFallId: string | null = null
   try {
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (user) {
       const { data: fallFuerKunde } = await svc
         .from('v_claim_full')
-        .select('fall_id, kunde_id')
+        .select('fall_id, kunde_id, sa_unterschrieben, abrechnungsweg')
         .eq('lead_id', leadId)
         .eq('kunde_id', user.id)
         .limit(1)
         .maybeSingle()
       if (fallFuerKunde?.fall_id) {
-        redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.fall_id}`)
+        const brauchtSignatur =
+          fallFuerKunde.sa_unterschrieben === false &&
+          !istWerkstattReparaturWeg((fallFuerKunde.abrechnungsweg as string | null) ?? null)
+        if (brauchtSignatur) {
+          signaturBenoetigtFallId = fallFuerKunde.fall_id as string
+        } else {
+          redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.fall_id}`)
+        }
       }
     }
   } catch (err) {
     // Auth-Check soll nie die FlowWizardKfz-Anzeige blockieren — bei
     // Fehler fallen wir auf den Legacy-Pfad zurueck.
     console.warn('[flow/[token]] Auth-Check fuer Onboarding-Redirect:', err)
+  }
+  if (signaturBenoetigtFallId) {
+    return (
+      <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+        <LeadRealtimeRefresh leadId={lead.id} />
+        <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
+          <FokusSignaturClient
+            token={token}
+            leadId={leadId}
+            flowLinkId={flowLinkId}
+            legalDocs={getAllLegalDocs()}
+            fallId={signaturBenoetigtFallId}
+          />
+        </NextIntlClientProvider>
+      </div>
+    )
   }
 
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
