@@ -4,7 +4,7 @@
 // Server-Component (kein 'use client'): die URLs sind serverseitig signiert (Loader), es gibt
 // keine Interaktion. scan null / keine Fotos -> null (Card erscheint dann gar nicht).
 import { SectionCard } from '@/components/shared/SectionCard'
-import { ZustandsQualitaetsBadge } from '@/components/shared/ZustandsQualitaetsBadge'
+import { VehicleScanFotoGrid } from '@/components/shared/VehicleScanFotoGrid'
 import type { VehicleScanView } from '@/lib/vehicles/vehicle-scan-view'
 
 function formatDatum(iso: string | null): string | null {
@@ -33,27 +33,7 @@ export function VehicleScanGalerie({ scan }: { scan: VehicleScanView | null }) {
       <div className="space-y-4">
         {meta ? <p className="text-caption text-claimondo-ondo/60">{meta}</p> : null}
 
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {scan.fotos.map((f) => (
-            <figure key={f.id} className="space-y-1">
-              <div className="relative aspect-square overflow-hidden rounded-ios-md border border-claimondo-border bg-claimondo-bg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={f.url} alt={f.label} className="h-full w-full object-cover" />
-                <ZustandsQualitaetsBadge
-                  prozent={f.prozent}
-                  hinweis={f.hinweis}
-                  className="absolute right-1 top-1"
-                />
-              </div>
-              <figcaption
-                className="truncate text-caption text-claimondo-ondo/70"
-                title={f.label}
-              >
-                {f.label}
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+        <VehicleScanFotoGrid fotos={scan.fotos} />
 
         {scan.vorschaeden.length > 0 ? (
           <div className="space-y-1 border-t border-claimondo-border pt-3">
