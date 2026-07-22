@@ -437,7 +437,10 @@ export async function getKundeFallDetailRecord(
   // CMM-49 Display-Sweep: aus v_claim_full statt faelle. Aliasing haelt den FALL_SELECT_KUNDE-
   // Vertrag: id<-fall_id, claim_id<-claims.id, status<-operative_status (claims-SSoT, post-drop-safe).
   const FALL_DETAIL_SELECT =
-    'id:fall_id, claim_id:id, status:operative_status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
+    // K1 (b0e963b6 22.07.): Fahrzeug-/Gegner-/Halter-Fakten ergaenzt. StammdatenReadSection
+    // (Uebersicht-Tab) rendert diese Felder, der Kunde-Loader lud sie bisher NICHT -> die
+    // "Fahrzeug & Unfall"-Sektion war halb-blank. Alle liegen auf v_claim_full (kein Join noetig).
+    'id:fall_id, claim_id:id, status:operative_status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung, gegner_name, gegner_kennzeichen, gegner_fahrzeugtyp, gegner_bekannt, gegner_aktenzeichen, gegner_versicherungsnummer, fin_vin, erstzulassung, fahrzeug_fahrbereit, lackfarbe_code, halter_ungleich_fahrer, halter_name, halter_vorname, halter_nachname, halter_telefon, halter_email'
   // fallId kann claim_id (vcf.id) ODER fall_id (vcf.fall_id) sein — beide Pfade wie zuvor.
   const byClaim = await admin
     .from('v_claim_full')
@@ -528,7 +531,7 @@ export async function getKundeFallDetailRecord(
           // CMM-74 b″: operative_status ergaenzt — claims = SSoT (1:1-Mirror faelle.status).
           // KVA-Loop (Kunde-Seite): kostenvoranschlag_netto/_brutto + reparatur_freigegeben_am
           // ergaenzt — claims = SSoT (Werkstatt-Upload setzt sie, Kunde sieht + gibt frei).
-          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id, kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am, reparaturdauer_tage_kva',
+          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, hat_personenschaden, hat_mietwagen, mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_limit_grund, mietwagen_rechnung_vorhanden, mietwagen_argumentations_puffer, mietwagen_vermieter, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id, kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am, reparaturdauer_tage_kva',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -720,6 +723,14 @@ export async function getKundeFallDetailRecord(
     kanzlei_wunsch: c.kanzlei_wunsch ?? null,
     hat_personenschaden: c.hat_personenschaden ?? null,
     hat_mietwagen: c.hat_mietwagen ?? null,
+    // K2: MietwagenStatusCard (Uebersicht-Tab) liest diese Detail-Felder; der Record lud nur
+    // `hat_mietwagen` -> Card blieb leer. Aus claims (SSoT).
+    mietwagen_seit_datum: c.mietwagen_seit_datum ?? null,
+    mietwagen_limit_tage: c.mietwagen_limit_tage ?? null,
+    mietwagen_limit_grund: c.mietwagen_limit_grund ?? null,
+    mietwagen_rechnung_vorhanden: c.mietwagen_rechnung_vorhanden ?? null,
+    mietwagen_argumentations_puffer: c.mietwagen_argumentations_puffer ?? null,
+    mietwagen_vermieter: c.mietwagen_vermieter ?? null,
     hat_nutzungsausfall: c.hat_nutzungsausfall ?? null,
     hat_sachschaden: c.hat_sachschaden ?? null,
     sachschaden_beschreibung: c.sachschaden_beschreibung ?? null,
@@ -727,7 +738,25 @@ export async function getKundeFallDetailRecord(
     unfallskizze_url: c.unfallskizze_url ?? null,
     unfallskizze_svg: c.unfallskizze_svg ?? null,
     unfallskizze_bestaetigt: c.unfallskizze_bestaetigt ?? null,
-    gegner_aktenzeichen: c.gegner_aktenzeichen ?? null,
-    gegner_versicherungsnummer: c.gegner_versicherungsnummer ?? null,
+    // K1: gegner_aktenzeichen/-versicherungsnummer liegen auf v_claim_full, NICHT auf claims —
+    // vorher aus `c` gelesen => immer null. Jetzt aus `f` (v_claim_full).
+    gegner_aktenzeichen: f.gegner_aktenzeichen ?? null,
+    gegner_versicherungsnummer: f.gegner_versicherungsnummer ?? null,
+    // K1: Fahrzeug-/Gegner-/Halter-Fakten aus v_claim_full (StammdatenReadSection-Consumer).
+    gegner_name: f.gegner_name ?? null,
+    gegner_kennzeichen: f.gegner_kennzeichen ?? null,
+    gegner_fahrzeugtyp: f.gegner_fahrzeugtyp ?? null,
+    gegner_bekannt: f.gegner_bekannt ?? null,
+    fin_vin: f.fin_vin ?? null,
+    erstzulassung: f.erstzulassung ?? null,
+    fahrzeug_fahrbereit: f.fahrzeug_fahrbereit ?? null,
+    lackfarbe_code: f.lackfarbe_code ?? null,
+    // Alias: StammdatenReadSection liest `halter_ungleich_fahrer_flag`, DB-Spalte = `halter_ungleich_fahrer`.
+    halter_ungleich_fahrer_flag: f.halter_ungleich_fahrer ?? null,
+    halter_name: f.halter_name ?? null,
+    halter_vorname: f.halter_vorname ?? null,
+    halter_nachname: f.halter_nachname ?? null,
+    halter_telefon: f.halter_telefon ?? null,
+    halter_email: f.halter_email ?? null,
   }
 }
