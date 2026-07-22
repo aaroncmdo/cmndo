@@ -32,6 +32,9 @@ import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
+// AAR-956 Zustandsdoku-Vorzustand (SV-Galerie): Loader + Read-only-Kachel-Galerie.
+import { getLetzterScanFuerVehicle } from '@/lib/vehicles/vehicle-scan-view'
+import { VehicleScanGalerie } from '@/components/shared/VehicleScanGalerie'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 // AAR-651: Zentrale Fall-Loader-Lib
 
@@ -416,9 +419,17 @@ export default async function GutachterFallPage({
   const claimIdForStorage = noShowClaimId ?? ''
   // No-Show-Counter für den rose-Banner „Termin(e) verpasst".
   const { data: fallClaimRow } = noShowClaimId
-    ? await admin.from('claims').select('kunde_no_show_count').eq('id', noShowClaimId).maybeSingle()
+    ? await admin.from('claims').select('kunde_no_show_count, vehicle_id').eq('id', noShowClaimId).maybeSingle()
     : { data: null }
   const noShowCount = (fallClaimRow?.kunde_no_show_count as number | null) ?? 0
+
+  // Zustandsdoku-Vorzustand (SV-Galerie): letzter abgeschlossener Fahrzeug-Scan (Fotos +
+  // Qualitaets-Ampel + dokumentierte Vorschaeden). admin nach dem sv_id-Gate; vehicle_scans*
+  // sind admin-scoped (kein SV-RLS-Pfad). vehicle_id aus dem claims-SSoT (oben mitgelesen).
+  const zustandVehicleId = (fallClaimRow?.vehicle_id as string | null) ?? null
+  const vehicleScan = zustandVehicleId
+    ? await getLetzterScanFuerVehicle(admin, zustandVehicleId)
+    : null
 
   // Reparatur-Werkstatt-Vermittlung (Gutachter im Auftrag): Gate + 5 naechste Partner.
   // Nur wenn Reparatur gewuenscht + noch keine Werkstatt hinterlegt (brauchtWerkstattVermittlung).
@@ -726,6 +737,9 @@ export default async function GutachterFallPage({
         />
       )}
       {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}
+      {/* Zustandsdoku-Vorzustand (Read-only): letzter FM-Scan des Fahrzeugs — Fotos +
+          Qualitaets-Ampel + Vorschaeden. Null-safe: die Galerie rendert nichts ohne Scan. */}
+      <VehicleScanGalerie scan={vehicleScan} />
     </>
   )
 
