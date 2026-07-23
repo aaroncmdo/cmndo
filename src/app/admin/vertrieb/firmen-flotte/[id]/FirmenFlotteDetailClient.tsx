@@ -13,6 +13,7 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import { NfcKarteBeschreiben } from '@/components/flotte/NfcKarteBeschreiben'
+import { NfcKarteSchreibenButton } from '@/components/flotte/NfcKarteSchreibenButton'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
@@ -343,6 +344,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
                   <Th className="text-left">Token</Th>
                   <Th className="text-left">Status</Th>
                   <Th className="text-left">Fahrzeug</Th>
+                  <Th className="text-left">NFC</Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -368,6 +370,13 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
                           ))}
                         </select>
                       )}
+                    </Td>
+                    <Td>
+                      <NfcKarteSchreibenButton
+                        token={k.token}
+                        beschrieben={k.beschrieben}
+                        onGeschrieben={(token, uid) => finalisiereKarteStaff(firma.id, token, uid, null)}
+                      />
                     </Td>
                   </Tr>
                 ))}

@@ -159,10 +159,10 @@ export async function getKartenFuerFirma(
   db: AnyDb,
   firmaId: string,
   opts?: { nurGebunden?: boolean },
-): Promise<Array<{ id: string; token: string; status: string; fahrzeugId: string | null }>> {
+): Promise<Array<{ id: string; token: string; status: string; fahrzeugId: string | null; nfcUid: string | null }>> {
   let query = db
     .from('schadenkarten')
-    .select('id, karten_token, status, fahrzeug_id')
+    .select('id, karten_token, status, fahrzeug_id, nfc_uid')
     .eq('firma_id', firmaId)
   // Flotten-Ansichten zeigen nur real gebundene Karten (Admin ohne Param = alle Status).
   if (opts?.nurGebunden) query = query.eq('status', 'gebunden')
@@ -170,14 +170,21 @@ export async function getKartenFuerFirma(
 
   if (!data) return []
 
-  return (data as Array<{ id: string; karten_token: string; status: string; fahrzeug_id: string | null }>).map(
-    (row) => ({
-      id: row.id,
-      token: row.karten_token,
-      status: row.status,
-      fahrzeugId: row.fahrzeug_id,
-    }),
-  )
+  return (
+    data as Array<{
+      id: string
+      karten_token: string
+      status: string
+      fahrzeug_id: string | null
+      nfc_uid: string | null
+    }>
+  ).map((row) => ({
+    id: row.id,
+    token: row.karten_token,
+    status: row.status,
+    fahrzeugId: row.fahrzeug_id,
+    nfcUid: row.nfc_uid,
+  }))
 }
 
 // ─── Lebenszyklus: sperren · entsperren · entbinden ─────────────────────────
