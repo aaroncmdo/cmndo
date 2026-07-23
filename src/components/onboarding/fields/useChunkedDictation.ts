@@ -20,12 +20,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const AUTO_STOP_MS = 120_000 // 2 min Safety (ausfuehrliches Diktat erlaubt)
 const REFRESH_MS = 7_000
 
-export type DictationSource = { kind: 'flow'; token: string } | { kind: 'auth' }
+export type DictationSource =
+  | { kind: 'flow'; token: string }
+  | { kind: 'schaden'; token: string }
+  | { kind: 'auth' }
 
 export function useChunkedDictation(source: DictationSource) {
   const endpoint =
-    source.kind === 'flow' ? '/api/flow/voice-transcribe' : '/api/support/voice-transcribe'
-  const flowToken = source.kind === 'flow' ? source.token : null
+    source.kind === 'flow'
+      ? '/api/flow/voice-transcribe'
+      : source.kind === 'schaden'
+        ? '/api/schaden/voice-transcribe'
+        : '/api/support/voice-transcribe'
+  // Token-Gate fuer die anonymen Link-Quellen (flow: flow_links, schaden: Schadenkarte).
+  const linkToken = source.kind === 'flow' || source.kind === 'schaden' ? source.token : null
 
   const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
@@ -71,7 +79,7 @@ export function useChunkedDictation(source: DictationSource) {
       if (blob.size === 0) return null
       const fd = new FormData()
       fd.append('audio', blob, 'recording.webm')
-      if (flowToken) fd.append('token', flowToken)
+      if (linkToken) fd.append('token', linkToken)
       fd.append('language', 'de')
       try {
         const res = await fetch(endpoint, { method: 'POST', body: fd })
@@ -89,7 +97,7 @@ export function useChunkedDictation(source: DictationSource) {
         return null
       }
     },
-    [endpoint, flowToken],
+    [endpoint, linkToken],
   )
 
   // stop VOR start definiert (start referenziert stop im Auto-Stop-Timer).

@@ -5,7 +5,8 @@ import type { WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlae
 import { WerkstattProfileInhalt, type WerkstattProfilData } from '@/components/werkstatt/finder/WerkstattProfileInhalt'
 import { GlassSurface } from './GlassSurface'
 
-function toProfil(w: WerkstattVorschlag): WerkstattProfilData {
+// Exportiert: auch der Mobil-Bottom-Sheet (WerkstattProfileSheet) mappt Vorschlag -> Profil-Daten.
+export function toProfil(w: WerkstattVorschlag): WerkstattProfilData {
   return {
     name: w.name,
     ort: w.adresse_ort ?? null,
