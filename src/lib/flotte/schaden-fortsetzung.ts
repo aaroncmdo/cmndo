@@ -15,7 +15,6 @@ import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { createLead } from '@/lib/leads/create-lead'
-import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
 import type { OeffentlichesSvProfil } from '@/lib/sv-matching-modul/types'
 
 export type Haftungstyp = 'haftpflicht' | 'selbstverschuldet'
@@ -258,17 +257,42 @@ export async function waehleGutachterUndStarteFlow(params: {
   return { ok: true, token: fl.token }
 }
 
+const FLOTTEN_LEAD_DEDUP_MS = 10 * 60_000 // 10 Min — Doppelklick/Re-Submit-Fenster (Muster findRecentGegnerLead)
+
 /**
- * FU3: Meldet einen NEUEN Flotten-Schaden für ein Fahrzeug OHNE bestehenden ersterfassung-Claim
- * (v.a. selbstverschuldet — dafür gibt es keinen Gegner-Tap-Flow). Legt Lead + Claim an
- * (geschädigter = Flotten-Fahrzeug; kein Gegner = kein verursacher — convertLeadToClaim ist
- * datengetrieben) und liefert die claimId für den Gutachter-Picker. Auth: FM der Fahrzeug-Firma.
+ * §0-Dedup: frischen flotte-manuell-Lead fuer DIESES Fahrzeug im Fenster finden (Doppelklick/
+ * Re-Submit). Ohne Guard erzeugt jeder „Schaden melden"-Klick einen neuen Lead + FlowLink.
+ * Best-effort: bei DB-Fehler null (lieber neu anlegen als den Flow brechen).
  */
-export async function erstelleFlottenSchadenClaim(params: {
+async function findRecentFlottenLead(admin: AnyDb, vehicleId: string): Promise<string | null> {
+  const sinceIso = new Date(Date.now() - FLOTTEN_LEAD_DEDUP_MS).toISOString()
+  const { data, error } = await admin
+    .from('leads')
+    .select('id')
+    .eq('vehicle_id', vehicleId)
+    .eq('source_channel', 'flotte-manuell')
+    .gt('created_at', sinceIso)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (error) {
+    console.error('[schaden-fortsetzung] findRecentFlottenLead fehlgeschlagen:', error.message)
+    return null
+  }
+  return (data?.id as string | null) ?? null
+}
+
+/**
+ * Lead-first (Aaron 23.07.): Meldet einen NEUEN Flotten-Schaden fuer ein Fahrzeug — erzeugt NUR
+ * einen baren Lead (kein schuldfrage-Vorsetzen, KEIN Upfront-Claim) + kanonischen FlowLink. Die
+ * Haftpflicht/Kasko-Weiche faellt db-driven im /flow (quali-Step); am /flow-Ende entsteht Claim
+ * (Haftpflicht→SV) bzw. Werkstatt-Auftrag (Kasko/Selbstzahler). Auth: FM der Fahrzeug-Firma.
+ * Dedup: ein frischer flotte-manuell-Lead desselben Fahrzeugs wird wiederverwendet (§0).
+ */
+export async function erstelleFlottenSchadenLead(params: {
   vehicleId: string
   userId: string
-  haftungstyp: Haftungstyp
-}): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+}): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   const admin = createAdminClient() as AnyDb
   const firma = await getFlottenmanagerFirma(admin, params.userId)
   if (!firma) return { ok: false, error: 'Kein Flotten-Konto.' }
@@ -282,19 +306,59 @@ export async function erstelleFlottenSchadenClaim(params: {
     .maybeSingle()
   if (!ff) return { ok: false, error: 'Fahrzeug gehört nicht zu Ihrer Flotte.' }
 
-  const created = await createLead(
-    admin,
-    { source_channel: 'flotte-manuell', status: 'neu' },
-    {
-      vehicle_id: params.vehicleId,
-      firma_name: firma.name,
-      gewerbe_flag: true,
-      schuldfrage: params.haftungstyp === 'haftpflicht' ? 'gegner' : 'eigenverantwortung',
-    },
-  )
-  if (!created.ok) return { ok: false, error: created.error }
+  // §0-Dedup: frischen flotte-manuell-Lead wiederverwenden statt einen zweiten anzulegen.
+  let leadId = await findRecentFlottenLead(admin, params.vehicleId)
+  if (!leadId) {
+    const created = await createLead(
+      admin,
+      { source_channel: 'flotte-manuell', status: 'neu' },
+      { vehicle_id: params.vehicleId, firma_name: firma.name, gewerbe_flag: true },
+    )
+    if (!created.ok) return { ok: false, error: created.error }
+    leadId = created.leadId
+  }
 
-  const conv = await convertLeadToClaim({ leadId: created.leadId })
-  if (!conv.ok) return { ok: false, error: conv.error }
-  return { ok: true, claimId: conv.claimId }
+  const fl = await ensureCanonicalFlowLinkForLead(leadId, { serviceTyp: 'komplett', admin })
+  if (!fl.ok) return { ok: false, error: fl.error }
+  return { ok: true, token: fl.token }
+}
+
+/**
+ * §2d „Schaden vervollständigen" (Claim-Detail): setzt einen BESTEHENDEN Claim (Gegner-Tap oder
+ * frueher gemeldet) db-driven ueber /flow fort — liefert den FlowLink-Token seines Leads. Auth:
+ * FM der Fahrzeug-Firma (self-contained — damit die picker-`resolveSchadenFortsetzung` in §3
+ * geloescht werden kann).
+ */
+export async function flowLinkFuerClaimFortsetzung(
+  claimId: string,
+  userId: string,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const admin = createAdminClient() as AnyDb
+  const { data: claim } = await admin
+    .from('claims')
+    .select('lead_id, vehicle_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.lead_id || !claim?.vehicle_id) return { ok: false, error: 'Kein Zugriff auf diesen Schaden.' }
+
+  const { data: ff } = await admin
+    .from('flotten_fahrzeuge')
+    .select('firma_id')
+    .eq('vehicle_id', claim.vehicle_id)
+    .maybeSingle()
+  const firmaId = (ff?.firma_id as string | null) ?? null
+  if (!firmaId) return { ok: false, error: 'Kein Zugriff auf diesen Schaden.' }
+
+  const { data: konto } = await admin
+    .from('firmen_flotten_konten')
+    .select('id')
+    .eq('firma_id', firmaId)
+    .eq('user_id', userId)
+    .eq('status', 'aktiv')
+    .maybeSingle()
+  if (!konto) return { ok: false, error: 'Kein Zugriff auf diesen Schaden.' }
+
+  const fl = await ensureCanonicalFlowLinkForLead(claim.lead_id as string, { serviceTyp: 'komplett', admin })
+  if (!fl.ok) return { ok: false, error: fl.error }
+  return { ok: true, token: fl.token }
 }

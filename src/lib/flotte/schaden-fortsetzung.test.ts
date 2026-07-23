@@ -26,6 +26,8 @@ function builder(table: string) {
     select: () => b,
     eq: () => b,
     is: () => b,
+    gt: () => b,
+    order: () => b,
     limit: () => b,
     maybeSingle: async () => ({ data: state.rows[table] ?? null, error: null }),
     insert: (row: Record<string, unknown>) => {
@@ -255,39 +257,38 @@ describe('waehleGutachterUndStarteFlow', () => {
   })
 })
 
-describe('erstelleFlottenSchadenClaim (FU3 — neuer Claim)', () => {
+describe('erstelleFlottenSchadenLead (lead-first)', () => {
   it('kein Flotten-Konto -> Fehler', async () => {
     state.firma = null
-    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
-    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'selbstverschuldet' })
+    const { erstelleFlottenSchadenLead } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenLead({ vehicleId: 'veh-1', userId: 'u' })
     expect(res).toEqual({ ok: false, error: 'Kein Flotten-Konto.' })
   })
 
   it('Fahrzeug fremd -> Fehler, kein createLead', async () => {
     state.rows.flotten_fahrzeuge = null // Ownership faellt durch
-    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
-    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-x', userId: 'u', haftungstyp: 'haftpflicht' })
+    const { erstelleFlottenSchadenLead } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenLead({ vehicleId: 'veh-x', userId: 'u' })
     expect(res.ok).toBe(false)
     expect(state.createLeadCalls).toHaveLength(0)
   })
 
-  it('selbstverschuldet: createLead schuldfrage=eigenverantwortung, liefert claimId', async () => {
+  it('barer Lead (KEIN schuldfrage) + FlowLink-Token, kein Upfront-Claim', async () => {
     state.rows.flotten_fahrzeuge = { id: 'ff-1' }
-    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
-    const res = await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'selbstverschuldet' })
-    expect(res).toEqual({ ok: true, claimId: 'claim-new' })
-    expect(state.createLeadCalls[0].extra).toMatchObject({
-      vehicle_id: 'veh-1',
-      firma_name: 'ACME',
-      gewerbe_flag: true,
-      schuldfrage: 'eigenverantwortung',
-    })
+    state.rows.leads = null // §0-Dedup: kein frischer Lead
+    const { erstelleFlottenSchadenLead } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenLead({ vehicleId: 'veh-1', userId: 'u' })
+    expect(res).toEqual({ ok: true, token: 'flow-token-1' })
+    expect(state.createLeadCalls[0].extra).toMatchObject({ vehicle_id: 'veh-1', firma_name: 'ACME', gewerbe_flag: true })
+    expect(state.createLeadCalls[0].extra).not.toHaveProperty('schuldfrage')
   })
 
-  it('haftpflicht: schuldfrage=gegner', async () => {
+  it('§0-Dedup: frischer flotte-manuell-Lead -> reuse, KEIN neuer createLead', async () => {
     state.rows.flotten_fahrzeuge = { id: 'ff-1' }
-    const { erstelleFlottenSchadenClaim } = await import('./schaden-fortsetzung')
-    await erstelleFlottenSchadenClaim({ vehicleId: 'veh-1', userId: 'u', haftungstyp: 'haftpflicht' })
-    expect(state.createLeadCalls[0].extra).toMatchObject({ schuldfrage: 'gegner' })
+    state.rows.leads = { id: 'lead-recent' } // findRecentFlottenLead trifft
+    const { erstelleFlottenSchadenLead } = await import('./schaden-fortsetzung')
+    const res = await erstelleFlottenSchadenLead({ vehicleId: 'veh-1', userId: 'u' })
+    expect(res).toEqual({ ok: true, token: 'flow-token-1' })
+    expect(state.createLeadCalls).toHaveLength(0)
   })
 })
