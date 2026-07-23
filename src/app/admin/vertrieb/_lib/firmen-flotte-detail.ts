@@ -29,6 +29,8 @@ export type FlottenKarte = {
   status: string
   fahrzeug_id: string | null
   kennzeichen: string | null
+  /** true = NFC-Chip wurde bereits beschrieben (nfc_uid gesetzt). */
+  beschrieben: boolean
 }
 
 export type FlottenSchaden = {
