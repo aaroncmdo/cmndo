@@ -274,7 +274,13 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
 export async function erstelleGutachterFinderAnfrage(
   payload: GutachterFinderPayload,
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  const supabase = await createClient()
+  // SERVICE-ROLE fuer den gfa-Insert (wie insertAnfrage / gfa-handler). Einziger Aufrufer ist
+  // reserviereEmbedTermin (/embed/gutachter-finder + werkstatt-finder-Embed, ANON). Der PII-Leak-Fix
+  // (Mig 20260716200848) entzog anon das SELECT-Grant auf gutachter_finder_anfragen -> das
+  // .insert(...).select('id') unten (RETURNING) endet fuer anon in "permission denied for table"
+  // (42501) -> der Embed-Finder nahm keine Anfragen mehr an. source bleibt NULL (nativer Finder),
+  // die anon-INSERT-with_check (source IS NULL) wird damit weiterhin erfuellt.
+  const supabase = createAdminClient()
 
   // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
   const gaClientId = await getConsentedGaClientId()

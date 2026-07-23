@@ -48,6 +48,10 @@ type Lead = {
   schadens_fall_typ: string | null
   service_typ: string | null
   source_channel: string | null
+  firma_name: string | null
+  gegner_name: string | null
+  gegner_kennzeichen: string | null
+  konvertiert_zu_claim_id: string | null
   flow_link_geoeffnet: boolean | null
   flow_link_abgeschlossen: boolean | null
   whatsapp_verfuegbar: boolean | null
@@ -187,6 +191,20 @@ function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { 
   if (abgeschlossen) return { label: 'Abgeschlossen', cls: 'bg-success-soft text-success-strong' }
   if (offen) return { label: 'Offen', cls: 'bg-warning-soft text-warning-strong' }
   return { label: '—', cls: 'text-claimondo-ondo/50' }
+}
+
+// Flotten-Schaden-Leads (Schadenkarte-Gegner-Submit / FM-manuell): der „Kunde" ist die FIRMA,
+// nicht eine Person -> vorname/nachname sind leer, die Zeile waere sonst namenlos. Anzeige faellt
+// auf firma_name (bzw. Gegner) zurueck. + „Flotte"-Chip als Herkunft, damit der Dispatcher die
+// Fleet-Faelle erkennt (statt sie als kaputte Zeile zu ueberlesen). Der Lead bleibt die
+// universelle Intake-Zeile — er wird nur korrekt gerendert (kein neues Dispatch-Surface).
+const FLOTTE_KANAELE = ['schaden-karte', 'flotte-manuell']
+function istFlottenLead(lead: Lead): boolean {
+  return lead.source_channel != null && FLOTTE_KANAELE.includes(lead.source_channel)
+}
+function leadAnzeigeName(lead: Lead): string {
+  const person = [lead.vorname, lead.nachname].filter(Boolean).join(' ').trim()
+  return person || lead.firma_name || lead.gegner_name || '—'
 }
 
 export default function LeadsViewToggle({
@@ -402,8 +420,16 @@ function ListView({
                 >
                   <Td>
                     <Link href={`/dispatch/leads/${lead.id}`} className="font-medium text-claimondo-navy hover:text-claimondo-ondo">
-                      {lead.vorname} {lead.nachname}
+                      {leadAnzeigeName(lead)}
                     </Link>
+                    {istFlottenLead(lead) && (
+                      <span className="ml-2 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
+                    )}
+                    {lead.konvertiert_zu_claim_id && (
+                      <Link href={`/faelle/${lead.konvertiert_zu_claim_id}`} className="ml-1.5 text-[10px] font-medium text-claimondo-ondo hover:underline">
+                        → Fall
+                      </Link>
+                    )}
                     {lead.schadens_fall_typ && (
                       <span className="ml-2 text-[10px] text-claimondo-ondo/70">{lead.schadens_fall_typ}</span>
                     )}
@@ -523,8 +549,11 @@ function KanbanView({
                     }`}
                   >
                     <p className="text-xs font-medium text-claimondo-navy truncate">
-                      {lead.vorname} {lead.nachname}
+                      {leadAnzeigeName(lead)}
                     </p>
+                    {istFlottenLead(lead) && (
+                      <span className="mt-0.5 inline-block text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-claimondo-ondo/10 text-claimondo-navy">Flotte</span>
+                    )}
                     {lead.telefon && (
                       <p className="text-[10px] text-claimondo-ondo flex items-center gap-1 mt-0.5">
                         <PhoneIcon className="w-2.5 h-2.5" />

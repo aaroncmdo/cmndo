@@ -9,7 +9,7 @@
 // - CarDentity-Vorschaden-Check wird auf 'ausstehend' gesetzt; tatsaechlicher
 //   Trigger erfolgt beim Konvertieren der Anfrage zu einem Fall
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 import { runZB1Ocr } from '@/lib/ocr/zb1-parser'
 import { buildImaginUrl } from '@/lib/fahrzeug/imagin'
@@ -43,7 +43,11 @@ export async function POST(request: Request) {
       })
     }
 
-    const supabase = await createClient()
+    // SERVICE-ROLE (wie insertAnfrage / gfa-handler): anon-Finder-Flow (Fahrzeugschein-Upload
+    // ohne Login). Der PII-Leak-Fix (Mig 20260716200848) entzog anon das SELECT-Grant -> der
+    // anon-.update().eq('id') (WHERE + RLS-USING lesen die Zeile) endet in 42501. source-Guard
+    // unten haelt den Update auf native anon-Finder-Zeilen (nicht embed/sv) begrenzt.
+    const supabase = createAdminClient()
 
     const updateData: Record<string, unknown> = {
       ocr_rohdaten: { raw_text: fullText, extracted, timestamp: new Date().toISOString() },
@@ -85,6 +89,7 @@ export async function POST(request: Request) {
       .from('gutachter_finder_anfragen')
       .update(updateData)
       .eq('id', anfrage_id)
+      .is('source', null)
 
     if (updateError) {
       console.error('[OCR-ZB1-Anfrage] DB update error:', updateError)
