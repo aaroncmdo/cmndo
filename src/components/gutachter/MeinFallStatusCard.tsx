@@ -28,6 +28,9 @@ type Props = {
   lexdriveCaseId: string | null
   svHonorarBetrag: number | null
   svHonorarEingegangenAm: string | null
+  // S4: verdientes Honorar (Soll, gutachten_sv_honorar_brutto) — stabile Quelle, um das
+  // Honorar schon vor der Auszahlung (mit Pending-Status) zu zeigen.
+  svHonorarVerdient: number | null
 }
 
 function fmtEuro(n: number | null): string {
@@ -141,17 +144,37 @@ export default function MeinFallStatusCard(props: Props) {
         )
       })()}
 
-      {/* Auszahlungs-Detail */}
-      {props.phase === 'auszahlung' && props.svHonorarBetrag != null && (
-        <div className="rounded-ios-xl bg-success-soft border border-success/30 p-3 flex items-center justify-between">
-          <span className="text-xs text-success-strong font-medium flex items-center gap-1.5">
-            <EuroIcon className="w-3.5 h-3.5" /> Honorar
-          </span>
-          <span className="text-sm font-bold text-success-strong">
-            {fmtEuro(props.svHonorarBetrag)}
-          </span>
-        </div>
-      )}
+      {/* S4: SV-Honorar-Sicht — verdientes Honorar + Auszahlungs-Status, ab gutachten-freigegeben
+          (nicht mehr nur in der auszahlung-Phase). Betrag: bevorzugt der ausgezahlte Ist, sonst
+          der verdiente Soll (gutachten_sv_honorar_brutto, stabile Quelle). */}
+      {(props.phase === 'gutachten-freigegeben' ||
+        props.phase === 'bei-kanzlei' ||
+        props.phase === 'auszahlung' ||
+        props.phase === 'abgeschlossen-fall') &&
+        (props.svHonorarBetrag != null || props.svHonorarVerdient != null) && (
+          <div className="rounded-ios-xl bg-claimondo-bg border border-claimondo-border p-3 space-y-1.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs text-claimondo-ondo font-medium flex items-center gap-1.5">
+                <EuroIcon className="w-3.5 h-3.5" /> Dein Honorar
+              </span>
+              <span className="text-sm font-bold text-claimondo-navy">
+                {fmtEuro(props.svHonorarBetrag ?? props.svHonorarVerdient)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-[11px] text-claimondo-ondo">Auszahlung</span>
+              {props.svHonorarEingegangenAm ? (
+                <span className="text-[11px] font-medium text-success-strong">
+                  am {fmtDatum(props.svHonorarEingegangenAm)} überwiesen
+                </span>
+              ) : (
+                <span className="text-[11px] font-medium text-warning-strong">
+                  ausstehend — nach Regulierung
+                </span>
+              )}
+            </div>
+          </div>
+        )}
     </div>
   )
 }

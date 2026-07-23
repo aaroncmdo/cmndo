@@ -734,6 +734,7 @@ export default async function GutachterFallPage({
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
           svHonorarBetrag={svHonorarBetrag}
           svHonorarEingegangenAm={svHonorarEingegangenAm}
+          svHonorarVerdient={gutachtenWerte?.gutachten_sv_honorar_brutto ?? null}
         />
       )}
       {werkstattVermittlung && (
