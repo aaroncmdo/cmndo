@@ -819,7 +819,9 @@
     "kva_quelle",
     "kva_abgelehnt_am",
     "kva_abgelehnt_grund",
-    "kanzlei_id"
+    "kanzlei_id",
+    "schuldfrage",
+    "eigene_versicherung"
    ]
   },
   "client_error_log": {
@@ -5863,7 +5865,9 @@
     "ist_nahaufnahme",
     "vorschaden_id",
     "reihenfolge",
-    "erstellt_am"
+    "erstellt_am",
+    "qualitaet_prozent",
+    "qualitaet_hinweis"
    ]
   },
   "vehicle_scans": {

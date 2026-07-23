@@ -756,9 +756,7 @@ export default async function GutachterFallPage({
       vorOrtCard={
         zeigeVorOrt ? (
           <VorOrtTriggerCard
-            fallId={id}
-            kundeName={kundenName}
-            kennzeichen={(fall.kennzeichen as string | null) ?? null}
+            aktiverTerminId={aktiverTermin?.id ?? null}
             adresse={besichtigungsAdresse}
           />
         ) : null

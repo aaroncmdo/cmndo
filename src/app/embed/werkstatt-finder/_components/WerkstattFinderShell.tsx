@@ -17,6 +17,7 @@ import { fetchDrivingRoute } from '@/lib/mapbox/directions'
 import { addPulsingFlow, type PulsingFlowHandle } from '@/lib/mapbox/pulsing-route'
 import { createRoot, type Root } from 'react-dom/client'
 import { WerkstattProfilePopup } from './WerkstattProfilePopup'
+import { WerkstattProfileSheet } from './WerkstattProfileSheet'
 
 const COL_NAVY = '#0D1B3E'
 const COL_ONDO = '#4573A2'
@@ -63,6 +64,8 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
   const dragStartRef = useRef<number | null>(null)
   const [dragY, setDragY] = useState(0)
   const sheetRef = useRef<HTMLDivElement>(null)
+  // Mobil (<lg): geklicktes Werkstatt-Profil als Bottom-Sheet (statt engem Map-Popup).
+  const [sheetWerkstatt, setSheetWerkstatt] = useState<WerkstattVorschlag | null>(null)
 
   // Karte einmalig initialisieren.
   useEffect(() => {
@@ -107,6 +110,12 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
     }
     const openWerkstattPopup = (w: WerkstattVorschlag) => {
       if (w.lat == null || w.lng == null) return
+      // Mobil/iPad (<lg): Profil als Bottom-Sheet statt engem Map-Popup (Pin liegt teils unter dem
+      // Wizard-Sheet + Popup ragt aus dem Screen) — Muster wie FinderMap.openSvPopup (SV, AAR-956).
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        setSheetWerkstatt(w)
+        return
+      }
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
       const container = document.createElement('div')
@@ -297,6 +306,9 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
       {/* Karte full-bleed. position/inset MÜSSEN inline sein: mapbox-gl.css setzt .mapboxgl-map{position:relative}
           und würde eine .absolute-Utility überschreiben → Höhe kollabiert auf 0 (leerer Canvas, kein Fehler). */}
       <div ref={containerRef} style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface, #FFFFFF)' }} />
+
+      {/* Mobil/iPad: geklicktes Werkstatt-Profil als Bottom-Sheet (statt engem Map-Popup) */}
+      {sheetWerkstatt && <WerkstattProfileSheet w={sheetWerkstatt} onClose={() => setSheetWerkstatt(null)} />}
 
       {/* Desktop: freischwebende Glass-Spalte mit dem Wizard */}
       <div
