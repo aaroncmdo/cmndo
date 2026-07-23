@@ -24,6 +24,15 @@ export type FlottenClaimDokument = {
   url: string | null
 }
 
+/** Schadenmeldung-Eckdaten (Gegner/Hergang/Unfallort) fuer die FM-Claim-Ansicht. */
+export type FlottenClaimUnfalldaten = {
+  gegnerName: string | null
+  gegnerKennzeichen: string | null
+  gegnerVersicherung: string | null
+  hergang: string | null
+  unfallort: string | null
+}
+
 export type FlottenClaimView = {
   claimId: string
   fallId: string | null
@@ -36,6 +45,7 @@ export type FlottenClaimView = {
   modell: string | null
   sv: SvKontakt | null
   kb: KbKontakt | null
+  unfalldaten: FlottenClaimUnfalldaten
   dokumente: FlottenClaimDokument[]
 }
 
@@ -66,7 +76,7 @@ export async function getFlottenClaimView(
   // Gate 2: Claim gehoert GENAU zu diesem Fahrzeug?
   const { data: claimRow } = await db
     .from('claims')
-    .select('id,claim_nummer,operative_status,schadentag,schadens_hoehe_netto,vehicle_id,sv_id,kundenbetreuer_id')
+    .select('id,claim_nummer,operative_status,schadentag,schadens_hoehe_netto,vehicle_id,sv_id,kundenbetreuer_id,hergang_kunde_text,schadenort_adresse,schadenort_ort')
     .eq('id', claimId)
     .maybeSingle()
   const claim = claimRow as Record<string, unknown> | null
@@ -108,6 +118,42 @@ export async function getFlottenClaimView(
     )
   }
 
+  // Unfalldaten (Schadenmeldung): Hergang/Unfallort direkt vom Claim; Gegner aus der verursacher-Party.
+  // kennzeichen/versicherung_klartext bleiben auf claim_parties; der Name liegt via person_id auf
+  // personen (beim Convert wurden die flachen Personen-Felder aus der Party nach personen ausgelagert).
+  // v_claim_base/-full sind NICHT nutzbar (leer — faelle-basiert/deprecated, 0 Zeilen). Alles fail-soft.
+  const { data: gegnerRow } = await db
+    .from('claim_parties')
+    .select('kennzeichen, versicherung_klartext, person_id')
+    .eq('claim_id', claimId)
+    .eq('rolle', 'verursacher')
+    .maybeSingle()
+  const gegner = gegnerRow as {
+    kennzeichen: string | null
+    versicherung_klartext: string | null
+    person_id: string | null
+  } | null
+  let gegnerName: string | null = null
+  if (gegner?.person_id) {
+    const { data: personRow } = await db
+      .from('personen')
+      .select('vorname, nachname')
+      .eq('id', gegner.person_id)
+      .maybeSingle()
+    const p = personRow as { vorname: string | null; nachname: string | null } | null
+    gegnerName = [p?.vorname, p?.nachname].filter((t) => t && String(t).trim()).join(' ') || null
+  }
+  const unfalldaten: FlottenClaimUnfalldaten = {
+    gegnerName,
+    gegnerKennzeichen: gegner?.kennzeichen ?? null,
+    gegnerVersicherung: gegner?.versicherung_klartext ?? null,
+    hergang: (claim.hergang_kunde_text as string | null) ?? null,
+    unfallort:
+      [claim.schadenort_adresse as string | null, claim.schadenort_ort as string | null]
+        .filter((t) => t && String(t).trim())
+        .join(', ') || null,
+  }
+
   const sv = await getSvKontakt(db, (claim.sv_id as string | null) ?? null)
   const kb = await getKbKontakt(db, (claim.kundenbetreuer_id as string | null) ?? null)
 
@@ -123,6 +169,7 @@ export async function getFlottenClaimView(
     modell: (veh.modell_haupttyp as string | null) ?? null,
     sv,
     kb,
+    unfalldaten,
     dokumente,
   }
 }

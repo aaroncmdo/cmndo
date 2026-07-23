@@ -9,12 +9,7 @@ import { useEffect, useState } from 'react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 import { provisioniereKarte, type ProvisionEffects } from '@/lib/schadenkarte/provisioniere-karte'
-import {
-  nfcVerfuegbar,
-  NDEF_RECORD_TYPE,
-  type NdefReaderCtor,
-  type NdefReadingEventLike,
-} from '@/lib/schadenkarte/nfc'
+import { nfcVerfuegbar, writeUndLiesZurueck } from '@/lib/schadenkarte/nfc'
 
 type Props = {
   fahrzeuge: Array<{ vehicleId: string; label: string }>
@@ -52,59 +47,12 @@ export function NfcKarteBeschreiben({ fahrzeuge, onMintToken, onFinalize }: Prop
     }
   }, [])
 
-  // NFC-Adapter: schreibt mit overwrite:false (Clobber-Schutz), liest zurueck, liefert uid+readBack.
-  async function writeAndRead(
-    url: string,
-  ): Promise<{ ok: true; uid: string | null; readBack: string | null } | { ok: false; error: string }> {
-    try {
-      const Ctor = (window as unknown as { NDEFReader: NdefReaderCtor }).NDEFReader
-      const writer = new Ctor()
-      await writer.write({ records: [{ recordType: NDEF_RECORD_TYPE, data: url }] }, { overwrite: false })
-
-      const reader = new Ctor()
-      const controller = new AbortController()
-      const gelesen = await new Promise<{ uid: string | null; readBack: string | null }>((resolve) => {
-        const timeout = setTimeout(() => {
-          controller.abort()
-          resolve({ uid: null, readBack: null })
-        }, 10_000)
-        reader.onreading = (ev: NdefReadingEventLike) => {
-          clearTimeout(timeout)
-          const rec = ev.message.records.find((r) => r.recordType === NDEF_RECORD_TYPE)
-          const text = rec?.data ? new TextDecoder().decode(rec.data) : null
-          controller.abort()
-          resolve({ uid: ev.serialNumber ?? null, readBack: text })
-        }
-        reader.onreadingerror = () => {
-          clearTimeout(timeout)
-          controller.abort()
-          resolve({ uid: null, readBack: null })
-        }
-        reader.scan({ signal: controller.signal }).catch(() => {
-          clearTimeout(timeout)
-          controller.abort()
-          resolve({ uid: null, readBack: null })
-        })
-      })
-      return { ok: true, uid: gelesen.uid, readBack: gelesen.readBack }
-    } catch (err) {
-      // overwrite:false auf einer NICHT leeren Karte UND eine abgelehnte Berechtigung landen beide
-      // als NotAllowedError -> nicht sicher unterscheidbar. Ehrliche kombinierte Meldung.
-      const denied = err instanceof Error && err.name === 'NotAllowedError'
-      return {
-        ok: false,
-        error: denied
-          ? 'Beschreiben nicht möglich — entweder ist die Karte nicht leer oder der NFC-Zugriff wurde abgelehnt. Bitte eine leere Karte auflegen und den Zugriff erlauben.'
-          : 'Beschreiben fehlgeschlagen. Bitte eine leere Karte erneut auflegen.',
-      }
-    }
-  }
-
   async function beschreibe() {
     setFehler(null)
     setErfolg(null)
     setLaeuft(true)
-    const effects: ProvisionEffects = { mintToken: onMintToken, writeAndRead, finalize: onFinalize }
+    // writeUndLiesZurueck (geteilter Adapter) hat jetzt ein Write-Timeout -> kein Endlos-Haengen mehr.
+    const effects: ProvisionEffects = { mintToken: onMintToken, writeAndRead: writeUndLiesZurueck, finalize: onFinalize }
     const res = await provisioniereKarte(effects, { fahrzeugId: fahrzeugId || null, pendingToken })
     if (res.ok) {
       setPendingToken(null)

@@ -147,6 +147,7 @@ export async function getFirmenFlotteDetail(
     fahrzeug_id: k.fahrzeugId,
     kennzeichen:
       k.fahrzeugId != null ? (kennzeichenByVehicleId[k.fahrzeugId] ?? null) : null,
+    beschrieben: k.nfcUid != null,
   }))
 
   // 5) Schaeden (claims) fuer alle Fahrzeuge dieser Flotte laden
