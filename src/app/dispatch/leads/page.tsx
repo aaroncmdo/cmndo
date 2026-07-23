@@ -22,6 +22,11 @@ export default async function DispatchLeads({
   // ruft sie an (alle Daten inkl. Mail liegen vor). Eigene Filter-Dimension,
   // orthogonal zu den Phase-Chips; sortiert nach letzter Aktivitaet (updated_at).
   const istAbbrecherFilter = params.filter === 'abbrecher'
+  // Flotte-Filter: Schaden-Karte-Gegner-Submits + FM-manuelle Flotten-Schaeden (source_channel).
+  // Eigene Filter-Dimension wie Abbrecher — der Dispatcher sieht die Fleet-Faelle gebuendelt,
+  // ohne dass sie die Haupt-Liste fluten. Der Lead ist + bleibt die universelle Intake-Zeile.
+  const istFlotteFilter = params.filter === 'flotte'
+  const FLOTTE_KANAELE = ['schaden-karte', 'flotte-manuell']
 
   // leads-Audit 15.05.2026 (#2): status + kunden_konstellation ergänzt. Vorher
   // lud die Liste nur qualifizierungs_phase — der Dispatcher sah den
@@ -38,6 +43,7 @@ export default async function DispatchLeads({
       id, vorname, nachname, telefon, email,
       qualifizierungs_phase, status, kunden_konstellation,
       schadens_fall_typ, service_typ, source_channel,
+      firma_name, gegner_name, gegner_kennzeichen, konvertiert_zu_claim_id,
       flow_link_geoeffnet, flow_link_abgeschlossen, whatsapp_verfuegbar,
       created_at, updated_at,
       zugewiesen_an,
@@ -52,6 +58,8 @@ export default async function DispatchLeads({
       .eq('flow_link_abgeschlossen', false)
       .not('status', 'in', '("disqualifiziert","kalt")')
       .order('updated_at', { ascending: false })
+  } else if (istFlotteFilter) {
+    query = query.in('source_channel', FLOTTE_KANAELE).order('created_at', { ascending: false })
   } else {
     query = query.order('created_at', { ascending: false })
     if (params.phase) {
@@ -60,7 +68,7 @@ export default async function DispatchLeads({
   }
 
   const { data: leads } = await query
-  const activePhase = istAbbrecherFilter ? '' : (params.phase ?? '')
+  const activePhase = istAbbrecherFilter || istFlotteFilter ? '' : (params.phase ?? '')
 
   // FIX (Dashboard-Audit 29.06.): die Liste ist auf 200 begrenzt -> leads.length unterzaehlte
   // "X Ergebnisse" sobald >200 Leads matchten. Exakte Gesamtzahl passend zum aktiven Filter.
@@ -70,6 +78,8 @@ export default async function DispatchLeads({
       .eq('flow_link_geoeffnet', true)
       .eq('flow_link_abgeschlossen', false)
       .not('status', 'in', '("disqualifiziert","kalt")')
+  } else if (istFlotteFilter) {
+    countQuery = countQuery.in('source_channel', FLOTTE_KANAELE)
   } else if (params.phase) {
     countQuery = countQuery.eq('qualifizierungs_phase', params.phase)
   }
@@ -90,13 +100,19 @@ export default async function DispatchLeads({
     .eq('flow_link_abgeschlossen', false)
     .not('status', 'in', '("disqualifiziert","kalt")')
 
+  // Flotte-Zaehler fuer den Chip-Badge (immer, auch ausserhalb des Filters) — glanceable Signal.
+  const { count: flotteCount } = await supabase
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .in('source_channel', FLOTTE_KANAELE)
+
   return (
     <div className="py-6 space-y-4">
       <PageHeader
         title="Leads"
         actions={
           <>
-            <span className="text-sm text-claimondo-ondo">{leads?.length ?? 0} Ergebnisse</span>
+            <span className="text-sm text-claimondo-ondo">{gesamtCount ?? leads?.length ?? 0} Ergebnisse</span>
             <NeuLeadDrawer />
           </>
         }
@@ -128,6 +144,17 @@ export default async function DispatchLeads({
           }`}
         >
           Abbrecher{typeof abbrecherCount === 'number' ? ` (${abbrecherCount})` : ''}
+        </Chip>
+        {/* Flotte — Schaden-Karte-Gegner-Submits + FM-manuelle Schaeden. Eigene Filter-Dimension. */}
+        <Chip
+          href="/dispatch/leads?filter=flotte"
+          className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
+            istFlotteFilter
+              ? 'bg-claimondo-navy text-white'
+              : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
+          }`}
+        >
+          Flotte{typeof flotteCount === 'number' ? ` (${flotteCount})` : ''}
         </Chip>
       </ChipRow>
 
