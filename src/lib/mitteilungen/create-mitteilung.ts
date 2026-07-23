@@ -56,6 +56,10 @@ function autoRouteUrl(
       if (rolle === 'kundenbetreuer' || rolle === 'dispatch') return '/mitarbeiter/nachrichten'
       if (rolle === 'admin') return '/admin/nachrichten'
       return null
+    case 'fahrzeug':
+      // Flottenmanager-Kontext (Fahrzeug-Detail, z.B. Zustandsaufnahme-Reminder). kontextId = vehicle_id.
+      if (rolle === 'flottenmanager') return `/flotte/fahrzeug/${kontextId}`
+      return null
     default:
       return null
   }
@@ -69,6 +73,7 @@ function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): stri
   if (kontextTyp === 'lead') return '📋'
   if (kontextTyp === 'termin') return '📅'
   if (kontextTyp === 'abrechnung') return '💶'
+  if (kontextTyp === 'fahrzeug') return '🚗'
   return '🔔'
 }
 
