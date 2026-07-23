@@ -13,6 +13,7 @@
 //   3. UPDATE via Service-Client (kein Kunde-RLS-UPDATE auf claims vorhanden).
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { notifyWerkstattKundenreaktion } from '@/lib/werkstatt/notify-werkstatt-kundenreaktion'
 import { revalidatePath } from 'next/cache'
 
 export async function genehmigeKvaPortal(
@@ -101,6 +102,63 @@ export async function genehmigeKvaPortal(
     })
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
+
+  revalidatePath(`/kunde/faelle/${claimId}`)
+  return { ok: true }
+}
+
+// R1 (Repair-Audit): Kunde LEHNT den Werkstatt-KVA ab (mit Grund) statt sign-or-nothing.
+// Setzt claims.kva_abgelehnt_am + kva_abgelehnt_grund + benachrichtigt die Werkstatt. Diese laedt
+// dann einen revidierten KVA hoch, was kva_abgelehnt_am + reparatur_freigegeben_am wieder resettet
+// (auftraege/actions.ts) — der Ablehn->Revidier-Loop schliesst sich. Un-stuckt den Kunden.
+export async function lehneKvaAbPortal(
+  claimId: string,
+  grund: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!claimId) return { ok: false, error: 'Keine Fall-ID.' }
+  const trimmed = (grund ?? '').trim()
+
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  // Ownership-Gate: Kunde-Session-SELECT ist RLS-gated auf die eigenen Claims (eine Row => Besitz).
+  const { data: claim } = await supabase
+    .from('claims')
+    .select('id, kva_abgelehnt_am, reparatur_freigegeben_am, reparatur_werkstatt_id, werkstatt_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Kein Zugriff auf diesen Fall.' }
+  const c = claim as {
+    kva_abgelehnt_am: string | null
+    reparatur_freigegeben_am: string | null
+    reparatur_werkstatt_id: string | null
+    werkstatt_id: string | null
+  }
+
+  // Bereits freigegeben => nicht mehr ablehnbar (der Loop ist durch).
+  if (c.reparatur_freigegeben_am) return { ok: false, error: 'Der Reparaturauftrag ist bereits freigegeben.' }
+  // Idempotent: schon abgelehnt => ok (kein Ueberschreiben des Zeitpunkts).
+  if (c.kva_abgelehnt_am) return { ok: true }
+
+  const svc = createServiceClient()
+  const { error } = await svc
+    .from('claims')
+    .update({ kva_abgelehnt_am: new Date().toISOString(), kva_abgelehnt_grund: trimmed || null })
+    .eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+
+  // Werkstatt benachrichtigen (non-fatal — ein Notify-Fail darf die Ablehnung nicht kippen).
+  const werkstattId = c.reparatur_werkstatt_id ?? c.werkstatt_id
+  if (werkstattId) {
+    try {
+      await notifyWerkstattKundenreaktion({ werkstattId, ereignis: 'kva_abgelehnt', grund: trimmed || null, svc })
+    } catch (e) {
+      console.error('[lehneKvaAbPortal] Werkstatt-Notify (nicht kritisch):', e)
+    }
+  }
 
   revalidatePath(`/kunde/faelle/${claimId}`)
   return { ok: true }
