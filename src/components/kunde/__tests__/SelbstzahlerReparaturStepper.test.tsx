@@ -40,37 +40,43 @@ function collectClassNames(node: ReactNode): string {
   return out.join(' ')
 }
 
-const render = (p: { hatWerkstatt: boolean; terminStatus: string | null; abgeschlossen: boolean }) =>
+const render = (p: { hatWerkstatt: boolean; terminStatus: string | null; kvaFreigegeben: boolean; abgeschlossen: boolean }) =>
   SelbstzahlerReparaturStepper(p) as ReactNode
 
 describe('SelbstzahlerReparaturStepper (Render-Tree)', () => {
-  it('rendert alle 4 Schritt-Labels', () => {
-    const s = collectStrings(render({ hatWerkstatt: false, terminStatus: null, abgeschlossen: false }))
+  it('rendert alle 5 Schritt-Labels (inkl. Freigabe)', () => {
+    const s = collectStrings(render({ hatWerkstatt: false, terminStatus: null, kvaFreigegeben: false, abgeschlossen: false }))
     expect(s).toContain('Schaden gemeldet')
     expect(s).toContain('Werkstatt')
     expect(s).toContain('Termin')
+    expect(s).toContain('Freigabe')
     expect(s).toContain('Reparatur')
   })
 
   it('keine Werkstatt: Schaden erledigt (success) + Werkstatt aktiv (navy)', () => {
-    const c = collectClassNames(render({ hatWerkstatt: false, terminStatus: null, abgeschlossen: false }))
+    const c = collectClassNames(render({ hatWerkstatt: false, terminStatus: null, kvaFreigegeben: false, abgeschlossen: false }))
     expect(c).toContain('bg-success')
     expect(c).toContain('bg-claimondo-navy')
   })
 
   it('Werkstatt gewaehlt, Termin offen: aktiver Schritt bleibt navy', () => {
-    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: null, abgeschlossen: false }))
+    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: null, kvaFreigegeben: false, abgeschlossen: false }))
     expect(c).toContain('bg-claimondo-navy')
     expect(c).toContain('bg-success')
   })
 
-  it('Termin bestaetigt: Reparatur ist aktiver Schritt (navy)', () => {
-    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: 'bestaetigt', abgeschlossen: false }))
+  it('Termin bestaetigt + KVA NICHT freigegeben: aktiver Schritt (Freigabe) ist navy — NICHT Reparatur', () => {
+    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: 'bestaetigt', kvaFreigegeben: false, abgeschlossen: false }))
+    expect(c).toContain('bg-claimondo-navy')
+  })
+
+  it('Termin bestaetigt + KVA freigegeben: Reparatur aktiv (navy)', () => {
+    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: 'bestaetigt', kvaFreigegeben: true, abgeschlossen: false }))
     expect(c).toContain('bg-claimondo-navy')
   })
 
   it('abgeschlossen: alle Schritte success, kein aktiver navy-Schritt', () => {
-    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: 'erledigt', abgeschlossen: true }))
+    const c = collectClassNames(render({ hatWerkstatt: true, terminStatus: 'erledigt', kvaFreigegeben: true, abgeschlossen: true }))
     expect(c).toContain('bg-success')
     expect(c).not.toContain('bg-claimondo-navy')
   })

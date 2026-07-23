@@ -77,6 +77,7 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <SelbstzahlerReparaturStepper
           hatWerkstatt={vm.geld.reparaturWerkstattId != null}
           terminStatus={vm.termine.find((x) => x.art === 'reparatur')?.status ?? null}
+          kvaFreigegeben={vm.flags.reparaturFreigegeben}
           abgeschlossen={lifecycle.mainPhase === 'abschluss'}
         />
       ) : (

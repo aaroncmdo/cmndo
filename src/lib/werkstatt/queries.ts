@@ -14,6 +14,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getStorageUrlBulk } from '@/lib/storage/url'
 // FG4-A: Provisions-Freigabe = Fall-Completion + 7 Tage. Die pending-Frist wird daraus abgeleitet
 // (nicht mehr aus hold_until = Erstellung+7d, seit FG4-A falsch).
 import { releaseDeadlineTs } from '@/lib/provisionen/completion-release-gate'
@@ -420,6 +421,8 @@ export type WerkstattAuftragExtra = {
   kunde_telefon: string | null
   kunde_email: string | null
   betreuer: { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null
+  // W1: aufgeloeste Kunden-Schadensfoto-URLs (fuer den Werkstatt-KVA).
+  schadensfotos: string[]
 }
 
 export async function getWerkstattAuftragExtra(claimId: string): Promise<WerkstattAuftragExtra | null> {
@@ -454,6 +457,25 @@ export async function getWerkstattAuftragExtra(claimId: string): Promise<Werksta
     }
   }
 
+  // W1: Kunden-Schadensfotos fuer den KVA (fall_dokumente typ='schadensfoto', claim-gekeyt).
+  // Die zugewiesene Werkstatt (ownership via getWerkstattAuftrag) braucht die Schadensbilder,
+  // um zu kalkulieren — bei Selbstzahler gibt es kein Gutachten. URLs zur Laufzeit aufloesen
+  // (getStorageUrlBulk) statt gespeicherte, evtl. abgelaufene URLs zu nutzen.
+  const { data: fotoRows } = await admin
+    .from('fall_dokumente')
+    .select('storage_path')
+    .eq('claim_id', claimId)
+    .eq('dokument_typ', 'schadensfoto')
+    .is('geloescht_am', null)
+  const fotoPaths = ((fotoRows ?? []) as Array<{ storage_path: string | null }>)
+    .map((r) => r.storage_path)
+    .filter((p): p is string => !!p)
+  const schadensfotos = fotoPaths.length
+    ? (await getStorageUrlBulk(admin, fotoPaths.map((path) => ({ bucket: 'fall-dokumente', path })))).filter(
+        (u): u is string => !!u,
+      )
+    : []
+
   return {
     fahrzeug_baujahr: (row.fahrzeug_baujahr as string | number | null) ?? null,
     fahrzeug_farbe: (row.fahrzeug_farbe as string | null) ?? null,
@@ -469,6 +491,7 @@ export async function getWerkstattAuftragExtra(claimId: string): Promise<Werksta
     kunde_telefon: (row.kunde_telefon as string | null) ?? null,
     kunde_email: (row.kunde_email as string | null) ?? null,
     betreuer,
+    schadensfotos,
   }
 }
 
