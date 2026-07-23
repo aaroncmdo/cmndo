@@ -4,7 +4,9 @@
 // als Mitteilung materialisiert.
 export type MitteilungKategorie = 'update' | 'nachricht' | 'anruf'
 export type MitteilungPrioritaet = 'normal' | 'hoch' | 'dringend'
-export type KontextTyp = 'fall' | 'lead' | 'auftrag' | 'termin' | 'abrechnung' | 'nachricht' | 'claim'
+// 'fahrzeug': Flottenmanager-Kontext (z.B. 3-Monats-Zustandsaufnahme-Reminder) — kontext_id = vehicle_id.
+// mitteilungen.kontext_typ hat KEINEN DB-CHECK, daher rein TS-seitige Erweiterung (kein Migration-Bedarf).
+export type KontextTyp = 'fall' | 'lead' | 'auftrag' | 'termin' | 'abrechnung' | 'nachricht' | 'claim' | 'fahrzeug'
 // AAR-720: makler + dispatch ergänzt — beide haben user_role-Enum-
 // Einträge und jeweils eigene UI/Portal-Routen. Vorher konnten Mitteilungen
 // nicht an Makler-User geroutet werden, obwohl /makler/* existiert.
