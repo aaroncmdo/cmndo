@@ -16,6 +16,8 @@ import { TextField } from '@/components/shared/forms/TextField'
 import { VersichererSelect } from '@/components/shared/VersichererSelect'
 import SignaturePadInput from '@/components/SignaturePadInput'
 import { compressImage } from '@/lib/dokumente/compress-image'
+import { VoiceDictation } from '@/components/onboarding/fields/VoiceDictation'
+import { appendTranscript } from '@/components/onboarding/fields/append-transcript'
 import { submitSchadenGegner } from './actions'
 import type { GegnerFoto, GegnerFormData } from './gegner-form-types'
 
@@ -91,7 +93,7 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
   })
 
   // Photo state — keyed by GegnerFoto.typ
-  const [fotos, setFotos] = useState<Partial<Record<FotoTyp, FotoState>>>({})
+  const [fotos, setFotos] = useState<Partial<Record<FotoTyp, FotoState[]>>>({})
   const [fotoErrors, setFotoErrors] = useState<Partial<Record<FotoTyp, string>>>({})
   const [fotoLoading, setFotoLoading] = useState<Partial<Record<FotoTyp, boolean>>>({})
 
@@ -110,14 +112,13 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
     setFotoLoading((prev) => ({ ...prev, [typ]: true }))
     try {
       const { base64, contentType } = await compressImage(file)
-      setFotos((prev) => ({
-        ...prev,
-        [typ]: {
-          base64,
-          contentType,
-          previewUrl: `data:${contentType};base64,${base64}`,
-        },
-      }))
+      const neu: FotoState = {
+        base64,
+        contentType,
+        previewUrl: `data:${contentType};base64,${base64}`,
+      }
+      // Mehrere Fotos je Kategorie: an das bestehende Array anhaengen statt ersetzen.
+      setFotos((prev) => ({ ...prev, [typ]: [...(prev[typ] ?? []), neu] }))
     } catch (err) {
       setFotoErrors((prev) => ({
         ...prev,
@@ -128,10 +129,12 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
     }
   }
 
-  function removeFoto(typ: FotoTyp) {
+  function removeFoto(typ: FotoTyp, index: number) {
     setFotos((prev) => {
+      const arr = (prev[typ] ?? []).filter((_, i) => i !== index)
       const next = { ...prev }
-      delete next[typ]
+      if (arr.length) next[typ] = arr
+      else delete next[typ]
       return next
     })
   }
@@ -139,12 +142,10 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
   async function handleSubmit() {
     // Assemble fotos array from state
     const fotoArray: GegnerFoto[] = (
-      Object.entries(fotos) as [FotoTyp, FotoState][]
-    ).map(([typ, state]) => ({
-      typ,
-      base64: state.base64,
-      contentType: state.contentType,
-    }))
+      Object.entries(fotos) as [FotoTyp, FotoState[]][]
+    ).flatMap(([typ, states]) =>
+      states.map((state) => ({ typ, base64: state.base64, contentType: state.contentType })),
+    )
 
     setSubmitting(true)
     setSubmitError(null)
@@ -356,12 +357,21 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
               <label className="text-xs font-semibold text-claimondo-shield">
                 Unfallhergang
               </label>
+              {/* Whisper-Sprachdiktat (wiederverwendete VoiceDictation, Quelle 'schaden' =
+                  token-authed /api/schaden/voice-transcribe): einsprechen -> Groq-Transkript
+                  wird an den bestehenden Text angehaengt (appendTranscript, nie ueberschrieben). */}
+              <VoiceDictation
+                source={{ kind: 'schaden', token }}
+                onFinalTranscript={(text) =>
+                  set('hergang', appendTranscript(data.hergang ?? '', text))
+                }
+              />
               {/* Plain <textarea> — no shared Textarea component exists;
                   styled identically to TextField's INPUT_CLS pattern (token-bound). */}
               <textarea
                 value={data.hergang ?? ''}
                 onChange={(e) => set('hergang', e.target.value)}
-                placeholder="Beschreiben Sie kurz den Unfallhergang: Wo, wann und wie ist es passiert?"
+                placeholder="Beschreiben Sie kurz den Unfallhergang: Wo, wann und wie ist es passiert? — oder oben einsprechen."
                 rows={6}
                 className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30 resize-y"
               />
@@ -379,34 +389,31 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
               </div>
 
               <FotoPicker
-                typ="gegner_fahrzeug"
                 label="Schaden am Fahrzeug des Unfallgegners"
                 required
-                state={fotos['gegner_fahrzeug']}
+                states={fotos['gegner_fahrzeug'] ?? []}
                 loading={!!fotoLoading['gegner_fahrzeug']}
                 error={fotoErrors['gegner_fahrzeug']}
                 onFile={(file) => handleFotoChange('gegner_fahrzeug', file)}
-                onRemove={() => removeFoto('gegner_fahrzeug')}
+                onRemove={(i) => removeFoto('gegner_fahrzeug', i)}
               />
 
               <FotoPicker
-                typ="eigenes_fahrzeug"
                 label="Schaden an Ihrem Fahrzeug"
-                state={fotos['eigenes_fahrzeug']}
+                states={fotos['eigenes_fahrzeug'] ?? []}
                 loading={!!fotoLoading['eigenes_fahrzeug']}
                 error={fotoErrors['eigenes_fahrzeug']}
                 onFile={(file) => handleFotoChange('eigenes_fahrzeug', file)}
-                onRemove={() => removeFoto('eigenes_fahrzeug')}
+                onRemove={(i) => removeFoto('eigenes_fahrzeug', i)}
               />
 
               <FotoPicker
-                typ="unfallort"
                 label="Unfallort (optional)"
-                state={fotos['unfallort']}
+                states={fotos['unfallort'] ?? []}
                 loading={!!fotoLoading['unfallort']}
                 error={fotoErrors['unfallort']}
                 onFile={(file) => handleFotoChange('unfallort', file)}
-                onRemove={() => removeFoto('unfallort')}
+                onRemove={(i) => removeFoto('unfallort', i)}
               />
             </div>
           )}
@@ -462,12 +469,12 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                   <SummaryRow label="Unfallhergang" value={data.hergang} />
                 ) : null}
                 {/* Photo summary */}
-                {Object.keys(fotos).length > 0 ? (
-                  <SummaryRow
-                    label="Fotos"
-                    value={`${Object.keys(fotos).length} Foto(s) beigefügt`}
-                  />
-                ) : null}
+                {(() => {
+                  const anzahl = Object.values(fotos).reduce((n, a) => n + (a?.length ?? 0), 0)
+                  return anzahl > 0 ? (
+                    <SummaryRow label="Fotos" value={`${anzahl} Foto(s) beigefügt`} />
+                  ) : null
+                })()}
                 {unterschrift ? <SummaryRow label="Unterschrift" value="Vorhanden" /> : null}
               </div>
 
@@ -544,23 +551,21 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
 // ─── FotoPicker ───────────────────────────────────────────────────────────────
 
 function FotoPicker({
-  typ,
   label,
   required = false,
-  state,
+  states,
   loading,
   error,
   onFile,
   onRemove,
 }: {
-  typ: FotoTyp
   label: string
   required?: boolean
-  state: FotoState | undefined
+  states: FotoState[]
   loading: boolean
   error: string | undefined
   onFile: (file: File) => void
-  onRemove: () => void
+  onRemove: (index: number) => void
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -585,31 +590,40 @@ function FotoPicker({
         onChange={(e) => {
           const file = e.target.files?.[0]
           if (file) onFile(file)
-          // Reset so same file can be re-selected after remove
+          // Reset, damit direkt das naechste Foto gewaehlt werden kann (mehrere je Kategorie)
           e.target.value = ''
         }}
       />
 
-      {state ? (
-        // Preview + remove
-        <div className="relative rounded-ios-md overflow-hidden border border-claimondo-border bg-claimondo-bg">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={state.previewUrl}
-            alt={`Vorschau: ${label}`}
-            className="w-full h-auto max-h-52 object-cover"
-          />
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label="Foto entfernen"
-            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-claimondo-navy/80 flex items-center justify-center"
-          >
-            <XIcon className="w-4 h-4 text-white" />
-          </button>
+      {/* Bereits erfasste Fotos dieser Kategorie — Kachel-Grid, je Kachel entfernbar */}
+      {states.length > 0 ? (
+        <div className="grid grid-cols-3 gap-2">
+          {states.map((s, i) => (
+            <div
+              key={i}
+              className="relative aspect-square rounded-ios-md overflow-hidden border border-claimondo-border bg-claimondo-bg"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={s.previewUrl}
+                alt={`Vorschau ${i + 1}: ${label}`}
+                className="h-full w-full object-cover"
+              />
+              <button
+                type="button"
+                onClick={() => onRemove(i)}
+                aria-label="Foto entfernen"
+                className="absolute top-1 right-1 w-6 h-6 rounded-full bg-claimondo-navy/80 flex items-center justify-center"
+              >
+                <XIcon className="w-3.5 h-3.5 text-white" />
+              </button>
+            </div>
+          ))}
         </div>
-      ) : loading ? (
-        <div className="flex items-center justify-center gap-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-4 py-6 text-body-sm text-claimondo-ondo">
+      ) : null}
+
+      {loading ? (
+        <div className="flex items-center justify-center gap-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-4 py-4 text-body-sm text-claimondo-ondo">
           <div className="w-4 h-4 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
           Foto wird verarbeitet …
         </div>
@@ -617,16 +631,16 @@ function FotoPicker({
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex flex-col items-center gap-2 rounded-ios-md border-2 border-dashed border-claimondo-navy/20 bg-claimondo-bg px-4 py-6 text-body-sm text-claimondo-ondo hover:border-claimondo-ondo hover:bg-white transition-colors"
+          className="flex flex-col items-center gap-1.5 rounded-ios-md border-2 border-dashed border-claimondo-navy/20 bg-claimondo-bg px-4 py-4 text-body-sm text-claimondo-ondo hover:border-claimondo-ondo hover:bg-white transition-colors"
         >
           <div className="flex gap-3 text-claimondo-ondo/60">
             <CameraIcon className="w-5 h-5" />
             <ImageIcon className="w-5 h-5" />
           </div>
-          <span className="font-semibold text-claimondo-navy">Foto aufnehmen oder auswählen</span>
-          <span className="text-caption text-claimondo-shield">
-            Kamera oder Galerie
+          <span className="font-semibold text-claimondo-navy">
+            {states.length > 0 ? 'Weiteres Foto hinzufügen' : 'Foto aufnehmen oder auswählen'}
           </span>
+          <span className="text-caption text-claimondo-shield">Kamera oder Galerie · mehrere möglich</span>
         </button>
       )}
 
