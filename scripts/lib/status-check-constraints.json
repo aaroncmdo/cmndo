@@ -1,9 +1,8 @@
 {
   "_meta": {
-    "purpose": "Snapshot der Postgres-CHECK-Constraints fuer status-artige Spalten (col = ANY (ARRAY[...])). Quelle der Wahrheit fuer check:flag-drift (CHECK-invalide Status-Literale wie 'geplant'/'kunde_storniert' fangen).",
-    "generatedFrom": "pg_get_constraintdef ueber pg_constraint WHERE contype='c' AND conname ~ status|work_state|_phase (Projekt paizkjajbuxxksdoycev)",
-    "regenerate": "Bei jeder Aenderung eines status-CHECKs neu ziehen (SQL siehe scripts/check-flag-drift.mjs Header) + committen.",
-    "note": "Nur ENUM-artige (col = ANY ARRAY) CHECKs. Nullable-CHECKs sind identisch behandelt (NULL wird im Scanner ignoriert, nur String-Literale geprueft). [22.07. auf VOLLSTAENDIGE ANY-ARRAY-Abdeckung erweitert — nicht mehr nur status-benannt.]"
+    "_regen": "Automatisch regeneriert via scripts/build-flag-drift-snapshot.mjs (RPC audit_enum_check_constraints, Cron: .github/workflows/schema-snapshot-regen.yml). NICHT manuell editieren — bei enum-CHECK-Aenderung das Script laufen lassen (neuer Wert IMMER zuerst per MCP-Migration in den CHECK).",
+    "purpose": "Snapshot ALLER public ANY-ARRAY-enum-CHECKs (col = ANY (ARRAY[...])). Ground-Truth fuer check:flag-drift.",
+    "note": "Volle Abdeckung (nicht nur status-benannt). Werte je Spalte sortiert; NULL wird im Scanner ignoriert (nur String-Literale geprueft)."
   },
   "columns": {
     "abrechnung_reminders.reminder_typ": [
