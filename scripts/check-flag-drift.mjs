@@ -16,6 +16,9 @@
 //   Lücke verbarg einen Silent-Write-Fail (nachrichten.kanal='system', Reminder-Bug). Jetzt fängt
 //   das Gate JEDEN CHECK-invaliden enum-Literal (schadenart, abrechnungsweg, kanal, …).
 //   REGENERATION (neuer/geänderter enum-CHECK per MCP-Migration; Wert IMMER zuerst in den CHECK):
+//   → `node --env-file=.env.local scripts/build-flag-drift-snapshot.mjs` (via RPC
+//     audit_enum_check_constraints; naechtlich auto via .github/workflows/schema-snapshot-regen.yml).
+//   Das SQL unten ist das manuelle Aequivalent (Debug / ohne Script):
 //   SELECT cls.relname AS tbl,
 //     (regexp_match(pg_get_constraintdef(con.oid), '\(([a-z_][a-z0-9_]*) = ANY'))[1] AS col,
 //     (SELECT string_agg(m[1], ',' ORDER BY m[1])

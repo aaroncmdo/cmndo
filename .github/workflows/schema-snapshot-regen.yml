@@ -1,7 +1,9 @@
-# Naechtlicher Regen der Write-Achsen-Ground-Truth (scripts/lib/schema-snapshot.json) aus prod.
-# Motivation: der Snapshot driftete 2x in 12h still (claims.status/finance_eintraege-Drops), weil
-# "jede Migration zieht den Snapshot nach" im Multi-Session-Betrieb nicht haelt. Dieser Job faengt
-# Drift automatisch + oeffnet EINEN rollierenden PR gegen staging.
+# Naechtlicher Regen BEIDER prod-Spiegel-Snapshots aus prod:
+#   - scripts/lib/schema-snapshot.json          (Write-Achse von check:query-parse, via OpenAPI)
+#   - scripts/lib/status-check-constraints.json (enum-CHECKs von check:flag-drift, via RPC audit_enum_check_constraints)
+# Motivation: beide drifteten still (schema 2x in 12h — claims.status/finance_eintraege-Drops; flag-drift lag
+# 176 enum-Spalten zurueck), weil "jede Migration zieht den Snapshot nach" im Multi-Session-Betrieb nicht haelt.
+# Dieser Job faengt Drift beider automatisch + oeffnet EINEN rollierenden PR gegen staging.
 #
 # ⚙️ SETUP (einmalig, Aaron): zwei Repo-Secrets setzen —
 #   NEXT_PUBLIC_SUPABASE_URL   = die prod-REST-URL (https://paizkjajbuxxksdoycev.supabase.co)
@@ -47,11 +49,16 @@ jobs:
         with:
           node-version: '20'
       # Kein npm ci noetig — das Script nutzt nur Node-Builtins (fs/path/url/fetch).
-      - name: Snapshot aus prod regenerieren
+      - name: Schema-Snapshot aus prod regenerieren (Write-Achse)
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: node scripts/build-schema-snapshot.mjs
+      - name: Flag-Drift-Snapshot aus prod regenerieren (enum-CHECKs)
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/build-flag-drift-snapshot.mjs
       - name: Bei Drift rollierenden PR gegen staging
         env:
           # PAT wenn gesetzt (oeffnet PR + triggert CI, ohne das Self-Approve-Repo-Setting),
@@ -60,7 +67,7 @@ jobs:
           # sauber: `gh pr create` failt -> der `else`-Zweig unten warnt (kein rotes Failing).
           GH_TOKEN: ${{ secrets.SNAPSHOT_REGEN_PAT || secrets.GITHUB_TOKEN }}
         run: |
-          if git diff --quiet -- scripts/lib/schema-snapshot.json; then
+          if git diff --quiet -- scripts/lib/schema-snapshot.json scripts/lib/status-check-constraints.json; then
             echo "Kein Drift — nichts zu tun."
             exit 0
           fi
@@ -69,8 +76,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -B "$BRANCH"
-          git add scripts/lib/schema-snapshot.json
-          git commit -m "chore(query-parse): schema-snapshot regen (auto — Drift erkannt)"
+          git add scripts/lib/schema-snapshot.json scripts/lib/status-check-constraints.json
+          git commit -m "chore(query-parse): snapshot regen (auto — Drift erkannt: schema + flag-drift)"
           git push -f -u origin "$BRANCH"
           # PR-Auto-Erstellung ist OPTIONAL. Zwei Wege sie zu aktivieren:
           #  (a) SNAPSHOT_REGEN_PAT-Secret (EMPFOHLEN, s. Header) — der PAT-Actor legt den PR an;
@@ -80,12 +87,12 @@ jobs:
           # Ist KEINS aktiv, failt `gh pr create` mit "GitHub Actions is not permitted to create
           # pull requests" — dann NICHT den Job rot faerben: der Branch ist gepusht (= Drift
           # erfasst), PR wird manuell via 1-Klick-Link geoeffnet.
-          echo "### 🔁 Schema-Snapshot-Drift — Branch \`$BRANCH\` gepusht" >> "$GITHUB_STEP_SUMMARY"
-          BODY="Automatischer Regen von scripts/lib/schema-snapshot.json aus prod (Cron). Drift zur committeten Write-Achsen-Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). Review: gelistete Tabellen/Spalten gegen die zugehoerige Migration; NEUE Relationen default kind=t (falls View -> manuell v)."
+          echo "### 🔁 Snapshot-Drift (schema und/oder flag-drift) — Branch \`$BRANCH\` gepusht" >> "$GITHUB_STEP_SUMMARY"
+          BODY="Automatischer Regen der prod-Spiegel-Snapshots (Cron): scripts/lib/schema-snapshot.json (Write-Achse, via OpenAPI) und/oder scripts/lib/status-check-constraints.json (flag-drift enum-CHECKs, via RPC audit_enum_check_constraints). Drift zur committeten Ground-Truth erkannt. Reiner Snapshot-Sync, kein Code (Regel 4 n/a). Review: gelistete Tabellen/Spalten/enum-Werte gegen die zugehoerige Migration; NEUE Relationen default kind=t (falls View -> manuell v)."
           OPEN=$(gh pr list --head "$BRANCH" --state open --json number --jq 'length' 2>/dev/null || echo 0)
           if [ "$OPEN" != "0" ]; then
             echo "Rollierender PR existiert bereits → per force-push aktualisiert." | tee -a "$GITHUB_STEP_SUMMARY"
-          elif gh pr create --base staging --head "$BRANCH" --title "chore(query-parse): schema-snapshot regen (auto)" --body "$BODY"; then
+          elif gh pr create --base staging --head "$BRANCH" --title "chore(query-parse): snapshot regen (auto — schema + flag-drift)" --body "$BODY"; then
             echo "✅ PR automatisch erstellt." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "⚠️ Auto-PR nicht erlaubt (Repo-Setting aus). Branch gepusht — PR manuell oeffnen: https://github.com/${GITHUB_REPOSITORY}/pull/new/$BRANCH" | tee -a "$GITHUB_STEP_SUMMARY"
