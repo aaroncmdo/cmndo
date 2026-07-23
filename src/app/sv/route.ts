@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { externalUrl } from '@/lib/external-url'
 
 // Doc 34 Task 0b.4 — Kurz-URL fuer QR-Codes, Visitenkarten, Press-/Social-Posts.
 //   /sv?plz=50670   -> /gutachter-finden?plz=50670
@@ -20,5 +21,8 @@ export function GET(req: Request) {
     target = `/gutachter-finden?stadt=${encodeURIComponent(stadt)}`
   }
 
-  return NextResponse.redirect(new URL(target, req.url), 308)
+  // externalUrl statt new URL(target, req.url): hinter nginx ist req.url der INTERNE
+  // Listen-Origin (0.0.0.0:3000) -> der 308-Location leakte '0.0.0.0:3000' an den Browser
+  // (ERR_ADDRESS_INVALID) -> jeder /sv-QR-/Visitenkarten-/Social-Link war tot.
+  return NextResponse.redirect(externalUrl(req, target), 308)
 }
