@@ -20,6 +20,19 @@ export const HART_SCHWELLE = 60
 const STATUS_AKTIV = 'aktiv'
 const MAX_VORSCHLAEGE = 5
 
+/**
+ * „Belastbare" Google-Bewertung = echtes Vertrauens-Signal: >= 4,0 Sterne UND >= 5 Bewertungen.
+ * Ein 3-Sterne- oder 2-Reviews-Profil ist kein Trust-Argument. Single Source of Truth fuer den
+ * GBP-Trust-Chip (baueGruende) UND den Google-Badge in Card/Popup/Sheet (WerkstattFinder /
+ * WerkstattProfileInhalt) — sonst zeigt der Badge auch „★ 2,5" (Aaron 23.07.).
+ */
+export function istBelastbareBewertung(
+  rating: number | null | undefined,
+  anzahl: number | null | undefined,
+): boolean {
+  return rating != null && anzahl != null && rating >= 4 && anzahl >= 5
+}
+
 export type Fit = 'passt' | 'passt_nicht' | 'unbekannt'
 export type MarkenMatch = 'marke' | 'frei' | 'unbekannt'
 // 'trust' = Chips, die die Finder-Karte SEPARAT rendert (aktuell nur "Verifizierter Partner",
@@ -188,7 +201,7 @@ function baueGruende(
   // (Sortierung bleibt Marke→Gewerke→Gruppe→verifiziert→Distanz; Umbau = Produktentscheidung).
   const rating = w.google_rating ?? null
   const anzahl = w.google_review_count ?? 0
-  if (rating !== null && rating >= 4 && anzahl >= 5) {
+  if (rating !== null && istBelastbareBewertung(rating, anzahl)) {
     gruende.push({
       // typ 'rating', NICHT 'trust' — s. MatchGrundTyp. Als 'trust' filtert die Finder-Karte
       // den Chip weg (dort ist 'trust' = "wird separat gerendert"), und er kam nie beim Kunden an.

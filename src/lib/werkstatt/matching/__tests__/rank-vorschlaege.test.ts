@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { rankeWerkstattVorschlaege, type WerkstattKandidat, type MatchingKontext } from '../rank-vorschlaege'
+import { rankeWerkstattVorschlaege, istBelastbareBewertung, type WerkstattKandidat, type MatchingKontext } from '../rank-vorschlaege'
 
 // Aaron 14.07.: "ich möchte einen Vorschlag von bis zu fünf Werkstätten — im FlowLink auswählbar, mit
 // wirklichem Grund warum das passt. Also BMW markengebunden schlägt freie Werkstatt, und natürlich
@@ -304,5 +304,17 @@ describe('GBP-Trust-Chip (Spec §5 — reine Anzeige, kein Ranking-Einfluss)', (
       werkstatt({ id: 'sichtbar', google_rating: 4.9, google_review_count: 81 }),
     )
     expect(sichtbar.map((c) => c.text)).toContain('★ 4,9 bei Google (81 Bewertungen)')
+  })
+})
+
+describe('istBelastbareBewertung', () => {
+  it('true nur bei >= 4,0 UND >= 5 Bewertungen (sonst kein Badge/Chip)', () => {
+    expect(istBelastbareBewertung(4.0, 5)).toBe(true)
+    expect(istBelastbareBewertung(4.8, 112)).toBe(true)
+    expect(istBelastbareBewertung(3.9, 100)).toBe(false) // Rating zu niedrig
+    expect(istBelastbareBewertung(4.9, 4)).toBe(false) // zu wenige Bewertungen
+    expect(istBelastbareBewertung(null, 10)).toBe(false)
+    expect(istBelastbareBewertung(4.5, null)).toBe(false)
+    expect(istBelastbareBewertung(undefined, undefined)).toBe(false)
   })
 })

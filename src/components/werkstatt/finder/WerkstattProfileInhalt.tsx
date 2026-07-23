@@ -7,7 +7,7 @@
 import { ShieldCheck, Wrench } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
-import type { MatchGrund } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import { istBelastbareBewertung, type MatchGrund } from '@/lib/werkstatt/matching/rank-vorschlaege'
 
 export type WerkstattProfilData = {
   name: string
@@ -49,7 +49,8 @@ export function WerkstattProfileInhalt({
   zeigeDistanz?: boolean
 }) {
   const ort = data.ort ?? 'Ihrer Nähe'
-  const hatBewertung = data.googleRating != null && data.googleAnzahl != null
+  // Badge nur bei belastbarer Bewertung (>= 4,0 & >= 5) — konsistent mit dem Ranking-Chip.
+  const hatBewertung = istBelastbareBewertung(data.googleRating, data.googleAnzahl)
   // marke + gewerk als Chips; distanz/trust raus (stehen anderswo — wie in der WerkstattFinder-Card).
   const grundChips = data.gruende.filter((g) => g.typ === 'marke' || g.typ === 'gewerk')
   const gruppen = (data.fahrzeugGruppen ?? []).map((g) => GRUPPE_LABEL[g] ?? g)

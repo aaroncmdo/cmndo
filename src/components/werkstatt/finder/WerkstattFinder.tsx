@@ -10,7 +10,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import type { Fit } from '@/lib/werkstatt/bedarf/types'
-import type { MatchGrund, MatchGrundTyp } from '@/lib/werkstatt/matching/rank-vorschlaege'
+import { istBelastbareBewertung, type MatchGrund, type MatchGrundTyp } from '@/lib/werkstatt/matching/rank-vorschlaege'
 
 type Props = {
   // Spec B (Aaron 14.07.): `gruende` kommt aus der Matching-Engine — "mit wirklichem Grund warum das
@@ -166,9 +166,9 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
                     ) : (
                       fitChip
                     )}
-                    {w.google_rating != null && w.google_review_count != null ? (
+                    {istBelastbareBewertung(w.google_rating, w.google_review_count) ? (
                       <div className="mt-1.5">
-                        <GoogleBewertungBadge durchschnitt={w.google_rating} anzahl={w.google_review_count} size="sm" />
+                        <GoogleBewertungBadge durchschnitt={w.google_rating ?? null} anzahl={w.google_review_count ?? null} size="sm" />
                       </div>
                     ) : null}
                     {adresse ? (
