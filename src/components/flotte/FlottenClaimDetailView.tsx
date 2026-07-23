@@ -6,10 +6,8 @@
 
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { VehicleScanGalerie } from '@/components/shared/VehicleScanGalerie'
 import { FlottenDokumentUpload } from './FlottenDokumentUpload'
 import type { FlottenClaimView } from '@/lib/flotte/flotten-claim-detail'
-import type { VehicleScanView } from '@/lib/vehicles/vehicle-scan-view'
 
 function formatDatum(iso: string | null): string {
   if (!iso) return '—'
@@ -41,12 +39,10 @@ function KontaktZeile({
 export function FlottenClaimDetailView({
   view,
   vehicleId,
-  scan,
   onUpload,
 }: {
   view: FlottenClaimView
   vehicleId: string
-  scan: VehicleScanView | null
   onUpload: (
     vehicleId: string,
     claimId: string,
@@ -96,8 +92,6 @@ export function FlottenClaimDetailView({
           </div>
         </SectionCard>
       ) : null}
-
-      <VehicleScanGalerie scan={scan} />
 
       <SectionCard title={`Dokumente (${view.dokumente.length})`}>
         {view.dokumente.length === 0 ? (
