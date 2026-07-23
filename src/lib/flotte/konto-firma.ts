@@ -59,6 +59,23 @@ export async function getFlottenmanagerWhatsappNummern(db: AnyDb, firmaId: strin
     .filter((n): n is string => Boolean(n && n.trim()))
 }
 
+/** Aktive Flottenmanager einer Firma (user_id + optionale WA-Nummer) — fuer firmenweite
+ *  Benachrichtigungen (Mitteilung an user_id + optional WhatsApp-Push). db = Admin/Service-Role. */
+export async function getAktiveFlottenmanager(
+  db: AnyDb,
+  firmaId: string,
+): Promise<Array<{ userId: string; whatsapp: string | null }>> {
+  const { data } = await db
+    .from('firmen_flotten_konten')
+    .select('user_id, whatsapp_nummer')
+    .eq('firma_id', firmaId)
+    .eq('status', 'aktiv')
+  return ((data ?? []) as Array<{ user_id: string; whatsapp_nummer: string | null }>).map((r) => ({
+    userId: r.user_id,
+    whatsapp: r.whatsapp_nummer && r.whatsapp_nummer.trim() ? r.whatsapp_nummer : null,
+  }))
+}
+
 /** Dispatch nach Rolle: kunde -> personen.firma_id; flottenmanager -> firmen_flotten_konten. */
 export async function resolveKontoFirma(db: AnyDb, userId: string, rolle: string): Promise<KundeFirma | null> {
   if (rolle === 'flottenmanager') return getFlottenmanagerFirma(db, userId)

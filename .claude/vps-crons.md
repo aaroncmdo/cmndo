@@ -29,6 +29,31 @@ PM2 cron-Eintrag auf VPS hinzufügen:
 }
 ```
 
+## zustandsaufnahme-faellig (Flotte: 3-Monats-Reminder)
+
+Schedule: wöchentlich, Montag 08:00 UTC (= 10:00 MESZ). Wöchentlich reicht — der Dedup
+(max. 1 Reminder je Fahrzeug / 30 Tage) bremst Spam; ein täglicher Lauf brächte nichts.
+Route: /api/cron/zustandsaufnahme-faellig
+Curl-Befehl:
+```bash
+curl -s -H "Authorization: Bearer $CRON_SECRET" https://app.claimondo.de/api/cron/zustandsaufnahme-faellig
+```
+
+PM2 cron-Eintrag auf VPS hinzufügen:
+```js
+{
+  name: 'zustandsaufnahme-faellig',
+  script: 'curl',
+  args: ['-s', '-H', 'Authorization: Bearer <CRON_SECRET>', 'https://app.claimondo.de/api/cron/zustandsaufnahme-faellig'],
+  cron_restart: '0 8 * * 1',
+  autorestart: false,
+}
+```
+
+Was er tut: findet Flotten-Fahrzeuge mit letzter abgeschlossener Zustandsdoku > 3 Monate und
+erinnert die Flottenmanager der Firma (in-App-Mitteilung + WhatsApp-Push). Nur bereits-gescannte
+Fahrzeuge (>=1 abgeschlossener Scan). Idempotent — Mehrfachlauf schadet nicht.
+
 ## Baileys Inbound Logger
 
 Der Baileys-VPS-Service (`services/baileys`) postet eingehende WA-Nachrichten an:
