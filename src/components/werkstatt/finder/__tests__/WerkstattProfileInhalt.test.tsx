@@ -53,4 +53,10 @@ describe('WerkstattProfileInhalt', () => {
     expect(h).toContain('Transporter')
     expect(h).toContain('3,4 km entfernt')
   })
+
+  it('Badge nur bei belastbarer Bewertung (>= 4,0 & >= 5): niedrig/wenige -> kein Badge', () => {
+    expect(html({ data: { ...base, googleRating: 3.5, googleAnzahl: 40 } })).not.toContain('3,5') // <4,0
+    expect(html({ data: { ...base, googleRating: 4.9, googleAnzahl: 3 } })).not.toContain('4,9') // <5 Bewertungen
+    expect(html({ data: { ...base, googleRating: 4.2, googleAnzahl: 12 } })).toContain('4,2') // belastbar -> Badge
+  })
 })
