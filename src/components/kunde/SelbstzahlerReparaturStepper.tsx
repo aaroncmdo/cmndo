@@ -7,7 +7,7 @@
 // Kern-Lifecycle/v_claim_phase-Parity NICHT.
 
 import React from 'react'
-import { CheckIcon, ClipboardListIcon, WrenchIcon, CalendarIcon, FlagIcon } from 'lucide-react'
+import { CheckIcon, ClipboardListIcon, WrenchIcon, CalendarIcon, FileSignatureIcon, FlagIcon } from 'lucide-react'
 import { Card } from '@/components/primitives'
 import {
   selbstzahlerStepIndex,
@@ -19,6 +19,7 @@ const STEP_ICON: Record<SelbstzahlerStep, typeof ClipboardListIcon> = {
   schaden: ClipboardListIcon,
   werkstatt: WrenchIcon,
   termin: CalendarIcon,
+  freigabe: FileSignatureIcon,
   reparatur: FlagIcon,
 }
 
@@ -26,21 +27,25 @@ const STEP_LABEL: Record<SelbstzahlerStep, string> = {
   schaden: 'Schaden gemeldet',
   werkstatt: 'Werkstatt',
   termin: 'Termin',
+  freigabe: 'Freigabe',
   reparatur: 'Reparatur',
 }
 
 export default function SelbstzahlerReparaturStepper({
   hatWerkstatt,
   terminStatus,
+  kvaFreigegeben,
   abgeschlossen,
 }: {
   hatWerkstatt: boolean
   terminStatus: string | null
+  kvaFreigegeben: boolean
   abgeschlossen: boolean
 }) {
   const { currentIndex, abgeschlossen: fertig } = selbstzahlerStepIndex({
     hatWerkstatt,
     terminStatus,
+    kvaFreigegeben,
     abgeschlossen,
   })
 

@@ -606,6 +606,27 @@ export function WerkstattAuftragDetail({
             </SectionCard>
           )}
 
+          {extra.schadensfotos.length > 0 && (
+            <SectionCard title="Schadensfotos">
+              <p className="text-body-xs text-claimondo-ondo mb-2">
+                Vom Kunden gemeldete Schadensbilder — Grundlage für den Kostenvoranschlag.
+              </p>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {extra.schadensfotos.map((url, i) => (
+                  <a
+                    key={i}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block aspect-square overflow-hidden rounded-ios-md border border-claimondo-border"
+                  >
+                    <img src={url} alt={`Schadensfoto ${i + 1}`} className="w-full h-full object-cover" />
+                  </a>
+                ))}
+              </div>
+            </SectionCard>
+          )}
+
           <SectionCard title="Vorschäden">
             {extra.hat_vorschaeden || extra.vorschaden_anzahl ? (
               <div className="text-body-sm text-claimondo-navy space-y-1">
