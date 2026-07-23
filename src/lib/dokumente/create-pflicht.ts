@@ -42,10 +42,24 @@ export async function createPflichtdokumenteFromKatalog(
   const ctx = buildDokumentKontext({ claim: fall ?? null, lead: lead ?? null })
   const pflichtSlots = await getPflichtSlotsFuerFall(supabase, ctx)
 
+  // AAR-956 Katalog-Domaenengrenze: `gutachter_verifizierung`-Slots sind SV-Onboarding-
+  // Dokumente (uploadbar_von=[sachverstaendiger], eigener sv_id-gekeyter Anlagepfad in
+  // sv-verifizierung-actions.ts) und gehoeren NICHT auf einen Claim/Fall. Vier davon
+  // (sv_sicherungsabtretung/-berufshaftpflicht/-gewerbeanmeldung/-abtretungserklaerung)
+  // tragen pflicht_wenn={} ("leeres Objekt = immer wahr", ruleEvaluator) und rutschen
+  // damit am `pflicht_wenn == null`-Filter vorbei -> wurden als perpetuell-ausstehende
+  // Karteileichen auf JEDEN Claim geschrieben (nie kunde-/claim-uploadbar; auf
+  // reparatur-Wegen ohne SV nie erfuellbar). Claim-Doku-Konsumenten filtern die
+  // Kategorie ohnehin raus (gutachter/feldmodus/_fallakte/actions.ts) — hier an der
+  // QUELLE schliessen. `{}` bleibt korrekt fuer die SV-Domaene (dort immer Pflicht).
+  const claimPflichtSlots = pflichtSlots.filter(
+    (slot) => slot.kategorie !== 'gutachter_verifizierung',
+  )
+
   const docs: PflichtdokumenteInsert[] = []
   const seen = new Set<string>()
 
-  for (const slot of pflichtSlots) {
+  for (const slot of claimPflichtSlots) {
     if (seen.has(slot.slot_id)) continue
     if (existingSlots.has(slot.slot_id)) continue // CMM-23: nicht doppelt anlegen
     docs.push({
@@ -64,9 +78,9 @@ export async function createPflichtdokumenteFromKatalog(
     // (pflichtSlots leer), ist das fuer einen realen Claim ungewoehnlich und eine moegliche
     // Ursache des "Claim ohne Pflichtdokument-Slots"-Health-Funds (evtl. unvollstaendiger
     // Lead-/Fall-Kontext). Loggen, damit der stille Fall diagnostizierbar ist.
-    if (pflichtSlots.length === 0) {
+    if (claimPflichtSlots.length === 0) {
       console.warn(
-        `[create-pflicht] Katalog lieferte 0 Pflicht-Slots fuer fall ${fallId} — kein Slot angelegt (Lead-/Fall-Kontext evtl. unvollstaendig).`,
+        `[create-pflicht] Katalog lieferte 0 Claim-Pflicht-Slots fuer fall ${fallId} — kein Slot angelegt (Lead-/Fall-Kontext evtl. unvollstaendig).`,
       )
     }
     return

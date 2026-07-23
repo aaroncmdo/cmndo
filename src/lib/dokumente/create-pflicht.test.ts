@@ -199,3 +199,56 @@ describe('createPflichtdokumenteFromKatalog', () => {
     errorSpy.mockRestore()
   })
 })
+
+describe('createPflichtdokumenteFromKatalog — Domaenengrenze SV-Verifizierung', () => {
+  // Spiegelt die echten Prod-Katalog-Zeilen: die 4 sv_*-Slots tragen
+  // freigeschaltet_wenn={} + pflicht_wenn={} (ruleEvaluator: leeres Objekt = "immer
+  // wahr"), wodurch sie sonst als perpetuell-ausstehende Karteileichen auf JEDEN
+  // Claim/Fall geschrieben wuerden (uploadbar nur vom SV, nie kunde/claim). Sie
+  // gehoeren in die SV-Verifizierung (eigener, sv_id-gekeyter Pfad), nicht auf den Claim.
+  const SLOT_SV_BERUFSHAFTPFLICHT: DokumentKatalogRow = {
+    slot_id: 'sv_berufshaftpflicht',
+    label: 'SV Berufshaftpflicht',
+    beschreibung: null,
+    kategorie: 'gutachter_verifizierung',
+    freigeschaltet_wenn: {} as unknown as DokumentKatalogRow['freigeschaltet_wenn'],
+    pflicht_wenn: {} as unknown as DokumentKatalogRow['pflicht_wenn'],
+    sichtbar_fuer: ['sachverstaendiger', 'admin'],
+    anforderbar_von: ['admin'],
+    uploadbar_von: ['sachverstaendiger'],
+    multi_file: false,
+    akzeptierte_mime_types: ['application/pdf'],
+    max_mb: 10,
+    sort_order: 90,
+    aktiv: true,
+    maps_to_qualifikation: null,
+    steuert_kundensichtbarkeit: false,
+  }
+
+  beforeEach(() => {
+    invalidateKatalogCache()
+    vi.clearAllMocks()
+  })
+
+  it('schliesst gutachter_verifizierung-Slots aus, laesst Claim-Slots durch', async () => {
+    const mock = buildMockSupabase([SLOT_SV_BERUFSHAFTPFLICHT, SLOT_FAHRZEUGSCHEIN], [])
+    // zb1_status != bestaetigt -> fahrzeugschein ist Pflicht (Claim-Slot)
+    await createPflichtdokumenteFromKatalog(mock as unknown as SupabaseClient, 'fall-sv', { zb1_status: 'offen' })
+
+    const insertCalls = (mock as unknown as { _pflichdokChain: { insert: ReturnType<typeof vi.fn> } })
+      ._pflichdokChain.insert.mock.calls
+    expect(insertCalls).toHaveLength(1)
+    const slotIds = (insertCalls[0][0] as Array<{ dokument_typ: string }>).map((d) => d.dokument_typ)
+    expect(slotIds).toContain('fahrzeugschein')
+    expect(slotIds).not.toContain('sv_berufshaftpflicht')
+  })
+
+  it('reiner SV-Verifizierungs-Katalog -> gar kein Claim-Insert', async () => {
+    const mock = buildMockSupabase([SLOT_SV_BERUFSHAFTPFLICHT], [])
+    await createPflichtdokumenteFromKatalog(mock as unknown as SupabaseClient, 'fall-sv2', { zb1_status: 'offen' })
+
+    const insertCalls = (mock as unknown as { _pflichdokChain: { insert: ReturnType<typeof vi.fn> } })
+      ._pflichdokChain.insert.mock.calls
+    expect(insertCalls).toHaveLength(0)
+  })
+})
