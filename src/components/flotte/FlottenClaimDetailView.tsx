@@ -4,8 +4,10 @@
 // Aktionen ausser Upload bewusst NICHT (read-only-Cockpit, v1) — die Kunde-Mutationen
 // (Bank/Slot) gelten fuer den Flottenmanager nicht.
 
+import Link from 'next/link'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Button } from '@/components/primitives'
 import { FlottenDokumentUpload } from './FlottenDokumentUpload'
 import type { FlottenClaimView } from '@/lib/flotte/flotten-claim-detail'
 
@@ -57,6 +59,17 @@ export function FlottenClaimDetailView({
       <div>
         <h1 className="text-xl font-bold text-claimondo-navy">{view.claimNummer ?? 'Schaden'}</h1>
         <p className="mt-1 text-sm text-claimondo-shield">Schaden-Details · {fahrzeugLabel}</p>
+        {/* Gutachter finden: FM startet den Finder direkt AUS dem Claim (Aaron: „extra button im claim").
+            typ=haftpflicht als Vorbelegung — die Haftpflicht/Kasko-Weiche laeuft db-driven weiter IM
+            FlowLink (identisch zu FahrzeugMiniAktionen, dort dokumentiert). Nur solange noch kein
+            Gutachter zugewiesen ist (sonst zeigt „Ansprechpartner" den SV). */}
+        {!view.sv ? (
+          <Link href={`/flotte/schaden/${view.claimId}/gutachter?typ=haftpflicht`} className="mt-3 inline-block">
+            <Button variant="ondo" size="sm">
+              Gutachter finden
+            </Button>
+          </Link>
+        ) : null}
       </div>
 
       <SectionCard title="Status">
@@ -90,6 +103,43 @@ export function FlottenClaimDetailView({
               <KontaktZeile label="Gutachter" name={view.sv.anzeigename ?? view.sv.name} telefon={view.sv.telefon} />
             ) : null}
           </div>
+        </SectionCard>
+      ) : null}
+
+      {view.unfalldaten.gegnerName ||
+      view.unfalldaten.gegnerKennzeichen ||
+      view.unfalldaten.gegnerVersicherung ||
+      view.unfalldaten.hergang ||
+      view.unfalldaten.unfallort ? (
+        <SectionCard title="Unfalldaten">
+          <dl className="space-y-2 text-sm">
+            {view.unfalldaten.unfallort ? (
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-claimondo-ondo">Unfallort</dt>
+                <dd className="text-right text-claimondo-navy">{view.unfalldaten.unfallort}</dd>
+              </div>
+            ) : null}
+            {view.unfalldaten.gegnerName || view.unfalldaten.gegnerKennzeichen ? (
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-claimondo-ondo">Unfallgegner</dt>
+                <dd className="text-right text-claimondo-navy">
+                  {[view.unfalldaten.gegnerName, view.unfalldaten.gegnerKennzeichen].filter(Boolean).join(' · ')}
+                </dd>
+              </div>
+            ) : null}
+            {view.unfalldaten.gegnerVersicherung ? (
+              <div className="flex items-start justify-between gap-3">
+                <dt className="text-claimondo-ondo">Gegner-Versicherung</dt>
+                <dd className="text-right text-claimondo-navy">{view.unfalldaten.gegnerVersicherung}</dd>
+              </div>
+            ) : null}
+            {view.unfalldaten.hergang ? (
+              <div className="space-y-1 border-t border-claimondo-border/60 pt-2">
+                <dt className="text-claimondo-ondo">Hergang</dt>
+                <dd className="whitespace-pre-wrap text-claimondo-navy">{view.unfalldaten.hergang}</dd>
+              </div>
+            ) : null}
+          </dl>
         </SectionCard>
       ) : null}
 

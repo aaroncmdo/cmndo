@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { headers } from 'next/headers'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { OnboardingFeld } from '@/components/onboarding/types'
 import type { OnboardingTableHandler } from './types'
 
@@ -40,8 +41,17 @@ function buildGfaUpdates(
   return updates
 }
 
-// gutachter-finden (anon-Front): Shell-Insert (mit Rate-Limit) wenn keine anfrageId, sonst Update
-// mit Existenz-Check. ctx.supabase = anon-Client (RLS erlaubt den gfa-Insert).
+// gutachter-finden / werkstatt-finden (anon-Front): Shell-Insert (mit Rate-Limit) wenn keine
+// anfrageId, sonst Update mit Existenz-Check.
+//
+// SERVICE-ROLE statt anon-Client (wie insertAnfrage / embed/actions.ts): der PII-Leak-Fix
+// (Mig 20260716200848) entzog anon das SELECT-Grant auf gfa. Ohne SELECT kann der anon-Client die
+// Tabelle nicht mehr LESEN — und jeder Insert-RETURNING (.select('id')) UND jeder Update
+// (.eq('id') + RLS-USING lesen source/status der Zeile) endet in "permission denied for table
+// gutachter_finder_anfragen" (42501). Ergebnis: der oeffentliche Finder-Funnel nahm seit 16.07.
+// KEINE anonymen Anfragen mehr an. Statt anon SELECT wieder zu granten (= PII-Leak zurueck) laeuft
+// der Schreibpfad server-seitig; die Sicherheit der anon-Write-RLS-Policies wird explizit als
+// WHERE-Guard repliziert (INSERT: source bleibt NULL; UPDATE: nur eigene anonyme Entwuerfe).
 export const gfaHandler: OnboardingTableHandler = {
   tabelle: GFA_TABLE,
   async apply(ctx, felder, values, now) {
@@ -49,7 +59,7 @@ export const gfaHandler: OnboardingTableHandler = {
     // Keine gfa-Werte in dieser Phase -> kein Insert/Update (1:1 zur alten size===0-Frueh-Rueckgabe).
     if (Object.keys(updates).length === 0) return { ok: true, id: ctx.anfrageId ?? '' }
 
-    const supabase = ctx.supabase
+    const supabase = createAdminClient()
     const id = ctx.anfrageId ?? null
 
     if (!id) {
@@ -57,8 +67,7 @@ export const gfaHandler: OnboardingTableHandler = {
       // der UPDATE-Pfad (Wizard-Weiterklicken) bleibt unbegrenzt.
       const ipHash = await getClientIpHash()
       if (ipHash) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: allowed, error: rlErr } = await (supabase as any).rpc('check_gfa_rate_limit', {
+        const { data: allowed, error: rlErr } = await supabase.rpc('check_gfa_rate_limit', {
           p_ip_hash: ipHash,
         })
         if (rlErr) {
@@ -73,16 +82,24 @@ export const gfaHandler: OnboardingTableHandler = {
         }
       }
       // Shell-Datensatz: vorname/nachname/email NOT NULL -> leere Platzhalter; status='entwurf'.
+      // source bleibt NULL (nativer Finder) — repliziert die anon-INSERT-RLS-with_check (source IS NULL).
       const payload = { vorname: '', nachname: '', email: '', schadentyp: 'unbekannt', status: 'entwurf', ...updates }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).from(GFA_TABLE).insert(payload).select('id').single()
+      const { data, error } = await supabase.from(GFA_TABLE).insert(payload).select('id').single()
       if (error || !data) return { ok: false, error: error?.message ?? 'Insert fehlgeschlagen' }
       return { ok: true, id: (data as { id: string }).id }
     }
 
-    // AAR-890: .select('id') -> erkennt wenn die Zeile nicht (mehr) existiert (RLS-Block / DSGVO-Delete).
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).from(GFA_TABLE).update(updates).eq('id', id).select('id')
+    // Sicherheits-Guard = anon-UPDATE-RLS-Policy: nur anonyme Entwuerfe (source IS NULL AND
+    // status='entwurf') sind editierbar — ein fremder/konvertierter Datensatz (selbst bei geratener
+    // id) bleibt unberuehrt. AAR-890: .select('id') erkennt weiterhin die nicht-(mehr)-editierbare
+    // Zeile (0 Rows -> anfrage_not_found), z.B. nach slot-ttl-cleanup oder Status-Wechsel.
+    const { data, error } = await supabase
+      .from(GFA_TABLE)
+      .update(updates)
+      .eq('id', id)
+      .is('source', null)
+      .eq('status', 'entwurf')
+      .select('id')
     if (error) return { ok: false, error: error.message }
     if (!Array.isArray(data) || data.length === 0) {
       return { ok: false, error: 'Anfrage nicht gefunden', reason: 'anfrage_not_found' }
