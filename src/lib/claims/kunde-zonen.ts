@@ -32,9 +32,20 @@ export function deriveKundeAufgaben(vm: KundeClaimViewModel): KundeAufgabe[] {
   if (vm.flags.bankdatenOffen) {
     aufgaben.push({ id: 'bankdaten', label: 'Bankdaten hinterlegen' })
   }
-  // Reparatur-Route: KVA liegt vor, aber der Reparaturauftrag ist noch nicht per Unterschrift
-  // freigegeben.
-  if (vm.flags.istReparaturRoute && vm.geld.kvaBrutto != null && !vm.flags.reparaturFreigegeben) {
+  // Reparatur-Route: ein KVA liegt vor, der Kunde hat ihn noch nicht per Unterschrift
+  // freigegeben UND ihn nicht gerade abgelehnt. Zwei Kohärenz-Fixes:
+  //  - R2: netto-ODER-brutto (nicht nur brutto). Jeder andere KVA-Consumer nutzt
+  //    `brutto ?? netto` (werkstatt-auftrag-segment kvaStatus, WerkstattAuftragDetail,
+  //    GeldZone-Card-Sichtbarkeit) — ein netto-only-KVA ist ein gültiger KVA; nur diese
+  //    Aufgabe fiel bisher aus → Kunde bekam keinen „Reparaturauftrag freigeben"-Nudge.
+  //  - R1: bei kvaAbgelehntAm blendet die KostenvoranschlagCard die Freigabe aus (die
+  //    Werkstatt überarbeitet) → dann ist „Reparaturauftrag freigeben" kein Kunden-To-do.
+  if (
+    vm.flags.istReparaturRoute &&
+    (vm.geld.kvaBrutto != null || vm.geld.kvaNetto != null) &&
+    vm.geld.kvaAbgelehntAm == null &&
+    !vm.flags.reparaturFreigegeben
+  ) {
     aufgaben.push({ id: 'kva_freigabe', label: 'Reparaturauftrag freigeben' })
   }
   if (vm.pflichtdokumente.offen > 0) {

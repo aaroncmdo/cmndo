@@ -8,7 +8,7 @@ function vm(over: Record<string, unknown> = {}): KundeClaimViewModel {
     lifecycle: { mainPhase: 'begutachtung', subPhase: 'termin' },
     termine: [],
     team: { kb: null, sv: null },
-    geld: { forderungNetto: null, auszahlungNetto: null, kvaNetto: null, kvaBrutto: null, reparaturdauerTageKva: null, gutachtenWerte: null },
+    geld: { forderungNetto: null, auszahlungNetto: null, kvaNetto: null, kvaBrutto: null, kvaAbgelehntAm: null, kvaAbgelehntGrund: null, reparaturdauerTageKva: null, gutachtenWerte: null },
     pflichtdokumente: { offen: 0 },
     fall: {},
     flags: { abrechnungsweg: null, istReparaturRoute: false, bankdatenOffen: false, gutachtenVerfuegbar: false, reparaturFreigegeben: false, istNurGutachter: false, kanzleiSichtbar: false },
@@ -26,6 +26,14 @@ describe('deriveKundeAufgaben', () => {
   })
   it('KVA aber bereits freigegeben -> KEIN kva_freigabe', () => {
     const r = deriveKundeAufgaben(vm({ flags: { istReparaturRoute: true, reparaturFreigegeben: true }, geld: { kvaBrutto: 2380 } }))
+    expect(r.map((a) => a.id)).not.toContain('kva_freigabe')
+  })
+  it('R2: netto-only-KVA (kein brutto) feuert kva_freigabe (jeder KVA-Consumer nutzt brutto ?? netto)', () => {
+    const r = deriveKundeAufgaben(vm({ flags: { istReparaturRoute: true, reparaturFreigegeben: false }, geld: { kvaNetto: 2000, kvaBrutto: null } }))
+    expect(r.map((a) => a.id)).toContain('kva_freigabe')
+  })
+  it('R1-Kohaerenz: KVA vom Kunden abgelehnt -> KEIN kva_freigabe (Werkstatt ueberarbeitet)', () => {
+    const r = deriveKundeAufgaben(vm({ flags: { istReparaturRoute: true, reparaturFreigegeben: false }, geld: { kvaBrutto: 2380, kvaAbgelehntAm: '2026-07-24T10:00:00Z' } }))
     expect(r.map((a) => a.id)).not.toContain('kva_freigabe')
   })
   it('bankdatenOffen -> bankdaten; offene Pflichtdoks -> pflichtdok', () => {
