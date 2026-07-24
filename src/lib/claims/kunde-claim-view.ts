@@ -174,6 +174,9 @@ export type KundeClaimViewModel = {
     kvaPdfUrl: string | null
     reparaturWerkstattId: string | null
     reparaturdauerTageKva: number | null
+    // R1 (Repair-Audit): Kunde-KVA-Ablehnung — Zeitpunkt + Grund (steuert KostenvoranschlagCard-State).
+    kvaAbgelehntAm: string | null
+    kvaAbgelehntGrund: string | null
     // P3 (GeldZone): FiktiveAbrechnungCard-Gate (claims.reparaturwunsch === 'fiktiv').
     reparaturwunsch: string | null
     gutachtenWerte: KundeGutachtenWerte | null
@@ -649,6 +652,8 @@ export async function getKundeClaimView(
       kvaPdfUrl,
       reparaturWerkstattId: (claimExtra?.reparatur_werkstatt_id as string | null) ?? null,
       reparaturdauerTageKva: num(fall.reparaturdauer_tage_kva),
+      kvaAbgelehntAm: (fall.kva_abgelehnt_am as string | null) ?? null,
+      kvaAbgelehntGrund: (fall.kva_abgelehnt_grund as string | null) ?? null,
       reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
       gutachtenWerte,
       ausfall,
