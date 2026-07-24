@@ -9,6 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   buildKatalogContext,
   evaluateKatalogRule,
+  istLeereRegel,
   type Rule,
   type EvalContext,
 } from './ruleEvaluator'
@@ -128,9 +129,10 @@ export async function getPflichtSlotsFuerFall(
   const alle = await getAlleSlots(supabase)
   return alle.filter((slot) => {
     if (!evaluateKatalogRule(slot.freigeschaltet_wenn, context)) return false
-    // Pflicht nur wenn pflicht_wenn explizit gesetzt ist und zu true evaluiert.
-    // NULL = optional (nicht automatisch Pflicht).
-    if (slot.pflicht_wenn == null) return false
+    // Pflicht nur bei EXPLIZITER pflicht_wenn-Regel, die zu true evaluiert. Eine leere Regel
+    // (null ODER {}) darf NIE unbedingt-Pflicht bedeuten (istLeereRegel; #4727-Nachzug gegen
+    // die {}-Footgun -- {} wertet evaluateKatalogRule sonst als "immer wahr").
+    if (istLeereRegel(slot.pflicht_wenn)) return false
     return evaluateKatalogRule(slot.pflicht_wenn, context)
   })
 }

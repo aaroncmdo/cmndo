@@ -1,10 +1,28 @@
 import { describe, it, expect } from 'vitest'
 import {
   evaluateKatalogRule,
+  istLeereRegel,
   buildKatalogContext,
   type Rule,
   type EvalContext,
 } from './ruleEvaluator'
+
+describe('istLeereRegel', () => {
+  it('null/undefined → true (keine Regel)', () => {
+    expect(istLeereRegel(null)).toBe(true)
+    expect(istLeereRegel(undefined)).toBe(true)
+  })
+  it('leeres Objekt {} → true (JSONB-Leerregel)', () => {
+    expect(istLeereRegel({} as unknown as Rule)).toBe(true)
+  })
+  it('echte Regel (mit op) → false', () => {
+    expect(istLeereRegel({ op: 'eq', field: 'x', value: 1 })).toBe(false)
+    expect(istLeereRegel({ op: 'is_not_null', field: 'lead.id' })).toBe(false)
+  })
+  it('evaluateKatalogRule behaelt {}=true (Verhalten unveraendert)', () => {
+    expect(evaluateKatalogRule({} as unknown as Rule, {})).toBe(true)
+  })
+})
 
 describe('evaluateKatalogRule', () => {
   const ctx: EvalContext = {
