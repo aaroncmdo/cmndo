@@ -1,8 +1,7 @@
 'use client'
 
 // Per-Karte NFC-Beschreiben-Button (fuer die Karten-Tabelle im Admin-Vertrieb).
-// Anders als NfcKarteBeschreiben (write-first, mintet bei jedem Tap einen NEUEN Token) schreibt
-// dieser Button den BESTEHENDEN Token einer bereits erzeugten (Batch-)Karte auf einen leeren Chip
+// Schreibt den BESTEHENDEN Token einer bereits erzeugten (Batch-)Karte auf einen leeren Chip
 // -> Batch erzeugen (schnell, Desktop) + spaeter am Android pro Karte den Chip beschreiben.
 // Verifiziert per Zuruecklesen (chipTraegtToken) + persistiert die Chip-UID via onGeschrieben.
 // Web NFC = nur Android/Chrome; Desktop/iPhone sehen nur den Status.
@@ -21,7 +20,7 @@ export function NfcKarteSchreibenButton({
   beschrieben: boolean
   onGeschrieben: (token: string, nfcUid: string | null) => Promise<{ ok: boolean; error?: string }>
 }) {
-  // Verfuegbarkeit erst nach Mount (SSR-safe, wie NfcKarteBeschreiben).
+  // Verfuegbarkeit erst nach Mount (SSR-safe).
   const [unterstuetzt, setUnterstuetzt] = useState(false)
   const [laeuft, setLaeuft] = useState(false)
   const [lokalOk, setLokalOk] = useState(false)
