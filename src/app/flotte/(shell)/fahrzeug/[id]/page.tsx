@@ -212,13 +212,19 @@ export default async function FahrzeugDetailPage({
               </p>
             </div>
           )}
-          <ZustandsScanWizard
-            vehicleId={id}
-            onStart={starteScan}
-            onFoto={ladeFotoHoch}
-            onAnalyse={analysiereZustandsFotos}
-            onFinalize={finalisiereScan}
-          />
+          {/* „Neu dokumentieren" bewusst UNTER der bestehenden Doku (Aaron 24.07.): vehicle_scans
+              traegt Historie (page laedt den letzten abgeschlossenen Scan) -> ein neuer Scan ersetzt
+              die alte Doku nicht, sondern wird der neue „letzte". Trenner nur wenn schon dokumentiert. */}
+          <div className={scan ? 'border-t border-claimondo-border/60 pt-3' : ''}>
+            <ZustandsScanWizard
+              vehicleId={id}
+              bestehendeDoku={!!scan}
+              onStart={starteScan}
+              onFoto={ladeFotoHoch}
+              onAnalyse={analysiereZustandsFotos}
+              onFinalize={finalisiereScan}
+            />
+          </div>
         </div>
       </SectionCard>
     </div>
