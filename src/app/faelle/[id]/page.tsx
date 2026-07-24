@@ -85,6 +85,8 @@ export default async function FallaktePage({
   const claimId = (fall as Record<string, unknown>).claim_id as string | null
   let claimStatus: string | null = null
   let claimKanzleiWunsch: string | null = null
+  // FlowLink-Review C: reparaturwunsch fuers fiktiv-Szenario-Badge im Header.
+  let claimReparaturwunsch: string | null = null
   // CMM-Brücke: claim-Subset für die Stammdaten-Sections (admin/KB-Sicht).
   // Liest die vier Spalten, deren Namen auf claims abweichen und vom
   // Sync-Trigger (1.5a) nicht in faelle gespiegelt werden — UI fällt darauf
@@ -95,7 +97,7 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('operative_status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
+      .select('operative_status, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am, reparaturwunsch')
       .eq('id', claimId)
       .maybeSingle<{
         operative_status: string | null
@@ -107,6 +109,8 @@ export default async function FallaktePage({
         kostenvoranschlag_brutto: number | null
         werkstatt_id: string | null
         reparatur_freigegeben_am: string | null
+        // FlowLink-Review C: fiktiv-Szenario-Badge im Fallakte-Header (operativ).
+        reparaturwunsch: string | null
       }>()
     // CMM-49 Tier-2: gegner_aktenzeichen aus v_claim_full (verursacher-Party-
     // sourced via COALESCE party->claims) statt direkt aus claims — ueberlebt den
@@ -118,8 +122,9 @@ export default async function FallaktePage({
       .maybeSingle<{ gegner_aktenzeichen: string | null }>()
     // B3/T4 (Status-Achsen-Konsolidierung, Aaron 15.07.): der Fallakte-Badge zeigt jetzt
     // operative_status = die EINE Status-Achse (aktive Phasen + jeder Terminal seit slice-2a).
-    claimStatus        = claimRow?.operative_status ?? null
-    claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
+    claimStatus          = claimRow?.operative_status ?? null
+    claimKanzleiWunsch   = claimRow?.kanzlei_wunsch ?? null
+    claimReparaturwunsch = claimRow?.reparaturwunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {
         id: claimId,
@@ -1093,6 +1098,7 @@ export default async function FallaktePage({
         claimId={claimId}
         claimStatus={claimStatus}
         claimKanzleiWunsch={claimKanzleiWunsch}
+        claimReparaturwunsch={claimReparaturwunsch}
         claim={claimStammdatenFallback}
         kanzleiPaketPending={kanzleiPaketPending}
         timelineEvents={timelineEvents}

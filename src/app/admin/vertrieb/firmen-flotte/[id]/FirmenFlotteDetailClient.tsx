@@ -15,6 +15,7 @@ import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import { NfcKarteSchreibenButton } from '@/components/flotte/NfcKarteSchreibenButton'
 import { NfcBeschreibenHinweis } from '@/components/flotte/NfcBeschreibenHinweis'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { ConfirmEntfernenButton } from '@/components/shared/ConfirmEntfernenButton'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
   fuegeFahrzeugZuFlotteHinzu,
@@ -218,9 +219,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
                     <Td>{f.modell ?? '—'}</Td>
                     <Td>{f.status ?? '—'}</Td>
                     <Td className="text-right">
-                      <Button variant="ghost" size="sm" onClick={() => fahrzeugEntfernen(f.flotten_fahrzeug_id)}>
-                        Entfernen
-                      </Button>
+                      <ConfirmEntfernenButton onConfirm={() => fahrzeugEntfernen(f.flotten_fahrzeug_id)} />
                     </Td>
                   </Tr>
                 ))}

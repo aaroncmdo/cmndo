@@ -45,6 +45,8 @@ import {
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+// FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header.
+import { FiktivAbrechnungBadge } from '@/components/shared/FiktivAbrechnungBadge'
 import SaSignaturStep from './SaSignaturStep'
 import SaOfflineHinweis from './SaOfflineHinweis'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
@@ -95,6 +97,9 @@ export type LeadData = {
   // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad).
   schuldfrage?: string | null
   disqualifiziert?: boolean | null
+  // FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header (Lead kommt via
+  // select('*') aus page.tsx → alle Felder liegen vor).
+  reparaturwunsch?: string | null
 }
 
 // AAR-336: Label-Maps wurden in next-intl Translations migriert (flow.step_summary.*).
@@ -572,6 +577,14 @@ export default function FlowWizardKfz({
             </div>
           ))}
         </div>
+        {/* FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header, sobald der
+            Kunde die fiktive Abrechnung gewaehlt hat. Die Werkstatt-Vermittlung
+            bleibt angeboten — das Badge macht nur das Abrechnungs-Szenario sichtbar. */}
+        {lead.reparaturwunsch === 'fiktiv' && (
+          <div className="mx-auto flex max-w-lg justify-center px-5 pb-2.5">
+            <FiktivAbrechnungBadge reparaturwunsch={lead.reparaturwunsch} size="xs" />
+          </div>
+        )}
       </div>
 
       {/* Content */}
