@@ -401,6 +401,16 @@ export async function markTerminDurchgefuehrt(
     .update({ durchgefuehrt_am: new Date().toISOString() })
     .eq('id', terminId)
 
+  // SV-Bewertungs-Nudge an den Kunden (non-fatal, fire-and-forget): nach der
+  // Besichtigung um eine Google-Bewertung fuer DIESEN SV bitten. Transition-guarded
+  // oben (durchgefuehrt_am war null) -> feuert genau einmal.
+  if (termin.fall_id) {
+    const fid = termin.fall_id
+    import('@/lib/google-bewertungen/notify-kunde-sv-bewerten')
+      .then(({ notifyKundeSvBewerten }) => notifyKundeSvBewerten({ svId: sv.id, fallId: fid, svc: db }))
+      .catch((err) => console.warn('[markTerminDurchgefuehrt] SV-Review-Nudge fehlgeschlagen:', err))
+  }
+
   revalidateTerminRoutes(termin.fall_id)
   return { ok: true }
 }
@@ -449,6 +459,16 @@ export async function completeBegutachtung(
     .eq('id', terminId)
 
   if (updErr) return { error: updErr.message }
+
+  // SV-Bewertungs-Nudge an den Kunden (non-fatal, fire-and-forget): nach der
+  // Besichtigung um eine Google-Bewertung fuer DIESEN SV bitten. Transition-guarded
+  // oben (durchgefuehrt_am war null) -> feuert genau einmal.
+  if (termin.fall_id) {
+    const fid = termin.fall_id
+    import('@/lib/google-bewertungen/notify-kunde-sv-bewerten')
+      .then(({ notifyKundeSvBewerten }) => notifyKundeSvBewerten({ svId: sv.id, fallId: fid, svc: db }))
+      .catch((err) => console.warn('[completeBegutachtung] SV-Review-Nudge fehlgeschlagen:', err))
+  }
 
   // KFZ-202: Fall-Status auf gutachten-eingegangen setzen
   try {
