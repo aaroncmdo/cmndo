@@ -1,13 +1,14 @@
 'use server'
 
-// Firmen-Flotten Admin-Actions: Schaden-Karten minten + an Fahrzeuge binden (staff-Variante).
-// Wiederverwendet die KANONISCHE schadenkarte-Lib (89f501f6-owned, src/lib/schadenkarte/*);
-// hier nur der staff-Wrapper hinter requireRole. Kein eigener Mint/Bind-Code.
+// Firmen-Flotten Admin-Actions: Schaden-Karten minten + NFC-beschreiben (staff-Variante).
+// Das BINDEN ans Fahrzeug macht der Flottenmanager selbst (bindeKarteFuerFahrzeug im FM-Portal)
+// — der Admin erzeugt + beschreibt nur. Wiederverwendet die KANONISCHE schadenkarte-Lib
+// (89f501f6-owned, src/lib/schadenkarte/*); hier nur der staff-Wrapper hinter requireRole.
 import { requireRole } from '@/lib/auth/guards'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { mintSchadenkarten, bindeSchadenkarteAnFahrzeug, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
+import { mintSchadenkarten, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
 
 // Ein Mint-Weg (reuse mintSchadenkarten, firma-gebunden):
 //   - minteKartenBatchStaff: Batch (N Token -> QR-Druck -> spaeter ans Fahrzeug binden).
@@ -34,31 +35,12 @@ export async function minteKartenBatchStaff(
   return { ok: true, anzahl: res.tokens.length, charge: chargeVal }
 }
 
-export async function bindeKarteAnFahrzeug(
-  firmaId: string,
-  token: string,
-  fahrzeugId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const guard = await requireRole(['admin', 'dispatch'])
-  if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
-  const admin = createAdminClient()
-  const res = await bindeSchadenkarteAnFahrzeug(admin, { token, fahrzeugId, firmaId, userId: user.id })
-  if (!res.ok) return { ok: false, error: res.error }
-  revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
-  return { ok: true }
-}
-
-/** Nach verifiziertem NFC-Schreiben (staff): Chip-UID vermerken + optional binden. */
+/** Nach verifiziertem NFC-Schreiben (staff): Chip-UID vermerken. Bewusst OHNE Bind —
+ *  der Admin schreibt nur, gebunden wird ausschliesslich vom Flottenmanager (FM-Portal). */
 export async function finalisiereKarteStaff(
   firmaId: string,
   token: string,
   nfcUid: string | null,
-  fahrzeugId: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   const guard = await requireRole(['admin', 'dispatch'])
   if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
@@ -68,7 +50,7 @@ export async function finalisiereKarteStaff(
   } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
   const admin = createAdminClient()
-  const res = await finalisiereSchadenkarte(admin, { token, firmaId, userId: user.id, nfcUid, fahrzeugId })
+  const res = await finalisiereSchadenkarte(admin, { token, firmaId, userId: user.id, nfcUid, fahrzeugId: null })
   if (res.ok) revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
   return res
 }
