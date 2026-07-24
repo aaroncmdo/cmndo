@@ -34,6 +34,10 @@ export type WerkstattFinderLeadPayload = {
   gewerbe?: boolean | null
   modell?: string | null
   beschreibung?: string | null
+  // F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl -> Lead-Szenario. Kasko/Selbstzahler = beide
+  // 'eigenverantwortung', getrennt per eigene_versicherung. BEIDE zusammen (sonst still-disqualifiziert).
+  schuldfrage?: 'eigenverantwortung' | null
+  eigeneVersicherung?: 'ja' | 'nein' | null
   // §10 Doppel-Lead-Falle: bestehender Flow-Token (Re-Entry) -> UPDATE statt INSERT.
   // Der Token ist die Capability; er wird server-seitig zu lead_id aufgeloest (nie roher leadId).
   flowToken?: string | null
@@ -197,6 +201,8 @@ export async function erstelleWerkstattFinderLead(
     gewerbe: payload.gewerbe ?? null,
     modell: payload.modell ?? null,
     beschreibung: payload.beschreibung ?? null,
+    schuldfrage: payload.schuldfrage ?? null,
+    eigeneVersicherung: payload.eigeneVersicherung ?? null,
   })
   if (gaClientId) (extra as Record<string, unknown>).ga_client_id = gaClientId
   // E1.1: Promo-Attribution (Provision-Spur). resolver liefert nur fuer gueltige AKTIVE

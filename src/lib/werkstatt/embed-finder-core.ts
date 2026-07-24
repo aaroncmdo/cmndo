@@ -17,6 +17,9 @@ export type WerkstattFinderLeadInput = {
   gewerbe?: boolean | null
   modell?: string | null
   beschreibung?: string | null
+  // F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl (Kasko/Selbstzahler) -> Lead-Szenario.
+  schuldfrage?: 'eigenverantwortung' | null
+  eigeneVersicherung?: 'ja' | 'nein' | null
 }
 
 /**
@@ -47,6 +50,13 @@ export function buildWerkstattFinderLeadExtra(input: WerkstattFinderLeadInput): 
     fahrzeug_modell: input.modell?.trim() || null,
     gewerbe_flag: input.gewerbe ?? false,
     fahrzeugschaden_beschreibung: input.beschreibung?.trim() || null,
+  }
+  // F1: Abrechnungsweg-Wahl -> Lead-Szenario-Felder. Nur setzen wenn gewaehlt (der Werkstatt-Finder
+  // fragt sie jetzt ab); sonst bleibt schuldfrage null -> /flow-Quali (Fallback fuer Alt-Aufrufer/Re-Entry).
+  // eigene_versicherung IMMER mit schuldfrage zusammen (sonst still-disqualifiziert, quali-gate.ts).
+  if (input.schuldfrage && input.eigeneVersicherung) {
+    extra.schuldfrage = input.schuldfrage
+    extra.eigene_versicherung = input.eigeneVersicherung
   }
   if (input.werkstattId && darfWerkstattZuweisen(input.kundeEmail, input.werkstattEmail)) {
     Object.assign(extra, buildZuweisungPatch(input.werkstattId, null, 'embed'), {

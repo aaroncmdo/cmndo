@@ -35,6 +35,10 @@ const FLOTTEN_LEAD_DEDUP_MS = 10 * 60_000 // 10 Min — Doppelklick/Re-Submit-Fe
 /**
  * §0-Dedup: frischen flotte-manuell-Lead fuer DIESES Fahrzeug im Fenster finden (Doppelklick/
  * Re-Submit). Ohne Guard erzeugt jeder „Schaden melden"-Klick einen neuen Lead + FlowLink.
+ * NUR noch-offene Drafts (DRAFT_STATUSES) werden wiederverwendet: ein zwischenzeitlich
+ * stornierter (disqualifiziert) oder bereits konvertierter (umgewandelt) Lead darf NICHT
+ * resurrekten — sonst untergraebt das 10-Min-Fenster den Draft-Storno (Zombie-Lead mit
+ * frischem FlowLink, im Draft-Grid unsichtbar) bzw. reuse einen schon umgewandelten Lead.
  * Best-effort: bei DB-Fehler null (lieber neu anlegen als den Flow brechen).
  */
 async function findRecentFlottenLead(admin: AnyDb, vehicleId: string): Promise<string | null> {
@@ -44,6 +48,7 @@ async function findRecentFlottenLead(admin: AnyDb, vehicleId: string): Promise<s
     .select('id')
     .eq('vehicle_id', vehicleId)
     .eq('source_channel', 'flotte-manuell')
+    .in('status', [...DRAFT_STATUSES])
     .gt('created_at', sinceIso)
     .order('created_at', { ascending: false })
     .limit(1)
