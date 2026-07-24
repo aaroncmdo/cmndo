@@ -33,6 +33,8 @@ import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
 import { EndzustandDropdown, KanzleiWunschDropdown } from '@/components/shared/claims'
 // B3/T4: der Fallakte-Badge zeigt operative_status (fall-status-Domain) statt claims.status ?? work_state.
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+// FlowLink-Review C: fiktiv-Szenario-Badge (reparaturwunsch='fiktiv') im Header.
+import { FiktivAbrechnungBadge } from '@/components/shared/FiktivAbrechnungBadge'
 // AAR-843: Timeline-View für den Verlaufs-Tab
 import { TimelineView } from '@/components/shared/claims'
 import type { ClaimTimelineEvent } from '@/lib/claims/timeline-queries'
@@ -104,6 +106,8 @@ type ShellProps = {
   claimStatus: string | null
   // AAR-841: claims.kanzlei_wunsch für KB-Sidebar-Override-Dropdown
   claimKanzleiWunsch: string | null
+  // FlowLink-Review C: claims.reparaturwunsch fuers fiktiv-Szenario-Badge im Header.
+  claimReparaturwunsch: string | null
   /**
    * CMM-Brücke: claim-Subset (admin/KB) für Stammdaten-Felder die noch nicht
    * namens-synchron gespiegelt sind — wird via FallProvider an Sections.tsx
@@ -133,6 +137,7 @@ export default function FallakteShell({
   claimId,
   claimStatus,
   claimKanzleiWunsch,
+  claimReparaturwunsch,
   claim,
   kanzleiPaketPending,
   timelineEvents,
@@ -201,6 +206,9 @@ export default function FallakteShell({
             {claimStatus && (
               <FallStatusBadge status={claimStatus} size="sm" />
             )}
+            {/* FlowLink-Review C: fiktiv-Szenario sichtbar machen (rendert null wenn
+                nicht fiktiv). Reparatur/Werkstatt wird trotzdem angeboten. */}
+            <FiktivAbrechnungBadge reparaturwunsch={claimReparaturwunsch} size="sm" />
             {claimId && (
               <EndzustandDropdown
                 claimId={claimId}
