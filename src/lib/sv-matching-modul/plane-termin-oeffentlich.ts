@@ -25,6 +25,7 @@ import { rankSlots } from './ranking'
 import { toOeffentlichesSvProfil } from './projection'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
 import { istTestSvAngebotBlockiert } from '@/lib/testdaten/test-sv-guard'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder } from './types'
 
 const SLOT_FENSTER_TAGE = 14
@@ -182,6 +183,38 @@ async function ladeProfilUndBewertung(
  * (`freieSlots` → v_belegung: Buchungen ∪ externe Kalender-Busy ∪ Ausnahmen,
  * Reachability + now-Floor). projiziert via toOeffentlichesSvProfil (AAR-941).
  */
+/**
+ * D (Aaron 24.07.): nächstgelegenen aktiven Test-SV finden — NUR fuer den internen-Tester-
+ * Fallback im Global-Match (planeTerminOeffentlich). Der Global-Pool (applyDispatchableFilter)
+ * excludet Test-SVs (ist_testaccount=true); echte Kunden erreichen diesen Pfad nie (das
+ * kundenIdentitaet-Gate am Call-Site). Distanz in-memory (wenige Test-SVs, kein PostGIS-Bedarf).
+ */
+async function findeNahenTestSv(
+  admin: ReturnType<typeof createAdminClient>,
+  lat: number,
+  lng: number,
+): Promise<string | null> {
+  const { data } = await admin
+    .from('sachverstaendige')
+    .select('id, standort_lat, standort_lng')
+    .eq('ist_testaccount', true)
+    .eq('ist_aktiv', true)
+    .not('standort_lat', 'is', null)
+    .not('standort_lng', 'is', null)
+  const rows = (data ?? []) as Array<{ id: string; standort_lat: number | null; standort_lng: number | null }>
+  let besterId: string | null = null
+  let besteKm = Infinity
+  for (const sv of rows) {
+    if (sv.standort_lat == null || sv.standort_lng == null) continue
+    const km = haversineKm(Number(sv.standort_lat), Number(sv.standort_lng), lat, lng)
+    if (km < besteKm) {
+      besteKm = km
+      besterId = sv.id
+    }
+  }
+  return besterId
+}
+
 export async function planeTerminOeffentlich(
   input: PlaneTerminOeffentlichInput,
 ): Promise<OeffentlichesSvProfil[]> {
@@ -254,5 +287,41 @@ export async function planeTerminOeffentlich(
       }),
     )
   })
+
+  // D (Aaron 24.07. „du bist die lane"): Interne Tester OHNE gfa-Fixer sehen im Global-Match KEINE
+  // Test-SVs — applyDispatchableFilter (findeBestePerson) excludet ist_testaccount=true. In PROD
+  // greift der Global-Match (echte Partner-SVs); nur in Test-SV-only-Gebieten (Smoke) bleibt der
+  // Pool leer, und der FM-/Fallback-Lead (kein Fixer, = lead-first-Umbau #4748) zeigt keinen
+  // Gutachter. Fuer INTERNE Identitaeten (istInterneIdentitaet — genau die, die einen Test-SV per
+  // Guard auch buchen duerfen) einen nahen Test-SV als Auto-Fixer nachreichen (reused
+  // ladeFixenSvKandidat → der istTestSvAngebotBlockiert-Guard laesst intern durch). Echte Kunden
+  // (nicht-interne Identitaet) triggern das NIE → kein Leak (fail-closed).
+  if (
+    profile.length === 0 &&
+    istInterneIdentitaet(kundenIdentitaet?.email ?? null, kundenIdentitaet?.name ?? null)
+  ) {
+    const testSvId = await findeNahenTestSv(admin, lat, lng)
+    if (testSvId) {
+      const candidates = await ladeFixenSvKandidat(admin, testSvId, lat, lng, kundenIdentitaet)
+      if (candidates.length > 0) {
+        const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
+        const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
+        const cand = candidates[0]
+        const slots = await slotsFuer(cand.svId, FIXER_MAX_SLOTS)
+        if (slots.length > 0) {
+          return [
+            toOeffentlichesSvProfil({
+              candidate: cand,
+              bewertung: cand.profileId ? bewById.get(cand.profileId) ?? null : null,
+              profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
+              slots,
+              rang: rangById.get(cand.svId) ?? null,
+            }),
+          ]
+        }
+      }
+    }
+  }
+
   return profile
 }
