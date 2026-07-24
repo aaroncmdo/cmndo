@@ -28,8 +28,10 @@ export type FahrzeugSchaeden = {
   drafts: DraftMini[]
 }
 
-/** Lead-Statuses die als "Draft" gelten (noch nicht umgewandelt/disqualifiziert). */
-const DRAFT_STATUSES = ['neu', 'rueckruf', 'quali-offen', 'flow-gesendet'] as const
+/** Lead-Statuses die als "Draft" gelten (noch nicht umgewandelt/disqualifiziert).
+ *  Exportiert: der Draft-Lifecycle (schaden-fortsetzung.ts) nutzt dieselbe Menge als
+ *  Race-Schutz beim Storno — ein Lead ist genau dann stornierbar, wenn er noch Draft ist. */
+export const DRAFT_STATUSES = ['neu', 'rueckruf', 'quali-offen', 'flow-gesendet'] as const
 
 /**
  * Laedt Claims + Draft-Leads fuer ein Fahrzeug — streng firma-scoped.
