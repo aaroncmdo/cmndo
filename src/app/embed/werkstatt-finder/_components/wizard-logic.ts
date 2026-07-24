@@ -26,6 +26,12 @@ export const HAEUFIGE_HERSTELLER = [
   'Dacia', 'Mini', 'Tesla', 'Porsche', 'Cupra',
 ] as const
 
+// F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl im Werkstatt-Finder. Ein Repair-Sucher ist
+// Kasko (eigene VS) oder Selbstzahler — beide schuldfrage='eigenverantwortung', getrennt per
+// eigene_versicherung. So matcht der /flow direkt kasko/selbstzahler statt ueber den vollen
+// Schuldfrage-Quali (Haftpflicht-Ast waere fuer einen Repair-Kunden semantisch schief).
+export type Abrechnungswahl = 'kasko' | 'selbstzahler'
+
 export type WerkstattWizardState = {
   standort: { adresse: string; lat: number; lng: number } | null
   hersteller: string
@@ -33,6 +39,7 @@ export type WerkstattWizardState = {
   gewerbe: boolean
   modell: string
   bedarf: Reparaturbedarf | null
+  abrechnung: Abrechnungswahl | null
 }
 
 export const WIZARD_INITIAL: WerkstattWizardState = {
@@ -42,10 +49,11 @@ export const WIZARD_INITIAL: WerkstattWizardState = {
   gewerbe: false,
   modell: '',
   bedarf: null,
+  abrechnung: null,
 }
 
-export type WizardStep = 'standort' | 'fahrzeug' | 'schaden' | 'kontakt'
-export const WIZARD_STEPS: WizardStep[] = ['standort', 'fahrzeug', 'schaden', 'kontakt']
+export type WizardStep = 'standort' | 'fahrzeug' | 'schaden' | 'abrechnung' | 'kontakt'
+export const WIZARD_STEPS: WizardStep[] = ['standort', 'fahrzeug', 'schaden', 'abrechnung', 'kontakt']
 
 // Pflicht-Gate pro Schritt (Spec §4): Standort Pflicht · Hersteller Pflicht (Typ/gewerbe haben
 // Defaults, Modell optional) · Schaden Pflicht (eine Bedarfs-Quelle) · Kontakt = im Wizard validiert.
@@ -57,9 +65,21 @@ export function kannWeiter(step: WizardStep, s: WerkstattWizardState): boolean {
       return s.hersteller.trim().length > 0
     case 'schaden':
       return s.bedarf != null && s.bedarf.kategorien.length > 0
+    case 'abrechnung':
+      return s.abrechnung != null
     case 'kontakt':
       return true
   }
+}
+
+// F1: Abrechnungswahl -> Lead-Felder. Kasko/Selbstzahler = beide Eigenverantwortung; eigene_versicherung
+// trennt sie. BEIDE zusammen setzen — eigenverantwortung OHNE eigene_versicherung wuerde im /flow-Quali
+// still disqualifizieren (Spiegel erstelle-anfrage.ts:122).
+export function abrechnungZuLeadFelder(w: Abrechnungswahl): {
+  schuldfrage: 'eigenverantwortung'
+  eigeneVersicherung: 'ja' | 'nein'
+} {
+  return { schuldfrage: 'eigenverantwortung', eigeneVersicherung: w === 'kasko' ? 'ja' : 'nein' }
 }
 
 // Manuelle Gewerke-Auswahl → Reparaturbedarf. confidence=70 (> HART_SCHWELLE 60): der Nutzer hat die
