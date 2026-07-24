@@ -21,6 +21,7 @@ import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
+import WerkstattVermittlungHoldingCard from '@/components/kunde/WerkstattVermittlungHoldingCard'
 import { saveBankdaten, updateZahlungsweg } from '@/app/kunde/faelle/[id]/actions'
 
 export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
@@ -48,6 +49,13 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
       {werkstatt.brauchtVermittlung && flags.reparaturPhaseErreicht && <WerkstattFinderCard claimId={vm.claimId} />}
       {/* Werkstatt-Card — bei hinterlegter Werkstatt (+ Reparaturtermin-Status). */}
       {werkstatt.data && <WerkstattCard claimId={vm.claimId} werkstatt={werkstatt.data} termin={werkstatt.reparaturTermin} />}
+      {/* R3 (Vermittlungs-Blind-Window): Finder aus (brauchtVermittlung=false, z.B. Dispatch/KB
+          brokert schon) UND noch keine Werkstatt zugewiesen → sonst rendert hier NICHTS, obwohl der
+          Stepper „Werkstatt" zeigt. Holding-State fuellt die Luecke. */}
+      {flags.istReparaturRoute &&
+        flags.reparaturPhaseErreicht &&
+        !werkstatt.brauchtVermittlung &&
+        !werkstatt.data && <WerkstattVermittlungHoldingCard />}
       {/* KVA-Loop — Reparatur-Claim (Werkstatt) mit hochgeladenem Kostenvoranschlag. */}
       {kvaSichtbar && (
         <KostenvoranschlagCard
