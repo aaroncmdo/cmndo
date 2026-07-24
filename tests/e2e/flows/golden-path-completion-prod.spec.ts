@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
+import { resolveTestSvId } from '../lib/test-sv'
 
 // Golden-Path COMPLETION E2E — der manuelle Claim-Abschluss (Back-Half) im echten
 // Browser bis fall_geschlossen, gegen Prod. Companion zu golden-path-prod.spec.ts.
@@ -19,7 +20,7 @@ const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 // Smoke-Fixture CLM-2026-00121 (fall_id != claim_id, post-CMM-49 Bridge) + Test-SV "Schmidt Köln".
 const CLAIM = process.env.GOLDEN_CLAIM_ID ?? 'afb349eb-5681-4b01-ac40-b5431cf88e80'
 const FALL = process.env.GOLDEN_FALL_ID ?? 'eeac8379-0aed-463b-bf13-953a23f7a791'
-const TEST_SV = process.env.GOLDEN_SV_ID ?? '1da11741-a406-45ce-a27b-c041576cccbb'
+// TEST_SV wird im Test ueber die stabile Email aufgeloest (Row-id churnt — s. resolveTestSvId).
 
 test.skip(!process.env.RUN_GOLDEN_PATH_PROD, 'set RUN_GOLDEN_PATH_PROD=1 (läuft echt gegen Prod)')
 
@@ -52,6 +53,7 @@ async function fireEvent(page: Page, label: RegExp, fields: Array<['date' | 'num
 test('Manueller Abschluss via Panel — Claim bis fall_geschlossen', async ({ page }) => {
   test.setTimeout(180_000)
   const db = admin()
+  const TEST_SV = await resolveTestSvId(db) // stabile Email -> aktuelle SV-Row-id (kein toter Hardcode)
 
   // Setup: Vorbedingung fuer die Back-Half (kanzlei-uebergeben, Test-SV zugewiesen, sauber).
   // kanzlei_uebergeben_am setzen: der ProzessTab zeigt die Kanzlei-Section (mit dem Panel)

@@ -57,6 +57,8 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
           freigegebenAm={(vm.fall.reparatur_freigegeben_am as string | null) ?? null}
           pdfUrl={geld.kvaPdfUrl}
           reparaturdauerTage={geld.reparaturdauerTageKva}
+          abgelehntAm={geld.kvaAbgelehntAm}
+          abgelehntGrund={geld.kvaAbgelehntGrund}
         />
       )}
 

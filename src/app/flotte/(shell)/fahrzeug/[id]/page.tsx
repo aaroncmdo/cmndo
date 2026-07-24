@@ -3,7 +3,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
 import { getFahrzeugSchaeden } from '@/lib/flotte/fahrzeug-schaeden'
-import { findeErsterfassungClaim } from '@/lib/flotte/schaden-fortsetzung'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { buildSchadenkarteUrl } from '@/lib/schadenkarte/url'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -63,8 +62,6 @@ export default async function FahrzeugDetailPage({
   }
 
   const schaeden = await getFahrzeugSchaeden(db, firma.id, id)
-  // T5-3b: ersterfassung-Claim → „Schaden melden"-Kachel aktiv (Gutachter-Picker).
-  const fortsetzenClaimId = await findeErsterfassungClaim(db, id)
 
   // Schadenkarte fuer dieses Fahrzeug abfragen (AnyDb — schadenkarten noch nicht in database.types).
 
@@ -121,7 +118,7 @@ export default async function FahrzeugDetailPage({
           {fahrzeug.kennzeichen ?? 'Fahrzeug'}
         </h1>
         <p className="mt-1 text-sm text-claimondo-shield">Fahrzeug-Details</p>
-        <FahrzeugMiniAktionen vehicleId={id} fortsetzenClaimId={fortsetzenClaimId} onMelden={meldeNeuenFlottenSchaden} />
+        <FahrzeugMiniAktionen vehicleId={id} onMelden={meldeNeuenFlottenSchaden} />
       </div>
 
       <FahrzeugStammdatenEditor
