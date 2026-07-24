@@ -10,10 +10,12 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { mintSchadenkarten, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
 
-// Ein Mint-Weg (reuse mintSchadenkarten, firma-gebunden):
-//   - minteKartenBatchStaff: Batch (N Token -> QR-Druck -> spaeter ans Fahrzeug binden).
+// Zwei Mint-Wege (beide reuse mintSchadenkarten, firma-gebunden):
+//   - minteKartenBatchStaff:        Batch (N Token -> QR-Druck), fuer vorgedruckte/QR-Karten.
+//   - provisioniereKarteTokenStaff: mint-on-tap (1 Token) fuer den Tap-to-Provision-Weg
+//     (NfcBlankoProvisionieren: Blanko-Chip antippen -> minten + schreiben in einem Zug).
 // Das NFC-Schreiben eines bereits gemintenten Tokens laeuft ueber finalisiereKarteStaff
-// (per-Karte-Button in der Tabelle); der write-first-Provisioner wurde entfernt.
+// (per-Karte-Button in der Tabelle). KEIN Bind-Wrapper (der FM bindet ans Fahrzeug).
 
 /**
  * Batch-Mint (staff): N Blanko-Karten-Token fuer die gewaehlte Firma anlegen (status='bestellt').
@@ -33,6 +35,19 @@ export async function minteKartenBatchStaff(
   if (!res.ok) return { ok: false, error: res.error }
   revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
   return { ok: true, anzahl: res.tokens.length, charge: chargeVal }
+}
+
+/** Blanko-Provisionierung (staff): einen frischen Karten-Token fuer die gewaehlte Firma minten
+ *  (fuer den Tap-to-Provision-Weg NfcBlankoProvisionieren). KEIN Binden. */
+export async function provisioniereKarteTokenStaff(
+  firmaId: string,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const guard = await requireRole(['admin', 'dispatch'])
+  if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
+  const admin = createAdminClient()
+  const res = await mintSchadenkarten(admin, { firmaId, anzahl: 1 })
+  if (!res.ok) return { ok: false, error: res.error }
+  return { ok: true, token: res.tokens[0] }
 }
 
 /** Nach verifiziertem NFC-Schreiben (staff): Chip-UID vermerken + optional binden. */

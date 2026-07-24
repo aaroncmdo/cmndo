@@ -14,6 +14,7 @@ import { Button } from '@/components/primitives'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import { NfcKarteSchreibenButton } from '@/components/flotte/NfcKarteSchreibenButton'
 import { NfcBeschreibenHinweis } from '@/components/flotte/NfcBeschreibenHinweis'
+import { NfcBlankoProvisionieren } from '@/components/flotte/NfcBlankoProvisionieren'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
@@ -22,7 +23,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
+import { finalisiereKarteStaff, minteKartenBatchStaff, provisioniereKarteTokenStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -331,6 +332,11 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
             </p>
           )}
         </div>
+
+        <NfcBlankoProvisionieren
+          onMint={() => provisioniereKarteTokenStaff(firma.id)}
+          onFinalize={(token, uid) => finalisiereKarteStaff(firma.id, token, uid, null)}
+        />
 
         {karten.length === 0 ? (
           <p className="text-body-sm text-claimondo-ondo/60">Noch keine Karten. Oben „Karten erzeugen" nutzen.</p>
