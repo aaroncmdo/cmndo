@@ -9,9 +9,10 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { mintSchadenkarten, bindeSchadenkarteAnFahrzeug, finalisiereSchadenkarte } from '@/lib/schadenkarte/schadenkarte'
 
-// Zwei Mint-Wege (beide reuse mintSchadenkarten, firma-gebunden):
-//   - minteKartenBatchStaff:        Batch fuer VORGEDRUCKTE Karten (N Token -> QR-Druck -> spaeter binden).
-//   - provisioniereKarteTokenStaff: mint-on-tap fuer einzelne NFC-Karten (write-first, ein Token pro Chip).
+// Ein Mint-Weg (reuse mintSchadenkarten, firma-gebunden):
+//   - minteKartenBatchStaff: Batch (N Token -> QR-Druck -> spaeter ans Fahrzeug binden).
+// Das NFC-Schreiben eines bereits gemintenten Tokens laeuft ueber finalisiereKarteStaff
+// (per-Karte-Button in der Tabelle); der write-first-Provisioner wurde entfernt.
 
 /**
  * Batch-Mint (staff): N Blanko-Karten-Token fuer die gewaehlte Firma anlegen (status='bestellt').
@@ -50,18 +51,6 @@ export async function bindeKarteAnFahrzeug(
   if (!res.ok) return { ok: false, error: res.error }
   revalidatePath(`/admin/vertrieb/firmen-flotte/${firmaId}`)
   return { ok: true }
-}
-
-/** Blanko-Provisionierung (staff): einen frischen Karten-Token für die gewählte Firma minten. */
-export async function provisioniereKarteTokenStaff(
-  firmaId: string,
-): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
-  const guard = await requireRole(['admin', 'dispatch'])
-  if (!guard.success) return { ok: false, error: guard.error ?? 'Kein Zugriff' }
-  const admin = createAdminClient()
-  const res = await mintSchadenkarten(admin, { firmaId, anzahl: 1 })
-  if (!res.ok) return { ok: false, error: res.error }
-  return { ok: true, token: res.tokens[0] }
 }
 
 /** Nach verifiziertem NFC-Schreiben (staff): Chip-UID vermerken + optional binden. */
