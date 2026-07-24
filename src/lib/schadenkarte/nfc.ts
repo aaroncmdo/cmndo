@@ -69,7 +69,7 @@ const NFC_READBACK_TIMEOUT_MS = 10_000
  * zeitbegrenzt (Write via AbortSignal, Read via Timeout) -- kein Endlos-Haengen mehr.
  *
  * Reiner Client-Adapter (nutzt window.NDEFReader); node/SSR-safe durch den window-Guard.
- * Geteilt von NfcKarteBeschreiben (write-first) und NfcKarteSchreibenButton (per-Karte).
+ * Genutzt von NfcKarteSchreibenButton (per-Karte NFC-Beschreiben in der Admin-Karten-Tabelle).
  */
 export async function writeUndLiesZurueck(
   url: string,
