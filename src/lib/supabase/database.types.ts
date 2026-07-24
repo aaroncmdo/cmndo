@@ -3661,6 +3661,7 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung: string | null
           dokumente_vollstaendig_am_phase: string | null
           dokumente_vollstaendig_fuer_phase: string | null
+          eigene_versicherung: string | null
           endzustand_gesetzt_am: string | null
           endzustand_gesetzt_durch_user_id: string | null
           endzustand_grund: string | null
@@ -3788,6 +3789,7 @@ export type Database = {
           schadentag: string
           schadenzeit: string | null
           schlussabrechnung_am: string | null
+          schuldfrage: string | null
           service_typ: string
           spezifikation: string | null
           sprache: string | null
@@ -3866,6 +3868,7 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
+          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -3993,6 +3996,7 @@ export type Database = {
           schadentag: string
           schadenzeit?: string | null
           schlussabrechnung_am?: string | null
+          schuldfrage?: string | null
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
@@ -4071,6 +4075,7 @@ export type Database = {
           dokumente_reminder_whatsapp_letzte_sendung?: string | null
           dokumente_vollstaendig_am_phase?: string | null
           dokumente_vollstaendig_fuer_phase?: string | null
+          eigene_versicherung?: string | null
           endzustand_gesetzt_am?: string | null
           endzustand_gesetzt_durch_user_id?: string | null
           endzustand_grund?: string | null
@@ -4198,6 +4203,7 @@ export type Database = {
           schadentag?: string
           schadenzeit?: string | null
           schlussabrechnung_am?: string | null
+          schuldfrage?: string | null
           service_typ?: string
           spezifikation?: string | null
           sprache?: string | null
@@ -20404,6 +20410,98 @@ export type Database = {
           },
         ]
       }
+      vehicle_scan_fotos: {
+        Row: {
+          erstellt_am: string
+          id: string
+          ist_nahaufnahme: boolean
+          perspektive: string
+          qualitaet_hinweis: string | null
+          qualitaet_prozent: number | null
+          reihenfolge: number | null
+          scan_id: string
+          storage_path: string
+          vorschaden_id: string | null
+        }
+        Insert: {
+          erstellt_am?: string
+          id?: string
+          ist_nahaufnahme?: boolean
+          perspektive: string
+          qualitaet_hinweis?: string | null
+          qualitaet_prozent?: number | null
+          reihenfolge?: number | null
+          scan_id: string
+          storage_path: string
+          vorschaden_id?: string | null
+        }
+        Update: {
+          erstellt_am?: string
+          id?: string
+          ist_nahaufnahme?: boolean
+          perspektive?: string
+          qualitaet_hinweis?: string | null
+          qualitaet_prozent?: number | null
+          reihenfolge?: number | null
+          scan_id?: string
+          storage_path?: string
+          vorschaden_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_scan_fotos_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_scans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_scan_fotos_vorschaden_id_fkey"
+            columns: ["vorschaden_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_vorschaeden"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_scans: {
+        Row: {
+          erstellt_am: string
+          erstellt_von: string | null
+          id: string
+          kilometerstand: number | null
+          notiz: string | null
+          status: string
+          vehicle_id: string
+        }
+        Insert: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          kilometerstand?: number | null
+          notiz?: string | null
+          status?: string
+          vehicle_id: string
+        }
+        Update: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          kilometerstand?: number | null
+          notiz?: string | null
+          status?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_scans_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_vorschaeden: {
         Row: {
           art: string | null
@@ -20541,6 +20639,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_werkstatt_auftrag"
             referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "vehicle_vorschaeden_scan_id_fkey"
+            columns: ["scan_id"]
+            isOneToOne: false
+            referencedRelation: "vehicle_scans"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "vehicle_vorschaeden_vehicle_id_fkey"
@@ -25951,6 +26056,7 @@ export type Database = {
           spalte: string
         }[]
       }
+      audit_enum_check_constraints: { Args: never; Returns: Json }
       audit_rls_function_grants: {
         Args: never
         Returns: {
@@ -26031,6 +26137,7 @@ export type Database = {
       cron_rate_limit_reset: { Args: never; Returns: undefined }
       cron_reparatur_freigabe_eskalation: { Args: never; Returns: undefined }
       cron_trigger_exif_worker: { Args: never; Returns: undefined }
+      cron_trigger_notification_worker: { Args: never; Returns: undefined }
       cron_trigger_release_provisionen: { Args: never; Returns: undefined }
       cron_trigger_salesforce_sync: { Args: never; Returns: undefined }
       cron_verjaehrungs_warner: { Args: never; Returns: undefined }
@@ -26180,6 +26287,10 @@ export type Database = {
           signals: string[]
           tier: string
         }[]
+      }
+      merge_stub_vehicle: {
+        Args: { p_stub: string; p_target: string }
+        Returns: undefined
       }
       my_werkstatt_ids: { Args: never; Returns: string[] }
       next_rechnungs_nr: {

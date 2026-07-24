@@ -8,7 +8,7 @@ import { bindeSchadenkarteAnFahrzeug } from '@/lib/schadenkarte/schadenkarte'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
 import { updateFahrzeugStammdaten, type FahrzeugStammdatenForm } from '@/lib/flotte/mutate-flotte'
-import { erstelleFlottenSchadenClaim, type Haftungstyp } from '@/lib/flotte/schaden-fortsetzung'
+import { erstelleFlottenSchadenLead, flowLinkFuerClaimFortsetzung } from '@/lib/flotte/schaden-fortsetzung'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = import('@supabase/supabase-js').SupabaseClient<any, any, any>
@@ -139,17 +139,27 @@ export async function storniereFahrzeugSchaden(
 }
 
 /**
- * FU3 (operativer-schaden-flow): meldet einen NEUEN Schaden für dieses Fahrzeug, wenn noch
- * kein ersterfassung-Claim existiert (v.a. selbstverschuldet — kein Gegner-Tap-Flow). Legt
- * Lead + Claim an (erstelleFlottenSchadenClaim = Auth + geschädigter-Party datengetrieben) und
- * liefert die claimId → der Client navigiert zum Gutachter-Picker.
+ * Lead-first (Aaron 23.07.): „Schaden melden" erzeugt NUR einen baren Lead + FlowLink (kein
+ * Upfront-Claim, kein schuldfrage-Vorsetzen). Die Haftpflicht/Kasko-Weiche faellt db-driven im
+ * /flow; am /flow-Ende entsteht Claim (Haftpflicht→SV) bzw. Werkstatt-Auftrag (Kasko/Selbstzahler).
+ * Der Client navigiert auf /flow/[token]. IMMER neuer Lead (ein Fahrzeug hat mehrere Vorfaelle).
  */
 export async function meldeNeuenFlottenSchaden(
   vehicleId: string,
-  haftungstyp: Haftungstyp,
-): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   const { user } = await requirePortalAccess(['flottenmanager'])
-  const res = await erstelleFlottenSchadenClaim({ vehicleId, userId: user.id, haftungstyp })
+  const res = await erstelleFlottenSchadenLead({ vehicleId, userId: user.id })
   if (res.ok) revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
   return res
+}
+
+/**
+ * §2d „Schaden vervollständigen" (Claim-Detail): setzt einen bestehenden Claim db-driven ueber
+ * /flow fort. Liefert den FlowLink-Token seines Leads → Client navigiert auf /flow/[token].
+ */
+export async function meldeSchadenVervollstaendigen(
+  claimId: string,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  return flowLinkFuerClaimFortsetzung(claimId, user.id)
 }
