@@ -6,6 +6,10 @@ import { z } from 'zod'
 
 export const miniWizardSchema = z.object({
   schuldfrage: z.enum(['gegner', 'unklar', 'eigenverantwortung']),
+  // F4-a (Entry-Point-Audit 24.07.): Kasko-Folgefrage bei Eigenverschulden. Nur Pflicht wenn
+  // schuldfrage='eigenverantwortung' (refine unten). Kasko (ja) -> Lead geht durch in den /flow
+  // (kasko-Szenario); reiner Selbstzahler (nein) -> /selbstverschulden + Werkstatt-Finder-CTA.
+  eigeneVersicherung: z.enum(['ja', 'nein']).optional(),
   unfalldatum: z
     .string()
     .min(1, 'Unfalldatum ist erforderlich')
@@ -34,6 +38,11 @@ export const miniWizardSchema = z.object({
   // (nur Laengen-Cap): ein krummer Tag darf NIE die Schadenmeldung blocken. Die
   // kanonische Sanitisierung + Namespacing passiert in campaignSourceChannel().
   src: z.string().max(80).optional(),
-})
+}).refine(
+  // F4-a: Bei Eigenverschulden MUSS die Kasko-Frage beantwortet sein — sonst wuesste der /flow nicht,
+  // ob kasko (ja) oder selbstzahler (nein). Fuer gegner/unklar irrelevant.
+  (d) => d.schuldfrage !== 'eigenverantwortung' || d.eigeneVersicherung != null,
+  { message: 'Bitte gib an, ob du kaskoversichert bist.', path: ['eigeneVersicherung'] },
+)
 
 export type MiniWizardInput = z.infer<typeof miniWizardSchema>

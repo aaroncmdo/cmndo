@@ -52,6 +52,12 @@ test('Mini-Wizard /schaden-melden: Selbstverschulden → Soft-Filter-Exit', asyn
   await dismissCookie(page)
 
   await page.locator('input[value="eigenverantwortung"]').check()
+  // F4-a (24.07.): Eigenverschulden oeffnet die Kasko-Folgefrage. 'nein' (kein Kasko) = reiner
+  // Selbstzahler -> Selbstverschulden-Seite (jetzt MIT Werkstatt-Finder-CTA). 'ja' laesst durch
+  // (siehe Kasko-Test unten).
+  await page.locator('input[value="nein"]').check()
+  await page.locator('#vorname').fill('Sven')
+  await page.locator('#nachname').fill('Selbst')
   await page.locator('#unfallort').fill('A4 Köln-Süd')
   await page.locator('#telefon').fill('+49 221 7654321')
   await page.locator('#email').fill(`smoke-mw-selbst-${RUN_ID}@claimondo.de`)
@@ -61,10 +67,32 @@ test('Mini-Wizard /schaden-melden: Selbstverschulden → Soft-Filter-Exit', asyn
   await page.waitForURL(/\/schaden-melden\/selbstverschulden/, { timeout: 20_000 })
 
   expect(page.url()).toContain('/selbstverschulden')
-  // Bestaetigung dass die Soft-Filter-Page rendert (existing i18n-Text
-  // "Kasko" greift unter de-locale)
+  // F4-a: die Sackgasse hat jetzt einen Ausgang — der Werkstatt-Finder-CTA muss da sein.
   const body = (await page.locator('body').textContent()) ?? ''
-  expect(body.length).toBeGreaterThan(0)
+  expect(body).toMatch(/Werkstatt finden/i)
+})
+
+test('Mini-Wizard /schaden-melden: Kasko (Eigenverschulden + kaskoversichert) → Magic-Link', async ({ page }) => {
+  test.setTimeout(60_000)
+  page.on('pageerror', (e) => console.log(`[BROWSER pageerror] ${e.message}`))
+
+  await page.goto('/schaden-melden', { waitUntil: 'domcontentloaded' })
+  await dismissCookie(page)
+
+  await page.locator('input[value="eigenverantwortung"]').check()
+  // F4-a: 'ja' (kaskoversichert) laesst den Lead in den /flow durch (kasko-Szenario) — KEIN Sackgassen-Exit.
+  await page.locator('input[value="ja"]').check()
+  await page.locator('#vorname').fill('Klara')
+  await page.locator('#nachname').fill('Kasko')
+  await page.locator('#unfallort').fill('Ringstraße 5, 50667 Köln')
+  await page.locator('#telefon').fill('+49 221 2223334')
+  await page.locator('#email').fill(`smoke-mw-kasko-${RUN_ID}@claimondo.de`)
+  await page.locator('[data-slot="checkbox"]').first().click()
+
+  await page.getByRole('button', { name: /login-link erhalten/i }).click()
+  // Kasko wird NICHT mehr disqualifiziert -> Magic-Link-Bestaetigung statt Selbstverschulden.
+  await page.waitForURL(/\/schaden-melden\/link-versendet/, { timeout: 20_000 })
+  expect(page.url()).toContain('kanal=email')
 })
 
 test('Karten-Toggle /gutachter-finden: Default = DynamicWizard, Tab = Mini-Wizard', async ({ page }) => {

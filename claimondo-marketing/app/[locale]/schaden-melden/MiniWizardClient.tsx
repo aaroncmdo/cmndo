@@ -36,7 +36,7 @@ const SCHULDFRAGE_OPTIONS = [
   {
     value: 'eigenverantwortung' as const,
     title: 'Ich bin selbst schuld',
-    desc: 'Kasko-Fall — Sie hören gleich auf der nächsten Seite, wie wir trotzdem helfen können.',
+    desc: 'Kasko oder selbst zahlen — wir fragen gleich kurz nach und finden Ihnen die passende Werkstatt.',
   },
 ]
 
@@ -65,6 +65,7 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
     register,
     handleSubmit,
     control,
+    watch,
     formState: { errors },
   } = useForm<MiniWizardInput>({
     resolver: zodResolver(miniWizardSchema),
@@ -82,6 +83,9 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
       src: initialSrc ?? '',
     },
   })
+
+  // F4-a (Entry-Point-Audit 24.07.): Kasko-Folgefrage nur bei Eigenverschulden zeigen.
+  const schuldfrageWatch = watch('schuldfrage')
 
   const onSubmit = handleSubmit((values) => {
     setServerError(null)
@@ -148,6 +152,64 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
           )}
         />
       </fieldset>
+
+      {/* F4-a: Kasko-Folgefrage — nur bei Eigenverschulden. Kasko (ja) -> Lead geht durch in den
+          /flow (kasko-Szenario); Selbstzahler (nein) -> /selbstverschulden mit Werkstatt-Finder-CTA. */}
+      {schuldfrageWatch === 'eigenverantwortung' ? (
+        <fieldset className="space-y-3">
+          <legend className="text-lg font-semibold text-claimondo-navy">
+            Sind Sie kaskoversichert?
+          </legend>
+          <Controller
+            control={control}
+            name="eigeneVersicherung"
+            render={({ field }) => (
+              <div className="space-y-2">
+                {[
+                  {
+                    value: 'ja' as const,
+                    title: 'Ja, ich bin kaskoversichert',
+                    desc: 'Voll- oder Teilkasko — wir organisieren die Reparatur direkt für Sie.',
+                  },
+                  {
+                    value: 'nein' as const,
+                    title: 'Nein, ich zahle die Reparatur selbst',
+                    desc: 'Kein Problem — wir helfen Ihnen, eine passende Werkstatt zu finden.',
+                  },
+                ].map((opt) => {
+                  const active = field.value === opt.value
+                  return (
+                    <label
+                      key={opt.value}
+                      className={[
+                        'flex cursor-pointer items-start gap-3 rounded-ios-sm border p-4 transition',
+                        active
+                          ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+                          : 'border-claimondo-border bg-white',
+                      ].join(' ')}
+                    >
+                      <input
+                        type="radio"
+                        value={opt.value}
+                        checked={active}
+                        onChange={() => field.onChange(opt.value)}
+                        className="mt-1 h-4 w-4 accent-claimondo-ondo"
+                      />
+                      <div>
+                        <div className="font-medium text-claimondo-navy">{opt.title}</div>
+                        <div className="text-sm text-claimondo-ondo">{opt.desc}</div>
+                      </div>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+          />
+          {errors.eigeneVersicherung ? (
+            <p className="mt-1 text-sm text-red-600">{errors.eigeneVersicherung.message}</p>
+          ) : null}
+        </fieldset>
+      ) : null}
 
       {/* Unfall */}
       <fieldset className="space-y-4">

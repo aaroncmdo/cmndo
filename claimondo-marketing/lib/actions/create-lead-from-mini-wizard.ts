@@ -45,7 +45,12 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   }
 
   const data = parsed.data
-  const isDisqualifiziert = data.schuldfrage === 'eigenverantwortung'
+  // F4-a (Entry-Point-Audit 24.07.): NICHT mehr jedes Eigenverschulden disqualifizieren. Kasko
+  // (eigenverantwortung + eigene VS 'ja') geht jetzt durch in den /flow (kasko-Szenario, Werkstatt-
+  // Vermittlung). NUR reiner Selbstzahler ohne Kasko ('nein') bleibt die Sackgasse (/selbstverschulden
+  // mit Werkstatt-Finder-CTA). gegner/unklar unveraendert durch.
+  const isDisqualifiziert =
+    data.schuldfrage === 'eigenverantwortung' && data.eigeneVersicherung === 'nein'
   const locale = await getLocaleCookie()
 
   // 15.05.2026: Promo-Code aus FormData (data.promoCode) statt aus Cookie.
@@ -90,6 +95,9 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     },
     {
       schuldfrage: data.schuldfrage,
+      // F4-a: eigene_versicherung -> der /flow matcht damit direkt kasko (ja) bzw. selbstzahler (nein),
+      // ohne den Schuldfrage-Quali erneut zu zeigen (schuldfrage ist schon gesetzt).
+      eigene_versicherung: data.eigeneVersicherung ?? null,
       unfalldatum: data.unfalldatum,
       unfallort: data.unfallort,
       sprache: locale,
