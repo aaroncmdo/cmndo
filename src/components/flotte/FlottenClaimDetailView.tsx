@@ -4,11 +4,10 @@
 // Aktionen ausser Upload bewusst NICHT (read-only-Cockpit, v1) — die Kunde-Mutationen
 // (Bank/Slot) gelten fuer den Flottenmanager nicht.
 
-import Link from 'next/link'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Button } from '@/components/primitives'
 import { FlottenDokumentUpload } from './FlottenDokumentUpload'
+import { SchadenVervollstaendigenButton } from './SchadenVervollstaendigenButton'
 import type { FlottenClaimView } from '@/lib/flotte/flotten-claim-detail'
 
 function formatDatum(iso: string | null): string {
@@ -59,17 +58,10 @@ export function FlottenClaimDetailView({
       <div>
         <h1 className="text-xl font-bold text-claimondo-navy">{view.claimNummer ?? 'Schaden'}</h1>
         <p className="mt-1 text-sm text-claimondo-shield">Schaden-Details · {fahrzeugLabel}</p>
-        {/* Gutachter finden: FM startet den Finder direkt AUS dem Claim (Aaron: „extra button im claim").
-            typ=haftpflicht als Vorbelegung — die Haftpflicht/Kasko-Weiche laeuft db-driven weiter IM
-            FlowLink (identisch zu FahrzeugMiniAktionen, dort dokumentiert). Nur solange noch kein
-            Gutachter zugewiesen ist (sonst zeigt „Ansprechpartner" den SV). */}
-        {!view.sv ? (
-          <Link href={`/flotte/schaden/${view.claimId}/gutachter?typ=haftpflicht`} className="mt-3 inline-block">
-            <Button variant="ondo" size="sm">
-              Gutachter finden
-            </Button>
-          </Link>
-        ) : null}
+        {/* §2d „Schaden vervollständigen": setzt DIESEN Claim db-driven ueber /flow fort (gutachter
+            ODER werkstatt — nicht haftpflicht-spezifisch). Nur solange noch kein Gutachter zugewiesen
+            ist (sonst zeigt „Ansprechpartner" den SV). */}
+        {!view.sv ? <SchadenVervollstaendigenButton claimId={view.claimId} /> : null}
       </div>
 
       <SectionCard title="Status">
