@@ -10,10 +10,11 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CarIcon, Trash2Icon, ChevronRightIcon, CameraIcon } from 'lucide-react'
+import { CarIcon, ChevronRightIcon, CameraIcon } from 'lucide-react'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
+import { ConfirmEntfernenButton } from '@/components/shared/ConfirmEntfernenButton'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import type { ScanErgebnis } from '@/lib/flotte/zb1-scan'
 import type { BatchAnlageZeile, BatchAnlageErgebnis } from '@/lib/flotte/zb1-batch-anlage'
@@ -151,13 +152,7 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
                   ) : (
                     <div className="flex min-w-0 flex-1 items-center gap-3">{inner}</div>
                   )}
-                  <Button
-                    variant="bare"
-                    size="icon"
-                    ariaLabel="Fahrzeug entfernen"
-                    onClick={() => handleEntferne(v.flottenId)}
-                    iconLeft={<Trash2Icon className="h-4 w-4" />}
-                  />
+                  <ConfirmEntfernenButton onConfirm={() => handleEntferne(v.flottenId)} />
                 </li>
               )
             })}
