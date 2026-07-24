@@ -8,6 +8,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
 import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
 import { FahrzeugSchadenStornoButton } from './FahrzeugSchadenStornoButton'
+import { SchadenEntwurfAktionen } from './SchadenEntwurfAktionen'
 import type { FahrzeugSchaeden, ClaimMini, DraftMini } from '@/lib/flotte/fahrzeug-schaeden'
 
 // Pill-Label fuer Draft-Leads (kein Status-Registry-Code — fester Text).
@@ -35,9 +36,24 @@ type Props = {
     vehicleId: string,
     grund: string,
   ) => Promise<{ ok: boolean; error?: string }>
+  /** Draft-Lifecycle (nur FM-Portal): einen baren Schaden-Entwurf ueber /flow fortsetzen. */
+  onEntwurfFortsetzen?: (
+    leadId: string,
+  ) => Promise<{ ok: true; token: string } | { ok: false; error: string }>
+  /** Draft-Lifecycle (nur FM-Portal): einen baren Schaden-Entwurf verwerfen. */
+  onEntwurfStornieren?: (
+    leadId: string,
+    vehicleId: string,
+  ) => Promise<{ ok: boolean; error?: string }>
 }
 
-export function FahrzeugSchaedenSection({ schaeden, vehicleId, onStorno }: Props) {
+export function FahrzeugSchaedenSection({
+  schaeden,
+  vehicleId,
+  onStorno,
+  onEntwurfFortsetzen,
+  onEntwurfStornieren,
+}: Props) {
   const { claims, drafts } = schaeden
   const hasEntries = claims.length > 0 || drafts.length > 0
 
@@ -54,7 +70,7 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId, onStorno }: Props
           {/* Drafts zuerst — kein StatusBadge, da lead-workflow die raw-Status-Codes
               (quali-offen/flow-gesendet) nicht abdeckt; stattdessen fester Text-Pill. */}
           {drafts.map((d: DraftMini) => (
-            <li key={d.leadId} className="flex items-center gap-3 py-3">
+            <li key={d.leadId} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-3">
               <DraftPill />
               <span className="flex-1 min-w-0 text-sm text-claimondo-navy truncate">
                 Schaden-Entwurf
@@ -62,6 +78,14 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId, onStorno }: Props
               <span className="text-body-xs text-claimondo-shield shrink-0">
                 {formatDatum(d.createdAt)}
               </span>
+              {onEntwurfFortsetzen && onEntwurfStornieren && (
+                <SchadenEntwurfAktionen
+                  leadId={d.leadId}
+                  vehicleId={vehicleId}
+                  onFortsetzen={onEntwurfFortsetzen}
+                  onStornieren={onEntwurfStornieren}
+                />
+              )}
             </li>
           ))}
 

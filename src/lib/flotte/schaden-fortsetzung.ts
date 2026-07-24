@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { createLead } from '@/lib/leads/create-lead'
+import { DRAFT_STATUSES } from '@/lib/flotte/fahrzeug-schaeden'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = any
@@ -153,4 +154,97 @@ export async function flowLinkFuerClaimFortsetzung(
   const fl = await ensureCanonicalFlowLinkForLead(claim.lead_id as string, { serviceTyp: 'komplett', admin })
   if (!fl.ok) return { ok: false, error: fl.error }
   return { ok: true, token: fl.token }
+}
+
+// ─── Draft-Entwurf-Lifecycle (Aaron 24.07.) ────────────────────────────────────
+// Ein „Schaden-Entwurf" ist ein barer flotte-manuell-Lead (DRAFT_STATUSES) VOR der
+// Claim-Konvertierung (FahrzeugSchaedenSection zeigt ihn). Er muss weitermachbar
+// (Resume /flow) UND stornierbar (verwerfen) sein; die Claim-Konvertierung selbst
+// passiert db-driven am /flow-Ende (convertLeadToClaim), nicht hier.
+
+/** Auth-Gate: gehoert der Lead einem Fahrzeug der Firma des eingeloggten FM?
+ *  Liefert vehicleId + aktuellen Lead-Status fuer die Aufrufer. */
+async function leadGehoertFmFirma(
+  admin: AnyDb,
+  leadId: string,
+  userId: string,
+): Promise<{ ok: true; vehicleId: string; status: string | null } | { ok: false; error: string }> {
+  const { data: lead } = await admin
+    .from('leads')
+    .select('id, vehicle_id, status')
+    .eq('id', leadId)
+    .maybeSingle()
+  const vehicleId = (lead?.vehicle_id as string | null) ?? null
+  if (!vehicleId) return { ok: false, error: 'Kein Zugriff auf diesen Entwurf.' }
+
+  const firma = await getFlottenmanagerFirma(admin, userId)
+  if (!firma) return { ok: false, error: 'Kein Flotten-Konto.' }
+
+  const { data: ff } = await admin
+    .from('flotten_fahrzeuge')
+    .select('id')
+    .eq('firma_id', firma.id)
+    .eq('vehicle_id', vehicleId)
+    .maybeSingle()
+  if (!ff) return { ok: false, error: 'Kein Zugriff auf diesen Entwurf.' }
+
+  return { ok: true, vehicleId, status: (lead?.status as string | null) ?? null }
+}
+
+/**
+ * Draft-Resume: setzt einen baren Schaden-Entwurf-Lead ueber /flow fort — liefert den
+ * FlowLink-Token seines Leads (reuse ensureCanonicalFlowLinkForLead: gueltigen Link
+ * wiederverwenden, sonst frisch minten). Auth: FM der Fahrzeug-Firma des Leads.
+ */
+export async function flowLinkFuerLeadFortsetzung(
+  leadId: string,
+  userId: string,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const admin = createAdminClient() as AnyDb
+  const gate = await leadGehoertFmFirma(admin, leadId, userId)
+  if (!gate.ok) return gate
+  const fl = await ensureCanonicalFlowLinkForLead(leadId, { serviceTyp: 'komplett', admin })
+  if (!fl.ok) return { ok: false, error: fl.error }
+  return { ok: true, token: fl.token }
+}
+
+/**
+ * Draft-Storno: verwirft einen baren Schaden-Entwurf-Lead. Lead → 'disqualifiziert'
+ * (grund_key='fm_storniert' ≠ 'timeout' → NICHT winback-eligible, kein Re-Mail) und
+ * seine FlowLinks werden abgelaufen gesetzt (→ /flow zeigt „Link abgelaufen"). KEIN
+ * Claim involviert (barer Lead vor Konvertierung). Nur ein NOCH offener Draft ist
+ * stornierbar (Race-Schutz gegen zwischenzeitliche Konvertierung). Auth: FM der Firma.
+ */
+export async function storniereFlottenSchadenLead(
+  leadId: string,
+  userId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const admin = createAdminClient() as AnyDb
+  const gate = await leadGehoertFmFirma(admin, leadId, userId)
+  if (!gate.ok) return gate
+  if (!(DRAFT_STATUSES as readonly string[]).includes(gate.status ?? '')) {
+    return { ok: false, error: 'Dieser Entwurf ist nicht mehr offen und kann nicht storniert werden.' }
+  }
+
+  const { error } = await admin
+    .from('leads')
+    .update({
+      status: 'disqualifiziert',
+      disqualifiziert_grund_key: 'fm_storniert',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+  if (error) return { ok: false, error: error.message }
+
+  // FlowLinks des Leads ablaufen lassen -> „weitermachen" ist danach zu. Best-effort:
+  // der Storno bleibt gueltig, auch wenn das Link-Update haengt (Lead-Status ist die Wahrheit).
+  const { error: flErr } = await admin
+    .from('flow_links')
+    .update({ expires_at: new Date(Date.now() - 1000).toISOString() })
+    .eq('lead_id', leadId)
+  if (flErr) {
+    console.error('[storniereFlottenSchadenLead] FlowLink-Ablauf fehlgeschlagen:', leadId, flErr.message)
+  }
+
+  return { ok: true }
 }
