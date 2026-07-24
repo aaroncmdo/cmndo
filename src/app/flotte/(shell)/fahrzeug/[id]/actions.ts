@@ -8,7 +8,12 @@ import { bindeSchadenkarteAnFahrzeug } from '@/lib/schadenkarte/schadenkarte'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { fmDarfStornieren } from '@/lib/flotte/fm-storno-erlaubt'
 import { updateFahrzeugStammdaten, type FahrzeugStammdatenForm } from '@/lib/flotte/mutate-flotte'
-import { erstelleFlottenSchadenLead, flowLinkFuerClaimFortsetzung } from '@/lib/flotte/schaden-fortsetzung'
+import {
+  erstelleFlottenSchadenLead,
+  flowLinkFuerClaimFortsetzung,
+  flowLinkFuerLeadFortsetzung,
+  storniereFlottenSchadenLead,
+} from '@/lib/flotte/schaden-fortsetzung'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyDb = import('@supabase/supabase-js').SupabaseClient<any, any, any>
@@ -162,4 +167,29 @@ export async function meldeSchadenVervollstaendigen(
 ): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
   const { user } = await requirePortalAccess(['flottenmanager'])
   return flowLinkFuerClaimFortsetzung(claimId, user.id)
+}
+
+/**
+ * Draft-Resume (Aaron 24.07.): setzt einen baren Schaden-Entwurf ueber /flow fort. Liefert den
+ * FlowLink-Token → Client navigiert auf /flow/[token]. Die Claim-Konvertierung passiert am /flow-Ende.
+ */
+export async function setzeSchadenEntwurfFort(
+  leadId: string,
+): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  return flowLinkFuerLeadFortsetzung(leadId, user.id)
+}
+
+/**
+ * Draft-Storno (Aaron 24.07.): verwirft einen baren Schaden-Entwurf (Lead 'disqualifiziert' +
+ * FlowLink ablaufen). vehicleId nur fuer revalidatePath. Auth + Ownership liegen in der Lib.
+ */
+export async function storniereSchadenEntwurf(
+  leadId: string,
+  vehicleId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { user } = await requirePortalAccess(['flottenmanager'])
+  const res = await storniereFlottenSchadenLead(leadId, user.id)
+  if (res.ok) revalidatePath(`/flotte/fahrzeug/${vehicleId}`)
+  return res
 }
