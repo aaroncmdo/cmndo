@@ -12,7 +12,6 @@ import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
-import { NfcKarteBeschreiben } from '@/components/flotte/NfcKarteBeschreiben'
 import { NfcKarteSchreibenButton } from '@/components/flotte/NfcKarteSchreibenButton'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
@@ -22,7 +21,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { bindeKarteAnFahrzeug, provisioniereKarteTokenStaff, finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
+import { bindeKarteAnFahrzeug, finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -269,23 +268,29 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
       </SectionCard>
 
       <SectionCard title={`Schaden-Karten (${karten.length})`}>
-        <div className="mb-4">
-          <NfcKarteBeschreiben
-            fahrzeuge={fahrzeuge.map((f) => ({
-              vehicleId: f.vehicle_id,
-              label: f.kennzeichen ?? f.vehicle_id,
-            }))}
-            onMintToken={() => provisioniereKarteTokenStaff(firma.id)}
-            onFinalize={(token, nfcUid, fahrzeugId) =>
-              finalisiereKarteStaff(firma.id, token, nfcUid, fahrzeugId)
-            }
-          />
+        {/* Flow-Erklaerung — NFC-Schreiben ist OPTIONAL (nur Android); eine gebundene Karte mit QR reicht. */}
+        <div className="mb-4 rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-3">
+          <p className="text-body-sm font-medium text-claimondo-navy">So funktioniert eine Schaden-Karte</p>
+          <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-caption text-claimondo-ondo/80">
+            <li>
+              <strong className="text-claimondo-navy">Erzeugen</strong> — Karten anlegen und als QR-Codes drucken.
+            </li>
+            <li>
+              <strong className="text-claimondo-navy">An Fahrzeug binden</strong> — in der Tabelle unten je Karte ein
+              Fahrzeug wählen.
+            </li>
+            <li>Fertig — der QR-Code macht die Karte sofort einsatzbereit.</li>
+          </ol>
+          <p className="mt-2 text-caption text-claimondo-ondo/60">
+            Das <strong className="text-claimondo-navy">NFC-Antippen</strong> ist optional und nur am Android-Handy
+            möglich. Eine gebundene Karte mit gedrucktem QR-Code funktioniert auch ohne.
+          </p>
         </div>
 
         <div className="mb-4 space-y-2 rounded-ios-lg border border-claimondo-border p-3">
-          <p className="text-body-sm font-medium text-claimondo-navy">Karten auf Vorrat erzeugen (vorgedruckt)</p>
+          <p className="text-body-sm font-medium text-claimondo-navy">1 · Karten erzeugen</p>
           <p className="text-caption text-claimondo-ondo/70">
-            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken, später ans Fahrzeug binden.
+            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken, danach ans Fahrzeug binden.
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <label className="block">
@@ -333,56 +338,62 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
         </div>
 
         {karten.length === 0 ? (
-          <p className="text-body-sm text-claimondo-ondo/60">
-            Noch keine Karten. Nutzen Sie oben „Karte auflegen &amp; beschreiben".
-          </p>
+          <p className="text-body-sm text-claimondo-ondo/60">Noch keine Karten. Oben „Karten erzeugen" nutzen.</p>
         ) : (
-          <DataTableContainer>
-            <Table>
-              <Thead>
-                <Tr>
-                  <Th className="text-left">Token</Th>
-                  <Th className="text-left">Status</Th>
-                  <Th className="text-left">Fahrzeug</Th>
-                  <Th className="text-left">NFC</Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {karten.map((k) => (
-                  <Tr key={k.id}>
-                    <Td className="font-mono text-body-xs text-claimondo-navy">{k.token}</Td>
-                    <Td>{k.status}</Td>
-                    <Td>
-                      {k.fahrzeug_id ? (
-                        k.kennzeichen ?? 'gebunden'
-                      ) : (
-                        <select
-                          defaultValue=""
-                          onChange={(e) => karteBinden(k.token, e.target.value)}
-                          disabled={fahrzeuge.length === 0}
-                          className={`${FELD_CLS} text-body-xs py-1`}
-                        >
-                          <option value="">— an Fahrzeug binden —</option>
-                          {fahrzeuge.map((f) => (
-                            <option key={f.vehicle_id} value={f.vehicle_id}>
-                              {f.kennzeichen ?? f.vehicle_id}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-                    </Td>
-                    <Td>
-                      <NfcKarteSchreibenButton
-                        token={k.token}
-                        beschrieben={k.beschrieben}
-                        onGeschrieben={(token, uid) => finalisiereKarteStaff(firma.id, token, uid, null)}
-                      />
-                    </Td>
+          <>
+            <div className="mb-2 flex items-baseline justify-between gap-2">
+              <p className="text-body-sm font-medium text-claimondo-navy">2 · An Fahrzeug binden</p>
+              {fahrzeuge.length === 0 && (
+                <span className="text-caption text-warning-strong">Zum Binden erst oben ein Fahrzeug anlegen.</span>
+              )}
+            </div>
+            <DataTableContainer>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th className="text-left">Token</Th>
+                    <Th className="text-left">Status</Th>
+                    <Th className="text-left">Fahrzeug</Th>
+                    <Th className="text-left">NFC (optional)</Th>
                   </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </DataTableContainer>
+                </Thead>
+                <Tbody>
+                  {karten.map((k) => (
+                    <Tr key={k.id}>
+                      <Td className="font-mono text-body-xs text-claimondo-navy">{k.token}</Td>
+                      <Td>{k.status}</Td>
+                      <Td>
+                        {k.fahrzeug_id ? (
+                          k.kennzeichen ?? 'gebunden'
+                        ) : (
+                          <select
+                            defaultValue=""
+                            onChange={(e) => karteBinden(k.token, e.target.value)}
+                            disabled={fahrzeuge.length === 0}
+                            className={`${FELD_CLS} text-body-xs py-1`}
+                          >
+                            <option value="">— an Fahrzeug binden —</option>
+                            {fahrzeuge.map((f) => (
+                              <option key={f.vehicle_id} value={f.vehicle_id}>
+                                {f.kennzeichen ?? f.vehicle_id}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </Td>
+                      <Td>
+                        <NfcKarteSchreibenButton
+                          token={k.token}
+                          beschrieben={k.beschrieben}
+                          onGeschrieben={(token, uid) => finalisiereKarteStaff(firma.id, token, uid, null)}
+                        />
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </DataTableContainer>
+          </>
         )}
         {bindFehler && <p className="text-caption text-danger-strong mt-2">{bindFehler}</p>}
       </SectionCard>
