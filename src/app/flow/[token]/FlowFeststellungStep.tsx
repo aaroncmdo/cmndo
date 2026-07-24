@@ -25,6 +25,7 @@ import { computeActiveFeststellungSteps, meetsCondition } from './feststellung-s
 import { Button } from '@/components/primitives/Button/Button.web'
 
 const istLeer = (v: unknown) => v == null || (typeof v === 'string' && v.trim() === '')
+const alsText = (v: unknown): string | null => (typeof v === 'string' && v.trim() ? v : null)
 
 // Konservativer Name-Match: Nachname exakt + Vorname kompatibel (exakt/Präfix).
 // Entscheidet, ob der OCR-Halter == der Kunde ist (→ kein Halter-Sub-Block).
@@ -266,6 +267,11 @@ export function FlowFeststellungStep({
           <FlowZb1Upload
             token={token}
             bereitsErfasst={fahrzeugErfasst}
+            fahrzeug={{
+              kennzeichen: alsText(initialValues['kennzeichen']),
+              hersteller: alsText(initialValues['fahrzeug_hersteller']),
+              modell: alsText(initialValues['fahrzeug_modell']),
+            }}
             onExtracted={handleZb1Extracted}
             onSkip={() => void handleWeiter()}
           />

@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { uploadZb1Flow, speichereZb1KorrekturFlow } from './self-service-actions'
 import { enqueueOp } from '@/lib/offline/enqueue'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { CarIcon } from 'lucide-react'
 
 export type Zb1FlowExtracted = {
   kennzeichen: string | null
@@ -31,11 +32,15 @@ export type Zb1FlowExtracted = {
 export function FlowZb1Upload({
   token,
   bereitsErfasst,
+  fahrzeug,
   onExtracted,
   onSkip,
 }: {
   token: string
   bereitsErfasst?: boolean
+  // Prefill-and-show (2): bei bekanntem Fahrzeug (FM-Lead — Fahrzeug-Stammdaten via #4757) statt
+  // des Foto-Prompts eine Fahrzeug-Karte zeigen (Kennzeichen/Hersteller/Modell), Foto optional.
+  fahrzeug?: { kennzeichen: string | null; hersteller: string | null; modell: string | null } | null
   // AAR-956 15.06.: OCR-Ergebnis in den Eltern-Stepper hochreichen (Halter/Fahrzeug
   // in die Formular-values mergen) — statt der bisherigen Nur-Anzeige.
   onExtracted?: (ex: Zb1FlowExtracted) => void
@@ -182,6 +187,32 @@ export function FlowZb1Upload({
               {t('zb1.neu_foto')}
             </button>
           </div>
+        </div>
+      ) : bereitsErfasst && fahrzeug?.kennzeichen ? (
+        /* Prefill-and-show (2): Fahrzeug bekannt (FM-Lead via #4757) → Fahrzeug-Karte statt Foto-
+           Prompt. Foto bleibt optional; „Weiter" liefert der Eltern-Step (handleWeiter-Button). */
+        <div className="rounded-ios-sm border border-claimondo-border bg-white p-3" data-testid="flow-zb1-fahrzeug-karte">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-ios-sm bg-claimondo-bg">
+              <CarIcon className="h-5 w-5 text-claimondo-ondo" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-claimondo-navy">{fahrzeug.kennzeichen}</p>
+              {[fahrzeug.hersteller, fahrzeug.modell].filter(Boolean).length > 0 && (
+                <p className="truncate text-sm text-claimondo-ondo">
+                  {[fahrzeug.hersteller, fahrzeug.modell].filter(Boolean).join(' ')}
+                </p>
+              )}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="mt-3 text-sm text-claimondo-ondo underline"
+            data-testid="flow-zb1-foto-optional"
+          >
+            {status === 'laden' ? t('zb1.wird_ausgelesen') : t('zb1.aufnehmen')}
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-3">
