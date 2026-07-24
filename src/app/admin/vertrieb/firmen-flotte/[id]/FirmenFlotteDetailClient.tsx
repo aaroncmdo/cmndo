@@ -266,8 +266,8 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
               <strong className="text-claimondo-navy">Erzeugen</strong> — Karten anlegen und als QR-Codes drucken.
             </li>
             <li>
-              <strong className="text-claimondo-navy">An Fahrzeug binden</strong> — in der Tabelle unten je Karte ein
-              Fahrzeug wählen.
+              <strong className="text-claimondo-navy">Flottenmanager bindet</strong> — die Karte wird im
+              Flottenmanager-Portal ans Fahrzeug gebunden (nicht hier im Admin).
             </li>
             <li>Fertig — der QR-Code macht die Karte sofort einsatzbereit.</li>
           </ol>
@@ -280,7 +280,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
         <div className="mb-4 space-y-2 rounded-ios-lg border border-claimondo-border p-3">
           <p className="text-body-sm font-medium text-claimondo-navy">1 · Karten erzeugen</p>
           <p className="text-caption text-claimondo-ondo/70">
-            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken, danach ans Fahrzeug binden.
+            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken; gebunden wird im Flottenmanager-Portal.
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <label className="block">
