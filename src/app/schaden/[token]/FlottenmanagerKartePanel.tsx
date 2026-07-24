@@ -6,6 +6,7 @@ import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
 import type { FlottenFahrzeug } from '@/lib/kunde/firma-flotte'
 import { bindeKarteAnFahrzeugPublic } from './actions'
+import { SchadenVervollstaendigenButton } from '@/components/flotte/SchadenVervollstaendigenButton'
 
 function fahrzeugLabel(f: FlottenFahrzeug): string {
   const marke = [f.hersteller, f.modell].filter(Boolean).join(' ')
@@ -119,17 +120,10 @@ export function FlottenmanagerKartePanel({
               {fortsetzenClaimId && (
                 <div className="flex flex-col gap-2 border-t border-claimondo-border/60 pt-3">
                   <p className="text-body-xs text-claimondo-ondo text-center">
-                    Für dieses Fahrzeug ist bereits ein Schaden erfasst. Wählen Sie jetzt einen
-                    Gutachter für die Besichtigung.
+                    Für dieses Fahrzeug ist bereits ein Schaden erfasst. Setzen Sie ihn jetzt fort —
+                    Gutachter, Werkstatt und Termin wählen Sie im Ablauf.
                   </p>
-                  <Button
-                    variant="navy"
-                    onClick={() =>
-                      router.push(`/flotte/schaden/${fortsetzenClaimId}/gutachter?typ=haftpflicht`)
-                    }
-                  >
-                    Gutachter finden
-                  </Button>
+                  <SchadenVervollstaendigenButton claimId={fortsetzenClaimId} />
                 </div>
               )}
             </div>
