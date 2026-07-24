@@ -72,9 +72,16 @@ export function NfcKarteSchreibenButton({
       {fertig ? (
         <span className="text-body-xs font-medium text-success-strong">✓ beschrieben</span>
       ) : (
-        <Button variant="ondo" size="sm" loading={laeuft} onClick={schreibe}>
-          NFC schreiben
-        </Button>
+        <>
+          <Button variant="ondo" size="sm" loading={laeuft} onClick={schreibe}>
+            {laeuft ? 'Karte anhalten…' : 'NFC-Karte beschreiben'}
+          </Button>
+          {laeuft && (
+            <span className="text-body-xs text-claimondo-ondo">
+              📶 Leere Karte jetzt an die Rückseite des Handys halten.
+            </span>
+          )}
+        </>
       )}
       {fehler && <span className="text-body-xs text-danger-strong">{fehler}</span>}
     </div>
