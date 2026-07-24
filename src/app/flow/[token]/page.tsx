@@ -337,13 +337,45 @@ export default async function FlowPage({
     weichen.brauchtWerkstatt &&
     brauchtWerkstattVermittlung(lead as unknown as BedarfRow)
 
+  // Prefill (Aaron 24.07., FlowLink-Lane): FM-initiierter Lead (source_channel='flotte-manuell')
+  // → Firma-Adresse als editierbarer DEFAULT fuer die Ort-Steps. Die Roh-Spalte wird bewusst NICHT
+  // gesetzt (sonst filtert erhebtNoch den ort-Step raus = keine Edit-Flaeche) — nur der Prefill-/
+  // Anzeige-Wert bekommt sie. Nur laden, wenn noch KEIN konkreter Ort da ist.
+  let firmaAdresse: string | null = null
+  if (
+    (lead.source_channel as string | null) === 'flotte-manuell' &&
+    (lead.vehicle_id as string | null) &&
+    !lead.besichtigungsort_adresse &&
+    !lead.fahrzeug_standort_adresse
+  ) {
+    const { data: ff } = await svc
+      .from('flotten_fahrzeuge')
+      .select('firma_id')
+      .eq('vehicle_id', lead.vehicle_id as string)
+      .maybeSingle()
+    const firmaId = (ff?.firma_id as string | null) ?? null
+    if (firmaId) {
+      const { data: firma } = await svc
+        .from('firmen')
+        .select('adresse_strasse, adresse_plz, adresse_ort')
+        .eq('id', firmaId)
+        .maybeSingle()
+      firmaAdresse =
+        [firma?.adresse_strasse, [firma?.adresse_plz, firma?.adresse_ort].filter(Boolean).join(' ')]
+          .filter((t: string | null | undefined) => t && String(t).trim())
+          .join(', ') || null
+    }
+  }
+
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
-  // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
-  // letzter Ausweg unfallort. Eine Quelle für gutachter-Prop + §3a-Anzeige.
+  // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort, dann unfallort,
+  // zuletzt die Firma-Adresse (FM-Lead-Prefill). Eine Quelle für gutachter-Prop + §3a-Anzeige +
+  // ort-Step-Prefill (FlowOrtStep.initialAdresse).
   const besichtigungsAdresse =
     (lead.besichtigungsort_adresse as string | null) ??
     (lead.fahrzeug_standort_adresse as string | null) ??
     (lead.unfallort as string | null) ??
+    firmaAdresse ??
     null
 
   // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
