@@ -81,10 +81,31 @@ export async function erstelleFlottenSchadenLead(params: {
   // §0-Dedup: frischen flotte-manuell-Lead wiederverwenden statt einen zweiten anzulegen.
   let leadId = await findRecentFlottenLead(admin, params.vehicleId)
   if (!leadId) {
+    // Prefill (Aaron 24.07.): bekannte Fahrzeug-Stammdaten auf den Lead mappen — der FM soll
+    // Bekanntes nicht neu eingeben. `kennzeichen` ist zugleich ein erhebt_feld des feststellung-Steps
+    // (neben schadentyp/hergang) -> erscheint dort vorbefuellt UND editierbar (der Step faellt NICHT
+    // weg). Rest = Downstream-Kontext (Dispatcher-Liste/Briefing/Claim lesen die lead.fahrzeug_*-Spalten).
+    // NUR Stammdaten — kein schaden-spezifisches Feld (Spec §2a: der Lead bleibt bar bei schuldfrage etc.).
+    const { data: veh } = await admin
+      .from('vehicles')
+      .select('kennzeichen_aktuell, hersteller, modell_haupttyp, fin, hsn, tsn, farbe_klartext')
+      .eq('id', params.vehicleId)
+      .maybeSingle()
     const created = await createLead(
       admin,
       { source_channel: 'flotte-manuell', status: 'neu' },
-      { vehicle_id: params.vehicleId, firma_name: firma.name, gewerbe_flag: true },
+      {
+        vehicle_id: params.vehicleId,
+        firma_name: firma.name,
+        gewerbe_flag: true,
+        kennzeichen: veh?.kennzeichen_aktuell ?? null,
+        fahrzeug_hersteller: veh?.hersteller ?? null,
+        fahrzeug_modell: veh?.modell_haupttyp ?? null,
+        fin: veh?.fin ?? null,
+        hsn: veh?.hsn ?? null,
+        tsn: veh?.tsn ?? null,
+        fahrzeug_farbe: veh?.farbe_klartext ?? null,
+      },
     )
     if (!created.ok) return { ok: false, error: created.error }
     leadId = created.leadId

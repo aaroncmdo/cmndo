@@ -82,13 +82,36 @@ describe('erstelleFlottenSchadenLead (lead-first)', () => {
     expect(state.createLeadCalls).toHaveLength(0)
   })
 
-  it('barer Lead (KEIN schuldfrage) + FlowLink-Token, kein Upfront-Claim', async () => {
+  it('barer Lead (KEIN schuldfrage) + Fahrzeug-Prefill + FlowLink-Token, kein Upfront-Claim', async () => {
     state.rows.flotten_fahrzeuge = { id: 'ff-1' }
     state.rows.leads = null // §0-Dedup: kein frischer Lead
+    // Fahrzeug-Stammdaten, die auf den Lead gemappt werden sollen.
+    state.rows.vehicles = {
+      kennzeichen_aktuell: 'B-XX-123',
+      hersteller: 'BMW',
+      modell_haupttyp: '320d',
+      fin: 'WBA12345678901234',
+      hsn: '0005',
+      tsn: 'ABC',
+      farbe_klartext: 'schwarz',
+    }
     const { erstelleFlottenSchadenLead } = await import('./schaden-fortsetzung')
     const res = await erstelleFlottenSchadenLead({ vehicleId: 'veh-1', userId: 'u' })
     expect(res).toEqual({ ok: true, token: 'flow-token-1' })
-    expect(state.createLeadCalls[0].extra).toMatchObject({ vehicle_id: 'veh-1', firma_name: 'ACME', gewerbe_flag: true })
+    // Basis + Fahrzeug-Prefill (Stammdaten aus vehicles auf die lead.fahrzeug_*-Spalten gemappt).
+    expect(state.createLeadCalls[0].extra).toMatchObject({
+      vehicle_id: 'veh-1',
+      firma_name: 'ACME',
+      gewerbe_flag: true,
+      kennzeichen: 'B-XX-123',
+      fahrzeug_hersteller: 'BMW',
+      fahrzeug_modell: '320d',
+      fin: 'WBA12345678901234',
+      hsn: '0005',
+      tsn: 'ABC',
+      fahrzeug_farbe: 'schwarz',
+    })
+    // Spec §2a: KEIN schaden-spezifisches Feld vorgesetzt (schuldfrage bleibt bar → /flow-Quali).
     expect(state.createLeadCalls[0].extra).not.toHaveProperty('schuldfrage')
   })
 
