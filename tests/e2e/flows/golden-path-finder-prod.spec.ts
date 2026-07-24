@@ -1,5 +1,11 @@
 import { test, expect, type Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
+import {
+  seedThrowawayFinderSv,
+  purgeThrowawayFinderSv,
+  purgeStaleThrowawayFinderSvs,
+  type ThrowawayFinderSv,
+} from '../lib/test-sv'
 
 // Golden-Path FINDER-Booking E2E — der zweite Entry (Gutachter-Finder) im echten Browser
 // bis zum reservierten Termin, gegen Prod. Companion zu golden-path-prod.spec.ts (Entry via
@@ -9,24 +15,31 @@ import { createClient } from '@supabase/supabase-js'
 // -> Termin) laeuft end-to-end. Anders als /schaden-melden faehrt DIESE Strecke die
 // SV-Matching-Engine (findBestSV) + Isochrone-Zustaendigkeit + Slot-Generierung.
 //
-// PARTNER-SICHER (vier unabhaengige Ebenen, staerkste zuerst):
-//   1. GUARD (reserviere-Chokepoint): entscheideTestSvGuard blockt echter-Kunde<->Test-SV HART.
-//      Die Test-Identitaet ist @claimondo.de => istInterneIdentitaet=true => test<->test erlaubt.
-//   2. KARTEN-UNSICHTBARKEIT: ist_testaccount=true haelt den SV von ladeAktiveSVs (Karten-Pins) fern.
-//   3. OBSKUR: der Test-SV sitzt auf Pellworm (faehr-isolierte Insel -> keine Festland-SV-Isochrone
-//      erreicht sie; ~1200 Einwohner -> ~0 Finder-Traffic). Buchungs-Ort = Tammensiel (auf der Insel).
-//   4. TRANSIENT: beforeAll aktiviert, afterAll re-sperrt den SV (idempotent). Crash-Reset via
-//      RESET_FINDER_TEST_SV=1 (deaktiviert nur, ohne Test).
+// FIXTURE (seit Befund #6, 17.07.): der globale Embed-Pool (ladeEmbedMatching ->
+// planeTerminMitFallback -> findBestSV -> applyDispatchableFilter) filtert `.eq('ist_testaccount',
+// false)` — ein Test-Account taucht dort NICHT mehr auf. Der Guard braucht daher einen ECHTEN
+// (ist_testaccount=false) dispatchbaren SV. Wir seeden ihn TRANSIENT (beforeAll) und LOESCHEN ihn
+// vollstaendig (afterAll: auth+profiles+sachverstaendige + evtl. Buchungs-Artefakte). Kein
+// Produktions-Code-Change, keine Migration.
 //
-// WARUM das ohne Produktions-Code funktioniert: der Buchungspfad (ladeEmbedMatching ->
-// planeTerminMitFallback -> findBestSV -> applyDispatchableFilter) filtert verifiziert+ist_aktiv+
-// portal_zugang+gesperrt_seit, aber NICHT ist_testaccount. Ein AKTIVER Test-SV ist am obskuren
-// Ort damit der einzige zustaendige Partner. Kein Code-Change, keine Migration.
+// PARTNER-SICHER (vier unabhaengige Ebenen):
+//   1. TRANSIENT + GELOESCHT: nur waehrend des ~90s-Laufs existent, danach restlos entfernt
+//      (+ Selbstheilung purgeStaleThrowawayFinderSvs raeumt Leichen abgestuerzter Laeufe).
+//   2. OBSKUR: der SV sitzt auf Pellworm (faehr-isolierte Insel, ~1200 Ew. -> ~0 Finder-Traffic;
+//      Isochrone offshore, Husum/Festland ausgeschlossen) -> praktisch keine echte Anfrage matcht ihn.
+//   3. INTERNE BUCHER-IDENTITAET: die Buchung laeuft unter @claimondo.de => istInterneIdentitaet
+//      => Send-Isolation (#3709) => keine echten Comms/Dispatch-Tasks, auch beim Full-Submit.
+//   4. OPT-IN: laeuft NUR mit RUN_GOLDEN_PATH_PROD=1 (nie in CI) -> Exposition nur bei bewusstem Lauf.
 //
 // Opt-in (nie in CI): RUN_GOLDEN_PATH_PROD=1 + SUPABASE_SERVICE_ROLE_KEY (Fixture/Verify).
 
 const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
-const TEST_SV = process.env.GOLDEN_SV_ID ?? '1da11741-a406-45ce-a27b-c041576cccbb'
+// In beforeAll auf die id des frisch geseedeten Wegwerf-SV gesetzt (kein Hardcode — der alte
+// Default 1da11741… war nach einem Golive-Cleanup tot; und ein Test-Account waere seit Befund #6
+// ohnehin aus dem globalen Matching gefiltert).
+let TEST_SV = ''
+let svHandle: ThrowawayFinderSv | null = null
+let bucherEmail: string | null = null // Bucher-Identitaet des Laufs -> Full-Submit-Cleanup
 
 // Pellworm / Tammensiel (Insel, faehr-isoliert, ~0 Finder-Traffic, keine Festland-SV-Isochrone
 // erreicht sie). Reale Strassenadresse (types:['address'] braucht street-level) fuer die Google-
@@ -52,57 +65,36 @@ function admin() {
   })
 }
 
-// Aktiviert den Test-SV am obskuren Ort + macht ihn dispatchable/buchbar. ist_testaccount BLEIBT
-// true (Ebene 1+2). Idempotent: setzt IMMER denselben bekannten Zustand (heilt einen abgestuerzten
-// Vorlauf selbst). Kontingent/Urlaub/Ablehnungen geleert -> hoch geranked, nicht geblockt.
-async function aktiviereTestSv(db: ReturnType<typeof admin>) {
-  const { error } = await db
-    .from('sachverstaendige')
-    .update({
-      ist_aktiv: true,
-      gesperrt_seit: null,
-      standort_lat: PELLWORM.lat,
-      standort_lng: PELLWORM.lng,
-      standort_adresse: 'Pellworm (E2E-Test)',
-      isochrone_polygon: ISO_BOX,
-      paket_faelle_gesamt: 100,
-      paket_faelle_genutzt: 0,
-      offene_faelle: 0,
-      ablehnungen_30_tage: 0,
-      urlaub_von: null,
-      urlaub_bis: null,
-    })
-    .eq('id', TEST_SV)
-  if (error) throw new Error(`Test-SV aktivieren fehlgeschlagen: ${error.message}`)
-}
-
-// Re-sperrt den Test-SV -> raus aus dem Dispatchable-Pool (applyDispatchableFilter verlangt
-// ist_aktiv=true AND gesperrt_seit IS NULL). Standort/Isochrone bleiben (harmlos: gesperrt +
-// ist_testaccount = unsichtbar + un-buchbar). Best-effort; ein Fehler hier darf den Teardown nicht werfen.
-async function deaktiviereTestSv(db: ReturnType<typeof admin>) {
-  const { error } = await db
-    .from('sachverstaendige')
-    .update({ ist_aktiv: false, gesperrt_seit: new Date().toISOString() })
-    .eq('id', TEST_SV)
-  if (error) console.error('[golden-finder] Test-SV deaktivieren fehlgeschlagen:', error.message)
-}
-
 test.beforeAll(async () => {
-  await aktiviereTestSv(admin())
+  const db = admin()
+  await purgeStaleThrowawayFinderSvs(db) // Leichen abgestuerzter Vorlaeufe zuerst entfernen
+  svHandle = await seedThrowawayFinderSv(db, {
+    lat: PELLWORM.lat,
+    lng: PELLWORM.lng,
+    isochrone: ISO_BOX,
+    runId: String(Date.now()),
+  })
+  TEST_SV = svHandle.svId
 })
+
 test.afterAll(async () => {
-  await deaktiviereTestSv(admin())
+  const db = admin()
+  // Full-Submit-Artefakte (gfa/Lead/Termin) + den Wegwerf-SV restlos entfernen. purgeStale faengt
+  // zusaetzlich einen Rest ab, falls svHandle wegen eines Seed-Fehlers null blieb.
+  await purgeThrowawayFinderSv(db, { svId: svHandle?.svId ?? null, uid: svHandle?.uid ?? null, bucherEmail })
+  await purgeStaleThrowawayFinderSvs(db)
 })
 
 // Der Embed rendert den Wizard 2x (Desktop-Sidebar + Mobile-Sheet); auf Desktop ist genau EINE
 // Instanz sichtbar. Alle Locator daher :visible + first() -> konsistent dieselbe (sichtbare) Instanz.
 const vis = (page: Page, selector: string) => page.locator(`${selector} >> visible=true`).first()
 
-test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ page }) => {
+test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async ({ page }) => {
   test.setTimeout(150_000)
   const db = admin()
   const runId = String(Date.now())
-  const email = `e2e-finder-${runId}@claimondo.de` // istInterneIdentitaet -> Guard erlaubt test<->test
+  const email = `e2e-finder-${runId}@claimondo.de` // istInterneIdentitaet -> Send-Isolation
+  bucherEmail = email // fuer afterAll-Cleanup (Full-Submit-Artefakte)
 
   // Desktop-Viewport erzwingen -> die inline GooglePlaceAutocomplete (statt Mobil-Overlay).
   await page.setViewportSize({ width: 1366, height: 900 })
@@ -126,9 +118,9 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
   await expect(pac, 'Google-Places-Suggestion erscheint').toBeVisible({ timeout: 15_000 })
   await pac.click()
 
-  // ── Step 2 (Termin): der Test-SV ist am obskuren Ort der EINZIGE Partner -> sein Slot erscheint ──
+  // ── Step 2 (Termin): der Wegwerf-SV ist am obskuren Ort der EINZIGE zustaendige Partner -> Slot ──
   const slot = vis(page, `[data-testid^="buchung-slot-${TEST_SV}-"]`)
-  await expect(slot, 'Slot des Test-SV erscheint (= er ist der zustaendige Partner am Ort)').toBeVisible({ timeout: 30_000 })
+  await expect(slot, 'Slot des Wegwerf-SV erscheint (= er ist der zustaendige Partner am Ort)').toBeVisible({ timeout: 30_000 })
   await slot.click()
 
   // ── Step 3 (Schaden): Schadenart waehlen ──
@@ -142,11 +134,11 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
   await vis(page, 'input[type="checkbox"]').check()
 
   // Dry-Run (FINDER_E2E_DRYRUN=1): alles bis zum Buchen validieren — Fixture, Google-Places,
-  // Test-SV als Partner mit Slots, Schaden, Formular — aber NICHT absenden. Kein Submit -> keine
+  // Wegwerf-SV als Partner mit Slots, Schaden, Formular — aber NICHT absenden. Kein Submit -> keine
   // Sends/kein Lead. Send-freie Validierung solange #3709 (Send-Isolation) nicht auf Prod ist.
   if (process.env.FINDER_E2E_DRYRUN) {
     await expect(vis(page, 'button:has-text("Termin reservieren")'), 'Buchen-Button bereit (Dry-Run)').toBeEnabled()
-    console.log('[golden-finder:dryrun] Ort→Test-SV-Slot→Schaden→Formular OK, Submit übersprungen ✓')
+    console.log('[golden-finder:dryrun] Ort→Wegwerf-SV-Slot→Schaden→Formular OK, Submit übersprungen ✓')
     return
   }
   await vis(page, 'button:has-text("Termin reservieren")').click()
@@ -154,14 +146,14 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
   // ── Step 5: Bestaetigung ──
   await expect(vis(page, ':text("Termin reserviert")'), 'Bestätigung "Termin reserviert"').toBeVisible({ timeout: 25_000 })
 
-  // ── Verify (service-role): gfa dem Test-SV zugeordnet (Partner-Matching) ──
+  // ── Verify (service-role): gfa dem Wegwerf-SV zugeordnet (Partner-Matching) ──
   await page.waitForTimeout(2_500) // revalidate + gfa.termin_id-Update
   const { data: gfa } = await db
     .from('gutachter_finder_anfragen')
     .select('id, zugeordneter_sv_id, matching_typ, termin_id')
     .eq('email', email)
     .maybeSingle()
-  expect(gfa?.zugeordneter_sv_id, 'gfa dem Test-SV zugeordnet').toBe(TEST_SV)
+  expect(gfa?.zugeordneter_sv_id, 'gfa dem Wegwerf-SV zugeordnet').toBe(TEST_SV)
   expect(gfa?.matching_typ, 'Partner-Matching (nicht Dead-Pin)').toBe('partner')
 
   // Send-Isolation (PR #3709): der interne @claimondo.de-Bucher darf KEINEN Dispatch-Task
@@ -172,13 +164,14 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
     .select('id')
     .eq('route_url', `/dispatch/gutachter-finder/${gfa?.id}`)
   expect(tasks?.length ?? 0, 'interne Buchung -> kein Dispatch-Task (Send-Isolation #3709)').toBe(0)
-  console.log(`[golden-finder] gfa ${gfa?.id} -> Test-SV ${TEST_SV}, Termin ${gfa?.termin_id}, 0 Team-Tasks ✓`)
+  console.log(`[golden-finder] gfa ${gfa?.id} -> Wegwerf-SV ${TEST_SV}, Termin ${gfa?.termin_id}, 0 Team-Tasks ✓`)
 })
 
-// Crash-Recovery: nur deaktivieren (falls ein abgebrochener Lauf den SV aktiv liess).
+// Crash-Recovery: alle Wegwerf-SV-Leichen (auth+profiles+sachverstaendige) restlos entfernen,
+// falls ein abgebrochener Lauf welche liegen liess.
 //   RESET_FINDER_TEST_SV=1 RUN_GOLDEN_PATH_PROD=1 npx playwright test golden-path-finder-prod -g reset
-test('reset — Test-SV deaktivieren (Crash-Recovery)', async () => {
-  test.skip(!process.env.RESET_FINDER_TEST_SV, 'set RESET_FINDER_TEST_SV=1 um nur zu deaktivieren')
-  await deaktiviereTestSv(admin())
-  console.log('[golden-finder] Test-SV deaktiviert (reset)')
+test('reset — Wegwerf-SV-Leichen entfernen (Crash-Recovery)', async () => {
+  test.skip(!process.env.RESET_FINDER_TEST_SV, 'set RESET_FINDER_TEST_SV=1 um nur aufzuraeumen')
+  await purgeStaleThrowawayFinderSvs(admin())
+  console.log('[golden-finder] Wegwerf-SV-Leichen entfernt (reset)')
 })
