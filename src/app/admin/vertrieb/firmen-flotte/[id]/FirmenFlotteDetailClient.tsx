@@ -13,6 +13,7 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
 import Zb1BatchScanner from '@/components/flotte/Zb1BatchScanner'
 import { NfcKarteSchreibenButton } from '@/components/flotte/NfcKarteSchreibenButton'
+import { NfcBeschreibenHinweis } from '@/components/flotte/NfcBeschreibenHinweis'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
 import {
@@ -341,6 +342,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
           <p className="text-body-sm text-claimondo-ondo/60">Noch keine Karten. Oben „Karten erzeugen" nutzen.</p>
         ) : (
           <>
+            <NfcBeschreibenHinweis />
             <div className="mb-2 flex items-baseline justify-between gap-2">
               <p className="text-body-sm font-medium text-claimondo-navy">2 · An Fahrzeug binden</p>
               {fahrzeuge.length === 0 && (

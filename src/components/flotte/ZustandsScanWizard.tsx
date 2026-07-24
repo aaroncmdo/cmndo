@@ -32,6 +32,8 @@ type FinalResult = { ok: true; angelegt: number } | { ok: false; error: string }
 
 type Props = {
   vehicleId: string
+  /** true = fuer dieses Fahrzeug existiert schon eine abgeschlossene Doku -> Label "Neu dokumentieren". */
+  bestehendeDoku?: boolean
   onStart: (vehicleId: string) => Promise<StartResult>
   onFoto: (
     scanId: string,
@@ -55,7 +57,7 @@ async function dateiZuDataUrl(file: File): Promise<string> {
   return `data:${contentType};base64,${base64}`
 }
 
-export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFinalize }: Props) {
+export function ZustandsScanWizard({ vehicleId, bestehendeDoku, onStart, onFoto, onAnalyse, onFinalize }: Props) {
   const router = useRouter()
   const [phase, setPhase] = useState<Phase>('idle')
   const [scanId, setScanId] = useState<string | null>(null)
@@ -163,7 +165,7 @@ export function ZustandsScanWizard({ vehicleId, onStart, onFoto, onAnalyse, onFi
   if (phase === 'idle') {
     return (
       <Button variant="ondo" size="sm" iconLeft={<CameraIcon className="h-4 w-4" />} loading={busy === 'start'} onClick={starten}>
-        Zustand dokumentieren
+        {bestehendeDoku ? 'Neu dokumentieren' : 'Zustand dokumentieren'}
       </Button>
     )
   }
