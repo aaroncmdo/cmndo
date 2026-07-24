@@ -233,6 +233,13 @@ export function FlowFeststellungStep({
               value={values[feld.feld_key]}
               onChange={(val) => setFeld(feld.feld_key, val)}
               disabled={saving}
+              // FlowLink-Review B (Aaron 24.07.): token durchreichen — der FieldRenderer
+              // gatet das Unfallhergang-Sprachdiktat (VoiceDictation) an `token`
+              // (feld_key === 'unfallhergang' && token → { kind: 'flow', token }). Ohne
+              // token war der "Unfallhergang einsprechen"-Button unsichtbar → Aaron konnte
+              // ihn nicht anklicken (es gab keinen). Die Voice-Infra existiert bereits
+              // vollstaendig (VoiceDictation + useChunkedDictation + api/flow/voice-transcribe).
+              token={token}
             />
           ))}
           {/* AAR-956 16.06. (Aaron): Polizeibericht-Upload INLINE im "Polizei & Zeugen"-
