@@ -35,8 +35,11 @@ const CASES: Array<{ rule: Rule | null | Record<string, never>; ctx: EvalContext
 ]
 
 d('dokument_regel_trifft ≡ evaluateKatalogRule', () => {
-  const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
   it('matches TS on the full operator matrix', async () => {
+    // createClient IM Test (nicht im describe-Body): laeuft nur wenn der RUN_PARITY-gegatete Test
+    // wirklich ausgefuehrt wird — sonst warf createClient(undefined!) schon zur Collection-Zeit
+    // (Suite-Load-Fehler; deshalb war die Datei vitest-baselined).
+    const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
     let mismatches = 0
     for (const c of CASES) {
       const ts = evaluateKatalogRule(c.rule as Rule, c.ctx)
