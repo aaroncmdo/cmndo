@@ -466,8 +466,16 @@ export default function FlowWizardKfz({
   // (kanonischer Pfad) -> dorthin (Kunde bucht selbst); sonst direkt zur Beauftragung
   // (Dispatcher-/Flag-off-Pfad ohne Slot-Picker: AAR-908 ordnet bei SA den Top-SV zu).
   // Kein telefonischer Wartezustand mehr.
-  const gutachterWeiterZiel: StepId =
-    !gutachterAnzeige && stepIndexById('termin') >= 0 ? 'termin' : 'sa'
+  // Gutachter da → sequenziell weiter (stepIndex+1), damit die Config-Steps zwischen gutachter
+  // und sa (ort_fahrzeug/werkstatt) NICHT uebersprungen werden. Der frueher hardcodierte Sprung
+  // auf 'sa' driftete gegen die DB-Step-Sequenz (Config-Code-Drift) → "springt ans Ende".
+  // Kein Gutachter → aktiv weiterleiten: zum Buchungs-Step, sonst 'sa' (Dispatcher-/Embed-Pfad
+  // ohne Slot-Picker, AAR-908 ordnet bei SA den Top-SV zu).
+  const gutachterWeiterZiel: StepId | null = gutachterAnzeige
+    ? null
+    : stepIndexById('termin') >= 0
+      ? 'termin'
+      : 'sa'
 
   // ─── SA unterzeichnen + Fall erstellen → <SaSignaturStep> (extrahiert, Approach C).
   //     onSigned setzt fallId + geht zum Account-Step (der Account-Step-Effect unten
@@ -879,7 +887,9 @@ export default function FlowWizardKfz({
 
                 {!umbuchen && (
                   <button
-                    onClick={() => setStepIndex(stepIndexById(gutachterWeiterZiel))}
+                    onClick={() =>
+                      setStepIndex(gutachterWeiterZiel ? stepIndexById(gutachterWeiterZiel) : stepIndex + 1)
+                    }
                     className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                   >
                     {t('common.weiter')}
