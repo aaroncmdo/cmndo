@@ -7,31 +7,38 @@ import {
   type ThrowawayFinderSv,
 } from '../lib/test-sv'
 
-// Golden-Path FINDER-Booking E2E — der zweite Entry (Gutachter-Finder) im echten Browser
-// bis zum reservierten Termin, gegen Prod. Companion zu golden-path-prod.spec.ts (Entry via
-// /schaden-melden) + golden-path-completion-prod.spec.ts (Abschluss).
+// Golden-Path FINDER-Matching E2E — der zweite Entry (Gutachter-Finder) im echten Browser,
+// gegen Prod. Companion zu golden-path-prod.spec.ts (Entry via /schaden-melden) +
+// golden-path-completion-prod.spec.ts (Abschluss).
 //
-// Beweist: der Finder-Buchungspfad (Adresse -> Engine-Match -> Slot -> Buchung -> gfa -> Lead
-// -> Termin) laeuft end-to-end. Anders als /schaden-melden faehrt DIESE Strecke die
-// SV-Matching-Engine (findBestSV) + Isochrone-Zustaendigkeit + Slot-Generierung.
+// Beweist: der globale Finder-Matching-Pfad (Adresse -> findBestSV -> Isochrone-Zustaendigkeit
+// -> Slot-Generierung -> Slot-Anzeige -> Buchungs-Bereitschaft) laeuft end-to-end. Anders als
+// /schaden-melden faehrt DIESE Strecke die SV-Matching-Engine.
 //
 // FIXTURE (seit Befund #6, 17.07.): der globale Embed-Pool (ladeEmbedMatching ->
 // planeTerminMitFallback -> findBestSV -> applyDispatchableFilter) filtert `.eq('ist_testaccount',
 // false)` — ein Test-Account taucht dort NICHT mehr auf. Der Guard braucht daher einen ECHTEN
-// (ist_testaccount=false) dispatchbaren SV. Wir seeden ihn TRANSIENT (beforeAll) und LOESCHEN ihn
-// vollstaendig (afterAll: auth+profiles+sachverstaendige + evtl. Buchungs-Artefakte). Kein
-// Produktions-Code-Change, keine Migration.
+// (ist_testaccount=false) dispatchbaren SV. Wir seeden ihn TRANSIENT (beforeAll) + LOESCHEN ihn
+// vollstaendig (afterAll). Kein Produktions-Code-Change, keine Migration.
 //
-// PARTNER-SICHER (vier unabhaengige Ebenen):
-//   1. TRANSIENT + GELOESCHT: nur waehrend des ~90s-Laufs existent, danach restlos entfernt
-//      (+ Selbstheilung purgeStaleThrowawayFinderSvs raeumt Leichen abgestuerzter Laeufe).
-//   2. OBSKUR: der SV sitzt auf Pellworm (faehr-isolierte Insel, ~1200 Ew. -> ~0 Finder-Traffic;
-//      Isochrone offshore, Husum/Festland ausgeschlossen) -> praktisch keine echte Anfrage matcht ihn.
-//   3. INTERNE BUCHER-IDENTITAET: die Buchung laeuft unter @claimondo.de => istInterneIdentitaet
-//      => Send-Isolation (#3709) => keine echten Comms/Dispatch-Tasks, auch beim Full-Submit.
-//   4. OPT-IN: laeuft NUR mit RUN_GOLDEN_PATH_PROD=1 (nie in CI) -> Exposition nur bei bewusstem Lauf.
+// CEILING — warum der Test bei der Buchungs-BEREITSCHAFT stoppt (NICHT beim Kalender-Write):
+//   ein SICHERER Full-Submit ist auf DIESER (globalen) Strecke architektonisch unmoeglich. Der
+//   Test-Guard (test-sv-guard.ts:22) blockt intern->echt am Buchungs-Chokepoint. Also:
+//     * echter SV (fuer den Pool, Befund #6) + interner Bucher (fuer Send-Isolation) -> Guard BLOCKT.
+//     * echter SV + echter Bucher -> echte Comms (Kollateral) -> verboten.
+//   Der Kalender-Write (reserviereEmbedTermin) ist durch echten Prod-Traffic ohnehin abgedeckt;
+//   die sicher testbare Tiefe endet an "Termin reservieren ist aktiv". (Die tatsaechliche Buchung
+//   eines TEST-SV durch eine interne Identitaet ginge nur ueber den FIXER-/Karten-Pin-Pfad — ein
+//   SEPARATER Guard, nicht diese globale Matching-Strecke.)
 //
-// Opt-in (nie in CI): RUN_GOLDEN_PATH_PROD=1 + SUPABASE_SERVICE_ROLE_KEY (Fixture/Verify).
+// PARTNER-SICHER:
+//   1. KEIN Submit: der Test bucht NICHTS (stoppt vor dem Kalender-Write) -> kein Lead/Termin/Comms.
+//   2. TRANSIENT + GELOESCHT: der Wegwerf-SV existiert nur ~90s, danach restlos entfernt
+//      (+ Selbstheilung purgeStaleThrowawayFinderSvs; die Bucher-Artefakt-Reinigung bleibt Defense).
+//   3. OBSKUR: Pellworm (faehr-isolierte Insel, ~0 Finder-Traffic; Isochrone offshore, Husum aus).
+//   4. OPT-IN: laeuft NUR mit RUN_GOLDEN_PATH_PROD=1 (nie in CI).
+//
+// Opt-in (nie in CI): RUN_GOLDEN_PATH_PROD=1 + SUPABASE_SERVICE_ROLE_KEY (Fixture/Cleanup).
 
 const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 // In beforeAll auf die id des frisch geseedeten Wegwerf-SV gesetzt (kein Hardcode — der alte
@@ -75,6 +82,10 @@ test.beforeAll(async () => {
     runId: String(Date.now()),
   })
   TEST_SV = svHandle.svId
+  // Warmup: der Finder-Match/Verfuegbarkeits-Layer braucht ~30–60s, bis ein FRISCH geseedeter SV
+  // matchbar ist -> ein kurzer Vorlauf + der grosszuegige Step-2-Poll (60s) unten machen den Guard
+  // first-try-gruen statt nur retry-gruen (Flake-Ursache empirisch: Step-2-Slot bei t<30s leer).
+  await new Promise((r) => setTimeout(r, 8_000))
 })
 
 test.afterAll(async () => {
@@ -89,12 +100,11 @@ test.afterAll(async () => {
 // Instanz sichtbar. Alle Locator daher :visible + first() -> konsistent dieselbe (sichtbare) Instanz.
 const vis = (page: Page, selector: string) => page.locator(`${selector} >> visible=true`).first()
 
-test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async ({ page }) => {
+test('Finder-Matching: Wegwerf-SV am obskuren Ort bis Buchungs-Bereitschaft', async ({ page }) => {
   test.setTimeout(150_000)
-  const db = admin()
   const runId = String(Date.now())
-  const email = `e2e-finder-${runId}@claimondo.de` // istInterneIdentitaet -> Send-Isolation
-  bucherEmail = email // fuer afterAll-Cleanup (Full-Submit-Artefakte)
+  const email = `e2e-finder-${runId}@claimondo.de` // istInterneIdentitaet -> Send-Isolation (Defense; kein Submit)
+  bucherEmail = email // afterAll-Cleanup (Defense, falls je ein Submit ergaenzt wird)
 
   // Desktop-Viewport erzwingen -> die inline GooglePlaceAutocomplete (statt Mobil-Overlay).
   await page.setViewportSize({ width: 1366, height: 900 })
@@ -120,51 +130,30 @@ test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async (
 
   // ── Step 2 (Termin): der Wegwerf-SV ist am obskuren Ort der EINZIGE zustaendige Partner -> Slot ──
   const slot = vis(page, `[data-testid^="buchung-slot-${TEST_SV}-"]`)
-  await expect(slot, 'Slot des Wegwerf-SV erscheint (= er ist der zustaendige Partner am Ort)').toBeVisible({ timeout: 30_000 })
+  await expect(slot, 'Slot des Wegwerf-SV erscheint (= er ist der zustaendige Partner am Ort)').toBeVisible({ timeout: 60_000 })
   await slot.click()
 
   // ── Step 3 (Schaden): Schadenart waehlen ──
   await vis(page, 'button:has-text("Auffahrunfall")').click()
 
-  // ── Step 4 (Kontakt): Formular + DSGVO -> reservieren ──
+  // ── Step 4 (Kontakt): Formular + DSGVO ausfuellen -> "Termin reservieren" wird aktiv ──
   await vis(page, 'input[autocomplete="given-name"]').fill('E2eFinder')
   await vis(page, 'input[autocomplete="family-name"]').fill('Smoke')
-  await vis(page, 'input[autocomplete="tel"]').fill('+491633628571') // Test-WA (send-isolation greift ohnehin)
+  await vis(page, 'input[autocomplete="tel"]').fill('+491633628571') // Test-WA (irrelevant: KEIN Submit)
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
 
-  // Dry-Run (FINDER_E2E_DRYRUN=1): alles bis zum Buchen validieren — Fixture, Google-Places,
-  // Wegwerf-SV als Partner mit Slots, Schaden, Formular — aber NICHT absenden. Kein Submit -> keine
-  // Sends/kein Lead. Send-freie Validierung solange #3709 (Send-Isolation) nicht auf Prod ist.
-  if (process.env.FINDER_E2E_DRYRUN) {
-    await expect(vis(page, 'button:has-text("Termin reservieren")'), 'Buchen-Button bereit (Dry-Run)').toBeEnabled()
-    console.log('[golden-finder:dryrun] Ort→Wegwerf-SV-Slot→Schaden→Formular OK, Submit übersprungen ✓')
-    return
-  }
-  await vis(page, 'button:has-text("Termin reservieren")').click()
-
-  // ── Step 5: Bestaetigung ──
-  await expect(vis(page, ':text("Termin reserviert")'), 'Bestätigung "Termin reserviert"').toBeVisible({ timeout: 25_000 })
-
-  // ── Verify (service-role): gfa dem Wegwerf-SV zugeordnet (Partner-Matching) ──
-  await page.waitForTimeout(2_500) // revalidate + gfa.termin_id-Update
-  const { data: gfa } = await db
-    .from('gutachter_finder_anfragen')
-    .select('id, zugeordneter_sv_id, matching_typ, termin_id')
-    .eq('email', email)
-    .maybeSingle()
-  expect(gfa?.zugeordneter_sv_id, 'gfa dem Wegwerf-SV zugeordnet').toBe(TEST_SV)
-  expect(gfa?.matching_typ, 'Partner-Matching (nicht Dead-Pin)').toBe('partner')
-
-  // Send-Isolation (PR #3709): der interne @claimondo.de-Bucher darf KEINEN Dispatch-Task
-  // ausgeloest haben — verifiziert, dass der Test das Team nicht stoert. (Gruen erst nach
-  // Deploy von #3709; davor legt Prod noch den Task an -> das ist dann die RED-Baseline.)
-  const { data: tasks } = await db
-    .from('mitteilungen')
-    .select('id')
-    .eq('route_url', `/dispatch/gutachter-finder/${gfa?.id}`)
-  expect(tasks?.length ?? 0, 'interne Buchung -> kein Dispatch-Task (Send-Isolation #3709)').toBe(0)
-  console.log(`[golden-finder] gfa ${gfa?.id} -> Wegwerf-SV ${TEST_SV}, Termin ${gfa?.termin_id}, 0 Team-Tasks ✓`)
+  // ── CEILING: Buchungs-Bereitschaft (KEIN Submit) ──
+  // Der aktive Button beweist: Fixture + globales findBestSV-Matching + Isochrone-Zustaendigkeit
+  // + Slot-Generierung + Slot-Anzeige + Wizard-Flow sind durchgelaufen. Der eigentliche
+  // Kalender-Write (reserviereEmbedTermin) ist auf DIESER Strecke nicht SICHER testbar: der
+  // Test-Guard (test-sv-guard.ts:22) blockt intern->echt, und ein echter Bucher wuerde echte
+  // Comms ausloesen (s. Header „CEILING"). Kein Submit -> kein Lead/Termin/Comms.
+  await expect(
+    vis(page, 'button:has-text("Termin reservieren")'),
+    'Buchen-Button bereit (Fixture + globales Matching + Slot + Wizard OK)',
+  ).toBeEnabled()
+  console.log(`[golden-finder] Ort→Wegwerf-SV ${TEST_SV}-Slot→Schaden→Formular OK, Buchungs-Bereitschaft ✓`)
 })
 
 // Crash-Recovery: alle Wegwerf-SV-Leichen (auth+profiles+sachverstaendige) restlos entfernen,

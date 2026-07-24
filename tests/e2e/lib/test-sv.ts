@@ -53,6 +53,8 @@ export async function resolveTestSvId(db: SupabaseClient): Promise<string> {
 /** Stabiler Email-Prefix + Standort-Marker -> Selbstheilung findet Leichen abgestuerzter Laeufe. */
 export const FINDER_SV_EMAIL_PREFIX = 'claimondo-e2e-finder-sv-'
 export const FINDER_SV_STANDORT_MARKER = 'Pellworm (E2E-Wegwerf-Finder-SV)'
+/** Bucher-Identitaet des Finder-Guards (@claimondo.de -> istInterneIdentitaet -> Send-Isolation). */
+export const FINDER_BUCHER_EMAIL_PREFIX = 'e2e-finder-'
 
 export type ThrowawayFinderSv = { svId: string; uid: string; email: string }
 
@@ -134,21 +136,25 @@ export async function purgeThrowawayFinderSv(
   handle: { svId?: string | null; uid?: string | null; bucherEmail?: string | null },
 ): Promise<void> {
   try {
+    // 1. Termine der reservierten Buchung zuerst (assignee = Wegwerf-SV). Loest zugleich den
+    //    NO-ACTION-FK gutachter_termine.lead_id -> leads (Termin muss VOR dem Lead weg).
+    if (handle.svId) await db.from('gutachter_termine').delete().eq('assignee_id', handle.svId)
+    // 2. Bucher-Artefakte eines FULL-Submits. Die NO-ACTION-Kinder von leads
+    //    (gfa.konvertiert_zu_lead_id, gutachter_termine.lead_id, tasks.lead_id) MUESSEN vor dem
+    //    Lead weg; danach raeumt der Lead-Delete via CASCADE flow_links/timeline/lead_historie/
+    //    anruf_log/dokument_upload_anfragen/personenschaden_personen selbst ab.
     if (handle.bucherEmail) {
-      const { data: gfas } = await db
-        .from('gutachter_finder_anfragen')
-        .select('id, termin_id')
-        .eq('email', handle.bucherEmail)
-      for (const g of gfas ?? []) {
-        if (g.termin_id) await db.from('gutachter_termine').delete().eq('id', g.termin_id)
-      }
+      const { data: leads } = await db.from('leads').select('id').eq('email', handle.bucherEmail)
+      const leadIds = (leads ?? []).map((l) => l.id as string)
       await db.from('gutachter_finder_anfragen').delete().eq('email', handle.bucherEmail)
+      for (const id of leadIds) {
+        await db.from('gutachter_termine').delete().eq('lead_id', id) // Legacy-Bezug (falls nicht assignee-erfasst)
+        await db.from('tasks').delete().eq('lead_id', id) // Rueckruf-Task (send-isolation -> i.d.R. keiner)
+      }
       await db.from('leads').delete().eq('email', handle.bucherEmail)
     }
-    if (handle.svId) {
-      await db.from('gutachter_termine').delete().eq('assignee_id', handle.svId)
-      await db.from('sachverstaendige').delete().eq('id', handle.svId)
-    }
+    // 3. SV-Kette (Termine sind ab Schritt 1 weg -> sachverstaendige-Delete nicht mehr blockiert).
+    if (handle.svId) await db.from('sachverstaendige').delete().eq('id', handle.svId)
     if (handle.uid) {
       await db.from('profiles').delete().eq('id', handle.uid)
       await db.auth.admin.deleteUser(handle.uid).catch(() => {})
@@ -164,6 +170,21 @@ export async function purgeThrowawayFinderSv(
  * Rest verschwindet. Vor dem Seeden aufrufen. Best-effort.
  */
 export async function purgeStaleThrowawayFinderSvs(db: SupabaseClient): Promise<void> {
+  // a) Bucher-Artefakte (gfa/Lead/Termine/tasks) abgestuerzter FULL-Submits per Email-Prefix.
+  const staleEmails = new Set<string>()
+  const { data: staleLeads } = await db
+    .from('leads')
+    .select('email')
+    .like('email', `${FINDER_BUCHER_EMAIL_PREFIX}%@claimondo.de`)
+  for (const l of staleLeads ?? []) if (l.email) staleEmails.add(l.email as string)
+  const { data: staleGfas } = await db
+    .from('gutachter_finder_anfragen')
+    .select('email')
+    .like('email', `${FINDER_BUCHER_EMAIL_PREFIX}%@claimondo.de`)
+  for (const g of staleGfas ?? []) if (g.email) staleEmails.add(g.email as string)
+  for (const email of staleEmails) await purgeThrowawayFinderSv(db, { bucherEmail: email })
+
+  // b) Wegwerf-SV-Ketten (auth+profiles+sachverstaendige) — zwei Achsen: Email-Prefix + Standort-Marker.
   const handles = new Map<string, { svId?: string; uid?: string }>()
   const { data: profs } = await db
     .from('profiles')
