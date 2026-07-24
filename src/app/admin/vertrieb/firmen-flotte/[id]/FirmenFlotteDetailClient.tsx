@@ -22,7 +22,7 @@ import {
   scanZb1KarteFuerFlotte,
   legeZb1FahrzeugeFuerFlotte,
 } from '../../_actions/firmen-flotte-fahrzeuge'
-import { bindeKarteAnFahrzeug, finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
+import { finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
@@ -60,8 +60,6 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [fzTsn, setFzTsn] = useState('')
   const [addBusy, setAddBusy] = useState(false)
   const [addFehler, setAddFehler] = useState<string | null>(null)
-
-  const [bindFehler, setBindFehler] = useState<string | null>(null)
 
   const [mintAnzahl, setMintAnzahl] = useState('10')
   const [mintCharge, setMintCharge] = useState('')
@@ -118,14 +116,6 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   async function fahrzeugEntfernen(flottenFahrzeugId: string) {
     const res = await entferneFahrzeugAusFlotte(firma.id, flottenFahrzeugId)
     if (res.ok) router.refresh()
-  }
-
-  async function karteBinden(token: string, fahrzeugId: string) {
-    if (!fahrzeugId) return
-    setBindFehler(null)
-    const res = await bindeKarteAnFahrzeug(firma.id, token, fahrzeugId)
-    if (!res.ok) return setBindFehler(res.error ?? 'Binden fehlgeschlagen.')
-    router.refresh()
   }
 
   async function karteBatchMinten() {
@@ -269,7 +259,7 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
       </SectionCard>
 
       <SectionCard title={`Schaden-Karten (${karten.length})`}>
-        {/* Flow-Erklaerung — NFC-Schreiben ist OPTIONAL (nur Android); eine gebundene Karte mit QR reicht. */}
+        {/* Flow-Erklaerung — Admin provisioniert (erzeugen + optional NFC beschreiben); das Binden macht der FM selbst. */}
         <div className="mb-4 rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-3">
           <p className="text-body-sm font-medium text-claimondo-navy">So funktioniert eine Schaden-Karte</p>
           <ol className="mt-1 list-decimal space-y-0.5 pl-4 text-caption text-claimondo-ondo/80">
@@ -277,21 +267,25 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
               <strong className="text-claimondo-navy">Erzeugen</strong> — Karten anlegen und als QR-Codes drucken.
             </li>
             <li>
-              <strong className="text-claimondo-navy">An Fahrzeug binden</strong> — in der Tabelle unten je Karte ein
-              Fahrzeug wählen.
+              <strong className="text-claimondo-navy">NFC beschreiben</strong> (optional) — am Android-Handy je Karte
+              den Chip mit ihrem eindeutigen Code beschreiben.
             </li>
-            <li>Fertig — der QR-Code macht die Karte sofort einsatzbereit.</li>
+            <li>
+              <strong className="text-claimondo-navy">An den Flottenmanager übergeben</strong> — er bindet jede Karte
+              selbst an ein Fahrzeug (er weiß, welche Karte zu welchem Fahrzeug gehört).
+            </li>
           </ol>
           <p className="mt-2 text-caption text-claimondo-ondo/60">
-            Das <strong className="text-claimondo-navy">NFC-Antippen</strong> ist optional und nur am Android-Handy
-            möglich. Eine gebundene Karte mit gedrucktem QR-Code funktioniert auch ohne.
+            Der QR-Code wird bei der Erzeugung fest vergeben und ändert sich nie — auch das spätere Binden im
+            Flotten-Portal ist ein reiner DB-Vorgang und fasst die gedruckte/beschriebene Karte nicht mehr an.
           </p>
         </div>
 
         <div className="mb-4 space-y-2 rounded-ios-lg border border-claimondo-border p-3">
           <p className="text-body-sm font-medium text-claimondo-navy">1 · Karten erzeugen</p>
           <p className="text-caption text-claimondo-ondo/70">
-            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken, danach ans Fahrzeug binden.
+            Erzeugt Blanko-Karten für diese Firma — als QR-Codes drucken. Das Binden ans Fahrzeug macht der
+            Flottenmanager selbst.
           </p>
           <div className="flex flex-wrap items-end gap-2">
             <label className="block">
@@ -343,46 +337,20 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
         ) : (
           <>
             <NfcBeschreibenHinweis />
-            <div className="mb-2 flex items-baseline justify-between gap-2">
-              <p className="text-body-sm font-medium text-claimondo-navy">2 · An Fahrzeug binden</p>
-              {fahrzeuge.length === 0 && (
-                <span className="text-caption text-warning-strong">Zum Binden erst oben ein Fahrzeug anlegen.</span>
-              )}
-            </div>
             <DataTableContainer>
               <Table>
                 <Thead>
                   <Tr>
                     <Th className="text-left">Token</Th>
                     <Th className="text-left">Status</Th>
-                    <Th className="text-left">Fahrzeug</Th>
-                    <Th className="text-left">NFC (optional)</Th>
+                    <Th className="text-left">NFC beschreiben</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {karten.map((k) => (
                     <Tr key={k.id}>
                       <Td className="font-mono text-body-xs text-claimondo-navy">{k.token}</Td>
-                      <Td>{k.status}</Td>
-                      <Td>
-                        {k.fahrzeug_id ? (
-                          k.kennzeichen ?? 'gebunden'
-                        ) : (
-                          <select
-                            defaultValue=""
-                            onChange={(e) => karteBinden(k.token, e.target.value)}
-                            disabled={fahrzeuge.length === 0}
-                            className={`${FELD_CLS} text-body-xs py-1`}
-                          >
-                            <option value="">— an Fahrzeug binden —</option>
-                            {fahrzeuge.map((f) => (
-                              <option key={f.vehicle_id} value={f.vehicle_id}>
-                                {f.kennzeichen ?? f.vehicle_id}
-                              </option>
-                            ))}
-                          </select>
-                        )}
-                      </Td>
+                      <Td>{k.fahrzeug_id ? `${k.status} · ${k.kennzeichen ?? 'Fahrzeug'}` : k.status}</Td>
                       <Td>
                         <NfcKarteSchreibenButton
                           token={k.token}
@@ -397,7 +365,6 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
             </DataTableContainer>
           </>
         )}
-        {bindFehler && <p className="text-caption text-danger-strong mt-2">{bindFehler}</p>}
       </SectionCard>
 
       <SectionCard title={`Schäden (${schaeden.length})`}>
