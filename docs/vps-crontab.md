@@ -284,3 +284,26 @@ filtert `kundenbetreuer_id IS NULL`); die Erst-Aktivierung läuft über den nat�
 hand-ausgelösten Batch. Auth: inline `Bearer CRON_SECRET` (kompatibel mit `cron-call.sh`, fail-open nur falls
 `CRON_SECRET` unset — auf prod gesetzt, per 60+ Crons bewiesen; Härtung auf `assertCronAuth` = optionaler Follow-up).
 
+## Stand 2026-07-24 — `zustandsaufnahme-faellig` NACHGETRAGEN (Live-VPS)
+
+> 3-Monats-Zustandsaufnahme-Reminder-Cron (Flotte, PR #4728, auf prod deployt). Per key-basiertem
+> SSH (`~/.ssh/claimondo_vps`, Aaron-autorisiert, root) auf den Live-VPS angewendet + verifiziert.
+> Backup: `/root/crontab-backup-20260724-135440-pre-zustandsaufnahme.txt` (Rollback: `crontab <backup>`).
+
+**Umgesetzt:** nachgetragen —
+```cron
+0 8 * * 1 /usr/local/bin/cron-call.sh /api/cron/zustandsaufnahme-faellig  # 3-Monats-Zustandsaufnahme-Reminder #4728 (Mo 08:00 UTC, dedup 30d)
+```
+Crontab **112 -> 113 Zeilen**. Der Cron findet Flotten-Fahrzeuge, deren letzter *abgeschlossener*
+`vehicle_scans` > 3 Monate zurueckliegt, und erinnert alle aktiven Flottenmanager (in-App-Mitteilung +
+best-effort WhatsApp, fail-soft). Dedup ohne DDL: max. 1 Reminder je Fahrzeug / 30 Tage (Anker =
+`mitteilungen`-Zeile mit `kontext_typ='fahrzeug'`). Nur bereits-gescannte Fahrzeuge (>= 1 abgeschl. Scan).
+
+**Verifiziert (E2E, sicher):** Test-Trigger via `cron-call.sh /api/cron/zustandsaufnahme-faellig` -> **exit 0**
+(HTTP 2xx: Wrapper -> 127.0.0.1:3000 -> Bearer `CRON_SECRET` -> deployte Route). **Sicher weil real-faellige = 0**
+(MCP-verifiziert unmittelbar vor dem Trigger): der Endpoint erzeugte **0** Mitteilungen (Live-Count
+`titel='Zustandsaufnahme fällig'` = 0, kein realer FM benachrichtigt). Feuert ab jetzt jeden **Montag
+08:00 UTC** (= 10:00 MESZ / 09:00 MEZ). Der separate Regel-4-Prod-Smoke (Throwaway-faelliges-Fahrzeug +
+FM ohne `whatsapp_nummer` + Dedup-Assert + 0-Leftover-Cleanup) lief gruen (10/10) — Marker
+`coordination-zustandsaufnahme-3monats-cron`.
+
