@@ -11,6 +11,7 @@
 
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
+import ReparaturKostenCard from '@/components/kunde/ReparaturKostenCard'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
@@ -72,8 +73,16 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
 
       {/* ── Geld ─────────────────────────────────────────────────────────────────────────────── */}
       {/* Audit-Fund b2: bei der Reparatur-Route (Kasko/Selbstzahler) gibt es NIE ein Gutachten —
-          die Säule zeigte dort „sobald das Gutachten vorliegt…" (falsche Botschaft). Die Geld-Story
-          der Reparatur-Route erzählen KostenvoranschlagCard/WerkstattCard. */}
+          die Säule zeigte dort „sobald das Gutachten vorliegt…" (falsche Botschaft). R4: die
+          Reparatur-Route bekommt stattdessen das Kosten-Framing (was zahlt der Kunde selbst/Kasko). */}
+      {vm.flags.istReparaturRoute && (
+        <ReparaturKostenCard
+          abrechnungsweg={flags.abrechnungsweg}
+          kvaNetto={geld.kvaNetto}
+          kvaBrutto={geld.kvaBrutto}
+          schlussrechnungUrl={werkstatt.schlussrechnungUrl}
+        />
+      )}
       {!vm.flags.istReparaturRoute && (
       <SaeuleMeinGeld
         fallId={vm.fallId}
