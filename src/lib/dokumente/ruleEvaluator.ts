@@ -34,6 +34,17 @@ export type EvalContext = Record<string, unknown>
  * Null/undefined → true (keine Einschränkung).
  * Unbekanntes Feld → undefined → bei eq/in stets false, bei falsy true.
  */
+/**
+ * "Leere" Regel: null/undefined ODER ein leeres Objekt {} (so aus JSONB geliefert) = keine
+ * Bedingung. Zentrale Shape-Definition -> beide Seiten konsistent: evaluateKatalogRule wertet
+ * sie als "keine Einschraenkung" (true; z.B. freigeschaltet_wenn={} = immer sichtbar, AAR-542);
+ * getPflichtSlotsFuerFall wertet sie als "nicht Pflicht" (eine Doku ohne EXPLIZITE Pflicht-Regel
+ * darf nie unbedingt-Pflicht werden -- die {}-Footgun-Wurzel, #4727-Nachzug).
+ */
+export function istLeereRegel(rule: Rule | null | undefined): boolean {
+  return rule == null || (typeof rule === 'object' && !('op' in (rule as Record<string, unknown>)))
+}
+
 export function evaluateKatalogRule(
   rule: Rule | null | undefined,
   context: EvalContext,
@@ -41,9 +52,7 @@ export function evaluateKatalogRule(
   if (rule == null) return true
   // AAR-542: Leeres Objekt aus JSONB = „immer wahr" (wird so aus dem
   // Katalog-Seed geliefert, z. B. sv_sa_vorlage).
-  if (typeof rule === 'object' && !('op' in (rule as Record<string, unknown>))) {
-    return true
-  }
+  if (istLeereRegel(rule)) return true
 
   switch (rule.op) {
     case 'eq':

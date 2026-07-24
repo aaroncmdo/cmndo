@@ -186,6 +186,15 @@ describe('katalog', () => {
       const pflicht = await getPflichtSlotsFuerFall(mock, ctx)
       expect(pflicht).toEqual([])
     })
+
+    it('pflicht_wenn = {} (leeres Objekt) → NICHT Pflicht (Robustheit, {}-Footgun #4727-Nachzug)', async () => {
+      // Spiegelt echte Katalog-Zeilen: pflicht_wenn={} wertet ruleEvaluator zwar als
+      // "immer wahr", darf aber NIE unbedingt-Pflicht bedeuten — nur eine EXPLIZITE Regel.
+      const slot = { ...SLOT_SCHADENSFOTOS, slot_id: 'dummy_leerpflicht', pflicht_wenn: {} as unknown as DokumentKatalogRow['pflicht_wenn'] }
+      const mock = buildMockSupabase([slot])
+      const pflicht = await getPflichtSlotsFuerFall(mock, {})
+      expect(pflicht).toEqual([])
+    })
   })
 
   describe('getPflichtSlotsFuerLeadFall', () => {
