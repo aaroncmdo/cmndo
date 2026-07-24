@@ -26,6 +26,8 @@ import {
   Td,
 } from '@/components/shared/DataTable'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+// FlowLink-Review C: fiktiv-Szenario-Chip in der Dispatch/KB-Liste.
+import { FiktivAbrechnungBadge } from '@/components/shared/FiktivAbrechnungBadge'
 import { MAIN_PHASE_LABEL, toClaimMainPhase } from '@/lib/claims/lifecycle'
 
 export const dynamic = 'force-dynamic'
@@ -102,6 +104,23 @@ export default async function FaelleListPage() {
   const { data: rows, error } = await query
   const listing = (rows ?? []) as ListingRow[]
 
+  // FlowLink-Review C: fiktiv-Szenario sichtbar in der Liste. v_claim_listing fuehrt
+  // reparaturwunsch nicht → separat aus claims nachladen (nur die gelisteten claim_ids,
+  // RLS-gescoped wie die Liste). Map claim_id → reparaturwunsch; das Badge self-guardet
+  // (rendert null wenn !== 'fiktiv'), daher kein Set-Lookup im Render noetig.
+  const reparaturwunschById = new Map<string, string | null>()
+  const claimIds = listing.map((r) => r.claim_id).filter(Boolean)
+  if (claimIds.length > 0) {
+    const { data: repRows } = await supabase
+      .from('claims')
+      .select('id, reparaturwunsch')
+      .in('id', claimIds)
+    for (const row of repRows ?? []) {
+      const rec = row as { id: string; reparaturwunsch: string | null }
+      reparaturwunschById.set(rec.id, rec.reparaturwunsch)
+    }
+  }
+
   return (
     <div className="p-6">
       <div className="mb-6 flex items-center justify-between">
@@ -149,7 +168,10 @@ export default async function FaelleListPage() {
                     <Td>{kundenName(r)}</Td>
                     <Td>{r.kennzeichen ?? '—'}</Td>
                     <Td>
-                      {r.status ? <FallStatusBadge status={r.status} /> : '—'}
+                      <div className="flex items-center gap-1.5">
+                        {r.status ? <FallStatusBadge status={r.status} /> : '—'}
+                        <FiktivAbrechnungBadge reparaturwunsch={reparaturwunschById.get(r.claim_id)} size="xs" />
+                      </div>
                     </Td>
                     <Td className="text-xs">{r.main_phase ? MAIN_PHASE_LABEL[toClaimMainPhase(r.main_phase)] : '—'}</Td>
                     <Td>{formatDate(r.schadentag)}</Td>
