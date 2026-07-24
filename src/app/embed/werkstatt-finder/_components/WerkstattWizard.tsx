@@ -15,6 +15,7 @@ import { GlassSurface } from './GlassSurface'
 import { StandortStep } from './StandortStep'
 import { FahrzeugStep } from './FahrzeugStep'
 import { SchadenStep } from './SchadenStep'
+import { AbrechnungStep } from './AbrechnungStep'
 import { erstelleWerkstattFinderLead } from '../actions'
 import {
   WIZARD_INITIAL,
@@ -24,6 +25,7 @@ import {
   kannWeiter,
   wizardStateZuSuche,
   fahrzeugtypZuEuKlasse,
+  abrechnungZuLeadFelder,
 } from './wizard-logic'
 
 export type WerkstattWizardProps = {
@@ -104,6 +106,9 @@ export function WerkstattWizard({
       return
     }
     startTransition(async () => {
+      // F1: Abrechnungswahl -> schuldfrage='eigenverantwortung' + eigene_versicherung (beide zusammen,
+      // sonst still-disqualifiziert). Der /flow matcht damit direkt kasko/selbstzahler statt Quali.
+      const abr = state.abrechnung ? abrechnungZuLeadFelder(state.abrechnung) : null
       const res = await erstelleWerkstattFinderLead({
         vorname: vorname || null,
         nachname: nachname || null,
@@ -121,6 +126,9 @@ export function WerkstattWizard({
         gewerbe: state.gewerbe,
         modell: state.modell.trim() || null,
         beschreibung: beschreibung.trim() || null,
+        // F1: Abrechnungsweg (Kasko/Selbstzahler) -> Lead-Szenario-Weiche
+        schuldfrage: abr?.schuldfrage ?? null,
+        eigeneVersicherung: abr?.eigeneVersicherung ?? null,
         flowToken: flowToken ?? null,
         promoCode: promoCode ?? null,
       })
@@ -169,6 +177,9 @@ export function WerkstattWizard({
             />
           )}
         </>
+      )}
+      {step === 'abrechnung' && (
+        <AbrechnungStep abrechnung={state.abrechnung} onChange={(w) => patch({ abrechnung: w })} />
       )}
       {step === 'kontakt' && (
         <div className="flex flex-col gap-3">
