@@ -23,6 +23,7 @@ import {
   changeWerkstattPasswort,
   setMeineFaehigkeiten,
   setMeineMarken,
+  setMeineMarkenoffen,
   setMeineFahrzeugGruppen,
 } from '@/lib/actions/werkstatt-settings'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
@@ -53,6 +54,7 @@ export type WerkstattSettingsProps = {
   bank_kontoinhaber: string | null
   faehigkeiten?: string[] | null
   marken?: string[] | null
+  ist_freie_werkstatt?: boolean | null
   fahrzeug_gruppen?: string[] | null
 }
 
@@ -77,7 +79,7 @@ export function WerkstattSettings(props: WerkstattSettingsProps) {
 
       <ProfilCard {...props} />
       <LeistungenCard faehigkeiten={props.faehigkeiten ?? null} />
-      <MarkenCard marken={props.marken ?? null} />
+      <MarkenCard marken={props.marken ?? null} istFreieWerkstatt={props.ist_freie_werkstatt ?? null} />
       <FahrzeugGruppenCard fahrzeugGruppen={props.fahrzeug_gruppen ?? null} />
       <BankCard {...props} />
       <PasswortCard />
@@ -485,11 +487,37 @@ function LeistungenCard({ faehigkeiten }: { faehigkeiten: string[] | null }) {
 
 // ── 5. Meine Marken ───────────────────────────────────────────────────────────
 
-function MarkenCard({ marken }: { marken: string[] | null }) {
+function MarkenCard({
+  marken,
+  istFreieWerkstatt,
+}: {
+  marken: string[] | null
+  /** D2: ist_freie_werkstatt-Override (null = nie gepflegt -> Matching leitet aus Marken ab). */
+  istFreieWerkstatt: boolean | null
+}) {
   const [sel, setSel] = useState<string[]>(marken ?? [])
   const [input, setInput] = useState('')
   const [state, setState] = useState<SaveState>({ status: 'idle' })
   const [isPending, startTransition] = useTransition()
+  const [markenoffen, setMarkenoffen] = useState<boolean>(istFreieWerkstatt === true)
+  const [markenoffenBusy, setMarkenoffenBusy] = useState(false)
+  const [markenoffenFehler, setMarkenoffenFehler] = useState<string | null>(null)
+
+  async function toggleMarkenoffen() {
+    const next = !markenoffen
+    setMarkenoffenFehler(null)
+    setMarkenoffenBusy(true)
+    try {
+      const res = await setMeineMarkenoffen(next)
+      if (!res.ok) {
+        setMarkenoffenFehler(res.error ?? 'Fehler beim Speichern')
+        return
+      }
+      setMarkenoffen(next)
+    } finally {
+      setMarkenoffenBusy(false)
+    }
+  }
 
   const hat = (m: string) => sel.some((x) => x.toLowerCase() === m.toLowerCase())
   function toggle(m: string) {
@@ -556,6 +584,32 @@ function MarkenCard({ marken }: { marken: string[] | null }) {
           </Button>
         </div>
         <p className="text-xs text-claimondo-ondo">Nichts gewählt = markenoffen (alle Marken).</p>
+
+        {/* D2: markenoffen-Override — speichert sofort (eigene Action, unabhaengig vom Marken-Save) */}
+        <label className="flex items-start gap-3 text-sm text-claimondo-navy">
+          <input
+            type="checkbox"
+            checked={markenoffen}
+            onChange={toggleMarkenoffen}
+            disabled={markenoffenBusy}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-claimondo-border"
+          />
+          <span>
+            Wir nehmen alle Marken an (markenoffen)
+            <span className="block text-xs text-claimondo-shield/70">
+              Auch mit gepflegten Marken können Sie markenoffen bleiben — reine Spezialisten
+              schalten das aus. Der Vertragswerkstatt-Rang für gepflegte Marken gilt erst nach
+              Verifizierung durch Claimondo.
+            </span>
+            {istFreieWerkstatt == null && sel.length === 0 && (
+              <span className="block text-xs text-claimondo-ondo">
+                markenoffen (abgeleitet — keine Marken gepflegt)
+              </span>
+            )}
+          </span>
+        </label>
+        {markenoffenFehler && <p className="text-xs text-danger-strong">{markenoffenFehler}</p>}
+
         <div className="flex items-center gap-2 pt-1">
           <Button variant="navy" size="sm" loading={isPending} onClick={handleSave} type="button">
             Speichern
