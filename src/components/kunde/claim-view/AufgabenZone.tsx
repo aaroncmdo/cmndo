@@ -19,6 +19,16 @@ export function AufgabenZone({ vm }: { vm: KundeClaimViewModel }) {
   const aufgaben = deriveKundeAufgaben(vm)
   if (aufgaben.length === 0) return null
 
+  // sa_vollmacht: SA/Vollmacht wird nur im /flow/[token]-Flow (FokusSignaturClient) signiert — der
+  // Anchor #zone-status war eine Sackgasse (StatusZone rendert kein Signier-UI). Der Resolver
+  // /kunde/faelle/[id]/unterschrift holt den FlowLink und leitet zum Nachsignieren.
+  const hrefFor = (a: KundeAufgabe): string =>
+    a.id === 'sa_vollmacht'
+      ? `/kunde/faelle/${vm.claimId}/unterschrift`
+      : a.zone
+        ? `#zone-${a.zone}`
+        : AUFGABE_ANCHOR[a.id]
+
   return (
     <Card p={4} className="space-y-2">
       <h2 className="text-body-sm font-semibold text-claimondo-navy">Deine Aufgaben</h2>
@@ -26,7 +36,7 @@ export function AufgabenZone({ vm }: { vm: KundeClaimViewModel }) {
         {aufgaben.map((a) => (
           <li key={a.id}>
             <a
-              href={a.zone ? `#zone-${a.zone}` : AUFGABE_ANCHOR[a.id]}
+              href={hrefFor(a)}
               className="flex items-center justify-between gap-2 rounded-ios-sm bg-claimondo-bg px-3 py-2 text-body-sm text-claimondo-navy hover:bg-claimondo-border/40 transition-colors"
             >
               <span>{a.label}</span>
