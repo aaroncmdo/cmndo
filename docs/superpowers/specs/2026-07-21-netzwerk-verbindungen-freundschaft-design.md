@@ -5,6 +5,7 @@
 **Branch:** `kitta/netzwerk-verbindungen-freundschaft` (Basis `origin/staging`)
 **Linear:** _TBD — AAR-Ticket anlegen und hier eintragen_
 **Verwandt:** Spec 2 »Angebotsstruktur / SV-Freemium« (`2026-07-25-angebotsstruktur-sv-freemium-netzwerk-entitlement-design.md`) — definiert das Entitlement-Gate, das der Boost hier liest.
+**Übergeordnet:** Epic-Overview »Netzwerk-Ökosystem« (`2026-07-27-netzwerk-oekosystem-epic-overview-design.md`) — enthält das *verfeinerte, einheitliche bidirektionale* Modell (immer-an-Netzwerk-Finder, Gate-immer-am-SV). Bei Abweichung gilt der Epic-Overview. Konkreter Flow: Spec 3 (`2026-07-27-sv-vermittlungs-flow-claim-lifecycle-design.md`).
 
 ---
 
@@ -222,6 +223,9 @@ Der Boost ist **zahlungspflichtig** (Angebotsstruktur, Spec 2). Vor dem Aufruf p
 - Anfrage muss angenommen werden (Spam-Schutz).
 
 ### 7.4 Netzwerk-Sektion im Finder
+
+> **VERFEINERT (27.07., s. Epic-Overview):** Primäre Surface ist der **Kunde-Portal-Finder** (immer an), nicht die SV-Dispositionsansicht. **Bidirektional** (Werkstatt-Finder *und* Gutachter-Finder), Gate **immer am SV** (Owner oder Kandidat). Der Empfehl-Batch ist dadurch abgelöst. Niemand wählt/empfiehlt vor — der gebundene Kunde bedient sich selbst im netzwerk-gescopten Finder. Details: Epic-Overview + Spec 3.
+
 Der zentrale Sichtbarkeits-Ort des Boosts: **eine dedizierte, visuell abgesetzte Sektion** oben im Werkstatt-Finder (SV-Dispositionsansicht, wo der SV Werkstätten empfiehlt) — **„Aus Ihrem Netzwerk"** — mit den qualifizierten Partner-Werkstätten des SV (untereinander nach Distanz/Score), darunter ein Trenner + **„Weitere Werkstätten"** (die normale gerankte Liste).
 
 - Wird **nur** gerendert, wenn (a) der Owner **zahlender Partner** ist (§5.4) **und** (b) ≥1 qualifizierter Partner in Reichweite. Sonst: keine Sektion, normale Liste — das ist der **sichtbare Free-vs-Paid-Unterschied** (Upsell-Fläche).
