@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { stepIndex, DASH_SEQUENCE } from '../pulsing-route'
+import { stepIndex, DASH_SEQUENCE, visualStepDirection } from '../pulsing-route'
 
 describe('stepIndex — gerichteter Dash-Schritt', () => {
   const N = DASH_SEQUENCE.length
@@ -42,5 +42,12 @@ describe('stepIndex — gerichteter Dash-Schritt', () => {
       expect(frame.length).toBeGreaterThan(0)
       expect(frame.every((n) => typeof n === 'number' && n >= 0)).toBe(true)
     }
+  })
+})
+
+describe('visualStepDirection — Mapbox-Dash-Gotcha invertiert die Richtung', () => {
+  it('kehrt forward<->reverse um (damit `direction` visuell in Geometrie-Richtung fliesst)', () => {
+    expect(visualStepDirection('forward')).toBe('reverse')
+    expect(visualStepDirection('reverse')).toBe('forward')
   })
 })

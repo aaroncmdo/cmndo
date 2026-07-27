@@ -61,6 +61,11 @@ export async function ladeWerkstattVorschlaege(input: {
    * DECKUNGSGLEICH sein — sonst wird eine angebotene Werkstatt beim Auswaehlen abgelehnt.
    */
   nurEchte?: boolean
+  /**
+   * D1 (Aaron 27.07.): Anzeige-Umkreis in km um den Anker. Weglassen = MAX_UMKREIS_KM (50,
+   * korrekt fuer alle Kunden-Surfaces); null = ungecappt (nur interne Tools).
+   */
+  maxUmkreisKm?: number | null
 }): Promise<WerkstattVorschlag[]> {
   const admin = createAdminClient()
 
@@ -85,6 +90,7 @@ export async function ladeWerkstattVorschlaege(input: {
     bedarf: input.bedarf,
     bedarfConfidence: input.bedarfConfidence,
     anker: input.anker,
+    maxUmkreisKm: input.maxUmkreisKm,
   }
 
   return rankeWerkstattVorschlaege(kandidaten, kontext, input.limit)

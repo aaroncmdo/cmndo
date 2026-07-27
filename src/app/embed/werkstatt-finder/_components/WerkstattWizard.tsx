@@ -24,14 +24,28 @@ import {
   type WerkstattWizardState,
   kannWeiter,
   wizardStateZuSuche,
+  zeigeUmkreisLeerHinweis,
   fahrzeugtypZuEuKlasse,
   abrechnungZuLeadFelder,
 } from './wizard-logic'
+
+// D1: Hinweis, wenn die Suche lief und im Umkreis nichts gefunden wurde — der Funnel traegt
+// auch ohne Werkstatt-Wahl (Lead + FlowLink entstehen trotzdem).
+function UmkreisLeerHinweis() {
+  return (
+    <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-3 text-body-sm text-claimondo-navy">
+      Noch keine Partner-Werkstatt in Ihrer Nähe — senden Sie Ihre Anfrage trotzdem ab, wir
+      kümmern uns um Gutachten und Abwicklung.
+    </div>
+  )
+}
 
 export type WerkstattWizardProps = {
   rows: WerkstattVorschlag[]
   selectedId: string | null
   loading: boolean
+  /** D1: true nach der ersten abgeschlossenen Suche — Gate fuer den Umkreis-Leer-Hinweis. */
+  hatGesucht?: boolean
   keineSpezialisierte: boolean
   onSelectWerkstatt: (id: string) => void
   // Vom Root: führt die Suche aus + hebt center; Wizard ruft es bei Standort/Marke/Typ/Bedarf-Änderung.
@@ -46,6 +60,7 @@ export function WerkstattWizard({
   rows,
   selectedId,
   loading,
+  hatGesucht = false,
   keineSpezialisierte,
   onSelectWerkstatt,
   onSuche,
@@ -176,6 +191,9 @@ export function WerkstattWizard({
               keineSpezialisierte={keineSpezialisierte}
             />
           )}
+          {zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
+            <UmkreisLeerHinweis />
+          )}
         </>
       )}
       {step === 'abrechnung' && (
@@ -229,6 +247,9 @@ export function WerkstattWizard({
               loading={loading}
               keineSpezialisierte={keineSpezialisierte}
             />
+          )}
+          {zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
+            <UmkreisLeerHinweis />
           )}
           {fehler && <p className="text-body-sm text-danger-strong">{fehler}</p>}
         </div>

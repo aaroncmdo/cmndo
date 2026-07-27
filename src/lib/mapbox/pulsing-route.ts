@@ -48,6 +48,18 @@ export function stepIndex(current: number, total: number, direction: FlowDirecti
   return (c + 1) % total
 }
 
+/**
+ * Mapbox-Gotcha (Aaron 27.07.): die animierte `line-dasharray`-Sequenz marschiert visuell
+ * ENTGEGEN der Step-Richtung — forward-Stepping laesst die hellen Striche zu coord[0]
+ * (Geometrie-START) wandern, nicht zu coord[n]. Damit `direction:'forward'` wie dokumentiert
+ * (s. Header) visuell start->end (in Geometrie-Richtung) fliesst, wird intern invertiert gesteppt.
+ * Ohne diese Korrektur lief der Gutachter-Puls Kunde->SV (falsch: zum SV) statt SV->Kunde und
+ * der Werkstatt-Puls Werkstatt->Kunde (falsch: zum Kunden) statt Kunde->Werkstatt.
+ */
+export function visualStepDirection(direction: FlowDirection): FlowDirection {
+  return direction === 'forward' ? 'reverse' : 'forward'
+}
+
 export type PulsingFlowHandle = { remove: () => void }
 
 /**
@@ -116,7 +128,7 @@ export function addPulsingFlow(
   const tick = (ts: number) => {
     if (stopped) return
     if (ts - lastTs >= stepMs) {
-      step = stepIndex(step, DASH_SEQUENCE.length, direction)
+      step = stepIndex(step, DASH_SEQUENCE.length, visualStepDirection(direction))
       // Der Layer kann während einer Style-Reload kurz fehlen — defensiv prüfen.
       if (map.getLayer(layerId)) {
         try {
