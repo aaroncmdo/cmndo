@@ -78,7 +78,11 @@ async function sendeInitialLink(opts: {
   if (telefon && telefon.trim().length >= 6) {
     try {
       const wa = await checkAndCacheAvailability('gfa', anfrageId, telefon)
-      if (wa.verfuegbar === true) {
+      // Haertung (Aaron 27.07., FlowLink-Audit): WA auch versuchen, wenn die Verfuegbarkeit
+      // UNBEKANNT ist (verfuegbar === null, z.B. Baileys-/check down/timeout) — nur bei explizitem
+      // false ueberspringen. Sonst degradierte der Flowlink still auf SMS/Email, sobald der Check
+      // nicht antwortete (der Dispatch/Makler-Pfad sendet ganz ohne Precheck = robuster).
+      if (wa.verfuegbar !== false) {
         const sent = await sendWhatsAppText(telefon, buildText(vorname, url))
         if (sent.ok) return 'whatsapp'
       }
