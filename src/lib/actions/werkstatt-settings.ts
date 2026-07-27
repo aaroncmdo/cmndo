@@ -68,12 +68,32 @@ export async function updateWerkstattProfil(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
-  const update: Record<string, string | boolean | null> = {}
+  const update: Record<string, string | boolean | number | null> = {}
   for (const [k, v] of Object.entries(parsed.data)) {
     if (k === 'ist_kleinunternehmer') {
       update[k] = v as boolean
     } else {
       update[k] = v === '' || v === undefined ? null : (v as string)
+    }
+  }
+
+  // Geo-Selbstheilung (D3, Spec 2026-07-27-werkstatt-finder-followups): vollstaendige Adresse
+  // -> best-effort re-geocoden. Heilt Signups mit Mapbox-Aussetzer beim naechsten Save; mit dem
+  // D1-Umkreis-Cap waere eine geo-lose Werkstatt im Kunden-Finder sonst dauerhaft unsichtbar.
+  // Dynamischer Import wie im Self-Signup (haelt den Modulgraphen der Action schlank).
+  const strasse = update.adresse_strasse as string | null
+  const plz = update.adresse_plz as string | null
+  const ort = update.adresse_ort as string | null
+  if (strasse && plz && ort) {
+    try {
+      const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
+      const geo = await geocodeAdresse(`${strasse}, ${plz} ${ort}`)
+      if (geo) {
+        update.lat = geo.lat
+        update.lng = geo.lng
+      }
+    } catch (err) {
+      console.error('[updateWerkstattProfil] Geocoding fehlgeschlagen (non-blocking):', err)
     }
   }
 
