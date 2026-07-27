@@ -20,6 +20,8 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz,
   )
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  // D1: erst nach der ersten abgeschlossenen Suche darf der Umkreis-Leer-Hinweis erscheinen.
+  const [hatGesucht, setHatGesucht] = useState(false)
   const [keineSpezialisierte, setKeineSpezialisierte] = useState(false)
   // Monotone Request-ID: nur die jüngste Antwort darf den State setzen (Stale-Race-Guard bei
   // schneller Wizard-Eingabe — analog FinderWizard.matchReqRef).
@@ -46,10 +48,12 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz,
       if (reqRef.current !== req) return // veraltete Antwort — eine neuere Suche hat übernommen
       setRows(r.werkstaetten)
       setKeineSpezialisierte(r.keineSpezialisierte)
+      setHatGesucht(true)
     } catch {
       if (reqRef.current !== req) return
       setRows([])
       setKeineSpezialisierte(false)
+      setHatGesucht(true)
     } finally {
       if (reqRef.current === req) setLoading(false)
     }
@@ -69,6 +73,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz,
           setRows(res.werkstaetten)
           setCenter(res.center)
           setKeineSpezialisierte(res.keineSpezialisierte)
+          setHatGesucht(true)
         })
         .catch(() => {
           if (reqRef.current === req) {
@@ -94,6 +99,7 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz,
           rows={rows}
           selectedId={selectedId}
           loading={loading}
+          hatGesucht={hatGesucht}
           keineSpezialisierte={keineSpezialisierte}
           onSelectWerkstatt={setSelectedId}
           onSuche={runSuche}

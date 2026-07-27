@@ -6,6 +6,12 @@ import { rankeWerkstattVorschlaege, istBelastbareBewertung, type WerkstattKandid
 // auch welcher Schaden passend ist, ob die das reparieren kann, und die Fahrzeugklasse. Das sind die
 // Kriterien, auf denen basierend die Vorschläge gerankt werden müssen."
 // + "Fahrzeugstandort spielt logischerweise auch eine Rolle, also Entfernung."
+//
+// REVISION Aaron 27.07. (D1+D4, Spec 2026-07-27-werkstatt-finder-followups):
+// "Es koennen nur Werkstaetten in der Naehe gezeigt werden; Distanz muss immer schlagen."
+// -> harter Umkreis (MAX_UMKREIS_KM) + Distanz primaer (ganze km); Marke/Gewerke/Gruppe/
+// verifiziert nur noch Tiebreaker in derselben km-Klasse. Und: Vertragswerkstatt-Rang NUR
+// verifiziert (lange Marken-Listen duerfen den Bonus nicht vervielfachen).
 
 const KOELN = { lat: 50.9375, lng: 6.9603 }
 
@@ -37,11 +43,11 @@ const KONTEXT: MatchingKontext = {
 }
 
 describe('rankeWerkstattVorschlaege — Ranking', () => {
-  it('AARONS KERN-REGEL: markengebunden schlaegt freie Werkstatt', () => {
+  it('AARONS KERN-REGEL (gleiche km-Klasse): markengebunden schlaegt freie Werkstatt', () => {
     const r = rankeWerkstattVorschlaege(
       [
         werkstatt({ id: 'frei', ist_freie_werkstatt: true }),
-        werkstatt({ id: 'bmw', marken: ['BMW', 'MINI'] }),
+        werkstatt({ id: 'bmw', marken: ['BMW', 'MINI'], verifiziert: true }),
       ],
       KONTEXT,
     )
@@ -50,21 +56,24 @@ describe('rankeWerkstattVorschlaege — Ranking', () => {
     expect(r[1].markenMatch).toBe('frei')
   })
 
-  it('Marken-Match schlaegt sogar die naehere Werkstatt (Marke ist das staerkste Kriterium)', () => {
+  it('D1-REVISION (Aaron 27.07.): Distanz schlaegt Marke — die naehere freie gewinnt', () => {
     const r = rankeWerkstattVorschlaege(
       [
-        // 50 km weg, aber BMW-Vertragswerkstatt
-        werkstatt({ id: 'bmw-fern', marken: ['BMW'], lat: 51.4, lng: 6.9 }),
+        // ~20 km weg (im Umkreis), verifizierte BMW-Vertragswerkstatt
+        werkstatt({ id: 'bmw-20km', marken: ['BMW'], verifiziert: true, lat: 51.117, lng: 6.9603 }),
         // direkt um die Ecke, aber markenoffen
         werkstatt({ id: 'frei-nah', ist_freie_werkstatt: true }),
       ],
       KONTEXT,
     )
-    expect(r[0].id).toBe('bmw-fern')
+    expect(r.map((x) => x.id)).toEqual(['frei-nah', 'bmw-20km'])
   })
 
   it('Marken-Vergleich ist case-insensitiv (OCR/Stammdaten liefern gemischt)', () => {
-    const r = rankeWerkstattVorschlaege([werkstatt({ id: 'a', marken: ['bmw'] })], KONTEXT)
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'a', marken: ['bmw'], verifiziert: true })],
+      KONTEXT,
+    )
     expect(r[0].markenMatch).toBe('marke')
   })
 
@@ -248,9 +257,10 @@ describe('rankeWerkstattVorschlaege — Begruendungen (Aaron: "mit wirklichem Gr
   })
 
   it('ohne Koordinaten kein Distanz-Chip (statt "Infinity km")', () => {
+    // Ohne Anker (D1-Cap greift nur mit Anker) — mit Anker waere ohne-Geo unsichtbar (s.u.).
     const r = rankeWerkstattVorschlaege(
       [werkstatt({ id: 'ohne-geo', lat: null, lng: null, ist_freie_werkstatt: true })],
-      KONTEXT,
+      { ...KONTEXT, anker: null },
     )
     expect(r[0].gruende.some((g) => g.typ === 'distanz')).toBe(false)
     expect(r[0].distanz_km).toBe(Infinity)
@@ -316,5 +326,122 @@ describe('istBelastbareBewertung', () => {
     expect(istBelastbareBewertung(null, 10)).toBe(false)
     expect(istBelastbareBewertung(4.5, null)).toBe(false)
     expect(istBelastbareBewertung(undefined, undefined)).toBe(false)
+  })
+})
+
+// D1 (Aaron 27.07.): "Es koennen nur Werkstaetten in der Naehe gezeigt werden; Distanz
+// muss immer schlagen." Harter Anzeige-Umkreis + Distanz als primaeres Sortierkriterium.
+describe('D1: Umkreis-Filter + Distanz primaer', () => {
+  it('jenseits MAX_UMKREIS_KM unsichtbar — auch verifiziert (kein Fern-Fallback mehr)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'fern-verifiziert', verifiziert: true, lat: 53.54, lng: 8.58 }), // ~300 km
+        werkstatt({ id: 'nah' }),
+      ],
+      KONTEXT,
+    )
+    expect(r.map((v) => v.id)).toEqual(['nah'])
+  })
+
+  it('ohne Geo bei vorhandenem Anker unsichtbar (Naehe nicht belegbar)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'ohne-geo', lat: null, lng: null }), werkstatt({ id: 'mit-geo' })],
+      KONTEXT,
+    )
+    expect(r.map((v) => v.id)).toEqual(['mit-geo'])
+  })
+
+  it('ohne Anker bleibt alles sichtbar (kein Distanz-Wissen = kein Ausschluss)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'ohne-geo', lat: null, lng: null }), werkstatt({ id: 'mit-geo' })],
+      { ...KONTEXT, anker: null },
+    )
+    expect(r).toHaveLength(2)
+  })
+
+  it('maxUmkreisKm=null hebt den Cap (interne Tools)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'fern', lat: 53.54, lng: 8.58 })],
+      { ...KONTEXT, maxUmkreisKm: null },
+    )
+    expect(r.map((v) => v.id)).toEqual(['fern'])
+  })
+
+  it('Distanz schlaegt verifiziert: 2-km-unverifiziert vor 4-km-verifiziert', () => {
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'verifiziert-4km', verifiziert: true, lat: KOELN.lat + 0.036, lng: KOELN.lng }),
+        werkstatt({ id: 'unverifiziert-2km', lat: KOELN.lat + 0.018, lng: KOELN.lng }),
+      ],
+      KONTEXT,
+    )
+    expect(r.map((v) => v.id)).toEqual(['unverifiziert-2km', 'verifiziert-4km'])
+  })
+
+  it('gleiche km-Klasse: verifiziert gewinnt (Tiebreak-Kaskade lebt)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'unverif', lat: KOELN.lat + 0.001, lng: KOELN.lng }),
+        werkstatt({ id: 'verif', verifiziert: true, lat: KOELN.lat + 0.002, lng: KOELN.lng }),
+      ],
+      KONTEXT,
+    )
+    expect(r.map((v) => v.id)).toEqual(['verif', 'unverif'])
+  })
+
+  it('Eignungs-Fallback bleibt im Umkreis (liefert nie Ferne nach)', () => {
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'nah-passt-nicht', faehigkeiten: ['glas'] }),
+        werkstatt({ id: 'fern-passt', faehigkeiten: ['karosserie'], lat: 53.54, lng: 8.58 }),
+      ],
+      { ...KONTEXT, bedarf: ['karosserie'], bedarfConfidence: 80 },
+    )
+    expect(r.map((v) => v.id)).toEqual(['nah-passt-nicht'])
+  })
+})
+
+// D4 (Aaron 27.07.): "wenn er mehrere Marken angibt und dadurch besser rankt ist das falsch."
+// Vertragswerkstatt-Rang nur beglaubigt (Verifizierungs-Gate).
+describe('D4: Marken-Rang nur verifiziert (Verifizierungs-Gate)', () => {
+  it('verifiziert + Treffer -> marke + Vertragswerkstatt-Chip', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'w', marken: ['BMW'], verifiziert: true })],
+      { ...KONTEXT, marke: 'BMW' },
+    )
+    expect(r[0].markenMatch).toBe('marke')
+    expect(r[0].gruende.map((g) => g.text)).toContain('BMW-Vertragswerkstatt')
+  })
+
+  it('unverifiziert + Treffer -> frei-Rang, Chip "Repariert BMW", KEIN Vertrags-/Frei-Chip', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'w', marken: ['BMW'], verifiziert: false, ist_freie_werkstatt: false })],
+      { ...KONTEXT, marke: 'BMW' },
+    )
+    expect(r[0].markenMatch).toBe('frei')
+    const texte = r[0].gruende.map((g) => g.text)
+    expect(texte).toContain('Repariert BMW')
+    expect(texte).not.toContain('BMW-Vertragswerkstatt')
+    expect(texte).not.toContain('Freie Werkstatt (alle Marken)')
+  })
+
+  it('lange Marken-Liste unverifiziert bringt keinen Bonus gegenueber markenoffen', () => {
+    const r = rankeWerkstattVorschlaege(
+      [
+        werkstatt({ id: 'gamer', marken: ['BMW', 'Audi', 'VW', 'Opel', 'Ford'], lat: KOELN.lat + 0.002, lng: KOELN.lng }),
+        werkstatt({ id: 'offen', ist_freie_werkstatt: true, lat: KOELN.lat + 0.001, lng: KOELN.lng }),
+      ],
+      { ...KONTEXT, marke: 'BMW' },
+    )
+    expect(r[0].markenMatch).toBe('frei')
+    expect(r[1].markenMatch).toBe('frei')
+  })
+
+  it('Spezialist-Guard unveraendert: gepflegte Marken ohne Treffer bleiben unbekannt', () => {
+    const r = rankeWerkstattVorschlaege(
+      [werkstatt({ id: 'w', marken: ['Audi'], verifiziert: true, ist_freie_werkstatt: false })],
+      { ...KONTEXT, marke: 'BMW' },
+    )
+    expect(r[0].markenMatch).toBe('unbekannt')
   })
 })
