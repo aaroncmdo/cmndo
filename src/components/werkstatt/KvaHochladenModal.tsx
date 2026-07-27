@@ -54,6 +54,11 @@ export function KvaHochladenModal({
   const [fehler, setFehler] = useState<string | null>(null)
 
   const pdfHochgeladen = pdfBase64 != null && pdfMediaType != null
+  // Ein Kostenvoranschlag nennt die Kosten — ohne Betrag bekommt der Kunde keine Freigabe
+  // (KostenvoranschlagCard: kvaSichtbar = netto || brutto). Betrag daher Pflicht (netto ODER
+  // brutto genuegt). Sonst: Werkstatt reicht KVA ein, Kunde sieht keine Freigabe -> stiller
+  // Deadlock (Regel-4-Smoke 27.07.).
+  const hatBetrag = parseNumOpt(netto) != null || parseNumOpt(brutto) != null
 
   function reset() {
     setNetto('')
@@ -127,6 +132,10 @@ export function KvaHochladenModal({
 
     if (!reparaturtermin) {
       setFehler('Bitte schlagen Sie einen Reparaturtermin vor.')
+      return
+    }
+    if (nettoNum == null && bruttoNum == null) {
+      setFehler('Bitte tragen Sie den Netto- oder Bruttobetrag aus dem Kostenvoranschlag ein — der Kunde benötigt ihn für die Freigabe.')
       return
     }
 
@@ -234,7 +243,12 @@ export function KvaHochladenModal({
               />
             </div>
           </div>
-          {pdfHochgeladen && (
+          {pdfHochgeladen && !hatBetrag && (
+            <p className="rounded-ios-sm bg-warning-soft px-3 py-2 text-body-xs text-warning-strong">
+              Bitte tragen Sie den Netto- oder Bruttobetrag ein — der Kunde benötigt ihn für die Freigabe.
+            </p>
+          )}
+          {pdfHochgeladen && hatBetrag && (
             <p className="text-body-xs text-claimondo-shield">
               Falls die automatische Erkennung daneben liegt, können Sie die Beträge korrigieren.
             </p>
@@ -287,7 +301,7 @@ export function KvaHochladenModal({
             variant="navy"
             size="sm"
             loading={speichern}
-            disabled={ocrLaden || !pdfHochgeladen}
+            disabled={ocrLaden || !pdfHochgeladen || !hatBetrag}
             onClick={handleSpeichern}
           >
             Speichern
