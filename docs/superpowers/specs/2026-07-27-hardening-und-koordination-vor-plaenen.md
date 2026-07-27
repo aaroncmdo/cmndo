@@ -43,6 +43,22 @@
 
 ---
 
+## A2 · Zusätzliche Härtung (Scout-Fleet: Matching + Billing)
+
+**K10 · Performance-Blocker — Freundes-Lookup MUSS gebatcht/vorgeladen sein.** `findBestSV` ist der teuerste Hot-Path (~1,2–1,8s); `PARTNER_RANG_MATCHING` wurde bewusst AUS gehalten, um dort einen DB-Read zu vermeiden. Ein per-Kandidat-Freundes-Read reintroduziert N+1 → **einmal pro Ranking-Call vorladen** (`Set<freundId>`), nie pro Kandidat.
+
+**K11 · Gutachter-Finder hat KEINEN Session-Owner.** Der öffentliche Finder lädt SVs **service-role/anonym** (`ladeAktiveSVs`) — kein `auth.uid()`-Owner. De-facto-Owner dort = die **Makler-Attribution** (`promotionCodeId→maklerId`); blanker `/gutachter-finden` ohne Code → **kein Owner → kein Boost** (explizit machen). Owner muss **injiziert** werden, nicht session-abgeleitet. Per-Kandidat-„befreundet"-Metadaten müssen den server→client `coverageUnion`-Trim überleben (per-SV `isochrone_polygon` wird gestrippt).
+
+**K12 · 4. Werkstatt-Finder-Surface + 2 Extra-Reorderings.** Neben den 3 Consumern: der **Kunde-Portal-Selbstzahler-Finder** (`WerkstattFinderMap`/`werkstatt-finder-actions.ts`, SP-C) — Boost dort? Und der Claim-Finder wendet **2 zusätzliche Reorderings** an (`qualifiziereWerkstaetten`-Fit #4101 + `verifiziert`-Vorreihung #4125) → Boost relativ dazu positionieren. `bewerteMarke` von #4649 geändert (rebase, Guard nicht re-brechen).
+
+**K13 · Provisions-Realität (verschärft K2).** Suppression an **Release-Zeit = FG4-A completion+7d via `deriveCompletionTs`** (`completion-release-gate.ts`/`release-runner.ts`), NICHT `hold_until` (Legacy, read-by-0, DROP pending). Trigger auf **2 Tabellen** (makler+flotte auf `faelle_claim_bridge`, werkstatt auf `claims`). `create_makler_provision` inserted VORHER `makler_fall_consent` → beim Suppress **nur den `partner_provisionen`-Zweig** unterdrücken, Consent behalten. ⚠ **„inbound-Haftpflicht-only" ist NICHT enforced** — `create_werkstatt_provision` feuert bei JEDEM `werkstatt_id` ohne abrechnungsweg-Gate (Selbstzahler/Kasko-Inbound mintet heute fälschlich 150€; Aaron-Entscheid offen). Nur `partner_provisionen` (Alt-Tabellen gedroppt). **Maik/`provisionen_maik`/`marketing_partner` GEDROPPT** (#4545) — SLA-Marker stale. Suppress verschiebt still `award_*_staffel_boni`-Schwellen.
+
+**K14 · Stripe-Recurring (verschärft K7).** Live-Webhook hat **exakt 6 Events, ZERO subscription/invoice** → `invoice.payment_{succeeded,failed}` + `customer.subscription.{updated,deleted}` müssen zum **Live-Endpoint** + Handler, sonst landet Dunning/Entitlement im Nichts. Rechnungen über den **DB-getriebenen `rechnungs_konfiguration`-Pfad**, NIE die 3 Legacy-PDF-Generatoren (hardcoden „Claimondo GmbH"). Recurring-Cron via **pg_cron + Vault** (wie `release_provisionen` jobid 22). ⚠ Kollision: pending UG-`rechnungssteller`-CHECK-Enum-Erweiterung auf `rechnungs_konfiguration` + `sv_onboarding_rechnungen` (27.07 aktiv) — CHECK-Edits koordinieren, `sv_onboarding_rechnungen.typ`-CHECK für `'netzwerk_einrichtung'` verifizieren.
+
+**K15 · Verifikations-Blocker (Regel-4 Billing).** Kein prod-Partner-Login → Wegwerf-Partner seeden. prod+staging **teilen `.env.local` → LIVE-Stripe auch auf staging** → kein sicherer Zahl-Smoke off-prod. Claim-Views → service-role liest 0, brauchen Admin-JWT-Sim.
+
+**Klarstellungen:** (a) „**Paket bleibt wichtigster Faktor**" ist durch unser Modell **abgelöst** (paket retired → Netzwerkpartner primär; `W_NETZWERK` DARF Paket-Stufen kreuzen — gewollt). (b) **Per-Rolle „zahlender Netzwerkpartner":** SV = Subscription; Werkstatt/Flotte = **frei** (Gate hängt am SV-Kandidaten; Werkstatt-Owner braucht KEINE Subscription). (c) `partner_rang.rang` = **NULL für unverifizierte** Partner → befreundet-aber-unverifiziert sortiert null-Rang.
+
 ## C · Empfohlener Pfad (statt naivem one-shot)
 1. **Specs korrigieren** (K1–K9 einarbeiten) — in unserer Hand, jetzt.
 2. **Koordinieren** mit den 4 Lanes (claims-RLS #4789, FlowLink, Finder-Engine, Schadenkarte) — deren Substrate-Merges abwarten, dann rebasen.
