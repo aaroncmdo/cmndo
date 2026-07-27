@@ -320,7 +320,13 @@ export default async function FlowPage({
   // schon gesetzt hereinkommt). Ergebnis: ein Kasko-Kunde sah den Gutachter-Finder ("loses Ende").
   // Jetzt: steht 'termin' in der Step-Sequenz des Szenarios, braucht der Kunde einen Gutachter — sonst nicht.
   // Die Termin-/Werkstatt-Zustandsfilter stecken als Bedingungen IN der Config ({"sv_id": null} usw.).
-  const flowConfigAktiv = process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  // Rollout-Flag-Haertung (27.07.): der DB-getriebene Flow (Feststellung/Booking/Werkstatt) ist auf
+  // Prod LIVE — Anon-Smoke 27.07. verifiziert: /flow Step 2 = "Schaden"/Feststellung mit 11 Sub-Steps.
+  // Der Gate-Flag CANONICAL_FLOWLINK_ENABLED='true' steht in der VPS-Env, aber in KEINER Repo-.env ->
+  // ein Env-Refresh, der ihn droppt, wuerde die Feststellung fuer ALLE Wege still abschalten (kein
+  // Build/tsc faengt das). Default-ON (=== 'true' -> !== 'false') macht das resilient; No-op auf Prod
+  // (Flag ist 'true'). Not-Aus bleibt via CANONICAL_FLOWLINK_ENABLED='false'.
+  const flowConfigAktiv = process.env.CANONICAL_FLOWLINK_ENABLED !== 'false'
   const needsBooking = flowConfigAktiv && weichen.brauchtGutachter
   // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
   // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung

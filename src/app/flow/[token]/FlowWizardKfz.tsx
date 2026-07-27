@@ -13,7 +13,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { createKundeAccount, updateLeadStammdaten } from './actions'
+import { createKundeAccount, updateLeadStammdaten, loginAfterFlowFormAction } from './actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
@@ -322,6 +322,8 @@ export default function FlowWizardKfz({
   const [accountEmail, setAccountEmail] = useState(editEmail)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
+  // C (Aaron 27.07.): Hidden-Form fuer den Cookie-safen Auto-Login nach der Account-Anlage.
+  const loginFormRef = useRef<HTMLFormElement>(null)
 
   // CMM-14: Werkstatt + Schadensfotos State entfernt — Step 'weitere-angaben'
   // wurde aus dem Wizard rausgenommen, der Foto-Upload erfolgt jetzt im
@@ -526,6 +528,13 @@ export default function FlowWizardKfz({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep.id, fallId])
+
+  // C (Aaron 27.07.): Nach der Account-Anlage AUTOMATISCH ins Portal. Auto-Login mit dem Temp-Passwort
+  // (loginAfterFlowFormAction = Cookie-safer Form-Submit-Pfad, CMM-14) -> force_password_change=true ->
+  // /passwort-aendern -> danach im Portal. Restauriert den 16.06. entfernten Portal-Redirect.
+  useEffect(() => {
+    if (accountCreated && accountPassword) loginFormRef.current?.requestSubmit()
+  }, [accountCreated, accountPassword])
 
   // AAR-99: Kein Skip-Button mehr — Account ist Pflicht
 
@@ -1043,6 +1052,20 @@ export default function FlowWizardKfz({
                     {t('step_account.success_text')}
                   </p>
                 </div>
+
+                {/* C (Aaron 27.07.): Auto-Login ins Portal (Passwort-Change) direkt nach der Account-Anlage. */}
+                {accountCreated && accountPassword && (
+                  <>
+                    <div className="rounded-ios-md border border-claimondo-border bg-white px-4 py-3 mb-5 flex items-center gap-3">
+                      <div className="inline-block w-5 h-5 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin shrink-0" />
+                      <p className="text-sm text-claimondo-ondo">Sie werden sicher in Ihr Portal weitergeleitet …</p>
+                    </div>
+                    <form ref={loginFormRef} action={loginAfterFlowFormAction} className="hidden">
+                      <input type="hidden" name="email" value={accountEmail} />
+                      <input type="hidden" name="password" value={accountPassword} />
+                    </form>
+                  </>
+                )}
 
                 {beratungstermin && (
                   <BeratungsterminCard token={token} termin={beratungstermin} />
