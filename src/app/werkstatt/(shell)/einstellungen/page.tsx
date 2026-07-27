@@ -17,7 +17,7 @@ export default async function WerkstattEinstellungenPage() {
   const { data: werkstatt } = await supabase
     .from('werkstaetten')
     .select(
-      'name, ansprechpartner_name, adresse_strasse, adresse_plz, adresse_ort, telefon, email, website, ust_id, ist_kleinunternehmer, bank_iban, bank_bic, bank_kontoinhaber, faehigkeiten, marken, fahrzeug_gruppen',
+      'name, ansprechpartner_name, adresse_strasse, adresse_plz, adresse_ort, telefon, email, website, ust_id, ist_kleinunternehmer, bank_iban, bank_bic, bank_kontoinhaber, faehigkeiten, marken, ist_freie_werkstatt, fahrzeug_gruppen',
     )
     .eq('user_id', user.id)
     .maybeSingle()
@@ -42,6 +42,7 @@ export default async function WerkstattEinstellungenPage() {
       bank_kontoinhaber={(werkstatt as unknown as { bank_kontoinhaber: string | null }).bank_kontoinhaber ?? null}
       faehigkeiten={(werkstatt as unknown as { faehigkeiten: string[] | null }).faehigkeiten ?? null}
       marken={(werkstatt as unknown as { marken: string[] | null }).marken ?? null}
+      ist_freie_werkstatt={(werkstatt as unknown as { ist_freie_werkstatt: boolean | null }).ist_freie_werkstatt ?? null}
       fahrzeug_gruppen={(werkstatt as unknown as { fahrzeug_gruppen: string[] | null }).fahrzeug_gruppen ?? null}
     />
       <div className="mx-auto max-w-2xl px-4 pb-8">

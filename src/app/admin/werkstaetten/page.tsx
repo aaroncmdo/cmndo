@@ -19,7 +19,7 @@ export default async function WerkstaettenPage() {
   const [{ data: werkstaetten }, ausstehendeFreigaben] = await Promise.all([
     supabase
       .from('werkstaetten')
-      .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon, faehigkeiten')
+      .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon, faehigkeiten, lat, lng')
       .order('aktiviert_am', { ascending: false }),
     getAusstehendeFreigaben(),
   ])
