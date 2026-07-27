@@ -180,6 +180,27 @@ Gate: nur zahlende SVs dürfen werben (Free-SV → Upgrade-CTA).
 
 ---
 
+## 13b · WS-B Durchsprache (27.07.) — LOCKED
+
+**Geschäftsmodell:** Das **Netzwerkpartner-Abo ist das Haupt-Preismodell.** Neu-SVs: kostenlose Registrierung ODER direkt Netzwerkpartner (Monats-Flat + einmalige Einrichtungsgebühr). **Per-Fall-`paket` (standard/pro/premium/Paketfälle) wird NICHT mehr verkauft** — Netzwerkpartner haben kein Kontingent. **Bestand:** alle aktiven SVs werden **comped Netzwerkpartner** (Backfill) + behalten ihr `paket`-**Fulfillment** (Kontingent/Billing) + Netzwerk freigeschaltet.
+
+**Terminologie (Aaron):** „**Netzwerkpartner**" (zahlender Abo-Status) ist NICHT „**(empfohlenes) Netzwerk**" (Freundes-Graph). Boost/Badge gaten am **Abo-Status**; Provisions-Suppression am **Freundes-Graph**.
+
+**Ranking (`matching-score.ts` `bewerteSvKandidat`) — Signal UMBIEGEN, nicht neu bauen:**
+- `paketPrio·W_PAKET(100)` → **`istZahlenderNetzwerkPartner·W_NETZWERK(100)`** (Netzwerkpartner-Bucket über Free).
+- `partner_rang` (rangOrdinal gold/silber/bronze) verfeinert **innerhalb** — unverändert (`2·W_RANG < W_NETZWERK`).
+- `istTopPartner` (projection.ts) → **`istZahlenderNetzwerkPartner`** (= „Netzwerkpartner"-Badge, löst `paket≠basic` ab).
+- `istKontingentBlockiert`: Netzwerkpartner nie blockiert (flach); nur Legacy-Pakete tracken Kontingent (Fulfillment).
+- `paket` = **Legacy** (Fulfillment/Billing, kein Ranking-Treiber, nicht verkauft).
+- **Zwei Boost-Ebenen:** #1 global (Netzwerkpartner > Free, überall + Badge) via matching-score; #2 relational („Dein Netzwerk"-Sektion, `applyNetzwerkPraeferenz`) für gebundene Kunden.
+
+**Provisionen — Freundes-Graph-Gate (LOCKED, „rein operativ"):**
+- Bestehende Inbound-Trigger unverändert (`create_werkstatt_provision` 150€, `create_makler_provision` 100/50€ **+10€ sponsor-Override**, `create_firmen_flotte_provision` 150€; inbound-Haftpflicht-only, `provision_aktiv`, 7d-Hold, Ledger `partner_provisionen`).
+- **NEU: pro-Fall Freundes-Graph-Check** — Provision **unterdrückt**, wenn intra-Freundesnetzwerk (Inbound-Partner ↔ zugewiesener Gegenpart befreundet). **Makler = extern** → feuert immer. **Cross-network** → feuert. **Kein neuer SV-seitiger Provisions-Typ.**
+- SV→Werkstatt-Referral (WS A/B): Partnerschaft + Einrichtungsgebühr-Waiver, **KEIN** Override (anders als das Makler-sponsor-10€).
+
+**Offen (WS-B-Rest, implementierungsgetrieben):** Registrierung-Umbau + DAT-Gating-Removal (WS F, Verifizierungs-Freigabe bleibt), Abo-Ask im Onboarding (skippbar), In-App-Upgrade (reuse SV-Konto), Entitlement-Subscription-Row (derive-at-read, partner-typ-agnostisch) + Stripe-Recurring + Grandfather-Backfill.
+
 ## 14 · Offene Verifikationen (für den Plan)
 
 - **Heutige Free-vs-Paid-Unterscheidung** genau (Basic-Onboarding vs `paket`/`onboarding_anzahlung`/`portal_zugang_freigeschaltet`) — den Prädikat-Term daran anlehnen, keine Doppel-Wahrheit schaffen.

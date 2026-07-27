@@ -236,6 +236,8 @@ Der zentrale Sichtbarkeits-Ort des Boosts: **eine dedizierte, visuell abgesetzte
 
 ## 8 · Kunden-Bindung (Seeding, Sticky First-Touch)
 
+> **VERFEINERT (27.07., WS-A):** Bindung ist **per-Claim** (`claims.netzwerk_owner_id`, bei Anlage aus Vermittler/SV-Origin gesetzt, sticky) **PLUS Kunden-Default** (`profiles.netzwerk_owner_id`, First-Touch, Fallback). Finder-Auflösung: Claim-Owner → sonst Kunden-Default → sonst kein Boost. Grund: ein Kunde kann mehrere Fahrzeuge aus *verschiedenen* Netzwerken haben (WS H). Analog zur gespeicherten `vermittler_id`-Attribution. Graph-Knoten = `profiles↔profiles` (bestätigt, nicht polymorph).
+
 - **Seed-Zeitpunkt:** wenn ein Kunden-Profil aus einem Fall entsteht (vorhandene Herkunfts-Spur `profiles.entstanden_via` / `entstanden_aus_claim_id`; Anlage-Pfad um `createKundeAccount` herum — beim Plan verifizieren).
 - **Seed-Wert:** `netzwerk_owner_id` = `resolveNetzwerkOwner` aus dem **Inbound-Vermittler** (`claims.vermittler_id`/`_typ` via `deriveVermittler`) des Herkunfts-Falls, in ein Profil aufgelöst. `netzwerk_owner_seit = now()`.
 - **First-Touch, unveränderlich:** ist `netzwerk_owner_id` gesetzt, wird es nie überschrieben.
