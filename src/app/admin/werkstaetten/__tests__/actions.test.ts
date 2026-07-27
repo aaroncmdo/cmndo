@@ -265,6 +265,23 @@ describe('createWerkstatt', () => {
     expect(h.werkstattInsert).not.toBeNull()
     expect(h.werkstattInsert).toMatchObject({ ansprechpartner_name: 'Max Muster' })
   })
+
+  it('setzt ist_freie_werkstatt=true im Insert (Anlage fragt keine Marken ab = markenoffen)', async () => {
+    mockConfig.authUser = { id: 'admin-user-id' }
+    mockConfig.profileRolle = 'admin'
+
+    const { createWerkstatt } = await import('../actions')
+    const fd = makeFormData({
+      name: 'Muster-Werkstatt',
+      email: 'werkstatt@example.com',
+      lat: '51.5',
+      lng: '7.0',
+    })
+    const result = await createWerkstatt(fd)
+
+    expect(result.ok).toBe(true)
+    expect(h.werkstattInsert).toMatchObject({ ist_freie_werkstatt: true })
+  })
 })
 
 describe('setWerkstattFaehigkeiten', () => {

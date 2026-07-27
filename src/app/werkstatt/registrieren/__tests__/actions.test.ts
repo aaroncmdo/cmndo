@@ -135,4 +135,26 @@ describe('registriereWerkstattSelf', () => {
     const res = await registriereWerkstattSelf(fd())
     expect(res.ok).toBe(true)
   })
+
+  it('Gewerke aus dem Formular landen validiert in rollenDetails.faehigkeiten', async () => {
+    const f = fd()
+    f.append('faehigkeiten', 'karosserie')
+    f.append('faehigkeiten', 'lackierung')
+    f.append('faehigkeiten', 'karosserie') // Duplikat -> dedupe
+    f.append('faehigkeiten', 'quatsch') // ungueltiger Wert -> gefiltert
+    const res = await registriereWerkstattSelf(f)
+    expect(res.ok).toBe(true)
+    const input = anlegeMock.mock.calls[0][2] as Record<string, unknown>
+    expect((input.rollenDetails as Record<string, unknown>).faehigkeiten).toEqual([
+      'karosserie',
+      'lackierung',
+    ])
+  })
+
+  it('ohne Gewerke-Auswahl bleibt rollenDetails ohne faehigkeiten-Key (DB-Default)', async () => {
+    const res = await registriereWerkstattSelf(fd())
+    expect(res.ok).toBe(true)
+    const input = anlegeMock.mock.calls[0][2] as Record<string, unknown>
+    expect('faehigkeiten' in (input.rollenDetails as Record<string, unknown>)).toBe(false)
+  })
 })

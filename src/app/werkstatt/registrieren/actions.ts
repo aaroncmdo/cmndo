@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
 import { sendWillkommenWerkstatt } from '@/lib/email/google/flows'
+import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
 
 // Offener Self-Signup einer Werkstatt (CTA der werkstatt.claimondo.de-Landing).
 // Erzeugt SOFORT eine aktive Werkstatt (status='aktiv') + Portal-Zugang (QR-Seite,
@@ -32,6 +33,16 @@ export async function registriereWerkstattSelf(
     formData.get('kleinunternehmer') === 'true' || formData.get('kleinunternehmer') === 'on'
   const einwilligung =
     formData.get('einwilligung') === 'on' || formData.get('einwilligung') === 'true'
+  // Gewerke (optional, Mehrfachauswahl): gegen das kanonische Vokabular validieren + dedupen.
+  // Leer = keine Angabe -> Feld bleibt weg (DB-Default), Matching rankt dann 'unbekannt'.
+  const faehigkeiten = Array.from(
+    new Set(
+      formData
+        .getAll('faehigkeiten')
+        .map(String)
+        .filter((f) => (GEWERKE as readonly string[]).includes(f)),
+    ),
+  )
 
   if (!firma) return { ok: false, error: 'Werkstatt-Name ist ein Pflichtfeld.' }
   if (!vorname || !nachname) {
@@ -101,6 +112,7 @@ export async function registriereWerkstattSelf(
       adresse_strasse: adresseStrasse,
       ist_kleinunternehmer: istKleinunternehmer,
       quelle: 'self_signup',
+      ...(faehigkeiten.length > 0 ? { faehigkeiten } : {}),
     },
   })
   if (!result.ok) {
