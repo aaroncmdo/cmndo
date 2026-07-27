@@ -443,6 +443,29 @@ async function finalizeKundeSetup(
     auth_provider: 'email',
   }, { onConflict: 'id' })
 
+  // D (Aaron 27.07.): Login-Daten EINMAL per WhatsApp (zusaetzlich zur Willkommens-Email). Nach dem
+  // /flow-Auto-Login hat der Kunde zwar schon eine Session, braucht Email+Passwort aber fuer spaetere
+  // Logins. Non-fatal: ein Baileys-Fail darf die Account-Anlage nie brechen.
+  if (telefon && telefon.trim().length >= 5) {
+    try {
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const credsText = [
+        '🔐 Ihre Claimondo-Zugangsdaten',
+        '',
+        `E-Mail: ${email}`,
+        `Passwort: ${password}`,
+        '',
+        `Login: ${base}/login`,
+        '',
+        'Bitte ändern Sie Ihr Passwort beim ersten Login. Ihr Claimondo-Team',
+      ].join('\n')
+      const r = await sendWhatsAppText(telefon, credsText)
+      if (!r.ok) console.error('[D] Login-Daten-WA fehlgeschlagen:', r.code, r.error)
+    } catch (err) {
+      console.error('[D] Login-Daten-WA Fehler:', err)
+    }
+  }
+
   // Portal-i18n F-11: Sprache aus dem Lead (faelle.lead_id → leads.sprache)
   // still VORBELEGEN — aber nur wenn profiles.sprache noch leer ist. Der
   // IS-NULL-Guard schützt eine explizite F-12-Wahl: finalizeKundeSetup läuft
