@@ -4,6 +4,7 @@
 **Status:** Spec (brainstormed, wartet auf Review → Plan)
 **Branch:** `kitta/netzwerk-verbindungen-freundschaft` (Basis `origin/staging`)
 **Linear:** _TBD — AAR-Ticket anlegen und hier eintragen_
+**Verwandt:** Spec 2 »Angebotsstruktur / SV-Freemium« (`2026-07-25-angebotsstruktur-sv-freemium-netzwerk-entitlement-design.md`) — definiert das Entitlement-Gate, das der Boost hier liest.
 
 ---
 
@@ -181,6 +182,14 @@ Jeder Consumer ruft nach seiner bestehenden Qualifikation+Rankstufe:
 `kandidaten = applyNetzwerkPraeferenz(kandidaten, await resolveNetzwerkFreundKandidatIds(...))`.
 Beim Batch wird das Ergebnis in `werkstatt_empfehlungen.rang` materialisiert.
 
+### 5.4 Entitlement-Gate (Abhängigkeit → Spec 2)
+
+Der Boost ist **zahlungspflichtig** (Angebotsstruktur, Spec 2). Vor dem Aufruf prüft der Consumer das Prädikat `istZahlenderNetzwerkPartner(ownerId)`:
+
+- Owner ist **kein** zahlender Netzwerk-Partner → Boost **übersprungen** = normales Engine-Matching (aus SV-Sicht „zufällig disponiert"), **keine** Netzwerk-Sektion im Finder (§7.4).
+- **v1-Scope:** das Gate greift für **SV-Owner** (Freemium ist ein SV-Produkt). Werkstatt-/Flotte-Owner sind v1 **ungegated** (noch kein Zahlprodukt) — Annahme, beim Review bestätigen.
+- Prädikat = **SSoT in Spec 2**; Spec 1 konsumiert nur. Der soziale Graph (Freundschaften, Netzwerk-Seite) ist **nicht** gegated — nur Boost + Finder-Sektion.
+
 ---
 
 ## 6 · Ranking-Semantik & Kanten-Fälle
@@ -191,7 +200,7 @@ Beim Batch wird das Ergebnis in `werkstatt_empfehlungen.rang` materialisiert.
 - **`offen` / `abgelehnt` / `blockiert`** zählen **nicht** als Freund (View filtert auf `angenommen`).
 - **Kein Owner auflösbar** (u.a. Makler-Vermittler v1) → `resolveNetzwerkFreundKandidatIds` liefert leeres Set → No-op, kein Fehler.
 - **Flotte ist nie Kandidat** einer Zielrolle (man wird keiner Flotte „zugewiesen") — Flotte ist ausschließlich Owner/Anfrager. `zielRolle ∈ {werkstatt, gutachter}`.
-- **UI:** Badge „aus deinem Netzwerk" an geboosteten Kandidaten; nie erzwungene Vorauswahl.
+- **UI:** eigene Finder-Sektion „Aus Ihrem Netzwerk" (§7.4) + Badge an geboosteten Kandidaten; nie erzwungene Vorauswahl.
 
 ---
 
@@ -211,6 +220,13 @@ Beim Batch wird das Ergebnis in `werkstatt_empfehlungen.rang` materialisiert.
 - **Durchsuchbares Profi-Verzeichnis** (Name/Ort/Rolle).
 - **„Vernetzen"-CTA im Kontext**, wo man einem Profi real begegnet: Finder-Ergebnisse, Fall-Beteiligte, Empfehlungs-Historie.
 - Anfrage muss angenommen werden (Spam-Schutz).
+
+### 7.4 Netzwerk-Sektion im Finder
+Der zentrale Sichtbarkeits-Ort des Boosts: **eine dedizierte, visuell abgesetzte Sektion** oben im Werkstatt-Finder (SV-Dispositionsansicht, wo der SV Werkstätten empfiehlt) — **„Aus Ihrem Netzwerk"** — mit den qualifizierten Partner-Werkstätten des SV (untereinander nach Distanz/Score), darunter ein Trenner + **„Weitere Werkstätten"** (die normale gerankte Liste).
+
+- Wird **nur** gerendert, wenn (a) der Owner **zahlender Partner** ist (§5.4) **und** (b) ≥1 qualifizierter Partner in Reichweite. Sonst: keine Sektion, normale Liste — das ist der **sichtbare Free-vs-Paid-Unterschied** (Upsell-Fläche).
+- Symmetrisch im **Gutachter-Finder** (Owner = Werkstatt/Flotte disponiert zu SV): analoge „Aus Ihrem Netzwerk"-Sektion (v1 ungegated, s. §5.4).
+- Immer noch „Wahl frei" (D5): beide Gruppen sind wählbar, nichts wird erzwungen/vorausgewählt.
 
 ---
 
