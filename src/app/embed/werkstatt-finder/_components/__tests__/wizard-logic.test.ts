@@ -4,6 +4,7 @@ import {
   manuelleGewerkeZuBedarf,
   kannWeiter,
   wizardStateZuSuche,
+  zeigeUmkreisLeerHinweis,
   WIZARD_INITIAL,
   FAHRZEUGTYP_OPTIONEN,
   type WerkstattWizardState,
@@ -69,5 +70,22 @@ describe('wizardStateZuSuche', () => {
   })
   it('leerer Hersteller → marke null', () => {
     expect(wizardStateZuSuche(WIZARD_INITIAL).marke).toBeNull()
+  })
+})
+
+// D1 (Aaron 27.07.): Umkreis-Cap macht die leere Liste zum legitimen Ergebnis — der Wizard
+// zeigt dann einen Hinweis statt stumm zu verschwinden.
+describe('zeigeUmkreisLeerHinweis', () => {
+  it('true nur nach abgeschlossener Suche ohne Treffer', () => {
+    expect(zeigeUmkreisLeerHinweis({ hatGesucht: true, loading: false, anzahlTreffer: 0 })).toBe(true)
+  })
+  it('false vor der ersten Suche (kein Flackern vor der ersten Antwort)', () => {
+    expect(zeigeUmkreisLeerHinweis({ hatGesucht: false, loading: false, anzahlTreffer: 0 })).toBe(false)
+  })
+  it('false waehrend loading', () => {
+    expect(zeigeUmkreisLeerHinweis({ hatGesucht: true, loading: true, anzahlTreffer: 0 })).toBe(false)
+  })
+  it('false sobald Treffer da sind', () => {
+    expect(zeigeUmkreisLeerHinweis({ hatGesucht: true, loading: false, anzahlTreffer: 3 })).toBe(false)
   })
 })
