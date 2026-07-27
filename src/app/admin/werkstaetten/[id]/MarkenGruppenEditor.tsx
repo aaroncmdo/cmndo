@@ -13,7 +13,7 @@ import { PlusIcon } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { HAEUFIGE_HERSTELLER } from '@/app/embed/werkstatt-finder/_components/wizard-logic'
 import { FAHRZEUG_GRUPPEN } from '@/lib/werkstatt/fahrzeug-gruppen'
-import { setWerkstattMarken, setWerkstattFahrzeugGruppen } from '../actions'
+import { setWerkstattMarken, setWerkstattFahrzeugGruppen, setWerkstattMarkenoffen } from '../actions'
 
 const INPUT_CLS =
   'flex-1 px-3 py-2 rounded-ios-md border border-claimondo-border bg-white text-body-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/20'
@@ -22,17 +22,39 @@ export function MarkenGruppenEditor({
   werkstattId,
   marken,
   fahrzeugGruppen,
+  istFreieWerkstatt,
 }: {
   werkstattId: string
   marken: string[]
   fahrzeugGruppen: string[]
+  /** D2: ist_freie_werkstatt-Override (null = nie gepflegt -> Matching leitet aus Marken ab). */
+  istFreieWerkstatt: boolean | null
 }) {
   const router = useRouter()
   const [markenSel, setMarkenSel] = useState<string[]>(marken)
   const [markenInput, setMarkenInput] = useState('')
   const [markenBusy, setMarkenBusy] = useState(false)
+  const [markenoffen, setMarkenoffen] = useState<boolean>(istFreieWerkstatt === true)
+  const [markenoffenBusy, setMarkenoffenBusy] = useState(false)
   const [gruppenSel, setGruppenSel] = useState<string[]>(fahrzeugGruppen)
   const [gruppenBusy, setGruppenBusy] = useState(false)
+
+  async function toggleMarkenoffen() {
+    const next = !markenoffen
+    setMarkenoffenBusy(true)
+    try {
+      const res = await setWerkstattMarkenoffen(werkstattId, next)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      setMarkenoffen(next)
+      toast.success(next ? 'Als markenoffen markiert' : 'Markenoffen entfernt')
+      router.refresh()
+    } finally {
+      setMarkenoffenBusy(false)
+    }
+  }
 
   const hatMarke = (m: string) => markenSel.some((x) => x.toLowerCase() === m.toLowerCase())
 
@@ -92,9 +114,33 @@ export function MarkenGruppenEditor({
         <div>
           <h3 className="text-body font-semibold text-claimondo-navy">Marken</h3>
           <p className="text-caption text-claimondo-shield/70">
-            Stärkste Ranking-Achse — markengebundene Werkstätten schlagen freie. Leer = markenoffen.
+            Bei gleicher Entfernung schlagen markengebundene Werkstätten freie. Leer = markenoffen.
           </p>
         </div>
+
+        {/* D2: markenoffen-Override pflegbar (bildet auch "Vertragswerkstatt, nimmt alle" ab) */}
+        <label className="flex items-start gap-3 text-body-sm text-claimondo-navy">
+          <input
+            type="checkbox"
+            checked={markenoffen}
+            onChange={toggleMarkenoffen}
+            disabled={markenoffenBusy}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-claimondo-border"
+          />
+          <span>
+            Nimmt alle Marken an (markenoffen)
+            <span className="block text-caption text-claimondo-shield/70">
+              Auch mit gepflegten Marken kann die Werkstatt markenoffen bleiben — reine
+              Spezialisten schalten das aus. Der Vertragswerkstatt-Rang für gepflegte Marken
+              gilt erst nach Verifizierung.
+            </span>
+            {istFreieWerkstatt == null && markenSel.length === 0 && (
+              <span className="block text-caption text-claimondo-ondo">
+                markenoffen (abgeleitet — keine Marken gepflegt)
+              </span>
+            )}
+          </span>
+        </label>
 
         <div className="flex flex-wrap gap-2">
           {markenChips.map((m) => (
