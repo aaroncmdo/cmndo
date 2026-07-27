@@ -32,8 +32,26 @@
 | **E · Netzwerkkarte** | Schadenkarte → „Netzwerkkarte" umframen, als Partner-Vorteil verkaufen | (neu) |
 | **F · DAT-Gating raus** | Registrierung für alle Gutachter öffnen; DAT-Gating auditieren + entfernen | (neu) |
 | **G · Flottenpartner-Features** | Feature-Set + Verkaufsargumente für Flottenpartner | (offen) |
+| **H · Kunde fahrzeug-zentrisch** | Fahrzeug-Übersicht statt Fälle-Liste; Schäden als Historie in Detail-Views | (neu, spiegelt FM) |
 
 ---
+
+## 2b · Nachträge (27.07.) — WS H, Kontaktverwaltung, Verfeinerungen
+
+**Workstream H · Kunde-Portal fahrzeug-zentrisch:** statt Fälle-Liste → **Fahrzeug-Übersicht** `/kunde/fahrzeuge` → Fahrzeug-Detail (Stammdaten + **Schadenhistorie**) → Schaden-Detail (bestehende Claim-View). **Reuse = FM-Muster generalisieren** (`/flotte/fahrzeug/[id]` + `schaden/[claimId]`, `lib/flotte/fahrzeug-schaeden.ts`, `flotten-claim-detail.ts`) von firma-scoped auf owner-scoped (`vehicles.current_owner_id`). `/kunde/faelle/[id]` bleibt Legacy-Redirect. Net-new: `/kunde/fahrzeuge`-Routen + owner-scoped Query. Ein-Auto-Kunden auto-expandiert.
+
+**Kontaktverwaltung (WS A):** der „Verbindungen"-Tab ist ein echter Kontakt-Manager — Freunde-Liste · offene Anfragen (annehmen/ablehnen) · entfernen/blockieren · Partner einladen. Soziale Substanz für späteren Chat.
+
+**Verfeinerungen (operativ beste Version):**
+1. **Bindung per-Claim, nicht per-Kunde** — Owner aus dem Claim-Ursprung (ein Kunde kann mehrere Fahrzeuge/Netzwerke haben); dovetailt mit WS H.
+2. **Entitlement partner-typ-agnostisch** (wie `partner_rang`/`partner_provisionen`: `partner_typ`+`partner_id`); Gate v1 nur SV, später ohne Umbau erweiterbar.
+3. **Reverse-Sicht trennen:** gebundener Kunde → SV-**Liste** (`SvSlotAuswahl` + „Dein Netzwerk"); anon Prospect → **Karte** + Badge.
+4. **DAT-Gating raus, Verifizierungs-Freigabe behalten** (48h Admin-Review bleibt → kein Spam).
+5. **„Dein Netzwerk" graceful + messbar:** leer → normales Ranking; Telemetrie (gezeigt/gewählt/konvertiert); Free-SV-Upsell.
+6. **Sofort-Claim ohne SA: Expiry + Nudge** (keine hängenden Claims).
+7. **Netzwerkkarte pro Fahrzeug** (WS E hängt am Fahrzeug, überlebt Schäden).
+
+**Revidierte offene Entscheidung (Graph-Knoten):** tendenziell **polymorph `partner_typ`+`partner_id`** (konsistent mit `partner_rang`/`partner_provisionen`) statt `profiles↔profiles`, da der ganze Partner-Stack entity-typ-basiert ist; Chat (profil-basiert, später) mappt via Entity→Profil. Zu bestätigen in der WS-A-Durchsprache (§überschreibt Offene Entscheidung #1).
 
 ## 3 · Reuse-Landkarte — BESTEHEND → INTEGRATION → NET-NEW
 
