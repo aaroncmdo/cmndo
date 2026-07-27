@@ -4,6 +4,7 @@ import React from 'react'
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getAktuelleRechnungsKonfig, type RechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -82,14 +83,18 @@ function fmtEur(val: number): string {
 
 // ─── PDF Document ──────────────────────────────────────────────────────────
 
-function AbrechnungPDF({ data }: { data: AbrechnungData }) {
-  const iban = process.env.CLAIMONDO_BANK_IBAN || '[IBAN nicht konfiguriert]'
-  const bic = process.env.CLAIMONDO_BANK_BIC || '[BIC nicht konfiguriert]'
-  const bankName = process.env.CLAIMONDO_BANK_NAME || '[Bank nicht konfiguriert]'
-  const ustId = process.env.CLAIMONDO_USTID || '[USt-IdNr nicht konfiguriert]'
-  const hrb = process.env.CLAIMONDO_HRB || '[HRB nicht konfiguriert]'
-  const gf = process.env.CLAIMONDO_GESCHAEFTSFUEHRER || 'Aaron Sprafke'
-  const firmenAdresse = process.env.CLAIMONDO_FIRMENADRESSE || '[Adresse nicht konfiguriert]'
+function AbrechnungPDF({ data, konfig }: { data: AbrechnungData; konfig: RechnungsKonfig }) {
+  // Aussteller-Identitaet aus der zeit-versionierten rechnungs_konfiguration (SSoT), nicht
+  // mehr aus CLAIMONDO_*-Env-Vars/hardcoded — so traegt jede Abrechnung den aktuellen
+  // Rechnungssteller (aktuell Kitta & Sprafke UG). §14: USt-IdNr wenn vorhanden, sonst Steuer-Nr.
+  const firmenname = konfig.firmenname
+  const firmenAdresse = `${konfig.strasse}, ${konfig.plz} ${konfig.ort}`
+  const iban = konfig.zahlungsempfaenger_iban
+  const bic = konfig.zahlungsempfaenger_bic
+  const bankName = konfig.zahlungsempfaenger_bank
+  const steuerZeile = konfig.ust_id ? `USt-IdNr: ${konfig.ust_id}` : `Steuer-Nr.: ${konfig.steuernummer ?? '—'}`
+  const hrb = konfig.hrb ? `HRB: ${konfig.hrb}` : ''
+  const gf = konfig.geschaeftsfuehrer ?? ''
 
   return (
     <Document>
@@ -110,9 +115,9 @@ function AbrechnungPDF({ data }: { data: AbrechnungData }) {
         <View style={s.addressRow}>
           <View style={s.addressBlock}>
             <Text style={s.addressLabel}>Absender</Text>
-            <Text style={s.addressText}>Claimondo GmbH</Text>
+            <Text style={s.addressText}>{firmenname}</Text>
             <Text style={s.addressText}>{firmenAdresse}</Text>
-            <Text style={s.addressText}>USt-IdNr: {ustId}</Text>
+            <Text style={s.addressText}>{steuerZeile}</Text>
           </View>
           <View style={s.addressBlock}>
             <Text style={s.addressLabel}>Empfänger</Text>
@@ -190,7 +195,7 @@ function AbrechnungPDF({ data }: { data: AbrechnungData }) {
         {/* Footer */}
         <View style={s.footer}>
           <Text style={s.footerText}>
-            Claimondo GmbH | {firmenAdresse} | USt-IdNr: {ustId} | {hrb} | GF: {gf}
+            {firmenname} | {firmenAdresse} | {steuerZeile}{hrb ? ` | ${hrb}` : ''}{gf ? ` | GF: ${gf}` : ''}
           </Text>
         </View>
       </Page>
@@ -218,16 +223,8 @@ export async function generateAbrechnungPDF(abrechnungId: string): Promise<strin
     return null
   }
 
-  // Fehlende env vars loggen
-  const missingEnvs: string[] = []
-  if (!process.env.CLAIMONDO_BANK_IBAN) missingEnvs.push('CLAIMONDO_BANK_IBAN')
-  if (!process.env.CLAIMONDO_BANK_BIC) missingEnvs.push('CLAIMONDO_BANK_BIC')
-  if (!process.env.CLAIMONDO_BANK_NAME) missingEnvs.push('CLAIMONDO_BANK_NAME')
-  if (!process.env.CLAIMONDO_USTID) missingEnvs.push('CLAIMONDO_USTID')
-  if (!process.env.CLAIMONDO_FIRMENADRESSE) missingEnvs.push('CLAIMONDO_FIRMENADRESSE')
-  if (missingEnvs.length > 0) {
-    console.warn(`[abrechnung-pdf] Fehlende env vars: ${missingEnvs.join(', ')} — Platzhalter werden verwendet`)
-  }
+  // Rechnungssteller-Identitaet aus der zeit-versionierten Konfig (SSoT), stichtaggenau.
+  const konfig = await getAktuelleRechnungsKonfig(new Date(abr.created_at))
 
   const faelligAm = abr.faellig_am
     || new Date(Date.now() + 14 * 86400_000).toISOString().slice(0, 10)
@@ -247,7 +244,7 @@ export async function generateAbrechnungPDF(abrechnungId: string): Promise<strin
   }
 
   // PDF rendern
-  const pdfBuffer = await renderToBuffer(<AbrechnungPDF data={data} />)
+  const pdfBuffer = await renderToBuffer(<AbrechnungPDF data={data} konfig={konfig} />)
 
   // Upload nach Storage
   const monat = abr.abrechnungs_zeitraum_start.slice(0, 7) // YYYY-MM

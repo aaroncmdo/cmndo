@@ -9,7 +9,7 @@ export type RechnungsKonfig = {
   id: string
   gueltig_ab: string
   gueltig_bis: string | null
-  rechnungssteller: 'claimondo_gmbh_igr' | 'claimondo_gmbh' | 'gbr'
+  rechnungssteller: 'claimondo_gmbh_igr' | 'claimondo_gmbh' | 'gbr' | 'kitta_sprafke_ug'
   firmenname: string
   strasse: string
   plz: string
