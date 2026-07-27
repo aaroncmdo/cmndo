@@ -60,6 +60,16 @@ function detailBoolean(details: Record<string, unknown>, key: string): boolean |
   return typeof v === 'boolean' ? v : null
 }
 
+/** Liest ein optionales String-Array-Feld aus rollenDetails (nur nicht-leere Strings; sonst null). */
+function detailStringArray(details: Record<string, unknown>, key: string): string[] | null {
+  const v = details[key]
+  if (!Array.isArray(v)) return null
+  const clean = v
+    .filter((x): x is string => typeof x === 'string' && x.trim().length > 0)
+    .map((x) => x.trim())
+  return clean.length > 0 ? clean : null
+}
+
 export async function anlegePartnerKern(
   admin: AdminClient,
   rolle: PartnerRolle,
@@ -236,6 +246,10 @@ export async function anlegePartnerKern(
         status: 'aktiv',
         aktiviert_am: new Date().toISOString(),
         aktiviert_von: input.aktiviertVon,
+        // Kein Anlage-Pfad fragt Marken ab -> jede neue Werkstatt startet markenoffen.
+        // Explizit true statt DB-Default null, damit der Datenbestand widerspiegelt, was
+        // bewerteMarke (rank-vorschlaege.ts) ohnehin ableitet (keine Marken = 'frei').
+        ist_freie_werkstatt: true,
       }
       // Self-Signup-Optionalfelder: nur setzen wenn vorhanden, damit der Convert-Pfad
       // (ohne diese Details) die DB-Defaults behaelt (Muster wie im makler-Case).
@@ -243,6 +257,10 @@ export async function anlegePartnerKern(
       if (wStrasse) werkstattInsert.adresse_strasse = wStrasse
       const wKleinunternehmer = detailBoolean(input.rollenDetails, 'ist_kleinunternehmer')
       if (wKleinunternehmer !== null) werkstattInsert.ist_kleinunternehmer = wKleinunternehmer
+      // Gewerke aus dem Self-Signup (Ranking-Achse gewerkeFit): Caller validiert das
+      // Vokabular (GEWERKE), hier nur Durchreichung nicht-leerer Strings.
+      const wFaehigkeiten = detailStringArray(input.rollenDetails, 'faehigkeiten')
+      if (wFaehigkeiten) werkstattInsert.faehigkeiten = wFaehigkeiten
 
       const { data: w, error: wErr } = await admin
         .from('werkstaetten')
