@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { WrenchIcon, PlusIcon, QrCodeIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import WerkstattAnlegenForm from './WerkstattAnlegenForm'
 
@@ -20,6 +21,8 @@ type Werkstatt = {
   email: string | null
   telefon: string | null
   faehigkeiten: string[] | null
+  lat: number | null
+  lng: number | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -105,6 +108,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                       {w.name}
                     </Link>
                     <div className="text-claimondo-ondo text-xs">{w.email ?? '—'}</div>
+                    {/* D3: Profil-Luecken sichtbar machen — ohne Geo ist die Werkstatt im
+                        Kunden-Finder unsichtbar (D1-Umkreis), ohne Gewerke rankt sie schlechter. */}
+                    {(w.lat == null || w.lng == null || !w.faehigkeiten || w.faehigkeiten.length === 0) && (
+                      <div className="mt-1 flex flex-wrap gap-1">
+                        {(w.lat == null || w.lng == null) && (
+                          <StatusBadge tone="warning" size="xs">
+                            Ohne Standort — im Finder unsichtbar
+                          </StatusBadge>
+                        )}
+                        {(!w.faehigkeiten || w.faehigkeiten.length === 0) && (
+                          <StatusBadge tone="neutral" size="xs">
+                            Ohne Gewerke
+                          </StatusBadge>
+                        )}
+                      </div>
+                    )}
                   </Td>
                   <Td>
                     <div className="text-claimondo-navy text-sm">{w.adresse_ort ?? '—'}</div>

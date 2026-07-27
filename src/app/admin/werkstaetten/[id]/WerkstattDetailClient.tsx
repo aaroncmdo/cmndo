@@ -679,10 +679,11 @@ export default function WerkstattDetailClient({
           werkstattId={w.id}
           marken={w.marken ?? []}
           fahrzeugGruppen={w.fahrzeug_gruppen ?? []}
+          istFreieWerkstatt={w.ist_freie_werkstatt ?? null}
         />
       </SectionCard>
 
-      {/* Verifizierung — Trust-Marker + Vorreihung im Finder */}
+      {/* Verifizierung — Trust-Marker + Tiebreak im Finder (D1: Distanz bleibt primaer) */}
       <SectionCard title="Verifizierung">
         <div className="space-y-3">
           <div className="flex items-center gap-3 flex-wrap">
@@ -701,6 +702,14 @@ export default function WerkstattDetailClient({
               </span>
             ) : null}
           </div>
+          {/* D4: Verifizierung beglaubigt die Markenbindung — erst dann greift der Vertragswerkstatt-Rang */}
+          <p className="text-caption text-claimondo-shield/70">
+            Mit der Verifizierung beglaubigen Sie auch die gepflegten Marken
+            {w.marken && w.marken.length > 0
+              ? ` (${w.marken.join(', ')})`
+              : ' (aktuell keine gepflegt)'}{' '}
+            — erst dann greift der Vertragswerkstatt-Rang im Finder.
+          </p>
           <div className="space-y-2">
             <label className="block text-body-xs font-medium text-claimondo-navy">
               Notiz (optional)

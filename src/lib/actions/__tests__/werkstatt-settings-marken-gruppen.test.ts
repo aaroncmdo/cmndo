@@ -18,7 +18,7 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve(serverClient)),
 }))
 
-import { setMeineMarken, setMeineFahrzeugGruppen } from '../werkstatt-settings'
+import { setMeineMarken, setMeineFahrzeugGruppen, setMeineMarkenoffen } from '../werkstatt-settings'
 import { revalidatePath } from 'next/cache'
 
 beforeEach(() => {
@@ -53,6 +53,31 @@ describe('setMeineMarken', () => {
     expect(result.ok).toBe(false)
     expect((result as { ok: false; error: string }).error).toBe('DB down')
     expect(revalidatePath).not.toHaveBeenCalled()
+  })
+})
+
+// D2 (Aaron 27.07.): ist_freie_werkstatt wird pflegbar — "Nimmt alle Marken an (markenoffen)".
+describe('setMeineMarkenoffen', () => {
+  it('schreibt ist_freie_werkstatt via SSR-Client mit .eq("user_id") (IDOR-Guard)', async () => {
+    const result = await setMeineMarkenoffen(true)
+    expect(result).toEqual({ ok: true })
+    expect(fromServerMock).toHaveBeenCalledWith('werkstaetten')
+    expect(updateMock).toHaveBeenCalledWith({ ist_freie_werkstatt: true })
+    expect(eqMock).toHaveBeenCalledWith('user_id', 'user-123')
+    expect(revalidatePath).toHaveBeenCalledWith('/werkstatt/einstellungen')
+  })
+
+  it('false wird als Wert geschrieben (bewusster Spezialist)', async () => {
+    const result = await setMeineMarkenoffen(false)
+    expect(result).toEqual({ ok: true })
+    expect(updateMock).toHaveBeenCalledWith({ ist_freie_werkstatt: false })
+  })
+
+  it('nicht angemeldet → { ok: false }, kein Write', async () => {
+    serverClient.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
+    const result = await setMeineMarkenoffen(true)
+    expect(result.ok).toBe(false)
+    expect(fromServerMock).not.toHaveBeenCalled()
   })
 })
 

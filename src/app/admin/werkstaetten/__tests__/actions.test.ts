@@ -297,6 +297,20 @@ describe('setWerkstattFaehigkeiten', () => {
   })
 })
 
+// D2 (Aaron 27.07.): ist_freie_werkstatt wird pflegbar.
+describe('setWerkstattMarkenoffen', () => {
+  it('gibt ok:false zurück wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }; mockConfig.profileRolle = 'dispatch'
+    const { setWerkstattMarkenoffen } = await import('../actions')
+    expect((await setWerkstattMarkenoffen('w-1', true)).ok).toBe(false)
+  })
+  it('admin -> ok:true', async () => {
+    mockConfig.authUser = { id: 'a' }; mockConfig.profileRolle = 'admin'
+    const { setWerkstattMarkenoffen } = await import('../actions')
+    expect((await setWerkstattMarkenoffen('w-1', false)).ok).toBe(true)
+  })
+})
+
 describe('setWerkstattVerifiziert', () => {
   it('gibt ok:false wenn nicht Admin', async () => {
     mockConfig.authUser = { id: 'u' }; mockConfig.profileRolle = 'dispatch'
