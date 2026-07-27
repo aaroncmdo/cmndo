@@ -3,7 +3,17 @@
 import { useState, useTransition, type ChangeEvent } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/primitives'
+import { GEWERKE, type Gewerk } from '@/lib/werkstatt/bedarf/types'
 import { registriereWerkstattSelf } from './actions'
+
+// Anzeige-Labels zum kanonischen Gewerke-Vokabular (Werte = werkstaetten.faehigkeiten).
+const GEWERK_LABEL: Record<Gewerk, string> = {
+  karosserie: 'Karosserie',
+  lackierung: 'Lackierung',
+  mechanik: 'Mechanik',
+  glas: 'Glas',
+  smart_repair: 'Smart Repair',
+}
 
 type FormState = {
   firma: string
@@ -35,6 +45,7 @@ export function WerkstattRegistrierenClient() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [form, setForm] = useState<FormState>(EMPTY)
+  const [faehigkeiten, setFaehigkeiten] = useState<Gewerk[]>([])
   const [kleinunternehmer, setKleinunternehmer] = useState(false)
   const [einwilligung, setEinwilligung] = useState(false)
 
@@ -43,10 +54,15 @@ export function WerkstattRegistrierenClient() {
       setForm((f) => ({ ...f, [key]: e.target.value }))
   }
 
+  function toggleGewerk(g: Gewerk) {
+    setFaehigkeiten((list) => (list.includes(g) ? list.filter((x) => x !== g) : [...list, g]))
+  }
+
   function submit() {
     setError(null)
     const fd = new FormData()
     for (const [k, v] of Object.entries(form)) fd.set(k, v)
+    for (const g of faehigkeiten) fd.append('faehigkeiten', g)
     fd.set('kleinunternehmer', kleinunternehmer ? 'true' : 'false')
     fd.set('einwilligung', einwilligung ? 'true' : 'false')
     startTransition(async () => {
@@ -113,6 +129,31 @@ export function WerkstattRegistrierenClient() {
         <Field label="Ort *">
           <input className={inputClass} value={form.adresse_ort} onChange={set('adresse_ort')} placeholder="Köln" />
         </Field>
+      </div>
+
+      <div className="mt-5">
+        <span className="mb-1 block text-xs font-semibold text-claimondo-ondo">
+          Welche Arbeiten führen Sie aus? (optional)
+        </span>
+        <p className="mb-2 text-xs text-claimondo-shield">
+          Mehrfachauswahl — stärkt Ihre Platzierung im Werkstatt-Finder.
+        </p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {GEWERKE.map((g) => (
+            <label
+              key={g}
+              className="flex items-center gap-2 rounded-ios-md border border-claimondo-border px-3 py-2 text-sm text-claimondo-navy"
+            >
+              <input
+                type="checkbox"
+                checked={faehigkeiten.includes(g)}
+                onChange={() => toggleGewerk(g)}
+                className="h-4 w-4 shrink-0 rounded border-claimondo-border"
+              />
+              <span>{GEWERK_LABEL[g]}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <label className="mt-5 flex items-start gap-3 text-sm text-claimondo-shield">

@@ -153,6 +153,9 @@ export async function createWerkstatt(
     status: 'aktiv',
     aktiviert_am: new Date().toISOString(),
     aktiviert_von: adminUser.id,
+    // Anlage fragt keine Marken ab -> markenoffen. Explizit true statt DB-Default null,
+    // damit der Datenbestand die bewerteMarke-Ableitung (keine Marken = 'frei') abbildet.
+    ist_freie_werkstatt: true,
     ...(faehigkeiten.length > 0 ? { faehigkeiten } : {}),
   }).select('id').single()
 
