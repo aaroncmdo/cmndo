@@ -59,7 +59,7 @@ export default async function KundeAbschlussCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className={`grid grid-cols-1 ${googleReviewUrl ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-2`}>
         {gutachtenUrl ? (
           <a
             href={gutachtenUrl}
@@ -80,15 +80,21 @@ export default async function KundeAbschlussCard({
           </span>
         )}
 
+        {/* Reklamation -> der Kunde-Chat dieses Falls. Vorher: toter Anker `#chat?reklamation=1`
+            (die #chat-Zone existiert nicht; Query im Fragment war zudem kaputt). Der Chat lebt als
+            Route /kunde/chat und selektiert per ?fall=<fallId> den Thread dieses Falls. */}
         <Link
-          href={`/kunde/faelle/${fallId}#chat?reklamation=1`}
+          href={`/kunde/chat?fall=${fallId}`}
           className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-warning/40 rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
         >
           <AlertCircleIcon className="w-4 h-4 text-warning-strong" />
           {t('reklamation')}
         </Link>
 
-        {googleReviewUrl ? (
+        {/* Bewerten nur wenn der SV ein Google-Business-Profil hat (google_place_id -> googleReviewUrl).
+            Ohne Ziel wurde vorher ein toter Anker `#bewerten` gerendert; ohne Review-Ziel entfaellt der
+            Button jetzt (das Grid oben faellt auf 2 Spalten). */}
+        {googleReviewUrl && (
           <a
             href={googleReviewUrl}
             target="_blank"
@@ -98,14 +104,6 @@ export default async function KundeAbschlussCard({
             <StarIcon className="w-4 h-4" />
             {t('bewerten')}
           </a>
-        ) : (
-          <Link
-            href={`/kunde/faelle/${fallId}#bewerten`}
-            className="inline-flex items-center justify-center gap-2 bg-claimondo-navy hover:bg-claimondo-ondo text-white rounded-ios-xl px-3 py-2.5 text-sm font-medium transition-colors"
-          >
-            <StarIcon className="w-4 h-4" />
-            {t('bewerten')}
-          </Link>
         )}
       </div>
     </div>
