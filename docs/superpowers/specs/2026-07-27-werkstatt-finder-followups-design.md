@@ -24,6 +24,12 @@
    Marken-Pflege-Stellen editierbar („Nimmt alle Marken an").
 3. **D3 — Admin-Badge + Geo-Selbstheilung:** Unvollstaendige Profile (ohne Standort / ohne
    Gewerke) werden im Admin sichtbar; Adress-Writes re-geocodieren best-effort.
+4. **D4 — Marken-Rang nur mit Verifizierungs-Gate:** „Markengebunden fuer die gesuchte Marke
+   schlaegt markenoffen" bleibt (erster Tiebreaker nach Distanz) — aber der Vertragswerkstatt-
+   Rang gilt NUR fuer verifizierte Werkstaetten. Wer viele Marken angibt, darf dadurch nicht
+   besser ranken: unverifizierte Marken-Treffer werden im Ranking wie markenoffen behandelt.
+   (Alternative „Marken-Cap N=4" bewusst verworfen — das Gate ist die haertere Bremse und gibt
+   der Verifizierung eine neue operative Rolle, nachdem D1 ihr Ranking-Gewicht genommen hat.)
 
 ## §1 Matching-Engine: Umkreis-Filter + Distanz-primaeres Ranking
 
@@ -54,6 +60,26 @@ Neu: **Distanz primaer, gerundet auf ganze km** (`Math.round(distanz_km)`); inne
 gerundeter Kilometer entscheidet die bisherige Kaskade als Tiebreaker
 (Marke → Gewerke-Fit → Fahrzeug-Gruppe → verifiziert → exakte Distanz). Die Rundung haelt die
 Tiebreaker real wirksam (exakter float-Vergleich wuerde sie entwerten), bleibt aber erklaerbar.
+Beispiel-Konsequenz (D1-konform): freie Werkstatt 6 km schlaegt BMW-Vertragswerkstatt 18 km;
+bei gleicher km-Klasse gewinnt die Vertragswerkstatt.
+
+### Marken-Rang: Verifizierungs-Gate (D4)
+
+`bewerteMarke` befoerdert zu `'marke'` nur noch, wenn **Treffer UND `verifiziert === true`**:
+
+- verifiziert + gesuchte Marke gepflegt → `'marke'` (Chip „{Marke}-Vertragswerkstatt").
+- **unverifiziert + gesuchte Marke gepflegt → `'frei'`-Rang** (Bindung behauptet, nicht
+  geprueft — im Ranking gleichgestellt mit markenoffen, NICHT schlechter: `'unbekannt'` waere
+  eine Strafe fuer ehrliche Pflege). Chip-Wahrheit: In diesem Fall KEIN „Vertragswerkstatt"-
+  und KEIN „Freie Werkstatt (alle Marken)"-Chip, sondern neutral „Repariert {Marke}" —
+  der Frei-Chip bleibt echten Frei-Faellen vorbehalten (Flag true oder keine Marken). Dafuer
+  liefert `bewerte`/`baueGruende` zusaetzlich den rohen Treffer (`markenTreffer: boolean`)
+  neben `markenMatch`.
+- Marken gepflegt, gesuchte NICHT dabei → unveraendert `'unbekannt'` (Spezialist-Guard #4649),
+  unabhaengig von Verifizierung; Flag true ueberschreibt weiter zu `'frei'`.
+- **Operative Konsequenz:** Der Marken-Bonus ist inaktiv, bis Werkstaetten verifiziert werden —
+  Verifizierung beglaubigt kuenftig ausdruecklich auch die Markenbindung (Hinweis im
+  Admin-Verifizieren-Flow, siehe §3).
 Harte **Eignungs-Ausschluesse bleiben unveraendert**: falsche Fahrzeug-Gruppe raus; nicht
 passende Gewerke raus ab `bedarfConfidence >= HART_SCHWELLE`. Kurzformel: *Filter = Eignung +
 Umkreis, Reihenfolge = Naehe.* Chips/`gruende` bleiben unveraendert (inkl. „Verifizierter
@@ -87,7 +113,8 @@ EmptyState-Nutzung der werkstatt-empfehlung-Seite.
     (user-scoped via `eq('user_id', user.id)`).
 - **UI:** Toggle „Nimmt alle Marken an (markenoffen)" im Admin-`MarkenGruppenEditor` und in der
   Portal-„Meine Marken"-Card, mit Hinweis: „Auch mit gepflegten Marken koennen Sie markenoffen
-  bleiben — reine Spezialisten schalten das aus." Anzeige des aktuellen Zustands inkl.
+  bleiben — reine Spezialisten schalten das aus." Zusatzhinweis in beiden UIs (D4): „Der
+  Vertragswerkstatt-Rang fuer gepflegte Marken gilt erst nach Verifizierung durch Claimondo." Anzeige des aktuellen Zustands inkl.
   Ableitungs-Hinweis, wenn `ist_freie_werkstatt` NULL und keine Marken gepflegt sind
   („markenoffen (abgeleitet)").
 - **Ranking-Logik unveraendert:** `bewerteMarke` behaelt `flag === true || keine Marken →
@@ -103,14 +130,19 @@ EmptyState-Nutzung der werkstatt-empfehlung-Seite.
   Admin-Detail) re-geocodiert best-effort (`geocodeAdresse`), wenn sich die Adresse aendert
   ODER `lat/lng` fehlen. Fehler bleiben non-fatal (wie im Signup). Der Implementierungsplan
   inventarisiert die konkreten Save-Stellen.
+- **Verifizieren-Flow (D4-Hinweis):** Im Admin-Verifizieren-Dialog/-Button ein Satz: „Mit der
+  Verifizierung beglaubigen Sie auch die gepflegten Marken (Vertragswerkstatt-Rang im Finder)."
+  Die gepflegten Marken werden dort angezeigt.
 
 ## §4 Paket-Schnitt, Tests, Rollout
 
 - **PR 1 (dringend, kundenwirksam):** §1 komplett. TDD auf
   `rank-vorschlaege.test.ts`: fern (>50 km) unsichtbar trotz verifiziert; ohne Geo unsichtbar
   bei Anker; ohne Anker ungefiltert; 2-km-unverifiziert vor 4-km-verifiziert; Tiebreak
-  innerhalb gleicher km (verifiziert gewinnt); Fallback bleibt im Umkreis. Plus
-  Wizard-Leer-Zustand-Test.
+  innerhalb gleicher km (verifiziert gewinnt); Fallback bleibt im Umkreis. D4-Tests:
+  verifizierter Marken-Treffer → 'marke'; unverifizierter Treffer → 'frei'-Rang + Chip
+  „Repariert {Marke}" (kein Vertrags-, kein Frei-Chip); Spezialist-Guard ('unbekannt')
+  unveraendert. Plus Wizard-Leer-Zustand-Test.
 - **PR 2:** §2 + §3 (Toggle, Badges, Selbstheilung) mit Action-Tests.
 - **Regel-4 (prod, anon):** `.invalid`-Wegwerf-Rezept aus Memory
   `coordination-werkstatt-anlage-frei-flag-gewerke` — eine nahe + eine ferne Werkstatt seeden:
