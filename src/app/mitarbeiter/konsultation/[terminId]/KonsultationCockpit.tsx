@@ -135,15 +135,25 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
         </p>
       </section>
 
-      {/* Aktion: FlowLink erneut senden */}
+      {/* Aktion: FlowLink erneut senden. Guard (Aaron 27.07., FlowLink-Audit): nach Abschluss KEIN
+          erneuter Versand — der Kunde hat konvertiert; ein Re-Send wuerde ihn nur auf den
+          "abgeschlossen"-Screen schicken. */}
       <section className="rounded-ios-md border border-claimondo-border bg-white p-5 space-y-3">
         <p className="text-caption uppercase tracking-wider text-claimondo-ondo">FlowLink erneut senden</p>
-        <p className="text-body-sm text-claimondo-ondo">Der Kunde schließt den Flow selbst ab (Termin, Auftrag, alles Weitere).</p>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="ondo" loading={sending === 'whatsapp'} disabled={!lead?.telefon || !!sending} onClick={() => resend('whatsapp')}>WhatsApp</Button>
-          <Button variant="ghost" loading={sending === 'sms'} disabled={!lead?.telefon || !!sending} onClick={() => resend('sms')}>SMS</Button>
-          <Button variant="ghost" loading={sending === 'email'} disabled={!lead?.email || !!sending} onClick={() => resend('email')}>Email</Button>
-        </div>
+        {flowLink?.abgeschlossen_am ? (
+          <p className="text-body-sm text-success-strong">
+            FlowLink bereits abgeschlossen — der Kunde hat den Flow konvertiert. Kein erneuter Versand nötig.
+          </p>
+        ) : (
+          <>
+            <p className="text-body-sm text-claimondo-ondo">Der Kunde schließt den Flow selbst ab (Termin, Auftrag, alles Weitere).</p>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button variant="ondo" loading={sending === 'whatsapp'} disabled={!lead?.telefon || !!sending} onClick={() => resend('whatsapp')}>WhatsApp</Button>
+              <Button variant="ghost" loading={sending === 'sms'} disabled={!lead?.telefon || !!sending} onClick={() => resend('sms')}>SMS</Button>
+              <Button variant="ghost" loading={sending === 'email'} disabled={!lead?.email || !!sending} onClick={() => resend('email')}>Email</Button>
+            </div>
+          </>
+        )}
       </section>
 
       {/* Aktion: Ergebnis loggen */}
