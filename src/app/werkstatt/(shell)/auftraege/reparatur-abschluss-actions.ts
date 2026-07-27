@@ -65,8 +65,22 @@ export async function markiereReparaturErledigt(
   const fallId = (bridge as { fall_id: string } | null)?.fall_id ?? claimId
 
   const ext = (file.name.split('.').pop() || 'pdf').toLowerCase()
-  const storagePath = `${fallId}/schlussrechnung_${Date.now()}.${ext}`
+  // Idempotenz: deterministischer Pfad (kein Date.now) — ein Retry ueberschreibt dasselbe Storage-
+  // Objekt statt ein zweites anzulegen. Zusammen mit dem Alt-Beleg-Replace unten verhindert das die
+  // Dubletten-Schlussrechnung, wenn der Close (Schritt 2) scheitert und die Werkstatt nochmal
+  // einreicht (der Pfad, den der Kommentar bei Schritt 2 ausdruecklich vorsieht) oder doppelt klickt.
+  const storagePath = `${fallId}/schlussrechnung.${ext}`
   const bytes = new Uint8Array(await file.arrayBuffer())
+
+  // Schon vorhandene Schlussrechnung(en) dieses Claims (aus abgebrochenen Vorversuchen) erfassen —
+  // nach erfolgreichem Neu-Insert ersetzt. fall_dokumente hat keinen Unique-Constraint darauf, sonst
+  // legte der Retry-Pfad bei jedem Versuch eine neue Zeile an.
+  const { data: alteBelege } = await admin
+    .from('fall_dokumente')
+    .select('id, storage_path')
+    .eq('claim_id', claimId)
+    .eq('dokument_typ', 'schlussrechnung')
+
   const { error: upErr } = await admin.storage
     .from('fall-dokumente')
     .upload(storagePath, bytes, { contentType: file.type || 'application/pdf', upsert: true })
@@ -85,6 +99,17 @@ export async function markiereReparaturErledigt(
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
   } as never)
   if (docErr) return { ok: false, error: `Dokument-Speicherung fehlgeschlagen: ${docErr.message}` }
+
+  // Alt-Belege erst NACH dem erfolgreichen Insert ersetzen (kein Datenverlust bei Fehler): die Zeilen
+  // weg + verwaiste Storage-Objekte (alte Date.now-Pfade) aufraeumen. Der neue Beleg bleibt.
+  const alte = (alteBelege ?? []) as { id: string; storage_path: string | null }[]
+  if (alte.length > 0) {
+    const verwaist = alte
+      .map((d) => d.storage_path)
+      .filter((p): p is string => !!p && p !== storagePath)
+    if (verwaist.length > 0) await admin.storage.from('fall-dokumente').remove(verwaist)
+    await admin.from('fall_dokumente').delete().in('id', alte.map((d) => d.id))
+  }
 
   const nowIso = new Date().toISOString()
 
