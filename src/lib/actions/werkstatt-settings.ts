@@ -231,6 +231,29 @@ export async function setMeineMarken(
   return { ok: true }
 }
 
+/**
+ * D2 (Aaron 27.07.): Self-Service-Toggle "Nimmt alle Marken an (markenoffen)" —
+ * schreibt ist_freie_werkstatt. user_id-scoped (kein IDOR), RLS-Backstop wie die
+ * Geschwister-Actions. Der Vertragswerkstatt-Rang fuer gepflegte Marken haengt
+ * unabhaengig davon am Verifizierungs-Gate (D4, rank-vorschlaege.ts).
+ */
+export async function setMeineMarkenoffen(
+  markenoffen: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const { error } = await supabase
+    .from('werkstaetten')
+    .update({ ist_freie_werkstatt: markenoffen })
+    .eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/werkstatt/einstellungen')
+  return { ok: true }
+}
+
 // ── Fahrzeug-Gruppen ──────────────────────────────────────────────────────────
 
 /**

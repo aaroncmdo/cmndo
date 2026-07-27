@@ -63,6 +63,25 @@ export async function setWerkstattMarken(
   return { ok: true }
 }
 
+// D2 (Aaron 27.07., Spec 2026-07-27-werkstatt-finder-followups): ist_freie_werkstatt pflegbar —
+// "Nimmt alle Marken an (markenoffen)". Der Override bildet auch "Vertragswerkstatt, nimmt
+// trotzdem alle" ab; reine Spezialisten schalten ihn aus.
+export async function setWerkstattMarkenoffen(
+  werkstattId: string,
+  markenoffen: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen das Marken-Profil ändern.' }
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('werkstaetten')
+    .update({ ist_freie_werkstatt: markenoffen })
+    .eq('id', werkstattId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
+}
+
 // Task #5: FAHRZEUG-GRUPPEN pflegen (Array-Spalte werkstaetten.fahrzeug_gruppen) — Ranking-Achse.
 // Fixe Werte-Liste (FAHRZEUG_GRUPPEN_VALUES); Unbekanntes wird gefiltert.
 export async function setWerkstattFahrzeugGruppen(
