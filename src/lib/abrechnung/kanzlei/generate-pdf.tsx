@@ -4,6 +4,7 @@ import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
+import { getAktuelleRechnungsKonfig, type RechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -82,10 +83,12 @@ function fmtEur(val: number): string {
 
 // ─── PDF Document ────────────────────────────────────────────────────────────
 
-function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
-  const firmenAdresse = process.env.CLAIMONDO_FIRMENADRESSE || 'Musterstr. 1, 50667 Koeln'
-  const ustId = process.env.CLAIMONDO_USTID || '[USt-IdNr nicht konfiguriert]'
-  const gf = process.env.CLAIMONDO_GESCHAEFTSFUEHRER || 'Aaron Sprafke'
+function KanzleiAbrechnungPDF({ data, konfig }: { data: KanzleiPdfData; konfig: RechnungsKonfig }) {
+  // Aussteller-Identitaet aus der zeit-versionierten rechnungs_konfiguration (SSoT).
+  const firmenname = konfig.firmenname
+  const firmenAdresse = `${konfig.strasse}, ${konfig.plz} ${konfig.ort}`
+  const steuerZeile = konfig.ust_id ? `USt-IdNr: ${konfig.ust_id}` : `Steuer-Nr.: ${konfig.steuernummer ?? '—'}`
+  const gf = konfig.geschaeftsfuehrer ?? ''
 
   return (
     <Document>
@@ -94,7 +97,7 @@ function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
         <View style={s.headerRow}>
           <View>
             <Text style={s.brand}>Claimondo</Text>
-            <Text style={s.brandSub}>Claimondo GmbH, {firmenAdresse}</Text>
+            <Text style={s.brandSub}>{firmenname}, {firmenAdresse}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' as const }}>
             <Text style={{ fontSize: 16, fontFamily: 'Helvetica-Bold', color: ONDO }}>RECHNUNG</Text>
@@ -106,9 +109,9 @@ function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
         <View style={s.addressRow}>
           <View style={s.addressBlock}>
             <Text style={s.addressLabel}>Absender</Text>
-            <Text style={s.addressText}>Claimondo GmbH</Text>
+            <Text style={s.addressText}>{firmenname}</Text>
             <Text style={s.addressText}>{firmenAdresse}</Text>
-            <Text style={s.addressText}>USt-IdNr: {ustId}</Text>
+            <Text style={s.addressText}>{steuerZeile}</Text>
           </View>
           <View style={s.addressBlock}>
             <Text style={s.addressLabel}>Empfaenger</Text>
@@ -185,7 +188,7 @@ function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
         {/* Footer */}
         <View style={s.footer}>
           <Text style={s.footerText}>
-            Claimondo GmbH | Geschaeftsfuehrer: {gf} | Gerichtsstand: Koeln
+            {firmenname}{gf ? ` | Geschäftsführer: ${gf}` : ''} | Gerichtsstand: Köln
           </Text>
         </View>
       </Page>
@@ -196,14 +199,8 @@ function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
 // ─── Public API ──────────────────────────────────────────────────────────────
 
 export async function generateKanzleiAbrechnungPdf(data: KanzleiPdfData): Promise<Buffer> {
-  const missingEnvs: string[] = []
-  if (!process.env.CLAIMONDO_FIRMENADRESSE) missingEnvs.push('CLAIMONDO_FIRMENADRESSE')
-  if (!process.env.CLAIMONDO_USTID) missingEnvs.push('CLAIMONDO_USTID')
-  if (missingEnvs.length > 0) {
-    console.warn(`[KFZ-188 generate-pdf] Fehlende env vars: ${missingEnvs.join(', ')} — Platzhalter werden verwendet`)
-  }
-
-  const pdfBuffer = await renderToBuffer(<KanzleiAbrechnungPDF data={data} />)
+  const konfig = await getAktuelleRechnungsKonfig()
+  const pdfBuffer = await renderToBuffer(<KanzleiAbrechnungPDF data={data} konfig={konfig} />)
   return Buffer.from(pdfBuffer)
 }
 
