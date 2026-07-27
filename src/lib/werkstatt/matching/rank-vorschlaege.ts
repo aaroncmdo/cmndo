@@ -21,6 +21,13 @@ const STATUS_AKTIV = 'aktiv'
 const MAX_VORSCHLAEGE = 5
 
 /**
+ * D1 (Aaron 27.07.): "Es koennen nur Werkstaetten in der Naehe gezeigt werden" — harter
+ * Anzeige-Umkreis in km um den Anker (Fahrzeugstandort). Default fuer alle Kunden-Surfaces;
+ * null im Kontext = ungecappt (interne Tools).
+ */
+export const MAX_UMKREIS_KM = 50
+
+/**
  * „Belastbare" Google-Bewertung = echtes Vertrauens-Signal: >= 4,0 Sterne UND >= 5 Bewertungen.
  * Ein 3-Sterne- oder 2-Reviews-Profil ist kein Trust-Argument. Single Source of Truth fuer den
  * GBP-Trust-Chip (baueGruende) UND den Google-Badge in Card/Popup/Sheet (WerkstattFinder /
@@ -93,6 +100,8 @@ export type MatchingKontext = {
   bedarfConfidence: number
   /** Geo-Anker = FAHRZEUGSTANDORT (wo das Auto steht) — NICHT der Besichtigungsort. */
   anker: { lat: number; lng: number } | null
+  /** D1: Anzeige-Umkreis in km. undefined = MAX_UMKREIS_KM; null = ungecappt (interne Tools). */
+  maxUmkreisKm?: number | null
 }
 
 const GEWERK_LABEL: Record<string, string> = {
@@ -130,11 +139,24 @@ const FIT_RANG: Record<Fit, number> = { passt: 0, unbekannt: 1, passt_nicht: 2 }
  * fälschlich zum Allrounder machen).
  */
 function bewerteMarke(w: WerkstattKandidat, marke: string | null): MarkenMatch {
-  const gesucht = marke?.trim().toUpperCase()
-  if (gesucht && w.marken?.some((m) => m.trim().toUpperCase() === gesucht)) return 'marke'
+  const trifft = trifftMarke(w, marke)
+  // D4 (Aaron 27.07.): Vertragswerkstatt-Rang NUR beglaubigt (Verifizierungs-Gate) —
+  // "wenn er mehrere Marken angibt und dadurch besser rankt ist das falsch." Lange
+  // Marken-Listen duerfen den Bonus nicht vervielfachen; der Admin prueft die Bindung
+  // beim Verifizieren.
+  if (trifft && w.verifiziert === true) return 'marke'
   const hatMarken = (w.marken?.length ?? 0) > 0
   if (w.ist_freie_werkstatt === true || !hatMarken) return 'frei'
+  // Unverifizierter Treffer: im Ranking wie markenoffen (Behauptung ist keine Strafe,
+  // aber auch kein Bonus). Chip-Wahrheit regelt baueGruende via markenTreffer.
+  if (trifft) return 'frei'
   return 'unbekannt'
+}
+
+/** Fuehrt die Werkstatt die gesuchte Marke (case-insensitiv)? */
+function trifftMarke(w: WerkstattKandidat, marke: string | null): boolean {
+  const gesucht = marke?.trim().toUpperCase()
+  return !!gesucht && !!w.marken?.some((m) => m.trim().toUpperCase() === gesucht)
 }
 
 /**
@@ -162,6 +184,7 @@ function baueGruende(
   w: WerkstattKandidat,
   k: MatchingKontext,
   markenMatch: MarkenMatch,
+  markenTreffer: boolean,
   gewerkeFit: Fit,
   gruppenFit: Fit,
   distanzKm: number,
@@ -170,6 +193,10 @@ function baueGruende(
 
   if (markenMatch === 'marke' && k.marke) {
     gruende.push({ typ: 'marke', text: `${k.marke.trim()}-Vertragswerkstatt` })
+  } else if (markenTreffer && k.marke) {
+    // D4: Treffer ohne Verifizierung — neutrale Faehigkeits-Aussage statt Vertrags-/Frei-Chip
+    // (weder beglaubigte Bindung noch echte Markenoffenheit behaupten).
+    gruende.push({ typ: 'marke', text: `Repariert ${k.marke.trim()}` })
   } else if (markenMatch === 'frei') {
     gruende.push({ typ: 'marke', text: 'Freie Werkstatt (alle Marken)' })
   }
@@ -220,6 +247,7 @@ function bewerte(w: WerkstattKandidat, k: MatchingKontext): WerkstattVorschlag {
       : Infinity
 
   const markenMatch = bewerteMarke(w, k.marke)
+  const markenTreffer = trifftMarke(w, k.marke)
   const gewerkeFit = bewerteGewerke(w.faehigkeiten, k.bedarf)
   const gruppenFit = bewerteGruppe(w.fahrzeug_gruppen, k.fahrzeugGruppe)
 
@@ -233,12 +261,22 @@ function bewerte(w: WerkstattKandidat, k: MatchingKontext): WerkstattVorschlag {
     // 'passt' = der Gewerke-Fit (so hat die alte UI es interpretiert). 'unbekannt' zaehlt bewusst
     // NICHT als passt — sonst wirkt eine ungepflegte Werkstatt so sicher wie eine geprüfte.
     passt: gewerkeFit === 'passt',
-    gruende: baueGruende(w, k, markenMatch, gewerkeFit, gruppenFit, distanz_km),
+    gruende: baueGruende(w, k, markenMatch, markenTreffer, gewerkeFit, gruppenFit, distanz_km),
   }
 }
 
-/** Aarons Reihenfolge: Marke > Gewerke-Fit > Fahrzeug-Gruppe > verifiziert > Entfernung. */
+/**
+ * D1 (Aaron 27.07.): "Distanz muss immer schlagen" — primaer nach ganzen km; die alte Kaskade
+ * (Marke > Gewerke-Fit > Fahrzeug-Gruppe > verifiziert, Aarons Spec-B-Reihenfolge) lebt nur
+ * noch als Tiebreak innerhalb derselben km-Klasse. Die Rundung haelt die Tiebreaker real
+ * wirksam — ein exakter float-Vergleich wuerde sie praktisch nie greifen lassen.
+ */
 function vergleiche(a: WerkstattVorschlag, b: WerkstattVorschlag): number {
+  // Infinity !== Infinity ist false -> zwei Geo-lose fallen in die Kaskade statt in NaN.
+  const kmA = Math.round(a.distanz_km)
+  const kmB = Math.round(b.distanz_km)
+  if (kmA !== kmB) return kmA - kmB
+
   const marke = MARKEN_RANG[a.markenMatch] - MARKEN_RANG[b.markenMatch]
   if (marke !== 0) return marke
 
@@ -251,19 +289,23 @@ function vergleiche(a: WerkstattVorschlag, b: WerkstattVorschlag): number {
   const trust = Number(b.verifiziert === true) - Number(a.verifiziert === true)
   if (trust !== 0) return trust
 
-  return a.distanz_km - b.distanz_km
+  const rest = a.distanz_km - b.distanz_km
+  return Number.isNaN(rest) ? 0 : rest
 }
 
 /**
  * Die bis zu 5 passendsten Werkstätten — gerankt, jede mit sichtbaren Gründen.
  *
  * HARTE FILTER (fliegt raus):
+ *   • D1: jenseits des Anzeige-Umkreises (maxUmkreisKm, Default MAX_UMKREIS_KM) — greift nur
+ *     mit Anker; Werkstätten ohne Koordinaten fallen dann mit raus (Nähe nicht belegbar).
  *   • Fahrzeug-Gruppe gepflegt UND passt nicht (PKW-Werkstatt ≠ LKW)
  *   • Gewerke passen nicht — aber nur ab bedarfConfidence >= HART_SCHWELLE; darunter wissen wir den
  *     Bedarf nicht sicher genug, um jemanden auszuschließen.
  *
- * FALLBACK: filtern die Kriterien ALLES weg, liefern wir lieber die Geo-nächsten als eine leere Liste
- * (der Kunde soll immer etwas wählen können — er sieht ja die Gründe und kann selbst entscheiden).
+ * FALLBACK: filtern die Eignungs-Kriterien alles weg, liefern wir lieber die Geo-nächsten
+ * INNERHALB DES UMKREISES als eine leere Liste. Jenseits des Umkreises gibt es keinen Fallback
+ * mehr — eine leere Liste ist seit D1 ein legitimes Ergebnis (Aaron 27.07.).
  */
 export function rankeWerkstattVorschlaege(
   kandidaten: WerkstattKandidat[],
@@ -274,12 +316,17 @@ export function rankeWerkstattVorschlaege(
     .filter((w) => w.status === STATUS_AKTIV)
     .map((w) => bewerte(w, kontext))
 
-  const gefiltert = bewertet.filter((v) => {
+  // D1: harter Anzeige-Umkreis. Infinity <= cap ist false -> ohne Geo faellt mit raus.
+  const cap = kontext.maxUmkreisKm === undefined ? MAX_UMKREIS_KM : kontext.maxUmkreisKm
+  const sichtbar =
+    kontext.anker && cap != null ? bewertet.filter((v) => v.distanz_km <= cap) : bewertet
+
+  const gefiltert = sichtbar.filter((v) => {
     if (v.gruppenFit === 'passt_nicht') return false
     if (kontext.bedarfConfidence >= HART_SCHWELLE && v.gewerkeFit === 'passt_nicht') return false
     return true
   })
 
-  const basis = gefiltert.length > 0 ? gefiltert : bewertet
+  const basis = gefiltert.length > 0 ? gefiltert : sichtbar
   return [...basis].sort(vergleiche).slice(0, limit)
 }

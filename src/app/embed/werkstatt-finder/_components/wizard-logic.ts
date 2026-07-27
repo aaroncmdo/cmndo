@@ -82,6 +82,17 @@ export function abrechnungZuLeadFelder(w: Abrechnungswahl): {
   return { schuldfrage: 'eigenverantwortung', eigeneVersicherung: w === 'kasko' ? 'ja' : 'nein' }
 }
 
+// D1 (Aaron 27.07.): Der Umkreis-Cap (MAX_UMKREIS_KM) macht die leere Ergebnisliste zum
+// legitimen Ergebnis. Der Wizard zeigt dann einen Hinweis statt stumm zu verschwinden —
+// aber erst NACH einer abgeschlossenen Suche (kein Flackern im Debounce-/Ladefenster).
+export function zeigeUmkreisLeerHinweis(s: {
+  hatGesucht: boolean
+  loading: boolean
+  anzahlTreffer: number
+}): boolean {
+  return s.hatGesucht && !s.loading && s.anzahlTreffer === 0
+}
+
 // Manuelle Gewerke-Auswahl → Reparaturbedarf. confidence=70 (> HART_SCHWELLE 60): der Nutzer hat die
 // Gewerke bewusst gewählt → hart auf passende Werkstätten filtern (Engine fällt bei 0 auf Geo-nächste zurück).
 export function manuelleGewerkeZuBedarf(gewerke: Gewerk[]): Reparaturbedarf {
