@@ -96,11 +96,11 @@ export async function starteEmbedBuchung(
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
-  // 2) gfa → lead → flow_link (Service-Role, idempotent). send:false = KEINE Flowlink-WA an den
-  //    Kunden (Aaron 14.06.: im Embed soll kein Magic-Link rausgehen — der Kunde bucht inline
-  //    weiter via FlowSlotStep; der Token wird nur intern für die Inline-Buchung gebraucht).
-  //    (Vorher send:true seit 11.06. — bewusst zurückgenommen für die Self-Service-Strecke.)
-  const issued = await issueCanonicalFlowLinkForAnfrage(gfa.id, { send: false })
+  // 2) gfa → lead → flow_link (Service-Role, idempotent). send:true = der Kunde bekommt seinen
+  //    Flowlink per WhatsApp (Aaron 27.07.: „der Kunde soll seinen Flowlink wieder per WhatsApp
+  //    bekommen" — Reversal der 14.06.-Ruecknahme). Der Kunde bucht zwar inline via FlowSlotStep
+  //    weiter, bekommt den Magic-Link aber zusaetzlich als Rueckkehr-/Beleg-Link (WA→SMS→Email).
+  const issued = await issueCanonicalFlowLinkForAnfrage(gfa.id, { send: true })
   if (!issued.ok) return { ok: false, error: issued.error }
 
   // AAR-956 16.06. (Aaron): anfrageId mit zurueckgeben → reserviereEmbedTermin kann
