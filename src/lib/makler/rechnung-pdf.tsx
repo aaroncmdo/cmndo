@@ -8,6 +8,7 @@
 // hinterlegt hat (USt-IdNr, IBAN) erscheinen als sichtbarer Platzhalter zum Ausfuellen.
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
+import { getAktuelleRechnungsKonfig, type RechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
 
 const NAVY = '#0D1B3E'
 const ONDO = '#4573A2'
@@ -77,8 +78,11 @@ function fmtEur(val: number): string {
   return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' €'
 }
 
-function MaklerRechnungPDF({ data }: { data: MaklerRechnungData }) {
-  const claimondoAdresse = process.env.CLAIMONDO_FIRMENADRESSE || 'Musterstr. 1, 50667 Koeln'
+function MaklerRechnungPDF({ data, konfig }: { data: MaklerRechnungData; konfig: RechnungsKonfig }) {
+  // Rechnungsempfaenger = die Plattform-Entitaet aus der rechnungs_konfiguration (SSoT).
+  // Der Makler ist Aussteller, die UG (bzw. jeweils aktive Konfig) der Empfaenger seiner Provisions-Rechnung.
+  const empfaengerName = konfig.firmenname
+  const empfaengerAdresse = `${konfig.strasse}, ${konfig.plz} ${konfig.ort}`
   const m = data.makler
   const adressZeilen = (m.adresse || '').split('\n').filter(Boolean)
 
@@ -111,8 +115,8 @@ function MaklerRechnungPDF({ data }: { data: MaklerRechnungData }) {
           </View>
           <View style={s.addressBlock}>
             <Text style={s.addressLabel}>Rechnungsempfaenger</Text>
-            <Text style={s.addressText}>Claimondo GmbH</Text>
-            <Text style={s.addressText}>{claimondoAdresse}</Text>
+            <Text style={s.addressText}>{empfaengerName}</Text>
+            <Text style={s.addressText}>{empfaengerAdresse}</Text>
           </View>
         </View>
 
@@ -191,6 +195,7 @@ function MaklerRechnungPDF({ data }: { data: MaklerRechnungData }) {
 }
 
 export async function generateMaklerRechnungPdf(data: MaklerRechnungData): Promise<Buffer> {
-  const pdfBuffer = await renderToBuffer(<MaklerRechnungPDF data={data} />)
+  const konfig = await getAktuelleRechnungsKonfig()
+  const pdfBuffer = await renderToBuffer(<MaklerRechnungPDF data={data} konfig={konfig} />)
   return Buffer.from(pdfBuffer)
 }
