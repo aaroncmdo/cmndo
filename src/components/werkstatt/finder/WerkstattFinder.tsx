@@ -4,6 +4,7 @@
 // Schadenort. Bewusst simpel (kein Wizard, keine Karte): pro Werkstatt eine
 // Card mit Name/Adresse/Distanz/Telefon + "Auswaehlen"-Button.
 
+import { useEffect, useRef } from 'react'
 import { Card, Button } from '@/components/primitives'
 import EmptyState from '@/components/shared/EmptyState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -28,6 +29,8 @@ type Props = {
   selectedIds?: string[]
   loading?: boolean
   keineSpezialisierte?: boolean
+  /** Embed: bei Auswahl (z.B. Map-Pin-Klick) die selektierte Card in den sichtbaren Bereich scrollen. */
+  scrollToSelected?: boolean
 }
 
 // Nur Toene, die StatusBadge kennt (success/neutral/warning — wie die bestehenden Fit-Chips).
@@ -53,7 +56,19 @@ function distanzLabel(distanz_km: number): string | null {
   return `${distanz_km.toFixed(1).replace('.', ',')} km vom Fahrzeugstandort`
 }
 
-export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedIds, loading, keineSpezialisierte }: Props) {
+export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedIds, loading, keineSpezialisierte, scrollToSelected }: Props) {
+  const listRef = useRef<HTMLUListElement | null>(null)
+  // Embed (Aaron 27.07.): bei Auswahl (z.B. Map-Pin-Klick) die selektierte Card in den sichtbaren
+  // Bereich scrollen — "die Auswahl springt darauf". block:'nearest' scrollt nur, wenn sie ausserhalb
+  // liegt (kein Sprung, wenn schon sichtbar). Container-Query via data-Attribut statt geteiltem Ref
+  // (robust gegen Ref-Wechsel zwischen Cards bei Auswahlwechsel).
+  useEffect(() => {
+    if (!scrollToSelected || !selectedId) return
+    listRef.current
+      ?.querySelector('[data-wf-selected="true"]')
+      ?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [scrollToSelected, selectedId])
+
   if (loading) {
     return (
       <div className="space-y-3" aria-busy>
@@ -88,7 +103,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
           Keine spezialisierte Werkstatt in der Nähe — hier die nächsten.
         </div>
       )}
-      <ul className="space-y-3">
+      <ul ref={listRef} className="space-y-3">
         {werkstaetten.map((w) => {
           const isSelected = selectedIds ? selectedIds.includes(w.id) : selectedId === w.id
           const adresse = adresseZeile(w)
@@ -137,7 +152,7 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, selectedId
               </div>
             ) : null
           return (
-            <li key={w.id}>
+            <li key={w.id} data-wf-selected={isSelected ? 'true' : undefined}>
               <Card
                 className={
                   isSelected
