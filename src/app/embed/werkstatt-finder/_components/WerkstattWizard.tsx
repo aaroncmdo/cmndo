@@ -189,6 +189,7 @@ export function WerkstattWizard({
               selectedId={selectedId}
               loading={loading}
               keineSpezialisierte={keineSpezialisierte}
+              scrollToSelected
             />
           )}
           {zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
@@ -246,6 +247,7 @@ export function WerkstattWizard({
               selectedId={selectedId}
               loading={loading}
               keineSpezialisierte={keineSpezialisierte}
+              scrollToSelected
             />
           )}
           {zeigeUmkreisLeerHinweis({ hatGesucht, loading, anzahlTreffer: rows.length }) && (
