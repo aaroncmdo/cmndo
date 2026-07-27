@@ -217,17 +217,17 @@ export default async function FlowPage({
     )
   }
 
-  // 2026-05-12 Funnel v2 PR #5: Wenn User eingeloggt + Fall existiert,
-  // direkt zum datenabhaengigen Onboarding redirecten — ersetzt den
-  // 891-LOC FlowWizardKfz fuer alle Magic-Link-Logins. FlowWizardKfz
-  // bleibt als Fallback fuer Token-Magic-Links ohne Login.
-  // AAR-956 (Marker #1): eingeloggter Kunde mit bestehendem Fall wird ins Portal-Onboarding
-  // geleitet — AUSSER der Fall ist ein SA-Weg und noch UNSIGNIERT (sa_unterschrieben=false).
-  // Dann fehlte bisher jeder Signier-Weg (onboarding-details enthaelt keine SA-Signatur ->
-  // Dead-End, der Portal-Task "Unterschrift ausstehend" ankerte ins Leere). Diesen Fall merken
-  // und NACH dem Auth-try den fokussierten SaSignaturStep rendern (return ausserhalb des try,
-  // damit ihn kein catch schluckt).
+  // 2026-05-12 Funnel v2 PR #5: eingeloggter Kunde mit bestehendem Fall -> datengetriebenes
+  // /kunde/onboarding-details. Das ist die KANONISCHE Strecke fuer eingeloggte Kunden (Aaron 27.07.:
+  // ersetzt FlowWizardKfz; der bleibt Fallback fuer Token-Magic-Links OHNE Login).
+  // AAR-956 (Marker #1): AUSSER der Fall ist ein SA-Weg und noch UNSIGNIERT (sa_unterschrieben=false)
+  // -> onboarding-details enthaelt keine SA-Signatur -> dann den fokussierten SaSignaturStep rendern.
+  // 27.07. (FlowLink-Audit): der redirect() lag frueher IM try -> der NEXT_REDIRECT-Throw wurde vom
+  // Catch verschluckt (kein isRedirectError-Re-throw, vgl. kunde/page.tsx:244) -> er lief NIE;
+  // eingeloggte Kunden fielen faelschlich in den Legacy-FlowWizardKfz (= die "zweite Feststellung").
+  // Fix: beide Ausgaenge MERKEN + AUSSERHALB des try feuern (dort schluckt kein catch den Throw).
   let signaturBenoetigtFallId: string | null = null
+  let onboardingRedirectFallId: string | null = null
   try {
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -246,7 +246,7 @@ export default async function FlowPage({
         if (brauchtSignatur) {
           signaturBenoetigtFallId = fallFuerKunde.fall_id as string
         } else {
-          redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.fall_id}`)
+          onboardingRedirectFallId = fallFuerKunde.fall_id as string
         }
       }
     }
@@ -254,6 +254,13 @@ export default async function FlowPage({
     // Auth-Check soll nie die FlowWizardKfz-Anzeige blockieren — bei
     // Fehler fallen wir auf den Legacy-Pfad zurueck.
     console.warn('[flow/[token]] Auth-Check fuer Onboarding-Redirect:', err)
+  }
+  // Kanonisch (s.o.): eingeloggter Kunde + Fall + SA erledigt -> onboarding-details. AUSSERHALB des
+  // try, damit NEXT_REDIRECT propagiert. Eine offene Feststellung wird DORT erhoben (datenabhaengig,
+  // ladeNoetigePhasen 'kunde-onboarding' -> claims.hergang_kunde_text; Bridge convertLeadToClaim
+  // kopiert leads.unfallhergang -> claims.hergang_kunde_text, also kein Doppel-Ask auf dem SA-Pfad).
+  if (onboardingRedirectFallId) {
+    redirect(`/kunde/onboarding-details?fall_id=${onboardingRedirectFallId}`)
   }
   if (signaturBenoetigtFallId) {
     return (

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
  * AAR-147 / Spec §3 Phase 6: Inaktiv-Cron für FlowLinks.
  *
  * Läuft alle 30 Minuten. Wenn ein FlowLink seit mehr als 2 Stunden erstellt
- * ist und noch nicht geöffnet wurde (geoeffnet_am IS NULL, status='offen'),
+ * ist und noch nicht geöffnet wurde (geoeffnet_am IS NULL),
  * dann wird für den zuständigen Dispatcher ein Task „Token-Link inaktiv"
  * angelegt — damit der MA den Kunden nachträglich anruft.
  *
@@ -28,11 +28,14 @@ export async function GET(request: Request) {
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
   const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
 
-  // FlowLinks die seit >2h inaktiv sind (offen + nie geöffnet)
+  // FlowLinks die seit >2h inaktiv sind (nie geöffnet). WICHTIG (Aaron 27.07., FlowLink-Audit):
+  // KEIN .eq('status','offen') — 'offen' wird NIE geschrieben (Default 'erstellt', danach nur
+  // 'geoeffnet'/'abgeschlossen'), der Filter lieferte 0 Zeilen => der Cron feuerte NIE. Ein nie
+  // geoeffneter Link hat geoeffnet_am IS NULL; ein abgeschlossener wurde immer erst geoeffnet.
+  // geoeffnet_am IS NULL ist also die korrekte + hinreichende Bedingung.
   const { data: stale } = await db
     .from('flow_links')
     .select('id, lead_id, erstellt_am, leads(vorname, nachname, telefon)')
-    .eq('status', 'offen')
     .is('geoeffnet_am', null)
     .lt('erstellt_am', twoHoursAgo)
 
