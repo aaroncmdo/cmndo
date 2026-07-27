@@ -24,7 +24,7 @@
 | **2 · Boost + Badge** | `applyNetzwerkPraeferenz` (relational) · global-Boost in beiden Engines · `istTopPartner`→Entitlement (1 Consumer) · Owner-**Injektion** im anon Finder · Metadaten überleben `coverageUnion`-Trim | K3,K4,K10,K11,K12 | **a8fc2a40 Finder-Engine** (`rank-vorschlaege`/`ladeWerkstattVorschlaege` API erweitern, nicht neu); `PARTNER_RANG_MATCHING`-prod-Wert verifizieren | blocked bis Finder-Lane-Merge |
 | **3 · Bindung-Seed + Provisions-Gate** | Seed claims/profiles.netzwerk_owner_id · Freundes-Graph-Suppression an Release-Zeit | K2,K6,K13 | **#4789/a6c863e2 Provisionen** (release-runner, hold_until-DROP pending; abrechnungsweg-Gate = Aaron-Entscheid) | blocked bis Provisions-Lane |
 | **4 · SV-Vermittlungs-Flow (D)** | SV-Selbstanlage · datengetriebener Initial-State · **sign-into-existing-claim** · alle Mid-Funnel-Reader + `assignReparaturWerkstatt` auf `onboarding_complete` gaten · Empfehl-Batch-Ablösung | K4,K5 | **b0e963b6 FlowLink** (`/flow/[token]`, Matching); `convert-lead-to-claim.ts` Hot-File | blocked bis FlowLink-Lane-Merge |
-| **5 · Freemium-Billing (B-Rest)** | Stripe-**Recurring** + Live-Webhook `invoice.*`/`customer.subscription.*` · Setup-Fee via `onboarding_anzahlung` · DB-getriebene Rechnungen (nicht Legacy-PDFs) · **Grandfather-Backfill** (comped aktive SVs) · Registrierung-Umbau + DAT-Audit (minimal) · Abo-Ask + In-App-Upgrade · Dunning-Cron (pg_cron+Vault) | K7,K14,K15 | **Aaron-Blocker:** live `whsec`, echte IBAN/USt, Custom-SMTP; UG-`rechnungssteller`-CHECK-Kollision | blocked bis Aaron-Blocker |
+| **5 · Freemium-Billing (B-Rest)** | Stripe-**Recurring** + Live-Webhook `invoice.*`/`customer.subscription.*` · **Setup-Fee (Einmal) + Monats-Abo BEIDE via Stripe** (Single Subscription-Checkout mit Setup-Fee als Erst-Rechnungs-Item erwägen; `stripe-best-practices`-Skill) · DB-getriebene §14-Rechnungen (nicht Legacy-PDFs) · **Grandfather-Backfill** (comped aktive SVs) · Registrierung-Umbau + DAT-Audit (minimal) · Abo-Ask + In-App-Upgrade · Dunning-Cron (pg_cron+Vault) | K7,K14,K15 | **Aaron-Blocker:** live `whsec`, echte IBAN/USt, Custom-SMTP; UG-`rechnungssteller`-CHECK-Kollision | blocked bis Aaron-Blocker |
 | **6 · Fahrzeug-zentrisch (H) + Netzwerkkarte (E)** | `vehicles.current_owner_id`-Writer + Backfill · zwei-vehicles-pro-Auto-Merge · `/kunde/fahrzeuge` (FM-Muster) · Netzwerkkarte-Rebrand (SKT-Token, token-basiert, ON-DELETE-Fix) · Scan→Bindung | K8,K9 | **63fe43f9 Schadenkarte** (`mintSchadenkarten`, `/flotte/fahrzeug/[id]`) + FM-Fahrzeug-Lane | blocked bis Schadenkarte-Lane |
 
 **Abhängigkeiten:** P0 → alles. P2/P3 → P0. P4 → P0+P3. P6 → P0(Bindung)+K8-Datenbasis.
@@ -37,5 +37,9 @@
 - Claim-Views service-role=0 → **Admin-JWT-Sim** für Stat-Checks.
 - Ratchets grün halten: `check:flag-drift` (neue Enums in CHECK + Snapshot-Regen VOR Code), `check:token-audit`, `check:component-set`, `check:knip`, `check:rls-policies`, `check:rls-grants`.
 
-## Nächster Schritt
-Detaillierte Pläne **pro Phase** (via writing-plans), beginnend mit **P0 (Fundament)** — der einzige, der ohne Lane-Merge startet. Jede Phase = eigener Branch/PR gegen `staging`, koordiniert mit ihrer Lane.
+## Nächster Schritt — PAUSE (Aaron 27.07., Option b)
+Design-Meilenstein gesetzt. **Kein Code jetzt** — wir warten auf die Substrate-Merges der 4 Lanes (#4789 claims-RLS, FlowLink, Finder-Engine, Schadenkarte).
+
+**PRE-PLAN-GATE (Pflicht, Aaron 27.07.):** BEVOR wir die detaillierten Pläne schreiben, **nochmal ein vollständiger Check** — die Härtungs-Runde (Edge-Cases + Reuse-Reality + Kollisions-Scan) gegen den DANN-aktuellen Code neu fahren, weil sich das Fundament bis dahin bewegt hat. K1–K15 + die 4 Lane-Stände re-verifizieren; erst dann schreiben.
+
+Danach: detaillierte Pläne **pro Phase** (writing-plans), **P0 (Fundament)** zuerst (startet nach #4789-Merge). Jede Phase = eigener Branch/PR gegen `staging`, koordiniert mit ihrer Lane.
