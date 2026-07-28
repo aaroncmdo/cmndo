@@ -17,7 +17,6 @@ export const SV_PAGE_TITLES: Array<{ prefix: string; title: string }> = [
   { prefix: '/gutachter/vertrag', title: 'Vertrag' },
   { prefix: '/gutachter/reklamationen', title: 'Reklamationen' },
   { prefix: '/gutachter/verifizierung', title: 'Verifizierung' },
-  { prefix: '/gutachter/team', title: 'Team' },
   { prefix: '/gutachter/community', title: 'Community' },
   { prefix: '/gutachter/tasks', title: 'Meine Tasks' },
   { prefix: '/gutachter/profil', title: 'Mein Profil' },
