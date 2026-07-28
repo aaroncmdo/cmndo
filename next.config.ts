@@ -207,6 +207,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // SV-Org-Retire 2026-07-28: /gutachter/team (Verwalter/Pool-Lead-Modell)
+      // retired — dormant + off-roadmap (s. docs/fundament/DECISIONS.md). War eh
+      // org-gated (0 Orgs → alle wurden auf /gutachter umgeleitet); Alt-Bookmarks
+      // → SV-Home statt 404. Exakt-Match, permanent (308).
+      {
+        source: '/gutachter/team',
+        destination: '/gutachter',
+        permanent: true,
+      },
       // Doc 41 PR9: Frueherer /haftpflicht -> /kfz-haftpflicht-schaden 301
       // (Stream A #1599, 23.05.) ENTFERNT. #1663 (24.05.) hat /haftpflicht bewusst
       // zum vollwertigen Glossar-Hub gemacht (alle 57 Spokes, eigener Canonical)
