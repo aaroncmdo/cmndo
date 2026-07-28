@@ -604,7 +604,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
         if (src) {
           src.setData(data)
         } else {
-          map.addSource('embed-route', { type: 'geojson', data })
+          // lineMetrics: true → Voraussetzung für den `line-gradient`-Puls (addPulsingFlow).
+          map.addSource('embed-route', { type: 'geojson', lineMetrics: true, data })
           // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
           map.addLayer({
             id: 'embed-route-casing',
