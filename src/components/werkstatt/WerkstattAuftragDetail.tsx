@@ -430,13 +430,15 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
       ? 'Als Erstes den Kostenvoranschlag hochladen — der Kunde benötigt ihn für die Reparatur.'
       : status === 'erstellt'
         ? 'Kostenvoranschlag liegt vor, wartet auf Freigabe durch den Kunden.'
-        : auftrag.reparatur_freigegeben_am
-          ? `Freigegeben am ${formatBerlin(auftrag.reparatur_freigegeben_am, {
-              day: '2-digit',
-              month: '2-digit',
-              year: 'numeric',
-            })} — die Reparatur kann starten.`
-          : 'Freigegeben — die Reparatur kann starten.'
+        : status === 'abgelehnt'
+          ? `Der Kunde hat den Kostenvoranschlag abgelehnt${auftrag.kva_abgelehnt_grund ? ` — „${auftrag.kva_abgelehnt_grund}"` : ''}. Bitte überarbeiten und einen neuen Kostenvoranschlag hochladen.`
+          : auftrag.reparatur_freigegeben_am
+            ? `Freigegeben am ${formatBerlin(auftrag.reparatur_freigegeben_am, {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })} — die Reparatur kann starten.`
+            : 'Freigegeben — die Reparatur kann starten.'
 
   return (
     <SectionCard title="Kostenvoranschlag (KVA)" className="mt-3">
@@ -456,10 +458,10 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
           </p>
         )}
 
-        {status === 'benoetigt' && (
+        {(status === 'benoetigt' || status === 'abgelehnt') && (
           <div className="pt-1">
             <Button variant="navy" size="sm" onClick={() => setModalOffen(true)}>
-              Kostenvoranschlag hochladen
+              {status === 'abgelehnt' ? 'Neuen Kostenvoranschlag hochladen' : 'Kostenvoranschlag hochladen'}
             </Button>
           </div>
         )}

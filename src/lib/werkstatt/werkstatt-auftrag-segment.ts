@@ -33,7 +33,7 @@ export function abrechnungswegLabel(w: string | null): 'Selbstzahler' | 'Haftpfl
 // Erster Schritt der Werkstatt bei Selbstzahler-/Kasko-Direkt-Reparaturen: einen
 // Kostenvoranschlag ausstellen. benoetigt -> erstellt(EUR) -> freigegeben.
 
-export type KvaStatus = 'benoetigt' | 'erstellt' | 'freigegeben'
+export type KvaStatus = 'benoetigt' | 'erstellt' | 'freigegeben' | 'abgelehnt'
 
 type KvaInput = {
   meine_rolle: string | null
@@ -42,6 +42,7 @@ type KvaInput = {
   reparatur_freigegeben_am: string | null
   kostenvoranschlag_netto: number | null
   kostenvoranschlag_brutto: number | null
+  kva_abgelehnt_am: string | null
 }
 
 /**
@@ -50,18 +51,24 @@ type KvaInput = {
  * istWerkstattReparaturWeg) im Reparatur-Segment. Haftpflicht laeuft die SV-Gutachten-Route
  * -> NIE KVA (Aaron 09.07.: „bei Haftpflicht braucht die Werkstatt keine KVA-Info"). Bei
  * Vermittlung ebenfalls null.
+ * benoetigt -> erstellt -> (Kunde: freigegeben | abgelehnt). 'abgelehnt' hat Vorrang vor
+ * 'erstellt': die Alt-Betraege bleiben gesetzt, aber der Auftrag wartet NICHT auf Freigabe,
+ * sondern auf einen NEUEN KVA. Der Re-Upload (erstelleKvaFuerAuftrag) resettet kva_abgelehnt_am
+ * -> zurueck auf 'erstellt'. Ohne diesen State saehe die Werkstatt faelschlich "wartet auf
+ * Freigabe" + haette keinen Re-Upload-Button -> stiller Deadlock (Regel-4-Smoke 27.07.).
  */
 export function kvaStatus(a: KvaInput): KvaStatus | null {
   if (werkstattAuftragSegment(a) !== 'reparatur') return null
   if (!istWerkstattReparaturWeg(a.abrechnungsweg)) return null
   if (a.reparatur_freigegeben_am != null) return 'freigegeben'
+  if (a.kva_abgelehnt_am != null) return 'abgelehnt'
   if (a.kostenvoranschlag_netto != null || a.kostenvoranschlag_brutto != null) return 'erstellt'
   return 'benoetigt'
 }
 
 /** DE-Label fuer den KVA-Status (Badge-Text). */
 export function kvaStatusLabel(s: KvaStatus): string {
-  return { benoetigt: 'KVA benötigt', erstellt: 'KVA erstellt', freigegeben: 'KVA freigegeben' }[s]
+  return { benoetigt: 'KVA benötigt', erstellt: 'KVA erstellt', freigegeben: 'KVA freigegeben', abgelehnt: 'Vom Kunden abgelehnt' }[s]
 }
 
 /**

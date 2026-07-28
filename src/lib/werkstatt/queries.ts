@@ -290,6 +290,9 @@ export type WerkstattAuftrag = {
   kostenvoranschlag_netto: number | null
   kostenvoranschlag_brutto: number | null
   reparatur_freigegeben_am: string | null
+  // R1: Kunde-KVA-Ablehnung -> Werkstatt muss ueberarbeiten (kvaStatus='abgelehnt' + Re-Upload).
+  kva_abgelehnt_am: string | null
+  kva_abgelehnt_grund: string | null
   // AV3/AV4/AV5: Auffahrunfall-Hinweis (bkat_unfallart) + Reparaturdauer (Gutachten bzw. Werkstatt-KVA).
   unfallart: string | null
   reparaturdauer_tage: number | null
@@ -312,6 +315,7 @@ const AUFTRAG_SELECT = `
   gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
   gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden,
   kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am,
+  kva_abgelehnt_am, kva_abgelehnt_grund,
   unfallart, reparaturdauer_tage, reparaturdauer_tage_kva,
   reparatur_rueckruf_wunschzeit
 `
@@ -359,6 +363,8 @@ function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
     kostenvoranschlag_netto: r.kostenvoranschlag_netto != null ? Number(r.kostenvoranschlag_netto) : null,
     kostenvoranschlag_brutto: r.kostenvoranschlag_brutto != null ? Number(r.kostenvoranschlag_brutto) : null,
     reparatur_freigegeben_am: (r.reparatur_freigegeben_am as string | null) ?? null,
+    kva_abgelehnt_am: (r.kva_abgelehnt_am as string | null) ?? null,
+    kva_abgelehnt_grund: (r.kva_abgelehnt_grund as string | null) ?? null,
     // AV3/AV4/AV5
     unfallart: (r.unfallart as string | null) ?? null,
     reparaturdauer_tage: r.reparaturdauer_tage != null ? Number(r.reparaturdauer_tage) : null,
