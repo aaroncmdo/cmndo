@@ -1252,7 +1252,8 @@
     "rechnungs_konfiguration.rechnungssteller": [
       "claimondo_gmbh",
       "claimondo_gmbh_igr",
-      "gbr"
+      "gbr",
+      "kitta_sprafke_ug"
     ],
     "regulierungs_klassifizierung.kuerzungsgrund": [
       "bagatelle",
@@ -1391,7 +1392,8 @@
     "sv_onboarding_rechnungen.rechnungssteller": [
       "claimondo_gmbh",
       "claimondo_gmbh_igr",
-      "gbr"
+      "gbr",
+      "kitta_sprafke_ug"
     ],
     "sv_onboarding_rechnungen.typ": [
       "akademie",
