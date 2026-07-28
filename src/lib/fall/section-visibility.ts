@@ -1,15 +1,16 @@
-// AAR-745 (Phase A): Visibility-Single-Source für Fallakte-Sections.
-// Generalisiert prozess-section-visibility.ts (bisher nur Admin-ProzessTab)
-// auf alle 3 Portale (Admin / SV / Kunde). Regel-Matrix ist unverändert
-// gegenüber der Admin-Funktion — lediglich das Ergebnis wird pro Rolle
-// gefiltert, weil z.B. Kunde keine Stellungnahme oder Rüge sieht.
+// Fallakte-Section-Relevanz: welche Prozess-Sektionen sind bei der aktuellen
+// Phase + Datenlage eines Falls INHALTLICH aktiv (rollen-agnostisch).
 //
-// Ziel: eine Quelle der Wahrheit für "welche Prozess-Sektion ist jetzt
-// sichtbar" — heute 4× reimplementiert (Admin-ProzessTab, SV-Karten
-// self-gating, Kunde-Sections, punktuelle Cards). Ein Bug = 4× fixen.
-//
-// Migration: prozess-section-visibility.ts bleibt bestehen als
-// @deprecated Wrapper, damit bestehende Consumer nicht brechen.
+// Historie: Die frühere Rollen-Whitelist-Schicht (getVisibleFallSections +
+// ROLLE_SECTION_WHITELIST + isFallSectionVisible) war toter Ballast. Einziger
+// Consumer war der Admin-ProzessTab, der die Rolle hart als 'admin' übergab,
+// und admins Whitelist enthielt alle 8 Sections → der Rollen-Filter war selbst
+// dort ein No-op. SV berechnete das Ergebnis und benutzte es nie; kunde/makler
+// importierten es nie; 4 weitere Rollen waren gar nicht modelliert. Entfernt als
+// Dead-Code-Hygiene (2026-07-28, verhaltens-neutral). Die per-Rolle-Sichtbarkeit
+// einer gemeinsamen Fallakte gehört ins Fundament-Paket C4 (Verfassung §4:
+// „Eine Akte, viele Sichten"), NICHT in diese Trigger-Logik — hier bewusst nicht
+// entschieden.
 
 import type { Szenario } from './subphase-resolver'
 
@@ -23,20 +24,8 @@ export type FallSectionKey =
   | 'klage'
   | 'auszahlung'
 
-// AAR-750: Makler sieht über Consent (makler_fall_consent) eine begrenzte
-// Auswahl an Sections — Auszahlung für die Provision-Tracking, VS-Reaktion
-// als Kontext-Info zum Kunde. Interne Prozessschritte (Kanzlei, AS, Rüge,
-// Stellungnahme, Nachbesichtigung, Klage) bleiben vorbehalten.
-// 'kb' (Kundenbetreuer) fehlte hier bis 19.07. — `getVisibleFallSections(fall,
-// 'kb', …)` lief damit in `ROLLE_SECTION_WHITELIST[rolle]` === undefined und
-// warf einen TypeError. Sichtbar wurde das nie, weil der ProzessTab die Rolle
-// hart als 'admin' uebergibt; jede korrekte Durchreichung der echten Rolle
-// haette die Fallakte zerlegt. Der KB faengt den Kanzlei-Lifecycle intern ab
-// (nur eine Partner-Kanzlei) und braucht denselben Section-Umfang wie admin.
-export type FallVisibilityRolle = 'admin' | 'kb' | 'sv' | 'kunde' | 'makler'
-
 /**
- * Subphase-Input — minimiert auf das was die Visibility braucht, damit
+ * Subphase-Input — minimiert auf das was die Relevanz-Logik braucht, damit
  * sowohl Admin (`SubphaseResult`) als auch SV (`getSvSubphase`) ihn
  * füttern können ohne shape-Kompatibilität. `phase` ist numerisch
  * (z.B. 5, 7, 7.6), `szenario` darf null sein.
@@ -49,68 +38,10 @@ export type FallPhaseInput = {
 type FallLike = Record<string, unknown>
 
 /**
- * Sections die pro Rolle überhaupt angezeigt werden sollen, unabhängig
- * vom Phase-Trigger. Kunde sieht z.B. keine Rüge oder Stellungnahme —
- * das sind interne Prozess-Schritte. SV sieht keine Kanzlei- oder
- * AS-Sections — die laufen am SV vorbei.
- *
- * Diese Matrix definiert die Portal-Sichtbarkeit, NICHT die inhaltliche
- * Sichtbarkeit (Phase/Trigger). Beide werden kombiniert angewendet.
- */
-const ROLLE_SECTION_WHITELIST: Record<FallVisibilityRolle, ReadonlySet<FallSectionKey>> = {
-  admin: new Set<FallSectionKey>([
-    'kanzlei',
-    'as',
-    'vs_reaktion',
-    'stellungnahme',
-    'ruege',
-    'nachbesichtigung',
-    'klage',
-    'auszahlung',
-  ]),
-  // Kundenbetreuer = interne Rolle mit demselben Prozess-Umfang wie admin:
-  // er fuehrt den Kanzlei-Lifecycle operativ (VS-Kontakt, Anschlussschreiben,
-  // VS-Reaktion, Eskalation, Ruege, Klage, Auszahlung), weil es nur eine
-  // Partner-Kanzlei gibt und deren Schritte intern abgefangen werden.
-  kb: new Set<FallSectionKey>([
-    'kanzlei',
-    'as',
-    'vs_reaktion',
-    'stellungnahme',
-    'ruege',
-    'nachbesichtigung',
-    'klage',
-    'auszahlung',
-  ]),
-  sv: new Set<FallSectionKey>([
-    'vs_reaktion',
-    'stellungnahme',
-    'ruege',
-    'nachbesichtigung',
-    'auszahlung',
-  ]),
-  kunde: new Set<FallSectionKey>([
-    'kanzlei',
-    'vs_reaktion',
-    'nachbesichtigung',
-    'klage',
-    'auszahlung',
-  ]),
-  // AAR-750: Makler-Portal ist noch nicht live, aber die Whitelist wird
-  // schon hier vorgehalten — sobald das Portal gebaut wird, konsumiert
-  // es diese Map direkt. Minimal-Set: Auszahlung für Provisions-Tracking
-  // + VS-Reaktion als Kontext, keine internen Prozessschritte.
-  makler: new Set<FallSectionKey>([
-    'vs_reaktion',
-    'auszahlung',
-  ]),
-}
-
-/**
- * Liefert die Liste aller Sections die aufgrund von Phase + Daten-
- * Triggern (z.B. mandatsnummer, ruege_counter, vs_reaktion_typ) aktiv
- * sein sollen. Ohne Rollen-Filter — das macht
- * {@link getVisibleFallSections}.
+ * Liefert die Liste aller Sections die aufgrund von Phase + Daten-Triggern
+ * (z.B. mandatsnummer, ruege_counter, vs_reaktion_typ) inhaltlich aktiv sein
+ * sollen. Rollen-agnostisch — WELCHE Rolle welche Section sehen darf, ist hier
+ * bewusst NICHT modelliert (→ Fundament C4 / Verfassung §4).
  *
  * Regeln (unverändert aus AAR-543):
  * - kanzlei      : Phase ≥ 4 ODER mandatsnummer ODER kanzlei_uebergeben_am
@@ -203,35 +134,4 @@ export function getTriggeredFallSections(
   }
 
   return result
-}
-
-/**
- * Kombiniert die inhaltliche (Phase/Trigger) mit der Portal-Sichtbarkeit
- * (Rolle). Reihenfolge bleibt kanonisch wie in
- * {@link getTriggeredFallSections}.
- *
- * @example
- * const visible = getVisibleFallSections(fall, 'admin', subphase)
- * {visible.includes('stellungnahme') && <StellungnahmeSection />}
- */
-export function getVisibleFallSections(
-  fall: FallLike,
-  rolle: FallVisibilityRolle,
-  subphase: FallPhaseInput,
-): FallSectionKey[] {
-  const whitelist = ROLLE_SECTION_WHITELIST[rolle]
-  return getTriggeredFallSections(subphase, fall).filter((key) => whitelist.has(key))
-}
-
-/**
- * Hilfsfunktion für Call-Sites die einzeln gaten — liest nicht schöner
- * als `visible.includes(key)`, aber macht die Intention explizit.
- */
-export function isFallSectionVisible(
-  fall: FallLike,
-  rolle: FallVisibilityRolle,
-  subphase: FallPhaseInput,
-  section: FallSectionKey,
-): boolean {
-  return getVisibleFallSections(fall, rolle, subphase).includes(section)
 }

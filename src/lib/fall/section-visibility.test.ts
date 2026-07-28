@@ -8,7 +8,7 @@
 // haengen und beide NULL waren. Auf prod steht CLM-2026-00837 exakt so.
 
 import { describe, expect, it } from 'vitest'
-import { getTriggeredFallSections, getVisibleFallSections } from './section-visibility'
+import { getTriggeredFallSections } from './section-visibility'
 
 const FRUEHE_PHASE = { phase: 1, szenario: null }
 
@@ -43,26 +43,5 @@ describe('getTriggeredFallSections — kanzlei', () => {
   it('triggert NICHT bei einem Fall ohne Kanzlei-Bezug', () => {
     expect(getTriggeredFallSections(FRUEHE_PHASE, { status: 'erfassung' })).not.toContain('kanzlei')
     expect(getTriggeredFallSections(FRUEHE_PHASE, {})).not.toContain('kanzlei')
-  })
-})
-
-describe('getVisibleFallSections — Rolle kundenbetreuer', () => {
-  const fall = {
-    status: 'kanzlei-uebergeben',
-    anschlussschreiben_am: '2026-07-01T00:00:00Z',
-    ruege_counter: 1,
-  }
-
-  it('kb sieht die internen Kanzlei-Prozess-Sections (wie admin)', () => {
-    const visible = getVisibleFallSections(fall, 'kb', FRUEHE_PHASE)
-    expect(visible).toContain('kanzlei')
-    expect(visible).toContain('as')
-    expect(visible).toContain('ruege')
-  })
-
-  it('kunde sieht die internen Schritte weiterhin NICHT', () => {
-    const visible = getVisibleFallSections(fall, 'kunde', FRUEHE_PHASE)
-    expect(visible).not.toContain('ruege')
-    expect(visible).not.toContain('as')
   })
 })
