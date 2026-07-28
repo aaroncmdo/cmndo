@@ -15,7 +15,6 @@ import { getSvSubphase, type AbrechnungSubphaseInput } from '@/lib/gutachter/sub
 import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 // AAR-745 (Phase A): Visibility-Single-Source — gleiche Regel wie Admin-ProzessTab,
 // gefiltert auf die SV-Sektionen. Cards self-gaten intern weiter (Defense-in-Depth).
-import { getVisibleFallSections } from '@/lib/fall/section-visibility'
 // AAR-568 (V2) / AAR-727: Pipeline-Daten baut FallPhasenPanel intern — der
 // FallHeader reicht nur fallId + abgeschlossen_am durch.
 // CMM-44 MP-6a: aktuelle_phase-Passthrough entfernt — FallHeader hat die
@@ -197,15 +196,6 @@ export default function FallDetailClient(props: Props) {
     },
     abrechnung,
   )
-
-  // AAR-745: Portal-Sichtbarkeit (SV) × Phase/Trigger-Regeln. Szenario
-  // bleibt null, weil SvSubphase keine Szenario-Ableitung hat — das ist
-  // admin-zentriert und für SV irrelevant (Klage-Section ist ohnehin
-  // nicht in der SV-Whitelist).
-  const visibleSections = getVisibleFallSections(fall, 'sv', {
-    phase: subphase.phase,
-    szenario: null,
-  })
 
   // AAR-568 (V2) / AAR-727 / CMM-44 MP-5: Panel-Input — buildClaimPhasePipeline (4-Phasen-Lifecycle) läuft intern.
   // CMM-44 MP-6a: aktuellePhaseSnake entfernt — FallHeader rendert keine
