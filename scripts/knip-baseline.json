@@ -40,7 +40,6 @@
     "src/lib/faelle/mark-read-action.ts",
     "src/lib/faelle/unread-counts.ts",
     "src/lib/fall/communication-timeline.ts",
-    "src/lib/fall/prozess-section-visibility.ts",
     "src/lib/fall/sla-config.ts",
     "src/lib/fall/urls.ts",
     "src/lib/faq-bot/analyse.ts",

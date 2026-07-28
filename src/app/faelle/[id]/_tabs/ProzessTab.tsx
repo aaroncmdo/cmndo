@@ -3,12 +3,13 @@
 // AAR-164 / W4: Prozess-Tab — 8 Sections phase-dynamisch.
 // AAR-543 (C6): Sichtbarkeits-Map aus den Daten-Triggern (vs_kuerzungs_typ,
 // Auszahlungs-Split, usw.) — zentral berechnet.
-// AAR-745 (Phase A): Wechsel auf section-visibility.ts mit rolle='admin';
-// dieselbe Quelle nutzt jetzt auch die SV-Fallakte.
+// 2026-07-28 (Dead-Code-Hygiene): die Rollen-Whitelist-Schicht war tot (No-op
+// fuer admin — Whitelist = alle 8 Sections). section-visibility exportiert nur
+// noch die rollen-agnostische Trigger-Logik getTriggeredFallSections.
 
 import { useFall } from '../FallContext'
 import type { SubphaseResult } from '@/lib/fall/subphase-resolver'
-import { getVisibleFallSections } from '@/lib/fall/section-visibility'
+import { getTriggeredFallSections } from '@/lib/fall/section-visibility'
 import {
   KanzleiEakteSection,
   AsSection,
@@ -22,7 +23,7 @@ import {
 
 export default function ProzessTab({ subphase }: { subphase: SubphaseResult }) {
   const { fall, phase } = useFall()
-  const visible = getVisibleFallSections(fall, 'admin', subphase)
+  const visible = getTriggeredFallSections(subphase, fall)
 
   if (visible.length === 0) {
     return (

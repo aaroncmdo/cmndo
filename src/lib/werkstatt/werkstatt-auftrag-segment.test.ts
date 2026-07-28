@@ -27,6 +27,7 @@ describe('kvaStatus', () => {
     reparatur_freigegeben_am: null as string | null,
     kostenvoranschlag_netto: null as number | null,
     kostenvoranschlag_brutto: null as number | null,
+    kva_abgelehnt_am: null as string | null,
   }
 
   it('Vermittler -> null (KVA nur im Reparatur-Segment)', () => {
@@ -52,6 +53,14 @@ describe('kvaStatus', () => {
   it('Reparateur + nichts -> "benoetigt"', () => {
     expect(kvaStatus(base)).toBe('benoetigt')
   })
+
+  it('Reparateur + kva_abgelehnt_am gesetzt -> "abgelehnt" (Vorrang vor erstellt)', () => {
+    expect(kvaStatus({ ...base, kostenvoranschlag_brutto: 2380, kva_abgelehnt_am: '2026-07-27T10:00:00Z' })).toBe('abgelehnt')
+  })
+
+  it('Reparateur + abgelehnt + neu freigegeben -> "freigegeben" (Re-Upload-Freigabe gewinnt)', () => {
+    expect(kvaStatus({ ...base, kva_abgelehnt_am: '2026-07-27T10:00:00Z', reparatur_freigegeben_am: '2026-07-28T09:00:00Z' })).toBe('freigegeben')
+  })
 })
 
 describe('kvaStatusLabel', () => {
@@ -59,5 +68,6 @@ describe('kvaStatusLabel', () => {
     expect(kvaStatusLabel('benoetigt')).toBe('KVA benötigt')
     expect(kvaStatusLabel('erstellt')).toBe('KVA erstellt')
     expect(kvaStatusLabel('freigegeben')).toBe('KVA freigegeben')
+    expect(kvaStatusLabel('abgelehnt')).toBe('Vom Kunden abgelehnt')
   })
 })
