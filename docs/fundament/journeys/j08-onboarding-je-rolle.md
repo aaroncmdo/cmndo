@@ -1,0 +1,54 @@
+# J8 — Onboarding je Rolle (SV, Werkstatt, Kanzlei)
+
+> Fundament A1 · Journey-Bibel. **Soll-Ablauf aus Nutzersicht** (Soll ≠ Ist — Abweichungen unter „⚠ IST weicht ab").
+> **Soll = das Netzwerk-Ökosystem-Modell** (Lane 332d22f1, [[coordination-netzwerk-verbindungen-freemium-angebotsstruktur]] —
+> Design komplett, Epic paused). Verfassung §10: die Journey beschreibt das **Ziel-Modell**, nicht den Alt-Bestand.
+> Abgestimmt mit a6c863e2 (DECISIONS.md): Org/Verwalter/Pool-Lead retired — die kanonische SV-Struktur ist der Netzwerk-Graph.
+
+**Rollen:** SV · Werkstatt · Kanzlei (je selbst) · KB/Admin (verifiziert, schaltet frei) · System (Stripe, Entitlement).
+**Vorbedingungen:** ein Account (Self-Signup oder Cold-Mail-Einladung).
+**Startpunkt(e):** SV-Registrierung · Werkstatt (Nachfrage-Seite, frei) · Kanzlei-Einladung (KB).
+
+## Ablauf (Soll)
+
+Gemeinsames Muster: **Registrieren → Stammdaten/Nachweise → Verifikation (48h Admin) → Freischaltung → sichtbar/arbeitsfähig.**
+Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein neuer wilder Entry-Point).
+
+### A · Sachverständiger (SV) — Freemium
+1. **Registrieren** — **kostenlos für alle** (kein DAT-Gating mehr). Büro-Daten, SV-Typ, Einzugsgebiet/Geo, optional Whitelabel-Branding.
+2. **Verifikation** — Admin prüft (48h) → `verifiziert=true`. Danach im Dispatch-Pool + Gutachter-Finder sichtbar (Gate: `verifiziert`, Geo).
+3. **Netzwerkpartner werden** (Haupt-Preismodell, optional) — **Monats-Flatrate + einmalige Einrichtungsgebühr, beide via Stripe** (Single Subscription-Checkout mit Setup-Fee-Item). Entitlement **derive-at-read** aus `sv_netzwerk_abonnements`. Ergebnis: **Netzwerkpartner-Badge + Ranking-Boost** (J10).
+4. **Rechtsform** — Nudge bei NULL (#4798) bleibt.
+
+### B · Werkstatt — frei (Nachfrage-Seite)
+5. **Zugang frei** — die Werkstatt zahlt nichts (sie ist die Nachfrage-Seite: bringt Reparaturaufträge). Sie erhält **Provision + einen konkreten Gutachter** aus dem Matching (Onboarding-Mailsequenz-Versprechen).
+6. **Stammdaten** — Adresse/Geo, freie Werkstattwahl, Marken/Gewerke. Sichtbar im Werkstatt-Finder nach Verifikation.
+
+### C · Kanzlei
+7. **Einladung** — KB legt die Kanzlei an (KB-Kanzlei-Lifecycle #4630, kb-Whitelist) → `/kanzlei`-Portal, `kanzlei_faelle`-Scope (RLS). Bekommt Fall-Pakete (J6).
+
+## Varianten / Abzweige
+
+- **Bestands-SV mit `paket`** — Per-Fall-Pakete werden **nicht mehr verkauft** (retired); Bestand behält Fulfillment und wird als Netzwerkpartner **comped** (`paket` = Legacy-Fulfillment, **nie überschreiben** — 5 Consumer).
+- **Cold-Mail-Einstieg** (SV/Werkstatt) — CTA aus der Kampagne → vorbefüllter Signup.
+- **Whitelabel-SV** — verifizierter SV mit `use_custom_branding` brandet Portal + Kunden-Sicht.
+
+## Fehlerfälle und ihr Soll-Verhalten
+
+- **Abo-Checkout scheitert** (Stripe) → SV bleibt verifiziert + kostenlos gelistet, nur ohne Netzwerkpartner-Boost; kein Zugangsverlust.
+- **Entitlement-Guard-Lücke** → die Privilegien-Prüfung (`guard_sachverstaendige_privilegien`) muss derive-at-read sein, sonst hängt ein gekündigtes Abo als Zombie-Boost nach.
+- **Unvollständige Stammdaten** → Onboarding-Slot bleibt offen sichtbar; keine Freischaltung, kein toter Zustand.
+
+## ⚠ IST weicht ab (mit Fundort)
+
+1. **Netzwerkpartner-Abo noch nicht gebaut (Epic paused):** `sv_netzwerk_abonnements` + Stripe-Recurring sind greenfield (Live-Webhook 0 subscription-Events). IST: Ranking-Primärsignal ist noch `paket`, nicht das Abo. Umbau = Netzwerk-Lane P0, dockt auf C1–C5.
+2. **DAT-Gating noch aktiv:** die Registrierung ist im Bestand teils DAT-/paket-gegatet — Soll: offen für alle. (Basic-SV-Freischaltung #4302 ist der Näherungs-Vorläufer.)
+3. **Werkstatt-Self-Onboarding fragmentiert:** Anlage-Pfade setzen `ist_freie_werkstatt`+Gewerke (#4787) und es gibt `werkstatt.claimondo.de`, aber **kein kohärenter Self-Anlege-Produkt-Flow** (offene Produkt-Entscheidung der Netzwerk-Lane). `ist_freie_werkstatt=null` macht die Werkstatt zudem still unsichtbar.
+4. **Redirect-Stub-Historie:** `/gutachter/onboarding` war ein reiner Redirect-Stub (leere Shell, 06.–07.07.) → per `next.config.ts`-Redirect gefixt.
+
+## Offene Fragen an Aaron (max. 5)
+
+1. **Setup-Fee-Höhe + Abo-Preis:** Konkrete Zahlen für die Netzwerkpartner-Einrichtungsgebühr + Monats-Flat?
+2. **Comp-Politik Bestand:** Werden **alle** Bestands-`paket`-SV als Netzwerkpartner comped, oder nur aktive?
+3. **Werkstatt-Onboarding:** Bekommt die Werkstatt einen echten Self-Anlege-Flow, oder bleibt sie admin-/mailsequenz-getrieben?
+4. **DAT-Gating-Abbau:** Soll die Registrierung sofort für alle offen sein, oder gestaffelt?
