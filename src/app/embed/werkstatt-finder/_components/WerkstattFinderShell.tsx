@@ -243,7 +243,8 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
         if (src) {
           src.setData(data)
         } else {
-          map.addSource('wf-route', { type: 'geojson', data })
+          // lineMetrics: true → Voraussetzung für den `line-gradient`-Puls (addPulsingFlow).
+          map.addSource('wf-route', { type: 'geojson', lineMetrics: true, data })
           // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
           map.addLayer({
             id: 'wf-route-casing',
