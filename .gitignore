@@ -111,8 +111,11 @@ docs/**/smoke-screenshots-authd/
 # - .agents/skills/ → kanonischer Skill-Speicher des skills-CLI
 # - .claude/skills/ → per-Agent-Symlinks mit ABSOLUTEN Pfaden → nicht portabel,
 #   committet broken für Teammates. Skills bei Bedarf via `npx skills add` neu holen.
+# - AUSNAHME (2026-07-28): echte portable Projekt-Skills (Dateien, keine Symlinks) werden
+#   gezielt gewhitelistet, damit Worktree-Sessions sie haben — aktuell nur bibliothekar/.
 .agents/
-.claude/skills/
+.claude/skills/*
+!.claude/skills/bibliothekar/
 
 # 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
 docs/PICS-private/
