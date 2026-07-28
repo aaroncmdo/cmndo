@@ -44,9 +44,15 @@
 4. **Redundante/duplizierte Status-Achse** — `operative_status` hat 33 Werte inkl. offensichtlicher Dubletten (`abgelehnt`/`abgelehnt_final`, `regulierung`/`regulierung-laeuft`, `besichtigung`/`termin_durchgefuehrt`) → A2 (State-Machine) klärt tote/redundante Werte.
 5. **KVA-ohne-Betrag-Deadlock** (Reparatur-nah, J4): ein KVA ohne Betrag war speicherbar → Kunde bekam keine Freigabe (stiller Deadlock, #4804). Zeigt die Klasse „Soll-Erwartung nicht erzwungen".
 
+6. **SV-Zuweisung umgeht die Engine (WILD-Writer, Schritt 3):** die Dispatch-API `sv-zuweisung/route.ts:284` schreibt `operative_status` per Type-Cast (`(claimsUpd as Record<…>).operative_status = …`) direkt → **kein `fall.status_changed`-Event, keine Timeline/`phase_transitions`**; der Cast macht den Write zusätzlich für den Operative-Status-Write-Ratchet unsichtbar (A2-Fund #6). Bei der SV-Findung läuft der Event-Fan-out an Makler/Flotte/Kanzlei leer. Soll: über die Engine (→ C1).
+7. **`gutachten_fertig` Doppel-WhatsApp (Schritt 5):** `gutachter/fall/[id]/actions.ts` feuert in derselben Action `sendFallCommunication('gutachten_fertig')` (:225) **und** `emitEvent('gutachten.fertig')` (:231) → **zwei** WhatsApp an den Kunden. Soll: eine (Outbox-Dedup → C3).
+8. **Zwei Abschluss-Pfade → zwei Terminal-Cursor (Schritt 10):** Engine-Cascade `zahlung-eingegangen → abgeschlossen` vs. Endzustand-Direkt `markClaimAsReguliert → reguliert_vollstaendig` (`endzustand-actions.ts`, umgeht die Engine → kein Event/SLA/Billing-Hook). Zusätzlich hängt der Auto-Abschluss-Cron (`cron/fall-abschluss`) an `schlussabrechnung_am`, das `recordZahlung` auf dem VS-Pfad **nicht** setzt → potenzielle Nie-Auto-Close-Lücke im Kern-Haftpflichtfall (**zu verifizieren**). Soll: EIN Abschluss-Pfad, EIN Terminal.
+9. **Template-Mislabeling (Schritt 3):** Dispatch `updateFallStatus('sv-zugewiesen')` feuert das Template `sv_losgefahren` (`dispatch-fall-actions.ts:85`), obwohl der SV noch nicht losgefahren ist.
+
 ## Offene Fragen an Aaron (max. 5)
 
 1. **Status-Dubletten:** sind `abgelehnt` vs. `abgelehnt_final`, `regulierung` vs. `regulierung-laeuft`, `besichtigung` vs. `termin_durchgefuehrt` bewusst getrennte Zustände oder Retire-Kandidaten? (Input für A2.)
 2. **Willkommens-Set (Schritt 3):** was ist das Soll — welche EINE WhatsApp bekommt der Kunde direkt nach SA (statt der 6)?
 3. **QC-Phase (Schritt 6):** ist `filmcheck` + `qc-pruefung` immer beides, oder szenario-abhängig?
 4. **Kanzlei-Zwang:** ist `komplett` = LexDrive-Partnerkanzlei **immer** (kein Kunde-Opt-out mehr), oder bleibt der Wechsel auf eigene Kanzlei ein Journey-Schritt?
+5. **Kanonischer Abschluss-Pfad:** Cron (`schlussabrechnung_am`, auf VS-Pfad evtl. nie gesetzt), Auto-Cascade (`regulierung→abgeschlossen`) oder manuelles `markClaimAsReguliert` — welcher ist Soll, und welches EINE Terminal (`abgeschlossen` vs. `reguliert_vollstaendig`)?
