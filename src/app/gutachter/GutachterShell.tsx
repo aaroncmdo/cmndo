@@ -17,7 +17,6 @@ import {
   UserIcon,
   SettingsIcon,
   LogOutIcon,
-  UsersIcon,
   TrophyIcon,
   InboxIcon,
   EuroIcon,
@@ -143,7 +142,6 @@ export default function GutachterShell({
   firmenname,
   standortLat,
   standortLng,
-  showTeam,
   showCommunity,
   showVerifizierung,
   svId,
@@ -159,9 +157,8 @@ export default function GutachterShell({
   firmenname?: string | null
   standortLat?: number | null
   standortLng?: number | null
-  // KFZ-152 Phase 2+3: conditional Nav fuer Team (Inhaber/Verwalter)
-  // und Community (Member).
-  showTeam?: boolean
+  // KFZ-152: conditional Nav fuer Community (Member). Team/Verwalter-Pfad
+  // retired 2026-07-28 (SV-Org-Modell dormant + off-roadmap, s. DECISIONS.md).
   showCommunity?: boolean
   // AAR-359 W5: conditional Verifizierungs-Link solange Verifizierung offen.
   showVerifizierung?: boolean
@@ -206,7 +203,6 @@ export default function GutachterShell({
     const before: NavItem[] = []
     if (showVerifizierung) before.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
     const after: NavItem[] = []
-    if (showTeam) after.push({ href: '/gutachter/team', label: 'Team', icon: UsersIcon })
     if (showCommunity) after.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
     return { ...sec, items: [...before, ...sec.items, ...after] }
   })

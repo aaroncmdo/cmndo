@@ -35,9 +35,8 @@ export default async function GutachterLayout({
     .maybeSingle()
 
   // KFZ-152 Phase 2+3: Conditional Sidebar-Eintraege
-  // - Team: nur fuer Inhaber (Buero) oder Akademie-Verwalter (rolle='inhaber' + ist_parent_account)
   // - Community: nur fuer community_member
-  const showTeam = !!(sv?.ist_parent_account || (sv?.rolle_in_organisation === 'inhaber'))
+  // (Team/Verwalter-Nav retired 2026-07-28 — SV-Org-Modell dormant, s. docs/fundament/DECISIONS.md)
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
   // AAR-359 W5 / AAR-714 / AAR-360: Verifizierungs-Link in Sidebar, solange
@@ -101,7 +100,6 @@ export default async function GutachterLayout({
       firmenname={useBrand ? (sv?.firmenname ?? null) : null}
       standortLat={sv?.standort_lat ? Number(sv.standort_lat) : null}
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
-      showTeam={showTeam}
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
       svId={sv?.id ? String(sv.id) : null}
