@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
-import { nimmAnfrageAn, lehneAnfrageAb } from '@/lib/netzwerk/verbindungen-actions'
+import { nimmAnfrageAn, lehneAnfrageAb, blockiereVerbindung } from '@/lib/netzwerk/verbindungen-actions'
 import type { AnfrageAnzeige } from '@/lib/netzwerk/verbindungen-queries'
 
 type Result = { ok: boolean; error?: string }
@@ -45,6 +45,9 @@ export function AnfragenTab({
                 </Button>
                 <Button variant="ghost" loading={pending} onClick={() => run(() => lehneAnfrageAb(a.verbindungId))}>
                   Ablehnen
+                </Button>
+                <Button variant="danger" loading={pending} onClick={() => run(() => blockiereVerbindung(a.verbindungId))}>
+                  Blockieren
                 </Button>
               </div>
             </div>

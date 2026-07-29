@@ -31,7 +31,6 @@ const FILTER_OPTIONEN = [
   { value: 'sachverstaendiger', label: 'Sachverständige' },
   { value: 'werkstatt', label: 'Werkstätten' },
   { value: 'flottenmanager', label: 'Flotten' },
-  { value: 'makler', label: 'Makler' },
 ]
 
 export function VerzeichnisSuche() {

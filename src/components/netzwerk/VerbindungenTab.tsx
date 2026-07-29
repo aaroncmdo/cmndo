@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
-import { entferneVerbindung, blockiereVerbindung } from '@/lib/netzwerk/verbindungen-actions'
+import { entferneVerbindung } from '@/lib/netzwerk/verbindungen-actions'
 import type { VerbindungAnzeige } from '@/lib/netzwerk/verbindungen-queries'
 import type { NetzwerkRolle } from '@/lib/netzwerk/types'
 import { VerzeichnisSuche } from './VerzeichnisSuche'
@@ -58,14 +58,6 @@ export function VerbindungenTab({ verbindungen }: { verbindungen: VerbindungAnze
                     onClick={() => run(() => entferneVerbindung(v.verbindungId))}
                   >
                     Entfernen
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    loading={pending}
-                    onClick={() => run(() => blockiereVerbindung(v.verbindungId))}
-                  >
-                    Blockieren
                   </Button>
                 </div>
               </div>

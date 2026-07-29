@@ -53,7 +53,7 @@ export async function erstelleNetzwerkEinladung(
       to: mail,
       subject: `${einladerName} lädt dich ins Claimondo-Netzwerk ein`,
       html: einladungEmailHtml({
-        vorname: '',
+        vorname: 'zusammen',
         email: mail,
         appUrl,
         magicLink: link,

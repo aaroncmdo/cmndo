@@ -14,15 +14,31 @@ async function ladeAnzeigen(
 ): Promise<Map<string, PartnerAnzeige>> {
   const out = new Map<string, PartnerAnzeige>()
   if (profilIds.length === 0) return out
-  const [{ data: profile }, { data: svs }, { data: wks }] = await Promise.all([
+  const [{ data: profile }, { data: svs }, { data: wks }, { data: flotten }] = await Promise.all([
     admin.from('profiles').select('id, rolle, anzeigename, vorname, nachname, firma, ort').in('id', profilIds),
     admin.from('sachverstaendige').select('profile_id, firmenname').in('profile_id', profilIds),
     admin.from('werkstaetten').select('user_id, name, adresse_ort').in('user_id', profilIds),
+    admin.from('firmen_flotten_konten').select('user_id, firmen(name)').in('user_id', profilIds),
   ])
   const svByProfil = new Map((svs ?? []).map((s: { profile_id: string }) => [s.profile_id, s]))
   const wkByProfil = new Map((wks ?? []).map((w: { user_id: string }) => [w.user_id, w]))
+  // Nested-FK (firmen_flotten_konten.firma_id -> firmen): je nach Cardinality Objekt ODER Array -> normalisieren.
+  const flotteByProfil = new Map(
+    (flotten ?? []).map((f: { user_id: string; firmen: { name: string | null } | { name: string | null }[] | null }) => {
+      const firma = Array.isArray(f.firmen) ? f.firmen[0] : f.firmen
+      return [f.user_id, firma?.name ?? null] as [string, string | null]
+    }),
+  )
   for (const p of (profile ?? []) as Array<Parameters<typeof bauePartnerAnzeige>[0]>)
-    out.set(p.id, bauePartnerAnzeige(p, (svByProfil.get(p.id) as never) ?? null, (wkByProfil.get(p.id) as never) ?? null))
+    out.set(
+      p.id,
+      bauePartnerAnzeige(
+        p,
+        (svByProfil.get(p.id) as never) ?? null,
+        (wkByProfil.get(p.id) as never) ?? null,
+        flotteByProfil.get(p.id) ?? null,
+      ),
+    )
   return out
 }
 
