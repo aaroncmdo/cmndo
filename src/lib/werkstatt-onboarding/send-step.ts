@@ -32,6 +32,18 @@ function abmeldeUrl(email: string): string {
   return `${base}/partner-abmelden/${createOptoutToken(email)}`
 }
 
+/**
+ * Betreff-Merge: dieselben SV-Platzhalter wie im Body (Templates .replace()n sie im Text).
+ * Der Betreff kommt verbatim aus steps.betreff (Spec §5.3) — die sv_vorstellung-Zeile
+ * "Dein Gutachter in [Region]: [Gutachter-Name]" wuerde sonst un-substituiert rausgehen.
+ * Harmlos fuer die 5 anderen Betreffe (keine Platzhalter -> keine Ersetzung).
+ */
+function substituiereBetreff(betreff: string, merge: WerkstattMergeVars): string {
+  return betreff
+    .replace('[Region]', merge.sv?.region ?? 'deiner Region')
+    .replace('[Gutachter-Name]', merge.sv?.name ?? '')
+}
+
 export async function sendeStep(args: {
   empfaengerEmail: string
   step: StepZuSenden
@@ -61,7 +73,7 @@ export async function sendeStep(args: {
   try {
     await sendEmail({
       to: empfaengerEmail,
-      subject: step.betreff,
+      subject: substituiereBetreff(step.betreff, merge),
       html,
       empfaengerTyp: 'werkstatt',
       template: `werkstatt_aktivierung_${step.template_key}`,

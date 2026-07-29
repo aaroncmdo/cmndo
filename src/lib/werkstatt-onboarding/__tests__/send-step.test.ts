@@ -60,7 +60,8 @@ describe('sendeStep', () => {
     expect(sendEmail).toHaveBeenCalledOnce()
     const call = vi.mocked(sendEmail).mock.calls[0][0]
     expect(call.to).toBe('w@test.de')
-    expect(call.subject).toBe(stepSv.betreff)
+    // Betreff-Platzhalter [Region]/[Gutachter-Name] werden aus merge.sv substituiert (nicht roh raus).
+    expect(call.subject).toBe('Dein Gutachter in Köln: Kelvin')
     expect(call.html).toBe('<html>mock</html>')
     expect(call.template).toBe('werkstatt_aktivierung_sv_vorstellung')
     expect(call.empfaengerTyp).toBe('werkstatt')
