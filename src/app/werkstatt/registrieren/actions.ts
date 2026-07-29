@@ -124,6 +124,15 @@ export async function registriereWerkstattSelf(
     }
   }
 
+  // 5b. Onboarding-Drip enrollen (non-critical) — direkt nach dem status='aktiv'-Anlage-Erfolg.
+  //     Idempotent (DB-UNIQUE werkstatt_id); ein Fehler hier darf die Registrierung nicht brechen.
+  try {
+    const { enrolleWerkstatt } = await import('@/lib/werkstatt-onboarding/enroll')
+    await enrolleWerkstatt(admin, result.partnerId)
+  } catch (e) {
+    console.error('[enroll] werkstatt-onboarding', e)
+  }
+
   // 6. Willkommens-Mail mit Magic-Link zum Passwort-Setzen (non-critical — Konto ist aktiv;
   //    sendWillkommenWerkstatt wirft hart, wenn kein Link erzeugbar ist -> try/catch).
   try {
