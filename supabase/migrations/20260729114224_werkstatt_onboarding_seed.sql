@@ -1,0 +1,27 @@
+-- Seed der 6 Aktivierungs-Steps. Copy validiert gegen copy-schemas.ts.
+-- [Region]/[Gutachter-Name] bleiben Platzhalter (SvVorstellung.tsx substituiert zur Render-Zeit).
+insert into public.werkstatt_onboarding_steps (position, offset_tage, template_key, betreff, preheader, copy, aktiv) values
+(1, 0, 'willkommen',
+ 'Willkommen bei Claimondo – so startet dein erster Fall',
+ 'Kein Aufwand für dich – dein Kunde scannt, wir übernehmen den Rest.',
+ $$ {"headline":"Willkommen bei Claimondo","absaetze":["willkommen bei Claimondo – schön, dass du dabei bist. Dein Zugang ist freigeschaltet, und dein QR-Aufsteller steht bereits bei dir an der Theke.","Ab jetzt kann jeder Kunde mit einem Haftpflichtschaden seinen Fall selbst starten: Er scannt einfach den Code auf dem Aufsteller, gibt seine Daten ein – wir übernehmen die komplette Abwicklung. Du musst an nichts denken.","Nur wenn du einen Fall lieber selbst übernehmen möchtest – z. B. weil dein Kunde kein Smartphone hat oder älter ist – legst du ihn in unter einer Minute im Werkstatt-Portal an.","Und kurz zu mir: Ich bin Nicolas, dein persönlicher Ansprechpartner. Den ersten Fall machen wir gern gemeinsam am Telefon."],"so_laeufts":["Standard: Kunde scannt den Aufsteller → Fall startet automatisch","Optional: du legst den Fall selbst im Portal an (Kundendaten · Termin · Besichtigungsort)"],"cta_label":"Bei Fragen anrufen"} $$::jsonb, true),
+(2, 3, 'nutzen',
+ 'Deine Rechnung – voll, nicht gekürzt',
+ 'Volles Honorar, der Auftrag bleibt bei dir, der Kunde ist versorgt.',
+ $$ {"headline":"Warum sich dein erster Fall konkret rechnet","bloecke":[{"titel":"Dein Honorar ist abgesichert.","text":"Das Werkstattrisiko tragen unsere Anwälte – deine Rechnung wird in voller Höhe durchgesetzt."},{"titel":"Der Auftrag bleibt bei dir.","text":"Kein Weglenken zur Partnerwerkstatt der Versicherung – der Kunde repariert bei dir."},{"titel":"Dein Kunde ist versorgt.","text":"Nutzungsausfall oder Mietwagen holen wir für ihn raus – ohne dass du dich kümmern musst."},{"titel":"Wir bringen dir zusätzliche Aufträge.","text":"Bei freier Kapazität steuern wir Schäden aus unserem Netzwerk gezielt in deine Werkstatt."}],"schluss":"Der nächste Haftpflichtschaden, der bei dir reinkommt, ist der perfekte erste Fall.","cta_label":"Ersten Fall anlegen"} $$::jsonb, true),
+(3, 6, 'sv_vorstellung',
+ 'Dein Gutachter in [Region]: [Gutachter-Name]',
+ 'Ein echter Sachverständiger vor Ort – direkt erreichbar.',
+ $$ {"headline":"Dein Gutachter in [Region]: [Gutachter-Name]","absaetze":["viele Werkstätten fragen sich zu Recht, wer ihre Schäden eigentlich begutachtet. Deshalb stelle ich dir kurz [Gutachter-Name] vor.","[Gutachter-Name] ist unser Sachverständiger für [Region] – vor Ort, direkt erreichbar, und erstellt einen Kostenvoranschlag meist innerhalb von 24 Stunden.","Sobald ein Fall angelegt ist, kommt [Gutachter-Name] zur Besichtigung am vereinbarten Ort."],"cta_label":"Ersten Fall anlegen"} $$::jsonb, true),
+(4, 9, 'kundenstory',
+ 'So erleben deine Kunden Claimondo',
+ 'Eine kurze Kundenstory – und was sie über deine Werkstatt sagt.',
+ $$ {"headline":"Wie sich Claimondo für deine Kunden anfühlt","intro":"Ein Kunde hatte einen unverschuldeten Unfall. An der Theke sah er den QR-Aufsteller, scannte ihn und gab in wenigen Minuten seine Daten ein. Den Rest hat Claimondo übernommen – Gutachter-Termin, Anwalt, Mietwagen, Nutzungsausfall.","zitat":"Ich dachte, so ein Unfall bedeutet wochenlangen Papierkram. Stattdessen habe ich einen Code gescannt und mich um gar nichts kümmern müssen. Dass meine Werkstatt sowas Modernes anbietet, hat mich echt überrascht.","schluss":["Der Aufsteller regelt nicht nur den Schaden – er lässt deine Werkstatt modern und professionell dastehen.","Und für dich ist es denkbar einfach: Der Aufsteller steht schon an der Theke – dein Kunde scannt, fertig."],"cta_label":"Bei Fragen anrufen"} $$::jsonb, true),
+(5, 13, 'bonus',
+ '200 € für deinen ersten Fall ab 4.000 €',
+ 'Kleiner Anschub für den Start – für den ersten Fall in 30 Tagen.',
+ $$ {"headline":"Ein Anschub für deinen Start","absaetze":["Für deinen ersten Haftpflichtfall mit einer Schadenhöhe ab 4.000 € schreiben wir dir 200 € als Aufwandsentschädigung für die Schadenaufnahme (Erfassung der Kunden- und Schadendaten) gut.","Das gilt für den ersten Fall, den du in den nächsten 30 Tagen anlegst – also am besten den nächsten passenden Schaden direkt reingeben."],"cta_label":"Fall anlegen & 200 € sichern","fussnote":"Aufwandsentschädigung für die dokumentierte Schadenaufnahme."} $$::jsonb, false),
+(6, 20, 'reaktivierung',
+ 'Noch keinen Fall? Meist ist es nur eine Kleinigkeit',
+ 'Meist reicht ein kurzer Hinweis an den Kunden.',
+ $$ {"headline":"Noch keinen Fall? Meist ist es nur eine Kleinigkeit","intro":"du bist seit ein paar Wochen dabei, aber ich sehe noch keinen Fall von dir – kein Problem. Das liegt fast immer an einer von drei Kleinigkeiten:","punkte":["Es kam noch kein passender Haftpflichtschaden – völlig normal.","Die Kunden nutzen den Aufsteller noch nicht von allein – ein kurzer Hinweis wirkt Wunder.","Eine Frage ist offen – dann ruf mich einfach an oder wir machen den ersten Fall zusammen."],"schluss":"Was trifft es bei dir? Ein kurzer Anruf oder eine kurze Antwort genügt.","cta_label":"Ersten Fall zusammen machen"} $$::jsonb, true);
