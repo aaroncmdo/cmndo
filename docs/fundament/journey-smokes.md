@@ -13,7 +13,7 @@
 
 | Journey | Bewachende Spec(s) | Abdeckung | Lauf-Modus | Verifiziert |
 |---|---|---|---|---|
-| **J1** Haftpflicht e2e | `golden-path-prod` · `golden-path-deep-prod` · `golden-path-completion-prod` · `smoke-vollstrecke` · `smoke-orchestrator-prod` | **voll** (Lead→SV→Gutachten→QC→Kanzlei→Abschluss) | prod-optin (`RUN_GOLDEN_PATH_PROD=1` + `TEST_SV_PASSWORD`) | ✅ gelesen |
+| **J1** Haftpflicht e2e | `golden-path-deep-prod`/`-completion-prod` (**Status-Assert** via pollRow) · `golden-path-prod` (⚠ **FLACH** — nur Landing) · `smoke-vollstrecke` · `smoke-orchestrator-prod` | Specs da; **Tiefe in deep/completion** — `golden-path-prod` selbst assertet **keine** Status-Progression (s. Soll-Assert-Ziel) | prod-optin (`RUN_GOLDEN_PATH_PROD=1` + `TEST_SV_PASSWORD`) | ✅ gelesen + a6c863e2 |
 | **J2** Meldung alle Kanäle | `lead-to-fall` · `flowlink-kunde` · `smoke-mini-wizard-strecke` · `golden-path-finder-prod` | teil (Wizard/FlowLink/Finder; Embed/API/Karte offen) | gemischt | Name |
 | **J3** Unterschriften SA/Vollmacht | eingebettet in `golden-path-completion-prod` · `smoke-vollstrecke` · `smoke-final-vollstaendig` | teil (kein **dediziertes** SA/Vollmacht-Spec) | prod-optin | ✅ grep |
 | **J4** Reparatur-Weg | `reparatur-weg-e2e-smoke` · `reparatur-funnel-abschluss-smoke` · `reparatur-weg-kva-betrag-pflicht` · `reparatur-weg-kva-ablehnung-loop` · `kasko-reparatur-phase-smoke` (Seed: `reparatur-weg-e2e-seed.mjs`) | **voll** (KVA→Freigabe/Ablehnung→Schlussrechnung→Abschluss) | prod-optin | ✅ gelesen |
@@ -25,6 +25,22 @@
 | **J10** Dispatch | `sv-tagesroute` · `werkstatt-finder-smoke` · `golden-path-finder-prod` · `smoke-staging-sv-termin-verlegen` | teil (Ranking/Reservierung/Eskalation nicht dediziert) | gemischt | Name |
 
 „Verifiziert": ✅ = Spec gelesen/gegrept; „Name" = Zuordnung aus Dateiname, in B1-Schritt 2 zu bestätigen.
+
+## Soll-Assert-Ziel (was ein guter Smoke prüfen muss — J1/J4, von a6c863e2)
+
+Die Matrix zeigt **welche** Spec eine Journey bewacht; dieser Abschnitt **was** sie asserten muss. Ein Oracle, das nur
+Landing-Text prüft, ist ein schwaches Oracle. (Quelle: a6c863e2's j01/j04-Ist-Verifikation + A2 `state-machine.md`.)
+
+**J1 — `golden-path-prod` ist FLACH** (Stage 1 = `/schaden-melden`-URL-Check, Stages 2–6 = nur Rollen-Landing). Die
+Status-Tiefe liegt in `golden-path-deep-prod`/`-completion-prod` (verifiziert: pollRow/`operative_status`-Assertions vorhanden).
+Ein guter J1-Smoke assertet die **Progression**:
+`ersterfassung → sv-gesucht/sv-zugewiesen → sv-termin → begutachtung-laeuft → gutachten-eingegangen → filmcheck →
+kanzlei-uebergeben → anschlussschreiben → regulierung → zahlung-eingegangen → abgeschlossen` — plus `phase_transitions`-Log
+pro Übergang + `fall.status_changed`-Event.
+- **IST-Abweichungen als bewusste Checks/Skips** (j01 #6–#9, PR #4835): #6 SV-Zuweisung-WILD (`sv-zuweisung/route.ts:284` → **kein** Event-Fanout); #7 `gutachten_fertig`-Doppel-WA; #9 Template-Mislabel `sv_losgefahren`.
+- ⚠ **Abschluss:** der Smoke prüft den **IST** (Sofort-Cascade `regulierung→abgeschlossen`), NICHT das Soll (C1c-48h-Karenz nach Schlussabrechnung ist noch nicht gebaut — Aaron-Entscheid B, [[audit-c1-auto-close-luecke-zahlung-eingegangen]]).
+
+**J4 — `reparatur-werkstatt-suche` ist ein toter Lane-State** (nie geschrieben; die Zuweisung springt `ersterfassung → reparatur-angefragt`). Ein Smoke, der ihn erwartet, wäre falsch. Prüfen, ob die 4 Reparatur-Specs den **Sprung** + die KVA-Lücken asserten: KVA-Betrag nur clientseitig erzwungen (#4804), KVA-Ablehnung-Loop (#4824), Schlussrechnung-Dedup (#4799).
 
 ## Lücken (priorisiert)
 
