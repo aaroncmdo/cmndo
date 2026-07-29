@@ -24,6 +24,7 @@ import { toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import { rankSlots } from './ranking'
 import { toOeffentlichesSvProfil } from './projection'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import { istTestSvAngebotBlockiert } from '@/lib/testdaten/test-sv-guard'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder } from './types'
@@ -246,6 +247,8 @@ export async function planeTerminOeffentlich(
     if (candidates.length === 0) return []
     const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
     const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
+    // 13b (K10): Netzwerkpartner-Abo-Praedikat fuers Badge, EIN Batch fuer diesen Pfad.
+    const zahlendeSet = await ladeZahlendeSvSet(admin, candidates.map((c) => c.svId))
     const cand = candidates[0]
     const slots = await slotsFuer(cand.svId, FIXER_MAX_SLOTS)
     return [
@@ -255,6 +258,7 @@ export async function planeTerminOeffentlich(
         profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
         slots,
         rang: rangById.get(cand.svId) ?? null,
+        istNetzwerkpartner: zahlendeSet.has(cand.svId),
       }),
     ]
   }
@@ -264,6 +268,8 @@ export async function planeTerminOeffentlich(
   if (candidates.length === 0) return []
   const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
   const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
+  // 13b (K10): Netzwerkpartner-Abo-Praedikat fuers Badge, EIN Batch fuer diesen Pfad.
+  const zahlendeSet = await ladeZahlendeSvSet(admin, candidates.map((c) => c.svId))
   // AAR-956 (Aaron 14.06.): die slotsFuer-Calls (freieSlots, DB-schwer) PARALLEL statt sequenziell —
   // der Hauptgrund der „Wir suchen"-Sekunden war 3× freieSlots nacheinander. Promise.all erhält die
   // Reihenfolge (Engine-Ranking) → Ergebnis bit-identisch, nur ~3× schneller.
@@ -284,6 +290,7 @@ export async function planeTerminOeffentlich(
         profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
         slots,
         rang: rangById.get(cand.svId) ?? null,
+        istNetzwerkpartner: zahlendeSet.has(cand.svId),
       }),
     )
   })
@@ -306,6 +313,9 @@ export async function planeTerminOeffentlich(
       if (candidates.length > 0) {
         const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
         const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
+        // 13b (K10): EIN Batch fuer diesen Pfad — der Test-SV traegt praktisch nie ein
+        // Netzwerk-Abo, zahlendeSet bleibt hier also leer -> istNetzwerkpartner: false.
+        const zahlendeSet = await ladeZahlendeSvSet(admin, candidates.map((c) => c.svId))
         const cand = candidates[0]
         const slots = await slotsFuer(cand.svId, FIXER_MAX_SLOTS)
         if (slots.length > 0) {
@@ -316,6 +326,7 @@ export async function planeTerminOeffentlich(
               profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
               slots,
               rang: rangById.get(cand.svId) ?? null,
+              istNetzwerkpartner: zahlendeSet.has(cand.svId),
             }),
           ]
         }

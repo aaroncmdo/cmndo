@@ -22,6 +22,7 @@ import {
   haversineKm, pointInPolygon, ersterFreierSlot, rangToOrdinal, type RankbarerKandidat,
 } from './matching-score'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { parseIsochrone } from '@/lib/dispatch/isochrone-parse'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
@@ -197,6 +198,9 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
   const rangById = rangAktiv
     ? await getPartnerRangBatch(db, 'sachverstaendiger', imGebiet.map((g) => g.sv.id as string))
     : null
+  // Netzwerk-Boost (13b, Ebene 1): zahlende Netzwerkpartner unter den in-Gebiet-SVs EINMAL
+  // vorladen (K10 — kein per-Kandidat-Read im Hot-Path). service-role: `db` ist der Admin-Client.
+  const zahlendeSet = await ladeZahlendeSvSet(db, imGebiet.map((g) => g.sv.id as string))
   type Bewertet = PersonKandidat & RankbarerKandidat & { sv: SvRow }
   const bewertet: Bewertet[] = imGebiet.map((g, i) => {
     const sv = g.sv
@@ -212,9 +216,11 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
       fallSpezifikation && Array.isArray(sv.spezifikationen) && sv.spezifikationen.includes(fallSpezifikation)
         ? SPEZ_MATCH_BONUS
         : 0
-    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm, rangOrdinal: rangById ? rangToOrdinal(rangById.get(sv.id as string)?.tier) : undefined }) + stickyBonus + spezBonus
+    const istNetzwerkpartner = zahlendeSet.has(sv.id as string)
+    const score = bewerteSvKandidat({ istNetzwerkpartner, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm, rangOrdinal: rangById ? rangToOrdinal(rangById.get(sv.id as string)?.tier) : undefined }) + stickyBonus + spezBonus
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     const reasons = [...g.reasons, `Paket: ${paket}`]
+    if (istNetzwerkpartner) reasons.push('Netzwerkpartner')
     if (etaVomBueroMin != null) reasons.push(`${etaVomBueroMin} min Fahrt vom Büro`)
     if (spezBonus > 0) reasons.push(`Fachgebiet passt (${fallSpezifikation})`)
     if (stickyBonus > 0) reasons.unshift('Bekannter SV (Sticky)')
