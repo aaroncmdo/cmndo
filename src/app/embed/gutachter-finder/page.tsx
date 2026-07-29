@@ -29,6 +29,12 @@ export default async function GutachterFinderEmbedPage({
   const sp = await searchParams
 
   // Reuse: dieselben Loader wie die public sv-in-naehe-API + die Marketing-Karte.
+  // P2-T7 (K11): ladeAktiveSVs traegt einen Owner-Injektions-Seam ({ ownerProfilId }) fuer den
+  // relationalen "Dein Netzwerk"-Boost. Diese Embed-URL hat v1 KEINE Attribution in den
+  // searchParams (lat/lng/zoom/fallback/schaetzung) und der anon-Finder keinen Session-Owner
+  // -> bewusst OHNE Owner (nur das globale istNetzwerkpartner-Badge). Sobald ein attribuierter
+  // Einstieg existiert (Werkstatt-QR ?werkstatt= / Makler-Link), dessen Entity -> profiles.id
+  // aufloesen und hier injizieren. Makler sind v1 kein Graph-Knoten (Owner haette 0 Freunde).
   const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
   const leadPins = leadsRes.ok ? leadsRes.data : []

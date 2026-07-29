@@ -171,4 +171,94 @@ describe('runProvisionsRelease — generischer Release (loest den per-Typ-Cron a
     if (r.ok) throw new Error('expected failure')
     expect(r.error).toBe('connection reset')
   })
+
+  // P3 (Netzwerk): Freundes-Graph-Gate — intra-Netzwerk-Provisionen werden unterdrueckt statt freigegeben.
+  it('Suppression-Gate: intra-Row -> unterdrueckt (nicht freigegeben, kein notify); cross-Row -> freigegeben', async () => {
+    const gesehen: [string, string][] = []
+    const db = fakeDb({
+      pending: [
+        pendingRow({ id: 'p-intra', partner_typ: 'werkstatt', partner_id: 'w1' }),
+        pendingRow({ id: 'p-cross', partner_typ: 'werkstatt', partner_id: 'w2' }),
+      ],
+      claims: [abgeschlossenerClaim()],
+    })
+
+    const r = await runProvisionsRelease(db, {
+      partnerTypen: RELEASE_PARTNER_TYPEN,
+      now: NOW,
+      onStatusChange: async (row, status) => { gesehen.push([row.id, status]); return false },
+      bestimmeUnterdrueckteProvisionen: async () => new Set(['p-intra']),
+    })
+
+    if (!r.ok) throw new Error(r.error)
+    expect(r.unterdrueckt).toBe(1)
+    expect(r.released).toBe(1)
+    expect(db._updates).toContainEqual({
+      table: 'partner_provisionen',
+      patch: { status: 'unterdrueckt', storno_grund: 'intra_netzwerk' },
+      ids: ['p-intra'],
+    })
+    expect(db._updates).toContainEqual({
+      table: 'partner_provisionen',
+      patch: { status: 'freigegeben' },
+      ids: ['p-cross'],
+    })
+    // K13 "still": die unterdrueckte Row wird NICHT benachrichtigt.
+    expect(gesehen).toEqual([['p-cross', 'freigegeben']])
+  })
+
+  it('Suppression-Gate erhaelt NUR die release-berechtigten Rows (nicht Storno/Hold)', async () => {
+    let erhalten: string[] = []
+    const db = fakeDb({
+      pending: [
+        pendingRow({ id: 'p-release', claim_id: 'c1' }),
+        pendingRow({ id: 'p-storno', claim_id: 'c-storno' }),
+        pendingRow({ id: 'p-hold', claim_id: 'c-hold' }),
+      ],
+      claims: [
+        abgeschlossenerClaim(),
+        abgeschlossenerClaim({ id: 'c-storno', operative_status: 'storniert', abgeschlossen_am: null }),
+        abgeschlossenerClaim({ id: 'c-hold', operative_status: 'sv-termin', abgeschlossen_am: null }),
+      ],
+    })
+
+    const r = await runProvisionsRelease(db, {
+      partnerTypen: RELEASE_PARTNER_TYPEN,
+      now: NOW,
+      bestimmeUnterdrueckteProvisionen: async (rows) => { erhalten = rows.map((p) => p.id); return new Set() },
+    })
+
+    if (!r.ok) throw new Error(r.error)
+    expect(erhalten).toEqual(['p-release'])
+    expect(r.storniert).toBe(1)
+    expect(r.released).toBe(1)
+    expect(r.unterdrueckt).toBe(0)
+  })
+
+  it('Suppression-Hook wirft -> fail-open: alles freigegeben (Status quo), Lauf bricht nicht', async () => {
+    const db = fakeDb({ pending: [pendingRow()], claims: [abgeschlossenerClaim()] })
+
+    const r = await runProvisionsRelease(db, {
+      partnerTypen: RELEASE_PARTNER_TYPEN,
+      now: NOW,
+      bestimmeUnterdrueckteProvisionen: async () => { throw new Error('graph down') },
+    })
+
+    if (!r.ok) throw new Error(r.error)
+    expect(r.released).toBe(1)
+    expect(r.unterdrueckt).toBe(0)
+    expect(db._updates).toContainEqual({
+      table: 'partner_provisionen',
+      patch: { status: 'freigegeben' },
+      ids: ['p1'],
+    })
+  })
+
+  it('ohne bestimmeUnterdrueckteProvisionen: Verhalten unveraendert (alles freigegeben)', async () => {
+    const db = fakeDb({ pending: [pendingRow({ id: 'p1', partner_typ: 'werkstatt' })], claims: [abgeschlossenerClaim()] })
+    const r = await runProvisionsRelease(db, { partnerTypen: RELEASE_PARTNER_TYPEN, now: NOW })
+    if (!r.ok) throw new Error(r.error)
+    expect(r.released).toBe(1)
+    expect(r.unterdrueckt).toBe(0)
+  })
 })

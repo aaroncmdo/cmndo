@@ -15,6 +15,7 @@ import {
 } from '@/lib/werkstatt/repair-closure'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { closeReparaturClaimViaEngine } from '@/lib/faelle/reparatur-cursor'
+import { bestimmeIntraNetzwerkProvisionen } from '@/lib/netzwerk/provisions-suppression'
 
 export async function markiereReparaturErledigt(
   terminId: string,
@@ -133,13 +134,42 @@ export async function markiereReparaturErledigt(
 
   // 3) Werkstatt-Provision freigeben (pending -> freigegeben), an die Fertigstellung gekoppelt.
   //    Non-critical: Cron heilt spaeter nach (Praematur-Release-Vermeidung = 457ab612-Naht).
-  const { error: provErr } = await admin
-    .from('partner_provisionen')
-    .update({ status: 'freigegeben' } as never)
-    .eq('partner_typ', 'werkstatt')
-    .eq('claim_id', claimId)
-    .eq('status', 'pending')
-  if (provErr) console.error('[WS6] Provisions-Freigabe fehlgeschlagen:', provErr.message)
+  //    P3 Netzwerk: derselbe Freundes-Graph-Gate wie im Release-Cron — ohne ihn waere dieser
+  //    Sofort-Release ein Suppression-Bypass (intra-Netzwerk-Provision wuerde freigegeben,
+  //    bevor der Cron sie je sieht). Fail-Modus: bei Fehler passiert hier NICHTS — der
+  //    (gegatete) Cron heilt nach.
+  try {
+    const { data: pendingProv } = await admin
+      .from('partner_provisionen')
+      .select('id, partner_typ, partner_id, claim_id')
+      .eq('partner_typ', 'werkstatt')
+      .eq('claim_id', claimId)
+      .eq('status', 'pending')
+    const provRows = (pendingProv ?? []) as {
+      id: string; partner_typ: string; partner_id: string; claim_id: string | null
+    }[]
+    if (provRows.length > 0) {
+      const unterdruecktSet = await bestimmeIntraNetzwerkProvisionen(admin, provRows)
+      const freigebenIds = provRows.filter((p) => !unterdruecktSet.has(p.id)).map((p) => p.id)
+      const unterdrueckenIds = provRows.filter((p) => unterdruecktSet.has(p.id)).map((p) => p.id)
+      if (freigebenIds.length > 0) {
+        const { error } = await admin
+          .from('partner_provisionen')
+          .update({ status: 'freigegeben' } as never)
+          .in('id', freigebenIds)
+        if (error) console.error('[WS6] Provisions-Freigabe fehlgeschlagen:', error.message)
+      }
+      if (unterdrueckenIds.length > 0) {
+        const { error } = await admin
+          .from('partner_provisionen')
+          .update({ status: 'unterdrueckt', storno_grund: 'intra_netzwerk' } as never)
+          .in('id', unterdrueckenIds)
+        if (error) console.error('[WS6] Provisions-Suppression fehlgeschlagen:', error.message)
+      }
+    }
+  } catch (err) {
+    console.error('[WS6] Provisions-Gate fehlgeschlagen (non-fatal, Cron heilt):', err)
+  }
 
   // 4) Termin -> erledigt (auth-aware Client wegen RLS is_werkstatt_for_claim).
   //    Non-critical: Claim + Provision sind schon committed; ein Status-Flip-Lag
