@@ -5800,7 +5800,9 @@
     "reparaturdauer_tage",
     "unfallart",
     "reparaturdauer_tage_kva",
-    "reparatur_rueckruf_wunschzeit"
+    "reparatur_rueckruf_wunschzeit",
+    "kva_abgelehnt_am",
+    "kva_abgelehnt_grund"
    ]
   },
   "v_werkstatt_lead": {
