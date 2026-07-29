@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
+import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
@@ -411,83 +411,11 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
 
   const db = createAdminClient()
 
-  // Gutachter-Onboarding-Audit #3: Go-Live-Geo-Guard. Die Freigabe macht den SV
-  // map-sichtbar (Karten-RLS: isochrone_polygon + lat/lng NOT NULL) UND dispatchbar
-  // (Matching: Isochrone deckt Schadenort). Fehlt Geo, waere der SV zwar "frei",
-  // wuerde aber 0 Leads treffen (self-reg geocodet lat/lng nur best-effort und
-  // berechnet NIE eine Isochrone). Darum: ohne Koordinaten blocken, fehlende
-  // Isochrone aus den Koordinaten nachberechnen.
-  const { data: sv, error: readErr } = await db
-    .from('sachverstaendige')
-    .select('standort_lat, standort_lng, paket_umkreis_km, isochrone_polygon')
-    .eq('id', svId)
-    .maybeSingle()
-  if (readErr) return { success: false, error: `SV konnte nicht geladen werden: ${readErr.message}` }
-  if (!sv) return { success: false, error: 'Sachverständiger nicht gefunden.' }
-
-  if (sv.standort_lat == null || sv.standort_lng == null) {
-    return {
-      success: false,
-      error:
-        'Freigabe nicht möglich: Dem Gutachter fehlen Standort-Koordinaten. Bitte zuerst die Adresse (via Google Places) nachtragen — sonst ist er auf der Karte unsichtbar und nicht buchbar.',
-    }
-  }
-
-  // Fehlende Isochrone nachberechnen, damit der SV nach der Freigabe wirklich
-  // sichtbar + dispatchbar ist. Schlägt die Berechnung fehl -> blocken (nicht
-  // stillschweigend "frei ohne Einsatzgebiet"), Admin kann später erneut freigeben.
-  const geoPatch: Record<string, unknown> = {}
-  if (sv.isochrone_polygon == null) {
-    const radiusKm = sv.paket_umkreis_km ?? 25
-    try {
-      const polygon = await calculateIsochrone(Number(sv.standort_lat), Number(sv.standort_lng), radiusKm)
-      if (!polygon.length) throw new Error('leeres Polygon')
-      geoPatch.isochrone_polygon = polygon
-    } catch (err) {
-      console.error('[gibBasicSvFrei] Isochrone-Nachberechnung fehlgeschlagen:', err)
-      return {
-        success: false,
-        error:
-          'Freigabe nicht möglich: Das Einsatzgebiet (Isochrone) konnte nicht berechnet werden. Bitte später erneut versuchen.',
-      }
-    }
-  }
-
-  // Schritt 1: alle 5 Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
-  const { error: svErr } = await db
-    .from('sachverstaendige')
-    .update({
-      verifizierung_status: 'geprueft',
-      verifiziert: true,
-      verifiziert_am: new Date().toISOString(),
-      ist_aktiv: true,
-      portal_zugang_freigeschaltet: true,
-      ...geoPatch,
-    })
-    .eq('id', svId)
-  if (svErr) return { success: false, error: `Freigabe fehlgeschlagen: ${svErr.message}` }
-
-  // Schritt 2: offenen sv_basic_claim_review-Task schliessen.
-  // Direktes Update statt resolveTasksForEntity, weil resolveTasksForEntity
-  // zugewiesen_an-Tasks nicht schliesst (Reviewer koennte es beansprucht haben).
-  // erledigt_am setzen wie updateTaskStatusCore (Konvention im Codebase).
-  const nowIso = new Date().toISOString()
-  const { error: taskErr } = await db
-    .from('tasks')
-    .update({
-      status: 'erledigt',
-      erledigt_am: nowIso,
-      auto_resolved_am: nowIso,
-      auto_resolved_grund: 'Basic-SV durch Admin freigegeben',
-    })
-    .eq('typ', 'sv_basic_claim_review')
-    .eq('entity_id', svId)
-    .eq('status', 'offen')
-  if (taskErr) {
-    // Non-fatal: SV ist bereits freigeschaltet; Admin-Task-Schliessen ist
-    // best-effort (Task bleibt sichtbar, schadet nicht).
-    console.error('[gibBasicSvFrei] Task-Schliessen fehlgeschlagen:', taskErr.message)
-  }
+  // Freigabe-Kern (Go-Live-Geo-Guard + Isochrone-Nachberechnung + 5 Freigabe-Flags +
+  // Task-Close) — geteilt mit der Auto-Freigabe bei Onboarding-Abschluss
+  // (sv-onboarding/finalize.ts, Aaron 29.07.: "alle SVs sollen sich selbst freigeben").
+  const res = await freigebeBasicSvCore(db, svId)
+  if (!res.ok) return { success: false, error: res.error }
 
   revalidateBoth(svId)
   revalidatePath('/admin/aufgaben/alle')
