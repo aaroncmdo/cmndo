@@ -77,8 +77,18 @@ den Basistabellen-Zugriff.
 - **Client-Direkt-Selects auf Basistabellen: 0** (verifiziert) → **keine Migration auf dieser Achse** (die
   DoD-„Top-3-Abweichler migrieren" ist hier gegenstandslos; server-first ist gelebt).
 - **Browser-Client-Nutzung: Realtime + Auth** (~25 Files, alle legit; R4-Gate `whenRealtimeAuthReady` ist verdrahtet).
-- **Offene Achse (spätere Tranche/Erhebung):** server-seitige Basistabellen-Reads, die die `v_claim_*`-Schicht
-  umgehen (Konsolidierung auf das View-Muster) — eigene Erhebung wert, nicht in dieser Prep-Tranche.
+- **Server-Achse — erhoben (29.07.):** `from('claims')` = **371 Vorkommen / 209 Files** vs. `v_claim_full` = **138**
+  (`v_claim_base` = 0 direkte Consumer; es liegt unter `v_claim_full`). Der große Base-Table-Footprint ist ein **Mix**:
+  - **30 API/Cron/Webhook** (service-role-intern) — meist **legit** (lesen spezifische Spalten; service-role bypasst RLS ohnehin, die View bringt dort wenig).
+  - **46 Server-Actions** (`actions.ts`/`_actions/`) — **Read+Write-Mix**; Writes sind **Base-Table-Pflicht** (man schreibt nicht durch eine View), nur der Read-Teil ist Kandidat.
+  - **17 rollen-gescopte Read-Surfaces** (`page`/`View`/`Widget`.tsx) = **die echten Abweichler** → auf `v_claim_full`/Rollen-View konsolidieren. Das Muster ist etabliert (138 Consumer), diese 17 sind nur noch nicht migriert:
+    `admin/{page,faelle/(hub)/page,nachrichten/page}.tsx` · `admin/_components/{KritischeUpdates,WichtigeUpdates,LeadPreiseVerteilung}Widget.tsx` · `admin/finance/(hub)/_views/{OffeneFaelle,Uebersicht}View.tsx` · `faelle/{page,[id]/page}.tsx` · `gutachter/{abrechnung,fall/[id],posteingang,profil}/page.tsx` · `kunde/{faelle/[id]/kalender,onboarding}/page.tsx` (`admin/smoke/lifecycle/page.tsx` = Test-Surface, kein echter Abweichler).
+
+  **Tranchen-Status:** eigene **C5-Code-Tranche** (Read-Surface-Migration auf `v_claim_full`), **NICHT** diese Prep-Tranche.
+  Pro File verifizieren, ob `v_claim_full` die gelesenen Spalten trägt (sonst View **additiv** erweitern, Regel 2). Writes +
+  service-role-interne Reads bleiben Base-Table (legit). ⚠ `KritischeUpdatesWidget`/`OffeneFaelleView` etc. tragen bereits
+  `CMM-49/CMM-74`-SSoT-Cutover-Kommentare (repointet auf `claims.operative_status`) — die Migration ist die Fortsetzung
+  dieses Cutovers auf die View-Schicht, kein Neubau.
 
 ## 6 · Incident-Anker (warum die Doktrin)
 
