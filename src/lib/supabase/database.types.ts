@@ -3743,6 +3743,7 @@ export type Database = {
           mietwagen_rechnung_vorhanden: boolean
           mietwagen_seit_datum: string | null
           mietwagen_vermieter: string | null
+          netzwerk_owner_id: string | null
           notizen: string | null
           onboarding_complete: boolean | null
           operative_status: string | null
@@ -3950,6 +3951,7 @@ export type Database = {
           mietwagen_rechnung_vorhanden?: boolean
           mietwagen_seit_datum?: string | null
           mietwagen_vermieter?: string | null
+          netzwerk_owner_id?: string | null
           notizen?: string | null
           onboarding_complete?: boolean | null
           operative_status?: string | null
@@ -4157,6 +4159,7 @@ export type Database = {
           mietwagen_rechnung_vorhanden?: boolean
           mietwagen_seit_datum?: string | null
           mietwagen_vermieter?: string | null
+          netzwerk_owner_id?: string | null
           notizen?: string | null
           onboarding_complete?: boolean | null
           operative_status?: string | null
@@ -4329,6 +4332,13 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "v_werkstatt_lead"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_netzwerk_owner_id_fkey"
+            columns: ["netzwerk_owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -13741,6 +13751,48 @@ export type Database = {
           },
         ]
       }
+      netzwerk_verbindungen: {
+        Row: {
+          anfrager_id: string
+          beantwortet_am: string | null
+          empfaenger_id: string
+          erstellt_am: string
+          id: string
+          status: string
+        }
+        Insert: {
+          anfrager_id: string
+          beantwortet_am?: string | null
+          empfaenger_id: string
+          erstellt_am?: string
+          id?: string
+          status?: string
+        }
+        Update: {
+          anfrager_id?: string
+          beantwortet_am?: string | null
+          empfaenger_id?: string
+          erstellt_am?: string
+          id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "netzwerk_verbindungen_anfrager_id_fkey"
+            columns: ["anfrager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "netzwerk_verbindungen_empfaenger_id_fkey"
+            columns: ["empfaenger_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_deliveries: {
         Row: {
           channel: string
@@ -15992,6 +16044,8 @@ export type Database = {
           ms_connected_at: string | null
           ms_email: string | null
           nachname: string | null
+          netzwerk_owner_id: string | null
+          netzwerk_owner_seit: string | null
           onboarding_completed_at: string | null
           ort: string | null
           plz: string | null
@@ -16048,6 +16102,8 @@ export type Database = {
           ms_connected_at?: string | null
           ms_email?: string | null
           nachname?: string | null
+          netzwerk_owner_id?: string | null
+          netzwerk_owner_seit?: string | null
           onboarding_completed_at?: string | null
           ort?: string | null
           plz?: string | null
@@ -16104,6 +16160,8 @@ export type Database = {
           ms_connected_at?: string | null
           ms_email?: string | null
           nachname?: string | null
+          netzwerk_owner_id?: string | null
+          netzwerk_owner_seit?: string | null
           onboarding_completed_at?: string | null
           ort?: string | null
           plz?: string | null
@@ -16241,6 +16299,13 @@ export type Database = {
             columns: ["kanzlei_id"]
             isOneToOne: false
             referencedRelation: "kanzlei"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_netzwerk_owner_id_fkey"
+            columns: ["netzwerk_owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -19014,6 +19079,51 @@ export type Database = {
           },
           {
             foreignKeyName: "sv_live_position_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "v_live_ops_sv"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sv_netzwerk_abonnements: {
+        Row: {
+          aktualisiert_am: string
+          erstellt_am: string
+          gueltig_bis: string | null
+          id: string
+          status: string
+          stripe_subscription_id: string | null
+          sv_id: string
+        }
+        Insert: {
+          aktualisiert_am?: string
+          erstellt_am?: string
+          gueltig_bis?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          sv_id: string
+        }
+        Update: {
+          aktualisiert_am?: string
+          erstellt_am?: string
+          gueltig_bis?: string | null
+          id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          sv_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sv_netzwerk_abonnements_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: false
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_netzwerk_abonnements_sv_id_fkey"
             columns: ["sv_id"]
             isOneToOne: false
             referencedRelation: "v_live_ops_sv"
@@ -23268,14 +23378,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -25505,6 +25615,13 @@ export type Database = {
         }
         Relationships: []
       }
+      v_netzwerk_freunde: {
+        Row: {
+          freund_id: string | null
+          profil_id: string | null
+        }
+        Relationships: []
+      }
       v_offene_anfragen: {
         Row: {
           bevorzugter_kanal: string | null
@@ -25795,6 +25912,8 @@ export type Database = {
           kostenvoranschlag_brutto: number | null
           kostenvoranschlag_netto: number | null
           kunde_name: string | null
+          kva_abgelehnt_am: string | null
+          kva_abgelehnt_grund: string | null
           meine_rolle: string | null
           operative_status: string | null
           provision_betrag_netto: number | null
@@ -26246,6 +26365,7 @@ export type Database = {
       is_claim_user_party: { Args: { p_claim_id: string }; Returns: boolean }
       is_dispatcher: { Args: never; Returns: boolean }
       is_kanzlei: { Args: never; Returns: boolean }
+      is_kanzlei_mandat: { Args: { p_claim_id: string }; Returns: boolean }
       is_kanzlei_member: { Args: { p_kanzlei_id: string }; Returns: boolean }
       is_kundenbetreuer: { Args: never; Returns: boolean }
       is_staff: { Args: never; Returns: boolean }
