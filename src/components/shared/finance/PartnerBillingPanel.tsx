@@ -52,6 +52,9 @@ const STATUS_LABEL: Record<string, string> = {
   gehalten: 'Gehalten',
   freigegeben: 'Freigegeben',
   entwurf: 'Entwurf',
+  // P3 Netzwerk: intra-Freundesnetzwerk -> Einzelprovision entfaellt (Abo deckt). Bewusst ohne
+  // Auszahlen-/Freigeben-Aktion (istAuszahlungGehalten/-Freigegeben matchen nicht).
+  unterdrueckt: 'Netzwerk-intern (nicht vergütet)',
 }
 
 function formatEur(betrag: number | null): string {
