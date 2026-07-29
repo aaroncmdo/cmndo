@@ -6,6 +6,9 @@
 >
 > **Erhebung:** 28.07.2026, Session 8c6de199, gegen `origin/staging` im frischen Worktree (4 parallele Code-Leser).
 > Belege = `file:line` relativ zu `src/`. **Scope-Zaun (§0.2):** nur registrieren, **keine Löcher fixen** — Funde sind ✗ + Notiz, Fix ist C2.
+>
+> **Tranche:** Die FlowLink-Eingänge (Issuance/Delivery von `flow_links`, 14 Einträge) sind separat
+> registriert in `docs/fundament/entry-points-flowlink.md` (#4818).
 
 ## Die 6 Pflicht-Nachwirkungen (Soll je Meldeweg)
 
