@@ -28,16 +28,18 @@ const ENV_CANDIDATES = [
 ]
 let envRaw = null
 for (const c of ENV_CANDIDATES) { try { envRaw = readFileSync(c, 'utf8'); break } catch { /* next */ } }
-if (!envRaw) throw new Error('.env.local nicht gefunden')
+// CI (Fundament B2): kein .env.local im Runner -> Fallback auf process.env (Secrets im Workflow durchgereicht).
 const env = {}
-for (const line of envRaw.split('\n')) {
-  const l = line.replace(/\r$/, '')
-  if (!l.includes('=') || l.trimStart().startsWith('#')) continue
-  const i = l.indexOf('='); env[l.slice(0, i).trim()] = l.slice(i + 1).trim().replace(/^["']|["']$/g, '')
+if (envRaw) {
+  for (const line of envRaw.split('\n')) {
+    const l = line.replace(/\r$/, '')
+    if (!l.includes('=') || l.trimStart().startsWith('#')) continue
+    const i = l.indexOf('='); env[l.slice(0, i).trim()] = l.slice(i + 1).trim().replace(/^["']|["']$/g, '')
+  }
 }
-const URL_ = env.NEXT_PUBLIC_SUPABASE_URL
-const KEY = env.SUPABASE_SERVICE_ROLE_KEY
-if (!URL_ || !KEY) throw new Error('SUPABASE URL/SERVICE_ROLE_KEY fehlen')
+const URL_ = env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const KEY = env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+if (!URL_ || !KEY) throw new Error('SUPABASE URL/SERVICE_ROLE_KEY fehlen (weder .env.local noch process.env)')
 const db = createClient(URL_, KEY, { auth: { persistSession: false, autoRefreshToken: false } })
 
 const APP = 'https://app.claimondo.de'
