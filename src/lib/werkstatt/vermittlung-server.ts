@@ -16,6 +16,8 @@ import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
 import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
+import { applyNetzwerkPraeferenz } from '@/lib/netzwerk/apply-netzwerk-praeferenz'
+import { ladeFreundKandidatIds } from '@/lib/netzwerk/freunde'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -87,7 +89,9 @@ export async function findReparaturWerkstaettenForTarget(
 }
 
 export type QualifizierteWerkstaettenResult = {
-  werkstaetten: Qualifiziert<WerkstattFinderRow>[]
+  // imNetzwerk (P2-T6, additiv): von applyNetzwerkPraeferenz gesetzt, wenn ein ownerProfilId
+  // durchgereicht wurde — true = Freund-Werkstatt des Owners, nach oben partitioniert.
+  werkstaetten: (Qualifiziert<WerkstattFinderRow> & { imNetzwerk?: boolean })[]
   keineSpezialisierte: boolean
   bedarf: Reparaturbedarf
 }
@@ -103,7 +107,7 @@ export type QualifizierteWerkstaettenResult = {
  * Caller das fit-Flag anzeigen oder keineSpezialisierte ausweisen moechte.
  */
 export async function findQualifizierteReparaturWerkstaetten(
-  input: VermittlungTarget & { nurEchte?: boolean },
+  input: VermittlungTarget & { nurEchte?: boolean; ownerProfilId?: string | null },
 ): Promise<QualifizierteWerkstaettenResult> {
   const admin = createAdminClient()
 
@@ -119,7 +123,20 @@ export async function findQualifizierteReparaturWerkstaetten(
   // 3. Qualifier annotiert fit + hart-filtert bei hoher confidence
   const { werkstaetten, keineSpezialisierte } = qualifiziereWerkstaetten(rows, bedarf)
 
-  return { werkstaetten, keineSpezialisierte, bedarf }
+  // 4. P2-T6 (Netzwerk, K12): relationale Partition als ALLERLETZTER Schritt — NACH dem
+  //    #4101/#4125-Reorder, damit Freunde ueber die Extra-Reorderings floaten, ohne sie zu
+  //    zerstoeren. K10: EIN Freund-Batch pro Aufruf. 'passt_nicht' zaehlt NICHT als
+  //    qualifiziert (Engine-Qualifikation schlaegt Freundschaft, Design §5.2).
+  let final: QualifizierteWerkstaettenResult['werkstaetten'] = werkstaetten
+  if (input.ownerProfilId) {
+    const freundIds = await ladeFreundKandidatIds(admin, input.ownerProfilId, 'werkstatt')
+    final = applyNetzwerkPraeferenz(
+      werkstaetten.map((w) => ({ ...w, qualifiziert: w.fit !== 'passt_nicht' })),
+      freundIds,
+    )
+  }
+
+  return { werkstaetten: final, keineSpezialisierte, bedarf }
 }
 
 /**
