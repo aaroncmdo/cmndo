@@ -27,6 +27,7 @@ export function SvVorstellungEmail({ copy, merge }: Props) {
     <EmailShell preview={subject(copy, merge)}>
       <Hero logoUrl={null} headline={copy.headline.replace('[Region]', region)} />
       <Card>
+        <Paragraph>Hallo {merge.werkstattName},</Paragraph>
         {merge.sv && (
           <BeraterCard
             name={merge.sv.name}

@@ -24,7 +24,7 @@ export function KundenstoryEmail({ copy, merge }: Props) {
         <Paragraph>{copy.intro}</Paragraph>
 
         <Callout>
-          <em>&ldquo;{copy.zitat}&rdquo;</em>
+          <em>„{copy.zitat}"</em>
         </Callout>
 
         {copy.schluss.map((s, i) => <Paragraph key={i}>{s}</Paragraph>)}
