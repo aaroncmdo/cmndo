@@ -4,16 +4,21 @@
 // nutzen nun diese Config statt hardcoded Modell-Strings. Zukünftige Upgrades
 // sind damit ein Ein-Zeilen-Change pro Feature.
 //
+// Modell-Upgrade 29.07.2026: die Sonnet-Use-Cases von 'claude-sonnet-4-6' auf die aktuelle
+// Sonnet 5 ('claude-sonnet-5') gehoben — Qualitäts-/Judgment-/Multimodal-Fälle profitieren; die
+// kosten-sensitiven bleiben Haiku 4.5, der schwerste Dokument-OCR bleibt Opus 4.8. Zusätzlich
+// linkedin_compose aus dem vormals hardcoded compose.ts ins Register gezogen (Konsistenz).
+//
 // Auswahl-Heuristik:
 //   Kunden-facing + Speed-kritisch + kurze Antwort → Haiku 4.5
-//   Interne Tools + Qualität > Speed + strukturierter Output → Sonnet 4.6
-//   Multimodal / komplexe Generierung (SVG/OCR) → Sonnet 4.6
+//   Interne Tools + Qualität > Speed + strukturierter Output → Sonnet 5
+//   Multimodal / komplexe Generierung (SVG/OCR) → Sonnet 5
 
 export const AI_MODELS = {
   /** FAQ-Bot Kunde — 2-4 Sätze, Speed kritisch. Haiku 4.5. */
   faq_bot_kunde: 'claude-haiku-4-5-20251001',
   /** FAQ-Bot KB — tiefe Antworten, Qualität wichtiger als Speed. */
-  faq_bot_kb: 'claude-sonnet-4-6',
+  faq_bot_kb: 'claude-sonnet-5',
   /**
    * AAR-445: Fall-Analyse nach Bot-Sessions. JSON-Output, klar strukturierter
    * Input — Haiku 4.5 reicht, günstig und schnell.
@@ -21,31 +26,31 @@ export const AI_MODELS = {
   fall_summary: 'claude-haiku-4-5-20251001',
   /**
    * AAR-377: SV-Briefing vor Vor-Ort-Termin. 3-5 Sätze, aus Fall/Lead-Daten
-   * zusammengefasst. Sonnet 4.6 — Qualität und guter deutscher Sprachstil
+   * zusammengefasst. Sonnet 5 — Qualität und guter deutscher Sprachstil
    * wichtiger als Speed (Batch-Generierung beim Fall-Anlegen).
    */
-  sv_briefing: 'claude-sonnet-4-6',
+  sv_briefing: 'claude-sonnet-5',
   /**
    * AAR-385: Strukturiertes SV-Briefing (kurzversion + hinweise[] +
    * warnungen[] + checkliste_vor_ort[]). JSON-Response-Format erzwungen via
-   * System-Prompt. Sonnet 4.6 — Qualität > Speed (Batch beim Fall-Anlegen).
+   * System-Prompt. Sonnet 5 — Qualität > Speed (Batch beim Fall-Anlegen).
    */
-  sv_briefing_struktur: 'claude-sonnet-4-6',
+  sv_briefing_struktur: 'claude-sonnet-5',
   /**
    * KFZ-143: Pre-Call-Briefing für KB vor Kunden-Call. Strukturierter Output
-   * aus Fall + Lead + letzter Bot-Analyse. Sonnet 4.6 — Entscheidungsgrundlage.
+   * aus Fall + Lead + letzter Bot-Analyse. Sonnet 5 — Entscheidungsgrundlage.
    */
-  pre_call_briefing: 'claude-sonnet-4-6',
+  pre_call_briefing: 'claude-sonnet-5',
   /**
    * KFZ-143: Post-Call-Analyse nach beendetem Call. Zusammenfassung längerer
-   * Transkripte braucht Qualität. Sonnet 4.6.
+   * Transkripte braucht Qualität. Sonnet 5.
    */
-  post_call_summary: 'claude-sonnet-4-6',
+  post_call_summary: 'claude-sonnet-5',
   /**
    * /api/schadenkalkulation: OCR / Multimodal-Analyse von Schadensfotos + Text-
-   * Schätzung. Multimodal, Qualität bei Dokumenten-Extraktion wichtig. Sonnet 4.6.
+   * Schätzung. Multimodal, Qualität bei Dokumenten-Extraktion wichtig. Sonnet 5.
    */
-  ocr: 'claude-sonnet-4-6',
+  ocr: 'claude-sonnet-5',
   /**
    * Dokument-OCR (Aaron 13.07.): fall_dokumente (Fahrzeugschein/ID/Führerschein/
    * Versicherung/Polizei — api/ocr-trigger, ersetzt Google Vision) + Gutachten-
@@ -55,68 +60,68 @@ export const AI_MODELS = {
   doc_ocr: 'claude-opus-4-8',
   /**
    * KFZ-??: Unfallskizze-SVG-Generator. Komplexe strukturierte Output-Generation
-   * (SVG) — Sonnet 4.6 nötig.
+   * (SVG) — Sonnet 5 nötig.
    */
-  unfallskizze: 'claude-sonnet-4-6',
+  unfallskizze: 'claude-sonnet-5',
   /**
    * AAR-420: Logo-Vision-Analyse (Brand-Mood + Font-Kategorie + Primary-Check).
-   * Multimodal Sonnet 4.6.
+   * Multimodal Sonnet 5.
    */
-  vision_branding: 'claude-sonnet-4-6',
+  vision_branding: 'claude-sonnet-5',
   /**
    * AAR-104: Claimondo AI Assistant — Fall-Zusammenfassung in der Fallakte.
-   * Kunden-Anliegen-Antwort und Fall-Zusammenfassung. Sonnet 4.6.
+   * Kunden-Anliegen-Antwort und Fall-Zusammenfassung. Sonnet 5.
    */
-  fall_assistant: 'claude-sonnet-4-6',
+  fall_assistant: 'claude-sonnet-5',
   /**
    * AAR-489 (M7): Makler-Copilot im Akte-Detail. Nutzt vollen Fall-Kontext +
    * Gutachten + Gruppenchat-Auszug + Eskalations-Playbook. User-facing,
-   * komplexer Prompt — Sonnet 4.6.
+   * komplexer Prompt — Sonnet 5.
    */
-  makler_copilot: 'claude-sonnet-4-6',
+  makler_copilot: 'claude-sonnet-5',
   /**
    * Werkstatt-Copilot in der Auftrag-Detail (reparatur-/abwicklungs-fokussiert):
    * Reparaturweg/Abrechnung, KVA, Gutachten-Abweichung, Reparaturtermin, Totalschaden.
-   * User-facing, komplexer Prompt — Sonnet 4.6 (analog makler_copilot).
+   * User-facing, komplexer Prompt — Sonnet 5 (analog makler_copilot).
    */
-  werkstatt_copilot: 'claude-sonnet-4-6',
+  werkstatt_copilot: 'claude-sonnet-5',
   /**
    * SV-Copilot in der Fallakte (technisch-fachlich): Kalkulation, Wertminderung,
    * Vorschaeden, Nutzungsausfall, Totalschaden/Restwert, BVSK. User-facing,
-   * komplexer Prompt — Sonnet 4.6 (analog makler_copilot).
+   * komplexer Prompt — Sonnet 5 (analog makler_copilot).
    */
-  gutachter_copilot: 'claude-sonnet-4-6',
+  gutachter_copilot: 'claude-sonnet-5',
   /**
    * AAR-472 (C6): Vision-Analyse der Schadensfotos im Kunden-Flow Schritt 2b.
    * Liefert strukturiertes JSON (beschaedigte_teile, schweregrad, fahrzeug_hinweise).
-   * Multimodal → Sonnet 4.6.
+   * Multimodal → Sonnet 5.
    */
-  vision_lead: 'claude-sonnet-4-6',
+  vision_lead: 'claude-sonnet-5',
   /**
    * AAR-470 (C4): Struktur-Extraktion aus dem Voice-Transkript im Kunden-Flow
-   * Schritt 1. Sonnet 4.6 — deutscher Sprachstil, konservative Null-Felder
+   * Schritt 1. Sonnet 5 — deutscher Sprachstil, konservative Null-Felder
    * wenn Info fehlt.
    */
-  voice_extract: 'claude-sonnet-4-6',
+  voice_extract: 'claude-sonnet-5',
   /**
    * AAR-518 (S1): Support-Bot fürs Bug/Feature-Widget. 4-Tool-Flow mit
    * Duplikat-Check (search_similar_issues → ask_clarifying_question →
    * comment_on_issue | create_linear_issue). Multimodal (Screenshot) +
-   * Qualität der Ticket-Beschreibung wichtig → Sonnet 4.6.
+   * Qualität der Ticket-Beschreibung wichtig → Sonnet 5.
    */
-  support_bot: 'claude-sonnet-4-6',
+  support_bot: 'claude-sonnet-5',
   /**
    * AAR-504/505 (B2+B3): BKat-Inferenz aus Unfallhergang-Text.
    * Klassifiziert Unfall in bkat_unfallart und schlägt 1-3 TBNR-Vorschläge
-   * vor. Deutscher Jura-Kontext, strukturierter JSON-Output → Sonnet 4.6.
+   * vor. Deutscher Jura-Kontext, strukturierter JSON-Output → Sonnet 5.
    */
-  bkat_inference: 'claude-sonnet-4-6',
+  bkat_inference: 'claude-sonnet-5',
   /**
    * AAR-504 (B2): Polizeibericht-OCR via Claude Vision — extrahiert TBNRs
    * aus gescannten/fotografierten Polizeiberichten. Multimodal-OCR mit
-   * Confidence-Handling → Sonnet 4.6.
+   * Confidence-Handling → Sonnet 5.
    */
-  bkat_ocr: 'claude-sonnet-4-6',
+  bkat_ocr: 'claude-sonnet-5',
   /**
    * AAR-unfallfotos: Dispatch-Flow Lead-Step-4 — Unfallfotos per WA/SMS/Email
    * beim Kunden angefordert, nach Upload füllt Haiku 4.5 das Feld
@@ -132,26 +137,26 @@ export const AI_MODELS = {
   chat_translate: 'claude-haiku-4-5-20251001',
   /**
    * AI-Claim-Orchestrator (Phase-1-PoC): liest Fall-Kontext, schlägt via Tool-Use
-   * den nächsten Schritt vor (Shadow-Mode). Judgment > Speed → Sonnet 4.6.
+   * den nächsten Schritt vor (Shadow-Mode). Judgment > Speed → Sonnet 5.
    */
-  claim_orchestrator: 'claude-sonnet-4-6',
+  claim_orchestrator: 'claude-sonnet-5',
   /**
    * Claim-AI-Konsole: interaktiver Admin-Copilot in der Claim-View (Streaming +
    * Tool-Use). Nutzt vollen Fall-Kontext, schlaegt freigabepflichtige Aktionen vor.
-   * Judgment > Speed → Sonnet 4.6.
+   * Judgment > Speed → Sonnet 5.
    */
-  claim_copilot: 'claude-sonnet-4-6',
+  claim_copilot: 'claude-sonnet-5',
   /**
    * KI-Aufsicht SLA-Rollen (Inkrement 1): Batch-Tool-Use ueber alle Rollen-SLAs,
    * schlaegt freigabepflichtige Remediation-Tasks vor (quelle='aufsicht').
-   * Judgment ueber mehrere Rollen > Speed → Sonnet 4.6.
+   * Judgment ueber mehrere Rollen > Speed → Sonnet 5.
    */
-  ki_aufsicht: 'claude-sonnet-4-6',
+  ki_aufsicht: 'claude-sonnet-5',
   /**
    * KI-Task-Executor: agentische Aufgaben-Ausfuehrung via Tool-Use (planen,
-   * bestaetigen, anwenden). Judgment ueber Risikostufen > Speed → Sonnet 4.6.
+   * bestaetigen, anwenden). Judgment ueber Risikostufen > Speed → Sonnet 5.
    */
-  task_executor: 'claude-sonnet-4-6',
+  task_executor: 'claude-sonnet-5',
   /**
    * Vertrieb Lead-Website-Enrichment: extrahiert den Ansprechpartner + Kontakt (Email/Telefon)
    * aus Impressum/Kontakt der Firmen-Website. Einfache strukturierte Extraktion aus kurzem
@@ -160,9 +165,16 @@ export const AI_MODELS = {
   lead_enrichment: 'claude-haiku-4-5-20251001',
   /**
    * Cold-Mailer S1: KI-Generierung von Cold-Mail-Vorlagen (Betreff + HTML-Body) je
-   * Lead-Rolle. Deutsche B2B-Vertriebstexte, Qualität > Speed → Sonnet 4.6.
+   * Lead-Rolle. Deutsche B2B-Vertriebstexte, Qualität > Speed → Sonnet 5.
    */
-  cold_mail_compose: 'claude-sonnet-4-6',
+  cold_mail_compose: 'claude-sonnet-5',
+  /**
+   * LinkedIn-Post-Generator (linkedin/compose.ts): deutscher B2B-Content für die Claimondo-
+   * Unternehmensseite, sachlich-kompetenter Rechts-Ton. Qualität > Speed (Batch, deterministisches
+   * Fallback-Template vorhanden) → Sonnet 5. Vormals hardcoded in compose.ts (29.07.2026 ins
+   * Register gezogen).
+   */
+  linkedin_compose: 'claude-sonnet-5',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
