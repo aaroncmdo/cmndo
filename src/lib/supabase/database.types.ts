@@ -22022,6 +22022,87 @@ export type Database = {
           },
         ]
       }
+      werkstatt_onboarding_enrollments: {
+        Row: {
+          aktueller_step: number
+          erstellt_am: string
+          id: string
+          next_send_at: string | null
+          status: string
+          werkstatt_id: string
+        }
+        Insert: {
+          aktueller_step?: number
+          erstellt_am?: string
+          id?: string
+          next_send_at?: string | null
+          status?: string
+          werkstatt_id: string
+        }
+        Update: {
+          aktueller_step?: number
+          erstellt_am?: string
+          id?: string
+          next_send_at?: string | null
+          status?: string
+          werkstatt_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "werkstatt_onboarding_enrollments_werkstatt_id_fkey"
+            columns: ["werkstatt_id"]
+            isOneToOne: true
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["werkstatt_id"]
+          },
+          {
+            foreignKeyName: "werkstatt_onboarding_enrollments_werkstatt_id_fkey"
+            columns: ["werkstatt_id"]
+            isOneToOne: true
+            referencedRelation: "werkstaetten"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      werkstatt_onboarding_steps: {
+        Row: {
+          aktiv: boolean
+          aktualisiert_am: string
+          betreff: string
+          copy: Json
+          erstellt_am: string
+          id: string
+          offset_tage: number
+          position: number
+          preheader: string
+          template_key: string
+        }
+        Insert: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          betreff: string
+          copy?: Json
+          erstellt_am?: string
+          id?: string
+          offset_tage: number
+          position: number
+          preheader?: string
+          template_key: string
+        }
+        Update: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          betreff?: string
+          copy?: Json
+          erstellt_am?: string
+          id?: string
+          offset_tage?: number
+          position?: number
+          preheader?: string
+          template_key?: string
+        }
+        Relationships: []
+      }
       werkstatt_qr_pool: {
         Row: {
           charge: string | null
@@ -26413,6 +26494,16 @@ export type Database = {
         Returns: undefined
       }
       my_werkstatt_ids: { Args: never; Returns: string[] }
+      netzwerk_verzeichnis_suche: {
+        Args: { q: string; ziel_rolle?: string }
+        Returns: {
+          anzeige_name: string
+          avatar_url: string
+          ort: string
+          profil_id: string
+          rolle: string
+        }[]
+      }
       next_rechnungs_nr: {
         Args: { p_jahr: number; p_serie: string }
         Returns: number
