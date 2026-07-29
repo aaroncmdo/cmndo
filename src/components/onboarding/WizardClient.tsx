@@ -12,6 +12,7 @@ import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import type { SvMatchResult } from '@/lib/onboarding/svMatching'
 import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from './types'
+import { wizardStorageKey } from './wizard-storage'
 import { FieldRenderer } from './FieldRenderer'
 // AAR-glass-s1: Liquid-Glass-Design-System.
 import { GlassPill, GlassButton, GlassStepIndicator, BeratungVereinbarenButton } from '@/components/shared/glass'
@@ -60,16 +61,12 @@ interface Props {
   token?: string | null
 }
 
-// AAR-890: flowKey-scoped Storage damit parallele Wizards (gutachter-finden +
-// kunde-onboarding) sich nicht gegenseitig überschreiben. 7-Tage-TTL gegen
-// Zombie-Wizards die jemand vor Monaten begonnen hat. localStorage statt
-// sessionStorage damit Tab-Suspend auf Mobile keinen Datenverlust verursacht.
-const STORAGE_PREFIX = 'claimondo-wizard-state'
+// AAR-890: flowKey-scoped Storage (Key-Bildung: ./wizard-storage, fall-scoped
+// wenn fallId vorliegt) damit parallele Wizards und mehrere Faelle desselben
+// Kunden sich nicht gegenseitig ueberschreiben. 7-Tage-TTL gegen Zombie-Wizards.
+// localStorage statt sessionStorage damit Tab-Suspend auf Mobile keinen
+// Datenverlust verursacht.
 const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000
-
-function storageKey(flowKey: string) {
-  return `${STORAGE_PREFIX}:${flowKey}`
-}
 
 type StoredWizardState = {
   anfrageId: string | null
@@ -135,12 +132,12 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   // soll bei Token-Wechsel oder URL-Param-Refresh gewinnen.
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(storageKey(flowKey))
+      const raw = localStorage.getItem(wizardStorageKey(flowKey, fallId))
       if (!raw) { setHydrated(true); return }
       const saved = JSON.parse(raw) as Partial<StoredWizardState>
       const savedAt = typeof saved.savedAt === 'number' ? saved.savedAt : 0
       if (!savedAt || Date.now() - savedAt > STORAGE_TTL_MS) {
-        localStorage.removeItem(storageKey(flowKey))
+        localStorage.removeItem(wizardStorageKey(flowKey, fallId))
         setHydrated(true)
         return
       }
@@ -161,7 +158,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       setHydrated(true)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowKey])
+  }, [flowKey, fallId])
 
   // Persist — erst nach Hydration damit der initial-Render mit prefilledValues
   // nicht den Restore-Pfad überschreibt.
@@ -175,11 +172,11 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         phaseKey: currentPhaseKey,
         savedAt: Date.now(),
       }
-      localStorage.setItem(storageKey(flowKey), JSON.stringify(payload))
+      localStorage.setItem(wizardStorageKey(flowKey, fallId), JSON.stringify(payload))
     } catch {
       // ignore quota errors
     }
-  }, [hydrated, anfrageId, values, phaseIdx, flowKey, phases])
+  }, [hydrated, anfrageId, values, phaseIdx, flowKey, fallId, phases])
 
   // AAR-890: Browser-Back integriert eine Phase zurück, statt die Route zu
   // verlassen. Wir pushen pro Phase einen History-State; popstate dekrementiert
@@ -196,7 +193,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   }, [hydrated])
 
   function resetWizard() {
-    try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+    try { localStorage.removeItem(wizardStorageKey(flowKey, fallId)) } catch {}
     setAnfrageId(null)
     setValues(prefilledValues ?? {})
     setPhaseIdx(0)
@@ -238,7 +235,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     const istFinalizPhase = felder.some((f) => f.db_target?.tabelle === '_finalize')
 
     if (istFinalizPhase) {
-      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      try { localStorage.removeItem(wizardStorageKey(flowKey, fallId)) } catch {}
       const signaturePngDataUri = typeof values['unterschrift'] === 'string'
         ? (values['unterschrift'] as string)
         : ''
@@ -258,7 +255,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     }
 
     if (phaseIdx >= totalPhases - 1) {
-      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+      try { localStorage.removeItem(wizardStorageKey(flowKey, fallId)) } catch {}
       setCompleted(true)
       return
     }
@@ -337,7 +334,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
       }
 
       if (phaseIdx >= totalPhases - 1) {
-        try { localStorage.removeItem(storageKey(flowKey)) } catch {}
+        try { localStorage.removeItem(wizardStorageKey(flowKey, fallId)) } catch {}
         // SV-/Lead-Zuordnung auf GFA persistieren (fire-and-forget, unkritisch).
         // Priorität: Karten-Click (premium > lead) vor Auto-Geo-Matching.
         if (preSelectedSvId) {
