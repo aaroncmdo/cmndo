@@ -28,16 +28,30 @@
 
 ## Lücken (priorisiert)
 
-1. **J7 Storno/DSGVO — echte Lücke** (kein E2E). Kritisch: DSGVO-Löschung ist rechtlich sensibel + hatte den Silent-Fail-Incident (#4625). → B1-Skeleton `storno-dsgvo-smoke.spec.ts` mit Stages (Storno→`storniert`; Löschantrag→Bestätigung→Ausführung), begründeter Skip wo dev-nicht-automatisierbar.
+1. **J7 Storno/DSGVO — ✅ Skeleton geliefert** (`tests/e2e/flows/storno-dsgvo-smoke.spec.ts`, opt-in `RUN_STORNO_DSGVO_SMOKE`, begründeter Skip). Stages: Storno→`storniert` (mit #4625-Row-Check-Guard); DSGVO Antrag→Bestätigung→Ausführung (⚠ irreversibel → nur Wegwerf-Konto). Selektoren TODO beim Lauffähig-Machen.
 2. **J3/J6 nur eingebettet** — SA/Vollmacht + Kanzlei-Übergabe laufen nur als Teil der Golden-Path-Kette, kein isolierter Wächter. Bei Bedarf ausgründen (der 6-WhatsApp/P1.1-Fix + der Kanzlei-Funnel/C1 brauchen einen fokussierten Smoke).
 3. **Abrechnungsweg-Weiche (J5)** + **Ranking/Reservierung (J10)** — die Netzwerk-Modell-Neuerungen (P1.4 harter Override, „Dein Netzwerk") haben noch keinen Smoke; kommen mit dem Netzwerk-Lane-Bau (P0).
 
 ## Nächste B1-Schritte (nach dieser Matrix)
 
-- **Journey-Schritt-Referenzen** in die Kern-Specs (DoD „kein Spec ohne Journey-Schritt-Referenzen"): je Spec ein Header-Kommentar `// Journey: J<N> Schritt <k>`.
-- **J1 + J4 grün nachweisen** (DoD): `RUN_GOLDEN_PATH_PROD=1 … npx playwright test golden-path-prod` + `reparatur-weg-e2e-smoke` — Kommando + Output in den B1-PR. Braucht die Test-Account-Passwörter (Env).
-- **J7-Skeleton** anlegen (begründeter Skip für dev-nicht-automatisierbare Schritte).
-- „Name"-Zuordnungen (J2/J5/J8/J9/J10) durch kurzes Spec-Lesen bestätigen.
+- ✅ **J7-Skeleton** angelegt (`storno-dsgvo-smoke.spec.ts`, opt-in + begründeter Skip).
+- **J1 + J4 grün** = **CI-Job** (nicht lokal — s. u.).
+- **Journey-Schritt-Referenzen**: diese Matrix IST die zentrale Journey↔Spec-Referenz; die neuen Skeletons tragen inline-Referenzen (`// Journey: J<N>`). Massen-Annotation der ~80 Bestands-Specs ist ohne Lauf-Verifikation geringwertig — verschoben.
+- „Name"-Zuordnungen (J2/J5/J8/J9/J10) durch kurzes Spec-Lesen bestätigen (parallel-sicher, jederzeit).
+
+## Grün-Nachweis = CI-Job (A · B1→B2-Übergang)
+
+Der „J1+J4 grün"-DoD läuft **nicht lokal** (empirisch 29.07.): (a) `test-sv` trägt einen **CI-TOTP-Faktor** (`e2e-ci`,
+Secret nur im CI-Repo-Secret) → golden-path braucht die CI-Umgebung; (b) in diesem Setup sind lokal **keine
+`node_modules`** installiert (CI baut/testet, nicht lokal). Der grüne Nachweis gehört daher in einen
+**post-merge-CI-Job**, der an den bestehenden `e2e`-Job in `.github/workflows/ci.yml` dockt (e2e läuft ohnehin nur post-merge):
+
+**Job-Rezept:**
+- **J4** (TOTP-frei, `@claimondo.test`-Wegwerf-Konten): `node scripts/smoke/reparatur-weg-e2e-seed.mjs` → `CI=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test reparatur-weg-e2e-smoke --project=chromium` → `--assert` → `--clean`.
+- **J1** (golden-path): `RUN_GOLDEN_PATH_PROD=1 npx playwright test golden-path-prod --workers=1` — mit dem `e2e-ci`-TOTP-Secret für die test-sv-2FA-Challenge; Kunde-Rolle auf `smoke-kunde@` umstellen (der Spec-Default `test-kunde@` ist tot).
+- **Secrets (CI-Repo):** `TEST_SV_PASSWORD=Claimondo2026!`, `TEST_ADMIN/DISPATCH/KB_PASSWORD`, `e2e-ci`-TOTP-Secret, `.env.local`-`SERVICE_ROLE` (Seed). Regel-4-sicher: `reserviere()`-Guard blockt echte SV-Buchung; Seed nutzt Wegwerf-Konten (`telefon=NULL`).
+
+Das ist der Übergang zu **B2** (CI-Gate): die Journey-Smokes als post-merge-Wächter grün halten.
 
 ## Scope
 B1 = Oracle (Zuordnung + Lücken + grüner Nachweis für J1/J4). **Kein** Produktions-Code-Umbau — das ist C.
