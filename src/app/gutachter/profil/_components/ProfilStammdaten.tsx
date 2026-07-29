@@ -7,7 +7,7 @@ import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/an
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { Button } from '@/components/primitives'
-import { MapPinIcon, InfoIcon } from 'lucide-react'
+import { MapPinIcon, InfoIcon, AlertTriangleIcon } from 'lucide-react'
 import AvatarUpload from '@/components/shared/AvatarUpload'
 import { SectionCard } from '@/components/shared/SectionCard'
 import {
@@ -128,6 +128,17 @@ export function ProfilStammdaten({
       {success && (
         <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-ios-xl p-3 mb-4 max-w-4xl">
           <p className="text-[var(--brand-primary)] text-sm">Profil gespeichert.</p>
+        </div>
+      )}
+
+      {/* Nudge: fehlende Rechtsform ist fuer die Honorarabrechnung (§14 UStG) noetig.
+          Kein Gate — nur ein Hinweis im View-Modus (analog Makler #4634). */}
+      {!sv.rechtsform && !editing && (
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-3 mb-4 max-w-4xl">
+          <p className="text-warning-strong text-sm flex items-start gap-2">
+            <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
+            <span>Für Ihre Honorarabrechnung fehlt noch Ihre Rechtsform. Bitte ergänzen Sie sie über „Bearbeiten" im Abschnitt „Firma / Steuerliches".</span>
+          </p>
         </div>
       )}
 
