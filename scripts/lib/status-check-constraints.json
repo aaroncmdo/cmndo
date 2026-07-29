@@ -1056,6 +1056,16 @@
       "queued",
       "zugestellt"
     ],
+    "netzwerk_einladungen.status": [
+      "abgelaufen",
+      "eingeloest",
+      "offen"
+    ],
+    "netzwerk_einladungen.ziel_rolle": [
+      "makler",
+      "sachverstaendiger",
+      "werkstatt"
+    ],
     "netzwerk_verbindungen.status": [
       "abgelehnt",
       "angenommen",
@@ -1575,6 +1585,20 @@
       "entschieden",
       "offen",
       "zurueckgezogen"
+    ],
+    "werkstatt_onboarding_enrollments.status": [
+      "aktiv",
+      "aktiviert",
+      "fertig",
+      "gestoppt"
+    ],
+    "werkstatt_onboarding_steps.template_key": [
+      "bonus",
+      "kundenstory",
+      "nutzen",
+      "reaktivierung",
+      "sv_vorstellung",
+      "willkommen"
     ],
     "werkstatt_qr_pool.status": [
       "frei",

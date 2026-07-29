@@ -13751,6 +13751,63 @@ export type Database = {
           },
         ]
       }
+      netzwerk_einladungen: {
+        Row: {
+          ablauf_am: string
+          eingeloest_am: string | null
+          eingeloest_profil_id: string | null
+          einlader_id: string
+          email: string
+          erstellt_am: string
+          id: string
+          status: string
+          token_hash: string
+          token_lookup_prefix: string
+          ziel_rolle: string
+        }
+        Insert: {
+          ablauf_am?: string
+          eingeloest_am?: string | null
+          eingeloest_profil_id?: string | null
+          einlader_id: string
+          email: string
+          erstellt_am?: string
+          id?: string
+          status?: string
+          token_hash: string
+          token_lookup_prefix: string
+          ziel_rolle: string
+        }
+        Update: {
+          ablauf_am?: string
+          eingeloest_am?: string | null
+          eingeloest_profil_id?: string | null
+          einlader_id?: string
+          email?: string
+          erstellt_am?: string
+          id?: string
+          status?: string
+          token_hash?: string
+          token_lookup_prefix?: string
+          ziel_rolle?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "netzwerk_einladungen_eingeloest_profil_id_fkey"
+            columns: ["eingeloest_profil_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "netzwerk_einladungen_einlader_id_fkey"
+            columns: ["einlader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       netzwerk_verbindungen: {
         Row: {
           anfrager_id: string
