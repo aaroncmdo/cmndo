@@ -209,7 +209,7 @@ describe('persistAufsichtRemediation', () => {
       },
     ]
 
-    const ids = await persistAufsichtRemediation('claude-sonnet-4-6', drafts)
+    const ids = await persistAufsichtRemediation('claude-sonnet-5', drafts)
 
     expect(h.insertSpy).toHaveBeenCalledTimes(1)
 
@@ -218,7 +218,7 @@ describe('persistAufsichtRemediation', () => {
     expect(insertArg.quelle).toBe('aufsicht')
     expect(insertArg.vorschlag_typ).toBe('task')
     expect(insertArg.ziel_rolle).toBe('sachverstaendiger')
-    expect(insertArg.modell).toBe('claude-sonnet-4-6')
+    expect(insertArg.modell).toBe('claude-sonnet-5')
     expect((insertArg.payload as Record<string, unknown>).titel).toBe('Gutachten einreichen')
     expect((insertArg.payload as Record<string, unknown>).prioritaet).toBe('kritisch')
     expect(insertArg.begruendung).toBe('SLA verletzt')
@@ -235,7 +235,7 @@ describe('persistAufsichtRemediation', () => {
       { claimId: 'c2', zielRolle: 'kanzlei', titel: 'AS versenden', begruendung: 'Grund 2', prioritaet: 'dringend' },
     ]
 
-    const ids = await persistAufsichtRemediation('claude-sonnet-4-6', drafts)
+    const ids = await persistAufsichtRemediation('claude-sonnet-5', drafts)
 
     expect(h.insertSpy).toHaveBeenCalledTimes(2)
     expect(ids).toHaveLength(2)
@@ -248,7 +248,7 @@ describe('persistAufsichtRemediation', () => {
   })
 
   it('gibt leeres Array zurueck bei 0 Drafts', async () => {
-    const ids = await persistAufsichtRemediation('claude-sonnet-4-6', [])
+    const ids = await persistAufsichtRemediation('claude-sonnet-5', [])
     expect(ids).toHaveLength(0)
     expect(h.insertSpy).not.toHaveBeenCalled()
   })
@@ -261,7 +261,7 @@ describe('persistAufsichtRemediation', () => {
     ]
 
     // Soll nicht werfen, nur stilles Ueberspringen
-    await expect(persistAufsichtRemediation('claude-sonnet-4-6', drafts)).resolves.not.toThrow()
+    await expect(persistAufsichtRemediation('claude-sonnet-5', drafts)).resolves.not.toThrow()
   })
 
   it('mappt Aufsicht-Rollen auf gueltige DB-ziel_rolle (dispatch/kanzlei -> kundenbetreuer)', async () => {

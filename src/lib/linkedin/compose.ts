@@ -1,5 +1,6 @@
 // src/lib/linkedin/compose.ts
 import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
 import type { LinkedInFeedItem } from './types'
 import { hashtagsFor } from './hashtags'
 
@@ -47,7 +48,7 @@ async function generateWithClaude(prompt: string): Promise<string> {
   if (!apiKey) throw new Error('ANTHROPIC_API_KEY missing')
   const client = new Anthropic({ apiKey })
   const res = await client.messages.create({
-    model: 'claude-sonnet-4-6',
+    model: AI_MODELS.linkedin_compose,
     max_tokens: 700,
     messages: [{ role: 'user', content: prompt }],
   })

@@ -13,7 +13,7 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
 
-export const WISSEN_MODEL = AI_MODELS.sv_briefing_struktur // claude-sonnet-4-6
+export const WISSEN_MODEL = AI_MODELS.sv_briefing_struktur // claude-sonnet-5
 const MAX_OUTPUT_TOKENS = 8192 // voller Artikel (Body + FAQ); 2048 wuerde truncaten
 const BODY_MARKER = '===BODY==='
 

@@ -17,7 +17,7 @@ beforeEach(() => insertSpy.mockClear())
 
 describe('persistCopilotProposals', () => {
   it('persistiert draft mit quelle=copilot', async () => {
-    const ids = await persistCopilotProposals('claim-1', 'claude-sonnet-4-6', [
+    const ids = await persistCopilotProposals('claim-1', 'claude-sonnet-5', [
       { vorschlagTyp: 'add_note', zielRolle: null, payload: { titel: 'X', text: 'Y' }, begruendung: 'z' },
     ])
     expect(ids).toEqual(['new-id'])
