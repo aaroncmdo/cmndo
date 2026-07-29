@@ -127,7 +127,11 @@ export function WerkstattAbrechnungen({
   boniSumme = 0,
   gutschriften = [],
 }: Props) {
-  const total = provisionen.reduce((s, r) => s + r.betrag_netto_eur, 0)
+  // "Gesamt" = verguetungsrelevant: ohne storniert/unterdrueckt — beide bekommt die
+  // Werkstatt nie ausgezahlt, sie mitzuzaehlen ueberstellt die Einnahmen (Review-Fund).
+  const total = provisionen
+    .filter((r) => r.status !== 'storniert' && r.status !== 'unterdrueckt')
+    .reduce((s, r) => s + r.betrag_netto_eur, 0)
   const offene = provisionen
     .filter((r) => r.status === 'pending')
     .reduce((s, r) => s + r.betrag_netto_eur, 0)

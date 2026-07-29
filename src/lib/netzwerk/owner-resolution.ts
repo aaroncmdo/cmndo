@@ -24,13 +24,18 @@ async function flottenKontoUserId(admin: SupabaseClient, kontoId: string): Promi
   return (data?.user_id as string | null) ?? null
 }
 
-/** firma_id -> profiles.id (aktives firmen_flotten_konten.user_id). Spiegelt den Trigger-Join. */
+/**
+ * firma_id -> profiles.id (aktives firmen_flotten_konten.user_id). Spiegelt den Trigger-Join.
+ * Deterministisch: bei mehreren aktiven Konten gewinnt das aelteste (created_at) — sonst waere
+ * der Owner-Graph bei Multi-Konto-Firmen zufallsabhaengig (Review-Fund, Spalte live verifiziert).
+ */
 async function flottenKontoUserIdByFirmaId(admin: SupabaseClient, firmaId: string): Promise<string | null> {
   const { data } = await admin
     .from('firmen_flotten_konten')
     .select('user_id')
     .eq('firma_id', firmaId)
     .eq('status', 'aktiv')
+    .order('created_at', { ascending: true })
     .limit(1)
     .maybeSingle()
   return (data?.user_id as string | null) ?? null

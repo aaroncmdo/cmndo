@@ -93,6 +93,38 @@ export async function gebeProvisionFrei(
   }
 
   const admin = createAdminClient()
+
+  // P3 Netzwerk (Review-Fund): der manuelle Freigeben-Pfad darf die Freundes-Graph-Suppression
+  // nicht UNINFORMIERT umgehen — die pending-Zeile traegt im Panel keinen Intra-Indikator, und
+  // nach manueller Freigabe fasst der (gegatete) Release-Cron die Row nie wieder an. Dieselbe
+  // Pruefung wie im Cron; bei intra-Netzwerk wird abgelehnt (KEIN Write — der Cron markiert die
+  // Row bei Release-Berechtigung selbst als 'unterdrueckt'). Fail-open: schlaegt die Pruefung
+  // fehl, zaehlt die Admin-Entscheidung (Status quo).
+  if (quelle === 'partner_provisionen') {
+    try {
+      const { data: row } = await admin
+        .from('partner_provisionen')
+        .select('id, partner_typ, partner_id, claim_id')
+        .eq('id', id)
+        .maybeSingle()
+      if (row) {
+        const { bestimmeIntraNetzwerkProvisionen } = await import('@/lib/netzwerk/provisions-suppression')
+        const intra = await bestimmeIntraNetzwerkProvisionen(admin, [
+          row as { id: string; partner_typ: string; partner_id: string; claim_id: string | null },
+        ])
+        if (intra.has(id)) {
+          return {
+            ok: false,
+            error:
+              'Netzwerk-intern: Der vermittelnde Partner ist mit dem zugewiesenen Gegenpart befreundet — diese Provision wird nicht vergütet (das Netzwerkpartner-Abo deckt sie). Der Release-Lauf markiert sie automatisch als „Netzwerk-intern".',
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[gebeProvisionFrei] Netzwerk-Gate fehlgeschlagen — Admin-Entscheidung zaehlt (fail-open):', err)
+    }
+  }
+
   const r = await freigebenProvision(admin, quelle as (typeof PROVISION_TABELLEN)[number], id)
   revalidatePath('/admin/finance')
   return r
