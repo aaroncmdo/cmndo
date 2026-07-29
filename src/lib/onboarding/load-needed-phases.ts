@@ -21,6 +21,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { localizePhase, localizeFeld } from './localize'
 import type { OnboardingPhase, OnboardingFeld, FieldOption, DbTarget, ConditionalOn } from '@/components/onboarding/types'
 import { filterFelderByAudience } from './filter-felder-by-audience'
+import { sollPhaseGeskipptWerden, resolveHergangFromLead } from './phasen-skip'
 
 export type LoadedWizardState = {
   phases: OnboardingPhase[]
@@ -107,6 +108,29 @@ export async function ladeNoetigePhasen(
     if (d.dokument_typ) prefilled[`doc_typ_${d.dokument_typ}`] = true
   }
 
+  // Bug3-dedupe-Edge (Prod-Smoke 28.07.): Claims, deren convertLeadToClaim-Bridge
+  // die Hergang-Kopie ausliess, fragten die Erzaehlung hier ERNEUT (leere textarea)
+  // obwohl leads.unfallhergang sie traegt. Heilung an der Stelle, wo die Luecke
+  // sichtbar wird: dieselbe Kaskade wie die Bridge, idempotent (nur wenn leer),
+  // fail-soft (bei Write-Fehler traegt wenigstens prefilled den Wert -> kein
+  // Doppel-Ask). FUNDAMENT §1.1: die Wahrheit gehoert an den Claim, nicht nur
+  // in die Anzeige.
+  if (claim_id && !prefilled['hergang_kunde_text']) {
+    const hergangFallback = resolveHergangFromLead(
+      (leadRes.data ?? null) as Record<string, unknown> | null,
+    )
+    if (hergangFallback) {
+      prefilled['hergang_kunde_text'] = hergangFallback
+      const { error: healErr } = await supabase
+        .from('claims')
+        .update({ hergang_kunde_text: hergangFallback })
+        .eq('id', claim_id)
+      if (healErr) {
+        console.error('[ladeNoetigePhasen] hergang-Backfill fehlgeschlagen:', healErr.message)
+      }
+    }
+  }
+
   // ─── 3. Phasen + Felder aus DB laden ────────────────────────────────
   const { data: phasenRows } = await supabase
     .from('onboarding_phasen')
@@ -167,23 +191,12 @@ export async function ladeNoetigePhasen(
     // auf 'dispatcher' gesetzt werden) sieht der Kunde dispatcher-only-Felder nicht.
     const sichtbareFelder = filterFelderByAudience(felder, 'kunde')
 
-    // Skip wenn ALLE Pflichtfelder schon einen DB-Wert haben.
-    //
-    // 2026-05-12 Funnel v3 PR #9: lookup via beiden Pfaden — feld_key
-    // (Standard-Match wenn Wizard-Key = DB-Spalte) und db_target.spalte
-    // (wenn sie abweichen, z.B. dsgvo_onboarding → dsgvo_zustimmung_am).
-    // So greift die Skip-Logik auch wenn der Wizard ein anderes Feld-Naming
-    // hat als die DB-Spalte.
-    const pflichtFelder = sichtbareFelder.filter(f => f.pflicht)
-    const allePflichtErfuellt = pflichtFelder.length > 0 && pflichtFelder.every(f => {
-      const valByKey = prefilled[f.feld_key]
-      const dbSpalte = f.db_target?.spalte ?? null
-      const valBySpalte = dbSpalte ? prefilled[dbSpalte] : undefined
-      const v = valByKey ?? valBySpalte
-      return v !== null && v !== undefined && v !== ''
-    })
-
-    if (allePflichtErfuellt) {
+    // Skip-Logik (extrahiert nach ./phasen-skip, unit-getestet): ALLE Pflicht-
+    // felder gefuellt (Lookup via feld_key UND db_target.spalte, Funnel v3 PR #9)
+    // ODER die Phase hat keine sichtbaren Felder (Bug3-Smoke 28.07.: sonst ist
+    // phases.length===0 unerreichbar und der Fallakte-Redirect der
+    // onboarding-details-Page toter Code).
+    if (sollPhaseGeskipptWerden(sichtbareFelder, prefilled)) {
       skipped++
       continue
     }
