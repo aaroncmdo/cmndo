@@ -170,8 +170,11 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
         }
       }
     }
-    if (map.loaded()) apply()
-    else map.once('load', apply)
+    // Direkt bauen — kein loaded()/isStyleLoaded()-Gate (s. Route-Effekt unten): beide flippen beim
+    // Auswahl-Wechsel transient auf false (Puls-removeLayer), und once('load') feuert nach dem
+    // initialen Load nie wieder → der Marker-Rebuild wuerde bei einer Suche waehrend aktiver Route
+    // verschluckt. apply() ist gefahrlos direkt (Marker sind DOM-Overlays, fitBounds ist try/catch).
+    apply()
   }, [rows, center, onSelectPin])
 
   // I4: Auswahl-Highlight OHNE Kamera-Bewegung — restylt nur die vorhandenen Marker-Elemente.
@@ -300,8 +303,15 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
       })
     }
 
-    if (map.loaded()) draw()
-    else map.once('load', draw)
+    // Direkt zeichnen — KEIN map.loaded()/isStyleLoaded()-Gate. Beide flippen beim Auswahl-Wechsel
+    // transient auf false: der Effekt-Cleanup der vorigen Auswahl entfernt den Puls-Layer
+    // (removeLayer = Style-Mutation) → im selben Tick sieht der neue Effekt styleLoaded=false. Der
+    // fruehere `else map.once('load', draw)`-Fallback feuert nach dem initialen Load NIE wieder →
+    // der Draw wurde stumm verschluckt, die Route aktualisierte beim Umschalten nicht (Bodyshop51-
+    // Bug, Aaron 29.07.). draw() ist gefahrlos direkt: fetchDrivingRoute ist async, die Map-Ops
+    // laufen erst im .then (Style laengst gesettled) — exakt wie der Gutachter-Finder (routeToTarget,
+    // ohne Gate). Der Effekt zeichnet ohnehin nur bei einer Nutzer-Auswahl (Map bereits geladen).
+    draw()
 
     // Deps-Wechsel/Unmount: Fetch abbrechen + Puls-rAF stoppen. Source/Layer bleiben bei
     // Auswahl-Wechsel bestehen (nächster Lauf macht setData → kein Flicker); Voll-Abbau nur

@@ -49,6 +49,45 @@ export function StandortStep({ standort, onStandort }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Google-Places-Dropdown (.pac-container) ans Claimondo-Design angepasst. Google haengt den
+          Container an document.body → das Styling ist global; die Embed-Seite hat aber NUR dieses
+          eine Autocomplete, also trifft es ausschliesslich hier (kein Eingriff in die 29 anderen
+          Konsumenten der Shared-Component). Farben ueber CSS-Vars → token-audit-safe. Das
+          "Powered by Google"-Attributions-Logo (:after) bleibt unangetastet (Places-ToS). */}
+      <style>{`
+        .pac-container {
+          margin-top: 6px;
+          padding: 4px;
+          border: 1px solid var(--color-claimondo-border);
+          border-radius: 16px;
+          background: white;
+          box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-primary) 14%, transparent);
+          font-family: var(--font-sans, system-ui, sans-serif);
+          overflow: hidden;
+        }
+        .pac-item {
+          border-top: 0;
+          border-radius: 10px;
+          padding: 9px 12px;
+          color: var(--color-claimondo-navy);
+          font-size: 0.875rem;
+          line-height: 1.35;
+          cursor: pointer;
+          transition: background-color .12s ease;
+        }
+        .pac-item:hover,
+        .pac-item-selected,
+        .pac-item.pac-item-selected { background-color: var(--brand-secondary-soft); }
+        .pac-icon { display: none; }
+        .pac-item-query {
+          color: var(--color-claimondo-navy);
+          font-size: 0.875rem;
+          font-weight: 600;
+          padding-right: 6px;
+        }
+        .pac-matched { font-weight: 700; }
+        .pac-item > span:last-child { color: var(--color-claimondo-shield); }
+      `}</style>
       <div>
         <h3 className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</h3>
         <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
