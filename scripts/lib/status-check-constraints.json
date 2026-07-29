@@ -1056,6 +1056,12 @@
       "queued",
       "zugestellt"
     ],
+    "netzwerk_verbindungen.status": [
+      "abgelehnt",
+      "angenommen",
+      "blockiert",
+      "offen"
+    ],
     "notification_deliveries.channel": [
       "email",
       "in_app",
@@ -1388,6 +1394,13 @@
       "aktiv",
       "ausstehend",
       "kontaktiert"
+    ],
+    "sv_netzwerk_abonnements.status": [
+      "aktiv",
+      "comped",
+      "gekuendigt",
+      "inaktiv",
+      "ueberfaellig"
     ],
     "sv_onboarding_rechnungen.rechnungssteller": [
       "claimondo_gmbh",
