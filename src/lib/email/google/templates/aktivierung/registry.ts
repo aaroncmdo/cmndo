@@ -1,12 +1,32 @@
 // Werkstatt-Onboarding-Aktivierungs-Drip — Template-Registry.
-// Task 5: nur sv_vorstellung befuellt. Task 6 komplettiert die restlichen 5 Keys
-// (willkommen/nutzen/kundenstory/bonus/reaktivierung) zu einer vollstaendigen,
-// ueber Registry-Typ erzwungenen Record<TemplateKey, TemplateEntry>.
+// Vollstaendig (Task 6): alle 6 TemplateKeys. Der `Registry`-Mapped-Type unten
+// erzwingt bei jedem Key das korrekte Copy-Schema fuer Component + subject()
+// (Compile-Fehler, falls ein Key fehlt oder ein Copy-Typ nicht mehr passt).
 
+import type { ZodType } from 'zod'
 import { copySchemas } from './copy-schemas'
-import { SvVorstellungEmail, subject as svSubject } from './SvVorstellung'
+import type { CopyFor } from './copy-schemas'
+import type { TemplateKey, WerkstattMergeVars } from './types'
+import { WillkommenEmail, subject as willkommenSubject } from './Willkommen'
+import { NutzenEmail, subject as nutzenSubject } from './Nutzen'
+import { SvVorstellungEmail, subject as svVorstellungSubject } from './SvVorstellung'
+import { KundenstoryEmail, subject as kundenstorySubject } from './Kundenstory'
+import { BonusEmail, subject as bonusSubject } from './Bonus'
+import { ReaktivierungEmail, subject as reaktivierungSubject } from './Reaktivierung'
 
-export const registry = {
-  sv_vorstellung: { Component: SvVorstellungEmail, copySchema: copySchemas.sv_vorstellung, subject: svSubject },
-  // willkommen/nutzen/kundenstory/bonus/reaktivierung: Task 6
-} as const
+type TemplateEntry<K extends TemplateKey> = {
+  Component: (props: { copy: CopyFor<K>; merge: WerkstattMergeVars }) => JSX.Element
+  copySchema: ZodType<CopyFor<K>>
+  subject: (copy: CopyFor<K>, merge: WerkstattMergeVars) => string
+}
+
+type Registry = { [K in TemplateKey]: TemplateEntry<K> }
+
+export const registry: Registry = {
+  willkommen: { Component: WillkommenEmail, copySchema: copySchemas.willkommen, subject: willkommenSubject },
+  nutzen: { Component: NutzenEmail, copySchema: copySchemas.nutzen, subject: nutzenSubject },
+  sv_vorstellung: { Component: SvVorstellungEmail, copySchema: copySchemas.sv_vorstellung, subject: svVorstellungSubject },
+  kundenstory: { Component: KundenstoryEmail, copySchema: copySchemas.kundenstory, subject: kundenstorySubject },
+  bonus: { Component: BonusEmail, copySchema: copySchemas.bonus, subject: bonusSubject },
+  reaktivierung: { Component: ReaktivierungEmail, copySchema: copySchemas.reaktivierung, subject: reaktivierungSubject },
+}
