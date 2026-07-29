@@ -26,3 +26,27 @@
 **Begründung:** Verfassung §4 (eine Akte) + §5 (ein Intake); folgt dem Funnel-v2-Plan (docs/plans/funnel-vereinfachung-2026-05-11.md — „/kunde/onboarding ersetzt FlowWizardKfz"). Dedup: convertLeadToClaim kopiert leads.unfallhergang → claims.hergang_kunde_text.
 
 **Review:** offen (Aaron) — Regel-4-Prod-Smoke 28.07. GELAUFEN (Session 264a7df6, 4 geseedete Sub-Fälle, echte UI, Seeds aufgeräumt): (a) ERLEDIGT. Kernpfade GRÜN wie entschieden: offene Feststellung → Redirect /kunde/onboarding-details mit hergang-Phase; SA-offen (haftpflicht) → FokusSignatur direkt auf /flow/<token>. VERFEHLT: „erledigte Feststellung → Fallakte" — die felderlose sa-Phase (onboarding_phasen kunde-onboarding, ord 40, 0 Felder) ist für den Server-Skip (`pflichtFelder.length > 0`-Guard in ladeNoetigePhasen) nie skippbar → `phases.length === 0` unerreichbar → der Fallakte-Redirect in onboarding-details/page.tsx ist toter Code; ein Kunde mit längst signierter SA sieht stattdessen Schritt 1/1 „Schaden-Abtretung unterschreiben" (irreführende Aufforderung, kein Bruch/500/Sackgasse → kein Revert, fix-forward). (c) dedupe-Edge BESTÄTIGT: hergang-Skip+Prefill sehen nur claims.hergang_kunde_text — leads.unfallhergang wird weder geskippt noch vorbefüllt (textarea leer, per eval verifiziert) = Doppel-Erhebung; Bestand quantifiziert 0/6 echte Kunde-Claims in dieser Konstellation → dormant, fix-forward statt Revert. (b) C2/C4-Vorgriff unverändert offen. NEU (Nebenbefund): Wizard-localStorage-Key `claimondo-wizard-state:<flowKey>` trägt keine fallId → Restore-Banner übernimmt Zustand aus dem ZULETZT bearbeiteten Fall desselben Kunden (Cross-Fall-Contamination bei Mehrfall-Kunden).
+
+## 2026-07-29 · C1 · Event-Log = bestehende `phase_transitions` (kein neues `claim_events`)
+
+**Lücke:** C1 (FUNDAMENT §5) verlangt ein Event-Log und lässt offen, ob eine bestehende Tabelle das Format trägt oder eine additive Migration `claim_events` nötig ist.
+
+**Entscheidung (VORSCHLAG):** **`phase_transitions` ist das Event-Log** — keine neue Tabelle. Verifiziertes Prod-Schema (`id · fall_id · claim_id · from_phase · to_phase · transition_at · transitioned_by · actor_rolle · trigger_type · grund · payload jsonb · created_at`) deckt das geforderte `{claim_id, event, actor, payload, created_at}` mehr als ab; die Engine (`state-machine.ts:324`, AAR-586) schreibt es bereits. C1 schließt nur die Gaps: `claim_id` in den Insert, fire-and-forget → `await`+non-fatal, WILD-Writer funneln. Details: `c1-transition-claim-plan.md` §2.
+
+**Review:** offen (Aaron)
+
+## 2026-07-29 · C1 · C1/FG1-Partition (Matrix-Funnel vs Terminal-Sync)
+
+**Lücke:** C1 und das FG1-Programm (`flag-fg1-claims-writer-funnel`) berühren beide `operative_status`-Writer. Doc-Vorgabe „andocken, nicht parallel erfinden" — Überschneidung ausweisen.
+
+**Entscheidung (VORSCHLAG):** Saubere Partition — **C1 = Matrix-Transition-Funnel** (Lifecycle-Writer durch `transitionFallStatus`; einziger engine-funnel-fähiger WILD-Rest = `sv-zuweisung/route.ts:284`). **FG1 = Terminal-Sync** (`status`→`operative_status` via Trigger/Mapping, Engine bewusst unangetastet; besitzt die 2 C1-Baseline-Writer). Berührungspunkt: der `operative_status`-CHECK (bereits gelandet, 33 Werte — C1 erbt ihn). Folge: C1a-Beweis = `sv-zuweisung` funneln + Event-Log-`claim_id`; die 2 Baseline-Writer zieht C1 nur nach, wenn FG1 sie synct. Details: `c1-transition-claim-plan.md` §4.
+
+**Review:** offen (Aaron)
+
+## 2026-07-29 · C1 · Abschluss-Pfad = Schlussabrechnung + 48h-Karenz (Option B)
+
+**Lücke:** Der Kern-Haftpflichtfall hat zwei Abschluss-Terminals (`abgeschlossen` via Engine-Cascade vs. `reguliert_vollstaendig` via Endzustand) und einen **toten** 48h-Grace-Cron (`cron/fall-abschluss` gated auf `schlussabrechnung_am`, das nie geschrieben wird — 0/23 Prod). Verifiziert: [[audit-c1-auto-close-luecke-zahlung-eingegangen]] (j01 #8, PR #4835). Nach VS-Zahlung: sofort schließen oder Karenz?
+
+**Entscheidung:** **Aaron 29.07.: Option B** — nach VS-Zahlung schließt der Fall NICHT sofort, sondern wartet auf eine echte Schlussabrechnung + 48h-Karenz. Umsetzung (C1c): Cascade-Regel `regulierung/… → abgeschlossen` (bei `zahlungEingegangen`, `autophase-decision.ts:72`) → **`→ zahlung-eingegangen`**; **neue KB-Aktion „Schlussabrechnung erstellt"** setzt `schlussabrechnung_am`; der bestehende 48h-Cron schließt dann `zahlung-eingegangen → abgeschlossen`. EIN Terminal = `abgeschlossen` (`reguliert_vollstaendig` darauf vereinheitlichen). Cron + Gate bleiben.
+
+**Review:** Richtung von Aaron **bestätigt** (29.07.); offenes Design-Detail (was genau die „Schlussabrechnung" ist — Dokument-Typ / KB-Bestätigung / `abrechnungen`-Anbindung) → C1c-Design. Behavior-Change am Kern-Close-Pfad → erst nach B1 bauen.
