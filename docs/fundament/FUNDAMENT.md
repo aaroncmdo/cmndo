@@ -82,18 +82,20 @@ Journey-Feinstatus (A1):
 
 | Journey | Titel | destilliert | Aaron-Review |
 |---|---|---|---|
-| J1 | Haftpflicht-Standardfall end-to-end | ☑ #4828 | ☐ |
-| J2 | Meldung über alle Kanäle (Wizard/Embed/API/Karte/FlowLink) | ☑ #4828 | ☐ |
-| J3 | Unterschriften SA/Vollmacht inkl. Nachsignieren | ☑ #4830 | ☐ |
-| J4 | Reparatur-Weg (KVA → Freigabe → Schlussrechnung) | ☑ #4832 | ☐ |
-| J5 | Kasko + Selbstzahler (Abrechnungsweg-Varianten) | ☑ #4837 | ☐ |
-| J6 | Kanzlei-Übergabe / Mandat | ☑ #4837 | ☐ |
-| J7 | Storno / DSGVO-Löschung | ☑ #4837 | ☐ |
-| J8 | Onboarding je Rolle (SV, Werkstatt, Kanzlei) | ☑ #4837 | ☐ |
-| J9 | Honorar / Provision / Zahlung | ☑ #4837 | ☐ |
-| J10 | Dispatch-Ausnahmen (kein SV, Eskalation, Reservierung) | ☑ #4837 | ☐ |
+| J1 | Haftpflicht-Standardfall end-to-end | ☑ #4828 | ☑ 29.07. |
+| J2 | Meldung über alle Kanäle (Wizard/Embed/API/Karte/FlowLink) | ☑ #4828 | ☑ 29.07. |
+| J3 | Unterschriften SA/Vollmacht inkl. Nachsignieren | ☑ #4830 | ☑ 29.07. |
+| J4 | Reparatur-Weg (KVA → Freigabe → Schlussrechnung) | ☑ #4832 | ☑ 29.07. |
+| J5 | Kasko + Selbstzahler (Abrechnungsweg-Varianten) | ☑ #4837 | ☑ 29.07. |
+| J6 | Kanzlei-Übergabe / Mandat | ☑ #4837 | ☑ 29.07. |
+| J7 | Storno / DSGVO-Löschung | ☑ #4837 | ☑ 29.07. |
+| J8 | Onboarding je Rolle (SV, Werkstatt, Kanzlei) | ☑ #4837 | ☑ 29.07. |
+| J9 | Honorar / Provision / Zahlung | ☑ #4837 | ☑ 29.07. |
+| J10 | Dispatch-Ausnahmen (kein SV, Eskalation, Reservierung) | ☑ #4837 | ☑ 29.07. |
 
 > J8/J9/J10 als **Netzwerk-Ökosystem-Modell**-Soll destilliert (Lane 332d22f1, abgestimmt); Org/Pool-Lead retired (a6c863e2, `DECISIONS.md`). Konsolidierte Review-Fragen: `docs/fundament/OFFENE-FRAGEN.md`.
+>
+> **✅ Aaron-Review erteilt (29.07.)** — gestützt auf die **P1-Entscheidungen** (`DECISIONS.md` 2026-07-29) + Freigabe „ja starten". Die 10 Journeys sind damit **B1/C-Grundlage**. (A1-DoD erfüllt: destilliert + reviewt.)
 
 ---
 
