@@ -5,6 +5,8 @@
 > damit das Review eine fokussierte Entscheidungs-Sitzung wird statt zehn Einzel-PRs.
 > **P1** blockt den C-Code-Umbau (echte Produkt-Weichen). **P2** = Soll-Klärungen (Default vorgeschlagen, kann ich annehmen).
 > **P3** = C-interne Konsolidierung (kein Aaron-Input nötig, nur Transparenz). Getroffene Antworten wandern nach `DECISIONS.md`.
+>
+> **✅ P1 beantwortet (Aaron, 29.07.) → `DECISIONS.md` (2026-07-29-Eintrag).** P1.3 war bereits via #4804 umgesetzt. P2-Defaults gelten mangels Widerspruch. Dieses Dokument bleibt als Frage-Historie stehen.
 
 ---
 
