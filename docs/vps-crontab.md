@@ -319,13 +319,19 @@ FM ohne `whatsapp_nummer` + Dedup-Assert + 0-Leftover-Cleanup) lief gruen (10/10
 ```cron
 0 6 * * * /usr/local/bin/cron-call.sh /api/cron/werkstatt-onboarding-drip  # Werkstatt-Onboarding-Drip (6 Mails, Stop bei erstem Fall)
 ```
-Arbeitet faellige `werkstatt_onboarding_enrollments` ab (Batch-Cap 100): stoppt bei erstem Fall
-(`status='aktiviert'`) oder `cold_mail_suppression`-Opt-out (`status='gestoppt'`), sonst sendet sie
-den naechsten aktiven Step und rechnet `next_send_at` gegen den Enrollment-Anker (`erstellt_am`,
-nicht `werkstaetten.aktiviert_am` — sonst wuerde ein spaeterer Backfill alle Offsets auf einmal
-abfeuern). Auth wie alle anderen Crons: `assertCronAuth` (Bearer `CRON_SECRET`, fail-closed).
+Arbeitet faellige `werkstatt_onboarding_enrollments` ab (Batch-Cap 100, aelteste `next_send_at`
+zuerst): ueberspringt gesperrte Werkstaetten (`werkstaetten.status!='aktiv'`, kein Status-Wechsel),
+stoppt bei erstem Fall (`status='aktiviert'`) oder `cold_mail_suppression`-Opt-out/fehlender Email
+(`status='gestoppt'`), sonst sendet sie den naechsten aktiven Step und rechnet `next_send_at` gegen
+den Enrollment-Anker (`erstellt_am`, nicht `werkstaetten.aktiviert_am` — sonst wuerde ein spaeterer
+Backfill alle Offsets auf einmal abfeuern). Ein echter Sende-Fehlschlag (SMTP down etc.) haelt den
+Cursor (kein Advance, `next_send_at` bleibt unangetastet) statt den Step permanent zu verlieren —
+Retry am naechsten Tick. Jedes Enrollment laeuft isoliert in einem eigenen try/catch (ein Throw killt
+nur dieses eine, nicht den Batch). Auth wie alle anderen Crons: `assertCronAuth` (Bearer
+`CRON_SECRET`, fail-closed).
 
 **Nach dem Nachtragen verifizieren:** `cron-call.sh /api/cron/werkstatt-onboarding-drip` manuell
-triggern -> erwartet `{ ok:true, gesendet, gestoppt, faellig }`; vorher per MCP `faellig`-Kandidaten
-zaehlen (nur Test-Werkstaetten mit Test-Email im ersten Lauf, s. Regel 4 — nie an echte Empfaenger).
+triggern -> erwartet `{ ok:true, gesendet, aktiviert, gestoppt, fehler, faellig }`; vorher per MCP
+`faellig`-Kandidaten zaehlen (nur Test-Werkstaetten mit Test-Email im ersten Lauf, s. Regel 4 — nie
+an echte Empfaenger).
 

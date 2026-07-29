@@ -82,4 +82,12 @@ describe('sendeStep', () => {
     expect(r.ok).toBe(false)
     expect(r.error).toBe('SMTP down')
   })
+
+  it('faengt eine render-Exception als Result ab (kein throw) — FIX 2 belt-and-suspenders', async () => {
+    vi.mocked(render).mockRejectedValue(new Error('render kaputt'))
+    const r = await sendeStep({ empfaengerEmail: 'w@test.de', step: stepWillkommen, merge })
+    expect(r.ok).toBe(false)
+    expect(r.error).toBe('render kaputt')
+    expect(sendEmail).not.toHaveBeenCalled()
+  })
 })

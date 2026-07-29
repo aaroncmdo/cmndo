@@ -64,13 +64,18 @@ export async function sendeStep(args: {
     return { ok: false, skipped: 'copy_invalid' }
   }
 
-  // Type-Bruecke: `entry` ist bei nicht-literalem template_key ein Union aller
-  // TemplateEntry<K>-Varianten (registry.ts) — TS kann Schema<->Component-Korrespondenz
-  // ueber den dynamischen Key-Zugriff nicht verifizieren. Zur Laufzeit ist sie bereits
-  // durch das erfolgreiche copySchema.safeParse desselben Keys sichergestellt.
-  const html = await render(entry.Component({ copy: parsed.data, merge } as never))
-
+  // Belt-and-suspenders (Review-Fix Task 13, FIX 2): render() liegt BEWUSST im selben
+  // try/catch wie sendEmail — eine Render-Exception (kaputte Merge-Vars, Component-Crash)
+  // soll sendeStep genauso wenig werfen lassen wie ein SMTP-Fehler. So bleibt der
+  // {ok,skipped?,error?}-Kontrakt fuer ALLE Fehlerquellen dieser Funktion einheitlich, und
+  // der Cron-Caller (route.ts) muss sendeStep nicht zusaetzlich try/catchen (das tut er
+  // trotzdem, als zweite Verteidigungslinie fuer sonstige unerwartete Throws).
   try {
+    // Type-Bruecke: `entry` ist bei nicht-literalem template_key ein Union aller
+    // TemplateEntry<K>-Varianten (registry.ts) — TS kann Schema<->Component-Korrespondenz
+    // ueber den dynamischen Key-Zugriff nicht verifizieren. Zur Laufzeit ist sie bereits
+    // durch das erfolgreiche copySchema.safeParse desselben Keys sichergestellt.
+    const html = await render(entry.Component({ copy: parsed.data, merge } as never))
     await sendEmail({
       to: empfaengerEmail,
       subject: substituiereBetreff(step.betreff, merge),
@@ -82,7 +87,7 @@ export async function sendeStep(args: {
     return { ok: true }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    console.error('[werkstatt-onboarding] sendEmail fehlgeschlagen fuer Step', step.position, message)
+    console.error('[werkstatt-onboarding] Senden fehlgeschlagen fuer Step', step.position, message)
     return { ok: false, error: message }
   }
 }
