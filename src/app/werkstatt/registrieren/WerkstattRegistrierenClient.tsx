@@ -40,7 +40,7 @@ const EMPTY: FormState = {
 const inputClass =
   'w-full rounded-ios-md border border-claimondo-border px-4 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-ondo focus:border-claimondo-ondo focus:outline-none'
 
-export function WerkstattRegistrierenClient() {
+export function WerkstattRegistrierenClient({ einladung }: { einladung?: string }) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -65,6 +65,7 @@ export function WerkstattRegistrierenClient() {
     for (const g of faehigkeiten) fd.append('faehigkeiten', g)
     fd.set('kleinunternehmer', kleinunternehmer ? 'true' : 'false')
     fd.set('einwilligung', einwilligung ? 'true' : 'false')
+    if (einladung) fd.set('einladung', einladung)
     startTransition(async () => {
       const res = await registriereWerkstattSelf(fd)
       if (res.ok) setSuccess(true)

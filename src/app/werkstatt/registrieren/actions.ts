@@ -33,6 +33,9 @@ export async function registriereWerkstattSelf(
     formData.get('kleinunternehmer') === 'true' || formData.get('kleinunternehmer') === 'on'
   const einwilligung =
     formData.get('einwilligung') === 'on' || formData.get('einwilligung') === 'true'
+  // Netzwerk-Kalt-Einladung (optional): Token aus ?einladung=<token> in der Registrier-URL,
+  // vom Client als Hidden-Field durchgereicht. Best-effort — bricht die Registrierung NIE.
+  const einladungToken = String(formData.get('einladung') ?? '').trim()
   // Gewerke (optional, Mehrfachauswahl): gegen das kanonische Vokabular validieren + dedupen.
   // Leer = keine Angabe -> Feld bleibt weg (DB-Default), Matching rankt dann 'unbekannt'.
   const faehigkeiten = Array.from(
@@ -121,6 +124,16 @@ export async function registriereWerkstattSelf(
     return {
       ok: false,
       error: 'Registrierung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
+    }
+  }
+
+  // Netzwerk-Kalt-Einladung einloesen (best-effort — bricht die Registrierung nie): Auto-Kante zum Einlader.
+  if (einladungToken) {
+    try {
+      const { loeseNetzwerkEinladungEin } = await import('@/lib/netzwerk/einladung')
+      await loeseNetzwerkEinladungEin(admin, einladungToken, result.userId)
+    } catch (err) {
+      console.error('[registriereWerkstattSelf] Netzwerk-Einladung einloesen fehlgeschlagen (non-critical):', err)
     }
   }
 

@@ -8,6 +8,7 @@ import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import type { Tier } from '@/lib/partner-rang/types'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -57,6 +58,9 @@ export type AktiverSVPublic = {
   rang: Tier | null
   /** Komponenten-ehrlicher Sinnsatz zum Rang (nie eine Fallzahl). */
   rangSinnsatz: string | null
+  /** 13b: zahlender Netzwerkpartner (Abo-Praedikat). Global-Badge auf der Finder-Karte/Popup.
+   *  Ueberlebt den coverageUnion-Trim (page.tsx strippt nur isochrone_polygon). */
+  istNetzwerkpartner: boolean
 }
 
 export type GutachterFinderPayload = {
@@ -187,7 +191,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const enrichBySvId = new Map<string, SvEnrich>()
 
   // `admin` (Service-Role) wird bereits in Read 1 erzeugt und hier wiederverwendet.
-  const [profilesRes, bewRes, enrichRes, rangBySvId] = await Promise.all([
+  const [profilesRes, bewRes, enrichRes, rangBySvId, zahlendeSvSet] = await Promise.all([
     admin.from('profiles').select('id,vorname,anzeigename,profilbeschreibung').in('id', profileIds),
     admin
       .from('google_bewertungen_cache')
@@ -201,6 +205,8 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       .in('id', svIds),
     // AAR-956 Partner-Tier: verdienter Rang je SV (partner_rang, cron-berechnet).
     getPartnerRangBatch(admin, 'sachverstaendiger', svIds),
+    // 13b (K10): Netzwerkpartner-Abo-Praedikat fuers Badge, EIN Batch fuer alle Kandidaten.
+    ladeZahlendeSvSet(admin, svIds),
   ])
   if (profilesRes.data) {
     for (const p of profilesRes.data as Array<{ id: string; vorname: string | null; anzeigename: string | null; profilbeschreibung: string | null }>) {
@@ -265,6 +271,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       profilbeschreibung: profileId ? beschreibungByProfileId.get(profileId) ?? null : null,
       rang: rangBySvId.get(r.id as string)?.tier ?? null,
       rangSinnsatz: rangBySvId.get(r.id as string)?.sinnsatz ?? null,
+      istNetzwerkpartner: zahlendeSvSet.has(r.id as string),
     }
   })
 

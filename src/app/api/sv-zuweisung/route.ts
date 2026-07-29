@@ -13,6 +13,8 @@ import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
+import { sortiereMitNetzwerk } from './sortiere-mit-netzwerk'
 
 // ─── Point-in-Polygon (Ray Casting) ─────────────────────────────────────────
 
@@ -229,13 +231,11 @@ export async function POST(request: Request) {
     }
   }
 
-  // 5. Sortieren: schadens_art-Match (true vor false), dann partner_seit ASC
-  matchedCandidates.sort((a, b) => {
-    if (a.schaden_match !== b.schaden_match) return a.schaden_match ? -1 : 1
-    const da = a.partner_seit ? new Date(a.partner_seit).getTime() : Infinity
-    const db = b.partner_seit ? new Date(b.partner_seit).getTime() : Infinity
-    return da - db
-  })
+  // 5. Sortieren (K4/13b): Netzwerkpartner zuerst, dann schadens_art-Match, dann partner_seit ASC.
+  //    Batch EINMAL (K10). Admin-Client, weil sv_netzwerk_abonnements per-User-RLS ist (der Staff-`db`
+  //    saehe 0 Zeilen). Pure Sort in ./sortiere-mit-netzwerk (DB-frei testbar).
+  const zahlendeSet = await ladeZahlendeSvSet(createAdminClient(), matchedCandidates.map((c) => c.id))
+  matchedCandidates = sortiereMitNetzwerk(matchedCandidates, zahlendeSet)
 
   // KFZ-152 Phase 2+3 + Follow-up: Organisations-aware Routing
   // - akademie_sub: Pool-Routing (sv_id=null, organisation_id=org).

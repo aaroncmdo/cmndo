@@ -36,6 +36,7 @@ import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
 import { deriveVermittler } from '@/lib/leads/vermittler'
+import { resolveVermittlerOwnerProfil } from '@/lib/netzwerk/owner-resolution'
 import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -504,6 +505,12 @@ export async function convertLeadToClaim(
   })
   ;(claimsInsert as Record<string, unknown>).vermittler_typ = vermittlerTyp
   ;(claimsInsert as Record<string, unknown>).vermittler_id = vermittlerId
+  // Netzwerk-Bindung (Spec 1 §8, K6): per-Claim Owner-Attribution aus dem INBOUND-Vermittler.
+  // Makler = v1 kein Graph-Knoten -> null (keine Bindung, wird aktiv sobald Makler Knoten werden).
+  // NIE aus sv_id/svIdFromTermin (OUTBOUND) seeden. Write-once: der Wert wird nur bei Anlage
+  // gesetzt, spaeter nie ueberschrieben. Record-Cast wie die uebrigen type-lagged Convert-Mappings.
+  ;(claimsInsert as Record<string, unknown>).netzwerk_owner_id =
+    await resolveVermittlerOwnerProfil(admin, vermittlerTyp, vermittlerId)
 
   // Reparatur-Werkstatt: Dispatcher-Zuweisung am Lead -> Claim uebernehmen (Record-Cast wg. Type-Lag).
   // Der Lead wird via select('*') geladen (s.o.), die reparatur_werkstatt_*-Spalten kommen also mit.
