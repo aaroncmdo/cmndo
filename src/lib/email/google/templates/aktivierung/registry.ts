@@ -3,6 +3,7 @@
 // erzwingt bei jedem Key das korrekte Copy-Schema fuer Component + subject()
 // (Compile-Fehler, falls ein Key fehlt oder ein Copy-Typ nicht mehr passt).
 
+import type { ReactElement } from 'react'
 import type { ZodType } from 'zod'
 import { copySchemas } from './copy-schemas'
 import type { CopyFor } from './copy-schemas'
@@ -14,8 +15,11 @@ import { KundenstoryEmail, subject as kundenstorySubject } from './Kundenstory'
 import { BonusEmail, subject as bonusSubject } from './Bonus'
 import { ReaktivierungEmail, subject as reaktivierungSubject } from './Reaktivierung'
 
+// React 19: kein ambientes globales `JSX` in reinen .ts-Dateien (nur .tsx triggert die
+// automatische jsx-runtime-Einbindung, die den Namespace mergt) -> ReactElement statt
+// JSX.Element (dieselbe Laufzeit-Bedeutung, ohne den Namespace-Lookup).
 type TemplateEntry<K extends TemplateKey> = {
-  Component: (props: { copy: CopyFor<K>; merge: WerkstattMergeVars }) => JSX.Element
+  Component: (props: { copy: CopyFor<K>; merge: WerkstattMergeVars }) => ReactElement
   copySchema: ZodType<CopyFor<K>>
   subject: (copy: CopyFor<K>, merge: WerkstattMergeVars) => string
 }

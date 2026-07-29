@@ -307,3 +307,25 @@ best-effort WhatsApp, fail-soft). Dedup ohne DDL: max. 1 Reminder je Fahrzeug / 
 FM ohne `whatsapp_nummer` + Dedup-Assert + 0-Leftover-Cleanup) lief gruen (10/10) — Marker
 `coordination-zustandsaufnahme-3monats-cron`.
 
+## Stand 2026-07-29 — `werkstatt-onboarding-drip` GEBAUT, NOCH NICHT im Live-Crontab
+
+> Werkstatt-Onboarding-Drip (6-Mail-Aktivierungs-Sequenz, Branch `kitta/werkstatt-onboarding-drip`,
+> Tasks 12+13). **Noch NICHT per SSH auf den VPS angewendet** — dieser Eintrag ist die vorbereitete
+> Doku fuer den Deploy-Schritt (Muster wie die Eintraege oben, aber ohne Live-Anwendung aus diesem
+> Worktree heraus). Vor dem Nachtragen: Prod-Deploy des PRs abwarten (Task 15/16 des Plans:
+> Regel-4-Smoke + einmaliger Backfill bestehender Werkstaetten).
+
+**Vorzutragen nach Deploy** (Muster `send-lead-reminders`, taeglich frueh):
+```cron
+0 6 * * * /usr/local/bin/cron-call.sh /api/cron/werkstatt-onboarding-drip  # Werkstatt-Onboarding-Drip (6 Mails, Stop bei erstem Fall)
+```
+Arbeitet faellige `werkstatt_onboarding_enrollments` ab (Batch-Cap 100): stoppt bei erstem Fall
+(`status='aktiviert'`) oder `cold_mail_suppression`-Opt-out (`status='gestoppt'`), sonst sendet sie
+den naechsten aktiven Step und rechnet `next_send_at` gegen den Enrollment-Anker (`erstellt_am`,
+nicht `werkstaetten.aktiviert_am` — sonst wuerde ein spaeterer Backfill alle Offsets auf einmal
+abfeuern). Auth wie alle anderen Crons: `assertCronAuth` (Bearer `CRON_SECRET`, fail-closed).
+
+**Nach dem Nachtragen verifizieren:** `cron-call.sh /api/cron/werkstatt-onboarding-drip` manuell
+triggern -> erwartet `{ ok:true, gesendet, gestoppt, faellig }`; vorher per MCP `faellig`-Kandidaten
+zaehlen (nur Test-Werkstaetten mit Test-Email im ersten Lauf, s. Regel 4 — nie an echte Empfaenger).
+
