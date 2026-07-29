@@ -1083,8 +1083,15 @@ export default function FlowWizardKfz({
 
                 {/* CMM-14: Bei Komplett-Mandat juristischen Ansprechpartner
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
-                    Edge-Function — hier nur die Visitenkarte. */}
-                {lead.service_typ === 'komplett' && (
+                    Edge-Function — hier nur die Visitenkarte.
+                    Prod-Incident 29.07. (Aaron, "nur Gutachten" -> LexDrive-Karte): das Gate darf
+                    nicht an der SSR-Prop lead.service_typ haengen — die ist zum Zeitpunkt des
+                    client-seitigen Sprungs auf den account-Step potenziell stale (Autosave der
+                    Service-Wahl + LeadRealtimeRefresh-Race). Die frische Wahl aus dem SA-/POS-Step
+                    (serviceValues) gewinnt; die Prop bleibt Fallback fuer Dispatcher-vorbereitete
+                    Leads ohne Service-Feld im Flow. Soll (Aaron): nur_gutachter = KEIN juristischer
+                    Ansprechpartner. */}
+                {((serviceValues['service_typ'] as string | undefined) ?? lead.service_typ) === 'komplett' && (
                   <div className="mb-5 rounded-ios-md border border-claimondo-ondo/20 bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 p-5">
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">
                       {t('step_account.lexdrive.label')}
