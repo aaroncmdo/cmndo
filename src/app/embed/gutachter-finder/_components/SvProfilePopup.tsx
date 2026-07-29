@@ -112,6 +112,9 @@ export function SvProfileInhalt({ sv, gross = false }: { sv: AktiverSVPublic; gr
       {/* Partner-Tier-Badge (verdienter Rang) — ehrliches Trust-/Wahl-Signal */}
       {sv.rang && <PartnerRangBadge tier={sv.rang} sinnsatz={sv.rangSinnsatz} />}
 
+      {/* 13b: Netzwerkpartner-Badge (Abo-Praedikat, nicht paket) */}
+      {sv.istNetzwerkpartner && <Chip strong>Netzwerkpartner</Chip>}
+
       {/* Bewertung + Einsatzgebiet */}
       {(hatBewertung || sv.umkreis_km !== null) && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

@@ -10,7 +10,12 @@ export const metadata: Metadata = {
     'Sofort startklar mit eigenem QR-Einstieg und Reparaturaufträgen über den Werkstatt-Finder.',
 }
 
-export default function WerkstattRegistrierenPage() {
+export default async function WerkstattRegistrierenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ einladung?: string }>
+}) {
+  const { einladung } = await searchParams
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
@@ -28,7 +33,7 @@ export default function WerkstattRegistrierenPage() {
             Kostenlos registrieren — sofort startklar mit Ihrem eigenen QR-Einstieg für Kunden.
           </p>
         </div>
-        <WerkstattRegistrierenClient />
+        <WerkstattRegistrierenClient einladung={einladung} />
       </div>
     </div>
   )

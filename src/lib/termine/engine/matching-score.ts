@@ -14,6 +14,10 @@ export const PAKET_PRIO: Record<string, number> = {
 
 // Score-Gewichte (höher = besser). Mirror der findBestSV-Formel; hier die eine Quelle.
 export const W_PAKET = 100
+// 13b LOCKED: das Netzwerkpartner-Abo loest paketPrio als Ranking-Primaertreiber ab
+// (paket = Legacy-Fulfillment, kein Ranking). Binaerer Bucket: zahlender Netzwerkpartner (100)
+// ueber Free (0). Gleiche Groesse wie W_PAKET, damit die Score-Skala stabil bleibt.
+export const W_NETZWERK = 100
 export const W_KONTINGENT_GENUTZT = 2
 export const W_ABLEHNUNG = 2
 export const W_ETA_MIN = 0.5
@@ -33,7 +37,9 @@ export function istKontingentBlockiert(paket: string, kontingentFrei: number): b
 }
 
 export interface SvKandidatFeatures {
-  paket: string
+  /** 13b: zahlender Netzwerkpartner (aktives/comped Abo) > Free. Loest paketPrio ab (K3:
+   *  paket bleibt Legacy-Fulfillment, NICHT im Score). Vom Caller batch-vorgeladen (K10). */
+  istNetzwerkpartner: boolean
   kontingentGenutzt: number
   ablehnungen30d: number
   /** echte Mapbox-ETA Büro→Schadenort in Minuten; null → Haversine-km als Fallback-Penalty. */
@@ -44,11 +50,10 @@ export interface SvKandidatFeatures {
   rangOrdinal?: number
 }
 
-/** Reiner SV-Score (höher = besser). "Pakete voll bekommen" = paketPrio + Rest-Kapazität bevorzugt. */
+/** Reiner SV-Score (höher = besser). 13b: zahlender Netzwerkpartner > Free (W_NETZWERK); rangOrdinal verfeinert innerhalb. */
 export function bewerteSvKandidat(f: SvKandidatFeatures): number {
-  const paketPrio = PAKET_PRIO[f.paket] ?? 1
   const distanzPenalty = f.etaVomBueroMin != null ? f.etaVomBueroMin * W_ETA_MIN : f.distanzKm
-  return paketPrio * W_PAKET
+  return (f.istNetzwerkpartner ? 1 : 0) * W_NETZWERK
     + (f.rangOrdinal ?? 0) * W_RANG
     - f.kontingentGenutzt * W_KONTINGENT_GENUTZT
     - f.ablehnungen30d * W_ABLEHNUNG
