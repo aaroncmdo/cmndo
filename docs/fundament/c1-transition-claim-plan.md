@@ -119,13 +119,22 @@ Angepasst an den Ist (Modul + Event-Log existieren schon):
   nächste Cast-Evasion unsichtbar.
 
 **C1b+** = die verbleibende Writer-Liste (v.a. Baseline-Abbau nach FG1) in Tranchen.
+
+**C1c — Abschluss-Pfad mit Karenz** (Aaron-Entscheid B, §6 #3):
+- **Cascade-Regel** `regulierung/in_kommunikation_vs/abgelehnt → abgeschlossen` bei `zahlungEingegangen`
+  (`autophase-decision.ts:72`) → **`→ zahlung-eingegangen`** ändern (Zahlung schließt nicht mehr sofort).
+- **Neue KB-Aktion „Schlussabrechnung erstellt"** setzt `schlussabrechnung_am` (der heute komplett fehlende Writer).
+- Der bestehende 48h-Cron (`cron/fall-abschluss`) schließt dann `zahlung-eingegangen → abgeschlossen` (Matrix-Kante existiert, Cron-Transition ist gültig).
+- `reguliert_vollstaendig`-Endzustand auf `abgeschlossen` vereinheitlichen.
+- ⚠ **Behavior-Change am Kern-Close-Pfad → braucht die J1-Smoke (B1) als Netz** (deshalb erst nach B1 bauen).
+
 **Letzte Tranche** = Ratchet-Baseline → **0** + der gehärtete Scanner blockt jeden neuen Nicht-Engine-Write.
 
 ## 6 · Offene Entscheidungen (→ `DECISIONS.md`, Aaron-Review vor C1a-Code)
 
 1. **Event-Log-Tabelle:** `phase_transitions` bestätigen (statt neuem `claim_events`)? *(Empfehlung: ja — trägt das Format, 1 Consumer schon live.)*
 2. **C1/FG1-Partition + Reihenfolge:** Nimmt **FG1** die 2 Terminal-Baseline-Writer (dann C1 nur Baseline-Abbau), oder übernimmt C1a einen davon als 2. Beweis-Writer? *(Empfehlung: FG1 behält die Terminal-Domäne; C1a-Beweis = sv-zuweisung + Event-Log-claim_id; die „2 Writer"-Vorgabe via sv-zuweisung + einem FG1-koordinierten Terminal.)*
-3. **Terminal-Vereinheitlichung (aus der Auto-Close-Lücke, [[audit-c1-auto-close-luecke-zahlung-eingegangen]]):** EIN Abschluss-Terminal — `abgeschlossen` (Engine-Cascade) vs. `reguliert_vollstaendig` (Endzustand)? Und: den toten 48h-Grace-Cron + `schlussabrechnung_am`-Gate + das unverdrahtete `recordZahlung` in C1 retiren? *(Produkt-Entscheidung Aarons — steuert die Cascade-Regel.)*
+3. **Abschluss-Pfad + Karenz — ✅ ENTSCHIEDEN (Aaron 29.07.: Option B).** Nach VS-Zahlung schließt der Fall **NICHT sofort**; er wartet auf eine echte Schlussabrechnung + Karenz. Soll: (a) Zahlung erfassen → `zahlung-eingegangen` (statt sofort `abgeschlossen`); (b) **neue KB-Aktion „Schlussabrechnung erstellt"** setzt `schlussabrechnung_am` (der heute fehlende Writer); (c) der **bestehende** 48h-Grace-Cron (`cron/fall-abschluss`) schließt `zahlung-eingegangen → abgeschlossen`. Cron + `schlussabrechnung_am`-Gate **bleiben** (nicht retiren). EIN Terminal = `abgeschlossen`; `reguliert_vollstaendig` (Endzustand) wird darauf vereinheitlicht. Umsetzung = **C1c** (§5). Der Trap `recordZahlung` (unverdrahtet) wird in C1c in den Fluss eingegliedert oder entfernt. Herkunft: [[audit-c1-auto-close-luecke-zahlung-eingegangen]] / j01 #8 / PR #4835. Offenes Design-Detail (C1c, kein Aaron-Blocker): was genau die „Schlussabrechnung" ist (neuer `fall_dokumente`-Typ / KB-Bestätigung / Anbindung an `abrechnungen`).
 
 ## 7 · DoD (C1 gesamt, unverändert aus §5) + Nicht-Ziele
 
