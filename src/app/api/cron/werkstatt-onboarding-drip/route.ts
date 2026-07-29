@@ -125,6 +125,13 @@ export async function GET(request: Request) {
     .order('position')
   const steps = (stepsData ?? []) as StepRow[]
 
+  // I3-Fix (Final-Review): eine leere/fehlgeschlagene steps-Query wuerde JEDE faellige Enrollment
+  // auf 'fertig' setzen (terminal — nie wieder Mail). Lieber den Lauf abbrechen, OHNE zu mutieren.
+  if (steps.length === 0) {
+    console.error('[werkstatt-onboarding] steps-Query leer/fehlgeschlagen — Lauf abgebrochen, keine Enrollment-Mutation.')
+    return Response.json({ ok: false, error: 'keine aktiven Steps', faellig: due?.length ?? 0 }, { status: 500 })
+  }
+
   let gesendet = 0
   let aktiviert = 0
   let gestoppt = 0

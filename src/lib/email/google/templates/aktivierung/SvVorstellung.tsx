@@ -23,9 +23,13 @@ export function subject(copy: CopyFor<'sv_vorstellung'>, merge: WerkstattMergeVa
 
 export function SvVorstellungEmail({ copy, merge }: Props) {
   const region = merge.sv?.region ?? 'deiner Region'
+  const svName = merge.sv?.name ?? ''
+  // C1-Fix (Final-Review): BEIDE Platzhalter in JEDEM Text ersetzen — sonst bleibt in der
+  // Headline [Gutachter-Name] und in Absatz 2 [Region] roh stehen (Betreff war schon korrekt).
+  const fill = (s: string) => s.replace('[Region]', region).replace('[Gutachter-Name]', svName)
   return (
     <EmailShell preview={subject(copy, merge)}>
-      <Hero logoUrl={null} headline={copy.headline.replace('[Region]', region)} />
+      <Hero logoUrl={null} headline={fill(copy.headline)} />
       <Card>
         <Paragraph>Hallo {merge.werkstattName},</Paragraph>
         {merge.sv && (
@@ -37,7 +41,7 @@ export function SvVorstellungEmail({ copy, merge }: Props) {
           />
         )}
         {copy.absaetze.map((a, i) => (
-          <Paragraph key={i}>{a.replace('[Gutachter-Name]', merge.sv?.name ?? '')}</Paragraph>
+          <Paragraph key={i}>{fill(a)}</Paragraph>
         ))}
         <Button href={merge.portalLink}>{copy.cta_label}</Button>
         <Paragraph>
