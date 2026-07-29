@@ -61,6 +61,9 @@ export type AktiverSVPublic = {
   /** 13b: zahlender Netzwerkpartner (Abo-Praedikat). Global-Badge auf der Finder-Karte/Popup.
    *  Ueberlebt den coverageUnion-Trim (page.tsx strippt nur isochrone_polygon). */
   istNetzwerkpartner: boolean
+  /** P2-T7 (K11, relational): Freund des INJIZIERTEN Owners UND zahlend. Ohne Owner-Injektion
+   *  (blanker anon-Finder) immer false. Getrennt vom globalen istNetzwerkpartner. */
+  imNetzwerk: boolean
 }
 
 export type GutachterFinderPayload = {
@@ -129,7 +132,12 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
   return { ok: true, data: data as SvLeadPublic[] }
 }
 
-export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
+export async function ladeAktiveSVs(
+  // P2-T7 (K11): Owner wird INJIZIERT (Attribution: Makler-/Werkstatt-Einstieg), nie
+  // session-abgeleitet — der anon-Finder hat keinen auth-Owner. Ohne Owner kein
+  // relationaler Boost (nur das globale istNetzwerkpartner-Badge).
+  opts?: { ownerProfilId?: string | null },
+): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
   // Read 1 (Service-Role, AAR-956): Geo + paket + spezifikationen. Test-/Demo-Accounts
   // filtert jetzt das kanonische ist_testaccount-Flag DIREKT in der Query (Befund #6 /
   // #3438) — kein firmenname-Read + keine App-seitige ILIKE-Heuristik mehr.
@@ -241,6 +249,18 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
     }
   }
 
+  // P2-T7 (K11): relationaler Boost NUR bei injiziertem Owner. Freund-SVs (sachverstaendige.id)
+  // des Owners, geschnitten mit den zahlenden (Gate immer am SV). zahlendeSvSet kommt aus dem
+  // Batch oben — hier nur EIN zusaetzlicher Freund-Read (K10). v1-Realitaet: Makler sind kein
+  // Graph-Knoten -> ein Makler-Owner hat 0 Freunde -> imNetzwerk bleibt ueberall false (Seam
+  // korrekt, aber inert, bis Werkstatt-/Flotte-Attributionen injiziert werden).
+  let netzSet = new Set<string>()
+  if (opts?.ownerProfilId) {
+    const { ladeFreundKandidatIds } = await import('@/lib/netzwerk/freunde')
+    const freundSvIds = await ladeFreundKandidatIds(admin, opts.ownerProfilId, 'gutachter')
+    netzSet = new Set([...freundSvIds].filter((id) => zahlendeSvSet.has(id)))
+  }
+
   const mapped: AktiverSVPublic[] = rows.map((r) => {
     const profileId = r.profile_id as string | null
     const vorname = profileId ? vornameByProfileId.get(profileId) ?? null : null
@@ -272,6 +292,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       rang: rangBySvId.get(r.id as string)?.tier ?? null,
       rangSinnsatz: rangBySvId.get(r.id as string)?.sinnsatz ?? null,
       istNetzwerkpartner: zahlendeSvSet.has(r.id as string),
+      imNetzwerk: netzSet.has(r.id as string),
     }
   })
 

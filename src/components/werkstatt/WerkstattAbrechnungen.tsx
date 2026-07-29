@@ -8,6 +8,7 @@ import Link from 'next/link'
 import {
   CheckCircle2Icon,
   ClockIcon,
+  UsersIcon,
   XCircleIcon,
   WalletIcon,
 } from 'lucide-react'
@@ -88,6 +89,17 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
       className: 'bg-danger-soft text-danger-strong border border-danger/20',
       icon: <XCircleIcon width={12} height={12} />,
       tooltip: row.storno_grund ?? undefined,
+    }
+  }
+  // P3 Netzwerk: intra-Freundesnetzwerk vermittelt -> keine Einzelprovision (Abo deckt).
+  // Ohne eigenen Zweig fiele der Status in den pending-Fallback ("fällig in X T.") — irreführend.
+  if (status === 'unterdrueckt') {
+    return {
+      label: 'Netzwerk-intern (nicht vergütet)',
+      className: 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border',
+      icon: <UsersIcon width={12} height={12} />,
+      tooltip:
+        'Innerhalb Ihres Partnernetzwerks vermittelt — durch das Netzwerkpartner-Abo abgedeckt, keine Einzelprovision.',
     }
   }
   // pending — Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). release_deadline null =

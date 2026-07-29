@@ -87,6 +87,13 @@ export type WerkstattVorschlag = Omit<WerkstattKandidat, 'verifiziert'> & {
    * bereitstehen — kein Big-Bang-Umbau der UI noetig.
    */
   passt: boolean
+  /**
+   * P2-T6 (Netzwerk, additiv): von applyNetzwerkPraeferenz gesetzt — true = Freund-Werkstatt des
+   * Owners, nach oben partitioniert. `qualifiziert` ist das Partition-Eingangsflag (= passt).
+   * Beide nur gesetzt, wenn ein ownerProfilId durchgereicht wurde (sonst untouched).
+   */
+  qualifiziert?: boolean
+  imNetzwerk?: boolean
 }
 
 export type MatchingKontext = {
