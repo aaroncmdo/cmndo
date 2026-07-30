@@ -15,6 +15,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
+import { kundeHatBestaetigt } from '@/lib/faelle/onboarding-gate'
 import { triggerSV05 } from '@/lib/gutachterTasking'
 import { createNotification } from '@/lib/notifications'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
@@ -95,10 +96,12 @@ export async function saveFilmcheck(
   // Faelle ohne aufloesbare claim_id das bisherige Verhalten behalten.
   let istKomplett = true
   let opStatus: string | null = null
+  let saUnterschrieben: boolean | null = null
   if (claimId) {
-    const { data: claimSvc } = await supabase.from('claims').select('service_typ, operative_status').eq('id', claimId).single()
+    const { data: claimSvc } = await supabase.from('claims').select('service_typ, operative_status, sa_unterschrieben').eq('id', claimId).single()
     istKomplett = (claimSvc?.service_typ as string | null) !== 'nur_gutachter'
     opStatus = (claimSvc?.operative_status as string | null) ?? null
+    saUnterschrieben = ((claimSvc as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben as boolean | null) ?? null
   }
 
   // Idempotenz (Filmcheck-Audit 29.06.2026): beide KB-Approve-Buttons (qcBestanden +
@@ -116,6 +119,19 @@ export async function saveFilmcheck(
         success: false,
         error:
           'Der Fall ist noch nicht im Filmcheck — die Übergabe an die Kanzlei ist erst nach vollständigem Gutachten möglich.',
+      }
+    }
+
+    // P4 (Invariante Spec 3 §4): der Kanzlei-Handoff loest Anschlussschreiben/VS aus — erst
+    // nach Kunden-Bestaetigung (sa_unterschrieben). Ein SV-Vermittlungs-Sofort-Claim haengt
+    // vor filmcheck (AutoPhase-Gate), dieser Guard ist Defense-in-Depth gegen manuelle
+    // Handoffs. Inert fuer Normalfall-Claims (am SA-Signing geboren; claimId-lose Faelle
+    // behalten via null-Check unten das Alt-Verhalten NICHT — konservativ blocken nur bei
+    // explizit vorhandenem Claim mit sa!=true).
+    if (claimId && !kundeHatBestaetigt({ sa_unterschrieben: saUnterschrieben })) {
+      return {
+        success: false,
+        error: 'Der Kunde hat noch nicht bestätigt — die Kanzlei-Übergabe ist blockiert.',
       }
     }
 
