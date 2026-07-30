@@ -106,14 +106,16 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // CMM-50.3b: Kennzeichen vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
   // als Fallback. Bis der 50.0-Write-Path vehicles fuellt, greift der Fallback (No-Op).
   let vehicleKennzeichen: string | null = null
+  let claimSaUnterschrieben: boolean | null = null
   if (fall.claim_id) {
     const { data: claim } = await db
       .from('claims')
-      .select('kanzlei_wunsch, vorsteuerabzugsberechtigt, vehicle_id')
+      .select('kanzlei_wunsch, vorsteuerabzugsberechtigt, vehicle_id, sa_unterschrieben')
       .eq('id', fall.claim_id)
       .maybeSingle()
     kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
     claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
+    claimSaUnterschrieben = ((claim as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben as boolean | null) ?? null
     const vehId = (claim?.vehicle_id as string | null) ?? null
     if (vehId) {
       const { data: veh } = await db.from('vehicles').select('kennzeichen_aktuell').eq('id', vehId).maybeSingle()
@@ -124,6 +126,14 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   const istPartnerkanzlei = kanzleiWunsch === 'partnerkanzlei'
   if (!istKomplett && !istPartnerkanzlei) {
     return { success: false, skipped: true, error: 'kein_komplett_oder_partnerkanzlei' }
+  }
+
+  // P4 (Review-Fund LOW-2, Defense-in-Depth): KEIN Mandats-Push ohne Kunden-SA — das Mandat
+  // IST die signierte Abtretung. Alle heutigen Caller pushen post-SA (signSAandCreateFall,
+  // Vollmacht-Reminder-Cron verlangt Termin), aber dieser single-point-Guard haelt die
+  // Invariante auch fuer kuenftige Caller (z.B. den un-signierten SV-Sofort-Claim, P4).
+  if (fall.claim_id && claimSaUnterschrieben !== true) {
+    return { success: false, skipped: true, error: 'sa_nicht_unterschrieben' }
   }
 
   // Safety-Net 2026-05-15: Smoke-/Test-Daten dürfen NIE an LexDrive gehen.

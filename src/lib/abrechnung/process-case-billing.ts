@@ -37,11 +37,18 @@ export async function processCaseBilling(fallId: string): Promise<{
   const claimId = await resolveClaimId(db, fallId)
   if (!claimId) return null
   const { data: claim } = await db.from('claims')
-    .select('id, sv_id, schadens_hoehe_netto, lead_preis_netto, gutachten(gesamt_schadensbetrag)')
+    .select('id, sv_id, sa_unterschrieben, schadens_hoehe_netto, lead_preis_netto, gutachten(gesamt_schadensbetrag)')
     .eq('id', claimId)
     .single()
 
   if (!claim?.sv_id) return null
+
+  // P4 (Invariante Spec 3 §4): kein Billing vor Kunden-Bestaetigung. Der SV-Vermittlungs-
+  // Sofort-Claim (geboren sa_unterschrieben=false, sv_id gesetzt) wuerde sonst vom
+  // case-billing-batch-Cron gebillt, obwohl der Kunde noch nicht signiert hat. Inert fuer
+  // Bestands-/Normalfall-Claims (live verifiziert 30.07.: 0 billable Claims mit false/null).
+  // Nach Onboarding feuert processCaseBilling erneut (idempotent) via resumeFunnelAfterOnboarding.
+  if ((claim as { sa_unterschrieben?: boolean | null }).sa_unterschrieben !== true) return null
 
   // Bereits berechnet? (Idempotenz-Guard) — lead_preis_netto ist claims-SSoT.
   const existingLeadPreis = (claim as { lead_preis_netto?: number | null }).lead_preis_netto

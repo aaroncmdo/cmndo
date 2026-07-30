@@ -27,6 +27,8 @@ export type OperativeSignals = {
   anschlussschreibenVorhanden: boolean
   /** claim_payments.zahlungseingang_am gesetzt (Zahlung eingegangen) */
   zahlungEingegangen: boolean
+  /** claims.sa_unterschrieben === true (P4-Gate: Kunden-Bestaetigung, kundeHatBestaetigt) */
+  kundeBestaetigt: boolean
 }
 
 /**
@@ -54,7 +56,11 @@ export function computeNextOperativePhase(status: string, s: OperativeSignals): 
       // KERN-FIX: komplett-gated (nicht zirkulaer ueber filmcheck_ok). nur_gutachter bleibt
       // hier stehen (keine Kanzlei-Strecke). Mandat ist fuer komplett per SA-Signing gegeben;
       // das LexDrive-mandatsnummer-Ack wird nicht als Gate verlangt (sonst Timing-Loch).
-      return s.istKomplett ? 'filmcheck' : null
+      // P4: zusaetzlich kunden-bestaetigt (sa_unterschrieben). Ein SV-Vermittlungs-Sofort-Claim
+      // (geboren un-onboardet) bleibt hier stehen, bis der Kunde die SA signiert -> kein
+      // verfruehter Kanzlei-/VS-Track (Invariante Spec 3 §4). Inert fuer Normalfall-Claims
+      // (die sind hier laengst sa_unterschrieben=true).
+      return s.istKomplett && s.kundeBestaetigt ? 'filmcheck' : null
     case 'filmcheck':
       // HALB-AUTOMATIK-GRENZE: KB macht den Handoff via saveFilmcheck. Kein Auto-Sprung.
       return null

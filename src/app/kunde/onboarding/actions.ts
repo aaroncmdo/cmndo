@@ -578,6 +578,14 @@ export async function completeOnboarding(
     // den Admin-Client (service_role) — guard_profiles_netzwerk_owner_upd erlaubt keine
     // authenticated-Writes auf netzwerk_owner_id/_seit.
     await seedeKundenBindungFirstTouch(admin, user.id, targetClaimId)
+
+    // P4: der Kunde hat sein Onboarding abgeschlossen -> aufgeschobene Funnel-Effekte des
+    // SV-Vermittlungs-Sofort-Claims nachholen (Billing + AutoPhase; No-op fuer Normalfall-
+    // Claims — Billing idempotent, AutoPhase findet keinen Hop). Non-fatal.
+    if (targetFallId) {
+      const { resumeFunnelAfterOnboarding } = await import('@/lib/faelle/resume-funnel-after-onboarding')
+      await resumeFunnelAfterOnboarding(targetFallId)
+    }
   }
 
   // profiles.onboarding_completed_at zusätzlich setzen (Erstkontakt-Marker).
