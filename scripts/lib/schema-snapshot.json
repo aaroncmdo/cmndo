@@ -821,7 +821,8 @@
     "kva_abgelehnt_grund",
     "kanzlei_id",
     "schuldfrage",
-    "eigene_versicherung"
+    "eigene_versicherung",
+    "netzwerk_owner_id"
    ]
   },
   "client_error_log": {
@@ -2824,6 +2825,33 @@
     "thread_id"
    ]
   },
+  "netzwerk_einladungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "einlader_id",
+    "email",
+    "ziel_rolle",
+    "token_hash",
+    "token_lookup_prefix",
+    "status",
+    "erstellt_am",
+    "ablauf_am",
+    "eingeloest_am",
+    "eingeloest_profil_id"
+   ]
+  },
+  "netzwerk_verbindungen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "anfrager_id",
+    "empfaenger_id",
+    "status",
+    "erstellt_am",
+    "beantwortet_am"
+   ]
+  },
   "notification_deliveries": {
    "kind": "t",
    "columns": [
@@ -3350,7 +3378,9 @@
     "ms_email",
     "ms_connected_at",
     "actions_last_seen_at",
-    "kanzlei_id"
+    "kanzlei_id",
+    "netzwerk_owner_id",
+    "netzwerk_owner_seit"
    ]
   },
   "profiles_oauth_secrets": {
@@ -3885,6 +3915,18 @@
     "route_polyline",
     "distance_to_target_meters",
     "captured_at"
+   ]
+  },
+  "sv_netzwerk_abonnements": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_id",
+    "status",
+    "gueltig_bis",
+    "stripe_subscription_id",
+    "erstellt_am",
+    "aktualisiert_am"
    ]
   },
   "sv_onboarding_rechnungen": {
@@ -5642,6 +5684,13 @@
     "live_heading"
    ]
   },
+  "v_netzwerk_freunde": {
+   "kind": "v",
+   "columns": [
+    "profil_id",
+    "freund_id"
+   ]
+  },
   "v_offene_anfragen": {
    "kind": "v",
    "columns": [
@@ -6185,6 +6234,32 @@
     "autor_name",
     "text",
     "created_at"
+   ]
+  },
+  "werkstatt_onboarding_enrollments": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "werkstatt_id",
+    "aktueller_step",
+    "next_send_at",
+    "status",
+    "erstellt_am"
+   ]
+  },
+  "werkstatt_onboarding_steps": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "position",
+    "offset_tage",
+    "template_key",
+    "betreff",
+    "preheader",
+    "copy",
+    "aktiv",
+    "erstellt_am",
+    "aktualisiert_am"
    ]
   },
   "werkstatt_qr_pool": {
