@@ -97,6 +97,20 @@ export async function vermittlePartnerWerkstatt(formData: FormData): Promise<Ver
     return { ok: false, error: `Vorgang konnte nicht angelegt werden: ${conv.error}` }
   }
 
+  // Netzwerk-Bindung (J8): der vermittelnde SV ist der Owner-Knoten dieses Claims. Der
+  // P3-Seed in convertLeadToClaim greift hier NICHT (deriveVermittler kennt nur werkstatt/
+  // firmen_flotte — der SV-Flow-Lead hat keinen Inbound-Vermittler) -> expliziter Seed,
+  // write-once via IS-NULL-Guard (frischer Claim). Non-fatal wie alle Bindungs-Seeds.
+  try {
+    await admin
+      .from('claims')
+      .update({ netzwerk_owner_id: user.id } as never)
+      .eq('id', conv.claimId)
+      .is('netzwerk_owner_id', null)
+  } catch (err) {
+    console.warn('[vermittlePartnerWerkstatt] netzwerk_owner_id-Seed non-fatal:', err)
+  }
+
   // 5. Gutachten anhaengen — OHNE Transition (der Claim ist schon 'gutachten-eingegangen').
   //    Non-fatal: der Vorgang existiert; ein Attach-Fehler wird geloggt, der SV kann das
   //    Gutachten in der Fallakte nachreichen.

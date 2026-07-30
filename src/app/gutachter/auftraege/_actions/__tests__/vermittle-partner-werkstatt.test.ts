@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 let authedUser: { id: string } | null = { id: 'user-sv' }
 let svProfil: { id: string } | null = { id: 'sv-1' }
 const leadDeletes: string[] = []
+const ownerSeeds: Array<{ payload: Record<string, unknown>; id: unknown }> = []
 
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -13,6 +14,14 @@ vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
     from: (table: string) => ({
       select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: 'lead-1' }, error: null }) }) }),
+      update: (payload: Record<string, unknown>) => ({
+        eq: (_c: string, id: unknown) => ({
+          is: () => {
+            if (table === 'claims') ownerSeeds.push({ payload, id })
+            return Promise.resolve({ error: null })
+          },
+        }),
+      }),
       delete: () => ({
         eq: (_c: string, id: string) => {
           if (table === 'leads') leadDeletes.push(id)
@@ -64,6 +73,7 @@ beforeEach(() => {
   authedUser = { id: 'user-sv' }
   svProfil = { id: 'sv-1' }
   leadDeletes.length = 0
+  ownerSeeds.length = 0
   vi.mocked(createLead).mockClear().mockResolvedValue({ ok: true, leadId: 'lead-1' })
   vi.mocked(convertLeadToClaim).mockClear().mockResolvedValue({
     ok: true, claimId: 'claim-1', fallId: 'fall-1', claimNummer: 'CLM-1', kundenbetreuerId: null,
@@ -93,6 +103,8 @@ describe('vermittlePartnerWerkstatt (P4 T7)', () => {
       expect.objectContaining({ claimId: 'claim-1', fallId: 'fall-1', svId: 'sv-1', betrag: 4200.5 }),
     )
     expect(sendeInitialLink).toHaveBeenCalledWith(expect.objectContaining({ leadId: 'lead-1' }))
+    // J8-Bindung: der vermittelnde SV wird Owner-Knoten (write-once via IS-NULL-Guard).
+    expect(ownerSeeds).toEqual([{ payload: { netzwerk_owner_id: 'user-sv' }, id: 'claim-1' }])
   })
 
   it('Nicht-SV -> {ok:false}, kein Lead', async () => {
