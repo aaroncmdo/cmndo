@@ -9,6 +9,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import Link from 'next/link'
 import AuftragCard from './AuftragCard'
 import TagesvorbereitungButton from './TagesvorbereitungButton'
+import PartnerWerkstattVermittelnButton from './PartnerWerkstattVermittelnButton'
 import { getUrsacheLabel, AUFTRAG_STATUS_LABELS } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
 
@@ -60,6 +61,7 @@ export default async function AuftraegePage({
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
           <div className="flex items-start justify-end gap-3 flex-wrap">
+            <PartnerWerkstattVermittelnButton />
             <TagesvorbereitungButton />
           </div>
           <EmptyState title="Keine Aufträge gefunden." />
@@ -166,6 +168,7 @@ export default async function AuftraegePage({
     <div className="h-full flex flex-col">
       <div className="w-full space-y-6">
         <div className="flex items-start justify-between gap-3 flex-wrap">
+          <PartnerWerkstattVermittelnButton />
           <TagesvorbereitungButton />
         </div>
 
