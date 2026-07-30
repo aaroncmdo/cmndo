@@ -59,6 +59,10 @@ export type ConvertLeadToClaimInput = {
   signatureUrl?: string
   /** Optional: Kunde-User-ID (z.B. nach Signup). Überschreibt lead.kunde_id. */
   kundeUserIdOverride?: string | null
+  /** SV-Vermittlungs-Flow (P4): das Gutachten liegt bereits vor -> Claim entsteht direkt in
+   *  'gutachten-eingegangen' (Direkt-INSERT, umgeht die State-Machine -> kein verfruehtes
+   *  Billing/SLA/QC; die aufgeschobenen Effekte feuert der Onboarding-Complete-Hook, P4 T5). */
+  gutachtenBereitsErstellt?: boolean
 }
 
 export type ConvertLeadToClaimResult =
@@ -439,8 +443,17 @@ export async function convertLeadToClaim(
   // Engine-Transition (sonst Reader-Fallback ?? faelle.status noetig + NULL-Straggler). Value-neutral
   // (== was faelle.status traegt). operative_status fehlt noch in den generierten Claims-Typen
   // (b'' types-regen aufgeschoben) -> Record-Cast wie bei anderen noch-nicht-getypten Spalten.
+  // P4 (Netzwerk): Sofort-Claim des SV-Vermittlungs-Flows -> 'gutachten-eingegangen' (Gutachten
+  // liegt vor, ueberspringt sv-termin/besichtigung/begutachtung). Direkt-INSERT = sanktionierter
+  // Initial-Cursor (Operative-Status-Write-Gate gatet nur .update). Umgeht bewusst die State-
+  // Machine, damit processCaseBilling/completeSla/emitEvent NICHT vor dem Kunden-Onboarding
+  // feuern (K5) — nachgeholt via resumeFunnelAfterOnboarding.
   ;(claimsInsert as Record<string, unknown>).operative_status =
-    input.svIdFromTermin ? 'sv-termin' : 'ersterfassung'
+    input.gutachtenBereitsErstellt
+      ? 'gutachten-eingegangen'
+      : input.svIdFromTermin
+        ? 'sv-termin'
+        : 'ersterfassung'
   // AAR-956 Werkstatt: vermittelnde Werkstatt (QR) -> claims.werkstatt_id (DB-Trigger legt
   // die Provision an). Record-Cast wie operative_status (generierte Types laggen die DB-Spalte).
   ;(claimsInsert as Record<string, unknown>).werkstatt_id =

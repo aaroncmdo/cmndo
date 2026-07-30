@@ -9,6 +9,9 @@ function sig(o: Partial<OperativeSignals> = {}): OperativeSignals {
     istKomplett: false,
     anschlussschreibenVorhanden: false,
     zahlungEingegangen: false,
+    // P4-Gate: Default true = Normalfall (Claim am SA-Signing geboren) — bestehende
+    // Faelle treffen das inerte Verhalten; nur der SV-Sofort-Claim setzt false.
+    kundeBestaetigt: true,
     ...o,
   }
 }
@@ -39,6 +42,15 @@ describe('computeNextOperativePhase', () => {
   // filmcheck_ok -> kein Claim erreichte je filmcheck). KB macht danach saveFilmcheck.
   it('gutachten-eingegangen + komplett -> filmcheck', () => {
     expect(computeNextOperativePhase('gutachten-eingegangen', sig({ istKomplett: true }))).toBe('filmcheck')
+  })
+
+  it('P4: gutachten-eingegangen -> filmcheck NUR wenn kundeBestaetigt (SV-Sofort-Claim bleibt stehen)', () => {
+    expect(
+      computeNextOperativePhase('gutachten-eingegangen', sig({ istKomplett: true, kundeBestaetigt: true })),
+    ).toBe('filmcheck')
+    expect(
+      computeNextOperativePhase('gutachten-eingegangen', sig({ istKomplett: true, kundeBestaetigt: false })),
+    ).toBeNull()
   })
   it('gutachten-eingegangen + nur_gutachter -> null (keine Kanzlei-Strecke)', () => {
     expect(computeNextOperativePhase('gutachten-eingegangen', sig({ istKomplett: false }))).toBeNull()
