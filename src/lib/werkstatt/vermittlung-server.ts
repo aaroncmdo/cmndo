@@ -161,14 +161,15 @@ export async function assignReparaturWerkstatt(
   // erzeugeSelbstzahlerClaim — live verifiziert 30.07.: kasko/selbstzahler-Zuweisungen mit
   // sa!=true existieren, haftpflicht ausnahmslos sa=true) -> dort KEIN Gate, sonst braeche der
   // FlowLink-Werkstatt-Step. Der Claim-Read wird unten im LEAD-CLAIM-SYNC wiederverwendet.
-  let gateClaim: { id: string; sa_unterschrieben?: boolean | null; abrechnungsweg?: string | null } | null = null
+  type GateClaim = { id: string; sa_unterschrieben?: boolean | null; abrechnungsweg?: string | null }
+  let gateClaim: GateClaim | null = null
   {
     const q = admin.from('claims').select('id, sa_unterschrieben, abrechnungsweg')
     const { data } =
       input.target === 'claim'
         ? await q.eq('id', input.id).maybeSingle()
         : await q.eq('lead_id', input.id).maybeSingle()
-    gateClaim = (data as typeof gateClaim) ?? null
+    gateClaim = (data as GateClaim | null) ?? null
   }
   if (gateClaim && gateClaim.abrechnungsweg === 'haftpflicht' && !kundeHatBestaetigt(gateClaim)) {
     return { ok: false, error: 'Der Kunde hat den Auftrag noch nicht bestätigt.' }

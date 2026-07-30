@@ -704,6 +704,22 @@ export async function signSAandCreateFall(
     aktiverTerminId = existingTermin?.id ?? null
   }
 
+  // P4 (Netzwerk): sign-into-existing-claim. Ist der Lead bereits in einen Claim konvertiert
+  // (SV-Vermittlungs-Sofort-Claim, vermittlePartnerWerkstatt), UPDATED die SA den bestehenden
+  // Claim (sa_unterschrieben/onboarding_complete/abtretung_pdf + resume der aufgeschobenen
+  // Funnel-Effekte) — convertLeadToClaim wuerde die Signatur sonst idempotent STILL verwerfen.
+  // Der uebrige Flow (Termin-Upgrade/WA/Account) laeuft danach unveraendert weiter; der
+  // convert-Call unten liefert idempotent dieselben Ids (kein Doppel-Claim).
+  if (lead.konvertiert_zu_claim_id && lead.konvertiert_zu_fall_id) {
+    const { applySAToExistingClaim } = await import('@/lib/faelle/apply-sa-to-existing-claim')
+    const applied = await applySAToExistingClaim(admin, {
+      claimId: lead.konvertiert_zu_claim_id as string,
+      fallId: lead.konvertiert_zu_fall_id as string,
+      signatureUrl,
+    })
+    if (!applied.ok) return { ok: false, error: `SA-Update fehlgeschlagen: ${applied.error}` }
+  }
+
   // 3. CMM-3: Lead → Claim direkt konvertieren. convertLeadToClaim macht
   // claims insert + claim_parties + claim_vehicle_involvements + faelle
   // (vollständig, bis Phase 6 frontend-relevant) + leads-Status auf
