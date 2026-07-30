@@ -36,7 +36,14 @@ export async function callForProposals<T>(input: CallForProposalsInput<T>): Prom
     res = await client.messages.create({
       model: input.model,
       max_tokens: input.maxTokens ?? 1024,
-      system: input.system,
+      // Prompt-Caching: cache_control auf dem System-Block cached den stabilen
+      // Prefix tools + system mit (Render-Reihenfolge tools -> system -> messages,
+      // Prefix-Match bis zum Breakpoint). Der volatile userContent steht danach,
+      // der Prefix ist ueber Calls hinweg byte-identisch -> Cache-Read statt Full-
+      // Price ab dem 2. Call. Analog zu streamForProposals, das cache_control-
+      // Bloecke schon durchreicht. Der String-Input bleibt die API (Caller
+      // uebergeben system: string) — das Wrappen ist eine reine Kosten-Optimierung.
+      system: [{ type: 'text', text: input.system, cache_control: { type: 'ephemeral' } }],
       tools: input.tools,
       messages: [{ role: 'user', content: input.userContent }],
     })
