@@ -480,12 +480,26 @@ export default async function GutachterFallPage({
             .filter((n): n is string => !!n),
         }
       }
+      // Bei laufender Empfehlung braucht die Card den Finder nicht -> Query sparen.
+      let finderWerkstaetten: WerkstattFinderRow[] = []
+      if (!offeneEmpfehlung) {
+        // P2-T6 (Netzwerk): Owner = der Session-SV, aber nur wenn er zahlender Netzwerkpartner
+        // ist (Gate am SV, Epic §1). sv.id = sachverstaendige.id (Abo-Praedikat); user.id =
+        // profiles.id des SV (Graph-Knoten). Free-SV -> null -> Partition-No-op.
+        const { istZahlenderNetzwerkPartner } = await import('@/lib/netzwerk/entitlement')
+        const svOwnerProfilId = (await istZahlenderNetzwerkPartner(admin, (sv as { id: string }).id))
+          ? user.id
+          : null
+        finderWerkstaetten = await findWerkstattVorschlaegeFuer({
+          target: 'claim',
+          id: noShowClaimId,
+          nurEchte: true,
+          ownerProfilId: svOwnerProfilId,
+        })
+      }
       werkstattVermittlung = {
         fallId: id,
-        // Bei laufender Empfehlung braucht die Card den Finder nicht -> Query sparen.
-        werkstaetten: offeneEmpfehlung
-          ? []
-          : await findWerkstattVorschlaegeFuer({ target: 'claim', id: noShowClaimId, nurEchte: true }),
+        werkstaetten: finderWerkstaetten,
         offeneEmpfehlung,
       }
     }

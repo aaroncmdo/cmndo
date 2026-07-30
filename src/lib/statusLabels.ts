@@ -236,6 +236,23 @@ export const PROVISION_STATUS_COLORS: Record<string, string> = Object.fromEntrie
   Object.entries(PROVISION_STATUS_SLOT_MAP).map(([k, slot]) => [k, STATUS_SLOT_CLASSES[slot]]),
 )
 
+// ─── partner_provisionen.status (Vermittlungs-Provisionen, unifiziertes Ledger) ─
+// P3 Netzwerk: 'unterdrueckt' = intra-Freundesnetzwerk vermittelt -> keine Einzelprovision
+// (durch das Netzwerkpartner-Abo abgedeckt, Spec 1 §13b). Nutzersichtbar in Werkstatt-Portal
+// (Abrechnungen + Auftrags-Chips) und Admin-Finance-Hub.
+export const PARTNER_PROVISION_STATUS_LABELS: Record<string, string> = {
+  pending: 'Ausstehend',
+  freigegeben: 'Freigegeben',
+  ausgezahlt: 'Ausgezahlt',
+  storniert: 'Storniert',
+  unterdrueckt: 'Netzwerk-intern (nicht vergütet)',
+}
+
+export function getPartnerProvisionStatusLabel(code: string | null | undefined): string {
+  if (!code) return 'offen'
+  return PARTNER_PROVISION_STATUS_LABELS[code] ?? code
+}
+
 // ─── Schadens-Ursache (Fallakte + Routen + Aufträge) ───────────────────────
 // AAR-410: Zentral statt pro Component hartkodiert.
 

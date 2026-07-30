@@ -14,6 +14,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runProvisionsRelease } from '@/lib/provisionen/release-runner'
+import { bestimmeIntraNetzwerkProvisionen } from '@/lib/netzwerk/provisions-suppression'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,9 +24,13 @@ export async function GET(request: Request) {
   }
 
   const now = new Date().toISOString()
-  const result = await runProvisionsRelease(createAdminClient(), {
+  const admin = createAdminClient()
+  const result = await runProvisionsRelease(admin, {
     partnerTypen: ['werkstatt'],
     now,
+    // P3 Netzwerk (Defense-in-Depth): solange der VPS-crontab noch auf diese Legacy-Route zeigt,
+    // muss auch sie das Freundes-Graph-Gate fahren — sonst bypasst der Alt-Cron die Suppression.
+    bestimmeUnterdrueckteProvisionen: (rows) => bestimmeIntraNetzwerkProvisionen(admin, rows),
   })
 
   if (!result.ok) {
@@ -37,6 +42,7 @@ export async function GET(request: Request) {
     checked: result.checked,
     storniert: result.storniert,
     released: result.released,
+    unterdrueckt: result.unterdrueckt,
     timestamp: now,
   })
 }
