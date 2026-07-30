@@ -50,3 +50,19 @@
 **Entscheidung:** **Aaron 29.07.: Option B** — nach VS-Zahlung schließt der Fall NICHT sofort, sondern wartet auf eine echte Schlussabrechnung + 48h-Karenz. Umsetzung (C1c): Cascade-Regel `regulierung/… → abgeschlossen` (bei `zahlungEingegangen`, `autophase-decision.ts:72`) → **`→ zahlung-eingegangen`**; **neue KB-Aktion „Schlussabrechnung erstellt"** setzt `schlussabrechnung_am`; der bestehende 48h-Cron schließt dann `zahlung-eingegangen → abgeschlossen`. EIN Terminal = `abgeschlossen` (`reguliert_vollstaendig` darauf vereinheitlichen). Cron + Gate bleiben.
 
 **Review:** Richtung von Aaron **bestätigt** (29.07.); offenes Design-Detail (was genau die „Schlussabrechnung" ist — Dokument-Typ / KB-Bestätigung / `abrechnungen`-Anbindung) → C1c-Design. Behavior-Change am Kern-Close-Pfad → erst nach B1 bauen.
+
+## 2026-07-30 · P4 (Netzwerk) · Kunden-Bestätigungs-Gate = `sa_unterschrieben`, nicht `onboarding_complete`
+
+**Lücke:** Der SV-Vermittlungs-Sofort-Claim (P4) wird un-onboardet in `gutachten-eingegangen` geboren — die Mid-Funnel-Reader (AutoPhase, case-billing-batch, Werkstatt-Zuweisung, Kanzlei-Handoff) brauchen ein Gate, das ihn blockt, ohne Normalfall-Claims zu stranden.
+
+**Entscheidung:** Gate-Prädikat = **`sa_unterschrieben === true`** (`kundeHatBestaetigt`, `src/lib/faelle/onboarding-gate.ts`). NICHT `onboarding_complete`: ein Normalfall-Claim erreicht `gutachten-eingegangen` legitim mit `onboarding_complete=false` (Portal-Wizard aufgeschoben) — ein Gate darauf würde die Regulierung stranden. Jeder Nicht-SV-Flow-Claim wird `sa_unterschrieben=true` geboren (Claim entsteht am SA-Signing) → das Gate ist dort inert; nur der SV-Sofort-Claim (geboren `false`) wird geblockt. Der sign-into-existing-Pfad setzt BEIDE Flags.
+
+**Review:** offen (Aaron) — Plan `docs/superpowers/plans/2026-07-28-netzwerk-p4-sv-vermittlungs-flow.md` Global Constraints.
+
+## 2026-07-30 · P4 (Netzwerk) · SV-Flow-Reparatur = Nebenschauplatz auf `reparatur_vermittlung_status`-Achse (J4 Offene Frage 3)
+
+**Lücke:** J4 ließ offen, ob die Haftpflicht-Reparatur des SV-Vermittlungs-Flows auf der `operative_status`-`reparatur-*`-Lane läuft.
+
+**Entscheidung:** SV-Flow-Claim = Abrechnungsweg `haftpflicht`, `service_typ='komplett'` → die SV-/Regulierungs-Achse läuft regulär (J1). Reparatur = **Nebenschauplatz** auf `reparatur_vermittlung_status`/`reparatur_termine` via `assignReparaturWerkstatt` (abrechnungsweg-agnostisch); die `operative_status`-`reparatur-*`-Lane bleibt reduced-repair-only (verifiziert: `advanceReparaturCursorTo` ist auf `abrechnungsweg ∈ {selbstzahler, kasko}` gegatet → bei Haftpflicht No-op).
+
+**Review:** offen (Aaron) — Plan P4, Abschnitt „Invariante & Reparatur-Achse".

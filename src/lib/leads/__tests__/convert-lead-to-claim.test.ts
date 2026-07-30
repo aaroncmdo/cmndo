@@ -656,3 +656,42 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
   })
 })
+
+// ─── P4 (Netzwerk): SV-Vermittlungs-Sofort-Claim ────────────────────────────
+describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', () => {
+  it('SV-Vermittlung: gutachtenBereitsErstellt -> operative_status=gutachten-eingegangen, sv_id gesetzt, onboarding_complete ungesetzt', async () => {
+    primeResponses([
+      { data: { id: 'lead-sv', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'haftpflicht' } }, // 1 leads select
+      { data: [] },                                                // 2 profiles select (KB Round-Robin)
+      { data: { id: 'claim-sv', claim_nummer: 'CLM-SV' } },        // 3 claims insert
+      { data: { id: 'person-sv' } },                               // 4 personen insert
+      { data: null },                                              // 5 claim_parties insert
+      { data: null },                                              // 6 faelle_claim_bridge upsert
+      { data: null },                                              // 7 leads update
+    ])
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-sv', svIdFromTermin: 'sv-1', gutachtenBereitsErstellt: true })
+    expect(r.ok).toBe(true)
+    const p = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(p.operative_status).toBe('gutachten-eingegangen')
+    expect(p.sv_id).toBe('sv-1')
+    expect(p.onboarding_complete).toBeUndefined() // Haftpflicht -> kein Reduced-Repair-Zweig
+  })
+
+  it('ohne gutachtenBereitsErstellt: Initial-State unveraendert (sv-termin bei svIdFromTermin)', async () => {
+    primeResponses([
+      { data: { id: 'lead-alt', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
+      { data: [] },
+      { data: { id: 'claim-alt', claim_nummer: 'CLM-ALT' } },
+      { data: { id: 'person-alt' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-alt', svIdFromTermin: 'sv-1' })
+    expect(r.ok).toBe(true)
+    const p = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(p.operative_status).toBe('sv-termin')
+  })
+})
