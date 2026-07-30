@@ -406,6 +406,28 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament B1: die Journey-Smokes (J1-deep + J4) ZUERST + isoliert fahren = der eigentliche
+      # gruene B1-Gate-Nachweis. Grund: die volle Suite ("Run E2E Tests" unten, 157 Tests, 1 worker)
+      # laeuft strukturell ueber das 20-min-Job-Cap -> Job wird gecancelt, BEVOR die (spaet
+      # einsortierten) Journey-Smokes drankommen (beobachtet 29.07.). Dieser fokussierte Step laeuft
+      # in Minuten und liefert grün/rot fuer J1+J4 verlaesslich. reparatur-weg-Seed steht (Step davor).
+      - name: Fundament B1 Journey-Smokes (J1-deep + J4)
+        run: npx playwright test golden-path-deep-prod reparatur-weg-e2e-smoke reparatur-weg-kva-betrag-pflicht reparatur-weg-kva-ablehnung-loop --project=chromium --reporter=line
+        env:
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          RUN_GOLDEN_PATH_DEEP: '1'
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+          TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
+          TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
+          TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
+          TEST_SV_EMAIL: ${{ secrets.TEST_SV_EMAIL }}
+          TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+          TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
