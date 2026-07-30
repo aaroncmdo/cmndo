@@ -704,20 +704,30 @@ export async function signSAandCreateFall(
     aktiverTerminId = existingTermin?.id ?? null
   }
 
-  // P4 (Netzwerk): sign-into-existing-claim. Ist der Lead bereits in einen Claim konvertiert
-  // (SV-Vermittlungs-Sofort-Claim, vermittlePartnerWerkstatt), UPDATED die SA den bestehenden
-  // Claim (sa_unterschrieben/onboarding_complete/abtretung_pdf + resume der aufgeschobenen
-  // Funnel-Effekte) — convertLeadToClaim wuerde die Signatur sonst idempotent STILL verwerfen.
-  // Der uebrige Flow (Termin-Upgrade/WA/Account) laeuft danach unveraendert weiter; der
-  // convert-Call unten liefert idempotent dieselben Ids (kein Doppel-Claim).
+  // P4 (Netzwerk): sign-into-existing-claim — SCOPE: NUR der SV-Vermittlungs-Sofort-Claim
+  // (geboren operative_status='gutachten-eingegangen' + un-signiert). Er braucht das UPDATE
+  // (abtretung_pdf + onboarding_complete + resume der aufgeschobenen Funnel-Effekte) —
+  // convertLeadToClaim verwuerfe die signatureUrl idempotent still, und der generische
+  // claimsSaUpdate unten setzt nur sa_unterschrieben(_am). NICHT fuer Kasko/Selbstzahler-
+  // Partial-Claims (ersterfassung, Quali-Step): deren Onboarding kommt regulaer NACH der SA
+  // (Portal-Wizard) — onboarding_complete=true hier wuerde ihn ueberspringen. Der convert-Call
+  // unten liefert idempotent dieselben Ids (kein Doppel-Claim).
   if (lead.konvertiert_zu_claim_id && lead.konvertiert_zu_fall_id) {
-    const { applySAToExistingClaim } = await import('@/lib/faelle/apply-sa-to-existing-claim')
-    const applied = await applySAToExistingClaim(admin, {
-      claimId: lead.konvertiert_zu_claim_id as string,
-      fallId: lead.konvertiert_zu_fall_id as string,
-      signatureUrl,
-    })
-    if (!applied.ok) return { ok: false, error: `SA-Update fehlgeschlagen: ${applied.error}` }
+    const { data: existingClaim } = await admin
+      .from('claims')
+      .select('operative_status, sa_unterschrieben')
+      .eq('id', lead.konvertiert_zu_claim_id as string)
+      .maybeSingle()
+    const ec = existingClaim as { operative_status?: string | null; sa_unterschrieben?: boolean | null } | null
+    if (ec && ec.operative_status === 'gutachten-eingegangen' && ec.sa_unterschrieben !== true) {
+      const { applySAToExistingClaim } = await import('@/lib/faelle/apply-sa-to-existing-claim')
+      const applied = await applySAToExistingClaim(admin, {
+        claimId: lead.konvertiert_zu_claim_id as string,
+        fallId: lead.konvertiert_zu_fall_id as string,
+        signatureUrl,
+      })
+      if (!applied.ok) return { ok: false, error: `SA-Update fehlgeschlagen: ${applied.error}` }
+    }
   }
 
   // 3. CMM-3: Lead → Claim direkt konvertieren. convertLeadToClaim macht
