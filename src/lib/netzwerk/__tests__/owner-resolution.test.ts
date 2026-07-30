@@ -1,12 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { resolveVermittlerOwnerProfil, resolveProvisionPartnerProfil, EXTERNE_PARTNER_TYPEN } from '../owner-resolution'
 
-// Minimaler chainable Fake: from(t).select().eq()[.eq().limit()].maybeSingle() -> { data, error }
+// Minimaler chainable Fake: from(t).select().eq()[.eq().order().limit()].maybeSingle() -> { data, error }
 function fakeDb(rowByTable: Record<string, unknown>) {
   const make = (table: string) => {
     const c: any = {}
     c.select = () => c
     c.eq = () => c
+    c.order = () => c
     c.limit = () => c
     c.maybeSingle = () => Promise.resolve({ data: rowByTable[table] ?? null, error: null })
     return c
