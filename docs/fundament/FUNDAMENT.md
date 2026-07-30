@@ -64,17 +64,17 @@ Pflege-Regeln: claimen vor Arbeitsbeginn (§0.1 Schritt 4); Tranchen-Splits hier
 
 | Paket | Titel | braucht | Status | PR |
 |---|---|---|---|---|
-| A1 | Journey-Bibel (J1–J10) | — | destilliert done (28.07., alle 10, `docs/fundament/journeys/`); Aaron-Review offen | #4828, #4830, #4832, #4837 |
-| A2 | State-Machine-Tabelle (Ist + Soll) | — | done (28.07., `docs/fundament/state-machine.md`) | #4819 |
-| A3 | Notification-Matrix (Ist + Lücken) | — | done (28.07., `docs/fundament/notification-matrix.md`) | #4823 |
-| A4 | Entry-Point-Register | — | Kern done (28.07., `docs/fundament/entry-points.md`); FlowLink-Tranche + DECISIONS in PR | #4816, #4818 |
-| B1 | Journey-Smokes (Oracle) | A1 (reviewte Journeys) | offen | — |
-| B2 | CI-Gate + Pending-Backlog | B1 | offen | — |
-| C1 | Ein Status-Writer: transitionClaim + Event-Log | A2, B1 | offen | — |
-| C2 | Ein Intake: createCase | A4, B1 | offen | — |
-| C3 | Notification-Outbox | A3, C1 | offen | — |
-| C4 | Eine Akte (rollen-parametrisierter Kern) | B1 | offen | — |
-| C5 | Zugriffs-Doktrin + View/RPC-Konsolidierung | A1 | offen | — |
+| A1 | Journey-Bibel (J1–J10) | — | ✅ **done** — alle 10 destilliert + Aaron-reviewt (29.07., `docs/fundament/journeys/`) | #4828/#4830/#4832/#4837 |
+| A2 | State-Machine-Tabelle (Ist + Soll) | — | ✅ **done** (`docs/fundament/state-machine.md`) | #4819 |
+| A3 | Notification-Matrix (Ist + Lücken) | — | ✅ **done** (`docs/fundament/notification-matrix.md`) | #4823 |
+| A4 | Entry-Point-Register | — | ✅ **done** (`entry-points.md` + `entry-points-flowlink.md`) | #4816/#4818 |
+| B1 | Journey-Smokes (Oracle) | A1 | ✅ **done** — Oracle-Matrix `journey-smokes.md` + Anchoring der bestehenden `golden-path-*`/`reparatur-weg-*`-Flows-Specs + J1/J4-Soll-Assert; Grün-Nachweis via **B2/CI** | #4846/#4856 |
+| B2 | CI-Gate + Pending-Backlog | B1 | 🔴 **in Arbeit / KRITISCHER PFAD** (8c6de199, `kitta/fundament-b2-journey-smoke-ci`) — der Journey-CI-Grün-Job ist **das Gate für die GESAMTE C-Code-Phase**; lokal nicht lauffähig (0 node_modules überall) → nur CI | — |
+| C1 | Ein Status-Writer: transitionClaim + Event-Log | A2, B1 | 🟢 **Plan done** (`c1-transition-claim-plan.md`: Ist-Erhebung + C1a-Tranchen); **Code gated auf B2-Grün** | #4845 |
+| C2 | Ein Intake: createCase | A4, B1 | 🟢 **Plan done** (`c2-create-case-plan.md`); Code gated auf B2 | — |
+| C3 | Notification-Outbox | A3, C1 | 🟢 **Plan done** (`c3-notification-outbox-plan.md`); Code gated auf C1 | — |
+| C4 | Eine Akte (rollen-parametrisierter Kern) | B1 | 🟢 **Plan done** (`c4-eine-akte-plan.md`); Code gated auf B2 | #4875 |
+| C5 | Zugriffs-Doktrin + View/RPC-Konsolidierung | A1 | 🟢 **Doktrin done** (`zugriffs-doktrin.md`) + Server-Achse erhoben; offen: 17-Read-Surface-Migration + AGENTS.md-Verweis | #4860 |
 | D1 | Feature-DoD umstellen (AGENTS.md) | B2 | offen | — |
 | D2 | Lebende Spec (Pflege-Rhythmus) | D1 | offen | — |
 
