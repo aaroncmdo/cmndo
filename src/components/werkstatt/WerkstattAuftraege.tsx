@@ -27,6 +27,7 @@ import {
   kvaStatus,
 } from '@/lib/werkstatt/werkstatt-auftrag-segment'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { getPartnerProvisionStatusLabel } from '@/lib/statusLabels'
 
 import {
   Table,
@@ -128,7 +129,7 @@ function VermittlungZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => 
         {a.provision_betrag_netto != null ? (
           <div className="flex flex-col items-start gap-1">
             <span>{EUR.format(a.provision_betrag_netto)}</span>
-            <StatusBadge tone="neutral" size="xs">{a.provision_status ?? 'offen'}</StatusBadge>
+            <StatusBadge tone="neutral" size="xs">{getPartnerProvisionStatusLabel(a.provision_status)}</StatusBadge>
           </div>
         ) : (
           '–'

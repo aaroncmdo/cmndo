@@ -60,18 +60,68 @@ vi.mock('@/app/admin/abrechnungen/actions', () => ({
   retryEinzug: vi.fn(),
   stornoAbrechnung: vi.fn(),
 }))
+vi.mock('@/lib/netzwerk/provisions-suppression', () => ({
+  bestimmeIntraNetzwerkProvisionen: vi.fn(async () => new Set<string>()),
+}))
 
 import {
+  gebeProvisionFrei,
   getPartnerGutschriftDownloadUrl,
   korrigierePartnerGutschriftAction,
   getKorrekturVorschauAction,
 } from './partner-billing-actions'
 import { korrigierePartnerGutschrift } from './partner-gutschrift-korrektur'
+import { freigebenProvision } from './provision-status'
+import { bestimmeIntraNetzwerkProvisionen } from '@/lib/netzwerk/provisions-suppression'
 
 beforeEach(() => {
   eqCalls.length = 0
   mockRow = { pdf_storage_path: 'partner-gutschriften/2026/x.pdf' }
   vi.mocked(korrigierePartnerGutschrift).mockClear()
+  vi.mocked(freigebenProvision).mockClear().mockResolvedValue({ ok: true })
+  vi.mocked(bestimmeIntraNetzwerkProvisionen).mockClear().mockResolvedValue(new Set())
+})
+
+// P3 Netzwerk (Review-Fund): der manuelle Admin-Freigeben-Pfad darf die Freundes-Graph-
+// Suppression nicht uninformiert umgehen — intra-Netzwerk wird abgelehnt statt freigegeben.
+describe('gebeProvisionFrei — Netzwerk-Gate', () => {
+  it('intra-Netzwerk-Row -> {ok:false} mit Netzwerk-Meldung, KEIN freigebenProvision-Call', async () => {
+    mockRow = { id: 'p1', partner_typ: 'werkstatt', partner_id: 'w1', claim_id: 'c1' }
+    vi.mocked(bestimmeIntraNetzwerkProvisionen).mockResolvedValueOnce(new Set(['p1']))
+
+    const r = await gebeProvisionFrei('partner_provisionen', 'p1')
+
+    expect(r.ok).toBe(false)
+    expect(r.error).toContain('Netzwerk-intern')
+    expect(freigebenProvision).not.toHaveBeenCalled()
+  })
+
+  it('cross-network-Row -> delegiert an freigebenProvision', async () => {
+    mockRow = { id: 'p1', partner_typ: 'werkstatt', partner_id: 'w1', claim_id: 'c1' }
+
+    const r = await gebeProvisionFrei('partner_provisionen', 'p1')
+
+    expect(r).toEqual({ ok: true })
+    expect(freigebenProvision).toHaveBeenCalledTimes(1)
+  })
+
+  it('partner_staffel_bonus -> kein Gate (kein Suppression-Scope), delegiert direkt', async () => {
+    const r = await gebeProvisionFrei('partner_staffel_bonus', 'b1')
+
+    expect(r).toEqual({ ok: true })
+    expect(bestimmeIntraNetzwerkProvisionen).not.toHaveBeenCalled()
+    expect(freigebenProvision).toHaveBeenCalledTimes(1)
+  })
+
+  it('Gate wirft -> fail-open: Admin-Entscheidung zaehlt, delegiert', async () => {
+    mockRow = { id: 'p1', partner_typ: 'werkstatt', partner_id: 'w1', claim_id: 'c1' }
+    vi.mocked(bestimmeIntraNetzwerkProvisionen).mockRejectedValueOnce(new Error('graph down'))
+
+    const r = await gebeProvisionFrei('partner_provisionen', 'p1')
+
+    expect(r).toEqual({ ok: true })
+    expect(freigebenProvision).toHaveBeenCalledTimes(1)
+  })
 })
 
 describe('getPartnerGutschriftDownloadUrl', () => {

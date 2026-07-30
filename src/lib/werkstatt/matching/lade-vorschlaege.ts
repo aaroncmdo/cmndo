@@ -5,6 +5,8 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import { filterEchteWerkstaetten } from '@/lib/werkstatt/finder'
+import { applyNetzwerkPraeferenz } from '@/lib/netzwerk/apply-netzwerk-praeferenz'
+import { ladeFreundKandidatIds } from '@/lib/netzwerk/freunde'
 import {
   rankeWerkstattVorschlaege,
   type MatchingKontext,
@@ -66,6 +68,12 @@ export async function ladeWerkstattVorschlaege(input: {
    * korrekt fuer alle Kunden-Surfaces); null = ungecappt (nur interne Tools).
    */
   maxUmkreisKm?: number | null
+  /**
+   * P2-T6 (Netzwerk): Owner-Knoten (profiles.id) fuer die relationale "Dein Netzwerk"-Partition.
+   * null/undefined = No-op (exakt dieselbe Rangfolge wie bisher). K12: die Partition laeuft als
+   * ALLERLETZTER Schritt nach dem Ranking, K10: EIN Freund-Batch pro Aufruf.
+   */
+  ownerProfilId?: string | null
 }): Promise<WerkstattVorschlag[]> {
   const admin = createAdminClient()
 
@@ -93,7 +101,18 @@ export async function ladeWerkstattVorschlaege(input: {
     maxUmkreisKm: input.maxUmkreisKm,
   }
 
-  return rankeWerkstattVorschlaege(kandidaten, kontext, input.limit)
+  const vorschlaege = rankeWerkstattVorschlaege(kandidaten, kontext, input.limit)
+  if (!input.ownerProfilId) return vorschlaege
+
+  // K10: 1 Batch — Freund-Werkstatt-Ids (werkstaetten.id) des Owners. K12: Partition als
+  // allerletzter Schritt, stabile Reihenfolge innerhalb beider Gruppen bleibt erhalten.
+  const freundIds = await ladeFreundKandidatIds(admin, input.ownerProfilId, 'werkstatt')
+  // WerkstattVorschlag.passt = Engine-Qualifikation -> als `qualifiziert` durchreichen
+  // (nur qualifizierte Freunde floaten — Engine-Fit schlaegt Freundschaft, Design §5.2).
+  return applyNetzwerkPraeferenz(
+    vorschlaege.map((v) => ({ ...v, qualifiziert: v.passt })),
+    freundIds,
+  )
 }
 
 /**
@@ -107,7 +126,7 @@ export async function ladeWerkstattVorschlaege(input: {
  * Reihenfolge: fahrzeug_standort -> besichtigungsort -> unfallort (dort steht das Auto evtl. noch).
  */
 export async function findWerkstattVorschlaegeFuer(
-  target: { target: 'lead' | 'claim'; id: string; nurEchte?: boolean },
+  target: { target: 'lead' | 'claim'; id: string; nurEchte?: boolean; ownerProfilId?: string | null },
   limit?: number,
 ): Promise<WerkstattVorschlag[]> {
   const admin = createAdminClient()
@@ -175,6 +194,7 @@ export async function findWerkstattVorschlaegeFuer(
     anker,
     limit,
     nurEchte: target.nurEchte,
+    ownerProfilId: target.ownerProfilId,
   })
 }
 
