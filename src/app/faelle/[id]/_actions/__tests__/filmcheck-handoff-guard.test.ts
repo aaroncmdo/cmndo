@@ -14,6 +14,8 @@ let state: {
   claimId: string | null
   serviceTyp: string
   opStatus: string
+  /** P4-Gate: Default true = Normalfall (Claim am SA-Signing geboren). */
+  saUnterschrieben: boolean
 }
 const transitionMock = vi.fn()
 const resolveMock = vi.fn()
@@ -22,7 +24,7 @@ function resolveRow(table: string, sel: string) {
   if (table === 'profiles' && sel.includes('rolle')) return { rolle: state.rolle }
   if (table === 'auftraege') return { id: 'auftrag-1' }
   if (table === 'claims' && sel.includes('service_typ')) {
-    return { service_typ: state.serviceTyp, operative_status: state.opStatus }
+    return { service_typ: state.serviceTyp, operative_status: state.opStatus, sa_unterschrieben: state.saUnterschrieben }
   }
   if (table === 'claims' && sel.includes('sv_id')) return { sv_id: null, claim_nummer: 'CLM-1' }
   if (table === 'claims') return { claim_nummer: 'CLM-1' }
@@ -87,6 +89,7 @@ beforeEach(() => {
     claimId: 'claim-1',
     serviceTyp: 'komplett',
     opStatus: 'filmcheck',
+    saUnterschrieben: true,
   }
   transitionMock.mockReset()
   resolveMock.mockReset().mockImplementation(async () => state.claimId)
@@ -129,6 +132,16 @@ describe('saveFilmcheck — Kanzlei-Handoff nur aus gueltigem Filmcheck-Status',
     const res = await saveFilmcheck('fall-4', 'ok')
 
     expect(res.success).toBe(true)
+    expect(transitionMock).not.toHaveBeenCalled()
+  })
+
+  it('P4: sa_unterschrieben=false (SV-Sofort-Claim) -> Handoff blockiert, KEIN Transition', async () => {
+    state.opStatus = 'filmcheck'
+    state.saUnterschrieben = false
+    const res = await saveFilmcheck('fall-5', 'ok')
+
+    expect(res.success).toBe(false)
+    expect(res.error).toMatch(/bestätigt/)
     expect(transitionMock).not.toHaveBeenCalled()
   })
 })
