@@ -65,8 +65,12 @@ function buildText(vorname: string | null, url: string): string {
   ].join('\n')
 }
 
-async function sendeInitialLink(opts: {
-  anfrageId: string
+// P4 (Netzwerk): exportiert + anfrageId optional — der SV-Vermittlungs-Flow
+// (vermittlePartnerWerkstatt) reused dieselbe Versand-Kaskade (WA > SMS > Email) ohne
+// gfa-Anfrage. Ohne anfrageId entfaellt der WA-Verfuegbarkeits-Precheck (= der robustere
+// Dispatch/Makler-Pfad, s. Haertungs-Kommentar unten). Verhalten mit anfrageId unveraendert.
+export async function sendeInitialLink(opts: {
+  anfrageId?: string | null
   leadId: string
   telefon: string | null
   email: string | null
@@ -77,12 +81,16 @@ async function sendeInitialLink(opts: {
   // WhatsApp bevorzugt — nur wenn laut 'gfa'-Cache/Lookup verfügbar.
   if (telefon && telefon.trim().length >= 6) {
     try {
-      const wa = await checkAndCacheAvailability('gfa', anfrageId, telefon)
+      let waVerfuegbar: boolean | null = null
+      if (anfrageId) {
+        const wa = await checkAndCacheAvailability('gfa', anfrageId, telefon)
+        waVerfuegbar = wa.verfuegbar
+      }
       // Haertung (Aaron 27.07., FlowLink-Audit): WA auch versuchen, wenn die Verfuegbarkeit
       // UNBEKANNT ist (verfuegbar === null, z.B. Baileys-/check down/timeout) — nur bei explizitem
       // false ueberspringen. Sonst degradierte der Flowlink still auf SMS/Email, sobald der Check
       // nicht antwortete (der Dispatch/Makler-Pfad sendet ganz ohne Precheck = robuster).
-      if (wa.verfuegbar !== false) {
+      if (waVerfuegbar !== false) {
         const sent = await sendWhatsAppText(telefon, buildText(vorname, url))
         if (sent.ok) return 'whatsapp'
       }
