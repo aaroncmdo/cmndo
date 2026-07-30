@@ -704,15 +704,23 @@ export async function signSAandCreateFall(
     aktiverTerminId = existingTermin?.id ?? null
   }
 
-  // P4 (Netzwerk): sign-into-existing-claim — SCOPE: NUR der SV-Vermittlungs-Sofort-Claim
-  // (geboren operative_status='gutachten-eingegangen' + un-signiert). Er braucht das UPDATE
-  // (abtretung_pdf + onboarding_complete + resume der aufgeschobenen Funnel-Effekte) —
+  // P4 (Netzwerk): sign-into-existing-claim — SCOPE: NUR der SV-Vermittlungs-Sofort-Claim.
+  // Doppelt gescoped (Review-Fund MEDIUM-1): (1) am URSPRUNG lead.source_channel=
+  // 'gutachter-vermittlung' (exklusiv von vermittlePartnerWerkstatt gesetzt — dispatch/admin-
+  // erstellte komplett-Claims werden ebenfalls sa=false geboren und duerfen NICHT hierher),
+  // (2) am Zustand operative_status='gutachten-eingegangen' + un-signiert. Er braucht das
+  // UPDATE (abtretung_pdf + onboarding_complete + resume der aufgeschobenen Funnel-Effekte) —
   // convertLeadToClaim verwuerfe die signatureUrl idempotent still, und der generische
   // claimsSaUpdate unten setzt nur sa_unterschrieben(_am). NICHT fuer Kasko/Selbstzahler-
   // Partial-Claims (ersterfassung, Quali-Step): deren Onboarding kommt regulaer NACH der SA
   // (Portal-Wizard) — onboarding_complete=true hier wuerde ihn ueberspringen. Der convert-Call
   // unten liefert idempotent dieselben Ids (kein Doppel-Claim).
-  if (lead.konvertiert_zu_claim_id && lead.konvertiert_zu_fall_id) {
+  let istVermittlungsSignIn = false
+  if (
+    lead.konvertiert_zu_claim_id &&
+    lead.konvertiert_zu_fall_id &&
+    lead.source_channel === 'gutachter-vermittlung'
+  ) {
     const { data: existingClaim } = await admin
       .from('claims')
       .select('operative_status, sa_unterschrieben')
@@ -727,6 +735,7 @@ export async function signSAandCreateFall(
         signatureUrl,
       })
       if (!applied.ok) return { ok: false, error: `SA-Update fehlgeschlagen: ${applied.error}` }
+      istVermittlungsSignIn = true
     }
   }
 
@@ -1466,19 +1475,26 @@ export async function signSAandCreateFall(
 
   // 13. AAR-85: SLA-Tracking starten (Prozessstart = SA unterschrieben)
   // Simultan-Trigger: alle Pipelines parallel via Promise.allSettled
+  // P4 (Review-Fund MEDIUM-2): fuer den Vermittlungs-sign-in KEINE Fresh-Fall-SLAs —
+  // der Sofort-Claim steht bereits bei filmcheck mit SV + fertigem Gutachten; die
+  // Zuweisungs-/Termin-/Besichtigungs-SLAs wuerden sofort breachen (spurious KB-Reminder).
   const slaPromises: Promise<unknown>[] = []
-  try {
-    const { startSla } = await import('@/lib/sla/tracker')
-    if (!svIdFromTermin) slaPromises.push(startSla(fall.id, 'gutachter_zuweisung'))
-    slaPromises.push(startSla(fall.id, 'termin_bestaetigung'))
-    slaPromises.push(startSla(fall.id, 'besichtigung'))
-  } catch (err) { console.error('[AAR-85] SLA-Start Fehler:', err) }
+  if (!istVermittlungsSignIn) {
+    try {
+      const { startSla } = await import('@/lib/sla/tracker')
+      if (!svIdFromTermin) slaPromises.push(startSla(fall.id, 'gutachter_zuweisung'))
+      slaPromises.push(startSla(fall.id, 'termin_bestaetigung'))
+      slaPromises.push(startSla(fall.id, 'besichtigung'))
+    } catch (err) { console.error('[AAR-85] SLA-Start Fehler:', err) }
+  }
 
   // Dispatch-Matching (best SV finden) parallel — falls noch kein SV
   // AAR-663: fahrzeug_standort_lat/lng aus Self-Service-Schritt 1 priorisieren.
+  // P4: nicht fuer den Vermittlungs-sign-in — der Claim HAT seinen SV (den Vermittler);
+  // findBestSV waere ein nutzloser Lauf (der sv_id-Guard unten verhindert das Overwrite eh).
   const fallLat = (lead.besichtigungsort_lat ?? lead.fahrzeug_standort_lat ?? lead.unfallort_lat ?? lead.kunde_lat) as number | null
   const fallLng = (lead.besichtigungsort_lng ?? lead.fahrzeug_standort_lng ?? lead.unfallort_lng ?? lead.kunde_lng) as number | null
-  if (!svIdFromTermin && fallLat != null && fallLng != null) {
+  if (!istVermittlungsSignIn && !svIdFromTermin && fallLat != null && fallLng != null) {
     slaPromises.push(
       (async () => {
         try {
