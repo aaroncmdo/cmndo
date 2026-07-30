@@ -90,9 +90,12 @@ async function clean() {
   // stamp); das Summary allein kennt nur den letzten Lauf.
   const { data: profs } = await db.from('profiles').select('id').like('email', 'throwaway-%repweg-%@claimondo.test')
   const uids = (profs ?? []).map((p) => p.id)
-  const zwei = new Date(Date.now() - 2 * 3600e3).toISOString()
   for (const uid of uids) {
-    await db.from('mitteilungen').delete().eq('empfaenger_id', uid).gt('created_at', zwei)
+    // ALLE mitteilungen des Test-Kontos loeschen (auf empfaenger_id=uid gescopt = reines throwaway-
+    // Konto, alle mitteilungen sind Test-Daten). KEIN <2h-Zeitfilter mehr: der liess bei einem
+    // Cleanup >2h nach dem Seed die alten mitteilungen stehen -> FK-Block auf profiles.delete ->
+    // verwaistes Test-Profil blieb auf prod liegen (Befund 30.07., manuell geraeumt).
+    await db.from('mitteilungen').delete().eq('empfaenger_id', uid)
     await db.from('werkstaetten').delete().eq('user_id', uid)
     await db.from('profiles').delete().eq('id', uid)
     await db.auth.admin.deleteUser(uid).catch(() => {})
