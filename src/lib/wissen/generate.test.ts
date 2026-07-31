@@ -3,7 +3,7 @@ import { buildSystemPrompt, buildB2BSystemPrompt, parseDraft } from './generate'
 
 describe('buildSystemPrompt', () => {
   it('enthaelt die Legal-Guardrails', () => {
-    const p = buildSystemPrompt({ titel: 'Nutzungsausfall' })
+    const p = buildSystemPrompt()
     expect(p).toMatch(/RDG|Handlungsempfehlung/)
     expect(p).toMatch(/BGH/)
     expect(p).toMatch(/absolut sicher|erfundenes/)
@@ -84,14 +84,14 @@ describe('parseDraft (2-Teile-Format: Metadaten-JSON + ===BODY=== + Markdown)', 
 
 describe('buildB2BSystemPrompt', () => {
   it('enthaelt Sachverstaendige, Tag-Liste und Quelle-Hinweis', () => {
-    const p = buildB2BSystemPrompt({ titel: 'Testthema' })
+    const p = buildB2BSystemPrompt()
     expect(p).toContain('Sachverständige')
     expect(p).toContain('Recht & Urteile')
     expect(p).toContain('Quelle:')
   })
 
   it('enthaelt Legal-Safeguards wie buildSystemPrompt', () => {
-    const p = buildB2BSystemPrompt({ titel: 'Testthema' })
+    const p = buildB2BSystemPrompt()
     expect(p).toMatch(/RDG|Handlungsempfehlung/)
     expect(p).toMatch(/BGH/)
     expect(p).toMatch(/absolut sicher|erfundenes/)
