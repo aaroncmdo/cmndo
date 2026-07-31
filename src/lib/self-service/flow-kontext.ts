@@ -19,6 +19,8 @@ export type LeadFuerKontext = {
   fahrzeug_standort_adresse?: string | null
   unfallort?: string | null
   disqualifiziert?: boolean | null
+  // P4: 'gutachter-vermittlung' = SV-Sofort-Claim, Gutachten existiert bereits.
+  source_channel?: string | null
   // Rohspalten fuer erhebt_felder (echte Erhebung, NICHT die *_effektiv-Fallback-Kette).
   kennzeichen?: string | null
   gegner_versicherung?: string | null
@@ -43,6 +45,12 @@ export function bauFlowKontext(lead: LeadFuerKontext, svHatTermin: boolean): Flo
     unfallhergang: lead.unfallhergang ?? null,
     fahrzeugschaden_beschreibung: lead.fahrzeugschaden_beschreibung ?? null,
     disqualifiziert: lead.disqualifiziert ?? null,
+
+    // P4 UX-Follow-up (Smoke-MINOR 31.07., PR #4897): Vermittlungs-Kunden (Gutachten existiert
+    // bereits) brauchen keine Logistik-Steps (Besichtigungsort/Termin/Gutachter/Werkstatt) —
+    // die Config blendet sie per {"gutachten_vermittelt": null} aus. 'ja' statt true, weil die
+    // Bedingungs-Syntax Feld==Wert vergleicht; null = normaler Weg -> Steps bleiben.
+    gutachten_vermittelt: lead.source_channel === 'gutachter-vermittlung' ? 'ja' : null,
 
     // Zugeordneter SV: der Termin-Step faellt weg, sobald einer haengt (dann wird er ANGEZEIGT).
     sv_id: svHatTermin ? 'gesetzt' : null,
