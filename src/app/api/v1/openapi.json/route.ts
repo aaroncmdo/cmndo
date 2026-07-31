@@ -233,6 +233,37 @@ const spec = {
         },
       },
     },
+    '/api/v1/case-status/{token}': {
+      get: {
+        operationId: 'caseStatus',
+        summary: 'Bearbeitungsstand eines gemeldeten Falls abfragen',
+        description:
+          'Gibt den groben Bearbeitungsstand eines zuvor über meldeSchaden/rueckruf angelegten Falls zurück — für einen wiederkehrenden Kunden, der fragt „wo steht mein Fall?". Der Kunde nennt seine persönliche Referenz (den Token aus seinem Claimondo-Link, den er per WhatsApp erhalten hat) — der Token ist die Autorisierung. Read-only, anonym. Liefert BEWUSST nur ein grobes Status-Label — KEINE personenbezogenen Daten (kein Name/Telefon/Gutachter/Fall-Detail).',
+        parameters: [
+          {
+            name: 'token',
+            in: 'path',
+            required: true,
+            description: 'Die persönliche Fall-Referenz des Kunden (Token aus seinem Claimondo-Link / der WhatsApp-Nachricht).',
+            schema: { type: 'string', minLength: 8, maxLength: 128 },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Grober Bearbeitungsstand.',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/CaseStatusResponse' } } },
+          },
+          '404': {
+            description: 'Kein Fall zu dieser Referenz gefunden (auch bei ungültigem Token — bewusst kein Enumerations-Signal).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
+          },
+          '429': {
+            description: 'Rate-Limit überschritten (60/min/IP).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
+          },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -430,6 +461,15 @@ const spec = {
           status: { type: 'string', description: 'rueckruf_angelegt / lead_angelegt / bereits_angelegt (identische Anfrage erneut gesendet — Retry-Dedup).' },
           wiederverwendet: { type: 'boolean', description: 'true = identische Anfrage (gleiche Telefonnummer) < 10 Min — bestehender Rückruf-Lead wiederverwendet, kein zweiter Dispatch-Task.' },
           wann: { type: 'string', description: 'Wunschzeit (ISO) oder "schnellstmöglich".' },
+          hinweis: { type: 'string' },
+        },
+        required: ['ok', 'status'],
+      },
+      CaseStatusResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          status: { type: 'string', description: 'Grobes, kundenverständliches Status-Label (z. B. „Wir verhandeln mit der Versicherung" oder „Deine Anfrage ist eingegangen und wird bearbeitet."). Bewusst KEINE personenbezogenen Daten und kein roher Status-Code.' },
           hinweis: { type: 'string' },
         },
         required: ['ok', 'status'],
