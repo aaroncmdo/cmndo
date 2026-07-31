@@ -105,9 +105,9 @@ export default function KartenClient({
         )}
       </SectionCard>
 
-      <SectionCard title="Ihre Schadenkarten">
+      <SectionCard title="Ihre Netzwerkkarten">
         {karten.length === 0 ? (
-          <p className="text-sm text-claimondo-shield">Noch keine Schadenkarten vorhanden.</p>
+          <p className="text-sm text-claimondo-shield">Noch keine Netzwerkkarten vorhanden.</p>
         ) : (
           <>
             <div className="mb-4">

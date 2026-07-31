@@ -71,7 +71,7 @@ export async function submitSchadenGegner(
   if (!ctx.ok) {
     return {
       ok: false,
-      error: 'Diese Schadenkarte ist ungültig oder keinem Fahrzeug zugewiesen.',
+      error: 'Diese Netzwerkkarte ist ungültig oder keinem Fahrzeug zugewiesen.',
     }
   }
 
