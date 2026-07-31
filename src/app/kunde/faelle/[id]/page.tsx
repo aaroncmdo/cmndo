@@ -37,6 +37,26 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // CMM-63 Canonicalize: Alt-faelle.id-URL -> kanonische claim_id-URL.
     if (vm.claimId && routeId !== vm.claimId) redirect(`/kunde/faelle/${vm.claimId}`)
 
+    // P6 / WS H: fahrzeug-zentrische Kanonik — hat der Claim ein owned Fahrzeug, ist die
+    // kanonische URL /kunde/fahrzeuge/[vehId]/schaden/[claimId]. Vehicle-lose Claims rendern
+    // hier weiter in place -> KEIN reiner Redirect-Stub (Content-return unten), kein Stranding.
+    const canonicalClaimId = vm.claimId ?? routeId
+    const { data: claimVeh } = await admin
+      .from('claims')
+      .select('vehicle_id')
+      .eq('id', canonicalClaimId)
+      .maybeSingle()
+    const vehId = (claimVeh as { vehicle_id?: string | null } | null)?.vehicle_id ?? null
+    if (vehId) {
+      const { data: owned } = await admin
+        .from('vehicles')
+        .select('id')
+        .eq('id', vehId)
+        .eq('current_owner_id', user.id)
+        .maybeSingle()
+      if (owned) redirect(`/kunde/fahrzeuge/${vehId}/schaden/${canonicalClaimId}`)
+    }
+
     return <KundeClaimView vm={vm} />
   } catch (err) {
     // redirect()/notFound() werfen Control-Flow-Errors, die an Next's Error-Boundary
