@@ -370,6 +370,18 @@ export async function konvertierePartnerLead(
     console.error('[konvertierePartnerLead] Login-Willkommens-Mail fehlgeschlagen (non-critical):', err)
   }
 
+  // Onboarding-Drip enrollen (non-critical) — werkstaetten.status='aktiv' ist bereits ueber
+  // convertPartnerLead -> anlegePartnerKern gesetzt. Nur fuer rolle=werkstatt relevant;
+  // idempotent (DB-UNIQUE werkstatt_id), ein Fehler hier darf die Konvertierung nicht brechen.
+  if (lead.rolle === 'werkstatt') {
+    try {
+      const { enrolleWerkstatt } = await import('@/lib/werkstatt-onboarding/enroll')
+      await enrolleWerkstatt(admin, result.partnerId)
+    } catch (e) {
+      console.error('[enroll] werkstatt-onboarding', e)
+    }
+  }
+
   revalidatePath('/admin/partner-leads')
   return { ok: true, userId: result.userId, partnerId: result.partnerId }
 }
