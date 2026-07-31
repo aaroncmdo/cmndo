@@ -6,7 +6,14 @@ function mockDb(userId: string | null) {
     from: () => ({
       select: () => ({
         eq: () => ({
-          maybeSingle: () => Promise.resolve({ data: userId ? { user_id: userId } : null, error: null }),
+          eq: () => ({
+            order: () => ({
+              limit: () => ({
+                maybeSingle: () =>
+                  Promise.resolve({ data: userId ? { user_id: userId } : null, error: null }),
+              }),
+            }),
+          }),
         }),
       }),
     }),

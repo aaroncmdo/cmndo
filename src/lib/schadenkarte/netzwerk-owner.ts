@@ -11,10 +11,16 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 type AnyDb = SupabaseClient<any, any, any>
 
 export async function resolveNetzwerkOwnerFuerFlotte(db: AnyDb, firmaId: string): Promise<string | null> {
+  // Paritaet mit deriveVermittler-Pfad (convert-lead-to-claim): nur AKTIVE Flotten-Konten;
+  // limit(1) statt maybeSingle-auf-alles (Firmen mit >1 Konto duerfen nicht no-op'en) +
+  // created_at-Determinismus (P3-Konvention: aeltestes Konto gewinnt).
   const { data } = await db
     .from('firmen_flotten_konten')
     .select('user_id')
     .eq('firma_id', firmaId)
+    .eq('status', 'aktiv')
+    .order('created_at', { ascending: true })
+    .limit(1)
     .maybeSingle()
   return ((data as { user_id?: string | null } | null)?.user_id) ?? null
 }

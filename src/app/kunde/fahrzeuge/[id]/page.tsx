@@ -34,13 +34,18 @@ export default async function KundeFahrzeugDetailPage({ params }: { params: Prom
 
     return (
       <div className="p-4 sm:p-6 lg:p-8 max-w-3xl mx-auto space-y-6">
-        <Link
-          href="/kunde/fahrzeuge"
-          className="inline-flex items-center gap-1 text-sm text-claimondo-shield hover:text-claimondo-navy transition-colors"
-        >
-          <ChevronLeftIcon size={16} />
-          Meine Fahrzeuge
-        </Link>
+        {/* Zurueck-Link nur fuer Mehr-Auto-Kunden: bei genau 1 Fahrzeug redirectet
+            /kunde/fahrzeuge sofort wieder hierher (Ein-Auto-Redirect) — der Link waere
+            ein Klick ins Leere (Review-Fix). */}
+        {fahrzeuge.length > 1 && (
+          <Link
+            href="/kunde/fahrzeuge"
+            className="inline-flex items-center gap-1 text-sm text-claimondo-shield hover:text-claimondo-navy transition-colors"
+          >
+            <ChevronLeftIcon size={16} />
+            Meine Fahrzeuge
+          </Link>
+        )}
         <PageHeader
           title={fahrzeug.kennzeichen ?? 'Mein Fahrzeug'}
           description={[fahrzeug.hersteller, fahrzeug.modell].filter(Boolean).join(' ') || undefined}

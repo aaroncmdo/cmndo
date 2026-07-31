@@ -246,13 +246,19 @@ export async function submitSchadenGegner(
 
   // 6c. WS E (P6 T10): der Karten-Issuer (Flotte) wird zum netzwerk_owner dieses Claims —
   //   Attribution fuer den "Dein Netzwerk"-Finder-Boost (P2) + die Provisions-Suppression (P3).
-  //   Fail-soft — darf den Gegner-Submit nie brechen.
+  //   BACKSTOP zum INSERT-Pfad: convertLeadToClaim seedet netzwerk_owner_id bereits bei Anlage
+  //   (write-once-Kontrakt) — hier wird NUR nachgezogen, wenn der Insert-Resolver leer ausging
+  //   (IS-NULL-Guard haelt den write-once-Kontrakt). Fail-soft — darf den Submit nie brechen.
   if (claimId && ctx.context.firmaId) {
     try {
       const { resolveNetzwerkOwnerFuerFlotte } = await import('@/lib/schadenkarte/netzwerk-owner')
       const ownerId = await resolveNetzwerkOwnerFuerFlotte(db, ctx.context.firmaId)
       if (ownerId) {
-        const { error } = await db.from('claims').update({ netzwerk_owner_id: ownerId }).eq('id', claimId)
+        const { error } = await db
+          .from('claims')
+          .update({ netzwerk_owner_id: ownerId })
+          .eq('id', claimId)
+          .is('netzwerk_owner_id', null)
         if (error) console.error('[schaden-gegner] netzwerk_owner_id set:', error.message)
       }
     } catch (err) {

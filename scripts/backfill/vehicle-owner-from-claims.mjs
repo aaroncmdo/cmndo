@@ -62,14 +62,19 @@ console.log(`owner-lose Fahrzeuge: ${vehs.length} — davon Flotten-Achse (ueber
 // 3) Claims je Fahrzeug (juengster zuerst) — via v_claim_full (CMM-49: claims traegt
 //    kein fall_id; die View bringt geschaedigter_user_id UND kunde_id in einer Row)
 const vehIds = kandidatVehs.map((v) => v.id)
+const CLAIM_FETCH_LIMIT = 10000
 const { data: claimsRaw, error: claimsErr } = vehIds.length
   ? await db
       .from('v_claim_full')
       .select('id, vehicle_id, fall_id, geschaedigter_user_id, kunde_id, claim_nummer, created_at')
       .in('vehicle_id', vehIds)
       .order('created_at', { ascending: false })
+      .limit(CLAIM_FETCH_LIMIT)
   : { data: [], error: null }
 if (claimsErr) throw new Error('v_claim_full query: ' + claimsErr.message)
+if ((claimsRaw ?? []).length >= CLAIM_FETCH_LIMIT) {
+  console.warn(`WARNUNG: Claim-Fetch am Limit (${CLAIM_FETCH_LIMIT}) — Ergebnis evtl. unvollstaendig, Re-Run noetig.`)
+}
 const claimByVeh = new Map()
 for (const c of claimsRaw ?? []) {
   if (!claimByVeh.has(c.vehicle_id)) claimByVeh.set(c.vehicle_id, c) // juengster gewinnt (desc-sortiert)
