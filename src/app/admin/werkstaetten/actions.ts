@@ -185,6 +185,15 @@ export async function createWerkstatt(
     return { ok: false, error: wErr?.message ?? 'Werkstatt-Anlage fehlgeschlagen' }
   }
 
+  // 3b) Onboarding-Drip enrollen (non-critical) — direkt nach dem status='aktiv'-Insert oben.
+  //     Idempotent (DB-UNIQUE werkstatt_id); ein Fehler hier darf die Anlage nicht brechen.
+  try {
+    const { enrolleWerkstatt } = await import('@/lib/werkstatt-onboarding/enroll')
+    await enrolleWerkstatt(admin, w.id as string)
+  } catch (e) {
+    console.error('[enroll] werkstatt-onboarding', e)
+  }
+
   // 4) Isochrone defensiv berechnen — werkstaetten.isochrone (jsonb, GeoJSON Polygon).
   //    Column heißt 'isochrone' (NICHT 'isochrone_polygon' wie bei sachverstaendige).
   //    Fehler sind non-fatal: die Werkstatt ist bereits angelegt.
