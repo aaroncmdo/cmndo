@@ -49,6 +49,9 @@ describe('notifyWerkstattNeuerAuftrag', () => {
     expect(mail).toHaveBeenCalledTimes(1)
     expect(mail.mock.calls[0][0].to).toBe('ws@example.com')
     expect(mail.mock.calls[0][0].subject).toContain('Reparaturauftrag')
+    // Send-Isolation muss umgangen werden, sonst erreicht die Mail keine internen
+    // Test-Werkstatt-Konten (@claimondo.de) — s. notify-werkstatt-auftrag.ts.
+    expect(mail.mock.calls[0][0].allowInternalRecipient).toBe(true)
     expect(r).toEqual({ email: true })
   })
 
