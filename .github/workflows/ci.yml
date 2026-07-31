@@ -360,6 +360,19 @@ jobs:
     # bleibt auf PRs required. Das entfernt das rote e2e von allen PRs (13 Parallel-Sessions
     # sahen es dauerhaft rot). Manuelle Live-Smokes s. playwright.config.ts testIgnore.
     if: ${{ github.event_name != 'pull_request' }}
+    # Serialisiert die prod-E2E-Laeufe: staging + main pushen beide gegen DIESELBE prod-App
+    # (app.claimondo.de) + denselben festen Seed-State (reparatur-weg-e2e-seed.mjs = feste
+    # @claimondo.test-Konten + feste FIN). Liefen zwei Laeufe parallel (gebuendelte Merges ->
+    # mehrere push:staging/main gleichzeitig), racten sie den Seed -> reparatur-weg-e2e-smoke
+    # cross-run-flaky (mal Login-Race = Passwort ueberschrieben, mal KVA-Zustand-Race). J1
+    # (golden-path-deep, eigene deterministische UUID-Fixtures) blieb stets gruen. EIN fester
+    # group-Name (KEIN github.ref) -> staging UND main teilen die Gruppe -> nie 2 parallel.
+    # cancel-in-progress:false = queue: jeder Lauf faehrt seinen Journey-Step VOLLSTAENDIG (kein
+    # Mid-Run-Cancel = verlaesslicher B1-Nachweis); Verzoegerung unkritisch (e2e informativ, gated
+    # nichts). Beobachtet 31.07. (4 parallele Laeufe: J1 stets gruen, J4 cross-run-flaky). b2-Marker.
+    concurrency:
+      group: prod-e2e-smoke
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     needs: build
     # Hard-Cap gegen Runaway: die post-merge E2E-Suite (110 Tests, workers:1, 30s/Test
