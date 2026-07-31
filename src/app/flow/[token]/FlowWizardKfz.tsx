@@ -97,6 +97,8 @@ export type LeadData = {
   // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad).
   schuldfrage?: string | null
   disqualifiziert?: boolean | null
+  // P4 UX: Vermittlung -> Logistik-Steps per Config-Bedingung ausgeblendet
+  source_channel?: string | null
   // FlowLink-Review C: fiktiv-Szenario-Badge im Sticky-Header (Lead kommt via
   // select('*') aus page.tsx → alle Felder liegen vor).
   reparaturwunsch?: string | null
