@@ -47,7 +47,13 @@ export type ArtikelDraft = {
 // System-Prompt
 // ---------------------------------------------------------------------------
 
-export function buildSystemPrompt(input: ThemaInput): string {
+// Statische System-Prompts (arg-los) — dies ist der Prompt-Caching-Prefix (gilt
+// auch fuer buildB2BSystemPrompt unten). Per-Artikel-Kontext (Titel etc.) lebt
+// NUR in der User-Message (generateArtikelDraft), damit der gecachte Prefix ueber
+// Artikel hinweg byte-identisch bleibt und der Cache wirklich greift. KEIN input.*
+// hier drin (frueher: input.titel in der slug-Zeile -> Prefix pro Artikel unique
+// -> cache_read immer 0 + 1.25x-Write-Premium umsonst).
+export function buildSystemPrompt(): string {
   return [
     'Du schreibst einen Wissens-Artikel fuer claimondo.de (Kfz-Schadenregulierung, unverschuldeter Unfall).',
     'HAUS-STIL: H1-Titel; direkt danach ein Blockquote "> **Kurz erklaert:** ..." (40-60 Woerter);',
@@ -64,7 +70,7 @@ export function buildSystemPrompt(input: ThemaInput): string {
     'TEIL 1: ein JSON-Objekt mit den Metadaten (KEIN body-Feld). In den JSON-Textwerten KEINE',
     '  geraden Anfuehrungszeichen (") verwenden — nutze typografische („ ") oder gar keine:',
     '{',
-    '  "slug": "<url-slug 3-80 Zeichen, nur a-z 0-9 und Bindestrich — passend zum Thema: ' + input.titel + '>",',
+    '  "slug": "<url-slug 3-80 Zeichen, nur a-z 0-9 und Bindestrich — passend zum gegebenen Thema>",',
     '  "title": "<SEO-Titel, ca. 50-60 Zeichen>",',
     '  "excerpt": "<Teaser-Text, ca. 120-160 Zeichen>",',
     '  "keyFacts": ["<Fakt 1>", "<Fakt 2>", "<Fakt 3>"],',
@@ -81,7 +87,7 @@ export function buildSystemPrompt(input: ThemaInput): string {
 // B2B-System-Prompt (Fachton fuer Sachverstaendige, Anwaelte, Werkstaetten, Makler)
 // ---------------------------------------------------------------------------
 
-export function buildB2BSystemPrompt(input: ThemaInput): string {
+export function buildB2BSystemPrompt(): string {
   return [
     'Du schreibst einen Fach-Artikel fuer claimondo.de (Kfz-Schadenregulierung, Branchenthemen).',
     'ZIELGRUPPE: Fach-Leser: Kfz-Sachverständige, Rechtsanwälte/Kanzleien, Kfz-Werkstätten und Versicherungsmakler',
@@ -111,7 +117,7 @@ export function buildB2BSystemPrompt(input: ThemaInput): string {
     'TEIL 1: ein JSON-Objekt mit den Metadaten (KEIN body-Feld). In den JSON-Textwerten KEINE',
     '  geraden Anführungszeichen (") verwenden — nutze typografische („ ") oder gar keine:',
     '{',
-    '  "slug": "<url-slug 3-80 Zeichen, nur a-z 0-9 und Bindestrich — passend zum Thema: ' + input.titel + '>",',
+    '  "slug": "<url-slug 3-80 Zeichen, nur a-z 0-9 und Bindestrich — passend zum gegebenen Thema>",',
     '  "title": "<SEO-Titel, ca. 50-60 Zeichen>",',
     '  "excerpt": "<Teaser-Text, ca. 120-160 Zeichen>",',
     '  "keyFacts": ["<Fakt 1>", "<Fakt 2>", "<Fakt 3>"],',
@@ -221,7 +227,7 @@ export async function generateArtikelDraft(
 
   const anthropic = new Anthropic({ apiKey, timeout: 120_000, maxRetries: 2 })
 
-  const systemPrompt = audience === 'b2b' ? buildB2BSystemPrompt(input) : buildSystemPrompt(input)
+  const systemPrompt = audience === 'b2b' ? buildB2BSystemPrompt() : buildSystemPrompt()
   const userMessage = [
     `Thema: ${input.titel}`,
     input.kurzbrief ? `Kurzbrief: ${input.kurzbrief}` : null,
