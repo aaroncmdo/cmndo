@@ -187,6 +187,11 @@ export async function GET(request: Request) {
 <p style="margin-top:16px">Wenn das Muster sich verfestigt: Folge-Ticket für Phase 2 (Auto-Heal mit <code>STRIPE_RECONCILE_HEAL=true</code> Env-Var-Gate) anlegen.</p>`,
         template: 'admin_stripe_drift_report',
         empfaengerTyp: 'admin',
+        // Admin-Finanz-Alert an die Founder-Adresse (aaron.sprafke@, @claimondo.de = intern) ->
+        // Send-Isolation umgehen, sonst wird der Drift-Report im Live-Modus suppressed und Aaron
+        // erfaehrt nie von Stripe-Unstimmigkeiten. Founder-Adressen sind bewusst NICHT in der
+        // operativen Send-Allowlist (Dual-Use als Test-Lead-Mail) -> per-call-Flag hier.
+        allowInternalRecipient: true,
       })
     } catch (err) {
       console.error('[AAR-929] Admin-Email fehlgeschlagen (non-critical):', err)

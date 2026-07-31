@@ -60,4 +60,18 @@ describe('sendEmail — Send-Isolation & allowInternalRecipient', () => {
     await sendEmail({ to: 'kunde@gmail.com', subject: 's', html: '<p>h</p>' })
     expect(sendMailMock).toHaveBeenCalledTimes(1)
   }, 20000)
+
+  it('stellt operative Betriebs-Inbox info@ OHNE Flag zu (Allowlist, kein Matching-Bystander)', async () => {
+    const { sendEmail } = await import('../client')
+    const res = await sendEmail({ to: 'info@claimondo.de', subject: 's', html: '<p>h</p>' })
+    expect(sendMailMock).toHaveBeenCalledTimes(1)
+    expect(res.messageId).toBe('smtp-real-123')
+  }, 20000)
+
+  it('haelt eine NICHT-allowlistete Founder-Adresse OHNE Flag weiter suppressed (Guard scharf)', async () => {
+    const { sendEmail } = await import('../client')
+    const res = await sendEmail({ to: 'aaron.sprafke@claimondo.de', subject: 's', html: '<p>h</p>' })
+    expect(res.messageId).toMatch(/internal-recipient-suppressed/)
+    expect(sendMailMock).not.toHaveBeenCalled()
+  }, 20000)
 })
