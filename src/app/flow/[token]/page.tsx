@@ -653,6 +653,8 @@ export default async function FlowPage({
             // AAR-956 §3a: Self-Service-Quali-State (steuert den incomplete-Pfad)
             schuldfrage: lead.schuldfrage ?? null,
             disqualifiziert: lead.disqualifiziert ?? null,
+            // P4 UX: Vermittlungs-Erkennung fuer den Client-Kontext-Rebuild nach Quali
+            source_channel: lead.source_channel ?? null,
           }}
           legalDocs={getAllLegalDocs()}
           beratungstermin={beratungstermin}
