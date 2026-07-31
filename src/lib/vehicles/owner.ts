@@ -13,9 +13,10 @@ export async function setVehicleOwnerFuerFall(
   fallId: string,
   userId: string,
 ): Promise<{ ok: boolean; updated: number; error?: string }> {
-  // Fahrzeug des Falls ueber die Claims-Bridge aufloesen (fall_id -> claims.vehicle_id).
+  // Fahrzeug des Falls ueber die kanonische Bridge aufloesen (CMM-49: claims traegt
+  // KEIN fall_id — v_claim_full ist die faelle-Drop-sichere Bruecke fall_id -> vehicle_id).
   const { data: claimRows, error: claimErr } = await db
-    .from('claims')
+    .from('v_claim_full')
     .select('vehicle_id')
     .eq('fall_id', fallId)
     .not('vehicle_id', 'is', null)

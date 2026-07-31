@@ -9,7 +9,7 @@ function makeDb(params: {
 }) {
   const db = {
     from: vi.fn((table: string) => {
-      if (table === 'claims') {
+      if (table === 'v_claim_full') {
         return {
           select: vi.fn(() => ({
             eq: vi.fn(() => ({
