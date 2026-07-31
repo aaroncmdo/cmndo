@@ -645,3 +645,46 @@ export async function fetchRueckruf(input: RueckrufInput, apiBase: string = DEFA
 export function formatRueckruf(r: RueckrufResult): string {
   return [`# Rückruf angefordert`, '', `**Wann:** ${r.wann}`, '', r.hinweis].join('\n')
 }
+
+// --- Fall-Status (read-only, coarse, PII-frei) -------------------------------
+// Wrappt GET /api/v1/case-status/{token}. Der wiederkehrende Kunde nennt sein EIGENES
+// Token (aus dem WhatsApp-FlowLink) — das Token ist die Autorisierung. Die Antwort ist
+// bewusst grob + PII-frei (nur ein kunde-Status-Label, kein Name/Telefon/SV/Fall-Detail).
+
+export type CaseStatusResult = { ok: boolean; status: string; hinweis: string }
+
+/** Fragt den groben Bearbeitungsstand per FlowLink-Token ab. 404 (unbekanntes/ungueltiges
+ *  Token) -> {@link ClaimondoApiError} mit freundlicher Meldung. */
+export async function fetchCaseStatus(token: string, apiBase: string = DEFAULT_API_BASE): Promise<CaseStatusResult> {
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/case-status/${encodeURIComponent(token)}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, { headers: { accept: 'application/json', 'user-agent': MCP_USER_AGENT }, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
+    }
+    throw new ClaimondoApiError(`Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as { ok?: boolean; status?: string; hinweis?: string; error?: string }
+  if (!res.ok || data.ok === false) {
+    if (res.status === 429) throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    if (res.status === 404) {
+      throw new ClaimondoApiError(
+        'Kein Fall zu dieser Referenz gefunden. Bitte lass dir vom Kunden die Fall-Referenz aus seinem persönlichen Claimondo-Link (per WhatsApp erhalten) nennen.',
+        404,
+      )
+    }
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return { ok: true, status: data.status ?? 'unbekannt', hinweis: data.hinweis ?? '' }
+}
+
+/** Menschenlesbarer Markdown-Report fuer den Fall-Status. */
+export function formatCaseStatus(r: CaseStatusResult): string {
+  return [`# Bearbeitungsstand`, '', `**Status:** ${r.status}`, r.hinweis ? `\n${r.hinweis}` : ''].filter(Boolean).join('\n')
+}

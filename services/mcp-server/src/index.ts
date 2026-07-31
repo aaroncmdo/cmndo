@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchCaseStatus, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatCaseStatus, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -189,6 +189,20 @@ const rueckrufOutput = {
   ok: z.boolean(),
   status: z.string(),
   wann: z.string(),
+  hinweis: z.string(),
+}
+
+// --- claimondo_fall_status (Fall-Status per FlowLink-Token, read-only, PII-frei) ----
+const caseStatusInput = {
+  token: z
+    .string()
+    .min(8)
+    .max(128)
+    .describe('Die persönliche Fall-Referenz des Kunden (Token aus seinem Claimondo-Link / der WhatsApp-Nachricht). Der Kunde muss sie selbst nennen — nicht raten/erfinden.'),
+}
+const caseStatusOutput = {
+  ok: z.boolean(),
+  status: z.string(),
   hinweis: z.string(),
 }
 
@@ -422,6 +436,36 @@ Erfrage Name + Telefonnummer + (optional) Schadenart/Anliegen/PLZ. Rufe dies NUR
     },
   )
 
+  server.registerTool(
+    'claimondo_fall_status',
+    {
+      title: 'Bearbeitungsstand eines gemeldeten Falls abfragen',
+      description: `Gibt den groben Bearbeitungsstand eines zuvor über claimondo_melde_schaden/claimondo_rueckruf angelegten Falls zurück — für einen wiederkehrenden Kunden, der fragt „wo steht mein Fall?".
+
+Der Kunde nennt seine persönliche Fall-Referenz (den Token aus seinem Claimondo-Link, den er per WhatsApp erhalten hat) — die Referenz ist die Autorisierung. Read-only. Liefert BEWUSST nur ein grobes Status-Label — KEINE personenbezogenen Daten (kein Name/Telefon/Gutachter/Fall-Detail).
+
+Args:
+  - token (string): Die persönliche Fall-Referenz des Kunden.
+
+Nicht raten/erfinden: ohne die vom Kunden genannte Referenz gibt es keinen Status. Unbekannte/ungültige Referenz -> „kein Fall gefunden".`,
+      inputSchema: caseStatusInput,
+      outputSchema: caseStatusOutput,
+      annotations: { readOnlyHint: true, openWorldHint: true },
+    },
+    async ({ token }) => {
+      try {
+        const r = await fetchCaseStatus(token, API_BASE)
+        return { content: [{ type: 'text', text: formatCaseStatus(r) }], structuredContent: r }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
   server.registerResource(
     'wissensbasis',
     'claimondo://wissensbasis',
@@ -576,6 +620,18 @@ async function runHttp(): Promise<void> {
               einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein (nach ausdrücklicher Nutzer-Einwilligung).' },
             },
             required: ['name', 'telefon', 'einwilligung_erteilt'],
+          },
+        },
+        {
+          name: 'claimondo_fall_status',
+          description:
+            'Gibt den groben Bearbeitungsstand eines zuvor über claimondo_melde_schaden/claimondo_rueckruf angelegten Falls zurück (read-only, PII-frei). Der Kunde nennt seine persönliche Fall-Referenz (Token aus seinem Claimondo-Link) — die Referenz ist die Autorisierung. Liefert nur ein grobes Status-Label, keine personenbezogenen Daten.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              token: { type: 'string', minLength: 8, maxLength: 128, description: 'Die persönliche Fall-Referenz des Kunden (Token aus seinem Claimondo-Link / der WhatsApp-Nachricht).' },
+            },
+            required: ['token'],
           },
         },
       ],
