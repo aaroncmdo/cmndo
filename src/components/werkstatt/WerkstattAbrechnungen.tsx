@@ -8,6 +8,7 @@ import Link from 'next/link'
 import {
   CheckCircle2Icon,
   ClockIcon,
+  UsersIcon,
   XCircleIcon,
   WalletIcon,
 } from 'lucide-react'
@@ -90,6 +91,17 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
       tooltip: row.storno_grund ?? undefined,
     }
   }
+  // P3 Netzwerk: intra-Freundesnetzwerk vermittelt -> keine Einzelprovision (Abo deckt).
+  // Ohne eigenen Zweig fiele der Status in den pending-Fallback ("fällig in X T.") — irreführend.
+  if (status === 'unterdrueckt') {
+    return {
+      label: 'Netzwerk-intern (nicht vergütet)',
+      className: 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border',
+      icon: <UsersIcon width={12} height={12} />,
+      tooltip:
+        'Innerhalb Ihres Partnernetzwerks vermittelt — durch das Netzwerkpartner-Abo abgedeckt, keine Einzelprovision.',
+    }
+  }
   // pending — Freigabe-/Clawback-Frist = Fall-Completion + 7 Tage (FG4-A). release_deadline null =
   // Fall noch nicht abgeschlossen → Freigabe erst nach Fallabschluss (frueher: hold_until = Erstellung+7d).
   const days = daysUntil(row.release_deadline)
@@ -115,7 +127,11 @@ export function WerkstattAbrechnungen({
   boniSumme = 0,
   gutschriften = [],
 }: Props) {
-  const total = provisionen.reduce((s, r) => s + r.betrag_netto_eur, 0)
+  // "Gesamt" = verguetungsrelevant: ohne storniert/unterdrueckt — beide bekommt die
+  // Werkstatt nie ausgezahlt, sie mitzuzaehlen ueberstellt die Einnahmen (Review-Fund).
+  const total = provisionen
+    .filter((r) => r.status !== 'storniert' && r.status !== 'unterdrueckt')
+    .reduce((s, r) => s + r.betrag_netto_eur, 0)
   const offene = provisionen
     .filter((r) => r.status === 'pending')
     .reduce((s, r) => s + r.betrag_netto_eur, 0)

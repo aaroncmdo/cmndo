@@ -15,11 +15,6 @@ import FallDetailClient from './FallDetailClient'
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
-import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
-import { reparaturPhaseErreicht } from '@/lib/werkstatt/reparatur-phase-erreicht'
-import { findWerkstattVorschlaegeFuer } from '@/lib/werkstatt/matching/lade-vorschlaege'
-import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
-import { WerkstattEmpfehlenCard } from './_components/WerkstattEmpfehlenCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
@@ -430,66 +425,11 @@ export default async function GutachterFallPage({
     ? await getLetzterScanFuerVehicle(admin, zustandVehicleId)
     : null
 
-  // Reparatur-Werkstatt-Vermittlung (Gutachter im Auftrag): Gate + 5 naechste Partner.
-  // Nur wenn Reparatur gewuenscht + noch keine Werkstatt hinterlegt (brauchtWerkstattVermittlung).
-  let werkstattVermittlung: {
-    fallId: string
-    werkstaetten: WerkstattFinderRow[]
-    offeneEmpfehlung: { anzahl: number; gesendetAm: string; werkstattNamen: string[] } | null
-  } | null = null
-  if (noShowClaimId) {
-    const { data: rwGate } = await admin
-      .from('claims')
-      .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
-      .eq('id', noShowClaimId)
-      .maybeSingle()
-    if (
-      rwGate &&
-      brauchtWerkstattVermittlung(rwGate as BedarfRow) &&
-      reparaturPhaseErreicht(
-        { abrechnungsweg: (rwGate as { abrechnungsweg?: string | null }).abrechnungsweg ?? null },
-        { gutachtenAbgeschlossen: !!erstgutachtenAuftrag?.gutachten_final_freigegeben, totalschaden: null },
-      )
-    ) {
-      // Laeuft bereits eine Empfehlung? Dann zeigt die Card statt des Finders den
-      // „laeuft"-Zustand + Zurueckziehen (Spec §11) — DB-driven, kein lokaler UI-State.
-      const { data: offenerBatch } = await admin
-        .from('werkstatt_empfehlung_batches')
-        .select('id, created_at')
-        .eq('claim_id', noShowClaimId)
-        .eq('status', 'offen')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      let offeneEmpfehlung: { anzahl: number; gesendetAm: string; werkstattNamen: string[] } | null = null
-      if (offenerBatch) {
-        const batch = offenerBatch as { id: string; created_at: string }
-        const { data: eRows } = await admin
-          .from('werkstatt_empfehlungen')
-          .select('werkstatt_id')
-          .eq('batch_id', batch.id)
-        const ids = ((eRows ?? []) as Array<{ werkstatt_id: string }>).map((e) => e.werkstatt_id)
-        const { data: wRows } = ids.length
-          ? await admin.from('werkstaetten').select('name').in('id', ids)
-          : { data: [] }
-        offeneEmpfehlung = {
-          anzahl: ids.length,
-          gesendetAm: batch.created_at,
-          werkstattNamen: ((wRows ?? []) as Array<{ name: string | null }>)
-            .map((w) => w.name)
-            .filter((n): n is string => !!n),
-        }
-      }
-      werkstattVermittlung = {
-        fallId: id,
-        // Bei laufender Empfehlung braucht die Card den Finder nicht -> Query sparen.
-        werkstaetten: offeneEmpfehlung
-          ? []
-          : await findWerkstattVorschlaegeFuer({ target: 'claim', id: noShowClaimId, nurEchte: true }),
-        offeneEmpfehlung,
-      }
-    }
-  }
+  // P4 T9 (Netzwerk): die SV-seitige Werkstatt-Empfehl-Vorauswahl (WerkstattEmpfehlenCard +
+  // werkstatt_empfehlung_batches-Berechnung) ist ABGELOEST — der Kunde waehlt self-served im
+  // immer-an-Kunde-Finder (Locked Decision Epic §4; die "Dein Netzwerk"-Partition laeuft dort,
+  // P2-T6). Live verifiziert 30.07.: 0 Batches je erzeugt. Route /werkstatt-empfehlung/[token]
+  // + Actions bleiben fuer theoretisch offene Magic-Links bestehen (kein neuer Einstiegspunkt).
 
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
   // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
@@ -735,13 +675,6 @@ export default async function GutachterFallPage({
           svHonorarBetrag={svHonorarBetrag}
           svHonorarEingegangenAm={svHonorarEingegangenAm}
           svHonorarVerdient={gutachtenWerte?.gutachten_sv_honorar_brutto ?? null}
-        />
-      )}
-      {werkstattVermittlung && (
-        <WerkstattEmpfehlenCard
-          fallId={werkstattVermittlung.fallId}
-          werkstaetten={werkstattVermittlung.werkstaetten}
-          offeneEmpfehlung={werkstattVermittlung.offeneEmpfehlung}
         />
       )}
       {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}

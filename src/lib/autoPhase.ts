@@ -3,6 +3,7 @@ import { triggerGutachterTerminTask, triggerQcTask, triggerArchivierungTask } fr
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { getClaimPayments } from '@/lib/faelle/claim-payments'
 import { computeNextOperativePhase, type OperativeSignals } from '@/lib/autophase-decision'
+import { kundeHatBestaetigt } from '@/lib/faelle/onboarding-gate'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 /**
@@ -58,7 +59,7 @@ export async function checkFallAutoPhase(fallId: string) {
 
   const { data: claim } = await svc
     .from('claims')
-    .select('operative_status, service_typ, sv_id, kundenbetreuer_id')
+    .select('operative_status, service_typ, sv_id, kundenbetreuer_id, sa_unterschrieben')
     .eq('id', claimId)
     .single()
   const status = (claim?.operative_status as string | null) ?? null
@@ -81,6 +82,8 @@ export async function checkFallAutoPhase(fallId: string) {
     istKomplett: (claim.service_typ as string | null) === 'komplett',
     anschlussschreibenVorhanden: !!(kanzleiRes.data as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am,
     zahlungEingegangen: !!payments.vs?.zahlungseingang_am,
+    // P4-Gate: SV-Sofort-Claims (geboren sa_unterschrieben=false) bleiben vor filmcheck stehen.
+    kundeBestaetigt: kundeHatBestaetigt({ sa_unterschrieben: (claim.sa_unterschrieben as boolean | null) ?? null }),
   }
 
   // Task-Empfaenger einmal aufloesen (aendern sich im Loop nicht).

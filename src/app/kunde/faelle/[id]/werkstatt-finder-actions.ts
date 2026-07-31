@@ -61,11 +61,17 @@ export async function ladeWerkstaettenFuerClaim(
   const owner = await assertOwnerOhneWerkstatt(claimId)
   if (!owner.ok) return { ok: false, error: owner.error }
   const { findQualifizierteReparaturWerkstaetten } = await import('@/lib/werkstatt/vermittlung-server')
+  const { resolveNetzwerkOwnerProfilId } = await import('@/lib/netzwerk/resolve-netzwerk-owner')
+  // P2-T6 (Netzwerk): Owner-Knoten des Claims (per-Claim > Kunden-Default > null) fuer die
+  // relationale "Dein Netzwerk"-Partition — Freund-Werkstaetten des Owners floaten nach oben.
+  // Service-Client: netzwerk_owner-Spalten sind nicht kunden-RLS-lesbar. null = No-op.
+  const ownerProfilId = await resolveNetzwerkOwnerProfilId(createServiceClient(), { claimId })
   // nurEchte: der Kunde darf keine Test-/internen Werkstaetten sehen (SSoT interne-identitaet).
   const { werkstaetten, keineSpezialisierte } = await findQualifizierteReparaturWerkstaetten({
     target: 'claim',
     id: claimId,
     nurEchte: true,
+    ownerProfilId,
   })
   return { ok: true, werkstaetten, keineSpezialisierte, center: owner.center }
 }
@@ -91,12 +97,33 @@ export async function waehleWerkstattPortal(
     return { ok: false, error: 'Diese Werkstatt ist nicht verfügbar.' }
   }
 
+  // P4 T9 (Netzwerk): ist der Claim SV-netzwerk-gebunden (netzwerk_owner_id zeigt auf ein
+  // Sachverstaendigen-Profil — SV-Vermittlungs-Flow), traegt die Zuweisung quelle='gutachter'
+  // (Attribution: der SV hat die Reparatur in sein Netzwerk gesteuert, der Kunde waehlt nur
+  // self-served aus). Sonst unveraendert 'kunde'. Non-fatal: Aufloesungs-Fehler -> 'kunde'.
+  let quelle: 'kunde' | 'gutachter' = 'kunde'
+  try {
+    const svcQ = createServiceClient()
+    const { resolveNetzwerkOwnerProfilId } = await import('@/lib/netzwerk/resolve-netzwerk-owner')
+    const ownerProfilId = await resolveNetzwerkOwnerProfilId(svcQ, { claimId })
+    if (ownerProfilId) {
+      const { data: svRow } = await svcQ
+        .from('sachverstaendige')
+        .select('id')
+        .eq('profile_id', ownerProfilId)
+        .maybeSingle()
+      if (svRow) quelle = 'gutachter'
+    }
+  } catch (err) {
+    console.warn('[waehleWerkstattPortal] quelle-Aufloesung non-fatal (fallback kunde):', err)
+  }
+
   const { assignReparaturWerkstatt } = await import('@/lib/werkstatt/vermittlung-server')
   const res = await assignReparaturWerkstatt({
     target: 'claim',
     id: claimId,
     werkstattId,
-    quelle: 'kunde',
+    quelle,
     actorUserId: owner.userId,
   })
   if (!res.ok) return { ok: false, error: res.error }

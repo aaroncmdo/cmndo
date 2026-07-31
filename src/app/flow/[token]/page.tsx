@@ -337,10 +337,9 @@ export default async function FlowPage({
   const needsBooking = flowConfigAktiv && weichen.brauchtGutachter
   // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
   // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung
-  // soll laufen. Die Bedingung dafuer steht jetzt ebenfalls in der Config und ist PRO SZENARIO
+  // soll laufen. Die Bedingung dafuer steht in der Config (erhebt_felder) und ist PRO SZENARIO
   // unterschiedlich: Haftpflicht prueft `unfallhergang`, Kasko/Selbstzahler `fahrzeugschaden_beschreibung`
   // (dort gibt es keinen Unfall — die Feststellung fragt den Schaden fuers Werkstatt-Matching ab).
-  const feststellungNeeded = flowConfigAktiv && weichen.steps.includes('feststellung')
 
   // Werkstatt-Picker: die Config sagt, ob der Weg ueberhaupt eine Werkstatt vorsieht (kasko/selbstzahler
   // sofort, haftpflicht nach dem Gutachten, nie bei nur_gutachter/Teilschuld) — brauchtWerkstattVermittlung
@@ -391,14 +390,21 @@ export default async function FlowPage({
     firmaAdresse ??
     null
 
-  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
-  // nur im incomplete-Pfad laden (sonst unnoetig). Werte feld_key -> aktueller
-  // leads-Wert (Boolean -> String fuer segmented/toggle-cards; Action coercet zurueck).
+  // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte.
+  // Werte feld_key -> aktueller leads-Wert (Boolean -> String fuer segmented/toggle-cards;
+  // Action coercet zurueck).
   // AAR-956 16.06. (Aaron): die lead-erfassung(kunde)-Config IMMER laden — daraus speist sich
-  // (a) die Feststellung (nur im incomplete-Pfad, feststellungNeeded) UND (b) die Service-/
-  // Kanzlei-Wahl im SA-/POS-Step (unabhaengig davon, ob die Feststellung noch laeuft).
+  // (a) die Feststellung UND (b) die Service-/Kanzlei-Wahl im SA-/POS-Step.
+  // Prod-Incident 29.07. (Aaron, Gutachter-Finder-Termin ohne Feststellung): die Phasen duerfen
+  // NICHT am Mount-Szenario gegatet werden (frueher `weichen.steps.includes('feststellung')`).
+  // Ein unqualifizierter Lead (nativer Finder fragt keine Schuldfrage) mountet im Quali-Szenario
+  // OHNE feststellung-Step -> feststellungPhasen=[] -> FlowWizardKfz friert
+  // initialHatFeststellung=false ein -> nach der Quali-Antwort filtert nurVorhandeneFeststellung
+  // den Step aus der neuen Haftpflicht-Sequenz -> Kunde erzaehlt NIE den Unfallhergang.
+  // Die Sichtbarkeit des Steps regeln weichen.steps (SSR) bzw. uebernimmSzenario (Client) —
+  // die Felder-Config muss dafuer nur VERFUEGBAR sein.
   const allKundeConfig = await ladeFlowPhasen('lead-erfassung', 'kunde')
-  const feststellungPhasen = feststellungNeeded ? allKundeConfig : []
+  const feststellungPhasen = allKundeConfig
   const leseFeldWert = (spalte: string | undefined): unknown => {
     if (spalte && spalte in (lead as Record<string, unknown>)) {
       const v = (lead as Record<string, unknown>)[spalte]

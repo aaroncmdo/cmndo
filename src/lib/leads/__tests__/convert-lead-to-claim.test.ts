@@ -557,11 +557,12 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-wk', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', werkstatt_id: 'werkstatt-inbound-1' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 3 claims insert
-      { data: { id: 'person-wk' } },                                   // 4 personen insert
-      { data: null },                                                  // 5 claim_parties insert
-      { data: null },                                                  // 6 faelle_claim_bridge upsert
-      { data: null },                                                  // 7 leads update
+      { data: { user_id: 'profil-werkstatt-1' } },                    // 3 werkstaetten select (netzwerk_owner_id-Resolver, P3-Seed)
+      { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 4 claims insert
+      { data: { id: 'person-wk' } },                                   // 5 personen insert
+      { data: null },                                                  // 6 claim_parties insert
+      { data: null },                                                  // 7 faelle_claim_bridge upsert
+      { data: null },                                                  // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -572,6 +573,8 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     expect(payload.werkstatt_id).toBe('werkstatt-inbound-1')
     expect(payload.vermittler_typ).toBe('werkstatt')
     expect(payload.vermittler_id).toBe('werkstatt-inbound-1')
+    // P3-Seed: claims.netzwerk_owner_id aus dem INBOUND-Vermittler (werkstaetten.user_id).
+    expect(payload.netzwerk_owner_id).toBe('profil-werkstatt-1')
     expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
   })
 
@@ -609,13 +612,14 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'lead-ff', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', vehicle_id: 'veh-ff-1' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
       { data: [{ firma_id: 'firma-1' }] },                            // 3 flotten_fahrzeuge select
-      { data: { id: 'konto-1' } },                                     // 4 firmen_flotten_konten select
-      { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 5 claims insert
-      { data: { id: 'person-ff' } },                                   // 6 personen insert
-      { data: null },                                                  // 7 claim_parties insert
-      { data: null },                                                  // 8 (ggf. claim_vehicle_involvements)
-      { data: null },                                                  // 9 faelle_claim_bridge upsert
-      { data: null },                                                  // 10 leads update
+      { data: { id: 'konto-1' } },                                     // 4 firmen_flotten_konten select (Vermittler-Aufloesung)
+      { data: { user_id: 'profil-flotte-1' } },                       // 5 firmen_flotten_konten select (netzwerk_owner_id-Resolver, P3-Seed)
+      { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 6 claims insert
+      { data: { id: 'person-ff' } },                                   // 7 personen insert
+      { data: null },                                                  // 8 claim_parties insert
+      { data: null },                                                  // 9 (ggf. claim_vehicle_involvements)
+      { data: null },                                                  // 10 faelle_claim_bridge upsert
+      { data: null },                                                  // 11 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -626,6 +630,8 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     expect(payload.vehicle_id).toBe('veh-ff-1')
     expect(payload.vermittler_typ).toBe('firmen_flotte')
     expect(payload.vermittler_id).toBe('konto-1')
+    // P3-Seed: claims.netzwerk_owner_id aus dem INBOUND-Vermittler (firmen_flotten_konten.user_id).
+    expect(payload.netzwerk_owner_id).toBe('profil-flotte-1')
   })
 
   it('kein Vermittler -> vermittler_typ=null (und KEIN Flotten-Lookup ohne Fahrzeug)', async () => {
@@ -648,5 +654,44 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     expect(payload.vermittler_id).toBeNull()
     // Ohne Fahrzeug kein Flotten-Roundtrip (und damit kein Queue-Shift in den Alt-Tests).
     expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
+  })
+})
+
+// ─── P4 (Netzwerk): SV-Vermittlungs-Sofort-Claim ────────────────────────────
+describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', () => {
+  it('SV-Vermittlung: gutachtenBereitsErstellt -> operative_status=gutachten-eingegangen, sv_id gesetzt, onboarding_complete ungesetzt', async () => {
+    primeResponses([
+      { data: { id: 'lead-sv', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'haftpflicht' } }, // 1 leads select
+      { data: [] },                                                // 2 profiles select (KB Round-Robin)
+      { data: { id: 'claim-sv', claim_nummer: 'CLM-SV' } },        // 3 claims insert
+      { data: { id: 'person-sv' } },                               // 4 personen insert
+      { data: null },                                              // 5 claim_parties insert
+      { data: null },                                              // 6 faelle_claim_bridge upsert
+      { data: null },                                              // 7 leads update
+    ])
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-sv', svIdFromTermin: 'sv-1', gutachtenBereitsErstellt: true })
+    expect(r.ok).toBe(true)
+    const p = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(p.operative_status).toBe('gutachten-eingegangen')
+    expect(p.sv_id).toBe('sv-1')
+    expect(p.onboarding_complete).toBeUndefined() // Haftpflicht -> kein Reduced-Repair-Zweig
+  })
+
+  it('ohne gutachtenBereitsErstellt: Initial-State unveraendert (sv-termin bei svIdFromTermin)', async () => {
+    primeResponses([
+      { data: { id: 'lead-alt', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
+      { data: [] },
+      { data: { id: 'claim-alt', claim_nummer: 'CLM-ALT' } },
+      { data: { id: 'person-alt' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-alt', svIdFromTermin: 'sv-1' })
+    expect(r.ok).toBe(true)
+    const p = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(p.operative_status).toBe('sv-termin')
   })
 })

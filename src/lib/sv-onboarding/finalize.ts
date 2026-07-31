@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { signAndStoreContract } from '@/lib/contracts/sign-and-store'
 import { revalidatePath } from 'next/cache'
 import { headers } from 'next/headers'
+import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
 
 /**
  * SV-Basic P2a Task 7: Basic-Onboarding finalisieren.
@@ -14,8 +15,11 @@ import { headers } from 'next/headers'
  * sachverstaendige — das Routing-Gate fuer den naechsten Wizard-Schritt.
  *
  * Voraussetzung: sachverstaendige.paket = 'basic'.
- * KEIN onboarding_status-Flip, KEIN ist_aktiv/portal_zugang — P3-Freigabe bleibt Gate.
- * verifizierung_status bleibt unveraendert.
+ * Danach AUTO-FREIGABE (Aaron 29.07.: "alle SVs sollen sich selbst freigeben"):
+ * freigebeBasicSvCore setzt verifiziert/ist_aktiv/portal_zugang, sofern der Go-Live-
+ * Geo-Guard passt (Standort + Isochrone) — sonst Fallback auf die manuelle
+ * Freigabe-Queue (Admin-Task). Spiegelt damit die bezahlten Pfade (Stripe/Gutschein/
+ * Sub-SV), die schon immer bei Abschluss selbst freischalten.
  *
  * unterschriftName wird server-seitig aus profiles.vorname/nachname abgeleitet —
  * der Wizard nimmt keinen expliziten Namen entgegen.
@@ -94,23 +98,31 @@ export async function schliesseSvBasicOnboardingAb(input: {
     return { ok: false, error: 'Abschluss fehlgeschlagen.' }
   }
 
-  // Admin-Task (non-critical, fire & forget)
-  try {
-    const { createLinkedTask } = await import('@/lib/tasks/create-task')
-    await createLinkedTask({
-      titel: 'Basic-Onboarding abgeschlossen — bereit zur Freigabe',
-      beschreibung: `SV ${sv.id} hat das Basic-Onboarding abgeschlossen. Bitte prüfen und freigeben.`,
-      prioritaet: 'normal',
-      typ: 'sv_basic_claim_review',
-      entity_type: 'gutachter',
-      entity_id: sv.id,
-      empfaenger_rolle: 'admin',
-      task_code: 'sv_basic_claim_review',
-      trigger_event: 'sv_basic_onboarding_done',
-      auto_erstellt: true,
-    })
-  } catch (err) {
-    console.error('[sv-onboarding] admin-task:', err)
+  // Auto-Freigabe (Aaron 29.07.): der SV schaltet sich bei Onboarding-Abschluss selbst
+  // frei — wie die bezahlten Pfade (Stripe/Gutschein/Sub-SV). Der Freigabe-Kern erzwingt
+  // den Go-Live-Geo-Guard (Standort + Isochrone), damit kein geo-loser SV "frei", aber
+  // map-unsichtbar/undispatchbar live geht.
+  const freigabe = await freigebeBasicSvCore(admin, sv.id)
+  if (!freigabe.ok) {
+    // Fallback: Geo-Guard hat blockiert (Standort/Isochrone fehlt) → manuelle
+    // Freigabe-Queue (Admin-Task), damit ein Admin die Adresse nachträgt + freigibt.
+    try {
+      const { createLinkedTask } = await import('@/lib/tasks/create-task')
+      await createLinkedTask({
+        titel: 'Basic-Onboarding abgeschlossen — Auto-Freigabe blockiert (Standort/Geo fehlt)',
+        beschreibung: `SV ${sv.id} hat das Basic-Onboarding abgeschlossen, die Auto-Freigabe wurde aber blockiert: ${freigabe.error} Bitte Adresse prüfen und manuell freigeben.`,
+        prioritaet: 'normal',
+        typ: 'sv_basic_claim_review',
+        entity_type: 'gutachter',
+        entity_id: sv.id,
+        empfaenger_rolle: 'admin',
+        task_code: 'sv_basic_claim_review',
+        trigger_event: 'sv_basic_onboarding_done',
+        auto_erstellt: true,
+      })
+    } catch (err) {
+      console.error('[sv-onboarding] fallback admin-task:', err)
+    }
   }
 
   revalidatePath('/gutachter/onboarding')

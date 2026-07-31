@@ -42,7 +42,8 @@ function fakeDb(opts: { claim: Record<string, unknown>; guthaben: number; latchR
   return { db, calls }
 }
 
-const baseClaim = { id: 'CLAIM-1', sv_id: 'SV-1', schadens_hoehe_netto: 5000, lead_preis_netto: null, gutachten: [] }
+// sa_unterschrieben: true = Normalfall (Claim am SA-Signing geboren) — das P4-Gate ist inert.
+const baseClaim = { id: 'CLAIM-1', sv_id: 'SV-1', sa_unterschrieben: true, schadens_hoehe_netto: 5000, lead_preis_netto: null, gutachten: [] }
 
 describe('processCaseBilling — Doppel-Abzug-Schutz (atomarer Latch)', () => {
   beforeEach(() => vi.clearAllMocks())
@@ -62,5 +63,34 @@ describe('processCaseBilling — Doppel-Abzug-Schutz (atomarer Latch)', () => {
     const r = await processCaseBilling('FALL-1')
     expect(calls.decrement).toBe(0) // <-- der Kern: kein Doppel-Abzug
     expect(r).toBeNull()
+  })
+})
+
+describe('processCaseBilling — P4 SA-Gate (Invariante: kein Billing vor Kunden-Bestaetigung)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  it('sa_unterschrieben=false (SV-Sofort-Claim) → null, KEIN Latch, KEIN Abzug', async () => {
+    const { db, calls } = fakeDb({
+      claim: { ...baseClaim, sa_unterschrieben: false },
+      guthaben: 300,
+      latchResult: [{ id: 'CLAIM-1' }],
+    })
+    createAdminClient.mockReturnValue(db)
+    const r = await processCaseBilling('FALL-1')
+    expect(r).toBeNull()
+    expect(calls.latchUsedIsNull).toBe(false)
+    expect(calls.decrement).toBe(0)
+  })
+
+  it('sa_unterschrieben=null (Alt-Daten defensiv) → null', async () => {
+    const { db, calls } = fakeDb({
+      claim: { ...baseClaim, sa_unterschrieben: null },
+      guthaben: 300,
+      latchResult: [{ id: 'CLAIM-1' }],
+    })
+    createAdminClient.mockReturnValue(db)
+    const r = await processCaseBilling('FALL-1')
+    expect(r).toBeNull()
+    expect(calls.decrement).toBe(0)
   })
 })

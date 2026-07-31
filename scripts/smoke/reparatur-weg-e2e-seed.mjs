@@ -28,16 +28,18 @@ const ENV_CANDIDATES = [
 ]
 let envRaw = null
 for (const c of ENV_CANDIDATES) { try { envRaw = readFileSync(c, 'utf8'); break } catch { /* next */ } }
-if (!envRaw) throw new Error('.env.local nicht gefunden')
+// CI (Fundament B2): kein .env.local im Runner -> Fallback auf process.env (Secrets im Workflow durchgereicht).
 const env = {}
-for (const line of envRaw.split('\n')) {
-  const l = line.replace(/\r$/, '')
-  if (!l.includes('=') || l.trimStart().startsWith('#')) continue
-  const i = l.indexOf('='); env[l.slice(0, i).trim()] = l.slice(i + 1).trim().replace(/^["']|["']$/g, '')
+if (envRaw) {
+  for (const line of envRaw.split('\n')) {
+    const l = line.replace(/\r$/, '')
+    if (!l.includes('=') || l.trimStart().startsWith('#')) continue
+    const i = l.indexOf('='); env[l.slice(0, i).trim()] = l.slice(i + 1).trim().replace(/^["']|["']$/g, '')
+  }
 }
-const URL_ = env.NEXT_PUBLIC_SUPABASE_URL
-const KEY = env.SUPABASE_SERVICE_ROLE_KEY
-if (!URL_ || !KEY) throw new Error('SUPABASE URL/SERVICE_ROLE_KEY fehlen')
+const URL_ = env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+const KEY = env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY
+if (!URL_ || !KEY) throw new Error('SUPABASE URL/SERVICE_ROLE_KEY fehlen (weder .env.local noch process.env)')
 const db = createClient(URL_, KEY, { auth: { persistSession: false, autoRefreshToken: false } })
 
 const APP = 'https://app.claimondo.de'
@@ -88,9 +90,12 @@ async function clean() {
   // stamp); das Summary allein kennt nur den letzten Lauf.
   const { data: profs } = await db.from('profiles').select('id').like('email', 'throwaway-%repweg-%@claimondo.test')
   const uids = (profs ?? []).map((p) => p.id)
-  const zwei = new Date(Date.now() - 2 * 3600e3).toISOString()
   for (const uid of uids) {
-    await db.from('mitteilungen').delete().eq('empfaenger_id', uid).gt('created_at', zwei)
+    // ALLE mitteilungen des Test-Kontos loeschen (auf empfaenger_id=uid gescopt = reines throwaway-
+    // Konto, alle mitteilungen sind Test-Daten). KEIN <2h-Zeitfilter mehr: der liess bei einem
+    // Cleanup >2h nach dem Seed die alten mitteilungen stehen -> FK-Block auf profiles.delete ->
+    // verwaistes Test-Profil blieb auf prod liegen (Befund 30.07., manuell geraeumt).
+    await db.from('mitteilungen').delete().eq('empfaenger_id', uid)
     await db.from('werkstaetten').delete().eq('user_id', uid)
     await db.from('profiles').delete().eq('id', uid)
     await db.auth.admin.deleteUser(uid).catch(() => {})

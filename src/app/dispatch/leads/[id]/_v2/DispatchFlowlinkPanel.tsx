@@ -16,6 +16,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { formatDatumUhrzeit } from '@/lib/format'
 import { sendFlowLinkMultiChannel } from '../_actions/flowlink'
 import { checkEmailIsSv } from '../_actions/email-sv-check'
+import { effektiverFlowlinkStatus } from './flowlink-status'
 
 export type DispatchFlowLink = {
   id: string
@@ -35,6 +36,7 @@ const FLOWLINK_STATUS_TONE: Record<string, 'success' | 'warning' | 'neutral'> = 
   abgeschlossen: 'success',
   geoeffnet: 'neutral',
   abgelaufen: 'warning',
+  storniert: 'warning',
 }
 
 const KANAL_LABEL: Record<string, string> = { whatsapp: 'WhatsApp', sms: 'SMS', email: 'E-Mail' }
@@ -81,14 +83,10 @@ export function DispatchFlowlinkPanel({
     })
   }
 
+  // FlowLink-Audit 27.07.: 'abgelaufen' ist eine Zeit-Ableitung (expires_at),
+  // kein DB-Status — vorher zeigten abgelaufene Links roh "erstellt".
   const latest = flowLinks[0] ?? null
-  const latestStatus = latest
-    ? latest.abgeschlossen_am
-      ? 'abgeschlossen'
-      : latest.geoeffnet_am
-        ? 'geoeffnet'
-        : latest.status
-    : null
+  const latestStatus = latest ? effektiverFlowlinkStatus(latest) : null
 
   return (
     <div className="mt-3 max-w-3xl rounded-ios-xl border border-claimondo-border bg-white p-5 space-y-3">

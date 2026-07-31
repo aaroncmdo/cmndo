@@ -33,7 +33,7 @@ export type ReleasePendingRow = {
 export type ReleaseStatus = 'freigegeben' | 'storniert'
 
 export type ReleaseErgebnis =
-  | { ok: true; checked: number; storniert: number; released: number; notifsEmitted: number }
+  | { ok: true; checked: number; storniert: number; released: number; unterdrueckt: number; notifsEmitted: number }
   | { ok: false; error: string }
 
 export type RunProvisionsReleaseOpts = {
@@ -45,6 +45,13 @@ export type RunProvisionsReleaseOpts = {
    * Cron NICHT — der Status-Flip ist wichtiger als die Notification.
    */
   onStatusChange?: (row: ReleasePendingRow, status: ReleaseStatus, grund?: string) => Promise<boolean>
+  /**
+   * Freundes-Graph-Gate (P3 Netzwerk, K2/K13). Erhaelt die release-BERECHTIGTEN Rows und liefert die
+   * Teilmenge der Provisions-Ids, die intra-Freundesnetzwerk sind -> werden auf 'unterdrueckt' gesetzt
+   * statt freigegeben (still, ohne onStatusChange). makler/makler_empfehlung sind extern -> nie im Set.
+   * Wirft der Hook, degradiert der Lauf fail-open zu Status quo (alles freigeben) mit lautem Log.
+   */
+  bestimmeUnterdrueckteProvisionen?: (releaseBerechtigt: ReleasePendingRow[]) => Promise<Set<string>>
   /** Max. Rows pro Lauf (Default 500 — wie die Vorgaenger-Crons). */
   limit?: number
 }
@@ -60,7 +67,7 @@ export async function runProvisionsRelease(
   db: SupabaseClient<Database>,
   opts: RunProvisionsReleaseOpts,
 ): Promise<ReleaseErgebnis> {
-  const { partnerTypen, now, onStatusChange, limit = 500 } = opts
+  const { partnerTypen, now, onStatusChange, bestimmeUnterdrueckteProvisionen, limit = 500 } = opts
 
   // Pending-Query. Hold-Filter erst NACH dem Storno-Pass — so erwischen wir auch Provisionen, die nach
   // der Hold-Periode, aber vor dem Cron-Run storniert wurden.
@@ -75,7 +82,7 @@ export async function runProvisionsRelease(
 
   const pending = (pendingRaw ?? []) as unknown as ReleasePendingRow[]
   if (pending.length === 0) {
-    return { ok: true, checked: 0, storniert: 0, released: 0, notifsEmitted: 0 }
+    return { ok: true, checked: 0, storniert: 0, released: 0, unterdrueckt: 0, notifsEmitted: 0 }
   }
 
   // Completion-Signale: Voll-Claim = abgeschlossen_am; nur_gutachter = juengster durchgefuehrter Termin.
@@ -163,16 +170,42 @@ export async function runProvisionsRelease(
     )
   })
 
+  // 2b) Suppression-Pass (P3 Netzwerk): intra-Freundesnetzwerk-Provisionen werden unterdrueckt
+  // statt freigegeben (Abo deckt die Leistung — Spec 1 §13b). Nur release-BERECHTIGTE Rows werden
+  // gegated; Storno/Hold bleiben unberuehrt. Fail-open: wirft der Hook, wird alles freigegeben.
+  let unterdruecktSet = new Set<string>()
+  if (bestimmeUnterdrueckteProvisionen && releaseRows.length > 0) {
+    try {
+      unterdruecktSet = await bestimmeUnterdrueckteProvisionen(releaseRows)
+    } catch (err) {
+      console.error('[release-runner] Suppression-Gate warf — fail-open zu Status quo (freigeben):', err)
+      unterdruecktSet = new Set()
+    }
+  }
+  const unterdrueckteRows = releaseRows.filter((p) => unterdruecktSet.has(p.id))
+  const freizugebendeRows = releaseRows.filter((p) => !unterdruecktSet.has(p.id))
+
+  let unterdrueckt = 0
+  if (unterdrueckteRows.length > 0) {
+    const { error } = await db
+      .from('partner_provisionen')
+      .update({ status: 'unterdrueckt', storno_grund: 'intra_netzwerk' })
+      .in('id', unterdrueckteRows.map((p) => p.id))
+    if (error) return { ok: false, error: error.message }
+    unterdrueckt = unterdrueckteRows.length
+    // K13 "still": KEIN notify — intra-Netzwerk ist operativ, nicht verguetungsrelevant.
+  }
+
   let released = 0
-  if (releaseRows.length > 0) {
+  if (freizugebendeRows.length > 0) {
     const { error } = await db
       .from('partner_provisionen')
       .update({ status: 'freigegeben' })
-      .in('id', releaseRows.map((p) => p.id))
+      .in('id', freizugebendeRows.map((p) => p.id))
     if (error) return { ok: false, error: error.message }
-    released = releaseRows.length
-    for (const p of releaseRows) await notify(p, 'freigegeben')
+    released = freizugebendeRows.length
+    for (const p of freizugebendeRows) await notify(p, 'freigegeben')
   }
 
-  return { ok: true, checked: pending.length, storniert, released, notifsEmitted }
+  return { ok: true, checked: pending.length, storniert, released, unterdrueckt, notifsEmitted }
 }

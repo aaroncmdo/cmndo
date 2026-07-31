@@ -23,6 +23,7 @@ import {
   kvaStatusLabel,
 } from '@/lib/werkstatt/werkstatt-auftrag-segment'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { getPartnerProvisionStatusLabel } from '@/lib/statusLabels'
 import {
   bestaetigeReparaturtermin,
   erbitteRueckruf,
@@ -745,7 +746,7 @@ export function WerkstattAuftragDetail({
             <p className="text-body-sm text-claimondo-ondo">
               Du hast diesen Kunden an Claimondo vermittelt.
               {auftrag.provision_betrag_netto != null
-                ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${auftrag.provision_status ?? 'offen'}).`
+                ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${getPartnerProvisionStatusLabel(auftrag.provision_status)}).`
                 : ''}
             </p>
           </div>

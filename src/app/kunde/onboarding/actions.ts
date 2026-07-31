@@ -10,6 +10,7 @@ import { getStorageUrl } from '@/lib/storage/url'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
+import { seedeKundenBindungFirstTouch } from '@/lib/netzwerk/bindung'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -570,6 +571,21 @@ export async function completeOnboarding(
       .update({ onboarding_complete: true })
       .eq('id', targetClaimId)
     if (claimError) return { success: false, error: claimError.message }
+
+    // Netzwerk-Bindung First-Touch (Spec 1 §8, K6): profiles.netzwerk_owner_id aus dem
+    // Origin-Claim (targetClaimId) — NICHT aus entstanden_via/-aus_claim_id (NULL-Writer).
+    // First-Touch (IS-NULL-Guard, sticky) + non-fatal, gekapselt in bindung.ts. Laeuft ueber
+    // den Admin-Client (service_role) — guard_profiles_netzwerk_owner_upd erlaubt keine
+    // authenticated-Writes auf netzwerk_owner_id/_seit.
+    await seedeKundenBindungFirstTouch(admin, user.id, targetClaimId)
+
+    // P4: der Kunde hat sein Onboarding abgeschlossen -> aufgeschobene Funnel-Effekte des
+    // SV-Vermittlungs-Sofort-Claims nachholen (Billing + AutoPhase; No-op fuer Normalfall-
+    // Claims — Billing idempotent, AutoPhase findet keinen Hop). Non-fatal.
+    if (targetFallId) {
+      const { resumeFunnelAfterOnboarding } = await import('@/lib/faelle/resume-funnel-after-onboarding')
+      await resumeFunnelAfterOnboarding(targetFallId)
+    }
   }
 
   // profiles.onboarding_completed_at zusätzlich setzen (Erstkontakt-Marker).

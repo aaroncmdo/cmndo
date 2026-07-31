@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  bewerteSvKandidat, vergleicheTenure, sortiereKandidaten,
+  bewerteSvKandidat, W_NETZWERK, W_RANG, vergleicheTenure, sortiereKandidaten,
   istKontingentBlockiert, haversineKm, pointInPolygon, ersterFreierSlot, rangToOrdinal,
   type RankbarerKandidat,
 } from '../matching-score'
@@ -13,42 +13,31 @@ describe('istKontingentBlockiert', () => {
   it('nicht-basic mit frei nicht blockiert', () => { expect(istKontingentBlockiert('pro', 3)).toBe(false) })
 })
 
-describe('bewerteSvKandidat', () => {
-  it('höheres Paket → höherer Score', () => {
-    const base = { kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: 10, distanzKm: 5 }
-    expect(bewerteSvKandidat({ ...base, paket: 'pro' })).toBeGreaterThan(bewerteSvKandidat({ ...base, paket: 'standard' }))
+describe('bewerteSvKandidat (Netzwerkpartner-Boost, 13b)', () => {
+  const base = { kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: null, distanzKm: 0 }
+  it('Netzwerkpartner bekommt W_NETZWERK, Free bekommt 0', () => {
+    const partner = bewerteSvKandidat({ ...base, istNetzwerkpartner: true })
+    const free = bewerteSvKandidat({ ...base, istNetzwerkpartner: false })
+    expect(partner - free).toBe(W_NETZWERK)
   })
-  it('mehr genutzt → niedriger Score (Pakete-voll-bekommen: Unterauslastung bevorzugt)', () => {
-    const base = { paket: 'pro', ablehnungen30d: 0, etaVomBueroMin: 10, distanzKm: 5 }
-    expect(bewerteSvKandidat({ ...base, kontingentGenutzt: 0 })).toBeGreaterThan(bewerteSvKandidat({ ...base, kontingentGenutzt: 5 }))
+  it('rangOrdinal verfeinert INNERHALB des Buckets, kreuzt ihn nie (2*W_RANG < W_NETZWERK)', () => {
+    const partnerBronze = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, rangOrdinal: 0 })
+    const partnerGold = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, rangOrdinal: 2 })
+    const freeGold = bewerteSvKandidat({ ...base, istNetzwerkpartner: false, rangOrdinal: 2 })
+    expect(partnerGold - partnerBronze).toBe(2 * W_RANG)
+    expect(partnerBronze).toBeGreaterThan(freeGold)
   })
-  it('weitere ETA → niedriger Score', () => {
-    const base = { paket: 'pro', kontingentGenutzt: 0, ablehnungen30d: 0, distanzKm: 5 }
-    expect(bewerteSvKandidat({ ...base, etaVomBueroMin: 5 })).toBeGreaterThan(bewerteSvKandidat({ ...base, etaVomBueroMin: 40 }))
+  it('Distanz/Kontingent/Ablehnung wirken negativ', () => {
+    const nah = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, distanzKm: 5 })
+    const fern = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, distanzKm: 25 })
+    expect(nah).toBeGreaterThan(fern)
+    const wenigerGenutzt = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, kontingentGenutzt: 0 })
+    const mehrGenutzt = bewerteSvKandidat({ ...base, istNetzwerkpartner: true, kontingentGenutzt: 5 })
+    expect(wenigerGenutzt).toBeGreaterThan(mehrGenutzt)
   })
-  it('null ETA → Haversine-km als Penalty', () => {
-    const s = bewerteSvKandidat({ paket: 'standard', kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: null, distanzKm: 20 })
-    expect(s).toBe(1 * 100 - 20) // paketPrio(standard=1)*100 - distanzKm
-  })
-})
-
-describe('bewerteSvKandidat — Rang-Fein-Sort (C: innerhalb Paket, nie tier-übergreifend)', () => {
-  const base = { kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: 10, distanzKm: 5 }
-  it('höherer Rang → höherer Score INNERHALB derselben Paket-Stufe', () => {
-    expect(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 2 }))
-      .toBeGreaterThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
-  })
-  it('Revenue-Schutz: Rang überschreitet NIE eine Paket-Stufe — standard+gold < pro+bronze', () => {
-    expect(bewerteSvKandidat({ ...base, paket: 'standard', rangOrdinal: 2 }))
-      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
-  })
-  it('auch pro+gold < premium+bronze', () => {
-    expect(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 2 }))
-      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
-  })
-  it('fehlender rangOrdinal → identischer Score (backward-compat)', () => {
-    expect(bewerteSvKandidat({ ...base, paket: 'pro' }))
-      .toBe(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  it('null ETA → Haversine-km als Penalty (istNetzwerkpartner(1)*W_NETZWERK(100) - distanzKm)', () => {
+    const s = bewerteSvKandidat({ istNetzwerkpartner: true, kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: null, distanzKm: 20 })
+    expect(s).toBe(1 * 100 - 20)
   })
   it('rangToOrdinal: gold=2, silber=1, bronze/null/undefined=0', () => {
     expect(rangToOrdinal('gold')).toBe(2)

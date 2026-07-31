@@ -23,7 +23,7 @@ export function rundeDistanz(km: number): string {
  * Nachnamen enthaelt).
  */
 export function toOeffentlichesSvProfil(input: ProjektionInput): OeffentlichesSvProfil {
-  const { candidate, bewertung, profil, slots, rang } = input
+  const { candidate, bewertung, profil, slots, rang, istNetzwerkpartner } = input
   const vorname = (profil?.vorname ?? '').trim()
   return {
     svId: candidate.svId,
@@ -35,10 +35,8 @@ export function toOeffentlichesSvProfil(input: ProjektionInput): OeffentlichesSv
     bewertungAktualisiert: bewertung?.aktualisiert ?? null,
     distanzGerundet: rundeDistanz(candidate.distanzKm),
     istWunschterminFrei: candidate.verfuegbarAmWunschtermin === true,
-    // AAR-956 (Aaron 14.06.): abgeleitetes Tier-Signal. paket !== 'basic' (und
-    // nicht leer) = zahlender Partner (Tier-1). Der rohe paket-Wert bleibt im
-    // candidate; hier verlaesst nur das JA/NEIN-Boolean das Modul (s. types.ts).
-    istTopPartner: candidate.paket !== '' && candidate.paket !== 'basic',
+    // 13b LOCKED: „Netzwerkpartner"-Badge haengt am Abo-Praedikat, nicht an paket (K3).
+    istTopPartner: istNetzwerkpartner === true,
     // AAR-956 Partner-Tier: ehrlicher verdienter Rang (loest die paket-Plakette ab).
     rang: rang?.tier ?? null,
     rangSinnsatz: rang?.sinnsatz ?? null,

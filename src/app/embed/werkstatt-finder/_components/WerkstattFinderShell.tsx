@@ -60,6 +60,9 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
   const popupRef = useRef<MapboxPopup | null>(null)
   const popupRootRef = useRef<Root | null>(null)
   const selectedIdRef = useRef<string | null>(selectedId)
+  // Zuletzt auf die Route gerahmte Auswahl — damit fitBounds NUR bei Auswahl-Wechsel feuert
+  // (nicht bei Re-Draw wegen rows/center) und Deselect wieder freigibt (Re-Select rahmt erneut).
+  const lastFramedRef = useRef<string | null>(null)
   const [sheetOffen, setSheetOffen] = useState(true)
   const dragStartRef = useRef<number | null>(null)
   const [dragY, setDragY] = useState(0)
@@ -167,8 +170,11 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
         }
       }
     }
-    if (map.loaded()) apply()
-    else map.once('load', apply)
+    // Direkt bauen — kein loaded()/isStyleLoaded()-Gate (s. Route-Effekt unten): beide flippen beim
+    // Auswahl-Wechsel transient auf false (Puls-removeLayer), und once('load') feuert nach dem
+    // initialen Load nie wieder → der Marker-Rebuild wuerde bei einer Suche waehrend aktiver Route
+    // verschluckt. apply() ist gefahrlos direkt (Marker sind DOM-Overlays, fitBounds ist try/catch).
+    apply()
   }, [rows, center, onSelectPin])
 
   // I4: Auswahl-Highlight OHNE Kamera-Bewegung — restylt nur die vorhandenen Marker-Elemente.
@@ -223,6 +229,7 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
 
     if (!ziel || ziel.lat == null || ziel.lng == null || !center) {
       removeRoute()
+      lastFramedRef.current = null // Deselect gibt frei → Re-Select derselben Werkstatt rahmt erneut
       return
     }
 
@@ -274,11 +281,37 @@ export function WerkstattFinderShell({ rows, center, selectedId, onSelectPin, wi
           direction: 'forward',
           width: ['interpolate', ['linear'], ['zoom'], 9, 3, 14, 5],
         })
+        // Kamera EINMALIG auf die Route rahmen, wenn sich die AUSWAHL geaendert hat (nicht bei
+        // Re-Draw wegen rows/center) — sonst liegt die kurze Route unsichtbar hinter Popup/Sheet
+        // (Aaron 29.07.: Pin-Klick zeigte "keine Route"). Analog Gutachter-Finder (routeToTarget):
+        // Padding links = Wizard-Glass-Spalte (Desktop, clamp 440..620px) bzw. unten = Bottom-Sheet
+        // (Mobil), damit die Route frei sichtbar bleibt statt verdeckt.
+        if (lastFramedRef.current !== selectedId) {
+          lastFramedRef.current = selectedId
+          const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+          const leftPad = desktop ? Math.min(620, Math.max(440, window.innerWidth * 0.33)) + 28 : 40
+          const bounds = new mapboxgl.LngLatBounds(
+            [center.lng, center.lat],
+            [center.lng, center.lat],
+          ).extend([zielLng, zielLat])
+          map.fitBounds(bounds, {
+            padding: { top: 80, right: 70, bottom: desktop ? 90 : 380, left: leftPad },
+            duration: 1200,
+            maxZoom: 14,
+          })
+        }
       })
     }
 
-    if (map.loaded()) draw()
-    else map.once('load', draw)
+    // Direkt zeichnen — KEIN map.loaded()/isStyleLoaded()-Gate. Beide flippen beim Auswahl-Wechsel
+    // transient auf false: der Effekt-Cleanup der vorigen Auswahl entfernt den Puls-Layer
+    // (removeLayer = Style-Mutation) → im selben Tick sieht der neue Effekt styleLoaded=false. Der
+    // fruehere `else map.once('load', draw)`-Fallback feuert nach dem initialen Load NIE wieder →
+    // der Draw wurde stumm verschluckt, die Route aktualisierte beim Umschalten nicht (Bodyshop51-
+    // Bug, Aaron 29.07.). draw() ist gefahrlos direkt: fetchDrivingRoute ist async, die Map-Ops
+    // laufen erst im .then (Style laengst gesettled) — exakt wie der Gutachter-Finder (routeToTarget,
+    // ohne Gate). Der Effekt zeichnet ohnehin nur bei einer Nutzer-Auswahl (Map bereits geladen).
+    draw()
 
     // Deps-Wechsel/Unmount: Fetch abbrechen + Puls-rAF stoppen. Source/Layer bleiben bei
     // Auswahl-Wechsel bestehen (nächster Lauf macht setData → kein Flicker); Voll-Abbau nur

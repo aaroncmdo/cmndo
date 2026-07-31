@@ -16,6 +16,9 @@ import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
 import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
+import { applyNetzwerkPraeferenz } from '@/lib/netzwerk/apply-netzwerk-praeferenz'
+import { ladeFreundKandidatIds } from '@/lib/netzwerk/freunde'
+import { kundeHatBestaetigt } from '@/lib/faelle/onboarding-gate'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -87,7 +90,9 @@ export async function findReparaturWerkstaettenForTarget(
 }
 
 export type QualifizierteWerkstaettenResult = {
-  werkstaetten: Qualifiziert<WerkstattFinderRow>[]
+  // imNetzwerk (P2-T6, additiv): von applyNetzwerkPraeferenz gesetzt, wenn ein ownerProfilId
+  // durchgereicht wurde — true = Freund-Werkstatt des Owners, nach oben partitioniert.
+  werkstaetten: (Qualifiziert<WerkstattFinderRow> & { imNetzwerk?: boolean })[]
   keineSpezialisierte: boolean
   bedarf: Reparaturbedarf
 }
@@ -103,7 +108,7 @@ export type QualifizierteWerkstaettenResult = {
  * Caller das fit-Flag anzeigen oder keineSpezialisierte ausweisen moechte.
  */
 export async function findQualifizierteReparaturWerkstaetten(
-  input: VermittlungTarget & { nurEchte?: boolean },
+  input: VermittlungTarget & { nurEchte?: boolean; ownerProfilId?: string | null },
 ): Promise<QualifizierteWerkstaettenResult> {
   const admin = createAdminClient()
 
@@ -119,7 +124,20 @@ export async function findQualifizierteReparaturWerkstaetten(
   // 3. Qualifier annotiert fit + hart-filtert bei hoher confidence
   const { werkstaetten, keineSpezialisierte } = qualifiziereWerkstaetten(rows, bedarf)
 
-  return { werkstaetten, keineSpezialisierte, bedarf }
+  // 4. P2-T6 (Netzwerk, K12): relationale Partition als ALLERLETZTER Schritt — NACH dem
+  //    #4101/#4125-Reorder, damit Freunde ueber die Extra-Reorderings floaten, ohne sie zu
+  //    zerstoeren. K10: EIN Freund-Batch pro Aufruf. 'passt_nicht' zaehlt NICHT als
+  //    qualifiziert (Engine-Qualifikation schlaegt Freundschaft, Design §5.2).
+  let final: QualifizierteWerkstaettenResult['werkstaetten'] = werkstaetten
+  if (input.ownerProfilId) {
+    const freundIds = await ladeFreundKandidatIds(admin, input.ownerProfilId, 'werkstatt')
+    final = applyNetzwerkPraeferenz(
+      werkstaetten.map((w) => ({ ...w, qualifiziert: w.fit !== 'passt_nicht' })),
+      freundIds,
+    )
+  }
+
+  return { werkstaetten: final, keineSpezialisierte, bedarf }
 }
 
 /**
@@ -135,6 +153,28 @@ export async function assignReparaturWerkstatt(
   },
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
+
+  // P4 (Invariante Spec 3 §4): keine Werkstatt-Zuweisung vor Kunden-Bestaetigung — GESCOPED auf
+  // abrechnungsweg='haftpflicht' (dort ist die SA/Abtretung die Legitimationsgrundlage; der
+  // SV-Vermittlungs-Sofort-Claim wird haftpflicht + sa_unterschrieben=false geboren). Kasko/
+  // Selbstzahler waehlen die Werkstatt LEGITIM vor jeder SA (partieller Quali-Claim aus
+  // erzeugeSelbstzahlerClaim — live verifiziert 30.07.: kasko/selbstzahler-Zuweisungen mit
+  // sa!=true existieren, haftpflicht ausnahmslos sa=true) -> dort KEIN Gate, sonst braeche der
+  // FlowLink-Werkstatt-Step. Der Claim-Read wird unten im LEAD-CLAIM-SYNC wiederverwendet.
+  type GateClaim = { id: string; sa_unterschrieben?: boolean | null; abrechnungsweg?: string | null }
+  let gateClaim: GateClaim | null = null
+  {
+    const q = admin.from('claims').select('id, sa_unterschrieben, abrechnungsweg')
+    const { data } =
+      input.target === 'claim'
+        ? await q.eq('id', input.id).maybeSingle()
+        : await q.eq('lead_id', input.id).maybeSingle()
+    gateClaim = (data as GateClaim | null) ?? null
+  }
+  if (gateClaim && gateClaim.abrechnungsweg === 'haftpflicht' && !kundeHatBestaetigt(gateClaim)) {
+    return { ok: false, error: 'Der Kunde hat den Auftrag noch nicht bestätigt.' }
+  }
+
   const table = input.target === 'lead' ? 'leads' : 'claims'
   const patch = buildZuweisungPatch(input.werkstattId, input.actorUserId, input.quelle)
   const { error } = await admin.from(table).update(patch as never).eq('id', input.id)
@@ -151,23 +191,15 @@ export async function assignReparaturWerkstatt(
   // Nebenwirkung, die das mitrepariert: die Werkstatt-Mitteilung verlinkt auf /werkstatt/auftraege,
   // und v_werkstatt_auftrag ist CLAIM-gekeyt — ohne die Zuordnung am Claim landete die Werkstatt auf
   // einer leeren Liste.
-  let effectiveClaimId: string | null = input.target === 'claim' ? input.id : null
-  if (input.target === 'lead') {
-    const { data: claim } = await admin
+  // (P4: der Claim-Read ist in den Gate-Block oben vorgezogen — gateClaim wird hier wiederverwendet.)
+  let effectiveClaimId: string | null = input.target === 'claim' ? input.id : (gateClaim?.id ?? null)
+  if (input.target === 'lead' && effectiveClaimId) {
+    const { error: syncErr } = await admin
       .from('claims')
-      .select('id')
-      .eq('lead_id', input.id)
-      .maybeSingle()
-    const claimId = (claim?.id as string | undefined) ?? null
-    effectiveClaimId = claimId
-    if (claimId) {
-      const { error: syncErr } = await admin
-        .from('claims')
-        .update(patch as never)
-        .eq('id', claimId)
-      // Non-critical: die Lead-Zuweisung steht bereits; ein Sync-Fehler darf sie nicht zuruecknehmen.
-      if (syncErr) console.error('[assignReparaturWerkstatt] Claim-Sync fehlgeschlagen:', syncErr.message)
-    }
+      .update(patch as never)
+      .eq('id', effectiveClaimId)
+    // Non-critical: die Lead-Zuweisung steht bereits; ein Sync-Fehler darf sie nicht zuruecknehmen.
+    if (syncErr) console.error('[assignReparaturWerkstatt] Claim-Sync fehlgeschlagen:', syncErr.message)
   }
 
   // Reparatur-Cursor: Werkstatt zugewiesen -> reparatur-angefragt (nur reduced-repair,

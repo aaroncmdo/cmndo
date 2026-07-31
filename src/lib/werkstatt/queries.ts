@@ -117,7 +117,8 @@ export async function getWerkstattOverview(werkstattId: string): Promise<Werksta
 // Provisionen-Liste
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type WerkstattProvisionStatus = 'pending' | 'freigegeben' | 'storniert' | 'ausgezahlt'
+// 'unterdrueckt' (P3 Netzwerk): intra-Freundesnetzwerk -> keine Einzelprovision (Abo deckt).
+export type WerkstattProvisionStatus = 'pending' | 'freigegeben' | 'storniert' | 'ausgezahlt' | 'unterdrueckt'
 
 export type WerkstattProvisionRow = {
   id: string

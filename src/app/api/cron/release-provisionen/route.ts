@@ -18,6 +18,7 @@ import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runProvisionsRelease, RELEASE_PARTNER_TYPEN } from '@/lib/provisionen/release-runner'
 import { notifyMaklerProvisionStatus } from '@/lib/provisionen/notify-makler-provision'
+import { bestimmeIntraNetzwerkProvisionen } from '@/lib/netzwerk/provisions-suppression'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,10 +28,14 @@ export async function GET(request: Request) {
   }
 
   const now = new Date().toISOString()
-  const result = await runProvisionsRelease(createAdminClient(), {
+  const admin = createAdminClient()
+  const result = await runProvisionsRelease(admin, {
     partnerTypen: RELEASE_PARTNER_TYPEN,
     now,
     onStatusChange: notifyMaklerProvisionStatus,
+    // P3 Netzwerk: intra-Freundesnetzwerk-Provisionen unterdruecken statt freigeben (Spec 1 §13b).
+    // makler ist extern (EXTERNE_PARTNER_TYPEN) -> vom Gate nie erfasst, feuert weiter.
+    bestimmeUnterdrueckteProvisionen: (rows) => bestimmeIntraNetzwerkProvisionen(admin, rows),
   })
 
   if (!result.ok) {
@@ -43,6 +48,7 @@ export async function GET(request: Request) {
     checked: result.checked,
     storniert: result.storniert,
     released: result.released,
+    unterdrueckt: result.unterdrueckt,
     notifs_emitted: result.notifsEmitted,
     timestamp: now,
   })

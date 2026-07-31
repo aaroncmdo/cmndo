@@ -44,7 +44,10 @@ describe('callForProposals', () => {
     expect(out).toEqual(['draft-a'])
     expect(messagesCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'm', max_tokens: 1500, system: 'sys', tools: [],
+        model: 'm', max_tokens: 1500, tools: [],
+        // System wird als cache_control-Block uebergeben (Prompt-Caching des
+        // stabilen tools+system-Prefix) — der Input bleibt system: string.
+        system: [{ type: 'text', text: 'sys', cache_control: { type: 'ephemeral' } }],
         messages: [{ role: 'user', content: 'ctx' }],
       }),
     )
