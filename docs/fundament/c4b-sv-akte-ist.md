@@ -82,7 +82,8 @@ Zonen-Kern (linearer Sektionen-Stack ≈ Zonen-Flow, keine Geo/Drawer/Copilot/Se
 („kleinste Sonderfälle zuerst") ist die **empfohlene Reihenfolge: Werkstatt VOR SV** — d.h. die tentative
 `c4-plan §4`-Zuordnung (C4b=SV, C4c=Werkstatt) **umdrehen** (C4b=Werkstatt, C4c=SV). Grund: Werkstatt validiert die
 Kern-Generalisierung (Layout-Variante + Custom-Header-Slot) am **einfacheren** View; SV (mit Client-Tree +
-Server-Bridge + Sub-Route) baut dann auf einem bereits an der Realität gehärteten Kern auf. → **DECISIONS** (§6).
+Server-Bridge + Sub-Route) baut dann auf einem bereits an der Realität gehärteten Kern auf.
+**→ Aaron 31.07. wählte dennoch SV-zuerst** (Roadmap-Priorität); die Größen-Analyse bleibt als Evidenz (§6).
 
 ## 5 · Tranchen-Skizze SV (nach der Kern-Generalisierung)
 
@@ -99,16 +100,17 @@ Server-Bridge + Sub-Route) baut dann auf einem bereits an der Realität gehärte
    (das Layout-Gerüst in `FallDetailClient`) entfernt; SV-Journey-Smoke grün (B1); die 13 `_components/`-Karten bleiben
    (via config referenziert); knip-Baseline sinkt.
 
-## 6 · Offene Entscheidungen (→ DECISIONS.md, Aaron-Review vor SV-Code)
+## 6 · Entscheidungen (Aaron 31.07., AskUserQuestion → `DECISIONS.md`)
 
-1. **Reihenfolge SV vs Werkstatt (§6-Q2):** Empfehlung **Werkstatt VOR SV** (Werkstatt = kleinerer struktureller
-   Sonderfall). Kippt die tentative C4b=SV-Zuordnung → C4b=Werkstatt, C4c=SV.
-2. **Kern-Generalisierung vs Shell-Behalt:** Wird der `<FallAkte>`-Kern um `layout`-Variante + Custom-Header-Slot +
-   ReactNode-Blöcke erweitert (dann rendert SV **echt** über den Kern, C4-DoD erfüllt), **oder** teilt SV nur die
-   Sub-Pieces (Realtime/Chat/Team/Doc-Filter) und behält seine Shell (C4-DoD „alle 5 über den Kern" abgeschwächt)?
-   *(Empfehlung: Generalisierung — die Nähte sind klein und der Hebel ist genau die je-Portal-Duplikation, die C4 auflöst.)*
-3. **Client/Server-Grenze:** Der `<FallAkte>`-Kern bleibt idealerweise Server-Component mit Client-Zonen + ReactNode-Slots;
-   die SV-Interaktivität (Geo/Drawer) lebt in den Zone-Komponenten, nicht im Kern. Bestätigen.
+1. **Reihenfolge SV vs Werkstatt (§6-Q2): ENTSCHIEDEN — SV VOR Werkstatt** (C4b=SV, C4c=Werkstatt). Aaron überstimmte
+   die Werkstatt-zuerst-Empfehlung (§4): der größere Sonderfall (SV) härtet die Kern-Generalisierung zuerst.
+2. **Kern-Generalisierung vs Shell-Behalt: ENTSCHIEDEN — Kern generalisieren.** `<FallAkte>` wächst um layout-Variante
+   (`columns`/`sidebar`/`tabs`) + Custom-Header-Slot + server-injizierte ReactNode-Blöcke → alle 5 Rollen echt über den
+   Kern (C4-DoD). Feed-Forward: die Nähte schon bei der C4a-Kunde-Ausführung offen lassen.
+3. **Client/Server-Grenze: ENTSCHIEDEN — Server-Kern + Client-Zonen.** Der `<FallAkte>`-Kern bleibt Server-Component;
+   Interaktivität (Geo/Drawer/Modal) lebt in den (Client-)Zone-Komponenten + ReactNode-Slots. Kunde/Staff behalten RSC.
+
+→ Verankert in `DECISIONS.md` (3× `2026-07-31 · C4`).
 
 ## 7 · Nicht-Ziele
 Kein visuelles Redesign (Token/Primitives + Look identisch); keine neuen SV-Features; keine Gate-/RLS-/Read-Pfad-Änderung

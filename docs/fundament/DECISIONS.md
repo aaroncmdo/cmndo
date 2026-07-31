@@ -66,3 +66,27 @@
 **Entscheidung:** SV-Flow-Claim = Abrechnungsweg `haftpflicht`, `service_typ='komplett'` → die SV-/Regulierungs-Achse läuft regulär (J1). Reparatur = **Nebenschauplatz** auf `reparatur_vermittlung_status`/`reparatur_termine` via `assignReparaturWerkstatt` (abrechnungsweg-agnostisch); die `operative_status`-`reparatur-*`-Lane bleibt reduced-repair-only (verifiziert: `advanceReparaturCursorTo` ist auf `abrechnungsweg ∈ {selbstzahler, kasko}` gegatet → bei Haftpflicht No-op).
 
 **Review:** offen (Aaron) — Plan P4, Abschnitt „Invariante & Reparatur-Achse".
+
+## 2026-07-31 · C4 · Tranchen-Reihenfolge = SV vor Werkstatt (C4b=SV, C4c=Werkstatt)
+
+**Lücke:** `c4-eine-akte-plan.md §6-Q2` ließ offen, welche Custom-Sicht nach dem Kunde-Prototyp (C4a) zuerst auf den `<FallAkte>`-Kern migriert. Die C4b-Ist-Erhebung (SV, #4916) fand: SV ist der strukturell GRÖSSERE Sonderfall (Client-Tree + Server-Block-Bridge + Stellungnahme-Sub-Route + Sidebar-Layout), Werkstatt der kleinere (linearer 5-Sektionen-Stack). Empfehlung war Werkstatt-zuerst („kleinste zuerst", §5).
+
+**Entscheidung:** **Aaron 31.07.: SV vor Werkstatt** (behält die tentative `c4-plan §4`-Zuordnung: C4b=SV, C4c=Werkstatt). Der größere Sonderfall härtet die Kern-Generalisierung zuerst; Werkstatt (kleiner) folgt als C4c.
+
+**Review:** Aaron 31.07. entschieden (AskUserQuestion). C4-Code gated auf B1/J4.
+
+## 2026-07-31 · C4 · `<FallAkte>`-Kern wird generalisiert (alle 5 Rollen über EINEN Kern)
+
+**Lücke:** Die C4b-Ist (SV) zeigte, dass der c4a-Kern (aus dem Kunde-Prototyp: Server-Component, `columns-2`-Masonry, `{title,description}`-Header) die SV-Client-Sicht nicht 1:1 hostet — 3 harte Divergenzen (Client-Tree, Sidebar-Layout, server-injizierte ReactNode-Blöcke). Kern generalisieren (alle 5 über einen Kern) oder SV/Werkstatt teilen nur Sub-Pieces + behalten ihre Shell?
+
+**Entscheidung:** **Aaron 31.07.: Kern generalisieren.** `<FallAkte>` wächst um (a) `layout`-Variante (`columns` | `sidebar` | später `tabs`), (b) optionalen Custom-Header-Slot (ReactNode statt nur `{title,description}`), (c) server-injizierte ReactNode-Blöcke (`topBlocks`/`footer`). Alle 5 Rollen rendern echt über den Kern (C4-DoD erfüllt). **Feed-Forward:** die Nähte schon bei der C4a-Kunde-Ausführung offen lassen (Kunde nutzt nur `columns` + `{title,description}`) → SV/Werkstatt erzwingen keinen Kern-Refactor.
+
+**Review:** Aaron 31.07. entschieden (AskUserQuestion). Löst zugleich `c4-plan §6-Q1` (Zone- vs Tab-Chrome → Chrome wird eine `layout`-Variante).
+
+## 2026-07-31 · C4 · `<FallAkte>`-Kern bleibt Server-Component (Client-Zonen für Interaktivität)
+
+**Lücke:** SV/Werkstatt-Sichten sind `'use client'` (Geo-Hook, Drawer-/Modal-State). Wird der generalisierte Kern eine Client-Component (einfacher für SV) oder bleibt er Server-Component?
+
+**Entscheidung:** **Aaron 31.07.: Server-Kern + Client-Zonen.** `<FallAkte>` bleibt Server-Component; die Interaktivität (Geo/Drawer/Modal) lebt in den (Client-)Zone-Komponenten + den ReactNode-Slots. Kunde/Staff (heute Server-Components) behalten die RSC-Vorteile (Bundle, Streaming) — kein Regressions-Risiko.
+
+**Review:** Aaron 31.07. entschieden (AskUserQuestion).
