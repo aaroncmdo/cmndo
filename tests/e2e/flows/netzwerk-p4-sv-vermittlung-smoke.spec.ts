@@ -155,6 +155,10 @@ test.afterAll(async () => {
   }
   if (sv) {
     try {
+      // Cleanup-Learning (31.07.): der SV bekommt im Flow In-App-Mitteilungen — deren FK
+      // (mitteilungen_empfaenger_id_fkey) blockt den profiles-/auth-Delete des throwaway-
+      // Tools (auth=500). Mitteilungen VOR dem Account-Cleanup raeumen.
+      await db.from('mitteilungen').delete().eq('empfaenger_id', sv.uid)
       execSync(`node scripts/smoke/throwaway-account.mjs cleanup ${sv.uid}`, { encoding: 'utf8' })
     } catch (err) {
       console.error('[cleanup sv]', err)
