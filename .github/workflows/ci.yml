@@ -411,8 +411,15 @@ jobs:
       # laeuft strukturell ueber das 20-min-Job-Cap -> Job wird gecancelt, BEVOR die (spaet
       # einsortierten) Journey-Smokes drankommen (beobachtet 29.07.). Dieser fokussierte Step laeuft
       # in Minuten und liefert grün/rot fuer J1+J4 verlaesslich. reparatur-weg-Seed steht (Step davor).
+      # NUR golden-path-deep (J1) + reparatur-weg-e2e-smoke (J4-Primaer, voller end-to-end). Die drei
+      # reparatur-weg-Specs teilen EINEN Seed-Claim (.reparatur-weg-e2e-seed.json); reparatur-weg-e2e-smoke
+      # laeuft alphabetisch zuerst + faehrt den Claim durch den ganzen Flow (KVA->Freigabe->Abschluss) ->
+      # die kva-Varianten (betrag-pflicht/ablehnung-loop) finden den VOR-KVA-Zustand nicht mehr (Button
+      # "Kostenvoranschlag hochladen" weg = Test-Isolations-Problem, NICHT Journey-Bug — verifiziert:
+      # reparatur-weg-e2e-smoke selbst passed, waere es das P4-sa-Gate wuerde auch es failen). Beide
+      # Laeufe 30.-31.07. (c5c8320a + 8c6de199). kva-Varianten brauchen eigene Seeds = Follow-up (b2-Marker).
       - name: Fundament B1 Journey-Smokes (J1-deep + J4)
-        run: npx playwright test golden-path-deep-prod reparatur-weg-e2e-smoke reparatur-weg-kva-betrag-pflicht reparatur-weg-kva-ablehnung-loop --project=chromium --reporter=line
+        run: npx playwright test golden-path-deep-prod reparatur-weg-e2e-smoke --project=chromium --reporter=line
         env:
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           RUN_GOLDEN_PATH_DEEP: '1'
