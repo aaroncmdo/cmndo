@@ -96,6 +96,11 @@ export async function notifyWerkstattNeuerAuftrag(
         html,
         template: 'werkstatt_neuer_auftrag',
         fallId: args.fallId ?? null,
+        // Auftrags-Notify an die zugewiesene Werkstatt selbst -> Send-Isolation umgehen,
+        // sonst erreicht die Mail nie interne/Test-Werkstatt-Konten (@claimondo.de). Der
+        // interne Empfaenger ist hier die gewollte Zielperson, kein Bystander-SV. Analog
+        // sendWillkommenWerkstatt (flows.ts).
+        allowInternalRecipient: true,
       })
       result.email = true
     } catch (err) {
