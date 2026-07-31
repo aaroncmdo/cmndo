@@ -146,6 +146,9 @@ async function seed() {
   const { data: claim, error: cErr } = await db.from('claims').insert({
     geschaedigter_user_id: kundeUid, lead_id: leadId, vehicle_id: vehicleId, schadentag: today,
     service_typ: 'komplett', abrechnungsweg: 'selbstzahler', reparaturwunsch: 'reparatur',
+    // Schaden-Feststellung fuer die Werkstatt-Sicht (Fall-Karte "Schaden" + Fahrzeug&Unfall/Unfallhergang):
+    schadenart: 'eigenverschulden', // CHECK: haftpflicht|vollkasko|teilkasko|eigenverschulden|unbekannt
+    hergang_kunde_text: 'Beim Ausparken die Beifahrertür an einem Poller verkratzt und eingedrückt.',
     schadenort_adresse: MARKER, schadenort_ort: KOELN.ort, schadenort_plz: KOELN.plz,
     schadenort_lat: KOELN.lat, schadenort_lng: KOELN.lng,
   }).select('id').single()
