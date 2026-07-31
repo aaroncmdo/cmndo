@@ -89,6 +89,15 @@ export async function notifyNewLead(opts: NotifyNewLeadOpts): Promise<void> {
       subject: `Neuer Lead aus ${opts.source}: ${opts.name}`,
       html,
       text,
+      // Team-Alert an die feste interne Inbox info@claimondo.de -> Send-Isolation umgehen.
+      // Ohne dieses Optout unterdrueckt der Live-Modus die Mail KOMPLETT (info@ ist eine
+      // @claimondo.de-Adresse == "intern" laut interne-identitaet.ts), d.h. der Lead-Alert
+      // kam seit dem Send-Isolation-Ship (#3537, 04.07.) nie beim Team an. info@ ist hier die
+      // GEWOLLTE Zielperson (Aaron-Direktive 20.05.), kein Funnel-/Matching-Empfaenger — genau
+      // der vom sendEmail-JSDoc sanktionierte Fall (analog sendWillkommenWerkstatt in flows.ts).
+      empfaengerTyp: 'admin',
+      template: 'neuer_lead',
+      allowInternalRecipient: true,
     })
   } catch (err) {
     console.error(
