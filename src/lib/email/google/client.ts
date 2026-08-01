@@ -4,7 +4,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 import { htmlToPlainText } from '@/lib/email/plain-text'
 import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
-import { nurExterneEmpfaenger } from '@/lib/testdaten/interne-identitaet'
+import { nurZustellbareEmpfaenger } from '@/lib/testdaten/interne-identitaet'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -70,18 +70,22 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     // Send-Isolation (2026-07-03): im Live-Modus interne/Test-Empfaenger (@claimondo.de etc.)
     // nie real anmailen — letzte Verteidigungslinie neben dem Booking-Guard. NUR live, damit
     // test-recipient (bewusste Umleitung an Test-Inbox) nicht faelschlich unterdrueckt wird.
-    // Ausnahme: allowInternalRecipient (admin-getriggerte 1:1-Transaktionsmail an den
-    // Empfaenger selbst, z.B. Werkstatt-Login) — dort ist die interne Adresse die gewollte
-    // Zielperson, kein Bystander-SV. Der Funnel-/Matching-/Reminder-Schutz bleibt intakt.
+    // Zustellbar = extern ODER operative Betriebs-Inbox (info@/schaden@ via
+    // nurZustellbareEmpfaenger): letztere sind gewollte Alert-/Handoff-Ziele (Team-Lead-Alert,
+    // Embed-Dispatch, Kanzlei-Mandat), NIE Matching-Bystander -> sie werden zugestellt.
+    // Ausnahme dazu: allowInternalRecipient (admin-getriggerte 1:1-Transaktionsmail an den
+    // Empfaenger selbst, z.B. Werkstatt-Login ODER Founder-Adress-Alerts wie Stripe-Drift an
+    // aaron.sprafke@) — dort ist die interne Adresse die gewollte Zielperson, kein Bystander-SV.
+    // Der Funnel-/Matching-/Reminder-Schutz (echte Test-SV-Identitaeten) bleibt intakt.
     if (se.mode === 'live' && !opts.allowInternalRecipient) {
       const empfaenger = Array.isArray(opts.to) ? opts.to : [opts.to]
-      const externe = nurExterneEmpfaenger(empfaenger)
-      if (externe.length === 0) {
+      const zustellbar = nurZustellbareEmpfaenger(empfaenger)
+      if (zustellbar.length === 0) {
         console.warn(`[send-isolation] Email an rein interne/Test-Adresse(n) unterdrueckt: "${empfaenger.join(', ')}" subject="${opts.subject}"`)
         return { messageId: `internal-recipient-suppressed-${Date.now()}` }
       }
-      if (externe.length !== empfaenger.length) {
-        opts = { ...opts, to: externe }
+      if (zustellbar.length !== empfaenger.length) {
+        opts = { ...opts, to: zustellbar }
       }
     }
   }

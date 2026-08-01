@@ -61,6 +61,37 @@ export function nurExterneEmpfaenger(to: string | string[]): string[] {
   return list.filter((r): r is string => !!r && !istInterneEmail(r))
 }
 
+// Operative Betriebs-Inboxen: reine Team-/Funktions-Postfaecher, die als GEWOLLTE Zielperson
+// operativer Alerts/Handoffs dienen (Team-Lead-Alert, Embed-Dispatch-Benachrichtigung,
+// Kanzlei-Mandat-Fallback). Sie sind NIE Matching-Ziele (kein SV im Kandidaten-Pool) -> beim
+// SENDEN duerfen sie erreicht werden, auch als @claimondo.de-Adresse.
+//
+// ⚠ NUR fuer die Send-Isolation (nurZustellbareEmpfaenger). Fuer die LEAD-IDENTITAET (Matching)
+// bleibt @claimondo.de weiter intern (istInterneEmail bewusst unveraendert) — ein Lead mit
+// info@ ist Test/intern. Founder-Adressen (aaron@/aaron.sprafke@) stehen bewusst NICHT hier:
+// sie sind Dual-Use (auch Test-Lead-Mail) -> deren Alerts brauchen den per-call
+// allowInternalRecipient, nicht die pauschale Allowlist.
+const OPERATIVE_EMPFAENGER = new Set<string>([
+  'info@claimondo.de',
+  'schaden@claimondo.de', // kanzlei/email-fallback: geplantes Migrations-Ziel (KANZLEI_EMAIL_TO)
+])
+
+/** true, wenn die Adresse eine operative Betriebs-Inbox ist (Send-Allowlist, s.o.). */
+export function istOperativerEmpfaenger(email: string | null | undefined): boolean {
+  if (!email) return false
+  return OPERATIVE_EMPFAENGER.has(email.trim().toLowerCase())
+}
+
+/**
+ * Fuer die SEND-Isolation: behaelt die ZUSTELLBAREN Empfaenger = extern ODER operative
+ * Betriebs-Inbox. Unterschied zu nurExterneEmpfaenger (das operative Inboxen als intern
+ * wegfiltern wuerde): operative Inboxen sind gewollte Alert-Ziele, keine Matching-Bystander.
+ */
+export function nurZustellbareEmpfaenger(to: string | string[]): string[] {
+  const list = Array.isArray(to) ? to : [to]
+  return list.filter((r): r is string => !!r && (!istInterneEmail(r) || istOperativerEmpfaenger(r)))
+}
+
 /**
  * Letzte 9 Ziffern einer Telefonnummer (formatunabhaengig) — robuster Match-Key gegen
  * Schreibweisen (+49 / 0049 / 0-Praefix / Leerzeichen). Leerer String bei < 9 Ziffern
