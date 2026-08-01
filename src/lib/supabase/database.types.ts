@@ -16738,6 +16738,8 @@ export type Database = {
           gueltig_bis: string | null
           hrb: string | null
           id: string
+          netzwerk_monat_cent: number | null
+          netzwerk_setup_cent: number | null
           ort: string
           plz: string
           rechnungssteller: string
@@ -16745,6 +16747,7 @@ export type Database = {
           strasse: string
           ust_id: string | null
           version: number
+          werkstatt_setup_cent: number | null
           zahlungsempfaenger_bank: string
           zahlungsempfaenger_bic: string
           zahlungsempfaenger_hinweis: string | null
@@ -16759,6 +16762,8 @@ export type Database = {
           gueltig_bis?: string | null
           hrb?: string | null
           id?: string
+          netzwerk_monat_cent?: number | null
+          netzwerk_setup_cent?: number | null
           ort: string
           plz: string
           rechnungssteller: string
@@ -16766,6 +16771,7 @@ export type Database = {
           strasse: string
           ust_id?: string | null
           version?: number
+          werkstatt_setup_cent?: number | null
           zahlungsempfaenger_bank: string
           zahlungsempfaenger_bic: string
           zahlungsempfaenger_hinweis?: string | null
@@ -16780,6 +16786,8 @@ export type Database = {
           gueltig_bis?: string | null
           hrb?: string | null
           id?: string
+          netzwerk_monat_cent?: number | null
+          netzwerk_setup_cent?: number | null
           ort?: string
           plz?: string
           rechnungssteller?: string
@@ -16787,6 +16795,7 @@ export type Database = {
           strasse?: string
           ust_id?: string | null
           version?: number
+          werkstatt_setup_cent?: number | null
           zahlungsempfaenger_bank?: string
           zahlungsempfaenger_bic?: string
           zahlungsempfaenger_hinweis?: string | null

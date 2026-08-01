@@ -1421,6 +1421,7 @@
     "sv_onboarding_rechnungen.typ": [
       "akademie",
       "buero",
+      "netzwerk_einrichtung",
       "solo"
     ],
     "sv_payment_reminders.reminder_typ": [
