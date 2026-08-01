@@ -1,4 +1,13 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Der stripe-Singleton (client.ts) instanziiert beim Modul-Load mit STRIPE_SECRET_KEY —
+// im Test-Env nicht gesetzt -> Konstruktor wirft. Seiteneffekt-Module mocken; der
+// getestete Params-Builder ist pure und braucht keins davon.
+vi.mock('../client', () => ({ stripe: {} }))
+vi.mock('../sv-checkout', () => ({ getOrCreateStripeCustomer: vi.fn() }))
+vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
+vi.mock('@/lib/billing/netzwerk-preise', () => ({ ladeNetzwerkPreise: vi.fn() }))
+
 import { buildNetzwerkAboCheckoutParams } from '../netzwerk-abo-checkout'
 
 describe('buildNetzwerkAboCheckoutParams', () => {
