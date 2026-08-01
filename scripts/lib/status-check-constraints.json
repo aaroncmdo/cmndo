@@ -1430,7 +1430,10 @@
       "email_14d",
       "email_3d",
       "email_7d",
-      "final_warnung"
+      "final_warnung",
+      "netzwerk_abo_ueberfaellig_10d",
+      "netzwerk_abo_ueberfaellig_1d",
+      "netzwerk_abo_ueberfaellig_5d"
     ],
     "sv_private_stops.source": [
       "caldav",
