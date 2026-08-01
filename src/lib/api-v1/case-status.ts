@@ -1,17 +1,41 @@
-import { isKnownStatus, statusLabel } from '@/lib/status/resolve'
+import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
+import { phaseForOperativeStatus } from '@/lib/claims/lifecycle'
 
 // Grober, kunden-facing Fall-Status fuer die oeffentliche case-status-API (MCP/GPT-Action).
 //
-// PII-FREI by design: liefert NUR ein kunden-taugliches Status-Label (via
-// statusLabel(..,'kunde')) — NIE Name/Telefon/SV/Fall-Detail und NIE den rohen
-// operative_status-Code (interne Taxonomie). Ein unbekannter/fehlender Status (z.B. Lead
-// noch nicht in einen Claim konvertiert, oder ein Code den die Registry nicht kennt)
-// faellt auf einen freundlichen Sammel-Status zurueck — kein Roh-Code-Leak.
+// PII-FREI by design: liefert NUR ein kunden-taugliches, GROBES Status-Label — NIE
+// Name/Telefon/SV/Fall-Detail und NIE den rohen operative_status-Code (interne Taxonomie).
+//
+// Quelle = die KANONISCHE Lifecycle-Phase (phaseForOperativeStatus -> OPERATIVE_PHASE, dieselbe
+// Map wie der Claim-Stepper / v_claim_phase). Wir gruppieren auf die 4 Hauptphasen (erfassung/
+// begutachtung/regulierung/abschluss) + unterscheiden die Abschluss-Ausgaenge (sonst waere ein
+// pauschales "abgeschlossen" fuer eine Ablehnung/Stornierung/Klage irrefuehrend). BEWUSST NICHT
+// die internen SUBPHASE_LABEL ("Filmcheck"/"QC-Pruefung"/"SA-Unterschrift offen") — die sind
+// Fachsprache, nicht kundentauglich. Unbekannter/fehlender/nicht-gemappter Status -> Fallback
+// (z.B. Lead noch nicht in einen Claim konvertiert).
 export const CASE_STATUS_FALLBACK = 'Deine Anfrage ist eingegangen und wird bearbeitet.'
 
+const KUNDE_STATUS_BY_MAIN: Record<ClaimMainPhase, string> = {
+  erfassung: 'Deine Anfrage ist eingegangen — wir organisieren gerade einen passenden Gutachter.',
+  begutachtung: 'Ein Gutachter ist beauftragt — die Begutachtung deines Schadens läuft.',
+  regulierung: 'Wir regulieren deinen Schaden mit der gegnerischen Versicherung.',
+  abschluss: 'Dein Fall ist abgeschlossen.',
+}
+
+// Feinere kunde-Labels fuer die Abschluss-Ausgaenge: ein pauschales "abgeschlossen" waere fuer
+// eine Ablehnung/Stornierung/Klage irrefuehrend. Nur diese Sub-Phasen ueberschreiben das
+// Haupt-Label; alle anderen Sub-Phasen nutzen KUNDE_STATUS_BY_MAIN.
+const KUNDE_STATUS_BY_SUB: Partial<Record<ClaimSubPhase, string>> = {
+  erfolgreich_reguliert: 'Dein Fall ist erfolgreich abgeschlossen und reguliert.',
+  termin_durchgefuehrt: 'Der Gutachter-Termin ist erfolgt — dein Fall ist abgeschlossen.',
+  storniert: 'Dein Fall wurde gestoppt.',
+  abgelehnt_final: 'Die gegnerische Versicherung hat den Anspruch abgelehnt.',
+  klage_rechtsstreit: 'Dein Fall wird gerichtlich geklärt (Rechtsstreit).',
+  an_externe_kanzlei: 'Dein Fall wurde an eine Rechtsanwaltskanzlei übergeben.',
+}
+
 export function coarseKundeStatus(operativeStatus: string | null | undefined): string {
-  if (operativeStatus && isKnownStatus('claims-status', operativeStatus)) {
-    return statusLabel('claims-status', operativeStatus, 'kunde')
-  }
-  return CASE_STATUS_FALLBACK
+  const phase = phaseForOperativeStatus(operativeStatus)
+  if (!phase) return CASE_STATUS_FALLBACK
+  return KUNDE_STATUS_BY_SUB[phase.sub] ?? KUNDE_STATUS_BY_MAIN[phase.main]
 }

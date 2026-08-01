@@ -206,6 +206,20 @@ const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase
   'reparatur-erledigt': { main: 'erfassung', sub: 'reparatur_fertig' },
 }
 
+/**
+ * Bare operative_status -> Lifecycle-Phase (nur die Cursor-Ableitung, OHNE Sub-Entities).
+ * Fuer Konsumenten, die NUR den operative_status haben (z.B. die public case-status-API) und
+ * daher getClaimLifecycle (braucht lead/auftraege/kanzleiFall) nicht aufrufen koennen. Nutzt
+ * DIESELBE OPERATIVE_PHASE-Map wie getClaimLifecycle -> keine Taxonomie-Duplikation, bleibt
+ * bit-gleich zur Cursor-Phasen-Ableitung. null = unbekannter/nicht gemappter Status.
+ */
+export function phaseForOperativeStatus(
+  operativeStatus: string | null | undefined,
+): { main: ClaimMainPhase; sub: ClaimSubPhase } | null {
+  if (!operativeStatus) return null
+  return OPERATIVE_PHASE[operativeStatus] ?? null
+}
+
 function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {
   if (lead?.vollmacht_signiert_am) return 'onboarding_offen'
   if (lead?.sa_unterschrieben) return 'vollmacht_offen'
