@@ -24,7 +24,7 @@ export type OnboardingRechnungData = {
   rechnungs_nr: string
   rechnungs_datum: Date
   leistungs_datum: Date
-  typ: 'solo' | 'buero' | 'akademie'
+  typ: 'solo' | 'buero' | 'akademie' | 'netzwerk_einrichtung'
   paket: string | null
   kontingent: number
   empfaenger: {
@@ -129,8 +129,10 @@ function paketLabel(paket: string | null): string {
 function OnboardingRechnungPDF({ data }: { data: OnboardingRechnungData }) {
   const paket = paketLabel(data.paket)
   const beschreibung =
-    `Onboarding-Anzahlung Paket ${paket} — ` +
-    `Werbebudget-Vorauszahlung für ${data.kontingent} Fälle`
+    data.typ === 'netzwerk_einrichtung'
+      ? 'Netzwerkpartner — einmalige Einrichtungsgebühr (§4 Kooperationsvertrag)'
+      : `Onboarding-Anzahlung Paket ${paket} — ` +
+        `Werbebudget-Vorauszahlung für ${data.kontingent} Fälle`
 
   return (
     <Document>
