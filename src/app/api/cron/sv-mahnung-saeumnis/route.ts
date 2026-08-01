@@ -142,6 +142,10 @@ export async function GET(request: Request) {
 <p><a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'}/admin/finance">Zur Admin-Finance-Hub</a></p>`,
           template: 'admin_mahnung_eskalation',
           empfaengerTyp: 'admin',
+          // Admin-Eskalation an die Founder-Adresse (aaron.sprafke@ = intern) -> Send-Isolation
+          // umgehen, sonst bleibt die 28d-Inkasso-Entscheidung im Live-Modus suppressed. Founder-
+          // Adressen bewusst nicht in der operativen Send-Allowlist (Dual-Use) -> per-call-Flag.
+          allowInternalRecipient: true,
         })
       } catch (err) {
         console.error('[AAR-927] Admin-Notification fehlgeschlagen (non-critical):', err)
