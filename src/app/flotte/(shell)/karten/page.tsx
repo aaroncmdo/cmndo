@@ -27,7 +27,7 @@ export default async function KartenPage() {
       <div>
         <h1 className="text-xl font-bold text-claimondo-navy">Karten</h1>
         <p className="mt-1 text-sm text-claimondo-shield">
-          Gebundene Schadenkarten verwalten und Fahrzeuge per Karte identifizieren.
+          Gebundene Netzwerkkarten verwalten und Fahrzeuge per Karte identifizieren.
         </p>
       </div>
       <KartenClient

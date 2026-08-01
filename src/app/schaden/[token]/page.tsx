@@ -78,10 +78,10 @@ export default async function SchadenTokenPage({
                 &#x26A0;&#xFE0F;
               </div>
               <h1 className="text-heading-md text-claimondo-navy">
-                Schadenkarte nicht gefunden
+                Netzwerkkarte nicht gefunden
               </h1>
               <p className="text-body-sm text-claimondo-ondo">
-                Diese Schadenkarte ist ungültig oder wurde noch keinem Fahrzeug
+                Diese Netzwerkkarte ist ungültig oder wurde noch keinem Fahrzeug
                 zugewiesen. Bitte wenden Sie sich an den Fahrzeughalter.
               </p>
             </div>

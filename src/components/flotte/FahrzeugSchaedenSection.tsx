@@ -45,6 +45,9 @@ type Props = {
     leadId: string,
     vehicleId: string,
   ) => Promise<{ ok: boolean; error?: string }>
+  /** P6 (WS H): Link-Basis der Schaden-Detail-Route. Default = FM-Portal;
+   *  das Kunde-Portal reicht '/kunde/fahrzeuge' (read-only, ohne Storno-/Entwurf-Props). */
+  schadenHrefBase?: string
 }
 
 export function FahrzeugSchaedenSection({
@@ -53,6 +56,7 @@ export function FahrzeugSchaedenSection({
   onStorno,
   onEntwurfFortsetzen,
   onEntwurfStornieren,
+  schadenHrefBase = '/flotte/fahrzeug',
 }: Props) {
   const { claims, drafts } = schaeden
   const hasEntries = claims.length > 0 || drafts.length > 0
@@ -93,7 +97,7 @@ export function FahrzeugSchaedenSection({
           {claims.map((c: ClaimMini) => (
             <li key={c.claimId} className="flex flex-wrap items-center gap-2">
               <Link
-                href={`/flotte/fahrzeug/${vehicleId}/schaden/${c.claimId}`}
+                href={`${schadenHrefBase}/${vehicleId}/schaden/${c.claimId}`}
                 className="flex flex-1 items-center gap-3 py-3 rounded-ios-sm hover:bg-claimondo-bg transition-colors group"
               >
                 <StatusBadge domain="claims-status" code={c.status} />
