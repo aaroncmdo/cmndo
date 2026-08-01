@@ -12,6 +12,8 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
+// C1a (Fundament): operative_status-Übergang der SV-Findung durch die State-Machine-Engine funneln.
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import { sortiereMitNetzwerk } from './sortiere-mit-netzwerk'
@@ -54,11 +56,15 @@ export async function POST(request: Request) {
   // manueller Fallback-Task). Der eingeloggte Staff-Pfad bleibt auf dem RLS-Client
   // (db === supabase), behaelt also exakt die Case-Visibility des Users.
   const db = isInternal ? createAdminClient() : supabase
+  // C1a: den handelnden Staff-User fuer den Engine-Funnel (transitionFallStatus) festhalten.
+  // Interner Auto-Dispatch (Bearer CRON_SECRET) ist user-los -> null (System-Actor).
+  let actorUserId: string | null = null
   if (!isInternal) {
     const user = (await db.auth.getUser())?.data?.user ?? null
     if (!user) {
       return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
     }
+    actorUserId = user.id
     const { data: profile } = await db
       .from('profiles')
       .select('rolle')
@@ -277,13 +283,40 @@ export async function POST(request: Request) {
   // CMM-74: faelle.status-Write retired — operative_status (Engine-Cursor, claims=SSoT) traegt
   // den Dispatch-Status ('sv-gesucht' Org-Pool / 'sv-zugewiesen' direkt). faelle.status war ein
   // reiner Dual-Write (0-divergent verifiziert). Record-Bridge (operative_status fehlt in gen. Typen).
+  // C1a (Fundament): der operative_status-Übergang läuft durch die State-Machine-Engine
+  // (Single-Writer-Funnel) statt als Direkt-Cast-Write auf claims — so erbt die SV-Findung
+  // Event (fall.status_changed) + Timeline + phase_transitions + SLA-Hook (schließt A2-#6,
+  // den bisher leeren Event-Fan-out bei SV-Findung). sv_zugewiesen_am bleibt Direkt-Write
+  // (kein Status-Feld).
   let updateErr: { message: string } | null = null
   if (fallClaimId) {
     const adminDb = createAdminClient()
-    const claimsUpd = { sv_zugewiesen_am: orgPool ? null : now }
-    ;(claimsUpd as Record<string, unknown>).operative_status = orgPool ? 'sv-gesucht' : 'sv-zugewiesen'
-    const { error } = await adminDb.from('claims').update(claimsUpd).eq('id', fallClaimId)
+    const { error } = await adminDb
+      .from('claims')
+      .update({ sv_zugewiesen_am: orgPool ? null : now })
+      .eq('id', fallClaimId)
     updateErr = error
+
+    // operative_status via Engine. transitionFallStatus WIRFT bei ungültigem Übergang
+    // (state-machine.ts:141). Der Normalfall (Claim auf 'ersterfassung'/'sv-gesucht') ist valide.
+    // Läuft die Zuweisung (Edge) auf einem bereits fortgeschritteneren Claim (z.B. 'sv-termin'),
+    // wäre der Rückwärts-Übergang ungültig -> non-fatal fangen: sv_id + sv_zugewiesen_am sind
+    // gesetzt (behavior-preserving), der Status bleibt auf seinem fortgeschritteneren Wert. Das
+    // ist strikt besser als der frühere Force-Cast-Write, der einen 'sv-termin'-Claim fälschlich
+    // auf 'sv-zugewiesen' zurückgesetzt hätte.
+    if (!updateErr) {
+      try {
+        await transitionFallStatus(fallId, orgPool ? 'sv-gesucht' : 'sv-zugewiesen', {
+          user_id: actorUserId ?? undefined,
+          grund: 'sv_zuweisung',
+        })
+      } catch (err) {
+        console.warn(
+          `[C1a sv-zuweisung] transitionFallStatus(${orgPool ? 'sv-gesucht' : 'sv-zugewiesen'}) fall=${fallId} abgelehnt (non-fatal):`,
+          err instanceof Error ? err.message : err,
+        )
+      }
+    }
   }
 
   // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
