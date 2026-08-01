@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 // #2 (Flotte, CarIcon) + #1 (Schaden melden, PlusCircleIcon) beim Rebase zusammengefuehrt.
-import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon, PlusCircleIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon, CarFrontIcon, PlusCircleIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
@@ -16,6 +16,9 @@ export function buildNavItems(singleFallId: string | null, t: (key: string) => s
     fallItem,
     { href: '/kunde/termine', label: t('nav.termine'), icon: CalendarIcon, exact: false },
     { href: '/kunde/nachbesichtigung', label: t('nav.nachbesichtigung'), icon: SearchIcon, exact: false },
+    // P6 (WS H, fahrzeug-zentrisch): eigene Fahrzeuge (owner-scoped) — vor der firma-scoped Flotte.
+    // TODO i18n-Follow-up: nav.fahrzeuge-Key in den 6 Locales; hardcoded DE wie beim Flotte-Item.
+    { href: '/kunde/fahrzeuge', label: 'Fahrzeuge', icon: CarFrontIcon, exact: false },
     // Sub-Projekt 2 (Firma & Flotte): Desktop-Nav (MOBILE_ITEMS ist kuratiert -> mobil (noch) aus).
     // TODO i18n-Follow-up: nav.flotte-Key in den 6 Locales; hardcoded DE reicht fuer den MVP-Ship.
     { href: '/kunde/flotte', label: 'Flotte', icon: CarIcon, exact: false },

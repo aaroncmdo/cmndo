@@ -145,7 +145,7 @@ export default async function FahrzeugDetailPage({
         onEntwurfStornieren={storniereSchadenEntwurf}
       />
 
-      <SectionCard title="Schadenkarte">
+      <SectionCard title="Netzwerkkarte">
         {karte && qrSvg ? (
           <div className="space-y-4">
             <p className="text-sm text-claimondo-navy">
@@ -158,7 +158,7 @@ export default async function FahrzeugDetailPage({
               <div dangerouslySetInnerHTML={{ __html: qrSvg }} />
             </div>
             <p className="text-xs text-claimondo-shield">
-              QR-Code der Schadenkarte — auf die Karte kleben oder als Ersatz ausdrucken.
+              QR-Code der Netzwerkkarte — auf die Karte kleben oder als Ersatz ausdrucken.
             </p>
             <QrCodeDownloadButtons
               qrSvg={qrSvg}

@@ -47,7 +47,7 @@ export default async function FlottePage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-8 space-y-6">
       <div>
         <h1 className="text-xl font-bold text-claimondo-navy">Flotte</h1>
-        <p className="mt-1 text-sm text-claimondo-shield">Ihre Firmenfahrzeuge — Grundlage für die Schadenkarten.</p>
+        <p className="mt-1 text-sm text-claimondo-shield">Ihre Firmenfahrzeuge — Grundlage für die Netzwerkkarten.</p>
       </div>
       {firma ? <WhatsappNummerPrompt nummer={whatsappNummer} onSpeichern={setzeMeineWhatsappNummer} /> : null}
       {/* onSpeichereFirma bewusst weggelassen: firma ist admin-provisioniert, kein Setup-Formular. */}
@@ -55,8 +55,8 @@ export default async function FlottePage() {
       {ungebundeneFlotte.length > 0 || flotte.length === 0 ? (
         <SchadenkarteBindenSection flotte={ungebundeneFlotte} onBinde={bindeKarte} />
       ) : (
-        <SectionCard title="Schadenkarten binden">
-          <p className="text-body-sm text-claimondo-ondo">Alle Fahrzeuge haben bereits eine Schadenkarte.</p>
+        <SectionCard title="Netzwerkkarten binden">
+          <p className="text-body-sm text-claimondo-ondo">Alle Fahrzeuge haben bereits eine Netzwerkkarte.</p>
         </SectionCard>
       )}
     </div>

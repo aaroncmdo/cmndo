@@ -47,14 +47,14 @@ export function SchadenkarteBindenSection({ flotte, onBinde }: Props) {
       busy: false,
       meldung: {
         ok: res.ok,
-        text: res.ok ? 'Schadenkarte erfolgreich gebunden.' : (res.error ?? 'Fehler beim Binden.'),
+        text: res.ok ? 'Netzwerkkarte erfolgreich gebunden.' : (res.error ?? 'Fehler beim Binden.'),
       },
     })
   }
 
   if (flotte.length === 0) {
     return (
-      <SectionCard title="Schadenkarten binden" subtitle="Fügen Sie zuerst Fahrzeuge zur Flotte hinzu.">
+      <SectionCard title="Netzwerkkarten binden" subtitle="Fügen Sie zuerst Fahrzeuge zur Flotte hinzu.">
         <p className="text-body-sm text-claimondo-ondo">Keine Fahrzeuge vorhanden.</p>
       </SectionCard>
     )
@@ -62,8 +62,8 @@ export function SchadenkarteBindenSection({ flotte, onBinde }: Props) {
 
   return (
     <SectionCard
-      title="Schadenkarten binden"
-      subtitle="Weisen Sie jeder Schadenkarte ein Fahrzeug zu. QR-Code scannen, Code manuell eingeben — oder die Karte mit dem Handy antippen."
+      title="Netzwerkkarten binden"
+      subtitle="Weisen Sie jeder Netzwerkkarte ein Fahrzeug zu. QR-Code scannen, Code manuell eingeben — oder die Karte mit dem Handy antippen."
     >
       <ul className="space-y-4">
         {flotte.map((fz) => {

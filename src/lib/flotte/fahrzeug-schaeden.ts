@@ -55,6 +55,15 @@ export async function getFahrzeugSchaeden(
     return { claims: [], drafts: [] }
   }
 
+  return ladeSchaedenFuerFahrzeug(db, vehicleId)
+}
+
+/**
+ * Ungegateter Kern: Claims + Draft-Leads eines Fahrzeugs. Der Caller MUSS das
+ * Ownership-Gate selbst gefahren haben (firma-scoped: getFahrzeugSchaeden;
+ * owner-scoped: src/lib/kunde/fahrzeug-schaeden.ts).
+ */
+export async function ladeSchaedenFuerFahrzeug(db: AnyDb, vehicleId: string): Promise<FahrzeugSchaeden> {
   // 2) Claims — absteigend nach Erstelldatum
   const { data: claimsRaw, error: claimsError } = await db
     .from('claims')
