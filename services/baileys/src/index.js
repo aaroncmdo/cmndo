@@ -23,6 +23,7 @@ import {
   DisconnectReason,
   makeCacheableSignalKeyStore,
   downloadMediaMessage,
+  fetchLatestBaileysVersion,
 } from '@whiskeysockets/baileys'
 import express from 'express'
 import pino from 'pino'
@@ -42,7 +43,14 @@ let lastQr = null
 async function startSock() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR)
 
+  // AAR (31.07.): live WA-web version from the Baileys endpoint instead of the
+  // (stale) bundled default — else WhatsApp rejects the login with code 405
+  // ("Connection Failure"). Prod-Outage 02.07.-31.07. was exactly this.
+  const { version } = await fetchLatestBaileysVersion()
+  logger.info({ version }, 'Baileys: live WA version')
+
   sock = makeWASocket({
+    version,
     auth: {
       creds: state.creds,
       keys: makeCacheableSignalKeyStore(state.keys, logger),

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, letzte9Ziffern } from '../interne-identitaet'
+import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, nurZustellbareEmpfaenger, istOperativerEmpfaenger, letzte9Ziffern } from '../interne-identitaet'
 
 // Regression-Guard fuer den Test-SV-Guard (2026-07-03): interne/Test-Leads duerfen NIE
 // einen echten Sachverstaendigen buchen/benachrichtigen. Firmendomain @claimondo.de = intern
@@ -96,5 +96,42 @@ describe('letzte9Ziffern — robuste Telefon-Normalisierung', () => {
     expect(letzte9Ziffern('123')).toBe('')
     expect(letzte9Ziffern('')).toBe('')
     expect(letzte9Ziffern(null)).toBe('')
+  })
+})
+
+// Operational-Allowlist (Send-Isolation-Kollateral-Fix): info@/schaden@ sind gewollte
+// operative Alert-Ziele, NIE Matching-Bystander -> beim Senden zustellbar, aber fuer die
+// LEAD-Identitaet (Matching) weiter intern (istInterneEmail unveraendert, s. oben Zeile 11).
+describe('istOperativerEmpfaenger — operative Betriebs-Inbox-Allowlist (Send-Pfad)', () => {
+  it('erkennt info@ und schaden@ als operativ (case-insensitiv)', () => {
+    expect(istOperativerEmpfaenger('info@claimondo.de')).toBe(true)
+    expect(istOperativerEmpfaenger('schaden@claimondo.de')).toBe(true)
+    expect(istOperativerEmpfaenger('INFO@Claimondo.de')).toBe(true)
+  })
+  it('Founder-Adressen sind NICHT operativ (Dual-Use als Test-Lead-Mail -> per-call-Flag)', () => {
+    expect(istOperativerEmpfaenger('aaron.sprafke@claimondo.de')).toBe(false)
+    expect(istOperativerEmpfaenger('aaron@claimondo.de')).toBe(false)
+  })
+  it('externe/leere Adressen sind nicht operativ', () => {
+    expect(istOperativerEmpfaenger('kunde@gmail.com')).toBe(false)
+    expect(istOperativerEmpfaenger(null)).toBe(false)
+    expect(istOperativerEmpfaenger('')).toBe(false)
+  })
+})
+
+describe('nurZustellbareEmpfaenger — extern ODER operative Inbox (Send-Isolation)', () => {
+  it('behaelt operative Inboxen — im Gegensatz zum puren nurExterneEmpfaenger', () => {
+    expect(nurZustellbareEmpfaenger('info@claimondo.de')).toEqual(['info@claimondo.de'])
+    expect(nurZustellbareEmpfaenger('schaden@claimondo.de')).toEqual(['schaden@claimondo.de'])
+    // Gegenprobe: der pure Klassifikator filtert dieselbe Adresse weiter raus (unveraendert)
+    expect(nurExterneEmpfaenger('info@claimondo.de')).toEqual([])
+  })
+  it('filtert nicht-operative interne (Test-SV, Founder) weiter raus', () => {
+    expect(nurZustellbareEmpfaenger('smoke-sv@claimondo.test')).toEqual([])
+    expect(nurZustellbareEmpfaenger('aaron.sprafke@claimondo.de')).toEqual([])
+  })
+  it('behaelt externe + operative gemischt, droppt Test-SV', () => {
+    expect(nurZustellbareEmpfaenger(['kunde@gmail.com', 'info@claimondo.de', 'smoke@claimondo.test']))
+      .toEqual(['kunde@gmail.com', 'info@claimondo.de'])
   })
 })
