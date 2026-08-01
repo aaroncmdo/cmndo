@@ -4,7 +4,7 @@
 // Zustandsuebergang = echter UI-Klick (kein DB-Seed). DB-Endbeweis via `--assert`.
 //
 // Run: CI=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test reparatur-weg-e2e-smoke --project=chromium
-import { test, expect, type Page, type BrowserContext } from '@playwright/test'
+import { test, expect, type Page, type Locator, type BrowserContext } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
@@ -17,6 +17,22 @@ async function login(page: Page, email: string, pw: string) {
   await page.fill('input[type="password"], input[name="password"]', pw)
   await page.click('button[type="submit"]')
   await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 30_000 })
+}
+
+// Hydration-robust: der Button ist SSR-sichtbar, aber sein onClick haengt erst nach der Client-
+// Hydration an (das Modal-Primitive ist zusaetzlich auf mounted+open gegatet). goto/reload mit
+// waitUntil:'domcontentloaded' resolved VOR der Hydration -> ein Sofort-Klick verpufft auf langsamer
+// CI (Klick landet, Handler fehlt noch) und der Dialog oeffnet nie. toPass re-klickt idempotent (nur
+// wenn noch KEIN Dialog im DOM -> das Modal rendert null wenn zu, kein versehentliches Schliessen),
+// bis der Dialog sichtbar ist. .first() am Button-Locator toleriert Namensgleichheit (Trigger +
+// Dialog-Submit tragen z.B. beide "Reparatur abschliessen").
+async function oeffneDialog(page: Page, button: Locator): Promise<Locator> {
+  const dialog = page.getByRole('dialog')
+  await expect(async () => {
+    if ((await dialog.count()) === 0) await button.click()
+    await expect(dialog).toBeVisible({ timeout: 2_000 })
+  }).toPass({ timeout: 30_000 })
+  return dialog
 }
 
 test('Selbstzahler-Reparatur-Weg end-to-end per UI (Werkstatt + Kunde)', async ({ browser }) => {
@@ -36,9 +52,7 @@ test('Selbstzahler-Reparatur-Weg end-to-end per UI (Werkstatt + Kunde)', async (
 
     await test.step('1) Werkstatt lädt KVA hoch (mit Betrag + Termin-Vorschlag)', async () => {
       await ws.goto(`/werkstatt/auftraege/${seed.claimId}`, { waitUntil: 'domcontentloaded' })
-      await ws.getByRole('button', { name: 'Kostenvoranschlag hochladen' }).click()
-      const dialog = ws.getByRole('dialog')
-      await expect(dialog).toBeVisible({ timeout: 10_000 })
+      const dialog = await oeffneDialog(ws, ws.getByRole('button', { name: 'Kostenvoranschlag hochladen' }))
       await ws.locator('#auftrag-kva-datei').setInputFiles(PDF)
       // Betrag Pflicht für Kunde-Sichtbarkeit (kvaSichtbar = kvaNetto||kvaBrutto)
       await ws.locator('input[name="auftrag-kva-brutto"]').fill('2500')
@@ -84,11 +98,7 @@ test('Selbstzahler-Reparatur-Weg end-to-end per UI (Werkstatt + Kunde)', async (
 
     await test.step('4) Werkstatt schließt ab (Schlussrechnung)', async () => {
       await ws.reload({ waitUntil: 'domcontentloaded' })
-      const trigger = ws.getByRole('button', { name: 'Reparatur abschließen' }).first()
-      await expect(trigger).toBeVisible({ timeout: 20_000 })
-      await trigger.click()
-      const dialog = ws.getByRole('dialog')
-      await expect(dialog).toBeVisible({ timeout: 10_000 })
+      const dialog = await oeffneDialog(ws, ws.getByRole('button', { name: 'Reparatur abschließen' }).first())
       await ws.locator('#reparatur-abschluss-datei').setInputFiles(PDF)
       await dialog.getByRole('button', { name: 'Reparatur abschließen' }).click()
       await expect(ws.locator('[data-sonner-toast]').filter({ hasText: 'Reparatur abgeschlossen' })).toBeVisible({ timeout: 25_000 })
