@@ -552,6 +552,17 @@ async function finalizeKundeSetup(
     console.warn('[CMM-19] claims/claim_parties user_id Update fehlgeschlagen:', err)
   }
 
+  // P6 / K8: das Fall-Fahrzeug an den frischen Kunden-Account binden (vehicles.current_owner_id).
+  // IS-NULL-Guard im Setter — ein bestehender Owner (Flotte/frueherer Kunde) wird nie ueberschrieben.
+  // Non-fatal: Owner-Bindung darf die Account-Anlage nie brechen.
+  try {
+    const { setVehicleOwnerFuerFall } = await import('@/lib/vehicles/owner')
+    const ownerRes = await setVehicleOwnerFuerFall(admin, fallId, userId)
+    if (!ownerRes.ok) console.warn('[P6 vehicle-owner] Bindung fehlgeschlagen:', ownerRes.error)
+  } catch (err) {
+    console.warn('[P6 vehicle-owner] Bindung warf:', err)
+  }
+
   // AAR-125: Lead laden für conditional Polizeibericht
   // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
   // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.

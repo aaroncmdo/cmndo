@@ -36,7 +36,7 @@ export function FahrzeugKarteBindClient({
   return (
     <div className="space-y-3">
       <p className="text-sm text-claimondo-shield">
-        Noch keine Karte gebunden. Scannen Sie den QR-Code der Schadenkarte — oder tippen Sie die
+        Noch keine Karte gebunden. Scannen Sie den QR-Code der Netzwerkkarte — oder tippen Sie die
         Karte mit dem Handy an — um sie diesem Fahrzeug zuzuweisen.
       </p>
       <SchadenkarteScanner onToken={handleToken} disabled={busy} />

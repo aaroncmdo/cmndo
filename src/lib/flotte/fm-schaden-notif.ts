@@ -25,7 +25,7 @@ export function buildFmSchadenNotifText(opts: {
     ? `${opts.gegnerName || 'unbekannt'} · ${opts.gegnerKennzeichen}`
     : opts.gegnerName || 'unbekannt'
   return [
-    'Neuer Schaden über Ihre Schadenkarte gemeldet.',
+    'Neuer Schaden über Ihre Netzwerkkarte gemeldet.',
     '',
     `Fahrzeug: ${fahrzeugLabel}`,
     `Unfallgegner: ${gegnerLabel}`,

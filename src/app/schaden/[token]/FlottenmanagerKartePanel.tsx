@@ -67,7 +67,7 @@ export function FlottenmanagerKartePanel({
           {zweig === 'bind' ? (
             <div className="flex flex-col gap-4 py-2">
               <div className="flex flex-col gap-1 text-center">
-                <h1 className="text-heading-md text-claimondo-navy">Schadenkarte binden</h1>
+                <h1 className="text-heading-md text-claimondo-navy">Netzwerkkarte binden</h1>
                 <p className="text-body-sm text-claimondo-ondo">
                   Diese Karte ist noch keinem Fahrzeug von {firmaName} zugewiesen. Wählen Sie
                   das Fahrzeug, zu dem sie gehört.
@@ -103,7 +103,7 @@ export function FlottenmanagerKartePanel({
           ) : (
             <div className="flex flex-col gap-4 py-2">
               <div className="flex flex-col gap-1 text-center">
-                <h1 className="text-heading-md text-claimondo-navy">Schadenkarte</h1>
+                <h1 className="text-heading-md text-claimondo-navy">Netzwerkkarte</h1>
                 <p className="text-body-sm text-claimondo-ondo">
                   {gebundenes
                     ? `Gebunden an ${fahrzeugLabel(gebundenes)}.`
