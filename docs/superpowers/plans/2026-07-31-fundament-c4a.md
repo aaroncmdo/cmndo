@@ -46,6 +46,13 @@ rollen-`config` + ein rollen-`vm` nimmt und die Zonen rendert. Zone-Komponenten 
 rollen-spezifisch. Genau die C4-Grenze (~80/20). Cross-Rollen bestätigt (`c4b/c4c/c4de-*-akte-ist.md`): SV braucht
 `sidebar`+Header-Slot+`topBlocks`/`footer`; Werkstatt `columns`+`footer`; Staff `tabs`+aside/sidebar.
 
+**⚠ Zwei Render-Sites (P6-Cross-Check 01.08.):** `<KundeClaimView vm>` wird an ZWEI Stellen gerendert —
+`src/app/kunde/faelle/[id]/page.tsx:60` **und** `src/app/kunde/fahrzeuge/[id]/schaden/[claimId]/page.tsx:37` (P6 #4924,
+sauberer Reuse — Kommentar dort: „C4-Gate: KONSUMIERT die bestehende Kunde-Claim-Sicht"). Die **Komponente selbst ist
+unverändert** (dieser Ist hält). Task 2 macht `KundeClaimView` zum Adapter → die `<KundeClaimView vm>`-API bleibt,
+**beide** Sites laufen automatisch weiter. **DoD-Konsequenz:** der Kunde-Render-Smoke prüft **BEIDE** Routen
+(`/kunde/faelle/[id]` + `/kunde/fahrzeuge/[id]/schaden/[claimId]`).
+
 ## Kern-Design (`<FallAkte>` — generalisiert)
 
 **File `src/components/fall-akte/types.ts`:**
