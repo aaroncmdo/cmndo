@@ -3475,7 +3475,10 @@
     "zahlungsempfaenger_bank",
     "zahlungsempfaenger_hinweis",
     "version",
-    "created_at"
+    "created_at",
+    "netzwerk_monat_cent",
+    "netzwerk_setup_cent",
+    "werkstatt_setup_cent"
    ]
   },
   "rechnungs_nr_counter": {
