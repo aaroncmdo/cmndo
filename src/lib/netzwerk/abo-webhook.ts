@@ -47,20 +47,41 @@ export function deriveAboStatusFromStripe(eventType: string, subStatus?: string 
   }
 }
 
-/** Resolved die sv_id aus subscription-metadata ODER Fallback ueber subscription_id/customer. */
+/** Metadata-typ des Events — Subscription-Objekte tragen unsere metadata direkt,
+ *  Invoices unter subscription_details.metadata (Stripe-API). */
+function eventTyp(obj: Record<string, unknown>): string | null {
+  const meta = (obj.metadata ?? {}) as Record<string, string>
+  if (meta.typ) return meta.typ
+  const subDetails = obj.subscription_details as { metadata?: Record<string, string> } | undefined
+  return subDetails?.metadata?.typ ?? null
+}
+
+/**
+ * Resolved die sv_id — Review-Fix I-2: OHNE typ='netzwerk_abo'-Nachweis KEIN
+ * customer-basierter Fallback (der wuerde jede manuelle Dashboard-Invoice eines
+ * SV-Customers zum Phantom-Entitlement machen und kuenftige Fremd-Abos — z.B.
+ * Werkstatt — auf die Netzwerk-Row clobbern). Ohne typ zaehlt nur eine BESTEHENDE
+ * Abo-Row per subscription_id (dann ist es nachweislich unser Abo).
+ */
 async function resolveSvId(
   db: SupabaseClient,
   obj: Record<string, unknown>,
 ): Promise<{ svId: string | null; subscriptionId: string | null }> {
   const meta = (obj.metadata ?? {}) as Record<string, string>
+  const typ = eventTyp(obj)
   const subscriptionId =
     typeof obj.subscription === 'string'
       ? obj.subscription
       : obj.object === 'subscription' && typeof obj.id === 'string'
         ? obj.id
         : null
-  if (meta.sv_id) return { svId: meta.sv_id, subscriptionId }
-  // Fallback A: bestehende Abo-Row per subscription_id.
+
+  // Fremd-Produkt (z.B. kuenftiges Werkstatt-Abo): explizit anderer typ -> nie anfassen.
+  if (typ && typ !== 'netzwerk_abo') return { svId: null, subscriptionId }
+
+  if (typ === 'netzwerk_abo' && meta.sv_id) return { svId: meta.sv_id, subscriptionId }
+
+  // Fallback A: bestehende Abo-Row per subscription_id (beweist Netzwerk-Zugehoerigkeit).
   if (subscriptionId) {
     const { data } = await db
       .from('sv_netzwerk_abonnements')
@@ -69,15 +90,18 @@ async function resolveSvId(
       .maybeSingle()
     if (data?.sv_id) return { svId: data.sv_id as string, subscriptionId }
   }
-  // Fallback B: ueber den Stripe-Customer.
-  const customerId = typeof obj.customer === 'string' ? obj.customer : null
-  if (customerId) {
-    const { data } = await db
-      .from('sachverstaendige')
-      .select('id')
-      .eq('stripe_customer_id', customerId)
-      .maybeSingle()
-    if (data?.id) return { svId: data.id as string, subscriptionId }
+
+  // Fallback B (customer-basiert) NUR mit typ-Nachweis — sonst Phantom-Entitlement.
+  if (typ === 'netzwerk_abo') {
+    const customerId = typeof obj.customer === 'string' ? obj.customer : null
+    if (customerId) {
+      const { data } = await db
+        .from('sachverstaendige')
+        .select('id')
+        .eq('stripe_customer_id', customerId)
+        .maybeSingle()
+      if (data?.id) return { svId: data.id as string, subscriptionId }
+    }
   }
   return { svId: null, subscriptionId }
 }
@@ -97,9 +121,20 @@ export async function applyNetzwerkAboEvent(
 
   const { svId, subscriptionId } = await resolveSvId(db, obj)
   if (!svId) {
-    console.error('[abo-webhook] sv_id unaufloesbar', event.type)
+    // Kein Fehler: fremde/unzuordenbare invoice.*-/subscription.*-Events (I-2) sind No-ops.
     return { acted: false, svId: null }
   }
+
+  // Review-Fixes M-2 + I-3: bestehende Row VOR dem Upsert lesen — comped ist manuell
+  // verwaltet (Partner-Konditionen) und wird von Stripe-Events NIE ueberschrieben;
+  // ueberfaellig_seit wird nur beim ECHTEN Uebergang gesetzt (Stripe-Retries resetten nicht).
+  const { data: bestehend } = await db
+    .from('sv_netzwerk_abonnements')
+    .select('status, ueberfaellig_seit')
+    .eq('sv_id', svId)
+    .maybeSingle()
+  const alterStatus = (bestehend as { status?: string | null } | null)?.status ?? null
+  if (alterStatus === 'comped') return { acted: false, svId }
 
   // gueltig_bis aus der Subscription (ein retrieve, kein Hot-Path).
   let gueltigBis: string | null = null
@@ -129,6 +164,12 @@ export async function applyNetzwerkAboEvent(
     aktualisiert_am: new Date().toISOString(),
   }
   if (gueltigBis) row.gueltig_bis = gueltigBis
+  // I-3: Dunning-Anker — setzen nur beim Uebergang IN ueberfaellig, nullen beim Verlassen.
+  if (neuStatus === 'ueberfaellig') {
+    if (alterStatus !== 'ueberfaellig') row.ueberfaellig_seit = new Date().toISOString()
+  } else {
+    row.ueberfaellig_seit = null
+  }
   const { error } = await db.from('sv_netzwerk_abonnements').upsert(row, { onConflict: 'sv_id' })
   if (error) {
     console.error('[abo-webhook] upsert', error.message)

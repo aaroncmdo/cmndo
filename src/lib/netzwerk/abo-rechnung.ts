@@ -14,6 +14,20 @@ export async function mintNetzwerkEinrichtungsRechnung(svId: string): Promise<{ 
   const preise = await ladeNetzwerkPreise()
   if (preise.setupCent <= 0) return { ok: true } // Waiver: keine Einrichtungsgebuehr
 
+  // Review-Fix I-1: Einrichtungsrechnung ist EINMALIG pro SV. Der Session-Dedup-Index
+  // greift hier nicht (session-los) -> expliziter Vorab-Check; das Race-Fenster deckt
+  // der partielle Unique-Index sv_onboarding_rechnungen_netzwerk_einrichtung_uniq
+  // (Mig 20260803083401) hart ab.
+  const vorDb = createAdminClient()
+  const { data: schonDa } = await vorDb
+    .from('sv_onboarding_rechnungen')
+    .select('id')
+    .eq('sv_id', svId)
+    .eq('typ', 'netzwerk_einrichtung')
+    .limit(1)
+    .maybeSingle()
+  if (schonDa) return { ok: true } // idempotenter Reprocess: nichts doppelt minten
+
   const res = await createOnboardingRechnung({
     typ: 'netzwerk_einrichtung',
     sv_id: svId,

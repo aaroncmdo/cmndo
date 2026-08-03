@@ -1,12 +1,28 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Steuert den I-1-Vorabcheck (bestehende netzwerk_einrichtung-Rechnung?).
+let rechnungSchonDa = false
+
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    from: () => ({
-      select: () => ({
-        eq: () => ({ single: async () => ({ data: { profile_id: null } }) }),
-      }),
-    }),
+    from: (table: string) =>
+      table === 'sv_onboarding_rechnungen'
+        ? {
+            select: () => ({
+              eq: () => ({
+                eq: () => ({
+                  limit: () => ({
+                    maybeSingle: async () => ({ data: rechnungSchonDa ? { id: 'r-alt' } : null, error: null }),
+                  }),
+                }),
+              }),
+            }),
+          }
+        : {
+            select: () => ({
+              eq: () => ({ single: async () => ({ data: { profile_id: null } }) }),
+            }),
+          },
   }),
 }))
 const ladeNetzwerkPreise = vi.fn()
@@ -23,6 +39,7 @@ import { mintNetzwerkEinrichtungsRechnung } from '../abo-rechnung'
 beforeEach(() => {
   ladeNetzwerkPreise.mockReset()
   createOnboardingRechnung.mockReset()
+  rechnungSchonDa = false
 })
 
 describe('mintNetzwerkEinrichtungsRechnung', () => {
@@ -56,5 +73,13 @@ describe('mintNetzwerkEinrichtungsRechnung', () => {
     createOnboardingRechnung.mockResolvedValue({ success: false, error: 'boom' })
     const res = await mintNetzwerkEinrichtungsRechnung('sv-1')
     expect(res).toEqual({ ok: false, error: 'boom' })
+  })
+
+  it('I-1: bestehende netzwerk_einrichtung-Rechnung -> idempotenter Skip (kein Doppel-Mint)', async () => {
+    ladeNetzwerkPreise.mockResolvedValue({ monatCent: 2999, setupCent: 3990, konfigId: 'k', konfigVersion: 1 })
+    rechnungSchonDa = true
+    const res = await mintNetzwerkEinrichtungsRechnung('sv-1')
+    expect(res.ok).toBe(true)
+    expect(createOnboardingRechnung).not.toHaveBeenCalled()
   })
 })

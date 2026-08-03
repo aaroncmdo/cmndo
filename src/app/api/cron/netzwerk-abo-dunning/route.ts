@@ -23,14 +23,15 @@ export async function GET(request: Request) {
 
   const { data: abos } = await db
     .from('sv_netzwerk_abonnements')
-    .select('sv_id, status, gueltig_bis, stripe_subscription_id, aktualisiert_am')
+    .select('sv_id, status, gueltig_bis, stripe_subscription_id, aktualisiert_am, ueberfaellig_seit')
     .eq('status', 'ueberfaellig')
   if (!abos?.length) return NextResponse.json({ ok: true, count: 0 })
 
   let acted = 0
   for (const abo of abos) {
-    // Tage seit ueberfaellig (aktualisiert_am setzte der payment_failed-Webhook).
-    const seit = new Date(abo.aktualisiert_am as string)
+    // Review-Fix I-3: Dunning-Anker = ueberfaellig_seit (nur beim Uebergang gesetzt —
+    // Stripe-Smart-Retries resetten ihn NICHT); aktualisiert_am nur als Alt-Row-Fallback.
+    const seit = new Date((abo.ueberfaellig_seit as string | null) ?? (abo.aktualisiert_am as string))
     const tage = Math.floor((Date.now() - seit.getTime()) / 86_400_000)
 
     for (const stufe of REMINDER_STUFEN) {
@@ -70,17 +71,21 @@ export async function GET(request: Request) {
     }
 
     // Karenz abgelaufen -> Stripe-Sub canceln + status=gekuendigt (aktiver Schnitt;
-    // der subscription.deleted-Webhook bestaetigt idempotent).
-    if (tage >= KARENZ_TAGE && abo.stripe_subscription_id) {
-      try {
-        const { stripe } = await import('@/lib/stripe/client')
-        await stripe.subscriptions.cancel(abo.stripe_subscription_id as string)
-      } catch (err) {
-        console.error('[netzwerk-dunning] cancel', err)
+    // der subscription.deleted-Webhook bestaetigt idempotent). Review-Fix M-3: der
+    // Status-Schnitt haengt NICHT an stripe_subscription_id — eine sub-lose Row
+    // bliebe sonst dauerhaft 'ueberfaellig'.
+    if (tage >= KARENZ_TAGE) {
+      if (abo.stripe_subscription_id) {
+        try {
+          const { stripe } = await import('@/lib/stripe/client')
+          await stripe.subscriptions.cancel(abo.stripe_subscription_id as string)
+        } catch (err) {
+          console.error('[netzwerk-dunning] cancel', err)
+        }
       }
       await db
         .from('sv_netzwerk_abonnements')
-        .update({ status: 'gekuendigt', aktualisiert_am: new Date().toISOString() })
+        .update({ status: 'gekuendigt', ueberfaellig_seit: null, aktualisiert_am: new Date().toISOString() })
         .eq('sv_id', abo.sv_id)
       acted++
     }

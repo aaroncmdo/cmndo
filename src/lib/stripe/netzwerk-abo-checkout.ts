@@ -65,6 +65,20 @@ export async function createNetzwerkAboCheckoutSession(
   svId: string,
 ): Promise<{ ok: true; clientSecret: string; sessionId: string } | { ok: false; error: string }> {
   try {
+    // Review-Fix I-4: Server-Guard gegen Doppel-Subscription — Stripe dedupliziert
+    // Subscription-Checkouts pro Customer NICHT; die UI-CTA allein reicht nicht
+    // (Webhook-Lag laesst status leer -> CTA bleibt sichtbar -> 2. Klick = 2. Abo).
+    const guardDb = createAdminClient()
+    const { data: abo } = await guardDb
+      .from('sv_netzwerk_abonnements')
+      .select('status')
+      .eq('sv_id', svId)
+      .maybeSingle()
+    const status = (abo as { status?: string | null } | null)?.status ?? null
+    if (status === 'aktiv' || status === 'comped' || status === 'ueberfaellig') {
+      return { ok: false, error: 'Du bist bereits Netzwerkpartner — dein Abo verwaltest du über „Abo verwalten".' }
+    }
+
     const preise = await ladeNetzwerkPreise()
     const customerId = await getOrCreateStripeCustomer(svId)
     const params = buildNetzwerkAboCheckoutParams({
