@@ -17,7 +17,11 @@ import {
   ClockIcon,
   CheckIcon,
   FileTextIcon,
+  NetworkIcon,
 } from 'lucide-react'
+// P5 T8: Netzwerkpartner-Abo-Ask als optionaler Abschluss-Step (skippbar).
+import { NetzwerkpartnerCta } from '@/components/netzwerk/NetzwerkpartnerCta'
+import { starteNetzwerkAboCheckout } from '@/app/gutachter/einstellungen/netzwerk-abo/actions'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
 import { signSvVertrag, startStripeCheckout, einloeseGutscheincode } from '@/lib/actions/sv-onboarding-actions'
@@ -133,6 +137,9 @@ const STEPS_4: { key: string; label: string; icon: typeof PackageIcon }[] = [
   { key: 'anzahlung', label: 'Anzahlung', icon: CreditCardIcon },
   { key: 'dokumente', label: 'Dokumente', icon: FileTextIcon },
   { key: 'kalender', label: 'Kalender', icon: CalendarIcon },
+  // P5 T8: optionaler Abschluss-Ask (skippbar) — kein Pflicht-Schritt, der Skip
+  // schliesst das Onboarding unveraendert ab.
+  { key: 'netzwerk', label: 'Netzwerk', icon: NetworkIcon },
 ]
 
 const STEPS_2_SUB: { key: string; label: string; icon: typeof PackageIcon }[] = [
@@ -156,6 +163,8 @@ export default function WillkommenClient({
   stepOverride,
   stripePublishableKey,
   leadpreise,
+  netzwerkMonatEuro = '',
+  netzwerkSetupEuro = '',
 }: {
   rolle: Rolle
   sv: SvData
@@ -168,6 +177,9 @@ export default function WillkommenClient({
   stepOverride?: number
   stripePublishableKey: string
   leadpreise: LeadpreisRow[]
+  /** P5 T8: formatierte Netzwerkpartner-Preise (leer = Config fehlt -> Step wird uebersprungen). */
+  netzwerkMonatEuro?: string
+  netzwerkSetupEuro?: string
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -243,6 +255,10 @@ export default function WillkommenClient({
   if (typeof stepOverride === 'number') initialStep = stepOverride
 
   const [step, setStep] = useState(initialStep)
+  // P5 T8: Netzwerkpartner-Ask (embedded Checkout im Abschluss-Step).
+  const [netzwerkClientSecret, setNetzwerkClientSecret] = useState<string | null>(null)
+  const [netzwerkLoading, setNetzwerkLoading] = useState(false)
+  const [netzwerkFehler, setNetzwerkFehler] = useState<string | null>(null)
   // AAR-509: currentKey vor die Stripe-Effects gezogen damit der Anzahlung-
   // Trigger keybasiert statt index-basiert prüfen kann — sonst hängt der
   // Checkout, weil `anzahlung` nach Einführung von `branding`/`dokumente`
@@ -1092,10 +1108,54 @@ export default function WillkommenClient({
               gcalConnected={sv.gcal_connected}
               caldavConnected={sv.caldav_connected}
               onDone={() => {
-                router.push('/gutachter')
-                router.refresh()
+                // P5 T8: optionaler Netzwerkpartner-Ask als Abschluss — nur wenn die
+                // Preis-Config da ist (leer = Step ueberspringen, Verhalten wie vorher).
+                if (netzwerkMonatEuro) {
+                  goToStep('netzwerk')
+                } else {
+                  router.push('/gutachter')
+                  router.refresh()
+                }
               }}
             />
+          )}
+
+          {/* P5 T8: Netzwerkpartner-Ask (skippbar) — Upgrade mountet den embedded
+              Checkout (KFZ-156-Muster wie der Anzahlungs-Step); Skip schliesst das
+              Onboarding unveraendert ab. Nach Zahlung leitet Stripe auf
+              /gutachter/einstellungen?netzwerk_abo=success (T9-Erfolgs-Banner). */}
+          {currentKey === 'netzwerk' && r !== 'sub_mitarbeiter' && (
+            netzwerkClientSecret && stripePublishableKey ? (
+              <EmbeddedCheckoutProvider
+                stripe={loadStripe(stripePublishableKey)}
+                options={{ clientSecret: netzwerkClientSecret }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            ) : (
+              <>
+                <NetzwerkpartnerCta
+                  monatEuro={netzwerkMonatEuro}
+                  setupEuro={netzwerkSetupEuro}
+                  loading={netzwerkLoading}
+                  onUpgrade={async () => {
+                    setNetzwerkLoading(true)
+                    setNetzwerkFehler(null)
+                    const res = await starteNetzwerkAboCheckout()
+                    setNetzwerkLoading(false)
+                    if (!res.ok) { setNetzwerkFehler(res.error); return }
+                    setNetzwerkClientSecret(res.clientSecret)
+                  }}
+                  onSkip={() => {
+                    router.push('/gutachter')
+                    router.refresh()
+                  }}
+                />
+                {netzwerkFehler && (
+                  <p className="mt-2 text-body-xs text-danger">{netzwerkFehler}</p>
+                )}
+              </>
+            )
           )}
 
           {/* AAR-509: Anzahlungs-Step hat eigenes Error-UI mit Retry — sonst
@@ -1110,7 +1170,7 @@ export default function WillkommenClient({
               Vertrag + Sub-AGB. Branding (LogoUploadStep), Anzahlung (Stripe),
               Dokumente (DokumenteUploadStep) und Kalender (KalenderConnectStep)
               haben eigene Buttons. */}
-          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'dokumente' && currentKey !== 'kalender' && (
+          {currentKey !== 'branding' && currentKey !== 'anzahlung' && currentKey !== 'dokumente' && currentKey !== 'kalender' && currentKey !== 'netzwerk' && (
             <div className="flex items-center gap-3 mt-6">
               {/* AAR-513: Bottom-Zurück nur noch für sub_mitarbeiter — alle
                   anderen Rollen nutzen den globalen Zurück-Pfeil oben rechts. */}

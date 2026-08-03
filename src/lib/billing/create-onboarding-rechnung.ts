@@ -22,7 +22,7 @@ import { ONBOARDING_DESCRIPTOR } from '@/lib/abrechnung/descriptors/onboarding'
  *   7. Gibt { rechnung_id, pdf_buffer, rechnungs_nr, brutto_formatted } zurück
  */
 export type OnboardingRechnungContext = {
-  typ: 'solo' | 'buero' | 'akademie'
+  typ: 'solo' | 'buero' | 'akademie' | 'netzwerk_einrichtung'
   sv_id?: string | null
   organisation_id?: string | null
   stripe_session_id?: string | null
@@ -62,7 +62,8 @@ export async function createOnboardingRechnung(
 
     // 2. Empfänger-Daten
     let empfaenger: OnboardingRechnungData['empfaenger']
-    if (ctx.typ === 'solo' && ctx.sv_id) {
+    // P5: netzwerk_einrichtung ist sv-adressiert wie solo (Setup-Fee des Netzwerkpartner-Abos).
+    if ((ctx.typ === 'solo' || ctx.typ === 'netzwerk_einrichtung') && ctx.sv_id) {
       const { data: sv } = await db.from('sachverstaendige')
         .select('firmenname, profile_id, standort_adresse, standort_plz, steuernummer, ust_id')
         .eq('id', ctx.sv_id)
