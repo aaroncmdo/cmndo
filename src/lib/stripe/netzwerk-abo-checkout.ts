@@ -1,7 +1,10 @@
 // P5 T3: Netzwerkpartner-Abo — Subscription-Checkout (Monats-Flatrate) mit der
-// einmaligen Einrichtungsgebuehr als add_invoice_items der ERSTEN Rechnung
-// (Stripe-kanonisch fuer "Setup-Fee + Abo"). Preise inline aus der Config (T2) ->
-// KEINE price_/prod_-IDs. KEIN payment_method_types (Dynamic Payment Methods).
+// einmaligen Einrichtungsgebuehr als ZWEITES one-time line_item (landet auf der
+// ERSTEN Rechnung). checkout.sessions.create kennt KEIN subscription_data.
+// add_invoice_items (nur die Subscriptions-API tut das) — der fruehere Ansatz
+// warf live "Received unknown parameter" (Regel-4-Smoke 03.08., PR #4946).
+// Preise inline aus der Config (T2) -> KEINE price_/prod_-IDs. KEIN
+// payment_method_types (Dynamic Payment Methods).
 // ui_mode-Cast = Bestandsmuster (akademie-/buero-checkout, stripe@22-Type-Lag).
 
 import type Stripe from 'stripe'
@@ -21,40 +24,36 @@ export function buildNetzwerkAboCheckoutParams(args: {
   returnUrl: string
 }): Stripe.Checkout.SessionCreateParams {
   const meta = { sv_id: args.svId, typ: 'netzwerk_abo' }
-  const subscriptionData = {
-    metadata: meta,
-    ...(args.setupCent > 0
-      ? {
-          add_invoice_items: [
-            {
-              price_data: {
-                currency: 'eur',
-                unit_amount: args.setupCent,
-                product_data: { name: 'Claimondo Netzwerkpartner — einmalige Einrichtungsgebühr' },
-              },
-              quantity: 1,
-            },
-          ],
-        }
-      : {}),
+  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+    {
+      price_data: {
+        currency: 'eur',
+        unit_amount: args.monatCent,
+        recurring: { interval: 'month' },
+        product_data: { name: 'Claimondo Netzwerkpartner (Monatsbeitrag)' },
+      },
+      quantity: 1,
+    },
+  ]
+  if (args.setupCent > 0) {
+    // one-time (kein recurring) -> Stripe stellt den Posten nur auf der ersten
+    // Rechnung der Subscription; T5 (billing_reason='subscription_create') bleibt intakt.
+    lineItems.push({
+      price_data: {
+        currency: 'eur',
+        unit_amount: args.setupCent,
+        product_data: { name: 'Claimondo Netzwerkpartner — einmalige Einrichtungsgebühr' },
+      },
+      quantity: 1,
+    })
   }
   const params: Stripe.Checkout.SessionCreateParams = {
     customer: args.customerId,
     mode: 'subscription',
     // KFZ-156-Muster: embedded Checkout inline im Portal (Cast wie akademie-checkout.ts).
     ui_mode: 'embedded_page' as unknown as Stripe.Checkout.SessionCreateParams['ui_mode'],
-    line_items: [
-      {
-        price_data: {
-          currency: 'eur',
-          unit_amount: args.monatCent,
-          recurring: { interval: 'month' },
-          product_data: { name: 'Claimondo Netzwerkpartner (Monatsbeitrag)' },
-        },
-        quantity: 1,
-      },
-    ],
-    subscription_data: subscriptionData as Stripe.Checkout.SessionCreateParams['subscription_data'],
+    line_items: lineItems,
+    subscription_data: { metadata: meta },
     metadata: meta,
     return_url: args.returnUrl,
   }

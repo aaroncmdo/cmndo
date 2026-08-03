@@ -33,12 +33,18 @@ describe('buildNetzwerkAboCheckoutParams', () => {
     expect(li.price_data.recurring.interval).toBe('month')
   })
 
-  it('Setup-Fee als add_invoice_items der ERSTEN Rechnung (config-cent, inline)', () => {
-    const aii = (
-      (p.subscription_data as unknown as { add_invoice_items: Array<{ price_data: { unit_amount: number } }> })
-        .add_invoice_items
-    )[0]
-    expect(aii.price_data.unit_amount).toBe(3990)
+  it('Setup-Fee als ZWEITES one-time line_item (config-cent, inline, KEIN recurring)', () => {
+    // Regel-4-Fund 03.08.: subscription_data.add_invoice_items existiert bei
+    // checkout.sessions.create nicht ("Received unknown parameter") — der
+    // one-time Posten landet als line_item auf der ersten Rechnung.
+    expect(p.line_items).toHaveLength(2)
+    const setup = p.line_items![1] as {
+      price_data: { unit_amount: number; currency: string; recurring?: unknown }
+    }
+    expect(setup.price_data.unit_amount).toBe(3990)
+    expect(setup.price_data.currency).toBe('eur')
+    expect('recurring' in setup.price_data).toBe(false)
+    expect('add_invoice_items' in (p.subscription_data as object)).toBe(false)
   })
 
   it('sv_id in subscription_data.metadata UND session.metadata (Resolver-Anker)', () => {
@@ -48,11 +54,10 @@ describe('buildNetzwerkAboCheckoutParams', () => {
     expect(p.metadata!.typ).toBe('netzwerk_abo')
   })
 
-  it('setupCent=0 => KEINE add_invoice_items (Waiver/Sonderfall)', () => {
+  it('setupCent=0 => nur das Abo-line_item (Waiver/Sonderfall)', () => {
     const p0 = buildNetzwerkAboCheckoutParams({
       customerId: 'c', svId: 's', monatCent: 2999, setupCent: 0, returnUrl: 'x',
     })
-    const aii = (p0.subscription_data as unknown as { add_invoice_items?: unknown[] }).add_invoice_items
-    expect(aii ?? []).toHaveLength(0)
+    expect(p0.line_items).toHaveLength(1)
   })
 })
