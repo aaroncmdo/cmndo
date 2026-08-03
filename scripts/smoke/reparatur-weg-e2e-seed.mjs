@@ -44,7 +44,7 @@ const db = createClient(URL_, KEY, { auth: { persistSession: false, autoRefreshT
 
 const APP = 'https://app.claimondo.de'
 const MARKER = 'SMOKE-REPWEG Koeln (Test)'
-const FIN_MARKER = 'WBASMOKEREPWEG017'
+const FIN_PREFIX = 'WBASMOKE' // 8-Zeichen-Marker; Rest pro-Lauf (stamp). fin ist UNIQUE (vehicles_fin_key) -> ein FESTER FIN kollidiert bei parallelen Seeds (2. Parallel-Problem neben dem Cleanup).
 const KOELN = { lat: 50.9413, lng: 6.9583, plz: '50667', ort: 'Köln' }
 const OUT = new URL('./.reparatur-weg-e2e-seed.json', import.meta.url)
 const MODE = process.argv.includes('--clean') ? 'clean' : process.argv.includes('--assert') ? 'assert' : 'seed'
@@ -72,8 +72,17 @@ const loadSummary = () => existsSync(OUT) ? JSON.parse(readFileSync(OUT, 'utf8')
 // ---------------------------------------------------------------- CLEAN
 async function clean() {
   const s = loadSummary()
-  const { data: claims } = await db.from('claims').select('id').eq('schadenort_adresse', MARKER)
-  const claimIds = [...new Set([...(claims ?? []).map((c) => c.id), ...(s ? [s.claimId] : [])].filter(Boolean))]
+  // PARALLEL-SICHERHEIT: eigene Daten (via Summary-IDs) IMMER loeschen; fremde marker-Daten NUR wenn
+  // >1h alt (verwaiste frueherer Laeufe). Marker + FIN sind bei ALLEN Laeufen identisch — ohne den
+  // Zeitfilter trampelt --clean eine parallele reparatur-weg-Session mit frischem Seed (2x beobachtet
+  // 30.+31.07.). Smokes dauern Minuten -> <1h = aktive Session, >1h = verwaist. Siehe
+  // COORDINATION-reparatur-weg-cleanup-nicht-parallel-sicher.
+  const eineStundeAgo = new Date(Date.now() - 3600e3).toISOString()
+
+  // CLAIMS: eigener (Summary) + alte marker-verwaiste (>1h)
+  const { data: markerClaims } = await db.from('claims').select('id')
+    .eq('schadenort_adresse', MARKER).lt('created_at', eineStundeAgo)
+  const claimIds = [...new Set([...(markerClaims ?? []).map((c) => c.id), ...(s ? [s.claimId] : [])].filter(Boolean))]
   for (const cid of claimIds) {
     const { data: files } = await db.storage.from('fall-dokumente').list(cid)
     if (files?.length) await db.storage.from('fall-dokumente').remove(files.map((f) => `${cid}/${f.name}`))
@@ -84,29 +93,37 @@ async function clean() {
     await db.from('phase_transitions').delete().eq('fall_id', cid)
     await db.from('claims').delete().eq('id', cid) // CASCADE -> faelle_claim_bridge
   }
-  await db.from('leads').delete().like('email', 'throwaway-kunde-repweg-%')
-  await db.from('vehicles').delete().eq('fin', FIN_MARKER)
-  // Marker-basiertes Konto-Cleanup — faengt AUCH verwaiste Konten frueherer Seeds (anderer
-  // stamp); das Summary allein kennt nur den letzten Lauf.
-  const { data: profs } = await db.from('profiles').select('id').like('email', 'throwaway-%repweg-%@claimondo.test')
-  const uids = (profs ?? []).map((p) => p.id)
+
+  // LEADS + VEHICLES: eigene (Summary) + alte marker-verwaiste (>1h). FIN ist fest = geteilt.
+  if (s?.leadId) await db.from('leads').delete().eq('id', s.leadId)
+  await db.from('leads').delete().like('email', 'throwaway-kunde-repweg-%').lt('created_at', eineStundeAgo)
+  if (s?.vehicleId) await db.from('vehicles').delete().eq('id', s.vehicleId)
+  await db.from('vehicles').delete().like('fin', FIN_PREFIX + '%').lt('created_at', eineStundeAgo)
+
+  // PROFILES: eigene (Summary-UIDs) + alte marker-verwaiste (>1h) — frische FREMDE Konten bleiben
+  const { data: profs } = await db.from('profiles').select('id, created_at').like('email', 'throwaway-%repweg-%@claimondo.test')
+  const eigeneUids = new Set([s?.werkstattUid, s?.kundeUid].filter(Boolean))
+  const uids = (profs ?? []).filter((p) => eigeneUids.has(p.id) || p.created_at < eineStundeAgo).map((p) => p.id)
   for (const uid of uids) {
-    // ALLE mitteilungen des Test-Kontos loeschen (auf empfaenger_id=uid gescopt = reines throwaway-
-    // Konto, alle mitteilungen sind Test-Daten). KEIN <2h-Zeitfilter mehr: der liess bei einem
-    // Cleanup >2h nach dem Seed die alten mitteilungen stehen -> FK-Block auf profiles.delete ->
-    // verwaistes Test-Profil blieb auf prod liegen (Befund 30.07., manuell geraeumt).
+    // ALLE mitteilungen des Test-Kontos loeschen (gescopt auf empfaenger_id=uid = reines throwaway-
+    // Konto). KEIN <2h-Zeitfilter: der liess alte mitteilungen stehen -> FK-Block -> verwaistes Profil.
     await db.from('mitteilungen').delete().eq('empfaenger_id', uid)
     await db.from('werkstaetten').delete().eq('user_id', uid)
     await db.from('profiles').delete().eq('id', uid)
     await db.auth.admin.deleteUser(uid).catch(() => {})
   }
-  await db.from('werkstaetten').delete().like('name', 'SMOKE Reparatur-Werkstatt %') // Namens-Backstop
-  log(`  cleaned: ${claimIds.length} claim(s) + lead/vehicle + ${uids.length} Konto/Satellit (Marker "${MARKER}")`)
+
+  // WERKSTAETTEN Namens-Backstop: eigene (Summary) + alte marker-verwaiste (>1h)
+  if (s?.werkstattId) await db.from('werkstaetten').delete().eq('id', s.werkstattId)
+  await db.from('werkstaetten').delete().like('name', 'SMOKE Reparatur-Werkstatt %').lt('created_at', eineStundeAgo)
+
+  log(`  cleaned: ${claimIds.length} claim(s) + lead/vehicle + ${uids.length} Konto/Satellit (eigene + verwaiste >1h; parallel-sicher)`)
 }
 
 // ---------------------------------------------------------------- SEED
 async function seed() {
   const stamp = Date.now().toString(36) + '-' + randomUUID().slice(0, 8)
+  const fin = (FIN_PREFIX + stamp.replace(/-/g, '').toUpperCase()).slice(0, 17) // 17 Zeichen, pro-Lauf-eindeutig (fin UNIQUE)
   const wsEmail = `throwaway-werkstatt-repweg-${stamp}@claimondo.test`
   const wsPw = `Thrw-${stamp}-Ws9!`
   const kEmail = `throwaway-kunde-repweg-${stamp}@claimondo.test`
@@ -126,7 +143,7 @@ async function seed() {
   const werkstattId = ws.id
 
   const { data: veh, error: vErr } = await db.from('vehicles').insert({
-    hersteller: 'BMW', modell_haupttyp: '320d', kennzeichen_aktuell: 'K-SM 4567', fin: FIN_MARKER,
+    hersteller: 'BMW', modell_haupttyp: '320d', kennzeichen_aktuell: 'K-SM 4567', fin,
   }).select('id').single()
   if (vErr) throw new Error('vehicles: ' + vErr.message)
   const vehicleId = veh.id
@@ -146,6 +163,9 @@ async function seed() {
   const { data: claim, error: cErr } = await db.from('claims').insert({
     geschaedigter_user_id: kundeUid, lead_id: leadId, vehicle_id: vehicleId, schadentag: today,
     service_typ: 'komplett', abrechnungsweg: 'selbstzahler', reparaturwunsch: 'reparatur',
+    // Schaden-Feststellung fuer die Werkstatt-Sicht (Fall-Karte "Schaden" + Fahrzeug&Unfall/Unfallhergang):
+    schadenart: 'eigenverschulden', // CHECK: haftpflicht|vollkasko|teilkasko|eigenverschulden|unbekannt
+    hergang_kunde_text: 'Beim Ausparken die Beifahrertür an einem Poller verkratzt und eingedrückt.',
     schadenort_adresse: MARKER, schadenort_ort: KOELN.ort, schadenort_plz: KOELN.plz,
     schadenort_lat: KOELN.lat, schadenort_lng: KOELN.lng,
   }).select('id').single()
