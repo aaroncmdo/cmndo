@@ -24,7 +24,10 @@ export function buildNetzwerkAboCheckoutParams(args: {
   returnUrl: string
 }): Stripe.Checkout.SessionCreateParams {
   const meta = { sv_id: args.svId, typ: 'netzwerk_abo' }
-  const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
+  // Index-Access statt Namespace: stripe@22-ESM re-exportiert Checkout.SessionCreateParams
+  // nicht als Namespace (CI-tsc TS2724) — der Typ selbst funktioniert.
+  type LineItem = NonNullable<Stripe.Checkout.SessionCreateParams['line_items']>[number]
+  const lineItems: LineItem[] = [
     {
       price_data: {
         currency: 'eur',
