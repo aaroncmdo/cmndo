@@ -80,7 +80,12 @@ export function scanContent(src) {
       }
     }
     // (3) IDENT.operative_status = ...  (Engine-Muster: claimsUpdate.operative_status = ...)
-    const assignRe = new RegExp(`(?<![\\w.])${ident}\\.operative_status\\s*=(?!=)`)
+    //     C1a: auch die CAST-Form `(IDENT as <T>).operative_status = ...` fangen — der Type-Cast
+    //     steht zwischen Ident und Property, die fruehere Regex `${ident}\.operative_status` matchte
+    //     ihn NICHT (A2-#6: sv-zuweisung war so unsichtbar). Die optionale `\s+as\s+<T>)`-Gruppe
+    //     deckt `(claimsUpd as Record<string, unknown>).operative_status = ...` ab; die Plain-Form
+    //     bleibt (optionale Gruppe matcht leer).
+    const assignRe = new RegExp(`(?<![\\w.])${ident}\\b(?:\\s+as\\s+[^)]+\\))?\\.operative_status\\s*=(?!=)`)
     if (assignRe.test(code)) {
       out.push({ line: lineAt(src, m.index), form: 'traced-assign' })
     }

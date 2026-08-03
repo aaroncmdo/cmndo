@@ -736,7 +736,11 @@ export default function FlowWizardKfz({
                 <TerminOfflineHinweis
                   onSkip={() => {
                     setOhneTermin(true)
-                    setStepIndex(stepIndexById('sa'))
+                    // Aaron-Incident 03.08.: kein harter 'sa'-Sprung mehr — der uebersprang die
+                    // NACH termin liegenden Sequenz-Steps (gutachter/ort_fahrzeug/werkstatt,
+                    // Spec 2026-07-21) -> Werkstatt-Vermittlung war im FlowLink unerreichbar.
+                    // +1 laesst die (Config-)Sequenz entscheiden.
+                    setStepIndex((i) => i + 1)
                   }}
                 />
               ) : (
@@ -748,7 +752,8 @@ export default function FlowWizardKfz({
                   }}
                   onOhneTermin={() => {
                     setOhneTermin(true)
-                    setStepIndex(stepIndexById('sa'))
+                    // s. Kommentar oben (Aaron-Incident 03.08.): Sequenz statt Hard-Jump.
+                    setStepIndex((i) => i + 1)
                   }}
                 />
               )
@@ -847,7 +852,8 @@ export default function FlowWizardKfz({
                       onOhneTermin={() => {
                         setOhneTermin(true)
                         setUmbuchen(false)
-                        setStepIndex(stepIndexById('sa'))
+                        // s. Kommentar am termin-Step (Aaron-Incident 03.08.).
+                        setStepIndex((i) => i + 1)
                       }}
                     />
                     <div className="mt-4 text-center">
