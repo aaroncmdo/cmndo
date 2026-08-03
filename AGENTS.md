@@ -209,6 +209,18 @@ Bei reinen Bugfix-Commits darf der Audit kürzer sein, aber alle 7 Punkte müsse
 
 Bisher sind mehrfach Inkonsistenzen durchgerutscht (AAR-123 Tabs statt integrierter View, `flow_links.created_at` statt `erstellt_am`, `faelle.vollmacht_unterschrieben` existierte nicht, `KarteHubClient h-[calc(100vh-120px)]` nach Layout-Move). Jeder dieser Fehler wäre durch einen der 7 Punkte oben gefangen worden. Der Audit ist Pflicht, kein Vorschlag.
 
+# Feature-Definition-of-Done — Journey-Zyklus (Fundament D1)
+
+Verfassungsprinzip „Kein Feature ohne Reise" (Fundament §1, Prinzip 10): operatives Soll in Prosa **vor** dem Bau, Journey-Smoke **vor** dem Merge. Für jede Änderung, die eine der 10 Journeys (`docs/fundament/journeys/j01…j10`) berührt, gilt **zusätzlich** zum 7-Punkte-Audit dieser Zyklus:
+
+1. **Soll zuerst (Journey-Delta VOR dem Bau).** Das neue/geänderte Soll-Verhalten wird als Journey-Abschnitt geschrieben — im **selben PR**, bevor der Code steht. Neue Journey → neue Datei im Pflichtformat (Fundament §A1); Änderung → Delta in der bestehenden Journey. Kein Feature-Code ohne vorher aufgeschriebene Soll-Erwartung.
+2. **Journey-Spec nachziehen.** Der zugehörige Journey-Smoke (`tests/e2e/…`, Schrittnummer als Kommentar → Traceability Spec ↔ Journey) wird auf das neue Soll aktualisiert; neue nicht-automatisierbare Schritte als `test.skip` mit Begründung + Journey-Referenz (nie stillschweigend weglassen).
+3. **Journey-Smoke grün VOR Merge.** Nachweis über den Prod-Smoke-Weg (Regel 4: Kommando + Output im PR) VOR dem Merge; der CI-Journey-Step (`e2e`-Job) läuft **post-merge** gegen prod und ist die Dauer-Absicherung (einmal grün → nie wieder rot gemergt). Rot → nicht mergen.
+
+**Verhältnis zu Regel 4:** Regel 4 (Prod-Smoke nach Deploy) bleibt der Abschluss-Beweis für **jeden** verhaltensrelevanten PR. D1 zieht für **Journey-berührende Feature-Arbeit** den Beweis nach vorn (Soll + grüner Journey-Smoke als Merge-Voraussetzung) und macht damit „OFFEN: Regel-4" für die abgedeckten Journeys zur strukturellen Ausnahme statt zur Dauerschuld.
+
+**Abgrenzung:** Reine interne Tools/Doku/Config/Scripts ohne Bezug zu einer J1–J10-Journey sind ausgenommen (im PR kurz vermerken). Steuerdokument des Programms: `docs/fundament/FUNDAMENT.md`; die 10 Journeys: `docs/fundament/journeys/`; der Journey-Smoke-CI-Step lebt im `e2e`-Job (`.github/workflows/ci.yml`).
+
 # Server-Actions — Error-Handling-Pattern
 
 Server-Actions (`'use server'`-Files unter `src/app/**/actions.ts`) müssen einem festen Pattern folgen, damit Caller keine try/catch-Mischung um sie wickeln müssen.
