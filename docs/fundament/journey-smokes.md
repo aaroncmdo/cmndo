@@ -82,8 +82,8 @@ Diese Matrix ist Schritt 1; sie ist parallel-sicher (nur diese Docs-Datei + spä
 | **J1** | ✅ **CI-Step** | `golden-path-deep-prod` (Status-Tiefe) |
 | **J4** | ✅ **CI-Step** | `reparatur-weg-e2e-smoke` (voller Reparatur-Weg) |
 | **J9** | ✅ **CI-Step** (T1) | `provisionen-verrechnung` + `provisionen-staffel` (rein DB, self-cleaning); `lifecycle` = **opt-in** (globaler Release-Cron → Geld-Timing-Effekt, DECISIONS 03.08.) |
-| **J5** | 🟡 CI-tauglich, **T2** | `kasko-reparatur-phase-smoke` (read-only) — braucht inline-Login → `fixtures.adminPage` + Fixture-Claim-Persistenz |
-| **J8** | 🟡 teils, **T2** | `2fa-enroll-smoke` (konto-isoliert) — braucht Seed-Step `seed-smoke-enroll.mjs` |
+| **J8** | ✅ **CI-Step** (T2) | `2fa-enroll-smoke` (konto-isoliert, TOTP-Enroll-UI) + Seed-Step `seed-smoke-enroll.mjs` (process.env-first, self-reset je Lauf) |
+| **J5** | ⏭️ **begründeter Skip** | `kasko-reparatur-phase-smoke` — Login-Refactor wäre machbar (`loginContextOrSkip('admin')`), ABER Fixture-Claim `39734007` ist **zustandsgedriftet** (MCP 03.08.: `werkstatt_id NULL`/`ersterfassung` statt „Werkstatt gesetzt") → Assertion unsicher; braucht eigenen deterministischen Seed = Follow-up (T-nachgelagert) |
 | **J10** | 🟡 teils, **T3** | `werkstatt-finder-smoke` — braucht Code-Fix (`db()` liest `.env.local` direkt → `process.env`) |
 | **J2** | ⏭️ **begründeter CI-Skip** | echte Meldung/Buchung (`smoke-mini-wizard` testIgnored schreibt Leads; Finder = echte Buchung, opt-in) → Regel-4-opt-in |
 | **J3** | ⏭️ **begründeter CI-Skip** | SA/Vollmacht nur eingebettet (`golden-path-completion-prod`, opt-in, mutiert Claim). Signatur-Mechanik läuft ersatzweise über **J4** |
@@ -92,4 +92,4 @@ Diese Matrix ist Schritt 1; sie ist parallel-sicher (nur diese Docs-Datei + spä
 
 **Regel-4-opt-in-Weg** für die skippenden Journeys: die jeweiligen Specs manuell mit ihrem Env-Flag (`RUN_GOLDEN_PATH_PROD` / `RUN_STORNO_DSGVO_SMOKE` / `RUN_PROVISION_SMOKE` für lifecycle / …) gegen prod fahren (Wegwerf-Konten, `reserviere()`-Guard schützt echte SVs).
 
-**Tranchen:** **T1** (J9 verrechnung+staffel) = dieser PR. **T2** = J5 (Login-Fix) + J8-`2fa-enroll` (Seed-Step). **T3** = J10-`werkstatt-finder` (+ `.env.local`→`process.env`-Fix). Die Skip-Journeys (J2/J3/J6/J7 + J9-lifecycle) sind mit obiger Begründung §9-konform „begründet, journey-referenziert geskippt".
+**Tranchen:** **T1** (#4948): J9 `verrechnung`+`staffel`. **T2**: J8 `2fa-enroll` (Seed-Step). **T3** (offen): J10 `werkstatt-finder` (`.env.local`→`process.env`-Fix). **J5-Follow-up**: Login-Refactor machbar, aber Fixture-Claim gedriftet → braucht eigenen deterministischen kasko-Seed. Die Skip-Journeys (J2/J3/J6/J7 + J9-`lifecycle` + J5) sind §9-konform „begründet, journey-referenziert geskippt".

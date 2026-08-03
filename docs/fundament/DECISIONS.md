@@ -106,3 +106,12 @@
 **Begründung:** Verfassung §5 (ein Intake, garantierte Nachwirkungen) für §7#2; §7#3 ist eine echte Produkt-Scope-Entscheidung (Marketing-Build-Grenze) → an Aaron, kein §1-Default.
 
 **Review:** offen (Aaron) — §7#2 vor C2b-Code, §7#3 vor C2c-Code.
+## 2026-08-03 · B-Journey-Suite · T2: J8-2FA-Enroll in CI; J5 bleibt Skip (Fixture-Claim-Drift)
+
+**Lücke:** T2 der Journey-Suite (J5 kasko + J8 2fa-enroll) — welche kommen in den CI-Journey-Step?
+
+**Entscheidung:** `2fa-enroll-smoke` (J8) läuft ab jetzt im CI-Journey-Step (Seed-Step `seed-smoke-enroll.mjs` + `RUN_2FA_ENROLL_SMOKE`). `kasko-reparatur-phase-smoke` (J5) bleibt opt-in/Skip.
+
+**Begründung:** J8 ist konto-isoliert (`smoke-enroll@claimondo.de`, TOTP-Enroll-UI, kein Comms/Booking); der Seed liest `process.env`-first (CI-tauglich) + setzt das Konto self-reset je Lauf faktorfrei. J5s Login-Refactor wäre machbar (`loginContextOrSkip('admin')` wie J1), ABER die MCP-Verifikation (03.08.) zeigt: der feste Fixture-Claim `39734007` ist zustandsgedriftet — `werkstatt_id NULL`, `operative_status=ersterfassung` statt des von der Spec erwarteten „Werkstatt gesetzt → Reparaturtermin"-Zustands. Die J5-Assertion (`Reparaturtermin|Werkstatt wählen|Reparatur`) wäre damit unsicher → ein flaky-roter Step statt eines verlässlichen Nachweises. J5 braucht einen eigenen deterministischen Seed (der den Claim in den erwarteten Reparatur-Zustand bringt) — Follow-up.
+
+**Review:** offen (im PR an Aaron).
