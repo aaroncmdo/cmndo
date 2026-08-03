@@ -42,7 +42,7 @@ export const STEPS_FIXTURE: FlowSzenarioStep[] = [
   { szenario_id: 'teilschuld', step_id: 'rueckruf', reihenfolge: 2, bedingung: null },
 
   { szenario_id: 'kasko', step_id: 'zusammenfassung', reihenfolge: 1, bedingung: null },
-  { szenario_id: 'kasko', step_id: 'feststellung', reihenfolge: 2, bedingung: null, erhebt_felder: ['kennzeichen', 'schadentyp'] },
+  { szenario_id: 'kasko', step_id: 'feststellung', reihenfolge: 2, bedingung: null, erhebt_felder: ['kennzeichen', 'schadentyp', 'unfallhergang'] },
   // Werkstattbindungs-Gate: Kasko-Kunde bestaetigt aktiv, dass die Police keine Werkstatt vorschreibt.
   // NUR Kasko (Selbstzahler hat keine Versicherung/Police -> keine Bindung moeglich).
   { szenario_id: 'kasko', step_id: 'werkstattbindung_check', reihenfolge: 3, bedingung: { freie_werkstattwahl: null } },
@@ -52,7 +52,7 @@ export const STEPS_FIXTURE: FlowSzenarioStep[] = [
   { szenario_id: 'kasko', step_id: 'account', reihenfolge: 7, bedingung: null },
 
   { szenario_id: 'selbstzahler', step_id: 'zusammenfassung', reihenfolge: 1, bedingung: null },
-  { szenario_id: 'selbstzahler', step_id: 'feststellung', reihenfolge: 2, bedingung: null, erhebt_felder: ['kennzeichen', 'schadentyp'] },
+  { szenario_id: 'selbstzahler', step_id: 'feststellung', reihenfolge: 2, bedingung: null, erhebt_felder: ['kennzeichen', 'schadentyp', 'unfallhergang'] },
   { szenario_id: 'selbstzahler', step_id: 'ort_fahrzeug', reihenfolge: 3, bedingung: null, erhebt_felder: ['fahrzeug_standort_adresse'] },
   { szenario_id: 'selbstzahler', step_id: 'werkstatt', reihenfolge: 4, bedingung: { reparatur_werkstatt_id: null } },
   { szenario_id: 'selbstzahler', step_id: 'werkstatt_anzeige', reihenfolge: 5, bedingung: { reparatur_werkstatt_id: '$gesetzt' } },
