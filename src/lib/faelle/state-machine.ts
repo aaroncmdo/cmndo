@@ -320,19 +320,25 @@ export async function transitionFallStatus(
   })
 
   // AAR-586 Finding 1: phase_transitions als Audit-Log aller Status-Übergänge.
-  // Non-critical — Fehler blockieren den Übergang nicht.
-  db.from('phase_transitions').insert({
-    fall_id: fallId,
-    from_phase: currentStatus,
-    to_phase: newStatus,
-    trigger_type: 'auto',
-    transitioned_by: metadata?.user_id ?? null,
-    actor_rolle: null,
-    grund: metadata?.grund ?? null,
-    payload: { via: 'transitionFallStatus', metadata: metadata ?? null },
-  }).then(({ error }) => {
-    if (error) console.error('[AAR-586] phase_transitions insert failed (non-critical):', error.message)
-  })
+  // C1a (Fundament): claim_id ergänzt (Event-Log claim-nativ — phase_transitions.claim_id ist die
+  // getrackte Spalte, uuid nullable) + await statt fire-and-forget: der Insert wird abgewartet, der
+  // Fehler bleibt aber non-critical (Log-Verlust wird geloggt, bricht den Übergang NICHT).
+  try {
+    const { error: ptErr } = await db.from('phase_transitions').insert({
+      fall_id: fallId,
+      claim_id: claimId ?? null,
+      from_phase: currentStatus,
+      to_phase: newStatus,
+      trigger_type: 'auto',
+      transitioned_by: metadata?.user_id ?? null,
+      actor_rolle: null,
+      grund: metadata?.grund ?? null,
+      payload: { via: 'transitionFallStatus', metadata: metadata ?? null },
+    })
+    if (ptErr) console.error('[AAR-586] phase_transitions insert failed (non-critical):', ptErr.message)
+  } catch (err) {
+    console.error('[C1a] phase_transitions insert threw (non-critical):', err instanceof Error ? err.message : err)
+  }
 
   // AAR-501 N6: Notification-Event emittieren. Generische fall.status_changed
   // für jeden Übergang + spezifische Events für Storno und Kanzlei-Übergabe.
