@@ -37,6 +37,9 @@ export type FallAkteZone<Vm> = (props: { vm: Vm }) => ReactNode | Promise<ReactN
 export type FallAkteConfig<Vm, ZK extends string> = {
   /** Shell-Modus. Default 'columns'. */
   layout?: FallAkteLayout
+  /** Optionaler Outer-Wrapper-className (Werkstatt: `max-w-3xl … space-y-4`; via C4b auch SV-Full-Bleed).
+   *  Fallback = der Layout-Default. */
+  wrapperClassName?: string
   /** Geordnete, phasen-adaptive Zonen-Reihenfolge (Kunde: deriveKundeZonen). */
   zones: (vm: Vm) => ZK[]
   /** Zone-Key -> Zone-Komponente (duerfen Client-Components sein). */
