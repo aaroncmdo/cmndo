@@ -33,6 +33,8 @@ Aaron hatte „reparaturkosten-basiert, autounfall-5–15 %-Heuristik + Faustreg
 
 → **Der Rechner implementiert die SEITE-eigene Faustregel** (nicht autounfalls flache 5–15 %). Vorteile: (1) **Kohärenz** — Rechner = interaktive Verallgemeinerung der Tabellen-Beispiele (die Beispiele sind exakt `Faktor × 10.000 €`), kein widersprüchliches Reframing nötig; (2) **BGH-Genauigkeit** — die Seite betont „BGH lehnt starre Altersgrenze ab" (VI ZR 357/03, OLG Oldenburg 200.000 km), also **kein** hartes „nicht relevant", sondern „Einzelfall" für alte/hoch-gelaufene Fahrzeuge; (3) die %-Faktoren sind eine generische Faustregel, **keine geschützte Tabelle** (compliance-leicht). Der **Relevanz-Kontext** (Laufleistung, Schadenhöhe) aus der autounfall-Logik bleibt als **weicher Hinweis** erhalten (FAQ-#3-konsistent), nicht als Denial.
 
+**Vorschäden** (Aaron-Input 03.08.; in FAQ #2 der Seite als Sanden/Danner-Eingangsgröße gelistet) sind der **stärkste Minderungsfaktor** — ein bereits vorgeschädigtes Fahrzeug verliert durch den neuen Unfall weniger *zusätzlichen* Marktwert. Sie werden als **eigene Dimension** aufgenommen: `erheblich` ⇒ `einzelfall` (dominiert das Alter; kein konfidenter €-Wert — das wäre auf einem rechtlich sensiblen Punkt unseriös), `repariert` (fachgerecht) ⇒ weicher Minderungs-Hinweis (Faustregel = Obergrenze), `keine` ⇒ volle Faustregel.
+
 ## Architektur
 
 Pure Logik (getestet) getrennt von der React-Component (Render → per Prod-Smoke verifiziert). Muster analog P1.
@@ -41,18 +43,19 @@ Pure Logik (getestet) getrennt von der React-Component (Render → per Prod-Smok
 
 ```
 WM_FAKTOREN: {maxJahr: 1..4, pct: 0.25|0.20|0.15|0.10}[]   // SSoT, MUSS die Tabelle spiegeln
-computeWertminderung({ reparaturkosten, alterJahre, km?, wbw? }): {
+computeWertminderung({ reparaturkosten, alterJahre, km?, wbw?, vorschaden? }): {
+  // vorschaden: 'keine' (default) | 'repariert' | 'erheblich'
   kind: 'schaetzung' | 'einzelfall' | 'unvollstaendig',
   betrag?,                  // €-Punkt-Schätzung (gerundet auf 50 €), bei kind='schaetzung'
   pct?,                     // angewendeter Faktor (für die UI-Anzeige "25 % der Reparaturkosten")
-  hinweise: string[]        // weiche Kontext-Flags (hohe km / kleiner Schaden), Keys für i18n
+  hinweise: string[]        // i18n-Keys: weiche Flags + Einzelfall-Grund
 }
 ```
-Logik: fehlt `reparaturkosten`/`alterJahre` → `unvollstaendig`. `alterJahre ≥ 5` → `einzelfall`. Sonst `schaetzung` mit `pct = WM_FAKTOREN[alter].pct`, `betrag = round50(pct × reparaturkosten)` — **Punkt-Schätzung, die die Tabellen-Beispiele exakt reproduziert** (Alter 1, 10.000 € → 25 % → 2.500 €). Kontext-Hinweise (weich, kein Gate): `km > 100000` → „eher unterer Rand", `wbw && reparaturkosten < 0.1·wbw` → „kleiner Schaden, Minderwert evtl. gering". **Pure, deterministisch, kein I/O, kein localStorage.**
+Logik (**Reihenfolge wichtig**): fehlt `reparaturkosten`/`alterJahre` → `unvollstaendig`. **`vorschaden === 'erheblich'` → `einzelfall`** (`hinweise:['einzelfall_vorschaden']` — erhebliche Vorschäden mindern die merkantile WM deutlich, belastbarer Betrag nur per Gutachten; **dominiert das Alter**). Sonst `alterJahre ≥ 5` → `einzelfall` (`['einzelfall_alter']`). Sonst `schaetzung` mit `pct = WM_FAKTOREN[alter].pct`, `betrag = round50(pct × reparaturkosten)` — **reproduziert die Tabellen-Beispiele exakt** (Alter 1, 10.000 € → 25 % → 2.500 €). Weiche Hinweise (kein Gate, additiv): `vorschaden === 'repariert'` → `'vorschaden_repariert'` (fachgerecht behobene Vorschäden mindern leicht; Faustregel ≈ Obergrenze); `km > 100000` → `'hohe_km'`; `wbw && reparaturkosten < 0.1·wbw` → `'kleiner_schaden'`. **Pure, deterministisch, kein I/O, kein localStorage.**
 
 ### Komponente 2 — Client-Component `.../wertminderung/WertminderungRechnerClient.tsx` (neu, co-located)
 
-`'use client'`. Controlled Inputs (Reparaturkosten, Fahrzeugalter, optional km + WBW), ruft `computeWertminderung`, rendert Ergebnis. **Design gebunden:** `claimondo-*`-Tokens (nie raw Hex — CI-Token-Audit), `rounded-ios-*`, `components/shared/DataTable` + `components/landing/AnswerCapsule` fürs Ergebnis, `components/primitives/Button`. **i18n Pflicht:** alle Strings via `useTranslations('wertminderung_rechner')`, Zahlen via `Intl.NumberFormat('de-DE')`. Ergebnis enthält den **Disclaimer** („Faustregel-Orientierung; belastbaren Betrag liefert das Gutachten" — spiegelt `faustregel_note`) + CTA zu `/schaden-melden`.
+`'use client'`. Controlled Inputs (Reparaturkosten, Fahrzeugalter, **Vorschaden-Select `keine/repariert/erheblich`**, optional km + WBW), ruft `computeWertminderung`, rendert Ergebnis (inkl. der `hinweise` als i18n-Zeilen). **Design gebunden:** `claimondo-*`-Tokens (nie raw Hex — CI-Token-Audit), `rounded-ios-*`, `components/shared/DataTable` + `components/landing/AnswerCapsule` fürs Ergebnis, `components/primitives/Button`. **i18n Pflicht:** alle Strings via `useTranslations('wertminderung_rechner')`, Zahlen via `Intl.NumberFormat('de-DE')`. Ergebnis enthält den **Disclaimer** („Faustregel-Orientierung; belastbaren Betrag liefert das Gutachten" — spiegelt `faustregel_note`) + CTA zu `/schaden-melden`.
 
 ### Komponente 3 — Schema-Builder `webApplicationSchema()` in `lib/seo/jsonld.ts` (neu)
 
@@ -75,9 +78,10 @@ Seite: page.tsx mountet Component nach der Faustregel-Tabelle + webApplicationSc
 ## Formel (exakt, SSoT)
 
 - `WM_FAKTOREN = [{maxJahr:1,pct:0.25},{maxJahr:2,pct:0.20},{maxJahr:3,pct:0.15},{maxJahr:4,pct:0.10}]` — **muss** die de.json-Tabelle spiegeln (Parität; ein Test asserted die Übereinstimmung, s.u.).
-- `alterJahre ≥ 5` → `einzelfall` (kein €, Text „abhängig von Laufleistung & Marktwert; auch ältere Fahrzeuge können Anspruch haben — BGH VI ZR 357/03").
+- **`vorschaden === 'erheblich'` → `einzelfall`** (dominiert das Alter; Text „erhebliche Vorschäden mindern die merkantile Wertminderung deutlich — belastbarer Betrag nur per Gutachten").
+- sonst `alterJahre ≥ 5` → `einzelfall` (kein €, Text „abhängig von Laufleistung & Marktwert; auch ältere Fahrzeuge können Anspruch haben — BGH VI ZR 357/03").
 - sonst `pct = WM_FAKTOREN.find(f => alterJahre ≤ f.maxJahr).pct`; `betrag = round50(pct·rep)` (Punkt-Schätzung, reproduziert die Tabellen-Beispiele exakt).
-- Kontext-Hinweise weich (kein Denial): `km>100000` → unterer-Rand-Hinweis; `wbw && rep<0.1·wbw` → kleiner-Schaden-Hinweis.
+- Weiche Hinweise (kein Denial, additiv): `vorschaden==='repariert'` → „mindert leicht, Faustregel ≈ Obergrenze"; `km>100000` → unterer-Rand-Hinweis; `wbw && rep<0.1·wbw` → kleiner-Schaden-Hinweis.
 
 ## Fehlerbehandlung / Edge
 
@@ -87,7 +91,7 @@ Seite: page.tsx mountet Component nach der Faustregel-Tabelle + webApplicationSc
 
 ## Testing
 
-- **Vitest** (claimondo-marketing hat eigenes `vitest run` + `vitest.config.ts`): `lib/tools/wertminderung.test.ts` — Faktor-je-Alter (1→0.25 … 4→0.10), `einzelfall` ab Jahr 5, `unvollstaendig` bei fehlenden Inputs, Rundung auf 50 €, Kontext-Hinweise (hohe km / kleiner Schaden), **Paritäts-Test `WM_FAKTOREN` == de.json-`faustregel`-Faktoren** (verhindert Drift Rechner↔Tabelle).
+- **Vitest** (claimondo-marketing hat eigenes `vitest run` + `vitest.config.ts`): `lib/tools/wertminderung.test.ts` — Faktor-je-Alter (1→0.25 … 4→0.10), `einzelfall` ab Jahr 5, **`vorschaden==='erheblich'` → `einzelfall` (dominiert selbst Alter 1)**, **`vorschaden==='repariert'` → `schaetzung` + `'vorschaden_repariert'`-Hinweis**, `unvollstaendig` bei fehlenden Inputs, Rundung auf 50 €, Kontext-Hinweise (hohe km / kleiner Schaden), **Paritäts-Test `WM_FAKTOREN` == de.json-`faustregel`-Faktoren** (verhindert Drift Rechner↔Tabelle).
 - Pure Calc unit-getestet; Client-Render + i18n-Vollständigkeit → per **Regel-4-Prod-Smoke** verifiziert.
 - ⚠ **Plan-Klärung:** ob claimondo-marketings vitest in CI läuft (der Haupt-CI-vitest-Job scannt `src/**`+`scripts/lib/**`, nicht das Marketing-Sub-Package) — falls nicht, ist der lokale Lauf das Gate + im PR vermerken.
 
