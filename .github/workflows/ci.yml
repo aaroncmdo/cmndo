@@ -448,6 +448,24 @@ jobs:
           TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
           TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
 
+      # Fundament Journey-Suite J9 (Honorar/Provision) — DB-harte Smokes: provisionen-verrechnung
+      # (Provisions-Erzeugungs-Trigger, 8 Attributions-Faelle) + provisionen-staffel (Staffel-Boni).
+      # Rein DB (kein Browser/Comms/Cron), self-seeding + FK-sicher self-cleaning via Marker
+      # (SMOKE-PROV / SMOKE-STAFFEL-LC, Crash-safe) — dasselbe Wegwerf-in-prod-DB-Muster wie J4.
+      # Der "opt-in nie in CI"-Spec-Kommentar war die Vorsichts-Default VOR der Journey-Suite (D-Phase);
+      # CI-tauglich, weil self-cleaning + die concurrency-Group (`prod-e2e-smoke`) serialisiert die
+      # e2e-Laeufe -> kein Fixture-Cleanup-Cross-Run-Race. BEWUSST NICHT dabei: provisionen-lifecycle-smoke
+      # -> triggert den GLOBALEN Release-Cron (echte faellige Provisionen wuerden pro Merge frueher
+      # freigegeben = Geld-Timing-Effekt); bleibt opt-in/Regel-4. Entscheidung: DECISIONS.md 2026-08-03.
+      - name: Fundament Journey-Smoke J9 (Provisionen, DB-hart)
+        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke --project=chromium --reporter=line
+        env:
+          RUN_PROVISION_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
