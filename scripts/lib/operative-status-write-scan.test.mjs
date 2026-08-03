@@ -29,6 +29,17 @@ describe('scanContent (FG1: direkte claims.operative_status-Writes)', () => {
     expect(v[0].form).toBe('traced-assign')
   })
 
+  it('flaggt traced-assign in CAST-Form: (payload as Record<...>).operative_status = ... (C1a / A2-#6 sv-zuweisung)', () => {
+    const src = `
+      const claimsUpd = { sv_zugewiesen_am: now }
+      ;(claimsUpd as Record<string, unknown>).operative_status = orgPool ? 'sv-gesucht' : 'sv-zugewiesen'
+      await adminDb.from('claims').update(claimsUpd).eq('id', fallClaimId)
+    `
+    const v = scanContent(src)
+    expect(v).toHaveLength(1)
+    expect(v[0].form).toBe('traced-assign')
+  })
+
   it('flaggt mehrzeiliges inline-Objekt (verschachtelt) korrekt', () => {
     const src = `await db.from('claims').update({
       kanzlei_uebergeben_am: now,
