@@ -16738,6 +16738,8 @@ export type Database = {
           gueltig_bis: string | null
           hrb: string | null
           id: string
+          netzwerk_monat_cent: number | null
+          netzwerk_setup_cent: number | null
           ort: string
           plz: string
           rechnungssteller: string
@@ -16745,6 +16747,7 @@ export type Database = {
           strasse: string
           ust_id: string | null
           version: number
+          werkstatt_setup_cent: number | null
           zahlungsempfaenger_bank: string
           zahlungsempfaenger_bic: string
           zahlungsempfaenger_hinweis: string | null
@@ -16759,6 +16762,8 @@ export type Database = {
           gueltig_bis?: string | null
           hrb?: string | null
           id?: string
+          netzwerk_monat_cent?: number | null
+          netzwerk_setup_cent?: number | null
           ort: string
           plz: string
           rechnungssteller: string
@@ -16766,6 +16771,7 @@ export type Database = {
           strasse: string
           ust_id?: string | null
           version?: number
+          werkstatt_setup_cent?: number | null
           zahlungsempfaenger_bank: string
           zahlungsempfaenger_bic: string
           zahlungsempfaenger_hinweis?: string | null
@@ -16780,6 +16786,8 @@ export type Database = {
           gueltig_bis?: string | null
           hrb?: string | null
           id?: string
+          netzwerk_monat_cent?: number | null
+          netzwerk_setup_cent?: number | null
           ort?: string
           plz?: string
           rechnungssteller?: string
@@ -16787,6 +16795,7 @@ export type Database = {
           strasse?: string
           ust_id?: string | null
           version?: number
+          werkstatt_setup_cent?: number | null
           zahlungsempfaenger_bank?: string
           zahlungsempfaenger_bic?: string
           zahlungsempfaenger_hinweis?: string | null
@@ -19152,6 +19161,7 @@ export type Database = {
           status: string
           stripe_subscription_id: string | null
           sv_id: string
+          ueberfaellig_seit: string | null
         }
         Insert: {
           aktualisiert_am?: string
@@ -19161,6 +19171,7 @@ export type Database = {
           status?: string
           stripe_subscription_id?: string | null
           sv_id: string
+          ueberfaellig_seit?: string | null
         }
         Update: {
           aktualisiert_am?: string
@@ -19170,6 +19181,7 @@ export type Database = {
           status?: string
           stripe_subscription_id?: string | null
           sv_id?: string
+          ueberfaellig_seit?: string | null
         }
         Relationships: [
           {
@@ -26394,6 +26406,7 @@ export type Database = {
       cron_rate_limit_reset: { Args: never; Returns: undefined }
       cron_reparatur_freigabe_eskalation: { Args: never; Returns: undefined }
       cron_trigger_exif_worker: { Args: never; Returns: undefined }
+      cron_trigger_netzwerk_abo_dunning: { Args: never; Returns: undefined }
       cron_trigger_notification_worker: { Args: never; Returns: undefined }
       cron_trigger_release_provisionen: { Args: never; Returns: undefined }
       cron_trigger_salesforce_sync: { Args: never; Returns: undefined }
