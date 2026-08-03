@@ -39,24 +39,16 @@ import type { TeamMitglied } from './_components/FallakteDrawer'
 // kein Activity-Feed. Stellungnahme/Nachbesichtigung/Konfrontation
 // rendern als Mitteilungs-Banner oben (topServerBlocks aus page.tsx).
 // CMM-32: Master-Detail-Stammdaten — Accordion mit Inline-Expansion.
-import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
-import { useState } from 'react'
-import { GutachtenCard } from './_components/GutachtenCard'
-import { GutachtenWerteCard } from './_components/GutachtenWerteCard'
+// C4b (Fundament „Eine Akte"): SV rendert jetzt ueber den <FallAkte layout='stack'>-Kern.
+import { FallAkte } from '@/components/fall-akte/FallAkte'
+import type { FallAkteConfig } from '@/components/fall-akte/types'
+import { SvContentZone, type SvContentVm } from './_components/SvContentZone'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
 // AAR-559 (C10): SV-Konfrontations-Antwort-Card — re-wire nach CMM-66-Regression.
 import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
-import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
-import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
-import AnsprechpartnerCard from './_components/AnsprechpartnerCard'
-import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
-import { GutachterCopilotPanel } from '@/components/gutachter/GutachterCopilotPanel'
 import { type PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { SvLifecyclePhase } from '@/lib/auftrag/phase'
-// AAR-757/S1: FallakteVollClient aufgeloest; von den vier SvToolsCard-Flows bleibt nur die
-// FIN-Nachtrag-Karte — die anderen drei sind korrekt anderswo platziert (s. FinNachtragenCard).
-import { FinNachtragenCard } from './_components/FinNachtragenCard'
 // CMM-23: FallActivityFeed + FallDokumenteSidebar raus (Activity-Feed
 // ohne Tagesgeschäfts-Use-Case; Dokumente-Sidebar war phase-/szenario-
 // gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
@@ -311,196 +303,93 @@ export default function FallDetailClient(props: Props) {
     initialEtaMinuten: aktiverTermin?.sv_eta_minuten ?? null,
   })
 
-  return (
-    <div className="min-h-full bg-claimondo-bg -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm">
-      <FallRealtimeRefresh fallId={fall.id as string} claimId={(fall.claim_id as string | null) ?? null} />
-      <FallWindowDropzone fallId={fall.id as string} />
-      {/* AAR-864 Polish: Akten-Header sticky direkt am Wrapper-Oberrand.
-          Negativer top kompensiert das main-Padding (p-2/3/4) damit der
-          Sticky-Anker direkt an der oberen rounded-2xl-Kante des Wrappers
-          klebt, nicht am Padding-Inside. */}
-      <div className="sticky -top-2 sm:-top-3 lg:-top-4 z-30 bg-claimondo-bg shadow-sm">
-        <FallHeader
-          fallNummer={fallNummer}
-          fallId={fall.id as string}
-          kundenName={kundenName}
-          ort={ort}
-          kennzeichen={kennzeichen}
-          fahrzeug={fahrzeug}
-          subphase={subphase}
-          drawer={drawerData}
-          abgeschlossenAm={abgeschlossenAm}
-        />
-      </div>
+  // C4b: die Content-Zone (grid + Gutachten/Werte/Copilot/Chat) rendert als stabile SvContentZone.
+  const svContentVm: SvContentVm = {
+    fall,
+    lead,
+    parteien: props.parteien,
+    dokumente,
+    team,
+    sichtbarFallDokumente,
+    fallNummer,
+    subphase,
+    gutachtenWerte: props.gutachtenWerte ?? null,
+    currentUserId: currentUserId ?? null,
+  }
 
-      {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
-        <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
-        {/* CMM-32 Walkthrough: AuftragHeaderPanel verschmilzt Stepper +
-            Termin-Banner zu einem Block. Termin-Sektion zeigt sich nur
-            solange der Auftrag aktiv ist (vor Regulierungs-Phase). */}
-        {props.svPhase &&
-          !['gutachten-freigegeben', 'bei-kanzlei', 'stellungnahme', 'nachbesichtigung', 'auszahlung', 'abgeschlossen-fall'].includes(props.svPhase) && (
-            <AuftragHeaderPanel
-              phase={props.svPhase}
-              gutachtenInQc={props.gutachtenInQc}
-              termin={aktiverTermin}
-              adresse={besichtigungsAdresse}
-              fallId={fall.id as string}
-              briefingText={(fall.sv_briefing_text as string | null) ?? null}
-              pflichtSlots={props.pflichtSlots ?? []}
-            />
-          )}
-      </div>
-
-      {/* CMM-23: Server-rendered Top-Blocks (Briefing + Einzuholen-Banner,
-          Stellungnahme/Nachbesichtigung, MeinFallStatusCard) */}
-      {props.topServerBlocks && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 space-y-3">
-          {props.topServerBlocks}
-        </div>
-      )}
-
-      {/* AAR-559 (C10): SV-Konfrontations-Antwort (Annehmen/Ablehnen).
-          Re-wire nach CMM-66-Rewrite-Regression — die konfrontation*-Props lagen
-          schon an, der Render fehlte. Der SV oeffnete den per WhatsApp verschickten
-          Portal-Link, fand aber keine Antwort-UI. Card self-gated zusaetzlich intern. */}
-      {props.konfrontationGewuenscht && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3">
-          <KonfrontationsTerminCard
+  // C4b: die SV-Shell kommt aus dem <FallAkte layout='stack'>-Kern. Full-Bleed-Wrapper + Realtime +
+  // sticky FallHeader (header.custom) + Stepper/Geo/topServerBlocks/Konfrontation (slots.topBlocks,
+  // inline — nutzt useGeoTracking) + Content-Zone + vorOrtCard (slots.footer). Behavior-preserving.
+  const config: FallAkteConfig<SvContentVm, 'content'> = {
+    layout: 'stack',
+    wrapperClassName:
+      'min-h-full bg-claimondo-bg -mx-2 sm:-mx-3 lg:-mx-4 -mb-2 sm:-mb-3 lg:-mb-4 -mt-2 sm:-mt-3 lg:-mt-4 [&_.rounded-2xl]:shadow-sm',
+    realtime: () => ({ fallId: fall.id as string, claimId: (fall.claim_id as string | null) ?? null }),
+    header: () => ({
+      custom: (
+        // AAR-864: Akten-Header sticky direkt am Wrapper-Oberrand.
+        <div className="sticky -top-2 sm:-top-3 lg:-top-4 z-30 bg-claimondo-bg shadow-sm">
+          <FallHeader
+            fallNummer={fallNummer}
             fallId={fall.id as string}
-            konfrontationGewuenscht={props.konfrontationGewuenscht}
-            terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
-            terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
+            kundenName={kundenName}
+            ort={ort}
+            kennzeichen={kennzeichen}
+            fahrzeug={fahrzeug}
+            subphase={subphase}
+            drawer={drawerData}
+            abgeschlossenAm={abgeschlossenAm}
           />
         </div>
-      )}
-
-      {/* CMM-32 Walkthrough: Stammdaten-Block links, Dokumente rechts
-          daneben. Aaron 2026-04-30: Dokumente waren als Tab kontra-
-          intuitiv — jetzt eigene Spalte. Mobile: stacked. */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4 sm:space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-4 sm:gap-6">
-          <StammdatenAccordion
-            data={{
-              fall,
-              lead,
-              parteien: props.parteien,
-              dokumenteAnzahl: (props.dokumente ?? []).length,
-            }}
-          />
-          <div className="space-y-4">
-            {/* S1: FIN-Nachtrag nur wenn die FIN fehlt — sonst zeigt StammdatenAccordion sie read-only. */}
-            {!fall.fin_vin && <FinNachtragenCard fallId={fall.id as string} />}
-            <WeitereDokumenteCard
-              fallId={fall.id as string}
-              dokumente={(props.dokumente ?? []).map((d) => ({
-                id: String(d.id),
-                dokument_typ: (d.typ as string | null) ?? null,
-                datei_url: (d.datei_url as string | null) ?? null,
-                datei_name: (d.datei_name as string | null) ?? null,
-                hochgeladen_von_rolle: (d.hochgeladen_von_rolle as string | null) ?? null,
-                created_at: (d.created_at as string | null) ?? null,
-                storage_path: ((d as { storage_path?: string | null }).storage_path) ?? null,
-              }))}
-            />
-            <AnsprechpartnerCard team={team} />
+      ),
+    }),
+    zones: () => ['content'] as ('content')[],
+    zoneComponents: { content: SvContentZone },
+    slots: () => ({
+      beforeHeader: <FallWindowDropzone fallId={fall.id as string} />,
+      topBlocks: (
+        <>
+          {/* Stepper + Termin-Banner als verschmolzener Header — volle Breite */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-3">
+            <SvUnterwegsInfo tracking={geoTracking} svVorname={props.svVorname ?? null} />
+            {props.svPhase &&
+              !['gutachten-freigegeben', 'bei-kanzlei', 'stellungnahme', 'nachbesichtigung', 'auszahlung', 'abgeschlossen-fall'].includes(props.svPhase) && (
+                <AuftragHeaderPanel
+                  phase={props.svPhase}
+                  gutachtenInQc={props.gutachtenInQc}
+                  termin={aktiverTermin}
+                  adresse={besichtigungsAdresse}
+                  fallId={fall.id as string}
+                  briefingText={(fall.sv_briefing_text as string | null) ?? null}
+                  pflichtSlots={props.pflichtSlots ?? []}
+                />
+              )}
           </div>
-        </div>
-
-        {!!fall.hat_vorschaeden && (
-          <div className="rounded-2xl bg-warning-soft/40 border border-warning/30 p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-ios-xl bg-warning-soft text-warning-strong flex items-center justify-center flex-shrink-0">
-                <span className="text-lg">⚠️</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-claimondo-navy">
-                  Vorschäden gemeldet
-                </p>
-                <p className="text-xs text-claimondo-ondo mt-1">
-                  Der Kunde hat{' '}
-                  <span className="font-medium text-claimondo-navy">
-                    {fall.vorschaden_anzahl != null
-                      ? `${String(fall.vorschaden_anzahl)} Vorschäden`
-                      : 'Vorschäden'}
-                  </span>{' '}
-                  am Fahrzeug angegeben. Reparaturrechnungen werden — falls
-                  vorhanden — über den gelben Banner mit nachgereicht.
-                </p>
-              </div>
+          {/* CMM-23: Server-rendered Top-Blocks (Briefing/Einzuholen/Stellungnahme/MeinFallStatusCard) */}
+          {props.topServerBlocks && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 space-y-3">
+              {props.topServerBlocks}
             </div>
-          </div>
-        )}
-
-        <GutachtenCard
-          fallId={fall.id as string}
-          fallNummer={fallNummer}
-          subphase={subphase}
-          gutachten={
-            (sichtbarFallDokumente ?? [])
-              .filter((d) => d.dokument_typ === 'gutachten')
-              .map((d) => ({
-                id: d.id,
-                dokument_typ: d.dokument_typ,
-                storage_path: d.storage_path,
-                original_filename: d.original_filename,
-                hochgeladen_am: d.hochgeladen_am,
-              }))
-          }
-          extracted={props.gutachtenWerte ?? null}
-        />
-
-        {props.gutachtenWerte && (
-          <GutachtenWerteCard
-            fallId={fall.id as string}
-            werte={{
-              reparaturkosten_netto: props.gutachtenWerte.reparaturkosten_netto,
-              reparaturkosten_brutto: props.gutachtenWerte.reparaturkosten_brutto,
-              minderwert: props.gutachtenWerte.minderwert,
-              wiederbeschaffungswert: props.gutachtenWerte.wiederbeschaffungswert,
-              restwert: props.gutachtenWerte.restwert,
-              nutzungsausfall_tage: props.gutachtenWerte.nutzungsausfall_tage,
-              gutachten_nutzungsausfall_tagessatz_eur: props.gutachtenWerte.gutachten_nutzungsausfall_tagessatz_eur,
-              wiederbeschaffungsdauer_tage: props.gutachtenWerte.wiederbeschaffungsdauer_tage,
-              totalschaden: props.gutachtenWerte.totalschaden,
-            }}
-            manuellUeberschrieben={props.gutachtenWerte.gutachten_ocr_manuell_ueberschrieben ?? false}
-          />
-        )}
-
-        {/* KI-Copilot: technisch-fachlicher Assistent (Kalkulation, Wertminderung,
-            Vorschaeden, Nutzungsausfall, Totalschaden/Restwert, BVSK). Streaming via
-            /api/gutachter/copilot mit Fall-Kontext (v_claim_full/v_gutachten_werte). */}
-        <GutachterCopilotPanel fallId={fall.id as string} />
-
-        {/* Fall-Chat: kanonischer Gruppen-Thread (ClaimChatPanel — dieselbe
-            Komponente wie der /faelle/[id] Kommunikation-Tab). istStaff=false ->
-            der SV sieht die Kunde-Gruppe + DMs, NICHT den team_intern-Thread.
-            claimId = fall.claim_id (Threads haengen an claims.id), Fallback fall.id. */}
-        {currentUserId && (
-          <div>
-            <h3 className="text-heading-sm font-semibold text-claimondo-navy mb-2 px-1">
-              Fall-Chat
-            </h3>
-            <div className="h-[60vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
-              <ClaimChatPanel
-                claimId={(fall.claim_id as string | null) ?? (fall.id as string)}
-                currentUserId={currentUserId}
-                istStaff={false}
+          )}
+          {/* AAR-559 (C10): SV-Konfrontations-Antwort (Annehmen/Ablehnen). */}
+          {props.konfrontationGewuenscht && (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3">
+              <KonfrontationsTerminCard
+                fallId={fall.id as string}
+                konfrontationGewuenscht={props.konfrontationGewuenscht}
+                terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
+                terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
               />
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </>
+      ),
+      // CMM-32: Vor-Ort-Trigger ganz unten.
+      footer: props.vorOrtCard ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">{props.vorOrtCard}</div>
+      ) : null,
+    }),
+  }
 
-      {/* CMM-32: Vor-Ort-Trigger ganz unten */}
-      {props.vorOrtCard && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
-          {props.vorOrtCard}
-        </div>
-      )}
-
-    </div>
-  )
+  return <FallAkte config={config} vm={svContentVm} />
 }
