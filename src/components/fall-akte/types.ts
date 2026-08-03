@@ -3,12 +3,12 @@ import type { ReactNode } from 'react'
 /**
  * C4a (Fundament, „Eine Akte"): der rollen-parametrisierte Fallakte-Kern-Contract. Traegt ALLE
  * Generalisierungs-Naehte (layout-Variante, Header-Slot, server-injizierte ReactNode-Bloecke),
- * damit C4b (SV, layout='sidebar'), C4c (Werkstatt, layout='columns'+footer) und C4d/e (Staff,
- * layout='tabs') je nur eine config + evtl. einen Layout-Zweig ergaenzen — keinen Kern-Refactor.
+ * damit C4b (SV, layout='stack'), C4c (Werkstatt) und C4d/e (Staff, layout='tabs') je nur eine
+ * config + evtl. einen Layout-Zweig ergaenzen — keinen Kern-Refactor.
  * Siehe docs/superpowers/plans/2026-07-31-fundament-c4a.md + DECISIONS.md (2026-07-31 · C4).
  */
 
-export type FallAkteLayout = 'columns' | 'sidebar' | 'tabs'
+export type FallAkteLayout = 'columns' | 'stack' | 'tabs'
 
 /** Header simpel ({title,…}, Kunde/Werkstatt) ODER ein Custom-ReactNode (SV FallHeader, Staff IdentityHeader). */
 export type FallAkteHeader =
@@ -17,13 +17,15 @@ export type FallAkteHeader =
 
 /** Server-injizierte ReactNode-Slots. Alle optional. */
 export type FallAkteSlots = {
-  /** Volle Breite, direkt unter dem Header (SV: topServerBlocks). */
+  /** Volle Breite, VOR dem Header (SV: FallWindowDropzone). Nur layout='stack'. */
+  beforeHeader?: ReactNode
+  /** Volle Breite, direkt unter dem Header (SV: Stepper/Geo + topServerBlocks + Konfrontation). */
   topBlocks?: ReactNode
   /** Volle Breite, ganz unten (SV: vorOrtCard; Werkstatt: Interaktiv-Segment + Copilot + Chat). */
   footer?: ReactNode
-  /** Linke Spalte (Staff: FallPhasenPanel) — nur layout='sidebar'/'tabs'. */
+  /** Linke Spalte (Staff: FallPhasenPanel) — nur layout='tabs'. */
   aside?: ReactNode
-  /** Rechte Spalte (Staff: FallSidebar) — nur layout='sidebar'/'tabs'. */
+  /** Rechte Spalte (Staff: FallSidebar) — nur layout='tabs'. */
   sidebar?: ReactNode
 }
 
@@ -37,6 +39,9 @@ export type FallAkteZone<Vm> = (props: { vm: Vm }) => ReactNode | Promise<ReactN
 export type FallAkteConfig<Vm, ZK extends string> = {
   /** Shell-Modus. Default 'columns'. */
   layout?: FallAkteLayout
+  /** Optionaler Outer-Wrapper-className (z.B. SV-Full-Bleed `min-h-full bg-claimondo-bg -mx-…`).
+   *  Fallback = der Layout-Default. Nur layout='stack' nutzt ihn. */
+  wrapperClassName?: string
   /** Geordnete, phasen-adaptive Zonen-Reihenfolge (Kunde: deriveKundeZonen). */
   zones: (vm: Vm) => ZK[]
   /** Zone-Key -> Zone-Komponente (duerfen Client-Components sein). */
