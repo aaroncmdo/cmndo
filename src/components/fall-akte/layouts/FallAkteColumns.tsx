@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import PageHeader from '@/components/shared/PageHeader'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
-import type { FallAkteConfig } from '../types'
+import type { FallAkteConfig, FallAkteZone } from '../types'
 
 /**
  * C4a: der 'columns'-Layout-Modus — 1:1 aus dem Kunde-Prototyp (KundeClaimView) extrahiert.
@@ -51,7 +51,10 @@ export function FallAkteColumns<Vm, ZK extends string>(
           erhalten; break-inside-avoid haelt jede Zone zusammen. */}
       <div className="lg:columns-2 lg:gap-6">
         {zones.map((z) => {
-          const Zone = config.zoneComponents[z]
+          // Fuer generisches ZK loest TS den Indexed-Access Record<ZK, FallAkteZone<Vm>>[ZK] nicht
+          // automatisch auf FallAkteZone<Vm> auf -> JSX LibraryManagedAttributes bricht (TS2322).
+          // Der Cast resolved ihn auf den konkreten (async-faehigen) Zone-Typ.
+          const Zone = config.zoneComponents[z] as FallAkteZone<Vm>
           return (
             <div id={`zone-${z}`} key={z} className="mb-4 break-inside-avoid">
               <Zone vm={vm} />
