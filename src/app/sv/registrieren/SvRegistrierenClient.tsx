@@ -85,6 +85,12 @@ function PaketPicker({ paket, onChange }: { paket: string; onChange: (p: string)
           Vertrag + Anzahlung schließt du nach der Registrierung im Portal ab.
         </p>
       )}
+      {/* P5 T10 (WS F): Freemium-Framing — Registrierung bleibt frei/Basic-first,
+          der Netzwerkpartner-Vorteil ist optional im Portal aktivierbar (T8/T9). */}
+      <p className="text-xs text-claimondo-shield">
+        Tipp: Den <span className="font-semibold">Netzwerkpartner</span>-Vorteil (bevorzugte
+        Platzierung im Finder deiner Kunden) kannst du jederzeit optional im Portal aktivieren.
+      </p>
     </div>
   )
 }
