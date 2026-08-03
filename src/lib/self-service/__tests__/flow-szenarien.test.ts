@@ -113,8 +113,10 @@ describe('berechneAktiveSteps', () => {
   })
 
   it('Werkstatt schon zugeordnet -> Picker faellt weg, werkstatt_anzeige erscheint (Symptom 4)', () => {
+    // unfallhergang mit im Kontext, damit die Feststellung uebersprungen ist (seit Mig 20260801163119
+    // im Gate) und die Liste den Werkstatt-Aspekt isoliert testet.
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
-      kennzeichen: 'K-1', schadentyp: 'kollision', freie_werkstattwahl: true,
+      kennzeichen: 'K-1', schadentyp: 'kollision', unfallhergang: 'x', freie_werkstattwahl: true,
       fahrzeug_standort_adresse: 'Koeln', reparatur_werkstatt_id: 'w-1',
     })
     expect(steps).toEqual(['zusammenfassung', 'werkstatt_anzeige', 'account'])
@@ -122,8 +124,9 @@ describe('berechneAktiveSteps', () => {
 
   // beschreibung kommt seit Werkstatt-Embed Phase 3 (#4412) schon aus dem Embed — sie darf die
   // Feststellung NICHT skippen. Frueher Marker hat_vorschaeden; jetzt gaten erhebt_felder
-  // [kennzeichen, schadentyp] (default-frei), die der Embed NICHT vorbelegt (Spec §3).
-  it('REGRESSION: Embed-beschreibung skippt die Feststellung NICHT (erhebt_felder = kennzeichen/schadentyp)', () => {
+  // [kennzeichen, schadentyp, unfallhergang] (default-frei), die der Embed NICHT vorbelegt (Spec §3;
+  // unfallhergang seit Mig 20260801163119 im Gate — garantiert mind. eine Schaden-Grundlage).
+  it('REGRESSION: Embed-beschreibung skippt die Feststellung NICHT (erhebt_felder = kennzeichen/schadentyp/unfallhergang)', () => {
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
       fahrzeugschaden_beschreibung: 'Kratzer im Lack (aus dem Embed)',
       fahrzeug_standort_adresse: 'Koeln', reparatur_werkstatt_id: 'w-1',
@@ -179,6 +182,17 @@ describe('erhebt_felder-Regression (Symptome 1/2/4 + Kasko-Gate + nur_gutachter)
   it('Symptom 1: Kasko-Feststellung erscheint trotz hat_vorschaeden=false, solange kennzeichen leer', () => {
     const steps = berechneAktiveSteps(STEPS, 'kasko', { ...kasko, hat_vorschaeden: false, kennzeichen: null, schadentyp: null })
     expect(steps).toContain('feststellung')
+  })
+  // Mig 20260801163119 (Aaron 01.08.): unfallhergang gehoert ins Gate von Kasko+Selbstzahler, damit
+  // mind. eine Schaden-Grundlage garantiert ist. Isoliert das neue Gate-Feld gegen kennzeichen/schadentyp.
+  it('unfallhergang im Gate: Feststellung bleibt bei kennzeichen+schadentyp GEFUELLT aber unfallhergang LEER', () => {
+    const komplett = { kennzeichen: 'K-1', schadentyp: 'kollision', unfallhergang: 'Beim Ausparken verkratzt.' }
+    // nur unfallhergang fehlt -> Feststellung bleibt (das neue Gate-Feld)
+    expect(berechneAktiveSteps(STEPS, 'kasko', { ...kasko, kennzeichen: 'K-1', schadentyp: 'kollision' })).toContain('feststellung')
+    expect(berechneAktiveSteps(STEPS, 'selbstzahler', { kennzeichen: 'K-1', schadentyp: 'kollision' })).toContain('feststellung')
+    // alle drei gefuellt -> Feststellung faellt weg (uebersprungen)
+    expect(berechneAktiveSteps(STEPS, 'kasko', { ...kasko, ...komplett })).not.toContain('feststellung')
+    expect(berechneAktiveSteps(STEPS, 'selbstzahler', { ...komplett })).not.toContain('feststellung')
   })
   it('Symptom 2: ort_fahrzeug erscheint bei gesetztem unfallort aber leerer Rohspalte', () => {
     const steps = berechneAktiveSteps(STEPS, 'kasko', {
