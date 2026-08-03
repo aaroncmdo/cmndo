@@ -87,6 +87,15 @@ export async function POST(request: Request) {
         const session = event.data.object
         const meta = (session.metadata ?? {}) as Record<string, string>
 
+        // P5 Netzwerkpartner-Abo: Subscription-Checkout abgeschlossen -> Abo-Row aktiv
+        // (service-role, K1). Fruehester Entitlement-Zeitpunkt; invoice.payment_succeeded
+        // bestaetigt idempotent.
+        if (meta.typ === 'netzwerk_abo' && meta.sv_id) {
+          const { applyNetzwerkAboEvent } = await import('@/lib/netzwerk/abo-webhook')
+          await applyNetzwerkAboEvent(db, event as never)
+          break
+        }
+
         // KFZ-152: Buero-Anzahlung — Parent zahlt zentral fuer alle Sub-Standorte
         if (meta.typ === 'buero_anzahlung' && meta.organisation_id) {
           const orgId = meta.organisation_id
@@ -529,6 +538,17 @@ export async function POST(request: Request) {
             revalidatePath('/admin/sachverstaendige', 'page')
           } catch { /* */ }
         }
+        break
+      }
+
+      // P5 Netzwerkpartner-Abo: Subscription-/Invoice-Lifecycle -> Abo-Row (service-role).
+      // Additiv — bestehende Handler unveraendert; payment_intent.* bleiben Einzugs-PIs.
+      case 'invoice.payment_succeeded':
+      case 'invoice.payment_failed':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted': {
+        const { applyNetzwerkAboEvent } = await import('@/lib/netzwerk/abo-webhook')
+        await applyNetzwerkAboEvent(db, event as never)
         break
       }
 

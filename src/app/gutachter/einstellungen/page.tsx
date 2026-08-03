@@ -26,10 +26,15 @@ type Item = {
   icon: typeof CalendarIcon
 }
 
-export default async function EinstellungenPage() {
+export default async function EinstellungenPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ netzwerk_abo?: string }>
+}) {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
+  const { netzwerk_abo } = await searchParams
 
   const sv = await getGutachterForUser<{
     id: string
@@ -173,6 +178,9 @@ export default async function EinstellungenPage() {
         gpsInitial={sv.live_tracking_enabled !== false}
       />
 
+      {/* P5 T9: Netzwerkpartner-Abo (Upgrade-CTA bzw. Status + Customer-Portal). */}
+      <NetzwerkAboBlock svId={sv.id} checkoutSuccess={netzwerk_abo === 'success'} />
+
       <div className="pt-2">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
           Konto &amp; Datenschutz
@@ -181,4 +189,38 @@ export default async function EinstellungenPage() {
       </div>
     </div>
   )
+}
+
+// P5 T9: Server-Block laedt Abo-Row (authenticated SELECT, P0-RLS) + Config-Preise.
+// Fail-safe: wirft die Preis-Config (fehlende Werte), wird die Sektion NICHT gerendert
+// (kein 0-Preis-Checkout, Einstellungen-Seite bleibt intakt).
+async function NetzwerkAboBlock({ svId, checkoutSuccess }: { svId: string; checkoutSuccess: boolean }) {
+  try {
+    const supabase = await createClient()
+    const { data: abo } = await supabase
+      .from('sv_netzwerk_abonnements')
+      .select('status, gueltig_bis')
+      .eq('sv_id', svId)
+      .maybeSingle()
+
+    const { ladeNetzwerkPreise } = await import('@/lib/billing/netzwerk-preise')
+    const preise = await ladeNetzwerkPreise()
+    const fmt = (cent: number) =>
+      (cent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+
+    const { NetzwerkAboSection } = await import('./netzwerk-abo/NetzwerkAboSection')
+    return (
+      <NetzwerkAboSection
+        aboStatus={(abo?.status as string | null) ?? null}
+        gueltigBis={(abo?.gueltig_bis as string | null) ?? null}
+        monatEuro={fmt(preise.monatCent)}
+        setupEuro={preise.setupCent > 0 ? fmt(preise.setupCent) : ''}
+        stripePublishableKey={process.env.STRIPE_PUBLISHABLE_KEY ?? ''}
+        checkoutSuccess={checkoutSuccess}
+      />
+    )
+  } catch (err) {
+    console.error('[einstellungen] NetzwerkAboBlock:', err)
+    return null
+  }
 }

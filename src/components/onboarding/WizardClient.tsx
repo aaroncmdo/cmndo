@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
@@ -47,6 +47,9 @@ function validatePhase(felder: OnboardingFeld[], vals: Record<string, unknown>):
 interface Props {
   phases: OnboardingPhase[]
   flowKey: string
+  /** P5 T8: optionaler Zusatz-Inhalt im Completed-Screen (z.B. Netzwerkpartner-Ask
+   *  des sv-onboarding-Wrappers). Ohne Prop rendert der Screen unveraendert. */
+  completedExtra?: ReactNode
   // 2026-05-11 Funnel v2 PR #4: vom Loader vorbefuellte Werte. Felder die in
   // prefilledValues vorhanden sind, werden NICHT mehr im Wizard abgefragt
   // (Pflicht-Phasen-Skip passiert schon im Loader; hier ist es nur fuer
@@ -75,7 +78,7 @@ type StoredWizardState = {
   savedAt: number
 }
 
-export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token, token }: Props) {
+export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Token, token, completedExtra }: Props) {
   const t = useTranslations('onboarding_wizard')
   const tc = useTranslations('common')
   const [phaseIdx, setPhaseIdx] = useState(0)
@@ -411,6 +414,11 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         <p style={{ fontSize: 16, color: 'var(--wiz-text-2)', maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>
           {t('erfolg_text')}
         </p>
+
+        {/* P5 T8: optionaler Wrapper-Zusatz (sv-onboarding: Netzwerkpartner-Ask). */}
+        {completedExtra ? (
+          <div style={{ maxWidth: 480, margin: '0 auto 32px', textAlign: 'left' }}>{completedExtra}</div>
+        ) : null}
 
         <div style={{
           display: 'inline-flex', gap: 12, padding: '16px 24px',

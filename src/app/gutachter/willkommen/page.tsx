@@ -95,6 +95,21 @@ export default async function GutachterWillkommenPage({
     sv = allSvs[0]
   }
 
+  // P5 T8: Netzwerkpartner-Preise fuer den optionalen Ask (beide Onboarding-Pfade;
+  // fail-safe: Config-Fehler -> leere Strings -> kein Ask, Flows unveraendert).
+  let netzwerkMonatEuro = ''
+  let netzwerkSetupEuro = ''
+  try {
+    const { ladeNetzwerkPreise } = await import('@/lib/billing/netzwerk-preise')
+    const preise = await ladeNetzwerkPreise()
+    const fmtCent = (cent: number) =>
+      (cent / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+    netzwerkMonatEuro = fmtCent(preise.monatCent)
+    netzwerkSetupEuro = preise.setupCent > 0 ? fmtCent(preise.setupCent) : ''
+  } catch (err) {
+    console.error('[willkommen] netzwerk-preise:', err)
+  }
+
   // Basic-SV-Branch: paket='basic' hat einen eigenen leichtgewichtigen Onboarding-
   // Flow (sv-onboarding) und keine Stripe/Vertrag/Pflichtdokument-Logik.
   // Frueher Exit vor allen bezahl-spezifischen Daten-Loads — paid path bleibt
@@ -105,7 +120,16 @@ export default async function GutachterWillkommenPage({
     if (!state || state.abgeschlossen || state.phasen.length === 0) {
       return <SvBasicPendingReview />
     }
-    return <SvBasicOnboardingClient phasen={state.phasen} svId={state.svId} prefilledValues={state.prefilledValues} />
+    return (
+      <SvBasicOnboardingClient
+        phasen={state.phasen}
+        svId={state.svId}
+        prefilledValues={state.prefilledValues}
+        netzwerkMonatEuro={netzwerkMonatEuro}
+        netzwerkSetupEuro={netzwerkSetupEuro}
+        stripePublishableKey={process.env.STRIPE_PUBLISHABLE_KEY ?? ''}
+      />
+    )
   }
 
   // KFZ-157: Wenn der User schon freigeschaltet ist, sind wir normalerweise
@@ -340,6 +364,8 @@ export default async function GutachterWillkommenPage({
       stepOverride={stepOverride}
       stripePublishableKey={stripePublishableKey}
       leadpreise={leadpreise}
+      netzwerkMonatEuro={netzwerkMonatEuro}
+      netzwerkSetupEuro={netzwerkSetupEuro}
     />
   )
 }

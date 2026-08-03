@@ -471,6 +471,18 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'Monatsabrechnung an SV (mit PDF-Anhang)',
   },
 
+  // P5 Netzwerkpartner-Abo: dedizierter Dunning-Trigger (NICHT sv_monatsabrechnung
+  // zweckentfremden — dieselbe Label-Falle wie beim Verifizierungs-Reminder unten).
+  netzwerk_abo_dunning: {
+    trigger_name: 'netzwerk_abo_dunning',
+    channel: 'email',
+    recipient: 'sv',
+    t_number: null,
+    whatsapp_template_name: null,
+    has_attachment: false,
+    description: 'Netzwerkpartner-Abo: Zahlung ausstehend (Dunning-Reminder)',
+  },
+
   // SV-Onboarding-Audit: dedizierte Verifizierungs-Reminder-Trigger. Vorher lief
   // beides faelschlich ueber 'sv_monatsabrechnung' -> Email-Tracking/Template-Label
   // war falsch (Billing statt Verifizierung). Channel/Recipient identisch (email/sv),
