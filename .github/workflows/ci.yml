@@ -471,9 +471,6 @@ jobs:
       # + wird danach beim Login 2FA-gechallenged. Konto-isoliert (smoke-enroll@claimondo.de, kein
       # Comms/Booking). Der Seed-Step setzt das Konto VOR dem Lauf faktorfrei zurueck (stateful self-reset
       # je Lauf; Seed liest process.env-first, .env.local nur lokal). RUN_2FA_ENROLL_SMOKE gatet den Spec.
-      # (J5 kasko-reparatur-phase-smoke NICHT dabei: Fixture-Claim 39734007 ist zustandsgedriftet —
-      # werkstatt_id NULL/ersterfassung statt "Werkstatt gesetzt" — Assertion unsicher; braucht eigenen
-      # deterministischen Seed = Follow-up. Bleibt opt-in. Siehe journey-smokes.md + DECISIONS 2026-08-03.)
       - name: Seed 2FA-Enroll-Fixture (J8)
         run: node scripts/seed-smoke-enroll.mjs
         env:
@@ -484,6 +481,27 @@ jobs:
         env:
           RUN_2FA_ENROLL_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+
+      # Fundament Journey-Suite J5 (Kasko/Selbstzahler-Reparatur-Phase) — die interne Fallakte eines
+      # Kasko-Claims mit gesetzter Werkstatt zeigt die Reparatur-Lane (Stepper "Terminfindung"), NICHT
+      # "SA-Unterschrift offen" (#4471). Der Seed-Step legt je Lauf einen frischen Wegwerf-Claim an
+      # (eigene Wegwerf-Werkstatt statt gedrifteter prod-Fixture badecb82 — die existiert nicht mehr;
+      # @claimondo.test/telefon=NULL, self-cleaning via Marker). Ersetzt den frueher fixen prod-Claim
+      # 39734007 (werkstatt_id auf NULL gedriftet). RUN_KASKO_SMOKE gatet den Spec; loginContextOrSkip
+      # ('admin') aal1 (test-admin traegt keinen TOTP-Faktor; MIT Secret wuerfe completeMfa mangels Faktor -> loginContextOrSkip skippt statt gruen).
+      - name: Seed Kasko-Reparatur-Fixture (J5)
+        run: node scripts/smoke/kasko-reparatur-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J5 (Kasko-Reparatur-Phase)
+        run: npx playwright test kasko-reparatur-phase-smoke --project=chromium --reporter=line
+        env:
+          RUN_KASKO_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
       - name: Run E2E Tests
         run: npx playwright test
