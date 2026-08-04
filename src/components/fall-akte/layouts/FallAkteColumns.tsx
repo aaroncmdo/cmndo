@@ -20,7 +20,7 @@ export function FallAkteColumns<Vm, ZK extends string>(
   const slots = config.slots?.(vm) ?? {}
 
   return (
-    <div className="mx-auto px-4 pt-5 pb-8 max-w-xl lg:max-w-5xl">
+    <div className={config.wrapperClassName ?? 'mx-auto px-4 pt-5 pb-8 max-w-xl lg:max-w-5xl'}>
       {/* Live-Aktualisierung: abonniert gutachter_termine/auftraege/faelle des Falls und
           refresht die server-gerenderten Zonen bei jedem Event (AAR-864-Muster). */}
       {realtime && <FallRealtimeRefresh fallId={realtime.fallId} claimId={realtime.claimId} />}
