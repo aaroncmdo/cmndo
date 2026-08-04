@@ -90,6 +90,8 @@ export async function notifyNewLead(opts: NotifyNewLeadOpts): Promise<void> {
       subject: `Neuer Lead aus ${opts.source}: ${opts.name}`,
       html,
       text,
+      leadId: opts.leadId,
+      template: 'lead_intern_notify',
     })
   } catch (err) {
     console.error(

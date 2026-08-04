@@ -1155,6 +1155,7 @@ export async function sendMiniWizardMagicLink(
       to: lead.email,
       subject: miniWizardMagicLinkSubject(props, locale),
       html,
+      leadId,
       empfaengerTyp: 'kunde',
       template: 'mini_wizard_magic_link',
     })

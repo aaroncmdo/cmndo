@@ -1,8 +1,7 @@
 'use server'
 
 // AAR-902 Prototyp: Server-Action fuer den Mini-Wizard.
-// 1. Lead einfuegen (4 Felder + Defaults), Disqualifikation bei
-//    schuldfrage='eigenverantwortung'
+// 1. Lead einfuegen (4 Felder + Defaults)
 // 2. flow_links-Token erstellen (72h gueltig)
 // 3. Magic-Link per Email an Lead.email senden
 //    (Baileys/WhatsApp folgt in PR 1+2 der AAR-897-Strecke)
@@ -31,7 +30,7 @@ type Result =
       success: true
       leadId: string
       redirectTo: string
-      kanal: 'whatsapp' | 'email' | 'disqualifiziert'
+      kanal: 'whatsapp' | 'email'
     }
   | { success: false; error: string }
 
@@ -45,7 +44,11 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   }
 
   const data = parsed.data
-  const isDisqualifiziert = data.schuldfrage === 'eigenverantwortung'
+  // Mapping-Audit 03.08.2026 (Befund B4): schuldfrage='eigenverantwortung' wurde
+  // hier hart disqualifiziert (Sackgasse /selbstverschulden), obwohl die App
+  // vollwertige Kasko-/Selbstzahler-Flows hat und der FlowLink-Quali-Step die
+  // Versicherungsfrage nachholt (flow-kontext.ts quali_offen). Selbstschuld-Leads
+  // laufen jetzt den normalen Magic-Link-Pfad.
   const locale = await getLocaleCookie()
 
   // 15.05.2026: Promo-Code aus FormData (data.promoCode) statt aus Cookie.
@@ -82,7 +85,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     admin,
     {
       source_channel: sourceChannel,
-      status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
+      status: 'neu',
       vorname: data.vorname,
       nachname: data.nachname,
       telefon: data.telefon,
@@ -93,10 +96,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       unfalldatum: data.unfalldatum,
       unfallort: data.unfallort,
       sprache: locale,
-      qualifizierungs_phase: isDisqualifiziert ? 'disqualifiziert' : 'in-qualifizierung',
-      disqualifiziert: isDisqualifiziert,
-      disqualifiziert_grund_key: isDisqualifiziert ? 'eigenverantwortung' : null,
-      disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
+      qualifizierungs_phase: 'in-qualifizierung',
       promotion_code_id: promotionCodeId,
       zugewiesen_an: dispatcherId,
     },
@@ -131,26 +131,23 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   // + generate_lead feuern (nur qualifizierte Leads, fire-and-forget).
   if (gaClientId) {
     await admin.from('leads').update({ ga_client_id: gaClientId }).eq('id', lead.id as string)
-    if (!isDisqualifiziert) {
-      void trackServerConversion(
-        gaClientId,
-        { name: 'generate_lead', params: { source: 'mini_wizard' } },
-        buildHashedUserData({
-          email: data.email,
-          phone: data.telefon,
-          firstName: data.vorname,
-          lastName: data.nachname,
-        }),
-      )
-    }
+    void trackServerConversion(
+      gaClientId,
+      { name: 'generate_lead', params: { source: 'mini_wizard' } },
+      buildHashedUserData({
+        email: data.email,
+        phone: data.telefon,
+        firstName: data.vorname,
+        lastName: data.nachname,
+      }),
+    )
   }
 
   // Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
-  // Auch bei disqualifizierten Leads — Team sieht alle public Submissions.
   const fullName = [data.vorname, data.nachname].filter(Boolean).join(' ') || data.email
   await notifyNewLead({
     leadId: lead.id as string,
-    source: `Mini-Wizard /schaden-melden${isDisqualifiziert ? ' (disqualifiziert)' : ''}${
+    source: `Mini-Wizard /schaden-melden${
       sourceChannel !== DEFAULT_SOURCE_CHANNEL ? ` · ${sourceChannel}` : ''
     }`,
     name: fullName,
@@ -162,17 +159,6 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       { label: 'Unfalldatum', value: data.unfalldatum },
     ],
   })
-
-  // Selbstverschulden: Lead bleibt in DB, kein Magic-Link
-  if (isDisqualifiziert) {
-    revalidatePath('/dispatch/leads')
-    return {
-      success: true,
-      leadId: lead.id as string,
-      redirectTo: '/schaden-melden/selbstverschulden',
-      kanal: 'disqualifiziert',
-    }
-  }
 
   // AAR-908 Gap 2: Geocoding fire-and-forget. unfallort → unfallort_lat/lng.
   // signSAandCreateFall (im Magic-Link-Klick-Pfad) liest die Koordinaten + ruft
