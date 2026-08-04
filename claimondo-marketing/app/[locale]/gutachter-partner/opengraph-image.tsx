@@ -3,7 +3,7 @@
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'
-export const alt = 'Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen'
+export const alt = 'Als Kfz-Sachverständiger Claimondo-Partner werden — kostenlos starten'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
 
@@ -272,7 +272,7 @@ export default function OgImage() {
             }}
           >
             <span style={{ fontSize: 16, color: '#7BA3CC', fontFamily: 'system-ui', fontWeight: 700 }}>
-              Jetzt auf die Warteliste →
+              Jetzt kostenlos starten →
             </span>
           </div>
         </div>

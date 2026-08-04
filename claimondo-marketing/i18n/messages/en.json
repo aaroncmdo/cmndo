@@ -2281,8 +2281,8 @@
     ]
   },
   "gutachter_partner": {
-    "sr_h1": "Join the waitlist — become a Claimondo partner as a Kfz-Sachverständiger",
-    "page_title": "Become a partner as a Kfz-Sachverständiger — waitlist",
+    "sr_h1": "Become a Claimondo vehicle assessor partner — register for free",
+    "page_title": "Become a Vehicle Assessor Partner — Start for Free",
     "hero": {
       "badge": "Verified experts only",
       "headline": "Become a Claimondo partner in your region",
@@ -2332,20 +2332,20 @@
       "prozess_text": "Claimondo is a claim settlement platform for Kfz liability claimants. We consolidate incoming jobs from marketing, workshops, and lawyers and match each job to the right expert in the area. You receive jobs with full preparation — insurance details, damage photos, and workshop contact are already stored in the portal. We handle acquisition, initial contact, and invoicing.",
       "schritte": [
         {
-          "titel": "Sign up for the waitlist",
-          "text": "Complete the form above — qualification, postcode, preferred radius. Takes under 3 minutes."
+          "titel": "Register for free",
+          "text": "Register on app.claimondo.de or claim your entry on the map above — takes less than 3 minutes."
         },
         {
-          "titel": "Verification",
-          "text": "We verify your DAT-Expert No., BVSK membership, and IHK or öbuv appointment against the respective registers. This is not a marketing check — we call the chambers directly if needed."
+          "titel": "Complete onboarding",
+          "text": "Finish profile, calendar connection and the partner agreement digitally — you activate yourself, no waiting."
         },
         {
-          "titel": "Region Activation",
-          "text": "As soon as demand arises in your postal code region (≥ 8 assignments / month), you will receive written activation. Until then, you remain on the waitlist — no costs, no commitment."
+          "titel": "Visible immediately",
+          "text": "Once activated you appear in the assessor finder and receive assignments in your region. Optional: as a Network Partner you get priority placement and your own branding."
         },
         {
-          "titel": "Live in the Portal",
-          "text": "30-minute onboarding call, SV portal access, first assignments appear in your inbox. Acceptance or rejection of each assignment remains your decision."
+          "titel": "Verification in parallel",
+          "text": "We verify DAT expert no., BVSK membership, IHK or öbuv appointment against the registers — in parallel, without blocking your start."
         }
       ],
       "schritt_label": "STEP {nr}",
@@ -2353,7 +2353,7 @@
       "verdienst_text1": "The basis is the BVSK-Honorartabelle. You invoice based on damage amount — as in any standard liability claim. The opposing insurance covers the fee in accordance with §249 BGB; Claimondo handles the billing, the partner law firm the enforcement of the claim. The specific platform commission depends on assignment volume and region, and is discussed transparently in the initial consultation — we provide a sample calculation based on your last 12 months in advance.",
       "verdienst_text2": "Assignments are non-exclusive: your own direct assignments, BVSK referrals, and insurer listings continue in parallel. We are an additional channel, not a binding commitment.",
       "onboarding_heading": "Onboarding Duration & Requirements",
-      "onboarding_text": "Once your region is activated, onboarding takes 7 to 14 working days: we verify your qualification against the relevant registers (DAT, BVSK, IHK, öbuv chambers), send the partner agreement, set you up in the SV portal, and conduct a 30-minute live onboarding call. After that, the first assignments go live.",
+      "onboarding_text": "You start immediately: registration and onboarding take less than 15 minutes combined — then you are activated and visible. Qualification verification (DAT, BVSK, IHK, öbuv) runs in parallel in the background.",
       "voraussetzungen": [
         "At least one recognised qualification: DAT-Expert · BVSK · IHK · öbuv",
         "Valid professional liability insurance (min. €2 million coverage)",
@@ -2362,10 +2362,10 @@
         "Smartphone for on-site evidence photo upload",
         "Availability for first contact within 24h of assignment allocation"
       ],
-      "warteliste_heading": "Why a Waitlist?",
-      "warteliste_text_pre": "Currently",
-      "warteliste_text_sv": "{anzahl} appraisers",
-      "warteliste_text_post": "are on the waitlist. We onboard partners on a regional, staggered basis: only when assignment volume in a postal code region is viable (≥ 8 assignments / month) do we activate one or more appraisers. This ensures no partner is onboarded on empty promises, and every activated appraiser sees a workable volume from day one. Your position on the list is not \"first come, first served\" — we match primarily by regional demand and qualification mix.",
+      "sofort_heading": "Start for free — today",
+      "sofort_text": "Register in minutes and complete onboarding — you are activated immediately and receive assignments without acquisition. Optionally become a Network Partner for priority placement in the assessor finder and your own branding.",
+      "sofort_netzwerk_zusatz": "Already {anzahl} assessors are in the Claimondo network.",
+      "sofort_cta": "Register for free now",
       "faq_heading": "Frequently Asked Questions",
       "faqs": [
         {
@@ -4066,8 +4066,8 @@
       "twitter_description": "No call center — a specialist in under 15 minutes."
     },
     "gutachter_partner": {
-      "title": "Become a partner car assessor — waiting list",
-      "description": "Join the waiting list: Claimondo's nationwide assessor network. Cases referred directly, no acquisition. DAT experts and BVSK members welcome.",
+      "title": "Become a Vehicle Assessor Partner — Start for Free",
+      "description": "Join the Claimondo assessor network for free: activated immediately, assignments without acquisition. Optional Network Partner with top placement and custom branding.",
       "og_title": "Become a partner car assessor — Claimondo",
       "og_description": "Cases without acquisition. Sign up for the Claimondo assessor network — we refer cases directly in your catchment area.",
       "twitter_description": "Cases without acquisition. Sign up for the Claimondo assessor network."
