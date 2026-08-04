@@ -6,12 +6,13 @@ import { Button } from '@/components/primitives'
 import { aktionenFuer, AKTION_LABEL, CRM_ACTIONS, type PartnerActionKey } from './partner-actions'
 import type { PartnerTyp } from '@/lib/partner/aktivitaet-types'
 
-// Deep-Link-Ziel je operativer Aktion + Partner-Typ (fuehrt in den bestehenden Flow,
-// wo die Action tatsaechlich lebt — Verifizierungs-/Onboarding-Tab bzw. Konto/Karten).
+// Deep-Link-Ziel je operativer Aktion + Partner-Typ. SV -> Verifizierungs-Tab (real).
+// Werkstatt -> Werkstatt-Detail (Verifizieren/Sperren leben dort; kanonische Tab-/Anchor-
+// Navigation = F2-Route-Konsolidierung, Folge-Schritt). Flotte -> Konto/Karten.
 function deepLink(key: PartnerActionKey, partnerTyp: PartnerTyp, partnerId: string): string | null {
   if (key === 'verifizieren' || key === 'freischalten' || key === 'sperren') {
     if (partnerTyp === 'sv') return `/admin/vertrieb/sachverstaendige/${partnerId}?tab=verifizierung`
-    if (partnerTyp === 'werkstatt') return `/admin/vertrieb/werkstaetten/${partnerId}?tab=zugang`
+    if (partnerTyp === 'werkstatt') return `/admin/vertrieb/werkstaetten/${partnerId}`
   }
   if (key === 'deeplinks' && partnerTyp === 'flotte') return `/admin/vertrieb/firmen-flotte/${partnerId}`
   return null
