@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import type { FallakteTabDef } from '@/components/shared/fall-tabs'
 
 /**
  * C4a (Fundament, „Eine Akte"): der rollen-parametrisierte Fallakte-Kern-Contract. Traegt ALLE
@@ -54,4 +55,11 @@ export type FallAkteConfig<Vm, ZK extends string> = {
   realtime?: (vm: Vm) => { fallId: string; claimId: string | null } | null
   /** Optionale server-injizierte ReactNode-Bloecke. */
   slots?: (vm: Vm) => FallAkteSlots
+  /** C4d/e (nur layout='tabs'): Tab-Definitionen — Reihenfolge + Meta (label/icon) fuer die Tab-Bar. */
+  tabs?: ReadonlyArray<FallakteTabDef>
+  /** C4d/e (nur layout='tabs'): Tab-Inhalt je id, VORGERENDERT — der Controller mountet nur den
+   *  aktiven (heterogene Props je Tab -> vorrendern statt zones(vm), das eine Prop-Buendelung erzwaenge). */
+  tabContent?: Record<string, ReactNode>
+  /** C4d/e (nur layout='tabs'): optionale Rechts-Aktion in der Tab-Bar (Staff: TaskAnlegenButton). */
+  tabRightSlot?: ReactNode
 }
