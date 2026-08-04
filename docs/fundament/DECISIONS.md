@@ -156,4 +156,12 @@
 
 **Review:** offen (im PR an Aaron).
 
+## 2026-08-04 · B-Journey-Suite · J6 (Kanzlei-Übergabe) als CI-Step — Kunde-Login, kein zweites Konto
+
+**J6 gebaut (PR gestackt auf #4981, Branch `kitta/fundament-journey-j6-kanzlei`):** neuer Seed `scripts/smoke/kanzlei-uebergabe-seed.mjs` + Spec `kanzlei-uebergabe-smoke.spec.ts`.
+
+**Kern:** Die Übergabe an die eigene Kanzlei ist mit **externem** Wegwerf-Kunde-Login fahrbar (kein Auth-Wall, **keine** echte Kanzlei-Gegenseite nötig — schlanker als J10). Trigger: Kunde-Portal-Button „Kanzleipaket versenden" (`EigeneKanzleiPaketCard`) → `versendeKanzleiPaketAnEigeneKanzlei` (`kanzlei-wunsch/actions.ts:270`, sanktionierter Direkt-Writer aus `operative-status-writes-baseline.json`) schreibt `claims.operative_status='an_externe_kanzlei_uebergeben'` + `kanzlei_uebergeben_am` (SSoT-Assert, **nicht** `kanzlei_id` = intern gecappt). Button-Gate (`kunde-claim-view.ts`): `service_typ≠nur_gutachter` + `eigene_kanzlei` + Ansprechpartner-Mail + **freigegebenes Erstgutachten** (`auftraege` typ=erstgutachten, `gutachten_final_freigegeben=true`; ⚠ `auftraege.sv_id` NOT NULL → Test-SV `0469524f`). Der Klick startet PDF-Gen (Button „Wird versendet…") → Assert per **toPass-Poll** (nicht fixer Timeout — sonst flaky). CI-Step `RUN_KANZLEI_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`). Lokal prod-grün 04.08.: Seed-assert 2/2 + Smoke 1 passed.
+
+**Review:** offen (im PR an Aaron).
+
 **Review:** offen (im PR an Aaron).
