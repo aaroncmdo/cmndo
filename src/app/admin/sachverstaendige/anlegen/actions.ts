@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { randomBytes } from 'node:crypto'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { PAKET_KONFIG, type AnlegePaket, type AnlegeSvFormData, type AnlegeBueroFormData, type AnlegeAkademieFormData, type AnlegeCommunityFormData } from './constants'
+import { randomPassword } from '@/lib/auth/random-password'
 
 // ARCH-1 Phase 2 (BLOCK C): Server Actions fuer Admin-Anlage von SVs.
 // Drei Modi: Solo / Buero / Sub-SV-zu-bestehendem-Buero.
@@ -19,16 +19,6 @@ import { PAKET_KONFIG, type AnlegePaket, type AnlegeSvFormData, type AnlegeBuero
  * Generiert ein sicheres 16-Zeichen Random-Passwort fuer Initial-Login.
  * Mix aus alphanum + Sonderzeichen, leicht zu lesen (keine 0/O/1/l/I).
  */
-function randomPassword(length = 16): string {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#$%&*+-='
-  const bytes = randomBytes(length)
-  let pw = ''
-  for (let i = 0; i < length; i++) {
-    pw += alphabet[bytes[i] % alphabet.length]
-  }
-  return pw
-}
-
 /**
  * AAR-129: Baut Geo-Felder für `organisationen`-Insert.
  * Berechnet die Isochrone via HERE API (AAR-132). Fehler werden geloggt,
