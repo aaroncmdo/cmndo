@@ -597,6 +597,28 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament Journey-Suite J2 (Meldung alle Kanaele) — 3 Meldewege = 3 Melde-Muster:
+      # A Kunde-Wizard /kunde/schaden-melden (Wrapper: leads+claims+pflichtdok, keine Terminwahl,
+      # kein reserviere()) · B POST /api/v1/melde-schaden (lead-first: gfa+lead+flow_link; 2. POST
+      # beweist j02-Dedup 'bereits_angelegt'; Assert kanal='none' = Runtime-Send-Isolations-Beweis
+      # der Drama-Festnetznummer) · C Gegner-Schadenkarte /schaden/[token] (Kern-direkt: Direkt-Claim
+      # + verursacher-Party + interner vs_meldung-Task; OHNE Telefon, OHNE Versicherer — VS-Meldung
+      # ist prod-scharf, /unfallmeldung wird NICHT bestaetigt). Isolation identitaetsbasiert
+      # (@claimondo.test/telefon=NULL/Drama-Nummer) — SIDE_EFFECT_MODE erreicht den prod-Prozess nicht.
+      - name: Seed Meldung-Kanaele-Fixture (J2)
+        run: node scripts/smoke/meldung-kanaele-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J2 (Meldung alle Kanaele)
+        run: npx playwright test meldung-kanaele-smoke --project=chromium --reporter=line --workers=1
+        env:
+          RUN_MELDUNG_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
