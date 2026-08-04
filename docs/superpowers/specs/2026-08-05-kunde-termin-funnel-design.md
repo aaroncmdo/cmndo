@@ -39,9 +39,11 @@ Es gibt keinen Terminzustand ohne Zustaendigen und keinen gewaehlten Termin, den
 
 ### 4.1 Termin-Identitaet (Convert haengt um)
 
-- `convertLeadToClaim` haengt am Ende der Konversion alle **offenen** `gutachter_termine` des Leads um: `bezug_typ 'lead' → 'claim'`, `bezug_id → claims.id`. "Offen" = nicht in `(storniert, abgesagt, abgelehnt, abgeschlossen)`. Non-fatal (try/catch, wie die anderen Konversions-Nachwirkungen), aber mit `console.error` bei Fehlschlag.
-- Der Umhaenge-Write filtert ueber die kanonische bezug-Achse (`.eq('bezug_typ','lead').eq('bezug_id', leadId)`) — Termin-Bezug-Gate-konform (Writes sind frei, kanonische Filter sowieso).
-- **Backfill (einmalig, MCP-Migration, DML):** alle bezug-`lead`-Termine, deren Lead bereits einen Claim hat, auf `claim` umhaengen (Join `claims.lead_id`). Betrifft ~16 Bestands-Termine.
+- `convertLeadToClaim` haengt am Ende der Konversion alle **offenen** Lead-Termine um auf **`bezug_typ='fall'`**, `bezug_id=claims.id`, **`lead_id=NULL`** (im selben UPDATE — der validate-Trigger lehnt Doppel-Bezug ab). "Offen" = Status nicht in `(storniert, abgesagt, abgelehnt, abgeschlossen, verlegt)`. Non-fatal (try/catch, wie die anderen Konversions-Nachwirkungen), aber mit `console.error` bei Fehlschlag.
+- **Warum `'fall'`, nicht `'claim'`:** Die Kunden-Akte + Termine-Hub filtern auf der fall-Achse, und `fall_id == claims.id` (claim-first, `faelle` existiert nicht als Tabelle). Prod hat 0 `bezug_typ='claim'`-Termine (verifiziert 05.08.: 22× lead, 21× NULL) — `'fall'` ist die gelebte Achse konvertierter Faelle.
+- **fall≡claim-Aequivalenz im Filter-Helper (Schisma-Heilung):** Ops-Reader (Storno, Verlegung, Reminder-/Eskalations-Crons, SLA, autoPhase) filtern mit `bezugOrExpr('claim', …)`, die Akte mit `'fall'` — zwei Vokabeln fuer DIESELBE UUID. `bezugOrExpr`/`bezugInExpr` behandeln deshalb kuenftig `fall` und `claim` als Aequivalenzklasse (`bezug_typ.in.(fall,claim)` bei beiden Achsen; `lead` bleibt strikt). Superset-Garantie bleibt: `bezug_id`-Gleichheit matcht nie einen fremden Termin. EIN Helper-Edit heilt damit alle ~44 Consumer beider Vokabeln, egal welches Literal ein Writer setzt.
+- **Beide Lead-Verankerungen** werden umgehaengt: bezug-nativ (`bezug_typ='lead' AND bezug_id=leadId`) UND legacy (`lead_id=leadId`, bezug_typ NULL) — Letzteres deckt die KB-Beratungstermine ab (17 legacy-lead auf prod), die exakt dieselbe Akte-Blindheit haben.
+- **Backfill (einmalig, MCP-Migration, DML):** alle lead-verankerten Termine (beide Formen), deren Lead bereits einen Claim hat, auf `'fall'` umhaengen (Join `claims.lead_id`).
 - `reparatur_termine` bleiben unveraendert `claim_id`-verankert.
 
 ### 4.2 Ehrlicher Claim-Cursor

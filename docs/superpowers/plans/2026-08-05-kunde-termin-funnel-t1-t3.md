@@ -80,19 +80,25 @@ export function istOffenerTerminStatus(status: string | null): boolean {
   return !(TERMINAL_TERMIN_STATUS as readonly string[]).includes(status)
 }
 
-/** Existiert mindestens ein nicht-terminaler bezug-nativer Lead-Termin? (Cursor-Input, T2) */
+/** Beide Lead-Verankerungen: bezug-nativ (bezug_typ='lead') ODER legacy (lead_id-Spalte). */
+function leadAnkerOrExpr(leadId: string): string {
+  return `and(bezug_typ.eq.lead,bezug_id.eq.${leadId}),lead_id.eq.${leadId}`
+}
+
+/** Existiert mindestens ein nicht-terminaler lead-verankerter Termin? (Cursor-Input, T2) */
 export async function hatOffeneLeadTermine(admin: SupabaseClient, leadId: string): Promise<boolean> {
   const { data } = await admin
     .from('gutachter_termine')
     .select('id')
-    .eq('bezug_typ', 'lead')
-    .eq('bezug_id', leadId)
+    .or(leadAnkerOrExpr(leadId))
     .not('status', 'in', `(${TERMINAL_TERMIN_STATUS.join(',')})`)
     .limit(1)
   return (data ?? []).length > 0
 }
 
-/** Haengt alle nicht-terminalen Lead-Termine auf den Claim um (bezug lead→claim). */
+/** Haengt alle nicht-terminalen lead-verankerten Termine auf den Fall um (bezug 'fall',
+ *  fall_id==claims.id claim-first). lead_id wird im selben UPDATE genullt (validate-Trigger
+ *  lehnt Doppel-Bezug ab). */
 export async function uebernehmeLeadTermine(
   admin: SupabaseClient,
   leadId: string,
@@ -100,15 +106,32 @@ export async function uebernehmeLeadTermine(
 ): Promise<{ ok: boolean; count: number; error?: string }> {
   const { data, error } = await admin
     .from('gutachter_termine')
-    .update({ bezug_typ: 'claim', bezug_id: claimId })
-    .eq('bezug_typ', 'lead')
-    .eq('bezug_id', leadId)
+    .update({ bezug_typ: 'fall', bezug_id: claimId, lead_id: null })
+    .or(leadAnkerOrExpr(leadId))
     .not('status', 'in', `(${TERMINAL_TERMIN_STATUS.join(',')})`)
     .select('id')
   if (error) return { ok: false, count: 0, error: error.message }
   return { ok: true, count: (data ?? []).length }
 }
 ```
+
+**Zusatz-Schritt (Schisma-Heilung, Spec §4.1):** In `src/lib/termine/bezug-filter.ts` behandeln `bezugOrExpr`/`bezugInExpr` die Achsen `fall` und `claim` als Aequivalenzklasse (IDs identisch, claim-first):
+
+```ts
+export function bezugOrExpr(achse: BezugAchse, id: string): string {
+  const typen = achse === 'lead' ? 'lead' : 'in.(fall,claim)'
+  const typExpr = achse === 'lead' ? `bezug_typ.eq.lead` : `bezug_typ.${typen}`
+  return `${achse}_id.eq.${id},and(${typExpr},bezug_id.eq.${id})`
+}
+
+export function bezugInExpr(achse: BezugAchse, ids: string[]): string {
+  const list = ids.join(',')
+  const typExpr = achse === 'lead' ? `bezug_typ.eq.lead` : `bezug_typ.in.(fall,claim)`
+  return `${achse}_id.in.(${list}),and(${typExpr},bezug_id.in.(${list}))`
+}
+```
+
+Bestehende Tests `src/lib/termine/bezug-filter.test.ts` auf die neuen Erwartungs-Strings anpassen + je ein neuer Fall: `bezugOrExpr('fall', 'F-1')` enthaelt `bezug_typ.in.(fall,claim)`; `bezugOrExpr('lead', 'L-1')` bleibt strikt `bezug_typ.eq.lead`.
 
 - [ ] **Step 4: Test gruen** — gleicher Befehl → PASS.
 - [ ] **Step 5: Commit** — `git add src/lib/leads/uebernehme-lead-termine.ts src/lib/leads/__tests__/uebernehme-lead-termine.test.ts && git commit` (Message: `feat(termine): Lead-Termin-Uebernahme-Helper (Konversions-Umhaengen T1)` + Audit-Block).
@@ -152,23 +175,25 @@ Import oben ergaenzen: `import { uebernehmeLeadTermine } from './uebernehme-lead
 
 ```sql
 select count(*) from gutachter_termine g
-join claims c on c.lead_id = g.bezug_id
-where g.bezug_typ = 'lead'
+join claims c on c.lead_id = coalesce(g.bezug_id, g.lead_id)
+where (g.bezug_typ = 'lead' or (g.bezug_typ is null and g.lead_id is not null))
   and g.status not in ('storniert','abgesagt','abgelehnt','abgeschlossen','verlegt');
 ```
 
-Erwartung: niedrige zweistellige Zahl (Audit 04.08.: ~16 inkl. dispatch_pending).
+Erwartung: niedrige zweistellige Zahl (Audit 04.08.: ~16 bezug-lead + legacy-lead-KB-Termine).
 
-- [ ] **Step 2: Migration anwenden** via MCP `apply_migration` (name `backfill_lead_termine_auf_claims`):
+- [ ] **Step 2: Migration anwenden** via MCP `apply_migration` (name `backfill_lead_termine_auf_faelle`):
 
 ```sql
--- Kunde-Termin-Funnel T1 Backfill: bezug-lead-Termine bereits konvertierter Leads
--- auf den Claim umhaengen (Spec 2026-08-05 §4.1). Idempotent.
+-- Kunde-Termin-Funnel T1 Backfill: lead-verankerte Termine (bezug-nativ UND legacy)
+-- bereits konvertierter Leads auf den Fall umhaengen (Spec 2026-08-05 §4.1;
+-- bezug 'fall' == gelebte Achse, fall_id==claims.id claim-first). lead_id wird
+-- genullt (validate-Trigger: kein Doppel-Bezug). Idempotent.
 update gutachter_termine g
-set bezug_typ = 'claim', bezug_id = c.id
+set bezug_typ = 'fall', bezug_id = c.id, lead_id = null
 from claims c
-where c.lead_id = g.bezug_id
-  and g.bezug_typ = 'lead'
+where c.lead_id = coalesce(g.bezug_id, g.lead_id)
+  and (g.bezug_typ = 'lead' or (g.bezug_typ is null and g.lead_id is not null))
   and g.status not in ('storniert','abgesagt','abgelehnt','abgeschlossen','verlegt');
 ```
 
@@ -350,7 +375,7 @@ export function initialOperativeStatus(i: {
     .order('created_at', { ascending: true })
 ```
 
-Kontext-Aufloesung in EINEM Nachlade-Block: `bezug_typ='lead'` → `leads(id, vorname, nachname, schadens_ort, schadens_plz)`; `bezug_typ='claim'` → `claims(id, claim_nummer)` + Kunde via `profiles`. `quelle = assignee_typ === 'sv_lead' ? 'dead_pin' : 'portal'`.
+Kontext-Aufloesung in EINEM Nachlade-Block: `bezug_typ='lead'` → `leads(id, vorname, nachname, schadens_ort, schadens_plz)`; `bezug_typ in ('fall','claim')` → `claims(id, claim_nummer)` + Kunde via `profiles` (fall≡claim, IDs identisch — Spec §4.1). `quelle = assignee_typ === 'sv_lead' ? 'dead_pin' : 'portal'`.
 
 - [ ] **Step 3: Liste rendern** — `shared/DataTable`-Set (KEIN handgerolltes `<table>` — Component-Set-Ratchet): Spalten Alter (relative Zeit; `> 24 h` → `StatusBadge`-Slot `danger`, sonst `pending`), Wunschzeit (Europe/Berlin), Kunde/Ort, Fall (Link auf `/faelle/[id]` wenn claimId), Quelle, Aktionen (Task 10). Leere Queue → `shared/EmptyState`.
 - [ ] **Step 4: Commit** — `feat(dispatch): Terminwunsch-Queue Ansicht (T3)`.
