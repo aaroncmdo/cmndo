@@ -212,8 +212,12 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
 /**
  * Manuelle Markierung als bezahlt — z.B. nach Bank-Ueberweisung die nicht
  * ueber Stripe lief. Setzt bezahlt_am, bezahlt_betrag und status='bezahlt'.
+ * Audit-Konsolidierung 04.08.: EINZIGER bezahlt-markieren-Pfad (der Finance-Hub-
+ * Zwilling markiereAlsBezahlt ist geloescht). `betrag` optional fuer den
+ * Hub-Fall "abweichender Zahlbetrag" (Default: summe_brutto); Task-Auto-Resolve
+ * (KFZ-151) aus dem Zwilling uebernommen — galt vorher nur auf einer Surface.
  */
-export async function markBezahlt(abrechnung_id: string, notiz?: string): Promise<{ success: boolean; error?: string }> {
+export async function markBezahlt(abrechnung_id: string, notiz?: string, betrag?: number): Promise<{ success: boolean; error?: string }> {
   const auth = await ensureAdmin()
   if (!auth.ok) return { success: false, error: auth.error }
 
@@ -230,13 +234,19 @@ export async function markBezahlt(abrechnung_id: string, notiz?: string): Promis
 
   const { error } = await db.from('abrechnungen').update({
     bezahlt_am: new Date().toISOString(),
-    bezahlt_betrag: Number(abr.summe_brutto ?? 0),
+    bezahlt_betrag: Number.isFinite(betrag) && (betrag as number) > 0 ? (betrag as number) : Number(abr.summe_brutto ?? 0),
     status: 'bezahlt',
     notiz: neueNotiz,
     updated_at: new Date().toISOString(),
   }).eq('id', abrechnung_id)
 
   if (error) return { success: false, error: error.message }
+
+  // KFZ-151: Auto-Resolve offener Tasks zu dieser Abrechnung (non-fatal)
+  try {
+    const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+    await resolveTasksForEntity('abrechnung', abrechnung_id, 'Rechnung bezahlt')
+  } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung bezahlt:', err) }
 
   revalidatePath('/admin/finance', 'page')
   return { success: true }
@@ -340,6 +350,13 @@ export async function stornoAbrechnung(
   } catch (e) {
     console.error('[KFZ-150] Storno-Email fehlgeschlagen:', e)
   }
+
+  // 5b. KFZ-151: Auto-Resolve offener Tasks (aus dem geloeschten Finance-Hub-
+  // Zwilling storniereAbrechnung uebernommen — non-fatal).
+  try {
+    const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
+    await resolveTasksForEntity('abrechnung', abrechnung_id, 'Rechnung storniert')
+  } catch (err) { console.error('[KFZ-151] resolveTasks abrechnung storniert:', err) }
 
   // 6. Timeline-Einträge für betroffene Fälle.
   // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT). Der Filter
