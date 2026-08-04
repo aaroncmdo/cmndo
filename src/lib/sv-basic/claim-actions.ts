@@ -421,6 +421,25 @@ export async function beanspracheSvLead(input: {
     console.error('[sv-basic/beanspracheSvLead] Admin-Task fehlgeschlagen:', err)
   }
 
+  // 8d. Team-WhatsApp (Helper wirft nie; interne/Test-Identitaeten unterdrueckt er) —
+  //     neue Marketing-Funnel-Partner sofort aufs Team-Handy (Aaron-Direktive 05.08.).
+  try {
+    const { notifyTeamPartnerSignup } = await import('@/lib/partner/notify-team-signup')
+    await notifyTeamPartnerSignup({
+      typ: 'gutachter',
+      art: 'registrierung',
+      quelle: '/sv/registrieren (Cold-Pin-Claim)',
+      firma: input.firmenname ?? lead.firma,
+      name: [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null,
+      email: input.email,
+      telefon: input.telefon,
+      ort: [lead.plz, lead.ort].filter(Boolean).join(' ') || null,
+      adminPfad: '/admin/sachverstaendige/basic-freigaben',
+    })
+  } catch (err) {
+    console.error('[sv-basic/beanspracheSvLead] Team-WA-Notify fehlgeschlagen (non-critical):', err)
+  }
+
   // Netzwerk-Kalt-Einladung einloesen (Auto-Kante zum Einlader) — best-effort,
   // bricht die Registrierung NIE (Muster werkstatt/registrieren).
   if (input.einladungToken) {
@@ -727,6 +746,26 @@ export async function registriereSvBasicNeu(input: {
     }
   } catch (err) {
     console.error('[sv-basic/registriereSvBasicNeu] partner_leads-Spiegel fehlgeschlagen (non-critical):', err)
+  }
+
+  // 9e. Team-WhatsApp (Helper wirft nie; interne/Test-Identitaeten unterdrueckt er) —
+  //     neue Marketing-Funnel-Partner sofort aufs Team-Handy (Aaron-Direktive 05.08.).
+  try {
+    const { notifyTeamPartnerSignup } = await import('@/lib/partner/notify-team-signup')
+    await notifyTeamPartnerSignup({
+      typ: 'gutachter',
+      art: 'registrierung',
+      quelle: '/sv/registrieren (Neu-Registrierung)',
+      firma: input.firmenname ?? null,
+      name: [input.vorname.trim(), input.nachname.trim()].filter(Boolean).join(' ') || null,
+      email: input.email,
+      telefon: input.telefon,
+      ort: input.plz ?? null,
+      adminPfad: '/admin/sachverstaendige/basic-freigaben',
+      extraFields: [{ label: 'DAT-Nr', value: input.datNr?.trim() || null }],
+    })
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] Team-WA-Notify fehlgeschlagen (non-critical):', err)
   }
 
   // Netzwerk-Kalt-Einladung einloesen (Auto-Kante zum Einlader) — best-effort,
