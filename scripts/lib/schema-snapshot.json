@@ -3929,7 +3929,8 @@
     "gueltig_bis",
     "stripe_subscription_id",
     "erstellt_am",
-    "aktualisiert_am"
+    "aktualisiert_am",
+    "ueberfaellig_seit"
    ]
   },
   "sv_onboarding_rechnungen": {
