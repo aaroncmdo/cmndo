@@ -547,11 +547,13 @@
       "anspruchsschreiben",
       "gutachten",
       "manuell",
-      "ruegeschreiben"
+      "ruegeschreiben",
+      "vs_kuerzung"
     ],
     "forderungspositionen.typ": [
       "abschleppkosten",
       "anwaltskosten",
+      "beilackierung",
       "gutachterkosten",
       "kostenpauschale",
       "mietwagen",
@@ -560,6 +562,9 @@
       "restwert",
       "schmerzensgeld",
       "sonstiges",
+      "stundenverrechnung",
+      "upe",
+      "verbringung",
       "wbw",
       "wertminderung"
     ],
