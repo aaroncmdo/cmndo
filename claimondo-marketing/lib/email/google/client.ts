@@ -23,6 +23,9 @@ type SendEmailOpts = {
   /** @deprecated Wird ignoriert — alle Sends gehen von RESEND_FROM/GMAIL_SMTP_FROM. */
   from?: string
   fallId?: string | null
+  // Mapping-Audit 03.08.2026 (Befund B2): ohne lead_id war die Magic-Link-Mail
+  // im email_log keinem Lead zuordenbar (Akte/Timeline blind auf den Send).
+  leadId?: string | null
   empfaengerTyp?: 'kunde' | 'sv' | 'kanzlei' | 'admin'
   template?: string
 }
@@ -40,6 +43,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     // Log failed
     await admin.from('email_log').insert({
       fall_id: opts.fallId ?? null,
+      lead_id: opts.leadId ?? null,
       empfaenger: '',
       empfaenger_typ: opts.empfaengerTyp ?? 'admin',
       template: opts.template ?? 'unknown',
@@ -57,6 +61,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
   // Insert pending log
   const { data: logEntry } = await admin.from('email_log').insert({
     fall_id: opts.fallId ?? null,
+    lead_id: opts.leadId ?? null,
     empfaenger: toAddr,
     empfaenger_typ: opts.empfaengerTyp ?? 'admin',
     template: opts.template ?? 'unknown',

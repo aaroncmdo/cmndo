@@ -16,10 +16,13 @@ import { createLeadFromMiniWizard } from '@/lib/actions/create-lead-from-mini-wi
 // AAR-902 Prototyp: 4-Felder-Mini-Wizard. Eine Seite, kein Step-by-Step.
 // Konzept: docs/14.05.2026/mini-wizard-magic-link-konzept.md Section "Phase 1".
 
-const TODAY_LOCAL_DATETIME = (() => {
+// Mapping-Audit 03.08.2026 (Befund B1): leads.unfalldatum ist DB-seitig `date` —
+// ein datetime-local-Input erhob eine Uhrzeit, die beim Insert still verworfen
+// wurde. Ehrliche Erhebung: nur das Datum (YYYY-MM-DD).
+const TODAY_LOCAL_DATE = (() => {
   const d = new Date()
   d.setMinutes(d.getMinutes() - d.getTimezoneOffset())
-  return d.toISOString().slice(0, 16)
+  return d.toISOString().slice(0, 10)
 })()
 
 const SCHULDFRAGE_OPTIONS = [
@@ -36,7 +39,7 @@ const SCHULDFRAGE_OPTIONS = [
   {
     value: 'eigenverantwortung' as const,
     title: 'Ich bin selbst schuld',
-    desc: 'Kasko-Fall — Sie hören gleich auf der nächsten Seite, wie wir trotzdem helfen können.',
+    desc: 'Kasko- oder Selbstzahler-Fall — auch hier helfen wir. Ihr sicherer Link kommt direkt per WhatsApp oder E-Mail.',
   },
 ]
 
@@ -71,7 +74,7 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
     mode: 'onBlur',
     defaultValues: {
       schuldfrage: 'gegner',
-      unfalldatum: TODAY_LOCAL_DATETIME,
+      unfalldatum: TODAY_LOCAL_DATE,
       unfallort: '',
       email: '',
       telefon: '',
@@ -158,8 +161,8 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
           <Label htmlFor="unfalldatum">Unfalldatum</Label>
           <Input
             id="unfalldatum"
-            type="datetime-local"
-            max={TODAY_LOCAL_DATETIME}
+            type="date"
+            max={TODAY_LOCAL_DATE}
             {...register('unfalldatum')}
           />
           {errors.unfalldatum ? (
