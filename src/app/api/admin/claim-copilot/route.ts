@@ -5,7 +5,6 @@
 // Guard: nur Admin-Rolle. Body: { fallId, messages, modus? }.
 
 import type Anthropic from '@anthropic-ai/sdk'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from '@/lib/ai/models'
 import { streamForProposals } from '@/lib/claim-ai/engine/call'
@@ -14,25 +13,12 @@ import { persistCopilotProposals } from '@/lib/claim-ai/proposals'
 import { appendTurns } from '@/lib/claim-ai/threads'
 import { buildClaimAiContext, summarizeClaimAiContext } from '@/lib/claim-ai/context'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { requireAdminUserId } from '@/lib/auth/require-admin-user-id'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 type ClientMessage = { role: 'user' | 'assistant'; content: string }
-
-async function requireAdminUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .maybeSingle()
-  return profile?.rolle === 'admin' ? user.id : null
-}
 
 function validateMessages(raw: unknown): ClientMessage[] | null {
   if (!Array.isArray(raw)) return null

@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { randomBytes } from 'node:crypto'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { PAKET_KONFIG } from '../anlegen/constants'
+import { randomPassword } from '@/lib/auth/random-password'
 
 const PAKET_KM: Record<string, number> = {
   standard: 15, 'starter-10': 15,
@@ -179,16 +179,6 @@ export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
  * auth.user, flaggt `force_password_change = true` und versendet die
  * WillkommenSv-Mail erneut mit den aktuellen Konditionen. Nur fuer Admins.
  */
-function randomPassword(length = 16): string {
-  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!#$%&*+-='
-  const bytes = randomBytes(length)
-  let pw = ''
-  for (let i = 0; i < length; i++) {
-    pw += alphabet[bytes[i] % alphabet.length]
-  }
-  return pw
-}
-
 export async function resendWelcomeMail(
   svId: string,
 ): Promise<{ success: boolean; error?: string; initial_password?: string }> {
