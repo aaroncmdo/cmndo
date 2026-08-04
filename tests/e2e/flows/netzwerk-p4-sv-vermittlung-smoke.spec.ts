@@ -235,11 +235,20 @@ test('Teil B — Kunde signiert SA in den bestehenden Claim: Effekte werden nach
   const page = await ctx.newPage()
   await page.goto(flowLinkUrl!, { waitUntil: 'domcontentloaded' })
 
+  // j03-Soll-Delta (04.08., P4-UX-Followup): der anonyme Vermittlungs-Kunde landet DIREKT
+  // an der Fokus-Signatur — keine Quali, keine Feststellung (der SV hat alles erfasst).
+  // Hartes Soll-Assert VOR der Treiberschleife; die Schleife bedient danach nur noch den
+  // SA-Step selbst (Checkboxen/Canvas/Absenden).
+  await expect(
+    page.getByRole('heading', { name: /Beauftragung unterzeichnen|Sicherungsabtretung/i }).first(),
+  ).toBeVisible({ timeout: 30_000 })
+
   // Durch den Flow bis zur SA treiben. Der Wizard ist heterogen (Quali-Options-Karten,
   // Feststellungs-Steps mit Inputs/Uploads, Skip-Links, Weiter-CTAs) — pro Iteration:
   // Canvas? -> zeichnen+absenden. Sonst: Checkboxen abhaken, Pflicht-Inputs mit Dummies
   // fuellen, Options-Karte klicken (bevorzugt "Unfallgegner" = Haftpflicht-konsistent),
-  // sonst Skip-Link, sonst Weiter-CTA.
+  // sonst Skip-Link, sonst Weiter-CTA. (Seit dem j03-Delta ist das nur noch der
+  // Fallback-Treiber fuer den SA-Step — das Direkt-Assert oben ist das Soll.)
   let signed = false
   for (let step = 0; step < 30 && !signed; step++) {
     if (await handleSaStep(page)) {

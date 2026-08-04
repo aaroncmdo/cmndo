@@ -30,6 +30,12 @@ Partnerkanzlei zur rechtlichen Vertretung.
 - **`nur_gutachter`** (Kunde reguliert selbst): **nur SA** (Abtretung an den SV fürs Honorar), **keine Vollmacht** (keine Kanzlei).
 - **Reparatur-Weg (Kasko/Selbstzahler, J5):** reduziertes Szenario — SA/Vollmacht entfallen bzw. sind nicht der Gate (der Fall ist im FlowLink erfasst, Reparatur läuft über eigene Freigaben, → J4).
 - **Eingeloggter Kunde** (kein Token): Signatur über das Portal statt den Magic-Link.
+- **SV-Vermittlungs-Kunde** (Netzwerk P4, `source_channel='gutachter-vermittlung'`): Der SV hat
+  Fall + Kunde + Gutachten bereits vollständig erfasst — der FlowLink startet **direkt am
+  Fokus-Signatur-Schritt** (keine Quali, keine Feststellung; kein Doppel-Ask erhobener Daten).
+  Gilt nur solange die SA offen ist UND noch kein Kunden-Account existiert; danach greifen die
+  regulären Pfade (eingeloggt → Fokus-Signatur bzw. Portal). (Soll-Delta 04.08., P4-UX-Followup —
+  vorher lief der Vermittlungs-Kunde fälschlich durch den vollen Wizard.)
 - **Airdrop-Gegner** (J2/E): der Gegner unterschreibt keine SA — er bestätigt nur seine Kontaktdaten.
 
 ## Fehlerfälle und ihr Soll-Verhalten
