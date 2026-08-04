@@ -15,27 +15,6 @@ async function requireAdmin(): Promise<boolean> {
   return p?.rolle === 'admin'
 }
 
-export async function getWerkstattStaffel(
-  werkstattId: string,
-): Promise<{ ok: true; stufen: { schwelle: number; bonus_betrag_netto: number }[] } | { ok: false; error: string }> {
-  if (!(await requireAdmin())) return { ok: false, error: 'Nur Admins.' }
-  if (!werkstattId) return { ok: false, error: 'Keine Werkstatt-ID.' }
-  const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('werkstatt_staffel_stufen')
-    .select('schwelle, bonus_betrag_netto')
-    .eq('werkstatt_id', werkstattId)
-    .order('schwelle', { ascending: true })
-  if (error) return { ok: false, error: error.message }
-  return {
-    ok: true,
-    stufen: (data ?? []).map((r) => ({
-      schwelle: Number((r as unknown as { schwelle: number }).schwelle),
-      bonus_betrag_netto: Number((r as unknown as { bonus_betrag_netto: number }).bonus_betrag_netto),
-    })),
-  }
-}
-
 export async function setWerkstattStaffel(
   werkstattId: string,
   stufen: { schwelle: number; bonus_betrag_netto: number }[],
