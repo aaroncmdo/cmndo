@@ -4584,4 +4584,26 @@
     "cta_p": "Unabhängig, qualifiziert, in Ihrer Nähe — Termin meist unter 48 Stunden. Bei Fremdverschulden 0 € für Sie.",
     "cta_schaden": "Jetzt Schaden melden"
   }
+,
+  "wertminderung_rechner": {
+    "titel": "Wertminderung mit deinen Werten berechnen",
+    "intro": "Die Tabelle oben zeigt die Faustregel. Rechne hier mit deinen eigenen Zahlen:",
+    "label_reparaturkosten": "Reparaturkosten (€)",
+    "label_alter": "Fahrzeugalter (Jahre)",
+    "label_km": "Laufleistung (km, optional)",
+    "label_wbw": "Wiederbeschaffungswert (€, optional)",
+    "label_vorschaden": "Vorschäden am Fahrzeug?",
+    "vorschaden_keine": "Keine",
+    "vorschaden_repariert": "Fachgerecht repariert",
+    "vorschaden_erheblich": "Erheblich / unrepariert",
+    "ergebnis_schaetzung": "Grobe Orientierung: {betrag} ({pct} der Reparaturkosten).",
+    "ergebnis_einzelfall_alter": "Einzelfall: abhängig von Laufleistung & Marktwert. Der BGH lehnt starre Altersgrenzen ab (VI ZR 357/03) — auch ältere Fahrzeuge können Anspruch haben. Den belastbaren Betrag liefert das Gutachten.",
+    "ergebnis_einzelfall_vorschaden": "Erhebliche Vorschäden mindern die merkantile Wertminderung deutlich. Die Höhe ist ein Einzelfall — den belastbaren Betrag ermittelt nur das Gutachten.",
+    "ergebnis_unvollstaendig": "Bitte Reparaturkosten und Fahrzeugalter angeben.",
+    "hinweis_vorschaden_repariert": "Fachgerecht reparierte Vorschäden mindern die Wertminderung leicht — die Faustregel ist hier eher eine Obergrenze.",
+    "hinweis_hohe_km": "Bei hoher Laufleistung liegt die Wertminderung eher am unteren Rand.",
+    "hinweis_kleiner_schaden": "Bei kleinem Schaden im Verhältnis zum Fahrzeugwert kann die Wertminderung gering ausfallen.",
+    "disclaimer": "Faustregel-Orientierung, kein Ersatz fürs Gutachten. Den belastbaren Betrag ermittelt ein zertifizierter Sachverständiger (Sanden/Danner) — er berücksichtigt Laufleistung, Marktwert, Vorschäden und Reparaturqualität.",
+    "cta": "Kostenlosen Gutachter beauftragen"
+  }
 }

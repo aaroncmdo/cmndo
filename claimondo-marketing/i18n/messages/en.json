@@ -4568,4 +4568,26 @@
     "cta_p": "Independent, qualified, near you — appointment usually within 48 hours. In case of third-party fault, €0 for you.",
     "cta_schaden": "Report your claim now"
   }
+,
+  "wertminderung_rechner": {
+    "titel": "Calculate diminished value with your figures",
+    "intro": "The table above shows the rule of thumb. Calculate with your own numbers here:",
+    "label_reparaturkosten": "Repair costs (€)",
+    "label_alter": "Vehicle age (years)",
+    "label_km": "Mileage (km, optional)",
+    "label_wbw": "Replacement value (€, optional)",
+    "label_vorschaden": "Prior damage to the vehicle?",
+    "vorschaden_keine": "None",
+    "vorschaden_repariert": "Professionally repaired",
+    "vorschaden_erheblich": "Substantial / unrepaired",
+    "ergebnis_schaetzung": "Rough guide: {betrag} ({pct} of repair costs).",
+    "ergebnis_einzelfall_alter": "Individual case: depends on mileage and market value. German courts reject rigid age limits (BGH VI ZR 357/03) — older vehicles can also have a claim. The binding figure comes from the expert report.",
+    "ergebnis_einzelfall_vorschaden": "Substantial prior damage significantly reduces the diminished value. The amount is an individual case — only the expert report determines the binding figure.",
+    "ergebnis_unvollstaendig": "Please enter repair costs and vehicle age.",
+    "hinweis_vorschaden_repariert": "Professionally repaired prior damage slightly reduces the diminished value — the rule of thumb is an upper bound here.",
+    "hinweis_hohe_km": "With high mileage the diminished value tends toward the lower end.",
+    "hinweis_kleiner_schaden": "For small damage relative to the vehicle value, the diminished value can be low.",
+    "disclaimer": "Rule-of-thumb guidance, not a substitute for an expert report. A certified expert (Sanden/Danner method) determines the binding figure — accounting for mileage, market value, prior damage and repair quality.",
+    "cta": "Commission a free expert"
+  }
 }
