@@ -9,7 +9,6 @@
 //   - Route-Param fallId             = FALL-ID   → logFallEvent, revalidatePath
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decideProposal } from '@/lib/orchestrator/proposals'
 import { buildTaskFromProposal } from '@/lib/orchestrator/task-from-proposal'
@@ -18,21 +17,7 @@ import { sendChatMessage } from '@/lib/communications/send-chat'
 import { VERB_KIND } from '@/lib/claim-ai/verbs'
 import type { ChatKanal } from '@/lib/communications/channels'
 import type { TaskProposalPayload } from '@/lib/orchestrator/types'
-
-// Spiegelt src/app/admin/ai-vorschlaege/actions.ts requireAdminUserId
-async function requireAdminUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .maybeSingle()
-  return profile?.rolle === 'admin' ? user.id : null
-}
+import { requireAdminUserId } from '@/lib/auth/require-admin-user-id'
 
 // ── freigebenClaimAiVorschlag ─────────────────────────────────────────────────
 
