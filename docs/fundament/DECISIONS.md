@@ -126,4 +126,14 @@
 
 **Stand §9-Punkt-2:** Grün in CI = J1/J4/J9/J8. Begründet geskippt = J2/J3/J5/J6/J7/J10 + J9-`lifecycle`. Alle 10 Journeys sind damit CI-abgesichert ODER begründet, journey-referenziert geskippt.
 
+## 2026-08-04 · B-Journey-Suite · Kurskorrektur „keine Skips" — J5 gebaut, alle Skips werden CI-Steps
+
+**Direktive (Aaron, 04.08.):** Die begründeten CI-Skips der Journey-Suite sind **nicht zulässig**. §9-Punkt-2 gilt erst als erfüllt, wenn **alle 10** Journeys wirklich CI-grün laufen — für jede geskippte Journey wird die fehlende Test-Infrastruktur gebaut/verändert (deterministischer, isolierter, self-cleaning Seed + robuste Spec, J4-Muster). Die frühere „§9 via Skips erfüllt"-Deklaration (03.08., zwei Einträge oben) ist damit **revidiert**.
+
+**J5 gebaut (dieser PR, kitta/fundament-journey-j5-kasko):** `scripts/smoke/kasko-reparatur-seed.mjs` legt je Lauf einen Wegwerf-Kasko-Claim an — `abrechnungsweg=kasko` + `operative_status=reparatur-angefragt` + `reparatur_werkstatt_id` gesetzt + **keine** `reparatur_termine` → subPhase `reparatur_terminfindung` (belegt `lifecycle.ts:234-244`), interne Fallakte zeigt „Terminfindung" statt „SA-Unterschrift offen". Eigene Wegwerf-Werkstatt (die frühere feste Fixture `badecb82…` existiert nicht mehr = genau der Drift), self-cleaning via Marker. Spec: `loginContextOrSkip('admin')` **aal1** — test-admin trägt keinen TOTP-Faktor, deshalb **kein** `TEST_ADMIN_TOTP_SECRET` im CI-Step (mit Secret würfe `completeMfa` mangels Faktor → `loginContextOrSkip` skippt statt grün). CI-Step `RUN_KASKO_SMOKE`. Lokal gegen prod grün 04.08.: Seed 5/5 + Smoke 1 passed. Ersetzt den gedrifteten festen prod-Claim `39734007`.
+
+**Reihenfolge der restlichen:** J10 (`db()`→`process.env` + Szenario-1-Isolation), J3/J6 (dedizierte Seeds+Specs), J7 (Skeleton → echte Storno/DSGVO-Logik), J2 (Multi-Kanal-Meldeweg), J9-`lifecycle` (Release-Cron Test-Row-Isolation — ggf. Produkt-Change, mit Aaron + Netzwerk-Lane abzustimmen).
+
+**Review:** offen (im PR an Aaron).
+
 **Review:** offen (im PR an Aaron).
