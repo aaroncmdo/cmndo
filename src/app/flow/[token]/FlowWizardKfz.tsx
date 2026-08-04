@@ -480,7 +480,11 @@ export default function FlowWizardKfz({
   // auf 'sa' driftete gegen die DB-Step-Sequenz (Config-Code-Drift) → "springt ans Ende".
   // Kein Gutachter → aktiv weiterleiten: zum Buchungs-Step, sonst 'sa' (Dispatcher-/Embed-Pfad
   // ohne Slot-Picker, AAR-908 ordnet bei SA den Top-SV zu).
-  const gutachterWeiterZiel: StepId | null = gutachterAnzeige
+  // Re-Smoke #4943 (03.08.): hat der Kunde EXPLIZIT "Termin lieber spaeter vereinbaren"
+  // gewaehlt (ohneTermin), darf das Rueck-Routing NICHT greifen — sonst Endlos-Loop
+  // termin -> gutachter -> termin, der ort_fahrzeug/werkstatt/sa unerreichbar macht.
+  // Sequenziell weiter (null -> stepIndex + 1) ist dann der korrekte Pfad.
+  const gutachterWeiterZiel: StepId | null = gutachterAnzeige || ohneTermin
     ? null
     : stepIndexById('termin') >= 0
       ? 'termin'
