@@ -78,6 +78,9 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
       ...(quali ? { schuldfrage: quali.schuldfrage, eigene_versicherung: quali.eigeneVersicherung } : {}),
       qualifizierungs_phase: 'konvertiert',
       fahrzeug_standort_plz: data.schadens_plz.trim(),
+      // B5-Fix (Entry-Point-Audit): PLZ auch nach unfallort_plz -> erreicht claims.schadenort_plz
+      // (convert liest lead.unfallort_plz; F6/Aaron 14.07. "Form-Wiring folgt").
+      unfallort_plz: data.schadens_plz.trim(),
       fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
       kennzeichen: data.kennzeichen?.trim() || null,
       notiz: data.notiz?.trim() || null,

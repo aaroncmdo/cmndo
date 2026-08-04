@@ -44,6 +44,7 @@ describe('buildSchadenLeadInput', () => {
     expect(r.extra.kunde_id).toBe('user-1') // Kunde = geschaedigter
     expect(r.extra.schadens_art).toBe('haftpflicht')
     expect(r.extra.fahrzeug_standort_plz).toBe('50667')
+    expect(r.extra.unfallort_plz).toBe('50667') // B5-Fix: PLZ erreicht claims.schadenort_plz
     expect(r.extra.fahrzeug_standort_adresse).toBe('Aachener Straße 12')
     expect(r.extra.gegner_bekannt).toBe(true)
     expect(r.extra.ist_fahrzeughalter).toBe(true)

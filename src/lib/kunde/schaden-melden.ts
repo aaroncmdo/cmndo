@@ -59,6 +59,7 @@ export type LeadExtraInput = {
   unfallhergang: string | null
   unfallort: string | null
   fahrzeug_standort_plz: string
+  unfallort_plz: string
   fahrzeug_standort_adresse: string | null
   kennzeichen: string | null
   fahrzeug_hersteller: string | null
@@ -121,6 +122,10 @@ export function buildSchadenLeadInput(form: SchadenMeldenForm, kunde: KundeKonte
     unfallhergang: clean(form.unfallhergang),
     unfallort: adresse,
     fahrzeug_standort_plz: plz,
+    // B5-Fix (Entry-Point-Audit): die Pflicht-PLZ des Schadenorts ZUSAETZLICH nach unfallort_plz —
+    // convertLeadToClaim liest claims.schadenort_plz aus lead.unfallort_plz (das bisher nie befuellt
+    // wurde, F6/Aaron 14.07. "Form-Wiring folgt"). Ohne das strandete die Pflicht-PLZ am Lead.
+    unfallort_plz: plz,
     // Kunde-Selbstmeldung: der genannte Schadenort ist zugleich der Fahrzeug-Standort.
     fahrzeug_standort_adresse: adresse,
     kennzeichen: clean(form.kennzeichen),
