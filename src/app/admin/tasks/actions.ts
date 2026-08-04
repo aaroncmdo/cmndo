@@ -8,10 +8,12 @@ import { requireRole } from '@/lib/auth/guards'
 export async function createTask(
   formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
-  // Audit 2026-05-06: requireRole war importiert aber nicht aufgerufen —
-  // jeder authentifizierte User konnte Tasks fuer beliebige Faelle anlegen,
-  // Layout-Guard schuetzte nur die UI nicht die Action selber.
-  await requireRole(['admin'])
+  // Audit 2026-05-06: requireRole war importiert aber nicht aufgerufen.
+  // Audit 2026-08-04: der blosse await war weiter ein No-op — requireRole WIRFT
+  // NICHT (liefert GuardResult), die Rueckgabe MUSS geprueft werden (Muster
+  // reassignTask unten). Vorher war der einzige Schutz die RLS auf tasks.
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error }
 
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -49,7 +51,9 @@ export async function updateTaskStatus(
 ): Promise<{ success: boolean; error?: string }> {
   // Audit-Fix #6: Rollen-Check ergaenzt — vorher konnten kunde/sv die Action
   // direkt aufrufen und beliebige Tasks erledigen/zurueckziehen.
-  await requireRole(['admin'])
+  // Audit 2026-08-04: Rueckgabe pruefen — requireRole wirft nicht (s. createTask).
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error }
 
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -88,7 +92,9 @@ export async function deleteTask(
   taskId: string,
 ): Promise<{ success: boolean; error?: string }> {
   // Audit-Fix #6: Rollen-Check ergaenzt.
-  await requireRole(['admin'])
+  // Audit 2026-08-04: Rueckgabe pruefen — requireRole wirft nicht (s. createTask).
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error }
 
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null

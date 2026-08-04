@@ -23,6 +23,11 @@ export async function updateSvProfile(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   // Auth-Guard darf werfen (Pre-Condition, kein Form-Fehler).
   if (!user) throw new Error('Nicht angemeldet')
+  // Audit 2026-08-04: presence-only reichte nicht — Rollen-Check wie in den
+  // Nachbar-Actions (setzeSvVerifiziert), sonst kann jeder eingeloggte User
+  // fremde SV-Profile/Pakete umschreiben (RLS war der einzige Fang).
+  const { data: me } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+  if (me?.rolle !== 'admin') return { ok: false, error: 'Keine Berechtigung' }
 
   const vorname = (formData.get('vorname') as string)?.trim() || null
   const nachname = (formData.get('nachname') as string)?.trim() || null
