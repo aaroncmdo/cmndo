@@ -2,7 +2,8 @@
 
 // Server-Actions fuer das Partner-Aktivitaets-Cockpit. Result-Object ({ ok, error }),
 // staff-gated (requireVertriebStaff). Reads laufen ueber den authenticated-Client ->
-// RLS partner_aktivitaeten_staff_all (is_staff()) greift. KEINE const/type-Exports (AAR-664).
+// RLS partner_aktivitaeten_staff_all (admin/dispatch/leadbearbeiter role-list, bewusst NICHT
+// is_staff() — das omittiert leadbearbeiter) greift. KEINE const/type-Exports (AAR-664).
 import { createClient } from '@/lib/supabase/server'
 import { requireVertriebStaff } from '@/lib/auth/require-vertrieb-staff'
 import { PARTNER_AKTIVITAET_MANUELL } from '@/lib/partner/aktivitaet-types'
