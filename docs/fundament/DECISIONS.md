@@ -146,4 +146,14 @@
 
 **Review:** offen (im PR an Aaron).
 
+## 2026-08-04 · B-Journey-Suite · J3 (SA/Vollmacht) als CI-Step — anon Canvas-Signatur
+
+**J3 gebaut (PR gestackt auf #4980, Branch `kitta/fundament-journey-j3-sa-vollmacht`):** neuer Seed `scripts/smoke/sa-vollmacht-seed.mjs` (Wegwerf-Lead mit `werkstatt_intake_am` + `abrechnungsweg=haftpflicht` + `service_typ=nur_gutachter` + flow_link mit DB-Token; Kunde-Account entsteht erst beim Signieren; self-cleaning via Marker + email-Muster) + neuer Spec `sa-vollmacht-smoke.spec.ts`.
+
+**Kern:** Die SA ist voll UI-fahrbar — der WerkstattIntake-Signatur-Surface (`flow/[token]/page.tsx:189`, `if lead.werkstatt_intake_am`) kurzschliesst `/flow/[token]` **anon** (kein Login → **kein Auth-Wall-Skip**) direkt auf `SaSignaturStep` (signature_pad-Canvas + 1 Checkbox + „SA unterzeichnen"). Canvas-Drive = das bereits in CI bewährte toPass-Muster (`reparatur-weg-e2e-smoke.spec.ts:73-86`). `signSAandCreateFall` → `convertLeadToClaim` schreibt `claims.sa_unterschrieben=true` + `sa_unterschrieben_am` + `abtretung_pdf` (SSoT-Assert per `lead_id`). Comms-Isolation: `telefon=NULL` → Willkommens-WA guarded weg; `@claimondo.test` → Send-Layer suppressed.
+
+**Vollmacht bewusst NICHT im UI-Smoke:** kein Kunde-Canvas — `vollmacht_signiert_am` / `vollmacht_status='bestaetigt'` werden server-intern gesetzt (LexDrive-Webhook / `confirmVollmacht`). Als Journey-Verweis (j03 Schritt 3) im Spec dokumentiert, **kein** `test.skip`. CI-Step `RUN_SA_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`). Lokal prod-grün 04.08.: Seed 4/4 + Smoke 1 passed.
+
+**Review:** offen (im PR an Aaron).
+
 **Review:** offen (im PR an Aaron).

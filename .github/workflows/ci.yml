@@ -524,6 +524,27 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament Journey-Suite J3 (Unterschriften SA/Vollmacht) — der SA-Signatur-Weg konvertiert einen
+      # Lead zu einem Claim mit sa_unterschrieben=true. Seed legt je Lauf einen Wegwerf-Lead im
+      # WerkstattIntake-SA-offen-Zustand (werkstatt_intake_am) + flow_link an (Kunde-Account entsteht erst
+      # beim Signieren); der Spec faehrt /flow/[token] ANON (kein Login/Auth-Wall) -> Canvas + Checkbox +
+      # "SA unterzeichnen" -> DB-Verify claims.sa_unterschrieben. self-cleaning via Marker + email-Muster.
+      # Die Vollmacht ist server-intern (kein Canvas) -> nicht Teil des UI-Smokes (Journey j03 Schritt 3).
+      # RUN_SA_SMOKE gatet; SUPABASE_SERVICE_ROLE_KEY fuer den db()-Verify-Read.
+      - name: Seed SA-Vollmacht-Fixture (J3)
+        run: node scripts/smoke/sa-vollmacht-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J3 (SA-Unterschrift)
+        run: npx playwright test sa-vollmacht-smoke --project=chromium --reporter=line
+        env:
+          RUN_SA_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
