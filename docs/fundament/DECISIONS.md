@@ -164,4 +164,16 @@
 
 **Review:** offen (im PR an Aaron).
 
+## 2026-08-04 · B-Journey-Suite · J7 (Storno/DSGVO) als CI-Step — Prod-Bug in der Anonymisierungs-RPC gefunden + gefixt
+
+**J7 gebaut (PR gestackt auf #4984, Branch `kitta/fundament-journey-j7-storno-dsgvo`):** neuer Seed `scripts/smoke/storno-dsgvo-seed.mjs` (**3 GETRENNTE Wegwerf-Konten**: Throwaway-Admin `throwaway-admin-j7-…` ohne TOTP + Storno-Kunde+Claim `operative_status='regulierung'` + DSGVO-Kunde+eigener Claim; self-cleaning, Clean-Reihenfolge FK-getrieben: `dsgvo_loeschauftraege` VOR dem Admin-Konto — `bestaetigt_von_user_id` → auth.users hat NO ACTION) + Spec `storno-dsgvo-smoke.spec.ts` (Skeleton → echte Logik, 3 Tests).
+
+**Soll≠Ist:** j07 „Kunde storniert" hat **keine** Kunde-UI — Storno ist intern (Admin/KB): `markClaimAsStorniert` (`endzustand-actions.ts:309`, requireRole admin/kb) via `EndzustandDropdown`→Modal (Begründung + Confirm-Tipp `STORNIEREN`; notify default false = keine Comms) → `operative_status='storniert'` + `abgeschlossen_am` + `endzustand_gesetzt_*` (Row-Check #4625-Klasse). DSGVO = 2-Schritt über `/kunde/profil` (`stelleLoeschAntrag`) + `/admin/datenschutz/loeschauftraege` („Bestätigen" → „Direkt ausführen"; Zeile per **EXAKTER** Wegwerf-Email, nie „erste Zeile"). **Bestätigen MUSS vor Ausführen:** der DB-CHECK `chk_bestaetigt_logic` verlangt `bestaetigt_am` für `status='ausgefuehrt'` — `fuehreLoeschungAus` ignoriert sein Update-Result, ein Direkt-Ausführen auf `eingereicht` verlöre den Status-Write silent (Rest-Befund, s.u.).
+
+**Smoke-Fund (Prod-Bug, gefixt):** Die RPC `dsgvo_anonymize_user_data` (Stand `20260510095718`) war gegen das Schema gedriftet — tote Referenzen auf `claims.kunde_email` (ersatzlos gedroppt), die `claim_parties`-PII-Spalten (seit dem personen-Modell weg) und `faelle.kunde_*` (CMM-49; der IF-EXISTS-Guard prüfte nur die TABELLE, nicht die Spalten). **Jede** DSGVO-Ausführung scheiterte prod-sichtbar mit „Anonymisierung fehlgeschlagen: column kunde_email of relation claims does not exist" → Fix Migration **`20260804193646`** (die drei toten UPDATEs entfernt; `personen` bewusst unberührt = Aaron-Entscheid 16.06.). Der Journey-Smoke hat damit beim ersten Lauf genau die Bug-Klasse gefangen, für die er gebaut wurde.
+
+**Offene Befunde für Aaron (bewusst NICHT unilateral geändert):** (1) `fuehreLoeschungAus` auf einem `eingereicht`-Antrag = Silent-CHECK-Reject (User wird anonymisiert+gelöscht, Antrag bleibt aber auf `eingereicht` stehen) — Fix wäre `bestaetigt_am` im Status-Update mitzusetzen + das Update-Result zu prüfen; (2) `claim_parties`-Rest-PII (`kennzeichen*`/`verletzungsart`/`krankenhaus_name`/`notiz`) und `personen` sind aktuell NICHT Teil der Anonymisierung (eigener `ist_anonymisiert`-Mechanismus existiert) — Soll-Klärung gegen Journey j07.
+
+CI-Step `RUN_STORNO_DSGVO_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` für `db()`; `--workers=1`; Admin-Creds aus dem Seed-JSON, **kein** `TEST_ADMIN_*`) + Cleanup-Step `if: always()` — das Wegwerf-**Admin**-Konto ist sensibler als die Wegwerf-Kunden der anderen Journeys und bleibt nicht bis zum nächsten Lauf liegen. Lokal prod-grün 04.08.: Smoke **3/3 passed** + Seed-assert **9/9**.
+
 **Review:** offen (im PR an Aaron).
