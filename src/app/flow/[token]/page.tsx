@@ -263,25 +263,25 @@ export default async function FlowPage({
   // eingeloggten Zweige oben den Fall). signSAandCreateFall traegt den Pfad anonym
   // (token-basiert, sign-into-existing + Account-Anlage aus den Lead-Daten, P4).
   // Fail-soft: Fehler -> Legacy-Wizard wie bisher.
-  if (!signaturBenoetigtFallId && !onboardingRedirectFallId) {
+  // source_channel lebt am LEAD (nicht am Claim — Query-Drift-Ratchet-Fang 04.08.);
+  // exakt der P4-sign-into-existing-Scope (actions.ts prueft lead.source_channel).
+  if (
+    !signaturBenoetigtFallId &&
+    !onboardingRedirectFallId &&
+    (lead.source_channel as string | null) === 'gutachter-vermittlung'
+  ) {
     try {
       const { data: vermittlungsFall } = await svc
         .from('v_claim_full')
-        .select('id, fall_id, sa_unterschrieben, geschaedigter_user_id, abrechnungsweg')
+        .select('fall_id, sa_unterschrieben, geschaedigter_user_id, abrechnungsweg')
         .eq('lead_id', leadId)
         .limit(1)
         .maybeSingle()
-      if (vermittlungsFall?.fall_id && vermittlungsFall.id) {
-        // source_channel lebt nicht in v_claim_full -> gezielter claims-Read.
-        const { data: claimRow } = await svc
-          .from('claims')
-          .select('source_channel')
-          .eq('id', vermittlungsFall.id as string)
-          .maybeSingle()
+      if (vermittlungsFall?.fall_id) {
         const { istAnonymerVermittlungsSaKandidat } = await import('@/lib/netzwerk/vermittlungs-sa-gate')
         if (
           istAnonymerVermittlungsSaKandidat({
-            sourceChannel: (claimRow?.source_channel as string | null) ?? null,
+            sourceChannel: (lead.source_channel as string | null) ?? null,
             saUnterschrieben: (vermittlungsFall.sa_unterschrieben as boolean | null) ?? null,
             geschaedigterUserId: (vermittlungsFall.geschaedigter_user_id as string | null) ?? null,
             abrechnungsweg: (vermittlungsFall.abrechnungsweg as string | null) ?? null,
