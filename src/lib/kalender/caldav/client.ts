@@ -59,7 +59,10 @@ async function createClient(creds: CalDavCredentials): Promise<DAVClient> {
   } catch (err) {
     if (err instanceof CalDavError) throw err
     const msg = err instanceof Error ? err.message : String(err)
-    if (/401|unauthorized|authentication/i.test(msg)) {
+    // "invalid credentials": tsdav wirft bei iCloud-Auth-Fails genau diesen Wortlaut
+    // (prod-Smoke 05.08.) — ohne ihn fiel der Fall in 'other' und der AAR-722-
+    // Bindestrich-Retry + die deutsche Fehlermeldung griffen nie.
+    if (/401|unauthorized|authentication|invalid credentials/i.test(msg)) {
       throw new CalDavError(
         'Login fehlgeschlagen — Benutzername oder App-Passwort falsch',
         'auth_failed',
