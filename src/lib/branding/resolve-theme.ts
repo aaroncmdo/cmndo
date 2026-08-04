@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme, type BrandThemeV2 } from './theme'
 import { svEigenBrandingErlaubt } from './gate'
+import { istBrandingBezahlt, istBrandingBezahltFuerOrg } from './bezahl-status'
 
 // AAR-424: Theme-Resolver für Server-Components.
 //
@@ -27,7 +28,8 @@ export async function resolveBrandTheme(
 ): Promise<ResolvedBranding> {
   const { data: sv } = await supabase
     .from('sachverstaendige')
-    .select('organisation_id, logo_url, firmenname, brand_primary, brand_secondary, brand_theme, use_custom_branding')
+    // Paid-Perk: id fuer den Bezahl-Check des sv-Zweigs (Org-Zweig prueft den Inhaber).
+    .select('id, organisation_id, logo_url, firmenname, brand_primary, brand_secondary, brand_theme, use_custom_branding')
     .eq('profile_id', userId)
     .limit(1)
     .maybeSingle()
@@ -46,7 +48,13 @@ export async function resolveBrandTheme(
       .eq('id', sv.organisation_id)
       .maybeSingle()
 
-    if (org && svEigenBrandingErlaubt(org) && (org.brand_primary || org.brand_theme)) {
+    // Paid-Perk: Org-Branding wirkt nur, wenn der INHABER zahlend ist (Aaron 03.08.).
+    if (
+      org &&
+      svEigenBrandingErlaubt(org) &&
+      (org.brand_primary || org.brand_theme) &&
+      (await istBrandingBezahltFuerOrg(sv.organisation_id))
+    ) {
       return {
         theme: hydrateTheme(
           org.brand_theme as Parameters<typeof hydrateTheme>[0],
@@ -61,7 +69,12 @@ export async function resolveBrandTheme(
     }
   }
 
-  if (svEigenBrandingErlaubt(sv) && (sv.brand_primary || sv.brand_theme)) {
+  // Paid-Perk: auch die eigene Portal-Wirkung ist zahlend-gebunden (Editor-Preview unberuehrt).
+  if (
+    svEigenBrandingErlaubt(sv) &&
+    (sv.brand_primary || sv.brand_theme) &&
+    (await istBrandingBezahlt((sv as { id?: string }).id ?? null))
+  ) {
     return {
       theme: hydrateTheme(
         sv.brand_theme as Parameters<typeof hydrateTheme>[0],
