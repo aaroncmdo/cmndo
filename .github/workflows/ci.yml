@@ -503,6 +503,27 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
+      # Fundament Journey-Suite J10 (Dispatch/Werkstatt-Finder) — S1 (Kunde-Fallakte fiktiv -> Finder
+      # erscheint + Werkstatt-Auswahl schreibt reparatur_werkstatt_id) + S3 (Werkstatt-Portal zeigt den
+      # zugewiesenen Auftrag). Seed legt je Lauf Wegwerf-Kunde + eigene Wegwerf-Werkstatt (email=NULL fuer
+      # nurEchte-Sichtbarkeit) + S1-Claim (fiktiv+selbstzahler, unzugewiesen) + S3-Claim (zugewiesen) an,
+      # self-cleaning via Marker. Ersetzt die tote Fixture badecb82 + den festen prod-Kunden. S2 (Flow-
+      # Wizard) = fragile 14-Schritt-Heuristik -> test.skip in der Spec. RUN_WF_SMOKE gatet den Spec;
+      # SUPABASE_SERVICE_ROLE_KEY im Test-Step, weil die Spec db() fuer die Verify-Reads nutzt (anders als J5).
+      - name: Seed Werkstatt-Finder-Fixture (J10)
+        run: node scripts/smoke/werkstatt-finder-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J10 (Werkstatt-Finder)
+        run: npx playwright test werkstatt-finder-smoke --project=chromium --reporter=line
+        env:
+          RUN_WF_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:

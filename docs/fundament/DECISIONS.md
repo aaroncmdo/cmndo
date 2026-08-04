@@ -132,7 +132,17 @@
 
 **J5 gebaut (dieser PR, kitta/fundament-journey-j5-kasko):** `scripts/smoke/kasko-reparatur-seed.mjs` legt je Lauf einen Wegwerf-Kasko-Claim an — `abrechnungsweg=kasko` + `operative_status=reparatur-angefragt` + `reparatur_werkstatt_id` gesetzt + **keine** `reparatur_termine` → subPhase `reparatur_terminfindung` (belegt `lifecycle.ts:234-244`), interne Fallakte zeigt „Terminfindung" statt „SA-Unterschrift offen". Eigene Wegwerf-Werkstatt (die frühere feste Fixture `badecb82…` existiert nicht mehr = genau der Drift), self-cleaning via Marker. Spec: `loginContextOrSkip('admin')` **aal1** — test-admin trägt keinen TOTP-Faktor, deshalb **kein** `TEST_ADMIN_TOTP_SECRET` im CI-Step (mit Secret würfe `completeMfa` mangels Faktor → `loginContextOrSkip` skippt statt grün). CI-Step `RUN_KASKO_SMOKE`. Lokal gegen prod grün 04.08.: Seed 5/5 + Smoke 1 passed. Ersetzt den gedrifteten festen prod-Claim `39734007`.
 
-**Reihenfolge der restlichen:** J10 (`db()`→`process.env` + Szenario-1-Isolation), J3/J6 (dedizierte Seeds+Specs), J7 (Skeleton → echte Storno/DSGVO-Logik), J2 (Multi-Kanal-Meldeweg), J9-`lifecycle` (Release-Cron Test-Row-Isolation — ggf. Produkt-Change, mit Aaron + Netzwerk-Lane abzustimmen).
+**Reihenfolge der restlichen:** J3/J6 (dedizierte Seeds+Specs), J7 (Skeleton → echte Storno/DSGVO-Logik), J2 (Multi-Kanal-Meldeweg), J9-`lifecycle` (Release-Cron Test-Row-Isolation — ggf. Produkt-Change, mit Aaron + Netzwerk-Lane abzustimmen).
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-04 · B-Journey-Suite · J10 (Werkstatt-Finder) als CI-Step — 2 Bugs behoben
+
+**J10 gebaut (PR gestackt auf #4973, Branch `kitta/fundament-journey-j10-werkstatt-finder`):** `scripts/smoke/werkstatt-finder-seed.mjs` überarbeitet — process.env-first (war `.env.local`-only = doppelter CI-Blocker), eigene Wegwerf-Werkstatt statt toter Fixture `badecb82`, Wegwerf-Kunde statt festem `aaron.sprafke+smokewf@`, self-cleaning inkl. Konten.
+
+**Zwei Bugs im alten Seed behoben:** (1) tote Fixture `badecb82` (MCP-verifiziert weg); (2) **fehlendes `abrechnungsweg`** → `reparaturPhaseErreicht=false` → die WerkstattFinderCard rendert **nie** (`GeldZone.tsx:50` gatet auf `brauchtVermittlung && reparaturPhaseErreicht`; `reparatur-phase-erreicht.ts:14-23` verlangt `abrechnungsweg ∈ {selbstzahler,kasko}`). Fix: S1-Claim `reparaturwunsch=fiktiv` **+ `abrechnungsweg=selbstzahler`**. Zusätzlich `nurEchte`-Filter (`finder.ts:46-48`, filtert per `werkstaetten.email`): die Wegwerf-Werkstatt braucht **`email=NULL`** für Finder-Sichtbarkeit — Comms laufen über die `@claimondo.test`-Profil-Email + `telefon=NULL` → Send-Layer suppressed alles.
+
+**Spec:** `db()`→`process.env`-first (Haupt-CI-Blocker); S1 (Kunde-Fallakte → Finder + Auswahl → `reparatur_werkstatt_id`) + S3 (Werkstatt-Portal-Auftrag, eigener zugewiesener S3-Claim unabhängig vom S1-Klick; `v_werkstatt_auftrag` rollen-gefiltert via `is_werkstatt_for_claim` = reparatur_werkstatt_id ODER werkstatt_id) deterministisch; S2 (Flow-Wizard) `test.skip` mit Begründung (fragile 14-Schritt-Heuristik + Match-Divergenz + `CANONICAL_FLOWLINK_ENABLED` — Follow-up: deterministischer Flow-Seed). CI-Step `RUN_WF_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` im Test-Step für `db()`). Lokal prod-grün 04.08.: Seed 5/5 + Smoke 2 passed / 1 skipped.
 
 **Review:** offen (im PR an Aaron).
 
