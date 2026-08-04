@@ -164,21 +164,17 @@ export async function findRecentIntakeLead(
   const sinceIso = new Date(Date.now() - (opts?.windowMs ?? DEFAULT_WINDOW_MS)).toISOString()
   const admin = createAdminClient()
 
-  // Person-Achse als PostgREST-or (telefon.eq ODER email.eq) + kennzeichen (AND) + Fenster.
-  const orParts: string[] = []
-  if (k.telefon) orParts.push(`telefon.eq.${k.telefon}`)
-  if (k.email) orParts.push(`email.eq.${k.email}`)
-
+  // Sicherheit: NUR parameterisiertes .eq() (KEIN .or() mit interpoliertem User-Input -> keine
+  // PostgREST-Filter-Injektion, wie die bestehenden findRecent*). Doppel-Submit traegt identische
+  // Person-Kennung -> EINE Achse fasst (telefon bevorzugt, sonst email).
   let q = admin
     .from('leads')
     .select('id, konvertiert_zu_claim_id')
     .eq('kennzeichen', k.kennzeichen as string)
     .gt('created_at', sinceIso)
-    .order('created_at', { ascending: false })
-    .limit(1)
-  q = q.or(orParts.join(','))
+  q = k.telefon ? q.eq('telefon', k.telefon) : q.eq('email', k.email as string)
 
-  const { data, error } = await q.maybeSingle()
+  const { data, error } = await q.order('created_at', { ascending: false }).limit(1).maybeSingle()
   if (error) {
     console.error('[intake/dedup] findRecentIntakeLead fehlgeschlagen:', error.message)
     return null
