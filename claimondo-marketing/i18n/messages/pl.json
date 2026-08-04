@@ -3294,7 +3294,7 @@
     "was_p": "Istotne jest odróżnienie od rzeczoznawcy ubezpieczenia sprawcy: jego służby weryfikacyjne działają na zlecenie sprawcy szkody i z doświadczenia systematycznie zaniżają kwoty. Jako poszkodowany bez własnej winy masz na podstawie §249 BGB prawo do zlecenia <strong>niezależnego rzeczoznawcy samochodowego</strong> według własnego wyboru — właśnie ten wybór przejmują od Ciebie cztery porównywane tutaj portale pośrednictwa. Szczegóły prawne znajdziesz w",
     "was_link_urteil": "sekcji dotyczącej wyroku LG Bremen w sprawie ekspertyz online",
     "tabelle_eyebrow": "bezpośrednim porównaniu",
-    "tabelle_h2": "4 platformy na pierwszy rzut oka",
+    "tabelle_h2": "Platformy na pierwszy rzut oka",
     "tabelle_intro_before": "Wszystkie dane dotyczące konkurencji pochodzą z odpowiednich stron internetowych usługodawców (stan na",
     "tabelle_intro_after": "). Wielkość sieci Claimondo jest renderowana na żywo z naszej bazy danych.",
     "tabelle_caption_before": "Pośrednictwo rzeczoznawców samochodowych w porównaniu — Claimondo, Neogutachter, Unfallpaten i Unfallgiganten (stan na",
@@ -3310,63 +3310,72 @@
         "claimondo": "Zarządzana kompleksowa likwidacja szkód — centrum spraw od ekspertyzy przez kancelarię partnerską po wypłatę",
         "neo": "Pośrednictwo rzeczoznawców (zapytanie online → odpowiedni rzeczoznawca)",
         "paten": "Likwidacja szkody „z jednej ręki\" (rzeczoznawca + pomoc prawna)",
-        "giganten": "Katalog z wyszukiwaniem w promieniu (rzeczoznawca, warsztat, adwokat, pomoc drogowa) + wpisy profilowe"
+        "giganten": "Katalog z wyszukiwaniem w promieniu (rzeczoznawca, warsztat, adwokat, pomoc drogowa) + wpisy profilowe",
+        "unfallhelden": "Pełna obsługa „z jednej ręki“ (adwokat + rzeczoznawca + warsztat + auto zastępcze)"
       },
       {
         "kriterium": "Dostępność",
         "claimondo": "Cyfrowo całą dobę, telefonicznie do co najmniej 22:00; czas reakcji poniżej 15 minut",
         "neo": "„całą dobę\", zapytanie „w 30 sekund\"; tel. 0160/4873888",
         "paten": "„24h natychmiastowa pomoc\", infolinia 0800 505 50 50",
-        "giganten": "„Natychmiastowe pośrednictwo\" + wyszukiwanie w promieniu (25–300 km)"
+        "giganten": "„Natychmiastowe pośrednictwo\" + wyszukiwanie w promieniu (25–300 km)",
+        "unfallhelden": "Zgłoszenie szkody online + bezpłatna infolinia"
       },
       {
         "kriterium": "Wielkość sieci rzeczoznawców (dane publiczne)",
         "claimondo": "",
         "neo": "brak danych publicznych",
         "paten": "„ogólnokrajowa sieć\" (bez podania liczby)",
-        "giganten": "„Ponad 250 zweryfikowanych\" (licznik wyszukiwania: 329; płatne wpisy premium)"
+        "giganten": "„Ponad 250 zweryfikowanych\" (licznik wyszukiwania: 329; płatne wpisy premium)",
+        "unfallhelden": "„ogólnokrajowa sieć“ (bez liczby)"
       },
       {
         "kriterium": "Oględziny na miejscu",
         "claimondo": "zawsze wymagane",
         "neo": "Standard",
         "paten": "„bezpośrednio na miejscu\"",
-        "giganten": "pośredniczy w kontakcie z rzeczoznawcami na miejscu"
+        "giganten": "pośredniczy w kontakcie z rzeczoznawcami na miejscu",
+        "unfallhelden": "tak (w tym pomiar grubości lakieru)"
       },
       {
         "kriterium": "Ekspertyza wyłącznie online bez oględzin",
         "claimondo": "nie",
         "neo": "nie",
         "paten": "nie",
-        "giganten": "nie"
+        "giganten": "nie",
+        "unfallhelden": "nie"
       },
       {
         "kriterium": "Dostęp do adwokata",
         "claimondo": "tak — zintegrowana stała kancelaria partnerska",
         "neo": "tak (rzeczoznawca + adwokat)",
         "paten": "tak — „fachowa pomoc prawna\"",
-        "giganten": "tak — adwokat jako kategoria partnerska"
+        "giganten": "tak — adwokat jako kategoria partnerska",
+        "unfallhelden": "tak — wyspecjalizowany adwokat w usłudze"
       },
       {
         "kriterium": "Koszty dla poszkodowanego",
         "claimondo": "0 € (§249 BGB, z zastrzeżeniem uznania)",
         "neo": "„niewiążąco i bezpłatnie\"",
         "paten": "0 € (płaci odpowiedzialna ubezpieczalnia)",
-        "giganten": "„Bezpłatnie dla poszkodowanych\""
+        "giganten": "„Bezpłatnie dla poszkodowanych\"",
+        "unfallhelden": "0 € („nie kosztuje ani grosza“)"
       },
       {
         "kriterium": "Whitelabel/Brand dla rzeczoznawców",
         "claimondo": "tak (jedyna spośród czterech)",
         "neo": "nie",
         "paten": "nie",
-        "giganten": "nie (płatne listingi „Premium Member\")"
+        "giganten": "nie (płatne listingi „Premium Member\")",
+        "unfallhelden": "nie"
       },
       {
         "kriterium": "Obszar usług",
         "claimondo": "ogólnokrajowo (DE), ze szczególnym uwzględnieniem NRW",
         "neo": "ogólnokrajowo (DE)",
         "paten": "ogólnokrajowo (DE)",
-        "giganten": "ogólnokrajowo (DE)"
+        "giganten": "ogólnokrajowo (DE)",
+        "unfallhelden": "w całych Niemczech"
       }
     ],
     "einordnung_titel": "Uwaga do interpretacji liczb dotyczących sieci:",
@@ -3451,7 +3460,8 @@
     "cta_h2": "Złóż wniosek o rzeczoznawcę — bezpłatnie i bez zobowiązań",
     "cta_p": "Zgłoś szkodę online lub zadzwoń bezpośrednio — online przez całą dobę, telefonicznie co najmniej do 22:00.",
     "cta_anfrage": "Złóż wniosek o rzeczoznawcę",
-    "cta_tel_label": "Zadzwoń"
+    "cta_tel_label": "Zadzwoń",
+    "th_unfallhelden": "Unfallhelden"
   },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Start",
@@ -4561,5 +4571,27 @@
     "cta_h2": "Miałeś wypadek? Zapewnij sobie własnego rzeczoznawcę.",
     "cta_p": "Niezależny, wykwalifikowany, w Twojej okolicy — termin zwykle poniżej 48 godzin. Przy winie osoby trzeciej 0 € dla Ciebie.",
     "cta_schaden": "Zgłoś szkodę teraz"
+  }
+,
+  "wertminderung_rechner": {
+    "titel": "Oblicz utratę wartości na podstawie własnych danych",
+    "intro": "Powyższa tabela pokazuje regułę orientacyjną. Oblicz tutaj według własnych liczb:",
+    "label_reparaturkosten": "Koszty naprawy (€)",
+    "label_alter": "Wiek pojazdu (lata)",
+    "label_km": "Przebieg (km, opcjonalnie)",
+    "label_wbw": "Wartość odtworzeniowa (€, opcjonalnie)",
+    "label_vorschaden": "Czy pojazd ma wcześniejsze szkody?",
+    "vorschaden_keine": "Brak",
+    "vorschaden_repariert": "Fachowo naprawione",
+    "vorschaden_erheblich": "Znaczne / nienaprawione",
+    "ergebnis_schaetzung": "Zgrubne oszacowanie: {betrag} ({pct} kosztów naprawy).",
+    "ergebnis_einzelfall_alter": "Przypadek indywidualny: zależy od przebiegu i wartości rynkowej. Niemieckie sądy odrzucają sztywne granice wieku (BGH VI ZR 357/03) — starsze pojazdy również mogą mieć roszczenie. Wiążącą kwotę określa ekspertyza.",
+    "ergebnis_einzelfall_vorschaden": "Znaczne wcześniejsze szkody istotnie obniżają utratę wartości. Kwota to przypadek indywidualny — wiążącą wartość określa wyłącznie ekspertyza.",
+    "ergebnis_unvollstaendig": "Podaj koszty naprawy i wiek pojazdu.",
+    "hinweis_vorschaden_repariert": "Fachowo naprawione wcześniejsze szkody nieznacznie obniżają utratę wartości — reguła orientacyjna jest tu raczej górną granicą.",
+    "hinweis_hohe_km": "Przy wysokim przebiegu utrata wartości jest raczej przy dolnej granicy.",
+    "hinweis_kleiner_schaden": "Przy małej szkodzie w stosunku do wartości pojazdu utrata wartości może być niska.",
+    "disclaimer": "Wskazówka orientacyjna, nie zastępuje ekspertyzy. Wiążącą kwotę określa certyfikowany rzeczoznawca (metoda Sanden/Danner) — uwzględniając przebieg, wartość rynkową, wcześniejsze szkody i jakość naprawy.",
+    "cta": "Zleć bezpłatnego rzeczoznawcę"
   }
 }

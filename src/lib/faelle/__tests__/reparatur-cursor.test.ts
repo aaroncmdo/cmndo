@@ -35,7 +35,7 @@ describe('darfReparaturAdvancen (abrechnungsweg-Gate)', () => {
   })
   it('false fuer NICHT-reduced-repair (Haftpflicht) — kein Hijack der SV-Achse', () => {
     expect(darfReparaturAdvancen('haftpflicht', 'ersterfassung')).toBe(false)
-    expect(darfReparaturAdvancen('nicht_zutreffend', 'reparatur-angefragt')).toBe(false)
+    expect(darfReparaturAdvancen('irgendwas', 'reparatur-angefragt')).toBe(false) // unbekannter Nicht-Reparatur-Weg ('nicht_zutreffend' mit Mig 20260804161329 abgeschafft)
     expect(darfReparaturAdvancen(null, 'ersterfassung')).toBe(false)
     expect(darfReparaturAdvancen(undefined, 'ersterfassung')).toBe(false)
   })

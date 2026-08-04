@@ -18,7 +18,7 @@ import { localeAlternates } from '@/lib/seo/alternates'
 import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
-const STAND = '25.05.2026'
+const STAND = '04.08.2026'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -33,6 +33,10 @@ export async function generateMetadata(): Promise<Metadata> {
       'unabhängiger kfz-gutachter finden',
       'kostenloser kfz-gutachter',
       'vermittlungsportal kfz',
+      'beste plattform unfallschaden',
+      'digitale schadensregulierung plattform',
+      'unfallhelden alternative',
+      'unfallhelden vergleich',
     ],
     alternates: await localeAlternates(PAGE_PATH),
     openGraph: {
@@ -53,7 +57,7 @@ const FAQ_SCHEMA = [
   {
     frage: 'Ist die Vermittlung wirklich kostenlos?',
     antwort:
-      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle vier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
+      'Ja. Bei einem unverschuldeten Unfall trägt die gegnerische Haftpflichtversicherung die Kosten des Sachverständigen als Schadensposition nach §249 BGB — vorbehaltlich Anerkenntnis der Haftung. Das gilt für alle hier verglichenen Plattformen. Der Sachverständige rechnet über eine Sicherungsabtretung (§398 BGB) direkt mit der Versicherung ab, Sie zahlen 0 €.',
   },
   {
     frage: 'Darf ich den Gutachter trotz Vorschlag der Versicherung selbst wählen?',
@@ -73,12 +77,12 @@ const FAQ_SCHEMA = [
   {
     frage: 'Brauche ich zusätzlich einen Anwalt?',
     antwort:
-      'Nicht zwingend, aber dringend empfohlen — auch die Anwaltskosten trägt bei Fremdverschulden die gegnerische Versicherung. Alle vier verglichenen Plattformen binden Rechtsbeistand an. Bei Claimondo ist eine feste Partnerkanzlei in den Ablauf integriert, sodass Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt durchgesetzt werden.',
+      'Nicht zwingend, aber dringend empfohlen — auch die Anwaltskosten trägt bei Fremdverschulden die gegnerische Versicherung. Alle verglichenen Plattformen binden Rechtsbeistand an. Bei Claimondo ist eine feste Partnerkanzlei in den Ablauf integriert, sodass Reparatur, Wertminderung, Mietwagen, Nutzungsausfall und Schmerzensgeld direkt durchgesetzt werden.',
   },
   {
     frage: 'Wie unterscheidet sich Claimondo konkret von Neogutachter?',
     antwort:
-      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der vier Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
+      'Neogutachter konzentriert sich im Kern auf die Vermittlung eines passenden Sachverständigen (Anwaltsanbindung inklusive). Claimondo ist demgegenüber eine gemanagte End-to-End-Regulierung: Ein Fall-Hub steuert den gesamten Weg vom Gutachten über die feste Partnerkanzlei bis zur Auszahlung — und ist als einzige der verglichenen Plattformen mit Whitelabel-Branding auch für Sachverständige als Partner nutzbar.',
   },
 ]
 
@@ -107,11 +111,11 @@ export default async function VermittlungsportaleVergleichPage() {
         dangerouslySetInnerHTML={jsonLdScript([
           articleSchema({
             headline:
-              'Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
+              'Kfz-Gutachter-Vermittlungsportale im Vergleich: Claimondo, Neogutachter, Unfallpaten, Unfallgiganten & Unfallhelden',
             description:
-              'Objektiver Direktvergleich der vier deutschen Kfz-Gutachter-Vermittlungsplattformen — Erreichbarkeit, Kosten, Leistungsumfang, rechtliche Sicherheit.',
+              'Objektiver Direktvergleich der führenden deutschen Kfz-Gutachter-Vermittlungsplattformen — Erreichbarkeit, Kosten, Leistungsumfang, rechtliche Sicherheit.',
             datePublished: '2026-05-25',
-            dateModified: '2026-05-25',
+            dateModified: '2026-08-04',
             url: `${SITE_URL}${PAGE_PATH}`,
             citation: ['LG Bremen 9 O 1720/24', '§ 249 BGB', '§ 398 BGB'],
           }),
@@ -228,10 +232,11 @@ export default async function VermittlungsportaleVergleichPage() {
                     <Th scope="col">{t('th_neo')}</Th>
                     <Th scope="col">{t('th_paten')}</Th>
                     <Th scope="col">{t('th_giganten')}</Th>
+                    <Th scope="col">{t('th_unfallhelden')}</Th>
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {(t.raw('tabelle_rows') as Array<{ kriterium: string; claimondo: string; neo: string; paten: string; giganten: string }>).map((row, rowIdx) => (
+                  {(t.raw('tabelle_rows') as Array<{ kriterium: string; claimondo: string; neo: string; paten: string; giganten: string; unfallhelden: string }>).map((row, rowIdx) => (
                     <Tr key={row.kriterium}>
                       <Th
                         scope="row"
@@ -247,6 +252,7 @@ export default async function VermittlungsportaleVergleichPage() {
                       <Td className="align-top text-claimondo-shield">{row.neo}</Td>
                       <Td className="align-top text-claimondo-shield">{row.paten}</Td>
                       <Td className="align-top text-claimondo-shield">{row.giganten}</Td>
+                      <Td className="align-top text-claimondo-shield">{row.unfallhelden}</Td>
                     </Tr>
                   ))}
                 </Tbody>
@@ -267,7 +273,8 @@ export default async function VermittlungsportaleVergleichPage() {
               {t('quellen_footnote_before')} {STAND}{t('quellen_footnote_after')} {STAND} {t('quellen_footnote_suffix')}{' '}
               <a href="https://neogutachter.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">neogutachter.de</a>,{' '}
               <a href="https://www.unfallpaten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallpaten.de</a>,{' '}
-              <a href="https://www.unfallgiganten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallgiganten.de</a>.
+              <a href="https://www.unfallgiganten.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallgiganten.de</a>,{' '}
+              <a href="https://www.unfallhelden.de" rel="nofollow noopener" target="_blank" className="underline underline-offset-2 hover:text-claimondo-navy">unfallhelden.de</a>.
             </p>
           </div>
         </div>
@@ -328,7 +335,7 @@ export default async function VermittlungsportaleVergleichPage() {
         </div>
       </section>
 
-      {/* Was alle vier gemeinsam haben */}
+      {/* Was alle Anbieter gemeinsam haben */}
       <section className="bg-white py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-3xl font-extrabold text-claimondo-navy">
