@@ -8,7 +8,14 @@ export const metadata: Metadata = {
     'Finde deinen bestehenden Eintrag oder lege ein neues Profil an.',
 }
 
-export default function SvRegistrierenPage() {
+export default async function SvRegistrierenPage({
+  searchParams,
+}: {
+  // Netzwerk-Kalt-Einladung (a-Followup): Token aus der Einladungs-Mail -> Auto-Kante
+  // nach der Registrierung (Muster werkstatt/registrieren).
+  searchParams: Promise<{ einladung?: string }>
+}) {
+  const { einladung } = await searchParams
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
@@ -26,7 +33,7 @@ export default function SvRegistrierenPage() {
             Kostenlos starten — nach unserer Prüfung schalten wir dein Profil innerhalb von 48 Stunden frei.
           </p>
         </div>
-        <SvRegistrierenClient />
+        <SvRegistrierenClient einladung={einladung} />
       </div>
     </div>
   )

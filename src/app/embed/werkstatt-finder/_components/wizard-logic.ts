@@ -26,11 +26,13 @@ export const HAEUFIGE_HERSTELLER = [
   'Dacia', 'Mini', 'Tesla', 'Porsche', 'Cupra',
 ] as const
 
-// F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl im Werkstatt-Finder. Ein Repair-Sucher ist
-// Kasko (eigene VS) oder Selbstzahler — beide schuldfrage='eigenverantwortung', getrennt per
-// eigene_versicherung. So matcht der /flow direkt kasko/selbstzahler statt ueber den vollen
-// Schuldfrage-Quali (Haftpflicht-Ast waere fuer einen Repair-Kunden semantisch schief).
-export type Abrechnungswahl = 'kasko' | 'selbstzahler'
+// F1 (Entry-Point-Audit 24.07.) + Unverschuldet-Option (Aaron 04.08.): Schuldfrage-/Abrechnungswahl
+// im Werkstatt-Finder. DREI Wege: unverschuldet (Gegner haftet -> haftpflicht), Kasko (eigene VS),
+// Selbstzahler. Der Kunde bestimmt damit das FlowLink-Szenario direkt. Vorher fehlte die Haftpflicht-
+// Option -> ein unverschuldeter Kunde MUSSTE sich falsch als kasko/selbstzahler einordnen und verlor
+// seinen Regulierungsanspruch (§ 249 BGB). Der Finder ist outbound (keine Provision) -> alle Wege
+// korrekt erheben statt Haftpflicht wegzuleiten (Aaron: Kunden behalten > wegschicken).
+export type Abrechnungswahl = 'haftpflicht' | 'kasko' | 'selbstzahler'
 
 export type WerkstattWizardState = {
   standort: { adresse: string; lat: number; lng: number } | null
@@ -72,13 +74,17 @@ export function kannWeiter(step: WizardStep, s: WerkstattWizardState): boolean {
   }
 }
 
-// F1: Abrechnungswahl -> Lead-Felder. Kasko/Selbstzahler = beide Eigenverantwortung; eigene_versicherung
-// trennt sie. BEIDE zusammen setzen — eigenverantwortung OHNE eigene_versicherung wuerde im /flow-Quali
-// still disqualifizieren (Spiegel erstelle-anfrage.ts:122).
+// Abrechnungswahl -> Lead-Felder (schuldfrage + eigene_versicherung, die das /flow-Szenario matchen):
+//   haftpflicht (unverschuldet) -> schuldfrage='gegner' (eigene_versicherung irrelevant, der Gegner zahlt)
+//   kasko/selbstzahler          -> schuldfrage='eigenverantwortung', getrennt per eigene_versicherung.
+// Kasko/Selbstzahler BEIDE zusammen — eigenverantwortung OHNE eigene_versicherung wuerde im /flow-Quali
+// still disqualifizieren (Spiegel erstelle-anfrage.ts:122); 'gegner' hat das Problem nicht (das
+// haftpflicht-Szenario matcht ueber schuldfrage allein).
 export function abrechnungZuLeadFelder(w: Abrechnungswahl): {
-  schuldfrage: 'eigenverantwortung'
-  eigeneVersicherung: 'ja' | 'nein'
+  schuldfrage: 'eigenverantwortung' | 'gegner'
+  eigeneVersicherung: 'ja' | 'nein' | null
 } {
+  if (w === 'haftpflicht') return { schuldfrage: 'gegner', eigeneVersicherung: null }
   return { schuldfrage: 'eigenverantwortung', eigeneVersicherung: w === 'kasko' ? 'ja' : 'nein' }
 }
 

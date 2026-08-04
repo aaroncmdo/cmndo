@@ -25,7 +25,7 @@ gemeldet wird, dieselben sechs Dinge passieren.
 
 ## Varianten / Abzweige (die Kanäle)
 
-- **Kunde-Wizard** (`/kunde/schaden-melden`, eingeloggt) → Lead+Claim direkt über den Wrapper `convertLeadToFall` (erbt Pflichtdok + Kunde-WA).
+- **Kunde-Wizard** (`/kunde/schaden-melden`, eingeloggt) → **ab C2a über `createCase`** (mode='direct-claim') = Lead + FlowLink(immer) + Server-Dedup + Wrapper `convertLeadToFall` (Pflichtdok + Kunde-WA + KB). Der erste createCase-Adapter.
 - **Gegner-Schadenkarte** (`/schaden/[token]`, QR/NFC, anonym) → Direkt-Claim; der **Gegner** (nicht der Geschädigte) meldet; Magic-Link geht an den Gegner (Airdrop), Flottenmanager wird per WA informiert.
 - **Embed-Finder** (Gutachter/Werkstatt) + **`melde-schaden`-API** (MCP) → lead-first: Anfrage (`gutachter_finder_anfragen`) + Lead + FlowLink, Claim erst bei /flow.
 - **Public-Rückruf / Makler-Anfrage** → lead-first, telefonischer Zweig (admin_termine-Rückruf statt FlowLink) oder FlowLink-Zweig.
@@ -48,6 +48,10 @@ gemeldet wird, dieselben sechs Dinge passieren.
 4. **Server-Dedup fehlt** bei Kunde-Wizard (`SchadenMeldenWizard.tsx`, nur Client-Guard) und Embed-Gutachter-Finder → Doppel-Submit = 2 Fälle. **Aircall** schwächer als Matelso (kein `external_call_id`-Vorabgate) → Doppel-Lead-Vektor.
 5. **Kunde-Erstnotification fehlt** bei Werkstatt-Finder, Flotte-Schaden, Admin-manuell (nur Client-Redirect bzw. nur Staff-Alert).
 6. **Positiv:** der historische `melde-schaden`-Hard-Reservierungs-Bug ist **behoben** (`route.ts:234-258`).
+
+## ✅ C2-Fortschritt (createCase)
+
+- **C2a (04.08., PR #4986):** der **Kunde-Wizard (A-1)** läuft jetzt über `createCase` (`src/lib/intake/create-case.ts`). Damit sind für A-1 die IST-Abweichungen **#3 (kein FlowLink im Direkt-Claim)** und **#4 (kein Server-Dedup)** geschlossen: `createCase` erzeugt den FlowLink IMMER + dedupliziert server-seitig (Person telefon|email + Kennzeichen + 10-min-Fenster → Doppel-Submit kehrt idempotent zum ersten Fall zurück, kein zweiter). Erstnotification bleibt der Wrapper-`sendFallCommunication` (bis C3-Outbox). Die übrigen Kanäle (Embed B-1, Gegner A-3, Aircall D-4b) folgen als **C2b+** (nach Settle der aar-956-Intake-Lane). Beweis = Regel-4-Prod-Smoke (Doppel-Submit → 1 Fall), deploy-gated.
 
 ## Offene Fragen an Aaron (max. 5)
 
