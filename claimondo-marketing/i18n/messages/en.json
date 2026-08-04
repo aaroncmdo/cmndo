@@ -3300,7 +3300,7 @@
     "was_p": "The distinction from the appraiser appointed by the opposing insurance is critical: their inspection services work on behalf of the at-fault party and, in practice, systematically reduce claims. As an injured party with no fault of your own, you have the right under §249 BGB to engage an <strong>independent vehicle appraiser</strong> of your choice — and that is precisely the choice the four referral portals compared here make for you. The legal detail is set out in the",
     "was_link_urteil": "section on the LG Bremen judgment on online expert reports",
     "tabelle_eyebrow": "Direct comparison",
-    "tabelle_h2": "All 4 platforms at a glance",
+    "tabelle_h2": "The platforms at a glance",
     "tabelle_intro_before": "All competitor information is taken from the respective provider websites (as of",
     "tabelle_intro_after": "). Claimondo's network size is rendered live from our database.",
     "tabelle_caption_before": "Vehicle appraiser referral services compared — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten (as of",
@@ -3316,63 +3316,72 @@
         "claimondo": "Managed full-service claim settlement — a case hub from expert report through partner law firm to payout",
         "neo": "Expert matching (online request → suitable appraiser)",
         "paten": "End-to-end claim handling (appraiser + legal counsel)",
-        "giganten": "Directory with radius search (appraiser, workshop, lawyer, towing service) + profile listings"
+        "giganten": "Directory with radius search (appraiser, workshop, lawyer, towing service) + profile listings",
+        "unfallhelden": "Full service “from a single source” (lawyer + expert + repair shop + replacement car)"
       },
       {
         "kriterium": "Availability",
         "claimondo": "Digital 24/7, by phone until at least 10 pm; response within 15 minutes",
         "neo": "\"Around the clock,\" request \"in 30 seconds\"; Tel. 0160/4873888",
         "paten": "\"24h emergency assistance,\" hotline 0800 505 50 50",
-        "giganten": "\"Instant matching\" + radius search (25–300 km)"
+        "giganten": "\"Instant matching\" + radius search (25–300 km)",
+        "unfallhelden": "Online claim report + toll-free hotline"
       },
       {
         "kriterium": "Appraiser network size (publicly stated)",
         "claimondo": "",
         "neo": "not publicly disclosed",
         "paten": "\"Nationwide network\" (no figure given)",
-        "giganten": "\"Over 250 vetted\" (search counter: 329; paid premium listings)"
+        "giganten": "\"Over 250 vetted\" (search counter: 329; paid premium listings)",
+        "unfallhelden": "“nationwide network” (no figure)"
       },
       {
         "kriterium": "On-site inspection",
         "claimondo": "always required",
         "neo": "Standard",
         "paten": "\"directly on-site\"",
-        "giganten": "connects clients with on-site appraisers"
+        "giganten": "connects clients with on-site appraisers",
+        "unfallhelden": "yes (incl. paint-thickness measurement)"
       },
       {
         "kriterium": "Online-only report without on-site inspection",
         "claimondo": "no",
         "neo": "no",
         "paten": "no",
-        "giganten": "no"
+        "giganten": "no",
+        "unfallhelden": "no"
       },
       {
         "kriterium": "Legal counsel integration",
         "claimondo": "yes — integrated dedicated partner law firm",
         "neo": "yes (appraiser + lawyer)",
         "paten": "yes — \"qualified legal counsel\"",
-        "giganten": "yes — lawyer as a partner category"
+        "giganten": "yes — lawyer as a partner category",
+        "unfallhelden": "yes — specialised lawyer included in the service"
       },
       {
         "kriterium": "Costs for Injured Parties",
         "claimondo": "0 € (§249 BGB, subject to acknowledgement)",
         "neo": "\"non-binding & free of charge\"",
         "paten": "0 € (liable insurance covers costs)",
-        "giganten": "\"Free for injured parties\""
+        "giganten": "\"Free for injured parties\"",
+        "unfallhelden": "€0 (“doesn’t cost you a cent”)"
       },
       {
         "kriterium": "Whitelabel/Brand for Appraisers",
         "claimondo": "yes (the only one of the four)",
         "neo": "no",
         "paten": "no",
-        "giganten": "no (paid \"Premium Member\" listings)"
+        "giganten": "no (paid \"Premium Member\" listings)",
+        "unfallhelden": "no"
       },
       {
         "kriterium": "Service Area",
         "claimondo": "nationwide (DE), focus on NRW",
         "neo": "nationwide (DE)",
         "paten": "nationwide (DE)",
-        "giganten": "nationwide (DE)"
+        "giganten": "nationwide (DE)",
+        "unfallhelden": "Germany-wide"
       }
     ],
     "einordnung_titel": "A note on interpreting the network figures:",
@@ -3457,7 +3466,8 @@
     "cta_h2": "Submit an appraisal request — free of charge & non-binding",
     "cta_p": "Report your claim online or call us directly — online 24/7, by phone until at least 10 p.m.",
     "cta_anfrage": "Submit an appraisal request",
-    "cta_tel_label": "Call us"
+    "cta_tel_label": "Call us",
+    "th_unfallhelden": "Unfallhelden"
   },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Home",
