@@ -1159,6 +1159,26 @@
       "frau",
       "herr"
     ],
+    "partner_aktivitaeten.partner_typ": [
+      "flotte",
+      "makler",
+      "sv",
+      "werkstatt"
+    ],
+    "partner_aktivitaeten.typ": [
+      "anruf",
+      "einstufung",
+      "email",
+      "freigeschaltet",
+      "gesperrt",
+      "lead_zugewiesen",
+      "notiz",
+      "provision",
+      "sonstiges",
+      "statuswechsel",
+      "verifiziert",
+      "vertrag"
+    ],
     "partner_lead_aktivitaeten.typ": [
       "anruf",
       "einstufung",

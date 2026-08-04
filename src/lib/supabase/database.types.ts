@@ -14802,6 +14802,50 @@ export type Database = {
           },
         ]
       }
+      partner_aktivitaeten: {
+        Row: {
+          erstellt_am: string
+          erstellt_von: string | null
+          id: string
+          ist_system: boolean
+          meta: Json | null
+          partner_id: string
+          partner_typ: string
+          text: string
+          typ: string
+        }
+        Insert: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          ist_system?: boolean
+          meta?: Json | null
+          partner_id: string
+          partner_typ: string
+          text: string
+          typ: string
+        }
+        Update: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          ist_system?: boolean
+          meta?: Json | null
+          partner_id?: string
+          partner_typ?: string
+          text?: string
+          typ?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_aktivitaeten_erstellt_von_fkey"
+            columns: ["erstellt_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_gutschriften: {
         Row: {
           aussteller_snapshot: Json

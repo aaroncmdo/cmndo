@@ -66,14 +66,25 @@ create index partner_aktivitaeten_partner_idx
 
 alter table public.partner_aktivitaeten enable row level security;
 
--- Staff-only (admin/dispatch/leadbearbeiter via is_staff()). Explizites TO authenticated
+-- Staff-Gate: admin/dispatch/leadbearbeiter — IDENTISCH zum erprobten
+-- partner_lead_akt_staff_all. Bewusst NICHT is_staff() (= admin/kundenbetreuer/dispatch):
+-- das enthaelt kundenbetreuer statt leadbearbeiter -> waere ein Mismatch zur Action-Gate
+-- requireVertriebStaff (admin/dispatch/leadbearbeiter). Explizites TO authenticated
 -- (RLS-Policy-Gate). Kein anon-Grant (Anon-Grant-Gate: 'text'/notiz-Muster = sensibel).
 create policy partner_aktivitaeten_staff_all
   on public.partner_aktivitaeten
   for all
   to authenticated
-  using (is_staff())
-  with check (is_staff());
+  using (
+    exists (select 1 from public.profiles p
+      where p.id = (select auth.uid())
+        and p.rolle = any (array['admin'::user_role, 'dispatch'::user_role, 'leadbearbeiter'::user_role]))
+  )
+  with check (
+    exists (select 1 from public.profiles p
+      where p.id = (select auth.uid())
+        and p.rolle = any (array['admin'::user_role, 'dispatch'::user_role, 'leadbearbeiter'::user_role]))
+  );
 
 grant select, insert, update, delete on public.partner_aktivitaeten to authenticated;
 
@@ -84,9 +95,14 @@ insert into public.partner_aktivitaeten
 select
   'werkstatt', wn.werkstatt_id, 'notiz', wn.text,
   case when wn.autor_name is not null then jsonb_build_object('autor_name', wn.autor_name) else null end,
-  false, wn.autor_user_id, wn.created_at
+  false,
+  -- gehaertet: orphan autor_user_id (nicht in profiles) -> null (FK on erstellt_von)
+  case when wn.autor_user_id is not null
+         and exists (select 1 from public.profiles p2 where p2.id = wn.autor_user_id)
+       then wn.autor_user_id else null end,
+  wn.created_at
 from public.werkstatt_notizen wn
-where wn.text is not null and btrim(wn.text) <> '';
+where wn.text is not null and btrim(wn.text) <> '' and wn.werkstatt_id is not null;
 
 comment on table public.werkstatt_notizen is
   'DEPRECATED (2026-08-04): nach partner_aktivitaeten migriert. Nicht droppen (Bestandsanzeige), keine neuen Writes.';
