@@ -2275,8 +2275,8 @@
     ]
   },
   "gutachter_partner": {
-    "sr_h1": "Zostań partnerem Claimondo jako rzeczoznawca samochodowy — zapisz się na listę oczekujących",
-    "page_title": "Zostań partnerem jako rzeczoznawca samochodowy — lista oczekujących",
+    "sr_h1": "Zostań partnerem Claimondo jako rzeczoznawca — bezpłatna rejestracja",
+    "page_title": "Zostań partnerem jako rzeczoznawca — zacznij bezpłatnie",
     "hero": {
       "badge": "Tylko zweryfikowani rzeczoznawcy",
       "headline": "Zostań partnerem Claimondo w swoim regionie",
@@ -2326,20 +2326,20 @@
       "prozess_text": "Claimondo to platforma do likwidacji szkód dla poszkodowanych w wypadkach Kfz-Haftpflicht. Konsolidujemy zlecenia pozyskiwane z działań marketingowych, warsztatów i kancelarii prawnych, a następnie kierujemy je do odpowiedniego rzeczoznawcy w danym regionie. Otrzymujesz zlecenia z kompletnym przygotowaniem — dane ubezpieczeniowe, zdjęcia szkody oraz kontakt do warsztatu są już zapisane w portalu. Pozyskiwanie klientów, pierwszą rozmowę i fakturowanie przejmujemy my.",
       "schritte": [
         {
-          "titel": "Zapisz się na listę oczekujących",
-          "text": "Wypełnij formularz powyżej — kwalifikacje, kod pocztowy, preferowany promień. Zajmuje to mniej niż 3 minuty."
+          "titel": "Bezpłatna rejestracja",
+          "text": "Zarejestruj się na app.claimondo.de lub przejmij swój wpis na mapie powyżej — zajmie to mniej niż 3 minuty."
         },
         {
-          "titel": "Weryfikacja",
-          "text": "Sprawdzamy nr DAT-Expert, członkostwo w BVSK oraz wpis IHK lub öbuv w odpowiednich rejestrach. To nie jest formalność marketingowa — w razie potrzeby kontaktujemy się telefonicznie z izbami."
+          "titel": "Ukończ onboarding",
+          "text": "Profil, kalendarz i umowa partnerska — wszystko cyfrowo. Aktywujesz się samodzielnie, bez czekania."
         },
         {
-          "titel": "Aktywacja regionu",
-          "text": "Gdy w Twoim regionie (kod pocztowy) pojawi się zapotrzebowanie (≥ 8 zleceń / miesiąc), otrzymasz pisemne potwierdzenie aktywacji. Do tego czasu pozostajesz na liście oczekujących — bez kosztów, bez zobowiązań."
+          "titel": "Natychmiast widoczny",
+          "text": "Po aktywacji jesteś widoczny w wyszukiwarce rzeczoznawców i otrzymujesz zlecenia w swoim regionie. Opcjonalnie: jako Partner Sieci zyskujesz priorytetową pozycję i własny branding."
         },
         {
-          "titel": "Na żywo w portalu",
-          "text": "30-minutowy onboarding call, dostęp do portalu SV, pierwsze zlecenia pojawiają się w Twojej skrzynce odbiorczej. Przyjęcie lub odrzucenie każdego zlecenia należy do Ciebie."
+          "titel": "Weryfikacja równolegle",
+          "text": "Weryfikujemy nr DAT, członkostwo BVSK, IHK lub powołanie öbuv w rejestrach — równolegle, bez blokowania startu."
         }
       ],
       "schritt_label": "KROK {nr}",
@@ -2347,7 +2347,7 @@
       "verdienst_text1": "Podstawą jest BVSK-Honorartabelle. Rozliczasz się według wysokości szkody — jak przy każdej standardowej szkodzie z OC. Wynagrodzenie pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB, Claimondo przejmuje fakturowanie, a kancelaria partnerska dochodzenie należności. Konkretna prowizja platformy zależy od wolumenu zleceń i regionu — omawiana jest transparentnie podczas pierwszej rozmowy. Wcześniej pokazujemy przykładowe wyliczenie na podstawie Twoich ostatnich 12 miesięcy.",
       "verdienst_text2": "Zlecenia nie są wyłączne: własne zlecenia bezpośrednie, pośrednictwo BVSK i wpisy na listach ubezpieczycieli działają równolegle bez zmian. Jesteśmy dodatkowym kanałem, bez żadnego wiązania.",
       "onboarding_heading": "Czas onboardingu i wymagania",
-      "onboarding_text": "Po uruchomieniu Twojego regionu onboarding trwa od 7 do 14 dni roboczych: weryfikujemy Twoje kwalifikacje w odpowiednich rejestrach (DAT, BVSK, IHK, öbuv), przesyłamy umowę partnerską, konfigurujemy Twoje konto w portalu SV i przeprowadzamy 30-minutowy onboarding call na żywo. Następnie pierwsze zlecenia ruszają.",
+      "onboarding_text": "Startujesz od razu: rejestracja i onboarding zajmują łącznie mniej niż 15 minut — potem jesteś aktywowany i widoczny. Weryfikacja kwalifikacji (DAT, BVSK, IHK, öbuv) przebiega równolegle w tle.",
       "voraussetzungen": [
         "Co najmniej jedna uznana kwalifikacja: DAT-Expert · BVSK · IHK · öbuv",
         "Ważne ubezpieczenie OC zawodowe (min. 2 mln € pokrycia)",
@@ -2356,10 +2356,10 @@
         "Smartfon do przesyłania zdjęć dowodowych na miejscu",
         "Gotowość do kontaktu wstępnego w ciągu 24h od przydzielenia zlecenia"
       ],
-      "warteliste_heading": "Dlaczego lista oczekujących?",
-      "warteliste_text_pre": "Aktualnie na liście znajduje się",
-      "warteliste_text_sv": "{anzahl} rzeczoznawców",
-      "warteliste_text_post": "na liście oczekujących. Partnerów przyjmujemy stopniowo, według regionów: dopiero gdy w danym obszarze PLZ wolumen zleceń jest wystarczający (≥ 8 zleceń / miesiąc), uruchamiamy jednego lub więcej rzeczoznawców. Dzięki temu żaden partner nie jest onboardowany na podstawie pustych obietnic, a każdy uruchomiony SV od pierwszego dnia widzi realny wolumen. Miejsce na liście nie jest przyznawane według zasady „kto pierwszy, ten lepszy\" — dobieramy partnerów przede wszystkim według zapotrzebowania regionu i odpowiedniego zestawu kwalifikacji.",
+      "sofort_heading": "Zacznij bezpłatnie — już dziś",
+      "sofort_text": "Zarejestruj się w kilka minut i ukończ onboarding — aktywacja następuje natychmiast, a zlecenia otrzymujesz bez akwizycji. Opcjonalnie jako Partner Sieci zyskasz priorytetową pozycję w wyszukiwarce rzeczoznawców i własny branding.",
+      "sofort_netzwerk_zusatz": "Już {anzahl} rzeczoznawców jest w sieci Claimondo.",
+      "sofort_cta": "Zarejestruj się bezpłatnie",
       "faq_heading": "Często zadawane pytania",
       "faqs": [
         {
@@ -4060,8 +4060,8 @@
       "twitter_description": "Żadnego call center — specjalista poniżej 15 minut."
     },
     "gutachter_partner": {
-      "title": "Zostań partnerem jako rzeczoznawca Kfz — lista oczekujących",
-      "description": "Już teraz na listę oczekujących: ogólnokrajowa sieć rzeczoznawców Claimondo. Zlecenia przekazywane bezpośrednio, bez akwizycji. Eksperci DAT i członkowie BVSK mile widziani.",
+      "title": "Zostań partnerem jako rzeczoznawca — zacznij bezpłatnie",
+      "description": "Dołącz bezpłatnie do sieci rzeczoznawców Claimondo: natychmiastowa aktywacja, zlecenia bez akwizycji. Opcjonalnie Partner Sieci z najwyższą pozycją i własnym brandingiem.",
       "og_title": "Zostań partnerem jako rzeczoznawca Kfz — Claimondo",
       "og_description": "Zlecenia bez akwizycji. Proszę dopisać się do sieci rzeczoznawców Claimondo — przekazujemy bezpośrednio w Pana/Pani rejonie działania.",
       "twitter_description": "Zlecenia bez akwizycji. Proszę dopisać się do sieci rzeczoznawców Claimondo."

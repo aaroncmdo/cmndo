@@ -716,8 +716,8 @@
       "twitter_description": "Kein Callcenter — ein Fachmann in unter 15 Minuten."
     },
     "gutachter_partner": {
-      "title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
-      "description": "Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.",
+      "title": "Kfz-Gutachter werden — kostenlos starten",
+      "description": "Jetzt kostenlos ins Claimondo SV-Netzwerk: sofort freigeschaltet, Aufträge ohne Akquise. Optional Netzwerkpartner mit Top-Platzierung und eigenem Branding.",
       "og_title": "Als Kfz-Sachverständiger Partner werden — Claimondo",
       "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
       "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
@@ -2573,8 +2573,8 @@
     }
   },
   "gutachter_partner": {
-    "sr_h1": "Als Kfz-Sachverständiger Claimondo-Partner werden — Warteliste eintragen",
-    "page_title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
+    "sr_h1": "Als Kfz-Sachverständiger Claimondo-Partner werden — kostenlos registrieren",
+    "page_title": "Als Kfz-Sachverständiger Partner werden — kostenlos starten",
     "hero": {
       "badge": "Nur verifizierte Sachverständige",
       "headline": "Werden Sie Claimondo-Partner in Ihrer Region",
@@ -2624,20 +2624,20 @@
       "prozess_text": "Claimondo ist eine Schadensregulierungs-Plattform für Kfz-Haftpflicht-Geschädigte. Wir bündeln den Auftragseingang aus Marketing, Werkstätten und Rechtsanwälten und vermitteln den Auftrag an den passenden Sachverständigen in der Region. Sie bekommen Aufträge mit komplettem Vorlauf — Versicherungsdaten, Schadenbilder, Werkstatt-Kontakt sind bereits im Portal hinterlegt. Akquise, Erstgespräch und Rechnungsstellung übernehmen wir.",
       "schritte": [
         {
-          "titel": "Auf die Warteliste eintragen",
-          "text": "Formular oben ausfüllen — Qualifikation, PLZ, Wunschradius. Dauert keine 3 Minuten."
+          "titel": "Kostenlos registrieren",
+          "text": "Auf app.claimondo.de registrieren oder Ihren Eintrag auf der Karte oben beanspruchen — dauert keine 3 Minuten."
         },
         {
-          "titel": "Verifikation",
-          "text": "Wir prüfen DAT-Expert-Nr., BVSK-Mitgliedschaft, IHK- oder öbuv-Bestellung gegen die jeweiligen Register. Das ist kein Marketing-Check — wir telefonieren bei Bedarf mit den Kammern."
+          "titel": "Onboarding abschließen",
+          "text": "Profil, Kalender-Anbindung und Partnervertrag digital abschließen — Sie schalten sich selbst frei, ohne Wartezeit."
         },
         {
-          "titel": "Region-Freischaltung",
-          "text": "Sobald in Ihrer PLZ-Region Bedarf entsteht (≥ 8 Aufträge / Monat), bekommen Sie eine schriftliche Freischaltung. Bis dahin bleiben Sie auf der Warteliste — ohne Kosten, ohne Bindung."
+          "titel": "Sofort sichtbar",
+          "text": "Ab Freischaltung sind Sie im Gutachter-Finder sichtbar und erhalten Aufträge in Ihrer Region. Optional: Als Netzwerkpartner sichern Sie sich die bevorzugte Platzierung und Ihr eigenes Branding."
         },
         {
-          "titel": "Live im Portal",
-          "text": "30-min Onboarding-Call, SV-Portal-Zugang, erste Aufträge erscheinen in Ihrer Inbox. Annahme oder Ablehnung pro Auftrag bleibt bei Ihnen."
+          "titel": "Verifikation parallel",
+          "text": "Wir prüfen DAT-Expert-Nr., BVSK-Mitgliedschaft, IHK- oder öbuv-Bestellung gegen die Register — das läuft parallel und blockiert Ihren Start nicht."
         }
       ],
       "schritt_label": "SCHRITT {nr}",
@@ -2645,7 +2645,7 @@
       "verdienst_text1": "Grundlage ist die BVSK-Honorartabelle. Sie rechnen nach Schadenhöhe ab — wie in jedem regulären Haftpflichtschaden. Die gegnerische Versicherung trägt das Honorar gemäß §249 BGB, Claimondo übernimmt die Abrechnung, unsere Partnerkanzlei die Forderungsdurchsetzung. Die konkrete Plattform-Provision hängt von Auftragsvolumen und Region ab und wird im Erstgespräch transparent besprochen — wir zeigen Ihnen vorab eine Beispielrechnung auf Basis Ihrer letzten 12 Monate.",
       "verdienst_text2": "Aufträge sind nicht exklusiv: Eigene Direktaufträge, BVSK-Vermittlungen und Versicherer-Listungen laufen parallel weiter. Wir sind ein zusätzlicher Kanal, keine Bindung.",
       "onboarding_heading": "Onboarding-Dauer & Voraussetzungen",
-      "onboarding_text": "Nach Freischaltung Ihrer Region dauert das Onboarding 7 bis 14 Werktage: Wir verifizieren Ihre Qualifikation gegen die jeweiligen Register (DAT, BVSK, IHK, öbuv-Kammern), schicken den Partnervertrag, richten Sie im SV-Portal ein und führen einen 30-minütigen Live-Onboarding-Call durch. Danach gehen die ersten Aufträge live.",
+      "onboarding_text": "Sie starten sofort: Registrierung und Onboarding dauern zusammen unter 15 Minuten — danach sind Sie freigeschaltet und sichtbar. Die Qualifikations-Verifizierung (DAT, BVSK, IHK, öbuv) läuft parallel im Hintergrund.",
       "voraussetzungen": [
         "Mindestens eine anerkannte Qualifikation: DAT-Expert · BVSK · IHK · öbuv",
         "Gültige Berufshaftpflicht (mind. 2 Mio. € Deckung)",
@@ -2654,10 +2654,10 @@
         "Smartphone für Beweisfoto-Upload vor Ort",
         "Bereitschaft zum 24h-Erstkontakt nach Auftragszuweisung"
       ],
-      "warteliste_heading": "Warum eine Warteliste?",
-      "warteliste_text_pre": "Aktuell stehen",
-      "warteliste_text_sv": "{anzahl} Sachverständige",
-      "warteliste_text_post": "auf der Warteliste. Wir nehmen Partner regional gestaffelt auf: Erst wenn in einer PLZ-Region das Auftragsvolumen tragfähig ist (≥ 8 Aufträge / Monat), schalten wir einen oder mehrere SV frei. So stellen wir sicher, dass kein Partner mit leeren Versprechen onboarded wird und jeder freigeschaltete SV von Tag 1 ein nutzbares Volumen sieht. Ihr Platz auf der Liste ist nicht „first come, first serve“ — wir matchen primär nach Region-Bedarf und Qualifikations-Mix.",
+      "sofort_heading": "Kostenlos starten — heute noch",
+      "sofort_text": "Registrieren Sie sich in wenigen Minuten und schließen Sie das Onboarding ab — Sie sind sofort freigeschaltet und erhalten Aufträge ohne Eigenakquise. Optional sichern Sie sich als Netzwerkpartner die bevorzugte Platzierung im Gutachter-Finder und Ihr eigenes Branding.",
+      "sofort_netzwerk_zusatz": "Bereits {anzahl} Sachverständige sind im Claimondo-Netzwerk.",
+      "sofort_cta": "Jetzt kostenlos registrieren",
       "ratgeber_heading": "Ratgeber für Sachverständige",
       "ratgeber_neukundengewinnung": "Neukundengewinnung für Kfz-Sachverständige",
       "ratgeber_marketing": "Marketing für Kfz-Gutachter",
