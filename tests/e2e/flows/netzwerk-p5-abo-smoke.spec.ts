@@ -101,8 +101,11 @@ test('J8-2: Free -> CTA mit Config-Preis -> embedded Checkout mountet (Abbruch v
   await expect(cta).toBeVisible()
   await cta.click()
 
-  // Embedded Stripe-Checkout mountet (iframe von stripe.com) — DANN SOFORT SCHLUSS (keine Zahlung).
-  await expect(page.locator('iframe[src*="stripe.com"], iframe[name^="embedded-checkout"]').first()).toBeVisible({
+  // Embedded Stripe-Checkout mountet — DANN SOFORT SCHLUSS (keine Zahlung).
+  // NUR name^=embedded-checkout: der hidden __privateStripeMetricsController-iframe
+  // (js.stripe.com) laedt IMMER mit Stripe.js; im breiten Selektor blieb first()
+  // dauerhaft an ihm haengen (Regel-4-Diagnose-Falle 03.08., s. #4954).
+  await expect(page.locator('iframe[name^="embedded-checkout"]').first()).toBeVisible({
     timeout: 45_000,
   })
   await ctx.close()

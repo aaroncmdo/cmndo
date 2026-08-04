@@ -8,13 +8,9 @@
 // P5 T8: Der Completed-Screen bekommt den optionalen Netzwerkpartner-Ask
 // (completedExtra) — skippbar, der bestehende „Zum Portal"-Button bleibt der Skip.
 
-import { useState } from 'react'
-import { loadStripe } from '@stripe/stripe-js'
-import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
 import { WizardClient } from '@/components/onboarding/WizardClient'
 import type { OnboardingPhase } from '@/components/onboarding/types'
-import { NetzwerkpartnerCta } from '@/components/netzwerk/NetzwerkpartnerCta'
-import { starteNetzwerkAboCheckout } from '@/app/gutachter/einstellungen/netzwerk-abo/actions'
+import { NetzwerkAskInline } from '@/components/netzwerk/NetzwerkAskInline'
 
 interface Props {
   phasen: OnboardingPhase[]
@@ -34,33 +30,15 @@ export function SvBasicOnboardingClient({
   netzwerkSetupEuro = '',
   stripePublishableKey = '',
 }: Props) {
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [fehler, setFehler] = useState<string | null>(null)
-
+  // P5 T8-Fix (04.08.): Ask in NetzwerkAskInline extrahiert (geteilt mit
+  // SvBasicPendingReview — dort ist der Ask nach finalize der einzig
+  // erreichbare Ort, s. Kommentar in der Komponente).
   const netzwerkAsk = netzwerkMonatEuro ? (
-    clientSecret && stripePublishableKey ? (
-      <EmbeddedCheckoutProvider stripe={loadStripe(stripePublishableKey)} options={{ clientSecret }}>
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
-    ) : (
-      <>
-        <NetzwerkpartnerCta
-          monatEuro={netzwerkMonatEuro}
-          setupEuro={netzwerkSetupEuro}
-          loading={loading}
-          onUpgrade={async () => {
-            setLoading(true)
-            setFehler(null)
-            const res = await starteNetzwerkAboCheckout()
-            setLoading(false)
-            if (!res.ok) { setFehler(res.error); return }
-            setClientSecret(res.clientSecret)
-          }}
-        />
-        {fehler ? <p className="mt-2 text-body-xs text-danger">{fehler}</p> : null}
-      </>
-    )
+    <NetzwerkAskInline
+      monatEuro={netzwerkMonatEuro}
+      setupEuro={netzwerkSetupEuro}
+      stripePublishableKey={stripePublishableKey}
+    />
   ) : null
 
   return (
