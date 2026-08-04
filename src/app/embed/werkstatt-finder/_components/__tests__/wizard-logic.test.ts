@@ -5,10 +5,23 @@ import {
   kannWeiter,
   wizardStateZuSuche,
   zeigeUmkreisLeerHinweis,
+  abrechnungZuLeadFelder,
   WIZARD_INITIAL,
   FAHRZEUGTYP_OPTIONEN,
   type WerkstattWizardState,
 } from '../wizard-logic'
+
+describe('abrechnungZuLeadFelder (Schuldfrage-Wahl -> Lead-Felder)', () => {
+  it('haftpflicht (unverschuldet) -> schuldfrage=gegner, eigeneVersicherung=null (Gegner zahlt)', () => {
+    expect(abrechnungZuLeadFelder('haftpflicht')).toEqual({ schuldfrage: 'gegner', eigeneVersicherung: null })
+  })
+  it('kasko -> eigenverantwortung + eigene VS', () => {
+    expect(abrechnungZuLeadFelder('kasko')).toEqual({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja' })
+  })
+  it('selbstzahler -> eigenverantwortung ohne eigene VS', () => {
+    expect(abrechnungZuLeadFelder('selbstzahler')).toEqual({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'nein' })
+  })
+})
 
 describe('fahrzeugtypZuEuKlasse', () => {
   it('mappt jeden Typ auf seine repräsentative EU-Klasse', () => {

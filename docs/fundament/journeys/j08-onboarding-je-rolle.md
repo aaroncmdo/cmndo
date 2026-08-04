@@ -31,6 +31,12 @@ Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein ne
 
 - **Bestands-SV mit `paket`** — Per-Fall-Pakete werden **nicht mehr verkauft** (retired); Bestand behält Fulfillment und wird als Netzwerkpartner **comped** (`paket` = Legacy-Fulfillment, **nie überschreiben** — 5 Consumer).
 - **Cold-Mail-Einstieg** (SV/Werkstatt) — CTA aus der Kampagne → vorbefüllter Signup.
+- **Netzwerk-Kalt-Einladung** (alle drei Partner-Rollen — Soll-Delta 04.08., Followup-a): Ein
+  bestehender Partner lädt per E-Mail ein (`?einladung=<token>` auf dem jeweiligen
+  Registrier-Pfad). Nach erfolgreicher Registrierung wird die Einladung eingelöst und die
+  **Freund-Kante automatisch `angenommen`** (die Einladung ist die Anfrage, die Registrierung
+  die Annahme). Redemption ist best-effort — ein Token-Fehler bricht die Registrierung nie.
+  (Vorher nur Werkstatt; SV `/sv/registrieren` + Makler `/makler/registrieren` nachgezogen.)
 - **Whitelabel-SV** — verifizierter SV mit `use_custom_branding` brandet Portal + Kunden-Sicht.
 
 ## Fehlerfälle und ihr Soll-Verhalten

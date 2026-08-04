@@ -4,11 +4,18 @@
 // Repair-Sucher — das ist Kasko (eigene VS) ODER Selbstzahler. Die Wahl setzt (via
 // abrechnungZuLeadFelder) schuldfrage='eigenverantwortung' + eigene_versicherung, damit der /flow
 // direkt das kasko/selbstzahler-Szenario matcht (statt den vollen Schuldfrage-Quali zu zeigen).
-// Wer einen Gegner-Unfall (Haftpflicht) hat, gehoert in den Gutachter-Finder -> dezenter Hinweis.
-import { ShieldCheck, Wallet } from 'lucide-react'
+// Drei Wege (Aaron 04.08.): unverschuldet (Gegner haftet -> haftpflicht), Kasko, Selbstzahler.
+// Vorher fehlte die Haftpflicht-Karte -> ein unverschuldeter Kunde musste sich falsch einordnen.
+import { Scale, ShieldCheck, Wallet } from 'lucide-react'
 import type { Abrechnungswahl } from './wizard-logic'
 
 const OPTIONEN: { wert: Abrechnungswahl; label: string; hint: string; icon: typeof ShieldCheck }[] = [
+  {
+    wert: 'haftpflicht',
+    label: 'Unverschuldeter Unfall — der Gegner haftet',
+    hint: 'Die gegnerische Haftpflicht übernimmt alles (§ 249 BGB): Gutachten, Reparatur, Wertminderung — für Sie kostenlos.',
+    icon: Scale,
+  },
   {
     wert: 'kasko',
     label: 'Über meine Kaskoversicherung',
@@ -33,7 +40,7 @@ export function AbrechnungStep({
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <h3 className="text-body font-bold text-claimondo-navy">Wie wird die Reparatur bezahlt?</h3>
+        <h3 className="text-body font-bold text-claimondo-navy">Wer trägt die Reparaturkosten?</h3>
         <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
           So bereiten wir die Abwicklung passend für Sie vor.
         </p>
@@ -66,14 +73,6 @@ export function AbrechnungStep({
         })}
       </div>
 
-      <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/70">
-        Unverschuldeter Unfall mit einem Unfallgegner? Dann übernimmt die gegnerische Haftpflicht
-        alles (§ 249 BGB) — dafür ist der{' '}
-        <a href="/embed/gutachter-finder" className="font-semibold text-claimondo-ondo hover:underline">
-          Gutachter-Finder
-        </a>{' '}
-        der richtige Weg.
-      </p>
     </div>
   )
 }

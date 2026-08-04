@@ -9,8 +9,8 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
-import { createLead } from '@/lib/leads/create-lead'
-import { convertLeadToFall } from '@/lib/leads/convert-lead-to-fall'
+// C2a (Fundament, Ein Intake): der Wizard laeuft ueber createCase (dedup->lead->flowlink->convert).
+import { createCase } from '@/lib/intake/create-case'
 import { ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
 import { buildSchadenLeadInput, type SchadenMeldenForm } from '@/lib/kunde/schaden-melden'
 
@@ -37,22 +37,24 @@ export async function meldeNeuenSchaden(
   })
   if (!built.ok) return { ok: false, error: built.error }
 
-  const created = await createLead(db, built.base, built.extra)
-  if (!created.ok) return { ok: false, error: created.error }
-
-  // convertLeadToFall WIRFT (kein Result-Object) + macht die volle Behandlung:
-  // KB-Zuweisung (sticky), Pflichtdokumente, WhatsApp "fall_eroeffnet" (fire-and-forget),
-  // Auto-Tasks. Bei Fehler NICHT den Lead loeschen — der Converter ist idempotent und
-  // ein Delete wuerde einen evtl. schon erstellten Claim verwaisen. Der Lead bleibt fuer
-  // manuelle Dispatch-Uebernahme erhalten.
-  let fallId: string
-  try {
-    const conv = await convertLeadToFall(db, created.leadId, user.id)
-    fallId = conv.fallId
-  } catch (err) {
-    console.error('[meldeNeuenSchaden] convertLeadToFall:', err)
-    return { ok: false, error: 'Beim Anlegen des Schadens ist etwas schiefgelaufen. Bitte versuche es erneut.' }
-  }
+  // C2a: EIN createCase-Call ersetzt createLead + convertLeadToFall. Modus 'direct-claim' (Muster D
+  // — sofort Claim). Garantien: Dedup (Doppel-Submit -> 1 Claim, schliesst P1 #3), Lead, FlowLink
+  // (Kunde-Kanal), Konversion inkl. Pflichtdok/Kunde-WA/KB. Der Wrapper-Pfad (KB-Sticky, non-fatal
+  // Sends) lebt unveraendert in convertLeadToFall, das createCase im direct-claim-Modus ruft.
+  const result = await createCase(db, {
+    mode: 'direct-claim',
+    base: built.base,
+    extra: built.extra,
+    triggerByUserId: user.id,
+    dedup: {
+      telefon: built.base.telefon ?? null,
+      email: built.base.email ?? null,
+      kennzeichen: (built.extra.kennzeichen as string | null | undefined) ?? null,
+    },
+    flowLink: { sprache: (prof?.sprache as string | null) ?? null },
+  })
+  if (!result.ok) return { ok: false, error: result.error }
+  const fallId = result.claimId ?? result.leadId
 
   // Fahrzeug ohne FIN -> Stub, setzt claims.vehicle_id. Non-critical (Fall steht bereits).
   if (built.extra.kennzeichen) {

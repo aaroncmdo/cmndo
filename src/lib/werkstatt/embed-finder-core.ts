@@ -17,8 +17,9 @@ export type WerkstattFinderLeadInput = {
   gewerbe?: boolean | null
   modell?: string | null
   beschreibung?: string | null
-  // F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl (Kasko/Selbstzahler) -> Lead-Szenario.
-  schuldfrage?: 'eigenverantwortung' | null
+  // F1 (Entry-Point-Audit 24.07.) + Unverschuldet-Option (Aaron 04.08.): Schuldfrage-Wahl -> Lead-Szenario.
+  // 'gegner' (unverschuldet) -> haftpflicht; 'eigenverantwortung' + eigeneVersicherung -> kasko/selbstzahler.
+  schuldfrage?: 'eigenverantwortung' | 'gegner' | null
   eigeneVersicherung?: 'ja' | 'nein' | null
 }
 
@@ -51,10 +52,14 @@ export function buildWerkstattFinderLeadExtra(input: WerkstattFinderLeadInput): 
     gewerbe_flag: input.gewerbe ?? false,
     fahrzeugschaden_beschreibung: input.beschreibung?.trim() || null,
   }
-  // F1: Abrechnungsweg-Wahl -> Lead-Szenario-Felder. Nur setzen wenn gewaehlt (der Werkstatt-Finder
-  // fragt sie jetzt ab); sonst bleibt schuldfrage null -> /flow-Quali (Fallback fuer Alt-Aufrufer/Re-Entry).
-  // eigene_versicherung IMMER mit schuldfrage zusammen (sonst still-disqualifiziert, quali-gate.ts).
-  if (input.schuldfrage && input.eigeneVersicherung) {
+  // Schuldfrage-Wahl -> Lead-Szenario-Felder. Nur setzen wenn gewaehlt (sonst schuldfrage null ->
+  // /flow-Quali-Fallback fuer Alt-Aufrufer/Re-Entry).
+  //   'gegner' (unverschuldet): schuldfrage allein reicht (haftpflicht-Szenario matcht OHNE
+  //     eigene_versicherung; der Gegner zahlt) -> eigene_versicherung NICHT setzen.
+  //   'eigenverantwortung': eigene_versicherung MUSS mit (sonst still-disqualifiziert, quali-gate.ts).
+  if (input.schuldfrage === 'gegner') {
+    extra.schuldfrage = 'gegner'
+  } else if (input.schuldfrage && input.eigeneVersicherung) {
     extra.schuldfrage = input.schuldfrage
     extra.eigene_versicherung = input.eigeneVersicherung
   }

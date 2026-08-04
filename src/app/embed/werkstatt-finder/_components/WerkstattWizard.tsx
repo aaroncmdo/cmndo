@@ -121,8 +121,8 @@ export function WerkstattWizard({
       return
     }
     startTransition(async () => {
-      // F1: Abrechnungswahl -> schuldfrage='eigenverantwortung' + eigene_versicherung (beide zusammen,
-      // sonst still-disqualifiziert). Der /flow matcht damit direkt kasko/selbstzahler statt Quali.
+      // Abrechnungswahl -> schuldfrage (+ eigene_versicherung bei kasko/selbstzahler). Der /flow matcht
+      // damit direkt haftpflicht/kasko/selbstzahler statt den vollen Schuldfrage-Quali zu zeigen.
       const abr = state.abrechnung ? abrechnungZuLeadFelder(state.abrechnung) : null
       const res = await erstelleWerkstattFinderLead({
         vorname: vorname || null,

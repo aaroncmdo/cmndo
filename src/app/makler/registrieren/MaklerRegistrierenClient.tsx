@@ -40,11 +40,14 @@ export function MaklerRegistrierenClient({
   maklerpools,
   werber = null,
   werberFirma = null,
+  einladung = null,
 }: {
   versicherungen: GesellschaftOption[]
   maklerpools: GesellschaftOption[]
   werber?: string | null
   werberFirma?: string | null
+  /** Netzwerk-Kalt-Einladung: Token aus ?einladung= (Auto-Kante nach Registrierung). */
+  einladung?: string | null
 }) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -69,6 +72,7 @@ export function MaklerRegistrierenClient({
     if (versicherungId) fd.set('versicherung_id', versicherungId)
     if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
     if (werber) fd.set('werber', werber)
+    if (einladung) fd.set('einladung', einladung)
     startTransition(async () => {
       const res = await registriereMaklerSelf(fd)
       if (res.ok) setSuccess({ code: res.code })
