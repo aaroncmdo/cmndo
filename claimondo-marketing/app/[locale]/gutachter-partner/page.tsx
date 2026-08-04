@@ -11,7 +11,7 @@ import { PartnerContent } from '@/components/gutachter-partner/PartnerContent'
 import { PARTNER_FAQ } from '@/components/gutachter-partner/partner-faq'
 import { PartnerFooter } from '@/components/gutachter-partner/PartnerFooter'
 
-export const revalidate = 3600 // Warteliste-Zahl 1× pro Stunde aktualisieren
+export const revalidate = 3600 // Netzwerk-Zahl 1× pro Stunde aktualisieren
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -49,20 +49,8 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function getWartelisteAnzahl(): Promise<number> {
-  try {
-    const supabase = createAdminClient()
-    // Nur echte Warteliste-Einträge zählen (quelle='gutachter-partner-page'),
-    // nicht die DAT-Expert-Imports im Gutachter-Finder (quelle='dat_expert')
-    const { count } = await supabase
-      .from('sv_leads')
-      .select('id', { count: 'exact', head: true })
-      .eq('quelle', 'gutachter-partner-page')
-    return count ?? 62
-  } catch {
-    return 62 // Fallback bei DB-Fehler — Zahl vom 13.05.2026
-  }
-}
+// Sofort-Start-Umbau 04.08.: getWartelisteAnzahl entfernt — das Warteliste-Framing
+// (inkl. WaitlistApply-Formular, 0 Consumer) ist dem Freemium-Self-Service gewichen.
 
 // Netzwerk-Größe für den serviceSchema-Claim: SV-Leads (gesamter Pool, alle Quellen)
 // + aktive Sachverständige, dynamisch summiert — statt einer hardcodierten Zahl.
@@ -82,8 +70,7 @@ async function getNetzwerkGroesse(): Promise<number | null> {
 }
 
 export default async function GutachterPartnerPage() {
-  const [warteliste, netzwerk, t] = await Promise.all([
-    getWartelisteAnzahl(),
+  const [netzwerk, t] = await Promise.all([
     getNetzwerkGroesse(),
     getTranslations('gutachter_partner'),
   ])
@@ -110,7 +97,7 @@ export default async function GutachterPartnerPage() {
         {t('sr_h1')}
       </h1>
       <GutachterPartnerClient />
-      <PartnerContent warteliste={warteliste} />
+      <PartnerContent netzwerk={netzwerk} />
       <PartnerFooter />
     </>
   )
