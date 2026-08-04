@@ -4578,4 +4578,26 @@
     "cta_p": "Bağımsız, nitelikli, yakınınızda — randevu genelde 48 saatin altında. Karşı tarafın kusurunda sizin için 0 €.",
     "cta_schaden": "Şimdi hasar bildir"
   }
+,
+  "wertminderung_rechner": {
+    "titel": "Değer kaybını kendi verilerinle hesapla",
+    "intro": "Yukarıdaki tablo genel kuralı gösterir. Kendi rakamlarınla burada hesapla:",
+    "label_reparaturkosten": "Onarım masrafları (€)",
+    "label_alter": "Araç yaşı (yıl)",
+    "label_km": "Kilometre (km, isteğe bağlı)",
+    "label_wbw": "Yeniden edinme değeri (€, isteğe bağlı)",
+    "label_vorschaden": "Araçta önceki hasar var mı?",
+    "vorschaden_keine": "Yok",
+    "vorschaden_repariert": "Usulüne uygun onarıldı",
+    "vorschaden_erheblich": "Ciddi / onarılmamış",
+    "ergebnis_schaetzung": "Kaba tahmin: {betrag} (onarım masraflarının {pct} kadarı).",
+    "ergebnis_einzelfall_alter": "Özel durum: kilometreye ve piyasa değerine bağlı. Alman mahkemeleri katı yaş sınırlarını reddeder (BGH VI ZR 357/03) — eski araçlar da hak talep edebilir. Bağlayıcı tutarı bilirkişi raporu belirler.",
+    "ergebnis_einzelfall_vorschaden": "Ciddi önceki hasarlar değer kaybını önemli ölçüde azaltır. Miktar özel bir durumdur — bağlayıcı tutarı yalnızca bilirkişi raporu belirler.",
+    "ergebnis_unvollstaendig": "Lütfen onarım masraflarını ve araç yaşını girin.",
+    "hinweis_vorschaden_repariert": "Usulüne uygun onarılan önceki hasarlar değer kaybını biraz azaltır — genel kural burada üst sınırdır.",
+    "hinweis_hohe_km": "Yüksek kilometrede değer kaybı daha çok alt sınırdadır.",
+    "hinweis_kleiner_schaden": "Araç değerine kıyasla küçük hasarlarda değer kaybı düşük olabilir.",
+    "disclaimer": "Genel kural niteliğinde, bilirkişi raporunun yerini tutmaz. Bağlayıcı tutarı sertifikalı bir bilirkişi (Sanden/Danner yöntemi) belirler — kilometre, piyasa değeri, önceki hasar ve onarım kalitesini dikkate alır.",
+    "cta": "Ücretsiz bilirkişi görevlendir"
+  }
 }

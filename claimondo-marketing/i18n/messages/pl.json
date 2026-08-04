@@ -4572,4 +4572,26 @@
     "cta_p": "Niezależny, wykwalifikowany, w Twojej okolicy — termin zwykle poniżej 48 godzin. Przy winie osoby trzeciej 0 € dla Ciebie.",
     "cta_schaden": "Zgłoś szkodę teraz"
   }
+,
+  "wertminderung_rechner": {
+    "titel": "Oblicz utratę wartości na podstawie własnych danych",
+    "intro": "Powyższa tabela pokazuje regułę orientacyjną. Oblicz tutaj według własnych liczb:",
+    "label_reparaturkosten": "Koszty naprawy (€)",
+    "label_alter": "Wiek pojazdu (lata)",
+    "label_km": "Przebieg (km, opcjonalnie)",
+    "label_wbw": "Wartość odtworzeniowa (€, opcjonalnie)",
+    "label_vorschaden": "Czy pojazd ma wcześniejsze szkody?",
+    "vorschaden_keine": "Brak",
+    "vorschaden_repariert": "Fachowo naprawione",
+    "vorschaden_erheblich": "Znaczne / nienaprawione",
+    "ergebnis_schaetzung": "Zgrubne oszacowanie: {betrag} ({pct} kosztów naprawy).",
+    "ergebnis_einzelfall_alter": "Przypadek indywidualny: zależy od przebiegu i wartości rynkowej. Niemieckie sądy odrzucają sztywne granice wieku (BGH VI ZR 357/03) — starsze pojazdy również mogą mieć roszczenie. Wiążącą kwotę określa ekspertyza.",
+    "ergebnis_einzelfall_vorschaden": "Znaczne wcześniejsze szkody istotnie obniżają utratę wartości. Kwota to przypadek indywidualny — wiążącą wartość określa wyłącznie ekspertyza.",
+    "ergebnis_unvollstaendig": "Podaj koszty naprawy i wiek pojazdu.",
+    "hinweis_vorschaden_repariert": "Fachowo naprawione wcześniejsze szkody nieznacznie obniżają utratę wartości — reguła orientacyjna jest tu raczej górną granicą.",
+    "hinweis_hohe_km": "Przy wysokim przebiegu utrata wartości jest raczej przy dolnej granicy.",
+    "hinweis_kleiner_schaden": "Przy małej szkodzie w stosunku do wartości pojazdu utrata wartości może być niska.",
+    "disclaimer": "Wskazówka orientacyjna, nie zastępuje ekspertyzy. Wiążącą kwotę określa certyfikowany rzeczoznawca (metoda Sanden/Danner) — uwzględniając przebieg, wartość rynkową, wcześniejsze szkody i jakość naprawy.",
+    "cta": "Zleć bezpłatnego rzeczoznawcę"
+  }
 }
