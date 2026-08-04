@@ -28,3 +28,35 @@ export function svEigenBrandingErlaubt(
 ): boolean {
   return entity?.use_custom_branding === true
 }
+
+// ─── Paid-Perk (Aaron 03.08.): Whitelabel-WIRKUNG nur fuer zahlende SVs ────────
+// Entscheid: bezahlt = Netzwerkpartner-Abo (aktiv|comped|ueberfaellig — dieselbe
+// Menge wie der Finder-Boost; ueberfaellig behaelt den Vorteil bis zum
+// Dunning-Karenz-Cancel) ODER Legacy-Paid-Paket mit BEZAHLTER Anzahlung.
+// anzahlung_status (nicht onboarding_status/portal_zugang!) ist der verlaessliche
+// Paid-Marker — portal_zugang_freigeschaltet setzt auch die Basic-Auto-Freigabe.
+// Downgrade ist derive-at-read: der Dunning-Cron flippt den Abo-Status, der
+// naechste Read rendert Claimondo. use_custom_branding bleibt reiner User-Intent
+// (wird NIE automatisch geschrieben) — Re-Subscribe reaktiviert die Wirkung sofort.
+// Konsequenz fuer Paid-Onboarding: VOR bezahlter Anzahlung brandet auch das
+// eigene Portal nicht (Editor-Preview bleibt davon unberuehrt) — gewollt.
+
+/** Zusaetzliche Felder fuer das Bezahl-Praedikat (sachverstaendige-Row). */
+export type BezahlGateFields = {
+  paket: string | null
+  anzahlung_status: string | null
+}
+
+/** Abo-Status, die als "zahlend" gelten (Kanon: wie istNetzwerkpartner/Finder-Boost). */
+export const BRANDING_ZAHLEND_ABO_STATUS = ['aktiv', 'comped', 'ueberfaellig'] as const
+
+/** Pure: zaehlt dieser SV fuer die Whitelabel-Wirkung als zahlend? */
+export function brandingBezahlt(
+  sv: BezahlGateFields | null | undefined,
+  aboStatus: string | null | undefined,
+): boolean {
+  if (aboStatus && (BRANDING_ZAHLEND_ABO_STATUS as readonly string[]).includes(aboStatus)) {
+    return true
+  }
+  return (sv?.paket ?? 'basic') !== 'basic' && sv?.anzahlung_status === 'bezahlt'
+}

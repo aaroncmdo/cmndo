@@ -5,6 +5,7 @@ import type { BrandTheme } from '@/lib/branding/theme'
 import type { FontCategory } from '@/lib/branding/fonts'
 import Link from 'next/link'
 import { ArrowLeftIcon } from 'lucide-react'
+import { istBrandingBezahlt } from '@/lib/branding/bezahl-status'
 
 // AAR-422: /gutachter/profil/branding — dedizierte Seite für Logo-Upload +
 // Farb-Extraktion + Font-Auswahl + Live-Preview. Vom Profil über einen Link
@@ -50,6 +51,11 @@ export default async function BrandingPage() {
       ? { primary: sv.brand_primary, secondary: sv.brand_secondary ?? sv.brand_primary } as Partial<BrandTheme>
       : null)
 
+  // Paid-Perk (Aaron 03.08.): Editor bleibt fuer alle offen (configure first),
+  // die WIRKUNG ist zahlend-gebunden — der Banner macht den Zustand explizit,
+  // damit niemand konfiguriert und sich wundert, warum Kunden nichts sehen.
+  const brandingLive = await istBrandingBezahlt(sv.id)
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
       <Link
@@ -59,6 +65,21 @@ export default async function BrandingPage() {
         <ArrowLeftIcon className="w-4 h-4" />
         Zurück zum Profil
       </Link>
+      {brandingLive ? (
+        <div className="rounded-ios-md bg-success-soft text-success-strong px-4 py-3 text-sm">
+          Dein Branding ist <span className="font-semibold">live</span> — Kunden, Magic-Links und
+          E-Mails erscheinen in deinem Design.
+        </div>
+      ) : (
+        <div className="rounded-ios-md bg-info-soft text-info-strong px-4 py-3 text-sm">
+          Du kannst dein Branding hier konfigurieren und in der Vorschau sehen —{' '}
+          <span className="font-semibold">live geht es als Netzwerkpartner</span> (oder mit einem
+          bezahlten Paket).{' '}
+          <Link href="/gutachter/einstellungen" className="underline font-semibold">
+            Jetzt Netzwerkpartner werden
+          </Link>
+        </div>
+      )}
       <BrandingEditor
         initialLogoUrl={sv.logo_url ?? null}
         initialTheme={initialTheme}
