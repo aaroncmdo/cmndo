@@ -36,11 +36,15 @@ export async function GET(request: Request) {
 
     for (const stufe of REMINDER_STUFEN) {
       if (tage < stufe.tage) continue
+      // Review-Followup M-5 (re-entrant): Dedup nur innerhalb der AKTUELLEN Ueberfaelligkeits-
+      // Episode (versendet_am >= ueberfaellig_seit-Anker). Reminder einer FRUEHEREN Episode
+      // (SV zahlte, fiel spaeter erneut aus) blocken die neue Staffel nicht mehr.
       const { data: existing } = await db
         .from('sv_payment_reminders')
         .select('id')
         .eq('sv_id', abo.sv_id)
         .eq('reminder_typ', stufe.typ)
+        .gte('versendet_am', seit.toISOString())
         .limit(1)
         .maybeSingle()
       if (existing) continue
