@@ -1,27 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decideProposal } from '@/lib/orchestrator/proposals'
 import { buildTaskFromProposal } from '@/lib/orchestrator/task-from-proposal'
 import { getTypeStats } from '@/lib/orchestrator/stats'
 import { setAutoMode } from '@/lib/orchestrator/policy'
 import type { TaskProposalPayload } from '@/lib/orchestrator/types'
-
-async function requireAdminUserId(): Promise<string | null> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return null
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .maybeSingle()
-  return profile?.rolle === 'admin' ? user.id : null
-}
+import { requireAdminUserId } from '@/lib/auth/require-admin-user-id'
 
 export async function annehmenVorschlag(
   id: string,
