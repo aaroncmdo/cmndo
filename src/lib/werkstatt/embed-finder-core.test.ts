@@ -80,4 +80,29 @@ describe('buildWerkstattFinderLeadExtra', () => {
     expect(e.fahrzeugschaden_beschreibung).toBeNull()
     expect(e.gewerbe_flag).toBe(false)
   })
+  // Unverschuldet-Option (Aaron 04.08.): schuldfrage-Wahl -> Lead-Felder.
+  it('gegner (unverschuldet) -> nur schuldfrage=gegner, KEINE eigene_versicherung (haftpflicht-Szenario)', () => {
+    const e = buildWerkstattFinderLeadExtra({
+      werkstattId: null, werkstattEmail: null, kundeEmail: 'a@b.de',
+      schuldfrage: 'gegner', eigeneVersicherung: null,
+    })
+    expect(e.schuldfrage).toBe('gegner')
+    expect(e.eigene_versicherung).toBeUndefined()
+  })
+  it('eigenverantwortung + eigeneVersicherung -> beide gesetzt (kasko/selbstzahler)', () => {
+    const e = buildWerkstattFinderLeadExtra({
+      werkstattId: null, werkstattEmail: null, kundeEmail: 'a@b.de',
+      schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja',
+    })
+    expect(e.schuldfrage).toBe('eigenverantwortung')
+    expect(e.eigene_versicherung).toBe('ja')
+  })
+  it('eigenverantwortung OHNE eigeneVersicherung -> nichts gesetzt (sonst still-disqualifiziert)', () => {
+    const e = buildWerkstattFinderLeadExtra({
+      werkstattId: null, werkstattEmail: null, kundeEmail: 'a@b.de',
+      schuldfrage: 'eigenverantwortung', eigeneVersicherung: null,
+    })
+    expect(e.schuldfrage).toBeUndefined()
+    expect(e.eigene_versicherung).toBeUndefined()
+  })
 })

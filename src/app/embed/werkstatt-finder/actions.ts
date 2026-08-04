@@ -34,9 +34,9 @@ export type WerkstattFinderLeadPayload = {
   gewerbe?: boolean | null
   modell?: string | null
   beschreibung?: string | null
-  // F1 (Entry-Point-Audit 24.07.): Abrechnungsweg-Wahl -> Lead-Szenario. Kasko/Selbstzahler = beide
-  // 'eigenverantwortung', getrennt per eigene_versicherung. BEIDE zusammen (sonst still-disqualifiziert).
-  schuldfrage?: 'eigenverantwortung' | null
+  // F1 (Entry-Point-Audit 24.07.) + Unverschuldet-Option (Aaron 04.08.): Schuldfrage-Wahl -> Lead-Szenario.
+  // 'gegner' (unverschuldet) -> haftpflicht; 'eigenverantwortung' + eigeneVersicherung -> kasko/selbstzahler.
+  schuldfrage?: 'eigenverantwortung' | 'gegner' | null
   eigeneVersicherung?: 'ja' | 'nein' | null
   // §10 Doppel-Lead-Falle: bestehender Flow-Token (Re-Entry) -> UPDATE statt INSERT.
   // Der Token ist die Capability; er wird server-seitig zu lead_id aufgeloest (nie roher leadId).
