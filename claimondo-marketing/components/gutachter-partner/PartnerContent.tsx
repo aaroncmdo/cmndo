@@ -10,7 +10,7 @@ import { useTranslations } from 'next-intl'
 
 const SCHRITTE_ICONS = [ClipboardListIcon, BadgeCheckIcon, MapPinIcon, CheckIcon]
 
-export function PartnerContent({ warteliste }: { warteliste: number }) {
+export function PartnerContent({ netzwerk }: { netzwerk: number | null }) {
   const t = useTranslations('gutachter_partner')
   const schritte = t.raw('content.schritte') as Array<{ titel: string; text: string }>
   const voraussetzungen = t.raw('content.voraussetzungen') as string[]
@@ -82,16 +82,29 @@ export function PartnerContent({ warteliste }: { warteliste: number }) {
           </ul>
         </div>
 
-        {/* Sektion 4 — Warteliste-Framing */}
+        {/* Sektion 4 — Sofort-Start-CTA (Freemium; ersetzt das Warteliste-Framing,
+            Aaron-Entscheid 04.08.: Self-Service ist live, keine Verknappung mehr) */}
         <div className="bg-claimondo-navy/[0.04] border border-claimondo-navy/[0.08] rounded-2xl px-6 py-5">
           <h2 className="text-lg font-bold tracking-[-.018em] mb-2">
-            {t('content.warteliste_heading')}
+            {t('content.sofort_heading')}
           </h2>
-          <p className="text-sm text-claimondo-shield leading-relaxed">
-            {t('content.warteliste_text_pre')}{' '}
-            <strong className="text-claimondo-navy">{t('content.warteliste_text_sv', { anzahl: warteliste })}</strong>{' '}
-            {t('content.warteliste_text_post')}
+          <p className="text-sm text-claimondo-shield leading-relaxed mb-4">
+            {t('content.sofort_text')}
+            {netzwerk ? (
+              <>
+                {' '}
+                <strong className="text-claimondo-navy">
+                  {t('content.sofort_netzwerk_zusatz', { anzahl: netzwerk })}
+                </strong>
+              </>
+            ) : null}
           </p>
+          <a
+            href="https://app.claimondo.de/sv/registrieren"
+            className="inline-flex items-center justify-center rounded-full bg-claimondo-navy px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-claimondo-ondo"
+          >
+            {t('content.sofort_cta')}
+          </a>
         </div>
 
         {/* Sektion 4b — Ratgeber-Crosslinks (B2B-SEO-Topic-Pages) */}
