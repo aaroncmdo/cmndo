@@ -137,9 +137,9 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
   const billing = await ladePartnerBilling('werkstatt', id)
 
   // QR-Code (regulaerer Kunden-Einstieg /start/werkstatt/<id>) mit den reinen Server-Utils
-  // direkt generieren — bewusst NICHT die 'use server'-Action werkstattQrSvg (die ist fuer
-  // Client-On-Demand-Calls gedacht; ein Server-Loader nutzt die Primitives, kein
-  // Action-Call-waehrend-des-Renders). generateQrCodeSvg ist eine reine, render-sichere Util.
+  // direkt generieren — generateQrCodeSvg ist eine reine, render-sichere Util.
+  // (Die fruehere 'use server'-Action werkstattQrSvg wurde im Dead-Action-Sweep
+  // 04.08. geloescht — sie hatte nie einen Prod-Consumer.)
   const qrUrl = werkstattStartUrl(id)
   const qrSvg = await generateQrCodeSvg(qrUrl, 300)
 

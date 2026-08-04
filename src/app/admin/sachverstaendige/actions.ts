@@ -13,7 +13,8 @@
 //   - /admin/sachverstaendige/anlegen/page.tsx → AnlegenTabs (Solo / Büro /
 //     Akademie / Sub-SV Wizards)
 //   - anlegen/actions.ts enthält die Backend-Actions (anlegeSv, anlegeBuero,
-//     anlegeAkademie, anlegeSubSv, listBueroOrganisationen)
+//     anlegeAkademie; anlegeSubSv + listBueroOrganisationen im Dead-Action-Sweep
+//     04.08. geloescht — 0 Consumer, Sub-SV-Anlage laeuft nicht ueber diesen Pfad)
 //   - /gutachter/willkommen → Vertrag + Stripe-Checkout
 //   - Stripe-Webhook setzt portal_zugang_freigeschaltet=true nach Zahlung
 //
