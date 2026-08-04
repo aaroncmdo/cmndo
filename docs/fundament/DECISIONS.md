@@ -177,3 +177,17 @@
 CI-Step `RUN_STORNO_DSGVO_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` für `db()`; `--workers=1`; Admin-Creds aus dem Seed-JSON, **kein** `TEST_ADMIN_*`) + Cleanup-Step `if: always()` — das Wegwerf-**Admin**-Konto ist sensibler als die Wegwerf-Kunden der anderen Journeys und bleibt nicht bis zum nächsten Lauf liegen. Lokal prod-grün 04.08.: Smoke **3/3 passed** + Seed-assert **9/9**.
 
 **Review:** offen (im PR an Aaron).
+
+## 2026-08-05 · B-Journey-Suite · J2 (Meldung alle Kanäle) als CI-Step — Suite damit 10/10 code-komplett
+
+**J2 gebaut (PR gestackt auf #4995, Branch `kitta/fundament-journey-j2-meldung`):** neuer Seed `scripts/smoke/meldung-kanaele-seed.mjs` + Spec `meldung-kanaele-smoke.spec.ts` — **drei Meldewege = die drei Melde-Muster** aus j02 (Wrapper / lead-first / Kern-direkt), aufbauend auf den empirischen Rezepten des Entry-Point-Mapping-Audits (Wege 6/7/8, Session 264a7df6, 03.08.).
+
+**Kanäle:** **A** Kunde-Wizard `/kunde/schaden-melden` (Ein-Formular, Pflicht nur PLZ, keine Terminwahl, kein `reserviere()`; `meldeNeuenSchaden` → `createLead` → `convertLeadToFall` = leads + claims + **pflichtdokumente**). **B** `POST /api/v1/melde-schaden` (anon, Zod-Minimum ohne `sv_id`/`slot_*` → keine Reservierung; gfa + lead + **flow_link**; **2. POST mit derselben Nummer → `bereits_angelegt`** = j02-Fehlerfall „Doppel-Submit idempotent" erstmals CI-bewiesen). **C** Gegner-Schadenkarte `/schaden/[token]` (geseedete Wegwerf-Karte `status='gebunden'`; 6-Step-Wizard, Pflicht nur Name+Consent; Direkt-Claim + verursacher-Party + interner `vs_meldung`-Fallback-Task).
+
+**Isolations-Modell (wichtigste Erkenntnis der Erhebung):** identitätsbasiert, NICHT `SIDE_EFFECT_MODE` (das erreicht den prod-Prozess nicht). A: `@claimondo.test`+`telefon=NULL` → `fall_eroeffnet` hat keine Empfänger. B: **Drama-Festnetznummer** (BNetzA-Fiktionsrange 030 23125xxx, je Lauf variiert gegen phone-cap 3/24h + Cross-Run-Dedup) → WA-Precheck false, SMS inert, kein Email-Feld ⇒ der Spec **asserted `kanal==='none'`** als Runtime-Beweis. C: Submit ohne Telefon (Airdrop unterbleibt → Fallback-Task ist das Assert) + Wegwerf-Firma OHNE `firmen_flotten_konten`-Zeile (→ 0 FM-WA-Nummern, `konto-firma.ts:50-60`); **nie einen Versicherer wählen** (VS-Meldung prod-scharf, STOP-Marker firmen-flotte) und `/unfallmeldung` nicht bestätigen.
+
+**Clean-Reihenfolgen (MCP-verifiziert):** gfa VOR leads (`konvertiert_zu_lead_id` NO ACTION) · `tasks.lead_id` ohne CASCADE → vor leads · vehicles NACH claims (`claims.vehicle_id` RESTRICT) · personen nach claims (parties `person_id` SET NULL) · `partner_provisionen` über alle drei Bezüge. `consent_records` (B) trägt keine Subjekt-Referenz (Befund B8) → bleibt als anonyme Audit-Zeile.
+
+CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Lokal prod-grün 05.08.: Smoke **3/3 passed** (erster Lauf) + Seed-assert **11/11** + Clean vollständig. **Damit haben alle 10 Journeys einen CI-Step; §9-P2-Nachweis = erster post-merge-e2e-Lauf nach Kette-Merge. Rest: J9-`lifecycle` (opt-in, Aaron).**
+
+**Review:** offen (im PR an Aaron).
