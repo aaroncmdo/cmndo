@@ -33,7 +33,8 @@ export function NetzwerkpartnerCta({
         </h3>
         <p className="text-sm text-claimondo-ondo mt-2">
           Als Netzwerkpartner erscheinst du bevorzugt im Gutachter-Finder deiner gebundenen
-          Kunden — und deine Partner-Werkstätten stehen oben im „Dein Netzwerk"-Bereich.
+          Kunden, deine Partner-Werkstätten stehen oben im „Dein Netzwerk"-Bereich — und dein
+          eigenes Branding (Logo &amp; Farben) geht für deine Kunden live.
         </p>
       </div>
 

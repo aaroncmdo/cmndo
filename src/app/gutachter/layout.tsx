@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import GutachterShell from './GutachterShell'
 import { svEigenBrandingErlaubt } from '@/lib/branding/gate'
+import { istBrandingBezahlt } from '@/lib/branding/bezahl-status'
 
 export default async function GutachterLayout({
   children,
@@ -81,7 +82,8 @@ export default async function GutachterLayout({
   // AAR-419 Follow-up: hydrateTheme() statt raw-Fallback — garantiert V2-
   // Volle-Hydrierung auch für alte V1-only brand_theme-Records in der DB
   // (sonst waren primaryHover/Status/Neutrale undefined im Consumer).
-  const useBrand = svEigenBrandingErlaubt(sv)
+  // Paid-Perk (Aaron 03.08.): Portal-Wirkung nur fuer zahlende SVs.
+  const useBrand = svEigenBrandingErlaubt(sv) && (await istBrandingBezahlt(sv?.id ?? null))
   const { hydrateTheme } = await import('@/lib/branding/theme')
   const brandTheme = useBrand
     ? hydrateTheme(
