@@ -28,6 +28,9 @@ export async function registriereMaklerSelf(
   const versicherungId = String(formData.get('versicherung_id') ?? '').trim() || null
   const maklerpoolId = String(formData.get('maklerpool_id') ?? '').trim() || null
   const rechtsform = String(formData.get('rechtsform') ?? '').trim()
+  // Netzwerk-Kalt-Einladung (optional): Token aus ?einladung= der Registrier-URL,
+  // Redemption best-effort nach der Anlage (Muster werkstatt/registrieren).
+  const einladungToken = String(formData.get('einladung') ?? '').trim()
   // Empfehlungsstruktur: optionaler Werber-Bezug aus dem Registrier-Link (?werber=<promo_code>).
   const werber = String(formData.get('werber') ?? '').trim() || null
   // Checkbox: nicht angehakt -> false (= regelbesteuert). Bewusst IMMER boolean (nie null),
@@ -127,6 +130,17 @@ export async function registriereMaklerSelf(
     return {
       ok: false,
       error: 'Registrierung konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.',
+    }
+  }
+
+  // 4b. Netzwerk-Kalt-Einladung einloesen (Auto-Kante zum Einlader) — best-effort,
+  // bricht die Registrierung NIE.
+  if (einladungToken) {
+    try {
+      const { loeseNetzwerkEinladungEin } = await import('@/lib/netzwerk/einladung')
+      await loeseNetzwerkEinladungEin(admin, einladungToken, result.userId)
+    } catch (err) {
+      console.error('[registriereMaklerSelf] netzwerk-einladung redemption (non-critical):', err)
     }
   }
 
