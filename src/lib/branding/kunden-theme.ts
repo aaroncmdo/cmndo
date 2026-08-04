@@ -18,6 +18,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme, type BrandThemeV2 } from './theme'
 import { kundenBrandingErlaubt } from './gate'
+import { istBrandingBezahlt } from './bezahl-status'
 
 export type KundenThemeResult = {
   theme: BrandThemeV2
@@ -64,6 +65,11 @@ export async function resolveKundenTheme(kundeId: string): Promise<KundenThemeRe
 
   // 3) Nur bei verifiziertem SV + aktivem Custom-Branding wird das Theme ausgerollt
   if (!kundenBrandingErlaubt(sv)) return fallback
+
+  // 3b) Paid-Perk (Aaron 03.08.): Wirkung nur fuer zahlende SVs (Abo oder
+  // Paid-Paket) — Admin-Helper, weil der Kunden-Kontext die Abo-Row per RLS
+  // nicht lesen darf. Fail-closed -> Claimondo-Default.
+  if (!(await istBrandingBezahlt(fall.sv_id))) return fallback
 
   // 4) Theme hydrieren — V2 wenn vorhanden, sonst aus Legacy-Primary generieren
   const theme = hydrateTheme(
