@@ -4,13 +4,12 @@
 // AAR-172: Ersetzt den 210-KB-Monolithen FallakteClient.tsx endgültig
 // (Monolith wurde gelöscht, siehe AAR-172 Commit).
 
-import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { ListIcon, FolderOpenIcon, MessageCircleIcon, GitBranchIcon, ActivityIcon, ClockIcon } from 'lucide-react'
-import { TabDropContent } from '@/components/ui/TabDropContent'
 import { FallProvider, type FallLike, type LeadLike } from './FallContext'
-import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
+// C4d/e (Fundament „Eine Akte"): Staff rendert ueber den <FallAkte layout='tabs'>-Kern.
+import { FallAkte } from '@/components/fall-akte/FallAkte'
+import type { FallAkteConfig } from '@/components/fall-akte/types'
 // AAR-687: alle 5 Tabs leben jetzt im _tabs/-Ordner (private-folder-
 // Konvention). Vorher war 4× tabs/ + 1× _tabs/ parallel.
 import UebersichtTab from './_tabs/UebersichtTab'
@@ -43,8 +42,6 @@ import type { ProjectedEvent } from '@/lib/claims/timeline-projection'
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-770: Mitteilungs-Banner ganz oben in der Fallakte
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
-// AAR-776: Shared Tab-Bar
-import { FallakteTabs } from '@/components/shared/fall-tabs'
 
 // Mapping FallakteRolle → shared PhasenRolle.
 // Admin-Route sieht im Normalfall nur admin + kundenbetreuer; dispatch und
@@ -68,6 +65,9 @@ const TABS: { id: TabId; label: string; icon: typeof ListIcon }[] = [
   { id: 'verlauf', label: 'Verlauf', icon: ClockIcon },
   { id: 'timeline', label: 'Timeline', icon: ActivityIcon },
 ]
+
+// C4d/e: minimales vm — nur was realtime braucht; header/slots/tabContent schliessen ueber den Scope.
+type StaffTabsVm = { fallId: string; claimId: string | null }
 
 // DokumenteTab erwartet eine große Menge Props aus dem alten Monolithen.
 // Wir reichen die hier durch — siehe ShellProps unten.
@@ -144,125 +144,97 @@ export default function FallakteShell({
   futureEvents,
   lifecycle,
 }: ShellProps) {
-  const router = useRouter()
-  const search = useSearchParams()
-  const tabParam = (search.get('tab') as TabId) ?? 'uebersicht'
-  const [activeTab, setActiveTabState] = useState<TabId>(
-    TABS.some((t) => t.id === tabParam) ? tabParam : 'uebersicht',
-  )
-
-  function setActiveTab(id: TabId) {
-    setActiveTabState(id)
-    // URL-Param sync — zurück-Button + Deep-Links funktionieren dadurch
-    const params = new URLSearchParams(search?.toString() ?? '')
-    params.set('tab', id)
-    router.replace(`?${params.toString()}`, { scroll: false })
-  }
-
   // AAR-567 (V1) / AAR-727 / CMM-44 MP-4b: Rolle-Mapping für FallPhasenPanel.
-  // Die Panel-Komponente ruft buildClaimPhasePipeline(lifecycle) intern auf.
   const phasenRolle = toPhasenRolle(userRolle)
+
+  // C4d/e: Staff-Fallakte ueber den <FallAkte layout='tabs'>-Kern. Der activeTab-State + ?tab=-Sync
+  // leben jetzt im FallAkteTabs-Controller; hier wird nur die Config gebaut. FallProvider wrappt
+  // <FallAkte> (unten), damit die Tab-Inhalte (UebersichtTab via FallContext etc.) Fall-Context haben.
+  const vm: StaffTabsVm = { fallId: fall.id, claimId }
+
+  const config: FallAkteConfig<StaffTabsVm, never> = {
+    layout: 'tabs',
+    zones: () => [],
+    zoneComponents: {},
+    tabs: TABS,
+    realtime: (v) => ({ fallId: v.fallId, claimId: v.claimId }),
+    // AAR-758: ein gemeinsamer Header-Block — FallIdentityHeader (Fallnr · Kunde · Ort) + ActionBar +
+    // Status/Endzustand/Kanzlei-Dropdowns im actions-Slot rechts.
+    header: () => ({
+      custom: (
+        <FallIdentityHeader
+          rolle="admin"
+          fallNummer={fall.claim_nummer ?? fall.id.slice(0, 8)}
+          kundenName={
+            lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null : null
+          }
+          ort={(fall.schadens_ort as string | null) ?? null}
+        >
+          <FallActionBar result={subphase} fallId={fall.id} compact />
+          {claimStatus && <FallStatusBadge status={claimStatus} size="sm" />}
+          <FiktivAbrechnungBadge reparaturwunsch={claimReparaturwunsch} size="sm" />
+          {claimId && (
+            <EndzustandDropdown
+              claimId={claimId}
+              currentStatus={claimStatus ?? 'dispatch_done'}
+              viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+            />
+          )}
+          {claimId && (
+            <KanzleiWunschDropdown
+              claimId={claimId}
+              currentWunsch={claimKanzleiWunsch}
+              viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
+              paketVersandPending={kanzleiPaketPending}
+            />
+          )}
+        </FallIdentityHeader>
+      ),
+    }),
+    slots: () => ({
+      // AAR-567/AAR-727: linke Spalte = Phasen-Pipeline (aside).
+      aside: (
+        <FallPhasenPanel
+          lifecycle={lifecycle}
+          fallId={fall.id}
+          rolle={phasenRolle}
+          variant="aside"
+        />
+      ),
+      sidebar: <FallSidebar kundenbetreuer={kundenbetreuer} sv={sv} />,
+      // AAR-770: Mitteilungs-Banner ganz oben — vor dem Identity-Header.
+      topBlocks: (
+        <div className="px-4 sm:px-6 pt-4">
+          <FallMitteilungenBanner fallId={fall.id} rolle={userRolle} />
+        </div>
+      ),
+    }),
+    // AAR-307: Ad-hoc Task-Anlegen aus der Tab-Bar.
+    tabRightSlot: <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />,
+    // Tab-Inhalte VORGERENDERT (heterogene Props); der Controller mountet nur den aktiven.
+    tabContent: {
+      uebersicht: <UebersichtTab />,
+      dokumente: <DokumenteTab {...dokumenteTabProps} />,
+      kommunikation: <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />,
+      prozess: <ProzessTab subphase={subphase} />,
+      // AAR-843: Timeline-View fuer den Verlaufs-Tab.
+      verlauf: (
+        <TimelineView
+          events={timelineEvents}
+          futureEvents={futureEvents}
+          viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : userRolle === 'sachverstaendiger' ? 'sv' : 'kunde'}
+          variant="full"
+          showKategorieBadge
+        />
+      ),
+      // AAR-544 (C7): unified Event-Stream fuer den Timeline-Tab.
+      timeline: <TimelineTab events={events} />,
+    },
+  }
 
   return (
     <FallProvider fall={fall} lead={lead} claim={claim} userRolle={userRolle}>
-      <FallRealtimeRefresh fallId={fall.id} claimId={claimId} />
-      <div className="flex flex-col lg:flex-row lg:h-[calc(100vh-96px)] gap-0">
-        {/* AAR-567 (V1) / AAR-727: Linke Spalte — Glass-Panel (aside). */}
-        <aside className="lg:w-72 xl:w-80 shrink-0 overflow-y-auto">
-          <div className="px-4 py-4">
-            <FallPhasenPanel
-              lifecycle={lifecycle}
-              fallId={fall.id}
-              rolle={phasenRolle}
-              variant="aside"
-            />
-          </div>
-        </aside>
-
-        {/* Haupt-Column: Konsolidierter Header + Tabs + Content */}
-        <main className="flex-1 overflow-y-auto min-w-0">
-          {/* AAR-758: Ein gemeinsamer Header-Block statt vorher zwei (IdentityHeader + ActionBar).
-              FallIdentityHeader zeigt Fallnummer · Kunde · Ort, die ActionBar-
-              Buttons landen im actions-Slot rechts. Phase-Label weggelassen —
-              steht bereits in der Aside-Phasen-Pipeline, keine Dopplung mehr. */}
-          {/* AAR-770: Mitteilungs-Banner ganz oben — vor dem Identity-Header */}
-          <div className="px-4 sm:px-6 pt-4">
-            <FallMitteilungenBanner fallId={fall.id} rolle={userRolle} />
-          </div>
-          <FallIdentityHeader
-            rolle="admin"
-            fallNummer={fall.claim_nummer ?? fall.id.slice(0, 8)}
-            kundenName={
-              lead
-                ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
-                : null
-            }
-            ort={(fall.schadens_ort as string | null) ?? null}
-          >
-            <FallActionBar result={subphase} fallId={fall.id} compact />
-            {/* AAR-840: Status-Badge + Endzustand-Dropdown rechts im Header.
-                Sichtbar für Admin (immer) und KB (durch EndzustandDropdown
-                rolle-intern guarded). claimId-Guard: ohne Claim kein Dropdown. */}
-            {claimStatus && (
-              <FallStatusBadge status={claimStatus} size="sm" />
-            )}
-            {/* FlowLink-Review C: fiktiv-Szenario sichtbar machen (rendert null wenn
-                nicht fiktiv). Reparatur/Werkstatt wird trotzdem angeboten. */}
-            <FiktivAbrechnungBadge reparaturwunsch={claimReparaturwunsch} size="sm" />
-            {claimId && (
-              <EndzustandDropdown
-                claimId={claimId}
-                currentStatus={claimStatus ?? 'dispatch_done'}
-                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
-              />
-            )}
-            {/* AAR-841 Self-Review-Fix: KanzleiWunschDropdown war als shared
-                Component gebaut aber nicht eingebunden. KB sieht jetzt den
-                aktuellen Wunsch + kann Override triggern. */}
-            {claimId && (
-              <KanzleiWunschDropdown
-                claimId={claimId}
-                currentWunsch={claimKanzleiWunsch}
-                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : 'kunde'}
-                paketVersandPending={kanzleiPaketPending}
-              />
-            )}
-          </FallIdentityHeader>
-          {/* AAR-776: Tab-Bar als shared Component (FallakteTabs) — gleiches
-              Component wie SV-Fallakte und Kunde-Fallakte. */}
-          <FallakteTabs
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            rightSlot={
-              <TaskAnlegenButton fallId={fall.id} rolle={userRolle} label="Task anlegen" />
-            }
-          />
-
-          {/* Content */}
-          <TabDropContent tabKey={activeTab} className="px-4 sm:px-6 py-6">
-            {activeTab === 'uebersicht' && <UebersichtTab />}
-            {activeTab === 'dokumente' && <DokumenteTab {...dokumenteTabProps} />}
-            {activeTab === 'kommunikation' && (
-              <KommunikationTab currentUserId={currentUserId} teilnehmer={teilnehmer} />
-            )}
-            {activeTab === 'prozess' && <ProzessTab subphase={subphase} />}
-            {activeTab === 'verlauf' && (
-              <TimelineView
-                events={timelineEvents}
-                futureEvents={futureEvents}
-                viewerRole={userRolle === 'kundenbetreuer' ? 'kb' : userRolle === 'admin' ? 'admin' : userRolle === 'sachverstaendiger' ? 'sv' : 'kunde'}
-                variant="full"
-                showKategorieBadge
-              />
-            )}
-            {activeTab === 'timeline' && <TimelineTab events={events} />}
-          </TabDropContent>
-        </main>
-
-        {/* Sidebar */}
-        <FallSidebar kundenbetreuer={kundenbetreuer} sv={sv} />
-      </div>
+      <FallAkte config={config} vm={vm} />
     </FallProvider>
   )
 }

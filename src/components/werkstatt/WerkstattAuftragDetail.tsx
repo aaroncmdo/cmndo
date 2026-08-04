@@ -40,6 +40,16 @@ import { Button, Modal } from '@/components/primitives'
 import { KvaHochladenModal } from '@/components/werkstatt/KvaHochladenModal'
 import { ReparaturAbschlussModal } from '@/components/werkstatt/ReparaturAbschlussModal'
 
+// C4c (Fundament „Eine Akte"): Werkstatt rendert ueber den <FallAkte layout='columns'>-Kern.
+import { FallAkte } from '@/components/fall-akte/FallAkte'
+import type { FallAkteConfig } from '@/components/fall-akte/types'
+import {
+  werkstattZonen,
+  werkstattZoneComponents,
+  type WerkstattVm,
+  type WerkstattZoneKey,
+} from '@/components/werkstatt/WerkstattDisplayZones'
+
 const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 const EUR2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
 
@@ -497,8 +507,6 @@ export function WerkstattAuftragDetail({
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
   const kundeName = auftrag.kunde_name ?? '–'
-  const fmtDatum = (iso: string | null): string =>
-    iso ? new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '–'
 
   // Früh-Zustand: der Kunde ist noch mitten in der Ersterfassung — es gibt noch
   // kein Fahrzeug, keinen Reparaturtermin und kein Gutachten. Statt einer nackten
@@ -508,262 +516,121 @@ export function WerkstattAuftragDetail({
     !auftrag.reparatur_termin_id &&
     !auftrag.gutachten_fertiggestellt_am
 
-  return (
-    <div className="p-4 md:p-6 max-w-3xl lg:max-w-5xl mx-auto space-y-4">
-      <header className="space-y-1">
-        <div className="flex items-center gap-2 flex-wrap">
-          <h1 className="text-heading-md text-claimondo-navy font-bold">
-            {auftrag.claim_nummer ?? 'Auftrag'}
-          </h1>
-          {typ && (
-            <StatusBadge tone="neutral" size="xs">{typ}</StatusBadge>
-          )}
-          {auftrag.meine_rolle === 'beide' && auftrag.provision_betrag_netto != null && (
-            <StatusBadge tone="info" size="xs">
-              + {EUR.format(auftrag.provision_betrag_netto)} Vermittlung
-            </StatusBadge>
-          )}
-        </div>
-        <p className="text-body-sm text-claimondo-navy font-medium">{kundeName}</p>
-        <p className="text-body-sm text-claimondo-ondo">
-          {[auftrag.fahrzeug_hersteller, auftrag.fahrzeug_modell].filter(Boolean).join(' ') || '–'}
-          {auftrag.kennzeichen ? ` · ${auftrag.kennzeichen}` : ''}
-        </p>
-      </header>
+  const vm: WerkstattVm = { auftrag, extra: extra ?? null, kundeName }
 
-      {/* AV3: Auffahrunfall-Hinweis fuer die Werkstatt (Aaron 09.07.). */}
-      {istAuffahrunfall(auftrag.unfallart) && (
+  // C4c: die Werkstatt-Shell kommt aus dem <FallAkte layout='columns'>-Kern. wrapperClassName haelt
+  // die exakte Werkstatt-Breite (max-w-3xl/5xl + space-y-4); header.custom = der Auftrags-Header;
+  // topBlocks = Auffahrunfall-Hinweis; die Display-Cards sind Zonen (2-Spalten-Masonry); footer =
+  // interaktives Segment (Reparatur/Vermittlung) + Copilot + Chat full-width. Behavior-preserving.
+  const config: FallAkteConfig<WerkstattVm, WerkstattZoneKey> = {
+    layout: 'columns',
+    wrapperClassName: 'p-4 md:p-6 max-w-3xl lg:max-w-5xl mx-auto space-y-4',
+    header: () => ({
+      custom: (
+        <header className="space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-heading-md text-claimondo-navy font-bold">
+              {auftrag.claim_nummer ?? 'Auftrag'}
+            </h1>
+            {typ && (
+              <StatusBadge tone="neutral" size="xs">{typ}</StatusBadge>
+            )}
+            {auftrag.meine_rolle === 'beide' && auftrag.provision_betrag_netto != null && (
+              <StatusBadge tone="info" size="xs">
+                + {EUR.format(auftrag.provision_betrag_netto)} Vermittlung
+              </StatusBadge>
+            )}
+          </div>
+          <p className="text-body-sm text-claimondo-navy font-medium">{kundeName}</p>
+          <p className="text-body-sm text-claimondo-ondo">
+            {[auftrag.fahrzeug_hersteller, auftrag.fahrzeug_modell].filter(Boolean).join(' ') || '–'}
+            {auftrag.kennzeichen ? ` · ${auftrag.kennzeichen}` : ''}
+          </p>
+        </header>
+      ),
+    }),
+    zones: werkstattZonen,
+    zoneComponents: werkstattZoneComponents,
+    slots: () => ({
+      // AV3: Auffahrunfall-Hinweis fuer die Werkstatt (Aaron 09.07.) — full-width ueber der Masonry.
+      topBlocks: istAuffahrunfall(auftrag.unfallart) ? (
         <div className="rounded-ios-md bg-warning-soft border border-warning/30 px-4 py-3">
           <p className="text-body-sm text-warning-strong font-medium">Auffahrunfall</p>
           <p className="text-body-xs text-warning-strong/90">
             Stoßfänger muss ausgebaut werden, Hebebühne benötigt.
           </p>
         </div>
-      )}
-
-      {/* Display-Info-Karten: auf Desktop 2-spaltig (CSS-Columns, Single-Render).
-          Das interaktive Segment (KVA/Reparaturtermin/Modals) + Copilot + Chat bleiben
-          full-width DARUNTER. [&>*] targetet die 4 SectionCards (Fragment flacht ab) ->
-          break-inside-avoid haelt jede Karte zusammen, mb-4 ersetzt space-y-4 hier. */}
-      <div className="lg:columns-2 lg:gap-4 [&>*]:mb-4 [&>*]:break-inside-avoid">
-
-      <SectionCard title="Fall">
-        <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
-          <div>
-            <dt className="text-body-xs text-claimondo-ondo">Kunde</dt>
-            <dd className="text-claimondo-navy font-medium">{kundeName}</dd>
-          </div>
-          <div>
-            <dt className="text-body-xs text-claimondo-ondo">Schaden</dt>
-            <dd className="text-claimondo-navy">{auftrag.schadenart ?? '–'}</dd>
-          </div>
-          <div>
-            <dt className="text-body-xs text-claimondo-ondo">Gutachter</dt>
-            <dd className="text-claimondo-navy">{auftrag.gutachter_firmenname ?? '–'}</dd>
-          </div>
-        </dl>
-      </SectionCard>
-
-      {/* Zusatz-Kontext (extra aus v_claim_full nach RLS-Gate): Fahrzeug-Detail,
-          Vorschaeden, Ansprechpartner — fuer die Reparatur-Einordnung + Koordination. */}
-      {extra && (
+      ) : null,
+      // Interaktives Segment (Reparatur/Vermittlung) + Copilot + Chat — full-width DARUNTER.
+      // Fragment (kein Wrapper-div) -> die Bloecke bleiben direkte Kinder des space-y-4-Wrappers
+      // (die SectionCards tragen ihr eigenes mt-3, Copilot/Chat erben das space-y-4).
+      footer: (
         <>
-          {(extra.fahrzeug_baujahr != null ||
-            extra.erstzulassung ||
-            extra.kilometerstand != null ||
-            extra.fahrzeug_farbe ||
-            extra.hergang) && (
-            <SectionCard title="Fahrzeug & Unfall">
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
-                {extra.fahrzeug_baujahr != null && (
-                  <div>
-                    <dt className="text-body-xs text-claimondo-ondo">Baujahr</dt>
-                    <dd className="text-claimondo-navy">{String(extra.fahrzeug_baujahr)}</dd>
-                  </div>
-                )}
-                {extra.erstzulassung && (
-                  <div>
-                    <dt className="text-body-xs text-claimondo-ondo">Erstzulassung</dt>
-                    <dd className="text-claimondo-navy">{fmtDatum(extra.erstzulassung)}</dd>
-                  </div>
-                )}
-                {extra.kilometerstand != null && (
-                  <div>
-                    <dt className="text-body-xs text-claimondo-ondo">Kilometerstand</dt>
-                    <dd className="text-claimondo-navy">{String(extra.kilometerstand)} km</dd>
-                  </div>
-                )}
-                {extra.fahrzeug_farbe && (
-                  <div>
-                    <dt className="text-body-xs text-claimondo-ondo">Farbe</dt>
-                    <dd className="text-claimondo-navy">{extra.fahrzeug_farbe}</dd>
-                  </div>
-                )}
-              </dl>
-              {extra.hergang && (
-                <div className="mt-2">
-                  <p className="text-body-xs text-claimondo-ondo">Unfallhergang</p>
-                  <p className="text-body-sm text-claimondo-navy">{extra.hergang}</p>
-                </div>
+          {segment === 'reparatur' ? (
+            <>
+              {istFrueh && (
+                <SectionCard title="Status" className="mt-3">
+                  <p className="text-body-sm text-claimondo-ondo">
+                    Der Kunde bearbeitet gerade seinen Fall (Ersterfassung). Fahrzeug- und
+                    Schadendaten erscheinen hier, sobald der Flow durchlaufen ist.
+                  </p>
+                </SectionCard>
               )}
-            </SectionCard>
-          )}
-
-          {extra.schadensfotos.length > 0 && (
-            <SectionCard title="Schadensfotos">
-              <p className="text-body-xs text-claimondo-ondo mb-2">
-                Vom Kunden gemeldete Schadensbilder — Grundlage für den Kostenvoranschlag.
-              </p>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {extra.schadensfotos.map((url, i) => (
-                  <a
-                    key={i}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block aspect-square overflow-hidden rounded-ios-md border border-claimondo-border"
-                  >
-                    <img src={url} alt={`Schadensfoto ${i + 1}`} className="w-full h-full object-cover" />
-                  </a>
-                ))}
-              </div>
-            </SectionCard>
-          )}
-
-          <SectionCard title="Vorschäden">
-            {extra.hat_vorschaeden || extra.vorschaden_anzahl ? (
-              <div className="text-body-sm text-claimondo-navy space-y-1">
-                <p className="font-medium text-warning-strong">
-                  Vorschäden gemeldet{extra.vorschaden_anzahl ? ` (${extra.vorschaden_anzahl})` : ''}
-                </p>
-                {extra.vorschaden_erkannt && <p>Erkannt/dokumentiert: {extra.vorschaden_erkannt}</p>}
-                {extra.vorschaden_letzter_datum && (
-                  <p>Letzter Vorschaden: {fmtDatum(extra.vorschaden_letzter_datum)}</p>
-                )}
-              </div>
-            ) : (
-              <p className="text-body-sm text-claimondo-ondo">Keine Vorschäden gemeldet.</p>
-            )}
-          </SectionCard>
-
-          <SectionCard title="Ansprechpartner">
-            <div className="space-y-3 text-body-sm">
-              <div>
-                <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">Kunde</p>
-                <p className="text-claimondo-navy font-medium">
-                  {[extra.kunde_vorname, extra.kunde_nachname].filter(Boolean).join(' ') || kundeName}
-                </p>
-                {extra.kunde_telefon && (
-                  <a
-                    href={`tel:${extra.kunde_telefon}`}
-                    className="text-claimondo-ondo hover:text-claimondo-navy"
-                  >
-                    {extra.kunde_telefon}
-                  </a>
-                )}
-                {extra.kunde_email && (
-                  <a
-                    href={`mailto:${extra.kunde_email}`}
-                    className="block text-claimondo-ondo hover:text-claimondo-navy truncate"
-                  >
-                    {extra.kunde_email}
-                  </a>
-                )}
-              </div>
-              {extra.betreuer && (
-                <div>
-                  <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">
-                    Claimondo-Betreuer
-                  </p>
-                  <p className="text-claimondo-navy font-medium">
-                    {[extra.betreuer.vorname, extra.betreuer.nachname].filter(Boolean).join(' ') ||
-                      'Betreuer'}
-                  </p>
-                  {extra.betreuer.telefon && (
-                    <a
-                      href={`tel:${extra.betreuer.telefon}`}
-                      className="text-claimondo-ondo hover:text-claimondo-navy"
-                    >
-                      {extra.betreuer.telefon}
-                    </a>
+              <KvaSektion auftrag={auftrag} />
+              <ReparaturterminSektion auftrag={auftrag} />
+              {zeigtGutachten(auftrag.abrechnungsweg) && <BesichtigungsterminSektion auftrag={auftrag} />}
+              {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
+            </>
+          ) : (
+            <SectionCard title="Meine Vermittlung">
+              <div className="space-y-3">
+                <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Kunde</dt>
+                    <dd className="text-claimondo-navy font-medium">{kundeName}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-body-xs text-claimondo-ondo">Quelle</dt>
+                    <dd className="text-claimondo-navy">{quelleLabel(auftrag.quelle) ?? '–'}</dd>
+                  </div>
+                  {auftrag.zugewiesen_am && (
+                    <div>
+                      <dt className="text-body-xs text-claimondo-ondo">Vermittelt am</dt>
+                      <dd className="text-claimondo-navy tabular-nums">
+                        {formatBerlin(auftrag.zugewiesen_am, {
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </dd>
+                    </div>
                   )}
-                </div>
-              )}
-              {auftrag.gutachter_firmenname && (
-                <div>
-                  <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo">
-                    Gutachter
-                  </p>
-                  <p className="text-claimondo-navy font-medium">{auftrag.gutachter_firmenname}</p>
-                </div>
-              )}
-            </div>
-          </SectionCard>
-        </>
-      )}
-      </div>
-
-      {segment === 'reparatur' ? (
-        <>
-          {istFrueh && (
-            <SectionCard title="Status" className="mt-3">
-              <p className="text-body-sm text-claimondo-ondo">
-                Der Kunde bearbeitet gerade seinen Fall (Ersterfassung). Fahrzeug- und
-                Schadendaten erscheinen hier, sobald der Flow durchlaufen ist.
-              </p>
+                </dl>
+                <p className="text-body-sm text-claimondo-ondo">
+                  Du hast diesen Kunden an Claimondo vermittelt.
+                  {auftrag.provision_betrag_netto != null
+                    ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${getPartnerProvisionStatusLabel(auftrag.provision_status)}).`
+                    : ''}
+                </p>
+              </div>
             </SectionCard>
           )}
-          <KvaSektion auftrag={auftrag} />
-          <ReparaturterminSektion auftrag={auftrag} />
-          {zeigtGutachten(auftrag.abrechnungsweg) && <BesichtigungsterminSektion auftrag={auftrag} />}
-          {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
+
+          {/* KI-Copilot: Reparatur/Abrechnung/KVA/Totalschaden — Streaming via /api/werkstatt/copilot. */}
+          <WerkstattCopilotPanel claimId={auftrag.claim_id} />
+
+          {/* Fall-Chat (v2-Thread kunde_gruppe + v1-kanal, analog Makler #4349) — ganz unten. */}
+          <WerkstattChatTab
+            claimId={auftrag.claim_id}
+            fallId={chatRealtime?.fallId ?? auftrag.claim_id}
+            gruppeThreadId={chatRealtime?.gruppeThreadId ?? null}
+            currentUserId={currentUserId ?? null}
+            initialMessages={chatMessages ?? []}
+          />
         </>
-      ) : (
-        <SectionCard title="Meine Vermittlung">
-          <div className="space-y-3">
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
-              <div>
-                <dt className="text-body-xs text-claimondo-ondo">Kunde</dt>
-                <dd className="text-claimondo-navy font-medium">{kundeName}</dd>
-              </div>
-              <div>
-                <dt className="text-body-xs text-claimondo-ondo">Quelle</dt>
-                <dd className="text-claimondo-navy">{quelleLabel(auftrag.quelle) ?? '–'}</dd>
-              </div>
-              {auftrag.zugewiesen_am && (
-                <div>
-                  <dt className="text-body-xs text-claimondo-ondo">Vermittelt am</dt>
-                  <dd className="text-claimondo-navy tabular-nums">
-                    {formatBerlin(auftrag.zugewiesen_am, {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })}
-                  </dd>
-                </div>
-              )}
-            </dl>
-            <p className="text-body-sm text-claimondo-ondo">
-              Du hast diesen Kunden an Claimondo vermittelt.
-              {auftrag.provision_betrag_netto != null
-                ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${getPartnerProvisionStatusLabel(auftrag.provision_status)}).`
-                : ''}
-            </p>
-          </div>
-        </SectionCard>
-      )}
+      ),
+    }),
+  }
 
-      {/* KI-Copilot: Reparatur/Abrechnung/KVA/Totalschaden — Streaming via /api/werkstatt/copilot. */}
-      <WerkstattCopilotPanel claimId={auftrag.claim_id} />
-
-      {/* Fall-Chat (v2-Thread kunde_gruppe + v1-kanal, analog Makler #4349) — ganz unten. */}
-      <WerkstattChatTab
-        claimId={auftrag.claim_id}
-        fallId={chatRealtime?.fallId ?? auftrag.claim_id}
-        gruppeThreadId={chatRealtime?.gruppeThreadId ?? null}
-        currentUserId={currentUserId ?? null}
-        initialMessages={chatMessages ?? []}
-      />
-    </div>
-  )
+  return <FallAkte config={config} vm={vm} />
 }
