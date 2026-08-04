@@ -19,7 +19,6 @@ describe('isPublicPath — Magic-Link-Routen bleiben public', () => {
     ['/kunde/termin/abc-token-123', 'SV-Live-Tracking (WhatsApp-Magic-Link)'],
     ['/kunde/re-termin/tok', 'Re-Termin-Slot-Picker (no-show-Cron)'],
     ['/kunde-termin', 'Token-Termin-Bestaetigung'],
-    ['/werkstatt-empfehlung/tok', 'Werkstatt-Auswahl per Magic-Link'],
     ['/g/mein-sv-slug', 'Hosted-Widget-Seite'],
     ['/embed/gutachter-finder', 'iframe-Embed'],
     ['/auth/bestaetigen', 'Prefetch-gehaerteter Klick-Gate'],

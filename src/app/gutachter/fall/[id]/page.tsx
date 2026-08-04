@@ -428,8 +428,8 @@ export default async function GutachterFallPage({
   // P4 T9 (Netzwerk): die SV-seitige Werkstatt-Empfehl-Vorauswahl (WerkstattEmpfehlenCard +
   // werkstatt_empfehlung_batches-Berechnung) ist ABGELOEST — der Kunde waehlt self-served im
   // immer-an-Kunde-Finder (Locked Decision Epic §4; die "Dein Netzwerk"-Partition laeuft dort,
-  // P2-T6). Live verifiziert 30.07.: 0 Batches je erzeugt. Route /werkstatt-empfehlung/[token]
-  // + Actions bleiben fuer theoretisch offene Magic-Links bestehen (kein neuer Einstiegspunkt).
+  // P2-T6). Netzwerk-Followup 03.08.: Route /werkstatt-empfehlung/[token] ENTFERNT (live 0
+  // Batches/0 Empfehlungen je erzeugt = 0 offene Magic-Links; DB-Tabellen bleiben).
 
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
   // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
