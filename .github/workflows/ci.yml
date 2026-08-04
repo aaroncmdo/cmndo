@@ -565,6 +565,38 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament Journey-Suite J7 (Storno/DSGVO-Loeschung) — beide Ausstiege: A Storno ist INTERN
+      # (Admin/KB; markClaimAsStorniert via EndzustandDropdown in /faelle/[id] — j07 "Kunde storniert"
+      # hat keine Kunde-UI) -> operative_status='storniert'. B DSGVO 2-Schritt: Kunde-Antrag
+      # (/kunde/profil) -> Admin BESTAETIGT -> "Direkt ausfuehren" (rpc-Anonymisierung + Auth-Delete).
+      # Bestaetigen MUSS vor Ausfuehren (chk_bestaetigt_logic verlangt bestaetigt_am — sonst Silent-
+      # CHECK-Reject des Status-Writes). IRREVERSIBEL nur fuer die 3 eigenen Wegwerf-Konten des Seeds
+      # (Throwaway-Admin + Storno-Kunde + DSGVO-Kunde, getrennt); die Admin-Zeile wird per EXAKTER
+      # Wegwerf-Email getargetet, nie "erste Zeile". Admin-Creds kommen aus dem Seed-JSON (KEIN
+      # TEST_ADMIN_*-Secret noetig, kein TOTP). RUN_STORNO_DSGVO_SMOKE gatet; SERVICE_ROLE fuer db().
+      - name: Seed Storno/DSGVO-Fixture (J7)
+        run: node scripts/smoke/storno-dsgvo-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J7 (Storno/DSGVO)
+        run: npx playwright test storno-dsgvo-smoke --project=chromium --reporter=line --workers=1
+        env:
+          RUN_STORNO_DSGVO_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # J7-Nachlauf: Wegwerf-ADMIN-Konto + Smoke-Antraege nicht bis zum naechsten Lauf liegen lassen
+      # (Admin-Rolle ist sensibler als die Wegwerf-Kunden der anderen Journeys) — laeuft auch bei
+      # rotem Smoke; Debugging nutzt eh den lokalen Re-Run mit frischem Seed.
+      - name: Cleanup Storno/DSGVO-Fixture (J7)
+        if: always()
+        run: node scripts/smoke/storno-dsgvo-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
