@@ -76,3 +76,33 @@
 **Begründung:** verrechnung+staffel sind rein DB (Insert-Trigger, kein Browser/Comms/Cron), self-cleaning (Marker `SMOKE-PROV`/`SMOKE-STAFFEL-LC`, FK-sicher + Crash-safe) — dasselbe Wegwerf-in-prod-DB-Muster wie J4 (Verfassungsprinzip 10 „Kein Feature ohne Reise"; das etablierte CI-Muster). Die concurrency-Group `prod-e2e-smoke` (#4911) serialisiert die e2e-Läufe → kein Fixture-Cleanup-Cross-Run-Race. Der „nie in CI"-Spec-Kommentar war die Vorsichts-Default vor der Journey-Suite (D-Phase). `lifecycle` triggert den GLOBALEN Release-Cron (`/api/cron/release-provisionen`) → bei jedem Merge würden echte fällige Provisionen früher freigegeben (Geld-Timing-Effekt) → bewusst ausgeschlossen, bleibt manueller Regel-4-Smoke.
 
 **Review:** offen (im PR an Aaron).
+
+## 2026-08-04 · C2 (createCase) · FlowLink IMMER + garantierter Kunde-Kanal (Prep §7#1)
+
+**Lücke:** Prep §7#1 / A4-Frage 2 — garantiert `createCase` bei jedem Meldeweg einen aktiven Kunde-Kanal (WA/Email), oder bleibt reiner Client-Redirect bei den No-Channel-Eingängen (B-2/C-4) zulässig?
+
+**Entscheidung:** `createCase` sichert für JEDE Meldung einen Kunde-Kanal, umgesetzt in C2a als **FlowLink IMMER** (`ensureCanonicalFlowLinkForLead`, in beiden Modi — auch direct-claim). Der FlowLink ist idempotent + harmlos (nur ein DB-Row, kein Send), liefert einen Magic-Link-Fallback auch für den eingeloggten-Kunde-Wizard. Der Voll-Send bleibt bis C3-Outbox der bestehende Wrapper-`sendFallCommunication` (direct-claim) bzw. der FlowLink-Send (lead-first).
+
+**Begründung:** Verfassung §1-Prinzip 8 (eine Outbox / kein stilles Sterben) + Prinzip 10; schließt die A3-P2-Lücken #5–#7 (notification-taube Rollen), die daraus entstanden, dass Eingänge den Kunden ohne Kanal ließen.
+
+**Review:** offen (Aaron) — via C2a-Plan `docs/superpowers/plans/2026-08-04-fundament-c2a.md`.
+
+## 2026-08-04 · C2 (createCase) · /flow bleibt Konvergenzpunkt — createCase speist es, kein Rewire in C2a (Prep §9#2)
+
+**Lücke:** Prep §9#2 — extrahiert `create-case.ts` die /flow-Garantien (Pflichtdok/Notif), sodass /flow SELBST `createCase` ruft, oder bleibt /flow ein eigenständiger zweiter Kanon neben `createCase`?
+
+**Entscheidung:** Für C2a: `createCase` extrahiert die /flow-Garantien NICHT und rewired /flow NICHT. `/flow/[token]` bleibt der Konversions-Konvergenzpunkt (Muster L); `createCase` (mode='lead-first') SPEIST es (Lead+FlowLink). Eine spätere Reconcile-Tranche kann /flow selbst auf `createCase` heben.
+
+**Begründung:** hält C2a bounded (Modul + Wizard A-1, ein Beweis-Adapter) und kollisionsfrei zur aktuell heißen aar-956-Intake/Embed-Lane (6+ Sessions). /flow-Umbau wäre ein separater, kollidierender Eingriff — Strangler-Fig-Direktive: kleinste Tranche zuerst.
+
+**Review:** offen (Aaron) — via C2a-Plan.
+
+## 2026-08-04 · C2 (createCase) · Gegner-Pflichtdok im Kern (C2b) + Marketing-Wizard deferred (C2c)
+
+**Lücke:** Prep §7#2 (bekommt der A-3-Gegner-Claim Pflichtdok-Slots?) + §7#3 (Marketing-Mini-Wizard `/schaden-melden` im `claimondo-marketing/`-Build als 16. Eingang?).
+
+**Entscheidung:** §7#2 — **ja, Pflichtdok im Kern** (der Geschädigte erbt den Fall); umgesetzt erst in **C2b** (A-3 Gegner-Flow), nicht C2a. §7#3 — **deferred an C2c** als offene Scope-Frage (eigener Adapter über eine API-Grenze); nicht in C2a/C2b.
+
+**Begründung:** Verfassung §5 (ein Intake, garantierte Nachwirkungen) für §7#2; §7#3 ist eine echte Produkt-Scope-Entscheidung (Marketing-Build-Grenze) → an Aaron, kein §1-Default.
+
+**Review:** offen (Aaron) — §7#2 vor C2b-Code, §7#3 vor C2c-Code.

@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 export default async function MaklerRegistrierenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ werber?: string }>
+  searchParams: Promise<{ werber?: string; einladung?: string }>
 }) {
-  const { werber } = await searchParams
+  const { werber, einladung } = await searchParams
   const werberCode = (werber ?? '').trim() || null
 
   // Optionaler Trust-Hinweis: Firma des aktiven Werbers server-seitig auflösen (non-fatal).
@@ -63,6 +63,7 @@ export default async function MaklerRegistrierenPage({
           </p>
         </div>
         <MaklerRegistrierenClient
+          einladung={einladung}
           versicherungen={versicherungen}
           maklerpools={maklerpools}
           werber={werberCode}

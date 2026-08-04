@@ -16,6 +16,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme } from './theme'
 import type { KundenThemeResult } from './kunden-theme'
 import { kundenBrandingErlaubt } from './gate'
+import { istBrandingBezahlt } from './bezahl-status'
 
 const FALLBACK: KundenThemeResult = {
   theme: CLAIMONDO_DEFAULT_THEME,
@@ -32,6 +33,9 @@ async function resolveBrandingFromSvId(db: SupabaseClient, svId: string): Promis
     .maybeSingle()
   if (!sv) return FALLBACK
   if (!kundenBrandingErlaubt(sv)) return FALLBACK
+  // Paid-Perk (Aaron 03.08.): Wirkung nur fuer zahlende SVs — zentraler Funnel
+  // fuer ALLE Token-/Email-Resolver dieses Files. Fail-closed -> Claimondo.
+  if (!(await istBrandingBezahlt(svId))) return FALLBACK
   if (!sv.brand_primary && !sv.brand_theme) return FALLBACK
 
   return {

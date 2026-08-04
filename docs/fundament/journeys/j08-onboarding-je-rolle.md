@@ -31,6 +31,12 @@ Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein ne
 
 - **Bestands-SV mit `paket`** — Per-Fall-Pakete werden **nicht mehr verkauft** (retired); Bestand behält Fulfillment und wird als Netzwerkpartner **comped** (`paket` = Legacy-Fulfillment, **nie überschreiben** — 5 Consumer).
 - **Cold-Mail-Einstieg** (SV/Werkstatt) — CTA aus der Kampagne → vorbefüllter Signup.
+- **Netzwerk-Kalt-Einladung** (alle drei Partner-Rollen — Soll-Delta 04.08., Followup-a): Ein
+  bestehender Partner lädt per E-Mail ein (`?einladung=<token>` auf dem jeweiligen
+  Registrier-Pfad). Nach erfolgreicher Registrierung wird die Einladung eingelöst und die
+  **Freund-Kante automatisch `angenommen`** (die Einladung ist die Anfrage, die Registrierung
+  die Annahme). Redemption ist best-effort — ein Token-Fehler bricht die Registrierung nie.
+  (Vorher nur Werkstatt; SV `/sv/registrieren` + Makler `/makler/registrieren` nachgezogen.)
 - **Whitelabel-SV** — verifizierter SV mit `use_custom_branding` brandet Portal + Kunden-Sicht.
 
 ## Fehlerfälle und ihr Soll-Verhalten
@@ -41,7 +47,7 @@ Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein ne
 
 ## ⚠ IST weicht ab (mit Fundort)
 
-1. **Netzwerkpartner-Abo noch nicht gebaut (Epic paused):** `sv_netzwerk_abonnements` + Stripe-Recurring sind greenfield (Live-Webhook 0 subscription-Events). IST: Ranking-Primärsignal ist noch `paket`, nicht das Abo. Umbau = Netzwerk-Lane P0, dockt auf C1–C5.
+1. ~~Netzwerkpartner-Abo noch nicht gebaut~~ **ERLEDIGT (P5, live seit R219 03.08. + Ask-Fix 04.08.):** Abo end-to-end (Checkout+Webhook+Dunning), Ranking-Primärsignal = Abo (`istNetzwerkpartner`, seit P2), Ask im Onboarding-Abschluss beider SV-Flows erreichbar (Basic: auf dem PendingReview-Screen — der Wizard-Completed-Screen wird nach finalize serverseitig ersetzt) + Einstellungen-CTA. Whitelabel ist seit 04.08. Paid-Perk (Abo/Paid-Paket-gebunden).
 2. **DAT-Gating noch aktiv:** die Registrierung ist im Bestand teils DAT-/paket-gegatet — Soll: offen für alle. (Basic-SV-Freischaltung #4302 ist der Näherungs-Vorläufer.)
 3. **Werkstatt-Self-Onboarding fragmentiert:** Anlage-Pfade setzen `ist_freie_werkstatt`+Gewerke (#4787) und es gibt `werkstatt.claimondo.de`, aber **kein kohärenter Self-Anlege-Produkt-Flow** (offene Produkt-Entscheidung der Netzwerk-Lane). `ist_freie_werkstatt=null` macht die Werkstatt zudem still unsichtbar.
 4. **Redirect-Stub-Historie:** `/gutachter/onboarding` war ein reiner Redirect-Stub (leere Shell, 06.–07.07.) → per `next.config.ts`-Redirect gefixt.

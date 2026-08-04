@@ -2281,8 +2281,8 @@
     ]
   },
   "gutachter_partner": {
-    "sr_h1": "Kfz bilirkişisi olarak Claimondo iş ortağı olun — bekleme listesine kaydolun",
-    "page_title": "Kfz bilirkişisi olarak iş ortağı olun — bekleme listesi",
+    "sr_h1": "Claimondo araç eksperi ortağı olun — ücretsiz kayıt",
+    "page_title": "Araç Eksperi Ortağı Olun — Ücretsiz Başlayın",
     "hero": {
       "badge": "Yalnızca doğrulanmış bilirkişiler",
       "headline": "Bölgenizdeki Claimondo iş ortağı olun",
@@ -2332,20 +2332,20 @@
       "prozess_text": "Claimondo, Kfz haksız haser tazminat süreçleri için bir hasar (Schadensregulierung) platformudur. Pazarlama, atölyeler ve avukatlardan gelen iş taleplerini bir araya getirerek bölgedeki uygun bilirkişiye yönlendiriyoruz. Görevlendirmeleri tam hazır olarak alırsınız — sigorta verileri, hasar fotoğrafları ve atölye iletişim bilgileri portalde önceden kayıtlıdır. Müşteri edinimi, ilk görüşme ve faturalandırmayı biz üstleniriz.",
       "schritte": [
         {
-          "titel": "Bekleme listesine kaydol",
-          "text": "Yukarıdaki formu doldurun — nitelik, posta kodu, istediğiniz yarıçap. 3 dakikadan kısa sürer."
+          "titel": "Ücretsiz kayıt",
+          "text": "app.claimondo.de'de kaydolun veya yukarıdaki haritadan kaydınızı sahiplenin — 3 dakikadan az sürer."
         },
         {
-          "titel": "Doğrulama",
-          "text": "DAT-Expert numaranızı, BVSK üyeliğinizi, IHK veya öbuv atamanızı ilgili sicillere karşı doğrularız. Bu bir pazarlama kontrolü değildir — gerektiğinde odalarla bizzat telefon görüşmesi yaparız."
+          "titel": "Onboarding'i tamamlayın",
+          "text": "Profil, takvim bağlantısı ve ortaklık sözleşmesi — tamamen dijital. Kendinizi aktifleştirirsiniz, beklemeden."
         },
         {
-          "titel": "Bölge Aktivasyonu",
-          "text": "Posta kodu bölgenizde talep oluştuğunda (ayda ≥ 8 görev), yazılı aktivasyon bildirimi alırsınız. O zamana kadar bekleme listesinde kalırsınız — ücretsiz, bağlayıcılık olmadan."
+          "titel": "Hemen görünür",
+          "text": "Aktivasyondan itibaren eksper bulucuda görünürsünüz ve bölgenizde işler alırsınız. İsteğe bağlı: Ağ Ortağı olarak öncelikli sıralama ve kendi markanız."
         },
         {
-          "titel": "Portalda Canlı",
-          "text": "30 dakikalık onboarding görüşmesi, SV-Portal erişimi; ilk görevler gelen kutunuzda belirir. Her görevi kabul ya da reddetmek size aittir."
+          "titel": "Doğrulama paralel",
+          "text": "DAT numarası, BVSK üyeliği, IHK veya öbuv atamasını kayıtlarda doğruluyoruz — paralel olarak, başlangıcınızı engellemeden."
         }
       ],
       "schritt_label": "ADIM {nr}",
@@ -2353,7 +2353,7 @@
       "verdienst_text1": "Temel, BVSK-Honorartabelle'dir. Hasar miktarına göre faturalarsınız — her normal haksız hasar davasında olduğu gibi. Karşı tarafın sigortası, §249 BGB uyarınca ücreti karşılar; hesaplaşmayı Claimondo, alacak takibini ortak hukuk bürosu üstlenir. Platform komisyonu, görev hacmine ve bölgeye bağlıdır; ilk görüşmede şeffaf biçimde ele alınır — son 12 ayınıza dayalı örnek hesaplamayı önceden gösteririz.",
       "verdienst_text2": "Görevler münhasır değildir: Kendi doğrudan görevleriniz, BVSK aracılığıyla gelenler ve sigorta şirketi listelemeleri paralel olarak devam eder. Biz ek bir kanaldır, bağlayıcılık yoktur.",
       "onboarding_heading": "Onboarding Süresi ve Gereksinimler",
-      "onboarding_text": "Bölgeniz aktive edildikten sonra onboarding 7 ila 14 iş günü sürer: Niteliğinizi ilgili sicillere (DAT, BVSK, IHK, öbuv-Kammern) karşı doğrularız, ortaklık sözleşmesini göndeririz, sizi SV-Portal'a kaydederiz ve 30 dakikalık canlı onboarding görüşmesi yaparız. Ardından ilk görevler yayına girer.",
+      "onboarding_text": "Hemen başlarsınız: kayıt ve onboarding birlikte 15 dakikadan az sürer — ardından aktifleştirilir ve görünür olursunuz. Yeterlilik doğrulaması (DAT, BVSK, IHK, öbuv) arka planda paralel yürür.",
       "voraussetzungen": [
         "En az bir tanınan nitelik: DAT-Expert · BVSK · IHK · öbuv",
         "Geçerli mesleki sorumluluk sigortası (en az 2 milyon € teminat)",
@@ -2362,10 +2362,10 @@
         "Yerinde kanıt fotoğrafı yüklemek için akıllı telefon",
         "Görev atanmasından sonra 24 saat içinde ilk iletişime hazır olma"
       ],
-      "warteliste_heading": "Neden bir bekleme listesi?",
-      "warteliste_text_pre": "Şu anda",
-      "warteliste_text_sv": "{anzahl} bilirkişi",
-      "warteliste_text_post": "bekleme listesinde bulunmaktadır. Ortakları bölgesel olarak kademeli şekilde alıyoruz: Bir posta kodu bölgesinde sipariş hacmi sürdürülebilir düzeye ulaştığında (≥ 8 sipariş / ay) bir veya birden fazla bilirkişiyi aktive ediyoruz. Bu sayede hiçbir ortağın boş vaatlerle sisteme dahil edilmediğini ve aktive edilen her bilirkişinin ilk günden itibaren kullanılabilir bir hacim gördüğünü garanti ediyoruz. Listedeki yeriniz \"ilk gelen, ilk alır\" esasına göre değil — öncelikle bölge ihtiyacı ve nitelik karmasına göre eşleştiriyoruz.",
+      "sofort_heading": "Ücretsiz başlayın — bugün",
+      "sofort_text": "Birkaç dakikada kaydolun ve onboarding'i tamamlayın — hemen aktifleştirilirsiniz ve müşteri aramadan iş alırsınız. İsteğe bağlı olarak Ağ Ortağı olun: eksper bulucuda öncelikli sıralama ve kendi markanız.",
+      "sofort_netzwerk_zusatz": "Claimondo ağında şimdiden {anzahl} eksper var.",
+      "sofort_cta": "Şimdi ücretsiz kaydol",
       "faq_heading": "Sık Sorulan Sorular",
       "faqs": [
         {
@@ -3300,7 +3300,7 @@
     "was_p": "Karşı tarafın sigortasına ait bilirkişiden ayrımı önemlidir: Bu denetim hizmetleri hatalı taraf adına çalışır ve deneyime göre sistematik biçimde kesinti yapar. Kusurunuz bulunmayan mağdur olarak §249 BGB uyarınca <strong>kendi seçtiğiniz bağımsız bir Kfz-Gutachter</strong> görevlendirme hakkına sahipsiniz — burada karşılaştırılan dört aracılık portalı tam da bu seçimi sizin adınıza üstlenir. Hukuki ayrıntılar için bkz.",
     "was_link_urteil": "LG-Bremen kararı ve online-gutachten hakkındaki bölüm",
     "tabelle_eyebrow": "Doğrudan Karşılaştırma",
-    "tabelle_h2": "4 Platformun Özeti",
+    "tabelle_h2": "Platformların karşılaştırması",
     "tabelle_intro_before": "Tüm rakip veriler ilgili sağlayıcıların web sitelerinden alınmıştır (tarih:",
     "tabelle_intro_after": "). Claimondo ağ büyüklüğü veritabanımızdan canlı olarak güncellenmektedir.",
     "tabelle_caption_before": "Kfz-Gutachter Aracılık Karşılaştırması — Claimondo, Neogutachter, Unfallpaten ve Unfallgiganten (tarih:",
@@ -3316,63 +3316,72 @@
         "claimondo": "Yönetilen tam hizmet tazminat süreci — bilirkişi raporundan partner hukuk bürosuna ve ödemeye kadar tek merkezden yönetim",
         "neo": "Bilirkişi aracılığı (online başvuru → uygun Sachverständiger)",
         "paten": "\"Tek elden\" hasar çözümü (bilirkişi + hukuki destek)",
-        "giganten": "Çevre aramasına sahip dizin (SV, tamirhane, avukat, çekici) + profil listeleri"
+        "giganten": "Çevre aramasına sahip dizin (SV, tamirhane, avukat, çekici) + profil listeleri",
+        "unfallhelden": "„Tek elden“ tam hizmet (avukat + bilirkişi + tamirhane + ikame araç)"
       },
       {
         "kriterium": "Erişilebilirlik",
         "claimondo": "Dijital 7/24, telefonla en az saat 22:00'ye kadar; 15 dakika altında yanıt",
         "neo": "\"7/24\", başvuru \"30 saniyede\"; Tel. 0160/4873888",
         "paten": "\"24 saat acil yardım\", Hotline 0800 505 50 50",
-        "giganten": "\"Anında aracılık\" + çevre araması (25–300 km)"
+        "giganten": "\"Anında aracılık\" + çevre araması (25–300 km)",
+        "unfallhelden": "Online hasar bildirimi + ücretsiz 0800 destek hattı"
       },
       {
         "kriterium": "SV Ağ Büyüklüğü (kamuya açık veri)",
         "claimondo": "",
         "neo": "kamuoyuna açıklanmamış",
         "paten": "\"Ulusal çaplı ağ\" (sayı belirtilmemiş)",
-        "giganten": "\"250'den fazla onaylı\" (arama sayacı 329; ücretli premium listeler)"
+        "giganten": "\"250'den fazla onaylı\" (arama sayacı 329; ücretli premium listeler)",
+        "unfallhelden": "„Almanya geneli ağ“ (rakam yok)"
       },
       {
         "kriterium": "Yerinde İnceleme",
         "claimondo": "her zaman zorunlu",
         "neo": "Standart",
         "paten": "\"doğrudan yerinde\"",
-        "giganten": "yerinde bilirkişi temin eder"
+        "giganten": "yerinde bilirkişi temin eder",
+        "unfallhelden": "evet (boya kalınlığı ölçümü dahil)"
       },
       {
         "kriterium": "Yerinde inceleme yapılmayan çevrimiçi bilirkişi raporu",
         "claimondo": "hayır",
         "neo": "hayır",
         "paten": "hayır",
-        "giganten": "hayır"
+        "giganten": "hayır",
+        "unfallhelden": "hayır"
       },
       {
         "kriterium": "Avukat entegrasyonu",
         "claimondo": "evet — entegre sabit partner hukuk bürosu",
         "neo": "evet (bilirkişi + avukat)",
         "paten": "evet — \"uzman hukuki danışmanlık\"",
-        "giganten": "evet — avukat partner kategorisi olarak"
+        "giganten": "evet — avukat partner kategorisi olarak",
+        "unfallhelden": "evet — hizmete dahil uzman avukat"
       },
       {
         "kriterium": "Mağdurlar için masraflar",
         "claimondo": "0 € (§249 BGB, kabul beyanına tabi)",
         "neo": "\"bağlayıcı değil & ücretsiz\"",
         "paten": "0 € (sorumlu sigorta öder)",
-        "giganten": "\"Mağdurlar için ücretsiz\""
+        "giganten": "\"Mağdurlar için ücretsiz\"",
+        "unfallhelden": "0 € („bir kuruş bile ödemezsiniz“)"
       },
       {
         "kriterium": "Bilirkişiler için Whitelabel/Marka",
         "claimondo": "evet (dördünün tek)",
         "neo": "hayır",
         "paten": "hayır",
-        "giganten": "hayır (ücretli \"Premium Member\" listeleme)"
+        "giganten": "hayır (ücretli \"Premium Member\" listeleme)",
+        "unfallhelden": "hayır"
       },
       {
         "kriterium": "Hizmet bölgesi",
         "claimondo": "federal geneli (DE), ağırlıklı NRW",
         "neo": "Almanya geneli (DE)",
         "paten": "Almanya geneli (DE)",
-        "giganten": "Almanya geneli (DE)"
+        "giganten": "Almanya geneli (DE)",
+        "unfallhelden": "Almanya geneli"
       }
     ],
     "einordnung_titel": "Ağ rakamlarını değerlendirmek için:",
@@ -3457,7 +3466,8 @@
     "cta_h2": "Bilirkişi talebi oluştur — ücretsiz ve bağlayıcısız",
     "cta_p": "Hasarı çevrimiçi bildirin ya da doğrudan arayın — çevrimiçi 7/24, telefon en az saat 22:00'ye kadar.",
     "cta_anfrage": "Bilirkişi talebi oluştur",
-    "cta_tel_label": "Ara"
+    "cta_tel_label": "Ara",
+    "th_unfallhelden": "Unfallhelden"
   },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Başlangıç",
@@ -4056,8 +4066,8 @@
       "twitter_description": "Çağrı merkezi yok — 15 dakika altında bir uzman."
     },
     "gutachter_partner": {
-      "title": "Araç uzman bilirkişisi olarak partner olun — Bekleme listesi",
-      "description": "Şimdi bekleme listesine: Claimondo'nun ülke geneli bilirkişi ağı. İşler doğrudan iletilir, müşteri kazanma çabası olmadan. DAT uzmanları ve BVSK üyeleri hoş geldiniz.",
+      "title": "Araç Eksperi Ortağı Olun — Ücretsiz Başlayın",
+      "description": "Claimondo eksper ağına ücretsiz katılın: anında aktivasyon, akvizisyonsuz işler. İsteğe bağlı Ağ Ortaklığı ile üst sıralama ve kendi markanız.",
       "og_title": "Araç uzman bilirkişisi olarak partner olun — Claimondo",
       "og_description": "Müşteri kazanma çabası olmadan işler. Claimondo bilirkişi ağına kaydolun — sizin bölgenizde doğrudan iletim yapıyoruz.",
       "twitter_description": "Müşteri kazanma çabası olmadan işler. Claimondo bilirkişi ağına kaydolun."
@@ -4567,5 +4577,27 @@
     "cta_h2": "Kaza mı geçirdiniz? Kendi eksperinizi güvenceye alın.",
     "cta_p": "Bağımsız, nitelikli, yakınınızda — randevu genelde 48 saatin altında. Karşı tarafın kusurunda sizin için 0 €.",
     "cta_schaden": "Şimdi hasar bildir"
+  }
+,
+  "wertminderung_rechner": {
+    "titel": "Değer kaybını kendi verilerinle hesapla",
+    "intro": "Yukarıdaki tablo genel kuralı gösterir. Kendi rakamlarınla burada hesapla:",
+    "label_reparaturkosten": "Onarım masrafları (€)",
+    "label_alter": "Araç yaşı (yıl)",
+    "label_km": "Kilometre (km, isteğe bağlı)",
+    "label_wbw": "Yeniden edinme değeri (€, isteğe bağlı)",
+    "label_vorschaden": "Araçta önceki hasar var mı?",
+    "vorschaden_keine": "Yok",
+    "vorschaden_repariert": "Usulüne uygun onarıldı",
+    "vorschaden_erheblich": "Ciddi / onarılmamış",
+    "ergebnis_schaetzung": "Kaba tahmin: {betrag} (onarım masraflarının {pct} kadarı).",
+    "ergebnis_einzelfall_alter": "Özel durum: kilometreye ve piyasa değerine bağlı. Alman mahkemeleri katı yaş sınırlarını reddeder (BGH VI ZR 357/03) — eski araçlar da hak talep edebilir. Bağlayıcı tutarı bilirkişi raporu belirler.",
+    "ergebnis_einzelfall_vorschaden": "Ciddi önceki hasarlar değer kaybını önemli ölçüde azaltır. Miktar özel bir durumdur — bağlayıcı tutarı yalnızca bilirkişi raporu belirler.",
+    "ergebnis_unvollstaendig": "Lütfen onarım masraflarını ve araç yaşını girin.",
+    "hinweis_vorschaden_repariert": "Usulüne uygun onarılan önceki hasarlar değer kaybını biraz azaltır — genel kural burada üst sınırdır.",
+    "hinweis_hohe_km": "Yüksek kilometrede değer kaybı daha çok alt sınırdadır.",
+    "hinweis_kleiner_schaden": "Araç değerine kıyasla küçük hasarlarda değer kaybı düşük olabilir.",
+    "disclaimer": "Genel kural niteliğinde, bilirkişi raporunun yerini tutmaz. Bağlayıcı tutarı sertifikalı bir bilirkişi (Sanden/Danner yöntemi) belirler — kilometre, piyasa değeri, önceki hasar ve onarım kalitesini dikkate alır.",
+    "cta": "Ücretsiz bilirkişi görevlendir"
   }
 }

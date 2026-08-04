@@ -276,10 +276,12 @@ function BeanspruchenSchritt({
   kandidat,
   onErfolg,
   onZurueck,
+  einladung,
 }: {
   kandidat: Kandidat
   onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
+  einladung?: string
 }) {
   const [email, setEmail] = useState('')
   const [telefon, setTelefon] = useState('')
@@ -305,6 +307,7 @@ function BeanspruchenSchritt({
     startTransition(async () => {
       const res = await beanspracheSvLead({
         svLeadId: kandidat.id,
+        einladungToken: einladung,
         email: email.trim(),
         telefon: telefon.trim(),
         paket,
@@ -407,9 +410,11 @@ function BeanspruchenSchritt({
 function NeuSchritt({
   onErfolg,
   onZurueck,
+  einladung,
 }: {
   onErfolg: (email: string, emailSent: boolean) => void
   onZurueck: () => void
+  einladung?: string
 }) {
   const [vorname, setVorname] = useState('')
   const [nachname, setNachname] = useState('')
@@ -442,6 +447,7 @@ function NeuSchritt({
 
     startTransition(async () => {
       const res = await registriereSvBasicNeu({
+        einladungToken: einladung,
         vorname: vorname.trim(),
         nachname: nachname.trim(),
         email: email.trim(),
@@ -620,7 +626,7 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
 
 // ─── Haupt-Komponente ─────────────────────────────────────────────────────────
 
-export function SvRegistrierenClient() {
+export function SvRegistrierenClient({ einladung }: { einladung?: string } = {}) {
   const [schritt, setSchritt] = useState<Schritt>('suche')
   const [gewaehlterKandidat, setGewaehlterKandidat] = useState<Kandidat | null>(null)
   const [bestaetigunsEmail, setBestaetigungsEmail] = useState('')
@@ -657,6 +663,7 @@ export function SvRegistrierenClient() {
   if (schritt === 'beanspruchen' && gewaehlterKandidat) {
     return (
       <BeanspruchenSchritt
+        einladung={einladung}
         kandidat={gewaehlterKandidat}
         onErfolg={handleErfolg}
         onZurueck={handleZurueckZurSuche}
@@ -667,6 +674,7 @@ export function SvRegistrierenClient() {
   if (schritt === 'neu') {
     return (
       <NeuSchritt
+        einladung={einladung}
         onErfolg={handleErfolg}
         onZurueck={handleZurueckZurSuche}
       />

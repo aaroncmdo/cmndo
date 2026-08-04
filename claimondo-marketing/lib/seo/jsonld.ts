@@ -573,3 +573,22 @@ export function onlineGutachtenSchema(opts?: { modified?: string }) {
     citation: [{ '@type': 'CreativeWork', name: 'LG Bremen 9 O 1720/24' }],
   }
 }
+
+// WebApplication — fuer interaktive Rechner/Tools (GEO-P3). Vorlage: autounfall toolGraph.
+// applicationCategory FinanceApplication + offers 0 EUR = AEO-Signal ("kostenloses Tool").
+export function webApplicationSchema(opts: { name: string; description: string; url: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    '@id': `${opts.url}#rechner`,
+    name: opts.name,
+    description: opts.description,
+    url: opts.url,
+    applicationCategory: 'FinanceApplication',
+    operatingSystem: 'Web',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'EUR' },
+    inLanguage: 'de-DE',
+    isAccessibleForFree: true,
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  }
+}

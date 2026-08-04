@@ -2,7 +2,11 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { markiereAlsBezahlt, storniereAbrechnung, manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
+// Audit-Konsolidierung 04.08.: bezahlt/storno kommen jetzt aus dem EINEN
+// Money-Pfad (admin/abrechnungen/actions) — der fruehere Hub-Thin-Storno
+// liess bezahlte Rechnungen ohne Stripe-Refund/Storno-Rechnung zurueck.
+import { markBezahlt, stornoAbrechnung } from '../../abrechnungen/actions'
+import { manuellVersenden, manuellGenerieren } from '../abrechnungen-actions'
 import { Modal } from '@/components/primitives/Modal'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { ABRECHNUNG_STATUS_COLORS, ABRECHNUNG_STATUS_LABELS } from '@/lib/statusLabels'
@@ -40,6 +44,8 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
   const [filterStatus, setFilterStatus] = useState<string>('alle')
   const [bezahltModal, setBezahltModal] = useState<{ id: string; brutto: number } | null>(null)
   const [bezahltBetrag, setBezahltBetrag] = useState('')
+  const [stornoModal, setStornoModal] = useState<{ id: string; nr: string } | null>(null)
+  const [stornoGrund, setStornoGrund] = useState('')
   const [loading, setLoading] = useState<string | null>(null)
   const [genMonat, setGenMonat] = useState('')
   const [genTyp, setGenTyp] = useState<'kanzlei'>('kanzlei')
@@ -53,17 +59,28 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
   async function handleBezahlt() {
     if (!bezahltModal) return
     setLoading(bezahltModal.id)
-    const result = await markiereAlsBezahlt(bezahltModal.id, parseFloat(bezahltBetrag) || bezahltModal.brutto)
-    if (!result.ok) toast.error(result.error ?? 'Fehler')
+    const result = await markBezahlt(bezahltModal.id, undefined, parseFloat(bezahltBetrag) || bezahltModal.brutto)
+    if (!result.success) toast.error(result.error ?? 'Fehler')
     setBezahltModal(null)
     setBezahltBetrag('')
     setLoading(null)
   }
 
-  async function handleStornieren(id: string) {
-    if (!confirm('Abrechnung wirklich stornieren?')) return
-    setLoading(id)
-    await storniereAbrechnung(id)
+  async function handleStornieren() {
+    if (!stornoModal) return
+    if (!stornoGrund.trim()) {
+      toast.error('Storno-Grund ist Pflicht')
+      return
+    }
+    setLoading(stornoModal.id)
+    const result = await stornoAbrechnung(stornoModal.id, stornoGrund.trim())
+    if (result.success) {
+      toast.success(`${stornoModal.nr} storniert — bezahlte Beträge werden über Stripe erstattet`)
+      setStornoModal(null)
+      setStornoGrund('')
+    } else {
+      toast.error(result.error ?? 'Storno fehlgeschlagen')
+    }
     setLoading(null)
   }
 
@@ -213,10 +230,11 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                               Bezahlt
                             </button>
                           )}
-                          {/* Stornieren */}
-                          {!['storniert', 'bezahlt'].includes(abr.status) && (
+                          {/* Stornieren — seit der Money-Konsolidierung (04.08.) auch fuer
+                              bezahlte moeglich: der volle Pfad refunded via Stripe. */}
+                          {abr.status !== 'storniert' && (
                             <button
-                              onClick={() => handleStornieren(abr.id)}
+                              onClick={() => setStornoModal({ id: abr.id, nr: abr.abrechnungs_nr })}
                               disabled={loading === abr.id}
                               className="text-[10px] px-2 py-0.5 rounded bg-danger-soft text-danger-strong hover:bg-danger/15 disabled:opacity-50"
                             >
@@ -258,6 +276,45 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                     className="px-3 py-1.5 text-xs bg-success text-white rounded-ios-lg hover:bg-success-strong disabled:opacity-50"
                   >
                     {loading === bezahltModal.id ? 'Speichere...' : 'Bestätigen'}
+                  </button>
+                </div>
+              </>
+            )}
+          </Modal>
+
+          {/* Storno-Modal — Grund ist Pflicht (voller Pfad: Refund bei bezahlt +
+              Storno-Rechnung + Empfaenger-Mail + Timeline) */}
+          <Modal open={stornoModal !== null} onClose={() => { setStornoModal(null); setStornoGrund('') }} maxWidth={420} ariaLabel="Abrechnung stornieren">
+            {stornoModal && (
+              <>
+                <h3 className="text-sm font-semibold text-claimondo-navy mb-2">
+                  {stornoModal.nr} stornieren
+                </h3>
+                <p className="text-xs text-claimondo-ondo mb-3">
+                  Es wird eine Storno-Rechnung erstellt und der Empfänger benachrichtigt.
+                  Bereits bezahlte Beträge werden über Stripe erstattet.
+                </p>
+                <label className="block text-xs text-claimondo-ondo mb-1">Storno-Grund (Pflicht)</label>
+                <textarea
+                  value={stornoGrund}
+                  onChange={e => setStornoGrund(e.target.value)}
+                  rows={3}
+                  className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm mb-4"
+                  placeholder="z. B. Doppelte Berechnung, Kulanz, fehlerhafte Positionen …"
+                />
+                <div className="flex gap-2 justify-end">
+                  <button
+                    onClick={() => { setStornoModal(null); setStornoGrund('') }}
+                    className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy"
+                  >
+                    Abbrechen
+                  </button>
+                  <button
+                    onClick={handleStornieren}
+                    disabled={loading === stornoModal.id || !stornoGrund.trim()}
+                    className="px-3 py-1.5 text-xs bg-danger text-white rounded-ios-lg hover:bg-danger-strong disabled:opacity-50"
+                  >
+                    {loading === stornoModal.id ? 'Storniere...' : 'Stornieren'}
                   </button>
                 </div>
               </>

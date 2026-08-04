@@ -30,7 +30,7 @@
 //     RLS-Boundary-übergreifend Lead, Claim, Fall und Profiles anfasst.
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resolveAbrechnungsweg, istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+import { deriveAbrechnungsweg, istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
@@ -555,16 +555,15 @@ export async function convertLeadToClaim(
   // WS1b (Reduced-Repair-Aktivierung): traegt der Lead keinen Weg (die meisten Nicht-/flow-
   // Entstehungspfade leiten nicht ab), am Konversionspunkt aus schuldfrage + eigene_versicherung
   // ableiten — sonst bleibt der Claim wegs-los und die Reparatur-Strecke dormant.
+  // Ableiter-Vereinheitlichung (Problem B): deriveAbrechnungsweg spiegelt die DB-Funktion
+  // derive_abrechnungsweg (die 3 Views nutzen sie READ-seitig) EXAKT -> die gespeicherte Spalte und
+  // die View-Ableitung divergieren nie. schadenart mit im Input (schadenart-Fallback).
   const resolvedAbrechnungsweg =
     (lead.abrechnungsweg as string | null) ??
-    resolveAbrechnungsweg({
+    deriveAbrechnungsweg({
       schuldfrage: (lead.schuldfrage as string | null) ?? null,
-      ueberEigeneVersicherung:
-        (lead.eigene_versicherung as string | null) === 'ja'
-          ? true
-          : (lead.eigene_versicherung as string | null) === 'nein'
-            ? false
-            : null,
+      eigeneVersicherung: (lead.eigene_versicherung as string | null) ?? null,
+      schadenart,
     })
   ;(claimsInsert as Record<string, unknown>).abrechnungsweg = resolvedAbrechnungsweg
   // AAR-956 T2: Roh-Inputs (schuldfrage, eigene_versicherung vom Lead) ZUSAETZLICH zum abgeleiteten

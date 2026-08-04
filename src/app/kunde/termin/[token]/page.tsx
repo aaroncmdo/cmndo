@@ -7,6 +7,7 @@ import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
 import { hydrateTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { kundenBrandingErlaubt } from '@/lib/branding/gate'
+import { istBrandingBezahlt } from '@/lib/branding/bezahl-status'
 import { terminBeiKundeZuhause } from '@/lib/kunde/termin-heuristik'
 import { SheetCard } from '@/components/shared/SheetCard'
 
@@ -156,7 +157,8 @@ export default async function KundeTerminPage({
   // letzteres wird auch von Tier-2 (tier2Freigeben) gestempelt, ohne `verifiziert` zu
   // setzen, und konnte so bei einem noch nicht Tier-1-verifizierten SV Whitelabel zeigen,
   // das das Kunde-Portal (resolveKundenTheme) verweigert. Jetzt konsistent.
-  const brandEnabled = kundenBrandingErlaubt(svRow)
+  // Paid-Perk (Aaron 03.08.): Wirkung nur fuer zahlende SVs (svId = termin.assignee_id).
+  const brandEnabled = kundenBrandingErlaubt(svRow) && (await istBrandingBezahlt(termin.assignee_id))
 
   const brandStyle = brandEnabled
     ? generateCssVars(

@@ -2281,8 +2281,8 @@
     ]
   },
   "gutachter_partner": {
-    "sr_h1": "Join the waitlist — become a Claimondo partner as a Kfz-Sachverständiger",
-    "page_title": "Become a partner as a Kfz-Sachverständiger — waitlist",
+    "sr_h1": "Become a Claimondo vehicle assessor partner — register for free",
+    "page_title": "Become a Vehicle Assessor Partner — Start for Free",
     "hero": {
       "badge": "Verified experts only",
       "headline": "Become a Claimondo partner in your region",
@@ -2332,20 +2332,20 @@
       "prozess_text": "Claimondo is a claim settlement platform for Kfz liability claimants. We consolidate incoming jobs from marketing, workshops, and lawyers and match each job to the right expert in the area. You receive jobs with full preparation — insurance details, damage photos, and workshop contact are already stored in the portal. We handle acquisition, initial contact, and invoicing.",
       "schritte": [
         {
-          "titel": "Sign up for the waitlist",
-          "text": "Complete the form above — qualification, postcode, preferred radius. Takes under 3 minutes."
+          "titel": "Register for free",
+          "text": "Register on app.claimondo.de or claim your entry on the map above — takes less than 3 minutes."
         },
         {
-          "titel": "Verification",
-          "text": "We verify your DAT-Expert No., BVSK membership, and IHK or öbuv appointment against the respective registers. This is not a marketing check — we call the chambers directly if needed."
+          "titel": "Complete onboarding",
+          "text": "Finish profile, calendar connection and the partner agreement digitally — you activate yourself, no waiting."
         },
         {
-          "titel": "Region Activation",
-          "text": "As soon as demand arises in your postal code region (≥ 8 assignments / month), you will receive written activation. Until then, you remain on the waitlist — no costs, no commitment."
+          "titel": "Visible immediately",
+          "text": "Once activated you appear in the assessor finder and receive assignments in your region. Optional: as a Network Partner you get priority placement and your own branding."
         },
         {
-          "titel": "Live in the Portal",
-          "text": "30-minute onboarding call, SV portal access, first assignments appear in your inbox. Acceptance or rejection of each assignment remains your decision."
+          "titel": "Verification in parallel",
+          "text": "We verify DAT expert no., BVSK membership, IHK or öbuv appointment against the registers — in parallel, without blocking your start."
         }
       ],
       "schritt_label": "STEP {nr}",
@@ -2353,7 +2353,7 @@
       "verdienst_text1": "The basis is the BVSK-Honorartabelle. You invoice based on damage amount — as in any standard liability claim. The opposing insurance covers the fee in accordance with §249 BGB; Claimondo handles the billing, the partner law firm the enforcement of the claim. The specific platform commission depends on assignment volume and region, and is discussed transparently in the initial consultation — we provide a sample calculation based on your last 12 months in advance.",
       "verdienst_text2": "Assignments are non-exclusive: your own direct assignments, BVSK referrals, and insurer listings continue in parallel. We are an additional channel, not a binding commitment.",
       "onboarding_heading": "Onboarding Duration & Requirements",
-      "onboarding_text": "Once your region is activated, onboarding takes 7 to 14 working days: we verify your qualification against the relevant registers (DAT, BVSK, IHK, öbuv chambers), send the partner agreement, set you up in the SV portal, and conduct a 30-minute live onboarding call. After that, the first assignments go live.",
+      "onboarding_text": "You start immediately: registration and onboarding take less than 15 minutes combined — then you are activated and visible. Qualification verification (DAT, BVSK, IHK, öbuv) runs in parallel in the background.",
       "voraussetzungen": [
         "At least one recognised qualification: DAT-Expert · BVSK · IHK · öbuv",
         "Valid professional liability insurance (min. €2 million coverage)",
@@ -2362,10 +2362,10 @@
         "Smartphone for on-site evidence photo upload",
         "Availability for first contact within 24h of assignment allocation"
       ],
-      "warteliste_heading": "Why a Waitlist?",
-      "warteliste_text_pre": "Currently",
-      "warteliste_text_sv": "{anzahl} appraisers",
-      "warteliste_text_post": "are on the waitlist. We onboard partners on a regional, staggered basis: only when assignment volume in a postal code region is viable (≥ 8 assignments / month) do we activate one or more appraisers. This ensures no partner is onboarded on empty promises, and every activated appraiser sees a workable volume from day one. Your position on the list is not \"first come, first served\" — we match primarily by regional demand and qualification mix.",
+      "sofort_heading": "Start for free — today",
+      "sofort_text": "Register in minutes and complete onboarding — you are activated immediately and receive assignments without acquisition. Optionally become a Network Partner for priority placement in the assessor finder and your own branding.",
+      "sofort_netzwerk_zusatz": "Already {anzahl} assessors are in the Claimondo network.",
+      "sofort_cta": "Register for free now",
       "faq_heading": "Frequently Asked Questions",
       "faqs": [
         {
@@ -3300,7 +3300,7 @@
     "was_p": "The distinction from the appraiser appointed by the opposing insurance is critical: their inspection services work on behalf of the at-fault party and, in practice, systematically reduce claims. As an injured party with no fault of your own, you have the right under §249 BGB to engage an <strong>independent vehicle appraiser</strong> of your choice — and that is precisely the choice the four referral portals compared here make for you. The legal detail is set out in the",
     "was_link_urteil": "section on the LG Bremen judgment on online expert reports",
     "tabelle_eyebrow": "Direct comparison",
-    "tabelle_h2": "All 4 platforms at a glance",
+    "tabelle_h2": "The platforms at a glance",
     "tabelle_intro_before": "All competitor information is taken from the respective provider websites (as of",
     "tabelle_intro_after": "). Claimondo's network size is rendered live from our database.",
     "tabelle_caption_before": "Vehicle appraiser referral services compared — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten (as of",
@@ -3316,63 +3316,72 @@
         "claimondo": "Managed full-service claim settlement — a case hub from expert report through partner law firm to payout",
         "neo": "Expert matching (online request → suitable appraiser)",
         "paten": "End-to-end claim handling (appraiser + legal counsel)",
-        "giganten": "Directory with radius search (appraiser, workshop, lawyer, towing service) + profile listings"
+        "giganten": "Directory with radius search (appraiser, workshop, lawyer, towing service) + profile listings",
+        "unfallhelden": "Full service “from a single source” (lawyer + expert + repair shop + replacement car)"
       },
       {
         "kriterium": "Availability",
         "claimondo": "Digital 24/7, by phone until at least 10 pm; response within 15 minutes",
         "neo": "\"Around the clock,\" request \"in 30 seconds\"; Tel. 0160/4873888",
         "paten": "\"24h emergency assistance,\" hotline 0800 505 50 50",
-        "giganten": "\"Instant matching\" + radius search (25–300 km)"
+        "giganten": "\"Instant matching\" + radius search (25–300 km)",
+        "unfallhelden": "Online claim report + toll-free hotline"
       },
       {
         "kriterium": "Appraiser network size (publicly stated)",
         "claimondo": "",
         "neo": "not publicly disclosed",
         "paten": "\"Nationwide network\" (no figure given)",
-        "giganten": "\"Over 250 vetted\" (search counter: 329; paid premium listings)"
+        "giganten": "\"Over 250 vetted\" (search counter: 329; paid premium listings)",
+        "unfallhelden": "“nationwide network” (no figure)"
       },
       {
         "kriterium": "On-site inspection",
         "claimondo": "always required",
         "neo": "Standard",
         "paten": "\"directly on-site\"",
-        "giganten": "connects clients with on-site appraisers"
+        "giganten": "connects clients with on-site appraisers",
+        "unfallhelden": "yes (incl. paint-thickness measurement)"
       },
       {
         "kriterium": "Online-only report without on-site inspection",
         "claimondo": "no",
         "neo": "no",
         "paten": "no",
-        "giganten": "no"
+        "giganten": "no",
+        "unfallhelden": "no"
       },
       {
         "kriterium": "Legal counsel integration",
         "claimondo": "yes — integrated dedicated partner law firm",
         "neo": "yes (appraiser + lawyer)",
         "paten": "yes — \"qualified legal counsel\"",
-        "giganten": "yes — lawyer as a partner category"
+        "giganten": "yes — lawyer as a partner category",
+        "unfallhelden": "yes — specialised lawyer included in the service"
       },
       {
         "kriterium": "Costs for Injured Parties",
         "claimondo": "0 € (§249 BGB, subject to acknowledgement)",
         "neo": "\"non-binding & free of charge\"",
         "paten": "0 € (liable insurance covers costs)",
-        "giganten": "\"Free for injured parties\""
+        "giganten": "\"Free for injured parties\"",
+        "unfallhelden": "€0 (“doesn’t cost you a cent”)"
       },
       {
         "kriterium": "Whitelabel/Brand for Appraisers",
         "claimondo": "yes (the only one of the four)",
         "neo": "no",
         "paten": "no",
-        "giganten": "no (paid \"Premium Member\" listings)"
+        "giganten": "no (paid \"Premium Member\" listings)",
+        "unfallhelden": "no"
       },
       {
         "kriterium": "Service Area",
         "claimondo": "nationwide (DE), focus on NRW",
         "neo": "nationwide (DE)",
         "paten": "nationwide (DE)",
-        "giganten": "nationwide (DE)"
+        "giganten": "nationwide (DE)",
+        "unfallhelden": "Germany-wide"
       }
     ],
     "einordnung_titel": "A note on interpreting the network figures:",
@@ -3457,7 +3466,8 @@
     "cta_h2": "Submit an appraisal request — free of charge & non-binding",
     "cta_p": "Report your claim online or call us directly — online 24/7, by phone until at least 10 p.m.",
     "cta_anfrage": "Submit an appraisal request",
-    "cta_tel_label": "Call us"
+    "cta_tel_label": "Call us",
+    "th_unfallhelden": "Unfallhelden"
   },
   "kosten_kfz_gutachten": {
     "breadcrumb_start": "Home",
@@ -4056,8 +4066,8 @@
       "twitter_description": "No call center — a specialist in under 15 minutes."
     },
     "gutachter_partner": {
-      "title": "Become a partner car assessor — waiting list",
-      "description": "Join the waiting list: Claimondo's nationwide assessor network. Cases referred directly, no acquisition. DAT experts and BVSK members welcome.",
+      "title": "Become a Vehicle Assessor Partner — Start for Free",
+      "description": "Join the Claimondo assessor network for free: activated immediately, assignments without acquisition. Optional Network Partner with top placement and custom branding.",
       "og_title": "Become a partner car assessor — Claimondo",
       "og_description": "Cases without acquisition. Sign up for the Claimondo assessor network — we refer cases directly in your catchment area.",
       "twitter_description": "Cases without acquisition. Sign up for the Claimondo assessor network."
@@ -4567,5 +4577,27 @@
     "cta_h2": "Had an accident? Secure your own appraiser.",
     "cta_p": "Independent, qualified, near you — appointment usually within 48 hours. In case of third-party fault, €0 for you.",
     "cta_schaden": "Report your claim now"
+  }
+,
+  "wertminderung_rechner": {
+    "titel": "Calculate diminished value with your figures",
+    "intro": "The table above shows the rule of thumb. Calculate with your own numbers here:",
+    "label_reparaturkosten": "Repair costs (€)",
+    "label_alter": "Vehicle age (years)",
+    "label_km": "Mileage (km, optional)",
+    "label_wbw": "Replacement value (€, optional)",
+    "label_vorschaden": "Prior damage to the vehicle?",
+    "vorschaden_keine": "None",
+    "vorschaden_repariert": "Professionally repaired",
+    "vorschaden_erheblich": "Substantial / unrepaired",
+    "ergebnis_schaetzung": "Rough guide: {betrag} ({pct} of repair costs).",
+    "ergebnis_einzelfall_alter": "Individual case: depends on mileage and market value. German courts reject rigid age limits (BGH VI ZR 357/03) — older vehicles can also have a claim. The binding figure comes from the expert report.",
+    "ergebnis_einzelfall_vorschaden": "Substantial prior damage significantly reduces the diminished value. The amount is an individual case — only the expert report determines the binding figure.",
+    "ergebnis_unvollstaendig": "Please enter repair costs and vehicle age.",
+    "hinweis_vorschaden_repariert": "Professionally repaired prior damage slightly reduces the diminished value — the rule of thumb is an upper bound here.",
+    "hinweis_hohe_km": "With high mileage the diminished value tends toward the lower end.",
+    "hinweis_kleiner_schaden": "For small damage relative to the vehicle value, the diminished value can be low.",
+    "disclaimer": "Rule-of-thumb guidance, not a substitute for an expert report. A certified expert (Sanden/Danner method) determines the binding figure — accounting for mileage, market value, prior damage and repair quality.",
+    "cta": "Commission a free expert"
   }
 }

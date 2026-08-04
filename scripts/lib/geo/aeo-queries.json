@@ -1,0 +1,30 @@
+{
+  "queries": [
+    { "id": "t01", "text": "Unfallgutachter Köln empfehlen", "cluster": "decision", "relevanz": "hoch" },
+    { "id": "t02", "text": "KFZ Schadensregulierung online Deutschland", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "t03", "text": "Versicherung kürzt Unfallgutachten was tun", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "t04", "text": "Beste Plattform Unfallschaden Abwicklung", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "t05", "text": "Was kostet KFZ Gutachter nach Unfall", "cluster": "awareness", "relevanz": "mittel" },
+    { "id": "t06", "text": "Unabhängiger Sachverständiger NRW", "cluster": "decision", "relevanz": "hoch" },
+    { "id": "t07", "text": "Haftpflichtschaden regulieren kostenlos", "cluster": "awareness", "relevanz": "hoch" },
+    { "id": "t08", "text": "Wertminderung nach Autounfall berechnen", "cluster": "awareness", "relevanz": "mittel" },
+    { "id": "t09", "text": "HUK kürzt Gutachten Erfahrungen", "cluster": "consideration", "relevanz": "mittel" },
+    { "id": "t10", "text": "Digitale Schadensregulierung Plattform Deutschland", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "j01", "text": "Wie finde ich einen unabhängigen Kfz-Sachverständigen?", "cluster": "awareness", "relevanz": "hoch" },
+    { "id": "j02", "text": "Vergleich Gutachter-Vermittlungsportale Deutschland", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "j03", "text": "Online-Kfz-Gutachten — geht das?", "cluster": "consideration", "relevanz": "hoch" },
+    { "id": "j04", "text": "Schneller Gutachter nach Unfall — wer kommt sofort?", "cluster": "decision", "relevanz": "mittel" },
+    { "id": "j05", "text": "Was ist Claimondo?", "cluster": "branded", "relevanz": "hoch" }
+  ],
+  "competitors": [
+    { "name": "ADAC", "domains": ["adac.de"] },
+    { "name": "DAT", "domains": ["dat.de"] },
+    { "name": "Bußgeldkatalog", "domains": ["bussgeldkatalog.org"] },
+    { "name": "Neogutachter", "domains": ["neogutachter.de"] },
+    { "name": "Unfallpaten", "domains": ["unfallpaten.de"] },
+    { "name": "Unfallgiganten", "domains": ["unfallgiganten.de"] },
+    { "name": "TÜV SÜD", "domains": ["tuvsud.com"] },
+    { "name": "BVSK", "domains": ["bvsk.de"] },
+    { "name": "autohaus.de", "domains": ["autohaus.de"] }
+  ]
+}

@@ -4,6 +4,7 @@ import {
   routeForAbrechnungsweg,
   istReparaturOnly,
   istWerkstattReparaturWeg,
+  deriveAbrechnungsweg,
 } from '../abrechnungsweg'
 
 describe('resolveAbrechnungsweg', () => {
@@ -73,5 +74,28 @@ describe('istWerkstattReparaturWeg (WS2 — selbstzahler ODER kasko-freie-Wahl)'
     expect(istWerkstattReparaturWeg('haftpflicht')).toBe(false)
     expect(istWerkstattReparaturWeg(null)).toBe(false)
     expect(istWerkstattReparaturWeg('irgendwas')).toBe(false)
+  })
+})
+
+describe('deriveAbrechnungsweg (spiegelt die DB-Funktion derive_abrechnungsweg, Mig 20260804161329)', () => {
+  it('gegner -> haftpflicht (service-typ-unabhaengig — auch fuer nur_gutachter-Claims)', () => {
+    expect(deriveAbrechnungsweg({ schuldfrage: 'gegner', eigeneVersicherung: null, schadenart: 'unbekannt' })).toBe('haftpflicht')
+    expect(deriveAbrechnungsweg({ schuldfrage: 'gegner', eigeneVersicherung: 'ja', schadenart: null })).toBe('haftpflicht')
+  })
+  it('eigenverantwortung + eigene VS -> kasko / ohne -> selbstzahler / offen -> null', () => {
+    expect(deriveAbrechnungsweg({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja', schadenart: null })).toBe('kasko')
+    expect(deriveAbrechnungsweg({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'nein', schadenart: null })).toBe('selbstzahler')
+    expect(deriveAbrechnungsweg({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: null, schadenart: null })).toBeNull()
+  })
+  it('schadenart-Fallback: schuldfrage fehlt aber schadenart=haftpflicht -> haftpflicht', () => {
+    expect(deriveAbrechnungsweg({ schuldfrage: null, eigeneVersicherung: null, schadenart: 'haftpflicht' })).toBe('haftpflicht')
+  })
+  it('sonst (schuldfrage null + schadenart != haftpflicht) -> null', () => {
+    expect(deriveAbrechnungsweg({ schuldfrage: null, eigeneVersicherung: null, schadenart: 'unbekannt' })).toBeNull()
+    expect(deriveAbrechnungsweg({ schuldfrage: 'unklar', eigeneVersicherung: null, schadenart: null })).toBeNull()
+  })
+  it('gibt NIE nicht_zutreffend — der nur_gutachter-Sonderfall ist entfernt (abrechnungsweg = Schaden-Natur)', () => {
+    expect(deriveAbrechnungsweg({ schuldfrage: 'gegner', eigeneVersicherung: null, schadenart: 'unbekannt' })).not.toBe('nicht_zutreffend')
+    expect(deriveAbrechnungsweg({ schuldfrage: null, eigeneVersicherung: null, schadenart: 'unbekannt' })).not.toBe('nicht_zutreffend')
   })
 })

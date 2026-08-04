@@ -10,10 +10,11 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import {
-  serviceSchema, breadcrumbsSchema, faqPageSchema,
+  serviceSchema, breadcrumbsSchema, faqPageSchema, webApplicationSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
+import WertminderungRechnerClient from './WertminderungRechnerClient'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -92,6 +93,12 @@ export default function WertminderungPage() {
               'Berechnung und Durchsetzung der merkantilen Wertminderung nach Verkehrsunfall. Sanden/Danner-Formel, BGH-Rechtsprechung VI ZR 357/03, typische Werte 500–2.500 €.',
             url: `${SITE_URL}/kfz-gutachter/wertminderung`,
           }),
+          webApplicationSchema({
+            name: 'Wertminderungs-Rechner',
+            description:
+              'Interaktiver Rechner für die merkantile Wertminderung nach Unfall — Faustregel nach Fahrzeugalter, mit Vorschaden-Berücksichtigung. Kostenlos.',
+            url: `${SITE_URL}/kfz-gutachter/wertminderung`,
+          }),
           faqPageSchema(FAQS_SCHEMA),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
@@ -155,6 +162,8 @@ export default function WertminderungPage() {
           <p className="mt-3 text-xs text-claimondo-ondo">
             {t('faustregel_note')}
           </p>
+
+          <WertminderungRechnerClient />
 
           <h2 className="mt-12 text-3xl font-extrabold text-claimondo-navy">
             {t('sanden_danner_h2')}

@@ -28,6 +28,30 @@ export function resolveAbrechnungsweg(args: {
   return null
 }
 
+/**
+ * Ableiter-Vereinheitlichung (Problem B): spiegelt die DB-Funktion derive_abrechnungsweg EXAKT
+ * (Mig 20260804161329), damit die gespeicherte Spalte (der convert schreibt sie) und die 3 Views
+ * (v_claim_base/-phase/-werkstatt_auftrag berechnen sie neu) NIE divergieren. Unterschied zu
+ * resolveAbrechnungsweg: + schadenart-Fallback (schuldfrage fehlt, schadenart='haftpflicht'
+ * -> haftpflicht). service_typ ist bewusst KEIN Input — der frühere nur_gutachter-Sonderfall
+ * ('nicht_zutreffend') wurde entfernt: abrechnungsweg = Schaden-Natur, unabhängig vom Service-Umfang.
+ * ⚠ MUSS logikgleich zur DB-Funktion bleiben (Unit-Test deckt die Matrix ab).
+ */
+export function deriveAbrechnungsweg(args: {
+  schuldfrage: string | null
+  eigeneVersicherung: string | null
+  schadenart: string | null
+}): Abrechnungsweg | null {
+  if (args.schuldfrage === 'gegner') return 'haftpflicht'
+  if (args.schuldfrage === 'eigenverantwortung') {
+    if (args.eigeneVersicherung === 'ja') return 'kasko'
+    if (args.eigeneVersicherung === 'nein') return 'selbstzahler'
+    return null
+  }
+  if (args.schuldfrage == null && args.schadenart === 'haftpflicht') return 'haftpflicht'
+  return null
+}
+
 /** Route pro Abrechnungsweg — steuert die Flow-Weiche (SP-B). */
 export function routeForAbrechnungsweg(weg: Abrechnungsweg): SchadenRoute {
   switch (weg) {

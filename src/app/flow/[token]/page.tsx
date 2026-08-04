@@ -255,6 +255,45 @@ export default async function FlowPage({
     // Fehler fallen wir auf den Legacy-Pfad zurueck.
     console.warn('[flow/[token]] Auth-Check fuer Onboarding-Redirect:', err)
   }
+
+  // P4-UX-Followup (j03-Soll-Delta 04.08.): ANONYMER SV-Vermittlungs-Kunde -> direkt zur
+  // Fokus-Signatur. Der SV hat Fall/Kunde/Gutachten komplett erfasst (Sofort-Claim,
+  // source_channel='gutachter-vermittlung'); Quali+Feststellung waeren ein Doppel-Ask.
+  // Nur solange die SA offen ist UND kein Kunden-Account existiert (danach besitzen die
+  // eingeloggten Zweige oben den Fall). signSAandCreateFall traegt den Pfad anonym
+  // (token-basiert, sign-into-existing + Account-Anlage aus den Lead-Daten, P4).
+  // Fail-soft: Fehler -> Legacy-Wizard wie bisher.
+  // source_channel lebt am LEAD (nicht am Claim — Query-Drift-Ratchet-Fang 04.08.);
+  // exakt der P4-sign-into-existing-Scope (actions.ts prueft lead.source_channel).
+  if (
+    !signaturBenoetigtFallId &&
+    !onboardingRedirectFallId &&
+    (lead.source_channel as string | null) === 'gutachter-vermittlung'
+  ) {
+    try {
+      const { data: vermittlungsFall } = await svc
+        .from('v_claim_full')
+        .select('fall_id, sa_unterschrieben, geschaedigter_user_id, abrechnungsweg')
+        .eq('lead_id', leadId)
+        .limit(1)
+        .maybeSingle()
+      if (vermittlungsFall?.fall_id) {
+        const { istAnonymerVermittlungsSaKandidat } = await import('@/lib/netzwerk/vermittlungs-sa-gate')
+        if (
+          istAnonymerVermittlungsSaKandidat({
+            sourceChannel: (lead.source_channel as string | null) ?? null,
+            saUnterschrieben: (vermittlungsFall.sa_unterschrieben as boolean | null) ?? null,
+            geschaedigterUserId: (vermittlungsFall.geschaedigter_user_id as string | null) ?? null,
+            abrechnungsweg: (vermittlungsFall.abrechnungsweg as string | null) ?? null,
+          })
+        ) {
+          signaturBenoetigtFallId = vermittlungsFall.fall_id as string
+        }
+      }
+    } catch (err) {
+      console.warn('[flow/[token]] Vermittlungs-SA-Check (fail-soft):', err)
+    }
+  }
   // Kanonisch (s.o.): eingeloggter Kunde + Fall + SA erledigt -> onboarding-details. AUSSERHALB des
   // try, damit NEXT_REDIRECT propagiert. Eine offene Feststellung wird DORT erhoben (datenabhaengig,
   // ladeNoetigePhasen 'kunde-onboarding' -> claims.hergang_kunde_text; Bridge convertLeadToClaim

@@ -5,6 +5,7 @@ import WillkommenClient from './WillkommenClient'
 import WillkommenWaiting from './WillkommenWaiting'
 import { SvBasicOnboardingClient } from './SvBasicOnboardingClient'
 import { SvBasicPendingReview } from './SvBasicPendingReview'
+import { NetzwerkAskInline } from '@/components/netzwerk/NetzwerkAskInline'
 import { resolveMaxFaelleMonat, resolveUmkreisKm } from '@/lib/sachverstaendige/kontingent'
 
 /**
@@ -118,7 +119,38 @@ export default async function GutachterWillkommenPage({
     const { ladeSvOnboardingPhasen } = await import('@/lib/onboarding/lade-sv-onboarding-phasen')
     const state = await ladeSvOnboardingPhasen()
     if (!state || state.abgeschlossen || state.phasen.length === 0) {
-      return <SvBasicPendingReview />
+      // P5 T8-Fix (04.08.): Der Ask lebt HIER — nach finalize ist dieser Screen
+      // der einzig erreichbare Abschluss-Moment (revalidate ersetzt den Wizard-
+      // Completed-Screen). Kein Ask fuer bereits zahlende SVs (Abo-Kanon wie
+      // Finder-Boost: aktiv/comped/ueberfaellig); Admin-Client, weil die
+      // Abo-Row RLS-seitig select_own ist und der Read hier serverseitig laeuft.
+      let hatAbo = false
+      try {
+        const { data: abo } = await createAdminClient()
+          .from('sv_netzwerk_abonnements')
+          .select('status')
+          .eq('sv_id', sv.id)
+          .maybeSingle()
+        hatAbo = ['aktiv', 'comped', 'ueberfaellig'].includes(
+          ((abo as { status?: string | null } | null)?.status ?? '') as string,
+        )
+      } catch (err) {
+        console.error('[willkommen] abo-status:', err)
+      }
+      return (
+        <SvBasicPendingReview
+          freigeschaltet={!!sv.portal_zugang_freigeschaltet}
+          netzwerkAsk={
+            !hatAbo && netzwerkMonatEuro ? (
+              <NetzwerkAskInline
+                monatEuro={netzwerkMonatEuro}
+                setupEuro={netzwerkSetupEuro}
+                stripePublishableKey={process.env.STRIPE_PUBLISHABLE_KEY ?? ''}
+              />
+            ) : null
+          }
+        />
+      )
     }
     return (
       <SvBasicOnboardingClient

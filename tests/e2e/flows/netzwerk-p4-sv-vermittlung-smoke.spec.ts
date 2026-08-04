@@ -93,8 +93,14 @@ async function drawSignature(page: Page): Promise<boolean> {
 
 /** Dedizierter SA-Step-Handler: Service waehlen -> Canvas zeichnen -> Checkboxen -> unterschreiben. */
 async function handleSaStep(page: Page): Promise<boolean> {
+  // Zwei Render-Varianten: Wizard-SA-Step (echtes heading) + Fokus-Signatur (j03-Delta:
+  // FokusSignaturClient rendert den Titel NICHT als heading-Role — Marker ist der
+  // "SA unterzeichnen"-CTA; Prod-Snapshot 04.08.).
   const heading = page.getByRole('heading', { name: /Beauftragung unterzeichnen|Sicherungsabtretung/i }).first()
-  if (!(await heading.isVisible().catch(() => false))) return false
+  const fokusCta = page.getByRole('button', { name: /SA unterzeichnen/i }).first()
+  const istSaStep =
+    (await heading.isVisible().catch(() => false)) || (await fokusCta.isVisible().catch(() => false))
+  if (!istSaStep) return false
 
   const komplett = page.getByRole('button', { name: /Komplettservice/ }).first()
   if (await komplett.isVisible().catch(() => false)) await komplett.click().catch(() => {})
@@ -235,11 +241,22 @@ test('Teil B — Kunde signiert SA in den bestehenden Claim: Effekte werden nach
   const page = await ctx.newPage()
   await page.goto(flowLinkUrl!, { waitUntil: 'domcontentloaded' })
 
+  // j03-Soll-Delta (04.08., P4-UX-Followup): der anonyme Vermittlungs-Kunde landet DIREKT
+  // an der Fokus-Signatur — keine Quali, keine Feststellung (der SV hat alles erfasst).
+  // Hartes Soll-Assert VOR der Treiberschleife; die Schleife bedient danach nur noch den
+  // SA-Step selbst (Checkboxen/Canvas/Absenden).
+  // Marker = Fokus-CTA "SA unterzeichnen" (die Fokus-Ansicht rendert den Titel nicht als
+  // heading-Role; disabled bis Checkboxen — toBeVisible reicht als Direkt-Start-Beweis).
+  await expect(page.getByRole('button', { name: /SA unterzeichnen/i }).first()).toBeVisible({
+    timeout: 30_000,
+  })
+
   // Durch den Flow bis zur SA treiben. Der Wizard ist heterogen (Quali-Options-Karten,
   // Feststellungs-Steps mit Inputs/Uploads, Skip-Links, Weiter-CTAs) — pro Iteration:
   // Canvas? -> zeichnen+absenden. Sonst: Checkboxen abhaken, Pflicht-Inputs mit Dummies
   // fuellen, Options-Karte klicken (bevorzugt "Unfallgegner" = Haftpflicht-konsistent),
-  // sonst Skip-Link, sonst Weiter-CTA.
+  // sonst Skip-Link, sonst Weiter-CTA. (Seit dem j03-Delta ist das nur noch der
+  // Fallback-Treiber fuer den SA-Step — das Direkt-Assert oben ist das Soll.)
   let signed = false
   for (let step = 0; step < 30 && !signed; step++) {
     if (await handleSaStep(page)) {

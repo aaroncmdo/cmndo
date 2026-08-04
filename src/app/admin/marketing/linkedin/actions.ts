@@ -95,16 +95,6 @@ export async function ueberspringen(id: string): Promise<{ ok: boolean; error?: 
   return { ok: true }
 }
 
-export async function linkedInTrennen(): Promise<{ ok: boolean; error?: string }> {
-  await requirePortalAccess(['admin'])
-  const admin = createAdminClient()
-  const { error } = await admin.from('linkedin_oauth_tokens').delete()
-    .neq('id', '00000000-0000-0000-0000-000000000000')
-  if (error) return { ok: false, error: error.message }
-  revalidatePath(QUEUE_PATH)
-  return { ok: true }
-}
-
 export async function startLinkedInConnect(): Promise<void> {
   await requirePortalAccess(['admin'])
   const state = crypto.randomUUID()

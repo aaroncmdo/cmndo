@@ -182,6 +182,8 @@ export async function beanspracheSvLead(input: {
   svLeadId: string
   email: string
   telefon: string
+  /** Netzwerk-Kalt-Einladung: Token aus ?einladung= der Registrier-URL (best-effort Redemption). */
+  einladungToken?: string
   paket?: string
   firmenname?: string
   rechtsform?: string
@@ -419,6 +421,17 @@ export async function beanspracheSvLead(input: {
     console.error('[sv-basic/beanspracheSvLead] Admin-Task fehlgeschlagen:', err)
   }
 
+  // Netzwerk-Kalt-Einladung einloesen (Auto-Kante zum Einlader) — best-effort,
+  // bricht die Registrierung NIE (Muster werkstatt/registrieren).
+  if (input.einladungToken) {
+    try {
+      const { loeseNetzwerkEinladungEin } = await import('@/lib/netzwerk/einladung')
+      await loeseNetzwerkEinladungEin(adminDb, input.einladungToken, userId)
+    } catch (err) {
+      console.error('[sv-basic] netzwerk-einladung redemption (non-critical):', err)
+    }
+  }
+
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
   return { ok: true, svId, emailSent }
 }
@@ -432,6 +445,8 @@ export async function registriereSvBasicNeu(input: {
   vorname: string
   nachname: string
   email: string
+  /** Netzwerk-Kalt-Einladung: Token aus ?einladung= der Registrier-URL (best-effort Redemption). */
+  einladungToken?: string
   telefon: string
   adresse: string
   plz?: string
@@ -712,6 +727,17 @@ export async function registriereSvBasicNeu(input: {
     }
   } catch (err) {
     console.error('[sv-basic/registriereSvBasicNeu] partner_leads-Spiegel fehlgeschlagen (non-critical):', err)
+  }
+
+  // Netzwerk-Kalt-Einladung einloesen (Auto-Kante zum Einlader) — best-effort,
+  // bricht die Registrierung NIE (Muster werkstatt/registrieren).
+  if (input.einladungToken) {
+    try {
+      const { loeseNetzwerkEinladungEin } = await import('@/lib/netzwerk/einladung')
+      await loeseNetzwerkEinladungEin(adminDb, input.einladungToken, userId)
+    } catch (err) {
+      console.error('[sv-basic] netzwerk-einladung redemption (non-critical):', err)
+    }
   }
 
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt

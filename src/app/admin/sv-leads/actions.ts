@@ -94,6 +94,11 @@ export async function importSvLeadsAction(csvText: string): Promise<
 }
 
 export async function getSvLeads(): Promise<SvLeadRow[]> {
+  // Audit 2026-08-04: einziger Export des Files OHNE Guard — service-role-Read
+  // auf sv_leads-PII war fuer JEDEN eingeloggten User als POST-Endpoint
+  // erreichbar. Array-Signatur bleibt (SSR-Consumer); unauthorized -> leer.
+  const gate = await requireAdmin()
+  if (!gate) return []
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('sv_leads')
