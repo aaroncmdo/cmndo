@@ -80,9 +80,11 @@ export function istOffenerTerminStatus(status: string | null): boolean {
   return !(TERMINAL_TERMIN_STATUS as readonly string[]).includes(status)
 }
 
-/** Beide Lead-Verankerungen: bezug-nativ (bezug_typ='lead') ODER legacy (lead_id-Spalte). */
-function leadAnkerOrExpr(leadId: string): string {
-  return `and(bezug_typ.eq.lead,bezug_id.eq.${leadId}),lead_id.eq.${leadId}`
+/** Beide Lead-Verankerungen fuers UMHAENGEN: bezug-nativ ODER echtes Legacy (lead_id UND
+ *  bezug-frei). Bewusst STRENGER als bezugOrExpr('lead') — stale lead_id neben fremdem
+ *  bezug darf nicht re-geankert werden (kein DB-Constraint verhindert den Doppel-Zustand). */
+export function leadAnkerOrExpr(leadId: string): string {
+  return `and(bezug_typ.eq.lead,bezug_id.eq.${leadId}),and(bezug_typ.is.null,lead_id.eq.${leadId})`
 }
 
 /** Existiert mindestens ein nicht-terminaler lead-verankerter Termin? (Cursor-Input, T2) */
@@ -97,8 +99,8 @@ export async function hatOffeneLeadTermine(admin: SupabaseClient, leadId: string
 }
 
 /** Haengt alle nicht-terminalen lead-verankerten Termine auf den Fall um (bezug 'fall',
- *  fall_id==claims.id claim-first). lead_id wird im selben UPDATE genullt (validate-Trigger
- *  lehnt Doppel-Bezug ab). */
+ *  fall_id==claims.id claim-first). lead_id wird im selben UPDATE genullt (Aufraeumen:
+ *  danach genau EIN Anker; identische Semantik zur Backfill-Migration 20260804235003). */
 export async function uebernehmeLeadTermine(
   admin: SupabaseClient,
   leadId: string,
