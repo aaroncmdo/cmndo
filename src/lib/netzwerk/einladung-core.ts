@@ -1,7 +1,7 @@
 // Pure Token-Erzeugung + Redemption-Eligibility (Airdrop-Muster: Hash+Prefix, Klartext nur im Link).
 import { createHash, randomBytes } from 'node:crypto'
 
-export type EinladungZielRolle = 'sachverstaendiger' | 'werkstatt' | 'makler'
+export type EinladungZielRolle = 'sachverstaendiger' | 'werkstatt' | 'makler' | 'flottenmanager'
 const TOKEN_BYTES = 16
 const PREFIX_LEN = 8
 
@@ -22,4 +22,5 @@ export const ROLLE_TO_REGISTRIER_PFAD: Record<EinladungZielRolle, string> = {
   sachverstaendiger: '/sv/registrieren',
   werkstatt: '/werkstatt/registrieren',
   makler: '/makler/registrieren',
+  flottenmanager: '/flotte/registrieren',
 }

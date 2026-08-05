@@ -18,18 +18,20 @@ import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 
 const APP_BASE_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
-export type PartnerSignupTyp = 'werkstatt' | 'makler' | 'gutachter'
+export type PartnerSignupTyp = 'werkstatt' | 'makler' | 'gutachter' | 'flotte'
 
 const TYP_EMOJI: Record<PartnerSignupTyp, string> = {
   werkstatt: '🔧',
   makler: '🤝',
   gutachter: '📋',
+  flotte: '🚛',
 }
 
 const TYP_LABEL: Record<PartnerSignupTyp, string> = {
   werkstatt: 'Werkstatt',
   makler: 'Makler',
   gutachter: 'Gutachter',
+  flotte: 'Firmen-Flotte',
 }
 
 export interface NotifyTeamPartnerSignupOpts {
