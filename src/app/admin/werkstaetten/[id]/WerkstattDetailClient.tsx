@@ -24,7 +24,6 @@ import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-
 import type { WerkstattDetail } from './detail-data'
 import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
 import { MarkenGruppenEditor } from './MarkenGruppenEditor'
-import { NotizenSection } from './NotizenSection'
 import { WerkstattKarte } from './WerkstattKarte'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
@@ -32,6 +31,7 @@ import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
 import { weiseQrPoolCodeZu } from '../qr-pool-actions'
 import { ClaimThreadChat } from '@/components/chat/ClaimThreadChat'
 import { holeOderErstelleDirektThread } from '@/lib/chat/thread-actions'
+import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
@@ -663,11 +663,6 @@ export default function WerkstattDetailClient({
         )}
       </SectionCard>
 
-      {/* Interne Notizen (nur Team-sichtbar) */}
-      <SectionCard title="Interne Notizen">
-        <NotizenSection werkstattId={w.id} notizen={detail.notizen} />
-      </SectionCard>
-
       {/* Fähigkeiten & Staffelung (inline editierbar) */}
       <SectionCard title="Fähigkeiten & Staffelung">
         <FaehigkeitenStaffelEditor werkstattId={w.id} faehigkeiten={w.faehigkeiten ?? []} staffel={staffel} />
@@ -733,6 +728,13 @@ export default function WerkstattDetailClient({
           </Button>
         </div>
       </SectionCard>
+
+      {/* Partner-Aktivität (CRM-Cockpit) — eigenstaendige Sektion, zu unterscheiden von
+          der "Aktivität — Aufträge/Vermittlungen"-SectionCard oben (Auftragsliste). */}
+      <div className="mt-6">
+        <h3 className="text-heading-sm text-claimondo-navy mb-2">Aktivität</h3>
+        <PartnerCockpitPanel partnerTyp="werkstatt" partnerId={w.id} />
+      </div>
 
       {/* Stammdaten-Bearbeiten-Modal */}
       <Modal open={editOpen} onClose={() => setEditOpen(false)} maxWidth={520} ariaLabel="Werkstatt bearbeiten">

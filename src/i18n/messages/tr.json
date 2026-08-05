@@ -5067,6 +5067,16 @@
     "abmelden": "Çıkış yap"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Atölye seçiliyor",
+    "reparatur-angefragt": "Onarım randevusu ayarlanıyor",
+    "reparatur-laeuft": "Onarım sürüyor",
+    "reparatur-erledigt": "Onarım tamamlandı",
+    "termin_durchgefuehrt": "Randevu gerçekleşti",
+    "reguliert_vollstaendig": "Tamamen ödendi",
+    "klage_rechtsstreit": "Dava sürecinde",
+    "verjaehrt": "Zaman aşımına uğradı",
+    "abgelehnt_final": "Kesin olarak reddedildi",
+    "an_externe_kanzlei_uebergeben": "Harici hukuk bürosuna devredildi",
     "ersterfassung": "Kayıt sürüyor",
     "flow-gesendet": "Bağlantı gönderildi",
     "onboarding": "Son bilgiler bekleniyor",

@@ -5067,6 +5067,16 @@
     "abmelden": "Выйти"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Выбор мастерской",
+    "reparatur-angefragt": "Согласование даты ремонта",
+    "reparatur-laeuft": "Идёт ремонт",
+    "reparatur-erledigt": "Ремонт завершён",
+    "termin_durchgefuehrt": "Приём проведён",
+    "reguliert_vollstaendig": "Полностью урегулировано",
+    "klage_rechtsstreit": "Судебное разбирательство",
+    "verjaehrt": "Истёк срок давности",
+    "abgelehnt_final": "Окончательно отклонено",
+    "an_externe_kanzlei_uebergeben": "Передано во внешнюю юридическую фирму",
     "ersterfassung": "Идёт регистрация",
     "flow-gesendet": "Ссылка отправлена",
     "onboarding": "Ожидаются последние данные",

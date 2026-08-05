@@ -295,7 +295,8 @@ export async function submitSchadenGegner(
  * Flottenmanager, der die physische Karte antippt und ueber /schaden/[token]
  * im Bind-Zweig landet. Auth-Grenze: nur ein eingeloggter Flottenmanager,
  * dessen Firma die Karte gehoert, darf binden. bindeSchadenkarteAnFahrzeug
- * prueft firma_id + Status-Guard (nur 'bestellt'/'frei') zusaetzlich.
+ * prueft zusaetzlich Fahrzeug-Ownership (flotten_fahrzeuge), firma_id der
+ * Karte + Status-Guard (nur 'bestellt'/'frei').
  */
 export async function bindeKarteAnFahrzeugPublic(
   token: string,

@@ -5067,6 +5067,16 @@
     "abmelden": "Sign out"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Choosing a workshop",
+    "reparatur-angefragt": "Scheduling the repair",
+    "reparatur-laeuft": "Repair in progress",
+    "reparatur-erledigt": "Repair completed",
+    "termin_durchgefuehrt": "Appointment completed",
+    "reguliert_vollstaendig": "Fully settled",
+    "klage_rechtsstreit": "In litigation",
+    "verjaehrt": "Time-barred",
+    "abgelehnt_final": "Finally declined",
+    "an_externe_kanzlei_uebergeben": "Handed to external law firm",
     "ersterfassung": "Recording in progress",
     "flow-gesendet": "Link sent",
     "onboarding": "Final details pending",

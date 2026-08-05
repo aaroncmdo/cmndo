@@ -27,6 +27,7 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   'makler.claimondo.de': '/makler/partner-werden',
   'werkstatt.claimondo.de': '/werkstatt/partner-werden',
   'kfzgutachter.claimondo.de': '/kfzgutachter-lp',
+  'flotte.claimondo.de': '/flotte/partner-werden',
 }
 
 function withLocale(req: NextRequest, locale: string): { request: { headers: Headers } } {

@@ -10,6 +10,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { Card } from '@/components/primitives'
 import { getMaklerAdminDetail, getMaklerProvisionen, type MaklerProvisionRow } from '@/lib/makler/admin-detail'
+import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 
 export const dynamic = 'force-dynamic'
 
@@ -172,6 +173,10 @@ export default async function MaklerAkteDetailPage({
               Staffelung, Abrechnung und Login-Mail verwaltest du weiterhin über die Makler-Liste.
             </p>
           </Card>
+          <div className="mt-6 max-w-3xl">
+            <h3 className="text-heading-sm text-claimondo-navy mb-2">Aktivität</h3>
+            <PartnerCockpitPanel partnerTyp="makler" partnerId={id} />
+          </div>
         </div>
       )}
     </EntityDetailShell>
