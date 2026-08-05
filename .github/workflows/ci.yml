@@ -454,17 +454,21 @@ jobs:
       # (SMOKE-PROV / SMOKE-STAFFEL-LC, Crash-safe) — dasselbe Wegwerf-in-prod-DB-Muster wie J4.
       # Der "opt-in nie in CI"-Spec-Kommentar war die Vorsichts-Default VOR der Journey-Suite (D-Phase);
       # CI-tauglich, weil self-cleaning + die concurrency-Group (`prod-e2e-smoke`) serialisiert die
-      # e2e-Laeufe -> kein Fixture-Cleanup-Cross-Run-Race. BEWUSST NICHT dabei: provisionen-lifecycle-smoke
-      # -> triggert den GLOBALEN Release-Cron (echte faellige Provisionen wuerden pro Merge frueher
-      # freigegeben = Geld-Timing-Effekt); bleibt opt-in/Regel-4. Entscheidung: DECISIONS.md 2026-08-03.
+      # e2e-Laeufe -> kein Fixture-Cleanup-Cross-Run-Race. SEIT 05.08. AUCH lifecycle (Aaron-Entscheid,
+      # DECISIONS 05.08.): der Spec schiesst den ECHTEN globalen Release-Cron, aber hinter einem
+      # Fremd-Effekt-Precheck-GELD-GUARD (Muster netzwerk-release-scharf-smoke.mts) — wuerde ein Schuss
+      # eine FREMDE faellige/storno-faellige pending-Provision flippen, skippt DIESER Lauf sichtbar
+      # (selten; der Nacht-Cron raeumt das Fenster). Kein Produkt-Change am Release-Runner.
+      # CRON_SECRET nur fuer den lifecycle-Trigger noetig.
       - name: Fundament Journey-Smoke J9 (Provisionen, DB-hart)
-        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke --project=chromium --reporter=line
+        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke provisionen-lifecycle-smoke --project=chromium --reporter=line
         env:
           RUN_PROVISION_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
       # Fundament Journey-Suite J8 (Onboarding je Rolle) — 2FA-Enroll: die Dispatch-Rolle richtet per UI
       # einen TOTP-Faktor ein (KontoSicherheitPanel/TotpEnrollCard, von keiner anderen Smoke abgedeckt)

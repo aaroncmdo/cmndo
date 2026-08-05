@@ -191,3 +191,15 @@ CI-Step `RUN_STORNO_DSGVO_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` für `db()`; `--
 CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Lokal prod-grün 05.08.: Smoke **3/3 passed** (erster Lauf) + Seed-assert **11/11** + Clean vollständig. **Damit haben alle 10 Journeys einen CI-Step; §9-P2-Nachweis = erster post-merge-e2e-Lauf nach Kette-Merge. Rest: J9-`lifecycle` (opt-in, Aaron).**
 
 **Review:** offen (im PR an Aaron).
+
+## 2026-08-05 · B-Journey-Suite · J9-`lifecycle` in CI via Fremd-Effekt-Precheck-Geld-Guard (Aaron-Entscheid)
+
+**Lücke:** `provisionen-lifecycle-smoke` schießt den ECHTEN globalen Release-Cron (`/api/cron/release-provisionen`) — in CI würde jeder Lauf echte fällige Provisionen FRÜHER freigeben (Geld-Timing-Effekt, deshalb 03.08. als opt-in ausgeschlossen). Drei Optionen wurden Aaron vorgelegt: (1) Precheck-Gate im Spec, (2) Test-Row-Filter-Param am Cron (Produkt-Change am Money-Pfad), (3) Status quo opt-in.
+
+**Entscheidung (AARON, 05.08.): Option 1 — Precheck-Geld-Guard im Spec, KEIN Produkt-Change.** Vor jedem Cron-Schuss läuft `zaehleFremdEffekte()` (portiert aus `scripts/smoke/netzwerk-release-scharf-smoke.mts:58-112`, dem prod-erprobten #4927-Muster): alle fremden `pending`-Rows werden bewertet (storno-fällig ODER release-berechtigt = Completion+7d, inkl. `nur_gutachter`-Terminpfad über beide Bezug-Achsen; P3-Suppression-Flips zählen mit). Betroffene > 0 → `test.skip` DIESES Laufs mit sichtbarer Begründung — zustandsabhängig-selten, der Nacht-Cron (02:00 UTC) räumt das Fenster, der nächste Lauf prüft neu. `afterAll`-Cleanup räumt die eigenen Seeds auch im Skip-Fall.
+
+**Begründung:** Testlogik bleibt aus dem Release-Runner (Money-Pfad) draußen; keine Koordinationslast mit der Netzwerk-Lane (Provisionen-Owner); der Guard ist derselbe Mechanismus, der den scharfen 01.08.-Referenzlauf abgesichert hat. Der bedingte Skip ist ein Geld-Guard, kein Test-Verzicht — qualitativ anders als die von der „keine Skips"-Direktive gemeinten Pauschal-Skips.
+
+**Beweis-Stand:** ci.yml-J9-Step fährt jetzt alle drei Specs (+ `CRON_SECRET`, in GH-Secrets vorhanden). Lokal 05.08.: (a) ohne `CRON_SECRET` → sauberer `beforeAll`-Skip (4 skipped, bewiesen); (b) Guard-Berechnung read-only gegen prod: **10 fremde pending-Rows, 0 betroffen** → der Schuss wäre aktuell safe, kein chronischer Skip (die 3 `nur_gutachter`-pending-Rows haben keinen durchgeführten Termin = korrekte Nicht-Treffer). Der scharfe 4-Test-Lauf = erster post-merge-CI-Lauf (`CRON_SECRET` liegt nur in CI/VPS — bewusst nicht in die lokale Env geholt); die 4 Szenarien selbst sind aus Phase B + #4927 prod-erprobt.
+
+**Review:** entschieden durch Aaron (05.08., Session 59cdebcb); CI-Nachweis nach Kette-Merge.
