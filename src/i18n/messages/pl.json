@@ -4521,6 +4521,10 @@
         "wirdGesendet": "Wysyłanie…",
         "vorschlagSenden": "Wyślij propozycję"
       },
+      "terminVorschlag": {
+        "titel": "Twój rzeczoznawca zaproponował termin",
+        "vorschlagText": "{svName} proponuje ten termin oględzin:"
+      },
       "slotAuswahl": {
         "bestaetigt": "Termin {datumStr} został potwierdzony! Rzeczoznawca zostanie poinformowany.",
         "fehlerBestaetigen": "Błąd podczas potwierdzania",
