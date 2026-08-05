@@ -36,7 +36,8 @@ import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
 import { deriveVermittler } from '@/lib/leads/vermittler'
-import { uebernehmeLeadTermine } from '@/lib/leads/uebernehme-lead-termine'
+import { hatOffeneLeadTermine, uebernehmeLeadTermine } from '@/lib/leads/uebernehme-lead-termine'
+import { initialOperativeStatus } from '@/lib/leads/initial-operative-status'
 import { resolveVermittlerOwnerProfil } from '@/lib/netzwerk/owner-resolution'
 import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
@@ -449,12 +450,13 @@ export async function convertLeadToClaim(
   // Initial-Cursor (Operative-Status-Write-Gate gatet nur .update). Umgeht bewusst die State-
   // Machine, damit processCaseBilling/completeSla/emitEvent NICHT vor dem Kunden-Onboarding
   // feuern (K5) — nachgeholt via resumeFunnelAfterOnboarding.
-  ;(claimsInsert as Record<string, unknown>).operative_status =
-    input.gutachtenBereitsErstellt
-      ? 'gutachten-eingegangen'
-      : input.svIdFromTermin
-        ? 'sv-termin'
-        : 'ersterfassung'
+  // T2: 3-stufiger Cursor: Gutachten > SV-am-Termin > Offener-Termin > Ersterfassung.
+  const hatOffenenTermin = await hatOffeneLeadTermine(admin, input.leadId)
+  ;(claimsInsert as Record<string, unknown>).operative_status = initialOperativeStatus({
+    gutachtenBereitsErstellt: !!input.gutachtenBereitsErstellt,
+    svIdFromTermin: input.svIdFromTermin ?? null,
+    hatOffenenTermin,
+  })
   // AAR-956 Werkstatt: vermittelnde Werkstatt (QR) -> claims.werkstatt_id (DB-Trigger legt
   // die Provision an). Record-Cast wie operative_status (generierte Types laggen die DB-Spalte).
   ;(claimsInsert as Record<string, unknown>).werkstatt_id =
