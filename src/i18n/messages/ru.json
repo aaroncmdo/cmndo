@@ -4521,6 +4521,10 @@
         "wirdGesendet": "Отправляется...",
         "vorschlagSenden": "Отправить предложение"
       },
+      "terminVorschlag": {
+        "titel": "Ваш эксперт предложил дату осмотра",
+        "vorschlagText": "{svName} предлагает эту дату для осмотра:"
+      },
       "slotAuswahl": {
         "bestaetigt": "Встреча на {datumStr} подтверждена! Эксперт-оценщик уведомлён.",
         "fehlerBestaetigen": "Ошибка при подтверждении",

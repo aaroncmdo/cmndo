@@ -4521,6 +4521,10 @@
         "wirdGesendet": "Sending...",
         "vorschlagSenden": "Send proposal"
       },
+      "terminVorschlag": {
+        "titel": "Your expert has proposed an appointment",
+        "vorschlagText": "{svName} suggests this appointment for the inspection:"
+      },
       "slotAuswahl": {
         "bestaetigt": "Appointment on {datumStr} has been confirmed! The expert appraiser has been notified.",
         "fehlerBestaetigen": "Error confirming appointment",
