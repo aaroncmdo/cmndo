@@ -70,6 +70,7 @@ Pflege-Regeln: claimen vor Arbeitsbeginn (§0.1 Schritt 4); Tranchen-Splits hier
 | A4 | Entry-Point-Register | — | ✅ **done** (`entry-points.md` + `entry-points-flowlink.md`) | #4816/#4818 |
 | B1 | Journey-Smokes (Oracle) | A1 | ✅ **done** — Oracle-Matrix `journey-smokes.md` + Anchoring der bestehenden `golden-path-*`/`reparatur-weg-*`-Flows-Specs + J1/J4-Soll-Assert; Grün-Nachweis via **B2/CI** | #4846/#4856 |
 | B2 | CI-Gate + Pending-Backlog | B1 | ✅ **done** (8c6de199, 01.08.) — Journey-Smoke-Step (J1-deep + J4) im `e2e`-Job, verlässlich grün nach Cross-Run-Serialisierung (#4911) + Hydration-Fix (#4929); der Grün-Nachweis entsperrte die C-Code-Phase. Skip-Politik in AGENTS.md §Feature-DoD (D1) verankert | #4866/#4889/#4911/#4929 |
+| B3 | Journey-Suite J2–J10 in CI (Tranchen) | B1, B2 | 🟢 **in Arbeit** (8c6de199, 03.08., `kitta/fundament-journey-suite-j9`) — T1: J9 (`provisionen-verrechnung`+`staffel`) im CI-Journey-Step; CI-Tauglichkeits-Klassifikation + Skip-Begründungen in `journey-smokes.md` (§9-konform: grün ODER begründeter Skip). T2/T3 offen (J5/J8/J10); J2/J3/J6/J7 + J9-`lifecycle` = begründeter opt-in-Skip | PR (folgt) |
 | C1 | Ein Status-Writer: transitionClaim + Event-Log | A2, B1 | 🟢 **Plan done** (`c1-transition-claim-plan.md`: Ist-Erhebung + C1a-Tranchen); **Code gated auf B2-Grün** | #4845 |
 | C2 | Ein Intake: createCase | A4, B1 | 🟢 **Plan done** (`c2-create-case-plan.md`); Code gated auf B2 | — |
 | C3 | Notification-Outbox | A3, C1 | 🟢 **Plan done** (`c3-notification-outbox-plan.md`); Code gated auf C1 | — |

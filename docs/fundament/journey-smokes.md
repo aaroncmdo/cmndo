@@ -72,3 +72,24 @@ Das ist der Übergang zu **B2** (CI-Gate): die Journey-Smokes als post-merge-Wä
 ## Scope
 B1 = Oracle (Zuordnung + Lücken + grüner Nachweis für J1/J4). **Kein** Produktions-Code-Umbau — das ist C.
 Diese Matrix ist Schritt 1; sie ist parallel-sicher (nur diese Docs-Datei + später Test-Header/Skeletons).
+
+## Journey-Suite in CI — Tauglichkeit + Stand (D-Phase, ab 03.08.)
+
+§9 verlangt: J1–J10 in CI **grün oder mit begründetem, journey-referenziertem Skip**. Nicht jede Journey ist gefahrlos gegen prod in CI fahrbar — viele Bewacher-Specs sind per Design `prod-optin` (echte Buchung/Comms, `reserviere()`-Guard, testIgnored). Klassifikation (Erhebung 03.08., file:line-belegt in der Spec-Lektüre):
+
+| Journey | CI-Stand | Bewacher / Grund |
+|---|---|---|
+| **J1** | ✅ **CI-Step** | `golden-path-deep-prod` (Status-Tiefe) |
+| **J4** | ✅ **CI-Step** | `reparatur-weg-e2e-smoke` (voller Reparatur-Weg) |
+| **J9** | ✅ **CI-Step** (T1) | `provisionen-verrechnung` + `provisionen-staffel` (rein DB, self-cleaning); `lifecycle` = **opt-in** (globaler Release-Cron → Geld-Timing-Effekt, DECISIONS 03.08.) |
+| **J5** | 🟡 CI-tauglich, **T2** | `kasko-reparatur-phase-smoke` (read-only) — braucht inline-Login → `fixtures.adminPage` + Fixture-Claim-Persistenz |
+| **J8** | 🟡 teils, **T2** | `2fa-enroll-smoke` (konto-isoliert) — braucht Seed-Step `seed-smoke-enroll.mjs` |
+| **J10** | 🟡 teils, **T3** | `werkstatt-finder-smoke` — braucht Code-Fix (`db()` liest `.env.local` direkt → `process.env`) |
+| **J2** | ⏭️ **begründeter CI-Skip** | echte Meldung/Buchung (`smoke-mini-wizard` testIgnored schreibt Leads; Finder = echte Buchung, opt-in) → Regel-4-opt-in |
+| **J3** | ⏭️ **begründeter CI-Skip** | SA/Vollmacht nur eingebettet (`golden-path-completion-prod`, opt-in, mutiert Claim). Signatur-Mechanik läuft ersatzweise über **J4** |
+| **J6** | ⏭️ **begründeter CI-Skip** | Kanzlei-Übergabe nur eingebettet + testIgnored-Staging → Regel-4-opt-in |
+| **J7** | ⏭️ **Lücke/Skip** | `storno-dsgvo-smoke` = Skeleton (Placeholder-Asserts); DSGVO-Löschung irreversibel → prod-optin auch fertig gebaut |
+
+**Regel-4-opt-in-Weg** für die skippenden Journeys: die jeweiligen Specs manuell mit ihrem Env-Flag (`RUN_GOLDEN_PATH_PROD` / `RUN_STORNO_DSGVO_SMOKE` / `RUN_PROVISION_SMOKE` für lifecycle / …) gegen prod fahren (Wegwerf-Konten, `reserviere()`-Guard schützt echte SVs).
+
+**Tranchen:** **T1** (J9 verrechnung+staffel) = dieser PR. **T2** = J5 (Login-Fix) + J8-`2fa-enroll` (Seed-Step). **T3** = J10-`werkstatt-finder` (+ `.env.local`→`process.env`-Fix). Die Skip-Journeys (J2/J3/J6/J7 + J9-lifecycle) sind mit obiger Begründung §9-konform „begründet, journey-referenziert geskippt".
