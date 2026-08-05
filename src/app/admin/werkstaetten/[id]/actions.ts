@@ -8,7 +8,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { SupabaseClient } from '@supabase/supabase-js'
 import { revalidatePath } from 'next/cache'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 
@@ -194,45 +193,5 @@ export async function aktualisiereWerkstattAdresse(
 
   revalidatePath(`/admin/werkstaetten/${werkstattId}`)
   revalidatePath('/admin/werkstaetten')
-  return { ok: true }
-}
-
-/**
- * Interne Notiz zu einer Werkstatt anlegen (nur Team-sichtbar). Admin-gegated wie die Page;
- * Insert via untypisierten Service-Role-Client (Tabelle nicht in database.types).
- */
-export async function fuegeWerkstattNotizHinzu(
-  werkstattId: string,
-  text: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
-  const { data: p } = await supabase.from('profiles').select('rolle, vorname, nachname').eq('id', user.id).single()
-  if (p?.rolle !== 'admin') return { ok: false, error: 'Nur Admins dürfen Notizen anlegen.' }
-  const t = (text ?? '').trim()
-  if (!t) return { ok: false, error: 'Notiz ist leer.' }
-  const autorName = [p?.vorname, p?.nachname].filter(Boolean).join(' ') || null
-
-  const db = createAdminClient() as unknown as SupabaseClient
-  const { error } = await db
-    .from('werkstatt_notizen')
-    .insert({ werkstatt_id: werkstattId, autor_user_id: user.id, autor_name: autorName, text: t })
-  if (error) return { ok: false, error: error.message }
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
-  return { ok: true }
-}
-
-export async function loescheWerkstattNotiz(
-  werkstattId: string,
-  notizId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  if (!(await requireAdmin())) return { ok: false, error: 'Nur Admins dürfen Notizen löschen.' }
-  const db = createAdminClient() as unknown as SupabaseClient
-  const { error } = await db.from('werkstatt_notizen').delete().eq('id', notizId).eq('werkstatt_id', werkstattId)
-  if (error) return { ok: false, error: error.message }
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
   return { ok: true }
 }

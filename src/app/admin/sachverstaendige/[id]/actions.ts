@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { PAKET_KONFIG } from '../anlegen/constants'
 import { randomPassword } from '@/lib/auth/random-password'
+import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
 const PAKET_KM: Record<string, number> = {
   standard: 15, 'starter-10': 15,
@@ -169,6 +170,9 @@ export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
 
   revalidatePath(`/admin/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
+  if (verifiziert) {
+    await logPartnerEvent({ partnerTyp: 'sv', partnerId: svId, typ: 'verifiziert', text: 'SV verifiziert' })
+  }
   return { success: true as const }
 }
 
