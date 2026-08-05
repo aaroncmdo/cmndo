@@ -61,13 +61,6 @@ export interface WerkstattDetailStammdaten {
   verifiziert_am: string | null
 }
 
-export interface WerkstattNotiz {
-  id: string
-  text: string
-  autor_name: string | null
-  created_at: string
-}
-
 export interface WerkstattBilling {
   rows: PartnerBillingRow[]
   aggregat: PartnerBillingAggregat
@@ -84,7 +77,6 @@ export interface WerkstattDetail {
   forcePasswordChange: boolean | null
   billing: WerkstattBilling | null
   leistung: WerkstattLeistung
-  notizen: WerkstattNotiz[]
   // QR: regulaerer Kunden-Einstiegs-QR (/start/werkstatt/<id>) — server-generiert,
   // damit die Detailseite ihn ohne Client-Action-Call inline zeigt.
   qrUrl: string
@@ -143,25 +135,15 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
   const qrUrl = werkstattStartUrl(id)
   const qrSvg = await generateQrCodeSvg(qrUrl, 300)
 
-  // Interne Notizen + aktuell zugewiesener Pool-QR-Code — beide ueber einen
-  // untypisierten Service-Role-Client (werkstatt_notizen nicht in database.types;
-  // werkstatt_qr_pool ist service-role-only). Die Page ist admin-gegated, RLS gatet
-  // Notizen zusaetzlich auf is_staff().
+  // Aktuell zugewiesener Pool-QR-Code — ueber einen untypisierten Service-Role-Client
+  // (werkstatt_qr_pool ist service-role-only). Die Page ist admin-gegated.
   const adminDb = createAdminClient() as unknown as SupabaseClient
-  const [notizenRes, poolRes] = await Promise.all([
-    adminDb
-      .from('werkstatt_notizen')
-      .select('id, text, autor_name, created_at')
-      .eq('werkstatt_id', id)
-      .order('created_at', { ascending: false })
-      .limit(50),
-    adminDb
-      .from('werkstatt_qr_pool')
-      .select('token')
-      .eq('werkstatt_id', id)
-      .eq('status', 'zugewiesen')
-      .limit(1),
-  ])
+  const poolRes = await adminDb
+    .from('werkstatt_qr_pool')
+    .select('token')
+    .eq('werkstatt_id', id)
+    .eq('status', 'zugewiesen')
+    .limit(1)
   const zugewiesenerPoolCode = (poolRes.data as { token: string }[] | null)?.[0]?.token ?? null
 
   const auftraege = (auftragRes.data ?? []) as unknown as WerkstattDetailAuftrag[]
@@ -183,7 +165,6 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
         }
       : null,
     leistung,
-    notizen: (notizenRes.data ?? []) as unknown as WerkstattNotiz[],
     qrUrl,
     qrSvg,
     zugewiesenerPoolCode,

@@ -24,7 +24,6 @@ import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-
 import type { WerkstattDetail } from './detail-data'
 import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
 import { MarkenGruppenEditor } from './MarkenGruppenEditor'
-import { NotizenSection } from './NotizenSection'
 import { WerkstattKarte } from './WerkstattKarte'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
@@ -662,11 +661,6 @@ export default function WerkstattDetailClient({
         ) : (
           <p className="text-body-sm text-claimondo-ondo">Keine Abrechnungsdaten.</p>
         )}
-      </SectionCard>
-
-      {/* Interne Notizen (nur Team-sichtbar) */}
-      <SectionCard title="Interne Notizen">
-        <NotizenSection werkstattId={w.id} notizen={detail.notizen} />
       </SectionCard>
 
       {/* Fähigkeiten & Staffelung (inline editierbar) */}
