@@ -4546,6 +4546,22 @@
         "titel": "Sigorta talebi reddetti",
         "text": "Sigorta tazminatı reddediyor. Ortak hukuk büromuz davayı inceleyerek sonraki adımlarla (itiraz veya dava tavsiyesi) geri dönecek."
       },
+      "terminDurchgefuehrt": {
+        "titel": "Randevunuz gerçekleşti",
+        "text": "Hasar tespiti yapıldı. Rapor hazırlanıyor ve hazır olduğunda size gönderilecek."
+      },
+      "externeKanzlei": {
+        "titel": "Hukuk bürosuna devredildi",
+        "text": "Dosyanız bir ortak hukuk bürosu tarafından yürütülüyor. Sigortayla iletişimi üstlenir ve sizinle iletişime geçer."
+      },
+      "abgelehntFinal": {
+        "titel": "Dosya kapandı: reddedildi",
+        "text": "Kapsamlı incelemenin ardından talepler yerine getirilemedi. Sorularınız için lütfen müşteri temsilcinizle iletişime geçin."
+      },
+      "verjaehrt": {
+        "titel": "Dosya zaman aşımına uğradı",
+        "text": "Bu hasar için yasal zaman aşımı süresi doldu. Talepler artık ileri sürülemez."
+      },
       "klage": {
         "titel": "Dava mahkemeye taşındı",
         "text": "Davanız ortak hukuk büromuza devredildi. Bundan sonraki iletişim doğrudan büro ile yürütülecek. Claimondo davayı sonuçlanana kadar takip eder."

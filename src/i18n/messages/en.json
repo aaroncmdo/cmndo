@@ -4546,6 +4546,22 @@
         "titel": "Insurance has rejected the claim",
         "text": "The insurance is refusing to settle the claim. Our partner law firm is reviewing the case and will be in touch with the next steps (formal objection or litigation recommendation)."
       },
+      "terminDurchgefuehrt": {
+        "titel": "Your appointment is complete",
+        "text": "Your assessment appointment took place. The report is being prepared and will be sent to you once it is ready."
+      },
+      "externeKanzlei": {
+        "titel": "Handed to a law firm",
+        "text": "Your case is being handled by a partner law firm. They take over communication with the insurer and will contact you."
+      },
+      "abgelehntFinal": {
+        "titel": "Case closed: declined",
+        "text": "After thorough review, the claims could not be enforced. If you have questions, please contact your case manager."
+      },
+      "verjaehrt": {
+        "titel": "Case time-barred",
+        "text": "The statutory limitation period for this claim has expired. Claims can therefore no longer be asserted."
+      },
       "klage": {
         "titel": "Case proceeding to court",
         "text": "Your case has been handed over to our partner law firm. Further communication will take place directly with the firm. Claimondo will accompany the case through to its conclusion."

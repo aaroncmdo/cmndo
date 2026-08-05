@@ -4546,6 +4546,22 @@
         "titel": "Ubezpieczenie odmówiło wypłaty",
         "text": "Ubezpieczenie sprawcy odmawia likwidacji szkody. Nasza kancelaria partnerska analizuje sprawę i skontaktuje się z kolejnymi krokami (sprzeciw lub rekomendacja do sądu)."
       },
+      "terminDurchgefuehrt": {
+        "titel": "Twoja wizyta się odbyła",
+        "text": "Oględziny szkody zostały przeprowadzone. Ekspertyza jest przygotowywana i zostanie do Ciebie wysłana, gdy będzie gotowa."
+      },
+      "externeKanzlei": {
+        "titel": "Przekazano kancelarii",
+        "text": "Twoją sprawą zajmuje się kancelaria partnerska. Przejmuje komunikację z ubezpieczycielem i skontaktuje się z Tobą."
+      },
+      "abgelehntFinal": {
+        "titel": "Sprawa zamknięta: odrzucona",
+        "text": "Po dokładnej analizie roszczeń nie udało się wyegzekwować. W razie pytań prosimy o kontakt z opiekunem."
+      },
+      "verjaehrt": {
+        "titel": "Sprawa przedawniona",
+        "text": "Ustawowy termin przedawnienia tej szkody upłynął. Roszczenia nie mogą już być dochodzone."
+      },
       "klage": {
         "titel": "Sprawa kierowana na drogę sądową",
         "text": "Sprawa została przekazana do naszej kancelarii partnerskiej. Dalsza komunikacja odbywa się bezpośrednio z kancelarią. Claimondo towarzyszy sprawie do jej zakończenia."
