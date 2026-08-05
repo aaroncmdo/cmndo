@@ -4,7 +4,7 @@
 
 import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon,
-  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, ShieldCheckIcon,
+  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, CalendarClockIcon, SearchIcon, ShieldCheckIcon,
 } from 'lucide-react'
 import TasksPill from '@/components/shared/TasksPill'
 import { DispatchNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
@@ -16,6 +16,7 @@ const NAV_ARBEIT: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
   { href: '/dispatch/leads', label: 'Leads', icon: UsersIcon },
   { href: '/dispatch/rueckrufe', label: 'Rückrufe', icon: PhoneIcon },
+  { href: '/dispatch/terminwuensche', label: 'Terminwünsche', icon: CalendarClockIcon },
   { href: '/dispatch/gutachter-finder', label: 'Gutachter-Finder', icon: SearchIcon },
   { href: '/dispatch/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/dispatch/karte', label: 'Karte', icon: MapIcon },

@@ -4641,7 +4641,8 @@
       },
       "stepper": {
         "navigation": "Yol tarifi",
-        "uhrSuffix": ""
+        "uhrSuffix": "",
+        "wirdBestaetigt": "onay bekliyor"
       }
     },
     "termine": {

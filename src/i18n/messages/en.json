@@ -4641,7 +4641,8 @@
       },
       "stepper": {
         "navigation": "Directions",
-        "uhrSuffix": "h"
+        "uhrSuffix": "h",
+        "wirdBestaetigt": "awaiting confirmation"
       }
     },
     "termine": {

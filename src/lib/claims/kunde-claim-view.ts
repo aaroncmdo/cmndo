@@ -295,7 +295,7 @@ export async function getKundeClaimView(
         .select('id, status, start_zeit, kanal, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
         .or(bezugOrExpr('fall', fallId))
         .eq('typ', 'sv_begutachtung')
-        .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
+        .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben', 'dispatch_pending', 'sv_gesucht'])
         .is('cancelled_at', null)
         .order('created_at', { ascending: false }),
       // P3 (StatusZone): Kunde-Vorname (terminInfo „X ist da").
@@ -527,8 +527,10 @@ export async function getKundeClaimView(
   const pflichtOffen = pflichtSlots.filter((s) => s.status === 'offen').length
 
   // Status-Strang (StatusZone): aktiver SV-Begutachtungstermin nach Status-Prio (bestaetigt>gegenvorschlag>
-  // reserviert>verschoben, wie page.tsx) + Realtime-Felder; SvLive/Abschluss-Flags aus erstAuftrag.
-  const SV_STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
+  // reserviert>verschoben>dispatch_pending>sv_gesucht, wie page.tsx) + Realtime-Felder; SvLive/Abschluss-Flags
+  // aus erstAuftrag. dispatch_pending/sv_gesucht (T1): Dead-Pin/noch-kein-SV-Termine — jetzt sichtbar statt
+  // komplett ausgeblendet, StatusZone/ClaimStepper zeigen dafuer "wird bestaetigt" statt Live-Status.
+  const SV_STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4, dispatch_pending: 5, sv_gesucht: 6 }
   const svTerminRow =
     ((svTerminRes.data ?? []) as Array<Record<string, unknown>>)
       .slice()
