@@ -60,7 +60,12 @@ export async function freigebeBasicSvCore(
     }
   }
 
-  // Die 5 Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
+  // Die Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
+  // onboarding_status='abgeschlossen': ohne den Flip blieben freigegebene
+  // Basic-SVs ewig auf dem Anlage-Default 'pending' — Dispatch-/Admin-Sichten
+  // zeigten sie als "im Onboarding haengend" (Aaron-Fund 05.08., 4 Prod-Faelle).
+  // Der Paid-Statusautomat (vertrag_unterzeichnet/anzahlung_offen/bezahlt/aktiv)
+  // laeuft NICHT ueber diesen Core und bleibt unberuehrt.
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
@@ -69,6 +74,7 @@ export async function freigebeBasicSvCore(
       verifiziert_am: new Date().toISOString(),
       ist_aktiv: true,
       portal_zugang_freigeschaltet: true,
+      onboarding_status: 'abgeschlossen',
       ...geoPatch,
     } as never)
     .eq('id', svId)
