@@ -44,7 +44,11 @@ Prod-Smoke mit externer Wegwerf-Identität.
   Registrier-Pfad). Nach erfolgreicher Registrierung wird die Einladung eingelöst und die
   **Freund-Kante automatisch `angenommen`** (die Einladung ist die Anfrage, die Registrierung
   die Annahme). Redemption ist best-effort — ein Token-Fehler bricht die Registrierung nie.
-  (Vorher nur Werkstatt; SV `/sv/registrieren` + Makler `/makler/registrieren` nachgezogen.)
+  (Vorher nur Werkstatt; SV `/sv/registrieren` + Makler `/makler/registrieren` nachgezogen;
+  **Flotte `/flotte/registrieren` = NEUER Self-Signup-Flow** — Soll-Delta 05.08., Aaron
+  „Firmen als Partner hinzufügen": public Formular → `ensureFirma` find-or-create +
+  Flottenmanager-Konto (Reuse Admin-Kern, `aktiviertVon=null`) + Welcome-Mail + Team-WA +
+  Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.)
 - **Whitelabel-SV** — verifizierter SV mit `use_custom_branding` brandet Portal + Kunden-Sicht.
 
 ## Fehlerfälle und ihr Soll-Verhalten

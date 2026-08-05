@@ -23,6 +23,7 @@ describe('isPublicPath — Magic-Link-Routen bleiben public', () => {
     ['/embed/gutachter-finder', 'iframe-Embed'],
     ['/auth/bestaetigen', 'Prefetch-gehaerteter Klick-Gate'],
     ['/werkstatt/registrieren', 'Werkstatt-Selbst-Registrierung'],
+    ['/flotte/registrieren', 'Flotten-Selbst-Registrierung (Partner-Einladung)'],
     ['/makler/registrieren', 'Makler-Selbst-Registrierung'],
     ['/login', 'Login selbst'],
     ['/', 'Root'],
