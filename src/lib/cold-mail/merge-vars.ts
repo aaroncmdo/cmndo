@@ -37,8 +37,9 @@ export function registrierungsUrl(rolle: string | null): string {
   switch (rolle) {
     case 'makler':
       return `${base}/makler/registrieren`
+    // 2026-08-05: /werkstatt-partner-werden (Interesse-Formular) retired -> Self-Signup.
     case 'werkstatt':
-      return `${base}/werkstatt-partner-werden`
+      return `${base}/werkstatt/registrieren`
     case 'sachverstaendiger':
       return `${base}/sv/registrieren`
     default:

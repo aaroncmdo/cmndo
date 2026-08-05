@@ -40,7 +40,7 @@ describe('buildMergeVars', () => {
 
   it('loest die Aktions-Tokens rollenabhaengig mit auf', () => {
     const v = buildMergeVars(werkstatt)
-    expect(v.Registrierungslink).toContain('/werkstatt-partner-werden')
+    expect(v.Registrierungslink).toContain('/werkstatt/registrieren')
     expect(v.Beratungslink).toContain('beratung-anfragen')
   })
 
