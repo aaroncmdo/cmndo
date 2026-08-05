@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import {
+  buildPiMatchOrExpr,
+  extractPaymentIntentId,
+  isTestmodeEvent,
+} from '@/lib/stripe/reconcile-payload'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +14,17 @@ export const dynamic = 'force-dynamic'
  *
  * Cross-Check zwischen stripe_events (payment_intent.succeeded /
  * charge.succeeded) und abrechnungen.bezahlt_am.
+ *
+ * Payload-Format: der Webhook speichert event.data.object FLACH (PI-Id
+ * top-level, kein Envelope) — Zugriff daher ausschliesslich ueber
+ * @/lib/stripe/reconcile-payload, das flach + Envelope toleriert. Der
+ * fruehere reine Envelope-Pfad (payload.data.object.*) fand NIE eine PI-Id:
+ * jedes Event landete als "event_ohne_abrechnung" im Report (5 Testmode-
+ * Altlasten vom April als Dauer-Drift) und Teil 2 haette fuer jede bezahlte
+ * Abrechnung ein False-Positive "abrechnung_ohne_event" gemeldet.
+ *
+ * Testmode-Events (livemode=false, aus der Zeit vor dem Stripe-Go-Live
+ * 27.07.) werden nicht als Drift gemeldet, nur gezaehlt (testmode_skipped).
  *
  * Phase 1 (dieser Code): Nur Report + Admin-Email. KEIN Auto-Heal — auch wenn
  * Drift erkannt wird, schreiben wir nichts. Aaron entscheidet manuell pro Fall.
@@ -41,6 +57,7 @@ export async function GET(request: Request) {
 
   const db = createAdminClient()
   const drift: DriftEntry[] = []
+  let testmodeSkipped = 0
 
   // 1) Alle Payment-Success-Events laden
   const { data: events, error: evtErr } = await db
@@ -54,12 +71,11 @@ export async function GET(request: Request) {
   }
 
   for (const evt of events ?? []) {
-    const payload = (evt.payload ?? {}) as Record<string, unknown>
-    const data = (payload.data ?? {}) as Record<string, unknown>
-    const obj = (data.object ?? {}) as Record<string, unknown>
-    const piId = evt.event_type === 'payment_intent.succeeded'
-      ? (obj.id as string | undefined) ?? null
-      : (obj.payment_intent as string | undefined) ?? null
+    if (isTestmodeEvent(evt.payload)) {
+      testmodeSkipped++
+      continue
+    }
+    const piId = extractPaymentIntentId(evt.event_type as string, evt.payload)
 
     if (!piId) {
       drift.push({
@@ -125,32 +141,40 @@ export async function GET(request: Request) {
     const piId = abr.stripe_payment_intent_id as string | null
     if (!piId) continue
 
+    // Ein or-Ausdruck deckt beide Payload-Formate (flach + Envelope) und beide
+    // Objekt-Typen (PI: id / Charge: payment_intent) in EINER Query ab.
+    const orExpr = buildPiMatchOrExpr(piId)
+    if (!orExpr) {
+      drift.push({
+        stripe_event_id: '',
+        stripe_payment_intent_id: piId,
+        event_type: '(nicht in stripe_events)',
+        empfangen_am: '',
+        abrechnung_id: abr.id as string,
+        abrechnung_bezahlt_am: abr.bezahlt_am as string,
+        drift_typ: 'abrechnung_ohne_event',
+        hinweis: `Abrechnung ${abr.id}: stripe_payment_intent_id hat unerwartetes Format (${piId}) — Event-Abgleich nicht möglich`,
+      })
+      continue
+    }
+
     const { count } = await db
       .from('stripe_events')
       .select('id', { count: 'exact', head: true })
       .in('event_type', ['payment_intent.succeeded', 'charge.succeeded'])
-      .filter('payload->data->object->>id', 'eq', piId)
+      .or(orExpr)
 
     if (!count || count === 0) {
-      // Zweiter Versuch: payment_intent als Sub-Feld (charge.succeeded hat es so)
-      const { count: count2 } = await db
-        .from('stripe_events')
-        .select('id', { count: 'exact', head: true })
-        .eq('event_type', 'charge.succeeded')
-        .filter('payload->data->object->>payment_intent', 'eq', piId)
-
-      if (!count2 || count2 === 0) {
-        drift.push({
-          stripe_event_id: '',
-          stripe_payment_intent_id: piId,
-          event_type: '(nicht in stripe_events)',
-          empfangen_am: '',
-          abrechnung_id: abr.id as string,
-          abrechnung_bezahlt_am: abr.bezahlt_am as string,
-          drift_typ: 'abrechnung_ohne_event',
-          hinweis: `Abrechnung ${abr.id} als bezahlt markiert mit pi_id=${piId}, aber kein entsprechendes Stripe-Event gefunden`,
-        })
-      }
+      drift.push({
+        stripe_event_id: '',
+        stripe_payment_intent_id: piId,
+        event_type: '(nicht in stripe_events)',
+        empfangen_am: '',
+        abrechnung_id: abr.id as string,
+        abrechnung_bezahlt_am: abr.bezahlt_am as string,
+        drift_typ: 'abrechnung_ohne_event',
+        hinweis: `Abrechnung ${abr.id} als bezahlt markiert mit pi_id=${piId}, aber kein entsprechendes Stripe-Event gefunden`,
+      })
     }
   }
 
@@ -198,11 +222,12 @@ export async function GET(request: Request) {
     }
   }
 
-  console.log(`[AAR-929] stripe-reconcile: drift=${drift.length} events=${events?.length ?? 0} bezahlte=${bezahlte?.length ?? 0}`)
+  console.log(`[AAR-929] stripe-reconcile: drift=${drift.length} events=${events?.length ?? 0} testmode_skipped=${testmodeSkipped} bezahlte=${bezahlte?.length ?? 0}`)
   return NextResponse.json({
     ok: true,
     drift_count: drift.length,
     events_checked: events?.length ?? 0,
+    testmode_skipped: testmodeSkipped,
     bezahlte_checked: bezahlte?.length ?? 0,
     drift,
   })
