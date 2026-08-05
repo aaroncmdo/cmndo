@@ -126,7 +126,8 @@ export default function GooglePlaceAutocomplete({
         setLoading(false)
         const msg = typeof err === 'string' ? err : 'Google Maps konnte nicht geladen werden — bitte Seite neu laden.'
         setLoadError(msg)
-        console.error('[GooglePlaceAutocomplete]', msg)
+        // err (Error-Objekt) statt msg loggen -> spezifische Ursache bleibt in der Konsole sichtbar.
+        console.error('[GooglePlaceAutocomplete]', err)
       })
 
     return () => { cancelled = true }
