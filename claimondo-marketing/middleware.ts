@@ -27,8 +27,6 @@ const SUBDOMAIN_LANDING: Record<string, string> = {
   'makler.claimondo.de': '/makler/partner-werden',
   'werkstatt.claimondo.de': '/werkstatt/partner-werden',
   'kfzgutachter.claimondo.de': '/kfzgutachter-lp',
-  // dormant bis DNS+Caddy stehen (Ops); bis dahin ist claimondo.de/flotte/partner-werden
-  // die kanonische URL (FLOTTE_LANDING_URL in lib/seo/jsonld.ts dann mit umstellen).
   'flotte.claimondo.de': '/flotte/partner-werden',
 }
 

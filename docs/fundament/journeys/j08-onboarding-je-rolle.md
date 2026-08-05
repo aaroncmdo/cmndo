@@ -49,7 +49,7 @@ Prod-Smoke mit externer Wegwerf-Identität.
   „Firmen als Partner hinzufügen": public Formular → `ensureFirma` find-or-create +
   Flottenmanager-Konto (Reuse Admin-Kern, `aktiviertVon=null`) + Welcome-Mail + Team-WA +
   Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.
-  Marketing-Einstieg: claimondo.de/flotte/partner-werden (LP, CTA -> Self-Signup) —
+  Marketing-Einstieg: flotte.claimondo.de (Subdomain-LP, CTA -> Self-Signup) —
   analog werkstatt.claimondo.de fuer Werkstaetten.)
 - **Werkstatt-Interesse-Formular retired** (Soll-Delta 05.08., Aaron „Anfrage = sofort
   Partner"): `/werkstatt-partner-werden` (erzeugte nur einen `partner_leads`-Prospect ohne

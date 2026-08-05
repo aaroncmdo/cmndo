@@ -169,7 +169,7 @@ export function LandingFooter({ finderHref = '/gutachter-finden' }: { finderHref
                 </Link>
               </li>
               <li>
-                <Link href="/flotte/partner-werden" className="transition-colors hover:text-white">
+                <Link href="https://flotte.claimondo.de" className="transition-colors hover:text-white">
                   Flottenpartner werden
                 </Link>
               </li>

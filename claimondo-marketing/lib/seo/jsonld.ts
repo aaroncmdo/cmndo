@@ -11,10 +11,7 @@ export const SITE_URL = 'https://claimondo.de'
 export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
 export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
 export const WERKSTATT_LANDING_URL = 'https://werkstatt.claimondo.de'
-// Flotte: PFAD-kanonisch, solange flotte.claimondo.de kein DNS/Caddy hat (Ops) —
-// das Subdomain-Mapping in middleware.ts liegt dormant bereit; bei Subdomain-Go
-// diese Konstante auf 'https://flotte.claimondo.de' umstellen.
-export const FLOTTE_LANDING_URL = `${SITE_URL}/flotte/partner-werden`
+export const FLOTTE_LANDING_URL = 'https://flotte.claimondo.de'
 export const SITE_NAME = 'Claimondo'
 export const PHONE_E164 = '+4922125906530'
 export const PHONE_DISPLAY = '0221 25906530'

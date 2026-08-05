@@ -198,8 +198,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly',
       priority: 0.7,
     },
-    // Flotten-Partner-LP — PFAD-kanonisch (flotte.claimondo.de-Subdomain liegt dormant
-    // in middleware.ts, bis DNS/Caddy stehen; dann auf die Subdomain-Root umstellen).
     {
       url: `${FLOTTE_LANDING_URL}/`,
       lastModified: now,
