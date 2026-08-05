@@ -7,6 +7,7 @@ import { enablePhoneLogin } from '@/lib/auth/phone-login'
 import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
+import { transitionFallStatus } from '@/lib/faelle/state-machine'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
@@ -1532,8 +1533,19 @@ export async function signSAandCreateFall(
               // claims.id == fall_id. claims.updated_at bumpt automatisch (+ claims-Realtime).
               await admin
                 .from('claims')
-                .update({ sv_id: topSv.svId })
+                .update({ sv_id: topSv.svId, sv_zugewiesen_am: new Date().toISOString() })
                 .eq('id', fall.id)
+              // Engine-Funnel (Diagnose 05.08.): der sv_id-Direkt-Write allein liess den
+              // operative_status auf 'ersterfassung' einfrieren (Prod: 6 Claims mit sv_id,
+              // trans_n=0, Stepper dauerhaft "Erfassung" trotz zugewiesenem SV). Den Uebergang
+              // durch die State-Machine funneln -> sv-zugewiesen + Event/Timeline/phase_transitions
+              // (Muster wie sv-zuweisung/route.ts:307-319). Non-fatal: steht der Claim schon
+              // weiter, wirft der Rueckwaerts-Uebergang -> geschluckt, sv_id bleibt gesetzt.
+              try {
+                await transitionFallStatus(fall.id, 'sv-zugewiesen', { grund: 'flow_findbestsv' })
+              } catch (err) {
+                console.warn('[flow findBestSV] transitionFallStatus(sv-zugewiesen) non-fatal:', err instanceof Error ? err.message : err)
+              }
             }
           }
         } catch (err) { console.error('[AAR-85/908] Dispatch-Matching:', err) }
