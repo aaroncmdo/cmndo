@@ -3,8 +3,8 @@
 // Warum dieser Test existiert: isPublicPath matcht per startsWith. Ein Eintrag OHNE
 // Trailing-Slash oeffnet daher stillschweigend alle Geschwister-Routen mit gleichem
 // Praefix — ein Auth-Bypass, den weder Build noch tsc noch ein anderer Ratchet faengt.
-// Die Datei warnt inline SECHSMAL vor genau dieser Falle ('/g/', '/auth/bestaetigen',
-// '/embed/', '/werkstatt-partner-werden', '/makler/registrieren', '/werkstatt/registrieren')
+// Die Datei warnt inline mehrfach vor genau dieser Falle ('/g/', '/auth/bestaetigen',
+// '/embed/', '/makler/registrieren', '/werkstatt/registrieren')
 // — und trotzdem ist sie erneut zugeschlagen: '/kunde/termin' (ohne Slash) oeffnete
 // '/kunde/termine' (Termin-Liste) und '/kunde/termine/[id]' (Termin-Detail). Beide sind
 // auth-required und laden per createAdminClient() (Service-Role, RLS-umgehend); anon bekam
