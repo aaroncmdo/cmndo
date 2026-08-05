@@ -3,31 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { MapPinIcon } from 'lucide-react'
 import { previewIsochrone, type IsochronePreviewResult } from '@/app/admin/sachverstaendige/anlegen/actions'
+import { loadGoogleMaps } from '@/lib/maps/load-google-maps'
 
 // AAR-364 SUB-1: Live-Karte mit Isochrone-Preview fuer den Admin-Wizard.
-// Laedt Google Maps via <script>-Tag (gleiche Methode wie LiveTrackingMap),
+// Laedt Google Maps ueber den geteilten Singleton-Loader (F4: verhindert Doppel-Load),
 // setzt einen Marker am SV-Standort und zeichnet das Fahr-Isochronen-Polygon
 // (oder Kreis-Fallback falls HERE API nicht antwortet). Bei Paket-/Radius-
 // Wechsel wird die Vorschau neu berechnet (debounced).
-
-function loadMaps(apiKey: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof google !== 'undefined' && google.maps) { resolve(); return }
-    const existing = document.querySelector('script[src*="maps.googleapis.com"]')
-    if (existing) {
-      const check = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps) { clearInterval(check); resolve() }
-      }, 100)
-      return
-    }
-    const s = document.createElement('script')
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&loading=async&v=weekly`
-    s.async = true; s.defer = true
-    s.onload = () => resolve()
-    s.onerror = () => reject(new Error('Maps load failed'))
-    document.head.appendChild(s)
-  })
-}
 
 type Props = {
   lat: number | null
@@ -53,7 +35,7 @@ export default function IsochronePreviewMap({ lat, lng, radius_km, adresse, pake
     if (!apiKey || !containerRef.current || mapRef.current) return
     if (lat == null || lng == null) return
     let cancelled = false
-    loadMaps(apiKey).then(() => {
+    loadGoogleMaps().then(() => {
       if (cancelled || !containerRef.current || mapRef.current) return
       mapRef.current = new google.maps.Map(containerRef.current, {
         center: { lat, lng },

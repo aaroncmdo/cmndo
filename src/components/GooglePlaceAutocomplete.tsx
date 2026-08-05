@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { loadGoogleMaps } from '@/lib/maps/load-google-maps'
 
 export type PlaceResult = {
   adresse: string
@@ -14,65 +15,6 @@ export type PlaceResult = {
   place_id: string
   /** AAR-956: Business-Name bei types=establishment (sonst undefined). */
   name?: string
-}
-
-// Google Maps Script einmalig laden (singleton)
-let scriptLoading = false
-let scriptLoaded = false
-
-function ensureGoogleMapsScript(): Promise<void> {
-  if (scriptLoaded || (typeof google !== 'undefined' && google.maps?.places)) {
-    scriptLoaded = true
-    return Promise.resolve()
-  }
-  if (scriptLoading) {
-    return new Promise(resolve => {
-      const iv = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps?.places) {
-          scriptLoaded = true
-          clearInterval(iv)
-          resolve()
-        }
-      }, 200)
-    })
-  }
-
-  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
-  if (!key) return Promise.reject('NEXT_PUBLIC_GOOGLE_MAPS_KEY fehlt')
-
-  scriptLoading = true
-  return new Promise((resolve, reject) => {
-    // Check if script tag already exists
-    if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-      const iv = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps?.places) {
-          scriptLoaded = true
-          clearInterval(iv)
-          resolve()
-        }
-      }, 200)
-      return
-    }
-
-    const s = document.createElement('script')
-    // loading=async ist seit März 2024 Pflicht — ohne den Param produziert
-    // Google Maps Console-Warnings und kann den Init blockieren wenn der
-    // API-Key nach diesem Datum erstellt wurde.
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${key}&libraries=places&loading=async&v=weekly`
-    s.async = true
-    s.defer = true
-    s.onload = () => {
-      const iv = setInterval(() => {
-        if (typeof google !== 'undefined' && google.maps?.places) {
-          scriptLoaded = true
-          clearInterval(iv)
-          resolve()
-        }
-      }, 100)
-    }
-    s.onerror = () => reject('Google Maps Script konnte nicht geladen werden')
-    document.head.appendChild(s)
-  })
 }
 
 export default function GooglePlaceAutocomplete({
@@ -171,7 +113,7 @@ export default function GooglePlaceAutocomplete({
     }
 
     // Script laden + Autocomplete initialisieren
-    ensureGoogleMapsScript()
+    loadGoogleMaps()
       .then(() => {
         if (cancelled) return
         initAutocomplete()
