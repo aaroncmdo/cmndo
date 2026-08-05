@@ -37,6 +37,12 @@ function makeBuilder(op: Operation) {
       op.filters.push({ method: 'in', args: [col, vals] })
       return handler
     },
+    // T1 (Kunde-Termin-Funnel): uebernehmeLeadTermine nutzt .or() fuer den
+    // Dual-Lookup (bezug-nativ + Legacy lead_id) beim gutachter_termine-Update.
+    or: (expr: string) => {
+      op.filters.push({ method: 'or', args: [expr] })
+      return handler
+    },
     not: (...args: unknown[]) => {
       op.filters.push({ method: 'not', args })
       return handler
@@ -192,6 +198,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-1', claim_nummer: 'CLM-1' } }, // 3 claims insert
       { data: { id: 'person-1' } }, // 4 personen insert (geschädigter, account-los)
       { data: null }, // 5 claim_parties insert
+      { data: [] }, // 5b T1 gutachter_termine-Umhaengen (uebernehmeLeadTermine, keine offenen Termine)
       { data: { id: 'fall-1' } }, // 6 faelle insert
       { data: null }, // 7 leads update
     ])
@@ -233,6 +240,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-rw', claim_nummer: 'CLM-RW' } }, // 3 claims insert
       { data: { id: 'person-2' } }, // 4 personen insert (geschädigter)
       { data: null }, // 5 claim_parties insert
+      { data: [] }, // 5b T1 gutachter_termine-Umhaengen
       { data: null }, // 6 faelle_claim_bridge upsert
       { data: null }, // 7 leads update
     ])
@@ -256,7 +264,8 @@ describe('convertLeadToClaim', () => {
       { data: [] },
       { data: { id: 'claim-norw', claim_nummer: 'CLM-NORW' } },
       { data: { id: 'person-3' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 gutachter_termine-Umhaengen
       { data: null },
       { data: null },
     ])
@@ -279,7 +288,8 @@ describe('convertLeadToClaim', () => {
       { data: [] },
       { data: { id: 'claim-rwu', claim_nummer: 'CLM-RWU' } },
       { data: { id: 'person-9' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 gutachter_termine-Umhaengen
       { data: null },
       { data: null },
     ])
@@ -302,7 +312,8 @@ describe('convertLeadToClaim', () => {
       { data: [] },
       { data: { id: 'claim-def', claim_nummer: 'CLM-DEF' } },
       { data: { id: 'person-10' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 gutachter_termine-Umhaengen
       { data: null },
       { data: null },
     ])
@@ -327,9 +338,10 @@ describe('convertLeadToClaim', () => {
     //  3 claims insert
     //  4 personen insert (geschaedigter, account-los)
     //  5 claim_parties insert
-    //  6 reparatur_termine insert  <-- neuer SP2-T4-Insert
-    //  7 faelle_claim_bridge upsert
-    //  8 leads update
+    //  6 T1 gutachter_termine-Umhaengen (uebernehmeLeadTermine)
+    //  7 reparatur_termine insert  <-- SP2-T4-Insert
+    //  8 faelle_claim_bridge upsert
+    //  9 leads update
     primeResponses([
       {
         data: {
@@ -346,9 +358,10 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-rt', claim_nummer: 'CLM-RT' } },    // 3 claims insert
       { data: { id: 'person-rt' } },                            // 4 personen insert
       { data: null },                                            // 5 claim_parties insert
-      { data: null },                                            // 6 reparatur_termine insert
-      { data: null },                                            // 7 faelle_claim_bridge upsert
-      { data: null },                                            // 8 leads update
+      { data: [] },                                              // 6 T1 gutachter_termine-Umhaengen
+      { data: null },                                            // 7 reparatur_termine insert
+      { data: null },                                            // 8 faelle_claim_bridge upsert
+      { data: null },                                            // 9 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -389,9 +402,10 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-no-rt', claim_nummer: 'CLM-NO-RT' } }, // 3 claims insert
       { data: { id: 'person-nrt' } },                              // 4 personen insert
       { data: null },                                              // 5 claim_parties insert
-      { data: null },                                              // 6 reparatur_termine insert (auch ohne Wunschtermin)
-      { data: null },                                              // 7 faelle_claim_bridge upsert
-      { data: null },                                              // 8 leads update
+      { data: [] },                                                // 6 T1 gutachter_termine-Umhaengen
+      { data: null },                                              // 7 reparatur_termine insert (auch ohne Wunschtermin)
+      { data: null },                                              // 8 faelle_claim_bridge upsert
+      { data: null },                                              // 9 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -416,6 +430,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-sz', claim_nummer: 'CLM-SZ' } }, // 2 claims insert (KEIN profiles-Select davor)
       { data: { id: 'person-sz' } },                         // 3 personen insert
       { data: null },                                        // 4 claim_parties insert
+      { data: [] },                                          // 4b T1 gutachter_termine-Umhaengen
       { data: null },                                        // 5 faelle_claim_bridge upsert
       { data: null },                                        // 6 leads update
     ])
@@ -444,6 +459,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-hp', claim_nummer: 'CLM-HP' } }, // 3 claims insert
       { data: { id: 'person-hp' } },                         // 4 personen insert
       { data: null },                                        // 5 claim_parties insert
+      { data: [] },                                          // 5b T1 gutachter_termine-Umhaengen
       { data: null },                                        // 6 faelle_claim_bridge upsert
       { data: null },                                        // 7 leads update
     ])
@@ -470,6 +486,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-ka', claim_nummer: 'CLM-KA' } }, // 2 claims insert (KB-Skip -> kein profiles-Select)
       { data: { id: 'person-ka' } },                        // 3 personen insert
       { data: null },                                       // 4 claim_parties insert
+      { data: [] },                                         // 4b T1 gutachter_termine-Umhaengen
       { data: null },                                       // 5 faelle_claim_bridge upsert
       { data: null },                                       // 6 leads update
     ])
@@ -488,6 +505,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-sz2', claim_nummer: 'CLM-SZ2' } }, // 2 claims insert
       { data: { id: 'person-sz2' } },                         // 3 personen insert
       { data: null },                                         // 4 claim_parties insert
+      { data: [] },                                           // 4b T1 gutachter_termine-Umhaengen
       { data: null },                                         // 5 faelle_claim_bridge upsert
       { data: null },                                         // 6 leads update
     ])
@@ -509,6 +527,7 @@ describe('convertLeadToClaim', () => {
       { data: { id: 'claim-hp2', claim_nummer: 'CLM-HP2' } }, // 3 claims insert
       { data: { id: 'person-hp2' } },                         // 4 personen insert
       { data: null },                                         // 5 claim_parties insert
+      { data: [] },                                           // 5b T1 gutachter_termine-Umhaengen
       { data: null },                                         // 6 faelle_claim_bridge upsert
       { data: null },                                         // 7 leads update
     ])
@@ -537,6 +556,7 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'claim-mk', claim_nummer: 'CLM-MK' } },           // 4 claims insert
       { data: { id: 'person-mk' } },                                   // 5 personen insert
       { data: null },                                                  // 6 claim_parties insert
+      { data: [] },                                                    // 6b T1 gutachter_termine-Umhaengen
       { data: null },                                                  // 7 faelle_claim_bridge upsert
       { data: null },                                                  // 8 leads update
     ])
@@ -561,6 +581,7 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 4 claims insert
       { data: { id: 'person-wk' } },                                   // 5 personen insert
       { data: null },                                                  // 6 claim_parties insert
+      { data: [] },                                                    // 6b T1 gutachter_termine-Umhaengen
       { data: null },                                                  // 7 faelle_claim_bridge upsert
       { data: null },                                                  // 8 leads update
     ])
@@ -589,6 +610,7 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'claim-both', claim_nummer: 'CLM-BOTH' } },       // 4 claims insert
       { data: { id: 'person-both' } },                                 // 5 personen insert
       { data: null },                                                  // 6 claim_parties insert
+      { data: [] },                                                    // 6b T1 gutachter_termine-Umhaengen
       { data: null },                                                  // 7 faelle_claim_bridge upsert
       { data: null },                                                  // 8 leads update
     ])
@@ -617,6 +639,7 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 6 claims insert
       { data: { id: 'person-ff' } },                                   // 7 personen insert
       { data: null },                                                  // 8 claim_parties insert
+      { data: [] },                                                    // 8b T1 gutachter_termine-Umhaengen
       { data: null },                                                  // 9 (ggf. claim_vehicle_involvements)
       { data: null },                                                  // 10 faelle_claim_bridge upsert
       { data: null },                                                  // 11 leads update
@@ -641,6 +664,7 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
       { data: { id: 'claim-nov', claim_nummer: 'CLM-NOV' } },         // 3 claims insert
       { data: { id: 'person-nov' } },                                  // 4 personen insert
       { data: null },                                                  // 5 claim_parties insert
+      { data: [] },                                                    // 5b T1 gutachter_termine-Umhaengen
       { data: null },                                                  // 6 faelle_claim_bridge upsert
       { data: null },                                                  // 7 leads update
     ])
@@ -666,6 +690,7 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
       { data: { id: 'claim-sv', claim_nummer: 'CLM-SV' } },        // 3 claims insert
       { data: { id: 'person-sv' } },                               // 4 personen insert
       { data: null },                                              // 5 claim_parties insert
+      { data: [] },                                                // 5b T1 gutachter_termine-Umhaengen
       { data: null },                                              // 6 faelle_claim_bridge upsert
       { data: null },                                              // 7 leads update
     ])
@@ -684,7 +709,8 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
       { data: [] },
       { data: { id: 'claim-alt', claim_nummer: 'CLM-ALT' } },
       { data: { id: 'person-alt' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 gutachter_termine-Umhaengen
       { data: null },
       { data: null },
     ])

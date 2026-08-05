@@ -36,6 +36,7 @@ import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
 import { deriveVermittler } from '@/lib/leads/vermittler'
+import { uebernehmeLeadTermine } from '@/lib/leads/uebernehme-lead-termine'
 import { resolveVermittlerOwnerProfil } from '@/lib/netzwerk/owner-resolution'
 import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
@@ -866,6 +867,17 @@ export async function convertLeadToClaim(
     return cleanupAndFail(
       `claim_parties-Insert fehlgeschlagen: ${partiesErr.message}`,
     )
+  }
+
+  // ─── Kunde-Termin-Funnel T1: offene Lead-Termine auf den Fall umhaengen ─────
+  // (Spec docs/superpowers/specs/2026-08-05-kunde-termin-funnel-design.md §4.1)
+  // Non-fatal: ein Fehler bricht die Konversion NICHT ab; ohne Umhaengen bleibt der
+  // Termin fuer die Kunden-Akte unsichtbar (Achsen-Blindheit) — deshalb lautes Log.
+  {
+    const uebernahme = await uebernehmeLeadTermine(admin, input.leadId, claimId)
+    if (!uebernahme.ok) {
+      console.error('[T1] Lead-Termin-Uebernahme fehlgeschlagen (non-fatal):', uebernahme.error)
+    }
   }
 
   // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
