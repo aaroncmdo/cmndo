@@ -3072,6 +3072,20 @@
     "claim_id"
    ]
   },
+  "partner_aktivitaeten": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "partner_typ",
+    "partner_id",
+    "typ",
+    "text",
+    "meta",
+    "ist_system",
+    "erstellt_von",
+    "erstellt_am"
+   ]
+  },
   "partner_gutschriften": {
    "kind": "t",
    "columns": [
@@ -6200,33 +6214,6 @@
     "google_rating",
     "google_review_count",
     "google_rating_am"
-   ]
-  },
-  "werkstatt_empfehlung_batches": {
-   "kind": "t",
-   "columns": [
-    "id",
-    "claim_id",
-    "empfohlen_von",
-    "token",
-    "status",
-    "gewaehlte_werkstatt_id",
-    "expires_at",
-    "entschieden_am",
-    "created_at",
-    "updated_at"
-   ]
-  },
-  "werkstatt_empfehlungen": {
-   "kind": "t",
-   "columns": [
-    "id",
-    "batch_id",
-    "werkstatt_id",
-    "rang",
-    "distanz_km",
-    "match_snapshot",
-    "created_at"
    ]
   },
   "werkstatt_notizen": {
