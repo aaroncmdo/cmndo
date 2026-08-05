@@ -16,10 +16,20 @@
 //   - Exclusion-Constraint exempt fuer dispatch_pending → „immer buchbar" (Dispatch dedupliziert
 //     beim Confirm). Darum direkter Insert statt reserviere (dessen Race-Safety hier moot ist).
 //   - validate_assignee-Trigger validiert assignee_typ='sv_lead' gegen sv_leads automatisch.
+//
+// T3 Task 11: zusaetzlich zum WhatsApp-Team-Hinweis (sendeEmbedDeadPinBestaetigung, Client-
+// getriggert nach dieser Buchung) jetzt eine ECHTE in_app-Dispatch-Mitteilung — bislang gab's
+// dafuer nur die Pull-only-Queue (/dispatch/terminwuensche). Mechanismus 1:1 gespiegelt von der
+// Rueckruf-Eingang-Notification (bucheRueckrufBeimDispatcher/upsertReservierungsRueckruf, beide
+// im selben app/embed/gutachter-finder/actions.ts-Nachbarschaftsbereich): EIN Empfaenger (der
+// dem Lead zugewiesene Dispatcher, sonst der erste Dispatch-User) + createMitteilung. Non-fatal
+// — ein Notify-Fehler darf die Buchung nie zuruecknehmen.
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { assigneeLegacyPatch, type Assignee } from '@/lib/termine/engine'
+import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 import type { BucheDeadPinTermin } from './fallback'
 
 const TERMIN_DAUER_MIN = 90
@@ -64,8 +74,48 @@ export const bucheDeadPinTermin: BucheDeadPinTermin = async ({ token, deadPinId,
     .select('id')
     .single()
   if (error) return { ok: false, error: error.message }
+  const terminId = data!.id as string
 
-  // 3) KEINE Notification (write-only). 4) Dispatch-Queue (dispatch_pending sv_lead) refreshen.
+  // 3) In-App-Dispatch-Notification (non-fatal) — s. Header-Kommentar. EIN Empfaenger:
+  //    der dem Lead zugewiesene Dispatcher, sonst der erste Dispatch-User (identisch zu
+  //    upsertReservierungsRueckruf). Ort-Fallback spiegelt terminwuensche/page.tsx's
+  //    leadOrt-Herleitung (besichtigungsort_adresse ist bei Dead-Pin-Buchungen leer).
+  try {
+    const { data: lead } = await db
+      .from('leads')
+      .select('zugewiesen_an, unfallort_ort, unfallort_plz')
+      .eq('id', leadId)
+      .maybeSingle()
+    let dispId = (lead?.zugewiesen_an as string | null) ?? null
+    if (!dispId) {
+      const { data: d } = await db.from('profiles').select('id').eq('rolle', 'dispatch').limit(1).maybeSingle()
+      dispId = (d?.id as string | null) ?? null
+    }
+    if (dispId) {
+      const ort = [lead?.unfallort_plz, lead?.unfallort_ort].filter(Boolean).join(' ') || 'unbekannt'
+      const datum = formatBerlin(startIso, { day: '2-digit', month: '2-digit' })
+      const uhrzeit = formatBerlin(startIso, { hour: '2-digit', minute: '2-digit' })
+      await createMitteilung({
+        empfaenger_id: dispId,
+        empfaenger_rolle: 'dispatch',
+        kategorie: 'update',
+        prioritaet: 'hoch',
+        titel: `Neuer Gutachter-Terminwunsch (${ort}, Wunsch: ${datum} ${uhrzeit} Uhr)`,
+        kontext_typ: 'termin',
+        kontext_id: terminId,
+        route_url: '/dispatch/terminwuensche',
+      })
+    }
+  } catch (err) {
+    console.error(
+      '[bucheDeadPinTermin] Dispatch-Mitteilung fehlgeschlagen (non-fatal):',
+      err instanceof Error ? err.message : err,
+    )
+  }
+
+  // 4) Dispatch-Queue refreshen — /dispatch/leads (Legacy-Sicht) UND die dedizierte
+  //    Terminwunsch-Queue (T3 Task 9/10), die diese Zeile jetzt ebenfalls listet.
   revalidatePath('/dispatch/leads')
-  return { ok: true, terminId: data!.id as string }
+  revalidatePath('/dispatch/terminwuensche')
+  return { ok: true, terminId }
 }

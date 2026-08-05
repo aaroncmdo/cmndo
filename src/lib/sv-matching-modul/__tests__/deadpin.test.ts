@@ -28,6 +28,7 @@ function makeDb(script: Resp[]) {
     insert(p: unknown) { calls.push({ insert: p }); return b },
     update(p: unknown) { calls.push({ update: p }); return b },
     eq() { return b },
+    limit() { return b },
     maybeSingle() { return Promise.resolve(next()) },
     single() { return Promise.resolve(next()) },
     then(res: (v: Resp) => void) { res(next()) },
@@ -64,13 +65,16 @@ describe('bucheDeadPinTermin', () => {
     h.db = makeDb([
       { data: { lead_id: 'lead-1', status: 'geoeffnet', expires_at: null }, error: null }, // flow_links
       { data: { id: 'term-1' }, error: null }, // insert single
+      { data: { zugewiesen_an: 'disp-assigned', unfallort_ort: 'Musterstadt', unfallort_plz: '12345' }, error: null }, // leads (Notify-Kontext)
+      { data: { id: 'mit-1' }, error: null }, // mitteilungen-insert (createMitteilung, T3 Task 11)
     ])
     const r = await bucheDeadPinTermin({ token: 'tok', deadPinId: 'pin-1', startIso: '2026-06-20T07:00:00.000Z' })
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.terminId).toBe('term-1')
 
     const calls = (h.db as { calls: Array<Record<string, unknown>> }).calls
-    const ins = calls.find((c) => 'insert' in c)!.insert as Record<string, unknown>
+    const inserts = calls.filter((c) => 'insert' in c)
+    const ins = inserts[0].insert as Record<string, unknown>
     expect(ins.assignee_typ).toBe('sv_lead')
     expect(ins.assignee_id).toBe('pin-1')
     expect(ins.sv_lead_id).toBe('pin-1') // Legacy-FK-Dual-Write via assigneeLegacyPatch
@@ -84,6 +88,52 @@ describe('bucheDeadPinTermin', () => {
     expect('lead_id' in ins).toBe(false) // KEIN Legacy-bezug (validate-Trigger-Falle + Doppelmatch)
     expect('kanal' in ins).toBe(false) // kanal-CHECK erlaubt nur telefon/video -> weglassen (Vor-Ort)
     expect(h.revalidatePath).toHaveBeenCalledWith('/dispatch/leads')
+    expect(h.revalidatePath).toHaveBeenCalledWith('/dispatch/terminwuensche')
+
+    // T3 Task 11: In-App-Dispatch-Notification — EIN Empfaenger (hier: der dem Lead
+    // bereits zugewiesene Dispatcher, kein Profiles-Fallback noetig).
+    expect(inserts).toHaveLength(2)
+    const mitteilung = inserts[1].insert as Record<string, unknown>
+    expect(mitteilung.empfaenger_id).toBe('disp-assigned')
+    expect(mitteilung.empfaenger_rolle).toBe('dispatch')
+    expect(mitteilung.titel).toBe('Neuer Gutachter-Terminwunsch (12345 Musterstadt, Wunsch: 20.06. 09:00 Uhr)')
+    expect(mitteilung.route_url).toBe('/dispatch/terminwuensche')
+  })
+
+  it('Notify-Fallback: kein zugewiesener Dispatcher -> erster Dispatch-User + "unbekannt" ohne Ort', async () => {
+    h.db = makeDb([
+      { data: { lead_id: 'lead-1', status: 'geoeffnet', expires_at: null }, error: null }, // flow_links
+      { data: { id: 'term-1' }, error: null }, // insert single
+      { data: { zugewiesen_an: null, unfallort_ort: null, unfallort_plz: null }, error: null }, // leads
+      { data: { id: 'disp-fallback' }, error: null }, // profiles-Fallback (erster Dispatch-User)
+      { data: { id: 'mit-1' }, error: null }, // mitteilungen-insert
+    ])
+    const r = await bucheDeadPinTermin({ token: 'tok', deadPinId: 'pin-1', startIso: '2026-06-20T07:00:00.000Z' })
+    expect(r.ok).toBe(true)
+
+    const calls = (h.db as { calls: Array<Record<string, unknown>> }).calls
+    const inserts = calls.filter((c) => 'insert' in c)
+    expect(inserts).toHaveLength(2)
+    const mitteilung = inserts[1].insert as Record<string, unknown>
+    expect(mitteilung.empfaenger_id).toBe('disp-fallback')
+    expect(mitteilung.titel).toBe('Neuer Gutachter-Terminwunsch (unbekannt, Wunsch: 20.06. 09:00 Uhr)')
+  })
+
+  it('Kein Dispatch-User verfuegbar -> Notify wird uebersprungen, Buchung bleibt ok:true', async () => {
+    h.db = makeDb([
+      { data: { lead_id: 'lead-1', status: 'geoeffnet', expires_at: null }, error: null }, // flow_links
+      { data: { id: 'term-1' }, error: null }, // insert single
+      { data: { zugewiesen_an: null, unfallort_ort: 'Musterstadt', unfallort_plz: '12345' }, error: null }, // leads
+      { data: null, error: null }, // profiles-Fallback: kein Dispatch-User im System
+    ])
+    const r = await bucheDeadPinTermin({ token: 'tok', deadPinId: 'pin-1', startIso: '2026-06-20T07:00:00.000Z' })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.terminId).toBe('term-1')
+
+    const calls = (h.db as { calls: Array<Record<string, unknown>> }).calls
+    // KEIN Empfaenger auflösbar -> createMitteilung wird gar nicht erst aufgerufen
+    // (kein zweiter insert), aber die Buchung selbst bleibt unberuehrt erfolgreich.
+    expect(calls.filter((c) => 'insert' in c)).toHaveLength(1)
   })
 
   it('ungueltiger Token -> ok:false, kein Insert, kein revalidate', async () => {
