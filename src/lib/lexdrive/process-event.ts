@@ -12,6 +12,7 @@ import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/crea
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { persistKuerzungsPositionen } from '@/lib/kanzlei-fall/kuerzungs-positionen'
 import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
 export const VALID_LEXDRIVE_EVENTS = [
@@ -99,6 +100,8 @@ export interface LexDriveEventPayload {
   // AAR-540: mandatsnummer Payload
   mandats_nr?: string
   mandatsnummer?: string
+  // GEO-P2 SP1: per-Position-Kürzungen (aus manuellem vs_kuerzt-Subform)
+  positionen?: Array<{ typ: string; betrag_gefordert?: number | null; betrag_gekuerzt: number; bezeichnung?: string | null }>
   [k: string]: unknown
 }
 
@@ -979,6 +982,15 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     // AAR-540: vs_kuerzt conditional Auto-Trigger
     if (input.eventType === 'vs_kuerzt') {
       await handleVsKuerztSideEffects(input.fallId, input.payload, input.source, input.triggeredByProfileId)
+      // GEO-P2 SP1: strukturierte per-Position-Kürzungen persistieren (falls im Payload)
+      if (Array.isArray(input.payload.positionen) && input.payload.positionen.length > 0) {
+        const kpRes = await persistKuerzungsPositionen(
+          db,
+          { fallId: input.fallId, claimId: claimIdForUpdates },
+          input.payload.positionen,
+        )
+        if (!kpRes.ok) console.error('[GEO-P2 SP1] forderungspositionen Kuerzungs-Write:', kpRes.error)
+      }
     }
 
     // AAR-540: ruege_versendet SLA-Diff

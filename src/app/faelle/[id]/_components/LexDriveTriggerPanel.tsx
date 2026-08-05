@@ -14,6 +14,7 @@ import { triggerLexDriveEventManually, getProcessedLexDriveEvents } from '../lex
 import type { LexDriveEvent } from '@/lib/lexdrive/process-event'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { KUERZBARE_POSITIONEN, FORDERUNGSPOSITION_TYP_LABEL } from '@/lib/kanzlei-fall/forderungsposition-typ'
 
 type FieldId =
   | 'datum' | 'betrag' | 'grund' | 'kuerzungs_betrag' | 'anerkannt_betrag'
@@ -140,6 +141,8 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null)
   // Fortschritts-Status: initial aus dem (optionalen) Prop, dann live nachgeladen.
   const [processed, setProcessed] = useState<ProcessedEventMap>(processedEvents ?? {})
+  // GEO-P2 SP1: per-Position-Kürzungen (nur vs_kuerzt), typ -> {gefordert, gekuerzt}
+  const [positionen, setPositionen] = useState<Record<string, { gefordert: string; gekuerzt: string }>>({})
 
   useEffect(() => {
     let alive = true
@@ -168,6 +171,17 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
         setFeedback({ ok: false, msg: 'Kürzungs-Typ ist Pflichtfeld' })
         return
       }
+      // GEO-P2 SP1: per-Position-Kürzungen aus dem Subform in den Payload (nur mit gekürzt-Betrag)
+      if (activeEvent.id === 'vs_kuerzt') {
+        const pos = Object.entries(positionen)
+          .map(([typ, v]) => ({
+            typ,
+            betrag_gefordert: v.gefordert ? Number(v.gefordert) : null,
+            betrag_gekuerzt: Number(v.gekuerzt),
+          }))
+          .filter((p) => Number.isFinite(p.betrag_gekuerzt) && p.betrag_gekuerzt > 0)
+        if (pos.length > 0) converted.positionen = pos
+      }
       const result = await triggerLexDriveEventManually(fallId, activeEvent.id, converted)
       if (result.success) {
         // Optimistisch: das gerade ausgelöste Event sofort als ✓ markieren.
@@ -175,6 +189,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
         setFeedback({ ok: true, msg: `Event "${activeEvent.label}" ausgelöst.` })
         setActiveEvent(null)
         setPayload({})
+        setPositionen({})
       } else {
         setFeedback({ ok: false, msg: result.error ?? 'Fehler' })
       }
@@ -209,7 +224,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
               return (
                 <button
                   key={ev.id}
-                  onClick={() => { setActiveEvent(ev); setPayload({}) }}
+                  onClick={() => { setActiveEvent(ev); setPayload({}); setPositionen({}) }}
                   className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-ios-lg transition-colors text-left ${
                     done
                       ? 'text-success-strong bg-success-soft hover:bg-success/15'
@@ -340,6 +355,37 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                 )}
               </div>
             ))}
+
+            {activeEvent.id === 'vs_kuerzt' && (
+              <div className="space-y-2 border-t border-claimondo-border pt-3">
+                <p className="text-xs font-semibold text-claimondo-navy">
+                  Kürzungspositionen <span className="font-normal text-claimondo-ondo">(optional — je Position gefordert/gekürzt in EUR)</span>
+                </p>
+                {KUERZBARE_POSITIONEN.map((typ) => (
+                  <div key={typ} className="grid grid-cols-[1fr_5rem_5rem] items-center gap-2">
+                    <span className="text-xs text-claimondo-navy truncate" title={FORDERUNGSPOSITION_TYP_LABEL[typ]}>
+                      {FORDERUNGSPOSITION_TYP_LABEL[typ]}
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="gefordert"
+                      value={positionen[typ]?.gefordert ?? ''}
+                      onChange={(e) => setPositionen((p) => ({ ...p, [typ]: { gefordert: e.target.value, gekuerzt: p[typ]?.gekuerzt ?? '' } }))}
+                      className="w-full px-2 py-1.5 border border-claimondo-border rounded-ios-lg text-xs focus:outline-none focus:border-claimondo-ondo"
+                    />
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      placeholder="gekürzt"
+                      value={positionen[typ]?.gekuerzt ?? ''}
+                      onChange={(e) => setPositionen((p) => ({ ...p, [typ]: { gefordert: p[typ]?.gefordert ?? '', gekuerzt: e.target.value } }))}
+                      className="w-full px-2 py-1.5 border border-claimondo-border rounded-ios-lg text-xs focus:outline-none focus:border-claimondo-ondo"
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="flex gap-2 pt-2">
               <button onClick={() => setActiveEvent(null)} className="flex-1 py-2.5 text-sm text-claimondo-ondo hover:bg-claimondo-bg rounded-ios-lg">
