@@ -12,7 +12,11 @@ import type { OnboardingFeld } from '../types'
 export function PhoneVerifyField({ feld, value, onChange, disabled }: {
   feld: OnboardingFeld; value: string; onChange: (v: string) => void; disabled?: boolean
 }) {
-  const [telefon, setTelefon] = useState('')
+  // Prefill: die bei der Registrierung angegebene Nummer (via Loader-Optionen-
+  // Injection, Muster calendar-connect) — sonst tippt der User sie doppelt.
+  const [telefon, setTelefon] = useState(
+    () => feld.optionen?.find((o) => o.value === 'telefonPrefill')?.label ?? '',
+  )
   const [code, setCode] = useState('')
   const [factorId, setFactorId] = useState<string | null>(null)
   const [challengeId, setChallengeId] = useState<string | null>(null)

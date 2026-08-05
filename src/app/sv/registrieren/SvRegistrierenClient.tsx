@@ -603,16 +603,17 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
             <>
               Wir haben dir einen Link an{' '}
               <strong className="text-claimondo-navy">{email}</strong> geschickt —
-              damit legst du dein Passwort fest. Nach unserer Prüfung (innerhalb von
-              48 Stunden) schalten wir dein Profil frei.
+              damit legst du dein Passwort fest. Danach führt dich unser Onboarding
+              in wenigen Minuten zur Freischaltung deines Profils.
             </>
           ) : (
             <>
               Dein Konto wurde angelegt. Die E-Mail mit dem Passwort-Link konnte gerade
               nicht zugestellt werden — du kannst dein Passwort jederzeit über
               „Passwort vergessen" mit der Adresse{' '}
-              <strong className="text-claimondo-navy">{email}</strong> setzen. Nach
-              unserer Prüfung (innerhalb von 48 Stunden) schalten wir dein Profil frei.
+              <strong className="text-claimondo-navy">{email}</strong> setzen. Danach
+              führt dich unser Onboarding in wenigen Minuten zur Freischaltung deines
+              Profils.
             </>
           )}
         </p>
