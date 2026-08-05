@@ -48,7 +48,9 @@ Prod-Smoke mit externer Wegwerf-Identität.
   **Flotte `/flotte/registrieren` = NEUER Self-Signup-Flow** — Soll-Delta 05.08., Aaron
   „Firmen als Partner hinzufügen": public Formular → `ensureFirma` find-or-create +
   Flottenmanager-Konto (Reuse Admin-Kern, `aktiviertVon=null`) + Welcome-Mail + Team-WA +
-  Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.)
+  Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.
+  Marketing-Einstieg: claimondo.de/flotte/partner-werden (LP, CTA -> Self-Signup) —
+  analog werkstatt.claimondo.de fuer Werkstaetten.)
 - **Werkstatt-Interesse-Formular retired** (Soll-Delta 05.08., Aaron „Anfrage = sofort
   Partner"): `/werkstatt-partner-werden` (erzeugte nur einen `partner_leads`-Prospect ohne
   Account) ist zugunsten des Self-Signups `/werkstatt/registrieren` retired — 308-Redirect

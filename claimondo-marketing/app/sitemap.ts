@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL, FLOTTE_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE, isHubCity } from '@/lib/kfz-gutachter/staedte'
 import { getStadtLastUpdated } from '@/lib/kfz-gutachter/freshness'
 import {
@@ -194,6 +194,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${MAKLER_LANDING_URL}/`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    // Flotten-Partner-LP — PFAD-kanonisch (flotte.claimondo.de-Subdomain liegt dormant
+    // in middleware.ts, bis DNS/Caddy stehen; dann auf die Subdomain-Root umstellen).
+    {
+      url: `${FLOTTE_LANDING_URL}/`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
