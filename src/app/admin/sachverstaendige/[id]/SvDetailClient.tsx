@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import Script from 'next/script'
 import { toast } from 'sonner'
 import { updateSvProfile, resendWelcomeMail } from './actions'
 import { svSperren, svEntsperren } from './verifizierung-actions'
@@ -189,11 +188,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
 
   return (
     <div className="glass-light border border-claimondo-border rounded-ios-md p-5">
-      <Script
-        src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async&v=weekly`}
-        strategy="lazyOnload"
-      />
-
+      {/* F4: kein eigenes Maps-<Script> mehr — GooglePlaceAutocomplete laedt Maps
+          ueber den geteilten Singleton-Loader (verhindert Doppel-Load). */}
       <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Profil bearbeiten</h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
