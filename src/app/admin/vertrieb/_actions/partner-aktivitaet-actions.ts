@@ -53,12 +53,21 @@ export async function logManuelleAktivitaet(input: {
   if (!trimmed) return { ok: false, error: 'Bitte einen Text eingeben.' }
 
   const supabase = await createClient()
+  // Autor-Namen aufloesen -> meta.autor_name, damit der Feed den echten Namen zeigt
+  // (statt Fallback "Team") — konsistent zum werkstatt_notizen-Backfill-Format.
+  const { data: prof } = await supabase
+    .from('profiles')
+    .select('anzeigename, vorname, nachname')
+    .eq('id', staff.id)
+    .maybeSingle()
+  const autorName =
+    (prof?.anzeigename?.trim() || [prof?.vorname, prof?.nachname].filter(Boolean).join(' ').trim()) || null
   const { error } = await supabase.from('partner_aktivitaeten').insert({
     partner_typ: input.partnerTyp,
     partner_id: input.partnerId,
     typ: input.typ,
     text: trimmed,
-    meta: input.meta ?? null,
+    meta: autorName ? { ...(input.meta ?? {}), autor_name: autorName } : (input.meta ?? null),
     ist_system: false,
     erstellt_von: staff.id,
   })
