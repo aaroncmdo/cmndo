@@ -874,9 +874,13 @@ export async function convertLeadToClaim(
   // Non-fatal: ein Fehler bricht die Konversion NICHT ab; ohne Umhaengen bleibt der
   // Termin fuer die Kunden-Akte unsichtbar (Achsen-Blindheit) — deshalb lautes Log.
   {
-    const uebernahme = await uebernehmeLeadTermine(admin, input.leadId, claimId)
-    if (!uebernahme.ok) {
-      console.error('[T1] Lead-Termin-Uebernahme fehlgeschlagen (non-fatal):', uebernahme.error)
+    try {
+      const uebernahme = await uebernehmeLeadTermine(admin, input.leadId, claimId)
+      if (!uebernahme.ok) {
+        console.error('[T1] Lead-Termin-Uebernahme fehlgeschlagen (non-fatal):', uebernahme.error)
+      }
+    } catch (err) {
+      console.error('[T1] Lead-Termin-Uebernahme geworfen (non-fatal):', err)
     }
   }
 

@@ -721,3 +721,30 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
     expect(p.operative_status).toBe('sv-termin')
   })
 })
+
+// ─── Kunde-Termin-Funnel T1: Fail-Injection (Review) ────────────────────────
+// Beweist die Non-Fatal-Invariante des T1-Blocks: ein echter Fehler beim
+// gutachter_termine-Update (uebernehmeLeadTermine, das .or()-Chain-Update) darf die
+// Konversion NICHT abbrechen — nur lautes console.error-Logging, kein cleanupAndFail.
+describe('convertLeadToClaim — T1 Fail-Injection', () => {
+  it('gutachter_termine-Update-Fehler in uebernehmeLeadTermine ist non-fatal (Konversion bleibt ok:true)', async () => {
+    primeResponses([
+      { data: { id: 'lead-t1err', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
+      { data: [] },                                                     // 2 profiles select
+      { data: { id: 'claim-t1err', claim_nummer: 'CLM-T1ERR' } },      // 3 claims insert
+      { data: { id: 'person-t1err' } },                                 // 4 personen insert
+      { data: null },                                                   // 5 claim_parties insert
+      { data: null, error: { message: 'kaputt' } },                     // 5b T1 gutachter_termine-Umhaengen -> FEHLER
+      { data: null },                                                   // 6 faelle_claim_bridge upsert
+      { data: null },                                                   // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-t1err' })
+
+    expect(r.ok).toBe(true)
+    // Beweist, dass der Fehler tatsaechlich den T1-Update-Call traf (kein ungenutzter Queue-Slot).
+    const terminUpdate = operations.find((o) => o.table === 'gutachter_termine' && o.op === 'update')
+    expect(terminUpdate).toBeTruthy()
+  })
+})
