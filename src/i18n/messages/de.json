@@ -4750,6 +4750,22 @@
         "titel": "Versicherung hat abgelehnt",
         "text": "Die Versicherung lehnt die Regulierung ab. Unsere Partnerkanzlei prüft den Fall und meldet sich mit den nächsten Schritten (Rüge oder Klage-Empfehlung)."
       },
+      "terminDurchgefuehrt": {
+        "titel": "Ihr Termin wurde durchgeführt",
+        "text": "Ihr Gutachtertermin ist erfolgt. Das Gutachten wird erstellt und Ihnen zugestellt, sobald es fertig ist."
+      },
+      "externeKanzlei": {
+        "titel": "An eine Kanzlei übergeben",
+        "text": "Ihr Fall wird von einer Partnerkanzlei weiterbearbeitet. Sie übernimmt die Kommunikation mit der Versicherung und meldet sich bei Ihnen."
+      },
+      "abgelehntFinal": {
+        "titel": "Fall abgeschlossen: abgelehnt",
+        "text": "Nach eingehender Prüfung konnten die Ansprüche nicht durchgesetzt werden. Bei Fragen wenden Sie sich gern an Ihren Betreuer."
+      },
+      "verjaehrt": {
+        "titel": "Fall verjährt",
+        "text": "Für diesen Schadensfall ist die gesetzliche Verjährungsfrist abgelaufen. Ansprüche können daher nicht mehr geltend gemacht werden."
+      },
       "klage": {
         "titel": "Fall wird gerichtlich geklärt",
         "text": "Ihr Fall wurde an unsere Partnerkanzlei übergeben. Die weitere Kommunikation läuft direkt mit der Kanzlei. Claimondo begleitet den Fall bis zum Abschluss."
