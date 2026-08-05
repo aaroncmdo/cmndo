@@ -6,12 +6,15 @@ import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/component
 import { statusSlotClass, type StatusSlot } from '@/lib/status'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { formatVorZeit } from '@/lib/format/datum'
+import TerminAktionen, { type SvOption } from './TerminAktionen'
 
 // kunde-termin-funnel T3 (Task 9): Dispatch-Queue fuer Wunschtermine, die noch
 // auf eine SV-Zuweisung warten (gutachter_termine.status in dispatch_pending/
 // sv_gesucht). Row-Shape + Kontext-Aufloesung leben im Loader (page.tsx);
 // diese Komponente ist reine Praesentation (DataTable-Set, keine handgerollten
 // HTML-Tabellen-Elemente — Component-Set-Ratchet).
+// Task 10: die Aktionsspalte (SV zuweisen / stornieren) ist ein eigener Client-
+// Component-Island (TerminAktionen) — diese Liste bleibt ein Server Component.
 
 export type TerminwunschRow = {
   id: string
@@ -48,12 +51,17 @@ function AlterBadge({ createdAt }: { createdAt: string | null }) {
 export default function TerminwunschListe({
   rows,
   ladeFehler = false,
+  svOptionen = [],
 }: {
   rows: TerminwunschRow[]
   /** Fix 3 (Review T3): true wenn der PRIMARY termine-Read fehlgeschlagen ist —
    *  dann NIE den (irrefuehrenden) Empty-State zeigen, sondern einen expliziten
    *  Fehlerhinweis, obwohl `rows` in diesem Fall ebenfalls leer ist. */
   ladeFehler?: boolean
+  /** Task 10: aktive SVs fuer den Zuweisen-Dialog — serverseitig in page.tsx
+   *  geladen (getDispatchableSvs), damit TerminAktionen ohne eigenen Ladezustand
+   *  auskommt (die Liste ist bereits vollstaendig da). */
+  svOptionen?: SvOption[]
 }) {
   if (ladeFehler) {
     return (
@@ -130,7 +138,9 @@ export default function TerminwunschListe({
                 )}
               </Td>
               <Td className="text-claimondo-ondo">{QUELLE_LABEL[row.quelle]}</Td>
-              <Td>{/* T3 Task 10: Aktionen */}</Td>
+              <Td>
+                <TerminAktionen terminId={row.id} status={row.status} svOptionen={svOptionen} />
+              </Td>
             </Tr>
           ))}
         </Tbody>

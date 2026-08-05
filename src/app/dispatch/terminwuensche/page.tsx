@@ -2,13 +2,20 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import PageHeader from '@/components/shared/PageHeader'
 import { CalendarClockIcon } from 'lucide-react'
 import TerminwunschListe, { type TerminwunschRow } from './TerminwunschListe'
+import type { SvOption } from './TerminAktionen'
+import { getDispatchableSvs } from '@/lib/sv/queries'
 
 // kunde-termin-funnel T3 (Task 9): Dispatch-Queue "Terminwünsche" — Wunschtermine
 // aus dem Kunden-Funnel, die noch auf eine SV-Zuweisung warten. Auth-Guard kommt
 // vom Dispatch-Layout (requirePortalAccess(['dispatch','admin'])), analog
-// src/app/dispatch/rueckrufe/page.tsx. Aktionen (SV zuweisen / stornieren)
-// folgen in Task 10 — s. reassigniereDeadPin (src/lib/termine/engine/state-transitions.ts)
-// fuer den Dead-Pin-Reassign-Pfad.
+// src/app/dispatch/rueckrufe/page.tsx.
+// Task 10: Aktionen (SV zuweisen / stornieren) — s. reassigniereDeadPin
+// (src/lib/termine/engine/state-transitions.ts) fuer den Dead-Pin-Reassign-Pfad.
+// Die SV-Optionsliste fuer den Zuweisen-Dialog wird HIER serverseitig geladen
+// (getDispatchableSvs — dieselbe "eine Wahrheit" wie /api/sv-zuweisung nutzt,
+// nicht nur ist_aktiv=true: schliesst gesperrte/geloeschte/unverifizierte/Test-
+// SVs aus) und als Prop durchgereicht, damit der Client-Dialog ohne eigenen
+// Ladezustand auskommt.
 //
 // Admin-Client: gutachter_termine/claims/leads-Reads unabhaengig von der
 // RLS-Sicht des eingeloggten Dispatchers — Auth ist bereits durch den
@@ -46,21 +53,37 @@ type ProfilKontext = {
   nachname: string | null
 }
 
+type SvOptionRaw = {
+  id: string
+  profiles: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+}
+
 export default async function DispatchTerminwuensche() {
   const admin = createAdminClient()
 
-  const { data: termineRaw, error: termineError } = await admin
-    .from('gutachter_termine')
-    .select(
-      'id, start_zeit, status, created_at, assignee_typ, assignee_id, bezug_typ, bezug_id, besichtigungsort_adresse',
-    )
-    .in('status', ['dispatch_pending', 'sv_gesucht'])
-    .is('cancelled_at', null)
-    .order('created_at', { ascending: true })
+  const [{ data: termineRaw, error: termineError }, svRaw] = await Promise.all([
+    admin
+      .from('gutachter_termine')
+      .select(
+        'id, start_zeit, status, created_at, assignee_typ, assignee_id, bezug_typ, bezug_id, besichtigungsort_adresse',
+      )
+      .in('status', ['dispatch_pending', 'sv_gesucht'])
+      .is('cancelled_at', null)
+      .order('created_at', { ascending: true }),
+    getDispatchableSvs<SvOptionRaw>(admin, 'id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)'),
+  ])
 
   if (termineError) {
     console.error('[terminwuensche] termine-Read fehlgeschlagen:', termineError.message)
   }
+
+  const svOptionen: SvOption[] = svRaw
+    .map((sv) => {
+      const profil = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
+      const name = [profil?.vorname, profil?.nachname].filter(Boolean).join(' ').trim()
+      return { id: sv.id, name: name || 'Unbenannter SV' }
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'de'))
 
   const termine = (termineRaw ?? []) as unknown as TerminRaw[]
 
@@ -144,7 +167,7 @@ export default async function DispatchTerminwuensche() {
         size="lg"
         icon={CalendarClockIcon}
       />
-      <TerminwunschListe rows={rows} ladeFehler={!!termineError} />
+      <TerminwunschListe rows={rows} ladeFehler={!!termineError} svOptionen={svOptionen} />
     </div>
   )
 }
