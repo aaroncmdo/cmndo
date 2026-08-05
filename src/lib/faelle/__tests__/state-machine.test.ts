@@ -64,4 +64,20 @@ describe('istGueltigerFallUebergang', () => {
       expect(istGueltigerFallUebergang('abgelehnt', 'ersterfassung')).toBe(false)
     })
   })
+
+  // T2 (Spec 2026-08-05 §4.2): Terminwunsch-Zweig — sv-gesucht ist Vorstufe der SV-Zuweisung.
+  // Alle drei Kanten existierten bereits VOR Task 8 (verifiziert per rg-Matrix-Lesung); dieser
+  // Block haelt sie als Assertions fest, damit ein kuenftiges Matrix-Refactor sie nicht still
+  // verliert (der Initial-Cursor beim Convert setzt 'sv-gesucht' bei Dead-Pin/Wunschtermin ohne
+  // echten SV — ohne diese Kanten waere der Claim ein Dead-End fuer transitionFallStatus).
+  describe('Terminwunsch-Zweig (sv-gesucht)', () => {
+    it('erlaubt ersterfassung -> sv-gesucht (Initial-Cursor bei Dead-Pin/Wunschtermin)', () => {
+      expect(istGueltigerFallUebergang('ersterfassung', 'sv-gesucht')).toBe(true)
+    })
+
+    it('erlaubt sv-gesucht -> sv-zugewiesen und sv-gesucht -> sv-termin (Engine-Uebergang nach SV-Findung)', () => {
+      expect(istGueltigerFallUebergang('sv-gesucht', 'sv-zugewiesen')).toBe(true)
+      expect(istGueltigerFallUebergang('sv-gesucht', 'sv-termin')).toBe(true)
+    })
+  })
 })

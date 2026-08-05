@@ -18,6 +18,9 @@ const AKTIONEN_STATUS = new Set(['reserviert', 'bestaetigt', 'gegenvorschlag'])
 const AKTIONIERBARE_TYPEN = new Set(['besichtigung', 'konfrontation'])
 // Status mit i18n-Label (statusLabel.*). Unbekannte -> Rohwert (next-intl wirft sonst bei Missing-Key).
 const KNOWN_STATUS = new Set(['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt', 'abgeschlossen', 'angefragt', 'anruf_erbeten'])
+// T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht, jetzt sichtbar seit kunde-claim-view T1) ->
+// dasselbe "wird bestaetigt"-Label wie der Stepper-Badge (kunde.fall.stepper), statt Rohwert.
+const PENDING_STATUS = new Set(['dispatch_pending', 'sv_gesucht'])
 
 export function TermineRow({
   termin, fall, href, muted, showActions,
@@ -29,12 +32,15 @@ export function TermineRow({
   showActions: boolean
 }) {
   const t = useTranslations('kunde.termine')
+  const ts = useTranslations('kunde.fall.stepper')
   const format = useFormatter()
   const [busy, setBusy] = useState(false)
 
   const start = termin.start ? new Date(termin.start) : null
   const statusLabel = termin.status
-    ? (KNOWN_STATUS.has(termin.status) ? t(`statusLabel.${termin.status}`) : termin.status)
+    ? (PENDING_STATUS.has(termin.status)
+        ? ts('wirdBestaetigt')
+        : (KNOWN_STATUS.has(termin.status) ? t(`statusLabel.${termin.status}`) : termin.status))
     : ''
   const kann = showActions && termin.art === 'sv' && AKTIONIERBARE_TYPEN.has(termin.terminTyp)
     && termin.status != null && AKTIONEN_STATUS.has(termin.status)

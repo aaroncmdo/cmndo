@@ -13,6 +13,9 @@ const STATUS_COLOR: Record<string, string> = {
   abgelehnt: 'bg-danger-soft text-danger-strong border-danger/30',
   abgesagt: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
   abgeschlossen: 'bg-success-soft text-success-strong border-success/30',
+  // T1: Dead-Pin/noch-kein-SV — gleicher warning-Ton wie reserviert/gegenvorschlag (auch "noch nicht fix").
+  dispatch_pending: 'bg-warning-soft text-warning-strong border-warning/30',
+  sv_gesucht: 'bg-warning-soft text-warning-strong border-warning/30',
 }
 
 const FALLBACK_COLOR = 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'

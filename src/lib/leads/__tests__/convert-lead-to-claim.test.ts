@@ -37,6 +37,12 @@ function makeBuilder(op: Operation) {
       op.filters.push({ method: 'in', args: [col, vals] })
       return handler
     },
+    // T1 (Kunde-Termin-Funnel): uebernehmeLeadTermine nutzt .or() fuer den
+    // Dual-Lookup (bezug-nativ + Legacy lead_id) beim gutachter_termine-Update.
+    or: (expr: string) => {
+      op.filters.push({ method: 'or', args: [expr] })
+      return handler
+    },
     not: (...args: unknown[]) => {
       op.filters.push({ method: 'not', args })
       return handler
@@ -189,9 +195,11 @@ describe('convertLeadToClaim', () => {
     primeResponses([
       { data: { id: 'lead-1', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select (load + Idempotenz)
       { data: [] }, // 2 profiles select (KB Round-Robin -> keine -> null)
+      { data: [] }, // 2b T2 hatOffeneLeadTermine (keine offenen Termine)
       { data: { id: 'claim-1', claim_nummer: 'CLM-1' } }, // 3 claims insert
       { data: { id: 'person-1' } }, // 4 personen insert (geschädigter, account-los)
       { data: null }, // 5 claim_parties insert
+      { data: [] }, // 5b T1 uebernehmeLeadTermine (Umhaengen der offenen Termine)
       { data: { id: 'fall-1' } }, // 6 faelle insert
       { data: null }, // 7 leads update
     ])
@@ -230,9 +238,11 @@ describe('convertLeadToClaim', () => {
         },
       }, // 1 leads select (load + Idempotenz)
       { data: [] }, // 2 profiles select (KB Round-Robin -> keine -> null)
+      { data: [] }, // 2b T2 hatOffeneLeadTermine
       { data: { id: 'claim-rw', claim_nummer: 'CLM-RW' } }, // 3 claims insert
       { data: { id: 'person-2' } }, // 4 personen insert (geschädigter)
       { data: null }, // 5 claim_parties insert
+      { data: [] }, // 5b T1 uebernehmeLeadTermine
       { data: null }, // 6 faelle_claim_bridge upsert
       { data: null }, // 7 leads update
     ])
@@ -254,9 +264,11 @@ describe('convertLeadToClaim', () => {
     primeResponses([
       { data: { id: 'lead-norw', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
       { data: [] },
+      { data: [] }, // T2 hatOffeneLeadTermine
       { data: { id: 'claim-norw', claim_nummer: 'CLM-NORW' } },
       { data: { id: 'person-3' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 uebernehmeLeadTermine
       { data: null },
       { data: null },
     ])
@@ -277,9 +289,11 @@ describe('convertLeadToClaim', () => {
                 reparaturwunsch: 'reparatur', reparatur_vermittlung_status: 'eigene', reparatur_werkstatt_extern: 'Karosserie Müller',
                 freie_werkstattwahl: true } },
       { data: [] },
+      { data: [] }, // T2 hatOffeneLeadTermine
       { data: { id: 'claim-rwu', claim_nummer: 'CLM-RWU' } },
       { data: { id: 'person-9' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 uebernehmeLeadTermine
       { data: null },
       { data: null },
     ])
@@ -300,9 +314,11 @@ describe('convertLeadToClaim', () => {
     primeResponses([
       { data: { id: 'lead-def', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
       { data: [] },
+      { data: [] }, // T2 hatOffeneLeadTermine
       { data: { id: 'claim-def', claim_nummer: 'CLM-DEF' } },
       { data: { id: 'person-10' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 uebernehmeLeadTermine
       { data: null },
       { data: null },
     ])
@@ -324,12 +340,14 @@ describe('convertLeadToClaim', () => {
     // Sequence:
     //  1 leads select (load + Idempotenz)
     //  2 profiles select (KB Round-Robin -> leer -> null)
-    //  3 claims insert
-    //  4 personen insert (geschaedigter, account-los)
-    //  5 claim_parties insert
-    //  6 reparatur_termine insert  <-- neuer SP2-T4-Insert
-    //  7 faelle_claim_bridge upsert
-    //  8 leads update
+    //  3 T2 hatOffeneLeadTermine
+    //  4 claims insert
+    //  5 personen insert (geschaedigter, account-los)
+    //  6 claim_parties insert
+    //  7 T1 uebernehmeLeadTermine (Umhaengen)
+    //  8 reparatur_termine insert  <-- SP2-T4-Insert
+    //  9 faelle_claim_bridge upsert
+    // 10 leads update
     primeResponses([
       {
         data: {
@@ -343,12 +361,14 @@ describe('convertLeadToClaim', () => {
         },
       }, // 1 leads select
       { data: [] },                                              // 2 profiles select
-      { data: { id: 'claim-rt', claim_nummer: 'CLM-RT' } },    // 3 claims insert
-      { data: { id: 'person-rt' } },                            // 4 personen insert
-      { data: null },                                            // 5 claim_parties insert
-      { data: null },                                            // 6 reparatur_termine insert
-      { data: null },                                            // 7 faelle_claim_bridge upsert
-      { data: null },                                            // 8 leads update
+      { data: [] },                                              // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-rt', claim_nummer: 'CLM-RT' } },    // 4 claims insert
+      { data: { id: 'person-rt' } },                            // 5 personen insert
+      { data: null },                                            // 6 claim_parties insert
+      { data: [] },                                              // 7 T1 uebernehmeLeadTermine
+      { data: null },                                            // 8 reparatur_termine insert
+      { data: null },                                            // 9 faelle_claim_bridge upsert
+      { data: null },                                            // 10 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -386,12 +406,14 @@ describe('convertLeadToClaim', () => {
         },
       }, // 1 leads select
       { data: [] },                                                // 2 profiles select
-      { data: { id: 'claim-no-rt', claim_nummer: 'CLM-NO-RT' } }, // 3 claims insert
-      { data: { id: 'person-nrt' } },                              // 4 personen insert
-      { data: null },                                              // 5 claim_parties insert
-      { data: null },                                              // 6 reparatur_termine insert (auch ohne Wunschtermin)
-      { data: null },                                              // 7 faelle_claim_bridge upsert
-      { data: null },                                              // 8 leads update
+      { data: [] },                                                // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-no-rt', claim_nummer: 'CLM-NO-RT' } }, // 4 claims insert
+      { data: { id: 'person-nrt' } },                              // 5 personen insert
+      { data: null },                                              // 6 claim_parties insert
+      { data: [] },                                                // 7 T1 uebernehmeLeadTermine
+      { data: null },                                              // 8 reparatur_termine insert (auch ohne Wunschtermin)
+      { data: null },                                              // 9 faelle_claim_bridge upsert
+      { data: null },                                              // 10 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -409,15 +431,17 @@ describe('convertLeadToClaim', () => {
   // ─── KB-Skip fuer Selbstzahler (Aaron 06.07.) ────────────────────────────
   it('KB-Skip: Selbstzahler-Lead bekommt KEINEN Kundenbetreuer (Round-Robin uebersprungen)', async () => {
     // abrechnungsweg='selbstzahler' -> reiner Reparatur-Vorgang ohne SV/Regulierung
-    // -> kein KB (analog embed-B). Der KB-Round-Robin (profiles-Select) faellt weg,
-    // die Response-Sequenz hat daher ein Element WENIGER als der Normalpfad.
+    // -> kein KB (analog embed-B). Der KB-Round-Robin (profiles-Select) faellt weg.
+    // Aber T2 hatOffeneLeadTermine laeuft trotzdem (vor dem claims-Insert).
     primeResponses([
       { data: { id: 'lead-sz', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'selbstzahler' } }, // 1 leads select
-      { data: { id: 'claim-sz', claim_nummer: 'CLM-SZ' } }, // 2 claims insert (KEIN profiles-Select davor)
-      { data: { id: 'person-sz' } },                         // 3 personen insert
-      { data: null },                                        // 4 claim_parties insert
-      { data: null },                                        // 5 faelle_claim_bridge upsert
-      { data: null },                                        // 6 leads update
+      { data: [] },                                          // 2 T2 hatOffeneLeadTermine (KEIN profiles-Select davor)
+      { data: { id: 'claim-sz', claim_nummer: 'CLM-SZ' } }, // 3 claims insert
+      { data: { id: 'person-sz' } },                         // 4 personen insert
+      { data: null },                                        // 5 claim_parties insert
+      { data: [] },                                          // 6 T1 uebernehmeLeadTermine
+      { data: null },                                        // 7 faelle_claim_bridge upsert
+      { data: null },                                        // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -441,11 +465,13 @@ describe('convertLeadToClaim', () => {
     primeResponses([
       { data: { id: 'lead-hp', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
       { data: [] },                                          // 2 profiles select (Round-Robin -> leer)
-      { data: { id: 'claim-hp', claim_nummer: 'CLM-HP' } }, // 3 claims insert
-      { data: { id: 'person-hp' } },                         // 4 personen insert
-      { data: null },                                        // 5 claim_parties insert
-      { data: null },                                        // 6 faelle_claim_bridge upsert
-      { data: null },                                        // 7 leads update
+      { data: [] },                                          // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-hp', claim_nummer: 'CLM-HP' } }, // 4 claims insert
+      { data: { id: 'person-hp' } },                         // 5 personen insert
+      { data: null },                                        // 6 claim_parties insert
+      { data: [] },                                          // 7 T1 uebernehmeLeadTermine
+      { data: null },                                        // 8 faelle_claim_bridge upsert
+      { data: null },                                        // 9 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -467,11 +493,13 @@ describe('convertLeadToClaim', () => {
   it('Bug F: Kasko-Lead -> Claim wird mit onboarding_complete=true angelegt', async () => {
     primeResponses([
       { data: { id: 'lead-ka', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'kasko' } }, // 1 leads select
-      { data: { id: 'claim-ka', claim_nummer: 'CLM-KA' } }, // 2 claims insert (KB-Skip -> kein profiles-Select)
-      { data: { id: 'person-ka' } },                        // 3 personen insert
-      { data: null },                                       // 4 claim_parties insert
-      { data: null },                                       // 5 faelle_claim_bridge upsert
-      { data: null },                                       // 6 leads update
+      { data: [] },                                          // 2 T2 hatOffeneLeadTermine (KB-Skip -> kein profiles-Select)
+      { data: { id: 'claim-ka', claim_nummer: 'CLM-KA' } }, // 3 claims insert
+      { data: { id: 'person-ka' } },                        // 4 personen insert
+      { data: null },                                       // 5 claim_parties insert
+      { data: [] },                                         // 6 T1 uebernehmeLeadTermine
+      { data: null },                                       // 7 faelle_claim_bridge upsert
+      { data: null },                                       // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -485,11 +513,13 @@ describe('convertLeadToClaim', () => {
   it('Bug F: Selbstzahler-Lead -> Claim wird mit onboarding_complete=true angelegt', async () => {
     primeResponses([
       { data: { id: 'lead-sz2', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'selbstzahler' } }, // 1 leads select
-      { data: { id: 'claim-sz2', claim_nummer: 'CLM-SZ2' } }, // 2 claims insert
-      { data: { id: 'person-sz2' } },                         // 3 personen insert
-      { data: null },                                         // 4 claim_parties insert
-      { data: null },                                         // 5 faelle_claim_bridge upsert
-      { data: null },                                         // 6 leads update
+      { data: [] },                                          // 2 T2 hatOffeneLeadTermine (KB-Skip)
+      { data: { id: 'claim-sz2', claim_nummer: 'CLM-SZ2' } }, // 3 claims insert
+      { data: { id: 'person-sz2' } },                         // 4 personen insert
+      { data: null },                                         // 5 claim_parties insert
+      { data: [] },                                           // 6 T1 uebernehmeLeadTermine
+      { data: null },                                         // 7 faelle_claim_bridge upsert
+      { data: null },                                         // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -506,11 +536,13 @@ describe('convertLeadToClaim', () => {
     primeResponses([
       { data: { id: 'lead-hp2', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'haftpflicht' } }, // 1 leads select
       { data: [] },                                           // 2 profiles select (Round-Robin)
-      { data: { id: 'claim-hp2', claim_nummer: 'CLM-HP2' } }, // 3 claims insert
-      { data: { id: 'person-hp2' } },                         // 4 personen insert
-      { data: null },                                         // 5 claim_parties insert
-      { data: null },                                         // 6 faelle_claim_bridge upsert
-      { data: null },                                         // 7 leads update
+      { data: [] },                                           // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-hp2', claim_nummer: 'CLM-HP2' } }, // 4 claims insert
+      { data: { id: 'person-hp2' } },                         // 5 personen insert
+      { data: null },                                         // 6 claim_parties insert
+      { data: [] },                                           // 7 T1 uebernehmeLeadTermine
+      { data: null },                                         // 8 faelle_claim_bridge upsert
+      { data: null },                                         // 9 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -533,12 +565,14 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-mk', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', promotion_code_id: 'promo-1' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: { makler_id: 'makler-1', code: 'MK1' } },               // 3 promotion_codes select
-      { data: { id: 'claim-mk', claim_nummer: 'CLM-MK' } },           // 4 claims insert
-      { data: { id: 'person-mk' } },                                   // 5 personen insert
-      { data: null },                                                  // 6 claim_parties insert
-      { data: null },                                                  // 7 faelle_claim_bridge upsert
-      { data: null },                                                  // 8 leads update
+      { data: [] },                                                    // 3 T2 hatOffeneLeadTermine
+      { data: { makler_id: 'makler-1', code: 'MK1' } },               // 4 promotion_codes select
+      { data: { id: 'claim-mk', claim_nummer: 'CLM-MK' } },           // 5 claims insert
+      { data: { id: 'person-mk' } },                                   // 6 personen insert
+      { data: null },                                                  // 7 claim_parties insert
+      { data: [] },                                                    // 8 T1 uebernehmeLeadTermine
+      { data: null },                                                  // 9 faelle_claim_bridge upsert
+      { data: null },                                                  // 10 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -557,12 +591,14 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-wk', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', werkstatt_id: 'werkstatt-inbound-1' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: { user_id: 'profil-werkstatt-1' } },                    // 3 werkstaetten select (netzwerk_owner_id-Resolver, P3-Seed)
-      { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 4 claims insert
-      { data: { id: 'person-wk' } },                                   // 5 personen insert
-      { data: null },                                                  // 6 claim_parties insert
-      { data: null },                                                  // 7 faelle_claim_bridge upsert
-      { data: null },                                                  // 8 leads update
+      { data: [] },                                                    // 3 T2 hatOffeneLeadTermine
+      { data: { user_id: 'profil-werkstatt-1' } },                    // 4 werkstaetten select (netzwerk_owner_id-Resolver, P3-Seed)
+      { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 5 claims insert
+      { data: { id: 'person-wk' } },                                   // 6 personen insert
+      { data: null },                                                  // 7 claim_parties insert
+      { data: [] },                                                    // 8 T1 uebernehmeLeadTermine
+      { data: null },                                                  // 9 faelle_claim_bridge upsert
+      { data: null },                                                  // 10 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -585,12 +621,14 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-both', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', promotion_code_id: 'promo-2', werkstatt_id: 'werkstatt-inbound-2' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: { makler_id: 'makler-2', code: 'MK2' } },               // 3 promotion_codes select
-      { data: { id: 'claim-both', claim_nummer: 'CLM-BOTH' } },       // 4 claims insert
-      { data: { id: 'person-both' } },                                 // 5 personen insert
-      { data: null },                                                  // 6 claim_parties insert
-      { data: null },                                                  // 7 faelle_claim_bridge upsert
-      { data: null },                                                  // 8 leads update
+      { data: [] },                                                    // 3 T2 hatOffeneLeadTermine
+      { data: { makler_id: 'makler-2', code: 'MK2' } },               // 4 promotion_codes select
+      { data: { id: 'claim-both', claim_nummer: 'CLM-BOTH' } },       // 5 claims insert
+      { data: { id: 'person-both' } },                                 // 6 personen insert
+      { data: null },                                                  // 7 claim_parties insert
+      { data: [] },                                                    // 8 T1 uebernehmeLeadTermine
+      { data: null },                                                  // 9 faelle_claim_bridge upsert
+      { data: null },                                                  // 10 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -611,15 +649,17 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-ff', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', vehicle_id: 'veh-ff-1' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: [{ firma_id: 'firma-1' }] },                            // 3 flotten_fahrzeuge select
-      { data: { id: 'konto-1' } },                                     // 4 firmen_flotten_konten select (Vermittler-Aufloesung)
-      { data: { user_id: 'profil-flotte-1' } },                       // 5 firmen_flotten_konten select (netzwerk_owner_id-Resolver, P3-Seed)
-      { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 6 claims insert
-      { data: { id: 'person-ff' } },                                   // 7 personen insert
-      { data: null },                                                  // 8 claim_parties insert
-      { data: null },                                                  // 9 (ggf. claim_vehicle_involvements)
-      { data: null },                                                  // 10 faelle_claim_bridge upsert
-      { data: null },                                                  // 11 leads update
+      { data: [] },                                                    // 3 T2 hatOffeneLeadTermine
+      { data: [{ firma_id: 'firma-1' }] },                            // 4 flotten_fahrzeuge select
+      { data: { id: 'konto-1' } },                                     // 5 firmen_flotten_konten select (Vermittler-Aufloesung)
+      { data: { user_id: 'profil-flotte-1' } },                       // 6 firmen_flotten_konten select (netzwerk_owner_id-Resolver, P3-Seed)
+      { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 7 claims insert
+      { data: { id: 'person-ff' } },                                   // 8 personen insert
+      { data: null },                                                  // 9 claim_parties insert
+      { data: [] },                                                    // 10 T1 uebernehmeLeadTermine
+      { data: null },                                                  // 11 (ggf. claim_vehicle_involvements)
+      { data: null },                                                  // 12 faelle_claim_bridge upsert
+      { data: null },                                                  // 13 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -638,11 +678,13 @@ describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
     primeResponses([
       { data: { id: 'lead-nov', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
       { data: [] },                                                    // 2 profiles select
-      { data: { id: 'claim-nov', claim_nummer: 'CLM-NOV' } },         // 3 claims insert
-      { data: { id: 'person-nov' } },                                  // 4 personen insert
-      { data: null },                                                  // 5 claim_parties insert
-      { data: null },                                                  // 6 faelle_claim_bridge upsert
-      { data: null },                                                  // 7 leads update
+      { data: [] },                                                    // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-nov', claim_nummer: 'CLM-NOV' } },         // 4 claims insert
+      { data: { id: 'person-nov' } },                                  // 5 personen insert
+      { data: null },                                                  // 6 claim_parties insert
+      { data: [] },                                                    // 7 T1 uebernehmeLeadTermine
+      { data: null },                                                  // 8 faelle_claim_bridge upsert
+      { data: null },                                                  // 9 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
@@ -663,11 +705,13 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
     primeResponses([
       { data: { id: 'lead-sv', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'haftpflicht' } }, // 1 leads select
       { data: [] },                                                // 2 profiles select (KB Round-Robin)
-      { data: { id: 'claim-sv', claim_nummer: 'CLM-SV' } },        // 3 claims insert
-      { data: { id: 'person-sv' } },                               // 4 personen insert
-      { data: null },                                              // 5 claim_parties insert
-      { data: null },                                              // 6 faelle_claim_bridge upsert
-      { data: null },                                              // 7 leads update
+      { data: [] },                                                // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-sv', claim_nummer: 'CLM-SV' } },        // 4 claims insert
+      { data: { id: 'person-sv' } },                               // 5 personen insert
+      { data: null },                                              // 6 claim_parties insert
+      { data: [] },                                                // 7 T1 uebernehmeLeadTermine
+      { data: null },                                              // 8 faelle_claim_bridge upsert
+      { data: null },                                              // 9 leads update
     ])
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')
     const r = await convertLeadToClaim({ leadId: 'lead-sv', svIdFromTermin: 'sv-1', gutachtenBereitsErstellt: true })
@@ -682,9 +726,11 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
     primeResponses([
       { data: { id: 'lead-alt', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
       { data: [] },
+      { data: [] }, // T2 hatOffeneLeadTermine
       { data: { id: 'claim-alt', claim_nummer: 'CLM-ALT' } },
       { data: { id: 'person-alt' } },
-      { data: null },
+      { data: null }, // claim_parties insert
+      { data: [] }, // T1 uebernehmeLeadTermine
       { data: null },
       { data: null },
     ])
@@ -693,5 +739,33 @@ describe('convertLeadToClaim — gutachtenBereitsErstellt (P4 Sofort-Claim)', ()
     expect(r.ok).toBe(true)
     const p = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
     expect(p.operative_status).toBe('sv-termin')
+  })
+})
+
+// ─── Kunde-Termin-Funnel T1: Fail-Injection (Review) ────────────────────────
+// Beweist die Non-Fatal-Invariante des T1-Blocks: ein echter Fehler beim
+// gutachter_termine-Update (uebernehmeLeadTermine, das .or()-Chain-Update) darf die
+// Konversion NICHT abbrechen — nur lautes console.error-Logging, kein cleanupAndFail.
+describe('convertLeadToClaim — T1 Fail-Injection', () => {
+  it('gutachter_termine-Update-Fehler in uebernehmeLeadTermine ist non-fatal (Konversion bleibt ok:true)', async () => {
+    primeResponses([
+      { data: { id: 'lead-t1err', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
+      { data: [] },                                                     // 2 profiles select
+      { data: [] },                                                     // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-t1err', claim_nummer: 'CLM-T1ERR' } },      // 4 claims insert
+      { data: { id: 'person-t1err' } },                                 // 5 personen insert
+      { data: null },                                                   // 6 claim_parties insert
+      { data: null, error: { message: 'kaputt' } },                     // 7 T1 uebernehmeLeadTermine -> FEHLER
+      { data: null },                                                   // 8 faelle_claim_bridge upsert
+      { data: null },                                                   // 9 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-t1err' })
+
+    expect(r.ok).toBe(true)
+    // Beweist, dass der Fehler tatsaechlich den T1-Update-Call traf (kein ungenutzter Queue-Slot).
+    const terminUpdate = operations.find((o) => o.table === 'gutachter_termine' && o.op === 'update')
+    expect(terminUpdate).toBeTruthy()
   })
 })

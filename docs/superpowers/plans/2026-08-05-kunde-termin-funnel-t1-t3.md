@@ -80,9 +80,11 @@ export function istOffenerTerminStatus(status: string | null): boolean {
   return !(TERMINAL_TERMIN_STATUS as readonly string[]).includes(status)
 }
 
-/** Beide Lead-Verankerungen: bezug-nativ (bezug_typ='lead') ODER legacy (lead_id-Spalte). */
-function leadAnkerOrExpr(leadId: string): string {
-  return `and(bezug_typ.eq.lead,bezug_id.eq.${leadId}),lead_id.eq.${leadId}`
+/** Beide Lead-Verankerungen fuers UMHAENGEN: bezug-nativ ODER echtes Legacy (lead_id UND
+ *  bezug-frei). Bewusst STRENGER als bezugOrExpr('lead') — stale lead_id neben fremdem
+ *  bezug darf nicht re-geankert werden (kein DB-Constraint verhindert den Doppel-Zustand). */
+export function leadAnkerOrExpr(leadId: string): string {
+  return `and(bezug_typ.eq.lead,bezug_id.eq.${leadId}),and(bezug_typ.is.null,lead_id.eq.${leadId})`
 }
 
 /** Existiert mindestens ein nicht-terminaler lead-verankerter Termin? (Cursor-Input, T2) */
@@ -97,8 +99,8 @@ export async function hatOffeneLeadTermine(admin: SupabaseClient, leadId: string
 }
 
 /** Haengt alle nicht-terminalen lead-verankerten Termine auf den Fall um (bezug 'fall',
- *  fall_id==claims.id claim-first). lead_id wird im selben UPDATE genullt (validate-Trigger
- *  lehnt Doppel-Bezug ab). */
+ *  fall_id==claims.id claim-first). lead_id wird im selben UPDATE genullt (Aufraeumen:
+ *  danach genau EIN Anker; identische Semantik zur Backfill-Migration 20260804235003). */
 export async function uebernehmeLeadTermine(
   admin: SupabaseClient,
   leadId: string,
@@ -169,7 +171,7 @@ Import oben ergaenzen: `import { uebernehmeLeadTermine } from './uebernehme-lead
 ### Task 3: Backfill-Migration (DML, Bestand)
 
 **Files:**
-- Create: `supabase/migrations/<V>_backfill_lead_termine_auf_claims.sql` (`<V>` = von `apply_migration` getrackte Version, Regel-2-Ablauf!)
+- Create: `supabase/migrations/<V>_backfill_lead_termine_auf_faelle.sql` (`<V>` = von `apply_migration` getrackte Version, Regel-2-Ablauf!)
 
 - [ ] **Step 1: Vorab-Zaehlung (READ)** via MCP `execute_sql`:
 
@@ -197,8 +199,8 @@ where c.lead_id = coalesce(g.bezug_id, g.lead_id)
   and g.status not in ('storniert','abgesagt','abgelehnt','abgeschlossen','verlegt');
 ```
 
-- [ ] **Step 3: Version ablesen** (`list_migrations`) → File exakt `<V>_backfill_lead_termine_auf_claims.sql` committen; Nach-Zaehlung (Step-1-Query → 0) via `execute_sql` dokumentieren.
-- [ ] **Step 4: Commit** — `chore(mig): Backfill Lead-Termine auf Claims (T1)`.
+- [ ] **Step 3: Version ablesen** (`list_migrations`) → File exakt `<V>_backfill_lead_termine_auf_faelle.sql` committen; Nach-Zaehlung (Step-1-Query → 0) via `execute_sql` dokumentieren.
+- [ ] **Step 4: Commit** — `chore(mig): Backfill Lead-Termine auf Faelle (T1)`.
 
 ### Task 4: Kunde-Loader sieht pending-Termine
 
