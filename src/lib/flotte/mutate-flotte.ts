@@ -100,7 +100,7 @@ export async function updateFahrzeugStammdaten(
   const kennzeichen = (p.form.kennzeichen ?? '').trim()
   if (!kennzeichen) return { ok: false, error: 'Bitte ein Kennzeichen angeben.' }
 
-  // Ownership: Fahrzeug muss zur Firma gehoeren (gleiches Gate wie bindeKarteFuerFahrzeug).
+  // Ownership: Fahrzeug muss zur Firma gehoeren (gleiches Gate wie bindeSchadenkarteAnFahrzeug).
   const { data: owner } = await db
     .from('flotten_fahrzeuge')
     .select('id')

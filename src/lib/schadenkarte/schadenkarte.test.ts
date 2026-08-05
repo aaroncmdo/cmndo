@@ -131,18 +131,72 @@ describe('mintSchadenkarten', () => {
 // bindeSchadenkarteAnFahrzeug
 // ---------------------------------------------------------------------------
 
-describe('bindeSchadenkarteAnFahrzeug', () => {
-  it('returns error when card not found', async () => {
-    const db = {
-      from: () => ({
+// Tabellen-bewusster Mock: bindeSchadenkarteAnFahrzeug fragt ZWEI Tabellen ab
+// (flotten_fahrzeuge fuer das Fahrzeug-Ownership-Gate, dann schadenkarten) --
+// der generische makeDb unterscheidet from()-Argumente nicht.
+function makeBindDb(opts: {
+  /** false = Fahrzeug gehoert NICHT zur Firma (flotten_fahrzeuge liefert keine Zeile). */
+  fahrzeugOwner?: boolean
+  karte?: unknown
+  updateResult?: { data: unknown; error: { code: string; message: string } | null }
+}) {
+  return {
+    from: (table: string) => {
+      if (table === 'flotten_fahrzeuge') {
+        return {
+          select: () => ({
+            eq: () => ({
+              eq: () => ({
+                maybeSingle: async () => ({
+                  data: (opts.fahrzeugOwner ?? true) ? { id: 'ff1' } : null,
+                }),
+              }),
+            }),
+          }),
+        }
+      }
+      return {
         select: () => ({
           eq: () => ({
-            maybeSingle: async () => ({ data: null }),
+            maybeSingle: async () => ({ data: opts.karte ?? null }),
           }),
         }),
-      }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+        update: () => ({
+          eq: () => ({
+            eq: () => ({
+              select: () => ({
+                maybeSingle: async () =>
+                  opts.updateResult ?? { data: { id: 'k1' }, error: null },
+              }),
+            }),
+          }),
+        }),
+      }
+    },
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any
+}
+
+describe('bindeSchadenkarteAnFahrzeug', () => {
+  it('weist ein Fahrzeug ab, das NICHT zur Firma gehoert (Ownership-Gate)', async () => {
+    // Karte gehoert der Firma und ist frei -- ohne das Gate ginge der Bind durch und
+    // /schaden/[token] zeigte anschliessend fremde Fahrzeugdaten (Kennzeichen etc.).
+    const db = makeBindDb({
+      fahrzeugOwner: false,
+      karte: { id: 'k1', status: 'frei', firma_id: 'f1' },
+    })
+    const res = await bindeSchadenkarteAnFahrzeug(db, {
+      token: 'SKT-TOKEN000000000',
+      fahrzeugId: 'FREMDES_FAHRZEUG',
+      firmaId: 'f1',
+      userId: 'u1',
+    })
+    expect(res.ok).toBe(false)
+    expect(res.error).toMatch(/nicht zu Ihrer Flotte/i)
+  })
+
+  it('returns error when card not found', async () => {
+    const db = makeBindDb({ karte: null })
     const res = await bindeSchadenkarteAnFahrzeug(db, {
       token: 'SKT-UNKNOWN000000',
       fahrzeugId: 'v1',
@@ -154,18 +208,9 @@ describe('bindeSchadenkarteAnFahrzeug', () => {
   })
 
   it('returns error when card firma_id differs from caller firmaId', async () => {
-    const db = {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({
-              data: { id: 'k1', status: 'frei', firma_id: 'ANDERE_FIRMA' },
-            }),
-          }),
-        }),
-      }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const db = makeBindDb({
+      karte: { id: 'k1', status: 'frei', firma_id: 'ANDERE_FIRMA' },
+    })
     const res = await bindeSchadenkarteAnFahrzeug(db, {
       token: 'SKT-TOKEN000000000',
       fahrzeugId: 'v1',
@@ -177,18 +222,9 @@ describe('bindeSchadenkarteAnFahrzeug', () => {
   })
 
   it('returns error when card is already gebunden', async () => {
-    const db = {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({
-              data: { id: 'k1', status: 'gebunden', firma_id: 'f1' },
-            }),
-          }),
-        }),
-      }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const db = makeBindDb({
+      karte: { id: 'k1', status: 'gebunden', firma_id: 'f1' },
+    })
     const res = await bindeSchadenkarteAnFahrzeug(db, {
       token: 'SKT-TOKEN000000000',
       fahrzeugId: 'v1',
@@ -200,30 +236,10 @@ describe('bindeSchadenkarteAnFahrzeug', () => {
   })
 
   it('maps a 23505 on UPDATE to "Dieses Fahrzeug hat bereits eine aktive Karte."', async () => {
-    const db = {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({
-              data: { id: 'k1', status: 'frei', firma_id: 'f1' },
-            }),
-          }),
-        }),
-        update: () => ({
-          eq: () => ({
-            eq: () => ({
-              select: () => ({
-                maybeSingle: async () => ({
-                  data: null,
-                  error: { code: '23505', message: 'unique_violation' },
-                }),
-              }),
-            }),
-          }),
-        }),
-      }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const db = makeBindDb({
+      karte: { id: 'k1', status: 'frei', firma_id: 'f1' },
+      updateResult: { data: null, error: { code: '23505', message: 'unique_violation' } },
+    })
     const res = await bindeSchadenkarteAnFahrzeug(db, {
       token: 'SKT-TOKEN000000000',
       fahrzeugId: 'v1',
@@ -235,27 +251,10 @@ describe('bindeSchadenkarteAnFahrzeug', () => {
   })
 
   it('succeeds when card is frei and update returns a row', async () => {
-    const db = {
-      from: () => ({
-        select: () => ({
-          eq: () => ({
-            maybeSingle: async () => ({
-              data: { id: 'k1', status: 'frei', firma_id: 'f1' },
-            }),
-          }),
-        }),
-        update: () => ({
-          eq: () => ({
-            eq: () => ({
-              select: () => ({
-                maybeSingle: async () => ({ data: { id: 'k1' }, error: null }),
-              }),
-            }),
-          }),
-        }),
-      }),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const db = makeBindDb({
+      karte: { id: 'k1', status: 'frei', firma_id: 'f1' },
+      updateResult: { data: { id: 'k1' }, error: null },
+    })
     const res = await bindeSchadenkarteAnFahrzeug(db, {
       token: 'SKT-TOKEN000000000',
       fahrzeugId: 'v1',

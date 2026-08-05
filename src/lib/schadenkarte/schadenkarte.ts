@@ -58,12 +58,25 @@ export async function mintSchadenkarten(
 
 /**
  * Freie oder bestellte Karte an ein Fahrzeug binden (status -> 'gebunden').
- * Nur Karten der eigenen Firma. Optimistic-Guard auf .eq('status', alterStatus).
+ * Nur Karten der eigenen Firma UND nur Fahrzeuge der eigenen Firma.
+ * Optimistic-Guard auf .eq('status', alterStatus).
  */
 export async function bindeSchadenkarteAnFahrzeug(
   db: AnyDb,
   params: { token: string; fahrzeugId: string; firmaId: string; userId: string },
 ): Promise<{ ok: boolean; error?: string }> {
+  // 0) Fahrzeug-Ownership-Gate (flotten_fahrzeuge = N:M Firma<->Fahrzeug). Server-Actions
+  //    sind aufrufbare Endpoints -- ohne dieses Gate koennte ein FM seine Karte per direktem
+  //    Call an eine fremde vehicle-UUID binden und /schaden/[token] zeigte fremde
+  //    Fahrzeugdaten. Kanonisch HIER statt in jedem Caller (vorher hatten 2 von 3 das Gate nicht).
+  const { data: owner } = await db
+    .from('flotten_fahrzeuge')
+    .select('id')
+    .eq('firma_id', params.firmaId)
+    .eq('vehicle_id', params.fahrzeugId)
+    .maybeSingle()
+  if (!owner) return { ok: false, error: 'Fahrzeug gehört nicht zu Ihrer Flotte.' }
+
   // 1) Karte holen
   const { data: karte } = await db
     .from('schadenkarten')
