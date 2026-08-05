@@ -60,6 +60,8 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         adresse: terminAdresse,
         svVorname: svName ? svName.split(' ')[0] : null,
         kundeVorname: status.kundeVorname,
+        // T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht) -> "wird bestaetigt"-Badge statt Live-Status.
+        pending: sv.status === 'dispatch_pending' || sv.status === 'sv_gesucht',
       }
     : null
 

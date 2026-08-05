@@ -39,6 +39,8 @@ type TerminInfo = {
   kundeVorname?: string | null
   /** Termin-Status — bei 'bestaetigt' wird der Verschieben-Button gezeigt */
   status?: string | null
+  /** T1: true bei dispatch_pending/sv_gesucht (Dead-Pin/noch-kein-SV) — zeigt "wird bestätigt"-Badge statt TerminLiveStatus */
+  pending?: boolean
 }
 
 /** AAR-864: Notice-Item das als verschmolzene Bottom-Sektion im Stepper
@@ -179,11 +181,17 @@ export default function ClaimStepper({
                   <p className="text-sm font-semibold text-claimondo-navy">
                     {terminInfo.datum}, {terminInfo.uhrzeit} {ts('uhrSuffix')}
                   </p>
-                  <TerminLiveStatus
-                    terminId={terminInfo.terminId}
-                    svVorname={terminInfo.svVorname}
-                    kundeVorname={terminInfo.kundeVorname}
-                  />
+                  {terminInfo.pending ? (
+                    <span className="inline-flex items-center rounded-full bg-warning-soft text-warning-strong text-[11px] font-medium px-2 py-0.5">
+                      {ts('wirdBestaetigt')}
+                    </span>
+                  ) : (
+                    <TerminLiveStatus
+                      terminId={terminInfo.terminId}
+                      svVorname={terminInfo.svVorname}
+                      kundeVorname={terminInfo.kundeVorname}
+                    />
+                  )}
                 </div>
                 {terminInfo.adresse && (
                   <p className="text-xs text-claimondo-ondo truncate">

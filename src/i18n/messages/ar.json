@@ -4624,7 +4624,8 @@
       },
       "stepper": {
         "navigation": "الاتجاهات",
-        "uhrSuffix": ""
+        "uhrSuffix": "",
+        "wirdBestaetigt": "في انتظار التأكيد"
       }
     },
     "termine": {

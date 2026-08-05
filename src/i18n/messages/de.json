@@ -4648,7 +4648,8 @@
     "fall": {
       "stepper": {
         "navigation": "Navigation",
-        "uhrSuffix": "Uhr"
+        "uhrSuffix": "Uhr",
+        "wirdBestaetigt": "wird bestätigt"
       },
       "betreuerStrip": {
         "labelKb": "Ihr Kundenbetreuer",

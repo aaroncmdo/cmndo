@@ -96,6 +96,10 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
 }
 
+// T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht, jetzt sichtbar seit kunde-claim-view T1) ->
+// dasselbe "wird bestaetigt"-Label wie der Stepper-Badge (kunde.fall.stepper), statt Rohwert.
+const PENDING_STATUS = new Set(['dispatch_pending', 'sv_gesucht'])
+
 export default function KundeTerminDetailClient({
   termin,
   fall,
@@ -106,6 +110,7 @@ export default function KundeTerminDetailClient({
   sv: Sv
 }) {
   const t = useTranslations('kunde.termine')
+  const ts = useTranslations('kunde.fall.stepper')
   const format = useFormatter()
   const start = new Date(termin.start_zeit)
   const ende = termin.end_zeit ? new Date(termin.end_zeit) : null
@@ -126,7 +131,9 @@ export default function KundeTerminDetailClient({
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
-  const statusLabel = termin.status in STATUS_LABEL ? t(`detail.statusLabel.${termin.status}`) : termin.status
+  const statusLabel = PENDING_STATUS.has(termin.status)
+    ? ts('wirdBestaetigt')
+    : (termin.status in STATUS_LABEL ? t(`detail.statusLabel.${termin.status}`) : termin.status)
 
   // Realtime: Besichtigung-läuft-Trigger live abrufen, damit der Kunde die
   // Seite offen halten kann und den Statuswechsel ohne Reload sieht.

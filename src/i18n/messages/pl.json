@@ -4624,7 +4624,8 @@
       },
       "stepper": {
         "navigation": "Trasa dojazdu",
-        "uhrSuffix": "godz."
+        "uhrSuffix": "godz.",
+        "wirdBestaetigt": "oczekuje na potwierdzenie"
       }
     },
     "termine": {
