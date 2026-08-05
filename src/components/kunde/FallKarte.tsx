@@ -21,6 +21,7 @@ import {
   type JetztZuTunTranslator,
 } from '@/lib/kunde/jetzt-zu-tun-i18n'
 import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
+import { phaseForOperativeStatus } from '@/lib/claims/lifecycle'
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
@@ -76,11 +77,25 @@ const PHASEN: Array<{ key: PhaseKey; label: string; labelKey: string }> = [
 // FG5 Cluster 1, Task 1b: replaced inline boolean-check with the shared helper
 // so that storniert/verjaehrt/etc. claims (set via endzustand-actions, no abgeschlossen_am)
 // correctly show the 'abschluss' phase instead of defaulting to 'erfassung'.
+//
+// Gap A (Endkunden-Views "eine Wahrheitsquelle", 05.08.): die Dashboard-Karte leitet die
+// Hauptphase PRIMAER aus operative_status ab — via phaseForOperativeStatus, das DIESELBE
+// OPERATIVE_PHASE-Map nutzt wie getClaimLifecycle/v_claim_phase (die Quelle des Fallakte-
+// Steppers). Damit zeigt die Karte bit-gleich dieselbe Phase wie der Stepper in der Fallakte,
+// statt einer dritten, aus Sub-Entity-Feldern geratenen Ableitung (die bei eingefrorenem oder
+// voraus-eilendem Sub-Entity gegenueber Stepper/Dashboard divergierte). Die alte Heuristik
+// bleibt NUR Fallback fuer null/unbekannten Status, damit die Karte ohne gesetzten
+// operative_status nicht faelschlich auf 'erfassung' zurueckfaellt.
 export function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
   // fall.status = operative_status (set by loader: claim.operative_status ?? fall.status).
-  // Pass it as BOTH axes so the helper catches both operative closed values (abgeschlossen/storniert)
-  // AND terminal claims.status values (reguliert_vollstaendig, verjaehrt, etc.) — the loader
-  // may expose either depending on which DB column is populated.
+  // phaseForOperativeStatus mappt den operativen Cursor (ersterfassung…zahlung-eingegangen),
+  // die terminalen claims.status-Werte (reguliert_vollstaendig/verjaehrt/abgelehnt_final/…) UND
+  // die geschlossenen Zustaende (abgeschlossen/storniert) → deckt alles ab, was der Loader in
+  // fall.status exponiert. null nur bei leerem/unbekanntem Status → Sub-Entity-Fallback unten.
+  const kanonisch = phaseForOperativeStatus(fall.status)?.main
+  if (kanonisch) return kanonisch
+
+  // Fallback (nur null/unbekannter operative_status): die fruehere Sub-Entity-Heuristik.
   if (istClaimGeschlossen({ operativeStatus: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) return 'abschluss'
   if (fall.gutachten_eingegangen_am || fall.regulierung_am)      return 'regulierung'
   if (fall.sa_unterschrieben)                                    return 'begutachtung'
