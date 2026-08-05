@@ -106,3 +106,24 @@
 **Begründung:** Verfassung §5 (ein Intake, garantierte Nachwirkungen) für §7#2; §7#3 ist eine echte Produkt-Scope-Entscheidung (Marketing-Build-Grenze) → an Aaron, kein §1-Default.
 
 **Review:** offen (Aaron) — §7#2 vor C2b-Code, §7#3 vor C2c-Code.
+## 2026-08-03 · B-Journey-Suite · T2: J8-2FA-Enroll in CI; J5 bleibt Skip (Fixture-Claim-Drift)
+
+**Lücke:** T2 der Journey-Suite (J5 kasko + J8 2fa-enroll) — welche kommen in den CI-Journey-Step?
+
+**Entscheidung:** `2fa-enroll-smoke` (J8) läuft ab jetzt im CI-Journey-Step (Seed-Step `seed-smoke-enroll.mjs` + `RUN_2FA_ENROLL_SMOKE`). `kasko-reparatur-phase-smoke` (J5) bleibt opt-in/Skip.
+
+**Begründung:** J8 ist konto-isoliert (`smoke-enroll@claimondo.de`, TOTP-Enroll-UI, kein Comms/Booking); der Seed liest `process.env`-first (CI-tauglich) + setzt das Konto self-reset je Lauf faktorfrei. J5s Login-Refactor wäre machbar (`loginContextOrSkip('admin')` wie J1), ABER die MCP-Verifikation (03.08.) zeigt: der feste Fixture-Claim `39734007` ist zustandsgedriftet — `werkstatt_id NULL`, `operative_status=ersterfassung` statt des von der Spec erwarteten „Werkstatt gesetzt → Reparaturtermin"-Zustands. Die J5-Assertion (`Reparaturtermin|Werkstatt wählen|Reparatur`) wäre damit unsicher → ein flaky-roter Step statt eines verlässlichen Nachweises. J5 braucht einen eigenen deterministischen Seed (der den Claim in den erwarteten Reparatur-Zustand bringt) — Follow-up.
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-03 · B-Journey-Suite · J10 = begründeter Skip (Flow-Wizard-Fragilität); §9-Punkt-2 erfüllt
+
+**Lücke:** T3 der Journey-Suite (J10 werkstatt-finder) — in den CI-Journey-Step?
+
+**Entscheidung:** `werkstatt-finder-smoke` (J10) bleibt begründeter opt-in-Skip (nicht in CI). Damit ist §9-Checkliste-Punkt-2 („J1–J10 grün ODER mit begründetem, journey-referenziertem Skip") **erfüllt** — B3 CI-Kern abgeschlossen.
+
+**Begründung:** J10 wäre mit dem `db()`-`.env.local`→`process.env`-Fix technisch liftbar, ABER Szenario 2 (Flow-Self-Service) ist eine fragile 14-Schritt-Wizard-Heuristik (`:99-143`: klickt sich durch FORWARD-Buttons/Checkboxen/Textareas, hängt an `CANONICAL_FLOWLINK_ENABLED`, failt bei jeder Wizard-/Label-Änderung), und alle 3 Szenarien mutieren prod-DB (Claim/Lead → Smoke-Werkstatt) ohne Spec-internes cleaning. Ein nicht-deterministischer Multi-Step-Smoke in einem post-merge-CI-Step erzeugt flaky-rot statt eines verlässlichen Nachweises — das Gegenteil des Oracle-Zwecks. Follow-up: db()-Fix + Isolation auf Szenario 1 (Kunde-Fallakte, deterministisch) + Seed-cleaning-Verifikation → dann grün-liftbar. Analog J5 (Fixture-Drift) ist das ein Follow-up, KEIN §9-Blocker.
+
+**Stand §9-Punkt-2:** Grün in CI = J1/J4/J9/J8. Begründet geskippt = J2/J3/J5/J6/J7/J10 + J9-`lifecycle`. Alle 10 Journeys sind damit CI-abgesichert ODER begründet, journey-referenziert geskippt.
+
+**Review:** offen (im PR an Aaron).

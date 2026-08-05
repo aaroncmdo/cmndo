@@ -82,9 +82,9 @@ Diese Matrix ist Schritt 1; sie ist parallel-sicher (nur diese Docs-Datei + spä
 | **J1** | ✅ **CI-Step** | `golden-path-deep-prod` (Status-Tiefe) |
 | **J4** | ✅ **CI-Step** | `reparatur-weg-e2e-smoke` (voller Reparatur-Weg) |
 | **J9** | ✅ **CI-Step** (T1) | `provisionen-verrechnung` + `provisionen-staffel` (rein DB, self-cleaning); `lifecycle` = **opt-in** (globaler Release-Cron → Geld-Timing-Effekt, DECISIONS 03.08.) |
-| **J5** | 🟡 CI-tauglich, **T2** | `kasko-reparatur-phase-smoke` (read-only) — braucht inline-Login → `fixtures.adminPage` + Fixture-Claim-Persistenz |
-| **J8** | 🟡 teils, **T2** | `2fa-enroll-smoke` (konto-isoliert) — braucht Seed-Step `seed-smoke-enroll.mjs` |
-| **J10** | 🟡 teils, **T3** | `werkstatt-finder-smoke` — braucht Code-Fix (`db()` liest `.env.local` direkt → `process.env`) |
+| **J8** | ✅ **CI-Step** (T2) | `2fa-enroll-smoke` (konto-isoliert, TOTP-Enroll-UI) + Seed-Step `seed-smoke-enroll.mjs` (process.env-first, self-reset je Lauf) |
+| **J5** | ⏭️ **begründeter Skip** | `kasko-reparatur-phase-smoke` — Login-Refactor wäre machbar (`loginContextOrSkip('admin')`), ABER Fixture-Claim `39734007` ist **zustandsgedriftet** (MCP 03.08.: `werkstatt_id NULL`/`ersterfassung` statt „Werkstatt gesetzt") → Assertion unsicher; braucht eigenen deterministischen Seed = Follow-up (T-nachgelagert) |
+| **J10** | ⏭️ **begründeter Skip** | `werkstatt-finder-smoke` — `db()`-`.env.local`→`process.env`-Fix wäre machbar, ABER Szenario 2 (Flow-Self-Service) = fragile 14-Schritt-Wizard-Heuristik (`:99-143`, `CANONICAL_FLOWLINK_ENABLED`-abhängig, failt bei jeder Wizard-Änderung) + alle 3 Szenarien mutieren prod-DB → kein deterministischer Step. Follow-up: db()-Fix + Szenario-1-Isolation (nur Kunde-Fallakte) + Seed-cleaning |
 | **J2** | ⏭️ **begründeter CI-Skip** | echte Meldung/Buchung (`smoke-mini-wizard` testIgnored schreibt Leads; Finder = echte Buchung, opt-in) → Regel-4-opt-in |
 | **J3** | ⏭️ **begründeter CI-Skip** | SA/Vollmacht nur eingebettet (`golden-path-completion-prod`, opt-in, mutiert Claim). Signatur-Mechanik läuft ersatzweise über **J4** |
 | **J6** | ⏭️ **begründeter CI-Skip** | Kanzlei-Übergabe nur eingebettet + testIgnored-Staging → Regel-4-opt-in |
@@ -92,4 +92,4 @@ Diese Matrix ist Schritt 1; sie ist parallel-sicher (nur diese Docs-Datei + spä
 
 **Regel-4-opt-in-Weg** für die skippenden Journeys: die jeweiligen Specs manuell mit ihrem Env-Flag (`RUN_GOLDEN_PATH_PROD` / `RUN_STORNO_DSGVO_SMOKE` / `RUN_PROVISION_SMOKE` für lifecycle / …) gegen prod fahren (Wegwerf-Konten, `reserviere()`-Guard schützt echte SVs).
 
-**Tranchen:** **T1** (J9 verrechnung+staffel) = dieser PR. **T2** = J5 (Login-Fix) + J8-`2fa-enroll` (Seed-Step). **T3** = J10-`werkstatt-finder` (+ `.env.local`→`process.env`-Fix). Die Skip-Journeys (J2/J3/J6/J7 + J9-lifecycle) sind mit obiger Begründung §9-konform „begründet, journey-referenziert geskippt".
+**Stand — §9-Punkt-2 erfüllt (03.08.):** Grün in CI = **J1/J4/J9/J8** (T1 #4948 = J9 `verrechnung`+`staffel`; T2 #4955 = J8 `2fa-enroll`). Begründet, journey-referenziert geskippt = J2/J3/J6 (echte Buchung/nur eingebettet, Signatur via J4), J7 (Skeleton/DSGVO irreversibel), J9-`lifecycle` (globaler Release-Cron), **J5** (Fixture-Claim gedriftet), **J10** (Flow-Wizard-Fragilität + prod-Mutation). **Optionale Follow-ups** (KEIN §9-Blocker — der Skip ist begründet): deterministische Seeds für J5 (kasko-Reparatur-Zustand) + J10-Szenario-1 (Kunde-Fallakte-Isolation + Seed-cleaning) würden je einen weiteren Journey grün-in-CI heben.
