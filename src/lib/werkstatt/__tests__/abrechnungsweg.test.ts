@@ -5,6 +5,7 @@ import {
   istReparaturOnly,
   istWerkstattReparaturWeg,
   deriveAbrechnungsweg,
+  qualiAusSchadensart,
 } from '../abrechnungsweg'
 
 describe('resolveAbrechnungsweg', () => {
@@ -97,5 +98,40 @@ describe('deriveAbrechnungsweg (spiegelt die DB-Funktion derive_abrechnungsweg, 
   it('gibt NIE nicht_zutreffend — der nur_gutachter-Sonderfall ist entfernt (abrechnungsweg = Schaden-Natur)', () => {
     expect(deriveAbrechnungsweg({ schuldfrage: 'gegner', eigeneVersicherung: null, schadenart: 'unbekannt' })).not.toBe('nicht_zutreffend')
     expect(deriveAbrechnungsweg({ schuldfrage: null, eigeneVersicherung: null, schadenart: 'unbekannt' })).not.toBe('nicht_zutreffend')
+  })
+})
+
+describe('qualiAusSchadensart (Fallback-Quali aus Versicherungs-Klassifikation)', () => {
+  it('haftpflicht -> gegner', () => {
+    expect(qualiAusSchadensart('haftpflicht')).toEqual({ schuldfrage: 'gegner', eigeneVersicherung: null })
+  })
+  it('vollkasko/teilkasko -> eigenverantwortung + eigene VS', () => {
+    expect(qualiAusSchadensart('vollkasko')).toEqual({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja' })
+    expect(qualiAusSchadensart('teilkasko')).toEqual({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja' })
+  })
+  it('eigenverschulden -> eigenverantwortung ohne VS', () => {
+    expect(qualiAusSchadensart('eigenverschulden')).toEqual({ schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'nein' })
+  })
+  it('unbekannt / null / undefined / unbekannter Wert -> null (Quali bleibt offen)', () => {
+    expect(qualiAusSchadensart('unbekannt')).toBeNull()
+    expect(qualiAusSchadensart(null)).toBeNull()
+    expect(qualiAusSchadensart(undefined)).toBeNull()
+    expect(qualiAusSchadensart('irgendwas')).toBeNull()
+  })
+  // E2E: die abgeleitete Quali muss durch resolveAbrechnungsweg den richtigen Weg geben — der Kern
+  // des Fixes (Weg 6 /kunde/schaden-melden + Admin-Anlage erzeugen sonst abrechnungsweg=null).
+  it('E2E: qualiAusSchadensart -> resolveAbrechnungsweg ergibt den erwarteten Weg', () => {
+    const wegAus = (art: string) => {
+      const q = qualiAusSchadensart(art)
+      return resolveAbrechnungsweg({
+        schuldfrage: q?.schuldfrage ?? null,
+        ueberEigeneVersicherung: q?.eigeneVersicherung === 'ja' ? true : q?.eigeneVersicherung === 'nein' ? false : null,
+      })
+    }
+    expect(wegAus('haftpflicht')).toBe('haftpflicht')
+    expect(wegAus('vollkasko')).toBe('kasko')
+    expect(wegAus('teilkasko')).toBe('kasko')
+    expect(wegAus('eigenverschulden')).toBe('selbstzahler')
+    expect(wegAus('unbekannt')).toBeNull()
   })
 })

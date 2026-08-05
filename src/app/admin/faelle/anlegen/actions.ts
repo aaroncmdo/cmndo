@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
+import { qualiAusSchadensart } from '@/lib/werkstatt/abrechnungsweg'
 import { revalidatePath } from 'next/cache'
 
 // KFZ-154 Cleanup-Follow-up: Manuelle Fall-Anlage UI fuer Admins.
@@ -53,6 +54,11 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
 
   const db = createAdminClient()
 
+  // Abrechnungsweg-Audit (03.08.): Quali-Achse aus schadens_art ableiten, sonst erzeugt der
+  // Sofort-Convert (Schritt 2) einen wegs-losen Claim (abrechnungsweg=null) trotz klarer
+  // Versicherungs-Klassifikation. Auf den LEAD schreiben -> convert-Spalte + DB-Views konsistent.
+  const quali = qualiAusSchadensart(data.schadens_art)
+
   // 1. Lead-Eintrag anlegen (Konversions-Source) damit alle existing Hooks
   //    (Tasks, Notifications) gleich greifen.
   const created = await createLead(
@@ -69,8 +75,12 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
       schadens_fall_typ: null,
       spezifikation: data.spezifikation || null,
       schadens_art: data.schadens_art || null,
+      ...(quali ? { schuldfrage: quali.schuldfrage, eigene_versicherung: quali.eigeneVersicherung } : {}),
       qualifizierungs_phase: 'konvertiert',
       fahrzeug_standort_plz: data.schadens_plz.trim(),
+      // B5-Fix (Entry-Point-Audit): PLZ auch nach unfallort_plz -> erreicht claims.schadenort_plz
+      // (convert liest lead.unfallort_plz; F6/Aaron 14.07. "Form-Wiring folgt").
+      unfallort_plz: data.schadens_plz.trim(),
       fahrzeug_standort_adresse: data.schadens_adresse?.trim() || null,
       kennzeichen: data.kennzeichen?.trim() || null,
       notiz: data.notiz?.trim() || null,
