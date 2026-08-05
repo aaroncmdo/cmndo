@@ -576,7 +576,15 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
           onClick={handleWeiter}
           disabled={isSaving}
         >
-          {isSaving ? t('speichern_laeuft') : isLast ? t('termin_buchen') : tc('weiter')}
+          {/* sv-onboarding endet mit Vertrags-Signatur, nicht mit Termin-Buchung —
+              "Termin buchen" stammt aus dem Kunden-Flow und war dort falsch. */}
+          {isSaving
+            ? t('speichern_laeuft')
+            : isLast
+              ? flowKey === 'sv-onboarding'
+                ? t('onboarding_abschliessen')
+                : t('termin_buchen')
+              : tc('weiter')}
         </GlassButton>
         <span
           className="text-[11px] uppercase tracking-[0.1em] font-bold"
