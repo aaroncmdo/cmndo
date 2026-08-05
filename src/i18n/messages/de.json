@@ -4726,6 +4726,10 @@
         "wirdGesendet": "Wird gesendet...",
         "vorschlagSenden": "Vorschlag senden"
       },
+      "terminVorschlag": {
+        "titel": "Ihr Gutachter hat einen Termin vorgeschlagen",
+        "vorschlagText": "{svName} schlägt diesen Termin für die Besichtigung vor:"
+      },
       "slotAuswahl": {
         "bestaetigt": "Termin am {datumStr} wurde bestätigt! Der Sachverständige wird informiert.",
         "fehlerBestaetigen": "Fehler beim Bestätigen",

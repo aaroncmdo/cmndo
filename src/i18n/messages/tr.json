@@ -4521,6 +4521,10 @@
         "wirdGesendet": "Gönderiliyor...",
         "vorschlagSenden": "Teklifi gönder"
       },
+      "terminVorschlag": {
+        "titel": "Eksperiniz bir randevu önerdi",
+        "vorschlagText": "{svName} inceleme için bu randevuyu öneriyor:"
+      },
       "slotAuswahl": {
         "bestaetigt": "{datumStr} tarihli randevu onaylandı! Bilirkişi bilgilendirilecek.",
         "fehlerBestaetigen": "Onaylama hatası",
