@@ -499,7 +499,7 @@ describe('convertLeadToClaim', () => {
       { data: null },                                       // 5 claim_parties insert
       { data: [] },                                         // 6 T1 uebernehmeLeadTermine
       { data: null },                                       // 7 faelle_claim_bridge upsert
-      { data: null },                                       // 6 leads update
+      { data: null },                                       // 8 leads update
     ])
 
     const { convertLeadToClaim } = await import('../convert-lead-to-claim')

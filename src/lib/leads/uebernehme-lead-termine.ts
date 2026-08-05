@@ -28,12 +28,13 @@ export function leadAnkerOrExpr(leadId: string): string {
 
 /** Existiert mindestens ein nicht-terminaler lead-verankerter Termin? (Cursor-Input, T2) */
 export async function hatOffeneLeadTermine(admin: SupabaseClient, leadId: string): Promise<boolean> {
-  const { data } = await admin
+  const { data, error } = await admin
     .from('gutachter_termine')
     .select('id')
     .or(leadAnkerOrExpr(leadId))
     .not('status', 'in', `(${TERMINAL_TERMIN_STATUS.join(',')})`)
     .limit(1)
+  if (error) console.error('[T2] hatOffeneLeadTermine-Select fehlgeschlagen (degradiert zu false):', error.message)
   return (data ?? []).length > 0
 }
 
