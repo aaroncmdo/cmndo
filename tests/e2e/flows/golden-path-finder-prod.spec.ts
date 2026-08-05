@@ -175,3 +175,17 @@ test('reset — Wegwerf-SV-Leichen entfernen (Crash-Recovery)', async () => {
   await purgeStaleThrowawayFinderSvs(admin())
   console.log('[golden-finder] Wegwerf-SV-Leichen entfernt (reset)')
 })
+
+// ── j01 Schritt 2 (Wunschtermin-Zweig) + Schritt 3 (Termin-Uebernahme + sv-gesucht-Cursor) ──
+// D1-Nachzug fuer PR #5012 (Spec docs/superpowers/specs/2026-08-05-kunde-termin-funnel-design.md):
+// Der Dead-Pin-/Wunschtermin-Zweig (Slot ohne echten Partner -> dispatch_pending -> Kunde sieht
+// "wird bestätigt" -> Dispatch-Queue) ist hier noch NICHT automatisiert, weil er ein Dead-Pin-
+// Fixture braucht (Region MIT sv_leads-Pin, OHNE echte Partner — Buchungen bei echten Partner-SVs
+// sind TABU) und der deterministische Portal-Einstieg erst mit T4 (Akte-CTA + Kalender-Engine-
+// Findung) existiert. Interim-Nachweis laut PR-Smoke-Plan: DB-Proben (Loader-Filter gegen
+// Backfill-Claim, operative_status='sv-gesucht' der naechsten Dead-Pin-Konversion) + Playwright-
+// Badge-Assert auf einem Backfill-Claim. Ausbau: mit T4 analog zum Pellworm-Wegwerf-SV-Muster
+// dieser Datei (Wegwerf-sv_lead-Pin statt Wegwerf-SV).
+test.skip('j01 Schritt 2+3: Wunschtermin-Zweig (Dead-Pin) bis "wird bestätigt" in der Akte', () => {
+  // T4: Dead-Pin-Fixture + Akte-CTA — siehe Kommentar oben.
+})

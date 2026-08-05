@@ -1,6 +1,7 @@
 // AAR-430: Sendet einen einzelnen Task-Reminder über die in `kanal` konfigurierten Channels.
 // kanal-Token: "system", "whatsapp", "email" (zusammengesetzt per "+").
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 
 type ReminderRow = {
   id: string
@@ -202,5 +203,86 @@ export async function sendTaskReminder(reminderId: string): Promise<void> {
         fehler: note ?? 'Kein zustellbarer Kanal',
       })
       .eq('id', reminder.id)
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// kunde-termin-funnel T3 (Task 11): 24h-SLA-Eskalation fuer die Terminwunsch-Queue
+// (gutachter_termine status in dispatch_pending/sv_gesucht, laenger als 24h offen).
+//
+// KEIN task_reminders-Eintrag: dessen Dedup-Idiom ist ein Upsert auf dem UNIQUE-Key
+// (task_id, reminder_typ) (reminder-generator.ts) — Terminwuensche sind KEINE
+// tasks-Zeilen, ein tasks/task_reminders-Datensatz dafuer waere ein Fremdkoerper im
+// Tasking-Domainmodell (1 Task = 1 Entitaet, hier aber eine AGGREGATION ueber N
+// Terminwuensche). Ein neues Dedup-Feld auf gutachter_termine waere eine Schema-
+// Aenderung (Regel 2 / AGENTS.md) — außerhalb des Scopes dieses Tasks.
+//
+// Dedup daher ueber ein bestehendes Log/Marker: die `mitteilungen`-Tabelle selbst
+// (fixer Titel-Praefix + created_at) — KEIN neues Schema. Aggregiert: GENAU EINE
+// Mitteilung pro 24h-Eskalationsfenster fuer ALLE ueberfaelligen Terminwuensche
+// zusammen (Spam-Guard, NICHT eine pro Termin) — respawnt nicht bei jedem
+// stuendlichen Cron-Lauf (`15 * * * * cron-call.sh /api/cron/task-erinnerungen`,
+// docs/vps-crontab.md), sondern hoechstens einmal pro 24h (analog zum
+// sustainedCrit-Re-Alert-Rhythmus in lib/health/persist-and-alert.ts).
+//
+// Empfaenger: ALLE Dispatch-User (Broadcast via createMitteilungMulti) — anders als
+// die Eingangs-Notification (buche-deadpin-termin.ts, EIN Empfaenger pro Lead) ist
+// eine SLA-Sammel-Eskalation nicht an einen einzelnen Lead/Dispatcher gebunden;
+// Muster gespiegelt von public-rueckruf.ts/gutachter-finder-actions.ts ("Alle
+// Dispatch-User laden" + createMitteilungMulti).
+//
+// Non-fatal: darf den Cron-Lauf (task-erinnerungen/route.ts) nie unterbrechen.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const ESKALATION_TITEL_PREFIX = 'Terminwunsch wartet > 24 h'
+const ESKALATION_FENSTER_MS = 24 * 60 * 60 * 1000
+
+export async function eskaliereOffeneTerminwuensche(): Promise<void> {
+  try {
+    const db = createAdminClient()
+    const cutoff = new Date(Date.now() - ESKALATION_FENSTER_MS).toISOString()
+
+    const { data: offen, error } = await db
+      .from('gutachter_termine')
+      .select('id')
+      .in('status', ['dispatch_pending', 'sv_gesucht'])
+      .is('cancelled_at', null)
+      .lt('created_at', cutoff)
+    if (error) {
+      console.error('[eskaliereOffeneTerminwuensche] Query gutachter_termine fehlgeschlagen:', error.message)
+      return
+    }
+    const n = offen?.length ?? 0
+    if (n === 0) return
+
+    // Dedup: juengste Eskalations-Mitteilung dieses Musters — < 24h alt = bereits
+    // eskaliert, kein Re-Fire (sonst wuerde jeder stuendliche Cron-Lauf spammen).
+    const { data: letzte } = await db
+      .from('mitteilungen')
+      .select('created_at')
+      .eq('route_url', '/dispatch/terminwuensche')
+      .like('titel', `${ESKALATION_TITEL_PREFIX}%`)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (letzte?.created_at && Date.now() - new Date(letzte.created_at as string).getTime() < ESKALATION_FENSTER_MS) {
+      return
+    }
+
+    const { data: dispatchUser } = await db.from('profiles').select('id').eq('rolle', 'dispatch')
+    const empfaenger = (dispatchUser ?? []).map((u) => ({ id: u.id as string, rolle: 'dispatch' as const }))
+    if (empfaenger.length === 0) return
+
+    await createMitteilungMulti(empfaenger, {
+      kategorie: 'update',
+      prioritaet: 'dringend',
+      titel: `${ESKALATION_TITEL_PREFIX} (${n} offen)`,
+      route_url: '/dispatch/terminwuensche',
+    })
+  } catch (err) {
+    console.error(
+      '[eskaliereOffeneTerminwuensche] fehlgeschlagen (non-fatal):',
+      err instanceof Error ? err.message : err,
+    )
   }
 }
