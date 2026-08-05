@@ -16,12 +16,14 @@ const ROLLEN_OPTIONEN = [
   { value: 'werkstatt', label: 'Werkstatt' },
   { value: 'sachverstaendiger', label: 'Gutachter' },
   { value: 'makler', label: 'Makler' },
+  { value: 'flottenmanager', label: 'Firma / Flotte' },
 ] as const
 
 const PLACEHOLDER: Record<string, string> = {
   werkstatt: 'werkstatt@beispiel.de',
   sachverstaendiger: 'gutachter@beispiel.de',
   makler: 'makler@beispiel.de',
+  flottenmanager: 'fuhrpark@beispiel.de',
 }
 
 export function EinladenForm() {
@@ -37,7 +39,7 @@ export function EinladenForm() {
     startTransition(async () => {
       const res = await sendeNetzwerkEinladung(
         email.trim(),
-        rolle as 'werkstatt' | 'sachverstaendiger' | 'makler',
+        rolle as 'werkstatt' | 'sachverstaendiger' | 'makler' | 'flottenmanager',
       )
       if (!res.ok) {
         toast.error(res.error ?? 'Einladung konnte nicht gesendet werden.')
@@ -52,8 +54,8 @@ export function EinladenForm() {
     <SectionCard title="Partner einladen">
       <div className="space-y-3">
         <p className="text-body-sm text-claimondo-shield">
-          Noch nicht bei Claimondo? Lade eine Werkstatt, einen Gutachter oder einen Makler per
-          E-Mail ein — bei Registrierung seid ihr automatisch vernetzt.
+          Noch nicht bei Claimondo? Lade eine Werkstatt, einen Gutachter, einen Makler oder
+          eine Firma mit Fuhrpark per E-Mail ein — bei Registrierung seid ihr automatisch vernetzt.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <SelectField

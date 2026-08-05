@@ -284,6 +284,10 @@ export function isPublicPath(pathname: string): boolean {
     // SPEZIFISCHER Pfad, NICHT '/werkstatt' (startsWith wuerde das ganze
     // Werkstatt-Portal oeffnen = Auth-Bypass).
     '/werkstatt/registrieren',
+    // Flotten-Self-Signup (05.08., Aaron: Firmen als Partner hinzufuegen) — public
+    // Registrier-Flow analog werkstatt/registrieren; SPEZIFISCHER Pfad, kollidiert via
+    // startsWith NICHT mit dem geschuetzten '/flotte'-Portal (laengerer Praefix gewinnt).
+    '/flotte/registrieren',
     // Prospect-Selbstbuchung Beratungsgespraech ({{Beratungslink}} aus Cold-Mails).
     // Links sind HMAC-signiert (exp+sig); Verify passiert in Route UND Action.
     '/beratung',
