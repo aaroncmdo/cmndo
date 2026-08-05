@@ -5067,6 +5067,16 @@
     "abmelden": "تسجيل الخروج"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "يتم اختيار الورشة",
+    "reparatur-angefragt": "يتم تحديد موعد الإصلاح",
+    "reparatur-laeuft": "الإصلاح جارٍ",
+    "reparatur-erledigt": "اكتمل الإصلاح",
+    "termin_durchgefuehrt": "تم إجراء الموعد",
+    "reguliert_vollstaendig": "تمت التسوية بالكامل",
+    "klage_rechtsstreit": "في نزاع قضائي",
+    "verjaehrt": "سقط بالتقادم",
+    "abgelehnt_final": "مرفوض نهائياً",
+    "an_externe_kanzlei_uebergeben": "أُحيل إلى مكتب محاماة خارجي",
     "ersterfassung": "جارٍ التسجيل",
     "flow-gesendet": "تم إرسال الرابط",
     "onboarding": "في انتظار البيانات الأخيرة",

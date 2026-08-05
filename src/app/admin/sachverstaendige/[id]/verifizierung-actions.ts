@@ -7,6 +7,7 @@ import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
 import { revalidatePath } from 'next/cache'
+import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
 const ADMIN_UPLOADBARE_SLOTS = [
   'sv_sicherungsabtretung',
@@ -204,6 +205,7 @@ export async function svSperren(
   if (error) return { success: false, error: `Sperren fehlgeschlagen: ${error.message}` }
 
   revalidateBoth(svId)
+  await logPartnerEvent({ partnerTyp: 'sv', partnerId: svId, typ: 'gesperrt', text: `SV gesperrt${grund ? `: ${grund}` : ''}` })
   return { success: true }
 }
 
@@ -419,6 +421,7 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
 
   revalidateBoth(svId)
   revalidatePath('/admin/aufgaben/alle')
+  await logPartnerEvent({ partnerTyp: 'sv', partnerId: svId, typ: 'freigeschaltet', text: 'SV ins Portal freigeschaltet' })
   return { success: true }
 }
 

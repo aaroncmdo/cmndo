@@ -26,6 +26,16 @@
     "abmelden": "Abmelden"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Werkstatt wird ausgewählt",
+    "reparatur-angefragt": "Reparatur-Termin wird abgestimmt",
+    "reparatur-laeuft": "Reparatur läuft",
+    "reparatur-erledigt": "Reparatur abgeschlossen",
+    "termin_durchgefuehrt": "Termin durchgeführt",
+    "reguliert_vollstaendig": "Erfolgreich reguliert",
+    "klage_rechtsstreit": "Im Rechtsstreit",
+    "verjaehrt": "Verjährt",
+    "abgelehnt_final": "Endgültig abgelehnt",
+    "an_externe_kanzlei_uebergeben": "An externe Kanzlei übergeben",
     "ersterfassung": "Erfassung läuft",
     "flow-gesendet": "Link verschickt",
     "onboarding": "Letzte Angaben ausstehend",
