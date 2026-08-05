@@ -6,6 +6,7 @@ import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 import { FAHRZEUG_GRUPPEN_VALUES } from '@/lib/werkstatt/fahrzeug-gruppen'
 import { revalidatePath } from 'next/cache'
+import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
 // Reuse the same generatePassword helper as in src/app/admin/team/actions.ts.
 // Mirrors the alphanum-only set (no 0/O/1/l/I), crypto-random.
@@ -239,6 +240,9 @@ export async function setWerkstattVerifiziert(
     .eq('id', werkstattId)
   if (error) return { ok: false, error: error.message }
   revalidatePath('/admin/werkstaetten')
+  if (verifiziert) {
+    await logPartnerEvent({ partnerTyp: 'werkstatt', partnerId: werkstattId, typ: 'verifiziert', text: `Werkstatt verifiziert${notiz ? `: ${notiz}` : ''}` })
+  }
   return { ok: true }
 }
 
