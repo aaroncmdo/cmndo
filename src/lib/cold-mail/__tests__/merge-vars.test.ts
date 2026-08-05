@@ -29,7 +29,7 @@ describe('Palette-Definitionen', () => {
 describe('registrierungsUrl — rollenbewusst', () => {
   it('mappt jede Partner-Rolle auf ihre Registrierungs-Route', () => {
     expect(registrierungsUrl('makler')).toContain('/makler/registrieren')
-    expect(registrierungsUrl('werkstatt')).toContain('/werkstatt-partner-werden')
+    expect(registrierungsUrl('werkstatt')).toContain('/werkstatt/registrieren')
     expect(registrierungsUrl('sachverstaendiger')).toContain('/sv/registrieren')
   })
   it('nutzt die App-Domain', () => {
@@ -70,7 +70,7 @@ describe('resolveActionVars — Tokens -> Button-HTML pro Lead', () => {
     const vars = resolveActionVars({ rolle: 'werkstatt' })
     expect(vars.Beratungslink).toContain('claimondo.de/beratung-anfragen')
     expect(vars.Beratungslink).toContain('Beratungsgespräch buchen')
-    expect(vars.Registrierungslink).toContain('/werkstatt-partner-werden')
+    expect(vars.Registrierungslink).toContain('/werkstatt/registrieren')
     expect(vars.Registrierungslink).toContain('Jetzt registrieren')
     // Beides sind Buttons.
     expect(vars.Registrierungslink).toContain('display:inline-block')
