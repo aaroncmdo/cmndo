@@ -169,7 +169,7 @@ Import oben ergaenzen: `import { uebernehmeLeadTermine } from './uebernehme-lead
 ### Task 3: Backfill-Migration (DML, Bestand)
 
 **Files:**
-- Create: `supabase/migrations/<V>_backfill_lead_termine_auf_claims.sql` (`<V>` = von `apply_migration` getrackte Version, Regel-2-Ablauf!)
+- Create: `supabase/migrations/<V>_backfill_lead_termine_auf_faelle.sql` (`<V>` = von `apply_migration` getrackte Version, Regel-2-Ablauf!)
 
 - [ ] **Step 1: Vorab-Zaehlung (READ)** via MCP `execute_sql`:
 
@@ -197,8 +197,8 @@ where c.lead_id = coalesce(g.bezug_id, g.lead_id)
   and g.status not in ('storniert','abgesagt','abgelehnt','abgeschlossen','verlegt');
 ```
 
-- [ ] **Step 3: Version ablesen** (`list_migrations`) → File exakt `<V>_backfill_lead_termine_auf_claims.sql` committen; Nach-Zaehlung (Step-1-Query → 0) via `execute_sql` dokumentieren.
-- [ ] **Step 4: Commit** — `chore(mig): Backfill Lead-Termine auf Claims (T1)`.
+- [ ] **Step 3: Version ablesen** (`list_migrations`) → File exakt `<V>_backfill_lead_termine_auf_faelle.sql` committen; Nach-Zaehlung (Step-1-Query → 0) via `execute_sql` dokumentieren.
+- [ ] **Step 4: Commit** — `chore(mig): Backfill Lead-Termine auf Faelle (T1)`.
 
 ### Task 4: Kunde-Loader sieht pending-Termine
 
