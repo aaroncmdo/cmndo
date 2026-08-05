@@ -20,17 +20,18 @@ type TerminRaw = {
   status: string | null
   created_at: string | null
   assignee_typ: string | null
-  assignee_id: string | null
+  assignee_id: string | null // Task 10: fuer SV-Zuweisung benoetigt
   bezug_typ: string | null
   bezug_id: string | null
+  besichtigungsort_adresse: string | null
 }
 
 type LeadKontext = {
   id: string
   vorname: string | null
   nachname: string | null
-  schadens_ort: string | null
-  schadens_plz: string | null
+  unfallort_ort: string | null
+  unfallort_plz: string | null
 }
 
 type ClaimKontext = {
@@ -48,12 +49,18 @@ type ProfilKontext = {
 export default async function DispatchTerminwuensche() {
   const admin = createAdminClient()
 
-  const { data: termineRaw } = await admin
+  const { data: termineRaw, error: termineError } = await admin
     .from('gutachter_termine')
-    .select('id, start_zeit, status, created_at, assignee_typ, assignee_id, bezug_typ, bezug_id')
+    .select(
+      'id, start_zeit, status, created_at, assignee_typ, assignee_id, bezug_typ, bezug_id, besichtigungsort_adresse',
+    )
     .in('status', ['dispatch_pending', 'sv_gesucht'])
     .is('cancelled_at', null)
     .order('created_at', { ascending: true })
+
+  if (termineError) {
+    console.error('[terminwuensche] termine-Read fehlgeschlagen:', termineError.message)
+  }
 
   const termine = (termineRaw ?? []) as unknown as TerminRaw[]
 
@@ -71,26 +78,29 @@ export default async function DispatchTerminwuensche() {
 
   const leadMap = new Map<string, LeadKontext>()
   if (leadIds.length > 0) {
-    const { data } = await admin
+    const { data, error } = await admin
       .from('leads')
-      .select('id, vorname, nachname, schadens_ort, schadens_plz')
+      .select('id, vorname, nachname, unfallort_ort, unfallort_plz')
       .in('id', leadIds)
+    if (error) console.error('[terminwuensche] leads-Read fehlgeschlagen:', error.message)
     for (const l of (data ?? []) as unknown as LeadKontext[]) leadMap.set(l.id, l)
   }
 
   const claimMap = new Map<string, ClaimKontext>()
   if (claimIds.length > 0) {
-    const { data } = await admin
+    const { data, error } = await admin
       .from('claims')
       .select('id, claim_nummer, geschaedigter_user_id')
       .in('id', claimIds)
+    if (error) console.error('[terminwuensche] claims-Read fehlgeschlagen:', error.message)
     for (const c of (data ?? []) as unknown as ClaimKontext[]) claimMap.set(c.id, c)
   }
 
   const kundeIds = [...new Set([...claimMap.values()].map((c) => c.geschaedigter_user_id).filter((x): x is string => !!x))]
   const profileMap = new Map<string, ProfilKontext>()
   if (kundeIds.length > 0) {
-    const { data } = await admin.from('profiles').select('id, vorname, nachname').in('id', kundeIds)
+    const { data, error } = await admin.from('profiles').select('id, vorname, nachname').in('id', kundeIds)
+    if (error) console.error('[terminwuensche] profiles-Read fehlgeschlagen:', error.message)
     for (const p of (data ?? []) as unknown as ProfilKontext[]) profileMap.set(p.id, p)
   }
 
@@ -105,7 +115,12 @@ export default async function DispatchTerminwuensche() {
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
       : [profil?.vorname, profil?.nachname].filter(Boolean).join(' ') || null
 
-    const ort = lead ? [lead.schadens_plz, lead.schadens_ort].filter(Boolean).join(' ') || null : null
+    // Fix 2 (Review T3): besichtigungsort_adresse aus gutachter_termine ist der
+    // EINHEITLICHE Ort fuer JEDE Zeile — auch Claim-Anker (kein Lead) bekommen so
+    // einen echten Ort. Lead-Text-Fallback (unfallort_plz/_ort) nur wenn der
+    // Termin (noch) keinen Besichtigungsort traegt.
+    const leadOrt = lead ? [lead.unfallort_plz, lead.unfallort_ort].filter(Boolean).join(' ') || null : null
+    const ort = t.besichtigungsort_adresse || leadOrt
 
     return {
       id: t.id,
@@ -129,7 +144,7 @@ export default async function DispatchTerminwuensche() {
         size="lg"
         icon={CalendarClockIcon}
       />
-      <TerminwunschListe rows={rows} />
+      <TerminwunschListe rows={rows} ladeFehler={!!termineError} />
     </div>
   )
 }

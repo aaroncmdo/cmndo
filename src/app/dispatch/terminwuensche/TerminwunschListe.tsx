@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { CalendarOffIcon } from 'lucide-react'
+import { AlertTriangleIcon, CalendarOffIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { statusSlotClass, type StatusSlot } from '@/lib/status'
@@ -44,7 +44,28 @@ function AlterBadge({ createdAt }: { createdAt: string | null }) {
   return <span className={`${BADGE_CLS} ${statusSlotClass(slot)}`}>{formatVorZeit(createdAt)}</span>
 }
 
-export default function TerminwunschListe({ rows }: { rows: TerminwunschRow[] }) {
+export default function TerminwunschListe({
+  rows,
+  ladeFehler = false,
+}: {
+  rows: TerminwunschRow[]
+  /** Fix 3 (Review T3): true wenn der PRIMARY termine-Read fehlgeschlagen ist —
+   *  dann NIE den (irrefuehrenden) Empty-State zeigen, sondern einen expliziten
+   *  Fehlerhinweis, obwohl `rows` in diesem Fall ebenfalls leer ist. */
+  ladeFehler?: boolean
+}) {
+  if (ladeFehler) {
+    return (
+      <div
+        className={`flex flex-col items-center gap-2 rounded-ios-md border border-danger/30 p-12 text-center ${statusSlotClass('danger')}`}
+      >
+        <AlertTriangleIcon size={40} />
+        <p className="text-heading-sm font-semibold">Terminwünsche konnten nicht geladen werden.</p>
+        <p className="text-body-sm">Bitte lade die Seite neu oder versuche es in Kürze erneut.</p>
+      </div>
+    )
+  }
+
   if (rows.length === 0) {
     return (
       <EmptyState
