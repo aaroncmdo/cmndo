@@ -67,9 +67,11 @@ export function EmbedSiteCreateField({
       setError('Bitte gib deinem Widget einen Namen.')
       return
     }
+    // Domain ist wie gelabelt optional: leer -> Hosted-Pfad (Prod-Smoke 05.08.:
+    // der fruehere Pflicht-Fehler hier widersprach dem "(optional)"-Label und
+    // liess User nach "Ich habe noch keine Website" + Name + "Widget anlegen" stolpern.
     if (!dom) {
-      setError('Bitte gib die Domain deiner Website an — oder nutze „Ich habe noch keine Website".')
-      return
+      return hostedSeite()
     }
     setSaving(true)
     const res = await createEmbedSite({
@@ -117,8 +119,8 @@ export function EmbedSiteCreateField({
         label="Deine Website-Domain (optional)"
         value={domain}
         onChange={(e) => setDomain(e.target.value)}
-        placeholder="z. B. meine-kanzlei.de"
-        hint="Keine eigene Website? Dann nutz den Button rechts — wir hosten eine Seite für dich."
+        placeholder="z. B. gutachter-mueller.de"
+        hint="Keine eigene Website? Einfach leer lassen — wir hosten eine Seite für dich."
         disabled={disabled || saving}
       />
       {error && <p className="text-sm font-medium text-red-600">{error}</p>}

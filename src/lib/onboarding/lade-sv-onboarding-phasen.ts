@@ -71,7 +71,8 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
     ...new Set(['id', 'paket', 'basic_onboarding_abgeschlossen_am', ...svDbCols]),
   ].join(', ')
   const profSelect = [
-    ...new Set(['twofa_telefon_verifiziert_am', 'google_connected_at', ...profDbCols]),
+    // 'telefon': Prefill fuer das phone-verify-Feld (Registrierungs-Nummer).
+    ...new Set(['twofa_telefon_verifiziert_am', 'google_connected_at', 'telefon', ...profDbCols]),
   ].join(', ')
 
   // ─── 2. sachverstaendige-Snapshot (DB-getrieben selektiert) ──────────
@@ -167,6 +168,12 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
               { value: 'gcal', label: String(gcal) },
               { value: 'caldav', label: String(hasCaldav) },
             ]
+          }
+
+          // phone-verify: Registrierungs-Nummer als Prefill injizieren (gleiches
+          // Options-Transport-Muster wie calendar-connect).
+          if (f.typ === 'phone-verify' && profileRec?.telefon) {
+            optionen = [{ value: 'telefonPrefill', label: String(profileRec.telefon) }]
           }
 
           const loc = localizeFeld(
