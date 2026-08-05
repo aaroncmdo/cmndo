@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
+import { notifyTeamPartnerSignup } from '@/lib/partner/notify-team-signup'
 
 // Oeffentlicher Inbound-Antrag "Werkstatt Partner werden" (Slice D). Erzeugt einen
 // partner_leads-Prospect (rolle=werkstatt, status=neu, source_channel=marketing_bewerbung),
@@ -104,6 +105,24 @@ export async function werkstattPartnerAnfrage(
   } catch (err) {
     console.error('[werkstattPartnerAnfrage] Admin-Notify fehlgeschlagen (non-critical):', err)
   }
+
+  // 5. Team-WhatsApp (wirft nie; interne/Test-Identitaeten unterdrueckt der Helper) —
+  //    neue Marketing-Funnel-Partner sofort aufs Team-Handy (Aaron-Direktive 05.08.).
+  await notifyTeamPartnerSignup({
+    typ: 'werkstatt',
+    art: 'anfrage',
+    quelle: '/werkstatt-partner-werden (Marketing-Formular)',
+    firma,
+    name: [vorname, nachname].filter(Boolean).join(' ') || null,
+    email,
+    telefon,
+    ort: [plz, ort].filter(Boolean).join(' ') || null,
+    adminPfad: '/admin/partner-leads',
+    extraFields: [
+      { label: 'Marken', value: marken },
+      { label: 'Nachricht', value: nachricht ? nachricht.slice(0, 200) : null },
+    ],
+  })
 
   return { ok: true }
 }

@@ -14,6 +14,14 @@
 Gemeinsames Muster: **Registrieren → Stammdaten/Nachweise → Verifikation (48h Admin) → Freischaltung → sichtbar/arbeitsfähig.**
 Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein neuer wilder Entry-Point).
 
+**Team-Echtzeit-Sichtbarkeit** (Soll-Delta 05.08.): Jede Partner-Selbstregistrierung aus dem
+Marketing-Funnel (Werkstatt-Self-Signup + Partner-Anfrage, Makler-Self-Signup, SV-Registrierung
+App + LP-embedded) löst zusätzlich zur Admin-In-App-Notification/-Task eine **Team-WhatsApp**
+aus (`notifyTeamPartnerSignup` → `notifyTeamWhatsApp`, feste Team-Nummern via Baileys —
+dieselbe Empfänger-Quelle wie der Lead-Notify). Interne/Test-Identitäten sind unterdrückt
+(`interne-identitaet.ts`) — der Schritt ist deshalb nicht CI-smokebar; Beweis = Regel-4-
+Prod-Smoke mit externer Wegwerf-Identität.
+
 ### A · Sachverständiger (SV) — Freemium
 1. **Registrieren** — **kostenlos für alle** (kein DAT-Gating mehr). Büro-Daten, SV-Typ, Einzugsgebiet/Geo, optional Whitelabel-Branding.
 2. **Verifikation** — Admin prüft (48h) → `verifiziert=true`. Danach im Dispatch-Pool + Gutachter-Finder sichtbar (Gate: `verifiziert`, Geo).
