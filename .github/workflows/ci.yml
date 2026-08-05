@@ -466,6 +466,25 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament Journey-Suite J8 (Onboarding je Rolle) — 2FA-Enroll: die Dispatch-Rolle richtet per UI
+      # einen TOTP-Faktor ein (KontoSicherheitPanel/TotpEnrollCard, von keiner anderen Smoke abgedeckt)
+      # + wird danach beim Login 2FA-gechallenged. Konto-isoliert (smoke-enroll@claimondo.de, kein
+      # Comms/Booking). Der Seed-Step setzt das Konto VOR dem Lauf faktorfrei zurueck (stateful self-reset
+      # je Lauf; Seed liest process.env-first, .env.local nur lokal). RUN_2FA_ENROLL_SMOKE gatet den Spec.
+      # (J5 kasko-reparatur-phase-smoke NICHT dabei: Fixture-Claim 39734007 ist zustandsgedriftet —
+      # werkstatt_id NULL/ersterfassung statt "Werkstatt gesetzt" — Assertion unsicher; braucht eigenen
+      # deterministischen Seed = Follow-up. Bleibt opt-in. Siehe journey-smokes.md + DECISIONS 2026-08-03.)
+      - name: Seed 2FA-Enroll-Fixture (J8)
+        run: node scripts/seed-smoke-enroll.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J8 (2FA-Enroll)
+        run: npx playwright test 2fa-enroll-smoke --project=chromium --workers=1 --reporter=line
+        env:
+          RUN_2FA_ENROLL_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
