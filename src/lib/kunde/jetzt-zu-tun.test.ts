@@ -158,17 +158,53 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a).toBeNull()
   })
 
-  it('11. kein-aktionsbedarf: alles erledigt, keine Aktion', () => {
+  it('11. kein-aktionsbedarf: unbekannter Status ohne Mittelphase-Erzählung → Default', () => {
     const a = getKundenJetztZuTun(
       makeFall({
         onboarding_complete: true,
         sa_unterschrieben: true,
         vollmacht_signiert_am: new Date('2026-04-01').toISOString(),
-        status: 'sv-zugewiesen',
+        status: 'unbekannt-neu',
       }),
     )
     expect(a?.state).toBe('kein-aktionsbedarf')
     expect(a?.variant).toBe('info')
+  })
+
+  // Gap B (05.08.): 'abgelehnt'/'klage'/'in_kommunikation_vs' haben KEIN vs-Prefix und fielen
+  // frueher zum Default "kein Handlungsbedarf" durch — waehrend die Fallakte rot alarmiert
+  // (Widerspruch Fallakte<->Dashboard). Jetzt konsistent als vs-antwort-abwarten abgedeckt.
+  it('Gap B: status=abgelehnt → vs-antwort-abwarten mit Einwände (nicht kein-aktionsbedarf)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'abgelehnt' }))
+    expect(a?.state).toBe('vs-antwort-abwarten')
+    expect(a?.severity).toBe('warning')
+    expect(a?.titel).toContain('Einwände')
+  })
+  it('Gap B: status=vs-kuerzt → vs-antwort-abwarten (Einwände, warning)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'vs-kuerzt' }))
+    expect(a?.state).toBe('vs-antwort-abwarten')
+    expect(a?.severity).toBe('warning')
+  })
+  it('Gap B: status=klage → vs-antwort-abwarten (bei Gericht)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'klage' }))
+    expect(a?.state).toBe('vs-antwort-abwarten')
+    expect(a?.titel).toContain('Gericht')
+  })
+
+  // Gap H (05.08.): Mittelphase-Zustaende zeigen "woran wir arbeiten" statt "kein Handlungsbedarf".
+  it('Gap H: status=gutachten-eingegangen → in-bearbeitung (Gutachten wird geprüft)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'gutachten-eingegangen' }))
+    expect(a?.state).toBe('in-bearbeitung')
+    expect(a?.titel).toContain('geprüft')
+  })
+  it('Gap H: status=sv-zugewiesen → in-bearbeitung (nicht mehr kein-aktionsbedarf)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'sv-zugewiesen' }))
+    expect(a?.state).toBe('in-bearbeitung')
+  })
+  it('Gap H: status=zahlung-eingegangen → in-bearbeitung (Auszahlung wird vorbereitet)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'zahlung-eingegangen' }))
+    expect(a?.state).toBe('in-bearbeitung')
+    expect(a?.titel).toContain('Auszahlung')
   })
 
   it('Priority: SLA-Breach schlägt Vollmacht', () => {
