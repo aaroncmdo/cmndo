@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { EuroIcon, ActivityIcon, BarChart3Icon } from 'lucide-react'
+import { EuroIcon, ActivityIcon, BarChart3Icon, EyeIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { EmbedSiteDetail } from '@/lib/embed-sites/queries'
@@ -39,7 +39,7 @@ export default function TrackingTab({ site }: { site: EmbedSiteDetail }) {
           value={`${site.einzelpreisEur.toLocaleString('de-DE')} €`}
         />
         <Feld label="Max. Anfragen / Stunde" value={site.maxAnfragenProH} />
-        <Feld label="Anfragen gesamt" value={site.anfragenGesamt} />
+        <Feld label="Anfragen gesamt" value={String(site.anfragenGesamt)} />
         <Feld
           label="Letzte Anfrage"
           value={
@@ -49,6 +49,34 @@ export default function TrackingTab({ site }: { site: EmbedSiteDetail }) {
                   timeStyle: 'short',
                 })
               : null
+          }
+        />
+      </SectionCard>
+
+      <SectionCard
+        title="Widget-Nutzung"
+        icon={<EyeIcon className="w-4 h-4 text-claimondo-ondo" />}
+        subtitle="Config-Loads des Widgets — zeigt, ob und wo das Snippet eingebaut ist, schon bevor Anfragen kommen."
+        bodyClassName={GRID}
+      >
+        <Feld label="Widget-Loads" value={String(site.configHits)} />
+        <Feld
+          label="Zuletzt geladen"
+          value={
+            site.letzterConfigHitAm
+              ? new Date(site.letzterConfigHitAm).toLocaleString('de-DE', {
+                  dateStyle: 'short',
+                  timeStyle: 'short',
+                })
+              : null
+          }
+        />
+        <Feld
+          label="Zuletzt geladen von"
+          value={
+            site.letzterConfigOrigin ? (
+              <span className="font-mono text-body-xs">{site.letzterConfigOrigin}</span>
+            ) : null
           }
         />
       </SectionCard>

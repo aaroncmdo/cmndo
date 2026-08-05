@@ -39,6 +39,9 @@ const ROW = {
   einzelpreis_eur: 49,
   anfragen_gesamt: 7,
   letzte_anfrage_am: '2026-07-01T10:00:00Z',
+  config_hits: 3,
+  letzter_config_hit_am: '2026-08-01T12:00:00Z',
+  letzter_config_origin: 'sv-muster.de',
   agb_akzeptiert_am: '2026-01-01T00:00:00Z',
   agb_version: 'v2',
   tracking_webhook_url: 'https://hook.muster.de',
@@ -72,6 +75,16 @@ describe('getEmbedSiteDetail', () => {
     expect(res.data.erlaubteDomains).toEqual(['muster.de', 'www.muster.de'])
     expect(res.data.webhookLastStatus).toBe('error')
     expect(res.data.webhookLastError).toBe('502 Bad Gateway')
+    expect(res.data.configHits).toBe(3)
+    expect(res.data.letzterConfigOrigin).toBe('sv-muster.de')
+  })
+
+  it('config_hits=null (Alt-Row) wird zu 0', async () => {
+    from.mockReturnValueOnce(makeQuery({ data: { ...ROW, config_hits: null }, error: null }))
+    const res = await getEmbedSiteDetail('e1')
+    expect(res.ok).toBe(true)
+    if (!res.ok) return
+    expect(res.data.configHits).toBe(0)
   })
 
   it('gibt das Webhook-Secret NIE aus — nur ob eins gesetzt ist', async () => {

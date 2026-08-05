@@ -19,6 +19,16 @@ interface SiteRow {
   funnel_modus: 'callback' | 'flowlink'
   sv_name: string
   anfragen_gesamt: number
+  letzte_anfrage_am: string | null
+  // Impression-Telemetrie: Config-Loads des Widgets (eingebaut? wo?)
+  config_hits: number
+  letzter_config_hit_am: string | null
+  letzter_config_origin: string | null
+}
+
+function kurzDatum(iso: string | null): string | null {
+  if (!iso) return null
+  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' })
 }
 
 export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
@@ -64,6 +74,7 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
                 <Th>Slug</Th>
                 <Th>Variante</Th>
                 <Th>Anfragen</Th>
+                <Th>Widget-Loads</Th>
                 <Th>Funnel-Modus</Th>
               </Tr>
             </Thead>
@@ -78,7 +89,21 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
                   <Td>{s.sv_name}</Td>
                   <Td className="font-mono text-xs">{s.slug}</Td>
                   <Td>{s.variante}</Td>
-                  <Td>{s.anfragen_gesamt}</Td>
+                  <Td>
+                    <div>{s.anfragen_gesamt}</div>
+                    {s.letzte_anfrage_am && (
+                      <div className="text-xs text-claimondo-ondo">{kurzDatum(s.letzte_anfrage_am)}</div>
+                    )}
+                  </Td>
+                  <Td>
+                    <div>{s.config_hits}</div>
+                    {s.letzter_config_origin && (
+                      <div className="text-xs text-claimondo-ondo font-mono">
+                        {s.letzter_config_origin}
+                        {s.letzter_config_hit_am ? ` · ${kurzDatum(s.letzter_config_hit_am)}` : ''}
+                      </div>
+                    )}
+                  </Td>
                   <Td>
                     {/* Aktions-Zelle: stopPropagation, sonst navigiert der Funnel-Toggle
                         die Zeile mit weg. Das Button-Primitive reicht kein Event durch
@@ -110,7 +135,7 @@ export function EmbedSitesAdminClient({ sites }: { sites: SiteRow[] }) {
               ))}
               {sites.length === 0 && (
                 <Tr>
-                  <Td colSpan={6}>Noch keine Embed-Sites angelegt.</Td>
+                  <Td colSpan={7}>Noch keine Embed-Sites angelegt.</Td>
                 </Tr>
               )}
             </Tbody>

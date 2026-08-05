@@ -14,7 +14,7 @@ const EMBED_COLUMNS =
   'agb_version, tracking_webhook_url, tracking_webhook_secret, tracking_webhook_last_status, ' +
   'tracking_webhook_last_error, tracking_webhook_last_at, tracking_ga4_measurement_id, ' +
   'tracking_gads_conversion_id, tracking_gads_conversion_label, tracking_gads_customer_id, ' +
-  'erstellt_am, updated_at'
+  'erstellt_am, updated_at, config_hits, letzter_config_hit_am, letzter_config_origin'
 
 export type EmbedSiteDetail = {
   id: string
@@ -36,6 +36,10 @@ export type EmbedSiteDetail = {
   einzelpreisEur: number
   anfragenGesamt: number
   letzteAnfrageAm: string | null
+  // Impression-Telemetrie: Config-Loads des Monika-Widgets (eingebaut? wo?)
+  configHits: number
+  letzterConfigHitAm: string | null
+  letzterConfigOrigin: string | null
   agbAkzeptiertAm: string | null
   agbVersion: string | null
   // Tracking / Webhook-Health — in der Liste unsichtbar
@@ -72,6 +76,9 @@ type EmbedRow = {
   einzelpreis_eur: number
   anfragen_gesamt: number
   letzte_anfrage_am: string | null
+  config_hits: number | null
+  letzter_config_hit_am: string | null
+  letzter_config_origin: string | null
   agb_akzeptiert_am: string | null
   agb_version: string | null
   tracking_webhook_url: string | null
@@ -123,6 +130,9 @@ export async function getEmbedSiteDetail(
       einzelpreisEur: e.einzelpreis_eur,
       anfragenGesamt: e.anfragen_gesamt,
       letzteAnfrageAm: e.letzte_anfrage_am,
+      configHits: e.config_hits ?? 0,
+      letzterConfigHitAm: e.letzter_config_hit_am,
+      letzterConfigOrigin: e.letzter_config_origin,
       agbAkzeptiertAm: e.agb_akzeptiert_am,
       agbVersion: e.agb_version,
       trackingWebhookUrl: e.tracking_webhook_url,

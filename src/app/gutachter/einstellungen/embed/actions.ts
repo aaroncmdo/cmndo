@@ -49,8 +49,8 @@ function validateForm(form: EmbedSiteFormData): string | null {
   if (!isValidSlug(form.slug.trim())) return 'Ungültiger Slug (a–z, 0–9, Bindestrich, 3–40 Zeichen).'
   if (!isValidEmail(form.empfaenger_email.trim())) return 'Ungültige Empfänger-Email.'
   if (form.cc_email.trim() && !isValidEmail(form.cc_email.trim())) return 'Ungültige CC-Email.'
-  const domains = normalizeDomains(form.erlaubte_domains)
-  if (domains.length === 0) return 'Mindestens eine erlaubte Domain angeben.'
+  // erlaubte_domains ist optional: leer = Widget darf auf jeder Domain laufen
+  // (Aaron 05.08.); der Origin-Check in anfrage-from-lp greift nur bei Eintraegen.
   if (form.variante === 'B' && !form.agb_akzeptiert) return 'Für Variante B muss die Kooperations-AGB akzeptiert werden.'
   if (!isValidWebhookUrl(form.tracking_webhook_url)) return 'Webhook-URL muss mit https:// beginnen.'
   return null
@@ -180,14 +180,11 @@ export async function updateEmbedSite(id: string, form: EmbedSiteFormData): Prom
   return { ok: true, id }
 }
 
-// AAR-939 Part B2: Claimondo-App-Domains, auf denen die Hosted-Widget-Seiten
-// /g/[slug] laufen (Origin-Check des Webhooks). Prod + Staging.
-const HOSTED_DOMAINS = ['app.claimondo.de', 'app.staging.claimondo.de']
-
 /**
  * AAR-939 Part B2: Hosted-Widget-Site fuer SVs OHNE eigene Website. Legt ein
- * Variante-A embed_site mit den Claimondo-App-Domains als erlaubte_domains an —
- * die oeffentliche Seite /g/[slug] traegt dann das Monika-Widget. Reuse buildRow.
+ * Variante-A embed_site OHNE Domain-Beschraenkung an (leer = ueberall erlaubt,
+ * Aaron 05.08.) — die oeffentliche Seite /g/[slug] traegt das Monika-Widget,
+ * und ein spaeterer Einbau auf der eigenen Website funktioniert sofort mit.
  */
 export async function createHostedEmbedSite(
   name: string,
@@ -213,7 +210,7 @@ export async function createHostedEmbedSite(
     name: trimmed,
     slug,
     variante: 'A',
-    erlaubte_domains: HOSTED_DOMAINS,
+    erlaubte_domains: [],
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -90,7 +90,8 @@ export function validateBasis(form: EmbedSiteFormData): Set<string> {
   if (!isValidSlug(form.slug.trim())) f.add('slug')
   if (!isValidEmail(form.empfaenger_email.trim())) f.add('empfaenger_email')
   if (form.cc_email.trim() && !isValidEmail(form.cc_email.trim())) f.add('cc_email')
-  if (form.erlaubte_domains.length === 0) f.add('erlaubte_domains')
+  // erlaubte_domains ist optional (Aaron 05.08.): leer = Widget darf auf jeder
+  // Domain laufen; Eintraege sind ein optionaler Origin-Lockdown pro Site.
   return f
 }
 
