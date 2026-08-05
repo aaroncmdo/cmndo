@@ -237,6 +237,12 @@ export function isPublicPath(pathname: string): boolean {
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',
+    // GEO-P2 SP2 (2026-08-05): NPS-Umfrage Magic-Link /kunde-nps/[token] — Post-Abschluss-
+    // Kundenbewertung aus Email, kein Login (Token-Validierung in der Action). MIT Slash
+    // (Prefix-Disziplin wie '/g/'/'/embed/'): '/kunde-nps' ohne Slash könnte künftige
+    // '/kunde-nps<x>'-Routen fälschlich öffnen. Ohne Eintrag: 307 → /login — Regel-4-Prod-
+    // Smoke-Befund 05.08.: der anonyme Kunde konnte nicht bewerten.
+    '/kunde-nps/',
     // Netzwerk-Followup 03.08.: /werkstatt-empfehlung-Whitelist entfernt — die Route ist
     // retired (Batch-Erzeuger in P4 geloescht, live 0 Batches/0 Empfehlungen je erzeugt;
     // der Kunde waehlt self-served im Kunde-Finder, quelle='gutachter').
