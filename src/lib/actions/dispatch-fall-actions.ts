@@ -11,7 +11,11 @@ import {
   emailGutachtenEingegangen,
   emailFilmcheckBestanden,
 } from '@/lib/email'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+// C3a Fundament: die J1-Statuswechsel-Sends laufen jetzt ueber die Notification-Outbox
+// (enqueue) statt fire-and-forget sendFallCommunication -> Dedup (doppeltes enqueue = 1
+// Versand), Retry + sichtbarer Fehler-Task. Der Worker delegiert weiterhin an
+// sendFallCommunication (Registry = Template-Layer UNTER der Outbox).
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
@@ -81,7 +85,12 @@ export async function updateFallStatus(
 
   // Fire-and-forget WhatsApp notifications on status change
   if (newStatus === 'sv-zugewiesen') {
-    sendFallCommunication(fallId, 'sv_losgefahren').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'sv_losgefahren', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'sv_losgefahren',
+      claimId: fallId,
+    }).catch(() => {})
     // Auto-Task: Gutachter soll Termin bestaetigen
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT). CMM-44 SP-B PR2c: schadens_ursache
     // ebenfalls claims. CMM-49: alles flach aus v_claim_full (faelle-frei, SSoT) statt faelle+Embed.
@@ -112,7 +121,12 @@ export async function updateFallStatus(
     }
   }
   if (newStatus === 'sv-termin') {
-    sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'termin_bestaetigt', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'termin_bestaetigt',
+      claimId: fallId,
+    }).catch(() => {})
     // Gutachter-Mitteilung: Termin bestaetigt.
     // CMM-49-Nachzug: sv_id/claim_nummer aus v_claim_full (wie die Nachbar-Branches),
     // Termin-Datum kanonisch aus gutachter_termine statt der stale
@@ -148,7 +162,12 @@ export async function updateFallStatus(
     triggerQcTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
   }
   if (newStatus === 'regulierung' || newStatus === 'vs-regulierung') {
-    sendFallCommunication(fallId, 'regulierung_angekuendigt').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'regulierung_angekuendigt', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'regulierung_angekuendigt',
+      claimId: fallId,
+    }).catch(() => {})
     // Gutachter-Mitteilung: Regulierung angekuendigt
     // CMM-49: sv_id + claim_nummer aus v_claim_full (flat, faelle-frei, SSoT).
     const { data: fallInfo } = await supabase.from('v_claim_full').select('sv_id, claim_nummer').eq('fall_id', fallId).single()
@@ -159,7 +178,12 @@ export async function updateFallStatus(
     }
   }
   if (newStatus === 'abgeschlossen') {
-    sendFallCommunication(fallId, 'fall_abgeschlossen').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'fall_abgeschlossen', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'fall_abgeschlossen',
+      claimId: fallId,
+    }).catch(() => {})
     // KFZ-151: Auto-Resolve aller offenen Fall- und Case-Tasks
     try {
       const { resolveTasksForEntity } = await import('@/lib/tasks/resolve-tasks')
@@ -174,7 +198,12 @@ export async function updateFallStatus(
     const { data: fallInfo } = await serviceClient.from('v_claim_full').select('sv_id, claim_nummer, kundenbetreuer_id').eq('fall_id', fallId).single()
     triggerKanzleiPaketTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
     triggerAsSendedatumTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
-    sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'kanzlei_uebergabe', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'kanzlei_uebergabe',
+      claimId: fallId,
+    }).catch(() => {})
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
         claim_nummer: fallInfo?.claim_nummer ?? undefined,
@@ -182,11 +211,21 @@ export async function updateFallStatus(
     }
   }
   if (newStatus === 'anschlussschreiben') {
-    sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'as_gesendet', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'as_gesendet',
+      claimId: fallId,
+    }).catch(() => {})
     autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
   }
   if (newStatus === 'zahlung-eingegangen') {
-    sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'zahlung_eingegangen', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'zahlung_eingegangen',
+      claimId: fallId,
+    }).catch(() => {})
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei).
     const { data: fallInfo } = await serviceClient.from('v_claim_full').select('kundenbetreuer_id').eq('fall_id', fallId).single()
     triggerArchivierungTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
@@ -225,7 +264,12 @@ export async function updateFallStatus(
     } catch (err) { console.error('[AAR-91] resolveTasks storniert:', err) }
 
     // Phase 2a: WhatsApp an Kunde
-    sendFallCommunication(fallId, 'termin_storniert').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'termin_storniert', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'termin_storniert',
+      claimId: fallId,
+    }).catch(() => {})
 
     // Phase 2b/3: SV-Mitteilung + Email + Refund
     if (stornoSvId) {
@@ -267,7 +311,12 @@ export async function updateFallStatus(
   }
 
   if (newStatus === 'vs-abgelehnt') {
-    sendFallCommunication(fallId, 'chat_fallback_kunde').catch(() => {})
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'chat_fallback_kunde', claimId: fallId }),
+      kanal: 'whatsapp',
+      template: 'chat_fallback_kunde',
+      claimId: fallId,
+    }).catch(() => {})
     // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei).
     const { data: fallInfo } = await serviceClient.from('v_claim_full').select('claim_nummer, kundenbetreuer_id').eq('fall_id', fallId).single()
     if (fallInfo?.kundenbetreuer_id) {

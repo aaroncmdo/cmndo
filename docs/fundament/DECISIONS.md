@@ -127,3 +127,43 @@
 **Stand §9-Punkt-2:** Grün in CI = J1/J4/J9/J8. Begründet geskippt = J2/J3/J5/J6/J7/J10 + J9-`lifecycle`. Alle 10 Journeys sind damit CI-abgesichert ODER begründet, journey-referenziert geskippt.
 
 **Review:** offen (im PR an Aaron).
+
+## 2026-08-05 · C3 (Notification-Outbox) · Outbox liegt DAVOR — notification_deliveries bleibt System-1-intern (Prep §8)
+
+**Lücke:** Prep §8 — wird die `notifications_outbox` die NEUE Delivery-Tabelle (ersetzt `notification_deliveries`), oder liegt sie DAVOR (enqueue → Outbox → Worker; System 1 unangetastet)?
+
+**Entscheidung:** Outbox liegt **davor**. `notification_deliveries` (System 1: emit → notification_events → fan-out → deliveries) bleibt intern **unverändert**. Die neue Outbox ist ein additiver, service_role-only durabler Puffer NUR für die heute nicht-durablen System-2/3-Sends. C3a wired den ersten Consumer (dispatch-`updateFallStatus`, 9 Statuswechsel-Trigger).
+
+**Begründung:** minimal-invasiv (Strangler-Fig): System 1 hat seine Durability (Retry/Dead-Letter/Lease) schon — es umzubauen wäre Risiko ohne Nutzen. Der Gewinn ist, die System-2-Sends (fire-and-forget, kein Dedup) auf dasselbe Durability-Niveau zu heben, ohne die 58-Event-Pipeline anzufassen.
+
+**Review:** offen (Aaron) — via C3a-Plan `docs/superpowers/plans/2026-08-05-fundament-c3a.md` + Code-PR.
+
+## 2026-08-05 · C3 (Notification-Outbox) · COMMUNICATION_REGISTRY bleibt Template-Layer UNTER der Outbox (Prep §6#2)
+
+**Lücke:** Prep §6#2 — `COMMUNICATION_REGISTRY` (~50 WA-Templates) komplett auf emit→Outbox heben, oder als Template-Layer UNTER der Outbox behalten?
+
+**Entscheidung:** **Template-Layer behalten.** Die Outbox speichert `template`+`payload`+`claimId`; der Worker ruft `sendFallCommunication(claimId, template, payload)` — die Registry rendert Empfänger/Kanal/Template weiterhin selbst. Die ~50 Templates werden **nicht** umgeschrieben, nur mit Durability (Dedup/Retry/Fehler-Task) umhüllt.
+
+**Begründung:** DRY + bounded: die Registry ist die getestete Template-Wahrheit; sie in die EVENT_MATRIX zu heben wäre eine große, riskante Migration ohne C3a-Nutzen. Die Outbox löst das eigentliche Problem (Durability), nicht das Template-Rendering.
+
+**Review:** offen (Aaron) — via C3a-Plan.
+
+## 2026-08-05 · C3 (Notification-Outbox) · gutachten_fertig-Doppel-Send-Verifikation → C3b (Prep §6#1)
+
+**Lücke:** Prep §6#1 — feuern `termin bestätigt`/`gutachten fertig` **beide** Sende-Systeme (→ 2 WhatsApp)? Konkret der `gutachten_fertig`-Doppel-Send-Verdacht in `gutachter/fall/[id]/actions.ts:225` (`sendFallCommunication`) **+** :231 (`emitEvent('gutachten.fertig')`) — J1-IST #7.
+
+**Entscheidung:** Verifikation + Dedup/Retire **an C3b defert**. C3a wired NUR die dispatch-`updateFallStatus`-Sends (die nicht mit einem parallelen emit in derselben Action kollidieren). Der `gutachten_fertig`-Doppel-Send (System 2 + System 1 zusammen) ist ein separater Fix, weil er das Zusammenführen ZWEIER Systeme über EINEN Dedup-Key braucht.
+
+**Begründung:** C3a bounded halten (ein Consumer, ein Beweis). Der Doppel-Send ist ein echter Bug (2 WA), aber sein Fix berührt die emit-Achse → eigene Tranche mit A2/A3-Abgleich.
+
+**Review:** offen (Aaron) — Verifikation gegen den dann-aktuellen Code vor C3b.
+
+## 2026-08-05 · C3 (Notification-Outbox) · FM/Kanzlei-Kanäle bleiben vorerst In-App → C3b (Prep §6#3)
+
+**Lücke:** Prep §6#3 — bekommen Flottenmanager/Kanzlei über In-App hinaus WA/Email im kanonischen fan-out (EVENT_MATRIX-Erweiterung), oder bleibt In-App bewusst?
+
+**Entscheidung:** **Deferred an C3b** — keine Matrix-Erweiterung in C3a. C3a ändert keine Preference-/Kanal-Semantik, es hüllt bestehende Kunde-Sends in Durability. Die FM/Kanzlei-Kanal-Frage ist eine Produkt-Entscheidung (wollen die Rollen WA/Email?), kein §1-Default.
+
+**Begründung:** Scope-Trennung: Durability (C3a) vs. Kanal-Reichweite (Produkt). Die Matrix-Erweiterung würde NEUE Empfänger-Sends erzeugen (nicht nur bestehende absichern) → eigene Tranche + Aaron-Produktentscheid.
+
+**Review:** offen (Aaron) — Produktentscheid vor C3b.
