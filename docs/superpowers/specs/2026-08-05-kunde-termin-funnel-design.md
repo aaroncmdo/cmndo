@@ -87,6 +87,15 @@ Es gibt keinen Terminzustand ohne Zustaendigen und keinen gewaehlten Termin, den
 - **Kein Modell-Umbau.** J4/Reparatur-Lane funktioniert (CI-Smokes gruen). Nach 4.1/4.3 sieht der Kunde Gutachter- UND Reparaturtermin in einer Akte.
 - Randfix: Die Aufgabe "Termin bestaetigen" ankert fuer Reparaturtermine auf die GeldZone (`kunde-zonen.ts:60`), die in fruehen Phasen nicht immer gerendert wird (`:82-95`) — Anker-Ziel absichern (Zone erzwingen oder Fallback-Anker).
 
+### 4.9 Tranche W — Werkstatt-Termin-Sicht (Aaron-Nachtrag 05.08., Bau nach T3)
+
+Zwei Werkstatt-seitige Befunde derselben Klasse (Aaron 05.08. nachmittags):
+
+- **W1 (Haftpflicht): Werkstatt sieht den Gutachtertermin nicht.** Verifiziert: KEIN File unter `app/werkstatt`/`lib/werkstatt`/`components/werkstatt` liest `gutachter_termine` — die Werkstatt-Auftragssicht ist strukturell blind fuer SV-Termine. Soll: `WerkstattAuftragDetail` laedt den aktiven SV-Begutachtungstermin bezug-aware (`bezugOrExpr('fall', …)`, Statusmenge inkl. `dispatch_pending`/`sv_gesucht` mit "wird bestätigt") und zeigt ihn read-only (Datum/Zeit/Ort) — die Werkstatt plant ihre Reparatur um die Begutachtung herum.
+- **W2 (Kasko/Selbstzahler): Werkstatt kann keinen Termin setzen.** Die Werkstatt-Actions existieren vollstaendig (`schlageWerkstattTerminVor`/`bestaetigeReparaturtermin`/`erbitteRueckruf`/`lehneReparaturterminAb`, `werkstatt/(shell)/auftraege/actions.ts`). Root-Cause-Verdacht (im W-Bau zu verifizieren): der Akte-Werkstatt-Finder-Pfad (`kunde/faelle/[id]/werkstatt-finder-actions.ts`, post-Konversion) legt — anders als der Convert-Pfad (SP2-T4) — KEINE `reparatur_termine`-Row an → ohne Row blendet `WerkstattAuftragDetail` die Termin-Sektion aus (dieselbe Klasse wie der historische b1-Bug). Soll: Werkstatt-Zuweisung aus der Akte legt die Row (`status='angefragt'`, `wunschtermin` nullable) an — EIN Anlage-Muster fuer beide Pfade.
+
+Tranche W ist NICHT Teil des T1-T3-PRs (#5012); eigener Plan/PR nach T3-Abschluss.
+
 ## 5. Nicht-Ziele
 
 - Kein Auto-Matching-Ausbau ueber die bestehende Engine-Findung hinaus (Phase 2).
