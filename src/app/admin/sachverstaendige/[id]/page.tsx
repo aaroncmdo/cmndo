@@ -15,6 +15,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
+import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 
 type SvSearchParams = { tab?: string }
 
@@ -483,6 +484,12 @@ export default async function SvDetailPage({
                 googlePlaceId: profile?.google_place_id ?? null,
               }}
             />
+
+            {/* Partner-Aktivität (CRM-Cockpit) — additiv, nicht im Verifizierung-Tab verschachtelt */}
+            <div className="mt-6">
+              <h3 className="text-heading-sm text-claimondo-navy mb-2">Aktivität</h3>
+              <PartnerCockpitPanel partnerTyp="sv" partnerId={id} />
+            </div>
           </div>
 
           {/* RIGHT: Offene Fälle + Tasks Panel — mobil unter dem Formular (Top-Border statt Left). */}

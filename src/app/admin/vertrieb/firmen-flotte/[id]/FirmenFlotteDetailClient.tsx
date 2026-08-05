@@ -26,6 +26,7 @@ import {
 import { finalisiereKarteStaff, minteKartenBatchStaff } from '../../_actions/firmen-flotte-karten'
 import { setzeFlottenKontoStatus, setzeFlottenKontoWhatsapp } from '../../_actions/firmen-flotte-konto'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
+import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
@@ -185,6 +186,11 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
           </Button>
         </div>
       </SectionCard>
+
+      <div className="mt-6">
+        <h3 className="text-heading-sm text-claimondo-navy mb-2">Aktivität</h3>
+        <PartnerCockpitPanel partnerTyp="flotte" partnerId={firma.id} />
+      </div>
 
       <SectionCard title={`Fahrzeuge (${fahrzeuge.length})`}>
         {fahrzeuge.length === 0 ? (
