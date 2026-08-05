@@ -162,6 +162,20 @@ export default function FallDetailSections({
             />
           )}
 
+          {/* Gap E (05.08.): SV hat einen Termin reserviert (initialer Vorschlag) — Kunde
+              bestaetigt oder schlaegt einen anderen vor. Ohne diesen Zweig fuehrte die
+              "Besichtigungstermin bestaetigen"-Aufgabe (jetzt-zu-tun.ts) ins Leere: nur der
+              gegenvorschlag-Zweig hatte eine Annehmen-UI. Derselbe Banner via variant='reserviert'. */}
+          {aktiverTermin && aktiverTermin.status === 'reserviert' && aktiverTermin.start_zeit && (
+            <GegenvorschlagBanner
+              fallId={fall.id as string}
+              svName={svName ?? t('uebersicht.sachverstaendiger')}
+              vorgeschlagenesDatum={aktiverTermin.start_zeit}
+              grund={null}
+              variant="reserviert"
+            />
+          )}
+
           {/* KFZ-192: SV hat mehrere alternative Slots vorgeschlagen */}
           {aktiverTermin && aktiverTermin.status === 'gegenvorschlag' && aktiverTermin.sv_vorgeschlagene_slots && aktiverTermin.sv_vorgeschlagene_slots.length > 0 && (
             <SlotAuswahlBanner
@@ -223,8 +237,12 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 // ─── KFZ-134: Gegenvorschlag-Banner (Kunde sieht SV-Vorschlag) ────────────
 
-function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
+function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund, variant = 'gegenvorschlag' }: {
   fallId: string; svName: string; vorgeschlagenesDatum: string; grund: string | null
+  // Gap E: 'reserviert' = initialer SV-Vorschlag (start_zeit), 'gegenvorschlag' = alternativer
+  // Vorschlag (vorgeschlagenes_datum). Nur Titel + Vorschlag-Text unterscheiden sich; Annehmen/
+  // Gegenvorschlag/Kalender-Aktionen sind identisch → derselbe Banner, ein variant-Schalter.
+  variant?: 'gegenvorschlag' | 'reserviert'
 }) {
   const t = useTranslations('kunde.fall')
   const format = useFormatter()
@@ -269,9 +287,14 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
   return (
     <>
       <div className="bg-claimondo-ondo/5 border border-claimondo-light-blue/30 rounded-ios-xl p-5">
-        <p className="text-sm font-semibold text-claimondo-navy mb-2">{t('gegenvorschlag.titel')}</p>
+        <p className="text-sm font-semibold text-claimondo-navy mb-2">
+          {variant === 'reserviert' ? t('terminVorschlag.titel') : t('gegenvorschlag.titel')}
+        </p>
         <p className="text-sm text-claimondo-shield mb-1">
-          {t('gegenvorschlag.vorschlagText', { svName })} <strong>{datumStr}</strong>
+          {variant === 'reserviert'
+            ? t('terminVorschlag.vorschlagText', { svName })
+            : t('gegenvorschlag.vorschlagText', { svName })}{' '}
+          <strong>{datumStr}</strong>
         </p>
         {grund && <p className="text-xs text-claimondo-ondo mb-3">{t('gegenvorschlag.grund', { grund })}</p>}
         {!grund && <div className="mb-3" />}

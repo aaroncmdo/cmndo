@@ -606,17 +606,21 @@ export async function terminAnnehmen({
     if ('error' in auth) return { success: false, error: auth.error }
     fId = auth.fallId
     svId = auth.svId
+    // Gap E (05.08.): auch den initialen reservierten SV-Vorschlag annehmen, nicht nur
+    // Gegenvorschlaege — sonst fuehrt die "Besichtigungstermin bestaetigen"-Aufgabe
+    // (jetzt-zu-tun.ts) ins Leere (reserviert hatte bisher keine Kunde-Annehmen-Aktion).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
       .eq('fall_id', fId)
-      .eq('status', 'gegenvorschlag')
+      .in('status', ['gegenvorschlag', 'reserviert'])
       .order('created_at', { ascending: false })
       .limit(1)
       .single()
-    if (!termin) return { success: false, error: 'Kein aktiver Gegenvorschlag gefunden' }
+    if (!termin) return { success: false, error: 'Kein aktiver Terminvorschlag gefunden' }
     tId = termin.id
 
-    // start_zeit = vorgeschlagenes_datum
+    // start_zeit = vorgeschlagenes_datum (nur bei Gegenvorschlag gesetzt; bei reserviert
+    // null → neueStartZeit=null → start_zeit bleibt der bereits reservierte Slot).
     const neueStartZeit = termin.vorgeschlagenes_datum ? new Date(termin.vorgeschlagenes_datum) : null
     // CMM-23: Kalender-Check vor Bestätigung
     if (neueStartZeit && svId) {
