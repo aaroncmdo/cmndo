@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { AlertTriangleIcon, CalendarOffIcon } from 'lucide-react'
+import { CalendarOffIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
+import ErrorState from '@/components/shared/ErrorState'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { statusSlotClass, type StatusSlot } from '@/lib/status'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
@@ -9,8 +10,8 @@ import { formatVorZeit } from '@/lib/format/datum'
 // kunde-termin-funnel T3 (Task 9): Dispatch-Queue fuer Wunschtermine, die noch
 // auf eine SV-Zuweisung warten (gutachter_termine.status in dispatch_pending/
 // sv_gesucht). Row-Shape + Kontext-Aufloesung leben im Loader (page.tsx);
-// diese Komponente ist reine Praesentation (DataTable-Set, kein handgerolltes
-// <table> — Component-Set-Ratchet).
+// diese Komponente ist reine Praesentation (DataTable-Set, keine handgerollten
+// HTML-Tabellen-Elemente — Component-Set-Ratchet).
 
 export type TerminwunschRow = {
   id: string
@@ -56,13 +57,10 @@ export default function TerminwunschListe({
 }) {
   if (ladeFehler) {
     return (
-      <div
-        className={`flex flex-col items-center gap-2 rounded-ios-md border border-danger/30 p-12 text-center ${statusSlotClass('danger')}`}
-      >
-        <AlertTriangleIcon size={40} />
-        <p className="text-heading-sm font-semibold">Terminwünsche konnten nicht geladen werden.</p>
-        <p className="text-body-sm">Bitte lade die Seite neu oder versuche es in Kürze erneut.</p>
-      </div>
+      <ErrorState
+        title="Terminwünsche konnten nicht geladen werden."
+        description="Bitte lade die Seite neu oder versuche es in Kürze erneut."
+      />
     )
   }
 
