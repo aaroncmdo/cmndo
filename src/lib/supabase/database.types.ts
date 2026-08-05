@@ -5696,6 +5696,7 @@ export type Database = {
           brand_primary_override: string | null
           brand_secondary_override: string | null
           cc_email: string | null
+          config_hits: number
           einzelpreis_eur: number
           empfaenger_email: string
           erlaubte_domains: string[]
@@ -5704,6 +5705,8 @@ export type Database = {
           id: string
           inhaber_profile_id: string
           letzte_anfrage_am: string | null
+          letzter_config_hit_am: string | null
+          letzter_config_origin: string | null
           max_anfragen_pro_h: number
           name: string
           paused_grund: string | null
@@ -5733,6 +5736,7 @@ export type Database = {
           brand_primary_override?: string | null
           brand_secondary_override?: string | null
           cc_email?: string | null
+          config_hits?: number
           einzelpreis_eur?: number
           empfaenger_email?: string
           erlaubte_domains?: string[]
@@ -5741,6 +5745,8 @@ export type Database = {
           id?: string
           inhaber_profile_id: string
           letzte_anfrage_am?: string | null
+          letzter_config_hit_am?: string | null
+          letzter_config_origin?: string | null
           max_anfragen_pro_h?: number
           name: string
           paused_grund?: string | null
@@ -5770,6 +5776,7 @@ export type Database = {
           brand_primary_override?: string | null
           brand_secondary_override?: string | null
           cc_email?: string | null
+          config_hits?: number
           einzelpreis_eur?: number
           empfaenger_email?: string
           erlaubte_domains?: string[]
@@ -5778,6 +5785,8 @@ export type Database = {
           id?: string
           inhaber_profile_id?: string
           letzte_anfrage_am?: string | null
+          letzter_config_hit_am?: string | null
+          letzter_config_origin?: string | null
           max_anfragen_pro_h?: number
           name?: string
           paused_grund?: string | null
@@ -11305,6 +11314,137 @@ export type Database = {
           },
         ]
       }
+      kunde_feedback: {
+        Row: {
+          abgemeldet_am: string | null
+          beantwortet_am: string | null
+          claim_id: string
+          created_at: string
+          eingeladen_am: string
+          id: string
+          kommentar: string | null
+          rating: number | null
+          response_token: string
+          token_expires_at: string
+        }
+        Insert: {
+          abgemeldet_am?: string | null
+          beantwortet_am?: string | null
+          claim_id: string
+          created_at?: string
+          eingeladen_am?: string
+          id?: string
+          kommentar?: string | null
+          rating?: number | null
+          response_token: string
+          token_expires_at: string
+        }
+        Update: {
+          abgemeldet_am?: string | null
+          beantwortet_am?: string | null
+          claim_id?: string
+          created_at?: string
+          eingeladen_am?: string
+          id?: string
+          kommentar?: string | null
+          rating?: number | null
+          response_token?: string
+          token_expires_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_dokumente"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_phase"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_claim_workstate"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "kunde_feedback_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: true
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["claim_id"]
+          },
+        ]
+      }
       kunde_gutachten_requests: {
         Row: {
           accessed_at: string | null
@@ -14122,6 +14262,156 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      notifications_outbox: {
+        Row: {
+          claim_id: string | null
+          created_at: string
+          dedup_key: string
+          empfaenger_rolle: string | null
+          empfaenger_user_id: string | null
+          fehler: string | null
+          id: string
+          kanal: string
+          next_retry_at: string | null
+          payload: Json
+          sent_at: string | null
+          status: string
+          template: string
+          versuche: number
+        }
+        Insert: {
+          claim_id?: string | null
+          created_at?: string
+          dedup_key: string
+          empfaenger_rolle?: string | null
+          empfaenger_user_id?: string | null
+          fehler?: string | null
+          id?: string
+          kanal: string
+          next_retry_at?: string | null
+          payload?: Json
+          sent_at?: string | null
+          status?: string
+          template: string
+          versuche?: number
+        }
+        Update: {
+          claim_id?: string | null
+          created_at?: string
+          dedup_key?: string
+          empfaenger_rolle?: string | null
+          empfaenger_user_id?: string | null
+          fehler?: string | null
+          id?: string
+          kanal?: string
+          next_retry_at?: string | null
+          payload?: Json
+          sent_at?: string | null
+          status?: string
+          template?: string
+          versuche?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "claims"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_base"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_dokumente"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_for_gast"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_listing"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_phase"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_claim_workstate"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_faelle_mit_aktuellem_termin"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_gutachten_werte"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_claim_id_fkey"
+            columns: ["claim_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_auftrag"
+            referencedColumns: ["claim_id"]
+          },
+          {
+            foreignKeyName: "notifications_outbox_empfaenger_user_id_fkey"
+            columns: ["empfaenger_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       nutzungsausfall_klasse_saetze: {
         Row: {
@@ -23749,14 +24039,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -26198,6 +26488,10 @@ export type Database = {
       }
       award_werkstatt_staffel_boni: {
         Args: { p_werkstatt_id: string }
+        Returns: undefined
+      }
+      bump_embed_config_hit: {
+        Args: { p_origin: string; p_slug: string }
         Returns: undefined
       }
       can_access_claim: { Args: { p_claim_id: string }; Returns: boolean }

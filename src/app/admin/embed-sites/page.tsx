@@ -18,7 +18,7 @@ export default async function AdminEmbedSitesPage() {
   const db = createAdminClient() as any
   const { data: siteRows } = await db
     .from('embed_sites')
-    .select('id, name, slug, variante, aktiv, funnel_modus, sv_id, anfragen_gesamt, erstellt_am')
+    .select('id, name, slug, variante, aktiv, funnel_modus, sv_id, anfragen_gesamt, letzte_anfrage_am, config_hits, letzter_config_hit_am, letzter_config_origin, erstellt_am')
     .order('erstellt_am', { ascending: false })
 
   const sites = siteRows ?? []
@@ -52,6 +52,10 @@ export default async function AdminEmbedSitesPage() {
           | 'flowlink',
         sv_name: r.sv_id ? (svNameMap[r.sv_id as string] ?? '—') : '—',
         anfragen_gesamt: Number(r.anfragen_gesamt ?? 0),
+        letzte_anfrage_am: (r.letzte_anfrage_am as string | null) ?? null,
+        config_hits: Number(r.config_hits ?? 0),
+        letzter_config_hit_am: (r.letzter_config_hit_am as string | null) ?? null,
+        letzter_config_origin: (r.letzter_config_origin as string | null) ?? null,
       }))}
     />
   )
