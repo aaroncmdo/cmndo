@@ -44,6 +44,7 @@ describe('buildSchadenLeadInput', () => {
     expect(r.extra.kunde_id).toBe('user-1') // Kunde = geschaedigter
     expect(r.extra.schadens_art).toBe('haftpflicht')
     expect(r.extra.fahrzeug_standort_plz).toBe('50667')
+    expect(r.extra.unfallort_plz).toBe('50667') // B5-Fix: PLZ erreicht claims.schadenort_plz
     expect(r.extra.fahrzeug_standort_adresse).toBe('Aachener Straße 12')
     expect(r.extra.gegner_bekannt).toBe(true)
     expect(r.extra.ist_fahrzeughalter).toBe(true)
@@ -82,5 +83,20 @@ describe('buildSchadenLeadInput', () => {
     if (!r.ok) return
     expect(r.extra.kennzeichen).toBeNull()
     expect(r.extra.unfallhergang).toBe('Hallo')
+  })
+
+  // Abrechnungsweg-Audit (03.08.): Weg 6 leitet die Quali-Achse aus schadens_art ab, damit der
+  // Sofort-Convert einen korrekten abrechnungsweg bekommt statt null (= wegs-los, Haftpflicht-Fehlrouting).
+  it('leitet schuldfrage/eigene_versicherung aus schadens_art ab (Fehlrouting-Fix)', () => {
+    const q = (art: string) => {
+      const r = buildSchadenLeadInput({ ...validForm, schadensart: art }, kunde)
+      if (!r.ok) throw new Error('unerwartet ungueltig')
+      return { schuldfrage: r.extra.schuldfrage, eigene_versicherung: r.extra.eigene_versicherung }
+    }
+    expect(q('haftpflicht')).toEqual({ schuldfrage: 'gegner', eigene_versicherung: null })
+    expect(q('vollkasko')).toEqual({ schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' })
+    expect(q('teilkasko')).toEqual({ schuldfrage: 'eigenverantwortung', eigene_versicherung: 'ja' })
+    expect(q('eigenverschulden')).toEqual({ schuldfrage: 'eigenverantwortung', eigene_versicherung: 'nein' })
+    expect(q('unbekannt')).toEqual({ schuldfrage: null, eigene_versicherung: null })
   })
 })

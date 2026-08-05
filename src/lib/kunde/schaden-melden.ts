@@ -9,7 +9,9 @@
 //   extra: kunde_id,schadens_art,unfalldatum,unfall_uhrzeit,unfallhergang,unfallort,
 //          fahrzeug_standort_plz,fahrzeug_standort_adresse,kennzeichen,
 //          fahrzeug_hersteller,fahrzeug_modell,gegner_bekannt,ist_fahrzeughalter,
-//          qualifizierungs_phase,sprache
+//          qualifizierungs_phase,sprache,schuldfrage,eigene_versicherung
+
+import { qualiAusSchadensart } from '@/lib/werkstatt/abrechnungsweg'
 
 export const SCHADENSARTEN = ['haftpflicht', 'vollkasko', 'teilkasko', 'eigenverschulden', 'unbekannt'] as const
 export type Schadensart = (typeof SCHADENSARTEN)[number]
@@ -49,11 +51,15 @@ export type LeadBaseInput = {
 export type LeadExtraInput = {
   kunde_id: string
   schadens_art: Schadensart
+  // Abrechnungsweg-Audit (03.08.): Quali-Achse aus schadens_art abgeleitet, sonst abrechnungsweg=null beim Convert.
+  schuldfrage: 'gegner' | 'eigenverantwortung' | null
+  eigene_versicherung: 'ja' | 'nein' | null
   unfalldatum: string | null
   unfall_uhrzeit: string | null
   unfallhergang: string | null
   unfallort: string | null
   fahrzeug_standort_plz: string
+  unfallort_plz: string
   fahrzeug_standort_adresse: string | null
   kennzeichen: string | null
   fahrzeug_hersteller: string | null
@@ -103,14 +109,23 @@ export function buildSchadenLeadInput(form: SchadenMeldenForm, kunde: KundeKonte
     telefon: clean(kunde.telefon),
     email: clean(kunde.email),
   }
+  const schadensart = normalizeSchadensart(form.schadensart)
+  const quali = qualiAusSchadensart(schadensart)
   const extra: LeadExtraInput = {
     kunde_id: kunde.userId,
-    schadens_art: normalizeSchadensart(form.schadensart),
+    schadens_art: schadensart,
+    // Quali aus der Versicherungs-Klassifikation (sonst abrechnungsweg=null beim Sofort-Convert)
+    schuldfrage: quali?.schuldfrage ?? null,
+    eigene_versicherung: quali?.eigeneVersicherung ?? null,
     unfalldatum: clean(form.unfalldatum),
     unfall_uhrzeit: clean(form.unfallUhrzeit),
     unfallhergang: clean(form.unfallhergang),
     unfallort: adresse,
     fahrzeug_standort_plz: plz,
+    // B5-Fix (Entry-Point-Audit): die Pflicht-PLZ des Schadenorts ZUSAETZLICH nach unfallort_plz —
+    // convertLeadToClaim liest claims.schadenort_plz aus lead.unfallort_plz (das bisher nie befuellt
+    // wurde, F6/Aaron 14.07. "Form-Wiring folgt"). Ohne das strandete die Pflicht-PLZ am Lead.
+    unfallort_plz: plz,
     // Kunde-Selbstmeldung: der genannte Schadenort ist zugleich der Fahrzeug-Standort.
     fahrzeug_standort_adresse: adresse,
     kennzeichen: clean(form.kennzeichen),

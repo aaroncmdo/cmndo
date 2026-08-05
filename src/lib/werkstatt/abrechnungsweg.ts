@@ -52,6 +52,36 @@ export function deriveAbrechnungsweg(args: {
   return null
 }
 
+/**
+ * Fallback-Quali aus der Versicherungs-Klassifikation `schadens_art`, für Entry-Points, die
+ * schadens_art erheben, aber NICHT schuldfrage/eigene_versicherung (kunde/schaden-melden,
+ * admin/faelle/anlegen). Ohne sie erzeugen diese beim Sofort-Convert einen wegs-losen Claim
+ * (abrechnungsweg=null), weil resolveAbrechnungsweg (Spalte) UND derive_abrechnungsweg (DB-Views)
+ * nur aus schuldfrage+eigene_versicherung ableiten. Wir leiten die QUALI-Achse ab (nicht
+ * abrechnungsweg direkt) und schreiben sie auf den LEAD -> beide Ableiter, die lead.schuldfrage
+ * lesen, bleiben konsistent (kein Spalte-vs-View-Drift).
+ *   haftpflicht         -> gegner                          => haftpflicht
+ *   vollkasko/teilkasko -> eigenverantwortung + eigene VS  => kasko
+ *   eigenverschulden    -> eigenverantwortung ohne VS      => selbstzahler
+ *   unbekannt / sonst   -> null (ehrlich offen; Fall bleibt wegs-los bis Quali)
+ */
+export function qualiAusSchadensart(schadensArt: string | null | undefined): {
+  schuldfrage: 'gegner' | 'eigenverantwortung'
+  eigeneVersicherung: 'ja' | 'nein' | null
+} | null {
+  switch (schadensArt) {
+    case 'haftpflicht':
+      return { schuldfrage: 'gegner', eigeneVersicherung: null }
+    case 'vollkasko':
+    case 'teilkasko':
+      return { schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'ja' }
+    case 'eigenverschulden':
+      return { schuldfrage: 'eigenverantwortung', eigeneVersicherung: 'nein' }
+    default:
+      return null
+  }
+}
+
 /** Route pro Abrechnungsweg — steuert die Flow-Weiche (SP-B). */
 export function routeForAbrechnungsweg(weg: Abrechnungsweg): SchadenRoute {
   switch (weg) {

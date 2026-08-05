@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
+import { notifyTeamPartnerSignup } from '@/lib/partner/notify-team-signup'
 import { istErlaubteRechtsform } from '@/lib/rechtsformen'
 
 // Offener Self-Signup eines Maklers (Saeule B). Erzeugt SOFORT einen aktiven Makler +
@@ -190,6 +191,21 @@ export async function registriereMaklerSelf(
   } catch (err) {
     console.error('[registriereMaklerSelf] Admin-Notify fehlgeschlagen (non-critical):', err)
   }
+
+  // 8. Team-WhatsApp (wirft nie; interne/Test-Identitaeten unterdrueckt der Helper) —
+  //    neue Marketing-Funnel-Partner sofort aufs Team-Handy (Aaron-Direktive 05.08.).
+  await notifyTeamPartnerSignup({
+    typ: 'makler',
+    art: 'registrierung',
+    quelle: '/makler/registrieren (Self-Signup)',
+    firma,
+    name: `${vorname} ${nachname}`,
+    email,
+    telefon,
+    ort: [adressePlz, adresseOrt].filter(Boolean).join(' ') || null,
+    adminPfad: '/admin/makler',
+    extraFields: [{ label: 'Promo-Code', value: code }],
+  })
 
   return { ok: true, code }
 }

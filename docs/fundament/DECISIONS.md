@@ -67,6 +67,16 @@
 
 **Review:** offen (Aaron) — Plan P4, Abschnitt „Invariante & Reparatur-Achse".
 
+## 2026-08-03 · B-Journey-Suite · J9-Provisions-Smokes in CI (verrechnung+staffel); lifecycle bleibt opt-in
+
+**Lücke:** Die Journey-Suite-in-CI-Aufgabe (§9, Tranche J9) trifft auf die `provisionen-*`-Smokes, die per Spec-Kommentar „opt-in (nie in CI)" markiert sind — dürfen sie in den post-merge-CI-Journey-Step?
+
+**Entscheidung:** `provisionen-verrechnung-smoke` + `provisionen-staffel-smoke` laufen ab jetzt im dedizierten CI-Journey-Step (J9, `.github/workflows/ci.yml`); `provisionen-lifecycle-smoke` NICHT — es bleibt opt-in/Regel-4.
+
+**Begründung:** verrechnung+staffel sind rein DB (Insert-Trigger, kein Browser/Comms/Cron), self-cleaning (Marker `SMOKE-PROV`/`SMOKE-STAFFEL-LC`, FK-sicher + Crash-safe) — dasselbe Wegwerf-in-prod-DB-Muster wie J4 (Verfassungsprinzip 10 „Kein Feature ohne Reise"; das etablierte CI-Muster). Die concurrency-Group `prod-e2e-smoke` (#4911) serialisiert die e2e-Läufe → kein Fixture-Cleanup-Cross-Run-Race. Der „nie in CI"-Spec-Kommentar war die Vorsichts-Default vor der Journey-Suite (D-Phase). `lifecycle` triggert den GLOBALEN Release-Cron (`/api/cron/release-provisionen`) → bei jedem Merge würden echte fällige Provisionen früher freigegeben (Geld-Timing-Effekt) → bewusst ausgeschlossen, bleibt manueller Regel-4-Smoke.
+
+**Review:** offen (im PR an Aaron).
+
 ## 2026-08-04 · C2 (createCase) · FlowLink IMMER + garantierter Kunde-Kanal (Prep §7#1)
 
 **Lücke:** Prep §7#1 / A4-Frage 2 — garantiert `createCase` bei jedem Meldeweg einen aktiven Kunde-Kanal (WA/Email), oder bleibt reiner Client-Redirect bei den No-Channel-Eingängen (B-2/C-4) zulässig?
