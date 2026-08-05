@@ -12,6 +12,7 @@ import { resendWerkstattWelcome } from '../_actions/resend-werkstatt-welcome'
 import { resendMaklerWelcome } from '@/app/admin/makler/actions'
 import { useUrlDrawerParam } from '@/lib/navigation/use-url-drawer-param'
 import type { VertriebKontakt, VertriebKontaktRow } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { PartnerTyp } from '@/lib/partner/aktivitaet-types'
 import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 
 const FELD_CLS =
@@ -142,12 +143,18 @@ export default function PartnerCockpit({
         </Button>
       </div>
 
-      {(kontakt.kind === 'sv' || kontakt.kind === 'makler' || kontakt.kind === 'werkstatt') && (
-        <div className="space-y-2">
-          <p className="text-caption text-claimondo-ondo/60">Aktivität</p>
-          <PartnerCockpitPanel partnerTyp={kontakt.kind} partnerId={kontakt.id} compact />
-        </div>
-      )}
+      {(() => {
+        const partnerTyp: PartnerTyp | null =
+          kontakt.kind === 'firmen-flotte' ? 'flotte'
+          : kontakt.kind === 'partner-lead' ? null
+          : kontakt.kind
+        return partnerTyp ? (
+          <div className="space-y-2">
+            <p className="text-caption text-claimondo-ondo/60">Aktivität</p>
+            <PartnerCockpitPanel partnerTyp={partnerTyp} partnerId={kontakt.id} compact />
+          </div>
+        ) : null
+      })()}
 
       <Button variant="navy" fullWidth onClick={() => router.push(link.href)}>
         {link.label}
