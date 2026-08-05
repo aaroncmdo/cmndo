@@ -454,26 +454,27 @@ jobs:
       # (SMOKE-PROV / SMOKE-STAFFEL-LC, Crash-safe) — dasselbe Wegwerf-in-prod-DB-Muster wie J4.
       # Der "opt-in nie in CI"-Spec-Kommentar war die Vorsichts-Default VOR der Journey-Suite (D-Phase);
       # CI-tauglich, weil self-cleaning + die concurrency-Group (`prod-e2e-smoke`) serialisiert die
-      # e2e-Laeufe -> kein Fixture-Cleanup-Cross-Run-Race. BEWUSST NICHT dabei: provisionen-lifecycle-smoke
-      # -> triggert den GLOBALEN Release-Cron (echte faellige Provisionen wuerden pro Merge frueher
-      # freigegeben = Geld-Timing-Effekt); bleibt opt-in/Regel-4. Entscheidung: DECISIONS.md 2026-08-03.
+      # e2e-Laeufe -> kein Fixture-Cleanup-Cross-Run-Race. SEIT 05.08. AUCH lifecycle (Aaron-Entscheid,
+      # DECISIONS 05.08.): der Spec schiesst den ECHTEN globalen Release-Cron, aber hinter einem
+      # Fremd-Effekt-Precheck-GELD-GUARD (Muster netzwerk-release-scharf-smoke.mts) — wuerde ein Schuss
+      # eine FREMDE faellige/storno-faellige pending-Provision flippen, skippt DIESER Lauf sichtbar
+      # (selten; der Nacht-Cron raeumt das Fenster). Kein Produkt-Change am Release-Runner.
+      # CRON_SECRET nur fuer den lifecycle-Trigger noetig.
       - name: Fundament Journey-Smoke J9 (Provisionen, DB-hart)
-        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke --project=chromium --reporter=line
+        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke provisionen-lifecycle-smoke --project=chromium --reporter=line
         env:
           RUN_PROVISION_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
 
       # Fundament Journey-Suite J8 (Onboarding je Rolle) — 2FA-Enroll: die Dispatch-Rolle richtet per UI
       # einen TOTP-Faktor ein (KontoSicherheitPanel/TotpEnrollCard, von keiner anderen Smoke abgedeckt)
       # + wird danach beim Login 2FA-gechallenged. Konto-isoliert (smoke-enroll@claimondo.de, kein
       # Comms/Booking). Der Seed-Step setzt das Konto VOR dem Lauf faktorfrei zurueck (stateful self-reset
       # je Lauf; Seed liest process.env-first, .env.local nur lokal). RUN_2FA_ENROLL_SMOKE gatet den Spec.
-      # (J5 kasko-reparatur-phase-smoke NICHT dabei: Fixture-Claim 39734007 ist zustandsgedriftet —
-      # werkstatt_id NULL/ersterfassung statt "Werkstatt gesetzt" — Assertion unsicher; braucht eigenen
-      # deterministischen Seed = Follow-up. Bleibt opt-in. Siehe journey-smokes.md + DECISIONS 2026-08-03.)
       - name: Seed 2FA-Enroll-Fixture (J8)
         run: node scripts/seed-smoke-enroll.mjs
         env:
@@ -484,6 +485,143 @@ jobs:
         env:
           RUN_2FA_ENROLL_SMOKE: '1'
           PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+
+      # Fundament Journey-Suite J5 (Kasko/Selbstzahler-Reparatur-Phase) — die interne Fallakte eines
+      # Kasko-Claims mit gesetzter Werkstatt zeigt die Reparatur-Lane (Stepper "Terminfindung"), NICHT
+      # "SA-Unterschrift offen" (#4471). Der Seed-Step legt je Lauf einen frischen Wegwerf-Claim an
+      # (eigene Wegwerf-Werkstatt statt gedrifteter prod-Fixture badecb82 — die existiert nicht mehr;
+      # @claimondo.test/telefon=NULL, self-cleaning via Marker). Ersetzt den frueher fixen prod-Claim
+      # 39734007 (werkstatt_id auf NULL gedriftet). RUN_KASKO_SMOKE gatet den Spec; loginContextOrSkip
+      # ('admin') aal1 (test-admin traegt keinen TOTP-Faktor; MIT Secret wuerfe completeMfa mangels Faktor -> loginContextOrSkip skippt statt gruen).
+      - name: Seed Kasko-Reparatur-Fixture (J5)
+        run: node scripts/smoke/kasko-reparatur-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J5 (Kasko-Reparatur-Phase)
+        run: npx playwright test kasko-reparatur-phase-smoke --project=chromium --reporter=line
+        env:
+          RUN_KASKO_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+
+      # Fundament Journey-Suite J10 (Dispatch/Werkstatt-Finder) — S1 (Kunde-Fallakte fiktiv -> Finder
+      # erscheint + Werkstatt-Auswahl schreibt reparatur_werkstatt_id) + S3 (Werkstatt-Portal zeigt den
+      # zugewiesenen Auftrag). Seed legt je Lauf Wegwerf-Kunde + eigene Wegwerf-Werkstatt (email=NULL fuer
+      # nurEchte-Sichtbarkeit) + S1-Claim (fiktiv+selbstzahler, unzugewiesen) + S3-Claim (zugewiesen) an,
+      # self-cleaning via Marker. Ersetzt die tote Fixture badecb82 + den festen prod-Kunden. S2 (Flow-
+      # Wizard) = fragile 14-Schritt-Heuristik -> test.skip in der Spec. RUN_WF_SMOKE gatet den Spec;
+      # SUPABASE_SERVICE_ROLE_KEY im Test-Step, weil die Spec db() fuer die Verify-Reads nutzt (anders als J5).
+      - name: Seed Werkstatt-Finder-Fixture (J10)
+        run: node scripts/smoke/werkstatt-finder-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J10 (Werkstatt-Finder)
+        run: npx playwright test werkstatt-finder-smoke --project=chromium --reporter=line
+        env:
+          RUN_WF_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Fundament Journey-Suite J3 (Unterschriften SA/Vollmacht) — der SA-Signatur-Weg konvertiert einen
+      # Lead zu einem Claim mit sa_unterschrieben=true. Seed legt je Lauf einen Wegwerf-Lead im
+      # WerkstattIntake-SA-offen-Zustand (werkstatt_intake_am) + flow_link an (Kunde-Account entsteht erst
+      # beim Signieren); der Spec faehrt /flow/[token] ANON (kein Login/Auth-Wall) -> Canvas + Checkbox +
+      # "SA unterzeichnen" -> DB-Verify claims.sa_unterschrieben. self-cleaning via Marker + email-Muster.
+      # Die Vollmacht ist server-intern (kein Canvas) -> nicht Teil des UI-Smokes (Journey j03 Schritt 3).
+      # RUN_SA_SMOKE gatet; SUPABASE_SERVICE_ROLE_KEY fuer den db()-Verify-Read.
+      - name: Seed SA-Vollmacht-Fixture (J3)
+        run: node scripts/smoke/sa-vollmacht-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J3 (SA-Unterschrift)
+        run: npx playwright test sa-vollmacht-smoke --project=chromium --reporter=line
+        env:
+          RUN_SA_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Fundament Journey-Suite J6 (Kanzlei-Übergabe) — der Kunde übergibt seinen Fall an die eigene
+      # Kanzlei ("Kanzleipaket versenden") -> claims.operative_status='an_externe_kanzlei_uebergeben'.
+      # Seed legt je Lauf einen Wegwerf-Claim im übergabe-bereiten Zustand an (haftpflicht + komplett +
+      # eigene_kanzlei + Ansprechpartner-Mail @claimondo.test + freigegebenes Erstgutachten als Button-Gate),
+      # self-cleaning via Marker. Externer Kunde-Login (kein Auth-Wall, keine echte Kanzlei-Gegenseite).
+      # RUN_KANZLEI_SMOKE gatet; SUPABASE_SERVICE_ROLE_KEY fuer den db()-Verify (toPass-Poll, PDF-Gen dauert).
+      - name: Seed Kanzlei-Uebergabe-Fixture (J6)
+        run: node scripts/smoke/kanzlei-uebergabe-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J6 (Kanzlei-Uebergabe)
+        run: npx playwright test kanzlei-uebergabe-smoke --project=chromium --reporter=line
+        env:
+          RUN_KANZLEI_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Fundament Journey-Suite J7 (Storno/DSGVO-Loeschung) — beide Ausstiege: A Storno ist INTERN
+      # (Admin/KB; markClaimAsStorniert via EndzustandDropdown in /faelle/[id] — j07 "Kunde storniert"
+      # hat keine Kunde-UI) -> operative_status='storniert'. B DSGVO 2-Schritt: Kunde-Antrag
+      # (/kunde/profil) -> Admin BESTAETIGT -> "Direkt ausfuehren" (rpc-Anonymisierung + Auth-Delete).
+      # Bestaetigen MUSS vor Ausfuehren (chk_bestaetigt_logic verlangt bestaetigt_am — sonst Silent-
+      # CHECK-Reject des Status-Writes). IRREVERSIBEL nur fuer die 3 eigenen Wegwerf-Konten des Seeds
+      # (Throwaway-Admin + Storno-Kunde + DSGVO-Kunde, getrennt); die Admin-Zeile wird per EXAKTER
+      # Wegwerf-Email getargetet, nie "erste Zeile". Admin-Creds kommen aus dem Seed-JSON (KEIN
+      # TEST_ADMIN_*-Secret noetig, kein TOTP). RUN_STORNO_DSGVO_SMOKE gatet; SERVICE_ROLE fuer db().
+      - name: Seed Storno/DSGVO-Fixture (J7)
+        run: node scripts/smoke/storno-dsgvo-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J7 (Storno/DSGVO)
+        run: npx playwright test storno-dsgvo-smoke --project=chromium --reporter=line --workers=1
+        env:
+          RUN_STORNO_DSGVO_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      # J7-Nachlauf: Wegwerf-ADMIN-Konto + Smoke-Antraege nicht bis zum naechsten Lauf liegen lassen
+      # (Admin-Rolle ist sensibler als die Wegwerf-Kunden der anderen Journeys) — laeuft auch bei
+      # rotem Smoke; Debugging nutzt eh den lokalen Re-Run mit frischem Seed.
+      - name: Cleanup Storno/DSGVO-Fixture (J7)
+        if: always()
+        run: node scripts/smoke/storno-dsgvo-seed.mjs --clean
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      # Fundament Journey-Suite J2 (Meldung alle Kanaele) — 3 Meldewege = 3 Melde-Muster:
+      # A Kunde-Wizard /kunde/schaden-melden (Wrapper: leads+claims+pflichtdok, keine Terminwahl,
+      # kein reserviere()) · B POST /api/v1/melde-schaden (lead-first: gfa+lead+flow_link; 2. POST
+      # beweist j02-Dedup 'bereits_angelegt'; Assert kanal='none' = Runtime-Send-Isolations-Beweis
+      # der Drama-Festnetznummer) · C Gegner-Schadenkarte /schaden/[token] (Kern-direkt: Direkt-Claim
+      # + verursacher-Party + interner vs_meldung-Task; OHNE Telefon, OHNE Versicherer — VS-Meldung
+      # ist prod-scharf, /unfallmeldung wird NICHT bestaetigt). Isolation identitaetsbasiert
+      # (@claimondo.test/telefon=NULL/Drama-Nummer) — SIDE_EFFECT_MODE erreicht den prod-Prozess nicht.
+      - name: Seed Meldung-Kanaele-Fixture (J2)
+        run: node scripts/smoke/meldung-kanaele-seed.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      - name: Fundament Journey-Smoke J2 (Meldung alle Kanaele)
+        run: npx playwright test meldung-kanaele-smoke --project=chromium --reporter=line --workers=1
+        env:
+          RUN_MELDUNG_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
       - name: Run E2E Tests
         run: npx playwright test
