@@ -5067,6 +5067,16 @@
     "abmelden": "Wyloguj się"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Wybór warsztatu",
+    "reparatur-angefragt": "Ustalanie terminu naprawy",
+    "reparatur-laeuft": "Naprawa w toku",
+    "reparatur-erledigt": "Naprawa zakończona",
+    "termin_durchgefuehrt": "Wizyta odbyta",
+    "reguliert_vollstaendig": "W pełni uregulowane",
+    "klage_rechtsstreit": "W sporze sądowym",
+    "verjaehrt": "Przedawnione",
+    "abgelehnt_final": "Ostatecznie odrzucone",
+    "an_externe_kanzlei_uebergeben": "Przekazane zewnętrznej kancelarii",
     "ersterfassung": "Trwa rejestracja",
     "flow-gesendet": "Link wysłany",
     "onboarding": "Oczekiwanie na ostatnie dane",
