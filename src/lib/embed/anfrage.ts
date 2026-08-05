@@ -5,7 +5,7 @@ import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { sendEmail } from '@/lib/email/google/client'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
-import { buildAnfrageColumns, splitName, type AnfrageVariante, type InsertAnfrageInput } from './anfrage-columns'
+import { buildAnfrageColumns, extractHost, splitName, type AnfrageVariante, type InsertAnfrageInput } from './anfrage-columns'
 import { svBezeichnung, kundenBestaetigungText } from './kunde-bestaetigung'
 
 /**
@@ -24,7 +24,7 @@ import { svBezeichnung, kundenBestaetigungText } from './kunde-bestaetigung'
  */
 
 // Re-Export der PURE-Helfer/Typen — route.ts importiert AnfrageVariante weiterhin von hier.
-export { buildAnfrageColumns, splitName }
+export { buildAnfrageColumns, extractHost, splitName }
 export type { AnfrageVariante, InsertAnfrageInput }
 
 export interface EmbedSiteConfig {
@@ -47,18 +47,7 @@ export interface EmbedSiteConfig {
 }
 
 // ── Helfer ─────────────────────────────────────────────────────────────────
-
-/** Host aus einem Origin-/Referer-Header oder einer URL extrahieren. */
-export function extractHost(value: string | null | undefined): string | null {
-  if (!value) return null
-  try {
-    return new URL(value).hostname.toLowerCase().replace(/^www\./, '')
-  } catch {
-    // Origin-Header ist manchmal nur der Host ohne Schema
-    const bare = value.trim().toLowerCase().replace(/^www\./, '')
-    return /^[a-z0-9.-]+$/.test(bare) ? bare : null
-  }
-}
+// extractHost lebt jetzt PURE in ./anfrage-columns (Re-Export oben).
 
 /** Cluster-LP-Domains, gegen die kfz_gutachter_lp-Anfragen validiert werden.
  *  Die 5 kanonischen Cluster-Domains sind IMMER erlaubt (hardcoded base);

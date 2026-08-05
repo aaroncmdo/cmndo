@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { after } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { signSiteToken } from '@/lib/embed/jwt'
 import { pickPublicTracking } from '@/lib/embed/config-tracking'
+import { extractHost } from '@/lib/embed/anfrage-columns'
 
 /**
  * AAR-939 · Monika-Embed · Stream 5 — Config-Endpoint /api/embed/config
@@ -91,9 +93,22 @@ export async function GET(req: NextRequest) {
   }
   const site = siteRes.data as EmbedSiteRow | null
   if (!site) return json({ error: 'unknown_site' }, 404)
+
+  // Impression-Telemetrie (Nutzungs-Audit 05.08.): jeder Config-Load beweist,
+  // dass das Widget irgendwo rendert — Zaehler + Origin beantworten "eingebaut?
+  // wo?" schon VOR der ersten Anfrage. Bewusst auch fuer pausierte Sites (ein
+  // Load belegt den Einbau genauso). after() = non-blocking, Fehler non-fatal.
+  const hitOrigin = extractHost(req.headers.get('origin')) ?? extractHost(req.headers.get('referer'))
+  after(async () => {
+    const { error: bumpErr } = await db.rpc('bump_embed_config_hit', { p_slug: site.slug, p_origin: hitOrigin })
+    if (bumpErr) console.error('[embed-config] impression-bump fehlgeschlagen:', bumpErr.message)
+  })
+
   if (!site.aktiv) return json({ paused: true }, 200)
 
-  const base = req.nextUrl.origin
+  // Hinter dem VPS-Proxy ist req.nextUrl.origin "https://0.0.0.0:3000" (Prod-Smoke
+  // 05.08.: kaputte logoUrl im Widget) -> public Base aus der Env, Origin nur Fallback.
+  const base = process.env.NEXT_PUBLIC_APP_URL ?? req.nextUrl.origin
   const variante = site.variante ?? 'A'
   const defaultLogo = `${base}${CLAIMONDO_LOGO}` // Widget laeuft cross-origin → absolut
 

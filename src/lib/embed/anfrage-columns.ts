@@ -15,6 +15,20 @@ export interface InsertAnfrageInput {
   originDomain: string | null
 }
 
+/** Host aus einem Origin-/Referer-Header oder einer URL extrahieren. Lebt hier
+ *  (PURE) statt in anfrage.ts, damit leichte Consumer wie /api/embed/config ihn
+ *  ohne den server-only-WA/Email-Graph importieren koennen. */
+export function extractHost(value: string | null | undefined): string | null {
+  if (!value) return null
+  try {
+    return new URL(value).hostname.toLowerCase().replace(/^www\./, '')
+  } catch {
+    // Origin-Header ist manchmal nur der Host ohne Schema
+    const bare = value.trim().toLowerCase().replace(/^www\./, '')
+    return /^[a-z0-9.-]+$/.test(bare) ? bare : null
+  }
+}
+
 /** Splittet einen Voll-Namen in vorname/nachname (gfa hat kein name-Feld). */
 export function splitName(full: string): { vorname: string; nachname: string } {
   const parts = full.trim().split(/\s+/)
