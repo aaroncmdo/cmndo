@@ -7,7 +7,6 @@ import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { createNotification } from '@/lib/notifications'
@@ -221,8 +220,10 @@ export async function uploadGutachten(
     if (admin.email) emailGutachtenEingegangen(admin.email, fallNr).catch(() => {})
   }
 
-  // WhatsApp: Gutachten erstellt, wird an Kanzlei uebergeben
-  sendFallCommunication(fallId, 'gutachten_fertig').catch(() => {})
+  // C3b (gutachten_fertig-Doppel-Send-Fix, J1-IST #7): der Kunden-WA-Send lief hier doppelt.
+  // System 1 emitEvent('gutachten.fertig') unten deckt den Kunden schon voll ab
+  // (EVENT_MATRIX kunde: whatsapp+email+web_push) + Fan-out an SV/Makler/Admin -> der
+  // redundante sendFallCommunication-Send ist entfernt.
 
   // AAR-501 N6: gutachten.fertig + dokument.hochgeladen Events
   try {
