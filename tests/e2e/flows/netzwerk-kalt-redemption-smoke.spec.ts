@@ -1,8 +1,11 @@
-// Regel-4-Prod-Smoke (#4994): Kalt-Einladungs-Redemption SV + Makler — gegen prod,
-// Wegwerf-Konten, 0 Residue. Beweist das NEUE Wiring end-to-end:
+// Regel-4-Prod-Smoke (#4994 SV+Makler, #5010 Flotte): Kalt-Einladungs-Redemption —
+// gegen prod, Wegwerf-Konten, 0 Residue. Beweist das Wiring end-to-end:
 //   Einladung (Token-Injection, P1-Muster) -> /{rolle}/registrieren?einladung=<token>
 //   -> Formular-Submit -> Account entsteht -> Einladung 'eingeloest' + Auto-Kante
 //   'angenommen' (Einlader <-> neues Profil).
+// Flotte (j08-Soll-Delta #5010): /flotte/registrieren ist der NEUE Self-Signup-Flow
+// (ensureFirma + Flottenmanager-Kern); Firmenname MUSS mit 'Throwaway-Flotte-' beginnen,
+// damit throwaway-account.mjs cleanup die firmen-Row mit abraeumt.
 //
 // SICHERHEIT: Einlader = throwaway-Werkstatt; neue Accounts mit throwaway-*@claimondo.test
 // (Mail-Domain tot) + Drama-Telefonnummer +49 30 23125 011 (P1-Muster — Formular-Pflicht,
@@ -31,11 +34,14 @@ function mintToken(): { token: string; hash: string; prefix: string } {
 const RUN = Date.now().toString(36)
 const SV_EMAIL = `throwaway-redemp-sv-${RUN}@claimondo.test`
 const MAKLER_EMAIL = `throwaway-redemp-makler-${RUN}@claimondo.test`
+const FLOTTE_EMAIL = `throwaway-redemp-flotte-${RUN}@claimondo.test`
+const FLOTTE_FIRMA = `Throwaway-Flotte-Redemp-${RUN}` // Praefix = cleanup-Pattern (s. Header)
 const TEL = '+49 30 23125 011' // Drama-Nummer (P1-Muster)
 
 let einlader: { uid: string }
 let tokenSv = ''
 let tokenMakler = ''
+let tokenFlotte = ''
 
 test.describe.configure({ mode: 'serial' })
 
@@ -62,6 +68,7 @@ test.beforeAll(async () => {
   }
   tokenSv = await mkEinladung(SV_EMAIL, 'sachverstaendiger')
   tokenMakler = await mkEinladung(MAKLER_EMAIL, 'makler')
+  tokenFlotte = await mkEinladung(FLOTTE_EMAIL, 'flottenmanager')
 })
 
 test.afterAll(async () => {
@@ -75,13 +82,16 @@ test.afterAll(async () => {
     await db.from('netzwerk_verbindungen').delete().in('empfaenger_id', alle)
     await db.from('mitteilungen').delete().in('empfaenger_id', alle)
   }
-  await db.from('netzwerk_einladungen').delete().in('email', [SV_EMAIL, MAKLER_EMAIL])
+  await db.from('netzwerk_einladungen').delete().in('email', [SV_EMAIL, MAKLER_EMAIL, FLOTTE_EMAIL])
   // Neue Accounts + Einlader via throwaway-cleanup (per Email bzw. uid)
-  for (const ref of [SV_EMAIL, MAKLER_EMAIL, einlader?.uid].filter(Boolean) as string[]) {
+  for (const ref of [SV_EMAIL, MAKLER_EMAIL, FLOTTE_EMAIL, einlader?.uid].filter(Boolean) as string[]) {
     try {
       execSync(`node scripts/smoke/throwaway-account.mjs cleanup ${ref}`, { cwd: process.cwd(), encoding: 'utf8' })
     } catch { /* best effort — makler-Rows haengen ggf. an eigener Kette */ }
   }
+  // Netz unter dem cleanup-Script: firmen-Row des Flotten-Self-Signups (idempotent,
+  // no-op wenn das Script sie ueber firmen_flotten_konten bereits mitgenommen hat).
+  await db.from('firmen').delete().eq('name', FLOTTE_FIRMA)
 })
 
 async function pollRedemption(
@@ -165,4 +175,39 @@ test('Redemption Makler: Registrierung mit ?einladung -> eingeloest + Auto-Kante
 
   const res = await pollRedemption(svc(), MAKLER_EMAIL)
   expect(res, 'Makler-Einladung eingeloest + Kante angenommen').not.toBeNull()
+})
+
+test('Redemption Flotte (#5010): Registrierung mit ?einladung -> eingeloest + Auto-Kante', async ({ page }) => {
+  test.setTimeout(180_000)
+  await page.goto(`${APP}/flotte/registrieren?einladung=${tokenFlotte}`, {
+    waitUntil: 'domcontentloaded',
+  })
+
+  // Public-Erreichbarkeit: kein Auth-Redirect (Middleware-Whitelist '/flotte/registrieren')
+  await expect(page).toHaveURL(/\/flotte\/registrieren/)
+
+  await fillByLabel(page, /Firmenname \*/, FLOTTE_FIRMA)
+  await fillByLabel(page, /Vorname/, 'Smoke') // Label: "Vorname (Ansprechpartner) *"
+  await fillByLabel(page, /^E-Mail \*/, FLOTTE_EMAIL)
+
+  await page.getByRole('button', { name: 'Kostenlos registrieren' }).click()
+
+  const res = await pollRedemption(svc(), FLOTTE_EMAIL)
+  expect(res, 'Flotten-Einladung eingeloest + Auto-Kante angenommen').not.toBeNull()
+
+  // Self-Signup-Substanz: Firma (quelle-Snapshot) + Flotten-Konto existieren
+  const db = svc()
+  const { data: firma } = await db.from('firmen').select('id').eq('name', FLOTTE_FIRMA).maybeSingle()
+  expect(firma, 'firmen-Row aus ensureFirma').not.toBeNull()
+  const { data: konto } = await db
+    .from('firmen_flotten_konten')
+    .select('status')
+    .eq('firma_id', (firma as { id: string }).id)
+    .maybeSingle()
+  expect((konto as { status?: string } | null)?.status, 'firmen_flotten_konten aktiv').toBe('aktiv')
+})
+
+test('Anon-Guard: /flotte-Portal bleibt hinter dem Login-Gate', async ({ page }) => {
+  await page.goto(`${APP}/flotte`, { waitUntil: 'domcontentloaded' })
+  await expect(page).toHaveURL(/\/login/)
 })

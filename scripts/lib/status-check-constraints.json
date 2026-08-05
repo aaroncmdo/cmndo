@@ -1067,6 +1067,7 @@
       "offen"
     ],
     "netzwerk_einladungen.ziel_rolle": [
+      "flottenmanager",
       "makler",
       "sachverstaendiger",
       "werkstatt"
@@ -1095,6 +1096,18 @@
       "failed",
       "pending",
       "processing"
+    ],
+    "notifications_outbox.kanal": [
+      "email",
+      "in_app",
+      "sms",
+      "whatsapp"
+    ],
+    "notifications_outbox.status": [
+      "failed",
+      "pending",
+      "sending",
+      "sent"
     ],
     "ocr_runs.engine": [
       "claude_vision",
