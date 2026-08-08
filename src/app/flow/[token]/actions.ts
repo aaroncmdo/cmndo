@@ -20,6 +20,7 @@ import { getStorageUrl } from '@/lib/storage/url'
 import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -775,6 +776,22 @@ export async function signSAandCreateFall(
   // Cold-Kill); ein Baileys-Fail darf die Konversion nie brechen.
   void (async () => {
     if (saWasAlreadySigned) return // Re-Entry (Reload/Retry): keine doppelte Willkommens-/Team-WA
+    // Send-Isolation (interne-identitaet.ts): interne/Test-Bucher (@claimondo.de, Test-Marker)
+    // loesen KEINE Kunde-/Team-WhatsApp aus — dieselbe Isolation, die reserviereEmbedTermin
+    // schon fuer seine Reservierungs-Sends hat. Verhindert das "kein Termin gebucht"-Rauschen
+    // aus Team-Funnel-Smokes: deren Partner-Buchung blockt der Test-SV-Guard (intern->echt) ->
+    // aktiverTerminId NULL -> Team-WA "⚠ kein Termin gebucht". Echte Kunden (extern) loesen den
+    // Dispatch-Alarm weiter aus.
+    if (
+      istInterneIdentitaet(
+        (lead.email as string | null) ?? null,
+        [((lead.vorname as string | null) ?? '').trim(), ((lead.nachname as string | null) ?? '').trim()]
+          .filter(Boolean)
+          .join(' ') || null,
+      )
+    ) {
+      return
+    }
     try {
       const vorname = ((lead.vorname as string | null) ?? '').trim()
       const nachname = ((lead.nachname as string | null) ?? '').trim()
