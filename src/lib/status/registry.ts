@@ -8,6 +8,7 @@ import { LEAD_WORKFLOW_DEFS } from './domains/lead-workflow'
 import { VERTRIEB_WORKFLOW_DEFS } from './domains/vertrieb-workflow'
 import { COLD_MAIL_DEFS } from './domains/cold-mail'
 import { PARTNER_AKTIVITAET_DEFS } from './domains/partner-aktivitaet'
+import { NETZWERK_ABO_DEFS } from './domains/netzwerk-abo'
 
 export const DOMAINS: Record<DomainName, Record<string, StatusDef>> = {
   'fall-status': FALL_STATUS_DEFS,
@@ -18,4 +19,5 @@ export const DOMAINS: Record<DomainName, Record<string, StatusDef>> = {
   'vertrieb-workflow': VERTRIEB_WORKFLOW_DEFS,
   'cold-mail': COLD_MAIL_DEFS,
   'partner-aktivitaet': PARTNER_AKTIVITAET_DEFS,
+  'netzwerk-abo': NETZWERK_ABO_DEFS,
 }
