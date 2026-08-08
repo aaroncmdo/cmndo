@@ -1,7 +1,8 @@
 // Aaron 07.07.: SV-Leads-Verwaltung in die Sachverstaendige-Sektion geholt.
-// Full-Page-Fallback (Deep-Link / Hard-Nav); die Soft-Nav oeffnet den Drawer
-// ueber der Karte via @drawer/(.)leads. Reused getSvLeads + SvLeadsClient
-// (unveraendert; die Actions/Types bleiben unter /admin/sv-leads).
+// F2b: dieser Content ist jetzt kanonisch unter /admin/vertrieb/sachverstaendige/leads
+// (Re-Export); /admin/sachverstaendige/leads ist ein 308-Redirect dorthin. Der fruehere
+// Legacy-@drawer/(.)leads wurde entfernt (tot, da die Liste wegredirectet). Reused
+// getSvLeads + SvLeadsClient (unveraendert; Actions/Types bleiben unter /admin/sv-leads).
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
