@@ -55,7 +55,7 @@ export async function generateQrPoolBatch(
     }
     if (!inserted) return { ok: false, error: 'Token-Generierung fehlgeschlagen (zu viele Kollisionen).' }
   }
-  revalidatePath('/admin/werkstaetten/qr-pool')
+  revalidatePath('/admin/vertrieb/werkstaetten/qr-pool')
   return { ok: true, tokens }
 }
 
@@ -98,6 +98,6 @@ export async function weiseQrPoolCodeZu(
   if (!updated) return { ok: false, error: 'Code wurde zwischenzeitlich vergeben.' }
 
   revalidatePath('/admin/werkstaetten')
-  revalidatePath('/admin/werkstaetten/qr-pool')
+  revalidatePath('/admin/vertrieb/werkstaetten/qr-pool')
   return { ok: true }
 }
