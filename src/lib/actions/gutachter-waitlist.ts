@@ -10,6 +10,7 @@
 // secret-Token besser für Quota-Tracking — fallback auf NEXT_PUBLIC_).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 import crypto from 'node:crypto'
 
@@ -133,13 +134,13 @@ export async function stelleWaitlistAnfrage(input: SubmitInput): Promise<Result>
     if (admins && admins.length > 0) {
       await Promise.all(
         admins.map((a) =>
-          admin.from('benachrichtigungen').insert({
-            user_id: a.id as string,
-            typ: 'update',
-            titel: 'Neue Gutachter-Bewerbung',
-            nachricht: `${input.vorname} ${input.nachname} (${input.plz}${geo?.ort ? ' ' + geo.ort : ''}) hat sich auf gutachter.claimondo.de eingetragen.`,
-            link: `/admin/partner/waitlist/${data.id}`,
-          }),
+          createNotification(
+            a.id as string,
+            'update',
+            'Neue Gutachter-Bewerbung',
+            `${input.vorname} ${input.nachname} (${input.plz}${geo?.ort ? ' ' + geo.ort : ''}) hat sich auf gutachter.claimondo.de eingetragen.`,
+            `/admin/partner/waitlist/${data.id}`,
+          ),
         ),
       )
     }

@@ -7,6 +7,7 @@
 // - sendManualWhatsAppAction: One-off WA-Nachricht, loggt in fall_communications
 
 import { createClient } from '@/lib/supabase/server'
+import { createNotification } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 import { sendManualWhatsApp } from '@/lib/whatsapp'
 
@@ -102,13 +103,13 @@ export async function sendChatNachricht(
     }
 
     for (const e of empfaenger) {
-      await admin.from('benachrichtigungen').insert({
-        user_id: e.user_id,
-        typ: 'chat',
-        titel: `Neue Nachricht von ${senderName}`,
-        beschreibung: nachricht.slice(0, 100),
-        link: e.isKunde ? `/kunde/faelle/${fallId}` : `/faelle/${fallId}`,
-      })
+      await createNotification(
+        e.user_id,
+        'chat',
+        `Neue Nachricht von ${senderName}`,
+        nachricht.slice(0, 100),
+        e.isKunde ? `/kunde/faelle/${fallId}` : `/faelle/${fallId}`,
+      )
 
       if (e.isKunde && fall?.lead_id) {
         const { data: lead } = await admin.from('leads').select('telefon').eq('id', fall.lead_id).single()
