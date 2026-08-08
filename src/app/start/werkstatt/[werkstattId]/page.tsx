@@ -12,6 +12,7 @@
 import { redirect } from 'next/navigation'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { resolveVermittlerOwnerProfil } from '@/lib/netzwerk/owner-resolution'
 import { FinderMap } from '@/app/embed/gutachter-finder/_components/FinderMap'
 import { FinderWizard } from '@/app/embed/gutachter-finder/_components/FinderWizard'
 
@@ -38,7 +39,12 @@ export default async function WerkstattStartPage({
 
   const adresse = [werkstatt.adresse_strasse, werkstatt.adresse_plz, werkstatt.adresse_ort].filter(Boolean).join(', ')
 
-  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
+  // Ebene-2 relationaler Boost (Design §5.2): die Owner-Profil-id der Werkstatt (werkstaetten.user_id).
+  // Gesetzt → im Finder-Ranking ranken die ZAHLENDEN Freund-SVs dieser Werkstatt oben (imNetzwerk).
+  // Die Werkstatt ist oben bereits als aktiv validiert; makler bliebe hier null (kein Graph-Knoten).
+  const ownerProfilId = await resolveVermittlerOwnerProfil(supabase, 'werkstatt', werkstatt.id)
+
+  const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs({ ownerProfilId }), ladeSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
   const leadPins = leadsRes.ok ? leadsRes.data : []
 
@@ -70,6 +76,7 @@ export default async function WerkstattStartPage({
           werkstattId={werkstatt.id}
           werkstattName={werkstatt.name}
           werkstattGeo={werkstattGeo}
+          ownerProfilId={ownerProfilId}
         />
       }
     />

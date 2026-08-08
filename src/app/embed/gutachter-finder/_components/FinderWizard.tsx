@@ -90,6 +90,7 @@ export function FinderWizard({
   werkstattGeo,
   promotionCodeId,
   schaetzungSessionId,
+  ownerProfilId = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -102,6 +103,10 @@ export function FinderWizard({
   promotionCodeId?: string | null
   /** Anspruch-pruefen: Session-Token der Schaetzung → reserviereEmbedTermin → Lead-Verknuepfung. */
   schaetzungSessionId?: string | null
+  /** Relationaler Owner-Boost (Ebene 2): profiles.id des attribuierenden Owners (aus dem
+   *  Werkstatt-Einstieg resolveVermittlerOwnerProfil). Gesetzt → dessen zahlende Freund-SVs
+   *  ranken im Matching oben (imNetzwerk-Badge). null (Default, anon-Embed) = kein Boost. */
+  ownerProfilId?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -179,7 +184,7 @@ export function FinderWizard({
     setSelectedDeadPinId(null)
     setMatchLoading(true)
     const req = ++matchReqRef.current
-    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback, ownerProfilId }).then((res) => {
       if (matchReqRef.current !== req) return
       setMatching(res)
       setMatchLoading(false)
@@ -201,7 +206,7 @@ export function FinderWizard({
     setSelectedDeadPinId(null)
     setMatchLoading(true)
     const req = ++matchReqRef.current
-    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback, ownerProfilId }).then((res) => {
       if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
       setMatching(res)
       setMatchLoading(false)
@@ -304,7 +309,7 @@ export function FinderWizard({
     if (ort) {
       setMatchLoading(true)
       const req = ++matchReqRef.current
-      void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+      void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, wunschterminLokal: wunschterminLokal || null, forceFallback, ownerProfilId }).then((res) => {
         if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
         setMatching(res)
         setMatchLoading(false)
