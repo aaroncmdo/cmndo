@@ -37,9 +37,9 @@ export default async function SvDetailPage({
   const sp = (await searchParams) ?? {}
   const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : sp.tab === 'abrechnungen' ? 'abrechnungen' : 'stammdaten'
   const tabs: DetailTab[] = [
-    { key: 'stammdaten', label: 'Stammdaten', href: `/admin/sachverstaendige/${id}` },
-    { key: 'verifizierung', label: 'Verifizierung', href: `/admin/sachverstaendige/${id}?tab=verifizierung` },
-    { key: 'abrechnungen', label: 'Abrechnungen', href: `/admin/sachverstaendige/${id}?tab=abrechnungen` },
+    { key: 'stammdaten', label: 'Stammdaten', href: `/admin/vertrieb/sachverstaendige/${id}` },
+    { key: 'verifizierung', label: 'Verifizierung', href: `/admin/vertrieb/sachverstaendige/${id}?tab=verifizierung` },
+    { key: 'abrechnungen', label: 'Abrechnungen', href: `/admin/vertrieb/sachverstaendige/${id}?tab=abrechnungen` },
   ]
   const supabase = await createClient()
 
