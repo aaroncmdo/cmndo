@@ -113,32 +113,13 @@ export async function uploadGutachten(
     erstellt_von: user.id,
   })
 
-  // AAR-229 W4: Mitteilung an Admin (Kundenbetreuer) bei Gutachten-Upload.
-  // Kanzlei-Empfänger bewusst weggelassen: kanzlei_id (seit CMM-44 SP-I6 auf
-  // kanzlei_faelle) referenziert die kanzleien-Tabelle, nicht profiles —
-  // mitteilungen.empfaenger_id hat aber FK auf profiles.id. Kanzlei-
-  // Benachrichtigung läuft via Email separat (send-gutachten-an-kanzlei).
-  try {
-    const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
-    // CMM-49: kundenbetreuer_id direkt aus claims (SSoT) via resolveClaimId — kein faelle-Read.
-    const mitClaimId = await resolveClaimId(supabase, fallId)
-    const { data: claimForMitteilung } = mitClaimId
-      ? await supabase
-          .from('claims')
-          .select('kundenbetreuer_id')
-          .eq('id', mitClaimId)
-          .maybeSingle()
-      : { data: null }
-    if (claimForMitteilung?.kundenbetreuer_id) {
-      await createMitteilung({
-        empfaenger_id: claimForMitteilung.kundenbetreuer_id,
-        empfaenger_rolle: 'admin',
-        kategorie: 'update', titel: 'Gutachten fertiggestellt',
-        inhalt: `${svName} — ${betragFmt}`,
-        kontext_typ: 'fall', kontext_id: fallId,
-      })
-    }
-  } catch { /* non-critical */ }
+  // C3c (Bell-Konsolidierung): die fruehere AAR-229-createMitteilung ("Gutachten
+  // fertiggestellt") an den KB war ein Double zur KFZ-204-Notification unten — beide
+  // schreiben mitteilungen, gleicher kundenbetreuer_id, gleiches Event. Vor C3c fiel es
+  // nicht auf, weil createNotification auf die tote benachrichtigungen-Tabelle schrieb;
+  // jetzt sichtbar -> zu EINER aktionablen KB-Mitteilung (unten, inkl. Betrag +
+  // Filmcheck-CTA) zusammengefuehrt. Kanzlei-Empfaenger laeuft separat via Email
+  // (send-gutachten-an-kanzlei; kanzlei_id -> kanzleien, nicht profiles).
 
   // KFZ-204: QC-Task fuer KB "Filmcheck durchfuehren"
   // CMM-49: kundenbetreuer_id + claim_nummer direkt aus claims (SSoT) via resolveClaimId.
@@ -169,7 +150,7 @@ export async function uploadGutachten(
       claimForTask.kundenbetreuer_id,
       'filmcheck',
       `Gutachten bereit: Fall ${fallNrForTask}`,
-      `${svName} hat das Gutachten hochgeladen. Filmcheck erforderlich.`,
+      `${svName} hat das Gutachten hochgeladen (${betragFmt}). Filmcheck erforderlich.`,
       `/faelle/${fallId}`,
     ).catch(() => {})
   }
