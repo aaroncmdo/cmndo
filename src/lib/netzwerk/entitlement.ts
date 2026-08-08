@@ -2,9 +2,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export type AboZeile = { status: string; gueltig_bis: string | null }
 
-/** Reine Ableitung (derive-at-read, K1): comped ODER (aktiv UND nicht abgelaufen). */
+/**
+ * Reine Ableitung (derive-at-read, K1). Aktiv, wenn:
+ *  - comped: unbefristet (gueltig_bis NULL, Bestandsfall) ODER befristet-und-nicht-abgelaufen,
+ *  - aktiv:  befristet-und-nicht-abgelaufen (ohne gueltig_bis kein aktives Stripe-Abo).
+ * Ein befristetes comped (Admin-Deal mit Ablaufdatum) laeuft damit real ab.
+ */
 export function istAktivesAbo(abo: AboZeile, now: Date = new Date()): boolean {
-  if (abo.status === 'comped') return true
+  if (abo.status === 'comped') return abo.gueltig_bis == null ? true : new Date(abo.gueltig_bis) >= now
   if (abo.status !== 'aktiv') return false
   return abo.gueltig_bis == null ? false : new Date(abo.gueltig_bis) >= now
 }

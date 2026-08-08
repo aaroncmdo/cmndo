@@ -17,6 +17,7 @@ import { getPartnerBilling } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
 import NetzwerkAboSektion, { type NetzwerkAboRow } from './NetzwerkAboSektion'
+import { istAktivesAbo } from '@/lib/netzwerk/entitlement'
 
 type SvSearchParams = { tab?: string }
 
@@ -97,13 +98,19 @@ export default async function SvDetailPage({
     if (error) {
       netzwerkAboLoadError = error.message
     } else {
-      netzwerkAbos = (data ?? []).map((r) => ({
-        id: r.id as string,
-        status: r.status as string,
-        gueltigBis: (r.gueltig_bis as string | null) ?? null,
-        stripeSubscriptionId: (r.stripe_subscription_id as string | null) ?? null,
-        erstelltAm: r.erstellt_am as string,
-      }))
+      const jetzt = new Date()
+      netzwerkAbos = (data ?? []).map((r) => {
+        const status = r.status as string
+        const gueltigBis = (r.gueltig_bis as string | null) ?? null
+        return {
+          id: r.id as string,
+          status,
+          gueltigBis,
+          stripeSubscriptionId: (r.stripe_subscription_id as string | null) ?? null,
+          erstelltAm: r.erstellt_am as string,
+          istAktiv: istAktivesAbo({ status, gueltig_bis: gueltigBis }, jetzt),
+        }
+      })
     }
   } catch (err) {
     console.error('[admin/sv-detail] netzwerk-abo-Read:', err)

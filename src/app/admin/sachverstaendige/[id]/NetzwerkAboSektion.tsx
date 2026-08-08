@@ -17,6 +17,8 @@ export type NetzwerkAboRow = {
   gueltigBis: string | null
   stripeSubscriptionId: string | null
   erstelltAm: string
+  /** Server-abgeleitet via istAktivesAbo (comped/aktiv & nicht abgelaufen). */
+  istAktiv: boolean
 }
 
 type Props = {
@@ -26,11 +28,16 @@ type Props = {
 }
 
 const STRIPE_GEFUEHRT = new Set(['aktiv', 'ueberfaellig'])
+const inputCls = 'rounded-ios-sm border border-claimondo-border px-2 py-1 text-body-xs bg-white'
 
 export default function NetzwerkAboSektion({ svId, abos, loadError }: Props) {
   const [pending, startTransition] = useTransition()
   const [fehler, setFehler] = useState<string | null>(null)
+  const [gueltigBis, setGueltigBis] = useState('')
+  const [grund, setGrund] = useState('')
 
+  // Nur ein AKTIVES comped blockt das Freistellen; ein abgelaufenes darf erneuert werden.
+  const hatAktivComped = abos.some((a) => a.status === 'comped' && a.istAktiv)
   const hatComped = abos.some((a) => a.status === 'comped')
   const hatStripeAbo = abos.some((a) => STRIPE_GEFUEHRT.has(a.status))
 
@@ -42,8 +49,10 @@ export default function NetzwerkAboSektion({ svId, abos, loadError }: Props) {
 
     setFehler(null)
     startTransition(async () => {
-      const res = await setzeNetzwerkComped(svId, ziel)
+      const opts = ziel === 'setzen' ? { gueltigBis: gueltigBis || null, grund } : undefined
+      const res = await setzeNetzwerkComped(svId, ziel, opts)
       if (!res.ok) setFehler(res.error ?? 'Unbekannter Fehler')
+      else if (ziel === 'setzen') { setGueltigBis(''); setGrund('') }
     })
   }
 
@@ -58,24 +67,30 @@ export default function NetzwerkAboSektion({ svId, abos, loadError }: Props) {
         <div className="space-y-3">
           {abos.length > 0 && (
             <ul className="space-y-2">
-              {abos.map((a) => (
-                <li key={a.id} className="flex items-center gap-3 flex-wrap">
-                  <StatusBadge domain="netzwerk-abo" code={a.status} />
-                  <span className="text-body-xs text-claimondo-ondo/70">
-                    seit {new Date(a.erstelltAm).toLocaleDateString('de-DE')}
-                  </span>
-                  {a.gueltigBis && (
+              {abos.map((a) => {
+                const abgelaufen = a.status === 'comped' && !a.istAktiv
+                return (
+                  <li key={a.id} className="flex items-center gap-3 flex-wrap">
+                    <StatusBadge domain="netzwerk-abo" code={a.status} />
+                    {abgelaufen && (
+                      <span className="text-body-xs text-warning-strong font-medium">abgelaufen</span>
+                    )}
                     <span className="text-body-xs text-claimondo-ondo/70">
-                      gültig bis {new Date(a.gueltigBis).toLocaleDateString('de-DE')}
+                      seit {new Date(a.erstelltAm).toLocaleDateString('de-DE')}
                     </span>
-                  )}
-                  {a.stripeSubscriptionId && (
-                    <span className="text-body-xs text-claimondo-ondo/50 font-mono" title="Stripe-Subscription">
-                      {a.stripeSubscriptionId}
-                    </span>
-                  )}
-                </li>
-              ))}
+                    {a.gueltigBis && (
+                      <span className="text-body-xs text-claimondo-ondo/70">
+                        gültig bis {new Date(a.gueltigBis).toLocaleDateString('de-DE')}
+                      </span>
+                    )}
+                    {a.stripeSubscriptionId && (
+                      <span className="text-body-xs text-claimondo-ondo/50 font-mono" title="Stripe-Subscription">
+                        {a.stripeSubscriptionId}
+                      </span>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           )}
 
@@ -83,14 +98,42 @@ export default function NetzwerkAboSektion({ svId, abos, loadError }: Props) {
             <p className="text-body-xs text-claimondo-ondo/70">
               Dieses Abo ist Stripe-geführt (Webhook + Mahnlauf) — Änderungen nur über Stripe, nicht hier.
             </p>
-          ) : hatComped ? (
+          ) : hatAktivComped ? (
             <Button variant="ghost" size="sm" loading={pending} onClick={() => toggle('entziehen')}>
               Comped entziehen
             </Button>
           ) : (
-            <Button variant="navy" size="sm" loading={pending} onClick={() => toggle('setzen')}>
-              Als Netzwerkpartner freistellen (comped)
-            </Button>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-end gap-2">
+                <label className="flex flex-col gap-0.5">
+                  <span className="text-caption text-claimondo-ondo/70">Befristet bis (optional)</span>
+                  <input
+                    type="date"
+                    value={gueltigBis}
+                    onChange={(e) => setGueltigBis(e.target.value)}
+                    className={inputCls}
+                  />
+                </label>
+                <label className="flex flex-col gap-0.5 flex-1 min-w-[180px]">
+                  <span className="text-caption text-claimondo-ondo/70">Grund (optional, für Verlauf)</span>
+                  <input
+                    type="text"
+                    value={grund}
+                    onChange={(e) => setGrund(e.target.value)}
+                    placeholder="z. B. Gründungspartner, Sonderkondition"
+                    className={inputCls}
+                  />
+                </label>
+              </div>
+              <Button variant="navy" size="sm" loading={pending} onClick={() => toggle('setzen')}>
+                Als Netzwerkpartner freistellen (comped)
+              </Button>
+              {hatComped && (
+                <p className="text-caption text-claimondo-ondo/60">
+                  Vorherige comped-Freistellung ist abgelaufen — Freistellen erneuert sie.
+                </p>
+              )}
+            </div>
           )}
 
           {fehler && <p className="text-body-xs text-danger">{fehler}</p>}

@@ -13,7 +13,7 @@
 // gueltig_bis ist fuer die Entscheidung bewusst irrelevant: auch ein
 // abgelaufenes 'aktiv' bleibt Stripe-gefuehrt (Webhook raeumt auf, nicht wir).
 
-export type AboRowMin = { id: string; status: string }
+export type AboRowMin = { id: string; status: string; gueltigBis?: string | null }
 export type CompedZiel = 'setzen' | 'entziehen'
 
 export type CompedEntscheidung =
@@ -24,12 +24,24 @@ export type CompedEntscheidung =
 
 const STRIPE_GEFUEHRT = new Set(['aktiv', 'ueberfaellig'])
 
-export function entscheideCompedToggle(rows: AboRowMin[], ziel: CompedZiel): CompedEntscheidung {
-  const compedRows = rows.filter((r) => r.status === 'comped')
+/** comped-Row, die (noch) Entitlement traegt: unbefristet ODER Ablaufdatum nicht erreicht. */
+function istCompedAktiv(r: AboRowMin, now: Date): boolean {
+  if (r.status !== 'comped') return false
+  return r.gueltigBis == null ? true : new Date(r.gueltigBis) >= now
+}
+
+export function entscheideCompedToggle(
+  rows: AboRowMin[],
+  ziel: CompedZiel,
+  now: Date = new Date(),
+): CompedEntscheidung {
+  const compedRows = rows.filter((r) => r.status === 'comped')          // alle (aktiv + abgelaufen)
+  const aktiveComped = compedRows.filter((r) => istCompedAktiv(r, now)) // nur noch gueltige
   const hatStripeAbo = rows.some((r) => STRIPE_GEFUEHRT.has(r.status))
 
   if (ziel === 'setzen') {
-    if (compedRows.length > 0) return { ok: true, aktion: 'noop', grund: 'bereits comped' }
+    // Nur ein AKTIVES comped blockt — ein abgelaufenes darf erneuert werden (neue Row, Historie bleibt).
+    if (aktiveComped.length > 0) return { ok: true, aktion: 'noop', grund: 'bereits comped' }
     if (hatStripeAbo) {
       return {
         ok: false,
@@ -39,6 +51,7 @@ export function entscheideCompedToggle(rows: AboRowMin[], ziel: CompedZiel): Com
     return { ok: true, aktion: 'insert_comped' }
   }
 
+  // entziehen: alle comped-Rows (aktiv ODER abgelaufen) auf inaktiv (Cleanup inklusive).
   if (compedRows.length > 0) {
     return { ok: true, aktion: 'set_inaktiv', rowIds: compedRows.map((r) => r.id) }
   }

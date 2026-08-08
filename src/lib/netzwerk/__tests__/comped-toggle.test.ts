@@ -7,6 +7,10 @@ import { entscheideCompedToggle, type AboRowMin } from '../comped-toggle'
 // Multi-Row-tolerant (sv_id hat KEIN Unique — Historie-Rows moeglich).
 
 const row = (id: string, status: string): AboRowMin => ({ id, status })
+const rowB = (id: string, status: string, gueltigBis: string | null): AboRowMin => ({ id, status, gueltigBis })
+const NOW = new Date('2026-08-08T00:00:00Z')
+const VERGANGEN = '2020-01-01T00:00:00Z'
+const ZUKUNFT = '2999-01-01T00:00:00Z'
 
 describe('entscheideCompedToggle — setzen', () => {
   test('keine Rows -> insert_comped', () => {
@@ -42,6 +46,16 @@ describe('entscheideCompedToggle — setzen', () => {
     const r = entscheideCompedToggle([row('a', 'comped'), row('b', 'aktiv')], 'setzen')
     expect(r).toMatchObject({ ok: true, aktion: 'noop' })
   })
+
+  test('befristetes comped in Zukunft -> noop (aktiv, blockt)', () => {
+    expect(entscheideCompedToggle([rowB('a', 'comped', ZUKUNFT)], 'setzen', NOW))
+      .toMatchObject({ ok: true, aktion: 'noop' })
+  })
+
+  test('abgelaufenes comped -> insert_comped (Erneuerung erlaubt)', () => {
+    expect(entscheideCompedToggle([rowB('a', 'comped', VERGANGEN)], 'setzen', NOW))
+      .toEqual({ ok: true, aktion: 'insert_comped' })
+  })
 })
 
 describe('entscheideCompedToggle — entziehen', () => {
@@ -57,6 +71,11 @@ describe('entscheideCompedToggle — entziehen', () => {
 
   test('comped + aktiv gemischt -> nur die comped-Row wird inaktiv (Stripe-Row unberuehrt)', () => {
     expect(entscheideCompedToggle([row('a', 'comped'), row('b', 'aktiv')], 'entziehen'))
+      .toEqual({ ok: true, aktion: 'set_inaktiv', rowIds: ['a'] })
+  })
+
+  test('abgelaufenes comped + entziehen -> set_inaktiv (Cleanup der Alt-Row)', () => {
+    expect(entscheideCompedToggle([rowB('a', 'comped', VERGANGEN)], 'entziehen', NOW))
       .toEqual({ ok: true, aktion: 'set_inaktiv', rowIds: ['a'] })
   })
 
