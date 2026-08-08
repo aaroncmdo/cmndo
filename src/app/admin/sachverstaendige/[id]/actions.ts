@@ -132,7 +132,7 @@ export async function updateSvProfile(
     }
   }
 
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   return { ok: true }
 }
@@ -168,7 +168,7 @@ export async function setzeSvVerifiziert(svId: string, verifiziert: boolean) {
 
   if (error) return { success: false, error: `Update fehlgeschlagen: ${error.message}` }
 
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   if (verifiziert) {
     await logPartnerEvent({ partnerTyp: 'sv', partnerId: svId, typ: 'verifiziert', text: 'SV verifiziert' })
@@ -293,6 +293,6 @@ export async function resendWelcomeMail(
     return { success: false, error: msg }
   }
 
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
   return { success: true, initial_password: initialPassword }
 }

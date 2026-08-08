@@ -110,7 +110,7 @@ export default function FallSidebar({
                 email: sv.profile.email,
                 telefon: sv.profile.telefon,
                 paket: sv.paket,
-                detailHref: `/admin/sachverstaendige/${sv.id}`,
+                detailHref: `/admin/vertrieb/sachverstaendige/${sv.id}`,
               }
             : null
         }

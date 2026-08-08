@@ -152,7 +152,7 @@ export default function SvPopup({ sv, role, svHrefBase }: SvPopupProps) {
                 ? `${svHrefBase}/${sv.id}`
                 : role === 'dispatch'
                   ? `/dispatch/sachverstaendige/${sv.id}`
-                  : `/admin/sachverstaendige/${sv.id}`
+                  : `/admin/vertrieb/sachverstaendige/${sv.id}`
             }
             style={{
               fontSize: 11,

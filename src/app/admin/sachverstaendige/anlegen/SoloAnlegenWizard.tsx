@@ -267,7 +267,7 @@ export default function SoloAnlegenWizard({ onSuccess, onCancel }: {
               </button>
               {/* AAR-205: Primary-Button zum frisch angelegten SV-Profil. */}
               <button
-                onClick={() => router.push(`/admin/sachverstaendige/${result.sv_id}`)}
+                onClick={() => router.push(`/admin/vertrieb/sachverstaendige/${result.sv_id}`)}
                 className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold"
               >
                 Zum Profil von {data.vorname} {data.nachname}
@@ -342,7 +342,7 @@ export default function SoloAnlegenWizard({ onSuccess, onCancel }: {
                         <>
                           {' '}
                           <Link
-                            href={`/admin/sachverstaendige/${emailCheck.sv_id}`}
+                            href={`/admin/vertrieb/sachverstaendige/${emailCheck.sv_id}`}
                             className="underline hover:text-warning-strong font-semibold"
                           >
                             Zum existierenden SV-Profil
