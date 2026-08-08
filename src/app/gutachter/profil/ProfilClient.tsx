@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
+import { loadGoogleMaps } from '@/lib/maps/load-google-maps'
 import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
 import { ProfilCommunityPrivacy } from './_components/ProfilCommunityPrivacy'
 import { ProfilVertrag } from './_components/ProfilVertrag'
@@ -40,16 +40,22 @@ export default function ProfilClient({
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
 
+  // F4-Fast-Follow: raw <Script> entfernt -> der geteilte Singleton loadGoogleMaps() laedt Maps
+  // genau einmal (idempotent, promise-gecacht, immer libraries=places). Der fruehere UNBEDINGTE
+  // <Script> injizierte einen ZWEITEN Maps-Tag, sobald der Singleton (via GooglePlaceAutocomplete
+  // in ProfilStammdaten) Maps schon von einer anderen Seite geladen hatte -> "included multiple
+  // times". Jetzt EINE Quelle; fehlender Key/Load-Fail -> mapsReady bleibt false -> Autocomplete
+  // degradiert auf Freitext (unveraendertes Verhalten zum bisherigen no-key-Fall).
+  useEffect(() => {
+    let cancelled = false
+    loadGoogleMaps()
+      .then(() => { if (!cancelled) setMapsReady(true) })
+      .catch((err) => { console.error('[ProfilClient] Google Maps Load fehlgeschlagen', err) })
+    return () => { cancelled = true }
+  }, [])
+
   return (
     <div className="h-full flex flex-col">
-      {process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY && (
-        <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY}&libraries=places&loading=async&v=weekly`}
-          strategy="lazyOnload"
-          onReady={() => setMapsReady(true)}
-        />
-      )}
-
       {/* BUG-91: Scroll-Container, max-w-full Page-Content
           BUG-98 Folge-Cleanup: Form von max-w-3xl auf max-w-4xl angehoben
           damit Desktop/Tablet quer den Platz nutzen. 4xl (~896px) bleibt
