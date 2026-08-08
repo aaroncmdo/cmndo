@@ -234,3 +234,48 @@ export async function reassigniereDeadPin(
     return { ok: false, error: 'Termin nicht (mehr) dispatch_pending', code: 'nicht_dispatch_pending' }
   return { ok: true, terminId }
 }
+
+export interface WeiseSvGesuchtZuInput {
+  /** Ziel-Partner (sachverstaendige.id) — validate_assignee-Trigger prueft die Existenz. */
+  partnerId: string
+  /** Ziel-Status. default 'bestaetigt' (Dispatch bestaetigt den echten Partner; s. reassigniereDeadPin). */
+  neuerStatus?: 'reserviert' | 'bestaetigt'
+  db?: SupabaseClient
+}
+export type WeiseSvGesuchtZuResult =
+  | { ok: true; terminId: string }
+  | { ok: false; error: string; code: 'nicht_sv_gesucht' | 'belegt' | 'db' }
+
+/**
+ * Kunde-Termin-Funnel T4: weist einen Portal-Wunschtermin (status='sv_gesucht', KEIN Assignee)
+ * einem echten Partner (sachverstaendiger) zu. Gegenstueck zu reassigniereDeadPin fuer die
+ * ANDERE Pending-Achse: sv_gesucht traegt keinen sv_lead-Assignee (der Kunde waehlte nur eine
+ * Wunschzeit ueber den Akte-Kalender), daher .eq('status','sv_gesucht') statt dispatch_pending+
+ * sv_lead und KEIN sv_lead_id-Null. Beim Flip in den Exclusion-Status (reserviert/bestaetigt)
+ * greift gutachter_termine_no_assignee_overlap → 23P01 bei Doppelbuchung (belegt). status-gegate
+ * → idempotent. Reine DB-Transition — Notify/Auth/Cursor-Nachlauf = Caller (Dispatch-Revier).
+ */
+export async function weiseSvGesuchtZu(
+  terminId: string,
+  input: WeiseSvGesuchtZuInput,
+): Promise<WeiseSvGesuchtZuResult> {
+  const db = input.db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+  const neuerStatus = input.neuerStatus ?? 'bestaetigt'
+  const { data, error } = await db
+    .from('gutachter_termine')
+    .update({
+      assignee_typ: 'sachverstaendiger',
+      assignee_id: input.partnerId,
+      status: neuerStatus,
+    })
+    .eq('id', terminId)
+    .eq('status', 'sv_gesucht')
+    .select('id')
+  if (error) {
+    if (error.code === '23P01') return { ok: false, error: 'Partner zu dieser Zeit belegt', code: 'belegt' }
+    return { ok: false, error: error.message, code: 'db' }
+  }
+  if (!data || data.length === 0)
+    return { ok: false, error: 'Termin nicht (mehr) sv_gesucht', code: 'nicht_sv_gesucht' }
+  return { ok: true, terminId }
+}

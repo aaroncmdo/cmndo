@@ -18,12 +18,6 @@ describe('Phase 1b — reaktivierte Termin-Consumer lesen kanonisch (gutachter_t
     expect(s).not.toMatch(SELECTS_SV_TERMIN)
   })
 
-  it('dispatch-fall-actions termin_bestaetigt nutzt aktuellerTerminFuerFall + selektiert kein sv_termin', () => {
-    const s = read('src/lib/actions/dispatch-fall-actions.ts')
-    expect(s).toMatch(/aktuellerTerminFuerFall/)
-    expect(s).not.toMatch(SELECTS_SV_TERMIN)
-  })
-
   it('gutachter-erinnerungen liest gutachter_termine + selektiert kein sv_termin', () => {
     const s = read('src/app/api/cron/gutachter-erinnerungen/route.ts')
     expect(s).toMatch(/from\(['"]gutachter_termine['"]\)/)

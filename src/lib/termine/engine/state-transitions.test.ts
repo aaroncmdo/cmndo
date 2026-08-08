@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sageAb, verlege, entscheideVerlegung, reassigniereDeadPin } from './state-transitions'
+import { sageAb, verlege, entscheideVerlegung, reassigniereDeadPin, weiseSvGesuchtZu } from './state-transitions'
 
 // Schlanker thenable-Recorder-Stub fuer den supabase-Query-Builder: jeder Terminal
 // (maybeSingle/single ODER ein awaited Builder nach select/eq) konsumiert die naechste
@@ -183,5 +183,38 @@ describe('reassigniereDeadPin', () => {
     const r = await reassigniereDeadPin('t1', { partnerId: 'sv-9', db: db as never })
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.code).toBe('nicht_dispatch_pending')
+  })
+})
+
+describe('weiseSvGesuchtZu (T4)', () => {
+  it('flippt sv_gesucht -> partner/bestaetigt, KEIN sv_lead_id-Touch', async () => {
+    const db = makeDb([{ data: [{ id: 't1' }], error: null }])
+    const r = await weiseSvGesuchtZu('t1', { partnerId: 'sv-9', db: db as never })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.terminId).toBe('t1')
+    const upd = (db as { calls: Array<Record<string, unknown>> }).calls.find((c) => 'update' in c)!.update as Record<string, unknown>
+    expect(upd.assignee_typ).toBe('sachverstaendiger')
+    expect(upd.assignee_id).toBe('sv-9')
+    expect(upd.status).toBe('bestaetigt')
+    // sv_gesucht hatte nie einen sv_lead-Assignee -> die Zuweisung fasst sv_lead_id NICHT an.
+    expect('sv_lead_id' in upd).toBe(false)
+  })
+  it('neuerStatus reserviert wird durchgereicht', async () => {
+    const db = makeDb([{ data: [{ id: 't1' }], error: null }])
+    await weiseSvGesuchtZu('t1', { partnerId: 'sv-9', neuerStatus: 'reserviert', db: db as never })
+    const upd = (db as { calls: Array<Record<string, unknown>> }).calls.find((c) => 'update' in c)!.update as Record<string, unknown>
+    expect(upd.status).toBe('reserviert')
+  })
+  it('23P01 (Partner zur Zeit belegt) -> belegt', async () => {
+    const db = makeDb([{ data: null, error: { code: '23P01', message: 'exclusion' } }])
+    const r = await weiseSvGesuchtZu('t1', { partnerId: 'sv-9', db: db as never })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.code).toBe('belegt')
+  })
+  it('kein Treffer (nicht mehr sv_gesucht) -> nicht_sv_gesucht', async () => {
+    const db = makeDb([{ data: [], error: null }])
+    const r = await weiseSvGesuchtZu('t1', { partnerId: 'sv-9', db: db as never })
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.code).toBe('nicht_sv_gesucht')
   })
 })
