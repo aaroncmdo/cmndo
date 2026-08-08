@@ -362,6 +362,15 @@ export default function FlowWizardKfz({
   // Schuldfrage erst jetzt im Quali-Step, faellt er auf die lokale Wahl zurueck — bei 'gegner' ist
   // das eindeutig (die Versicherungsfrage ist dann irrelevant, 'gegner' dominiert).
   const istHaftpflicht = weichen.abrechnungsweg === 'haftpflicht' || schuldfrageWahl === 'gegner'
+  // Kasko/Selbstzahler (DIRECT_REPARATUR_WEGE, siehe lib/claims/lifecycle.ts): eigene VS oder Kunde
+  // zahlt die Reparatur → KEIN Gegner-VS-Prozess → KEINE SA-Unterschrift, kein Gutachter, kein
+  // SV-Termin (Aaron 08.08.: "bei Kasko soll nichts unterzeichnet werden"). Positiv-Erkennung analog
+  // istHaftpflicht: Server-Weiche (kennt eigene_versicherung) hat Vorrang, sonst die lokale Quali-Wahl
+  // ('eigenverantwortung' deckt kasko+selbstzahler — beide brauchen kein 'sa').
+  const istDirectReparatur =
+    weichen.abrechnungsweg === 'kasko' ||
+    weichen.abrechnungsweg === 'selbstzahler' ||
+    schuldfrageWahl === 'eigenverantwortung'
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
   // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
   const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
@@ -402,11 +411,20 @@ export default function FlowWizardKfz({
   const nurVorhandeneFeststellung = (ids: StepId[]) =>
     ids.filter((id) => id !== 'feststellung' || initialHatFeststellung)
 
+  // Defense-in-Depth (Aaron 08.08.): SA/Gutachter/Termin sind Haftpflicht-Schritte (Gegner-VS-Prozess).
+  // Bei kasko/selbstzahler NIE in die Sequenz — auch wenn der legacySteps-Fallback greift (Config leer
+  // resolved, ladeFlowConfig schluckt Fehler still zu []) oder eine Config-Regression sie wieder
+  // einschleust. Die korrekte DB-Config laesst sie bei Kasko eh weg → dieser Filter ist idempotent,
+  // wenn die Config stimmt, und ein Netz, wenn nicht. `direct` explizit uebergebbar, weil
+  // uebernimmSzenario die frische Quali-Wahl kennt (der Closure-Wert kann dort noch stale sein).
+  const ohneHaftpflichtSteps = (ids: StepId[], direct: boolean = istDirectReparatur): StepId[] =>
+    direct ? ids.filter((id) => id !== 'sa' && id !== 'gutachter' && id !== 'termin') : ids
+
   // Beim Mount fixiert: sonst schrumpft/waechst die Sequenz mid-flow durch einen RSC-Re-Render
   // (LeadRealtimeRefresh) und der numerische stepIndex zeigt auf den falschen Step.
   const [steps, setSteps] = useState<StepId[]>(() => {
-    const ausConfig = nurVorhandeneFeststellung((weichen.steps ?? []) as StepId[])
-    return ausConfig.length > 0 ? ausConfig : legacySteps
+    const ausConfig = ohneHaftpflichtSteps(nurVorhandeneFeststellung((weichen.steps ?? []) as StepId[]))
+    return ausConfig.length > 0 ? ausConfig : ohneHaftpflichtSteps(legacySteps)
   })
 
   const STEPS: { id: StepId; label: string }[] = steps.map((id) => ({ id, label: STEP_LABELS[id] }))
@@ -433,7 +451,12 @@ export default function FlowWizardKfz({
       hatSvTermin === true,
     )
     const neu = resolveFlowWeichen(flowConfig.szenarien, flowConfig.steps, kontext)
-    const neueSteps = nurVorhandeneFeststellung(neu.steps as StepId[])
+    // Frische Quali-Wahl (schuldfrage-Argument), nicht der evtl. stale Closure-Wert: 'eigenverantwortung'
+    // = kasko/selbstzahler → SA/Gutachter/Termin raus.
+    const neueSteps = ohneHaftpflichtSteps(
+      nurVorhandeneFeststellung(neu.steps as StepId[]),
+      schuldfrage === 'eigenverantwortung',
+    )
     if (neueSteps.length === 0) {
       setStepIndex((i) => i + 1)
       return
