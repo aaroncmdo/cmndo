@@ -1,15 +1,17 @@
-// Aaron 07.07.: SV-Leads als Drawer ueber der Sachverstaendige-Karte.
-// Intercepting-Route (Soft-Nav zu /admin/sachverstaendige/leads oeffnet den
-// Drawer, Karte bleibt darunter). Muster analog @drawer/(.)anlegen. Hard-Nav
-// faellt auf die Full-Page ../../leads/page.tsx zurueck.
+// Aaron 07.07.: SV-Leads-Verwaltung in die Sachverstaendige-Sektion geholt.
+// F2b: dieser Content ist jetzt kanonisch unter /admin/vertrieb/sachverstaendige/leads
+// (Re-Export); /admin/sachverstaendige/leads ist ein 308-Redirect dorthin. Der fruehere
+// Legacy-@drawer/(.)leads wurde entfernt (tot, da die Liste wegredirectet). Reused
+// getSvLeads + SvLeadsClient (unveraendert; Actions/Types bleiben unter /admin/sv-leads).
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getSvLeads } from '@/app/admin/sv-leads/actions'
 import SvLeadsClient from '@/app/admin/sv-leads/SvLeadsClient'
-import { DrawerShell } from '@/components/shared/detail'
 
-export default async function InterceptedLeadsPage() {
+export const dynamic = 'force-dynamic'
+
+export default async function SachverstaendigeLeadsPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -23,11 +25,5 @@ export default async function InterceptedLeadsPage() {
 
   const svLeads = await getSvLeads()
 
-  return (
-    <DrawerShell title="SV-Leads" width={1040}>
-      <div className="px-4">
-        <SvLeadsClient svLeads={svLeads} hideHeader />
-      </div>
-    </DrawerShell>
-  )
+  return <SvLeadsClient svLeads={svLeads} />
 }

@@ -88,7 +88,28 @@ describe('runProvisionsRelease — generischer Release (loest den per-Typ-Cron a
         c.table === 'partner_provisionen' && c.method === 'in' && c.args[0] === 'partner_typ',
     )
     expect(typFilter).toBeDefined()
-    expect(typFilter.args[1]).toEqual(['makler', 'werkstatt', 'firmen_flotte'])
+    expect(typFilter.args[1]).toEqual(['makler', 'werkstatt', 'firmen_flotte', 'makler_empfehlung'])
+  })
+
+  it('RELEASE_PARTNER_TYPEN enthaelt makler_empfehlung (sonst bleibt der 10€-Override ewig pending)', () => {
+    expect(RELEASE_PARTNER_TYPEN).toContain('makler_empfehlung')
+  })
+
+  it('makler_empfehlung: abgeschlossener Claim + 7d -> freigegeben (Override jetzt releasebar)', async () => {
+    const db = fakeDb({
+      pending: [pendingRow({ id: 'pe', partner_typ: 'makler_empfehlung', partner_id: 'sponsor-1', betrag_netto_eur: 10 })],
+      claims: [abgeschlossenerClaim()],
+    })
+
+    const r = await runProvisionsRelease(db, { partnerTypen: RELEASE_PARTNER_TYPEN, now: NOW })
+
+    if (!r.ok) throw new Error(r.error)
+    expect(r.released).toBe(1)
+    expect(db._updates).toContainEqual({
+      table: 'partner_provisionen',
+      patch: { status: 'freigegeben' },
+      ids: ['pe'],
+    })
   })
 
   it('firmen_flotte: abgeschlossener Claim + 7d vorbei -> freigegeben (heute: bleibt ewig pending)', async () => {

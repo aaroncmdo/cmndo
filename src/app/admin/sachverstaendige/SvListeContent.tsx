@@ -63,7 +63,7 @@ export default async function SachverstaendigeHubPage() {
         <div className="flex items-center gap-2">
           {basicFreigabenCount > 0 ? (
             <Link
-              href="/admin/sachverstaendige/basic-freigaben"
+              href="/admin/vertrieb/sachverstaendige/basic-freigaben"
               className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-warning-soft text-warning-strong hover:bg-warning/25 border border-warning/30"
             >
               Basic-Freigaben
@@ -73,20 +73,20 @@ export default async function SachverstaendigeHubPage() {
             </Link>
           ) : (
             <Link
-              href="/admin/sachverstaendige/basic-freigaben"
+              href="/admin/vertrieb/sachverstaendige/basic-freigaben"
               className="text-xs font-medium px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
             >
               Basic-Freigaben
             </Link>
           )}
           <Link
-            href="/admin/sachverstaendige/leads"
+            href="/admin/vertrieb/sachverstaendige/leads"
             className="text-xs font-medium px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
           >
             SV-Leads
           </Link>
           <Link
-            href="/admin/sachverstaendige/anlegen"
+            href="/admin/vertrieb/sachverstaendige/anlegen"
             className="text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
             + Neuer SV

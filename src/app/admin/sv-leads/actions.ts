@@ -75,7 +75,7 @@ export async function createSvLead(
 
   if (!result.ok) return { ok: false, error: result.error }
 
-  revalidatePath('/admin/sachverstaendige/leads')
+  revalidatePath('/admin/vertrieb/sachverstaendige/leads')
   return { ok: true, id: result.id }
 }
 
@@ -89,7 +89,7 @@ export async function importSvLeadsAction(csvText: string): Promise<
   const result = await importSvLeads(csvText)
   if (!result.ok) return { ok: false, error: result.error }
 
-  revalidatePath('/admin/sachverstaendige/leads')
+  revalidatePath('/admin/vertrieb/sachverstaendige/leads')
   return { ok: true, importiert: result.importiert, fehler: result.fehler }
 }
 
@@ -121,7 +121,7 @@ export async function sendeSvLeadEinladung(
   if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Einladungen senden.' }
 
   const result = await ladeSvLeadEinladung(leadId)
-  revalidatePath('/admin/sachverstaendige/leads')
+  revalidatePath('/admin/vertrieb/sachverstaendige/leads')
   return result
 }
 
@@ -137,7 +137,7 @@ export async function datSyncAusfuehren(): Promise<
   const result = await syncSvLeadsFromSource(datStubSource)
   if (!result.ok) return { ok: false, error: result.error }
 
-  revalidatePath('/admin/sachverstaendige/leads')
+  revalidatePath('/admin/vertrieb/sachverstaendige/leads')
   return { ok: true, importiert: result.importiert, fehler: result.fehler }
 }
 
@@ -176,6 +176,6 @@ export async function sendeAlleOffenenEinladungen(): Promise<
     }
   }
 
-  revalidatePath('/admin/sachverstaendige/leads')
+  revalidatePath('/admin/vertrieb/sachverstaendige/leads')
   return { ok: true, gesendet, uebersprungen }
 }
