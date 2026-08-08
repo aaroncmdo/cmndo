@@ -607,7 +607,11 @@ export async function convertLeadToClaim(
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)
-    .select('id, claim_nummer')
+    // Tranche W (T4b): reparatur_werkstatt_id zuruecklesen — der DB-Trigger
+    // set_reparatur_werkstatt_from_qr promotet sie beim INSERT aus claims.werkstatt_id
+    // (qr_referral), wobei lead.reparatur_werkstatt_id NULL ist. Der zurueckgelesene Wert
+    // deckt so BEIDE Faelle fuer die reparatur_termine-Anlage unten.
+    .select('id, claim_nummer, reparatur_werkstatt_id')
     .single()
 
   if (claimErr || !claim) {
@@ -897,7 +901,13 @@ export async function convertLeadToClaim(
   // einen Termin vor (ohne Wunschtermin) / ruft an / lehnt ab im naechsten Schritt.
   // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
   {
-    const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
+    // Tranche W (T4b): den EFFEKTIVEN Claim-Zustand nutzen, nicht nur das Lead-Feld. Der
+    // qr_referral-Pfad promotet reparatur_werkstatt_id per DB-Trigger beim claims-INSERT
+    // (lead.reparatur_werkstatt_id ist dann NULL) -> ohne diesen Fallback entstand fuer 6/6
+    // qr_referral-Claims KEINE reparatur_termine-Row (live-DB 08.08.) = toter Auftrag. Bei
+    // gesetztem Lead-Feld ist claim.reparatur_werkstatt_id == Lead-Wert -> Verhalten unveraendert.
+    const rwtWerkstattId =
+      (claim.reparatur_werkstatt_id as string | null) ?? (lead.reparatur_werkstatt_id as string | null) ?? null
     const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
     if (rwtWerkstattId) {
       const { error: rtErr } = await admin

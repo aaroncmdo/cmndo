@@ -14,6 +14,7 @@ import {
 } from '@/lib/werkstatt/vermittlung-core'
 import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
 import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
+import { ensureReparaturTerminAngefragt } from '@/lib/werkstatt/ensure-reparatur-termin'
 import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
 import { applyNetzwerkPraeferenz } from '@/lib/netzwerk/apply-netzwerk-praeferenz'
@@ -212,6 +213,26 @@ export async function assignReparaturWerkstatt(
         user_id: input.actorUserId,
         grund: 'werkstatt_vermittelt',
       })
+    }
+  }
+
+  // Tranche W (Spec §4.9, W2): idempotente reparatur_termine-Row anlegen, damit die
+  // Werkstatt-Auftrag-Sektion sichtbar wird. Deckt alle Claim-facing Bindungspfade (Akte-
+  // Finder/Dispatch/KB/Lead-Sync) — bisher legten die kunde-/dispatch-Pfade KEINE Row an
+  // (live-DB 08.08.: Quelle 'kunde' 2/2 ohne Row -> toter Werkstatt-Auftrag). Non-fatal:
+  // die Zuweisung steht bereits, ein Row-Fehler darf sie nicht zuruecknehmen.
+  if (effectiveClaimId) {
+    try {
+      const ensureRes = await ensureReparaturTerminAngefragt(admin, {
+        claimId: effectiveClaimId,
+        werkstattId: input.werkstattId,
+        erstelltVon: input.actorUserId,
+      })
+      if (!ensureRes.ok) {
+        console.error('[assignReparaturWerkstatt] ensureReparaturTermin fehlgeschlagen (non-fatal):', ensureRes.error)
+      }
+    } catch (err) {
+      console.error('[assignReparaturWerkstatt] ensureReparaturTermin fehlgeschlagen (non-fatal):', err)
     }
   }
 

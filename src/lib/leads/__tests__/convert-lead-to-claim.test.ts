@@ -428,6 +428,37 @@ describe('convertLeadToClaim', () => {
     expect(rtPayload.status).toBe('angefragt')
   })
 
+  it('Tranche W (T4b): qr_referral — nutzt claims.reparatur_werkstatt_id (Trigger-Promotion) statt Lead-Feld', async () => {
+    // qr_referral: der DB-Trigger set_reparatur_werkstatt_from_qr promotet reparatur_werkstatt_id
+    // beim claims-INSERT aus claims.werkstatt_id; lead.reparatur_werkstatt_id ist NULL. Der
+    // post-Insert zurueckgelesene Claim-Wert traegt die reparatur_termine-Anlage — sonst
+    // entstuende keine Row (= toter Werkstatt-Auftrag, live-DB 08.08.: qr_referral 6/6 ohne Row).
+    primeResponses([
+      { data: { id: 'lead-qr', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select (Lead OHNE reparatur_werkstatt_id)
+      { data: [] },                                                                              // 2 profiles select
+      { data: [] },                                                                              // 3 T2 hatOffeneLeadTermine
+      { data: { id: 'claim-qr', claim_nummer: 'CLM-QR', reparatur_werkstatt_id: 'werkstatt-qr' } }, // 4 claims insert (Trigger-Promotion)
+      { data: { id: 'person-qr' } },                                                             // 5 personen insert
+      { data: null },                                                                            // 6 claim_parties insert
+      { data: [] },                                                                              // 7 T1 uebernehmeLeadTermine
+      { data: null },                                                                            // 8 reparatur_termine insert
+      { data: null },                                                                            // 9 faelle_claim_bridge upsert
+      { data: null },                                                                            // 10 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-qr' })
+    expect(r.ok).toBe(true)
+
+    const rtInsert = operations.find((o) => o.table === 'reparatur_termine' && o.op === 'insert')
+    expect(rtInsert).toBeTruthy()
+    const rtPayload = rtInsert!.payload as Record<string, unknown>
+    expect(rtPayload.claim_id).toBe('claim-qr')
+    expect(rtPayload.werkstatt_id).toBe('werkstatt-qr')
+    expect(rtPayload.wunschtermin).toBeNull()
+    expect(rtPayload.status).toBe('angefragt')
+  })
+
   // ─── KB-Skip fuer Selbstzahler (Aaron 06.07.) ────────────────────────────
   it('KB-Skip: Selbstzahler-Lead bekommt KEINEN Kundenbetreuer (Round-Robin uebersprungen)', async () => {
     // abrechnungsweg='selbstzahler' -> reiner Reparatur-Vorgang ohne SV/Regulierung
