@@ -123,6 +123,9 @@ export async function ladeEmbedMatching(input: {
   lng: number
   wunschterminLokal?: string | null
   forceFallback?: boolean
+  /** Relationaler Owner-Boost (Ebene 2): profiles.id des attribuierenden Owners (z.B. Werkstatt-
+   *  Einstieg /start/werkstatt/[id]). Gesetzt → dessen zahlende Freund-SVs ranken oben. null = keiner. */
+  ownerProfilId?: string | null
 }): Promise<PlaneTerminMitFallbackResult> {
   try {
     if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { kind: 'fallback', deadPins: [] }
@@ -168,7 +171,7 @@ export async function ladeEmbedMatching(input: {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
       return { kind: 'fallback', deadPins: mitZeiten(deadPins) }
     }
-    const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
+    const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso, ownerProfilId: input.ownerProfilId ?? null })
     if (res.kind === 'partner') return { kind: 'partner', svs: mitZeiten(res.svs) }
     return { kind: 'fallback', deadPins: mitZeiten(res.deadPins) }
   } catch (err) {

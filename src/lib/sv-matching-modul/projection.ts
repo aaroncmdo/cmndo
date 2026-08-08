@@ -23,7 +23,7 @@ export function rundeDistanz(km: number): string {
  * Nachnamen enthaelt).
  */
 export function toOeffentlichesSvProfil(input: ProjektionInput): OeffentlichesSvProfil {
-  const { candidate, bewertung, profil, slots, rang, istNetzwerkpartner } = input
+  const { candidate, bewertung, profil, slots, rang, istNetzwerkpartner, imNetzwerk } = input
   const vorname = (profil?.vorname ?? '').trim()
   return {
     svId: candidate.svId,
@@ -40,6 +40,8 @@ export function toOeffentlichesSvProfil(input: ProjektionInput): OeffentlichesSv
     // AAR-956 Partner-Tier: ehrlicher verdienter Rang (loest die paket-Plakette ab).
     rang: rang?.tier ?? null,
     rangSinnsatz: rang?.sinnsatz ?? null,
+    // Ebene-2 (relational): zahlender Freund des Owners. Fail-closed: fehlt der Input -> false.
+    imNetzwerk: imNetzwerk === true,
     slots,
   }
 }

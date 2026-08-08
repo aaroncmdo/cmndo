@@ -93,9 +93,36 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
     })
     expect(Object.keys(r).sort()).toEqual([
       'bewertungAktualisiert', 'bewertungAnzahl', 'bewertungDurchschnitt',
-      'distanzGerundet', 'istTopPartner', 'istWunschterminFrei',
+      'distanzGerundet', 'imNetzwerk', 'istTopPartner', 'istWunschterminFrei',
       'profilbeschreibung', 'profilbild', 'rang', 'rangSinnsatz', 'slots', 'svId', 'vorname',
     ])
+  })
+
+  // Ebene-2 (relational): imNetzwerk = zahlender Freund des attribuierenden Owners.
+  test('imNetzwerk true/false steuert das Feld 1:1; fehlend → false (fail-closed)', () => {
+    const boost = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: null,
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+      imNetzwerk: true,
+    })
+    expect(boost.imNetzwerk).toBe(true)
+    const ohneBoost = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: null,
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+      imNetzwerk: false,
+    })
+    expect(ohneBoost.imNetzwerk).toBe(false)
+    const fehlend = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: null,
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+    })
+    expect(fehlend.imNetzwerk).toBe(false)
   })
 
   test('rang — verdienter Tier + Sinnsatz werden projiziert; fehlend → null', () => {
