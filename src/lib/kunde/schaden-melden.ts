@@ -54,6 +54,10 @@ export type LeadExtraInput = {
   // Abrechnungsweg-Audit (03.08.): Quali-Achse aus schadens_art abgeleitet, sonst abrechnungsweg=null beim Convert.
   schuldfrage: 'gegner' | 'eigenverantwortung' | null
   eigene_versicherung: 'ja' | 'nein' | null
+  // Kasko-Selbstwahl (08.08.): armiert brauchtWerkstattVermittlung -> der Kunde sieht den Werkstatt-
+  // Finder (Selbstwahl, wie im Flow via qualiFlowOutcome). Ohne das bleibt reparaturwunsch=null ->
+  // Finder aus -> "wird vermittelt"-Holding ohne Vermittler (nativer Intake-Blind-Window).
+  reparaturwunsch: 'reparatur' | null
   unfalldatum: string | null
   unfall_uhrzeit: string | null
   unfallhergang: string | null
@@ -117,6 +121,10 @@ export function buildSchadenLeadInput(form: SchadenMeldenForm, kunde: KundeKonte
     // Quali aus der Versicherungs-Klassifikation (sonst abrechnungsweg=null beim Sofort-Convert)
     schuldfrage: quali?.schuldfrage ?? null,
     eigene_versicherung: quali?.eigeneVersicherung ?? null,
+    // Direct-Reparatur (kasko/selbstzahler = schuldfrage 'eigenverantwortung'): Werkstatt-Strecke,
+    // Kunde waehlt selbst -> reparaturwunsch='reparatur' (spiegelt qualiFlowOutcome). Haftpflicht/
+    // unbekannt -> null (SV-Gutachten-Weg, keine Werkstatt-Vermittlung).
+    reparaturwunsch: quali?.schuldfrage === 'eigenverantwortung' ? 'reparatur' : null,
     unfalldatum: clean(form.unfalldatum),
     unfall_uhrzeit: clean(form.unfallUhrzeit),
     unfallhergang: clean(form.unfallhergang),

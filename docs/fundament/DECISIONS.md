@@ -252,3 +252,13 @@ CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Loka
 **Begründung:** Verfassung §7 (Server-first-Zugriff) ist auf der Sicherheitsachse erfüllt und maschinell gegated; der offene Rest ist reine Read-Muster-Konsolidierung, kein Doktrin-Verstoß. Verankerung schließt den §9-Punkt ehrlich (nicht „Checkbox-Theater": die Client-Achse IST sauber). Reine Docs/Config → Regel-4-exempt.
 
 **Review:** offen (Aaron). Session 59cdebcb, Branch `kitta/fundament-c5-doc-close`.
+
+## 2026-08-08 · D2 (Lebende Spec) · Pflege-Rhythmus + erster Decision-Review-Digest
+
+**Lücke:** §2-Paket D2 („Lebende Spec / Pflege-Rhythmus") war das letzte formal offene §2-Paket. §7 (Paketformat) + §8 (DECISIONS-Format) definierten die **Formate**, aber nicht den **Rhythmus** — WANN/WIE Spec-Status + Entscheidungen aktiv nachgezogen werden. Symptom: 9 B-Suite-Entscheidungen standen nach Merge + Prod-Bewährung noch auf `offen (im PR)` (DECISIONS-Historie ≠ Live-Stand); 23 offene `Review`-Einträge aufgelaufen ohne Review-Mechanik.
+
+**Entscheidung:** D2 = zwei Deliverables, kein Code. (1) **Pflege-Rhythmus als FUNDAMENT §8.1** — 4 verbindliche Regeln: Status-Nachzug als Teil des Paket-Abschlusses (§2-Zelle + DECISIONS-Review-Zeile + §9-Checkbox); Decision-Review-Zyklus bei ≥10 offenen Einträgen oder Meilenstein via wegwerfbarem `DECISION-REVIEW-<datum>.md`-Digest; Journeys/Doktrin nur per PR (Journey gewinnt bei Widerspruch); neue Pakete nach §7-Format. (2) **Erster Digest `DECISION-REVIEW-2026-08-08.md`** — die 24 Einträge gruppiert nach empfohlener Aktion (14 durch Bau+Prod bestätigbar · 2 durch spätere Entscheidung überholt · 7 echter offener Produkt-/Design-Entscheid + C5/D2 frisch).
+
+**Begründung:** Verfassung §10 / FUNDAMENT-Methode „Bestand bleibt in jedem Zwischenzustand grün" gilt auch für die Spec selbst — eine Spec, deren Status verrottet, ist als Steuerdokument wertlos. Der Digest macht den DoD-Teil „erster Decision-Review" für Aaron in Minuten machbar. Reine Docs → Regel-4-exempt.
+
+**Review:** offen (Aaron). Session 59cdebcb, Branch `kitta/fundament-d2-lebende-spec`. ⚠ DoD-Rest = der Review SELBST (Aaron geht `DECISION-REVIEW-2026-08-08.md` durch → Status-Rückfluss per §8.1-Regel 1) — Handoff.

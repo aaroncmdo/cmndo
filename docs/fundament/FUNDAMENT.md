@@ -77,7 +77,7 @@ Pflege-Regeln: claimen vor Arbeitsbeginn (§0.1 Schritt 4); Tranchen-Splits hier
 | C4 | Eine Akte (rollen-parametrisierter Kern) | B1 | 🟢 **Plan done** (`c4-eine-akte-plan.md`); Code gated auf B2 | #4875 |
 | C5 | Zugriffs-Doktrin + View/RPC-Konsolidierung | A1 | ✅ **done (08.08., doc-close)** — Doktrin (`zugriffs-doktrin.md` #4860) jetzt im Review-Prozess verankert: `AGENTS.md`-Dach-Absatz „Zugriffs-Doktrin (Server-first)" + `.github/pull_request_template.md` mit 6-Punkt-Checkliste (§3). §9-#8 erfüllt (Client-Direkt-Selects = 0 → „Top-Abweichler" gegenstandslos). **Folge-Tranche (offen, kein Sicherheits-Thema):** server-seitige `from('claims')`→`v_claim_*`-Konsolidierung (Doktrin §5) — collision-prone, eigene Erhebung | #4860 + doc-close |
 | D1 | Feature-DoD umstellen (AGENTS.md) | B2 | 🟢 **in Arbeit** (8c6de199, 03.08., `kitta/fundament-d1-feature-dod`) — AGENTS.md-Abschnitt „Feature-Definition-of-Done" (Journey-Zyklus, ≤½ Seite, verweist auf FUNDAMENT.md); 2. DoD-Klausel („erstes Feature durchgelaufen") folgt beim nächsten Journey-Feature | PR (folgt) |
-| D2 | Lebende Spec (Pflege-Rhythmus) | D1 | offen | — |
+| D2 | Lebende Spec (Pflege-Rhythmus) | D1 | 🟢 **in Arbeit (08.08., `kitta/fundament-d2-lebende-spec`)** — Pflege-Rhythmus in §8.1 verankert (Status-Nachzug als Abschluss-Pflicht · Decision-Review-Zyklus · Journeys/Doktrin nur per PR · §7-Format) + erster Decision-Review-Digest `DECISION-REVIEW-2026-08-08.md` (24 Einträge gruppiert: 14 bestätigbar · 2 überholt · 7 echter Entscheid). Rest = Aaron-Review-Handoff (der Review selbst) | PR (folgt) |
 
 Journey-Feinstatus (A1):
 
@@ -306,6 +306,17 @@ Datei: `docs/fundament/DECISIONS.md`, append-only. Format je Eintrag:
 **Begründung:** <nach Verfassungs-Prinzip Nr. X / Journey JN>
 **Review:** offen | bestätigt (Aaron, <datum>) | revidiert → <Folge-Ticket>
 ```
+
+## 8.1 · Pflege-Rhythmus — „Lebende Spec" (D2)
+
+Die Spec bleibt nur lebendig, wenn Status + Entscheidungen aktiv nachgezogen werden. Vier Regeln, verbindlich für jede Fundament-berührende Session:
+
+1. **Status-Nachzug ist Teil des Paket-Abschlusses.** Wer ein Paket merged + prod-bewährt, zieht **im selben Zug** nach: (a) §2-Statuszelle → `done (<datum>)`; (b) die zugehörige `DECISIONS.md`-`Review:`-Zeile von `offen (im PR)` auf `bestätigt (Aaron, <datum>)` bzw. `revidiert → <Folge>` — sobald Aaron sie im Review quittiert hat; (c) §9-Checkbox, falls ein Endzustand-Punkt fällt. **Anti-Muster (real geblutet, 08.08.):** 9 B-Suite-Entscheidungen standen nach Merge + Prod-Bewährung noch wochenlang auf `offen (im PR)` — die DECISIONS-Historie widersprach dem Live-Stand.
+2. **Decision-Review-Zyklus.** Wenn ≥10 `Review: offen`-Einträge aufgelaufen sind ODER ein Programm-Meilenstein erreicht ist (Phase-Abschluss), wird ein Digest `docs/fundament/DECISION-REVIEW-<datum>.md` erstellt (nur offene Einträge, gruppiert nach empfohlener Aktion: bestätigen / revidiert-überholt / echter Entscheid). Aaron geht ihn durch; die Ergebnisse fließen per Regel 1(b) zurück in `DECISIONS.md`. Der Digest ist wegwerfbar (nächster Zyklus = neues File). **Erster Zyklus: `DECISION-REVIEW-2026-08-08.md`.**
+3. **Journeys + Doktrin nur per PR.** Änderungen an `docs/fundament/journeys/*`, `zugriffs-doktrin.md`, `state-machine.md` etc. laufen über den normalen PR-Flow (nie Direkt-Edit auf einem gemergten Doc ohne Review). Bei Widerspruch Code ↔ reviewte Journey **gewinnt die Journey** (§0.3) — der Code ist dann der Bug.
+4. **Neue Pakete/Tranchen nach §7-Format.** Splits (`C1a`/`C1b`) + neue Pakete werden in §2 eingetragen und im §7-Schablonen-Format beschrieben; niemals Zeilen aus §2 löschen (Historie).
+
+**DoD D2:** §8.1 verankert (dies) + erster Decision-Review-Digest erstellt (`DECISION-REVIEW-2026-08-08.md`) + erster Review mit Aaron durchlaufen (Handoff — der Review selbst ist Aarons Akt, D2 liefert die Vorbereitung).
 
 ## 9 · End-Checkliste „Fundament vollständig"
 

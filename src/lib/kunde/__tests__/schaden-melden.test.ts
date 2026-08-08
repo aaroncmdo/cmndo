@@ -99,4 +99,20 @@ describe('buildSchadenLeadInput', () => {
     expect(q('eigenverschulden')).toEqual({ schuldfrage: 'eigenverantwortung', eigene_versicherung: 'nein' })
     expect(q('unbekannt')).toEqual({ schuldfrage: null, eigene_versicherung: null })
   })
+
+  // Kasko-Selbstwahl (08.08.): Direct-Reparatur-Wege (kasko/selbstzahler) armieren reparaturwunsch,
+  // damit der Kunde den Werkstatt-Finder sieht (brauchtWerkstattVermittlung). Haftpflicht/unbekannt:
+  // null (SV-Gutachten-Weg). Ohne das bleibt reparaturwunsch=null -> "wird vermittelt"-Blind-Window.
+  it('armiert reparaturwunsch bei Direct-Reparatur (kasko/selbstzahler), null sonst', () => {
+    const rw = (art: string) => {
+      const r = buildSchadenLeadInput({ ...validForm, schadensart: art }, kunde)
+      if (!r.ok) throw new Error('unerwartet ungueltig')
+      return r.extra.reparaturwunsch
+    }
+    expect(rw('vollkasko')).toBe('reparatur')
+    expect(rw('teilkasko')).toBe('reparatur')
+    expect(rw('eigenverschulden')).toBe('reparatur')
+    expect(rw('haftpflicht')).toBeNull()
+    expect(rw('unbekannt')).toBeNull()
+  })
 })

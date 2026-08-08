@@ -7,6 +7,7 @@ import { Card } from '@/components/primitives'
 import { TerminStatusBadge } from '@/components/shared/TerminStatusBadge'
 import { TerminTypBadge } from './TerminTypBadge'
 import type { KundeTerminEntry } from '@/lib/claims/kunde-termin-entries'
+import { istPendingTerminStatus } from '@/lib/termine/pending-status'
 
 export type FallInfo = { id: string; claimId: string; claim_nummer: string | null; fahrzeug: string }
 
@@ -18,9 +19,8 @@ const AKTIONEN_STATUS = new Set(['reserviert', 'bestaetigt', 'gegenvorschlag'])
 const AKTIONIERBARE_TYPEN = new Set(['besichtigung', 'konfrontation'])
 // Status mit i18n-Label (statusLabel.*). Unbekannte -> Rohwert (next-intl wirft sonst bei Missing-Key).
 const KNOWN_STATUS = new Set(['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt', 'abgeschlossen', 'angefragt', 'anruf_erbeten'])
-// T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht, jetzt sichtbar seit kunde-claim-view T1) ->
-// dasselbe "wird bestaetigt"-Label wie der Stepper-Badge (kunde.fall.stepper), statt Rohwert.
-const PENDING_STATUS = new Set(['dispatch_pending', 'sv_gesucht'])
+// T1/T4: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht) -> dasselbe "wird bestaetigt"-Label
+// wie der Stepper-Badge (kunde.fall.stepper), statt Rohwert. Pending-Status = geteilte Quelle.
 
 export function TermineRow({
   termin, fall, href, muted, showActions,
@@ -38,7 +38,7 @@ export function TermineRow({
 
   const start = termin.start ? new Date(termin.start) : null
   const statusLabel = termin.status
-    ? (PENDING_STATUS.has(termin.status)
+    ? (istPendingTerminStatus(termin.status)
         ? ts('wirdBestaetigt')
         : (KNOWN_STATUS.has(termin.status) ? t(`statusLabel.${termin.status}`) : termin.status))
     : ''

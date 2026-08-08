@@ -21,19 +21,16 @@ export type SvOption = { id: string; name: string }
 
 export default function TerminAktionen({
   terminId,
-  status,
   svOptionen,
 }: {
   terminId: string
-  status: string | null
   svOptionen: SvOption[]
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
-  // Scope-Entscheidung (Controller-Contract): sv_gesucht-Wuensche sind erst mit
-  // T4 (Portal-Buchung) zuweisbar — Button bleibt deaktiviert, Tooltip erklaert warum.
-  const zuweisenGesperrt = status === 'sv_gesucht'
+  // T4: BEIDE Pending-Achsen (dispatch_pending + sv_gesucht) sind jetzt zuweisbar
+  // (weiseTerminwunschZu verzweigt serverseitig auf die passende Engine-Primitive).
 
   function handleAssign(svId: string) {
     startTransition(async () => {
@@ -63,17 +60,15 @@ export default function TerminAktionen({
 
   return (
     <div className="flex items-center gap-2">
-      <span title={zuweisenGesperrt ? 'sv_gesucht-Wünsche: Zuweisung folgt mit Portal-Buchung (T4)' : undefined}>
-        <Button
-          variant="ondo"
-          size="sm"
-          disabled={pending || zuweisenGesperrt}
-          onClick={() => setOpen(true)}
-          iconLeft={<UserPlusIcon className="w-3.5 h-3.5" />}
-        >
-          SV zuweisen
-        </Button>
-      </span>
+      <Button
+        variant="ondo"
+        size="sm"
+        disabled={pending}
+        onClick={() => setOpen(true)}
+        iconLeft={<UserPlusIcon className="w-3.5 h-3.5" />}
+      >
+        SV zuweisen
+      </Button>
       <Button
         variant="ghost"
         size="sm"
