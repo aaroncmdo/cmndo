@@ -45,6 +45,11 @@ export default async function GutachterLayout({
   // wurde mit AAR-360 entfernt — der Tier-2-Status ist der einzige Trigger.
   const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
   const showVerifizierung = !!tier2Offen
+  // Tier-2-Frist-Banner (Berufshaftpflicht/Gewerbeanmeldung — Spec 2026-08-08):
+  const tier2TageOffen = sv?.verifizierung_frist_bis
+    ? Math.max(0, Math.ceil((new Date(sv.verifizierung_frist_bis).getTime() - Date.now()) / 864e5))
+    : null
+  const tier2TageText = tier2TageOffen != null ? ` — noch ${tier2TageOffen} Tag${tier2TageOffen === 1 ? '' : 'e'}` : ''
 
   // Check if this gutachter has been soft-deleted → sign out + redirect
   if (sv?.geloescht_am) {
@@ -111,6 +116,20 @@ export default async function GutachterLayout({
       {isDeactivated && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2.5 text-center text-xs text-red-700 font-medium">
           Ihr Account ist deaktiviert. Sie erhalten keine neuen Fälle. Bitte begleichen Sie offene Rechnungen.
+        </div>
+      )}
+
+      {/* Tier-2-Frist-Banner: Berufshaftpflicht + Gewerbeanmeldung (Spec 2026-08-08). */}
+      {sv?.verifizierung_status === 'ausstehend' && (
+        <div className="bg-warning-soft border-b border-warning/30 px-4 py-2.5 text-center text-xs text-warning-strong font-medium">
+          Berufshaftpflicht &amp; Gewerbeanmeldung fehlen{tier2TageText} —{' '}
+          <a href="/gutachter/verifizierung" className="underline font-semibold">jetzt hochladen</a>, sonst pausieren wir deine Fälle.
+        </div>
+      )}
+      {sv?.verifizierung_status === 'frist_ueberschritten' && (
+        <div className="bg-danger-soft border-b border-danger/30 px-4 py-2.5 text-center text-xs text-danger-strong font-medium">
+          Deine Fälle sind pausiert, weil Berufshaftpflicht/Gewerbeanmeldung fehlen —{' '}
+          <a href="/gutachter/verifizierung" className="underline font-semibold">Nachweise hochladen</a>.
         </div>
       )}
       {/* AAR-359 W5: Account-Sperre (rot, höchste Priorität) — getrennt von
