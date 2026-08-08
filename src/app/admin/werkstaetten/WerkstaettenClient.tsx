@@ -102,7 +102,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 >
                   <Td>
                     <Link
-                      href={`/admin/werkstaetten/${w.id}`}
+                      href={`/admin/vertrieb/werkstaetten/${w.id}`}
                       className="text-claimondo-navy font-medium hover:text-claimondo-ondo hover:underline"
                     >
                       {w.name}

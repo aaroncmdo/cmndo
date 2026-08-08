@@ -126,7 +126,7 @@ export default function WerkstattAnlegenForm({
         <Button
           variant="navy"
           fullWidth
-          onClick={() => router.push(`/admin/werkstaetten/${createdCredentials.werkstattId}`)}
+          onClick={() => router.push(`/admin/vertrieb/werkstaetten/${createdCredentials.werkstattId}`)}
           iconLeft={<ArrowRightIcon className="w-4 h-4" />}
         >
           Zur Werkstatt-Verwaltung
