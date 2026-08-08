@@ -1501,8 +1501,13 @@ export async function signSAandCreateFall(
   // P4 (Review-Fund MEDIUM-2): fuer den Vermittlungs-sign-in KEINE Fresh-Fall-SLAs —
   // der Sofort-Claim steht bereits bei filmcheck mit SV + fertigem Gutachten; die
   // Zuweisungs-/Termin-/Besichtigungs-SLAs wuerden sofort breachen (spurious KB-Reminder).
+  // Kasko/Selbstzahler (DIRECT_REPARATUR_WEGE): kein Gegner-VS-Prozess → weder SV-Dispatch noch
+  // Zuweisungs-/Termin-/Besichtigungs-SLAs (Aaron 08.08.). Defense-in-Depth zum Client-Guard
+  // (FlowWizardKfz istDirectReparatur laesst den sa-Step bei Kasko weg → signSAandCreateFall feuert
+  // dort normal gar nicht; dieser Guard greift, falls es doch fuer einen Direct-Weg laeuft).
+  const istDirectReparaturWeg = lead.abrechnungsweg === 'kasko' || lead.abrechnungsweg === 'selbstzahler'
   const slaPromises: Promise<unknown>[] = []
-  if (!istVermittlungsSignIn) {
+  if (!istVermittlungsSignIn && !istDirectReparaturWeg) {
     try {
       const { startSla } = await import('@/lib/sla/tracker')
       if (!svIdFromTermin) slaPromises.push(startSla(fall.id, 'gutachter_zuweisung'))
@@ -1517,7 +1522,7 @@ export async function signSAandCreateFall(
   // findBestSV waere ein nutzloser Lauf (der sv_id-Guard unten verhindert das Overwrite eh).
   const fallLat = (lead.besichtigungsort_lat ?? lead.fahrzeug_standort_lat ?? lead.unfallort_lat ?? lead.kunde_lat) as number | null
   const fallLng = (lead.besichtigungsort_lng ?? lead.fahrzeug_standort_lng ?? lead.unfallort_lng ?? lead.kunde_lng) as number | null
-  if (!istVermittlungsSignIn && !svIdFromTermin && fallLat != null && fallLng != null) {
+  if (!istVermittlungsSignIn && !svIdFromTermin && !istDirectReparaturWeg && fallLat != null && fallLng != null) {
     slaPromises.push(
       (async () => {
         try {
