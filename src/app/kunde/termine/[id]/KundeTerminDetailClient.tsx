@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations, useFormatter } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { subscribeWhenAuthed } from '@/lib/supabase/realtime-gate'
+import { istPendingTerminStatus } from '@/lib/termine/pending-status'
 import {
   CalendarIcon,
   MapPinIcon,
@@ -96,9 +97,6 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
 }
 
-// T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht, jetzt sichtbar seit kunde-claim-view T1) ->
-// dasselbe "wird bestaetigt"-Label wie der Stepper-Badge (kunde.fall.stepper), statt Rohwert.
-const PENDING_STATUS = new Set(['dispatch_pending', 'sv_gesucht'])
 
 export default function KundeTerminDetailClient({
   termin,
@@ -131,7 +129,7 @@ export default function KundeTerminDetailClient({
     icon: ClockIcon,
   }
   const StatusIcon = status.icon
-  const statusLabel = PENDING_STATUS.has(termin.status)
+  const statusLabel = istPendingTerminStatus(termin.status)
     ? ts('wirdBestaetigt')
     : (termin.status in STATUS_LABEL ? t(`detail.statusLabel.${termin.status}`) : termin.status)
 

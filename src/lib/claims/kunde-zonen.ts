@@ -7,7 +7,7 @@ import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 export type ZoneId = 'status' | 'aufgaben' | 'team' | 'geld' | 'doksTermine'
 
 export type KundeAufgabe = {
-  id: 'bankdaten' | 'kva_freigabe' | 'pflichtdok' | 'termin_bestaetigen' | 'sa_vollmacht'
+  id: 'bankdaten' | 'kva_freigabe' | 'pflichtdok' | 'termin_waehlen' | 'termin_bestaetigen' | 'sa_vollmacht'
   label: string
   /** Audit-Fund b3: Ziel-Zone des CTA, wenn sie vom Fall-Zustand abhängt — der
    *  Reparaturtermin lebt in der GeldZone (WerkstattCard), der SV-Termin in
@@ -50,6 +50,20 @@ export function deriveKundeAufgaben(vm: KundeClaimViewModel): KundeAufgabe[] {
   }
   if (vm.pflichtdokumente.offen > 0) {
     aufgaben.push({ id: 'pflichtdok', label: 'Dokumente nachreichen' })
+  }
+  // T4: „Gutachtertermin wählen" — noch KEIN (Wunsch-)Termin gewählt, Claim nicht terminal,
+  // Fall braucht eine Begutachtung (nicht die reine Reparatur-Lane) und es ist noch KEIN SV
+  // zugewiesen. Nur dieser !svId-Fall führt in den funktionierenden Kalender-Wunschtermin-
+  // Fallback (T4-5a); die Engine-Partner-Findung + sv_id-Buchung folgt als T4-5b/T4-6.
+  // svTermin==null deckt beide Pending-Achsen mit ab (der Loader zählt dispatch_pending/
+  // sv_gesucht zu svTermin) → sobald der Kunde einen Wunsch stellt, verschwindet die Aufgabe.
+  if (
+    vm.status.svTermin == null &&
+    !vm.flags.istTerminal &&
+    !vm.flags.istReparaturRoute &&
+    !vm.team.sv
+  ) {
+    aufgaben.push({ id: 'termin_waehlen', label: 'Gutachtertermin wählen' })
   }
   const offenerTermin = vm.termine.find((t) => TERMIN_OFFEN.has(t.status ?? ''))
   if (offenerTermin) {

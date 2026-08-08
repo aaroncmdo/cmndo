@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import KalenderClient from './KalenderClient'
+import WunschterminFallbackClient from './WunschterminFallbackClient'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getSvKontakt } from '@/lib/kunde/get-kontakt'
@@ -28,13 +29,14 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
     claimNummer = (c?.claim_nummer as string | null) ?? null
   }
 
+  // T4: Noch kein SV zugewiesen → statt Sackgasse ein Wunschtermin-Fallback. Der Kunde wählt
+  // eine Wunschzeit → sv_gesucht-Termin in die Dispatch-Queue (Kaskadenstufe ③). Die Engine-
+  // Partner-Findung (Kaskadenstufe ②, braucht schadenort-Geo) folgt als T4-5b.
   if (!svId) {
     return (
       <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">
         <Link href={`/kunde/faelle/${id}`} className="text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo mb-4 inline-block">&larr; {t('kalender.zurueck')}</Link>
-        <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-8 text-center">
-          <p className="text-sm text-claimondo-ondo">{t('kalender.keinSv')}</p>
-        </div>
+        <WunschterminFallbackClient fallId={id} />
       </div>
     )
   }
