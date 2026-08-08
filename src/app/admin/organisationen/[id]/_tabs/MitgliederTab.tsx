@@ -40,7 +40,7 @@ export default function MitgliederTab({ mitglieder }: { mitglieder: Organisation
               <Tr key={m.id} className="hover:bg-claimondo-bg/50">
                 <Td>
                   <Link
-                    href={`/admin/sachverstaendige/${m.id}`}
+                    href={`/admin/vertrieb/sachverstaendige/${m.id}`}
                     className="font-medium text-claimondo-navy hover:text-claimondo-shield transition-colors"
                   >
                     {name}

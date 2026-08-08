@@ -126,7 +126,7 @@ function resolveObjectLink(
     // Bei unbekanntem entity_id fallen wir auf Task-Liste zurück.
     if (svMap[eid]) {
       return {
-        href: `/admin/sachverstaendige/${eid}`,
+        href: `/admin/vertrieb/sachverstaendige/${eid}`,
         label: svMap[eid],
         kind: 'SV',
       }

@@ -126,7 +126,7 @@ export default function BasisFreigabenDrawerContent() {
                   <Td>
                     <div className="space-y-0.5">
                       <Link
-                        href={`/admin/sachverstaendige/${sv.id}?tab=verifizierung`}
+                        href={`/admin/vertrieb/sachverstaendige/${sv.id}?tab=verifizierung`}
                         className="text-xs font-semibold text-claimondo-navy hover:underline"
                       >
                         {name || '—'}
