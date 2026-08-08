@@ -277,16 +277,24 @@ const nextConfig: NextConfig = {
       // page.tsx-Files hingen. Als HTTP-301 in next.config effizienter und
       // für SEO/Bookmarks sauberer — die Route wird gar nicht erst
       // gerendert.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb/sachverstaendige
+      // gezogen (die Liste lebt dort jetzt als echter Content, s.u.) -- sonst
+      // Doppel-Hop ueber den bereits bestehenden Exact-Match-Redirect
+      // /admin/sachverstaendige -> /admin/vertrieb (Zeile ~399, landet auf dem
+      // allgemeinen Cockpit-Roster statt der SV-Karte).
       {
         source: '/admin/karte',
-        destination: '/admin/sachverstaendige',
+        destination: '/admin/vertrieb/sachverstaendige',
         permanent: true,
       },
       // Aaron 07.07.: SV-Leads-Verwaltung wanderte in die Sachverstaendige-
       // Sektion (Drawer ueber der Karte). Alte Bookmarks -> neue Route.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen --
+      // sonst Doppel-Hop ueber den neuen Exact-Match-Redirect
+      // /admin/sachverstaendige/leads -> vertrieb (s.u.).
       {
         source: '/admin/sv-leads',
-        destination: '/admin/sachverstaendige/leads',
+        destination: '/admin/vertrieb/sachverstaendige/leads',
         permanent: true,
       },
       // P4b (Aufgaben-Hub-Konsolidierung): der Aufgaben-Hub /admin/aufgaben (Nav)
@@ -347,9 +355,12 @@ const nextConfig: NextConfig = {
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
       // Redirect-Kette.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen --
+      // sonst Doppel-Hop ueber den neuen Exact-Match-Redirect
+      // /admin/sachverstaendige/anlegen -> vertrieb (s.u.).
       {
         source: '/admin/sv-onboarding',
-        destination: '/admin/sachverstaendige/anlegen',
+        destination: '/admin/vertrieb/sachverstaendige/anlegen',
         permanent: true,
       },
       // AAR-530 (A6): Legacy-Redirects für die Hub-Konsolidierung aus
@@ -412,6 +423,29 @@ const nextConfig: NextConfig = {
         destination: '/admin/vertrieb/sachverstaendige/:id',
         permanent: true,
       },
+      // F2b Route-Konsolidierung REST (08.08.): analog fuer die restlichen 3 SV-Routen
+      // (anlegen/basic-freigaben/leads) -- ihre page.tsx wurden zu *Content.tsx umbenannt
+      // und haben keinen Route-Slot mehr. EXAKT-Match (kein :path*) je Route, damit die
+      // Routen sauber getrennt bleiben (kein Ueberschatten der Geschwister). Der Legacy-
+      // @drawer/(.)anlegen + (.)leads-Soft-Nav-Intercept auf der Legacy-Liste wurde
+      // entfernt (dieselbe Begruendung wie beim [id]-Drawer oben: die vertrieb-Konsole
+      // hat kein eigenes Pendant fuer diese 3 Routen -- verifiziert, kein Cockpit-Drawer
+      // fuer anlegen/basic-freigaben/leads vorhanden).
+      {
+        source: '/admin/sachverstaendige/anlegen',
+        destination: '/admin/vertrieb/sachverstaendige/anlegen',
+        permanent: true,
+      },
+      {
+        source: '/admin/sachverstaendige/basic-freigaben',
+        destination: '/admin/vertrieb/sachverstaendige/basic-freigaben',
+        permanent: true,
+      },
+      {
+        source: '/admin/sachverstaendige/leads',
+        destination: '/admin/vertrieb/sachverstaendige/leads',
+        permanent: true,
+      },
       // F2 Route-Konsolidierung (08.08.): analog fuer Werkstatt -- die Detail-Akte ist
       // jetzt kanonisch unter /admin/vertrieb/werkstaetten/[id] (admin/werkstaetten/[id]/
       // page.tsx wurde zu WsAkteContent.tsx und hat keinen Route-Slot mehr). UUID-Regex
@@ -457,7 +491,10 @@ const nextConfig: NextConfig = {
       // Static:
       // W1.8: /admin/aufgaben-Doppel-Redirect entfernt — der Aufgaben-Hub-Eintrag oben (→alle)
       // gewinnt per first-match; dieser (→meine) war toter Config-Code.
-      { source: '/admin/sachverstaendige/neu', destination: '/admin/sachverstaendige/anlegen', permanent: true },
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen -- sonst
+      // Doppel-Hop ueber den neuen Exact-Match-Redirect /admin/sachverstaendige/anlegen
+      // -> vertrieb (s.o.).
+      { source: '/admin/sachverstaendige/neu', destination: '/admin/vertrieb/sachverstaendige/anlegen', permanent: true },
       { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
       { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },
