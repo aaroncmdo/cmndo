@@ -70,7 +70,6 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 # ─── MONATLICH ────────────────────────────────────
 30   18 28-31 * * /usr/local/bin/cron-call.sh /api/cron/abrechnung-erstellen
 0    18 28-31 * * /usr/local/bin/cron-call.sh /api/cron/monats-abrechnungen
-0    2  1 * *  /usr/local/bin/cron-call.sh /api/cron/monatsabrechnung
 0    9  1 * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-kanzlei-erstellen
 0    9  1 * *  /usr/local/bin/cron-call.sh /api/cron/maik-monatsabrechnung
 
@@ -410,4 +409,24 @@ Delta gegenüber dem alten 2026-06-20-Abzug:
 - **Nichts ist ersatzlos entfallen** — jede Route des alten Abzugs ist live noch da, disabled-mit-
   Kommentar (Backups, `whatsapp-erinnerungen`) oder durch einen Nachfolger ersetzt (Provisions-Releases).
 - **Audit-Note #2 bleibt offen:** das @deprecated `monatsabrechnung` (0 2 am 1.) läuft live weiterhin.
+  *(Erledigt 2026-08-08 — Zeile vom VPS entfernt, s. Sektion unten.)*
+
+## Stand 2026-08-08 — `monatsabrechnung`-Crontab-Zeile ENTFERNT (Live-VPS)
+
+> Aaron-Go 08.08. Per key-basiertem SSH (root) die tote Zeile `0 2 1 * * … /api/cron/monatsabrechnung`
+> entfernt (Crontab 114 → 113 Zeilen). Backup:
+> `/root/crontab-backup-20260808-121932-pre-monatsabrechnung-remove.txt` (Rollback: `crontab <backup>`).
+> Damit ist **Audit-Anmerkung #2 (2026-06-20) vollständig erledigt** — beide Hälften:
+>
+> - **Route:** war bereits seit der System-A/B-Konsolidierung (Spec 2026-07-01) aus dem Code gelöscht;
+>   der Guard-Test `src/app/api/cron/no-monatsabrechnung.test.ts` sichert das ab. Die Crontab-Zeile
+>   traf seit dem 01.07. nur noch einen harmlosen 404 (`cron-call.sh` nutzt `curl -sf` → exit 22, no-op).
+>   Verifiziert 08.08.: unauth-Probe `/api/cron/monatsabrechnung` → **HTTP 404** (Kontrolle
+>   `/api/cron/stripe-reconcile` → 401 = existiert/auth-gated).
+> - **Daten:** `gutachter_monatsabrechnungen` enthält **0 Rows** (DB-verifiziert 08.08.) — kein
+>   Datenverlust moeglich, nichts konsumiert neue Legacy-Rows. Der Drop der leeren Tabelle selbst
+>   ist NICHT Teil dieser Aenderung (separater Entscheid, DDL via MCP-Migration).
+>
+> Entfernung mit Differenz-Guard (Abbruch wenn ≠ 1 Zeile rausfaellt); `maik-monatsabrechnung` und
+> `monats-abrechnungen` unberuehrt (verifiziert per `crontab -l`-Grep nach der Aenderung).
 

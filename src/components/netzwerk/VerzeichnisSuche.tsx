@@ -80,8 +80,8 @@ export function VerzeichnisSuche() {
       <div className="space-y-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <TextField
-            label="Name, Firma oder Ort"
-            placeholder="z. B. Müller oder Köln"
+            label="Name, Firma, Ort oder PLZ"
+            placeholder="z. B. Müller, Köln oder 50667"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="flex-1"

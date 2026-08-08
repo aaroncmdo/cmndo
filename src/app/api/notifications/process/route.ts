@@ -16,6 +16,7 @@ import { CHANNEL_HANDLERS } from '@/lib/notifications/channels'
 import { EVENT_MATRIX } from '@/lib/notifications/channel-matrix'
 import { decideDeliveries } from '@/lib/notifications/preferences'
 import type { Channel, EventType, NotificationEvent, Role } from '@/lib/notifications/types'
+import { processOutboxBatch, drainSingleOutbox } from '@/lib/notifications/outbox-worker'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -249,16 +250,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
-  let body: { eventId?: string } = {}
+  let body: { eventId?: string; outboxDedupKey?: string } = {}
   try {
     body = await req.json()
   } catch {
     body = {}
   }
 
-  const result = body.eventId
-    ? await processSingleById(body.eventId)
-    : await processBatch()
+  // C3a: outboxDedupKey -> Immediate-Drain der einen just-enqueued Outbox-Row (Latenz-Erhalt).
+  const result = body.outboxDedupKey
+    ? await drainSingleOutbox(body.outboxDedupKey)
+    : body.eventId
+      ? await processSingleById(body.eventId)
+      : await processBatch()
 
   return NextResponse.json({ ok: true, ...result })
 }
@@ -269,5 +273,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
   const result = await processBatch()
-  return NextResponse.json({ ok: true, ...result })
+  // C3a: derselbe */5min-Cron drant zusaetzlich die notifications_outbox (keine neue Cron-Registrierung).
+  // Defensiv gewrappt: ein Outbox-Fehler darf den kritischen Event-Cron nicht brechen.
+  let outbox = { processed: 0, failed: 0 }
+  try {
+    outbox = await processOutboxBatch()
+  } catch (e) {
+    console.error('[cron] outbox drain failed', e)
+  }
+  return NextResponse.json({ ok: true, ...result, outbox })
 }
