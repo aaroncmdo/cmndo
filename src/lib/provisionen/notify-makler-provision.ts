@@ -13,7 +13,9 @@ export async function notifyMaklerProvisionStatus(
   status: ReleaseStatus,
   grund?: string,
 ): Promise<boolean> {
-  if (row.partner_typ !== 'makler') return false
+  // makler + makler_empfehlung (Sponsor-Override): beide partner_id = ein makler.id -> derselbe
+  // Notification-Pfad. Werkstatt/firmen_flotte bleiben bewusst ohne Event (Portal-Sicht).
+  if (row.partner_typ !== 'makler' && row.partner_typ !== 'makler_empfehlung') return false
 
   await emitEvent('makler.provision_status', {
     fallId: row.fall_id ?? row.claim_id ?? '',
