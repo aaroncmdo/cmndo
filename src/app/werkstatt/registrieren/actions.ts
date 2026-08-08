@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
 import { notifyTeamPartnerSignup } from '@/lib/partner/notify-team-signup'
@@ -161,13 +162,13 @@ export async function registriereWerkstattSelf(
     if (admins && admins.length > 0) {
       await Promise.all(
         admins.map((a) =>
-          admin.from('benachrichtigungen').insert({
-            user_id: a.id as string,
-            typ: 'werkstatt_self_signup',
-            titel: `Neuer Werkstatt-Self-Signup: ${firma}`,
-            beschreibung: `${firma} (${email}) hat sich selbst registriert. QR-Pool-Token kann bei Bedarf zugewiesen werden.`,
-            link: '/admin/werkstaetten',
-          }),
+          createNotification(
+            a.id as string,
+            'werkstatt_self_signup',
+            `Neuer Werkstatt-Self-Signup: ${firma}`,
+            `${firma} (${email}) hat sich selbst registriert. QR-Pool-Token kann bei Bedarf zugewiesen werden.`,
+            '/admin/werkstaetten',
+          ),
         ),
       )
     }
