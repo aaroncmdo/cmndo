@@ -166,7 +166,7 @@ export async function uploadSvPflichtdokument(
             kategorie: 'update',
             titel: `${slot.label} von ${svName}`,
             inhalt: 'Bitte im SV-Verifizierungs-Tab prüfen und freigeben.',
-            route_url: `/admin/sachverstaendige/${svId}?tab=verifizierung`,
+            route_url: `/admin/vertrieb/sachverstaendige/${svId}?tab=verifizierung`,
             icon: 'bell',
             prioritaet: 'normal',
           },
@@ -178,7 +178,7 @@ export async function uploadSvPflichtdokument(
 
     revalidatePath('/gutachter/verifizierung')
     revalidatePath('/admin/aufgaben/alle')
-    revalidatePath(`/admin/sachverstaendige/${svId}`)
+    revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
 
     return { ok: true, slot_id: slotId, storage_path: path }
   } catch (err) {

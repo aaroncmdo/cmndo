@@ -45,7 +45,7 @@ async function requireAdmin() {
 }
 
 function revalidateBoth(svId: string) {
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   revalidatePath('/admin/aufgaben/alle')
   revalidatePath('/gutachter/verifizierung')

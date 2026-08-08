@@ -100,7 +100,7 @@ export default async function WerbebudgetAggregatWidget() {
                   return (
                     <Link
                       key={r.id}
-                      href={`/admin/sachverstaendige/${r.id}`}
+                      href={`/admin/vertrieb/sachverstaendige/${r.id}`}
                       className="block hover:bg-claimondo-bg rounded-ios-lg px-2 py-1.5 -mx-2 transition-colors"
                     >
                       <div className="flex items-center justify-between text-xs mb-1">

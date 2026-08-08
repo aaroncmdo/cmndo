@@ -1,9 +1,10 @@
 // Intercepting-Route fuer /admin/vertrieb/sachverstaendige/<uuid>: rendert den SV-Detail-RSC
 // als Drawer ueber dem Cockpit (Reuse des bestehenden ~592-LOC-RSC, kein Rewrite). Ein direkter
 // URL-Aufruf / Hard-Nav matcht NICHT -> Next rendert die Full-Page (Re-Export
-// /admin/vertrieb/sachverstaendige/[id]). Externe Links zeigen weiter auf
-// /admin/sachverstaendige/<uuid> (Full-Page) und bleiben unberuehrt.
-import SvDetailPage from '@/app/admin/sachverstaendige/[id]/page'
+// /admin/vertrieb/sachverstaendige/[id]). F2 Route-Konsolidierung (08.08.): externe Links auf
+// /admin/sachverstaendige/<uuid> werden jetzt per next.config.ts redirects() (308) auf die
+// kanonische vertrieb-Route umgeleitet (die Legacy-URL existiert nicht mehr als eigene Full-Page).
+import SvDetailPage from '@/app/admin/sachverstaendige/[id]/SvAkteContent'
 import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedCockpitSvDetail({

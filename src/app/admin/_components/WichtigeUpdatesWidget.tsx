@@ -119,7 +119,7 @@ async function loadEvents(): Promise<LoadResult> {
       key: `svneu-${r.id}`,
       type: 'sv_neu',
       text: `${svName(r.profile_id)} wurde als SV angelegt`,
-      href: `/admin/sachverstaendige/${r.id}`,
+      href: `/admin/vertrieb/sachverstaendige/${r.id}`,
       ts: r.created_at,
     })
   }
@@ -128,7 +128,7 @@ async function loadEvents(): Promise<LoadResult> {
       key: `vert-${r.id}`,
       type: 'vertrag_signiert',
       text: `${svName(r.profile_id)} hat den Vertrag unterzeichnet`,
-      href: `/admin/sachverstaendige/${r.id}`,
+      href: `/admin/vertrieb/sachverstaendige/${r.id}`,
       ts: r.vertrag_unterschrieben_am,
     })
   }
@@ -137,7 +137,7 @@ async function loadEvents(): Promise<LoadResult> {
       key: `anz-${r.id}`,
       type: 'anzahlung_eingegangen',
       text: `${svName(r.profile_id)} hat die Anzahlung geleistet`,
-      href: `/admin/sachverstaendige/${r.id}`,
+      href: `/admin/vertrieb/sachverstaendige/${r.id}`,
       ts: r.stripe_anzahlung_bezahlt_am,
     })
   }
