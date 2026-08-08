@@ -418,6 +418,12 @@ CI fährt `npm run check:termin-bezug -- --ratchet`. Es blockt **NEUE** Verletze
 
 **Abgrenzung zu `check:termin-engine-contract`:** Der Contract-Ratchet gatet `.eq('lead_id')`/`.eq('sv_id')` = **Engine-API-Disziplin** (nutze `findeTerminFuerLead`/`assignee_id`), hard-0. Dieses Gate gatet die **Bezug-Filter-Korrektheit** (`fall_id`/`claim_id` voll + `lead_id` jenseits `.eq`). Komplementär, keine funktionale Überlappung (die einzigen `.eq('lead_id')` liegen im ausgenommenen `finde-termin-fuer-lead.ts`). Ausnahmen identisch: `engine/*` + `finde-termin-fuer-lead.ts` dürfen die Achsen direkt anfassen. Marker: `coordination-p33-gutachter-termine-legacy-retire`.
 
+# Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
+
+**Kanonische Referenz: `docs/fundament/zugriffs-doktrin.md`** (Fundament C5, #4860). Kern in einem Satz: **Client liest über Views/RPCs je Rolle, schreibt über Server-Actions mit Guard + `.select()`-Row-Check; RLS ist Sicherheitsnetz, nicht Feinsteuerung** (Verfassung §7). Ist-Stand: Client-Direkt-Selects auf Basistabellen = **0** (verifiziert) — server-first ist gelebt.
+
+Die vier folgenden Ratchets (**RLS-Policy-**, **Anon-Grant-**, **Reachability-**, **Write-Reachability-Gate**) sind die maschinelle Durchsetzung dieser Doktrin. **Bei jeder NEUEN Tabelle/View/RPC** die 6-Punkt-Checkliste aus `zugriffs-doktrin.md` §3 durchgehen — sie liegt auch als Block im PR-Template (`.github/pull_request_template.md`). Offene Optimierungs-Tranche (kein Sicherheits-Thema): server-seitige `from('claims')`-Reads auf die `v_claim_*`-Schicht konsolidieren (Doktrin §5).
+
 <!-- BEGIN:branding-rules -->
 # RLS-Policy-Gate (Ratchet)
 
