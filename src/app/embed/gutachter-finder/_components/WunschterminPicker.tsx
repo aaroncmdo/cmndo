@@ -8,8 +8,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { naechsteWerktage, zukunftsZeiten, type TagOption } from './wunschtermin-slots'
 
-const WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const ZEITEN = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
 
 // AAR-956 (Aaron 14.06.): horizontale Scroll-Leiste. Touch (Handy/iPad, <lg) = nativ wischen.
@@ -71,29 +71,34 @@ export function WunschterminPicker({
 }) {
   const [datum, zeit] = value ? value.split('T') : ['', '']
 
-  // Nächste 14 Werktage (Sonntag raus). HYDRATION-SAFE: `new Date()` erst NACH dem Mount
-  // (useEffect), sonst differiert die Server-SSR-Liste (Server=UTC) von der Client-Liste
-  // (Browser=Berlin) an Tagesgrenzen → Hydration-Mismatch. Server rendert leer, Client füllt.
-  const [tage, setTage] = useState<{ iso: string; tag: string; wtag: string }[]>([])
+  // Nächste 14 Werktage (Sonntag raus) + Vergangenheits-Filter. HYDRATION-SAFE: `new Date()`
+  // erst NACH dem Mount (useEffect), sonst differiert die Server-SSR-Liste (Server=UTC) von der
+  // Client-Liste (Browser=Berlin) an Tagesgrenzen → Hydration-Mismatch. Server rendert leer,
+  // Client füllt. Reine Logik + Vergangenheits-Ausschluss in ./wunschtermin-slots (unit-getestet).
+  const [opts, setOpts] = useState<{ tage: TagOption[]; todayIso: string; nowHour: number }>({
+    tage: [],
+    todayIso: '',
+    nowHour: -1,
+  })
   useEffect(() => {
-    const out: { iso: string; tag: string; wtag: string }[] = []
-    const heute = new Date()
-    for (let i = 0; out.length < 14 && i < 21; i++) {
-      const d = new Date(heute.getFullYear(), heute.getMonth(), heute.getDate() + i)
-      if (d.getDay() === 0) continue // Sonntag aus
-      const y = d.getFullYear()
-      const mo = String(d.getMonth() + 1).padStart(2, '0')
-      const da = String(d.getDate()).padStart(2, '0')
-      out.push({ iso: `${y}-${mo}-${da}`, tag: `${da}.${mo}.`, wtag: WOCHENTAG[d.getDay()] })
-    }
-    setTage(out)
+    setOpts(naechsteWerktage(new Date(), ZEITEN, 14))
   }, [])
+  const { tage, todayIso, nowHour } = opts
+
+  // Effektives Datum = was ein Zeit-Klick erzeugt (gewähltes ODER erstes verfügbares). Die
+  // Zeit-Chips filtern darauf → für HEUTE keine vergangenen/laufenden Uhrzeiten mehr.
+  const effektivesDatum = datum || tage[0]?.iso || ''
+  const verfuegbareZeiten = zukunftsZeiten(ZEITEN, effektivesDatum, todayIso, nowHour)
 
   function waehleDatum(iso: string) {
-    onChange(`${iso}T${zeit || '10:00'}`)
+    // Getragene Zeit behalten, falls sie am neuen Datum noch gültig ist — sonst auf den ersten
+    // verfügbaren Slot fallen (verhindert, dass beim Wechsel auf heute eine vergangene Zeit bleibt).
+    const verf = zukunftsZeiten(ZEITEN, iso, todayIso, nowHour)
+    const z = zeit && verf.includes(zeit) ? zeit : (verf[0] ?? '10:00')
+    onChange(`${iso}T${z}`)
   }
   function waehleZeit(z: string) {
-    onChange(`${datum || tage[0]?.iso}T${z}`)
+    onChange(`${effektivesDatum}T${z}`)
   }
 
   return (
@@ -121,9 +126,9 @@ export function WunschterminPicker({
           )
         })}
       </HScroll>
-      {/* Zeit — horizontale Leiste: Touch wischen, Desktop Pfeile */}
-      <HScroll watch={ZEITEN.length}>
-        {ZEITEN.map((z) => {
+      {/* Zeit — horizontale Leiste: Touch wischen, Desktop Pfeile. Für heute nur Zukunfts-Slots. */}
+      <HScroll watch={verfuegbareZeiten.length}>
+        {verfuegbareZeiten.map((z) => {
           const aktiv = zeit === z
           return (
             <button
