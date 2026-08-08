@@ -52,6 +52,16 @@ export type FahrzeugForm = {
   tsn?: string
 }
 
+/**
+ * Lean: hat der Kunde ein Firmen-Konto (personen.firma_id gesetzt)? EIN Query — fuer das
+ * Nav-Gating (Flotte ist ein B2B-Feature, laeuft sonst als "Firmen-Konto anlegen"-Formular
+ * fuer jeden Privatkunden auf). db = Admin/Service-Role (personen ist deny-all fuer Kunden).
+ */
+export async function kundeHatFirma(db: AnyDb, userId: string): Promise<boolean> {
+  const { data } = await db.from('personen').select('firma_id').eq('user_id', userId).maybeSingle()
+  return ((data?.firma_id as string | null) ?? null) != null
+}
+
 /** Firma des eingeloggten Kunden (via personen.firma_id). db = Admin/Service-Role. */
 export async function getKundeFirma(db: AnyDb, userId: string): Promise<KundeFirma | null> {
   const { data: person } = await db.from('personen').select('firma_id').eq('user_id', userId).maybeSingle()
