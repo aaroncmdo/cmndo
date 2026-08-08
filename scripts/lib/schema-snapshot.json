@@ -1202,7 +1202,10 @@
     "tracking_gads_conversion_id",
     "tracking_gads_conversion_label",
     "funnel_modus",
-    "sv_telefon"
+    "sv_telefon",
+    "config_hits",
+    "letzter_config_hit_am",
+    "letzter_config_origin"
    ]
   },
   "faelle_claim_bridge": {
@@ -2298,6 +2301,21 @@
     "claim_id"
    ]
   },
+  "kunde_feedback": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "claim_id",
+    "rating",
+    "kommentar",
+    "response_token",
+    "token_expires_at",
+    "eingeladen_am",
+    "beantwortet_am",
+    "abgemeldet_am",
+    "created_at"
+   ]
+  },
   "kunde_gutachten_requests": {
    "kind": "t",
    "columns": [
@@ -2895,6 +2913,25 @@
     "channel_opt_outs",
     "event_opt_outs",
     "updated_at"
+   ]
+  },
+  "notifications_outbox": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "dedup_key",
+    "kanal",
+    "template",
+    "claim_id",
+    "empfaenger_user_id",
+    "empfaenger_rolle",
+    "payload",
+    "status",
+    "versuche",
+    "next_retry_at",
+    "fehler",
+    "created_at",
+    "sent_at"
    ]
   },
   "nutzungsausfall_klasse_saetze": {
