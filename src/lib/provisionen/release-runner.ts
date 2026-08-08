@@ -14,11 +14,17 @@ import type { Database } from '@/lib/supabase/database.types'
 import { istClaimStorniert, deriveCompletionTs, istReleaseBerechtigt } from './completion-release-gate'
 import { bezugInExpr } from '@/lib/termine/bezug-filter'
 
-/** partner_provisionen.partner_typ — DB-CHECK seit Mig 20260713181418. */
-export type ProvisionPartnerTyp = 'makler' | 'werkstatt' | 'firmen_flotte'
+/** partner_provisionen.partner_typ — DB-CHECK (makler/werkstatt/firmen_flotte seit
+ *  Mig 20260713181418, makler_empfehlung 20260718205558). */
+export type ProvisionPartnerTyp = 'makler' | 'werkstatt' | 'firmen_flotte' | 'makler_empfehlung'
 
-/** Alle Typen, die der generische Cron abarbeitet. */
-export const RELEASE_PARTNER_TYPEN: ProvisionPartnerTyp[] = ['makler', 'werkstatt', 'firmen_flotte']
+/**
+ * Alle Typen, die der generische Cron abarbeitet. 'makler_empfehlung' (10€-Sponsor-Override)
+ * fehlte hier bis 08.08. — dieselbe Luecke wie firmen_flotte vor der P2-Unifikation: der Cron
+ * selektierte die Rows nie -> sie blieben ewig 'pending' + waren im v_partner_billing unsichtbar.
+ * makler_empfehlung ist EXTERN (EXTERNE_PARTNER_TYPEN) -> Suppression greift nie, feuert immer frei.
+ */
+export const RELEASE_PARTNER_TYPEN: ProvisionPartnerTyp[] = ['makler', 'werkstatt', 'firmen_flotte', 'makler_empfehlung']
 
 export type ReleasePendingRow = {
   id: string
