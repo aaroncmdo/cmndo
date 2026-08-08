@@ -16,12 +16,15 @@ const KUNDE_PRIMARY_HREFS = ['/kunde/termine', '/kunde/chat', '/kunde/profil']
 
 export function KundeMobileNav({
   singleFallId = null,
+  hatFirma = false,
   brandLogo,
   brandName,
   sheetTop,
   sheetFooter,
 }: {
   singleFallId?: string | null
+  /** B2B-Kunde mit Firmen-Konto → Flotte-Item im Menü-Sheet sichtbar (T6). */
+  hatFirma?: boolean
   brandLogo?: React.ReactNode
   brandName: React.ReactNode
   sheetTop?: React.ReactNode
@@ -30,7 +33,7 @@ export function KundeMobileNav({
   const t = useTranslations('kunde.shell')
   const tHero = useTranslations('kundeHero')
 
-  const all: MobileNavItem[] = buildNavItems(singleFallId, t).map((i) => ({
+  const all: MobileNavItem[] = buildNavItems(singleFallId, t, hatFirma).map((i) => ({
     href: i.href,
     label: i.label,
     icon: i.icon,

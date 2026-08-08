@@ -13,52 +13,12 @@ import { revalidatePath } from 'next/cache'
 import { notifyWerkstattKundenreaktion } from '@/lib/werkstatt/notify-werkstatt-kundenreaktion'
 import { advanceReparaturCursorTo, fallIdForClaim } from '@/lib/faelle/reparatur-cursor'
 
-export async function schlageReparaturTerminVorPortal(
-  claimId: string,
-  wunschterminLokal: string,
-): Promise<{ ok: boolean; error?: string }> {
-  if (!claimId || !wunschterminLokal) {
-    return { ok: false, error: 'Claim und Wunschtermin sind erforderlich.' }
-  }
-
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
-
-  // Werkstatt aus Claim lesen (Kunde liest via claims-Owner-RLS)
-  const { data: claim } = await supabase
-    .from('claims')
-    .select('reparatur_werkstatt_id')
-    .eq('id', claimId)
-    .maybeSingle()
-  const werkstattId = (claim as { reparatur_werkstatt_id: string | null } | null)?.reparatur_werkstatt_id ?? null
-  if (!werkstattId) return { ok: false, error: 'Keine Werkstatt hinterlegt.' }
-
-  // Pruefen ob bereits ein aktiver Terminwunsch vorliegt
-  const { data: aktiv } = await supabase
-    .from('reparatur_termine')
-    .select('id')
-    .eq('claim_id', claimId)
-    .in('status', ['angefragt', 'anruf_erbeten', 'bestaetigt'])
-    .limit(1)
-  if (aktiv && aktiv.length > 0) {
-    return { ok: false, error: 'Es liegt bereits ein Terminwunsch vor.' }
-  }
-
-  // Berlin-Wandzeit → UTC-ISO (resolveWunschterminIso wirft nicht, gibt null zurueck)
-  const utc = resolveWunschterminIso(wunschterminLokal)
-  if (!utc) return { ok: false, error: 'Ungültiger Wunschtermin.' }
-
-  const { error } = await supabase.from('reparatur_termine').insert({
-    claim_id: claimId,
-    werkstatt_id: werkstattId,
-    wunschtermin: utc,
-    status: 'angefragt',
-    erstellt_von: user.id,
-  })
-  if (error) return { ok: false, error: error.message }
-
-  // Werkstatt benachrichtigen — non-fatal
+/**
+ * Werkstatt-Notify (non-fatal) + Kunde-Akte revalidieren. Von beiden Erfolgs-Pfaden von
+ * schlageReparaturTerminVorPortal genutzt (Neu-Insert + angefragt-Nachtrag) statt dupliziert.
+ * revalidatePath laeuft immer (ausserhalb des non-fatalen Notify-try).
+ */
+async function notifyWerkstattTerminwunschUndRevalidate(claimId: string, werkstattId: string): Promise<void> {
   try {
     const svc = createServiceClient()
     const { data: w } = await svc
@@ -81,6 +41,87 @@ export async function schlageReparaturTerminVorPortal(
   }
 
   revalidatePath(`/kunde/faelle/${claimId}`)
+}
+
+export async function schlageReparaturTerminVorPortal(
+  claimId: string,
+  wunschterminLokal: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!claimId || !wunschterminLokal) {
+    return { ok: false, error: 'Claim und Wunschtermin sind erforderlich.' }
+  }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  // Werkstatt aus Claim lesen (Kunde liest via claims-Owner-RLS). Genau dieser user-scoped
+  // Read ist zugleich die Owner-Legitimation fuer den Service-Client-Nachtrag unten — nur
+  // der Claim-Owner kommt ueber die RLS bis hierher.
+  const { data: claim } = await supabase
+    .from('claims')
+    .select('reparatur_werkstatt_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  const werkstattId = (claim as { reparatur_werkstatt_id: string | null } | null)?.reparatur_werkstatt_id ?? null
+  if (!werkstattId) return { ok: false, error: 'Keine Werkstatt hinterlegt.' }
+
+  // Berlin-Wandzeit → UTC-ISO (resolveWunschterminIso wirft nicht, gibt null zurueck).
+  // Vor den Aktiv-Check gezogen: Nachtrag- UND Insert-Zweig brauchen utc.
+  const utc = resolveWunschterminIso(wunschterminLokal)
+  if (!utc) return { ok: false, error: 'Ungültiger Wunschtermin.' }
+
+  // Aktiven Terminwunsch pruefen. Offene Menge = die "max. 1 offene Row"-Invariante der
+  // Tranche W (angefragt/werkstatt_vorschlag/anruf_erbeten/bestaetigt), konsistent mit
+  // ensureReparaturTerminAngefragt. status + wunschtermin mitlesen: eine offene 'angefragt'-
+  // Row OHNE Wunschtermin ist der neue Werkstatt-ensure-Zustand (W2) — dort traegt der Kunde
+  // den Wunschtermin NACH, statt blockiert zu werden.
+  const { data: aktiv } = await supabase
+    .from('reparatur_termine')
+    .select('id, status, wunschtermin')
+    .eq('claim_id', claimId)
+    .in('status', ['angefragt', 'werkstatt_vorschlag', 'anruf_erbeten', 'bestaetigt'])
+    .limit(1)
+  const aktiveRow = (aktiv?.[0] ?? null) as { id: string; status: string; wunschtermin: string | null } | null
+
+  if (aktiveRow) {
+    // Nachtrag: offene 'angefragt'-Row ohne Wunschtermin -> Wunschtermin per Service-Client
+    // setzen. Die Kunde-RLS-UPDATE-Policy erlaubt nur werkstatt_vorschlag-Uebergaenge (kein
+    // user-scoped angefragt-Update moeglich), daher der Service-Client; Owner ist oben erbracht.
+    // Das doppelte eq('status','angefragt') + is('wunschtermin', null) macht den Write racefrei
+    // (verlorenes Update -> 0 Zeilen -> Fehlermeldung statt stillem Ueberschreiben).
+    if (aktiveRow.status === 'angefragt' && aktiveRow.wunschtermin == null) {
+      const svc = createServiceClient()
+      const { data: updated, error: updErr } = await svc
+        .from('reparatur_termine')
+        .update({ wunschtermin: utc, updated_at: new Date().toISOString() } as never)
+        .eq('id', aktiveRow.id)
+        .eq('status', 'angefragt')
+        .is('wunschtermin', null)
+        .select('id')
+      if (updErr) return { ok: false, error: updErr.message }
+      if (!updated || updated.length === 0) {
+        return { ok: false, error: 'Terminwunsch wurde gerade aktualisiert – bitte neu laden.' }
+      }
+      await notifyWerkstattTerminwunschUndRevalidate(claimId, werkstattId)
+      return { ok: true }
+    }
+    // Alle anderen offenen Rows (bestaetigt/anruf_erbeten/werkstatt_vorschlag bzw. angefragt
+    // MIT Wunschtermin) blocken unveraendert.
+    return { ok: false, error: 'Es liegt bereits ein Terminwunsch vor.' }
+  }
+
+  // Keine offene Row -> neuen Wunschtermin anlegen (bestehender Pfad).
+  const { error } = await supabase.from('reparatur_termine').insert({
+    claim_id: claimId,
+    werkstatt_id: werkstattId,
+    wunschtermin: utc,
+    status: 'angefragt',
+    erstellt_von: user.id,
+  })
+  if (error) return { ok: false, error: error.message }
+
+  await notifyWerkstattTerminwunschUndRevalidate(claimId, werkstattId)
   return { ok: true }
 }
 

@@ -17,6 +17,7 @@ import EskalierterAdminCard from './_components/EskalierterAdminCard'
 import LexDriveCard from './_components/LexDriveCard'
 // CMM-28: Loader für singleFallId-Resolution in der Nav.
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { kundeHatFirma } from '@/lib/kunde/firma-flotte'
 // AAR-363: Outbox-Badge für offline-wartende Uploads (Pflichtdokumente etc.)
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import GlobalSearch from '@/components/shared/search/GlobalSearch'
@@ -95,9 +96,13 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // damit das Layout ohne Sidebar-Cards rendert statt in die Root-Error-Boundary.
   let adminForNav: ReturnType<typeof createAdminClient> | null = null
   let navFaelle: Awaited<ReturnType<typeof getKundeFaelle>> = []
+  // T6: Flotte-Nav nur fuer B2B-Kunden mit Firmen-Konto. Default false — bleibt versteckt,
+  // wenn adminForNav fehlt oder der Read scheitert (kein B2B-Item ohne Beleg).
+  let hatFirma = false
   try {
     adminForNav = createAdminClient()
     navFaelle = await getKundeFaelle(adminForNav, user.id, user.email ?? null)
+    hatFirma = await kundeHatFirma(adminForNav, user.id)
   } catch (err) {
     console.error('[kunde/layout] adminForNav init fehlgeschlagen:', err)
   }
@@ -428,7 +433,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           <LanguageSwitcher locale={activeLocale} variant="full" />
         </div>
 
-        <KundeNav singleFallId={singleRouteId} />
+        <KundeNav singleFallId={singleRouteId} hatFirma={hatFirma} />
 
         {/* Sidebar-Cards (KB / SV / Admin / LexDrive) — auf Desktop und im
             Mobile-Drawer identisch (sidebarCards-Fragment). */}
@@ -489,6 +494,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
       {/* Mobile Bottom-Nav — geteilte MobileNav (Pille + Menü-Sheet), bottom-only. */}
       <KundeMobileNav
         singleFallId={singleRouteId}
+        hatFirma={hatFirma}
         brandLogo={
           branding.useBrand && branding.logoUrl ? (
             <Image src={branding.logoUrl} alt={branding.firmenname ?? 'Logo'} width={120} height={28} unoptimized className="max-h-7 w-auto max-w-[120px] object-contain" />
