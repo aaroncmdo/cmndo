@@ -67,7 +67,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => router.push('/admin/werkstaetten/qr-pool')}
+                  onClick={() => router.push('/admin/vertrieb/werkstaetten/qr-pool')}
                   iconLeft={<QrCodeIcon className="w-4 h-4" />}
                 >
                   QR-Code-Pool

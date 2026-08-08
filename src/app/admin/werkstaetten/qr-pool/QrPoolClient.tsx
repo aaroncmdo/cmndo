@@ -158,7 +158,7 @@ export function QrPoolClient({
       <SectionCard title="QR-Codes anzeigen & herunterladen">
         <div className="space-y-3">
           <a
-            href="/admin/werkstaetten/qr-pool/drucken?status=frei"
+            href="/admin/vertrieb/werkstaetten/qr-pool/drucken?status=frei"
             target="_blank"
             rel="noreferrer"
             className="inline-flex text-body-sm font-medium text-claimondo-ondo underline"
@@ -173,7 +173,7 @@ export function QrPoolClient({
                 {chargen.map((ch) => (
                   <a
                     key={ch}
-                    href={`/admin/werkstaetten/qr-pool/drucken?charge=${encodeURIComponent(ch)}`}
+                    href={`/admin/vertrieb/werkstaetten/qr-pool/drucken?charge=${encodeURIComponent(ch)}`}
                     target="_blank"
                     rel="noreferrer"
                     className="rounded-ios-lg border border-claimondo-border px-3 py-1.5 text-body-sm text-claimondo-navy hover:border-claimondo-ondo"

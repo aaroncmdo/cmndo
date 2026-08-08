@@ -236,7 +236,7 @@ function PinDetail({ pin, onBack, role }: PinDetailProps) {
             Einladen
           </Button>
           <a
-            href="/admin/sachverstaendige/leads"
+            href="/admin/vertrieb/sachverstaendige/leads"
             className="flex items-center justify-center w-full rounded-ios-md border border-claimondo-border py-2 text-body-sm text-claimondo-navy hover:bg-claimondo-bg transition-colors"
           >
             In SV-Leads öffnen →

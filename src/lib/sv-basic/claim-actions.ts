@@ -434,7 +434,7 @@ export async function beanspracheSvLead(input: {
       email: input.email,
       telefon: input.telefon,
       ort: [lead.plz, lead.ort].filter(Boolean).join(' ') || null,
-      adminPfad: '/admin/sachverstaendige/basic-freigaben',
+      adminPfad: '/admin/vertrieb/sachverstaendige/basic-freigaben',
     })
   } catch (err) {
     console.error('[sv-basic/beanspracheSvLead] Team-WA-Notify fehlgeschlagen (non-critical):', err)
@@ -761,7 +761,7 @@ export async function registriereSvBasicNeu(input: {
       email: input.email,
       telefon: input.telefon,
       ort: input.plz ?? null,
-      adminPfad: '/admin/sachverstaendige/basic-freigaben',
+      adminPfad: '/admin/vertrieb/sachverstaendige/basic-freigaben',
       extraFields: [{ label: 'DAT-Nr', value: input.datNr?.trim() || null }],
     })
   } catch (err) {
