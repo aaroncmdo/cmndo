@@ -198,12 +198,9 @@ export async function updateFallStatus(
     const { data: fallInfo } = await serviceClient.from('v_claim_full').select('sv_id, claim_nummer, kundenbetreuer_id').eq('fall_id', fallId).single()
     triggerKanzleiPaketTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
     triggerAsSendedatumTask(fallId, fallInfo?.kundenbetreuer_id ?? null).catch(() => {})
-    await enqueue({
-      dedupKey: buildDedupKey({ template: 'kanzlei_uebergabe', claimId: fallId }),
-      kanal: 'whatsapp',
-      template: 'kanzlei_uebergabe',
-      claimId: fallId,
-    }).catch(() => {})
+    // C3b (kanzlei_uebergabe-Doppel-Send-Fix): transitionFallStatus('kanzlei-uebergeben') oben
+    // (:78) emittiert bereits System 1 kanzlei.uebergabe (EVENT_MATRIX kunde: whatsapp) + Fan-out
+    // an Makler/Admin. Der redundante Outbox-Send ist entfernt (kein Doppel-WA an den Kunden).
     if (fallInfo?.sv_id) {
       createGutachterMitteilung(fallInfo.sv_id, 'qc_bestanden', fallId, {
         claim_nummer: fallInfo?.claim_nummer ?? undefined,
@@ -263,13 +260,9 @@ export async function updateFallStatus(
       await resolveTasksForEntity('case', fallId, 'Fall storniert')
     } catch (err) { console.error('[AAR-91] resolveTasks storniert:', err) }
 
-    // Phase 2a: WhatsApp an Kunde
-    await enqueue({
-      dedupKey: buildDedupKey({ template: 'termin_storniert', claimId: fallId }),
-      kanal: 'whatsapp',
-      template: 'termin_storniert',
-      claimId: fallId,
-    }).catch(() => {})
+    // Phase 2a: Kunden-WA laeuft ueber System 1 — C3b (termin_storniert-Doppel-Send-Fix):
+    // transitionFallStatus('storniert') oben (:78) emittiert bereits fall.storniert
+    // (EVENT_MATRIX kunde: whatsapp+email) + Fan-out. Der redundante Outbox-Send ist entfernt.
 
     // Phase 2b/3: SV-Mitteilung + Email + Refund
     if (stornoSvId) {
