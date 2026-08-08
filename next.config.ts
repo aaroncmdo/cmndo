@@ -84,8 +84,15 @@ const nextConfig: NextConfig = {
     // Server-Actions (generateFlyerPdf) sie auf dem VPS via
     // process.cwd()/public/... finden — sonst fehlt das PDF im getraceten
     // Standalone-Output (analog OCR-Force-Include oben).
+    // F2b Route-Konsolidierung (08.08.): der QR-Pool rendert jetzt kanonisch unter
+    // /admin/vertrieb/werkstaetten/qr-pool(/drucken) (Legacy redirectet 308 dorthin) --
+    // outputFileTracingIncludes keyt auf die RENDERNDE Route, nicht auf Import-Pfade,
+    // daher zusaetzlich die vertrieb-Keys mit demselben Include-Wert. Legacy-Keys bleiben
+    // als Belt-and-Suspenders (kein Schaden, falls je wieder direkt gerendert).
     '/admin/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
     '/admin/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/vertrieb/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/vertrieb/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
     // Marketing-Content-Studio: der Render-Orchestrator (src/lib/marketing/render-clip.ts)
     // laedt @remotion/renderer + @remotion/bundler via runtime-require (serverExternalPackages,
     // s.o.). @vercel/nft traced deren CJS-Entry (renderer/dist/index.js), das native
@@ -449,12 +456,28 @@ const nextConfig: NextConfig = {
       // F2 Route-Konsolidierung (08.08.): analog fuer Werkstatt -- die Detail-Akte ist
       // jetzt kanonisch unter /admin/vertrieb/werkstaetten/[id] (admin/werkstaetten/[id]/
       // page.tsx wurde zu WsAkteContent.tsx und hat keinen Route-Slot mehr). UUID-Regex
-      // (nicht :path*) faengt NICHT qr-pool/qr-pool/drucken, die unter
-      // /admin/werkstaetten/* unveraendert weiterleben. Kein Legacy-@drawer/(.)[id] auf
-      // der Werkstatt-Liste vorhanden (anders als bei SV) -- nichts zu entfernen.
+      // (nicht :path*) faengt NICHT qr-pool/qr-pool/drucken -- die haben (F2b, s.u.)
+      // eigene EXAKT-Match-Redirects. Kein Legacy-@drawer/(.)[id] auf der Werkstatt-Liste
+      // vorhanden (anders als bei SV) -- nichts zu entfernen.
       {
         source: '/admin/werkstaetten/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
         destination: '/admin/vertrieb/werkstaetten/:id',
+        permanent: true,
+      },
+      // F2b Route-Konsolidierung REST (08.08.): analog fuer die restlichen 2 Werkstatt-
+      // Routen (qr-pool/qr-pool/drucken) -- ihre page.tsx wurden zu *Content.tsx
+      // umbenannt und haben keinen Route-Slot mehr. ZWEI SEPARATE EXAKT-Match-Eintraege
+      // (kein :path*), sonst wuerde ein :path* auf qr-pool das drucken-Sub-Segment
+      // schlucken statt es an seinen eigenen Redirect zu uebergeben. Kein Legacy-@drawer
+      // fuer Werkstatt vorhanden (s.o.) -- nichts zu entfernen.
+      {
+        source: '/admin/werkstaetten/qr-pool',
+        destination: '/admin/vertrieb/werkstaetten/qr-pool',
+        permanent: true,
+      },
+      {
+        source: '/admin/werkstaetten/qr-pool/drucken',
+        destination: '/admin/vertrieb/werkstaetten/qr-pool/drucken',
         permanent: true,
       },
       // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
