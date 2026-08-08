@@ -408,7 +408,7 @@ const nextConfig: NextConfig = {
       // Legacy-Liste wurde entfernt (Option 3a) -- die vertrieb-Konsole hat ihren eigenen
       // Cockpit-Drawer (admin/vertrieb/@drawer/(.)sachverstaendige/[id]), unberuehrt.
       {
-        source: '/admin/sachverstaendige/:id([0-9a-fA-F-]{36})',
+        source: '/admin/sachverstaendige/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
         destination: '/admin/vertrieb/sachverstaendige/:id',
         permanent: true,
       },
@@ -419,7 +419,7 @@ const nextConfig: NextConfig = {
       // /admin/werkstaetten/* unveraendert weiterleben. Kein Legacy-@drawer/(.)[id] auf
       // der Werkstatt-Liste vorhanden (anders als bei SV) -- nichts zu entfernen.
       {
-        source: '/admin/werkstaetten/:id([0-9a-fA-F-]{36})',
+        source: '/admin/werkstaetten/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
         destination: '/admin/vertrieb/werkstaetten/:id',
         permanent: true,
       },
