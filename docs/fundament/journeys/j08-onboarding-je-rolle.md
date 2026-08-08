@@ -51,6 +51,14 @@ Prod-Smoke mit externer Wegwerf-Identität.
   Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.
   Marketing-Einstieg: flotte.claimondo.de (Subdomain-LP, CTA -> Self-Signup) —
   analog werkstatt.claimondo.de fuer Werkstaetten.)
+- **Tier-2-Dokumente-Frist nach Freischaltung** (Soll-Delta 08.08., Aaron „Option B"): Jeder
+  freigeschaltete SV ohne geprüfte **Berufshaftpflicht + Gewerbeanmeldung** erhält 14 Tage Frist
+  ab Freischaltung (`verifizierung_status='ausstehend'` + `verifizierung_frist_bis`). Nach Ablauf →
+  `frist_ueberschritten` → **Fall-Empfang pausiert** (bestehendes FG3-Gate `svDarfFaelleEmpfangen`),
+  KEIN Zugangsverlust; Reaktivierung nach Doc-Prüfung (`tier2Freigeben`) oder Admin-Frist-Verlängerung
+  (`tier2FristVerlaengern`). Für Paid + Basic. Die Freischaltung setzt `verifizierung_status` NICHT mehr
+  blind auf `geprueft` (das war der Bypass, der 9 SVs ohne Docs dispatchbar machte, prod 08.08.).
+  Spec: `docs/superpowers/specs/2026-08-08-tier2-dokumente-enforcement-design.md`.
 - **Werkstatt-Interesse-Formular retired** (Soll-Delta 05.08., Aaron „Anfrage = sofort
   Partner"): `/werkstatt-partner-werden` (erzeugte nur einen `partner_leads`-Prospect ohne
   Account) ist zugunsten des Self-Signups `/werkstatt/registrieren` retired — 308-Redirect
