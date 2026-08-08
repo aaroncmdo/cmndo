@@ -25,6 +25,8 @@ import { rankSlots } from './ranking'
 import { toOeffentlichesSvProfil } from './projection'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
 import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
+import { ladeFreundKandidatIds } from '@/lib/netzwerk/freunde'
+import { applyNetzwerkPraeferenz } from '@/lib/netzwerk/apply-netzwerk-praeferenz'
 import { istTestSvAngebotBlockiert } from '@/lib/testdaten/test-sv-guard'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder } from './types'
@@ -33,6 +35,9 @@ const SLOT_FENSTER_TAGE = 14
 const KUNDE_MAX_SLOTS = 3
 // Best + Zweitbester + 1 Reserve für adaptive Auffüllung (z.B. Best ohne Slots).
 const TOP_KANDIDATEN = 3
+// Owner-Boost (Ebene 2): groesserer Pool, damit ein etwas fernerer ZAHLENDER Freund des Owners
+// nicht schon vor der relationalen Partition (Freund oben) durch den Top-3-Schnitt rausfaellt.
+const TOP_KANDIDATEN_MIT_OWNER = 8
 // SV-Embed: bis 6 Slots beim fixen SV (1:1 zum früheren matchAndSlots-SLOTS_PRO_SV).
 const FIXER_MAX_SLOTS = 6
 
@@ -51,6 +56,14 @@ export type PlaneTerminOeffentlichInput = {
    * applyDispatchableFilter). Fehlend/unbekannt = fail-closed (Test-SV wird nicht angeboten).
    */
   kundenIdentitaet?: { email?: string | null; name?: string | null } | null
+  /**
+   * Ebene-2 relationaler Boost (Design §5.2 "Freund oben"): profiles.id des attribuierenden Owners
+   * (z.B. aus ?werkstatt=<id> → resolveVermittlerOwnerProfil). Gesetzt → dessen ZAHLENDE Freund-SVs
+   * (Freundes-Graph ∩ Netzwerkpartner-Abo) werden im GLOBAL-Ranking nach oben partitioniert +
+   * `imNetzwerk` markiert. null/undefined (Default, jeder Nicht-Embed-Caller) → identisches Verhalten.
+   * NUR im GLOBAL-Pfad wirksam (der Fixer-/SV-Embed-Pfad zeigt genau einen SV, kein Boost).
+   */
+  ownerProfilId?: string | null
 }
 
 /**
@@ -219,7 +232,7 @@ async function findeNahenTestSv(
 export async function planeTerminOeffentlich(
   input: PlaneTerminOeffentlichInput,
 ): Promise<OeffentlichesSvProfil[]> {
-  const { lat, lng, wunschterminIso = null, fixerSvId = null, kundenIdentitaet = null } = input
+  const { lat, lng, wunschterminIso = null, fixerSvId = null, kundenIdentitaet = null, ownerProfilId = null } = input
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return []
 
   const admin = createAdminClient()
@@ -263,13 +276,33 @@ export async function planeTerminOeffentlich(
     ]
   }
 
-  // ── GLOBAL: Engine-Ranking (findBestSV) + 2+1-Verteilung ──
-  const candidates = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, TOP_KANDIDATEN)
-  if (candidates.length === 0) return []
+  // ── GLOBAL: Engine-Ranking (findBestSV) + relationaler Owner-Boost (Ebene 2) + 2+1-Verteilung ──
+  // Bei injiziertem Owner groesseren Pool laden, damit ein etwas fernerer zahlender Freund des
+  // Owners nicht schon vor der relationalen Partition durch den Top-3-Schnitt faellt.
+  const kandidatenLimit = ownerProfilId ? TOP_KANDIDATEN_MIT_OWNER : TOP_KANDIDATEN
+  const rohKandidaten = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, kandidatenLimit)
+  if (rohKandidaten.length === 0) return []
+
+  // 13b (K10): Netzwerkpartner-Abo-Praedikat EINMAL auf dem ganzen Pool — dient sowohl dem Badge
+  // (istNetzwerkpartner) als auch dem Freund-Filter (nur ZAHLENDE Freunde werden geboostet).
+  const zahlendeSet = await ladeZahlendeSvSet(admin, rohKandidaten.map((c) => c.svId))
+
+  // Ebene 2 (relational, Design §5.2 "Freund oben, Wahl frei"): die zahlenden Freund-SVs des Owners
+  // nach oben partitionieren (stabile Reihenfolge sonst). Ohne Owner / ohne zahlende Freunde: No-op
+  // → rohKandidaten unveraendert (identisch zum bisherigen Verhalten).
+  let freundPayingIds = new Set<string>()
+  if (ownerProfilId) {
+    const freundSvIds = await ladeFreundKandidatIds(admin, ownerProfilId, 'gutachter')
+    freundPayingIds = new Set([...freundSvIds].filter((id) => zahlendeSet.has(id)))
+  }
+  const geordnet: SvMatchCandidate[] =
+    freundPayingIds.size > 0
+      ? applyNetzwerkPraeferenz(rohKandidaten.map((c) => ({ ...c, id: c.svId, qualifiziert: true })), freundPayingIds)
+      : rohKandidaten
+  const candidates = geordnet.slice(0, TOP_KANDIDATEN)
+
   const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
   const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
-  // 13b (K10): Netzwerkpartner-Abo-Praedikat fuers Badge, EIN Batch fuer diesen Pfad.
-  const zahlendeSet = await ladeZahlendeSvSet(admin, candidates.map((c) => c.svId))
   // AAR-956 (Aaron 14.06.): die slotsFuer-Calls (freieSlots, DB-schwer) PARALLEL statt sequenziell —
   // der Hauptgrund der „Wir suchen"-Sekunden war 3× freieSlots nacheinander. Promise.all erhält die
   // Reihenfolge (Engine-Ranking) → Ergebnis bit-identisch, nur ~3× schneller.
@@ -291,6 +324,7 @@ export async function planeTerminOeffentlich(
         slots,
         rang: rangById.get(cand.svId) ?? null,
         istNetzwerkpartner: zahlendeSet.has(cand.svId),
+        imNetzwerk: freundPayingIds.has(cand.svId),
       }),
     )
   })

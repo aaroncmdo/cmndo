@@ -26,6 +26,7 @@ function svProfil(overrides: Partial<Record<string, unknown>> = {}) {
     istTopPartner: false,
     rang: null,
     rangSinnsatz: null,
+    imNetzwerk: false,
     slots: [],
     ...overrides,
   }
