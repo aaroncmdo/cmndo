@@ -58,6 +58,12 @@ export type OeffentlichesSvProfil = {
    */
   rang: Tier | null
   rangSinnsatz: string | null
+  /**
+   * Ebene-2 (relational, Design §5.2): dieser SV ist ein ZAHLENDER Freund des attribuierenden
+   * Owners (?werkstatt=<id> → Freundes-Graph ∩ Netzwerkpartner-Abo). Nur gesetzt, wenn ein Owner
+   * injiziert wurde; sonst false. Steuert die "In Ihrem Netzwerk"-Hervorhebung im Slot-Picker.
+   */
+  imNetzwerk: boolean
   slots: SlotVorschlag[]
 }
 
@@ -86,4 +92,6 @@ export type ProjektionInput = {
   /** 13b: zahlender Netzwerkpartner (Abo, aus ladeZahlendeSvSet). Loest die paket-basierte
    *  istTopPartner-Plakette ab. Vom Loader batch-gesetzt; fehlt er -> false (fail-closed). */
   istNetzwerkpartner?: boolean
+  /** Ebene-2 (relational): zahlender Freund des attribuierenden Owners. Fehlt -> false. */
+  imNetzwerk?: boolean
 }
