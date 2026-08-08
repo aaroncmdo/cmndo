@@ -108,18 +108,33 @@ async function clean(summary) {
     await db.from('flow_links').delete().in('lead_id', leadIds)
     await db.from('leads').delete().in('id', leadIds)
   }
-  if (s) {
-    const zweiStd = new Date(Date.now() - 2 * 3600e3).toISOString()
-    for (const uid of [s.kundeUid, s.werkstattUid].filter(Boolean)) {
-      await db.from('mitteilungen').delete().eq('empfaenger_id', uid).gt('created_at', zweiStd)
-    }
-    if (s.werkstattUid) await db.from('werkstaetten').delete().eq('user_id', s.werkstattUid)
-    for (const uid of [s.kundeUid, s.werkstattUid].filter(Boolean)) {
-      await db.from('profiles').delete().eq('id', uid)
-      await db.auth.admin.deleteUser(uid).catch(() => {})
-    }
+  // MUSTER-basiert statt summary-basiert (CI-Leichen-Fix 08.08.): auf frischen CI-Runnern
+  // existiert das Summary-JSON des Vorlaufs NIE -> der fruehere `if (s)`-Block raeumte in CI
+  // nichts, und die konto-lose S1-Smoke-Werkstatt (email=NULL, kein user_id) wurde NIRGENDS
+  // geraeumt -> +1 Werkstatt-Leiche pro Lauf. Ab 5 Leichen war die Top-5-Finder-Liste am
+  // Koeln-Standort voll und S1 fand die frische Werkstatt nicht mehr (J10 rot ab 05.08. 15:41,
+  // 5 Laeufe in Folge). Jetzt: alle Alt-Artefakte per Namens-/Email-Muster raeumen.
+  let leichen = 0
+  const { data: altWs } = await db.from('werkstaetten').select('id, name').like('name', 'SMOKE WF-Werkstatt %')
+  for (const w of altWs ?? []) {
+    // Marker-Claims sind oben schon weg; haengt eine Leiche noch an einem FREMDEN Claim
+    // (reparatur_werkstatt_id/werkstatt_id-FK), soll der Delete sichtbar scheitern statt crashen.
+    const { error } = await db.from('werkstaetten').delete().eq('id', w.id)
+    if (error) log(`  ! werkstatt-Leiche ${w.name} nicht loeschbar: ${error.message}`)
+    else leichen++
   }
-  log(`  cleaned: ${claimIds.length} claim(s) + ${leadIds.length} lead(s) + Konten/Werkstatt (Marker "${MARKER}")`)
+  const { data: altProfs } = await db
+    .from('profiles')
+    .select('id')
+    .or('email.ilike.throwaway-werkstatt-wf-%,email.ilike.throwaway-kunde-wf-%')
+  const zweiStd = new Date(Date.now() - 2 * 3600e3).toISOString()
+  for (const p of altProfs ?? []) {
+    await db.from('mitteilungen').delete().eq('empfaenger_id', p.id).gt('created_at', zweiStd)
+    await db.from('werkstaetten').delete().eq('user_id', p.id)
+    await db.from('profiles').delete().eq('id', p.id)
+    await db.auth.admin.deleteUser(p.id).catch(() => {})
+  }
+  log(`  cleaned: ${claimIds.length} claim(s) + ${leadIds.length} lead(s) + ${leichen} Werkstatt-Leiche(n) + ${(altProfs ?? []).length} Konto/en (Marker "${MARKER}")`)
 }
 
 // ---------------------------------------------------------------- SEED
