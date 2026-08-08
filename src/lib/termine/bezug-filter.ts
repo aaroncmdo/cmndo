@@ -20,7 +20,10 @@
 // Weitere top-level-Filter (.eq('status', …)) bleiben daneben stehen und AND-verknuepfen
 // mit der or-Gruppe (PostgREST-Semantik), also z.B.
 //   .or(bezugOrExpr('fall', X)).eq('status', 'bestaetigt')
-//   == (fall_id=X OR (bezug_typ=fall AND bezug_id=X)) AND status=bestaetigt
+//   == (fall_id=X OR (bezug_typ.in.(fall,claim) AND bezug_id=X)) AND status=bestaetigt
+//
+// WICHTIG: 'fall' und 'claim' bilden eine Aequivalenzklasse (claim-first: fall_id==claims.id,
+// dieselbe UUID) — Reader beider Vokabeln treffen die gleiche Zeile. 'lead' bleibt streng.
 //
 // Teil des Legacy-Retire (44 Consumer-Files, Boy-Scout — Marker audit-operativ-luecken).
 
@@ -29,12 +32,15 @@ export type BezugAchse = 'fall' | 'lead' | 'claim'
 /**
  * PostgREST-or-Ausdruck fuer die bezug-aware Filterung von gutachter_termine.
  * @param achse 'fall' | 'lead' | 'claim' — die Legacy-Spalte heisst `${achse}_id`.
+ *              'fall' und 'claim' matchen das gleiche bezug_typ-Set (beide → 'fall' oder
+ *              'claim' in der DB, claim-first Semantik).
  * @param id    Die Ziel-UUID (fall_id/lead_id/claim_id-PK). MUSS eine UUID sein — die
  *              PKs sind es immer; da der Wert in den or-String interpoliert wird, wuerden
  *              Sonderzeichen (Komma/Klammer) den Filter brechen. Keine freien Strings.
  */
 export function bezugOrExpr(achse: BezugAchse, id: string): string {
-  return `${achse}_id.eq.${id},and(bezug_typ.eq.${achse},bezug_id.eq.${id})`
+  const typExpr = achse === 'lead' ? 'bezug_typ.eq.lead' : 'bezug_typ.in.(fall,claim)'
+  return `${achse}_id.eq.${id},and(${typExpr},bezug_id.eq.${id})`
 }
 
 /**
@@ -45,10 +51,13 @@ export function bezugOrExpr(achse: BezugAchse, id: string): string {
  * supabase-js-Call: Syntax gueltig, Superset findet den bezug-nativen Termin (naive .in=15 → .or=16),
  * leere Liste → `in.()` matcht nichts OHNE Error → KEIN Guard noetig (wie `.in(col, [])`).
  * @param achse 'fall' | 'lead' | 'claim' — die Legacy-Spalte heisst `${achse}_id`.
+ *              'fall' und 'claim' matchen das gleiche bezug_typ-Set (beide → 'fall' oder
+ *              'claim' in der DB, claim-first Semantik).
  * @param ids   Ziel-UUIDs (fall_id/lead_id/claim_id-PKs). MUESSEN UUIDs sein — der Wert wird in den
  *              or-String interpoliert; Sonderzeichen (Komma/Klammer) wuerden den Filter brechen.
  */
 export function bezugInExpr(achse: BezugAchse, ids: string[]): string {
   const list = ids.join(',')
-  return `${achse}_id.in.(${list}),and(bezug_typ.eq.${achse},bezug_id.in.(${list}))`
+  const typExpr = achse === 'lead' ? 'bezug_typ.eq.lead' : 'bezug_typ.in.(fall,claim)'
+  return `${achse}_id.in.(${list}),and(${typExpr},bezug_id.in.(${list}))`
 }

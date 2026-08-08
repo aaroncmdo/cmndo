@@ -60,6 +60,8 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         adresse: terminAdresse,
         svVorname: svName ? svName.split(' ')[0] : null,
         kundeVorname: status.kundeVorname,
+        // T1: Dead-Pin/noch-kein-SV (dispatch_pending/sv_gesucht) -> "wird bestaetigt"-Badge statt Live-Status.
+        pending: sv.status === 'dispatch_pending' || sv.status === 'sv_gesucht',
       }
     : null
 
@@ -201,6 +203,34 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
         <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
           <p className="text-sm font-semibold text-danger-strong">{t('klage.titel')}</p>
           <p className="text-body-xs text-danger-strong">{t('klage.text')}</p>
+        </NoticeBox>
+      )}
+      {/* Gap D/I (05.08.): stille Endzustände ohne Abschluss-Card. Ohne diese Boxen zeigt der
+          Stepper „Abschluss", aber die Zone bleibt leer (KundeAbschlussCard rendert nur bei
+          abgeschlossen_am / erfolgreicher Regulierung) → der Kunde erfährt nicht, was mit
+          seinem Fall passiert ist. Je Terminal eine Erklärung. */}
+      {fallStatus === 'termin_durchgefuehrt' && (
+        <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
+          <p className="text-sm font-semibold text-info-strong">{t('terminDurchgefuehrt.titel')}</p>
+          <p className="text-body-xs text-info-strong">{t('terminDurchgefuehrt.text')}</p>
+        </NoticeBox>
+      )}
+      {fallStatus === 'an_externe_kanzlei_uebergeben' && (
+        <NoticeBox tone="info" className="rounded-ios-xl px-4 py-3 space-y-1">
+          <p className="text-sm font-semibold text-info-strong">{t('externeKanzlei.titel')}</p>
+          <p className="text-body-xs text-info-strong">{t('externeKanzlei.text')}</p>
+        </NoticeBox>
+      )}
+      {fallStatus === 'abgelehnt_final' && (
+        <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
+          <p className="text-sm font-semibold text-danger-strong">{t('abgelehntFinal.titel')}</p>
+          <p className="text-body-xs text-danger-strong">{t('abgelehntFinal.text')}</p>
+        </NoticeBox>
+      )}
+      {fallStatus === 'verjaehrt' && (
+        <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-1">
+          <p className="text-sm font-semibold text-warning-strong">{t('verjaehrt.titel')}</p>
+          <p className="text-body-xs text-warning-strong">{t('verjaehrt.text')}</p>
         </NoticeBox>
       )}
       {szenario === 'ruegefall' && (

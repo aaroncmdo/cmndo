@@ -4521,6 +4521,10 @@
         "wirdGesendet": "Wysyłanie…",
         "vorschlagSenden": "Wyślij propozycję"
       },
+      "terminVorschlag": {
+        "titel": "Twój rzeczoznawca zaproponował termin",
+        "vorschlagText": "{svName} proponuje ten termin oględzin:"
+      },
       "slotAuswahl": {
         "bestaetigt": "Termin {datumStr} został potwierdzony! Rzeczoznawca zostanie poinformowany.",
         "fehlerBestaetigen": "Błąd podczas potwierdzania",
@@ -4545,6 +4549,22 @@
       "vsAbgelehnt": {
         "titel": "Ubezpieczenie odmówiło wypłaty",
         "text": "Ubezpieczenie sprawcy odmawia likwidacji szkody. Nasza kancelaria partnerska analizuje sprawę i skontaktuje się z kolejnymi krokami (sprzeciw lub rekomendacja do sądu)."
+      },
+      "terminDurchgefuehrt": {
+        "titel": "Twoja wizyta się odbyła",
+        "text": "Oględziny szkody zostały przeprowadzone. Ekspertyza jest przygotowywana i zostanie do Ciebie wysłana, gdy będzie gotowa."
+      },
+      "externeKanzlei": {
+        "titel": "Przekazano kancelarii",
+        "text": "Twoją sprawą zajmuje się kancelaria partnerska. Przejmuje komunikację z ubezpieczycielem i skontaktuje się z Tobą."
+      },
+      "abgelehntFinal": {
+        "titel": "Sprawa zamknięta: odrzucona",
+        "text": "Po dokładnej analizie roszczeń nie udało się wyegzekwować. W razie pytań prosimy o kontakt z opiekunem."
+      },
+      "verjaehrt": {
+        "titel": "Sprawa przedawniona",
+        "text": "Ustawowy termin przedawnienia tej szkody upłynął. Roszczenia nie mogą już być dochodzone."
       },
       "klage": {
         "titel": "Sprawa kierowana na drogę sądową",
@@ -4625,7 +4645,8 @@
       },
       "stepper": {
         "navigation": "Trasa dojazdu",
-        "uhrSuffix": "godz."
+        "uhrSuffix": "godz.",
+        "wirdBestaetigt": "oczekuje na potwierdzenie"
       }
     },
     "termine": {
@@ -5067,6 +5088,16 @@
     "abmelden": "Wyloguj się"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "Wybór warsztatu",
+    "reparatur-angefragt": "Ustalanie terminu naprawy",
+    "reparatur-laeuft": "Naprawa w toku",
+    "reparatur-erledigt": "Naprawa zakończona",
+    "termin_durchgefuehrt": "Wizyta odbyta",
+    "reguliert_vollstaendig": "W pełni uregulowane",
+    "klage_rechtsstreit": "W sporze sądowym",
+    "verjaehrt": "Przedawnione",
+    "abgelehnt_final": "Ostatecznie odrzucone",
+    "an_externe_kanzlei_uebergeben": "Przekazane zewnętrznej kancelarii",
     "ersterfassung": "Trwa rejestracja",
     "flow-gesendet": "Link wysłany",
     "onboarding": "Oczekiwanie na ostatnie dane",

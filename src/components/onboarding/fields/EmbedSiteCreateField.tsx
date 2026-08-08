@@ -6,7 +6,7 @@
 // reuse der bestehenden Actions, self-persisting wie CalendarConnectField
 // (onChange('created') -> Pflichtfeld erfuellt). Zwei Wege, beide enden in einem
 // funktionierenden Widget (kein Skip -> der Step ist fuer alle erfuellbar):
-//   • Eigene Website  -> createEmbedSite (Domain als erlaubte_domain)
+//   • Eigene Website  -> createEmbedSite (Domain nur als Weiche, keine Origin-Beschraenkung)
 //   • Keine Website   -> createHostedEmbedSite -> Claimondo-Hosted-Seite /g/[slug] (Part B2)
 
 import { useState } from 'react'
@@ -79,7 +79,9 @@ export function EmbedSiteCreateField({
       name: name.trim(),
       slug: slugify(name) || slugify(dom),
       variante: 'A',
-      erlaubte_domains: [dom],
+      // leer = keine Origin-Beschraenkung (Widget darf ueberall laufen, Aaron 05.08.);
+      // die Domain-Eingabe ist nur die Weiche eigene-Website vs. Hosted-Seite.
+      erlaubte_domains: [],
     })
     setSaving(false)
     if (!res.ok) {

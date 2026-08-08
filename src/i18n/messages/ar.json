@@ -4521,6 +4521,10 @@
         "wirdGesendet": "جارٍ الإرسال...",
         "vorschlagSenden": "إرسال المقترح"
       },
+      "terminVorschlag": {
+        "titel": "اقترح خبيرك موعداً",
+        "vorschlagText": "يقترح {svName} هذا الموعد للمعاينة:"
+      },
       "slotAuswahl": {
         "bestaetigt": "تم تأكيد الموعد في {datumStr}! سيتم إخطار الخبير.",
         "fehlerBestaetigen": "خطأ في التأكيد",
@@ -4545,6 +4549,22 @@
       "vsAbgelehnt": {
         "titel": "شركة التأمين رفضت المطالبة",
         "text": "ترفض شركة التأمين تسوية الأضرار. يدرس مكتب المحامي الشريك القضية وسيتواصل معك بشأن الخطوات التالية (اعتراض أو توصية بالتقاضي)."
+      },
+      "terminDurchgefuehrt": {
+        "titel": "تم إجراء موعدك",
+        "text": "تمت معاينة الضرر. يتم إعداد التقرير وسيُرسل إليك بمجرد جاهزيته."
+      },
+      "externeKanzlei": {
+        "titel": "أُحيل إلى مكتب محاماة",
+        "text": "تتم معالجة ملفك من قبل مكتب محاماة شريك. سيتولى التواصل مع شركة التأمين وسيتصل بك."
+      },
+      "abgelehntFinal": {
+        "titel": "أُغلق الملف: مرفوض",
+        "text": "بعد مراجعة دقيقة، تعذّر إنفاذ المطالبات. لأي أسئلة، يرجى التواصل مع مسؤول ملفك."
+      },
+      "verjaehrt": {
+        "titel": "سقط الملف بالتقادم",
+        "text": "انتهت مدة التقادم القانونية لهذه المطالبة. لذلك لم يعد بالإمكان المطالبة بالحقوق."
       },
       "klage": {
         "titel": "القضية قيد التسوية القضائية",
@@ -4625,7 +4645,8 @@
       },
       "stepper": {
         "navigation": "الاتجاهات",
-        "uhrSuffix": ""
+        "uhrSuffix": "",
+        "wirdBestaetigt": "في انتظار التأكيد"
       }
     },
     "termine": {
@@ -5067,6 +5088,16 @@
     "abmelden": "تسجيل الخروج"
   },
   "fallStatus": {
+    "reparatur-werkstatt-suche": "يتم اختيار الورشة",
+    "reparatur-angefragt": "يتم تحديد موعد الإصلاح",
+    "reparatur-laeuft": "الإصلاح جارٍ",
+    "reparatur-erledigt": "اكتمل الإصلاح",
+    "termin_durchgefuehrt": "تم إجراء الموعد",
+    "reguliert_vollstaendig": "تمت التسوية بالكامل",
+    "klage_rechtsstreit": "في نزاع قضائي",
+    "verjaehrt": "سقط بالتقادم",
+    "abgelehnt_final": "مرفوض نهائياً",
+    "an_externe_kanzlei_uebergeben": "أُحيل إلى مكتب محاماة خارجي",
     "ersterfassung": "جارٍ التسجيل",
     "flow-gesendet": "تم إرسال الرابط",
     "onboarding": "في انتظار البيانات الأخيرة",

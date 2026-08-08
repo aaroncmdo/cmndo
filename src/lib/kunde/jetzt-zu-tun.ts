@@ -18,6 +18,7 @@ export type KundeAktionsTyp =
   | 'nachbesichtigung-waehlen'
   | 'vollmacht-unterschreiben'
   | 'vs-antwort-abwarten'
+  | 'in-bearbeitung'
   | 'fall-abgeschlossen'
   | 'kein-aktionsbedarf'
 
@@ -129,6 +130,59 @@ function fmtDate(iso: string | null | undefined): string {
   } catch {
     return iso
   }
+}
+
+// Gap H (Reise-Modell): für die Mittelphase-Zustände (SV-/Regulierungs-Achse läuft, der Kunde
+// muss nichts tun) eine „woran wir gerade arbeiten"-Erzählung aus operative_status — statt des
+// uninformativen „kein Handlungsbedarf". Spiegelt die subKunde-Stepper-Labels; reine Info (kein
+// CTA). Reparatur-HANDLUNGS-Zustände (Werkstatt wählen / KVA-Freigabe) bleiben bewusst aussen vor
+// (eigene CTAs in der GeldZone). Bewusst ohne i18n-Key → der Consumer rendert den de-Fallback
+// (titel/beschreibung); die Übersetzung ist ein Paket-3-Follow-up.
+const MITTELPHASE_ERZAEHLUNG: Record<string, { titel: string; text: string }> = {
+  'sv-gesucht': {
+    titel: 'Wir suchen Ihren Gutachter',
+    text: 'Wir finden gerade einen passenden Sachverständigen in Ihrer Nähe. Sie müssen nichts tun — wir melden uns, sobald der Termin steht.',
+  },
+  'sv-zugewiesen': {
+    titel: 'Gutachter zugewiesen',
+    text: 'Ihr Sachverständiger ist zugewiesen und meldet sich für einen Besichtigungstermin.',
+  },
+  'besichtigung': {
+    titel: 'Begutachtung läuft',
+    text: 'Ihr Gutachter erfasst gerade den Schaden an Ihrem Fahrzeug.',
+  },
+  'begutachtung-laeuft': {
+    titel: 'Gutachten wird erstellt',
+    text: 'Ihr Gutachten wird gerade erstellt — das dauert in der Regel ein bis zwei Werktage.',
+  },
+  'gutachten-eingegangen': {
+    titel: 'Gutachten wird geprüft',
+    text: 'Ihr Gutachten liegt vor und wird von uns geprüft.',
+  },
+  'filmcheck': {
+    titel: 'Gutachten wird geprüft',
+    text: 'Ihr Gutachten liegt vor und wird von uns geprüft.',
+  },
+  'qc-pruefung': {
+    titel: 'Qualitätsprüfung läuft',
+    text: 'Ihr Gutachten durchläuft unsere Qualitätsprüfung, bevor es an die Versicherung geht.',
+  },
+  'kanzlei-uebergeben': {
+    titel: 'Akte bei der Kanzlei',
+    text: 'Ihre Akte ist bei der Partnerkanzlei — sie bereitet die Forderung an die Versicherung vor.',
+  },
+  'zahlung-eingegangen': {
+    titel: 'Auszahlung wird vorbereitet',
+    text: 'Das Geld ist eingegangen — wir bereiten Ihre Auszahlung vor.',
+  },
+  'reparatur-laeuft': {
+    titel: 'Reparatur läuft',
+    text: 'Ihr Fahrzeug wird gerade in der Werkstatt repariert.',
+  },
+  'reparatur-erledigt': {
+    titel: 'Reparatur abgeschlossen',
+    text: 'Ihre Reparatur ist fertiggestellt.',
+  },
 }
 
 /**
@@ -339,13 +393,46 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 9. VS-Antwort abwarten (informativ)
+  // 9. VS-/Regulierungs-Phase (informativ — Kanzlei/wir kümmern uns, Kunde muss nichts tun).
+  // Gap-B-Fix: das nackte 'abgelehnt' + 'klage'/'klage_rechtsstreit' + 'in_kommunikation_vs' haben
+  // KEIN vs-Prefix und fielen früher zum Default „kein Handlungsbedarf" durch — während die Fallakte
+  // eine rote Alert-Box zeigt (Widerspruch). Jetzt konsistent abgedeckt, Botschaft nach Schwere
+  // differenziert. Die dynamischen Botschaften nutzen den de-Fallback (kein i18n-Key, Paket-3-Follow-up).
   const vsStatus = (fall.status ?? '').toLowerCase()
+  const istAblehnung = vsStatus === 'vs-abgelehnt' || vsStatus === 'abgelehnt' || vsStatus === 'vs-kuerzt'
+  const istKlage = vsStatus === 'klage' || vsStatus === 'klage_rechtsstreit'
   if (
     vsStatus.startsWith('vs-') ||
+    istAblehnung ||
+    istKlage ||
+    vsStatus === 'in_kommunikation_vs' ||
     vsStatus === 'anschlussschreiben-versendet' ||
     (fall.anschlussschreiben_am && !fall.regulierung_am)
   ) {
+    if (istKlage) {
+      return {
+        state: 'vs-antwort-abwarten',
+        prioritaet: 'niedrig',
+        titel: 'Ihr Fall ist bei Gericht',
+        beschreibung:
+          'Ihre Partnerkanzlei vertritt Sie vor Gericht. Sie müssen nichts tun — wir halten Sie auf dem Laufenden.',
+        variant: 'info',
+        severity: 'warning',
+        cta: null,
+      }
+    }
+    if (istAblehnung) {
+      return {
+        state: 'vs-antwort-abwarten',
+        prioritaet: 'niedrig',
+        titel: 'Die Versicherung hat Einwände',
+        beschreibung:
+          'Die Versicherung hat gekürzt oder abgelehnt. Ihre Kanzlei prüft die nächsten Schritte und legt Widerspruch ein — Sie müssen nichts tun.',
+        variant: 'info',
+        severity: 'warning',
+        cta: null,
+      }
+    }
     return {
       state: 'vs-antwort-abwarten',
       prioritaet: 'niedrig',
@@ -362,7 +449,23 @@ export function getKundenJetztZuTun(
     }
   }
 
-  // 11. Default: kein Aktionsbedarf
+  // 10. In Bearbeitung (Mittelphase, Gap H): der Fall läuft aktiv, aber der Kunde muss nichts tun.
+  // Statt des uninformativen „kein Handlungsbedarf" eine „woran wir gerade arbeiten"-Erzählung aus
+  // operative_status (Reise-Modell). Deckt sv-gesucht..zahlung-eingegangen + reparatur-läuft/-erledigt.
+  const bearbeitung = MITTELPHASE_ERZAEHLUNG[vsStatus]
+  if (bearbeitung) {
+    return {
+      state: 'in-bearbeitung',
+      prioritaet: 'niedrig',
+      titel: bearbeitung.titel,
+      beschreibung: bearbeitung.text,
+      variant: 'info',
+      severity: 'neutral',
+      cta: null,
+    }
+  }
+
+  // 11. Default: kein Aktionsbedarf (Fall läuft, kein bekannter Mittelphase-Zustand).
   return {
     state: 'kein-aktionsbedarf',
     prioritaet: 'niedrig',

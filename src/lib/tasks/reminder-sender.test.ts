@@ -15,6 +15,9 @@ const h = vi.hoisted(() => {
     b.select = () => b
     b.eq = () => b
     b.in = () => b
+    b.is = () => b
+    b.lt = () => b
+    b.like = () => b
     b.order = () => b
     b.limit = () => b
     b.single = () => Promise.resolve(next())
@@ -38,7 +41,7 @@ vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => h.db }))
 vi.mock('@/lib/whatsapp', () => ({ sendWhatsApp: h.sendWhatsApp }))
 vi.mock('@/lib/email/google/client', () => ({ sendEmail: h.sendEmail }))
 
-import { sendTaskReminder } from './reminder-sender'
+import { sendTaskReminder, eskaliereOffeneTerminwuensche } from './reminder-sender'
 
 const lastUpdate = () => h.state.updateCalls.at(-1) as Record<string, unknown> | undefined
 
@@ -108,6 +111,77 @@ describe('sendTaskReminder — Zustell-Semantik (#3288)', () => {
     h.state.q = [{ data: { id: 'r5', status: 'sent' } }]
     await sendTaskReminder('r5')
     expect(h.state.updateCalls).toHaveLength(0)
+    expect(h.state.insertCalls).toHaveLength(0)
+  })
+})
+
+describe('eskaliereOffeneTerminwuensche — 24h-SLA-Eskalation (T3 Task 11)', () => {
+  beforeEach(() => {
+    h.state.q = []
+    h.state.updateCalls.length = 0
+    h.state.insertCalls.length = 0
+    vi.clearAllMocks()
+  })
+
+  it('keine ueberfaelligen Terminwuensche -> kein Query-Overhead, keine Mitteilung', async () => {
+    h.state.q = [{ data: [], error: null }] // gutachter_termine: nichts > 24h offen
+    await eskaliereOffeneTerminwuensche()
+    expect(h.state.insertCalls).toHaveLength(0)
+  })
+
+  it('ueberfaellige Terminwuensche + keine vorherige Eskalation -> EINE aggregierte Mitteilung', async () => {
+    h.state.q = [
+      { data: [{ id: 't1' }, { id: 't2' }, { id: 't3' }], error: null }, // 3 ueberfaellig
+      { data: null, error: null }, // Dedup: keine vorherige Eskalation gefunden
+      { data: [{ id: 'disp-1' }], error: null }, // profiles rolle=dispatch
+      { data: { id: 'mit-1' }, error: null }, // mitteilungen-insert (createMitteilung fuer disp-1)
+    ]
+    await eskaliereOffeneTerminwuensche()
+    expect(h.state.insertCalls).toHaveLength(1)
+    expect(h.state.insertCalls[0]).toMatchObject({
+      empfaenger_id: 'disp-1',
+      empfaenger_rolle: 'dispatch',
+      kategorie: 'update',
+      prioritaet: 'dringend',
+      titel: 'Terminwunsch wartet > 24 h (3 offen)',
+      route_url: '/dispatch/terminwuensche',
+    })
+  })
+
+  it('bereits < 24h eskaliert -> kein Re-Fire (Spam-Guard fuer den stuendlichen Cron)', async () => {
+    h.state.q = [
+      { data: [{ id: 't1' }], error: null },
+      { data: { created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString() }, error: null }, // vor 1h
+    ]
+    await eskaliereOffeneTerminwuensche()
+    expect(h.state.insertCalls).toHaveLength(0)
+  })
+
+  it('letzte Eskalation > 24h her -> re-fired', async () => {
+    h.state.q = [
+      { data: [{ id: 't1' }], error: null },
+      { data: { created_at: new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString() }, error: null }, // vor 25h
+      { data: [{ id: 'disp-1' }], error: null },
+      { data: { id: 'mit-1' }, error: null },
+    ]
+    await eskaliereOffeneTerminwuensche()
+    expect(h.state.insertCalls).toHaveLength(1)
+    expect(h.state.insertCalls[0]).toMatchObject({ titel: 'Terminwunsch wartet > 24 h (1 offen)' })
+  })
+
+  it('kein Dispatch-User im System -> kein Insert (non-fatal, nichts zum Adressieren)', async () => {
+    h.state.q = [
+      { data: [{ id: 't1' }], error: null },
+      { data: null, error: null },
+      { data: [], error: null }, // profiles: keine Dispatch-User
+    ]
+    await eskaliereOffeneTerminwuensche()
+    expect(h.state.insertCalls).toHaveLength(0)
+  })
+
+  it('DB-Fehler bei der Ueberfaellig-Query -> wirft nicht (non-fatal, Cron-Lauf bleibt unbeeintraechtigt)', async () => {
+    h.state.q = [{ data: null, error: { message: 'boom' } }]
+    await expect(eskaliereOffeneTerminwuensche()).resolves.toBeUndefined()
     expect(h.state.insertCalls).toHaveLength(0)
   })
 })

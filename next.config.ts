@@ -216,6 +216,15 @@ const nextConfig: NextConfig = {
         destination: '/gutachter',
         permanent: true,
       },
+      // Werkstatt-Interesse-Formular-Retire 2026-08-05 (Aaron): /werkstatt-partner-werden
+      // (partner_leads-Prospect OHNE Account, Alt-Weg vor dem Self-Signup) ist zugunsten
+      // der Selbst-Registrierung retired — "Anfrage = sofort aktiver Partner". Exakt-Match,
+      // permanent (308); faengt Alt-Bookmarks + versendete Cold-Mail-Links ab.
+      {
+        source: '/werkstatt-partner-werden',
+        destination: '/werkstatt/registrieren',
+        permanent: true,
+      },
       // Doc 41 PR9: Frueherer /haftpflicht -> /kfz-haftpflicht-schaden 301
       // (Stream A #1599, 23.05.) ENTFERNT. #1663 (24.05.) hat /haftpflicht bewusst
       // zum vollwertigen Glossar-Hub gemacht (alle 57 Spokes, eigener Canonical)

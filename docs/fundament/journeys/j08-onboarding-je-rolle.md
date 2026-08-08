@@ -15,8 +15,8 @@ Gemeinsames Muster: **Registrieren → Stammdaten/Nachweise → Verifikation (48
 Jede Selbstanlage läuft durch **createCase/C2** (§5 „ein Intake" — kein neuer wilder Entry-Point).
 
 **Team-Echtzeit-Sichtbarkeit** (Soll-Delta 05.08.): Jede Partner-Selbstregistrierung aus dem
-Marketing-Funnel (Werkstatt-Self-Signup + Partner-Anfrage, Makler-Self-Signup, SV-Registrierung
-App + LP-embedded) löst zusätzlich zur Admin-In-App-Notification/-Task eine **Team-WhatsApp**
+Marketing-Funnel (Werkstatt-, Makler-, Flotten-Self-Signup, SV-Registrierung App +
+LP-embedded) löst zusätzlich zur Admin-In-App-Notification/-Task eine **Team-WhatsApp**
 aus (`notifyTeamPartnerSignup` → `notifyTeamWhatsApp`, feste Team-Nummern via Baileys —
 dieselbe Empfänger-Quelle wie der Lead-Notify). Interne/Test-Identitäten sind unterdrückt
 (`interne-identitaet.ts`) — der Schritt ist deshalb nicht CI-smokebar; Beweis = Regel-4-
@@ -48,7 +48,15 @@ Prod-Smoke mit externer Wegwerf-Identität.
   **Flotte `/flotte/registrieren` = NEUER Self-Signup-Flow** — Soll-Delta 05.08., Aaron
   „Firmen als Partner hinzufügen": public Formular → `ensureFirma` find-or-create +
   Flottenmanager-Konto (Reuse Admin-Kern, `aktiviertVon=null`) + Welcome-Mail + Team-WA +
-  Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.)
+  Redemption. Vorher war die Flotte ausschliesslich admin-provisioniert.
+  Marketing-Einstieg: flotte.claimondo.de (Subdomain-LP, CTA -> Self-Signup) —
+  analog werkstatt.claimondo.de fuer Werkstaetten.)
+- **Werkstatt-Interesse-Formular retired** (Soll-Delta 05.08., Aaron „Anfrage = sofort
+  Partner"): `/werkstatt-partner-werden` (erzeugte nur einen `partner_leads`-Prospect ohne
+  Account) ist zugunsten des Self-Signups `/werkstatt/registrieren` retired — 308-Redirect
+  via `next.config.ts`, Cold-Mail-`Registrierungslink` zeigt direkt auf den Self-Signup.
+  Es gibt EINEN Werkstatt-Funnel; `partner_leads` wird nur noch durch Scrape/CSV/CRM-Spiegel
+  befüllt, nicht mehr durch ein öffentliches Formular.
 - **Whitelabel-SV** — verifizierter SV mit `use_custom_branding` brandet Portal + Kunden-Sicht.
 
 ## Fehlerfälle und ihr Soll-Verhalten
@@ -68,5 +76,5 @@ Prod-Smoke mit externer Wegwerf-Identität.
 
 1. **Setup-Fee-Höhe + Abo-Preis:** Konkrete Zahlen für die Netzwerkpartner-Einrichtungsgebühr + Monats-Flat?
 2. **Comp-Politik Bestand:** Werden **alle** Bestands-`paket`-SV als Netzwerkpartner comped, oder nur aktive?
-3. **Werkstatt-Onboarding:** Bekommt die Werkstatt einen echten Self-Anlege-Flow, oder bleibt sie admin-/mailsequenz-getrieben?
+3. ~~**Werkstatt-Onboarding:** Bekommt die Werkstatt einen echten Self-Anlege-Flow, oder bleibt sie admin-/mailsequenz-getrieben?~~ **Beantwortet 05.08. (Aaron):** Self-Signup `/werkstatt/registrieren` ist der kanonische Weg; das Interesse-Formular ist retired.
 4. **DAT-Gating-Abbau:** Soll die Registrierung sofort für alle offen sein, oder gestaffelt?

@@ -1,8 +1,9 @@
 # VPS-Crontab — app.claimondo.de (212.132.119.110)
 
-**Gezogen 2026-06-20** per `crontab -l` (root). Diese Datei versioniert die bislang **nur auf dem VPS**
-gepflegte Crontab (Audit-Befund: war nirgends im Repo → Single Point of Failure beim Neuaufsetzen).
-Quelle der Wahrheit bleibt der VPS; diese Datei ist der versionierte Abzug + Audit-Annotation.
+**Voll-Re-Sync 2026-08-05** per `crontab -l` (root; Erstabzug war 2026-06-20). Diese Datei versioniert
+die bislang **nur auf dem VPS** gepflegte Crontab (Audit-Befund: war nirgends im Repo → Single Point
+of Failure beim Neuaufsetzen). Quelle der Wahrheit bleibt der VPS; diese Datei ist der versionierte
+Abzug + Audit-Annotation.
 
 Alle App-Crons laufen über den Wrapper `/usr/local/bin/cron-call.sh <pfad>` (setzt `Authorization:
 Bearer $CRON_SECRET` + trifft die lokale App auf `127.0.0.1:3000`). `pg_cron` (18 DB-Jobs) und die
@@ -13,83 +14,128 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 > (Sommer) bzw. 08:00 MEZ (Winter). Wer eine Uhrzeit hier als „morgens um 7" liest, sucht einen
 > vermeintlich ausbleibenden Lauf zwei Stunden zu früh.
 
-> **⚠️ Dieser Abzug ist vom 2026-06-20 und driftet.** Messung 2026-07-20 (`crontab -l` gegen diese
-> Datei): **72 Routen live aktiv, 58 hier dokumentiert — 19 fehlen**, u. a. `recovery-monitor`,
-> `slot-ttl-cleanup`, `golden-path`, `purge-test-data`, `stripe-reconcile`, `cold-mailer-advance`,
-> `lead-kalt-cleanup`, `case-billing-batch`. Umgekehrt nennt die Datei **3 Routen, die live nicht
-> (mehr) laufen**: `whatsapp-erinnerungen` (auf dem VPS auskommentiert, Reminder-Duplikat) sowie
-> `release-makler-provisionen` + `release-werkstatt-provisionen` (durch `release-provisionen`
-> abgelöst). **Quelle der Wahrheit ist der VPS**, nicht diese Datei. Ein vollständiger Re-Sync ist
-> eine eigene Aufgabe; am 20.07. wurde hier nur der Partner-Nudge-Eintrag nachgetragen.
+> **Re-Sync 2026-08-05:** der Abzug unten ist der vollständige Live-Stand vom 05.08. (114 Zeilen,
+> 1:1 inkl. Live-Kommentare). Der frühere 2026-06-20-Abzug driftete massiv (Messung 20.07.:
+> 19 live-aktive Routen fehlten). Delta-Zusammenfassung: Sektion „Stand 2026-08-05 — Voll-Re-Sync"
+> unten. **Quelle der Wahrheit bleibt der VPS** — nach jeder Crontab-Änderung diese Datei nachziehen.
 
-## Live-Crontab (Abzug 2026-06-20)
+## Live-Crontab (Voll-Abzug 2026-08-05)
 
 ```cron
-# Backups (Shell-Skripte, nicht App-Routen)
-0 2 * * *   /root/backup-daily.sh   >> /var/log/claimondo-backup.log 2>&1
-0 3 * * 0   /root/backup-weekly.sh  >> /var/log/claimondo-backup.log 2>&1
-0 4 1 * *   /root/backup-monthly.sh >> /var/log/claimondo-backup.log 2>&1
+# FAKE-BACKUP DISABLED 2026-06-20 (Claude): sicherte /var/www/claimondo/data/claimondo.db (existiert NICHT; App=/var/www/claimondo-v2 + Supabase) -> 4KB-Leerarchiv. Echtes Netz=Supabase-PITR. 0 2 * * *   /root/backup-daily.sh >> /var/log/claimondo-backup.log 2>&1
+# FAKE-BACKUP DISABLED 2026-06-20 (Claude): sicherte /var/www/claimondo/data/claimondo.db (existiert NICHT; App=/var/www/claimondo-v2 + Supabase) -> 4KB-Leerarchiv. Echtes Netz=Supabase-PITR. 0 3 * * 0   /root/backup-weekly.sh >> /var/log/claimondo-backup.log 2>&1
+# FAKE-BACKUP DISABLED 2026-06-20 (Claude): sicherte /var/www/claimondo/data/claimondo.db (existiert NICHT; App=/var/www/claimondo-v2 + Supabase) -> 4KB-Leerarchiv. Echtes Netz=Supabase-PITR. 0 4 1 * *   /root/backup-monthly.sh >> /var/log/claimondo-backup.log 2>&1
 
-# ─── KRITISCH ───
-*/5  * * * *  cron-call.sh /api/cron/dispatch-lead-alert
-*/5  * * * *  cron-call.sh /api/cron/send-reminders            # Kunden-/SV-Termin-Reminder — ALLEINIGER Sender ab 2026-07-03 (s.u.)
-*/5  * * * *  cron-call.sh /api/cron/gutachter-erinnerungen
-*/10 * * * *  cron-call.sh /api/notifications/process          # Notification-Worker (Pipeline)
-*/15 * * * *  cron-call.sh /api/cron/caldav-healthcheck
-*/15 * * * *  cron-call.sh /api/cron/sla-check
-*/15 * * * *  cron-call.sh /api/cron/kb-termin-reminder-1h
-*/30 * * * *  cron-call.sh /api/cron/verlegung-eskalation      # einzige emitEvent-Cron
-*/30 * * * *  cron-call.sh /api/cron/whatsapp-erinnerungen     # ⚠ Reminder-Dup #2
-0    * * * *  cron-call.sh /api/cron/termin-erinnerungen       # nur noch 48h-Pflichtdokumente-Check ab 2026-07-03 (s.u.)
-0    * * * *  cron-call.sh /api/cron/re-termin-eskalation
-0    8 * * *  cron-call.sh /api/cron/vs-timer
-0    7 * * *  cron-call.sh /api/cron/gegner-invite-nachfassen   # Slice 2c: Gegner hat SMS-Link nicht bestaetigt -> Dispatch
-0  */6 * * *  cron-call.sh /api/cron/fall-abschluss
-0  */6 * * *  cron-call.sh /api/cron/task-eskalation
-15  17 * * *  cron-call.sh /api/cron/no-show-timeout
+# ─── KRITISCH ─────────────────────────────────────
+*/5  * * * *  /usr/local/bin/cron-call.sh /api/cron/dispatch-lead-alert
+*/5  * * * *  /usr/local/bin/cron-call.sh /api/cron/send-reminders
+*/5  * * * *  /usr/local/bin/cron-call.sh /api/cron/gutachter-erinnerungen
+*/10 * * * *  /usr/local/bin/cron-call.sh /api/notifications/process
+*/15 * * * *  /usr/local/bin/cron-call.sh /api/cron/caldav-healthcheck
+*/15 * * * *  /usr/local/bin/cron-call.sh /api/cron/sla-check
+*/15 * * * *  /usr/local/bin/cron-call.sh /api/cron/kb-termin-reminder-1h
+*/30 * * * *  /usr/local/bin/cron-call.sh /api/cron/verlegung-eskalation
+# DISABLED 2026-06-20 (Claude): Duplikat von termin-erinnerungen (24h/2h), inkompatibles Dedup -> Kunden-Doppel-WA. */30 * * * *  /usr/local/bin/cron-call.sh /api/cron/whatsapp-erinnerungen
+0    * * * *  /usr/local/bin/cron-call.sh /api/cron/termin-erinnerungen
+0    * * * *  /usr/local/bin/cron-call.sh /api/cron/re-termin-eskalation
+0    8 * * *  /usr/local/bin/cron-call.sh /api/cron/vs-timer
+0    */6 * * * /usr/local/bin/cron-call.sh /api/cron/fall-abschluss
+0    */6 * * * /usr/local/bin/cron-call.sh /api/cron/task-eskalation
+15   17 * * * /usr/local/bin/cron-call.sh /api/cron/no-show-timeout
 
-# ─── WICHTIG ───
-30 */4 * * *  cron-call.sh /api/cron/pflichtdokumente-reminder
-15  *  * * *  cron-call.sh /api/cron/task-erinnerungen
-30  *  * * *  cron-call.sh /api/cron/kb-termin-reminder
-45  *  * * *  cron-call.sh /api/cron/send-lead-reminders
-0   7  * * *  cron-call.sh /api/cron/abrechnung-reminder
-0   7  * * *  cron-call.sh /api/cron/sv-termin-dokument-reminder
-0   7  * * *  cron-call.sh /api/cron/partner-aktivierung-nachfassen  # NACHGETRAGEN 2026-07-20 (PR #4627): Partner ohne Erst-Login -> 1 Vertriebs-Task, dedupliziert + selbstheilend
-20  8  * * *  cron-call.sh /api/cron/abrechnung-einzug
-5   10 * * *  cron-call.sh /api/cron/sa-reminder
-0   10 * * *  cron-call.sh /api/cron/vollmacht-reminder
-0   10 * * *  cron-call.sh /api/cron/gast-conversion-reminder  # emittiert notification_events
-0   13 * * *  cron-call.sh /api/cron/abrechnungen-faellig-check
-10  14 * * *  cron-call.sh /api/cron/abrechnung-kanzlei-reminder
-30  14 * * *  cron-call.sh /api/cron/kanzlei-sla-check
-0   16 * * *  cron-call.sh /api/cron/reklamation-frist-check
-30  16 * * *  cron-call.sh /api/cron/sv-payment-reminders
-40  15 * * *  cron-call.sh /api/cron/haftpflicht-ablauf
-20  11 * * *  cron-call.sh /api/cron/verifizierung-reminder
-0   9  * * *  cron-call.sh /api/cron/mietwagen-tracking
-0   2  * * *  cron-call.sh /api/cron/release-makler-provisionen
-0   2  * * *  cron-call.sh /api/cron/release-werkstatt-provisionen
-0   9  * * 1  cron-call.sh /api/cron/vs-korrespondenz-review
-0   3  * * *  cron-call.sh /api/cron/db-backup
-0   3  * * *  cron-call.sh /api/cron/kb-reassign-inactive
+# ─── WICHTIG ──────────────────────────────────────
+30   */4 * * * /usr/local/bin/cron-call.sh /api/cron/pflichtdokumente-reminder
+15   *  * * *  /usr/local/bin/cron-call.sh /api/cron/task-erinnerungen
+30   *  * * *  /usr/local/bin/cron-call.sh /api/cron/kb-termin-reminder
+45   *  * * *  /usr/local/bin/cron-call.sh /api/cron/send-lead-reminders
+0    7  * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-reminder
+0    7  * * *  /usr/local/bin/cron-call.sh /api/cron/sv-termin-dokument-reminder
+10   8  * * *  /usr/local/bin/cron-call.sh /api/cron/zahlungspruefung
+20   8  * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-einzug
+5    10 * * *  /usr/local/bin/cron-call.sh /api/cron/sa-reminder
+0    10 * * *  /usr/local/bin/cron-call.sh /api/cron/vollmacht-reminder
+0    10 * * *  /usr/local/bin/cron-call.sh /api/cron/gast-conversion-reminder
+0    13 * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnungen-faellig-check
+10   14 * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-kanzlei-reminder
+30   14 * * *  /usr/local/bin/cron-call.sh /api/cron/kanzlei-sla-check
+0    16 * * *  /usr/local/bin/cron-call.sh /api/cron/reklamation-frist-check
+30   16 * * *  /usr/local/bin/cron-call.sh /api/cron/sv-payment-reminders
+40   15 * * *  /usr/local/bin/cron-call.sh /api/cron/haftpflicht-ablauf
+20   11 * * *  /usr/local/bin/cron-call.sh /api/cron/verifizierung-reminder
+0    9  * * *  /usr/local/bin/cron-call.sh /api/cron/mietwagen-tracking
+0    9  * * 1  /usr/local/bin/cron-call.sh /api/cron/vs-korrespondenz-review
+0    3  * * *  /usr/local/bin/cron-call.sh /api/cron/db-backup
+0    3  * * *  /usr/local/bin/cron-call.sh /api/cron/kb-reassign-inactive
 
-# ─── MONATLICH ───
-30 18 28-31 * *  cron-call.sh /api/cron/abrechnung-erstellen
-0  18 28-31 * *  cron-call.sh /api/cron/monats-abrechnungen
-0  2  1 * *      cron-call.sh /api/cron/monatsabrechnung          # ⚠ @deprecated (Legacy System A)
-0  9  1 * *      cron-call.sh /api/cron/abrechnung-kanzlei-erstellen
-0  9  1 * *      cron-call.sh /api/cron/maik-monatsabrechnung
-0  18 28-31 * *  cron-call.sh /api/cron/embed-abrechnung-erstellen
+# ─── MONATLICH ────────────────────────────────────
+30   18 28-31 * * /usr/local/bin/cron-call.sh /api/cron/abrechnung-erstellen
+0    18 28-31 * * /usr/local/bin/cron-call.sh /api/cron/monats-abrechnungen
+0    2  1 * *  /usr/local/bin/cron-call.sh /api/cron/monatsabrechnung
+0    9  1 * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-kanzlei-erstellen
+0    9  1 * *  /usr/local/bin/cron-call.sh /api/cron/maik-monatsabrechnung
 
-# ─── LOW ───
-*/30 * * * *  cron-call.sh /api/cron/flowlink-inaktiv
-0    4 * * *  cron-call.sh /api/cron/community-leaderboard-update
-0    3 * * *  cron-call.sh /api/cron/google-bewertungen
-0    4 * * *  cron-call.sh /api/cron/isochrone-backfill
-*/5  * * * *  cron-call.sh /api/cron/sync-external-calendars
-25   5 * * *  cron-call.sh /api/indexnow
-17   * * * *  cron-call.sh /api/cron/embed-b-termin-resolution
+# ─── LOW ──────────────────────────────────────────
+*/30 * * * *  /usr/local/bin/cron-call.sh /api/cron/flowlink-inaktiv
+0    4  * * *  /usr/local/bin/cron-call.sh /api/cron/community-leaderboard-update
+0    3  * * *  /usr/local/bin/cron-call.sh /api/cron/google-bewertungen
+0    4  * * *  /usr/local/bin/cron-call.sh /api/cron/isochrone-backfill
+*/5  * * * *  /usr/local/bin/cron-call.sh /api/cron/sync-external-calendars
+25 5 * * * /usr/local/bin/cron-call.sh /api/indexnow
+0    18 28-31 * * /usr/local/bin/cron-call.sh /api/cron/embed-abrechnung-erstellen
+17 * * * * /usr/local/bin/cron-call.sh /api/cron/embed-b-termin-resolution
+
+# --- NACHGETRAGEN 2026-06-29 (Claude Cron-Audit): slot-ttl-cleanup war 47d dormant; recovery-monitor=Dead-Letter-Eskalation ---
+*/5 * * * * /usr/local/bin/cron-call.sh /api/cron/slot-ttl-cleanup
+0,15,30,45 * * * * /usr/local/bin/cron-call.sh /api/cron/recovery-monitor
+
+# --- NACHGETRAGEN 2026-06-29 #2 (Cron-Audit Routen-Empfehlungen) ---
+0 17 * * * /usr/local/bin/cron-call.sh /api/cron/case-billing-batch
+0 6 * * * /usr/local/bin/cron-call.sh /api/cron/stripe-reconcile
+0 8 * * * /usr/local/bin/cron-call.sh /api/cron/sv-mahnung-saeumnis
+*/10 * * * * /usr/local/bin/cron-call.sh /api/cron/kb-beratung-anlage-notify
+0 6 * * * /usr/local/bin/cron-call.sh /api/cron/refresh-feeds
+
+# --- NACHGETRAGEN 2026-07-01 (Claude): lead-kalt-cleanup -- taeglich stallende Leads -> kalt; aktiv nach Deploy von PR3329 (vorher harmloser 404) ---
+30 4 * * * /usr/local/bin/cron-call.sh /api/cron/lead-kalt-cleanup
+
+# --- NACHGETRAGEN 2026-07-02 (Claude): Golden-Path E2E-Sentinel + Test-Daten-Janitor (PR #3443); aktiv nach Deploy (vorher harmloser 404 via curl -f) ---
+45 3 * * * /usr/local/bin/cron-call.sh /api/cron/golden-path
+15 5 * * * /usr/local/bin/cron-call.sh '/api/cron/purge-test-data?confirm=DELETE-TESTDATA'
+0    *  * * *  cron-call.sh /api/cron/pipeline-health  # Pipeline-Observability #3327 (health_check_runs -> /admin/health)
+
+# --- B2B Content-Pipeline (taeglich 04:00, AI-Artikel; cron-call.sh setzt Bearer) ---
+0 4 * * *  cron-call.sh /api/cron/wissen-pipeline-b2b
+
+# Makler-Wochenreport (PR #3608, gesetzt 2026-07-05 Merge-Session): Mo 07:00 Digest an Opt-in-Makler, One-Click-Opt-out
+0 7 * * 1  /usr/local/bin/cron-call.sh /api/cron/makler-wochenreport
+
+# --- NACHGETRAGEN 2026-07-06 (Claude): AI-Claim-Orchestrator PoC (PR #3687); taeglich 06:00 stagnierende Faelle -> Shadow-Vorschlaege; aktiv nach Deploy (vorher harmloser 404) ---
+0 6 * * * /usr/local/bin/cron-call.sh /api/cron/claim-orchestrator
+
+# --- NACHGETRAGEN 2026-07-07 (Claude): Trusted-Device-Token-Purge (PR #3819); loescht abgelaufene + >30d alt-widerrufene auth_remember_tokens; aktiv nach Deploy (vorher harmloser 404) ---
+20 3 * * * /usr/local/bin/cron-call.sh /api/cron/purge-remember-tokens
+# --- NACHGETRAGEN 2026-07-08 (Claude): partner-rang compute (Phase 0 partner-tier-badge); nach google-bewertungen ---
+40 3 * * * /usr/local/bin/cron-call.sh /api/cron/compute-partner-rang
+
+# KI-Aufsicht SLA-Rollen-Aufsicht (Ink.1) - taeglich 08:00
+0 8 * * * /usr/local/bin/cron-call.sh /api/cron/ki-aufsicht-sla
+0 * * * * /usr/local/bin/cron-call.sh /api/cron/repair-reminders
+0    2  * * *  /usr/local/bin/cron-call.sh /api/cron/release-provisionen
+
+# --- NACHGETRAGEN 2026-07-14 (Claude b0e963b6): Slice-2c Gegner-Invite-Nachfassen; 48h unbestaetigter Invite -> Dispatch-Task. Ohne diese Zeile eskaliert kein Invite. ---
+0 7 * * * /usr/local/bin/cron-call.sh /api/cron/gegner-invite-nachfassen
+
+# --- NACHGETRAGEN 2026-07-14 (Claude marketing-content-studio): Render-Worker-Queue Slice 3 (#4309); holt render_queued-Jobs, rendert 1/Lauf RAM-gegated; aktiv nach Deploy (vorher harmloser 404). ---
+*/3 * * * * /usr/local/bin/cron-call.sh /api/cron/marketing-render
+# Cold-Mailer-Sequenzen (14.07.): rueckt faellige Enrollments vor + sendet.
+# Geschaeftszeiten statt 24/7 - eine Cold-Mail um 03:47 schadet der Domain-Reputation.
+# Sendet NICHTS, solange keine aktive Sequenz mit Enrollments existiert.
+50   8-17 * * 1-5  /usr/local/bin/cron-call.sh /api/cron/cold-mailer-advance
+
+# --- NACHGETRAGEN 2026-07-20 (Claude): Partner-Aktivierungs-Nudge (PR #4627) -- taeglich 07:00, ein Anruf-Task je Partner-Account ohne Erst-Login; aktiv nach Deploy (vorher harmloser 404 via curl -sf) ---
+0 7 * * * /usr/local/bin/cron-call.sh /api/cron/partner-aktivierung-nachfassen
+0 8 * * 1 /usr/local/bin/cron-call.sh /api/cron/zustandsaufnahme-faellig  # 3-Monats-Zustandsaufnahme-Reminder #4728 (Mo 08:00 UTC, dedup 30d)
+0 6 * * * /usr/local/bin/cron-call.sh /api/cron/werkstatt-onboarding-drip  # Werkstatt-Onboarding-Drip (6 Mails, Stop bei erstem Fall)
 ```
 
 ## Audit-Anmerkungen (2026-06-20)
@@ -334,4 +380,34 @@ nur dieses eine, nicht den Batch). Auth wie alle anderen Crons: `assertCronAuth`
 triggern -> erwartet `{ ok:true, gesendet, aktiviert, gestoppt, fehler, faellig }`; vorher per MCP
 `faellig`-Kandidaten zaehlen (nur Test-Werkstaetten mit Test-Email im ersten Lauf, s. Regel 4 — nie
 an echte Empfaenger).
+
+**Update 2026-08-05 (Re-Sync):** der Eintrag `0 6 * * * … werkstatt-onboarding-drip` steht inzwischen
+in der Live-Crontab (siehe Voll-Abzug oben) — diese „Vorzutragen"-Sektion ist damit erledigt.
+
+## Stand 2026-08-05 — Voll-Re-Sync des Abzugs (Live-VPS, read-only)
+
+> Im Zuge des AAR-929-Reconcile-Smokes (SSH-Key `~/.ssh/claimondo_vps`, root) wurde `crontab -l`
+> frisch gezogen und der Kern-Abzug oben **1:1 ersetzt** (vorher Stand 2026-06-20; Messung 20.07.:
+> 19 live-aktive Routen fehlten). **KEINE Änderung an der Live-Crontab selbst** — reiner Doku-Sync.
+> Damit ist der „vollständige Re-Sync" aus der früheren Drift-Warnung erledigt.
+
+Delta gegenüber dem alten 2026-06-20-Abzug:
+
+- **Backups:** die 3 `/root/backup-*.sh`-Zeilen sind seit 2026-06-20 als **FAKE-BACKUP DISABLED**
+  auskommentiert (sicherten eine nicht-existente SQLite-DB → 4-KB-Leerarchiv; echtes Netz =
+  Supabase-PITR + `db-backup`-Route, die weiterhin täglich 03:00 läuft). Der alte Abzug zeigte sie aktiv.
+- **`release-provisionen` (0 2)** ersetzt `release-makler-provisionen` + `release-werkstatt-provisionen`.
+- **`zahlungspruefung` (10 8 * * *)** war bislang **nirgends** dokumentiert (weder Abzug noch Addendum).
+- **Seit 20.06. neu geschedult** (Details in den Addenda-Sektionen bzw. Live-Kommentaren):
+  `slot-ttl-cleanup` (*/5) · `recovery-monitor` (0,15,30,45) · `case-billing-batch` (0 17) ·
+  `stripe-reconcile` (0 6) · `sv-mahnung-saeumnis` (0 8) · `kb-beratung-anlage-notify` (*/10) ·
+  `refresh-feeds` (0 6) · `lead-kalt-cleanup` (30 4) · `golden-path` (45 3) ·
+  `purge-test-data` (15 5) · `pipeline-health` (0 *) · `wissen-pipeline-b2b` (0 4) ·
+  `makler-wochenreport` (0 7 Mo) · `claim-orchestrator` (0 6) · `purge-remember-tokens` (20 3) ·
+  `compute-partner-rang` (40 3) · `ki-aufsicht-sla` (0 8) · `repair-reminders` (0 *) ·
+  `marketing-render` (*/3) · `cold-mailer-advance` (50 8-17 Mo–Fr) ·
+  `zustandsaufnahme-faellig` (0 8 Mo) · `werkstatt-onboarding-drip` (0 6).
+- **Nichts ist ersatzlos entfallen** — jede Route des alten Abzugs ist live noch da, disabled-mit-
+  Kommentar (Backups, `whatsapp-erinnerungen`) oder durch einen Nachfolger ersetzt (Provisions-Releases).
+- **Audit-Note #2 bleibt offen:** das @deprecated `monatsabrechnung` (0 2 am 1.) läuft live weiterhin.
 

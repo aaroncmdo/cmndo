@@ -11,7 +11,6 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { emailFilmcheckBestanden } from '@/lib/email'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKanzleiPaketTask, triggerAsSendedatumTask, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
@@ -165,7 +164,10 @@ export async function saveFilmcheck(
       status: 'offen',
     })
 
-    sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
+    // C3b (kanzlei_uebergabe-Doppel-Send-Fix): der Kunden-WA lief hier doppelt — der
+    // transitionFallStatus('kanzlei-uebergeben')-Aufruf oben (:139) emittiert bereits
+    // System 1 kanzlei.uebergabe (EVENT_MATRIX kunde: whatsapp) + Fan-out an Makler/Admin.
+    // Der redundante System-2-Send ist entfernt.
   }
 
   // CMM-49: claims-direkt (sv_id + claim_nummer claim-native)

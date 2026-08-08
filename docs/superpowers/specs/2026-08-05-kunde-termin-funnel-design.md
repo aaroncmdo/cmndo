@@ -39,7 +39,7 @@ Es gibt keinen Terminzustand ohne Zustaendigen und keinen gewaehlten Termin, den
 
 ### 4.1 Termin-Identitaet (Convert haengt um)
 
-- `convertLeadToClaim` haengt am Ende der Konversion alle **offenen** Lead-Termine um auf **`bezug_typ='fall'`**, `bezug_id=claims.id`, **`lead_id=NULL`** (im selben UPDATE — der validate-Trigger lehnt Doppel-Bezug ab). "Offen" = Status nicht in `(storniert, abgesagt, abgelehnt, abgeschlossen, verlegt)`. Non-fatal (try/catch, wie die anderen Konversions-Nachwirkungen), aber mit `console.error` bei Fehlschlag.
+- `convertLeadToClaim` haengt am Ende der Konversion alle **offenen** Lead-Termine um auf **`bezug_typ='fall'`**, `bezug_id=claims.id`, **`lead_id=NULL`** (im selben UPDATE — Aufraeumen auf genau EINEN Anker; ein Doppel-Zustand wird von keinem DB-Constraint verhindert, der legacy-Zweig des Umhaeng-Filters ist deshalb auf bezug-freie Termine gegated). "Offen" = Status nicht in `(storniert, abgesagt, abgelehnt, abgeschlossen, verlegt)`. Non-fatal (try/catch, wie die anderen Konversions-Nachwirkungen), aber mit `console.error` bei Fehlschlag.
 - **Warum `'fall'`, nicht `'claim'`:** Die Kunden-Akte + Termine-Hub filtern auf der fall-Achse, und `fall_id == claims.id` (claim-first, `faelle` existiert nicht als Tabelle). Prod hat 0 `bezug_typ='claim'`-Termine (verifiziert 05.08.: 22× lead, 21× NULL) — `'fall'` ist die gelebte Achse konvertierter Faelle.
 - **fall≡claim-Aequivalenz im Filter-Helper (Schisma-Heilung):** Ops-Reader (Storno, Verlegung, Reminder-/Eskalations-Crons, SLA, autoPhase) filtern mit `bezugOrExpr('claim', …)`, die Akte mit `'fall'` — zwei Vokabeln fuer DIESELBE UUID. `bezugOrExpr`/`bezugInExpr` behandeln deshalb kuenftig `fall` und `claim` als Aequivalenzklasse (`bezug_typ.in.(fall,claim)` bei beiden Achsen; `lead` bleibt strikt). Superset-Garantie bleibt: `bezug_id`-Gleichheit matcht nie einen fremden Termin. EIN Helper-Edit heilt damit alle ~44 Consumer beider Vokabeln, egal welches Literal ein Writer setzt.
 - **Beide Lead-Verankerungen** werden umgehaengt: bezug-nativ (`bezug_typ='lead' AND bezug_id=leadId`) UND legacy (`lead_id=leadId`, bezug_typ NULL) — Letzteres deckt die KB-Beratungstermine ab (17 legacy-lead auf prod), die exakt dieselbe Akte-Blindheit haben.
@@ -86,6 +86,15 @@ Es gibt keinen Terminzustand ohne Zustaendigen und keinen gewaehlten Termin, den
 
 - **Kein Modell-Umbau.** J4/Reparatur-Lane funktioniert (CI-Smokes gruen). Nach 4.1/4.3 sieht der Kunde Gutachter- UND Reparaturtermin in einer Akte.
 - Randfix: Die Aufgabe "Termin bestaetigen" ankert fuer Reparaturtermine auf die GeldZone (`kunde-zonen.ts:60`), die in fruehen Phasen nicht immer gerendert wird (`:82-95`) — Anker-Ziel absichern (Zone erzwingen oder Fallback-Anker).
+
+### 4.9 Tranche W — Werkstatt-Termin-Sicht (Aaron-Nachtrag 05.08., Bau nach T3)
+
+Zwei Werkstatt-seitige Befunde derselben Klasse (Aaron 05.08. nachmittags):
+
+- **W1 (Haftpflicht): Werkstatt sieht den Gutachtertermin nicht.** Verifiziert: KEIN File unter `app/werkstatt`/`lib/werkstatt`/`components/werkstatt` liest `gutachter_termine` — die Werkstatt-Auftragssicht ist strukturell blind fuer SV-Termine. Soll: `WerkstattAuftragDetail` laedt den aktiven SV-Begutachtungstermin bezug-aware (`bezugOrExpr('fall', …)`, Statusmenge inkl. `dispatch_pending`/`sv_gesucht` mit "wird bestätigt") und zeigt ihn read-only (Datum/Zeit/Ort) — die Werkstatt plant ihre Reparatur um die Begutachtung herum.
+- **W2 (Kasko/Selbstzahler): Werkstatt kann keinen Termin setzen.** Die Werkstatt-Actions existieren vollstaendig (`schlageWerkstattTerminVor`/`bestaetigeReparaturtermin`/`erbitteRueckruf`/`lehneReparaturterminAb`, `werkstatt/(shell)/auftraege/actions.ts`). Root-Cause-Verdacht (im W-Bau zu verifizieren): der Akte-Werkstatt-Finder-Pfad (`kunde/faelle/[id]/werkstatt-finder-actions.ts`, post-Konversion) legt — anders als der Convert-Pfad (SP2-T4) — KEINE `reparatur_termine`-Row an → ohne Row blendet `WerkstattAuftragDetail` die Termin-Sektion aus (dieselbe Klasse wie der historische b1-Bug). Soll: Werkstatt-Zuweisung aus der Akte legt die Row (`status='angefragt'`, `wunschtermin` nullable) an — EIN Anlage-Muster fuer beide Pfade.
+
+Tranche W ist NICHT Teil des T1-T3-PRs (#5012); eigener Plan/PR nach T3-Abschluss.
 
 ## 5. Nicht-Ziele
 

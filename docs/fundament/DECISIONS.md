@@ -126,6 +126,14 @@
 
 **Stand §9-Punkt-2:** Grün in CI = J1/J4/J9/J8. Begründet geskippt = J2/J3/J5/J6/J7/J10 + J9-`lifecycle`. Alle 10 Journeys sind damit CI-abgesichert ODER begründet, journey-referenziert geskippt.
 
+## 2026-08-04 · B-Journey-Suite · Kurskorrektur „keine Skips" — J5 gebaut, alle Skips werden CI-Steps
+
+**Direktive (Aaron, 04.08.):** Die begründeten CI-Skips der Journey-Suite sind **nicht zulässig**. §9-Punkt-2 gilt erst als erfüllt, wenn **alle 10** Journeys wirklich CI-grün laufen — für jede geskippte Journey wird die fehlende Test-Infrastruktur gebaut/verändert (deterministischer, isolierter, self-cleaning Seed + robuste Spec, J4-Muster). Die frühere „§9 via Skips erfüllt"-Deklaration (03.08., zwei Einträge oben) ist damit **revidiert**.
+
+**J5 gebaut (dieser PR, kitta/fundament-journey-j5-kasko):** `scripts/smoke/kasko-reparatur-seed.mjs` legt je Lauf einen Wegwerf-Kasko-Claim an — `abrechnungsweg=kasko` + `operative_status=reparatur-angefragt` + `reparatur_werkstatt_id` gesetzt + **keine** `reparatur_termine` → subPhase `reparatur_terminfindung` (belegt `lifecycle.ts:234-244`), interne Fallakte zeigt „Terminfindung" statt „SA-Unterschrift offen". Eigene Wegwerf-Werkstatt (die frühere feste Fixture `badecb82…` existiert nicht mehr = genau der Drift), self-cleaning via Marker. Spec: `loginContextOrSkip('admin')` **aal1** — test-admin trägt keinen TOTP-Faktor, deshalb **kein** `TEST_ADMIN_TOTP_SECRET` im CI-Step (mit Secret würfe `completeMfa` mangels Faktor → `loginContextOrSkip` skippt statt grün). CI-Step `RUN_KASKO_SMOKE`. Lokal gegen prod grün 04.08.: Seed 5/5 + Smoke 1 passed. Ersetzt den gedrifteten festen prod-Claim `39734007`.
+
+**Reihenfolge der restlichen:** J3/J6 (dedizierte Seeds+Specs), J7 (Skeleton → echte Storno/DSGVO-Logik), J2 (Multi-Kanal-Meldeweg), J9-`lifecycle` (Release-Cron Test-Row-Isolation — ggf. Produkt-Change, mit Aaron + Netzwerk-Lane abzustimmen).
+
 **Review:** offen (im PR an Aaron).
 
 ## 2026-08-05 · C3 (Notification-Outbox) · Outbox liegt DAVOR — notification_deliveries bleibt System-1-intern (Prep §8)
@@ -167,3 +175,70 @@
 **Begründung:** Scope-Trennung: Durability (C3a) vs. Kanal-Reichweite (Produkt). Die Matrix-Erweiterung würde NEUE Empfänger-Sends erzeugen (nicht nur bestehende absichern) → eigene Tranche + Aaron-Produktentscheid.
 
 **Review:** offen (Aaron) — Produktentscheid vor C3b.
+## 2026-08-04 · B-Journey-Suite · J10 (Werkstatt-Finder) als CI-Step — 2 Bugs behoben
+
+**J10 gebaut (PR gestackt auf #4973, Branch `kitta/fundament-journey-j10-werkstatt-finder`):** `scripts/smoke/werkstatt-finder-seed.mjs` überarbeitet — process.env-first (war `.env.local`-only = doppelter CI-Blocker), eigene Wegwerf-Werkstatt statt toter Fixture `badecb82`, Wegwerf-Kunde statt festem `aaron.sprafke+smokewf@`, self-cleaning inkl. Konten.
+
+**Zwei Bugs im alten Seed behoben:** (1) tote Fixture `badecb82` (MCP-verifiziert weg); (2) **fehlendes `abrechnungsweg`** → `reparaturPhaseErreicht=false` → die WerkstattFinderCard rendert **nie** (`GeldZone.tsx:50` gatet auf `brauchtVermittlung && reparaturPhaseErreicht`; `reparatur-phase-erreicht.ts:14-23` verlangt `abrechnungsweg ∈ {selbstzahler,kasko}`). Fix: S1-Claim `reparaturwunsch=fiktiv` **+ `abrechnungsweg=selbstzahler`**. Zusätzlich `nurEchte`-Filter (`finder.ts:46-48`, filtert per `werkstaetten.email`): die Wegwerf-Werkstatt braucht **`email=NULL`** für Finder-Sichtbarkeit — Comms laufen über die `@claimondo.test`-Profil-Email + `telefon=NULL` → Send-Layer suppressed alles.
+
+**Spec:** `db()`→`process.env`-first (Haupt-CI-Blocker); S1 (Kunde-Fallakte → Finder + Auswahl → `reparatur_werkstatt_id`) + S3 (Werkstatt-Portal-Auftrag, eigener zugewiesener S3-Claim unabhängig vom S1-Klick; `v_werkstatt_auftrag` rollen-gefiltert via `is_werkstatt_for_claim` = reparatur_werkstatt_id ODER werkstatt_id) deterministisch; S2 (Flow-Wizard) `test.skip` mit Begründung (fragile 14-Schritt-Heuristik + Match-Divergenz + `CANONICAL_FLOWLINK_ENABLED` — Follow-up: deterministischer Flow-Seed). CI-Step `RUN_WF_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` im Test-Step für `db()`). Lokal prod-grün 04.08.: Seed 5/5 + Smoke 2 passed / 1 skipped.
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-04 · B-Journey-Suite · J3 (SA/Vollmacht) als CI-Step — anon Canvas-Signatur
+
+**J3 gebaut (PR gestackt auf #4980, Branch `kitta/fundament-journey-j3-sa-vollmacht`):** neuer Seed `scripts/smoke/sa-vollmacht-seed.mjs` (Wegwerf-Lead mit `werkstatt_intake_am` + `abrechnungsweg=haftpflicht` + `service_typ=nur_gutachter` + flow_link mit DB-Token; Kunde-Account entsteht erst beim Signieren; self-cleaning via Marker + email-Muster) + neuer Spec `sa-vollmacht-smoke.spec.ts`.
+
+**Kern:** Die SA ist voll UI-fahrbar — der WerkstattIntake-Signatur-Surface (`flow/[token]/page.tsx:189`, `if lead.werkstatt_intake_am`) kurzschliesst `/flow/[token]` **anon** (kein Login → **kein Auth-Wall-Skip**) direkt auf `SaSignaturStep` (signature_pad-Canvas + 1 Checkbox + „SA unterzeichnen"). Canvas-Drive = das bereits in CI bewährte toPass-Muster (`reparatur-weg-e2e-smoke.spec.ts:73-86`). `signSAandCreateFall` → `convertLeadToClaim` schreibt `claims.sa_unterschrieben=true` + `sa_unterschrieben_am` + `abtretung_pdf` (SSoT-Assert per `lead_id`). Comms-Isolation: `telefon=NULL` → Willkommens-WA guarded weg; `@claimondo.test` → Send-Layer suppressed.
+
+**Vollmacht bewusst NICHT im UI-Smoke:** kein Kunde-Canvas — `vollmacht_signiert_am` / `vollmacht_status='bestaetigt'` werden server-intern gesetzt (LexDrive-Webhook / `confirmVollmacht`). Als Journey-Verweis (j03 Schritt 3) im Spec dokumentiert, **kein** `test.skip`. CI-Step `RUN_SA_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`). Lokal prod-grün 04.08.: Seed 4/4 + Smoke 1 passed.
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-04 · B-Journey-Suite · J6 (Kanzlei-Übergabe) als CI-Step — Kunde-Login, kein zweites Konto
+
+**J6 gebaut (PR gestackt auf #4981, Branch `kitta/fundament-journey-j6-kanzlei`):** neuer Seed `scripts/smoke/kanzlei-uebergabe-seed.mjs` + Spec `kanzlei-uebergabe-smoke.spec.ts`.
+
+**Kern:** Die Übergabe an die eigene Kanzlei ist mit **externem** Wegwerf-Kunde-Login fahrbar (kein Auth-Wall, **keine** echte Kanzlei-Gegenseite nötig — schlanker als J10). Trigger: Kunde-Portal-Button „Kanzleipaket versenden" (`EigeneKanzleiPaketCard`) → `versendeKanzleiPaketAnEigeneKanzlei` (`kanzlei-wunsch/actions.ts:270`, sanktionierter Direkt-Writer aus `operative-status-writes-baseline.json`) schreibt `claims.operative_status='an_externe_kanzlei_uebergeben'` + `kanzlei_uebergeben_am` (SSoT-Assert, **nicht** `kanzlei_id` = intern gecappt). Button-Gate (`kunde-claim-view.ts`): `service_typ≠nur_gutachter` + `eigene_kanzlei` + Ansprechpartner-Mail + **freigegebenes Erstgutachten** (`auftraege` typ=erstgutachten, `gutachten_final_freigegeben=true`; ⚠ `auftraege.sv_id` NOT NULL → Test-SV `0469524f`). Der Klick startet PDF-Gen (Button „Wird versendet…") → Assert per **toPass-Poll** (nicht fixer Timeout — sonst flaky). CI-Step `RUN_KANZLEI_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`). Lokal prod-grün 04.08.: Seed-assert 2/2 + Smoke 1 passed.
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-04 · B-Journey-Suite · J7 (Storno/DSGVO) als CI-Step — Prod-Bug in der Anonymisierungs-RPC gefunden + gefixt
+
+**J7 gebaut (PR gestackt auf #4984, Branch `kitta/fundament-journey-j7-storno-dsgvo`):** neuer Seed `scripts/smoke/storno-dsgvo-seed.mjs` (**3 GETRENNTE Wegwerf-Konten**: Throwaway-Admin `throwaway-admin-j7-…` ohne TOTP + Storno-Kunde+Claim `operative_status='regulierung'` + DSGVO-Kunde+eigener Claim; self-cleaning, Clean-Reihenfolge FK-getrieben: `dsgvo_loeschauftraege` VOR dem Admin-Konto — `bestaetigt_von_user_id` → auth.users hat NO ACTION) + Spec `storno-dsgvo-smoke.spec.ts` (Skeleton → echte Logik, 3 Tests).
+
+**Soll≠Ist:** j07 „Kunde storniert" hat **keine** Kunde-UI — Storno ist intern (Admin/KB): `markClaimAsStorniert` (`endzustand-actions.ts:309`, requireRole admin/kb) via `EndzustandDropdown`→Modal (Begründung + Confirm-Tipp `STORNIEREN`; notify default false = keine Comms) → `operative_status='storniert'` + `abgeschlossen_am` + `endzustand_gesetzt_*` (Row-Check #4625-Klasse). DSGVO = 2-Schritt über `/kunde/profil` (`stelleLoeschAntrag`) + `/admin/datenschutz/loeschauftraege` („Bestätigen" → „Direkt ausführen"; Zeile per **EXAKTER** Wegwerf-Email, nie „erste Zeile"). **Bestätigen MUSS vor Ausführen:** der DB-CHECK `chk_bestaetigt_logic` verlangt `bestaetigt_am` für `status='ausgefuehrt'` — `fuehreLoeschungAus` ignoriert sein Update-Result, ein Direkt-Ausführen auf `eingereicht` verlöre den Status-Write silent (Rest-Befund, s.u.).
+
+**Smoke-Fund (Prod-Bug, gefixt):** Die RPC `dsgvo_anonymize_user_data` (Stand `20260510095718`) war gegen das Schema gedriftet — tote Referenzen auf `claims.kunde_email` (ersatzlos gedroppt), die `claim_parties`-PII-Spalten (seit dem personen-Modell weg) und `faelle.kunde_*` (CMM-49; der IF-EXISTS-Guard prüfte nur die TABELLE, nicht die Spalten). **Jede** DSGVO-Ausführung scheiterte prod-sichtbar mit „Anonymisierung fehlgeschlagen: column kunde_email of relation claims does not exist" → Fix Migration **`20260804193646`** (die drei toten UPDATEs entfernt; `personen` bewusst unberührt = Aaron-Entscheid 16.06.). Der Journey-Smoke hat damit beim ersten Lauf genau die Bug-Klasse gefangen, für die er gebaut wurde.
+
+**Offene Befunde für Aaron (bewusst NICHT unilateral geändert):** (1) `fuehreLoeschungAus` auf einem `eingereicht`-Antrag = Silent-CHECK-Reject (User wird anonymisiert+gelöscht, Antrag bleibt aber auf `eingereicht` stehen) — Fix wäre `bestaetigt_am` im Status-Update mitzusetzen + das Update-Result zu prüfen; (2) `claim_parties`-Rest-PII (`kennzeichen*`/`verletzungsart`/`krankenhaus_name`/`notiz`) und `personen` sind aktuell NICHT Teil der Anonymisierung (eigener `ist_anonymisiert`-Mechanismus existiert) — Soll-Klärung gegen Journey j07.
+
+CI-Step `RUN_STORNO_DSGVO_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY` für `db()`; `--workers=1`; Admin-Creds aus dem Seed-JSON, **kein** `TEST_ADMIN_*`) + Cleanup-Step `if: always()` — das Wegwerf-**Admin**-Konto ist sensibler als die Wegwerf-Kunden der anderen Journeys und bleibt nicht bis zum nächsten Lauf liegen. Lokal prod-grün 04.08.: Smoke **3/3 passed** + Seed-assert **9/9**.
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-05 · B-Journey-Suite · J2 (Meldung alle Kanäle) als CI-Step — Suite damit 10/10 code-komplett
+
+**J2 gebaut (PR gestackt auf #4995, Branch `kitta/fundament-journey-j2-meldung`):** neuer Seed `scripts/smoke/meldung-kanaele-seed.mjs` + Spec `meldung-kanaele-smoke.spec.ts` — **drei Meldewege = die drei Melde-Muster** aus j02 (Wrapper / lead-first / Kern-direkt), aufbauend auf den empirischen Rezepten des Entry-Point-Mapping-Audits (Wege 6/7/8, Session 264a7df6, 03.08.).
+
+**Kanäle:** **A** Kunde-Wizard `/kunde/schaden-melden` (Ein-Formular, Pflicht nur PLZ, keine Terminwahl, kein `reserviere()`; `meldeNeuenSchaden` → `createLead` → `convertLeadToFall` = leads + claims + **pflichtdokumente**). **B** `POST /api/v1/melde-schaden` (anon, Zod-Minimum ohne `sv_id`/`slot_*` → keine Reservierung; gfa + lead + **flow_link**; **2. POST mit derselben Nummer → `bereits_angelegt`** = j02-Fehlerfall „Doppel-Submit idempotent" erstmals CI-bewiesen). **C** Gegner-Schadenkarte `/schaden/[token]` (geseedete Wegwerf-Karte `status='gebunden'`; 6-Step-Wizard, Pflicht nur Name+Consent; Direkt-Claim + verursacher-Party + interner `vs_meldung`-Fallback-Task).
+
+**Isolations-Modell (wichtigste Erkenntnis der Erhebung):** identitätsbasiert, NICHT `SIDE_EFFECT_MODE` (das erreicht den prod-Prozess nicht). A: `@claimondo.test`+`telefon=NULL` → `fall_eroeffnet` hat keine Empfänger. B: **Drama-Festnetznummer** (BNetzA-Fiktionsrange 030 23125xxx, je Lauf variiert gegen phone-cap 3/24h + Cross-Run-Dedup) → WA-Precheck false, SMS inert, kein Email-Feld ⇒ der Spec **asserted `kanal==='none'`** als Runtime-Beweis. C: Submit ohne Telefon (Airdrop unterbleibt → Fallback-Task ist das Assert) + Wegwerf-Firma OHNE `firmen_flotten_konten`-Zeile (→ 0 FM-WA-Nummern, `konto-firma.ts:50-60`); **nie einen Versicherer wählen** (VS-Meldung prod-scharf, STOP-Marker firmen-flotte) und `/unfallmeldung` nicht bestätigen.
+
+**Clean-Reihenfolgen (MCP-verifiziert):** gfa VOR leads (`konvertiert_zu_lead_id` NO ACTION) · `tasks.lead_id` ohne CASCADE → vor leads · vehicles NACH claims (`claims.vehicle_id` RESTRICT) · personen nach claims (parties `person_id` SET NULL) · `partner_provisionen` über alle drei Bezüge. `consent_records` (B) trägt keine Subjekt-Referenz (Befund B8) → bleibt als anonyme Audit-Zeile.
+
+CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Lokal prod-grün 05.08.: Smoke **3/3 passed** (erster Lauf) + Seed-assert **11/11** + Clean vollständig. **Damit haben alle 10 Journeys einen CI-Step; §9-P2-Nachweis = erster post-merge-e2e-Lauf nach Kette-Merge. Rest: J9-`lifecycle` (opt-in, Aaron).**
+
+**Review:** offen (im PR an Aaron).
+
+## 2026-08-05 · B-Journey-Suite · J9-`lifecycle` in CI via Fremd-Effekt-Precheck-Geld-Guard (Aaron-Entscheid)
+
+**Lücke:** `provisionen-lifecycle-smoke` schießt den ECHTEN globalen Release-Cron (`/api/cron/release-provisionen`) — in CI würde jeder Lauf echte fällige Provisionen FRÜHER freigeben (Geld-Timing-Effekt, deshalb 03.08. als opt-in ausgeschlossen). Drei Optionen wurden Aaron vorgelegt: (1) Precheck-Gate im Spec, (2) Test-Row-Filter-Param am Cron (Produkt-Change am Money-Pfad), (3) Status quo opt-in.
+
+**Entscheidung (AARON, 05.08.): Option 1 — Precheck-Geld-Guard im Spec, KEIN Produkt-Change.** Vor jedem Cron-Schuss läuft `zaehleFremdEffekte()` (portiert aus `scripts/smoke/netzwerk-release-scharf-smoke.mts:58-112`, dem prod-erprobten #4927-Muster): alle fremden `pending`-Rows werden bewertet (storno-fällig ODER release-berechtigt = Completion+7d, inkl. `nur_gutachter`-Terminpfad über beide Bezug-Achsen; P3-Suppression-Flips zählen mit). Betroffene > 0 → `test.skip` DIESES Laufs mit sichtbarer Begründung — zustandsabhängig-selten, der Nacht-Cron (02:00 UTC) räumt das Fenster, der nächste Lauf prüft neu. `afterAll`-Cleanup räumt die eigenen Seeds auch im Skip-Fall.
+
+**Begründung:** Testlogik bleibt aus dem Release-Runner (Money-Pfad) draußen; keine Koordinationslast mit der Netzwerk-Lane (Provisionen-Owner); der Guard ist derselbe Mechanismus, der den scharfen 01.08.-Referenzlauf abgesichert hat. Der bedingte Skip ist ein Geld-Guard, kein Test-Verzicht — qualitativ anders als die von der „keine Skips"-Direktive gemeinten Pauschal-Skips.
+
+**Beweis-Stand:** ci.yml-J9-Step fährt jetzt alle drei Specs (+ `CRON_SECRET`, in GH-Secrets vorhanden). Lokal 05.08.: (a) ohne `CRON_SECRET` → sauberer `beforeAll`-Skip (4 skipped, bewiesen); (b) Guard-Berechnung read-only gegen prod: **10 fremde pending-Rows, 0 betroffen** → der Schuss wäre aktuell safe, kein chronischer Skip (die 3 `nur_gutachter`-pending-Rows haben keinen durchgeführten Termin = korrekte Nicht-Treffer). Der scharfe 4-Test-Lauf = erster post-merge-CI-Lauf (`CRON_SECRET` liegt nur in CI/VPS — bewusst nicht in die lokale Env geholt); die 4 Szenarien selbst sind aus Phase B + #4927 prod-erprobt.
+
+**Review:** entschieden durch Aaron (05.08., Session 59cdebcb); CI-Nachweis nach Kette-Merge.
