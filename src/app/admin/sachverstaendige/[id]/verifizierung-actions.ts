@@ -6,6 +6,7 @@ import { freigebeBasicSvCore } from '@/lib/sv-basic/freigabe'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
+import { TIER2_SLOTS, tier2FreigabeErlaubt } from '@/lib/sv/tier2-docs'
 import { revalidatePath } from 'next/cache'
 import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
@@ -59,6 +60,26 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
   if (!auth.success) return { success: false, error: auth.error }
 
   const db = createAdminClient()
+
+  // Anti-Bypass (Spec 2026-08-08): kein Blind-Freigeben — beide Tier-2-Slots muessen
+  // mindestens hochgeladen sein. Sonst reisst tier2Freigeben dasselbe Loch wieder auf,
+  // das freigebeBasicSvCore alt hatte (verifizierung_status='geprueft' ohne Docs).
+  const { data: tier2Docs } = await db
+    .from('pflichtdokumente')
+    .select('dokument_typ, status')
+    .eq('sv_id', svId)
+    .in('dokument_typ', TIER2_SLOTS as unknown as string[])
+  if (!tier2FreigabeErlaubt((tier2Docs ?? []) as Array<{ dokument_typ: string; status: string }>)) {
+    return { success: false, error: 'Berufshaftpflicht und Gewerbeanmeldung müssen zuerst hochgeladen sein.' }
+  }
+
+  // Die Tier-2-Dokumente auf 'geprueft' heben (Doc-Ebene konsistent mit dem SV-Status,
+  // damit sindTier2DocsGeprueft bei einer erneuten Freischaltung true liefert).
+  await db.from('pflichtdokumente')
+    .update({ status: 'geprueft' })
+    .eq('sv_id', svId)
+    .in('dokument_typ', TIER2_SLOTS as unknown as string[])
+
   const { error } = await db
     .from('sachverstaendige')
     .update({
@@ -66,11 +87,46 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
       verifiziert_am: new Date().toISOString(),
       verifiziert_von: auth.userId,
       verifizierung_admin_notiz: null,
+      // Frist-Reset: nach Freigabe keine offene Frist / kein Ueberschritten-Marker mehr.
+      verifizierung_frist_bis: null,
+      verifizierung_frist_ueberschritten_am: null,
     })
     .eq('id', svId)
   if (error) return { success: false, error: `Freigabe fehlgeschlagen: ${error.message}` }
 
   await resolveTasksForEntity('gutachter', svId, 'Tier-2-Verifizierung durch Admin freigegeben')
+
+  revalidateBoth(svId)
+  return { success: true }
+}
+
+/**
+ * Verlaengert die Tier-2-Frist eines SV (Admin-Kulanz). Setzt den Status zurueck
+ * auf 'ausstehend' + neue Frist + hebt einen etwaigen frist_ueberschritten-Marker
+ * auf → ein bereits dispatch-geblockter SV wird damit reaktiviert (Fall-Empfang
+ * wieder moeglich, solange die neue Frist laeuft).
+ */
+export async function tier2FristVerlaengern(
+  svId: string,
+  tage: number,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.success) return { success: false, error: auth.error }
+  if (!Number.isFinite(tage) || tage < 1 || tage > 90) {
+    return { success: false, error: 'Ungültige Verlängerung (1–90 Tage).' }
+  }
+
+  const db = createAdminClient()
+  const { error } = await db
+    .from('sachverstaendige')
+    .update({
+      verifizierung_status: 'ausstehend',
+      verifizierung_frist_bis: new Date(Date.now() + tage * 864e5).toISOString(),
+      verifizierung_frist_ueberschritten_am: null,
+      verifizierung_reminder_7d_gesendet_am: null,
+    })
+    .eq('id', svId)
+  if (error) return { success: false, error: `Frist-Verlängerung fehlgeschlagen: ${error.message}` }
 
   revalidateBoth(svId)
   return { success: true }
