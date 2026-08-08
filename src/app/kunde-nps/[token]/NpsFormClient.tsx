@@ -11,10 +11,12 @@ export function NpsFormClient({
   token,
   claimNummer,
   startAbmelden,
+  reviewUrl,
 }: {
   token: string
   claimNummer: string | null
   startAbmelden?: boolean
+  reviewUrl?: string | null
 }) {
   const [rating, setRating] = useState<number | null>(null)
   const [kommentar, setKommentar] = useState('')
@@ -49,6 +51,21 @@ export function NpsFormClient({
       <Card className="max-w-md w-full text-center">
         <p className="text-lg font-semibold text-claimondo-navy">Vielen Dank!</p>
         <p className="text-sm text-claimondo-ondo mt-2">Ihre Bewertung hilft uns, besser zu werden.</p>
+        {/* GEO: NPS->Review-Funnel — allen Antwortenden angeboten (ungated, Trustpilot/
+            ProvenExpert-Richtlinien-konform). Dormant bis NPS_REVIEW_URL gesetzt ist. */}
+        {reviewUrl && (
+          <div className="mt-4 pt-4 border-t border-claimondo-border">
+            <p className="text-sm text-claimondo-ondo mb-3">Möchten Sie Ihre Erfahrung auch öffentlich teilen?</p>
+            <a
+              href={reviewUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-4 py-2 rounded-ios-lg bg-claimondo-navy text-white text-sm font-medium hover:bg-claimondo-ondo"
+            >
+              Öffentlich bewerten
+            </a>
+          </div>
+        )}
       </Card>
     )
   }
