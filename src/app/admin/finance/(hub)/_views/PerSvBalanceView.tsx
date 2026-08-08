@@ -130,7 +130,7 @@ export default async function PerSvBalanceView() {
                     </Td>
                     <Td className="px-4 text-right">
                       <Link
-                        href={`/admin/sachverstaendige/${r.id}`}
+                        href={`/admin/vertrieb/sachverstaendige/${r.id}`}
                         className="text-claimondo-ondo hover:text-claimondo-navy underline text-sm"
                       >
                         Öffnen

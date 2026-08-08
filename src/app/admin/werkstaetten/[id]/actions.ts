@@ -65,7 +65,7 @@ export async function aktualisiereWerkstattStammdaten(
     .eq('id', werkstattId)
   if (error) return { ok: false, error: error.message }
 
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
+  revalidatePath(`/admin/vertrieb/werkstaetten/${werkstattId}`)
   revalidatePath('/admin/werkstaetten')
   return { ok: true }
 }
@@ -93,7 +93,7 @@ export async function setzeWerkstattStatus(
   const { error } = await admin.from('werkstaetten').update(patch).eq('id', werkstattId)
   if (error) return { ok: false, error: error.message }
 
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
+  revalidatePath(`/admin/vertrieb/werkstaetten/${werkstattId}`)
   revalidatePath('/admin/werkstaetten')
   return { ok: true }
 }
@@ -131,7 +131,7 @@ export async function aktualisiereWerkstattEmail(
   const { error: updErr } = await admin.from('werkstaetten').update({ email }).eq('id', werkstattId)
   if (updErr) return { ok: false, error: updErr.message }
 
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
+  revalidatePath(`/admin/vertrieb/werkstaetten/${werkstattId}`)
   revalidatePath('/admin/werkstaetten')
   return { ok: true }
 }
@@ -191,7 +191,7 @@ export async function aktualisiereWerkstattAdresse(
     console.error('[werkstatt-detail] Isochrone-Neuberechnung fehlgeschlagen (non-fatal):', err)
   }
 
-  revalidatePath(`/admin/werkstaetten/${werkstattId}`)
+  revalidatePath(`/admin/vertrieb/werkstaetten/${werkstattId}`)
   revalidatePath('/admin/werkstaetten')
   return { ok: true }
 }

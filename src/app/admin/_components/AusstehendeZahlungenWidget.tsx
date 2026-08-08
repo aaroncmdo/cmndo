@@ -74,7 +74,7 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
       betrag: Number(r.onboarding_anzahlung_betrag ?? 0),
       faelligSeitTage: tageSeit(r.vertrag_unterschrieben_am),
       status: 'anzahlung_offen',
-      href: `/admin/sachverstaendige/${r.id}`,
+      href: `/admin/vertrieb/sachverstaendige/${r.id}`,
     })
   }
 

@@ -3,9 +3,10 @@
 // CRM-Drawer-Programms (Phase-A-Befund a2: Werkstatt-Detail hatte keinen Drawer-Pfad;
 // PartnerCockpit-CTA via detailLink('werkstatt') zielt hierauf). Ein direkter URL-Aufruf /
 // Hard-Nav matcht NICHT -> Next rendert die Full-Page (Re-Export
-// /admin/vertrieb/werkstaetten/[id]). Externe Links auf /admin/werkstaetten/<uuid>
-// (Alt-Route) bleiben unberuehrt.
-import WerkstattDetailPage from '@/app/admin/werkstaetten/[id]/page'
+// /admin/vertrieb/werkstaetten/[id]). F2 Route-Konsolidierung (08.08.): externe Links auf
+// /admin/werkstaetten/<uuid> werden jetzt per next.config.ts redirects() (308) auf die
+// kanonische vertrieb-Route umgeleitet (die Legacy-URL existiert nicht mehr als eigene Full-Page).
+import WerkstattDetailPage from '@/app/admin/werkstaetten/[id]/WsAkteContent'
 import { DrawerShell } from '@/components/shared/detail'
 
 export default async function InterceptedCockpitWerkstattDetail({
