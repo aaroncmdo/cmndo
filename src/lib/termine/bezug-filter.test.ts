@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { bezugOrExpr, bezugInExpr } from './bezug-filter'
+import { bezugOrExpr, bezugInExpr, bezugOrExprKonversion } from './bezug-filter'
 
 // P3.3: bezugOrExpr baut den PostgREST-or-Ausdruck, der Legacy-Achse ODER bezug-native Achse
 // matcht (Superset des naiven .eq). Reiner String-Builder -> deterministisch pruefbar.
@@ -53,5 +53,30 @@ describe('bezugInExpr (P3.3 .in-Superset)', () => {
   })
   it('leere Liste → in.() (matcht nichts, kein Error — prod-verifiziert, kein Guard)', () => {
     expect(bezugInExpr('fall', [])).toBe('fall_id.in.(),and(bezug_typ.in.(fall,claim),bezug_id.in.())')
+  })
+})
+
+// Konversions-Race (Prod-Regression 07.08., Marker audit-signsa-termin-bestaetigung-bezug-
+// fall-regression): signSAandCreateFall bestaetigt den Self-Service-Termin NACH
+// convertLeadToClaim — dessen uebernehmeLeadTermine (T1, PR #5012) haengt den Termin dort
+// bereits auf bezug ('fall', claimId) um und nullt lead_id. Ein reiner lead-Anker-Filter
+// matcht danach 0 Rows -> Termin blieb 'reserviert' -> TTL-Sweep stornierte ihn.
+// bezugOrExprKonversion deckt BEIDE Seiten der Konversion ab (lead-Anker fuer den Fall,
+// dass das non-fatale Umhaengen fehlschlug, + fall/claim-Anker fuer den Normalfall).
+describe('bezugOrExprKonversion (SA-Confirm ueber die Lead→Claim-Konversion)', () => {
+  it('matcht den lead-Anker (Umhaengen fehlgeschlagen / Legacy lead_id)', () => {
+    const expr = bezugOrExprKonversion('L-1', 'C-1')
+    expect(expr).toContain('lead_id.eq.L-1')
+    expect(expr).toContain('and(bezug_typ.eq.lead,bezug_id.eq.L-1)')
+  })
+  it('matcht den umgehaengten Termin (bezug fall/claim + Legacy fall_id)', () => {
+    const expr = bezugOrExprKonversion('L-1', 'C-1')
+    expect(expr).toContain('fall_id.eq.C-1')
+    expect(expr).toContain('and(bezug_typ.in.(fall,claim),bezug_id.eq.C-1)')
+  })
+  it('ist exakt die Komposition beider bezugOrExpr-Achsen (lead, dann fall)', () => {
+    expect(bezugOrExprKonversion('L-1', 'C-1')).toBe(
+      'lead_id.eq.L-1,and(bezug_typ.eq.lead,bezug_id.eq.L-1),fall_id.eq.C-1,and(bezug_typ.in.(fall,claim),bezug_id.eq.C-1)',
+    )
   })
 })

@@ -7,6 +7,7 @@ import { enablePhoneLogin } from '@/lib/auth/phone-login'
 import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
+import { bezugOrExpr, bezugOrExprKonversion } from '@/lib/termine/bezug-filter'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
@@ -828,9 +829,11 @@ export async function signSAandCreateFall(
       const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         // AAR-956 #8 (Linchpin): Engine-reservierte Termine sind bezug-nativ (lead_id NULL,
-        // bezug_typ='lead'). Dual-Filter relinkt Legacy- UND Self-Service-Termine -> setzt
-        // fall_id/claim_id, damit ALLE fall_id-Reader sie post-Conversion finden.
-        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+        // bezug_typ='lead'). Der Filter muss BEIDE Seiten der Konversion matchen:
+        // convertLeadToClaim (uebernehmeLeadTermine, T1 #5012) hat den Termin hier bereits
+        // auf bezug ('fall', claimId) umgehaengt + lead_id genullt — ein reiner lead-Anker
+        // fand ihn nicht mehr (Prod-Regression 07.08.: Termin blieb 'reserviert' -> TTL-Storno).
+        .or(bezugOrExprKonversion(leadId, convClaimId))
         .eq('status', 'reserviert')
         .select('id')
 
@@ -846,7 +849,10 @@ export async function signSAandCreateFall(
             const { data: existingTermine } = await admin
               .from('gutachter_termine')
               .select('id')
-              .eq('fall_id', fall.id)
+              // bezug-aware statt .eq('fall_id'): umgehaengte Engine-Termine tragen NUR
+              // bezug ('fall', claimId), fall_id bleibt NULL wenn das Confirm-UPDATE oben
+              // 0 Rows traf (z.B. Termin stand schon auf 'bestaetigt').
+              .or(bezugOrExpr('fall', fall.id))
               // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
               .eq('assignee_id', svIdFromTermin)
               .eq('assignee_typ', 'sachverstaendiger')
@@ -881,8 +887,10 @@ export async function signSAandCreateFall(
       // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
       const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
-        // AAR-956 #8 (Linchpin): bezug-nativen Self-Service-Termin mit-relinken (s.o.).
-        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+        // AAR-956 #8 (Linchpin): bezug-nativen Self-Service-Termin mit-relinken — inkl. der
+        // von convertLeadToClaim bereits auf bezug ('fall', claimId) umgehaengten Termine
+        // (s. Kommentar im nur_gutachter-Branch; Prod-Regression 07.08.).
+        .or(bezugOrExprKonversion(leadId, convClaimId))
         .eq('status', 'reserviert')
         .select('id')
 
@@ -900,7 +908,8 @@ export async function signSAandCreateFall(
             const { data: existingTermine } = await admin
               .from('gutachter_termine')
               .select('id')
-              .eq('fall_id', fall.id)
+              // bezug-aware statt .eq('fall_id') — s. Kommentar im nur_gutachter-Branch.
+              .or(bezugOrExpr('fall', fall.id))
               // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
               .eq('assignee_id', svIdFromTermin)
               .eq('assignee_typ', 'sachverstaendiger')
@@ -1081,7 +1090,8 @@ export async function signSAandCreateFall(
       const { data: caldavTermine } = await admin
         .from('gutachter_termine')
         .select('id')
-        .eq('fall_id', fall.id)
+        // bezug-aware: umgehaengte Engine-Termine koennen fall_id NULL tragen (s.o.).
+        .or(bezugOrExpr('fall', fall.id))
         .eq('assignee_typ', 'sachverstaendiger')
         .in('status', ['bestaetigt', 'reserviert'])
       const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
@@ -1366,7 +1376,8 @@ export async function signSAandCreateFall(
       const { data: terminRow } = await admin.from('gutachter_termine')
         // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
         .select('id, assignee_id, ablehnen_token')
-        .eq('fall_id', fall.id)
+        // bezug-aware: umgehaengte Engine-Termine koennen fall_id NULL tragen (s.o.).
+        .or(bezugOrExpr('fall', fall.id))
         .eq('status', 'bestaetigt')
         .limit(1)
         .maybeSingle()
