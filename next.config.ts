@@ -399,6 +399,19 @@ const nextConfig: NextConfig = {
       { source: '/admin/sachverstaendige', destination: '/admin/vertrieb', permanent: true },
       { source: '/admin/werkstaetten', destination: '/admin/vertrieb', permanent: true },
       { source: '/admin/partner-leads', destination: '/admin/vertrieb', permanent: true },
+      // F2 Route-Konsolidierung (08.08.): die SV-Detail-Akte ist jetzt kanonisch unter
+      // /admin/vertrieb/sachverstaendige/[id] (vorher Re-Export-Ziel, jetzt der echte
+      // Content -- admin/sachverstaendige/[id]/page.tsx wurde zu SvAkteContent.tsx und
+      // hat keinen Route-Slot mehr). UUID-Regex (nicht :path*) faengt NICHT die
+      // Geschwister anlegen/basic-freigaben/leads, die unter /admin/sachverstaendige/*
+      // unveraendert weiterleben. Der Legacy-@drawer/(.)[id]-Soft-Nav-Intercept auf der
+      // Legacy-Liste wurde entfernt (Option 3a) -- die vertrieb-Konsole hat ihren eigenen
+      // Cockpit-Drawer (admin/vertrieb/@drawer/(.)sachverstaendige/[id]), unberuehrt.
+      {
+        source: '/admin/sachverstaendige/:id([0-9a-fA-F-]{36})',
+        destination: '/admin/vertrieb/sachverstaendige/:id',
+        permanent: true,
+      },
       // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
       // aus /admin/faelle/[id] rausgezogen in die neutrale Route /faelle/[id],
       // damit KB + Kanzlei ihre eigene Shell bekommen. Der Redirect muss
