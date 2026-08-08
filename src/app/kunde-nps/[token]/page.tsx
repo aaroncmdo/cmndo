@@ -15,6 +15,8 @@ export default async function KundeNpsPage({
   const { token } = await params
   const { abmelden } = await searchParams
   const { feedback, error } = await getNpsByToken(token)
+  // GEO: öffentlicher Review-Link (Trustpilot/ProvenExpert). Dormant bis env gesetzt.
+  const reviewUrl = process.env.NPS_REVIEW_URL ?? null
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-claimondo-bg p-4">
@@ -23,7 +25,7 @@ export default async function KundeNpsPage({
           <p className="text-claimondo-navy">{error ?? 'Link nicht mehr gültig.'}</p>
         </Card>
       ) : (
-        <NpsFormClient token={token} claimNummer={feedback.claim_nummer} startAbmelden={abmelden === '1'} />
+        <NpsFormClient token={token} claimNummer={feedback.claim_nummer} startAbmelden={abmelden === '1'} reviewUrl={reviewUrl} />
       )}
     </div>
   )
