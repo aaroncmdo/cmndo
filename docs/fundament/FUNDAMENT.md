@@ -75,7 +75,7 @@ Pflege-Regeln: claimen vor Arbeitsbeginn (§0.1 Schritt 4); Tranchen-Splits hier
 | C2 | Ein Intake: createCase | A4, B1 | 🟢 **Plan done** (`c2-create-case-plan.md`); Code gated auf B2 | — |
 | C3 | Notification-Outbox | A3, C1 | 🟢 **Plan done** (`c3-notification-outbox-plan.md`); Code gated auf C1 | — |
 | C4 | Eine Akte (rollen-parametrisierter Kern) | B1 | 🟢 **Plan done** (`c4-eine-akte-plan.md`); Code gated auf B2 | #4875 |
-| C5 | Zugriffs-Doktrin + View/RPC-Konsolidierung | A1 | 🟢 **Doktrin done** (`zugriffs-doktrin.md`) + Server-Achse erhoben; offen: 17-Read-Surface-Migration + AGENTS.md-Verweis | #4860 |
+| C5 | Zugriffs-Doktrin + View/RPC-Konsolidierung | A1 | ✅ **done (08.08., doc-close)** — Doktrin (`zugriffs-doktrin.md` #4860) jetzt im Review-Prozess verankert: `AGENTS.md`-Dach-Absatz „Zugriffs-Doktrin (Server-first)" + `.github/pull_request_template.md` mit 6-Punkt-Checkliste (§3). §9-#8 erfüllt (Client-Direkt-Selects = 0 → „Top-Abweichler" gegenstandslos). **Folge-Tranche (offen, kein Sicherheits-Thema):** server-seitige `from('claims')`→`v_claim_*`-Konsolidierung (Doktrin §5) — collision-prone, eigene Erhebung | #4860 + doc-close |
 | D1 | Feature-DoD umstellen (AGENTS.md) | B2 | 🟢 **in Arbeit** (8c6de199, 03.08., `kitta/fundament-d1-feature-dod`) — AGENTS.md-Abschnitt „Feature-Definition-of-Done" (Journey-Zyklus, ≤½ Seite, verweist auf FUNDAMENT.md); 2. DoD-Klausel („erstes Feature durchgelaufen") folgt beim nächsten Journey-Feature | PR (folgt) |
 | D2 | Lebende Spec (Pflege-Rhythmus) | D1 | offen | — |
 
@@ -316,7 +316,7 @@ Datei: `docs/fundament/DECISIONS.md`, append-only. Format je Eintrag:
 - [ ] Alle Meldewege laufen über `createCase`; A4-Register komplett ✓
 - [ ] Ausgehende Kommunikation läuft über die Outbox mit Dedup; 0 offene P1-Lücken aus A3
 - [ ] Ein Akte-Kern, alle Rollen-Detailseiten migriert, Alt-Implementierungen gelöscht
-- [ ] Zugriffs-Doktrin dokumentiert, verlinkt, Checkliste im Review-Prozess; Top-Abweichler migriert
+- [x] Zugriffs-Doktrin dokumentiert, verlinkt, Checkliste im Review-Prozess; Top-Abweichler migriert (C5-doc-close 08.08.: AGENTS.md-Verweis + PR-Template-Checkliste; Client-Abweichler = 0)
 - [ ] Feature-DoD in AGENTS.md umgestellt; erstes Feature nach neuem Zyklus durchgelaufen
 
 ## 10 · Nicht-Ziele des Programms

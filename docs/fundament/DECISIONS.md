@@ -242,3 +242,13 @@ CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Loka
 **Beweis-Stand:** ci.yml-J9-Step fährt jetzt alle drei Specs (+ `CRON_SECRET`, in GH-Secrets vorhanden). Lokal 05.08.: (a) ohne `CRON_SECRET` → sauberer `beforeAll`-Skip (4 skipped, bewiesen); (b) Guard-Berechnung read-only gegen prod: **10 fremde pending-Rows, 0 betroffen** → der Schuss wäre aktuell safe, kein chronischer Skip (die 3 `nur_gutachter`-pending-Rows haben keinen durchgeführten Termin = korrekte Nicht-Treffer). Der scharfe 4-Test-Lauf = erster post-merge-CI-Lauf (`CRON_SECRET` liegt nur in CI/VPS — bewusst nicht in die lokale Env geholt); die 4 Szenarien selbst sind aus Phase B + #4927 prod-erprobt.
 
 **Review:** entschieden durch Aaron (05.08., Session 59cdebcb); CI-Nachweis nach Kette-Merge.
+
+## 2026-08-08 · C5 (Zugriffs-Doktrin) · doc-close statt server-migration — §9-#8 via Verankerung erfüllt
+
+**Lücke:** §9-Endzustand-Punkt #8 verlangt „Zugriffs-Doktrin dokumentiert, **verlinkt**, **Checkliste im Review-Prozess**; Top-Abweichler migriert". Die Doktrin (`zugriffs-doktrin.md`, #4860) war zwar geschrieben, aber (a) aus `AGENTS.md` mit **0** Referenzen unverlinkt, (b) ohne Checkliste im Review-Prozess (kein PR-Template im Repo), und die §2-C5-Zeile führte „17-Read-Surface-Migration" als offen. Frage: Schließt C5 über die (große, collision-prone) server-`from('claims')`→`v_claim_*`-Migration ab, oder reicht die Verankerung?
+
+**Entscheidung: doc-close.** Die zugriffs-*relevante* Achse ist die Client-Achse — und dort sind die Direkt-Selects auf Basistabellen **= 0** (Doktrin §5, verifiziert): „Top-Abweichler migrieren" ist gegenstandslos, server-first ist gelebt. §9-#8 fehlte damit nur noch die **Verankerung**: (a) `AGENTS.md`-Dach-Absatz „Zugriffs-Doktrin (Server-first)" über den vier durchsetzenden Ratchets (RLS-Policy/Anon-Grant/Reachability/Write-Reachability); (b) `.github/pull_request_template.md` (NEU) mit der 6-Punkt-„neue Tabelle"-Checkliste (§3); (c) Status-Nachzug (§2-C5 + §9-#8 → done). Die server-seitige `v_claim_*`-Konsolidierung ist eine **separate Optimierungs-Tranche** (kein Zugriffs-*Sicherheits*-Thema; die vier Gates decken die Sicherheitsachse), collision-prone bei den aktuell ~8 heißen Sessions → bewusst NICHT in dieser Tranche.
+
+**Begründung:** Verfassung §7 (Server-first-Zugriff) ist auf der Sicherheitsachse erfüllt und maschinell gegated; der offene Rest ist reine Read-Muster-Konsolidierung, kein Doktrin-Verstoß. Verankerung schließt den §9-Punkt ehrlich (nicht „Checkbox-Theater": die Client-Achse IST sauber). Reine Docs/Config → Regel-4-exempt.
+
+**Review:** offen (Aaron). Session 59cdebcb, Branch `kitta/fundament-c5-doc-close`.
