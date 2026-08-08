@@ -28,7 +28,6 @@ export type ErstelleSvGesuchtInput = {
     lng?: number | null
     placeId?: string | null
   } | null
-  quelle?: string
 }
 
 export async function erstelleSvGesuchtTermin(

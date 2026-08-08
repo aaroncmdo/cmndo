@@ -139,7 +139,7 @@ export default function TerminwunschListe({
               </Td>
               <Td className="text-claimondo-ondo">{QUELLE_LABEL[row.quelle]}</Td>
               <Td>
-                <TerminAktionen terminId={row.id} status={row.status} svOptionen={svOptionen} />
+                <TerminAktionen terminId={row.id} svOptionen={svOptionen} />
               </Td>
             </Tr>
           ))}
