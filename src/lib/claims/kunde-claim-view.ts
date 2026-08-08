@@ -202,6 +202,8 @@ export type KundeClaimViewModel = {
     kanzleiSichtbar: boolean
     // Task 11: WerkstattFinderCard-Gate — Haftpflicht: erst nach fertigem Gutachten; Selbstzahler/Kasko: sofort.
     reparaturPhaseErreicht: boolean
+    // T4: Claim ist terminal (abgeschlossen/storniert) — gatet die „Gutachtertermin wählen"-Aufgabe.
+    istTerminal: boolean
   }
 }
 
@@ -683,6 +685,7 @@ export async function getKundeClaimView(
       reparaturFreigegeben,
       istNurGutachter,
       kanzleiSichtbar,
+      istTerminal: claimTerminal,
     },
   }
 }
