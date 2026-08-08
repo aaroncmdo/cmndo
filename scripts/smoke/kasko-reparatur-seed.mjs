@@ -99,18 +99,32 @@ async function clean(summary) {
     await db.from('phase_transitions').delete().eq('fall_id', cid)
     await db.from('claims').delete().eq('id', cid) // CASCADE -> faelle_claim_bridge
   }
-  if (s) {
-    const zweiStd = new Date(Date.now() - 2 * 3600e3).toISOString()
-    for (const uid of [s.kundeUid, s.werkstattUid].filter(Boolean)) {
-      await db.from('mitteilungen').delete().eq('empfaenger_id', uid).gt('created_at', zweiStd)
-    }
-    if (s.werkstattUid) await db.from('werkstaetten').delete().eq('user_id', s.werkstattUid)
-    for (const uid of [s.kundeUid, s.werkstattUid].filter(Boolean)) {
-      await db.from('profiles').delete().eq('id', uid)
-      await db.auth.admin.deleteUser(uid).catch(() => {})
-    }
+  // Werkstatt-Leichen + Konten MUSTER-basiert raeumen (CI-Leichen-Fix 08.08., analog J10 #5053):
+  // der fruehere `if (s)`-Block lief nur mit lokalem Summary-JSON -> auf CI-Runnern NIE, d.h. die
+  // Wegwerf-Werkstatt (name LIKE) + beide Wegwerf-Konten blieben pro Lauf liegen (33 Werkstatt- +
+  // 66 Konto-Leichen aufgelaufen seit 04.08.). Anders als bei J10 ist die Kasko-Werkstatt NICHT
+  // finder-sichtbar (email != NULL) -> kein Smoke-Bruch, aber monotoner prod-DB-Muell.
+  let leichen = 0
+  const { data: altWs } = await db.from('werkstaetten').select('id, name').like('name', 'SMOKE Kasko-Werkstatt %')
+  for (const w of altWs ?? []) {
+    // Marker-Claims sind oben schon weg; haengt eine Leiche noch an einem FREMDEN Claim
+    // (reparatur_werkstatt_id-FK), soll der Delete sichtbar scheitern statt zu crashen.
+    const { error } = await db.from('werkstaetten').delete().eq('id', w.id)
+    if (error) log(`  ! werkstatt-Leiche ${w.name} nicht loeschbar: ${error.message}`)
+    else leichen++
   }
-  log(`  cleaned: ${claimIds.length} claim(s) + Konten/Werkstatt (Marker "${MARKER}")`)
+  const { data: altProfs } = await db
+    .from('profiles')
+    .select('id')
+    .or('email.ilike.throwaway-werkstatt-kasko-%,email.ilike.throwaway-kunde-kasko-%')
+  const zweiStd = new Date(Date.now() - 2 * 3600e3).toISOString()
+  for (const p of altProfs ?? []) {
+    await db.from('mitteilungen').delete().eq('empfaenger_id', p.id).gt('created_at', zweiStd)
+    await db.from('werkstaetten').delete().eq('user_id', p.id)
+    await db.from('profiles').delete().eq('id', p.id)
+    await db.auth.admin.deleteUser(p.id).catch(() => {})
+  }
+  log(`  cleaned: ${claimIds.length} claim(s) + ${leichen} Werkstatt-Leiche(n) + ${(altProfs ?? []).length} Konto/en (Marker "${MARKER}")`)
 }
 
 // ---------------------------------------------------------------- SEED
