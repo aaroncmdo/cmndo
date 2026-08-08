@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
 import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
 import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
 import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
@@ -166,13 +167,13 @@ export async function POST(req: Request) {
       .eq('aktiv', true)
     for (const k of kbs ?? []) {
       try {
-        await db.from('benachrichtigungen').insert({
-          user_id: k.id,
-          typ: 'unbekannte-nachricht',
-          titel: `Unbekannte Nummer: ${kundenNummer}`,
-          nachricht: msgBody?.slice(0, 100) || 'Medien-Nachricht',
-          link: '/admin/nachrichten',
-        })
+        await createNotification(
+          k.id,
+          'unbekannte-nachricht',
+          `Unbekannte Nummer: ${kundenNummer}`,
+          msgBody?.slice(0, 100) || 'Medien-Nachricht',
+          '/admin/nachrichten',
+        )
       } catch { /* fire-and-forget */ }
     }
   }
