@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-08-08T13:07:23.543Z",
-  "count": 17,
+  "generatedAt": "2026-08-08T22:50:53.716Z",
+  "count": 16,
   "files": [
     "src/app/flow/[token]/actions.ts",
     "src/app/gutachter/auftraege/export-action.ts",
@@ -17,7 +17,6 @@
     "src/app/kunde/onboarding/page.tsx",
     "src/app/kunde/re-termin/[token]/actions.ts",
     "src/app/kunde/re-termin/[token]/page.tsx",
-    "src/components/termine/TerminListeClient.tsx",
-    "src/lib/actions/termin-actions.ts"
+    "src/components/termine/TerminListeClient.tsx"
   ]
 }
