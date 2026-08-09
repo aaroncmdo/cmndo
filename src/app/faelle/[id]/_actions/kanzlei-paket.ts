@@ -161,7 +161,7 @@ export async function applyKanzleiPaket(
 // saveKanzleiAnsprechpartner → stammdaten-Update auf faelle.kanzlei_*
 // erfasseZahlungseingang → zahlungseingaenge + Positionen + Timeline + Auto-Phase
 // saveRegulierungsKlassifizierung → upsert auf regulierungs_klassifizierung
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { triggerArchivierungTask, autoCompleteTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
@@ -192,7 +192,13 @@ export async function setAnschlussschreibenDatum(
   // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline)
   await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
 
-  sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
+  // C3a: durable via Outbox (Dedup: Doppel-Klick = 1 WA; Silent-Fail → Dispatch-Task).
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'as_gesendet', claimId: fallId }),
+    kanal: 'whatsapp',
+    template: 'as_gesendet',
+    claimId: fallId,
+  }).catch(() => {})
   autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
   // CMM-49: faelle-frei — sv_id + claim_nummer via claims (sv_id 0-diff). asClaimId von oben (Z.181).
@@ -238,7 +244,14 @@ export async function recordZahlung(
   // KFZ-202: State-Machine (setzt zahlung_eingegangen_am + erhaltener_betrag im Ledger + Timeline)
   await transitionFallStatus(fallId, 'zahlung-eingegangen', { betrag, user_id: user.id })
 
-  sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
+  // C3a: durable via Outbox — gemeinsamer Dedup-Key ueber beide Erfassungswege
+  // (einfache Zahlung + Positionen), damit ein Fall genau 1 Regulierungs-WA erhaelt.
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'zahlung_eingegangen', claimId: fallId }),
+    kanal: 'whatsapp',
+    template: 'zahlung_eingegangen',
+    claimId: fallId,
+  }).catch(() => {})
 
   // CMM-49: sv_id (0-diff) + kundenbetreuer_id + claim_nummer (claims-native) direkt aus
   // claims via bereits aufgeloestem betragClaimId (oben null-geguarded).
@@ -401,7 +414,14 @@ export async function erfasseZahlungseingang(
     erstellt_von: user.id,
   })
 
-  sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
+  // C3a: durable via Outbox — gemeinsamer Dedup-Key ueber beide Erfassungswege
+  // (einfache Zahlung + Positionen), damit ein Fall genau 1 Regulierungs-WA erhaelt.
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'zahlung_eingegangen', claimId: fallId }),
+    kanal: 'whatsapp',
+    template: 'zahlung_eingegangen',
+    claimId: fallId,
+  }).catch(() => {})
   checkFallAutoPhase(fallId).catch(() => {})
 
   revalidatePath(`/faelle/${fallId}`)
