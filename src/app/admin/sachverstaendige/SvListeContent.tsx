@@ -32,13 +32,15 @@ export default async function SachverstaendigeHubPage() {
     .single()
   if (profile?.rolle !== 'admin') redirect('/login?error=Nur+Admins')
 
-  // Pending Basic-SVs fuer den Queue-Badge im Header
+  // Pending Basic-SVs fuer den Queue-Badge im Header — nur NOCH-NICHT-freigeschaltete
+  // (seit Tier-2-Enforcement tragen auch freigeschaltete SVs 'ausstehend' = Frist laeuft).
   const { data: basicRaw } = await supabase
     .from('sachverstaendige')
     .select('id, paket, verifizierung_status')
     .is('geloescht_am', null)
     .eq('paket', 'basic')
     .eq('verifizierung_status', 'ausstehend')
+    .eq('portal_zugang_freigeschaltet', false)
   const basicFreigabenCount = (basicRaw ?? []).length
 
   // Live-Ops-Loader (role-scoped)

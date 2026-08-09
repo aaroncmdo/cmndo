@@ -6,6 +6,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { type EmbedSiteFormData } from '@/lib/embed/site-write'
 import EmbedSiteWizard from '../EmbedSiteWizard'
+import EmbedSnippets from '../EmbedSnippets'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,6 +56,7 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
   return (
     <div className="py-6 space-y-4">
       <SvPageChrome title="Embed-Site bearbeiten" />
+      {data.slug && <EmbedSnippets slug={data.slug} />}
       <EmbedSiteWizard
         mode="edit"
         siteId={id}

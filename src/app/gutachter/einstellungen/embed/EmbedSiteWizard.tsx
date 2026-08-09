@@ -7,10 +7,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { CheckIcon, CopyIcon } from 'lucide-react'
 import { Button, Card, Badge } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms'
 import { SectionCard } from '@/components/shared/SectionCard'
+import EmbedSnippets from './EmbedSnippets'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
   type EmbedSiteFormData,
@@ -123,33 +123,15 @@ export default function EmbedSiteWizard({
     else toast.error(res.error ?? 'Test fehlgeschlagen')
   }
 
-  // ── Erfolgs-Snippet nach Anlegen ──────────────────────────────────────────
+  // ── Erfolgs-Snippets nach Anlegen ─────────────────────────────────────────
   if (createdSlug) {
-    const snippet = `<script src="https://claimondo.de/embed/monika.js" data-site-id="${createdSlug}" defer></script>`
     return (
-      <SectionCard title="Fertig — dein Einbinde-Snippet" icon={<CheckIcon style={{ width: 18, height: 18 }} />}>
-        <p className="text-sm text-claimondo-ondo mb-3">
-          Füge dieses Snippet einmalig in den <code>&lt;head&gt;</code> deiner Website ein:
-        </p>
-        <pre className="rounded-ios-lg bg-claimondo-navy text-white text-xs p-4 overflow-x-auto whitespace-pre-wrap break-all">
-          {snippet}
-        </pre>
-        <div className="flex gap-2 mt-3">
-          <Button
-            variant="navy"
-            iconLeft={<CopyIcon style={{ width: 16, height: 16 }} />}
-            onClick={() => {
-              navigator.clipboard.writeText(snippet)
-              toast.success('Snippet kopiert')
-            }}
-          >
-            Kopieren
-          </Button>
-          <Button variant="ghost" onClick={() => router.push('/gutachter/einstellungen/embed')}>
-            Zu meinen Sites
-          </Button>
-        </div>
-      </SectionCard>
+      <div className="space-y-4">
+        <EmbedSnippets slug={createdSlug} />
+        <Button variant="ghost" onClick={() => router.push('/gutachter/einstellungen/embed')}>
+          Zu meinen Sites
+        </Button>
+      </div>
     )
   }
 

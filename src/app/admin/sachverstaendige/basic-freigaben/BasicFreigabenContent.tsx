@@ -48,6 +48,11 @@ export default async function BasicFreigabenPage() {
     )
     .eq('paket', 'basic')
     .eq('verifizierung_status', 'ausstehend')
+    // Nur NOCH-NICHT-freigeschaltete SVs = „wartet auf Admin-Freigabe". Seit dem
+    // Tier-2-Enforcement (Spec 2026-08-08) tragen auch FREIGESCHALTETE SVs ohne
+    // geprüfte Docs 'ausstehend' (Tier-2-Frist läuft) — die gehören NICHT in die
+    // Freigabe-Queue. Der Tier-2-Zustand wird in der SV-Akte/Liste gezeigt.
+    .eq('portal_zugang_freigeschaltet', false)
     .is('geloescht_am', null)
     .order('created_at', { ascending: true })
 
