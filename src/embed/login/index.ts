@@ -9,7 +9,7 @@
 // esbuild baut das als IIFE -> laeuft beim Laden sofort (defer/lazyOnload).
 //
 // Einbinden:
-//   <script src="https://claimondo.de/embed/claimondo-login.js"
+//   <script src="https://app.claimondo.de/embed/claimondo-login.js"
 //           data-site-id="sv-bergmann-koeln" defer></script>
 // Optional: data-mode="slot" (in [data-claimondo-login-slot] statt floating),
 //           data-label="Mein Bereich", data-login-base, data-continue.

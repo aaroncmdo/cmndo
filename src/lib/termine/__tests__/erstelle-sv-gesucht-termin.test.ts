@@ -52,6 +52,8 @@ describe('erstelleSvGesuchtTermin (T4)', () => {
     expect(ins.bezug_id).toBe('c1')
     expect(ins.typ).toBe('sv_begutachtung')
     expect(ins.start_zeit).toBe('2026-08-20T08:00:00Z')
+    // end_zeit ist NOT NULL in der DB (Prod-Smoke-Fix 09.08.) — start + TERMIN_DAUER_MIN (40).
+    expect(ins.end_zeit).toBe('2026-08-20T08:40:00.000Z')
     expect(ins.besichtigungsort_adresse).toBe('Teststr. 1')
     // kein Assignee — der wird erst bei der Dispatch-Zuweisung gesetzt.
     expect('assignee_typ' in ins).toBe(false)

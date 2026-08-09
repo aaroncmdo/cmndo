@@ -12,6 +12,7 @@
 
 import type { createAdminClient } from '@/lib/supabase/admin'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
+import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -49,12 +50,16 @@ export async function erstelleSvGesuchtTermin(
   }
 
   // 2. Kein offener Termin -> sv_gesucht-Zeile anlegen. .select()+Row-Check (#4625).
+  // end_zeit ist NOT NULL (Prod-Smoke 09.08.: der ungetypte admin-Client fing das nicht in
+  // tsc, der DB-Mock nicht in vitest) → wie bucheDeadPinTermin start+TERMIN_DAUER_MIN setzen.
+  const endIso = new Date(new Date(startIso).getTime() + TERMIN_DAUER_MIN * 60_000).toISOString()
   const insert: Record<string, unknown> = {
     bezug_typ: 'fall',
     bezug_id: claimId,
     typ: 'sv_begutachtung',
     status: 'sv_gesucht',
     start_zeit: startIso,
+    end_zeit: endIso,
   }
   if (besichtigungsort) {
     if (besichtigungsort.adresse != null) insert.besichtigungsort_adresse = besichtigungsort.adresse
