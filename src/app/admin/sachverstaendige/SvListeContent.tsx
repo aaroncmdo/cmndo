@@ -86,6 +86,12 @@ export default async function SachverstaendigeHubPage() {
             SV-Leads
           </Link>
           <Link
+            href="/admin/netzwerk-partner"
+            className="text-xs font-medium px-3 py-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg"
+          >
+            Netzwerkpartner
+          </Link>
+          <Link
             href="/admin/vertrieb/sachverstaendige/anlegen"
             className="text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white hover:bg-claimondo-navy"
           >
