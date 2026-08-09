@@ -11,6 +11,7 @@ const TABS: { key: NetzwerkTab; label: string }[] = [
   { key: 'feed', label: 'Feed' },
   { key: 'verbindungen', label: 'Verbindungen' },
   { key: 'anfragen', label: 'Anfragen' },
+  { key: 'karte', label: 'Karte' },
 ]
 
 export function NetzwerkTabBar({ portal, active }: { portal: NetzwerkPortal; active: NetzwerkTab }) {
