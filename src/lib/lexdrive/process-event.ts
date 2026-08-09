@@ -7,7 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/state-machine'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
@@ -1118,10 +1118,25 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       }
     }
 
-    // WA-Template
+    // WA-Template — C3a: durable via Notification-Outbox (Retry-Backoff + Dead-Letter
+    // statt fire-and-forget). dedupKey = template:claimId:webhookEventId -> jeder
+    // webhook_events-Record loest genau 1 Send aus (semantik-neutral zum bisherigen
+    // sendFallCommunication; wiederholbare Events wie kuerzung/konfrontation haben je
+    // einen eigenen webhook_events-Record und werden NICHT faelschlich dedupliziert).
+    // EVENT_COMM_MAP ist ausschliesslich WA -> kanal fix; der Worker resolved den
+    // echten Kanal ohnehin via sendFallCommunication -> COMMUNICATION_REGISTRY.
     const commTrigger = EVENT_COMM_MAP[input.eventType]
     if (commTrigger) {
-      sendFallCommunication(input.fallId, commTrigger).catch(() => {})
+      await enqueue({
+        dedupKey: buildDedupKey({
+          template: commTrigger,
+          claimId: input.fallId,
+          fenster: eventRecord?.id ?? undefined,
+        }),
+        kanal: 'whatsapp',
+        template: commTrigger,
+        claimId: input.fallId,
+      }).catch(() => {})
     }
 
     // Timeline
