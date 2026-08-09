@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -176,7 +177,7 @@ export async function terminAblehnen({
     // Find the active termin for this fall
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, start_zeit')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag'])
@@ -331,7 +332,7 @@ export async function terminGegenvorschlag({
     // zurück auf 'gegenvorschlag', Kunde muss neu bestätigen).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
@@ -350,7 +351,7 @@ export async function terminGegenvorschlag({
     svId = auth.svId
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('status', 'gegenvorschlag')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -611,7 +612,7 @@ export async function terminAnnehmen({
     // (jetzt-zu-tun.ts) ins Leere (reserviert hatte bisher keine Kunde-Annehmen-Aktion).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
-      .eq('fall_id', fId)
+      .or(bezugOrExpr('fall', fId))
       .in('status', ['gegenvorschlag', 'reserviert'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -644,7 +645,7 @@ export async function terminAnnehmen({
     svId = auth.svId
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
-      .eq('fall_id', fId)
+      .or(bezugOrExpr('fall', fId))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .eq('status', 'gegenvorschlag')
@@ -735,7 +736,7 @@ export async function terminAnnehmen({
       if (sv?.profile_id) {
         const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
         if (svProfile?.telefon) {
-          const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
+          const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').or(bezugOrExpr('fall', fId)).eq('status', 'bestaetigt').single()
           const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
           await sendManualWhatsApp(svProfile.telefon,
             `✅ Kunde akzeptiert ${terminStr} für Fall ${fallDataClaimNummer ?? ''}.`,
@@ -746,7 +747,7 @@ export async function terminAnnehmen({
       // Notification an Kunde
       const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
       if (kundeProfile?.telefon) {
-        const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
+        const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').or(bezugOrExpr('fall', fId)).eq('status', 'bestaetigt').single()
         const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
         await sendManualWhatsApp(kundeProfile.telefon,
           `✅ Der Sachverständige akzeptiert Ihren Terminvorschlag: ${terminStr}.`,
@@ -829,7 +830,7 @@ export async function terminBuchen({
   // Find the active termin
   const { data: termin } = await admin.from('gutachter_termine')
     .select('id')
-    .eq('fall_id', fId)
+    .or(bezugOrExpr('fall', fId))
     .in('status', ['gegenvorschlag', 'reserviert'])
     .order('created_at', { ascending: false })
     .limit(1)
