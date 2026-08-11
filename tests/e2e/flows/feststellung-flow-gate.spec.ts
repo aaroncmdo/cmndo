@@ -12,7 +12,18 @@ import { test, expect, type Page } from '@playwright/test'
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
-const seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.feststellung-flow-gate-seed.json'), 'utf8'))
+// Fundament-B1-Haerte (gleiches Muster wie reparatur-funnel-abschluss-smoke.spec.ts): Seed-Fixture
+// crash-sicher laden. Fehlt die Datei, skippen die Tests sauber (s. test.skip unten) statt beim
+// top-level readFileSync den GESAMTEN Playwright-Collection-Prozess zu brechen -- ein fehlender Seed
+// riss sonst den kompletten e2e-Lauf mit (inkl. der geseedeten Journey-Smokes).
+// Der Generator scripts/smoke/feststellung-flow-gate-seed.mjs ist local-only (hardcodierter
+// .env.local-Pfad, seedet prod) und laeuft bewusst NICHT im e2e-Job -> in CI wird geskippt.
+let seed: any = null
+try {
+  seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.feststellung-flow-gate-seed.json'), 'utf8'))
+} catch { /* nicht geseedet -> test.skip im Test-Body */ }
+
+const SEED_FEHLT = 'Seed-Fixture .feststellung-flow-gate-seed.json fehlt — local-only Prod-Smoke (scripts/smoke/feststellung-flow-gate-seed.mjs), laeuft nicht im e2e-Job'
 
 // Summary-Step (Step 0): Datenschutz-Checkbox + Weiter. vorname/nachname sind geseedet (non-empty).
 async function passiereSummaryStep(page: Page) {
@@ -23,6 +34,7 @@ async function passiereSummaryStep(page: Page) {
 }
 
 test('Gate positiv: Lead OHNE unfallhergang bekommt den Hergang-Step gezeigt', async ({ page }) => {
+  test.skip(!seed, SEED_FEHLT)
   test.setTimeout(90_000)
   await page.goto(`/flow/${seed.tokenA}`, { waitUntil: 'domcontentloaded' })
   await passiereSummaryStep(page)
@@ -40,6 +52,7 @@ test('Gate positiv: Lead OHNE unfallhergang bekommt den Hergang-Step gezeigt', a
 })
 
 test('Gate negativ: Lead MIT unfallhergang ueberspringt die Feststellung (Gate ist unfallhergang-spezifisch)', async ({ page }) => {
+  test.skip(!seed, SEED_FEHLT)
   test.setTimeout(90_000)
   await page.goto(`/flow/${seed.tokenB}`, { waitUntil: 'domcontentloaded' })
   await passiereSummaryStep(page)
