@@ -61,7 +61,9 @@ export type OeffentlichesSvProfil = {
   /**
    * Ebene-2 (relational, Design §5.2): dieser SV ist ein ZAHLENDER Freund des attribuierenden
    * Owners (?werkstatt=<id> → Freundes-Graph ∩ Netzwerkpartner-Abo). Nur gesetzt, wenn ein Owner
-   * injiziert wurde; sonst false. Steuert die "In Ihrem Netzwerk"-Hervorhebung im Slot-Picker.
+   * injiziert wurde; sonst false. Steuert die "Netzwerkpartner"-Hervorhebung im Slot-Picker
+   * (SvSlotAuswahl-Badge, Aaron 09.08.: Wortlaut "Netzwerkpartner", NICHT "In Ihrem Netzwerk" —
+   * es ist das Netzwerk des Owners/der Werkstatt, nicht des Kunden) + die Gold-Pin-Prominenz (#5111).
    */
   imNetzwerk: boolean
   slots: SlotVorschlag[]
