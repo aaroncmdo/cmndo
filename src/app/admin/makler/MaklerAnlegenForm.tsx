@@ -14,6 +14,7 @@ import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
 import { Button } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SelectField } from '@/components/shared/forms/SelectField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 
 // Typ lokal definiert — NICHT aus 'use server'-Files importieren (AAR-664: Client-Bundle
@@ -35,6 +36,8 @@ export default function MaklerAnlegenForm({
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
   const [versicherungId, setVersicherungId] = useState<string | null>(null)
   const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
+  // P3 Ortseingaben: Adresse controlled (GooglePlaceAutocomplete rendert kein name) → Submit via fd.set.
+  const [adr, setAdr] = useState({ strasse: '', plz: '', ort: '' })
 
   function reset() {
     setVersicherungId(null)
@@ -48,6 +51,9 @@ export default function MaklerAnlegenForm({
     const fd = new FormData(e.currentTarget)
     if (versicherungId) fd.set('versicherung_id', versicherungId)
     if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
+    fd.set('adresse_strasse', adr.strasse)
+    fd.set('adresse_plz', adr.plz)
+    fd.set('adresse_ort', adr.ort)
     try {
       const result = await createMakler(fd)
       if (!result.ok) {
@@ -113,10 +119,20 @@ export default function MaklerAnlegenForm({
           <TextField label="Nachname" name="ansprechpartner_nachname" required placeholder="Müller" />
         </div>
         <TextField label="Telefon (optional)" name="telefon" type="tel" placeholder="+49 221 …" />
-        <TextField label="Straße (optional)" name="adresse_strasse" placeholder="Musterstraße 1" />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-claimondo-shield">Straße (optional)</label>
+          {/* P3 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort (controlled state → Submit via fd.set). */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+            defaultValue={adr.strasse}
+            placeholder="Musterstraße 1"
+            onSelect={(r) => setAdr((a) => ({ strasse: r.strasse || a.strasse, plz: r.plz || a.plz, ort: r.stadt || a.ort }))}
+            onChange={(t) => setAdr((a) => ({ ...a, strasse: t }))}
+          />
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          <TextField label="PLZ" name="adresse_plz" placeholder="50667" />
-          <TextField label="Ort" name="adresse_ort" placeholder="Köln" />
+          <TextField label="PLZ" value={adr.plz} onChange={(e) => setAdr((a) => ({ ...a, plz: e.target.value }))} placeholder="50667" />
+          <TextField label="Ort" value={adr.ort} onChange={(e) => setAdr((a) => ({ ...a, ort: e.target.value }))} placeholder="Köln" />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <TextField label="Provision komplett (€)" name="provision_betrag_komplett_netto" type="number" step="0.01" min="0" defaultValue={100} />

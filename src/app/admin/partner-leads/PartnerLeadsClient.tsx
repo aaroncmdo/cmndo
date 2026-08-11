@@ -39,6 +39,7 @@ import {
 } from '@/components/shared/DataTable'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SelectField } from '@/components/shared/forms/SelectField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { Chip } from '@/components/ui/Chip'
 import {
   createPartnerLead,
@@ -459,6 +460,8 @@ function CreateProspectModal({
     if (open && defaultRolle) setRolle(defaultRolle)
   }, [open, defaultRolle])
   const [loading, setLoading] = useState(false)
+  // P3 Ortseingaben: PLZ/Ort controlled (Autocomplete-Befüllung sichtbar); fd.get liest sie via name.
+  const [adr, setAdr] = useState({ plz: '', ort: '' })
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -515,9 +518,18 @@ function CreateProspectModal({
         </div>
         <TextField label="E-Mail" name="email" type="email" required placeholder="kontakt@beispiel.de" />
         <TextField label="Telefon (optional)" name="telefon" type="tel" placeholder="+49 221 …" />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-claimondo-shield">Adresse suchen (füllt PLZ + Ort)</label>
+          {/* P3 Ortseingaben: Autocomplete füllt PLZ + Ort. Felder bleiben editierbar (name → FormData). */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+            placeholder="Straße, PLZ, Ort eingeben…"
+            onSelect={(r) => setAdr((a) => ({ plz: r.plz || a.plz, ort: r.stadt || a.ort }))}
+          />
+        </div>
         <div className="grid grid-cols-2 gap-3">
-          <TextField label="PLZ (optional)" name="plz" placeholder="50667" />
-          <TextField label="Ort (optional)" name="ort" placeholder="Köln" />
+          <TextField label="PLZ (optional)" name="plz" value={adr.plz} onChange={(e) => setAdr((a) => ({ ...a, plz: e.target.value }))} placeholder="50667" />
+          <TextField label="Ort (optional)" name="ort" value={adr.ort} onChange={(e) => setAdr((a) => ({ ...a, ort: e.target.value }))} placeholder="Köln" />
         </div>
 
         {/* Rollen-spezifische Felder */}

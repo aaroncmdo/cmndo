@@ -12,6 +12,7 @@ import { SearchIcon, MailIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 import { createVersicherung, type VersicherungInput } from './actions'
@@ -158,9 +159,22 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                 <label htmlFor={`neu-${key}`} className="text-body-xs text-claimondo-ondo mb-0.5 block">
                   {key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}
                 </label>
-                <input id={`neu-${key}`} value={form[key] ?? ''}
-                  onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value === '' ? null : e.target.value }))}
-                  className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
+                {key === 'adresse' ? (
+                  /* P3 Ortseingaben: Autocomplete füllt Adresse + PLZ + Stadt (plz/stadt bleiben editierbar). */
+                  <GooglePlaceAutocomplete
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
+                    defaultValue={form.adresse ?? ''}
+                    placeholder="Straße + Hausnummer, Stadt eingeben…"
+                    onSelect={r =>
+                      setForm(prev => ({ ...prev, adresse: r.strasse || prev.adresse, plz: r.plz || prev.plz, stadt: r.stadt || prev.stadt }))
+                    }
+                    onChange={t => setForm(prev => ({ ...prev, adresse: t || null }))}
+                  />
+                ) : (
+                  <input id={`neu-${key}`} value={form[key] ?? ''}
+                    onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value === '' ? null : e.target.value }))}
+                    className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
+                )}
               </div>
             ))}
             {error && (

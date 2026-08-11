@@ -9,8 +9,9 @@
 //       + leads + flow_links (route.ts:90,185,219). OHNE sv_id/slot_start/slot_end KEINE
 //       Reservierung (:240). 2. POST gleiche Nummer -> status='bereits_angelegt' (Dedup :123)
 //       = j02-Soll "idempotent" empirisch.
-//   C · Gegner-Schadenkarte /schaden/[token] (anon QR/NFC, Kern-direkt): Direkt-Claim OHNE
-//       pflichtdokumente (j02-IST-Delta #2, actions.ts:179), verursacher-Party, VS-Fallback-Task.
+//   C · Gegner-Schadenkarte /schaden/[token] (anon QR/NFC, Kern-direkt): Direkt-Claim MIT
+//       pflichtdokumenten (C2b-1, 11.08.: der Kern convertLeadToClaim legt die Slots jetzt selbst
+//       an -> j02-IST-Delta #2 geschlossen), verursacher-Party, VS-Fallback-Task.
 //
 // ISOLATION (Regel 4, identitaetsbasiert — SIDE_EFFECT_MODE erreicht den prod-Prozess nicht):
 //   A: Wegwerf-Kunde @claimondo.test + profiles.telefon=NULL -> sendFallCommunication
@@ -290,6 +291,11 @@ async function assertKanaele() {
     ? await db.from('tasks').select('id', { count: 'exact', head: true }).eq('claim_id', cClaim.id).eq('typ', 'vs_meldung')
     : { count: 0 }
   check("C interner Fallback-Task typ='vs_meldung' (kein Telefon)", (vsTaskCount ?? 0) >= 1, `count=${vsTaskCount}`)
+  // C2b-1: Pflichtdok-Slots jetzt auch auf dem Kern-direkten Weg (j02-IST-Delta #2 geschlossen).
+  const { count: cPflichtdok } = cClaim?.id
+    ? await db.from('pflichtdokumente').select('id', { count: 'exact', head: true }).eq('fall_id', cClaim.id)
+    : { count: 0 }
+  check('C pflichtdokumente >= 1 (Kern-Garantie, C2b-1)', (cPflichtdok ?? 0) >= 1, `count=${cPflichtdok}`)
 
   const passed = results.filter((r) => r.ok).length
   log(`\n  === ${passed}/${results.length} Assertions gruen ===\n`)

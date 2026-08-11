@@ -4811,6 +4811,7 @@
         "uhrSuffix": "Uhr",
         "wirdGebucht": "Wird gebucht...",
         "verbindlichBuchen": "Termin verbindlich buchen",
+        "buchungFehlgeschlagen": "Die Buchung ist fehlgeschlagen. Bitte versuchen Sie es erneut oder wenden Sie sich an uns.",
         "frei": "Frei",
         "belegt": "Belegt"
       },
