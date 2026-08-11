@@ -323,7 +323,13 @@ export async function POST(request: Request) {
   // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst
   // sv_id unveraendert (wie bisher).
   if (!orgPool) {
-    await setSvIdForFall(db, fallId, bestSv.id)
+    const zuweisung = await setSvIdForFall(db, fallId, bestSv.id)
+    // Test-SV-Guard (11.08.): intern/Test-Kunde <-> echter SV (und umgekehrt) wird hier geblockt.
+    // Als 409 zurueckgeben statt still weiterlaufen — sonst meldet die Route Erfolg, obwohl
+    // claims.sv_id leer blieb.
+    if (!zuweisung.ok && zuweisung.code === 'test_guard') {
+      return NextResponse.json({ error: zuweisung.grund }, { status: 409 })
+    }
   }
 
   if (updateErr) {
