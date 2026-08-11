@@ -23,14 +23,46 @@ describe('buildIntakeSystemPrompt', () => {
     const p = buildIntakeSystemPrompt({ firmenname: null, schema: [F({})], bekannt: {} })
     expect(p).toContain('Claimondo')
   })
-  it('listet noch leere Felder, bereits gefuellte nicht mehr', () => {
+  /** Nur den "Noch offen"-Block (bis zur naechsten === Sektion) zurueckgeben. */
+  function offenBlock(prompt: string): string {
+    return prompt.split('Noch offen:')[1]?.split('===')[0] ?? ''
+  }
+
+  it('listet leere Felder unter "Noch offen", gefuellte nicht', () => {
     const schema = [
       F({ feld_key: 'unfallhergang' }),
       F({ feld_key: 'unfallort', label: 'Unfallort', spalte: 'unfallort' }),
     ]
     const p = buildIntakeSystemPrompt({ firmenname: null, schema, bekannt: { unfallhergang: 'x' } })
-    expect(p).toContain('Unfallort')
-    expect(p).not.toContain('- Unfallhergang')
+    expect(offenBlock(p)).toContain('Unfallort')
+    expect(offenBlock(p)).not.toContain('Unfallhergang')
+  })
+
+  // Prod-Smoke 11.08.: der Embed-Funnel schreibt Platzhalter-Defaults
+  // (schadentyp='sonstiges', polizei_vor_ort=false). Standen die nur nicht in
+  // "Noch offen", galten sie als beantwortet -> ein Auffahrunfall wurde nie erkannt.
+  it('zeigt bereits gefuellte Felder MIT Wert zur Korrektur', () => {
+    const schema = [
+      F({
+        feld_key: 'schadentyp',
+        label: 'Schadentyp',
+        spalte: 'schadentyp',
+        optionen: [
+          { wert: 'auffahrunfall', label: 'Auffahrunfall' },
+          { wert: 'sonstiges', label: 'Sonstiges' },
+        ],
+      }),
+    ]
+    const p = buildIntakeSystemPrompt({ firmenname: null, schema, bekannt: { schadentyp: 'sonstiges' } })
+    expect(p).toContain('BEREITS ERFASST')
+    expect(p).toContain('Schadentyp: sonstiges')
+    expect(p).toContain('auffahrunfall') // Optionen mitgegeben -> korrigierbar
+    expect(offenBlock(p)).not.toContain('Schadentyp')
+  })
+
+  it('ohne gefuellte Felder gibt es keinen BEREITS-ERFASST-Block', () => {
+    const p = buildIntakeSystemPrompt({ firmenname: null, schema: [F({})], bekannt: {} })
+    expect(p).not.toContain('BEREITS ERFASST')
   })
 
   // Prod-Smoke 11.08.: die Feststellungs-Felder sind in onboarding_felder fast

@@ -4,6 +4,15 @@ on:
   pull_request:
   push:
     branches: [main, staging]
+  # Journey-Suite (`e2e`-Job) laeuft NIGHTLY statt bei jedem Push — Begruendung im Job-Kommentar
+  # bei `e2e:`. 03:30 UTC = nach dem 02:00-Nacht-Cron (Release-Provisionen sind dann schon
+  # freigegeben -> der J9-lifecycle-Geld-Guard findet 0 fremde faellige Rows und schiesst scharf)
+  # und in der ruhigsten Fleet-Phase (keine lokalen Sessions -> keine Seed-Races auf prod).
+  schedule:
+    - cron: '30 3 * * *'
+  # Manueller Trigger: "ich will den Journey-Beweis JETZT" (z.B. nach einem Journey-PR-Merge).
+  # Actions -> CI -> Run workflow  bzw.  gh workflow run CI --ref main
+  workflow_dispatch:
 
 # wait-for-vercel-preview pollt Deployment-Status via GITHUB_TOKEN.
 # Ohne explizite Grants läuft der Token je nach Repo-Default read-only
@@ -361,13 +370,24 @@ jobs:
           NODE_OPTIONS: --max-old-space-size=8192
 
   e2e:
-    # E2E laeuft NUR post-merge (push auf main/staging) gegen den DEPLOYTEN Stand auf
-    # app.claimondo.de — NICHT auf pull_request. Auf PRs testete der Job den Prod-Stand
-    # gegen den (nicht deployten) PR-Branch -> systematisch rot (doc40-cards-clickable.spec.ts
-    # sagt das im Header selbst: "Asserts werden erst gruen, wenn deployed"). Der `build`-Job
-    # bleibt auf PRs required. Das entfernt das rote e2e von allen PRs (13 Parallel-Sessions
-    # sahen es dauerhaft rot). Manuelle Live-Smokes s. playwright.config.ts testIgnore.
-    if: ${{ github.event_name != 'pull_request' }}
+    # E2E laeuft gegen den DEPLOYTEN Stand auf app.claimondo.de — deshalb NIE auf pull_request:
+    # dort testete der Job den Prod-Stand gegen den (nicht deployten) PR-Branch -> systematisch rot
+    # (doc40-cards-clickable.spec.ts sagt das im Header selbst: "Asserts werden erst gruen, wenn
+    # deployed"). Der `build`-Job bleibt auf PRs required. Manuelle Live-Smokes s.
+    # playwright.config.ts testIgnore. Trigger seit 11.08.: nightly + workflow_dispatch (s. unten).
+    # NIGHTLY + MANUELL statt push (11.08.): der Job lief bei jedem push:main/staging — kam aber
+    # bei der Fleet-Frequenz NIE durch. Gemessen an den letzten 37 staging/main-Laeufen:
+    # 21 cancelled · 10 failure · 0 success. Ursache ist NICHT Rot in den Journey-Steps, sondern
+    # die Queue: `cancel-in-progress: false` (s.u.) cancelt zwar keine LAUFENDEN Jobs, aber GitHub
+    # haelt pro concurrency-group nur EINEN wartenden Lauf — jeder neuere verdraengt den wartenden.
+    # Bei ~6 Releases in 2 Minuten kommt ein 15-20-minuetiger e2e-Job schlicht nie dran; der
+    # Journey-Waechter wachte faktisch nicht (und erzeugte dabei prod-Seed-Last + cancelled-Rauschen).
+    # Der Job GATET NICHTS (laeuft post-merge, informativ) -> nightly erfuellt seinen Zweck als
+    # REGRESSIONS-Waechter vollstaendig, laeuft garantiert durch und trifft die ruhigste Fleet-Phase
+    # (keine parallelen lokalen Seed-Laeufe -> kein Fixture-Race). Fuer sofortiges Feedback nach
+    # einem Journey-PR: `workflow_dispatch` (Actions -> CI -> Run workflow).
+    # ⚠ NICHT auf `push` zurueckstellen, ohne die Frequenz-Messung zu wiederholen.
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
     # Serialisiert die prod-E2E-Laeufe: staging + main pushen beide gegen DIESELBE prod-App
     # (app.claimondo.de) + denselben festen Seed-State (reparatur-weg-e2e-seed.mjs = feste
     # @claimondo.test-Konten + feste FIN). Liefen zwei Laeufe parallel (gebuendelte Merges ->
