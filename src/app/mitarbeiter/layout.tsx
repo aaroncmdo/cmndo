@@ -28,7 +28,8 @@ export default async function MitarbeiterLayout({
     <div className="h-screen bg-claimondo-bg overflow-hidden">
       <MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />
       {/* pb-24 mobile: Platz fuer die PortalNav-Bottom-Bar (md:hidden). */}
-      <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-6 py-6 pb-24 md:pb-6">
+      {/* lg:pb-20 = Safe-Area fuer den GlobalPosteingangFab (siehe globals.css). */}
+      <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-6 py-6 pb-24 md:pb-6 lg:pb-20">
         {children}
       </main>
       {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen. */}
