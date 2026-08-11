@@ -117,7 +117,8 @@ export default async function FaelleLayout({
         {/* AAR-911 v2: Statt md:pr-36 die VOLLE Main-Höhe für die fixe Corner-Pill
             zu opfern, hält `.has-corner-pill` (globals.css) nur die PageHeader-
             Action-Zeile rechts frei — Body-Content gewinnt 144px Breite zurück. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
+        {/* lg:pb-20 = Safe-Area fuer den GlobalPosteingangFab (siehe globals.css). */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 lg:pb-20 has-corner-pill">
           <PageContainer fullBleed className="h-full">{children}</PageContainer>
         </main>
       </div>

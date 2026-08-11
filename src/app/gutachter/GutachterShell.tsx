@@ -643,7 +643,12 @@ export default function GutachterShell({
           <main
             id="main-content"
             role="main"
-            className={`h-full overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+96px)] lg:pb-0 lg:rounded-l-2xl lg:rounded-r-none lg:bg-claimondo-bg lg:shadow-sm lg:p-4 ${
+            /* lg:pb-20 (statt lg:pb-0) = Safe-Area fuer den GlobalPosteingangFab
+               (fixed right-4 bottom-4, 48px, nur lg+). Das mobile pb deckt die
+               Tab-Bar ab; auf Desktop war der Boden bewusst 0 — genau dort schwebt
+               aber der FAB und machte die letzte Inhaltszeile unklickbar
+               (Prod-Smoke 11.08., Embed-Wizard "Weiter"). Siehe globals.css. */
+            className={`h-full overflow-y-auto pb-[calc(env(safe-area-inset-bottom,0px)+96px)] lg:pb-20 lg:rounded-l-2xl lg:rounded-r-none lg:bg-claimondo-bg lg:shadow-sm lg:p-4 ${
               isCockpitRoute ? '' : 'pt-[calc(env(safe-area-inset-top,0px)+76px)] px-3 lg:px-0 lg:pt-0'
             }`}
           >
