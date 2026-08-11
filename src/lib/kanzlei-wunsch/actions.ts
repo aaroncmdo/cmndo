@@ -334,19 +334,28 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     console.warn('[versendeKanzleiPaket] Communications-Layer nicht verfuegbar:', err)
   }
 
-  // DB: Übergabe-Marker + Endzustand
+  // DB: Übergabe-Marker (Nicht-Status-Spalte) + Endzustand via ENGINE (Fundament C1-Funnel).
+  // Frueher ein Direkt-Write auf claims.operative_status (Ratchet-Baseline) -> umging
+  // transitionFallStatus: kein phase_transitions-Event-Log, keine Timeline, kein
+  // fall.status_changed-Emit. 'an_externe_kanzlei_uebergeben' ist in der Engine ein
+  // BROADLY_REACHABLE_TERMINAL (aus jedem AKTIVEN Zustand erreichbar = das frueher
+  // guard-lose Verhalten) und setzt abgeschlossen_am selbst.
   const now = new Date().toISOString()
   const { error: uErr } = await admin
     .from('claims')
-    .update({
-      kanzlei_uebergeben_am: now,
-      // T3-S4: operative_status ist die einzige Achse (Terminal + abgeschlossen_am als
-      // Close-Marker, damit Badge/Phase/aktive-Faelle-Filter den Uebergang sehen).
-      operative_status: 'an_externe_kanzlei_uebergeben',
-      abgeschlossen_am: now,
-    })
+    .update({ kanzlei_uebergeben_am: now })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
+
+  try {
+    const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+    await transitionFallStatus(fall.id, 'an_externe_kanzlei_uebergeben', { user_id: auth.userId })
+  } catch (err) {
+    console.error(
+      '[versendeKanzleiPaket] Terminal-Close via Engine fehlgeschlagen (non-fatal, Uebergabe-Marker steht):',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   // Timeline-Audit
   try {
@@ -406,17 +415,25 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
     return { ok: false, error: 'Gutachten ist noch nicht freigegeben' }
   }
 
+  // Uebergabe-Marker + Endzustand via ENGINE (Fundament C1-Funnel, analog
+  // versendeKanzleiPaketAnEigeneKanzlei): der Terminal laeuft ueber transitionFallStatus
+  // (Event-Log + Timeline + Emit), abgeschlossen_am setzt die Engine.
   const now = new Date().toISOString()
   const { error: uErr } = await admin
     .from('claims')
-    .update({
-      kanzlei_uebergeben_am: now,
-      // T3-S4: operative_status + abgeschlossen_am (analog versendeKanzleiPaket) — einzige Achse.
-      operative_status: 'an_externe_kanzlei_uebergeben',
-      abgeschlossen_am: now,
-    })
+    .update({ kanzlei_uebergeben_am: now })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
+
+  try {
+    const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+    await transitionFallStatus(fall.id, 'an_externe_kanzlei_uebergeben', { user_id: auth.userId })
+  } catch (err) {
+    console.error(
+      '[bestaetigeSelbstEinreichung] Terminal-Close via Engine fehlgeschlagen (non-fatal, Uebergabe-Marker steht):',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   try {
     await admin.from('timeline').insert({
