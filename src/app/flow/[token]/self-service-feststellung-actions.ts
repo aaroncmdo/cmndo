@@ -7,32 +7,11 @@
 // onboarding_felder (NIE Client-Mapping vertrauen).
 
 import { revalidatePath } from 'next/cache'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { ladeLeadErfassungLeadsFelder } from '@/lib/onboarding/lead-erfassung-allowlist'
 import { saveOnboardingFields } from '@/lib/onboarding/save-onboarding-fields'
+import { resolveFlowLeadId } from '@/lib/flow/flow-token'
 import type { OnboardingFeld } from '@/components/onboarding/types'
 import type { OnboardingWriteContext } from '@/lib/onboarding/write-context'
-
-async function resolveFlowLeadId(token: string): Promise<{
-  admin: ReturnType<typeof createAdminClient> | null
-  leadId: string | null
-  error?: string
-}> {
-  if (!token) return { admin: null, leadId: null, error: 'Kein Token.' }
-  const admin = createAdminClient()
-  const { data: flowLink } = await admin
-    .from('flow_links')
-    .select('lead_id, expires_at')
-    .eq('token', token)
-    .maybeSingle()
-  if (flowLink) {
-    if (flowLink.expires_at && new Date(flowLink.expires_at as string).getTime() < Date.now()) {
-      return { admin, leadId: null, error: 'Dieser Link ist abgelaufen.' }
-    }
-    return { admin, leadId: (flowLink.lead_id as string | null) ?? null }
-  }
-  return { admin, leadId: token } // Backward-compat: Token = lead_id
-}
 
 export async function speichereFeststellungFlow(
   token: string,
