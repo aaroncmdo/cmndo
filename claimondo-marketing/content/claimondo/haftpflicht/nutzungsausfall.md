@@ -95,6 +95,8 @@ Die Sanden-Danner-Tabelle (Sanden/Danner/Küppersbusch) ist gerichtlich anerkann
 Nutzungsausfall = Tagessatz × Reparatur-/Wiederbeschaffungs-Dauer
 ```
 
+**Direkt ausrechnen:** [Nutzungsausfall-Rechner](/kfz-gutachter/nutzungsausfall) — Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive der üblichen Alters-Rückstufung.
+
 ### Beispiel
 
 | Position | Wert |

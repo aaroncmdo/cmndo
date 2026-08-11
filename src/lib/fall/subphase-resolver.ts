@@ -211,8 +211,12 @@ export function resolveSubphase(input: ResolverInput): SubphaseResult {
   // 'verschoben' (= terminaler Verlegungs-Endzustand) gehören NICHT in
   // den aktiven Termin — sonst zeigt der Resolver „SV unterwegs" anhand
   // alter Tracking-Felder obwohl der Termin nicht mehr stattfindet.
+  // A1 (11.08.): 'abgesagt' (Kunden-Absage, api/kunde/termin/absagen) und 'abgelehnt'
+  // (SV-Ablehnung / slot-ttl-cleanup) fehlten in dieser Liste — dieselbe Bug-Klasse:
+  // nach der Absage zeigte die Fallakte weiter eine tote Subphase („SV vor Ort").
+  // Vollständige tote Status laut gutachter_termine_status_check (DB-verifiziert).
   const aktTermin = (gutachter_termine ?? [])
-    .filter((t) => !['storniert', 'verlegt', 'verschoben'].includes(t.status ?? ''))
+    .filter((t) => !['storniert', 'verlegt', 'verschoben', 'abgesagt', 'abgelehnt'].includes(t.status ?? ''))
     .sort((a, b) => ((b.durchgefuehrt_am ?? b.sv_angekommen_am ?? b.sv_unterwegs_seit ?? '') > (a.durchgefuehrt_am ?? a.sv_angekommen_am ?? a.sv_unterwegs_seit ?? '') ? 1 : -1))[0]
 
   // ══ Reparatur-Lane (Direct-Reparatur: kasko/selbstzahler — WS6/Kasko-Fix 17.07.) ══
