@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,8 +39,24 @@ export async function GET(request: Request) {
       // T13: Fall abgeschlossen
       // AAR-719: Silent-Catch durch Logging ersetzt — Benachrichtigungs-
       // Fehler waren unsichtbar, Kunde bekam kein Abschluss-Email.
-      sendFallCommunication(fall.id, 'fall_abgeschlossen').catch((err) => {
-        console.error('[fall-abschluss-cron] Abschluss-Benachrichtigung für Fall', fall.id, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
+      // C3a: jetzt durable via Notification-Outbox — ein fehlgeschlagener Send wird
+      // mit Backoff [1,5,30,120]min wiederholt und landet sonst als Dispatch-Task,
+      // statt nur eine Log-Zeile zu hinterlassen (der Fall ist da schon abgeschlossen
+      // und faellt aus dem Cron-Filter = es gab bisher keinen zweiten Versuch).
+      // dedupKey mit Tages-Fenster: schuetzt gegen Mehrfachlaeufe am selben Tag,
+      // laesst aber einen echten Re-Open + erneuten Abschluss wieder zu (die
+      // bestehende Idempotenz ist der Status-Filter, kein Fuer-immer-Flag).
+      await enqueue({
+        dedupKey: buildDedupKey({
+          template: 'fall_abgeschlossen',
+          claimId: fall.id,
+          fenster: new Date().toISOString().slice(0, 10),
+        }),
+        kanal: 'whatsapp',
+        template: 'fall_abgeschlossen',
+        claimId: fall.id,
+      }).catch((err) => {
+        console.error('[fall-abschluss-cron] Outbox-enqueue für Fall', fall.id, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
       })
 
       await db.from('timeline').insert({
