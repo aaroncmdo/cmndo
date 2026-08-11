@@ -149,7 +149,7 @@ export async function createKbVideoterminByKb(
 // AAR-684 Phase 2: KFZ-41 Termine — createTermin (Video-Call via Google
 // Calendar, Phone-Only ohne) + updateTerminStatus (cancel-Flow inkl.
 // Google-Event-Löschung).
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 export async function createTermin(
   fallId: string,
@@ -248,13 +248,24 @@ export async function createTermin(
   })
 
   const terminDate = new Date(data.datum)
-  sendFallCommunication(fallId, 'kb_termin_bestaetigt', {
-    termin_typ: data.typ,
-    termin_datum: terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
-    termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-    meet_link: meetLink ?? '',
-    '3': terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
-    '4': terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+  // C3a: durable via Notification-Outbox — eine verlorene Terminbestaetigung heisst,
+  // dass der Kunde nicht erscheint. dedupKey mit dem Termin-Zeitpunkt als Fenster:
+  // ein Fall hat legitim MEHRERE Termine, ein Key ohne Fenster haette jede weitere
+  // Bestaetigung unterdrueckt; der Insert traegt kein .select(), eine Termin-ID
+  // steht hier also nicht zur Verfuegung.
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'kb_termin_bestaetigt', claimId: fallId, fenster: data.datum }),
+    kanal: 'whatsapp',
+    template: 'kb_termin_bestaetigt',
+    claimId: fallId,
+    payload: {
+      termin_typ: data.typ,
+      termin_datum: terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
+      termin_uhrzeit: terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+      meet_link: meetLink ?? '',
+      '3': terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
+      '4': terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+    },
   }).catch(() => {})
 
   revalidatePath(`/faelle/${fallId}`)
