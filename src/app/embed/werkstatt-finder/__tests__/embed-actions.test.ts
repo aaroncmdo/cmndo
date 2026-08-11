@@ -46,9 +46,11 @@ vi.mock('@/lib/supabase/admin', () => ({
   })),
 }))
 
-// ─── Mock: createLead ────────────────────────────────────────────────────────
-vi.mock('@/lib/leads/create-lead', () => ({
-  createLead: vi.fn(),
+// ─── Mock: createCase (C2b — die Action ruft jetzt das Intake-Modul statt createLead) ──
+// Das Mocken ist hier doppelt noetig: (a) die Action ruft createCase, (b) create-case.ts
+// importiert 'server-only' — ohne Mock wuerde der Import in der vitest-Node-Umgebung brechen.
+vi.mock('@/lib/intake/create-case', () => ({
+  createCase: vi.fn(),
 }))
 
 // ─── Mock: buildWerkstattFinderLeadExtra ─────────────────────────────────────
@@ -80,7 +82,7 @@ import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbi
 import { klassifiziereSchadenbeschreibung } from '@/lib/werkstatt/bedarf/schadenbeschreibung-gewerke'
 import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschlaege'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
-import { createLead } from '@/lib/leads/create-lead'
+import { createCase } from '@/lib/intake/create-case'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
@@ -97,7 +99,7 @@ const mockKlassifiziere = vi.mocked(klassifiziereSchadenbildBase64)
 const mockKlassBeschreibung = vi.mocked(klassifiziereSchadenbeschreibung)
 const mockLadeWerkstattVorschlaege = vi.mocked(ladeWerkstattVorschlaege)
 const mockGeocodeAdresse = vi.mocked(geocodeAdresse)
-const mockCreateLead = vi.mocked(createLead)
+const mockCreateCase = vi.mocked(createCase)
 const mockBuildExtra = vi.mocked(buildWerkstattFinderLeadExtra)
 const mockEnsureFlowLink = vi.mocked(ensureCanonicalFlowLinkForLead)
 const mockResolvePromo = vi.mocked(resolvePromoCodeToId)
@@ -394,9 +396,9 @@ describe('erstelleWerkstattFinderLead', () => {
 
   const setupMocks = (leadOk = true, flowOk = true) => {
     if (leadOk) {
-      mockCreateLead.mockResolvedValue({ ok: true, leadId })
+      mockCreateCase.mockResolvedValue({ ok: true, leadId, claimId: null, flowLinkToken: token, deduped: false })
     } else {
-      mockCreateLead.mockResolvedValue({ ok: false, error: 'DB-Fehler' })
+      mockCreateCase.mockResolvedValue({ ok: false, error: 'DB-Fehler' })
     }
 
     if (flowOk) {
@@ -438,7 +440,7 @@ describe('erstelleWerkstattFinderLead', () => {
   })
 
   // E1.1 (Entry-Point-Matrix-Audit): Promo-Attribution — ?promo= wird resolved + persistiert.
-  it('promoCode gueltig (Resolver liefert id) → promotion_code_id im createLead-extra', async () => {
+  it('promoCode gueltig (Resolver liefert id) → promotion_code_id im createCase-extra', async () => {
     setupMocks()
     mockResolvePromo.mockResolvedValue('promo-uuid-1')
 
@@ -446,7 +448,7 @@ describe('erstelleWerkstattFinderLead', () => {
 
     expect(result.ok).toBe(true)
     expect(mockResolvePromo).toHaveBeenCalledWith('MK-TEST')
-    const extraArg = mockCreateLead.mock.calls[0][2] as Record<string, unknown>
+    const extraArg = mockCreateCase.mock.calls[0][1].extra as Record<string, unknown>
     expect(extraArg).toMatchObject({ promotion_code_id: 'promo-uuid-1' })
   })
 
@@ -457,7 +459,7 @@ describe('erstelleWerkstattFinderLead', () => {
     const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', promoCode: 'QUATSCH' })
 
     expect(result.ok).toBe(true)
-    const extraArg = mockCreateLead.mock.calls[0][2] as Record<string, unknown>
+    const extraArg = mockCreateCase.mock.calls[0][1].extra as Record<string, unknown>
     expect(extraArg).not.toHaveProperty('promotion_code_id')
   })
 
@@ -572,7 +574,7 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
 
   function setupTokenMocks(leadIdAusToken: string | null, updates: Array<Record<string, unknown>>) {
     mockEnsureFlowLink.mockResolvedValue({ ok: true, token, wiederverwendet: true })
-    mockCreateLead.mockResolvedValue({ ok: true, leadId: 'lead-NEU' })
+    mockCreateCase.mockResolvedValue({ ok: true, leadId: 'lead-NEU', claimId: null, flowLinkToken: null, deduped: false })
     mockFrom.mockImplementation((table: string) => {
       if (table === 'flow_links') {
         return {
@@ -595,7 +597,7 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
     })
   }
 
-  it('gueltiger Token -> UPDATE des bestehenden Leads (kein createLead); null gestrippt, false bleibt', async () => {
+  it('gueltiger Token -> UPDATE des bestehenden Leads (kein createCase); null gestrippt, false bleibt', async () => {
     const updates: Array<Record<string, unknown>> = []
     setupTokenMocks('lead-bestand-77', updates)
     mockBuildExtra.mockReturnValueOnce({ fahrzeug_hersteller: 'BMW', fahrzeug_modell: null, gewerbe_flag: false })
@@ -608,7 +610,7 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
 
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.token).toBe(token)
-    expect(mockCreateLead).not.toHaveBeenCalled()
+    expect(mockCreateCase).not.toHaveBeenCalled()
     expect(mockEnsureFlowLink.mock.calls[0][0]).toBe('lead-bestand-77')
     expect(updates[0]).toMatchObject({
       email: 'kunde@example.com',
@@ -628,7 +630,7 @@ describe('erstelleWerkstattFinderLead — §10 flowToken (Doppel-Lead-Falle)', (
     const result = await erstelleWerkstattFinderLead({ email: 'kunde@example.com', flowToken: 'tok-tot' })
 
     expect(result.ok).toBe(true)
-    expect(mockCreateLead).toHaveBeenCalledOnce()
+    expect(mockCreateCase).toHaveBeenCalledOnce()
     expect(mockEnsureFlowLink.mock.calls[0][0]).toBe('lead-NEU')
   })
 })
