@@ -3,6 +3,7 @@ import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { reminderStufeNachAlter } from '@/lib/cron/reminder-stufe'
 import { bezugInExpr } from '@/lib/termine/bezug-filter'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 /**
  * KFZ-192: Vollmacht-Reminder Cron.
@@ -155,18 +156,29 @@ export async function GET(request: Request) {
 
         if (lead?.telefon) {
           try {
-            const { sendCommunication } = await import('@/lib/communications/send')
             const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-            await sendCommunication('dokumente_nachreichen', {
-              telefon: lead.telefon,
-              vorname: lead.vorname ?? 'Kunde',
-              '1': lead.vorname ?? 'Kunde',
-              '2': `Vollmacht für Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
-              '3': `${appUrl}/kunde`,
+            // C3a: durable via Notification-Outbox — siehe sa-reminder. Empfaenger-
+            // kreis unveraendert (lead.telefon-Guard bleibt, sendFallCommunication
+            // resolved denselben Kunden). dedupKey mit Cron-Diskriminator, weil
+            // 'dokumente_nachreichen' von mehreren Crons gesendet wird.
+            const res = await enqueue({
+              dedupKey: buildDedupKey({
+                template: 'dokumente_nachreichen',
+                claimId: fall.fall_id as string,
+                fenster: `vollmacht-${reminderNr}`,
+              }),
+              kanal: 'whatsapp',
+              template: 'dokumente_nachreichen',
+              claimId: fall.fall_id as string,
+              payload: {
+                '1': lead.vorname ?? 'Kunde',
+                '2': `Vollmacht für Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
+                '3': `${appUrl}/kunde`,
+              },
             })
-            gesendet = true
+            gesendet = res.ok
           } catch (err) {
-            console.error('[vollmacht-reminder] WhatsApp:', err)
+            console.error('[vollmacht-reminder] Outbox-enqueue:', err)
           }
         }
       }

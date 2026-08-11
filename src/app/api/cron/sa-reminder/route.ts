@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { reminderStufeNachAlter } from '@/lib/cron/reminder-stufe'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 /**
  * B1 (CMM Phase 1.5e): SA-Reminder Cron.
@@ -121,18 +122,36 @@ export async function GET(request: Request) {
 
         if (lead?.telefon) {
           try {
-            const { sendCommunication } = await import('@/lib/communications/send')
             const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-            await sendCommunication('dokumente_nachreichen', {
-              telefon: lead.telefon,
-              vorname: lead.vorname ?? 'Kunde',
-              '1': lead.vorname ?? 'Kunde',
-              '2': `Schadensanzeige für Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
-              '3': `${appUrl}/kunde`,
+            // C3a: durable via Notification-Outbox (Retry-Backoff + Dead-Letter statt
+            // stillem console.error — der Reminder ging bisher bei einem Twilio-
+            // Aussetzer verloren, und die Timeline-Idempotenz darunter verhindert
+            // jeden Nachschuss).
+            // Der Empfaengerkreis bleibt EXAKT gleich: die lead.telefon-Guard oben
+            // bleibt stehen, und sendFallCommunication resolved denselben Kunden
+            // (claims.lead_id -> leads.telefon).
+            // dedupKey mit Cron-Diskriminator + Reminder-Stufe: 'dokumente_nachreichen'
+            // wird von DREI Crons (sa/vollmacht/pflichtdokumente) + konditional-tasks +
+            // sv-termin-reminder gesendet — ein gemeinsames Fenster wuerde sie
+            // gegenseitig deduplizieren.
+            const res = await enqueue({
+              dedupKey: buildDedupKey({
+                template: 'dokumente_nachreichen',
+                claimId: fall.fall_id as string,
+                fenster: `sa-${reminderNr}`,
+              }),
+              kanal: 'whatsapp',
+              template: 'dokumente_nachreichen',
+              claimId: fall.fall_id as string,
+              payload: {
+                '1': lead.vorname ?? 'Kunde',
+                '2': `Schadensanzeige für Fall ${fall.claim_nummer ?? (fall.fall_id as string).slice(0, 8)}`,
+                '3': `${appUrl}/kunde`,
+              },
             })
-            gesendet = true
+            gesendet = res.ok
           } catch (err) {
-            console.error('[sa-reminder] WhatsApp:', err)
+            console.error('[sa-reminder] Outbox-enqueue:', err)
           }
         }
       }
