@@ -8,6 +8,7 @@ import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitHomeLead } from './home-lead-action'
 import { trackEvent } from '@/lib/analytics/track-event'
 import { setUserData } from '@/lib/analytics/user-data'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // Hero-Lead-Formular der Hauptseite. Vorher ein rohes
 // <form action="/api/leads/home" method="POST"> -> diese Route existierte nie,
@@ -23,6 +24,9 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
   const [submittedName, setSubmittedName] = useState<string | null>(null)
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
+  // P4 Ortseingaben: Ort-Autocomplete controlled (AC rendert kein name) -> Wert per hidden input in FormData.
+  const [city, setCity] = useState('')
+  const [placeId, setPlaceId] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -138,16 +142,24 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
           disabled={pending}
           errorMessage={error?.field === 'phone' ? error.message : undefined}
         />
-        <Field
-          name="city"
-          label={t('lead_form.field_city_label')}
-          type="text"
-          placeholder={t('lead_form.field_city_placeholder')}
-          autoComplete="postal-code"
-          required
-          disabled={pending}
-          errorMessage={error?.field === 'city' ? error.message : undefined}
-        />
+        <div>
+          <label htmlFor="home-lead-city" className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
+            {t('lead_form.field_city_label')}
+          </label>
+          {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Stadt/PLZ; Wert -> verstecktes name="city" (+ place_id) für die FormData. */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-md border bg-white/85 px-4 py-3 text-base text-claimondo-navy placeholder:text-claimondo-shield/55 transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20"
+            placeholder={t('lead_form.field_city_placeholder')}
+            defaultValue={city}
+            onSelect={(r) => { setCity(r.stadt || r.plz || r.adresse); setPlaceId(r.place_id) }}
+            onChange={(v) => { setCity(v); setPlaceId('') }}
+          />
+          <input type="hidden" name="city" value={city} />
+          {placeId ? <input type="hidden" name="place_id" value={placeId} /> : null}
+          {error?.field === 'city' ? (
+            <p className="mt-1 text-xs font-semibold text-red-600">{error.message}</p>
+          ) : null}
+        </div>
       </div>
       <button
         type="submit"

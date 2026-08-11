@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/primitives'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { createLeadFromMiniWizard } from '@/lib/actions/create-lead-from-mini-wizard'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // AAR-902 Prototyp: 4-Felder-Mini-Wizard. Eine Seite, kein Step-by-Step.
 // Konzept: docs/14.05.2026/mini-wizard-magic-link-konzept.md Section "Phase 1".
@@ -68,6 +69,8 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
     register,
     handleSubmit,
     control,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<MiniWizardInput>({
     resolver: zodResolver(miniWizardSchema),
@@ -171,10 +174,14 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
         </div>
         <div>
           <Label htmlFor="unfallort">Unfallort</Label>
-          <Input
-            id="unfallort"
+          {/* P4 Ortseingaben: Google-Places-Autocomplete füllt den Unfallort; Wert -> RHF via setValue
+              (kein register-Input, aber weiter zod-validiert: unfallort ist in defaultValues + shouldValidate). */}
+          <GooglePlaceAutocomplete
+            className="h-8 w-full min-w-0 rounded-ios-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none file:inline-flex file:h-6 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40"
             placeholder="Straße, Stadt — z.B. Hauptstraße 12, Köln"
-            {...register('unfallort')}
+            defaultValue={watch('unfallort')}
+            onSelect={(r) => setValue('unfallort', r.stadt || r.plz || r.adresse, { shouldValidate: true })}
+            onChange={(v) => setValue('unfallort', v, { shouldValidate: true })}
           />
           {errors.unfallort ? (
             <p className="mt-1 text-sm text-red-600">{errors.unfallort.message}</p>
