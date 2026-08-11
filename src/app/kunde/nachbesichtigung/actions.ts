@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT). Ersetzt den inline-Check
 // (faelle.kunde_id + leads.user_id-Fallback) durch den prod-erprobten Helper
 // (claim_parties-primär + faelle.kunde_id + leads.email-Fallback).
@@ -60,7 +60,16 @@ export async function waehleNachbesichtigungsTermin(
   })
 
   // WA: Termin bestaetigt
-  sendFallCommunication(fallId, 'nachbesichtigung_termin').catch(() => {})
+  // C3a: durable via Notification-Outbox. dedupKey mit dem gewaehlten Datum als
+  // Fenster — ein Doppelklick auf denselben Slot ergibt genau eine Bestaetigung,
+  // waehlt der Kunde spaeter ein ANDERES Datum, bekommt er wieder eine (ein Key
+  // ohne Fenster haette die Umwahl-Bestaetigung verschluckt).
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'nachbesichtigung_termin', claimId: fallId, fenster: datum }),
+    kanal: 'whatsapp',
+    template: 'nachbesichtigung_termin',
+    claimId: fallId,
+  }).catch(() => {})
 
   revalidatePath(`/kunde/faelle/${fallId}`)
   revalidatePath(`/kunde/nachbesichtigung`)

@@ -16,7 +16,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createNotification } from '@/lib/notifications'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { triggerKonversionTasks } from '@/lib/tasking'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 import { assignKundenbetreuer } from '@/lib/faelle/kb-assignment'
@@ -231,7 +231,17 @@ export async function convertLeadToFall(
   }
 
   // 11. WhatsApp-Communication + Auto-Tasks (fire-and-forget).
-  sendFallCommunication(fall.id, 'fall_eroeffnet').catch(() => {})
+  // C3a: durable via Notification-Outbox. Das ist die ERSTE Nachricht an den Kunden
+  // nach der Lead-Konversion — ging sie verloren, erfuhr er nie, dass sein Fall
+  // existiert, und nichts holte das nach. dedupKey ohne Fenster: ein Fall wird genau
+  // einmal eroeffnet. Bewusst awaited (nicht fire-and-forget wie der Send davor):
+  // der Insert IST die Zustellgarantie, ein verlorener enqueue verfehlt den Zweck.
+  await enqueue({
+    dedupKey: buildDedupKey({ template: 'fall_eroeffnet', claimId: fall.id }),
+    kanal: 'whatsapp',
+    template: 'fall_eroeffnet',
+    claimId: fall.id,
+  }).catch(() => {})
   triggerKonversionTasks(fall.id, kundenbetreuerId, null).catch(() => {})
 
   return { fallId: fall.id, linked }
