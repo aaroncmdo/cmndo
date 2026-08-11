@@ -6,10 +6,14 @@
 //     (Termin -> bestaetigt + fall_id + final_verbindlich_ab, Auftrag angelegt).
 //   • #5085: Flow-Abschluss-WhatsApp ist für interne/Test-Identitäten still.
 //
-// Abgedeckt (gegner = unverschuldet, mit Termin + SA):
-//   1. unverschuldet + komplett      (SA "Komplettservice", Vollmacht/Anwalt)
-//   2. unverschuldet + nur_gutachter (SA "Nur Gutachten")
-// Struktur ist erweiterbar (eigenverschulden -> Werkstatt/kein Termin, teilschuld -> Rückruf).
+// Abgedeckt sind ALLE fünf Leaf-Szenarien der Quali-Weiche:
+//   A. unverschuldet + komplett       (Termin + SA "Komplettservice", Vollmacht/Anwalt)
+//   B. unverschuldet + nur_gutachter  (Termin + SA "Nur Gutachten")
+//   C. eigenverschulden + selbstzahler (Reparatur-Lane: KEIN Termin, KEINE SA)
+//   D. eigenverschulden + kasko        (dito, abrechnungsweg='kasko')
+//   E. teilschuld                      (Rückruf beim Dispatch: KEIN Claim, KEIN Account)
+// A+B decken den von #5062/#5085 gefixten Pfad ab; C-E sind die Kontrast-Lanes, die beweisen,
+// dass "kein Termin" dort SOLL ist (und nicht dieselbe Strandung wie im #5012-Bug).
 //
 // TEST-INFRA-HINWEIS: Ein interner Test-Lead kann über den ALLGEMEINEN Finder KEINEN
 // Termin buchen (echte SVs -> Test-SV-Guard intern->echt; Test-SVs -> aus dem Pool
@@ -18,7 +22,8 @@
 // Teil (SA-Confirm + Anzeige + Portal) läuft voll über die echte UI.
 //
 // Isolation: intern-Test-Identität (@claimondo.test) -> keine echten Kunden-Comms.
-// afterEach räumt Claim/Termin/Auftrag/Lead/FlowLink + Account auf.
+// afterEach räumt Claim/Termin/Auftrag/Rückruf/Lead/FlowLink + Account auf — bewusst dort und
+// nicht in einem try/finally, damit das Cleanup auch nach einem Test-Timeout noch läuft.
 //
 // Gated: läuft NICHT auf jedem PR (CI e2e-Job fährt alle Specs gegen prod). Setzen:
 //   RUN_KUNDENFUNNEL_SMOKE=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de \
@@ -64,6 +69,11 @@ async function paintCanvas(page: Page): Promise<void> {
 // liest .checked bzw. aria-checked. scrollIntoView, weil Pflicht-Checkboxen unter dem Fold liegen.
 async function checkAlleCheckboxen(page: Page): Promise<void> {
   const boxes = page.getByRole('checkbox')
+  // WICHTIG: erst auf die erste Checkbox warten. page.goto(waitUntil:'domcontentloaded') wartet
+  // NICHT auf die React-Hydration — ein sofortiges count() liefert auf langsamem Prod-Load 0,
+  // die Schleife tut nichts, und der (ohne Consent disabled) "Weiter"-Button läuft danach in den
+  // Test-Timeout. Genau so ist der selbstzahler-Lauf am 09.08. einmal geflaked.
+  await boxes.first().waitFor({ state: 'visible', timeout: 20_000 })
   const n = await boxes.count()
   for (let i = 0; i < n; i++) {
     const b = boxes.nth(i)
@@ -208,6 +218,93 @@ async function fahreFlowBisPortal(
   }
 }
 
+// EIGENVERSCHULDEN ("Ich selbst") -> Reparatur-Lane: KEIN Gutachter-Termin, KEINE SA.
+// Der Flow endet direkt in der Account-Anlage. Zwei Unter-Varianten hinter der Kasko-Weiche:
+//   kasko=true  -> "Ja, ich habe eine Kaskoversicherung" -> abrechnungsweg='kasko'
+//   kasko=false -> "Nein, ich zahle die Reparatur selbst" -> abrechnungsweg='selbstzahler'
+//
+// Empirische Schrittfolge (09.08. auf prod durchgeklickt):
+//   selbstzahler: Quali -> Kasko-Weiche -> Schaden(skip) -> Werkstatt-Liste(skip) -> Account
+//   kasko:        Quali -> Kasko-Weiche -> Werkstattbindung#1 -> Schaden(skip)
+//                 -> Werkstattbindung#2 -> Werkstatt-Liste(skip) -> Account
+// Die beiden Werkstattbindungs-Gates sind unterschiedlich formuliert ("Bist du an eine Werkstatt
+// deiner Versicherung gebunden?" / "Darfst du die Werkstatt frei wählen?"), bieten aber je genau
+// EINE Option mit "kann die Werkstatt frei wählen" (die Gegenoption lautet "...Versicherung
+// schreibt die Werkstatt vor"). Deshalb wird die Zwischenstrecke als Schleife gefahren: das
+// macht den Driver unabhängig von der Gate-Reihenfolge und -Anzahl.
+async function fahreFlowEigenverschulden(
+  page: Page,
+  token: string,
+  opts: { kasko: boolean },
+): Promise<void> {
+  await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+
+  // Datencheck: Datenschutz-Checkbox(en) + Weiter.
+  await checkAlleCheckboxen(page)
+  await page.getByRole('button', { name: /^weiter/i }).first().click()
+
+  // Quali: Schuldfrage -> eigenverantwortung.
+  await page.getByRole('button', { name: /Ich selbst/i }).click()
+
+  // Kasko-Weiche (bestimmt den abrechnungsweg).
+  await page
+    .getByRole('button', {
+      name: opts.kasko ? /Ja, ich habe eine Kaskoversicherung/i : /Nein, ich zahle die Reparatur selbst/i,
+    })
+    .click()
+
+  // Zwischenstrecke: Werkstattbindungs-Gate(s) + optionale Schaden-Aufnahme. Max. 3 Runden
+  // (2 Gates + 1 Schaden-Skip); bricht ab, sobald keiner der beiden Buttons mehr erscheint.
+  for (let i = 0; i < 3; i++) {
+    const naechster = page
+      .getByRole('button', { name: /kann die Werkstatt frei wählen|vorerst überspringen/i })
+      .first()
+    try {
+      await naechster.waitFor({ state: 'visible', timeout: 8_000 })
+    } catch {
+      break
+    }
+    await naechster.click()
+  }
+
+  // Werkstatt-Liste: bewusst überspringen (Wahl ist optional — sonst vermittelt der Dispatch).
+  await page
+    .getByRole('button', { name: /^überspringen$/i })
+    .first()
+    .click({ timeout: 10_000 })
+    .catch(() => {})
+
+  // Kein Termin, keine SA -> direkt Account-Anlage -> Passwort -> Kundenportal.
+  await page.waitForURL(/\/passwort-aendern|\/kunde/, { timeout: 90_000 })
+  if (/\/passwort-aendern/.test(page.url())) {
+    await page.getByRole('textbox', { name: /Neues Passwort/i }).fill(KUNDE_PASSWORT)
+    await page.getByRole('textbox', { name: /Passwort bestätigen/i }).fill(KUNDE_PASSWORT)
+    await page.getByRole('button', { name: /Passwort ändern|Speichern|Weiter/i }).click()
+    await page.waitForURL(/\/kunde/, { timeout: 30_000 })
+  }
+}
+
+// TEILSCHULD ("Noch unklar") -> Rückruf beim Dispatch statt Gutachter-Buchung.
+// Endet BEWUSST im /flow: kein Claim, kein Account — nur ein offener Rückruf-Task in der
+// Dispatch-Queue (admin_termine typ='rueckruf'), den ein Berater abarbeitet.
+async function fahreFlowTeilschuld(page: Page, token: string): Promise<void> {
+  await page.goto(`${APP}/flow/${token}`, { waitUntil: 'domcontentloaded' })
+
+  await checkAlleCheckboxen(page)
+  await page.getByRole('button', { name: /^weiter/i }).first().click()
+
+  // Quali: Schuldfrage -> unklar.
+  await page.getByRole('button', { name: /Noch unklar/i }).click()
+
+  // Rückruf-Step. BEWUSST rollenbasiert statt über die data-testids aus FlowRueckrufStep.tsx:
+  // prod deployt von `main`, und die testid-Commits liegen (Stand 09.08.) nur auf `staging` —
+  // getByTestId lief hier deshalb live ins Leere. Rolle+Text sind versionsunabhängig.
+  await page.getByRole('button', { name: /Rückruf anfordern/i }).click()
+  await expect(page.getByRole('heading', { name: /Wir rufen dich zurück/i })).toBeVisible({
+    timeout: 20_000,
+  })
+}
+
 // Alles rund um den Lead aufräumen (Service-Role). Claim deaktivieren (nicht hart löschen,
 // FK-sicher), Termin/Auftrag stornieren, Lead/FlowLink löschen, Account entfernen.
 async function cleanup(db: SupabaseClient, email: string, terminId?: string): Promise<void> {
@@ -241,6 +338,9 @@ async function cleanup(db: SupabaseClient, email: string, terminId?: string): Pr
     }
     if (leadId) {
       await db.from('flow_links').delete().eq('lead_id', leadId)
+      // Rückruf-Task des teilschuld-Pfads (admin_termine.lead_id -> FK auf leads) muss VOR
+      // dem Lead-Delete weg, sonst bleibt der Lead an der FK hängen.
+      await db.from('admin_termine').delete().eq('lead_id', leadId)
       // Lead entfernen: erst die claims.lead_id-FK lösen (Claim bleibt deaktiviert bestehen),
       // dann den Lead löschen. Best-effort — greift eine FK, bleibt der Lead (harmlos) liegen.
       if (claimId) await db.from('claims').update({ lead_id: null }).eq('id', claimId)
@@ -259,15 +359,30 @@ const SZENARIEN = [
 test.describe('Kundenfunnel-Szenarien (Prod, gated RUN_KUNDENFUNNEL_SMOKE)', () => {
   test.skip(!RUN, 'RUN_KUNDENFUNNEL_SMOKE nicht gesetzt')
 
+  // Aufräum-Kontext des laufenden Tests. Das Cleanup MUSS im afterEach hängen, nicht in einem
+  // try/finally im Test: bei einem Test-Timeout bricht Playwright den Test-Body ab — der
+  // finally-Block läuft dann NICHT mehr und es bleibt Prod-Residue liegen (am 09.08. genau so
+  // passiert: ein Lead des geflakten Laufs blieb stehen). afterEach hat ein eigenes Zeitbudget.
+  // Tests laufen je Worker seriell, das Modul-Scope-Objekt ist damit race-frei.
+  let aufraeumen: { email: string; terminId?: string } | null = null
+
+  test.afterEach(async () => {
+    if (!aufraeumen) return
+    const { email, terminId } = aufraeumen
+    aufraeumen = null
+    await cleanup(svc(), email, terminId)
+  })
+
   for (const sz of SZENARIEN) {
     test(`unverschuldet + ${sz.name}: Flow -> SA -> Termin bestätigt -> Kundenportal`, async ({ page }) => {
       test.setTimeout(210_000)
       const email = `smoke-kf-${sz.name}-${Date.now()}@claimondo.test`
       const db = svc()
-      let terminId: string | undefined
-      try {
+      aufraeumen = { email }
+      {
         const { leadId, token } = await seedeLeadUndFlowLink(db, email)
-        terminId = await seedeReserviertenTermin(db, leadId)
+        const terminId = await seedeReserviertenTermin(db, leadId)
+        aufraeumen = { email, terminId }
         await fahreFlowBisPortal(page, token, {
           schuldfrageRegex: /Der Unfallgegner/i,
           serviceRegex: sz.serviceRegex,
@@ -304,9 +419,86 @@ test.describe('Kundenfunnel-Szenarien (Prod, gated RUN_KUNDENFUNNEL_SMOKE)', () 
         })
         await expect(page.getByText(/Ihr Gutachter/i).first()).toBeVisible()
         await expect(page.getByText(/Ihr Betreuer|Kundenbetreuer/i).first()).toBeVisible()
-      } finally {
-        await cleanup(db, email, terminId)
       }
     })
   }
+
+  // ── EIGENVERSCHULDEN: Reparatur-Lane, KEIN Termin/keine SA (von #5062/#5085 unberührt) ──
+  for (const variante of [
+    { name: 'selbstzahler', kasko: false, abrechnungsweg: 'selbstzahler' },
+    { name: 'kasko', kasko: true, abrechnungsweg: 'kasko' },
+  ] as const) {
+    test(`eigenverschulden + ${variante.name}: Flow -> Werkstatt-Lane -> Kundenportal (ohne Termin)`, async ({
+      page,
+    }) => {
+      test.setTimeout(210_000)
+      const email = `smoke-kf-eigen-${variante.name}-${Date.now()}@claimondo.test`
+      const db = svc()
+      aufraeumen = { email }
+      {
+        const { leadId, token } = await seedeLeadUndFlowLink(db, email)
+        await fahreFlowEigenverschulden(page, token, { kasko: variante.kasko })
+
+        // ── DB-Assertion: Claim liegt in der Reparatur-Lane, NICHT in der SV-Termin-Lane ──
+        const { data: claim } = await db
+          .from('claims')
+          .select('id, operative_status, schuldfrage, abrechnungsweg, sa_unterschrieben')
+          .eq('lead_id', leadId)
+          .maybeSingle()
+        expect(claim, 'Claim wurde angelegt').toBeTruthy()
+        expect(claim!.schuldfrage, 'Selbstverschulden erkannt').toBe('eigenverantwortung')
+        expect(claim!.abrechnungsweg, 'Abrechnungsweg aus der Kasko-Weiche').toBe(variante.abrechnungsweg)
+        // Kein Gutachter-Auftrag -> keine SA, Claim bleibt in der Ersterfassung.
+        expect(claim!.sa_unterschrieben, 'Keine SA im Eigenverschulden-Pfad').toBe(false)
+        expect(claim!.operative_status).toBe('ersterfassung')
+
+        const { count: terminCount } = await db
+          .from('gutachter_termine')
+          .select('id', { count: 'exact', head: true })
+          .eq('bezug_typ', 'fall')
+          .eq('bezug_id', claim!.id)
+        expect(terminCount ?? 0, 'Kein SV-Termin in der Reparatur-Lane').toBe(0)
+
+        const { count: auftragCount } = await db
+          .from('auftraege')
+          .select('id', { count: 'exact', head: true })
+          .eq('claim_id', claim!.id)
+        expect(auftragCount ?? 0, 'Kein Gutachten-Auftrag in der Reparatur-Lane').toBe(0)
+
+        // ── Kundenportal erreichbar (Account angelegt, Claim sichtbar) ──
+        await expect(page).toHaveURL(/\/kunde/, { timeout: 20_000 })
+      }
+    })
+  }
+
+  // ── TEILSCHULD: Rückruf beim Dispatch — bewusst KEIN Claim/Account ──
+  test('teilschuld: Flow -> Rückruf angefordert -> Dispatch-Queue (kein Claim)', async ({ page }) => {
+    test.setTimeout(150_000)
+    const email = `smoke-kf-teil-${Date.now()}@claimondo.test`
+    const db = svc()
+    aufraeumen = { email }
+    {
+      const { leadId, token } = await seedeLeadUndFlowLink(db, email)
+      await fahreFlowTeilschuld(page, token)
+
+      // ── DB-Assertion: Lead bleibt Lead, Rückruf landet in der Dispatch-Queue ──
+      const { data: lead } = await db
+        .from('leads')
+        .select('schuldfrage, konvertiert_zu_claim_id')
+        .eq('id', leadId)
+        .maybeSingle()
+      expect(lead!.schuldfrage, 'Schuldfrage unklar gespeichert').toBe('unklar')
+      expect(lead!.konvertiert_zu_claim_id, 'Kein Claim vor der Haftungsklärung').toBeNull()
+
+      const { data: rueckruf } = await db
+        .from('admin_termine')
+        .select('typ, status, zugewiesen_an')
+        .eq('lead_id', leadId)
+        .maybeSingle()
+      expect(rueckruf, 'Rückruf-Task angelegt').toBeTruthy()
+      expect(rueckruf!.typ).toBe('rueckruf')
+      expect(rueckruf!.status, 'Rückruf offen in der Dispatch-Queue').toBe('offen')
+      expect(rueckruf!.zugewiesen_an, 'Rückruf einem Dispatcher zugewiesen').toBeTruthy()
+    }
+  })
 })
