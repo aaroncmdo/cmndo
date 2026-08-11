@@ -4606,6 +4606,7 @@
         "uhrSuffix": "h",
         "wirdGebucht": "Booking...",
         "verbindlichBuchen": "Book appointment",
+        "buchungFehlgeschlagen": "The booking failed. Please try again or contact us.",
         "frei": "Available",
         "belegt": "Taken"
       },

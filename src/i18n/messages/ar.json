@@ -4606,6 +4606,7 @@
         "uhrSuffix": "",
         "wirdGebucht": "جارٍ الحجز...",
         "verbindlichBuchen": "حجز الموعد نهائياً",
+        "buchungFehlgeschlagen": "فشل الحجز. يرجى المحاولة مرة أخرى أو الاتصال بنا.",
         "frei": "متاح",
         "belegt": "محجوز"
       },
