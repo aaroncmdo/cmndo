@@ -1,7 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createLead } from '@/lib/leads/create-lead'
+import { createCase } from '@/lib/intake/create-case'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
@@ -242,10 +242,15 @@ export async function erstelleWerkstattFinderLead(
     }
   }
 
+  // C2b (Fundament B-1): Neu-Lead ueber createCase statt createLead — EIN Intake-Pfad mit
+  // garantierten Nachwirkungen (FlowLink immer + Dedup). Der Re-Entry-Pfad oben (bestehender
+  // Lead via FlowLink-Token) bleibt unveraendert: dort wird aktualisiert, nicht angelegt.
+  // triggerByUserId entfaellt (public Embed, kein User; mode='lead-first' braucht ihn nicht).
+  let flowTokenAusIntake: string | null = null
   if (!leadId) {
-    const result = await createLead(
-      admin,
-      {
+    const result = await createCase(admin, {
+      mode: 'lead-first',
+      base: {
         vorname: payload.vorname ?? null,
         nachname: payload.nachname ?? null,
         email: payload.email,
@@ -254,9 +259,18 @@ export async function erstelleWerkstattFinderLead(
         status: 'neu',
       },
       extra,
-    )
+      dedup: {
+        telefon: payload.telefon ?? null,
+        email: payload.email,
+        // Der Finder erhebt kein Kennzeichen -> dedupKeyIsUsable() ist false und createCase
+        // ueberspringt den Dedup. Bewusst mitgegeben, damit der Key automatisch greift,
+        // sobald der Finder das Kennzeichen erhebt (kein zweiter Eingriff noetig).
+        kennzeichen: (extra as Record<string, unknown>).kennzeichen as string | null ?? null,
+      },
+    })
     if (!result.ok) return { ok: false, error: result.error }
     leadId = result.leadId
+    flowTokenAusIntake = result.flowLinkToken
   }
 
   // T5: Foto + Bedarf nicht-kritisch persistieren (vor FlowLink-Return).
@@ -313,7 +327,11 @@ export async function erstelleWerkstattFinderLead(
     console.error('[werkstatt-finder] Foto/Bedarf-Persistenz fehlgeschlagen (non-fatal):', err)
   }
 
-  // Non-kritisch: FlowLink erzeugen. Schlaegt er fehl, ist der Lead trotzdem da (Dispatcher greift).
+  // FlowLink. C2b: im Neu-Lead-Pfad hat createCase ihn bereits erzeugt (FlowLink-immer-Garantie)
+  // -> Token direkt verwenden statt ein zweites Mal zu erzeugen. Der explizite Call bleibt fuer
+  // den Re-Entry-Pfad (bestehender Lead) und als Fallback, falls createCase's non-fataler
+  // FlowLink-Schritt fehlschlug. ensureCanonicalFlowLinkForLead ist idempotent.
+  if (flowTokenAusIntake) return { ok: true, token: flowTokenAusIntake }
   try {
     const link = await ensureCanonicalFlowLinkForLead(leadId)
     if (link.ok) return { ok: true, token: link.token }
