@@ -5,10 +5,18 @@
 //
 // Run: CI=1 PLAYWRIGHT_BASE_URL=<host> npx playwright test reparatur-weg-kva-betrag-pflicht --project=chromium
 import { test, expect, type Page } from '@playwright/test'
-import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { ladeSeedFixture } from '../lib/seed-fixture'
 
-const seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.reparatur-weg-e2e-seed.json'), 'utf8'))
+// Seed crash-sicher laden (Begruendung + skip-vs-fail-Regel: tests/e2e/lib/seed-fixture.ts).
+// ciErzeugt: der e2e-Job legt die Datei im Step "Seed reparatur-weg E2E-Fixture" an.
+const fixture = ladeSeedFixture(
+  '.reparatur-weg-e2e-seed.json',
+  'scripts/smoke/reparatur-weg-e2e-seed.mjs',
+  { ciErzeugt: true },
+)
+const seed = fixture.daten
+test.beforeEach(() => fixture.guard())
 const PDF = join(process.cwd(), 'tests/e2e/fixtures/test-upload.pdf')
 
 async function login(page: Page, email: string, pw: string) {

@@ -7,10 +7,18 @@
 //
 // Run: CI=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test selbstzahler-feststellung-werkstatt-sicht --project=chromium
 import { test, expect, type Page, type BrowserContext } from '@playwright/test'
-import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { ladeSeedFixture } from '../lib/seed-fixture'
 
-const seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.reparatur-weg-e2e-seed.json'), 'utf8'))
+// Seed crash-sicher laden (Begruendung + skip-vs-fail-Regel: tests/e2e/lib/seed-fixture.ts).
+// ciErzeugt: der e2e-Job legt die Datei im Step "Seed reparatur-weg E2E-Fixture" an.
+const fixture = ladeSeedFixture(
+  '.reparatur-weg-e2e-seed.json',
+  'scripts/smoke/reparatur-weg-e2e-seed.mjs',
+  { ciErzeugt: true },
+)
+const seed = fixture.daten
+test.beforeEach(() => fixture.guard())
 const FOTO = join(process.cwd(), 'tests/e2e/fixtures/test-schadenfoto.png')
 
 async function login(page: Page, email: string, pw: string) {
