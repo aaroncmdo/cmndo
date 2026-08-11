@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { getPflichtDokumenteFuerFall, type Phase, type Szenario } from '@/lib/dokumente/pflicht-dokumente'
 
 // KFZ-172 Phase 4: Pflichtdokumente-Reminder Cron.
@@ -138,14 +139,28 @@ export async function GET(request: Request) {
             if (fallFull?.lead_id) {
               const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
               if (lead?.telefon) {
-                const { sendCommunication } = await import('@/lib/communications/send')
                 const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-                await sendCommunication('dokumente_nachreichen', {
-                  telefon: lead.telefon,
-                  vorname: lead.vorname ?? 'Kunde',
-                  '1': lead.vorname ?? 'Kunde',
-                  '2': fehlendListe,
-                  '3': `${appUrl}/kunde`,
+                // C3a: durable via Notification-Outbox — siehe sa-reminder. Empfaenger-
+                // kreis unveraendert (lead.telefon-Guard bleibt, sendFallCommunication
+                // resolved denselben Kunden).
+                // dedupKey mit Cron-Diskriminator + Tages-Fenster: 'dokumente_nachreichen'
+                // wird von mehreren Crons gesendet; die 48h-Kadenz-Guard oben ist
+                // strenger als das Fenster, das nur einen Doppel-Send am selben Tag
+                // abfaengt, falls der Flag-Write mal fehlschlaegt.
+                await enqueue({
+                  dedupKey: buildDedupKey({
+                    template: 'dokumente_nachreichen',
+                    claimId: fall.fall_id as string,
+                    fenster: `pflicht-${now.toISOString().slice(0, 10)}`,
+                  }),
+                  kanal: 'whatsapp',
+                  template: 'dokumente_nachreichen',
+                  claimId: fall.fall_id as string,
+                  payload: {
+                    '1': lead.vorname ?? 'Kunde',
+                    '2': fehlendListe,
+                    '3': `${appUrl}/kunde`,
+                  },
                 }).catch(() => {})
                 // CMM-44 SP-B PR2c: dokumente_reminder_whatsapp_letzte_sendung auf claims (SSoT).
                 const remClaimId = await resolveClaimId(db, fall.fall_id as string)
