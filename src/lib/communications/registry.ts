@@ -408,6 +408,24 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'Willkommens-Email an Kunden mit Portal-Zugangsdaten',
   },
 
+  // AAR-431 SLA-Fallback: Der Aufrufer (sla/kanzlei-mahnungen.ts) sendet diesen
+  // Trigger, WENN die Kunden-WA nicht rausging (kein Telefon / Baileys down).
+  // Er fehlte im Registry -> sendFallCommunication lieferte nur
+  // {sent:false,'unbekannter Trigger'} (send-fall.ts:24) und loggte eine Warnung:
+  // der Fallback hat also NIE gefeuert. Kein Twilio-Template noetig — der Caller
+  // uebergibt subject+html, die send.ts:69-70 direkt verwendet.
+  // Name traegt historisch das '_wa'-Suffix (gemeint war der WA-Ersatz), der Kanal
+  // ist bewusst email.
+  kanzlei_wartet_auf_kunde_wa: {
+    trigger_name: 'kanzlei_wartet_auf_kunde_wa',
+    channel: 'email',
+    recipient: 'kunde',
+    t_number: null,
+    whatsapp_template_name: null,
+    has_attachment: false,
+    description: 'SLA-Fallback: Kanzlei wartet auf Rueckmeldung des Kunden (Email, wenn WA nicht moeglich war)',
+  },
+
   // ─── Email-only: SV ─────────────────────────────────────────────────────
 
   welcome_sv_solo: {
