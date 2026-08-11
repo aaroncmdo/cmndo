@@ -126,15 +126,28 @@ export async function createKbVideoterminByKb(
         .eq('id', fall.lead_id)
         .single()
       if (lead?.telefon) {
-        const { sendCommunication } = await import('@/lib/communications/send')
-        await sendCommunication('kb_termin_bestaetigt', {
-          telefon: lead.telefon,
-          vorname: lead.vorname ?? '',
-          '1': lead.vorname ?? '',
-          '2': startZeit.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
-          '3': startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-          '4': kanal,
-          '5': videoLink ?? '',
+        // C3a: durable via Notification-Outbox. DIES ist der lebende KB-Termin-Pfad
+        // (gerufen von _tabs/UebersichtTab.tsx) — eine verlorene Bestaetigung heisst,
+        // der Kunde erscheint nicht. Empfaengerkreis unveraendert: die lead.telefon-
+        // Guard bleibt, sendFallCommunication resolved denselben Kunden.
+        // dedupKey mit der ID des soeben angelegten Termins: ein Fall hat legitim
+        // MEHRERE KB-Termine, jeder bekommt genau eine Bestaetigung.
+        await enqueue({
+          dedupKey: buildDedupKey({
+            template: 'kb_termin_bestaetigt',
+            claimId: fallId,
+            fenster: termin.id as string,
+          }),
+          kanal: 'whatsapp',
+          template: 'kb_termin_bestaetigt',
+          claimId: fallId,
+          payload: {
+            '1': lead.vorname ?? '',
+            '2': startZeit.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
+            '3': startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+            '4': kanal,
+            '5': videoLink ?? '',
+          },
         })
       }
     } catch (err) {
@@ -151,6 +164,15 @@ export async function createKbVideoterminByKb(
 // Google-Event-Löschung).
 import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
+/**
+ * ⚠ DEAD CODE (verifiziert 11.08.2026): `createTermin` hat **keinen Aufrufer** —
+ * `grep createTermin src/` liefert nur diese Definition + den Barrel-Re-Export in
+ * `_actions/index.ts`. Der LEBENDE KB-Termin-Pfad ist `createKbVideoterminByKb`
+ * (oben, gerufen von `_tabs/UebersichtTab.tsx`); der schreibt nach
+ * `gutachter_termine`, diese Funktion nach `termine`.
+ * Der `enqueue`-Wiring hier stammt aus der C3a-Tranche 3 und feuert folglich NIE.
+ * Vor einer Reaktivierung: erst pruefen, ob `termine` ueberhaupt noch bespielt wird.
+ */
 export async function createTermin(
   fallId: string,
   data: { typ: string; datum: string; dauer_minuten: number; betreff: string; notiz?: string },
