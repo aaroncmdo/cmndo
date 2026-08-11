@@ -61,18 +61,30 @@ export async function POST(req: Request, { params }: { params: Promise<{ token: 
     bekannt,
     historie: Array.isArray(body.historie) ? body.historie.slice(-12) : [],
     nachricht,
+    heute: new Date().toISOString().slice(0, 10),
   })
   if (!turn.ok) return NextResponse.json({ ok: false, error: turn.error }, { status: 502 })
 
   const sauber = filterDeltas(turn.deltas, schema)
+  let gespeichert: Record<string, unknown> = sauber
   if (Object.keys(sauber).length > 0) {
     const saved = await speichereFeststellungFlow(token, sauber)
     if (!saved.ok) {
-      return NextResponse.json({ ok: false, error: saved.error ?? 'save_failed' }, { status: 500 })
+      // Ein einzelner unbrauchbarer Wert (Prod-Smoke 11.08.: unfalldatum="gestern"
+      // gegen eine date-Spalte) darf nicht den GANZEN Turn verwerfen — der Save ist
+      // alles-oder-nichts. Also Feld fuer Feld nachziehen und nur die schlechten
+      // Werte fallen lassen; das Modell fragt sie in der naechsten Runde erneut ab.
+      console.error('[flow-intake] Sammel-Save fehlgeschlagen, einzeln:', saved.error)
+      gespeichert = {}
+      for (const [key, wert] of Object.entries(sauber)) {
+        const einzeln = await speichereFeststellungFlow(token, { [key]: wert })
+        if (einzeln.ok) gespeichert[key] = wert
+        else console.error('[flow-intake] Feld verworfen:', key, einzeln.error)
+      }
     }
   }
 
-  const fehlend = fehlendePflicht(schema, { ...bekannt, ...sauber })
+  const fehlend = fehlendePflicht(schema, { ...bekannt, ...gespeichert })
   return NextResponse.json({
     ok: true,
     naechste_frage: turn.naechste_frage,
