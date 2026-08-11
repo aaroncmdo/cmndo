@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Button } from '@/components/primitives'
 import { GEWERKE, type Gewerk } from '@/lib/werkstatt/bedarf/types'
 import { registriereWerkstattSelf } from './actions'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // Anzeige-Labels zum kanonischen Gewerke-Vokabular (Werte = werkstaetten.faehigkeiten).
 const GEWERK_LABEL: Record<Gewerk, string> = {
@@ -122,7 +123,23 @@ export function WerkstattRegistrierenClient({ einladung }: { einladung?: string 
           <input className={inputClass} type="tel" value={form.telefon} onChange={set('telefon')} placeholder="0221 1234567" />
         </Field>
         <Field label="Straße + Hausnummer *" className="sm:col-span-2">
-          <input className={inputClass} value={form.adresse_strasse} onChange={set('adresse_strasse')} placeholder="Musterstraße 12" />
+          {/* P2 Ortseingaben: Google-Places-Autocomplete füllt Straße + PLZ + Ort in einem Schritt.
+              onChange hält den Freitext (Direkt-Submit ohne Dropdown-Auswahl → Server-Geocoding).
+              PLZ/Ort bleiben darunter editierbar (Korrektur/Fallback). */}
+          <GooglePlaceAutocomplete
+            className={inputClass}
+            defaultValue={form.adresse_strasse}
+            placeholder="Straße + Hausnummer eingeben…"
+            onSelect={(r) =>
+              setForm((f) => ({
+                ...f,
+                adresse_strasse: r.strasse || f.adresse_strasse,
+                adresse_plz: r.plz || f.adresse_plz,
+                adresse_ort: r.stadt || f.adresse_ort,
+              }))
+            }
+            onChange={(t) => setForm((f) => ({ ...f, adresse_strasse: t }))}
+          />
         </Field>
         <Field label="PLZ *">
           <input className={inputClass} value={form.adresse_plz} onChange={set('adresse_plz')} placeholder="50667" />

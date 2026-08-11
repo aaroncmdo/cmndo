@@ -37,6 +37,7 @@ import {
 } from '@/components/notifications/NotificationPreferencesForm'
 import { Modal } from '@/components/primitives/Modal'
 import { SelectField } from '@/components/shared/forms/SelectField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 import {
@@ -186,6 +187,8 @@ function Input({
   label,
   name,
   defaultValue,
+  value,
+  onChange,
   type = 'text',
   readOnly = false,
   placeholder,
@@ -194,8 +197,11 @@ function Input({
   autoComplete,
 }: {
   label: string
-  name: string
+  name?: string
   defaultValue?: string | null
+  // P2 Ortseingaben: optionaler controlled-Modus (value+onChange) für Autocomplete-befüllte Felder.
+  value?: string
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   type?: string
   readOnly?: boolean
   placeholder?: string
@@ -212,7 +218,7 @@ function Input({
       <input
         name={name}
         type={type}
-        defaultValue={defaultValue ?? ''}
+        {...(value !== undefined ? { value, onChange } : { defaultValue: defaultValue ?? '' })}
         readOnly={readOnly}
         placeholder={placeholder}
         required={required}
@@ -231,6 +237,13 @@ function Input({
 function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
   const [state, setState] = useState<SaveState>({ status: 'idle' })
   const [isPending, startTransition] = useTransition()
+  // P2 Ortseingaben: Adresse controlled (GooglePlaceAutocomplete rendert kein name-Attribut) →
+  // im Submit aus dem state statt fd.get. Autocomplete füllt strasse/plz/ort, Felder editierbar.
+  const [adr, setAdr] = useState({
+    strasse: profile.adresse_strasse ?? '',
+    plz: profile.adresse_plz ?? '',
+    ort: profile.adresse_ort ?? '',
+  })
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -246,9 +259,9 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
         rechtsform: String(fd.get('rechtsform') ?? ''),
         ist_kleinunternehmer: fd.get('kleinunternehmer') === 'on',
         telefon: String(fd.get('telefon') ?? ''),
-        adresse_strasse: String(fd.get('adresse_strasse') ?? ''),
-        adresse_plz: String(fd.get('adresse_plz') ?? ''),
-        adresse_ort: String(fd.get('adresse_ort') ?? ''),
+        adresse_strasse: adr.strasse,
+        adresse_plz: adr.plz,
+        adresse_ort: adr.ort,
       })
       if (res.success) {
         setState({ status: 'success' })
@@ -332,22 +345,30 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
           defaultValue={profile.telefon}
           placeholder="+49 30 1234567"
         />
-        <Input
-          label="Straße & Hausnummer"
-          name="adresse_strasse"
-          defaultValue={profile.adresse_strasse}
-        />
+        <label className="block">
+          <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">Straße &amp; Hausnummer</span>
+          {/* P2 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort (controlled state → Submit). */}
+          <GooglePlaceAutocomplete
+            className="mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40"
+            defaultValue={adr.strasse}
+            placeholder="Straße + Hausnummer eingeben…"
+            onSelect={(r) =>
+              setAdr((a) => ({ strasse: r.strasse || a.strasse, plz: r.plz || a.plz, ort: r.stadt || a.ort }))
+            }
+            onChange={(t) => setAdr((a) => ({ ...a, strasse: t }))}
+          />
+        </label>
         <div className="grid grid-cols-3 gap-3">
           <Input
             label="PLZ"
-            name="adresse_plz"
-            defaultValue={profile.adresse_plz}
+            value={adr.plz}
+            onChange={(e) => setAdr((a) => ({ ...a, plz: e.target.value }))}
           />
           <div className="col-span-2">
             <Input
               label="Ort"
-              name="adresse_ort"
-              defaultValue={profile.adresse_ort}
+              value={adr.ort}
+              onChange={(e) => setAdr((a) => ({ ...a, ort: e.target.value }))}
             />
           </div>
         </div>

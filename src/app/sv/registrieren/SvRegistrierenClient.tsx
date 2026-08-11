@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Button, Card } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { SelectField } from '@/components/shared/forms/SelectField'
 import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
 import {
@@ -525,13 +526,21 @@ function NeuSchritt({
           onChange={(e) => setTelefon(e.target.value)}
           autoComplete="tel"
         />
-        <TextField
-          label="Adresse (Straße + Hausnummer, Ort) *"
-          placeholder="Musterstraße 1, 42103 Wuppertal"
-          value={adresse}
-          onChange={(e) => setAdresse(e.target.value)}
-          autoComplete="street-address"
-        />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-claimondo-shield">Adresse (Straße + Hausnummer, Ort) *</label>
+          {/* P2 Ortseingaben: Google-Places-Autocomplete füllt Adresse + PLZ. onChange hält den
+              Freitext (Direkt-Submit ohne Dropdown-Auswahl → Server-Geocoding). PLZ bleibt editierbar. */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+            defaultValue={adresse}
+            placeholder="Musterstraße 1, 42103 Wuppertal"
+            onSelect={(r) => {
+              setAdresse(r.adresse)
+              if (r.plz) setPlz(r.plz)
+            }}
+            onChange={(t) => setAdresse(t)}
+          />
+        </div>
         <TextField
           label="PLZ (optional)"
           placeholder="42103"
