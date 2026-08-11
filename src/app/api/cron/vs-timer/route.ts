@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 
 type Stufe = {
@@ -22,6 +22,15 @@ const STUFEN: Stufe[] = [
   { key: 'vs-05', tage: 28, titel: 'Mahnung mit Verzugszinsen + Klageankuendigung', taskTyp: 'versicherung-kontakt', taskTitel: 'Mahnung + Klageankuendigung senden',  whatsapp: true  },
   { key: 'vs-06', tage: 60, titel: 'Klage eingereicht',                     taskTyp: 'versicherung-kontakt',    taskTitel: 'Klage eingereicht – Dokumentation',         whatsapp: false },
 ]
+
+// KFZ-207: WA-Template je Eskalationsstufe — deckungsgleich mit den drei Stufen,
+// die oben whatsapp:true tragen (vs-03/04/05). Ersetzt die frueheren drei
+// if-Zweige im Send-Block (identische Logik, eine Quelle).
+const ESKALATION_TEMPLATES: Record<string, string> = {
+  'vs-03': 'eskalation_tag14',
+  'vs-04': 'eskalation_tag21',
+  'vs-05': 'eskalation_tag28',
+}
 
 /**
  * Cron-Route: Prueft alle Faelle mit AS-Datum und aktualisiert die Eskalationsstufe.
@@ -98,17 +107,22 @@ export async function GET(request: Request) {
       beschreibung: `${stufeDef.titel} (Tag ${tage} seit AS).`,
     })
 
-    // KFZ-207: WhatsApp bei vs-03 (Tag 14), vs-04 (Tag 21), vs-05 (Tag 28)
-    if (stufeDef.whatsapp) {
-      if (neueStufe === 'vs-03') {
-        sendFallCommunication(fall.fall_id as string, 'eskalation_tag14').catch(() => {})
-      }
-      if (neueStufe === 'vs-04') {
-        sendFallCommunication(fall.fall_id as string, 'eskalation_tag21').catch(() => {})
-      }
-      if (neueStufe === 'vs-05') {
-        sendFallCommunication(fall.fall_id as string, 'eskalation_tag28').catch(() => {})
-      }
+    // KFZ-207: WhatsApp bei vs-03 (Tag 14), vs-04 (Tag 21), vs-05 (Tag 28).
+    // C3a: durable via Notification-Outbox statt fire-and-forget .catch(() => {}).
+    // Bisher verschluckte ein Twilio-Aussetzer die Eskalations-WA SPURLOS — und weil
+    // vs_eskalationsstufe oben bereits geschrieben ist, greift der Skip-Guard (Z.64)
+    // beim naechsten Lauf, es gab also nie einen zweiten Versuch. Jetzt: Retry-Backoff
+    // + Dead-Letter-Task. dedupKey = template:claimId -> pro Fall und Stufe genau EIN
+    // Versand; haertet zusaetzlich die oben beschriebene Doppel-Drohungs-Sorge ab.
+    const eskalationsTemplate = ESKALATION_TEMPLATES[neueStufe]
+    if (stufeDef.whatsapp && eskalationsTemplate) {
+      const eskalationsClaimId = fall.fall_id as string
+      await enqueue({
+        dedupKey: buildDedupKey({ template: eskalationsTemplate, claimId: eskalationsClaimId }),
+        kanal: 'whatsapp',
+        template: eskalationsTemplate,
+        claimId: eskalationsClaimId,
+      }).catch(() => {})
     }
 
     updated++

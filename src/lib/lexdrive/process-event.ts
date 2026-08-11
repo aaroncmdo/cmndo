@@ -784,6 +784,18 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     if (input.eventType === 'manual_status_override' && typeof input.payload.neuer_status === 'string') {
       const neuerStatus = input.payload.neuer_status
       const now = new Date().toISOString()
+      // Fundament C1 (Event-Log-Vollstaendigkeit): den Cursor VOR dem Write lesen — er ist
+      // die from_phase des Audit-Eintrags unten. Der Override bleibt validation-frei (s.o.),
+      // bekommt aber eine Spur (§9 "Event-Log bei jedem Uebergang").
+      let cursorVorOverride: string | null = null
+      if (claimIdForUpdates) {
+        const { data: vorher } = await db
+          .from('claims')
+          .select('operative_status')
+          .eq('id', claimIdForUpdates)
+          .maybeSingle()
+        cursorVorOverride = (vorher?.operative_status as string | null) ?? null
+      }
       const overrideUpdate: Record<string, unknown> = {
         status: neuerStatus,
         status_changed_at: now,
@@ -824,6 +836,34 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // entfernt) -> kein faelle-Write mehr (CMM-49 faelle-Drop-Runway).
       if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
         await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
+
+        // Fundament C1: Audit-Spur fuer den forcierten Sprung. Der Override umgeht die
+        // State-Machine BEWUSST (Legacy-Migration/aussergerichtliche Einigung) — ohne Eintrag
+        // waere er aber der einzige Status-Wechsel OHNE Event-Log (§9-Luecke, Befund 11.08.).
+        // Nur wenn wirklich ein operative_status gesetzt wurde (sonst gab es keinen Uebergang).
+        // trigger_type='manual': der CHECK erlaubt NUR auto|manual|webhook|scheduled —
+        // ein 'manual_override' waere ein stiller Reject (Flag-Drift-Klasse). Die Override-
+        // Herkunft steht deshalb im payload. Non-critical wie in der Engine (nur Log).
+        if (typeof ovClaims.operative_status === 'string') {
+          const { error: ptErr } = await db.from('phase_transitions').insert({
+            fall_id: input.fallId,
+            claim_id: claimIdForUpdates,
+            from_phase: cursorVorOverride,
+            to_phase: ovClaims.operative_status,
+            trigger_type: 'manual',
+            transitioned_by: input.triggeredByProfileId ?? null,
+            actor_rolle: null,
+            grund: typeof input.payload.override_grund === 'string' ? input.payload.override_grund : null,
+            payload: {
+              via: 'manual_status_override',
+              source: input.source,
+              external_event_id: input.externalEventId,
+            },
+          })
+          if (ptErr) {
+            console.error('[C1] phase_transitions (manual_status_override) fehlgeschlagen:', ptErr.message)
+          }
+        }
       }
       await writeAuftraegeColumns(db, claimIdForUpdates, ovAuftraege)
     }
