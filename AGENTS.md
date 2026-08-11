@@ -73,10 +73,13 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 
 **Ablauf:**
 
-1. **Im PR/Marker:** Smoke-Plan benennen — welche Flows, welche Specs, welche Test-Konten.
-2. **Nach Prod-Deploy:** vollständigen Smoke fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren.
-3. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
-4. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+1. **ZUERST das operative Soll — vor jedem Seed, jedem Klick, jeder Spec-Zeile.** Formuliere als Nutzer-Schrittfolge, wie das Feature **operativ ablaufen SOLLTE** — aus Nutzer-/Business-Sicht, **hergeleitet aus der Fachlogik, NICHT aus dem Code gelesen**. Das Soll ist die Referenz, gegen die gesmoked wird; der Code ist der Prüfling, nicht der Maßstab. Das Soll gehört in den PR/Marker (kurz, in Prosa) und wird **mit Aaron abgesprochen**, bevor final bewertet wird.
+2. **Smoke-Plan benennen** (im PR/Marker): welche Flows, welche Specs, welche Test-Konten — abgeleitet aus dem Soll aus Schritt 1.
+3. **Nach Prod-Deploy:** vollständigen Smoke **gegen das Soll** fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren. **Jede Abweichung Code↔Soll ist ein BEFUND**, keine Seed-Hürde, um die man herumbaut.
+4. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
+5. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (**inklusive des ausformulierten Solls** + Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+
+**Alles per UI:** Der Smoke fährt den operativen Weg durch die **echte Benutzeroberfläche** — echte Logins, echte Klicks, über **alle** beteiligten Rollen (z. B. Werkstatt UND Kunde), nicht per DB-Seed abgekürzt. DB-Seed ist **nur** für den realistischen **Ausgangszustand** erlaubt, den ein vorgelagerter (evtl. fremder/instabiler) Schritt erzeugt hätte. **Jeder Zustandsübergang, der zum getesteten Soll gehört, ist ein echter UI-Klick** — ein geseedeter Zwischenzustand verdeckt genau den Schritt, den der Smoke beweisen soll.
 
 **Sicherheit — kein Kollateralschaden auf Prod:**
 
@@ -85,6 +88,8 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 * **Niemals** Prod-Daten echter Kunden mutieren oder löschen.
 
 Begründung: Wiederholt war „build grün" ≠ „live nutzbar" (Feature nie erreichbar, Route 500, Silent-DB-CHECK-Reject, den kein Build/`tsc` fängt). Der Prod-Smoke ist die einzige Instanz, die echtes Nutzerverhalten prüft. Codifiziert den Broadcast-Mandat (11.07., Aaron) als harte Regel.
+
+Begründung „Soll zuerst" (Schritt 1, Aaron-Regel 27.07., verankert 11.08.): Ein Smoke, der nur die Implementierung nachfährt („seede den Zustand, den der Code erwartet, treibe den Pfad, den der Code nimmt"), bestätigt bloß *„Code tut, was Code tut"* — eine **Tautologie**. Er verdeckt die Lücke zwischen dem, was gebaut wurde, und dem, was Nutzer/Geschäft brauchen. Ausgelöst durch den #4567-Reparatur-Funnel-Smoke: auf `reparatur-laeuft` geseedet + nur den Abschluss getrieben → bestätigte den Code-Pfad statt des vollen operativen Wegs (Schadenmeldung → Kunden-Beleg). Wer das Soll erst nach dem Code formuliert, schreibt die Implementierung als Maßstab fest — genau das soll diese Regel verhindern.
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
