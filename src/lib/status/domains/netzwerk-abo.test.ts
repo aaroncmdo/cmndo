@@ -7,7 +7,7 @@ const DB_CHECK_WERTE = ['inaktiv', 'aktiv', 'ueberfaellig', 'gekuendigt', 'compe
 
 describe('NETZWERK_ABO_DEFS', () => {
   test('deckt alle DB-CHECK-Werte + kein_abo ab', () => {
-    for (const wert of [...DB_CHECK_WERTE, 'kein_abo']) {
+    for (const wert of [...DB_CHECK_WERTE, 'kein_abo'] as const) {
       expect(NETZWERK_ABO_DEFS[wert], `Def fuer '${wert}' fehlt`).toBeDefined()
       expect(NETZWERK_ABO_DEFS[wert].label.length).toBeGreaterThan(0)
     }
