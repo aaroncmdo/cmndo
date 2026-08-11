@@ -11,7 +11,6 @@
 // Bewusst KEIN 'use server'-File (Shared-Kernlogik fuer zwei owner-unterschiedliche Caller).
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { CLOSED_OPERATIVE_STATUS_PG } from '@/lib/claims/terminal-status'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -63,33 +62,50 @@ export async function closeNurGutachterTerminAlsDurchgefuehrt(
     console.error('[AAR-939 8b] tracking termin_durchgefuehrt fehlgeschlagen:', err)
   }
 
-  // 2) Claim terminal schliessen — guarded gegen bereits terminale Stati.
-  // B4-slice-2a-i-b (Status-Achsen-Konsolidierung): operative_status='termin_durchgefuehrt' +
-  // abgeschlossen_am MITSCHREIBEN. Vorher blieb operative_status auf dem letzten aktiven Wert
-  // (sv-termin/besichtigung) -> (a) der abgeschlossene nur_gutachter-Fall zaehlte in ALLEN
-  // CLOSED_OPERATIVE_STATUS_PG-Aktiv-Filtern faelschlich als aktiv (latenter Bug); (b) die
-  // Abschluss-Sub-Phase war nur aus claims.status ableitbar (blockte den status-Read-Drop
-  // slice-2a-ii). Konvergiert die op-Achse mit dem Terminal (wie Klage in slice-2a-i).
-  // 'termin_durchgefuehrt' ist seit dieser Slice gueltiges operative_status-Vokabular
-  // (fall_status-enum + claims_operative_status_check erweitert). abgeschlossen_am = robuster
-  // Close-Marker (istClaimGeschlossen/deriveCompletionTs). Billing bleibt am durchgefuehrt_am-
-  // Anker (unveraendert). Nur bei NICHT bereits terminalem Claim (Guard unten).
-  // T3-S4: claims.status wird nicht mehr geschrieben; Guard auf operative_status + NULL-safe
-  // (der alte `.not('status','in',...)`-Guard schloss status=NULL-Rows aus -> das Update matchte
-  // 0 Rows OHNE Error = silent-no-close; gleiche Bug-Klasse wie endzustand/verjaehrungs-cron).
-  const { error: claimErr } = await db
-    .from('claims')
-    .update({
-      operative_status: 'termin_durchgefuehrt',
-      abgeschlossen_am: now,
-      endzustand_gesetzt_durch_user_id: byUserId,
-      endzustand_gesetzt_am: now,
-      endzustand_grund: grund,
-    })
-    .eq('id', claimId)
-    .or(`operative_status.is.null,operative_status.not.in.${CLOSED_OPERATIVE_STATUS_PG}`)
-  if (claimErr) {
-    console.error('[AAR-939] claim terminal close failed:', claimErr.message)
+  // 2) Claim terminal schliessen — via ENGINE (Fundament C1-Funnel).
+  // Frueher ein Direkt-Write auf claims.operative_status (Ratchet-Baseline-Eintrag): der
+  // umging die State-Machine -> KEIN phase_transitions-Event-Log, keine Timeline, kein
+  // fall.status_changed-Emit. Jetzt laeuft der Close ueber transitionFallStatus; 'termin_
+  // durchgefuehrt' ist dort ein BROADLY_REACHABLE_TERMINAL (aus jedem AKTIVEN Zustand
+  // erreichbar = das frueher guard-lose Verhalten) und setzt abgeschlossen_am selbst.
+  // Der bisherige "nur wenn nicht bereits terminal"-Guard steckt jetzt in der Engine
+  // (istTerminalUebergangErlaubt) -> bereits geschlossener Claim => Engine wirft => caught
+  // (Idempotenz erhalten, kein Doppel-Close).
+  // Non-fatal wie zuvor: der durchgefuehrt_am-Anker (Billing) steht nach Schritt 1 bereits.
+  const { data: bridge } = await db
+    .from('faelle_claim_bridge')
+    .select('fall_id')
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  const fallId = (bridge?.fall_id as string | null) ?? null
+  if (fallId) {
+    try {
+      const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+      await transitionFallStatus(fallId, 'termin_durchgefuehrt', {
+        user_id: byUserId ?? undefined,
+        grund,
+      })
+      // endzustand_*-Audit-Anker: claims-only Spalten (NICHT im CLAIM_OWNED_DUPLICATE_COLUMNS-
+      // Split-Set der Engine -> dort wuerden sie im ungeschriebenen faelleUpdate landen).
+      // Daher hier separat, nach dem erfolgreichen Engine-Uebergang. Kein operative_status
+      // in diesem Payload -> Ratchet-konform.
+      const { error: auditErr } = await db
+        .from('claims')
+        .update({
+          endzustand_gesetzt_durch_user_id: byUserId,
+          endzustand_gesetzt_am: now,
+          endzustand_grund: grund,
+        })
+        .eq('id', claimId)
+      if (auditErr) console.error('[AAR-939] endzustand-Audit-Write fehlgeschlagen:', auditErr.message)
+    } catch (err) {
+      console.error(
+        '[AAR-939] claim terminal close via Engine fehlgeschlagen (non-fatal):',
+        err instanceof Error ? err.message : err,
+      )
+    }
+  } else {
+    console.error(`[AAR-939] keine Bridge-Row fuer claim ${claimId} — Terminal-Close uebersprungen`)
   }
 
   return { ok: true }
