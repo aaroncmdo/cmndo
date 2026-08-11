@@ -63,11 +63,42 @@ async function ladeIdentitaet(
     const { data } = await db.from('claims').select('lead_id').eq('id', bezug.id).maybeSingle()
     leadId = (data?.lead_id as string | null) ?? null
   }
-  if (!leadId) return { email: null, name: null }
-  const { data: lead } = await db.from('leads').select('email, vorname, nachname').eq('id', leadId).maybeSingle()
-  if (!lead) return { email: null, name: null }
-  const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
-  return { email: (lead.email as string | null) ?? null, name }
+  if (leadId) {
+    const { data: lead } = await db.from('leads').select('email, vorname, nachname').eq('id', leadId).maybeSingle()
+    if (lead) {
+      const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || null
+      return { email: (lead.email as string | null) ?? null, name }
+    }
+  }
+  // Fallback ueber claim_parties (11.08.): die lead_id-only-Aufloesung war bei 30/79 Claims (38 %)
+  // blind — der Guard sah dort weder Email noch Name und lief fail-open durch. 26 dieser 30 sind
+  // ueber den Geschaedigten der claim_parties aufloesbar (user_id -> profiles ODER person_id ->
+  // personen, je nach Gast/Account). Belegt an CLM-2026-01011: Smoke-Claim (lead_id NULL) klebte
+  // 13 Tage im Portal eines ECHTEN Partner-SV, ohne dass der Guard etwas sehen konnte.
+  if (bezug.typ === 'lead') return { email: null, name: null }
+  const { data: party } = await db
+    .from('claim_parties')
+    .select('user_id, person_id')
+    .eq('claim_id', bezug.id)
+    .eq('rolle', 'geschaedigter')
+    .eq('ist_aktiv', true)
+    .order('reihenfolge')
+    .limit(1)
+    .maybeSingle()
+  if (!party) return { email: null, name: null }
+  const alsIdentitaet = (r: { email?: unknown; vorname?: unknown; nachname?: unknown } | null) =>
+    r ? { email: (r.email as string | null) ?? null, name: [r.vorname, r.nachname].filter(Boolean).join(' ') || null } : null
+  if (party.user_id) {
+    const { data: prof } = await db.from('profiles').select('email, vorname, nachname').eq('id', party.user_id).maybeSingle()
+    const ident = alsIdentitaet(prof)
+    if (ident && (ident.email || ident.name)) return ident
+  }
+  if (party.person_id) {
+    const { data: pers } = await db.from('personen').select('email, vorname, nachname').eq('id', party.person_id).maybeSingle()
+    const ident = alsIdentitaet(pers)
+    if (ident && (ident.email || ident.name)) return ident
+  }
+  return { email: null, name: null }
 }
 
 /**
