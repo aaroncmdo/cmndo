@@ -9,6 +9,12 @@ describe('istAktivesAbo (pure)', () => {
   it('comped (Bestand) = true, auch ohne gueltig_bis', () => {
     expect(istAktivesAbo({ status: 'comped', gueltig_bis: null }, now)).toBe(true)
   })
+  it('befristetes comped mit gueltig_bis in Zukunft = true', () => {
+    expect(istAktivesAbo({ status: 'comped', gueltig_bis: '2026-08-28T00:00:00Z' }, now)).toBe(true)
+  })
+  it('befristetes comped abgelaufen = false', () => {
+    expect(istAktivesAbo({ status: 'comped', gueltig_bis: '2026-07-01T00:00:00Z' }, now)).toBe(false)
+  })
   it('aktiv aber abgelaufen = false', () => {
     expect(istAktivesAbo({ status: 'aktiv', gueltig_bis: '2026-07-01T00:00:00Z' }, now)).toBe(false)
   })

@@ -28,6 +28,21 @@ export function buildIntakeSystemPrompt(p: {
         })`,
     )
     .join('\n')
+
+  // Bereits gefuellte Felder MIT Wert zeigen (Prod-Smoke 11.08.): der Embed-Funnel
+  // schreibt Platzhalter-Defaults (schadentyp='sonstiges', polizei_vor_ort=false).
+  // Standen die nur nicht in "Noch offen", galten sie als beantwortet — ein
+  // Auffahrunfall wurde nie erkannt und "die Polizei war da" nie uebernommen.
+  // Jetzt sieht das Modell den Ist-Wert und darf ihn korrigieren.
+  const bereits = p.schema.filter((f) => !offen.includes(f))
+  const bereitsText = bereits
+    .map(
+      (f) =>
+        `- ${f.label}: ${String(p.bekannt[f.feld_key])} (feld_key: ${f.feld_key}${
+          f.optionen ? `, Optionen: ${f.optionen.map((o) => o.wert).join('/')}` : ''
+        })`,
+    )
+    .join('\n')
   return `Du bist die freundliche Schaden-Assistentin von ${persona}. Du hilfst dem Kunden nach einem Kfz-Unfall, seine Angaben Schritt fuer Schritt zu erfassen.
 
 === DEINE AUFGABE ===
@@ -35,7 +50,19 @@ Erfasse im Dialog GENAU die folgenden noch offenen Angaben. Frage locker, EINE S
 
 Noch offen:
 ${felderText || '(alle Angaben liegen vor)'}
-
+${
+  bereitsText
+    ? `
+=== BEREITS ERFASST ===
+Diese Angaben stehen schon in der Akte. Frage NICHT erneut danach.
+Korrigiere einen Wert NUR, wenn der Kunde ihm widerspricht ODER etwas Genaueres
+sagt — z.B. steht "sonstiges" und der Kunde schildert einen Auffahrunfall, dann
+setze den passenden Options-Wert; steht "false" und der Kunde sagt "die Polizei
+war da", dann setze true. Sonst lass den Wert unveraendert (nicht in deltas).
+${bereitsText}
+`
+    : ''
+}
 === REGELN ===
 - Frage NUR nach diesen Feldern. Erfinde keine zusaetzlichen Pflichtangaben.
 - Extrahiere aus JEDER Kundennachricht ALLES, was zu den offenen Feldern passt — auch
