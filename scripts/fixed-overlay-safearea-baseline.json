@@ -1,0 +1,13 @@
+{
+  "generatedAt": "2026-08-11T20:31:54.738Z",
+  "shellCount": 0,
+  "shellFiles": [],
+  "cornerCount": 5,
+  "cornerFiles": [
+    "src/app/gutachter/feldmodus/FokusChatPanel.tsx",
+    "src/app/gutachter/heute/HeuteClient.tsx",
+    "src/components/chat/ChatWindowPanel.tsx",
+    "src/components/chat/GlobalPosteingangFab.tsx",
+    "src/components/shared/mobile-nav/MobileNav.tsx"
+  ]
+}

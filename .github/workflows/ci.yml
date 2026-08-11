@@ -132,6 +132,17 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # Fixed-Overlay-Safe-Area-Bremse (Ratchet): ein `position: fixed`-Overlay steht
+      # ausserhalb des Layout-Flusses und beansprucht seine Bildschirmecke dauerhaft —
+      # Seiteninhalt darunter ist NICHT klickbar (der Klick trifft das Overlay). 2x real:
+      # ZB1-Footer 16.07. + Embed-Wizard-"Weiter" 11.08. (1280x720), beide nur per
+      # Hand-Smoke gefunden. Gate 1 (hart, Baseline 0): wer den FAB mountet, braucht
+      # lg:pb-20 auf dem scrollenden <main>. Gate 2 (grandfathered): NEUE unten-rechts
+      # fixierte Elemente brauchen eine bewusste Entscheidung.
+      # Siehe AGENTS.md §Fixed-Overlay-Gate + globals.css (.has-corner-pill-Nachbarblock).
+      - name: Fixed-Overlay-Safe-Area-Ratchet
+        run: npm run check:fixed-overlay -- --ratchet
+
       # E2E-Toplevel-FS-Bremse (Ratchet): blockt NEUE Playwright-Specs, die einen Seed per
       # readFileSync auf MODUL-EBENE lesen. Fehlt die Datei, wirft das schon beim Import ->
       # die gesamte Playwright-COLLECTION crasht und reisst ALLE anderen Journey-Smokes mit.
