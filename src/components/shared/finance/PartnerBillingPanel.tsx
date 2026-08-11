@@ -5,6 +5,7 @@ import { Button } from '@/components/primitives/Button'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import {
   DataTableContainer,
   Table,
@@ -517,12 +518,21 @@ export function PartnerBillingPanel({
                   onChange={(e) => setStUstId(e.target.value)}
                   placeholder="DE123456789"
                 />
-                <TextField
-                  label="Straße"
-                  value={stStrasse}
-                  onChange={(e) => setStStrasse(e.target.value)}
-                  placeholder="Musterstraße 1"
-                />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-semibold text-claimondo-shield">Straße</label>
+                  {/* P3 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort. Felder bleiben editierbar. */}
+                  <GooglePlaceAutocomplete
+                    className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+                    defaultValue={stStrasse}
+                    placeholder="Musterstraße 1"
+                    onSelect={(r) => {
+                      setStStrasse(r.strasse || stStrasse)
+                      if (r.plz) setStPlz(r.plz)
+                      if (r.stadt) setStOrt(r.stadt)
+                    }}
+                    onChange={(t) => setStStrasse(t)}
+                  />
+                </div>
                 <TextField
                   label="PLZ"
                   value={stPlz}
