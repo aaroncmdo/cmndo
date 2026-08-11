@@ -19,7 +19,11 @@ const mode = process.argv.includes('--ratchet')
     ? 'update'
     : 'warn'
 
-const files = execSync('git ls-files "tests/e2e/**/*.spec.ts"', { encoding: 'utf8' })
+// ALLE .ts unter tests/e2e -- nicht nur *.spec.ts. Ein geteilter Helper (z.B.
+// tests/e2e/lib/seed-fixture.ts) wird beim Collection-Import mitgeladen; ein ungeschuetzter
+// top-level Read dort crasht die Collection genauso, waere mit einem *.spec.ts-Glob aber
+// durchgerutscht. Aktuell 0 Verletzer unter den Helpern -> Erweiterung ohne Baseline-Effekt.
+const files = execSync('git ls-files "tests/e2e/**/*.ts"', { encoding: 'utf8' })
   .split('\n')
   .filter(Boolean)
 
