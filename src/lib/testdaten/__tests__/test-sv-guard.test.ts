@@ -25,6 +25,9 @@ function fakeDb(handlers: Record<string, () => Row>): SupabaseClient {
   const builder = (table: string): unknown => ({
     select: () => builder(table),
     eq: () => builder(table),
+    // order/limit: vom claim_parties-Fallback der Identitaets-Aufloesung genutzt.
+    order: () => builder(table),
+    limit: () => builder(table),
     maybeSingle: async () => (handlers[table] ? handlers[table]() : { data: null, error: null }),
   })
   return { from: (table: string) => builder(table) } as unknown as SupabaseClient
@@ -63,6 +66,52 @@ describe('pruefeTestSvKonsistenz — bezug-Aufloesung + fail-open', () => {
   it('kein bezug -> nicht blockieren', async () => {
     const db = fakeDb({})
     expect((await pruefeTestSvKonsistenz(db, 'sv-1', null)).blockieren).toBe(false)
+  })
+
+  // Fallback-Achse (11.08.): 30/79 prod-Claims haben KEINE lead_id — dort war der Guard blind
+  // und liess intern<->echt durch (belegt an CLM-2026-01011). 26 davon sind ueber den
+  // Geschaedigten der claim_parties aufloesbar.
+  it('claim OHNE lead_id -> Fallback claim_parties.user_id -> profiles (blockt intern auf echtem SV)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      claims: () => ({ data: { lead_id: null }, error: null }),
+      claim_parties: () => ({ data: { user_id: 'user-1', person_id: null }, error: null }),
+      profiles: () => ({ data: { email: 'smoke-kunde@claimondo.de', vorname: 'Smoke', nachname: 'Kunde' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'fall', id: 'claim-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
+  it('claim OHNE lead_id -> Fallback ueber person_id -> personen (Gast ohne Account)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      claims: () => ({ data: { lead_id: null }, error: null }),
+      claim_parties: () => ({ data: { user_id: null, person_id: 'pers-1' }, error: null }),
+      personen: () => ({ data: { email: 'aaron.sprafke+smokeq@claimondo.de', vorname: 'Smoke', nachname: 'Quali' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'fall', id: 'claim-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
+  it('claim OHNE lead_id und OHNE party -> fail-open (echter Kunde wird nie ausgesperrt)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      claims: () => ({ data: { lead_id: null }, error: null }),
+      claim_parties: () => ({ data: null, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'fall', id: 'claim-1' })
+    expect(res.blockieren).toBe(false)
+  })
+
+  it('Fallback erkennt echten Kunden korrekt als extern (kein False-Positive-Block)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      claims: () => ({ data: { lead_id: null }, error: null }),
+      claim_parties: () => ({ data: { user_id: 'user-2', person_id: null }, error: null }),
+      profiles: () => ({ data: { email: 'anja.harig@icloud.com', vorname: 'Anja', nachname: 'Harig' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'fall', id: 'claim-1' })
+    expect(res.blockieren).toBe(false)
   })
 
   it('fail-open: Lookup-Fehler blockt nie eine Buchung', async () => {
