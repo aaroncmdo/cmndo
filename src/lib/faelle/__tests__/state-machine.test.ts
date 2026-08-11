@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istGueltigerFallUebergang } from '../state-machine'
+import { istGueltigerFallUebergang, istTerminalUebergangErlaubt, BROADLY_REACHABLE_TERMINALS } from '../state-machine'
 
 // Pure Vorab-Check fuer den fall_geschlossen-All-or-Nothing-Guard (process-event.ts):
 // 'abgeschlossen' ist laut FALL_STATUS_TRANSITIONS nur aus regulierung / klage /
@@ -79,5 +79,31 @@ describe('istGueltigerFallUebergang', () => {
       expect(istGueltigerFallUebergang('sv-gesucht', 'sv-zugewiesen')).toBe(true)
       expect(istGueltigerFallUebergang('sv-gesucht', 'sv-termin')).toBe(true)
     })
+  })
+})
+
+// ── C1-Funnel: breit-erreichbare Terminal-Closes ──────────────────────────────
+// Die 2 vormaligen Direkt-Writer (kanzlei-wunsch/versendeKanzleiPaket -> an_externe_kanzlei_
+// uebergeben, close-nur-gutachter-termin -> termin_durchgefuehrt) laufen jetzt ueber
+// transitionFallStatus. Beide Terminals sind NICHT in der Matrix, sondern via
+// BROADLY_REACHABLE_TERMINALS aus jedem AKTIVEN Zustand erlaubt (wie storniert) ->
+// Verhaltens-erhaltend (die Direkt-Writes hatten keine Source-Guard).
+describe('C1-Funnel: breit-erreichbare Terminal-Closes', () => {
+  it('BROADLY_REACHABLE_TERMINALS enthaelt die 2 Nicht-Matrix-Terminals', () => {
+    expect(BROADLY_REACHABLE_TERMINALS.has('an_externe_kanzlei_uebergeben')).toBe(true)
+    expect(BROADLY_REACHABLE_TERMINALS.has('termin_durchgefuehrt')).toBe(true)
+  })
+
+  it('istTerminalUebergangErlaubt: aus aktivem Zustand erlaubt', () => {
+    for (const aktiv of ['ersterfassung', 'sv-termin', 'regulierung', 'in_kommunikation_vs', 'kanzlei-uebergeben']) {
+      expect(istTerminalUebergangErlaubt(aktiv), aktiv).toBe(true)
+    }
+  })
+
+  it('istTerminalUebergangErlaubt: aus geschlossenem Zustand / null abgelehnt', () => {
+    for (const zu of ['abgeschlossen', 'storniert', 'an_externe_kanzlei_uebergeben', 'termin_durchgefuehrt', 'klage_rechtsstreit']) {
+      expect(istTerminalUebergangErlaubt(zu), zu).toBe(false)
+    }
+    expect(istTerminalUebergangErlaubt(null)).toBe(false)
   })
 })

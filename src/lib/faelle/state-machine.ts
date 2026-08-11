@@ -4,6 +4,7 @@ import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/clai
 import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { resolveCursorOperativeStatus } from '@/lib/faelle/fall-status-claim-mapping'
+import { CLOSED_OPERATIVE_STATUS } from '@/lib/claims/terminal-status'
 
 /**
  * KFZ-202: Zentrale State-Machine fuer den operativen Status (claims.operative_status, SSoT).
@@ -91,6 +92,23 @@ export function istGueltigerFallUebergang(
   return (FALL_STATUS_TRANSITIONS[from] ?? []).includes(to)
 }
 
+/**
+ * C1-Funnel: Terminal-Close-Ziele, die — wie 'storniert' — aus JEDEM aktiven Zustand
+ * erreichbar sind (Nicht-Matrix-Terminals). Sie funneln die frueheren Direkt-Writer
+ * (kanzlei-wunsch/versendeKanzleiPaket + close-nur-gutachter-termin), die keine
+ * Source-State-Guard hatten — Verhaltens-erhaltend: kein aktiver Claim wird abgelehnt.
+ * Beide sind bereits in CLOSED_OPERATIVE_STATUS + CLAIMS_TERMINAL_STATES (Clobber-Guard).
+ */
+export const BROADLY_REACHABLE_TERMINALS: ReadonlySet<string> = new Set([
+  'an_externe_kanzlei_uebergeben',
+  'termin_durchgefuehrt',
+])
+
+/** Terminal-Close aus `current` erlaubt? True wenn Cursor gesetzt + noch nicht geschlossen. */
+export function istTerminalUebergangErlaubt(current: string | null): boolean {
+  return !!current && !CLOSED_OPERATIVE_STATUS.has(current)
+}
+
 export async function transitionFallStatus(
   fallId: string,
   newStatus: string,
@@ -136,9 +154,13 @@ export async function transitionFallStatus(
     )
   }
 
-  // Validate transition
+  // Validate transition. BROADLY_REACHABLE_TERMINALS (an_externe_kanzlei_uebergeben /
+  // termin_durchgefuehrt) sind — wie storniert — aus jedem aktiven Zustand erreichbar
+  // (Funnel der frueheren Direkt-Writer ohne Source-Guard).
   const allowed = FALL_STATUS_TRANSITIONS[currentStatus]
-  if (!allowed || !allowed.includes(newStatus)) {
+  const istBreitTerminal =
+    BROADLY_REACHABLE_TERMINALS.has(newStatus) && istTerminalUebergangErlaubt(currentStatus)
+  if (!istBreitTerminal && (!allowed || !allowed.includes(newStatus))) {
     throw new Error(
       `Ungueltiger Status-Uebergang: ${currentStatus} → ${newStatus}. Erlaubt: ${allowed?.join(', ') ?? 'keine'}`,
     )
@@ -167,6 +189,13 @@ export async function transitionFallStatus(
     // geschlossen_grund persistiert. Andere abgeschlossen-Caller (Cron fall-abschluss)
     // uebergeben keinen grund -> Verhalten unveraendert.
     if (metadata?.grund) update.geschlossen_grund = metadata.grund
+  }
+  // C1-Funnel: die 2 breit-erreichbaren Terminal-Closes setzen den Close-Marker
+  // abgeschlossen_am (routet via CLAIM_OWNED_DUPLICATE_COLUMNS auf claims — wie 'abgeschlossen').
+  // Die endzustand_*-Audit-Felder (nur close-nur-gutachter) setzt der Caller separat: sie sind
+  // claims-only, NICHT im faelle-Split-Set -> wuerden hier im ungeschriebenen faelleUpdate landen.
+  if (newStatus === 'an_externe_kanzlei_uebergeben' || newStatus === 'termin_durchgefuehrt') {
+    update.abgeschlossen_am = now
   }
   if (newStatus === 'kanzlei-uebergeben') {
     update.kanzlei_uebergeben_am = now
