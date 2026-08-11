@@ -4606,6 +4606,7 @@
         "uhrSuffix": "",
         "wirdGebucht": "Rezerve ediliyor...",
         "verbindlichBuchen": "Randevuyu bağlayıcı olarak onayla",
+        "buchungFehlgeschlagen": "Randevu alınamadı. Lütfen tekrar deneyin veya bizimle iletişime geçin.",
         "frei": "Müsait",
         "belegt": "Dolu"
       },

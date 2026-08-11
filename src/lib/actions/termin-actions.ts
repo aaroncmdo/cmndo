@@ -835,7 +835,15 @@ export async function terminBuchen({
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
-  if (!termin) return { success: false, error: 'Kein aktiver Termin gefunden' }
+  // Kunde-sichtbarer Text (einziger Consumer ist der Kunde-Kalender) — keine Entwickler-Sprache.
+  // Tritt auf, wenn ein SV zugewiesen ist, aber (noch) kein reservierter/vorgeschlagener Termin
+  // existiert; der Slot-Picker rendert dann trotzdem (prod-belegt 11.08. an CLM-2026-00834).
+  if (!termin) {
+    return {
+      success: false,
+      error: 'Aktuell liegt für Ihren Fall kein buchbarer Termin vor. Ihr Sachverständiger meldet sich zur Terminabstimmung — bei Fragen wenden Sie sich bitte an Ihren Betreuer.',
+    }
+  }
 
   const slotDate = new Date(slot)
   const endDate = new Date(slotDate.getTime() + TERMIN_DAUER_MS)

@@ -24,6 +24,9 @@ export default function KalenderClient({
   const [confirmSlot, setConfirmSlot] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  // Prod-Smoke 11.08.: terminBuchen antwortete {success:false,error:'Kein aktiver Termin gefunden'},
+  // die UI verwarf result.error stumm -> Kunde klickte ins Leere. Fehler MUSS sichtbar sein.
+  const [fehler, setFehler] = useState<string | null>(null)
 
   // Naechste 14 Tage generieren
   const today = new Date()
@@ -70,11 +73,16 @@ export default function KalenderClient({
   async function handleBuchen() {
     if (!confirmSlot) return
     setLoading(true)
+    setFehler(null)
     const result = await terminBuchen({ slot: confirmSlot, source: 'kunde_kalender', fallId })
     setLoading(false)
     if (result.success) {
       setDone(true)
+      return
     }
+    // Jeder Fehlschlag wird angezeigt — nicht nur „Kein aktiver Termin gefunden", auch der
+    // Doppelbuchungs-Konflikt aus assertSvKalenderFrei und DB-/Auth-Fehler.
+    setFehler(result.error ?? t('kalender.buchungFehlgeschlagen'))
   }
 
   if (done) {
@@ -169,6 +177,11 @@ export default function KalenderClient({
             className="w-full py-3 rounded-ios-xl bg-claimondo-ondo text-white font-medium text-sm hover:bg-claimondo-shield transition-colors disabled:opacity-40">
             {loading ? t('kalender.wirdGebucht') : t('kalender.verbindlichBuchen')}
           </button>
+          {fehler && (
+            <NoticeBox tone="danger" className="mt-3">
+              <p className="text-sm">{fehler}</p>
+            </NoticeBox>
+          )}
         </div>
       )}
 
