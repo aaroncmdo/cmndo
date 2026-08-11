@@ -4,6 +4,7 @@ import { useState, useTransition, type ChangeEvent } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/primitives'
 import { registriereMaklerSelf } from './actions'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { ShareTools } from '@/components/makler/ShareTools'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
 import { RECHTSFORM_OPTIONEN } from '@/lib/rechtsformen'
@@ -145,6 +146,17 @@ export function MaklerRegistrierenClient({
         </Field>
         <Field label="Telefon *">
           <input className={inputClass} type="tel" value={form.telefon} onChange={set('telefon')} placeholder="0151 23456789" />
+        </Field>
+        <Field label="Adresse suchen (füllt PLZ + Ort)" className="sm:col-span-2">
+          {/* P2 Ortseingaben: Google-Places-Autocomplete füllt PLZ + Ort. Makler hat keine
+              Straße-Spalte → nur plz/ort. Felder bleiben editierbar (Korrektur/Fallback). */}
+          <GooglePlaceAutocomplete
+            className={inputClass}
+            placeholder="Straße, PLZ, Ort eingeben…"
+            onSelect={(r) =>
+              setForm((f) => ({ ...f, adresse_plz: r.plz || f.adresse_plz, adresse_ort: r.stadt || f.adresse_ort }))
+            }
+          />
         </Field>
         <Field label="PLZ">
           <input className={inputClass} value={form.adresse_plz} onChange={set('adresse_plz')} placeholder="50667" />

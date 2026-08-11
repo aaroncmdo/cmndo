@@ -31,6 +31,7 @@ import { HAEUFIGE_HERSTELLER } from '@/app/embed/werkstatt-finder/_components/wi
 import { FAHRZEUG_GRUPPEN } from '@/lib/werkstatt/fahrzeug-gruppen'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
 import { TextField } from '@/components/shared/forms'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { Button } from '@/components/primitives/Button'
 
 const MARKEN_INPUT_CLS =
@@ -154,6 +155,13 @@ function fieldLabel(text: string, required = false) {
 function ProfilCard(props: WerkstattSettingsProps) {
   const [state, setState] = useState<SaveState>({ status: 'idle' })
   const [isPending, startTransition] = useTransition()
+  // P2 Ortseingaben: Adresse controlled (GooglePlaceAutocomplete rendert kein name-Attribut) →
+  // im Submit aus dem state statt fd.get. Autocomplete füllt strasse/plz/ort, Felder editierbar.
+  const [adr, setAdr] = useState({
+    strasse: props.adresse_strasse ?? '',
+    plz: props.adresse_plz ?? '',
+    ort: props.adresse_ort ?? '',
+  })
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -163,9 +171,9 @@ function ProfilCard(props: WerkstattSettingsProps) {
       const res = await updateWerkstattProfil({
         name: String(fd.get('name') ?? ''),
         ansprechpartner_name: String(fd.get('ansprechpartner_name') ?? ''),
-        adresse_strasse: String(fd.get('adresse_strasse') ?? ''),
-        adresse_plz: String(fd.get('adresse_plz') ?? ''),
-        adresse_ort: String(fd.get('adresse_ort') ?? ''),
+        adresse_strasse: adr.strasse,
+        adresse_plz: adr.plz,
+        adresse_ort: adr.ort,
         telefon: String(fd.get('telefon') ?? ''),
         email: String(fd.get('email') ?? ''),
         website: String(fd.get('website') ?? ''),
@@ -225,22 +233,30 @@ function ProfilCard(props: WerkstattSettingsProps) {
           defaultValue={props.ust_id ?? ''}
           placeholder="DE123456789"
         />
-        <TextField
-          label="Straße & Hausnummer"
-          name="adresse_strasse"
-          defaultValue={props.adresse_strasse ?? ''}
-        />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-claimondo-shield">Straße &amp; Hausnummer</label>
+          {/* P2 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort (controlled state → Submit). */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+            defaultValue={adr.strasse}
+            placeholder="Straße + Hausnummer eingeben…"
+            onSelect={(r) =>
+              setAdr((a) => ({ strasse: r.strasse || a.strasse, plz: r.plz || a.plz, ort: r.stadt || a.ort }))
+            }
+            onChange={(t) => setAdr((a) => ({ ...a, strasse: t }))}
+          />
+        </div>
         <div className="grid grid-cols-3 gap-3">
           <TextField
             label="PLZ"
-            name="adresse_plz"
-            defaultValue={props.adresse_plz ?? ''}
+            value={adr.plz}
+            onChange={(e) => setAdr((a) => ({ ...a, plz: e.target.value }))}
           />
           <div className="col-span-2">
             <TextField
               label="Ort"
-              name="adresse_ort"
-              defaultValue={props.adresse_ort ?? ''}
+              value={adr.ort}
+              onChange={(e) => setAdr((a) => ({ ...a, ort: e.target.value }))}
             />
           </div>
         </div>
