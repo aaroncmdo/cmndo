@@ -5,6 +5,7 @@ import Markdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import type { Article } from '@/lib/article-types'
 import { SITE } from '@/lib/site'
+import { ctaVarianteFuerRoute, ctaHref } from '@/lib/cta/article-cta-varianten'
 
 // Markdown-Renderer (RSC): interne /-Links → next/link, externe → neuer Tab.
 const mdComponents: Components = {
@@ -188,28 +189,29 @@ export function ArticleDisclaimer() {
 
 // CTA → eigenes Lead-Formular /gutachter-finden (WP-6). KEINE claimondo.de-Links,
 // kein tel/WhatsApp (Footprint-Telefon ist Platzhalter, siehe site.ts).
-export function ArticleCta() {
+//
+// `route` steuert die kontext-abhaengige Variante (lib/cta/article-cta-varianten.ts):
+// ohne Prop bleibt es exakt der Bestandstext, /schadenfreiheitsklasse/* bekommt die
+// intent-gerechte Fassung + ref-Attribution. Grund: gemessener Intent-Mismatch
+// (~60 % der Formular-Besucher kamen aus dem SFK-Cluster, 0 % Conversion).
+export function ArticleCta({ route }: { route?: string | null } = {}) {
+  const v = ctaVarianteFuerRoute(route)
   return (
     <section className="bg-au-ink py-14 text-au-surface sm:py-20">
       <div className="container-narrow mx-auto max-w-3xl px-4 text-center sm:px-6">
         <h2 className="text-balance font-display text-3xl font-extrabold leading-tight tracking-tight sm:text-4xl">
-          Unverschuldet verunfallt?{' '}
-          <span className="font-medium italic text-au-amber-soft">Beweise sichern lassen</span>
+          {v.h2Pre}{' '}
+          <span className="font-medium italic text-au-amber-soft">{v.h2Highlight}</span>
         </h2>
-        <p className="mt-5 text-lg leading-relaxed text-au-surface/80">
-          Ein unabhängiges Gutachten dokumentiert Schaden und Hergang — die Grundlage Ihrer Forderung.
-          Bei Fremdverschulden kostenfrei.
-        </p>
-        <p className="mt-5 text-sm font-semibold text-au-amber-soft">
-          Bei unverschuldetem Unfall kostenfrei · § 249 BGB
-        </p>
+        <p className="mt-5 text-lg leading-relaxed text-au-surface/80">{v.body}</p>
+        <p className="mt-5 text-sm font-semibold text-au-amber-soft">{v.trust}</p>
         <div className="mt-7">
           <CtaLink
-            href="/gutachter-finden"
+            href={ctaHref(v)}
             location="artikel-hub"
             className="inline-flex items-center gap-2 rounded-ios-md bg-au-amber px-7 py-3.5 font-semibold text-au-surface shadow-au-md transition-opacity hover:opacity-90"
           >
-            Sachverständigen anfragen
+            {v.button}
           </CtaLink>
         </div>
       </div>
