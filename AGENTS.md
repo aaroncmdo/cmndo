@@ -379,6 +379,19 @@ Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB
 **Abgrenzung (0 False-Positives):** NICHT betroffen sind **Content-Seiten**, die im Normalfall JSX rendern und nur als **Guard** redirecten (`if(!user)redirect('/login'); … return <JSX>`), (shell)-Layouts, DB-getriebene Router mit `return`. Faustregel: irgendein Content-`return` → ok; redirectet auf allen Pfaden (kein return) → Stub.
 
 CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
+# Fixed-Overlay-Safe-Area-Gate (Ratchet)
+
+**Ein `position: fixed`-Overlay steht ausserhalb des Layout-Flusses und beansprucht seine Bildschirmecke DAUERHAFT. Landet Seiteninhalt dort, ist er nicht mehr klickbar — der Klick trifft das Overlay.** Die Ecke muss deshalb **im Fluss** reserviert werden.
+
+**Zweimal real passiert, beide Male nur per Hand-Smoke gefunden** (kein Build/tsc/Ratchet fing es): **16.07.** der `GlobalPosteingangFab` fing Klicks auf die ZB1-Footer-Ecke ab; **11.08.** war „Weiter" im Embed-Wizard bei **1280×720** unklickbar (`document.elementFromPoint()` auf der Button-Mitte traf den FAB; bei 1920×1080 frei — deshalb fällt es auf grossen Monitoren nie auf). **Ein z-Index löst es nicht:** senken → das Overlay verschwindet hinter Modals (genau deshalb wurde es 16.07. von 9990 auf 950 gesenkt); heben → es frisst wieder Klicks.
+
+**Der Vertrag** (Gegenstück zu `.has-corner-pill` für die Ecke *oben rechts*, siehe `globals.css`): Wer ein persistentes Ecken-Overlay mountet, reserviert dessen Footprint auf dem **scrollenden `<main>`** — `lg:pb-20` (80px > FAB-Footprint 64px). Betroffen sind die 4 Shells, die den FAB mounten: `gutachter/GutachterShell`, `admin/layout`, `faelle/layout`, `mitarbeiter/layout` (dispatch mountet ihn **nicht**). **Falle:** die Shells hatten `md:pb-0`/`lg:pb-0` — Bodenabstand nur für die **mobile** Tab-Bar, auf Desktop bewusst null. Genau dort lebt der FAB (`hidden lg:flex`).
+
+CI fährt `npm run check:fixed-overlay -- --ratchet`. **Zwei Regeln** gegen `scripts/fixed-overlay-safearea-baseline.json`:
+* **Regel 1 (hart, Baseline 0):** File mountet ein Overlay aus `OVERLAY_COMPONENTS` → sein `<main>` MUSS `lg:pb-{MIN_SAFE_PB}`+ tragen. Präzise, 0 False-Positives.
+* **Regel 2 (grandfathered, Baseline 5):** **NEUE** Elemente mit `fixed` + `bottom-*` + `right-*` (ohne `inset-0` = kein Vollflächen-Backdrop). Persistentes Overlay → Safe-Area sicherstellen **und** in `OVERLAY_COMPONENTS` eintragen; flüchtig/harmlos (Toast, Drawer, Bubble) → `-- --update-baseline`.
+
+Pure-Logik: `scripts/lib/fixed-overlay-scan.mjs` (unit-getestet, 17 Fälle). **Kommentare werden gestrippt** — ohne das blendet ein Erklär-Kommentar mit `lg:pb-20` im `<main>`-Tag das Gate (beim Selbsttest 11.08. passiert). Lokal (ohne Flag) `--warn` (exit 0).
 <!-- END:redirect-stub-gate -->
 
 # E2E-Toplevel-FS-Gate (Ratchet)
