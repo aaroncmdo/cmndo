@@ -81,6 +81,9 @@ const PILLAR_HREFS = [
   '/kfz-gutachter/sachverstaendiger-vs-gutachter',
   '/kfz-gutachter/autoschaden-soforthilfe',
   '/kfz-gutachter/gutachten-service',
+  // Index-Kopplung: PILLAR_HREFS[i] <-> kfz_gutachter_hub.pillars[i] (siehe Render unten).
+  // Neuer Spoke MUSS in beiden Arrays an derselben Position stehen.
+  '/kfz-gutachter/nutzungsausfall',
 ]
 
 const SPEZIAL_HREFS = [
