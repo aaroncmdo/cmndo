@@ -44,6 +44,19 @@ describe('buildIntakeSystemPrompt', () => {
     expect(p).not.toContain('(alle Angaben liegen vor)')
   })
 
+  // Prod-Smoke 11.08.: das Modell lieferte unfalldatum="gestern" -> Postgres
+  // "invalid input syntax for type date" -> der GANZE Turn ging verloren.
+  it('verlangt ISO-Datum und nennt das heutige Datum', () => {
+    const p = buildIntakeSystemPrompt({
+      firmenname: null,
+      schema: [F({ feld_key: 'unfalldatum', label: 'Unfalldatum', spalte: 'unfalldatum' })],
+      bekannt: {},
+      heute: '2026-08-11',
+    })
+    expect(p).toContain('YYYY-MM-DD')
+    expect(p).toContain('2026-08-11')
+  })
+
   it('markiert Pflichtfelder als [PFLICHT]', () => {
     const schema = [
       F({ feld_key: 'unfallort', label: 'Unfallort', spalte: 'unfallort', pflicht: true }),
