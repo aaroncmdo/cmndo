@@ -48,6 +48,7 @@ import { parseUhrzeit } from '@/lib/format/zeit'
 import { clampKennzeichenForDb } from '@/lib/format/kennzeichen'
 import type { ClaimInsert } from '@/lib/claims/types'
 import { emitEvent } from '@/lib/notifications/emit'
+import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 
 export type ConvertLeadToClaimInput = {
   leadId: string
@@ -1059,6 +1060,21 @@ export async function convertLeadToClaim(
     } catch (err) {
       console.error('[convertLeadToClaim] makler.lead_eingegangen emit fehlgeschlagen (non-critical):', err)
     }
+  }
+
+  // C2b-1 (Fundament C2 „Ein Intake", j02-IST-Delta #2): Pflichtdok-Slots gehoeren in den KERN.
+  // Die Direkt-Claim-Meldewege (Gegner-Schadenkarte `schaden/[token]/actions.ts`, Admin-manuell)
+  // rufen convertLeadToClaim DIREKT statt ueber den Wrapper convertLeadToFall — ihre Claims hatten
+  // deshalb nie Upload-Platzhalter. createPflichtdokumenteFromKatalog ist pro-Slot-idempotent
+  // (CMM-23: liest existingSlots, legt nur Fehlendes an) -> der spaetere Wrapper-Aufruf findet
+  // 0 fehlende Slots = No-op, keine Dubletten. Non-fatal: ein Slot-Fehler darf die Konversion
+  // (Geld-/Fall-Pfad) nie kippen.
+  // BEWUSST NICHT mitgezogen: sendFallCommunication('fall_eroeffnet') bleibt im Wrapper — beim
+  // Gegner-Flow meldet der GEGNER; der Geschaedigte darf davon nicht ungefragt angeschrieben werden.
+  try {
+    await createPflichtdokumenteFromKatalog(admin, fallId, lead)
+  } catch (err) {
+    console.error('[convertLeadToClaim] Pflichtdok-Slots fehlgeschlagen (non-critical):', err)
   }
 
   return {
