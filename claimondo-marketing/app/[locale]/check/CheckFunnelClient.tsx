@@ -10,6 +10,7 @@ import { trackEvent } from '@/lib/analytics/track-event'
 import { setUserData } from '@/lib/analytics/user-data'
 import { buildCheckResult, type Schuld, type Frist, type Gutachten } from '@/lib/check/result-model'
 import { AnspruchFotoCheckCta } from '@/components/check/AnspruchFotoCheckCta'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // Interaktive Anspruchs-Prüfung: 3 Klick-Fragen -> antwort-adaptives Ergebnis
 // (result-model.ts, 4 Tiers) -> Lead-Formular (submitCheckLead). Funnel-Tracking
@@ -32,6 +33,9 @@ export function CheckFunnelClient() {
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
   const startedRef = useRef(false)
+  // P4 Ortseingaben: Ort-Autocomplete controlled (AC rendert kein name) -> Wert per hidden input in FormData.
+  const [city, setCity] = useState('')
+  const [placeId, setPlaceId] = useState('')
 
   const QUESTIONS = [
     {
@@ -258,7 +262,22 @@ export function CheckFunnelClient() {
             <form onSubmit={handleSubmit} noValidate data-tracking="lead-form-check" className="mt-4 space-y-3">
               <Field name="name" label={tl('lead_form.field_name_label')} placeholder={tl('lead_form.field_name_placeholder')} type="text" autoComplete="name" required disabled={pending} errorMessage={error?.field === 'name' ? error.message : undefined} />
               <Field name="phone" label={tl('lead_form.field_phone_label')} placeholder={tl('lead_form.field_phone_placeholder')} type="tel" autoComplete="tel" inputMode="tel" required disabled={pending} errorMessage={error?.field === 'phone' ? error.message : undefined} />
-              <Field name="city" label={tl('lead_form.field_city_label')} placeholder={tl('lead_form.field_city_placeholder')} type="text" autoComplete="postal-code" required disabled={pending} errorMessage={error?.field === 'city' ? error.message : undefined} />
+              <div>
+                <label htmlFor="check-lead-city" className="mb-1.5 block text-xs font-semibold text-claimondo-shield">{tl('lead_form.field_city_label')}</label>
+                {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Stadt/PLZ; Wert -> verstecktes name="city" (+ place_id) für die FormData. */}
+                <GooglePlaceAutocomplete
+                  className="w-full rounded-ios-md border bg-white px-4 py-3 text-base transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20"
+                  placeholder={tl('lead_form.field_city_placeholder')}
+                  defaultValue={city}
+                  onSelect={(r) => { setCity(r.stadt || r.plz || r.adresse); setPlaceId(r.place_id) }}
+                  onChange={(v) => { setCity(v); setPlaceId('') }}
+                />
+                <input type="hidden" name="city" value={city} />
+                {placeId ? <input type="hidden" name="place_id" value={placeId} /> : null}
+                {error?.field === 'city' ? (
+                  <p className="mt-1 text-xs font-semibold text-red-600">{error.message}</p>
+                ) : null}
+              </div>
               <button
                 type="submit"
                 disabled={pending}

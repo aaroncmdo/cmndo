@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { submitKfzgutachterLead } from './actions'
 import { trackLpEvent } from './track'
 import { TEL_HREF, TEL_DISPLAY } from './constants'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // Generisches Lead-Formular für die kfzgutachter-Ads-Landeseite.
 // Nutzt eigene Server-Action submitKfzgutachterLead; lp_variant + source
@@ -15,6 +16,9 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
   const [submittedName, setSubmittedName] = useState<string | null>(null)
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
+  // P4 Ortseingaben: Ort-Autocomplete controlled (AC rendert kein name) -> Wert per hidden input in FormData.
+  const [city, setCity] = useState('')
+  const [placeId, setPlaceId] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -138,16 +142,24 @@ export function LeadFormClient({ id = 'lead-form' }: { id?: string }) {
           disabled={pending}
           errorMessage={error?.field === 'phone' ? error.message : undefined}
         />
-        <Field
-          name="city"
-          label="Stadt / PLZ des Unfalls"
-          type="text"
-          placeholder="z. B. Köln oder 50667"
-          autoComplete="postal-code"
-          required
-          disabled={pending}
-          errorMessage={error?.field === 'city' ? error.message : undefined}
-        />
+        <div>
+          <label htmlFor="kfzgl-city" className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
+            Stadt / PLZ des Unfalls
+          </label>
+          {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Stadt/PLZ; Wert -> verstecktes name="city" (+ place_id) für die FormData. */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-md border bg-white px-4 py-3 text-base transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20"
+            placeholder="z. B. Köln oder 50667"
+            defaultValue={city}
+            onSelect={(r) => { setCity(r.stadt || r.plz || r.adresse); setPlaceId(r.place_id) }}
+            onChange={(v) => { setCity(v); setPlaceId('') }}
+          />
+          <input type="hidden" name="city" value={city} />
+          {placeId ? <input type="hidden" name="place_id" value={placeId} /> : null}
+          {error?.field === 'city' ? (
+            <p className="mt-1 text-xs font-semibold text-red-600">{error.message}</p>
+          ) : null}
+        </div>
       </div>
 
       <button
