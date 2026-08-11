@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-08-11T19:13:18.888Z",
+  "count": 11,
+  "files": [
+    "tests/e2e/flows/kanzlei-uebergabe-smoke.spec.ts",
+    "tests/e2e/flows/kasko-reparatur-phase-smoke.spec.ts",
+    "tests/e2e/flows/meldung-kanaele-smoke.spec.ts",
+    "tests/e2e/flows/reparatur-weg-e2e-smoke.spec.ts",
+    "tests/e2e/flows/reparatur-weg-kva-ablehnung-loop.spec.ts",
+    "tests/e2e/flows/reparatur-weg-kva-betrag-pflicht.spec.ts",
+    "tests/e2e/flows/sa-vollmacht-smoke.spec.ts",
+    "tests/e2e/flows/selbstzahler-feststellung-werkstatt-sicht.spec.ts",
+    "tests/e2e/flows/smoke-vollstrecke.spec.ts",
+    "tests/e2e/flows/storno-dsgvo-smoke.spec.ts",
+    "tests/e2e/flows/werkstatt-finder-smoke.spec.ts"
+  ]
+}

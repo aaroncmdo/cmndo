@@ -132,6 +132,14 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # E2E-Toplevel-FS-Bremse (Ratchet): blockt NEUE Playwright-Specs, die einen Seed per
+      # readFileSync auf MODUL-EBENE lesen. Fehlt die Datei, wirft das schon beim Import ->
+      # die gesamte Playwright-COLLECTION crasht und reisst ALLE anderen Journey-Smokes mit.
+      # Genau das hielt main-e2e vom 05.-11.08. dauerhaft rot (feststellung-flow-gate).
+      # Siehe AGENTS.md §E2E-Toplevel-FS-Gate.
+      - name: E2E-Toplevel-FS-Ratchet
+        run: npm run check:e2e-toplevel-fs -- --ratchet
+
       # Query-Drift-Bremse (Ratchet): blockt NEUE Queries auf nicht-existente Spalten —
       # Filter-/Order-Params (.order('created_at') auf flow_links/auftraege), insert/update-
       # Keys (pflichtdokumente.datei_url) und top-level select-Spalten — gg. database.types.ts
