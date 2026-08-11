@@ -19,6 +19,7 @@ import { getTranslations } from 'next-intl/server'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
+import { ladeFeststellungIntakeSchema } from '@/lib/self-service/feststellung-intake-schema'
 import { getStorageUrl } from '@/lib/storage/url'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -620,6 +621,20 @@ export default async function FlowPage({
   // sprache/flowLocale/flowMessages: bereits FRUEH aufgeloest (oben, vor dem
   // Werkstatt-Intake-Branch) — hier nur noch genutzt.
 
+  // KI-Intake-Gate: nur wenn der zugewiesene SV freigeschaltet ist (Default aus).
+  // Das Schema wird nur DANN geladen (kein Query fuer die 99 % Formular-Faelle).
+  let kiIntakeAktiv = false
+  let schemaIntake: Awaited<ReturnType<typeof ladeFeststellungIntakeSchema>> | undefined
+  if (lead.zugewiesen_an) {
+    const { data: svGate } = await svc
+      .from('sachverstaendige')
+      .select('ki_intake_aktiv')
+      .eq('profile_id', lead.zugewiesen_an)
+      .maybeSingle()
+    kiIntakeAktiv = svGate?.ki_intake_aktiv === true
+    if (kiIntakeAktiv) schemaIntake = await ladeFeststellungIntakeSchema()
+  }
+
   return (
     <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
       {/* AAR-956 Self-Service #3b: Live-Refresh der /flow-Seite. Anon-Client
@@ -642,6 +657,8 @@ export default async function FlowPage({
       <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
         <FlowWizardKfz
           token={token}
+          kiIntakeAktiv={kiIntakeAktiv}
+          schemaIntake={schemaIntake}
           flowLinkId={flowLinkId}
           gutachter={gutachter}
           needsBooking={needsBooking}

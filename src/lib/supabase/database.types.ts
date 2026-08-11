@@ -17976,6 +17976,7 @@ export type Database = {
           kalender_sync_letzte: string | null
           kalender_typ: string | null
           kapazitaeten_jsonb: Json | null
+          ki_intake_aktiv: boolean
           live_tracking_enabled: boolean | null
           logo_url: string | null
           notizen: string | null
@@ -18071,6 +18072,7 @@ export type Database = {
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
           kapazitaeten_jsonb?: Json | null
+          ki_intake_aktiv?: boolean
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
@@ -18166,6 +18168,7 @@ export type Database = {
           kalender_sync_letzte?: string | null
           kalender_typ?: string | null
           kapazitaeten_jsonb?: Json | null
+          ki_intake_aktiv?: boolean
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
@@ -24039,14 +24042,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
