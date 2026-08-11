@@ -2892,6 +2892,22 @@
       {
         "titel": "مقارنة المنصات",
         "lead": "Claimondo، Neogutachter، Unfallpaten & Unfallgiganten — التكاليف والأداء والأمان القانوني في مقارنة مباشرة."
+      },
+      {
+        "titel": "خبير أم مقيّم؟",
+        "lead": "ما الفرق — ولماذا يهم الاستقلال وحقك في اختيار المقيّم بحرية (BGH VI ZR 67/06)."
+      },
+      {
+        "titel": "ضرر بالسيارة — ماذا تفعل؟",
+        "lead": "أهم 5 خطوات فورية بعد الحادث لتأمين جميع مطالباتك."
+      },
+      {
+        "titel": "خدمة التقييم",
+        "lead": "تقرير ضرر مستقل مع تنسيق الورشة وسيارة بديلة ومحامٍ — مجاناً عند خطأ الطرف الآخر."
+      },
+      {
+        "titel": "احسب فقدان الاستخدام",
+        "lead": "المعدل اليومي حسب فئة المركبة × أيام التعطل — حاسبة وجدول كامل بالفئات."
       }
     ],
     "staedte_eyebrow": "متاح محلياً",
@@ -4225,6 +4241,12 @@
       "description": "خبير السيارات مقابل المُقيّم: في حالة الضرر كلاهما يعني الشيء نفسه. ما معنى «معيَّن رسميًا»، ولماذا تهمّ الاستقلالية، وأنه يمكنك الاختيار بحرية (BGH VI ZR 67/06).",
       "og_title": "خبير أم مُقيّم — أين الفرق؟",
       "og_description": "مترادفان في ضرر السيارة — الحاسم هو الاستقلالية وحرية اختيارك للخبير."
+    },
+    "kfz_gutachter_nutzungsausfall": {
+      "title": "احسب تعويض فقدان الاستخدام | Claimondo",
+      "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
+      "og_title": "احسب تعويض فقدان الاستخدام",
+      "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."
     }
   },
   "gutachter_partner_neukundengewinnung": {
@@ -4571,8 +4593,7 @@
     "cta_h2": "تعرّضت لحادث؟ أمِّن خبيرك الخاص.",
     "cta_p": "مستقل، مؤهل، قريب منك — الموعد عادةً خلال أقل من 48 ساعة. وعند خطأ الغير 0 € عليك.",
     "cta_schaden": "بلّغ عن الضرر الآن"
-  }
-,
+  },
   "wertminderung_rechner": {
     "titel": "احسب انخفاض القيمة بأرقامك الخاصة",
     "intro": "يوضح الجدول أعلاه القاعدة التقريبية. احسب هنا بأرقامك الخاصة:",
@@ -4593,5 +4614,68 @@
     "hinweis_kleiner_schaden": "بالنسبة للأضرار الصغيرة مقارنةً بقيمة المركبة، قد يكون انخفاض القيمة منخفضًا.",
     "disclaimer": "إرشاد تقريبي، وليس بديلاً عن تقرير الخبير. يحدد خبير معتمد (طريقة Sanden/Danner) المبلغ المُلزِم — مع مراعاة المسافة المقطوعة والقيمة السوقية والأضرار السابقة وجودة الإصلاح.",
     "cta": "كلّف خبيرًا مجانًا"
+  },
+  "kfz_gutachter_nutzungsausfall": {
+    "breadcrumb_start": "Kfz-Gutachter",
+    "breadcrumb_current": "فقدان الاستخدام",
+    "hero_h1": "احسب تعويض فقدان الاستخدام",
+    "hero_intro": "Wer nach einem unverschuldeten Unfall auf sein Auto verzichten muss, bekommt <strong>Geld für jeden Ausfalltag</strong> — auch ohne Mietwagen. Wie viel, zeigt der Rechner.",
+    "antwort_capsule": "Die Nutzungsausfallentschädigung ersetzt den entgangenen Gebrauch des Fahrzeugs. Sie berechnet sich als <strong>Tagessatz der Fahrzeugklasse × Ausfalldauer</strong>. Der Tagessatz liegt je nach Klasse zwischen rund 23 € (Kleinstwagen) und 219 € (Luxus-Sportwagen); die Ausfalldauer ergibt sich aus der Reparatur- oder Wiederbeschaffungsdauer im Gutachten.",
+    "tabelle_h2": "Tagessätze nach Fahrzeugklasse",
+    "th_klasse": "Klasse",
+    "th_bezeichnung": "Fahrzeugtyp",
+    "th_beispiele": "Beispiele",
+    "th_satz": "€ pro Tag",
+    "tabelle_note": "Orientierungswerte. Die verbindliche Einstufung nimmt der Sachverständige im Gutachten vor — bei älteren Fahrzeugen üblicherweise mit Rückstufung um eine oder zwei Klassen.",
+    "voraussetzungen_h2": "Wann Sie Anspruch haben",
+    "voraussetzungen_capsule": "Drei Dinge müssen zusammenkommen: Sie sind <strong>unverschuldet</strong> geschädigt, das Fahrzeug war <strong>nicht nutzbar</strong>, und Sie hätten es in dieser Zeit auch <strong>genutzt</strong> (Nutzungswille und Nutzungsmöglichkeit). Wer einen Mietwagen nimmt, erhält keinen Nutzungsausfall — es gilt entweder oder.",
+    "dauer_h2": "Für wie viele Tage wird gezahlt?",
+    "dauer_capsule": "Maßgeblich ist die im Gutachten ausgewiesene Reparatur- oder Wiederbeschaffungsdauer plus eine angemessene Überlegungs- und Bestellzeit. Im Reparaturfall liegt der erstattete Zeitraum typischerweise bei etwa 12 bis 14 Tagen, bei Totalschaden gilt die Wiederbeschaffungsdauer von üblicherweise 10 bis 14 Tagen. Verzögert die Versicherung, kann sich der Zeitraum verlängern.",
+    "mietwagen_h2": "Mietwagen oder Nutzungsausfall?",
+    "mietwagen_capsule": "Beides zusammen gibt es nicht. <strong>Mietwagen</strong> lohnt sich, wenn Sie in der Ausfallzeit wirklich ein Fahrzeug brauchen. <strong>Nutzungsausfall</strong> lohnt sich, wenn Sie die Zeit überbrücken können — das Geld wird ohne Gegenleistung ausgezahlt. Die Entscheidung treffen Sie, nicht die Versicherung.",
+    "faq_h2": "Häufige Fragen zum Nutzungsausfall",
+    "faqs": [
+      {
+        "frage": "Wie hoch ist der Nutzungsausfall pro Tag?",
+        "antwort": "Je nach Fahrzeugklasse: rund 23–27 € bei Kleinstwagen (Klasse A), 59–65 € in der Mittelklasse (Klasse E, z. B. VW Passat oder BMW 3er) und 175–219 € bei Luxus-Sportwagen (Klasse L). Die konkrete Einstufung nimmt der Sachverständige vor."
+      },
+      {
+        "frage": "Wann bekomme ich überhaupt Nutzungsausfall?",
+        "antwort": "Wenn Sie unverschuldet geschädigt sind, das Fahrzeug nicht nutzbar war und Sie es in dieser Zeit auch genutzt hätten. Wer stattdessen einen Mietwagen nimmt, bekommt keinen Nutzungsausfall."
+      },
+      {
+        "frage": "Für wie viele Tage wird gezahlt?",
+        "antwort": "Für die Reparatur- oder Wiederbeschaffungsdauer laut Gutachten plus Überlegungs- und Bestellzeit. Im Reparaturfall sind das typischerweise etwa 12 bis 14 Tage, bei Totalschaden 10 bis 14 Tage."
+      },
+      {
+        "frage": "Wird der Satz bei einem älteren Auto gekürzt?",
+        "antwort": "In der Praxis ja: ab etwa fünf Jahren üblicherweise eine Klasse zurück, ab etwa zehn Jahren zwei. Aus Klasse E wird dann rechnerisch D beziehungsweise C. Der Anspruch selbst bleibt bestehen."
+      },
+      {
+        "frage": "Muss ich den Ausfall nachweisen?",
+        "antwort": "Die Ausfalldauer ergibt sich aus dem Gutachten. Bei Reparatur wird der Nutzungsausfall in der Regel rückwirkend nach nachgewiesener Instandsetzung geltend gemacht — deshalb ist ein vollständiges Gutachten die Grundlage."
+      }
+    ],
+    "crosslinks_h2": "Passend dazu",
+    "crosslink_wertminderung": "Wertminderung berechnen",
+    "crosslink_kosten": "Was kostet ein Gutachten?",
+    "crosslink_recht": "Nutzungsausfall — rechtlich im Detail",
+    "crosslink_gutachter": "Gutachter finden",
+    "cta_h2": "Ihren Anspruch vollständig sichern",
+    "cta_p": "Nutzungsausfall steht im Gutachten — oder er wird nicht gezahlt. Wir vermitteln Ihnen einen unabhängigen Sachverständigen, bei unverschuldetem Unfall kostenlos.",
+    "cta_schaden": "Schaden melden"
+  },
+  "nutzungsausfall_rechner": {
+    "titel": "حاسبة تعويض فقدان الاستخدام",
+    "intro": "Fahrzeugklasse und Ausfalltage wählen — die Schätzung erscheint sofort.",
+    "label_klasse": "Fahrzeugklasse",
+    "label_tage": "Ausfalltage",
+    "label_alter": "Fahrzeugalter in Jahren (optional)",
+    "ergebnis_unvollstaendig": "Bitte Fahrzeugklasse und Ausfalltage angeben.",
+    "ergebnis_schaetzung": "التعويض التقديري: {min} – {max} (الفئة {klasse}، {satz} يومياً)",
+    "hinweis_rueckstufung": "بسبب عمر المركبة، تم خفض الفئة {basis} بمقدار {stufen} فئة إلى {klasse} — هكذا تحسب شركات التأمين عادة.",
+    "hinweis_lange_dauer": "Im Reparaturfall erstatten Versicherer typischerweise etwa 12 bis 14 Tage. Längere Zeiträume brauchen eine Begründung aus dem Gutachten (z. B. Teileverzug) oder eine verzögerte Regulierung.",
+    "disclaimer": "Unverbindliche Orientierung, keine Rechtsberatung. Verbindlich sind Fahrzeugklasse und Ausfalldauer aus dem Sachverständigen-Gutachten.",
+    "cta": "Gutachten beauftragen"
   }
 }

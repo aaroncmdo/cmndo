@@ -208,5 +208,13 @@ test('C · Gegner-Schadenkarte: anon /schaden/[token] -> Direkt-Claim + VS-Fallb
       .eq('claim_id', claim!.id as string)
       .eq('typ', 'vs_meldung')
     expect(vsTasks ?? 0, 'interner VS-Fallback-Task (kein Telefon angegeben)').toBeGreaterThanOrEqual(1)
+    // C2b-1 (11.08., j02-IST-Delta #2 geschlossen): auch der Kern-direkte Meldeweg bekommt seine
+    // Pflichtdok-Slots — `convertLeadToClaim` legt sie jetzt selbst an (vorher nur der Wrapper).
+    // Dieser Assert ist der Wächter des neuen Solls: fällt der Kern-Aufruf weg, wird J2 rot.
+    const { count: pflichtdok } = await d
+      .from('pflichtdokumente')
+      .select('id', { count: 'exact', head: true })
+      .eq('fall_id', claim!.id as string)
+    expect(pflichtdok ?? 0, 'Pflichtdok-Slots auch beim Direkt-Claim (Kern-Garantie)').toBeGreaterThanOrEqual(1)
   }).toPass({ timeout: 45_000 })
 })

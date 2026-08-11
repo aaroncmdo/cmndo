@@ -136,6 +136,45 @@
 
 **Review:** offen (im PR an Aaron).
 
+## 2026-08-05 · C3 (Notification-Outbox) · Outbox liegt DAVOR — notification_deliveries bleibt System-1-intern (Prep §8)
+
+**Lücke:** Prep §8 — wird die `notifications_outbox` die NEUE Delivery-Tabelle (ersetzt `notification_deliveries`), oder liegt sie DAVOR (enqueue → Outbox → Worker; System 1 unangetastet)?
+
+**Entscheidung:** Outbox liegt **davor**. `notification_deliveries` (System 1: emit → notification_events → fan-out → deliveries) bleibt intern **unverändert**. Die neue Outbox ist ein additiver, service_role-only durabler Puffer NUR für die heute nicht-durablen System-2/3-Sends. C3a wired den ersten Consumer (dispatch-`updateFallStatus`, 9 Statuswechsel-Trigger).
+
+**Begründung:** minimal-invasiv (Strangler-Fig): System 1 hat seine Durability (Retry/Dead-Letter/Lease) schon — es umzubauen wäre Risiko ohne Nutzen. Der Gewinn ist, die System-2-Sends (fire-and-forget, kein Dedup) auf dasselbe Durability-Niveau zu heben, ohne die 58-Event-Pipeline anzufassen.
+
+**Review:** offen (Aaron) — via C3a-Plan `docs/superpowers/plans/2026-08-05-fundament-c3a.md` + Code-PR.
+
+## 2026-08-05 · C3 (Notification-Outbox) · COMMUNICATION_REGISTRY bleibt Template-Layer UNTER der Outbox (Prep §6#2)
+
+**Lücke:** Prep §6#2 — `COMMUNICATION_REGISTRY` (~50 WA-Templates) komplett auf emit→Outbox heben, oder als Template-Layer UNTER der Outbox behalten?
+
+**Entscheidung:** **Template-Layer behalten.** Die Outbox speichert `template`+`payload`+`claimId`; der Worker ruft `sendFallCommunication(claimId, template, payload)` — die Registry rendert Empfänger/Kanal/Template weiterhin selbst. Die ~50 Templates werden **nicht** umgeschrieben, nur mit Durability (Dedup/Retry/Fehler-Task) umhüllt.
+
+**Begründung:** DRY + bounded: die Registry ist die getestete Template-Wahrheit; sie in die EVENT_MATRIX zu heben wäre eine große, riskante Migration ohne C3a-Nutzen. Die Outbox löst das eigentliche Problem (Durability), nicht das Template-Rendering.
+
+**Review:** offen (Aaron) — via C3a-Plan.
+
+## 2026-08-05 · C3 (Notification-Outbox) · gutachten_fertig-Doppel-Send-Verifikation → C3b (Prep §6#1)
+
+**Lücke:** Prep §6#1 — feuern `termin bestätigt`/`gutachten fertig` **beide** Sende-Systeme (→ 2 WhatsApp)? Konkret der `gutachten_fertig`-Doppel-Send-Verdacht in `gutachter/fall/[id]/actions.ts:225` (`sendFallCommunication`) **+** :231 (`emitEvent('gutachten.fertig')`) — J1-IST #7.
+
+**Entscheidung:** Verifikation + Dedup/Retire **an C3b defert**. C3a wired NUR die dispatch-`updateFallStatus`-Sends (die nicht mit einem parallelen emit in derselben Action kollidieren). Der `gutachten_fertig`-Doppel-Send (System 2 + System 1 zusammen) ist ein separater Fix, weil er das Zusammenführen ZWEIER Systeme über EINEN Dedup-Key braucht.
+
+**Begründung:** C3a bounded halten (ein Consumer, ein Beweis). Der Doppel-Send ist ein echter Bug (2 WA), aber sein Fix berührt die emit-Achse → eigene Tranche mit A2/A3-Abgleich.
+
+**Review:** offen (Aaron) — Verifikation gegen den dann-aktuellen Code vor C3b.
+
+## 2026-08-05 · C3 (Notification-Outbox) · FM/Kanzlei-Kanäle bleiben vorerst In-App → C3b (Prep §6#3)
+
+**Lücke:** Prep §6#3 — bekommen Flottenmanager/Kanzlei über In-App hinaus WA/Email im kanonischen fan-out (EVENT_MATRIX-Erweiterung), oder bleibt In-App bewusst?
+
+**Entscheidung:** **Deferred an C3b** — keine Matrix-Erweiterung in C3a. C3a ändert keine Preference-/Kanal-Semantik, es hüllt bestehende Kunde-Sends in Durability. Die FM/Kanzlei-Kanal-Frage ist eine Produkt-Entscheidung (wollen die Rollen WA/Email?), kein §1-Default.
+
+**Begründung:** Scope-Trennung: Durability (C3a) vs. Kanal-Reichweite (Produkt). Die Matrix-Erweiterung würde NEUE Empfänger-Sends erzeugen (nicht nur bestehende absichern) → eigene Tranche + Aaron-Produktentscheid.
+
+**Review:** offen (Aaron) — Produktentscheid vor C3b.
 ## 2026-08-04 · B-Journey-Suite · J10 (Werkstatt-Finder) als CI-Step — 2 Bugs behoben
 
 **J10 gebaut (PR gestackt auf #4973, Branch `kitta/fundament-journey-j10-werkstatt-finder`):** `scripts/smoke/werkstatt-finder-seed.mjs` überarbeitet — process.env-first (war `.env.local`-only = doppelter CI-Blocker), eigene Wegwerf-Werkstatt statt toter Fixture `badecb82`, Wegwerf-Kunde statt festem `aaron.sprafke+smokewf@`, self-cleaning inkl. Konten.
@@ -203,3 +242,37 @@ CI-Step `RUN_MELDUNG_SMOKE` (+ `SUPABASE_SERVICE_ROLE_KEY`, `--workers=1`). Loka
 **Beweis-Stand:** ci.yml-J9-Step fährt jetzt alle drei Specs (+ `CRON_SECRET`, in GH-Secrets vorhanden). Lokal 05.08.: (a) ohne `CRON_SECRET` → sauberer `beforeAll`-Skip (4 skipped, bewiesen); (b) Guard-Berechnung read-only gegen prod: **10 fremde pending-Rows, 0 betroffen** → der Schuss wäre aktuell safe, kein chronischer Skip (die 3 `nur_gutachter`-pending-Rows haben keinen durchgeführten Termin = korrekte Nicht-Treffer). Der scharfe 4-Test-Lauf = erster post-merge-CI-Lauf (`CRON_SECRET` liegt nur in CI/VPS — bewusst nicht in die lokale Env geholt); die 4 Szenarien selbst sind aus Phase B + #4927 prod-erprobt.
 
 **Review:** entschieden durch Aaron (05.08., Session 59cdebcb); CI-Nachweis nach Kette-Merge.
+
+## 2026-08-08 · C5 (Zugriffs-Doktrin) · doc-close statt server-migration — §9-#8 via Verankerung erfüllt
+
+**Lücke:** §9-Endzustand-Punkt #8 verlangt „Zugriffs-Doktrin dokumentiert, **verlinkt**, **Checkliste im Review-Prozess**; Top-Abweichler migriert". Die Doktrin (`zugriffs-doktrin.md`, #4860) war zwar geschrieben, aber (a) aus `AGENTS.md` mit **0** Referenzen unverlinkt, (b) ohne Checkliste im Review-Prozess (kein PR-Template im Repo), und die §2-C5-Zeile führte „17-Read-Surface-Migration" als offen. Frage: Schließt C5 über die (große, collision-prone) server-`from('claims')`→`v_claim_*`-Migration ab, oder reicht die Verankerung?
+
+**Entscheidung: doc-close.** Die zugriffs-*relevante* Achse ist die Client-Achse — und dort sind die Direkt-Selects auf Basistabellen **= 0** (Doktrin §5, verifiziert): „Top-Abweichler migrieren" ist gegenstandslos, server-first ist gelebt. §9-#8 fehlte damit nur noch die **Verankerung**: (a) `AGENTS.md`-Dach-Absatz „Zugriffs-Doktrin (Server-first)" über den vier durchsetzenden Ratchets (RLS-Policy/Anon-Grant/Reachability/Write-Reachability); (b) `.github/pull_request_template.md` (NEU) mit der 6-Punkt-„neue Tabelle"-Checkliste (§3); (c) Status-Nachzug (§2-C5 + §9-#8 → done). Die server-seitige `v_claim_*`-Konsolidierung ist eine **separate Optimierungs-Tranche** (kein Zugriffs-*Sicherheits*-Thema; die vier Gates decken die Sicherheitsachse), collision-prone bei den aktuell ~8 heißen Sessions → bewusst NICHT in dieser Tranche.
+
+**Begründung:** Verfassung §7 (Server-first-Zugriff) ist auf der Sicherheitsachse erfüllt und maschinell gegated; der offene Rest ist reine Read-Muster-Konsolidierung, kein Doktrin-Verstoß. Verankerung schließt den §9-Punkt ehrlich (nicht „Checkbox-Theater": die Client-Achse IST sauber). Reine Docs/Config → Regel-4-exempt.
+
+**Review:** offen (Aaron). Session 59cdebcb, Branch `kitta/fundament-c5-doc-close`.
+
+## 2026-08-08 · D2 (Lebende Spec) · Pflege-Rhythmus + erster Decision-Review-Digest
+
+**Lücke:** §2-Paket D2 („Lebende Spec / Pflege-Rhythmus") war das letzte formal offene §2-Paket. §7 (Paketformat) + §8 (DECISIONS-Format) definierten die **Formate**, aber nicht den **Rhythmus** — WANN/WIE Spec-Status + Entscheidungen aktiv nachgezogen werden. Symptom: 9 B-Suite-Entscheidungen standen nach Merge + Prod-Bewährung noch auf `offen (im PR)` (DECISIONS-Historie ≠ Live-Stand); 23 offene `Review`-Einträge aufgelaufen ohne Review-Mechanik.
+
+**Entscheidung:** D2 = zwei Deliverables, kein Code. (1) **Pflege-Rhythmus als FUNDAMENT §8.1** — 4 verbindliche Regeln: Status-Nachzug als Teil des Paket-Abschlusses (§2-Zelle + DECISIONS-Review-Zeile + §9-Checkbox); Decision-Review-Zyklus bei ≥10 offenen Einträgen oder Meilenstein via wegwerfbarem `DECISION-REVIEW-<datum>.md`-Digest; Journeys/Doktrin nur per PR (Journey gewinnt bei Widerspruch); neue Pakete nach §7-Format. (2) **Erster Digest `DECISION-REVIEW-2026-08-08.md`** — die 24 Einträge gruppiert nach empfohlener Aktion (14 durch Bau+Prod bestätigbar · 2 durch spätere Entscheidung überholt · 7 echter offener Produkt-/Design-Entscheid + C5/D2 frisch).
+
+**Begründung:** Verfassung §10 / FUNDAMENT-Methode „Bestand bleibt in jedem Zwischenzustand grün" gilt auch für die Spec selbst — eine Spec, deren Status verrottet, ist als Steuerdokument wertlos. Der Digest macht den DoD-Teil „erster Decision-Review" für Aaron in Minuten machbar. Reine Docs → Regel-4-exempt.
+
+**Review:** offen (Aaron). Session 59cdebcb, Branch `kitta/fundament-d2-lebende-spec`. ⚠ DoD-Rest = der Review SELBST (Aaron geht `DECISION-REVIEW-2026-08-08.md` durch → Status-Rückfluss per §8.1-Regel 1) — Handoff.
+
+## 2026-08-11 · C1 (Ein Status-Writer) · Nicht-Matrix-Terminals funneln statt allowlisten
+
+**Lücke:** Die 2 letzten Ratchet-Baseline-Direkt-Writer (`kanzlei-wunsch/actions.ts` → `an_externe_kanzlei_uebergeben`, `termine/close-nur-gutachter-termin.ts` → `termin_durchgefuehrt`) schrieben `operative_status` an der Engine vorbei. Beide Ziele standen **nicht** in `FALL_STATUS_TRANSITIONS` — ein Funnel war also nicht mechanisch möglich, sondern brauchte eine Engine-Entscheidung: (a) Matrix-Kanten von jedem denkbaren Quellstatus ergänzen, (b) die 2 in die Ratchet-Allowlist aufnehmen (wie `endzustand-actions`), oder (c) ein Terminal-Konzept einführen.
+
+**Entscheidung:** (c) — **`BROADLY_REACHABLE_TERMINALS`**: die 2 Terminal-Closes sind aus **jedem AKTIVEN** Zustand erreichbar (`istTerminalUebergangErlaubt(current)` = Cursor gesetzt und nicht in `CLOSED_OPERATIVE_STATUS`), exakt das Muster von `storniert`. Die Engine setzt für sie `abgeschlossen_am`. Kein DDL nötig (beide Werte waren bereits CHECK-gültig und in `CLOSED_OPERATIVE_STATUS` + `CLAIMS_TERMINAL_STATES`). Ratchet-Baseline **2 → 0**, keine neue Allowlist-Ausnahme.
+
+Zwei Nebenentscheidungen: (1) Die 4 `smoke*`-Reset-Server-Actions in `kanzlei-wunsch/actions.ts` wurden **gelöscht statt allowlistet** — Erhebung ergab **0 Consumer** (git grep src/tests/scripts); ungenutzte prod-mutierende Actions (Vollmacht-Reset, Status-Sprung, Fake-OCR) sind reine Angriffsfläche. (2) Die `endzustand_*`-Audit-Felder setzt der Caller separat **nach** dem Engine-Übergang — sie sind claims-only und **nicht** in `CLAIM_OWNED_DUPLICATE_COLUMNS`, würden in der Engine also im (nie geschriebenen) `faelleUpdate` verschwinden = stiller Audit-Datenverlust.
+
+**Begründung:** Verfassung §2 („Status wird nie direkt geschrieben"). (a) hätte die Matrix mit ~20 künstlichen Kanten aufgebläht; (b) hätte den Ratchet grün gemacht, aber das eigentliche Ziel verfehlt — die Writes blieben event-log-los. (c) erhält das Verhalten exakt (die Direkt-Writes hatten **keine** Source-State-Guard) und bringt Timeline + `phase_transitions` + `fall.status_changed`-Emit für beide Terminals. Emit ist `fall.status_changed` = kunde `[web_push, in_app]`, **kein WA** → kein Kunden-Kommunikations-Delta.
+
+**Fund + Nachtrag (11.08., selber Tag gefixt):** Die Voll-Achsen-Verifikation (11.08., Prod-READ) zeigt die DB-Achse sauber (0 Trigger/Functions schreiben `operative_status`) und `reparatur-cursor.ts` als Engine-Wrapper. **Verbleibende Event-Log-Feinlücke:** der `manual_status_override`-Pfad in `lexdrive/process-event.ts` (dokumentierte Allowlist-Ausnahme, bewusst validierungsfrei) schreibt kein `phase_transitions` — ein Admin-Force-Status bleibt damit ohne Event-Log-Spur. **Direkt im Statusnachzug-PR geschlossen** (der Punkt ist C1-DoD „Event-Log bei jedem Übergang", kein Fremd-Paket-Beifang): der Override-Zweig schreibt jetzt einen `phase_transitions`-Eintrag (`from_phase` = Cursor vor dem Write, `trigger_type='manual'`, Herkunft in `payload.via='manual_status_override'`), **ohne** den Override zu funneln — validation-frei bleibt er per Design. ⚠ Beim Bau gefangen: `trigger_type='manual_override'` wäre ein **stiller CHECK-Reject** gewesen (erlaubt sind nur `auto|manual|webhook|scheduled`) — exakt die Flag-Drift-Klasse; `check:flag-drift` bestätigt den Fix als CHECK-gültig. Ebenfalls notiert: die 52 prod-Claims „mit `status_changed_at` ohne Event-Log" sind zu 43/52 **Initial-Cursor ohne je einen Übergang** (`status_changed_at ≈ created_at`) — kein Loch, sondern korrekt.
+
+**Review:** offen (Aaron). Session a6c863e2, PR **#5114** (Code) + Statusnachzug-PR. ⚠ Regel-4-Prod-Smoke deploy-gated: nur_gutachter-Close + kanzlei-Selbsteinreichung, je mit `phase_transitions`-Nachweis.

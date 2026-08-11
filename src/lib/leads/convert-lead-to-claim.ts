@@ -48,6 +48,7 @@ import { parseUhrzeit } from '@/lib/format/zeit'
 import { clampKennzeichenForDb } from '@/lib/format/kennzeichen'
 import type { ClaimInsert } from '@/lib/claims/types'
 import { emitEvent } from '@/lib/notifications/emit'
+import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
 
 export type ConvertLeadToClaimInput = {
   leadId: string
@@ -607,7 +608,11 @@ export async function convertLeadToClaim(
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)
-    .select('id, claim_nummer')
+    // Tranche W (T4b): reparatur_werkstatt_id zuruecklesen — der DB-Trigger
+    // set_reparatur_werkstatt_from_qr promotet sie beim INSERT aus claims.werkstatt_id
+    // (qr_referral), wobei lead.reparatur_werkstatt_id NULL ist. Der zurueckgelesene Wert
+    // deckt so BEIDE Faelle fuer die reparatur_termine-Anlage unten.
+    .select('id, claim_nummer, reparatur_werkstatt_id')
     .single()
 
   if (claimErr || !claim) {
@@ -897,7 +902,13 @@ export async function convertLeadToClaim(
   // einen Termin vor (ohne Wunschtermin) / ruft an / lehnt ab im naechsten Schritt.
   // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
   {
-    const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
+    // Tranche W (T4b): den EFFEKTIVEN Claim-Zustand nutzen, nicht nur das Lead-Feld. Der
+    // qr_referral-Pfad promotet reparatur_werkstatt_id per DB-Trigger beim claims-INSERT
+    // (lead.reparatur_werkstatt_id ist dann NULL) -> ohne diesen Fallback entstand fuer 6/6
+    // qr_referral-Claims KEINE reparatur_termine-Row (live-DB 08.08.) = toter Auftrag. Bei
+    // gesetztem Lead-Feld ist claim.reparatur_werkstatt_id == Lead-Wert -> Verhalten unveraendert.
+    const rwtWerkstattId =
+      (claim.reparatur_werkstatt_id as string | null) ?? (lead.reparatur_werkstatt_id as string | null) ?? null
     const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
     if (rwtWerkstattId) {
       const { error: rtErr } = await admin
@@ -1049,6 +1060,21 @@ export async function convertLeadToClaim(
     } catch (err) {
       console.error('[convertLeadToClaim] makler.lead_eingegangen emit fehlgeschlagen (non-critical):', err)
     }
+  }
+
+  // C2b-1 (Fundament C2 „Ein Intake", j02-IST-Delta #2): Pflichtdok-Slots gehoeren in den KERN.
+  // Die Direkt-Claim-Meldewege (Gegner-Schadenkarte `schaden/[token]/actions.ts`, Admin-manuell)
+  // rufen convertLeadToClaim DIREKT statt ueber den Wrapper convertLeadToFall — ihre Claims hatten
+  // deshalb nie Upload-Platzhalter. createPflichtdokumenteFromKatalog ist pro-Slot-idempotent
+  // (CMM-23: liest existingSlots, legt nur Fehlendes an) -> der spaetere Wrapper-Aufruf findet
+  // 0 fehlende Slots = No-op, keine Dubletten. Non-fatal: ein Slot-Fehler darf die Konversion
+  // (Geld-/Fall-Pfad) nie kippen.
+  // BEWUSST NICHT mitgezogen: sendFallCommunication('fall_eroeffnet') bleibt im Wrapper — beim
+  // Gegner-Flow meldet der GEGNER; der Geschaedigte darf davon nicht ungefragt angeschrieben werden.
+  try {
+    await createPflichtdokumenteFromKatalog(admin, fallId, lead)
+  } catch (err) {
+    console.error('[convertLeadToClaim] Pflichtdok-Slots fehlgeschlagen (non-critical):', err)
   }
 
   return {

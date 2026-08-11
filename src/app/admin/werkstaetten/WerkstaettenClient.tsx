@@ -43,8 +43,9 @@ function formatDatum(iso: string | null) {
 }
 
 // Reine Navigations-Liste: die pro-Werkstatt-Steuerung (QR, Staffel, Faehigkeiten, Login-Mail,
-// Abrechnung, Status, Stammdaten, Notizen, …) lebt komplett in der Detailseite
-// /admin/werkstaetten/[id]. Hier bleibt nur: Ueberblick + Klick auf eine Zeile -> Verwaltung,
+// Abrechnung, Status, Stammdaten, Notizen, …) lebt in der kanonischen Detail-Akte
+// /admin/vertrieb/werkstaetten/[id] (Content = WsAkteContent; /admin/werkstaetten/[id] ist ein
+// 308-Redirect dorthin, F2). Hier bleibt nur: Ueberblick + Klick auf eine Zeile -> Verwaltung,
 // plus "Neue Werkstatt" anlegen.
 export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Werkstatt[] }) {
   const router = useRouter()
@@ -66,7 +67,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
-                  onClick={() => router.push('/admin/werkstaetten/qr-pool')}
+                  onClick={() => router.push('/admin/vertrieb/werkstaetten/qr-pool')}
                   iconLeft={<QrCodeIcon className="w-4 h-4" />}
                 >
                   QR-Code-Pool
@@ -102,7 +103,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 >
                   <Td>
                     <Link
-                      href={`/admin/werkstaetten/${w.id}`}
+                      href={`/admin/vertrieb/werkstaetten/${w.id}`}
                       className="text-claimondo-navy font-medium hover:text-claimondo-ondo hover:underline"
                     >
                       {w.name}

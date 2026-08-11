@@ -61,3 +61,17 @@ export function bezugInExpr(achse: BezugAchse, ids: string[]): string {
   const typExpr = achse === 'lead' ? 'bezug_typ.eq.lead' : 'bezug_typ.in.(fall,claim)'
   return `${achse}_id.in.(${list}),and(${typExpr},bezug_id.in.(${list}))`
 }
+
+/**
+ * Konversions-uebergreifender or-Ausdruck: Termin verankert am LEAD ODER an dessen
+ * konvertiertem FALL/CLAIM. Fuer Filter, die NACH convertLeadToClaim laufen —
+ * dessen uebernehmeLeadTermine haengt offene Lead-Termine bereits auf bezug
+ * ('fall', claimId) um und nullt lead_id. Ein reiner lead-Anker matcht dann 0 Rows
+ * (Prod-Regression 07.08.: SA-Confirm in signSAandCreateFall fand den Termin nicht
+ * mehr -> blieb 'reserviert' -> TTL-Sweep stornierte ihn). Der lead-Zweig bleibt
+ * drin, weil das Umhaengen non-fatal ist (schlaegt es fehl, traegt der Termin
+ * weiter den lead-Anker). Beide ids MUESSEN UUIDs sein (String-Interpolation).
+ */
+export function bezugOrExprKonversion(leadId: string, claimId: string): string {
+  return `${bezugOrExpr('lead', leadId)},${bezugOrExpr('fall', claimId)}`
+}

@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createNotification } from '@/lib/notifications'
 import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
@@ -178,13 +179,13 @@ export async function registriereMaklerSelf(
     if (admins && admins.length > 0) {
       await Promise.all(
         admins.map((a) =>
-          admin.from('benachrichtigungen').insert({
-            user_id: a.id as string,
-            typ: 'makler_self_signup',
-            titel: `Neuer Makler-Self-Signup: ${firma}`,
-            beschreibung: `${firma} (${email}) hat sich selbst registriert. Promo-Code: ${code ?? '—'}.`,
-            link: '/admin/makler',
-          }),
+          createNotification(
+            a.id as string,
+            'makler_self_signup',
+            `Neuer Makler-Self-Signup: ${firma}`,
+            `${firma} (${email}) hat sich selbst registriert. Promo-Code: ${code ?? '—'}.`,
+            '/admin/makler',
+          ),
         ),
       )
     }

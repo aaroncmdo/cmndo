@@ -82,7 +82,9 @@ export function RestArticle({ page }: { page: RestPage }) {
         <ArticleDisclaimer />
       </article>
       <RelatedTopics route={page.route} />
-      <ArticleCta />
+      {/* route → kontext-abhaengiger CTA (SFK-Cluster bekommt die intent-gerechte
+          Fassung + ref-Attribution; alle anderen Routen unveraendert). */}
+      <ArticleCta route={page.route} />
     </>
   )
 }

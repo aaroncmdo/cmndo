@@ -8,17 +8,41 @@ function vm(over: Record<string, unknown> = {}): KundeClaimViewModel {
     lifecycle: { mainPhase: 'begutachtung', subPhase: 'termin' },
     termine: [],
     team: { kb: null, sv: null },
+    status: { svTermin: null },
     geld: { forderungNetto: null, auszahlungNetto: null, kvaNetto: null, kvaBrutto: null, kvaAbgelehntAm: null, kvaAbgelehntGrund: null, reparaturdauerTageKva: null, gutachtenWerte: null },
     pflichtdokumente: { offen: 0 },
     fall: {},
-    flags: { abrechnungsweg: null, istReparaturRoute: false, bankdatenOffen: false, gutachtenVerfuegbar: false, reparaturFreigegeben: false, istNurGutachter: false, kanzleiSichtbar: false },
+    flags: { abrechnungsweg: null, istReparaturRoute: false, bankdatenOffen: false, gutachtenVerfuegbar: false, reparaturFreigegeben: false, istNurGutachter: false, kanzleiSichtbar: false, istTerminal: false },
   }
-  return { ...base, ...over, lifecycle: { ...base.lifecycle, ...(over.lifecycle as object ?? {}) }, geld: { ...base.geld, ...(over.geld as object ?? {}) }, flags: { ...base.flags, ...(over.flags as object ?? {}) } } as unknown as KundeClaimViewModel
+  return { ...base, ...over, lifecycle: { ...base.lifecycle, ...(over.lifecycle as object ?? {}) }, status: { ...base.status, ...(over.status as object ?? {}) }, team: { ...base.team, ...(over.team as object ?? {}) }, geld: { ...base.geld, ...(over.geld as object ?? {}) }, flags: { ...base.flags, ...(over.flags as object ?? {}) } } as unknown as KundeClaimViewModel
 }
 
 describe('deriveKundeAufgaben', () => {
-  it('nichts offen -> []', () => {
-    expect(deriveKundeAufgaben(vm())).toEqual([])
+  it('nichts offen (SV zugewiesen, kein Termin-Wahl-Bedarf) -> []', () => {
+    // Mit zugewiesenem SV greift die termin_waehlen-Aufgabe NICHT (der Kalender-Fallback ist
+    // für den !svId-Fall) → ein sonst leerer Claim hat keine offenen Aufgaben.
+    expect(deriveKundeAufgaben(vm({ team: { kb: null, sv: { name: 'SV' } } }))).toEqual([])
+  })
+
+  // T4: Gutachtertermin wählen
+  it('kein SV + kein Termin + nicht terminal + Begutachtung -> termin_waehlen', () => {
+    expect(deriveKundeAufgaben(vm()).map((a) => a.id)).toContain('termin_waehlen')
+  })
+  it('SV zugewiesen -> KEIN termin_waehlen', () => {
+    const r = deriveKundeAufgaben(vm({ team: { kb: null, sv: { name: 'SV' } } }))
+    expect(r.map((a) => a.id)).not.toContain('termin_waehlen')
+  })
+  it('bereits ein (Wunsch-)Termin gewählt (svTermin gesetzt) -> KEIN termin_waehlen', () => {
+    const r = deriveKundeAufgaben(vm({ status: { svTermin: { id: 't1', status: 'sv_gesucht' } } }))
+    expect(r.map((a) => a.id)).not.toContain('termin_waehlen')
+  })
+  it('Reparatur-Route (braucht keine SV-Begutachtung) -> KEIN termin_waehlen', () => {
+    const r = deriveKundeAufgaben(vm({ flags: { istReparaturRoute: true } }))
+    expect(r.map((a) => a.id)).not.toContain('termin_waehlen')
+  })
+  it('terminaler Claim -> KEIN termin_waehlen', () => {
+    const r = deriveKundeAufgaben(vm({ flags: { istTerminal: true } }))
+    expect(r.map((a) => a.id)).not.toContain('termin_waehlen')
   })
   it('Reparatur-Route + KVA + nicht freigegeben -> kva_freigabe', () => {
     const r = deriveKundeAufgaben(vm({ flags: { istReparaturRoute: true, reparaturFreigegeben: false }, geld: { kvaBrutto: 2380 } }))
@@ -48,10 +72,12 @@ describe('deriveKundeAufgaben', () => {
 
 describe('deriveKundeZonen', () => {
   it('Begutachtung ohne Aufgaben/Geld, KB da -> status, team, doksTermine', () => {
-    expect(deriveKundeZonen(vm({ team: { kb: { name: 'KB' }, sv: null } }))).toEqual(['status', 'team', 'doksTermine'])
+    // svTermin gesetzt = Termin bereits gewählt → die T4-termin_waehlen-Aufgabe (und damit die
+    // aufgaben-Zone) greift nicht; der Fall hat sonst nichts Offenes.
+    expect(deriveKundeZonen(vm({ team: { kb: { name: 'KB' }, sv: null }, status: { svTermin: { id: 't', status: 'bestaetigt' } } }))).toEqual(['status', 'team', 'doksTermine'])
   })
   it('Regulierung -> geld erscheint (in Reihenfolge)', () => {
-    expect(deriveKundeZonen(vm({ lifecycle: { mainPhase: 'regulierung' } }))).toEqual(['status', 'geld', 'doksTermine'])
+    expect(deriveKundeZonen(vm({ lifecycle: { mainPhase: 'regulierung' }, status: { svTermin: { id: 't', status: 'bestaetigt' } } }))).toEqual(['status', 'geld', 'doksTermine'])
   })
   // Preserve-all: die GeldZone beherbergt jetzt auch Kanzlei/Werkstatt/Bankdaten-Cards,
   // die in der Live-page.tsx phasen-unabhaengig (in der immer-sichtbaren Sidebar) standen.

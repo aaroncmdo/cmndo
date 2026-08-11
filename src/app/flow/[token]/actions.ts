@@ -7,6 +7,7 @@ import { enablePhoneLogin } from '@/lib/auth/phone-login'
 import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
+import { bezugOrExpr, bezugOrExprKonversion } from '@/lib/termine/bezug-filter'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
@@ -19,6 +20,7 @@ import { getStorageUrl } from '@/lib/storage/url'
 import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -774,6 +776,22 @@ export async function signSAandCreateFall(
   // Cold-Kill); ein Baileys-Fail darf die Konversion nie brechen.
   void (async () => {
     if (saWasAlreadySigned) return // Re-Entry (Reload/Retry): keine doppelte Willkommens-/Team-WA
+    // Send-Isolation (interne-identitaet.ts): interne/Test-Bucher (@claimondo.de, Test-Marker)
+    // loesen KEINE Kunde-/Team-WhatsApp aus — dieselbe Isolation, die reserviereEmbedTermin
+    // schon fuer seine Reservierungs-Sends hat. Verhindert das "kein Termin gebucht"-Rauschen
+    // aus Team-Funnel-Smokes: deren Partner-Buchung blockt der Test-SV-Guard (intern->echt) ->
+    // aktiverTerminId NULL -> Team-WA "⚠ kein Termin gebucht". Echte Kunden (extern) loesen den
+    // Dispatch-Alarm weiter aus.
+    if (
+      istInterneIdentitaet(
+        (lead.email as string | null) ?? null,
+        [((lead.vorname as string | null) ?? '').trim(), ((lead.nachname as string | null) ?? '').trim()]
+          .filter(Boolean)
+          .join(' ') || null,
+      )
+    ) {
+      return
+    }
     try {
       const vorname = ((lead.vorname as string | null) ?? '').trim()
       const nachname = ((lead.nachname as string | null) ?? '').trim()
@@ -828,9 +846,11 @@ export async function signSAandCreateFall(
       const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
         // AAR-956 #8 (Linchpin): Engine-reservierte Termine sind bezug-nativ (lead_id NULL,
-        // bezug_typ='lead'). Dual-Filter relinkt Legacy- UND Self-Service-Termine -> setzt
-        // fall_id/claim_id, damit ALLE fall_id-Reader sie post-Conversion finden.
-        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+        // bezug_typ='lead'). Der Filter muss BEIDE Seiten der Konversion matchen:
+        // convertLeadToClaim (uebernehmeLeadTermine, T1 #5012) hat den Termin hier bereits
+        // auf bezug ('fall', claimId) umgehaengt + lead_id genullt — ein reiner lead-Anker
+        // fand ihn nicht mehr (Prod-Regression 07.08.: Termin blieb 'reserviert' -> TTL-Storno).
+        .or(bezugOrExprKonversion(leadId, convClaimId))
         .eq('status', 'reserviert')
         .select('id')
 
@@ -846,7 +866,10 @@ export async function signSAandCreateFall(
             const { data: existingTermine } = await admin
               .from('gutachter_termine')
               .select('id')
-              .eq('fall_id', fall.id)
+              // bezug-aware statt .eq('fall_id'): umgehaengte Engine-Termine tragen NUR
+              // bezug ('fall', claimId), fall_id bleibt NULL wenn das Confirm-UPDATE oben
+              // 0 Rows traf (z.B. Termin stand schon auf 'bestaetigt').
+              .or(bezugOrExpr('fall', fall.id))
               // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
               .eq('assignee_id', svIdFromTermin)
               .eq('assignee_typ', 'sachverstaendiger')
@@ -881,8 +904,10 @@ export async function signSAandCreateFall(
       // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
       const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
-        // AAR-956 #8 (Linchpin): bezug-nativen Self-Service-Termin mit-relinken (s.o.).
-        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+        // AAR-956 #8 (Linchpin): bezug-nativen Self-Service-Termin mit-relinken — inkl. der
+        // von convertLeadToClaim bereits auf bezug ('fall', claimId) umgehaengten Termine
+        // (s. Kommentar im nur_gutachter-Branch; Prod-Regression 07.08.).
+        .or(bezugOrExprKonversion(leadId, convClaimId))
         .eq('status', 'reserviert')
         .select('id')
 
@@ -900,7 +925,8 @@ export async function signSAandCreateFall(
             const { data: existingTermine } = await admin
               .from('gutachter_termine')
               .select('id')
-              .eq('fall_id', fall.id)
+              // bezug-aware statt .eq('fall_id') — s. Kommentar im nur_gutachter-Branch.
+              .or(bezugOrExpr('fall', fall.id))
               // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
               .eq('assignee_id', svIdFromTermin)
               .eq('assignee_typ', 'sachverstaendiger')
@@ -1081,7 +1107,8 @@ export async function signSAandCreateFall(
       const { data: caldavTermine } = await admin
         .from('gutachter_termine')
         .select('id')
-        .eq('fall_id', fall.id)
+        // bezug-aware: umgehaengte Engine-Termine koennen fall_id NULL tragen (s.o.).
+        .or(bezugOrExpr('fall', fall.id))
         .eq('assignee_typ', 'sachverstaendiger')
         .in('status', ['bestaetigt', 'reserviert'])
       const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
@@ -1366,7 +1393,8 @@ export async function signSAandCreateFall(
       const { data: terminRow } = await admin.from('gutachter_termine')
         // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
         .select('id, assignee_id, ablehnen_token')
-        .eq('fall_id', fall.id)
+        // bezug-aware: umgehaengte Engine-Termine koennen fall_id NULL tragen (s.o.).
+        .or(bezugOrExpr('fall', fall.id))
         .eq('status', 'bestaetigt')
         .limit(1)
         .maybeSingle()
@@ -1490,8 +1518,13 @@ export async function signSAandCreateFall(
   // P4 (Review-Fund MEDIUM-2): fuer den Vermittlungs-sign-in KEINE Fresh-Fall-SLAs —
   // der Sofort-Claim steht bereits bei filmcheck mit SV + fertigem Gutachten; die
   // Zuweisungs-/Termin-/Besichtigungs-SLAs wuerden sofort breachen (spurious KB-Reminder).
+  // Kasko/Selbstzahler (DIRECT_REPARATUR_WEGE): kein Gegner-VS-Prozess → weder SV-Dispatch noch
+  // Zuweisungs-/Termin-/Besichtigungs-SLAs (Aaron 08.08.). Defense-in-Depth zum Client-Guard
+  // (FlowWizardKfz istDirectReparatur laesst den sa-Step bei Kasko weg → signSAandCreateFall feuert
+  // dort normal gar nicht; dieser Guard greift, falls es doch fuer einen Direct-Weg laeuft).
+  const istDirectReparaturWeg = lead.abrechnungsweg === 'kasko' || lead.abrechnungsweg === 'selbstzahler'
   const slaPromises: Promise<unknown>[] = []
-  if (!istVermittlungsSignIn) {
+  if (!istVermittlungsSignIn && !istDirectReparaturWeg) {
     try {
       const { startSla } = await import('@/lib/sla/tracker')
       if (!svIdFromTermin) slaPromises.push(startSla(fall.id, 'gutachter_zuweisung'))
@@ -1506,7 +1539,7 @@ export async function signSAandCreateFall(
   // findBestSV waere ein nutzloser Lauf (der sv_id-Guard unten verhindert das Overwrite eh).
   const fallLat = (lead.besichtigungsort_lat ?? lead.fahrzeug_standort_lat ?? lead.unfallort_lat ?? lead.kunde_lat) as number | null
   const fallLng = (lead.besichtigungsort_lng ?? lead.fahrzeug_standort_lng ?? lead.unfallort_lng ?? lead.kunde_lng) as number | null
-  if (!istVermittlungsSignIn && !svIdFromTermin && fallLat != null && fallLng != null) {
+  if (!istVermittlungsSignIn && !svIdFromTermin && !istDirectReparaturWeg && fallLat != null && fallLng != null) {
     slaPromises.push(
       (async () => {
         try {

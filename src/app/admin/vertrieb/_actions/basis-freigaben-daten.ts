@@ -35,6 +35,9 @@ export async function getBasisFreigaben(): Promise<
     )
     .eq('paket', 'basic')
     .eq('verifizierung_status', 'ausstehend')
+    // Nur noch-nicht-freigeschaltete (Tier-2-Enforcement: freigeschaltete SVs tragen
+    // 'ausstehend' = Frist laeuft, gehoeren nicht in die Freigabe-Queue).
+    .eq('portal_zugang_freigeschaltet', false)
     .is('geloescht_am', null)
     .order('created_at', { ascending: true })
 

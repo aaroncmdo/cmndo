@@ -35,7 +35,7 @@ export async function setzeSvTestaccount(
     .eq('id', svId)
   if (error) return { success: false, error: `Update fehlgeschlagen: ${error.message}` }
 
-  revalidatePath(`/admin/sachverstaendige/${svId}`)
+  revalidatePath(`/admin/vertrieb/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
   return { success: true }
 }

@@ -750,6 +750,24 @@ body[data-sidebar-mode="floating"] header.glass-branded {
   }
 }
 
+/* ── REGEL: Fixe Ecken-Overlays brauchen eine Safe-Area im Layout-Fluss ──────────
+   Ein `position: fixed`-Element steht ausserhalb des Flusses und beansprucht seine
+   Bildschirmecke DAUERHAFT. Landet Seiteninhalt dort, ist er nicht mehr klickbar —
+   der Klick trifft das Overlay. Zweimal real passiert (ZB1-Footer 16.07.,
+   Embed-Wizard-"Weiter" 11.08. bei 1280x720: elementFromPoint traf den FAB).
+   Ein z-Index loest das NICHT: senkt man ihn, verschwindet das Overlay hinter
+   Modals; hebt man ihn, frisst es Klicks. Die Ecke muss im Fluss reserviert sein.
+
+   Zwei Ecken, zwei Reservierungen — beide gehoeren auf das Layout-`<main>`:
+     • oben rechts  = Corner-Pill (UpdatesNav/Outbox) -> `.has-corner-pill` (oben)
+     • unten rechts = GlobalPosteingangFab (fixed right-4 bottom-4, 48px, nur lg+)
+                      -> `lg:pb-20` auf dem scrollenden `<main>` der 4 Shells, die
+                      den FAB mounten: gutachter/GutachterShell, admin/layout,
+                      faelle/layout, mitarbeiter/layout. (dispatch mountet ihn nicht.)
+   ACHTUNG bei neuen Portalen/Overlays: mountest du den FAB, setz die Safe-Area mit.
+   Die Shells hatten `md:pb-0`/`lg:pb-0` — Bodenabstand NUR fuer die mobile Tab-Bar,
+   auf Desktop bewusst null. Genau dort lebt der FAB; das war die Wurzel. */
+
 /* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
    `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
    BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
@@ -995,3 +1013,43 @@ html { scroll-behavior: smooth; }
   outline: 2px solid var(--brand-primary, #0D1B3E);
   outline-offset: 2px;
 }
+
+/* P1 (Ortseingaben-Audit 08.08.): Google-Places-Vorschlagsliste (.pac-container) global
+   ans Claimondo-Design angepasst. Google haengt den Container an document.body -> EIN
+   globaler Style brandet ALLE ~19 App-internen Autocomplete-Stellen (vorher Google-Default
+   weiss/Roboto/Google-Pins). Whitelabel: var(--brand-*) greift automatisch das SV-Theme und
+   faellt in nicht-gebrandeten Portalen (Admin/Dispatch) sauber auf Claimondo zurueck. Die 2
+   Embed-Finder haben eigene lokale <style>-Bloecke (spaeter im DOM = spezifischer) -> dort
+   unveraendert. "Powered by Google"-Attribution (:after) bleibt unangetastet (Places-ToS). */
+.pac-container {
+  margin-top: 6px;
+  padding: 4px;
+  border: 1px solid var(--color-claimondo-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 14px 34px color-mix(in srgb, var(--brand-primary, #0D1B3E) 14%, transparent);
+  font-family: var(--font-sans, system-ui, sans-serif);
+  overflow: hidden;
+}
+.pac-item {
+  border-top: 0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  color: var(--color-claimondo-navy);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background-color .12s ease;
+}
+.pac-item:hover,
+.pac-item-selected,
+.pac-item.pac-item-selected { background-color: var(--brand-secondary-soft, #eef2f8); }
+.pac-icon { display: none; }
+.pac-item-query {
+  color: var(--color-claimondo-navy);
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding-right: 6px;
+}
+.pac-matched { font-weight: 700; }
+.pac-item > span:last-child { color: var(--color-claimondo-shield); }

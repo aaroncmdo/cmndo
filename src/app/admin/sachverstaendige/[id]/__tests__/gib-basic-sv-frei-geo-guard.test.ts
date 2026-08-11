@@ -36,13 +36,24 @@ function makeUpdateChain(table: 'sachverstaendige' | 'tasks') {
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    from: (table: 'sachverstaendige' | 'tasks') => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: cfg.svRow, error: cfg.svReadError }) }) }),
-      update: (vals: Record<string, unknown>) => {
-        updateCapture[table] = vals
-        return makeUpdateChain(table)
-      },
-    }),
+    from: (table: 'sachverstaendige' | 'tasks' | 'pflichtdokumente') => {
+      // Tier-2-Doc-Query (sindTier2DocsGeprueft): select().eq().eq().in() → { data }.
+      // Leer = keine gepruaeften Tier-2-Docs → Freischaltung setzt ausstehend+Frist.
+      if (table === 'pflichtdokumente') {
+        const chain: Record<string, unknown> = {}
+        chain.select = () => chain
+        chain.eq = () => chain
+        chain.in = () => Promise.resolve({ data: [] })
+        return chain
+      }
+      return {
+        select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: cfg.svRow, error: cfg.svReadError }) }) }),
+        update: (vals: Record<string, unknown>) => {
+          updateCapture[table] = vals
+          return makeUpdateChain(table)
+        },
+      }
+    },
   }),
 }))
 

@@ -11,6 +11,7 @@ const AUFGABE_ANCHOR: Record<KundeAufgabe['id'], string> = {
   bankdaten: '#zone-geld',
   kva_freigabe: '#zone-geld',
   pflichtdok: '#zone-doksTermine',
+  termin_waehlen: '#zone-doksTermine', // Fallback — hrefFor routet auf die Kalender-Route (T4)
   termin_bestaetigen: '#zone-doksTermine',
   sa_vollmacht: '#zone-status',
 }
@@ -22,12 +23,16 @@ export function AufgabenZone({ vm }: { vm: KundeClaimViewModel }) {
   // sa_vollmacht: SA/Vollmacht wird nur im /flow/[token]-Flow (FokusSignaturClient) signiert — der
   // Anchor #zone-status war eine Sackgasse (StatusZone rendert kein Signier-UI). Der Resolver
   // /kunde/faelle/[id]/unterschrift holt den FlowLink und leitet zum Nachsignieren.
+  // T4: termin_waehlen führt in den Akte-Kalender (Wunschtermin-Fallback / SV-Slots), analog
+  // zum sa_vollmacht-Route-Resolver — beide sind echte Routen, kein In-Page-Anchor.
   const hrefFor = (a: KundeAufgabe): string =>
     a.id === 'sa_vollmacht'
       ? `/kunde/faelle/${vm.claimId}/unterschrift`
-      : a.zone
-        ? `#zone-${a.zone}`
-        : AUFGABE_ANCHOR[a.id]
+      : a.id === 'termin_waehlen'
+        ? `/kunde/faelle/${vm.claimId}/kalender`
+        : a.zone
+          ? `#zone-${a.zone}`
+          : AUFGABE_ANCHOR[a.id]
 
   return (
     <Card p={4} className="space-y-2">

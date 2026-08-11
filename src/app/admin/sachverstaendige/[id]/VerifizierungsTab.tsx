@@ -18,6 +18,7 @@ import {
 import {
   tier2Freigeben,
   tier2DokumentNachfordern,
+  tier2FristVerlaengern,
   svSperren,
   svEntsperren,
   pflichtdokumentFreigeben,
@@ -593,6 +594,15 @@ function Tier2Card({
     })
   }
 
+  function handleFristVerlaengern() {
+    if (!confirm('Tier-2-Frist um 14 Tage verlängern? Ein pausierter SV wird damit wieder für Fälle freigegeben.')) return
+    setFehler(null)
+    startTransition(async () => {
+      const res = await tier2FristVerlaengern(svId, 14)
+      if (!res.success) setFehler(res.error ?? 'Unbekannter Fehler')
+    })
+  }
+
   const defaultFrist = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
 
   return (
@@ -720,17 +730,43 @@ function Tier2Card({
         </div>
       )}
 
-      {verifizierungStatus !== 'geprueft' && (
-        <button
-          type="button"
-          onClick={handleFreigeben}
-          disabled={pending}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
-        >
-          <CheckCircle2Icon className="w-3.5 h-3.5" />
-          Tier-2 komplett freigeben
-        </button>
+      {verifizierungStatus === 'frist_ueberschritten' && (
+        <div className="mb-3 px-3 py-2.5 rounded-ios-lg bg-danger-soft border border-danger/30 text-[11px]">
+          <p className="font-semibold text-danger-strong flex items-center gap-1">
+            <AlertTriangleIcon className="w-3 h-3" />
+            Fall-Empfang pausiert
+          </p>
+          <p className="text-danger-strong mt-1">
+            Dieser SV erhält keine neuen Fälle, bis Berufshaftpflicht + Gewerbeanmeldung geprüft sind.
+            „Frist +14 Tage" reaktiviert ihn übergangsweise.
+          </p>
+        </div>
       )}
+
+      <div className="flex items-center gap-2 flex-wrap">
+        {verifizierungStatus !== 'geprueft' && (
+          <button
+            type="button"
+            onClick={handleFreigeben}
+            disabled={pending}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
+          >
+            <CheckCircle2Icon className="w-3.5 h-3.5" />
+            Tier-2 komplett freigeben
+          </button>
+        )}
+        {(verifizierungStatus === 'ausstehend' || verifizierungStatus === 'frist_ueberschritten') && (
+          <button
+            type="button"
+            onClick={handleFristVerlaengern}
+            disabled={pending}
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold text-claimondo-ondo border border-claimondo-ondo/30 hover:bg-claimondo-ondo/5 disabled:opacity-50"
+          >
+            <ClockIcon className="w-3.5 h-3.5" />
+            Frist +14 Tage
+          </button>
+        )}
+      </div>
 
       {fehler && <p className="text-xs text-danger mt-2">{fehler}</p>}
     </section>

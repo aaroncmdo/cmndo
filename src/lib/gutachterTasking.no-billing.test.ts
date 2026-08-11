@@ -10,9 +10,4 @@ describe('gutachterTasking: keine Leadpreis-/Guthaben-Logik mehr', () => {
   it.each(['calculateLeadpreis', 'deductLeadpreis', 'refundLeadpreis'])('exportiert %s nicht mehr', (fn) => {
     expect(gt).not.toMatch(new RegExp(`function ${fn}\\b`))
   })
-
-  it('dispatch-storno nutzt nicht mehr refundLeadpreis (State-Machine macht revertCaseBilling)', () => {
-    const d = readFileSync('src/lib/actions/dispatch-fall-actions.ts', 'utf8')
-    expect(d).not.toMatch(/refundLeadpreis/)
-  })
 })

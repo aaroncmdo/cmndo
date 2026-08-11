@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
+import { sindTier2DocsGeprueft, berechneTier2Patch } from '@/lib/sv/tier2-docs'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -26,7 +27,7 @@ export async function freigebeBasicSvCore(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const { data: sv, error: readErr } = await db
     .from('sachverstaendige')
-    .select('standort_lat, standort_lng, paket_umkreis_km, isochrone_polygon')
+    .select('standort_lat, standort_lng, paket_umkreis_km, isochrone_polygon, verifizierung_status, verifizierung_frist_bis')
     .eq('id', svId)
     .maybeSingle()
   if (readErr) return { ok: false, error: `SV konnte nicht geladen werden: ${readErr.message}` }
@@ -60,21 +61,32 @@ export async function freigebeBasicSvCore(
     }
   }
 
-  // Die Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
-  // onboarding_status='abgeschlossen': ohne den Flip blieben freigegebene
-  // Basic-SVs ewig auf dem Anlage-Default 'pending' — Dispatch-/Admin-Sichten
-  // zeigten sie als "im Onboarding haengend" (Aaron-Fund 05.08., 4 Prod-Faelle).
-  // Der Paid-Statusautomat (vertrag_unterzeichnet/anzahlung_offen/bezahlt/aktiv)
+  // Tier-2-Enforcement (Spec 2026-08-08): Freischaltung setzt verifizierung_status
+  // NICHT mehr blind auf 'geprueft'. Nur wenn Berufshaftpflicht + Gewerbeanmeldung
+  // wirklich geprueft sind → 'geprueft'; sonst 'ausstehend' + 14-Tage-Frist, damit
+  // der Reminder-Cron + der FG3-Dispatch-Gate (frist_ueberschritten) greifen. Der
+  // fruehere Blind-'geprueft'-Setter war der Bypass, der 9 SVs ohne Docs dispatchbar
+  // machte (prod 08.08.). 'geprueft' setzt kuenftig NUR tier2Freigeben nach Doc-Pruefung.
+  const tier2Patch = berechneTier2Patch(
+    await sindTier2DocsGeprueft(db, svId),
+    (sv as { verifizierung_status?: string | null }).verifizierung_status ?? null,
+    (sv as { verifizierung_frist_bis?: string | null }).verifizierung_frist_bis ?? null,
+    Date.now(),
+  )
+
+  // Die Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone + Tier-2-Patch).
+  // onboarding_status='abgeschlossen': ohne den Flip blieben freigegebene Basic-SVs
+  // ewig auf dem Anlage-Default 'pending' (Aaron-Fund 05.08.). Der Paid-Statusautomat
   // laeuft NICHT ueber diesen Core und bleibt unberuehrt.
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
-      verifizierung_status: 'geprueft',
       verifiziert: true,
       verifiziert_am: new Date().toISOString(),
       ist_aktiv: true,
       portal_zugang_freigeschaltet: true,
       onboarding_status: 'abgeschlossen',
+      ...tier2Patch,
       ...geoPatch,
     } as never)
     .eq('id', svId)

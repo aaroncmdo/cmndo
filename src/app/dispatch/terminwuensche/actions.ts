@@ -20,17 +20,19 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { reassigniereDeadPin } from '@/lib/termine/engine/state-transitions'
+import { reassigniereDeadPin, weiseSvGesuchtZu } from '@/lib/termine/engine/state-transitions'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
+import { pruefeTestSvKonsistenz } from '@/lib/testdaten/test-sv-guard'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 /**
- * Weist einen Terminwunsch (status='dispatch_pending') einem echten SV zu.
- * sv_gesucht-Wuensche sind (noch) NICHT ueber diesen Pfad zuweisbar — die
- * Portal-Buchung dafuer folgt mit T4 (UI deaktiviert den Button zusaetzlich,
- * dieser serverseitige Check ist die Defense-in-Depth-Kopie).
+ * Weist einen Terminwunsch einem echten SV zu — BEIDE Pending-Achsen (T4):
+ * `dispatch_pending` (Embed-Dead-Pin, assignee sv_lead) → `reassigniereDeadPin`;
+ * `sv_gesucht` (Portal-Wunschtermin, kein Assignee) → `weiseSvGesuchtZu`. Beide flippen
+ * race-sicher auf `bestaetigt`+`assignee 'sachverstaendiger'`; der Claim-Nachlauf
+ * (setSvIdForFall + transitionFallStatus + SV-Mitteilung) ist danach identisch.
  */
 export async function weiseTerminwunschZu(
   terminId: string,
@@ -48,11 +50,26 @@ export async function weiseTerminwunschZu(
     .maybeSingle()
   if (ladeErr) return { ok: false, error: ladeErr.message }
   if (!termin) return { ok: false, error: 'Terminwunsch nicht gefunden' }
-  if (termin.status === 'sv_gesucht') {
-    return { ok: false, error: 'sv_gesucht-Wünsche: Zuweisung folgt mit Portal-Buchung (T4)' }
+
+  // Test-SV-Guard VOR dem Termin-Flip pruefen. Wuerde erst setSvIdForFall unten blocken, waere
+  // der Termin bereits dem SV zugewiesen, der Fall aber nicht -> inkonsistenter Zwischenzustand.
+  // Die Engine-Primitive unten sind reine Status-Updates und tragen den Guard (anders als
+  // reserviere()) nicht selbst.
+  if (termin.bezug_typ && termin.bezug_id) {
+    const vorabGuard = await pruefeTestSvKonsistenz(admin, svId, {
+      typ: termin.bezug_typ as 'claim' | 'fall' | 'lead',
+      id: termin.bezug_id as string,
+    })
+    if (vorabGuard.blockieren) {
+      return { ok: false, error: vorabGuard.grund ?? 'Test-Guard: Zuweisung blockiert.' }
+    }
   }
 
-  const result = await reassigniereDeadPin(terminId, { partnerId: svId, db: admin })
+  // Status-verzweigte Engine-Primitive (beide race-sicher via gutachter_termine_no_assignee_overlap).
+  const result =
+    termin.status === 'sv_gesucht'
+      ? await weiseSvGesuchtZu(terminId, { partnerId: svId, db: admin })
+      : await reassigniereDeadPin(terminId, { partnerId: svId, db: admin })
   if (!result.ok) return { ok: false, error: result.error }
 
   // Claim-verankerte Terminwuensche: bestehenden sv-zuweisung-Nachlauf ziehen.
@@ -66,7 +83,15 @@ export async function weiseTerminwunschZu(
 
   if (istClaimAnker && bezugId) {
     try {
-      await setSvIdForFall(admin, bezugId, svId)
+      const zuweisung = await setSvIdForFall(admin, bezugId, svId)
+      // Ein Test-Guard-Block ist KEIN non-fatal-Fall: der Termin waere dem SV zugewiesen,
+      // der Fall aber nicht — Dispatch muss das sehen statt es still zu schlucken.
+      if (!zuweisung.ok && zuweisung.code === 'test_guard') {
+        return { ok: false, error: zuweisung.grund }
+      }
+      if (!zuweisung.ok) {
+        console.error('[weiseTerminwunschZu] setSvIdForFall fehlgeschlagen (non-fatal):', zuweisung.grund)
+      }
     } catch (err) {
       console.error(
         '[weiseTerminwunschZu] setSvIdForFall fehlgeschlagen (non-fatal):',

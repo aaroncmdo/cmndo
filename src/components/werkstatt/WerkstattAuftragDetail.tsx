@@ -77,10 +77,14 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const [vorschlagLaden, setVorschlagLaden] = useState(false)
   const [abschlussOffen, setAbschlussOffen] = useState(false)
 
+  // T6: Ohne reparatur_termine-Row rendert die Sektion NICHT null, sondern den
+  // "Terminvorschlag offen"-Zustand (behandelt wie status='angefragt', wunschtermin=null).
+  // schlageWerkstattTerminVor legt die Row per Server-Upsert an (braucht nur claim_id);
+  // terminId-abhaengige Aktionen (bestaetigen/anrufen/ablehnen) bleiben row-los verborgen.
   const terminId: string = auftrag.reparatur_termin_id ?? ''
-  if (!terminId) return null
+  const hatRow = Boolean(terminId)
 
-  const status = auftrag.reparatur_termin_status as ReparaturTerminStatus | null
+  const status = hatRow ? (auftrag.reparatur_termin_status as ReparaturTerminStatus | null) : 'angefragt'
   const phase = reparaturTerminPhase(status)
   const badgeTone = TON_TO_BADGE_TONE[phase.ton]
 
@@ -200,26 +204,30 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
                   Termin bestätigen
                 </Button>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                loading={anrufLaden || isPending}
-                disabled={bestätigenLaden || ablehnenLaden}
-                onClick={handleAnrufen}
-              >
-                Anrufen / telefonisch klären
-              </Button>
+              {hatRow && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  loading={anrufLaden || isPending}
+                  disabled={bestätigenLaden || ablehnenLaden}
+                  onClick={handleAnrufen}
+                >
+                  Anrufen / telefonisch klären
+                </Button>
+              )}
               <Button variant="ghost" size="sm" disabled={bestätigenLaden || anrufLaden || ablehnenLaden} onClick={() => setVorschlagOffen((v) => !v)}>
                 {hatWunschtermin ? 'Anderen Termin vorschlagen' : 'Termin vorschlagen'}
               </Button>
-              <Button
-                variant="danger"
-                size="sm"
-                disabled={bestätigenLaden || anrufLaden || ablehnenLaden}
-                onClick={() => setAblehnungOffen(true)}
-              >
-                Ablehnen
-              </Button>
+              {hatRow && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  disabled={bestätigenLaden || anrufLaden || ablehnenLaden}
+                  onClick={() => setAblehnungOffen(true)}
+                >
+                  Ablehnen
+                </Button>
+              )}
             </div>
           )}
 
@@ -388,6 +396,16 @@ function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 // Termin existiert. Aaron 09.07.: „der genaue abgemachte Termin plus der Gutachter".
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Besichtigungs-Status → Anzeige-Label (Label-only, keine Farben; Status-Registry-safe).
+// dispatch_pending/sv_gesucht = Termin steht, wird noch final bestaetigt → "wird bestätigt".
+const BESICHTIGUNG_STATUS_LABEL: Record<string, string> = {
+  bestaetigt: 'bestätigt',
+  dispatch_pending: 'wird bestätigt',
+  sv_gesucht: 'wird bestätigt',
+  abgeschlossen: 'durchgeführt',
+  durchgefuehrt: 'durchgeführt',
+}
+
 function BesichtigungsterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   if (!auftrag.besichtigung_start) return null
 
@@ -413,7 +431,7 @@ function BesichtigungsterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) 
         )}
         {auftrag.besichtigung_status && (
           <p className="text-body-xs text-claimondo-ondo">
-            Status: {auftrag.besichtigung_status === 'bestaetigt' ? 'bestätigt' : 'reserviert'}
+            Status: {BESICHTIGUNG_STATUS_LABEL[auftrag.besichtigung_status] ?? 'reserviert'}
           </p>
         )}
       </div>

@@ -7,7 +7,7 @@ import { haversineKm } from '@/lib/gps/geofence'
 // AAR-87: nachgelagerte Trigger
 import { triggerGutachterTerminTask } from '@/lib/tasking'
 import { triggerSV01 } from '@/lib/gutachterTasking'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { sendNachricht } from '@/lib/whatsapp/send'
@@ -323,7 +323,13 @@ export async function POST(request: Request) {
   // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst
   // sv_id unveraendert (wie bisher).
   if (!orgPool) {
-    await setSvIdForFall(db, fallId, bestSv.id)
+    const zuweisung = await setSvIdForFall(db, fallId, bestSv.id)
+    // Test-SV-Guard (11.08.): intern/Test-Kunde <-> echter SV (und umgekehrt) wird hier geblockt.
+    // Als 409 zurueckgeben statt still weiterlaufen — sonst meldet die Route Erfolg, obwohl
+    // claims.sv_id leer blieb.
+    if (!zuweisung.ok && zuweisung.code === 'test_guard') {
+      return NextResponse.json({ error: zuweisung.grund }, { status: 409 })
+    }
   }
 
   if (updateErr) {
@@ -470,8 +476,21 @@ export async function POST(request: Request) {
       }
 
       // WhatsApp an Kunden
-      sendFallCommunication(fallId, 'sv_losgefahren').catch((err) => {
-        console.error('[sv-zuweisung] sv_losgefahren-Benachrichtigung:', err instanceof Error ? err.message : err)
+      // C3a: durable via Notification-Outbox — der Kunde wartet auf den SV, ein
+      // verschluckter Send liess ihn ohne Info. dedupKey mit Tages-Fenster: derselbe
+      // Anlass am selben Tag genau einmal, aber ein Re-Dispatch an einem anderen Tag
+      // (SV abgesagt, neuer SV faehrt) bekommt wieder eine Nachricht.
+      await enqueue({
+        dedupKey: buildDedupKey({
+          template: 'sv_losgefahren',
+          claimId: fallId,
+          fenster: new Date().toISOString().slice(0, 10),
+        }),
+        kanal: 'whatsapp',
+        template: 'sv_losgefahren',
+        claimId: fallId,
+      }).catch((err) => {
+        console.error('[sv-zuweisung] sv_losgefahren-Outbox-enqueue:', err instanceof Error ? err.message : err)
       })
 
       // WhatsApp an SV — bei Fall-direkter Zuweisung (Kanzlei/LexDrive)

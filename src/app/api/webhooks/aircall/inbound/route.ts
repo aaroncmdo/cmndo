@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { verifyWebhookSignature } from '@/lib/aircall/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { createLead } from '@/lib/leads/create-lead'
+import { createCase } from '@/lib/intake/create-case'
 import { createNotification } from '@/lib/notifications'
 import { AircallEventSchema } from '@/lib/schemas/aircall-event'
 
@@ -68,10 +68,15 @@ export async function POST(req: NextRequest) {
 
     if (!leadId && !fallId && eventType === 'call.created') {
       // Nur bei call.created neuen Lead anlegen - verhindert Duplikate bei ended/answered.
-      // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
-      const created = await createLead(
-        admin,
-        {
+      // C2b (Fundament D-4b): via createCase statt createLead -> der Anrufer-Lead bekommt jetzt
+      // GARANTIERT einen FlowLink (DECISIONS 2026-08-04 §7#1). Vorher entstand er ohne Kunde-
+      // Kanal: der Dispatcher hatte nichts zum Verschicken, der Anrufer keinen Selbstbedien-Weg.
+      // mode='lead-first' (ein Anruf ist noch kein Fall — Konversion spaeter via /flow).
+      // KEIN generischer dedup-Key: der ist ohne Kennzeichen unbrauchbar (dedupKeyIsUsable),
+      // und der praezisere Telefon-Dedup laeuft bereits oben ueber matchInboundToFall.
+      const created = await createCase(admin, {
+        mode: 'lead-first',
+        base: {
           source_channel: 'aircall-inbound',
           status: 'neu',
           // AAR-956 17.07. (Befund 4, PR #4473/E5): KEINE Platzhalter-Strings mehr —
@@ -80,11 +85,11 @@ export async function POST(req: NextRequest) {
           // `|| 'Unbekannt'`) behandeln NULL korrekt; 'Hallo Unbekannt!' entfaellt.
           telefon: fromNumber,
         },
-        {
+        extra: {
           qualifizierungs_phase: 'neu',
           notiz: `Auto-erstellt durch eingehenden Anruf am ${new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })}`,
         },
-      )
+      })
       leadId = created.ok ? created.leadId : null
       isNewLead = true
 

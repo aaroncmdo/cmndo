@@ -37,6 +37,12 @@ export const AI_MODELS = {
    */
   sv_briefing_struktur: 'claude-sonnet-5',
   /**
+   * KI-gefuehrtes /flow-Intake — konversationelle Feststellungs-Erfassung mit
+   * Tool-Use (strukturierte Feld-Extraktion). Kunden-facing, aber Qualitaet der
+   * Extraktion > Speed -> Struktur-Output-Stufe (wie sv_briefing_struktur).
+   */
+  flow_intake: 'claude-sonnet-5',
+  /**
    * KFZ-143: Pre-Call-Briefing für KB vor Kunden-Call. Strukturierter Output
    * aus Fall + Lead + letzter Bot-Analyse. Sonnet 5 — Entscheidungsgrundlage.
    */

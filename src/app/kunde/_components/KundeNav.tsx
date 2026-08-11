@@ -8,7 +8,10 @@ import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIco
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
-export function buildNavItems(singleFallId: string | null, t: (key: string) => string) {
+// T6 (08.08.): `hatFirma` gatet das Flotte-Item — Flotte ist ein B2B-Feature; ohne
+// Firmen-Konto lief `/kunde/flotte` als "Firmen-Konto anlegen"-Formular fuer jeden
+// Privatkunden auf (Aaron: "Flotte gehört zu B2B-Kunden"). Default false = versteckt.
+export function buildNavItems(singleFallId: string | null, t: (key: string) => string, hatFirma = false) {
   const fallItem = singleFallId
     ? { href: `/kunde/faelle/${singleFallId}`, label: t('nav.meinFall'), icon: HomeIcon, exact: false }
     : { href: '/kunde', label: t('nav.meineFaelle'), icon: HomeIcon, exact: true }
@@ -19,9 +22,9 @@ export function buildNavItems(singleFallId: string | null, t: (key: string) => s
     // P6 (WS H, fahrzeug-zentrisch): eigene Fahrzeuge (owner-scoped) — vor der firma-scoped Flotte.
     // TODO i18n-Follow-up: nav.fahrzeuge-Key in den 6 Locales; hardcoded DE wie beim Flotte-Item.
     { href: '/kunde/fahrzeuge', label: 'Fahrzeuge', icon: CarFrontIcon, exact: false },
-    // Sub-Projekt 2 (Firma & Flotte): Desktop-Nav (MOBILE_ITEMS ist kuratiert -> mobil (noch) aus).
+    // Sub-Projekt 2 (Firma & Flotte): NUR fuer B2B-Kunden mit Firmen-Konto (T6).
     // TODO i18n-Follow-up: nav.flotte-Key in den 6 Locales; hardcoded DE reicht fuer den MVP-Ship.
-    { href: '/kunde/flotte', label: 'Flotte', icon: CarIcon, exact: false },
+    ...(hatFirma ? [{ href: '/kunde/flotte', label: 'Flotte', icon: CarIcon, exact: false }] : []),
     { href: '/kunde/chat', label: t('nav.nachrichten'), icon: MessageSquareIcon, exact: false },
     { href: '/kunde/profil', label: t('nav.profil'), icon: UserIcon, exact: false },
   ]
@@ -29,10 +32,13 @@ export function buildNavItems(singleFallId: string | null, t: (key: string) => s
 
 export default function KundeNav({
   singleFallId = null,
+  hatFirma = false,
 }: {
   /** Wenn der Kunde nur einen Fall hat: faelle.id direkt durchreichen, damit
    *  die Nav direkt zur Detail-Page linkt statt zum Dashboard mit Liste. */
   singleFallId?: string | null
+  /** B2B-Kunde mit Firmen-Konto → Flotte-Item sichtbar (T6). */
+  hatFirma?: boolean
 }) {
   const pathname = usePathname()
   const t = useTranslations('kunde.shell')
@@ -41,7 +47,7 @@ export default function KundeNav({
   // Locales) → kein neuer i18n-Key noetig.
   const tHero = useTranslations('kundeHero')
   const SCHADEN_HREF = '/kunde/schaden-melden'
-  const NAV_ITEMS = buildNavItems(singleFallId, t)
+  const NAV_ITEMS = buildNavItems(singleFallId, t, hatFirma)
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href

@@ -11,6 +11,7 @@ import {
   setVersicherungAktiv,
   type VersicherungInput,
 } from '../../actions'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // `get` liest den aktuellen Wert aus dem (camelCase-)Detail — damit der Lese-Modus
 // immer die frischen Server-Daten zeigt, nicht den evtl. veralteten Form-State.
@@ -131,15 +132,33 @@ export default function StammdatenTab({ versicherer }: { versicherer: Versichere
               {f.key === 'name' && <span className="text-danger"> *</span>}
             </label>
             {editing ? (
-              <input
-                id={`vs-${f.key}`}
-                type={f.type ?? 'text'}
-                className={INPUT_CLS}
-                value={form[f.key] ?? ''}
-                onChange={(e) =>
-                  setForm((s) => ({ ...s, [f.key]: e.target.value === '' ? null : e.target.value }))
-                }
-              />
+              f.key === 'adresse' ? (
+                /* P3 Ortseingaben: Autocomplete füllt Adresse + PLZ + Stadt (plz/stadt bleiben editierbar). */
+                <GooglePlaceAutocomplete
+                  className={INPUT_CLS}
+                  defaultValue={form.adresse ?? ''}
+                  placeholder="Straße + Hausnummer, Stadt eingeben…"
+                  onSelect={(r) =>
+                    setForm((s) => ({
+                      ...s,
+                      adresse: r.strasse || s.adresse,
+                      plz: r.plz || s.plz,
+                      stadt: r.stadt || s.stadt,
+                    }))
+                  }
+                  onChange={(t) => setForm((s) => ({ ...s, adresse: t || null }))}
+                />
+              ) : (
+                <input
+                  id={`vs-${f.key}`}
+                  type={f.type ?? 'text'}
+                  className={INPUT_CLS}
+                  value={form[f.key] ?? ''}
+                  onChange={(e) =>
+                    setForm((s) => ({ ...s, [f.key]: e.target.value === '' ? null : e.target.value }))
+                  }
+                />
+              )
             ) : (
               <p className="text-body-sm text-claimondo-navy break-words">
                 {f.get(versicherer) || '—'}

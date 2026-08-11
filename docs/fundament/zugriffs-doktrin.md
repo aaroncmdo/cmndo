@@ -80,6 +80,13 @@ den Basistabellen-Zugriff.
 - **Offene Achse (spätere Tranche/Erhebung):** server-seitige Basistabellen-Reads, die die `v_claim_*`-Schicht
   umgehen (Konsolidierung auf das View-Muster) — eigene Erhebung wert, nicht in dieser Prep-Tranche.
 
+**Verankert im Review-Prozess (08.08., C5-doc-close):** Die Doktrin ist jetzt (a) aus `AGENTS.md` verlinkt
+(Dach-Absatz „Zugriffs-Doktrin (Server-first)" über den vier Zugriffs-Gates) und (b) als 6-Punkt-Checkliste
+im PR-Template (`.github/pull_request_template.md`, Block „Zugriffs-Doktrin — bei neuer Tabelle/View/RPC").
+Damit ist **§9-Endzustand-Punkt #8** erfüllt: dokumentiert · verlinkt · Checkliste im Review-Prozess · Top-
+Abweichler migriert (Client-Achse = 0, gegenstandslos). Die server-seitige `v_claim_*`-Konsolidierung
+(Punkt oben) bleibt eine **separate Optimierungs-Tranche** (kein Zugriffs-Sicherheits-Thema).
+
 ## 6 · Incident-Anker (warum die Doktrin)
 
 Die RLS-Incident-Familie ist **eine Klasse — Feinsteuerung in RLS statt definierter Zugriffsschicht:** #4625 (DSGVO-Storno

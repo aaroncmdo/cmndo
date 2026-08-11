@@ -7,7 +7,7 @@
 // Dokument bereits hochgeladen wurde.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 /** Slot-IDs fuer die der WA-Task greift. */
 const KONDITIONAL_SLOT_IDS = new Set(['freigabe_bank', 'zeugenbericht'])
@@ -103,10 +103,17 @@ export async function triggerKonditionaleDokumentTasks(
 
     // WA-Nachricht an Kunde via bestehendes Template „dokumente_nachreichen"
     // mit slot-spezifischem Grund-Text in extraData.
-    await sendFallCommunication(fallId, 'dokumente_nachreichen', {
-      slot_id: slotId,
-      slot_label: meta.label,
-      grund: meta.grund,
+    // C3a: durable via Notification-Outbox. dedupKey mit slotId als Fenster — diese
+    // Schleife laeuft pro offenem Dokument-Slot, ein Key ohne slotId wuerde bei
+    // mehreren fehlenden Dokumenten nur das erste anfordern. Kollidiert NICHT mit
+    // dem sv-termin-dokument-reminder-Cron (gleiches Template, aber dort ist das
+    // Fenster die termin.id).
+    await enqueue({
+      dedupKey: buildDedupKey({ template: 'dokumente_nachreichen', claimId: fallId, fenster: slotId }),
+      kanal: 'whatsapp',
+      template: 'dokumente_nachreichen',
+      claimId: fallId,
+      payload: { slot_id: slotId, slot_label: meta.label, grund: meta.grund },
     })
 
     result.triggered.push(slotId)

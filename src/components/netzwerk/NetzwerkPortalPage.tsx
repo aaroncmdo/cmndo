@@ -6,10 +6,12 @@ import { getTopCommentsPreview } from '@/lib/community/threads'
 import { NetzwerkFeed } from '@/components/shared/netzwerk/NetzwerkFeed'
 import type { NetzwerkPortal } from '@/components/shared/netzwerk/types'
 import { ladeMeineVerbindungen, ladeMeineAnfragen } from '@/lib/netzwerk/verbindungen-queries'
+import { ladeMeinNetzwerkGeo } from '@/lib/netzwerk/netzwerk-geo'
 import { parseTab } from './tab'
 import { NetzwerkTabBar } from './NetzwerkTabBar'
 import { VerbindungenTab } from './VerbindungenTab'
 import { AnfragenTab } from './AnfragenTab'
+import { NetzwerkKarteClient } from './NetzwerkKarteClient'
 
 export async function NetzwerkPortalPage({
   portal,
@@ -26,6 +28,8 @@ export async function NetzwerkPortalPage({
   } else if (tab === 'anfragen') {
     const { eingehend, ausgehend } = await ladeMeineAnfragen()
     content = <AnfragenTab eingehend={eingehend} ausgehend={ausgehend} />
+  } else if (tab === 'karte') {
+    content = <NetzwerkKarteClient geo={await ladeMeinNetzwerkGeo(portal)} />
   } else {
     const entries = await getNetzwerkFeed()
     const [likedKeys, previewsByKey] = await Promise.all([

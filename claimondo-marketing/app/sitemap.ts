@@ -138,6 +138,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: langAlternates('/kfz-gutachter/wertminderung') },
     },
     {
+      url: `${SITE_URL}/kfz-gutachter/nutzungsausfall`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/kfz-gutachter/nutzungsausfall') },
+    },
+    {
       url: `${SITE_URL}/kfz-gutachter/gutachten-service`,
       lastModified: now,
       changeFrequency: 'monthly',

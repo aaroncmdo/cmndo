@@ -84,8 +84,15 @@ const nextConfig: NextConfig = {
     // Server-Actions (generateFlyerPdf) sie auf dem VPS via
     // process.cwd()/public/... finden — sonst fehlt das PDF im getraceten
     // Standalone-Output (analog OCR-Force-Include oben).
+    // F2b Route-Konsolidierung (08.08.): der QR-Pool rendert jetzt kanonisch unter
+    // /admin/vertrieb/werkstaetten/qr-pool(/drucken) (Legacy redirectet 308 dorthin) --
+    // outputFileTracingIncludes keyt auf die RENDERNDE Route, nicht auf Import-Pfade,
+    // daher zusaetzlich die vertrieb-Keys mit demselben Include-Wert. Legacy-Keys bleiben
+    // als Belt-and-Suspenders (kein Schaden, falls je wieder direkt gerendert).
     '/admin/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
     '/admin/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/vertrieb/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/vertrieb/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
     // Marketing-Content-Studio: der Render-Orchestrator (src/lib/marketing/render-clip.ts)
     // laedt @remotion/renderer + @remotion/bundler via runtime-require (serverExternalPackages,
     // s.o.). @vercel/nft traced deren CJS-Entry (renderer/dist/index.js), das native
@@ -277,16 +284,24 @@ const nextConfig: NextConfig = {
       // page.tsx-Files hingen. Als HTTP-301 in next.config effizienter und
       // für SEO/Bookmarks sauberer — die Route wird gar nicht erst
       // gerendert.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb/sachverstaendige
+      // gezogen (die Liste lebt dort jetzt als echter Content, s.u.) -- sonst
+      // Doppel-Hop ueber den bereits bestehenden Exact-Match-Redirect
+      // /admin/sachverstaendige -> /admin/vertrieb (Zeile ~399, landet auf dem
+      // allgemeinen Cockpit-Roster statt der SV-Karte).
       {
         source: '/admin/karte',
-        destination: '/admin/sachverstaendige',
+        destination: '/admin/vertrieb/sachverstaendige',
         permanent: true,
       },
       // Aaron 07.07.: SV-Leads-Verwaltung wanderte in die Sachverstaendige-
       // Sektion (Drawer ueber der Karte). Alte Bookmarks -> neue Route.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen --
+      // sonst Doppel-Hop ueber den neuen Exact-Match-Redirect
+      // /admin/sachverstaendige/leads -> vertrieb (s.u.).
       {
         source: '/admin/sv-leads',
-        destination: '/admin/sachverstaendige/leads',
+        destination: '/admin/vertrieb/sachverstaendige/leads',
         permanent: true,
       },
       // P4b (Aufgaben-Hub-Konsolidierung): der Aufgaben-Hub /admin/aufgaben (Nav)
@@ -347,9 +362,12 @@ const nextConfig: NextConfig = {
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
       // Redirect-Kette.
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen --
+      // sonst Doppel-Hop ueber den neuen Exact-Match-Redirect
+      // /admin/sachverstaendige/anlegen -> vertrieb (s.u.).
       {
         source: '/admin/sv-onboarding',
-        destination: '/admin/sachverstaendige/anlegen',
+        destination: '/admin/vertrieb/sachverstaendige/anlegen',
         permanent: true,
       },
       // AAR-530 (A6): Legacy-Redirects für die Hub-Konsolidierung aus
@@ -399,6 +417,69 @@ const nextConfig: NextConfig = {
       { source: '/admin/sachverstaendige', destination: '/admin/vertrieb', permanent: true },
       { source: '/admin/werkstaetten', destination: '/admin/vertrieb', permanent: true },
       { source: '/admin/partner-leads', destination: '/admin/vertrieb', permanent: true },
+      // F2 Route-Konsolidierung (08.08.): die SV-Detail-Akte ist jetzt kanonisch unter
+      // /admin/vertrieb/sachverstaendige/[id] (vorher Re-Export-Ziel, jetzt der echte
+      // Content -- admin/sachverstaendige/[id]/page.tsx wurde zu SvAkteContent.tsx und
+      // hat keinen Route-Slot mehr). UUID-Regex (nicht :path*) faengt NICHT die
+      // Geschwister anlegen/basic-freigaben/leads, die unter /admin/sachverstaendige/*
+      // unveraendert weiterleben. Der Legacy-@drawer/(.)[id]-Soft-Nav-Intercept auf der
+      // Legacy-Liste wurde entfernt (Option 3a) -- die vertrieb-Konsole hat ihren eigenen
+      // Cockpit-Drawer (admin/vertrieb/@drawer/(.)sachverstaendige/[id]), unberuehrt.
+      {
+        source: '/admin/sachverstaendige/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+        destination: '/admin/vertrieb/sachverstaendige/:id',
+        permanent: true,
+      },
+      // F2b Route-Konsolidierung REST (08.08.): analog fuer die restlichen 3 SV-Routen
+      // (anlegen/basic-freigaben/leads) -- ihre page.tsx wurden zu *Content.tsx umbenannt
+      // und haben keinen Route-Slot mehr. EXAKT-Match (kein :path*) je Route, damit die
+      // Routen sauber getrennt bleiben (kein Ueberschatten der Geschwister). Der Legacy-
+      // @drawer/(.)anlegen + (.)leads-Soft-Nav-Intercept auf der Legacy-Liste wurde
+      // entfernt (dieselbe Begruendung wie beim [id]-Drawer oben: die vertrieb-Konsole
+      // hat kein eigenes Pendant fuer diese 3 Routen -- verifiziert, kein Cockpit-Drawer
+      // fuer anlegen/basic-freigaben/leads vorhanden).
+      {
+        source: '/admin/sachverstaendige/anlegen',
+        destination: '/admin/vertrieb/sachverstaendige/anlegen',
+        permanent: true,
+      },
+      {
+        source: '/admin/sachverstaendige/basic-freigaben',
+        destination: '/admin/vertrieb/sachverstaendige/basic-freigaben',
+        permanent: true,
+      },
+      {
+        source: '/admin/sachverstaendige/leads',
+        destination: '/admin/vertrieb/sachverstaendige/leads',
+        permanent: true,
+      },
+      // F2 Route-Konsolidierung (08.08.): analog fuer Werkstatt -- die Detail-Akte ist
+      // jetzt kanonisch unter /admin/vertrieb/werkstaetten/[id] (admin/werkstaetten/[id]/
+      // page.tsx wurde zu WsAkteContent.tsx und hat keinen Route-Slot mehr). UUID-Regex
+      // (nicht :path*) faengt NICHT qr-pool/qr-pool/drucken -- die haben (F2b, s.u.)
+      // eigene EXAKT-Match-Redirects. Kein Legacy-@drawer/(.)[id] auf der Werkstatt-Liste
+      // vorhanden (anders als bei SV) -- nichts zu entfernen.
+      {
+        source: '/admin/werkstaetten/:id([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})',
+        destination: '/admin/vertrieb/werkstaetten/:id',
+        permanent: true,
+      },
+      // F2b Route-Konsolidierung REST (08.08.): analog fuer die restlichen 2 Werkstatt-
+      // Routen (qr-pool/qr-pool/drucken) -- ihre page.tsx wurden zu *Content.tsx
+      // umbenannt und haben keinen Route-Slot mehr. ZWEI SEPARATE EXAKT-Match-Eintraege
+      // (kein :path*), sonst wuerde ein :path* auf qr-pool das drucken-Sub-Segment
+      // schlucken statt es an seinen eigenen Redirect zu uebergeben. Kein Legacy-@drawer
+      // fuer Werkstatt vorhanden (s.o.) -- nichts zu entfernen.
+      {
+        source: '/admin/werkstaetten/qr-pool',
+        destination: '/admin/vertrieb/werkstaetten/qr-pool',
+        permanent: true,
+      },
+      {
+        source: '/admin/werkstaetten/qr-pool/drucken',
+        destination: '/admin/vertrieb/werkstaetten/qr-pool/drucken',
+        permanent: true,
+      },
       // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
       // aus /admin/faelle/[id] rausgezogen in die neutrale Route /faelle/[id],
       // damit KB + Kanzlei ihre eigene Shell bekommen. Der Redirect muss
@@ -433,7 +514,10 @@ const nextConfig: NextConfig = {
       // Static:
       // W1.8: /admin/aufgaben-Doppel-Redirect entfernt — der Aufgaben-Hub-Eintrag oben (→alle)
       // gewinnt per first-match; dieser (→meine) war toter Config-Code.
-      { source: '/admin/sachverstaendige/neu', destination: '/admin/sachverstaendige/anlegen', permanent: true },
+      // F2b Route-Konsolidierung (08.08.): Ziel direkt auf vertrieb gezogen -- sonst
+      // Doppel-Hop ueber den neuen Exact-Match-Redirect /admin/sachverstaendige/anlegen
+      // -> vertrieb (s.o.).
+      { source: '/admin/sachverstaendige/neu', destination: '/admin/vertrieb/sachverstaendige/anlegen', permanent: true },
       { source: '/gutachter/mitteilungen', destination: '/gutachter/heute', permanent: true },
       { source: '/gutachter/nachrichten', destination: '/gutachter/posteingang', permanent: true },
       { source: '/gutachter/route', destination: '/gutachter/heute', permanent: true },

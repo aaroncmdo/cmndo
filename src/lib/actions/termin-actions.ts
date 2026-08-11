@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -11,7 +12,7 @@ import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
-import { ladeBelegung } from '@/lib/termine/engine'
+import { ladeBelegung, reserviere } from '@/lib/termine/engine'
 import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
 
 type ActionResult = { success: boolean; error?: string }
@@ -176,7 +177,7 @@ export async function terminAblehnen({
     // Find the active termin for this fall
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, start_zeit')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag'])
@@ -331,7 +332,7 @@ export async function terminGegenvorschlag({
     // zurück auf 'gegenvorschlag', Kunde muss neu bestätigen).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
@@ -350,7 +351,7 @@ export async function terminGegenvorschlag({
     svId = auth.svId
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallIdArg)
+      .or(bezugOrExpr('fall', fallIdArg))
       .eq('status', 'gegenvorschlag')
       .order('created_at', { ascending: false })
       .limit(1)
@@ -611,7 +612,7 @@ export async function terminAnnehmen({
     // (jetzt-zu-tun.ts) ins Leere (reserviert hatte bisher keine Kunde-Annehmen-Aktion).
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
-      .eq('fall_id', fId)
+      .or(bezugOrExpr('fall', fId))
       .in('status', ['gegenvorschlag', 'reserviert'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -644,7 +645,7 @@ export async function terminAnnehmen({
     svId = auth.svId
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
-      .eq('fall_id', fId)
+      .or(bezugOrExpr('fall', fId))
       .eq('assignee_id', auth.svId)
       .eq('assignee_typ', 'sachverstaendiger')
       .eq('status', 'gegenvorschlag')
@@ -735,7 +736,7 @@ export async function terminAnnehmen({
       if (sv?.profile_id) {
         const { data: svProfile } = await admin.from('profiles').select('telefon').eq('id', sv.profile_id).single()
         if (svProfile?.telefon) {
-          const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
+          const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').or(bezugOrExpr('fall', fId)).eq('status', 'bestaetigt').single()
           const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
           await sendManualWhatsApp(svProfile.telefon,
             `✅ Kunde akzeptiert ${terminStr} für Fall ${fallDataClaimNummer ?? ''}.`,
@@ -746,7 +747,7 @@ export async function terminAnnehmen({
       // Notification an Kunde
       const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
       if (kundeProfile?.telefon) {
-        const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').eq('fall_id', fId).eq('status', 'bestaetigt').single()
+        const { data: termin } = await admin.from('gutachter_termine').select('start_zeit').or(bezugOrExpr('fall', fId)).eq('status', 'bestaetigt').single()
         const terminStr = termin?.start_zeit ? formatDatumDE(termin.start_zeit) : ''
         await sendManualWhatsApp(kundeProfile.telefon,
           `✅ Der Sachverständige akzeptiert Ihren Terminvorschlag: ${terminStr}.`,
@@ -829,13 +830,11 @@ export async function terminBuchen({
   // Find the active termin
   const { data: termin } = await admin.from('gutachter_termine')
     .select('id')
-    .eq('fall_id', fId)
+    .or(bezugOrExpr('fall', fId))
     .in('status', ['gegenvorschlag', 'reserviert'])
     .order('created_at', { ascending: false })
     .limit(1)
     .single()
-  if (!termin) return { success: false, error: 'Kein aktiver Termin gefunden' }
-
   const slotDate = new Date(slot)
   const endDate = new Date(slotDate.getTime() + TERMIN_DAUER_MS)
 
@@ -845,22 +844,60 @@ export async function terminBuchen({
     if (conflict) return conflict
   }
 
+  // Kein vorgeschlagener/reservierter Termin, aber ein SV ist zugewiesen: die UI zeigt dem
+  // Kunden trotzdem den vollen Slot-Picker aus dem SV-Kalender ("Termin verbindlich buchen").
+  // Frueher lief der Klick hier ins Leere (prod-belegt 11.08. an CLM-2026-00834: Action
+  // antwortete 'Kein aktiver Termin gefunden', die UI verschluckte es). Statt abzuweisen wird
+  // ueber den ENGINE-Pfad reserviert — reserviere() bringt Test-SV-Guard, Belegungs-Vorcheck
+  // und Race-Sicherheit (Exclusion-Constraint 23P01) mit; danach laeuft der normale
+  // Bestaetigungs-Nachlauf (Reminder/Kalender-Sync/SV-Benachrichtigung) unveraendert weiter.
+  let ermittelteTerminId: string | undefined = termin?.id
+  if (!ermittelteTerminId) {
+    if (!svId) {
+      return {
+        success: false,
+        error: 'Aktuell liegt für Ihren Fall kein buchbarer Termin vor. Ihr Sachverständiger meldet sich zur Terminabstimmung — bei Fragen wenden Sie sich bitte an Ihren Betreuer.',
+      }
+    }
+    const res = await reserviere({
+      assignee: { typ: 'sachverstaendiger', id: svId },
+      von: slotDate.toISOString(),
+      bis: endDate.toISOString(),
+      quelle: 'self_service',
+      typ: 'sv_begutachtung',
+      bezug: { typ: 'fall', id: fId },
+      db: admin,
+    })
+    if (!res.ok) {
+      return {
+        success: false,
+        error: res.code === 'belegt'
+          ? 'Dieser Zeitpunkt ist inzwischen vergeben. Bitte wählen Sie einen anderen Termin.'
+          : res.error,
+      }
+    }
+    ermittelteTerminId = res.terminId
+  }
+  // ab hier garantiert gesetzt — als const gebunden, damit die .then()-Closures unten
+  // nicht auf `string | undefined` schauen.
+  const zielTerminId: string = ermittelteTerminId
+
   // 1. DB Update
   const { error: updateErr } = await admin.from('gutachter_termine').update({
     status: 'bestaetigt',
     start_zeit: slotDate.toISOString(),
     end_zeit: endDate.toISOString(),
     gegenvorschlag_von: null,
-  }).eq('id', termin.id)
+  }).eq('id', zielTerminId)
 
   if (updateErr) return { success: false, error: updateErr.message }
 
   // KFZ-136: Reminder generieren (Termin gebucht)
-  try { await generateReminderForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
+  try { await generateReminderForTermin(zielTerminId) } catch (err) { console.error('[KFZ-136] Reminder-Generierung fehlgeschlagen:', err) }
 
   // AAR-694 Teil B: SV-Google-Kalender-Event anlegen/aktualisieren (non-critical)
   import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEvent }) =>
-    syncSvCalendarEvent(termin.id).catch((err) =>
+    syncSvCalendarEvent(zielTerminId).catch((err) =>
       console.warn('[terminBuchen] syncSvCalendarEvent:', err instanceof Error ? err.message : err),
     ),
   )
@@ -870,13 +907,13 @@ export async function terminBuchen({
   // bisher nur Google schrieb, während setTermin/Magic-Link/Dispatch alle
   // beide Provider schreiben.
   import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
-    syncSvTerminToCalDav(termin.id, fId).catch((err) =>
+    syncSvTerminToCalDav(zielTerminId, fId).catch((err) =>
       console.warn('[terminBuchen] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
     ),
   )
   // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
   import('@/lib/microsoft/sv-termin-sync').then(({ syncSvTerminToOutlook }) =>
-    syncSvTerminToOutlook(termin.id, fId).catch((err) =>
+    syncSvTerminToOutlook(zielTerminId, fId).catch((err) =>
       console.warn('[terminBuchen] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
     ),
   )
@@ -946,7 +983,7 @@ export async function terminBuchen({
       'termin.sv_bestaetigt',
       {
         fallId: fId,
-        terminId: termin.id,
+        terminId: zielTerminId,
         datum: slotDate.toISOString().slice(0, 10),
         uhrzeit: slotDate.toISOString().slice(11, 16),
         ort: ort || '—',

@@ -1,10 +1,11 @@
 'use client'
 
-import { useTransition, type FormEvent } from 'react'
+import { useState, useTransition, type FormEvent } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { submitStadtLead } from './actions'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 type GtagFn = (command: string, eventName: string, params?: Record<string, unknown>) => void
 function trackGtag(eventName: string, params?: Record<string, unknown>) {
@@ -21,6 +22,10 @@ type Props = {
 export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
   const t = useTranslations('kfz_gutachter_stadt')
   const [pending, startTransition] = useTransition()
+  // P4 Ortseingaben: Ort-Autocomplete controlled (AC rendert kein name) -> Wert per hidden input in FormData.
+  // Stadt-LP: das Ort-Feld ist mit dem Stadtnamen der Seite vorbelegt.
+  const [city, setCity] = useState(stadtName ?? '')
+  const [placeId, setPlaceId] = useState('')
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -66,7 +71,21 @@ export function StadtLeadFormClient({ stadtName, stadtSlug }: Props) {
       <div className="mt-5 space-y-3">
         <Field name="name" label={t('form_name_label')} type="text" placeholder={t('form_name_placeholder')} autoComplete="name" required disabled={pending} />
         <Field name="phone" label={t('form_phone_label')} type="tel" placeholder={t('form_phone_placeholder')} autoComplete="tel" inputMode="tel" required disabled={pending} />
-        <Field name="city" label={t('form_city_label')} type="text" placeholder={t('form_city_placeholder', { stadt: stadtName })} autoComplete="postal-code" defaultValue={stadtName} required disabled={pending} />
+        <div>
+          <label htmlFor="stadt-lead-city" className="mb-1.5 block text-xs font-semibold text-claimondo-shield">
+            {t('form_city_label')}
+          </label>
+          {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Stadt/PLZ; Wert -> verstecktes name="city" (+ place_id) für die FormData. */}
+          <GooglePlaceAutocomplete
+            className="w-full rounded-ios-md border border-claimondo-border bg-white/85 px-4 py-3 text-base transition-all focus:border-claimondo-ondo focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/20 disabled:cursor-not-allowed disabled:opacity-70"
+            placeholder={t('form_city_placeholder', { stadt: stadtName })}
+            defaultValue={city}
+            onSelect={(r) => { setCity(r.stadt || r.plz || r.adresse); setPlaceId(r.place_id) }}
+            onChange={(v) => { setCity(v); setPlaceId('') }}
+          />
+          <input type="hidden" name="city" value={city} />
+          {placeId ? <input type="hidden" name="place_id" value={placeId} /> : null}
+        </div>
       </div>
       <button
         type="submit"

@@ -21,6 +21,7 @@
     "check:knip": "node scripts/check-knip.mjs",
     "check:migration-utf8": "node scripts/check-migration-utf8.mjs",
     "check:operative-status-writes": "node scripts/check-operative-status-writes.mjs",
+    "check:e2e-toplevel-fs": "node scripts/check-e2e-toplevel-fs.mjs",
     "check:query-drift": "node scripts/check-query-drift.mjs",
     "check:query-parse": "node --env-file=.env.local scripts/check-query-parse.mjs",
     "check:redirect-stubs": "node scripts/check-redirect-stubs.mjs",

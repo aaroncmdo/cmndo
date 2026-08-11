@@ -8,6 +8,7 @@ import { anlegeFall, type AnlegeFallInput } from './actions'
 import { SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import PageHeader from '@/components/shared/PageHeader'
 import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // KFZ-154 Cleanup-Follow-up: Minimale Fall-Anlage Form fuer Admins.
 // Erstellt einen Lead + Fall in einem Rutsch (analog convertLeadToFall).
@@ -135,7 +136,21 @@ export default function AnlegenFallClient() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Kennzeichen" value={form.kennzeichen ?? ''} onChange={v => update('kennzeichen', v)} mono />
             <Field label="Schadens-PLZ *" value={form.schadens_plz} onChange={v => update('schadens_plz', v)} required />
-            <Field label="Schadens-Adresse" value={form.schadens_adresse ?? ''} onChange={v => update('schadens_adresse', v)} className="sm:col-span-2" />
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label className="text-xs font-semibold text-claimondo-shield">Schadens-Adresse</label>
+              {/* P3 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort. PLZ/Ort bleiben editierbar. */}
+              <GooglePlaceAutocomplete
+                className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+                defaultValue={form.schadens_adresse ?? ''}
+                placeholder="Straße + Hausnummer, Ort eingeben…"
+                onSelect={(r) => {
+                  update('schadens_adresse', r.strasse || form.schadens_adresse || '')
+                  if (r.plz) update('schadens_plz', r.plz)
+                  if (r.stadt) update('schadens_ort', r.stadt)
+                }}
+                onChange={(t) => update('schadens_adresse', t)}
+              />
+            </div>
             <Field label="Schadens-Ort" value={form.schadens_ort ?? ''} onChange={v => update('schadens_ort', v)} />
             <Field label="Schadensursache" value={form.schadensursache ?? ''} onChange={v => update('schadensursache', v)} placeholder="z.B. Auffahrunfall" />
           </div>

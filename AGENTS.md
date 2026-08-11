@@ -73,10 +73,13 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 
 **Ablauf:**
 
-1. **Im PR/Marker:** Smoke-Plan benennen — welche Flows, welche Specs, welche Test-Konten.
-2. **Nach Prod-Deploy:** vollständigen Smoke fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren.
-3. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
-4. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+1. **ZUERST das operative Soll — vor jedem Seed, jedem Klick, jeder Spec-Zeile.** Formuliere als Nutzer-Schrittfolge, wie das Feature **operativ ablaufen SOLLTE** — aus Nutzer-/Business-Sicht, **hergeleitet aus der Fachlogik, NICHT aus dem Code gelesen**. Das Soll ist die Referenz, gegen die gesmoked wird; der Code ist der Prüfling, nicht der Maßstab. Das Soll gehört in den PR/Marker (kurz, in Prosa) und wird **mit Aaron abgesprochen**, bevor final bewertet wird.
+2. **Smoke-Plan benennen** (im PR/Marker): welche Flows, welche Specs, welche Test-Konten — abgeleitet aus dem Soll aus Schritt 1.
+3. **Nach Prod-Deploy:** vollständigen Smoke **gegen das Soll** fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren. **Jede Abweichung Code↔Soll ist ein BEFUND**, keine Seed-Hürde, um die man herumbaut.
+4. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
+5. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (**inklusive des ausformulierten Solls** + Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+
+**Alles per UI:** Der Smoke fährt den operativen Weg durch die **echte Benutzeroberfläche** — echte Logins, echte Klicks, über **alle** beteiligten Rollen (z. B. Werkstatt UND Kunde), nicht per DB-Seed abgekürzt. DB-Seed ist **nur** für den realistischen **Ausgangszustand** erlaubt, den ein vorgelagerter (evtl. fremder/instabiler) Schritt erzeugt hätte. **Jeder Zustandsübergang, der zum getesteten Soll gehört, ist ein echter UI-Klick** — ein geseedeter Zwischenzustand verdeckt genau den Schritt, den der Smoke beweisen soll.
 
 **Sicherheit — kein Kollateralschaden auf Prod:**
 
@@ -85,6 +88,8 @@ PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # ode
 * **Niemals** Prod-Daten echter Kunden mutieren oder löschen.
 
 Begründung: Wiederholt war „build grün" ≠ „live nutzbar" (Feature nie erreichbar, Route 500, Silent-DB-CHECK-Reject, den kein Build/`tsc` fängt). Der Prod-Smoke ist die einzige Instanz, die echtes Nutzerverhalten prüft. Codifiziert den Broadcast-Mandat (11.07., Aaron) als harte Regel.
+
+Begründung „Soll zuerst" (Schritt 1, Aaron-Regel 27.07., verankert 11.08.): Ein Smoke, der nur die Implementierung nachfährt („seede den Zustand, den der Code erwartet, treibe den Pfad, den der Code nimmt"), bestätigt bloß *„Code tut, was Code tut"* — eine **Tautologie**. Er verdeckt die Lücke zwischen dem, was gebaut wurde, und dem, was Nutzer/Geschäft brauchen. Ausgelöst durch den #4567-Reparatur-Funnel-Smoke: auf `reparatur-laeuft` geseedet + nur den Abschluss getrieben → bestätigte den Code-Pfad statt des vollen operativen Wegs (Schadenmeldung → Kunden-Beleg). Wer das Soll erst nach dem Code formuliert, schreibt die Implementierung als Maßstab fest — genau das soll diese Regel verhindern.
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
@@ -376,6 +381,30 @@ Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB
 CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
 <!-- END:redirect-stub-gate -->
 
+# E2E-Toplevel-FS-Gate (Ratchet)
+
+**Ein `readFileSync(...)` auf MODUL-EBENE einer Playwright-Spec ist verboten.** Fehlt die Datei, wirft es bereits **beim Import** → die gesamte Playwright-**Collection** crasht, und damit fallen **ALLE** anderen Journey-Smokes mit aus (auch die kerngesunden). Genau das hielt den `main`-e2e-Job vom **05.–11.08. dauerhaft rot**: `tests/e2e/flows/feststellung-flow-gate.spec.ts` las einen **local-only** Seed top-level (`scripts/smoke/.feststellung-flow-gate-seed.json`, Generator läuft bewusst nicht in CI) → auf main lief **kein einziger** Journey-Smoke mehr, echte Regressionen wären unbemerkt geblieben. Kein Build/tsc/anderer Ratchet fängt das.
+
+Verschärfend: die e2e-Steps laufen **sequenziell**. Scheitert ein Journey-Smoke, werden die **nachfolgenden Seed-Steps übersprungen** → deren Seed-Dateien fehlen → der abschließende `playwright test`-Lauf crasht an der nächsten top-level lesenden Spec. Ein einzelner roter Journey kann so die ganze Collection mitreißen.
+
+**Richtig** (Muster: `tests/e2e/flows/reparatur-funnel-abschluss-smoke.spec.ts`):
+```ts
+let seed: any = null
+try { seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.x-seed.json'), 'utf8')) } catch { /* nicht geseedet */ }
+
+test('…', async ({ page }) => {
+  test.skip(!seed, 'Seed-Fixture fehlt — local-only Prod-Smoke, läuft nicht im e2e-Job')
+  …
+})
+```
+Fehlt der Seed, **skippt** der Test sauber statt die Collection zu sprengen. Ist der Seed CI-erzeugt, ist der fehlgeschlagene Seed-Step ohnehin schon als CI-Fehler sichtbar — das Skippen verschluckt also nichts.
+
+CI fährt `npm run check:e2e-toplevel-fs -- --ratchet`. Es blockt **NEUE** Verletzer-Specs gegen `scripts/e2e-toplevel-fs-baseline.json`. Lokal (ohne Flag) `--warn` (exit 0). Pure Logik: `scripts/lib/e2e-toplevel-fs-scan.mjs` (unit-getestet, 15 Fälle) — **Brace-Depth-Tracking** statt Einrückungs-Heuristik: auf Depth 0 = Modul-Scope, innerhalb `try { … }`/Funktion/`test()`-Body ≥ 1 → nicht geflaggt. Kommentare + String-Inhalte werden entrauscht (ein `{` im String verschiebt die Depth nicht).
+
+**Baseline = 12 grandfathered** (Stand 11.08.), per **Boy-Scout** abzubauen: wer eine dieser Specs anfasst, kapselt ihren Seed-Read und senkt die Baseline mit `npm run check:e2e-toplevel-fs -- --update-baseline`. **Bekannte Grenze** (dokumentiert, nicht versteckt): ein über mehrere Zeilen verteilter Aufruf, bei dem `readFileSync` erst nach einer öffnenden Klammer auf einer Folgezeile steht, wird nicht erkannt — der Guard fängt die real aufgetretene Form, er ist eine Drift-Bremse, kein Beweis. Echter Sonderfall → `// e2e-toplevel-fs-skip: <grund>`.
+
+Kontext: `BROADCAST-main-ci-e2e-red-feststellung-seed-crash` (Memory).
+
 # Flag-Drift-Gate (Ratchet)
 
 CHECK-invalide enum-Literale in Supabase-Writes/Filtern sind verboten — seit 22.07. **volle Abdeckung**: ALLE public ANY-ARRAY-enum-CHECKs (Status, Kanäle, Typen, Rollen, Kategorien, …), nicht mehr nur status-*benannte* (der alte conname-Filter deckte nur ~1/3 ab und verbarg den `nachrichten.kanal='system'`-Silent-Fail). Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).
@@ -417,6 +446,12 @@ CI fährt `npm run check:i18n-coverage -- --ratchet`. Je Eintrag der `COVERAGE`-
 CI fährt `npm run check:termin-bezug -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/termin-bezug-baseline.json` (Baseline **51** grandfathered, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline` → dann sind die Legacy-Spalten droppbar = der eigentliche Retire-Abschluss). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/termin-bezug-scan.mjs` (unit-getestet, 14 Fälle); block-aware über das `.from('gutachter_termine')`-Segment → 0 False-Positives. **WRITES** (`.insert/.update({ fall_id: … })`) sind erlaubt (Legacy-Spalte schreiben ist legitim, solange sie existiert) — nur FILTER übersehen Zeilen. Bewusst Legacy-only? → `// termin-bezug-skip: <grund>`-Header.
 
 **Abgrenzung zu `check:termin-engine-contract`:** Der Contract-Ratchet gatet `.eq('lead_id')`/`.eq('sv_id')` = **Engine-API-Disziplin** (nutze `findeTerminFuerLead`/`assignee_id`), hard-0. Dieses Gate gatet die **Bezug-Filter-Korrektheit** (`fall_id`/`claim_id` voll + `lead_id` jenseits `.eq`). Komplementär, keine funktionale Überlappung (die einzigen `.eq('lead_id')` liegen im ausgenommenen `finde-termin-fuer-lead.ts`). Ausnahmen identisch: `engine/*` + `finde-termin-fuer-lead.ts` dürfen die Achsen direkt anfassen. Marker: `coordination-p33-gutachter-termine-legacy-retire`.
+
+# Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
+
+**Kanonische Referenz: `docs/fundament/zugriffs-doktrin.md`** (Fundament C5, #4860). Kern in einem Satz: **Client liest über Views/RPCs je Rolle, schreibt über Server-Actions mit Guard + `.select()`-Row-Check; RLS ist Sicherheitsnetz, nicht Feinsteuerung** (Verfassung §7). Ist-Stand: Client-Direkt-Selects auf Basistabellen = **0** (verifiziert) — server-first ist gelebt.
+
+Die vier folgenden Ratchets (**RLS-Policy-**, **Anon-Grant-**, **Reachability-**, **Write-Reachability-Gate**) sind die maschinelle Durchsetzung dieser Doktrin. **Bei jeder NEUEN Tabelle/View/RPC** die 6-Punkt-Checkliste aus `zugriffs-doktrin.md` §3 durchgehen — sie liegt auch als Block im PR-Template (`.github/pull_request_template.md`). Offene Optimierungs-Tranche (kein Sicherheits-Thema): server-seitige `from('claims')`-Reads auf die `v_claim_*`-Schicht konsolidieren (Doktrin §5).
 
 <!-- BEGIN:branding-rules -->
 # RLS-Policy-Gate (Ratchet)
