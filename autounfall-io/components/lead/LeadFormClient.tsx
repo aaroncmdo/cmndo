@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { submitAutounfallLead, type SubmitLeadResult } from '@/app/gutachter-finden/actions'
 import { trackCtaClick, trackFormStart, trackLeadSubmit } from '@/lib/track'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 
 // Lead-Formular für /gutachter-finden. Felder name/telefon/email?/plz_oder_stadt
 // + Schadenskontext + DSGVO-Pflicht-Checkbox. Hidden-Inputs für utm_*/ref/
@@ -35,17 +36,20 @@ export function LeadFormClient() {
   const [result, setResult] = useState<SubmitLeadResult | null>(null)
   const startedRef = useRef(false)
   const formRef = useRef<HTMLFormElement>(null)
-  const plzRef = useRef<HTMLInputElement>(null)
   // SV-Praeferenz aus einem Karten-Pin-Klick (FinderMap dispatcht 'auio:finder-select').
   const [svId, setSvId] = useState('')
+  // P4 Ortseingaben: Ort controlled (GooglePlaceAutocomplete rendert kein name) -> Wert per hidden input in FormData.
+  const [ort, setOrt] = useState('')
+  const [placeId, setPlaceId] = useState('')
 
   useEffect(() => {
     function onSelect(e: Event) {
       const detail = (e as CustomEvent<{ svId?: string; stadt?: string }>).detail
       if (detail?.svId) setSvId(detail.svId)
       // Ort vorbefuellen, wenn das Feld noch leer ist (bestehende Eingabe nie ueberschreiben).
-      if (plzRef.current && detail?.stadt && !plzRef.current.value.trim()) {
-        plzRef.current.value = detail.stadt
+      if (detail?.stadt) {
+        const stadt = detail.stadt
+        setOrt((prev) => (prev.trim() ? prev : stadt))
       }
       formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -128,7 +132,16 @@ export function LeadFormClient() {
             <label htmlFor="lf-plz" className={labelCls}>
               Ort oder PLZ
             </label>
-            <input ref={plzRef} id="lf-plz" name="plz_oder_stadt" type="text" autoComplete="address-level2" required placeholder="z. B. 50670 Köln" className={fieldCls} />
+            {/* P4 Ortseingaben: Google-Places-Autocomplete füllt Ort/PLZ; Wert -> verstecktes name="plz_oder_stadt" (+ place_id) für FormData. */}
+            <GooglePlaceAutocomplete
+              className={fieldCls}
+              placeholder="z. B. 50670 Köln"
+              defaultValue={ort}
+              onSelect={(r) => { setOrt(r.stadt || r.plz || r.adresse); setPlaceId(r.place_id) }}
+              onChange={(v) => { setOrt(v); setPlaceId('') }}
+            />
+            <input type="hidden" name="plz_oder_stadt" value={ort} />
+            {placeId ? <input type="hidden" name="place_id" value={placeId} /> : null}
             {fieldError('plz_oder_stadt') ? <p className="mt-1 text-sm text-au-danger">{fieldError('plz_oder_stadt')}</p> : null}
           </div>
         </div>
