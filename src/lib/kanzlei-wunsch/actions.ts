@@ -334,19 +334,28 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
     console.warn('[versendeKanzleiPaket] Communications-Layer nicht verfuegbar:', err)
   }
 
-  // DB: Übergabe-Marker + Endzustand
+  // DB: Übergabe-Marker (Nicht-Status-Spalte) + Endzustand via ENGINE (Fundament C1-Funnel).
+  // Frueher ein Direkt-Write auf claims.operative_status (Ratchet-Baseline) -> umging
+  // transitionFallStatus: kein phase_transitions-Event-Log, keine Timeline, kein
+  // fall.status_changed-Emit. 'an_externe_kanzlei_uebergeben' ist in der Engine ein
+  // BROADLY_REACHABLE_TERMINAL (aus jedem AKTIVEN Zustand erreichbar = das frueher
+  // guard-lose Verhalten) und setzt abgeschlossen_am selbst.
   const now = new Date().toISOString()
   const { error: uErr } = await admin
     .from('claims')
-    .update({
-      kanzlei_uebergeben_am: now,
-      // T3-S4: operative_status ist die einzige Achse (Terminal + abgeschlossen_am als
-      // Close-Marker, damit Badge/Phase/aktive-Faelle-Filter den Uebergang sehen).
-      operative_status: 'an_externe_kanzlei_uebergeben',
-      abgeschlossen_am: now,
-    })
+    .update({ kanzlei_uebergeben_am: now })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
+
+  try {
+    const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+    await transitionFallStatus(fall.id, 'an_externe_kanzlei_uebergeben', { user_id: auth.userId })
+  } catch (err) {
+    console.error(
+      '[versendeKanzleiPaket] Terminal-Close via Engine fehlgeschlagen (non-fatal, Uebergabe-Marker steht):',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   // Timeline-Audit
   try {
@@ -406,17 +415,25 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
     return { ok: false, error: 'Gutachten ist noch nicht freigegeben' }
   }
 
+  // Uebergabe-Marker + Endzustand via ENGINE (Fundament C1-Funnel, analog
+  // versendeKanzleiPaketAnEigeneKanzlei): der Terminal laeuft ueber transitionFallStatus
+  // (Event-Log + Timeline + Emit), abgeschlossen_am setzt die Engine.
   const now = new Date().toISOString()
   const { error: uErr } = await admin
     .from('claims')
-    .update({
-      kanzlei_uebergeben_am: now,
-      // T3-S4: operative_status + abgeschlossen_am (analog versendeKanzleiPaket) — einzige Achse.
-      operative_status: 'an_externe_kanzlei_uebergeben',
-      abgeschlossen_am: now,
-    })
+    .update({ kanzlei_uebergeben_am: now })
     .eq('id', claimId)
   if (uErr) return { ok: false, error: uErr.message }
+
+  try {
+    const { transitionFallStatus } = await import('@/lib/faelle/state-machine')
+    await transitionFallStatus(fall.id, 'an_externe_kanzlei_uebergeben', { user_id: auth.userId })
+  } catch (err) {
+    console.error(
+      '[bestaetigeSelbstEinreichung] Terminal-Close via Engine fehlgeschlagen (non-fatal, Uebergabe-Marker steht):',
+      err instanceof Error ? err.message : err,
+    )
+  }
 
   try {
     await admin.from('timeline').insert({
@@ -500,296 +517,5 @@ export async function bestaetigeVollmachtKunde(
   }
 
   if (claimId) revalidateClaim(claimId as string, fallId)
-  return { ok: true }
-}
-
-/**
- * SMOKE-Helper: Setzt einen bestehenden Fall in den Zustand
- * "Erfassung -> Kanzlei-Wunsch offen, ohne Vollmacht" zurueck, damit der
- * Walkthrough (Banner-Wahl LexDrive/eigene Kanzlei/selbst, Vollmacht-
- * Bestaetigung) erneut durchgespielt werden kann.
- *
- * Setzt:
- *  - leads.sa_unterschrieben=true, vollmacht_signiert_am=null,
- *    onboarding_complete=true
- *  - faelle.vollmacht_signiert_am=null, vollmacht_datum=null,
- *    onboarding_complete=true, status='regulierung'
- *  - claims.kanzlei_wunsch='noch_unentschieden', kanzlei_uebergeben_am=null,
- *    kanzlei_ansprechpartner_*=null, phase='4_gutachten_fertig'
- *  - auftraege.gutachten_final_freigegeben=true (latest erstgutachten)
- *  - loescht kanzlei_faelle Eintraege
- *
- * Auth: Admin oder KB (Security-Haertung 18.07. — Kunden-Zweig entfernt).
- */
-// Security-Haertung (18.07., coordination-an-security-sweep-smoke-actions-in-prod-src):
-// Die smoke*-Helper unten sind exportierte Server-Actions, die ECHTE Claims mutieren
-// (Vollmacht-Reset, operative_status-Sprung, claim_nummer-Overwrite, Fake-OCR). Frueher
-// erlaubte das Gate "der Kunde selbst ODER admin/kb" — ein Endkunde haette (per Action-ID-
-// Discovery) seinen EIGENEN Claim korrumpieren koennen. Jetzt admin/kb-only; die Konsole-
-// Smokes laufen ohnehin als Admin. (Fixture-Only-Guard = dokumentierter Follow-up: der naive
-// 'CLM-2026-000%'-Vorschlag ist UNSICHER, weil echte fruehe Prod-Claims ihn matchen.)
-async function assertSmokeAdminOrKb(): Promise<{ ok: true } | { ok: false; error: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
-  const { data: profile } = await supabase
-    .from('profiles').select('rolle').eq('id', user.id).maybeSingle()
-  if (!profile || !['admin', 'kundenbetreuer'].includes(profile.rolle as string)) {
-    return { ok: false, error: 'Nur Admin/KB (Smoke-Helper)' }
-  }
-  return { ok: true }
-}
-
-export async function smokeResetAufKanzleiWunsch(
-  fallId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const gate = await assertSmokeAdminOrKb()
-  if (!gate.ok) return { ok: false, error: gate.error }
-
-  const admin = createAdminClient()
-  // CMM-49: faelle-frei (Read) — claims = SSoT (lead_id, 0-diff).
-  const claimId = await resolveClaimId(admin, fallId)
-  if (!claimId) return { ok: false, error: 'Fall nicht gefunden' }
-  const { data: claim } = await admin
-    .from('claims')
-    .select('lead_id')
-    .eq('id', claimId)
-    .maybeSingle()
-  if (!claim) return { ok: false, error: 'Fall nicht gefunden' }
-
-  // 1) Lead — SA bleibt, Vollmacht raus, Onboarding bleibt komplett.
-  if (claim.lead_id) {
-    await admin.from('leads').update({
-      sa_unterschrieben: true,
-      vollmacht_signiert_am: null,
-      // onboarding_complete lebt auf claims (SP-B SSoT) — leads hat die Spalte nicht.
-    }).eq('id', claim.lead_id as string)
-  }
-
-  // 2) Status regulierung -> claims.operative_status (Engine-Cursor/SSoT).
-  // CMM-74: faelle.status-Write retired (war reiner Dual-Write, 0-divergent verifiziert);
-  // operative_status traegt den Status (im claims-Update unten via Record-Bridge).
-
-  // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
-  // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am=null auf claims (SSoT).
-  if (claimId) {
-    const claimsUpd = {
-      onboarding_complete: true,
-      kanzlei_wunsch: 'noch_unentschieden' as const,
-      kanzlei_wunsch_gefragt_am: null,
-      kanzlei_uebergeben_am: null,
-      kanzlei_ansprechpartner_name: null,
-      kanzlei_ansprechpartner_email: null,
-      kanzlei_ansprechpartner_telefon: null,
-      // B3/T4: work_state-Write entfernt — die Dispatch/Processing-Achse ist eliminiert,
-      // operative_status ist die eine Status-Achse.
-      vollmacht_signiert_am: null,
-    }
-    // CMM-74: operative_status (Engine-Cursor/SSoT) ersetzt den retired faelle.status-Write.
-    // Record-Bridge — operative_status fehlt in gen. Typen (b''-Konvention wie sv-zuweisung/#2884).
-    ;(claimsUpd as Record<string, unknown>).operative_status = 'regulierung'
-    await admin.from('claims').update(claimsUpd).eq('id', claimId as string)
-
-    // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
-    await admin.from('kanzlei_faelle').delete().eq('claim_id', claimId as string)
-  }
-
-  // 5) Erstgutachten als QC-freigegeben markieren — sonst zeigt der Stepper
-  //    den Banner gar nicht. Wenn keiner existiert, nichts tun.
-  const { data: erstgutachten } = await admin
-    .from('auftraege')
-    .select('id')
-    .eq('fall_id', fallId)
-    .eq('typ', 'erstgutachten')
-    .order('erstellt_am', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (erstgutachten?.id) {
-    await admin.from('auftraege').update({
-      gutachten_final_freigegeben: true,
-      gutachten_url: 'https://example.com/smoke-gutachten.pdf',
-    }).eq('id', erstgutachten.id as string)
-  }
-
-  if (claimId) revalidateClaim(claimId as string, fallId)
-  return { ok: true }
-}
-
-/**
- * SMOKE-Helper: Setzt den Fall auf den Stand "LexDrive gewaehlt + Vollmacht
- * signiert + Anspruch 7000 EUR + Stammdaten BMW 5er, K-AS 2014,
- * CLM-2026-00043". Damit kann das volle Regulierungs-Panel + die
- * Sidebar-LexDrive-QR-Card gleichzeitig getestet werden.
- */
-export async function smokeResetAufLexDriveVollmachtSigniert(
-  fallId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const base = await smokeResetAufKanzleiWunsch(fallId)
-  if (!base.ok) return base
-
-  const admin = createAdminClient()
-  // CMM-49 Reader-Sweep: faelle-frei (Read) — claimId via resolveClaimId, lead_id aus claims
-  // (0-diff). Der faelle-Stammdaten-WRITE unten bleibt bewusst (P5/Entity-W-track).
-  const claimId = await resolveClaimId(admin, fallId)
-  if (!claimId) return { ok: false, error: 'Kein Claim am Fall' }
-  const { data: claim } = await admin
-    .from('claims')
-    .select('lead_id')
-    .eq('id', claimId)
-    .maybeSingle()
-
-  const nowIso = new Date().toISOString()
-
-  // Lead: Vollmacht signiert
-  if (claim?.lead_id) {
-    await admin.from('leads').update({
-      vollmacht_signiert_am: nowIso,
-    }).eq('id', claim.lead_id as string)
-  }
-
-  // CMM-49 faelle-DROP: faelle ist gedroppt — der Smoke-Reset der Stammdaten (kennzeichen/
-  // fahrzeug_*/status) entfaellt. Reader lesen vehicles + claims.operative_status (SSoT).
-
-  // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
-  // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
-  // via apply_gutachten_ocr() in der gutachten-Tabelle.
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am auf claims (SSoT).
-  await admin.from('claims').update({
-    kanzlei_wunsch: 'partnerkanzlei',
-    kanzlei_wunsch_gefragt_am: nowIso,
-    claim_nummer: 'CLM-2026-00043',
-    // T3-S4: operative_status traegt den Non-Terminal-Outcome (einzige Achse).
-    // phase ist derived-first (Engine) — claims hat keine phase-Spalte (prod-verifiziert); status-Writes retired (T3-S4).
-    operative_status: 'in_kommunikation_vs',
-    vollmacht_signiert_am: nowIso,
-  }).eq('id', claimId)
-
-  // Smoke-OCR-Werte über die zentrale RPC schreiben → gutachten-Tabelle.
-  await admin.rpc('apply_gutachten_ocr', {
-    p_claim_id: claimId,
-    p_values: {
-      reparaturkosten_brutto: 6500,
-      minderwert: 500,
-      totalschaden: false,
-      nutzungsausfall_tage: 12,
-      gutachten_ocr_processed_at: nowIso,
-      gutachten_nutzungsausfall_tagessatz_eur: 65,
-    },
-  })
-
-  // Erstgutachten als final freigegeben markieren (uebernimmt smokeResetAufKanzleiWunsch
-  // bereits, aber sicherheitshalber)
-  const { data: erstgutachten } = await admin
-    .from('auftraege')
-    .select('id')
-    .eq('fall_id', fallId)
-    .eq('typ', 'erstgutachten')
-    .order('erstellt_am', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (erstgutachten?.id) {
-    await admin.from('auftraege').update({
-      gutachten_final_freigegeben: true,
-      abgeschlossen_am: nowIso,
-    }).eq('id', erstgutachten.id as string)
-  }
-
-  revalidateClaim(claimId, fallId)
-  return { ok: true }
-}
-
-/**
- * SMOKE-Helper: Erzeugt offene Pflichtdokumente fuer den aktuellen Fall —
- * triggert den gelben Pflichtdokumente-Banner ueber dem Layout-Inhalt.
- * Nutzt die kanonische createPflichtdokumenteFromKatalog-Logik, ergaenzt
- * fallback-direkte Inserts wenn der Katalog keine Eintraege erzeugt.
- */
-export async function smokePflichtdokumenteAnlegen(
-  fallId: string,
-): Promise<{ ok: boolean; error?: string; angelegt: number }> {
-  // Security-Haertung (18.07.): admin/kb-only. Vorher NUR "angemeldet" -> jeder eingeloggte
-  // User konnte auf beliebigen Faellen Pflichtdokumente anlegen (schwaecher als die anderen
-  // smoke*-Gates). Marker: coordination-an-security-sweep-smoke-actions-in-prod-src.
-  const gate = await assertSmokeAdminOrKb()
-  if (!gate.ok) return { ok: false, error: gate.error, angelegt: 0 }
-
-  const admin = createAdminClient()
-  // CMM-49 Reader-Sweep: claimId via resolveClaimId (faelle-frei), lead_id aus claims (0-diff).
-  const claimId = await resolveClaimId(admin, fallId)
-  if (!claimId) return { ok: false, error: 'Fall nicht gefunden', angelegt: 0 }
-  const { data: claim } = await admin
-    .from('claims')
-    .select('lead_id')
-    .eq('id', claimId)
-    .maybeSingle()
-
-  // Katalog-Pfad
-  let lead: Record<string, unknown> | null = null
-  if (claim?.lead_id) {
-    const { data } = await admin.from('leads').select('*').eq('id', claim.lead_id as string).maybeSingle()
-    lead = (data as Record<string, unknown> | null) ?? null
-  }
-  // CMM-49 faelle-DROP: createPflichtdokumenteFromKatalog nutzt den optionalen fall-Parameter
-  // nicht (Katalog-Block ist entfernt; es liest nur lead + fallId) -> kein faelle-Read noetig.
-  try {
-    const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
-    await createPflichtdokumenteFromKatalog(admin as unknown as Parameters<typeof createPflichtdokumenteFromKatalog>[0], fallId, lead)
-  } catch (err) {
-    console.warn('[smokePflichtdokumenteAnlegen] Katalog-Pfad:', err)
-  }
-
-  // Fallback: ein paar haendisch eingefuegte Slots damit der Banner sicher
-  // etwas zu zeigen hat. status='ausstehend' + pflicht=true triggert den
-  // Banner-Filter.
-  const fallback = ['personalausweis', 'fahrzeugschein', 'schadenmeldung']
-  const { data: existing } = await admin
-    .from('pflichtdokumente')
-    .select('dokument_typ').eq('fall_id', fallId)
-  const existingTypen = new Set((existing ?? []).map((r) => r.dokument_typ as string))
-  const toInsert = fallback
-    .filter((t) => !existingTypen.has(t))
-    .map((typ, i) => ({
-      fall_id: fallId,
-      dokument_typ: typ,
-      pflicht: true,
-      status: 'ausstehend',
-      quelle: 'smoke',
-      sort_order: i,
-    }))
-  if (toInsert.length > 0) {
-    await admin.from('pflichtdokumente').insert(toInsert)
-  }
-
-  // CMM-49: claimId via resolveClaimId immer gesetzt → revalidateClaim deckt /kunde/faelle/${fallId}
-  // + /kunde-Layout (frueherer else-Zweig) mit ab.
-  revalidateClaim(claimId, fallId)
-  return { ok: true, angelegt: toInsert.length }
-}
-
-/**
- * SMOKE-Helper: Setzt den Fall in den Zustand
- * "LexDrive gewaehlt, Vollmacht ausstehend" — der blaue Vollmacht-Gate
- * ist sichtbar, der Kunde kann hier oder via WhatsApp bestaetigen.
- *
- * Auth: Admin oder KB (Security-Haertung 18.07. — Kunden-Zweig entfernt).
- */
-export async function smokeResetAufLexDriveVollmachtOffen(
-  fallId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const base = await smokeResetAufKanzleiWunsch(fallId)
-  if (!base.ok) return base
-
-  const admin = createAdminClient()
-  const kwClaimId = await resolveClaimId(admin, fallId)
-  if (!kwClaimId) return { ok: false, error: 'Kein Claim am Fall' }
-
-  const { error } = await admin.from('claims').update({
-    kanzlei_wunsch: 'partnerkanzlei',
-    kanzlei_wunsch_gefragt_am: new Date().toISOString(),
-  }).eq('id', kwClaimId)
-  if (error) return { ok: false, error: error.message }
-
-  revalidateClaim(kwClaimId, fallId)
   return { ok: true }
 }
