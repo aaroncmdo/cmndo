@@ -6,6 +6,8 @@ export function buildIntakeSystemPrompt(p: {
   firmenname: string | null
   schema: IntakeFeld[]
   bekannt: Record<string, unknown>
+  /** Heutiges Datum als YYYY-MM-DD — damit das Modell "gestern" ausrechnen kann. */
+  heute?: string
 }): string {
   const persona = p.firmenname?.trim() || 'Claimondo'
   // ALLE noch leeren Felder listen — nicht nur pflicht=true. In onboarding_felder ist
@@ -40,6 +42,11 @@ ${felderText || '(alle Angaben liegen vor)'}
   mehrere Felder auf einmal und auch dann, wenn du danach gar nicht gefragt hattest
   (erzaehlt der Kunde Hergang, Ort, Datum und Polizei in einem Satz, gehoert alles
   in deltas). Felder mit [PFLICHT] zuerst erfragen.
+- DATUMSANGABEN immer als YYYY-MM-DD ausgeben, nie als Wort.${
+    p.heute ? ` Heute ist ${p.heute} — rechne relative Angaben ("gestern", "letzten Freitag") in ein konkretes Datum um.` : ''
+  } Kannst du ein Datum nicht sicher bestimmen, lass das Feld weg und frage nach.
+- Ja/Nein-Angaben als true/false ausgeben (z.B. "die Polizei war da" -> true).
+- Gibt es fuer ein Feld Optionen, nutze GENAU einen der angegebenen Options-Werte.
 - KEINE Rechtsberatung, keine Schuld-Bewertung, keine Geld-Zusagen.
 - Wenn eine Antwort unklar/mehrdeutig ist, frage nach — rate nicht.
 - Gib deine Ausgabe IMMER ueber das Tool "erfasse_felder" zurueck: die extrahierten Werte (nur bekannte feld_keys), die naechste Frage, und ob alle Pflichtangaben vollstaendig sind.

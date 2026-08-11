@@ -40,6 +40,8 @@ export async function extractIntakeTurn(p: {
   bekannt: Record<string, unknown>
   historie: IntakeTurn[]
   nachricht: string
+  /** Heutiges Datum (YYYY-MM-DD) fuer relative Datumsangaben im Prompt. */
+  heute?: string
 }): Promise<IntakeTurnResult> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) return { ok: false, error: 'ANTHROPIC_API_KEY nicht gesetzt' }
@@ -49,6 +51,7 @@ export async function extractIntakeTurn(p: {
     firmenname: p.firmenname,
     schema: p.schema,
     bekannt: p.bekannt,
+    heute: p.heute,
   })
   const messages: IntakeTurn[] = [
     ...p.historie.slice(-12),
