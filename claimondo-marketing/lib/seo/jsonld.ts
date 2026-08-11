@@ -117,11 +117,16 @@ export function organizationSchema(opts?: {
     ],
     // sameAs: externe verifizierbare Profile für GEO/Knowledge-Graph-Linkage.
     // Wikidata-Item Q139954250 verankert die Entität für AI/Knowledge-Graph
-    // (P31 Unternehmen · P159 Köln · P856 claimondo.de). Erweiterung möglich:
-    // BVSK-Verzeichnis, Anwalt.de, Provenexpert-Profil sobald gepflegt.
+    // (P31 Unternehmen · P159 Köln · P856 claimondo.de). ProvenExpert ergänzt
+    // das Bewertungs-Profil, das AI-Assistenten bei "Erfahrungen/seriös/beste"-
+    // Fragen heranziehen (Profil live seit 11.08.2026, HTTP 200 verifiziert).
+    // Erweiterung möglich: BVSK-Verzeichnis, Anwalt.de.
+    // ⚠ aggregateRating bleibt bewusst ungesetzt bis echte Bewertungen vorliegen
+    //   (s. Kommentar weiter unten — Schema.org-Spam-Strafe ohne Belege).
     sameAs: [
       'https://www.linkedin.com/company/claimondo',
       'https://www.wikidata.org/wiki/Q139954250',
+      'https://www.provenexpert.com/de-de/claimondo/',
     ],
     ...(opts?.aggregateRating
       ? {
