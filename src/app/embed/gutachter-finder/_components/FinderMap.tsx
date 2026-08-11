@@ -37,6 +37,7 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
 import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
+import { istHervorgehobenerPartner } from './partner-pin'
 import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
@@ -81,6 +82,9 @@ const USER_LOCATION_ZOOM = 10.5
 // Klassen + globals.css-Aliase auf claimondo-* Tokens).
 const COL_ONDO = '#4573A2'
 const COL_NAVY = '#0D1B3E'
+// (ii) Netzwerkpartner-Highlight: Navigation-Gold (whitelisted in external-brand-colors.ts).
+// NUR fuer relationale Partner (sv.imNetzwerk) am attribuierten Einstieg — s. partner-pin.ts.
+const COL_GOLD = '#C9A84C'
 
 
 // Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
@@ -121,12 +125,23 @@ function addClickableMarker(
   onClick: () => void,
 ) {
   const initiale = sv.vorname_initiale ?? '·'
+  // (ii) Relationale Partner-Prominenz: nur bei attribuiertem Einstieg (Werkstatt-/Gutachter-QR)
+  // traegt der SV imNetzwerk=true → goldener Rahmen + Gold-Halo + Stern-Badge. Anon-Finder = neutral.
+  const partner = istHervorgehobenerPartner(sv)
+  const rand = partner ? COL_GOLD : COL_NAVY
+  const schatten = partner
+    ? '0 0 0 4px rgba(201,168,76,0.35),0 8px 20px rgba(13,27,62,0.28)'
+    : '0 6px 18px rgba(13,27,62,0.22)'
+  const sternBadge = partner
+    ? `<div style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;border-radius:50%;background:${COL_GOLD};border:2px solid #fff;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.25)"><span style="font-size:9px;line-height:1;color:#fff">&#9733;</span></div>`
+    : ''
   const el = document.createElement('div')
   el.style.cursor = 'pointer'
   el.innerHTML = `
     <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_NAVY};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${rand};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:${schatten};position:relative">
         ${initiale}
+        ${sternBadge}
         <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
       </div>
     </div>
