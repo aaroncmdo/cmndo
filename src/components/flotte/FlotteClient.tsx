@@ -12,6 +12,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { CarIcon, ChevronRightIcon, CameraIcon } from 'lucide-react'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
 import { ConfirmEntfernenButton } from '@/components/shared/ConfirmEntfernenButton'
@@ -93,7 +94,19 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
             <TextField label="Rechtsform (optional)" value={firmaForm.rechtsform} onChange={(e) => setFirmaForm((p) => ({ ...p, rechtsform: e.target.value }))} placeholder="GmbH" />
             <TextField label="USt-IdNr. (optional)" value={firmaForm.ustId} onChange={(e) => setFirmaForm((p) => ({ ...p, ustId: e.target.value }))} placeholder="DE…" />
           </div>
-          <TextField label="Straße (optional)" value={firmaForm.strasse} onChange={(e) => setFirmaForm((p) => ({ ...p, strasse: e.target.value }))} />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-semibold text-claimondo-shield">Straße (optional)</label>
+            {/* P2 Ortseingaben: Autocomplete füllt Straße + PLZ + Ort. Felder bleiben editierbar. */}
+            <GooglePlaceAutocomplete
+              className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+              defaultValue={firmaForm.strasse}
+              placeholder="Straße + Hausnummer eingeben…"
+              onSelect={(r) =>
+                setFirmaForm((p) => ({ ...p, strasse: r.strasse || p.strasse, plz: r.plz || p.plz, ort: r.stadt || p.ort }))
+              }
+              onChange={(t) => setFirmaForm((p) => ({ ...p, strasse: t }))}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <TextField label="PLZ (optional)" value={firmaForm.plz} onChange={(e) => setFirmaForm((p) => ({ ...p, plz: e.target.value }))} inputMode="numeric" maxLength={5} />
             <TextField label="Ort (optional)" value={firmaForm.ort} onChange={(e) => setFirmaForm((p) => ({ ...p, ort: e.target.value }))} />
