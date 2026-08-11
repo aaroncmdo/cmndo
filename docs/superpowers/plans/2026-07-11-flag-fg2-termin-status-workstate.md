@@ -1,4 +1,34 @@
 # Termin-Status → Claim-Workstate + Silent-Fail-Bugs Implementation Plan
+
+> # ✅ ABGESCHLOSSEN / UEBERHOLT (verifiziert 2026-08-11) — NICHT MEHR AUSFUEHREN
+>
+> Alle drei Phasen sind erledigt, Phase 2 auf einem **besseren** Weg als hier geplant:
+>
+> * **Phase 0 (Bug A + Bug B)** — gefixt im „Status-Enum-Audit 05.07.". `git grep "status: 'geplant'"`
+>   in `src/lib/onboarding/slots.ts` = 0 Treffer; `kunde_storniert` existiert nur noch als
+>   erklaerender FIX-Kommentar in `src/lib/termine/kb-booking.ts:272`.
+> * **Phase 1 (Resolver)** — `abgesagt`/`abgelehnt` sind im `aktTermin`-Filter; separat nochmals
+>   per TDD abgesichert (Session 3c886b70, PR #5149).
+> * **Phase 2 (Backstop) — UEBERHOLT durch `check:flag-drift`.** Task 2.1/2.2 wollten einen
+>   *tabellen-spezifischen* `check:gutachter-termine-status` bauen. Gebaut wurde stattdessen der
+>   **allgemeine** Guard (`scripts/lib/flag-drift-scan.mjs` + `scripts/check-flag-drift.mjs`), der
+>   seit 22.07. **ALLE** public ANY-ARRAY-enum-CHECKs abdeckt — Ground-Truth ist der automatisch
+>   per Cron regenerierte DB-Snapshot `scripts/lib/status-check-constraints.json`
+>   (262 Spalten, inkl. aller 9 `gutachter_termine`-CHECK-Spalten). Er laeuft in CI mit
+>   `--ratchet` (`.github/workflows/ci.yml:181`) und ist in AGENTS.md §Flag-Drift-Gate dokumentiert.
+>
+>   **Wirksamkeit gegen genau diesen Plan verifiziert** (11.08., `scanContent` gegen den echten
+>   Snapshot): `geplant` → 1 Hit · `kunde_storniert` → 1 Hit · gueltiges `bestaetigt` → 0 Hits ·
+>   `.from('termine')` mit `geplant` (dort gueltig) → 0 Hits. Der Snapshot-Wertesatz ist
+>   deckungsgleich mit dem prod-`gutachter_termine_status_check` (12 Werte, per MCP geprueft).
+>
+>   ⚠ **Einen eigenen `check:gutachter-termine-status` zu bauen waere Duplikation** eines
+>   allgemeineren, bereits CI-verdrahteten Guards (Audit-Punkt 3). Task 2.3 (typ-schmaler
+>   Wrapper `updateGutachterTerminStatus`) ist damit ebenfalls hinfaellig — der Ratchet
+>   erzwingt die Gueltigkeit bereits, ohne Call-Site-Migration.
+>
+> Konsequenz fuer Handoff-Punkt **A4**: „zwei nie gebaute Ratchet-Guards" ist fuer FG2 **stale**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree. ⚠ COORDINATION: this edits the termine reservation engine (slots.ts / kb-booking.ts / gutachter_termine) — the SAME area another session is debugging (melde-schaden hard-reservierung `reserviert:false`). This work MUST be owned by that same termine session or explicitly serialized after it. Do NOT run as a parallel session editing termine files.
 
