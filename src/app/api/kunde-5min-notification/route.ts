@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { sendCommunication } from '@/lib/communications/send'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 // KFZ-179: 5-Minuten-Notification an Kunden — getriggert vom Client wenn ETA < 5.
 
@@ -43,11 +43,25 @@ export async function POST(request: Request) {
   }
 
   if (kundeTelefon) {
-    await sendCommunication('sv_fast_da', {
-      telefon: kundeTelefon,
-      vorname: kundeVorname,
-      '1': kundeVorname,
-      '2': svName,
+    // C3a: durable via Notification-Outbox. Der Kunde wartet gerade auf den SV —
+    // ein verschluckter Send liess ihn ohne die "gleich da"-Info, und das Flag
+    // notification_5min_gesendet_am unten verhindert jeden Nachschuss.
+    // Empfaengerkreis UNVERAENDERT: die kundeTelefon-Guard bleibt stehen, und
+    // sendFallCommunication resolved denselben Kunden (claims.lead_id ->
+    // leads.telefon). Der zusaetzliche geschaedigter-Fallback ist auf prod leer
+    // (0 von 77 Claims haetten NUR darueber einen Empfaenger) -> kein Change.
+    // dedupKey mit termin.id: der Anstoss gehoert zu GENAU diesem Termin (dort
+    // liegt auch das Idempotenz-Flag).
+    await enqueue({
+      dedupKey: buildDedupKey({
+        template: 'sv_fast_da',
+        claimId: termin.fall_id as string,
+        fenster: termin.id as string,
+      }),
+      kanal: 'whatsapp',
+      template: 'sv_fast_da',
+      claimId: termin.fall_id as string,
+      payload: { '1': kundeVorname, '2': svName },
     }).catch(() => {})
   }
 

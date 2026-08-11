@@ -87,6 +87,15 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
 /**
  * KFZ-150: SV meldet Kunde No-Show.
  */
+/**
+ * ⚠ DEAD CODE (verifiziert 11.08.2026): `meldeNoShow` hat **keinen Aufrufer** —
+ * `grep meldeNoShow src/` liefert nur diese Definition; alle weiteren Treffer sind
+ * Kommentare, und der einzige Import aus dieser Datei ist `entscheideReklamation`.
+ * Deshalb wurde der WA-Send unten (`no_show_kunde`) bei der C3a-Umstellung bewusst
+ * NICHT auf die Notification-Outbox gehoben: er feuert nie.
+ * Vor einer Reaktivierung: den Send auf `sendFallCommunication`/`enqueue` umstellen
+ * (heute telefon-explizit) und die No-Show-Erfassung an einen echten Trigger haengen.
+ */
 export async function meldeNoShow(fallId: string): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
