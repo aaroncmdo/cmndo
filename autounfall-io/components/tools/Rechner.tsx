@@ -19,7 +19,10 @@ export type RechnerType =
   | 'wertminderung'
   | 'verzugszinsen'
 
-type CtaKind = 'gutachter' | 'anwalt' | null
+// 'sf' = eigener Anschluss fuer den SF-Klassen-Modus: dort ist der Intent
+// "Was passiert mit meinem Rabatt?", nicht "Ich brauche ein Gutachten".
+// Die Bruecke: bei unverschuldetem Unfall gibt es keine Rueckstufung.
+type CtaKind = 'gutachter' | 'anwalt' | 'sf' | null
 
 type FieldDef = {
   key: string
@@ -90,7 +93,10 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
       { key: 'be', label: 'Jahresbeitrag €', kind: 'number', half: true, min: 0, placeholder: '320' },
       { key: 'sch', label: 'Schadenshöhe €', kind: 'number', min: 0, placeholder: '700' },
     ],
-    cta: null,
+    // War null — der einzige Modus ohne CTA, obwohl der SF-Cluster den meisten
+    // Traffic bringt. 'sf' fuehrt ueber die Bruecke "unverschuldet = keine
+    // Rueckstufung" statt ueber "Gutachten anfragen".
+    cta: 'sf',
     compute: (s) => {
       const sfv = num(s.sf)
       const b = num(s.be)
@@ -110,7 +116,8 @@ const CONFIG: Record<RechnerType, RechnerConfig> = {
             : '<b>Grenzfall</b> — beim Versicherer den genauen Wiederaufstiegs-Effekt anfragen (kostenlos). Faustregel: Schaden unter ~800 € bei hoher SF → eher selbst zahlen.'
       return (
         `Rückstufung ca. SF ${sfv} → SF ${sn}. Mehrbeitrag über ~${j} Jahre: <b>${eur(lo)}–${eur(hi)} €</b>. ${rec}` +
-        `<span class="aur-note">Richtwert — exakt nur über deinen Versicherer.</span>`
+        `<span class="aur-note">Richtwert — exakt nur über deinen Versicherer. ` +
+        `Bei <b>unverschuldetem</b> Unfall entfällt die Rückstufung ganz: dann reguliert die gegnerische Haftpflicht.</span>`
       )
     },
   },
@@ -210,18 +217,36 @@ const fieldCls =
 const labelCls =
   'mb-1.5 block font-mono text-[11px] font-semibold uppercase tracking-wider text-au-ink-soft'
 
-function CtaLink({ kind }: { kind: Exclude<CtaKind, null> }) {
+function CtaLink({ kind, type }: { kind: Exclude<CtaKind, null>; type: RechnerType }) {
   const cls =
     'mt-3.5 inline-flex items-center gap-2 rounded-ios-sm bg-au-amber px-[18px] py-2.5 text-[15px] font-bold text-au-surface transition-opacity hover:opacity-90'
+  // ref = Lead-Attribution (quelle_variant). Muss ^[a-z0-9_-]{1,64}$ erfuellen —
+  // die RechnerType-Werte tun das per Definition.
+  const ref = `rechner-${type}`
+  if (kind === 'sf') {
+    return (
+      <Link
+        href={`/gutachter-finden?ref=${ref}`}
+        className={cls}
+        onClick={() => trackCtaClick('rechner-sf')}
+      >
+        Unverschuldet? Rückstufung vermeiden →
+      </Link>
+    )
+  }
   if (kind === 'gutachter') {
     return (
-      <Link href="/gutachter-finden#anfrage" className={cls} onClick={() => trackCtaClick('rechner')}>
+      <Link
+        href={`/gutachter-finden?ref=${ref}#anfrage`}
+        className={cls}
+        onClick={() => trackCtaClick('rechner')}
+      >
         Exakt durch Gutachter — anfragen →
       </Link>
     )
   }
   return (
-    <Link href="/gutachter-finden" className={cls} onClick={() => trackCtaClick('rechner-anwalt')}>
+    <Link href={`/gutachter-finden?ref=${ref}`} className={cls} onClick={() => trackCtaClick('rechner-anwalt')}>
       Mit Anwalt durchsetzen →
     </Link>
   )
@@ -294,7 +319,9 @@ export function Rechner({ type }: { type: RechnerType }) {
         />
       ) : null}
 
-      {cfg.cta ? <CtaLink kind={cfg.cta} /> : null}
+      {/* CTA erst im Moment-of-Value: hing frueher nur an cfg.cta und war damit
+          schon vor jeder Eingabe sichtbar. Jetzt an das Ergebnis gekoppelt. */}
+      {html && cfg.cta ? <CtaLink kind={cfg.cta} type={type} /> : null}
     </div>
   )
 }

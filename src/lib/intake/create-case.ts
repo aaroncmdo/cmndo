@@ -17,8 +17,11 @@ export type CreateCaseInput = {
   mode: 'lead-first' | 'direct-claim'
   base: LeadBase
   extra?: LeadExtra
-  /** Fuer die direct-claim-Konversion (KB-Zuweisung, Timeline-Actor). */
-  triggerByUserId: string
+  /** Fuer die direct-claim-Konversion (KB-Zuweisung, Timeline-Actor).
+   *  C2b: OPTIONAL — die public-Eingaenge (Embed-Finder B-1, Aircall-Webhook D-4b) haben keinen
+   *  eingeloggten User und sind immer 'lead-first' (Konversion spaeter via /flow). Im
+   *  direct-claim-Zweig bleibt er Pflicht (Guard unten). */
+  triggerByUserId?: string
   /** Optionaler Dedup-Key (Person+Schaden). Fehlt/unbrauchbar -> kein Dedup. */
   dedup?: DedupKeyInput
   flowLink?: { serviceTyp?: string | null; sprache?: string | null }
@@ -58,6 +61,12 @@ export async function createCase(
   //    convertLeadToFall WIRFT -> hier abfangen und in ein Result-Object uebersetzen.
   let claimId: string | null = null
   if (input.mode === 'direct-claim') {
+    // C2b: triggerByUserId ist nur hier Pflicht (KB-Zuweisung + Timeline-Actor). Fehlt er,
+    // waere die Konversion actor-los -> harter Fehler statt stiller Falsch-Zuordnung.
+    if (!input.triggerByUserId) {
+      console.error('[intake/createCase] direct-claim ohne triggerByUserId')
+      return { ok: false, error: 'Interner Fehler: Fall-Anlage ohne Benutzer-Kontext.' }
+    }
     try {
       const conv = await convertLeadToFall(client, leadId, input.triggerByUserId)
       claimId = conv.fallId // claims = SSoT, fall-id === claim-id
