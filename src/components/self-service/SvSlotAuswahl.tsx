@@ -90,6 +90,22 @@ export function SvSlotAuswahl({
                       {t('slot.empfohlen')}
                     </span>
                   )}
+                  {/* Relationales Netzwerkpartner-Badge (Aaron 09.08.): NUR bei attribuiertem
+                      Einstieg traegt die Projektion imNetzwerk=true (zahlender Freund des Owners,
+                      sv-matching-modul/types.ts). Anon-Finder/-flow/-anfrage setzen es nie -> kein
+                      Badge. Wortlaut "Netzwerkpartner" = konsistent mit dem Karten-Popup-Chip +
+                      der Gold-Pin-Prominenz (PR #5111). Kein Gold hier (Clash mit PartnerRangBadge-
+                      Gold-Tier) -> dezente navy/weiss-Pille, dunkel-adaptiv wie die Nachbar-Badges. */}
+                  {sv.imNetzwerk && (
+                    <span
+                      className={cn(
+                        'inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold',
+                        dunkel ? 'bg-white/15 text-white' : 'bg-claimondo-navy/10 text-claimondo-navy',
+                      )}
+                    >
+                      Netzwerkpartner
+                    </span>
+                  )}
                   {selektiert && (
                     <span className={cn('ml-auto inline-flex items-center gap-1 text-[11px] font-bold', dunkel ? 'text-white' : 'text-claimondo-navy')}>
                       <Check className="h-3.5 w-3.5" /> Ausgewählt
