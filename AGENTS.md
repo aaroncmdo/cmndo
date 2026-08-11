@@ -381,6 +381,30 @@ Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB
 CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
 <!-- END:redirect-stub-gate -->
 
+# E2E-Toplevel-FS-Gate (Ratchet)
+
+**Ein `readFileSync(...)` auf MODUL-EBENE einer Playwright-Spec ist verboten.** Fehlt die Datei, wirft es bereits **beim Import** → die gesamte Playwright-**Collection** crasht, und damit fallen **ALLE** anderen Journey-Smokes mit aus (auch die kerngesunden). Genau das hielt den `main`-e2e-Job vom **05.–11.08. dauerhaft rot**: `tests/e2e/flows/feststellung-flow-gate.spec.ts` las einen **local-only** Seed top-level (`scripts/smoke/.feststellung-flow-gate-seed.json`, Generator läuft bewusst nicht in CI) → auf main lief **kein einziger** Journey-Smoke mehr, echte Regressionen wären unbemerkt geblieben. Kein Build/tsc/anderer Ratchet fängt das.
+
+Verschärfend: die e2e-Steps laufen **sequenziell**. Scheitert ein Journey-Smoke, werden die **nachfolgenden Seed-Steps übersprungen** → deren Seed-Dateien fehlen → der abschließende `playwright test`-Lauf crasht an der nächsten top-level lesenden Spec. Ein einzelner roter Journey kann so die ganze Collection mitreißen.
+
+**Richtig** (Muster: `tests/e2e/flows/reparatur-funnel-abschluss-smoke.spec.ts`):
+```ts
+let seed: any = null
+try { seed = JSON.parse(readFileSync(join(process.cwd(), 'scripts/smoke/.x-seed.json'), 'utf8')) } catch { /* nicht geseedet */ }
+
+test('…', async ({ page }) => {
+  test.skip(!seed, 'Seed-Fixture fehlt — local-only Prod-Smoke, läuft nicht im e2e-Job')
+  …
+})
+```
+Fehlt der Seed, **skippt** der Test sauber statt die Collection zu sprengen. Ist der Seed CI-erzeugt, ist der fehlgeschlagene Seed-Step ohnehin schon als CI-Fehler sichtbar — das Skippen verschluckt also nichts.
+
+CI fährt `npm run check:e2e-toplevel-fs -- --ratchet`. Es blockt **NEUE** Verletzer-Specs gegen `scripts/e2e-toplevel-fs-baseline.json`. Lokal (ohne Flag) `--warn` (exit 0). Pure Logik: `scripts/lib/e2e-toplevel-fs-scan.mjs` (unit-getestet, 15 Fälle) — **Brace-Depth-Tracking** statt Einrückungs-Heuristik: auf Depth 0 = Modul-Scope, innerhalb `try { … }`/Funktion/`test()`-Body ≥ 1 → nicht geflaggt. Kommentare + String-Inhalte werden entrauscht (ein `{` im String verschiebt die Depth nicht).
+
+**Baseline = 12 grandfathered** (Stand 11.08.), per **Boy-Scout** abzubauen: wer eine dieser Specs anfasst, kapselt ihren Seed-Read und senkt die Baseline mit `npm run check:e2e-toplevel-fs -- --update-baseline`. **Bekannte Grenze** (dokumentiert, nicht versteckt): ein über mehrere Zeilen verteilter Aufruf, bei dem `readFileSync` erst nach einer öffnenden Klammer auf einer Folgezeile steht, wird nicht erkannt — der Guard fängt die real aufgetretene Form, er ist eine Drift-Bremse, kein Beweis. Echter Sonderfall → `// e2e-toplevel-fs-skip: <grund>`.
+
+Kontext: `BROADCAST-main-ci-e2e-red-feststellung-seed-crash` (Memory).
+
 # Flag-Drift-Gate (Ratchet)
 
 CHECK-invalide enum-Literale in Supabase-Writes/Filtern sind verboten — seit 22.07. **volle Abdeckung**: ALLE public ANY-ARRAY-enum-CHECKs (Status, Kanäle, Typen, Rollen, Kategorien, …), nicht mehr nur status-*benannte* (der alte conname-Filter deckte nur ~1/3 ab und verbarg den `nachrichten.kanal='system'`-Silent-Fail). Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).

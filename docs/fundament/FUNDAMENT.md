@@ -320,15 +320,15 @@ Die Spec bleibt nur lebendig, wenn Status + Entscheidungen aktiv nachgezogen wer
 
 ## 9 · End-Checkliste „Fundament vollständig"
 
-- [ ] 10/10 Journeys geschrieben UND von Aaron reviewt (§2-Feinstatus komplett)
-- [ ] Journey-Smoke-Suite in CI; J1–J10 grün oder mit begründetem, journey-referenziertem Skip
+- [x] 10/10 Journeys geschrieben UND von Aaron reviewt (§2-Feinstatus komplett) — *Beleg 11.08.: §2-Journey-Feinstatus zeigt für **alle 10** Zeilen BEIDE Haken (destilliert ☑ + Aaron-Review ☑ 29.07.); PRs #4828/#4830/#4832/#4837.*
+- [x] Journey-Smoke-Suite in CI; J1–J10 grün oder mit begründetem, journey-referenziertem Skip — *Beleg: B3 (#5024) + post-merge-`e2e`-Lauf **31260565130** (08.08., nach dem J10-Seed-Clean-Fix #5053): **alle 10 Journey-Steps `success`** (J1-deep/J4 · J9 inkl. lifecycle-Geld-Guard · J8 · J5 · J10 · J3 · J6 · J7 · J2). Einziges Job-Rot = Fremd-Blocker `feststellung-flow-gate`-ENOENT im finalen „Run E2E Tests"-Step (andere Lane), unabhängig von den Journey-Steps.*
 - [x] `operative_status` hat genau einen Writer (transition-Modul); Ratchet blockt neue Direkt-Writes (C1-Finish #5114, 11.08.: Baseline **2→0**, `check:operative-status-writes --ratchet` scharf in CI. Beide Achsen verifiziert — TS: 0 Verletzer/2781 Files; **DB: 0** Trigger/Functions, die `operative_status` schreiben (Prod-READ). Sanktionierte Allowlist bleibt: `state-machine` (=die Engine), `endzustand-actions` (Cursor-Outcomes, schreibt eigenes Event-Log), `lexdrive` `manual_status_override` (bewusst validierungsfrei))
 - [ ] Event-Log wird bei jedem Übergang geschrieben; seit C1 keine neue `ist_*`/`hat_*`-Interaktions-Spalte — *Stand 11.08.: **alle** Status-Schreibpfade schreiben jetzt `phase_transitions` — Engine · `endzustand-actions` (eigenes) · `reparatur-cursor` (via Engine) · die 2 mit #5114 gefunnelten Terminals · **`lexdrive manual_status_override`** (letzte Lücke, mit diesem PR geschlossen: Audit-Eintrag `trigger_type='manual'` + `payload.via`, ohne den Override zu funneln). Forensik der 52 prod-Claims „ohne Event-Log": 43 = Initial-Cursor (nie transitioniert), Rest = Test-Seeds + 1 historisches Opfer des mit #5114 behobenen Direkt-Writes → **kein unbekannter Bypass**. Offen nur noch: Prod-Nachweis = Regel-4-Smoke.*
-- [ ] Alle Meldewege laufen über `createCase`; A4-Register komplett ✓
+- [ ] Alle Meldewege laufen über `createCase`; A4-Register komplett ✓ — *Teilfortschritt 11.08.: C2a (#4992) hebt Wizard A-1 als Adapter auf `createCase`; C2b-1 (#5126) zieht die **Pflichtdok-Garantie in den Konversions-Kern**, womit sie für ALLE Direkt-Claim-Wege gilt (j02-IST-Delta #2 zu). **Offen:** Embed B-1, Aircall D-4b, Marketing C2c → C2-Lane.*
 - [ ] Ausgehende Kommunikation läuft über die Outbox mit Dedup; 0 offene P1-Lücken aus A3
 - [ ] Ein Akte-Kern, alle Rollen-Detailseiten migriert, Alt-Implementierungen gelöscht
 - [x] Zugriffs-Doktrin dokumentiert, verlinkt, Checkliste im Review-Prozess; Top-Abweichler migriert (C5-doc-close 08.08.: AGENTS.md-Verweis + PR-Template-Checkliste; Client-Abweichler = 0)
-- [ ] Feature-DoD in AGENTS.md umgestellt; erstes Feature nach neuem Zyklus durchgelaufen
+- [x] Feature-DoD in AGENTS.md umgestellt; erstes Feature nach neuem Zyklus durchgelaufen — *Beleg 11.08.: AGENTS.md-Abschnitt „Feature-Definition-of-Done — Journey-Zyklus" vorhanden (D1, #4942). Erste Features nach dem Zyklus durchgelaufen: die Journey-Suite-Tranchen J5/J10/J3/J6/J7/J2 (Soll → Spec → Smoke vor Merge) und zuletzt C2b-1 (#5126: j02-Soll-Delta VOR dem Code, Spec als Wächter nachgezogen).*
 
 ## 10 · Nicht-Ziele des Programms
 
