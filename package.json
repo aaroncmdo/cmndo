@@ -25,6 +25,7 @@
     "check:query-drift": "node scripts/check-query-drift.mjs",
     "check:query-parse": "node --env-file=.env.local scripts/check-query-parse.mjs",
     "check:redirect-stubs": "node scripts/check-redirect-stubs.mjs",
+    "check:fixed-overlay": "node scripts/check-fixed-overlay-safearea.mjs",
     "check:rls-grants": "node --env-file=.env.local scripts/check-rls-function-grants.mjs",
     "check:rls-policies": "node scripts/check-rls-policies.mjs",
     "check:server-actions": "node scripts/check-server-actions.mjs",
