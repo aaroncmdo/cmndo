@@ -235,6 +235,27 @@ describe('resolveSubphase — Begutachtung re-based (auftraege + gutachten + Ter
     })
     expect(r.subphase).toBe('3.2')
   })
+
+  // A1-Bug: der aktTermin-Filter schloss nur storniert/verlegt/verschoben aus, NICHT
+  // 'abgesagt' (Kunden-Absage, api/kunde/termin/absagen) und 'abgelehnt' (SV-Ablehnung /
+  // slot-ttl-cleanup). Folge: die Fallakte zeigte nach der Absage weiter eine TOTE Subphase
+  // ("SV vor Ort") anhand alter Tracking-Felder, obwohl kein Termin mehr steht.
+  // Erwartung: ein toter Termin verhaelt sich exakt wie GAR KEIN Termin.
+  describe('toter Termin darf keine Subphase mehr tragen', () => {
+    const ohneTermin = resolveSubphase({ now: NOW }).subphase
+
+    it.each(['abgesagt', 'abgelehnt', 'storniert', 'verlegt', 'verschoben'])(
+      'Status %s -> wie ohne Termin (nicht mehr 3.2)',
+      (status) => {
+        const r = resolveSubphase({
+          gutachter_termine: [termin({ status, sv_angekommen_am: '2026-04-19T08:00:00Z' })],
+          now: NOW,
+        })
+        expect(r.subphase).not.toBe('3.2')
+        expect(r.subphase).toBe(ohneTermin)
+      },
+    )
+  })
 })
 
 describe('resolveSubphase — Vorbereitung re-based (lead + claim + Termin)', () => {
