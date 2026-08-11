@@ -4606,6 +4606,7 @@
         "uhrSuffix": "godz.",
         "wirdGebucht": "Rezerwowanie...",
         "verbindlichBuchen": "Zarezerwuj termin wiążąco",
+        "buchungFehlgeschlagen": "Rezerwacja nie powiodła się. Spróbuj ponownie lub skontaktuj się z nami.",
         "frei": "Wolny",
         "belegt": "Zajęty"
       },
