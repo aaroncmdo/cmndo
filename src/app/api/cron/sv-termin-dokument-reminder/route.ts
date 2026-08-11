@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { enqueue, buildDedupKey } from '@/lib/notifications/outbox'
 
 // AAR-354: SV-Termin-Dokument-Reminder.
 // Läuft täglich um 09:00 CET (07:00 UTC). Sucht alle bestätigten SV-Termine
@@ -103,10 +103,31 @@ export async function GET(request: Request) {
     try {
       // extraData-Keys überschreiben resolved vorname aus send-fall.ts:75 —
       // deshalb '1' NICHT setzen, damit der Vorname korrekt eingesetzt wird.
-      await sendFallCommunication(fall.id as string, 'dokumente_nachreichen', {
-        '2': labels,
-        '3': uploadLink,
+      // C3a: durable via Notification-Outbox. Hier besonders wertvoll, weil das
+      // Termin-Fenster [+20h,+28h] eng ist: schlug der Send fehl, war der Termin beim
+      // naechsten Lauf aus dem Fenster und der Reminder ging NIE raus. Jetzt Retry-
+      // Backoff (innerhalb des Fensters) + Dead-Letter-Task.
+      // dedupKey mit termin.id als Fenster — der Reminder ist PRO TERMIN (das
+      // Idempotenz-Flag liegt auf gutachter_termine), ein Fall mit Nachbesichtigung
+      // oder Re-Termin bekommt legitim mehrere; ein template:claimId-Key wuerde den
+      // zweiten Termin-Reminder faelschlich unterdruecken.
+      const enqRes = await enqueue({
+        dedupKey: buildDedupKey({
+          template: 'dokumente_nachreichen',
+          claimId: fall.id as string,
+          fenster: termin.id as string,
+        }),
+        kanal: 'whatsapp',
+        template: 'dokumente_nachreichen',
+        claimId: fall.id as string,
+        payload: { '2': labels, '3': uploadLink },
       })
+      if (!enqRes.ok) {
+        // Kein Flag/Timeline setzen -> naechster Lauf versucht es erneut (identisch
+        // zum frueheren throw-Pfad, der Timeline+Flag ebenfalls uebersprang).
+        console.error(`[AAR-354] Outbox-enqueue fehlgeschlagen für Fall ${fall.id}:`, enqRes.error)
+        continue
+      }
 
       // Timeline-Eintrag
       await db.from('timeline').insert({
