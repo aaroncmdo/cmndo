@@ -388,8 +388,13 @@ export default function EmbedSiteWizard({
         </SectionCard>
       )}
 
-      {/* Navigation */}
-      <div className="flex justify-between">
+      {/* Navigation.
+          lg:pr-16 haelt den Primaer-Button aus der Zone des globalen Posteingang-FABs
+          (GlobalPosteingangFab: fixed right-4 bottom-4, 48px -> belegt die rechten 64px,
+          nur lg+ sichtbar). Prod-Smoke 11.08. bei 1280x720: "Weiter" lag exakt darunter
+          und war nicht klickbar (elementFromPoint traf den FAB) — der SV konnte sein
+          Widget nicht anlegen. Gleiche Bug-Klasse wie der ZB1-Footer-Befund 16.07. */}
+      <div className="flex justify-between lg:pr-16">
         <Button variant="ghost" onClick={() => setStep((s) => Math.max(s - 1, 0))} disabled={step === 0}>
           Zurück
         </Button>

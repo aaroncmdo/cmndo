@@ -33,7 +33,8 @@
 // bleibt stehen (1 anonyme Audit-Zeile je Lauf).
 //
 // Nutzung (aus Repo-Root, node >= 18; env process.env-first, .env.local nur lokal):
-//   node scripts/smoke/meldung-kanaele-seed.mjs           # raeumt alte Reste + seedet frisch
+//   node scripts/smoke/meldung-kanaele-seed.mjs           # raeumt NUR ALTE Reste (>30 Min) + seedet frisch
+//                                                          (Race-Guard: ein paralleler Lauf bleibt unberuehrt)
 //   node scripts/smoke/meldung-kanaele-seed.mjs --assert  # prueft alle 3 Kanal-Endzustaende
 //   node scripts/smoke/meldung-kanaele-seed.mjs --clean   # nur aufraeumen
 
@@ -119,15 +120,32 @@ async function cleanClaimKette(claimIds, leadIds) {
   if (leadIds.length) await db.from('leads').delete().in('id', leadIds) // flow_links CASCADE
 }
 
-async function clean() {
+// RACE-GUARD (11.08.): `nurAlte=true` (Seed-Start) raeumt NUR Fixtures aelter als GRACE_MS.
+// Warum: alle Laeufe teilen sich die festen Praefixe — ein paralleler Seed-Start raeumte sonst die
+// FRISCHEN Fixtures des anderen Laufs mit. Real beobachtet 11.08.: Auth-API `400 invalid_credentials`
+// fuer den gerade geseedeten Kunden + 2 statt 1 `SMOKE-J2-Flotte`-Firmen -> Smoke-Test A scheiterte
+// am Login, C am Karten-Fixture (beides KEIN Produktfehler, nur zerstoerter Ausgangszustand).
+// Explizites `--clean` raeumt weiterhin ALLES (nurAlte=false) — das ist der Aufraeum-Modus.
+// CI ist zusaetzlich durch die concurrency-Group `prod-e2e-smoke` (#4911) serialisiert; dieser
+// Guard schuetzt den Fall CI-vs-lokale-Session (den die Group NICHT abdeckt).
+const GRACE_MS = 30 * 60_000
+const alterFilter = (query, spalte, nurAlte) =>
+  nurAlte ? query.lt(spalte, new Date(Date.now() - GRACE_MS).toISOString()) : query
+
+async function clean(nurAlte = false) {
   let n = { gfa: 0, leads: 0, claims: 0, konten: 0, fixtures: 0 }
 
   // --- Kanal B: gfa (VOR leads — konvertiert_zu_lead_id NO ACTION) + konvertierte Leads ---
-  const { data: gfaRows } = await db
-    .from('gutachter_finder_anfragen')
-    .select('id, konvertiert_zu_lead_id')
-    .ilike('vorname', `${API_VORNAME}%`)
-  const { data: apiLeads } = await db.from('leads').select('id').ilike('vorname', `${API_VORNAME}%`)
+  const { data: gfaRows } = await alterFilter(
+    db.from('gutachter_finder_anfragen').select('id, konvertiert_zu_lead_id').ilike('vorname', `${API_VORNAME}%`),
+    'erstellt_am',
+    nurAlte,
+  )
+  const { data: apiLeads } = await alterFilter(
+    db.from('leads').select('id').ilike('vorname', `${API_VORNAME}%`),
+    'created_at',
+    nurAlte,
+  )
   const leadIdsB = [...new Set([...ids(gfaRows, 'konvertiert_zu_lead_id'), ...ids(apiLeads)])]
   if (leadIdsB.length) await db.from('tasks').delete().in('lead_id', leadIdsB)
   if (gfaRows?.length) await db.from('gutachter_finder_anfragen').delete().in('id', ids(gfaRows))
@@ -136,7 +154,11 @@ async function clean() {
   n.leads += leadIdsB.length
 
   // --- Kanal A: alles am Wegwerf-Kunden ---
-  const { data: profs } = await db.from('profiles').select('id').ilike('email', `${KUNDE_PREFIX}%@claimondo.test`)
+  const { data: profs } = await alterFilter(
+    db.from('profiles').select('id').ilike('email', `${KUNDE_PREFIX}%@claimondo.test`),
+    'created_at',
+    nurAlte,
+  )
   const uids = ids(profs)
   if (uids.length) {
     const { data: aLeads } = await db.from('leads').select('id').in('kunde_id', uids)
@@ -152,7 +174,11 @@ async function clean() {
   }
 
   // --- Kanal C: Kette ueber das Fixture-Fahrzeug (lead.vehicle_id) ---
-  const { data: fixtureVehicles } = await db.from('vehicles').select('id').ilike('kennzeichen_aktuell', 'SMOKE-J2%')
+  const { data: fixtureVehicles } = await alterFilter(
+    db.from('vehicles').select('id').ilike('kennzeichen_aktuell', 'SMOKE-J2%'),
+    'created_at',
+    nurAlte,
+  )
   const fixtureVehicleIds = ids(fixtureVehicles)
   if (fixtureVehicleIds.length) {
     const { data: cLeads } = await db
@@ -170,10 +196,18 @@ async function clean() {
   }
 
   // --- Fixtures: Karte -> Fixture-Fahrzeug -> Firma (FKs SET NULL, Reihenfolge trotzdem sauber) ---
-  const { data: karten } = await db.from('schadenkarten').select('id').ilike('karten_token', `${KARTE_PREFIX}%`)
+  const { data: karten } = await alterFilter(
+    db.from('schadenkarten').select('id').ilike('karten_token', `${KARTE_PREFIX}%`),
+    'erstellt_am',
+    nurAlte,
+  )
   if (karten?.length) await db.from('schadenkarten').delete().in('id', ids(karten))
   if (fixtureVehicleIds.length) await db.from('vehicles').delete().in('id', fixtureVehicleIds)
-  const { data: firmen } = await db.from('firmen').select('id').eq('name', FIRMA_NAME)
+  const { data: firmen } = await alterFilter(
+    db.from('firmen').select('id').eq('name', FIRMA_NAME),
+    'created_at',
+    nurAlte,
+  )
   if (firmen?.length) await db.from('firmen').delete().in('id', ids(firmen))
   n.fixtures = (karten ?? []).length + fixtureVehicleIds.length + (firmen ?? []).length
 
@@ -307,7 +341,7 @@ async function main() {
   log(`\n== Meldung-Kanaele J2-Seed [${MODE.toUpperCase()}] gegen ${URL_} ==`)
   if (MODE === 'clean') { await clean(); log('  --clean fertig.\n'); return }
   if (MODE === 'assert') { await assertKanaele(); return }
-  await clean() // frischer Start
+  await clean(true) // frischer Start — NUR alte Reste (Race-Guard: fremde frische Laeufe unberuehrt)
   await seed()
 }
 main().catch((e) => { console.error('FEHLER:', e.message); process.exit(1) })
