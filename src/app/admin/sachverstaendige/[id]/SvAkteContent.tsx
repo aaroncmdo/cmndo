@@ -16,6 +16,8 @@ import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 import { PartnerCockpitPanel } from '@/components/shared/partner/PartnerCockpitPanel'
+import NetzwerkAboSektion, { type NetzwerkAboRow } from './NetzwerkAboSektion'
+import { istAktivesAbo } from '@/lib/netzwerk/entitlement'
 
 type SvSearchParams = { tab?: string }
 
@@ -81,6 +83,39 @@ export default async function SvDetailPage({
     .not('isochrone_polygon', 'is', null)
     .maybeSingle()
   const hatIsochrone = !!isoRow
+
+  // Netzwerkpartner-Abo-Rows für die Admin-Sektion (Status + comped-Toggle).
+  // AdminClient: sv_netzwerk_abonnements ist RLS-locked für den Admin-User-Context.
+  // Defensiv wie der ist_testaccount-Read — ein Fehler crasht nicht die Seite.
+  let netzwerkAbos: NetzwerkAboRow[] = []
+  let netzwerkAboLoadError: string | null = null
+  try {
+    const { data, error } = await createAdminClient()
+      .from('sv_netzwerk_abonnements')
+      .select('id, status, gueltig_bis, stripe_subscription_id, erstellt_am')
+      .eq('sv_id', id)
+      .order('erstellt_am', { ascending: false })
+    if (error) {
+      netzwerkAboLoadError = error.message
+    } else {
+      const jetzt = new Date()
+      netzwerkAbos = (data ?? []).map((r) => {
+        const status = r.status as string
+        const gueltigBis = (r.gueltig_bis as string | null) ?? null
+        return {
+          id: r.id as string,
+          status,
+          gueltigBis,
+          stripeSubscriptionId: (r.stripe_subscription_id as string | null) ?? null,
+          erstelltAm: r.erstellt_am as string,
+          istAktiv: istAktivesAbo({ status, gueltig_bis: gueltigBis }, jetzt),
+        }
+      })
+    }
+  } catch (err) {
+    console.error('[admin/sv-detail] netzwerk-abo-Read:', err)
+    netzwerkAboLoadError = err instanceof Error ? err.message : 'Unbekannter Fehler'
+  }
 
   // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
   // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
@@ -454,6 +489,9 @@ export default async function SvDetailPage({
                 </div>
               </div>
             </div>
+
+            {/* Netzwerkpartner-Status + comped-Toggle (Matching-Override P1.4 haengt daran) */}
+            <NetzwerkAboSektion svId={sv.id} abos={netzwerkAbos} loadError={netzwerkAboLoadError} />
 
             {/* Edit form mit Google Places */}
             <SvDetailClient
