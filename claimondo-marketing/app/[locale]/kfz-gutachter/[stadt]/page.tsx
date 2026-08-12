@@ -25,7 +25,8 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, stadtLegalServiceSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { STAEDTE, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
+import { getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
+import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
 // /kfz-gutachter/[stadt] — Premium-Layout für alle SEO-Stadt-Routes.
@@ -157,22 +158,23 @@ export default async function KfzGutachterStadtPage({
     name: s.name,
     containedInPlace: { '@type': 'AdministrativeArea', name: s.bundesland },
   }
+  // Cross-City: die sechs geografisch NAECHSTEN Stadt-Pages (Haversine ueber die
+  // je Stadt gepflegten Koordinaten). Vorher wurden die ersten sechs Array-
+  // Eintraege des gleichen Bundeslands genommen, mit Auffuellern aus beliebigen
+  // anderen — im Schnitt 132 km statt 54 km, und Berlin verlinkte NRW-Staedte in
+  // ~475 km Entfernung. Details: lib/kfz-gutachter/nachbarstaedte.ts
+  const crossCity = naechsteStaedte(s.slug, 6)
+
   const areaServed = s.hyperlocal
     ? [
         cityPlace,
         ...s.hyperlocal.angrenzendeOrte.map((ort) => ({ '@type': 'City', name: ort })),
         ...(s.hyperlocal.plzListe ?? []),
       ]
-    : cityPlace
-
-  // Cross-City: bis zu 6 Nachbarn nach Bundesland, sonst Auffüller aus anderen Bundesländern
-  const nachbarn = STAEDTE
-    .filter((x) => x.slug !== s.slug && x.bundesland === s.bundesland)
-    .slice(0, 6)
-  const fallback = nachbarn.length < 6
-    ? STAEDTE.filter((x) => x.slug !== s.slug && !nachbarn.some((n) => n.slug === x.slug)).slice(0, 6 - nachbarn.length)
-    : []
-  const crossCity = [...nachbarn, ...fallback]
+    : // Nicht-Hub-Staedte trugen bisher nur sich selbst im areaServed. Die echten
+      // Nachbarorte sind eine belastbare Erweiterung des Einsatzgebiet-Signals —
+      // dieselbe Aussage, die der verlinkte Cross-City-Block ohnehin trifft.
+      [cityPlace, ...crossCity.map((c) => ({ '@type': 'City', name: c.name }))]
 
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
