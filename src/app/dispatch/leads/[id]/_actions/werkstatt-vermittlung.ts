@@ -20,6 +20,12 @@ export type VermittleWerkstattInput = {
   target: 'lead' | 'claim'
   id: string
   werkstattId: string
+  /**
+   * Ops-Test 12.08.: "Sicherungsabtretung liegt bereits vor" — der Sachverstaendige
+   * hat sie offline eingeholt. Erfuellt die P4-Invariante ohne zweite digitale
+   * Kunden-Unterschrift; wird auf dem Claim mit Zeitpunkt + Urheber protokolliert.
+   */
+  saLiegtBereitsVor?: boolean
 }
 
 export async function vermittleWerkstatt(
@@ -38,6 +44,7 @@ export async function vermittleWerkstatt(
     werkstattId: input.werkstattId,
     quelle,
     actorUserId: guard.user.id,
+    saLiegtBereitsVor: input.saLiegtBereitsVor === true,
   })
   if (!res.ok) return res
 

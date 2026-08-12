@@ -14,6 +14,9 @@ const { assignMock, findMock } = vi.hoisted(() => ({
 vi.mock('@/lib/werkstatt/vermittlung-server', () => ({
   assignReparaturWerkstatt: assignMock,
   findReparaturWerkstaettenForTarget: findMock,
+  // Boy-Scout: getWerkstaettenNah importiert DIESEN Namen — ohne ihn waere er im
+  // Mock undefined und der erste Test, der den Read-Pfad anfasst, crasht ratlos.
+  findQualifizierteReparaturWerkstaetten: findMock,
 }))
 
 let guardOk = true
@@ -48,8 +51,39 @@ describe('vermittleWerkstatt', () => {
       werkstattId: 'w-1',
       quelle: 'dispatcher',
       actorUserId: 'dispatcher-user-9',
+      // Ops-Test 12.08.: ohne gesetzte Checkbox bleibt es beim Default — die
+      // SA-Invariante wird NICHT stillschweigend als erfuellt gemeldet.
+      saLiegtBereitsVor: false,
     })
     expect(revalidateMock).toHaveBeenCalledWith('/dispatch/leads/lead-1')
+  })
+
+  // Ops-Test 12.08.: der Dispatcher hakt "SA liegt bereits vor" an, weil der
+  // Sachverstaendige sie offline eingeholt hat. Die Action darf das Flag nicht
+  // verschlucken — der Kern protokolliert daraufhin Zeitpunkt + Urheber.
+  it('reicht saLiegtBereitsVor=true an den Kern durch', async () => {
+    const { vermittleWerkstatt } = await import('../werkstatt-vermittlung')
+    const r = await vermittleWerkstatt({
+      target: 'claim',
+      id: 'claim-7',
+      werkstattId: 'w-7',
+      saLiegtBereitsVor: true,
+    })
+    expect(r.ok).toBe(true)
+    expect(assignMock).toHaveBeenCalledWith(expect.objectContaining({ saLiegtBereitsVor: true }))
+  })
+
+  // Nur ein echtes true zaehlt: ein truthy-Wert aus einem ungeprueften Formular
+  // (z.B. der String "false") darf die SA-Invariante nicht aushebeln.
+  it('normalisiert einen truthy Nicht-Boolean auf false', async () => {
+    const { vermittleWerkstatt } = await import('../werkstatt-vermittlung')
+    await vermittleWerkstatt({
+      target: 'lead',
+      id: 'lead-3',
+      werkstattId: 'w-3',
+      saLiegtBereitsVor: 'false' as unknown as boolean,
+    })
+    expect(assignMock).toHaveBeenCalledWith(expect.objectContaining({ saLiegtBereitsVor: false }))
   })
 
   it('revalidiert die Fallakte bei target=claim', async () => {
