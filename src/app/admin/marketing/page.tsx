@@ -18,8 +18,18 @@ export default function MarketingPage() {
         <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
           <h2 className="text-heading-sm font-semibold text-claimondo-navy">Lead-Reaktivierung</h2>
           <p className="text-body-sm text-claimondo-slate mt-1">
-            Erreichbare, kalt gewordene Leads mit einer einmaligen „Schadenmeldung abschließen"-Mail
-            reaktivieren.
+            Erreichbare, kalt gewordene Leads mit einer einmaligen &bdquo;Schadenmeldung
+            abschließen&ldquo;-Mail reaktivieren.
+          </p>
+        </SectionCard>
+      </Link>
+      <Link href="/admin/marketing/lokal-content" className="block">
+        <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
+          <h2 className="text-heading-sm font-semibold text-claimondo-navy">Hyperlokale Ortsinhalte</h2>
+          <p className="text-body-sm text-claimondo-slate mt-1">
+            Stadtbezirke, Verkehrsachsen, Unfallschwerpunkte und ortsspezifische FAQs für die
+            Stadtseiten. KI erstellt den Entwurf, veröffentlicht wird erst nach Freigabe —
+            Unfallschwerpunkte nur mit belegbarer Quelle.
           </p>
         </SectionCard>
       </Link>
