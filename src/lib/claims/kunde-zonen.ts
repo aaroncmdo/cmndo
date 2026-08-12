@@ -20,7 +20,19 @@ export type KundeAufgabe = {
 // werkstatt_vorschlag ist der handlungspflichtigste Status — die Werkstatt hat einen
 // Termin VORGESCHLAGEN, der Kunde muss „Passt/Passt nicht" antworten (CHECK-Constraint
 // prod-verifiziert 17.07.).
-const TERMIN_OFFEN = new Set(['reserviert', 'gegenvorschlag', 'angefragt', 'werkstatt_vorschlag', 'anruf_erbeten'])
+// Ops-Test 11.08. (RC-10): 'angefragt' und 'reserviert' sind WARTE-Zustaende, keine
+// Kunden-To-dos — sie erzeugten die Aufgabe "Termin bestätigen", obwohl es nichts zu
+// bestaetigen gab. Aaron: "es gibt aber noch keinen Rücktermin von der Werkstatt … der
+// Termin für den SV wird automatisch bestätigt."
+//   angefragt   = Anfrage ist bei der Werkstatt, sie hat noch nicht geantwortet.
+//                 prod-verifiziert 12.08.: alle 7 'angefragt'-Zeilen haben WEDER
+//                 bestaetigter_termin NOCH wunschtermin — es existiert kein Zeitpunkt.
+//   reserviert  = SV-Termin vor der (automatischen) Bestaetigung — der Kunde tut nichts.
+// Handlungspflichtig bleibt nur, wenn die Gegenseite dem Kunden den Ball zuspielt:
+//   werkstatt_vorschlag = Werkstatt hat einen Termin vorgeschlagen -> "Passt / Passt nicht"
+//   gegenvorschlag      = SV hat einen Gegenvorschlag gemacht
+//   anruf_erbeten       = Werkstatt bittet um Rueckruf
+const TERMIN_OFFEN = new Set(['gegenvorschlag', 'werkstatt_vorschlag', 'anruf_erbeten'])
 
 /**
  * Offene Kunde-To-dos aus dem Fall-Zustand (reine Ableitung). Leeres Array = nichts zu tun
