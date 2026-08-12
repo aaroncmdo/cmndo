@@ -288,3 +288,27 @@ Zwei Nebenentscheidungen: (1) Die 4 `smoke*`-Reset-Server-Actions in `kanzlei-wu
 **Nicht gewählt:** (a) *nur auf `main`* — halbiert die Läufe, löst das Problem aber nicht (Releases takten in Peaks alle ~8 Min < Job-Laufzeit). (b) *`cancel-in-progress: true`* — würde den laufenden Job killen statt den wartenden und die #4911-Serialisierung gegen Cross-Run-Fixture-Races aufgeben.
 
 **Review:** offen (Aaron). Session 59cdebcb. ⚠ Rückstellung auf `push` nur nach erneuter Frequenz-Messung.
+
+## 2026-08-12 · C4/§9-#7 · „Alle Rollen-Detailseiten" schließt künftige Rollen ein — §9-#7 ist ein Dauerkriterium
+
+**Frage:** §9-#7 verlangt „Ein Akte-Kern, **alle** Rollen-Detailseiten migriert, Alt-Implementierungen gelöscht". Der C4-Scope waren die **5 Rollen** aus #4977 (Kunde · SV · Werkstatt · Staff-Varianten). Meint „alle" genau diese 5 (dann wäre der Punkt hakbar) — oder jede Rolle mit Fall-Detailsicht, auch künftige?
+
+**Entscheidung (Aaron, 12.08.):** **einschließen.** „Alle Rollen-Detailseiten" meint *jede* Rolle mit einer Fall-/Claim-Detailsicht, auch später hinzukommende. §9-#7 ist damit **kein Momentaufnahme-Haken, sondern ein Dauerkriterium**: Wer eine neue Rollen-Fallsicht baut, baut sie am `<FallAkte>`-Kern.
+
+**Begründung:** Deckt sich mit Verfassungsprinzip 4 („Eine Akte, viele Sichten … **Neue Rolle = Konfiguration, nicht neues Portal**"). Eine Auslegung „nur die 5 von damals" hätte den Punkt abhakbar gemacht, während parallel weiter eigene Akte-Implementierungen entstehen — genau die Divergenz, die C4 beseitigen sollte.
+
+**Erhebung dazu (12.08., Session 9ac44965) — 3 Claim-Detailsichten hängen NICHT am Kern:**
+
+| Sicht | Status | Umsetzung heute |
+|---|---|---|
+| Staff `faelle/[id]` · SV `gutachter/fall/[id]` | ✅ am Kern | direkter `fall-akte`-Import |
+| Kunde `fahrzeuge/[id]/schaden/[claimId]` · Werkstatt `(shell)/auftraege/[claimId]` | ✅ am Kern | via `KundeClaimView` / `WerkstattAuftragDetail` |
+| **Makler `(shell)/akten/[id]`** | ❌ | **eigene Komponente `components/makler/akte-detail/MaklerAkteDetail`** |
+| **Flotte `(shell)/fahrzeug/[id]/schaden/[claimId]`** | ❌ | eigene Implementierung, liest `from('claims')` direkt |
+| **Kunde `faelle/[id]`** | ❌ | `FallDetailSections` + `shared/fall-header`/`fall-kontakte` — **parallel** zur bereits migrierten `KundeClaimView`-Variante (zwei Kunde-Fallsichten nebeneinander) |
+
+**Konsequenz:** §9-#7 bleibt **offen** mit dieser konkreten Rest-Liste (statt einer Auslegungsfrage). Die Kanzlei ist **kein** Rest-Punkt — sie hat keine Fall-Detailsicht (nur `kanzlei/mandate` als Liste) und kam im C4-Plan nie vor.
+
+⚠ **Territorien beachten:** `flotte/*` und die Kunde-Zonen gehören anderen Lanes (Memory `COORDINATION-AN-b0e963b6-claim-detail-fm-vs-kunde-split`: „63fe43f9=FM (flotte/*), b0e963b6=Kunde+SV; Kunde-Zonen NICHT anfassen"). Die Migration ist deshalb **bewusst nicht** in diesem PR erfolgt, sondern als zuweisbare Tranche dokumentiert.
+
+**Review:** offen (Aaron). Session 9ac44965, PR #5186 (Doku) · Vorarbeit #5181 (§2-Sync) + #5184 (6 tote Akte-Files, knip 54→48).
