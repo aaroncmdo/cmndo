@@ -1,4 +1,15 @@
 # Geld/Ops Timer→Signal Implementation Plan
+> # ✅ ERFUELLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> Umgesetzt und im Code **namentlich als FG4 gekennzeichnet**:
+> **`src/lib/provisionen/completion-release-gate.ts`**, Zeile 1:
+> „**FG4-A** (Aaron 13.07. „einheitlich"): Provisions-Release = Completion-Signal + 7-Tage-Hold,
+> EINHEITLICH" — inkl. `/** 7-Tage-Hold nach Completion (Clawback-Fenster), in ms. */`.
+> Begleitend: `completion-fetch.ts` + `release-runner.ts`.
+>
+> Der Timer->Signal-Umbau ist damit gelandet; die im Plan-Kopf gewarnte Provisions-Lane-Kollision
+> hat sich aufgeloest (die Lane hat den Gate selbst eingebaut).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree. ⚠ COORDINATION: this is the PROVISION domain — a session on `kitta/ws6-werkstatt-provision-reparatur` (and its follow-up `kitta/werkstatt-provision-inbound-only`) is actively auditing provision. Hand this plan to that lane to reconcile, or serialize — do NOT run a parallel provision session editing the same crons. **See §Coordination BEFORE writing any code** — the makler-release cron has ALREADY been rewritten to `partner_provisionen` on those branches (but WITHOUT the completion gate this FG adds); FG4-A layers onto the landed version, it must NOT re-do the table migration.
 

@@ -1,4 +1,11 @@
 # Dual-SSoT Signing Collapse + work_state-Konsolidierung Implementation Plan
+> # ✅ UEBERHOLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> Die `work_state`-Konsolidierung ist vollzogen — nicht per Collapse wie geplant, sondern durch
+> den **Drop der Spalte**: `claims.work_state` existiert auf prod **nicht mehr**
+> (DB-verifiziert 12.08.). Damit gibt es keinen Dual-SSoT mehr, den man zusammenlegen koennte;
+> der verbliebene Status-SSoT ist `operative_status` mit genau einem Writer (C1/#5114, Ratchet 0/0).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree (`node scripts/new-session-worktree.mjs flag-fg6-dual-ssot staging`).
 > **Depends on:** FG1 (for Part B only). Part A is independent and buildable now.
