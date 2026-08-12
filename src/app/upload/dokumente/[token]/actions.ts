@@ -89,12 +89,24 @@ export async function getDokumenteAnfrageStatus(token: string): Promise<Dokument
 export type DokumentUploadResult = {
   success: boolean
   error?: string
-  // Nur bei fahrzeugschein mit OCR gesetzt — Rückmeldung an Kunde
+  // Nur bei fahrzeugschein mit OCR gesetzt — Rückmeldung an Kunde.
+  // Ops-Test 11.08. (RC-3): waren 4 Felder, obwohl der Parser 15 liefert — die
+  // Preview konnte Halteradresse/FIN/HSN/TSN gar nicht erst anzeigen, also auch
+  // nicht korrigieren lassen. Jetzt vollstaendig, damit der Kunde Parser-Fehler
+  // heilen kann (der Parser liefert nachweislich falsche Werte).
   extracted?: {
     kennzeichen?: string | null
     fahrzeug_hersteller?: string | null
     fahrzeug_modell?: string | null
     halter_name?: string | null
+    halter_strasse?: string | null
+    halter_plz?: string | null
+    halter_stadt?: string | null
+    fin?: string | null
+    erstzulassung?: string | null
+    hsn?: string | null
+    tsn?: string | null
+    fahrzeug_farbe?: string | null
   }
   // True wenn mit diesem Upload alle Slots befüllt sind
   alle_hochgeladen?: boolean
@@ -456,6 +468,16 @@ async function runZb1OcrAndUpdate(
       fahrzeug_hersteller: extracted.fahrzeug_hersteller ?? null,
       fahrzeug_modell: extracted.fahrzeug_modell ?? null,
       halter_name: [extracted.halter_vorname, extracted.halter_nachname].filter(Boolean).join(' ') || null,
+      // Ops-Test 11.08. (RC-3): diese sieben fehlten — die Preview konnte sie
+      // nicht anzeigen, also konnte der Kunde auch nichts korrigieren.
+      halter_strasse: extracted.halter_strasse ?? null,
+      halter_plz: extracted.halter_plz ?? null,
+      halter_stadt: extracted.halter_stadt ?? null,
+      fin: extracted.fin_vin ?? null,
+      erstzulassung: extracted.erstzulassung ?? null,
+      hsn: extracted.hsn ?? null,
+      tsn: extracted.tsn ?? null,
+      fahrzeug_farbe: extracted.fahrzeug_farbe ?? null,
     },
   }
 }
