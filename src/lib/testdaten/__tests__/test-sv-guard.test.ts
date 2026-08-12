@@ -68,6 +68,45 @@ describe('pruefeTestSvKonsistenz — bezug-Aufloesung + fail-open', () => {
     expect((await pruefeTestSvKonsistenz(db, 'sv-1', null)).blockieren).toBe(false)
   })
 
+  // E2E-Wegwerf-Fixture (Mig 20260812152026): ein SV, der fuers MATCHING echt sein muss
+  // (ist_testaccount=false, sonst filtert ihn applyDispatchableFilter raus), fuer den Guard
+  // aber als Test zaehlt. Ohne diesen Zweig war der Finder-Buchungspfad auf prod nicht
+  // smokebar — interner Bucher + echter SV = BLOCK, und beide Seiten sind im Test nicht frei
+  // waehlbar (s. memory/BROADCAST-finder-buchung-prod-nicht-smokebar.md).
+  it('laesst internen Lead auf einer E2E-WEGWERF-FIXTURE durch (ist_testaccount=false!)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      e2e_test_fixtures: () => ({ data: { sv_id: 'sv-1' }, error: null }),
+      leads: () => ({ data: { email: 'e2e-finder-123@claimondo.de', vorname: 'E2e', nachname: 'Smoke' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(false)
+  })
+
+  // Die Gegenprobe ist die eigentliche Sicherheitsaussage: die Fixture oeffnet NUR fuer
+  // interne Identitaeten. Ein echter Kunde darf auf ihr weiterhin NICHT landen.
+  it('blockt einen ECHTEN Kunden auf einer E2E-Wegwerf-Fixture (echt -> Test)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      e2e_test_fixtures: () => ({ data: { sv_id: 'sv-1' }, error: null }),
+      leads: () => ({ data: { email: 'anja.harig@icloud.com', vorname: 'Anja', nachname: 'Harig' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
+  // Und der Vorfall-Schutz bleibt: ein SV, der NICHT als Fixture eingetragen ist, ist fuer
+  // interne Buchungen weiterhin gesperrt — genau der Fall vom 03.07.
+  it('blockt internen Lead auf echtem SV OHNE Fixture-Eintrag (Vorfall-Schutz intakt)', async () => {
+    const db = fakeDb({
+      sachverstaendige: () => ({ data: { ist_testaccount: false }, error: null }),
+      e2e_test_fixtures: () => ({ data: null, error: null }),
+      leads: () => ({ data: { email: 'aaron.sprafke@claimondo.de', vorname: 'Aaron', nachname: 'Sprafke' }, error: null }),
+    })
+    const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
+    expect(res.blockieren).toBe(true)
+  })
+
   // Fallback-Achse (11.08.): 30/79 prod-Claims haben KEINE lead_id — dort war der Guard blind
   // und liess intern<->echt durch (belegt an CLM-2026-01011). 26 davon sind ueber den
   // Geschaedigten der claim_parties aufloesbar.
