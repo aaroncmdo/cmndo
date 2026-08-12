@@ -3769,6 +3769,8 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_von: string | null
           reparaturdauer_tage_kva: number | null
           reparaturwunsch: string | null
+          sa_extern_bestaetigt_am: string | null
+          sa_extern_bestaetigt_von: string | null
           sa_pdf_url: string | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
@@ -3977,6 +3979,8 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_von?: string | null
           reparaturdauer_tage_kva?: number | null
           reparaturwunsch?: string | null
+          sa_extern_bestaetigt_am?: string | null
+          sa_extern_bestaetigt_von?: string | null
           sa_pdf_url?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
@@ -4185,6 +4189,8 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_von?: string | null
           reparaturdauer_tage_kva?: number | null
           reparaturwunsch?: string | null
+          sa_extern_bestaetigt_am?: string | null
+          sa_extern_bestaetigt_von?: string | null
           sa_pdf_url?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
