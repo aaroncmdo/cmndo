@@ -3721,7 +3721,8 @@
     "stripe_einzug_fehlgeschlagen_am",
     "onboarding_quelle",
     "basic_onboarding_abgeschlossen_am",
-    "ist_testaccount"
+    "ist_testaccount",
+    "ki_intake_aktiv"
    ]
   },
   "schadenkarten": {
