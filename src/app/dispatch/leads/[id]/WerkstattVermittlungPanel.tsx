@@ -34,6 +34,11 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
   const [werkstaetten, setWerkstaetten] = useState<WerkstattFinderRow[]>([])
   const [keineSpezialisierte, setKeineSpezialisierte] = useState(false)
   const [pending, startTransition] = useTransition()
+  // Ops-Test 12.08. (Aaron): Im Haftpflichtfall blockte die P4-Invariante die
+  // Vermittlung, solange der Kunde nicht digital unterschrieben hat. Hat der
+  // Sachverstaendige die Sicherungsabtretung bereits offline eingeholt, bestaetigt
+  // der Vermittelnde das hier — statt den Kunden ein zweites Mal unterschreiben zu lassen.
+  const [saLiegtVor, setSaLiegtVor] = useState(false)
 
   function openDrawer() {
     setOpen(true)
@@ -52,7 +57,7 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
 
   function handleSelect(werkstattId: string) {
     startTransition(async () => {
-      const r = await vermittleWerkstatt({ target, id, werkstattId })
+      const r = await vermittleWerkstatt({ target, id, werkstattId, saLiegtBereitsVor: saLiegtVor })
       if (r.ok) {
         toast.success('Werkstatt vermittelt')
         setOpen(false)
@@ -103,6 +108,26 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
               <MapPinIcon className="w-3 h-3" />
               Partner-Werkstätten in der Nähe des Schadenorts
             </p>
+          </div>
+          {/* Ops-Test 12.08.: Ohne diese Bestätigung blockt die P4-Invariante die
+              Vermittlung im Haftpflichtfall, bis der Kunde digital unterschreibt —
+              obwohl der Sachverständige die SA oft längst analog eingeholt hat. */}
+          <div className="border-b border-claimondo-border px-5 py-3">
+            <label className="flex cursor-pointer items-start gap-2.5">
+              <input
+                type="checkbox"
+                checked={saLiegtVor}
+                onChange={(e) => setSaLiegtVor(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 accent-claimondo-ondo"
+              />
+              <span className="text-xs leading-relaxed text-claimondo-navy">
+                Sicherungsabtretung liegt bereits vor
+                <span className="mt-0.5 block text-claimondo-ondo/70">
+                  Der Sachverständige hat sie eingeholt — der Kunde muss nicht erneut unterschreiben.
+                  Wird mit Ihrem Namen und Zeitpunkt am Fall protokolliert.
+                </span>
+              </span>
+            </label>
           </div>
           <div className="flex-1 overflow-y-auto px-5 py-4">
             <WerkstattFinder

@@ -151,6 +151,13 @@ export async function assignReparaturWerkstatt(
     werkstattId: string
     quelle: VermittlungQuelle
     actorUserId: string | null
+    /**
+     * Ops-Test 12.08. (Aaron-Entscheid): Der Vermittelnde bestaetigt per Checkbox, dass
+     * die Sicherungsabtretung dem Sachverstaendigen bereits OFFLINE vorliegt. Damit ist
+     * die P4-Invariante erfuellt, ohne dass der Kunde ein zweites Mal digital
+     * unterschreiben muss. Wird auf dem Claim mit Zeitpunkt + Urheber protokolliert.
+     */
+    saLiegtBereitsVor?: boolean
   },
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
@@ -162,18 +169,42 @@ export async function assignReparaturWerkstatt(
   // erzeugeSelbstzahlerClaim — live verifiziert 30.07.: kasko/selbstzahler-Zuweisungen mit
   // sa!=true existieren, haftpflicht ausnahmslos sa=true) -> dort KEIN Gate, sonst braeche der
   // FlowLink-Werkstatt-Step. Der Claim-Read wird unten im LEAD-CLAIM-SYNC wiederverwendet.
-  type GateClaim = { id: string; sa_unterschrieben?: boolean | null; abrechnungsweg?: string | null }
+  type GateClaim = {
+    id: string
+    sa_unterschrieben?: boolean | null
+    abrechnungsweg?: string | null
+    sa_extern_bestaetigt_am?: string | null
+  }
   let gateClaim: GateClaim | null = null
   {
-    const q = admin.from('claims').select('id, sa_unterschrieben, abrechnungsweg')
+    const q = admin.from('claims').select('id, sa_unterschrieben, abrechnungsweg, sa_extern_bestaetigt_am')
     const { data } =
       input.target === 'claim'
         ? await q.eq('id', input.id).maybeSingle()
         : await q.eq('lead_id', input.id).maybeSingle()
     gateClaim = (data as GateClaim | null) ?? null
   }
+
+  // Ops-Test 12.08.: Hakt der Vermittelnde "SA liegt bereits vor" an, protokollieren wir
+  // das VOR dem Gate-Check auf dem Claim (Zeitpunkt + Urheber = Nachweiskette) und
+  // spiegeln es in den lokalen gateClaim, damit der Check unten sofort greift.
+  // Idempotent: eine bestehende Bestaetigung wird nicht ueberschrieben.
+  if (input.saLiegtBereitsVor && gateClaim && !gateClaim.sa_extern_bestaetigt_am) {
+    const nowIso = new Date().toISOString()
+    const { error: saErr } = await admin
+      .from('claims')
+      .update({ sa_extern_bestaetigt_am: nowIso, sa_extern_bestaetigt_von: input.actorUserId } as never)
+      .eq('id', gateClaim.id)
+    if (saErr) return { ok: false, error: `SA-Bestätigung konnte nicht gespeichert werden: ${saErr.message}` }
+    gateClaim = { ...gateClaim, sa_extern_bestaetigt_am: nowIso }
+  }
+
   if (gateClaim && gateClaim.abrechnungsweg === 'haftpflicht' && !kundeHatBestaetigt(gateClaim)) {
-    return { ok: false, error: 'Der Kunde hat den Auftrag noch nicht bestätigt.' }
+    return {
+      ok: false,
+      error:
+        'Der Kunde hat den Auftrag noch nicht bestätigt. Liegt Ihnen die Sicherungsabtretung bereits vor, bestätigen Sie das bitte mit der Checkbox.',
+    }
   }
 
   const table = input.target === 'lead' ? 'leads' : 'claims'
