@@ -15,6 +15,14 @@ type EventConfig = {
 
 export const EVENT_MATRIX: Record<EventType, EventConfig> = {
   // 5.1 Fall-Lifecycle
+  // Kunden-Nachzug (12.08.): NUR kunde-Kanaele — bewusst KEIN admin/makler, sonst
+  // gaebe es ein Doppel zu `fall.created`, das die Staff-Rollen bereits erhalten haben.
+  'kunde.account_bereit': {
+    priority: 'normal',
+    channels: {
+      kunde: ['whatsapp', 'email', 'in_app'],
+    },
+  },
   'fall.created': {
     priority: 'normal',
     channels: {
