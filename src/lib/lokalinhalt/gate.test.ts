@@ -106,10 +106,9 @@ describe('pruefeLokalinhalt — Substanz-Gate', () => {
   })
 
   it('blockt einen Entwurf unter der Mindest-Substanz', () => {
-    const b = pruefeLokalinhalt(
-      { stadtbezirke: [{ name: 'Herne-Mitte', ortsteile: [] }] } as LokalinhaltEntwurf,
-      'Herne',
-    )
+    // Kein Cast noetig — pruefeLokalinhalt nimmt bewusst Partial<...> entgegen,
+    // weil ein Modell-Ergebnis unvollstaendig sein darf.
+    const b = pruefeLokalinhalt({ stadtbezirke: [{ name: 'Herne-Mitte', ortsteile: [] }] }, 'Herne')
     expect(b.substanzScore).toBeLessThan(MIN_SUBSTANZ_SCORE)
     expect(b.ok).toBe(false)
     expect(b.gruende.join(' ')).toContain('Substanz-Score')
