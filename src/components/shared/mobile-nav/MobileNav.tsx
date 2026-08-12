@@ -35,6 +35,7 @@ export function MobileNav({
   sheetFooter,
   hideBreakpoint = 'md',
   ariaLabel,
+  activeHref,
 }: MobileNavProps) {
   const pathname = usePathname()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -62,7 +63,7 @@ export function MobileNav({
   }, [menuOpen])
 
   function renderTab(item: MobileNavItem) {
-    const active = isNavItemActive(item, pathname)
+    const active = activeHref !== undefined ? item.href === activeHref : isNavItemActive(item, pathname)
     return (
       <Link
         key={item.href}
@@ -147,7 +148,7 @@ export function MobileNav({
                   )}
                   <div className="space-y-0.5">
                     {section.items.map((item) => {
-                      const active = isNavItemActive(item, pathname)
+                      const active = activeHref !== undefined ? item.href === activeHref : isNavItemActive(item, pathname)
                       return (
                         <Link
                           key={item.href}

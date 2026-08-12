@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { bestimmeAktivenHref } from './nav-aktiv'
 // #2 (Flotte, CarIcon) + #1 (Schaden melden, PlusCircleIcon) beim Rebase zusammengefuehrt.
 import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon, CarFrontIcon, PlusCircleIcon } from 'lucide-react'
 
@@ -49,10 +50,14 @@ export default function KundeNav({
   const SCHADEN_HREF = '/kunde/schaden-melden'
   const NAV_ITEMS = buildNavItems(singleFallId, t, hatFirma)
 
+  // Ops-Test #26: Genau EIN Eintrag ist aktiv — inkl. der kanonischen Claim-Route
+  // unter /kunde/fahrzeuge/[vehId]/schaden/[claimId], wo vorher faelschlich
+  // „Fahrzeuge" markiert wurde. Regel + Tests in ./nav-aktiv.
+  const fallHref = singleFallId ? `/kunde/faelle/${singleFallId}` : null
+  const aktiverHref = bestimmeAktivenHref(pathname, NAV_ITEMS, fallHref)
+
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
-    // Bei Single-Fall-Href (`/kunde/faelle/[id]`) ist active wenn der User
-    // auf der Detail-Page ODER einer Sub-Page (kalender etc.) ist.
     return pathname === href || pathname?.startsWith(href + '/')
   }
 
@@ -71,7 +76,7 @@ export default function KundeNav({
       </Link>
       <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue px-3 pt-4 pb-2">{t('nav.heading')}</p>
       {NAV_ITEMS.map(item => {
-        const active = isActive(item.href, item.exact)
+        const active = item.href === aktiverHref
         return (
           <Link key={item.href} href={item.href}
             className={`flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors duration-500 ${

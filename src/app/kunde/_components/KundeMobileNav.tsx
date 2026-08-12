@@ -5,11 +5,13 @@
 // seitig via buildNavItems gebaut werden. Branding/Updates/Abmelden reicht das
 // Layout (server) als Slots durch.
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { PlusCircleIcon } from 'lucide-react'
 import { MobileNav, type MobileNavItem } from '@/components/shared/mobile-nav'
 import { MobileUpdatesDot } from '@/components/shared/updates/MobileUpdatesDot'
 import { buildNavItems } from './KundeNav'
+import { bestimmeAktivenHref } from './nav-aktiv'
 
 const SCHADEN_HREF = '/kunde/schaden-melden'
 const KUNDE_PRIMARY_HREFS = ['/kunde/termine', '/kunde/chat', '/kunde/profil']
@@ -32,6 +34,7 @@ export function KundeMobileNav({
 }) {
   const t = useTranslations('kunde.shell')
   const tHero = useTranslations('kundeHero')
+  const pathname = usePathname()
 
   const all: MobileNavItem[] = buildNavItems(singleFallId, t, hatFirma).map((i) => ({
     href: i.href,
@@ -44,9 +47,14 @@ export function KundeMobileNav({
     .filter((i): i is MobileNavItem => Boolean(i))
     .slice(0, 4)
 
+  // Ops-Test #26: gleiche Aktiv-Regel wie in der Desktop-Sidebar — auf der kanonischen
+  // Claim-Route (/kunde/fahrzeuge/[vehId]/schaden/[claimId]) gewinnt „Mein Fall".
+  const aktiverHref = bestimmeAktivenHref(pathname, all, singleFallId ? `/kunde/faelle/${singleFallId}` : null)
+
   return (
     <MobileNav
       ariaLabel="Kunde-Navigation"
+      activeHref={aktiverHref}
       primary={primary}
       sections={[{ items: all }]}
       brand={{ logo: brandLogo, name: brandName }}
