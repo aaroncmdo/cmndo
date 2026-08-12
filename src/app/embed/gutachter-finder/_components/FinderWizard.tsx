@@ -14,7 +14,7 @@
 // SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
+import { ChevronRight, ChevronLeft, CheckCircle2, Clock, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
@@ -135,6 +135,9 @@ export function FinderWizard({
   const [email, setEmail] = useState('')
   const [dsgvo, setDsgvo] = useState(false)
   const [gebucht, setGebucht] = useState<{
+    /** Ops-Test RC-1: true = Termin steht wirklich in der DB. false = Anfrage, die
+     *  Dispatch noch bestaetigen muss. Vorher zeigte die Danke-Seite immer "reserviert". */
+    bestaetigt: boolean
     svVorname: string | null
     ortLabel: string | null
     startIso: string | null
@@ -284,7 +287,7 @@ export function FinderWizard({
         if (res.slotWeg && ort) setSlotWeg(true)
         return
       }
-      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher, gutachter: res.gutachter })
+      setGebucht({ bestaetigt: res.bestaetigt, svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher, gutachter: res.gutachter })
       setBuchungToken(res.token)
       setBuchungLeadId(res.leadId)
       // Conversion (value-based, wie Monika): Reservierung = haftpflicht-Lead (100 €) + lead_id-Dedupe
@@ -601,17 +604,31 @@ export function FinderWizard({
 
       {phase === 'gebucht' && gebucht && (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
-          <CheckCircle2 className="h-12 w-12 text-success" />
+          {/* Ein gruener Haken sagt "erledigt" — bei einer unbestaetigten Anfrage waere das
+              dieselbe Luege wie der alte Bestaetigungstext (Ops-Test RC-1). */}
+          {gebucht.bestaetigt ? (
+            <CheckCircle2 className="h-12 w-12 text-success" />
+          ) : (
+            <Clock className="h-12 w-12 text-claimondo-ondo" />
+          )}
           <h3 className="text-body font-bold text-claimondo-navy">
-            {gebucht.startIso ? 'Termin reserviert' : 'Anfrage eingegangen'}
+            {!gebucht.startIso
+              ? 'Anfrage eingegangen'
+              : gebucht.bestaetigt
+                ? 'Termin bestätigt'
+                : 'Terminanfrage eingegangen'}
           </h3>
+          {/* Ops-Test RC-1: Der Text folgt dem tatsaechlichen Buchungs-Ausgang. Vorher stand hier
+              immer "reserviert" — auch wenn die Buchung am Kalender des SV gescheitert war und
+              gar kein Termin existierte. */}
           <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
-            {gebucht.startIso ? (
+            {!gebucht.startIso ? (
+              'Vielen Dank — unser Team meldet sich in Kürze telefonisch für die Terminvereinbarung.'
+            ) : gebucht.bestaetigt ? (
               <>
                 {gebucht.svVorname
-                  ? `${gebucht.svVorname} ist`
-                  : `Ihr Kfz-Gutachter${gebucht.ortLabel ? ` in ${gebucht.ortLabel}` : ''} ist`}{' '}
-                für{' '}
+                  ? `${gebucht.svVorname} kommt am`
+                  : `Ihr Kfz-Gutachter${gebucht.ortLabel ? ` in ${gebucht.ortLabel}` : ''} kommt am`}{' '}
                 {new Date(gebucht.startIso).toLocaleString('de-DE', {
                   weekday: 'long',
                   day: '2-digit',
@@ -619,10 +636,22 @@ export function FinderWizard({
                   hour: '2-digit',
                   minute: '2-digit',
                 })}{' '}
-                Uhr reserviert. Wir bestätigen Ihren Termin in Kürze.
+                Uhr.
               </>
             ) : (
-              'Vielen Dank — unser Team meldet sich in Kürze telefonisch für die Terminvereinbarung.'
+              <>
+                Sie haben{' '}
+                {new Date(gebucht.startIso).toLocaleString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: 'long',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                Uhr angefragt
+                {gebucht.svVorname ? ` bei ${gebucht.svVorname}` : ''}. Diese Zeit ist noch nicht
+                bestätigt — wir prüfen sie und melden uns kurzfristig mit einer festen Zusage.
+              </>
             )}
           </p>
 

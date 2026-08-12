@@ -109,6 +109,11 @@ export function DeadPinSlotStep({
                     {slot.matchType === 'wunschtermin' && (
                       <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">Wunschzeit</span>
                     )}
+                    {/* Ops-Test RC-1: Dead-Pins haben keinen verbundenen Kalender — jede Zeit
+                        hier ist eine Anfrage, nie eine Zusage. */}
+                    {slot.matchType === 'wunschtermin_anfrage' && (
+                      <span className="ml-1 text-[10px] font-semibold text-claimondo-shield/70">auf Anfrage</span>
+                    )}
                   </button>
                 ))}
               </div>

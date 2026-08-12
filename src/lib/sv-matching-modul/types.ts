@@ -11,7 +11,12 @@ import type { Tier } from '@/lib/partner-rang/types'
 export type SlotVorschlag = {
   start: string // ISO
   end: string // ISO
-  matchType: 'wunschtermin' | 'gleicher_tag' | 'nahe' | 'nach'
+  /**
+   * 'wunschtermin'          = echter Engine-Slot, der die Wunschzeit trifft (buchbar)
+   * 'wunschtermin_anfrage'  = die Wunschzeit selbst, gegen v_belegung geprueft, aber KEIN
+   *                           Raster-Slot — eine Anfrage, die Dispatch bestaetigt (Ops-Test RC-1)
+   */
+  matchType: 'wunschtermin' | 'wunschtermin_anfrage' | 'gleicher_tag' | 'nahe' | 'nach'
 }
 
 /**
