@@ -334,7 +334,21 @@ async function cleanup(db: SupabaseClient, email: string, terminId?: string): Pr
       await db.from('auftraege').update({ storniert_am: new Date().toISOString() }).eq('claim_id', claimId)
       const { data: claim } = await db.from('claims').select('geschaedigter_user_id').eq('id', claimId).maybeSingle()
       const uid = claim?.geschaedigter_user_id as string | undefined
-      if (uid) await db.auth.admin.deleteUser(uid).catch(() => {})
+      if (uid) {
+        // Der Account haengt an mehreren FKs — ohne diese Reihenfolge scheitert deleteUser
+        // still (der .catch schluckt es) und JEDER Lauf laesst einen Test-Account auf prod
+        // zurueck. Real aufgetreten 12.08.: `mitteilungen_empfaenger_id_fkey` (23503), erzeugt
+        // von der in-app-Zustellung des `kunde.account_bereit`-Events (#5205).
+        await db.from('mitteilungen').delete().eq('empfaenger_id', uid)
+        await db.from('notification_deliveries').delete().eq('recipient_user_id', uid)
+        await db.from('claim_parties').update({ user_id: null }).eq('user_id', uid)
+        await db.from('claims').update({ geschaedigter_user_id: null }).eq('geschaedigter_user_id', uid)
+        const del = await db.auth.admin.deleteUser(uid).catch((e: unknown) => ({ error: e }))
+        // Nicht still scheitern lassen: ein Rest faellt sonst erst beim naechsten Audit auf.
+        if (del && 'error' in del && del.error) {
+          console.warn('[cleanup] deleteUser fehlgeschlagen — Test-Account bleibt auf prod:', uid, del.error)
+        }
+      }
     }
     if (leadId) {
       await db.from('flow_links').delete().eq('lead_id', leadId)
