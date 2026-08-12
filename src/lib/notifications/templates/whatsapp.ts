@@ -56,6 +56,14 @@ const MAPPING: Partial<Record<EventType, Partial<Record<Role, EventTemplate>>>> 
       resolve: (_p, c) => ({ '1': c.vorname ?? '', '2': c.portalLink }),
     },
   },
+  // Kunden-Nachzug: dasselbe Willkommens-Template wie `fall.created` — nur zu dem
+  // Zeitpunkt, zu dem der Kunde tatsaechlich erreichbar ist (Account verknuepft).
+  'kunde.account_bereit': {
+    kunde: {
+      template: 'fall_eroeffnet',
+      resolve: (_p, c) => ({ '1': c.vorname ?? '', '2': c.portalLink }),
+    },
+  },
   'fall.sv_assigned': {
     kunde: {
       template: 'sv_beauftragt',
