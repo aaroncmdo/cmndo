@@ -117,8 +117,12 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   // claims — manueller Reroute via upsertCurrentClaimPayment).
   'guthaben_verrechnet_netto',
   'schlussabrechnung_am',
-  'auszahlung_gutachter_betrag',
-  'auszahlung_gutachter_eingegangen_am',
+  // Payment-Ledger Phase 3 (Collapse): auszahlung_gutachter_betrag +
+  // auszahlung_gutachter_eingegangen_am ENTFERNT — beide claims-Spalten sind GEDROPPT
+  // (DB-verifiziert 12.08.), die Werte leben im (claim_id, partei='sv')-Ledger. Stuenden sie
+  // hier, routete splitFaelleUpdate sie auf claims -> `column does not exist`. Der einzige
+  // Writer (faelle-stammdaten `auszahlungLedger`, short-circuit VOR dem Split) schreibt
+  // claim_payments; alle uebrigen Aufrufer nutzen nur claimsUpdate, faelleUpdate ist tot.
   'auszahlung_zahlungsweg',
   'sv_nachzahlung_netto',
   'abrechnung_id',
@@ -269,7 +273,12 @@ export const CLUSTER3_RENAMED_TO_CLAIMS: Record<string, string> = {
   // CMM-44 MP-6c: aktuelle_phase -> phase entfernt — claims.phase wurde gedroppt
   // (tote 10-Code-Spalte, 0 Reader/Writer; Phase kommt aus v_claim_phase).
   konvertiert_von_lead: 'lead_id',
-  regulierung_betrag: 'regulierungs_betrag',
+  // Payment-Ledger Phase 3 (Collapse): regulierung_betrag -> regulierungs_betrag ENTFERNT —
+  // das Rename-ZIEL claims.regulierungs_betrag ist gedroppt (DB-verifiziert 12.08.), das
+  // Mapping zeigte also ins Leere und haette einen Writer in `column does not exist` laufen
+  // lassen. Der VS-Regulierungsbetrag kommt aus dem (claim,'vs')-Ledger; die verbliebenen
+  // `regulierung_betrag`-Vorkommen in src/app/admin/** sind READS aus Views (dort flach
+  // vorhanden), keine Writer — deshalb war der Eintrag bereits heute unerreichbar.
   vs_ablehnungsgrund: 'vs_ablehnungs_grund',
 }
 
