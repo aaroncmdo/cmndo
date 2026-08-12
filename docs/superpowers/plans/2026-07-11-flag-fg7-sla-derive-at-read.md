@@ -1,4 +1,11 @@
 # SLA breached/blocker Derive-at-Read Implementation Plan
+> # ✅ ERFUELLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> „Derive-at-Read" ist Realitaet: die persistierten SLA-Flags gibt es nicht mehr.
+> **DB-Beleg (12.08.):** `claims.sla_breached` und `claims.sla_blocker` sind **gedroppt** —
+> SLA-Zustaende koennen nur noch beim Lesen abgeleitet werden (u.a. `src/lib/fall/subphase-resolver.ts`).
+> Der Plan haette genau diesen Zustand herbeigefuehrt; er ist auf anderem Weg erreicht.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree (`node scripts/new-session-worktree.mjs flag-fg7-sla-derive`).
 **Goal:** Stop SV-SLA `breached` flags + `kritisch` breach-tasks from persisting after a claim actually progressed, and stop kanzlei dunning from mahn-ing the wrong party after the customer fixed the blocker — by re-checking live completion before escalating and recomputing the blocker at every dunning stage.

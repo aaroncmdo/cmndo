@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { GoogleReviews } from '@/components/shared/GoogleReviews'
+import { ProvenExpertSiegel } from '@/components/shared/ProvenExpertSiegel'
 
 // Phase D2 — Home-Trust-Strip (premium, home-spezifisch).
 // Vorher ein duenner Wrapper um die generische TrustStripSection (8 Pages teilen sie).
@@ -41,6 +42,10 @@ export async function HomeTrustStripSection() {
 
         {/* E1 — LIVE Google-Bewertungen (null-safe: rendert nichts ohne echte Daten). */}
         <GoogleReviews />
+
+        {/* LIVE ProvenExpert-Siegel (null-safe, serverseitig geholt — kein
+            Drittanbieter-Script im Besucher-Browser, siehe Komponenten-Kommentar). */}
+        <ProvenExpertSiegel />
       </div>
     </section>
   )

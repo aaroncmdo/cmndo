@@ -150,8 +150,6 @@ describe('central-writer invariant: peel BEFORE split → SP-H never reaches fae
 const SPJ_BUCKET_B = [
   'guthaben_verrechnet_netto',
   'schlussabrechnung_am',
-  'auszahlung_gutachter_betrag',
-  'auszahlung_gutachter_eingegangen_am',
   'auszahlung_zahlungsweg',
   'sv_nachzahlung_netto',
   'abrechnung_id',
@@ -159,22 +157,37 @@ const SPJ_BUCKET_B = [
 ] as const
 const SPJ_BUCKET_A = ['zahlung_eingegangen_am', 'zahlung_betrag'] as const
 
+// Payment-Ledger Phase 3 (Collapse): auszahlung_gutachter_betrag/-eingegangen_am wurden auf
+// claims GEDROPPT — sie leben im (claim_id, partei='sv')-Ledger. Sie duerfen deshalb NICHT
+// mehr nach claims geroutet werden (waere `column does not exist`). Der einzige Writer
+// (faelle-stammdaten `auszahlungLedger`) faengt sie vorher ab und schreibt claim_payments.
+const GEDROPPTE_CLAIMS_SPALTEN = ['auszahlung_gutachter_betrag', 'auszahlung_gutachter_eingegangen_am'] as const
+
 describe('SP-J Bucket B routet auf claims', () => {
-  it('splitOrKeepFaelleUpdate routet die 8 Bucket-B nach claims, faelle-only bleibt', () => {
+  it('splitOrKeepFaelleUpdate routet die Bucket-B nach claims, faelle-only bleibt', () => {
     const u = {
       status: 'x', // faelle-only
       schlussabrechnung_am: 't',
-      auszahlung_gutachter_betrag: 5,
       abrechnung_id: 'a1',
       lead_preis_netto: 99, // CMM-44 Phase 3: claims-native (CLAIM_OWNED) -> claimsUpdate
     }
     const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
-    expect(claimsUpdate).toEqual({ schlussabrechnung_am: 't', auszahlung_gutachter_betrag: 5, abrechnung_id: 'a1', lead_preis_netto: 99 })
+    expect(claimsUpdate).toEqual({ schlussabrechnung_am: 't', abrechnung_id: 'a1', lead_preis_netto: 99 })
     expect(faelleUpdate).toEqual({ status: 'x' })
   })
 
-  it('alle 8 Bucket-B-Spalten sind im Set', () => {
+  it('alle Bucket-B-Spalten sind im Set', () => {
     for (const c of SPJ_BUCKET_B) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(true)
+  })
+
+  it('die auf claims GEDROPPTEN Auszahlungs-Spalten sind NICHT (mehr) im Set', () => {
+    for (const c of GEDROPPTE_CLAIMS_SPALTEN) expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has(c)).toBe(false)
+  })
+
+  it('gedroppte Auszahlungs-Spalten landen NICHT in claimsUpdate (sonst: column does not exist)', () => {
+    const u = { auszahlung_gutachter_betrag: 5, auszahlung_gutachter_eingegangen_am: '2026-08-12' }
+    const { claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
+    expect(claimsUpdate).toEqual({})
   })
 
   it('die 2 Bucket-A (zahlung_*) sind NICHT im Set (gehen auf claim_payments)', () => {

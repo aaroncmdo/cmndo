@@ -44,7 +44,14 @@ export default async function GutachterLayout({
   // ein Verifizierungs-Zustand aktiv bleibt. Die Legacy-SA-Vorlage (Tier 1)
   // wurde mit AAR-360 entfernt — der Tier-2-Status ist der einzige Trigger.
   const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
-  const showVerifizierung = !!tier2Offen
+  // Ops-Test 11.08.: Nach 'geprueft' verschwand der Eintrag — der SV kam an seine
+  // eigenen Nachweise nicht mehr heran (Aaron: "Der Gutachter muss seine
+  // Sicherungsabtretung nachtraeglich in den Einstellungen hochladen koennen").
+  // Die Route /gutachter/verifizierung blieb erreichbar, war aber unauffindbar.
+  // Das ist kein Onboarding-Einmalschritt: Nachweise laufen ab (Berufshaftpflicht),
+  // und fehlende Tier-2-Dokumente machen den SV nicht-dispatchbar — er MUSS
+  // jederzeit nachreichen koennen. Label unten wechselt auf "Nachweise".
+  const showVerifizierung = !!sv
   // Tier-2-Frist-Banner (Berufshaftpflicht/Gewerbeanmeldung — Spec 2026-08-08):
   const tier2TageOffen = sv?.verifizierung_frist_bis
     ? Math.max(0, Math.ceil((new Date(sv.verifizierung_frist_bis).getTime() - Date.now()) / 864e5))
@@ -109,6 +116,7 @@ export default async function GutachterLayout({
       standortLng={sv?.standort_lng ? Number(sv.standort_lng) : null}
       showCommunity={showCommunity}
       showVerifizierung={showVerifizierung}
+      verifizierungOffen={!!tier2Offen}
       svId={sv?.id ? String(sv.id) : null}
       onboardingModus={sv?.portal_zugang_freigeschaltet === false}
     >

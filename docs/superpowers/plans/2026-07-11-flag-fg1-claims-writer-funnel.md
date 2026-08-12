@@ -1,4 +1,15 @@
 # claims Single-Writer-Funnel Implementation Plan
+> # ✅ ERFUELLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> Ziel des Plans (`operative_status` hat genau EINEN Writer) ist erreicht — allerdings ueber das
+> **Fundament-C1-Paket**, nicht ueber diesen Plan: `transitionFallStatus` ist der Funnel, die
+> letzten 2 Direkt-Writer wurden mit **#5114** gehoben.
+>
+> **Beleg (12.08.):** `npm run check:operative-status-writes -- --ratchet` -> „OK — 0 bekannte
+> Verletzer (Baseline 0), 0 neue" — das Gate ist scharf und leer. Zusaetzlich ist `claims.status`
+> auf prod **gedroppt** (DB-verifiziert), die Dual-Status-Grundlage des Plans existiert nicht mehr.
+> Fundament §9-#3 ist mit genau diesem Beleg abgehakt.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax.
 > **Isolation:** implement in a dedicated git worktree (`node scripts/new-session-worktree.mjs flag-fg1-claims-writer-funnel`).
 

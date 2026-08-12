@@ -23,8 +23,11 @@ export type Stadt = {
   }
   /** Honorar-Spannen nach BVSK-Honorartabelle für die Stadt */
   bvskHonorarSpanne: string
-  /** Anzahl Partner-SVs in dieser Region */
-  partnerSVs: number
+  // `partnerSVs` (geschaetzte Partner-Anzahl je Stadt) wurde am 12.08.2026 entfernt:
+  // 0 Consumer im gesamten Projekt, und die Summe ueber alle Staedte ergab 473
+  // behauptete Partner bei 15 real verifizierten Sachverstaendigen. Nicht gerendert,
+  // also nie eine Falschaussage — waere aber eine geworden, sobald jemand das Feld
+  // verdrahtet. Echte Abdeckung gehoert aus der DB abgeleitet, nicht gepflegt.
   /** Heading-Suffix für H1 — manchmal nominativ, manchmal genitiv */
   h1Anker: string
   /**
@@ -137,7 +140,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '650–2.400 €',
-    partnerSVs: 23,
     h1Anker: 'in Köln',
   },
   {
@@ -154,7 +156,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '650–2.400 €',
-    partnerSVs: 18,
     h1Anker: 'in Düsseldorf',
   },
   {
@@ -171,7 +172,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 11,
     h1Anker: 'in Bonn',
   },
   {
@@ -188,7 +188,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 8,
     h1Anker: 'in Aachen',
   },
   {
@@ -205,7 +204,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 14,
     h1Anker: 'in Dortmund',
   },
   // Welle 2: weitere NRW-Großstädte
@@ -223,7 +221,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 12,
     h1Anker: 'in Essen',
   },
   {
@@ -240,7 +237,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 12,
     h1Anker: 'in Duisburg',
   },
   {
@@ -257,7 +253,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 9,
     h1Anker: 'in Bochum',
   },
   {
@@ -274,7 +269,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 7,
     h1Anker: 'in Bielefeld',
   },
   {
@@ -291,7 +285,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 8,
     h1Anker: 'in Münster',
   },
   {
@@ -308,7 +301,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 8,
     h1Anker: 'in Wuppertal',
   },
   {
@@ -325,7 +317,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 7,
     h1Anker: 'in Mönchengladbach',
   },
   {
@@ -342,7 +333,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 7,
     h1Anker: 'in Krefeld',
   },
   {
@@ -359,7 +349,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 6,
     h1Anker: 'in Oberhausen',
   },
   {
@@ -376,7 +365,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 6,
     h1Anker: 'in Leverkusen',
   },
   {
@@ -393,7 +381,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Paderborn',
   },
   {
@@ -410,7 +397,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Hagen',
   },
   {
@@ -427,7 +413,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Solingen',
     spokeLocal: {
       hubName: 'Wuppertal',
@@ -463,7 +448,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 4,
     h1Anker: 'in Bergisch Gladbach',
   },
   {
@@ -480,7 +464,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 4,
     h1Anker: 'in Remscheid',
     spokeLocal: {
       hubName: 'Wuppertal',
@@ -516,7 +499,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Berlin',
     },
     bvskHonorarSpanne: '700–2.600 €',
-    partnerSVs: 8,
     h1Anker: 'in Berlin',
   },
   {
@@ -533,7 +515,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Hanseatische Rechtsanwaltskammer Hamburg',
     },
     bvskHonorarSpanne: '700–2.600 €',
-    partnerSVs: 7,
     h1Anker: 'in Hamburg',
   },
   {
@@ -550,7 +531,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer München',
     },
     bvskHonorarSpanne: '700–2.600 €',
-    partnerSVs: 6,
     h1Anker: 'in München',
   },
   {
@@ -567,7 +547,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Frankfurt am Main',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 5,
     h1Anker: 'in Frankfurt am Main',
   },
   {
@@ -584,7 +563,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Stuttgart',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 5,
     h1Anker: 'in Stuttgart',
   },
   // Welle 4 — weitere Großstädte (≥100k Einw.) für GEO/SEO-Indexing-Surface
@@ -603,7 +581,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Nürnberg',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 6,
     h1Anker: 'in Nürnberg',
   },
   {
@@ -620,7 +597,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer München',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 5,
     h1Anker: 'in Augsburg',
   },
   {
@@ -637,7 +613,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Bamberg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Würzburg',
   },
   {
@@ -654,7 +629,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Nürnberg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Regensburg',
   },
   {
@@ -671,7 +645,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer München',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Ingolstadt',
   },
   {
@@ -688,7 +661,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Nürnberg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Fürth',
   },
   {
@@ -705,7 +677,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Nürnberg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Erlangen',
   },
   // Baden-Württemberg
@@ -723,7 +694,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Karlsruhe',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 6,
     h1Anker: 'in Mannheim',
   },
   {
@@ -740,7 +710,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Karlsruhe',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 6,
     h1Anker: 'in Karlsruhe',
   },
   {
@@ -757,7 +726,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Freiburg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 5,
     h1Anker: 'in Freiburg im Breisgau',
   },
   {
@@ -774,7 +742,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Karlsruhe',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Heidelberg',
   },
   {
@@ -791,7 +758,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Stuttgart',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Heilbronn',
   },
   {
@@ -808,7 +774,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Tübingen',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Ulm',
   },
   {
@@ -825,7 +790,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Karlsruhe',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Pforzheim',
   },
   {
@@ -842,7 +806,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Tübingen',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Reutlingen',
   },
   // Hessen
@@ -860,7 +823,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Frankfurt am Main',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 5,
     h1Anker: 'in Wiesbaden',
   },
   {
@@ -877,7 +839,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Frankfurt am Main',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Kassel',
   },
   {
@@ -894,7 +855,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Frankfurt am Main',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Darmstadt',
   },
   {
@@ -911,7 +871,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Frankfurt am Main',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 3,
     h1Anker: 'in Offenbach am Main',
   },
   // Niedersachsen
@@ -929,7 +888,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Celle',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 7,
     h1Anker: 'in Hannover',
   },
   {
@@ -946,7 +904,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Braunschweig',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 5,
     h1Anker: 'in Braunschweig',
   },
   {
@@ -963,7 +920,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Oldenburg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Oldenburg',
   },
   {
@@ -980,7 +936,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Oldenburg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Osnabrück',
   },
   {
@@ -997,7 +952,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Braunschweig',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 3,
     h1Anker: 'in Wolfsburg',
   },
   {
@@ -1014,7 +968,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Celle',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Göttingen',
   },
   // Bremen
@@ -1032,7 +985,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Bremen',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 6,
     h1Anker: 'in Bremen',
   },
   {
@@ -1049,7 +1001,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Bremen',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Bremerhaven',
   },
   // Schleswig-Holstein
@@ -1067,7 +1018,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Schleswig-Holsteinische Rechtsanwaltskammer',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 5,
     h1Anker: 'in Kiel',
   },
   {
@@ -1084,7 +1034,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Schleswig-Holsteinische Rechtsanwaltskammer',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Lübeck',
   },
   // Rheinland-Pfalz
@@ -1102,7 +1051,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Koblenz',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 5,
     h1Anker: 'in Mainz',
   },
   {
@@ -1119,7 +1067,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Zweibrücken',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Ludwigshafen am Rhein',
   },
   {
@@ -1136,7 +1083,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Koblenz',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Koblenz',
   },
   {
@@ -1153,7 +1099,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Koblenz',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Trier',
   },
   // Saarland
@@ -1171,7 +1116,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer des Saarlandes',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Saarbrücken',
   },
   // Sachsen
@@ -1189,7 +1133,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Sachsen',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 7,
     h1Anker: 'in Leipzig',
   },
   {
@@ -1206,7 +1149,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Sachsen',
     },
     bvskHonorarSpanne: '650–2.500 €',
-    partnerSVs: 6,
     h1Anker: 'in Dresden',
   },
   {
@@ -1223,7 +1165,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Sachsen',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Chemnitz',
   },
   // Sachsen-Anhalt
@@ -1241,7 +1182,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Sachsen-Anhalt',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Halle (Saale)',
   },
   {
@@ -1258,7 +1198,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Sachsen-Anhalt',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Magdeburg',
   },
   // Thüringen
@@ -1276,7 +1215,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Thüringen',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Erfurt',
   },
   {
@@ -1293,7 +1231,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Thüringen',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Jena',
   },
   // Brandenburg
@@ -1311,7 +1248,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Brandenburg',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Potsdam',
   },
   {
@@ -1328,7 +1264,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Brandenburg',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Cottbus',
   },
   // Mecklenburg-Vorpommern
@@ -1346,7 +1281,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Mecklenburg-Vorpommern',
     },
     bvskHonorarSpanne: '600–2.300 €',
-    partnerSVs: 4,
     h1Anker: 'in Rostock',
   },
   {
@@ -1363,7 +1297,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Mecklenburg-Vorpommern',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Schwerin',
   },
   // Spoke-Towns (Doc 38 P5) — Hub-Anbindung, minimal-unique-content (kein Doorway).
@@ -1381,7 +1314,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 9,
     h1Anker: 'in Neuss',
     spokeLocal: {
       hubName: 'Düsseldorf',
@@ -1418,7 +1350,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 7,
     h1Anker: 'in Ratingen',
     spokeLocal: {
       hubName: 'Düsseldorf',
@@ -1455,7 +1386,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Hilden',
     spokeLocal: {
       hubName: 'Düsseldorf',
@@ -1492,7 +1422,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Langenfeld',
     spokeLocal: {
       hubName: 'Düsseldorf',
@@ -1529,7 +1458,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Dormagen',
     spokeLocal: {
       hubName: 'Düsseldorf',
@@ -1566,7 +1494,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 6,
     h1Anker: 'in Velbert',
     spokeLocal: {
       hubName: 'Wuppertal',
@@ -1600,7 +1527,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Hamm',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Schwelm',
     spokeLocal: {
       hubName: 'Wuppertal',
@@ -1637,7 +1563,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Düsseldorf',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 4,
     h1Anker: 'in Haan',
     spokeLocal: {
       hubName: 'Wuppertal',
@@ -1674,7 +1599,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 6,
     h1Anker: 'in Siegburg',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1712,7 +1636,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 6,
     h1Anker: 'in Troisdorf',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1750,7 +1673,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 5,
     h1Anker: 'in Sankt Augustin',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1788,7 +1710,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 4,
     h1Anker: 'in Hennef',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1826,7 +1747,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 3,
     h1Anker: 'in Meckenheim',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1864,7 +1784,6 @@ export const STAEDTE: Stadt[] = [
       kammer: 'Rechtsanwaltskammer Köln',
     },
     bvskHonorarSpanne: '550–2.200 €',
-    partnerSVs: 4,
     h1Anker: 'in Bornheim',
     spokeLocal: {
       hubName: 'Bonn',
@@ -1887,6 +1806,142 @@ export const STAEDTE: Stadt[] = [
       },
       vorwahl: '02222',
     },
+  },
+
+  // Welle 5 (12.08.2026) — Ruhrgebiets-Luecken. Acht NRW-Staedte ueber 100 Tsd.
+  // Einwohner lieferten bis hierhin HTTP 404, obwohl sie im Einzugsgebiet unserer
+  // tatsaechlich verifizierten Sachverstaendigen liegen (Duisburg, Duesseldorf,
+  // Remscheid, Koeln). Gelsenkirchen allein hat 260 Tsd. Einwohner.
+  // Alle Werte verifizierbare oeffentliche Fakten (Gerichtsbezirke, PLZ, Koordinaten).
+  // Bei 7 der 8 liegt das Amtsgericht in einem ANDEREN Ort als das Landgericht —
+  // genau der Fall, den die korrigierte Gerichts-FAQ jetzt richtig beantwortet.
+  {
+    slug: 'gelsenkirchen',
+    name: 'Gelsenkirchen',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '45',
+    bevoelkerung: '260 Tsd.',
+    lat: 51.5177,
+    lng: 7.0857,
+    lokal: {
+      landgericht: 'Landgericht Essen',
+      amtsgericht: 'Amtsgericht Gelsenkirchen',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '600–2.300 €',
+    h1Anker: 'in Gelsenkirchen',
+  },
+  {
+    slug: 'hamm',
+    name: 'Hamm',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '59',
+    bevoelkerung: '180 Tsd.',
+    lat: 51.6739,
+    lng: 7.815,
+    lokal: {
+      landgericht: 'Landgericht Dortmund',
+      amtsgericht: 'Amtsgericht Hamm',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Hamm',
+  },
+  {
+    slug: 'muelheim-an-der-ruhr',
+    name: 'Mülheim an der Ruhr',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '45',
+    bevoelkerung: '172 Tsd.',
+    lat: 51.4266,
+    lng: 6.8829,
+    lokal: {
+      landgericht: 'Landgericht Duisburg',
+      amtsgericht: 'Amtsgericht Mülheim an der Ruhr',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Mülheim an der Ruhr',
+  },
+  {
+    slug: 'herne',
+    name: 'Herne',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '44',
+    bevoelkerung: '156 Tsd.',
+    lat: 51.5386,
+    lng: 7.2257,
+    lokal: {
+      landgericht: 'Landgericht Bochum',
+      amtsgericht: 'Amtsgericht Herne',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Herne',
+  },
+  {
+    slug: 'bottrop',
+    name: 'Bottrop',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '46',
+    bevoelkerung: '117 Tsd.',
+    lat: 51.5216,
+    lng: 6.9289,
+    lokal: {
+      landgericht: 'Landgericht Essen',
+      amtsgericht: 'Amtsgericht Bottrop',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Bottrop',
+  },
+  {
+    slug: 'recklinghausen',
+    name: 'Recklinghausen',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '45',
+    bevoelkerung: '112 Tsd.',
+    lat: 51.6142,
+    lng: 7.1979,
+    lokal: {
+      landgericht: 'Landgericht Bochum',
+      amtsgericht: 'Amtsgericht Recklinghausen',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Recklinghausen',
+  },
+  {
+    slug: 'moers',
+    name: 'Moers',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '47',
+    bevoelkerung: '104 Tsd.',
+    lat: 51.4508,
+    lng: 6.6404,
+    lokal: {
+      landgericht: 'Landgericht Kleve',
+      amtsgericht: 'Amtsgericht Moers',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Moers',
+  },
+  {
+    slug: 'siegen',
+    name: 'Siegen',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '57',
+    bevoelkerung: '103 Tsd.',
+    lat: 50.8748,
+    lng: 8.0243,
+    lokal: {
+      landgericht: 'Landgericht Siegen',
+      amtsgericht: 'Amtsgericht Siegen',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Siegen',
   },
 ]
 
