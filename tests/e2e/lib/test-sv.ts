@@ -121,6 +121,22 @@ export async function seedThrowawayFinderSv(
     await db.auth.admin.deleteUser(uid).catch(() => {})
     throw new Error(`seedThrowawayFinderSv: sachverstaendige: ${svErr?.message ?? 'kein row'}`)
   }
+
+  // 4. E2E-Fixture-Kennzeichnung (Mig 20260812152026). Der SV MUSS oben ist_testaccount=false
+  // tragen, sonst filtert ihn applyDispatchableFilter aus dem Matching — dann wuerde ihn aber
+  // der Test-SV-Guard in reserviere() fuer jeden internen Bucher sperren (Matrix intern->echt
+  // = BLOCK), und der Submit-Zweig waere nicht smokebar. Dieser Eintrag loest genau das: fuer
+  // das MATCHING echt, fuer den GUARD Test. Nur service_role darf hier schreiben.
+  // Fehlschlag ist KEIN harter Abbruch: der Seed ist dann weiterhin fuers Matching brauchbar
+  // (Slots/Formular), nur der Submit liefe in den Guard — das faellt im Test sichtbar auf,
+  // statt hier den ganzen Lauf zu kippen.
+  const { error: fixErr } = await db
+    .from('e2e_test_fixtures')
+    .insert({ sv_id: sv.id as string, notiz: `golden-path-finder runId=${opts.runId}` })
+  if (fixErr) {
+    console.warn('[seedThrowawayFinderSv] e2e_test_fixtures-Eintrag fehlgeschlagen:', fixErr.message)
+  }
+
   return { svId: sv.id as string, uid, email }
 }
 
