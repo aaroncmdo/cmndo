@@ -47,7 +47,17 @@ export async function reserviere(input: ReserviereInput): Promise<ReserviereResu
   if (assignee.typ === 'sachverstaendiger') {
     const guard = await pruefeTestSvKonsistenz(db, assignee.id, bezug)
     if (guard.blockieren) {
-      return { ok: false, error: guard.grund ?? 'Test-Guard: Buchung blockiert.', code: 'test_guard' }
+      // Der technische Grund gehoert ins LOG, nicht in die UI: `error` wird von den Consumern
+      // bis in die Kunden-Oberflaeche durchgereicht (belegt 12.08. — im Finder-Formular stand
+      // woertlich "Test-Guard: interner/Test-Lead darf keinen echten Sachverstaendigen buchen":
+      // Entwickler-Vokabular, verraet interne Mechanik und verletzt die Umlaut-Pflicht fuer
+      // nutzersichtbare Texte). Wer den Fall gezielt behandeln will, liest `code:'test_guard'`.
+      console.warn('[reserviere] Test-SV-Guard blockiert:', guard.grund, { svId: assignee.id, bezug })
+      return {
+        ok: false,
+        error: 'Dieser Termin lässt sich gerade nicht reservieren. Bitte wählen Sie einen anderen Termin oder melden Sie sich bei uns.',
+        code: 'test_guard',
+      }
     }
   }
 
