@@ -84,11 +84,18 @@ jobs:
               exit 1
             fi
             mkdir -p /etc/claimondo-marketing
+            # ACHTUNG: dieser Block schreibt /etc/claimondo-marketing/.env.local mit ">" NEU —
+            # alles, was dort manuell eingetragen wurde, ist nach dem naechsten Deploy weg.
+            # Ein neuer server-only Key muss deshalb BEIDES: in /etc/claimondo/.env.local (VPS)
+            # stehen UND hier in der Whitelist gelistet sein. Sonst ist er zur Laufzeit einfach
+            # nicht da — meist ohne Fehler, nur mit stiller Funktionslosigkeit.
+            # (So verschwand PROVENEXPERT_API_* nach PR #5182 und das Siegel rendete nichts.)
             {
               for k in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
                        SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_MAPBOX_TOKEN \
                        RESEND_API_KEY RESEND_FROM BAILEYS_BASE_URL BAILEYS_AUTH_TOKEN \
                        NEXT_PUBLIC_IMAGIN_CUSTOMER IMAGIN_SECRET GOOGLE_PLACES_API_KEY \
+                       PROVENEXPERT_API_USER PROVENEXPERT_API_KEY \
                        START_LINK_HMAC_SECRET CANONICAL_FLOWLINK_ENABLED; do
                 grep "^${k}=" /etc/claimondo/.env.local || true
               done
