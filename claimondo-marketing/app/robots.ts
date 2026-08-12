@@ -8,8 +8,7 @@ import { SITE_URL } from '@/lib/seo/jsonld'
  *  - Standard-Crawler: Allow `/`, gezielt Disallow für App-Portale + Auth + Build
  *  - Explizites Allow für AI-Antwort-/Search-Bots (GPTBot, ChatGPT-User, OAI-SearchBot,
  *    ClaudeBot, Claude-Web, PerplexityBot, Applebot, Meta-ExternalAgent, Amazonbot …)
- *  - Explizites Disallow für reine Training-/Scraper-Bots (CCBot, Bytespider,
- *    Google-Extended) — kein AI-Antwort-Nutzen, schützt Crawl-Budget (selektiver Block)
+ *  - Explizites Disallow nur noch für aggressive Scraper ohne Zitier-Nutzen (Bytespider)
  *
  * Quelle: marketing-strategy/strategy/16-TECH-IMPLEMENTATION-ROBOTS-INFOPLACEMENT.md
  *  + marketing-strategy/published/claimondo.de/* (69 Public-Assets)
@@ -46,6 +45,11 @@ const AI_BOTS_ALLOW = [
   'Googlebot-Image',
   'Googlebot-News',
   'Googlebot-Video',
+  // Google-Extended = Freigabe fuer Gemini-/Vertex-Grounding (12.08.2026, Aaron).
+  // Es ist KEIN eigener Crawler, sondern ein Nutzungs-Signal fuer bereits von
+  // Googlebot geholte Inhalte; die AI-Overviews der SUCHE liefen ohnehin ueber
+  // Googlebot und waren nie betroffen. Vorher geblockt -> wir fehlten in Gemini.
+  'Google-Extended',
   // Bing
   'Bingbot',
   'BingPreview',
@@ -73,22 +77,32 @@ const AI_BOTS_ALLOW = [
   'MistralAI-User',
   // Diffbot
   'Diffbot',
+  // Common Crawl — freigegeben 12.08.2026 (Aaron). Der CC-Korpus ist Input
+  // vieler Modelle; ein Block schliesst uns dort dauerhaft aus. Preis der
+  // Freigabe: der Korpus ist oeffentlich, also auch fuer Wettbewerber lesbar —
+  // die Inhalte sind aber ohnehin oeffentliche Marketing-Seiten.
+  'CCBot',
   // Sonstige
   'DuckDuckBot',
   'YandexBot',
 ] as const
 
 /**
- * Training-/Scraper-Bots, die wir blocken (selektiver Block):
- * kein Beitrag zu AI-Antworten/Search, nur Crawl-Last; CCBot/Bytespider sind
- * aggressive Scraper, Google-Extended ist reines Gemini-Training (Such-Index +
- * AI-Overviews via Googlebot bleiben unberührt).
- * Siehe docs/conversion-tracking-attribution-runbook.md (A3).
+ * Verbleibender selektiver Block.
+ *
+ * Bis 12.08.2026 standen hier auch CCBot + Google-Extended — unter der Annahme,
+ * sie brächten „keinen AI-Antwort-Nutzen". Diese Annahme kollidierte mit dem
+ * erklärten Ziel, in KI-Antworten zitiert zu werden: Google-Extended steuert das
+ * Gemini-/Vertex-Grounding, CCBot speist den Common-Crawl-Korpus. Beide sind
+ * jetzt in AI_BOTS_ALLOW (Aaron-Entscheid).
+ *
+ * Bytespider bleibt geblockt: aggressiver Scraper (ByteDance/TikTok) ohne
+ * Zitier-Oberfläche im deutschen Kfz-Gutachten-Markt — reine Crawl-Last.
+ * Siehe docs/conversion-tracking-attribution-runbook.md (A3) und
+ * docs/superpowers/specs/2026-08-12-hyperlokal-geo-content-design.md §8.
  */
 const AI_BOTS_BLOCK = [
-  'CCBot',           // Common Crawl (Trainings-Korpus vieler LLMs)
-  'Bytespider',      // ByteDance/TikTok — aggressiver Scraper
-  'Google-Extended', // Gemini-Training (Suche unberührt)
+  'Bytespider', // ByteDance/TikTok — aggressiver Scraper
 ] as const
 
 export default function robots(): MetadataRoute.Robots {
