@@ -14,6 +14,7 @@ import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-altern
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 import { syncKbTerminOut } from '@/lib/termine/kb-termin-sync'
 import { planeTermin } from '@/lib/termine/engine'
+import { cancelOffeneTermineFuerBezug } from '@/lib/termine/cancel-offene-termine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
@@ -185,6 +186,11 @@ export async function speichereQualiFlow(
       } as never)
       .eq('id', leadId)
     if (updErr) return { ok: false, error: updErr.message }
+    await loeseGutachterZuordnung(
+      admin,
+      leadId,
+      `quali_disqualifiziert: ${outcome.disqualifikationsGrundKey ?? 'eigenverschulden'}`,
+    )
     revalidatePath('/dispatch/leads')
     return { ok: true, ergebnis: 'abbruch', abrechnungsweg: outcome.abrechnungsweg }
   }
@@ -205,8 +211,48 @@ export async function speichereQualiFlow(
   }
   const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
+
+  // Ops-Test 11.08. (RC-5): reparaturwunsch='reparatur' ist die Reparatur-Abzweigung
+  // (selbstzahler bzw. kasko mit freier Werkstattwahl) — dort gibt es bewusst KEIN
+  // SV-Gutachten (Aaron 08.07.). Der ueber den Gutachter-Finder bereits reservierte
+  // Termin blieb hier trotzdem stehen: der Gutachter hatte einen Phantom-Termin im
+  // Kalender fuer einen Auftrag, den er nie bekommt. Das ist der haeufigere Fall als
+  // die Disqualifikation oben, weil der Lead ganz normal weiterlaeuft.
+  if (outcome.reparaturwunsch === 'reparatur') {
+    await loeseGutachterZuordnung(admin, leadId, `quali_reparatur: ${outcome.abrechnungsweg ?? 'unbekannt'}`)
+  }
+
   revalidatePath('/dispatch/leads')
   return { ok: true, ergebnis: 'weiter', abrechnungsweg: outcome.abrechnungsweg }
+}
+
+/**
+ * Ops-Test 11.08. (RC-5): Loest die Gutachter-Bindung eines Leads, wenn die Quali in einen
+ * Zweig OHNE SV-Gutachten fuehrt (Disqualifikation oder Reparatur-Abzweigung).
+ *
+ * Aaron (Ops-Test): "bei selbstverschulden ... dadurch darf dann kein Gutachter mehr
+ * hinterlegt sein." Zwei Dinge muessen weg:
+ *   1. der aktive Termin — sonst blockiert er den Kalender-Slot des Gutachters
+ *   2. die SV-Zuordnung auf der Finder-Anfrage — sonst zeigt der Dispatcher weiterhin
+ *      einen SV zu einem Lead, der keinen bekommen soll
+ * Der Wunschtermin bleibt als Historie stehen. Non-critical: der Lead-Update steht bereits,
+ * ein Fehler hier darf die Quali-Antwort des Kunden nicht zurueckdrehen.
+ */
+async function loeseGutachterZuordnung(
+  admin: ReturnType<typeof createAdminClient>,
+  leadId: string,
+  grund: string,
+): Promise<void> {
+  await cancelOffeneTermineFuerBezug(admin, 'lead', leadId, grund)
+  try {
+    const { error } = await admin
+      .from('gutachter_finder_anfragen')
+      .update({ zugeordneter_sv_id: null, zugeordneter_sv_lead_id: null, termin_id: null })
+      .eq('konvertiert_zu_lead_id', leadId)
+    if (error) console.error('[quali] gfa-SV-Zuordnung loesen (non-critical):', error.message)
+  } catch (err) {
+    console.error('[quali] gfa-SV-Zuordnung loesen (non-critical):', err)
+  }
 }
 
 /**
