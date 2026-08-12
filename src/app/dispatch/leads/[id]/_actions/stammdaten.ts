@@ -130,6 +130,40 @@ export async function saveStammdaten(
   allowed.updated_at = new Date().toISOString()
   const { error } = await supabase.from('leads').update(allowed).eq('id', leadId)
   if (error) return { success: false, error: error.message, ignored }
+
+  // Ops-Test 11.08. (RC-2): Der Claim liest Fahrzeugdaten aus vehicles (v_claim_full),
+  // nicht aus leads. Die SA-Sperre oben faengt den Normalfall ab, aber ein Claim kann
+  // schon VOR der SA existieren (auto-claim/createCase) — dann lief der Lead-Edit
+  // weiter und die vehicles-Row driftete auseinander. Nur die Fahrzeugfelder, nur
+  // wenn sie im Save vorkamen; non-critical.
+  const fahrzeugImSave =
+    'kennzeichen' in allowed || 'fahrzeug_hersteller' in allowed || 'fahrzeug_modell' in allowed ||
+    'hsn' in allowed || 'tsn' in allowed || 'fahrzeug_farbe' in allowed ||
+    'erstzulassung' in allowed || 'fahrzeug_baujahr' in allowed || 'kennzeichen_buchstaben' in allowed
+  if (fahrzeugImSave) {
+    const { ziehVehicleNach } = await import('@/lib/vehicles/snapshot-update')
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const nachzug = await ziehVehicleNach({
+      leadId,
+      snapshot: {
+        kennzeichen: (allowed.kennzeichen as string | null) ?? null,
+        hersteller: (allowed.fahrzeug_hersteller as string | null) ?? null,
+        modell: (allowed.fahrzeug_modell as string | null) ?? null,
+        hsn: (allowed.hsn as string | null) ?? null,
+        tsn: (allowed.tsn as string | null) ?? null,
+        farbe: (allowed.fahrzeug_farbe as string | null) ?? null,
+        erstzulassung: (allowed.erstzulassung as string | null) ?? null,
+        baujahr: (allowed.fahrzeug_baujahr as number | null) ?? null,
+        kennzeichenBuchstaben: (allowed.kennzeichen_buchstaben as string | null) ?? null,
+      },
+      // vehicles ist service_role-seitig; der Guard oben hat bereits autorisiert.
+      db: createAdminClient(),
+    })
+    if (!nachzug.ok) {
+      console.error('[stammdaten] vehicles-Nachzug fehlgeschlagen (nicht kritisch):', nachzug.error)
+    }
+  }
+
   revalidatePath(`/dispatch/leads/${leadId}`)
   return { success: true, ignored: ignored.length ? ignored : undefined }
 }

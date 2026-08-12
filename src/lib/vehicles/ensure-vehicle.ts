@@ -37,14 +37,14 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export const VIN_REGEX = /^[A-HJ-NPR-Z0-9]{17}$/
 
 /** Jahr (int) -> 'YYYY-01-01' fuer vehicles.baujahr_monat (date). Null wenn unplausibel. */
-function yearToDateStr(y?: number | null): string | null {
+export function yearToDateStr(y?: number | null): string | null {
   if (y == null || !Number.isInteger(y) || y < 1900 || y > 2100) return null
   return `${y}-01-01`
 }
 
 /** Freitext-Erstzulassung -> ISO-date-String (best-effort) fuer vehicles.erstzulassung (date).
  *  Unterstuetzt YYYY-MM-DD, YYYY, DD.MM.YYYY, MM/YYYY. Unparsebar/ungueltig -> null. */
-function textToDateStr(t?: string | null): string | null {
+export function textToDateStr(t?: string | null): string | null {
   if (!t) return null
   const s = String(t).trim()
   const mk = (y: string | number, mo: string | number, d: string | number): string | null => {
