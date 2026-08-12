@@ -7,6 +7,7 @@
 
 import type { OnboardingFeld } from './types'
 import { TextField } from './fields/TextField'
+import { PlaceField } from './fields/PlaceField'
 import { TextareaField } from './fields/TextareaField'
 import { SegmentedField } from './fields/SegmentedField'
 import { ToggleCardsField } from './fields/ToggleCardsField'
@@ -68,6 +69,16 @@ export function FieldRenderer({
     case 'number':
       return (
         <TextField
+          feld={feld}
+          value={(value as string) ?? ''}
+          onChange={onChange as (v: string) => void}
+          disabled={disabled}
+        />
+      )
+    // Ops-Test 11.08. (RC-8): Adressfeld mit Autocomplete statt Freitext.
+    case 'place':
+      return (
+        <PlaceField
           feld={feld}
           value={(value as string) ?? ''}
           onChange={onChange as (v: string) => void}
