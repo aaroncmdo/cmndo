@@ -5625,6 +5625,7 @@
       "empfohlener_partner": "Recommended partner",
       "partner": "Partner",
       "wunschzeit": "Preferred time",
+      "wunschzeit_anfrage": "on request",
       "keine_termine": "No available appointments at the moment.",
       "uhr_suffix": "h"
     },

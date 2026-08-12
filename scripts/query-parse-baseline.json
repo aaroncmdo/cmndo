@@ -1,7 +1,5 @@
 {
   "note": "Tote PostgREST-Queries (grandfathered). keys = SELECT-Trockenschuss, writeKeys = statische Write-Achse. Boy-Scout senkt.",
-  "keys": [
-    "email_log::id,empfaenger,subject,status,gesendet_am,richtung,body_html,body_text,empfaenger_array,attachments,template,lead_id,created_at"
-  ],
+  "keys": [],
   "writeKeys": []
 }

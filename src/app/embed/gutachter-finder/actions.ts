@@ -24,6 +24,7 @@ import {
   type SlotVorschlag,
   type PlaneTerminMitFallbackResult,
 } from '@/lib/sv-matching-modul'
+import { baueWunschzeitOption, istWunschzeitFrei } from '@/lib/sv-matching-modul/wunschzeit-optionen'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
@@ -138,42 +139,45 @@ export async function ladeEmbedMatching(input: {
         wunschterminIso = null
       }
     }
-    // Request-Modell (Aaron 12.06.): bei GESETZTEM Wunschtermin bietet JEDER Gutachter (Partner
-    // UND Dead-Pin) 3 ZEITEN an — die Wunschzeit (Badge) + 2 Alternativen (±2h, gleicher Tag,
-    // 8–18 Uhr, chronologisch). Die Reservierung ist eine Anfrage auf die gewählte Zeit; der
-    // Dispatcher (Lead-Owner) bestätigt. Ohne Wunschtermin: unverändert (Partner = echte Engine-
-    // Slots, Dead-Pin = generische).
-    const dreiZeiten = ((): SlotVorschlag[] => {
-      if (!wunschterminIso || !input.wunschterminLokal) return []
-      const [datum, zeit] = input.wunschterminLokal.split('T')
-      const H = parseInt((zeit ?? '10:00').split(':')[0] ?? '10', 10)
-      if (!datum || Number.isNaN(H)) return []
-      // Wunschstunde + ±2h-Alternativen, geclamped 8–18, eindeutig, chronologisch, max 3.
-      const stunden = [...new Set([H, H + 2, H - 2, H + 4, H - 4].filter((h) => h >= 8 && h <= 18))]
-        .slice(0, 3)
-        .sort((a, b) => a - b)
-      const out: SlotVorschlag[] = []
-      for (const h of stunden) {
-        try {
-          const start = berlinWallClockToUtc(`${datum}T${String(h).padStart(2, '0')}:00`)
-          const end = new Date(new Date(start).getTime() + 90 * 60_000).toISOString()
-          out.push({ start, end, matchType: h === H ? 'wunschtermin' : 'nahe' })
-        } catch {
-          /* ungültige Stunde überspringen */
-        }
-      }
-      return out
-    })()
-    const mitZeiten = <T extends { slots: SlotVorschlag[] }>(items: T[]): T[] =>
-      dreiZeiten.length ? items.map((it) => ({ ...it, slots: dreiZeiten })) : items
+    // Request-Modell (Aaron 12.06.) — korrigiert nach dem Ops-Test 11.08. (RC-1):
+    // Der Kunde darf eine Wunschzeit ANFRAGEN, aber die ECHTEN Engine-Slots bleiben
+    // fuehrend. Vorher ersetzte ein synthetisches Zeit-Tripel (Wunschstunde +/-2h/+/-4h)
+    // die Engine-Slots komplett — ohne Belegung, Arbeitszeit oder Raster. Ergebnis im
+    // Test: 12:00 wurde als frei angeboten, obwohl der SV um 12:30 belegt war; die
+    // Engine lehnte danach korrekt ab, der Kunde bekam trotzdem "Termin reserviert".
+    // Jetzt: die Wunschzeit kommt NUR dazu, wenn sie gegen v_belegung frei ist, und
+    // traegt matchType 'wunschtermin_anfrage' (UI: "auf Anfrage", kein Slot-Versprechen).
+    const wunschOption = baueWunschzeitOption(input.wunschterminLokal ?? null)
 
+    const mitWunschAnfrage = async <T extends { svId: string; slots: SlotVorschlag[] }>(
+      items: T[],
+    ): Promise<T[]> => {
+      if (!wunschOption) return items
+      return Promise.all(
+        items.map(async (it) => {
+          if (!(await istWunschzeitFrei(it.svId, wunschOption))) return it
+          // Deckt sich die Anfrage mit einem echten Raster-Slot, gewinnt der echte Slot.
+          if (it.slots.some((s) => s.start === wunschOption.start)) return it
+          const anfrage: SlotVorschlag = {
+            start: wunschOption.start,
+            end: wunschOption.end,
+            matchType: 'wunschtermin_anfrage',
+          }
+          return { ...it, slots: [anfrage, ...it.slots] }
+        }),
+      )
+    }
+
+    // Dead-Pins (unclaimte sv_leads) haben keinen verbundenen Kalender — ihre Verfuegbarkeit
+    // ist nicht pruefbar. Sie bekommen daher KEINE Wunsch-Anfrage-Option; ihre generischen
+    // Zeiten bleiben und werden UI-seitig als Anfrage beschriftet.
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
-      return { kind: 'fallback', deadPins: mitZeiten(deadPins) }
+      return { kind: 'fallback', deadPins }
     }
     const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso, ownerProfilId: input.ownerProfilId ?? null })
-    if (res.kind === 'partner') return { kind: 'partner', svs: mitZeiten(res.svs) }
-    return { kind: 'fallback', deadPins: mitZeiten(res.deadPins) }
+    if (res.kind === 'partner') return { kind: 'partner', svs: await mitWunschAnfrage(res.svs) }
+    return { kind: 'fallback', deadPins: res.deadPins }
   } catch (err) {
     console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { kind: 'fallback', deadPins: [] }
@@ -305,7 +309,15 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; token: string; leadId: string | null; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null; gutachter: EmbedGutachterProfil | null }
+  | {
+      ok: true
+      /** Ops-Test RC-1: true = es steht ein Termin in der DB. false = unbestaetigte Anfrage
+       *  (Lead + Wunschzeit stehen, Dispatch bestaetigt). Der Consumer MUSS unterscheiden —
+       *  vorher wurde ein fehlgeschlagener Buchungsversuch als Erfolg gemeldet. */
+      bestaetigt: boolean
+      token: string; leadId: string | null; svVorname: string | null; ortLabel: string | null
+      startIso: string | null; dispatcher: EmbedDispatcher | null; gutachter: EmbedGutachterProfil | null
+    }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -386,8 +398,8 @@ export async function reserviereEmbedTermin(input: {
     }
   }
 
-  // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, token, leadId, svVorname: null, ortLabel: null, startIso: null, dispatcher, gutachter: null }
+  // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert. Nie bestaetigt.
+  if (!input.auswahl) return { ok: true, bestaetigt: false, token, leadId, svVorname: null, ortLabel: null, startIso: null, dispatcher, gutachter: null }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -405,20 +417,31 @@ export async function reserviereEmbedTermin(input: {
         console.error('[reserviereEmbedTermin] gfa.termin_id setzen fehlgeschlagen:', err)
       }
     }
-    // Request-Modell: Kalender-Buchung ist best-effort. Schlägt sie fehl, steht die Anfrage
-    // trotzdem (Lead + Dispatcher + Wunschzeit auf der gfa + Bestätigung) — Dispatcher bestätigt.
+    // Request-Modell: Kalender-Buchung ist best-effort. Schlaegt sie fehl, steht die Anfrage
+    // trotzdem (Lead + Dispatcher + Wunschzeit auf der gfa) — Dispatcher bestaetigt die Zeit.
+    // Ops-Test RC-1: der Ausgang wird jetzt DURCHGEREICHT statt verschluckt. Vorher deutete
+    // requestModus ein b.ok===false in Erfolg um -> der Kunde bekam "Ihr Termin ist
+    // reserviert" per WhatsApp, obwohl kein gutachter_termine-Eintrag existierte
+    // (prod-verifiziert: gfa.termin_id NULL, 0 Termine). Ohne Wunschtermin bleibt der
+    // harte Abbruch (Verfuegbarkeits-Modell: echter Slot weg -> Kunde waehlt neu).
     if (!b.ok && !requestModus) {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
-    if (!intern) void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
+    const bestaetigt = b.ok === true
+    if (!bestaetigt) {
+      console.warn('[reserviereEmbedTermin] Wunschzeit nicht buchbar, laeuft als Anfrage:', b.error)
+    }
+    if (!intern) void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start, bestaetigt })
     const gutachter = await ladeGutachterProfil(input.auswahl.svId)
-    return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher, gutachter }
+    return { ok: true, bestaetigt, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher, gutachter }
   }
 
+  // Dead-Pin: erzeugt einen dispatch_pending-Termin zur MANUELLEN Koordination —
+  // nie eine Bestaetigung gegenueber dem Kunden.
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   if (!intern) void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher, gutachter: null }
+  return { ok: true, bestaetigt: false, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher, gutachter: null }
 }
 
 /**
@@ -438,6 +461,9 @@ export async function sendeEmbedTerminBestaetigung(input: {
   token: string
   svVorname: string
   startIso: string
+  /** Ops-Test RC-1: true = Termin steht in der DB -> Bestaetigung. false = Wunschzeit
+   *  konnte nicht gebucht werden -> Anfrage-Wortlaut. Nie eine Zusage ohne Termin. */
+  bestaetigt: boolean
 }): Promise<void> {
   try {
     if (!input.token || !input.startIso) return
@@ -476,30 +502,47 @@ export async function sendeEmbedTerminBestaetigung(input: {
     })
 
     // ── an den Kunden ──
+    // Ops-Test RC-1: der Wortlaut folgt dem tatsaechlichen Buchungs-Ausgang. Vorher ging
+    // "Ihr Termin ist reserviert" auch raus, wenn gar kein Termin entstanden war.
     if (telefon.length >= 5) {
-      const kundeText = [
-        '✅ Ihr Termin ist reserviert',
-        '',
-        `Hallo ${vorname || name},`,
-        `Ihr Kfz-Gutachter ${input.svVorname} ist für ${wann} Uhr reserviert.`,
-        '',
-        'Wir bestätigen Ihren Termin in Kürze. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
-        '',
-        'Ihr Claimondo-Team',
-      ].join('\n')
+      const kundeText = input.bestaetigt
+        ? [
+            '✅ Ihr Termin ist bestätigt',
+            '',
+            `Hallo ${vorname || name},`,
+            `Ihr Kfz-Gutachter ${input.svVorname} kommt am ${wann} Uhr.`,
+            '',
+            'Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+            '',
+            'Ihr Claimondo-Team',
+          ].join('\n')
+        : [
+            '📩 Ihre Terminanfrage ist eingegangen',
+            '',
+            `Hallo ${vorname || name},`,
+            `Sie haben ${wann} Uhr bei ${input.svVorname} angefragt. Diese Zeit ist noch nicht bestätigt — wir prüfen sie und melden uns kurzfristig mit einer festen Zusage.`,
+            '',
+            'Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+            '',
+            'Ihr Claimondo-Team',
+          ].join('\n')
       const r = await sendWhatsAppText(telefon, kundeText)
       if (!r.ok) console.error('[embed-termin-bestaetigung] Kunde-WA fehlgeschlagen:', r.code, r.error)
     }
 
     // ── ans Team ──
+    // Bei einer unbestaetigten Anfrage MUSS der Dispatcher sehen, dass nichts gebucht ist —
+    // sonst verlaesst sich niemand auf die Zeit und der Kunde faellt hinten runter.
     const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     const teamText = [
-      '📅 Neuer Termin reserviert (Gutachter-Finder)',
+      input.bestaetigt
+        ? '📅 Neuer Termin gebucht (Gutachter-Finder)'
+        : '⚠️ Terminanfrage OHNE Buchung (Gutachter-Finder) — bitte Zeit klären',
       '',
       `👤 ${name}`,
       telefon ? `📞 ${telefon}` : null,
       `🔧 SV: ${input.svVorname}`,
-      `🕐 ${wann} Uhr`,
+      input.bestaetigt ? `🕐 ${wann} Uhr (gebucht)` : `🕐 ${wann} Uhr — NICHT gebucht (SV zu der Zeit belegt)`,
       '',
       `${base}/dispatch/leads/${leadId}`,
     ]
@@ -642,10 +685,10 @@ export async function sendeEmbedDeadPinBestaetigung(input: {
     // ── an den Kunden ──
     if (telefon.length >= 5) {
       const kundeText = [
-        '✅ Ihr Termin ist reserviert',
+        '📩 Ihre Terminanfrage ist eingegangen',
         '',
         `Hallo ${vorname || name},`,
-        `Ihr ${gutachterLabel} ist für ${wann} Uhr vorgemerkt.`,
+        `Sie haben ${wann} Uhr bei einem ${gutachterLabel} angefragt. Wir prüfen die Zeit und bestätigen sie in Kürze.`,
         '',
         'Wir bestätigen Ihren Termin in Kürze. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
         '',
