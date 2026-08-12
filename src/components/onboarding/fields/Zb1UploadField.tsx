@@ -20,12 +20,59 @@ import { confirmZb1Korrekturen, clearZb1Felder } from '@/app/kunde/onboarding-de
 
 type Status = 'idle' | 'uploading' | 'preview' | 'error' | 'skipped'
 
-type Extracted = {
-  kennzeichen: string
-  fahrzeug_hersteller: string
-  fahrzeug_modell: string
-  halter_name: string
-}
+// Ops-Test 11.08. (RC-3): Die Feldmenge stand vorher VIERMAL untereinander
+// (Upload-Result, Extracted-Typ, leereExtracted, Diff-Bildung) — jedes Mal mit
+// denselben 4 Feldern, obwohl der Parser 15 liefert. Halteradresse, FIN, HSN/TSN
+// und Erstzulassung konnte der Kunde damit weder sehen noch korrigieren. Eine
+// Liste als Quelle verhindert, dass die Stellen wieder auseinanderlaufen.
+const ZB1_FELDER = [
+  'kennzeichen',
+  'fahrzeug_hersteller',
+  'fahrzeug_modell',
+  'erstzulassung',
+  'fahrzeug_farbe',
+  'halter_name',
+  'halter_strasse',
+  'halter_plz',
+  'halter_stadt',
+  'fin',
+  'hsn',
+  'tsn',
+] as const
+
+type Zb1Feld = (typeof ZB1_FELDER)[number]
+type Extracted = Record<Zb1Feld, string>
+
+/** Anzeige-Reihenfolge in der Preview, gruppiert. i18n-Key je Feld. */
+const GRUPPEN: ReadonlyArray<{ titelKey: string; felder: ReadonlyArray<{ feld: Zb1Feld; labelKey: string }> }> = [
+  {
+    titelKey: 'zb1_gruppe_fahrzeug',
+    felder: [
+      { feld: 'kennzeichen', labelKey: 'zb1_label_kennzeichen' },
+      { feld: 'fahrzeug_hersteller', labelKey: 'zb1_label_hersteller' },
+      { feld: 'fahrzeug_modell', labelKey: 'zb1_label_modell' },
+      { feld: 'erstzulassung', labelKey: 'zb1_label_erstzulassung' },
+      { feld: 'fahrzeug_farbe', labelKey: 'zb1_label_farbe' },
+    ],
+  },
+  {
+    titelKey: 'zb1_gruppe_halter',
+    felder: [
+      { feld: 'halter_name', labelKey: 'zb1_label_halter' },
+      { feld: 'halter_strasse', labelKey: 'zb1_label_halter_strasse' },
+      { feld: 'halter_plz', labelKey: 'zb1_label_halter_plz' },
+      { feld: 'halter_stadt', labelKey: 'zb1_label_halter_stadt' },
+    ],
+  },
+  {
+    titelKey: 'zb1_gruppe_technisch',
+    felder: [
+      { feld: 'fin', labelKey: 'zb1_label_fin' },
+      { feld: 'hsn', labelKey: 'zb1_label_hsn' },
+      { feld: 'tsn', labelKey: 'zb1_label_tsn' },
+    ],
+  },
+]
 
 const MAX_VERSUCHE = 2
 
@@ -74,12 +121,8 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
       return
     }
 
-    const ex: Extracted = {
-      kennzeichen: res.extracted?.kennzeichen ?? '',
-      fahrzeug_hersteller: res.extracted?.fahrzeug_hersteller ?? '',
-      fahrzeug_modell: res.extracted?.fahrzeug_modell ?? '',
-      halter_name: res.extracted?.halter_name ?? '',
-    }
+    const roh = (res.extracted ?? {}) as Partial<Record<Zb1Feld, string | null>>
+    const ex = Object.fromEntries(ZB1_FELDER.map((f) => [f, roh[f] ?? ''])) as Extracted
     setExtracted(ex)
     setEdit(ex)
     setStatus('preview')
@@ -105,11 +148,12 @@ export function Zb1UploadField({ feld, value, onChange, disabled, token, fallId 
 
   async function handleBestaetigen() {
     if (!fallId || !extracted) return
+    // Nur geaenderte Felder schreiben — die Action macht daraus ein Force-Update,
+    // das die H6-Regel (nur leere Felder) bewusst umgeht.
     const diff: Parameters<typeof confirmZb1Korrekturen>[1] = {}
-    if (edit.kennzeichen !== extracted.kennzeichen) diff.kennzeichen = edit.kennzeichen || null
-    if (edit.fahrzeug_hersteller !== extracted.fahrzeug_hersteller) diff.fahrzeug_hersteller = edit.fahrzeug_hersteller || null
-    if (edit.fahrzeug_modell !== extracted.fahrzeug_modell) diff.fahrzeug_modell = edit.fahrzeug_modell || null
-    if (edit.halter_name !== extracted.halter_name) diff.halter_name = edit.halter_name || null
+    for (const feld of ZB1_FELDER) {
+      if (edit[feld] !== extracted[feld]) diff[feld] = edit[feld] || null
+    }
 
     if (Object.keys(diff).length > 0) {
       const res = await confirmZb1Korrekturen(fallId, diff)
@@ -270,10 +314,27 @@ function PreviewCard({
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--brand-success, #1a7a35)', letterSpacing: '-.005em' }}>
         {t('zb1_preview_titel')}
       </div>
-      <EditRow label={t('zb1_label_kennzeichen')} value={edit.kennzeichen} onChange={v => onChange({ ...edit, kennzeichen: v })} />
-      <EditRow label={t('zb1_label_hersteller')} value={edit.fahrzeug_hersteller} onChange={v => onChange({ ...edit, fahrzeug_hersteller: v })} />
-      <EditRow label={t('zb1_label_modell')} value={edit.fahrzeug_modell} onChange={v => onChange({ ...edit, fahrzeug_modell: v })} />
-      <EditRow label={t('zb1_label_halter')} value={edit.halter_name} onChange={v => onChange({ ...edit, halter_name: v })} />
+      {/* Ops-Test 11.08. (RC-3): Die Texterkennung liegt regelmaessig daneben — im
+          Testfall stand als Strasse das Formularfeld-Label statt der Adresse. Der
+          Hinweis macht klar, dass Pruefen erwartet wird, nicht blindes Bestaetigen. */}
+      <div style={{ fontSize: 12, color: 'var(--wiz-text-3)', marginTop: -6 }}>
+        {t('zb1_pruefen_hinweis')}
+      </div>
+      {GRUPPEN.map((gruppe) => (
+        <div key={gruppe.titelKey} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--wiz-text-3)', textTransform: 'uppercase', letterSpacing: '.03em' }}>
+            {t(gruppe.titelKey)}
+          </div>
+          {gruppe.felder.map(({ feld, labelKey }) => (
+            <EditRow
+              key={feld}
+              label={t(labelKey)}
+              value={edit[feld]}
+              onChange={(v) => onChange({ ...edit, [feld]: v })}
+            />
+          ))}
+        </div>
+      ))}
       <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
         <button
           type="button"
@@ -382,19 +443,15 @@ function infoBoxStyle(kind: 'info' | 'error' | 'warn'): React.CSSProperties {
 // ─── Helpers ──────────────────────────────────────────────────────────
 
 function leereExtracted(): Extracted {
-  return { kennzeichen: '', fahrzeug_hersteller: '', fahrzeug_modell: '', halter_name: '' }
+  return Object.fromEntries(ZB1_FELDER.map((f) => [f, ''])) as Extracted
 }
 
 function readExtractedFromValue(value: unknown): Extracted | null {
   if (!value || typeof value !== 'object') return null
-  const v = value as { extracted?: Partial<Extracted> }
+  const v = value as { extracted?: Partial<Record<Zb1Feld, string | null>> }
   if (!v.extracted) return null
-  return {
-    kennzeichen: v.extracted.kennzeichen ?? '',
-    fahrzeug_hersteller: v.extracted.fahrzeug_hersteller ?? '',
-    fahrzeug_modell: v.extracted.fahrzeug_modell ?? '',
-    halter_name: v.extracted.halter_name ?? '',
-  }
+  const ex = v.extracted
+  return Object.fromEntries(ZB1_FELDER.map((f) => [f, ex[f] ?? ''])) as Extracted
 }
 
 async function fileToBase64(file: File): Promise<string | null> {
