@@ -61,7 +61,36 @@ Vor jedem Artikel steht die Frage: *Was wissen wir über diesen Ort, das ein Wet
 | Eigene Fallzahlen / Bearbeitungszeit | „Ø 2,4 Tage bis Gutachten" | eigene DB | ✅ **stärkstes Signal** |
 | Regionale Regulierungspraxis | Kürzungsquoten je VS | eigene Fälle | ✅ einzigartig |
 
-**Gate:** Ein Ort braucht **mindestens 3 harte Fakten**, davon **mindestens 1 aus eigenen Daten**, sonst wird nicht publiziert (nur Hub-Abschnitt). Das ist die Bremse gegen Massen-Dünnsinn — und zugleich die ehrliche Antwort darauf, dass wir heute erst 15 SV haben: **die Fläche wächst mit der echten Abdeckung.**
+**Gate (ursprünglich):** Ein Ort braucht **mindestens 3 harte Fakten**, davon **mindestens 1 aus eigenen Daten**, sonst wird nicht publiziert (nur Hub-Abschnitt).
+
+### 4.1 ⚠️ Korrektur 12.08.2026 — die Eigendaten-Klausel ist heute nicht erfüllbar
+
+Beim Bau von P1 habe ich die Eigendaten-Abdeckung **gemessen** statt sie zu unterstellen. Ergebnis: Die Klausel „≥ 1 Fakt aus eigenen Daten" würde **rund 95 % aller Städte blockieren**.
+
+Die 15 als „verifiziert" geführten Sachverständigen zerfallen in:
+
+| | Anzahl |
+|---|---|
+| Test-Accounts (`firmenname` enthält test/smoke/demo) | **3** |
+| `ist_aktiv = false` (u. a. **Münster** und Köln-Rodenkirchen) | **2** |
+| **tatsächlich nutzbar** (verifiziert · aktiv · nicht gelöscht · mit Isochrone) | **10** |
+
+Gegen die **echten Isochrone-Polygone** geprüft (nicht gegen einen Näherungsradius — der überschätzt massiv; meine erste Rechnung kam auf 33 Städte und war falsch):
+
+| Stadt | abdeckende SV |
+|---|---|
+| Köln | 3 |
+| Leverkusen · Mönchengladbach · Wuppertal | je 2 |
+| Duisburg · Krefeld | je 1 |
+| **Essen · Dortmund · Bochum · Münster · Aachen · Hagen · Bielefeld · Gelsenkirchen · Hamburg · Berlin · München · Frankfurt · Stuttgart · Bremerhaven** | **0** |
+
+Eigene Substanz existiert also für **etwa 6 Städte**, nicht für die Fläche. Die nutzbaren SV sitzen im Rheinland (Düsseldorf, Erkelenz, Remscheid, Duisburg, Bedburg, 2× Köln, Heinsberg) plus je einer in Hessen und Nordfriesland.
+
+**Konsequenz:** Das Gate in dieser Form ist kein Qualitätsfilter, sondern ein Totalblocker. Es muss geändert werden, **bevor** die Pipeline gebaut wird — sonst entsteht eine Maschine, die für 86 von 92 Städten nichts freigibt.
+
+**Vorschlag (Aaron-Entscheid nötig):** Die Eigendaten-Pflicht streichen und durch **„≥ 3 harte, extern verifizierbare Ortsfakten"** ersetzen. Die Stadtseiten erfüllen das nach P1 bereits: **Amtsgericht + Landgericht + Streitwertgrenze** (§ 23 GVG), **PLZ-Bereich**, **BVSK-Honorarspanne**, **Rechtsanwaltskammer**, **6 echte Nachbarorte mit Entfernung**. Eigene Daten bleiben ein **Bonus-Signal** (stärkstes, wo vorhanden), nicht die Eintrittskarte.
+
+**Operativer Nebenbefund für Aaron:** 3 Test-Accounts und 2 inaktive SV laufen im „verifiziert"-Bestand mit. Besonders **Münster**: Die Stadtseite existiert, der dortige SV ist inaktiv.
 
 ---
 
@@ -93,7 +122,7 @@ wissen_artikel-Muster (Speicherung + Rendering) → Seite live
 
 ## 6. Qualitäts-Gates (automatisch, blockierend)
 
-1. **Substanz-Score** ≥ 3 harte Fakten, ≥ 1 aus eigenen Daten (§4).
+1. **Substanz-Score** ≥ 3 harte Fakten. ⚠️ Die ursprüngliche Zusatzbedingung „≥ 1 aus eigenen Daten" ist **ausgesetzt** — sie würde 95 % der Städte blockieren (Messung + Vorschlag in **§4.1**). Eigene Daten zählen als Bonus, nicht als Pflicht.
 2. **Uniqueness:** n-Gramm-Überlappung zu allen anderen Ortsseiten **< 40 %**. Darüber = Template-Text → Block.
 3. **Zahlen-Herkunft:** Jede Zahl im Text muss aus dem Register stammen (Abgleich). Freihändige Zahlen → Block. *(UWG §5 — dieselbe Regel, die bei `getGoogleReviews` schon gilt: „echt, nie erfunden".)*
 4. **Ortsbezug:** Ortsname + mindestens zwei ortsspezifische Entitäten im Text (Gericht, Achse, Stadtteil).
