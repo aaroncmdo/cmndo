@@ -13,7 +13,7 @@
 | Städte-Seiten | **87** unter `/kfz-gutachter/[stadt]` | `claimondo-marketing/lib/kfz-gutachter/staedte.ts` |
 | Sitemap | **544 URLs** | `claimondo.de/sitemap.xml` |
 | Schema je Stadt-Seite | FAQPage (**13 Q&A**), City, LegalService, HowTo, GeoCoordinates, OpeningHours, Service, Offer, Person | Live-HTML `/kfz-gutachter/koeln` |
-| KI-Crawler | GPTBot ✅ · ClaudeBot ✅ · PerplexityBot ✅ · **CCBot ❌** · **Google-Extended ❌** | `claimondo.de/robots.txt` |
+| KI-Crawler | GPTBot ✅ · ClaudeBot ✅ · PerplexityBot ✅ · ~~CCBot ❌~~ · ~~Google-Extended ❌~~ → **beide freigegeben** (12.08., PR #5189) | `claimondo.de/robots.txt` |
 | Echte lokale Substanz | **15** verifizierte SV · **28** Werkstätten · **73** Claims | prod-DB |
 | Lücken | `gelsenkirchen` (260 Tsd. Einwohner) und `bocholt` → **404** | Live-Check |
 | Content-Pipeline | `marketing_content_jobs` (Status + **Kosten in Cents**) + `/admin/marketing/content-studio` | Repo |
@@ -118,14 +118,16 @@ Angewandt auf jede Ortsseite — die Prozente sind die gemessenen Sichtbarkeitse
 
 ---
 
-## 8. Entscheidung nötig: CCBot & Google-Extended
+## 8. CCBot & Google-Extended — ✅ entschieden am 12.08.2026: freigegeben
 
-Beide sind aktuell **gesperrt**. Das steht dem Citation-Ziel entgegen:
+Beide waren gesperrt, was dem Citation-Ziel entgegenstand:
 
-* **CCBot** (Common Crawl) — Korpus, aus dem viele Modelle schöpfen. Sperre = wir fehlen dort dauerhaft.
-* **Google-Extended** — steuert Gemini-/Vertex-**Grounding**. Sperre = keine Nennung in Gemini-Antworten. *(Betrifft **nicht** die AI Overviews der Suche — die laufen über Googlebot und sind erlaubt.)*
+* **CCBot** (Common Crawl) — Korpus, aus dem viele Modelle schöpfen. Sperre = wir fehlten dort dauerhaft.
+* **Google-Extended** — steuert Gemini-/Vertex-**Grounding**. Sperre = keine Nennung in Gemini-Antworten. *(Betraf **nicht** die AI Overviews der Suche — die laufen über Googlebot und waren durchgehend erlaubt.)*
 
-**Trade-off:** Freigeben heißt, Inhalte auch für KI-Training zur Verfügung zu stellen. Das ist eine Geschäftsentscheidung, keine technische. **Empfehlung:** freigeben — Sichtbarkeit in KI-Antworten ist genau das erklärte Ziel, und die Inhalte sind ohnehin öffentlich.
+**Aaron-Entscheid: beide freigeben.** Umgesetzt in **PR #5189** auf claimondo.de + den 5 kfz-Cluster-LPs. Die Freigabe läuft über die normale Allow-Liste, trägt also die üblichen Portal-/Auth-Disallows — offen sind nur die öffentlichen Marketing-Seiten. **Bytespider bleibt geblockt** (aggressiver Scraper ohne Zitier-Oberfläche).
+
+Nebenbefund aus der Umsetzung: Die Properties waren auseinandergelaufen — `autounfall-io` hatte den Block nie ausgerollt und erlaubte alle drei.
 
 ---
 
@@ -155,15 +157,23 @@ Der Citation-Ist-Stand sollte hier stehen. Er fehlt, weil der Ahrefs-Zugang zwar
 
 Bemerkenswert: Selbst die kostenlosen Endpunkte und die Kontingent-Abfrage werden abgewiesen — der Tarif erlaubt offenbar gar keine API-Nutzung, nicht bloß eingeschränkte.
 
-**Konsequenz:** Es gibt aktuell **keine Nullmessung**. Ohne sie lässt sich später nicht belegen, ob das Programm gewirkt hat. Zu klären, **bevor** P4 skaliert:
-* Ahrefs-Tarif mit API-Zugang (die `ai-responses-count`-Felder sind genau die Zielmetrik), **oder**
-* manuelle Nullmessung: ein fester Satz Ortsfragen, quartalsweise in ChatGPT/Perplexity/Google gestellt und protokolliert — kostenlos, gröber, aber besser als nichts.
+**✅ Entschieden am 12.08.2026 (Aaron): Ahrefs bleibt wie es ist** — kein Tarif-Upgrade. Damit ist die Messung **manuell**:
+
+> **Nullmessung vor P4:** ein fester Satz Ortsfragen (z. B. *„Wer erstellt ein Kfz-Gutachten in Gelsenkirchen-Buer?"*, *„Kfz-Sachverständiger Bocholt Kosten"*) wird quartalsweise in ChatGPT, Perplexity und Google gestellt und protokolliert: **Wird Claimondo genannt? An welcher Stelle? Mit welcher Quelle?** Gröber als die API, kostenlos — und ausreichend, um eine Richtung zu erkennen.
+
+Der Fragensatz muss **vor** dem ersten generierten Artikel festgeschrieben und einmal durchlaufen werden, sonst gibt es keinen Vorher-Wert. Als eigener Schritt in P3 (Pilot) verankert, nicht erst in P6.
+
+Ergänzend kostenlos verfügbar: der **VPS-nginx-Log-Grep** nach KI-Bot-User-Agents auf den GEO-Routen (etabliert in `docs/superpowers/specs/2026-08-03-geo-p1-aeo-measurement-design.md`). Er misst zwar Crawling, nicht Citations — beantwortet aber die vorgelagerte Frage, ob die Bots die neuen Seiten überhaupt abholen.
 
 ---
 
 ## 10. Offene Punkte für Aaron
 
-1. **CCBot/Google-Extended freigeben?** (§8 — Empfehlung: ja)
-2. **Wie viele Orte** ist das Ziel? (87 → 150 Hubs? + Spots?) Meine Empfehlung: nicht als Zahl definieren, sondern als Regel *„jeder Ort, der 3 harte Fakten hat"*.
-3. **Redaktionelle Freigabe:** Wer klickt „veröffentlichen"? (Bei 300 Orten ist das Arbeit — realistisch stichprobenartig nach bewährter Vorlage?)
-4. **Externe Datenquellen** für Gericht/Unfallschwerpunkte: einmalig einpflegen oder automatisiert beziehen?
+**Erledigt am 12.08.2026:**
+* ✅ **CCBot/Google-Extended freigegeben** (§8) → PR #5189
+* ✅ **Ahrefs bleibt wie es ist** (§9.1) → Messung läuft manuell, Fragensatz in P3
+
+**Noch offen:**
+1. **Wie viele Orte** ist das Ziel? (87 → 150 Hubs? + Spots?) Meine Empfehlung: nicht als Zahl definieren, sondern als Regel *„jeder Ort, der 3 harte Fakten hat"*.
+2. **Redaktionelle Freigabe:** Wer klickt „veröffentlichen"? (Bei 300 Orten ist das Arbeit — realistisch stichprobenartig nach bewährter Vorlage?)
+3. **Externe Datenquellen** für Gericht/Unfallschwerpunkte: einmalig einpflegen oder automatisiert beziehen?
