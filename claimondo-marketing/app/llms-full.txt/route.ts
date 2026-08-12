@@ -588,7 +588,7 @@ const FOOTER = `
 - Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart) — versteckte Schäden, Tesla, Eigenreparatur
 
 ### Robots.txt + Sitemap + llms.txt
-- https://claimondo.de/robots.txt — explizites Allow für 35+ AI-Crawler (GPTBot, ClaudeBot, anthropic-ai, ChatGPT-User, PerplexityBot, Google-Extended, Meta-ExternalAgent, Bytespider, Amazonbot, Mistral-AI, Applebot-Extended, Diffbot, CCBot u. a.)
+- https://claimondo.de/robots.txt — explizites Allow für 26 AI-Crawler (GPTBot, ClaudeBot, anthropic-ai, ChatGPT-User, OAI-SearchBot, PerplexityBot, Google-Extended, Meta-ExternalAgent, Amazonbot, Mistral-AI, Applebot-Extended, Diffbot, CCBot u. a.)
 - https://claimondo.de/sitemap.xml — vollständige indexierbare URL-Liste inkl. Cornerstones, 57 Glossar-Spokes, 10 Versicherer-Brief-Decoder, Stadt-Pages
 - https://claimondo.de/llms.txt — strukturierte Index-Variante dieses Dokuments (llmstxt.org-Format)
 
