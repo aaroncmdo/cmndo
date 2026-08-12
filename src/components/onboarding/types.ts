@@ -5,6 +5,10 @@ export type FieldTyp =
   | 'zb1-upload' | 'termin'
   | 'phone-verify' | 'avatar-upload' | 'calendar-connect'
   | 'embed-site-create'
+  // Ops-Test 11.08. (RC-8): Adressfeld mit Google-Places-Autocomplete. Wert bleibt ein
+  // String (formatierte Adresse) -> kompatibel zum generischen Speicherpfad; Koordinaten
+  // ergaenzt der Server per Geocoding. Freitext bleibt erlaubt.
+  | 'place'
 
 export type FieldOption = {
   value: string
