@@ -113,7 +113,7 @@ function buildStadtFaq(s: Stadt) {
     },
     {
       frage: `Welches Gericht ist bei Streitigkeiten zuständig ${s.h1Anker}?`,
-      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist erstinstanzlich das ${s.lokal.landgericht} zuständig. Geht eine Versicherung gerichtlich gegen ein Gutachten vor oder kürzt unrechtmäßig, klagt unsere Partnerkanzlei für Verkehrsrecht in der Regel vor diesem Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
+      antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist bis 5.000 € Streitwert das ${s.lokal.amtsgericht} erstinstanzlich zuständig, darüber das ${s.lokal.landgericht} (§ 23 Nr. 1 und § 71 Abs. 1 GVG). Die meisten Kürzungsstreitigkeiten — gekürzte Gutachterkosten, UPE-Aufschläge, Wertminderung, Nutzungsausfall — liegen unter dieser Grenze und werden daher vor dem Amtsgericht geführt. Kürzt eine Versicherung unrechtmäßig oder geht sie gerichtlich gegen ein Gutachten vor, klagt unsere Partnerkanzlei für Verkehrsrecht vor dem jeweils zuständigen Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
     },
     {
       frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
@@ -189,7 +189,7 @@ export default async function KfzGutachterStadtPage({
   const faqsVisible = [
     { frage: t('faq_kosten_frage', { ort }), antwort: t('faq_kosten_antwort', { ort, stadt: s.name, bvskSpanne: s.bvskHonorarSpanne }) },
     { frage: t('faq_finden_frage', { ort }), antwort: t('faq_finden_antwort', { ort, stadt: s.name, plz: s.plzPrefix, bundesland: s.bundesland }) },
-    { frage: t('faq_gericht_frage', { ort }), antwort: t('faq_gericht_antwort', { ort, landgericht: s.lokal.landgericht }) },
+    { frage: t('faq_gericht_frage', { ort }), antwort: t('faq_gericht_antwort', { ort, amtsgericht: s.lokal.amtsgericht, landgericht: s.lokal.landgericht }) },
     { frage: t('faq_kuerzung_frage'), antwort: t('faq_kuerzung_antwort') },
     { frage: t('faq_sa_frage'), antwort: t('faq_sa_antwort') },
     { frage: t('faq_wertminderung_frage'), antwort: t('faq_wertminderung_antwort') },
