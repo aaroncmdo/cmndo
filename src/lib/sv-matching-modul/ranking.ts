@@ -18,9 +18,12 @@ const WUNSCH_FENSTER_MS = 30 * 60_000
 const NAHE_FENSTER_MS = 1.5 * 24 * 60 * 60_000
 const PRIO: Record<SlotVorschlag['matchType'], number> = {
   wunschtermin: 0,
-  gleicher_tag: 1,
-  nahe: 2,
-  nach: 3,
+  // Ops-Test RC-1: die geprueefte Wunschzeit-Anfrage rankt direkt hinter einem echten
+  // Treffer — sie ist das, was der Kunde wollte, aber noch nicht bestaetigt.
+  wunschtermin_anfrage: 1,
+  gleicher_tag: 2,
+  nahe: 3,
+  nach: 4,
 }
 
 function wallToMs(wall: string): number {

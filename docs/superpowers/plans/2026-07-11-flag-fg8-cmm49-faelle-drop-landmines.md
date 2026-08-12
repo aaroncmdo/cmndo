@@ -1,4 +1,39 @@
 # CMM-49 faelle-Drop Landmines Implementation Plan
+
+> # ✅ UEBERHOLT (verifiziert 2026-08-11) — NICHT MEHR AUSFUEHREN
+>
+> **Die Praemisse haelt, der geplante Guard ist redundant.**
+>
+> * **Ground-Truth bestaetigt** (gegen `origin/staging`, 11.08.): `git grep "from('faelle')" -- 'src/**'`
+>   liefert ausschliesslich **Kommentare** (`// CMM-49 (faelle-Drop-Runway): … statt .from('faelle')`).
+>   **0 live Refs** — wie 2026-07-11 erhoben.
+> * **`check:faelle-refs` NICHT bauen — `check:query-parse` deckt die Klasse bereits ab** (und zwar
+>   breiter). Es entstand am **16.07.**, also *nach* diesem Plan, und schiesst jede statisch
+>   rekonstruierbare PostgREST-Query gegen die echte DB trocken.
+>
+>   **Empirisch verifiziert** (11.08., Negativ-Kontrolle mit einer Scratch-Datei, danach entfernt):
+>   ```
+>   404 PGRST205  faelle  ⚠ NEU
+>      src/__scratch-faelle-probe.ts:8, src/__scratch-faelle-probe.ts:15
+>   ```
+>   Gefangen wurden **beide** Varianten — Zeile 8 = getypter `createClient()`, Zeile 15 =
+>   **ungetypter `createAdminClient()`** (dort ist `tsc` blind, siehe Memory-Marker
+>   `reference-supabase-select-strings-untyped-admin-client`). `⚠ NEU` heisst: der CI-Lauf
+>   `check-query-parse.mjs --ratchet` (`.github/workflows/ci.yml:339`) haette den PR **geblockt**.
+>
+>   Gegenprobe: **`check:query-drift` faengt es NICHT** (4212 Query-Ketten, 0 Findings) — es prueft
+>   Spalten *innerhalb bekannter* Tabellen und ignoriert unbekannte Relationen still. Die Abdeckung
+>   kommt also allein von `check:query-parse`.
+>
+>   Vorteil gegenueber dem hier geplanten Guard: `query-parse` faengt **jede** tote Relation
+>   (und tote Spalten + mehrdeutige Embeds), nicht nur den Sonderfall `faelle`. Ein eigener
+>   `check:faelle-refs` waere ein schwaecheres Duplikat (Audit-Punkt 3).
+> * **Task 4 (Stale-Branch-Hazard) bleibt inhaltlich gueltig:** ein Branch mit merge-base vor
+>   2026-06-22 kann live `faelle`-Writes zurueckbringen. Das faengt jetzt `check:query-parse --ratchet`
+>   beim PR — der Punkt ist also abgedeckt, nur durch einen anderen Guard als geplant.
+>
+> Konsequenz fuer Handoff-Punkt **A4**: „zwei nie gebaute Ratchet-Guards" ist auch fuer FG8 **stale**.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree (`node scripts/new-session-worktree.mjs flag-fg8-faelle-drop-landmines staging`).
 > **Ownership:** belongs to the CMM-49 faelle-drop program — coordinate with / hand to that lane; do NOT race their migration.

@@ -414,12 +414,21 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     needs: build
-    # Hard-Cap gegen Runaway: die post-merge E2E-Suite (110 Tests, workers:1, 30s/Test
-    # + retries:1) laeuft strukturell 15-40 min. Ohne Cap konnte ein haengender/rot-
-    # schleifender Run bis zum GH-6h-Limit einen Runner blockieren -> CI-Stau + andere
-    # PR-Builds langsam ("Build laeuft nicht wie er soll", 11.07.). 20 min = harte Grenze;
-    # E2E ist informativ (post-merge, gated NICHT den Deploy) -> Kill-at-cap ist unkritisch.
-    timeout-minutes: 20
+    # Hard-Cap gegen Runaway: die Suite (110 Tests, workers:1, 30s/Test + retries:1) laeuft
+    # strukturell 15-40 min. Ohne Cap konnte ein haengender/rot-schleifender Run bis zum
+    # GH-6h-Limit einen Runner blockieren -> CI-Stau + andere PR-Builds langsam (11.07.).
+    #
+    # 20 -> 45 (12.08.): Das 20er-Cap war GEGEN DIE EIGENE 15-40-min-Schaetzung gesetzt und
+    # schnitt den letzten Step deshalb SYSTEMATISCH ab. Gemessen am ersten Nightly (Run
+    # 31565748829) + am dispatch-Lauf davor (31535504632) — in BEIDEN identisch:
+    #   Setup ~1:40 | alle 10 Journey-Steps zusammen ~4:00 | "Run E2E Tests" >14:30 -> Kill.
+    # Nicht die Journeys fressen das Budget (die sind schnell), sondern der Sammel-Step, der
+    # nie fertig wurde -> die Nicht-Journey-Specs (routes/service-pitch/cmm44/doc40 ...) sind
+    # faktisch NIE gelaufen. 45 = eigene Obergrenze (40) + Setup/Journeys (~6).
+    # Der urspruengliche Grund fuer das enge Cap ist mit #5165 entfallen: der Job haengt nicht
+    # mehr an jedem push, sondern laeuft nightly 03:30 + on-demand -> er blockiert keinen
+    # PR-Build mehr. Runaway-Schutz bleibt (45 min statt GH-6h).
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
 

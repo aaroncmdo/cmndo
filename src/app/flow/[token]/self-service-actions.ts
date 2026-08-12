@@ -1075,3 +1075,60 @@ export async function speichereReparaturWunschterminFlow(
   revalidatePath(`/flow/${token}`)
   return { ok: true }
 }
+
+/**
+ * KI-Intake Phase 2 (Foto-Vision): Unfallfoto aus dem KI-Dialog entgegennehmen.
+ *
+ * Geschwister zu uploadZb1Flow — gleicher Token-Auth-Weg (resolveFlowLead), gleicher
+ * Bucket. Die eigentliche Auswertung ist BESTAND: appendUnfallfotoAndAnalyze haengt die
+ * URL an leads.schadensfoto_urls, laesst Haiku die sichtbaren Fahrzeugschaeden
+ * beschreiben (-> leads.fahrzeugschaden_beschreibung) und setzt schaden_sichtbar.
+ *
+ * Warum nur der Lead-Mirror und kein fall_dokumente-Insert: vor der SA existiert noch
+ * kein Fall — der Insert waere ein No-op. convert-lead-to-fall liest schadensfoto_urls
+ * und zieht die Fotos bei der Konversion in die Akte nach. Der Lead-Weg ist also der
+ * vollstaendige, nicht der halbe.
+ *
+ * Bewusst AWAIT (nicht fire-and-forget wie im Dokumente-Upload): der Chat sagt dem
+ * Kunden, was die Assistentin auf dem Foto sieht — dafuer brauchen wir die Beschreibung.
+ */
+export async function uploadUnfallfotoFlow(
+  token: string,
+  imageBase64: string,
+  contentType: string = 'image/jpeg',
+): Promise<{ ok: boolean; error?: string; beschreibung?: string }> {
+  if (!imageBase64 || imageBase64.length < 100) return { ok: false, error: 'Bild fehlt oder zu klein.' }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const ext = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg'
+  const path = `leads/${leadId}/unfallfoto_flow_${Date.now()}.${ext}`
+  const buf = Buffer.from(imageBase64, 'base64')
+  const { error: upErr } = await admin.storage
+    .from('fall-dokumente')
+    .upload(path, buf, { contentType, upsert: false })
+  if (upErr) return { ok: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
+
+  const { getStorageUrl } = await import('@/lib/storage/url')
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+  if (!publicUrl) return { ok: false, error: 'URL-Generierung fehlgeschlagen.' }
+
+  try {
+    const { appendUnfallfotoAndAnalyze } = await import('@/lib/ai/vision/analyze-unfallfotos')
+    await appendUnfallfotoAndAnalyze(leadId, publicUrl)
+  } catch (err) {
+    // Foto liegt im Storage + der Lead-Mirror wird im naechsten Versuch nachgezogen —
+    // eine gescheiterte Analyse darf den Dialog nicht abbrechen.
+    console.error('[flow-intake] Foto-Analyse fehlgeschlagen:', err)
+    return { ok: true }
+  }
+
+  const { data } = await admin
+    .from('leads')
+    .select('fahrzeugschaden_beschreibung')
+    .eq('id', leadId)
+    .maybeSingle()
+  const beschreibung = (data?.fahrzeugschaden_beschreibung as string | null) ?? undefined
+  revalidatePath(`/flow/${token}`)
+  return { ok: true, beschreibung }
+}

@@ -176,6 +176,14 @@ export function SvSlotAuswahl({
                       {slot.matchType === 'wunschtermin' && (
                         <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">{t('slot.wunschzeit')}</span>
                       )}
+                      {/* Ops-Test RC-1: die Wunschzeit ist KEIN freier Raster-Slot, sondern eine
+                          geprueefte Anfrage. Optisch zuruecknehmen, damit sie nicht wie eine
+                          feste Zusage wirkt. */}
+                      {slot.matchType === 'wunschtermin_anfrage' && (
+                        <span className="ml-1 text-[10px] font-semibold text-claimondo-shield/70">
+                          {t('slot.wunschzeit_anfrage')}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
