@@ -61,7 +61,7 @@ type AssigneeKalenderKonfig = {
 }
 
 /** Arbeitszeiten-Konfig je Assignee-Typ. sachverstaendiger + kundenbetreuer; Rest deferred. */
-async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promise<AssigneeKalenderKonfig> {
+export async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promise<AssigneeKalenderKonfig> {
   if (assignee.typ === 'sachverstaendiger') {
     const { data } = await db
       .from('sachverstaendige')
