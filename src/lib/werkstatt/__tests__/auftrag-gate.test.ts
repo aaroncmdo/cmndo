@@ -13,6 +13,43 @@ const base: AuftragGateInput = {
   kva_abgelehnt_am: null,
 }
 
+// Ops-Test 11.08. (RC-9): Im Haftpflichtfall ist der KVA nicht die Kostengrundlage —
+// das GUTACHTEN ist es, und die gegnerische Haftpflicht reguliert danach. Das Gate
+// blockierte trotzdem den Terminvorschlag der Werkstatt ("Kostenvoranschlag
+// ausstehend"), obwohl sie dort gar keinen KVA liefern muss. Aaron: "das ist ein
+// hard blocker". Das Kostenrisiko, gegen das das Gate schuetzt, existiert nur, wenn
+// der KUNDE zahlt (kasko/selbstzahler).
+describe('reparaturGate — Haftpflicht (Ops-Test RC-9)', () => {
+  it('haftpflicht → offen, auch ohne KVA und ohne Freigabe', () => {
+    expect(reparaturGate({ ...base, abrechnungsweg: 'haftpflicht' })).toEqual({ offen: true, grund: null })
+  })
+
+  it('haftpflicht → offen, auch wenn der Kunde einen Werkstatt-KVA abgelehnt hat', () => {
+    expect(
+      reparaturGate({
+        ...base,
+        abrechnungsweg: 'haftpflicht',
+        kva_quelle: 'werkstatt',
+        kva_abgelehnt_am: '2026-08-01T10:00:00Z',
+      }).offen,
+    ).toBe(true)
+  })
+
+  it('kasko/selbstzahler bleiben gegatet — dort traegt der Kunde das Kostenrisiko', () => {
+    for (const weg of ['kasko', 'selbstzahler']) {
+      expect(reparaturGate({ ...base, abrechnungsweg: weg })).toEqual({
+        offen: false,
+        grund: 'kva_ausstehend',
+      })
+    }
+  })
+
+  it('abrechnungsweg unbekannt/null → Verhalten unveraendert (defensiv gegatet)', () => {
+    expect(reparaturGate({ ...base, abrechnungsweg: null }).offen).toBe(false)
+    expect(reparaturGate({ ...base }).offen).toBe(false)
+  })
+})
+
 describe('reparaturGate — Spec-E-Termin-Gate', () => {
   it("direkt → offen, egal welche Quelle/Freigabe", () => {
     expect(reparaturGate({ ...base, reparatur_auftrag_modus: 'direkt' })).toEqual({ offen: true, grund: null })
