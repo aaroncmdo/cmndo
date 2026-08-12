@@ -71,10 +71,18 @@ Die LP-Forms (`LeadFormClient`/`StadtLeadFormClient`) feuern `generate_lead` ber
 
 ### A3 · robots.txt — selektiver AI-Crawler-Block  [Task 4-robots]
 
-- `claimondo-marketing/app/robots.ts`: `CCBot`, `Bytespider`, `Google-Extended` aus der `AI_BOTS_ALLOW`-Liste entfernen und als **eigene Block-Regeln** (`{ userAgent, disallow: '/' }`) eintragen.
-- **Erlaubt bleiben** (AI-Antwort/Search): GPTBot, ChatGPT-User, OAI-SearchBot, ClaudeBot, Claude-Web, Claude-SearchBot, anthropic-ai, PerplexityBot, Perplexity-User, Applebot(+Extended), Bingbot, Googlebot(+Image/News/Video), Meta-ExternalAgent, Amazonbot, Diffbot, MistralAI-User, DuckDuckBot, YandexBot.
-- **Trade-off:** Google-Extended-Block = kein Gemini-Training-Beitrag (Such-Index + AI-Overviews bleiben unberührt). CCBot/Bytespider = reine Scraper/Training ohne AI-Antwort-Nutzen.
-- **Scope:** nur claimondo.de (`claimondo-marketing`). Die 5 kfz-LPs + autounfall haben eigene `robots.ts` mit derselben Allow-Liste → optionaler Folge-PR. Gegen den (direct)-Bot-Flood wirkt ohnehin Cloudflare stärker (B4) — robots stoppt nur höfliche Bots.
+> ⚠️ **Am 12.08.2026 teilweise revidiert (Aaron-Entscheid).** `CCBot` und
+> `Google-Extended` sind wieder **freigegeben**; geblockt bleibt allein
+> `Bytespider`. Grund: Der Block beruhte auf der Annahme „kein AI-Antwort-Nutzen",
+> die dem erklärten Ziel widersprach, in KI-Antworten **zitiert** zu werden —
+> Google-Extended steuert das Gemini-/Vertex-Grounding, CCBot speist den
+> Common-Crawl-Korpus vieler Modelle. Analyse:
+> `docs/superpowers/specs/2026-08-12-hyperlokal-geo-content-design.md` §8.
+
+- **Ist-Stand** in `claimondo-marketing/app/robots.ts`: `AI_BOTS_BLOCK = ['Bytespider']`; `CCBot` + `Google-Extended` stehen in `AI_BOTS_ALLOW` (also mit den üblichen Portal-/Auth-Disallows, nicht schrankenlos).
+- **Erlaubt** (AI-Antwort/Search): GPTBot, ChatGPT-User, OAI-SearchBot, ClaudeBot, Claude-Web, Claude-SearchBot, anthropic-ai, PerplexityBot, Perplexity-User, Applebot(+Extended), Bingbot, Googlebot(+Image/News/Video), Meta-ExternalAgent, Amazonbot, Diffbot, MistralAI-User, DuckDuckBot, YandexBot — **sowie CCBot + Google-Extended**.
+- **Trade-off (revidiert):** Google-Extended-Freigabe = Gemini/Vertex darf unsere Inhalte zum Grounding nutzen; die AI-Overviews der Suche liefen ohnehin über Googlebot und waren nie betroffen. CCBot-Freigabe = Aufnahme in den Common-Crawl-Korpus, der öffentlich ist (also auch für Wettbewerber lesbar) — es handelt sich um ohnehin öffentliche Marketing-Seiten. Bytespider bleibt geblockt: aggressiver Scraper ohne Zitier-Oberfläche im deutschen Kfz-Markt.
+- **Scope (erweitert):** claimondo.de **und** die 5 kfz-Cluster-LPs tragen die Freigabe. `autounfall-io` hatte den Block nie ausgerollt und erlaubte CCBot/Google-Extended (dort zusätzlich Bytespider) durchgehend — die Properties waren auseinandergelaufen. Gegen den (direct)-Bot-Flood wirkt ohnehin Cloudflare stärker (B4) — robots stoppt nur höfliche Bots.
 
 ### Audit / Verifikation (Code)
 - `cd claimondo-marketing && npm run typecheck` (= `tsc --noEmit`) grün.
@@ -123,7 +131,7 @@ Anwalts-Freigabe liegt vor (von Aaron bestätigt 26.06.2026) → Consent-Default
 ## Akzeptanzkriterien
 - [ ] **A1:** Home-Hero + /schaden-melden feuern je genau 1× `generate_lead` (GA4 DebugView).
 - [ ] **A2:** Consent-Default `granted` (Anwalts-Freigabe); Rollback via `NEXT_PUBLIC_CONSENT_DEFAULT=denied`. Merge+Deploy = granted live.
-- [ ] **A3:** robots.txt blockt CCBot/Bytespider/Google-Extended, erlaubt die AI-Antwort-Bots.
+- [ ] **A3:** robots.txt blockt **nur noch Bytespider** und erlaubt die AI-Antwort-Bots **inkl. CCBot + Google-Extended** (revidiert 12.08.2026, s. o.).
 - [ ] `typecheck` grün; CI-Build grün.
 - [ ] Teil B als Runbook abarbeitbar; B1 als Blocker markiert.
 
@@ -168,5 +176,5 @@ Google Ads (951-112-7970) → **Tools → Einrichtung → Verknüpfte Konten →
 
 ## Update — 26.06.2026 (Folge-Arbeiten)
 - **Lead-Tracking-Audit + Fixes → PR #3214:** Mini-Wizard-Doppelzählung behoben (Server-Event kanonisch); Rückruf-Pfade (`BeratungModal` + `StickyCallBar`) feuern jetzt `generate_lead`. → jeder kunden-seitige Lead-Pfad zählt genau 1×.
-- **robots selektiv auf 5 kfz-Cluster-LPs** (CCBot/Bytespider/Google-Extended geblockt) → dieser PR.
+- **robots selektiv auf 5 kfz-Cluster-LPs** (CCBot/Bytespider/Google-Extended geblockt) → dieser PR. *(Historischer Stand — CCBot + Google-Extended sind am 12.08.2026 wieder freigegeben, s. A3.)*
 - **/check-Rebuild → PR #3197:** `check_start/step/complete` + `generate_lead(source=check-anspruch)`.
