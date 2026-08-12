@@ -53,9 +53,14 @@ export async function reserviere(input: ReserviereInput): Promise<ReserviereResu
       // Entwickler-Vokabular, verraet interne Mechanik und verletzt die Umlaut-Pflicht fuer
       // nutzersichtbare Texte). Wer den Fall gezielt behandeln will, liest `code:'test_guard'`.
       console.warn('[reserviere] Test-SV-Guard blockiert:', guard.grund, { svId: assignee.id, bezug })
+      // Bewusst KEIN "waehlen Sie einen anderen Termin": der Guard blockt die KONSTELLATION
+      // (Kunde <-> Sachverstaendiger), nicht die Uhrzeit. Jeder andere Slot desselben SV
+      // scheitert genauso — der Hinweis wuerde den Kunden in eine Endlosschleife schicken.
+      // Er kann den Fall selbst gar nicht aufloesen (er entsteht aus einer Fehl-Klassifikation
+      // seiner Identitaet), deshalb fuehrt der Text direkt zum menschlichen Kontakt.
       return {
         ok: false,
-        error: 'Dieser Termin lässt sich gerade nicht reservieren. Bitte wählen Sie einen anderen Termin oder melden Sie sich bei uns.',
+        error: 'Diese Buchung konnte leider nicht abgeschlossen werden. Bitte melden Sie sich kurz bei uns — wir vereinbaren Ihren Termin persönlich.',
         code: 'test_guard',
       }
     }
