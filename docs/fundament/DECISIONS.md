@@ -312,3 +312,19 @@ Zwei Nebenentscheidungen: (1) Die 4 `smoke*`-Reset-Server-Actions in `kanzlei-wu
 ⚠ **Territorien beachten:** `flotte/*` und die Kunde-Zonen gehören anderen Lanes (Memory `COORDINATION-AN-b0e963b6-claim-detail-fm-vs-kunde-split`: „63fe43f9=FM (flotte/*), b0e963b6=Kunde+SV; Kunde-Zonen NICHT anfassen"). Die Migration ist deshalb **bewusst nicht** in diesem PR erfolgt, sondern als zuweisbare Tranche dokumentiert.
 
 **Review:** offen (Aaron). Session 9ac44965, PR #5186 (Doku) · Vorarbeit #5181 (§2-Sync) + #5184 (6 tote Akte-Files, knip 54→48).
+
+## 2026-08-12 · C3 · Kunden-Nachzug-Event `kunde.account_bereit` — der Fan-out erreichte Kunden strukturell nicht
+
+**Lücke (prod-gemessen, 30–60 T):** `fall.created` + `sa.signed` feuern in `signSAandCreateFall`. Dort ist `claims.geschaedigter_user_id` **noch NULL** — der Kunden-Account entsteht erst danach in `createKundeAccount` (Code-Kommentar dort sagt es wörtlich: „Account wird ja erst HIER nach SA angelegt"). Der Fan-out adressiert den Kunden aber **ausschliesslich** über diese Spalte (`loadClaimParticipants` → `kundeUserId`) → es entsteht **kein Empfänger und nicht einmal eine `skipped`-Zeile**.
+
+**Messung:** Bei denselben Events bekam **Staff 312** Zustellungen, **Kunden 5**. Aufgeschlüsselt: **Neukunden 0 von 9**, Wiederkehrer 1 von 15. Geprüft und **widerlegt** als Ursachen: fehlende `claim_id` am Event (39/39 haben eine) und Selbst-Notify-Skip (`triggered_by_user_id` ist bei allen 39 NULL).
+
+**Entscheidung:** Neues Event **`kunde.account_bereit`**, das in `createKundeAccount` **nach** der Account-Verknüpfung feuert — also genau dann, wenn der Kunde erreichbar ist **und** seine Identität bestätigt ist (er hat die E-Mail im Account-Schritt selbst eingegeben).
+
+**Warum ein eigenes Event statt `fall.created`-Repeat:** Die Matrix trägt für `kunde.account_bereit` **nur kunde-Kanäle** → Staff bekommt kein Doppel. Ein Wiederholen von `fall.created` hätte 8 Admin-Zustellungen pro Fall dupliziert.
+
+**Nicht gewählt:** *Verknüpfung früher setzen* (in `signSAandCreateFall` per Lead-E-Mail einen bestehenden Account suchen) — **unsicher**: der Kunde kann im Account-Schritt eine **andere** E-Mail angeben; ein E-Mail-Match hätte womöglich einen fremden Account mit dem Claim verknüpft (RLS-Sichtbarkeit!). Die Identität ist erst nach dem Account-Schritt bestätigt.
+
+**Offen (eigene Tranche):** Der account-lose Empfängerpfad. **57 % der aktiven Claims haben gar keinen Kunden-Account** (magic-link-first, Verfassung §1-6) — für sie bleibt der Event-Kanal blind, sie werden weiter über die Direkt-Sends (Telefon/E-Mail) bedient. §9-#6 ist erst mit einem account-losen Pfad vollständig erreichbar.
+
+**Review:** offen (Aaron). Session 9ac44965. Marker [[audit-event-fanout-erreicht-kunden-nicht]]. ⚠ Regel-4-Nachweis deploy-gated: nach Deploy einen Flow-Durchlauf fahren und prüfen, dass für den Claim eine `notification_deliveries`-Zeile mit `recipient_role='kunde'` entsteht.
