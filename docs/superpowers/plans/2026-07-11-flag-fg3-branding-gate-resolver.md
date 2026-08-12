@@ -1,4 +1,15 @@
 # Branding-Gate Shared-Resolver Implementation Plan
+> # ✅ ERFUELLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> Der geplante Shared-Resolver fuer das Branding-Gate existiert:
+> **`src/lib/branding/bezahl-status.ts`** („Paid-Perk-Ladehelfer (Aaron 03.08.): liest die
+> Bezahl-Grundlage fuer die Whitelabel-Wirkung"), **7 Consumer** im Repo.
+>
+> Die Umsetzung kam ueber die Whitelabel=Paid-Perk-Lane (Memory
+> `COORDINATION-whitelabel-paid-perk-und-admin-audit`), nicht ueber diesen Plan — inhaltlich
+> deckungsgleich: EIN Resolver statt inline-Gates, bewusst via Admin-Client, gibt nur einen
+> booleschen Ableitungswert nach aussen.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree (`node scripts/new-session-worktree.mjs flag-fg3-branding-gate-resolver`).
 **Goal:** Extract the customer-facing branding gate (`verifiziert && use_custom_branding`) and the intentionally-different SV-own gate (`use_custom_branding` alone) into two named, unit-tested pure helpers, migrate every call-site onto them, and add a third named gate `svDarfFaelleEmpfangen(sv)` that centralises the dispatchable predicate — so the `frist_ueberschritten` intent/enforcement gap becomes a single explicit toggle instead of five inline copies.
