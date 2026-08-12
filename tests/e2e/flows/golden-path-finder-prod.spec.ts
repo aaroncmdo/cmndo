@@ -11,14 +11,14 @@ import {
 // Companion zu golden-path-prod.spec.ts (Entry via /schaden-melden) +
 // golden-path-completion-prod.spec.ts (Abschluss).
 //
-// Beweist: Adresse -> Engine-Match -> Slot -> Schadenart -> buchbereites Kontaktformular.
+// Beweist: Adresse -> Engine-Match -> Slot -> Schadenart -> Buchung -> gfa -> Termin.
 // Anders als /schaden-melden faehrt DIESE Strecke die SV-Matching-Engine (findBestSV) +
-// Isochrone-Zustaendigkeit + Slot-Generierung.
+// Isochrone-Zustaendigkeit + Slot-Generierung — und mit dem Submit den Chokepoint
+// reserviere(), in dem der Ops-Test-Bug (RC-1: Zusage ohne Termin) sass.
 //
-// ⚠ NICHT (mehr) abgedeckt: der SUBMIT bis "Termin reserviert". Er ist auf prod durch den
-// Test-SV-Guard blockiert und lief hier dauerhaft rot bzw. wurde per ENV uebersprungen —
-// beides ohne Signal, dass die Strecke ungedeckt ist. Jetzt als eigener `test.skip` mit
-// voller Begruendung sichtbar (s. unten). Kontext:
+// Der Submit war zwischenzeitlich nicht durchfuehrbar (Test-SV-Guard, s. Historie unten);
+// aufgeloest durch die E2E-Fixture-Kennzeichnung (Mig 20260812152026), die
+// seedThrowawayFinderSv setzt. Kontext:
 // memory/BROADCAST-finder-buchung-prod-nicht-smokebar.md
 //
 // FIXTURE (seit Befund #6, 17.07.): der globale Embed-Pool (ladeEmbedMatching ->
@@ -96,13 +96,12 @@ test.afterAll(async () => {
 // Instanz sichtbar. Alle Locator daher :visible + first() -> konsistent dieselbe (sichtbare) Instanz.
 const vis = (page: Page, selector: string) => page.locator(`${selector} >> visible=true`).first()
 
-test('Finder-Matching: Wegwerf-SV am obskuren Ort bis zum buchbereiten Formular', async ({ page }) => {
+test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async ({ page }) => {
   test.setTimeout(150_000)
+  const db = admin()
   const runId = String(Date.now())
   const email = `e2e-finder-${runId}@claimondo.de` // istInterneIdentitaet -> Send-Isolation
-  // Bleibt gesetzt, obwohl dieser Test nicht mehr absendet: das afterAll-Purge ist damit
-  // auch dann vollstaendig, wenn der Submit-Zweig (test.skip unten) reaktiviert wird.
-  bucherEmail = email
+  bucherEmail = email // fuer afterAll-Cleanup (Full-Submit-Artefakte)
 
   // Desktop-Viewport erzwingen -> die inline GooglePlaceAutocomplete (statt Mobil-Overlay).
   await page.setViewportSize({ width: 1366, height: 900 })
@@ -141,44 +140,45 @@ test('Finder-Matching: Wegwerf-SV am obskuren Ort bis zum buchbereiten Formular'
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
 
-  // ── Ende der beweisbaren Strecke ─────────────────────────────────────────────────────
-  // Der Buchen-Button ist bereit: Fixture, Google-Places, Wegwerf-SV als zustaendiger
-  // Partner MIT Engine-Slots, Schadenart und Kontaktformular sind damit verifiziert.
-  // Der SUBMIT gehoert bewusst NICHT mehr dazu — Begruendung im test.skip darunter.
+  // ── Step 5: absenden + Bestaetigung ───────────────────────────────────────────────────
   await expect(vis(page, 'button:has-text("Termin reservieren")'), 'Buchen-Button bereit').toBeEnabled()
-  console.log('[golden-finder] Ort→Wegwerf-SV-Slot→Schaden→Formular OK ✓ (Submit: s. test.skip)')
+  await vis(page, 'button:has-text("Termin reservieren")').click()
+  await expect(vis(page, ':text("Termin reserviert")'), 'Bestätigung "Termin reserviert"').toBeVisible({ timeout: 25_000 })
+
+  // ── Verify (service-role): gfa dem Wegwerf-SV zugeordnet (Partner-Matching) ──
+  await page.waitForTimeout(2_500) // revalidate + gfa.termin_id-Update
+  const { data: gfa } = await db
+    .from('gutachter_finder_anfragen')
+    .select('id, zugeordneter_sv_id, matching_typ, termin_id')
+    .eq('email', email)
+    .maybeSingle()
+  expect(gfa?.zugeordneter_sv_id, 'gfa dem Wegwerf-SV zugeordnet').toBe(TEST_SV)
+  expect(gfa?.matching_typ, 'Partner-Matching (nicht Dead-Pin)').toBe('partner')
+  // Die Zusage darf nicht leer sein — genau das war der Ops-Test-Bug (RC-1): "Termin
+  // reserviert" bei termin_id = NULL.
+  expect(gfa?.termin_id, 'Zusage gegeben => Termin existiert wirklich').toBeTruthy()
+
+  // Send-Isolation (PR #3709): der interne @claimondo.de-Bucher darf KEINEN Dispatch-Task
+  // ausgeloest haben — verifiziert, dass der Test das Team nicht stoert.
+  const { data: tasks } = await db
+    .from('mitteilungen')
+    .select('id')
+    .eq('route_url', `/dispatch/gutachter-finder/${gfa?.id}`)
+  expect(tasks?.length ?? 0, 'interne Buchung -> kein Dispatch-Task (Send-Isolation #3709)').toBe(0)
+  console.log(`[golden-finder] gfa ${gfa?.id} -> Wegwerf-SV ${TEST_SV}, Termin ${gfa?.termin_id}, 0 Team-Tasks ✓`)
 })
 
-// ⚠ 12.08. — WAR DAUERHAFT ROT, still. Dieser Zweig assertete `"Termin reserviert"`, kann
-// auf prod aber NICHT gruen werden. Vorher verdeckte das die ENV `FINDER_E2E_DRYRUN`: ohne
-// sie lief der Submit und scheiterte, mit ihr wurde er uebersprungen — beides ohne Signal,
-// dass die Strecke gar nicht abgedeckt IST. Genau die Luecke, die das E2E-Toplevel-FS-Gate
-// fuer eine andere Klasse schliesst: ein Test, der Abdeckung suggeriert, die es nicht gibt.
-//
-// URSACHE (empirisch belegt am 12.08., scharfer Lauf gegen prod):
-// Der Buchungs-Chokepoint `reserviere()` faehrt den Test-SV-Guard
-// (src/lib/testdaten/test-sv-guard.ts, nach dem Vorfall 03.07.: ein echter SV bekam
-// laufend Test-Termine). Seine Matrix blockt (interner Lead, ECHTER SV) — und genau diese
-// Kombination ist hier unvermeidbar:
-//   * der Bucher ist `e2e-finder-…@claimondo.de` -> DOPPELT intern (Firmendomain UND der
-//     Token `e2e` an Wortgrenze, s. istInterneEmail);
-//   * der Wegwerf-SV MUSS `ist_testaccount=false` sein, sonst filtert ihn
-//     applyDispatchableFilter aus dem Matching und er taucht nie als Vorschlag auf;
-//   * ein NICHT-interner Bucher wuerde die Send-Isolation aushebeln -> echte Kunden-Comms
-//     und Dispatch-Tasks auf prod.
-// Der Lauf endete entsprechend mit der Guard-Meldung im Formular statt einer Bestaetigung.
-//
-// Wieder aktivierbar, sobald der Finder-Buchungspfad test-konsistent buchbar ist — z.B. wenn
-// das Matching eine Kunden-Identitaet kennt (dann greift der findeNahenTestSv-Fallback und
-// ein TEST-SV waere waehlbar -> Matrix (intern,Test) = ok).
-// Kontext: memory/BROADCAST-finder-buchung-prod-nicht-smokebar.md
-test.skip('Finder-Buchung: Submit bis "Termin reserviert" — auf prod durch den Test-SV-Guard blockiert', () => {
-  // Absichtlich leer: die Strecke ist auf prod nicht durchfuehrbar (s. Begruendung oben).
-  // Was der Submit einst pruefte und bei Reaktivierung wieder pruefen muss:
-  //   1. Danke-Seite zeigt "Termin reserviert"
-  //   2. gfa.zugeordneter_sv_id == Wegwerf-SV und matching_typ == 'partner'
-  //   3. Send-Isolation (#3709): 0 Dispatch-Tasks auf /dispatch/gutachter-finder/<gfa>
-})
+// ── Historie zum Submit-Zweig (12.08.) — damit die Kernursache nicht verloren geht ──────
+// Dieser Zweig war zwischenzeitlich ein `test.skip`: er assertete `"Termin reserviert"`,
+// konnte das auf prod aber nicht halten. Der Buchungs-Chokepoint `reserviere()` faehrt den
+// Test-SV-Guard (nach dem Vorfall 03.07.), dessen Matrix (interner Lead, ECHTER SV) blockt —
+// eine Kombination, die hier unvermeidbar war: ein Test-SV wird von applyDispatchableFilter
+// aus dem Matching gefiltert, der Wegwerf-SV musste also `ist_testaccount=false` tragen, und
+// ein nicht-interner Bucher haette die Send-Isolation ausgehebelt. Verdeckt wurde das von der
+// ENV `FINDER_E2E_DRYRUN` (ohne sie rot, mit ihr uebersprungen — beides ohne Signal).
+// Aufgeloest durch die E2E-Fixture-Kennzeichnung (Mig 20260812152026): fuer das MATCHING
+// echt, fuer den GUARD Test. seedThrowawayFinderSv traegt den Eintrag, ON DELETE CASCADE
+// raeumt ihn mit dem SV ab. Kontext: memory/BROADCAST-finder-buchung-prod-nicht-smokebar.md
 
 // Crash-Recovery: alle Wegwerf-SV-Leichen (auth+profiles+sachverstaendige) restlos entfernen,
 // falls ein abgebrochener Lauf welche liegen liess.

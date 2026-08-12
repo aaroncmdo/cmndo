@@ -112,11 +112,19 @@ export async function pruefeTestSvKonsistenz(
 ): Promise<TestSvGuardResult> {
   if (!bezug) return { blockieren: false }
   try {
-    const [svRes, identitaet] = await Promise.all([
+    const [svRes, fixtureRes, identitaet] = await Promise.all([
       db.from('sachverstaendige').select('ist_testaccount').eq('id', svId).maybeSingle(),
+      // E2E-Wegwerf-Fixture (Mig 20260812152026): ein SV, der fuers MATCHING echt sein MUSS
+      // (ist_testaccount=false, sonst filtert ihn applyDispatchableFilter raus), fuer den
+      // Guard aber als Test zaehlt. Ohne das war der Finder-Buchungspfad auf prod gar nicht
+      // smokebar: interner Bucher + echter SV = BLOCK, und beide Seiten sind im Test nicht
+      // frei waehlbar. Die Tabelle ist nur fuer service_role beschreibbar — das Signal liegt
+      // also NICHT im Schreibbereich des SV, den es klassifiziert.
+      db.from('e2e_test_fixtures').select('sv_id').eq('sv_id', svId).maybeSingle(),
       ladeIdentitaet(db, bezug),
     ])
-    const svIstTest = (svRes.data?.ist_testaccount as boolean | null) === true
+    const svIstTest =
+      (svRes.data?.ist_testaccount as boolean | null) === true || fixtureRes.data != null
     const leadIstIntern = istInterneIdentitaet(identitaet.email, identitaet.name)
     return entscheideTestSvGuard(leadIstIntern, svIstTest)
   } catch (err) {
