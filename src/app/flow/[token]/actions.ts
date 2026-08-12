@@ -555,6 +555,25 @@ async function finalizeKundeSetup(
     console.warn('[CMM-19] claims/claim_parties user_id Update fehlgeschlagen:', err)
   }
 
+  // C3-Kundenlücke (12.08.): `fall.created` + `sa.signed` feuern in signSAandCreateFall —
+  // dort ist claims.geschaedigter_user_id noch NULL (der Account entsteht ja erst HIER,
+  // s. CMM-19-Block oben). Der Fan-out adressiert den Kunden ausschliesslich ueber diese
+  // Spalte -> er findet keinen Empfaenger und erzeugt nicht mal eine `skipped`-Zeile.
+  // Prod-Messung 12.08. (60 T): Neukunden 0/9, Wiederkehrer 1/15 Kunden-Deliveries, waehrend
+  // Staff 312 bekam. JETZT ist der Kunde erreichbar UND seine Identitaet bestaetigt (eigene
+  // E-Mail im Account-Schritt) -> Willkommens-Benachrichtigung nachziehen.
+  // Eigenes Event statt `fall.created`-Repeat: die Matrix traegt fuer `kunde.account_bereit`
+  // NUR kunde-Kanaele -> Staff bekommt kein Doppel. Non-fatal (Account-Anlage darf nie brechen).
+  try {
+    const claimIdFuerEvent = await resolveClaimId(admin, fallId)
+    if (claimIdFuerEvent) {
+      const { emitEvent } = await import('@/lib/notifications/emit')
+      await emitEvent('kunde.account_bereit', { fallId }, { fallId })
+    }
+  } catch (err) {
+    console.warn('[C3-Kundenluecke] kunde.account_bereit emit fehlgeschlagen (non-fatal):', err)
+  }
+
   // P6 / K8: das Fall-Fahrzeug an den frischen Kunden-Account binden (vehicles.current_owner_id).
   // IS-NULL-Guard im Setter — ein bestehender Owner (Flotte/frueherer Kunde) wird nie ueberschrieben.
   // Non-fatal: Owner-Bindung darf die Account-Anlage nie brechen.

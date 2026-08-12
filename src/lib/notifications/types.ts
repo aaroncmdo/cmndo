@@ -34,6 +34,13 @@ export type EventType =
   // 5.2 SA / Vollmacht
   | 'sa.flow_sent'
   | 'sa.signed'
+  // Kunden-Nachzug: `fall.created`/`sa.signed` feuern in signSAandCreateFall, wo
+  // claims.geschaedigter_user_id noch NULL ist (der Account entsteht erst danach in
+  // createKundeAccount) -> der Fanout findet keinen Kunden-Empfaenger und erzeugt nicht
+  // mal eine skipped-Zeile. Prod 12.08.: Neukunden 0/9, Wiederkehrer 1/15 Kunden-Deliveries.
+  // Dieses Event feuert, sobald der Kunde ERREICHBAR ist (Account verknuepft) und traegt
+  // bewusst NUR kunde-Kanaele -> kein Admin-Doppel zu fall.created.
+  | 'kunde.account_bereit'
   // 5.3 Termine SV
   | 'termin.sv_bestaetigt'
   | 'termin.sv_abgelehnt'
@@ -111,6 +118,8 @@ export type EventType =
 export interface EventPayloads {
   // 5.1
   'fall.created': { fallId: string; leadId: string }
+  /** Kunden-Nachzug: feuert erst, wenn der Kunden-Account verknuepft (= Kunde erreichbar) ist. */
+  'kunde.account_bereit': { fallId: string }
   'fall.sv_assigned': { fallId: string; svId: string; terminId?: string }
   'fall.status_changed': { fallId: string; oldStatus: string; newStatus: string }
   'fall.storniert': { fallId: string; grund: string }
