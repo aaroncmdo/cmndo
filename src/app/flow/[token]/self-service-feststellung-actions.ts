@@ -42,6 +42,29 @@ export async function speichereFeststellungFlow(
   }
   const r = await saveOnboardingFields(ctx, felder, values)
   if (!r.ok) return { ok: false, error: r.error }
+
+  // Ops-Test 11.08. (RC-8): Der Unfallort wurde als reiner Text gespeichert —
+  // unfallort_lat/lng blieben NULL (prod-Beleg: 'Ecke Wiesenstrasse' ohne Koordinaten).
+  // Damit ist der Ort weder kartierbar noch als Anker fuer die Unfallskizze nutzbar.
+  // Nur wenn der Ort in DIESEM Save vorkam -> kein Geocoding-Call bei jedem Schritt.
+  // Non-critical: der Text steht bereits, ein Geocoding-Fehler darf ihn nicht zuruecknehmen.
+  const ort = typeof values.unfallort === 'string' ? values.unfallort.trim() : ''
+  if (ort.length >= 3) {
+    try {
+      const { geocodeAdresse } = await import('@/lib/mapbox/geocode')
+      const geo = await geocodeAdresse(ort)
+      if (geo) {
+        const { error: geoErr } = await admin
+          .from('leads')
+          .update({ unfallort_lat: geo.lat, unfallort_lng: geo.lng } as never)
+          .eq('id', leadId)
+        if (geoErr) console.warn('[feststellung] unfallort-Koordinaten (non-critical):', geoErr.message)
+      }
+    } catch (err) {
+      console.warn('[feststellung] Geocoding unfallort (non-critical):', err)
+    }
+  }
+
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }
