@@ -13,7 +13,7 @@
 // Ob sie ueberhaupt angeboten werden darf, entscheidet istWunschzeitFrei.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import { TERMIN_DAUER_MIN, berechneBlockadeFenster } from '@/lib/dispatch/termin-konstanten'
 import { pruefeBelegungStrict } from '@/lib/termine/engine/belegung'
 
@@ -52,6 +52,36 @@ export function baueWunschzeitOption(wunschterminLokal: string | null): Wunschze
  * FAIL-CLOSED: DB-Fehler oder unparsbarer Start => false. Eine faelschlich als frei
  * angebotene Wunschzeit ist genau der Ops-Test-Bug — im Zweifel nicht anbieten.
  */
+/**
+ * Liegt der Termin vollstaendig innerhalb der Arbeitszeit des Wochentags? PURE.
+ *
+ * Ops-Test 12.08. (Nachbesserung zu #5176): Die Belegungspruefung allein reicht NICHT —
+ * ausserhalb der Arbeitszeit gibt es schlicht keine Belegung, also galt 08:00, 18:00 oder
+ * ein Samstag als "frei". Prod-Beleg: 10 self_service-Termine liegen ausserhalb der
+ * Arbeitszeit (9x 08:00 bei Start 09:00, 1x 17:00 mit Ende 17:40), einer an einem Samstag.
+ * Der abgeloeste `dreiZeiten`-Block clampte auf 8..18 Uhr und kannte weder Arbeitszeiten
+ * noch blockierte Wochentage.
+ *
+ * @param wallStart Berlin-Wall-Clock "YYYY-MM-DDTHH:mm[:ss]" (KEIN UTC — der Wochentag
+ *                  muss der Berliner sein, sonst kippt er an Tagesgrenzen).
+ * @param proWochentag Arbeitszeit-Fenster je JS-Wochentag (0=So..6=Sa), null = frei/blockiert.
+ */
+export function liegtInArbeitszeit(
+  wallStart: string,
+  dauerMin: number,
+  proWochentag: (dowJs: number) => { vonMin: number; bisMin: number } | null,
+): boolean {
+  const m = wallStart.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/)
+  if (!m) return false
+  // Die Wall-Clock als fiktives UTC lesen -> getUTCDay liefert den BERLINER Wochentag
+  // (gleiche Konvention wie ranking.ts/wallToMs; die fiktive TZ hebt sich auf).
+  const dowJs = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])).getUTCDay()
+  const fenster = proWochentag(dowJs)
+  if (!fenster) return false
+  const startMin = +m[4] * 60 + +m[5]
+  return startMin >= fenster.vonMin && startMin + dauerMin <= fenster.bisMin
+}
+
 export async function istWunschzeitFrei(
   svId: string,
   option: WunschzeitOption,
@@ -59,11 +89,24 @@ export async function istWunschzeitFrei(
 ): Promise<boolean> {
   const fenster = berechneBlockadeFenster(option.start)
   if (!fenster) return false
-  const res = await pruefeBelegungStrict(
-    { typ: 'sachverstaendiger', id: svId },
-    fenster.start,
-    fenster.end,
-    db,
-  )
+
+  // 1. Arbeitszeit + Wochentag — dieselbe Konfig-Quelle wie freieSlots, damit die
+  //    angebotene Wunschzeit denselben Regeln unterliegt wie ein echter Engine-Slot.
+  const client: SupabaseClient = db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+  const assignee = { typ: 'sachverstaendiger' as const, id: svId }
+  try {
+    const { konfigFuerAssignee } = await import('@/lib/termine/engine/slots')
+    const konfig = await konfigFuerAssignee(client, assignee)
+    if (!liegtInArbeitszeit(toBerlinWallClock(option.start), konfig.slotDauerMin, konfig.proWochentag)) {
+      return false
+    }
+  } catch (err) {
+    // Fail-closed: laesst sich die Arbeitszeit nicht bestimmen, wird die Zeit NICHT angeboten.
+    console.warn('[wunschzeit] Arbeitszeit-Pruefung fehlgeschlagen:', err)
+    return false
+  }
+
+  // 2. Belegung (Buchungen ∪ externe Kalender-Blocks ∪ Ausnahmen), fail-closed.
+  const res = await pruefeBelegungStrict(assignee, fenster.start, fenster.end, client)
   return res.ok ? res.frei : false
 }
