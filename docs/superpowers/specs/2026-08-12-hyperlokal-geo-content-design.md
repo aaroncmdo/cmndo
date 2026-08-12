@@ -138,9 +138,26 @@ Beide sind aktuell **gesperrt**. Das steht dem Citation-Ziel entgegen:
 | **P3** | Generator + die 5 Gates, **Pilot mit 5 Orten** | Qualität bewiesen, bevor skaliert wird |
 | **P4** | Skalierung nach Substanz — **nur Orte, die das Gate bestehen** | Wachstum ohne Abstrafungsrisiko |
 | **P5** | Spots je Hub (Stadtteile/Vororte), Regions-Vergleichsseiten | Hyperlokale Tiefe |
-| **P6** | Citation-Monitoring (Ahrefs Brand Radar / Perplexity-Stichproben), Auffrisch-Zyklus | Messbar statt Bauchgefühl |
+| **P6** | Citation-Monitoring (s. §9.1), Auffrisch-Zyklus | Messbar statt Bauchgefühl |
 
 **Reihenfolge ist kein Zufall:** Erst Substanz, dann Fläche. Andersherum entsteht das, was Google abstraft — und was ohnehin niemand zitiert.
+
+### 9.1 Blocker beim Messen: Ahrefs liefert keine Daten
+
+Der Citation-Ist-Stand sollte hier stehen. Er fehlt, weil der Ahrefs-Zugang zwar **verbunden**, der Tarif aber für **jeden** Datenabruf gesperrt ist — am 12.08. geprüft:
+
+| Abruf | Ergebnis |
+|---|---|
+| `site-explorer-ai-responses-count` (Citations je Plattform: ChatGPT, AI Overviews, Gemini, Perplexity, Copilot, Grok) | `Insufficient plan` |
+| `site-explorer-domain-rating` · `site-explorer-metrics` | `Insufficient plan` |
+| `public-domain-rating-free` (als *free* deklariert) | `Insufficient plan` |
+| `subscription-info-limits-and-usage` (laut Doku „free, verbraucht keine Units") | `Insufficient plan` |
+
+Bemerkenswert: Selbst die kostenlosen Endpunkte und die Kontingent-Abfrage werden abgewiesen — der Tarif erlaubt offenbar gar keine API-Nutzung, nicht bloß eingeschränkte.
+
+**Konsequenz:** Es gibt aktuell **keine Nullmessung**. Ohne sie lässt sich später nicht belegen, ob das Programm gewirkt hat. Zu klären, **bevor** P4 skaliert:
+* Ahrefs-Tarif mit API-Zugang (die `ai-responses-count`-Felder sind genau die Zielmetrik), **oder**
+* manuelle Nullmessung: ein fester Satz Ortsfragen, quartalsweise in ChatGPT/Perplexity/Google gestellt und protokolliert — kostenlos, gröber, aber besser als nichts.
 
 ---
 
