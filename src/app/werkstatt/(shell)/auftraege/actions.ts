@@ -116,6 +116,9 @@ export async function schlageWerkstattTerminVor(
     kva_quelle: (gateRow?.kva_quelle as string | null) ?? null,
     reparatur_freigegeben_am: (gateRow?.reparatur_freigegeben_am as string | null) ?? null,
     kva_abgelehnt_am: (gateRow?.kva_abgelehnt_am as string | null) ?? null,
+    // Ops-Test 11.08. (RC-9): kommt aus v_werkstatt_auftrag (derive_abrechnungsweg) und ist
+    // hier schon geladen — bei Haftpflicht ist das Gutachten die Kostengrundlage, nicht der KVA.
+    abrechnungsweg: auftrag.abrechnungsweg,
   })
   if (!gate.offen) {
     return {

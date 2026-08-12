@@ -144,6 +144,7 @@ export default function GutachterShell({
   standortLng,
   showCommunity,
   showVerifizierung,
+  verifizierungOffen,
   svId,
   onboardingModus,
 }: {
@@ -160,8 +161,11 @@ export default function GutachterShell({
   // KFZ-152: conditional Nav fuer Community (Member). Team/Verwalter-Pfad
   // retired 2026-07-28 (SV-Org-Modell dormant + off-roadmap, s. DECISIONS.md).
   showCommunity?: boolean
-  // AAR-359 W5: conditional Verifizierungs-Link solange Verifizierung offen.
+  // AAR-359 W5: Verifizierungs-Link in der Sidebar. Ops-Test 11.08.: bleibt jetzt
+  // dauerhaft sichtbar, damit der SV seine Nachweise nachreichen/erneuern kann.
   showVerifizierung?: boolean
+  /** Steuert nur das LABEL: offen -> "Verifizierung", geprueft -> "Nachweise". */
+  verifizierungOffen?: boolean
   // CMM-36: SV-ID für Geo-Tracking
   svId?: string | null
   // Onboarding-Modus (Option B, 17.07.): SV noch nicht freigeschaltet -> operative Nav gesperrt.
@@ -201,7 +205,15 @@ export default function GutachterShell({
     // Jetzt korrekt auf 'Verwaltung' gematcht.
     if (sec.title !== 'Verwaltung') return sec
     const before: NavItem[] = []
-    if (showVerifizierung) before.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
+    if (showVerifizierung) {
+      before.push({
+        href: '/gutachter/verifizierung',
+        // Nach abgeschlossener Pruefung ist "Verifizierung" irrefuehrend — der SV
+        // verwaltet dort seine hinterlegten Nachweise (SA, Haftpflicht, Gewerbe).
+        label: verifizierungOffen ? 'Verifizierung' : 'Nachweise',
+        icon: ShieldCheckIcon,
+      })
+    }
     const after: NavItem[] = []
     if (showCommunity) after.push({ href: '/gutachter/community', label: 'Community', icon: TrophyIcon })
     return { ...sec, items: [...before, ...sec.items, ...after] }

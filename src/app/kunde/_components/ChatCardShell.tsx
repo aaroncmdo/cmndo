@@ -144,7 +144,10 @@ export default function ChatCardShell({
               <XIcon className="w-4 h-4" />
             </button>
             <div className="px-2 pt-2 shrink-0">
-              <div className="glass-panel rounded-2xl px-3 py-2.5 flex items-center gap-2.5">{modalHeader}</div>
+              {/* Ops-Test 11.08.: `glass-panel` existierte als CSS-Klasse NICHT (nirgends
+                  definiert) — der Modal-Header hatte dadurch keine Flaeche. Werte =
+                  GlassPanel-Variante 'prominent' (shared/GlassPanel.tsx). */}
+              <div className="rounded-ios-md bg-white/75 backdrop-blur-xl border border-white/60 shadow-ios-lg px-3 py-2.5 flex items-center gap-2.5">{modalHeader}</div>
             </div>
             <div className="flex-1 min-h-0">{children}</div>
           </div>

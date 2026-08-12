@@ -194,9 +194,13 @@ export default function KundeKbChat({
   return (
     <div className="flex flex-col h-full bg-transparent p-2 gap-2 min-h-0">
       {/* Messages — eigener gewrappter Bereich (white-transparent, rounded) */}
+      {/* Ops-Test 11.08.: `glass-panel` war eine TOTE Klasse — nirgends in CSS definiert,
+          also hatte der Chat gar keine Flaeche und der Text schwebte ueber dem Backdrop.
+          Werte = GlassPanel-Variante 'prominent' (shared/GlassPanel.tsx): blickdicht genug,
+          um ueber dem navy Backdrop lesbar zu bleiben. */}
       <div
         ref={scrollRef}
-        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2 glass-panel rounded-2xl"
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-2 rounded-ios-md bg-white/75 backdrop-blur-xl border border-white/60 shadow-ios-lg"
       >
         {messages.length === 0 && (
           <p className="text-center text-xs text-claimondo-ondo/70 mt-8">
@@ -308,7 +312,8 @@ export default function KundeKbChat({
           Nachrichten-Block aber gleicher Stil. Links neben dem Input sitzt
           der runde Claim-Bezug-Picker. */}
       <div className="shrink-0">
-        <div className="glass-panel rounded-2xl px-3 pt-2 pb-2">
+        {/* Eingabe-Leiste — gleiche Flaeche wie der Nachrichten-Bereich (s. Kommentar oben). */}
+        <div className="rounded-ios-md bg-white/75 backdrop-blur-xl border border-white/60 shadow-ios-lg px-3 pt-2 pb-2">
         {sendError && (
           <p className="text-[11px] text-danger mb-1.5 px-1">{sendError}</p>
         )}

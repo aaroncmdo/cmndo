@@ -1,4 +1,14 @@
 # Derivable-Duplicate Demotions Implementation Plan
+> # ✅ UEBERHOLT (verifiziert 2026-08-12) — NICHT MEHR AUSFUEHREN
+>
+> Die geplanten „Demotions" ableitbarer Duplikat-Spalten sind durch spaetere Konsolidierungen
+> **radikaler geloest**: die Ziel-Spalten existieren auf `claims` schlicht nicht mehr.
+>
+> **DB-Beleg (12.08., information_schema):** `status`, `work_state`, `sla_breached`, `sla_blocker`
+> sind auf `claims` **alle gedroppt**; vorhanden ist nur noch `operative_status` als SSoT.
+> Eine Demotion „Spalte bleibt, wird aber nicht mehr geschrieben" ist damit gegenstandslos —
+> es gibt keine Spalte mehr zu demoten.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans. Steps use `- [ ]` syntax.
 > **Isolation:** implement in a dedicated worktree (`node scripts/new-session-worktree.mjs flag-fg5-derivable-demotions`). Each demotion is an INDEPENDENT task — safe to ship one at a time (boy-scout).
 **Goal:** Retire derivable-duplicate state columns/predicates from Fix-Group FG5 of the interaction-flags audit — deriving closed-ness, gutachten-presence, termin-completion, upload-presence, and reminder-recency from their authoritative sources instead of stored duplicates.

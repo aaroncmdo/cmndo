@@ -2,7 +2,8 @@
 // vermittelter Werkstatt-Auftrag terminiert/gebucht/abgeschlossen werden darf.
 //
 // GATE OFFEN ⟺
-//   modus = 'direkt'                                  (Bagatell/Express/VS-Direkt/Kunde-Wahl "ohne KVA")
+//   abrechnungsweg = 'haftpflicht'                    (Gutachten ist die Kostengrundlage, nicht der KVA)
+//   ∨ modus = 'direkt'                                (Bagatell/Express/VS-Direkt/Kunde-Wahl "ohne KVA")
 //   ∨ kva_quelle ∈ ('kunde','zubringer')              (Preis kunde-seitig eingebracht → kein Kostenrisiko)
 //   ∨ (kva_quelle = 'werkstatt' ∧ freigegeben)        (Werkstatt-KVA vom Kunden freigegeben)
 //
@@ -19,6 +20,13 @@ export type AuftragGateInput = {
   reparatur_freigegeben_am: string | null
   /** claims.kva_abgelehnt_am — Kunde hat den (Werkstatt-)KVA abgelehnt. */
   kva_abgelehnt_am?: string | null
+  /**
+   * Ops-Test 11.08. (RC-9): abrechnungsweg ('haftpflicht' | 'kasko' | 'selbstzahler' | null),
+   * in v_werkstatt_auftrag via derive_abrechnungsweg bereits vorhanden. Bei Haftpflicht
+   * traegt die gegnerische Versicherung die Kosten und das GUTACHTEN ist die Grundlage —
+   * die Werkstatt muss dort keinen KVA liefern. Unbekannt/null bleibt defensiv gegatet.
+   */
+  abrechnungsweg?: string | null
 }
 
 /** Grund, warum das Gate ZU ist (für Werkstatt-Erklärtext + Kunde-Stepper-Label). null = offen. */
@@ -31,6 +39,13 @@ export type ReparaturGateStatus = { offen: boolean; grund: GateGrund }
  * Termin-Actions, Werkstatt-Auftrags-Detail (Führung), Kunde-Stepper-Label.
  */
 export function reparaturGate(claim: AuftragGateInput): ReparaturGateStatus {
+  // Ops-Test 11.08. (RC-9): Haftpflicht zuerst. Das Gate schuetzt den KUNDEN vor
+  // Kosten, die er selbst traegt — bei Haftpflicht reguliert die gegnerische
+  // Versicherung auf Basis des Gutachtens, ein KVA ist fachlich nicht erforderlich.
+  // Vorher blockierte "Kostenvoranschlag ausstehend" dort den Terminvorschlag der
+  // Werkstatt komplett (hard blocker im Ops-Test).
+  if (claim.abrechnungsweg === 'haftpflicht') return { offen: true, grund: null }
+
   if (claim.reparatur_auftrag_modus === 'direkt') return { offen: true, grund: null }
 
   const q = claim.kva_quelle

@@ -64,8 +64,8 @@ describe('deriveKundeAufgaben', () => {
     const r = deriveKundeAufgaben(vm({ flags: { bankdatenOffen: true }, pflichtdokumente: { offen: 2 } }))
     expect(r.map((a) => a.id)).toEqual(expect.arrayContaining(['bankdaten', 'pflichtdok']))
   })
-  it('offener Terminwunsch -> termin_bestaetigen', () => {
-    const r = deriveKundeAufgaben(vm({ termine: [{ id: 't1', art: 'sv', start: null, status: 'reserviert', claim_id: null }] }))
+  it('Gegenvorschlag des SV -> termin_bestaetigen', () => {
+    const r = deriveKundeAufgaben(vm({ termine: [{ id: 't1', art: 'sv', start: null, status: 'gegenvorschlag', claim_id: null }] }))
     expect(r.map((a) => a.id)).toContain('termin_bestaetigen')
   })
 })
@@ -122,12 +122,12 @@ describe('deriveKundeAufgaben — Termin-Bestaetigung (Audit b3/b4)', () => {
 
   it('b3: Reparaturtermin verlinkt in die GeldZone, SV-Termin nach DoksTermine', () => {
     const rep = deriveKundeAufgaben(
-      vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status: 'angefragt', claim_id: null }] }),
+      vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status: 'werkstatt_vorschlag', claim_id: null }] }),
     )
     expect(rep.find((a) => a.id === 'termin_bestaetigen')?.zone).toBe('geld')
 
     const sv = deriveKundeAufgaben(
-      vm({ termine: [{ id: 't2', art: 'sv', start: null, status: 'reserviert', claim_id: null }] }),
+      vm({ termine: [{ id: 't2', art: 'sv', start: null, status: 'gegenvorschlag', claim_id: null }] }),
     )
     expect(sv.find((a) => a.id === 'termin_bestaetigen')?.zone).toBe('doksTermine')
   })
@@ -139,5 +139,20 @@ describe('deriveKundeAufgaben — Termin-Bestaetigung (Audit b3/b4)', () => {
       )
       expect(r.map((a) => a.id)).not.toContain('termin_bestaetigen')
     }
+  })
+
+  // Ops-Test 11.08. (RC-10): Warte-Zustaende sind KEINE Kunden-To-dos.
+  it('angefragt erzeugt KEINE Aufgabe — die Werkstatt hat noch nicht geantwortet', () => {
+    const r = deriveKundeAufgaben(
+      vm({ termine: [{ id: 't1', art: 'reparatur', start: null, status: 'angefragt', claim_id: null }] }),
+    )
+    expect(r.map((a) => a.id)).not.toContain('termin_bestaetigen')
+  })
+
+  it('reserviert erzeugt KEINE Aufgabe — der SV-Termin wird automatisch bestaetigt', () => {
+    const r = deriveKundeAufgaben(
+      vm({ termine: [{ id: 't1', art: 'sv', start: null, status: 'reserviert', claim_id: null }] }),
+    )
+    expect(r.map((a) => a.id)).not.toContain('termin_bestaetigen')
   })
 })
