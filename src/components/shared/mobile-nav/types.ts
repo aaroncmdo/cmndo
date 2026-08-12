@@ -32,4 +32,15 @@ export type MobileNavProps = {
   /** Breakpoint, ab dem die Mobile-Nav ausgeblendet wird (Desktop-Sidebar uebernimmt). */
   hideBreakpoint?: 'md' | 'lg'
   ariaLabel?: string
+  /**
+   * Optionaler Override: WELCHER href gilt als aktiv. Gesetzt → gewinnt gegen die
+   * generische `isNavItemActive`-Pfadableitung; nicht gesetzt (Default) → unveraendertes
+   * Verhalten fuer alle bestehenden Portale.
+   *
+   * Gebraucht, wenn ein Eintrag auf eine Route zeigt, die serverseitig woanders endet:
+   * im Kunde-Portal linkt „Mein Fall" auf /kunde/faelle/[id], die kanonische Claim-URL
+   * liegt aber unter /kunde/fahrzeuge/[vehId]/schaden/[claimId] (P6/WS H) — ohne Override
+   * markiert die Pfadableitung dort „Fahrzeuge" statt „Mein Fall" (Ops-Test #26).
+   */
+  activeHref?: string | null
 }
