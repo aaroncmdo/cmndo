@@ -198,6 +198,61 @@ const FIELD_MAP: Array<[keyof GutachtenOcrResult, string]> = [
   ['seitenzahl', 'gutachten_seitenzahl'],
 ]
 
+/** PDF-Quelle fuer die Extraktion: entweder bereits geladene Bytes oder eine abrufbare URL. */
+export type GutachtenPdfQuelle = { base64: string } | { url: string }
+
+/**
+ * E3b (13.08.): die REINE Extraktion — PDF rein, Felder raus, **kein** DB-Zugriff.
+ *
+ * Herausgeschnitten aus `extractGutachtenAndSaveToClaim`, weil dort Extraktion und
+ * DB-Write gekoppelt waren: Der Vermittlungs-Einstieg (SV legt einen Fall aus einem
+ * fertigen Gutachten an) braucht die Felder, BEVOR ein Claim existiert — er soll ja
+ * erst daraus entstehen. Ein claim-gebundener Pfad ist dort per Definition unbrauchbar.
+ *
+ * `extractGutachtenAndSaveToClaim` ruft jetzt diese Funktion; ihr Verhalten ist
+ * unveraendert (gleicher Prompt, gleiches Modell, gleiches Schema).
+ */
+export async function extractGutachtenFelder(
+  quelle: GutachtenPdfQuelle,
+): Promise<{ ok: true; felder: GutachtenOcrResult } | { ok: false; error: string }> {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) return { ok: false, error: 'ANTHROPIC_API_KEY fehlt' }
+
+  try {
+    const client = new Anthropic({ apiKey })
+    const response = await client.messages.parse({
+      model: AI_MODELS.doc_ocr,
+      max_tokens: 2048,
+      system: SYSTEM_PROMPT,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source:
+                'base64' in quelle
+                  ? { type: 'base64', media_type: 'application/pdf', data: quelle.base64 }
+                  : { type: 'url', url: quelle.url },
+            },
+            {
+              type: 'text',
+              text: 'Extrahiere die im System-Prompt definierten Felder aus diesem Gutachten.',
+            },
+          ],
+        },
+      ],
+      output_config: { format: zodOutputFormat(GutachtenSchema) },
+    })
+
+    const parsed = response.parsed_output as GutachtenOcrResult | null
+    if (!parsed) return { ok: false, error: 'Keine strukturierte OCR-Antwort' }
+    return { ok: true, felder: parsed }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'OCR fehlgeschlagen' }
+  }
+}
+
 /**
  * Extrahiert Felder aus dem Gutachten-PDF und schreibt sie auf den Claim.
  * Idempotent: wenn gutachten_ocr_processed_at gesetzt ist und force=false,
@@ -292,39 +347,12 @@ export async function extractGutachtenAndSaveToClaim(
   }
 
   try {
-    const client = new Anthropic({ apiKey })
-    const response = await client.messages.parse({
-      model: AI_MODELS.doc_ocr,
-      max_tokens: 2048,
-      system: SYSTEM_PROMPT,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: pdfBase64
-                ? {
-                    type: 'base64',
-                    media_type: 'application/pdf',
-                    data: pdfBase64,
-                  }
-                : {
-                    type: 'url',
-                    url: auftrag.gutachten_url as string,
-                  },
-            },
-            {
-              type: 'text',
-              text: 'Extrahiere die im System-Prompt definierten Felder aus diesem Gutachten.',
-            },
-          ],
-        },
-      ],
-      output_config: { format: zodOutputFormat(GutachtenSchema) },
-    })
-
-    const parsed = response.parsed_output as GutachtenOcrResult | null
+    // E3b: der LLM-Aufruf lebt jetzt in `extractGutachtenFelder` (pure, DB-frei) —
+    // hier bleibt nur die claim-gebundene Klammer (Idempotenz, Merge, Write).
+    const ocr = await extractGutachtenFelder(
+      pdfBase64 ? { base64: pdfBase64 } : { url: auftrag.gutachten_url as string },
+    )
+    const parsed = ocr.ok ? ocr.felder : null
     if (!parsed) {
       // Cluster F+G PR-1: Write via RPC apply_gutachten_ocr (Dual-Write claims+gutachten)
       await admin.rpc('apply_gutachten_ocr', {

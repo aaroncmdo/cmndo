@@ -7,16 +7,45 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { HandshakeIcon } from 'lucide-react'
+import { HandshakeIcon, ScanTextIcon } from 'lucide-react'
 import { Button, Modal } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
 import { vermittlePartnerWerkstatt } from './_actions/vermittle-partner-werkstatt'
+// E3b (Ops-Test #23): Felder aus dem Gutachten vorschlagen, statt sie abtippen zu lassen.
+import { liesGutachtenFelder, type GutachtenVorschlag } from './_actions/lies-gutachten-felder'
 
 export default function PartnerWerkstattVermittelnButton() {
   const [open, setOpen] = useState(false)
   const [pending, startTransition] = useTransition()
   const [flowLinkUrl, setFlowLinkUrl] = useState<string | null>(null)
   const formRef = useRef<HTMLFormElement>(null)
+  // E3b: Vorschlag aus dem Gutachten. `ocrRunde` remountet die betroffenen Felder, damit
+  // ihr `defaultValue` greift — so bleibt das Formular uncontrolled (FormData beim
+  // Submit) und der bestehende Absende-Pfad voellig unberuehrt.
+  const [vorschlag, setVorschlag] = useState<GutachtenVorschlag | null>(null)
+  const [ocrRunde, setOcrRunde] = useState(0)
+  const [liest, startLesen] = useTransition()
+
+  function ausGutachtenUebernehmen() {
+    const form = formRef.current
+    if (!form) return
+    startLesen(async () => {
+      const res = await liesGutachtenFelder(new FormData(form))
+      if (!res.ok) {
+        // Das Auslesen ist eine Hilfe, kein Muss — bei Fehlschlag bleibt das Formular
+        // wie es ist und der SV tippt weiter von Hand.
+        toast.error(res.error)
+        return
+      }
+      setVorschlag(res.vorschlag)
+      setOcrRunde((n) => n + 1)
+      toast.success(
+        res.gefunden > 0
+          ? `${res.gefunden} Feld${res.gefunden === 1 ? '' : 'er'} übernommen — bitte prüfen und ergänzen.`
+          : 'Im Gutachten war nichts eindeutig lesbar — bitte von Hand ausfüllen.',
+      )
+    })
+  }
 
   function submit(formData: FormData) {
     startTransition(async () => {
@@ -88,10 +117,26 @@ export default function PartnerWerkstattVermittelnButton() {
                 <TextField label="Nachname" name="nachname" required autoComplete="off" />
                 <TextField label="Telefon" name="telefon" type="tel" hint="Telefon oder E-Mail — mindestens eines" />
                 <TextField label="E-Mail" name="email" type="email" />
-                <TextField label="Kennzeichen" name="kennzeichen" required placeholder="B-XX 123" />
+                <TextField
+                  key={`kz-${ocrRunde}`}
+                  label="Kennzeichen"
+                  name="kennzeichen"
+                  required
+                  placeholder="B-XX 123"
+                  defaultValue={vorschlag?.kennzeichen ?? ''}
+                />
                 <TextField label="Unfallort" name="unfallort" placeholder="Stadt / Adresse" />
                 <TextField label="Hersteller" name="fahrzeug_hersteller" placeholder="z. B. BMW" />
-                <TextField label="Modell" name="fahrzeug_modell" placeholder="z. B. 320d" />
+                {/* Das OCR-Schema kennt nur einen kombinierten `fahrzeug_typ` ("BMW 320d") —
+                    er landet unzerlegt hier, weil ein Split am Leerzeichen bei
+                    "Mercedes-Benz C 200" falsch waere. Der SV rueckt es zurecht. */}
+                <TextField
+                  key={`modell-${ocrRunde}`}
+                  label="Modell"
+                  name="fahrzeug_modell"
+                  placeholder="z. B. 320d"
+                  defaultValue={vorschlag?.fahrzeug_typ ?? ''}
+                />
               </div>
               <TextField
                 label="Schadenshergang (optional)"
@@ -100,11 +145,15 @@ export default function PartnerWerkstattVermittelnButton() {
               />
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <TextField
+                  key={`betrag-${ocrRunde}`}
                   label="Schadenshöhe netto (€)"
                   name="betrag"
                   required
                   inputMode="decimal"
                   placeholder="z. B. 4200,50"
+                  defaultValue={
+                    vorschlag?.betrag != null ? String(vorschlag.betrag).replace('.', ',') : ''
+                  }
                 />
                 <TextField
                   label="Gutachten (PDF)"
@@ -113,6 +162,22 @@ export default function PartnerWerkstattVermittelnButton() {
                   required
                   accept="application/pdf"
                 />
+              </div>
+
+              {/* E3b: liest Kennzeichen, Fahrzeug und Schadenshöhe aus dem hochgeladenen
+                  Gutachten. Bewusst ein eigener Klick statt automatisch beim Dateiwaehlen:
+                  der SV entscheidet, wann gelesen wird, und jeder Lauf kostet einen
+                  LLM-Aufruf. Die Werte werden VORGESCHLAGEN, nicht gesetzt — geprueft wird
+                  am Formular (Lehre aus B5: ungeprueftes OCR schrieb dort Formular-Labels
+                  als Halteradresse in den Lead). */}
+              <div className="flex items-center justify-between gap-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5">
+                <p className="text-xs text-claimondo-ondo">
+                  Felder aus dem Gutachten übernehmen — Sie können jeden Wert danach ändern.
+                </p>
+                <Button variant="ghost" type="button" onClick={ausGutachtenUebernehmen} loading={liest}>
+                  <ScanTextIcon width={15} height={15} />
+                  Auslesen
+                </Button>
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <Button variant="ghost" onClick={close} type="button">Abbrechen</Button>
