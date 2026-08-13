@@ -952,3 +952,33 @@ html { scroll-behavior: smooth; }
 }
 .pac-matched { font-weight: 700; }
 .pac-item > span:last-child { color: var(--color-claimondo-shield); }
+
+/* ProvenExpert-ProSeal: oben rechts statt unten rechts (Aaron 13.08.2026).
+ *
+ * Das Widget kennt KEINE top-Option — die Konfiguration bietet nur `bottom` und
+ * `stickyToSide` (im Script-Bundle geprueft, vollstaendige Optionsliste). Es setzt
+ * `bottom` als Inline-Style auf .pe-pro-seal; eine CSS-Regel mit !important
+ * gewinnt dagegen. Deshalb hier statt in der Komponente.
+ *
+ * Der Wrapper ist 0 Pixel hoch und die Karte waechst NACH OBEN von ihm weg
+ * (transform-origin: right bottom). `top` markiert also die UNTERkante der Karte,
+ * nicht die Oberkante — daher 340px und nicht ~80px.
+ *
+ * Live gemessen mit dieser Regel (Header endet ueberall bei y=65):
+ *   Desktop 1440x900   Karte y  91-340   Abstand zum Header 26 px
+ *   Tablet   768x1024  Karte y  91-340   Abstand zum Header 26 px
+ *   Mobil    390x844   Karte y 116-348   Abstand zum Header 51 px
+ * In allen drei Faellen null Ueberlappung mit fixen Elementen.
+ *
+ * ⚠ Warum nicht ueber die Konfiguration: `bottom: 'calc(100vh - 340px)'` funktioniert
+ * auf Desktop, wird auf Mobil aber vom Script ueberschrieben (dort landet inline
+ * `bottom: 0px`) — das Siegel klebte weiter unten und verdeckte die CTA-Leiste.
+ * Die CSS-Regel greift auf allen Breiten.
+ *
+ * ⚠ Wird die Karte deutlich hoeher als 275 px (z. B. wenn ProvenExpert das Layout
+ * aendert), rutscht ihre Oberkante unter den Header. Dann diesen Wert nachziehen.
+ */
+.pe-pro-seal {
+  top: 340px !important;
+  bottom: auto !important;
+}
