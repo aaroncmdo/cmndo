@@ -2,6 +2,79 @@
  "_regen": "Automatisch regeneriert via scripts/build-schema-snapshot.mjs (Cron: .github/workflows/schema-snapshot-regen.yml). NICHT manuell editieren — bei Schema-Aenderung Script laufen lassen. fks: eingefroren/unused.",
  "project": "paizkjajbuxxksdoycev",
  "tables": {
+  "_backup_smoke_residue_dok_20260812": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "dokument_typ",
+    "ist_pflicht",
+    "ab_phase",
+    "storage_path",
+    "original_filename",
+    "mime_type",
+    "groesse_bytes",
+    "ocr_status",
+    "ocr_extracted_data",
+    "ocr_processed_at",
+    "hochgeladen_von_user_id",
+    "hochgeladen_am",
+    "geloescht_am",
+    "lead_id",
+    "discrepancy_flag",
+    "ocr_result",
+    "uploaded_by_sv",
+    "uploaded_by_kunde",
+    "schaden_position",
+    "beschreibung",
+    "idempotency_key",
+    "kategorie",
+    "quelle",
+    "sichtbar_fuer",
+    "position_id",
+    "pflichtdokument_id",
+    "abgelehnt_am",
+    "zurueckweisung_kommentar",
+    "kb_gesehen_am",
+    "claim_id"
+   ]
+  },
+  "_backup_smoke_residue_tasks_20260812": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "fall_id",
+    "typ",
+    "titel",
+    "beschreibung",
+    "status",
+    "zugewiesen_an",
+    "faellig_am",
+    "erledigt_am",
+    "sort_order",
+    "created_at",
+    "updated_at",
+    "task_typ",
+    "deadline",
+    "auto_erstellt",
+    "erinnerung_gesendet",
+    "prioritaet",
+    "lead_id",
+    "empfaenger_rolle",
+    "empfaenger_user_id",
+    "phase",
+    "task_code",
+    "trigger_event",
+    "gate_task_id",
+    "entity_type",
+    "entity_id",
+    "auto_resolved_am",
+    "auto_resolved_grund",
+    "erstellt_von_id",
+    "eskaliert_am",
+    "claim_id"
+   ]
+  },
   "abrechnung_positionen": {
    "kind": "t",
    "columns": [
@@ -822,7 +895,9 @@
     "kanzlei_id",
     "schuldfrage",
     "eigene_versicherung",
-    "netzwerk_owner_id"
+    "netzwerk_owner_id",
+    "sa_extern_bestaetigt_am",
+    "sa_extern_bestaetigt_von"
    ]
   },
   "client_error_log": {
@@ -1126,6 +1201,14 @@
     "ausgefuehrt_am",
     "abgelehnt_grund",
     "audit_payload"
+   ]
+  },
+  "e2e_test_fixtures": {
+   "kind": "t",
+   "columns": [
+    "sv_id",
+    "angelegt_am",
+    "notiz"
    ]
   },
   "email_log": {
@@ -3784,6 +3867,28 @@
     "n_mahnungen",
     "letzte_mahnung_am",
     "claim_id"
+   ]
+  },
+  "stadt_lokalinhalte": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "stadt_slug",
+    "status",
+    "stadtbezirke",
+    "hauptachsen",
+    "unfall_hotspots",
+    "lokale_faqs",
+    "hero_anker",
+    "topografie_anker",
+    "substanz_score",
+    "ai_generated",
+    "ai_model",
+    "reviewed_von",
+    "reviewed_am",
+    "veroeffentlicht_am",
+    "created_at",
+    "updated_at"
    ]
   },
   "stripe_events": {
