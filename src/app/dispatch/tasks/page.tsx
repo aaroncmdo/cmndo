@@ -7,8 +7,12 @@
 // dessen Tasks entstehen korrekt, kamen aber nie in der Anzeige an.
 //
 // Zwei bewusste Entscheidungen:
-//   1. ÄLTESTE ZUERST (faellig_am, dann created_at — beides aufsteigend). Der Zweck dieser
-//      Liste ist "was bleibt liegen", nicht "was ist neu". Der Live-Feed bleibt das Dashboard.
+//   1. ESKALATIONEN ZUERST, DARIN AELTESTE ZUERST. Der Zweck dieser Liste ist "was
+//      braucht Aufmerksamkeit", nicht "was ist neu" — der Live-Feed bleibt das Dashboard.
+//      ⚠ Eine reine Datums-Sortierung reicht dafuer NICHT: die Haenger-Tasks (#5223) sind
+//      die juengsten und landeten damit auf Position 328-347 von 347 — bei limit 300 waeren
+//      sie gar nicht erschienen. Erst seit #5273 traegt `prioritaet` wieder ein Signal
+//      (21 dringend statt 347), vorher waere diese Sortierung wirkungslos gewesen.
 //   2. ANZAHL SICHTBAR je Status-Tab. Vorher war die Menge unsichtbar ("10 von ???"); der
 //      aelteste offene Task ist vom 14.07. Wer nicht weiss, wie gross der Berg ist, kann
 //      ihn nicht abtragen.
@@ -67,18 +71,41 @@ export default async function DispatchTasksSeite({
     alle: alleC.count ?? 0,
   }
 
-  let query = supabase
+  // ESKALATIONEN ZUERST, darin aelteste zuerst — in ZWEI Abfragen statt einer.
+  //
+  // Warum nicht `.order('prioritaet')`: die Spalte ist `text` mit CHECK, kein Enum.
+  // Alphabetisch ergaebe das dringend < kritisch < normal — kritisch stuende also
+  // hinter dringend. Und eine rein clientseitige Sortierung waere noch schlechter:
+  // sie kaeme zu SPAET, weil das `limit` in der DB bereits nach Datum vorausgewaehlt
+  // haette. Genau daran waere diese Seite fast gescheitert — Messung 13.08.: die 20
+  // Haenger-Tasks lagen bei reiner Datums-Sortierung auf Position 328-347 von 347
+  // (sie sind die juengsten) und waeren bei limit 300 GAR NICHT erschienen.
+  const felder = 'id, titel, beschreibung, status, prioritaet, faellig_am, created_at, lead_id, fall_id'
+
+  let eskalationQ = supabase
     .from('tasks')
-    .select('id, titel, beschreibung, status, prioritaet, faellig_am, created_at, lead_id, fall_id')
+    .select(felder)
     .eq('typ', 'dispatch')
-    // Aelteste zuerst: ueberfaellige oben, danach die am laengsten offenen.
+    .in('prioritaet', ['kritisch', 'dringend'])
     .order('faellig_am', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: true })
     .limit(MAX_ZEILEN)
-  if (status !== 'alle') query = query.eq('status', status)
+  if (status !== 'alle') eskalationQ = eskalationQ.eq('status', status)
+  const { data: eskalationen } = await eskalationQ
+  const oben = eskalationen ?? []
 
-  const { data } = await query
-  const liste = data ?? []
+  let routineQ = supabase
+    .from('tasks')
+    .select(felder)
+    .eq('typ', 'dispatch')
+    .eq('prioritaet', 'normal')
+    .order('faellig_am', { ascending: true, nullsFirst: false })
+    .order('created_at', { ascending: true })
+    .limit(Math.max(0, MAX_ZEILEN - oben.length))
+  if (status !== 'alle') routineQ = routineQ.eq('status', status)
+  const { data: routine } = await routineQ
+
+  const liste = [...oben, ...(routine ?? [])]
   const gesamt = zaehler[status] ?? 0
   const abgeschnitten = gesamt > liste.length
 
@@ -87,7 +114,7 @@ export default async function DispatchTasksSeite({
       <PageHeader
         title="Aufgaben"
         description={
-          `Alle Dispatch-Aufgaben — älteste zuerst, damit Liegengebliebenes oben steht.` +
+          `Alle Dispatch-Aufgaben — Eskalationen zuerst, darin die am längsten liegenden.` +
           (meineC.count ? ` ${meineC.count} davon sind Ihnen persönlich zugewiesen.` : '')
         }
         size="lg"
