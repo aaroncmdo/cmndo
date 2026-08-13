@@ -1,12 +1,14 @@
 # Ops-Test-Sanierung + Sweep-Rückstände — Implementierungsplan
 
-**Stand: 12.08.2026, 12:00** · Basis `origin/staging` @ `c44175b43`
+**Stand: 13.08.2026, 18:40** · Basis `origin/staging`
 
 > ## 🟢 Der Bau-Teil dieses Plans ist zu ~85 % erledigt
 >
 > Lanes **A, B, C1, E, F1–F3, G1, G2, G3** sind gebaut und in `staging` gemergt (PRs #5176, #5180, #5187, #5191, #5196, #5200). **Nicht neu bauen** — vor jeder Aufnahme den Marker `COORDINATION-ops-test-lane-a-embed-termin-wahrheit` lesen, er ist die laufende Wahrheit.
 >
-> **Was wirklich offen ist, steht in „Reststand" weiter unten.** Kurz: 3 PRs mergen · Regel-4-Prod-Smokes (4 Lanes ohne Nachweis) · D1 Stufe 2 · Lane H (Fundament, unberührt) · 6 Aaron-Entscheide.
+> **Was wirklich offen ist, steht in „Reststand" weiter unten.** Stand 13.08.: **D3 und F5 sind gebaut** (Datum · Nav-Markierung), **B5 und E3a sind gegenstandslos** (Datenbasis bzw. Befund entfallen). Offen bleiben: Regel-4-Smokes für die deploy-gated PRs · Lane H (Fundament, unberührt) · die Aaron-Entscheide zu **D4** (Voice/AVV), **E3b** (OCR-Einstieg) und **F4** (fahrzeug-zentrierte Navigation).
+>
+> ⚠️ **Regel-4-Lehre vom 13.08.:** Der Prod-Smoke der eigenen PRs fand **zwei Regressionen, die alle Unit-Tests bestanden hatten** — das Datumsfeld verschluckte „3.4.2026" still, und der Nav-Fix griff nur bei Kunden mit genau EINEM Fall. Gefunden hat sie erst die *untypische* Konfiguration (englisches Browser-Locale, Konto mit 7 Fällen). Beim Smoken bewusst die untypische Variante wählen — die typische deckt man beim Bauen ohnehin ab. Fix: **#5256**.
 >
 > ⚠️ **Eine Belegstufe der zugrunde liegenden RCA wurde am 12.08. widerlegt** (`last_synced_at` taugt nicht als „zuletzt gesehen"). Die Wurzel RC-1 steht unverändert, der Ersatz-Beleg ist härter. Details im Korrekturkasten der RCA.
 
@@ -195,33 +197,30 @@ Die Erhebung vor dem Bau hat die Prämisse widerlegt. Aufschlüsselung der 16 Cl
 
 **Lehre:** Bei Drift-Messungen zwischen zwei Quellen NULL immer separat ausweisen — „A ≠ B" und „A fehlt" sind verschiedene Befunde mit gegensätzlicher Behandlung. Der Fix aus #5180 (`ziehVehicleNach`) bleibt richtig; er verhindert künftige echte Drift.
 
-### B5 · ZB1-Testkorpus aus prod-Uploads (P1)
-Parser liefert falsche Werte (Formular-Label als Straße, Vorname im Nachname-Feld, FIN nicht erkannt). Korpus aus vorhandenen Storage-Uploads bauen, Erwartungswerte **anonymisiert** (keine Klarnamen/FIN im Repo-Klartext), dann Parser dagegen härten.
-*Akzeptanz:* Reproduzierbare Testsuite; die drei bekannten Fehlklassen abgedeckt und grün.
+### B5 · ZB1-Testkorpus aus prod-Uploads — ❌ **NICHT BAUBAR** (Erhebung 13.08.)
 
-### D3 · Datum im US-Format — ✅ **diagnostiziert (13.08.), Fix ist eine Produktentscheidung**
+Der Korpus sollte aus vorhandenen Storage-Uploads entstehen. Von **233** ZB1-Dateien im Bucket sind **231 Smoke-Dummies** (70–200 Byte); es bleiben **2** echte Scans, und genau **1** Lead trägt einen `raw_text`. Aarons Entscheid „Korpus aus prod-Uploads, anonymisiert" hatte damit keine Datenbasis.
 
-Die systematische Suche ist gelaufen und **im Code erfolglos** — das ist selbst der Befund:
+**Ersatz:** Die Parser-Härtung lief gegen den einen vorhandenen Rohtext (den amtlichen **Muster**-Schein, keine Kundendaten) → **PR #5243**. Ein echter Korpus braucht erst echte Uploads.
+*Rest-Akzeptanz:* Regel-4-Smoke für #5243 steht aus.
 
-| Gesuchte Ursache | Treffer in `src/` |
+### D3 · Datum im US-Format — ✅ **ERLEDIGT (13.08.)**, PRs #5242 · #5254 · #5256
+
+Native `<input type="date">` rendern **immer** im Browser-/OS-Locale (deutscher Browser `13.08.2026`, englischer `08/13/2026`) — per HTML/CSS nicht erzwingbar. Der Ops-Test lief auf einem Gerät mit englischem Locale.
+
+> ⚠ **Korrektur der Erhebung vom 13.08.:** Der früher hier stehende Satz *„betrifft aktuell **keine** [kundensichtbare Stelle], da alle 23 intern sind"* war **falsch**. `kunde/schaden-melden/SchadenMeldenWizard.tsx` ist kundensichtbar und trug ein `type="date"`. Die Zählung hatte die Kunden-Oberflächen übersehen — genau darauf war die Empfehlung „nichts tun" gestützt.
+
+**Gebaut statt entschieden** (Option 2, auf Erfassungsfelder begrenzt):
+
+| PR | Umfang |
 |---|---|
-| argumentloses `toLocaleDateString()` / `toLocaleString()` / `toLocaleTimeString()` | **0** |
-| `toLocale*(undefined \| locale \| lang)` | **0** |
-| `Intl.DateTimeFormat` ohne Locale | **0** — alle Treffer sind bewusst: `sv-SE`/`en-CA` erzeugen sortierbares `YYYY-MM-DD`, `i18n/format.ts` nutzt `localeToBcp47(locale)` |
-| `.toDateString()` | 5 — **alle nur Tagesvergleiche**, keine Anzeige |
+| **#5242** | `DatumFeld` + `lib/format/datum-de` (Kunde: Schaden melden) |
+| **#5254** | `DatumInput` für interne Erfassungsfelder (Dispatch-Phase-1, `InlineEditField`, `VsKorrespondenzCard`) |
+| **#5256** | Regressions-Fix: der Formatierer zerstörte „3.4.2026" zu „34.20.26" → Datum ging **still** verloren (Prod-Smoke-Fund, betraf beide Komponenten) |
 
-**Die verbleibende Erklärung: 23 native `<input type="date">`** — ausschließlich in den **internen** Portalen (admin, dispatch, faelle, gutachter), also genau dort, wo der Ops-Test lief. Ein nativer Date-Input rendert **immer im Browser-/OS-Locale**: deutscher Browser → `13.08.2026`, englischer → `08/13/2026`. Das ist per Code **nicht** korrigierbar.
+**Bewusste Grenze — kein offener Rest:** Die **Termin-Wahl**-Felder (Spontantermin, Verfügbarkeit, Nachbesichtigungs-Picker, alle `datetime-local`) behalten das native Feld; dort ist der Kalender ein Vorteil, weil ein Datum in der ZUKUNFT gewählt statt erinnert wird. Ein „noch nicht migriert"-Fund dort ist **kein Befund**.
 
-Die frühere Notiz „das Feld ist `typ='text'`" stimmt — gilt aber für den **Kunden-Flow**: `unfalldatum`, `halter_geburtsdatum`, `unfall_uhrzeit` stehen im Feldkatalog alle auf `typ='text'` (in der DB verifiziert). Dort gibt es also gar keinen nativen Date-Input. Die Annahme wurde damals auf der falschen Oberfläche geprüft.
-
-🔎 **Konsequenz:** Für einen deutschen Endnutzer mit deutschem Browser ist die Anzeige **korrekt**. Der Befund stammt mit hoher Wahrscheinlichkeit von einer nicht-deutschen Browser-/OS-Spracheinstellung am Testgerät.
-
-**Aaron-Entscheid nötig** — drei Optionen:
-1. **Nichts tun** (Empfehlung): Endnutzer sehen ihr eigenes Locale-Format; das ist Browser-Standardverhalten.
-2. Eigener Date-Picker statt nativem Input in den 23 Stellen — erzwingt DD.MM.YYYY für alle, kostet Zugänglichkeit + Mobile-Komfort des nativen Pickers.
-3. Nur die kundensichtbaren Stellen umstellen — betrifft aktuell **keine**, da alle 23 intern sind.
-
-*Zur Bestätigung genügt:* Browser-Sprache am Testgerät auf Deutsch stellen und dieselbe Maske erneut öffnen.
+⚠ **Offen (Aufräumen, kein Bug):** `DatumFeld` (#5242) und `DatumInput` (#5254) lösen dieselbe Aufgabe mit derselben Kernlogik, je 4 Consumer — gehören zusammengeführt.
 
 ### D4 · Streaming-STT statt Batch-Transkription (P2, Beschaffung nötig)
 Voice ist im Flow eingebunden (`voiceDictation` am Unfallhergang), aber Batch: aufnehmen → stoppen → Whisper → Text am Stück. Wort-für-Wort ist so ausgeschlossen. Web Speech API wurde verworfen (Chrome schickt das Audio an Google — bei Unfall- und Personendaten datenschutzrechtlich zu prüfen).
@@ -252,9 +251,11 @@ Der Kunde sieht in diesem Zustand **nicht** nichts, sondern den Stepper auf `Beg
 ### E3b · OCR-Einstieg für Gutachten + SV-Rechnung (P3, Feature)
 Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen. Eigenes Feature-Ticket, folgt auf E3a.
 
-### F5 · Nav-Sprung „Mein Fall" → „Fahrzeuge" (P3, klein)
-`KundeNav.tsx:12` setzt bei genau einem Fall `href=/kunde/faelle/${singleFallId}`; die aktive Markierung fällt danach auf einen anderen Eintrag. Nur die Markierung geraderichten, Struktur bleibt.
-*Akzeptanz:* Der Menüpunkt bleibt beim Klick markiert.
+### F5 · Nav-Sprung „Mein Fall" → „Fahrzeuge" — ✅ **ERLEDIGT (13.08.)**, PRs #5227 · #5256
+
+Regel + Tests in `kunde/_components/nav-aktiv.ts`; genau ein Eintrag ist aktiv, auf der kanonischen Claim-Route gewinnt das Fall-Item.
+
+⚠ **#5227 allein reichte nicht:** Der Fall-Href kam als `singleFallId ? … : null`. Bei einem Kunden mit **mehreren** Fällen war er `null`, die Regel griff nicht, und „Fahrzeuge" blieb markiert — der Befund bestand für diese Kunden fort (Prod-verifiziert an einem Konto mit 7 Fällen). **#5256** schließt das über `fallItemHref()` als eine Quelle.
 
 ### F4 · Fahrzeug-zentrierter Einstieg (P3, Produktarbeit — eigenes Ticket)
 Fahrzeuge werden Einstieg (Liste + Detail), Claim von dort erreichbar. Betrifft Navigation und Routenstruktur, braucht eigene Smokes. **Nicht** im Bugfix-Strom.

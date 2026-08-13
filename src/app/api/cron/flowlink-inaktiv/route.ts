@@ -12,9 +12,10 @@ export const dynamic = 'force-dynamic'
  * dann wird für den zuständigen Dispatcher ein Task „Token-Link inaktiv"
  * angelegt — damit der MA den Kunden nachträglich anruft.
  *
- * Dedupe: Pro Lead wird maximal alle 4 Stunden ein neuer Inaktiv-Task
- * erstellt. Wenn bereits ein offener Task mit task_typ='inaktiv_followup'
- * existiert oder in den letzten 4h einer angelegt wurde, wird er übersprungen.
+ * Dedupe: Pro Lead gibt es höchstens EINEN nicht erledigten Inaktiv-Task.
+ * Solange er offen (oder in Bearbeitung) ist, kommt kein neuer dazu — erst
+ * wenn er erledigt wurde und der Link immer noch ungeöffnet ist, entsteht
+ * wieder einer. Siehe den Kommentar an der Dedupe-Query.
  *
  * NOTE: flow_links hat die Spalte `erstellt_am` (nicht `created_at`) —
  * siehe Schema. Das wurde im ursprünglichen page.tsx-Refactor übersehen.
@@ -26,7 +27,6 @@ export async function GET(request: Request) {
   const db = createAdminClient()
 
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-  const fourHoursAgo = new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
 
   // FlowLinks die seit >2h inaktiv sind (nie geöffnet). WICHTIG (Aaron 27.07., FlowLink-Audit):
   // KEIN .eq('status','offen') — 'offen' wird NIE geschrieben (Default 'erstellt', danach nur
@@ -50,13 +50,27 @@ export async function GET(request: Request) {
   }>) {
     if (!fl.lead_id) continue
 
-    // Dedupe: Task mit task_typ='inaktiv_followup' existiert bereits + ist frisch
+    // Dedupe: Es gibt bereits einen NICHT ERLEDIGTEN Task fuer diesen Lead.
+    //
+    // ⚠ Vorher stand hier `.gte('created_at', fourHoursAgo)` — es zaehlte also nur, ob in
+    // den letzten 4 Stunden einer angelegt wurde, NICHT ob noch einer offen ist. Ein Task,
+    // den niemand abgearbeitet hat, wurde damit alle 4 Stunden erneut erzeugt, und der alte
+    // blieb offen daneben stehen. Prod-Messung 13.08.: **1483 offene „Token-Link inaktiv"-
+    // Tasks** aus 18 Tagen fuer eine Handvoll Leads — 86 % aller 1729 offenen Dispatch-Tasks.
+    // Das Dashboard zeigt die 10 neuesten; jede andere Aufgabe war damit unsichtbar
+    // (gefunden, weil die Haenger-Tasks aus #5223 nicht mehr ankamen).
+    //
+    // Der Funktions-Kommentar oben beschrieb das richtige Verhalten bereits („wenn bereits
+    // ein offener Task existiert ODER in den letzten 4h einer angelegt wurde") — nur der
+    // Code prueft es nicht. Jetzt gilt: solange der Task nicht erledigt ist, kommt kein
+    // neuer dazu. `neq('erledigt')` statt `eq('offen')`, damit ein Task in Bearbeitung
+    // ebenfalls keinen Nachschub ausloest.
     const { count: existing } = await db
       .from('tasks')
       .select('*', { count: 'exact', head: true })
       .eq('lead_id', fl.lead_id)
       .eq('task_typ', 'inaktiv_followup')
-      .gte('created_at', fourHoursAgo)
+      .neq('status', 'erledigt')
 
     if ((existing ?? 0) > 0) {
       skipped++
