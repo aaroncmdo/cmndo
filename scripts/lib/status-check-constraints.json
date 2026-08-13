@@ -1138,6 +1138,7 @@
       "file",
       "number",
       "phone-verify",
+      "place",
       "segmented",
       "select",
       "signature",
@@ -1387,6 +1388,13 @@
       "breached",
       "completed",
       "pending"
+    ],
+    "stadt_lokalinhalte.status": [
+      "abgelehnt",
+      "archiviert",
+      "entwurf",
+      "in_review",
+      "veroeffentlicht"
     ],
     "support_ticket_log.action_type": [
       "comment",
