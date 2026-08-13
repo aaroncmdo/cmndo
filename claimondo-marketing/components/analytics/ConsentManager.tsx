@@ -52,7 +52,11 @@ export function ConsentManager() {
               savePreferencesBtn: 'Auswahl speichern',
               sections: [
                 { title: 'Notwendig', description: 'Fuer den Betrieb erforderlich.', linkedCategory: 'necessary' },
-                { title: 'Statistik', description: 'Google Analytics, Microsoft Clarity.', linkedCategory: 'analytics' },
+                // ProvenExpert steht hier, weil das ProSeal-Widget an genau diese Kategorie
+                // gehaengt ist (ProSealWidget.tsx). Wer einwilligt, muss lesen koennen, was
+                // dadurch tatsaechlich geladen wird — sonst ist die Einwilligung inhaltlich
+                // nicht gedeckt. Details in der Datenschutzerklaerung, Abschnitt 9.6.
+                { title: 'Statistik', description: 'Google Analytics, Microsoft Clarity, ProvenExpert-Bewertungssiegel.', linkedCategory: 'analytics' },
                 { title: 'Marketing', description: 'Google Ads Conversion-Messung.', linkedCategory: 'ads' },
               ],
             },
