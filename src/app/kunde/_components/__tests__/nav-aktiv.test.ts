@@ -97,3 +97,28 @@ describe('bestimmeAktivenHref', () => {
     expect(bestimmeAktivenHref(null, ITEMS, FALL_HREF)).toBeNull()
   })
 })
+
+// ⚠ Regel-4-Prod-Smoke 13.08.: fallHref kam vorher als `singleFallId ? … : null`.
+// Bei einem Kunden mit MEHREREN Faellen war er null, die Claim-Regel griff nicht,
+// und auf der Schaden-Detailseite blieb "Fahrzeuge" markiert (prod-verifiziert an
+// einem Konto mit 7 Faellen). fallItemHref liefert jetzt immer einen Href.
+describe('Claim-Detailseite bei einem Kunden mit MEHREREN Faellen', () => {
+  const items = [
+    { href: '/kunde', exact: true },
+    { href: '/kunde/fahrzeuge' },
+    { href: '/kunde/profil' },
+  ]
+  const claimPfad = '/kunde/fahrzeuge/veh-1/schaden/claim-1'
+
+  it('markiert die Fall-Uebersicht, nicht "Fahrzeuge"', () => {
+    expect(bestimmeAktivenHref(claimPfad, items, '/kunde')).toBe('/kunde')
+  })
+
+  it('ohne Fall-Href faellt es auf "Fahrzeuge" zurueck — der alte Fehlerzustand', () => {
+    expect(bestimmeAktivenHref(claimPfad, items, null)).toBe('/kunde/fahrzeuge')
+  })
+
+  it('die Fahrzeugliste selbst markiert weiterhin "Fahrzeuge"', () => {
+    expect(bestimmeAktivenHref('/kunde/fahrzeuge', items, '/kunde')).toBe('/kunde/fahrzeuge')
+  })
+})
