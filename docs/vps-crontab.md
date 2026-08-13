@@ -135,6 +135,14 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 0 7 * * * /usr/local/bin/cron-call.sh /api/cron/partner-aktivierung-nachfassen
 0 8 * * 1 /usr/local/bin/cron-call.sh /api/cron/zustandsaufnahme-faellig  # 3-Monats-Zustandsaufnahme-Reminder #4728 (Mo 08:00 UTC, dedup 30d)
 0 6 * * * /usr/local/bin/cron-call.sh /api/cron/werkstatt-onboarding-drip  # Werkstatt-Onboarding-Drip (6 Mails, Stop bei erstem Fall)
+
+# --- NACHGETRAGEN 2026-08-13 13:11 UTC: Haenger-Detektor (PR #5223, Ops-Test I1) ---
+# Findet Claims, die >5 Tage im SELBEN Status stehen UND keinen aktiven Termin haben, und
+# legt je Fall EINEN Dispatch-Task an. Dedup ueber task_code -> idempotent; deshalb ist
+# 4-stuendlich unbedenklich (wiederholte Laeufe erzeugen keine Duplikate, nur ~5 Queries).
+# Der SLA-Tracker faengt diese Faelle NICHT: er ist rein reaktiv ueber sla_tracking-Zeilen,
+# und 9 der 15 Erst-Funde hatten gar keine.
+0 */4 * * *  /usr/local/bin/cron-call.sh /api/cron/haenger-detektor
 ```
 
 ## Audit-Anmerkungen (2026-06-20)
