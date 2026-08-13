@@ -65,6 +65,66 @@ export async function speichereFeststellungFlow(
     }
   }
 
+  // Ops-Test 11.08. (#11): „unfallskizze generieren fehlt". Der Generator (AAR-317)
+  // existierte, war aber NUR im Dispatch-Portal verdrahtet — ein Kunde, der seinen
+  // Hergang hier beschreibt, erzeugte nie eine Skizze; sie entstand erst, wenn ein
+  // Mitarbeiter sie manuell anstiess.
+  //
+  // Die Skizze ist ein VORSCHLAG: unfallskizze_bestaetigt bleibt false, Dispatch gibt
+  // frei oder lehnt ab (bestehendes Modell, approveSkizze/clearSkizze). Wir setzen also
+  // niemanden vor vollendete Tatsachen.
+  //
+  // Non-critical wie das Geocoding darueber: der erfasste Text steht bereits, ein
+  // fehlgeschlagener API-Call darf ihn nicht zuruecknehmen.
+  //
+  // FIRE-AND-FORGET (bewusst kein await): der Claude-Call braucht 5-15 s. Das Geocoding
+  // darueber ist ein Mapbox-Lookup (~200 ms) und darf blockieren — ein KI-Call nicht.
+  // Der Kunde klickt „Weiter" und soll weitergehen, nicht auf eine Zeichnung warten.
+  // Die App laeuft als langlebiger Node-Prozess auf dem VPS (kein Serverless-Freeze),
+  // die Promise laeuft also zu Ende. Geht sie bei einem Deploy verloren, bleibt der
+  // manuelle Dispatch-Weg (generateAndSaveUnfallskizze) — die Skizze ist nirgends
+  // Voraussetzung, sie ist eine Zugabe.
+  void (async () => {
+  try {
+    const { sollSkizzeGenerieren } = await import('@/lib/unfallskizze/soll-generieren')
+    const { data: standAlt } = await admin
+      .from('leads')
+      .select('unfallskizze_svg, schadentyp, gegner_fahrzeugtyp')
+      .eq('id', leadId)
+      .maybeSingle()
+
+    if (
+      sollSkizzeGenerieren({
+        hergangImSave: values.unfallhergang,
+        vorhandeneSkizze: (standAlt?.unfallskizze_svg as string | null) ?? null,
+      })
+    ) {
+      const { generateUnfallskizze } = await import('@/lib/unfallskizze/generate')
+      const skizze = await generateUnfallskizze({
+        unfallhergang: String(values.unfallhergang),
+        schadentyp: (standAlt?.schadentyp as string | null) ?? null,
+        gegnerFahrzeugtyp: (standAlt?.gegner_fahrzeugtyp as string | null) ?? null,
+      })
+      if (skizze.success) {
+        const { error: skizzeErr } = await admin
+          .from('leads')
+          .update({
+            unfallskizze_svg: skizze.svg,
+            unfallskizze_bestaetigt: false,
+            unfallskizze_ablehnung_grund: null,
+            unfallskizze_generiert_am: new Date().toISOString(),
+          } as never)
+          .eq('id', leadId)
+        if (skizzeErr) console.warn('[feststellung] Unfallskizze speichern (non-critical):', skizzeErr.message)
+      } else {
+        console.warn('[feststellung] Unfallskizze-Generierung (non-critical):', skizze.error)
+      }
+    }
+  } catch (err) {
+    console.warn('[feststellung] Unfallskizze (non-critical):', err)
+  }
+  })()
+
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }
