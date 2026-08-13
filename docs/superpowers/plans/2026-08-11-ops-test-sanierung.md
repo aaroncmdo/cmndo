@@ -330,3 +330,30 @@ Vier Dinge, die beim nächsten Audit Zeit sparen:
 2. **`sv_kalender_events_cache.sv_id` ist bei allen 126 prod-Zeilen NULL** — der CalDAV-Sync füllt nur `profile_id`, der `v_belegung`-Join läuft über den Fallback. Wer über `sv_id` seedet, seedet ins Leere.
 3. **Ein Muster schlägt einen Einzelfall.** Der widerlegte Cache-Beleg wurde durch eine Messung über 41 Termine ersetzt — die trug, weil sie nicht von einem rekonstruierten Zeitpunkt abhing.
 4. **Symptom ≠ Diagnose.** Bei F1, F2, F3 und C1 lag die Ursache jeweils woanders als vermutet (Nav-Ausblendung statt fehlendem Upload; tote CSS-Klasse; Warte-Zustände ohne Zeitpunkt; Phantom-Termin statt fehlender Weiche). Vermutete Ursachen aus diesem Plan vor der Umsetzung erneut prüfen.
+
+---
+
+# Abgleich RCA-Maßnahmen ↔ diesem Plan (13.08.)
+
+Die RCA schließt mit **21 nummerierten Maßnahmen** (P0 1–4 · P1 5–9 · P2 10–17 · P3 18–21). Dieser Plan hat sie in Lanes übersetzt — **vier sind dabei nie zu einem Task geworden**. Nicht falsch bearbeitet: schlicht nie aufgenommen. Der Abgleich schließt diese Lücke.
+
+| RCA | Maßnahme | Stand (13.08. verifiziert) |
+|---|---|---|
+| 1–4 | P0 Terminzusage | ✅ Lane A (#5176/#5200/#5207), Regel-4 grün |
+| 5–6 | vehicles-Rücksync · ZB1 15 Felder | ✅ #5180 |
+| **7** | „Klären, warum das OCR nichts geschrieben hat" | ✅ **beantwortet** — der Parser las Formular-**Labels** als Werte, weil alle Anker die Zeile *exakt* als Feldcode verlangten (#5243) |
+| **8** | Schuldfrage-Weiche in den Finder | ⏸️ bewusst nicht gebaut (Conversion-Entscheidung, s. „Nicht gebaut") |
+| **9** | Onboarding-Vorlauf „was ist schon da" | 🔴 **nie aufgenommen, nicht umgesetzt** (0 Treffer in `kunde/onboarding`) |
+| 10–12 | Unfallort · Unfallskizze · Datumsfelder | ✅ Ortseingaben-Marker · #5249 · #5242/#5254 |
+| 13 | Live-Transkript | ⏸️ D4 — braucht Anbieter + AVV |
+| **14** | Werkstatt-Pfad kartieren | ✅ **erledigt** — die Bestandsaufnahme ist gelaufen (#5247), sie widerlegte #23 |
+| **15** | Werkstatt als Claim-Beteiligte | 🟡 **nie aufgenommen — aber datenseitig erledigt:** 12 der 75 Claims tragen `reparatur_werkstatt_id`, und **0 Claims haben einen Reparaturtermin ohne Werkstatt**. Der RCA-Satz „mangels Verknüpfung gibt es nichts anzuzeigen" trifft nicht mehr zu; `GeldZone` rendert `WerkstattCard` samt Termin. **Ungeprüft bleibt** die dritte Teilforderung: den Gutachtertermin in die **Werkstatt-Sicht** spiegeln |
+| 16 | KVA-Blocker Haftpflicht | ✅ #5196, am Bestand belegt (4 Hänger gelöst) |
+| **17** | „Partnerwerkstatt vermitteln" neu bauen | ❌ **gegenstandslos** (#5247) — Claim WIRD angelegt, die „Unterschrift" ist die per #4922 designte SA-Sequenz, die Werkstattwahl kommt bei Haftpflicht fachlich erst nach Gutachten-Freigabe. Der OCR-Teil bleibt als **E3b** ein Feature-Wunsch |
+| **18** | SA-Upload in `gutachter/einstellungen` | 🔴 **nie aufgenommen, real offen** — verifiziert: in `gutachter/einstellungen/` existiert kein SA-Upload; er lebt nur in `willkommen/` (Onboarding) und `verifizierung/`. Ein SV kann seine Sicherungsabtretung also **nie austauschen** (neue AGB, neue Kanzlei) und braucht dafür den Support |
+| **19** | Chat-Hintergrund `KundeKbChat` | 🟡 **nie aufgenommen, nicht bewertbar** — die Komponente nutzt eine bewusste Glass-Optik (`bg-transparent` + `bg-white/75 backdrop-blur-xl`). Ob das gemeldete Problem noch besteht, ist ohne Screenshot nicht entscheidbar (gleiche Lage wie bei D3) |
+| 20–21 | Fahrzeug-Einstieg · Termin-Aufgabe | ✅ F4 (`/kunde/fahrzeuge`) · F3 (#5191) |
+
+**Was daraus offen bleibt:** **#18** (klein, klar, frei — bester nächster Bau-Kandidat) · **#9** (Scope unklar formuliert, braucht eine Klärung, was „was ist schon da" zeigen soll) · **#19** (braucht einen Screenshot) · die dritte Hälfte von **#15** (Gutachtertermin in der Werkstatt-Sicht).
+
+**Lehre für den nächsten Plan:** Wer eine RCA in Lanes übersetzt, sollte am Ende **rückwärts** abgleichen — Maßnahme für Maßnahme gegen den Plan. Vier von 21 sind hier lautlos herausgefallen, darunter mit #18 ein echter Nutzer-Gap. Aufgefallen ist es erst, als der Plan fast leer war und jemand fragte, ob der Ops-Test wirklich abgearbeitet ist.
