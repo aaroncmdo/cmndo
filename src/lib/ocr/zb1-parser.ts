@@ -28,6 +28,70 @@ function normalisiereFahrzeugklasse(roh: string): string {
 const HSN_REGEX = /\b(\d{4})\b/
 const TSN_REGEX = /\b([A-Z0-9]{3})\b/i
 
+// Amtliches Kennzeichen: 1-3 Buchstaben (Kreis) + 1-2 Buchstaben + 1-4 Ziffern.
+// Als ANKER (^…$) — dient dazu, einen Wert zu BESTAETIGEN, nicht ihn irgendwo
+// aus dem Fliesstext zu fischen (genau das erzeugte den Phantom-Wert "Q-F 2").
+const KENNZEICHEN_ANKER = /^([A-ZÄÖÜ]{1,3})[\s-]?([A-Z]{1,2})[\s-]?(\d{1,4})[A-Z]?$/i
+
+// B5 (13.08.): Feldcodes, die Google Vision je nach Scan-Layout ENTWEDER allein auf
+// eine Zeile legt ODER zusammen mit der amtlichen Beschriftung:
+//     "A"                        + Folgezeile "XX Z123"
+//     "A Amtliches Kennzeichen"  + Folgezeile "XX Z123"
+// Die bisherigen Anker (^A$, ^C\.?1\.2$, …) trafen nur die erste Form — im einzigen
+// echten prod-Scan greift deshalb KEIN Label, und alle Halterfelder kamen aus
+// Zufalls-Fallbacks (Straße = "C1.3 Anschnitt", Nachname = der Vorname).
+const ZB1_FELDCODES = [
+  'A', 'B', 'J', 'R',
+  'C1', 'C1.1', 'C1.2', 'C1.3', 'C3', 'C4',
+  'D1', 'D2', 'D3',
+  '2.1', '2.2',
+] as const
+
+/** "C.1.1" / "C1.1" / "c11" -> "C11" — macht die Punkt-Schreibweisen vergleichbar. */
+function normalisiereFeldCode(roh: string): string {
+  return roh.toUpperCase().replace(/\./g, '')
+}
+
+const FELDCODES_NORMALISIERT = new Set<string>(ZB1_FELDCODES.map(normalisiereFeldCode))
+
+/**
+ * Zerlegt eine OCR-Zeile in Feldcode + Rest, sofern das erste Token ein bekannter
+ * ZB1-Feldcode ist. `rest` ist je nach Layout die amtliche Beschriftung
+ * ("Amtliches Kennzeichen") oder bereits der Wert ("14.01.2018" bei "B 14.01.2018").
+ *
+ * Bewusst gegen eine feste Code-Liste statt gegen ein generisches Muster: sonst
+ * ginge eine Wertzeile wie "XX Z123" als Label "XX" durch.
+ */
+function zerlegeFeldZeile(zeile: string): { code: string; rest: string } | null {
+  const kompakt = zeile.trim()
+  const trenner = kompakt.search(/\s/)
+  const kopf = trenner === -1 ? kompakt : kompakt.slice(0, trenner)
+  const rest = trenner === -1 ? '' : kompakt.slice(trenner + 1).trim()
+  const code = normalisiereFeldCode(kopf)
+  return FELDCODES_NORMALISIERT.has(code) ? { code, rest } : null
+}
+
+/** Ist die Zeile ein Feld-LABEL (evtl. mit Beschriftung) statt eines Werts? */
+function istFeldLabel(zeile: string): boolean {
+  return zerlegeFeldZeile(zeile) !== null
+}
+
+/**
+ * Bringt eine Hersteller-Schreibweise auf das kanonische Vokabular
+ * ("FIAT" -> "Fiat", "BAYER. MOT. WERKE" -> "BMW"); ohne Treffer bleibt der Rohwert.
+ *
+ * Wird von BEIDEN Pfaden genutzt — Label-Treffer (D.1) und Keyword-Fallback —,
+ * damit die Schreibweise nicht vom Scan-Layout abhaengt: der Label-Pfad lieferte
+ * sonst "FIAT", der Fallback "Fiat", und ein Vergleich auf Herstellernamen
+ * (Werkstatt-Matching) traefe je nach Scan ins Leere.
+ */
+function normalisiereHersteller(roh: string): string {
+  for (const { patterns, normalized } of HERSTELLER_KEYWORDS) {
+    if (patterns.some((p) => p.test(roh))) return normalized
+  }
+  return roh
+}
+
 // AAR-351: Hersteller-Keywords für Fallback-Extraktion, wenn das Label-
 // basierte Matching (^D.1$ auf eigener Zeile) an der Vision-API-Fließtext-
 // Ausgabe scheitert. Patterns decken ZB1-typische OCR-Varianten ab
@@ -109,59 +173,87 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
       const finMatch = line.match(FIN_REGEX)
       if (finMatch) result.fin_vin = finMatch[0].toUpperCase()
     }
-    if (/^A$/i.test(trimmed) && nextLine) {
-      result.kennzeichen = nextLine.trim()
+    // B5: Feldcode ermitteln — traegt die Zeile die amtliche Beschriftung hinter
+    // dem Code ("A Amtliches Kennzeichen"), steht sie in `feld.rest`.
+    const feld = zerlegeFeldZeile(trimmed)
+    const code = feld?.code ?? null
+
+    if (code === 'A') {
+      // Der Wert steht je nach Scan im Rest derselben Zeile oder in der naechsten.
+      // Beide werden gegen das Kennzeichen-Muster GEPRUEFT statt blind uebernommen —
+      // sonst landet die Beschriftung ("Amtliches Kennzeichen") im Feld.
+      for (const kandidat of [feld!.rest, nextLine]) {
+        const m = kandidat.trim().match(KENNZEICHEN_ANKER)
+        if (m) {
+          result.kennzeichen = kandidat.trim()
+          break
+        }
+      }
     }
-    if (/^B$/i.test(trimmed) && nextLine) {
-      const dateMatch = nextLine.match(DATE_REGEX)
+    if (code === 'B') {
+      const dateMatch = (feld!.rest.match(DATE_REGEX) ?? nextLine.match(DATE_REGEX))
       if (dateMatch) result.erstzulassung = dateMatch[1]
     }
-    if (/^C\.?1(\.1)?$/i.test(trimmed) && nextLine) {
+    if ((code === 'C11' || code === 'C1') && nextLine) {
       // ZB1-Konvention: "NACHNAME, VORNAME" — OCR verschluckt das Komma
       // aber häufig. Daher: Komma bevorzugt, sonst Whitespace-Heuristik.
       const split = splitHalterName(nextLine.trim())
       result.halter_nachname = split.nachname
       result.halter_vorname = split.vorname
     }
-    if (/^C\.?1\.2$/i.test(trimmed) && nextLine && !result.halter_vorname) {
+    if (code === 'C12' && nextLine && !result.halter_vorname) {
       // ZB1 listet C.1.2 = Vorname(n) als eigenes Subfeld
       result.halter_vorname = nextLine.trim()
     }
-    if (/^C\.?[34]$/i.test(trimmed) && nextLine) {
-      result.halter_strasse = nextLine.trim()
-      const addrNext = lines[i + 2] ?? ''
-      const plzMatch = addrNext.match(PLZ_ORT_REGEX)
-      if (plzMatch) {
-        result.halter_plz = plzMatch[1]
-        result.halter_stadt = plzMatch[2].trim()
+    if (code === 'C13' || code === 'C3' || code === 'C4') {
+      // Anschrift: die naechsten bis zu drei Zeilen tragen Strasse und "PLZ Ort" —
+      // in BEIDEN Reihenfolgen. Der einzige echte prod-Scan listet "12345 Berlin"
+      // UEBER "Hauptstr. 1", das idealisierte Layout genau umgekehrt. Deshalb wird
+      // je Zeile am PLZ-Muster entschieden, statt auf feste Positionen zu setzen.
+      for (let k = 1; k <= 3; k++) {
+        const kandidat = lines[i + k]
+        if (!kandidat || istFeldLabel(kandidat)) break
+        const plzMatch = kandidat.match(/^(\d{5})\s+(\S.*)$/)
+        if (plzMatch) {
+          if (!result.halter_plz) {
+            result.halter_plz = plzMatch[1]
+            result.halter_stadt = plzMatch[2].trim()
+          }
+        } else if (!result.halter_strasse) {
+          result.halter_strasse = kandidat
+        }
       }
     }
-    if (/^D\.?1$/i.test(trimmed) && nextLine) {
-      result.fahrzeug_hersteller = nextLine.trim()
+    // Bei D.1/D.2/D.3/R steht der Wert im prod-Layout HINTER dem Code ("D1 FIAT",
+    // "D3 Fiat 500"), im idealisierten Layout in der Folgezeile. Deshalb `rest`
+    // zuerst — sonst laese "D1 FIAT" die naechste Zeile ("312") als Hersteller.
+    const restOderNaechste = (feld?.rest || nextLine).trim()
+    if (code === 'D1' && restOderNaechste) {
+      result.fahrzeug_hersteller = normalisiereHersteller(restOderNaechste)
     }
     // D.3 = Handelsbezeichnung (z.B. "GOLF VII") — bevorzugt, weil
     // D.2 oft kryptische Typcodes ("AUV") liefert.
-    if (/^D\.?3$/i.test(trimmed) && nextLine) {
-      result.fahrzeug_modell = nextLine.trim()
+    if (code === 'D3' && restOderNaechste) {
+      result.fahrzeug_modell = restOderNaechste
     }
-    if (/^D\.?2$/i.test(trimmed) && nextLine && !result.fahrzeug_modell) {
-      result.fahrzeug_modell = nextLine.trim()
+    if (code === 'D2' && restOderNaechste && !result.fahrzeug_modell) {
+      result.fahrzeug_modell = restOderNaechste
     }
     // R = Farbe des Fahrzeugs
-    if (/^R$/i.test(trimmed) && nextLine && !result.fahrzeug_farbe) {
-      result.fahrzeug_farbe = nextLine.trim()
+    if (code === 'R' && restOderNaechste && !result.fahrzeug_farbe) {
+      result.fahrzeug_farbe = restOderNaechste
     }
     // J = EU-/KBA-Fahrzeugklasse (Spec B): der harte Filter fuers Werkstatt-Matching.
-    if (/^J$/i.test(trimmed) && nextLine && !result.fahrzeugklasse) {
-      const klasseMatch = nextLine.match(FAHRZEUGKLASSE_REGEX)
+    if (code === 'J' && !result.fahrzeugklasse) {
+      const klasseMatch = restOderNaechste.match(FAHRZEUGKLASSE_REGEX)
       if (klasseMatch) result.fahrzeugklasse = normalisiereFahrzeugklasse(klasseMatch[1])
     }
-    if (/^2\.?1$/i.test(trimmed) && nextLine) {
-      const hsnMatch = nextLine.match(HSN_REGEX)
+    if (code === '21') {
+      const hsnMatch = restOderNaechste.match(HSN_REGEX)
       if (hsnMatch) result.hsn = hsnMatch[1]
     }
-    if (/^2\.?2$/i.test(trimmed) && nextLine) {
-      const tsnMatch = nextLine.match(TSN_REGEX)
+    if (code === '22') {
+      const tsnMatch = restOderNaechste.match(TSN_REGEX)
       if (tsnMatch) result.tsn = tsnMatch[1].toUpperCase()
     }
   }
@@ -173,8 +265,18 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
     }
   }
   if (!result.kennzeichen) {
-    const kzMatch = fullText.match(/\b([A-ZÄÖÜ]{1,3})[\s-]([A-Z]{1,2})[\s]?(\d{1,4})\b/)
-    if (kzMatch) result.kennzeichen = `${kzMatch[1]}-${kzMatch[2]} ${kzMatch[3]}`
+    // B5: ZEILENWEISE gegen den Anker statt frei im Fliesstext zu suchen. Die alte
+    // Variante lief ueber den GESAMTEN Text und verband dabei Zeilenenden mit
+    // Zeilenanfaengen — aus den Zeilen "Q" und "F2 001354" wurde so das Phantom-
+    // Kennzeichen "Q-F 2", das ueber `ziehVehicleNach` bis in SA und Gutachten
+    // gewandert waere. Ein falsches Kennzeichen ist schaedlicher als keines.
+    for (const kandidat of lines) {
+      if (istFeldLabel(kandidat)) continue
+      if (KENNZEICHEN_ANKER.test(kandidat.trim())) {
+        result.kennzeichen = kandidat.trim()
+        break
+      }
+    }
   }
 
   // AAR-351: Fallback-Runde für Felder die ohne Label-Match null geblieben
@@ -183,12 +285,8 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
 
   // Hersteller-Fallback: OCR-Keywords im Fließtext
   if (!result.fahrzeug_hersteller) {
-    for (const { patterns, normalized } of HERSTELLER_KEYWORDS) {
-      if (patterns.some((p) => p.test(fullText))) {
-        result.fahrzeug_hersteller = normalized
-        break
-      }
-    }
+    const treffer = normalisiereHersteller(fullText)
+    if (treffer !== fullText) result.fahrzeug_hersteller = treffer
   }
 
   // Erstzulassung-Fallback: ältestes plausibles DD.MM.YYYY-Datum. Erstzulassung
@@ -220,9 +318,13 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
       result.halter_stadt = plzMatch[2].trim()
 
       // Zeile davor = Straße (nicht wenn es ein Feld-Label wie "C.3" ist)
+      // B5: `istFeldLabel` statt des alten `^[A-Z]\.?\d*$` — der erkannte nur den
+      // NACKTEN Code. Traegt die Zeile die Beschriftung mit ("C1.3 Anschnitt"),
+      // rutschte sie durch und das Formular-Label landete als Halteranschrift im
+      // Lead — und von dort in die Sicherungsabtretung.
       if (!result.halter_strasse && i > 0) {
         const prev = lines[i - 1]
-        if (prev && !/^[A-Z]\.?\d*$/i.test(prev) && prev.length > 2) {
+        if (prev && !istFeldLabel(prev) && prev.length > 2) {
           result.halter_strasse = prev
         }
       }
@@ -230,7 +332,7 @@ export function parseZB1Fields(fullText: string): ZB1ExtractedData {
       // 2 Zeilen davor = Name (optional Vorname nach Komma)
       if (!result.halter_nachname && i > 1) {
         const nameLine = lines[i - 2]
-        const isLabel = /^[A-Z]\.?\d*$/i.test(nameLine)
+        const isLabel = istFeldLabel(nameLine)
         const isNumeric = /^\d+$/.test(nameLine)
         if (nameLine && !isLabel && !isNumeric && nameLine.length > 1) {
           const parts = nameLine.split(/[,;]/).map((p) => p.trim()).filter(Boolean)

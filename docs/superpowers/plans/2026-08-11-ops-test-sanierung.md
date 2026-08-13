@@ -199,17 +199,55 @@ Die Erhebung vor dem Bau hat die Prämisse widerlegt. Aufschlüsselung der 16 Cl
 Parser liefert falsche Werte (Formular-Label als Straße, Vorname im Nachname-Feld, FIN nicht erkannt). Korpus aus vorhandenen Storage-Uploads bauen, Erwartungswerte **anonymisiert** (keine Klarnamen/FIN im Repo-Klartext), dann Parser dagegen härten.
 *Akzeptanz:* Reproduzierbare Testsuite; die drei bekannten Fehlklassen abgedeckt und grün.
 
-### D3 · Datum im US-Format — Ursache lokalisieren (P2)
-Die Plan-Annahme (natives `<input type="date">`) trug nicht: das Feld ist `typ='text'`. Systematisch nach Datumsausgaben **ohne** explizites `'de-DE'` suchen (`toLocaleDateString` / `toLocaleString` / `Intl.DateTimeFormat`) und die Fundstellen in den Kunden-Oberflächen geraderichten.
-*Akzeptanz:* Keine nutzersichtbare Datumsausgabe mehr im US-Format; Fundstellen dokumentiert.
+### D3 · Datum im US-Format — ✅ **diagnostiziert (13.08.), Fix ist eine Produktentscheidung**
+
+Die systematische Suche ist gelaufen und **im Code erfolglos** — das ist selbst der Befund:
+
+| Gesuchte Ursache | Treffer in `src/` |
+|---|---|
+| argumentloses `toLocaleDateString()` / `toLocaleString()` / `toLocaleTimeString()` | **0** |
+| `toLocale*(undefined \| locale \| lang)` | **0** |
+| `Intl.DateTimeFormat` ohne Locale | **0** — alle Treffer sind bewusst: `sv-SE`/`en-CA` erzeugen sortierbares `YYYY-MM-DD`, `i18n/format.ts` nutzt `localeToBcp47(locale)` |
+| `.toDateString()` | 5 — **alle nur Tagesvergleiche**, keine Anzeige |
+
+**Die verbleibende Erklärung: 23 native `<input type="date">`** — ausschließlich in den **internen** Portalen (admin, dispatch, faelle, gutachter), also genau dort, wo der Ops-Test lief. Ein nativer Date-Input rendert **immer im Browser-/OS-Locale**: deutscher Browser → `13.08.2026`, englischer → `08/13/2026`. Das ist per Code **nicht** korrigierbar.
+
+Die frühere Notiz „das Feld ist `typ='text'`" stimmt — gilt aber für den **Kunden-Flow**: `unfalldatum`, `halter_geburtsdatum`, `unfall_uhrzeit` stehen im Feldkatalog alle auf `typ='text'` (in der DB verifiziert). Dort gibt es also gar keinen nativen Date-Input. Die Annahme wurde damals auf der falschen Oberfläche geprüft.
+
+🔎 **Konsequenz:** Für einen deutschen Endnutzer mit deutschem Browser ist die Anzeige **korrekt**. Der Befund stammt mit hoher Wahrscheinlichkeit von einer nicht-deutschen Browser-/OS-Spracheinstellung am Testgerät.
+
+**Aaron-Entscheid nötig** — drei Optionen:
+1. **Nichts tun** (Empfehlung): Endnutzer sehen ihr eigenes Locale-Format; das ist Browser-Standardverhalten.
+2. Eigener Date-Picker statt nativem Input in den 23 Stellen — erzwingt DD.MM.YYYY für alle, kostet Zugänglichkeit + Mobile-Komfort des nativen Pickers.
+3. Nur die kundensichtbaren Stellen umstellen — betrifft aktuell **keine**, da alle 23 intern sind.
+
+*Zur Bestätigung genügt:* Browser-Sprache am Testgerät auf Deutsch stellen und dieselbe Maske erneut öffnen.
 
 ### D4 · Streaming-STT statt Batch-Transkription (P2, Beschaffung nötig)
 Voice ist im Flow eingebunden (`voiceDictation` am Unfallhergang), aber Batch: aufnehmen → stoppen → Whisper → Text am Stück. Wort-für-Wort ist so ausgeschlossen. Web Speech API wurde verworfen (Chrome schickt das Audio an Google — bei Unfall- und Personendaten datenschutzrechtlich zu prüfen).
 *Akzeptanz:* Text erscheint während des Sprechens; AVV liegt vor.
 
-### E3a · „Partnerwerkstatt vermitteln" — der kaputte Ablauf (P2)
-Es wird kein Auftrag angelegt, und der Kunde landet in einer Unterschrift statt in der Werkstattwahl. ⚠ **Zuerst prüfen, ob der Befund nach #5196 überhaupt noch gilt** — die Ursache ist nicht verifiziert, und bei F1/F2/F3/C1 lag sie jeweils woanders als vermutet.
-*Akzeptanz:* Vermittlung legt einen Auftrag an; der Kunde sieht seinen Claim und wählt die Werkstatt.
+### E3a · „Partnerwerkstatt vermitteln" — ❌ **GEGENSTANDSLOS** (Bestandsaufnahme 13.08.)
+
+Die vom RCA geforderte eigene Bestandsaufnahme des Werkstatt-Pfads ist gelaufen. **Alle drei Teilbehauptungen von #23 halten nicht.**
+
+Einstieg ist `gutachter/auftraege/PartnerWerkstattVermittelnButton.tsx` → `_actions/vermittle-partner-werkstatt.ts` (P4/Netzwerk, SV-Selbstanlage). Auf prod existiert genau **ein** Vermittlungsvorgang (`source_channel='gutachter-vermittlung'`):
+
+| Behauptung #23 | Befund |
+|---|---|
+| „legt keinen Auftrag an" | ❌ **falsch** — `CLM-2026-03529` wurde angelegt (Lead → `convertLeadToClaim` → Claim + FlowLink, `vermittle-partner-werkstatt.ts:83–161`) |
+| „schickt den Kunden in eine Unterschrift" | ❌ **designtes Verhalten** — PR #4922 hat die Vermittlungs-Sequenz bewusst auf `zusammenfassung/quali/feststellung/sa/account` verkürzt (der Kunde bringt ein fertiges Gutachten mit, braucht also keine Termin-/Logistik-Steps). Die SA ist bei Haftpflicht die **Abtretung** — sie gehört genau dorthin. |
+| „statt in die Werkstattauswahl" | ❌ **fachlich korrekt so** — siehe unten |
+
+**Warum keine Werkstattwahl erscheint:** Der Claim trägt `abrechnungsweg='haftpflicht'`. `reparaturPhaseErreicht()` (`lib/werkstatt/reparatur-phase-erreicht.ts`) gibt dort erst `true` zurück, **wenn das Gutachten abgeschlossen und kein Totalschaden ist** — bei Selbstzahler/Kasko dagegen sofort. Der Claim steht auf `filmcheck`, das Gutachten ist also noch in der QC. Man repariert nicht, bevor der Schaden abgenommen ist.
+
+Der Kunde sieht in diesem Zustand **nicht** nichts, sondern den Stepper auf `Begutachtung` mit dem Untertitel **„Gutachten wird geprüft"** (`phasen.subKunde.filmcheck`). Die Werkstattzone bleibt konsistent leer — und der Haftpflicht-Stepper (`ClaimStepper`) hat gar keine Werkstatt-Stufe, die eine Erwartung wecken würde. (Der R3-„Blind-Window"-Kommentar in `GeldZone.tsx` zielt auf den **Selbstzahler**-Stepper, der eine hat.)
+
+**Auch der scheinbare Rest löst sich auf:** Der Claim steht seit 09.08. im `filmcheck`, gehört aber `nicolas.kitta@claimondo.de` — er ist der **Testvorgang aus dem Ops-Test selbst**, kein wartender Kunde. Es gibt auf prod keinen einzigen echten Vermittlungsfall. (Sollte die QC künftig real liegenbleiben, fängt das der Hänger-Detektor #5223 + VPS-Cron #5241.)
+
+⚠ Nebenbefund: Dieser Test-Lead trägt eine **echte Telefonnummer** (`telefon` nicht NULL) — bei künftigen Tests des Vermittlungspfads gilt Regel 4 (Test-Konten mit `telefon = NULL`), sonst gehen echte Comms raus.
+
+**Der Sollzustand aus dem Test** („oben OCR für Gutachten *und* SV-Rechnung, daraus Claim per Klick") ist **E3b** — ein Feature-Wunsch, kein Fix.
 
 ### E3b · OCR-Einstieg für Gutachten + SV-Rechnung (P3, Feature)
 Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen. Eigenes Feature-Ticket, folgt auf E3a.
@@ -257,18 +295,29 @@ Kein Automatismus meldet steckengebliebene Fälle — `CLM-2026-01011` hing 13 T
 # Empfohlene Reihenfolge
 
 ~~R1~~ ✅ · ~~R4~~ ✅ (#5212) · ~~H0~~ ✅ (§2 nachgezogen, §9 bei 6/9, #5184)
+~~**B4**~~ ❌ **gegenstandslos** — die Prämisse ist widerlegt, die Migration wäre schädlich gewesen (Details oben bei B4). **Nicht bauen.**
+~~**R2**~~ ✅ — alle vier Lane-Smokes (E · F3 · B · C1) gebaut und **gegen prod grün** (#5237).
+~~**I1**~~ ✅ **Code** (#5223) — ⚠ der Cron braucht noch den VPS-Crontab-Eintrag, sonst läuft er nie (liegt bei der `ops-vps-crontab-nachzug`-Session).
 
-**Jetzt, nach den Entscheidungen vom 12.08.:**
+~~**F5**~~ ✅ **gebaut** — `_components/nav-aktiv.ts` + Unit-Tests; der Kommentar dort nennt den Auslöser („Ops-Test #26"). Genau ein Nav-Eintrag ist aktiv, auch unter `/kunde/fahrzeuge/[vehId]/schaden/[claimId]`.
+~~**F4**~~ ✅ **gebaut** — der fahrzeug-zentrierte Einstieg steht: `/kunde/fahrzeuge` (Liste), `/[id]` (Detail), `/[id]/schaden/[claimId]` (Claim von dort). Damit erklärt sich auch der Titel von F5.
+~~**D3**~~ ✅ **diagnostiziert** — Ursache sind native `<input type="date">` + Browser-Locale, kein Code-Defekt (Details oben). Nur noch Aaron-Entscheid.
 
-1. **B4** — Kennzeichen-Migration. Klein und dringend: falsche Kennzeichen wandern sonst in Gutachten und Abrechnung. Erhebung (SA-Status) zuerst.
-2. **I1** — Hänger-Detektor. Größter operativer Wert; erst Bestand (`sla-check`, `task-eskalation`) sichten.
-3. **F5** — Nav-Sprung. Klein, sofort sichtbar.
-4. **R2** — Regel-4-Smokes für B/C1/E/F3. **Größte verbleibende Lücke:** fünf gemergte Lanes ohne Nachweis am lebenden System.
-5. **D2** — Unfallskizze, entsperrt sobald #5212 deployed ist.
-6. **B5** · **D3** · **E3a** — Testkorpus, Datumssuche, Werkstatt-Ablauf.
-7. **H2** — SA-WhatsApp 7→3 („drei nach Zweck"). ⚠ Territorium `app/flow/[token]/actions.ts`.
-8. **§9-Reste** — #5 (~13 Intake-Writer außerhalb `createCase`) · #6 (Outbox-Dedup) · #7 (Makler-Akte ist frei; Flotte + Kunde gehören fremden Lanes).
-9. **D4** (nach Anbieterwahl) · **E3b** · **F4** — Beschaffung bzw. eigene Produkt-Tickets.
+**Jetzt offen, in dieser Reihenfolge:**
+
+1. ~~**B5**~~ ✅ **Parser gehärtet → PR #5243** (13.08.). Eine Wurzel für alle Fehler: die Label-Anker verlangten die Zeile *exakt* als Feldcode, echtes OCR legt die Beschriftung daneben. **Vierter, vorher unbekannter Fehler:** `kennzeichen` war `Q-F 2` statt `XX Z123` — genau der Wert, den `ziehVehicleNach` ins Claim-Fahrzeug zieht. ⚠ Der **Testkorpus ist nicht baubar** (231 der 233 Bucket-Dateien sind Smoke-Dummies, 1 echter `raw_text`); die FIN war **kein** Fehler (18 statt 17 Zeichen → korrekt abgelehnt). **Regel-4-Smoke steht aus.**
+2. ~~**E3a**~~ ❌ **gegenstandslos** (Bestandsaufnahme 13.08., Details oben) — der Claim wird angelegt, die Unterschrift ist designt, und die Werkstattwahl kommt bei Haftpflicht fachlich erst nach der Gutachten-Freigabe. **Nichts zu bauen.**
+3. **§9-Reste** — #5 (~13 Intake-Writer außerhalb `createCase`) · #6 (Outbox-Dedup) · #7 (Makler-Akte ist frei; Flotte + Kunde gehören fremden Lanes). **Jetzt der größte offene Code-Posten.**
+4. **D2** — Unfallskizze: im Kunden-Flow bisher **nur als Ankündigungstext** vorhanden („Daraus erstellen wir die präzise Unfallskizze" in `feststellung-steps.ts`), das Feature selbst liegt in Dispatch. Scope vor dem Bau klären.
+5. **D4** (nach Anbieterwahl) · **E3b** — Beschaffung bzw. eigenes Produkt-Ticket.
+
+**H2** (SA-WhatsApp 7→3) — **vermutlich erledigt, nicht abschließend belegt.** In `signSAandCreateFall` (die Funktion läuft von Z. 684 bis Dateiende) gehen heute noch **drei** Sends an den Kunden: `sendWhatsAppText` (Willkommen), `sendFallCommunication('fall_eroeffnet')`, `sendFallCommunication('info_nach_sa')`. Die übrigen adressieren SV oder Team. Das entspricht dem Ziel „drei nach Zweck" — ob die ursprüngliche „6–7" dieselbe Zählweise hatte, ist aus dem Marker nicht rekonstruierbar. ⚠ Territorium `app/flow/[token]/actions.ts`.
+
+> ⚠ **Diese Liste war bis 13.08. eine Falle:** Sie führte B4 als Priorität 1 mit der Begründung „falsche Kennzeichen wandern sonst in Gutachten und Abrechnung" — obwohl der Detail-Abschnitt B4 weiter oben die Prämisse längst widerlegt hatte. Wer die Reihenfolge liest statt den Abschnitt, hätte die schädliche Migration gebaut.
+>
+> **Zwei Lehren:**
+> 1. Eine Widerlegung muss an **jeder** Stelle nachgezogen werden, an der die Aufgabe auftaucht — Detailabschnitt UND Reihenfolge UND Marker.
+> 2. **Vor dem Bau gegen `origin/staging` prüfen, nicht gegen den lokalen Checkout.** Beim Nachziehen am 13.08. stellte sich heraus: F5, F4 und D3 waren längst erledigt — der Haupt-Checkout hing so weit zurück, dass `KundeNav.tsx` dort 75, die Fall-Detailseite 973 Zeilen anders aussah als auf `staging`. Wer den lokalen Stand liest, baut Erledigtes nach.
 
 ---
 

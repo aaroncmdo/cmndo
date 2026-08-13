@@ -10,6 +10,7 @@ import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { TextField } from '@/components/shared/forms/TextField'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { DatumFeld } from '@/components/shared/forms/DatumFeld'
 import { SelectField, type SelectFieldOption } from '@/components/shared/forms/SelectField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
@@ -34,6 +35,7 @@ export default function SchadenMeldenWizard() {
     fahrzeugHersteller: '',
     fahrzeugModell: '',
     unfalldatum: '',
+    unfallUhrzeit: '',
     unfallhergang: '',
     unfallort: '',
     unfallortLat: null,
@@ -93,20 +95,28 @@ export default function SchadenMeldenWizard() {
       <SectionCard title="Unfall / Schaden" subtitle="Wann und wo ist es passiert?">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <TextField
+            {/* Ops-Test #13: war `type="date"` — das rendert im Browser-Locale, ein
+                deutscher Nutzer mit englischem System sah MM/DD/YYYY. DatumFeld zeigt
+                immer TT.MM.JJJJ und meldet weiterhin ISO zurück. */}
+            <DatumFeld
               label="Datum"
-              type="date"
-              value={f.unfalldatum ?? ''}
-              onChange={(e) => set('unfalldatum', e.target.value)}
+              valueIso={f.unfalldatum}
+              onChangeIso={(iso) => set('unfalldatum', iso)}
             />
+            {/* Weg-6-Audit Punkt C: `unfallUhrzeit` war im Formular-Typ vorhanden und
+                wurde nach `unfall_uhrzeit` gemappt — nur das Eingabefeld fehlte, also
+                blieb claims.schadenzeit immer NULL. Der Flow erhebt die Uhrzeit
+                (feststellung-steps.ts). Für ein Gutachten zählt sie: Lichtverhältnisse,
+                Verkehrslage, Plausibilität des Hergangs.
+                Hier bewusst `type="time"` statt eines Pendants zu DatumFeld: ein
+                englisches Systemlocale zeigt zwar „2:30 PM" statt „14:30", der Wert
+                bleibt aber HH:MM (24h) und ist EINDEUTIG. Beim Datum war das anders —
+                03/04 ist echt zweideutig, deshalb brauchte es dort ein eigenes Feld. */}
             <TextField
-              label="PLZ des Schadenorts"
-              value={f.schadenPlz ?? ''}
-              onChange={(e) => set('schadenPlz', e.target.value)}
-              placeholder="50667"
-              inputMode="numeric"
-              maxLength={5}
-              required
+              label="Uhrzeit (optional)"
+              type="time"
+              value={f.unfallUhrzeit ?? ''}
+              onChange={(e) => set('unfallUhrzeit', e.target.value)}
             />
           </div>
           {/* Ops-Test #14: war ein reines Textfeld. Dieser Einstieg erzeugte damit Leads
@@ -140,6 +150,17 @@ export default function SchadenMeldenWizard() {
               }}
             />
           </div>
+          {/* PLZ steht bewusst UNTER dem Ort: die Places-Auswahl füllt sie automatisch —
+              ein Feld, das sich weiter oben von selbst ändert, wirkt wie ein Fehler. */}
+          <TextField
+            label="PLZ des Schadenorts"
+            value={f.schadenPlz ?? ''}
+            onChange={(e) => set('schadenPlz', e.target.value)}
+            placeholder="50667"
+            inputMode="numeric"
+            maxLength={5}
+            required
+          />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="hergang" className="text-xs font-semibold text-claimondo-shield">
               Was ist passiert?
