@@ -444,23 +444,34 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             dem Profil-<Link> (nicht darin) — sonst bubblet ihr Klick zum <Link>
             und navigiert nach /kunde/profil statt das Popover zu oeffnen. */}
         <div className="kunde-sidebar-rest mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3 transition-opacity duration-200">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/kunde/profil"
-              className="flex flex-1 min-w-0 items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
+          {/* Profil-Link auf voller Breite, Trigger-Zeile DARUNTER — nicht daneben.
+              Vorher standen beide in einer Flex-Zeile; die ist bei lg:w-60 nur 216 px
+              breit und war ueberbucht: UpdatesNav rendert den Text "Updates" + Badge
+              und belegt allein 124 px, Outbox und Suche je 34 px, dazu 2x12 px gap —
+              macht exakt 216 px. Fuer den Profil-Link blieb nichts: er wurde trotz
+              flex-1 auf 34 px (Avatarbreite) gequetscht, sodass Name und
+              "Profil ansehen" aus ihrem Container in die Nachbarn liefen. Sichtbar
+              als uebereinanderliegender Text im Sidebar-Fuss (auch auf dem
+              Marketing-Screenshot der Fallakte). */}
+          <Link
+            href="/kunde/profil"
+            className="flex w-full min-w-0 items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
+          >
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+              style={{ backgroundColor: accentBg }}
             >
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                style={{ backgroundColor: accentBg }}
-              >
-                {initials}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{displayName}</p>
-                <p className="text-[10px] text-claimondo-light-blue leading-tight">{tDrawer('profilAnsehen')}</p>
-              </div>
-            </Link>
-            {/* Sidebar-Fuß sitzt unten-links → Popover nach oben-rechts. */}
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-medium truncate">{displayName}</p>
+              <p className="text-[10px] text-claimondo-light-blue leading-tight truncate">{tDrawer('profilAnsehen')}</p>
+            </div>
+          </Link>
+          {/* Sidebar-Fuß sitzt unten-links → Popover nach oben-rechts. Die Trigger
+              bleiben ausserhalb des <Link> (Klick wuerde sonst nach /kunde/profil
+              bubblen statt das Popover zu oeffnen) — jetzt nur eine Zeile tiefer. */}
+          <div className="flex items-center gap-2 px-3">
             <SearchTriggerButton />
             <OutboxBadge />
             <UpdatesNav variant="dark" placement="up-right" />
