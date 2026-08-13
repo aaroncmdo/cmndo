@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { FileTextIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -31,6 +33,31 @@ export function EinstellungenSettings({
 }) {
   return (
     <>
+      {/* Ops-Test #18: „SA-Upload in den Einstellungen nachrüsten (bislang nur im
+          Onboarding)." Erhebung 13.08.: Der Upload existiert bereits vollständig auf
+          /gutachter/verifizierung — samt Sicherungsabtretung —, und die Slots dort
+          rendern UNABHÄNGIG vom Verifizierungsstatus. Es fehlte allein der WEG dorthin:
+          `layout.tsx` blendet den Nav-Eintrag aus, sobald `verifizierung_status`
+          'geprueft' ist ("Die Route blieb erreichbar, war aber unauffindbar"). Ein
+          fertig verifizierter SV fand seine Dokumente also nie wieder und musste für
+          jeden Austausch — neue AGB, neue Kanzlei — den Support bemühen.
+          Deshalb hier ein dauerhafter Einstieg statt eines zweiten Uploads: die
+          Upload-Logik bleibt an genau EINER Stelle. */}
+      <SectionCard className="p-6 mt-5">
+        <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Dokumente &amp; Nachweise</h2>
+        <p className="text-xs text-claimondo-ondo/70 mb-4">
+          Sicherungsabtretung, Honorarvereinbarung und Ihre Qualifikations-Nachweise
+          ansehen oder durch eine neue Fassung ersetzen.
+        </p>
+        <Link
+          href="/gutachter/verifizierung"
+          className="inline-flex items-center gap-2 rounded-ios-lg border border-claimondo-border px-3 py-2 text-sm font-medium text-claimondo-navy transition-colors hover:border-claimondo-ondo hover:bg-claimondo-bg"
+        >
+          <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
+          Dokumente verwalten
+        </Link>
+      </SectionCard>
+
       {/* KFZ-158 Phase 2: GPS-Tracking Privacy-Toggle */}
       <SectionCard className="p-6 mt-5">
         <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Live-Standort</h2>
