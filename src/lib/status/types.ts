@@ -10,7 +10,7 @@ export type StatusSlot =
 export type ViewerRole = 'admin' | 'kb' | 'sv' | 'kunde'
 
 // Registry domain keys. Extended per wave.
-export type DomainName = 'fall-status' | 'fall-phase' | 'claim-main-phase' | 'claims-status' | 'lead-workflow' | 'vertrieb-workflow' | 'cold-mail' | 'partner-aktivitaet' | 'netzwerk-abo'
+export type DomainName = 'fall-status' | 'fall-phase' | 'claim-main-phase' | 'claims-status' | 'lead-workflow' | 'vertrieb-workflow' | 'cold-mail' | 'partner-aktivitaet' | 'netzwerk-abo' | 'task-prioritaet'
 
 export type StatusDef = {
   /** Default / Fachsprache */

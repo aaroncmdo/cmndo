@@ -23,6 +23,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import PageHeader from '@/components/shared/PageHeader'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -140,7 +141,8 @@ export default async function DispatchTasksSeite({
 
       {abgeschnitten ? (
         <p className="text-body-xs text-claimondo-ondo/70">
-          Zeigt die {liste.length} ältesten von {gesamt} Aufgaben.
+          Zeigt {liste.length} von {gesamt} Aufgaben — alle Eskalationen und darunter die am
+          längsten liegenden.
         </p>
       ) : null}
 
@@ -157,17 +159,11 @@ export default async function DispatchTasksSeite({
                 <>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={cn(
-                          'shrink-0 rounded px-1.5 py-0.5 text-caption font-bold',
-                          t.prioritaet === 'kritisch'
-                            ? 'bg-danger-soft text-danger-strong'
-                            : t.prioritaet === 'dringend'
-                              ? 'bg-warning-soft text-warning-strong'
-                              : 'bg-claimondo-bg text-claimondo-ondo',
-                        )}
-                      >
-                        {t.prioritaet}
+                      {/* Farbe + Label aus der Registry-Domain `task-prioritaet` statt aus
+                          einem Farb-Ternary — genau die streuen dieselbe Zuordnung ueber
+                          viele Dateien, bis sie auseinanderlaeuft (Status-Registry-Gate). */}
+                      <span className="shrink-0">
+                        <StatusBadge domain="task-prioritaet" code={t.prioritaet} />
                       </span>
                       <p className="truncate text-body-sm font-medium text-claimondo-navy">{t.titel}</p>
                     </div>
