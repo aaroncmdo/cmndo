@@ -4,6 +4,7 @@ import { inter, notoSans, spaceMono, spaceGrotesk } from './fonts/fonts'
 import { SITE } from '@/lib/site'
 import { CLUSTER } from '@/lib/cluster'
 import { CookieConsentBanner } from '@/components/CookieConsent'
+import { ProSealWidget } from '@/components/ProSealWidget'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <CookieConsentBanner />
+        <ProSealWidget />
       </body>
     </html>
   )
