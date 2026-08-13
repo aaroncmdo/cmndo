@@ -12,6 +12,7 @@ import { saveOnboardingFields } from '@/lib/onboarding/save-onboarding-fields'
 import { resolveFlowLeadId } from '@/lib/flow/flow-token'
 import type { OnboardingFeld } from '@/components/onboarding/types'
 import type { OnboardingWriteContext } from '@/lib/onboarding/write-context'
+import type { SkizzeLeadClient } from '@/lib/unfallskizze/erzeuge-fuer-lead'
 
 export async function speichereFeststellungFlow(
   token: string,
@@ -84,46 +85,21 @@ export async function speichereFeststellungFlow(
   // die Promise laeuft also zu Ende. Geht sie bei einem Deploy verloren, bleibt der
   // manuelle Dispatch-Weg (generateAndSaveUnfallskizze) — die Skizze ist nirgends
   // Voraussetzung, sie ist eine Zugabe.
+  // Die vier Schritte (Stand lesen, Regel pruefen, generieren, speichern) stehen geteilt
+  // in erzeugeSkizzeFuerLead — createLead ruft dieselbe Funktion beim Anlegen auf, wenn
+  // der Hergang schon im ersten Save mitkommt (Kunde-Portal, Schaden-Karte, Werkstatt-
+  // Finder, …). Hier ist der zweite Moment: im Flow entsteht der Lead frueher als der Text.
   void (async () => {
-  try {
-    const { sollSkizzeGenerieren } = await import('@/lib/unfallskizze/soll-generieren')
-    const { data: standAlt } = await admin
-      .from('leads')
-      .select('unfallskizze_svg, schadentyp, gegner_fahrzeugtyp')
-      .eq('id', leadId)
-      .maybeSingle()
-
-    if (
-      sollSkizzeGenerieren({
-        hergangImSave: values.unfallhergang,
-        vorhandeneSkizze: (standAlt?.unfallskizze_svg as string | null) ?? null,
-      })
-    ) {
-      const { generateUnfallskizze } = await import('@/lib/unfallskizze/generate')
-      const skizze = await generateUnfallskizze({
-        unfallhergang: String(values.unfallhergang),
-        schadentyp: (standAlt?.schadentyp as string | null) ?? null,
-        gegnerFahrzeugtyp: (standAlt?.gegner_fahrzeugtyp as string | null) ?? null,
-      })
-      if (skizze.success) {
-        const { error: skizzeErr } = await admin
-          .from('leads')
-          .update({
-            unfallskizze_svg: skizze.svg,
-            unfallskizze_bestaetigt: false,
-            unfallskizze_ablehnung_grund: null,
-            unfallskizze_generiert_am: new Date().toISOString(),
-          } as never)
-          .eq('id', leadId)
-        if (skizzeErr) console.warn('[feststellung] Unfallskizze speichern (non-critical):', skizzeErr.message)
-      } else {
-        console.warn('[feststellung] Unfallskizze-Generierung (non-critical):', skizze.error)
-      }
-    }
-  } catch (err) {
+    const { erzeugeSkizzeFuerLead } = await import('@/lib/unfallskizze/erzeuge-fuer-lead')
+    await erzeugeSkizzeFuerLead({
+      leadId,
+      hergang: values.unfallhergang,
+      admin: admin as unknown as SkizzeLeadClient,
+      kontext: 'feststellung',
+    })
+  })().catch((err) => {
     console.warn('[feststellung] Unfallskizze (non-critical):', err)
-  }
-  })()
+  })
 
   revalidatePath('/dispatch/leads')
   return { ok: true }
