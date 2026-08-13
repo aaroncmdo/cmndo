@@ -514,12 +514,11 @@ export default function DatenschutzPage() {
               Auf unserer Startseite binden wir das Bewertungssiegel („ProSeal") von ProvenExpert
               ein, einem Angebot der Expert Systems AG, Quedlinburger Straße 1, 10589 Berlin. Beim
               Laden des Siegels werden Daten — insbesondere Ihre IP-Adresse sowie technische
-              Browserdaten — an den Anbieter übertragen. Die Einbindung erfolgt{' '}
-              <strong>erst nach Ihrer Einwilligung</strong> über das Consent-Banner (Kategorie
-              „Statistik"); ohne Einwilligung wird das Siegel nicht geladen und es entsteht keine
-              Verbindung Ihres Browsers zum Anbieter. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a
-              DSGVO; Sie können Ihre Einwilligung jederzeit über die Cookie-Einstellungen
-              widerrufen.
+              Browserdaten — an den Anbieter übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f
+              DSGVO (berechtigtes Interesse an der Darstellung geprüfter Kundenbewertungen). Sie
+              können der Einbindung <strong>jederzeit widersprechen</strong> — über die
+              Cookie-Einstellungen, Kategorie „Statistik". Nach einem Widerspruch wird das Siegel
+              nicht mehr geladen und es entsteht keine Verbindung Ihres Browsers zum Anbieter.
             </p>
             <p className="mt-2">
               Davon zu unterscheiden ist die Anzeige unserer Bewertungsnote und der Anzahl der
