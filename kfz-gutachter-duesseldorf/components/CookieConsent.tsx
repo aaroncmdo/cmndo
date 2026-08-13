@@ -50,6 +50,14 @@ export function CookieConsentBanner() {
   function save(cats: string[]) {
     writeConsent(cats)
     applyGcm(cats.includes('analytics'), cats.includes('ads'))
+    // Andere Consent-Verbraucher (ProSealWidget) sofort informieren — ohne das
+    // erschiene das Siegel erst beim naechsten Seitenaufruf, obwohl der Besucher
+    // gerade zugestimmt hat.
+    try {
+      window.dispatchEvent(new Event('cc:changed'))
+    } catch {
+      // noop
+    }
     setOpen(false)
   }
 
