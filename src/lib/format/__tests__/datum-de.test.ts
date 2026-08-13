@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { formatiereDatumEingabe, deZuIso, isoZuDe } from '../datum-de'
+import { formatiereDatumEingabe, deZuIso, isoZuDe, istUnvollstaendigeEingabe } from '../datum-de'
 
 describe('formatiereDatumEingabe', () => {
   it.each([
@@ -112,5 +112,33 @@ describe('formatiereDatumEingabe — vom Nutzer gesetzte Trennzeichen', () => {
 
   it('ignoriert alles ab der vierten Gruppe — ein Datum hat drei Teile', () => {
     expect(formatiereDatumEingabe('1.2.2026.9')).toBe('1.2.2026')
+  })
+})
+
+// Zweiter Anlauf derselben Bug-Klasse (13.08.): auto-speichernde Felder (InlineEditField
+// in der Fallakte) speichern bei BLUR. Dort heisst ein leerer ISO-Wert zweierlei —
+// „geleert" oder „noch am Tippen". Ohne Unterscheidung nimmt ein Klick neben das Feld
+// das Datum weg, waehrend der Nutzer seinen Text noch davor stehen sieht.
+describe('istUnvollstaendigeEingabe — schuetzt auto-speichernde Felder', () => {
+  it('leeres Feld ist NICHT unvollstaendig (Loeschen muss erlaubt bleiben)', () => {
+    expect(istUnvollstaendigeEingabe('')).toBe(false)
+    expect(istUnvollstaendigeEingabe('   ')).toBe(false)
+  })
+
+  it('Zwischenstaende beim Tippen sind unvollstaendig', () => {
+    expect(istUnvollstaendigeEingabe('1')).toBe(true)
+    expect(istUnvollstaendigeEingabe('15.03.')).toBe(true)
+    expect(istUnvollstaendigeEingabe('15.03.202')).toBe(true)
+  })
+
+  it('ein vollstaendiges Datum ist nicht unvollstaendig — auch einstellig', () => {
+    expect(istUnvollstaendigeEingabe('15.03.2026')).toBe(false)
+    expect(istUnvollstaendigeEingabe('3.4.2026')).toBe(false)
+  })
+
+  it('ein UNMOEGLICHES Datum gilt als unvollstaendig — es darf nichts ueberschreiben', () => {
+    // 31.02. laesst sich tippen, existiert aber nicht. Es als "fertig" zu behandeln
+    // wuerde den gespeicherten Wert mit Leere ueberschreiben.
+    expect(istUnvollstaendigeEingabe('31.02.2026')).toBe(true)
   })
 })

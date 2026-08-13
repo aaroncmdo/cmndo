@@ -8,7 +8,7 @@
 import { useState, useTransition } from 'react'
 import { LoaderIcon, CheckIcon } from 'lucide-react'
 import { useFall } from '../FallContext'
-import { formatiereDatumEingabe, deZuIso, isoZuDe } from '@/lib/format/datum-de'
+import { formatiereDatumEingabe, deZuIso, isoZuDe, istUnvollstaendigeEingabe } from '@/lib/format/datum-de'
 
 type Props = {
   label: string
@@ -48,6 +48,16 @@ export default function InlineEditField({
 
   function handleBlur() {
     if (!editable) return
+    // Dieses Feld speichert AUTOMATISCH bei Blur. Bei einem Datum heisst draft='' aber
+    // zweierlei: das Feld wurde geleert (loeschen ist gewollt) ODER die Eingabe ist noch
+    // unvollstaendig ("15.03."). Ohne die Unterscheidung nimmt ein Klick neben das Feld
+    // das gespeicherte Datum weg, waehrend der Nutzer seinen Text noch davor stehen
+    // sieht — stiller Datenverlust. Die Anzeige springt stattdessen sichtbar zurueck.
+    if (type === 'date' && istUnvollstaendigeEingabe(datumAnzeige)) {
+      setDatumAnzeige(isoZuDe(initial))
+      setDraft(initial)
+      return
+    }
     const final = transform ? transform(draft) : draft
     if (final === initial) return
     setStatus('saving')

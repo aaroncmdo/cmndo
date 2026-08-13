@@ -75,3 +75,19 @@ export function isoZuDe(iso: string | null | undefined): string {
   if (!m) return ''
   return `${m[3]}.${m[2]}.${m[1]}`
 }
+
+/**
+ * Steht im Feld eine ANGEFANGENE, aber noch unvollstaendige Datumseingabe ("15.03.")?
+ *
+ * Der Unterschied ist nur fuer Felder wichtig, die **automatisch bei Blur speichern**:
+ * dort bedeutet ein leerer ISO-Wert zweierlei — der Nutzer hat das Feld GELEERT (dann
+ * soll wirklich geloescht werden) oder er ist mitten im Tippen (dann darf der
+ * gespeicherte Wert NICHT verschwinden). Ohne diese Unterscheidung nimmt ein Klick
+ * neben das Feld das Datum weg, waehrend der Nutzer seinen Text noch davor stehen
+ * sieht — dieselbe Klasse stillen Datenverlusts, die schon `formatiereDatumEingabe`
+ * einmal produziert hat (Regel-4-Smoke 13.08., „3.4.2026").
+ */
+export function istUnvollstaendigeEingabe(anzeige: string): boolean {
+  const t = anzeige.trim()
+  return t !== '' && deZuIso(t) === null
+}
