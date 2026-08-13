@@ -33,7 +33,7 @@ function darfSiegelLaden(): boolean {
   return parseConsent(m[1]).statistics // Entscheidung liegt vor -> respektieren
 }
 
-// ProvenExpert ProSeal — das offizielle, schwebende Trust-Siegel (sticky rechts unten).
+// ProvenExpert ProSeal — das offizielle, schwebende Trust-Siegel (sticky rechts OBEN).
 //
 // ABGRENZUNG zum server-seitigen Siegel: <ProvenExpertSiegel> im Home-Trust-Strip holt
 // Note + Anzahl ueber die Rating-API und rendert sie im Claimondo-Design, ohne dass der
@@ -61,6 +61,11 @@ function darfSiegelLaden(): boolean {
 //
 // Konfiguration = das Snippet aus dem ProvenExpert-Dashboard (Marketing → ProSeal),
 // 1:1 uebernommen; `widgetId` ist account-gebunden.
+//
+// ⚠ `bottom` unten ist WIRKUNGSLOS und bleibt nur stehen, damit das Snippet
+// unveraendert nachvollziehbar ist: die vertikale Position kommt aus der Regel
+// `.pe-pro-seal` in app/globals.css (top statt bottom, mit !important). Das Widget
+// bietet keine top-Option — Begruendung und Messwerte stehen dort.
 const PROSEAL_SRC = 'https://s.provenexpert.net/seals/proseal-v2.js'
 const PROSEAL_CONFIG = {
   widgetId: '8d507789-add3-47a2-aa80-c8c82937c29a',
