@@ -140,10 +140,23 @@ test('Finder-Buchung: Wegwerf-SV am obskuren Ort bis Termin reserviert', async (
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
 
-  // ── Step 5: absenden + Bestaetigung ───────────────────────────────────────────────────
+  // ── Step 5: absenden + Zusage ─────────────────────────────────────────────────────────
   await expect(vis(page, 'button:has-text("Termin reservieren")'), 'Buchen-Button bereit').toBeEnabled()
   await vis(page, 'button:has-text("Termin reservieren")').click()
-  await expect(vis(page, ':text("Termin reserviert")'), 'Bestätigung "Termin reserviert"').toBeVisible({ timeout: 25_000 })
+
+  // Die Danke-Seite meldet je nach Ausgang "Termin bestaetigt" (Auto-Confirm greift) ODER
+  // "Termin reserviert". Beides ist eine ZUSAGE und damit hier korrekt — die frueher fest
+  // verdrahtete Erwartung auf "reserviert" liess den Test rot laufen, obwohl die Buchung
+  // sauber durchging (prod 12.08.: "Termin bestätigt — Ihr Gutachter kommt am … um 09:00").
+  // Verboten ist nur der ANFRAGE-Ausgang: das war der Ops-Test-Bug RC-1 (Zusage ohne Termin).
+  // Der harte Beweis steht ohnehin unten in der DB (gfa.termin_id), nicht im Text.
+  const dankeText = async () => (await page.locator('body').innerText()).replace(/\s+/g, ' ').trim()
+  await expect
+    .poll(dankeText, { timeout: 30_000, message: 'Danke-Seite erscheint' })
+    .toMatch(/Termin (bestätigt|reserviert)|Terminanfrage eingegangen|konnte nicht|Fehler/i)
+  const danke = await dankeText()
+  expect(danke, 'echter Slot => ZUSAGE, nicht nur Anfrage').toMatch(/Termin (bestätigt|reserviert)/i)
+  expect(danke, 'keine unverbindliche Anfrage bei einem echten Slot').not.toContain('Terminanfrage eingegangen')
 
   // ── Verify (service-role): gfa dem Wegwerf-SV zugeordnet (Partner-Matching) ──
   await page.waitForTimeout(2_500) // revalidate + gfa.termin_id-Update
