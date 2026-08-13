@@ -2,62 +2,32 @@
 
 import { useEffect, useRef } from 'react'
 
-import {
-  CONSENT_CHANGED_EVENT,
-  CONSENT_COOKIE_NAME,
-  parseConsent,
-} from '@/lib/analytics/consent'
-
-/**
- * Darf das Siegel laden? — OPT-OUT, passend zur Hausregel dieser Seite.
- *
- * claimondo.de faehrt Consent-Default **'granted'** (Anwalts-Freigabe + GF-Entscheid
- * 26.06.2026, siehe app/[locale]/layout.tsx); das CMP ist ein **Opt-out**, es gibt kein
- * Opt-in-Banner. `hasTrackingConsent()` liefert deshalb `false`, solange der Besucher
- * gar nichts entschieden hat — und genau das ist der Normalfall. Haengt man das Siegel
- * daran, erscheint es praktisch nie (auf prod verifiziert: 0 Requests, kein Badge).
- *
- * Richtig ist die gleiche Logik wie fuer Analytics/Clarity auf dieser Seite:
- *   • keine Entscheidung getroffen  -> laden (Default 'granted')
- *   • aktiv widersprochen           -> NICHT laden
- *
- * Damit respektiert das Siegel jeden Widerspruch, folgt aber der freigegebenen Linie
- * statt eine strengere Sonderregel zu sein.
- */
-function darfSiegelLaden(): boolean {
-  if (typeof document === 'undefined') return false
-  const m = document.cookie.match(
-    new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'),
-  )
-  if (!m?.[1]) return true // keine Entscheidung -> Hausregel 'granted'
-  return parseConsent(m[1]).statistics // Entscheidung liegt vor -> respektieren
-}
-
 // ProvenExpert ProSeal — das offizielle, schwebende Trust-Siegel (sticky rechts OBEN).
 //
 // ABGRENZUNG zum server-seitigen Siegel: <ProvenExpertSiegel> im Home-Trust-Strip holt
 // Note + Anzahl ueber die Rating-API und rendert sie im Claimondo-Design, ohne dass der
 // Besucher-Browser ProvenExpert kontaktiert. Das hier ist das ProSeal-WIDGET von
-// ProvenExpert selbst — eigenes Design, eigene Reviews-Ansicht, sticky am Rand. Beide
-// koennen nebeneinander stehen; das eine ist Inline-Trust im Strip, das andere das
-// bekannte Badge.
+// ProvenExpert selbst — eigenes Design, eigene Reviews-Ansicht, sticky am Rand.
 //
-// CONSENT (Opt-out, siehe darfSiegelLaden oben):
-// Das Widget laedt `s.provenexpert.net` IM BESUCHER-BROWSER, die IP des Besuchers geht
-// also an einen Dritten. Es respektiert daher jeden Widerspruch — folgt aber der
-// Hausregel dieser Seite (Default 'granted', CMP = Opt-out) statt auf eine Einwilligung
-// zu warten, die hier gar nicht eingeholt wird.
+// KEIN CONSENT-GATE — Entscheidung Aaron 13.08.2026.
+// Das Siegel laedt auf jedem Seitenaufruf, unabhaengig vom CMP. Damit haengt es nicht
+// mehr an der Kategorie „Statistik"; entsprechend ist es dort auch nicht mehr genannt
+// (ConsentManager) — ein CMP, das eine Kategorie fuer etwas verantwortlich macht, das
+// sie gar nicht steuert, waere schlimmer als gar kein Hinweis.
 //
-// Ablauf, analog zu Clarity (useClarityConsentInit):
-//   - initial pruefen, bei erlaubtem Zustand sofort laden
-//   - auf CONSENT_CHANGED_EVENT lauschen, falls der Besucher spaeter zustimmt
-//   - einmal geladen bleibt geladen (ein erneutes Injizieren gaebe doppelte Badges)
+// Was dabei tatsaechlich passiert (am 13.08. im Browser gemessen, nicht abgeleitet):
+//   • Request an s.provenexpert.net + d.provenexpert.net -> die IP des Besuchers geht
+//     an einen Dritten (Expert Systems AG, Berlin)
+//   • EIN Eintrag in sessionStorage: `PE_PRO_SEAL_CACHE` (Note/Anzahl, damit nicht
+//     jeder Seitenaufruf neu laedt) — endet mit dem Schliessen des Tabs
+//   • KEINE Cookies, KEIN localStorage
+// Genau so steht es in der Datenschutzerklaerung, Abschnitt 9.6, mit Art. 6 Abs. 1
+// lit. f als Rechtsgrundlage und Widerspruch nach Art. 21 ueber die dort genannte
+// Kontaktadresse.
 //
-// ⚠ Ein bereits geladenes Widget verschwindet nicht, wenn der Besucher waehrend der
-// Sitzung widerspricht — das Script laesst sich nicht zurueckrufen. Beim naechsten
-// Seitenaufruf greift der Widerspruch. Wer das haerter braucht, muss beim Widerruf
-// reloaden; das ist bewusst nicht eingebaut, weil es jede CMP-Interaktion zu einem
-// Seiten-Reload machen wuerde.
+// ⚠ Wer das wieder an eine Einwilligung haengen will, muss BEIDES anfassen: dieses
+// Gate und den Rechtstext in 9.6. Ein Auseinanderlaufen von Technik und Text ist der
+// Fehler, der hier schon zweimal passiert ist.
 //
 // Konfiguration = das Snippet aus dem ProvenExpert-Dashboard (Marketing → ProSeal),
 // 1:1 uebernommen; `widgetId` ist account-gebunden.
@@ -89,40 +59,33 @@ type ProvenExpertWindow = Window & {
 }
 
 export function ProSealWidget() {
-  const startedRef = useRef(false)
+  const gestartetRef = useRef(false)
 
   useEffect(() => {
-    const start = () => {
-      if (startedRef.current) return
-      if (!darfSiegelLaden()) return
+    if (gestartetRef.current) return
+    gestartetRef.current = true
 
-      startedRef.current = true
-
-      const w = window as ProvenExpertWindow
-      const init = () => {
-        try {
-          w.provenExpert?.proSeal?.({ ...PROSEAL_CONFIG })
-        } catch {
-          // Siegel ist Beiwerk — ein Fehler darf die Seite nie stoeren.
-        }
+    const w = window as ProvenExpertWindow
+    const init = () => {
+      try {
+        w.provenExpert?.proSeal?.({ ...PROSEAL_CONFIG })
+      } catch {
+        // Siegel ist Beiwerk — ein Fehler darf die Seite nie stoeren.
       }
-
-      // Script schon da (z. B. nach Client-Navigation)? Dann nur initialisieren.
-      if (w.provenExpert?.proSeal) {
-        init()
-        return
-      }
-
-      const s = document.createElement('script')
-      s.src = PROSEAL_SRC
-      s.async = true
-      s.addEventListener('load', init)
-      document.head.appendChild(s)
     }
 
-    start()
-    window.addEventListener(CONSENT_CHANGED_EVENT, start)
-    return () => window.removeEventListener(CONSENT_CHANGED_EVENT, start)
+    // Script schon da (z. B. nach Client-Navigation)? Dann nur initialisieren —
+    // ein zweites Injizieren gaebe doppelte Badges.
+    if (w.provenExpert?.proSeal) {
+      init()
+      return
+    }
+
+    const s = document.createElement('script')
+    s.src = PROSEAL_SRC
+    s.async = true
+    s.addEventListener('load', init)
+    document.head.appendChild(s)
   }, [])
 
   return null
