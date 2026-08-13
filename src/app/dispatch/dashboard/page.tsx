@@ -29,7 +29,7 @@ export default async function DispatchDashboard() {
   const todayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`))
 
   // Parallel queries
-  const [newLeadsRes, openRueckrufeRes, flowLinksRes, myTasksRes, recentLeadsRes, kommendeRueckrufeRes] = await Promise.all([
+  const [newLeadsRes, openRueckrufeRes, flowLinksRes, myTasksRes, recentLeadsRes, kommendeRueckrufeRes, offeneTasksRes] = await Promise.all([
     // Neue Leads heute
     supabase
       .from('leads')
@@ -73,9 +73,19 @@ export default async function DispatchDashboard() {
       .not('lead_id', 'is', null)
       .order('start_zeit', { ascending: true })
       .limit(12),
+    // Ops-Test 13.08.: ECHTE Anzahl offener Dispatch-Aufgaben. Die Kennzahl darunter
+    // stand vorher auf `tasks.length` — und `tasks` ist die auf 10 limitierte Liste.
+    // Bei 347 offenen Aufgaben zeigte das Dashboard dauerhaft „10", was den Rueckstand
+    // nicht nur verschwieg, sondern aktiv harmlos aussehen liess.
+    supabase
+      .from('tasks')
+      .select('*', { count: 'exact', head: true })
+      .eq('typ', 'dispatch')
+      .eq('status', 'offen'),
   ])
 
   const tasks = myTasksRes.data ?? []
+  const offeneTasksGesamt = offeneTasksRes.count ?? 0
   const recentLeads = recentLeadsRes.data ?? []
 
   // Tasks mit fall_id aber ohne lead_id → Bulk-Resolve via faelle.lead_id,
@@ -167,12 +177,12 @@ export default async function DispatchDashboard() {
   if (festgefahrene.length) seg.push({ t: `${festgefahrene.length} festgefahrene ${festgefahrene.length === 1 ? 'Fall' : 'Fälle'}`, danger: true })
   if (overdueRueckrufe) seg.push({ t: `${overdueRueckrufe} ${overdueRueckrufe === 1 ? 'überfälliger Rückruf' : 'überfällige Rückrufe'}`, danger: true })
   if (newLeadsRes.count) seg.push({ t: `${newLeadsRes.count} ${newLeadsRes.count === 1 ? 'neuer Lead' : 'neue Leads'} heute` })
-  if (tasks.length) seg.push({ t: `${tasks.length} ${tasks.length === 1 ? 'offener Task' : 'offene Tasks'}` })
+  if (offeneTasksGesamt) seg.push({ t: `${offeneTasksGesamt} ${offeneTasksGesamt === 1 ? 'offene Aufgabe' : 'offene Aufgaben'}` })
   const statBarItems: StatBarItem[] = [
     { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, href: '/dispatch/leads' },
     { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, href: '/dispatch/rueckrufe', tone: (openRueckrufeRes.count ?? 0) > 0 ? 'warning' : 'default' },
     { label: 'FlowLinks heute', value: flowLinksRes.count ?? 0, icon: LinkIcon, href: '/dispatch/leads', tone: 'success' },
-    { label: 'Offene Tasks', value: tasks.length, icon: ClockIcon },
+    { label: 'Offene Aufgaben', value: offeneTasksGesamt, icon: ClockIcon, href: '/dispatch/tasks' },
   ]
 
   return (
