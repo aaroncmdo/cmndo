@@ -170,4 +170,17 @@ describe('buildSchadenLeadInput — Koordinaten des Schadenorts', () => {
     const extra = extraVon({ ...validForm, unfallortLat: 0, unfallortLng: 0 })
     expect(extra.fahrzeug_standort_lat).toBe(0)
   })
+
+  // Weg-6-Audit Punkt C: das Mapping gab es laengst, nur das Eingabefeld im Wizard
+  // fehlte — claims.schadenzeit blieb dadurch immer NULL. Der Test haelt die Kette
+  // fest, damit sie beim naechsten Umbau des Formulars nicht wieder abreisst.
+  it('reicht die Unfall-Uhrzeit durch', () => {
+    const extra = extraVon({ ...validForm, unfallUhrzeit: '14:30' })
+    expect(extra.unfall_uhrzeit).toBe('14:30')
+  })
+
+  it('laesst die Uhrzeit weg, wenn keine angegeben wurde', () => {
+    const extra = extraVon({ ...validForm, unfallUhrzeit: '' })
+    expect(extra.unfall_uhrzeit).toBeNull()
+  })
 })
