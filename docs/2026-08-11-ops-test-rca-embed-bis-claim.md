@@ -27,7 +27,10 @@
 3. **RC-3 — Die ZB1-Korrektur-UI deckt 4 von 15 ausgelesenen Feldern ab.** Halteradresse ist weder sichtbar noch korrigierbar.
 4. **RC-9 — Die Werkstatt ist im Claim nicht als Beteiligte modelliert** (`werkstatt_id=NULL` trotz Vermittlung).
 
-Bemerkenswert: **Die Termin-Engine selbst ist korrekt.** `reserviere()` hat den Kalenderkonflikt sauber erkannt und die Buchung verweigert (`writes.ts:43-45`). Der Fehler liegt ausschließlich in der Embed-Schicht darüber, die dieses „belegt" wegwirft.
+Bemerkenswert: **Die Termin-Engine selbst ist intakt.** `reserviere()` prüft die Belegung fail-closed (`writes.ts:43-45`) — der Fehler liegt in der Embed-Schicht darüber, die die Engine erst umgeht und ihr „belegt" dann wegwirft.
+
+> **Status 12.08.:** Die Sanierung ist weitgehend umgesetzt — RC-1 (#5176 + Nachbesserung #5200), RC-2/RC-3 (#5180), RC-5 (#5187), RC-7/RC-10 (#5191), RC-9-Teil (#5196). Offen: #5197, #5201, #5207 sowie die Regel-4-Prod-Smokes. Aktueller Stand immer im Marker `COORDINATION-ops-test-lane-a-embed-termin-wahrheit` und im Plan `docs/superpowers/plans/2026-08-11-ops-test-sanierung.md`.
+> **Eine Belegstufe dieses Dokuments wurde am 12.08. widerlegt** — siehe Korrekturkasten in RC-1 (a). Die Wurzel selbst hat sich dadurch nicht geändert, der Ersatz-Beleg ist härter.
 
 ---
 
@@ -39,13 +42,20 @@ Der SV hatte Di 12:30–13:30 im verbundenen Kalender. Der Kunde gab Di 12:00 al
 
 ### Beweiskette
 
-**a) Der Kalenderblock war korrekt in der Belegung.** `v_belegung` liefert für den Test-SV:
+**a) Der Kalenderblock liegt in der Belegung.** `v_belegung` liefert für den Test-SV:
 
 ```
 extern | 2026-08-11 10:30:00+00 → 11:30:00+00   (= Di 12:30–13:30 Berlin)
 ```
 
-Der Block war seit dem 09.08. 16:40 im Cache — also **vor** dem Test vorhanden. Der Cache-Join funktioniert trotz `sv_id=NULL` über den `profile_id`-Fallback der View.
+Der Cache-Join funktioniert trotz `sv_id=NULL` über den `profile_id`-Fallback der View.
+
+> ⚠️ **KORREKTUR 12.08. — die ursprüngliche Fassung dieses Punktes war falsch.**
+> Hier stand: „Der Block war seit dem 09.08. 16:40 im Cache — also **vor** dem Test vorhanden."
+> Das trägt nicht. Alle 5 Cache-Zeilen des Test-SV tragen dasselbe `last_synced_at = 2026-08-09 16:40:21` — der Kalender wurde als Ganzes **erstmals** synchronisiert, **25 Sekunden NACH** der Anfrage (16:39:56). Zum Buchungszeitpunkt war der Block also **nicht** im Cache.
+> **Ursache des Fehlschlusses:** `last_synced_at` wird in `sv_kalender_events_cache` **nur beim INSERT** gesetzt — `diffAndApply` aktualisiert bestehende Zeilen nicht. Es taugt nicht als „zuletzt gesehen".
+> **Lehre:** vom heutigen Datenstand nicht auf den Zustand von vor Tagen schließen.
+> ⇒ **Warum die Buchung im Einzelfall scheiterte, ist aus den Daten nicht rekonstruierbar.** Der Ersatz-Beleg unter (c) ist jedoch härter als der widerlegte, weil er ein Muster statt eines Einzelfalls zeigt.
 
 **b) Ein 12:00-Slot existiert im Engine-Raster überhaupt nicht.** `slots.ts:15-21` + `termin-konstanten.ts`: Default-Arbeitszeit Di 09:00–17:00, `TERMIN_DAUER_MIN=40` → Raster ist 09:00, 09:40, 10:20, 11:00, **11:40**, **12:20**, 13:00 … Ein angebotener 12:00-Slot kann daher nur synthetisch sein.
 
@@ -67,6 +77,15 @@ Sobald ein Wunschtermin gesetzt ist, werden die **echten Engine-Slots ersetzt** 
 
 Das ist als „Request-Modell" dokumentiert (Kommentar Z. 111-115, Entscheidung 12.06.). Die Absicht — der Kunde soll wünschen dürfen, Dispatch bestätigt — ist legitim; **falsch ist die Darstellung als verfügbar und die anschließende Erfolgsmeldung.**
 
+**Ersatz-Beleg (prod-Messung 12.08.) — Muster statt Einzelfall.** Nachdem der Cache-Beleg aus (a) weggefallen ist, wurde der synthetische Pfad direkt an den erzeugten Terminen nachgewiesen:
+
+- **39 von 41** `self_service`-Terminen liegen auf **voller Stunde**, nur 2 im 40-Minuten-Engine-Raster ⇒ `dreiZeiten` war der **reale** Buchungsweg, nicht die Engine.
+- **10 Termine liegen außerhalb der Arbeitszeit**: 9× 08:00 (Start ist 09:00), 1× 17:00 (Ende wäre 17:40) — **einer davon an einem Samstag**. `dreiZeiten` clampt auf 8–18 Uhr und kennt weder Arbeitszeiten noch `blockierte_wochentage`.
+
+Dieser Befund ist stärker als der widerlegte: Er zeigt den Fehler an 41 echten Buchungen statt an einer.
+
+🔴 **Folge für den Fix:** Eine reine Belegungsprüfung genügt **nicht**. Außerhalb der Arbeitszeit existiert keine Belegung — 08:00, 18:00 und Samstag hätten weiterhin als „frei" gegolten. Der erste Fix (#5176) war deshalb unvollständig und wurde in **#5200** um eine Arbeitszeit-/Wochentag-Prüfung ergänzt.
+
 **d) Die Engine hat korrekt abgelehnt.** `writes.ts:39-46`:
 
 ```ts
@@ -74,7 +93,9 @@ const pre = await pruefeBelegungStrict(assignee, von, bis, db)
 if (!pre.frei) return { ok: false, error: 'Slot belegt', code: 'belegt' }
 ```
 
-12:00 + 40 min + 10 min Puffer = Fenster 11:50–12:50 Berlin → überlappt 12:30 → `belegt`. Korrekt.
+Der Mechanismus ist korrekt: 12:00 + 40 min + 10 min Puffer = Fenster 11:50–12:50 Berlin → überlappt einen 12:30-Block → `belegt`.
+
+> ⚠️ **Einschränkung (Korrektur 12.08.):** Dass *dieser* Mechanismus die Buchung im Testfall verhindert hat, ist **nicht belegt** — siehe Korrektur unter (a). Zum Buchungszeitpunkt war der Block nicht im Cache, und es gab auch keine kollidierende Buchung. Der konkrete Fehlschlag-Grund bleibt offen. Unverändert belegt bleibt: **die Buchung schlug fehl, und der Fehlschlag wurde verschluckt** (e/f).
 
 **e) Der Fehlschlag wird verschluckt — `actions.ts:284, 337`:**
 
