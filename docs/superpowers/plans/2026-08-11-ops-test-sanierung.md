@@ -249,7 +249,22 @@ Der Kunde sieht in diesem Zustand **nicht** nichts, sondern den Stepper auf `Beg
 **Der Sollzustand aus dem Test** („oben OCR für Gutachten *und* SV-Rechnung, daraus Claim per Klick") ist **E3b** — ein Feature-Wunsch, kein Fix.
 
 ### E3b · OCR-Einstieg für Gutachten + SV-Rechnung (P3, Feature)
-Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen. Eigenes Feature-Ticket, folgt auf E3a.
+Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen.
+
+**✅ Aaron-Entscheid 13.08.: bauen.** Erhebung dazu (13.08.) — der Bau ist damit vorbereitet:
+
+**Ist-Zustand:** Das Modal `gutachter/auftraege/PartnerWerkstattVermittelnButton.tsx` lässt den SV **11 Felder von Hand tippen** (Vor-/Nachname, Telefon, E-Mail, Kennzeichen, Unfallort, Hersteller, Modell, Hergang, Schadenshöhe netto) — und lädt daneben bereits das **Gutachten als PDF** hoch. Genau diese Felder stehen im PDF.
+
+**Was schon existiert:** `POST /api/ocr-gutachten` sowie `lib/ai/gutachten-ocr.ts` mit Zod-Schema und LLM-Prompt, die u.a. `kennzeichen`, `schadenhoehe_netto` und `wiederbeschaffungswert` liefern.
+
+**Warum es trotzdem nicht einfach verdrahtbar ist — die eigentliche Arbeit:** Beide Pfade sind **claim-gebunden**. Der Endpoint lehnt ohne `fall_id` mit 400 ab, und das Modul exportiert genau **eine** Funktion: `extractGutachtenAndSaveToClaim` — Extraktion und DB-Write sind gekoppelt. Im Vermittlungs-Formular existiert der Claim aber noch **nicht** (er soll ja erst daraus entstehen).
+
+**Bauplan (drei Schritte, in dieser Reihenfolge):**
+1. **Extraktion herauslösen:** eine pure `extractGutachtenFelder(pdfText)` aus `extractGutachtenAndSaveToClaim` schneiden; die bestehende Funktion ruft sie danach auf (kein Verhaltenswechsel, unit-testbar).
+2. **Claim-freier Endpoint** (`extract`-Modus ohne `fall_id`) — gibt die Felder nur zurück, schreibt nichts.
+3. **UI:** Nach Dateiwahl im Modal OCR anstoßen und die Felder **vorbefüllen statt setzen** — der SV muss jeden Wert sehen und korrigieren können (der ZB1-Parser hat gezeigt, wohin ungeprüft übernommene OCR-Werte führen: Formular-Labels als Adresse, siehe B5/#5243).
+
+⚠ **SV-Rechnung:** Für sie gibt es noch **keinen** Extraktor — `ocr-gutachten` deckt nur das Gutachten ab. Das ist der zweite, eigenständige Teil des Wunsches.
 
 ### F5 · Nav-Sprung „Mein Fall" → „Fahrzeuge" — ✅ **ERLEDIGT (13.08.)**, PRs #5227 · #5256
 
