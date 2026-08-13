@@ -52,11 +52,12 @@ export function ConsentManager() {
               savePreferencesBtn: 'Auswahl speichern',
               sections: [
                 { title: 'Notwendig', description: 'Fuer den Betrieb erforderlich.', linkedCategory: 'necessary' },
-                // ProvenExpert steht hier, weil das ProSeal-Widget an genau diese Kategorie
-                // gehaengt ist (ProSealWidget.tsx). Wer einwilligt, muss lesen koennen, was
-                // dadurch tatsaechlich geladen wird — sonst ist die Einwilligung inhaltlich
-                // nicht gedeckt. Details in der Datenschutzerklaerung, Abschnitt 9.6.
-                { title: 'Statistik', description: 'Google Analytics, Microsoft Clarity, ProvenExpert-Bewertungssiegel.', linkedCategory: 'analytics' },
+                // ProvenExpert stand hier, solange das ProSeal an dieser Kategorie hing.
+                // Seit 13.08.2026 laedt es unabhaengig vom CMP (Art. 6 Abs. 1 lit. f,
+                // Datenschutzerklaerung 9.6) — es hier weiter zu nennen, wuerde eine
+                // Steuerung vorspiegeln, die dieser Schalter nicht hat. Das waere
+                // schlimmer als gar kein Hinweis.
+                { title: 'Statistik', description: 'Google Analytics, Microsoft Clarity.', linkedCategory: 'analytics' },
                 { title: 'Marketing', description: 'Google Ads Conversion-Messung.', linkedCategory: 'ads' },
               ],
             },
