@@ -15,6 +15,7 @@ import {
   type PersonenschadenPerson,
 } from '../actions'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { DatumInput } from '@/components/shared/forms/DatumInput'
 import { PlusIcon, Trash2Icon, UserIcon } from 'lucide-react'
 
 type Draft = {
@@ -187,10 +188,13 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <input
-              type="date"
-              value={d.geburtsdatum}
-              onChange={(e) => updateDraft(idx, { geburtsdatum: e.target.value })}
+            {/* Ops-Test #13: Geburtsdatum ist ein VERGANGENHEITS-Datum — deutsche Maske
+                statt nativem Feld, das im Browser-Locale (engl. System: MM/DD/YYYY) rendert.
+                Der gemeldete Wert bleibt ISO, `updateDraft` ist unveraendert. */}
+            <DatumInput
+              aria-label="Geburtsdatum"
+              valueIso={d.geburtsdatum}
+              onChangeIso={(iso) => updateDraft(idx, { geburtsdatum: iso })}
               className="px-2 py-1 border border-claimondo-border rounded text-[11px]"
             />
             <label className="flex items-center gap-1.5 text-[11px] text-claimondo-navy px-2 py-1 border border-claimondo-border rounded cursor-pointer">
