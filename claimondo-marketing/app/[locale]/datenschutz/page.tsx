@@ -511,14 +511,32 @@ export default function DatenschutzPage() {
             </p>
             <H3>9.6 ProvenExpert (Bewertungssiegel)</H3>
             <p>
-              Auf unserer Startseite binden wir das Bewertungssiegel („ProSeal") von ProvenExpert
-              ein, einem Angebot der Expert Systems AG, Quedlinburger Straße 1, 10589 Berlin. Beim
-              Laden des Siegels werden Daten — insbesondere Ihre IP-Adresse sowie technische
-              Browserdaten — an den Anbieter übertragen. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f
-              DSGVO (berechtigtes Interesse an der Darstellung geprüfter Kundenbewertungen). Sie
-              können der Einbindung <strong>jederzeit widersprechen</strong> — über die
-              Cookie-Einstellungen, Kategorie „Statistik". Nach einem Widerspruch wird das Siegel
-              nicht mehr geladen und es entsteht keine Verbindung Ihres Browsers zum Anbieter.
+              Auf unseren Webseiten binden wir das Bewertungssiegel („ProSeal") von ProvenExpert
+              ein, einem Angebot der Expert Systems AG, Quedlinburger Straße 1, 10589 Berlin. Das
+              Siegel wird auf allen Seiten dieses Auftritts sowie auf unseren regionalen
+              Landingpages angezeigt.
+            </p>
+            <p className="mt-2">
+              Beim Laden des Siegels werden Daten an den Anbieter übertragen — insbesondere Ihre{' '}
+              <strong>IP-Adresse</strong> sowie technische Browserdaten (etwa Browsertyp und
+              aufgerufene Adresse). Zusätzlich legt das Siegel einen Eintrag im{' '}
+              <strong>Session-Speicher</strong> Ihres Browsers ab (
+              <code className="text-[0.9em]">PE_PRO_SEAL_CACHE</code>). Darin werden ausschließlich
+              die angezeigte Bewertungsnote und die Anzahl der Bewertungen zwischengespeichert,
+              damit diese nicht bei jedem Seitenaufruf neu geladen werden müssen. Der Eintrag
+              enthält keine Angaben zu Ihrer Person und wird gelöscht, sobald Sie den Browser-Tab
+              schließen. <strong>Cookies setzt das Siegel nicht.</strong>
+            </p>
+            <p className="mt-2">
+              Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> — unser berechtigtes
+              Interesse daran, unabhängig geprüfte Kundenbewertungen nachvollziehbar auszuweisen.
+              Das Siegel wird deshalb <strong>ohne vorherige Einwilligung geladen</strong> und ist
+              nicht Teil der Cookie-Einstellungen. Sie haben das Recht, dieser Verarbeitung nach{' '}
+              <strong>Art. 21 DSGVO</strong> zu widersprechen — formlos an{' '}
+              <a href="mailto:datenschutz@claimondo.de" className={linkCls}>
+                datenschutz@claimondo.de
+              </a>
+              . Näheres zu Ihren Rechten finden Sie in Abschnitt 5.
             </p>
             <p className="mt-2">
               Davon zu unterscheiden ist die Anzeige unserer Bewertungsnote und der Anzahl der
