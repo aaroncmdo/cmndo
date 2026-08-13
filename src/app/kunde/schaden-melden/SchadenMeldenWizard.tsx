@@ -9,6 +9,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { SelectField, type SelectFieldOption } from '@/components/shared/forms/SelectField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
@@ -35,6 +36,8 @@ export default function SchadenMeldenWizard() {
     unfalldatum: '',
     unfallhergang: '',
     unfallort: '',
+    unfallortLat: null,
+    unfallortLng: null,
     schadenPlz: '',
     schadensart: 'unbekannt',
     gegnerBekannt: false,
@@ -106,12 +109,37 @@ export default function SchadenMeldenWizard() {
               required
             />
           </div>
-          <TextField
-            label="Ort / Adresse (optional)"
-            value={f.unfallort ?? ''}
-            onChange={(e) => set('unfallort', e.target.value)}
-            placeholder="z. B. Aachener Straße 12, Köln"
-          />
+          {/* Ops-Test #14: war ein reines Textfeld. Dieser Einstieg erzeugte damit Leads
+              OHNE jeden Geo-Anker (prod: 3 von 3 kunde_portal-Leads ohne Koordinaten) —
+              findBestSV braucht fallLat/fallLng und fand so keinen Gutachter.
+              Die Places-Auswahl liefert Koordinaten UND PLZ direkt mit; ein serverseitiges
+              Nach-Geocoding wie im Flow ist hier deshalb nicht nötig.
+              Freitext bleibt erlaubt (Feldweg, Kreuzung) — dann ohne Koordinaten. */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="unfallort" className="text-xs font-semibold text-claimondo-shield">
+              Ort / Adresse (optional)
+            </label>
+            <GooglePlaceAutocomplete
+              defaultValue={f.unfallort ?? ''}
+              placeholder="z. B. Aachener Straße 12, Köln"
+              onChange={(v) => {
+                // Freitext: Adresse übernehmen, aber die Koordinaten der vorherigen
+                // Auswahl verwerfen — sie gehören zu einem anderen Ort.
+                setF((prev) => ({ ...prev, unfallort: v, unfallortLat: null, unfallortLng: null }))
+              }}
+              onSelect={(r) => {
+                setF((prev) => ({
+                  ...prev,
+                  unfallort: r.adresse,
+                  unfallortLat: r.lat,
+                  unfallortLng: r.lng,
+                  // PLZ ist Pflicht und steckt in der Auswahl — der Kunde soll sie nicht
+                  // abtippen müssen. Nur füllen, wenn Google eine liefert.
+                  schadenPlz: r.plz || prev.schadenPlz,
+                }))
+              }}
+            />
+          </div>
           <div className="flex flex-col gap-1.5">
             <label htmlFor="hergang" className="text-xs font-semibold text-claimondo-shield">
               Was ist passiert?

@@ -116,3 +116,58 @@ describe('buildSchadenLeadInput', () => {
     expect(rw('unbekannt')).toBeNull()
   })
 })
+
+// Ops-Test #14 (13.08.): Dieser Einstieg erzeugte Leads OHNE jeden Geo-Anker —
+// prod-Messung: 3 von 3 kunde_portal-Leads ohne fahrzeug_standort_lat / unfallort_lat /
+// kunde_lat. findBestSV braucht fallLat/fallLng und fand damit keinen Gutachter.
+describe('buildSchadenLeadInput — Koordinaten des Schadenorts', () => {
+  function extraVon(form: SchadenMeldenForm) {
+    const r = buildSchadenLeadInput(form, kunde)
+    expect(r.ok).toBe(true)
+    if (!r.ok) throw new Error('unerwartet')
+    return r.extra as Record<string, unknown>
+  }
+
+  it('schreibt die Places-Koordinaten auf BEIDE Achsen', () => {
+    // fahrzeug_standort_* ist der Anker, den das SV-Matching zuerst liest;
+    // unfallort_* macht den Ort kartierbar (und ist der Anker der Unfallskizze).
+    const extra = extraVon({ ...validForm, unfallortLat: 50.9375, unfallortLng: 6.9603 })
+    expect(extra.fahrzeug_standort_lat).toBe(50.9375)
+    expect(extra.fahrzeug_standort_lng).toBe(6.9603)
+    expect(extra.unfallort_lat).toBe(50.9375)
+    expect(extra.unfallort_lng).toBe(6.9603)
+  })
+
+  // Freitext (Feldweg, Kreuzung) bleibt erlaubt — dann ohne Koordinaten.
+  it('setzt ohne Auswahl KEINE Koordinaten (kein 0/0)', () => {
+    const extra = extraVon(validForm)
+    expect(extra.fahrzeug_standort_lat).toBeUndefined()
+    expect(extra.unfallort_lat).toBeUndefined()
+  })
+
+  // Eine halbe Koordinate taeuscht einen Standort vor, den es nicht gibt.
+  it.each([
+    ['nur lat', 50.9375, null],
+    ['nur lng', null, 6.9603],
+  ])('verwirft eine halbe Koordinate (%s)', (_name, lat, lng) => {
+    const extra = extraVon({ ...validForm, unfallortLat: lat, unfallortLng: lng })
+    expect(extra.fahrzeug_standort_lat).toBeUndefined()
+    expect(extra.unfallort_lat).toBeUndefined()
+  })
+
+  it.each([
+    ['NaN', Number.NaN, 6.9603],
+    ['Infinity', 50.9375, Number.POSITIVE_INFINITY],
+  ])('verwirft nicht-endliche Werte (%s)', (_name, lat, lng) => {
+    const extra = extraVon({ ...validForm, unfallortLat: lat, unfallortLng: lng })
+    expect(extra.fahrzeug_standort_lat).toBeUndefined()
+    expect(extra.unfallort_lat).toBeUndefined()
+  })
+
+  it('0/0 ist eine gueltige Koordinate und wird durchgelassen', () => {
+    // Null Island ist unplausibel, aber technisch endlich — die Regel prueft
+    // Endlichkeit, nicht Plausibilitaet. Bewusst dokumentiert.
+    const extra = extraVon({ ...validForm, unfallortLat: 0, unfallortLng: 0 })
+    expect(extra.fahrzeug_standort_lat).toBe(0)
+  })
+})

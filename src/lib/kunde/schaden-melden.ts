@@ -24,6 +24,13 @@ export type SchadenMeldenForm = {
   unfallUhrzeit?: string | null
   unfallhergang?: string | null
   unfallort?: string | null // Adresse/Strasse des Schadenorts
+  // Ops-Test #14 (13.08.): Koordinaten des Schadenorts, direkt aus der Places-Auswahl.
+  // Ohne sie erzeugte dieser Einstieg Leads OHNE jeden Geo-Anker — prod-Messung: 3 von 3
+  // kunde_portal-Leads hatten weder fahrzeug_standort_lat noch unfallort_lat noch kunde_lat.
+  // findBestSV braucht fallLat/fallLng; ohne Anker findet das Matching keinen Gutachter.
+  // Optional, weil Freitext erlaubt bleibt (Feldweg, Kreuzung) — dann bleiben sie null.
+  unfallortLat?: number | null
+  unfallortLng?: number | null
   schadenPlz?: string | null // Pflicht, 5-stellig (Dispatch-Anker)
   schadensart?: string | null // wird gegen Whitelist normalisiert
   gegnerBekannt?: boolean | null
@@ -105,6 +112,14 @@ export function buildSchadenLeadInput(form: SchadenMeldenForm, kunde: KundeKonte
     return { ok: false, error: 'Bitte eine gültige 5-stellige PLZ des Schadenorts angeben.' }
   }
   const adresse = clean(form.unfallort)
+  // Koordinaten nur uebernehmen, wenn BEIDE endlich sind — eine halbe Koordinate ist
+  // schlimmer als keine (sie taeuscht einen Standort vor, den es nicht gibt).
+  const lat = form.unfallortLat
+  const lng = form.unfallortLng
+  const geo =
+    typeof lat === 'number' && Number.isFinite(lat) && typeof lng === 'number' && Number.isFinite(lng)
+      ? { lat, lng }
+      : null
   const base: LeadBaseInput = {
     source_channel: 'kunde_portal',
     status: 'neu',
@@ -136,6 +151,14 @@ export function buildSchadenLeadInput(form: SchadenMeldenForm, kunde: KundeKonte
     unfallort_plz: plz,
     // Kunde-Selbstmeldung: der genannte Schadenort ist zugleich der Fahrzeug-Standort.
     fahrzeug_standort_adresse: adresse,
+    // Ops-Test #14: Koordinaten auf BEIDE Achsen. `fahrzeug_standort_*` ist der Anker, den
+    // das SV-Matching zuerst liest (besichtigungsort -> fahrzeug_standort -> unfallort ->
+    // kunde); `unfallort_*` macht den Ort kartierbar und ist der Anker der Unfallskizze.
+    // Nur setzen, wenn die Places-Auswahl echte Werte lieferte — bei Freitext bleibt es
+    // null statt 0/0 (Null Island im Golf von Guinea waere ein plausibel aussehender,
+    // voellig falscher Standort).
+    ...(geo ? { fahrzeug_standort_lat: geo.lat, fahrzeug_standort_lng: geo.lng } : {}),
+    ...(geo ? { unfallort_lat: geo.lat, unfallort_lng: geo.lng } : {}),
     kennzeichen: clean(form.kennzeichen),
     fahrzeug_hersteller: clean(form.fahrzeugHersteller),
     fahrzeug_modell: clean(form.fahrzeugModell),
