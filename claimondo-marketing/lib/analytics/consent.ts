@@ -7,8 +7,25 @@ export const CONSENT_POLICY_VERSION = '2026-05-27'
 
 /** GA4/Ads-Tracking-Hosts (gtag laedt nur hier). */
 const TRACKING_HOSTS = new Set(['claimondo.de', 'www.claimondo.de'])
-/** Marketing-Hosts, auf denen das CMP/Banner laeuft (breiter; LP inkl.). NICHT Portale. */
-const MARKETING_HOSTS = new Set(['claimondo.de', 'www.claimondo.de', 'kfzgutachter.claimondo.de'])
+/**
+ * Marketing-Hosts, auf denen das CMP/Banner laeuft (breiter; LP inkl.). NICHT Portale.
+ *
+ * Das sind ALLE Hosts, die die Marketing-App bedient (siehe
+ * .github/workflows/deploy-vps-marketing.yml). gutachter/schaden/makler kamen am
+ * 13.08.2026 dazu, als das ProvenExpert-Siegel auf alle Marketing-Seiten sollte:
+ * das Widget laedt einen Drittanbieter im Besucher-Browser, und ein Besucher muss
+ * dem widersprechen koennen. Ohne CMP gaebe es dafuer keinen Weg — die Liste hier
+ * ist also die Bedingung dafuer, dass das Siegel dort ueberhaupt laufen DARF,
+ * nicht bloss Beiwerk.
+ */
+const MARKETING_HOSTS = new Set([
+  'claimondo.de',
+  'www.claimondo.de',
+  'kfzgutachter.claimondo.de',
+  'gutachter.claimondo.de',
+  'schaden.claimondo.de',
+  'makler.claimondo.de',
+])
 
 function matchHost(host: string | null | undefined, set: Set<string>): boolean {
   if (!host) return false
