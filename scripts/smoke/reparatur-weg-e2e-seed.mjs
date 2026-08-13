@@ -48,6 +48,17 @@ const FIN_PREFIX = 'WBASMOKE' // 8-Zeichen-Marker; Rest pro-Lauf (stamp). fin is
 const KOELN = { lat: 50.9413, lng: 6.9583, plz: '50667', ort: 'Köln' }
 const OUT = new URL('./.reparatur-weg-e2e-seed.json', import.meta.url)
 const MODE = process.argv.includes('--clean') ? 'clean' : process.argv.includes('--assert') ? 'assert' : 'seed'
+// Ops-Test Lane E: derselbe Ausgangszustand, aber wahlweise auf dem HAFTPFLICHT-Weg. Dort ist
+// das Gutachten die Kostengrundlage, nicht der KVA — das KVA-Gate muss also offen sein, waehrend
+// es bei selbstzahler/kasko zu bleibt (auftrag-gate.ts:47). Default bleibt 'selbstzahler', damit
+// reparatur-weg-e2e-smoke.spec.ts unveraendert weiterlaeuft.
+//   node scripts/smoke/reparatur-weg-e2e-seed.mjs --weg=haftpflicht
+const WEG = (process.argv.find((a) => a.startsWith('--weg=')) ?? '').split('=')[1] || 'selbstzahler'
+if (!['selbstzahler', 'haftpflicht'].includes(WEG)) throw new Error(`--weg: nur selbstzahler|haftpflicht (war "${WEG}")`)
+// derive_abrechnungsweg (prod geprueft): schuldfrage='gegner' => haftpflicht;
+// 'eigenverantwortung' + eigene_versicherung='nein' => selbstzahler.
+const LEAD_SCHULD = WEG === 'haftpflicht' ? 'gegner' : 'eigenverantwortung'
+const LEAD_EIGENE_VS = WEG === 'haftpflicht' ? null : 'nein'
 const log = (...a) => console.log(...a)
 
 async function createUser(email, password) {
@@ -148,9 +159,9 @@ async function seed() {
   if (vErr) throw new Error('vehicles: ' + vErr.message)
   const vehicleId = veh.id
 
-  // Lead: schuldfrage=eigenverantwortung + eigene_versicherung=nein -> derive => selbstzahler.
+  // Lead: derive_abrechnungsweg leitet den Weg aus schuldfrage/eigene_versicherung ab (s. WEG oben).
   const { data: lead, error: lErr } = await db.from('leads').insert({
-    status: 'umgewandelt', schuldfrage: 'eigenverantwortung', eigene_versicherung: 'nein',
+    status: 'umgewandelt', schuldfrage: LEAD_SCHULD, eigene_versicherung: LEAD_EIGENE_VS,
     vorname: 'Smoke', nachname: 'RepWeg', email: kEmail, telefon: null,
     reparaturwunsch: 'reparatur', freie_werkstattwahl: true, source_channel: 'werkstatt_finder',
     reparatur_werkstatt_id: werkstattId, reparatur_vermittlung_status: 'vermittelt',
@@ -162,7 +173,7 @@ async function seed() {
   const today = new Date().toISOString().slice(0, 10)
   const { data: claim, error: cErr } = await db.from('claims').insert({
     geschaedigter_user_id: kundeUid, lead_id: leadId, vehicle_id: vehicleId, schadentag: today,
-    service_typ: 'komplett', abrechnungsweg: 'selbstzahler', reparaturwunsch: 'reparatur',
+    service_typ: 'komplett', abrechnungsweg: WEG, reparaturwunsch: 'reparatur',
     // Schaden-Feststellung fuer die Werkstatt-Sicht (Fall-Karte "Schaden" + Fahrzeug&Unfall/Unfallhergang):
     schadenart: 'eigenverschulden', // CHECK: haftpflicht|vollkasko|teilkasko|eigenverschulden|unbekannt
     hergang_kunde_text: 'Beim Ausparken die Beifahrertür an einem Poller verkratzt und eingedrückt.',
