@@ -11,6 +11,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowDownIcon, ArrowUpIcon, MailIcon, PhoneIcon, FileTextIcon, GlobeIcon, PrinterIcon, PlusIcon } from 'lucide-react'
 import { erfasseVsKorrespondenz } from '@/lib/vs-korrespondenz/actions'
+import { DatumInput } from '@/components/shared/forms/DatumInput'
 
 type Kanal = 'email' | 'post' | 'fax' | 'telefon' | 'portal'
 type Richtung = 'eingehend' | 'ausgehend'
@@ -244,10 +245,12 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
 
             <div className="grid grid-cols-2 gap-2">
               <Field label="Datum">
-                <input
-                  type="date"
-                  value={datum}
-                  onChange={(e) => setDatum(e.target.value)}
+                {/* Ops-Test #13: erfasstes Kontaktdatum (Vergangenheit) — deutsche Maske
+                    statt nativem Feld, das im Browser-Locale rendert. Wert bleibt ISO. */}
+                <DatumInput
+                  aria-label="Datum"
+                  valueIso={datum}
+                  onChangeIso={setDatum}
                   className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
                 />
               </Field>
@@ -329,10 +332,11 @@ export default function VsKorrespondenzCard({ fallId, claimId, eintraege, versic
             </Field>
 
             <Field label="Nächste erwartete Frist (optional)">
-              <input
-                type="date"
-                value={naechsteFrist}
-                onChange={(e) => setNaechsteFrist(e.target.value)}
+              {/* Notierte Frist, keine Termin-WAHL — dieselbe deutsche Maske. */}
+              <DatumInput
+                aria-label="Nächste erwartete Frist"
+                valueIso={naechsteFrist}
+                onChangeIso={setNaechsteFrist}
                 className="w-full rounded-ios-lg border border-claimondo-border px-2.5 py-1.5 text-sm focus:border-claimondo-ondo focus:outline-none"
               />
             </Field>
