@@ -14,6 +14,7 @@
 // Notification an Admin, damit das Loch nicht stillschweigend verschwindet.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istTestKonto } from '@/lib/testdaten/ist-test-konto'
 
 export type AutoAssignResult = {
   user_id: string
@@ -29,7 +30,7 @@ export async function chooseAssigneeForRolle(
 
   const { data: candidates, error: candErr } = await db
     .from('profiles')
-    .select('id, rolle, aktiv')
+    .select('id, rolle, aktiv, email, vorname, nachname')
     .eq('rolle', rolle)
     .not('aktiv', 'is', false)
     .order('id', { ascending: true })
@@ -39,7 +40,33 @@ export async function chooseAssigneeForRolle(
     return null
   }
 
-  const aktiveKandidaten = (candidates ?? []).map(c => c.id as string)
+  // Ops-Test 12.08.: Test-/Smoke-Konten aus dem Round-Robin nehmen.
+  //
+  // BEFUND: Von 5 aktiven `dispatch`-Profilen waren 4 Test-/Smoke-Konten
+  // (`test-dispatch@`, `smoke-enroll@`, 2x `bkat-smoke-dispatch-*@`) — das Round-Robin
+  // verteilte also ~80 % der Dispatch-Tasks an Postfaecher, die niemand ansieht.
+  // Messung prod: 29 von 61 offenen Tasks (48 %) lagen bei solchen Konten.
+  //
+  // Das erklaert, warum haengende Faelle liegenblieben, OBWOHL sie offene Tasks hatten:
+  // die Tasks existierten, nur nicht bei einem Menschen. Ein Auto-Assign, das an ein
+  // totes Postfach zustellt, ist schlimmer als gar keines — es sieht nach Zuweisung aus.
+  //
+  // Kein `ist_testaccount`-Flag auf profiles (existiert nur auf sachverstaendige) →
+  // dieselbe Wort-Heuristik wie an den anderen Stellen (istTestPartner), plus 'bkat'
+  // fuer die Smoke-Enrollment-Konten. Word-Boundary verhindert Treffer wie "Contest".
+  const alleKandidaten = candidates ?? []
+  const echteKandidaten = alleKandidaten.filter(
+    (c) => !istTestKonto(`${c.vorname ?? ''} ${c.nachname ?? ''}`, (c.email as string | null) ?? null),
+  )
+  if (echteKandidaten.length < alleKandidaten.length) {
+    console.warn(
+      `[AAR-723] auto-assign: ${alleKandidaten.length - echteKandidaten.length} Test-/Smoke-Konto(en) ` +
+        `der Rolle "${rolle}" uebersprungen`,
+    )
+  }
+  // Bleibt nach dem Filter niemand uebrig, gilt die Rolle als leer → Admin-Fallback
+  // unten. Besser ein Admin, der es sieht, als ein Smoke-Konto, das es nie tut.
+  const aktiveKandidaten = echteKandidaten.map(c => c.id as string)
 
   if (aktiveKandidaten.length === 0) {
     // Fallback: erster Admin.
