@@ -509,6 +509,25 @@ export default function DatenschutzPage() {
               Consent-Banner; die Übermittlung in die USA erfolgt auf Basis von
               Standardvertragsklauseln (SCCs).
             </p>
+            <H3>9.6 ProvenExpert (Bewertungssiegel)</H3>
+            <p>
+              Auf unserer Startseite binden wir das Bewertungssiegel („ProSeal") von ProvenExpert
+              ein, einem Angebot der Expert Systems AG, Quedlinburger Straße 1, 10589 Berlin. Beim
+              Laden des Siegels werden Daten — insbesondere Ihre IP-Adresse sowie technische
+              Browserdaten — an den Anbieter übertragen. Die Einbindung erfolgt{' '}
+              <strong>erst nach Ihrer Einwilligung</strong> über das Consent-Banner (Kategorie
+              „Statistik"); ohne Einwilligung wird das Siegel nicht geladen und es entsteht keine
+              Verbindung Ihres Browsers zum Anbieter. Rechtsgrundlage ist Art. 6 Abs. 1 lit. a
+              DSGVO; Sie können Ihre Einwilligung jederzeit über die Cookie-Einstellungen
+              widerrufen.
+            </p>
+            <p className="mt-2">
+              Davon zu unterscheiden ist die Anzeige unserer Bewertungsnote und der Anzahl der
+              Bewertungen im Vertrauensbereich der Startseite: Diese Angaben rufen wir
+              serverseitig ab und liefern sie als Teil unserer Seite aus. Dabei wird{' '}
+              <strong>keine Verbindung Ihres Browsers zu ProvenExpert hergestellt</strong> und es
+              werden keine Daten von Ihnen an den Anbieter übermittelt.
+            </p>
           </section>
 
           {/* 10. Online-Marketing */}
