@@ -14,19 +14,15 @@ import { MaklerAkteDetail } from '@/components/makler/akte-detail/MaklerAkteDeta
 
 export const dynamic = 'force-dynamic'
 
+// C4/§9-#7: `searchParams` entfaellt — den aktiven Tab liest der FallAkte-Kern selbst aus
+// `?tab=`. Ihn hier zusaetzlich serverseitig zu lesen und durchzureichen waere eine zweite
+// Wahrheit ueber denselben Zustand.
 type Props = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{
-    tab?: 'overview' | 'timeline' | 'chat' | 'copilot'
-  }>
 }
 
-export default async function MaklerAkteDetailPage({
-  params,
-  searchParams,
-}: Props) {
+export default async function MaklerAkteDetailPage({ params }: Props) {
   const { id } = await params
-  const { tab = 'overview' } = await searchParams
 
   const makler = await getCurrentMakler()
   if (!makler) return null
@@ -49,7 +45,6 @@ export default async function MaklerAkteDetailPage({
   return (
     <MaklerAkteDetail
       detail={detail}
-      initialTab={tab}
       makler={makler}
       currentUserId={user?.id ?? ''}
       initialChatMessages={chatMessages}
