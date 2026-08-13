@@ -9,6 +9,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { DatumFeld } from '@/components/shared/forms/DatumFeld'
 import { SelectField, type SelectFieldOption } from '@/components/shared/forms/SelectField'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -34,8 +35,11 @@ export default function SchadenMeldenWizard() {
     fahrzeugHersteller: '',
     fahrzeugModell: '',
     unfalldatum: '',
+    unfallUhrzeit: '',
     unfallhergang: '',
     unfallort: '',
+    unfallortLat: null,
+    unfallortLng: null,
     schadenPlz: '',
     schadensart: 'unbekannt',
     gegnerBekannt: false,
@@ -99,21 +103,63 @@ export default function SchadenMeldenWizard() {
               valueIso={f.unfalldatum}
               onChangeIso={(iso) => set('unfalldatum', iso)}
             />
+            {/* Weg-6-Audit Punkt C: `unfallUhrzeit` war im Formular-Typ vorhanden und
+                wurde nach `unfall_uhrzeit` gemappt — nur das Eingabefeld fehlte, also
+                blieb claims.schadenzeit immer NULL. Der Flow erhebt die Uhrzeit
+                (feststellung-steps.ts). Für ein Gutachten zählt sie: Lichtverhältnisse,
+                Verkehrslage, Plausibilität des Hergangs.
+                Hier bewusst `type="time"` statt eines Pendants zu DatumFeld: ein
+                englisches Systemlocale zeigt zwar „2:30 PM" statt „14:30", der Wert
+                bleibt aber HH:MM (24h) und ist EINDEUTIG. Beim Datum war das anders —
+                03/04 ist echt zweideutig, deshalb brauchte es dort ein eigenes Feld. */}
             <TextField
-              label="PLZ des Schadenorts"
-              value={f.schadenPlz ?? ''}
-              onChange={(e) => set('schadenPlz', e.target.value)}
-              placeholder="50667"
-              inputMode="numeric"
-              maxLength={5}
-              required
+              label="Uhrzeit (optional)"
+              type="time"
+              value={f.unfallUhrzeit ?? ''}
+              onChange={(e) => set('unfallUhrzeit', e.target.value)}
             />
           </div>
+          {/* Ops-Test #14: war ein reines Textfeld. Dieser Einstieg erzeugte damit Leads
+              OHNE jeden Geo-Anker (prod: 3 von 3 kunde_portal-Leads ohne Koordinaten) —
+              findBestSV braucht fallLat/fallLng und fand so keinen Gutachter.
+              Die Places-Auswahl liefert Koordinaten UND PLZ direkt mit; ein serverseitiges
+              Nach-Geocoding wie im Flow ist hier deshalb nicht nötig.
+              Freitext bleibt erlaubt (Feldweg, Kreuzung) — dann ohne Koordinaten. */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="unfallort" className="text-xs font-semibold text-claimondo-shield">
+              Ort / Adresse (optional)
+            </label>
+            <GooglePlaceAutocomplete
+              defaultValue={f.unfallort ?? ''}
+              placeholder="z. B. Aachener Straße 12, Köln"
+              onChange={(v) => {
+                // Freitext: Adresse übernehmen, aber die Koordinaten der vorherigen
+                // Auswahl verwerfen — sie gehören zu einem anderen Ort.
+                setF((prev) => ({ ...prev, unfallort: v, unfallortLat: null, unfallortLng: null }))
+              }}
+              onSelect={(r) => {
+                setF((prev) => ({
+                  ...prev,
+                  unfallort: r.adresse,
+                  unfallortLat: r.lat,
+                  unfallortLng: r.lng,
+                  // PLZ ist Pflicht und steckt in der Auswahl — der Kunde soll sie nicht
+                  // abtippen müssen. Nur füllen, wenn Google eine liefert.
+                  schadenPlz: r.plz || prev.schadenPlz,
+                }))
+              }}
+            />
+          </div>
+          {/* PLZ steht bewusst UNTER dem Ort: die Places-Auswahl füllt sie automatisch —
+              ein Feld, das sich weiter oben von selbst ändert, wirkt wie ein Fehler. */}
           <TextField
-            label="Ort / Adresse (optional)"
-            value={f.unfallort ?? ''}
-            onChange={(e) => set('unfallort', e.target.value)}
-            placeholder="z. B. Aachener Straße 12, Köln"
+            label="PLZ des Schadenorts"
+            value={f.schadenPlz ?? ''}
+            onChange={(e) => set('schadenPlz', e.target.value)}
+            placeholder="50667"
+            inputMode="numeric"
+            maxLength={5}
+            required
           />
           <div className="flex flex-col gap-1.5">
             <label htmlFor="hergang" className="text-xs font-semibold text-claimondo-shield">

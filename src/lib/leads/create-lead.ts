@@ -19,6 +19,8 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
+// type-only: verschwindet zur Laufzeit, belastet den Trichter nicht.
+import type { SkizzeLeadClient } from '@/lib/unfallskizze/erzeuge-fuer-lead'
 
 type LeadInsert = Database['public']['Tables']['leads']['Insert']
 type LeadStatus = Database['public']['Enums']['lead_status']
@@ -76,5 +78,43 @@ export async function createLead(
   if (error || !data) {
     return { ok: false, error: error?.message ?? 'Lead-Anlage fehlgeschlagen' }
   }
+
+  // Unfallskizze — hier, weil createLead der gemeinsame Trichter ALLER Eintrittspunkte ist.
+  //
+  // Messung prod 13.08.: 18 Leads mit Unfallhergang, davon 0 mit Skizze. Der Generator
+  // (AAR-317) war nur im Dispatch-Portal verdrahtet und wurde dort nie angestossen. Die
+  // Kanaele, die den Hergang schon beim Anlegen mitschicken — Kunde-Portal, Schaden-Karte,
+  // Werkstatt-Finder, Flotte, Makler-FlowLink — bekommen ihn damit alle auf einmal, statt
+  // je einzeln nachgeruestet zu werden. Der Flow-Feststellungs-Schritt bleibt der zweite
+  // Ausloeser: dort entsteht der Lead frueher als der Hergangstext.
+  //
+  // Billiger Vorab-Check (String, nicht leer): spart Admin-Client + Query bei Stub-Leads
+  // (Quick-Create, Rueckruf) — das ist die Mehrheit. Die eigentliche Regel (Mindestlaenge,
+  // schon vorhandene Skizze) liegt ungeteilt in erzeugeSkizzeFuerLead.
+  const hergang = (extra as { unfallhergang?: unknown } | undefined)?.unfallhergang
+  if (typeof hergang === 'string' && hergang.trim() !== '') {
+    const neueLeadId = data.id
+    // FIRE-AND-FORGET (bewusst kein await): der Claude-Call braucht 5-15 s — niemand soll
+    // beim Absenden einer Schadenmeldung darauf warten. Die App laeuft als langlebiger
+    // Node-Prozess auf dem VPS (kein Serverless-Freeze), die Promise laeuft also zu Ende.
+    // Geht sie bei einem Deploy verloren, bleibt der manuelle Dispatch-Weg — die Skizze
+    // ist nirgends Voraussetzung, sie ist eine Zugabe.
+    void (async () => {
+      const { createAdminClient } = await import('@/lib/supabase/admin')
+      const { erzeugeSkizzeFuerLead } = await import('@/lib/unfallskizze/erzeuge-fuer-lead')
+      await erzeugeSkizzeFuerLead({
+        leadId: neueLeadId,
+        hergang,
+        // createAdminClient() ist ungetypt; SkizzeLeadClient beschreibt strukturell
+        // genau die zwei Queries, die die Funktion faehrt.
+        admin: createAdminClient() as unknown as SkizzeLeadClient,
+        kontext: 'create-lead',
+      })
+    })().catch((err) => {
+      // erzeugeSkizzeFuerLead wirft nicht — die dynamischen Imports koennten es.
+      console.warn('[create-lead] Unfallskizze (non-critical):', err)
+    })
+  }
+
   return { ok: true, leadId: data.id }
 }
