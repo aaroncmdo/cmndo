@@ -7,6 +7,21 @@ import { bestimmeAktivenHref } from './nav-aktiv'
 // #2 (Flotte, CarIcon) + #1 (Schaden melden, PlusCircleIcon) beim Rebase zusammengefuehrt.
 import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon, CarFrontIcon, PlusCircleIcon } from 'lucide-react'
 
+/**
+ * Href des Fall-Eintrags — bei Single-Fall die Detailseite, sonst die Uebersicht.
+ *
+ * ⚠ Regel-4-Prod-Smoke 13.08.: Die Aktiv-Regel bekam diesen Href vorher als
+ * `singleFallId ? … : null`. Bei einem Kunden mit MEHREREN Faellen war er damit `null`,
+ * die Claim-Regel in `bestimmeAktivenHref` griff nicht, und auf der Schaden-Detailseite
+ * blieb „Fahrzeuge" markiert — der Ops-Test-Befund #26 bestand fuer diese Kunden fort
+ * (prod-verifiziert an einem Konto mit 7 Faellen). Eine Quelle fuer beides — Nav-Item
+ * UND Aktiv-Regel — schliesst die Luecke; „Meine Fälle" ist auch bei mehreren Faellen
+ * der Bereich, in dem ein einzelner Fall liegt.
+ */
+export function fallItemHref(singleFallId: string | null | undefined): string {
+  return singleFallId ? `/kunde/faelle/${singleFallId}` : '/kunde'
+}
+
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
 // T6 (08.08.): `hatFirma` gatet das Flotte-Item — Flotte ist ein B2B-Feature; ohne
@@ -14,8 +29,8 @@ import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIco
 // Privatkunden auf (Aaron: "Flotte gehört zu B2B-Kunden"). Default false = versteckt.
 export function buildNavItems(singleFallId: string | null, t: (key: string) => string, hatFirma = false) {
   const fallItem = singleFallId
-    ? { href: `/kunde/faelle/${singleFallId}`, label: t('nav.meinFall'), icon: HomeIcon, exact: false }
-    : { href: '/kunde', label: t('nav.meineFaelle'), icon: HomeIcon, exact: true }
+    ? { href: fallItemHref(singleFallId), label: t('nav.meinFall'), icon: HomeIcon, exact: false }
+    : { href: fallItemHref(null), label: t('nav.meineFaelle'), icon: HomeIcon, exact: true }
   return [
     fallItem,
     { href: '/kunde/termine', label: t('nav.termine'), icon: CalendarIcon, exact: false },
@@ -53,7 +68,7 @@ export default function KundeNav({
   // Ops-Test #26: Genau EIN Eintrag ist aktiv — inkl. der kanonischen Claim-Route
   // unter /kunde/fahrzeuge/[vehId]/schaden/[claimId], wo vorher faelschlich
   // „Fahrzeuge" markiert wurde. Regel + Tests in ./nav-aktiv.
-  const fallHref = singleFallId ? `/kunde/faelle/${singleFallId}` : null
+  const fallHref = fallItemHref(singleFallId)
   const aktiverHref = bestimmeAktivenHref(pathname, NAV_ITEMS, fallHref)
 
   function isActive(href: string, exact?: boolean) {

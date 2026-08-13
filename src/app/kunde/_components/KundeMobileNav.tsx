@@ -12,6 +12,7 @@ import { MobileNav, type MobileNavItem } from '@/components/shared/mobile-nav'
 import { MobileUpdatesDot } from '@/components/shared/updates/MobileUpdatesDot'
 import { buildNavItems } from './KundeNav'
 import { bestimmeAktivenHref } from './nav-aktiv'
+import { fallItemHref } from './KundeNav'
 
 const SCHADEN_HREF = '/kunde/schaden-melden'
 const KUNDE_PRIMARY_HREFS = ['/kunde/termine', '/kunde/chat', '/kunde/profil']
@@ -49,7 +50,7 @@ export function KundeMobileNav({
 
   // Ops-Test #26: gleiche Aktiv-Regel wie in der Desktop-Sidebar — auf der kanonischen
   // Claim-Route (/kunde/fahrzeuge/[vehId]/schaden/[claimId]) gewinnt „Mein Fall".
-  const aktiverHref = bestimmeAktivenHref(pathname, all, singleFallId ? `/kunde/faelle/${singleFallId}` : null)
+  const aktiverHref = bestimmeAktivenHref(pathname, all, fallItemHref(singleFallId))
 
   return (
     <MobileNav
