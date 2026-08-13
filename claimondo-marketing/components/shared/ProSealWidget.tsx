@@ -72,7 +72,19 @@ const PROSEAL_CONFIG = {
   hideDate: true,
   hideName: false,
   hideOnMobile: false,
-  bottom: '30px',
+  // ABWEICHUNG vom Dashboard-Snippet (dort '30px') — die einzige.
+  // Unten rechts sitzt bereits unsere fixe CTA-Leiste („Sofort anrufen / Rueckruf").
+  // Live gemessen, nachdem das Siegel zum ersten Mal rendert:
+  //   Desktop 1440x900: Siegel y 621-870, Leiste y 834-884  ->  36 px Ueberlappung
+  //   Mobil    390x844: Siegel y 604-836, Leiste y 722-828  -> 106 px, die Leiste lag
+  //                     also fast vollstaendig unter dem Siegel
+  // Auf dem Handy verdeckte das Siegel damit den primaeren Call-to-Action — ein
+  // Trust-Element darf keine Conversion kosten. 140px haelt in beiden Viewports
+  // Abstand (Desktop 74 px, Mobil 18 px). Der Script-Default waere 110px und reichte
+  // mobil NICHT (12 px Rest-Ueberlappung) — deshalb der eigene Wert.
+  // ⚠ Wer die CTA-Leiste hoeher macht, muss hier nachziehen; die Zahl ist gemessen,
+  // nicht gesetzt.
+  bottom: '140px',
   stickyToSide: 'right',
   googleStars: true,
   zIndex: '9999',
