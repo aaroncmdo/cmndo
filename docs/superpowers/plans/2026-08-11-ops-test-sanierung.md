@@ -227,9 +227,27 @@ Die frühere Notiz „das Feld ist `typ='text'`" stimmt — gilt aber für den *
 Voice ist im Flow eingebunden (`voiceDictation` am Unfallhergang), aber Batch: aufnehmen → stoppen → Whisper → Text am Stück. Wort-für-Wort ist so ausgeschlossen. Web Speech API wurde verworfen (Chrome schickt das Audio an Google — bei Unfall- und Personendaten datenschutzrechtlich zu prüfen).
 *Akzeptanz:* Text erscheint während des Sprechens; AVV liegt vor.
 
-### E3a · „Partnerwerkstatt vermitteln" — der kaputte Ablauf (P2)
-Es wird kein Auftrag angelegt, und der Kunde landet in einer Unterschrift statt in der Werkstattwahl. ⚠ **Zuerst prüfen, ob der Befund nach #5196 überhaupt noch gilt** — die Ursache ist nicht verifiziert, und bei F1/F2/F3/C1 lag sie jeweils woanders als vermutet.
-*Akzeptanz:* Vermittlung legt einen Auftrag an; der Kunde sieht seinen Claim und wählt die Werkstatt.
+### E3a · „Partnerwerkstatt vermitteln" — ❌ **GEGENSTANDSLOS** (Bestandsaufnahme 13.08.)
+
+Die vom RCA geforderte eigene Bestandsaufnahme des Werkstatt-Pfads ist gelaufen. **Alle drei Teilbehauptungen von #23 halten nicht.**
+
+Einstieg ist `gutachter/auftraege/PartnerWerkstattVermittelnButton.tsx` → `_actions/vermittle-partner-werkstatt.ts` (P4/Netzwerk, SV-Selbstanlage). Auf prod existiert genau **ein** Vermittlungsvorgang (`source_channel='gutachter-vermittlung'`):
+
+| Behauptung #23 | Befund |
+|---|---|
+| „legt keinen Auftrag an" | ❌ **falsch** — `CLM-2026-03529` wurde angelegt (Lead → `convertLeadToClaim` → Claim + FlowLink, `vermittle-partner-werkstatt.ts:83–161`) |
+| „schickt den Kunden in eine Unterschrift" | ❌ **designtes Verhalten** — PR #4922 hat die Vermittlungs-Sequenz bewusst auf `zusammenfassung/quali/feststellung/sa/account` verkürzt (der Kunde bringt ein fertiges Gutachten mit, braucht also keine Termin-/Logistik-Steps). Die SA ist bei Haftpflicht die **Abtretung** — sie gehört genau dorthin. |
+| „statt in die Werkstattauswahl" | ❌ **fachlich korrekt so** — siehe unten |
+
+**Warum keine Werkstattwahl erscheint:** Der Claim trägt `abrechnungsweg='haftpflicht'`. `reparaturPhaseErreicht()` (`lib/werkstatt/reparatur-phase-erreicht.ts`) gibt dort erst `true` zurück, **wenn das Gutachten abgeschlossen und kein Totalschaden ist** — bei Selbstzahler/Kasko dagegen sofort. Der Claim steht auf `filmcheck`, das Gutachten ist also noch in der QC. Man repariert nicht, bevor der Schaden abgenommen ist.
+
+Der Kunde sieht in diesem Zustand **nicht** nichts, sondern den Stepper auf `Begutachtung` mit dem Untertitel **„Gutachten wird geprüft"** (`phasen.subKunde.filmcheck`). Die Werkstattzone bleibt konsistent leer — und der Haftpflicht-Stepper (`ClaimStepper`) hat gar keine Werkstatt-Stufe, die eine Erwartung wecken würde. (Der R3-„Blind-Window"-Kommentar in `GeldZone.tsx` zielt auf den **Selbstzahler**-Stepper, der eine hat.)
+
+**Auch der scheinbare Rest löst sich auf:** Der Claim steht seit 09.08. im `filmcheck`, gehört aber `nicolas.kitta@claimondo.de` — er ist der **Testvorgang aus dem Ops-Test selbst**, kein wartender Kunde. Es gibt auf prod keinen einzigen echten Vermittlungsfall. (Sollte die QC künftig real liegenbleiben, fängt das der Hänger-Detektor #5223 + VPS-Cron #5241.)
+
+⚠ Nebenbefund: Dieser Test-Lead trägt eine **echte Telefonnummer** (`telefon` nicht NULL) — bei künftigen Tests des Vermittlungspfads gilt Regel 4 (Test-Konten mit `telefon = NULL`), sonst gehen echte Comms raus.
+
+**Der Sollzustand aus dem Test** („oben OCR für Gutachten *und* SV-Rechnung, daraus Claim per Klick") ist **E3b** — ein Feature-Wunsch, kein Fix.
 
 ### E3b · OCR-Einstieg für Gutachten + SV-Rechnung (P3, Feature)
 Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen. Eigenes Feature-Ticket, folgt auf E3a.
@@ -288,8 +306,8 @@ Kein Automatismus meldet steckengebliebene Fälle — `CLM-2026-01011` hing 13 T
 **Jetzt offen, in dieser Reihenfolge:**
 
 1. ~~**B5**~~ ✅ **Parser gehärtet → PR #5243** (13.08.). Eine Wurzel für alle Fehler: die Label-Anker verlangten die Zeile *exakt* als Feldcode, echtes OCR legt die Beschriftung daneben. **Vierter, vorher unbekannter Fehler:** `kennzeichen` war `Q-F 2` statt `XX Z123` — genau der Wert, den `ziehVehicleNach` ins Claim-Fahrzeug zieht. ⚠ Der **Testkorpus ist nicht baubar** (231 der 233 Bucket-Dateien sind Smoke-Dummies, 1 echter `raw_text`); die FIN war **kein** Fehler (18 statt 17 Zeichen → korrekt abgelehnt). **Regel-4-Smoke steht aus.**
-2. **E3a** — „Partnerwerkstatt vermitteln", der kaputte Ablauf. **Jetzt der größte offene Posten.**
-3. **§9-Reste** — #5 (~13 Intake-Writer außerhalb `createCase`) · #6 (Outbox-Dedup) · #7 (Makler-Akte ist frei; Flotte + Kunde gehören fremden Lanes).
+2. ~~**E3a**~~ ❌ **gegenstandslos** (Bestandsaufnahme 13.08., Details oben) — der Claim wird angelegt, die Unterschrift ist designt, und die Werkstattwahl kommt bei Haftpflicht fachlich erst nach der Gutachten-Freigabe. **Nichts zu bauen.**
+3. **§9-Reste** — #5 (~13 Intake-Writer außerhalb `createCase`) · #6 (Outbox-Dedup) · #7 (Makler-Akte ist frei; Flotte + Kunde gehören fremden Lanes). **Jetzt der größte offene Code-Posten.**
 4. **D2** — Unfallskizze: im Kunden-Flow bisher **nur als Ankündigungstext** vorhanden („Daraus erstellen wir die präzise Unfallskizze" in `feststellung-steps.ts`), das Feature selbst liegt in Dispatch. Scope vor dem Bau klären.
 5. **D4** (nach Anbieterwahl) · **E3b** — Beschaffung bzw. eigenes Produkt-Ticket.
 
