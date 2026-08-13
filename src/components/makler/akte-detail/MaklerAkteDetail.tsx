@@ -1,12 +1,19 @@
 ﻿'use client'
 
-// AAR-487 (M5): Makler-Akte-Detail — Client-Komponente mit Header, Quick-
-// Stats, 5-Tab-Navigation (3 aktive Panels + 2 Placeholder für M6/M7).
-// URL-State-Sync via ?tab=.
+// AAR-487 (M5): Makler-Akte-Detail — Header, Quick-Stats und vier Tab-Panels.
+//
+// C4/§9-#7 (Fundament „Eine Akte", 13.08.): Die Sicht haengt jetzt am gemeinsamen
+// `<FallAkte layout='tabs'>`-Kern statt an einer eigenen Shell. Tab-Bar, Tab-State und der
+// `?tab=`-URL-Sync kommen von dort — die lokale TabButton-Leiste samt `selectTab`,
+// `useState`, `useRouter` und `useSearchParams` ist dadurch ersatzlos entfallen.
+// Vorbild ist der Staff-Consumer `app/faelle/[id]/FallakteShell.tsx`.
 
-import { useMemo, useState } from 'react'
+import { useMemo, type ReactNode } from 'react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
+// C4-Kern („Eine Akte") — rollen-parametrisiert, hier im Tabs-Modus.
+import { FallAkte } from '@/components/fall-akte/FallAkte'
+import type { FallAkteConfig } from '@/components/fall-akte/types'
+import type { FallakteTabDef } from '@/components/shared/fall-tabs'
 import {
   ArrowLeftIcon,
   PhoneIcon,
@@ -42,11 +49,11 @@ import {
   consentScopeValueClass,
 } from '@/lib/makler/consent-display'
 
-type TabKey = 'overview' | 'timeline' | 'chat' | 'copilot'
-
+// `initialTab` ist mit der C4-Migration entfallen: den aktiven Tab liest der Kern selbst
+// aus `?tab=` (und faellt auf den ersten zurueck, wenn der Wert unbekannt ist). Ein
+// server-durchgereichter Startwert waere ab jetzt eine zweite Wahrheit.
 type Props = {
   detail: FallDetail
-  initialTab: TabKey
   makler: MaklerRow
   currentUserId: string
   initialChatMessages: MaklerChatMessage[]
@@ -97,30 +104,16 @@ function fullName(
 
 export function MaklerAkteDetail({
   detail,
-  initialTab,
   currentUserId,
   initialChatMessages,
   gruppeThreadId,
 }: Props) {
   const copilotVerfuegbar = istVollzugriff(detail.consent_scope)
-  // Copilot arbeitet nur bei Vollzugriff (API 403t sonst). Deep-Link ?tab=copilot
-  // ohne Vollzugriff faellt auf die Uebersicht zurueck (den Tab gibt es dann nicht).
-  const [tab, setTab] = useState<TabKey>(
-    initialTab === 'copilot' && !copilotVerfuegbar ? 'overview' : initialTab,
-  )
-  const router = useRouter()
-  const searchParams = useSearchParams()
-
+  // Copilot arbeitet nur bei Vollzugriff (API 403t sonst). Der Tab wird deshalb gar nicht
+  // erst angeboten — der Kern faellt bei einem Deep-Link `?tab=copilot` automatisch auf den
+  // ersten Tab zurueck (`tabs.some(t => t.id === tabParam) ? tabParam : firstId`), was die
+  // bisherige Sonderbehandlung von `initialTab` ueberfluessig macht.
   const { fall, kunde, provision, timeline } = detail
-
-  function selectTab(next: TabKey) {
-    setTab(next)
-    const params = new URLSearchParams(searchParams?.toString() ?? '')
-    if (next === 'overview') params.delete('tab')
-    else params.set('tab', next)
-    const qs = params.toString()
-    router.replace(qs ? `?${qs}` : '?')
-  }
 
   const gesamtforderung = useMemo(() => {
     const parts = [
@@ -138,10 +131,20 @@ export function MaklerAkteDetail({
 
   const estimateShown = fall.schadens_hoehe_netto ?? gesamtforderung
 
-  return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+  // C4/§9-#7 („Eine Akte", Fundament): die Makler-Detailsicht haengt jetzt am gemeinsamen
+  // Kern statt an einer eigenen Shell. Uebernommen hat er Tab-Bar, Tab-State und den
+  // `?tab=`-URL-Sync — die lokale `TabButton`-Leiste samt `selectTab`/`useState` entfaellt
+  // dadurch ersatzlos. Header, Kennzahlen und die vier Panels bleiben INHALTLICH
+  // unveraendert; sie wandern nur in die Config-Slots.
+  //
+  // ⚠ Einzige bewusste Verhaltensaenderung: der Kern schreibt `?tab=overview` explizit in
+  // die URL, wo die alte Shell den Parameter fuer die Uebersicht entfernte. Deep-Links
+  // bleiben kompatibel (fehlender Parameter => erster Tab), nur die URL ist eine Spur
+  // gespraechiger.
+  const header = (
+    <>
       {/* Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-claimondo-ondo">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1 text-xs text-claimondo-ondo mb-4">
         <Link href="/makler/akten" className="inline-flex items-center gap-1 hover:text-claimondo-navy">
           <ArrowLeftIcon width={12} height={12} /> Meine Akten
         </Link>
@@ -181,11 +184,14 @@ export function MaklerAkteDetail({
           ) : null}
         </div>
       </header>
+    </>
+  )
 
-      {/* Quick-Stats */}
+  // Quick-Stats — laufen als topBlocks-Slot volle Breite unter dem Header.
+  const kennzahlen = (
       <section
         aria-label="Kennzahlen"
-        className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-6"
       >
         <QuickStat
           label="Geschätzte Regulierung"
@@ -210,66 +216,60 @@ export function MaklerAkteDetail({
           icon={<CalendarIcon width={16} height={16} />}
         />
       </section>
-
-      {/* Tab-Navigation */}
-      <div
-        role="tablist"
-        aria-label="Akte-Details"
-        className="flex gap-1 border-b border-claimondo-border overflow-x-auto"
-      >
-        <TabButton
-          active={tab === 'overview'}
-          onClick={() => selectTab('overview')}
-          label="Übersicht"
-          icon={<LayoutListIcon width={15} height={15} />}
-        />
-        <TabButton
-          active={tab === 'timeline'}
-          onClick={() => selectTab('timeline')}
-          label="Timeline"
-          icon={<CalendarIcon width={15} height={15} />}
-        />
-        <TabButton
-          active={tab === 'chat'}
-          onClick={() => selectTab('chat')}
-          label="Chat"
-          icon={<MessageSquareIcon width={15} height={15} />}
-        />
-        {copilotVerfuegbar ? (
-          <TabButton
-            active={tab === 'copilot'}
-            onClick={() => selectTab('copilot')}
-            label="Copilot"
-            icon={<SparklesIcon width={15} height={15} />}
-          />
-        ) : null}
-      </div>
-
-      {/* Panels */}
-      {tab === 'overview' ? (
-        <OverviewPanel detail={detail} gesamtforderung={gesamtforderung} />
-      ) : null}
-      {tab === 'timeline' ? <TimelinePanel events={timeline} /> : null}
-      {tab === 'chat' ? (
-        <div className="space-y-4">
-          <MaklerKontakte kontakte={detail.kontakte} />
-          <MaklerChatTab
-            fallId={fall.id}
-            currentUserId={currentUserId}
-            initialMessages={initialChatMessages}
-            gruppeThreadId={gruppeThreadId}
-          />
-        </div>
-      ) : null}
-      {tab === 'copilot' && copilotVerfuegbar ? (
-        <MaklerCopilotTab
-          fallId={fall.id}
-          gegnerVsName={fall.gegner_versicherung}
-          kontextLoaded={copilotVerfuegbar}
-        />
-      ) : null}
-    </div>
   )
+
+  // Tab-Definitionen: der Copilot-Eintrag entsteht nur bei Vollzugriff — dadurch braucht
+  // es keine Sonderbehandlung mehr fuer den Deep-Link `?tab=copilot`.
+  const tabs: FallakteTabDef[] = [
+    { id: 'overview', label: 'Übersicht', icon: LayoutListIcon },
+    { id: 'timeline', label: 'Timeline', icon: CalendarIcon },
+    { id: 'chat', label: 'Chat', icon: MessageSquareIcon },
+    ...(copilotVerfuegbar ? [{ id: 'copilot', label: 'Copilot', icon: SparklesIcon }] : []),
+  ]
+
+  // Panels VORGERENDERT (Kern-Contract: heterogene Props je Tab -> tabContent statt zones).
+  // Inhaltlich identisch zur bisherigen Fassung.
+  const tabContent: Record<string, ReactNode> = {
+    overview: <OverviewPanel detail={detail} gesamtforderung={gesamtforderung} />,
+    timeline: <TimelinePanel events={timeline} />,
+    chat: (
+      <div className="space-y-4">
+        <MaklerKontakte kontakte={detail.kontakte} />
+        <MaklerChatTab
+          fallId={fall.id}
+          currentUserId={currentUserId}
+          initialMessages={initialChatMessages}
+          gruppeThreadId={gruppeThreadId}
+        />
+      </div>
+    ),
+    ...(copilotVerfuegbar
+      ? {
+          copilot: (
+            <MaklerCopilotTab
+              fallId={fall.id}
+              gegnerVsName={fall.gegner_versicherung}
+              kontextLoaded={copilotVerfuegbar}
+            />
+          ),
+        }
+      : {}),
+  }
+
+  const config: FallAkteConfig<FallDetail, never> = {
+    layout: 'tabs',
+    // Bei layout='tabs' rendert der Kern ausschliesslich den aktiven Tab — die
+    // Zonen-Maschinerie bleibt leer (identisch zum Staff-Consumer).
+    zones: () => [],
+    zoneComponents: {},
+    wrapperClassName: 'max-w-6xl mx-auto px-4 sm:px-6 py-6',
+    header: () => ({ custom: header }),
+    slots: () => ({ topBlocks: kennzahlen }),
+    tabs,
+    tabContent,
+  }
+
+  return <FallAkte config={config} vm={detail} />
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -303,34 +303,7 @@ function QuickStat({
   )
 }
 
-function TabButton({
-  active,
-  onClick,
-  label,
-  icon,
-}: {
-  active: boolean
-  onClick: () => void
-  label: string
-  icon: React.ReactNode
-}) {
-  return (
-    <button
-      type="button"
-      role="tab"
-      aria-selected={active}
-      onClick={onClick}
-      className={`shrink-0 inline-flex items-center gap-2 px-3 py-2.5 text-sm border-b-2 -mb-px transition-colors ${
-        active
-          ? 'border-claimondo-navy text-claimondo-navy font-semibold'
-          : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
-      }`}
-    >
-      {icon}
-      {label}
-    </button>
-  )
-}
+// (TabButton entfernt — die Tab-Leiste kommt seit der C4-Migration aus dem Kern.)
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Overview Panel

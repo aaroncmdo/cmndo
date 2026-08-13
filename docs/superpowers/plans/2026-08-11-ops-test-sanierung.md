@@ -249,7 +249,22 @@ Der Kunde sieht in diesem Zustand **nicht** nichts, sondern den Stepper auf `Beg
 **Der Sollzustand aus dem Test** („oben OCR für Gutachten *und* SV-Rechnung, daraus Claim per Klick") ist **E3b** — ein Feature-Wunsch, kein Fix.
 
 ### E3b · OCR-Einstieg für Gutachten + SV-Rechnung (P3, Feature)
-Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen. Eigenes Feature-Ticket, folgt auf E3a.
+Im Vermittlungs-Einstieg Gutachten **und** SV-Rechnung per OCR auslesen, Claim per Klick anlegen.
+
+**✅ Aaron-Entscheid 13.08.: bauen.** Erhebung dazu (13.08.) — der Bau ist damit vorbereitet:
+
+**Ist-Zustand:** Das Modal `gutachter/auftraege/PartnerWerkstattVermittelnButton.tsx` lässt den SV **11 Felder von Hand tippen** (Vor-/Nachname, Telefon, E-Mail, Kennzeichen, Unfallort, Hersteller, Modell, Hergang, Schadenshöhe netto) — und lädt daneben bereits das **Gutachten als PDF** hoch. Genau diese Felder stehen im PDF.
+
+**Was schon existiert:** `POST /api/ocr-gutachten` sowie `lib/ai/gutachten-ocr.ts` mit Zod-Schema und LLM-Prompt, die u.a. `kennzeichen`, `schadenhoehe_netto` und `wiederbeschaffungswert` liefern.
+
+**Warum es trotzdem nicht einfach verdrahtbar ist — die eigentliche Arbeit:** Beide Pfade sind **claim-gebunden**. Der Endpoint lehnt ohne `fall_id` mit 400 ab, und das Modul exportiert genau **eine** Funktion: `extractGutachtenAndSaveToClaim` — Extraktion und DB-Write sind gekoppelt. Im Vermittlungs-Formular existiert der Claim aber noch **nicht** (er soll ja erst daraus entstehen).
+
+**Bauplan (drei Schritte, in dieser Reihenfolge):**
+1. **Extraktion herauslösen:** eine pure `extractGutachtenFelder(pdfText)` aus `extractGutachtenAndSaveToClaim` schneiden; die bestehende Funktion ruft sie danach auf (kein Verhaltenswechsel, unit-testbar).
+2. **Claim-freier Endpoint** (`extract`-Modus ohne `fall_id`) — gibt die Felder nur zurück, schreibt nichts.
+3. **UI:** Nach Dateiwahl im Modal OCR anstoßen und die Felder **vorbefüllen statt setzen** — der SV muss jeden Wert sehen und korrigieren können (der ZB1-Parser hat gezeigt, wohin ungeprüft übernommene OCR-Werte führen: Formular-Labels als Adresse, siehe B5/#5243).
+
+⚠ **SV-Rechnung:** Für sie gibt es noch **keinen** Extraktor — `ocr-gutachten` deckt nur das Gutachten ab. Das ist der zweite, eigenständige Teil des Wunsches.
 
 ### F5 · Nav-Sprung „Mein Fall" → „Fahrzeuge" — ✅ **ERLEDIGT (13.08.)**, PRs #5227 · #5256
 
@@ -312,7 +327,7 @@ Kein Automatismus meldet steckengebliebene Fälle — `CLM-2026-01011` hing 13 T
 4. **D2** — Unfallskizze: im Kunden-Flow bisher **nur als Ankündigungstext** vorhanden („Daraus erstellen wir die präzise Unfallskizze" in `feststellung-steps.ts`), das Feature selbst liegt in Dispatch. Scope vor dem Bau klären.
 5. **D4** (nach Anbieterwahl) · **E3b** — Beschaffung bzw. eigenes Produkt-Ticket.
 
-**H2** (SA-WhatsApp 7→3) — **vermutlich erledigt, nicht abschließend belegt.** In `signSAandCreateFall` (die Funktion läuft von Z. 684 bis Dateiende) gehen heute noch **drei** Sends an den Kunden: `sendWhatsAppText` (Willkommen), `sendFallCommunication('fall_eroeffnet')`, `sendFallCommunication('info_nach_sa')`. Die übrigen adressieren SV oder Team. Das entspricht dem Ziel „drei nach Zweck" — ob die ursprüngliche „6–7" dieselbe Zählweise hatte, ist aus dem Marker nicht rekonstruierbar. ⚠ Territorium `app/flow/[token]/actions.ts`.
+**H2** (SA-WhatsApp 7→3) — ❌ **GEGENSTANDSLOS, belegt (13.08.).** Die Zahl „6–7 Kunden-WhatsApps" hielt der Nachprüfung nicht stand. Gemessen über die Historie von `signSAandCreateFall` (Funktionsgrenze je Stand einzeln bestimmt, nicht mit fester Zeilennummer): **18.07. · 27.07. · 08.08. · 13.08. — jedes Mal 6 Sends gesamt, davon konstant 3 an den KUNDEN.** Die übrigen adressieren SV und Team. Es gab also nie 7 Kunden-Sends und folglich auch keine Konsolidierung — im Git-Log existiert kein entsprechender Commit. Die „6–7" war die **Gesamtzahl** aller Sends, gelesen als Kunden-Zahl. **Nichts zu bauen; `flow/[token]/actions.ts` bleibt unberührt.**
 
 > ⚠ **Diese Liste war bis 13.08. eine Falle:** Sie führte B4 als Priorität 1 mit der Begründung „falsche Kennzeichen wandern sonst in Gutachten und Abrechnung" — obwohl der Detail-Abschnitt B4 weiter oben die Prämisse längst widerlegt hatte. Wer die Reihenfolge liest statt den Abschnitt, hätte die schädliche Migration gebaut.
 >
