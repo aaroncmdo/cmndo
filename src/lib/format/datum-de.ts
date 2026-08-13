@@ -14,8 +14,32 @@
 // Der gespeicherte Wert bleibt ISO (YYYY-MM-DD) — identisch zum nativen Feld, also
 // kompatibel zu allen bestehenden Schreibpfaden.
 
-/** Tippen soll sich fluessig anfuehlen: aus "15032026" wird waehrend der Eingabe "15.03.2026". */
+/**
+ * Tippen soll sich fluessig anfuehlen: aus "15032026" wird waehrend der Eingabe "15.03.2026".
+ *
+ * ⚠ Regel-4-Prod-Smoke 13.08. — hier steckte ein SCHLIMMERER Bug als der, den dieses
+ * Modul beheben sollte: die erste Fassung strippte ALLE Nicht-Ziffern und gruppierte
+ * stur 2-2-4. Wer "3.4.2026" tippte — fuer einen deutschen Nutzer die natuerlichste
+ * Schreibweise — bekam "34.20.26", und `deZuIso` verwarf das als ungueltig. Das Datum
+ * ging damit STILL verloren: kein Fehler, kein Hinweis, nur ein leeres Feld im Lead.
+ *
+ * Deshalb gilt jetzt: **hat der Nutzer selbst Trennzeichen gesetzt, bestimmt ER die
+ * Gruppen.** "3.4.2026" ist der 3. April, nicht Tag 34 in Monat 20. Nur die reine
+ * Ziffernfolge wird noch automatisch gruppiert. Gepaddet wird bewusst NICHT waehrend
+ * des Tippens (aus "3." wuerde sonst "03." und der Cursor spraenge) — noetig ist das
+ * auch nicht, denn `deZuIso` akzeptiert ein- wie zweistellige Tage und Monate.
+ */
 export function formatiereDatumEingabe(roh: string): string {
+  if (/[.,/\-\s]/.test(roh)) {
+    const gruppen = roh.split(/[.,/\-\s]+/)
+    const tt = (gruppen[0] ?? '').replace(/\D/g, '').slice(0, 2)
+    const mm = (gruppen[1] ?? '').replace(/\D/g, '').slice(0, 2)
+    const jjjj = (gruppen[2] ?? '').replace(/\D/g, '').slice(0, 4)
+    if (gruppen.length <= 1) return tt
+    if (gruppen.length === 2) return `${tt}.${mm}`
+    // Alles ab der 4. Gruppe faellt weg — ein Datum hat drei Teile.
+    return `${tt}.${mm}.${jjjj}`
+  }
   const ziffern = roh.replace(/\D/g, '').slice(0, 8)
   if (ziffern.length <= 2) return ziffern
   if (ziffern.length <= 4) return `${ziffern.slice(0, 2)}.${ziffern.slice(2)}`

@@ -78,3 +78,39 @@ describe('Rundlauf', () => {
     expect(isoZuDe(iso)).toBe(de)
   })
 })
+
+// ⚠ Regel-4-Prod-Smoke 13.08.: Die erste Fassung strippte alle Trennzeichen und
+// gruppierte stur 2-2-4 — aus "3.4.2026" wurde "34.20.26", deZuIso verwarf das,
+// und das Datum ging STILL verloren. Diese Gruppe haelt den Fall fest.
+describe('formatiereDatumEingabe — vom Nutzer gesetzte Trennzeichen', () => {
+  it.each([
+    ['3.4.2026', '3.4.2026'],
+    ['15.03.2026', '15.03.2026'],
+    ['03/04/2026', '03.04.2026'],
+    ['3-4-2026', '3.4.2026'],
+  ])('respektiert die Gruppen des Nutzers: %s → %s', (roh, erwartet) => {
+    expect(formatiereDatumEingabe(roh)).toBe(erwartet)
+  })
+
+  it('die getippte Eingabe bleibt ein speicherbares Datum', () => {
+    // Der eigentliche Schaden war nicht die Anzeige, sondern der Verlust:
+    // "34.20.26" ergab null und wurde nie geschrieben.
+    expect(deZuIso(formatiereDatumEingabe('3.4.2026'))).toBe('2026-04-03')
+  })
+
+  it.each([
+    ['3.', '3.'],
+    ['3.4', '3.4'],
+    ['3.4.', '3.4.'],
+  ])('paddet waehrend des Tippens nicht (%s bleibt %s)', (roh, erwartet) => {
+    expect(formatiereDatumEingabe(roh)).toBe(erwartet)
+  })
+
+  it('gruppiert reine Ziffernfolgen weiterhin automatisch', () => {
+    expect(formatiereDatumEingabe('15032026')).toBe('15.03.2026')
+  })
+
+  it('ignoriert alles ab der vierten Gruppe — ein Datum hat drei Teile', () => {
+    expect(formatiereDatumEingabe('1.2.2026.9')).toBe('1.2.2026')
+  })
+})
