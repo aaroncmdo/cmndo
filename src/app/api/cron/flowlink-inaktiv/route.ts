@@ -92,7 +92,12 @@ export async function GET(request: Request) {
       titel: `Token-Link inaktiv — Kunde anrufen: ${name}`,
       beschreibung: `FlowLink seit ${hoursInactive}h inaktiv. Telefon: ${tel}. Bitte Kunde anrufen und Status klären.`,
       status: 'offen',
-      prioritaet: 'dringend',
+      // Ops-Test 13.08.: war 'dringend'. Ein Kunde, der seinen Link noch nicht
+      // geoeffnet hat, ist Nachfass-ROUTINE, kein Notfall. Weil dieser Cron und
+      // dispatch-lead-alert zusammen ~94 % aller offenen Dispatch-Aufgaben stellen
+      // und beide pauschal 'dringend' setzten, stand am Ende JEDE Aufgabe auf
+      // 'dringend' -- das Feld trug kein Signal mehr. 'normal' gibt ihm eines zurueck.
+      prioritaet: 'normal',
       entity_type: 'lead',
       entity_id: fl.lead_id,
       lead_id: fl.lead_id,

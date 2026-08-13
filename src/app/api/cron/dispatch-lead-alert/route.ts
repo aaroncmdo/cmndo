@@ -41,7 +41,10 @@ export async function GET(request: Request) {
     await db.from('tasks').insert({
       titel: `Lead unbearbeitet: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (${lead.telefon ?? '?'})`,
       typ: 'dispatch',
-      prioritaet: 'dringend',
+      // Ops-Test 13.08.: war 'dringend'. Ein frisch eingegangener, noch nicht
+      // aufgegriffener Lead ist der NORMALFALL im Posteingang -- 'dringend' ist
+      // hier bedeutungslos geworden (225 offene, aeltester vom 14.07.).
+      prioritaet: 'normal',
       status: 'offen',
       entity_type: 'lead',
       entity_id: lead.id,
