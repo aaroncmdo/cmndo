@@ -1989,3 +1989,25 @@ body {
   font-style: italic;
   letter-spacing: 0.1px;
 }
+
+/* ProvenExpert-ProSeal: oben rechts statt unten rechts (Aaron 13.08.2026).
+ *
+ * Das Widget kennt KEINE top-Option — nur `bottom` und `stickyToSide` (im
+ * Script-Bundle geprueft). Es setzt `bottom` als Inline-Style auf .pe-pro-seal;
+ * eine CSS-Regel mit !important gewinnt dagegen. Daher hier statt in der Komponente.
+ *
+ * Der Wrapper ist 0 Pixel hoch und die Karte waechst NACH OBEN von ihm weg
+ * (transform-origin: right bottom). `top` markiert also die UNTERkante der Karte,
+ * nicht die Oberkante — daher 340px und nicht ~80px.
+ *
+ * Auf claimondo.de mit derselben Regel gemessen (Header dort 65px hoch):
+ *   Desktop 1440x900  Karte y  91-340   |  Mobil 390x844  Karte y 116-348
+ * Ueberall null Ueberlappung mit fixen Elementen.
+ *
+ * ⚠ Der Weg ueber die Konfiguration (`bottom: calc(100vh - 340px)`) taugt NICHT:
+ * auf Mobil ueberschreibt das Script ihn mit `bottom: 0px`.
+ */
+.pe-pro-seal {
+  top: 340px !important;
+  bottom: auto !important;
+}
