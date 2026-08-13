@@ -8,6 +8,7 @@
 import { useState, useTransition } from 'react'
 import { LoaderIcon, CheckIcon } from 'lucide-react'
 import { useFall } from '../FallContext'
+import { formatiereDatumEingabe, deZuIso, isoZuDe } from '@/lib/format/datum-de'
 
 type Props = {
   label: string
@@ -35,6 +36,13 @@ export default function InlineEditField({
   const editable = canEdit(fieldName)
   const initial = value == null ? '' : String(value)
   const [draft, setDraft] = useState(initial)
+  // Ops-Test #13: Ein natives <input type="date"> rendert im BROWSER-Locale — auf einem
+  // englisch eingestellten System steht dort MM/DD/YYYY, und das laesst sich nicht
+  // erzwingen (Chrome ignoriert `lang`). Datumsfelder in der Fallakte sind durchweg
+  // ERFASSUNG (versendet am, eingegangen am) — also Vergangenheit, wo Tippen ohnehin
+  // schneller ist als Blaettern. Deshalb ein Textfeld mit deutscher Maske.
+  // `draft` bleibt ISO (YYYY-MM-DD): handleBlur/updateField sind unveraendert.
+  const [datumAnzeige, setDatumAnzeige] = useState(() => isoZuDe(initial))
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [, startTransition] = useTransition()
 
@@ -101,6 +109,24 @@ export default function InlineEditField({
             </option>
           ))}
         </select>
+      ) : type === 'date' ? (
+        // value/onChange NACH dem Spread — sie ersetzen die ISO-Variante aus `common`.
+        <input
+          {...common}
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          placeholder="TT.MM.JJJJ"
+          maxLength={10}
+          value={datumAnzeige}
+          onChange={(e) => {
+            const formatiert = formatiereDatumEingabe(e.target.value)
+            setDatumAnzeige(formatiert)
+            // Nach aussen nur, was ein vollstaendiges Datum ergibt — sonst schriebe
+            // jeder Tastendruck einen Teilstand ("15.03.") in den Fall.
+            setDraft(deZuIso(formatiert) ?? '')
+          }}
+        />
       ) : (
         <input type={type as Exclude<Props['type'], 'select' | 'textarea'>} {...common} />
       )}

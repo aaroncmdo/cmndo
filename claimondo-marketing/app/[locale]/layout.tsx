@@ -18,6 +18,7 @@ import { isTrackingHost, isMarketingHost } from '@/lib/analytics/consent'
 import { ConsentManager } from '@/components/analytics/ConsentManager'
 import { ClarityInit } from '@/components/analytics/ClarityInit'
 import { PhoneClickTracker } from '@/components/analytics/PhoneClickTracker'
+import { ProSealWidget } from '@/components/shared/ProSealWidget'
 import { isLocale } from '@/i18n/locales'
 import '../globals.css'
 
@@ -208,6 +209,10 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {shouldShowConsent && <ConsentManager />}
           <ClarityInit />
+          {/* ProSeal laedt s.provenexpert.net im Besucher-Browser -> nur dort, wo auch
+              ein CMP laeuft. Ohne CMP gaebe es keine Einwilligung, die das Widget
+              freischalten koennte. Das Consent-Gate selbst sitzt in der Komponente. */}
+          {shouldShowConsent && <ProSealWidget />}
           <PhoneClickTracker />
           {children}
         </NextIntlClientProvider>

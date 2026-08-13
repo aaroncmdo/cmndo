@@ -4,7 +4,9 @@
 // (schliesst P1b / Verfassung §8). Der eigentliche Versand delegiert an
 // sendFallCommunication (COMMUNICATION_REGISTRY = Template-Layer UNTER der Outbox).
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
+// ⚠ ZWINGEND die DIREKT-Variante: `sendFallCommunication` ist seit C3/§9-#6 durable und
+// wuerde beim Abarbeiten einer Row eine NEUE Row schreiben -> Endlosschleife.
+import { sendFallCommunicationDirekt } from '@/lib/communications/send-fall'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 
 const BATCH_SIZE = 25
@@ -75,7 +77,7 @@ async function sendOne(row: OutboxRow): Promise<{ ok: boolean }> {
     return { ok: false }
   }
   try {
-    const res = await sendFallCommunication(row.claim_id, row.template, row.payload ?? undefined)
+    const res = await sendFallCommunicationDirekt(row.claim_id, row.template, row.payload ?? undefined)
     if (res.sent) {
       await supabase
         .from('notifications_outbox')
