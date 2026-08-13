@@ -14,7 +14,7 @@
 // Fuer Termin-WAHL (Zukunft) bleibt das native Feld bzw. der WunschterminPicker richtig.
 
 import { useState } from 'react'
-import { formatiereDatumEingabe, deZuIso, isoZuDe } from '@/lib/format/datum-de'
+import { formatiereDatumEingabe, deZuIso, isoZuDe, istUnvollstaendigeEingabe } from '@/lib/format/datum-de'
 
 export function DatumInput({
   valueIso,
@@ -54,6 +54,12 @@ export function DatumInput({
         const formatiert = formatiereDatumEingabe(e.target.value)
         setAnzeige(formatiert)
         onChangeIso(deZuIso(formatiert) ?? '')
+      }}
+      onBlur={() => {
+        // Beim Verlassen einen Zwischenstand ("15.03.") sichtbar zuruecksetzen. Sonst
+        // steht Text im Feld, der nirgends gespeichert ist — der Nutzer haelt sein
+        // Datum fuer erfasst und merkt den Verlust erst nach dem Neuladen.
+        if (istUnvollstaendigeEingabe(anzeige)) setAnzeige(isoZuDe(valueIso))
       }}
     />
   )

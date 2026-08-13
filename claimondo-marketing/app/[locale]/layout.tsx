@@ -139,8 +139,11 @@ export default async function LocaleLayout({
   const host = (await headers()).get('host')
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId)
   const shouldShowConsent = isMarketingHost(host)
-  const shouldLoadAhrefs =
-    isMarketingHost(host) || host === 'gutachter.claimondo.de' || host === 'makler.claimondo.de'
+  // gutachter/makler standen hier frueher einzeln, weil MARKETING_HOSTS sie nicht kannte.
+  // Seit 13.08.2026 sind sie Teil der Menge (Siegel braucht ueberall ein Opt-out) — die
+  // Sonderfaelle waeren also nur noch Rauschen. schaden.claimondo.de bekommt Ahrefs damit
+  // neu; das ist gewollt: cookielos, und die Marketing-Hosts sollen vergleichbar messen.
+  const shouldLoadAhrefs = isMarketingHost(host)
 
   return (
     <html
@@ -210,8 +213,10 @@ export default async function LocaleLayout({
           {shouldShowConsent && <ConsentManager />}
           <ClarityInit />
           {/* ProSeal laedt s.provenexpert.net im Besucher-Browser -> nur dort, wo auch
-              ein CMP laeuft. Ohne CMP gaebe es keine Einwilligung, die das Widget
-              freischalten koennte. Das Consent-Gate selbst sitzt in der Komponente. */}
+              ein CMP laeuft. Ohne CMP haette der Besucher keinen Weg zu widersprechen.
+              Seit 13.08.2026 laeuft das CMP auf allen sechs Marketing-Hosts, das Siegel
+              also auch. Das Consent-Gate selbst sitzt in der Komponente, die vertikale
+              Position in globals.css (.pe-pro-seal). */}
           {shouldShowConsent && <ProSealWidget />}
           <PhoneClickTracker />
           {children}
