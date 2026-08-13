@@ -9,6 +9,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { TextField } from '@/components/shared/forms/TextField'
+import { DatumFeld } from '@/components/shared/forms/DatumFeld'
 import { SelectField, type SelectFieldOption } from '@/components/shared/forms/SelectField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
@@ -90,11 +91,13 @@ export default function SchadenMeldenWizard() {
       <SectionCard title="Unfall / Schaden" subtitle="Wann und wo ist es passiert?">
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <TextField
+            {/* Ops-Test #13: war `type="date"` — das rendert im Browser-Locale, ein
+                deutscher Nutzer mit englischem System sah MM/DD/YYYY. DatumFeld zeigt
+                immer TT.MM.JJJJ und meldet weiterhin ISO zurück. */}
+            <DatumFeld
               label="Datum"
-              type="date"
-              value={f.unfalldatum ?? ''}
-              onChange={(e) => set('unfalldatum', e.target.value)}
+              valueIso={f.unfalldatum}
+              onChangeIso={(iso) => set('unfalldatum', iso)}
             />
             <TextField
               label="PLZ des Schadenorts"
