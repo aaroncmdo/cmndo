@@ -14,19 +14,22 @@ export async function getFlotteTermine(
   const vehicleIds = flotte.map((v) => v.vehicleId).filter(Boolean)
   if (vehicleIds.length === 0) return { termine: [], fallMap: {}, vehicleByClaim: {} }
 
-  // claims des Fuhrparks (via claims.vehicle_id — Muster wie getFahrzeugSchaeden).
-  const { data: claims } = await admin.from('claims').select('id, vehicle_id').in('vehicle_id', vehicleIds)
-  const claimIds = (claims ?? []).map((c) => c.id as string)
-  const vehicleByClaim: Record<string, string> = {}
-  for (const c of claims ?? []) vehicleByClaim[c.id as string] = c.vehicle_id as string
-  if (claimIds.length === 0) return { termine: [], fallMap: {}, vehicleByClaim: {} }
-
-  // fall_id + Anzeige-Meta NUR aus v_claim_full (claim-anchored SSoT).
+  // C5 (Doktrin §5, 14.08.): EIN Read statt zwei. Vorher holte ein Vorab-Select auf der
+  // Basistabelle `claims` nur `id, vehicle_id`, um die IDs anschliessend per `.in('id', …)`
+  // an `v_claim_full` weiterzureichen — die View traegt `vehicle_id` aber selbst, der
+  // Umweg war also ein reiner Zusatz-Roundtrip.
   const { data: faelle } = await admin
     .from('v_claim_full')
-    .select('id, fall_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claim_nummer')
-    .in('id', claimIds)
+    .select('id, vehicle_id, fall_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claim_nummer')
+    .in('vehicle_id', vehicleIds)
 
+  const vehicleByClaim: Record<string, string> = {}
+  for (const f of faelle ?? []) vehicleByClaim[f.id as string] = f.vehicle_id as string
+  if ((faelle ?? []).length === 0) return { termine: [], fallMap: {}, vehicleByClaim: {} }
+
+  // claimIds kamen frueher aus dem Vorab-Select auf `claims`; die View traegt dieselben
+  // Claim-IDs in `id` (vcf.id == claims.id) — identische Menge, nur ohne Extra-Roundtrip.
+  const claimIds = (faelle ?? []).map((f) => f.id as string).filter(Boolean)
   const fallIds = (faelle ?? []).map((f) => f.fall_id as string).filter(Boolean)
   const fallMap: Record<string, FallInfo> = {}
   for (const f of faelle ?? []) {
