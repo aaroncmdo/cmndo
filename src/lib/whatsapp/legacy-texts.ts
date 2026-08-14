@@ -12,7 +12,7 @@ import { TEMPLATES_PL } from './legacy-texts.pl'
 
 const TEMPLATES: Record<TemplateName, (vars: Record<string, string>) => string> = {
   fall_eroeffnet: (v) =>
-    `Hallo ${v['1'] ?? 'Kunde'}, Ihr Fall ${v['2'] ?? ''} wurde bei Claimondo eroeffnet. Wir kuemmern uns um alles Weitere. Bei Fragen antworten Sie einfach auf diese Nachricht.`,
+    `👋 Willkommen bei Claimondo, ${v['1'] ?? 'Kunde'}!\n\nIhr Fall ${v['2'] ?? ''} ist eröffnet — ab jetzt kümmern wir uns. Zu Ihrem Gutachter-Termin melden wir uns.\n\nDer Gutachter kommt zu Ihnen, Sie müssen nirgends hinfahren. Für Sie entstehen keine Kosten: Die gegnerische Versicherung übernimmt sie. Die Auszahlung erfolgt oft in zwei Schritten — eine schnelle Teilzahlung, den Rest nach Abschluss.\n\nAlles zu Ihrem Fall: ${v['3'] ?? ''}\n\nBei Fragen antworten Sie einfach auf diese Nachricht.`,
 
   // AAR-312: Direkt nach SA — erklärt Zwei-Stufen-Zahlung + Sachverständiger kommt.
   // Variablen: 1=Vorname, 2=Portal-Link

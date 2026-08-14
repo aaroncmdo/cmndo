@@ -4,7 +4,7 @@ import type { TemplateName } from './template-sids'
 // Mirrors the de structure in legacy-texts.ts exactly; only the prose is translated.
 export const TEMPLATES_TR: Partial<Record<TemplateName, (vars: Record<string, string>) => string>> = {
   fall_eroeffnet: (v) =>
-    `Merhaba ${v['1'] ?? 'Müşteri'}, ${v['2'] ?? ''} numaralı dosyanız Claimondo'da açıldı. Geri kalan her şeyle biz ilgileniyoruz. Sorularınız olursa bu mesaja yanıt vermeniz yeterli.`,
+    `👋 Claimondo'ya hoş geldiniz, ${v['1'] ?? 'Müşteri'}!\n\n${v['2'] ?? ''} numaralı dosyanız açıldı — bundan sonrasıyla biz ilgileniyoruz. Bilirkişi randevunuz için sizinle iletişime geçeceğiz.\n\nBilirkişi doğrudan size geliyor, hiçbir yere gitmenize gerek yok. Hasar işlemleri için hiçbir ücret ödemiyorsunuz: Tüm masrafları karşı tarafın sigortası karşılıyor. Ödeme genellikle iki aşamada yapılır — ilk kısmi ödeme hızlıca, kalanı işlem tamamlandıktan sonra.\n\nDosyanızla ilgili her şey: ${v['3'] ?? ''}\n\nSorularınız olursa bu mesaja yanıt vermeniz yeterli.`,
 
   // AAR-312: Direkt nach SA — erklärt Zwei-Stufen-Zahlung + Sachverständiger kommt.
   // Variablen: 1=Vorname, 2=Portal-Link

@@ -4,7 +4,7 @@ import type { TemplateName } from './template-sids'
 // Mirrors the de structure in legacy-texts.ts exactly; only the prose is translated.
 export const TEMPLATES_PL: Partial<Record<TemplateName, (vars: Record<string, string>) => string>> = {
   fall_eroeffnet: (v) =>
-    `Dzień dobry ${v['1'] ?? 'Kliencie'}, Pana/Pani sprawa ${v['2'] ?? ''} została otwarta w Claimondo. Zajmiemy się wszystkim pozostałym. W razie pytań wystarczy odpowiedzieć na tę wiadomość.`,
+    `👋 Witamy w Claimondo, ${v['1'] ?? 'Kliencie'}!\n\nPana/Pani sprawa ${v['2'] ?? ''} została otwarta — od teraz zajmujemy się wszystkim. W sprawie terminu z rzeczoznawcą odezwiemy się.\n\nRzeczoznawca przyjeżdża bezpośrednio do Pana/Pani, nie musi Pan/Pani nigdzie jechać. Nie płaci Pan/Pani nic: wszystkie koszty pokrywa ubezpieczyciel sprawcy. Wypłata następuje często w dwóch etapach — pierwsza częściowa wypłata szybko, reszta po zakończeniu.\n\nWszystko o Pana/Pani sprawie: ${v['3'] ?? ''}\n\nW razie pytań wystarczy odpowiedzieć na tę wiadomość.`,
 
   // AAR-312: Direkt nach SA — erklärt Zwei-Stufen-Zahlung + Sachverständiger kommt.
   // Variablen: 1=Vorname, 2=Portal-Link
