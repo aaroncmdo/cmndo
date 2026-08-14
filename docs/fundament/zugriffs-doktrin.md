@@ -77,8 +77,33 @@ den Basistabellen-Zugriff.
 - **Client-Direkt-Selects auf Basistabellen: 0** (verifiziert) → **keine Migration auf dieser Achse** (die
   DoD-„Top-3-Abweichler migrieren" ist hier gegenstandslos; server-first ist gelebt).
 - **Browser-Client-Nutzung: Realtime + Auth** (~25 Files, alle legit; R4-Gate `whenRealtimeAuthReady` ist verdrahtet).
-- **Offene Achse (spätere Tranche/Erhebung):** server-seitige Basistabellen-Reads, die die `v_claim_*`-Schicht
-  umgehen (Konsolidierung auf das View-Muster) — eigene Erhebung wert, nicht in dieser Prep-Tranche.
+- **Offene Achse — ERHEBUNG GELAUFEN (14.08.):** server-seitige Reads, die die `v_claim_*`-Schicht umgehen.
+
+  **(a) Die View-Schicht selbst ist kanonisch.** Die Kette baut sauber aufeinander auf, es gibt keine
+  Parallel-Views: `v_claim_payments` + `v_claim_phase` + `v_gutachten_werte` → **`v_claim_base` (370 Sp.)** →
+  **`v_claim_full` (166 Sp.)** → `v_claim_workstate` (33 Sp.). Dass schmale Spezial-Views (`v_claim_phase`,
+  3 Spalten) direkt auf `claims` lesen statt durch die 370-Spalten-Basis, ist **richtig so** — nicht „unkanonisch".
+
+  **(b) Die Lesebasis der App ist aber gespalten:** **262 direkte `.from('claims').select(…)` in 180 Files**
+  gegenüber **~140 View-Reads in 91 Files** (davon `v_claim_full` 130×). Rund zwei Drittel der Claim-Reads
+  gehen also an der Schicht vorbei.
+
+  **(c) Die Mehrheit davon ist legitim.** Die häufigsten Muster sind Ein-Feld-Fragen — `kundenbetreuer_id` (9×),
+  `claim_nummer` (9×), `geschaedigter_user_id` (8×), `operative_status` (5×). Das sind Guards, Ownership-Checks
+  und Write-Rückprüfungen; sie über eine 166-Spalten-View zu führen wäre teurer, nicht sauberer.
+
+  **(d) Die echten Kandidaten sind ~8 BREITE Bündel-Reads (8–16 Spalten)**, die fachliche Blöcke nachbauen,
+  die `v_claim_full` schon enthält — u.a. der Mietwagen-Block (16 Sp.), der Kanzlei-Block (12 Sp., inkl.
+  Nested-Join `kanzlei_faelle(…)`), eine Claim-Übersicht (11 Sp.) und der Werkstatt/KVA-Block (10 Sp.).
+
+  **(e) 27 Files lesen BEIDES** (`claims` direkt *und* `v_claim_*`). Ob das echte Doppelarbeit im selben
+  Ausführungspfad ist oder zwei getrennte Zwecke, braucht Einzelprüfung — das ist der lohnendste Startpunkt.
+
+  ⚖️ **Trade-off, der die Tranche bisher zurückgehalten hat und weiter gilt:** `v_claim_full` joint über
+  `v_claim_base` rund **16 Tabellen**. Für einen 8-Spalten-Read ist das teurer als der direkte Zugriff. Die
+  Konsolidierung ist deshalb **kein reiner Cleanup**, sondern pro Call-Site eine Abwägung „ein Ort für die
+  Feld-Semantik" gegen „Joins, die niemand braucht". Blind migrieren würde Reads verlangsamen.
+  → Empfehlung: bei (e) beginnen (echte Redundanz), dann (d) einzeln bewerten; (c) bewusst **nicht** anfassen.
 
 **Verankert im Review-Prozess (08.08., C5-doc-close):** Die Doktrin ist jetzt (a) aus `AGENTS.md` verlinkt
 (Dach-Absatz „Zugriffs-Doktrin (Server-first)" über den vier Zugriffs-Gates) und (b) als 6-Punkt-Checkliste
