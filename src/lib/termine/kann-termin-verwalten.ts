@@ -26,9 +26,11 @@ export async function kannTerminFallVerwalten(
   user: User,
   fallId: string,
 ): Promise<TerminVerwaltenResult> {
+  // C5 (Doktrin §5): `vehicle_id` kommt aus DIESEM Read mit — der Flottenmanager-Zweig
+  // unten holte es frueher per zweitem Roundtrip auf `claims` fuer denselben Claim.
   const { data: fallRow } = await admin
     .from('v_claim_full')
-    .select('id, fall_id, kunde_id, lead_id, kundenbetreuer_id, claim_nummer')
+    .select('id, fall_id, kunde_id, lead_id, kundenbetreuer_id, claim_nummer, vehicle_id')
     .eq('fall_id', fallId)
     .maybeSingle()
   if (!fallRow) return { ok: false, kundenbetreuerId: null, claimNummer: null }
@@ -48,8 +50,7 @@ export async function kannTerminFallVerwalten(
   // 2) Flottenmanager: Firma des Users haelt das Fahrzeug dieses Claims?
   const firma = await getFlottenmanagerFirma(admin, user.id)
   if (!firma) return { ok: false, kundenbetreuerId, claimNummer }
-  const { data: claim } = await admin.from('claims').select('vehicle_id').eq('id', fallRow.id as string).maybeSingle()
-  const vehicleId = (claim?.vehicle_id as string | null) ?? null
+  const vehicleId = (fallRow.vehicle_id as string | null) ?? null
   if (!vehicleId) return { ok: false, kundenbetreuerId, claimNummer }
   const flotte = await getKundeFlotte(admin, firma.id)
   return { ok: flotte.some((v) => v.vehicleId === vehicleId), kundenbetreuerId, claimNummer }
