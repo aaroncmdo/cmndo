@@ -5,7 +5,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { createLead } from '@/lib/leads/create-lead'
+// C2/§9-#5 (Ein Intake): der Anrufer-Lead laeuft ueber `createCase` statt roh ueber
+// `createLead` — dadurch bekommt er einen garantierten FlowLink (siehe unten).
+import { createCase } from '@/lib/intake/create-case'
 import { createNotification } from '@/lib/notifications'
 import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { MatelsoEventSchema } from '@/lib/schemas/matelso-event'
@@ -115,17 +117,26 @@ export async function POST(req: NextRequest) {
     // 5. Auto-Lead nur wenn weder Lead noch Fall gematcht (wie Aircall).
     if (!leadId && !fallId) {
       const nowBerlin = new Date().toLocaleString('de-DE', { timeZone: 'Europe/Berlin' })
-      const created = await createLead(
-        admin,
+      // C2/§9-#5: ueber `createCase` statt roh ueber `createLead` — identisch zum bereits
+      // gehobenen Aircall-Webhook (C2b D-4b). Der Gewinn ist der garantierte FlowLink:
+      // vorher entstand hier ein Anrufer-Lead OHNE jeden Kunde-Kanal; wer nicht
+      // zurueckgerufen wurde, hatte keinen Weg zurueck in den Vorgang.
+      //
+      // mode='lead-first': ein Anruf ist noch kein Fall — die Konversion passiert spaeter
+      // ueber /flow. KEIN dedup-Key: der generische ist ohne Kennzeichen unbrauchbar
+      // (`dedupKeyIsUsable`), und der praezisere Telefon-Abgleich lief oben schon ueber
+      // `matchInboundToFall` — genau diese Begruendung steht so auch im Aircall-Pfad.
+      const created = await createCase(admin, {
+        mode: 'lead-first',
         // AAR-956 17.07. (Befund 4): keine 'Unbekannt'/'Anrufer'-Platzhalter — NULL laesst
         // Gruss-Fallbacks (#4469) und Staff-Render-Fallbacks korrekt greifen.
-        { source_channel: 'matelso-call', status: 'neu', telefon: fromNumber },
-        {
+        base: { source_channel: 'matelso-call', status: 'neu', telefon: fromNumber },
+        extra: {
           qualifizierungs_phase: 'neu',
           notiz: `Auto-erstellt durch matelso-Anruf am ${nowBerlin} · Quelle: ${quelle ?? 'unbekannt'} · Status: ${status} · Dauer: ${duration ?? 0}s`,
         },
-      )
-      if (!created.ok) console.error('[matelso] createLead failed:', created.error)
+      })
+      if (!created.ok) console.error('[matelso] createCase failed:', created.error)
       leadId = created.ok ? created.leadId : null
       isNewLead = created.ok // bewusst praeziser als der aircall-Pfad: nur true bei echtem Erfolg
     }
