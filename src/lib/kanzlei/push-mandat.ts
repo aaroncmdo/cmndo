@@ -86,7 +86,10 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   const { data: fall, error: fallErr } = await db
     .from('v_claim_full')
     .select(
-      'claim_id:id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, service_typ, kunde_email',
+      // C5 (Doktrin §5): kanzlei_wunsch/vorsteuerabzugsberechtigt/vehicle_id/sa_unterschrieben
+      // kommen aus DIESEM Read mit — sie standen frueher in einem zweiten Roundtrip auf
+      // `claims` fuer denselben Claim. Alle vier traegt v_claim_full selbst.
+      'claim_id:id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, service_typ, kunde_email, kanzlei_wunsch, vorsteuerabzugsberechtigt, vehicle_id, sa_unterschrieben',
     )
     .eq('fall_id', fallId)
     .maybeSingle()
@@ -108,15 +111,10 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   let vehicleKennzeichen: string | null = null
   let claimSaUnterschrieben: boolean | null = null
   if (fall.claim_id) {
-    const { data: claim } = await db
-      .from('claims')
-      .select('kanzlei_wunsch, vorsteuerabzugsberechtigt, vehicle_id, sa_unterschrieben')
-      .eq('id', fall.claim_id)
-      .maybeSingle()
-    kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
-    claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
-    claimSaUnterschrieben = ((claim as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben as boolean | null) ?? null
-    const vehId = (claim?.vehicle_id as string | null) ?? null
+    kanzleiWunsch = (fall.kanzlei_wunsch as string | null) ?? null
+    claimVorsteuer = (fall.vorsteuerabzugsberechtigt as boolean | null) ?? null
+    claimSaUnterschrieben = (fall.sa_unterschrieben as boolean | null) ?? null
+    const vehId = (fall.vehicle_id as string | null) ?? null
     if (vehId) {
       const { data: veh } = await db.from('vehicles').select('kennzeichen_aktuell').eq('id', vehId).maybeSingle()
       vehicleKennzeichen = (veh?.kennzeichen_aktuell as string | null) ?? null

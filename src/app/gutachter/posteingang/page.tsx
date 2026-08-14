@@ -37,20 +37,22 @@ export default async function PosteingangPage({
   // CMM-74 b″: Status-Filter auf claims.operative_status (SSoT-Cutover) statt faelle.status.
   // Zwei-Schritt: nicht-stornierte claim-IDs vorab holen, dann faelle.in('claim_id', …).
   // faelle.status wird hier nicht gelesen (nur claims.created_at + claim_nummer) → aus dem Select raus.
-  const { data: nichtStornierteClaims } = await supabase
-    .from('claims')
-    .select('id')
-    .not('operative_status', 'in', '("storniert")')
-  const aktiveClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
-  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id = claim_id (Filter);
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id = claim_id;
   // fall_id == faelle.id; claim_nummer + created_at flach (SSoT).
-  const { data: faelleRaw } = aktiveClaimIds.length
-    ? await supabase
-        .from('v_claim_full')
-        .select('id, fall_id, lead_id, claim_nummer, created_at')
-        .eq('sv_id', sv.id)
-        .in('id', aktiveClaimIds)
-    : { data: [] as Array<{ id: string; fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }> }
+  //
+  // C5 (Doktrin §5, 14.08.): EIN Read statt zwei. Vorher lud ein Vorab-Select auf `claims`
+  // ALLE nicht-stornierten Claim-IDs — systemweit, ungefiltert nach SV — nur um sie als
+  // `.in('id', …)`-Liste zurueckzureichen. Das skaliert mit der Gesamtzahl der Claims,
+  // obwohl der SV nur seine eigenen sieht. `v_claim_full` traegt `operative_status` selbst,
+  // der Filter laeuft also direkt mit.
+  // ⚠ Semantik unveraendert: `.not(col,'in',…)` schliesst NULL-Status genauso aus wie zuvor
+  // (SQL: NOT (NULL IN (…)) ist NULL, also kein Treffer) — derselbe Ausdruck, nur eine Ebene
+  // hoeher.
+  const { data: faelleRaw } = await supabase
+    .from('v_claim_full')
+    .select('id, fall_id, lead_id, claim_nummer, created_at')
+    .eq('sv_id', sv.id)
+    .not('operative_status', 'in', '("storniert")')
   const claimCreatedAt = (f: { created_at?: string | null }): string => f.created_at ?? ''
   const faelle = (faelleRaw ?? [])
     .slice()
