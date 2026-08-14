@@ -4,7 +4,7 @@ import type { TemplateName } from './template-sids'
 // Mirrors the de structure in legacy-texts.ts exactly; only the prose is translated.
 export const TEMPLATES_EN: Partial<Record<TemplateName, (vars: Record<string, string>) => string>> = {
   fall_eroeffnet: (v) =>
-    `Hello ${v['1'] ?? 'Customer'}, your case ${v['2'] ?? ''} has been opened at Claimondo. We will take care of everything else. If you have any questions, simply reply to this message.`,
+    `👋 Welcome to Claimondo, ${v['1'] ?? 'Customer'}!\n\nYour case ${v['2'] ?? ''} is now open — we will take it from here. We will be in touch about your appraiser appointment.\n\nThe appraiser comes directly to you, you don't have to go anywhere. You pay nothing: the other party's insurer covers all costs. The payout is often made in two steps — a first partial payment quickly, the rest after completion.\n\nEverything about your case: ${v['3'] ?? ''}\n\nIf you have any questions, simply reply to this message.`,
 
   // AAR-312: Right after the SA — explains the two-stage payment + the appraiser is coming.
   // Variables: 1=first name, 2=portal link
