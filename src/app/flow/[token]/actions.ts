@@ -819,21 +819,17 @@ export async function signSAandCreateFall(
       const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
       const hatTermin = !!aktiverTerminId
 
-      if (telefon.length >= 5) {
-        const kundeText = [
-          `👋 Willkommen bei Claimondo${vorname ? `, ${vorname}` : ''}!`,
-          '',
-          'Ihre Schadenmeldung ist bei uns eingegangen — ab jetzt kümmern wir uns um alles.',
-          '',
-          hatTermin
-            ? 'Ihr Gutachter-Termin ist reserviert; wir melden uns mit den nächsten Schritten.'
-            : 'Wir vereinbaren zeitnah Ihren Gutachter-Termin und melden uns bei Ihnen.',
-          '',
-          'Bei Fragen antworten Sie einfach auf diese Nachricht. Ihr Claimondo-Team',
-        ].join('\n')
-        const r = await sendWhatsAppText(telefon, kundeText)
-        if (!r.ok) console.error('[AAR-956] Willkommens-WA (Kunde) fehlgeschlagen:', r.code, r.error)
-      }
+      // H2 (Aaron-Entscheid 12.08.): Die handgeschriebene Willkommens-WA stand hier —
+      // sie sagte dasselbe wie das Template `fall_eroeffnet`, das wenige Zeilen spaeter
+      // ohnehin rausging (bis hin zum woertlich identischen Schlusssatz „Bei Fragen
+      // antworten Sie einfach auf diese Nachricht"). Sie ist jetzt IN `fall_eroeffnet`
+      // gebuendelt und hier entfernt.
+      //
+      // Nebenwirkung, die dabei mitverschwindet: dieser Text existierte nur auf DEUTSCH
+      // (inline, keine i18n) und ging so auch an fremdsprachige Kunden. Das Template
+      // liegt in 6 Sprachen vor und folgt der Sprache des Falls.
+      //
+      // Die Team-Nachricht unten bleibt unveraendert — sie geht nicht an den Kunden.
 
       const teamText = [
         '✅ Self-Service abgeschlossen (Flow)',
@@ -1393,16 +1389,30 @@ export async function signSAandCreateFall(
     console.error('[KFZ-129] sendSystemNachricht (Welcome) fehlgeschlagen:', e)
   }
 
-  // 9. WhatsApp an Kunde: Fall eröffnet (non-critical)
+  // 9. WhatsApp an Kunde: EINE Nachricht zum Fall-Start (non-critical)
+  //
+  // H2 (Aaron-Entscheid 12.08. „drei nach Zweck"): Hier gingen bisher DREI Nachrichten
+  // unmittelbar nacheinander an denselben Kunden —
+  //   (a) eine handgeschriebene „👋 Willkommen … Schadenmeldung eingegangen" (weiter oben),
+  //   (b) `fall_eroeffnet`: „Ihr Fall … wurde eröffnet. Wir kümmern uns um alles Weitere.",
+  //   (c) `info_nach_sa`: keine Kosten / Zwei-Stufen-Zahlung / Gutachter kommt.
+  // (a) und (b) sagten dasselbe, der Schlusssatz stand sogar wörtlich zweimal drin.
+  // Alle drei sind jetzt in `fall_eroeffnet` gebündelt (6 Sprachen), (a) ist entfernt.
+  //
+  // Die Zugangsdaten-Nachricht aus createKundeAccount bleibt BEWUSST getrennt: ein
+  // Passwort muss wiederauffindbar sein, nicht in einem Fließtext stehen.
+  //
+  // Der Termin bleibt ein eigener Zweck (T4 `termin_bestaetigt`) — hier steht nur der
+  // neutrale Satz „Zu Ihrem Gutachter-Termin melden wir uns", der in beiden Fällen
+  // stimmt (reserviert wie noch offen) und keine Fallunterscheidung braucht.
   try {
     const { sendFallCommunication } = await import('@/lib/communications/send-fall')
-    await sendFallCommunication(fall.id, 'fall_eroeffnet')
-    // AAR-312: Info-Nachricht direkt im Anschluss — Erklärt Zwei-Stufen-Zahlung
-    // und dass der Gutachter zum Kunden kommt. Reduziert Rückfragen ans KB.
-    // Portal-Link explizit via extraData übergeben — sendFallCommunication
-    // setzt '2' sonst auf regulierung_betrag (relevant für fall_eroeffnet).
+    // '2' würde sonst auf regulierung_betrag zeigen; '3' ist der Portal-Link.
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'}/kunde/faelle/${fall.id}`
-    await sendFallCommunication(fall.id, 'info_nach_sa', { '2': portalUrl })
+    await sendFallCommunication(fall.id, 'fall_eroeffnet', {
+      '2': fallNummer,
+      '3': portalUrl,
+    })
   } catch { /* */ }
 
   // 10. WhatsApp an Gutachter: Termin bestätigt + Ablehnen-Link (KFZ-118)
