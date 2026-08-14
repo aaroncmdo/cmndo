@@ -87,8 +87,9 @@ async function pingAndUpdate(v: VerbindungRow): Promise<{ status: 'ok' | 'failed
 
   try {
     await pingConnection({ serverUrl: v.server_url, username: v.username, password: plaintext })
-    // Erfolg — last_error zurücksetzen, Task schließen falls vorhanden.
-    if (v.last_error) {
+    // Erfolg — last_error zuruecksetzen, Warnungen aufloesen.
+    const warErrorVermerkt = !!v.last_error
+    if (warErrorVermerkt) {
       await db
         .from('kalender_verbindungen')
         .update({
@@ -98,16 +99,30 @@ async function pingAndUpdate(v: VerbindungRow): Promise<{ status: 'ok' | 'failed
           fehler_task_id: null,
         })
         .eq('id', v.id)
-      const sv = await svFuerProfil(db, v.profile_id)
-      if (sv) {
-        await resolveTasksForEntity('gutachter', sv.id, 'CalDAV-Verbindung wieder erreichbar')
-      }
-      return { status: 'recovered' }
+    } else {
+      await db
+        .from('kalender_verbindungen')
+        .update({ last_sync_at: new Date().toISOString() })
+        .eq('id', v.id)
     }
-    await db
-      .from('kalender_verbindungen')
-      .update({ last_sync_at: new Date().toISOString() })
-      .eq('id', v.id)
+
+    // ⚠ Warnungen IMMER aufloesen, nicht nur wenn `last_error` gesetzt WAR.
+    //
+    // Vorher stand das Aufloesen im `if (v.last_error)`-Zweig. Wurde `last_error` auf
+    // irgendeinem anderen Weg genullt (Recovery in einem Lauf, der die Tasks nicht fand;
+    // manueller Eingriff; Aenderung am Fehlerpfad), blieb die Warnung fuer immer offen --
+    // die Aufraeumlogik haengte an einem FLAG statt am tatsaechlichen Zustand.
+    // Prod-Messung 14.08.: 7 offene "Kalender-Verbindung fehlgeschlagen"-Tasks bei
+    // 5 von 5 gesunden Verbindungen (alle mit Sync derselben Stunde, kein last_error).
+    // Ein Alarm, der ein behobenes Problem meldet, kostet dasselbe Vertrauen wie ein
+    // uebersehener -- nach ein paar davon sieht niemand mehr hin.
+    //
+    // resolveTasksForEntity ist idempotent: gibt es nichts Offenes, tut es nichts.
+    const sv = await svFuerProfil(db, v.profile_id)
+    if (sv) {
+      await resolveTasksForEntity('gutachter', sv.id, 'CalDAV-Verbindung wieder erreichbar')
+    }
+    if (warErrorVermerkt) return { status: 'recovered' }
     return { status: 'ok' }
   } catch (err) {
     const errorMsg =
