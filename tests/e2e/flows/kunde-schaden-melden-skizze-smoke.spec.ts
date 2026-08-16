@@ -6,10 +6,15 @@
 //
 // WARUM DIESER SMOKE: Der Skizzen-Generator war gebaut und TOT — 18 Leads mit Hergang,
 // 0 mit Skizze. #5238 haengte ihn an den Dispatch-Weg, #5249 an `createLead` (den
-// dokumentierten Funnel, den auch `/kunde/schaden-melden` nutzt). Ob er dort greift,
-// laesst sich am Bestand NICHT ablesen: seit dem Fix (13.08.) kam prod kein einziger
-// Lead mit Hergang herein. Ein leeres Zeitfenster beweist nichts — also erzeugen wir
-// den Fall selbst.
+// dokumentierten Funnel, den auch `/kunde/schaden-melden` nutzt).
+//
+// Der Regel-4-Nachweis dafuer wurde am 13.08. bereits per Hand gefuehrt (936-Byte-Skizze,
+// ein Wizard-Durchgang, 0 Residue). Diese Spec macht ihn WIEDERHOLBAR — der Handlauf war
+// ad hoc und hinterliess nichts, womit sich eine Regression spaeter fangen liesse.
+//
+// ⚠ Lehrreich: Am Bestand ist der Fix NICHT ablesbar — seit dem 13.08. steht prod bei
+// 0 Leads mit Hergang, gerade WEIL jener Smoke sauber aufgeraeumt hat. Ein leeres
+// Zeitfenster ist kein Befund; wer daraus "ungeprueft" liest, misst das Aufraeumen.
 //
 // ⚠ Der Skizzen-Lauf ist FIRE-AND-FORGET (Claude-Call, 5–15 s). Die UI ist deshalb
 // schon fertig, bevor die Skizze steht — der Beweis liegt im DB-Zustand, nicht im Toast.
