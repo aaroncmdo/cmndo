@@ -4,6 +4,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { buildPreCallStaticSystem, buildPreCallUser, type PreCallContext } from './prompts'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { AI_MODELS } from '@/lib/ai/models'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 // AAR-437: Modell-Audit Nacht-Shift — ehemals hardcoded 'claude-sonnet-4-20250514'
 const BRIEFING_MODEL = AI_MODELS.pre_call_briefing
@@ -196,7 +197,7 @@ export async function getPreCallBriefing(opts: { fallId?: string; leadId?: strin
     messages: [{ role: 'user', content: buildPreCallUser(ctx) }],
   })
 
-  const briefing = response.content[0]?.type === 'text' ? response.content[0].text : 'Briefing konnte nicht generiert werden.'
+  const briefing = extractAnthropicText(response.content) || 'Briefing konnte nicht generiert werden.'
 
   void logAiUsage({
     endpoint: 'pre_call_briefing',

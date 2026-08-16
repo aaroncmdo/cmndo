@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { POST_CALL_STATIC_SYSTEM, buildPostCallUser } from './prompts'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { AI_MODELS } from '@/lib/ai/models'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 // AAR-437: Modell-Audit Nacht-Shift — ehemals hardcoded 'claude-sonnet-4-20250514'
 const POST_CALL_MODEL = AI_MODELS.post_call_summary
@@ -68,7 +69,7 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   })
   const response = await streamHandle.finalMessage()
 
-  const text = response.content[0]?.type === 'text' ? response.content[0].text : ''
+  const text = extractAnthropicText(response.content)
 
   // Versuche JSON zu parsen
   let zusammenfassung = text

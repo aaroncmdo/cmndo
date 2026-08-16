@@ -8,6 +8,7 @@
 import { AI_MODELS } from '@/lib/ai/models'
 import { getAnthropicVisionClient } from '@/lib/ai/vision/client'
 import { sanitizeSvg } from './sanitize-svg'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 export type UnfallskizzeInput = {
   unfallhergang: string | null
@@ -100,7 +101,7 @@ export async function generateUnfallskizze(
       messages: [{ role: 'user', content: prompt }],
     })
 
-    const raw = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    const raw = extractAnthropicText(response.content)
     const svg = extractSvg(raw)
     if (!svg) return { success: false, error: 'Claude hat kein valides SVG geliefert' }
     return { success: true, svg }

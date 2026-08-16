@@ -112,6 +112,15 @@ jobs:
       - name: Termin-Bezug-Ratchet
         run: npm run check:termin-bezug -- --ratchet
 
+      # Stille-Write-Ratchet: blockt NEUE Supabase-Writes auf schadenstraechtige Tabellen,
+      # deren Ergebnis niemand liest, ggue. scripts/silent-write-baseline.json.
+      # supabase-js WIRFT NICHT — `await db.from('claims').update(…)` ohne Destrukturierung
+      # ist von Erfolg ununterscheidbar. Drei belegte Vorfaelle: DSGVO-Storno (19.07., Antrag
+      # lief nach "storniert" weiter), J2-Seed (16.08., 13 Tage lang nichts geloescht),
+      # Skizzen-Korrektur (16.08.). Siehe AGENTS.md Paragraph Stille-Write-Gate.
+      - name: Stille-Write-Ratchet
+        run: npm run check:silent-writes -- --ratchet
+
       # RLS-Policy-Ratchet: blockt NEUE permissive CREATE POLICY ohne explizite Rollen-Klausel
       # ggue. scripts/rls-policy-baseline.json. Ohne `TO` ist der Postgres-Default `TO public` —
       # die Policy gilt dann auch fuer authenticator/cli_login_postgres/dashboard_user/

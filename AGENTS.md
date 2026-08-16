@@ -478,6 +478,29 @@ CI fährt `npm run check:termin-bezug -- --ratchet`. Es blockt **NEUE** Verletze
 
 **Abgrenzung zu `check:termin-engine-contract`:** Der Contract-Ratchet gatet `.eq('lead_id')`/`.eq('sv_id')` = **Engine-API-Disziplin** (nutze `findeTerminFuerLead`/`assignee_id`), hard-0. Dieses Gate gatet die **Bezug-Filter-Korrektheit** (`fall_id`/`claim_id` voll + `lead_id` jenseits `.eq`). Komplementär, keine funktionale Überlappung (die einzigen `.eq('lead_id')` liegen im ausgenommenen `finde-termin-fuer-lead.ts`). Ausnahmen identisch: `engine/*` + `finde-termin-fuer-lead.ts` dürfen die Achsen direkt anfassen. Marker: `coordination-p33-gutachter-termine-legacy-retire`.
 
+# Stille-Write-Gate (Ratchet)
+
+**Ein Supabase-Write auf eine schadensträchtige Tabelle, dessen Ergebnis niemand liest, ist verboten.** `supabase-js` **wirft nicht** — ein fehlgeschlagener Write gibt `{ error }` zurück. Wer den Rückgabewert verwirft, kann Erfolg und Fehlschlag nicht unterscheiden:
+
+```ts
+await db.from('claims').update({ … }).eq('id', id)          // ❌ Fehler unsichtbar
+const { error } = await db.from('claims').update({ … })     // ✅
+if (error) { … }
+```
+
+**Läuft der Write über den RLS-Client** (`createClient()`, nicht `createAdminClient()`), zusätzlich `.select()` anhängen und die **Row-Zahl** prüfen: Ein RLS-gefiltertes UPDATE trifft 0 Rows **ohne Fehler** — `error === null` bedeutet dort nicht „hat gewirkt".
+
+**Drei belegte Vorfälle:**
+* **DSGVO-Storno (19.07.):** 0-Row-UPDATE unter RLS → die Action meldete Erfolg, die Karte verschwand, der Löschauftrag lief weiter Richtung Anonymisierung.
+* **J2-Seed (16.08.):** FK-Verletzung beim Lead-DELETE. Der Seed meldete **13 Tage lang** Erfolg und löschte nichts; 88 Leads liefen auf und verzerrten Messungen.
+* **Skizzen-Korrektur (16.08.):** Task-Insert in einem `try/catch` (fängt nichts, da kein `throw`) + Update ohne Prüfung — im selben File, am selben Tag wie der J2-Fix. ⚠ **Ein `try/catch` um einen Supabase-Call ist reine Dekoration.**
+
+CI fährt `npm run check:silent-writes -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/silent-write-baseline.json` (**Baseline 214 Stellen in 106 Files**, grandfathered → Boy-Scout: wer ein File anfasst, zieht die Prüfung nach und senkt mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0).
+
+**Nur `KRITISCHE_TABELLEN`** (`claims`, `leads`, `tasks`, `faelle`, `fall_dokumente`, `pflichtdokumente`, `gutachter_termine`) — bewusst nicht alle ~684 Write-Stellen des Repos: Dort ist ein stiller Fehlschlag ein Datenverlust, der erst Wochen später auffällt. Die Liste darf wachsen, jede Erweiterung hebt aber die Baseline.
+
+**0 False-Positives by design:** Gescannt wird **nur die Statement-Form** — eine Zeile, die (nach Whitespace) mit `await` beginnt. `const { error } = await …`, `return await …`, Reads und Ketten mit mehreren `.from()` (Zuordnung uneindeutig) werden per Konstruktion nie geflaggt. Pure Logik: `scripts/lib/silent-write-scan.mjs` (unit-getestet, 13 Fälle, davon 7 Negativ-Fälle). Bewusst fire-and-forget → `// silent-write-skip: <grund>` am File-Anfang.
+
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
 **Kanonische Referenz: `docs/fundament/zugriffs-doktrin.md`** (Fundament C5, #4860). Kern in einem Satz: **Client liest über Views/RPCs je Rolle, schreibt über Server-Actions mit Guard + `.select()`-Row-Check; RLS ist Sicherheitsnetz, nicht Feinsteuerung** (Verfassung §7). Ist-Stand: Client-Direkt-Selects auf Basistabellen = **0** (verifiziert) — server-first ist gelebt.
