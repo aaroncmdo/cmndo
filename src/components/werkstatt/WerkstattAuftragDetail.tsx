@@ -316,7 +316,26 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const [pdfLaden, setPdfLaden] = useState(false)
 
-  if (!auftrag.gutachten_fertiggestellt_am) return null
+  // Haftpflicht, Gutachten noch nicht fertig: die Werkstatt sah hier BISHER GAR NICHTS.
+  //
+  // Operativ (Aaron 16.08.): Bei Haftpflicht muss die Werkstatt keinen Kostenvoranschlag
+  // abgeben — der Sachverstaendige schreibt das Gutachten und kalkuliert die Reparatur-
+  // kosten. Das Gate ist dort deshalb offen (#5196) und `kvaStatus` liefert bewusst null,
+  // die KvaSektion rendert also nichts. Zusammen mit dem frueheren `return null` hier
+  // stand die Werkstatt vor einer leeren Seite: kein Hinweis, dass sie NICHTS liefern
+  // muss, und keiner, worauf sie wartet. Genau daraus entsteht die Fehlannahme
+  // „KVA fehlt". Prod 16.08.: 6 aktive Haftpflicht-Claims mit Werkstatt, alle ohne KVA.
+  if (!auftrag.gutachten_fertiggestellt_am) {
+    return (
+      <SectionCard title="Gutachten" className="mt-3">
+        <p className="text-body-sm text-claimondo-ondo">
+          Für diesen Auftrag brauchen Sie <strong>keinen Kostenvoranschlag</strong>. Die gegnerische
+          Versicherung reguliert auf Basis des Gutachtens — der Sachverständige kalkuliert die
+          Reparaturkosten. Sobald sein Gutachten vorliegt, sehen Sie hier alle Positionen.
+        </p>
+      </SectionCard>
+    )
+  }
 
   async function handlePdf() {
     setPdfLaden(true)
