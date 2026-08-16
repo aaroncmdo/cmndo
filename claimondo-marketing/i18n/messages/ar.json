@@ -3812,7 +3812,7 @@
     "lokal_capsule": "<strong>المحكمة المختصة:</strong> {landgericht}. <strong>نقابة المحامين:</strong> {kammer}. <strong>منطقة الرمز البريدي:</strong> {plz} (حوالي {bevoelkerung} نسمة، ولاية {bundesland}). في النزاعات القضائية مع شركات التأمين، ترفع مكتب محاماتنا الشريك للقانون المروري الدعاوى أمام {landgericht} — حيث تعرف الدوائر القضائية القضايا جيداً. نطاق الأتعاب وفق BVSK: <strong>{bvskSpanne}</strong> (يتدرج مع حجم الضرر).",
     "bezirke_eyebrow": "في جميع أنحاء {stadt}",
     "bezirke_h2": "نُجري التقييم في جميع أحياء {anzahlBezirke} {ort}",
-    "bezirke_region": "<strong>أيضاً في المنطقة المحيطة:</strong> نصل إلى {orte} كذلك — في الغالب في اليوم التالي.",
+    "bezirke_region": "<strong>أيضاً في المنطقة المحيطة:</strong> نصل إلى <orte></orte> كذلك — في الغالب في اليوم التالي.",
     "hotspots_eyebrow": "أحوال المرور المحلية",
     "hotspots_h2": "بؤر الحوادث والمحاور الرئيسية {ort}",
     "hotspots_stadtweit": "على مستوى المدينة {jahr}: {text}.",

@@ -3953,7 +3953,7 @@
     "lokal_capsule": "<strong>Zuständiges Gericht:</strong> {landgericht}. <strong>Anwaltskammer:</strong> {kammer}. <strong>PLZ-Gebiet:</strong> {plz} (rund {bevoelkerung} Einwohner, Bundesland {bundesland}). Bei gerichtlichen Auseinandersetzungen mit Versicherern klagt unsere Partnerkanzlei für Verkehrsrecht vor dem {landgericht} — dort kennen die Kammern. Honorar-Spanne nach BVSK: <strong>{bvskSpanne}</strong> (skaliert mit Schadenshöhe).",
     "bezirke_eyebrow": "In ganz {stadt} vor Ort",
     "bezirke_h2": "Wir begutachten in allen {anzahlBezirke} Stadtbezirken {ort}",
-    "bezirke_region": "<strong>Auch in der Region:</strong> Wir kommen ebenso nach {orte} — meist schon am Folgetag vor Ort.",
+    "bezirke_region": "<strong>Auch in der Region:</strong> Wir kommen ebenso nach <orte></orte> — meist schon am Folgetag vor Ort.",
     "hotspots_eyebrow": "Lokale Verkehrslage",
     "hotspots_h2": "Unfallschwerpunkte und Hauptachsen {ort}",
     "hotspots_stadtweit": "Stadtweit {jahr}: {text}.",
