@@ -41,6 +41,10 @@ const HERGANG =
   'Der Fahrer hinter mir bremste zu spät und fuhr auf mein Heck auf. ' +
   'Beide Fahrzeuge waren danach noch fahrbereit, die Polizei kam nicht dazu.'
 
+// Eine Korrektur, die die Skizze inhaltlich veraendern MUSS — sonst beweist der Lauf nur,
+// dass ein Formular absendbar ist, nicht dass die Korrektur wirkt.
+const KORREKTUR = 'Der andere Wagen kam von rechts aus einer Seitenstraße, nicht von hinten.'
+
 test('Kunde meldet Schaden mit Hergang — Meldung geht durch', async ({ page }) => {
   test.skip(!process.env.RUN_SKIZZE_SMOKE, 'Opt-in: RUN_SKIZZE_SMOKE=1 (loest einen echten Claude-Call aus)')
 
@@ -68,4 +72,50 @@ test('Kunde meldet Schaden mit Hergang — Meldung geht durch', async ({ page })
   await expect(page.locator('#hergang')).toBeHidden({ timeout: 30_000 })
 
   console.log(`[skizze-smoke] Lead angelegt mit Kennzeichen-Marker: ${MARKER}`)
+})
+
+// D2 (#5311): Der Kunde MUSS die Skizze in seiner Fallakte sehen — als Entwurf, mit
+// Korrekturmoeglichkeit. Bis 16.08. sah sie nur Dispatch.
+//
+// Warum die Claim-Id per ENV und nicht ueber die Fall-Liste erklickt: Die Skizze entsteht
+// asynchron (5-15 s nach der Meldung), der vorige Test kann also nicht direkt weiterlaufen.
+// Die Id kommt aus der DB-Pruefung dazwischen — genau die Stelle, an der man ohnehin
+// verifiziert, dass die Skizze den CLAIM erreicht hat (und nicht nur den Lead).
+//   SKIZZE_CLAIM_ID=<uuid> RUN_SKIZZE_SMOKE=1 npx playwright test kunde-schaden-melden-skizze
+test('Kunde sieht die Unfallskizze als Entwurf in seiner Fallakte', async ({ page }) => {
+  test.skip(!process.env.RUN_SKIZZE_SMOKE, 'Opt-in: RUN_SKIZZE_SMOKE=1')
+  const claimId = process.env.SKIZZE_CLAIM_ID
+  test.skip(!claimId, 'SKIZZE_CLAIM_ID fehlt — Id des Claims mit Skizze aus der DB setzen')
+
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  await page.fill('input[type="email"], input[name="email"]', KUNDE_EMAIL)
+  await page.fill('input[type="password"], input[name="password"]', KUNDE_PW)
+  await page.click('button[type="submit"]')
+  await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 30_000 })
+
+  await page.goto(`/kunde/faelle/${claimId}`)
+
+  // Die Card traegt die Ueberschrift; das SVG selbst wird inline gerendert.
+  await expect(page.getByText('Unfallskizze', { exact: false }).first()).toBeVisible({
+    timeout: 30_000,
+  })
+  // Der Entwurfs-Charakter MUSS erkennbar sein — eine ungepruefte KI-Zeichnung, die wie
+  // eine amtliche Feststellung aussieht, waere schlimmer als keine.
+  await expect(page.getByText(/Entwurf/i).first()).toBeVisible({ timeout: 10_000 })
+  // Und der Widerspruchsweg muss offenstehen.
+  await expect(page.getByRole('button', { name: /stimmt nicht/i })).toBeVisible({ timeout: 10_000 })
+
+  console.log('[skizze-smoke] Fallakte zeigt Skizze + Entwurfs-Hinweis + Korrektur-Button')
+
+  // Zweiter Teil des Solls: Der Widerspruch muss ANKOMMEN. Gemessen wird am DB-Zustand
+  // (neue `unfallskizze_generiert_am` + Dispatch-Aufgabe), nicht am Toast — Toasts sind
+  // fluechtig und ein Body-Poll auf „Unfallskizze" ist sofort erfuellt (so heisst die Card).
+  await page.getByRole('button', { name: /stimmt nicht/i }).click()
+  await page.locator('#skizze-korrektur').fill(KORREKTUR)
+  await page.getByRole('button', { name: /Korrektur senden/i }).click()
+
+  // Die Neugenerierung laeuft im Request (Sprachmodell, 5-15 s) — der Button bleibt
+  // solange im Lade-Zustand. Erfolg = das Formular schliesst sich wieder.
+  await expect(page.locator('#skizze-korrektur')).toBeHidden({ timeout: 60_000 })
+  console.log('[skizze-smoke] Korrektur gesendet — DB-Gegenprobe: neue skizze_generiert_am + Task')
 })

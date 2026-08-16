@@ -23,7 +23,11 @@ export type CreateAdHocTaskInput = {
   empfaengerRolle: EmpfaengerRolle
   empfaengerUserId?: string
   deadline?: string
-  prioritaet?: 'niedrig' | 'normal' | 'hoch'
+  // ⚠ Muss den DB-CHECK spiegeln: CHECK (prioritaet = ANY (ARRAY['normal','dringend','kritisch'])).
+  // Stand bis 16.08.: 'niedrig' | 'normal' | 'hoch' — zwei der drei Werte hat die Datenbank
+  // abgelehnt, der Insert scheiterte. Der Flag-Drift-Ratchet greift hier nicht, weil der Wert
+  // als Variable und nicht als String-Literal eingesetzt wird; der Scanner sieht nur Literale.
+  prioritaet?: 'normal' | 'dringend' | 'kritisch'
   entityType?: EntityType
   entityId?: string
 }

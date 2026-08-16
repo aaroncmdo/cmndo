@@ -37,7 +37,14 @@ export function UnfallskizzeCard({ claimId, svg }: { claimId: string; svg: strin
     }
     setFormOffen(false)
     setText('')
-    toast.success('Danke — wir haben die Skizze angepasst und prüfen sie.')
+    // Ehrlich bleiben: Die Neuzeichnung hängt an einem Sprachmodell und kann scheitern.
+    // Dem Kunden „wir haben die Skizze angepasst" zuzusagen, wenn nichts passiert ist,
+    // wäre eine Zusage ohne Deckung — angekommen ist die Meldung aber in jedem Fall.
+    toast.success(
+      res.neuGeneriert
+        ? 'Danke — wir haben die Skizze neu gezeichnet.'
+        : 'Danke, Ihre Korrektur ist angekommen. Wir schauen sie uns an.',
+    )
     startTransition(() => router.refresh())
   }
 

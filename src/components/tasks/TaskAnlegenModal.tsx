@@ -13,6 +13,10 @@ import {
 } from '@/lib/tasks/create-adhoc'
 import { ladeEntityOptions, type EntityOption } from '@/lib/tasks/entity-loader'
 import { Modal } from '@/components/primitives/Modal'
+import {
+  TASK_PRIORITAET_DEFS,
+  type TaskPrioritaet,
+} from '@/lib/status/domains/task-prioritaet'
 
 // AAR-402: „Dispatcher" (Phase-1-intern) + „Sachverständiger" (der
 // Ersteller selbst) wurden aus der Empfänger-Auswahl entfernt — sie tauchten
@@ -46,7 +50,7 @@ export function TaskAnlegenModal({
   const [beschreibung, setBeschreibung] = useState('')
   const [empfaengerRolle, setEmpfaengerRolle] = useState<EmpfaengerRolle>('kundenbetreuer')
   const [deadline, setDeadline] = useState('')
-  const [prioritaet, setPrioritaet] = useState<'niedrig' | 'normal' | 'hoch'>('normal')
+  const [prioritaet, setPrioritaet] = useState<TaskPrioritaet>('normal')
   const [entityType, setEntityType] = useState<EntityType | ''>('')
   const [entityId, setEntityId] = useState('')
   const [entityOptions, setEntityOptions] = useState<EntityOption[]>([])
@@ -178,14 +182,17 @@ export function TaskAnlegenModal({
               </label>
               <select
                 value={prioritaet}
-                onChange={(e) =>
-                  setPrioritaet(e.target.value as 'niedrig' | 'normal' | 'hoch')
-                }
+                onChange={(e) => setPrioritaet(e.target.value as TaskPrioritaet)}
                 className="w-full text-sm rounded-ios-md border border-claimondo-border px-2 py-1.5 outline-none focus:border-claimondo-ondo bg-white"
               >
-                <option value="niedrig">Niedrig</option>
-                <option value="normal">Normal</option>
-                <option value="hoch">Hoch</option>
+                {/* Die Optionen kommen aus der Registry — sie spiegelt den DB-CHECK.
+                    Vorher standen hier „Niedrig"/„Hoch": beides kennt die Datenbank nicht,
+                    der Insert scheiterte. Nur „Normal" ging durch. */}
+                {Object.entries(TASK_PRIORITAET_DEFS).map(([wert, def]) => (
+                  <option key={wert} value={wert}>
+                    {def.label}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
