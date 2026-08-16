@@ -9,6 +9,7 @@ import {
   einwohnerZahl,
   naechsteAus,
   naechsteStaedte,
+  nachbarnMitRueckkanten,
 } from './nachbarstaedte'
 import { STAEDTE } from './staedte'
 
@@ -89,14 +90,13 @@ describe('naechsteStaedte — Grossstadt-Garantie (Gegenprobe Koeln)', () => {
     expect(treffer).toContain('duisburg')
   })
 
-  it('erzeugt in der Rheinschiene bewusst eine einseitige Kante Koeln -> Duesseldorf', () => {
-    // Dokumentierter Befund, kein Versehen: Duesseldorf hat SECHS Grossstaedte
-    // naeher als Koeln (Krefeld 18, Duisburg 23, MG 24, Wuppertal 26, Essen 30,
-    // Oberhausen 31 km — Koeln erst 34). Reziprozitaet ueber alle Kanten zu
-    // erzwingen waere zirkulaer; sie gehoert in den Hub-Spoke-Block (P3-A2) und
-    // wird vom Linknetz-Pruefskript (P3-A3) gemessen, nicht hier erzwungen.
-    expect(naechsteStaedte('koeln').map((s) => s.slug)).toContain('duesseldorf')
-    expect(naechsteStaedte('duesseldorf').map((s) => s.slug)).not.toContain('koeln')
+  it('zeigt Duesseldorf Koeln als Rueckkante, obwohl es die Distanzwahl nicht traf', () => {
+    // Duesseldorf hat SECHS Grossstaedte naeher als Koeln (Krefeld 18,
+    // Duisburg 23, MG 24, Wuppertal 26, Essen 30, Oberhausen 31 km — Koeln
+    // erst 34). Koeln waehlt Duesseldorf aber, und Nachbarschaft ist
+    // symmetrisch — also erscheint Koeln als Rueckkante.
+    expect(naechsteAus('duesseldorf', STAEDTE, 6).map((s) => s.slug)).not.toContain('koeln')
+    expect(naechsteStaedte('duesseldorf').map((s) => s.slug)).toContain('koeln')
   })
 
   it('nimmt bei Koeln trotzdem die allernaechsten Orte mit', () => {
@@ -114,13 +114,15 @@ describe('naechsteStaedte — Vertrag', () => {
     expect(verstoesse.map((s) => s.slug)).toEqual([])
   })
 
-  it('haelt das limit ein', () => {
-    expect(naechsteStaedte('koeln', 3)).toHaveLength(3)
-    expect(naechsteStaedte('koeln', 1)).toHaveLength(1)
-    expect(naechsteStaedte('koeln', 0)).toHaveLength(0)
+  it('steuert mit limit die GEWAEHLTEN — Rueckkanten kommen zusaetzlich', () => {
+    // Das Limit begrenzt, wie viele Orte eine Stadt selbst waehlt. Wer sie
+    // gewaehlt hat, kommt oben drauf: sonst waere die Kante wieder einseitig.
+    expect(naechsteAus('koeln', STAEDTE, 3)).toHaveLength(3)
+    expect(naechsteAus('koeln', STAEDTE, 0)).toHaveLength(0)
+    expect(naechsteStaedte('koeln', 3).length).toBeGreaterThanOrEqual(3)
   })
 
-  it('liefert jeder der 92 Staedte volle 6 Nachbarn (keine Waise durch die Grenze)', () => {
+  it('liefert jeder der 92 Staedte mindestens 6 Nachbarn', () => {
     const zuWenig = STAEDTE.filter((s) => naechsteStaedte(s.slug).length < 6)
     expect(zuWenig.map((s) => `${s.slug}=${naechsteStaedte(s.slug).length}`)).toEqual([])
   })
@@ -140,6 +142,85 @@ describe('naechsteStaedte — Vertrag', () => {
     expect(naechsteStaedte('essen').map((s) => s.slug)).toEqual(
       naechsteStaedte('essen').map((s) => s.slug),
     )
+  })
+})
+
+describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
+  // Aaron-Entscheid 16.08.: der Block zeigt die selbst gewaehlten Orte UND die,
+  // die einen selbst gewaehlt haben. Ohne das bleibt jede Stadt unsichtbar, die
+  // zwar Nachbarn hat, aber bei keinem von ihnen unter die naechsten faellt.
+
+  it('hat KEINE einseitige Kante mehr — A zeigt B, also zeigt B auch A', () => {
+    const netz = new Map(STAEDTE.map((s) => [s.slug, naechsteStaedte(s.slug).map((n) => n.slug)]))
+    const einseitig: string[] = []
+    for (const [von, ziele] of netz) {
+      for (const nach of ziele) {
+        if (!netz.get(nach)?.includes(von)) einseitig.push(`${von}->${nach}`)
+      }
+    }
+    expect(einseitig).toEqual([])
+  })
+
+  it('laesst keine Stadt ohne eingehenden Link zurueck', () => {
+    const eingehend = new Set<string>()
+    for (const s of STAEDTE) for (const n of naechsteStaedte(s.slug)) eingehend.add(n.slug)
+    const waisen = STAEDTE.filter((s) => !eingehend.has(s.slug)).map((s) => s.slug)
+    expect(waisen).toEqual([])
+  })
+
+  it('rettet siegen — die Stadt, die vorher niemand waehlte', () => {
+    // siegen liegt am NRW-Rand; alle seine Nachbarn haben Naeheres. Vor der
+    // Reziprozitaet war es die einzige Waise unter 92 Staedten.
+    expect(STAEDTE.filter((s) => naechsteAus(s.slug, STAEDTE, 6).some((n) => n.slug === 'siegen')))
+      .toEqual([])
+    const zeigenSiegen = STAEDTE.filter((s) =>
+      naechsteStaedte(s.slug).some((n) => n.slug === 'siegen'),
+    ).map((s) => s.slug)
+    expect(zeigenSiegen.length).toBeGreaterThan(0)
+    // Genau die, die siegen selbst gewaehlt hat.
+    expect(zeigenSiegen.sort()).toEqual(
+      naechsteAus('siegen', STAEDTE, 6)
+        .map((n) => n.slug)
+        .sort(),
+    )
+  })
+
+  it('bringt keine fernen Staedte ins Spiel — die Umkreis-Grenze gilt weiter', () => {
+    const verstoesse: string[] = []
+    for (const s of STAEDTE) {
+      for (const n of naechsteStaedte(s.slug)) {
+        const km = distanzKm(s, n)
+        if (km > NACHBAR_MAX_KM) verstoesse.push(`${s.slug}->${n.slug} ${km.toFixed(0)}km`)
+      }
+    }
+    expect(verstoesse).toEqual([])
+  })
+
+  it('haelt den Block in vertretbarer Groesse', () => {
+    // Reissleine gegen ein Netz, das sich unbemerkt aufblaeht: waechst der
+    // Schnitt deutlich, stimmt etwas mit der Auswahlregel nicht.
+    const groessen = STAEDTE.map((s) => naechsteStaedte(s.slug).length)
+    const schnitt = groessen.reduce((a, b) => a + b, 0) / groessen.length
+    expect(Math.min(...groessen)).toBe(6)
+    expect(schnitt).toBeLessThan(10)
+    expect(Math.max(...groessen)).toBeLessThanOrEqual(25)
+  })
+
+  it('sortiert auch die Rueckkanten nach Distanz ein', () => {
+    for (const s of STAEDTE.slice(0, 20)) {
+      const km = naechsteStaedte(s.slug).map((n) => distanzKm(s, n))
+      expect(km).toEqual([...km].sort((a, b) => a - b))
+    }
+  })
+
+  it('bleibt ohne Rueckkanten identisch zur reinen Auswahl', () => {
+    const einsam = [
+      { slug: 'basis', lat: 50, lng: 10, bevoelkerung: '100 Tsd.' },
+      { slug: 'nah-a', lat: 50.1, lng: 10, bevoelkerung: '20 Tsd.' },
+      { slug: 'nah-b', lat: 50.2, lng: 10, bevoelkerung: '20 Tsd.' },
+    ]
+    // nah-a und nah-b waehlen basis ebenfalls -> Rueckkanten sind hier gleich.
+    expect(nachbarnMitRueckkanten('basis', einsam, 2).map((s) => s.slug)).toEqual(['nah-a', 'nah-b'])
   })
 })
 
@@ -198,8 +279,13 @@ describe('naechsteAus — deterministischer Tie-Break', () => {
 describe('Snapshot-Kopplung zu src/lib/lokalinhalt/staedte-stammdaten.json', () => {
   // Der Admin-Generator in src/ bekommt die Nachbarorte als vorberechneten Snapshot
   // (scripts/build-stadt-stammdaten.mjs), weil src/ die Marketing-Staedteliste nicht
-  // importieren kann. Laufen beide auseinander, zeigt die Seite andere Nachbarn als
-  // der KI-Prompt kennt. Dieser Test ist die einzige Klammer, die das verhindert.
+  // importieren kann. Laufen beide auseinander, kennt der KI-Prompt eine andere
+  // Geografie als die Seite. Dieser Test ist die einzige Klammer, die das verhindert.
+  //
+  // Verglichen wird gegen `naechsteAus` (die reine Distanzauswahl), NICHT gegen
+  // `naechsteStaedte`: der Snapshot liefert dem Generierungs-Prompt die
+  // naechstgelegenen Orte als Ortskenntnis — die Rueckkanten der Seite sind ein
+  // LINKNETZ-Mittel und im Prompt nur Rauschen. Gemeinsame Distanzbasis, zwei Zwecke.
   const snapshotPfad = join(
     dirname(fileURLToPath(import.meta.url)),
     '..',
@@ -222,7 +308,7 @@ describe('Snapshot-Kopplung zu src/lib/lokalinhalt/staedte-stammdaten.json', () 
       .map((eintrag) => ({
         slug: eintrag.slug,
         snapshot: eintrag.nachbarorte,
-        lib: naechsteStaedte(eintrag.slug, 6).map((s) => s.name),
+        lib: naechsteAus(eintrag.slug, STAEDTE, 6).map((s) => s.name),
       }))
       .filter((x) => x.snapshot.join('|') !== x.lib.join('|'))
 
