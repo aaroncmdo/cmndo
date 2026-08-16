@@ -3,6 +3,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { WISSEN_MODEL } from '@/lib/wissen/generate'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 export type ProposedTopic = {
   titel: string
@@ -144,8 +145,7 @@ export async function proposeGapTopics(
       system: [{ type: 'text', text: buildProposeSystemPrompt(), cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: buildProposeUserMessage(count, covered) }],
     })
-    const firstBlock = response.content[0]
-    const raw = firstBlock && firstBlock.type === 'text' ? firstBlock.text : ''
+    const raw = extractAnthropicText(response.content)
     const parsed = parseProposedTopics(raw)
     if (!parsed.ok) return parsed
     return { ok: true, data: dedupeTopics(parsed.data, covered) }

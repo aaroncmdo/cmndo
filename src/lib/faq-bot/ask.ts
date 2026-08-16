@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { checkOffTopic } from './off-topic-guard'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 export type FaqBotRolle = 'kunde' | 'kundenbetreuer'
 
@@ -432,7 +433,7 @@ export async function askFaqBot(
       ],
       messages,
     })
-    const antwort = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    const antwort = extractAnthropicText(response.content)
     if (!antwort) return { success: false, error: 'Claude hat keine Antwort geliefert' }
 
     // AAR-436: Usage-Log fire-and-forget.

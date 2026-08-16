@@ -12,6 +12,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 export const WISSEN_MODEL = AI_MODELS.sv_briefing_struktur // claude-sonnet-5
 const MAX_OUTPUT_TOKENS = 8192 // voller Artikel (Body + FAQ); 2048 wuerde truncaten
@@ -246,8 +247,7 @@ export async function generateArtikelDraft(
       messages: [{ role: 'user', content: userMessage }],
     })
 
-    const firstBlock = response.content[0]
-    const raw = firstBlock && firstBlock.type === 'text' ? firstBlock.text : ''
+    const raw = extractAnthropicText(response.content)
     // KI-Relevanz-Backstop (nur B2B): faengt Keyword-Filter-False-Positives, bevor
     // ein themenfremder Artikel entsteht. Das Modell antwortet mit NICHT_RELEVANT.
     if (audience === 'b2b' && /^\s*NICHT_RELEVANT\b/i.test(raw)) {
