@@ -2308,6 +2308,25 @@ export function getStadtBySlug(slug: string): Stadt | null {
 }
 
 /**
+ * Sucht eine Stadt ueber ihren ANZEIGENAMEN statt ueber den Slug.
+ *
+ * Gebraucht fuer `hyperlocal.angrenzendeOrte`: dort stehen Ortsnamen als
+ * Fliesstext ('Leverkusen', 'Roesrath', 'Wesseling'), und nur ein Teil davon
+ * hat eine eigene Stadtseite. Wer die Liste verlinken will, muss vorher wissen,
+ * welche — sonst entstehen 404-Links.
+ *
+ * Bewusst EXAKTER Vergleich (nur getrimmt): unscharfes Matching wuerde falsche
+ * Ziele treffen. 'Monheim' aus duesseldorfs angrenzendeOrte ist nicht
+ * 'Monheim am Rhein', und keiner von beiden hat eine Seite.
+ */
+export function getStadtByName(name: string): Stadt | null {
+  const gesucht = name.trim()
+  if (!gesucht) return null
+  const stadt = STAEDTE.find((s) => s.name === gesucht)
+  return stadt ? getStadtBySlug(stadt.slug) : null
+}
+
+/**
  * Hub-Cities (Doc 38) = Staedte mit hyperlocaler Tiefe (Eintrag in HYPERLOCAL_DATA).
  * Single Source of Truth fuer die Sitemap-Gewichtung (Doc 38 §8) und die
  * LLM-Surface (§7) — wer hier rein faellt, bekommt automatisch Prio 0.9 +

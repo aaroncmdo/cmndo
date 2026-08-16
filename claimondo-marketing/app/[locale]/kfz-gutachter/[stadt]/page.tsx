@@ -1,4 +1,5 @@
 import { localeAlternates } from '@/lib/seo/alternates'
+import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -25,7 +26,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, stadtLegalServiceSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
+import { getStadtByName, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
@@ -379,7 +380,36 @@ export default async function KfzGutachterStadtPage({
               <p className="text-sm leading-relaxed text-claimondo-shield">
                 {t.rich('bezirke_region', {
                   strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
-                  orte: s.hyperlocal.angrenzendeOrte.join(', '),
+                  // Orte mit eigener Stadtseite werden zum Link, der Rest bleibt
+                  // Text — ein Link auf einen Ort ohne Seite waere eine 404.
+                  // Das schliesst zugleich die sieben Hub->Spoke-Kanten, die die
+                  // Distanzauswahl nicht zieht (Duesseldorf->Langenfeld/Dormagen,
+                  // Wuppertal->Velbert/Haan, Bonn->Siegburg/Hennef/Meckenheim).
+                  // Tag statt Wert-Platzhalter: t.rich nimmt fuer Werte nur
+                  // Primitives, ReactNodes gehen nur ueber eine Tag-Funktion.
+                  // Deshalb steht in allen 6 Locales <orte></orte> statt {orte}.
+                  orte: () => (
+                    <>
+                      {s.hyperlocal!.angrenzendeOrte.map((ort, i) => {
+                        const ziel = getStadtByName(ort)
+                        return (
+                          <Fragment key={ort}>
+                            {i > 0 && ', '}
+                            {ziel ? (
+                              <Link
+                                href={`/kfz-gutachter/${ziel.slug}`}
+                                className="font-semibold text-claimondo-ondo underline decoration-claimondo-ondo/40 underline-offset-2 hover:text-claimondo-navy hover:decoration-claimondo-navy"
+                              >
+                                {ort}
+                              </Link>
+                            ) : (
+                              ort
+                            )}
+                          </Fragment>
+                        )
+                      })}
+                    </>
+                  ),
                 })}
               </p>
             </div>
