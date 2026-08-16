@@ -3812,7 +3812,7 @@
     "lokal_capsule": "<strong>Компетентный суд:</strong> {landgericht}. <strong>Адвокатская палата:</strong> {kammer}. <strong>Почтовый район:</strong> {plz} (около {bevoelkerung} жителей, федеральная земля {bundesland}). При судебных спорах со страховщиками наша партнёрская адвокатская фирма по транспортному праву обращается в суд {landgericht} — там хорошо знают практику. Размер вознаграждения по BVSK: <strong>{bvskSpanne}</strong> (зависит от суммы ущерба).",
     "bezirke_eyebrow": "По всему {stadt}",
     "bezirke_h2": "Мы проводим экспертизу во всех {anzahlBezirke} районах {ort}",
-    "bezirke_region": "<strong>Также в регионе:</strong> Мы выезжаем и в {orte} — как правило, уже на следующий день.",
+    "bezirke_region": "<strong>Также в регионе:</strong> Мы выезжаем и в <orte></orte> — как правило, уже на следующий день.",
     "hotspots_eyebrow": "Местная дорожная обстановка",
     "hotspots_h2": "Аварийные очаги и главные магистрали {ort}",
     "hotspots_stadtweit": "По городу за {jahr}: {text}.",

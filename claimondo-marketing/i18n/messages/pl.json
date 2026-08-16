@@ -3812,7 +3812,7 @@
     "lokal_capsule": "<strong>Właściwy sąd:</strong> {landgericht}. <strong>Izba adwokacka:</strong> {kammer}. <strong>Obszar PLZ:</strong> {plz} (ok. {bevoelkerung} mieszkańców, kraj związkowy {bundesland}). W sporach sądowych z ubezpieczycielami nasza kancelaria partnerska ds. prawa drogowego wytacza powództwo przed {landgericht} — tamtejsze składy orzekające znają specyfikę. Przedział wynagrodzenia według BVSK: <strong>{bvskSpanne}</strong> (skaluje się z wysokością szkody).",
     "bezirke_eyebrow": "W całym {stadt} na miejscu",
     "bezirke_h2": "Przeprowadzamy ekspertyzy we wszystkich {anzahlBezirke} dzielnicach {ort}",
-    "bezirke_region": "<strong>Również w regionie:</strong> Przyjeżdżamy także do {orte} — zazwyczaj już następnego dnia.",
+    "bezirke_region": "<strong>Również w regionie:</strong> Przyjeżdżamy także do <orte></orte> — zazwyczaj już następnego dnia.",
     "hotspots_eyebrow": "Lokalna sytuacja drogowa",
     "hotspots_h2": "Miejsca wypadków i główne arterie {ort}",
     "hotspots_stadtweit": "W całym mieście {jahr}: {text}.",

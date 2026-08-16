@@ -3818,7 +3818,7 @@
     "lokal_capsule": "<strong>Yetkili mahkeme:</strong> {landgericht}. <strong>Avukatlar Birliği:</strong> {kammer}. <strong>Posta kodu bölgesi:</strong> {plz} (yaklaşık {bevoelkerung} kişi, {bundesland} eyaleti). Sigortacılarla mahkeme yoluyla yaşanan anlaşmazlıklarda partner trafik hukuku büromuz davayı {landgericht} önünde açmaktadır — daireler burada tanınmaktadır. BVSK kapsamında onur aralığı: <strong>{bvskSpanne}</strong> (hasar miktarıyla orantılı).",
     "bezirke_eyebrow": "Tüm {stadt} genelinde yerinde hizmet",
     "bezirke_h2": "{ort} genelindeki tüm {anzahlBezirke} ilçede değerlendirme yapıyoruz",
-    "bezirke_region": "<strong>Çevre bölgelerde de:</strong> {orte} lokasyonlarına da gidiyoruz — genellikle ertesi gün yerinde oluyoruz.",
+    "bezirke_region": "<strong>Çevre bölgelerde de:</strong> <orte></orte> lokasyonlarına da gidiyoruz — genellikle ertesi gün yerinde oluyoruz.",
     "hotspots_eyebrow": "Yerel trafik durumu",
     "hotspots_h2": "Kaza odak noktaları ve ana ulaşım eksenleri {ort}",
     "hotspots_stadtweit": "Şehir genelinde {jahr}: {text}.",
