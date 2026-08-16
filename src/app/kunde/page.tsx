@@ -91,8 +91,15 @@ export default async function KundeStartseite() {
     /* non-critical */
   }
 
-  // Onboarding-Redirect
-  const needsOnboarding = faelle.find((f) => f.onboarding_complete === false)
+  // Onboarding-Redirect — NUR beim Erst-Onboarding global erzwingen.
+  // Zieht den Multi-Claim-Fix nach, den `kunde/layout.tsx` (Z110-125, Aaron 15.07.)
+  // schon hat: dort wurde `some(false)` auf `every(false)` umgestellt, hier blieb das
+  // aequivalente `find(false)` stehen. Ergebnis war genau der dort beschriebene Fall A1
+  // eine Ebene tiefer — ein Bestandskunde mit fertigem Fall UND einem neuen offenen Fall
+  // wurde auf /kunde in den Onboarding-Wizard geworfen und kam nicht mehr an seine
+  // bestehenden Faelle (das Layout liess ihn durch, die Startseite nicht).
+  // Ein neuer offener Fall wird claim-spezifisch in SEINER Detail-View gefuehrt.
+  const needsOnboarding = faelle.length > 0 && faelle.every((f) => f.onboarding_complete === false)
   if (needsOnboarding) redirect('/kunde/onboarding')
 
   // CMM-28: Single-Fall-Kunde landet direkt auf der Detail-Page statt auf
