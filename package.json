@@ -30,6 +30,7 @@
     "check:rls-grants": "node --env-file=.env.local scripts/check-rls-function-grants.mjs",
     "check:rls-policies": "node scripts/check-rls-policies.mjs",
     "check:server-actions": "node scripts/check-server-actions.mjs",
+    "check:stadt-linknetz": "node scripts/check-stadt-linknetz.mjs",
     "check:status-registry": "node scripts/check-status-registry.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
     "check:termin-bezug": "node scripts/check-termin-bezug.mjs",
