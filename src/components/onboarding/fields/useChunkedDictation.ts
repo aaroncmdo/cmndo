@@ -1,7 +1,7 @@
 'use client'
 
 // Gechunktes Sprachdiktat (rolling re-transcribe) fuer das Unfallhergang-Feld.
-// MediaRecorder nimmt durchgehend auf (1s-Timeslice); alle ~7s wird das BISHER
+// MediaRecorder nimmt durchgehend auf (1s-Timeslice); alle ~2,5s wird das BISHER
 // aufgenommene Gesamt-Audio (gueltiges webm-Praefix -> kein Wortverlust an
 // Chunk-Grenzen) an den Transkriptions-Endpoint geschickt -> Live-Vorschau waechst
 // mit. Beim Stopp liefert transcribeSnapshot(final) den maßgeblichen verbatim Text.
@@ -14,11 +14,27 @@
 // Trade-off (bewusst, Aaron 07.07.): rolling re-transcribe laedt das wachsende Audio
 // wiederholt hoch. Fuer typische Diktate (30-120s, Groq turbo billig/schnell)
 // unkritisch; der 2-min-Auto-Stop begrenzt die Obergrenze.
+//
+// TAKT 7s -> 2,5s (Aaron 16.08., Ops-Test-Befund #5 „Spracheingabe nicht Wort-fuer-Wort"):
+// Bei 7s sah man beim fluessigen Sprechen erst nach 7 Sekunden etwas — und wer kuerzer als
+// 7s sprach, sah VOR dem Stopp nie eine Vorschau. Das las sich wie Batch, obwohl die
+// Live-Vorschau laengst existierte; der Sanierungsplan hat daraus faelschlich einen
+// Beschaffungsbedarf (Streaming-STT + AVV) abgeleitet. Es war die Taktung, nicht der Anbieter.
+//
+// Warum der kuerzere Takt NICHT durchdreht: `inFlightRef` ueberspringt einen Tick, solange
+// noch ein Call laeuft. Waechst das Audio, dauert ein Durchgang laenger und das effektive
+// Intervall dehnt sich von selbst — das Verfahren reguliert sich, statt Calls zu stapeln.
+//
+// ⚠ Beobachtungspunkt: Whisper neigt bei SEHR kurzem Audio zu Halluzinationen. Der erste
+// Tick sieht jetzt nur ~2,5s Audio (vorher 7s). `language: 'de'` ist gesetzt, was das Risiko
+// deutlich senkt (die klassischen Faelle entstehen bei Sprach-Autodetect) — und ein
+// verunglueckter Zwischenstand wird vom finalen Durchgang ueberschrieben. Beim Abnehmen
+// trotzdem darauf achten, ob am Anfang Unsinn aufblitzt.
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 const AUTO_STOP_MS = 120_000 // 2 min Safety (ausfuehrliches Diktat erlaubt)
-const REFRESH_MS = 7_000
+const REFRESH_MS = 2_500
 
 export type DictationSource =
   | { kind: 'flow'; token: string }

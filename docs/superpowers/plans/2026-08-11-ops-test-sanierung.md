@@ -6,7 +6,7 @@
 >
 > | offen | was |
 > |---|---|
-> | 🔴 **braucht Aaron** | **D4** Voice/Streaming-STT (Anbieter + AVV) · **F4** fahrzeug-zentrischer Einstieg · **D2-Fundament** Review-Durchgang |
+> | 🔴 **braucht Aaron** | ~~**D4** Voice/Streaming-STT (Anbieter + AVV)~~ ✅ **erledigt 16.08. ohne Beschaffung** (Takt 7 s → 2,5 s) · **F4** fahrzeug-zentrischer Einstieg · **D2-Fundament** Review-Durchgang |
 > | 🟢 **frei baubar** | **H3** — 9 Meldewege laufen an `createCase` vorbei (⚠ keine mechanische Migration, s. R5) · **H0-Rest** §2-Nachzug für C2/C3 (reine Doku) |
 > | 🟡 **wartet auf Traffic** | **C3-Haken** — die durable Outbox (#5252) hat seit dem Deploy 2 Zeilen, beide `sent`, 0 Dubletten. Rate gestiegen (vorher 1 in 14 Tagen), Basis für einen Beweis noch zu dünn |
 >
@@ -19,7 +19,7 @@
 >
 > Lanes **A, B, C1, E, F1–F3, G1, G2, G3** sind gebaut und in `staging` gemergt (PRs #5176, #5180, #5187, #5191, #5196, #5200). **Nicht neu bauen** — vor jeder Aufnahme den Marker `COORDINATION-ops-test-lane-a-embed-termin-wahrheit` lesen, er ist die laufende Wahrheit.
 >
-> **Was wirklich offen ist, steht in „Reststand" weiter unten.** Stand 13.08.: **D3 und F5 sind gebaut** (Datum · Nav-Markierung), **B5 und E3a sind gegenstandslos** (Datenbasis bzw. Befund entfallen). Offen bleiben: Regel-4-Smokes für die deploy-gated PRs · Lane H (Fundament, unberührt) · die Aaron-Entscheide zu **D4** (Voice/AVV), **E3b** (OCR-Einstieg) und **F4** (fahrzeug-zentrierte Navigation).
+> **Was wirklich offen ist, steht in „Reststand" weiter unten.** Stand 13.08.: **D3 und F5 sind gebaut** (Datum · Nav-Markierung), **B5 und E3a sind gegenstandslos** (Datenbasis bzw. Befund entfallen). Offen bleiben: Regel-4-Smokes für die deploy-gated PRs · Lane H (Fundament, unberührt) · die Aaron-Entscheide zu **E3b** (OCR-Einstieg) und **F4** (fahrzeug-zentrierte Navigation). **D4 ist seit 16.08. erledigt** — die Prämisse „ist Batch" war falsch, es fehlte kein Anbieter (Takt 7 s → 2,5 s).
 >
 > ⚠️ **Regel-4-Lehre vom 13.08.:** Der Prod-Smoke der eigenen PRs fand **zwei Regressionen, die alle Unit-Tests bestanden hatten** — das Datumsfeld verschluckte „3.4.2026" still, und der Nav-Fix griff nur bei Kunden mit genau EINEM Fall. Gefunden hat sie erst die *untypische* Konfiguration (englisches Browser-Locale, Konto mit 7 Fällen). Beim Smoken bewusst die untypische Variante wählen — die typische deckt man beim Bauen ohnehin ab. Fix: **#5256**.
 >
@@ -181,14 +181,14 @@ PR #5212 erweitert den Constraint additiv (17→18) **und** stellt die Zeile um 
 | 2 | 7 Alt-Claims mit divergentem Kennzeichen | **Migration, Lead-Wert gewinnt** | B4 |
 | 3 | SA-Moment: 6–7 WhatsApp bündeln | **Drei nach Zweck** (SA · Termin · Dokumente) | H2 |
 | 4 | Fahrzeug-zentrierte Navigation | **Gestaffelt** — Sprung sofort, Umstellung eigenes Ticket | F5 + F4 |
-| 5 | Spracheingabe Wort-für-Wort | **Streaming-STT** mit AVV | D4 |
+| 5 | Spracheingabe Wort-für-Wort | ~~Streaming-STT mit AVV~~ → **hinfällig (16.08.)**: Live-Vorschau existiert längst, nur der Takt war mit 7 s zu lang → **2,5 s** | D4 |
 | 6 | Datum im US-Format | **Systematisch suchen** (Ursache nicht lokalisiert) | D3 |
 | 7 | „Partnerwerkstatt vermitteln" | **Erst der Bug, OCR als eigenes Ticket** | E3a + E3b |
 | 8 | ZB1-Parser-Härtung | **Testkorpus aus prod-Uploads** (anonymisiert) | B5 |
 
 **Zu #2 — abweichend von meiner Empfehlung, bewusst so entschieden.** Ich hatte Einzelprüfung empfohlen, weil bei bereits unterschriebener SA das Papier den alten Wert trägt und eine stille DB-Änderung Dokument und Datensatz auseinanderlaufen lässt. Aaron hat die Migration gewählt. Umsetzung daher **mit** zwei Sicherungen, die die Entscheidung nicht aufweichen: (a) Vorher-Werte im Migrations-Kommentar + Backup-Tabelle festhalten, damit der Schritt reversibel bleibt; (b) vor dem Lauf erheben, **welche** der 7 Fälle eine unterschriebene SA oder ein versandtes Gutachten haben — das Ergebnis wird berichtet, nicht zur Blockade gemacht.
 
-**Zu #5 — Beschaffung nötig.** Streaming-STT braucht Anbieterwahl + AVV (Deepgram/AssemblyAI/OpenAI Realtime). Vor dem Bau prüfen, was `src/lib/ai/models.ts` bereits an Infrastruktur bietet (Redundanz-Check), dann Anbieter vorschlagen.
+~~**Zu #5 — Beschaffung nötig.**~~ ❌ **Widerlegt am 16.08.** — der hier geforderte Redundanz-Check hätte es gefunden, er wurde nur nie gemacht: Die Live-Vorschau ist seit dem 07.07. gebaut (`useChunkedDictation`, Groq) und seit dem 24.07. im Flow aktiv. Es fehlte kein Anbieter, der Takt war zu lang (7 s → 2,5 s). Details im D4-Abschnitt.
 
 ---
 
@@ -236,9 +236,17 @@ Native `<input type="date">` rendern **immer** im Browser-/OS-Locale (deutscher 
 
 ⚠ **Offen (Aufräumen, kein Bug):** `DatumFeld` (#5242) und `DatumInput` (#5254) lösen dieselbe Aufgabe mit derselben Kernlogik, je 4 Consumer — gehören zusammengeführt.
 
-### D4 · Streaming-STT statt Batch-Transkription (P2, Beschaffung nötig)
-Voice ist im Flow eingebunden (`voiceDictation` am Unfallhergang), aber Batch: aufnehmen → stoppen → Whisper → Text am Stück. Wort-für-Wort ist so ausgeschlossen. Web Speech API wurde verworfen (Chrome schickt das Audio an Google — bei Unfall- und Personendaten datenschutzrechtlich zu prüfen).
-*Akzeptanz:* Text erscheint während des Sprechens; AVV liegt vor.
+### D4 · Streaming-STT — ❌ **PRÄMISSE WIDERLEGT** (16.08.), kein Beschaffungsbedarf
+
+**Die Live-Vorschau existiert seit dem 07.07. und läuft mit Groq.** `src/components/onboarding/fields/useChunkedDictation.ts`: MediaRecorder nimmt durchgehend auf (1s-Timeslice), in festem Takt geht das bisher aufgenommene Gesamt-Audio an den Transkriptions-Endpoint, `liveTranscript` wächst mit und wird in `VoiceDictation.tsx` gerendert. Im **Flow** ist es seit dem 24.07. aktiv (`FlowFeststellungStep` reicht `token` an `FieldRenderer` durch, der das Diktat an `feld_key === 'unfallhergang' && token` gatet).
+
+**Wie die falsche Prämisse entstand:** `src/lib/ai/transcribe.ts` **ist** Batch — die Funktion nimmt eine fertige Datei. Nur ruft die Oberfläche sie wiederholt auf. Wer die Transkriptionsfunktion liest und daraus auf die Oberfläche schließt, kommt zu „ist Batch, Wort-für-Wort ausgeschlossen". Genau das ist hier passiert. ⭐ **Lehre: Eine Datenfluss-Aussage über die UI lässt sich nicht aus der aufgerufenen Funktion ableiten — der Aufrufer bestimmt das Verhalten, nicht der Aufgerufene.**
+
+**Der reale Befund war die Taktung, nicht der Anbieter:** `REFRESH_MS` stand auf **7 s**. Wer flüssig sprach, sah 7 Sekunden nichts; wer kürzer als 7 s sprach, sah **vor dem Stopp nie** eine Vorschau. Das liest sich wie Batch. **Aaron-Entscheid 16.08.: Takt auf 2,5 s** — der Rest bleibt wie gebaut. Web Speech API bleibt verworfen (Chrome schickt das Audio an Google).
+
+⚠ Der AVV-Punkt verschwindet damit **nicht**, er verschiebt sich nur: Schon heute geht Audio mit Unfallschilderungen an **Groq** (US-Anbieter). Ob dafür ein AVV vorliegt, ist eine bestehende Frage — unabhängig von der Taktung und von Streaming.
+
+*Akzeptanz:* Text wächst beim Sprechen sichtbar mit (Abnahme nur am echten Mikrofon möglich).
 
 ### E3a · „Partnerwerkstatt vermitteln" — ❌ **GEGENSTANDSLOS** (Bestandsaufnahme 13.08.)
 
@@ -339,7 +347,7 @@ Kein Automatismus meldet steckengebliebene Fälle — `CLM-2026-01011` hing 13 T
 2. ~~**E3a**~~ ❌ **gegenstandslos** (Bestandsaufnahme 13.08., Details oben) — der Claim wird angelegt, die Unterschrift ist designt, und die Werkstattwahl kommt bei Haftpflicht fachlich erst nach der Gutachten-Freigabe. **Nichts zu bauen.**
 3. **§9-Reste** — #5 (~13 Intake-Writer außerhalb `createCase`) · #6 (Outbox-Dedup) · ~~#7~~ ✅ **erledigt (14.08.)**: alle sechs Rollen-Detailsichten hängen am Kern, Makler via **#5277**, Flotte via **#5283** — siehe `FUNDAMENT.md:77`. Die hier notierte Rest-Position „Kunde" existierte nie (`/kunde/faelle/[id]` rendert längst `<KundeClaimView>`). **Von den drei Posten sind damit nur #5 und #6 offen — und beide sind nicht frei baubar** (#5 braucht je Entry-Point eine fachliche Entscheidung, #6 zeigt sich erst unter Traffic).
 4. **D2** — Unfallskizze: im Kunden-Flow bisher **nur als Ankündigungstext** vorhanden („Daraus erstellen wir die präzise Unfallskizze" in `feststellung-steps.ts`), das Feature selbst liegt in Dispatch. Scope vor dem Bau klären.
-5. **D4** (nach Anbieterwahl) · **E3b** — Beschaffung bzw. eigenes Produkt-Ticket.
+5. ~~**D4** (nach Anbieterwahl)~~ ✅ **erledigt 16.08.** — keine Anbieterwahl nötig, die Prämisse war falsch (Takt 7 s → 2,5 s, s. D4-Abschnitt) · **E3b** — eigenes Produkt-Ticket.
 
 **H2** (SA-WhatsApp 7→3) — ❌ **GEGENSTANDSLOS, belegt (13.08.).** Die Zahl „6–7 Kunden-WhatsApps" hielt der Nachprüfung nicht stand. Gemessen über die Historie von `signSAandCreateFall` (Funktionsgrenze je Stand einzeln bestimmt, nicht mit fester Zeilennummer): **18.07. · 27.07. · 08.08. · 13.08. — jedes Mal 6 Sends gesamt, davon konstant 3 an den KUNDEN.** Die übrigen adressieren SV und Team. Es gab also nie 7 Kunden-Sends und folglich auch keine Konsolidierung — im Git-Log existiert kein entsprechender Commit. Die „6–7" war die **Gesamtzahl** aller Sends, gelesen als Kunden-Zahl. **Nichts zu bauen; `flow/[token]/actions.ts` bleibt unberührt.**
 
@@ -374,7 +382,7 @@ Die RCA schließt mit **21 nummerierten Maßnahmen** (P0 1–4 · P1 5–9 · P2
 | **8** | Schuldfrage-Weiche in den Finder | ⏸️ bewusst nicht gebaut (Conversion-Entscheidung, s. „Nicht gebaut") |
 | **9** | Onboarding-Vorlauf „was ist schon da" | 🔴 **nie aufgenommen, nicht umgesetzt** (0 Treffer in `kunde/onboarding`) |
 | 10–12 | Unfallort · Unfallskizze · Datumsfelder | ✅ Ortseingaben-Marker · #5249 · #5242/#5254 |
-| 13 | Live-Transkript | ⏸️ D4 — braucht Anbieter + AVV |
+| 13 | Live-Transkript | ✅ **existierte bereits** (seit 07.07., Groq) — brauchte weder Anbieter noch AVV, nur einen kürzeren Takt (16.08.) |
 | **14** | Werkstatt-Pfad kartieren | ✅ **erledigt** — die Bestandsaufnahme ist gelaufen (#5247), sie widerlegte #23 |
 | **15** | Werkstatt als Claim-Beteiligte | ✅ **vollständig erledigt** (13.08. verifiziert) — (a) **Verknüpfung**: 12 der 75 Claims tragen `reparatur_werkstatt_id`, 8 zusätzlich `werkstatt_id` (dort *steht* das Fahrzeug), und **0 Claims haben einen Reparaturtermin ohne Werkstatt**. (b) **Werkstatt + Termin im Claim**: `GeldZone` rendert `WerkstattCard` samt `reparaturTermin`. (c) **Gutachtertermin in der Werkstatt-Sicht**: `v_werkstatt_auftrag` liefert `besichtigung_start`/`_ort`/`_status` + `gutachter_firmenname`, und `WerkstattAuftragDetail.tsx:410-430` zeigt sie an. Der RCA-Satz „mangels Verknüpfung gibt es nichts anzuzeigen" trifft an keiner der drei Stellen mehr zu |
 | 16 | KVA-Blocker Haftpflicht | ✅ #5196, am Bestand belegt (4 Hänger gelöst) |
