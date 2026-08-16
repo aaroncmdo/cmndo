@@ -10,7 +10,7 @@
 > | 🟢 **frei baubar** | **H3** — 9 Meldewege laufen an `createCase` vorbei (⚠ keine mechanische Migration, s. R5) · **H0-Rest** §2-Nachzug für C2/C3 (reine Doku) |
 > | 🟡 **wartet auf Traffic** | **C3-Haken** — die durable Outbox (#5252) hat seit dem Deploy 2 Zeilen, beide `sent`, 0 Dubletten. Rate gestiegen (vorher 1 in 14 Tagen), Basis für einen Beweis noch zu dünn |
 >
-> **Erledigt seit dem 13.08.:** D2 (Skizze) · D3 (Datum) · F5 (Nav) · I1 (Hänger-Detektor) · **H2** (SA-WhatsApp) · **H4** (Event-Log beim Override) · **H5 komplett** · C4/§9-#7 · die vierteilige Task-Sichtbarkeitskette (#5261/#5263/#5269/#5273) · tote Postfächer (#5286) · CalDAV-Warnungen (#5290).
+> **Erledigt seit dem 13.08.:** D2 (Skizze — ⚠ **war nur zur Hälfte erledigt**: die *Erzeugung* lief seit #5249, die **Kundensicht fehlte** komplett. Nachgeholt 16.08. mit **#5311**, inkl. eines dabei gefundenen Race: die Skizze erreichte den **Claim** nie, weil der Generator 5–15 s braucht und Lead+Claim in derselben Sekunde entstehen → prod 0 von 74 Claims) · D3 (Datum) · F5 (Nav) · I1 (Hänger-Detektor) · **H2** (SA-WhatsApp) · **H4** (Event-Log beim Override) · **H5 komplett** · C4/§9-#7 · die vierteilige Task-Sichtbarkeitskette (#5261/#5263/#5269/#5273) · tote Postfächer (#5286) · CalDAV-Warnungen (#5290).
 > **Gegenstandslos:** B5 (Testkorpus nicht baubar) · E3a (Befund entfallen) · B4 (Messartefakt).
 >
 > ⚠ **Wer diesen Plan aufnimmt, prüft die Zeile am Code — nicht am Plan.** Beim Stand-Abgleich am 16.08. waren in Lane H drei von fünf Punkten längst gebaut; der Text hätte drei Sessions in erledigte Arbeit geschickt.
