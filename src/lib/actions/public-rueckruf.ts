@@ -1,7 +1,9 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { createLead } from '@/lib/leads/create-lead'
+// C2/§9-#5 (Ein Intake): der Rueckruf-Lead laeuft ueber `createCase` statt roh ueber
+// `createLead` — dadurch bekommt er einen garantierten FlowLink (Begruendung am Aufruf).
+import { createCase } from '@/lib/intake/create-case'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
@@ -68,12 +70,26 @@ export async function erstelleOeffentlichenRueckruf(
   const hatKoords = koordLat != null && koordLng != null
   const koordPlaceId = input.standortPlaceId?.trim() || null
 
-  // 2. Lead anlegen — via zentrale createLead() (Writer-Konsistenz, leads-Audit
-  // 15.05.2026). status='rueckruf' konsistent zu qualifizierungs_phase;
-  // source_channel = Marketing-Quelle; zugewiesen_an = Dispatch-Empfänger.
-  const created = await createLead(
-    admin,
-    {
+  // 2. Lead anlegen — via `createCase` (C2/§9-#5 „Ein Intake"), identisch zum bereits
+  // gehobenen Aircall- und matelso-Webhook. Der Lead-Teil ist unveraendert (createCase
+  // ruft intern dasselbe createLead auf, Writer-Konsistenz + leads-Audit 15.05.2026
+  // bleiben); status='rueckruf' konsistent zu qualifizierungs_phase, source_channel =
+  // Marketing-Quelle, zugewiesen_an = Dispatch-Empfaenger.
+  //
+  // Der Gewinn ist der garantierte FlowLink: Hier meldet sich ein ECHTER Interessent
+  // ueber ein oeffentliches Formular. Blieb der Rueckruf aus, hatte er bisher keinerlei
+  // Kanal zurueck in seinen Vorgang — derselbe Befund wie beim Anrufer-Lead. Der Link
+  // wird nur ANGELEGT (nicht versendet); Dispatch kann ihn dem Kunden reichen.
+  //
+  // mode='lead-first': ein Rueckruf-Wunsch ist noch kein Fall — die Konversion passiert
+  // spaeter ueber /flow. KEIN dedup-Key: der generische ist ohne Kennzeichen unbrauchbar
+  // (`dedupKeyIsUsable`), und ein Dedup waere hier eine Verhaltensaenderung (zwei
+  // Rueckruf-Wuensche = heute bewusst zwei Leads).
+  const sprache = await getLocaleCookie()
+  const serviceTyp = input.serviceTyp ?? null
+  const created = await createCase(admin, {
+    mode: 'lead-first',
+    base: {
       source_channel: input.quelle?.trim() || 'rueckruf',
       status: 'rueckruf',
       vorname,
@@ -81,19 +97,20 @@ export async function erstelleOeffentlichenRueckruf(
       telefon,
       email: input.email?.trim() || null,
     },
-    {
+    extra: {
       qualifizierungs_phase: 'rueckruf',
       zugewiesen_an: erstellerId,
-      sprache: await getLocaleCookie(),
+      sprache,
       ...(input.promotionCodeId ? { promotion_code_id: input.promotionCodeId } : {}),
       ...(input.standortPlz ? { fahrzeug_standort_plz: input.standortPlz } : {}),
       ...(input.standortOrt ? { fahrzeug_standort_adresse: input.standortOrt } : {}),
       ...(hatKoords ? { fahrzeug_standort_lat: koordLat, fahrzeug_standort_lng: koordLng } : {}),
       ...(koordPlaceId ? { fahrzeug_standort_place_id: koordPlaceId } : {}),
       ...(input.notiz ? { notiz: input.notiz } : {}),
-      ...(input.serviceTyp ? { service_typ: input.serviceTyp } : {}),
+      ...(serviceTyp ? { service_typ: serviceTyp } : {}),
     },
-  )
+    flowLink: { serviceTyp, sprache },
+  })
   if (!created.ok) {
     return { ok: false, error: `Lead-Anlage fehlgeschlagen: ${created.error}` }
   }

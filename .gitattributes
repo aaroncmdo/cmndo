@@ -2,3 +2,10 @@
 # als "Text" fehlerkannte PDF beim Checkout LF->CRLF konvertieren und damit das
 # Binaer-File korrumpieren (z.B. die Unfallskizze-Download-Vorlage). Stream B.6.
 *.pdf binary
+
+# Generierter Snapshot: build-stadt-stammdaten.mjs --check vergleicht den Datei-
+# inhalt BYTE-fuer-BYTE gegen frisch erzeugten Text (\n). Mit core.autocrlf=true
+# (hier gesetzt) checkt Git die Datei als CRLF aus -> --check meldet dauerhaft
+# "nicht mehr aktuell", obwohl nichts driftet. Am 16.08. reproduziert: ein Pruef-
+# werkzeug, das immer rot ist, wird ignoriert. Deshalb auf LF festgenagelt.
+src/lib/lokalinhalt/staedte-stammdaten.json text eol=lf
