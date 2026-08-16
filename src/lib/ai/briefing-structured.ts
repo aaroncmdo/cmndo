@@ -20,6 +20,7 @@ import {
 } from '@/lib/ai/briefing-structured-prompt'
 import { buildFallbackBriefing } from '@/lib/ai/briefing-fallback'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 const BRIEFING_MODEL = AI_MODELS.sv_briefing_struktur
 const MAX_OUTPUT_TOKENS = 700
@@ -116,9 +117,7 @@ export async function generateSvBriefingStruktur(
         ],
       })
 
-      const firstBlock = response.content[0]
-      const raw =
-        firstBlock && firstBlock.type === 'text' ? firstBlock.text : ''
+      const raw = extractAnthropicText(response.content)
       usageForLog = response.usage
       const parsed = svBriefingStrukturSchema.parse(extractJsonObject(raw))
       briefing = parsed

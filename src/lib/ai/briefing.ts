@@ -18,6 +18,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 import {
   buildBriefingInput,
   buildSvBriefingSystem,
@@ -114,11 +115,7 @@ export async function generateSvBriefing(
       messages: [{ role: 'user', content: buildSvBriefingUser(input) }],
     })
 
-    const firstBlock = response.content[0]
-    briefingText =
-      firstBlock && firstBlock.type === 'text'
-        ? firstBlock.text.trim()
-        : ''
+    briefingText = extractAnthropicText(response.content)
     usageForLog = response.usage
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Claude-API-Fehler'

@@ -18,6 +18,7 @@
 
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 export type ClaudeLogoAnalysis = {
   brandMood: 'sportlich' | 'edel' | 'funktional' | 'unbekannt'
@@ -157,7 +158,7 @@ export async function analyzeLogo(
       ],
     })
 
-    const text = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    const text = extractAnthropicText(response.content)
     const parsed = parseResponse(text)
     if (!parsed) {
       console.warn('[AAR-420] Claude-Response nicht parsebar:', text.slice(0, 200))
