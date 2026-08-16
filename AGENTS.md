@@ -438,6 +438,22 @@ CI fährt `npm run check:operative-status-writes -- --ratchet`. Es blockt **NEUE
 
 **Baseline = 2 grandfathered** (bekannte Direkt-Writer, per Boy-Scout auf den Funnel heben): `kanzlei-wunsch/actions.ts` (an_externe_kanzlei_uebergeben / in_kommunikation_vs — Nicht-Matrix-Terminals) + `termine/close-nur-gutachter-termin.ts`. Abgebaut von urspruenglich 4: `gutachter/team/actions.ts` (sv-zugewiesen) ist auf den Funnel gehoben (#4579), `lexdrive/process-event.ts` in die Allowlist (Manual-Override, s.o.). Der Reparatur-Abschluss (`reparatur-abschluss-actions.ts`) war der 5. — er ging schon mit `kitta/reparatur-cursor-funnel` aus der Baseline. Marker: `coordination-an-status-achsen-lane-werkstatt-abschluss-bypass`.
 
+# Intake-Funnel-Gate (Ratchet)
+
+**Ein direkter `createLead(...)`-Aufruf ausserhalb des Intake-Moduls ist verboten.** Jeder Lead-Eintrittspunkt geht über **`createCase`** (`src/lib/intake/create-case.ts`) — nur der garantiert neben dem Lead auch den **FlowLink** (C2 §7#1, DECISIONS 2026-08-04). Ein roher `createLead`-Aufruf erzeugt einen Interessenten **ohne jeden Kunde-Kanal**: bleibt die Rückmeldung aus, hat er keinen Weg zurück in seinen Vorgang — und niemand merkt es, weil der Lead ja existiert.
+
+Genau diese Klasse hatten der Aircall-Webhook (C2b D-4b), der matelso-Webhook (#5292) und der öffentliche Rückruf (#5308). Beim Rückruf gemessen: **2 von 2 Rückruf-Leads ohne FlowLink** — 100 % der Klasse, still.
+
+**Fix:** `createCase(client, { mode: 'lead-first' | 'direct-claim', base, extra })`. `base`/`extra` bleiben **unverändert** — `createCase` ruft intern dasselbe `createLead` (Writer-Konsistenz + leads-Audit bleiben) und ergänzt nur den FlowLink (non-fatal, kein neues Fehlerrisiko). `mode='lead-first'` wenn die Meldung noch kein Fall ist (Konversion später über `/flow`); `direct-claim` zieht zusätzlich `convertLeadToFall` (dann ist `triggerByUserId` Pflicht).
+
+⚠ **Falle beim Unit-Test der Call-Site:** `create-case.ts` importiert `'server-only'`, das in der vitest-Node-Umgebung **schon beim Import** wirft. Wer eine Call-Site migriert, macht damit deren Test rot (und der vitest-Ratchet blockt neue rote Files). **`createCase` mocken** — nicht die inneren Teile; ein Mock nur auf `ensureCanonicalFlowLinkForLead` reicht **nicht**. Vorbild: `src/app/embed/werkstatt-finder/__tests__/embed-actions.test.ts`. Assertions ziehen dann `createCaseMock.mock.calls[0][1].extra` statt Argument 3 von `createLead`.
+
+CI fährt `npm run check:intake-funnel -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/intake-funnel-baseline.json`. Lokal (ohne Flag) `--warn` (exit 0). Pure Logik: `scripts/lib/intake-funnel-scan.mjs` (unit-getestet, 16 Fälle). **Kommentare werden gestrippt** — ohne das flaggt jede Erklärung („läuft über createCase statt createLead") ihr eigenes File; Imports/Re-Exports/`typeof`-Referenzen zählen nicht.
+
+**Allowlist** (per Design direkte Aufrufer, nie geflaggt): `src/lib/intake/create-case.ts` (DER Funnel), `src/lib/leads/create-lead.ts` (die Definition), `src/lib/start-link/issue-canonical-flowlink.ts` (erzeugt selbst kanonische FlowLinks — über `createCase` zu gehen wäre zirkulär).
+
+**Baseline = 7 grandfathered** (Stand 16.08.), per **Boy-Scout** abzubauen: `admin/faelle/anlegen`, `dispatch/leads`, `dispatch/kalender/spontan`, `makler/erstelle-anfrage`, `flotte/schaden-fortsetzung`, `schaden/[token]`, `gutachter/auftraege/vermittle-partner-werkstatt`. Nach einer Migration `npm run check:intake-funnel -- --update-baseline`. Echter Sonderfall → **Allowlist mit Begründung**, nicht die Baseline aufblähen.
+
 # i18n-Coverage-Gate (Ratchet)
 
 **Ein dynamisch adressierter i18n-Key muss in den Messages existieren.** Baut der Code den Key zur LAUFZEIT aus einer TS-Union — z.B. `subphase-visibility.ts`: `` `${extern ? 'subKunde' : 'subIntern'}.${lifecycle.subPhase}` `` — und fehlt ein Union-Wert in den Messages, wirft next-intl `MISSING_MESSAGE` und die UI rendert den **rohen Key**: das deutsche Produkt zeigt dann wörtlich `phasen.subIntern.reparatur_terminfindung`.
