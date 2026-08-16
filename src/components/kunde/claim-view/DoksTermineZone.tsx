@@ -14,6 +14,7 @@ import GutachtenPdfButton from '@/components/kunde/GutachtenPdfButton'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import FallDetailSections from '@/app/kunde/faelle/[id]/FallDetailSections'
 import { BelegePaketCard } from './BelegePaketCard'
+import { UnfallskizzeCard } from '@/components/kunde/UnfallskizzeCard'
 
 export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
   const t = await getTranslations('kunde.fall')
@@ -30,6 +31,10 @@ export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
           variant="banner"
         />
       )}
+
+      {/* D2: Die automatisch erzeugte Unfallskizze — als Entwurf, mit Korrekturmoeglichkeit.
+          Steht bei den Dokumenten, weil sie genau das wird: ein Beleg im Gutachten. */}
+      {vm.unfallskizze && <UnfallskizzeCard claimId={vm.fallId} svg={vm.unfallskizze.svg} />}
 
       {/* KB-Beratungstermin als eigene Card (SV-Termin lebt im ClaimStepper der StatusZone). */}
       {doks.kbTerminCard && <TerminSectionCard {...doks.kbTerminCard} />}
