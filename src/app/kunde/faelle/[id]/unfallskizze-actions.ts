@@ -20,7 +20,7 @@ import { revalidatePath } from 'next/cache'
 export async function meldeSkizzeKorrektur(
   claimId: string,
   korrektur: string,
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; neuGeneriert?: boolean }> {
   const text = korrektur.trim()
   if (!text) return { ok: false, error: 'Bitte beschreibe kurz, was nicht stimmt.' }
   if (text.length > 1000) return { ok: false, error: 'Bitte fasse dich etwas kuerzer (max. 1000 Zeichen).' }
@@ -57,19 +57,22 @@ export async function meldeSkizzeKorrektur(
   // 2. Dispatch informieren. Bewusst NICHT ueber `createAdHocTask` — der Helper laesst
   //    (richtigerweise) nur KB/SV/Admin zu; ein Kunde soll keine beliebigen Tasks anlegen
   //    koennen. Hier ist der Task die Folge einer gepruefsten Eigentuemer-Aktion.
-  try {
-    await admin.from('tasks').insert({
-      claim_id: claimId,
-      typ: 'adhoc',
-      titel: 'Kunde meldet: Unfallskizze stimmt nicht',
-      beschreibung: `Korrektur des Kunden zu ${claim.claim_nummer ?? claimId}:\n\n${text}`,
-      status: 'offen',
-      empfaenger_rolle: 'dispatch',
-      prioritaet: 'normal',
-    })
-  } catch (err) {
-    // Non-critical: die Meldung steht bereits am Claim, Dispatch sieht sie dort.
-    console.error('[skizze-korrektur] Task anlegen fehlgeschlagen:', err)
+  // ⚠ Supabase WIRFT nicht — ein try/catch drumherum faengt nichts. Der Fehler steht im
+  // Rueckgabewert und muss GELESEN werden, sonst ist ein Fehlschlag von Erfolg
+  // ununterscheidbar (dieselbe Klasse wie der J2-Seed-Bug, #5305).
+  const { error: taskFehler } = await admin.from('tasks').insert({
+    claim_id: claimId,
+    typ: 'adhoc',
+    titel: 'Kunde meldet: Unfallskizze stimmt nicht',
+    beschreibung: `Korrektur des Kunden zu ${claim.claim_nummer ?? claimId}:\n\n${text}`,
+    status: 'offen',
+    empfaenger_rolle: 'dispatch',
+    prioritaet: 'normal',
+  })
+  if (taskFehler) {
+    // Non-critical fuer den Kunden: die Meldung steht bereits am Claim, Dispatch sieht sie
+    // dort auch ohne Aufgabe. Aber es MUSS im Log stehen.
+    console.error('[skizze-korrektur] Task anlegen fehlgeschlagen:', taskFehler.message)
   }
 
   // 3. Neu generieren — mit Original-Hergang PLUS Korrektur. Fire-and-forget waere hier
@@ -80,11 +83,12 @@ export async function meldeSkizzeKorrektur(
   //    liesse (die Skizze entsteht ausschliesslich aus Lead-Daten). Dann bleibt es bei
   //    Meldung + Dispatch-Aufgabe — der Mensch uebernimmt. Kein Fehler fuer den Kunden.
   const leadId = claim.lead_id as string | null
+  let neuGeneriert = false
   try {
     if (!leadId) {
       console.warn('[skizze-korrektur] Claim ohne lead_id — keine Neugenerierung moeglich')
       revalidatePath(`/kunde/faelle/${claimId}`)
-      return { ok: true }
+      return { ok: true, neuGeneriert: false }
     }
     const { data: lead } = await admin
       .from('leads')
@@ -93,13 +97,19 @@ export async function meldeSkizzeKorrektur(
       .maybeSingle()
 
     const { generateUnfallskizze } = await import('@/lib/unfallskizze/generate')
+    // Die Korrektur geht als EIGENER Parameter, nicht an den Hergang geklebt — sonst
+    // widerspricht sie ihm unaufgeloest und das Modell beantwortet den Widerspruch,
+    // statt zu zeichnen (prod 16.08. belegt: "kein valides SVG geliefert").
     const skizze = await generateUnfallskizze({
-      unfallhergang: `${lead?.unfallhergang ?? ''}\n\nKorrektur des Kunden: ${text}`.trim(),
+      unfallhergang: (lead?.unfallhergang as string | null) ?? null,
       schadentyp: (lead?.schadentyp as string | null) ?? null,
       gegnerFahrzeugtyp: (lead?.gegner_fahrzeugtyp as string | null) ?? null,
+      korrektur: text,
     })
-    if (skizze.success) {
-      await admin
+    if (!skizze.success) {
+      console.warn('[skizze-korrektur] Neugenerierung fehlgeschlagen:', skizze.error)
+    } else {
+      const { data: aktualisiert, error: updateFehler } = await admin
         .from('claims')
         .update({
           unfallskizze_svg: skizze.svg,
@@ -108,13 +118,20 @@ export async function meldeSkizzeKorrektur(
           // sehen, worauf diese Fassung antwortet.
         })
         .eq('id', claimId)
-    } else {
-      console.warn('[skizze-korrektur] Neugenerierung fehlgeschlagen:', skizze.error)
+        .select('id')
+      if (updateFehler) {
+        console.error('[skizze-korrektur] Neue Skizze speichern:', updateFehler.message)
+      } else {
+        neuGeneriert = (aktualisiert?.length ?? 0) > 0
+      }
     }
   } catch (err) {
     console.warn('[skizze-korrektur] Neugenerierung (non-critical):', err)
   }
 
   revalidatePath(`/kunde/faelle/${claimId}`)
-  return { ok: true }
+  // `neuGeneriert` geht an die UI, damit sie dem Kunden nicht "wir haben die Skizze
+  // angepasst" zusagt, wenn die Neuzeichnung scheiterte. Die Meldung ist trotzdem
+  // angekommen — Dispatch hat sie.
+  return { ok: true, neuGeneriert }
 }
