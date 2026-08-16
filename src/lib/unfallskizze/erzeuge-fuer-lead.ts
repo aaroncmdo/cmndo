@@ -112,6 +112,33 @@ export async function erzeugeSkizzeFuerLead(input: ErzeugeSkizzeInput): Promise<
       return { status: 'fehler', grund: error.message }
     }
 
+    // …und in den Claim, falls es inzwischen einen gibt.
+    //
+    // WARUM NOETIG: `convert-lead-to-claim` kopiert die fuenf Skizzen-Spalten beim Anlegen
+    // mit — aber die Skizze existiert zu diesem Zeitpunkt oft noch NICHT. Der Generator
+    // laeuft fire-and-forget (Claude-Call 5-15 s), waehrend `/kunde/schaden-melden` Lead
+    // und Claim praktisch gleichzeitig anlegt. Gemessen am Prod-Smoke 16.08.:
+    //   Lead 14:58:06 · Claim 14:58:07 · Skizze 14:58:11
+    // Die Kopie lief also ueber ein leeres Feld; die Skizze blieb am Lead haengen, waehrend
+    // der Kunde seine Fallakte auf CLAIM-Ebene sieht. Ohne diesen Nachzug ist die Skizze
+    // fuer ihn dauerhaft unsichtbar.
+    //
+    // Trifft 0 Zeilen, solange kein Claim existiert (der Normalfall bei Lead-first-Wegen) —
+    // das ist kein Fehler. Ein Fehlschlag hier laesst den Gesamtstatus 'generiert', weil die
+    // Skizze am Lead liegt und der Convert sie spaeter noch mitnimmt; er wird nur geloggt.
+    const { error: claimError } = await admin
+      .from('claims')
+      .update({
+        unfallskizze_svg: skizze.svg,
+        unfallskizze_bestaetigt: false,
+        unfallskizze_ablehnung_grund: null,
+        unfallskizze_generiert_am: new Date().toISOString(),
+      })
+      .eq('lead_id', leadId)
+    if (claimError) {
+      console.warn(`[${kontext}] Unfallskizze -> Claim (non-critical):`, claimError.message)
+    }
+
     return { status: 'generiert' }
   } catch (err) {
     // Auch der dynamische Import kann scheitern (fehlender API-Key, Deploy-Race).

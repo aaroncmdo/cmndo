@@ -190,6 +190,14 @@ export type KundeClaimViewModel = {
   werkstatt: KundeWerkstatt
   hatMehrereFaelle: boolean
   defaultEmail: string | null
+  /**
+   * D2: Die automatisch erzeugte Unfallskizze. Der Kunde bekommt sie als ENTWURF zu sehen —
+   * bewusst nicht an `unfallskizze_bestaetigt` gegatet: das Flag bedeutet „Mitarbeiter hat
+   * freigegeben", und dieser manuelle Schritt ist auf prod noch nie erfolgt (0 von allen).
+   * Eine Anzeige daran zu haengen hiesse, sie tot zu bauen. Der Kunde ist ohnehin die einzige
+   * Instanz, die weiss, ob die Darstellung stimmt.
+   */
+  unfallskizze: { svg: string } | null
   flags: {
     abrechnungsweg: string | null
     istReparaturRoute: boolean
@@ -673,6 +681,12 @@ export async function getKundeClaimView(
     werkstatt,
     hatMehrereFaelle: alleFaelle.length > 1,
     defaultEmail: userEmail,
+    // `unfallskizze_generiert_am` steht NICHT in den Rollen-Spaltenlisten von
+    // getClaimForRole — bewusst nicht nachgezogen: das Datum traegt hier nichts,
+    // die Kennzeichnung als Entwurf schon.
+    unfallskizze: (fall.unfallskizze_svg as string | null)
+      ? { svg: fall.unfallskizze_svg as string }
+      : null,
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
