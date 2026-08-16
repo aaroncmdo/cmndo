@@ -14,6 +14,7 @@
     "check:claims-column-grants": "node --env-file=.env.local scripts/check-claims-column-grants.mjs",
     "check:component-set": "node scripts/check-component-set.mjs",
     "check:flag-drift": "node scripts/check-flag-drift.mjs",
+    "check:intake-funnel": "node scripts/check-intake-funnel.mjs",
     "check:flow-erhebt-felder": "node scripts/check-flow-erhebt-felder.mjs",
     "check:i18n": "node scripts/i18n/check-complete.mjs",
     "check:i18n-coverage": "node scripts/check-i18n-coverage.mjs",
