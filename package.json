@@ -32,6 +32,7 @@
     "check:server-actions": "node scripts/check-server-actions.mjs",
     "check:status-registry": "node scripts/check-status-registry.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",
+    "check:silent-writes": "node scripts/check-silent-writes.mjs",
     "check:termin-bezug": "node scripts/check-termin-bezug.mjs",
     "check:termin-engine-contract": "node scripts/check-termin-engine-contract.mjs",
     "check:token-audit": "node scripts/check-token-audit.mjs",
