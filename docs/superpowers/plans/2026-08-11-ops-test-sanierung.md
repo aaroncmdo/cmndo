@@ -1,6 +1,19 @@
 # Ops-Test-Sanierung + Sweep-Rückstände — Implementierungsplan
 
-**Stand: 13.08.2026, 18:40** · Basis `origin/staging`
+**Stand: 16.08.2026** · Basis `origin/staging`
+
+> ## 🟢 Was von diesem Plan wirklich offen ist (geprüft 16.08., nicht aus Markern übernommen)
+>
+> | offen | was |
+> |---|---|
+> | 🔴 **braucht Aaron** | **D4** Voice/Streaming-STT (Anbieter + AVV) · **F4** fahrzeug-zentrischer Einstieg · **D2-Fundament** Review-Durchgang |
+> | 🟢 **frei baubar** | **H3** — 9 Meldewege laufen an `createCase` vorbei (⚠ keine mechanische Migration, s. R5) · **H0-Rest** §2-Nachzug für C2/C3 (reine Doku) |
+> | 🟡 **wartet auf Traffic** | **C3-Haken** — die durable Outbox (#5252) hat seit dem Deploy 2 Zeilen, beide `sent`, 0 Dubletten. Rate gestiegen (vorher 1 in 14 Tagen), Basis für einen Beweis noch zu dünn |
+>
+> **Erledigt seit dem 13.08.:** D2 (Skizze) · D3 (Datum) · F5 (Nav) · I1 (Hänger-Detektor) · **H2** (SA-WhatsApp) · **H4** (Event-Log beim Override) · **H5 komplett** · C4/§9-#7 · die vierteilige Task-Sichtbarkeitskette (#5261/#5263/#5269/#5273) · tote Postfächer (#5286) · CalDAV-Warnungen (#5290).
+> **Gegenstandslos:** B5 (Testkorpus nicht baubar) · E3a (Befund entfallen) · B4 (Messartefakt).
+>
+> ⚠ **Wer diesen Plan aufnimmt, prüft die Zeile am Code — nicht am Plan.** Beim Stand-Abgleich am 16.08. waren in Lane H drei von fünf Punkten längst gebaut; der Text hätte drei Sessions in erledigte Arbeit geschickt.
 
 > ## 🟢 Der Bau-Teil dieses Plans ist zu ~85 % erledigt
 >
@@ -132,21 +145,22 @@ PR #5212 erweitert den Constraint additiv (17→18) **und** stellt die Zeile um 
 
 ⚠️ **Nebenbefund:** `FieldTyp` kennt auch `'embed-site-create'`, das ebenfalls im DB-Constraint fehlt — also ebenfalls nicht setzbar. Nicht mitgenommen (eigener Scope). Zu prüfen, ob `EmbedSiteCreateField` toter Code ist.
 
-## R5 · Lane H — Fundament (komplett unberührt)
+## R5 · Lane H — Fundament ⚠ **war NICHT „komplett unberührt" — Stand geprüft 16.08.**
 
-Aus dem Sweep, von der Ops-Test-Sanierung nie angefasst. **Der größte freie Block.**
+> **Von den fünf Punkten sind drei erledigt und einer teilweise.** Der Text unten stand seit dem 11.08. unverändert und hätte drei Sessions in bereits gebaute Arbeit geschickt. Jede Zeile hier ist gegen `origin/staging` bzw. prod geprüft, nicht aus Markern übernommen.
 
-- **H0 · C4-Formalabschluss + §2/§9-Sync** — größter Hebel, **kein neuer Code**. Die §2-Tabelle in `docs/fundament/FUNDAMENT.md` ist für C2, C3 und C4 stale („Plan done, Code gated"), obwohl C4a–e (#4940, #4977), C2a (#4986/#4992) und C3a/b + Teile c (#5011/#5090/#5095, #5017/#5044/#5059, #5068) gemergt sind. §9 steht real bei 2/9; reines Nachziehen bringt 4–5/9. Für #7 fehlt der DoD-Nachweis (knip/Alt-Code-Check + Journey-Smokes pro Rolle).
-- **H2 · C3c SA-Moment 7→3 WhatsApp** — meistzitierter offener Punkt. ⚠ Territorium `app/flow/[token]/actions.ts` · offene Produktentscheidung: welche WA bleibt kanonisch?
-- **H3 · C2b create-case-Lücken** — nur 1 von ~15 Meldewegen läuft über `createCase`. Aircall-Dedup (D-4b) und Embed-Finder-Dedup (B-1) frei; Gegner-Pflichtdok **vergeben**.
-- **H4 · C1-Rest** — Regel-4-Prod-Smoke-Nachweis · `lexdrive manual_status_override` schreibt kein Event-Log.
-- **H5 · Unaufgenommene Handoffs** — Outbox-Retarget-Rest · **#4804 KVA-Pflicht** (⚠ mit E abgleichen: dort ist Haftpflicht jetzt KVA-frei — die Pflicht muss abrechnungsweg-abhängig sein) · Ortseingaben P3/P4 · Partner-Cockpit-System-Events · C5-Folgetranche (`from('claims')` → `v_claim_full`, 17 Stellen).
+- **H0 · C4-Formalabschluss + §2/§9-Sync** — 🟡 **teilweise erledigt.** §9-#7 ist gehakt (#5288, 14.08.: alle sechs Rollen-Detailsichten am Kern), C4 steht in §2 auf ✅. Offen bleibt der Rest des §2-Nachzugs (C2/C3 stehen auf 🟡 „Code läuft") — reine Doku-Arbeit.
+- **H2 · C3c SA-Moment WhatsApp** — ✅ **erledigt (#5296, 14.08.).** Es waren **vier** Kunden-Nachrichten, nicht 6–7 (Team- und SV-Nachricht wurden mitgezählt); zwei davon sagten dasselbe. Jetzt **zwei**: Zugangsdaten (bewusst getrennt) + eine gebündelte Fall-Nachricht in 6 Sprachen. ⚠ Nicht am DB-Zustand verifizierbar — der Baileys-Pfad protokolliert nirgends (0 ausgehende WA in `nachrichten`).
+- **H3 · C2b create-case-Lücken** — 🟢 **einziger echter Bau-Rest, aber KEINE mechanische Migration.** Ist-Stand 16.08.: **5 Wege über `createCase`** (aircall · matelso · dispatch-stammdaten · embed-werkstatt-finder · kunde/schaden-melden), **9 daneben** (admin/anlegen · dispatch/spontan · dispatch/leads · gutachter-vermittlung · schaden/[token] · public-rueckruf · flotte-fortsetzung · makler · start-link). Der Plan sagte „~15" bzw. „1 von 15" — beides überholt.
+  ⚠ **Vor jeder Migration fachlich prüfen, ob `createCase`s Garantien dort passen.** Beispiel `schaden/[token]` (FlowLink-Quote nur 29 %, sieht nach Lücke aus): Dort meldet der **Gegner** über eine NFC-Karte, er bekommt `inviteGegnerViaAirdrop` und der Flottenmanager eine eigene Benachrichtigung. Ein erzwungener FlowLink wäre dort ein verwirrender Zusatzlink, keine Verbesserung. Die niedrige Quote ist erklärbar, kein Bug.
+- **H4 · C1-Rest** — ✅ **erledigt.** `manual_status_override` schreibt sein Event-Log: `process-event.ts:790-851` liest den Cursor vor dem Write und schreibt `phase_transitions` mit `from_phase`/`to_phase`/`trigger_type='manual'`. Prod-Beleg: **180 Zeilen** mit `trigger_type='manual'`, davon 134 in den letzten 30 Tagen.
+- **H5 · Unaufgenommene Handoffs** — ✅ **erledigt.** #4804 KVA-Pflicht **gemergt 27.07.** (der Abgleich mit E ist erfüllt: `reparaturGate` prüft `abrechnungsweg === 'haftpflicht'` als ERSTE Bedingung, #5196) · Ortseingaben P3/P4 **#5154 + #5170 gemergt 11.08.** · Partner-Cockpit **#5027 gemergt 05.08.** · C5-Folgetranche läuft (#5297, 14.08. — 4 Files; Rest in Arbeit auf `kitta/aar-956-c5-doppel-reads`).
 
 ## R6 · Rest aus den Ops-Test-Lanes
 
-- **D2** Unfallskizze im Kunden-Flow — blockiert bis R4 gelaufen ist
-- **E3** „Partnerwerkstatt vermitteln" neu bauen (#23) — braucht Aaron-Entscheid
-- **F4** Kunden-Einstieg auf Fahrzeuge (#26) — Produktarbeit, eigener Scope
+- **D2** Unfallskizze im Kunden-Flow — ✅ **erledigt.** #5238 (Flow-Feststellung) + **#5249** (zentral an `createLead`, deckt alle 6 Meldewege ab). Regel-4 grün: 933-Byte-SVG erzeugt, Gegenprobe „Unfall" (6 Zeichen) erzeugt keine, 0 Residue. Auslöser war die Messung **18 Leads mit Hergang, 0 mit Skizze** — das Feature war gebaut und wurde nie ausgelöst.
+- **E3a** „Partnerwerkstatt vermitteln" — ❌ **gegenstandslos** (#5247, Bestandsaufnahme 13.08.). **E3b** (OCR-Einstieg) lief separat auf `kitta/aar-956-e3b-ocr-extract`.
+- **F4** Kunden-Einstieg auf Fahrzeuge (#26) — 🔴 **offen, braucht Aaron.** Teil 2 des „gestaffelt"-Entscheids (Teil 1 = F5, erledigt). Produktarbeit an Navigation + Routenstruktur, eigener Scope.
 - **C2-Rest**: #21 ist mit #5176 überwiegend erledigt (der Text hing an `termin === null`); Rest-Fall: Wunschzeit nur angefragt → Text weiterhin irreführend
 
 ---
