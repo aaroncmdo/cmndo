@@ -18,3 +18,10 @@ export const TASK_PRIORITAET_DEFS = {
   dringend: { label: 'Dringend', slot: 'warning' },
   kritisch: { label: 'Kritisch', slot: 'danger' },
 } satisfies Record<string, StatusDef>
+
+/**
+ * Die erlaubten Werte, aus der Registry abgeleitet statt danebengeschrieben.
+ * Wer sie anderswo neu tippt, laeuft in genau den Fehler, den das Task-Modal hatte:
+ * dort stand 'niedrig' | 'normal' | 'hoch' — zwei Werte, die der DB-CHECK ablehnt.
+ */
+export type TaskPrioritaet = keyof typeof TASK_PRIORITAET_DEFS
