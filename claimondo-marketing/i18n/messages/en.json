@@ -3818,7 +3818,7 @@
     "lokal_capsule": "<strong>Competent court:</strong> {landgericht}. <strong>Bar association:</strong> {kammer}. <strong>Postcode area:</strong> {plz} (approx. {bevoelkerung} residents, state of {bundesland}). In legal disputes with insurers, our partner law firm for traffic law typically files at {landgericht} — the chambers know the cases. Fee range per BVSK: <strong>{bvskSpanne}</strong> (scales with claim amount).",
     "bezirke_eyebrow": "On-site throughout {stadt}",
     "bezirke_h2": "We assess damage in all {anzahlBezirke} city districts {ort}",
-    "bezirke_region": "<strong>Also in the surrounding area:</strong> We also come to {orte} — usually on site the very next day.",
+    "bezirke_region": "<strong>Also in the surrounding area:</strong> We also come to <orte></orte> — usually on site the very next day.",
     "hotspots_eyebrow": "Local traffic situation",
     "hotspots_h2": "Accident hotspots and main routes {ort}",
     "hotspots_stadtweit": "City-wide {jahr}: {text}.",
