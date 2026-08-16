@@ -13,6 +13,17 @@ export type UnfallskizzeInput = {
   unfallhergang: string | null
   schadentyp: string | null
   gegnerFahrzeugtyp?: string | null
+  /**
+   * Korrektur des Kunden an einer bereits erzeugten Skizze (D2, #5311).
+   *
+   * ⚠ NICHT einfach an `unfallhergang` anhaengen — genau daran ist der erste Versuch
+   * gescheitert (prod 16.08.: „Claude hat kein valides SVG geliefert"). Eine Korrektur
+   * WIDERSPRICHT der urspruenglichen Schilderung fast immer („kam von rechts" gegen
+   * „fuhr auf mein Heck auf"); ohne Angabe, was gilt, beantwortet das Modell den
+   * Widerspruch, statt zu zeichnen. Deshalb steht sie als eigener Block mit
+   * ausdruecklichem Vorrang im Prompt.
+   */
+  korrektur?: string | null
 }
 
 export type UnfallskizzeResult =
@@ -62,11 +73,21 @@ export async function generateUnfallskizze(
     return { success: false, error: 'Weder Unfallhergang noch Schadentyp gesetzt' }
   }
 
+  const korrektur = (input.korrektur ?? '').trim()
   const prompt = [
     `Unfalltyp: ${typLabel}`,
     `Gegner-Fahrzeugtyp: ${gegner}`,
     `Hergang (wörtlich vom Kunden):`,
     hergang || '(leer — bitte generisch für den Unfalltyp zeichnen)',
+    ...(korrektur
+      ? [
+          '',
+          'KORREKTUR DES KUNDEN an einer früheren Skizze. Sie hat VORRANG vor der',
+          'Schilderung oben, wo sie ihr widerspricht. Zeichne die korrigierte Fassung.',
+          'Stelle keine Rückfragen und kommentiere den Widerspruch nicht:',
+          korrektur,
+        ]
+      : []),
     '',
     'Bitte erzeuge jetzt das SVG. Antworte NUR mit dem <svg>...</svg>-Element.',
   ].join('\n')
