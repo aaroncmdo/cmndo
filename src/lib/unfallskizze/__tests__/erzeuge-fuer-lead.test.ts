@@ -14,15 +14,20 @@ afterAll(() => warnSpy.mockRestore())
 
 const HERGANG_LANG = 'Von hinten aufgefahren an der Ampel'
 
-/** Fake-Client, der die zwei Queries der Funktion nachbildet + Writes mitschreibt. */
+/**
+ * Fake-Client, der die Queries der Funktion nachbildet + Writes mitschreibt.
+ * Die Tabelle wird MITGESCHRIEBEN: seit dem Claim-Nachzug schreibt die Funktion in
+ * `leads` UND `claims`, und die Tests sollen belegen, dass beides passiert.
+ */
 function fakeAdmin(opts: {
   stand: SkizzeLeadStand | null
   updateError?: { message: string } | null
+  claimUpdateError?: { message: string } | null
   leseFehler?: Error
 }) {
-  const updates: Record<string, unknown>[] = []
+  const updates: { table: string; payload: Record<string, unknown> }[] = []
   const client = {
-    from: () => ({
+    from: (table: string) => ({
       select: () => ({
         eq: () => ({
           maybeSingle: async () => {
@@ -32,8 +37,12 @@ function fakeAdmin(opts: {
         }),
       }),
       update: (payload: Record<string, unknown>) => {
-        updates.push(payload)
-        return { eq: async () => ({ error: opts.updateError ?? null }) }
+        updates.push({ table, payload })
+        return {
+          eq: async () => ({
+            error: (table === 'claims' ? opts.claimUpdateError : opts.updateError) ?? null,
+          }),
+        }
       },
     }),
   } as unknown as SkizzeLeadClient
@@ -62,13 +71,36 @@ describe('erzeugeSkizzeFuerLead', () => {
     })
 
     expect(res).toEqual({ status: 'generiert' })
-    expect(updates).toHaveLength(1)
-    expect(updates[0].unfallskizze_svg).toBe('<svg/>')
-    // Vorschlag, keine vollendete Tatsache: Dispatch gibt frei oder lehnt ab.
-    expect(updates[0].unfallskizze_bestaetigt).toBe(false)
-    // Ein alter Ablehnungsgrund darf nicht an einer neuen Skizze kleben.
-    expect(updates[0].unfallskizze_ablehnung_grund).toBeNull()
-    expect(typeof updates[0].unfallskizze_generiert_am).toBe('string')
+    // Zwei Writes: Lead UND Claim. Der Claim-Nachzug ist noetig, weil der Convert die
+    // Skizze beim Anlegen kopiert — zu einem Zeitpunkt, an dem sie oft noch nicht da ist
+    // (fire-and-forget, 5-15 s). Ohne ihn bleibt sie fuer den Kunden unsichtbar.
+    expect(updates.map((u) => u.table)).toEqual(['leads', 'claims'])
+    for (const { payload } of updates) {
+      expect(payload.unfallskizze_svg).toBe('<svg/>')
+      // Vorschlag, keine vollendete Tatsache: Dispatch gibt frei oder lehnt ab.
+      expect(payload.unfallskizze_bestaetigt).toBe(false)
+      // Ein alter Ablehnungsgrund darf nicht an einer neuen Skizze kleben.
+      expect(payload.unfallskizze_ablehnung_grund).toBeNull()
+      expect(typeof payload.unfallskizze_generiert_am).toBe('string')
+    }
+  })
+
+  it('meldet trotzdem Erfolg, wenn nur der Claim-Nachzug scheitert', async () => {
+    // Die Skizze liegt dann am Lead — der Convert nimmt sie spaeter mit. Ein harter
+    // Fehlschlag hier waere unverhaeltnismaessig: die Skizze ist eine Zugabe.
+    const { client, updates } = fakeAdmin({
+      stand: STAND_LEER,
+      claimUpdateError: { message: 'claims kaputt' },
+    })
+    const res = await erzeugeSkizzeFuerLead({
+      leadId: 'l1',
+      hergang: HERGANG_LANG,
+      admin: client,
+      kontext: 'test',
+    })
+
+    expect(res).toEqual({ status: 'generiert' })
+    expect(updates.map((u) => u.table)).toEqual(['leads', 'claims'])
   })
 
   it('reicht schadentyp + gegner_fahrzeugtyp als Prompt-Kontext durch', async () => {
