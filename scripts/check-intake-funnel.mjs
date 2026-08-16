@@ -34,6 +34,14 @@ const ALLOWLIST = new Set([
   // Erzeugt SELBST kanonische FlowLinks. Ueber createCase zu gehen waere zirkulaer
   // (createCase ruft ensureCanonicalFlowLinkForLead, das hier lebt).
   'src/lib/start-link/issue-canonical-flowlink.ts',
+  // NFC-Schadenkarte = GEGNER-Flow, nicht Kunde. Ein Flottenfahrzeug wird beschaedigt,
+  // der VERURSACHER tappt die Karte und traegt sich ein: die Daten landen in `gegner_*`,
+  // `schuldfrage='gegner'`, Geschaedigter ist die Flotten-Firma (gewerbe_flag + firma_name).
+  // Ein FlowLink wuerde dem Gegner einen Kunde-Kanal in den Vorgang des Geschaedigten geben
+  // — fachlich falsch. Die 4 von 6 Leads ohne FlowLink (Messung 16.08.) sind hier KORREKT.
+  // Deshalb Allowlist statt Baseline: sonst liest die naechste Session das als Schuld und
+  // migriert es „weg" (beim Aufraeumen 16.08. beinahe passiert).
+  'src/app/schaden/[token]/actions.ts',
 ])
 
 const mode = process.argv.includes('--ratchet')

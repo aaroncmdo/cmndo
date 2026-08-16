@@ -1,12 +1,11 @@
 {
-  "generatedAt": "2026-08-16T18:00:17.352Z",
-  "count": 7,
+  "generatedAt": "2026-08-16T18:26:14.643Z",
+  "count": 6,
   "files": [
     "src/app/admin/faelle/anlegen/actions.ts",
     "src/app/dispatch/kalender/_actions/spontan.ts",
     "src/app/dispatch/leads/actions.ts",
     "src/app/gutachter/auftraege/_actions/vermittle-partner-werkstatt.ts",
-    "src/app/schaden/[token]/actions.ts",
     "src/lib/flotte/schaden-fortsetzung.ts",
     "src/lib/makler/erstelle-anfrage.ts"
   ]
