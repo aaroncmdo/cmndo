@@ -26,7 +26,11 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, stadtLegalServiceSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
-import { getStadtByName, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
+import {
+  getStadtByName, getStadtBySlug,
+  type LokaleFaq, type Stadt,
+} from '@/lib/kfz-gutachter/staedte'
+import { ladeLokalinhalt } from '@/lib/kfz-gutachter/lokalinhalt'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
@@ -103,7 +107,7 @@ export async function generateMetadata({
   }
 }
 
-function buildStadtFaq(s: Stadt) {
+function buildStadtFaq(s: Stadt, lokaleFaqs: LokaleFaq[] = []) {
   const base = [
     {
       frage: `Was kostet ein Kfz-Gutachter ${s.h1Anker}?`,
@@ -134,8 +138,10 @@ function buildStadtFaq(s: Stadt) {
       antwort: 'Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.',
     },
   ]
-  // Hub-Cities (Doc 38): lokale FAQ anhängen — fließen in Akkordeon + FAQPage-Schema.
-  return s.hyperlocal?.lokaleFaqs ? [...base, ...s.hyperlocal.lokaleFaqs] : base
+  // Lokale FAQ anhängen — fließen in Akkordeon + FAQPage-Schema. Quelle sind
+  // entweder die gepflegten Hub-Daten oder eine freigegebene stadt_lokalinhalte-
+  // Zeile; der Aufrufer hat das bereits aufgelöst.
+  return lokaleFaqs.length > 0 ? [...base, ...lokaleFaqs] : base
 }
 
 export default async function KfzGutachterStadtPage({
@@ -147,8 +153,23 @@ export default async function KfzGutachterStadtPage({
   const s = getStadtBySlug(stadt)
   if (!s) notFound()
 
+  // Redaktionell freigegebene Ortstiefe aus stadt_lokalinhalte. Nur fuer Staedte
+  // OHNE gepflegte Hub-Daten: die sieben Hubs sind handverifiziert und haben
+  // Vorrang — ein generierter Inhalt soll sie nicht ueberschreiben oder ergaenzen,
+  // weil sonst nicht mehr erkennbar waere, welcher Satz woher stammt.
+  // `null` ist der Normalfall (Tabelle leer) -> die Seite bleibt wie bisher.
+  const freigegeben = s.hyperlocal ? null : await ladeLokalinhalt(s.slug)
+
+  // Die Sektionen unten haengen ab hier an den DATEN, nicht an der Quelle.
+  const stadtbezirke = s.hyperlocal?.stadtbezirke ?? freigegeben?.stadtbezirke ?? []
+  const hauptachsen = s.hyperlocal?.hauptachsen ?? freigegeben?.hauptachsen ?? null
+  const unfallHotspots = s.hyperlocal?.unfallHotspots ?? freigegeben?.unfallHotspots ?? []
+  const heroAnker = s.hyperlocal?.heroAnker ?? freigegeben?.heroAnker
+  const topografieAnker = s.hyperlocal?.topografieAnker ?? freigegeben?.topografieAnker
+  const lokaleFaqs = s.hyperlocal?.lokaleFaqs ?? freigegeben?.lokaleFaqs ?? []
+
   // Deutsche Quelle fürs FAQPage-Schema (Dual-Use, AGENTS.md §5).
-  const faqs = buildStadtFaq(s)
+  const faqs = buildStadtFaq(s, lokaleFaqs)
 
   // areaServed: bei Hub-Cities die angrenzenden Orte als City-Array + die vollständige,
   // verifizierte PLZ-Liste als Text-Einträge (Doc 38 §9.2 / P6 — stärkt Local-SEO/GEO
@@ -194,7 +215,9 @@ export default async function KfzGutachterStadtPage({
     { frage: t('faq_sa_frage'), antwort: t('faq_sa_antwort') },
     { frage: t('faq_wertminderung_frage'), antwort: t('faq_wertminderung_antwort') },
     { frage: t('faq_130_frage'), antwort: t('faq_130_antwort') },
-    ...(s.hyperlocal?.lokaleFaqs ?? []),
+    // Dieselbe Quelle wie das FAQPage-Schema oben — sonst stuende eine
+    // freigegebene FAQ im strukturierten Datensatz, aber nicht im Akkordeon.
+    ...lokaleFaqs,
   ]
 
   return (
@@ -283,9 +306,9 @@ export default async function KfzGutachterStadtPage({
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/80">
               {t('hero_subheadline')}
             </p>
-            {s.hyperlocal?.heroAnker && (
+            {heroAnker && (
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/65">
-                {s.hyperlocal.heroAnker}
+                {heroAnker}
               </p>
             )}
             <ul className="mt-7 grid grid-cols-1 gap-x-4 gap-y-3 text-sm text-white/80 sm:grid-cols-2">
@@ -354,8 +377,10 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 4b — Hyperlokal: Stadtbezirke + Einsatzgebiet (nur Hub-Cities, Doc 38 §6.2) */}
-      {s.hyperlocal && (
+      {/* 4b — Hyperlokal: Stadtbezirke + Einsatzgebiet. Quelle: gepflegte Hub-Daten
+          (Doc 38 §6.2) ODER eine freigegebene stadt_lokalinhalte-Zeile (P3-B1).
+          Der Guard haengt an den DATEN, nicht an der Quelle. */}
+      {stadtbezirke.length > 0 && (
         <section className="bg-white py-16 sm:py-20" aria-labelledby="bezirke-stadt-heading">
           <div className="mx-auto max-w-5xl px-5">
             <div className="mx-auto max-w-3xl text-center">
@@ -363,11 +388,11 @@ export default async function KfzGutachterStadtPage({
                 {t('bezirke_eyebrow', { stadt: s.name })}
               </p>
               <h2 id="bezirke-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
-                {t('bezirke_h2', { anzahlBezirke: s.hyperlocal.stadtbezirke.length, ort })}
+                {t('bezirke_h2', { anzahlBezirke: stadtbezirke.length, ort })}
               </h2>
             </div>
             <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {s.hyperlocal.stadtbezirke.map((b) => (
+              {stadtbezirke.map((b) => (
                 <div key={b.name} className="rounded-ios-md border border-claimondo-border bg-claimondo-bg p-4">
                   <p className="text-sm font-bold text-claimondo-navy">{b.name}</p>
                   <p className="mt-1 text-xs leading-relaxed text-claimondo-shield">
@@ -376,6 +401,11 @@ export default async function KfzGutachterStadtPage({
                 </div>
               ))}
             </div>
+            {/* Umland-Satz nur bei gepflegten Hub-Daten: `angrenzendeOrte` ist
+                handrecherchiert und hat in freigegebenen Zeilen kein Pendant.
+                Ohne diesen Guard stuende dort "Wir kommen ebenso nach  — meist
+                schon am Folgetag". */}
+            {s.hyperlocal && (
             <div className="mt-8 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5">
               <p className="text-sm leading-relaxed text-claimondo-shield">
                 {t.rich('bezirke_region', {
@@ -413,17 +443,19 @@ export default async function KfzGutachterStadtPage({
                 })}
               </p>
             </div>
-            {s.hyperlocal.topografieAnker && (
+            )}
+            {topografieAnker && (
               <p className="mt-6 text-center text-sm italic leading-relaxed text-claimondo-shield">
-                {s.hyperlocal.topografieAnker}
+                {topografieAnker}
               </p>
             )}
           </div>
         </section>
       )}
 
-      {/* 4c — Hyperlokal: Unfallschwerpunkte + Hauptachsen, quellenbelegt (Doc 38 §6.3) */}
-      {s.hyperlocal && (
+      {/* 4c — Hyperlokal: Unfallschwerpunkte + Hauptachsen, quellenbelegt (Doc 38 §6.3).
+          Wie 4b: Quelle sind gepflegte Hub-Daten ODER eine freigegebene Zeile. */}
+      {unfallHotspots.length > 0 && hauptachsen && (
         <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="hotspots-stadt-heading">
           <div className="mx-auto max-w-4xl px-5">
             <div className="mx-auto max-w-2xl text-center">
@@ -433,14 +465,14 @@ export default async function KfzGutachterStadtPage({
               <h2 id="hotspots-stadt-heading" className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl">
                 {t('hotspots_h2', { ort })}
               </h2>
-              {s.hyperlocal.unfallzahlStadt && (
+              {s.hyperlocal?.unfallzahlStadt && (
                 <p className="mt-3 text-sm text-claimondo-shield">
                   {t('hotspots_stadtweit', { jahr: String(s.hyperlocal.unfallzahlStadt.jahr), text: s.hyperlocal.unfallzahlStadt.text })}
                 </p>
               )}
             </div>
             <ul className="mt-8 space-y-3">
-              {s.hyperlocal.unfallHotspots.map((h) => (
+              {unfallHotspots.map((h) => (
                 // Doc 41 §8: Hotspot-Cards verlinken auf die Pillar-B-Cornerstone.
                 <li key={h.ort}>
                   <Link
@@ -462,18 +494,18 @@ export default async function KfzGutachterStadtPage({
               <p>
                 {t.rich('hotspots_achsen', {
                   strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
-                  autobahnen: s.hyperlocal.hauptachsen.autobahnen.join(', '),
-                  bundesstrassen: s.hyperlocal.hauptachsen.bundesstrassen.join(', '),
+                  autobahnen: hauptachsen.autobahnen.join(', '),
+                  bundesstrassen: hauptachsen.bundesstrassen.join(', '),
                 })}
               </p>
-              {s.hyperlocal.hauptachsen.knoten.length > 0 && (
-                <p className="mt-1">{t('hotspots_knoten', { knoten: s.hyperlocal.hauptachsen.knoten.join(' · ') })}</p>
+              {hauptachsen.knoten.length > 0 && (
+                <p className="mt-1">{t('hotspots_knoten', { knoten: hauptachsen.knoten.join(' · ') })}</p>
               )}
-              {s.hyperlocal.hauptachsen.aktuelleBaustelle && (
+              {hauptachsen.aktuelleBaustelle && (
                 <p className="mt-1">
                   {t.rich('hotspots_baustelle', {
                     strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
-                    baustelle: s.hyperlocal.hauptachsen.aktuelleBaustelle,
+                    baustelle: hauptachsen.aktuelleBaustelle,
                   })}
                 </p>
               )}
@@ -481,7 +513,32 @@ export default async function KfzGutachterStadtPage({
             <p className="mt-4 text-sm leading-relaxed text-claimondo-shield">
               {t('hotspots_outro')}
             </p>
-            <p className="mt-3 text-xs text-claimondo-shield/75">{t('hotspots_quelle', { quelle: s.hyperlocal.hotspotQuelle })}</p>
+            {/* Quellenangabe. Gepflegte Hub-Daten tragen EINE Sammelquelle,
+                freigegebene Zeilen eine Quelle JE Hotspot (Quellenzwang aus
+                src/lib/lokalinhalt/gate.ts). Beide werden gerendert — ohne
+                sichtbaren Beleg waere der Quellenzwang eine interne Formalie,
+                die dem Leser nichts nuetzt. */}
+            {s.hyperlocal ? (
+              <p className="mt-3 text-xs text-claimondo-shield/75">
+                {t('hotspots_quelle', { quelle: s.hyperlocal.hotspotQuelle })}
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-1 text-xs text-claimondo-shield/75">
+                {(freigegeben?.unfallHotspots ?? []).map((h) => (
+                  <li key={`quelle-${h.ort}`}>
+                    {h.ort}:{' '}
+                    <a
+                      href={h.quelle}
+                      target="_blank"
+                      rel="nofollow noopener noreferrer"
+                      className="underline hover:text-claimondo-navy"
+                    >
+                      {new URL(h.quelle).hostname.replace(/^www\./, '')}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
           </div>
         </section>
       )}
