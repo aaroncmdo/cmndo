@@ -21,7 +21,7 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { analysiereLinknetz } from './lib/stadt-linknetz-scan.mjs'
+import { GLOBALE_QUELLEN, analysiereLinknetz } from './lib/stadt-linknetz-scan.mjs'
 import { waehleNachbarn } from '../claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
@@ -91,14 +91,34 @@ function parseAngrenzendeOrte(quelltext) {
   return treffer
 }
 
-/** `spokeLocal.hubSlug` — die Spoke->Hub-Beziehung liegt als Datum vor, wird
- *  aber nirgends verlinkt (P3-A2). */
-function parseSpokeHubs(quelltext) {
-  const re = /hubSlug: '([a-z0-9-]+)'/g
-  const hubs = []
-  let m
-  while ((m = re.exec(quelltext))) hubs.push(m[1])
-  return hubs
+/** Die Spoke->Hub-Paare aus `spokeLocal`. Diese Kante WIRD gerendert — als
+ *  Inline-Link im Fliesstext der Spoke-Sektion ([stadt]/page.tsx, "spoke_einsatz").
+ *  Sie zaehlt deshalb als thematische Kante. Die Gegenrichtung Hub->Spoke fehlt
+ *  dagegen komplett; das ist P3-A2. */
+function parseSpokeHubPaare(quelltext) {
+  const block = staedteBlock(quelltext)
+  const paare = []
+  // Je Stadt-Eintrag pruefen: der naechste `hubSlug` vor dem naechsten `slug:`
+  // gehoert zu dieser Stadt.
+  const stadtRe = /slug: '([a-z0-9-]+)',\s*\n\s*name: '/g
+  const starts = [...block.matchAll(stadtRe)].map((m) => ({ slug: m[1], idx: m.index }))
+  for (let i = 0; i < starts.length; i++) {
+    const segment = block.slice(starts[i].idx, starts[i + 1]?.idx ?? block.length)
+    const hub = segment.match(/hubSlug: '([a-z0-9-]+)'/)
+    if (hub) paare.push({ spoke: starts[i].slug, hub: hub[1] })
+  }
+
+  // Reissleine: kommt `hubSlug` im Block vor, muss die Zuordnung auch greifen.
+  // Sonst faellt der Parser still auf 0 zurueck und das Skript meldet wieder
+  // "keine Spoke->Hub-Kante" — genau der Fehlschluss, den es beim ersten Wurf
+  // schon einmal produziert hat.
+  const roh = (block.match(/hubSlug: '/g) ?? []).length
+  if (roh !== paare.length) {
+    throw new Error(
+      `${roh} hubSlug-Vorkommen, aber ${paare.length} zugeordnet — der Spoke-Parser passt nicht mehr zur Formatierung von staedte.ts.`,
+    )
+  }
+  return paare
 }
 
 function parseFooterStandorte(quelltext) {
@@ -141,25 +161,38 @@ function sammleAusDaten() {
 
   // 3. Uebersicht /kfz-gutachter listet alle Staedte -> ebenfalls global.
   for (const s of staedte) {
-    kanten.push({ von: 'kfz-gutachter', nach: s.slug, quelle: 'hub', vonIstStadt: false })
+    kanten.push({ von: 'kfz-gutachter', nach: s.slug, quelle: 'uebersicht', vonIstStadt: false })
   }
 
-  return { staedte, kanten, footer, quelltext }
+  // 4. Spoke -> Hub. Diese Kante existiert bereits als Inline-Link in der
+  //    Spoke-Sektion. Sie fehlte im ersten Wurf dieses Skripts, das nur die
+  //    DATEN sah und daraus "nicht verlinkt" schloss — derselbe Fehlschluss,
+  //    den die P3-Spec §0 anprangert. Am gerenderten HTML nachgeprueft
+  //    (solingen verlinkt wuppertal ausserhalb des <footer>).
+  const spokeHubs = parseSpokeHubPaare(quelltext)
+  for (const { spoke, hub } of spokeHubs) {
+    kanten.push({ von: spoke, nach: hub, quelle: 'spoke-hub' })
+  }
+
+  return { staedte, kanten, footer, spokeHubs, quelltext }
 }
 
 // ------------------------------------------------------------ Crawl-Modus
 
-/** Nur die Pills des Einsatzgebiet-Blocks — NICHT jeder /kfz-gutachter/-Link
- *  der Seite. Der Footer-Strip verlinkt auf jeder Seite dieselben zehn Staedte
- *  und wuerde eine naive Zaehlung unbrauchbar machen (16.08. reproduziert:
- *  eine Volltext-Zaehlung meldete weiter "NRW-Staedte auf Berlin"). */
-function pillsAusHtml(html) {
-  const re =
-    /py-1\.5 text-xs font-semibold text-claimondo-ondo[^"]*"\s+href="\/kfz-gutachter\/([a-z0-9-]+)"/g
-  return [...html.matchAll(re)].map((m) => m[1])
+/** Trennt den Seiteninhalt vom Footer-Strip.
+ *
+ *  WARUM am `<footer>`-Element und nicht an CSS-Klassen: Der erste Wurf nahm
+ *  "Pill-Klasse = thematisch, alles andere = global" an und verbuchte damit den
+ *  Hub-Link der Spoke-Seiten (ein Inline-Link im Fliesstext) faelschlich als
+ *  Footer. Die Klassen sind ein Implementierungsdetail, das Element ist die
+ *  Struktur. Gegen prod geprueft: bei /kfz-gutachter/solingen steht der
+ *  Hub-Link `wuppertal` ausserhalb, die zehn FOOTER_STANDORTE innerhalb. */
+function teileAmFooter(html) {
+  const i = html.indexOf('<footer')
+  return i < 0 ? { inhalt: html, footer: '' } : { inhalt: html.slice(0, i), footer: html.slice(i) }
 }
 
-function alleStadtLinks(html) {
+function stadtLinks(html) {
   return [...html.matchAll(/href="\/kfz-gutachter\/([a-z0-9-]+)"/g)].map((m) => m[1])
 }
 
@@ -183,14 +216,15 @@ async function sammleAusCrawl(basisUrl) {
       fehler.push(`${s.slug}: ${err.message}`)
       continue
     }
-    const pills = new Set(pillsAusHtml(html))
-    for (const ziel of pills) {
-      kanten.push({ von: s.slug, nach: ziel, quelle: 'nachbar' })
+    const { inhalt, footer } = teileAmFooter(html)
+    if (!footer) fehler.push(`${s.slug}: kein <footer>-Element — Trennung unsicher`)
+
+    for (const ziel of new Set(stadtLinks(inhalt))) {
+      if (ratgeber.has(ziel) || ziel === s.slug) continue
+      kanten.push({ von: s.slug, nach: ziel, quelle: 'seiteninhalt' })
     }
-    // Alles, was NICHT Pill und keine Ratgeber-Route ist, als globalen Strip
-    // verbuchen (Footer etc.).
-    for (const ziel of alleStadtLinks(html)) {
-      if (pills.has(ziel) || ratgeber.has(ziel)) continue
+    for (const ziel of new Set(stadtLinks(footer))) {
+      if (ratgeber.has(ziel)) continue
       kanten.push({ von: s.slug, nach: ziel, quelle: 'footer' })
     }
   }
@@ -215,7 +249,7 @@ function berichte(ergebnis, extras) {
   )
   console.log('\n  Kanten je Quelle:')
   for (const [quelle, anzahl] of Object.entries(kennzahl.jeQuelle).sort()) {
-    const marke = ['footer', 'hub'].includes(quelle) ? ' (global, zaehlt nicht thematisch)' : ''
+    const marke = GLOBALE_QUELLEN.includes(quelle) ? ' (global, zaehlt nicht thematisch)' : ''
     zeile(`  ${quelle}`, `${anzahl}${marke}`)
   }
 
@@ -280,12 +314,14 @@ async function main() {
 
     const angrenzend = parseAngrenzendeOrte(r.quelltext)
     const angrenzendMitSeite = angrenzend.flat().filter((ort) => nachName.has(ort))
-    const spokeHubs = parseSpokeHubs(r.quelltext)
+    const hubsMitSpokes = new Set(r.spokeHubs.map((p) => p.hub))
 
     extras.geplant = [
       `angrenzendeOrte: ${angrenzend.flat().length} Ortsnamen auf ${angrenzend.length} Hub-Seiten, davon ${angrenzendMitSeite.length} mit eigener Stadtseite — heute Fliesstext, kein Link`,
-      `spokeLocal.hubSlug: ${spokeHubs.length} Spoke->Hub-Beziehungen gepflegt, keine davon verlinkt`,
-      ...spokeHubs.filter((h) => !slugSet.has(h)).map((h) => `hubSlug '${h}' hat KEINE Stadtseite`),
+      `Hub -> Spoke: ${r.spokeHubs.length} Spokes zeigen auf ${hubsMitSpokes.size} Hubs, aber KEIN Hub verlinkt seine Spokes zurueck (am gerenderten HTML geprueft)`,
+      ...r.spokeHubs
+        .filter((p) => !slugSet.has(p.hub))
+        .map((p) => `hubSlug '${p.hub}' (von ${p.spoke}) hat KEINE Stadtseite`),
     ]
     extras.nichtErfasst = [
       'Links von der Startseite, /ratgeber und /schadensreport-2026 (dort werden Slugs teils zur Laufzeit abgeleitet)',

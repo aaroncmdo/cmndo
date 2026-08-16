@@ -13,7 +13,7 @@
 
 /** Quellen, die auf jeder Seite gleich sind und deshalb kein thematisches
  *  Signal tragen. Ueber die Option `globaleQuellen` ueberschreibbar. */
-export const GLOBALE_QUELLEN = ['footer', 'hub']
+export const GLOBALE_QUELLEN = ['footer', 'uebersicht']
 
 /**
  * @typedef {{ von: string, nach: string, quelle?: string, vonIstStadt?: boolean }} Kante
