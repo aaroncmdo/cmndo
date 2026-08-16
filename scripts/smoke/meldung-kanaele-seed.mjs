@@ -91,6 +91,31 @@ async function createUser(email, password) {
 }
 
 // ---------------------------------------------------------------- CLEAN
+// Auf `leads.id` zeigen drei FKs OHNE CASCADE — sie muessen VOR dem Lead-Delete weg, sonst
+// scheitert er an der FK-Verletzung. `tasks` war bekannt; `gutachter_termine` fehlte in BEIDEN
+// Raeum-Pfaden und blockierte real 88 Leads (04.–16.08.) — der J2-Journey ERZEUGT einen Termin,
+// der Blocker entsteht also bei jedem Lauf zwangslaeufig. `whatsapp_inbound_messages` ist hier
+// nie belegt (0 Zeilen), wird der Vollstaendigkeit halber aber mitgeraeumt.
+// Termine haengen an der Legacy-Achse (`lead_id`, 88/88 geprueft) — bezug-native Termine
+// (lead_id NULL) blockieren den FK nicht, werden ueber `bezug_id` aber ebenfalls entfernt,
+// damit kein Residue zurueckbleibt.
+async function entferneLeadBlocker(leadIds) {
+  if (!leadIds.length) return
+  await db.from('tasks').delete().in('lead_id', leadIds)
+  await db.from('gutachter_termine').delete().in('lead_id', leadIds)
+  await db.from('gutachter_termine').delete().in('bezug_id', leadIds).eq('bezug_typ', 'lead')
+  await db.from('whatsapp_inbound_messages').delete().in('matched_lead_id', leadIds)
+}
+
+// Der Lead-Delete lief bisher ohne Fehlerpruefung — Supabase WIRFT bei FK-Verletzung nicht,
+// sondern liefert `{ error }`. Genau deshalb blieb der Rueckstand 13 Tage lang unbemerkt:
+// der Seed meldete Erfolg, waehrend jeder Lauf einen Lead zurueckliess.
+async function loescheLeads(leadIds) {
+  if (!leadIds.length) return
+  const { error } = await db.from('leads').delete().in('id', leadIds)
+  if (error) console.error(`[clean] leads-DELETE fehlgeschlagen (${leadIds.length} Ids): ${error.message}`)
+}
+
 // Loescht die Claim-Kette einer Menge von claim-/lead-Ids in FK-sicherer Reihenfolge.
 async function cleanClaimKette(claimIds, leadIds) {
   let fallIds = []
@@ -108,7 +133,7 @@ async function cleanClaimKette(claimIds, leadIds) {
   if (claimIds.length) await db.from('partner_provisionen').delete().in('claim_id', claimIds)
   if (fallIds.length) await db.from('partner_provisionen').delete().in('fall_id', fallIds)
   if (leadIds.length) await db.from('partner_provisionen').delete().in('lead_id', leadIds)
-  if (leadIds.length) await db.from('tasks').delete().in('lead_id', leadIds) // kein CASCADE auf lead_id
+  await entferneLeadBlocker(leadIds) // tasks/gutachter_termine/wa-inbound: kein CASCADE auf lead_id
   const fallScope = [...new Set([...fallIds, ...claimIds])]
   if (fallScope.length) {
     await db.from('timeline').delete().in('fall_id', fallScope)
@@ -117,7 +142,7 @@ async function cleanClaimKette(claimIds, leadIds) {
   if (claimIds.length) await db.from('claims').delete().in('id', claimIds) // CASCADE: parties/pflichtdok/bridge/tasks
   if (personIds.length) await db.from('personen').delete().in('id', personIds)
   if (vehicleIds.length) await db.from('vehicles').delete().in('id', vehicleIds) // nach claims (RESTRICT); leads.vehicle_id SET NULL
-  if (leadIds.length) await db.from('leads').delete().in('id', leadIds) // flow_links CASCADE
+  await loescheLeads(leadIds) // flow_links CASCADE
 }
 
 // RACE-GUARD (11.08.): `nurAlte=true` (Seed-Start) raeumt NUR Fixtures aelter als GRACE_MS.
@@ -147,9 +172,9 @@ async function clean(nurAlte = false) {
     nurAlte,
   )
   const leadIdsB = [...new Set([...ids(gfaRows, 'konvertiert_zu_lead_id'), ...ids(apiLeads)])]
-  if (leadIdsB.length) await db.from('tasks').delete().in('lead_id', leadIdsB)
+  await entferneLeadBlocker(leadIdsB)
   if (gfaRows?.length) await db.from('gutachter_finder_anfragen').delete().in('id', ids(gfaRows))
-  if (leadIdsB.length) await db.from('leads').delete().in('id', leadIdsB)
+  await loescheLeads(leadIdsB)
   n.gfa = (gfaRows ?? []).length
   n.leads += leadIdsB.length
 
