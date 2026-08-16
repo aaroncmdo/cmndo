@@ -23,6 +23,7 @@
 import { readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { waehleNachbarn } from '../claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const QUELLE = join(ROOT, 'claimondo-marketing', 'lib', 'kfz-gutachter', 'staedte.ts')
@@ -85,26 +86,15 @@ function main() {
   }
 
   // Nachbarorte hier VORBERECHNEN, statt die Geo-Logik in src/ zu duplizieren.
-  // Das Marketing rendert seine Nachbarn ueber lib/kfz-gutachter/nachbarstaedte.ts;
   // src/ braucht sie nur als Prompt-Kontext, also reicht die fertige Liste.
-  const ERDRADIUS_KM = 6371
-  const bogen = (g) => (g * Math.PI) / 180
-  const distanzKm = (a, b) => {
-    const dLat = bogen(b.lat - a.lat)
-    const dLng = bogen(b.lng - a.lng)
-    const h =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos(bogen(a.lat)) * Math.cos(bogen(b.lat)) * Math.sin(dLng / 2) ** 2
-    return Math.round(2 * ERDRADIUS_KM * Math.asin(Math.sqrt(h)))
-  }
-
+  //
+  // Die Auswahlregel kommt aus derselben Datei, die auch die Stadtseite rendert
+  // (claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs). Vorher stand hier
+  // eine eigene Haversine-Kopie — die haette frueher oder spaeter andere Nachbarn
+  // geliefert als die Seite anzeigt. Ein Drift-Test in nachbarstaedte.test.ts
+  // vergleicht den erzeugten Snapshot zusaetzlich gegen die gerenderte Auswahl.
   for (const s of staedte) {
-    s.nachbarorte = staedte
-      .filter((x) => x.slug !== s.slug)
-      .map((x) => ({ name: x.name, km: distanzKm(s, x) }))
-      .sort((a, b) => a.km - b.km || a.name.localeCompare(b.name))
-      .slice(0, 6)
-      .map((x) => x.name)
+    s.nachbarorte = waehleNachbarn(s.slug, staedte, 6).map((x) => x.name)
   }
 
   staedte.sort((a, b) => a.slug.localeCompare(b.slug))

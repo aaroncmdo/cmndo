@@ -16,8 +16,8 @@
       "Neuss",
       "Dormagen",
       "Köln",
-      "Bornheim",
-      "Meckenheim"
+      "Düsseldorf",
+      "Bonn"
     ]
   },
   {
@@ -36,9 +36,9 @@
       "München",
       "Ingolstadt",
       "Ulm",
-      "Regensburg",
       "Nürnberg",
-      "Fürth"
+      "Stuttgart",
+      "Karlsruhe"
     ]
   },
   {
@@ -57,9 +57,9 @@
       "Leverkusen",
       "Köln",
       "Langenfeld",
-      "Solingen",
-      "Troisdorf",
-      "Remscheid"
+      "Bonn",
+      "Wuppertal",
+      "Düsseldorf"
     ]
   },
   {
@@ -98,10 +98,10 @@
     "nachbarorte": [
       "Paderborn",
       "Osnabrück",
-      "Hamm",
       "Münster",
       "Hannover",
-      "Dortmund"
+      "Dortmund",
+      "Kassel"
     ]
   },
   {
@@ -120,9 +120,9 @@
       "Herne",
       "Gelsenkirchen",
       "Essen",
-      "Recklinghausen",
       "Dortmund",
-      "Bottrop"
+      "Oberhausen",
+      "Wuppertal"
     ]
   },
   {
@@ -141,9 +141,9 @@
       "Bornheim",
       "Sankt Augustin",
       "Troisdorf",
-      "Siegburg",
-      "Meckenheim",
-      "Hennef"
+      "Köln",
+      "Wuppertal",
+      "Düsseldorf"
     ]
   },
   {
@@ -162,9 +162,9 @@
       "Bonn",
       "Troisdorf",
       "Sankt Augustin",
-      "Meckenheim",
-      "Siegburg",
-      "Hennef"
+      "Köln",
+      "Düsseldorf",
+      "Wuppertal"
     ]
   },
   {
@@ -183,9 +183,9 @@
       "Oberhausen",
       "Essen",
       "Gelsenkirchen",
-      "Mülheim an der Ruhr",
       "Duisburg",
-      "Bochum"
+      "Bochum",
+      "Krefeld"
     ]
   },
   {
@@ -204,9 +204,9 @@
       "Wolfsburg",
       "Hannover",
       "Magdeburg",
-      "Göttingen",
       "Kassel",
-      "Halle (Saale)"
+      "Halle (Saale)",
+      "Bielefeld"
     ]
   },
   {
@@ -226,8 +226,8 @@
       "Bremerhaven",
       "Hamburg",
       "Hannover",
-      "Osnabrück",
-      "Bielefeld"
+      "Bielefeld",
+      "Braunschweig"
     ]
   },
   {
@@ -248,7 +248,7 @@
       "Hamburg",
       "Kiel",
       "Lübeck",
-      "Osnabrück"
+      "Hannover"
     ]
   },
   {
@@ -269,7 +269,7 @@
       "Jena",
       "Halle (Saale)",
       "Erfurt",
-      "Cottbus"
+      "Magdeburg"
     ]
   },
   {
@@ -311,7 +311,7 @@
       "Mainz",
       "Wiesbaden",
       "Mannheim",
-      "Ludwigshafen am Rhein"
+      "Karlsruhe"
     ]
   },
   {
@@ -331,8 +331,8 @@
       "Hilden",
       "Leverkusen",
       "Düsseldorf",
-      "Neuss",
-      "Haan"
+      "Köln",
+      "Wuppertal"
     ]
   },
   {
@@ -351,9 +351,9 @@
       "Hagen",
       "Herne",
       "Bochum",
-      "Recklinghausen",
       "Gelsenkirchen",
-      "Schwelm"
+      "Essen",
+      "Wuppertal"
     ]
   },
   {
@@ -373,8 +373,8 @@
       "Cottbus",
       "Leipzig",
       "Halle (Saale)",
-      "Jena",
-      "Potsdam"
+      "Berlin",
+      "Magdeburg"
     ]
   },
   {
@@ -393,9 +393,9 @@
       "Neuss",
       "Ratingen",
       "Hilden",
-      "Dormagen",
-      "Haan",
-      "Krefeld"
+      "Krefeld",
+      "Duisburg",
+      "Mönchengladbach"
     ]
   },
   {
@@ -414,9 +414,9 @@
       "Mülheim an der Ruhr",
       "Moers",
       "Oberhausen",
-      "Bottrop",
       "Krefeld",
-      "Ratingen"
+      "Essen",
+      "Düsseldorf"
     ]
   },
   {
@@ -437,7 +437,7 @@
       "Göttingen",
       "Leipzig",
       "Kassel",
-      "Chemnitz"
+      "Magdeburg"
     ]
   },
   {
@@ -456,9 +456,9 @@
       "Fürth",
       "Nürnberg",
       "Würzburg",
-      "Ingolstadt",
-      "Regensburg",
-      "Augsburg"
+      "Augsburg",
+      "Erfurt",
+      "Stuttgart"
     ]
   },
   {
@@ -474,12 +474,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
-      "Bottrop",
       "Gelsenkirchen",
+      "Bottrop",
       "Mülheim an der Ruhr",
       "Oberhausen",
-      "Velbert",
-      "Bochum"
+      "Bochum",
+      "Duisburg"
     ]
   },
   {
@@ -500,7 +500,7 @@
       "Wiesbaden",
       "Mainz",
       "Mannheim",
-      "Ludwigshafen am Rhein"
+      "Karlsruhe"
     ]
   },
   {
@@ -521,7 +521,7 @@
       "Karlsruhe",
       "Stuttgart",
       "Saarbrücken",
-      "Heilbronn"
+      "Mannheim"
     ]
   },
   {
@@ -540,9 +540,9 @@
       "Nürnberg",
       "Erlangen",
       "Würzburg",
-      "Ingolstadt",
-      "Regensburg",
-      "Augsburg"
+      "Augsburg",
+      "Stuttgart",
+      "München"
     ]
   },
   {
@@ -561,9 +561,9 @@
       "Essen",
       "Bochum",
       "Herne",
-      "Bottrop",
-      "Recklinghausen",
-      "Oberhausen"
+      "Oberhausen",
+      "Duisburg",
+      "Dortmund"
     ]
   },
   {
@@ -604,8 +604,8 @@
       "Solingen",
       "Langenfeld",
       "Wuppertal",
-      "Remscheid",
-      "Dormagen"
+      "Düsseldorf",
+      "Köln"
     ]
   },
   {
@@ -624,9 +624,9 @@
       "Schwelm",
       "Dortmund",
       "Bochum",
-      "Herne",
       "Wuppertal",
-      "Remscheid"
+      "Gelsenkirchen",
+      "Essen"
     ]
   },
   {
@@ -647,7 +647,7 @@
       "Magdeburg",
       "Erfurt",
       "Chemnitz",
-      "Potsdam"
+      "Braunschweig"
     ]
   },
   {
@@ -666,9 +666,9 @@
       "Lübeck",
       "Kiel",
       "Bremerhaven",
-      "Schwerin",
       "Bremen",
-      "Oldenburg"
+      "Hannover",
+      "Braunschweig"
     ]
   },
   {
@@ -687,9 +687,9 @@
       "Dortmund",
       "Münster",
       "Hagen",
-      "Herne",
-      "Recklinghausen",
-      "Bochum"
+      "Bochum",
+      "Gelsenkirchen",
+      "Essen"
     ]
   },
   {
@@ -708,9 +708,9 @@
       "Braunschweig",
       "Wolfsburg",
       "Bielefeld",
-      "Göttingen",
-      "Paderborn",
-      "Bremen"
+      "Bremen",
+      "Kassel",
+      "Hamburg"
     ]
   },
   {
@@ -728,10 +728,10 @@
     "nachbarorte": [
       "Mannheim",
       "Ludwigshafen am Rhein",
-      "Heilbronn",
       "Karlsruhe",
-      "Darmstadt",
-      "Pforzheim"
+      "Mainz",
+      "Stuttgart",
+      "Frankfurt am Main"
     ]
   },
   {
@@ -752,7 +752,7 @@
       "Heidelberg",
       "Karlsruhe",
       "Mannheim",
-      "Ludwigshafen am Rhein"
+      "Frankfurt am Main"
     ]
   },
   {
@@ -772,8 +772,8 @@
       "Sankt Augustin",
       "Troisdorf",
       "Bonn",
-      "Bornheim",
-      "Meckenheim"
+      "Köln",
+      "Wuppertal"
     ]
   },
   {
@@ -794,7 +794,7 @@
       "Gelsenkirchen",
       "Dortmund",
       "Essen",
-      "Bottrop"
+      "Oberhausen"
     ]
   },
   {
@@ -813,9 +813,9 @@
       "Haan",
       "Langenfeld",
       "Solingen",
-      "Dormagen",
       "Düsseldorf",
-      "Leverkusen"
+      "Wuppertal",
+      "Köln"
     ]
   },
   {
@@ -836,7 +836,7 @@
       "München",
       "Nürnberg",
       "Fürth",
-      "Erlangen"
+      "Stuttgart"
     ]
   },
   {
@@ -857,7 +857,7 @@
       "Leipzig",
       "Chemnitz",
       "Magdeburg",
-      "Göttingen"
+      "Dresden"
     ]
   },
   {
@@ -877,8 +877,8 @@
       "Heidelberg",
       "Ludwigshafen am Rhein",
       "Mannheim",
-      "Heilbronn",
-      "Stuttgart"
+      "Stuttgart",
+      "Mainz"
     ]
   },
   {
@@ -897,9 +897,9 @@
       "Göttingen",
       "Paderborn",
       "Bielefeld",
-      "Siegen",
       "Erfurt",
-      "Hannover"
+      "Hannover",
+      "Braunschweig"
     ]
   },
   {
@@ -941,7 +941,7 @@
       "Sankt Augustin",
       "Bonn",
       "Wiesbaden",
-      "Siegburg"
+      "Mainz"
     ]
   },
   {
@@ -959,10 +959,10 @@
     "nachbarorte": [
       "Leverkusen",
       "Bergisch Gladbach",
-      "Dormagen",
       "Langenfeld",
-      "Bornheim",
-      "Troisdorf"
+      "Bonn",
+      "Düsseldorf",
+      "Wuppertal"
     ]
   },
   {
@@ -982,8 +982,8 @@
       "Duisburg",
       "Neuss",
       "Düsseldorf",
-      "Ratingen",
-      "Mönchengladbach"
+      "Mönchengladbach",
+      "Oberhausen"
     ]
   },
   {
@@ -1002,9 +1002,9 @@
       "Hilden",
       "Dormagen",
       "Leverkusen",
-      "Haan",
-      "Solingen",
-      "Düsseldorf"
+      "Düsseldorf",
+      "Köln",
+      "Wuppertal"
     ]
   },
   {
@@ -1044,9 +1044,9 @@
       "Langenfeld",
       "Köln",
       "Bergisch Gladbach",
-      "Dormagen",
-      "Hilden",
-      "Solingen"
+      "Düsseldorf",
+      "Wuppertal",
+      "Bonn"
     ]
   },
   {
@@ -1067,7 +1067,7 @@
       "Darmstadt",
       "Karlsruhe",
       "Mainz",
-      "Heilbronn"
+      "Wiesbaden"
     ]
   },
   {
@@ -1087,8 +1087,8 @@
       "Hamburg",
       "Kiel",
       "Rostock",
-      "Bremerhaven",
-      "Bremen"
+      "Bremen",
+      "Hannover"
     ]
   },
   {
@@ -1108,8 +1108,8 @@
       "Halle (Saale)",
       "Braunschweig",
       "Leipzig",
-      "Potsdam",
-      "Berlin"
+      "Berlin",
+      "Hannover"
     ]
   },
   {
@@ -1128,9 +1128,9 @@
       "Wiesbaden",
       "Darmstadt",
       "Frankfurt am Main",
-      "Offenbach am Main",
       "Mannheim",
-      "Ludwigshafen am Rhein"
+      "Karlsruhe",
+      "Bonn"
     ]
   },
   {
@@ -1151,7 +1151,7 @@
       "Darmstadt",
       "Karlsruhe",
       "Mainz",
-      "Heilbronn"
+      "Wiesbaden"
     ]
   },
   {
@@ -1170,9 +1170,9 @@
       "Bonn",
       "Bornheim",
       "Sankt Augustin",
-      "Troisdorf",
-      "Siegburg",
-      "Hennef"
+      "Köln",
+      "Aachen",
+      "Düsseldorf"
     ]
   },
   {
@@ -1191,9 +1191,9 @@
       "Neuss",
       "Krefeld",
       "Düsseldorf",
-      "Dormagen",
-      "Ratingen",
-      "Moers"
+      "Duisburg",
+      "Köln",
+      "Oberhausen"
     ]
   },
   {
@@ -1212,9 +1212,9 @@
       "Duisburg",
       "Krefeld",
       "Oberhausen",
-      "Mülheim an der Ruhr",
-      "Bottrop",
-      "Ratingen"
+      "Essen",
+      "Düsseldorf",
+      "Gelsenkirchen"
     ]
   },
   {
@@ -1230,12 +1230,12 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
-      "Duisburg",
       "Oberhausen",
+      "Duisburg",
       "Essen",
-      "Bottrop",
-      "Ratingen",
-      "Velbert"
+      "Gelsenkirchen",
+      "Krefeld",
+      "Düsseldorf"
     ]
   },
   {
@@ -1256,7 +1256,7 @@
       "Regensburg",
       "Ulm",
       "Nürnberg",
-      "Fürth"
+      "Stuttgart"
     ]
   },
   {
@@ -1276,8 +1276,8 @@
       "Osnabrück",
       "Recklinghausen",
       "Dortmund",
-      "Herne",
-      "Bochum"
+      "Bochum",
+      "Gelsenkirchen"
     ]
   },
   {
@@ -1298,7 +1298,7 @@
       "Ratingen",
       "Krefeld",
       "Mönchengladbach",
-      "Hilden"
+      "Duisburg"
     ]
   },
   {
@@ -1317,9 +1317,9 @@
       "Fürth",
       "Erlangen",
       "Ingolstadt",
-      "Regensburg",
-      "Würzburg",
-      "Augsburg"
+      "Augsburg",
+      "München",
+      "Stuttgart"
     ]
   },
   {
@@ -1340,7 +1340,7 @@
       "Duisburg",
       "Essen",
       "Gelsenkirchen",
-      "Moers"
+      "Bochum"
     ]
   },
   {
@@ -1361,7 +1361,7 @@
       "Wiesbaden",
       "Mainz",
       "Mannheim",
-      "Ludwigshafen am Rhein"
+      "Karlsruhe"
     ]
   },
   {
@@ -1401,9 +1401,9 @@
       "Bielefeld",
       "Münster",
       "Hamm",
-      "Paderborn",
       "Dortmund",
-      "Recklinghausen"
+      "Bremen",
+      "Bochum"
     ]
   },
   {
@@ -1422,9 +1422,9 @@
       "Bielefeld",
       "Hamm",
       "Kassel",
-      "Osnabrück",
-      "Göttingen",
-      "Münster"
+      "Münster",
+      "Dortmund",
+      "Hannover"
     ]
   },
   {
@@ -1443,9 +1443,9 @@
       "Karlsruhe",
       "Stuttgart",
       "Heilbronn",
-      "Heidelberg",
-      "Reutlingen",
-      "Ludwigshafen am Rhein"
+      "Mannheim",
+      "Freiburg im Breisgau",
+      "Mainz"
     ]
   },
   {
@@ -1466,7 +1466,7 @@
       "Cottbus",
       "Halle (Saale)",
       "Leipzig",
-      "Wolfsburg"
+      "Dresden"
     ]
   },
   {
@@ -1485,9 +1485,9 @@
       "Düsseldorf",
       "Velbert",
       "Mülheim an der Ruhr",
-      "Neuss",
       "Duisburg",
-      "Haan"
+      "Krefeld",
+      "Essen"
     ]
   },
   {
@@ -1506,9 +1506,9 @@
       "Herne",
       "Gelsenkirchen",
       "Bochum",
-      "Bottrop",
       "Dortmund",
-      "Essen"
+      "Essen",
+      "Oberhausen"
     ]
   },
   {
@@ -1548,9 +1548,9 @@
       "Solingen",
       "Wuppertal",
       "Haan",
-      "Schwelm",
-      "Hilden",
-      "Langenfeld"
+      "Düsseldorf",
+      "Köln",
+      "Essen"
     ]
   },
   {
@@ -1569,9 +1569,9 @@
       "Stuttgart",
       "Pforzheim",
       "Ulm",
-      "Heilbronn",
       "Karlsruhe",
-      "Heidelberg"
+      "Freiburg im Breisgau",
+      "Mannheim"
     ]
   },
   {
@@ -1612,8 +1612,8 @@
       "Karlsruhe",
       "Ludwigshafen am Rhein",
       "Mannheim",
-      "Heidelberg",
-      "Mainz"
+      "Mainz",
+      "Wiesbaden"
     ]
   },
   {
@@ -1631,10 +1631,10 @@
     "nachbarorte": [
       "Siegburg",
       "Troisdorf",
-      "Bonn",
       "Hennef",
-      "Bornheim",
-      "Meckenheim"
+      "Bonn",
+      "Köln",
+      "Wuppertal"
     ]
   },
   {
@@ -1653,9 +1653,9 @@
       "Wuppertal",
       "Remscheid",
       "Hagen",
-      "Velbert",
-      "Solingen",
-      "Bochum"
+      "Bochum",
+      "Essen",
+      "Dortmund"
     ]
   },
   {
@@ -1675,8 +1675,8 @@
       "Rostock",
       "Hamburg",
       "Kiel",
-      "Wolfsburg",
-      "Braunschweig"
+      "Braunschweig",
+      "Magdeburg"
     ]
   },
   {
@@ -1696,8 +1696,8 @@
       "Troisdorf",
       "Hennef",
       "Bonn",
-      "Bornheim",
-      "Bergisch Gladbach"
+      "Köln",
+      "Wuppertal"
     ]
   },
   {
@@ -1716,9 +1716,9 @@
       "Hennef",
       "Siegburg",
       "Sankt Augustin",
-      "Troisdorf",
-      "Bergisch Gladbach",
-      "Koblenz"
+      "Bonn",
+      "Wuppertal",
+      "Köln"
     ]
   },
   {
@@ -1737,9 +1737,9 @@
       "Haan",
       "Remscheid",
       "Hilden",
-      "Langenfeld",
       "Wuppertal",
-      "Leverkusen"
+      "Düsseldorf",
+      "Köln"
     ]
   },
   {
@@ -1759,8 +1759,8 @@
       "Pforzheim",
       "Heilbronn",
       "Karlsruhe",
-      "Ulm",
-      "Heidelberg"
+      "Mannheim",
+      "Freiburg im Breisgau"
     ]
   },
   {
@@ -1780,8 +1780,8 @@
       "Koblenz",
       "Meckenheim",
       "Bonn",
-      "Bornheim",
-      "Mainz"
+      "Mainz",
+      "Aachen"
     ]
   },
   {
@@ -1800,9 +1800,9 @@
       "Siegburg",
       "Sankt Augustin",
       "Bonn",
-      "Hennef",
-      "Bornheim",
-      "Bergisch Gladbach"
+      "Köln",
+      "Wuppertal",
+      "Düsseldorf"
     ]
   },
   {
@@ -1821,9 +1821,9 @@
       "Reutlingen",
       "Augsburg",
       "Stuttgart",
-      "Heilbronn",
-      "Pforzheim",
-      "Ingolstadt"
+      "München",
+      "Karlsruhe",
+      "Nürnberg"
     ]
   },
   {
@@ -1842,9 +1842,9 @@
       "Wuppertal",
       "Essen",
       "Ratingen",
-      "Mülheim an der Ruhr",
-      "Haan",
-      "Schwelm"
+      "Bochum",
+      "Gelsenkirchen",
+      "Oberhausen"
     ]
   },
   {
@@ -1863,9 +1863,9 @@
       "Mainz",
       "Frankfurt am Main",
       "Darmstadt",
-      "Offenbach am Main",
-      "Koblenz",
-      "Mannheim"
+      "Mannheim",
+      "Bonn",
+      "Karlsruhe"
     ]
   },
   {
@@ -1884,9 +1884,9 @@
       "Braunschweig",
       "Magdeburg",
       "Hannover",
-      "Göttingen",
       "Halle (Saale)",
-      "Hamburg"
+      "Hamburg",
+      "Bremen"
     ]
   },
   {
@@ -1905,9 +1905,9 @@
       "Erlangen",
       "Fürth",
       "Nürnberg",
-      "Heilbronn",
-      "Offenbach am Main",
-      "Darmstadt"
+      "Frankfurt am Main",
+      "Mannheim",
+      "Mainz"
     ]
   },
   {
@@ -1926,9 +1926,9 @@
       "Remscheid",
       "Schwelm",
       "Solingen",
-      "Haan",
-      "Velbert",
-      "Hilden"
+      "Essen",
+      "Bochum",
+      "Düsseldorf"
     ]
   }
 ]
