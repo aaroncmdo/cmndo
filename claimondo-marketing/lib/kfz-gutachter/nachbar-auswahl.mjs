@@ -104,3 +104,44 @@ export function waehleNachbarn(basisSlug, kandidaten, limit = 6) {
     .sort((a, b) => a.km - b.km || a.ort.slug.localeCompare(b.ort.slug))
     .map((x) => x.ort)
 }
+
+/**
+ * Wie `waehleNachbarn`, zusaetzlich aber die Orte, die IHRERSEITS die Basis
+ * gewaehlt haben.
+ *
+ * WARUM (Aaron-Entscheid 16.08.): Nachbarschaft ist eine symmetrische Relation
+ * — die Auswahl "die N naechsten" ist es nicht. Solange nur die eigene Wahl
+ * zaehlt, entstehen einseitige Kanten und Staedte, die niemand verlinkt:
+ * gemessen 233 einseitige Kanten und mit `siegen` eine Stadt, die von KEINER
+ * der 92 Stadtseiten aus erreichbar war (sie liegt am NRW-Rand, alle ihre
+ * Nachbarn haben Naeheres). Die Rueckkante macht aus der Auswahl ein Netz.
+ *
+ * Es kommen dabei keine fernen Orte hinzu: eine Rueckkante existiert nur, wenn
+ * die Basis bei jemandem unter den naechsten war, also ohnehin innerhalb
+ * NACHBAR_MAX_KM liegt. Ergebnis bleibt nach Distanz sortiert.
+ *
+ * @template {{ slug: string, lat: number, lng: number, bevoelkerung: string }} T
+ * @param {string} basisSlug
+ * @param {readonly T[]} kandidaten
+ * @param {number} [limit]
+ * @returns {T[]}
+ */
+export function nachbarnMitRueckkanten(basisSlug, kandidaten, limit = 6) {
+  const basis = kandidaten.find((k) => k.slug === basisSlug)
+  if (!basis) return []
+
+  const gewaehlt = waehleNachbarn(basisSlug, kandidaten, limit)
+  const drin = new Set(gewaehlt.map((o) => o.slug))
+
+  for (const kandidat of kandidaten) {
+    if (kandidat.slug === basisSlug || drin.has(kandidat.slug)) continue
+    if (waehleNachbarn(kandidat.slug, kandidaten, limit).some((o) => o.slug === basisSlug)) {
+      gewaehlt.push(kandidat)
+      drin.add(kandidat.slug)
+    }
+  }
+
+  return gewaehlt.sort(
+    (a, b) => distanzKm(basis, a) - distanzKm(basis, b) || a.slug.localeCompare(b.slug),
+  )
+}
