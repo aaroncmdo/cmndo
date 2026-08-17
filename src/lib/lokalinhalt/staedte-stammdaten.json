@@ -12,12 +12,33 @@
     "kammer": "Rechtsanwaltskammer Köln",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Düren",
       "Heinsberg",
       "Erkelenz",
       "Mönchengladbach",
       "Köln",
-      "Düsseldorf",
-      "Bonn"
+      "Düsseldorf"
+    ]
+  },
+  {
+    "slug": "arnsberg",
+    "name": "Arnsberg",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "598",
+    "bevoelkerung": "74 Tsd.",
+    "lat": 51.3997,
+    "lng": 8.0599,
+    "landgericht": "Landgericht Arnsberg",
+    "amtsgericht": "Amtsgericht Arnsberg",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Iserlohn",
+      "Hamm",
+      "Lüdenscheid",
+      "Dortmund",
+      "Bochum",
+      "Wuppertal"
     ]
   },
   {
@@ -39,6 +60,27 @@
       "Nürnberg",
       "Stuttgart",
       "Karlsruhe"
+    ]
+  },
+  {
+    "slug": "bergheim",
+    "name": "Bergheim",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "501",
+    "bevoelkerung": "62 Tsd.",
+    "lat": 50.9537,
+    "lng": 6.6401,
+    "landgericht": "Landgericht Köln",
+    "amtsgericht": "Amtsgericht Bergheim",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Kerpen",
+      "Grevenbroich",
+      "Düren",
+      "Köln",
+      "Mönchengladbach",
+      "Düsseldorf"
     ]
   },
   {
@@ -96,12 +138,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
-      "Paderborn",
-      "Osnabrück",
+      "Herford",
+      "Gütersloh",
+      "Detmold",
       "Münster",
       "Hannover",
-      "Dortmund",
-      "Kassel"
+      "Dortmund"
     ]
   },
   {
@@ -117,12 +159,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
-      "Bottrop",
+      "Wesel",
+      "Dorsten",
+      "Dinslaken",
       "Oberhausen",
-      "Moers",
       "Duisburg",
-      "Gelsenkirchen",
-      "Essen"
+      "Gelsenkirchen"
     ]
   },
   {
@@ -139,11 +181,11 @@
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
       "Herne",
+      "Witten",
       "Gelsenkirchen",
       "Essen",
       "Dortmund",
-      "Oberhausen",
-      "Wuppertal"
+      "Oberhausen"
     ]
   },
   {
@@ -202,11 +244,11 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Oberhausen",
+      "Gladbeck",
       "Essen",
       "Gelsenkirchen",
       "Duisburg",
-      "Bochum",
-      "Krefeld"
+      "Bochum"
     ]
   },
   {
@@ -245,10 +287,10 @@
     "nachbarorte": [
       "Oldenburg",
       "Bremerhaven",
+      "Minden",
       "Hamburg",
       "Hannover",
-      "Bielefeld",
-      "Braunschweig"
+      "Bielefeld"
     ]
   },
   {
@@ -270,6 +312,27 @@
       "Kiel",
       "Lübeck",
       "Hannover"
+    ]
+  },
+  {
+    "slug": "castrop-rauxel",
+    "name": "Castrop-Rauxel",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "445",
+    "bevoelkerung": "72 Tsd.",
+    "lat": 51.564,
+    "lng": 7.3093,
+    "landgericht": "Landgericht Dortmund",
+    "amtsgericht": "Amtsgericht Castrop-Rauxel",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Herne",
+      "Recklinghausen",
+      "Bochum",
+      "Dortmund",
+      "Gelsenkirchen",
+      "Essen"
     ]
   },
   {
@@ -336,6 +399,48 @@
     ]
   },
   {
+    "slug": "detmold",
+    "name": "Detmold",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "327",
+    "bevoelkerung": "74 Tsd.",
+    "lat": 51.934,
+    "lng": 8.8786,
+    "landgericht": "Landgericht Detmold",
+    "amtsgericht": "Amtsgericht Detmold",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Herford",
+      "Paderborn",
+      "Bielefeld",
+      "Hannover",
+      "Kassel",
+      "Münster"
+    ]
+  },
+  {
+    "slug": "dinslaken",
+    "name": "Dinslaken",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "465",
+    "bevoelkerung": "67 Tsd.",
+    "lat": 51.5613,
+    "lng": 6.7326,
+    "landgericht": "Landgericht Duisburg",
+    "amtsgericht": "Amtsgericht Dinslaken",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Oberhausen",
+      "Wesel",
+      "Moers",
+      "Duisburg",
+      "Essen",
+      "Gelsenkirchen"
+    ]
+  },
+  {
     "slug": "dormagen",
     "name": "Dormagen",
     "bundesland": "Nordrhein-Westfalen",
@@ -357,6 +462,27 @@
     ]
   },
   {
+    "slug": "dorsten",
+    "name": "Dorsten",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "462",
+    "bevoelkerung": "75 Tsd.",
+    "lat": 51.6602,
+    "lng": 6.9639,
+    "landgericht": "Landgericht Essen",
+    "amtsgericht": "Amtsgericht Dorsten",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Marl",
+      "Gladbeck",
+      "Herten",
+      "Gelsenkirchen",
+      "Oberhausen",
+      "Essen"
+    ]
+  },
+  {
     "slug": "dortmund",
     "name": "Dortmund",
     "bundesland": "Nordrhein-Westfalen",
@@ -369,12 +495,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
-      "Hagen",
-      "Herne",
+      "Lünen",
+      "Castrop-Rauxel",
+      "Witten",
       "Bochum",
       "Gelsenkirchen",
-      "Essen",
-      "Wuppertal"
+      "Essen"
     ]
   },
   {
@@ -396,6 +522,27 @@
       "Halle (Saale)",
       "Berlin",
       "Magdeburg"
+    ]
+  },
+  {
+    "slug": "dueren",
+    "name": "Düren",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "523",
+    "bevoelkerung": "95 Tsd.",
+    "lat": 50.8028,
+    "lng": 6.4837,
+    "landgericht": "Landgericht Aachen",
+    "amtsgericht": "Amtsgericht Düren",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Kerpen",
+      "Bergheim",
+      "Aachen",
+      "Köln",
+      "Mönchengladbach",
+      "Bonn"
     ]
   },
   {
@@ -476,7 +623,7 @@
     "nachbarorte": [
       "Mönchengladbach",
       "Heinsberg",
-      "Neuss",
+      "Grevenbroich",
       "Krefeld",
       "Düsseldorf",
       "Aachen"
@@ -601,11 +748,32 @@
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
       "Essen",
+      "Gladbeck",
+      "Herten",
       "Bochum",
-      "Herne",
       "Oberhausen",
-      "Duisburg",
-      "Dortmund"
+      "Duisburg"
+    ]
+  },
+  {
+    "slug": "gladbeck",
+    "name": "Gladbeck",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "459",
+    "bevoelkerung": "76 Tsd.",
+    "lat": 51.5735,
+    "lng": 6.9929,
+    "landgericht": "Landgericht Essen",
+    "amtsgericht": "Amtsgericht Gladbeck",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bottrop",
+      "Gelsenkirchen",
+      "Dorsten",
+      "Oberhausen",
+      "Essen",
+      "Bochum"
     ]
   },
   {
@@ -623,10 +791,52 @@
     "nachbarorte": [
       "Kassel",
       "Paderborn",
+      "Detmold",
       "Braunschweig",
       "Hannover",
-      "Erfurt",
-      "Bielefeld"
+      "Erfurt"
+    ]
+  },
+  {
+    "slug": "grevenbroich",
+    "name": "Grevenbroich",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "415",
+    "bevoelkerung": "66 Tsd.",
+    "lat": 51.0884,
+    "lng": 6.5894,
+    "landgericht": "Landgericht Mönchengladbach",
+    "amtsgericht": "Amtsgericht Grevenbroich",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Neuss",
+      "Mönchengladbach",
+      "Bergheim",
+      "Düsseldorf",
+      "Krefeld",
+      "Köln"
+    ]
+  },
+  {
+    "slug": "guetersloh",
+    "name": "Gütersloh",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "333",
+    "bevoelkerung": "100 Tsd.",
+    "lat": 51.9065,
+    "lng": 8.3792,
+    "landgericht": "Landgericht Bielefeld",
+    "amtsgericht": "Amtsgericht Gütersloh",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bielefeld",
+      "Lippstadt",
+      "Herford",
+      "Münster",
+      "Dortmund",
+      "Bochum"
     ]
   },
   {
@@ -663,12 +873,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Witten",
       "Schwelm",
       "Dortmund",
       "Bochum",
       "Wuppertal",
-      "Gelsenkirchen",
-      "Essen"
+      "Gelsenkirchen"
     ]
   },
   {
@@ -726,12 +936,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Lünen",
       "Dortmund",
+      "Iserlohn",
       "Münster",
-      "Hagen",
       "Bochum",
-      "Gelsenkirchen",
-      "Essen"
+      "Gelsenkirchen"
     ]
   },
   {
@@ -748,11 +958,11 @@
     "bvskHonorarSpanne": "650–2.500 €",
     "nachbarorte": [
       "Braunschweig",
+      "Minden",
       "Wolfsburg",
       "Bielefeld",
       "Bremen",
-      "Kassel",
-      "Hamburg"
+      "Kassel"
     ]
   },
   {
@@ -812,10 +1022,10 @@
     "nachbarorte": [
       "Erkelenz",
       "Mönchengladbach",
+      "Viersen",
       "Aachen",
       "Krefeld",
-      "Düsseldorf",
-      "Köln"
+      "Düsseldorf"
     ]
   },
   {
@@ -840,6 +1050,27 @@
     ]
   },
   {
+    "slug": "herford",
+    "name": "Herford",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "320",
+    "bevoelkerung": "67 Tsd.",
+    "lat": 52.1147,
+    "lng": 8.6734,
+    "landgericht": "Landgericht Bielefeld",
+    "amtsgericht": "Amtsgericht Herford",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bielefeld",
+      "Detmold",
+      "Minden",
+      "Münster",
+      "Hannover",
+      "Kassel"
+    ]
+  },
+  {
     "slug": "herne",
     "name": "Herne",
     "bundesland": "Nordrhein-Westfalen",
@@ -853,11 +1084,32 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Bochum",
-      "Recklinghausen",
+      "Castrop-Rauxel",
+      "Herten",
       "Gelsenkirchen",
       "Dortmund",
-      "Essen",
-      "Oberhausen"
+      "Essen"
+    ]
+  },
+  {
+    "slug": "herten",
+    "name": "Herten",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "456",
+    "bevoelkerung": "61 Tsd.",
+    "lat": 51.5934,
+    "lng": 7.1384,
+    "landgericht": "Landgericht Bochum",
+    "amtsgericht": "Amtsgericht Recklinghausen",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Recklinghausen",
+      "Marl",
+      "Herne",
+      "Gelsenkirchen",
+      "Bochum",
+      "Essen"
     ]
   },
   {
@@ -900,6 +1152,27 @@
       "Nürnberg",
       "Fürth",
       "Stuttgart"
+    ]
+  },
+  {
+    "slug": "iserlohn",
+    "name": "Iserlohn",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "586",
+    "bevoelkerung": "91 Tsd.",
+    "lat": 51.3741,
+    "lng": 7.7001,
+    "landgericht": "Landgericht Hagen",
+    "amtsgericht": "Amtsgericht Iserlohn",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Hagen",
+      "Lüdenscheid",
+      "Dortmund",
+      "Bochum",
+      "Wuppertal",
+      "Gelsenkirchen"
     ]
   },
   {
@@ -959,10 +1232,31 @@
     "nachbarorte": [
       "Göttingen",
       "Paderborn",
+      "Detmold",
       "Bielefeld",
       "Erfurt",
-      "Hannover",
-      "Braunschweig"
+      "Hannover"
+    ]
+  },
+  {
+    "slug": "kerpen",
+    "name": "Kerpen",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "501",
+    "bevoelkerung": "66 Tsd.",
+    "lat": 50.87,
+    "lng": 6.695,
+    "landgericht": "Landgericht Köln",
+    "amtsgericht": "Amtsgericht Kerpen",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bergheim",
+      "Düren",
+      "Köln",
+      "Bonn",
+      "Mönchengladbach",
+      "Düsseldorf"
     ]
   },
   {
@@ -1043,7 +1337,7 @@
     "nachbarorte": [
       "Moers",
       "Duisburg",
-      "Neuss",
+      "Viersen",
       "Düsseldorf",
       "Mönchengladbach",
       "Oberhausen"
@@ -1113,6 +1407,27 @@
     ]
   },
   {
+    "slug": "lippstadt",
+    "name": "Lippstadt",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "595",
+    "bevoelkerung": "68 Tsd.",
+    "lat": 51.6762,
+    "lng": 8.3457,
+    "landgericht": "Landgericht Paderborn",
+    "amtsgericht": "Amtsgericht Lippstadt",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Gütersloh",
+      "Paderborn",
+      "Arnsberg",
+      "Bielefeld",
+      "Münster",
+      "Dortmund"
+    ]
+  },
+  {
     "slug": "ludwigshafen",
     "name": "Ludwigshafen am Rhein",
     "bundesland": "Rheinland-Pfalz",
@@ -1152,6 +1467,48 @@
       "Rostock",
       "Bremen",
       "Hannover"
+    ]
+  },
+  {
+    "slug": "luedenscheid",
+    "name": "Lüdenscheid",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "585",
+    "bevoelkerung": "71 Tsd.",
+    "lat": 51.218,
+    "lng": 7.6396,
+    "landgericht": "Landgericht Hagen",
+    "amtsgericht": "Amtsgericht Lüdenscheid",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Iserlohn",
+      "Hagen",
+      "Schwelm",
+      "Wuppertal",
+      "Dortmund",
+      "Bochum"
+    ]
+  },
+  {
+    "slug": "luenen",
+    "name": "Lünen",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "445",
+    "bevoelkerung": "86 Tsd.",
+    "lat": 51.6142,
+    "lng": 7.5227,
+    "landgericht": "Landgericht Dortmund",
+    "amtsgericht": "Amtsgericht Lünen",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Dortmund",
+      "Castrop-Rauxel",
+      "Hamm",
+      "Bochum",
+      "Gelsenkirchen",
+      "Münster"
     ]
   },
   {
@@ -1218,6 +1575,27 @@
     ]
   },
   {
+    "slug": "marl",
+    "name": "Marl",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "457",
+    "bevoelkerung": "87 Tsd.",
+    "lat": 51.6481,
+    "lng": 7.0817,
+    "landgericht": "Landgericht Essen",
+    "amtsgericht": "Amtsgericht Marl",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Herten",
+      "Dorsten",
+      "Recklinghausen",
+      "Gelsenkirchen",
+      "Bochum",
+      "Essen"
+    ]
+  },
+  {
     "slug": "meckenheim",
     "name": "Meckenheim",
     "bundesland": "Nordrhein-Westfalen",
@@ -1239,6 +1617,27 @@
     ]
   },
   {
+    "slug": "minden",
+    "name": "Minden",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "324",
+    "bevoelkerung": "84 Tsd.",
+    "lat": 52.2885,
+    "lng": 8.9171,
+    "landgericht": "Landgericht Bielefeld",
+    "amtsgericht": "Amtsgericht Minden",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Herford",
+      "Bielefeld",
+      "Detmold",
+      "Hannover",
+      "Bremen",
+      "Münster"
+    ]
+  },
+  {
     "slug": "moenchengladbach",
     "name": "Mönchengladbach",
     "bundesland": "Nordrhein-Westfalen",
@@ -1251,12 +1650,12 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Viersen",
       "Erkelenz",
-      "Neuss",
+      "Grevenbroich",
       "Krefeld",
       "Düsseldorf",
-      "Duisburg",
-      "Köln"
+      "Duisburg"
     ]
   },
   {
@@ -1274,10 +1673,10 @@
     "nachbarorte": [
       "Duisburg",
       "Krefeld",
+      "Dinslaken",
       "Oberhausen",
       "Essen",
-      "Düsseldorf",
-      "Gelsenkirchen"
+      "Düsseldorf"
     ]
   },
   {
@@ -1336,8 +1735,8 @@
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
       "Hamm",
-      "Osnabrück",
-      "Recklinghausen",
+      "Rheine",
+      "Lünen",
       "Dortmund",
       "Bochum",
       "Gelsenkirchen"
@@ -1357,8 +1756,8 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Düsseldorf",
+      "Grevenbroich",
       "Dormagen",
-      "Ratingen",
       "Krefeld",
       "Mönchengladbach",
       "Duisburg"
@@ -1461,9 +1860,9 @@
     "kammer": "Rechtsanwaltskammer Oldenburg",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Rheine",
       "Bielefeld",
       "Münster",
-      "Hamm",
       "Dortmund",
       "Bremen",
       "Bochum"
@@ -1482,12 +1881,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Detmold",
+      "Lippstadt",
+      "Gütersloh",
       "Bielefeld",
-      "Hamm",
       "Kassel",
-      "Münster",
-      "Dortmund",
-      "Hannover"
+      "Münster"
     ]
   },
   {
@@ -1566,12 +1965,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Herten",
       "Herne",
+      "Marl",
       "Gelsenkirchen",
       "Bochum",
-      "Dortmund",
-      "Essen",
-      "Oberhausen"
+      "Dortmund"
     ]
   },
   {
@@ -1635,6 +2034,27 @@
       "Karlsruhe",
       "Freiburg im Breisgau",
       "Mannheim"
+    ]
+  },
+  {
+    "slug": "rheine",
+    "name": "Rheine",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "484",
+    "bevoelkerung": "78 Tsd.",
+    "lat": 52.2788,
+    "lng": 7.4383,
+    "landgericht": "Landgericht Münster",
+    "amtsgericht": "Amtsgericht Rheine",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Münster",
+      "Osnabrück",
+      "Hamm",
+      "Bielefeld",
+      "Dortmund",
+      "Gelsenkirchen"
     ]
   },
   {
@@ -1776,9 +2196,9 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Lüdenscheid",
       "Hennef",
       "Siegburg",
-      "Sankt Augustin",
       "Bonn",
       "Wuppertal",
       "Köln"
@@ -1911,6 +2331,48 @@
     ]
   },
   {
+    "slug": "viersen",
+    "name": "Viersen",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "417",
+    "bevoelkerung": "78 Tsd.",
+    "lat": 51.2559,
+    "lng": 6.3905,
+    "landgericht": "Landgericht Mönchengladbach",
+    "amtsgericht": "Amtsgericht Viersen",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Mönchengladbach",
+      "Krefeld",
+      "Erkelenz",
+      "Düsseldorf",
+      "Duisburg",
+      "Oberhausen"
+    ]
+  },
+  {
+    "slug": "wesel",
+    "name": "Wesel",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "464",
+    "bevoelkerung": "61 Tsd.",
+    "lat": 51.6573,
+    "lng": 6.6151,
+    "landgericht": "Landgericht Duisburg",
+    "amtsgericht": "Amtsgericht Wesel",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Dinslaken",
+      "Bocholt",
+      "Moers",
+      "Oberhausen",
+      "Duisburg",
+      "Essen"
+    ]
+  },
+  {
     "slug": "wiesbaden",
     "name": "Wiesbaden",
     "bundesland": "Hessen",
@@ -1929,6 +2391,27 @@
       "Mannheim",
       "Bonn",
       "Karlsruhe"
+    ]
+  },
+  {
+    "slug": "witten",
+    "name": "Witten",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "584",
+    "bevoelkerung": "91 Tsd.",
+    "lat": 51.4369,
+    "lng": 7.3352,
+    "landgericht": "Landgericht Bochum",
+    "amtsgericht": "Amtsgericht Witten",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bochum",
+      "Hagen",
+      "Dortmund",
+      "Gelsenkirchen",
+      "Essen",
+      "Wuppertal"
     ]
   },
   {
