@@ -3,7 +3,7 @@
 //
 // WARUM die Quellen getrennt gezaehlt werden (das ist der Kern dieser Datei):
 // Der LandingFooter verlinkt von JEDER Seite der Site auf dieselben zehn
-// Staedte, die Uebersicht /kfz-gutachter auf alle 92. Zaehlt man diese Kanten
+// Staedte, die Uebersicht /kfz-gutachter auf alle. Zaehlt man diese Kanten
 // mit, hat jede Stadt zweistellig viele "eingehende Links", es gibt nie eine
 // Waise, und die Kennzahl misst nur noch, dass es einen Footer gibt. Solche
 // globalen Strips sagen ueber das THEMATISCHE Netz — welche Stadt verweist auf
