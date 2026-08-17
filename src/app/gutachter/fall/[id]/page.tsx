@@ -29,6 +29,8 @@ import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 // AAR-956 Zustandsdoku-Vorzustand (SV-Galerie): Loader + Read-only-Kachel-Galerie.
 import { getLetzterScanFuerVehicle } from '@/lib/vehicles/vehicle-scan-view'
 import { VehicleScanGalerie } from '@/components/shared/VehicleScanGalerie'
+// P3.3: bezug-aware Termin-Filter (matcht Legacy fall_id UND bezug_typ+bezug_id).
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 // AAR-651: Zentrale Fall-Loader-Lib
 
@@ -88,7 +90,11 @@ export default async function GutachterFallPage({
     const { data: aktualisiert } = await supabase
       .from('gutachter_termine')
       .update({ gesehen_am: new Date().toISOString() })
-      .eq('fall_id', id)
+      // P3.3-Boy-Scout: derselbe Bezug-Fix wie beim Read unten. Hier ist `.eq('fall_id')`
+      // zwar Teil eines UPDATE, aber es ist trotzdem ein FILTER (welche Zeilen) — bei
+      // bezug-nativen Terminen wuerde `gesehen_am` nie gesetzt und der gelbe
+      // „Termin durch Kunde verschoben"-Banner bliebe dauerhaft stehen.
+      .or(bezugOrExpr('fall', id))
       // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Filter)
       .eq('assignee_id', (sv as { id: string }).id)
       .eq('assignee_typ', 'sachverstaendiger')
@@ -309,10 +315,17 @@ export default async function GutachterFallPage({
   // ist der NEUE Slot der "aktuelle" Termin den der Header rendert (mit
   // dem read-only „Verlegung beantragt — Bestätigung ausstehend"-Hinweis).
   // verlegt-Slot bleibt draußen — er ist nur Slot-Blocker im Kalender.
+  // P3.3-Boy-Scout (17.08.): `.eq('fall_id', id)` uebersah BEZUG-NATIVE Termine (die
+  // Engine schreibt neue Termine nur mit bezug_typ+bezug_id, fall_id bleibt NULL).
+  // Folge war nicht bloss „verwaiste Logik": `aktiverTermin` blieb null -> die Bedingung
+  // `zeigeGutachtenUpload` (weiter unten) war nie erfuellt -> der SV bekam das
+  // Gutachten-Upload-Banner NIE zu sehen und konnte sein Gutachten nicht abgeben.
+  // Per E2E-Smoke 16./17.08. reproduziert; gemessen betraf es 4 von 19 Fall-Terminen.
+  // `bezugOrExpr` matcht BEIDE Achsen (Superset — nie weniger, nie ein fremder Termin).
   const { data: aktiveTermine } = await admin
     .from('gutachter_termine')
     .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_unterwegs_seit, sv_angekommen_am, durchgefuehrt_am, geschaetzte_fahrtzeit_min, sv_eta_minuten, verlegung_initiator_kunde')
-    .eq('fall_id', id)
+    .or(bezugOrExpr('fall', id))
     // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Filter)
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
