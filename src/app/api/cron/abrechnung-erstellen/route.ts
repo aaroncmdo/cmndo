@@ -210,7 +210,16 @@ export async function GET(request: Request) {
       // Doppel-Rechnungs-Schutz: bestehende Rechnung gefunden (pruefeBestehend).
       // Orphan-Relink: Claims an die bestehende Rechnung haengen (crash-recovery).
       if (abrClaimIds.length > 0) {
-        await db.from('claims').update({ abrechnung_id: result.bestehendeId }).in('id', abrClaimIds)
+        // Orphan-Relink: schlaegt er still fehl, bleiben die Claims OHNE Rechnungs-
+        // verknuepfung — und der naechste Lauf erzeugt genau die zweite Rechnung,
+        // die dieser Zweig verhindern soll.
+        const { error: relinkFehler } = await db
+          .from('claims')
+          .update({ abrechnung_id: result.bestehendeId })
+          .in('id', abrClaimIds)
+        if (relinkFehler) {
+          console.error(`[KFZ-149] Orphan-Relink fehlgeschlagen (SV ${sv.id}) — Doppel-Rechnung moeglich:`, relinkFehler.message)
+        }
       }
       console.warn(`[KFZ-149] SV ${sv.id}: bestehende Monatsrechnung gefunden — ${abrClaimIds.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
       continue
@@ -316,7 +325,14 @@ export async function GET(request: Request) {
       // Doppel-Rechnungs-Schutz: bestehende Org-Sammelrechnung gefunden.
       // Orphan-Relink: Claims an die bestehende Rechnung haengen (crash-recovery).
       if (acc.claim_ids.length > 0) {
-        await db.from('claims').update({ abrechnung_id: result.bestehendeId }).in('id', acc.claim_ids)
+        // Siehe KFZ-149 oben: ohne Relink erzeugt der naechste Lauf eine zweite Rechnung.
+        const { error: orgRelinkFehler } = await db
+          .from('claims')
+          .update({ abrechnung_id: result.bestehendeId })
+          .in('id', acc.claim_ids)
+        if (orgRelinkFehler) {
+          console.error(`[KFZ-152] Org-Relink fehlgeschlagen (org ${orgId}) — Doppel-Sammelrechnung moeglich:`, orgRelinkFehler.message)
+        }
       }
       console.warn(`[KFZ-152] Org ${orgId}: bestehende Sammelrechnung gefunden — ${acc.claim_ids.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
       continue
