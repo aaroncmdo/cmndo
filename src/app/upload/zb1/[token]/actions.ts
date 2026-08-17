@@ -61,10 +61,13 @@ export async function uploadZb1ViaToken(
     .from('fall-dokumente')
     .upload(path, buf, { contentType, upsert: false })
   if (upErr) {
-    await db.from('leads').update({
+    const { error: zaehlerFehler } = await db.from('leads').update({
       zb1_upload_versuche: (lead.zb1_upload_versuche ?? 0) + 1,
       updated_at: new Date().toISOString(),
     }).eq('id', lead.id)
+    if (zaehlerFehler) {
+      console.error(`[zb1] Versuchszaehler nicht erhoeht (lead ${lead.id}):`, zaehlerFehler.message)
+    }
     return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
   }
   const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
@@ -86,13 +89,18 @@ export async function uploadZb1ViaToken(
       err instanceof Error ? err.message : err,
       err instanceof Error ? err.stack : undefined,
     )
-    // Foto bleibt in Storage, Status auf fehlgeschlagen — KB prüft manuell
-    await db.from('leads').update({
+    // Foto bleibt in Storage, Status auf fehlgeschlagen — KB prüft manuell.
+    // Scheitert dieser Write, erfaehrt der KB nie, dass er pruefen muss: der Lead
+    // behaelt seinen alten Status und das Foto liegt unbeachtet im Storage.
+    const { error: statusFehler } = await db.from('leads').update({
       zb1_status: 'fehlgeschlagen',
       zb1_url: publicUrl,
       zb1_upload_versuche: (lead.zb1_upload_versuche ?? 0) + 1,
       updated_at: new Date().toISOString(),
     }).eq('id', lead.id)
+    if (statusFehler) {
+      console.error(`[zb1] Status 'fehlgeschlagen' nicht gesetzt (lead ${lead.id}):`, statusFehler.message)
+    }
 
     if (lead.zugewiesen_an) {
       try {
@@ -122,13 +130,17 @@ export async function uploadZb1ViaToken(
       'status:',
       'status' in ocrResult ? ocrResult.status : 'unknown',
     )
-    // Bild bleibt in Storage erhalten, MA sieht es manuell
-    await db.from('leads').update({
+    // Bild bleibt in Storage erhalten, MA sieht es manuell — vorausgesetzt, dieser
+    // Status-Write geht durch. Sonst bleibt der Lead unauffaellig und niemand schaut hin.
+    const { error: ocrStatusFehler } = await db.from('leads').update({
       zb1_status: 'fehlgeschlagen',
       zb1_url: publicUrl,
       zb1_upload_versuche: (lead.zb1_upload_versuche ?? 0) + 1,
       updated_at: new Date().toISOString(),
     }).eq('id', lead.id)
+    if (ocrStatusFehler) {
+      console.error(`[zb1] OCR-Fehlstatus nicht gesetzt (lead ${lead.id}):`, ocrStatusFehler.message)
+    }
 
     if (lead.zugewiesen_an) {
       try {
@@ -159,7 +171,18 @@ export async function uploadZb1ViaToken(
   // H6 (geteiltes Mapping, AAR-956): nur leere Felder fuellen.
   Object.assign(leadUpdate, buildZb1LeadUpdate(extracted, lead as unknown as Record<string, unknown>))
 
-  await db.from('leads').update(leadUpdate).eq('id', lead.id)
+  // Das ist der ERFOLGSPFAD: hier landen die aus dem Fahrzeugschein ausgelesenen Daten
+  // im Lead — der ganze Zweck des ZB1-Uploads. Ein stiller Fehlschlag hier bedeutet:
+  // OCR lief, das Bild liegt da, der Status sagt "erfolgreich" — und die Daten fehlen.
+  // Genau diese Klasse hat an dieser Datei schon einmal zugeschlagen (CMM-49, 15.07.:
+  // falscher Spaltenname, der Slot wurde nie 'hochgeladen').
+  const { error: leadDatenFehler } = await db.from('leads').update(leadUpdate).eq('id', lead.id)
+  if (leadDatenFehler) {
+    console.error(
+      `[zb1] ZB1-Daten NICHT in den Lead geschrieben (lead ${lead.id}) — Bild liegt im Storage, Felder fehlen:`,
+      leadDatenFehler.message,
+    )
+  }
 
   // 4b. CMM-50.0: vehicles-Write-Path — bei vorhandener FIN die vehicles-SSoT-Row
   //     anlegen + leads.vehicle_id setzen (idempotent, non-critical). Greift auch,
