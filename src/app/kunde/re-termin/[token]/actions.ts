@@ -15,6 +15,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { pruefeBelegungStrict } from '@/lib/termine/engine'
 import { revalidatePath } from 'next/cache'
+// P3.3: bezug-aware Termin-Filter (matcht Legacy claim_id UND bezug_typ+bezug_id).
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 const SLOT_DURATION_H = 1
 
@@ -73,10 +75,13 @@ export async function waehleReTerminSlot(
 
   let aktTerminReTermin: { re_termin_token_eingelaufen_am: string | null } | null = null
   if (fall.claim_id) {
+    // P3.3-Boy-Scout: bezug-aware. Mit `.eq('claim_id')` griff der Guard unten bei
+    // bezug-nativen Terminen NICHT -> ein bereits eingeloester Re-Termin-Token liess
+    // sich erneut verwenden (Doppel-Verschiebung).
     const { data: at } = await db
       .from('gutachter_termine')
       .select('re_termin_token_eingelaufen_am')
-      .eq('claim_id', fall.claim_id)
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -177,8 +182,10 @@ export async function waehleReTerminSlot(
   } else {
     // Fallback: aktueller Termin per claim_id auflosen
     if (fall.claim_id) {
+      // P3.3-Boy-Scout: bezug-aware. Sonst fand der Fallback bei bezug-nativen Terminen
+      // keine Zeile -> der Token wurde NICHT entwertet und blieb wiederverwendbar.
       const { data: t } = await db.from('gutachter_termine').select('id')
-        .eq('claim_id', fall.claim_id)
+        .or(bezugOrExpr('claim', fall.claim_id))
         .order('start_zeit', { ascending: false })
         .limit(1)
         .maybeSingle()
