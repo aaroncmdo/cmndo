@@ -426,8 +426,14 @@ jobs:
       # Ohne Ratchet/Baseline, weil der Bestand beim Verdrahten am 17.08.2026
       # vollstaendig gruen war (23 Files / 196 Tests) — es gibt keine Schuld
       # zu grandfathern, und ein rotes File soll hier sofort blocken.
+      # npm install statt npm ci — dieselbe Begruendung wie in
+      # deploy-vps-marketing.yml: das Lockfile des Marketings fuehrt die
+      # Transitive @swc/helpers nicht, und `npm ci` bricht darauf ab
+      # ("Missing: @swc/helpers@0.5.23 from lock file"). Der Deploy loest es
+      # seit jeher so; ein abweichender Weg hier haette nur bedeutet, dass CI
+      # und Deploy verschiedene Baeume installieren.
       - name: Marketing-Deps
-        run: npm ci
+        run: npm install --no-audit --no-fund
         working-directory: claimondo-marketing
       - name: Marketing-Unit-Tests
         run: npx vitest run
