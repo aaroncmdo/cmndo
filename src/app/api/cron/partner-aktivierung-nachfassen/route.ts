@@ -109,7 +109,10 @@ export async function GET(request: Request) {
       const userId = t.task_code.slice(CODE_PREFIX.length)
       const { data: udata, error: uErr } = await admin.auth.admin.getUserById(userId)
       if (uErr || !udata?.user?.last_sign_in_at) continue
-      await admin.from('tasks').update({ status: 'erledigt' }).eq('id', t.id)
+      const { error: schliessFehler } = await admin.from('tasks').update({ status: 'erledigt' }).eq('id', t.id)
+      if (schliessFehler) {
+        console.error(`[cron/partner-aktivierung-nachfassen] Task ${t.id} nicht geschlossen:`, schliessFehler.message)
+      }
       tasksGeschlossen++
     } catch (err) {
       console.error('[cron/partner-aktivierung-nachfassen] Task', t.id, 'schliessen fehlgeschlagen:', err)

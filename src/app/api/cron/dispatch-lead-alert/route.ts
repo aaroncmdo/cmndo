@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     if ((count ?? 0) > 0) continue
 
     // Task erstellen
-    await db.from('tasks').insert({
+    const { error: alertTaskFehler } = await db.from('tasks').insert({
       titel: `Lead unbearbeitet: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (${lead.telefon ?? '?'})`,
       typ: 'dispatch',
       // Ops-Test 13.08.: war 'dringend'. Ein frisch eingegangener, noch nicht
@@ -50,6 +50,11 @@ export async function GET(request: Request) {
       entity_id: lead.id,
       faellig_am: new Date().toISOString(),
     })
+    // Ohne diesen Task sieht Dispatch den liegengebliebenen Lead nie — der Cron
+    // ist die einzige Instanz, die ihn meldet.
+    if (alertTaskFehler) {
+      console.error(`[dispatch-lead-alert] Task NICHT angelegt (lead ${lead.id}):`, alertTaskFehler.message)
+    }
 
     created++
   }

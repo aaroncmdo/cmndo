@@ -88,7 +88,15 @@ export async function GET(req: NextRequest) {
         '6': mapsLink,
       })
       // Dedup-Flag direkt auf dem Termin (SSoT).
-      await svc.from('gutachter_termine').update({ losfahren_erinnerung_gesendet: true }).eq('id', termin.id)
+      // DEDUP-FLAG nach dem Versand. Bleibt es ungesetzt, schickt der naechste
+      // Cron-Lauf dieselbe Losfahr-Erinnerung erneut an den SV.
+      const { error: losfahrFlagFehler } = await svc
+        .from('gutachter_termine')
+        .update({ losfahren_erinnerung_gesendet: true })
+        .eq('id', termin.id)
+      if (losfahrFlagFehler) {
+        console.error(`[gutachter-erinnerungen] Losfahr-Dedup-Flag nicht gesetzt (${termin.id}) — Doppel-Send moeglich:`, losfahrFlagFehler.message)
+      }
       sent++
     }
 
@@ -100,7 +108,15 @@ export async function GET(req: NextRequest) {
         '1': kundeName,
         '2': addr,
       })
-      await svc.from('gutachter_termine').update({ termin_erinnerung_5min_gesendet: true }).eq('id', termin.id)
+      // DEDUP-FLAG, siehe oben. Das 5-Minuten-Fenster ist 15 Minuten breit
+      // (minutesUntil <= 5 && >= -10) — ohne Flag trifft der Cron es mehrfach.
+      const { error: min5FlagFehler } = await svc
+        .from('gutachter_termine')
+        .update({ termin_erinnerung_5min_gesendet: true })
+        .eq('id', termin.id)
+      if (min5FlagFehler) {
+        console.error(`[gutachter-erinnerungen] 5min-Dedup-Flag nicht gesetzt (${termin.id}) — Doppel-Send moeglich:`, min5FlagFehler.message)
+      }
       sent++
     }
   }
