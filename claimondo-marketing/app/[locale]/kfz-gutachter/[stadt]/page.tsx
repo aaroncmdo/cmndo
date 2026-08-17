@@ -28,6 +28,7 @@ import {
 } from '@/lib/seo/jsonld'
 import { getStadtByName, getStadtBySlug, type Stadt } from '@/lib/kfz-gutachter/staedte'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
+import { finderHrefFuerStadt } from '@/lib/kfz-gutachter/finder-link'
 import { StadtLeadFormClient } from './StadtLeadFormClient'
 
 // /kfz-gutachter/[stadt] — Premium-Layout für alle SEO-Stadt-Routes.
@@ -174,6 +175,10 @@ export default async function KfzGutachterStadtPage({
   // Aachen/Bonn/Dortmund/Düsseldorf/Essen/Köln — 400–500 km entfernt.
   const crossCity = naechsteStaedte(s.slug, 6)
 
+  // Das Einsatzgebiet-Bild ist eine NRW-Karte — nur dort zeigt es die Region,
+  // um die es auf der Seite geht (P3-A5).
+  const zeigtNrwKarte = s.bundesland === 'Nordrhein-Westfalen'
+
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
   const t = await getTranslations('kfz_gutachter_stadt')
@@ -225,7 +230,12 @@ export default async function KfzGutachterStadtPage({
         ])}
       />
 
-      <LandingTopbar authenticatedUser={null} />
+      {/* finderHref mit Ortsbezug: Topbar, Sticky-Bar und Footer tragen denselben
+          Finder-Link wie der Bottom-CTA. Die Prop existiert bereits (der
+          Makler-Hub nutzt sie fuer die Attribution) — die Stadtseite hat sie
+          bisher nur nicht gesetzt und schickte auf allen vier Wegen zum
+          NRW-Default statt in die Stadt, aus der der Klick kommt. */}
+      <LandingTopbar authenticatedUser={null} finderHref={finderHrefFuerStadt(s)} />
 
       {/* 1 — Hero Image Band */}
       <section className="relative h-[280px] overflow-hidden sm:h-[360px]">
@@ -677,15 +687,25 @@ export default async function KfzGutachterStadtPage({
               {t('einsatz_h2')}
             </h2>
           </div>
-          <div className="mt-12 grid items-center gap-10 md:grid-cols-[1.2fr_1fr]">
-            <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
-              <Image
-                src="/marketing-landing-koeln/nrw-karte.png"
-                alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, deutschlandweite Anbindung"
-                width={900} height={650}
-                className="h-auto w-full"
-              />
-            </div>
+          {/* Die Karte zeigt Nordrhein-Westfalen — sie stand bisher auf JEDER
+              Stadtseite, also auch auf Berlin, Hamburg und München (50 der 92
+              Seiten liegen ausserhalb von NRW). Ein Bild, das eine andere Region
+              zeigt als die Seite, ist eine Falschaussage. Es gibt kein Asset für
+              die übrigen Bundesländer, deshalb entfällt die Spalte dort — kein
+              Platzhalter, der etwas Unwahres behauptet (P3-A5). */}
+          <div
+            className={`mt-12 grid items-center gap-10 ${zeigtNrwKarte ? 'md:grid-cols-[1.2fr_1fr]' : ''}`}
+          >
+            {zeigtNrwKarte && (
+              <div className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-claimondo-bg shadow-claimondo-sm">
+                <Image
+                  src="/marketing-landing-koeln/nrw-karte.png"
+                  alt="Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, deutschlandweite Anbindung"
+                  width={900} height={650}
+                  className="h-auto w-full"
+                />
+              </div>
+            )}
             <div>
               <p className="text-sm font-semibold text-claimondo-shield">
                 {t('einsatz_verfuegbar')}
@@ -775,8 +795,11 @@ export default async function KfzGutachterStadtPage({
               {PHONE_DISPLAY}
             </a>
             <Link
-              href="/gutachter-finden"
+              // Mit Ortsbezug: die Karte zentriert auf die Stadt, aus der der
+              // Klick kommt, statt auf den NRW-Default mit Geolocation-Prompt.
+              href={finderHrefFuerStadt(s)}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-4 text-base font-semibold text-white/90 backdrop-blur-sm hover:border-white/50"
+              data-tracking={`karte-${s.slug}-bottom`}
             >
               <MapPin className="h-5 w-5" aria-hidden />
               {t('cta_karte')}
@@ -785,9 +808,9 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      <LandingFooter />
+      <LandingFooter finderHref={finderHrefFuerStadt(s)} />
       <TrackingHooks />
-      <StickyCallBar quelle={`Kfz-Gutachter ${s.name}`} />
+      <StickyCallBar quelle={`Kfz-Gutachter ${s.name}`} finderHref={finderHrefFuerStadt(s)} />
     </div>
   )
 }
