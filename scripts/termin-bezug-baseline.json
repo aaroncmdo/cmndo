@@ -1,13 +1,12 @@
 {
-  "generatedAt": "2026-08-08T22:50:53.716Z",
-  "count": 16,
+  "generatedAt": "2026-08-17T12:17:44.021Z",
+  "count": 15,
   "files": [
     "src/app/flow/[token]/actions.ts",
     "src/app/gutachter/auftraege/export-action.ts",
     "src/app/gutachter/auftraege/page.tsx",
     "src/app/gutachter/fall/[id]/_actions/konfrontation.ts",
     "src/app/gutachter/fall/[id]/actions.ts",
-    "src/app/gutachter/fall/[id]/page.tsx",
     "src/app/gutachter/feldmodus/_fallakte/actions.ts",
     "src/app/gutachter/feldmodus/page.tsx",
     "src/app/gutachter/heute/page.tsx",
