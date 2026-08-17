@@ -215,9 +215,14 @@ export async function terminAblehnen({
   // 2. Fall updaten — sv_id freigeben (claims = SSoT); Termin-Status spiegelt die View aus gutachter_termine
   // CMM-49 (faelle-Drop-Runway): sv_id claims-direkt statt faelle.sv_id; claims.id == fall_id.
   // claims.updated_at bumpt automatisch (+ claims-Realtime-Subscription).
-  await admin.from('claims').update({
+  // Schlaegt die Freigabe fehl, bleibt der SV am Fall gebunden, obwohl der Termin weg ist —
+  // ein Phantom-Zustand, den bisher niemand bemerkt haette (supabase-js wirft nicht).
+  const { error: svFreigabeFehler } = await admin.from('claims').update({
     sv_id: null,
   }).eq('id', fId)
+  if (svFreigabeFehler) {
+    console.error(`[termin-actions] sv_id-Freigabe fehlgeschlagen (claim ${fId}):`, svFreigabeFehler.message)
+  }
 
   // 3. Timeline
   await admin.from('timeline').insert({
