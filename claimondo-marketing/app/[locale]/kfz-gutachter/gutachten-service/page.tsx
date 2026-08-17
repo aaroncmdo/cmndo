@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { RatgeberStaedteSection } from '@/components/landing/sections/RatgeberStaedteSection'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
@@ -212,6 +213,9 @@ export default function GutachtenServicePage() {
           </div>
         </div>
       </section>
+
+      <RatgeberStaedteSection artikelSlug="gutachten-service" />
+
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter: Gutachten-Service" />

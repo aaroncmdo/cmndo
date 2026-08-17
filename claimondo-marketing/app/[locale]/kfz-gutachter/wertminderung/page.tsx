@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { RatgeberStaedteSection } from '@/components/landing/sections/RatgeberStaedteSection'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -263,6 +264,9 @@ export default function WertminderungPage() {
       </section>
 
       <ReviewerByline datum="2026-05-13" />
+
+      <RatgeberStaedteSection artikelSlug="wertminderung" />
+
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter Wertminderung" />
