@@ -553,12 +553,15 @@ async function syncKonfrontationsTerminBestaetigt(
   _payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
-  await db
+  const { error } = await db
     .from('gutachter_termine')
     .update({ status: 'bestaetigt' })
     .or(bezugOrExpr('fall', fallId))
     .eq('typ', 'konfrontation')
     .in('status', ['reserviert', 'gegenvorschlag'])
+  if (error) {
+    console.error(`[lexdrive] Konfrontationstermin nicht bestaetigt (fall ${fallId}):`, error.message)
+  }
 }
 
 /**
@@ -835,7 +838,12 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // ovFaelle ist danach leer (status -> operative_status; updated_at trigger-redundant
       // entfernt) -> kein faelle-Write mehr (CMM-49 faelle-Drop-Runway).
       if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
-        await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
+        // Scheitert dieser Write still, wird die Audit-Spur unten TROTZDEM geschrieben:
+        // das Event-Log meldet dann einen Status-Wechsel, den die DB nie vollzogen hat.
+        const { error: ovFehler } = await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
+        if (ovFehler) {
+          console.error(`[lexdrive] Status-Override NICHT geschrieben (claim ${claimIdForUpdates}):`, ovFehler.message)
+        }
 
         // Fundament C1: Audit-Spur fuer den forcierten Sprung. Der Override umgeht die
         // State-Machine BEWUSST (Legacy-Migration/aussergerichtliche Einigung) — ohne Eintrag
@@ -980,7 +988,10 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // (fuFaelle wird oben weiterhin fuer den claim_payments-Peel gelesen; sein Rest war
       // schon vor dem DROP reader-frei.)
       if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
-        await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
+        const { error: fuFehler } = await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
+        if (fuFehler) {
+          console.error(`[lexdrive] Folge-Update nicht geschrieben (claim ${claimIdForUpdates}):`, fuFehler.message)
+        }
       }
       if (claimIdForUpdates && Object.keys(cpFields).length > 0) {
         const cpRes = await upsertClaimPayment(
@@ -1136,10 +1147,19 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
             !claimForKanzlei.kanzlei_uebergeben_am
           ) {
             const now = new Date().toISOString()
-            await db
+            // IDEMPOTENZ-ANKER: die Kanzleipaket-Email geht gleich danach raus. Bleibt
+            // dieser Marker ungesetzt, verschickt der naechste Durchlauf sie ERNEUT —
+            // die Kanzlei bekommt denselben Fall zweimal.
+            const { error: kanzleiFehler } = await db
               .from('claims')
               .update({ kanzlei_uebergeben_am: now })
               .eq('id', claimIdForKanzlei)
+            if (kanzleiFehler) {
+              console.error(
+                `[lexdrive] kanzlei_uebergeben_am nicht gesetzt (claim ${claimIdForKanzlei}) — Doppel-Versand moeglich:`,
+                kanzleiFehler.message,
+              )
+            }
             // Fire-and-forget Kanzleipaket-Email an LexDrive (AAR-77 buildAndSendKanzleiEmail)
             import('@/lib/lexdrive/email-sender')
               .then(({ buildAndSendKanzleiEmail }) => buildAndSendKanzleiEmail(input.fallId))
