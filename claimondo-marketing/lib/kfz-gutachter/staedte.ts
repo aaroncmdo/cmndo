@@ -1943,6 +1943,76 @@ export const STAEDTE: Stadt[] = [
     bvskHonorarSpanne: '550–2.200 €',
     h1Anker: 'in Siegen',
   },
+
+  // Welle 5 (P3-B2, 17.08.2026) — kleinere Staedte. Auswahl NICHT nach
+  // Einwohnerzahl, sondern nach belegbarer Substanz:
+  //  * bocholt      — schloss eine bekannte 404-Luecke (73 Tsd., groesste Stadt
+  //                   im Kreis Borken ohne eigene Seite)
+  //  * erkelenz     — verifizierter Sachverstaendiger MIT Isochronen-Polygon vor Ort
+  //  * heinsberg    — dito
+  // Bei den letzten beiden ist "wir sind vor Ort" durch eigene Daten gedeckt;
+  // in Bocholt waere es das NICHT (kein SV im Kreis Borken) — die Seite lebt dort
+  // von den Rechts- und Ortsankern, nicht von einer Praesenzbehauptung.
+  //
+  // Gerichtsketten am 17.08.2026 einzeln belegt (ag-*.nrw.de/aufgaben/gerichtsbezirk):
+  //  * Bocholt   -> AG Bocholt (auch Rhede, Isselburg)          -> LG Muenster
+  //  * Erkelenz  -> AG Erkelenz (auch Hueckelhoven, Wegberg)    -> LG Moenchengladbach
+  //  * Heinsberg -> AG Heinsberg (auch Wassenberg, Waldfeucht,
+  //                 Selfkant)                                    -> LG Aachen, OLG Koeln
+  // ACHTUNG: Erkelenz und Heinsberg liegen im SELBEN Kreis, gehoeren aber zu
+  // VERSCHIEDENEN Landgerichten. Wer das aus der Nachbarschaft ableitet, schreibt
+  // auf einer der beiden Seiten ein falsches Gericht — genau der Fehler, der in
+  // P1 auf 31 von 84 Seiten stand. Die Kammer folgt dem OLG-Bezirk und ist aus
+  // den bestehenden Eintraegen desselben Landgerichts uebernommen, nicht geraten.
+  // Einwohner + Koordinaten: Wikipedia-Infobox, Stand 31.12.2025.
+  {
+    slug: 'bocholt',
+    name: 'Bocholt',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '463',
+    bevoelkerung: '73 Tsd.',
+    lat: 51.8384,
+    lng: 6.6151,
+    lokal: {
+      landgericht: 'Landgericht Münster',
+      amtsgericht: 'Amtsgericht Bocholt',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Bocholt',
+  },
+  {
+    slug: 'erkelenz',
+    name: 'Erkelenz',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '418',
+    bevoelkerung: '45 Tsd.',
+    lat: 51.0797,
+    lng: 6.3163,
+    lokal: {
+      landgericht: 'Landgericht Mönchengladbach',
+      amtsgericht: 'Amtsgericht Erkelenz',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Erkelenz',
+  },
+  {
+    slug: 'heinsberg',
+    name: 'Heinsberg',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '525',
+    bevoelkerung: '43 Tsd.',
+    lat: 51.0638,
+    lng: 6.0963,
+    lokal: {
+      landgericht: 'Landgericht Aachen',
+      amtsgericht: 'Amtsgericht Heinsberg',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Heinsberg',
+  },
 ]
 
 /**

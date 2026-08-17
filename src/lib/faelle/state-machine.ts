@@ -546,7 +546,7 @@ export async function transitionFallStatus(
           .eq('task_code', 'mietwagen-klaeren')
           .maybeSingle()
         if (!existing) {
-          await db.from('tasks').insert({
+          const { error: mietwagenTaskFehler } = await db.from('tasks').insert({
             fall_id: fallId,
             typ: 'kb',
             task_code: 'mietwagen-klaeren',
@@ -564,6 +564,15 @@ export async function transitionFallStatus(
             trigger_event: `status:${newStatus}`,
             phase: 'besichtigung',
           })
+          // Die Status-Transition darf an einer Zusatz-Aufgabe NICHT scheitern — aber der
+          // Fehlschlag muss sichtbar sein. Genau hier ist es am 16.07. schon einmal still
+          // passiert (siehe prioritaet-Kommentar oben): der Task fehlte, niemand erfuhr es.
+          if (mietwagenTaskFehler) {
+            console.error(
+              `[state-machine] mietwagen-klaeren-Task fuer ${fallId} nicht angelegt:`,
+              mietwagenTaskFehler.message,
+            )
+          }
         }
       }
     } catch (err) {

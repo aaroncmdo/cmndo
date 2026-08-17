@@ -150,6 +150,18 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # Stadt-Linknetz: blockt tote Links (404 fuer Nutzer UND Crawler) und Waisen
+      # (Stadtseiten, die von keiner anderen Stadtseite aus erreichbar sind) im
+      # /kfz-gutachter/[stadt]-Netz. Vor P3 waren 41 der 92 Seiten Waisen, waehrend
+      # eine Stadt 74 eingehende Links bekam — der Durchschnitt (6,0) war dabei
+      # identisch und als Kennzahl wertlos. Rein statisch, kein Netz, keine DB.
+      # Einseitige Kanten blocken bewusst NICHT: sie sind in einem distanzbasierten
+      # Netz strukturell normal. Der Step kommt erst jetzt dazu, weil das Gate bis
+      # zur Reziprozitaet (siegen war Waise) nicht gruen werden konnte — ein Gate,
+      # das von Tag eins rot ist, wird ignoriert. Siehe P3-Spec §A3.
+      - name: Stadt-Linknetz
+        run: npm run check:stadt-linknetz -- --check
+
       # Fixed-Overlay-Safe-Area-Bremse (Ratchet): ein `position: fixed`-Overlay steht
       # ausserhalb des Layout-Flusses und beansprucht seine Bildschirmecke dauerhaft —
       # Seiteninhalt darunter ist NICHT klickbar (der Klick trifft das Overlay). 2x real:
