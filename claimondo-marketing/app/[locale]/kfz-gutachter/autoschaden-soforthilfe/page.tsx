@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { RatgeberStaedteSection } from '@/components/landing/sections/RatgeberStaedteSection'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
@@ -241,6 +242,9 @@ export default function AutoschadenSoforthilfePage() {
           </div>
         </div>
       </section>
+
+      <RatgeberStaedteSection artikelSlug="autoschaden-soforthilfe" />
+
 
       <LandingFooter />
       <StickyCallBar quelle="Kfz-Gutachter: Autoschaden Soforthilfe" />
