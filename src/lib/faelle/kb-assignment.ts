@@ -66,11 +66,17 @@ async function updateKbOnFallAndClaim(
   // der claims.update unten bumpt claims.updated_at (moddatetime) + feuert die
   // claims-Realtime-Subscription.
   if (claimId) {
-    await supabase.from('claims').update({
+    const { error } = await supabase.from('claims').update({
       kundenbetreuer_id: kbId,
       kundenbetreuer_fallback_flag: fallbackFlag,
       kundenbetreuer_zugewiesen_am: now,
     }).eq('id', claimId)
+    // Schlaegt das fehl, steht der Fall OHNE Kundenbetreuer da — und weil supabase-js nicht
+    // wirft, hat es bisher niemand erfahren. Die Funktion gibt `void` zurueck; ein throw
+    // waere eine Verhaltensaenderung fuer alle Aufrufer, deshalb hier (vorerst) laut loggen.
+    if (error) {
+      console.error(`[kb-assignment] KB-Zuweisung fehlgeschlagen (claim ${claimId}):`, error.message)
+    }
   }
 }
 
