@@ -13,6 +13,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { buildSlotGrid, DEFAULT_HORIZON_DAYS } from '@/lib/termine/slot-grid'
 import ReTerminPickerWrapper from './ReTerminPickerWrapper'
 import { waehleReTerminSlot } from './actions'
+// P3.3: bezug-aware Termin-Filter (matcht Legacy claim_id UND bezug_typ+bezug_id).
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,10 +66,13 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
 
   let aktTerminRePage: { re_termin_token_eingelaufen_am: string | null } | null = null
   if (fall.claim_id) {
+    // P3.3-Boy-Scout: bezug-aware. Mit `.eq('claim_id')` blieb `aktTerminRePage` bei
+    // bezug-nativen Terminen null -> `eingeloest` false -> der Kunde bekam den Picker
+    // statt der Bestaetigung, obwohl der Token schon eingeloest war.
     const { data: at } = await db
       .from('gutachter_termine')
       .select('re_termin_token_eingelaufen_am')
-      .eq('claim_id', fall.claim_id)
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
