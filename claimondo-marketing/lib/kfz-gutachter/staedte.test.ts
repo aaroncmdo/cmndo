@@ -187,7 +187,7 @@ describe('P3-B2 — die drei neuen Orte', () => {
     )
   })
 
-  it('bringt die Staedtezahl auf 95', () => {
-    expect(STAEDTE).toHaveLength(95)
+  it('bringt die Staedtezahl auf 118', () => {
+    expect(STAEDTE).toHaveLength(118)
   })
 })
