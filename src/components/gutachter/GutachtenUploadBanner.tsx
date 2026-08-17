@@ -14,7 +14,8 @@ import { gutachtenAbgeben, loescheGutachtenDokument } from '@/lib/auftrag/qc'
 
 type Props = {
   auftragId: string
-  claimId: string
+  // `claimId` entfaellt: den Storage-Pfad baut jetzt die signed-url-Route serverseitig
+  // (aus auftraege.claim_id) — der Client soll ihn gar nicht mehr bestimmen koennen.
   hatGutachten: boolean
   /** CMM-32e: KB hat Nachbesserung angefordert. Banner wird lila + zeigt Grund + öffnet Re-Upload. */
   zurueckgewiesenAm?: string | null
@@ -30,7 +31,6 @@ type UploadFile = { name: string; status: UploadStatus; error?: string; istHaupt
 
 export default function GutachtenUploadBanner({
   auftragId,
-  claimId,
   hatGutachten,
   zurueckgewiesenAm,
   zurueckweisungGrund,
@@ -104,17 +104,32 @@ export default function GutachtenUploadBanner({
 
   async function uploadEine(file: File, istHaupt: boolean): Promise<{ ok: boolean; storagePath?: string; error?: string }> {
     const supabase = createClient()
-    const safeName = file.name.replace(/[^a-z0-9._-]/gi, '_')
-    // CMM-32: Storage am Claim verankern, Auftrag-Bezug bleibt im Pfad.
-    // CMM-32e: bei aktivem Reject landet jede Datei in einem
-    // nachbesserung/-Subfolder — sauber abgegrenzt, mehrfach-iterierbar.
-    const subfolder = istReject ? 'nachbesserung/' : ''
-    // AAR-862: claims/ (Plural)
-    const storagePath = `claims/${claimId}/gutachten/${auftragId}/${subfolder}${Date.now()}-${safeName}`
-    // Direktupload — kein API-Body, umgeht Vercel-413-Limit
+    // Direktupload bleibt (Drag&Drop am Claim, kein API-Body -> kein Body-Limit bei
+    // grossen Gutachten-PDFs). Er laeuft aber ueber eine SIGNIERTE Upload-URL statt mit
+    // dem User-Client: der Bucket `fall-dokumente` ist per RLS gesperrt
+    // (locked_buckets_block_authenticated), nur service_role darf schreiben. Vorher
+    // scheiterte deshalb JEDER SV-Upload mit „new row violates row-level security policy"
+    // — belegt: 962 Objekte im Bucket, davon 0 im SV-Pfad.
+    // Marker: broadcast-sv-gutachten-upload-scheitert-an-storage-rls.
+    //
+    // Den Pfad bestimmt der Server (inkl. CMM-32e nachbesserung/-Subfolder aus
+    // auftraege.zurueckgewiesen_am) — der Client kann ihn nicht waehlen.
+    const sig = await fetch('/api/sv/upload-gutachten/signed-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auftragId, filename: file.name }),
+    })
+    if (!sig.ok) {
+      const j = await sig.json().catch(() => ({}))
+      return { ok: false, error: (j as { error?: string }).error ?? `HTTP ${sig.status}` }
+    }
+    const { path: storagePath, token } = (await sig.json()) as { path: string; token: string }
+
     const { error: upErr } = await supabase.storage
       .from('fall-dokumente')
-      .upload(storagePath, file, { contentType: file.type || 'application/octet-stream', upsert: false })
+      .uploadToSignedUrl(storagePath, token, file, {
+        contentType: file.type || 'application/octet-stream',
+      })
     if (upErr) return { ok: false, error: upErr.message }
 
     // Metadaten + Auftrag-Update via Finalize-API
