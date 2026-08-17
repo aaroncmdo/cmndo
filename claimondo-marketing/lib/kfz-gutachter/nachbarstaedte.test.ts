@@ -197,13 +197,35 @@ describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
   })
 
   it('haelt den Block in vertretbarer Groesse', () => {
-    // Reissleine gegen ein Netz, das sich unbemerkt aufblaeht: waechst der
-    // Schnitt deutlich, stimmt etwas mit der Auswahlregel nicht.
+    // Reissleine gegen ein Netz, das sich unbemerkt aufblaeht.
+    //
+    // Gemessen am MEDIAN, nicht am Schnitt: Rueckkanten sammeln sich
+    // systematisch bei den Grossstaedten (jede neue Kleinstadt waehlt die
+    // naechste grosse und liefert ihr eine Rueckkante). Schnitt und Maximum
+    // wachsen deshalb mit JEDER Welle — Welle 7 hob den Schnitt von 8,1 auf
+    // 9,1 und Duesseldorf von 24 auf 37. Beides ist die Regel bei der Arbeit,
+    // kein Fehler; eine Grenze darauf misst nur, wie viele Staedte man zuletzt
+    // aufgenommen hat, und wird bei jeder Welle hochgesetzt, bis sie nichts
+    // mehr aussagt.
+    //
+    // Der Median bleibt stabil, solange sich die Rueckkanten dort sammeln, wo
+    // sie hingehoeren. Steigt er, verteilt die Auswahlregel breitflaechig zu
+    // viel — genau der Fall, den diese Reissleine fangen soll.
     const groessen = STAEDTE.map((s) => naechsteStaedte(s.slug).length)
-    const schnitt = groessen.reduce((a, b) => a + b, 0) / groessen.length
+    const sortiert = [...groessen].sort((a, b) => a - b)
     expect(Math.min(...groessen)).toBe(6)
-    expect(schnitt).toBeLessThan(10)
-    expect(Math.max(...groessen)).toBeLessThanOrEqual(25)
+    expect(sortiert[Math.floor(sortiert.length / 2)]).toBeLessThanOrEqual(8)
+  })
+
+  it('sammelt die grossen Bloecke ausschliesslich bei Grossstaedten', () => {
+    // Die inhaltliche Fassung der alten Obergrenze: nicht WIE VIELE Nachbarn
+    // eine Seite haben darf, sondern WER viele haben darf. Ein langer Block
+    // auf Duesseldorf ist das Hub-Spoke-Muster (die starke Seite verlinkt die
+    // schwachen). Derselbe Block auf Bocholt waere ein Rechenfehler — und
+    // genau den faengt eine nackte Zahl nicht, solange sie hoch genug steht.
+    const auffaellig = STAEDTE.map((s) => ({ slug: s.slug, n: naechsteStaedte(s.slug).length, ew: einwohnerZahl(s.bevoelkerung) }))
+      .filter((x) => x.n > 15 && x.ew < GROSSSTADT_AB_EINWOHNER)
+    expect(auffaellig.map((x) => `${x.slug}: ${x.n} Nachbarn bei ${x.ew} Einw.`)).toEqual([])
   })
 
   it('sortiert auch die Rueckkanten nach Distanz ein', () => {

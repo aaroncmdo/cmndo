@@ -55,7 +55,30 @@ describe('angrenzendeOrte — welche sind verlinkbar', () => {
   it('sind mehr Orte als verlinkbare — der Rest bleibt bewusst Text', () => {
     const verlinkbar = alleOrte.filter((ort) => getStadtByName(ort) !== null)
     expect(alleOrte.length).toBeGreaterThan(verlinkbar.length)
-    expect(verlinkbar.length).toBe(21)
+    expect(verlinkbar.length).toBe(29)
+  })
+
+  it('schreibt keinen Ort verkuerzt, dessen Langform eine Seite hat', () => {
+    // Der teure Fehler ist nicht der 404-Link, sondern der Link, der NIE
+    // ENTSTEHT: 'Monheim' in duesseldorfs Liste meinte immer 'Monheim am
+    // Rhein'. Solange die Stadt keine Seite hatte, war das folgenlos — mit
+    // Welle 7 bekam sie eine, und der exakte Namensvergleich haette den Link
+    // stillschweigend uebersprungen. Kein Build, kein tsc und auch der
+    // 404-Test oben faengt das, weil nichts kaputt ist: es fehlt nur.
+    //
+    // Generisch statt fallbezogen, weil jede kuenftige Welle dieselbe Falle
+    // stellt — 'Menden' vs 'Menden (Sauerland)', 'Gronau' vs 'Gronau (Westf.)'.
+    const verkuerzt: string[] = []
+    for (const hub of getHubCities()) {
+      for (const ort of hub.hyperlocal.angrenzendeOrte) {
+        if (getStadtByName(ort)) continue
+        const langform = STAEDTE.find(
+          (s) => s.name !== ort && (s.name.startsWith(`${ort} `) || s.name.startsWith(`${ort} (`)),
+        )
+        if (langform) verkuerzt.push(`${hub.slug}: '${ort}' -> '${langform.name}'`)
+      }
+    }
+    expect(verkuerzt).toEqual([])
   })
 
   it('loest jeden verlinkbaren Ort auf eine existierende Seite auf', () => {
@@ -187,7 +210,53 @@ describe('P3-B2 — die drei neuen Orte', () => {
     )
   })
 
-  it('bringt die Staedtezahl auf 118', () => {
-    expect(STAEDTE).toHaveLength(118)
+})
+
+describe('P3-B2c — NRW zwischen 40 und 60 Tsd. Einwohnern', () => {
+  // Belegt am 17.08.2026; Quellen im Commit-Body. Geprueft werden nur die
+  // Ketten, die man sich NICHT aus der Nachbarschaft herleiten kann — die
+  // uebrigen 29 deckt die LG-Kammer-Invariante oben ab.
+  const knifflig = [
+    // Naeher liegt das AG Kerpen; zustaendig ist trotzdem Bruehl.
+    { slug: 'erftstadt', ag: 'Amtsgericht Brühl', lg: 'Landgericht Köln' },
+    // Ohne eigenes AG, und das zustaendige liegt im Nachbarkreis.
+    { slug: 'bad-salzuflen', ag: 'Amtsgericht Lemgo', lg: 'Landgericht Detmold' },
+    { slug: 'loehne', ag: 'Amtsgericht Bad Oeynhausen', lg: 'Landgericht Bielefeld' },
+    { slug: 'monheim-am-rhein', ag: 'Amtsgericht Langenfeld', lg: 'Landgericht Düsseldorf' },
+    { slug: 'willich', ag: 'Amtsgericht Krefeld', lg: 'Landgericht Krefeld' },
+    { slug: 'kaarst', ag: 'Amtsgericht Neuss', lg: 'Landgericht Düsseldorf' },
+  ] as const
+
+  it.each(knifflig)('$slug hat die belegte Gerichtskette', ({ slug, ag, lg }) => {
+    const s = getStadtBySlug(slug)
+    expect(s).not.toBeNull()
+    expect(s!.lokal.amtsgericht).toBe(ag)
+    expect(s!.lokal.landgericht).toBe(lg)
+  })
+
+  it('trennt Bad Salzuflen und Loehne trotz ~20 km Abstand', () => {
+    // Beide Ostwestfalen, beide ohne eigenes Amtsgericht, verschiedene
+    // Landgerichte. Wer von einem auf den anderen schliesst, liegt falsch.
+    expect(getStadtBySlug('bad-salzuflen')!.lokal.landgericht).not.toBe(
+      getStadtBySlug('loehne')!.lokal.landgericht,
+    )
+  })
+
+  it('verlinkt Monheim am Rhein aus beiden Nachbar-Hubs', () => {
+    // Koeln fuehrte den vollen Namen, Duesseldorf die Kurzform — der Link
+    // waere nur auf einer der beiden Seiten entstanden.
+    const ausHub = (slug: string) =>
+      getHubCities().find((h) => h.slug === slug)!.hyperlocal.angrenzendeOrte
+    expect(ausHub('koeln')).toContain('Monheim am Rhein')
+    expect(ausHub('duesseldorf')).toContain('Monheim am Rhein')
+    expect(getStadtByName('Monheim am Rhein')?.slug).toBe('monheim-am-rhein')
+  })
+})
+
+describe('Gesamtbestand', () => {
+  // Waechst mit jeder Welle mit. Der Wert ist bewusst hart: eine Stadt, die
+  // beim Rebase verloren geht, faellt sonst niemandem auf.
+  it('fuehrt 150 Staedte', () => {
+    expect(STAEDTE).toHaveLength(150)
   })
 })

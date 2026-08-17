@@ -313,7 +313,10 @@ function berichte(ergebnis, extras) {
     for (const z of extras.nichtErfasst) console.log(`  - ${z}`)
   }
   if (extras?.geplant?.length) {
-    console.log('\nVORHANDENE DATEN OHNE LINK (Material fuer P3-A2)\n')
+    // Hiess bis 17.08.2026 "Material fuer P3-A2" — A2 ist gebaut, die Orte MIT
+    // eigener Seite werden laengst verlinkt. Der Abschnitt zeigt jetzt, was
+    // bewusst Text bleibt, und wie gross dieser Rest noch ist.
+    console.log('\nORTSNAMEN OHNE EIGENE SEITE (bleiben bewusst Text)\n')
     for (const z of extras.geplant) console.log(`  - ${z}`)
   }
   if (extras?.fehler?.length) {
@@ -345,7 +348,10 @@ async function main() {
     kanten = r.kanten
     extras.fehler = r.fehler
     extras.nichtErfasst = [
-      'Links von Nicht-Stadtseiten (Startseite, /ratgeber, /schadensreport-2026) — es werden nur die 92 Stadtseiten abgerufen',
+      // Zahl aus dem Lauf, nicht aus dem Quelltext: hier stand fest "92", waehrend
+      // die Kennzahl darueber schon 150 meldete. Ein Bericht, der sich selbst
+      // widerspricht, ist schlimmer als einer ohne die Zahl.
+      `Links von Nicht-Stadtseiten (Startseite, /ratgeber, /schadensreport-2026) — es werden nur die ${r.staedte.length} Stadtseiten abgerufen`,
       `Ratgeber-Geschwister unter /kfz-gutachter/ (${r.ratgeber.length}: ${r.ratgeber.join(', ')}) — als Nicht-Staedte ausgefiltert, nicht als tote Links gezaehlt`,
     ]
   } else {
