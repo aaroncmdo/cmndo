@@ -72,7 +72,6 @@
     "src/lib/communications/channel-router.ts",
     "src/lib/dokumente/konditional-tasks.ts",
     "src/lib/dokumente/sync-lead-zu-pflicht.ts",
-    "src/lib/dokumente/zuordnung.ts",
     "src/lib/google-calendar/sv-event-sync.ts",
     "src/lib/gutachterTasking.ts",
     "src/lib/inbound/process-inbound-media.ts",
