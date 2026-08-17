@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
+import { RatgeberStaedteSection } from '@/components/landing/sections/RatgeberStaedteSection'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
@@ -369,6 +370,9 @@ export default function OnlineKfzGutachtenPage() {
       </section>
 
       <ReviewerByline datum="2026-05-25" />
+
+      <RatgeberStaedteSection artikelSlug="online-kfz-gutachten" />
+
 
       <LandingFooter />
       <StickyCallBar quelle="Online-Kfz-Gutachten Wissens-Page" />
