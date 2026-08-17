@@ -17,6 +17,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import type { ChatMessage } from './ask'
+import { extractAnthropicText } from '@/lib/ai/extract-text'
 
 // System-Prompt: striktes JSON — keine Markdown-Fences, keine Prosa.
 const ANALYSE_SYSTEM = `Du analysierst ein abgeschlossenes Chat-Gespräch
@@ -173,7 +174,7 @@ export async function maybeAnalyseBotInteraktion(
       messages: [{ role: 'user', content: chatText }],
     })
 
-    const raw = response.content[0]?.type === 'text' ? response.content[0].text : ''
+    const raw = extractAnthropicText(response.content)
     const analyse = extrahiereJson(raw)
     if (!analyse) {
       console.error('[AAR-445] JSON-Parsing fehlgeschlagen — raw:', raw)

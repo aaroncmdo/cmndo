@@ -13,20 +13,39 @@
 // bindet sie nur an STAEDTE und den Typ `Stadt`.
 
 import { STAEDTE, type Stadt } from './staedte'
-import { waehleNachbarn } from './nachbar-auswahl.mjs'
+import { nachbarnMitRueckkanten } from './nachbar-auswahl.mjs'
 
 export {
   GROSSSTADT_AB_EINWOHNER,
   NACHBAR_MAX_KM,
   distanzKm,
   einwohnerZahl,
+  nachbarnMitRueckkanten,
   waehleNachbarn as naechsteAus,
 } from './nachbar-auswahl.mjs'
 
-/** Die `limit` passendsten Nachbarstaedte einer Stadtseite, nach Distanz
- *  aufsteigend: zur Haelfte die naechstgelegenen Orte, zur Haelfte die
- *  naechsten Grossstaedte. Unbekannter Slug -> leeres Array (die Seite ist dann
- *  ohnehin eine 404, sie soll aber nicht im Datenzugriff sterben). */
+// Die Rueckkanten-Suche prueft fuer JEDE andere Stadt deren eigene Auswahl —
+// das ist O(n^2) je Aufruf und liefe sonst bei jedem Seitenrender neu. STAEDTE
+// ist zur Laufzeit konstant, also wird das Ergebnis einmal je (slug, limit)
+// gemerkt. Ohne den Cache waeren es ~8.400 Distanzrechnungen pro Stadtseite.
+const cache = new Map<string, Stadt[]>()
+
+/**
+ * Die Nachbarstaedte einer Stadtseite, nach Distanz aufsteigend:
+ * die `limit` passendsten selbst gewaehlten Orte (halb Nahbereich, halb
+ * naechste Grossstaedte) PLUS alle Staedte, die ihrerseits diese Stadt
+ * gewaehlt haben. Dadurch ist jede Kante beidseitig und keine Stadt bleibt
+ * ohne eingehenden Link — Begruendung in nachbar-auswahl.mjs.
+ *
+ * Unbekannter Slug -> leeres Array (die Seite ist dann ohnehin eine 404, sie
+ * soll aber nicht im Datenzugriff sterben).
+ */
 export function naechsteStaedte(slug: string, limit = 6): Stadt[] {
-  return waehleNachbarn(slug, STAEDTE, limit)
+  const schluessel = `${slug}:${limit}`
+  let treffer = cache.get(schluessel)
+  if (!treffer) {
+    treffer = nachbarnMitRueckkanten(slug, STAEDTE, limit)
+    cache.set(schluessel, treffer)
+  }
+  return treffer
 }
