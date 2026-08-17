@@ -642,7 +642,6 @@ export default async function GutachterFallPage({
       {zeigeGutachtenUpload && erstgutachtenAuftrag && (
         <GutachtenUploadBanner
           auftragId={erstgutachtenAuftrag.id}
-          claimId={claimIdForStorage}
           hatGutachten={!!erstgutachtenAuftrag.gutachten_url}
           zurueckgewiesenAm={erstgutachtenReject}
           zurueckweisungGrund={erstgutachtenRejectGrund}
