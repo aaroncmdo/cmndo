@@ -68,7 +68,13 @@ export async function revertCaseBilling(
     claimId,
   )
   if (claimId && Object.keys(revClaims).length > 0) {
-    await db.from('claims').update(revClaims).eq('id', claimId)
+    // Diese Funktion verspricht eine ATOMARE Rueckbuchung. Ein stiller Fehlschlag hier
+    // liesse die Preisfelder stehen, waehrend Werbebudget/Abrechnung schon zurueckgebucht
+    // sind — der Fall saehe abgerechnet aus, obwohl er storniert ist. supabase-js wirft
+    // nicht, der Fehler steht im Rueckgabewert; werfen ist hier konsistent mit den
+    // Vorbedingungs-Checks oben (Z. 37/43).
+    const { error } = await db.from('claims').update(revClaims).eq('id', claimId)
+    if (error) throw new Error(`Rueckbuchung der Preisfelder fehlgeschlagen: ${error.message}`)
   }
 
   // CMM-44 SP-H PR2: storniert_am/storno_grund/storno_durch_user_id leben jetzt
