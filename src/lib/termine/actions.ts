@@ -186,15 +186,22 @@ export async function updateLivePosition(
 
   // Termin-ETA updaten
   if (etaMinutes !== null) {
-    await db.from('gutachter_termine').update({
+    const { error: etaFehler } = await db.from('gutachter_termine').update({
       sv_eta_minuten: etaMinutes,
       sv_eta_letzte_berechnung: now,
     }).eq('id', terminId)
+    if (etaFehler) console.error(`[termine] ETA nicht gespeichert (${terminId}):`, etaFehler.message)
   }
 
   // ETA-Reminder: 15 Minuten
   if (etaMinutes !== null && etaMinutes <= 15 && !termin.reminder_15min_sent_at) {
-    await db.from('gutachter_termine').update({ reminder_15min_sent_at: now }).eq('id', terminId)
+    // IDEMPOTENZ-ANKER: schlaegt dieser Write fehl, gilt der Reminder als nicht
+    // gesendet — und der Kunde bekommt ihn beim naechsten Durchlauf ERNEUT.
+    const { error: r15Fehler } = await db
+      .from('gutachter_termine')
+      .update({ reminder_15min_sent_at: now })
+      .eq('id', terminId)
+    if (r15Fehler) console.error(`[termine] 15min-Reminder-Marker nicht gesetzt (${terminId}) — Doppel-Send moeglich:`, r15Fehler.message)
     try {
       if (leadId) {
         const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
@@ -218,7 +225,12 @@ export async function updateLivePosition(
 
   // ETA-Reminder: 5 Minuten
   if (etaMinutes !== null && etaMinutes <= 5 && !termin.reminder_5min_sent_at) {
-    await db.from('gutachter_termine').update({ reminder_5min_sent_at: now }).eq('id', terminId)
+    // IDEMPOTENZ-ANKER, siehe 15-Minuten-Reminder oben.
+    const { error: r5Fehler } = await db
+      .from('gutachter_termine')
+      .update({ reminder_5min_sent_at: now })
+      .eq('id', terminId)
+    if (r5Fehler) console.error(`[termine] 5min-Reminder-Marker nicht gesetzt (${terminId}) — Doppel-Send moeglich:`, r5Fehler.message)
   }
 
   // Ankunft: < 50 Meter
@@ -267,7 +279,11 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
 
   const now = new Date().toISOString()
 
-  await db.from('gutachter_termine').update({ sv_angekommen_am: now }).eq('id', terminId)
+  const { error: ankunftFehler } = await db
+    .from('gutachter_termine')
+    .update({ sv_angekommen_am: now })
+    .eq('id', terminId)
+  if (ankunftFehler) console.error(`[termine] Ankunft nicht vermerkt (${terminId}):`, ankunftFehler.message)
 
   // WhatsApp T23 (sv_angekommen): SV angekommen
   try {
@@ -396,10 +412,16 @@ export async function markTerminDurchgefuehrt(
   if (termin.durchgefuehrt_am) return { ok: true }
   if (!termin.sv_angekommen_am) return { ok: false, error: 'SV war noch nicht angekommen' }
 
-  await db
+  // Ohne diesen Marker gilt der Termin als NICHT durchgefuehrt — Folgeprozesse
+  // (Gutachten-Erwartung, Abrechnung, Status-Nachzug) warten dann auf etwas,
+  // das laengst passiert ist.
+  const { error: durchgefuehrtFehler } = await db
     .from('gutachter_termine')
     .update({ durchgefuehrt_am: new Date().toISOString() })
     .eq('id', terminId)
+  if (durchgefuehrtFehler) {
+    console.error(`[termine] durchgefuehrt_am nicht gesetzt (${terminId}):`, durchgefuehrtFehler.message)
+  }
 
   // SV-Bewertungs-Nudge an den Kunden (non-fatal, fire-and-forget): nach der
   // Besichtigung um eine Google-Bewertung fuer DIESEN SV bitten. Transition-guarded
@@ -480,7 +502,13 @@ export async function completeBegutachtung(
   // lief gegen eine nicht-existente Spalte und schlug (fire-and-forget) still
   // fehl. Der as-Record-Cast war nur da, um den Type-Fehler zu verstecken.
   if (notizen) {
-    await db.from('gutachter_termine').update({ notizen_vor_ort: notizen }).eq('id', terminId).then(() => {})
+    // `.then(() => {})` verbrauchte das Promise, ohne den Fehler zu lesen — die
+    // Notizen des SV konnten unbemerkt verlorengehen.
+    const { error: notizFehler } = await db
+      .from('gutachter_termine')
+      .update({ notizen_vor_ort: notizen })
+      .eq('id', terminId)
+    if (notizFehler) console.error(`[termine] Vor-Ort-Notizen nicht gespeichert (${terminId}):`, notizFehler.message)
   }
 
   // Discrepancy-Flags prüfen

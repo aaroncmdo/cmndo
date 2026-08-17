@@ -417,7 +417,9 @@ export async function ladeMatchingFlow(
         lat = geo.lat
         lng = geo.lng
         try {
-          await admin
+          // Ohne Geo-Anker findet findBestSV keinen Gutachter — der Fehlschlag ist
+          // "nicht kritisch" fuer den Request, aber teuer fuer das Matching.
+          const { error: geoFehler } = await admin
             .from('leads')
             .update({
               besichtigungsort_adresse: adresse,
@@ -426,6 +428,9 @@ export async function ladeMatchingFlow(
               updated_at: new Date().toISOString(),
             })
             .eq('id', leadId)
+          if (geoFehler) {
+            console.error(`[ladeMatchingFlow] Besichtigungsort nicht gespeichert (${leadId}):`, geoFehler.message)
+          }
         } catch (err) {
           console.error('[ladeMatchingFlow] Geocode-Persist fehlgeschlagen (nicht kritisch):', err)
         }
@@ -463,7 +468,7 @@ export async function ladeMatchingFlow(
         lat = fallback.lat
         lng = fallback.lng
         try {
-          await admin
+          const { error: wsGeoFehler } = await admin
             .from('leads')
             .update({
               besichtigungsort_adresse: fallback.adresse || null,
@@ -472,6 +477,9 @@ export async function ladeMatchingFlow(
               updated_at: new Date().toISOString(),
             })
             .eq('id', leadId)
+          if (wsGeoFehler) {
+            console.error(`[ladeMatchingFlow] Werkstatt-Geo nicht gespeichert (${leadId}):`, wsGeoFehler.message)
+          }
         } catch (err) {
           console.error('[ladeMatchingFlow] Werkstatt-Geo-Persist fehlgeschlagen (nicht kritisch):', err)
         }
@@ -564,11 +572,17 @@ export async function bucheTerminFlow(
   // AAR-956 Booking-Repoint: Idempotenz (eine aktive Reservierung pro Lead) bleibt
   // funnel-seitig — storniert alte Lead-Reservierungen vor der neuen Buchung. Dual-
   // Lookup (Engine #2576), damit auch engine-reservierte (bezug) Termine getroffen werden.
-  await admin
+  const { error: stornoFehler } = await admin
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
+  // Genau hier haengt die zugesagte Idempotenz ("eine aktive Reservierung pro Lead").
+  // Still fehlgeschlagen bleiben ZWEI aktive Reservierungen stehen — Doppelbelegung
+  // im SV-Kalender, ohne dass irgendwo etwas rot wird.
+  if (stornoFehler) {
+    console.error(`[flow] Alt-Reservierungen nicht storniert (lead ${leadId}) — Doppelbuchung moeglich:`, stornoFehler.message)
+  }
 
   // Reservierung über die Termin-Engine: race-safe via EXCLUSION-Constraint
   // gutachter_termine_no_assignee_overlap (DB-Level, kein App-TOCTOU-Pre-Check mehr).
@@ -826,10 +840,11 @@ export async function uploadZb1Flow(
 
   const versuche = ((lead.zb1_upload_versuche as number | null) ?? 0) + 1
   const fehlgeschlagen = async (msg: string) => {
-    await admin
+    const { error: zb1FehlStatus } = await admin
       .from('leads')
       .update({ zb1_status: 'fehlgeschlagen', zb1_url: publicUrl, zb1_upload_versuche: versuche, updated_at: new Date().toISOString() })
       .eq('id', leadId)
+    if (zb1FehlStatus) console.error(`[flow] ZB1-Fehlstatus nicht gesetzt (${leadId}):`, zb1FehlStatus.message)
     return { ok: false as const, error: msg }
   }
 
@@ -939,7 +954,8 @@ export async function uploadPolizeiberichtFlow(
     if (bkat.aktenzeichen && !leadVor?.polizei_aktenzeichen) bkatUpdate.polizei_aktenzeichen = bkat.aktenzeichen
     if (Object.keys(bkatUpdate).length > 0) {
       bkatUpdate.updated_at = new Date().toISOString()
-      await admin.from('leads').update(bkatUpdate).eq('id', leadId)
+      const { error: bkatFehler } = await admin.from('leads').update(bkatUpdate).eq('id', leadId)
+      if (bkatFehler) console.error(`[uploadPolizeiberichtFlow] BKAT-Daten nicht gespeichert (${leadId}):`, bkatFehler.message)
     }
   } catch (err) {
     console.error('[uploadPolizeiberichtFlow] BKAT-Auslese fehlgeschlagen (non-critical):', err)
