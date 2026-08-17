@@ -300,11 +300,17 @@ export async function POST(req: NextRequest) {
 
   // Intent-Aktionen
   if (matchedFallId && intent === 'termin_bestaetigung_ja' && matchedTerminId) {
-    await db.from('gutachter_termine')
+    // Der Kunde hat gerade per WhatsApp ZUGESAGT. Schlaegt dieser Write still fehl,
+    // bleibt der Termin 'reserviert' — der Kunde geht von einer Bestaetigung aus,
+    // das System nicht.
+    const { error: bestaetigFehler } = await db.from('gutachter_termine')
       .update({ status: 'bestaetigt' })
       .eq('id', matchedTerminId)
       // 'angefragt' ist ein reparatur_termine-Wert (nicht im gutachter_termine-CHECK) — toter Filter.
       .in('status', ['reserviert'])
+    if (bestaetigFehler) {
+      console.error(`[twilio-inbound] Terminbestaetigung NICHT gespeichert (${matchedTerminId}):`, bestaetigFehler.message)
+    }
 
     await db.from('timeline').insert({
       fall_id: matchedFallId,
@@ -457,10 +463,11 @@ export async function POST(req: NextRequest) {
 
         const res = await fetch(url, basicAuth ? { headers: { Authorization: basicAuth } } : undefined)
         if (!res.ok) {
-          await db.from('leads').update({
+          const { error: pbDlFehler } = await db.from('leads').update({
             polizeibericht_status: 'fehlgeschlagen',
             updated_at: new Date().toISOString(),
           }).eq('id', matchedLeadId)
+          if (pbDlFehler) console.error('[twilio-inbound] PB-Fehlstatus nicht gesetzt:', pbDlFehler.message)
           console.warn('[AAR-263] Twilio-Media Download fehlgeschlagen:', res.status)
         } else {
           const buf = Buffer.from(await res.arrayBuffer())
@@ -470,10 +477,11 @@ export async function POST(req: NextRequest) {
             .from('fall-dokumente')
             .upload(path, buf, { contentType, upsert: false })
           if (upErr) {
-            await db.from('leads').update({
+            const { error: pbStoreFehler } = await db.from('leads').update({
               polizeibericht_status: 'fehlgeschlagen',
               updated_at: new Date().toISOString(),
             }).eq('id', matchedLeadId)
+            if (pbStoreFehler) console.error('[twilio-inbound] PB-Fehlstatus nicht gesetzt:', pbStoreFehler.message)
             console.warn('[AAR-263] Storage-Upload fehlgeschlagen:', upErr.message)
           } else {
             const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
@@ -481,12 +489,17 @@ export async function POST(req: NextRequest) {
               console.warn('[AAR-263] URL-Generierung fehlgeschlagen')
               return new NextResponse(EMPTY_TWIML, { status: 200, headers: { 'Content-Type': 'text/xml' } })
             }
-            await db.from('leads').update({
+            // ERFOLGSPFAD: die Datei liegt im Storage. Still fehlgeschlagen heisst,
+            // der Kunde hat per WhatsApp geliefert und der Lead weiss nichts davon.
+            const { error: pbOkFehler } = await db.from('leads').update({
               polizeibericht_status: 'hochgeladen',
               polizeibericht_url: publicUrl,
               polizeibericht_hochgeladen_am: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             }).eq('id', matchedLeadId)
+            if (pbOkFehler) {
+              console.error(`[twilio-inbound] Polizeibericht NICHT am Lead vermerkt (${matchedLeadId}):`, pbOkFehler.message)
+            }
             await syncDokumentUploadAnfrage(db, matchedLeadId, 'polizeibericht', publicUrl)
             // AAR-504: Auto-OCR via after() — läuft garantiert nach Response-Send.
             const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
@@ -544,10 +557,11 @@ export async function POST(req: NextRequest) {
 
         const res = await fetch(url, basicAuth ? { headers: { Authorization: basicAuth } } : undefined)
         if (!res.ok) {
-          await db.from('leads').update({
+          const { error: zb1DlFehler } = await db.from('leads').update({
             zb1_status: 'fehlgeschlagen',
             updated_at: new Date().toISOString(),
           }).eq('id', matchedLeadId)
+          if (zb1DlFehler) console.error('[twilio-inbound] ZB1-Fehlstatus nicht gesetzt:', zb1DlFehler.message)
           console.warn('[AAR-182] Twilio-Media Download fehlgeschlagen:', res.status)
         } else {
           const buf = Buffer.from(await res.arrayBuffer())
@@ -569,11 +583,12 @@ export async function POST(req: NextRequest) {
             const { runZB1Ocr } = await import('@/lib/ocr/zb1-parser')
             const ocrResult = await runZB1Ocr(buf.toString('base64'))
             if ('error' in ocrResult) {
-              await db.from('leads').update({
+              const { error: zb1OcrFehler } = await db.from('leads').update({
                 zb1_status: 'fehlgeschlagen',
                 zb1_url: publicUrl,
                 updated_at: new Date().toISOString(),
               }).eq('id', matchedLeadId)
+              if (zb1OcrFehler) console.error('[twilio-inbound] ZB1-OCR-Fehlstatus nicht gesetzt:', zb1OcrFehler.message)
             } else {
               const { fullText, extracted } = ocrResult
               const leadUpdate: Record<string, unknown> = {
@@ -600,7 +615,11 @@ export async function POST(req: NextRequest) {
               // AAR-208: HSN/TSN aus OCR (Migration aar208_leads_hsn_tsn)
               if (extracted.hsn) leadUpdate.hsn = extracted.hsn
               if (extracted.tsn) leadUpdate.tsn = extracted.tsn
-              await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
+              // ERFOLGSPFAD: die ausgelesenen Fahrzeugschein-Daten.
+              const { error: zb1DatenFehler } = await db.from('leads').update(leadUpdate).eq('id', matchedLeadId)
+              if (zb1DatenFehler) {
+                console.error(`[twilio-inbound] ZB1-Daten NICHT im Lead (${matchedLeadId}):`, zb1DatenFehler.message)
+              }
               await syncDokumentUploadAnfrage(db, matchedLeadId, 'fahrzeugschein', publicUrl)
 
               // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig)
@@ -686,7 +705,9 @@ export async function POST(req: NextRequest) {
         }
 
         const kategorie = contentType.startsWith('image/') ? 'whatsapp-foto' : 'kundendokument'
-        await db.from('fall_dokumente').insert({
+        // Datei liegt im Storage. Scheitert der Insert still, existiert sie physisch,
+        // aber fuer die Akte gar nicht.
+        const { error: waDokFehler } = await db.from('fall_dokumente').insert({
           fall_id: matchedFallId,
           dokument_typ: contentType.startsWith('image/') ? 'whatsapp-foto' : 'whatsapp-datei',
           kategorie,
@@ -702,6 +723,12 @@ export async function POST(req: NextRequest) {
           sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
           beschreibung: 'Via WhatsApp eingegangen',
         })
+        if (waDokFehler) {
+          console.error(
+            `[twilio-inbound] WhatsApp-Dokument NICHT in der Akte (fall ${matchedFallId}, storage ${path}):`,
+            waDokFehler.message,
+          )
+        }
         gespeichert.push(path)
       } catch (err) {
         console.error('[AAR-158] Media-Verarbeitung Fehler:', err)

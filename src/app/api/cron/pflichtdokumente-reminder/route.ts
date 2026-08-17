@@ -97,7 +97,7 @@ export async function GET(request: Request) {
 
         if (!existing || existing === 0) {
           const fehlendListe = fehlend.map(f => f.label).join(', ')
-          await db.from('tasks').insert({
+          const { error: reminderTaskFehler } = await db.from('tasks').insert({
             fall_id: fall.fall_id as string,
             typ: 'action',
             titel: `Fehlende Dokumente: ${fehlendListe}`,
@@ -113,6 +113,15 @@ export async function GET(request: Request) {
             empfaenger_rolle: phase === 'termin' ? 'sachverstaendiger' : 'kundenbetreuer',
             empfaenger_user_id: phase === 'termin' ? fall.sv_id : fall.kundenbetreuer_id,
           })
+          // Genau dieser Insert ist am 16.07. still gescheitert (prioritaet 'mittel',
+          // siehe Kommentar oben) — der Reminder-Task wurde NIE erstellt und niemand
+          // erfuhr davon. Deshalb wird der Fehler jetzt gelesen.
+          if (reminderTaskFehler) {
+            console.error(
+              `[pflichtdokumente-reminder] Reminder-Task NICHT angelegt (fall ${fall.fall_id}):`,
+              reminderTaskFehler.message,
+            )
+          }
           reminders++
 
           // KFZ-181 Trigger 26: WhatsApp an Kunden (max alle 48h)
@@ -165,7 +174,18 @@ export async function GET(request: Request) {
                 // CMM-44 SP-B PR2c: dokumente_reminder_whatsapp_letzte_sendung auf claims (SSoT).
                 const remClaimId = await resolveClaimId(db, fall.fall_id as string)
                 if (remClaimId) {
-                  await db.from('claims').update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() }).eq('id', remClaimId)
+                  // IDEMPOTENZ-ANKER: die WhatsApp-Mahnung ist gerade RAUS. Bleibt dieser
+                  // Marker ungesetzt, mahnt der naechste Cron-Lauf denselben Kunden erneut.
+                  const { error: sendeMarkerFehler } = await db
+                    .from('claims')
+                    .update({ dokumente_reminder_whatsapp_letzte_sendung: now.toISOString() })
+                    .eq('id', remClaimId)
+                  if (sendeMarkerFehler) {
+                    console.error(
+                      `[pflichtdokumente-reminder] Sendemarker nicht gesetzt (claim ${remClaimId}) — Doppel-Mahnung moeglich:`,
+                      sendeMarkerFehler.message,
+                    )
+                  }
                 }
               }
             }
@@ -178,13 +198,21 @@ export async function GET(request: Request) {
         // CMM-44 SP-B PR2c: dokumente_vollstaendig_* auf claims (SSoT).
         const vollstClaimId = await resolveClaimId(db, fall.fall_id as string)
         if (vollstClaimId) {
-          await db
+          // Ohne diesen Marker haelt der Cron die Unterlagen weiter fuer unvollstaendig
+          // und mahnt einen Kunden, der laengst alles geliefert hat.
+          const { error: vollstFehler } = await db
             .from('claims')
             .update({
               dokumente_vollstaendig_fuer_phase: phase,
               dokumente_vollstaendig_am_phase: now.toISOString(),
             })
             .eq('id', vollstClaimId)
+          if (vollstFehler) {
+            console.error(
+              `[pflichtdokumente-reminder] Vollstaendigkeits-Marker nicht gesetzt (claim ${vollstClaimId}) — Mahnung trotz vollstaendiger Unterlagen moeglich:`,
+              vollstFehler.message,
+            )
+          }
         }
 
         // Folge-Task erstellen (falls fuer diese Phase definiert)
@@ -198,7 +226,7 @@ export async function GET(request: Request) {
             .neq('status', 'erledigt')
 
           if (!existingFolge || existingFolge === 0) {
-            await db.from('tasks').insert({
+            const { error: folgeTaskFehler } = await db.from('tasks').insert({
               fall_id: fall.fall_id as string,
               typ: 'action',
               titel: `${folge.titel} (Dokumente vollständig)`,
@@ -213,6 +241,12 @@ export async function GET(request: Request) {
               empfaenger_rolle: folge.empfaenger_rolle,
               empfaenger_user_id: folge.empfaenger_rolle === 'sachverstaendiger' ? fall.sv_id : fall.kundenbetreuer_id,
             })
+            if (folgeTaskFehler) {
+              console.error(
+                `[pflichtdokumente-reminder] Folge-Task '${folge.task_code}' NICHT angelegt (fall ${fall.fall_id}):`,
+                folgeTaskFehler.message,
+              )
+            }
           }
         }
         completed++

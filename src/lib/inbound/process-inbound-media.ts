@@ -164,20 +164,28 @@ export async function processInboundMedia(
           .from('fall-dokumente')
           .upload(path, buffer, { contentType: mime, upsert: false })
         if (upErr) {
-          await db.from('leads').update({
+          const { error: pbFehlStatus } = await db.from('leads').update({
             polizeibericht_status: 'fehlgeschlagen',
             updated_at: new Date().toISOString(),
           }).eq('id', leadId)
+          if (pbFehlStatus) {
+            console.error('[process-inbound-media] Polizeibericht-Fehlstatus nicht gesetzt:', pbFehlStatus.message)
+          }
           console.warn('[process-inbound-media] Polizeibericht Storage-Upload fehlgeschlagen:', upErr.message)
         } else {
           const publicUrl = await getStorageUrl(db, 'fall-dokumente', path)
           if (publicUrl) {
-            await db.from('leads').update({
+            // ERFOLGSPFAD: die Datei liegt bereits im Storage. Still fehlgeschlagen
+            // heisst: der Kunde hat per WhatsApp geliefert und der Lead weiss nichts davon.
+            const { error: pbOkStatus } = await db.from('leads').update({
               polizeibericht_status: 'hochgeladen',
               polizeibericht_url: publicUrl,
               polizeibericht_hochgeladen_am: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             }).eq('id', leadId)
+            if (pbOkStatus) {
+              console.error(`[process-inbound-media] Polizeibericht NICHT am Lead vermerkt (${leadId}):`, pbOkStatus.message)
+            }
             await syncDokumentUploadAnfrage(db, leadId, 'polizeibericht', publicUrl)
             scheduleBkatAnalyseAfterUpload(db, leadId, publicUrl)
           } else {
@@ -224,11 +232,14 @@ export async function processInboundMedia(
           if (publicUrl) {
             const ocrResult = await runZB1Ocr(buffer.toString('base64'))
             if ('error' in ocrResult) {
-              await db.from('leads').update({
+              const { error: zb1FehlStatus } = await db.from('leads').update({
                 zb1_status: 'fehlgeschlagen',
                 zb1_url: publicUrl,
                 updated_at: new Date().toISOString(),
               }).eq('id', leadId)
+              if (zb1FehlStatus) {
+                console.error('[process-inbound-media] ZB1-Fehlstatus nicht gesetzt:', zb1FehlStatus.message)
+              }
             } else {
               const { fullText, extracted } = ocrResult
               const leadUpdate: Record<string, unknown> = {
@@ -252,7 +263,12 @@ export async function processInboundMedia(
               if (extracted.halter_stadt) leadUpdate.halter_stadt = extracted.halter_stadt
               if (extracted.hsn) leadUpdate.hsn = extracted.hsn
               if (extracted.tsn) leadUpdate.tsn = extracted.tsn
-              await db.from('leads').update(leadUpdate).eq('id', leadId)
+              // ERFOLGSPFAD: die ausgelesenen Fahrzeugschein-Daten. Still fehlgeschlagen
+              // heisst: OCR lief, Bild liegt da, Felder fehlen.
+              const { error: zb1DatenFehler } = await db.from('leads').update(leadUpdate).eq('id', leadId)
+              if (zb1DatenFehler) {
+                console.error(`[process-inbound-media] ZB1-Daten NICHT im Lead (${leadId}):`, zb1DatenFehler.message)
+              }
               await syncDokumentUploadAnfrage(db, leadId, 'fahrzeugschein', publicUrl)
               // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig)
               // — manueller Abruf ueber den Cardentity-Button (2026-05-31).
@@ -313,7 +329,9 @@ export async function processInboundMedia(
           hour: '2-digit',
           minute: '2-digit',
         })
-        await db.from('fall_dokumente').insert({
+        // Die Datei liegt im Storage. Scheitert dieser Insert still, existiert sie
+        // physisch, aber fuer die Akte gar nicht — der Kunde hat geliefert, niemand sieht es.
+        const { error: waDokFehler } = await db.from('fall_dokumente').insert({
           fall_id: fallId,
           dokument_typ: mime.startsWith('image/') ? 'whatsapp-foto' : 'whatsapp-datei',
           kategorie,
@@ -327,6 +345,12 @@ export async function processInboundMedia(
           sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
           beschreibung: 'Via WhatsApp eingegangen',
         })
+        if (waDokFehler) {
+          console.error(
+            `[process-inbound-media] WhatsApp-Dokument NICHT in der Akte (fall ${fallId}, storage ${path}):`,
+            waDokFehler.message,
+          )
+        }
         gespeichert.push(path)
       } catch (err) {
         console.error('[process-inbound-media] Fall Media-Verarbeitung Fehler:', err instanceof Error ? err.message : err)
