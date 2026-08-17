@@ -27,6 +27,36 @@ import { getKatalogSlot } from './katalog'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { sendSmartChannel } from '@/lib/communications/channel-router'
 
+/**
+ * Erledigt den zum Dokument gehoerenden Task — MIT Fehlerpruefung.
+ *
+ * supabase-js wirft nicht: ohne Pruefung bliebe die Aufgabe bei einem Fehlschlag offen,
+ * und der Kundenbetreuer bekaeme sie weiter angezeigt, obwohl er sie erledigt hat.
+ * Drei Aufrufer teilten bisher denselben Block — jetzt EINE Stelle.
+ */
+async function erledigeDokumentTask(
+  admin: ReturnType<typeof createAdminClient>,
+  claimId: string,
+  fallDokumentId: string,
+  taskTyp: string,
+): Promise<void> {
+  const { error } = await admin
+    .from('tasks')
+    .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
+    .eq('claim_id', claimId)
+    .eq('entity_type', 'fall_dokumente')
+    .eq('entity_id', fallDokumentId)
+    .eq('task_typ', taskTyp)
+    .in('status', ['offen', 'in-bearbeitung'])
+  if (error) {
+    console.error(
+      `[dokumente/zuordnung] Task ${taskTyp} nicht auf erledigt gesetzt (dok ${fallDokumentId}):`,
+      error.message,
+    )
+  }
+}
+
+
 type ActionResult = { success: boolean; error?: string }
 
 async function requireKbOrAdmin(): Promise<
@@ -99,7 +129,7 @@ export async function zuordneDokument(
     .limit(1)
     .maybeSingle()
   if (pflichtRow?.id) {
-    await admin
+    const { error: slotFehler } = await admin
       .from('pflichtdokumente')
       .update({
         status: 'hochgeladen',
@@ -107,17 +137,15 @@ export async function zuordneDokument(
         dokument_url: dok.storage_path,
       })
       .eq('id', pflichtRow.id)
+    // Bleibt der Slot 'ausstehend', wird der Kunde weiter gemahnt, obwohl das
+    // Dokument zugeordnet ist.
+    if (slotFehler) {
+      console.error(`[dokumente/zuordnung] Slot nicht auf 'hochgeladen' (${pflichtRow.id}):`, slotFehler.message)
+    }
   }
 
   // 3. Zuordnen-Task erledigen.
-  await admin
-    .from('tasks')
-    .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('claim_id', dok.claim_id as string)
-    .eq('entity_type', 'fall_dokumente')
-    .eq('entity_id', fallDokumentId)
-    .eq('task_typ', 'dokument-zuordnen')
-    .in('status', ['offen', 'in-bearbeitung'])
+  await erledigeDokumentTask(admin, dok.claim_id as string, fallDokumentId, 'dokument-zuordnen')
 
   revalidatePath(`/faelle/${dok.fall_id}`)
   return { success: true, fallId: dok.fall_id as string }
@@ -143,22 +171,18 @@ export async function akzeptiereDokument(
 
   // Pflicht-Eintrag auf 'geprueft' (falls Slot Pflicht war).
   if (dok.dokument_typ) {
-    await admin
+    const { error: pruefFehler } = await admin
       .from('pflichtdokumente')
       .update({ status: 'geprueft' })
       .eq('claim_id', dok.claim_id as string)
       .eq('dokument_typ', dok.dokument_typ as string)
       .eq('status', 'hochgeladen')
+    if (pruefFehler) {
+      console.error(`[dokumente/zuordnung] Slot nicht auf 'geprueft' (${dok.dokument_typ}):`, pruefFehler.message)
+    }
   }
 
-  await admin
-    .from('tasks')
-    .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('claim_id', dok.claim_id as string)
-    .eq('entity_type', 'fall_dokumente')
-    .eq('entity_id', fallDokumentId)
-    .eq('task_typ', 'dokument-pruefen')
-    .in('status', ['offen', 'in-bearbeitung'])
+  await erledigeDokumentTask(admin, dok.claim_id as string, fallDokumentId, 'dokument-pruefen')
 
   revalidatePath(`/faelle/${dok.fall_id}`)
   return { success: true, fallId: dok.fall_id as string }
@@ -196,7 +220,7 @@ export async function ablehneDokument(
     const slot = await getKatalogSlot(supabase, dok.dokument_typ as string)
     if (slot) slotLabel = slot.label
 
-    await admin
+    const { error: ablehnFehler } = await admin
       .from('pflichtdokumente')
       .update({
         status: 'abgelehnt',
@@ -205,9 +229,14 @@ export async function ablehneDokument(
       .eq('claim_id', dok.claim_id as string)
       .eq('dokument_typ', dok.dokument_typ as string)
       .eq('status', 'hochgeladen')
+    if (ablehnFehler) {
+      console.error(`[dokumente/zuordnung] Slot nicht auf 'abgelehnt' (${dok.dokument_typ}):`, ablehnFehler.message)
+    }
 
     // 2. Neuen ausstehenden Pflicht-Eintrag anlegen (Kunde muss erneut).
-    await admin.from('pflichtdokumente').insert({
+    // DER KRITISCHSTE WRITE DIESER DATEI: ohne diesen Slot fordert niemand das
+    // Dokument neu an — die Ablehnung ist ausgesprochen, aber der Fall haengt still.
+    const { error: neuerSlotFehler } = await admin.from('pflichtdokumente').insert({
       fall_id: dok.fall_id as string,
       dokument_typ: dok.dokument_typ,
       status: 'ausstehend',
@@ -218,17 +247,16 @@ export async function ablehneDokument(
       angefordert_am: new Date().toISOString(),
       begruendung: `Nachbesserung: ${trimmed}`,
     })
+    if (neuerSlotFehler) {
+      console.error(
+        `[dokumente/zuordnung] Nachforderungs-Slot NICHT angelegt (fall ${dok.fall_id}, typ ${dok.dokument_typ}) — niemand fordert das Dokument neu an:`,
+        neuerSlotFehler.message,
+      )
+    }
   }
 
   // 3. QC-Task als erledigt markieren.
-  await admin
-    .from('tasks')
-    .update({ status: 'erledigt', erledigt_am: new Date().toISOString() })
-    .eq('claim_id', dok.claim_id as string)
-    .eq('entity_type', 'fall_dokumente')
-    .eq('entity_id', fallDokumentId)
-    .eq('task_typ', 'dokument-pruefen')
-    .in('status', ['offen', 'in-bearbeitung'])
+  await erledigeDokumentTask(admin, dok.claim_id as string, fallDokumentId, 'dokument-pruefen')
 
   // 4. Kunden-Task erzeugen (Nachreichung) + Mitteilung.
   // CMM-44 SP-B PR2a: bevorzugter_kanal wird hier nicht gelesen — der

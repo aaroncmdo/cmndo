@@ -196,12 +196,12 @@ export async function uploadDokumentViaAnfrageToken(
   } else if (slotId === 'polizeibericht') {
     await insertFallDokument(db, fallId, 'polizeibericht', path, contentType, buf.length, slot.label)
     // Legacy-Felder aktualisieren damit alte Queries (Pflicht-Check) weiter funktionieren
-    await db.from('leads').update({
+    await spiegleAufLead(db, anfrage.lead_id, {
       polizeibericht_status: 'hochgeladen',
       polizeibericht_url: publicUrl,
       polizeibericht_hochgeladen_am: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }).eq('id', anfrage.lead_id)
+    }, 'polizeibericht')
     // AAR-504: Auto-OCR via after() — läuft garantiert nach Response-Send.
     const { scheduleBkatAnalyseAfterUpload } = await import('@/lib/bkat/auto-trigger')
     scheduleBkatAnalyseAfterUpload(db, anfrage.lead_id, publicUrl)
@@ -315,7 +315,7 @@ async function syncPflichtdokument(
     .neq('status', 'hochgeladen')
     .maybeSingle()
   if (!pd) return
-  await db
+  const { error } = await db
     .from('pflichtdokumente')
     // CMM-49 Schema-Drift-Fix (15.07.): dokument_url statt datei_url (existiert nicht ->
     // der Update schlug fehl, der Magic-Link-Upload markierte den Slot nie 'hochgeladen').
@@ -325,6 +325,39 @@ async function syncPflichtdokument(
       hochgeladen_am: new Date().toISOString(),
     })
     .eq('id', pd.id)
+  // Der Fehlschlag von 15.07. war genau hier und blieb unbemerkt, weil supabase-js
+  // nicht wirft: der Kunde hatte hochgeladen, der Slot blieb 'ausstehend' — und die
+  // Mahnkette lief weiter gegen jemanden, der seine Pflicht erfuellt hatte.
+  if (error) {
+    console.error(
+      `[upload-dokumente] Pflichtslot ${dokumentTyp} NICHT auf 'hochgeladen' gesetzt (fall ${fallId}):`,
+      error.message,
+    )
+  }
+}
+
+/**
+ * leads-Spiegel-Update MIT Fehlerpruefung.
+ *
+ * supabase-js wirft nicht — ohne diesen Wrapper waeren die Spiegel-Writes dieser Datei
+ * stille Fehlschlaege: der Kunde laedt hoch, die Datei liegt im Storage, aber der Lead
+ * behaelt seinen alten Status und der Kunde wird weiter gemahnt. Genau das ist hier schon
+ * einmal passiert (CMM-49, 15.07.: falscher Spaltenname, der Slot wurde nie 'hochgeladen').
+ *
+ * Gibt `false` zurueck, damit ein Caller reagieren kann — geloggt wird in jedem Fall.
+ */
+async function spiegleAufLead(
+  db: AdminDb,
+  leadId: string,
+  patch: Record<string, unknown>,
+  kontext: string,
+): Promise<boolean> {
+  const { error } = await db.from('leads').update(patch).eq('id', leadId)
+  if (error) {
+    console.error(`[upload-dokumente/${kontext}] leads-Spiegel fehlgeschlagen (${leadId}):`, error.message)
+    return false
+  }
+  return true
 }
 
 async function insertFallDokument(
@@ -337,7 +370,7 @@ async function insertFallDokument(
   label: string,
 ): Promise<void> {
   if (!fallId) return  // Kein Fall (noch in Dispatch-Phase) → nur leads-Mirror reicht
-  await db.from('fall_dokumente').insert({
+  const { error } = await db.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: dokumentTyp,
     storage_path: storagePath,
@@ -348,6 +381,15 @@ async function insertFallDokument(
     beschreibung: label,
     hochgeladen_am: new Date().toISOString(),
   })
+  // Der gravierendste Fall dieser Datei: die Datei liegt bereits im Storage. Scheitert
+  // dieser Insert still, existiert sie physisch, aber fuer die Akte gar nicht — niemand
+  // findet sie, und der Kunde glaubt geliefert zu haben.
+  if (error) {
+    console.error(
+      `[upload-dokumente] fall_dokumente-Eintrag fehlt (fall ${fallId}, typ ${dokumentTyp}, storage ${storagePath}):`,
+      error.message,
+    )
+  }
 }
 
 async function mirrorFahrzeugscheinOhneOcr(
@@ -358,11 +400,11 @@ async function mirrorFahrzeugscheinOhneOcr(
   // Wenn fahrzeugschein ohne OCR hochgeladen wurde (Fremdfahrzeug etc.), setzen
   // wir zb1_status nicht — sonst glaubt der Twilio-Webhook es wäre schon alles
   // erledigt. Nur die URL spiegeln für KB-Ansicht.
-  await db.from('leads').update({
+  await spiegleAufLead(db, leadId, {
     zb1_url: publicUrl,
     zb1_hochgeladen_am: new Date().toISOString(),
     updated_at: new Date().toISOString(),
-  }).eq('id', leadId)
+  }, 'fahrzeugschein-ohne-ocr')
 }
 
 async function runZb1OcrAndUpdate(
@@ -387,12 +429,12 @@ async function runZb1OcrAndUpdate(
     ocrResult = await runZB1Ocr(imageBase64)
   } catch (err) {
     console.error('[AAR-352] ZB1 OCR CRASH:', err instanceof Error ? err.message : err)
-    await db.from('leads').update({
+    await spiegleAufLead(db, leadId, {
       zb1_status: 'fehlgeschlagen',
       zb1_url: publicUrl,
       zb1_upload_versuche: ((lead.zb1_upload_versuche as number | null) ?? 0) + 1,
       updated_at: new Date().toISOString(),
-    }).eq('id', leadId)
+    }, 'ocr-crash')
     return {
       success: false,
       error: `OCR-Fehler: ${err instanceof Error ? err.message : 'Unbekannt'}`,
@@ -401,12 +443,12 @@ async function runZb1OcrAndUpdate(
 
   if ('error' in ocrResult) {
     console.error('[AAR-352] ZB1 OCR fehlgeschlagen:', ocrResult.error)
-    await db.from('leads').update({
+    await spiegleAufLead(db, leadId, {
       zb1_status: 'fehlgeschlagen',
       zb1_url: publicUrl,
       zb1_upload_versuche: ((lead.zb1_upload_versuche as number | null) ?? 0) + 1,
       updated_at: new Date().toISOString(),
-    }).eq('id', leadId)
+    }, 'ocr-fehler')
     return { success: false, error: 'Daten konnten nicht ausgelesen werden — bitte erneut versuchen' }
   }
 
@@ -456,7 +498,9 @@ async function runZb1OcrAndUpdate(
     leadUpdate.ist_fahrzeughalter = true
   }
 
-  await db.from('leads').update(leadUpdate).eq('id', leadId)
+  // ERFOLGSPFAD: hier landen die aus dem Fahrzeugschein ausgelesenen Daten im Lead.
+  // Still fehlgeschlagen hiesse: OCR lief, Bild liegt da, Felder fehlen.
+  await spiegleAufLead(db, leadId, leadUpdate, 'zb1-daten')
 
   // Cardentity-Enrich feuert NICHT mehr automatisch (kostenpflichtig) —
   // manueller Abruf ueber den Cardentity-Button (2026-05-31).
