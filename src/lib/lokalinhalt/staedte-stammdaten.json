@@ -12,9 +12,9 @@
     "kammer": "Rechtsanwaltskammer Köln",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Heinsberg",
+      "Erkelenz",
       "Mönchengladbach",
-      "Neuss",
-      "Dormagen",
       "Köln",
       "Düsseldorf",
       "Bonn"
@@ -102,6 +102,27 @@
       "Hannover",
       "Dortmund",
       "Kassel"
+    ]
+  },
+  {
+    "slug": "bocholt",
+    "name": "Bocholt",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "463",
+    "bevoelkerung": "73 Tsd.",
+    "lat": 51.8384,
+    "lng": 6.6151,
+    "landgericht": "Landgericht Münster",
+    "amtsgericht": "Amtsgericht Bocholt",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Bottrop",
+      "Oberhausen",
+      "Moers",
+      "Duisburg",
+      "Gelsenkirchen",
+      "Essen"
     ]
   },
   {
@@ -441,6 +462,27 @@
     ]
   },
   {
+    "slug": "erkelenz",
+    "name": "Erkelenz",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "418",
+    "bevoelkerung": "45 Tsd.",
+    "lat": 51.0797,
+    "lng": 6.3163,
+    "landgericht": "Landgericht Mönchengladbach",
+    "amtsgericht": "Amtsgericht Erkelenz",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Mönchengladbach",
+      "Heinsberg",
+      "Neuss",
+      "Krefeld",
+      "Düsseldorf",
+      "Aachen"
+    ]
+  },
+  {
     "slug": "erlangen",
     "name": "Erlangen",
     "bundesland": "Bayern",
@@ -753,6 +795,27 @@
       "Karlsruhe",
       "Mannheim",
       "Frankfurt am Main"
+    ]
+  },
+  {
+    "slug": "heinsberg",
+    "name": "Heinsberg",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "525",
+    "bevoelkerung": "43 Tsd.",
+    "lat": 51.0638,
+    "lng": 6.0963,
+    "landgericht": "Landgericht Aachen",
+    "amtsgericht": "Amtsgericht Heinsberg",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Erkelenz",
+      "Mönchengladbach",
+      "Aachen",
+      "Krefeld",
+      "Düsseldorf",
+      "Köln"
     ]
   },
   {
@@ -1188,12 +1251,12 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Erkelenz",
       "Neuss",
       "Krefeld",
       "Düsseldorf",
       "Duisburg",
-      "Köln",
-      "Oberhausen"
+      "Köln"
     ]
   },
   {

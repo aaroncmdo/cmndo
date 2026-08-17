@@ -22,7 +22,7 @@ import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { GLOBALE_QUELLEN, analysiereLinknetz } from './lib/stadt-linknetz-scan.mjs'
-import { waehleNachbarn } from '../claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs'
+import { nachbarnMitRueckkanten } from '../claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const STAEDTE_TS = join(ROOT, 'claimondo-marketing', 'lib', 'kfz-gutachter', 'staedte.ts')
@@ -74,21 +74,44 @@ function parseStaedte(quelltext) {
   return staedte
 }
 
-/** `angrenzendeOrte` der Hub-Cities — heute Fliesstext, in P3-A2 sollen daraus
- *  Links werden, aber nur dort, wo der Ort eine eigene Seite hat. */
-function parseAngrenzendeOrte(quelltext) {
-  const treffer = []
-  const re = /angrenzendeOrte: \[([^\]]*)\]/g
-  let m
-  while ((m = re.exec(quelltext))) {
-    treffer.push(
-      m[1]
+/** `angrenzendeOrte` je Hub-City — seit P3-A2 werden die Orte MIT eigener
+ *  Stadtseite als Link gerendert, sind also echte Kanten. Die Hub-Zuordnung
+ *  muss dafuer erhalten bleiben; die erste Fassung sammelte nur die Ortslisten
+ *  und konnte daraus keine Kante bilden. */
+function parseAngrenzendeOrteJeHub(quelltext) {
+  const start = quelltext.indexOf('HYPERLOCAL_DATA')
+  if (start < 0) throw new Error('HYPERLOCAL_DATA nicht gefunden')
+  const block = quelltext.slice(start)
+
+  const hubs = [...block.matchAll(/^ {2}([a-z][a-z0-9-]*): \{/gm)].map((m) => ({
+    slug: m[1],
+    idx: m.index,
+  }))
+  if (!hubs.length) throw new Error('keine Hub-Sektion in HYPERLOCAL_DATA erkannt')
+
+  const ergebnis = []
+  for (let i = 0; i < hubs.length; i++) {
+    const segment = block.slice(hubs[i].idx, hubs[i + 1]?.idx ?? block.length)
+    const treffer = segment.match(/angrenzendeOrte: \[([^\]]*)\]/)
+    if (!treffer) continue
+    ergebnis.push({
+      hub: hubs[i].slug,
+      orte: treffer[1]
         .split(',')
         .map((s) => s.trim().replace(/^'|'$/g, ''))
         .filter(Boolean),
+    })
+  }
+
+  // Reissleine: kommt `angrenzendeOrte` im Block vor, muss es auch zugeordnet
+  // werden — sonst faellt der Parser still auf 0 Kanten zurueck.
+  const roh = (block.match(/angrenzendeOrte: \[/g) ?? []).length
+  if (roh !== ergebnis.length) {
+    throw new Error(
+      `${roh} angrenzendeOrte-Listen, aber ${ergebnis.length} einem Hub zugeordnet — der Parser passt nicht mehr zur Formatierung von staedte.ts.`,
     )
   }
-  return treffer
+  return ergebnis
 }
 
 /** Die Spoke->Hub-Paare aus `spokeLocal`. Diese Kante WIRD gerendert — als
@@ -145,8 +168,13 @@ function sammleAusDaten() {
 
   // 1. Nachbar-Pills im Einsatzgebiet-Block. DIESELBE Funktion, die die Seite
   //    rendert — sonst misst das Skript etwas anderes als der Nutzer sieht.
+  //    Seit der Reziprozitaet ist das `nachbarnMitRueckkanten`, nicht mehr
+  //    `waehleNachbarn`: mit der reinen Auswahl meldete der Datenmodus Waisen,
+  //    die auf der Seite laengst verlinkt sind (17.08. an bocholt/siegen
+  //    aufgefallen). Ein Messwerkzeug, das der Seite hinterherhinkt, erzeugt
+  //    Fehlalarme — und beim naechsten Mal glaubt sie niemand mehr.
   for (const s of staedte) {
-    for (const ziel of waehleNachbarn(s.slug, staedte, 6)) {
+    for (const ziel of nachbarnMitRueckkanten(s.slug, staedte, 6)) {
       kanten.push({ von: s.slug, nach: ziel.slug, quelle: 'nachbar' })
     }
   }
@@ -174,7 +202,23 @@ function sammleAusDaten() {
     kanten.push({ von: spoke, nach: hub, quelle: 'spoke-hub' })
   }
 
-  return { staedte, kanten, footer, spokeHubs, quelltext }
+  // 5. angrenzendeOrte der Hub-Seiten. Seit P3-A2 werden die Orte MIT eigener
+  //    Stadtseite als Link gerendert — das sind echte Kanten. Sie standen hier
+  //    faelschlich weiter unter "Material" (siehe unten), wodurch der Datenmodus
+  //    nach dem A2-Merge unveraenderte Zahlen meldete und der PR beinahe fuer
+  //    wirkungslos gehalten wurde.
+  const nachName = new Map(staedte.map((s) => [s.name, s.slug]))
+  const angrenzendeKanten = []
+  for (const { hub, orte } of parseAngrenzendeOrteJeHub(quelltext)) {
+    for (const ort of orte) {
+      const ziel = nachName.get(ort)
+      if (!ziel || ziel === hub) continue
+      kanten.push({ von: hub, nach: ziel, quelle: 'angrenzend' })
+      angrenzendeKanten.push(`${hub}->${ziel}`)
+    }
+  }
+
+  return { staedte, kanten, footer, spokeHubs, angrenzendeKanten, quelltext }
 }
 
 // ------------------------------------------------------------ Crawl-Modus
@@ -310,15 +354,10 @@ async function main() {
     kanten = r.kanten
 
     const slugSet = new Set(staedte.map((s) => s.slug))
-    const nachName = new Map(staedte.map((s) => [s.name, s.slug]))
-
-    const angrenzend = parseAngrenzendeOrte(r.quelltext)
-    const angrenzendMitSeite = angrenzend.flat().filter((ort) => nachName.has(ort))
-    const hubsMitSpokes = new Set(r.spokeHubs.map((p) => p.hub))
+    const alleOrte = parseAngrenzendeOrteJeHub(r.quelltext).flatMap((x) => x.orte)
 
     extras.geplant = [
-      `angrenzendeOrte: ${angrenzend.flat().length} Ortsnamen auf ${angrenzend.length} Hub-Seiten, davon ${angrenzendMitSeite.length} mit eigener Stadtseite — heute Fliesstext, kein Link`,
-      `Hub -> Spoke: ${r.spokeHubs.length} Spokes zeigen auf ${hubsMitSpokes.size} Hubs, aber KEIN Hub verlinkt seine Spokes zurueck (am gerenderten HTML geprueft)`,
+      `angrenzendeOrte: ${alleOrte.length} Ortsnamen auf Hub-Seiten, davon ${r.angrenzendeKanten.length} mit eigener Stadtseite — diese werden verlinkt und zaehlen oben als Kante (Quelle 'angrenzend'); der Rest bleibt bewusst Text, ein Link waere eine 404`,
       ...r.spokeHubs
         .filter((p) => !slugSet.has(p.hub))
         .map((p) => `hubSlug '${p.hub}' (von ${p.spoke}) hat KEINE Stadtseite`),
