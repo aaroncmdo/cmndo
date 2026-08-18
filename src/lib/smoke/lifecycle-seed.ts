@@ -124,15 +124,21 @@ async function deleteAllSmoke(db: Db): Promise<number> {
       // WS6/Kasko: Reparatur-Szenarien (FK claim_id -> vor claims loeschen).
       ['reparatur_termine', 'claim_id'],
     ] as const) {
-      await db.from(t).delete().in(col, claimIds)
+      const { error } = await db.from(t).delete().in(col, claimIds)
+      if (error) console.error(`[lifecycle-seed] ${t}-Cleanup fehlgeschlagen:`, error.message)
     }
-    await db.from('claims').delete().in('id', claimIds)
+    // Ein still fehlgeschlagener Seed-Cleanup laesst Residue auf prod zurueck, das
+    // spaeter Messungen verfaelscht — genau so liefen im J2-Seed 88 Leads auf (#5305).
+    const { error: claimDelFehler } = await db.from('claims').delete().in('id', claimIds)
+    if (claimDelFehler) console.error('[lifecycle-seed] claims-Cleanup fehlgeschlagen:', claimDelFehler.message)
     // WS6/Kasko: SMOKE-Werkstaetten NACH claims (FK claims.reparatur_werkstatt_id).
     await db.from('werkstaetten').delete().like('name', 'SMOKE-LC-Werkstatt%')
   }
   if (leadIds.length > 0) {
-    await db.from('gutachter_termine').delete().or(bezugInExpr('lead', leadIds))
-    await db.from('leads').delete().in('id', leadIds)
+    const { error: terminDelFehler } = await db.from('gutachter_termine').delete().or(bezugInExpr('lead', leadIds))
+    if (terminDelFehler) console.error('[lifecycle-seed] termine-Cleanup fehlgeschlagen:', terminDelFehler.message)
+    const { error: leadDelFehler } = await db.from('leads').delete().in('id', leadIds)
+    if (leadDelFehler) console.error('[lifecycle-seed] leads-Cleanup fehlgeschlagen:', leadDelFehler.message)
   }
   return claimIds.length
 }
@@ -286,7 +292,10 @@ async function seedAuftragArtefakte(
       const { data: ws, error: wsErr } = await db
         .from('werkstaetten').insert({ name: `SMOKE-LC-Werkstatt ${scenarioKey}` }).select('id').single()
       if (wsErr || !ws) throw new Error(`werkstatt insert: ${wsErr?.message ?? 'keine werkstatt'}`)
-      await db.from('claims').update({ reparatur_werkstatt_id: ws.id }).eq('id', claimId)
+      // Der Seed wirft bei allen anderen Fehlern — hier genauso, sonst entsteht ein
+      // Szenario, das anders aussieht als beabsichtigt, und der Smoke prueft das Falsche.
+      const { error: wsLinkErr } = await db.from('claims').update({ reparatur_werkstatt_id: ws.id }).eq('id', claimId)
+      if (wsLinkErr) throw new Error(`werkstatt-link: ${wsLinkErr.message}`)
       if (scenarioKey === 'reparatur-laeuft') {
         const { error: rtErr } = await db
           .from('reparatur_termine')
@@ -343,7 +352,7 @@ async function seedAuftragArtefakte(
     const svUnterwegsSeit = scenarioKey === 'begutachtung-besichtigung'
       ? new Date(Date.now() - 30 * 60_000).toISOString() : null
     // CMM-44 SP-D PR2b: besichtigungsort auf gutachter_termine (Phase-6-valid).
-    await db.from('gutachter_termine').insert({
+    const { error: terminInsErr } = await db.from('gutachter_termine').insert({
       fall_id: fallId,
       claim_id: claimId,
       auftrag_id: auftragId,
@@ -355,6 +364,7 @@ async function seedAuftragArtefakte(
       sv_unterwegs_seit: svUnterwegsSeit,
       besichtigungsort_adresse: 'Teststraße 12, 10115 Berlin',
     })
+    if (terminInsErr) throw new Error(`gutachter_termin insert: ${terminInsErr.message}`)
   }
 
   // Kanzleifall + Auszahlung

@@ -193,7 +193,13 @@ async function runForFall(db: DB, fallId: string, finHint?: string): Promise<Car
   // claim-zeitige Vorschaden-Flags (claim-gebunden)
   if (claimId) {
     try {
-      await db.from('claims').update({ hat_vorschaeden: s.vorhanden, vorschaden_geprueft: true, vorschaden_erkannt: s.vorhanden }).eq('id', claimId)
+      // Das umgebende try faengt hier nichts (supabase-js wirft nicht). Ohne diese
+      // Flags gilt der Vorschaden als ungeprueft — die Abfrage war aber schon
+      // kostenpflichtig und wird beim naechsten Mal erneut ausgeloest.
+      const { error: flagsFehler } = await db.from('claims').update({ hat_vorschaeden: s.vorhanden, vorschaden_geprueft: true, vorschaden_erkannt: s.vorhanden }).eq('id', claimId)
+      if (flagsFehler) {
+        console.error(`[cardentity/run-full] Vorschaden-Flags nicht gesetzt (claim ${claimId}):`, flagsFehler.message)
+      }
     } catch (e) {
       console.warn('[cardentity/run-full] claims flags:', e)
     }
@@ -273,11 +279,16 @@ async function runForLead(db: DB, leadId: string): Promise<CardentityRunResult> 
   const s = summarizeEvents(report)
   // Lead-Snapshot (pre-claim): Report + Flag auf dem Lead
   try {
-    await db.from('leads').update({
+    // Der Report ist bereits abgerufen (kostenpflichtig). Geht dieser Write verloren,
+    // ist die Abfrage bezahlt und das Ergebnis weg.
+    const { error: reportFehler } = await db.from('leads').update({
       cardentity_report: { ...(report as CardentityReport), fetchedAt, typB: true },
       hat_vorschaeden: s.vorhanden,
       cardentity_enriched_at: fetchedAt,
     }).eq('id', leadId)
+    if (reportFehler) {
+      console.error(`[cardentity/run-full] Report NICHT gespeichert (lead ${leadId}) — Abfrage bezahlt, Ergebnis weg:`, reportFehler.message)
+    }
   } catch (e) {
     console.warn('[cardentity/run-full] leads snapshot:', e)
   }

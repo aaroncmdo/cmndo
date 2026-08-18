@@ -48,8 +48,6 @@
     "src/lib/autoPhase.ts",
     "src/lib/beleg-review/actions.ts",
     "src/lib/bkat/auto-trigger.ts",
-    "src/lib/cardentity/run-full.ts",
-    "src/lib/communications/channel-router.ts",
     "src/lib/dokumente/konditional-tasks.ts",
     "src/lib/dokumente/sync-lead-zu-pflicht.ts",
     "src/lib/gutachterTasking.ts",
@@ -58,13 +56,10 @@
     "src/lib/leads/convert-lead-to-claim.ts",
     "src/lib/leads/convert-lead-to-fall.ts",
     "src/lib/makler/erstelle-anfrage.ts",
-    "src/lib/onboarding/slots.ts",
     "src/lib/resolver/eskalation-cron.ts",
     "src/lib/sla/kanzlei-tracker.ts",
     "src/lib/sla/tracker.ts",
-    "src/lib/smoke/lifecycle-seed.ts",
     "src/lib/start-link/send-flowlink-multichannel.ts",
-    "src/lib/tasking.ts",
     "src/lib/termine/baseline-fahrtzeit.ts",
     "src/lib/termine/embed-b-dispatcher-actions.ts",
     "src/lib/termine/engine/kalender-sync.ts",
@@ -73,7 +68,6 @@
     "src/lib/termine/sv-ablehnung.ts",
     "src/lib/termine/trigger-losgefahren.ts",
     "src/lib/termine/verlege-nach-no-show.ts",
-    "src/lib/werkstatt/bedarf/ermittle-bedarf.ts",
     "src/lib/whatsapp.ts"
   ]
 }
