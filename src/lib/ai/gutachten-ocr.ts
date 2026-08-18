@@ -18,7 +18,6 @@
 // NULL-Felder gefuellt — bestehende Werte bleiben.
 
 import Anthropic from '@anthropic-ai/sdk'
-import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from './models'
@@ -211,6 +210,17 @@ export type GutachtenPdfQuelle = { base64: string } | { url: string }
  *
  * `extractGutachtenAndSaveToClaim` ruft jetzt diese Funktion; ihr Verhalten ist
  * unveraendert (gleicher Prompt, gleiches Modell, gleiches Schema).
+ *
+ * ⚠ KEIN `messages.parse` / `output_config.format` hier — bewusst, nicht vergessen.
+ * Structured Outputs lehnt dieses Schema ab: 37 fakultative Felder reissen sowohl
+ * das Union-Limit (max 16 `anyOf`/type-arrays) als auch — mit `.optional()` statt
+ * `.nullable()` — das eigene Optional-Limit; Verschachteln nach Clustern hilft
+ * nicht, das Limit zaehlt global. Belegt 18.08. gegen die echte API mit einem
+ * echten 24-seitigen Gutachten, auf Opus 4.8 UND Opus 5: JEDER Aufruf endete in
+ * HTTP 400. Die Zod-Validierung bleibt erhalten, aber FELDWEISE und tolerant
+ * (siehe unten) — ohne serverseitige Grammatik weicht das Modell gelegentlich von
+ * den Enums ab, und ein Alles-oder-nichts-Parse wuerde deswegen eine sonst
+ * einwandfreie Extraktion komplett verwerfen.
  */
 export async function extractGutachtenFelder(
   quelle: GutachtenPdfQuelle,
@@ -220,9 +230,12 @@ export async function extractGutachtenFelder(
 
   try {
     const client = new Anthropic({ apiKey })
-    const response = await client.messages.parse({
+    const response = await client.messages.create({
       model: AI_MODELS.doc_ocr,
-      max_tokens: 2048,
+      // Gemessen 18.08. an einem echten 24-seitigen Gutachten: 1515 Output-Tokens
+      // (Opus 5 denkt standardmaessig und teilt sich das Budget mit der Antwort).
+      // 2048 waeren zu 74 % ausgelastet — zu duenn fuer laengere Gutachten.
+      max_tokens: 4096,
       system: SYSTEM_PROMPT,
       messages: [
         {
@@ -242,12 +255,40 @@ export async function extractGutachtenFelder(
           ],
         },
       ],
-      output_config: { format: zodOutputFormat(GutachtenSchema) },
     })
 
-    const parsed = response.parsed_output as GutachtenOcrResult | null
-    if (!parsed) return { ok: false, error: 'Keine strukturierte OCR-Antwort' }
-    return { ok: true, felder: parsed }
+    const textBlock = response.content.find((b) => b.type === 'text')
+    const raw = textBlock?.type === 'text' ? textBlock.text : ''
+    const match = raw.match(/\{[\s\S]*\}/)
+    if (!match) return { ok: false, error: 'Keine JSON-Antwort der OCR' }
+
+    let roh: unknown
+    try {
+      roh = JSON.parse(match[0])
+    } catch {
+      return { ok: false, error: 'OCR-Antwort ist kein valides JSON' }
+    }
+
+    // Zod bleibt der Vertrag — aber FELDWEISE und tolerant, nicht als
+    // Alles-oder-nichts. Ohne die serverseitige Grammatik haelt sich das Modell
+    // nicht mehr garantiert an die Enums: gemessen 18.08. lieferte es fuer
+    // `kraftstoff` einen Wert ausserhalb der Liste. Ein `safeParse` ueber das
+    // ganze Objekt haette deshalb die komplette Extraktion verworfen — mitsamt
+    // der 29 korrekt erkannten Felder. Stattdessen: gueltige Felder uebernehmen,
+    // ungueltige auslassen (der Consumer filtert ohnehin per `v == null`).
+    const rohObjekt = (roh ?? {}) as Record<string, unknown>
+    const felder: Record<string, unknown> = {}
+    const verworfen: string[] = []
+    for (const [key, feldSchema] of Object.entries(GutachtenSchema.shape)) {
+      if (!(key in rohObjekt)) continue
+      const geprueft = feldSchema.safeParse(rohObjekt[key])
+      if (geprueft.success) felder[key] = geprueft.data
+      else verworfen.push(key)
+    }
+    if (verworfen.length > 0) {
+      console.warn('[gutachten-ocr] Felder verworfen (Schema-Verletzung):', verworfen.join(', '))
+    }
+    return { ok: true, felder: felder as GutachtenOcrResult }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'OCR fehlgeschlagen' }
   }
