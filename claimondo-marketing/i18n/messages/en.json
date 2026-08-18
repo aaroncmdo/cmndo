@@ -4029,7 +4029,7 @@
   },
   "page_meta": {
     "check": {
-      "title": "Free Claim Check After a Car Accident | Claimondo",
+      "title": "Free Claim Check After a Car Accident",
       "description": "Check in 3 questions: what are you entitled to after a no-fault car accident? Damage appraisal, diminished value, loss of use, lawyer’s fees — free and without cost risk.",
       "og_description": "In 60 seconds, find out what you're entitled to after your accident. Free, no obligation.",
       "twitter_title": "Free Claim Check After a Car Accident",
@@ -4042,7 +4042,7 @@
       "twitter_description": "After the crash: assessment, lawyer, repair shop & payout — coordinated from a single source. €0 for those not at fault."
     },
     "vorteile": {
-      "title": "Benefits — insurer deductions recovered · Claimondo",
+      "title": "Benefits — insurer deductions recovered",
       "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent independent assessor instead of an inspection-service cut. See what you are really entitled to.",
       "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per NDR/BGH)."
     },
@@ -4054,7 +4054,7 @@
       "twitter_description": "Diminished value, deductions, the 130% rule — all answers at a glance."
     },
     "wie_es_funktioniert": {
-      "title": "How it works — from crash to payout in 5 steps · Claimondo",
+      "title": "How it works — from crash to payout in 5 steps",
       "description": "From reporting the crash to the payout in 5 steps — 32 days on average. Callback in under 15 min, independent assessor on site within 48 h. Track it live in your portal.",
       "og_description": "Full compensation in 5 steps — 32 days on average. Advisor callback <15 min, independent assessor <48 h."
     },
@@ -4089,25 +4089,25 @@
       "twitter_description": "Cases without acquisition. Sign up for the Claimondo assessor network."
     },
     "e_auto_gutachter": {
-      "title": "EV assessor after a crash — value high-voltage damage correctly · Claimondo",
+      "title": "EV assessor after a crash — value high-voltage damage correctly",
       "description": "EV assessment after a no-fault crash: an assessor with high-voltage battery diagnostics and correct diminished value. The other side covers the cost.",
       "og_title": "EV assessor after a crash — value high-voltage damage correctly",
       "og_description": "A specialist assessor with high-voltage battery diagnostics, diminished value & economic-viability check. The other side's liability insurer covers the cost (§ 249 BGB)."
     },
     "lkw_gutachter": {
-      "title": "Truck & commercial-vehicle assessor after a crash · Claimondo",
+      "title": "Truck & commercial-vehicle assessor after a crash",
       "description": "Truck and commercial-vehicle assessment after a no-fault crash: your own assessor, correct valuation of the body/superstructure. The other side covers the cost (§249 BGB).",
       "og_title": "Truck & commercial-vehicle assessor after a crash",
       "og_description": "Your own assessor, commercial loss of use (standby costs / lost profit) instead of a flat passenger-car rate, bodies/superstructures valued correctly. The other side's liability insurer covers the cost (§ 249 BGB)."
     },
     "motorrad_gutachter": {
-      "title": "Motorcycle assessor after a crash — independent & free · Claimondo",
+      "title": "Motorcycle assessor after a crash — independent & free",
       "description": "Motorcycle assessor after a no-fault crash: an independent assessor, correct valuation of fall and frame damage. The other side covers the cost.",
       "og_title": "Motorcycle assessor after a crash — independent & free",
       "og_description": "Your own assessor, protective gear as a claim item, diminished value & total loss valued correctly. The other side's liability insurer covers the cost (§ 249 BGB)."
     },
     "kosten_kfz_gutachten": {
-      "title": "What does a car assessment cost? For those not at fault, €0 · Claimondo",
+      "title": "What does a car assessment cost? For those not at fault, €0",
       "description": "What does a car assessment cost after a crash? Fees per the BVSK table (typically 300–1,200 €). If the crash was not your fault, the other side pays — €0.",
       "og_title": "What does a car assessment cost? For those not at fault, €0",
       "og_description": "The BVSK fee table explained + why those not at fault pay €0 (§ 249 BGB, BGH VI ZR 67/06)."
@@ -4120,7 +4120,7 @@
       "twitter_description": "Free, instant, no obligation."
     },
     "unfallskizze": {
-      "title": "Create an accident sketch — free template (PDF) + 8 tips · Claimondo",
+      "title": "Create an accident sketch — free template (PDF) + 8 tips",
       "description": "Create an accident sketch the right way: free PDF template, step-by-step guide and best-practice tips. Often the decisive piece of evidence.",
       "og_title": "Create an accident sketch — free template (PDF) + 8 tips",
       "og_description": "Free printable PDF template + step-by-step guide. The accident sketch is often the decisive piece of evidence about how the crash happened."
@@ -4132,25 +4132,25 @@
       "og_description": "Which items do insurers cut most often? What does the BGH say? Original data + public evidence."
     },
     "versicherung_schickt_gutachter": {
-      "title": "The insurer is sending an assessor — do I have to accept? · Claimondo",
+      "title": "The insurer is sending an assessor — do I have to accept?",
       "description": "The other side's insurer wants to send “their” assessor? You do not have to accept: under § 249 BGB you freely choose your own, independent assessor. If the crash was not your fault, the other side covers the cost (BGH VI ZR 67/06) — €0 for you.",
       "og_title": "The insurer is sending an assessor — do I have to accept?",
       "og_description": "No. Free choice of your own, independent assessor under § 249 BGB. The other side's liability insurer covers the cost (BGH VI ZR 67/06)."
     },
     "gegnerische_versicherung_zahlt_nicht": {
-      "title": "The other side's insurer is not paying — what now? · Claimondo",
+      "title": "The other side's insurer is not paying — what now?",
       "description": "The other side's liability insurer not paying or cutting your claim? After the review period, default sets in (§286 BGB), including interest and lawyer's fees. €0 for you.",
       "og_title": "The other side's insurer is not paying — what now?",
       "og_description": "Default under § 286 BGB, default interest under § 288 BGB, recoverable lawyer's fees — and why deductions are usually unjustified (BGH VI ZR 280/22)."
     },
     "unfall_was_tun": {
-      "title": "Accident — what to do as the injured party? Steps & rights · Claimondo",
+      "title": "Accident — what to do as the injured party? Steps & rights",
       "description": "No-fault accident — what to do? Immediate steps, who is liable and your claims under §249 BGB. The other side pays for lawyer and assessment — €0.",
       "og_title": "Accident — what to do as the injured party? Steps & rights",
       "og_description": "Immediate steps, liability by accident type, your claims (§ 249 BGB) and the insurer tricks — explained concisely. €0 for those not at fault."
     },
     "unverschuldeter_unfall_rechte": {
-      "title": "No-fault accident — your rights & claims · Claimondo",
+      "title": "No-fault accident — your rights & claims",
       "description": "After a no-fault accident you are entitled to full restoration (§249 BGB): assessment, diminished value, loss of use, rental car, lawyer. €0 for you.",
       "og_title": "No-fault accident — your rights & claims",
       "og_description": "Full restoration under § 249 BGB: assessment, repair, diminished value, loss of use, rental car, lawyer, pain and suffering — covered by the other side's liability insurer."
@@ -4191,19 +4191,19 @@
       "og_description": "Claimondo, Neogutachter, Unfallpaten and Unfallgiganten in an objective head-to-head — cost, service, legal certainty."
     },
     "decoder": {
-      "title": "Insurer letter decoder — a reply to every reduction letter · Claimondo",
+      "title": "Insurer letter decoder — a reply to every reduction letter",
       "description": "The insurer is cutting diminished value, rental car or loss of use? Our decoders break down the insurers’ standard letters and give you the BGH answer.",
       "og_title": "Insurer letter decoder",
       "og_description": "What the insurer writes → what it means → a BGH-compliant counter-argument. Reply templates for the most common reduction and standard letters."
     },
     "haftpflicht": {
-      "title": "Car liability claim glossary — terms, claims & quotas · Claimondo",
+      "title": "Car liability claim glossary — terms, claims & quotas",
       "description": "A glossary of the car liability claim: liability bases, claim items and deadlines — every term with a BGH reference. Not at fault? § 249 BGB.",
       "og_title": "Car liability claim glossary",
       "og_description": "All the terms around the car liability claim — sorted by cluster, with BGH references and typical liability quotas."
     },
     "sachverstaendige": {
-      "title": "Car assessors & associations — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "title": "Car assessors & associations — BVSK, DEKRA, IfS, öbV",
       "description": "Which car-assessor associations and certifications are there — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? And why, under § 249 BGB, you freely choose your own.",
       "og_title": "Car assessors & associations in Germany",
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV and inspection-service providers — explained clearly, with your rights under § 249 BGB."
@@ -4249,7 +4249,7 @@
       "og_description": "Synonymous in a car claim — what matters is independence and your free choice of appraiser."
     },
     "kfz_gutachter_nutzungsausfall": {
-      "title": "Calculate loss-of-use compensation | Claimondo",
+      "title": "Calculate loss-of-use compensation",
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Calculate loss-of-use compensation",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."

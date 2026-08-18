@@ -12,7 +12,7 @@ import { SITE_URL } from '@/lib/seo/jsonld'
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {
-  title: 'Kommentar-Regeln | Claimondo',
+  title: 'Kommentar-Regeln',
   description:
     'Die Regeln für Kommentare unter den Wissens-Artikeln von Claimondo: respektvoller Umgang, keine sensiblen oder fremden personenbezogenen Daten, kein Rechtsrat. Jeder Kommentar wird vor Veröffentlichung geprüft.',
   alternates: { canonical: '/kommentar-regeln' },
