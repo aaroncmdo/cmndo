@@ -84,7 +84,16 @@ export async function generateMetadata({
 
   // Title OHNE Brand-Suffix — das kam aus #5352 ("doppelter Brand im Title"),
   // weil das Layout den Marken-Namen bereits anhaengt. Nicht zurueckdrehen.
-  const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall`
+  //
+  // "Unabhaengig & " ist am 18.08. entfallen (Aaron-Entscheidung): mit dem
+  // Zusatz lagen ALLE 158 Stadt-Titel ueber 60 Zeichen (Median 72), also
+  // jenseits dessen, was Google in der Anzeige zeigt. Ohne ihn sind es 43
+  // (Median 59) — die Restlichen sind lange Ortsnamen ("Ludwigshafen am
+  // Rhein"), die sich nicht weiter kuerzen lassen. Die Aussage bleibt sonst
+  // unveraendert: "unabhaengig" steht weiterhin in der Description und 7x im
+  // Seitentext (auf /kfz-gutachter/koeln nachgezaehlt) — nur nicht in der H1,
+  // die ist die Conversion-Headline "Unfall gehabt?".
+  const title = `Kfz-Gutachter ${s.name} — kostenfrei nach Unfall`
 
   // Die Beschreibung war bis 18.08.2026 fuer JEDE Stadt derselbe Satz mit
   // ausgetauschtem Ortsnamen — bei 173 Seiten ein Duplicate-Signal. Sie zog

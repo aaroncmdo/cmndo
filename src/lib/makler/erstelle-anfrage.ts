@@ -270,10 +270,15 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
         erstellt_von: dispatcherId ?? maklerUserId,
         erinnerung_min_vorher: 10,
       })
-      await admin
+      // Das try faengt den Write nicht. Ohne ihn steht der Lead nicht auf 'rueckruf'
+      // und taucht in der Rueckruf-Liste nicht auf — obwohl der Termin angelegt ist.
+      const { error: rueckrufFehler } = await admin
         .from('leads')
         .update({ status: 'rueckruf', qualifizierungs_phase: 'rueckruf', updated_at: new Date().toISOString() })
         .eq('id', leadId)
+      if (rueckrufFehler) {
+        console.error(`[erstelleMaklerAnfrage] Rueckruf-Status nicht gesetzt (Lead ${leadId}):`, rueckrufFehler.message)
+      }
     } catch (err) {
       console.error('[erstelleMaklerAnfrage] Send-Fail Auto-Rückruf:', err)
     }

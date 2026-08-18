@@ -22,11 +22,16 @@ export async function createErstgutachtenAuftragWennNoetig(
   if (existing) {
     // Termine die noch keine auftrag_id haben dranhängen
     if (terminIds.length) {
-      await admin
+      // Ohne die Verknuepfung haengt der Termin an keinem Auftrag — die Auftrags-Sicht
+      // des Gutachters zeigt ihn dann nicht.
+      const { error: verknuepfFehler } = await admin
         .from('gutachter_termine')
         .update({ auftrag_id: existing.id })
         .in('id', terminIds)
         .is('auftrag_id', null)
+      if (verknuepfFehler) {
+        console.error(`[CMM-32] Termine nicht an Auftrag ${existing.id} gehaengt:`, verknuepfFehler.message)
+      }
     }
     return { auftragId: existing.id as string }
   }
@@ -49,10 +54,13 @@ export async function createErstgutachtenAuftragWennNoetig(
   }
 
   if (terminIds.length) {
-    await admin
+    const { error: verknuepfFehler } = await admin
       .from('gutachter_termine')
       .update({ auftrag_id: inserted.id })
       .in('id', terminIds)
+    if (verknuepfFehler) {
+      console.error(`[CMM-32] Termine nicht an neuen Auftrag ${inserted.id} gehaengt:`, verknuepfFehler.message)
+    }
   }
 
   return { auftragId: inserted.id as string }

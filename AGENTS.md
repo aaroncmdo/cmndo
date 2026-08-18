@@ -495,7 +495,9 @@ if (error) { … }
 * **J2-Seed (16.08.):** FK-Verletzung beim Lead-DELETE. Der Seed meldete **13 Tage lang** Erfolg und löschte nichts; 88 Leads liefen auf und verzerrten Messungen.
 * **Skizzen-Korrektur (16.08.):** Task-Insert in einem `try/catch` (fängt nichts, da kein `throw`) + Update ohne Prüfung — im selben File, am selben Tag wie der J2-Fix. ⚠ **Ein `try/catch` um einen Supabase-Call ist reine Dekoration.**
 
-CI fährt `npm run check:silent-writes -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/silent-write-baseline.json` (**Baseline 214 Stellen in 106 Files**, grandfathered → Boy-Scout: wer ein File anfasst, zieht die Prüfung nach und senkt mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0).
+CI fährt `npm run check:silent-writes -- --ratchet`. **Die Baseline ist 0** — der Bestand von ursprünglich **214 Stellen in 106 Files** wurde in neun Boy-Scout-Blöcken vollständig abgebaut (#5320 → #5372, 18.08.). Das ist damit keine Drift-Bremse mehr, sondern eine **harte Regel: jeder neue ungeprüfte Write auf eine kritische Tabelle blockt sofort.** Lokal (ohne Flag) `--warn` (exit 0).
+
+⚠ **Die Baseline nicht wieder aufblähen.** `--update-baseline` war für den Abbau da, nicht zum Eintragen neuer Verstöße. Echter fire-and-forget-Fall → `// silent-write-skip: <grund>` (s.u.); alles andere bekommt die Fehlerprüfung.
 
 **Nur `KRITISCHE_TABELLEN`** (`claims`, `leads`, `tasks`, `faelle`, `fall_dokumente`, `pflichtdokumente`, `gutachter_termine`) — bewusst nicht alle ~684 Write-Stellen des Repos: Dort ist ein stiller Fehlschlag ein Datenverlust, der erst Wochen später auffällt. Die Liste darf wachsen, jede Erweiterung hebt aber die Baseline.
 

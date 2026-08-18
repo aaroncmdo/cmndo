@@ -30,7 +30,12 @@ export async function checkLeadAutoPhase(leadId: string) {
   }
 
   if (Object.keys(updates).length > 0) {
-    await svc.from('leads').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', leadId)
+    // Der Phasen-Fortschritt des Leads. Bleibt er aus, steht der Lead in jeder
+    // Arbeitsliste weiter in der alten Phase.
+    const { error: phasenFehler } = await svc.from('leads').update({ ...updates, updated_at: new Date().toISOString() }).eq('id', leadId)
+    if (phasenFehler) {
+      console.error(`[autoPhase] Phasen-Update nicht gespeichert (Lead ${leadId}):`, phasenFehler.message)
+    }
   }
 }
 

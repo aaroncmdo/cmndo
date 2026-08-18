@@ -413,7 +413,12 @@ export async function reIssueAbrechnung(
         kClaimId,
       )
       if (kClaimId && Object.keys(claimsUpdate).length > 0) {
-        await db.from('claims').update(claimsUpdate).eq('id', kClaimId)
+        // Geldbetrag (Nachzahlung an den Gutachter) — geht der Write verloren, weicht
+        // die Akte von der Abrechnung ab.
+        const { error: nachzahlungFehler } = await db.from('claims').update(claimsUpdate).eq('id', kClaimId)
+        if (nachzahlungFehler) {
+          console.error(`[abrechnungen] Nachzahlung nicht am Claim vermerkt (${kClaimId}):`, nachzahlungFehler.message)
+        }
       }
     }
   }

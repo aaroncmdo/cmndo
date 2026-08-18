@@ -23,13 +23,16 @@ type AdminClient = ReturnType<typeof createAdminClient>
 // Loest den offenen Klaerungs-Task fuer einen Termin (idempotent).
 async function resolveKlaerungsTask(db: AdminClient, terminId: string, grund: string) {
   const now = new Date().toISOString()
-  await db
+  const { error: klaerungFehler } = await db
     .from('tasks')
     .update({ status: 'erledigt', erledigt_am: now, auto_resolved_grund: grund })
     .eq('entity_type', 'termin')
     .eq('entity_id', terminId)
     .eq('task_typ', EMBED_B_KLAERUNG_TASK_TYP)
     .eq('status', 'offen')
+  if (klaerungFehler) {
+    console.error(`[embed-b] Klaerungs-Task nicht aufgeloest (Termin ${terminId}) — bleibt offen:`, klaerungFehler.message)
+  }
 }
 
 function revalidate() {
