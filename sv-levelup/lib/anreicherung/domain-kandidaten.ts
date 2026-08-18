@@ -16,14 +16,19 @@ export function domainKandidaten(firma: string, ort: string | null): string[] {
 
   const teile = kern.split(' ')
   const erstes = teile[0]
+  // Bei "Inh. Harald Lange" ist der Nachname das LETZTE Kernwort — am Bestand
+  // der haeufigste Domain-Kern. Wer nur das erste nimmt, raet `harald.de`.
+  const letztes = teile[teile.length - 1]
   const zusammen = teile.join('')
   const ortSlug = ort ? umlauteAuf(ort).toLowerCase().replace(/[^a-z0-9]/g, '') : null
+  const mehrteilig = teile.length > 1
 
   const kandidaten = [
     `${erstes}.de`,
-    teile.length > 1 ? `${zusammen}.de` : null,
     `sv-${erstes}.de`,
-    `kfz-gutachter-${erstes}.de`,
+    mehrteilig ? `${letztes}.de` : null,
+    mehrteilig ? `sv-${letztes}.de` : null,
+    mehrteilig ? `${zusammen}.de` : `kfz-gutachter-${erstes}.de`,
     ortSlug ? `${erstes}-${ortSlug}.de` : null,
   ].filter((d): d is string => d !== null)
 

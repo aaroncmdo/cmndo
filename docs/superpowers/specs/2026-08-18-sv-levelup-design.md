@@ -475,6 +475,28 @@ Archivo kursiv in Versalien, Rennstreifen, schräge Plakette. **Nicht** das Clai
 ist eine eigene Marke. Die Diagrammfarben bleiben davon getrennt (`GESAMTSPEC` §11.2:
 Signalorange trägt die Marke, nie eine Datenaussage).
 
+**Was die Eigenständigkeit kostet — und was dagegen zu tun ist.** Ein eigener Top-Level-Build
+liegt außerhalb *aller* Schutzmechanismen des Hauptprojekts. Nachgeprüft am 18.08.2026:
+
+| Mechanismus | Reichweite | Folge für `sv-levelup/` |
+|---|---|---|
+| Root-`tsconfig.json` | `include: **/*.ts` | **zog `sv-levelup/` mit hinein** → korrigiert: in `exclude` aufgenommen |
+| Root-`eslint.config.mjs` | alles außer `autounfall-io/**` | **griff durch** → korrigiert: `sv-levelup/**` ignoriert, eigene Config angelegt |
+| Root-`vitest.config.ts` | `include: src/**` | sieht die Tests nicht |
+| `knip.json` | `project: src/**` | sieht die Dateien nicht |
+| alle ~20 Ratchets | `git ls-files "src/**"` | greifen nicht |
+
+Die ersten beiden Zeilen waren echte Fehler und sind behoben. Die übrigen drei sind richtig so —
+aber zusammen bedeuten sie: **die 140 Unit-Tests liefen nirgends automatisch.** Das ist exakt
+die Lücke, die beim Schwesterprojekt `claimondo-marketing` erst am 17.08.2026 auffiel, nachdem
+seine 23 Test-Files monatelang in keiner Pipeline liefen. Deshalb steht im `vitest`-Job der
+CI drei Schritte für `sv-levelup` (Deps, Typecheck, Unit-Tests) — ohne Ratchet und ohne
+Baseline, weil der Bestand vollständig grün ist und es keine Schuld zu grandfathern gibt.
+
+Der Typecheck gehört zwingend dazu: der Anreicherungs-Schreibpfad arbeitet gegen einen
+**ungetypten** Supabase-Client (`createClient` ohne `Database`-Generic). `tsc` prüft
+Spaltennamen dort nicht — eine falsche Spalte fängt nur die Testsuite.
+
 ### 5.2 Lead-Spiegelung in die Vertriebsliste
 
 Sobald F-06 einen Lead erzeugt, entsteht zusätzlich eine `tasks`-Zeile. Vorbild ist
@@ -646,6 +668,142 @@ Deutschland-Scrape aus §5.5.2 ist der Grundstock, dieser Pfad hält ihn aktuell
 ausschließlich Stammdaten (Name, Adresse, PLZ, Ort, Koordinaten, `place_id`) und **nie** in
 `partner_leads` oder `leads` (R-M).
 
+#### 5.5.3a Was die Anreicherung am echten Bestand leistet — gemessen, nicht geschätzt
+
+Zwei vollständige Trockenläufe über alle 62 Leads am 18.08.2026, jeweils ohne Schreibzugriff.
+Ausgangslage: **alle 62 Leads haben 0 E-Mail-Adressen, 0 Telefonnummern, 0 Websites.** Die
+Cold-Mail-Strategie hat ohne diesen Schritt buchstäblich keine Adresse.
+
+| | Websites | davon belastbar (≥ 70) | E-Mail | Telefon | Person |
+|---|---|---|---|---|---|
+| **Lauf 1** (naive Kandidaten) | 43 (69 %) | **16 (26 %)** | 19 (31 %) | 22 (35 %) | 7 (11 %) |
+| **Lauf 2** (korrigiert) | 49 (79 %) | **24 (39 %)** | 22 (35 %) | 22 (35 %) | 11 (18 %) |
+
+**Jede Zahl ist besser, obwohl Lauf 2 die strengere Regel fährt.** Die Kandidaten-Korrekturen
+erschließen mehr echte Treffer, als die Kontakt-Schwelle an falschen entfernt. Ohne Treffer
+blieben 13 Leads statt 19; belastbare Zuordnungen stiegen von 15 auf 23.
+
+**27 der 43 Treffer lagen unter Sicherheit 70** — also bei bloßer Namensähnlichkeit. Die
+Ursache war nicht Pech, sondern eine Klasse: der Domain-Kern wurde aus Gattungswörtern,
+Titeln und Vornamen gebildet.
+
+| Lead | geratene Domain | was das ist |
+|---|---|---|
+| `Ing.-Büro Urbach KG` | `sv-ing.de` | „Ing." = Abkürzung für Ingenieur |
+| `Dipl.-Ing. W. Lütz GmbH` | `dipl.de` | akademischer Titel |
+| `Michael Schneider GmbH` | `michael.de` | Vorname |
+| `Sachverständigenbüro Tobias Busse` | `tobias.de` | Vorname |
+| `KFZ-Sachverständigenbüro AL Inh. Tarkan Al` | `al.de` | zwei Buchstaben |
+| `Brockmann Ingenieure GmbH` | `brockmann.de` | häufiger Familienname |
+
+Der letzte Fall zeigt den Schaden am deutlichsten: aus `brockmann.de` wurden **E-Mail, Telefon,
+Vorname und Nachname** übernommen — eine vollständige fremde Identität im Lead. Daraus folgen
+die drei Korrekturen, die Lauf 2 zugrunde liegen:
+
+1. **Gattungswörter, Titel und Füllwörter streichen** (`ing`, `inh`, `dipl`, `dr`, `für`,
+   `fahrzeugtechnik`, `pruefstelle`, …) — `kern-name.ts`.
+2. **Auch aus dem letzten Kernwort Kandidaten bilden.** Bei „Inh. Harald Lange" ist der
+   Nachname das letzte Wort; wer nur das erste nimmt, rät `harald.de` statt `sv-lange.de`.
+3. **Kontaktdaten erst ab Sicherheit 70** — die Verschärfung gegenüber `CONTEXT` §5, begründet
+   in §5.5.3b.
+
+Nebenbefund: die Filialstruktur (§5.5.6 Punkt 3) führte dazu, dass dieselbe Website bis zu
+viermal abgerufen wurde. Ein Seiten-Cache über die Laufzeit behebt das — weniger Last auf
+fremden Servern bei identischem Ergebnis.
+
+#### Der Austausch im Detail — warum eine Firma weniger ein Gewinn ist
+
+Auf Lead-Ebene stiegen die E-Mail-Treffer von 19 auf 22. Auf **Firmen**-Ebene sanken sie von 15
+auf 14. Beides stimmt, und die Differenz ist die eigentliche Aussage: die Zugewinne fallen bei
+Filialen derselben Firma an (Lütz allein bringt vier Lead-Zeilen), während auf Firmenebene
+tatsächlich getauscht wurde.
+
+| | Firma | Lauf 1 | Lauf 2 |
+|---|---|---|---|
+| **raus** | Sachverständigenbüro Marc Limburg | `marc.de` (40) | verworfen |
+| | Brockmann Ingenieure GmbH | `brockmann.de` (40) | verworfen |
+| | Ingenieurbüro Schuppert & Tenne | `schuppert.de` (40) | verworfen |
+| | Lange & Brandenburg Ingenieurbüro | `sv-lange.de` (40) | verworfen |
+| | Kfz Gutachtenzentrum Rheinland | `gutachtenzentrum.de` (40) | verworfen |
+| **rein** | Ing.-Büro Urbach KG | `sv-ing.de` (40) | `kfz-gutachter-urbach.de` (90) |
+| | Dipl.-Ing. W. Lütz GmbH | `dipl.de` (40) | `luetz.de` (90) |
+| | Ingenieurbüro Dipl.-Ing. Dirk Zager | *kein Treffer* | `sv-zager.de` (90) |
+| | Sachverständigenbüro Tobias Busse | `tobias.de` (40) | `sv-busse.de` (100) |
+
+Fünf Zuordnungen bei bloßer Namensähnlichkeit fielen weg, vier belegte kamen hinzu. **Netto eine
+Firma weniger — aber vorher waren 15 Adressen zu einem unbekannten Teil fremd, jetzt sind 14
+belegt.** Für eine Kaltansprache ist das kein Verlust, sondern der Unterschied zwischen einer
+Liste, der man trauen kann, und einer, der man nicht trauen kann.
+
+#### Vier Fehler, die erst der scharfe Lauf zeigte
+
+Die 140 Unit-Tests waren grün, beide Trockenläufe vollständig, die Trefferquoten plausibel.
+Trotzdem lieferte der **erste Schreibzugriff auf fünf echte Leads** vier Befunde, die kein Test
+gefunden hätte — weil sie alle in der Form „Wert vorhanden, Wert unbrauchbar" auftreten:
+
+| # | Was in der Datenbank stand | Ursache | Folge |
+|---|---|---|---|
+| 1 | `email = &#105;&#x6e;&#102;…` | Die Seite kodiert die Adresse als HTML-Entities gegen Spam-Ernter; der `mailto:`-Wert wurde roh übernommen | Eine unbrauchbare Adresse, die **gefüllt aussieht**. Der Versand wäre hart gescheitert |
+| 2 | `vorname = "Herr"`, `nachname = "Patrick"` | „Geschäftsführer: **Herr** Patrick Brandenburg" — die Anrede rutschte in den Vornamen, der echte Nachname fiel hinten heraus | Eine Kaltmail hätte „Sehr geehrter Herr Patrick" geschrieben |
+| 3 | `website_sicherheit = 90` neben `website_url = null` | Der Rückwärtsgang drehte nur die fünf Audit-Felder zurück; die Begleitspalten stehen nicht im Audit | Eine Sicherheitsangabe zu einer Website, die es nicht mehr gibt |
+| 4 | `--limit 5` traf zweimal **verschiedene** Leads | Alle 62 tragen denselben `erstellt_am` (ein Import); ohne Tiebreaker gibt PostgreSQL keine Reihenfolge | Teilläufe nicht reproduzierbar, abgebrochener Massenlauf nicht fortsetzbar (**P6**) |
+
+Alle vier sind behoben, jeder mit einem zuerst roten Test. Zwei davon haben zusätzlich einen
+**Auffangschutz** bekommen, der auch die Varianten fängt, die hier nicht vorhergesehen sind:
+eine E-Mail muss nach dem Deuten die Form einer Adresse haben, ein Name muss aus zwei Teilen
+bestehen — sonst gibt es keinen Wert. R-B in seiner härtesten Lesart: **lieber kein Wert als
+einer, der gefüllt aussieht.**
+
+Die Lehre gehört in den Plan für P6: Ein Massenlauf über tausende Betriebe darf nicht als erster
+Schreibzugriff auf echte Daten stattfinden. Ein scharfer Lauf über wenige Datensätze mit
+anschließender Sichtprüfung **jedes einzelnen Feldes** ist der Schritt, der diese Klasse findet —
+Trockenläufe zeigen sie nicht, weil dort niemand die Werte anschaut.
+
+#### Was das für die Strategie heißt
+
+**Von 45 Firmen sind nach der Anreicherung 14 per E-Mail oder Telefon erreichbar (31 %).** Ohne
+die Anreicherung wären es null — insofern trägt der Schritt. Für eine Kampagne sind 14 Firmen
+aber keine Grundlage. Das bestätigt §5.5.1 mit gemessenen Zahlen statt einer Vermutung: **der
+Hebel ist die Lead-Gewinnung (§5.5.2), nicht die Aufbereitung des Bestands.** Die 62 Zeilen sind
+nach dieser Runde ausgereizt; der Deutschland-Scrape ist es, der den Trichter füllt.
+
+#### 5.5.3b Warum Kontaktdaten eine höhere Schwelle brauchen als Websites
+
+`CONTEXT` §5 sieht vor, Funde unter Sicherheit 70 zu schreiben und in der Vertriebsliste als
+unsicher zu markieren. Für die **Website** ist das richtig: sie ist ein Rechercheanhaltspunkt,
+und zwischen Eintrag und Nutzung steht ein Mensch, der beim Draufschauen korrigiert.
+
+Für **Kontaktdaten** trägt dieselbe Regel nicht, weil zwischen Markierung und Versand kein
+Mensch mehr steht. Eine E-Mail-Adresse mit Sicherheit 40 ist kein Hinweis, sondern ein Kanal:
+die Sequenz versendet automatisiert. Der Empfänger wäre ein Unbeteiligter, der nicht einmal
+zur Zielgruppe gehört — § 7 Abs. 2 UWG gegenüber einem Dritten, plus Schaden an der
+Absender-Reputation, der die gesamte Kampagne trifft.
+
+**Verbindlich:** `email`, `telefon`, `vorname`, `nachname` werden nur ab
+`KONTAKT_MINDESTSICHERHEIT = 70` geschrieben; darunter erscheinen sie mit Grund in
+`uebersprungen`. `website_url` wird weiterhin auch darunter geschrieben — mit
+`website_sicherheit` als Warnung, wie die Übergabe-Spec es vorsieht.
+
+**Die Schwelle prüft die Zuordnung der Quelle, nicht die Belastbarkeit des Werts.** Das ist
+keine Feinheit, sondern der Unterschied zwischen einer funktionierenden und einer nutzlosen
+Regel. Ein Fund trägt zwei verschiedene Zahlen:
+
+| Feld | Bedeutung | Beispiel `zentrale@sv-wester.de` |
+|---|---|---|
+| `zuordnung` | Gehört die Quelle zu **diesem** Lead? | 100 — Firmenname, Ort und PLZ stimmen |
+| `sicherheit` | Wie belastbar ist **dieser Wert**? | 60 — Rollenadresse, keine benennbare Person (T-25) |
+
+Die erste Fassung dieser Regel prüfte `sicherheit` — und verwarf damit **jede** Rollenadresse,
+weil T-25 sie auf 60 kappt. Bei Kfz-Sachverständigen ist `info@` / `kontakt@` / `zentrale@` die
+mit Abstand häufigste Impressumsadresse; die Regel hätte die Cold-Mail-Basis fast vollständig
+zerstört, während sie vorgab, sie zu schützen. Aufgefallen ist es nur, weil ein Lead im
+Nachher-Lauf eine E-Mail verlor, die er im Vorher-Lauf hatte. Die Kappung auf 60 bleibt
+erhalten — sie steht im Audit und sagt der Ansprache, dass keine persönliche Anrede möglich ist.
+
+Folge für die Erwartung: **die gemessene Trefferquote bei Kontaktdaten sinkt durch diese Regel.**
+Das ist der Zweck. Eine E-Mail-Quote von 31 %, bei der zwei Drittel fremde Adressen sind, ist
+für eine Kaltansprache schlechter als eine Quote von 12 % aus belastbaren Zuordnungen.
+
 #### 5.5.4 Zwei Preisstufen für zwei Zwecke
 
 Die Feldwahl entscheidet über die SKU-Stufe — und damit über den Preis (§7):
@@ -697,7 +855,7 @@ unverändert übernommen: `sv_lead_id` auf den drei `cold_mail_*`-Tabellen mit
 Abmeldelink in jeder Vorlage), Suppression-Prüfung R-O vor **jedem** Send, Ein-Klick-Abmeldung
 ohne Rückfrage.
 
-Zwei Dinge, die dort nicht stehen und ohne die eine Kampagne nicht laufen darf:
+Drei Dinge, die dort nicht stehen und ohne die eine Kampagne nicht laufen darf:
 
 1. **Der Befund in der Mail ist ein Teilbefund.** Der Massenlauf misst höchstens sechs von
    siebzehn Modulen (§3.4). Es gilt `kein_score = true`. **Die Vorlagen dürfen deshalb keinen
@@ -710,6 +868,16 @@ Zwei Dinge, die dort nicht stehen und ohne die eine Kampagne nicht laufen darf:
    schlechter als keine Kaltmail. Vorschlag: Das Enrollment geht bei einer Antwort auf
    `geantwortet`, und derselbe `tasks`-Mechanismus wie bei einem Terminwunsch (§5.2) legt eine
    Aufgabe mit Frist an — mit `typ = 'levelup_antwort'`.
+3. **Der Adressat ist die Firma, nicht der Lead.** Am Bestand gemessen (18.08.): die 62 Leads
+   sind **45 Firmen**; 9 davon haben mehrere Standorte, zusammen 17 Filialzeilen. Die
+   `Dipl.-Ing. W. Lütz GmbH` steht viermal drin (Overath, Waldbröl, Rösrath, Bergisch Gladbach),
+   `Ing.-Büro Urbach KG` dreimal. Ein Versand je `sv_lead_id` schickt derselben Firma vier
+   Mails — das ist der kürzeste Weg von einem Interessenten zu einer Beschwerde nach § 7 UWG.
+   **Vor jedem Send muss auf Firmenebene entdoppelt werden**; der belastbarste Schlüssel ist die
+   gefundene Domain (eine Firma hat eine Website), ersatzweise `kernName(firma)`. Für den
+   *Sichtbarkeits-Check* bleibt dagegen die Filiale die richtige Einheit — jeder Standort hat
+   eigene lokale Sichtbarkeit. Die beiden Einheiten sind verschieden und dürfen nicht
+   vermischt werden.
 
 **Rechtlich getrennt zu betrachten** — der Apotheken-Scraper hält es genauso:
 

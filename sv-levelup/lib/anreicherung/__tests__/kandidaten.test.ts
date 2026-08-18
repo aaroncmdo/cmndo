@@ -21,6 +21,26 @@ describe('kernName', () => {
     // Nichts zu raten — der Aufrufer muss das als "kein Kandidat" behandeln (R-B)
     expect(kernName('Kfz-Sachverständigenbüro')).toBe('')
   })
+
+  /**
+   * Am echten Bestand gemessen (18.08., Trockenlauf ueber die 62 Excel-Leads):
+   * ohne diese Streichungen wurde der Domain-Kern aus einer Abkuerzung gebildet
+   * — "Ing.-Büro Urbach KG" ergab den Kandidaten `sv-ing.de`, eine FREMDE Firma,
+   * unter deren Impressum eine fremde Telefonnummer stand.
+   */
+  it('streicht die Abkuerzung "Ing." — sie ist ein Gattungswort', () => {
+    expect(kernName('Ing.-Büro Urbach KG')).toBe('urbach')
+  })
+
+  it('streicht Fuellwoerter und "Inh."', () => {
+    expect(kernName('Sachverständigenbüro für Fahrzeugtechnik Inh. Harald Lange'))
+      .toBe('harald lange')
+  })
+
+  it('streicht Taetigkeitsbegriffe, die keine Eigennamen sind', () => {
+    expect(kernName('Kfz-Prüfstelle Fahrzeugbewertung Dornbach')).toBe('dornbach')
+    expect(kernName('Dipl.-Ing. Kessel Schadengutachten')).toBe('kessel')
+  })
 })
 
 describe('domainKandidaten', () => {
@@ -50,5 +70,21 @@ describe('domainKandidaten', () => {
   it('erzeugt keine Duplikate', () => {
     const k = domainKandidaten('Sachverständigenbüro Musterwerk', 'Münster')
     expect(new Set(k).size).toBe(k.length)
+  })
+
+  /**
+   * Bei "Inh. Harald Lange" ist der Nachname das LETZTE Kernwort. Wer nur das
+   * erste nimmt, raet `harald.de` und verpasst `sv-lange.de`. Beim Bestand ist
+   * der Personenname der haeufigste Domain-Kern.
+   */
+  it('bildet auch aus dem letzten Kernwort Kandidaten', () => {
+    const k = domainKandidaten('Sachverständigenbüro Inh. Harald Lange', null)
+    expect(k).toContain('lange.de')
+    expect(k).toContain('sv-lange.de')
+  })
+
+  it('haelt die Obergrenze von 5 auch bei mehrteiligen Kernen', () => {
+    expect(domainKandidaten('Gutachter Andreas Wettstein Rommerskirchen', 'Köln').length)
+      .toBeLessThanOrEqual(5)
   })
 })

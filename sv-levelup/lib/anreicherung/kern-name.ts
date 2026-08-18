@@ -14,12 +14,28 @@
  * zweiter Teil zur Domain gehoert. 'und' wird separat als Bindewort entfernt.
  */
 const GATTUNG = [
-  'kfz', 'kraftfahrzeug', 'sachverstaendigenbuero', 'sachverstaendiger', 'sachverstaendige',
-  'gutachter', 'gutachterbuero', 'ingenieurbuero', 'ingenieur', 'sv', 'svbuero', 'buero',
+  'kfz', 'kraftfahrzeug', 'kraftfahrzeugtechnik', 'fahrzeugtechnik', 'fahrzeugbewertung',
+  'sachverstaendigenbuero', 'sachverstaendiger', 'sachverstaendige', 'sachverstaendigen',
+  'gutachter', 'gutachterbuero', 'gutachten', 'schadengutachten', 'pruefstelle',
+  'ingenieurbuero', 'ingenieur', 'sv', 'svbuero', 'buero',
   'gmbh', 'ug', 'ag', 'kg', 'ohg', 'gbr', 'mbh', 'co',
 ]
 
-const IMMER_STREICHEN = new Set(GATTUNG)
+/**
+ * Titel, Abkuerzungen und Fuellwoerter. Sie stehen bewusst NEBEN der
+ * Gattungsliste: es sind keine Taetigkeitsbegriffe, aber als Domain-Kern
+ * genauso unbrauchbar.
+ *
+ * ⚠ Am Bestand gemessen (18.08.): ohne 'ing' ergab "Ing.-Büro Urbach KG" den
+ * Kandidaten `sv-ing.de` — eine fremde Firma, deren Impressum eine fremde
+ * Telefonnummer lieferte. Ohne 'inh' entstand `inh.de`.
+ */
+const TITEL_UND_FUELLWOERTER = [
+  'ing', 'inh', 'dipl', 'dr', 'prof', 'kfm',
+  'fuer', 'der', 'die', 'das', 'den', 'dem', 'von', 'vom', 'am', 'im', 'zur', 'zum',
+]
+
+const IMMER_STREICHEN = new Set([...GATTUNG, ...TITEL_UND_FUELLWOERTER])
 
 export function umlauteAuf(s: string): string {
   return s
