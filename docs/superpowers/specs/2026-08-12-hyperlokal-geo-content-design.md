@@ -78,14 +78,21 @@ marketing_content_jobs  (Status + Kosten in Cents — existiert bereits)
    ├─► 1. Substanz laden   (Register §4; ohne 3 Fakten -> Job bricht ab)
    ├─► 2. Claude generiert  (Prompt bekommt NUR die Fakten + Quellen)
    ├─► 3. Qualitäts-Gates   (§6) — automatisch, blockierend
-   └─► 4. Status 'review'   → **kein Auto-Publish**
-   ▼
-Redaktion im Admin: lesen, korrigieren, freigeben
+   └─► 4. Gate bestanden?
+          ├─ ja   → Status 'veroeffentlicht'  → **direkt live**
+          └─ nein → Status 'in_review'        → Redaktion im Admin
    ▼
 wissen_artikel-Muster (Speicherung + Rendering) → Seite live
 ```
 
-**Warum kein Auto-Publish:** Ein Fehler in einem generierten Text ist bei 300 Orten ein Fehler auf 300 Seiten — und UWG-Verstöße (erfundene Zahlen) sind abmahnfähig. Der Admin ist der Gate, genau wie bei Wissen.
+**Auto-Publish nach bestandenem Gate — geändert am 18.08.2026 (Aaron).**
+Die ursprüngliche Fassung schrieb hier „kein Auto-Publish" fest, mit der Begründung: *„Ein Fehler in einem generierten Text ist bei 300 Orten ein Fehler auf 300 Seiten — und UWG-Verstöße (erfundene Zahlen) sind abmahnfähig."*
+
+Diese Sorge gilt **ungeprüften** Zahlen. Genau dagegen wurde das Gate gebaut: es verwirft jeden Unfall-Hotspot ohne belegbare Quell-URL und verlangt ≥ 3 harte, extern verifizierbare Fakten. Damit ist es dieselbe Bedingung, unter der Auto-Publish bei der **B2B-Content-Pipeline** seit dem 02.07.2026 läuft („Auto-Publish NUR nach Validierung", Aaron-Entscheid). Die Regel ist also nicht gelockert, sondern über beide Pipelines vereinheitlicht.
+
+Was den Schutz weiterhin trägt: das Gate läuft unverändert, `aktualisiere` schickt auch von Hand ergänzte Inhalte erneut hindurch, und der Marketing-Read filtert `status='veroeffentlicht'` über eine **RLS-Policy** statt im Code — ein vergessener Filter kann keine Entwürfe ausliefern.
+
+Was den Ausschlag gab: Nach vier Tagen mit fertiger Pipeline standen **0 Zeilen** in `stadt_lokalinhalte`. Die Freigabe war nicht das Sicherheitsnetz, sondern der Engpass — gebaut, aber nie ausgelöst.
 
 **Aktualität:** Artikel bekommen ein `stand_am`. Wird ein Fakt neu (mehr SV, neue Werkstatt), markiert der Job den Artikel als *auffrischbar*. Frische ist bei ChatGPT ein starker Citation-Faktor.
 
