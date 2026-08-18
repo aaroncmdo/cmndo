@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV-LevelUp — Zwei Wege, ein Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,600;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nacht:#0a121c; --asphalt:#111c29; --chrom:#e6ebf2;
+  --signal:#ff4d1c; --signal-tief:#e03c0f; --blau:#1668d6;
+  --flaeche:#ffffff; --flaeche-2:#f4f7fa; --flaeche-3:#e9eff5;
+  --ink:#0a121c; --text:#3c4b5d; --muted:#78899d;
+  --linie:#dfe7ef; --linie-stark:#c3cfdc;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --r:12px; --r-gross:20px;
+  --schatten:0 2px 4px rgba(10,18,28,.05), 0 14px 34px -18px rgba(10,18,28,.28);
+  --schatten-hoch:0 4px 8px rgba(10,18,28,.08), 0 30px 60px -24px rgba(10,18,28,.4);
+  --takt:cubic-bezier(.2,.8,.25,1);
+  --display:"Archivo","Archivo Narrow","Helvetica Neue Condensed",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --text-font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--text-font); font-size:16px; line-height:1.6; color:var(--text); background:var(--flaeche); -webkit-font-smoothing:antialiased}
+h1,h2,h3,.display{font-family:var(--display); font-style:italic; font-weight:800; color:var(--ink); letter-spacing:-.03em; line-height:1.02; text-transform:uppercase}
+h1{font-size:clamp(2.3rem,5.6vw,4.2rem)}
+h2{font-size:clamp(1.6rem,3.2vw,2.6rem)}
+h3{font-size:1.2rem; letter-spacing:-.02em; line-height:1.14; text-transform:none}
+h4{font-family:var(--display); font-style:italic; font-weight:700; font-size:1rem; color:var(--ink); letter-spacing:-.015em; text-transform:none}
+p{margin:0 0 1em}
+strong,b{font-weight:650; color:var(--ink)}
+.tnum{font-variant-numeric:tabular-nums}
+.huelle{max-width:1120px; margin:0 auto; padding:0 26px}
+.schmal{max-width:760px}
+.augbraue{font-family:var(--display); font-style:italic; font-weight:700; font-size:.8rem; letter-spacing:.16em; text-transform:uppercase; color:var(--signal)}
+.lead{font-size:1.14rem; line-height:1.6}
+.klein{font-size:.84rem; line-height:1.5; color:var(--muted)}
+.mini{font-size:.75rem; line-height:1.45; color:var(--muted)}
+.streifen{height:7px; background:repeating-linear-gradient(115deg, var(--signal) 0 22px, var(--signal-tief) 22px 44px, var(--nacht) 44px 62px, var(--asphalt) 62px 84px)}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; font-family:var(--display); font-style:italic; font-weight:700; font-size:1rem; letter-spacing:.01em; text-transform:uppercase; padding:16px 30px; border:0; border-radius:var(--r); cursor:pointer; transition:transform .16s var(--takt), background .16s, box-shadow .16s}
+.btn:active{transform:translateY(2px)}
+.btn-haupt{background:var(--signal); color:#fff; box-shadow:0 3px 0 var(--signal-tief), 0 14px 28px -14px rgba(255,77,28,.85)}
+.btn-haupt:hover{background:var(--signal-tief)}
+.btn-hell{background:#fff; color:var(--ink); box-shadow:inset 0 0 0 2px var(--linie-stark)}
+.btn-hell:hover{box-shadow:inset 0 0 0 2px var(--ink)}
+.btn-geist{background:transparent; color:var(--muted); padding:10px 14px; font-size:.86rem}
+.btn-geist:hover{color:var(--ink)}
+.btn-breit{width:100%}
+.btn:disabled{opacity:.35; cursor:not-allowed; transform:none; box-shadow:none}
+
+.demo{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:900; display:flex; align-items:center; gap:3px; padding:5px; background:rgba(10,18,28,.95); backdrop-filter:blur(14px); border-radius:100px; box-shadow:var(--schatten-hoch); max-width:calc(100vw - 28px); overflow-x:auto}
+.demo b{font-family:var(--display); font-style:italic; color:rgba(255,255,255,.45); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; padding:0 10px 0 13px; white-space:nowrap}
+.demo button{font-family:var(--display); font-style:italic; font-size:.75rem; font-weight:700; color:rgba(255,255,255,.7); background:transparent; border:0; padding:8px 12px; border-radius:100px; cursor:pointer; text-transform:uppercase; white-space:nowrap}
+.demo button:hover{color:#fff; background:rgba(255,255,255,.1)}
+.demo button[aria-current="true"]{background:var(--signal); color:#fff}
+
+.buehne{display:none; animation:auf .38s var(--takt)}
+.buehne[data-aktiv]{display:block}
+@keyframes auf{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){.buehne{animation:none}}
+
+.kopf{background:var(--nacht); position:sticky; top:0; z-index:400}
+.kopf .huelle{display:flex; align-items:center; justify-content:space-between; height:68px}
+.logo{display:flex; align-items:center; gap:9px; font-family:var(--display); font-style:italic; font-weight:800; color:#fff; font-size:1.3rem; letter-spacing:-.035em; text-transform:uppercase}
+.logo .plakette{background:var(--signal); color:#fff; padding:5px 9px; border-radius:7px; font-size:.9rem; letter-spacing:-.02em; transform:skewX(-7deg)}
+.logo .plakette span{display:inline-block; transform:skewX(7deg)}
+.kopf .btn-geist{color:rgba(255,255,255,.6)}
+.kopf .btn-geist:hover{color:#fff}
+
+/* Fortschrittsleiste */
+.schritte{background:var(--nacht); border-top:1px solid rgba(255,255,255,.08)}
+.schritte .huelle{display:flex; gap:0; align-items:stretch; overflow-x:auto; scrollbar-width:none}
+.schritte .huelle::-webkit-scrollbar{display:none}
+.sr{display:flex; align-items:center; gap:9px; padding:13px 20px 13px 0; white-space:nowrap; opacity:.42}
+.sr .nr{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 .72rem var(--mono); background:rgba(255,255,255,.14); color:#fff}
+.sr .tx{font-family:var(--display); font-style:italic; font-weight:700; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; color:#fff}
+.sr.aktiv{opacity:1}
+.sr.aktiv .nr{background:var(--signal)}
+.sr.fertig{opacity:.85}
+.sr.fertig .nr{background:var(--good)}
+.sr::after{content:"›"; color:rgba(255,255,255,.28); margin-left:14px; font-size:1.1rem}
+.sr:last-child::after{content:""}
+
+.hero{background:var(--nacht); color:#fff; padding:64px 0 72px; position:relative; overflow:hidden}
+.hero::before{content:""; position:absolute; inset:-40% -20% auto auto; width:60%; height:180%; background:radial-gradient(closest-side, rgba(255,77,28,.22), transparent 70%); pointer-events:none}
+.hero h1{color:#fff; position:relative}
+.hero .lead{color:rgba(255,255,255,.78); position:relative; max-width:60ch}
+.abschnitt{padding:56px 0}
+.abschnitt.grau{background:var(--flaeche-2)}
+
+/* Moduskarten */
+.modi{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px; position:relative}
+@media(max-width:820px){.modi{grid-template-columns:1fr}}
+.modus{background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.14); border-radius:var(--r-gross); padding:26px 26px 22px; cursor:pointer; text-align:left; transition:all .18s var(--takt); position:relative; overflow:hidden}
+.modus:hover{border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.08)}
+.modus[aria-pressed="true"]{border-color:var(--signal); background:rgba(255,77,28,.13); box-shadow:0 0 0 4px rgba(255,77,28,.15)}
+.modus .kennung{font-family:var(--display); font-style:italic; font-weight:700; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--signal)}
+.modus h3{color:#fff; margin:10px 0 8px; font-size:1.45rem; font-family:var(--display); font-style:italic; text-transform:uppercase; letter-spacing:-.02em}
+.modus p{color:rgba(255,255,255,.72); font-size:.92rem; margin:0 0 14px}
+.modus ul{list-style:none; display:flex; flex-direction:column; gap:6px}
+.modus li{color:rgba(255,255,255,.62); font-size:.82rem; display:flex; gap:8px; align-items:flex-start}
+.modus li::before{content:"—"; color:var(--signal); flex:none}
+.modus .haken{position:absolute; top:18px; right:18px; width:26px; height:26px; border-radius:50%; border:2px solid rgba(255,255,255,.25); display:grid; place-items:center; color:transparent; font-weight:800; font-size:.8rem}
+.modus[aria-pressed="true"] .haken{background:var(--signal); border-color:var(--signal); color:#fff}
+
+.feld{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap}
+.feld input{flex:1 1 320px; min-width:0; border:2px solid var(--linie-stark); background:#fff; color:var(--ink); border-radius:var(--r); padding:16px 18px; font:500 1rem var(--text-font)}
+.feld input:focus{outline:0; border-color:var(--signal)}
+.hero .feld input{background:rgba(255,255,255,.96)}
+/* Prüfumfang */
+.module{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; margin-top:26px}
+.mod{background:#fff; border:2px solid var(--linie); border-radius:var(--r-gross); padding:18px 20px; cursor:pointer; text-align:left; transition:all .16s var(--takt); position:relative; display:flex; flex-direction:column; gap:8px}
+.mod:hover{border-color:var(--linie-stark)}
+.mod[aria-pressed="true"]{border-color:var(--signal); box-shadow:0 0 0 3px rgba(255,77,28,.13)}
+.mod[data-gesperrt]{opacity:.42; cursor:not-allowed; background:var(--flaeche-2)}
+.mod[data-gesperrt]:hover{border-color:var(--linie)}
+.mod .zeile{display:flex; align-items:center; gap:11px}
+.mod .schalter{width:42px;height:24px;border-radius:100px;background:var(--linie-stark);position:relative;flex:none;transition:background .16s}
+.mod .schalter::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .18s var(--takt);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.mod[aria-pressed="true"] .schalter{background:var(--signal)}
+.mod[aria-pressed="true"] .schalter::after{transform:translateX(18px)}
+.mod h4{flex:1}
+.mod .dauer{font:700 .68rem var(--mono); color:var(--muted); background:var(--flaeche-2); padding:3px 8px; border-radius:100px; white-space:nowrap}
+.mod p{margin:0; font-size:.84rem; color:var(--text); line-height:1.5}
+.mod .liefert{font-size:.74rem; color:var(--muted); border-top:1px dashed var(--linie); padding-top:8px; margin-top:2px}
+.mod .liefert b{color:var(--ink); font-weight:650}
+.mod .warn{font:700 .68rem var(--mono); color:var(--warning); text-transform:uppercase; letter-spacing:.06em}
+.mod .neu{position:absolute; top:-9px; right:14px; background:var(--signal); color:#fff; font:800 .62rem var(--display); font-style:italic; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border-radius:100px}
+
+.bilanz{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:26px; background:var(--nacht); color:#fff; border-radius:var(--r-gross); padding:20px 24px}
+.bilanz .z{display:flex; gap:26px; flex-wrap:wrap}
+.bilanz .z div{display:flex; flex-direction:column}
+.bilanz .z span{font:700 .68rem var(--mono); letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.5)}
+.bilanz .z b{font-family:var(--display); font-style:italic; font-size:1.6rem; letter-spacing:-.03em; color:#fff}
+
+/* Warten */
+.pruefliste{display:flex; flex-direction:column; gap:10px; margin-top:28px; max-width:620px}
+.pz{display:flex; align-items:center; gap:13px; background:#fff; border:1px solid var(--linie); border-radius:var(--r); padding:13px 16px}
+.pz .ik{width:22px;height:22px;border-radius:50%;border:2px solid var(--linie-stark);flex:none;display:grid;place-items:center;font-size:.7rem;color:transparent}
+.pz.laeuft .ik{border-color:var(--signal); border-right-color:transparent; animation:dreh .8s linear infinite}
+.pz.fertig .ik{background:var(--good); border-color:var(--good); color:#fff}
+@keyframes dreh{to{transform:rotate(360deg)}}
+.pz .tx{flex:1; font-size:.92rem; font-weight:600; color:var(--ink)}
+.pz .st{font:700 .7rem var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+.pz.fertig .st{color:var(--good)}
+
+/* Ergebnis */
+.kacheln{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:26px}
+.kachel{background:#fff; border:1px solid var(--linie); border-radius:var(--r-gross); padding:18px 20px; position:relative; overflow:hidden; box-shadow:var(--schatten)}
+.kachel .bar{position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--signal)}
+.kachel.g .bar{background:var(--good)} .kachel.b .bar{background:var(--blau)} .kachel.r .bar{background:var(--critical)}
+.kachel .lab{font-size:.78rem; color:var(--muted); font-weight:600}
+.kachel .val{font-family:var(--display); font-style:italic; font-weight:800; font-size:2.5rem; letter-spacing:-.045em; line-height:1.04; color:var(--ink); margin:6px 0 2px}
+.kachel .sub{font-size:.75rem; color:var(--muted)}
+
+.rows{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.row{display:grid;grid-template-columns:minmax(90px,200px) 1fr auto;align-items:center;gap:13px}
+.row .nm{font-size:.8rem;color:var(--muted);font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{height:20px;background:var(--flaeche-2);border-radius:5px;overflow:hidden}
+.fill{display:block;height:100%;border-radius:0 5px 5px 0;background:var(--linie-stark);transition:width .6s var(--takt)}
+.row.hi .fill{background:var(--signal)} .row.hi .nm{color:var(--ink)}
+.row.ok .fill{background:var(--good)} .row.gap .fill{background:var(--critical)}
+.row .vv{font:800 .82rem var(--display);font-style:italic;color:var(--ink);min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+
+.karte{background:#fff;border:1px solid var(--linie);border-radius:var(--r-gross);padding:22px 24px;box-shadow:var(--schatten)}
+.karte h3{margin-bottom:4px}
+.karte .u{font-size:.84rem;color:var(--muted);margin-bottom:16px}
+
+/* Gesperrter Bereich */
+.sperre{position:relative; margin-top:30px; border-radius:var(--r-gross); overflow:hidden; background:var(--nacht); color:#fff; padding:44px 30px; text-align:center}
+.sperre::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(115deg, rgba(255,77,28,.14) 0 26px, transparent 26px 52px); pointer-events:none}
+.sperre .schloss{width:56px;height:56px;border-radius:50%;background:var(--signal);display:grid;place-items:center;margin:0 auto 18px;font-size:1.5rem}
+.sperre h2{color:#fff; margin-bottom:10px}
+.sperre p{color:rgba(255,255,255,.75); max-width:56ch; margin:0 auto 22px}
+.sperrliste{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;max-width:860px;margin:0 auto 26px;text-align:left}
+.sperrliste div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:13px 15px}
+.sperrliste b{color:#fff;font-size:.9rem;display:block;margin-bottom:3px}
+.sperrliste span{color:rgba(255,255,255,.55);font-size:.78rem}
+
+/* Funnel */
+.frage{background:#fff;border:1px solid var(--linie);border-radius:var(--r-gross);padding:24px 26px;margin-bottom:14px;box-shadow:var(--schatten)}
+.frage h4{margin-bottom:14px;font-size:1.05rem}
+.wahl{display:flex;gap:10px;flex-wrap:wrap}
+.wahl button{border:2px solid var(--linie-stark);background:#fff;color:var(--text);border-radius:100px;padding:11px 20px;font:650 .88rem var(--text-font);cursor:pointer;transition:all .15s var(--takt)}
+.wahl button:hover{border-color:var(--ink);color:var(--ink)}
+.wahl button[aria-pressed="true"]{background:var(--signal);border-color:var(--signal);color:#fff}
+
+.slot{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px}
+.slot button{border:2px solid var(--linie-stark);background:#fff;border-radius:var(--r);padding:14px 10px;cursor:pointer;text-align:center;transition:all .15s var(--takt)}
+.slot button:hover{border-color:var(--ink)}
+.slot button[aria-pressed="true"]{border-color:var(--signal);background:rgba(255,77,28,.07)}
+.slot b{display:block;font-family:var(--display);font-style:italic;font-size:1rem;color:var(--ink)}
+.slot span{font-size:.74rem;color:var(--muted)}
+
+.merk{border-left:4px solid var(--signal);background:rgba(255,77,28,.06);border-radius:0 var(--r) var(--r) 0;padding:15px 18px;font-size:.9rem;margin-top:18px}
+.merk.gruen{border-left-color:var(--good);background:rgba(12,163,12,.07)}
+.merk.gelb{border-left-color:var(--warning);background:rgba(250,178,25,.09)}
+fuss{display:block}
+.fuss{background:var(--nacht);color:rgba(255,255,255,.55);padding:34px 0 90px;font-size:.82rem;margin-top:50px}
+.fuss b{color:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--linie-stark);background:var(--flaeche-2);padding:4px 11px;border-radius:100px;font:700 .66rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.chip.on{border-color:var(--good);background:rgba(12,163,12,.1);color:#0a7a0a}
+</style>
+</head>
+<body>
+
+<header class="kopf"><div class="huelle">
+  <div class="logo">SV<span class="plakette"><span>Level</span></span>Up</div>
+  <button class="btn btn-geist" onclick="zeige('start')">Neu starten</button>
+</div></header>
+<div class="streifen"></div>
+
+<div class="schritte"><div class="huelle" id="schrittleiste">
+  <div class="sr" data-s="start"><span class="nr">1</span><span class="tx">Ausgangslage</span></div>
+  <div class="sr" data-s="umfang"><span class="nr">2</span><span class="tx">Prüfumfang</span></div>
+  <div class="sr" data-s="warten"><span class="nr">3</span><span class="tx">Messung</span></div>
+  <div class="sr" data-s="ergebnis"><span class="nr">4</span><span class="tx">Befund</span></div>
+  <div class="sr" data-s="buchung"><span class="nr">5</span><span class="tx">Freischalten</span></div>
+  <div class="sr" data-s="funnel"><span class="nr">6</span><span class="tx">Kurz zu Ihnen</span></div>
+  <div class="sr" data-s="frei"><span class="nr">7</span><span class="tx">Lösungen</span></div>
+</div></div>
+
+<!-- ══════════ 1 · AUSGANGSLAGE ══════════ -->
+<section class="buehne" id="start" data-aktiv>
+  <div class="hero"><div class="huelle">
+    <div class="augbraue">Sichtbarkeits-Check für Kfz-Sachverständige</div>
+    <h1 style="margin:12px 0 16px">Wo stehen Sie<br>gerade?</h1>
+    <p class="lead">Zwei Wege, ein Check. Wer gerade aufbaut, braucht andere Zahlen als wer seit
+    zehn Jahren im Markt ist. Wählen Sie Ihre Ausgangslage — der Prüfumfang richtet sich danach.</p>
+
+    <div class="modi">
+      <button class="modus" id="m-aufbau" aria-pressed="false" onclick="setzeModus('aufbau')">
+        <div class="haken">✓</div>
+        <div class="kennung">Weg A</div>
+        <h3>Ich baue gerade auf</h3>
+        <p>Kein Google-Profil, Website im Bau oder gerade erst online. Sie wollen wissen, gegen wen
+        Sie antreten und was zuerst zu tun ist.</p>
+        <ul>
+          <li>Wettbewerbsfeld im 50-km-Umkreis</li>
+          <li>Marktbewertung gegen Vergleichsmärkte</li>
+          <li>Suchnachfrage und freie Nischen</li>
+          <li>Reihenfolge der ersten zwölf Schritte</li>
+        </ul>
+      </button>
+      <button class="modus" id="m-bestand" aria-pressed="false" onclick="setzeModus('bestand')">
+        <div class="haken">✓</div>
+        <div class="kennung">Weg B</div>
+        <h3>Ich bin schon da</h3>
+        <p>Profil und Website laufen. Sie wollen wissen, wo Sie im Feld stehen, was Ihnen entgeht
+        und welche Stellschraube am meisten bringt.</p>
+        <ul>
+          <li>Ihr Score über sieben Säulen</li>
+          <li>Ihre Position gegen die Büros im Umkreis</li>
+          <li>Technik, SEO und Nutzererlebnis Ihrer Seite</li>
+          <li>Ihre Anzeigen und was sie bringen</li>
+        </ul>
+      </button>
+    </div>
+
+    <div class="feld" id="eingabe" style="display:none">
+      <input type="url" id="url" placeholder="Ihre Website — oder leer lassen, wenn es noch keine gibt">
+      <button class="btn btn-haupt" onclick="zeige('umfang')">Weiter zum Prüfumfang</button>
+    </div>
+    <p class="mini" id="hinweis" style="margin-top:14px;color:rgba(255,255,255,.5);display:none"></p>
+  </div></div>
+</section>
+<!-- ══════════ 2 · PRÜFUMFANG ══════════ -->
+<section class="buehne" id="umfang">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Schritt 2</div>
+    <h2 style="margin:10px 0 12px">Was sollen wir messen?</h2>
+    <p class="lead schmal" id="umfangText">Voreingestellt ist, was zu Ihrer Ausgangslage passt.
+    Sie können jedes Modul an- und abschalten. Was wir nicht messen, steht später auch nicht im
+    Bericht — als „nicht erhoben“, nie als Schätzung.</p>
+
+    <div class="module" id="modulliste"></div>
+
+    <div class="bilanz">
+      <div class="z">
+        <div><span>Module</span><b id="bModule">0</b></div>
+        <div><span>Prüfpunkte</span><b id="bPunkte">0</b></div>
+        <div><span>Dauer</span><b id="bDauer">0 min</b></div>
+      </div>
+      <button class="btn btn-haupt" id="btnStart" onclick="starteMessung()">Messung starten</button>
+    </div>
+    <p class="mini" style="margin-top:14px">Alle Abfragen sind rein lesend. Vor jeder
+    Verzeichnisabfrage wird die <span style="font-family:var(--mono)">robots.txt</span> gelesen und
+    befolgt; gesperrte Quellen erscheinen als „nicht geprüft“.</p>
+  </div></div>
+</section>
+
+<!-- ══════════ 3 · MESSUNG ══════════ -->
+<section class="buehne" id="warten">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Schritt 3</div>
+    <h2 style="margin:10px 0 12px">Wir messen gerade</h2>
+    <p class="lead schmal">Jede Zahl bekommt eine Quelle und ein Datum. Was nicht messbar ist,
+    wird als solches vermerkt — und nicht ersetzt.</p>
+    <div class="pruefliste" id="pruefliste"></div>
+    <div class="merk gruen" style="max-width:620px" id="fertigHinweis" hidden>
+      <b>Fertig.</b> <span id="fertigText"></span>
+      <div style="margin-top:12px"><button class="btn btn-haupt" onclick="zeige('ergebnis')">Befund ansehen</button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- ══════════ 4 · BEFUND ══════════ -->
+<section class="buehne" id="ergebnis">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue" id="befundAugbraue">Schritt 4 · Befund</div>
+    <h2 style="margin:10px 0 12px" id="befundTitel">Ihr Befund</h2>
+    <p class="lead schmal" id="befundLead"></p>
+
+    <div class="kacheln" id="befundKacheln"></div>
+
+    <!-- Modul-Ausgaben -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;align-items:start" id="befundBlocks"></div>
+
+    <!-- GESPERRT -->
+    <div class="sperre">
+      <div class="schloss">🔒</div>
+      <h2>Was jetzt zu tun ist — Schritt für Schritt</h2>
+      <p>Der Befund oben zeigt die Lage. Was daraus folgt, in welcher Reihenfolge und mit welchem
+      Aufwand, besprechen wir im Citation-Call. Danach ist alles hier freigeschaltet.</p>
+      <div class="sperrliste" id="sperrliste"></div>
+      <button class="btn btn-haupt" onclick="zeige('buchung')">Freischalten &amp; Termin wählen</button>
+      <p class="mini" style="margin-top:14px;color:rgba(255,255,255,.42)">30 Minuten, kostenfrei,
+      ohne Verpflichtung. Sie bekommen den vollständigen Maßnahmenplan als PDF.</p>
+    </div>
+  </div></div>
+</section>
+<!-- ══════════ 5 · BUCHUNG ══════════ -->
+<section class="buehne" id="buchung">
+  <div class="abschnitt"><div class="huelle schmal">
+    <div class="augbraue">Schritt 5</div>
+    <h2 style="margin:10px 0 12px">Wann passt es Ihnen?</h2>
+    <p class="lead">Dreißig Minuten am Telefon. Wir gehen den Befund durch und Sie bekommen den
+    Maßnahmenplan als PDF — unabhängig davon, ob wir danach zusammenarbeiten.</p>
+    <div class="karte" style="margin-top:24px">
+      <h3>Freie Termine</h3>
+      <div class="u">Diese Woche · Zeiten in MEZ</div>
+      <div class="slot">
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Mi · 09:30</b><span>13. August</span></button>
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Mi · 14:00</b><span>13. August</span></button>
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Do · 11:00</b><span>14. August</span></button>
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Fr · 08:30</b><span>15. August</span></button>
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Fr · 16:30</b><span>15. August</span></button>
+        <button aria-pressed="false" onclick="waehleSlot(this)"><b>Mo · 10:00</b><span>18. August</span></button>
+      </div>
+      <div class="feld" style="margin-top:20px">
+        <input type="tel" placeholder="Ihre Telefonnummer für den Rückruf">
+        <button class="btn btn-haupt" onclick="zeige('funnel')">Termin bestätigen</button>
+      </div>
+    </div>
+    <div class="merk">Kein Verkaufsgespräch mit Vertrag am Ende. Wenn Sie danach nichts von uns
+    wollen, behalten Sie trotzdem den Plan.</div>
+  </div></div>
+</section>
+
+<!-- ══════════ 6 · FUNNEL ══════════ -->
+<section class="buehne" id="funnel">
+  <div class="abschnitt"><div class="huelle schmal">
+    <div class="augbraue">Schritt 6</div>
+    <h2 style="margin:10px 0 12px">Drei Fragen, dann sind Sie durch</h2>
+    <p class="lead">Damit das Gespräch nicht bei Null anfängt.</p>
+
+    <div class="frage" style="margin-top:24px">
+      <h4>Wie lange sind Sie schon als Sachverständiger unterwegs?</h4>
+      <div class="wahl">
+        <button aria-pressed="false" onclick="einfach(this)">Ich starte gerade</button>
+        <button aria-pressed="false" onclick="einfach(this)">Unter 2 Jahren</button>
+        <button aria-pressed="false" onclick="einfach(this)">2 bis 10 Jahre</button>
+        <button aria-pressed="false" onclick="einfach(this)">Über 10 Jahre</button>
+      </div>
+    </div>
+    <div class="frage">
+      <h4>Nutzen Sie schon KI im Büro?</h4>
+      <div class="wahl">
+        <button aria-pressed="false" onclick="einfach(this)">Täglich</button>
+        <button aria-pressed="false" onclick="einfach(this)">Ab und zu</button>
+        <button aria-pressed="false" onclick="einfach(this)">Noch nicht</button>
+        <button aria-pressed="false" onclick="einfach(this)">Weiß nicht, was gemeint ist</button>
+      </div>
+    </div>
+    <div class="frage">
+      <h4>Haben Sie einen Marketingpartner?</h4>
+      <div class="wahl">
+        <button aria-pressed="false" onclick="einfach(this)">Ja, feste Agentur</button>
+        <button aria-pressed="false" onclick="einfach(this)">Jemand macht es nebenbei</button>
+        <button aria-pressed="false" onclick="einfach(this)">Mache ich selbst</button>
+        <button aria-pressed="false" onclick="einfach(this)">Niemand</button>
+      </div>
+    </div>
+    <button class="btn btn-haupt btn-breit" style="margin-top:8px" onclick="zeige('frei')">Fertig — Lösungen anzeigen</button>
+  </div></div>
+</section>
+
+<!-- ══════════ 7 · FREI ══════════ -->
+<section class="buehne" id="frei">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Schritt 7 · Freigeschaltet</div>
+    <h2 style="margin:10px 0 12px" id="freiTitel">Ihre Maßnahmen, in der Reihenfolge der Wirkung</h2>
+    <p class="lead schmal" id="freiLead"></p>
+    <div class="merk gruen" style="max-width:760px"><b>Termin steht.</b> Die Bestätigung mit
+    Kalendereintrag ist unterwegs. Den vollständigen Plan als PDF finden Sie im Anhang.</div>
+    <div id="freiListe" style="margin-top:26px;display:flex;flex-direction:column;gap:11px"></div>
+  </div></div>
+</section>
+
+<div class="fuss"><div class="huelle">
+  <b>SV-LevelUp · Entwurf</b> — alle Zahlen auf dieser Seite sind Beispielwerte aus der
+  Münsterland-Erhebung vom 12. August 2026 und dienen nur der Darstellung des Ablaufs.<br>
+  Rechtliche Angaben sind Hinweise, keine Rechtsberatung.
+</div></div>
+
+<nav class="demo" aria-label="Entwurfs-Navigation">
+  <b>Entwurf</b>
+  <button onclick="zeige('start')" aria-current="true">1 Lage</button>
+  <button onclick="zeige('umfang')">2 Umfang</button>
+  <button onclick="zeige('warten')">3 Messung</button>
+  <button onclick="zeige('ergebnis')">4 Befund</button>
+  <button onclick="zeige('buchung')">5 Termin</button>
+  <button onclick="zeige('funnel')">6 Funnel</button>
+  <button onclick="zeige('frei')">7 Frei</button>
+</nav>
+<script>
+/* ═══════════════ Zustand ═══════════════ */
+let MODUS = null;                 // 'aufbau' | 'bestand'
+let AKTIV = new Set();            // gewählte Modul-Ids
+
+const MODULE = [
+ {id:'gbp', t:'Google-Unternehmensprofil', neu:false, p:14, min:1, modi:['bestand'],
+  x:'Kategorie, Öffnungszeiten, Fotos, Leistungen, Bewertungen und Antwortverhalten Ihres Profils.',
+  l:'<b>Liefert:</b> Profilstärke von 20 Punkten, Vergleich mit dem Umkreis, Liste der fehlenden Felder.',
+  braucht:'gbp'},
+ {id:'web', t:'Website — Technik &amp; Recht', neu:false, p:22, min:2, modi:['bestand','aufbau'],
+  x:'Auslieferung, Ladezeit, Mobilansicht, Auszeichnungen, Impressum und Datenschutz.',
+  l:'<b>Liefert:</b> Aufbau-Index von 10, Ladezeit im Vergleich, Liste der Rechtslücken.',
+  braucht:'url'},
+ {id:'seo', t:'SEO &amp; Inhalte', neu:false, p:20, min:2, modi:['bestand','aufbau'],
+  x:'Titel, Beschreibungen, Überschriften, Textumfang, interne Verlinkung, Ortsseiten.',
+  l:'<b>Liefert:</b> Abdeckung Ihrer zehn wichtigsten Suchbegriffe, Seiten die fehlen.',
+  braucht:'url'},
+ {id:'ux', t:'Nutzererlebnis', neu:false, p:12, min:2, modi:['bestand'],
+  x:'Bildschirmfotos auf Handy und Rechner, Kontaktwege, Terminbuchung, Formular.',
+  l:'<b>Liefert:</b> Zwei Bildschirmfotos, Wegeprüfung bis zur Anfrage.',
+  braucht:'url'},
+ {id:'wett', t:'Wettbewerber im 50-km-Umkreis', neu:false, p:18, min:3, modi:['aufbau','bestand'],
+  x:'Alle Sachverständigenbüros im Radius mit Bewertungen, Sternen und Entfernung.',
+  l:'<b>Liefert:</b> Rangliste, Verteilung der Bewertungen, Nahfeld gegen Weitfeld.',
+  braucht:null},
+ {id:'verz', t:'Branchenverzeichnisse &amp; NAP', neu:true, p:15, min:2, modi:['aufbau','bestand'],
+  x:'Fünfzehn deutsche Verzeichnisse, robots.txt-konform abgefragt, Namensabgleich.',
+  l:'<b>Liefert:</b> Wo Sie und der Wettbewerb stehen, wo Einträge fehlen, Schreibweisen-Abgleich.',
+  braucht:null},
+ {id:'nach', t:'Suchnachfrage &amp; Keywords', neu:true, p:20, min:3, modi:['aufbau','bestand'],
+  x:'Google-Autocomplete über alle Orte des Gebiets und acht Themenstämme.',
+  l:'<b>Liefert:</b> Welche Orte Nachfrage haben und welche nicht, Redaktionsliste im Wortlaut.',
+  braucht:null},
+ {id:'ads', t:'Anzeigen im Transparenzcenter', neu:true, p:10, min:2, modi:['aufbau','bestand'],
+  x:'Wer im Gebiet Google-Anzeigen schaltet, wie viele, und wer Conversion misst.',
+  l:'<b>Liefert:</b> Anzeigendruck im Nahbereich, Liste der Werbenden, Ihre Lücke.',
+  braucht:null},
+ {id:'markt', t:'Marktbewertung im Vergleich', neu:true, p:16, min:3, modi:['aufbau','bestand'],
+  x:'Ihr Gebiet gegen sechs Vergleichsmärkte — gleiche Methode, gleicher Tag.',
+  l:'<b>Liefert:</b> Einstiegs-Index von 100, Marktmatrix, Faktor für Faktor.',
+  braucht:null},
+ {id:'nische', t:'Nischen &amp; Positionierung', neu:true, p:12, min:2, modi:['aufbau','bestand'],
+  x:'Zehn Spezialisierungen auf messbare Nachfrage geprüft — Oldtimer bis Batteriegutachten.',
+  l:'<b>Liefert:</b> Welche Nische trägt, welche zu klein ist, wer sie im Umkreis besetzt.',
+  braucht:null},
+ {id:'volumen', t:'Marktvolumen-Rechnung', neu:true, p:6, min:1, modi:['aufbau','bestand'],
+  x:'Einwohner, Fahrzeugbestand, Schadenhäufigkeit — mit sichtbaren Annahmen zum Selberdrehen.',
+  l:'<b>Liefert:</b> Gutachtenrelevante Schäden pro Jahr im Gebiet, geteilt durch die Büros.',
+  braucht:null},
+];
+
+const VORWAHL = {
+  aufbau:  ['wett','verz','nach','ads','markt','nische','volumen'],
+  bestand: ['gbp','web','seo','ux','wett','verz','nach','ads','markt']
+};
+
+/* ═══════════════ Schritt 1 ═══════════════ */
+function setzeModus(m){
+  MODUS = m;
+  document.getElementById('m-aufbau').setAttribute('aria-pressed', m==='aufbau');
+  document.getElementById('m-bestand').setAttribute('aria-pressed', m==='bestand');
+  document.getElementById('eingabe').style.display='flex';
+  const h=document.getElementById('hinweis'); h.style.display='block';
+  h.textContent = m==='aufbau'
+    ? 'Ohne Website ist das kein Problem — die Module zur eigenen Seite bleiben dann einfach aus.'
+    : 'Mit Website prüfen wir zusätzlich Technik, SEO und Nutzererlebnis Ihrer Seite.';
+  document.getElementById('url').placeholder = m==='aufbau'
+    ? 'Website — oder leer lassen, wenn es noch keine gibt'
+    : 'Ihre Website, z. B. sv-mustermann.de';
+  AKTIV = new Set(VORWAHL[m]);
+  baueModule();
+}
+
+/* ═══════════════ Schritt 2 ═══════════════ */
+function istGesperrt(m){
+  const url = (document.getElementById('url').value||'').trim();
+  return !m.modi.includes(MODUS) || (m.braucht==='url' && !url) || (m.braucht==='gbp' && MODUS==='aufbau');
+}
+function istAktiv(m){ return AKTIV.has(m.id) && !istGesperrt(m); }
+function gewaehlt(){ return MODULE.filter(istAktiv); }
+
+function baueModule(){
+  const url = (document.getElementById('url').value||'').trim();
+  const el = document.getElementById('modulliste'); el.innerHTML='';
+  document.getElementById('umfangText').innerHTML = MODUS==='aufbau'
+    ? 'Voreingestellt ist der <b>Markteintritt</b>: Wettbewerb, Nachfrage, Marktbewertung und Nischen. '
+      + 'Module zur eigenen Seite sind aus — die haben Sie ja noch nicht. Alles ist umschaltbar.'
+    : 'Voreingestellt ist der <b>Vollbefund</b>: Ihr Profil, Ihre Seite und das Umfeld. '
+      + 'Was Sie nicht messen lassen, steht später als „nicht erhoben“ im Bericht — nie als Schätzung.';
+
+  MODULE.forEach(m=>{
+    const fehltUrl = m.braucht==='url' && !url;
+    const fehltGbp = m.braucht==='gbp' && MODUS==='aufbau';
+    const gesperrt = istGesperrt(m);
+    const an = istAktiv(m);
+    const b=document.createElement('button');
+    b.className='mod'; b.setAttribute('aria-pressed', an);
+    if(gesperrt) b.setAttribute('data-gesperrt','');
+    b.innerHTML =
+      (m.neu?'<span class="neu">neu</span>':'')+
+      '<div class="zeile"><span class="schalter"></span><h4>'+m.t+'</h4>'+
+      '<span class="dauer">'+m.p+' Punkte · '+m.min+' min</span></div>'+
+      '<p>'+m.x+'</p>'+
+      (gesperrt
+        ? '<div class="warn">'+(fehltUrl?'braucht eine Website-Adresse':(fehltGbp?'brauchen Sie erst, wenn das Profil steht':'für diesen Weg nicht vorgesehen'))+'</div>'
+        : '<div class="liefert">'+m.l+'</div>');
+    if(!gesperrt) b.onclick=()=>{ AKTIV.has(m.id)?AKTIV.delete(m.id):AKTIV.add(m.id); baueModule(); };
+    el.appendChild(b);
+  });
+  const gew = gewaehlt();
+  document.getElementById('bModule').textContent = gew.length;
+  document.getElementById('bPunkte').textContent = gew.reduce((s,m)=>s+m.p,0);
+  document.getElementById('bDauer').textContent  = gew.reduce((s,m)=>s+m.min,0)+' min';
+  document.getElementById('btnStart').disabled = gew.length===0;
+}
+document.getElementById('url').addEventListener('input', ()=>{ if(MODUS) baueModule(); });
+
+/* ═══════════════ Schritt 3 ═══════════════ */
+function starteMessung(){
+  zeige('warten');
+  const gew = gewaehlt();
+  const el=document.getElementById('pruefliste'); el.innerHTML='';
+  document.getElementById('fertigHinweis').hidden = true;
+  gew.forEach(m=>{
+    const d=document.createElement('div'); d.className='pz'; d.dataset.id=m.id;
+    d.innerHTML='<span class="ik">✓</span><span class="tx">'+m.t+'</span><span class="st">wartet</span>';
+    el.appendChild(d);
+  });
+  let i=0;
+  const takt=()=>{
+    const zs=[...el.children];
+    if(i>0){ zs[i-1].className='pz fertig'; zs[i-1].querySelector('.st').textContent='fertig'; }
+    if(i<zs.length){
+      zs[i].className='pz laeuft'; zs[i].querySelector('.st').textContent='läuft';
+      i++; setTimeout(takt, 620);
+    } else {
+      document.getElementById('fertigText').textContent =
+        gew.length+' Module gemessen, '+gew.reduce((s,m)=>s+m.p,0)+' Prüfpunkte erhoben. '+
+        (MODUS==='aufbau' ? 'Der Befund zeigt das Feld, in das Sie eintreten.'
+                          : 'Der Befund zeigt, wo Sie im Feld stehen.');
+      document.getElementById('fertigHinweis').hidden = false;
+    }
+  };
+  setTimeout(takt, 400);
+}
+
+/* ═══════════════ Schritt 4 ═══════════════ */
+function balken(daten,max){
+  return '<div class="rows">'+daten.map(d=>
+    '<div class="row '+(d.c||'')+'"><div class="nm">'+d.n+'</div><div class="track">'+
+    '<span class="fill" style="width:'+(d.v/max*100).toFixed(1)+'%"></span></div>'+
+    '<div class="vv">'+(d.l!==undefined?d.l:d.v)+'</div></div>').join('')+'</div>';
+}
+const BLOCK = {
+ wett:()=>['Wettbewerber im Nahbereich','Bewertungszahl der neun sichtbarsten Büros im 15-km-Umkreis.',
+   balken([{n:'KÜS Kroos · 4,0 km',v:191,c:'gap'},{n:'KÜS Volkmer · 3,8 km',v:188,c:'gap'},
+   {n:'Stanoksei · 5,4 km',v:95,c:'hi'},{n:'Haves · 8,0 km',v:93,c:'hi'},{n:'Tenhagen · 4,6 km',v:65,c:'ok'},
+   {n:'Hartlieb · 3,8 km',v:59,c:'ok'},{n:'Schmitz · 3,6 km',v:51,c:'ok'},{n:'Belz · 3,9 km',v:43,c:'ok'},
+   {n:'Deutscher · 5,3 km',v:32,c:'ok'}],191)],
+ markt:()=>['Marktbewertung','Einstiegs-Index gegen sechs Vergleichsmärkte — höher heißt leichter.',
+   balken([{n:'Münster',v:80,c:'hi'},{n:'Paderborn',v:74},{n:'Osnabrück',v:70},{n:'Essen',v:60},
+   {n:'Dortmund',v:59},{n:'Bielefeld',v:34},{n:'Oldenburg',v:33}],100)],
+ nach:()=>['Suchnachfrage','Orte mit belegter Nachfrage — geprüft über Google-Autocomplete.',
+   balken([{n:'beide Varianten',v:11,c:'ok',l:'11 Orte'},{n:'nur eine Variante',v:1,c:'hi',l:'1 Ort'},
+   {n:'keine Nachfrage',v:6,c:'gap',l:'6 Orte'}],11)
+   +'<p class="mini" style="margin-top:12px">Ohne messbare Nachfrage: Telgte, Sendenhorst, Drensteinfurt, Everswinkel, Havixbeck, Altenberge.</p>'],
+ verz:()=>['Branchenverzeichnisse','Fünfzehn geprüft, drei abfragbar und abgefragt.',
+   balken([{n:'11880.com',v:17,c:'hi',l:'17'},{n:'gelbeseiten.de',v:10,c:'hi',l:'10'},
+   {n:'die-kfzgutachter.de',v:2,c:'hi',l:'2'},{n:'gesperrt / nicht erreichbar',v:6,c:'gap',l:'6 Verz.'}],17)],
+ ads:()=>['Anzeigen im Gebiet','Google-Anzeigen je Domain, Transparenzcenter Region DE.',
+   balken([{n:'kluenenberg.de',v:37,c:'gap'},{n:'sv-schumann.de',v:17,c:'gap'},
+   {n:'kfz-gutachten-isinger.de',v:11,c:'gap'},{n:'svgedik.com',v:6,c:'gap'},
+   {n:'schmitz-gutachten.de',v:5,c:'hi'},{n:'13 weitere geprüft',v:0,l:'0'}],37)],
+ nische:()=>['Nischen mit Nachfrage','Eindeutige Suchanfragen je Spezialisierung.',
+   balken([{n:'Oldtimer · Wertgutachten',v:40,c:'hi'},{n:'Fiktive Abrechnung',v:28,c:'hi'},
+   {n:'Leasingrückgabe',v:18,c:'hi'},{n:'Wohnmobil',v:11,c:'hi'},{n:'Motorrad',v:11,c:'hi'},
+   {n:'E-Auto · Batterie',v:4}],40)],
+ volumen:()=>['Marktvolumen','Hergeleitet aus Einwohnern, Fahrzeugbestand und Schadenhäufigkeit.',
+   '<div style="display:flex;flex-direction:column;gap:9px;font-size:.9rem">'+
+   '<div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--linie);padding-bottom:7px"><span>Pkw im Gebiet</span><b>945.400</b></div>'+
+   '<div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--linie);padding-bottom:7px"><span>Haftpflichtschäden pro Jahr</span><b>56.724</b></div>'+
+   '<div style="display:flex;justify-content:space-between;border-bottom:1px dashed var(--linie);padding-bottom:7px"><span>davon gutachtenrelevant</span><b>28.362</b></div>'+
+   '<div style="display:flex;justify-content:space-between;padding-top:6px"><span>je Büro und Jahr</span><b style="color:var(--signal);font-size:1.3rem;font-family:var(--display);font-style:italic">184</b></div></div>'+
+   '<p class="mini" style="margin-top:12px">Annahmen im Bericht offengelegt und veränderbar.</p>'],
+ web:()=>['Ihre Website — Aufbau-Index','Zehn prüfbare Merkmale, verglichen mit 42 Büros im Umkreis.',
+   balken([{n:'Ihr Wert',v:6,c:'gap',l:'6 / 10'},{n:'Median im Feld',v:7,l:'7 / 10'},
+   {n:'Bestwert im Feld',v:9,c:'ok',l:'9 / 10'}],10)],
+ seo:()=>['SEO &amp; Inhalte','Abdeckung Ihrer zehn wichtigsten Suchbegriffe.',
+   balken([{n:'abgedeckt',v:3,c:'ok',l:'3'},{n:'angerissen',v:2,c:'hi',l:'2'},
+   {n:'fehlt',v:5,c:'gap',l:'5'}],10)],
+ gbp:()=>['Google-Unternehmensprofil','Ihre Profilstärke von 20 Punkten.',
+   balken([{n:'Ihr Profil',v:11,c:'hi',l:'11 / 20'},{n:'Schnitt im Umkreis',v:14,l:'14 / 20'}],20)],
+ ux:()=>['Nutzererlebnis','Wege bis zur Anfrage, Handy und Rechner.',
+   balken([{n:'Telefon als Klick',v:1,c:'ok',l:'ja'},{n:'Formular',v:0,c:'gap',l:'nein'},
+   {n:'Terminbuchung',v:0,c:'gap',l:'nein'},{n:'WhatsApp',v:0,c:'gap',l:'nein'}],1)],
+};
+
+const KACHELN = {
+ aufbau:[{l:'Büros im 50-km-Radius',v:'154',s:'Google Maps · 12.08.2026',k:''},
+   {l:'Median je Büro',v:'11',s:'Die Hälfte hat 11 oder weniger',k:'g'},
+   {l:'Einstiegs-Index',v:'80',s:'von 100 · Platz 1 von 7 Märkten',k:'b'},
+   {l:'Ihre Position heute',v:'154.',s:'von 154 · noch kein Profil',k:'r'}],
+ bestand:[{l:'Ihr Gesamtscore',v:'31',s:'von 100 · Level 2 „Anfahrt“',k:'r'},
+   {l:'Position im Umkreis',v:'38.',s:'von 154 Büros',k:''},
+   {l:'Ihre Bewertungen',v:'24',s:'Median im Gebiet: 11',k:'g'},
+   {l:'Größte Einzellücke',v:'−18',s:'Punkte · SEO &amp; Inhalte',k:'r'}]
+};
+
+function baueBefund(){
+  const istA = MODUS==='aufbau';
+  document.getElementById('befundAugbraue').textContent = 'Schritt 4 · Befund · '+(istA?'Markteintritt':'Bestandsaufnahme');
+  document.getElementById('befundTitel').textContent = istA
+    ? 'Das Feld, in das Sie eintreten' : 'Wo Sie im Feld stehen';
+  document.getElementById('befundLead').innerHTML = istA
+    ? 'Sie starten ohne Profil und ohne Seite — und das ist in diesem Gebiet die zweitbeste Ausgangslage, die es gibt. Die Mitte des Marktes ist weich.'
+    : 'Ihr Profil und Ihre Seite laufen. Der Befund zeigt, wo Sie im Vergleich stehen und welche Säule am meisten kostet.';
+  document.getElementById('befundKacheln').innerHTML = KACHELN[MODUS].map(k=>
+    '<div class="kachel '+k.k+'"><div class="bar"></div><div class="lab">'+k.l+'</div>'+
+    '<div class="val">'+k.v+'</div><div class="sub">'+k.s+'</div></div>').join('');
+  const bl=document.getElementById('befundBlocks'); bl.innerHTML='';
+  gewaehlt().forEach(m=>{
+    if(!BLOCK[m.id]) return;
+    const [h,u,inhalt]=BLOCK[m.id]();
+    bl.insertAdjacentHTML('beforeend',
+      '<div class="karte"><h3>'+h+'</h3><div class="u">'+u+'</div>'+inhalt+'</div>');
+  });
+  const sperr = istA
+    ? [['Die zwölf ersten Schritte','in der Reihenfolge, in der sie wirken'],
+       ['Ihre KPI-Leiter','5 · 12 · 45 · 120 Bewertungen — woher die Zahlen kommen'],
+       ['Ortsseiten-Plan','welche zwölf Orte, welche sechs Sie weglassen'],
+       ['Nischen-Entscheidung','welche Spezialisierung zuerst, mit Begründung'],
+       ['Anzeigen-Einstieg','Kampagnenaufbau, Gebote, Landeseiten'],
+       ['Zuweiser-Plan','Werkstätten und Kanzleien im Nahbereich']]
+    : [['Ihre Sofortmaßnahmen','sortiert nach Punkten pro Stunde Aufwand'],
+       ['Die Rechtslücken','was heute abmahnfähig ist'],
+       ['Keyword-Plan','welche Seite auf welchen Begriff'],
+       ['Bewertungsaufbau','Prozess statt Kauf — mit Vorlagen'],
+       ['Anzeigen-Optimierung','was Ihr Konto heute verschenkt'],
+       ['Ihr Vergleichsbüro','wer im Umkreis es besser macht und warum']];
+  document.getElementById('sperrliste').innerHTML = sperr.map(s=>
+    '<div><b>'+s[0]+'</b><span>'+s[1]+'</span></div>').join('');
+}
+
+/* ═══════════════ Schritt 7 ═══════════════ */
+const MASS = {
+ aufbau:[['Google-Unternehmensprofil anlegen','Kategorie „Gutachter“, Servicegebiet, 20 Fotos','1–2 h + Wartezeit'],
+  ['Bewertungsprozess einrichten','QR auf der Gutachtenmappe, feste Frage bei der Übergabe','2 h'],
+  ['Website mit sechs Pflichtseiten','inkl. Impressum nach § 5 DDG','Projekt'],
+  ['Zwölf Ortsseiten — nur die mit Nachfrage','Münster, Greven, Warendorf, Coesfeld …','1 Tag je 4'],
+  ['§ 249, Wertminderung, Nutzungsausfall','die drei größten Themenlücken im Gebiet','2 Tage'],
+  ['Neun Verzeichniseinträge','zeichengleicher Name, Adresse, Telefon','3–4 h'],
+  ['Messung einschalten','GA4 und Search Console vor allem anderen','2 h'],
+  ['Ads-Konto und Keyword-Planer','erst dann gibt es echte Volumenzahlen','2 h']],
+ bestand:[['Die vier Rechtslücken schließen','Impressum, Datenschutz, Cookie-Hinweis','2 h'],
+  ['LocalBusiness-Auszeichnung nachrüsten','hat nur ein Viertel des Feldes','1 h'],
+  ['Fünf fehlende Ortsseiten schreiben','die Begriffe, für die keine Seite existiert','1 Tag je 4'],
+  ['Bewertungsprozess reaktivieren','Sie liegen bei 24, das obere Viertel beginnt bei 43','2 h'],
+  ['Startseite auf 1.500 Wörter','Ihr Wert heute: 610','4 h'],
+  ['Interne Verlinkung auf 25 Links','Ihr Wert heute: 4','3 h'],
+  ['Terminbuchung einbinden','4 von 42 Büros im Umkreis haben eine','3 h'],
+  ['Anzeigen-Conversion messen','Sie werben ohne Messung','1 h']]
+};
+function baueFrei(){
+  const istA=MODUS==='aufbau';
+  document.getElementById('freiTitel').textContent = istA
+    ? 'Ihr Aufbauplan — acht Schritte' : 'Ihre Sofortmaßnahmen — acht Schritte';
+  document.getElementById('freiLead').textContent = istA
+    ? 'Die Reihenfolge ist nicht beliebig: ohne Profil bringt die beste Seite keine Anrufe, ohne Messung ist jede spätere Entscheidung geraten.'
+    : 'Sortiert nach Wirkung pro Stunde Aufwand. Die ersten beiden Punkte sind heute abmahnfähig.';
+  document.getElementById('freiListe').innerHTML = MASS[MODUS].map((m,i)=>
+    '<div style="display:grid;grid-template-columns:38px 1fr auto;gap:15px;align-items:start;background:#fff;'
+    +'border:1px solid var(--linie);border-left:4px solid var(--signal);border-radius:var(--r);padding:15px 17px;box-shadow:var(--schatten)">'
+    +'<div style="font:800 1.25rem var(--display);font-style:italic;color:var(--linie-stark)">'+String(i+1).padStart(2,'0')+'</div>'
+    +'<div><h4>'+m[0]+'</h4><p style="margin:3px 0 0;font-size:.85rem;color:var(--text)">'+m[1]+'</p></div>'
+    +'<div style="font:800 .64rem var(--display);font-style:italic;letter-spacing:.06em;text-transform:uppercase;'
+    +'background:var(--flaeche-2);color:var(--muted);padding:5px 10px;border-radius:100px;white-space:nowrap">'+m[2]+'</div></div>').join('');
+}
+
+/* ═══════════════ Navigation ═══════════════ */
+function zeige(id){
+  if((id!=='start') && !MODUS){ id='start'; }
+  if(id==='ergebnis') baueBefund();
+  if(id==='frei') baueFrei();
+  document.querySelectorAll('.buehne').forEach(b=>b.removeAttribute('data-aktiv'));
+  document.getElementById(id).setAttribute('data-aktiv','');
+  const ord=['start','umfang','warten','ergebnis','buchung','funnel','frei'];
+  const k=ord.indexOf(id);
+  document.querySelectorAll('.sr').forEach(sr=>{
+    const i=ord.indexOf(sr.dataset.s);
+    sr.className='sr'+(i===k?' aktiv':(i<k?' fertig':''));
+  });
+  document.querySelectorAll('.demo button').forEach((b,i)=>
+    b.setAttribute('aria-current', String(i===k)));
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function einfach(b){ [...b.parentElement.children].forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); }
+function waehleSlot(b){ [...b.parentElement.children].forEach(x=>x.setAttribute('aria-pressed','false')); b.setAttribute('aria-pressed','true'); }
+zeige('start');
+</script>
+</body>
+</html>
