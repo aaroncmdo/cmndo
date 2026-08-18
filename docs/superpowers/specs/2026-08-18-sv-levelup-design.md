@@ -97,7 +97,43 @@ Sie listet 10 der 13 Module; `nach`, `markt` und `nische` fehlen. Zusätzlich is
 bei `volumen` („Autocomplete-Abfrage") vertauscht — Autocomplete ist `nach`, `volumen` rechnet
 aus Einwohner- und Bestandsdaten. Die vollständige Tabelle steht in §3.4.
 
-### 2.6 🔴 Welle 7 Schritt A: das Abbruchkriterium ist getroffen
+### 2.6 Welle 7 Schritt A — und warum das Leck trotzdem nicht existiert
+
+> **Korrektur vom 18.08.2026, nach Messung mit dem echten anon-Key.** Der
+> Abschnitt unten stand zunächst als „Abbruchkriterium getroffen". Der
+> öffentliche Lesepfad ist real — aber das **Leck** ist es nicht:
+>
+> ```
+> View sv_leads_map_pins  → 62 Zeilen                              (anon-Key)
+> sv_leads.email,telefon  → permission denied for table sv_leads    (anon-Key)
+> sv_leads.id,lat,lng     → funktioniert
+> ```
+>
+> anon besitzt auf `sv_leads` **nur Spalten-GRANTs** auf `id`, `lat`, `lng`,
+> `ist_aktiv` — Ergebnis des Anon-Grant-Gates. `name`, `firma`, `adresse`,
+> `telefon`, `email`, `vorname`, `notizen` und auch die zehn heute ergänzten
+> Spalten sind für anon gesperrt; neue Spalten erben von sich aus keinen Grant
+> (Default-Privileges).
+>
+> **Damit fällt die Prämisse von `CONTEXT` §9:** „Ab dem Moment, in dem `email`
+> und `telefon` gefüllt sind, steht eine fertige Kontaktliste offen im Netz" ist
+> falsch. **Die Anreicherung ist nicht blockiert** und braucht keine Vorarbeit.
+>
+> **Der Fehlschluss:** Aus der RLS-Policy (`OR ist_aktiv = true`, gilt für
+> `anon`) wurde auf Lesbarkeit geschlossen. Eine Policy entscheidet, **welche
+> Zeilen** sichtbar sind — ein GRANT entscheidet, **ob überhaupt** und welche
+> Spalten. Beide Ebenen müssen zusammen gemessen werden, und zwar mit dem
+> Key der betroffenen Rolle: `execute_sql` läuft als `postgres` und beweist
+> über Views und Grants nichts.
+>
+> **Was bleibt:** Die View `sv_leads_map_pins` (Migration
+> `20260818163928`) ist gebaut und liefert für anon dieselben Pins. Sie ist
+> **Härtung, kein Fix** — sie entkoppelt den Finder von der Policy-Klausel,
+> sodass diese später entfernt werden *könnte*, ohne die Dead-Pins zu löschen.
+> Die Code-Umstellung von `ladeSvLeads()` und die Policy-Verschärfung sind damit
+> **optional und nicht dringend**, nicht mehr Voraussetzung für Welle 7.
+
+Der ursprüngliche Befund zum Lesepfad bleibt als Bestandsaufnahme gültig:
 
 `WELLEN_PLAN` Welle 7 verlangt als Abbruchkriterium die Prüfung, ob eine öffentliche Ansicht
 `sv_leads` mit `ist_aktiv = true` über den anon-Key liest.
@@ -829,7 +865,7 @@ Zeit für Gespräche — und genau die soll der Befund vorqualifizieren.
 | A-5 | **Durchsprache nach `DURCHSPRACHE.md`** — rechtliche Grundentscheidung nach § 7 Abs. 2 UWG, die vier Vorlagen im Wortlaut, Startmenge, Abbruchschwelle, wer Antworten liest | Aaron + Anwalt | Scharfschalten der Sequenz |
 | A-6 | Google-Ads-Konto (für `kwg`) und Meta-Business-Konto (für `kwm`) | Aaron | 22 der 150 Punkte |
 | A-7 | Entscheidung: Wer übermittelt bei der Admin-Konvertierung das Anfangspasswort? | Aaron | §5.4 Variante (1) |
-| **A-8** | **Freigabe für den Eingriff in Bestandscode:** `ladeSvLeads()` in `src/lib/actions/` **und** `claimondo-marketing/lib/actions/` auf die View `sv_leads_map_pins` umstellen (§2.6). Ohne diesen Schritt kann die Anreicherung nicht scharf gehen, mit falscher Reihenfolge leert er die Karte im Kunden-Embed. Liegt außerhalb der in `CONTEXT` §2 erlaubten Dateiliste. | Aaron | Welle 7 |
+| ~~A-8~~ | ~~Freigabe für den Eingriff in Bestandscode~~ — **entfallen.** Am 18.08. mit dem anon-Key gemessen: das Leck existiert nicht, die Anreicherung ist nicht blockiert (§2.6). Die Code-Umstellung auf `sv_leads_map_pins` bleibt als **optionale Härtung** offen, ohne Dringlichkeit und ohne Blockerwirkung. | — | nichts |
 
 **A-5 bleibt ein Menschenklick.** `cold_mail_sequenzen.aktiv` und `auto_enroll` werden vom Code
 nie auf `true` gesetzt — auch nicht zum Testen.
