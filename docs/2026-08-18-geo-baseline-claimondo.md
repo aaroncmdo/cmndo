@@ -477,5 +477,61 @@ SEO-Lane abstimmen — dort läuft parallel ein Audit der Marketing-Seiten.
 
 ---
 
+## 11 · Blinder Fleck der Baseline: die sechs weiteren Properties
+
+Die Messung galt ausschließlich `claimondo.de`. Im Repo liegen aber **sechs eigenständige
+Top-Level-Builds** mit je eigener `robots.ts`, `sitemap.ts` und `llms.txt` — sie wurden nie
+gemessen. Nachgeholt am 18.08.2026:
+
+| Property | Start | robots | llms.txt | sitemap | HTML | Text-Anteil |
+|---|---|---|---|---|---|---|
+| autounfall.io | 200 | 200 | 200 | 200 | 49 KB | 5,7 % |
+| kfz-unfallgutachter-aachen.de | 200 | 200 | 200 | 200 | 316 KB | **8,0 %** |
+| kfz-unfallgutachter-bonn.de | 200 | 200 | 200 | 200 | 305 KB | 6,8 % |
+| kfz-unfallgutachter-duesseldorf.de | 200 | 200 | 200 | 200 | 305 KB | 6,8 % |
+| kfz-unfallgutachter-koeln.de | 200 | 200 | 200 | 200 | 317 KB | **8,0 %** |
+| kfz-unfallgutachter-wuppertal.de | 200 | 200 | 200 | 200 | 307 KB | 6,7 % |
+
+**Alle sechs sind live und technisch besser aufgestellt als die Hauptdomain** — der
+Text-Anteil liegt bei 6,7–8,0 % gegenüber 4,4 % auf `claimondo.de` nach allen Fixes. Das
+Schema ist solide: 5 JSON-LD-Blöcke je Cluster-Seite (`AutomotiveBusiness`, `FAQPage`,
+`AggregateRating`, `GeoCoordinates`, `OpeningHoursSpecification`).
+
+### Befund 1 — kein Aktualitäts-Signal (B2 gilt hier genauso)
+
+**Keine der sechs Properties setzt `dateModified`.** Das ist derselbe Befund, der auf
+`claimondo.de` als B2 behoben wurde. Der Fix wäre analog (`dateModified` in `faqSchema()`,
+`lib/schema.ts`) — vier der fünf Cluster-`schema.ts` sind byte-identisch, Aachen weicht ab.
+
+Bewusst **nicht** blind umgesetzt: Jede Property ist ein eigener Next-Build mit eigenem
+Deploy, das wären fünf Build-/Verifikationszyklen. Und die Frage darunter wiegt schwerer:
+
+### Befund 2 🔴 — zwei Cluster-Domains ohne buchbaren Gutachter
+
+Gemessen über `GET /api/v1/gutachter-termine` — also über genau den Weg, den ein Besucher
+dieser Domains nimmt:
+
+| Cluster-Domain für | PLZ | buchbare Gutachter | freie Slots |
+|---|---|---|---|
+| **Aachen** | 52062 | **0** | **0** |
+| **Bonn** | 53111 | **0** | **0** |
+| Düsseldorf | 40213 | 1 | 3 |
+| Köln | 50670 | 2 | 3 |
+| Wuppertal | 42103 | 2 | 3 |
+
+Für Aachen und Bonn existiert je eine **eigene Domain mit eigenem Deployment und eigener
+SEO-Arbeit** — für Städte, in denen aktuell kein Termin vergeben werden kann. Wer dort
+ankommt und bucht, landet zwangsläufig im Rückruf-Fallback.
+
+*Einschränkung:* Gemessen sind **buchbare Slots**, nicht bloße SV-Präsenz — ein
+Sachverständiger ohne freie Termine erscheint hier ebenfalls als 0. Die Richtung deckt sich
+aber mit der unabhängigen Erhebung, nach der Bonn zu den 101 unabgedeckten Städten zählt.
+
+**Empfehlung:** Diese beiden Domains sind der schärfste Beleg dafür, dass SV-Akquise vor
+weiterer Reichweitenarbeit kommt. Ein `dateModified`-Fix auf einer Domain ohne Gutachter
+verbessert die Zitierfähigkeit einer Antwort, die keinen Termin anbieten kann.
+
+---
+
 *Messung: 18.08.2026, 14:51 UTC · Seiten-Sample: 27 · User-Agent: OAI-SearchBot/1.0 ·
 Skript: `scripts/geo-baseline.mjs`*
