@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
-import { FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
 
 export const metadata: Metadata = {
   title: 'Nutzungsbedingungen',
@@ -8,7 +7,7 @@ export const metadata: Metadata = {
     'Nutzungsbedingungen für die Claimondo-Plattform — Rechte und Pflichten bei der Nutzung von Schadenmeldung, Gutachter-Vermittlung und Kundenportal.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
-  alternates: { canonical: '/nutzungsbedingungen', types: FEED_ALTERNATE_TYPES },
+  alternates: { canonical: '/nutzungsbedingungen' },
 }
 
 export default function NutzungsbedingungenPage() {

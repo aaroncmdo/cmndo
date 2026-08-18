@@ -3,7 +3,6 @@ import type { ReactNode } from 'react'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_COUNTRY } from '@/lib/seo/brand-constants'
-import { FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
     'Datenschutzerklärung der Claimondo GmbH gemäß Art. 13 und 14 DSGVO — Verarbeitung personenbezogener Daten bei Lead-Anfrage, Schadenabwicklung und Webseitenbesuch.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
-  alternates: { canonical: '/datenschutz', types: FEED_ALTERNATE_TYPES },
+  alternates: { canonical: '/datenschutz' },
 }
 
 // Wiederverwendbare Link-Styles (Claimondo-Token, kein Inline-Hex).

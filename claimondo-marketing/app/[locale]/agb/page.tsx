@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
-import { FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
 
 export const metadata: Metadata = {
   title: 'Allgemeine Geschäftsbedingungen',
@@ -8,7 +7,7 @@ export const metadata: Metadata = {
     'Allgemeine Geschäftsbedingungen von Claimondo für die Vermittlung unabhängiger Kfz-Sachverständiger und die Abwicklung von Unfallschäden.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
-  alternates: { canonical: '/agb', types: FEED_ALTERNATE_TYPES },
+  alternates: { canonical: '/agb' },
 }
 
 export default function AGBPage() {

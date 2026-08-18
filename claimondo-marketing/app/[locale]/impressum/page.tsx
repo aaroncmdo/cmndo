@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
-import { FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
 
 export const metadata: Metadata = {
   title: 'Impressum',
@@ -10,7 +9,7 @@ export const metadata: Metadata = {
     'Impressum von Claimondo — Anbieterkennzeichnung nach § 5 DDG mit Anschrift, Vertretungsberechtigten und Kontaktdaten.',
   // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
   // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
-  alternates: { canonical: '/impressum', types: FEED_ALTERNATE_TYPES },
+  alternates: { canonical: '/impressum' },
 }
 
 export default function ImpressumPage() {

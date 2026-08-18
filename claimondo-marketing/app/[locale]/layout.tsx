@@ -10,7 +10,7 @@ import {
   jsonLdScript,
   SITE_URL,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates, FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
+import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import { getGoogleReviews } from '@/lib/reviews/google-places'
 import Script from 'next/script'
 import { headers } from 'next/headers'
@@ -45,6 +45,22 @@ const notoSans = Noto_Sans({
   variable: '--font-noto-sans',
 })
 
+/** GEO-Feeds fuer die Autodiscovery im <head>. */
+const FEEDS = [
+  { type: 'application/rss+xml', url: '/feed.xml', title: 'Claimondo — Aktuelle Wissens-Updates' },
+  { type: 'application/rss+xml', url: '/feed/katalog.xml', title: 'Claimondo — Wissens-Katalog' },
+  {
+    type: 'application/feed+json',
+    url: '/feed.json',
+    title: 'Claimondo — Aktuelle Wissens-Updates (JSON Feed)',
+  },
+  {
+    type: 'application/feed+json',
+    url: '/feed/katalog.json',
+    title: 'Claimondo — Wissens-Katalog (JSON Feed)',
+  },
+]
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -65,10 +81,12 @@ export const metadata: Metadata = {
     // Sitemap und nahmen sich per Canonical selbst aus dem Index. Jede Seite
     // setzt ihr Canonical jetzt selbst (die uebrigen 338 taten das ohnehin).
     ...buildLanguageAlternates('/'),
-    // Feed-Autodiscovery (geo-feeds-spec §9): macht die GEO-Feeds fuer Browser,
-    // RSS-Reader (Feedly) + Crawler ueber <link rel="alternate"> auffindbar.
-    // Vorher waren sie NUR in llms.txt verlinkt (allein der AI-Crawler-Pfad).
-    types: FEED_ALTERNATE_TYPES,
+    // Feed-Autodiscovery steht NICHT hier, sondern als <link> im <head> unten.
+    // Grund: `alternates` wird nur FLACH gemerged (Next-Doku "Merging") — ein
+    // eigenes `alternates` einer Page ersetzt den ganzen Block samt `types`.
+    // Ueber Metadata erreichten die Feeds daher nur die 10 Seiten ohne eigenes
+    // `alternates` (Impressum/AGB/noindex), nicht die Startseite und keine
+    // Content-Seite. Im JSX erbt sie jede Seite.
   },
   openGraph: {
     type: 'website',
@@ -151,6 +169,18 @@ export default async function LocaleLayout({
         {/* Perf: Preconnect zu Mapbox (gutachter-finden/-partner-Karten). */}
         <link rel="preconnect" href="https://api.mapbox.com" crossOrigin="" />
         <link rel="preconnect" href="https://events.mapbox.com" crossOrigin="" />
+        {/* Feed-Autodiscovery (geo-feeds-spec §9): macht die GEO-Feeds fuer
+            Browser, RSS-Reader (Feedly) + Crawler auffindbar. Bewusst hier statt
+            in `metadata.alternates.types` — siehe Kommentar am metadata-Export. */}
+        {FEEDS.map((feed) => (
+          <link
+            key={feed.url}
+            rel="alternate"
+            type={feed.type}
+            href={`${SITE_URL}${feed.url}`}
+            title={feed.title}
+          />
+        ))}
         {shouldLoadGtag && (
           <>
             <Script
