@@ -83,3 +83,24 @@ export async function localeAlternates(
 ): Promise<{ canonical: string; languages: Record<string, string> }> {
   return buildLocaleAlternates(path, await getLocale())
 }
+
+/**
+ * Feed-Autodiscovery (geo-feeds-spec §9) als wiederverwendbare Konstante.
+ *
+ * Next.js merged `alternates` NICHT tief: setzt eine Page ein eigenes
+ * `alternates`, ersetzt das den Layout-Block KOMPLETT — inklusive `types`.
+ * Wer also einer bisher erbenden Seite ein eigenes Canonical gibt, nimmt ihr
+ * damit die Feed-Links. Diese Konstante macht sie mitgebbar.
+ */
+// Kein `as const`: das macht die Arrays `readonly`, und Next.js erwartet an
+// `alternates.types` mutable `AlternateLinkDescriptor[]` (sonst tsc-Fehler).
+export const FEED_ALTERNATE_TYPES = {
+  'application/rss+xml': [
+    { url: '/feed.xml', title: 'Claimondo — Aktuelle Wissens-Updates' },
+    { url: '/feed/katalog.xml', title: 'Claimondo — Wissens-Katalog' },
+  ],
+  'application/feed+json': [
+    { url: '/feed.json', title: 'Claimondo — Aktuelle Wissens-Updates (JSON Feed)' },
+    { url: '/feed/katalog.json', title: 'Claimondo — Wissens-Katalog (JSON Feed)' },
+  ],
+}

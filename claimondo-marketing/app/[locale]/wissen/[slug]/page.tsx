@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     a.title
 
   return {
-    title: `${a.title} · Claimondo`,
+    title: a.title,
     description,
     alternates: { canonical: `/wissen/${slug}` },
     openGraph: {

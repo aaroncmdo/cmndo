@@ -39,7 +39,7 @@ export function generateMetadata(): Metadata {
   const a = getAsset()
   if (!a) return {}
   return {
-    title: `${a.title} · Claimondo`,
+    title: a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     // Stream B.5: /ratgeber (emotionaler Begleiter) konsolidiert auf den primaeren
     // „was tun"-Pillar — Ranking-Signal buendeln statt kannibalisieren.

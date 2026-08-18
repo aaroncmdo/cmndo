@@ -80,7 +80,7 @@ export async function generateMetadata({
   const s = getStadtBySlug(stadt)
   if (!s) return { title: 'Stadt nicht gefunden' }
 
-  const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall · Claimondo`
+  const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall`
   const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Unfall. Zertifizierte Partner, Termin unter 48 h, 0 € bei unverschuldetem Unfall (§249 BGB).`
 
   return {
