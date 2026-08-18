@@ -387,7 +387,10 @@ export async function uploadKundenDokument(
     // AAR-324: Insert ohne pflichtdokumente-Update — das sind optionale Slots.
     // AAR-325-Trigger feuert auf uploaded_by_kunde=true → dokument-pruefen Task
     // und bei slot='kunde-nachreichung' zusätzlich dokument-zuordnen.
-    await admin.from('fall_dokumente').insert({
+    // Auf diesen Insert feuert der AAR-325-Trigger (uploaded_by_kunde=true) und
+    // legt den dokument-pruefen-Task an. Schlaegt er still fehl, liegt die Datei
+    // im Storage, es entsteht KEIN Pruef-Task — niemand schaut sie an.
+    const { error: kundenDokFehler } = await admin.from('fall_dokumente').insert({
       fall_id: fallId,
       dokument_typ: effektiverSlot,
       storage_path: path,
@@ -401,6 +404,12 @@ export async function uploadKundenDokument(
       // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
       sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
+    if (kundenDokFehler) {
+      console.error(
+        `[onboarding] Kunden-Upload nicht in der Akte (fall ${fallId}, slot ${effektiverSlot}) — kein Pruef-Task:`,
+        kundenDokFehler.message,
+      )
+    }
 
     revalidatePath('/kunde/onboarding')
     revalidatePath('/kunde')
@@ -662,15 +671,19 @@ export async function uploadPflichtdokument(
     // CMM-21: Multi-File-Upload — bei bereits gesetzter dokument_url die
     // bestehende behalten (sie zeigt aufs erste hochgeladene File als
     // "Cover"). Status auf 'hochgeladen' setzen ist idempotent.
-    await admin.from('pflichtdokumente').update({
+    const { error: slotStatusFehler } = await admin.from('pflichtdokumente').update({
       status: 'hochgeladen',
       dokument_url: pd?.dokument_url ?? publicUrl,
       hochgeladen_am: pd?.dokument_url ? undefined : new Date().toISOString(),
     }).eq('id', pflichtdokumentId)
+    // Bleibt der Slot 'ausstehend', wird der Kunde weiter gemahnt, obwohl er geliefert hat.
+    if (slotStatusFehler) {
+      console.error(`[onboarding] Pflichtslot nicht auf 'hochgeladen' (${pflichtdokumentId}):`, slotStatusFehler.message)
+    }
 
     // CMM-21: pflichtdokument_id direkt verlinken — eine fall_dokumente-Row
     // pro hochgeladenem File, der Slot wird über die FK aggregiert.
-    await admin.from('fall_dokumente').insert({
+    const { error: slotDokFehler } = await admin.from('fall_dokumente').insert({
       fall_id: fallId,
       pflichtdokument_id: pflichtdokumentId,
       dokument_typ: slotTyp,
@@ -684,6 +697,9 @@ export async function uploadPflichtdokument(
       // CMM-23: ein Doku-Pool für alle Akten-Beteiligten.
       sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
     })
+    if (slotDokFehler) {
+      console.error(`[onboarding] Slot-Dokument nicht in der Akte (fall ${fallId}, slot ${slotTyp}):`, slotDokFehler.message)
+    }
 
     // CMM-23: Polizeibericht-Upload triggert automatisch BKat-OCR (fire-and-forget).
     // Läuft asynchron, blockiert den Upload-Response nicht. Ergebnis landet auf

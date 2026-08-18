@@ -89,7 +89,7 @@ export async function GET(request: Request) {
 
     // Create task for Kundenbetreuer
     if (stufeDef.taskTyp) {
-      await supabase.from('tasks').insert({
+      const { error: eskalationsTaskFehler } = await supabase.from('tasks').insert({
         fall_id: fall.fall_id as string,
         typ: stufeDef.taskTyp,
         titel: stufeDef.taskTitel,
@@ -97,6 +97,14 @@ export async function GET(request: Request) {
         status: 'offen',
         zugewiesen_an: fall.kundenbetreuer_id || null,
       })
+      // Die Eskalationsstufe ist damit erreicht — ohne Task merkt es niemand,
+      // und der Fall laeuft weiter, ohne dass jemand nachfasst.
+      if (eskalationsTaskFehler) {
+        console.error(
+          `[vs-timer] Eskalations-Task ${neueStufe} NICHT angelegt (fall ${fall.fall_id}):`,
+          eskalationsTaskFehler.message,
+        )
+      }
     }
 
     // Timeline entry

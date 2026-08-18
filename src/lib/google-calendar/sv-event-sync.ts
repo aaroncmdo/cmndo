@@ -101,7 +101,9 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         (err) => console.warn('[sv-event-sync] delete:', err instanceof Error ? err.message : err),
       )
     }
-    await db
+    // Das Google-Event ist geloescht. Bleiben die IDs stehen, zeigt die DB auf ein
+    // Event, das es nicht mehr gibt — der naechste Sync versucht es zu aktualisieren.
+    const { error: nullenFehler } = await db
       .from('gutachter_termine')
       .update({
         google_event_id: null,
@@ -109,6 +111,9 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         google_event_synced_at: new Date().toISOString(),
       })
       .eq('id', terminId)
+    if (nullenFehler) {
+      console.error(`[sv-event-sync] Event-IDs nicht genullt (${terminId}):`, nullenFehler.message)
+    }
     return
   }
 
@@ -197,10 +202,13 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
           location: t.besichtigungsort_adresse ?? undefined,
         },
       })
-      await db
+      const { error: syncMarkFehler } = await db
         .from('gutachter_termine')
         .update({ google_event_synced_at: new Date().toISOString() })
         .eq('id', terminId)
+      if (syncMarkFehler) {
+        console.error(`[sv-event-sync] Sync-Marker nicht gesetzt (${terminId}):`, syncMarkFehler.message)
+      }
     } else {
       // Neues Event anlegen
       const res = await calendar.events.insert({
@@ -222,7 +230,10 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         },
       })
       if (res.data.id) {
-        await db
+        // Das Google-Event EXISTIERT bereits. Wird seine ID hier nicht gespeichert,
+        // kennt die DB es nicht — und der naechste Sync legt ein ZWEITES an:
+        // Doppeleintrag im Kalender des Sachverstaendigen.
+        const { error: eventIdFehler } = await db
           .from('gutachter_termine')
           .update({
             google_event_id: res.data.id,
@@ -230,6 +241,9 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
             google_event_synced_at: new Date().toISOString(),
           })
           .eq('id', terminId)
+        if (eventIdFehler) {
+          console.error(`[sv-event-sync] google_event_id NICHT gespeichert (${terminId}) — Doppel-Event moeglich:`, eventIdFehler.message)
+        }
       }
     }
   } catch (err) {

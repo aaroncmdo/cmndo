@@ -86,7 +86,7 @@ export async function GET(request: Request) {
     const tel = lead?.telefon ?? '—'
     const hoursInactive = Math.floor((Date.now() - new Date(fl.erstellt_am).getTime()) / (60 * 60 * 1000))
 
-    await db.from('tasks').insert({
+    const { error: inaktivTaskFehler } = await db.from('tasks').insert({
       typ: 'dispatch',
       task_typ: 'inaktiv_followup',
       titel: `Token-Link inaktiv — Kunde anrufen: ${name}`,
@@ -104,6 +104,9 @@ export async function GET(request: Request) {
       faellig_am: new Date().toISOString(),
       auto_erstellt: true,
     })
+    if (inaktivTaskFehler) {
+      console.error(`[flowlink-inaktiv] Followup-Task NICHT angelegt (lead ${fl.lead_id}):`, inaktivTaskFehler.message)
+    }
 
     created++
   }

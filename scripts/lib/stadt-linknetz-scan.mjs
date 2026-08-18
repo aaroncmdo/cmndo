@@ -16,6 +16,52 @@
 export const GLOBALE_QUELLEN = ['footer', 'uebersicht']
 
 /**
+ * Trennt ausgeliefertes HTML in Seiteninhalt und Site-Footer.
+ *
+ * Der Schnitt ist der Kern jeder Crawl-Messung: der LandingFooter verlinkt von
+ * JEDER Seite dieselben zehn Staedte. Landen die im Inhalt, hat jede Stadt zehn
+ * eingehende Links geschenkt und die Waisen-Zahl misst nur noch, dass es einen
+ * Footer gibt.
+ *
+ * Geschnitten wird am LETZTEN `<footer`, nicht am ersten: `<footer>` innerhalb
+ * `<blockquote>` ist korrektes HTML fuer eine Quellenangabe, und genau das
+ * steht auf /kfz-gutachter/online-kfz-gutachten ("— sinngemaesse Kernaussage
+ * des LG Bremen"). Am ersten Vorkommen abzuschneiden verwarf dort den halben
+ * Seiteninhalt samt der acht Stadt-Verweise — die Seite meldete null, obwohl
+ * sie korrekt gerendert war.
+ *
+ * `standorte` aktiviert die Reissleine gegen die Umkehrung dieses Fehlers:
+ * stuende der Site-Footer VOR einem weiteren `<footer`, schnitte diese Funktion
+ * zu spaet ab. Traegt der Footer-Teil die erwarteten Standorte nicht, ist die
+ * Trennung nicht vertrauenswuerdig und der Aufrufer erfaehrt es, statt still
+ * falsch zu zaehlen.
+ *
+ * @param {string} html
+ * @param {readonly string[]} [standorte] Slugs, die im Site-Footer stehen MUESSEN.
+ * @returns {{ inhalt: string, footer: string, unsicher: string | null }}
+ */
+export function teileAmSeitenFooter(html, standorte = []) {
+  const i = html.lastIndexOf('<footer')
+  if (i < 0) return { inhalt: html, footer: '', unsicher: 'kein <footer>-Element — Trennung unsicher' }
+
+  const inhalt = html.slice(0, i)
+  const footer = html.slice(i)
+  if (standorte.length === 0) return { inhalt, footer, unsicher: null }
+
+  const gefunden = standorte.filter((s) => footer.includes(`/kfz-gutachter/${s}"`)).length
+  // Die Haelfte reicht: der Footer koennte legitim gekuerzt werden, aber ein
+  // Zitat-Footer oder Nachwort traegt KEINEN dieser Slugs.
+  if (gefunden * 2 < standorte.length) {
+    return {
+      inhalt,
+      footer,
+      unsicher: `hinter dem Schnitt stehen nur ${gefunden}/${standorte.length} Footer-Standorte — Trennung unsicher`,
+    }
+  }
+  return { inhalt, footer, unsicher: null }
+}
+
+/**
  * @typedef {{ von: string, nach: string, quelle?: string, vonIstStadt?: boolean }} Kante
  */
 

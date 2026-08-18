@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { RATGEBER_SEITEN, staedteFuerRatgeber } from './ratgeber-staedte'
+import { waehleRatgeberStaedte } from './ratgeber-auswahl.mjs'
 import { STAEDTE } from './staedte'
 
 describe('staedteFuerRatgeber', () => {
@@ -71,6 +72,45 @@ describe('staedteFuerRatgeber', () => {
     expect(staedteFuerRatgeber('kosten', -1)).toEqual([])
     expect(staedteFuerRatgeber('kosten', 999).length).toBe(STAEDTE.length)
     expect(staedteFuerRatgeber('', 8)).toHaveLength(8)
+  })
+})
+
+describe('waehleRatgeberStaedte — die geteilte Regel', () => {
+  // Die Regel liegt seit 18.08.2026 in ratgeber-auswahl.mjs, weil sie zwei
+  // Consumer in zwei Builds hat: diese Seite und scripts/check-stadt-linknetz.
+  // Ohne den geteilten Stand muesste das Skript sie nachbauen — und ein
+  // Messwerkzeug, das die Regel nachbaut, misst frueher oder spaeter etwas
+  // anderes, als die Seite rendert. Genau das ist in dieser Lane zweimal
+  // passiert.
+
+  it('liefert fuer den Bestand dasselbe wie der TS-Wrapper', () => {
+    for (const seite of RATGEBER_SEITEN) {
+      expect(waehleRatgeberStaedte(seite, STAEDTE, 8).map((s: { slug: string }) => s.slug)).toEqual(
+        staedteFuerRatgeber(seite, 8).map((s) => s.slug),
+      )
+    }
+  })
+
+  it('arbeitet auf einer FREMDEN Staedteliste', () => {
+    // Der Regel-4-Fall: das Pruefskript rechnet gegen den Stand, der auf prod
+    // liegt — nicht gegen den des Arbeitsbaums. Waere die Liste fest
+    // eingebaut, ginge das nicht.
+    const fremd = [
+      { slug: 'aa', bevoelkerung: '900 Tsd.' },
+      { slug: 'bb', bevoelkerung: '500 Tsd.' },
+      { slug: 'cc', bevoelkerung: '100 Tsd.' },
+    ]
+    const auswahl = waehleRatgeberStaedte('kosten', fremd, 2)
+    expect(auswahl).toHaveLength(2)
+    expect(auswahl.every((s: { slug: string }) => fremd.some((f) => f.slug === s.slug))).toBe(true)
+  })
+
+  it('sortiert nach Groesse, nicht nach Eingabereihenfolge', () => {
+    const klein = [
+      { slug: 'winzig', bevoelkerung: '10 Tsd.' },
+      { slug: 'riesig', bevoelkerung: '2 Mio.' },
+    ]
+    expect(waehleRatgeberStaedte('ablauf', klein, 1)[0].slug).toBe('riesig')
   })
 })
 
