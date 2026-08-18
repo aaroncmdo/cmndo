@@ -321,7 +321,12 @@ export async function erstelleWerkstattFinderLead(
       updatePayload.bedarf_ermittelt_am = new Date().toISOString()
     }
     if (Object.keys(updatePayload).length > 0) {
-      await admin.from('leads').update(updatePayload as never).eq('id', leadId)
+      // Das try faengt den Write nicht. Ohne ihn fehlen Fotos und ermittelter Bedarf
+      // am Lead — die Werkstatt-Vermittlung liefe dann auf leerer Grundlage.
+      const { error: bedarfFehler } = await admin.from('leads').update(updatePayload as never).eq('id', leadId)
+      if (bedarfFehler) {
+        console.error(`[werkstatt-finder] Foto/Bedarf nicht gespeichert (Lead ${leadId}):`, bedarfFehler.message)
+      }
     }
   } catch (err) {
     console.error('[werkstatt-finder] Foto/Bedarf-Persistenz fehlgeschlagen (non-fatal):', err)

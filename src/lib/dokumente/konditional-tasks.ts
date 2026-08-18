@@ -85,7 +85,9 @@ export async function triggerKonditionaleDokumentTasks(
     const claimEmbed = Array.isArray(bridgeRow?.claims) ? bridgeRow?.claims[0] : bridgeRow?.claims
     const fall = { kunde_id: (claimEmbed?.geschaedigter_user_id ?? null) as string | null }
 
-    await supabase.from('tasks').insert({
+    // Ueber diesen Task wird das fehlende Dokument beim Kunden angefordert — ohne ihn
+    // wartet der Vorgang auf etwas, wonach nie jemand gefragt hat.
+    const { error: dokTaskFehler } = await supabase.from('tasks').insert({
       fall_id: fallId,
       typ: 'dokument-einholen',
       titel: `${meta.label} einholen und hochladen`,
@@ -100,6 +102,9 @@ export async function triggerKonditionaleDokumentTasks(
       entity_id: fallId,
       task_code: taskCode,
     })
+    if (dokTaskFehler) {
+      console.error(`[konditional-tasks] Task '${taskCode}' NICHT erstellt (Fall ${fallId}):`, dokTaskFehler.message)
+    }
 
     // WA-Nachricht an Kunde via bestehendes Template „dokumente_nachreichen"
     // mit slot-spezifischem Grund-Text in extraData.

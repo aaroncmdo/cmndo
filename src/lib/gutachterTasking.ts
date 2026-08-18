@@ -101,7 +101,12 @@ export async function completeSVTask(fallId: string, taskCode: string) {
   const db = createAdminClient()
   const { data: task } = await db.from('tasks').select('id').eq('fall_id', fallId).eq('task_code', taskCode).in('status', ['offen', 'in-bearbeitung']).limit(1).maybeSingle()
   if (task) {
-    await db.from('tasks').update({ status: 'erledigt', erledigt_am: new Date().toISOString() }).eq('id', task.id)
+    // Bleibt die Aufgabe offen, sieht der Gutachter sie weiter in seiner Liste,
+    // obwohl der Schritt erledigt ist.
+    const { error: erledigtFehler } = await db.from('tasks').update({ status: 'erledigt', erledigt_am: new Date().toISOString() }).eq('id', task.id)
+    if (erledigtFehler) {
+      console.error(`[gutachterTasking] Task ${task.id} nicht auf erledigt gesetzt:`, erledigtFehler.message)
+    }
     // AAR-430: pending Reminder stornieren
     try {
       await cancelRemindersForTask(task.id)

@@ -109,7 +109,12 @@ export async function markiereReparaturErledigt(
       .map((d) => d.storage_path)
       .filter((p): p is string => !!p && p !== storagePath)
     if (verwaist.length > 0) await admin.storage.from('fall-dokumente').remove(verwaist)
-    await admin.from('fall_dokumente').delete().in('id', alte.map((d) => d.id))
+    // Die Storage-Objekte sind an dieser Stelle bereits geloescht. Bleiben die Zeilen
+    // stehen, zeigen sie auf Dateien, die es nicht mehr gibt.
+    const { error: altBelegFehler } = await admin.from('fall_dokumente').delete().in('id', alte.map((d) => d.id))
+    if (altBelegFehler) {
+      console.error(`[reparatur-abschluss] Alt-Belege nicht entfernt (${alte.length} Zeilen zeigen jetzt ins Leere):`, altBelegFehler.message)
+    }
   }
 
   const nowIso = new Date().toISOString()

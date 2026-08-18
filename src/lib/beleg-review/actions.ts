@@ -141,10 +141,13 @@ export async function approveBeleg(
   if (typ === 'mietwagen_rechnung') {
     const claimId = await resolveClaimId(admin, fallId)
     if (claimId) {
-      await admin
+      const { error: belegFehler } = await admin
         .from('claims')
         .update({ mietwagen_rechnung_vorhanden: true })
         .eq('id', claimId)
+      if (belegFehler) {
+        console.error(`[beleg-review] Mietwagen-Rechnung nicht vermerkt (Claim ${claimId}):`, belegFehler.message)
+      }
     }
   }
 

@@ -387,10 +387,16 @@ export async function POST(request: Request) {
                 .in('fall_id', fallIds)
               const claimIds = (claimRows ?? []).map((f) => f.claim_id as string).filter(Boolean)
               if (claimIds.length > 0) {
-                await db.from('claims').update({
+                // Das Geld ist an dieser Stelle geflossen (Stripe-Event). Bleibt der
+                // Marker aus, gelten die Provisionen weiter als offen — mit dem Risiko
+                // einer zweiten Auszahlung. Das umschliessende try faengt den Write nicht.
+                const { error: provisionFehler } = await db.from('claims').update({
                   kanzlei_provision_status: 'ausgezahlt',
                   kanzlei_provision_ausgezahlt_am: bezahltAm,
                 }).in('id', claimIds)
+                if (provisionFehler) {
+                  console.error(`[stripe] Provisions-Status NICHT gesetzt (${claimIds.length} Claims) — Doppelauszahlung moeglich:`, provisionFehler.message)
+                }
               }
             }
           } catch (err) {
