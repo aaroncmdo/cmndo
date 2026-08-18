@@ -75,7 +75,17 @@ export const googleProvider: KalenderProvider = {
     const resp = await calendar.events.insert({ calendarId: 'primary', requestBody: eventBody })
     const eventId = resp.data.id
     if (eventId) {
-      await db.from('gutachter_termine').update({ google_event_id: eventId, google_calendar_id: 'primary' }).eq('id', termin.id)
+      // Idempotenz-Anker: das Event steht bereits im Kalender. Bleibt die Id ungespeichert,
+      // kennt die DB es nicht — der naechste Sync legt ein ZWEITES an (Duplikat beim Assignee).
+      const { error: ankerFehler } = await db
+        .from('gutachter_termine')
+        .update({ google_event_id: eventId, google_calendar_id: 'primary' })
+        .eq('id', termin.id)
+      if (ankerFehler) {
+        throw new Error(
+          `Event angelegt (${eventId}), aber google_event_id nicht gespeichert — naechster Sync erzeugt ein Duplikat: ${ankerFehler.message}`,
+        )
+      }
     }
     return 'created'
   },
@@ -92,7 +102,15 @@ export const googleProvider: KalenderProvider = {
       const m = err instanceof Error ? err.message : String(err)
       if (!/404|not.?found/i.test(m)) throw err
     }
-    await db.from('gutachter_termine').update({ google_event_id: null, google_calendar_id: null }).eq('id', termin.id)
+    // Referenz loesen. Bleibt sie stehen, zeigt sie auf ein geloeschtes Event —
+    // jeder weitere Sync laeuft in events.update -> 404.
+    const { error: refFehler } = await db
+      .from('gutachter_termine')
+      .update({ google_event_id: null, google_calendar_id: null })
+      .eq('id', termin.id)
+    if (refFehler) {
+      throw new Error(`Event geloescht, aber google_event_id nicht zurueckgesetzt: ${refFehler.message}`)
+    }
     return 'updated'
   },
 }
@@ -131,7 +149,14 @@ export const caldavProvider: KalenderProvider = {
           objectUrl: termin.caldav_object_url,
           event: { uid: termin.caldav_event_uid, summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
         })
-        await db.from('gutachter_termine').update({ caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
+        // Nur der Sync-Zeitstempel — ohne Folgeschaden, daher kein throw (anders als beim Anker unten).
+        const { error: stempelFehler } = await db
+          .from('gutachter_termine')
+          .update({ caldav_synced_at: new Date().toISOString() })
+          .eq('id', termin.id)
+        if (stempelFehler) {
+          console.error(`[kalender-sync] caldav_synced_at nicht gesetzt (${termin.id}):`, stempelFehler.message)
+        }
         return 'updated'
       }
       const result = await createCalendarEvent({
@@ -139,7 +164,17 @@ export const caldavProvider: KalenderProvider = {
         calendarUrl: conn.calendar_url,
         event: { summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
       })
-      await db.from('gutachter_termine').update({ caldav_object_url: result.objectUrl, caldav_event_uid: result.uid, caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
+      // Idempotenz-Anker (wie google_event_id): ohne objectUrl/uid findet der naechste
+      // Sync das Event nicht wieder und legt ein ZWEITES an.
+      const { error: ankerFehler } = await db
+        .from('gutachter_termine')
+        .update({ caldav_object_url: result.objectUrl, caldav_event_uid: result.uid, caldav_synced_at: new Date().toISOString() })
+        .eq('id', termin.id)
+      if (ankerFehler) {
+        throw new Error(
+          `CalDAV-Event angelegt (${result.uid}), aber Referenz nicht gespeichert — naechster Sync erzeugt ein Duplikat: ${ankerFehler.message}`,
+        )
+      }
       return 'created'
     } catch (err) {
       // Parity mit dem alten caldav/sv-termin-sync: bei auth_failed die Verbindung
@@ -163,7 +198,14 @@ export const caldavProvider: KalenderProvider = {
     if (!conn) return 'skip'
     const password = decrypt(conn.password_encrypted)
     await deleteCalendarEvent({ creds: { serverUrl: conn.server_url, username: conn.username, password }, objectUrl: termin.caldav_object_url })
-    await db.from('gutachter_termine').update({ caldav_object_url: null, caldav_event_uid: null, caldav_synced_at: null }).eq('id', termin.id)
+    // Referenz loesen — bleibt sie stehen, zeigt sie auf ein geloeschtes Event.
+    const { error: refFehler } = await db
+      .from('gutachter_termine')
+      .update({ caldav_object_url: null, caldav_event_uid: null, caldav_synced_at: null })
+      .eq('id', termin.id)
+    if (refFehler) {
+      throw new Error(`CalDAV-Event geloescht, aber Referenz nicht zurueckgesetzt: ${refFehler.message}`)
+    }
     return 'updated'
   },
 }
@@ -203,7 +245,16 @@ export const outlookProvider: KalenderProvider = {
     if (!resp.ok) throw new Error(`graph events.insert ${resp.status}`)
     const created = (await resp.json()) as { id?: string }
     if (created.id) {
-      await db.from('gutachter_termine').update({ ms_event_id: created.id }).eq('id', termin.id)
+      // Idempotenz-Anker (wie google_event_id) — ohne ihn legt der naechste Sync ein Duplikat an.
+      const { error: ankerFehler } = await db
+        .from('gutachter_termine')
+        .update({ ms_event_id: created.id })
+        .eq('id', termin.id)
+      if (ankerFehler) {
+        throw new Error(
+          `Graph-Event angelegt (${created.id}), aber ms_event_id nicht gespeichert — naechster Sync erzeugt ein Duplikat: ${ankerFehler.message}`,
+        )
+      }
     }
     return 'created'
   },
@@ -218,7 +269,14 @@ export const outlookProvider: KalenderProvider = {
       headers: { Authorization: `Bearer ${token}` },
     })
     if (!resp.ok && resp.status !== 404) throw new Error(`graph events.delete ${resp.status}`)
-    await db.from('gutachter_termine').update({ ms_event_id: null }).eq('id', termin.id)
+    // Referenz loesen — bleibt sie stehen, zeigt sie auf ein geloeschtes Event.
+    const { error: refFehler } = await db
+      .from('gutachter_termine')
+      .update({ ms_event_id: null })
+      .eq('id', termin.id)
+    if (refFehler) {
+      throw new Error(`Graph-Event geloescht, aber ms_event_id nicht zurueckgesetzt: ${refFehler.message}`)
+    }
     return 'updated'
   },
 }
