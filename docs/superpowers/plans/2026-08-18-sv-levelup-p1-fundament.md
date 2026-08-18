@@ -227,16 +227,23 @@ Rufe `mcp__plugin_supabase_supabase__execute_sql` mit dieser Query auf:
 ```sql
 select
   (select count(*) from information_schema.tables
-     where table_schema='public' and table_name like 'levelup%')                as tabellen,
+     where table_schema='public' and table_name like 'levelup%')                 as tabellen,
+  (select count(*) from pg_class c where c.relname like 'levelup%'
+     and c.relkind='r' and c.relrowsecurity)                                     as mit_rls,
   (select count(*) from pg_policy p join pg_class c on c.oid=p.polrelid
-     where c.relname like 'levelup%')                                           as policies,
+     where c.relname like 'levelup%')                                            as policies,
+  -- anon-Zugriff auf zwei Wegen: explizit genannt ODER polroles={0} (= PUBLIC,
+  -- gilt fuer ALLE Rollen). Eine Policy ohne TO-Klausel ist PUBLIC — genau die
+  -- Luecke, die der RLS-Policy-Ratchet im Projekt adressiert.
   (select count(*) from pg_policy p join pg_class c on c.oid=p.polrelid
      where c.relname like 'levelup%'
-       and 'anon' = any(select rolname from pg_roles where oid = any(p.polroles))) as anon_policies,
-  (select count(*) from public.leads)                                           as leads_unveraendert;
+       and (0 = any(p.polroles)
+            or exists (select 1 from pg_roles r
+                       where r.oid = any(p.polroles) and r.rolname = 'anon')))    as anon_oder_public,
+  (select count(*) from public.leads)                                            as leads_unveraendert;
 ```
 
-Erwartet: `tabellen = 7`, `policies = 7`, **`anon_policies = 0`**, `leads_unveraendert = 78`.
+Erwartet: `tabellen = 7`, `mit_rls = 7`, `policies = 7`, **`anon_oder_public = 0`**, `leads_unveraendert = 78`.
 
 Bricht eine dieser Zahlen aus, **nicht weitermachen** — melden.
 
