@@ -24,8 +24,6 @@
     "src/app/faelle/[id]/_actions/filmcheck.ts",
     "src/app/faelle/[id]/_actions/kanzlei-paket.ts",
     "src/app/faelle/[id]/_actions/prozess.ts",
-    "src/app/flow/[token]/actions.ts",
-    "src/app/flow/[token]/page.tsx",
     "src/app/gutachter/auftraege/_actions/vermittle-partner-werkstatt.ts",
     "src/app/gutachter/kalender/actions.ts",
     "src/app/gutachter/profil/ProfilClient.tsx",
