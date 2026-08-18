@@ -2935,6 +2935,180 @@ export const STAEDTE: Stadt[] = [
     bvskHonorarSpanne: '550–2.200 €',
     h1Anker: 'in Löhne',
   },
+  // Welle 8 (P3-B3, 18.08.2026) — Auswahl nach ABDECKUNG statt nach Groesse.
+  //
+  // Diese acht Orte sind deutlich kleiner als alles bisher Aufgenommene
+  // (20–40 Tsd. statt 40+), aber sie erfuellen als einzige das staerkste
+  // Substanz-Kriterium der Spec: sie liegen im **echten Einzugsgebiet eines
+  // aktiven, verifizierten Sachverstaendigen**. "Wir sind vor Ort" ist hier
+  // durch eigene Daten gedeckt — dasselbe Kriterium, das in Welle 5 fuer
+  // Erkelenz und Heinsberg galt und das Bocholt ausdruecklich NICHT erfuellt.
+  //
+  // Gemessen am 18.08.2026 gegen die echten `isochrone_polygon` der acht
+  // aktiven verifizierten SVs (Point-in-Polygon, nicht Radius). Von den 18
+  // NRW-Ortsnamen, die bereits in `angrenzendeOrte` stehen und noch keine
+  // Seite hatten, liegen genau diese acht in einem Einzugsgebiet:
+  //   mettmann / wuelfrath / korschenbroich  — 2 SVs
+  //   ennepetal / gevelsberg / radevormwald / roesrath / sprockhoevel — 1 SV
+  //
+  // ⚠ Der Unterschied zu einer Radius-Naeherung ist kein Detail: Bruehl und
+  // Huerth liegen NAEHER an Koeln als Roesrath, fallen aber heraus — die
+  // Koelner SVs sitzen im Osten (Kalk, Rath/Heumar), die Isochrone reicht
+  // nicht nach Suedwesten. Ein Umkreis haette beide eingeschlossen und damit
+  // eine Praesenz behauptet, die es nicht gibt.
+  //
+  // Nebeneffekt: alle acht stehen bereits namentlich in `angrenzendeOrte` der
+  // Hub-Staedte. Sie werden dadurch sofort verlinkt (P3-A2), ohne dass eine
+  // Liste angefasst werden muss.
+  //
+  // Gerichtsketten einzeln bei ag-<name>.nrw.de/aufgaben/gerichtsbezirk belegt.
+  // Auch hier folgt die Zuordnung keiner Geografie:
+  //   Radevormwald -> AG Wipperfuerth -> LG KOELN, obwohl es im Bergischen
+  //   liegt und Remscheid (LG Wuppertal) naeher ist.
+  //   Korschenbroich -> AG Neuss, NICHT Moenchengladbach — waehrend das
+  //   ebenfalls im Rhein-Kreis Neuss gelegene Grevenbroich zu AG
+  //   Moenchengladbach gehoert.
+  // Keiner der acht hat ein eigenes Amtsgericht.
+  //
+  // Einwohner: Wikipedia-Liste der Staedte in NRW, Stand 31.12.2025.
+  // Koordinaten und PLZ: Mapbox Places, jeder Treffer gegen das Bundesland
+  // im place_name geprueft (dort ENGLISCH: "North Rhine-Westphalia").
+  {
+    // 2 aktive verifizierte SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'mettmann',
+    name: 'Mettmann',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '408',
+    bevoelkerung: '40 Tsd.',
+    lat: 51.2508,
+    lng: 6.9772,
+    lokal: {
+      landgericht: 'Landgericht Wuppertal',
+      amtsgericht: 'Amtsgericht Mettmann',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Mettmann',
+  },
+  {
+    // 2 aktive verifizierte SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'korschenbroich',
+    name: 'Korschenbroich',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '413',
+    bevoelkerung: '34 Tsd.',
+    lat: 51.1908,
+    lng: 6.5137,
+    lokal: {
+      landgericht: 'Landgericht Düsseldorf',
+      amtsgericht: 'Amtsgericht Neuss',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Korschenbroich',
+  },
+  {
+    // 1 aktiver verifizierter SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'gevelsberg',
+    name: 'Gevelsberg',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '582',
+    bevoelkerung: '30 Tsd.',
+    lat: 51.3196,
+    lng: 7.3392,
+    lokal: {
+      landgericht: 'Landgericht Hagen',
+      amtsgericht: 'Amtsgericht Schwelm',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Gevelsberg',
+  },
+  {
+    // 1 aktiver verifizierter SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'ennepetal',
+    name: 'Ennepetal',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '582',
+    bevoelkerung: '29 Tsd.',
+    lat: 51.2973,
+    lng: 7.369,
+    lokal: {
+      landgericht: 'Landgericht Hagen',
+      amtsgericht: 'Amtsgericht Schwelm',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Ennepetal',
+  },
+  {
+    // 1 aktiver verifizierter SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'roesrath',
+    name: 'Rösrath',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '515',
+    bevoelkerung: '29 Tsd.',
+    lat: 50.8955,
+    lng: 7.182,
+    lokal: {
+      landgericht: 'Landgericht Köln',
+      amtsgericht: 'Amtsgericht Bergisch Gladbach',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Rösrath',
+  },
+  {
+    // 1 aktiver verifizierter SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'sprockhoevel',
+    name: 'Sprockhövel',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '455',
+    bevoelkerung: '24 Tsd.',
+    lat: 51.3689,
+    lng: 7.2495,
+    lokal: {
+      landgericht: 'Landgericht Essen',
+      amtsgericht: 'Amtsgericht Hattingen',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Sprockhövel',
+  },
+  {
+    // 1 aktiver verifizierter SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'radevormwald',
+    name: 'Radevormwald',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '424',
+    bevoelkerung: '21 Tsd.',
+    lat: 51.203,
+    lng: 7.3568,
+    lokal: {
+      landgericht: 'Landgericht Köln',
+      amtsgericht: 'Amtsgericht Wipperfürth',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Radevormwald',
+  },
+  {
+    // 2 aktive verifizierte SV mit Isochrone ueber diesem Ort (18.08.2026).
+    slug: 'wuelfrath',
+    name: 'Wülfrath',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '424',
+    bevoelkerung: '21 Tsd.',
+    lat: 51.2821,
+    lng: 7.0325,
+    lokal: {
+      landgericht: 'Landgericht Wuppertal',
+      amtsgericht: 'Amtsgericht Mettmann',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Wülfrath',
+  },
 ]
 
 /**

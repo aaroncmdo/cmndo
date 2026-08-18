@@ -202,8 +202,8 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Leverkusen",
+      "Rösrath",
       "Köln",
-      "Langenfeld",
       "Bonn",
       "Wuppertal",
       "Düsseldorf"
@@ -756,6 +756,27 @@
     ]
   },
   {
+    "slug": "ennepetal",
+    "name": "Ennepetal",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "582",
+    "bevoelkerung": "29 Tsd.",
+    "lat": 51.2973,
+    "lng": 7.369,
+    "landgericht": "Landgericht Hagen",
+    "amtsgericht": "Amtsgericht Schwelm",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Gevelsberg",
+      "Schwelm",
+      "Hagen",
+      "Wuppertal",
+      "Bochum",
+      "Dortmund"
+    ]
+  },
+  {
     "slug": "erftstadt",
     "name": "Erftstadt",
     "bundesland": "Nordrhein-Westfalen",
@@ -812,7 +833,7 @@
     "nachbarorte": [
       "Mönchengladbach",
       "Heinsberg",
-      "Grevenbroich",
+      "Korschenbroich",
       "Krefeld",
       "Düsseldorf",
       "Aachen"
@@ -831,9 +852,9 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Mettmann",
       "Hilden",
       "Haan",
-      "Ratingen",
       "Düsseldorf",
       "Wuppertal",
       "Duisburg"
@@ -1029,6 +1050,27 @@
     ]
   },
   {
+    "slug": "gevelsberg",
+    "name": "Gevelsberg",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "582",
+    "bevoelkerung": "30 Tsd.",
+    "lat": 51.3196,
+    "lng": 7.3392,
+    "landgericht": "Landgericht Hagen",
+    "amtsgericht": "Amtsgericht Schwelm",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Ennepetal",
+      "Schwelm",
+      "Sprockhövel",
+      "Wuppertal",
+      "Bochum",
+      "Dortmund"
+    ]
+  },
+  {
     "slug": "gladbeck",
     "name": "Gladbeck",
     "bundesland": "Nordrhein-Westfalen",
@@ -1083,9 +1125,9 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Korschenbroich",
       "Neuss",
       "Mönchengladbach",
-      "Bergheim",
       "Düsseldorf",
       "Krefeld",
       "Köln"
@@ -1147,8 +1189,8 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Lüdenscheid",
-      "Bergisch Gladbach",
-      "Remscheid",
+      "Radevormwald",
+      "Rösrath",
       "Wuppertal",
       "Köln",
       "Bonn"
@@ -1169,7 +1211,7 @@
     "nachbarorte": [
       "Hilden",
       "Solingen",
-      "Erkrath",
+      "Mettmann",
       "Wuppertal",
       "Düsseldorf",
       "Köln"
@@ -1188,12 +1230,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Gevelsberg",
+      "Ennepetal",
       "Witten",
-      "Schwelm",
       "Dortmund",
       "Bochum",
-      "Wuppertal",
-      "Gelsenkirchen"
+      "Wuppertal"
     ]
   },
   {
@@ -1293,9 +1335,9 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Sprockhövel",
       "Bochum",
       "Witten",
-      "Velbert",
       "Essen",
       "Gelsenkirchen",
       "Wuppertal"
@@ -1764,6 +1806,27 @@
     ]
   },
   {
+    "slug": "korschenbroich",
+    "name": "Korschenbroich",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "413",
+    "bevoelkerung": "34 Tsd.",
+    "lat": 51.1908,
+    "lng": 6.5137,
+    "landgericht": "Landgericht Düsseldorf",
+    "amtsgericht": "Amtsgericht Neuss",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Mönchengladbach",
+      "Willich",
+      "Kaarst",
+      "Krefeld",
+      "Düsseldorf",
+      "Duisburg"
+    ]
+  },
+  {
     "slug": "krefeld",
     "name": "Krefeld",
     "bundesland": "Nordrhein-Westfalen",
@@ -1945,8 +2008,8 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Iserlohn",
+      "Radevormwald",
       "Hagen",
-      "Gummersbach",
       "Wuppertal",
       "Dortmund",
       "Bochum"
@@ -2121,6 +2184,27 @@
     ]
   },
   {
+    "slug": "mettmann",
+    "name": "Mettmann",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "408",
+    "bevoelkerung": "40 Tsd.",
+    "lat": 51.2508,
+    "lng": 6.9772,
+    "landgericht": "Landgericht Wuppertal",
+    "amtsgericht": "Amtsgericht Mettmann",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Wülfrath",
+      "Erkrath",
+      "Haan",
+      "Wuppertal",
+      "Düsseldorf",
+      "Essen"
+    ]
+  },
+  {
     "slug": "minden",
     "name": "Minden",
     "bundesland": "Nordrhein-Westfalen",
@@ -2154,9 +2238,9 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Korschenbroich",
       "Viersen",
       "Willich",
-      "Kaarst",
       "Krefeld",
       "Düsseldorf",
       "Duisburg"
@@ -2478,6 +2562,27 @@
     ]
   },
   {
+    "slug": "radevormwald",
+    "name": "Radevormwald",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "424",
+    "bevoelkerung": "21 Tsd.",
+    "lat": 51.203,
+    "lng": 7.3568,
+    "landgericht": "Landgericht Köln",
+    "amtsgericht": "Amtsgericht Wipperfürth",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Schwelm",
+      "Ennepetal",
+      "Remscheid",
+      "Wuppertal",
+      "Bochum",
+      "Dortmund"
+    ]
+  },
+  {
     "slug": "ratingen",
     "name": "Ratingen",
     "bundesland": "Nordrhein-Westfalen",
@@ -2492,7 +2597,7 @@
     "nachbarorte": [
       "Düsseldorf",
       "Erkrath",
-      "Meerbusch",
+      "Mettmann",
       "Duisburg",
       "Krefeld",
       "Essen"
@@ -2555,7 +2660,7 @@
     "nachbarorte": [
       "Solingen",
       "Wuppertal",
-      "Haan",
+      "Radevormwald",
       "Düsseldorf",
       "Köln",
       "Essen"
@@ -2622,6 +2727,27 @@
       "Münster",
       "Bielefeld",
       "Dortmund"
+    ]
+  },
+  {
+    "slug": "roesrath",
+    "name": "Rösrath",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "515",
+    "bevoelkerung": "29 Tsd.",
+    "lat": 50.8955,
+    "lng": 7.182,
+    "landgericht": "Landgericht Köln",
+    "amtsgericht": "Amtsgericht Bergisch Gladbach",
+    "kammer": "Rechtsanwaltskammer Köln",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Troisdorf",
+      "Bergisch Gladbach",
+      "Siegburg",
+      "Köln",
+      "Bonn",
+      "Wuppertal"
     ]
   },
   {
@@ -2700,12 +2826,12 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Gevelsberg",
+      "Ennepetal",
+      "Sprockhövel",
       "Wuppertal",
-      "Remscheid",
-      "Hattingen",
       "Bochum",
-      "Essen",
-      "Dortmund"
+      "Essen"
     ]
   },
   {
@@ -2811,6 +2937,27 @@
       "Wuppertal",
       "Düsseldorf",
       "Köln"
+    ]
+  },
+  {
+    "slug": "sprockhoevel",
+    "name": "Sprockhövel",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "455",
+    "bevoelkerung": "24 Tsd.",
+    "lat": 51.3689,
+    "lng": 7.2495,
+    "landgericht": "Landgericht Essen",
+    "amtsgericht": "Amtsgericht Hattingen",
+    "kammer": "Rechtsanwaltskammer Hamm",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Hattingen",
+      "Gevelsberg",
+      "Schwelm",
+      "Bochum",
+      "Wuppertal",
+      "Essen"
     ]
   },
   {
@@ -2952,12 +3099,12 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Wülfrath",
+      "Mettmann",
       "Wuppertal",
-      "Hattingen",
       "Essen",
       "Bochum",
-      "Gelsenkirchen",
-      "Oberhausen"
+      "Gelsenkirchen"
     ]
   },
   {
@@ -2975,7 +3122,7 @@
     "nachbarorte": [
       "Mönchengladbach",
       "Willich",
-      "Kaarst",
+      "Korschenbroich",
       "Krefeld",
       "Düsseldorf",
       "Duisburg"
@@ -3037,8 +3184,8 @@
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
       "Kaarst",
+      "Korschenbroich",
       "Krefeld",
-      "Meerbusch",
       "Mönchengladbach",
       "Düsseldorf",
       "Duisburg"
@@ -3057,9 +3204,9 @@
     "kammer": "Rechtsanwaltskammer Hamm",
     "bvskHonorarSpanne": "550–2.200 €",
     "nachbarorte": [
+      "Sprockhövel",
       "Bochum",
       "Hattingen",
-      "Hagen",
       "Dortmund",
       "Gelsenkirchen",
       "Essen"
@@ -3084,6 +3231,27 @@
       "Halle (Saale)",
       "Hamburg",
       "Bremen"
+    ]
+  },
+  {
+    "slug": "wuelfrath",
+    "name": "Wülfrath",
+    "bundesland": "Nordrhein-Westfalen",
+    "plzPrefix": "424",
+    "bevoelkerung": "21 Tsd.",
+    "lat": 51.2821,
+    "lng": 7.0325,
+    "landgericht": "Landgericht Wuppertal",
+    "amtsgericht": "Amtsgericht Mettmann",
+    "kammer": "Rechtsanwaltskammer Düsseldorf",
+    "bvskHonorarSpanne": "550–2.200 €",
+    "nachbarorte": [
+      "Mettmann",
+      "Velbert",
+      "Wuppertal",
+      "Düsseldorf",
+      "Essen",
+      "Duisburg"
     ]
   },
   {
@@ -3141,9 +3309,9 @@
     "kammer": "Rechtsanwaltskammer Düsseldorf",
     "bvskHonorarSpanne": "600–2.300 €",
     "nachbarorte": [
+      "Wülfrath",
       "Remscheid",
       "Schwelm",
-      "Solingen",
       "Essen",
       "Bochum",
       "Düsseldorf"
