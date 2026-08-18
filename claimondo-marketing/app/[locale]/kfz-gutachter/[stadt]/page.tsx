@@ -1,4 +1,5 @@
 import { localeAlternates } from '@/lib/seo/alternates'
+import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -81,8 +82,21 @@ export async function generateMetadata({
   const s = getStadtBySlug(stadt)
   if (!s) return { title: 'Stadt nicht gefunden' }
 
+  // Title OHNE Brand-Suffix — das kam aus #5352 ("doppelter Brand im Title"),
+  // weil das Layout den Marken-Namen bereits anhaengt. Nicht zurueckdrehen.
   const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall`
-  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Unfall. Zertifizierte Partner, Termin unter 48 h, 0 € bei unverschuldetem Unfall (§249 BGB).`
+
+  // Die Beschreibung war bis 18.08.2026 fuer JEDE Stadt derselbe Satz mit
+  // ausgetauschtem Ortsnamen — bei 173 Seiten ein Duplicate-Signal. Sie zog
+  // ausserdem die freigegebene Ortstiefe nicht heran: die Seite zeigte
+  // Stadtbezirke, die Suchergebnis-Vorschau nicht.
+  //
+  // Dieselbe Vorrang-Regel wie im Seiten-Render unten (Hub-Daten schlagen DB),
+  // damit Vorschau und Seite denselben Ort beschreiben. `ladeLokalinhalt` ist
+  // per React-cache dedupliziert — der Render unten loest keinen zweiten
+  // Supabase-Call aus.
+  const tiefeFuerMeta = s.hyperlocal ?? (await ladeLokalinhalt(s.slug))
+  const description = stadtMetaDescription(s, tiefeFuerMeta)
 
   return {
     title,

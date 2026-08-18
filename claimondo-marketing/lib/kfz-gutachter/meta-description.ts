@@ -1,0 +1,110 @@
+import type { Stadt } from './staedte'
+
+// Meta-Description je Stadtseite.
+//
+// DER BEFUND (18.08.2026): Die Beschreibung war fuer JEDE Stadt derselbe Satz
+// mit ausgetauschtem Ortsnamen —
+//   "Unabhaengiger Kfz-Sachverstaendiger in <Ort> nach Unfall. Zertifizierte
+//    Partner, Termin unter 48 h, 0 € bei unverschuldetem Unfall (§249 BGB)."
+// Bei 173 Seiten ist das 173x dieselbe Beschreibung. Fuer Suchmaschinen ist das
+// ein Duplicate-Signal und genau das Muster, das seit dem Maerz-2024-Update als
+// "Scaled Content" abgewertet wird; fuer Modelle ist daran nichts zitierfaehig.
+// Ausserdem las die Beschreibung die freigegebene Ortstiefe nicht — die Seite
+// zeigte Stadtbezirke und Verkehrsachsen, die Suchergebnis-Vorschau nicht.
+//
+// WAS HIER NICHT PASSIERT: nichts wird formuliert, das nicht in den Daten
+// steht. Amtsgericht, PLZ-Bereich und Bundesland sind gepflegte Fakten;
+// Stadtbezirke und Achsen stammen aus einem Eintrag, der das Substanz-Gate
+// bestanden hat. Eine erfundene Ortsangabe waere hier besonders teuer, weil
+// die Beschreibung im Suchergebnis steht, bevor jemand die Seite sieht.
+
+/** Googles Anzeige bricht darueber ab; laengere Texte werden abgeschnitten. */
+export const MAX_META_LAENGE = 160
+
+type Ortstiefe = {
+  stadtbezirke?: Array<{ name: string }>
+  hauptachsen?: { autobahnen?: string[]; bundesstrassen?: string[]; knoten?: string[] }
+}
+
+/**
+ * Setzt Kopf, Mittelteil und Schluss zusammen — der Schluss hat VORRANG.
+ *
+ * Die erste Fassung haengte den Schluss nur an, wenn er noch passte. Bei langen
+ * Ortsnamen (Ludwigshafen am Rhein, Mülheim an der Ruhr) fiel er damit weg, und
+ * genau die Seiten verloren den Kostenhinweis. Richtig herum: Kopf und Schluss
+ * sind gesetzt, der Mittelteil fuellt, was uebrig bleibt — notfalls gar nichts.
+ */
+function baue(kopf: string, mitte: string, schluss: string): string {
+  const mitSchluss = `${kopf} ${mitte} ${schluss}`.replace(/\s+/g, ' ').trim()
+  if (mitSchluss.length <= MAX_META_LAENGE) return mitSchluss
+  return `${kopf} ${schluss}`.replace(/\s+/g, ' ').trim()
+}
+
+/** Die ersten n Namen, die zusammen noch in die Grenze passen. */
+function nenneBis(namen: string[], platz: number): string[] {
+  const gewaehlt: string[] = []
+  let laenge = 0
+  for (const n of namen) {
+    const zusatz = gewaehlt.length ? n.length + 2 : n.length
+    if (laenge + zusatz > platz) break
+    gewaehlt.push(n)
+    laenge += zusatz
+  }
+  return gewaehlt
+}
+
+/**
+ * Beschreibung fuer eine Stadtseite.
+ *
+ * Ohne Ortstiefe traegt sie die Rechts- und Ortsanker der Stammdaten — die
+ * unterscheiden sich je Stadt und sind belegt. Mit freigegebener Ortstiefe
+ * treten Stadtbezirke (bevorzugt) oder Verkehrsachsen an ihre Stelle, weil das
+ * die konkretere Ortsangabe ist.
+ */
+export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): string {
+  const kopf = `Kfz-Gutachter ${stadt.h1Anker} nach Unfall:`
+  // Bewusst knapp: die erste Fassung war 61 Zeichen lang und fiel damit bei
+  // kurzen Ortsnamen aus der Laengengrenze — Bocholt kam auf 100 Zeichen ohne
+  // jeden Hinweis auf die Kostenfreiheit, also ohne das staerkste Argument.
+  // Lieber ein kuerzerer Schlusssatz, der ueberall passt, als ein vollstaendiger,
+  // der auf der Haelfte der Seiten fehlt.
+  const schluss = 'Termin unter 48 h, 0 € nach §249 BGB.'
+
+  const bezirke = (tiefe?.stadtbezirke ?? []).map((b) => b.name).filter(Boolean)
+  const achsen = [
+    ...(tiefe?.hauptachsen?.autobahnen ?? []),
+    ...(tiefe?.hauptachsen?.bundesstrassen ?? []),
+  ].filter(Boolean)
+
+  /** Was Kopf und Schluss dem Mittelteil uebrig lassen. */
+  const platzFuerMitte = MAX_META_LAENGE - kopf.length - schluss.length - 2
+
+  // Reihenfolge nach Konkretheit: ein Stadtbezirk sagt mehr ueber den Ort als
+  // eine Autobahn, und die mehr als ein Gerichtsbezirk.
+  if (bezirke.length) {
+    const rahmen = 'unabhängige Sachverständige für  und Umgebung.'.length
+    const genannt = nenneBis(bezirke, Math.max(platzFuerMitte - rahmen, 0))
+    if (genannt.length) {
+      return baue(kopf, `unabhängige Sachverständige für ${genannt.join(', ')} und Umgebung.`, schluss)
+    }
+  }
+
+  if (achsen.length) {
+    const rahmen = 'Unfallaufnahme an  und im Stadtgebiet.'.length
+    const genannt = nenneBis(achsen, Math.max(platzFuerMitte - rahmen, 0))
+    if (genannt.length) {
+      return baue(kopf, `Unfallaufnahme an ${genannt.join(', ')} und im Stadtgebiet.`, schluss)
+    }
+  }
+
+  // Rueckfall ohne Ortstiefe: die gepflegten Anker. `plzPrefix` und das
+  // Amtsgericht variieren je Stadt und machen die Beschreibung unterscheidbar.
+  const mitGericht = `unabhängige Sachverständige im Raum ${stadt.plzPrefix} (${stadt.lokal.amtsgericht}).`
+  if (mitGericht.length <= platzFuerMitte) return baue(kopf, mitGericht, schluss)
+
+  // Bei sehr langen Orts- UND Gerichtsnamen (Ludwigshafen am Rhein, Mülheim an
+  // der Ruhr) sprengt die volle Fassung die Grenze. Vorher fiel der Mittelteil
+  // dann komplett weg und die Beschreibung schrumpfte auf ~88 Zeichen — die
+  // kurze Fassung ohne Gerichtsnamen traegt immer noch den PLZ-Raum.
+  return baue(kopf, `unabhängige Sachverständige im Raum ${stadt.plzPrefix}.`, schluss)
+}

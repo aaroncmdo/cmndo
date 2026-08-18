@@ -1,3 +1,5 @@
+import { cache } from 'react'
+
 // Marketing-Read fuer freigegebene Stadt-Lokalinhalte (Tabelle stadt_lokalinhalte).
 //
 // WARUM diese Datei das offene Ende der P2-Pipeline schliesst: Gate, Generator,
@@ -161,7 +163,7 @@ function anonClient() {
  * Der Statusfilter steht hier ZUSAETZLICH zur RLS-Policy — doppelt gemoppelt
  * ist bei "nichts Ungeprueftes veroeffentlichen" das richtige Mass.
  */
-export async function ladeLokalinhalt(stadtSlug: string): Promise<Lokalinhalt | null> {
+async function ladeLokalinhaltUngecacht(stadtSlug: string): Promise<Lokalinhalt | null> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
     return null
   }
@@ -183,3 +185,14 @@ export async function ladeLokalinhalt(stadtSlug: string): Promise<Lokalinhalt | 
     return null
   }
 }
+
+/**
+ * Derselbe Read, pro Request nur EINMAL ausgefuehrt.
+ *
+ * Noetig, seit auch `generateMetadata` die Ortstiefe braucht (fuer die
+ * Meta-Description): Next ruft Metadata und Seiten-Render getrennt auf, ohne
+ * Deduplizierung waere das je Seitenaufruf ein zweiter Supabase-Call fuer
+ * dieselbe Zeile. React `cache` haelt das Ergebnis innerhalb eines Requests —
+ * anders als `fetch` dedupliziert Next Supabase-Aufrufe nicht von selbst.
+ */
+export const ladeLokalinhalt = cache(ladeLokalinhaltUngecacht)
