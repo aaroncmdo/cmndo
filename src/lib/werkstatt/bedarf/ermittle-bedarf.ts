@@ -159,7 +159,9 @@ export async function ermittleReparaturbedarf(
 
   if (claimId) {
     try {
-      await sb.from('claims').update(patch).eq('id', claimId)
+      // Das try faengt hier nichts — supabase-js wirft nicht.
+      const { error } = await sb.from('claims').update(patch).eq('id', claimId)
+      if (error) console.error(`[ermittleReparaturbedarf] Claim-Persist (claim ${claimId}):`, error.message)
     } catch (err) {
       console.warn('[ermittleReparaturbedarf] Claim-Persist fehlgeschlagen (non-fatal):', err)
     }
@@ -167,7 +169,8 @@ export async function ermittleReparaturbedarf(
   if (resolvedLeadId ?? leadId) {
     const lid = resolvedLeadId ?? leadId
     try {
-      await sb.from('leads').update(patch).eq('id', lid)
+      const { error } = await sb.from('leads').update(patch).eq('id', lid)
+      if (error) console.error(`[ermittleReparaturbedarf] Lead-Persist (lead ${lid}):`, error.message)
     } catch (err) {
       console.warn('[ermittleReparaturbedarf] Lead-Persist fehlgeschlagen (non-fatal):', err)
     }

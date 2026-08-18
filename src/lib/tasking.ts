@@ -321,10 +321,12 @@ export async function autoCompleteTask(fallId: string, eventType: string) {
 
     if (!task) continue
 
-    await supabase.from('tasks').update({
+    const { error: erledigtFehler } = await supabase.from('tasks').update({
       status: 'erledigt',
       erledigt_am: new Date().toISOString(),
     }).eq('id', task.id)
+    // Bleibt die Aufgabe faelschlich offen, sieht der Bearbeiter sie weiter.
+    if (erledigtFehler) console.error(`[tasking] Task ${task.id} nicht erledigt:`, erledigtFehler.message)
 
     // AAR-430: pending Reminder stornieren, da Task abgeschlossen
     try {
@@ -359,6 +361,8 @@ export async function resolveGates(taskId: string) {
   if (!blocked?.length) return
 
   for (const t of blocked) {
-    await supabase.from('tasks').update({ status: 'offen' }).eq('id', t.id)
+    const { error: unblockFehler } = await supabase.from('tasks').update({ status: 'offen' }).eq('id', t.id)
+    // Bleibt sie blockiert, taucht sie in KEINER Arbeitsliste auf — sie ist unsichtbar.
+    if (unblockFehler) console.error(`[tasking] Task ${t.id} nicht entsperrt:`, unblockFehler.message)
   }
 }

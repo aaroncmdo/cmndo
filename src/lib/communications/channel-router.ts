@@ -54,11 +54,13 @@ async function persistBevorzugterKanal(
       // CMM-44 SP-B PR2a: bevorzugter_kanal lebt jetzt auf claims (SSoT).
       const claimId = await resolveClaimId(db, recipient.fallId)
       if (claimId) {
-        await db.from('claims').update({ bevorzugter_kanal: kanal }).eq('id', claimId)
+        const { error: claimKanalFehler } = await db.from('claims').update({ bevorzugter_kanal: kanal }).eq('id', claimId)
+        if (claimKanalFehler) console.error(`[channel-router] Kanal nicht gemerkt (claim ${claimId}):`, claimKanalFehler.message)
       }
     }
     if (recipient.leadId) {
-      await db.from('leads').update({ bevorzugter_kanal: kanal }).eq('id', recipient.leadId)
+      const { error: leadKanalFehler } = await db.from('leads').update({ bevorzugter_kanal: kanal }).eq('id', recipient.leadId)
+      if (leadKanalFehler) console.error(`[channel-router] Kanal nicht gemerkt (lead ${recipient.leadId}):`, leadKanalFehler.message)
     }
   } catch (err) {
     // Non-critical: persisting failure darf den Versand nicht blocken

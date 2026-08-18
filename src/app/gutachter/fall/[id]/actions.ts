@@ -14,6 +14,8 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
 import { filterWerteFelder } from '@/lib/gutachter/gutachten-werte-felder'
+// P3.3: bezug-aware Termin-Filter (matcht Legacy fall_id UND bezug_typ+bezug_id).
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 type ActionResult = { success?: boolean; error?: string }
 
@@ -576,14 +578,19 @@ export async function declineTermin(
   // 1. gutachter_termine → abgelehnt
   // KFZ-136: Termin-IDs vor dem Update holen fuer Reminder-Cancel
   // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
+  // P3.3-Boy-Scout: bezug-aware. Mit `.eq('fall_id')` blieben bezug-native Termine bei
+  // einer Ablehnung UNBERUEHRT — der Auftrag war abgelehnt, der Termin stand aber weiter
+  // auf reserviert/bestaetigt UND die Reminder liefen weiter (activeTermine war leer, also
+  // wurde nichts storniert). Der Kunde haette Erinnerungen fuer einen abgelehnten Termin
+  // bekommen. Betrifft SELECT und UPDATE gleichermassen — beide sind FILTER.
   const { data: activeTermine } = await supabase.from('gutachter_termine')
-    .select('id').eq('fall_id', fallId).eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger').in('status', ['reserviert', 'bestaetigt'])
+    .select('id').or(bezugOrExpr('fall', fallId)).eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger').in('status', ['reserviert', 'bestaetigt'])
 
   // Der SV hat im Portal abgelehnt. Bleibt der Write aus, gilt der Termin weiter
   // als reserviert/bestaetigt — Dispatch disponiert nicht um, der Kunde wartet.
   const { error: ablehnFehler } = await supabase.from('gutachter_termine')
     .update({ status: 'abgelehnt', abgelehnt_am: new Date().toISOString(), abgelehnt_grund: grund || 'Im Portal abgelehnt' })
-    .eq('fall_id', fallId)
+    .or(bezugOrExpr('fall', fallId))
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'bestaetigt'])
