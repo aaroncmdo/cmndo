@@ -10,6 +10,15 @@
 //   node scripts/check-stadt-linknetz.mjs --check      # exit 1 bei toten Links/Waisen (CI)
 //   node scripts/check-stadt-linknetz.mjs --crawl https://claimondo.de
 //                                                      # liest die ECHTEN Seiten
+//   node scripts/check-stadt-linknetz.mjs --crawl https://claimondo.de \
+//     --staedte /pfad/zu/staedte.ts                    # Crawl gegen einen FREMDEN Stand
+//
+// WOFUER --staedte: Bei Regel-4-Nachweisen laeuft prod dem Arbeitsbaum immer
+// hinterher — staging traegt schon die naechste Welle, prod noch nicht. Ohne den
+// Schalter meldet der Crawl jede noch nicht deployte Stadt als 404 UND als
+// Waise, und der Bericht steckt voller Fehlalarme, in denen ein echter Befund
+// untergeht. Mit ihm crawlt man gegen genau den Stand, der online ist:
+//   git show origin/main:claimondo-marketing/lib/kfz-gutachter/staedte.ts > /tmp/prod-staedte.ts
 //
 // DATENMODUS vs. CRAWL — der Unterschied ist wichtig:
 // Der Datenmodus rechnet aus denselben Quellen, aus denen die Seite rendert.
@@ -21,8 +30,12 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { GLOBALE_QUELLEN, analysiereLinknetz } from './lib/stadt-linknetz-scan.mjs'
+import { GLOBALE_QUELLEN, analysiereLinknetz, teileAmSeitenFooter } from './lib/stadt-linknetz-scan.mjs'
 import { nachbarnMitRueckkanten } from '../claimondo-marketing/lib/kfz-gutachter/nachbar-auswahl.mjs'
+import {
+  RATGEBER_SEITEN,
+  waehleRatgeberStaedte,
+} from '../claimondo-marketing/lib/kfz-gutachter/ratgeber-auswahl.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const STAEDTE_TS = join(ROOT, 'claimondo-marketing', 'lib', 'kfz-gutachter', 'staedte.ts')
@@ -44,6 +57,12 @@ const MIN_ERWARTETE_STAEDTE = 50
 
 /** Wie viele eingehende thematische Links eine Stadt mindestens haben sollte. */
 const MIN_EINGEHEND = 2
+
+/** Muss dem Wert in RatgeberStaedteSection.tsx entsprechen — sonst rechnet der
+ *  Datenmodus mit einer anderen Menge als die Seite rendert. Eine Abweichung
+ *  faellt sofort auf, weil Datenmodus und Crawl dann verschiedene Kantenzahlen
+ *  melden. */
+const RATGEBER_STAEDTE_JE_SEITE = 8
 
 // ---------------------------------------------------------------- Quellen
 
@@ -218,50 +237,57 @@ function sammleAusDaten() {
     }
   }
 
+  // 6. Ratgeber-Geschwister -> Staedte (P3-A4). DIESELBE Funktion, die die
+  //    Sektion rendert. Sie hier nachzubauen waere der Fehler, der in dieser
+  //    Lane schon zweimal passiert ist: ein Datenmodus, der die Regel
+  //    nachrechnet statt sie zu benutzen, meldet nach der naechsten Aenderung
+  //    andere Zahlen als der Crawl — und dann glaubt man dem falschen Lauf.
+  for (const seite of RATGEBER_SEITEN) {
+    for (const ziel of waehleRatgeberStaedte(seite, staedte, RATGEBER_STAEDTE_JE_SEITE)) {
+      kanten.push({ von: `ratgeber:${seite}`, nach: ziel.slug, quelle: 'ratgeber', vonIstStadt: false })
+    }
+  }
+
   return { staedte, kanten, footer, spokeHubs, angrenzendeKanten, quelltext }
 }
 
 // ------------------------------------------------------------ Crawl-Modus
 
-/** Trennt den Seiteninhalt vom Footer-Strip.
- *
- *  WARUM am `<footer>`-Element und nicht an CSS-Klassen: Der erste Wurf nahm
- *  "Pill-Klasse = thematisch, alles andere = global" an und verbuchte damit den
- *  Hub-Link der Spoke-Seiten (ein Inline-Link im Fliesstext) faelschlich als
- *  Footer. Die Klassen sind ein Implementierungsdetail, das Element ist die
- *  Struktur. Gegen prod geprueft: bei /kfz-gutachter/solingen steht der
- *  Hub-Link `wuppertal` ausserhalb, die zehn FOOTER_STANDORTE innerhalb. */
-function teileAmFooter(html) {
-  const i = html.indexOf('<footer')
-  return i < 0 ? { inhalt: html, footer: '' } : { inhalt: html.slice(0, i), footer: html.slice(i) }
-}
-
 function stadtLinks(html) {
   return [...html.matchAll(/href="\/kfz-gutachter\/([a-z0-9-]+)"/g)].map((m) => m[1])
 }
 
-async function sammleAusCrawl(basisUrl) {
-  const staedte = parseStaedte(readFileSync(STAEDTE_TS, 'utf8'))
+/** Eine Seite abrufen. Fehler landen als Text in `fehler`, nicht als Abbruch —
+ *  ein 404 auf einer Seite ist ein Befund, kein Grund, den Lauf zu beenden. */
+async function hole(url, kennung, fehler) {
+  try {
+    const antwort = await fetch(url)
+    if (!antwort.ok) {
+      fehler.push(`${kennung}: HTTP ${antwort.status}`)
+      return null
+    }
+    return await antwort.text()
+  } catch (err) {
+    fehler.push(`${kennung}: ${err.message}`)
+    return null
+  }
+}
+
+async function sammleAusCrawl(basisUrl, staedteQuelle = STAEDTE_TS) {
+  const quelltext = readFileSync(staedteQuelle, 'utf8')
+  const staedte = parseStaedte(quelltext)
   const ratgeber = new Set(nichtStadtRouten())
+  const standorte = parseFooterStandorte(readFileSync(FOOTER_TSX, 'utf8'))
   const kanten = []
   const fehler = []
+  const basis = basisUrl.replace(/\/$/, '')
 
   for (const s of staedte) {
-    const url = `${basisUrl.replace(/\/$/, '')}/kfz-gutachter/${s.slug}`
-    let html = ''
-    try {
-      const antwort = await fetch(url)
-      if (!antwort.ok) {
-        fehler.push(`${s.slug}: HTTP ${antwort.status}`)
-        continue
-      }
-      html = await antwort.text()
-    } catch (err) {
-      fehler.push(`${s.slug}: ${err.message}`)
-      continue
-    }
-    const { inhalt, footer } = teileAmFooter(html)
-    if (!footer) fehler.push(`${s.slug}: kein <footer>-Element — Trennung unsicher`)
+    const html = await hole(`${basis}/kfz-gutachter/${s.slug}`, s.slug, fehler)
+    if (html === null) continue
+
+    const { inhalt, footer, unsicher } = teileAmSeitenFooter(html, standorte)
+    if (unsicher) fehler.push(`${s.slug}: ${unsicher}`)
 
     for (const ziel of new Set(stadtLinks(inhalt))) {
       if (ratgeber.has(ziel) || ziel === s.slug) continue
@@ -270,6 +296,26 @@ async function sammleAusCrawl(basisUrl) {
     for (const ziel of new Set(stadtLinks(footer))) {
       if (ratgeber.has(ziel)) continue
       kanten.push({ von: s.slug, nach: ziel, quelle: 'footer' })
+    }
+  }
+
+  // Die Ratgeber-Geschwister. Sie waren bis 18.08.2026 nur ein FILTER (damit
+  // ihre Slugs nicht als tote Stadt-Links zaehlen) — abgerufen wurden sie nie.
+  // Seit P3-A4 verlinken sie je acht Staedte, und dieser Lauf sah davon nichts:
+  // wer die Sektion entfernt haette, waere durch jede Messung gekommen.
+  for (const slug of ratgeber) {
+    const html = await hole(`${basis}/kfz-gutachter/${slug}`, `ratgeber/${slug}`, fehler)
+    if (html === null) continue
+
+    const { inhalt, unsicher } = teileAmSeitenFooter(html, standorte)
+    if (unsicher) fehler.push(`ratgeber/${slug}: ${unsicher}`)
+
+    for (const ziel of new Set(stadtLinks(inhalt))) {
+      if (ratgeber.has(ziel)) continue
+      // `vonIstStadt: false` haelt die Kante aus der Reziprozitaets-Rechnung:
+      // eine Stadtseite kann nicht sinnvoll "zurueck" auf einen Ratgeber
+      // verweisen — das taete nur die Navigation, und die ist ueberall gleich.
+      kanten.push({ von: `ratgeber:${slug}`, nach: ziel, quelle: 'ratgeber', vonIstStadt: false })
     }
   }
 
@@ -282,7 +328,7 @@ function zeile(titel, wert) {
   console.log(`  ${titel.padEnd(34)} ${wert}`)
 }
 
-function berichte(ergebnis, extras) {
+function berichte(ergebnis, extras, nurStadtNetz) {
   const { kennzahl } = ergebnis
   console.log('\nSTADT-LINKNETZ\n')
   zeile('Stadtseiten', kennzahl.staedte)
@@ -291,6 +337,18 @@ function berichte(ergebnis, extras) {
     'eingehend je Stadt (min/Ø/max)',
     `${kennzahl.eingehendMin} / ${kennzahl.eingehendSchnitt.toFixed(1)} / ${kennzahl.eingehendMax}`,
   )
+  if (nurStadtNetz) {
+    // Ohne diese zweite Zeile verwaessert die erste: eine Stadt ohne JEDEN
+    // Stadt-Nachbarn, die zufaellig auf einer Ratgeber-Seite auftaucht, waere
+    // oben keine Waise mehr — obwohl im Stadt-Netz genau dort ein Loch ist.
+    // Die Ratgeber-Kanten sind ein Zugewinn, aber sie ersetzen die Nachbarschaft
+    // nicht, und die Kennzahl soll nicht so tun.
+    const n = nurStadtNetz.kennzahl
+    zeile(
+      '  davon nur von Stadtseiten',
+      `${n.eingehendMin} / ${n.eingehendSchnitt.toFixed(1)} / ${n.eingehendMax}`,
+    )
+  }
   console.log('\n  Kanten je Quelle:')
   for (const [quelle, anzahl] of Object.entries(kennzahl.jeQuelle).sort()) {
     const marke = GLOBALE_QUELLEN.includes(quelle) ? ' (global, zaehlt nicht thematisch)' : ''
@@ -306,6 +364,14 @@ function berichte(ergebnis, extras) {
   for (const s of ergebnis.schwach.slice(0, 20)) console.log(`     ${s.slug} (${s.eingehend})`)
   if (ergebnis.schwach.length > 20) console.log(`     … und ${ergebnis.schwach.length - 20} weitere`)
   zeile('einseitige Kanten A->B ohne B->A', ergebnis.einseitig.length)
+  if (nurStadtNetz) {
+    // Der eigentliche Ertrag von A4 in einer Zahl: Staedte, die OHNE die
+    // Ratgeber-Verweise von keiner anderen Stadtseite erreichbar waeren.
+    // Steht hier 0, sind die Ratgeber-Kanten reiner SEO-Zugewinn; steht hier
+    // mehr als 0, verdecken sie ein Loch im Nachbarschaftsnetz.
+    zeile('nur ueber Ratgeber erreichbar', nurStadtNetz.waisen.length)
+    for (const w of nurStadtNetz.waisen.slice(0, 20)) console.log(`     ${w}`)
+  }
 
   if (extras?.nichtErfasst?.length) {
     // Ohne diesen Abschnitt liest sich "0 tote Links" wie eine Vollpruefung.
@@ -331,9 +397,19 @@ async function main() {
   const nurPruefen = process.argv.includes('--check')
   const crawlIndex = process.argv.indexOf('--crawl')
   const basisUrl = crawlIndex >= 0 ? process.argv[crawlIndex + 1] : null
+  const staedteIndex = process.argv.indexOf('--staedte')
+  const staedteQuelle = staedteIndex >= 0 ? process.argv[staedteIndex + 1] : null
 
   if (crawlIndex >= 0 && !basisUrl) {
     console.error('FEHLER: --crawl braucht eine Basis-URL, z.B. --crawl https://claimondo.de')
+    process.exit(1)
+  }
+  if (staedteIndex >= 0 && !staedteQuelle) {
+    console.error('FEHLER: --staedte braucht einen Pfad auf eine staedte.ts')
+    process.exit(1)
+  }
+  if (staedteQuelle && !basisUrl) {
+    console.error('FEHLER: --staedte ergibt nur zusammen mit --crawl Sinn.')
     process.exit(1)
   }
 
@@ -343,7 +419,8 @@ async function main() {
 
   if (basisUrl) {
     console.log(`crawle ${basisUrl} …`)
-    const r = await sammleAusCrawl(basisUrl)
+    if (staedteQuelle) console.log(`Staedteliste aus ${staedteQuelle}`)
+    const r = await sammleAusCrawl(basisUrl, staedteQuelle ?? STAEDTE_TS)
     staedte = r.staedte
     kanten = r.kanten
     extras.fehler = r.fehler
@@ -351,8 +428,7 @@ async function main() {
       // Zahl aus dem Lauf, nicht aus dem Quelltext: hier stand fest "92", waehrend
       // die Kennzahl darueber schon 150 meldete. Ein Bericht, der sich selbst
       // widerspricht, ist schlimmer als einer ohne die Zahl.
-      `Links von Nicht-Stadtseiten (Startseite, /ratgeber, /schadensreport-2026) — es werden nur die ${r.staedte.length} Stadtseiten abgerufen`,
-      `Ratgeber-Geschwister unter /kfz-gutachter/ (${r.ratgeber.length}: ${r.ratgeber.join(', ')}) — als Nicht-Staedte ausgefiltert, nicht als tote Links gezaehlt`,
+      `Links von der Startseite und /schadensreport-2026 — abgerufen werden die ${r.staedte.length} Stadtseiten und die ${r.ratgeber.length} Ratgeber-Geschwister`,
     ]
   } else {
     const r = sammleAusDaten()
@@ -374,13 +450,20 @@ async function main() {
     ]
   }
 
-  const ergebnis = analysiereLinknetz({
-    slugs: staedte.map((s) => s.slug),
-    kanten,
+  const slugs = staedte.map((s) => s.slug)
+  const ergebnis = analysiereLinknetz({ slugs, kanten, minEingehend: MIN_EINGEHEND })
+
+  // Zweite Sicht OHNE die Ratgeber-Kanten. Beide Zahlen sind wahr und messen
+  // Verschiedenes: "erreichbar ueberhaupt" und "im Nachbarschaftsnetz drin".
+  // Nur die erste zu zeigen hiesse, ein Loch im Netz mit einem Ratgeber-Link
+  // zustopfen zu koennen.
+  const nurStadtNetz = analysiereLinknetz({
+    slugs,
+    kanten: kanten.filter((k) => k.quelle !== 'ratgeber'),
     minEingehend: MIN_EINGEHEND,
   })
 
-  berichte(ergebnis, extras)
+  berichte(ergebnis, extras, nurStadtNetz)
 
   // Blockend sind nur die beiden harten Fehler. Einseitige Kanten sind in einem
   // distanzbasierten Netz strukturell normal (Duesseldorf hat sechs Grossstaedte
