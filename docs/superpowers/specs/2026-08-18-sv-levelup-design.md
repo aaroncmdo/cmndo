@@ -823,6 +823,32 @@ Haiku 4.5 ≈ 0,04 € · Sonnet 5 ≈ 0,08 € · Opus 5 ≈ 0,21 €. Der Maß
 Einordnungen nötig. Im Scraper übernimmt Haiku den Fallback für Impressum-Felder, die der
 Regex-Layer nicht sicher trifft (§7.2).
 
+### 7.6 Legacy oder New? — die Entscheidung, die vor dem ersten Places-Modul fällt
+
+Gemessen am 18.08.2026 mit dem vorhandenen Key: die **Legacy Places API läuft, die New ist
+gesperrt**. Beide sind gangbar, und sie unterscheiden sich nicht nur im Preis.
+
+| | Legacy (`maps.googleapis.com/maps/api/place/*`) | New (`places.googleapis.com/v1/*`) |
+|---|---|---|
+| Zugang heute | **läuft** | 403, braucht einen Klick in der Console |
+| Freitext + Radius | **Nearby Search mit `keyword`** — genau was `wett`/`zuweiser` brauchen | nur `includedTypes`; für „Kfz-Sachverständiger" existiert **kein Typ** → nur Text Search mit `locationBias` |
+| Treffer je Anfrage | 20, mit `next_page_token` bis **60** | 20, **kein Paging** bei Nearby |
+| Feld-/Preisstufen | Basic / Contact / Atmosphere Data | Essentials / Pro / Enterprise |
+| Zukunft | für neue Kunden geschlossen; Bestandsprojekte laufen weiter, **ohne Zusage** | die Variante, die Google weiterentwickelt |
+
+**Empfehlung:** Die Restriction um „Places API (New)" erweitern und **auf New bauen** — das
+Kostenmodell in §7.1/§7.2 ist darauf gerechnet, und Legacy ist ein Auslaufpfad, auf dem man
+keine Strecke aufbauen will, die vier bis sechs Monate laufen soll.
+
+**Aber:** Legacy ist der bessere Sofort-Start und für den Deutschland-Scrape sogar bequemer
+(Freitext-`keyword` mit Radius und 60 statt 20 Treffern je Kachel spart Quadtree-Ebenen). Wer
+zuerst Legacy baut, sollte die Abfrageschicht **hinter einem Adapter** kapseln, damit der Wechsel
+ein Modultausch bleibt und nicht die Module berührt.
+
+> **Offen, wenn Legacy gewählt wird:** Die Kostenrechnung in §7.1/§7.2 gilt für die New-API-SKUs.
+> Legacy hat eigene SKUs und ein eigenes Gratis-Kontingent — das ist vor dem ersten Massenlauf
+> gegen die aktuelle Preisseite zu prüfen, nicht zu schätzen.
+
 ### 7.4 Menschenzeit — der eigentliche Kostenblock
 
 | | ohne erweiterte Restriction | mit |
@@ -857,7 +883,7 @@ Zeit für Gespräche — und genau die soll der Befund vorqualifizieren.
 
 | # | Aufgabe | Wer | Blockiert |
 |---|---|---|---|
-| A-1 | **Places-Key-Restriction erweitern** um „Places API (New) → Text Search + Nearby Search" (Projekt `67468726375`). Aktuell: `403 API_KEY_SERVICE_BLOCKED` auf beiden Methoden. | Aaron | `gbp`, `wett`, `markt`, `zuweiser`, **Weg A insgesamt und der komplette Lead-Scrape (Welle 7b)** |
+| A-1 | **„Places API (New)" zur Key-Restriction hinzufügen** (Projekt `67468726375`, Key in `GOOGLE_PLACES_API_KEY`). In der Console sind „Places API" und „Places API (New)" **zwei getrennte Einträge**; der Key hat nur die alte. Messung 18.08.: Legacy `maps.googleapis.com/maps/api/place/*` **funktioniert** (Nearby Search: 17 Treffer, Text Search mit `next_page_token`), New `places.googleapis.com/v1/*` gibt **403 `API_KEY_SERVICE_BLOCKED`**. **Kein Blocker mehr** — siehe §7.6 zur Wahl zwischen beiden APIs. | Aaron | nichts hart; New API wäre die zukunftssichere Variante |
 | A-1b | **Enterprise-Kontingent im Auge behalten.** Nur 1.000 Gratis-Calls im Monat (§7.1); ein eigener Key oder Budget-Guard für die Discovery verhindert, dass ein Scrape-Lauf das Kontingent der Checks aufbraucht. Getrennte Keys für Discovery (Pro) und Messung (Enterprise) sind der einfachste Schnitt. | Aaron | Kostenkontrolle |
 | A-2 | **VPS-root-Passwort rotieren** — es wurde am 18.08. im Klartext übermittelt. | Aaron | — |
 | A-3 | DNS + NGINX-vhost + certbot für `sv-levelup.claimondo.de` | Aaron | Deployment |
