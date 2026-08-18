@@ -20,11 +20,19 @@ vi.mock('@/lib/supabase/admin', () => ({
             : table === 'sachverstaendige'
               ? { id: 'sv-OTHER' } // != auftrag.sv_id 'sv-OWNER'
               : null
+      // Nur LESE-Kettenglieder. Schreibende (`update`/`insert`/`upsert`) fehlen
+      // ABSICHTLICH: dieser Test prueft, dass ein fremder SV NICHT schreiben darf —
+      // ein gemocktes `update` wuerde einen Guard-Bruch stillschweigend durchlassen.
+      // Ein Write im no-permission-Pfad soll hier krachen.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const chain: any = {
         select: () => chain,
         eq: () => chain,
         is: () => chain,
+        in: () => chain,
+        order: () => chain,
+        limit: () => chain,
+        single: async () => ({ data: result }),
         maybeSingle: async () => ({ data: result }),
       }
       return chain
