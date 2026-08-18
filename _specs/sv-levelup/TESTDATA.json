@@ -1,0 +1,793 @@
+{
+  "hinweis": "Testdaten für SV-LevelUp. Alle Werte stammen aus der echten Münsterland-Erhebung vom 12.08.2026 oder sind erfunden und als solche gekennzeichnet. Niemals in Produktion einspielen. Fassung 3.0: T-23 bis T-36 decken Anreicherung, Massenlauf, Präsentationslink und Cold-Mail ab.",
+  "supabase_projekt": "paizkjajbuxxksdoycev",
+  "faelle": [
+    {
+      "id": "T-01",
+      "name": "Weg A · Aufbau ohne Website",
+      "eingabe": {
+        "modus": "aufbau",
+        "websiteUrl": null,
+        "ort": "Münster",
+        "plz": "48143"
+      },
+      "erwartet": {
+        "moduleAkzeptiert": [
+          "wett",
+          "verz",
+          "kwg",
+          "kwm",
+          "nach",
+          "ads",
+          "markt",
+          "nische",
+          "volumen"
+        ],
+        "moduleVerworfen": [
+          "gbp",
+          "web",
+          "seo",
+          "ux"
+        ],
+        "verwerfungsgrund": {
+          "gbp": "braucht Profil",
+          "web": "braucht URL",
+          "seo": "braucht URL",
+          "ux": "nicht für Weg A"
+        },
+        "punkteErhebbar": 60,
+        "keinScore": false,
+        "svLeadIdNachBefund": null
+      }
+    },
+    {
+      "id": "T-02",
+      "name": "Weg A · URL wird nachgetragen",
+      "eingabe": {
+        "modus": "aufbau",
+        "websiteUrl": null,
+        "dann": {
+          "websiteUrl": "sv-musterwerk.de"
+        }
+      },
+      "erwartet": {
+        "kommentar": "web und seo müssen ZURÜCKKOMMEN. Der Wunsch des Nutzers wird getrennt vom Messbaren gespeichert.",
+        "moduleAkzeptiertNachher": [
+          "web",
+          "seo",
+          "wett",
+          "verz",
+          "kwg",
+          "kwm",
+          "nach",
+          "ads",
+          "markt",
+          "nische",
+          "volumen"
+        ],
+        "moduleVerworfenNachher": [
+          "gbp",
+          "ux"
+        ]
+      }
+    },
+    {
+      "id": "T-03",
+      "name": "Weg B · Vollbefund mit Website",
+      "eingabe": {
+        "modus": "bestand",
+        "websiteUrl": "sv-musterwerk.de",
+        "ort": "Münster",
+        "plz": "48143"
+      },
+      "erwartet": {
+        "moduleAkzeptiert": [
+          "gbp",
+          "web",
+          "seo",
+          "ux",
+          "wett",
+          "verz",
+          "kwg",
+          "kwm",
+          "nach",
+          "ads",
+          "markt",
+          "nische",
+          "volumen"
+        ],
+        "punkteErhebbar": 124,
+        "keinScore": false,
+        "scoreBerechnung": "istPunkte / 124 * 100"
+      }
+    },
+    {
+      "id": "T-04",
+      "name": "Teilbefund — unter 60 erhebbaren Punkten",
+      "eingabe": {
+        "modus": "aufbau",
+        "moduleGewaehlt": [
+          "markt",
+          "nische",
+          "volumen",
+          "ads"
+        ]
+      },
+      "erwartet": {
+        "punkteErhebbar": 10,
+        "keinScore": true,
+        "score": null,
+        "anzeige": "Teilbefund mit Sternchen, kein normierter Wert",
+        "kommentar": "R-B: Ein auf ein Sechstel der Kriterien normierter Wert sieht aus wie eine Messung und ist keine."
+      }
+    },
+    {
+      "id": "T-05",
+      "name": "Leere Modulauswahl",
+      "eingabe": {
+        "moduleGewaehlt": []
+      },
+      "erwartet": {
+        "http": 400,
+        "fehler": "kein_modul",
+        "checkBleibtStatus": "neu"
+      }
+    },
+    {
+      "id": "T-06",
+      "name": "Client schickt gesperrtes Modul mit — Manipulationsversuch",
+      "eingabe": {
+        "modus": "aufbau",
+        "websiteUrl": null,
+        "moduleGewaehlt": [
+          "web",
+          "seo",
+          "gbp",
+          "wett"
+        ]
+      },
+      "erwartet": {
+        "moduleAkzeptiert": [
+          "wett"
+        ],
+        "moduleVerworfen": [
+          "web",
+          "seo",
+          "gbp"
+        ],
+        "kommentar": "Serverseitige Prüfung ist verbindlich. Der Client ist nicht vertrauenswürdig."
+      }
+    },
+    {
+      "id": "T-07",
+      "name": "R-E · Befund darf keine Maßnahmen enthalten",
+      "eingabe": {
+        "endpunkt": "F-05",
+        "status": "fertig"
+      },
+      "erwartet": {
+        "antwortEnthaeltFeld_massnahmen": false,
+        "kommentar": "Nicht leer, nicht null, nicht unscharf — das Feld wird nicht erzeugt. Prüfung: JSON.stringify(antwort).includes('massnahmen') === false",
+        "tresor": {
+          "anzahl": 27,
+          "phasen": [
+            {
+              "nr": 1,
+              "anzahl": 9,
+              "aufwand": "14 h"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "T-08",
+      "name": "R-A · Befund ohne Quelle wird verworfen",
+      "eingabe": {
+        "befund": {
+          "wert": 154,
+          "label": "Büros im Radius"
+        }
+      },
+      "erwartet": {
+        "verworfen": true,
+        "alsFehlstelle": "Modul wett · Befund ohne Quelle und Erhebungsdatum",
+        "kommentar": "quelle und erhoben sind Pflichtfelder."
+      }
+    },
+    {
+      "id": "T-09",
+      "name": "R-B · null statt 0",
+      "eingabe": {
+        "modul": "kwg",
+        "suchvolumen": null,
+        "grund": "Google-Ads-Konto fehlt"
+      },
+      "erwartet": {
+        "anzeige": "nicht erhoben — Google-Ads-Konto fehlt",
+        "balkenLaenge": null,
+        "kommentar": "Ein Balken auf 0 heißt gemessen und schlecht. Hier wurde nicht gemessen."
+      }
+    },
+    {
+      "id": "T-10",
+      "name": "Lead entsteht erst bei Terminwunsch",
+      "ablauf": [
+        {
+          "schritt": "F-01 bis F-05 durchlaufen",
+          "svLeadId": null
+        },
+        {
+          "schritt": "F-06 ohne einwilligung",
+          "http": 400,
+          "svLeadId": null
+        },
+        {
+          "schritt": "F-06 mit einwilligung + telefon",
+          "svLeadId": "wird erzeugt",
+          "consentRecord": "geschrieben"
+        }
+      ],
+      "erwartet": {
+        "svLeadsZeilenVorher": 0,
+        "svLeadsZeilenNachher": 1,
+        "quelle": "sv-levelup"
+      }
+    },
+    {
+      "id": "T-11",
+      "name": "Dublette — derselbe SV kommt zweimal",
+      "eingabe": [
+        {
+          "name": "Kfz-Sachverständigenbüro Musterwerk GmbH",
+          "plz": "48143"
+        },
+        {
+          "name": "SV-Büro Musterwerk",
+          "plz": "48143"
+        }
+      ],
+      "erwartet": {
+        "normalizedName": "musterwerk",
+        "svLeadsZeilen": 1,
+        "zweiterCheckVerknuepft": true,
+        "kommentar": "Gattungswörter kfz, sachverständigenbüro, gmbh, sv-büro werden entfernt."
+      }
+    },
+    {
+      "id": "T-12",
+      "name": "Zustandsautomat — verbotener Übergang",
+      "eingabe": {
+        "status": "fertig",
+        "aktion": "F-03 Messung starten"
+      },
+      "erwartet": {
+        "http": 409,
+        "statusBleibt": "fertig",
+        "hinweis": "Für eine neue Messung F-14 nutzen."
+      }
+    },
+    {
+      "id": "T-13",
+      "name": "Maßnahmen nur nach Termin",
+      "eingabe": {
+        "endpunkt": "F-09",
+        "terminVorhanden": false
+      },
+      "erwartet": {
+        "http": 403,
+        "massnahmenAusgeliefert": false
+      }
+    },
+    {
+      "id": "T-14",
+      "name": "Plan-Sortierung",
+      "eingabe": {
+        "massnahmen": [
+          {
+            "titel": "A",
+            "wirkung": "mittel",
+            "punkte": 6,
+            "phase": 1
+          },
+          {
+            "titel": "B",
+            "wirkung": "hoch",
+            "punkte": 3,
+            "phase": 1
+          },
+          {
+            "titel": "C",
+            "wirkung": "hoch",
+            "punkte": 5,
+            "phase": 1
+          }
+        ]
+      },
+      "erwartet": {
+        "reihenfolge": [
+          "C",
+          "B",
+          "A"
+        ],
+        "kommentar": "Wirkung zuerst, dann Punkte. Nicht nach Aufwand."
+      }
+    },
+    {
+      "id": "T-15",
+      "name": "Modul abschalten leert Plan und Gespräch",
+      "eingabe": {
+        "moduleAbwaehlen": [
+          "verz",
+          "ads"
+        ]
+      },
+      "erwartet": {
+        "planEnthaeltHerkunft_verz": false,
+        "planEnthaeltHerkunft_ads": false,
+        "gespraechsbausteine": "nur aus verbleibenden Modulen",
+        "kommentar": "Es gibt keine Ansicht, die mehr zeigt als gemessen wurde."
+      }
+    },
+    {
+      "id": "T-16",
+      "name": "Gesprächsbausteine — die drei schwächsten Module",
+      "eingabe": {
+        "module": [
+          {
+            "id": "gbp",
+            "ist": 11,
+            "max": 20
+          },
+          {
+            "id": "seo",
+            "ist": 4,
+            "max": 12
+          },
+          {
+            "id": "ads",
+            "ist": 0,
+            "max": 10
+          },
+          {
+            "id": "web",
+            "ist": 7,
+            "max": 12
+          },
+          {
+            "id": "verz",
+            "ist": 3,
+            "max": 12
+          }
+        ]
+      },
+      "erwartet": {
+        "quotienten": {
+          "ads": 0.0,
+          "verz": 0.25,
+          "seo": 0.33,
+          "gbp": 0.55,
+          "web": 0.58
+        },
+        "gewaehlt": [
+          "ads",
+          "verz",
+          "seo"
+        ]
+      }
+    },
+    {
+      "id": "T-17",
+      "name": "Rollenprüfung Vertriebsliste",
+      "faelle": [
+        {
+          "rolle": "admin",
+          "zugriff": true
+        },
+        {
+          "rolle": "dispatch",
+          "zugriff": true
+        },
+        {
+          "rolle": "leadbearbeiter",
+          "zugriff": true
+        },
+        {
+          "rolle": "kundenbetreuer",
+          "zugriff": true,
+          "schreiben": false
+        },
+        {
+          "rolle": "sachverstaendiger",
+          "zugriff": false
+        },
+        {
+          "rolle": "kunde",
+          "zugriff": false
+        },
+        {
+          "rolle": "werkstatt",
+          "zugriff": false
+        },
+        {
+          "anonym": true,
+          "zugriff": false
+        }
+      ]
+    },
+    {
+      "id": "T-18",
+      "name": "Öffentlicher Client kann nicht direkt schreiben",
+      "eingabe": {
+        "anonKey": true,
+        "aktion": "insert in levelup_checks"
+      },
+      "erwartet": {
+        "abgelehnt": true,
+        "grund": "keine INSERT-Policy für anon",
+        "kommentar": "Jeder Schreibzugriff läuft über Server Action mit createAdminClient()."
+      }
+    },
+    {
+      "id": "T-19",
+      "name": "Wiederholmessung mit Vergleich",
+      "eingabe": {
+        "ersterCheck": {
+          "bewertungen": 24
+        },
+        "zweiterCheck": {
+          "bewertungen": 39
+        },
+        "moduleGleich": true
+      },
+      "erwartet": {
+        "delta": [
+          {
+            "modul": "gbp",
+            "feld": "bewertungen",
+            "vorher": 24,
+            "nachher": 39,
+            "delta": "+15"
+          }
+        ]
+      }
+    },
+    {
+      "id": "T-20",
+      "name": "Wiederholmessung bei geänderter Modulauswahl",
+      "eingabe": {
+        "moduleGleich": false
+      },
+      "erwartet": {
+        "delta": [],
+        "hinweis": "Vergleich nicht möglich — andere Modulauswahl."
+      }
+    },
+    {
+      "id": "T-21",
+      "name": "Aufräumen nach 90 Tagen",
+      "eingabe": [
+        {
+          "check": "ohne sv_lead_id",
+          "alter": "91 Tage"
+        },
+        {
+          "check": "mit sv_lead_id",
+          "alter": "91 Tage"
+        }
+      ],
+      "erwartet": {
+        "ohneLead": "vollständig gelöscht inklusive befunde",
+        "mitLead": "bleibt als Vorgangshistorie, status='abgelaufen'"
+      }
+    },
+    {
+      "id": "T-22",
+      "name": "Rate-Limit",
+      "eingabe": {
+        "checksJeIpHashJeStunde": 6
+      },
+      "erwartet": {
+        "sechsterAbgelehnt": true,
+        "http": 429,
+        "ipImKlartextGespeichert": false
+      }
+    },
+    {
+      "id": "T-23",
+      "name": "RLS-Leck geschlossen",
+      "eingabe": {
+        "rolle": "anon",
+        "abfrage": "select id, email, telefon from sv_leads"
+      },
+      "erwartet": {
+        "zeilen": 0,
+        "fehler": false,
+        "hinweis": "Vor der Korrektur lieferte diese Abfrage 62 Zeilen. Das ist der Beleg."
+      }
+    },
+    {
+      "id": "T-24",
+      "name": "Anreicherung überschreibt nichts",
+      "eingabe": {
+        "svLead": {
+          "firma": "Musterbüro",
+          "email": "alt@example.de"
+        },
+        "gefunden": {
+          "email": "neu@example.de",
+          "telefon": "+49 251 1234"
+        }
+      },
+      "erwartet": {
+        "emailNachher": "alt@example.de",
+        "telefonNachher": "+492511234",
+        "zeilenInAnreicherung": 1,
+        "begruendung": "nur Leerstellen werden gefüllt"
+      }
+    },
+    {
+      "id": "T-25",
+      "name": "Rollenadresse wird markiert",
+      "eingabe": {
+        "gefundeneEmail": "info@musterbuero.de"
+      },
+      "erwartet": {
+        "geschrieben": true,
+        "sicherheit": 60,
+        "warnungInListe": true
+      }
+    },
+    {
+      "id": "T-26",
+      "name": "Lauf zurückdrehen",
+      "eingabe": {
+        "laufId": "11111111-1111-1111-1111-111111111111",
+        "aktion": "zuruecksetzen"
+      },
+      "erwartet": {
+        "felderZurueckgesetzt": true,
+        "anreicherungszeilenBleiben": true,
+        "hinweis": "Der Log ist append-only. Zurückdrehen löscht nicht, es schreibt zurück."
+      }
+    },
+    {
+      "id": "T-27",
+      "name": "Massenlauf ohne Website",
+      "eingabe": {
+        "svLeadIds": [
+          "a",
+          "b",
+          "c"
+        ],
+        "websiteUrlVorhanden": [
+          true,
+          false,
+          true
+        ]
+      },
+      "erwartet": {
+        "angelegt": 2,
+        "uebersprungen": [
+          {
+            "svLeadId": "b",
+            "grund": "keine website_url"
+          }
+        ]
+      }
+    },
+    {
+      "id": "T-28",
+      "name": "Massenlauf ist Teilbefund",
+      "eingabe": {
+        "module": [
+          "web",
+          "seo",
+          "ux",
+          "verz",
+          "volumen"
+        ],
+        "placesSchluessel": false
+      },
+      "erwartet": {
+        "punkteErhebbar": 45,
+        "keinScore": true,
+        "score": null,
+        "nichtErhoben": {
+          "gbp": "kein Places-Schlüssel",
+          "wett": "kein Places-Schlüssel",
+          "ads": "nur manuell auslösbar",
+          "kwg": "kein Google-Ads-Konto",
+          "kwm": "kein Meta-Konto"
+        },
+        "nullBalkenGerendert": false
+      }
+    },
+    {
+      "id": "T-29",
+      "name": "Plan im Lead-Detail ohne Termin",
+      "eingabe": {
+        "checkStatus": "fertig",
+        "terminVorhanden": false,
+        "massnahmenSpalte": []
+      },
+      "erwartet": {
+        "planImVertriebSichtbar": true,
+        "planAusSpalteGelesen": false,
+        "planLiveGerechnet": true,
+        "begruendung": "F-11 rechnet über befunde. Die Spalte ist bis F-09 leer."
+      }
+    },
+    {
+      "id": "T-30",
+      "name": "Präsentationslink zweimal erzeugen",
+      "eingabe": {
+        "checkId": "c1",
+        "aufrufe": 2
+      },
+      "erwartet": {
+        "tokensErzeugt": 1,
+        "zweiterAufrufGibtBestehenden": true
+      }
+    },
+    {
+      "id": "T-31",
+      "name": "Abgelaufener Präsentationslink",
+      "eingabe": {
+        "gueltigBis": "2026-07-01T00:00:00+02:00",
+        "heute": "2026-08-16"
+      },
+      "erwartet": {
+        "http": 410,
+        "seiteSachlich": true,
+        "planImAntwortkoerper": false
+      }
+    },
+    {
+      "id": "T-32",
+      "name": "Check-Token ist kein Plan-Token",
+      "eingabe": {
+        "checkToken": "abc123…",
+        "aufruf": "/plan/abc123…"
+      },
+      "erwartet": {
+        "http": 404,
+        "begruendung": "getrennte Tabellen, keine Ableitung"
+      }
+    },
+    {
+      "id": "T-33",
+      "name": "Genau ein Lead je Enrollment",
+      "eingabe": [
+        {
+          "lead_id": "p1",
+          "sv_lead_id": "s1"
+        },
+        {
+          "lead_id": null,
+          "sv_lead_id": null
+        },
+        {
+          "lead_id": null,
+          "sv_lead_id": "s1"
+        }
+      ],
+      "erwartet": {
+        "ersterAbgelehnt": true,
+        "zweiterAbgelehnt": true,
+        "dritterAngenommen": true,
+        "constraint": "num_nonnulls(lead_id, sv_lead_id) = 1"
+      }
+    },
+    {
+      "id": "T-34",
+      "name": "Vorlage ohne Abmeldelink",
+      "eingabe": {
+        "bodyHtml": "<p>Guten Tag, wir haben Ihre Seite geprüft.</p>"
+      },
+      "erwartet": {
+        "sendVerworfen": true,
+        "grund": "R-N: Herkunftsangabe und Abmeldelink fehlen",
+        "protokolliert": true
+      }
+    },
+    {
+      "id": "T-35",
+      "name": "Suppression vor jedem Send",
+      "eingabe": {
+        "enrollmentAktiv": true,
+        "adresseInSuppressionSeitStep2": true,
+        "faelligerStep": 3
+      },
+      "erwartet": {
+        "gesendet": false,
+        "enrollmentStatus": "opt_out",
+        "begruendung": "Prüfung vor jedem Send, nicht nur beim Enrollment"
+      }
+    },
+    {
+      "id": "T-36",
+      "name": "Sequenz bleibt kalt",
+      "eingabe": {
+        "nachWelle10": true
+      },
+      "erwartet": {
+        "aktiv": false,
+        "autoEnroll": false,
+        "gesendeteMails": 0,
+        "hinweis": "Scharfschalten ist ein Menschenklick nach DURCHSPRACHE.md. Ein Testlauf zählt nur gegen eine eigene Adresse."
+      }
+    }
+  ],
+  "beispielbefund_muensterland": {
+    "hinweis": "Echte Werte aus der Erhebung vom 12.08.2026, im Report mit Quelle belegt.",
+    "wett": {
+      "bueros_im_radius": 154,
+      "median_bewertungen": 11,
+      "p75": 43,
+      "p90": 117,
+      "max": 191,
+      "ohne_bewertung": 21,
+      "quelle": "Google Maps, manuell ausgelöst",
+      "erhoben": "2026-08-12"
+    },
+    "verz": {
+      "geprueft": 15,
+      "abfragbar": 9,
+      "gesperrt": 3,
+      "nicht_erreichbar": 3,
+      "eintraege_11880": 17,
+      "eintraege_gelbeseiten": 10,
+      "quelle": "robots.txt-konforme Abfrage",
+      "erhoben": "2026-08-12"
+    },
+    "kwg": {
+      "radius_km": 20,
+      "suchvolumen": null,
+      "grund": "Google-Ads-Konto fehlt",
+      "orte_geprueft": 12,
+      "quelle": "Google Keyword-Planer",
+      "erhoben": null
+    },
+    "kwm": {
+      "radius_km": 20,
+      "reichweite": null,
+      "grund": "Meta-Business-Konto fehlt",
+      "quelle": "Meta Marketing API",
+      "erhoben": null
+    },
+    "nach": {
+      "suchanfragen": 1021,
+      "orte_mit_nachfrage": 12,
+      "orte_ohne_nachfrage": 6,
+      "thema_wertminderung": 151,
+      "thema_nutzungsausfall": 150,
+      "thema_249bgb": 1,
+      "quelle": "Google Autocomplete",
+      "erhoben": "2026-08-12"
+    },
+    "ads": {
+      "domains_geprueft": 19,
+      "mit_anzeigen": 6,
+      "im_nahbereich": 1,
+      "quelle": "Google Ads Transparency Center",
+      "erhoben": "2026-08-12"
+    },
+    "markt": {
+      "einstiegs_index": 80,
+      "platz": 1,
+      "von_maerkten": 7,
+      "nachfragebreite": 8,
+      "quelle": "sieben Kartenausschnitte, gleiche Methode",
+      "erhoben": "2026-08-12"
+    },
+    "web": {
+      "aufbau_index": 7,
+      "feld_median": 7,
+      "feld_bestwert": 9,
+      "ladezeit_ms": 2400,
+      "quelle": "eigener Serverabruf",
+      "erhoben": "2026-08-12"
+    }
+  }
+}
