@@ -97,30 +97,82 @@ Sie listet 10 der 13 Module; `nach`, `markt` und `nische` fehlen. Zusätzlich is
 bei `volumen` („Autocomplete-Abfrage") vertauscht — Autocomplete ist `nach`, `volumen` rechnet
 aus Einwohner- und Bestandsdaten. Die vollständige Tabelle steht in §3.4.
 
-### 2.6 Welle 7 Schritt A ist bereits beantwortet
+### 2.6 🔴 Welle 7 Schritt A: das Abbruchkriterium ist getroffen
 
 `WELLEN_PLAN` Welle 7 verlangt als Abbruchkriterium die Prüfung, ob eine öffentliche Ansicht
 `sv_leads` mit `ist_aktiv = true` über den anon-Key liest.
 
-**Geprüft am 18.08.2026: nein.** Alle elf Lesestellen laufen über `createAdminClient()` bzw.
-`createServiceClient()` — beide umgehen RLS:
+**Geprüft am 18.08.2026: ja, zwei Stellen.** `ladeSvLeads()` in
+`src/lib/actions/gutachter-finder-actions.ts` (und die Zwillingsdatei unter
+`claimondo-marketing/lib/`) liest über den **anon-Client mit RLS**:
 
-```
-src/app/api/kfzgutachter-lp/gutachter-verfuegbar/route.ts   createAdminClient, createServiceClient
-src/lib/actions/gutachter-finder-actions.ts                 createAdminClient
-src/lib/onboarding/svMatching.ts                            createAdminClient
-src/lib/sv-basic/claim-actions.ts                           createAdminClient
-src/lib/sv-matching-modul/lade-deadpin-fallback.ts          createAdminClient
-claimondo-marketing/app/api/kfzgutachter-lp/…/route.ts      createAdminClient, createServiceClient
-claimondo-marketing/app/[locale]/gutachter-partner/{page,actions}.ts   createAdminClient
-claimondo-marketing/lib/actions/gutachter-finder-actions.ts createAdminClient
-claimondo-marketing/lib/sv-basic/claim-actions.ts           createAdminClient
-autounfall-io/lib/finder/pins.ts                            createServiceClient
+```ts
+export async function ladeSvLeads() {
+  // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
+  // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
+  // identifizierenden Felder raus (kein name, firma, adresse, telefon, email).
+  const supabase = await createClient()        // ← nicht createAdminClient
+  const { data, error } = await supabase
+    .from('sv_leads')
+    .select('id,lat,lng')                      // ← nur diese drei Spalten
+    .eq('ist_aktiv', true)                     // ← genau die Policy-Bedingung
 ```
 
-Die Policy-Verschärfung ist damit gefahrlos. Sie bleibt trotzdem **der erste Schritt vor jeder
-Anreicherung** — ab dem Moment, in dem `email` und `telefon` gefüllt sind, stünde sonst eine
-fertige Wettbewerber-Kontaktliste offen im Netz.
+Die Nachbarfunktion `ladeAktiveSVs()` kommentiert sich selbst mit „Read 1 (anon-RLS)" — der
+anon-Pfad ist hier Absicht, nicht Versehen.
+
+**Öffentliche Consumer:**
+
+| Consumer | öffentlich? |
+|---|---|
+| `src/app/embed/gutachter-finder/page.tsx` | ja — **läuft als Embed auf fremden Websites** |
+| `claimondo-marketing/app/[locale]/kfz-gutachter/vermittlungsportale-vergleich/page.tsx` | ja — Marketing-Seite ohne Login |
+
+`FinderMap.tsx` rendert die 62 Leads als **Dead-Pins** (Kommentar dort: „Aaron 12.06.: die
+Dead-Pins müssen …") — sie sind eine bewusste Produktentscheidung, kein Altlast-Zufall.
+
+> **Konsequenz:** Die in `CONTEXT` §9 vorgeschlagene Policy-Verschärfung würde beide Karten
+> leeren. Sie darf **nicht** so ausgeführt werden, wie sie dort steht.
+
+**Der Lösungsweg steht bereits in `CONTEXT` §9** („braucht diese Ansicht eine eigene View mit
+genau den Spalten, die öffentlich sein dürfen") und passt hier exakt, weil die Action ohnehin
+nur drei Spalten zieht:
+
+```sql
+-- 1. View mit genau den Spalten, die öffentlich sein dürfen.
+--    security_invoker AUS ist hier gewollt: die View liest mit Owner-Rechten,
+--    anon bekommt Zugriff auf die View, nie auf die Tabelle.
+create view public.sv_leads_map_pins with (security_invoker = off) as
+  select id, lat, lng from public.sv_leads where ist_aktiv = true;
+
+-- 2. Grant ist Pflicht — neue public-Objekte granten anon von sich aus nichts.
+grant select on public.sv_leads_map_pins to anon, authenticated;
+
+-- 3. ERST DANACH die Basistabelle schließen.
+drop policy sv_leads__b1sel on public.sv_leads;
+create policy sv_leads__b1sel on public.sv_leads
+  for select to authenticated
+  using (is_staff() or exists (
+    select 1 from profiles where id = auth.uid() and rolle = 'admin'));
+```
+
+**Die Reihenfolge ist nicht verhandelbar:** View + Grant + beide `ladeSvLeads()` auf die View
+umstellen + **deployen**, und erst dann die Policy. Wer die Policy zuerst setzt, hat zwischen
+Migration und Deploy eine leere Karte im Embed auf Kundenseiten.
+
+Damit bleibt die eigentliche Absicht erhalten: Ab dem Moment, in dem `email` und `telefon`
+gefüllt sind, darf `sv_leads` nicht mehr offen lesbar sein — eine fertige
+Wettbewerber-Kontaktliste, von uns zusammengetragen. Die View gibt weiterhin nur `id`, `lat`,
+`lng` heraus und wächst nicht mit der Anreicherung mit.
+
+**Diese Änderung fasst Bestandscode an** (`gutachter-finder-actions.ts` in beiden Bäumen) und
+liegt damit außerhalb der in `CONTEXT` §2 erlaubten Dateiliste. Sie gehört als eigener,
+abgenommener Schritt in Welle 7 — nicht als Nebenwirkung der Anreicherung.
+
+> **Wie der Fehlschluss entstand** (damit er sich nicht wiederholt): Eine erste Prüfung listete
+> je Datei auf, *welche* Supabase-Clients darin vorkommen — nicht, *welcher Client zu welchem
+> Query* gehört. `gutachter-finder-actions.ts` enthält beide, und die Datei galt damit
+> fälschlich als Admin-Client-Leser. Die Zuordnung muss pro Query geprüft werden, nicht pro Datei.
 
 ### 2.7 Der Stack-Abschnitt der GESAMTSPEC ist überholt
 
@@ -777,6 +829,7 @@ Zeit für Gespräche — und genau die soll der Befund vorqualifizieren.
 | A-5 | **Durchsprache nach `DURCHSPRACHE.md`** — rechtliche Grundentscheidung nach § 7 Abs. 2 UWG, die vier Vorlagen im Wortlaut, Startmenge, Abbruchschwelle, wer Antworten liest | Aaron + Anwalt | Scharfschalten der Sequenz |
 | A-6 | Google-Ads-Konto (für `kwg`) und Meta-Business-Konto (für `kwm`) | Aaron | 22 der 150 Punkte |
 | A-7 | Entscheidung: Wer übermittelt bei der Admin-Konvertierung das Anfangspasswort? | Aaron | §5.4 Variante (1) |
+| **A-8** | **Freigabe für den Eingriff in Bestandscode:** `ladeSvLeads()` in `src/lib/actions/` **und** `claimondo-marketing/lib/actions/` auf die View `sv_leads_map_pins` umstellen (§2.6). Ohne diesen Schritt kann die Anreicherung nicht scharf gehen, mit falscher Reihenfolge leert er die Karte im Kunden-Embed. Liegt außerhalb der in `CONTEXT` §2 erlaubten Dateiliste. | Aaron | Welle 7 |
 
 **A-5 bleibt ein Menschenklick.** `cold_mail_sequenzen.aktiv` und `auto_enroll` werden vom Code
 nie auf `true` gesetzt — auch nicht zum Testen.
@@ -795,7 +848,7 @@ Die zehn Wellen aus `WELLEN_PLAN.md` bleiben in Reihenfolge und Zuschnitt. Ände
 | 4 | zusätzlich Lead-Spiegelung nach `tasks` (§5.2) |
 | 5 | wandert in das eigene Projekt als `/auswertung/[token]` mit Staff-Gate; zusätzlich Konvertierungs-Knopf (§5.4) |
 | 6 | unverändert |
-| 7 | Schritt A ist erledigt (§2.6) — Policy-Verschärfung direkt, dann Anreicherung der 62 |
+| 7 | **Schritt A hat das Abbruchkriterium getroffen** (§2.6): zwei öffentliche Karten lesen `sv_leads` als anon. Reihenfolge zwingend — View `sv_leads_map_pins` + Grant, beide `ladeSvLeads()` umstellen, **deployen**, erst dann die Policy. Danach Anreicherung der 62. |
 | **7b** | **NEU · Lead-Gewinnung** (§5.5.2): Quadtree-Discovery über DE nach dem Muster des apo-scrapers, Ziel `sv_leads`, Dedup über `google_place_id` + `normalized_name`/PLZ. Dazu der Nebenprodukt-Schreibpfad aus `wett` (§5.5.3). |
 | 8 | Massenlauf-Tabelle aus §3.4 |
 | 9 | unverändert (Präsentationslink bleibt vom Auswertungslink getrennt) |
