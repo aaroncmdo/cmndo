@@ -70,6 +70,23 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+
+  // Domain-Verifikation fuer die OpenAI-Plugin-/Apps-Directory-Einreichung
+  // (docs/superpowers/specs/2026-06-18-mcp-active-in-chat-design.md, Baustein 6 —
+  // der letzte offene Baustein: die Bausteine 1-5 + 8-10 sind live).
+  //
+  // REWRITE statt Ordner `app/.well-known/`: ein Segment, das mit '.' beginnt, ist
+  // im App-Router kein verlaesslicher Routen-Name. REWRITE statt REDIRECT: OpenAI
+  // erwartet den Token als Body dieser URL — ein 30x wuerde die Pruefung brechen
+  // (anders als bei /openapi.json oben, wo ein 308 auf den Portal-Host korrekt ist).
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/openai-apps-challenge',
+        destination: '/api/openai-apps-challenge',
+      },
+    ]
+  },
 }
 
 export default withNextIntl(nextConfig)

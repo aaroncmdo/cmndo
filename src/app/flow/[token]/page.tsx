@@ -122,8 +122,17 @@ export default async function FlowPage({
 
     // Mark as opened if first visit
     if (!flowLink.geoeffnet_am) {
-      await svc.from('flow_links').update({ geoeffnet_am: new Date().toISOString(), status: 'geoeffnet' }).eq('id', flowLink.id)
-      await svc.from('leads').update({ flow_link_geoeffnet: true, updated_at: new Date().toISOString() }).eq('id', leadId)
+      // geoeffnet_am ist der Idempotenz-Anker dieses Blocks (s. Bedingung oben). Bleibt er
+      // aus, laeuft der Block bei jedem weiteren Aufruf erneut — samt Mitteilung an
+      // Mitarbeiter und Gutachter.
+      const { error: oeffnungFehler } = await svc.from('flow_links').update({ geoeffnet_am: new Date().toISOString(), status: 'geoeffnet' }).eq('id', flowLink.id)
+      if (oeffnungFehler) {
+        console.error(`[flow] geoeffnet_am nicht gesetzt (FlowLink ${flowLink.id}) — Oeffnungs-Benachrichtigung wiederholt sich:`, oeffnungFehler.message)
+      }
+      const { error: leadOeffnungFehler } = await svc.from('leads').update({ flow_link_geoeffnet: true, updated_at: new Date().toISOString() }).eq('id', leadId)
+      if (leadOeffnungFehler) {
+        console.error(`[flow] flow_link_geoeffnet nicht gesetzt (Lead ${leadId}):`, leadOeffnungFehler.message)
+      }
 
       // AAR-229 W4: Mitteilung an zugewiesenen MA + SV
       try {
@@ -153,10 +162,22 @@ export default async function FlowPage({
     // KFZ-207: Auto-Reaktivierung kalt-Lead wenn FlowLink geöffnet wird
     const { data: lead } = await svc.from('leads').select('qualifizierungs_phase, vorname, nachname').eq('id', leadId).single()
     if (lead?.qualifizierungs_phase === 'kalt') {
-      await svc.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', leadId)
+      // Die Phase ist zugleich der Wiederholungs-Schutz: bleibt der Lead 'kalt', legt der
+      // naechste Aufruf denselben Reaktivierungs-Task noch einmal an. Deshalb wird der
+      // Task nur erstellt, wenn die Reaktivierung tatsaechlich gespeichert wurde.
+      const { error: reaktivierungFehler } = await svc.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', leadId)
       const { data: linkedFall } = await svc.from('v_claim_full').select('fall_id').eq('lead_id', leadId).limit(1).maybeSingle()
       const fallId = linkedFall?.fall_id ?? null
-      await svc.from('tasks').insert({ fall_id: fallId, titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+      if (reaktivierungFehler) {
+        console.error(`[flow] Lead-Reaktivierung nicht gespeichert (Lead ${leadId}) — Task uebersprungen, sonst Dublette bei jedem Oeffnen:`, reaktivierungFehler.message)
+      } else {
+        const { error: reaktTaskFehler } = await svc.from('tasks').insert({ fall_id: fallId, titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
+        if (reaktTaskFehler) {
+          // Dieser Task ist der einzige Hinweis darauf, dass sich ein kalter Lead selbst
+          // zurueckgemeldet hat.
+          console.error(`[flow] Reaktivierungs-Task NICHT erstellt (Lead ${leadId}):`, reaktTaskFehler.message)
+        }
+      }
       if (fallId) {
         await svc.from('timeline').insert({ fall_id: fallId, typ: 'system', titel: 'Lead reaktiviert (FlowLink geöffnet)', beschreibung: `${lead.vorname ?? ''} ${lead.nachname ?? ''} war kalt, hat sich selbst reaktiviert.` })
       }
