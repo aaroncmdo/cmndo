@@ -30,14 +30,19 @@ export async function POST(request: Request) {
   if (!dok) return NextResponse.json({ error: 'Dokument nicht gefunden' }, { status: 404 })
 
   // Status auf processing
-  await db.from('fall_dokumente').update({ ocr_status: 'processing' }).eq('id', dokumentId)
+  // Bleibt dieser Marker aus, kann derselbe Lauf parallel erneut getriggert werden.
+  const { error: procFehler } = await db.from('fall_dokumente').update({ ocr_status: 'processing' }).eq('id', dokumentId)
+  if (procFehler) console.error(`[OCR] Status 'processing' nicht gesetzt (${dokumentId}):`, procFehler.message)
 
   // Datei aus Storage lesen (Admin-Client umgeht RLS) -> Base64 fuer Claude Vision.
   const { data: fileData, error: fileErr } = await db.storage
     .from('fall-dokumente')
     .download(dok.storage_path)
   if (fileErr || !fileData) {
-    await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+    // Ohne 'failed' bleibt das Dokument auf 'processing' haengen — es sieht dann
+    // dauerhaft "in Bearbeitung" aus, obwohl nichts mehr laeuft.
+    const { error: failFehler } = await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+    if (failFehler) console.error(`[OCR] Status 'failed' nicht gesetzt (${dokumentId}) — bleibt auf 'processing':`, failFehler.message)
     return NextResponse.json({ error: 'Datei nicht lesbar' }, { status: 500 })
   }
   const base64 = Buffer.from(await fileData.arrayBuffer()).toString('base64')
@@ -47,7 +52,8 @@ export async function POST(request: Request) {
   const ocr = await extractDokument(dok.dokument_typ, base64, mimeType)
   if (!ocr.success) {
     console.error('[OCR] Claude-Vision Fehler:', ocr.error)
-    await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+    const { error: ocrFailFehler } = await db.from('fall_dokumente').update({ ocr_status: 'failed' }).eq('id', dokumentId)
+    if (ocrFailFehler) console.error(`[OCR] Status 'failed' nicht gesetzt (${dokumentId}) — bleibt auf 'processing':`, ocrFailFehler.message)
     return NextResponse.json({ error: ocr.error ?? 'OCR fehlgeschlagen' }, { status: 502 })
   }
   const extractedData: Record<string, unknown> = {
@@ -58,8 +64,10 @@ export async function POST(request: Request) {
     parsed: ocr.parsed,
   }
 
-  // Ergebnis speichern
-  await db
+  // Ergebnis speichern. ERFOLGSPFAD: das OCR ist gelaufen (und hat gekostet).
+  // Still fehlgeschlagen sind die extrahierten Daten weg UND der Status bleibt
+  // auf 'processing' — das Dokument sieht dauerhaft "in Bearbeitung" aus.
+  const { error: ergebnisFehler } = await db
     .from('fall_dokumente')
     .update({
       ocr_status: 'done',
@@ -67,6 +75,9 @@ export async function POST(request: Request) {
       ocr_processed_at: new Date().toISOString(),
     })
     .eq('id', dokumentId)
+  if (ergebnisFehler) {
+    console.error(`[OCR] Ergebnis NICHT gespeichert (${dokumentId}) — Daten verloren:`, ergebnisFehler.message)
+  }
 
   // CMM-49 faelle-DROP (CMM-67 / CMM-50 Group C): Geburtsdatum aus Personalausweis-/
   // Fuehrerschein-OCR auf die ist_halter-claim_party -> personen.geburtsdatum schreiben

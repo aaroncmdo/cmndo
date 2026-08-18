@@ -134,7 +134,7 @@ export async function uploadGutachten(
 
   const fallNrForTask = (claimForTask?.claim_nummer as string | null) ?? fallId.slice(0, 8)
 
-  await supabase.from('tasks').insert({
+  const { error: qcTaskFehler } = await supabase.from('tasks').insert({
     fall_id: fallId,
     typ: 'filmcheck',
     titel: `Filmcheck durchführen für Fall ${fallNrForTask}`,
@@ -143,6 +143,11 @@ export async function uploadGutachten(
     prioritaet: 'dringend',
     zugewiesen_an: claimForTask?.kundenbetreuer_id ?? null,
   })
+  // Ohne diesen Task wird das gerade hochgeladene Gutachten NIE zur QC-Pruefung
+  // aufgerufen — es liegt in der Akte und niemand schaut es an.
+  if (qcTaskFehler) {
+    console.error(`[gutachter-fall] Filmcheck-Task NICHT angelegt (fall ${fallId}):`, qcTaskFehler.message)
+  }
 
   // KFZ-204: In-App Notification fuer KB (KEIN Email — R19)
   if (claimForTask?.kundenbetreuer_id) {
@@ -339,7 +344,7 @@ export async function uploadDokument(
 
   // Update pflichtdokumente entry if this was for a specific required doc
   if (pflichtdokumentId) {
-    await supabase
+    const { error: slotFehler } = await supabase
       .from('pflichtdokumente')
       .update({
         status: 'hochgeladen',
@@ -348,6 +353,9 @@ export async function uploadDokument(
         hochgeladen_am: new Date().toISOString(),
       })
       .eq('id', pflichtdokumentId)
+    if (slotFehler) {
+      console.error(`[gutachter-fall] Pflichtslot nicht auf 'hochgeladen' (${pflichtdokumentId}):`, slotFehler.message)
+    }
   }
 
   // Timeline entry
@@ -571,12 +579,17 @@ export async function declineTermin(
   const { data: activeTermine } = await supabase.from('gutachter_termine')
     .select('id').eq('fall_id', fallId).eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger').in('status', ['reserviert', 'bestaetigt'])
 
-  await supabase.from('gutachter_termine')
+  // Der SV hat im Portal abgelehnt. Bleibt der Write aus, gilt der Termin weiter
+  // als reserviert/bestaetigt — Dispatch disponiert nicht um, der Kunde wartet.
+  const { error: ablehnFehler } = await supabase.from('gutachter_termine')
     .update({ status: 'abgelehnt', abgelehnt_am: new Date().toISOString(), abgelehnt_grund: grund || 'Im Portal abgelehnt' })
     .eq('fall_id', fallId)
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'bestaetigt'])
+  if (ablehnFehler) {
+    console.error(`[gutachter-fall] Termin-Ablehnung nicht gespeichert (fall ${fallId}):`, ablehnFehler.message)
+  }
 
   // KFZ-136: Reminder stornieren
   try {
@@ -723,10 +736,13 @@ export async function storniereTermin(
   if (!termin) return { error: 'Termin nicht gefunden' }
 
   // Status auf storniert setzen
-  await supabase
+  const { error: stornoFehler } = await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .eq('id', terminId)
+  if (stornoFehler) {
+    console.error(`[gutachter-fall] Termin nicht storniert (${terminId}):`, stornoFehler.message)
+  }
 
   // WhatsApp an Kunden
   const { sendCommunication } = await import('@/lib/communications/send')
@@ -780,10 +796,15 @@ export async function meldeVerspaetung(
   if (!termin) return { error: 'Termin nicht gefunden' }
 
   // Update verspaetung
-  await supabase
+  // Die Verspaetung wird dem Kunden angezeigt — geht sie verloren, wartet er
+  // ohne Information.
+  const { error: verspaetungFehler } = await supabase
     .from('gutachter_termine')
     .update({ verspaetung_minuten: minuten })
     .eq('id', terminId)
+  if (verspaetungFehler) {
+    console.error(`[gutachter-fall] Verspaetung nicht gespeichert (${terminId}):`, verspaetungFehler.message)
+  }
 
   // WhatsApp an Kunden
   const { sendCommunication } = await import('@/lib/communications/send')

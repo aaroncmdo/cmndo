@@ -108,7 +108,12 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     if (!conv.ok) {
       // Rollback: Lead loeschen (kein Claim -> kein Fall); convertLeadToClaim hat den Claim bei
       // einem Folgefehler bereits selbst zurueckgerollt (cleanupAndFail).
-      await db.from('leads').delete().eq('id', lead.id)
+      // Rollback-Delete: schlaegt ER fehl, bleibt ein verwaister Lead OHNE Claim
+      // zurueck und taucht als Dublette in der Dispatch-Liste auf.
+      const { error: rollbackFehler } = await db.from('leads').delete().eq('id', lead.id)
+      if (rollbackFehler) {
+        console.error(`[admin-anlegen] Rollback-Delete fehlgeschlagen (lead ${lead.id}) — verwaister Lead:`, rollbackFehler.message)
+      }
       return { success: false, error: `Fall-Anlage fehlgeschlagen: ${conv.error}` }
     }
     // CMM-49: zwei admin-Form-Felder, die der kanonische lead->claim NICHT aus dem Lead mappt:
@@ -121,7 +126,12 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     if (data.schadens_ort?.trim()) adminExtras.schadenort_ort = data.schadens_ort.trim()
     if (data.schadensursache?.trim()) adminExtras.schadens_ursache = data.schadensursache.trim()
     if (Object.keys(adminExtras).length > 0) {
-      await db.from('claims').update(adminExtras).eq('id', conv.claimId)
+      // Die beiden Admin-Formularfelder (Schadenort, Ursache), die der kanonische
+      // lead->claim nicht mappt. Gehen sie verloren, hat der Fall sie nie.
+      const { error: extrasFehler } = await db.from('claims').update(adminExtras).eq('id', conv.claimId)
+      if (extrasFehler) {
+        console.error(`[admin-anlegen] Admin-Zusatzfelder nicht gespeichert (claim ${conv.claimId}):`, extrasFehler.message)
+      }
     }
     // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id
     // (Kennzeichen aus dem Formular). convertLeadToClaim legt mangels Lead-FIN kein Fahrzeug an.
@@ -157,7 +167,10 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     return { success: true, fall_id: conv.fallId, claim_nummer: conv.claimNummer }
   } catch (err) {
     console.error('[CMM-49] convertLeadToClaim (admin-anlegen):', err)
-    await db.from('leads').delete().eq('id', lead.id)
+    const { error: catchRollbackFehler } = await db.from('leads').delete().eq('id', lead.id)
+    if (catchRollbackFehler) {
+      console.error(`[admin-anlegen] Rollback-Delete (catch) fehlgeschlagen (lead ${lead.id}) — verwaister Lead:`, catchRollbackFehler.message)
+    }
     return { success: false, error: 'Fall-Anlage fehlgeschlagen (Konversion)' }
   }
 }

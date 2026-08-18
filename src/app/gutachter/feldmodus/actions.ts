@@ -114,13 +114,18 @@ export async function markSvVorOrt(
     .eq('id', terminId)
     .maybeSingle()
   if (!existing?.sv_angekommen_am) {
-    await admin
+    // Der Kunde bekommt die Ankunfts-Benachrichtigung; bleibt der Marker aus,
+    // gilt der SV als nicht angekommen und ein Folgelauf meldet es erneut.
+    const { error: ankunftFehler } = await admin
       .from('gutachter_termine')
       .update({
         sv_angekommen_am: nowIso,
         notification_angekommen_gesendet_am: nowIso,
       })
       .eq('id', terminId)
+    if (ankunftFehler) {
+      console.error(`[feldmodus] Ankunft nicht vermerkt (${terminId}):`, ankunftFehler.message)
+    }
   }
   revalidatePath('/gutachter/feldmodus')
   if (existing?.fall_id) {
@@ -163,10 +168,13 @@ export async function markBesichtigungGestartet(
     update.notification_angekommen_gesendet_am = nowIso
   }
 
-  await admin
+  const { error: feldUpdateFehler } = await admin
     .from('gutachter_termine')
     .update(update)
     .eq('id', terminId)
+  if (feldUpdateFehler) {
+    console.error(`[feldmodus] Termin-Update nicht gespeichert (${terminId}):`, feldUpdateFehler.message)
+  }
 
   // CMM-44 SP-H PR2: der fruehere faelle.besichtigung_gestartet_am-Dual-Write
   // entfaellt. besichtigung_gestartet_am wird von gutachter_termine gelesen
@@ -213,7 +221,11 @@ export async function completeAndAdvance(
   // Slice 1b: IF-NULL-Guard macht den durablen Abschluss-Write idempotent —
   // ein Offline-Doppel-Replay überschreibt abschluss_zeit nicht mit einem
   // späteren Zeitstempel.
-  await admin
+  // Abschluss der Vor-Ort-Besichtigung. Der Feldmodus arbeitet OFFLINE-faehig, die
+  // `.is('abschluss_zeit', null)`-Bedingung schuetzt gegen Doppel-Replay. Schlaegt der
+  // Write still fehl, gilt die Besichtigung als nicht abgeschlossen — der SV steht
+  // schon wieder im Auto, und die Folgeprozesse warten.
+  const { error: abschlussFehler } = await admin
     .from('gutachter_termine')
     .update({
       abschluss_zeit: new Date().toISOString(),
@@ -221,6 +233,9 @@ export async function completeAndAdvance(
     })
     .eq('id', terminId)
     .is('abschluss_zeit', null)
+  if (abschlussFehler) {
+    console.error(`[feldmodus] Besichtigungs-Abschluss nicht gespeichert (${terminId}):`, abschlussFehler.message)
+  }
 
   // Slice 1b: Compare-and-Set. Beim Offline-Replay wird terminId als
   // expectedAktuellerTerminId uebergeben. Steht die Session nicht mehr auf

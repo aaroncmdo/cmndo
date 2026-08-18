@@ -84,7 +84,9 @@ export async function submitStellungnahme(
   }
 
   // Eintrag in fall_dokumente (sichtbar für Admin + KB + SV)
-  await db.from('fall_dokumente').insert({
+  // Die Datei liegt bereits im Storage. Ohne diesen Eintrag existiert die
+  // technische Stellungnahme des SV fuer die Akte nicht — niemand findet sie.
+  const { error: stellungnahmeFehler } = await db.from('fall_dokumente').insert({
     fall_id: input.fallId,
     dokument_typ: 'technische_stellungnahme',
     storage_path: storagePath,
@@ -95,6 +97,12 @@ export async function submitStellungnahme(
     uploaded_by_sv: true,
     sichtbar_fuer: ['sachverstaendiger', 'kundenbetreuer', 'admin'],
   })
+  if (stellungnahmeFehler) {
+    console.error(
+      `[stellungnahme] Akteneintrag fehlt (fall ${input.fallId}, storage ${storagePath}):`,
+      stellungnahmeFehler.message,
+    )
+  }
 
   // CMM-44 SP-H PR2: technische_stellungnahme_notiz_sv lebt auf der auftraege-
   // Sub-Tabelle (Reader lesen sie von auftraege). Auf den aktuellen Auftrag des

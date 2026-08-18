@@ -359,10 +359,15 @@ export async function loescheGutachtenDokument(
   if (storageErr) return { ok: false, error: storageErr.message }
 
   const now = new Date().toISOString()
-  await db
+  // Die Datei ist im Storage bereits geloescht. Schlaegt diese Markierung still fehl,
+  // bleibt der DB-Eintrag stehen und zeigt auf eine Datei, die es nicht mehr gibt.
+  const { error: loeschMarkFehler } = await db
     .from('fall_dokumente')
     .update({ geloescht_am: now })
     .eq('id', dok.id)
+  if (loeschMarkFehler) {
+    console.error(`[qc] Loesch-Markierung fehlgeschlagen (dok ${dok.id}) — Eintrag zeigt ins Leere:`, loeschMarkFehler.message)
+  }
 
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
   return { ok: true }
@@ -418,7 +423,7 @@ export async function weiseGutachtenZurueck(
   // der allgemeine Grund reicht dann als Hinweis an den SV.
   if (abgelehnteDoks && abgelehnteDoks.length > 0) {
     for (const dok of abgelehnteDoks) {
-      await db
+      const { error: ablehnFehler } = await db
         .from('fall_dokumente')
         .update({
           abgelehnt_am: now,
@@ -426,6 +431,11 @@ export async function weiseGutachtenZurueck(
         })
         .eq('id', dok.id)
         .is('geloescht_am', null)
+      // Ohne die Markierung sieht der SV nicht, WELCHES Dokument beanstandet wurde —
+      // er bekommt nur den allgemeinen Zurueckweisungsgrund.
+      if (ablehnFehler) {
+        console.error(`[qc] Dokument-Ablehnung nicht vermerkt (dok ${dok.id}):`, ablehnFehler.message)
+      }
     }
   }
 
@@ -456,7 +466,7 @@ export async function weiseGutachtenZurueck(
   // Task für SV
   try {
     const fristIso = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-    await db.from('tasks').insert({
+    const { error: korrekturTaskFehler } = await db.from('tasks').insert({
       fall_id: auftrag.fall_id,
       task_typ: 'gutachten-korrigieren',
       typ: 'gutachten-korrigieren',
@@ -468,6 +478,12 @@ export async function weiseGutachtenZurueck(
       faellig_am: fristIso,
       auto_erstellt: true,
     })
+    // Das umgebende try faengt hier NICHTS: supabase-js wirft nicht. Ohne diesen
+    // Task erfaehrt der SV nie, dass er sein Gutachten korrigieren soll — die
+    // Zurueckweisung verpufft.
+    if (korrekturTaskFehler) {
+      console.error(`[qc] Korrektur-Task NICHT angelegt (fall ${auftrag.fall_id}):`, korrekturTaskFehler.message)
+    }
   } catch (err) {
     console.warn('[weiseGutachtenZurueck] Task fehlgeschlagen:', err)
   }
