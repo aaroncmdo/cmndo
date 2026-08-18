@@ -17,7 +17,12 @@ import { AI_MODELS } from '@/lib/ai/models'
 import type { LokalinhaltEntwurf } from './gate'
 
 export const LOKALINHALT_MODEL = AI_MODELS.sv_briefing_struktur
-const MAX_OUTPUT_TOKENS = 4096
+// 4096 reichten fuer den urspruenglichen Umfang (5 FAQs), nicht fuer den
+// angestrebten (10-14 mit ausfuehrlichen Antworten). Gemessen 18.08.2026: bei
+// der hoeheren Anforderung riss die Ausgabe und lieferte einen Rumpf. Der Wert
+// deckt jetzt den vollen Entwurf mit Reserve; die Pruefung auf `stop_reason`
+// unten faengt den Rest, falls eine Stadt trotzdem darueber liegt.
+const MAX_OUTPUT_TOKENS = 16_000
 
 /** Verifizierte Fakten, die die Seite bereits traegt — als Kontext in den Prompt. */
 export type StadtKontext = {
@@ -79,15 +84,32 @@ const TOOL: Anthropic.Tool = {
       },
       lokaleFaqs: {
         type: 'array',
-        description: 'Ortsspezifische Fragen. Nichts, was auf jeder Stadtseite stehen koennte.',
+        // Menge bewusst benannt (18.08.2026): ohne Angabe lieferte das Modell
+        // fuenf Fragen = 349 Woerter, gemessen an Solingen. Die FAQ tragen ~80 %
+        // des Ortstextes; bei ~2.800 Woertern Seitenumfang braucht eine Seite
+        // grob 1.200 Woerter Eigenes, um unter die 40-%-Aehnlichkeitsschwelle
+        // der Spec zu kommen. Die Untergrenze steht bewusst NICHT drin — lieber
+        // acht belegbare Fragen als vierzehn, von denen sechs erfunden sind.
+        description:
+          'Ortsspezifische Fragen mit ausfuehrlichen Antworten (je 60-100 Woerter). ' +
+          'Ziel: 10-14 Stueck. Nichts, was auf jeder Stadtseite Deutschlands stehen ' +
+          'koennte. Lieber weniger als erfundene — Substanz vor Menge.',
         items: {
           type: 'object',
           properties: { frage: { type: 'string' }, antwort: { type: 'string' } },
           required: ['frage', 'antwort'],
         },
       },
-      heroAnker: { type: 'string', description: 'Ein Satz mit konkretem Ortsbezug. Optional.' },
-      topografieAnker: { type: 'string', description: 'Lagebesonderheit. Optional.' },
+      heroAnker: {
+        type: 'string',
+        description: 'Ein bis zwei Saetze mit konkretem Ortsbezug (25-45 Woerter). Optional.',
+      },
+      topografieAnker: {
+        type: 'string',
+        description:
+          'Lagebesonderheit der Stadt und was sie fuer Unfallgeschehen und Schadensbild ' +
+          'bedeutet (40-70 Woerter). Optional.',
+      },
     },
     required: ['stadtbezirke', 'hauptachsen', 'unfallHotspots', 'lokaleFaqs'],
   },
@@ -150,6 +172,25 @@ export async function generateLokalinhaltDraft(
       tools: [TOOL],
       tool_choice: { type: 'tool', name: 'erfasse_ortsinhalt' },
     })
+
+    // 🔴 STILLER DATENVERLUST, gemessen am 18.08.2026: Reisst die Antwort das
+    // Token-Limit, liefert die API einen UNVOLLSTAENDIGEN tool_use-Block. Die
+    // Zuweisungen unten fangen das mit `?? []` ab — aus abgeschnittenen Feldern
+    // werden dann still LEERE, und der Generator meldet trotzdem Erfolg.
+    //
+    // Konkret gemessen: mit einer hoeheren FAQ-Anforderung fielen von 436
+    // Woertern 399 weg (0 FAQs, 0 Anker), waehrend der Aufruf `ok: true`
+    // zurueckgab. Ohne diese Pruefung landet so ein Rumpf in der DB, besteht
+    // womoeglich sogar das Gate — und niemand sieht, dass zwei Drittel fehlen.
+    // Dieselbe Klasse wie #5354 (Structured-Outputs-Limit in der OCR).
+    if (response.stop_reason === 'max_tokens') {
+      return {
+        ok: false,
+        error:
+          `Ausgabe am Token-Limit abgeschnitten (${MAX_OUTPUT_TOKENS}). ` +
+          'Der Entwurf waere unvollstaendig — lieber kein Inhalt als ein halber.',
+      }
+    }
 
     const block = response.content.find((c) => c.type === 'tool_use')
     if (!block || block.type !== 'tool_use') {
