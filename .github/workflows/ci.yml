@@ -121,6 +121,19 @@ jobs:
       - name: Stille-Write-Ratchet
         run: npm run check:silent-writes -- --ratchet
 
+      # stop_reason-Drift-Bremse: blockt NEUE erzwungene Tool-Aufrufe (tool_choice),
+      # die `stop_reason` nicht pruefen. Reisst eine Antwort das Token-Limit, liefert
+      # die Anthropic-API einen HALBEN tool_use-Block — kein Fehler, keine Exception.
+      # Mit Fallbacks ausgelesen wird daraus still "nichts gefunden", und der Aufruf
+      # meldet Erfolg. Zwei belegte Vorfaelle (18.08.): der Lokalinhalt-Generator
+      # verlor 399 von 436 Woertern, flow-intake verschluckte die Schadenmeldung des
+      # Kunden (nichts gespeichert, keine Rueckfrage, kein Fehler).
+      # ⚠ Ein groesseres max_tokens ist KEIN Ersatz — es verschiebt nur, ab welcher
+      # Eingabe es still bricht. Freitext-Antworten sind bewusst NICHT erfasst (dort
+      # bricht der Satz sichtbar ab). Siehe AGENTS.md §stop-reason-Gate.
+      - name: stop_reason-Ratchet
+        run: npm run check:anthropic-stop-reason -- --ratchet
+
       # RLS-Policy-Ratchet: blockt NEUE permissive CREATE POLICY ohne explizite Rollen-Klausel
       # ggue. scripts/rls-policy-baseline.json. Ohne `TO` ist der Postgres-Default `TO public` —
       # die Policy gilt dann auch fuer authenticator/cli_login_postgres/dashboard_user/
