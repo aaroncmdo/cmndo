@@ -483,6 +483,164 @@ wer das Anfangspasswort übermittelt — dieselbe Frage beantwortet der Self-Ser
 
 `sv_leads.claim_status` ist bei allen 62 Bestandsleads `'offen'` — sie sind alle konvertierbar.
 
+### 5.5 Die Kette: vom Scrape zur Konvertierung
+
+Cold Mail ist keine Welle am Ende, sondern der Vertriebsweg, für den alles andere gebaut wird.
+Die Übergabe-Specs decken die Glieder 2 bis 6 ab. **Glied 1 fehlt vollständig** — und ohne
+Glied 1 ist die Strategie nach einmaligem Durchlauf zu Ende.
+
+```
+① GEWINNEN    Places-Discovery über DE          → sv_leads       ← FEHLT in allen Specs
+② ANREICHERN  Website finden, Impressum lesen   → email, telefon   F-15/F-16
+③ MESSEN      Massenlauf, Teilbefund je Lead    → levelup_checks   F-17
+④ ANSPRECHEN  Sequenz mit dem echten Befund     → cold_mail_*      F-21/F-22
+⑤ ANTWORTEN   Enrollment auf 'geantwortet'      → tasks            F-22
+⑥ GESPRÄCH    Auswertungslink, Plan, Leitfaden  → /auswertung      §5.3
+⑦ KONVERTIEREN Lead wird Partner-SV             → sachverstaendige §5.4
+```
+
+#### 5.5.1 Warum 62 Leads keine Strategie sind
+
+Alle 62 stammen aus `quelle = 'excel_import_2026-05-11'`. Es gibt **keinen Zufluss** — kein
+Formular, kein Scraper, kein wiederkehrender Import. Die Liste ist endlich und einmalig.
+
+Der Markt dahinter: Der BVSK schätzt **rund 10.000 Kfz-Sachverständige** in Deutschland, davon
+**5.000 bis 6.000 freie und unabhängige Gutachter** — das ist die Zielgruppe, weil an
+Prüforganisationen gebundene SVs ihre Aufträge über die Organisation beziehen. Eine
+Firmendatenbank zählt 5.471 Einträge (Stand 29.07.2026), 84,6 % davon Kleingewerbe oder
+Freiberuf, allein 1.564 in Nordrhein-Westfalen.
+
+**Die 62 sind gut 1 % des adressierbaren Marktes.** Bei realistischen Kaltmail-Quoten ergeben
+sie zwei bis fünf Antworten — einmalig. Dieselbe Mechanik auf 2.000 anschreibbare Leads
+angewendet ergibt eine laufende Pipeline.
+
+#### 5.5.2 Lead-Gewinnung — das Muster existiert bereits
+
+`docs/superpowers/specs/2026-08-01-apotheken-scraper-design.md` beschreibt exakt diese Aufgabe
+für Apotheken, ist von Aaron abgenommen und in wesentlichen Teilen übertragbar:
+
+| Stufe | Apotheken-Scraper | für SV-Leads |
+|---|---|---|
+| ① Discovery | Quadtree über DE, Text Search, `place_id`-Dedup, Verfeinerung bei 60-Treffer-Cap | identisch, `textQuery="Kfz-Sachverständiger"` / `"Kfz-Gutachter"` |
+| ② Fetch | Startseite + Impressum, robots.txt, ≥2 s je Host, HTML-Cache | identisch — **ist F-15/F-16** |
+| ③ Extract | Regex für E-Mail, Telefon, Inhaber (~70–80 % gratis) | identisch |
+| ④ Enrich | Haiku nur für unsichere Felder | identisch |
+| ⑤ Classify | Größen-Tier aus `userRatingCount` | Sichtbarkeits-Bedarf statt Größe (§5.5.4) |
+| ⑥ Export | XLSX/CSV | **entfällt** — Ziel ist `sv_leads`, nicht eine Datei |
+
+**Der wesentliche Unterschied:** Der Apotheken-Scraper ist ein eigenes Repo mit SQLite und
+Datei-Export. Für SV-Leads ist das Ziel die Produktionstabelle `sv_leads`, also läuft die
+Pipeline gegen Supabase und respektiert die Dublettenerkennung aus `CONTEXT` §5
+(`normalized_name` + PLZ innerhalb 10 km). `place_id` kommt als zusätzlicher, härterer
+Dedup-Schlüssel dazu — er ist stabil, während Namen variieren.
+
+```sql
+alter table public.sv_leads
+  add column google_place_id text unique,     -- härtester Dedup-Schlüssel
+  add column entdeckt_am     timestamptz,
+  add column entdeckt_lauf   uuid;            -- welcher Discovery-Lauf
+```
+
+`quelle` bleibt das Textfeld und bekommt den Wert `'places_discovery'` statt
+`'excel_import_2026-05-11'`.
+
+#### 5.5.3 Das Nebenprodukt, das nichts kostet
+
+Jeder `wett`-Lauf ruft die Sachverständigenbüros im 50-km-Umkreis ab — in Münster 154 Stück.
+Diese Daten sind bereits abgerufen und bezahlt. **Sie in `sv_leads` zu schreiben ist ein
+zusätzlicher Schreibpfad, kein zusätzlicher Abruf.**
+
+Damit füttert jeder durchgeführte Check die Lead-Datenbank. Bei 25 Checks im Monat sind das
+mehrere tausend Büro-Sichtungen, die über `place_id` sauber dedupliziert werden. Der
+Deutschland-Scrape aus §5.5.2 ist der Grundstock, dieser Pfad hält ihn aktuell.
+
+**Regel:** Der Schreibpfad läuft nur über `service_role` in einer Server Action, schreibt
+ausschließlich Stammdaten (Name, Adresse, PLZ, Ort, Koordinaten, `place_id`) und **nie** in
+`partner_leads` oder `leads` (R-M).
+
+#### 5.5.4 Zwei Preisstufen für zwei Zwecke
+
+Die Feldwahl entscheidet über die SKU-Stufe — und damit über den Preis (§7):
+
+| Zweck | Felder | Stufe | Gratis/Monat |
+|---|---|---|---|
+| **Lead-Discovery** | `id`, `displayName`, `formattedAddress`, `addressComponents`, `location` | **Pro** | 5.000 |
+| **Messung** (`wett`, `markt`, `gbp`) | zusätzlich `rating`, `userRatingCount`, `websiteUri` | **Enterprise** | 1.000 |
+
+Für die Lead-Gewinnung reichen die Pro-Felder: Kontaktdaten kommen ohnehin aus dem Impressum
+(F-16), die Website wird per Domainraten gefunden (F-15). **Der Deutschland-weite Scrape läuft
+damit vollständig im Gratiskontingent** (§7).
+
+Bewertungszahlen sind für die **Lead-Priorisierung** trotzdem wertvoll — und zwar umgekehrt zur
+Intuition: Ein Büro mit null Bewertungen hat den größten Sichtbarkeits-Bedarf und ist damit der
+beste Kandidat für SV-LevelUp, nicht der schlechteste. Diese Abfrage lohnt sich aber erst für
+die Leads, die tatsächlich in eine Kampagne gehen — gezielt und in Enterprise, statt pauschal
+für 5.500 Datensätze.
+
+#### 5.5.5 Trichter und Kapazität
+
+| Stufe | Menge | Grundlage |
+|---|---|---|
+| freie Kfz-SV in DE | ~5.500 | BVSK-Schätzung, Firmendatenbank 5.471 (29.07.2026) |
+| davon per Discovery gefunden | 90 % ≈ 5.000 | Erfolgskriterium analog Apotheken-Scraper |
+| davon mit Website | **40–70 %** ≈ 2.000–3.500 | **Annahme, der erste Lauf misst sie** |
+| davon E-Mail im Impressum | ~60 % ≈ 1.200–2.100 | Erfolgskriterium Apotheken-Scraper |
+| **anschreibbar** | **grob 1.500–2.000** | |
+
+Die Website-Quote ist bewusst als Spanne angegeben. Die Münsterland-Erhebung prüfte 42 Domains
+bei 154 Büros — ob das die Zahl der vorhandenen Websites war oder die Deckelung des
+Breitenschnitts (`seiten_check.py`: „bis zu 50 Domains"), ist aus den Unterlagen nicht
+entscheidbar. **Der erste Discovery-Lauf beantwortet das und ist die Grundlage jeder weiteren
+Planung.** Bis dahin wird nicht hochgerechnet (R-B).
+
+**Versandkapazität** nach `CONTRACT` F-22: höchstens 20 Mails je Lauf, 40 am Tag, werktags 9–17 Uhr.
+Das sind 800 im Monat. Bei 2.000 anschreibbaren Leads und einer Sequenz aus vier Schritten
+dauert eine vollständige Welle **vier bis sechs Monate** — inklusive Warmup, der in der ersten
+Woche bei etwa zehn Mails am Tag beginnt.
+
+Diese Zahl ist die eigentliche Planungsgröße: Nicht die Zahl der Leads begrenzt die Strategie,
+sondern die Zustellrate einer neuen Absenderdomain.
+
+#### 5.5.6 Was auf dem Weg zur Mail entschieden sein muss
+
+Die Mechanik ist in `CONTRACT` F-21 bis F-23 und `CONTEXT` §11 vollständig beschrieben und wird
+unverändert übernommen: `sv_lead_id` auf den drei `cold_mail_*`-Tabellen mit
+`num_nonnulls(...) = 1`, eigener Absender je Sequenz, Validator R-N (Herkunftsangabe und
+Abmeldelink in jeder Vorlage), Suppression-Prüfung R-O vor **jedem** Send, Ein-Klick-Abmeldung
+ohne Rückfrage.
+
+Zwei Dinge, die dort nicht stehen und ohne die eine Kampagne nicht laufen darf:
+
+1. **Der Befund in der Mail ist ein Teilbefund.** Der Massenlauf misst höchstens sechs von
+   siebzehn Modulen (§3.4). Es gilt `kein_score = true`. **Die Vorlagen dürfen deshalb keinen
+   Score nennen** — nur einzelne gemessene Werte, jeder mit Quelle und Datum, plus die
+   ausdrückliche Nennung dessen, was nicht geprüft wurde (`DURCHSPRACHE` §4). Ein „Ihr
+   Sichtbarkeits-Score liegt bei 31" in einer Mail an einen Fremden verletzt R-A und R-B
+   gleichzeitig.
+2. **Wer die Antworten liest, und in welcher Frist.** `DURCHSPRACHE` §2 stellt die Frage, die
+   Übergabe-Spec beantwortet sie nicht. Eine unbeantwortete Antwort auf eine Kaltmail ist
+   schlechter als keine Kaltmail. Vorschlag: Das Enrollment geht bei einer Antwort auf
+   `geantwortet`, und derselbe `tasks`-Mechanismus wie bei einem Terminwunsch (§5.2) legt eine
+   Aufgabe mit Frist an — mit `typ = 'levelup_antwort'`.
+
+**Rechtlich getrennt zu betrachten** — der Apotheken-Scraper hält es genauso:
+
+- **Erhebung** aus Impressen ist als berechtigtes Interesse nach Art. 6 Abs. 1 lit. f DSGVO im
+  B2B-Kontext tragbar. Art. 14 verlangt die Information der Betroffenen innerhalb eines Monats —
+  die Herkunftsangabe in jeder Mail erfüllt das, für nicht angeschriebene Leads bleibt es offen.
+- **Werbliche Ansprache** fällt unter § 7 Abs. 2 UWG und braucht eine eigene Grundlage. Die
+  Ausnahme in § 7 Abs. 3 setzt eine bestehende Kundenbeziehung voraus, die hier nicht besteht.
+- **Google-Places-Nutzungsbedingungen** beschränken die dauerhafte Speicherung von Places-Inhalten.
+  `place_id` darf unbegrenzt gespeichert werden; selbst erhobene Anreicherungsdaten sind
+  unkritisch. Als internes Vertriebswerkzeug in dieser Größenordnung ist das Risiko gering,
+  gehört aber auf die Tagesordnung.
+
+Das Scrapen ist damit **unabhängig vom Versand baubar und nutzbar** — die angereicherte Basis
+trägt Telefonakquise, Messeansprache und Postweg genauso. Fällt die Entscheidung in A-5 gegen
+Cold Mail, bleibt die Arbeit aus ① bis ③ vollständig werthaltig.
+
+> *Hinweise, keine Rechtsberatung.*
+
 ---
 
 ## 6 · Datenmodell — Änderungen gegenüber CONTEXT §3
@@ -518,39 +676,66 @@ zusätzlich `is_staff()` zum Schreiben, kein `anon`.
 
 Google Maps Platform, Stufe 0–100 k/Monat, Stand 18.08.2026.
 
+### 7.1 Ein Vollcheck
+
 | Posten | SKU | Calls | $/1000 | $ |
 |---|---|---|---|---|
-| `wett` — 50-km-Raster | Text Search Pro | ~20 | 32,00 | 0,64 |
-| `markt` — 6 Vergleichsmärkte | Text Search Pro | ~12 | 32,00 | 0,38 |
-| `zuweiser` — 25 km, drei Typen | Text Search Pro | ~6 | 32,00 | 0,19 |
-| `gbp` — Profil finden | Text Search Pro | 1 | 32,00 | 0,03 |
-| `gbp` — Profildaten | Place Details Pro | 1 | 17,00 | 0,02 |
+| `wett` — 50-km-Raster | Text Search **Enterprise** | ~20 | 35,00 | 0,70 |
+| `markt` — 6 Vergleichsmärkte | Text Search **Enterprise** | ~12 | 35,00 | 0,42 |
+| `zuweiser` — 25 km, drei Typen | Text Search **Enterprise** | ~6 | 35,00 | 0,21 |
+| `gbp` — Profil finden | Text Search **Enterprise** | 1 | 35,00 | 0,04 |
+| `gbp` — Profildaten | Place Details **Enterprise** | 1 | 20,00 | 0,02 |
 | Standort | — | — | — | 0 (aus `plz_geo`) |
-| **Summe** | | **~40** | | **~1,26 $ ≈ 1,16 €** |
+| **Summe** | | **~40** | | **~1,39 $ ≈ 1,27 €** |
+
+> **Enterprise, nicht Pro — das ist der teure Teil.** Die Stufe richtet sich nach den
+> angeforderten Feldern, und **`rating`, `userRatingCount` und `websiteUri` sind
+> Enterprise-Felder** (geprüft 18.08.2026). Genau die tragen `wett` (Rang nach Bewertungszahl),
+> `markt` (Median und 90.-Perzentil) und `zuweiser` (nennt die Werkstatt einen Gutachter?).
+> Der Gratis-Anteil ist bei Enterprise **1.000 Calls im Monat**, nicht 5.000.
 
 > **Text Search, nicht Nearby Search.** Nearby Search filtert über `includedTypes`, und für
-> „Kfz-Sachverständiger" existiert kein Places-Typ. `wett`, `markt` und der Kanzlei-Teil von
-> `zuweiser` brauchen Freitext und laufen deshalb über Text Search. Nur der Werkstatt-Teil von
-> `zuweiser` könnte `car_repair` per Nearby Search nutzen — gleicher Preis, daher ohne Gewinn.
-> Beide SKUs sind derzeit gesperrt (A-1).
+> „Kfz-Sachverständiger" existiert kein Places-Typ. Freitext ist Pflicht. Nur der Werkstatt-Teil
+> von `zuweiser` könnte `car_repair` per Nearby Search abfragen — gleicher Preis, gleiche Stufe,
+> daher ohne Gewinn. Beide SKUs sind derzeit gesperrt (A-1).
 
 Alle übrigen dreizehn Module: **0 €** (eigener Crawl, PageSpeed, SSL Labs, Verzeichnisse,
 Autocomplete, Ads-API, Meta-API, GSC-API, lokale Statistik) — nur Serverzeit, ~3–5 min CPU.
 
-**Der Free Tier trägt den Regelbetrieb:** 5.000 Pro-Calls **je SKU** und Monat. Text Search ist
-mit ~39 Calls je Vollcheck der Engpass; Place Details (1 Call) reicht für 5.000 Checks:
+**Gratiskontingent:** 1.000 Enterprise-Calls im Monat, bei ~39 Calls je Vollcheck:
 
-- **bis ~128 Checks im Monat: 0 €**
+- **bis ~25 Checks im Monat: 0 €**, danach ~1,27 € je Check
 - mit Markt-Cache (die sechs Vergleichsmärkte sind je Region identisch — einmal monatlich statt
-  je Check): ~27 Calls → **bis ~185 Checks gratis**, danach ~0,88 €
+  je Check): ~27 Calls → **bis ~37 Checks gratis**, danach ~0,89 €
 - **Massenlauf über die 62 Bestandsleads: 0 €**, solange die Places-Module ausgeschlossen sind
 
-**Optional**, falls Befundtexte generiert statt getemplatet werden (~15 k Input, ~6 k Output je
-Check): Haiku 4.5 ≈ 0,04 € · Sonnet 5 ≈ 0,08 € · Opus 5 ≈ 0,21 €. Der Maßnahmenplan selbst wird
-**abgeleitet, nicht generiert** (F-11) — ein Modell wäre nur für die Formulierung der Einordnungen
-nötig.
+### 7.2 Der Deutschland-weite Lead-Scrape
 
-**Der eigentliche Kostenblock ist Menschenzeit:**
+Hier greift die Trennung aus §5.5.4: Discovery braucht keine Enterprise-Felder.
+
+| Posten | SKU | Calls | $/1000 | $ |
+|---|---|---|---|---|
+| Quadtree über DE, ~5.500 SV bei 20 je Seite | Text Search **Pro** | 800–2.000 | 32,00 | 26–64 |
+| Website + Impressum je Lead | eigener Crawl | — | — | 0 |
+| Extraktion (Regex, ~70–80 %) | — | — | — | 0 |
+| Extraktion (Haiku-Fallback für den Rest) | Haiku 4.5 | ~1.500 × 2k Token | — | ~2 |
+
+**Gratiskontingent Pro: 5.000 Calls im Monat.** Ein Discovery-Lauf über ganz Deutschland passt
+vollständig hinein — **einmalig 0 €**, wenn er in einem Kalendermonat gefahren wird. Selbst die
+obere Schätzung von 2.000 Calls lässt 3.000 Calls Luft für laufende Nachläufe.
+
+> Die Lead-Basis für die gesamte Cold-Mail-Strategie kostet damit praktisch nichts. Der
+> Kostenblock liegt bei den **Checks**, nicht bei den Leads.
+
+### 7.3 Sprachmodell, optional
+
+Falls Befundtexte generiert statt getemplatet werden (~15 k Input, ~6 k Output je Check):
+Haiku 4.5 ≈ 0,04 € · Sonnet 5 ≈ 0,08 € · Opus 5 ≈ 0,21 €. Der Maßnahmenplan selbst wird
+**abgeleitet, nicht generiert** (F-11) — ein Modell wäre nur für die Formulierung der
+Einordnungen nötig. Im Scraper übernimmt Haiku den Fallback für Impressum-Felder, die der
+Regex-Layer nicht sicher trifft (§7.2).
+
+### 7.4 Menschenzeit — der eigentliche Kostenblock
 
 | | ohne erweiterte Restriction | mit |
 |---|---|---|
@@ -562,6 +747,21 @@ Dazu das Gespräch (30 min plus Vor- und Nachbereitung ≈ 45 €), das unvermei
 Zweck des Ganzen darstellt.
 
 > Die Erweiterung der Key-Restriction kostet nichts und spart 35–45 € Menschenzeit je Check.
+> Ohne sie ist der Deutschland-Scrape ebenso blockiert wie Weg A — beide brauchen Text Search.
+
+### 7.5 Was die Strategie insgesamt kostet
+
+| Posten | einmalig | laufend |
+|---|---|---|
+| Lead-Scrape über DE (Discovery Pro, im Gratiskontingent) | **0 €** | 0 € |
+| Anreicherung 5.000 Leads (Crawl + Haiku-Fallback) | ~2 € | — |
+| Massenlauf-Checks ohne Places-Module | 0 € | 0 € |
+| Cold-Mail-Versand (Resend) | — | ~0,40 € je 1.000 |
+| Vollchecks für Gesprächskandidaten | — | 0 € bis 25/Monat, danach 1,27 € |
+
+Der Sachkostenblock der gesamten Kette liegt damit im **einstelligen Eurobereich pro Monat**,
+solange die Vollchecks im Gratiskontingent bleiben. Was die Strategie wirklich kostet, ist die
+Zeit für Gespräche — und genau die soll der Befund vorqualifizieren.
 
 ---
 
@@ -569,7 +769,8 @@ Zweck des Ganzen darstellt.
 
 | # | Aufgabe | Wer | Blockiert |
 |---|---|---|---|
-| A-1 | **Places-Key-Restriction erweitern** um „Places API (New) → Text Search + Nearby Search" (Projekt `67468726375`). Aktuell: `403 API_KEY_SERVICE_BLOCKED` auf beiden Methoden. | Aaron | `gbp`, `wett`, `markt`, `zuweiser` — und damit Weg A insgesamt |
+| A-1 | **Places-Key-Restriction erweitern** um „Places API (New) → Text Search + Nearby Search" (Projekt `67468726375`). Aktuell: `403 API_KEY_SERVICE_BLOCKED` auf beiden Methoden. | Aaron | `gbp`, `wett`, `markt`, `zuweiser`, **Weg A insgesamt und der komplette Lead-Scrape (Welle 7b)** |
+| A-1b | **Enterprise-Kontingent im Auge behalten.** Nur 1.000 Gratis-Calls im Monat (§7.1); ein eigener Key oder Budget-Guard für die Discovery verhindert, dass ein Scrape-Lauf das Kontingent der Checks aufbraucht. Getrennte Keys für Discovery (Pro) und Messung (Enterprise) sind der einfachste Schnitt. | Aaron | Kostenkontrolle |
 | A-2 | **VPS-root-Passwort rotieren** — es wurde am 18.08. im Klartext übermittelt. | Aaron | — |
 | A-3 | DNS + NGINX-vhost + certbot für `sv-levelup.claimondo.de` | Aaron | Deployment |
 | A-4 | Resend: Domain `sv-levelup.claimondo.de` verifizieren, SPF, DKIM, DMARC (`p=none` mit `rua`), Warmup | Aaron | Welle 10 (Versand) |
@@ -588,26 +789,39 @@ Die zehn Wellen aus `WELLEN_PLAN.md` bleiben in Reihenfolge und Zuschnitt. Ände
 
 | Welle | Änderung |
 |---|---|
-| 1 | zusätzlich `levelup_auswertungslinks`, `zuweiser_treffer`, `gsc_*`; Registry mit 17 Modulen und 150 Punkten |
+| 1 | zusätzlich `levelup_auswertungslinks`, `zuweiser_treffer`, `gsc_*`, `google_place_id`; Registry mit 17 Modulen und 150 Punkten |
 | 2 | Registry aus §3.1 statt aus dem Check-Mockup; Auswahl in vier Gruppen (§3.6) |
 | 3 | Teilbefund-Schwelle relativ (`< 75`); Säulendiagramm zeigt `ist/soll` der Module |
 | 4 | zusätzlich Lead-Spiegelung nach `tasks` (§5.2) |
 | 5 | wandert in das eigene Projekt als `/auswertung/[token]` mit Staff-Gate; zusätzlich Konvertierungs-Knopf (§5.4) |
 | 6 | unverändert |
-| 7 | Schritt A ist erledigt (§2.6) — Policy-Verschärfung direkt, dann Anreicherung |
+| 7 | Schritt A ist erledigt (§2.6) — Policy-Verschärfung direkt, dann Anreicherung der 62 |
+| **7b** | **NEU · Lead-Gewinnung** (§5.5.2): Quadtree-Discovery über DE nach dem Muster des apo-scrapers, Ziel `sv_leads`, Dedup über `google_place_id` + `normalized_name`/PLZ. Dazu der Nebenprodukt-Schreibpfad aus `wett` (§5.5.3). |
 | 8 | Massenlauf-Tabelle aus §3.4 |
 | 9 | unverändert (Präsentationslink bleibt vom Auswertungslink getrennt) |
-| 10 | unverändert — endet vor dem ersten Versand |
+| 10 | unverändert in der Mechanik; zusätzlich `typ='levelup_antwort'`-Aufgabe beim Enrollment-Wechsel auf `geantwortet` (§5.5.6) — endet weiterhin vor dem ersten Versand |
+
+**Warum 7b nach 7 und nicht davor:** Die Anreicherungs-Pipeline (F-15/F-16) wird an den 62
+Bestandsleads erprobt, wo Fehler überschaubar bleiben und die Trefferquote messbar ist. Erst
+danach läuft dieselbe Pipeline über mehrere tausend Datensätze. Wer umgekehrt vorgeht,
+debuggt an 5.000 Zeilen.
 
 **Empfohlener Einstieg:** Welle 1 und 7 zusammen. Ohne E-Mail-Adressen ist keiner der 62 Leads
 erreichbar; die Anreicherung ist die Voraussetzung für alles Weitere, und das offene Leseleck
-gehört vorher geschlossen. Beides ist unabhängig von A-1 baubar.
+gehört vorher geschlossen. Beides ist unabhängig von A-1 baubar — **7b nicht**, die Discovery
+braucht Text Search.
 
 ---
 
 ## 10 · Was diese Spec nicht entscheidet
 
 - **Die Textinhalte der vier Mailvorlagen.** Gegenstand von A-5.
+- **Ob der Lead-Scraper ein eigenes Repo wird.** Der apo-scraper ist eines, weil er fachlich
+  unabhängig ist und nach XLSX exportiert. Der SV-Scraper schreibt in `sv_leads` und teilt die
+  Anreicherungslogik mit F-15/F-16 — das spricht für einen Platz im `sv-levelup`-Projekt.
+  Entscheidung gehört in den Implementierungsplan, nicht hierher.
+- **Die tatsächliche Website-Quote unter Kfz-Sachverständigen.** Aus den Unterlagen nicht
+  entscheidbar (§5.5.5); der erste Discovery-Lauf misst sie. Bis dahin wird nicht hochgerechnet.
 - **Die Formulierung der Befund-Einordnungen.** Die Bausteine in `scoring-modell.md` §10 sind
   ausdrücklich Ausgangspunkt, nicht Wortlaut.
 - **Ob `ads` langfristig automatisierbar wird.** Solange R-F1 gilt, bleibt es Handarbeit.
