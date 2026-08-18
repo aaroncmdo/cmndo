@@ -81,7 +81,9 @@ export async function ladeKundePreisdokument(
         .eq('claim_id', claimId)
         .maybeSingle()
       const fallId = (bridge as { fall_id: string } | null)?.fall_id ?? claimId
-      await svc.from('fall_dokumente').insert({
+      // Das PDF liegt bereits im Storage; ohne diesen Eintrag taucht es in keiner
+      // Akte auf. Das umschliessende try faengt den Insert nicht.
+      const { error: kvaDokFehler } = await svc.from('fall_dokumente').insert({
         fall_id: fallId,
         claim_id: claimId,
         dokument_typ: 'kostenvoranschlag',
@@ -93,6 +95,9 @@ export async function ladeKundePreisdokument(
         quelle: 'kunde',
         sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde', 'werkstatt'],
       } as never)
+      if (kvaDokFehler) {
+        console.error(`[ladeKundePreisdokument] KVA-Beleg NICHT erstellt (Fall ${fallId}):`, kvaDokFehler.message)
+      }
     }
   } catch (err) {
     console.error('[ladeKundePreisdokument] PDF-Beleg (non-fatal):', (err as Error).message)
