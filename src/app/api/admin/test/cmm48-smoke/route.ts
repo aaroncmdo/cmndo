@@ -195,10 +195,15 @@ export async function POST(req: NextRequest) {
     stamp('cleanup start')
     // 7. Cleanup — claim.id == fallId (Genesis). CMM-49 faelle-DROP: faelle ist gedroppt;
     // der Claim-Delete raeumt die faelle_claim_bridge via ON DELETE CASCADE mit ab.
+    // Ungeprueftes Cleanup ist die Konstellation, mit der der J2-Seed 88 Leads auf
+    // prod liegen liess: der Delete scheitert an einem Fremdschluessel, meldet aber
+    // Erfolg — und die Reste sammeln sich unbemerkt an.
     if (fallId) {
-      await svc.from('claims').delete().eq('id', fallId)
+      const { error: claimCleanupFehler } = await svc.from('claims').delete().eq('id', fallId)
+      if (claimCleanupFehler) console.error(`[cmm48-smoke] Claim-Cleanup fehlgeschlagen (${fallId}):`, claimCleanupFehler.message)
     }
-    await svc.from('leads').delete().eq('id', leadId)
+    const { error: leadCleanupFehler } = await svc.from('leads').delete().eq('id', leadId)
+    if (leadCleanupFehler) console.error(`[cmm48-smoke] Lead-Cleanup fehlgeschlagen (${leadId}) — Rest bleibt auf prod:`, leadCleanupFehler.message)
     stamp('cleanup done')
   }
 

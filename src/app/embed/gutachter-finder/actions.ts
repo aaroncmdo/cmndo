@@ -375,7 +375,12 @@ export async function reserviereEmbedTermin(input: {
   const resolvedPromoId = input.promotion_code_id ?? (await resolvePromoCodeToId(input.maklerCode))
   if (leadId && resolvedPromoId) {
     try {
-      await createAdminClient().from('leads').update({ promotion_code_id: resolvedPromoId }).eq('id', leadId)
+      // Am promotion_code steht die Makler-Zuordnung und damit die Provision (DB-Trigger).
+      // Das try faengt den Write nicht.
+      const { error: promoFehler } = await createAdminClient().from('leads').update({ promotion_code_id: resolvedPromoId }).eq('id', leadId)
+      if (promoFehler) {
+        console.error(`[reserviereEmbedTermin] promotion_code_id nicht gesetzt (Lead ${leadId}) — Provisions-Zuordnung fehlt:`, promoFehler.message)
+      }
     } catch (err) {
       console.error('[reserviereEmbedTermin] promotion_code_id setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
     }

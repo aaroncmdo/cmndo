@@ -363,10 +363,15 @@ export async function sendStatusWhatsApp(
     if (nachrichtTyp === 'nach_abschluss') {
       const claimId = waClaimId
       if (claimId) {
-        await supabase
+        // Dedup-Marker NACH dem Versand: ohne ihn bekommt der Kunde die
+        // Bewertungs-Anfrage erneut.
+        const { error: reviewMarkerFehler } = await supabase
           .from('claims')
           .update({ google_review_gesendet: true })
           .eq('id', claimId)
+        if (reviewMarkerFehler) {
+          console.error(`[whatsapp] google_review_gesendet nicht gesetzt (Claim ${claimId}) — Doppel-Versand moeglich:`, reviewMarkerFehler.message)
+        }
       }
     }
   } catch (err) {

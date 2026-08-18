@@ -52,10 +52,13 @@ export async function appendUnfallfotoAndAnalyze(
     : []
   const next = existing.includes(fotoUrl) ? existing : [...existing, fotoUrl]
 
-  await db
+  const { error: fotoFehler } = await db
     .from('leads')
     .update({ schadensfoto_urls: next, updated_at: new Date().toISOString() })
     .eq('id', leadId)
+  if (fotoFehler) {
+    console.error(`[vision] Foto-URLs nicht gespeichert (Lead ${leadId}):`, fotoFehler.message)
+  }
 
   // Nur (neu) analysieren, wenn mindestens 1 Foto vorhanden ist
   if (next.length === 0) return
@@ -63,7 +66,7 @@ export async function appendUnfallfotoAndAnalyze(
   const beschreibung = await analyzeFotosToBeschreibung(next.slice(0, MAX_FOTOS))
   if (!beschreibung) return
 
-  await db
+  const { error: beschreibungFehler } = await db
     .from('leads')
     .update({
       fahrzeugschaden_beschreibung: beschreibung,
@@ -82,6 +85,11 @@ export async function appendUnfallfotoAndAnalyze(
       updated_at: new Date().toISOString(),
     })
     .eq('id', leadId)
+  if (beschreibungFehler) {
+    // Die Beschreibung stammt aus einem kostenpflichtigen Modell-Aufruf; zudem haengt
+    // am schaden_sichtbar-Flag das Hard-Gate der Phase 1.
+    console.error(`[vision] Schadensbeschreibung nicht gespeichert (Lead ${leadId}):`, beschreibungFehler.message)
+  }
 }
 
 async function analyzeFotosToBeschreibung(urls: string[]): Promise<string | null> {

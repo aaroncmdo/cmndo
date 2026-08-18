@@ -83,12 +83,18 @@ export async function completeKanzleiSla(
 
   // Pending KB-Nachfass-Tasks aufloesen. Der fruehre Wert abgebrochen ist KEIN
   // gueltiger task_status-enum-Wert (Postgres lehnte das UPDATE ab -> Cancel lief nie).
-  await db
+  // ⚠ Genau hier hat die Klasse schon einmal zugeschlagen (s. Kommentar oben): ein
+  // CHECK-invalider Status liess das UPDATE still scheitern, der Cancel lief NIE.
+  // Der Wert wurde korrigiert, die Pruefung fehlte bis jetzt.
+  const { error: cancelFehler } = await db
     .from('tasks')
     .update(resolveSlaBreachTaskCancel(new Date(), 'Kanzlei-SLA erfüllt — Nachfass hinfällig'))
     .eq('fall_id', fallId)
     .in('typ', ['kanzlei-nachfassen', 'kunde-erinnern-fuer-kanzlei', 'sv-nachfassen-fuer-kanzlei'])
     .in('status', ['offen', 'in-bearbeitung', 'blockiert'])
+  if (cancelFehler) {
+    console.error(`[Kanzlei-SLA] Nachfass-Tasks nicht aufgeloest (Fall ${fallId}) — bleiben offen:`, cancelFehler.message)
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,

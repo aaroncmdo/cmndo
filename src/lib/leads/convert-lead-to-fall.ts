@@ -95,7 +95,9 @@ export async function convertLeadToFall(
   // (kein faelle-Write mehr).
   const nowIso = new Date().toISOString()
   if (conv.claimId) {
-    await supabase
+    // Kundenbetreuer-Zuweisung + Reset der SA-Felder auf dem frischen Claim. Bleibt der
+    // Write aus, hat der Fall keinen Betreuer und traegt womoeglich SA-Reste.
+    const { error: initFehler } = await supabase
       .from('claims')
       .update({
         ...(kundenbetreuerId ? {
@@ -108,6 +110,9 @@ export async function convertLeadToFall(
         abtretung_pdf: null,
       })
       .eq('id', conv.claimId)
+    if (initFehler) {
+      console.error(`[convertLeadToFall] Claim-Initialisierung fehlgeschlagen (${conv.claimId}):`, initFehler.message)
+    }
   }
 
   // 4. KFZ-146: Alle verbundenen Daten (Calls/Tasks/Emails/Termine/Nachrichten/Dokumente) verlinken.

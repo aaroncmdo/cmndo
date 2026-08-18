@@ -121,7 +121,8 @@ export async function POST(request: Request) {
           const altesFahrzeug = (claimRow?.vehicle_id as string | null) ?? null
           const veh = await ensureVehicleFromFin({ fin: extracted.fin_vin, snapshot: vehSnapshot, db: vehDb, supersedesVehicleId: altesFahrzeug ?? undefined })
           if (veh.ok) {
-            await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+            const { error: vehFehler } = await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+            if (vehFehler) console.error(`[CMM-68] vehicle_id nicht verknuepft (Claim ${claimId}):`, vehFehler.message)
           } else {
             console.warn('[CMM-68] OCR vehicles (FIN):', veh.error)
           }

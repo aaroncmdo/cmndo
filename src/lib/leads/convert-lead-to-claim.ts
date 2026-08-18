@@ -629,7 +629,12 @@ export async function convertLeadToClaim(
   // Bei Fehler in den Folge-Steps löschen wir den Claim wieder. Sub-Entities
   // werden via FK CASCADE entfernt.
   const cleanupAndFail = async (msg: string): Promise<ConvertLeadToClaimResult> => {
-    await admin.from('claims').delete().eq('id', claimId)
+    // Scheitert der Rollback selbst, bleibt ein halb angelegter Claim zurueck —
+    // waehrend die Funktion nur den urspruenglichen Fehler meldet.
+    const { error: rollbackFehler } = await admin.from('claims').delete().eq('id', claimId)
+    if (rollbackFehler) {
+      console.error(`[convertLeadToClaim] Rollback fehlgeschlagen — Claim ${claimId} bleibt verwaist:`, rollbackFehler.message)
+    }
     return { ok: false, error: msg }
   }
 

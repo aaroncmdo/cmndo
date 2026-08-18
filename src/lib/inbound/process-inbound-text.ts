@@ -202,11 +202,16 @@ export async function processInboundText(
       .maybeSingle()
 
     if (naechsterTermin) {
-      await db.from('gutachter_termine')
+      // Der Kunde hat gerade per Nachricht zugesagt. Bleibt der Write aus, steht der
+      // Termin weiter auf 'reserviert' und gilt als unbestaetigt.
+      const { error: bestaetigFehler } = await db.from('gutachter_termine')
         .update({ status: 'bestaetigt' })
         .eq('id', naechsterTermin.id)
         // 'angefragt' ist ein reparatur_termine-Wert (nicht im gutachter_termine-CHECK) — toter Filter.
         .in('status', ['reserviert'])
+      if (bestaetigFehler) {
+        console.error(`[inbound] Termin-Zusage nicht gespeichert (Termin ${naechsterTermin.id}):`, bestaetigFehler.message)
+      }
 
       try {
         await db.from('timeline').insert({

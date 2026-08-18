@@ -75,10 +75,15 @@ export async function tier2Freigeben(svId: string): Promise<{ success: boolean; 
 
   // Die Tier-2-Dokumente auf 'geprueft' heben (Doc-Ebene konsistent mit dem SV-Status,
   // damit sindTier2DocsGeprueft bei einer erneuten Freischaltung true liefert).
-  await db.from('pflichtdokumente')
+  const { error: tier2Fehler } = await db.from('pflichtdokumente')
     .update({ status: 'geprueft' })
     .eq('sv_id', svId)
     .in('dokument_typ', TIER2_SLOTS as unknown as string[])
+  if (tier2Fehler) {
+    // Siehe Kommentar oben: ohne diesen Write bleibt die Doc-Ebene inkonsistent zum
+    // SV-Status, und eine erneute Freischaltung scheitert an der eigenen Vorpruefung.
+    console.error(`[verifizierung] Tier-2-Dokumente nicht auf 'geprueft' gehoben (SV ${svId}):`, tier2Fehler.message)
+  }
 
   const { error } = await db
     .from('sachverstaendige')

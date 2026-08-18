@@ -449,13 +449,19 @@ export async function terminGegenvorschlag({
         const { randomBytes } = await import('crypto')
         const responseToken = randomBytes(24).toString('hex')
         const tokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
-        await admin
+        const { error: tokenFehler } = await admin
           .from('gutachter_termine')
           .update({
             kunde_response_token: responseToken,
             kunde_response_token_expires_at: tokenExpiresAt,
           })
           .eq('id', tId)
+        if (tokenFehler) {
+          // Der Link unten traegt genau diesen Token. Steht er nicht in der Datenbank,
+          // fuehrt die Mail ins Leere — dann lieber keine Mail (der throw landet im
+          // umschliessenden catch, der Versand bleibt aus).
+          throw new Error(`kunde_response_token nicht gespeichert (Termin ${tId}): ${tokenFehler.message}`)
+        }
 
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
         const responseUrl = `${baseUrl}/kunde-termin/${responseToken}`

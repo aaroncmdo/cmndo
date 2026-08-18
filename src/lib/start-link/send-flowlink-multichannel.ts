@@ -144,7 +144,9 @@ export async function sendFlowLinkMultiChannelCore(
     .select('zugewiesen_an')
     .eq('id', leadId)
     .maybeSingle()
-  await db
+  // Versand-Marker NACH dem Versand: der Link ist an dieser Stelle beim Kunden.
+  // Ohne die Marker gilt er als nicht verschickt und wird erneut zugestellt.
+  const { error: versandMarkerFehler } = await db
     .from('leads')
     .update({
       ...(kanal === 'whatsapp' && { wa_gesendet: true }),
@@ -154,6 +156,9 @@ export async function sendFlowLinkMultiChannelCore(
       updated_at: new Date().toISOString(),
     })
     .eq('id', leadId)
+  if (versandMarkerFehler) {
+    console.error(`[send-flowlink] Versand-Marker nicht gesetzt (Lead ${leadId}, ${kanal}) — Doppel-Zustellung moeglich:`, versandMarkerFehler.message)
+  }
 
   const kanalLabel = kanal === 'whatsapp' ? 'WhatsApp' : kanal === 'sms' ? 'SMS' : 'Email'
   await db

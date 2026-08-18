@@ -58,7 +58,9 @@ export async function triggerAutoBkatOcr(
     // sofort den passenden Eintrag highlightet (statt erst nach Dispatcher-
     // Übernahme).
     const legacy = bkatToLegacySchadentyp(result.unfallart)
-    await supabase
+    // Ergebnis einer kostenpflichtigen Bild-Auswertung — geht der Write verloren,
+    // muss sie erneut laufen.
+    const { error: bkatFehler } = await supabase
       .from('leads')
       .update({
         bkat_unfallart: result.unfallart,
@@ -66,6 +68,9 @@ export async function triggerAutoBkatOcr(
         updated_at: new Date().toISOString(),
       })
       .eq('id', leadId)
+    if (bkatFehler) {
+      console.error(`[bkat] Unfallart nicht gespeichert (Lead ${leadId}):`, bkatFehler.message)
+    }
 
     console.info(
       `[AAR-504] Auto-OCR für Lead ${leadId} erfolgreich: ` +

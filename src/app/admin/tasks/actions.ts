@@ -72,13 +72,17 @@ export async function updateTaskStatus(
 
     // Admin-spezifischer Side-Effect: Auto-Follow-up filmcheck → kanzlei-anschlussschreiben.
     if (newStatus === 'erledigt' && result.typ === 'filmcheck' && result.fallId) {
-      await supabase.from('tasks').insert({
+      // Anstoss fuer das Anschlussschreiben — ohne ihn passiert nach dem Filmcheck nichts.
+      const { error: anschlussFehler } = await supabase.from('tasks').insert({
         fall_id: result.fallId,
         typ: 'kanzlei-anschlussschreiben',
         titel: 'Anschlussschreiben an Kanzlei senden',
         beschreibung: 'Automatisch erstellt nach abgeschlossenem Filmcheck.',
         status: 'offen',
       })
+      if (anschlussFehler) {
+        console.error(`[admin/tasks] Anschlussschreiben-Task NICHT erstellt (Fall ${result.fallId}):`, anschlussFehler.message)
+      }
     }
 
     revalidatePath('/admin/aufgaben/alle')
