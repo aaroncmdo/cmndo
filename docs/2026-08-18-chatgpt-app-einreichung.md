@@ -132,6 +132,17 @@ Login gibt. Im Formular entsprechend vermerken.
 Andere Grossstaedte liefern derzeit korrekt eine leere Trefferliste; ein Reviewer, der
 Berlin testet, sieht sonst ein „funktioniert nicht".
 
+**Screenshots** — bewusst nicht automatisiert erzeugt: das Aufnehmen ist trivial, die
+Auswahl ist die Arbeit. Drei zeigen den Funnel vollstaendig:
+
+1. **`/gutachter-finden`** mit vorgewaehltem Köln (`?plz=50670`) — die Karte mit echten
+   Partner-Sachverständigen. Das ist das Produktversprechen in einem Bild.
+2. **Ein Chat-Verlauf** mit dem MCP-Tool: „Mein Auto wurde in Köln angefahren" →
+   Gutachter-Liste mit freien Terminen → Reservierung. Zeigt genau das, wofuer die App
+   gelistet werden soll — und belegt dem Reviewer, dass die Tools funktionieren.
+3. **`/haftpflicht/4-wochen-frist`** oder `/decoder/kfz-gutachter-kosten-tabelle` — die
+   Beratungstiefe hinter der Vermittlung (BGH-Belege, Honorartabellen).
+
 ---
 
 ## 3 · Drei Punkte, die die Einreichung kippen koennen
@@ -143,11 +154,18 @@ Unternehmens-Verifikation ohne HR-Eintrag schlaegt typischerweise fehl. **Empfeh
 zunaechst als **verifizierte Einzelperson** einreichen (Aaron Sprafke) und nach
 HR-Eintragung auf die Gesellschaft umstellen.
 
-**b) Icon-Format** — vorhanden sind `public/claimondo-icon.svg`, `public/brand/logo-mark.svg`
-und `public/brand/logo-full.png`. Directory-Listings erwarten ueblicherweise ein **quadratisches
-PNG** (Richtwert 64×64, unter 5 KB). Aus dem vorhandenen SVG schnell erzeugbar — vor der
-Einreichung pruefen, ob die Marke in 64 px noch lesbar ist (die Wortmarke ist es nicht, die
-Bildmarke `logo-mark.svg` schon).
+**b) Icon-Format** — ✅ **erledigt.** Aus `public/brand/logo-mark.svg` gerendert (sharp,
+`density: 600`, transparenter Hintergrund):
+
+| Datei | Groesse | Dateigroesse | Zweck |
+|---|---|---|---|
+| `public/brand/logo-mark-64.png` | 64×64 | **1,3 KB** | Plugin-Directory (Limit 5 KB) |
+| `public/brand/logo-mark-512.png` | 512×512 | 11,2 KB | uebliche Store-Groesse |
+
+Beide sind auch per URL abrufbar (`https://claimondo.de/brand/logo-mark-64.png`), falls das
+Formular eine URL statt eines Uploads will. Visuell geprueft: die Bildmarke (Schild mit
+Haken) traegt auch in 64 px; die **Wortmarke** waere dort unlesbar und wurde bewusst nicht
+genommen.
 
 **c) Der Deckel bleibt die Abdeckung** — gemessen ueber `/api/v1/gutachter-termine`:
 
