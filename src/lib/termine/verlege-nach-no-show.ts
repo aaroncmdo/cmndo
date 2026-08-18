@@ -97,10 +97,16 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   // CMM-49 faelle-Drop-Runway: faelle.re_termin_token-Shadow-Write entfernt — reader-frei
   // (kein Consumer liest faelle.re_termin_token; live faelle_only_tok=0).
   const token = randomUUID()
-  await db
+  const { error: tokenFehler } = await db
     .from('gutachter_termine')
     .update({ re_termin_token: token, re_termin_token_eingelaufen_am: null })
     .eq('id', terminId)
+  if (tokenFehler) {
+    // ABBRUCH VOR dem Versand: der Magic-Link unten traegt genau diesen Token. Steht er nicht
+    // in der DB, bekommt der Kunde einen Link, der ins Leere fuehrt (waehleReTerminSlot sucht
+    // den Termin ueber re_termin_token). Kein 'verlegt'-Mark gesetzt -> sauberer Retry moeglich.
+    return { ok: false, error: 'Re-Termin-Token nicht gespeichert: ' + tokenFehler.message }
+  }
 
   // Magic-Link an Kunde (non-critical: ein Baileys/Send-Fail darf die Umhaengung
   // nicht zuruecknehmen). Pattern wie meldeNoShow (storno-actions, CMM-39).
@@ -145,11 +151,17 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
 
   // Completion-Marker + Idempotenz-Key: alten Termin verlegt (LETZTER Schritt, damit
   // ein Fehler davor (kein verlegt) einen sauberen Retry erlaubt).
-  await db
+  const { error: markerFehler } = await db
     .from('gutachter_termine')
     .update({ status: 'verlegt' })
     .eq('id', terminId)
     .not('status', 'eq', 'verlegt')
+  if (markerFehler) {
+    // Ohne den Marker greift die Idempotenz-Sperre oben nicht mehr: ein Replay laeuft komplett
+    // durch, sucht erneut einen Ersatz-SV, erzeugt einen NEUEN Token (entwertet den gerade
+    // verschickten Link) und schickt dem Kunden eine zweite Nachricht.
+    console.error(`[6b] Completion-Marker 'verlegt' nicht gesetzt (${terminId}) — Replay wuerde doppelt laufen:`, markerFehler.message)
+  }
 
   return { ok: true, ersatzSvId }
 }

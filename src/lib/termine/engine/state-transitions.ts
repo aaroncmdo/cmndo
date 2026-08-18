@@ -110,10 +110,19 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
   if (insErr || !neu) {
     // Rollback alt — cancelled_at mit zuruecksetzen: alt war vor verlege aktiv (cancelled_at=null),
     // beim 'verschoben'-Pfad haben wir es oben gesetzt -> hier wieder nullen, sonst Geist nach Fail.
-    await db
+    // Scheitert DIESER Write, bleibt der alte Termin auf altNeuStatus stehen, ohne dass ein neuer
+    // existiert. Beim 'verschoben'-Pfad ist das terminal: 'verschoben' steht nicht in AKTIV, also
+    // laeuft JEDER weitere Verlegungs-Versuch in 'alt_nicht_aktiv' — der Termin ist dann tot.
+    const { error: rollbackFehler } = await db
       .from('gutachter_termine')
       .update({ status: alt.status as string, verlegung_grund: null, cancelled_at: null })
       .eq('id', alt.id)
+    if (rollbackFehler) {
+      console.error(
+        `[state-transitions] Rollback nach fehlgeschlagenem Insert misslungen (Termin ${alt.id} haengt auf '${altNeuStatus}'):`,
+        rollbackFehler.message,
+      )
+    }
     if (insErr?.code === '23P01') return { ok: false, error: 'Neuer Slot belegt', code: 'belegt' }
     return { ok: false, error: insErr?.message ?? 'Insert fehlgeschlagen', code: 'db' }
   }
@@ -156,7 +165,17 @@ export async function entscheideVerlegung(
       .eq('id', neu.verlegung_quelle_id)
       .eq('status', 'verlegt')
     if (e2) {
-      await db.from('gutachter_termine').update({ status: 'verlegung_pending' }).eq('id', neu.id)
+      // Ohne Rollback stehen BEIDE Termine aktiv: der neue auf 'bestaetigt', der alte auf 'verlegt'.
+      const { error: rollbackFehler } = await db
+        .from('gutachter_termine')
+        .update({ status: 'verlegung_pending' })
+        .eq('id', neu.id)
+      if (rollbackFehler) {
+        console.error(
+          `[state-transitions] Rollback misslungen — Termin ${neu.id} bleibt 'bestaetigt' neben aktivem Quell-Termin ${neu.verlegung_quelle_id}:`,
+          rollbackFehler.message,
+        )
+      }
       return { ok: false, error: e2.message, code: 'db' }
     }
     return { ok: true }
@@ -175,10 +194,18 @@ export async function entscheideVerlegung(
       .eq('id', neu.verlegung_quelle_id)
       .eq('status', 'verlegt')
     if (e2) {
-      await db
+      // Ohne Rollback ist der neue Termin storniert UND der alte bleibt auf 'verlegt' haengen —
+      // der Kunde haette dann gar keinen aktiven Termin mehr.
+      const { error: rollbackFehler } = await db
         .from('gutachter_termine')
         .update({ status: 'verlegung_pending', cancelled_at: null })
         .eq('id', neu.id)
+      if (rollbackFehler) {
+        console.error(
+          `[state-transitions] Rollback misslungen — Termin ${neu.id} bleibt storniert, Quell-Termin ${neu.verlegung_quelle_id} auf 'verlegt':`,
+          rollbackFehler.message,
+        )
+      }
       return { ok: false, error: e2.message, code: 'db' }
     }
     return { ok: true }

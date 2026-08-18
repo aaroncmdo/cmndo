@@ -46,7 +46,12 @@ export async function notifyKundeAngekommen(terminId: string) {
     }).catch((err: unknown) => console.error('[KFZ-179] WhatsApp angekommen failed:', err))
   }
 
-  await db.from('gutachter_termine').update({
+  // Dedup-Marker NACH dem Versand — genau ihn prueft der Guard oben. Bleibt er aus,
+  // schickt der naechste Aufruf dem Kunden dieselbe Nachricht erneut.
+  const { error: markerFehler } = await db.from('gutachter_termine').update({
     notification_angekommen_gesendet_am: new Date().toISOString(),
   }).eq('id', terminId)
+  if (markerFehler) {
+    console.error(`[KFZ-179] Dedup-Marker 'angekommen' nicht gesetzt (${terminId}) — Doppel-Versand moeglich:`, markerFehler.message)
+  }
 }
