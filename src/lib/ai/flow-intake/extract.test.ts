@@ -57,6 +57,51 @@ describe('extractIntakeTurn', () => {
       fertig: false,
     })
   })
+  it('meldet Fehler statt leerer Felder, wenn die Antwort am Token-Limit riss', async () => {
+    // Der teure Fall: Die API liefert bei `stop_reason: 'max_tokens'` einen
+    // UNVOLLSTAENDIGEN tool_use-Block. Ohne Pruefung machen die Fallbacks
+    // daraus still `deltas: {}` und `naechste_frage: ''` — bei `ok: true`.
+    // Im Kundenfluss heisst das: getippte Schadenmeldung, nichts gespeichert
+    // (die Route ueberspringt den Write bei leeren Deltas), keine Rueckfrage,
+    // kein Fehler. Ein sichtbarer Fehlschlag laesst die 502 der Route greifen.
+    create.mockResolvedValueOnce({
+      stop_reason: 'max_tokens',
+      content: [{ type: 'tool_use', name: 'erfasse_felder', input: { deltas: { unfallort: 'Koe' } } }],
+    })
+    const r = await extractIntakeTurn({
+      firmenname: null,
+      schema: [F('unfallort')],
+      bekannt: {},
+      historie: [],
+      nachricht: 'Ein langer Unfallbericht mit vielen Angaben',
+    })
+    expect(r).toMatchObject({ ok: false })
+    // Entscheidend: NICHT ok:true mit leeren Deltas.
+    expect(r).not.toMatchObject({ ok: true })
+  })
+
+  it('laesst eine vollstaendige Antwort passieren (stop_reason end_turn)', async () => {
+    // Gegenprobe zur Reissleine oben — sie darf den Normalfall nicht blocken.
+    create.mockResolvedValueOnce({
+      stop_reason: 'tool_use',
+      content: [
+        {
+          type: 'tool_use',
+          name: 'erfasse_felder',
+          input: { deltas: { unfallort: 'Koeln' }, naechste_frage: 'Wann?', fertig: false },
+        },
+      ],
+    })
+    const r = await extractIntakeTurn({
+      firmenname: null,
+      schema: [F('unfallort')],
+      bekannt: {},
+      historie: [],
+      nachricht: 'In Koeln',
+    })
+    expect(r).toMatchObject({ ok: true, deltas: { unfallort: 'Koeln' } })
+  })
+
   it('ohne API-Key -> Fehler', async () => {
     delete process.env.ANTHROPIC_API_KEY
     const r = await extractIntakeTurn({

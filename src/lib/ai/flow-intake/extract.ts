@@ -62,12 +62,34 @@ export async function extractIntakeTurn(p: {
     const anthropic = new Anthropic({ apiKey })
     const res = await anthropic.messages.create({
       model: AI_MODELS.flow_intake,
-      max_tokens: 700,
+      // 700 war knapp: ein Turn liefert die erfassten Felder UND die naechste
+      // Rueckfrage. Bei einer ausfuehrlichen Nutzernachricht mit mehreren
+      // Angaben reicht das nicht sicher, und der Riss war bis heute unsichtbar
+      // (s. stop_reason-Pruefung unten). Moderat angehoben statt grosszuegig:
+      // der Intake ist latenzkritisch, der Nutzer wartet auf die Antwort.
+      max_tokens: 1500,
       system: [{ type: 'text', text: system }],
       tools: [TOOL],
       tool_choice: { type: 'tool', name: 'erfasse_felder' },
       messages,
     })
+    // 🔴 Reisst die Antwort das Token-Limit, liefert die API einen
+    // UNVOLLSTAENDIGEN tool_use-Block. Die Fallbacks unten machen daraus
+    // still `deltas: {}` und `naechste_frage: ''` — bei `ok: true`.
+    //
+    // Im Kundenfluss heisst das: der Nutzer tippt seine Schadenmeldung, es wird
+    // NICHTS gespeichert (die Route ueberspringt den Write bei leeren Deltas)
+    // und er bekommt KEINE Rueckfrage. Kein Fehler, keine 502 — nur eine leere
+    // Antwort. Ein sichtbarer Fehlschlag ist hier allemal besser: dann greift
+    // die 502 der Route und der Nutzer sieht, dass etwas schiefging.
+    //
+    // Klasse gefunden 18.08.2026 beim Vermessen des Lokalinhalt-Generators, wo
+    // derselbe Mechanismus zwei Drittel des Inhalts verschluckte. Siehe
+    // BROADCAST-anthropic-stop-reason-nie-geprueft.
+    if (res.stop_reason === 'max_tokens') {
+      return { ok: false, error: 'Antwort am Token-Limit abgeschnitten' }
+    }
+
     const block = res.content.find((b) => b.type === 'tool_use')
     if (!block || block.type !== 'tool_use') return { ok: false, error: 'Keine strukturierte Antwort' }
     const input = block.input as {
