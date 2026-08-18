@@ -400,6 +400,38 @@ Der Detektor auf rohe Keys prüft den sichtbaren Text gegen alle 51 echten Names
 (präziser als eine Punkt-Heuristik, die auch Domains träfe) und lief auf beiden Ständen
 sauber — auf prod als Positiv-Kontrolle, dass er keine Fehlalarme wirft.
 
+### Wo der Payload danach steht
+
+`/kfz-gutachter/koeln`, erneut zerlegt: **409 KB** (vorher 615 KB). Der Flight-Payload fiel
+von 466 auf 260 KB, der Messages-Block darin von 280 auf **75,7 KB** — exakt die 12
+benötigten Namespaces. Der Rest ist funktional notwendige RSC-Serialisierung der
+Komponenten; ein zweiter Hebel dieser Größenordnung ist dort **nicht** mehr erkennbar.
+
+Weiter ginge nur noch eine Filterung **pro Route** statt global. Das Layout kennt die Route
+aber nicht ohne `headers()` — was Static Rendering für 346 Seiten kosten würde. Für
+geschätzte 40 KB ist das ein schlechtes Geschäft; bewusst nicht gemacht.
+
+---
+
+## 9 · Stand nach allen Fixes (dieselben 27 Seiten, dasselbe Instrument)
+
+| Kennzahl | Ausgangsmessung | nach B1–B4 |
+|---|---|---|
+| **Ø GEO-Score** | 59,2 / 100 | **67,7 / 100** |
+| Ø Text-Anteil im HTML | 2,5 % | **4,5 %** |
+| Ø HTML pro Seite | 456,6 KB | **250,3 KB** |
+| Seiten mit Aktualitäts-Signal | 13 / 27 | **22 / 27** |
+| Seiten mit Quelle | 15 / 27 | 15 / 27 |
+| FAQPage-Schema | 20 / 27 | 20 / 27 |
+| JSON-LD-Parse-Fehler | 0 | 0 |
+
+**Was das nicht ist:** eine Aussage über die Sichtbarkeit. Die Prompt-Abdeckung (2/10)
+hängt an Autorität und Wettbewerb, nicht an der Seitentechnik — sie wird sich erst über
+Wochen bewegen und ist beim nächsten Durchlauf des Prompt-Sets aus §3 zu messen.
+
+**Offen aus der Baseline:** B5 (Cornerstones Ø 747 Wörter, 0,4 Statistiken) — Redaktions-
+arbeit, kein Code. B6 (doppelte H1) — bewusst zurückgestellt, §6.
+
 ---
 
 *Messung: 18.08.2026, 14:51 UTC · Seiten-Sample: 27 · User-Agent: OAI-SearchBot/1.0 ·
