@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/site'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getDecoder, getDecoderSlugs } from '@/lib/decoders'
@@ -25,8 +26,8 @@ export async function generateMetadata({
     title: metaTitle(d.title),
     description: d.metaDesc,
     alternates: { canonical: url },
-    openGraph: { type: 'article', url, title: d.title, description: d.metaDesc },
-    twitter: { card: 'summary_large_image', title: d.title, description: d.metaDesc },
+    openGraph: { type: 'article', url, title: d.title, description: d.metaDesc, images: [OG_IMAGE] },
+    twitter: { card: 'summary_large_image', title: d.title, description: d.metaDesc, images: [OG_IMAGE] },
   }
 }
 
