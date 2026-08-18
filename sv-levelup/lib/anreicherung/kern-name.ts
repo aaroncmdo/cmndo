@@ -39,6 +39,15 @@ const IMMER_STREICHEN = new Set([...GATTUNG, ...TITEL_UND_FUELLWOERTER])
 
 export function umlauteAuf(s: string): string {
   return s
+    // NFKC zuerst: Betriebe fuehren ihren Namen als Auffaelligkeits-Trick in
+    // Unicode-Schmuckschrift ("𝗞𝗙𝗭 𝗦𝗮𝗰𝗵𝘃𝗲𝗿𝘀𝘁ä𝗻𝗱𝗶𝗴𝗲𝗻𝗯ü𝗿𝗼"), am echten Places-Lauf
+    // gefunden (18.08.). Ohne das filtert die a-z-Regel unten alles weg und der
+    // Kern wird zu Muell ("ae ue") statt zum Namen.
+    //
+    // NFKC, nicht NFKD: beide zerlegen Kompatibilitaetszeichen, aber nur NFKC
+    // setzt danach wieder zusammen. Unter NFKD zerfiele "ü" in u + Trema, und
+    // die Ersetzung unten faende kein "ü" mehr — aus "Müller" wuerde "Muller".
+    .normalize('NFKC')
     .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue')
     .replace(/Ä/g, 'Ae').replace(/Ö/g, 'Oe').replace(/Ü/g, 'Ue')
     .replace(/ß/g, 'ss')

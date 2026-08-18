@@ -1054,6 +1054,42 @@ A-1 ist damit endgültig kein Blocker mehr, sondern eine Zukunftsentscheidung.
 > Budget rechnet, sagt sie nicht. Und Preisseiten ändern sich — vor dem ersten Massenlauf
 > gehört ein Blick in die **tatsächliche Abrechnung** der ersten Läufe, nicht nur auf die Liste.
 
+#### 7.6.2 Legacy liefert die Website nicht mit — am echten Lauf gemessen
+
+Erster echter Adapter-Lauf gegen die Produktions-API (18.08.2026, Münster, 50 km):
+
+```
+suchText 'Kfz-Sachverständiger'  →  60 Betriebe   (Paging über 3 Seiten funktioniert)
+                                    mit Bewertungen: 58 von 60
+                                    mit Website:      0 von 60      ← !
+details(erster Treffer)          →  https://gutachter-yigit.com/    ← die Website IST da
+```
+
+Legacy Text Search liefert **Basic Data**; `website` gehört zu **Contact Data** und kommt nur
+über Place Details. Das ist der Preis der günstigeren Endpunkt-Stufe — die New API kann das Feld
+direkt in der FieldMask anfordern, dann aber zum Enterprise-Tarif.
+
+**Was das für die Module heißt:**
+
+| Modul | braucht Website der Fremdbetriebe? | Folge |
+|---|---|---|
+| `wett` (Rang nach Bewertungszahl) | nein — `rating`/`user_ratings_total` kommen mit | Text Search reicht, **0 Zusatzkosten** |
+| `markt` (Median, P90) | nein | Text Search reicht |
+| `zuweiser` (nennt die Werkstatt einen Gutachter?) | **ja** | + 1 Details-Call je geprüfter Werkstatt |
+| `gbp` (eigenes Profil) | ja, aber nur **ein** Betrieb | + 1 Details-Call, in §7.1 schon eingerechnet |
+
+**Für den Deutschland-Scrape (§7.2) ändert sich nichts** — und zwar aus einem gemessenen Grund:
+Die Anreicherung aus P2 errät die Domain selbst mit **79 % Trefferquote** (§5.5.3a). Die Website
+über Places nachzuladen hieße ~5.500 zusätzliche Details-Calls für eine Information, die der
+eigene Weg ohnehin größtenteils findet. **Discovery bleibt bei Text Search allein, also gratis.**
+
+⚠ Nebenbefund für die Discovery: Mehrere Betriebe führen ihren Namen in
+Unicode-Fettschrift (`𝗞𝗙𝗭 𝗦𝗮𝗰𝗵𝘃𝗲𝗿𝘀𝘁ä𝗻𝗱𝗶𝗴𝗲𝗻𝗯ü𝗿𝗼 …`) als Auffälligkeits-Trick. `kernName()` filtert
+auf `[a-z0-9]` und macht daraus einen **leeren Kern** — solche Betriebe bekämen keine
+Domain-Kandidaten. Vor 7b gehört eine Unicode-Normalisierung (NFKD) an den Anfang von
+`kernName()`; sie ist ein Zweizeiler, aber ohne sie fällt eine unbekannte Zahl von Betrieben
+still durch.
+
 ### 7.4 Menschenzeit — der eigentliche Kostenblock
 
 | | ohne erweiterte Restriction | mit |
