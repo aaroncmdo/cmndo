@@ -9,6 +9,8 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
+// P3.3: bezug-aware Termin-Filter (matcht Legacy fall_id UND bezug_typ+bezug_id).
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 // ─── AAR-134: SV-Termin ablehnen ──────────────────────────────────────────
 
@@ -297,10 +299,20 @@ export async function uploadPolizeiberichtAsSv(
 
   let svIstZustaendig = fall.sv_id === sv.id
   if (!svIstZustaendig) {
+    // P3.3-Boy-Scout: bezug-aware. Dieser Fallback existiert genau fuer den Fall, dass
+    // der Claim noch KEIN sv_id traegt, der Termin dem SV aber zugewiesen ist
+    // (Pre-FlowLink/Reservierungs-Flow, AAR-115). Mit `.eq('fall_id')` fand er
+    // bezug-native Termine nicht -> `svIstZustaendig` blieb false -> der SV bekam
+    // „SV nicht fuer diesen Fall zugewiesen" und konnte den Polizeibericht nicht
+    // hochladen. Gemessen 18.08.: von 28 SV-Terminen weichen 7 vom claims.sv_id ab —
+    // und ALLE 7 sind bezug-nativ. Der Fallback war also in genau der Teilmenge kaputt,
+    // fuer die er gebaut wurde.
+    // Sicherheit unveraendert: der Ausdruck matcht nur Termine DIESES Falls, und der
+    // assignee_id/-typ-Filter darunter bleibt bestehen.
     const { data: terminMatch } = await adminDb
       .from('gutachter_termine')
       .select('id')
-      .eq('fall_id', fallId)
+      .or(bezugOrExpr('fall', fallId))
       // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
       .eq('assignee_id', sv.id)
       .eq('assignee_typ', 'sachverstaendiger')

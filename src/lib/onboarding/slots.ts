@@ -113,7 +113,9 @@ export async function reserviereSlot(
 
   if (gfaCurrent?.reservierter_slot_von) {
     if (gfaCurrent.reservierter_sv_id) {
-      await supabase
+      // Alte Reservierung freigeben. Bleibt sie stehen, blockiert sie den Slot des
+      // Sachverstaendigen weiter — Doppelbelegung, ohne dass irgendwo etwas rot wird.
+      const { error: svSlotFehler } = await supabase
         .from('gutachter_termine')
         .update({ status: 'abgelehnt' })
         // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Update-Filter)
@@ -121,14 +123,20 @@ export async function reserviereSlot(
         .eq('assignee_typ', 'sachverstaendiger')
         .eq('start_zeit', gfaCurrent.reservierter_slot_von)
         .eq('status', 'reserviert')
+      if (svSlotFehler) {
+        console.error('[onboarding/slots] Alt-Reservierung (SV) nicht freigegeben:', svSlotFehler.message)
+      }
     }
     if (gfaCurrent.zugeordneter_sv_lead_id) {
-      await supabase
+      const { error: svLeadSlotFehler } = await supabase
         .from('gutachter_termine')
         .update({ status: 'abgelehnt' })
         .eq('sv_lead_id', gfaCurrent.zugeordneter_sv_lead_id)
         .eq('start_zeit', gfaCurrent.reservierter_slot_von)
         .eq('status', 'reserviert')
+      if (svLeadSlotFehler) {
+        console.error('[onboarding/slots] Alt-Reservierung (SV-Lead) nicht freigegeben:', svLeadSlotFehler.message)
+      }
     }
   }
 

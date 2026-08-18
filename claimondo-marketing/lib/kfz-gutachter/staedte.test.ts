@@ -16,10 +16,17 @@ describe('getStadtByName', () => {
   })
 
   it('liefert null fuer einen Ort ohne eigene Seite', () => {
-    // Roesrath und Wesseling stehen in koelns angrenzendeOrte, haben aber keine
-    // Stadtseite. Ein Link dorthin waere eine 404.
-    expect(getStadtByName('Rösrath')).toBeNull()
+    // Wesseling, Bruehl und Huerth stehen in koelns angrenzendeOrte, haben aber
+    // keine Stadtseite. Ein Link dorthin waere eine 404.
+    //
+    // Die drei sind kein Zufall, sondern das Ergebnis der Welle-8-Messung: sie
+    // liegen NICHT im Einzugsgebiet eines verifizierten Sachverstaendigen,
+    // obwohl Bruehl und Huerth naeher an Koeln liegen als das aufgenommene
+    // Roesrath. Die Koelner SVs sitzen im Osten der Stadt. (Roesrath stand hier
+    // bis 18.08.2026 als Beispiel — es hat jetzt eine Seite.)
     expect(getStadtByName('Wesseling')).toBeNull()
+    expect(getStadtByName('Brühl')).toBeNull()
+    expect(getStadtByName('Hürth')).toBeNull()
     expect(getStadtByName('')).toBeNull()
   })
 
@@ -55,7 +62,9 @@ describe('angrenzendeOrte — welche sind verlinkbar', () => {
   it('sind mehr Orte als verlinkbare — der Rest bleibt bewusst Text', () => {
     const verlinkbar = alleOrte.filter((ort) => getStadtByName(ort) !== null)
     expect(alleOrte.length).toBeGreaterThan(verlinkbar.length)
-    expect(verlinkbar.length).toBe(29)
+    // 29 -> 37 mit Welle 8: die acht neuen Orte standen alle schon als Text in
+    // angrenzendeOrte und werden allein durch ihre Existenz zu Links.
+    expect(verlinkbar.length).toBe(37)
   })
 
   it('schreibt keinen Ort verkuerzt, dessen Langform eine Seite hat', () => {
@@ -253,10 +262,52 @@ describe('P3-B2c — NRW zwischen 40 und 60 Tsd. Einwohnern', () => {
   })
 })
 
+describe('P3-B3 — Auswahl nach SV-Abdeckung', () => {
+  // Belegt am 18.08.2026 gegen die echten isochrone_polygon (Point-in-Polygon,
+  // nicht Radius). Geprueft werden die Ketten, die sich NICHT aus der
+  // Nachbarschaft herleiten lassen — der Rest faellt unter die LG-Kammer-
+  // Invariante oben.
+  const knifflig = [
+    // Im Bergischen gelegen, aber Koeln zustaendig — Remscheid (LG Wuppertal)
+    // liegt naeher.
+    { slug: 'radevormwald', ag: 'Amtsgericht Wipperfürth', lg: 'Landgericht Köln' },
+    // Rhein-Kreis Neuss, aber AG Neuss — waehrend Grevenbroich im selben Kreis
+    // zu AG Moenchengladbach gehoert.
+    { slug: 'korschenbroich', ag: 'Amtsgericht Neuss', lg: 'Landgericht Düsseldorf' },
+    { slug: 'sprockhoevel', ag: 'Amtsgericht Hattingen', lg: 'Landgericht Essen' },
+    { slug: 'ennepetal', ag: 'Amtsgericht Schwelm', lg: 'Landgericht Hagen' },
+    { slug: 'roesrath', ag: 'Amtsgericht Bergisch Gladbach', lg: 'Landgericht Köln' },
+    { slug: 'wuelfrath', ag: 'Amtsgericht Mettmann', lg: 'Landgericht Wuppertal' },
+  ] as const
+
+  it.each(knifflig)('$slug hat die belegte Gerichtskette', ({ slug, ag, lg }) => {
+    const s = getStadtBySlug(slug)
+    expect(s).not.toBeNull()
+    expect(s!.lokal.amtsgericht).toBe(ag)
+    expect(s!.lokal.landgericht).toBe(lg)
+  })
+
+  it('trennt Radevormwald und Remscheid trotz 12 km Abstand', () => {
+    expect(getStadtBySlug('radevormwald')!.lokal.landgericht).not.toBe(
+      getStadtBySlug('remscheid')!.lokal.landgericht,
+    )
+  })
+
+  it('nimmt die kleineren Orte auf, nicht die naeheren', () => {
+    // Der Kern dieser Welle: Auswahlkriterium ist die gemessene Abdeckung durch
+    // einen verifizierten Sachverstaendigen, nicht Groesse und nicht Distanz.
+    // Roesrath (29 Tsd.) ist drin, das groessere und naeher an Koeln liegende
+    // Huerth (60 Tsd.) nicht — dort deckt keine Isochrone.
+    expect(getStadtBySlug('roesrath')).not.toBeNull()
+    expect(getStadtByName('Hürth')).toBeNull()
+    expect(getStadtByName('Brühl')).toBeNull()
+  })
+})
+
 describe('Gesamtbestand', () => {
   // Waechst mit jeder Welle mit. Der Wert ist bewusst hart: eine Stadt, die
   // beim Rebase verloren geht, faellt sonst niemandem auf.
-  it('fuehrt 150 Staedte', () => {
-    expect(STAEDTE).toHaveLength(150)
+  it('fuehrt 158 Staedte', () => {
+    expect(STAEDTE).toHaveLength(158)
   })
 })
