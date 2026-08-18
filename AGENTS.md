@@ -503,6 +503,29 @@ CI fährt `npm run check:silent-writes -- --ratchet`. **Die Baseline ist 0** —
 
 **0 False-Positives by design:** Gescannt wird **nur die Statement-Form** — eine Zeile, die (nach Whitespace) mit `await` beginnt. `const { error } = await …`, `return await …`, Reads und Ketten mit mehreren `.from()` (Zuordnung uneindeutig) werden per Konstruktion nie geflaggt. Pure Logik: `scripts/lib/silent-write-scan.mjs` (unit-getestet, 13 Fälle, davon 7 Negativ-Fälle). Bewusst fire-and-forget → `// silent-write-skip: <grund>` am File-Anfang.
 
+# stop_reason-Gate (Ratchet)
+
+**Ein erzwungener Tool-Aufruf an die Anthropic-API (`tool_choice`) muss `stop_reason` prüfen.** Reißt die Antwort das Token-Limit, liefert die API einen **unvollständigen `tool_use`-Block** — kein Fehler, keine Exception. Wer ihn danach mit Fallbacks ausliest, macht daraus stillschweigend leere Werte:
+
+```ts
+const block = res.content.find((b) => b.type === 'tool_use')
+return { ok: true, deltas: block.input.deltas ?? {} }          // ❌ leer statt Fehler
+
+if (res.stop_reason === 'max_tokens') return { ok: false, … }  // ✅ VOR dem Auslesen
+```
+
+**Zwei belegte Vorfälle, beide 18.08.2026:**
+* **Lokalinhalt-Generator** (#5372): Bei höherer Anforderung fielen von 436 Wörtern 399 weg (0 FAQs, 0 Anker) — der Aufruf meldete `ok: true`. Drei Messläufe zeigten 436 → 37 → 1151 Wörter; ohne die Messung wäre es nie aufgefallen, die Seite hätte einfach fast nichts gezeigt.
+* **`flow-intake/extract`** (#5377): `deltas: {}` + `naechste_frage: ''` bei `ok: true`. Im Kundenfluss heißt das: **Schadenmeldung getippt, nichts gespeichert** (die Route überspringt den Write bei leeren Deltas), keine Rückfrage, kein Fehler.
+
+⚠ **Ein größeres `max_tokens` ist KEIN Ersatz für die Prüfung** — es verschiebt nur, ab welcher Eingabe es still bricht. Genau das blieb bei der Gutachten-OCR (#5354) offen: dort wurde das Limit erhöht, `stop_reason` nie geprüft. **Reihenfolge:** erst den stillen Fehlschlag sichtbar machen, dann das Limit anheben.
+
+CI fährt `npm run check:anthropic-stop-reason -- --ratchet`. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Nur erzwungene Tool-Antworten** (`tool_choice`) — bewusst nicht jeder `messages.create`-Aufruf: Freitext bricht sichtbar mitten im Satz ab, ein halbes Tool-JSON sieht dagegen aus wie „das Modell hatte nichts". 28 Aufrufer gäbe es insgesamt; die gefährliche Kombination trugen genau zwei. Pure Logik: `scripts/lib/anthropic-stop-reason-scan.mjs` (unit-getestet, 10 Fälle). **Kommentare werden gestrippt** — sonst blendet ein `// TODO: stop_reason später` das Gate.
+
+**Baseline 1** (`flow-intake/extract.ts`, wird von #5377 behoben → danach auf 0 senken mit `-- --update-baseline`). Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
+
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
 **Kanonische Referenz: `docs/fundament/zugriffs-doktrin.md`** (Fundament C5, #4860). Kern in einem Satz: **Client liest über Views/RPCs je Rolle, schreibt über Server-Actions mit Guard + `.select()`-Row-Check; RLS ist Sicherheitsnetz, nicht Feinsteuerung** (Verfassung §7). Ist-Stand: Client-Direkt-Selects auf Basistabellen = **0** (verifiziert) — server-first ist gelebt.
