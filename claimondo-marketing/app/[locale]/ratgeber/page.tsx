@@ -25,7 +25,7 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 
 const SLUG = 'ratgeber'
@@ -51,6 +51,8 @@ export function generateMetadata(): Metadata {
       description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }

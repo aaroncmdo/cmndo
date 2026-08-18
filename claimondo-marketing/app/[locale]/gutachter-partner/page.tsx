@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import {
   serviceSchema, breadcrumbsSchema, organizationSchema, faqPageSchema,
   jsonLdScript, GUTACHTER_LANDING_URL, SITE_URL,
+  OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { getTranslations } from 'next-intl/server'
@@ -38,6 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: `${GUTACHTER_LANDING_URL}/`,
       title: t('gutachter_partner.og_title'),
       description: t('gutachter_partner.og_description'),

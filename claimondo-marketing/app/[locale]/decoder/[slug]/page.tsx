@@ -30,7 +30,7 @@ import {
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const WA = WHATSAPP_HREF
 
@@ -54,6 +54,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
