@@ -34,8 +34,8 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { generateLokalinhaltDraft } from '@/lib/lokalinhalt/generate'
 import { pruefeLokalinhalt, type LokalinhaltEntwurf } from '@/lib/lokalinhalt/gate'
+import { erzeugeFuerEineStadt } from '@/lib/lokalinhalt/pipeline'
 import { getStadtKontext, getStadtStammdaten } from '@/lib/lokalinhalt/staedte'
 
 const ADMIN_PFAD = '/admin/marketing/lokal-content'
@@ -107,80 +107,34 @@ export async function generiereEntwurf(stadtSlug: string): Promise<{
     return { ok: false, error: 'Es liegt bereits ein offener Entwurf für diese Stadt vor.' }
   }
 
-  const erzeugt = await generateLokalinhaltDraft(kontext)
-  if (!erzeugt.ok) return { ok: false, error: erzeugt.error }
+  // Generieren, pruefen, ablegen macht `erzeugeFuerEineStadt` — dieselbe
+  // Funktion, die der Cron nutzt (src/lib/lokalinhalt/pipeline.ts). Zwei
+  // Implementierungen desselben Wegs waeren die Sorte Redundanz, die spaeter
+  // auseinanderlaeuft: eine Gate-Aenderung wuerde dann nur an einer Stelle
+  // ankommen, und welche das ist, faellt erst im Ergebnis auf.
+  const treffer = await erzeugeFuerEineStadt(supabase, stadtSlug)
 
-  // Das Gate ist die EINE Pruefstelle: es wirft Hotspots ohne belastbare
-  // Quell-URL raus und meldet, was fehlt. Seit 18.08.2026 entscheidet es
-  // zusaetzlich, ob der Entwurf direkt live geht.
-  const befund = pruefeLokalinhalt(erzeugt.data, stadt.name)
-  const jetzt = new Date().toISOString()
+  if (treffer.art === 'fehler') return { ok: false, error: treffer.grund }
 
-  // Durchgefallene Entwuerfe werden trotzdem GESPEICHERT — vorher gingen sie
-  // verloren, und der Admin sah nur eine Fehlermeldung. Jetzt liegen sie zur
-  // Ansicht bereit.
-  //
-  // Die Gate-Gruende gehen nur als Rueckgabewert an die aufrufende UI, nicht in
-  // die Zeile: eine Spalte dafuer gibt es nicht, und der gespeicherte
-  // `substanz_score` zeigt bereits, an welcher Schwelle es lag. Wer die Gruende
-  // spaeter dauerhaft braucht, ergaenzt eine Spalte per Migration — nicht
-  // heimlich in einem bestehenden jsonb-Feld.
-  if (!befund.ok) {
-    const { error: reviewErr } = await supabase.from('stadt_lokalinhalte').insert({
-      stadt_slug: stadtSlug,
-      status: 'in_review',
-      stadtbezirke: befund.bereinigt.stadtbezirke,
-      hauptachsen: befund.bereinigt.hauptachsen,
-      unfall_hotspots: befund.bereinigt.unfallHotspots,
-      lokale_faqs: befund.bereinigt.lokaleFaqs,
-      hero_anker: befund.bereinigt.heroAnker ?? null,
-      topografie_anker: befund.bereinigt.topografieAnker ?? null,
-      substanz_score: befund.substanzScore,
-      ai_generated: true,
-      ai_model: erzeugt.data.ai_model,
-    })
-    if (reviewErr) return { ok: false, error: reviewErr.message }
+  revalidatePath(ADMIN_PFAD)
 
-    revalidatePath(ADMIN_PFAD)
+  if (treffer.art === 'review') {
     return {
       ok: true,
       veroeffentlicht: false,
-      hinweis: befund.gruende.join(' · '),
-      verworfen: befund.verworfen,
-      substanzScore: befund.substanzScore,
+      hinweis: treffer.grund,
+      verworfen: treffer.verworfen,
+      substanzScore: treffer.substanzScore,
     }
   }
-
-  // Gate bestanden -> direkt live. Erst die alte Fassung archivieren, sonst
-  // verletzt der Insert den partiellen Unique-Index.
-  const archiv = await archiviereAktuelleFassung(supabase, stadtSlug)
-  if (!archiv.ok) return { ok: false, error: archiv.error }
-
-  const { error: insertErr } = await supabase.from('stadt_lokalinhalte').insert({
-    stadt_slug: stadtSlug,
-    status: 'veroeffentlicht',
-    veroeffentlicht_am: jetzt,
-    stadtbezirke: befund.bereinigt.stadtbezirke,
-    hauptachsen: befund.bereinigt.hauptachsen,
-    unfall_hotspots: befund.bereinigt.unfallHotspots,
-    lokale_faqs: befund.bereinigt.lokaleFaqs,
-    hero_anker: befund.bereinigt.heroAnker ?? null,
-    topografie_anker: befund.bereinigt.topografieAnker ?? null,
-    substanz_score: befund.substanzScore,
-    ai_generated: true,
-    ai_model: erzeugt.data.ai_model,
-  })
-  if (insertErr) return { ok: false, error: insertErr.message }
-
-  revalidatePath(ADMIN_PFAD)
   // Die Stadtseite selbst liegt im Marketing-Build (eigene Anwendung) und wird
   // von hier aus nicht revalidiert — sie holt den Inhalt bei ihrem naechsten
   // Rendern. Das ist bewusst: ein Cross-App-Revalidate gibt es nicht.
   return {
     ok: true,
     veroeffentlicht: true,
-    verworfen: befund.verworfen,
-    substanzScore: befund.substanzScore,
+    verworfen: treffer.verworfen,
+    substanzScore: treffer.substanzScore,
   }
 }
 
