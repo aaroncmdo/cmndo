@@ -13,6 +13,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -88,7 +89,10 @@ export default function KostenPage() {
               'Bei unverschuldetem Verkehrsunfall trägt die gegnerische Haftpflichtversicherung 100 % der Sachverständigen-Honorare gemäß §249 BGB. Honorar nach BVSK-Tabelle 550–2.600 €.',
             url: `${SITE_URL}/kfz-gutachter/kosten`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/kosten'),
+            url: '/kfz-gutachter/kosten',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

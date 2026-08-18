@@ -14,6 +14,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, webApplicationSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 import WertminderungRechnerClient from './WertminderungRechnerClient'
 
@@ -100,7 +101,10 @@ export default function WertminderungPage() {
               'Interaktiver Rechner für die merkantile Wertminderung nach Unfall — Faustregel nach Fahrzeugalter, mit Vorschaden-Berücksichtigung. Kostenlos.',
             url: `${SITE_URL}/kfz-gutachter/wertminderung`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/wertminderung'),
+            url: '/kfz-gutachter/wertminderung',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

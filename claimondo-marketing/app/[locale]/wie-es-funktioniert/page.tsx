@@ -17,6 +17,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // /wie-es-funktioniert — Premium-Layout. Conversion-Page mit Fokus auf
@@ -83,7 +84,10 @@ export default async function WieEsFunktioniertPage() {
               text: s.text,
             })),
           },
-          faqPageSchema(faqsForSchema),
+          faqPageSchema(faqsForSchema, {
+            dateModified: getRouteLastUpdatedISO('/wie-es-funktioniert'),
+            url: '/wie-es-funktioniert',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Wie es funktioniert', url: '/wie-es-funktioniert' },

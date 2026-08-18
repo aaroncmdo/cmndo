@@ -11,6 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -82,7 +83,10 @@ export default function LeadsGenerierenPage() {
               'Vorqualifizierte Geschädigten-Anfragen für verifizierte Kfz-Sachverständige. Zentrales Marketing, planbare Auftragslage, kein eigenes Werbebudget nötig.',
             url: `${SITE_URL}/gutachter-partner/leads-generieren`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/gutachter-partner/leads-generieren'),
+            url: '/gutachter-partner/leads-generieren',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Gutachter-Partner', url: '/gutachter-partner' },

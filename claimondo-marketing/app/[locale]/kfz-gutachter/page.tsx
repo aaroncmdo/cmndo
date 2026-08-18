@@ -13,6 +13,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 
@@ -118,7 +119,10 @@ export default function KfzGutachterPillarPage() {
               'Vermittlung an unabhängige, zertifizierte Kfz-Sachverständige in ganz Deutschland — kostenfrei für unverschuldet Geschädigte nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer). Partner-Gutachter aus dem öffentlichen Sachverständigen-Verzeichnis, Termin in unter 48 Stunden.',
             url: `${SITE_URL}/kfz-gutachter`,
           }),
-          faqPageSchema(TOP_FAQ),
+          faqPageSchema(TOP_FAQ, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter'),
+            url: '/kfz-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

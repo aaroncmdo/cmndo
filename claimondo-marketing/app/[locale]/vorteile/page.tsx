@@ -19,6 +19,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
@@ -75,7 +76,10 @@ export default async function VorteilePage() {
               'Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.). Claimondo koordiniert die Rückholung: 0 € Eigenanteil nach §249 BGB, Kfz-Gutachter + Partnerkanzlei für Verkehrsrecht inklusive. Vollständige BGH-konforme Durchsetzung.',
             url: `${SITE_URL}/vorteile`,
           }),
-          faqPageSchema(faqsForSchema),
+          faqPageSchema(faqsForSchema, {
+            dateModified: getRouteLastUpdatedISO('/vorteile'),
+            url: '/vorteile',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Vorteile', url: '/vorteile' },

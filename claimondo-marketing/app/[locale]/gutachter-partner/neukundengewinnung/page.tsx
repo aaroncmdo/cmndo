@@ -11,6 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, GUTACHTER_LANDING_URL,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -92,7 +93,10 @@ export default function NeukundengewinnungPage() {
               'Planbare Auslastung für freie Kfz-Sachverständige ohne CPL-Risiko: regionale Freischaltung statt Cost-per-Lead — qualifizierte Schadenfälle direkt zugeteilt.',
             url: `${GUTACHTER_LANDING_URL}/neukundengewinnung`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/gutachter-partner/neukundengewinnung'),
+            url: '/gutachter-partner/neukundengewinnung',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Für Gutachter', url: `${GUTACHTER_LANDING_URL}/` },
