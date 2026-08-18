@@ -89,7 +89,10 @@ export async function POST(req: NextRequest) {
       // att.url ist eine EXTERNE Bot-URL (kein interner Storage-Pfad); als Referenz in
       // storage_path. Generische Signed-URL-Reader muessen lexdrive-Rows
       // (quelle='lexdrive_bot') ueberspringen. (Endpunkt aktuell inaktiv: LexDrive-Inbound "nie".)
-      await db.from('fall_dokumente').insert({
+      // ⚠ Genau hier hat die Klasse schon einmal zugeschlagen (s. Kommentar oben):
+      // ein Schema-Drift liess den Insert still scheitern. Die Spalten wurden
+      // korrigiert, die Pruefung fehlte bis jetzt.
+      const { error: botDokFehler } = await db.from('fall_dokumente').insert({
         fall_id: fallId,
         dokument_typ: 'lexdrive_bot_output',
         kategorie: 'lexdrive',
@@ -97,12 +100,16 @@ export async function POST(req: NextRequest) {
         original_filename: att.name,
         quelle: 'lexdrive_bot',
       })
+      if (botDokFehler) {
+        console.error(`[lexdrive] Bot-Anhang NICHT gespeichert (Fall ${fallId}, ${att.name}):`, botDokFehler.message)
+      }
     }
   }
 
   // Bei Fehler: Eskalations-Task
   if (body.result === 'error') {
-    await db.from('tasks').insert({
+    // Der Eskalations-Task ist die einzige Instanz, die auf den Bot-Fehler hinweist.
+    const { error: botFehlerTask } = await db.from('tasks').insert({
       fall_id: fallId,
       typ: 'lexdrive_bot_error',
       titel: `Bot-Fehler: ${body.bot_action} - Fall ${body.claim_nummer ?? fallId.slice(0, 8)}`,
@@ -110,6 +117,9 @@ export async function POST(req: NextRequest) {
       prioritaet: 'dringend',
       auto_erstellt: true,
     })
+    if (botFehlerTask) {
+      console.error(`[lexdrive] Eskalations-Task NICHT erstellt (Fall ${fallId}) — Bot-Fehler bleibt unbemerkt:`, botFehlerTask.message)
+    }
   }
 
   return NextResponse.json({ ok: true, fall_id: fallId, bot_action: body.bot_action })

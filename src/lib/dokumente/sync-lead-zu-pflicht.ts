@@ -98,7 +98,9 @@ export async function syncLeadDokumenteAnPflicht(
     const mapping = slotMappings.find((m) => m.slotId === row.dokument_typ)
     if (!mapping) continue
 
-    await supabase
+    // Ohne diesen Write gilt der Slot weiter als unbefuellt, obwohl das Dokument
+    // vorliegt — der Vorgang haengt dann an einem Dokument, das laengst da ist.
+    const { error: slotFehler } = await supabase
       .from('pflichtdokumente')
       .update({
         status: 'hochgeladen',
@@ -106,5 +108,8 @@ export async function syncLeadDokumenteAnPflicht(
         hochgeladen_am: now,
       })
       .eq('id', row.id)
+    if (slotFehler) {
+      console.error(`[sync-lead-zu-pflicht] Slot ${row.dokument_typ} nicht befuellt (${row.id}):`, slotFehler.message)
+    }
   }
 }

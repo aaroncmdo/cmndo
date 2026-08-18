@@ -200,7 +200,8 @@ export async function POST(request: Request) {
           db: admin,
         })
         if (veh.ok) {
-          await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+          const { error: vehFehler } = await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+          if (vehFehler) console.error(`[CMM-68] vehicle_id nicht verknuepft (Claim ${claimId}):`, vehFehler.message)
         } else {
           console.warn('[CMM-68] ocr-gutachten vehicles (FIN):', veh.error)
         }

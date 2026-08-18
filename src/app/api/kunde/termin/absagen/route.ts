@@ -98,7 +98,8 @@ export async function POST(req: Request) {
       .join('\n')
 
     try {
-      await admin.from('tasks').insert({
+      // Ueber diesen Task erfaehrt das Team von der Absage. Das try faengt ihn nicht.
+      const { error: absageTaskFehler } = await admin.from('tasks').insert({
         fall_id: effFallId,
         titel,
         beschreibung,
@@ -112,6 +113,9 @@ export async function POST(req: Request) {
         auto_erstellt: true,
         erstellt_von_id: user.id,
       })
+      if (absageTaskFehler) {
+        console.error(`[termin/absagen] Task NICHT erstellt (Fall ${effFallId}) — Absage bleibt unbemerkt:`, absageTaskFehler.message)
+      }
     } catch (e) {
       console.error('[termin/absagen] Task-Insert fehlgeschlagen:', e)
     }

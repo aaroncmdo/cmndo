@@ -98,7 +98,8 @@ export async function POST(req: Request) {
       .join('\n')
 
     try {
-      await admin.from('tasks').insert({
+      // Ueber diesen Task erfaehrt das Team vom Verschiebungswunsch. Das try faengt ihn nicht.
+      const { error: verschiebTaskFehler } = await admin.from('tasks').insert({
         fall_id: effFallId,
         titel,
         beschreibung,
@@ -112,6 +113,9 @@ export async function POST(req: Request) {
         auto_erstellt: true,
         erstellt_von_id: user.id,
       })
+      if (verschiebTaskFehler) {
+        console.error(`[termin/verschieben] Task NICHT erstellt (Fall ${effFallId}) — Wunsch bleibt unbemerkt:`, verschiebTaskFehler.message)
+      }
     } catch (e) {
       console.error('[termin/verschieben] Task-Insert fehlgeschlagen:', e)
       // non-critical — Termin-Status-Update ist bereits persistiert
