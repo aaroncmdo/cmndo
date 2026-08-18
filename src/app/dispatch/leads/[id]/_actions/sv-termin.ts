@@ -240,11 +240,17 @@ export async function reserveSvTerminForLead(
   // AAR-134: 'abgelehnt' auch stornieren — verhindert Doppel-Termine nach SV-Ablehnung.
   // AAR-956: bezug-native Self-Service-Termine (lead_id NULL) mit-stornieren, sonst bliebe
   // beim Rebook ein reservierter Self-Service-Termin haengen (EXCLUSION-Slot-Blocker).
-  await supabase
+  // Vorbedingung fuer den Insert direkt darunter: bleiben die alten Termine aktiv,
+  // entsteht entweder ein Doppel-Termin oder der neue Insert scheitert an der
+  // Ueberlappungs-Constraint (23P01) — der Grund waere dann nicht erkennbar.
+  const { error: stornoFehler } = await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
+  if (stornoFehler) {
+    console.error(`[sv-termin] Alt-Termine nicht storniert (Lead ${leadId}) — Doppel-Termin moeglich:`, stornoFehler.message)
+  }
 
   const { data: inserted, error } = await supabase
     .from('gutachter_termine')

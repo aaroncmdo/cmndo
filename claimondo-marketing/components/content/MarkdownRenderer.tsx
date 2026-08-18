@@ -13,13 +13,32 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
  * kein prose/typography-Plugin — Element-Styling über die components-Map.
  * Interne Links (inkl. claimondo.de-Absolut) laufen über next/link.
  */
-export function MarkdownRenderer({ body }: { body: string }) {
+export function MarkdownRenderer({
+  body,
+  pageHasOwnH1 = false,
+}: {
+  body: string
+  /**
+   * Setzen, wenn die Seite den Titel bereits selbst als H1 rendert (AssetHero).
+   * Dann wird die H1 des Markdown-Bodys unterdrueckt — sonst steht sie ein
+   * zweites Mal im DOM, mit identischem Text: `extractTitle()` gewinnt den
+   * Seitentitel genau aus dieser H1 (claimondo-mdx.ts), der Hero zeigt ihn
+   * also 1:1. Ergebnis war 2x H1 pro Seite und der Titel doppelt sichtbar.
+   *
+   * Aktuell setzen es alle 7 Consumer: 6 rendern `AssetHero`, /versicherer/[slug]
+   * rendert `VersichererHero` — beide mit eigener H1. NICHT setzen, wenn eine
+   * kuenftige Seite den Body OHNE eigene Ueberschrift rendert; dann waere die
+   * Body-H1 die einzige H1 der Seite.
+   */
+  pageHasOwnH1?: boolean
+}) {
   return (
     <div className="max-w-[68ch] text-[1.0625rem] leading-[1.7] text-claimondo-shield">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: 'wrap' }]]}
         components={{
+          ...(pageHasOwnH1 ? { h1: () => null } : {}),
           h2: ({ children, id }) => (
             <h2 id={id} style={HEAD_FONT} className="mt-12 mb-3 scroll-mt-24 text-2xl font-bold text-claimondo-navy">
               {children}

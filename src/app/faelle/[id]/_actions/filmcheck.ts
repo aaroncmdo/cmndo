@@ -156,13 +156,18 @@ export async function saveFilmcheck(
       }
     } catch (err) { console.error('[KFZ-137] Kanzlei-Email fehlgeschlagen:', err) }
 
-    await supabase.from('tasks').insert({
+    // Dieser Task ist der Anstoss fuer das Anschlussschreiben. Ohne ihn passiert nach
+    // dem Filmcheck nichts mehr.
+    const { error: anschlussFehler } = await supabase.from('tasks').insert({
       fall_id: fallId,
       typ: 'kanzlei-anschlussschreiben',
       titel: 'Anschlussschreiben an Kanzlei senden',
       beschreibung: 'Automatisch erstellt nach abgeschlossenem Filmcheck.',
       status: 'offen',
     })
+    if (anschlussFehler) {
+      console.error(`[KFZ-137] Anschlussschreiben-Task NICHT erstellt (Fall ${fallId}):`, anschlussFehler.message)
+    }
 
     // C3b (kanzlei_uebergabe-Doppel-Send-Fix): der Kunden-WA lief hier doppelt — der
     // transitionFallStatus('kanzlei-uebergeben')-Aufruf oben (:139) emittiert bereits
@@ -349,7 +354,10 @@ export async function qcNachbesserung(
     svProfileId = svd?.profile_id ?? null
   }
 
-  await supabase.from('tasks').insert({
+  // Die Zurueckweisung erreicht den Gutachter AUSSCHLIESSLICH ueber diesen Task.
+  // Geht er verloren, wartet die Pruefung auf eine Korrektur, von der der
+  // Gutachter nie erfahren hat.
+  const { error: korrekturFehler } = await supabase.from('tasks').insert({
     fall_id: fallId,
     typ: 'filmcheck',
     titel: `Gutachten korrigieren für Fall ${fallNr}`,
@@ -358,6 +366,9 @@ export async function qcNachbesserung(
     prioritaet: 'dringend',
     zugewiesen_an: svProfileId,
   })
+  if (korrekturFehler) {
+    console.error(`[KFZ-204] Korrektur-Task NICHT erstellt (Fall ${fallId}) — Gutachter erfaehrt nichts von der Zurueckweisung:`, korrekturFehler.message)
+  }
 
   await supabase.from('timeline').insert({
     fall_id: fallId,

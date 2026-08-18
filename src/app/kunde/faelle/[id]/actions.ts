@@ -114,9 +114,12 @@ export async function waehleGegenvorschlagSlot(
     await touchClaimRecency(admin, ownership.claimId)
 
     if (ownership.leadId) {
-      await admin.from('leads')
+      const { error: terminSpiegelFehler } = await admin.from('leads')
         .update({ gutachter_termin: startZeit, updated_at: new Date().toISOString() })
         .eq('id', ownership.leadId)
+      if (terminSpiegelFehler) {
+        console.error(`[kunde/faelle] Termin nicht auf den Lead gespiegelt (${ownership.leadId}):`, terminSpiegelFehler.message)
+      }
     }
 
     // KFZ-136: Reminder generieren

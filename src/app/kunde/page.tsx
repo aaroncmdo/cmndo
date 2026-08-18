@@ -57,10 +57,18 @@ export default async function KundeStartseite() {
       .eq('email', user.email!)
       .eq('qualifizierungs_phase', 'kalt')
     for (const lead of kaltLeads ?? []) {
-      await admin
+      // Die Phase ist zugleich der Wiederholungs-Schutz. Bleibt der Lead 'kalt', legt
+      // JEDER weitere Aufruf der Portal-Startseite denselben Task erneut an — deshalb
+      // wird er unten nur bei erfolgreicher Reaktivierung erstellt. (Dieselbe Logik
+      // steht in flow/[token]/page.tsx und hatte dort denselben Fehler.)
+      const { error: reaktivierungFehler } = await admin
         .from('leads')
         .update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() })
         .eq('id', lead.id)
+      if (reaktivierungFehler) {
+        console.error(`[kunde] Lead-Reaktivierung nicht gespeichert (Lead ${lead.id}) — Task uebersprungen:`, reaktivierungFehler.message)
+        continue
+      }
       // Fall-ID für Task + Timeline ermitteln
       // CMM-49 (faelle-Drop-Runway): lead->fall via Bridge+claims!inner statt .from('faelle').
       // faelle.lead_id == claims.lead_id (Divergenz=0 live verifiziert). Non-critical Pfad.
@@ -71,13 +79,17 @@ export default async function KundeStartseite() {
         .limit(1)
         .maybeSingle()
       const fallId = (linkedFall as { fall_id?: string | null } | null)?.fall_id ?? null
-      await admin.from('tasks').insert({
+      const { error: reaktTaskFehler } = await admin.from('tasks').insert({
         fall_id: fallId,
         titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (Portal geöffnet)`,
         typ: 'dispatch',
         prioritaet: 'dringend',
         status: 'offen',
       })
+      if (reaktTaskFehler) {
+        // Der einzige Hinweis darauf, dass sich ein kalter Lead selbst zurueckgemeldet hat.
+        console.error(`[kunde] Reaktivierungs-Task NICHT erstellt (Lead ${lead.id}):`, reaktTaskFehler.message)
+      }
       if (fallId) {
         await admin.from('timeline').insert({
           fall_id: fallId,
