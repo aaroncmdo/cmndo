@@ -12,7 +12,7 @@ import { SITE_URL } from '@/lib/seo/jsonld'
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {
-  title: 'Community-Regeln | Claimondo',
+  title: 'Community-Regeln',
   description:
     'Die Regeln für die Claimondo-Partner-Community: fachlicher Austausch unter Sachverständigen, Maklern und Werkstätten — respektvoll, ohne Rechtsrat und ohne Drittdaten.',
   alternates: { canonical: '/community-regeln' },

@@ -12,7 +12,7 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, FLOTTE_LANDING_URL, WER
 const REGISTRIEREN_URL = 'https://app.claimondo.de/flotte/registrieren'
 
 export const metadata: Metadata = {
-  title: 'Flottenpartner werden — Schadenmanagement für Ihren Fuhrpark | Claimondo',
+  title: 'Flottenpartner werden — Schadenmanagement für Ihren Fuhrpark',
   description:
     'Schadenmanagement für Firmen-Flotten: Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden lassen, unabhängige Gutachten und Regulierung über die gegnerische Haftpflicht. Kostenlos registrieren.',
   keywords: [

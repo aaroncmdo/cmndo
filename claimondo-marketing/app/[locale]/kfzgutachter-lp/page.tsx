@@ -40,7 +40,7 @@ import {
 // UWG-konform: Methodik-Note bei aggregierten Kennzahlen.
 
 export const metadata: Metadata = {
-  title: 'Kfz-Gutachter nach Unfall — unabhängig & kostenfrei | Claimondo',
+  title: 'Kfz-Gutachter nach Unfall — unabhängig & kostenfrei',
   description:
     'Unverschuldeter Unfall? Unabhängiger zertifizierter Kfz-Gutachter vor Ort in unter 48 Stunden. Anwaltlich durchgesetzt, 0 € für Unverschuldete (§249 BGB).',
   robots: { index: false, follow: false },
