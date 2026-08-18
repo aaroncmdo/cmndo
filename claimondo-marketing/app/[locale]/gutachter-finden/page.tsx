@@ -37,6 +37,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
+      images: OG_DEFAULT_IMAGES,
       title: t('gutachter_finden.twitter_title'),
       description: t('gutachter_finden.twitter_description'),
     },
