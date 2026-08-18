@@ -3109,6 +3109,282 @@ export const STAEDTE: Stadt[] = [
     bvskHonorarSpanne: '550–2.200 €',
     h1Anker: 'in Wülfrath',
   },
+  // Welle 9 (P3-B4, 18.08.2026) — die restlichen NRW-Luecken. KEINE dieser
+  // Staedte hat einen Sachverstaendigen im Einzugsgebiet (am 18.08. gegen die
+  // isochrone_polygon geprueft, s. Welle 8). Ihre Seiten leben deshalb allein
+  // von den Rechts- und Ortsankern und behaupten KEINE Praesenz — dieselbe
+  // Lage wie bei Bocholt in Welle 5.
+  //
+  // ⚠ ZWEI GRUPPEN, unterschiedlich begruendet:
+  //
+  // A) Die zehn Ortsnamen, die seit jeher in `angrenzendeOrte` der Hub-Staedte
+  //    stehen und keine Seite hatten (Koeln- und Bonn-Umland). Sie werden
+  //    dadurch sofort verlinkt, ohne dass eine Liste angefasst werden muss.
+  //    Bemerkenswert: Bruehl und Huerth liegen NAEHER an Koeln als das in
+  //    Welle 8 aufgenommene Roesrath und sind deutlich groesser — sie fielen
+  //    dort nur heraus, weil die Isochronen der Koelner SVs nach Osten zeigen.
+  //
+  // B) Fuenf echte Luecken oberhalb 40 Tsd. Einwohner. Sie sind der Ertrag
+  //    einer Pruefung, die vorher NIE gelaufen war: die bisherigen Wellen
+  //    entstanden aus Einzelrecherchen, und die Aussage "NRW ab 40 Tsd. ist
+  //    vollstaendig" war nie gegen eine Gesamtliste gehalten worden. Der
+  //    Abgleich gegen die Wikipedia-Gemeindeliste (98 Gemeinden ab 40 Tsd.,
+  //    Stand 31.12.2025) fand sieben Fehlende — davon zwei (Huerth, Bruehl)
+  //    schon in Gruppe A. Huerth hat 61.732 Einwohner und haette damit sogar
+  //    in Welle 6 gehoert ("die 23 fehlenden Staedte ueber 60 Tsd.").
+  //    ⭐ Erst mit diesem Eintrag ist die Vollstaendigkeits-Aussage belegt
+  //    statt behauptet. Wer die naechste Groessenklasse aufnimmt, prueft
+  //    wieder gegen die Gesamtliste — nicht gegen die Erinnerung.
+  //
+  // Gerichtsketten einzeln bei ag-<name>.nrw.de/aufgaben/gerichtsbezirk belegt.
+  // Sechs der 15 haben kein eigenes Amtsgericht (Huerth/Wesseling -> AG Bruehl,
+  // Niederkassel/Lohmar -> AG Siegburg, Swisttal -> AG Rheinbach, Bad Honnef ->
+  // AG Koenigswinter, Alfter/Wachtberg -> AG Bonn, Hueckelhoven -> AG Erkelenz).
+  //
+  // Einwohner: Wikipedia-Liste der GEMEINDEN in NRW (nicht der Staedte — drei
+  // Eintraege sind Gemeinden ohne Stadtrecht), Stand 31.12.2025.
+  // Koordinaten und PLZ: Mapbox Places, jeder Treffer gegen das Bundesland im
+  // place_name geprueft.
+  {
+    slug: 'huerth',
+    name: 'Hürth',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '503',
+    bevoelkerung: '62 Tsd.',
+    lat: 50.8806,
+    lng: 6.8767,
+    lokal: {
+      landgericht: 'Landgericht Köln',
+      amtsgericht: 'Amtsgericht Brühl',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Hürth',
+  },
+  {
+    slug: 'bruehl',
+    name: 'Brühl',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '503',
+    bevoelkerung: '46 Tsd.',
+    lat: 50.828,
+    lng: 6.9048,
+    lokal: {
+      landgericht: 'Landgericht Köln',
+      amtsgericht: 'Amtsgericht Brühl',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Brühl',
+  },
+  {
+    slug: 'niederkassel',
+    name: 'Niederkassel',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '538',
+    bevoelkerung: '38 Tsd.',
+    lat: 50.8125,
+    lng: 7.0347,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Siegburg',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Niederkassel',
+  },
+  {
+    slug: 'wesseling',
+    name: 'Wesseling',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '503',
+    bevoelkerung: '38 Tsd.',
+    lat: 50.8222,
+    lng: 6.9778,
+    lokal: {
+      landgericht: 'Landgericht Köln',
+      amtsgericht: 'Amtsgericht Brühl',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Wesseling',
+  },
+  {
+    slug: 'lohmar',
+    name: 'Lohmar',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '537',
+    bevoelkerung: '31 Tsd.',
+    lat: 50.8398,
+    lng: 7.2095,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Siegburg',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Lohmar',
+  },
+  {
+    slug: 'rheinbach',
+    name: 'Rheinbach',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '533',
+    bevoelkerung: '27 Tsd.',
+    lat: 50.6264,
+    lng: 6.9473,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Rheinbach',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Rheinbach',
+  },
+  {
+    slug: 'bad-honnef',
+    name: 'Bad Honnef',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '536',
+    bevoelkerung: '25 Tsd.',
+    lat: 50.6442,
+    lng: 7.228,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Königswinter',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Bad Honnef',
+  },
+  {
+    slug: 'alfter',
+    name: 'Alfter',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '533',
+    bevoelkerung: '24 Tsd.',
+    lat: 50.737,
+    lng: 7.0096,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Bonn',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Alfter',
+  },
+  {
+    slug: 'wachtberg',
+    name: 'Wachtberg',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '533',
+    bevoelkerung: '20 Tsd.',
+    lat: 50.6255,
+    lng: 7.135,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Bonn',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Wachtberg',
+  },
+  {
+    slug: 'swisttal',
+    name: 'Swisttal',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '539',
+    bevoelkerung: '19 Tsd.',
+    lat: 50.7177,
+    lng: 6.9114,
+    lokal: {
+      landgericht: 'Landgericht Bonn',
+      amtsgericht: 'Amtsgericht Rheinbach',
+      kammer: 'Rechtsanwaltskammer Köln',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Swisttal',
+  },
+  {
+    slug: 'buende',
+    name: 'Bünde',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '322',
+    bevoelkerung: '46 Tsd.',
+    lat: 52.1961,
+    lng: 8.5815,
+    lokal: {
+      landgericht: 'Landgericht Bielefeld',
+      amtsgericht: 'Amtsgericht Bünde',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Bünde',
+  },
+  {
+    slug: 'schwerte',
+    name: 'Schwerte',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '582',
+    bevoelkerung: '46 Tsd.',
+    lat: 51.4414,
+    lng: 7.5663,
+    lokal: {
+      landgericht: 'Landgericht Hagen',
+      amtsgericht: 'Amtsgericht Schwerte',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Schwerte',
+  },
+  {
+    slug: 'kamen',
+    name: 'Kamen',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '591',
+    bevoelkerung: '42 Tsd.',
+    lat: 51.5924,
+    lng: 7.664,
+    lokal: {
+      landgericht: 'Landgericht Dortmund',
+      amtsgericht: 'Amtsgericht Kamen',
+      kammer: 'Rechtsanwaltskammer Hamm',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Kamen',
+  },
+  {
+    slug: 'nettetal',
+    name: 'Nettetal',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '413',
+    bevoelkerung: '42 Tsd.',
+    lat: 51.3149,
+    lng: 6.2713,
+    lokal: {
+      landgericht: 'Landgericht Krefeld',
+      amtsgericht: 'Amtsgericht Nettetal',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Nettetal',
+  },
+  {
+    slug: 'hueckelhoven',
+    name: 'Hückelhoven',
+    bundesland: 'Nordrhein-Westfalen',
+    plzPrefix: '418',
+    bevoelkerung: '41 Tsd.',
+    lat: 51.0538,
+    lng: 6.2234,
+    lokal: {
+      landgericht: 'Landgericht Mönchengladbach',
+      amtsgericht: 'Amtsgericht Erkelenz',
+      kammer: 'Rechtsanwaltskammer Düsseldorf',
+    },
+    bvskHonorarSpanne: '550–2.200 €',
+    h1Anker: 'in Hückelhoven',
+  },
 ]
 
 /**
