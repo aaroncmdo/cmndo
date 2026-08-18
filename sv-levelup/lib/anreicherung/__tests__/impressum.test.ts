@@ -54,6 +54,25 @@ describe('extrahiere', () => {
     expect(extrahiere('Geschäftsführerin: Petra Lang').person).toBe('Petra Lang')
   })
 
+  /**
+   * Echter Fall aus dem scharfen Lauf (18.08., sv-bergk.de):
+   * "Geschäftsführer: Herr Patrick Brandenburg" ergab vorname="Herr",
+   * nachname="Patrick" — der echte Nachname ging verloren. Eine Kaltmail haette
+   * "Sehr geehrter Herr Patrick" geschrieben, was jede Ansprache sofort als
+   * automatisiert entlarvt.
+   */
+  it('ueberliest die Anrede vor dem Namen', () => {
+    expect(extrahiere('<p>Geschäftsführer: Herr Patrick Brandenburg</p>').person)
+      .toBe('Patrick Brandenburg')
+    expect(extrahiere('<p>Inhaberin: Frau Sabine Kunz</p>').person).toBe('Sabine Kunz')
+    expect(extrahiere('<p>vertreten durch Herrn Dr. Jens Ahlers</p>').person).toBe('Jens Ahlers')
+  })
+
+  /** Auffangschutz: bleibt nach dem Abziehen eine Anrede stehen, ist es kein Name. */
+  it('verwirft einen Namen, der nur aus Anrede und Titel besteht', () => {
+    expect(extrahiere('<p>Inhaber: Herr Dr.</p>').person).toBeNull()
+  })
+
   it('liest eine Telefonnummer', () => {
     expect(extrahiere('<p>Telefon: 0251 / 123456</p>').telefon).toBe('+49251123456')
   })
@@ -71,5 +90,43 @@ describe('extrahiere', () => {
 
   it('verwirft eine Bilddatei, die als Text im Fliesstext steht', () => {
     expect(extrahiere('<p>siehe logo@2x.png</p>').email).toBeNull()
+  })
+
+  /**
+   * Echter Fall aus dem scharfen Lauf (18.08., sv-rommerskirchen.de): die Seite
+   * kodiert die Adresse als HTML-Entities gegen Spam-Ernter. Ungedeutet landete
+   * die Zeichenfolge `&#105;&#x6e;&#102;…` als "E-Mail" in der Datenbank — sie
+   * sah gefuellt aus und war unbrauchbar.
+   */
+  it('dekodiert HTML-Entities in einer mailto-Adresse', () => {
+    const html = '<a href="mailto:&#105;&#x6e;&#102;&#x6f;&#64;&#x73;&#118;&#x2e;&#x64;&#101;">M</a>'
+    expect(extrahiere(html).email).toBe('info@sv.de')
+  })
+
+  it('dekodiert Entities auch im Fliesstext', () => {
+    expect(extrahiere('<p>kontakt&#64;musterwerk&#46;de</p>').email).toBe('kontakt@musterwerk.de')
+  })
+
+  /**
+   * Der Auffangschutz fuer alles, was hier nicht vorhergesehen ist
+   * (JavaScript-Zusammenbau, CSS-Umkehr, Unicode-Tricks): sieht das Ergebnis
+   * nicht wie eine Adresse aus, gibt es KEINE Adresse. R-B — lieber kein Wert
+   * als ein falscher, der gefuellt aussieht.
+   */
+  it('verwirft alles, was nach der Deutung keine Adresse ist', () => {
+    expect(extrahiere('<a href="mailto:&#105;&#x6e;&#102;">M</a>').email).toBeNull()
+    expect(extrahiere('<a href="mailto:kein-at-zeichen.de">M</a>').email).toBeNull()
+    expect(extrahiere('<a href="mailto:a@b">M</a>').email).toBeNull()          // keine TLD
+    expect(extrahiere('<a href="mailto:a b@c.de">M</a>').email).toBeNull()     // Leerzeichen
+    expect(extrahiere('<a href="mailto:info@firmaXde">M</a>').email).toBeNull() // Punkt fehlt
+  })
+
+  it('akzeptiert Subdomains und Bindestrich-Domains', () => {
+    expect(extrahiere('<a href="mailto:a@mail.sv-buero.de">M</a>').email).toBe('a@mail.sv-buero.de')
+  })
+
+  it('behandelt &amp; im Umfeld, ohne die Adresse zu zerstoeren', () => {
+    expect(extrahiere('<p>Meyer &amp; Sohn: buero@meyer-sohn.de</p>').email)
+      .toBe('buero@meyer-sohn.de')
   })
 })

@@ -726,14 +726,44 @@ from public.sv_leads;
 
 - [ ] **Step 6: Commit mit der gemessenen Trefferquote im Body**
 
+#### Abweichungen von diesem Task, bewusst und begründet
+
+1. **Sequenziell statt 8 Hosts parallel.** Der Nutzen wäre gering — die Kandidaten-Hosts eines
+   Laufs sind ohnehin verschieden, die Drossel greift je Host, nicht global. Ein Abbruch
+   mitten in einem parallelen Lauf wäre zudem schwerer zu deuten. Gemessene Laufzeit: **561 s
+   für 62 Leads**. ⚠ Für den Deutschland-Massenlauf (P6, ~5.500 Einträge) trägt das nicht —
+   dort sind es hochgerechnet über 13 Stunden. **P6 muss Parallelität nachrüsten**, dieser Lauf
+   braucht sie nicht.
+2. **Zwei Versuche statt drei.** Ein Wiederholversuch nur, wenn er Aussicht hat: bei
+   `ENOTFOUND` / `ECONNREFUSED` / Zertifikatsfehlern gar keiner (die Domain existiert beim
+   dritten Versuch auch nicht), bei Timeout und 5xx genau einer. Ein dritter Versuch
+   verdreifacht die Last auf einem ohnehin wackligen fremden Server.
+3. **Der Trockenlauf ist der Default, nicht `--dry-run`.** Das Script schreibt in die
+   Produktionsdatenbank; ein versehentlicher Aufruf darf dort nichts anfassen. Scharf schalten
+   erfordert `--schreiben`. Ein Aufruf mit `--dry-run` verhält sich unverändert korrekt.
+4. **Der Supabase-Client wird hereingegeben, nicht im Modul beschafft.** `@/lib/supabase/admin`
+   importiert `server-only`, was in jeder Node-Umgebung außerhalb von Next schon beim Import
+   wirft — CLI und Tests könnten das Modul sonst nicht laden. Nebenwirkung: die Tests brauchen
+   kein `vi.mock` mehr.
+
 ---
 
-## Abnahme P2
+## Abnahme P2 — Stand 18.08.2026
 
-- [ ] Alle sechs Logikbausteine haben grüne Tests
-- [ ] T-24 (überschreibt nichts), T-25 (Rollenadresse ≤ 60), T-26 (Lauf zurückdrehen) sind als Tests vorhanden und grün
-- [ ] Trockenlauf über alle 62 Leads gelaufen, **Trefferquote notiert**
-- [ ] Echter Lauf über eine kleine Teilmenge, in der DB verifiziert
-- [ ] Rückwärtsgang an einem echten Lauf bewiesen
-- [ ] `partner_leads` = 126 und `leads` = 78 unverändert
-- [ ] `npm run typecheck` und `npm run test` grün
+- [x] Alle sechs Logikbausteine haben grüne Tests — **153 Tests in 12 Files**
+- [x] T-24 (überschreibt nichts), T-25 (Rollenadresse ≤ 60), T-26 (Lauf zurückdrehen) sind als Tests vorhanden und grün
+- [x] Trockenlauf über alle 62 Leads gelaufen, **Trefferquote notiert** — zwei vollständige Läufe, Vorher/Nachher in Design-Spec §5.5.3a
+- [x] Echter Lauf über eine kleine Teilmenge, in der DB verifiziert — 5 Leads, jedes Feld einzeln geprüft; **vier Befunde**, siehe Design-Spec §5.5.3a „Vier Fehler, die erst der scharfe Lauf zeigte"
+- [x] Rückwärtsgang an einem echten Lauf bewiesen — zweimal: erst der Fehlerfall, dann die Selbstreparatur nach dem Fix (Audit-Zeilen unverändert bei 11, alle Felder inkl. Begleitspalten auf null)
+- [x] `partner_leads` = 126 und `leads` = 78 unverändert — nach jedem Lauf geprüft
+- [x] `npm run typecheck` und `npm run test` grün — zusätzlich `npx eslint .` und der volle CI-Pfad (`npm ci` → 408 Pakete, exit 0)
+
+**Zusätzlich erledigt, nicht im ursprünglichen Plan:**
+
+- [x] `sv-levelup` aus Root-`tsconfig.json` und Root-`eslint.config.mjs` ausgenommen, eigene `eslint.config.mjs` angelegt — beide griffen mit fremden Regeln durch
+- [x] CI-Schritte im `vitest`-Job (Deps, Typecheck, Unit-Tests) — die 153 Tests liefen sonst **nirgends**
+
+**Offen und bewusst nicht getan:**
+
+- [ ] **Scharfer Lauf über alle 62 Leads.** Das ist eine operative Entscheidung, keine Bauaufgabe: er verändert 62 echte Vertriebsdatensätze. Technisch bereit und reversibel (`--zurueck <laufId>`), fachlich sinnvoll erst zusammen mit der Entscheidung aus A-5 (DURCHSPRACHE, § 7 Abs. 2 UWG). **Aaron-Entscheid.**
+- Aktuell in der Datenbank: **2 angereicherte Leads** aus dem Verifikationslauf `6027de5d-2960-4289-be4d-84f54aaab107` (Bergk vollständig, Brockmann nur Website). Bewusst stehen gelassen — es sind korrekte Daten und der Beleg des funktionierenden Pfads.

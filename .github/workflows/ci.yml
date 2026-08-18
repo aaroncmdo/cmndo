@@ -439,6 +439,33 @@ jobs:
         run: npx vitest run
         working-directory: claimondo-marketing
 
+      # sv-levelup/ ist derselbe Fall wie claimondo-marketing darueber: eigener
+      # Top-Level-Build, eigenes package.json, eigene vitest.config.mts. Der
+      # Root-Runner sieht ihn nicht (include: src/**), und KEINER der ~20
+      # Ratchets erfasst ihn (alle scannen `git ls-files "src/**"`). Ohne diese
+      # Steps liefen seine Tests NIRGENDS — dieselbe Luecke, die beim Marketing
+      # am 17.08.2026 auffiel, hier von vornherein geschlossen.
+      #
+      # Der Typecheck steht mit dabei, weil der Anreicherungs-Schreibpfad gegen
+      # ein UNGETYPTES Supabase-Client-Objekt laeuft (createClient ohne
+      # Database-Generic): tsc prueft dort die Spaltennamen NICHT, also faengt
+      # nur die Testsuite eine falsche Spalte. Ein rotes File soll sofort
+      # blocken — kein Ratchet, keine Baseline: der Bestand ist vollstaendig
+      # gruen (12 Files / 140 Tests, Stand 18.08.2026), es gibt keine Schuld zu
+      # grandfathern.
+      #
+      # npm ci (nicht npm install wie beim Marketing): das Lockfile ist frisch
+      # erzeugt und vollstaendig, der ci-Pfad ist reproduzierbar.
+      - name: SV-LevelUp-Deps
+        run: npm ci --no-audit --no-fund
+        working-directory: sv-levelup
+      - name: SV-LevelUp-Typecheck
+        run: npx tsc --noEmit
+        working-directory: sv-levelup
+      - name: SV-LevelUp-Unit-Tests
+        run: npx vitest run
+        working-directory: sv-levelup
+
   e2e:
     # E2E laeuft gegen den DEPLOYTEN Stand auf app.claimondo.de — deshalb NIE auf pull_request:
     # dort testete der Job den Prod-Stand gegen den (nicht deployten) PR-Branch -> systematisch rot
