@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const a = getAsset(slug)
   if (!a) return {}
   return {
-    title: `${a.title} · Claimondo`,
+    title: a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: a.url },
     openGraph: {

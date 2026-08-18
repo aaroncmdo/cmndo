@@ -16,7 +16,7 @@ const META_DESC =
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: 'Kfz-Haftpflichtversicherer im Vergleich · Claimondo',
+    title: 'Kfz-Haftpflichtversicherer im Vergleich',
     description: META_DESC,
     alternates: { canonical: '/versicherer' },
     openGraph: {
