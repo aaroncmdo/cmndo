@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/*
+ * SV-LevelUp — eigene Marke, NICHT das Claimondo-Schema.
+ * Tokens woertlich aus mockup-levelup-v2.html (Zeilen 10-24).
+ *
+ * Der Token-Audit-Ratchet (check:token-audit) scannt ausschliesslich src/** —
+ * dieses Projekt liegt ausserhalb und ist bewusst nicht an claimondo-*-Tokens
+ * gebunden. Design-Spec §5.1 (E-4).
+ *
+ * Diagrammfarben sind bewusst von der Markenfarbe getrennt: Signalorange
+ * traegt die Marke, nie eine Datenaussage (GESAMTSPEC §11.2).
+ */
+:root {
+  --nacht: #0a121c;
+  --asphalt: #111c29;
+  --chrom: #e6ebf2;
+  --signal: #ff4d1c;
+  --signal-tief: #e03c0f;
+  --blau: #1668d6;
+  --flaeche: #ffffff;
+  --flaeche-2: #f4f7fa;
+  --flaeche-3: #e9eff5;
+  --ink: #0a121c;
+  --text: #3c4b5d;
+  --muted: #78899d;
+  --linie: #dfe7ef;
+  --linie-stark: #c3cfdc;
+  --good: #0ca30c;
+  --warning: #fab219;
+  --serious: #ec835a;
+  --critical: #d03b3b;
+  --r: 12px;
+  --r-gross: 20px;
+  --takt: cubic-bezier(0.2, 0.8, 0.25, 1);
+}
+
+@theme inline {
+  --color-nacht: var(--nacht);
+  --color-asphalt: var(--asphalt);
+  --color-chrom: var(--chrom);
+  --color-signal: var(--signal);
+  --color-signal-tief: var(--signal-tief);
+  --color-flaeche: var(--flaeche);
+  --color-flaeche-2: var(--flaeche-2);
+  --color-ink: var(--ink);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-linie: var(--linie);
+  --color-linie-stark: var(--linie-stark);
+  --color-good: var(--good);
+  --color-warning: var(--warning);
+  --color-serious: var(--serious);
+  --color-critical: var(--critical);
+  --radius-sv: var(--r);
+  --radius-sv-gross: var(--r-gross);
+}
+
+body {
+  background: var(--flaeche);
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Die kursive Archivo in Versalien ist Teil der Marke. Sie kommt mit der
+ * Oberflaeche in P3 dazu — bewusst NICHT ueber next/font/google, weil dessen
+ * Build-Zeit-Download im Projekt schon mehrfach rote Builds ohne Code-Ursache
+ * erzeugt hat. Bis dahin System-Stack.
+ */
+.display {
+  font-family: "Archivo", "Archivo Narrow", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-style: italic;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
