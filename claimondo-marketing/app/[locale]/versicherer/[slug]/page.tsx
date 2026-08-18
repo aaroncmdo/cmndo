@@ -156,7 +156,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
           {narrative && (
             <article>
-              <MarkdownRenderer body={narrative} />
+              <MarkdownRenderer body={narrative} pageHasOwnH1 />
             </article>
           )}
 

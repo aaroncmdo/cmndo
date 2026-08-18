@@ -85,7 +85,7 @@ export default function Page() {
         <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <ClusterHubGrid />
         <article className="pt-2">
-          <MarkdownRenderer body={cleaned} />
+          <MarkdownRenderer body={cleaned} pageHasOwnH1 />
           <FaqStems stems={FAQ_STEMS_MAPPING[SLUG] ?? []} />
           <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />

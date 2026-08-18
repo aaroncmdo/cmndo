@@ -97,7 +97,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             untranslated (de-Fallback, Body eh deutsch) behalten die Box. */}
         {!translated && <CitationBox sentences={getFakten(getMappingFor(a.slug))} />}
         <article className="pt-8">
-          <MarkdownRenderer body={cleaned} />
+          <MarkdownRenderer body={cleaned} pageHasOwnH1 />
           <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
           <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
           <ConversionAnchorBlock variant="decoder" />

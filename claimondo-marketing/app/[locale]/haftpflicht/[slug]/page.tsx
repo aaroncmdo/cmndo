@@ -98,7 +98,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <div className="grid grid-cols-1 gap-12 pt-9 lg:grid-cols-[230px_1fr]">
           <TableOfContents headings={headings} />
           <article>
-            <MarkdownRenderer body={cleaned} />
+            <MarkdownRenderer body={cleaned} pageHasOwnH1 />
             <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
             <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
             <ConversionAnchorBlock variant="spoke" />
