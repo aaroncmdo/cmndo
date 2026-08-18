@@ -12,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „LKW-/Nutzfahrzeug-Gutachter".
@@ -99,7 +100,10 @@ export default function Page() {
               'Unabhängiges Schadensgutachten für LKW, Transporter und Nutzfahrzeuge nach unverschuldetem Unfall: Bewertung von Aufbauten und Sonderausstattung, gewerblicher Ausfallschaden (Vorhaltekosten / entgangener Gewinn). Für unverschuldet Geschädigte 0 € (§ 249 BGB, gegnerischer Haftpflichtversicherer trägt die Kosten).',
             url: `${SITE_URL}/lkw-gutachter`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/lkw-gutachter'),
+            url: '/lkw-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'LKW- & Nutzfahrzeug-Gutachter', url: '/lkw-gutachter' },

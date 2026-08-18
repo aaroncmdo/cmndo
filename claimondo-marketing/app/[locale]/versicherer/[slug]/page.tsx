@@ -23,6 +23,7 @@ import {
   stripSchemaSection,
   stripLeadingSnippet,
   extractFaqPairs,
+  extractCitations,
 } from '@/lib/content/claimondo-mdx'
 import { BAFIN_BRANCHENSCHNITT_2024, getKonzernSiblings } from '@/data/versicherer-mapping'
 import { getKuerzungen } from '@/data/decoder-versicherer-cross'
@@ -62,6 +63,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const detail = getVersichererDetail(slug)
   const kuerzungen = getKuerzungen(slug)
   const faqPairs = extractFaqPairs(a.body)
+  const citations = extractCitations(a.body)
 
   // Narrativ = Prosa vor der "## Häufige Fragen"-Sektion (FAQ wird separat gerendert).
   const cleaned = stripLeadingSnippet(stripSchemaSection(a.body))
@@ -83,6 +85,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       publisher: { '@type': 'Organization', name: 'Claimondo' },
       about: { '@id': orgId },
       mainEntityOfPage: `${SITE_URL}${a.url}`,
+      // Urteils-Az. + §§ aus dem Body als citation — legt die Primaerquellen
+      // maschinenlesbar offen (Princeton-GEO-Hebel "Cite Sources"). Die uebrigen
+      // Content-Routen (/haftpflicht, /decoder, /sachverstaendige) liefern das
+      // ueber ContentJsonLd bereits; die Versicherer-Hubs bauen ihren @graph
+      // selbst und waren als einzige ohne — GEO-Baseline 18.08.2026, Befund B3.
+      // Ausgerechnet hier zaehlt es am meisten: die Kuerzungs-Streitthemen sind
+      // die Prompts, in denen reine Urteilssammlungen die Zitate abraeumen.
+      ...(citations.length > 0 && {
+        citation: citations.map((c) => ({ '@type': 'CreativeWork', name: c })),
+      }),
     },
     {
       '@type': 'Organization',

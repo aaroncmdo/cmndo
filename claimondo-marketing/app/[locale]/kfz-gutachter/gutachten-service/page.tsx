@@ -12,6 +12,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -89,7 +90,10 @@ export default function GutachtenServicePage() {
               'Unabhängiges Kfz-Schadengutachten plus Koordination der gesamten Regulierung: Terminierung in unter 48 h, Werkstatt, Mietwagen und anwaltliche Durchsetzung. Bei Fremdverschulden kostenfrei (§ 249 BGB).',
             url: `${SITE_URL}/kfz-gutachter/gutachten-service`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/gutachten-service'),
+            url: '/kfz-gutachter/gutachten-service',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

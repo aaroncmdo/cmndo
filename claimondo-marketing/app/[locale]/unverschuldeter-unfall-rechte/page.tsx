@@ -12,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Unverschuldeter Unfall: Ihre Rechte".
@@ -113,7 +114,10 @@ export default function Page() {
               'Vollständige Wiederherstellung nach § 249 BGB nach unverschuldetem Verkehrsunfall: Gutachten, Reparatur oder Wiederbeschaffung, Wertminderung, Nutzungsausfall, Mietwagen, anwaltliche Vertretung und Schmerzensgeld — alle Kosten trägt die gegnerische Haftpflichtversicherung, für Geschädigte 0 €.',
             url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/unverschuldeter-unfall-rechte'),
+            url: '/unverschuldeter-unfall-rechte',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Unverschuldeter Unfall: Ihre Rechte', url: '/unverschuldeter-unfall-rechte' },

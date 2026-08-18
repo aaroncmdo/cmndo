@@ -11,6 +11,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, GUTACHTER_LANDING_URL,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -92,7 +93,10 @@ export default function MarketingPage() {
               'Kundenakquise für Kfz-Sachverständige: lokale SEO, Bewertungen, Online-Präsenz und Plattform-Distribution — was wirklich Aufträge bringt statt Budget zu verbrennen.',
             url: `${GUTACHTER_LANDING_URL}/marketing`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/gutachter-partner/marketing'),
+            url: '/gutachter-partner/marketing',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Für Gutachter', url: `${GUTACHTER_LANDING_URL}/` },

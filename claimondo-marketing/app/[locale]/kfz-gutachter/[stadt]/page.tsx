@@ -30,6 +30,7 @@ import {
   getStadtByName, getStadtBySlug,
   type LokaleFaq, type Stadt,
 } from '@/lib/kfz-gutachter/staedte'
+import { getStadtLastUpdatedISO } from '@/lib/kfz-gutachter/freshness'
 import { ladeLokalinhalt } from '@/lib/kfz-gutachter/lokalinhalt'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { finderHrefFuerStadt } from '@/lib/kfz-gutachter/finder-link'
@@ -244,7 +245,13 @@ export default async function KfzGutachterStadtPage({
             totalTime: 'P32D',
             step: PROZESS_STEPS.map((p) => ({ '@type': 'HowToStep', position: p.nr, name: p.titel, text: p.text })),
           },
-          faqPageSchema(faqs),
+          // dateModified aus der gepflegten Stadt-Freshness-Map (dieselbe Quelle,
+          // die die Sitemap nutzt). Ohne das trug KEINE der ~160 Stadt-Seiten ein
+          // Aktualitaets-Signal — GEO-Baseline 18.08.2026, Befund B2.
+          faqPageSchema(faqs, {
+            dateModified: getStadtLastUpdatedISO(s.slug),
+            url: `/kfz-gutachter/${s.slug}`,
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

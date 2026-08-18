@@ -14,6 +14,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, webApplicationSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { NA_KLASSEN } from '@/lib/tools/nutzungsausfall'
 import NutzungsausfallRechnerClient from './NutzungsausfallRechnerClient'
@@ -95,7 +96,10 @@ export default function NutzungsausfallPage() {
               'Interaktiver Rechner für die Nutzungsausfallentschädigung nach Unfall — Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive Alters-Rückstufung. Kostenlos.',
             url: `${SITE_URL}/kfz-gutachter/nutzungsausfall`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/nutzungsausfall'),
+            url: '/kfz-gutachter/nutzungsausfall',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
