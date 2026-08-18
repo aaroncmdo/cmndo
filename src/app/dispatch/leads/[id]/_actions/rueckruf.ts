@@ -38,12 +38,17 @@ export async function saveRueckruf(
       .eq('status', 'offen')
       .select('id')
     if (error) return { success: false, error: error.message }
-    await supabase
+    // (Der separate `updated_at`-Touch, der hier stand, war redundant: der Write
+    // direkt darunter setzt `updated_at` ohnehin mit — ein DB-Roundtrip weniger.)
+    // Schnell-Lookup auf leads nullen. Bleibt er stehen, zeigt die Dispatch-Liste
+    // weiter einen geplanten Rueckruf, den es nicht mehr gibt.
+    const { error: nullenFehler } = await supabase
       .from('leads')
-      .update({ updated_at: new Date().toISOString() })
+      .update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() })
       .eq('id', leadId)
-    // Schnell-Lookup auf leads nullen
-    await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
+    if (nullenFehler) {
+      console.error(`[rueckruf] Schnell-Lookup nicht genullt (lead ${leadId}):`, nullenFehler.message)
+    }
     // AAR-698: Google-Calendar-Events der abgesagten Termine entfernen
     for (const c of cancelled ?? []) {
       import('@/lib/google-calendar/admin-event-sync').then(({ syncAdminTerminCalendarEvent }) =>
@@ -116,7 +121,9 @@ export async function saveRueckruf(
     terminId = inserted.id as string
   }
 
-  await supabase
+  // Der Termin ist bereits angelegt. Schlaegt dieser Write still fehl, weiss der
+  // LEAD nichts davon — Dispatch sieht den geplanten Rueckruf nicht in seiner Liste.
+  const { error: planFehler } = await supabase
     .from('leads')
     .update({
       qualifizierungs_phase: 'rueckruf',
@@ -124,6 +131,9 @@ export async function saveRueckruf(
       updated_at: nowIso,
     })
     .eq('id', leadId)
+  if (planFehler) {
+    console.error(`[rueckruf] Rueckruf-Planung nicht am Lead vermerkt (${leadId}) — Termin existiert, Liste zeigt ihn nicht:`, planFehler.message)
+  }
 
   // AAR-698: Im Google-Kalender des Vereinbarenden (zugewiesen_an = user.id)
   // spiegeln. Fail-silent wenn kein Token vorhanden.
@@ -158,8 +168,14 @@ export async function markRueckrufErledigt(leadId: string): Promise<RueckrufActi
 
   if (error) return { success: false, error: error.message }
 
-  // Schnell-Lookup auf leads nullen
-  await supabase.from('leads').update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() }).eq('id', leadId)
+  // Schnell-Lookup auf leads nullen — sonst bleibt der erledigte Rueckruf sichtbar.
+  const { error: erledigtNullenFehler } = await supabase
+    .from('leads')
+    .update({ rueckruf_geplant_am: null, updated_at: new Date().toISOString() })
+    .eq('id', leadId)
+  if (erledigtNullenFehler) {
+    console.error(`[rueckruf] Schnell-Lookup nach 'erledigt' nicht genullt (lead ${leadId}):`, erledigtNullenFehler.message)
+  }
 
   // AAR-698: Google-Calendar-Events entfernen wenn als erledigt markiert
   for (const e of erledigt ?? []) {

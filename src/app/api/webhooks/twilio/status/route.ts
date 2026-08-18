@@ -51,7 +51,13 @@ export async function POST(req: NextRequest) {
         .limit(3)
       for (const lead of leads ?? []) {
         if (lead.bevorzugter_kanal !== 'sms') {
-          await db.from('leads').update({ bevorzugter_kanal: 'sms' }).eq('id', lead.id)
+          // Kanal-Umschaltung nach WhatsApp-Zustellfehler. Bleibt sie aus, laufen
+          // weitere Nachrichten erneut ueber den Kanal, der gerade nicht ankam.
+          const { error: kanalLeadFehler } = await db
+            .from('leads')
+            .update({ bevorzugter_kanal: 'sms' })
+            .eq('id', lead.id)
+          if (kanalLeadFehler) console.error(`[twilio-status] Kanalwechsel lead ${lead.id}:`, kanalLeadFehler.message)
         }
       }
 
@@ -65,7 +71,11 @@ export async function POST(req: NextRequest) {
         .limit(3)
       for (const claim of (claims ?? []) as Array<{ id: string; bevorzugter_kanal: string | null }>) {
         if (claim.bevorzugter_kanal !== 'sms') {
-          await db.from('claims').update({ bevorzugter_kanal: 'sms' }).eq('id', claim.id)
+          const { error: kanalClaimFehler } = await db
+            .from('claims')
+            .update({ bevorzugter_kanal: 'sms' })
+            .eq('id', claim.id)
+          if (kanalClaimFehler) console.error(`[twilio-status] Kanalwechsel claim ${claim.id}:`, kanalClaimFehler.message)
         }
       }
     }

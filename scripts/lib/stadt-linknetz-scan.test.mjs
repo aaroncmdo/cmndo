@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { analysiereLinknetz } from './stadt-linknetz-scan.mjs'
+import { analysiereLinknetz, teileAmSeitenFooter } from './stadt-linknetz-scan.mjs'
 
 /** Kurzschreibweise fuer eine Kante. */
 const k = (von, nach, quelle = 'nachbar') => ({ von, nach, quelle })
@@ -166,5 +166,60 @@ describe('analysiereLinknetz — Randfaelle', () => {
     })
     expect(r.einseitig).toEqual([])
     expect(r.waisen).toEqual([])
+  })
+})
+
+describe('teileAmSeitenFooter', () => {
+  /** Der echte Site-Footer traegt immer die zehn Footer-Standorte. */
+  const siteFooter = (...slugs) =>
+    `<footer class="bg-claimondo-navy">${slugs.map((s) => `<a href="/kfz-gutachter/${s}">x</a>`).join('')}</footer>`
+  const STANDORTE = ['koeln', 'duesseldorf', 'dortmund']
+
+  it('trennt eine Seite mit genau einem Footer', () => {
+    const html = `<main><a href="/kfz-gutachter/bonn">B</a></main>${siteFooter(...STANDORTE)}`
+    const r = teileAmSeitenFooter(html, STANDORTE)
+    expect(r.inhalt).toContain('/kfz-gutachter/bonn')
+    expect(r.inhalt).not.toContain('/kfz-gutachter/dortmund')
+    expect(r.footer).toContain('/kfz-gutachter/dortmund')
+    expect(r.unsicher).toBe(null)
+  })
+
+  it('trennt am LETZTEN Footer, nicht am ersten', () => {
+    // Der reale Fall: /kfz-gutachter/online-kfz-gutachten fuehrt ein
+    // <blockquote> mit <footer> als Quellenangabe ("— sinngemaesse Kernaussage
+    // des LG Bremen"). Das ist korrektes HTML und wird sich wiederholen, sobald
+    // eine Seite ein Urteil zitiert. Wer am ERSTEN Footer abschneidet, verliert
+    // den gesamten Seiteninhalt dahinter — auf jener Seite genau die acht
+    // Stadt-Verweise, die dort gemessen werden sollen.
+    const html =
+      '<article><blockquote>Zitat<footer>— LG Bremen</footer></blockquote>' +
+      '<a href="/kfz-gutachter/bonn">B</a></article>' +
+      siteFooter(...STANDORTE)
+    const r = teileAmSeitenFooter(html, STANDORTE)
+    expect(r.inhalt).toContain('/kfz-gutachter/bonn')
+    expect(r.footer).toContain('/kfz-gutachter/koeln')
+    expect(r.unsicher).toBe(null)
+  })
+
+  it('meldet eine Seite ohne Footer als unsicher', () => {
+    const r = teileAmSeitenFooter('<main>nichts</main>', STANDORTE)
+    expect(r.footer).toBe('')
+    expect(r.unsicher).toMatch(/kein <footer>/)
+  })
+
+  it('meldet als unsicher, wenn hinter dem Schnitt die Standorte fehlen', () => {
+    // Die Reissleine gegen die Umkehrung des Fehlers oben: stuende der echte
+    // Site-Footer VOR einem weiteren <footer>, schnitte lastIndexOf zu spaet ab
+    // und die zehn globalen Standorte liefen als thematische Kanten mit. Dann
+    // haette jede Stadt zehn Links geschenkt und die Waisen-Zahl waere wertlos.
+    const html = `<main>x</main>${siteFooter(...STANDORTE)}<footer>Nachwort</footer>`
+    const r = teileAmSeitenFooter(html, STANDORTE)
+    expect(r.unsicher).toMatch(/Footer-Standorte/)
+  })
+
+  it('braucht keine Standort-Liste, um zu funktionieren', () => {
+    // Ohne erwartete Standorte entfaellt nur die Reissleine, nicht der Schnitt.
+    const html = `<main>x</main>${siteFooter('koeln')}`
+    expect(teileAmSeitenFooter(html, []).unsicher).toBe(null)
   })
 })

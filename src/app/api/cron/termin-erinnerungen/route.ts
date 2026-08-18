@@ -99,10 +99,14 @@ export async function GET(request: Request) {
       }
     }
 
-    await supabase
+    // DEDUP-FLAG nach dem Versand — ohne ihn mahnt der naechste Lauf erneut.
+    const { error: docs48hFehler } = await supabase
       .from('gutachter_termine')
       .update({ erinnerung_48h_docs_gesendet: true })
       .eq('id', termin.id)
+    if (docs48hFehler) {
+      console.error(`[termin-erinnerungen] 48h-Docs-Flag nicht gesetzt (${termin.id}) — Doppel-Send moeglich:`, docs48hFehler.message)
+    }
 
     sent48hDocs++
   }
