@@ -1,0 +1,19 @@
+-- Claim-View-RLS-Guard schlug an: sv_leads_map_pins war eine SECURITY-DEFINER-View
+-- mit anon/authenticated-Grant. Kein Claim-Leak (die View hat keine claim_id), aber
+-- die Definer-Semantik umgeht die RLS von sv_leads unnoetig.
+--
+-- Umstellung auf security_invoker ist nachgemessen VERHALTENSNEUTRAL (prod, 18.08.):
+--   Policy sv_leads__b1sel (anon, authenticated):  (admin) OR (ist_aktiv = true)
+--     -> identisch zur WHERE-Klausel der View
+--   Spalten-Grants anon auf sv_leads:  id, ist_aktiv, lat, lng
+--     -> exakt die vier Spalten, die die View beruehrt (3 projiziert + 1 im Filter)
+-- Damit sieht anon dieselben Zeilen und dieselben Spalten wie zuvor; es entfallen
+-- lediglich die geborgten Owner-Rechte.
+--
+-- Nachweis nach dem Apply (prod, 18.08. 19:47):
+--   als postgres: 62 Zeilen | als anon (set local role anon): 62 Zeilen
+--   lat 49.770256 .. 51.764884 -> Kartenpins unveraendert vollstaendig.
+--
+-- Ausgeloest von 20260818163928_sv_leads_map_pins_view (SV-LevelUp-Lane).
+-- Freigabe Aaron 18.08. an die Merge/Drain-Session.
+alter view public.sv_leads_map_pins set (security_invoker = on);

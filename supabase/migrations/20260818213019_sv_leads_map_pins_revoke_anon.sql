@@ -1,0 +1,23 @@
+-- Der Anon-Exposure-Guard (scripts/check-anon-exposure.mjs) meldet, dass
+-- sv_leads_map_pins einem ECHTEN anon Zeilen zeigt. Er lief bisher nie: der
+-- Claim-View-RLS-Schritt davor brach den Job ab (Schritte 33-36 waren "skipped").
+--
+-- Der Guard bietet drei Wege: REVOKE, RLS-Gate oder Whitelist "nur bei
+-- bewusst-oeffentlichen Daten".
+--
+-- Entscheidung REVOKE, weil die View NULL Consumer hat — geprueft ueber ALLE
+-- Remote-Branches (nicht nur staging), mit Positiv-Kontrolle: die Suche nach
+-- 'sv_leads' findet sehr wohl Treffer, die nach 'sv_leads_map_pins' keinen.
+-- Sie wurde am 18.08. um 16:39 von der SV-LevelUp-Lane fuer geplante Arbeit
+-- angelegt.
+--
+-- Eine Whitelist wuerde bedeuten: Koordinaten von 62 potenziellen (noch nicht
+-- vertraglich gebundenen) Sachverstaendigen oeffentlich zugaenglich machen —
+-- ohne dass irgendetwas sie liest. Der REVOKE nimmt die Entscheidung nicht
+-- vorweg, er verschiebt sie an die Stelle, an der der Consumer entsteht: wer
+-- die oeffentliche Karte baut, granted anon bewusst neu und traegt sie mit
+-- Begruendung in ANON_EXPOSURE_WHITELIST ein.
+--
+-- `authenticated` behaelt den Zugriff (interne Nutzung unberuehrt).
+-- Verifiziert: grants = authenticated, postgres, service_role | anon=false | auth=true
+revoke select on public.sv_leads_map_pins from anon;
