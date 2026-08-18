@@ -15,4 +15,17 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  {
+    rules: {
+      // Ein fuehrender Unterstrich heisst "absichtlich ungenutzt" — etwa bei
+      // Signaturen, die einen Vertrag erfuellen muessen (siehe lib/places/neu.ts,
+      // das Skelett der New-API). Ohne diese Regel erzeugt jede solche Stelle
+      // eine Warnung, und Rauschen verdeckt die Warnungen, auf die es ankommt.
+      '@typescript-eslint/no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      }],
+    },
+  },
 ])
