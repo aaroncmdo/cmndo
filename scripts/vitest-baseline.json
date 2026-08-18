@@ -1,7 +1,7 @@
 {
   "generatedAt": "2026-07-22T15:48:24.619Z",
   "note": "Bekannte rote Test-Files (grandfathered, file-level). Der Ratchet blockt NEUE. Boy-Scout: File fixen + Baseline via `npm run check:vitest -- --update-baseline` senken. Echter Flake -> hier belassen + im PR begruenden.",
-  "fileCount": 10,
+  "fileCount": 9,
   "files": [
     "src/app/admin/makler/__tests__/actions.test.ts",
     "src/app/api/cron/reminder-dedup.regression.test.ts",

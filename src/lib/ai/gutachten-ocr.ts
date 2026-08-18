@@ -68,8 +68,11 @@ type GutachtenOcrResult = {
   seitenzahl?: number | null
 }
 
-// Structured-outputs-Schema (spiegelt GutachtenOcrResult). Opus 4.8 fuellt es via
-// messages.parse() -> erzwingt valides JSON statt fragilem raw.match(/{...}/).
+// Validierungs-Schema (spiegelt GutachtenOcrResult). Es beschreibt den Vertrag der
+// Modell-Antwort und wird FELDWEISE gegen das geparste JSON geprueft — siehe
+// extractGutachtenFelder. NICHT als Structured-Outputs-Grammatik verwendbar: 37
+// fakultative Felder reissen das API-Limit (max 16 Unions), jeder solche Call
+// endet in HTTP 400 (belegt 18.08. gegen die echte API).
 const GutachtenSchema = z.object({
   reparaturkosten_netto: z.number().nullable(),
   reparaturkosten_brutto: z.number().nullable(),
