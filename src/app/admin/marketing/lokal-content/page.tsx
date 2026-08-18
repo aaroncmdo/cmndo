@@ -97,9 +97,10 @@ export default async function LokalContentPage() {
           <strong className="text-claimondo-navy">{ohneInhalt}</strong> ohne Inhalt
         </p>
         <p className="text-body-xs text-claimondo-slate mt-2">
-          Die KI erstellt nur einen Entwurf — veröffentlicht wird ausschließlich per Freigabe.
-          Unfallschwerpunkte ohne belegbare Quell-URL werden automatisch verworfen; was verworfen
-          wurde, erscheint als Hinweis.
+          Inhalte, die das Qualitäts-Gate bestehen, gehen direkt live. Verlangt werden mindestens
+          drei harte Ortsfakten; Unfallschwerpunkte ohne belegbare Quell-URL werden verworfen und
+          erscheinen als Hinweis. Was das Gate nicht besteht, landet hier zur Prüfung und wartet
+          auf eine Freigabe.
         </p>
       </SectionCard>
 

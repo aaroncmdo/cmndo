@@ -12,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „E-Auto-Gutachter". Konversions-Framing
@@ -99,7 +100,10 @@ export default function Page() {
               'Unabhängiges Schadensgutachten für Elektrofahrzeuge nach unverschuldetem Unfall: Hochvolt-Batterie-Diagnose, Struktur- und Assistenzsystem-Prüfung, merkantile Wertminderung und Wirtschaftlichkeitsbewertung. Für unverschuldet Geschädigte 0 € (§ 249 BGB, gegnerischer Haftpflichtversicherer trägt die Kosten).',
             url: `${SITE_URL}/e-auto-gutachter`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/e-auto-gutachter'),
+            url: '/e-auto-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'E-Auto-Gutachter', url: '/e-auto-gutachter' },

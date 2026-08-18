@@ -12,6 +12,7 @@ import {
   articleSchema, howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.5 (Doc 26) — Cornerstone-Pillar „Unfall — was tun als Geschädigter".
@@ -138,7 +139,10 @@ export default function Page() {
             totalTime: 'PT30M',
             schritte: SOFORT,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/unfall-was-tun-als-geschaedigter'),
+            url: '/unfall-was-tun-als-geschaedigter',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Unfall — was tun als Geschädigter', url: '/unfall-was-tun-als-geschaedigter' },

@@ -12,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Gegnerische Versicherung zahlt nicht".
@@ -118,7 +119,10 @@ export default function Page() {
               'Wenn die gegnerische Haftpflichtversicherung nach unverschuldetem Unfall nicht oder nur gekürzt zahlt: Verzug nach § 286 BGB, Verzugszinsen nach § 288 BGB und Durchsetzung aller Ansprüche über eine Partnerkanzlei für Verkehrsrecht — für unverschuldet Geschädigte 0 €.',
             url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/gegnerische-versicherung-zahlt-nicht'),
+            url: '/gegnerische-versicherung-zahlt-nicht',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Gegnerische Versicherung zahlt nicht', url: '/gegnerische-versicherung-zahlt-nicht' },

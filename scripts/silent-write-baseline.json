@@ -60,14 +60,7 @@
     "src/lib/sla/kanzlei-tracker.ts",
     "src/lib/sla/tracker.ts",
     "src/lib/start-link/send-flowlink-multichannel.ts",
-    "src/lib/termine/baseline-fahrtzeit.ts",
     "src/lib/termine/embed-b-dispatcher-actions.ts",
-    "src/lib/termine/engine/kalender-sync.ts",
-    "src/lib/termine/engine/state-transitions.ts",
-    "src/lib/termine/notify-kunde-angekommen.ts",
-    "src/lib/termine/sv-ablehnung.ts",
-    "src/lib/termine/trigger-losgefahren.ts",
-    "src/lib/termine/verlege-nach-no-show.ts",
     "src/lib/whatsapp.ts"
   ]
 }

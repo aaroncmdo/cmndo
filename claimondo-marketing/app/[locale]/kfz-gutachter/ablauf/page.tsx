@@ -12,6 +12,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, howToSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -131,7 +132,10 @@ export default function AblaufPage() {
               text: s.text,
             })),
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/ablauf'),
+            url: '/kfz-gutachter/ablauf',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

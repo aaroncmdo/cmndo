@@ -260,10 +260,23 @@ export function serviceSchema(args: {
 }
 
 // FAQPage — Princeton GEO: +40% AI-Visibility
-export function faqPageSchema(faqs: Array<{ frage: string; antwort: string }>) {
+//
+// `opts.dateModified` liefert das Aktualitaets-Signal (GEO-Baseline 18.08.2026,
+// Befund B2: 14 von 27 Seiten trugen keinerlei Datum). FAQPage ist ein WebPage-
+// Subtyp, `dateModified`/`url` sind dort gueltige Properties. Datum kommt aus
+// lib/seo/freshness.ts (Routen) bzw. lib/kfz-gutachter/freshness.ts (Staedte) —
+// beide gepflegt, nie `new Date()`: ein Datum, das ohne inhaltliche Aenderung
+// mitwandert, entwertet das Signal.
+export function faqPageSchema(
+  faqs: Array<{ frage: string; antwort: string }>,
+  opts?: { dateModified?: string; url?: string },
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    ...(opts?.url && { url: opts.url.startsWith('http') ? opts.url : `${SITE_URL}${opts.url}` }),
+    ...(opts?.dateModified && { dateModified: opts.dateModified }),
+    inLanguage: 'de-DE',
     mainEntity: faqs.map((f) => ({
       '@type': 'Question',
       name: f.frage,

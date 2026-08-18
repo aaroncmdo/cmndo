@@ -13,6 +13,7 @@ import {
   onlineGutachtenSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 const PAGE_PATH = '/kfz-gutachter/online-kfz-gutachten'
@@ -81,7 +82,10 @@ export default function OnlineKfzGutachtenPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           onlineGutachtenSchema({ modified: '2026-05-25' }),
-          faqPageSchema(FAQ_SCHEMA),
+          faqPageSchema(FAQ_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/online-kfz-gutachten'),
+            url: '/kfz-gutachter/online-kfz-gutachten',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

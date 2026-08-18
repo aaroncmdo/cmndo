@@ -55,10 +55,14 @@ export async function ablehnTermin(terminId: string, grund: string) {
 
   if (!svErr && sv) {
     const neueAnzahl = (sv.ablehnungen_30_tage ?? 0) + 1
-    await db
+    // Der Zaehler treibt die Quote unten. Bleibt er stehen, wird die Schwelle nie erreicht.
+    const { error: zaehlerFehler } = await db
       .from('sachverstaendige')
       .update({ ablehnungen_30_tage: neueAnzahl })
       .eq('id', svId)
+    if (zaehlerFehler) {
+      console.error(`[ablehnTermin] Ablehnungs-Zaehler nicht erhoeht (SV ${svId}):`, zaehlerFehler.message)
+    }
 
     // Ablehnquote-Check: Termine der letzten 30 Tage zaehlen
     const dreissigTageHer = new Date(Date.now() - 30 * 86400_000).toISOString()
@@ -73,21 +77,32 @@ export async function ablehnTermin(terminId: string, grund: string) {
 
     // >20%: SV auto-deaktivieren + Admin-Task
     if (quote > 20 && sv.ist_aktiv !== false) {
-      await db.from('sachverstaendige').update({ ist_aktiv: false }).eq('id', svId)
-      await db.from('tasks').insert({
+      const { error: deaktivierFehler } = await db.from('sachverstaendige').update({ ist_aktiv: false }).eq('id', svId)
+      if (deaktivierFehler) {
+        console.error(`[ablehnTermin] SV-Deaktivierung fehlgeschlagen (${svId}):`, deaktivierFehler.message)
+      }
+      // Dieser Task ist der EINZIGE Hinweis auf die automatische Deaktivierung. Geht er
+      // verloren, bekommt der SV keine Auftraege mehr und niemand weiss, warum.
+      const { error: taskFehler } = await db.from('tasks').insert({
         titel: 'SV wegen hoher Ablehnquote automatisch deaktiviert',
         beschreibung: `Ablehnquote: ${quote.toFixed(1)}% (${neueAnzahl}/${termineCount}). SV wurde automatisch auf inaktiv gesetzt. Manuelle Klärung nötig.`,
         typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'dringend', auto_erstellt: true,
       })
+      if (taskFehler) {
+        console.error(`[ablehnTermin] Deaktivierungs-Task NICHT erstellt (SV ${svId} ist inaktiv, ohne Hinweis):`, taskFehler.message)
+      }
     }
     // >10%: Warning-Task
     else if (quote > 10) {
-      await db.from('tasks').insert({
+      const { error: warnTaskFehler } = await db.from('tasks').insert({
         titel: 'SV hat hohe Ablehnquote — Klärung empfohlen',
         beschreibung: `Ablehnquote: ${quote.toFixed(1)}% (${neueAnzahl}/${termineCount}).`,
         // tasks_prioritaet_check: 'mittel' existiert nicht (normal|dringend|kritisch) -> normal.
         typ: 'sv_ablehnquote', status: 'offen', prioritaet: 'normal', auto_erstellt: true,
       })
+      if (warnTaskFehler) {
+        console.error(`[ablehnTermin] Warn-Task nicht erstellt (SV ${svId}):`, warnTaskFehler.message)
+      }
     }
   }
 
