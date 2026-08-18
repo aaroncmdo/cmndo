@@ -1013,9 +1013,46 @@ keine Strecke aufbauen will, die vier bis sechs Monate laufen soll.
 zuerst Legacy baut, sollte die Abfrageschicht **hinter einem Adapter** kapseln, damit der Wechsel
 ein Modultausch bleibt und nicht die Module berührt.
 
-> **Offen, wenn Legacy gewählt wird:** Die Kostenrechnung in §7.1/§7.2 gilt für die New-API-SKUs.
-> Legacy hat eigene SKUs und ein eigenes Gratis-Kontingent — das ist vor dem ersten Massenlauf
-> gegen die aktuelle Preisseite zu prüfen, nicht zu schätzen.
+#### 7.6.1 Die Legacy-SKUs — geprüft, nicht geschätzt (18.08.2026)
+
+Die zuvor offene Frage ist beantwortet. Quelle: Google-Maps-Platform-Preisseite, abgerufen am
+18.08.2026; SKU-Kennungen mitgeführt, damit die Zahlen nachprüfbar bleiben.
+
+| SKU | Kennung | erste Stufe ($/1000) | gratis je Monat |
+|---|---|---|---|
+| Places — Text Search *(Legacy)* | `E95A-86C7-7F47` | **32,00** | **5.000** |
+| Places — Nearby Search *(Legacy)* | `6B23-8A17-D29D` | **32,00** | **5.000** |
+| Places Details *(Legacy)* | `FC5C-DF28-543F` | **17,00** | **5.000** |
+| Places API Text Search **Enterprise** *(New)* | `E967-44BC-B44D` | 35,00 | **1.000** |
+| Places API Place Details **Enterprise** *(New)* | `2D9A-3DE0-3766` | 20,00 | **1.000** |
+
+**Das dreht die Kostenlage um.** Der Grund ist strukturell: **Legacy bestimmt die Preisstufe
+über den Endpunkt, New über die FieldMask.** Wir brauchen `rating`, `userRatingCount` und
+`websiteUri` — in der New API sind das Enterprise-Felder, in Legacy sind sie im normalen
+Endpunkt-Preis enthalten.
+
+| | New (Enterprise) | Legacy |
+|---|---|---|
+| Vollcheck (~40 Calls) | ~1,39 $ ≈ **1,27 €** | ~1,27 $ ≈ **1,16 €** |
+| Gratis-Kontingent | 1.000 Enterprise-Calls | 5.000 **je SKU** |
+| **Vollchecks gratis im Monat** | **~25** | **~128** |
+
+⭐ **Und ein Hebel, den es in der New API nicht gibt:** Text Search und Nearby Search sind bei
+Legacy **getrennte SKUs mit getrennten Kontingenten**. Führt man den Werkstatt-Teil von
+`zuweiser` über Nearby Search (`car_repair`) statt über Text Search, verteilt sich die Last auf
+zwei Töpfe: 33 Text-Calls je Check → **~151 gratis**, während Nearby bei 6 Calls je Check erst
+bei 833 Checks anschlägt. Die Aussage in §7.1 („gleicher Preis, gleiche Stufe, daher ohne
+Gewinn") gilt nur für die New API — für Legacy ist sie falsch.
+
+**Folge für die Empfehlung:** Sie bleibt bestehen — New ist die Variante mit Zukunft, und der
+Adapter (`lib/places/`) macht den Wechsel zu einem Modultausch. Aber die Dringlichkeit von A-1
+sinkt: Legacy ist in unserer Größenordnung **billiger und großzügiger**, nicht nur ein Notbehelf.
+A-1 ist damit endgültig kein Blocker mehr, sondern eine Zukunftsentscheidung.
+
+> ⚠ Zwei Einschränkungen, damit die Zahlen nicht mehr behaupten als sie belegen: Die Preisseite
+> weist die Free-Cap **je SKU** aus; ob Google die drei Töpfe intern gegen ein gemeinsames
+> Budget rechnet, sagt sie nicht. Und Preisseiten ändern sich — vor dem ersten Massenlauf
+> gehört ein Blick in die **tatsächliche Abrechnung** der ersten Läufe, nicht nur auf die Liste.
 
 ### 7.4 Menschenzeit — der eigentliche Kostenblock
 
