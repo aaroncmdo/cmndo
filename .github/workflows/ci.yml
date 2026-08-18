@@ -409,6 +409,36 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8192
 
+      # claimondo-marketing/ ist ein eigener Top-Level-Build mit eigenem
+      # package.json, eigenen node_modules und eigener vitest.config.ts. Der
+      # Root-Runner sieht ihn nicht (include: src/**), gebaut wird er in CI
+      # ebenfalls nicht — seine 23 Test-Files liefen damit NIRGENDS.
+      #
+      # Das faellt genau dann auf, wenn man sich auf sie verlaesst: die
+      # Stadt-Stammdaten (150 Eintraege, je 12 Felder) haengen komplett an den
+      # Invarianten in lib/kfz-gutachter/staedte.test.ts — u.a. daran, dass
+      # Landgericht und Rechtsanwaltskammer sich ueber alle Staedte hinweg
+      # nicht widersprechen. Eine falsche Gerichtszuordnung ist auf der Seite
+      # nicht zu sehen und bricht keinen Build; in P1 stand sie auf 31 von 84
+      # Seiten. Ohne diesen Schritt war die Absicherung dagegen eine Datei,
+      # die zufaellig jemand lokal ausfuehrt.
+      #
+      # Ohne Ratchet/Baseline, weil der Bestand beim Verdrahten am 17.08.2026
+      # vollstaendig gruen war (23 Files / 196 Tests) — es gibt keine Schuld
+      # zu grandfathern, und ein rotes File soll hier sofort blocken.
+      # npm install statt npm ci — dieselbe Begruendung wie in
+      # deploy-vps-marketing.yml: das Lockfile des Marketings fuehrt die
+      # Transitive @swc/helpers nicht, und `npm ci` bricht darauf ab
+      # ("Missing: @swc/helpers@0.5.23 from lock file"). Der Deploy loest es
+      # seit jeher so; ein abweichender Weg hier haette nur bedeutet, dass CI
+      # und Deploy verschiedene Baeume installieren.
+      - name: Marketing-Deps
+        run: npm install --no-audit --no-fund
+        working-directory: claimondo-marketing
+      - name: Marketing-Unit-Tests
+        run: npx vitest run
+        working-directory: claimondo-marketing
+
   e2e:
     # E2E laeuft gegen den DEPLOYTEN Stand auf app.claimondo.de — deshalb NIE auf pull_request:
     # dort testete der Job den Prod-Stand gegen den (nicht deployten) PR-Branch -> systematisch rot
