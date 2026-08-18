@@ -229,7 +229,7 @@ Prüfszenarien:
 | Szenario | erhebbar | Ergebnis |
 |---|---|---|
 | Weg B voll, ohne Ads-/Meta-Konto, ohne GSC | 116 | Score |
-| Weg A ohne Website | 92 | Score |
+| Weg A ohne Website (ohne `gbp`, `web`, `seo`, `ux`, `gsc`) | 80 | Score |
 | Massenlauf (`web`,`seo`,`ux`,`verz`,`volumen`,`ortsseiten`) | 48 | **Teilbefund** |
 | T-04 (`markt`,`nische`,`volumen`,`ads`) | 10 | **Teilbefund** |
 
