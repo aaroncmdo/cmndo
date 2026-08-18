@@ -65,12 +65,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.85,
       alternates: { languages: langAlternates('/ueber-uns') },
     },
-    {
-      url: `${SITE_URL}/schaden-melden`,
-      lastModified: getRouteLastUpdated('/schaden-melden'),
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
+    // /schaden-melden steht bewusst NICHT hier: der Zweig traegt
+    // `robots: { index: false }` (schaden-melden/layout.tsx) — er ist der
+    // Formular-Funnel, keine Landing. Eine noindex-Seite in der Sitemap
+    // einzureichen kostet Crawl-Budget und erzeugt in der Search Console
+    // "Durch noindex ausgeschlossen, in Sitemap eingereicht".
     // KI-Ersteinschätzung — SEO-Landing (Front-Door), klickt weiter in den /check-Funnel
     {
       url: `${SITE_URL}/ersteinschaetzung`,
@@ -324,14 +323,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     },
 
-    // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
-    ...getCornerstones().map((a) => ({
-      url: `${SITE_URL}${a.url}`,
-      lastModified: a.lastModified,
-      changeFrequency: 'monthly' as const,
-      priority: 0.95,
-      alternates: { languages: langAlternates(a.url) },
-    })),
+    // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber).
+    // /ratgeber ist ausgenommen: die Seite canonicalisiert bewusst auf
+    // /unfall-was-tun-als-geschaedigter (Stream B.5, siehe ratgeber/page.tsx).
+    // Eine Seite einzureichen, die per Canonical auf eine andere zeigt, ist ein
+    // Widerspruch — die Sitemap sagt "indexiere mich", das Canonical "ich bin
+    // eine andere". Der Ziel-Cornerstone steht ohnehin selbst in der Sitemap.
+    ...getCornerstones()
+      .filter((a) => a.url !== '/ratgeber')
+      .map((a) => ({
+        url: `${SITE_URL}${a.url}`,
+        lastModified: a.lastModified,
+        changeFrequency: 'monthly' as const,
+        priority: 0.95,
+        alternates: { languages: langAlternates(a.url) },
+      })),
 
     // Kfz-Haftpflichtschaden-Glossar-Hub (Doc 25 Gap 3) — crawlbare Index-URL fuer die 57 Spokes
     {
