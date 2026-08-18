@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 // Kommentar-Regeln / Netiquette fuer die Artikel-Kommentare. DPIA-Launch-Gate-Massnahme
 // (operationalisiert R1/R2/R7: keine Selbst-/Dritt-Daten, kein Rechtsrat, keine Impersonation)
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
       'Wie wir Kommentare unter den Wissens-Artikeln moderieren — und was beim Kommentieren bitte zu beachten ist.',
     locale: 'de_DE',
     siteName: 'Claimondo',
+    images: OG_DEFAULT_IMAGES,
   },
 }
 

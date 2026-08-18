@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
-import { SITE_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 // Community-Regeln / B2B-Netiquette fuer den Partner-Feed auf der Startseite.
 // DPIA-Massnahme (Identitaet ist oeffentlich / kein Rechtsrat / keine Drittdaten).
@@ -24,6 +24,7 @@ export const metadata: Metadata = {
       'Netiquette für die B2B-Community von Claimondo — was im Partner-Feed erlaubt ist und was nicht.',
     locale: 'de_DE',
     siteName: 'Claimondo',
+    images: OG_DEFAULT_IMAGES,
   },
 }
 

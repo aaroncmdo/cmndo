@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { GutachterFindenSection } from '@/components/gutachter-finden/GutachterFindenSection'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
@@ -29,12 +29,15 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: `${SITE_URL}/gutachter-finden`,
       title: t('gutachter_finden.og_title'),
       description: t('gutachter_finden.og_description'),
     },
     twitter: {
       card: 'summary_large_image',
+      images: OG_DEFAULT_IMAGES,
       title: t('gutachter_finden.twitter_title'),
       description: t('gutachter_finden.twitter_description'),
     },
