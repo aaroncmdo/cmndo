@@ -37,6 +37,22 @@ describe('kernName', () => {
       .toBe('harald lange')
   })
 
+  /**
+   * Am echten Places-Lauf gefunden (18.08., Muenster): Betriebe fuehren ihren
+   * Namen in Unicode-Fettschrift als Auffaelligkeits-Trick. Ohne
+   * Normalisierung filtert `[a-z0-9]` alles weg -> leerer Kern -> keine
+   * Domain-Kandidaten, und der Betrieb faellt still durch.
+   */
+  it('normalisiert Unicode-Schmuckschrift zu ASCII', () => {
+    expect(kernName('𝗞𝗙𝗭 𝗦𝗮𝗰𝗵𝘃𝗲𝗿𝘀𝘁ä𝗻𝗱𝗶𝗴𝗲𝗻𝗯ü𝗿𝗼 𝗕𝗲𝗿𝗸𝗮𝘆 𝗬𝗶𝗴𝗶𝘁')).toBe('berkay yigit')
+  })
+
+  it('laesst echte Umlaute dabei unbeschaedigt', () => {
+    // NFKC (nicht NFKD): zerlegt Kompatibilitaetszeichen, setzt Umlaute aber
+    // wieder zusammen — sonst wuerde aus "ü" ein "u" statt "ue".
+    expect(kernName('Sachverständigenbüro Müller')).toBe('mueller')
+  })
+
   it('streicht Taetigkeitsbegriffe, die keine Eigennamen sind', () => {
     expect(kernName('Kfz-Prüfstelle Fahrzeugbewertung Dornbach')).toBe('dornbach')
     expect(kernName('Dipl.-Ing. Kessel Schadengutachten')).toBe('kessel')
