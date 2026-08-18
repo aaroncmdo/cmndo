@@ -103,12 +103,16 @@ git log -1 --format="%h %ad" --date=short   # muss 2026-08-12 oder neuer sein
 >
 > | Punkt | verifizierter Stand 18.08. |
 > |---|---|
-> | **R2** UI-Klickwege (E/F3/C1/B) | 🟢 **echt offen** — einziger substanzieller Rest |
+> | **R2** UI-Klickwege (E/F3/C1/B) | ✅ **erledigt** — alle vier Specs liegen seit 13.08. auf staging (#5237) |
 > | **R3** Lane-A-Wunschzeit | ⚠ vermutlich erledigt (#5213 „Smoke GRÜN" liegt auf staging) · Lane von `9f54b5bf` |
 > | **R5-H0** §2-Nachzug | 🟢 offen, reine Doku |
 > | **R5-H3** C2b create-case | ⚪ **gegenstandslos** — 6 Wege (nicht 9), aber **0 echte Kundenleads ohne FlowLink** in 90 Tagen |
 > | **R6-C2** Wunschzeit-Text | ⚪ **gegenstandslos** — genau 1 Termin `sv_gesucht` auf prod, `pending`-Flag greift bereits |
 > | **R6-F4** Fahrzeuge-Einstieg | 🔴 braucht Aaron (Produktentscheid) |
+>
+> **⇒ Der Bau-Scope der Sanierung ist damit durch.** Übrig bleiben ein Doku-Nachzug (R5-H0) und ein Produktentscheid (R6-F4). Wer „noch etwas bauen" sucht, findet hier nichts mehr.
+>
+> ⚠ **In eigener Sache:** In der ersten Fassung dieses Blocks stand R2 als „echt offen — einziger substanzieller Rest". Das war **ungeprüft aus dem Plantext übernommen**, während ich alle anderen Zeilen gemessen habe. Tatsächlich liegen alle vier Specs (`werkstatt-haftpflicht-gate-smoke`, `kunde-termin-aufgabe-f3-smoke`, `quali-gutachter-bindung-c1-smoke`, `vehicles-nachzug-b-smoke`) seit dem 13.08. auf staging. Derselbe Fehler, den dieser Block verhindern soll — und der Grund, warum unten in R2 jetzt die Dateinamen stehen statt einer Statusfarbe.
 >
 > ⭐ **Methodischer Kern beider ⚪-Befunde:** Eine Rohzahl („9 Wege ohne createCase", „Text ist irreführend") ist noch kein Auftrag. Erst die Frage *„betrifft das einen echten Nutzer?"* entscheidet — und beide Male lautete die Antwort nach dem Join auf Test-/Smoke-Daten bzw. auf die Fallzahl: nein.
 >
@@ -131,7 +135,24 @@ Die vier operativen Solls (Regel 4, Schritt 1) fehlten komplett und stehen jetzt
 
 ⭐ **Kernbefund:** Von 15 Hängern haben 4 eine Werkstatt — und **alle 4 waren vom KVA-Gate blockiert** (`CLM-2026-00932/-00939/-00977/-00991`, 16–26 Tage still). E ist damit nicht nur ein UI-Blocker-Fix, sondern löst reale Hänger auf.
 
-**Verbleibend:** die UI-Klickwege. Hürden je Lane im Marker.
+**✅ Erledigt (13.08., #5237) — nachgeprüft 18.08.:** Alle vier UI-Klickwege haben eine grüne Spec auf staging:
+
+| Lane | Spec |
+|---|---|
+| E | `tests/e2e/flows/werkstatt-haftpflicht-gate-smoke.spec.ts` |
+| F3 | `tests/e2e/flows/kunde-termin-aufgabe-f3-smoke.spec.ts` |
+| C1 | `tests/e2e/flows/quali-gutachter-bindung-c1-smoke.spec.ts` |
+| B | `tests/e2e/flows/vehicles-nachzug-b-smoke.spec.ts` |
+
+Der E-Smoke trifft dabei genau den wunden Punkt: Das Gate sitzt **serverseitig** in `schlageWerkstattTerminVor`, der Button ist also immer klickbar — ein „ist der Button da"-Test wäre wertlos gewesen. Geprüft wird das Absenden, gegengeprüft mit Selbstzahler (Gate bleibt zu).
+
+⚠ Bekannte Rest-Lücke (im Marker dokumentiert, bewusst offen): Bei **B** ist der Dispatch-Weg gedeckt, die **Kunden-ZB1-Variante** (`confirmZb1Korrekturen`) nicht — sie bräuchte echten Upload + OCR-Lauf.
+
+<details><summary>Ursprünglicher Text: „Verbleibend: die UI-Klickwege"</summary>
+
+Hürden je Lane im Marker. (Überholt — s. Tabelle oben.)
+
+</details>
 
 Pro Lane: **operatives Soll zuerst formulieren**, dann per UI auf prod nachstellen, dann Residue aufräumen.
 
