@@ -10,7 +10,7 @@ import {
   jsonLdScript,
   SITE_URL,
 } from '@/lib/seo/jsonld'
-import { buildLanguageAlternates } from '@/lib/seo/alternates'
+import { buildLanguageAlternates, FEED_ALTERNATE_TYPES } from '@/lib/seo/alternates'
 import { getGoogleReviews } from '@/lib/reviews/google-places'
 import Script from 'next/script'
 import { headers } from 'next/headers'
@@ -58,21 +58,17 @@ export const metadata: Metadata = {
   creator: 'Claimondo',
   publisher: 'Claimondo',
   alternates: {
-    canonical: SITE_URL,
+    // KEIN `canonical` hier. Next.js vererbt Layout-`alternates` an jede Seite,
+    // die selbst keines setzt — ein absolutes SITE_URL-Canonical machte daraus
+    // eine erklaerte Kopie der Startseite. Real getroffen hat das /impressum,
+    // /datenschutz, /agb und /nutzungsbedingungen: alle vier standen in der
+    // Sitemap und nahmen sich per Canonical selbst aus dem Index. Jede Seite
+    // setzt ihr Canonical jetzt selbst (die uebrigen 338 taten das ohnehin).
     ...buildLanguageAlternates('/'),
     // Feed-Autodiscovery (geo-feeds-spec §9): macht die GEO-Feeds fuer Browser,
     // RSS-Reader (Feedly) + Crawler ueber <link rel="alternate"> auffindbar.
     // Vorher waren sie NUR in llms.txt verlinkt (allein der AI-Crawler-Pfad).
-    types: {
-      'application/rss+xml': [
-        { url: '/feed.xml', title: 'Claimondo — Aktuelle Wissens-Updates' },
-        { url: '/feed/katalog.xml', title: 'Claimondo — Wissens-Katalog' },
-      ],
-      'application/feed+json': [
-        { url: '/feed.json', title: 'Claimondo — Aktuelle Wissens-Updates (JSON Feed)' },
-        { url: '/feed/katalog.json', title: 'Claimondo — Wissens-Katalog (JSON Feed)' },
-      ],
-    },
+    types: FEED_ALTERNATE_TYPES,
   },
   openGraph: {
     type: 'website',

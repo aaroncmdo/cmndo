@@ -73,12 +73,19 @@ export async function triggerSvLosgefahren(
     ? await calculateEtaMinutes({ lat: Number(lastPos.lat), lng: Number(lastPos.lng) }, adresse || 'Deutschland')
     : 30
 
-  // DB Update
-  await db.from('gutachter_termine').update({
+  // DB Update — ABBRUCH VOR dem Versand, denn dieser eine Write traegt beides: den
+  // Tracking-Token (die WhatsApp unten verlinkt /kunde/termin/<token> — ohne DB-Eintrag
+  // fuehrt der Link ins Leere) UND die Dedup-Marker (ohne sie kann der SV erneut auf
+  // "Losfahren" druecken und der Kunde bekommt die Nachricht ein zweites Mal).
+  const { error: updateFehler } = await db.from('gutachter_termine').update({
     losgefahren_am: new Date().toISOString(),
     kunden_tracking_token: token,
     notification_losgefahren_gesendet_am: new Date().toISOString(),
   }).eq('id', terminId)
+  if (updateFehler) {
+    console.error(`[KFZ-179] Losgefahren-Update fehlgeschlagen (${terminId}):`, updateFehler.message)
+    return { error: 'Konnte den Termin nicht aktualisieren — bitte erneut versuchen.' }
+  }
 
   // WhatsApp an Kunden
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'

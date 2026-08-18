@@ -12,6 +12,7 @@ import {
   howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.6 (Doc 26) — Tool-Page „Unfallskizze". Faengt die Tool-/Vorlage-
@@ -104,7 +105,10 @@ export default function Page() {
             totalTime: 'PT10M',
             schritte: SCHRITTE_SCHEMA,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/unfallskizze'),
+            url: '/unfallskizze',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Unfallskizze', url: '/unfallskizze' },

@@ -89,10 +89,15 @@ export async function speichereBaselineFahrtzeit(
     const minuten = await fahrtzeitMinuten(Number(lat), Number(lng), zielAdresse)
     if (minuten == null) return
 
-    await supabase
+    // Das umschliessende try/catch faengt diesen Write NICHT (supabase-js wirft nicht) —
+    // es sichert nur den Mapbox-Aufruf darueber ab.
+    const { error: fahrtzeitFehler } = await supabase
       .from('gutachter_termine')
       .update({ geschaetzte_fahrtzeit_min: minuten })
       .eq('id', terminId)
+    if (fahrtzeitFehler) {
+      console.warn(`[CMM-36] Baseline-Fahrtzeit nicht gespeichert (${terminId}):`, fahrtzeitFehler.message)
+    }
   } catch (err) {
     console.warn('[CMM-36] Baseline-Fahrtzeit fehlgeschlagen:', err)
   }

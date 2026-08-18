@@ -7,7 +7,6 @@
     "src/app/api/cron/reminder-dedup.regression.test.ts",
     "src/app/api/cron/send-reminders/route.test.ts",
     "src/app/api/search/route.test.ts",
-    "src/lib/ai/gutachten-ocr.test.ts",
     "src/lib/auftrag/qc.test.ts",
     "src/lib/claims/__tests__/kunde-termine.test.ts",
     "src/lib/inbound/__tests__/process-inbound-media.test.ts",

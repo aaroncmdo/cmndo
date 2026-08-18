@@ -40,7 +40,7 @@ export function generateMetadata(): Metadata {
   const a = getAsset()
   if (!a) return {}
   return {
-    title: `${a.title} · Claimondo`,
+    title: a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: `/${SLUG}` },
     openGraph: {

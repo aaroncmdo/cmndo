@@ -6,6 +6,7 @@ import type { FaqGruppe } from '@/lib/faq/faqs'
 import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -63,7 +64,10 @@ export default async function FaqPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
-          faqPageSchema(alleFragen),
+          faqPageSchema(alleFragen, {
+            dateModified: getRouteLastUpdatedISO('/faq'),
+            url: '/faq',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'FAQ', url: '/faq' },

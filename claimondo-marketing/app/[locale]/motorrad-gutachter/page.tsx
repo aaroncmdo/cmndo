@@ -12,6 +12,7 @@ import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „Motorrad-Gutachter" (höchster
@@ -99,7 +100,10 @@ export default function Page() {
               'Unabhängiges Schadensgutachten für Motorräder nach unverschuldetem Unfall: Bewertung von Sturz- und Rahmenschäden, Schutzkleidung, Wertminderung und Totalschaden. Honorar nach BVSK-Tabelle, für unverschuldet Geschädigte 0 € (§ 249 BGB, gegnerischer Haftpflichtversicherer trägt die Kosten).',
             url: `${SITE_URL}/motorrad-gutachter`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/motorrad-gutachter'),
+            url: '/motorrad-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Motorrad-Gutachter', url: '/motorrad-gutachter' },

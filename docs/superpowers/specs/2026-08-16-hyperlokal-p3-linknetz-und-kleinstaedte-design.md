@@ -198,8 +198,8 @@ Was eine kleinere Stadt schon „geschenkt" mitbringt, wenn sie in `staedte.ts` 
 
 ### B3 · Erzeugen, prüfen, freigeben
 
-* Generierung über die bestehenden Admin-Actions (`generiereEntwurf` → Gate → `in_review`).
-* **Kein Auto-Publish.** Redaktionelle Freigabe ist Pflicht (UWG-Risiko bei generierten Zahlen — dieselbe Regel wie „nie erfundene Bewertungen").
+* Generierung über die bestehenden Admin-Actions (`generiereEntwurf` → Gate → live **oder** `in_review`).
+* **Auto-Publish nach bestandenem Gate** (Aaron-Entscheid 18.08.2026, ersetzt die ursprüngliche Freigabepflicht). Was das Gate besteht — jeder Hotspot mit Quell-URL, ≥ 3 harte Fakten —, geht direkt live; was durchfällt, landet in `in_review` und wartet auf einen Menschen. Dieselbe Bedingung wie bei der B2B-Content-Pipeline seit 02.07. („Auto-Publish NUR nach Validierung"). Begründung und was den Schutz weiterhin trägt: Design vom 12.08., Abschnitt „Auto-Publish nach bestandenem Gate".
 * `verworfen[]` aus dem Gate sichtbar machen: Was rausgeflogen ist, ist die interessantere Hälfte.
 
 ### B4 · Erst Pilot, dann Fläche

@@ -12,6 +12,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -89,7 +90,10 @@ export default function SvVsGutachterPage() {
               'Vermittlung unabhängiger, zertifizierter Kfz-Sachverständiger für ein neutrales Schadengutachten nach einem unverschuldeten Unfall. Freie Gutachterwahl, Kosten trägt die gegnerische Versicherung.',
             url: `${SITE_URL}/kfz-gutachter/sachverstaendiger-vs-gutachter`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/sachverstaendiger-vs-gutachter'),
+            url: '/kfz-gutachter/sachverstaendiger-vs-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },

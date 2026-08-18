@@ -4,6 +4,7 @@ import {
   serviceSchema, breadcrumbsSchema, organizationSchema, faqPageSchema,
   jsonLdScript, GUTACHTER_LANDING_URL, SITE_URL,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { getTranslations } from 'next-intl/server'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 import GutachterPartnerClient from './GutachterPartnerClient'
@@ -86,7 +87,10 @@ export default async function GutachterPartnerPage() {
             description: `Kfz-Sachverständige tragen sich in das Claimondo-Netzwerk ein und erhalten Aufträge direkt ohne Eigenakquise.${netzwerk ? ` ${netzwerk} Sachverständige im bundesweiten Netzwerk.` : ' Bundesweites Netzwerk.'}`,
             url: `${GUTACHTER_LANDING_URL}/`,
           }),
-          faqPageSchema(PARTNER_FAQ),
+          faqPageSchema(PARTNER_FAQ, {
+            dateModified: getRouteLastUpdatedISO('/gutachter-partner'),
+            url: '/gutachter-partner',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: SITE_URL },
             { name: 'Sachverständiger werden', url: `${GUTACHTER_LANDING_URL}/` },

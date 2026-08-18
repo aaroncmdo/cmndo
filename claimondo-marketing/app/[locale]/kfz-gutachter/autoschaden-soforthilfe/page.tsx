@@ -12,6 +12,7 @@ import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, howToSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -118,7 +119,10 @@ export default function AutoschadenSoforthilfePage() {
             estimatedCost: { currency: 'EUR', value: '0' },
             schritte: SCHRITTE.map((s) => ({ name: s.titel, text: s.text })),
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/autoschaden-soforthilfe'),
+            url: '/kfz-gutachter/autoschaden-soforthilfe',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
