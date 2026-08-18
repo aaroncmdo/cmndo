@@ -327,7 +327,7 @@ die profitieren alle vom Datums-Fix. Am Server-Response verifiziert (nicht nur �
   zusaetzlich zum Hero-H1. Beide tragen **denselben** Text. Ein Fix beruehrt 105 Seiten
   Rendering (TOC-Anker haengen daran) bei marginalem GEO-Nutzen. Eigenstaendige
   Design-Entscheidung, kein GEO-Blocker.
-* **B4 (Text-Anteil 2,5 %)** — RSC-Payload-Overhead, architektonisch. Nicht nebenbei zu machen.
+* ~~**B4 (Text-Anteil 2,5 %)**~~ — **nachgezogen, siehe §8.**
 * **B5 (duenne Cornerstones)** — Redaktionsarbeit, kein Code.
 
 ## 7 · Offene Punkte
@@ -339,6 +339,98 @@ die profitieren alle vom Datums-Fix. Am Server-Response verifiziert (nicht nur �
   einzige Loesung, die aus dem Proxy eine echte Messung macht.
 * **Diese Messung enthaelt bewusst keine Massnahmen** — sie ist die Nullmessung. Die Befunde B1–B6
   sind priorisierbar, sobald gewuenscht.
+
+---
+
+## 8 · B4 nachgezogen — 46 % des HTML waren ungenutzte Übersetzungen
+
+Der Befund B4 („Text-Anteil 2,5 %") war zunächst als „architektonisch, nicht nebenbei zu
+machen" zurückgestellt. Eine Analyse der HTML-Zusammensetzung zeigte eine konkrete,
+behebbare Ursache. Gemessen auf `/kfz-gutachter/koeln`:
+
+| Bestandteil | Größe | Anteil |
+|---|---|---|
+| HTML gesamt | 615 KB | 100 % |
+| `<script>` gesamt | 482 KB | 78 % |
+| davon RSC-Flight-Payload | 466 KB | 76 % |
+| **davon i18n-Messages** | **280 KB** | **46 %** |
+| sichtbarer Text | 24 KB | 3,9 % |
+
+Der `NextIntlClientProvider` bekam `messages={messages}` — **alle 51 Namespaces** (265 KB),
+serialisiert in das HTML **jeder** Seite. Darunter `flow` (14,8 KB), `upload` (6,8 KB) und
+`page_meta` (18,3 KB), die eine Stadtseite nie anfasst.
+
+**Server-Komponenten brauchen den Provider gar nicht** — sie übersetzen mit
+`getTranslations()` direkt auf dem Server. Nur `useTranslations()` in `'use client'`
+benötigt die Messages im Browser. Gemessen über alle 76 Client-Dateien: **12 Namespaces**
+(72 KB statt 265 KB). Keine dynamischen Aufrufe, kein `useMessages()`, nur ein Provider —
+die Whitelist ist damit vollständig belegbar, nicht geraten.
+
+**Umgesetzt:** `i18n/client-namespaces.ts` (Whitelist + `pickClientMessages`), Filter im
+`[locale]/layout.tsx`.
+
+**Abgesichert:** `i18n/client-namespaces.test.ts` scannt alle Client-Dateien und schlägt
+fehl, sobald ein genutzter Namespace in der Liste fehlt — läuft in CI (Job `build` →
+„Marketing-Unit-Tests"), ohne Ratchet, rot blockt sofort. Der Guard wurde **gegengeprüft**:
+mit entferntem `faq` wird er rot und benennt die Datei (`app/[locale]/faq/FaqClient.tsx`).
+Ein dritter Test hält die Liste klein (meldet Namespaces, die niemand nutzt), ein vierter
+ist die Positiv-Kontrolle gegen einen toten Scanner.
+
+Nötig ist der Guard, weil der Fehlerfall sonst still wäre: Fehlt ein Namespace, zeigt die
+UI zur Laufzeit den **rohen Key** — kein Build- und kein `tsc`-Fehler.
+
+### Ergebnis, gemessen über 15 Seiten
+
+| Kennzahl | vorher (prod) | nachher (Build) | Δ |
+|---|---|---|---|
+| HTML gesamt | 7.594 KB | **4.496 KB** | **−41 %** |
+| sichtbarer Text | 226,6 KB | 226,5 KB | **unverändert** |
+| Text-Anteil | 3,0 % | **5,0 %** | +67 % |
+| rohe i18n-Keys | 0 | **0** | ✓ |
+
+**Der Text ist identisch** — entfernt wurde ausschließlich Ballast, kein Inhalt. Einzelne
+Seiten: `/faq` 467 → 261 KB (−44 %), `/haftpflicht/4-wochen-frist` 454 → 248 KB (−45 %),
+`/kfz-gutachter/koeln` 615 → 409 KB (−33 %).
+
+Die Vorher-Werte stammen von prod (ohne die Fixes aus §6), die Nachher-Werte vom lokalen
+Build (mit). Da §6 JSON-LD *hinzufügt*, ist der ausgewiesene Vorteil eher zu klein als zu
+groß.
+
+Der Detektor auf rohe Keys prüft den sichtbaren Text gegen alle 51 echten Namespace-Namen
+(präziser als eine Punkt-Heuristik, die auch Domains träfe) und lief auf beiden Ständen
+sauber — auf prod als Positiv-Kontrolle, dass er keine Fehlalarme wirft.
+
+### Wo der Payload danach steht
+
+`/kfz-gutachter/koeln`, erneut zerlegt: **409 KB** (vorher 615 KB). Der Flight-Payload fiel
+von 466 auf 260 KB, der Messages-Block darin von 280 auf **75,7 KB** — exakt die 12
+benötigten Namespaces. Der Rest ist funktional notwendige RSC-Serialisierung der
+Komponenten; ein zweiter Hebel dieser Größenordnung ist dort **nicht** mehr erkennbar.
+
+Weiter ginge nur noch eine Filterung **pro Route** statt global. Das Layout kennt die Route
+aber nicht ohne `headers()` — was Static Rendering für 346 Seiten kosten würde. Für
+geschätzte 40 KB ist das ein schlechtes Geschäft; bewusst nicht gemacht.
+
+---
+
+## 9 · Stand nach allen Fixes (dieselben 27 Seiten, dasselbe Instrument)
+
+| Kennzahl | Ausgangsmessung | nach B1–B4 |
+|---|---|---|
+| **Ø GEO-Score** | 59,2 / 100 | **67,7 / 100** |
+| Ø Text-Anteil im HTML | 2,5 % | **4,5 %** |
+| Ø HTML pro Seite | 456,6 KB | **250,3 KB** |
+| Seiten mit Aktualitäts-Signal | 13 / 27 | **22 / 27** |
+| Seiten mit Quelle | 15 / 27 | 15 / 27 |
+| FAQPage-Schema | 20 / 27 | 20 / 27 |
+| JSON-LD-Parse-Fehler | 0 | 0 |
+
+**Was das nicht ist:** eine Aussage über die Sichtbarkeit. Die Prompt-Abdeckung (2/10)
+hängt an Autorität und Wettbewerb, nicht an der Seitentechnik — sie wird sich erst über
+Wochen bewegen und ist beim nächsten Durchlauf des Prompt-Sets aus §3 zu messen.
+
+**Offen aus der Baseline:** B5 (Cornerstones Ø 747 Wörter, 0,4 Statistiken) — Redaktions-
+arbeit, kein Code. B6 (doppelte H1) — bewusst zurückgestellt, §6.
 
 ---
 

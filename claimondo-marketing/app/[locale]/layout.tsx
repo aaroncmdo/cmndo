@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Montserrat, Noto_Sans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
+import { pickClientMessages } from '@/i18n/client-namespaces'
 import { notFound } from 'next/navigation'
 import {
   organizationSchema,
@@ -235,7 +236,13 @@ export default async function LocaleLayout({
         >
           Zum Hauptinhalt springen
         </a>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        {/* Nur die client-seitig genutzten Namespaces serialisieren (12 statt 51).
+            Alles hier landet im RSC-Flight-Payload und damit im HTML JEDER Seite —
+            vorher 280 KB, also 46 % des ausgelieferten HTML, fuer Uebersetzungen,
+            die zu drei Vierteln nur Server-Komponenten brauchen. Server-Rendering
+            ist unberuehrt: getTranslations() liest die vollen Messages weiter.
+            Begruendung + Pflege-Pflicht: i18n/client-namespaces.ts. */}
+        <NextIntlClientProvider locale={locale} messages={pickClientMessages(messages)}>
           {shouldShowConsent && <ConsentManager />}
           <ClarityInit />
           {/* ProSeal laedt s.provenexpert.net im Besucher-Browser -> nur dort, wo auch
