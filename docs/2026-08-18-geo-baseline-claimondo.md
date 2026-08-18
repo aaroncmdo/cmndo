@@ -429,8 +429,51 @@ geschätzte 40 KB ist das ein schlechtes Geschäft; bewusst nicht gemacht.
 hängt an Autorität und Wettbewerb, nicht an der Seitentechnik — sie wird sich erst über
 Wochen bewegen und ist beim nächsten Durchlauf des Prompt-Sets aus §3 zu messen.
 
-**Offen aus der Baseline:** B5 (Cornerstones Ø 747 Wörter, 0,4 Statistiken) — Redaktions-
-arbeit, kein Code. B6 (doppelte H1) — bewusst zurückgestellt, §6.
+**Offen aus der Baseline:** B5 — siehe §10. B6 (doppelte H1) — bewusst zurückgestellt, §6.
+
+---
+
+## 10 · B5 nachgeschärft: nicht „zu wenig geschrieben", sondern **aufgeteilt**
+
+B5 lautete „Cornerstones sind dünner als ihre Spokes". Die Nachprüfung am gerenderten HTML
+bestätigt die Zahlen — und zeigt, dass es **kein Rendering-Problem** ist (Absätze, Listen und
+H2 sind vorhanden, es ist real weniger Inhalt):
+
+| Seite | Wörter | H2 | Absätze |
+|---|---|---|---|
+| `/haftpflicht/4-wochen-frist` (Spoke) | **1.839** | 15 | 41 |
+| `/unfall-was-tun-als-geschaedigter` (Cornerstone) | 1.032 | 8 | 49 |
+| `/gegnerische-versicherung-zahlt-nicht` | 620 | 6 | 20 |
+| `/unverschuldeter-unfall-rechte` | 541 | 5 | 24 |
+| `/kosten-kfz-gutachten` | 540 | 5 | **8** |
+
+Ein einzelner Spoke trägt das 3,4-fache seiner Cornerstone. Strategisch ist das verkehrt
+herum: Die Cornerstone soll die Themenautorität bündeln und auf die Spokes verteilen.
+
+### Der eigentliche Befund: zwei Seiten beantworten dieselbe Frage
+
+| URL | `<title>` | Wörter |
+|---|---|---|
+| `/kosten-kfz-gutachten` | „Was kostet ein Kfz-**Gutachten**? Für Geschädigte 0 €" | 540 |
+| `/kfz-gutachter/kosten` | „Was kostet ein Kfz-**Gutachter**? — 0 € bei Fremdverschulden (§ 249 BGB)" | 841 |
+
+Für einen Nutzer — und für ein Antwortsystem — ist das **dieselbe Frage**. Zwei URLs
+konkurrieren darum, beide mittelmäßig ausgestattet; keine gewinnt klar. Das erklärt B5
+besser als „zu wenig geschrieben": die Substanz ist auf zwei Seiten **verteilt**.
+
+(Nicht betroffen: `/decoder/kfz-gutachter-kosten-tabelle` — die BVSK-Tabelle ist ein eigenes
+Format mit eigenem Zweck und war in der Messung die stärkste Seite überhaupt, 71/100.)
+
+### Empfehlung
+
+**Zusammenführen statt beides ausbauen.** Eine Seite trägt die Frage „Was kostet das?"
+vollständig (Honorarspannen, wer zahlt, § 249, Kürzungsfälle, Verweis auf die BVSK-Tabelle),
+die andere wird darauf umgeleitet. Das verdoppelt die Substanz der bleibenden Seite, ohne
+dass eine Zeile neu erfunden werden muss — der Stoff existiert bereits, nur eben zweigeteilt.
+
+⚠ Das ist eine **Redaktions- und SEO-Entscheidung**, keine technische: Welche URL bleibt,
+hängt an Rankings und Backlinks, die außerhalb dieser Messung liegen. Vor dem Umbau mit der
+SEO-Lane abstimmen — dort läuft parallel ein Audit der Marketing-Seiten.
 
 ---
 
