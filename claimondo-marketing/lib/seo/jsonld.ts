@@ -10,6 +10,18 @@ export const SITE_URL = 'https://claimondo.de'
 // Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
 export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
 export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
+
+/**
+ * Standard-Vorschaubild fuer `openGraph.images`.
+ *
+ * Muss von jeder Seite mitgegeben werden, die einen EIGENEN `openGraph`-Block
+ * setzt: Next merged `metadata` nur FLACH (Doku "Merging") — ein eigener
+ * openGraph-Block ersetzt den des Layouts komplett, inklusive `images`. Genau
+ * so verloren 167 Seiten ihr Vorschaubild, obwohl das Layout eines definiert.
+ */
+export const OG_DEFAULT_IMAGES = [
+  { url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' },
+]
 export const WERKSTATT_LANDING_URL = 'https://werkstatt.claimondo.de'
 export const FLOTTE_LANDING_URL = 'https://flotte.claimondo.de'
 export const SITE_NAME = 'Claimondo'

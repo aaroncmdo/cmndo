@@ -11,6 +11,7 @@ import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBloc
 import {
   articleSchema, howToSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
+  OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -45,6 +46,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'article',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: URL_SELF,
       title: t('unfall_was_tun.og_title'),
       description: t('unfall_was_tun.og_description'),
