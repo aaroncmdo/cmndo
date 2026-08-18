@@ -138,13 +138,16 @@ export async function updateKundePosition(
   if (upsertErr) return { success: false, error: upsertErr.message }
 
   if (etaMinutes != null) {
-    await db
+    const { error: etaFehler } = await db
       .from('gutachter_termine')
       .update({
         kunde_eta_minuten: etaMinutes,
         kunde_eta_letzte_berechnung: new Date().toISOString(),
       })
       .eq('id', terminId)
+    if (etaFehler) {
+      console.error(`[kunde-tracking] ETA nicht gespeichert (Termin ${terminId}):`, etaFehler.message)
+    }
   }
   return { success: true, etaMinutes }
 }
@@ -166,8 +169,18 @@ export async function stopKundeTracking(
   const patch: Record<string, unknown> = { kunde_tracking_aktiviert: false }
   if (opts?.angekommen) patch.kunde_angekommen_am = new Date().toISOString()
 
-  await db.from('gutachter_termine').update(patch).eq('id', terminId)
-  await db.from('kunde_live_position').delete().eq('termin_id', terminId)
+  // Das Flag ist der eigentliche Stopp. Bleibt es auf true, wird der Kunde weiter
+  // als "trackt" gefuehrt, obwohl er die Freigabe beendet hat — deshalb hier ein
+  // echter Fehler statt eines stillen "success".
+  const { error: stoppFehler } = await db.from('gutachter_termine').update(patch).eq('id', terminId)
+  if (stoppFehler) {
+    console.error(`[kunde-tracking] Stopp NICHT gespeichert (Termin ${terminId}) — Tracking bleibt aktiv:`, stoppFehler.message)
+    return { success: false, error: 'Das Tracking konnte nicht beendet werden — bitte erneut versuchen.' }
+  }
+  const { error: posFehler } = await db.from('kunde_live_position').delete().eq('termin_id', terminId)
+  if (posFehler) {
+    console.error(`[kunde-tracking] Live-Position nicht entfernt (Termin ${terminId}):`, posFehler.message)
+  }
   return { success: true }
 }
 

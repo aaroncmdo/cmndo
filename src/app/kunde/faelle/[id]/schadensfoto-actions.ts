@@ -89,10 +89,15 @@ export async function uploadSchadensfotoKunde(
         : []
       const merged = [...existing]
       for (const u of neueUrls) if (!merged.includes(u)) merged.push(u)
-      await admin
+      // Das umschliessende try faengt diesen Write nicht. Bleibt er aus, liegen die
+      // vom Kunden hochgeladenen Fotos im Storage, tauchen aber nirgends auf.
+      const { error: fotoFehler } = await admin
         .from('leads')
         .update({ schadensfoto_urls: merged, updated_at: new Date().toISOString() } as never)
         .eq('id', ownership.leadId)
+      if (fotoFehler) {
+        console.error(`[uploadSchadensfotoKunde] Foto-URLs nicht gespeichert (Lead ${ownership.leadId}, ${neueUrls.length} neu):`, fotoFehler.message)
+      }
     } catch (err) {
       console.error('[uploadSchadensfotoKunde] leads.schadensfoto_urls-Update fehlgeschlagen (non-fatal):', err)
     }

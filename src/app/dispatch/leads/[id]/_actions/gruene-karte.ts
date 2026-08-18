@@ -57,7 +57,9 @@ export async function setGrueneKarteAngefragt(
 
     if (!existing) {
       const kunde = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : ''
-      await admin.from('tasks').insert({
+      // Dieser Task ist die einzige Erinnerung, die Antwort des Deutschen Bueros
+      // nachzuverfolgen. Das umschliessende try faengt den Insert nicht.
+      const { error: reminderFehler } = await admin.from('tasks').insert({
         lead_id: leadId,
         typ: 'kb',
         task_code: 'gruene-karte-reminder',
@@ -74,6 +76,9 @@ export async function setGrueneKarteAngefragt(
         auto_erstellt: true,
         trigger_event: 'gruene-karte-angefragt',
       })
+      if (reminderFehler) {
+        console.error(`[AAR-314] Gruene-Karte-Reminder NICHT erstellt (Lead ${leadId}) — Antwort wird nicht nachverfolgt:`, reminderFehler.message)
+      }
     }
   } catch (err) {
     console.error('[AAR-314] Grüne-Karte-Reminder-Task fehlgeschlagen:', err)
