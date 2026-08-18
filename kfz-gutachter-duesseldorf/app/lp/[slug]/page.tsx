@@ -4,6 +4,13 @@ import { LandingPage } from '@/components/LandingPage'
 import { SPOKE_SLUGS, getCity } from '@/lib/cluster'
 import { metadataForCity } from '@/lib/seo'
 
+// ISR (18.08.2026): Die Ortstiefe aus stadt_lokalinhalte kommt zur Laufzeit aus
+// der DB. Ohne revalidate waere sie beim Deploy eingefroren — jeder neue
+// freigegebene Inhalt braeuchte einen Redeploy, und "automatischer Content"
+// waere keiner. Stuendlich, wie die Stadtseiten auf claimondo.de.
+export const revalidate = 3600
+
+
 // Statische Spoke-Pages fuer alle Staedte AUSSER der Hauptstadt (= Hub "/").
 export function generateStaticParams() {
   return SPOKE_SLUGS.map((slug) => ({ slug }))

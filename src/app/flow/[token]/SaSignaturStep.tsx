@@ -128,7 +128,12 @@ export default function SaSignaturStep({
       onSigned(result.fallId)
 
       // 3. SA-PDF generieren (Background, non-blocking)
-      generateSAPdf(result.fallId, leadId, publicUrl, token).catch(() => {})
+      // Bewusst ohne Nutzer-Fehlermeldung — die Beauftragung ist an dieser Stelle durch.
+      // Der Fehler wird aber nicht mehr verschluckt: die Server-Action loggt ihre Writes
+      // selbst, hier bleibt der Aufruf-Fehler sichtbar.
+      generateSAPdf(result.fallId, leadId, publicUrl, token).catch((err: unknown) =>
+        console.error('[SaSignaturStep] SA-PDF-Erzeugung fehlgeschlagen:', err),
+      )
     } catch (err) {
       setError(err instanceof Error ? err.message : t('step_sa.error_fallback'))
     } finally {

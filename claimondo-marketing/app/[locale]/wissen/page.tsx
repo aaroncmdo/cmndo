@@ -17,7 +17,7 @@ const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {
-  title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung | Claimondo',
+  title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung',
   description:
     'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden — verständlich erklärt, mit BGH-Bezug.',
   alternates: { canonical: '/wissen' },

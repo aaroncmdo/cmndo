@@ -120,5 +120,13 @@ export default async function middleware(req: NextRequest) {
 export const config = {
   // Alle Pfade ausser Next-Internals, API, OG-Image-Metadata-Route und statischen
   // Files (mit Datei-Endung: sitemap.xml/robots.txt/feed.json/llms.txt/favicon.ico).
-  matcher: ['/((?!_next/|api/|opengraph-image|.*\\.[^/]+$).*)'],
+  //
+  // `.well-known/` ist zusaetzlich ausgenommen: Verifikations- und Discovery-Endpunkte
+  // dort sind protokoll-fest und duerfen NIE ein Locale-Prefix bekommen. Die bestehende
+  // Datei-Endungs-Ausnahme (`.*\.[^/]+$`) greift fuer sie nicht — der einzige Punkt im
+  // Pfad steht in `.well-known` selbst, danach folgt noch ein `/`, also matcht
+  // `[^/]+$` nicht. Ohne diese Zeile lief `/.well-known/openai-apps-challenge` in das
+  // Locale-Routing und antwortete 404, obwohl die Route selbst sauber 200 lieferte
+  // (nur im echten Request sichtbar — Build, tsc und Route-Manifest waren gruen).
+  matcher: ['/((?!_next/|api/|\\.well-known/|opengraph-image|.*\\.[^/]+$).*)'],
 }

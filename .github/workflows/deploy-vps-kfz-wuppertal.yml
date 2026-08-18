@@ -44,6 +44,10 @@ jobs:
         run: npm run build
         env:
           NODE_OPTIONS: --max-old-space-size=6144
+          # Ortstiefe aus stadt_lokalinhalte (P3): Anon-Key + RLS-Policy, kein
+          # Geheimnis — aber wie im Marketing-Deploy ueber Secrets gefuehrt.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           # 3 public NEXT_PUBLIC_-Werte (= VPS-Runtime-ENV, kein Secret noetig):
           NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-wuppertal.de
           NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
@@ -92,6 +96,8 @@ jobs:
             NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-wuppertal.de
             NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de
             NEXT_PUBLIC_GTM_ID=GTM-KD2L63T3
+            NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+            NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
             ENV
             rm -rf "${APP}-new/public/assets/img"
             mkdir -p "${APP}-new/public/assets"
