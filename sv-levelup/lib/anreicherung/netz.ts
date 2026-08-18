@@ -61,6 +61,9 @@ export function erzeugeHoler(opts: HolerOpts = {}): Holer {
   const letzter = new Map<string, number>()
 
   async function einVersuch(url: string): Promise<Antwort & { endgueltig?: boolean }> {
+    // Die Uhr laeuft AB HIER — die Drossel liegt davor und gehoert nicht zur
+    // Antwortzeit der fremden Seite (s. Antwort.dauerMs in lauf.ts).
+    const begonnen = jetzt()
     try {
       const res = await f(url, {
         headers: { 'user-agent': USER_AGENT, accept: 'text/html,text/plain,*/*' },
@@ -70,13 +73,18 @@ export function erzeugeHoler(opts: HolerOpts = {}): Holer {
 
       // Ein PDF oder Bild interessiert uns nicht — Header lesen genuegt.
       const typ = res.headers.get('content-type') ?? ''
-      if (typ && !/text\/|xml|json/i.test(typ)) return { status: res.status, text: '' }
+      if (typ && !/text\/|xml|json/i.test(typ)) {
+        return { status: res.status, text: '', dauerMs: jetzt() - begonnen }
+      }
 
       const roh = await res.text()
-      return { status: res.status, text: roh.slice(0, MAX_BYTES) }
+      return { status: res.status, text: roh.slice(0, MAX_BYTES), dauerMs: jetzt() - begonnen }
     } catch (err) {
       const code = fehlerCode(err)
-      return { status: 0, text: '', endgueltig: ENDGUELTIG.includes(code) }
+      return {
+        status: 0, text: '', dauerMs: jetzt() - begonnen,
+        endgueltig: ENDGUELTIG.includes(code),
+      }
     }
   }
 
@@ -107,7 +115,7 @@ export function erzeugeHoler(opts: HolerOpts = {}): Holer {
     }
 
     opts.protokoll?.(`${antwort.status} ${url}`)
-    const ergebnis = { status: antwort.status, text: antwort.text }
+    const ergebnis = { status: antwort.status, text: antwort.text, dauerMs: antwort.dauerMs }
 
     if (opts.cachen) {
       // Aeltesten Eintrag verdraengen — Map haelt die Einfuegereihenfolge.

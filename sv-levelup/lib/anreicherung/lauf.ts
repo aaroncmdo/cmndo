@@ -11,7 +11,19 @@ export const IMPRESSUM_PFADE = ['/impressum', '/kontakt', '/imprint', '/legal-no
 export const USER_AGENT =
   'SVLevelUp/1.0 (+https://sv-levelup.claimondo.de; Kontakt-Recherche, robots.txt-konform)'
 
-export type Antwort = { status: number; text: string }
+export type Antwort = {
+  status: number
+  text: string
+  /**
+   * Reine Abrufdauer in Millisekunden — OHNE Drosselzeit.
+   *
+   * ⚠ Wer die Zeit um `hole()` herum selbst misst, misst die Drossel mit: vor
+   * dem zweiten Abruf auf denselben Host wartet der Holer 2 Sekunden. Am
+   * echten Lauf aufgefallen (18.08.): drei Websites „brauchten" 1532/2164/2058
+   * ms und verloren alle denselben Punkt — gemessen wurde die Wartezeit.
+   */
+  dauerMs?: number
+}
 
 /**
  * Injizierbar, damit die Orchestrierung ohne echtes Netz testbar ist. Die
