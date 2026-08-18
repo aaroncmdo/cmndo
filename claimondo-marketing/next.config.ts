@@ -85,6 +85,15 @@ const nextConfig: NextConfig = {
         source: '/.well-known/openai-apps-challenge',
         destination: '/api/openai-apps-challenge',
       },
+      {
+        // Domain-Verifikation der offiziellen MCP-Registry. Der Namespace
+        // `de.claimondo/sv-finder` ist Reverse-DNS unserer Domain und verlangt
+        // deshalb einen Eigentumsnachweis — wahlweise per DNS-TXT oder ueber
+        // genau diese Datei. Wir nutzen den HTTP-Weg: kein DNS-Zugriff noetig,
+        // sofort widerrufbar (ENV leeren).
+        source: '/.well-known/mcp-registry-auth',
+        destination: '/api/mcp-registry-auth',
+      },
     ]
   },
 }
