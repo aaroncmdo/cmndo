@@ -57,3 +57,19 @@ export const SITE = {
 } as const
 
 export type SiteConfig = typeof SITE
+
+/**
+ * Standard-Vorschaubild fuer `openGraph.images` / `twitter.images`.
+ *
+ * Muss von JEDER Stelle mitgegeben werden, die einen eigenen `openGraph`- oder
+ * `twitter`-Block setzt: Next merged `metadata` nur FLACH — ein eigener Block
+ * ersetzt den des Layouts komplett, inklusive `images`. Auf prod gemessen
+ * (18.08.): Startseite hatte ein Bild, /nutzungsausfall, /schmerzensgeld,
+ * /wer-hat-schuld und /verbringungskosten keins.
+ */
+export const OG_IMAGE = {
+  url: '/og-image.jpg',
+  width: 1200,
+  height: 630,
+  alt: SITE.name,
+}

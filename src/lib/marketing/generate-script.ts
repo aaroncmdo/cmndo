@@ -9,6 +9,9 @@ import { ContentScriptSchema, type ContentScript, type ContentFormat } from './s
  */
 
 const MODEL = 'claude-opus-4-8'
+/** Als Konstante, damit die Abbruch-Meldung unten denselben Wert nennt wie der
+ *  Aufruf — sonst laufen Limit und Fehlertext beim naechsten Anheben auseinander. */
+const MAX_TOKENS = 1500
 
 const TOOL: Anthropic.Tool = {
   name: 'liefere_clip',
@@ -81,12 +84,25 @@ export async function generiereSkript(
       : 'Ratgeber-Clip, aufklaerend, Mehrwert zuerst. Bogen: Hook (Frage oder haeufiger Fehler) -> 2-3 konkrete Schritte/Tipps. LETZTES Segment = praegnantes Fazit. Kein harter Verkauf.'
   const res = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 1500,
+    max_tokens: MAX_TOKENS,
     system: SYSTEM,
     tools: [TOOL],
     tool_choice: { type: 'tool', name: 'liefere_clip' },
     messages: [{ role: 'user', content: `Thema: "${thema}". Format: ${modus}` }],
   })
+  // Reisst die Antwort das Token-Limit, liefert die API einen unvollstaendigen
+  // tool_use-Block. Hier faellt das immerhin auf — `ContentScriptSchema.parse`
+  // wirft. Aber es wirft als Schema-Verstoss, und wer den Fehler liest, sucht
+  // den Bug im Prompt statt am Limit. Die explizite Meldung spart diese Runde.
+  //
+  // (Anders als bei flow-intake/extract, wo Fallbacks den Abbruch STILL
+  // verschluckten — siehe BROADCAST-anthropic-stop-reason-nie-geprueft.)
+  if (res.stop_reason === 'max_tokens') {
+    throw new Error(
+      `Claude-Antwort am Token-Limit abgeschnitten (max_tokens=${MAX_TOKENS}) — Skript unvollstaendig`,
+    )
+  }
+
   const call = res.content.find((c) => c.type === 'tool_use')
   if (!call || call.type !== 'tool_use') throw new Error('Kein tool_use in Claude-Antwort')
   return ContentScriptSchema.parse(call.input)
