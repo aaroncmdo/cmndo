@@ -60,6 +60,18 @@ describe('pruefeBefunde', () => {
     expect(r.fehlstellen[0].grund).toContain('grund')
   })
 
+  /**
+   * ⚠ Ein nicht erhobener Wert ist NICHT rot. Rot heisst „schlecht"; eine
+   * Fehlstelle ist kein Mangel des Betriebs, sondern eine Grenze der Messung.
+   * Mit roter Ampel waere „Impressum nicht erhoben" optisch nicht von
+   * „Impressum fehlt" zu unterscheiden — und R-B waere in der Anzeige wieder
+   * eingeebnet.
+   */
+  it('faerbt einen nicht erhobenen Wert offen, nicht rot', () => {
+    const b = nichtErhoben('lade', 'Ladezeit', 4, 'Seite antwortete nicht', 'https://x.de', JETZT)
+    expect(b.ampel).toBe('offen')
+  })
+
   it('laesst wert=null MIT grund durch', () => {
     const r = pruefeBefunde([nichtErhoben('lade', 'Ladezeit', 4, 'Seite antwortete nicht', 'https://x.de', JETZT)])
     expect(r.gueltig).toHaveLength(1)

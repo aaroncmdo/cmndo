@@ -21,11 +21,19 @@ export const GEWICHTE = { sichtbar: 4, rang: 8, median: 4, dynamik: 2 }
 /** Kuerzere Namenskerne sind fuer einen Abgleich nicht belastbar. */
 const MIN_KERN = 4
 
+/**
+ * Median der Bewertungszahlen — auf eine ganze Zahl gerundet.
+ *
+ * ⚠ Bewertungen sind Zaehlwerte. Bei gerader Anzahl liefert der echte Median
+ * einen halben Wert, und im Befund stand dann „1 von 76,5" bzw. „75,5
+ * Bewertungen fehlen dorthin" — eine halbe Bewertung kann niemand sammeln.
+ * Aufgerundet, damit die Latte nicht zu niedrig erscheint.
+ */
 function medianVon(zahlen: number[]): number {
   if (zahlen.length === 0) return 0
   const s = [...zahlen].sort((a, b) => a - b)
   const m = Math.floor(s.length / 2)
-  return s.length % 2 === 0 ? (s[m - 1] + s[m]) / 2 : s[m]
+  return s.length % 2 === 0 ? Math.ceil((s[m - 1] + s[m]) / 2) : s[m]
 }
 
 /**
