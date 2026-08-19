@@ -552,7 +552,7 @@ CI fährt `npm run check:anthropic-stop-reason -- --ratchet`. Lokal (ohne Flag) 
 
 **Nur erzwungene Tool-Antworten** (`tool_choice`) — bewusst nicht jeder `messages.create`-Aufruf: Freitext bricht sichtbar mitten im Satz ab, ein halbes Tool-JSON sieht dagegen aus wie „das Modell hatte nichts". 28 Aufrufer gäbe es insgesamt; die gefährliche Kombination trugen genau zwei. Pure Logik: `scripts/lib/anthropic-stop-reason-scan.mjs` (unit-getestet, 10 Fälle). **Kommentare werden gestrippt** — sonst blendet ein `// TODO: stop_reason später` das Gate.
 
-**Baseline 1** (`flow-intake/extract.ts`, wird von #5377 behoben → danach auf 0 senken mit `-- --update-baseline`). Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
+**Baseline 0** — kein Bestand, kein Grandfathering. Jeder neue erzwungene Tool-Aufruf ohne `stop_reason`-Prüfung blockt sofort (nachgemessen: Probe-Datei eingebaut → exit 1, entfernt → exit 0). Der einzige Alt-Verstoß (`flow-intake/extract.ts`) ist mit #5377 behoben. Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
 
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
