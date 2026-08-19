@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next'
-import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL, FLOTTE_LANDING_URL } from '@/lib/seo/jsonld'
+import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL, WERKSTATT_LANDING_URL, FLOTTE_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE, isHubCity } from '@/lib/kfz-gutachter/staedte'
 import { getStadtLastUpdated } from '@/lib/kfz-gutachter/freshness'
 import { getRouteLastUpdated } from '@/lib/seo/freshness'
@@ -201,6 +201,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${MAKLER_LANDING_URL}/`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      // Fehlte hier als einzige der vier Recruiting-Subdomains: lib/seo/jsonld.ts
+      // definiert GUTACHTER_/MAKLER_/WERKSTATT_/FLOTTE_LANDING_URL, die Sitemap
+      // listete nur drei. Die Konstante steht dort durch einen spaeter eingefuegten
+      // Block (OG_DEFAULT_IMAGES) von ihren Geschwistern getrennt — beim Anlegen
+      // dieser Eintraege uebersehen. werkstatt.claimondo.de ist live, von der
+      // Startseite verlinkt und crawlbar, stand aber in keiner Sitemap.
+      url: `${WERKSTATT_LANDING_URL}/`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.7,
