@@ -53,6 +53,43 @@ export type GateBefund = {
 export const MIN_SUBSTANZ_SCORE = 2
 
 /**
+ * Wortstaemme, die im Deutschen ZWINGEND einen Umlaut oder ein ß tragen.
+ *
+ * Bewusst eine Liste und kein Scan auf blosses `ae`/`oe`/`ue`/`ss`: nach kurzem
+ * Vokal ist `ss` korrekt (Fluss, Schloss, dass), und `oe`/`ae` stecken in echten
+ * Ortsnamen dieser Lane — Soest, Coesfeld, Oer-Erkenschwick, Baesweiler. Ein
+ * naiver Scan haette die alle geflaggt.
+ */
+const ASCII_ERSATZ_STAEMME = [
+  'strasse', 'buendel', 'fuer', 'ueber', 'koenn', 'muess', 'groess', 'naechst',
+  'waehrend', 'haeufig', 'moeglich', 'zurueck', 'aendern', 'hoehe', 'laeng',
+  'staerk', 'ueblich', 'aeusser', 'oeffentl', 'schliess', 'gemaess', 'fuehr',
+  'pruef', 'schaeden', 'beschaedig', 'zustaendig', 'unfaelle', 'spaeter',
+  'taeglich', 'jaehrl', 'oertlich', 'verzoeger', 'zaehl', 'waehl',
+]
+
+const ASCII_ERSATZ_REGEX = new RegExp(`\\p{L}*(?:${ASCII_ERSATZ_STAEMME.join('|')})\\p{L}*`, 'giu')
+
+/**
+ * Ab dieser Textlaenge ist deutscher Fliesstext OHNE einen einzigen Umlaut
+ * praktisch unmoeglich (ä/ö/ü/ß machen ~1,5 % der Buchstaben aus — auf 800
+ * Zeichen waeren ~12 zu erwarten, die Wahrscheinlichkeit fuer null liegt bei
+ * ~1e-5). Darunter ist Umlautfreiheit legitim: "Bonn-Nord, A565, B9".
+ */
+const MIN_ZEICHEN_FUER_UMLAUT_PFLICHT = 800
+
+/**
+ * Findet ASCII-Ersatzschreibweisen ("buendelt", "Kaiserstrasse") in einem Text.
+ *
+ * Frontend-Texte muessen echte Umlaute tragen (AGENTS.md §Sprache) — bei
+ * generierten Ortsinhalten ist das nicht selbstverstaendlich: das Modell liefert
+ * nicht-deterministisch mal so, mal so (gemessen 19.08., siehe gate.test.ts).
+ */
+export function findeAsciiUmlautErsatz(text: string): string[] {
+  return [...new Set(text.match(ASCII_ERSATZ_REGEX) ?? [])]
+}
+
+/**
  * Belastbare Quelle = absolute http(s)-URL mit echtem Host.
  *
  * Bewusst streng: relative Pfade, `example.com`, blosse Behoerdennamen ohne Link
@@ -173,6 +210,41 @@ export function pruefeLokalinhalt(
 
   if (stadt && !textkorpus.includes(stadt)) {
     gruende.push(`Ortsbezug fehlt — "${stadtName}" kommt im Inhalt nicht vor`)
+  }
+
+  // --- Umlaut-Pflicht --------------------------------------------------------
+  // Eigener Korpus, weil hier ALLE nutzersichtbaren Werte zaehlen (auch Achsen
+  // und Ortsteile) — der Ortsbezug-Korpus oben ist absichtlich enger.
+  // WERTE, nicht Schluessel: `bundesstrassen` ist ein Schema-Feldname und steht
+  // in jedem Entwurf; ein Scan ueber JSON.stringify() haette am 19.08. alle
+  // fuenf erzeugten Staedte geflaggt, auch die drei einwandfreien.
+  const sichtbar = [
+    ...bereinigt.stadtbezirke.flatMap((b) => [b.name, ...(b.ortsteile ?? [])]),
+    ...bereinigt.hauptachsen.autobahnen,
+    ...bereinigt.hauptachsen.bundesstrassen,
+    ...bereinigt.hauptachsen.knoten,
+    ...bereinigt.unfallHotspots.flatMap((h) => [h.ort, h.beschreibung]),
+    ...bereinigt.lokaleFaqs.flatMap((f) => [f.frage, f.antwort]),
+    bereinigt.heroAnker ?? '',
+    bereinigt.topografieAnker ?? '',
+  ].join(' ')
+
+  const ersatz = findeAsciiUmlautErsatz(sichtbar)
+  if (ersatz.length > 0) {
+    gruende.push(
+      `ASCII-Ersatz statt Umlauten: ${ersatz.slice(0, 6).join(', ')}` +
+        (ersatz.length > 6 ? ` (+${ersatz.length - 6} weitere)` : ''),
+    )
+  } else if (
+    sichtbar.length >= MIN_ZEICHEN_FUER_UMLAUT_PFLICHT &&
+    !/[äöüßÄÖÜ]/.test(sichtbar)
+  ) {
+    // Der frankfurt-Fall: die Musterliste greift nicht, weil das Modell auch die
+    // Woerter umschrieb — aber 11.836 Zeichen deutscher Text ohne EINEN Umlaut
+    // sind der Beweis fuer sich.
+    gruende.push(
+      `Kein einziger Umlaut auf ${sichtbar.length} Zeichen — Text ist durchgaengig transliteriert`,
+    )
   }
 
   return {

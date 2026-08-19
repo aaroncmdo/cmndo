@@ -16,17 +16,18 @@ describe('getStadtByName', () => {
   })
 
   it('liefert null fuer einen Ort ohne eigene Seite', () => {
-    // Wesseling, Bruehl und Huerth stehen in koelns angrenzendeOrte, haben aber
-    // keine Stadtseite. Ein Link dorthin waere eine 404.
+    // Beispiele aus dem Umland der Nicht-NRW-Hubs. Sie stehen in
+    // angrenzendeOrte und haben keine Stadtseite — ein Link dorthin waere 404.
     //
-    // Die drei sind kein Zufall, sondern das Ergebnis der Welle-8-Messung: sie
-    // liegen NICHT im Einzugsgebiet eines verifizierten Sachverstaendigen,
-    // obwohl Bruehl und Huerth naeher an Koeln liegen als das aufgenommene
-    // Roesrath. Die Koelner SVs sitzen im Osten der Stadt. (Roesrath stand hier
-    // bis 18.08.2026 als Beispiel — es hat jetzt eine Seite.)
-    expect(getStadtByName('Wesseling')).toBeNull()
-    expect(getStadtByName('Brühl')).toBeNull()
-    expect(getStadtByName('Hürth')).toBeNull()
+    // ⚠ Dieser Test wurde schon zweimal von der Wirklichkeit ueberholt: erst
+    // stand Roesrath hier, dann Wesseling/Bruehl/Huerth — alle haben inzwischen
+    // eine Seite. Der Ausbau lief bisher in NRW, deshalb jetzt Beispiele aus
+    // Hamburg-, Berlin- und Muenchen-Umland. Wer dort ausbaut, tauscht sie
+    // wieder; die generische Absicherung leistet ohnehin der Verkuerzungs-Test
+    // weiter unten, nicht diese Einzelfaelle.
+    expect(getStadtByName('Norderstedt')).toBeNull()
+    expect(getStadtByName('Teltow')).toBeNull()
+    expect(getStadtByName('Dachau')).toBeNull()
     expect(getStadtByName('')).toBeNull()
   })
 
@@ -62,9 +63,11 @@ describe('angrenzendeOrte — welche sind verlinkbar', () => {
   it('sind mehr Orte als verlinkbare — der Rest bleibt bewusst Text', () => {
     const verlinkbar = alleOrte.filter((ort) => getStadtByName(ort) !== null)
     expect(alleOrte.length).toBeGreaterThan(verlinkbar.length)
-    // 29 -> 37 mit Welle 8: die acht neuen Orte standen alle schon als Text in
-    // angrenzendeOrte und werden allein durch ihre Existenz zu Links.
-    expect(verlinkbar.length).toBe(37)
+    // 29 -> 37 (Welle 8) -> 48 (Welle 9): die neuen Orte standen alle schon als
+    // Text in angrenzendeOrte und werden allein durch ihre Existenz zu Links.
+    // Damit hat KEIN NRW-Ort aus diesen Listen mehr eine Luecke; der Rest sind
+    // Umlandorte von Hamburg, Berlin und Muenchen.
+    expect(verlinkbar.length).toBe(48)
   })
 
   it('schreibt keinen Ort verkuerzt, dessen Langform eine Seite hat', () => {
@@ -293,21 +296,78 @@ describe('P3-B3 — Auswahl nach SV-Abdeckung', () => {
     )
   })
 
-  it('nimmt die kleineren Orte auf, nicht die naeheren', () => {
-    // Der Kern dieser Welle: Auswahlkriterium ist die gemessene Abdeckung durch
-    // einen verifizierten Sachverstaendigen, nicht Groesse und nicht Distanz.
-    // Roesrath (29 Tsd.) ist drin, das groessere und naeher an Koeln liegende
-    // Huerth (60 Tsd.) nicht — dort deckt keine Isochrone.
-    expect(getStadtBySlug('roesrath')).not.toBeNull()
-    expect(getStadtByName('Hürth')).toBeNull()
-    expect(getStadtByName('Brühl')).toBeNull()
+  it('nahm die kleineren Orte VOR den groesseren auf', () => {
+    // Der Kern dieser Welle war: Auswahlkriterium ist die gemessene Abdeckung
+    // durch einen verifizierten Sachverstaendigen, nicht Groesse und nicht
+    // Distanz. Roesrath (29 Tsd.) kam deshalb rein, das groessere und naeher an
+    // Koeln liegende Huerth (62 Tsd.) nicht — dort deckt keine Isochrone.
+    //
+    // ⚠ Die urspruengliche Fassung pruefte `getStadtByName('Hürth') === null`.
+    // Das ging mit Welle 9 kaputt, die Huerth aus einem ANDEREN Grund aufnahm
+    // (Luecke oberhalb 40 Tsd.). Beide Gruende stehen nebeneinander und
+    // widersprechen sich nicht — nachweisbar bleibt die Reihenfolge, und genau
+    // die traegt die Aussage.
+    const rang = (slug: string) => STAEDTE.findIndex((s) => s.slug === slug)
+    expect(rang('roesrath')).toBeGreaterThan(-1)
+    expect(rang('roesrath')).toBeLessThan(rang('huerth'))
+    expect(rang('roesrath')).toBeLessThan(rang('bruehl'))
+  })
+})
+
+describe('P3-B4 — Vollstaendigkeit NRW ab 40 Tsd.', () => {
+  // ⭐ DER TEST, DER GEFEHLT HAT.
+  //
+  // Bis zum 18.08.2026 entstanden die Wellen aus Einzelrecherchen, und die
+  // Aussage "NRW ab 40 Tsd. ist vollstaendig" wurde nie gegen eine Gesamtliste
+  // gehalten. Der erste Abgleich fand sieben Fehlende — darunter Huerth mit
+  // 61.732 Einwohnern, das schon in Welle 6 ("die 23 fehlenden Staedte ueber
+  // 60 Tsd.") haette stehen muessen. Eine Luecke dieser Art faellt niemandem
+  // auf: die Seite fehlt einfach, es gibt keinen Fehler, den man sehen koennte.
+  //
+  // Quelle: Wikipedia "Liste der Gemeinden in Nordrhein-Westfalen",
+  // Stand 31.12.2025 — alle 98 Gemeinden ab 40.000 Einwohnern.
+  //
+  // ⚠ Die Liste ist eine Momentaufnahme. Waechst eine Gemeinde ueber die
+  // Schwelle, gehoert sie hier ergaenzt (und dann gebaut). Wer die naechste
+  // Groessenklasse aufnimmt, erweitert diese Liste — sie ist das Gegenstueck
+  // zur Behauptung, nicht ihre Wiederholung.
+  const NRW_AB_40_TSD = [
+    'Köln', 'Düsseldorf', 'Dortmund', 'Essen', 'Duisburg', 'Bochum', 'Wuppertal',
+    'Bielefeld', 'Bonn', 'Münster', 'Mönchengladbach', 'Gelsenkirchen', 'Aachen',
+    'Krefeld', 'Oberhausen', 'Hagen', 'Hamm', 'Mülheim an der Ruhr', 'Leverkusen',
+    'Solingen', 'Herne', 'Paderborn', 'Neuss', 'Bottrop', 'Recklinghausen',
+    'Remscheid', 'Bergisch Gladbach', 'Siegen', 'Moers', 'Gütersloh', 'Düren',
+    'Witten', 'Iserlohn', 'Ratingen', 'Marl', 'Lünen', 'Minden', 'Velbert',
+    'Viersen', 'Dorsten', 'Arnsberg', 'Detmold', 'Bocholt', 'Castrop-Rauxel',
+    'Lüdenscheid', 'Lippstadt', 'Herford', 'Dinslaken', 'Dormagen', 'Bergheim',
+    'Hürth', 'Wesel', 'Herten', 'Euskirchen', 'Langenfeld', 'Unna',
+    'Stolberg (Rheinland)', 'Eschweiler', 'Meerbusch', 'Sankt Augustin', 'Pulheim',
+    'Hilden', 'Bad Salzuflen', 'Kleve', 'Hattingen', 'Ahlen', 'Menden (Sauerland)',
+    'Frechen', 'Ibbenbüren', 'Gummersbach', 'Bad Oeynhausen', 'Gronau (Westf.)',
+    'Willich', 'Bergkamen', 'Alsdorf', 'Erftstadt', 'Herzogenrath', 'Hennef',
+    'Rheda-Wiedenbrück', 'Bornheim', 'Dülmen', 'Soest', 'Bünde', 'Schwerte',
+    'Brühl', 'Erkelenz', 'Monheim am Rhein', 'Erkrath', 'Kaarst', 'Borken',
+    'Heinsberg', 'Kamen', 'Nettetal', 'Hückelhoven', 'Löhne', 'Königswinter',
+    'Würselen', 'Ahaus',
+  ]
+
+  it('kennt die Liste in der erwarteten Groesse', () => {
+    // Reissleine: waere die Liste beim Kopieren verkuerzt worden, liefe der
+    // Test darunter gruen und pruefte fast nichts.
+    expect(NRW_AB_40_TSD).toHaveLength(98)
+    expect(new Set(NRW_AB_40_TSD).size).toBe(98)
+  })
+
+  it('fuehrt eine Seite fuer JEDE NRW-Gemeinde ab 40 Tsd. Einwohnern', () => {
+    const fehlend = NRW_AB_40_TSD.filter((name) => getStadtByName(name) === null)
+    expect(fehlend).toEqual([])
   })
 })
 
 describe('Gesamtbestand', () => {
   // Waechst mit jeder Welle mit. Der Wert ist bewusst hart: eine Stadt, die
   // beim Rebase verloren geht, faellt sonst niemandem auf.
-  it('fuehrt 158 Staedte', () => {
-    expect(STAEDTE).toHaveLength(158)
+  it('fuehrt 173 Staedte', () => {
+    expect(STAEDTE).toHaveLength(173)
   })
 })

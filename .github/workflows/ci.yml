@@ -163,6 +163,15 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # Metadata-Merge: Next merged `metadata` nur FLACH — ein eigener openGraph/
+      # twitter-Block ERSETZT den des Layouts komplett, inklusive `images`. Die Klasse
+      # trat im SEO-Audit 18.08. FUENFMAL auf (canonical #5352, feed-types #5357,
+      # og/twitter #5369, autounfall #5384) und kostete u.a. 167 Seiten ihr
+      # Vorschaubild — kein Build/tsc/anderer Ratchet faengt das.
+      # Siehe AGENTS.md §Metadata-Merge-Gate.
+      - name: Metadata-Merge-Ratchet
+        run: npm run check:metadata-merge -- --ratchet
+
       # Stadt-Linknetz: blockt tote Links (404 fuer Nutzer UND Crawler) und Waisen
       # (Stadtseiten, die von keiner anderen Stadtseite aus erreichbar sind) im
       # /kfz-gutachter/[stadt]-Netz. Vor P3 waren 41 der 92 Seiten Waisen, waehrend

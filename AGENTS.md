@@ -369,6 +369,34 @@ CI faehrt jetzt einen **parallelen `vitest`-Job** (`npm run check:vitest -- --ra
 Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB-Zugriff** — die vitest-Suite ist Unit/pure (kein `--env-file`), der Job braucht keine DB-Secrets und saettigt daher **nicht** den prod-Pool (anders als die `check:rls-*`-Checks).
 <!-- END:test-gate -->
 
+<!-- BEGIN:metadata-merge-gate -->
+# Metadata-Merge-Gate (Ratchet)
+
+**Wer in einer Marketing-Route einen eigenen `openGraph`- oder `twitter`-Block setzt, MUSS `images` mitgeben.**
+
+Next.js merged `metadata` aus Layout und Page nur **flach** — die Doku sagt es woertlich (`generate-metadata.md`, „Merging"): *„Metadata objects exported from multiple segments … are **shallowly** merged … nested fields … are **overwritten** by the last segment to define them."* Ein eigener `openGraph`-Block ersetzt damit den des Layouts **komplett**, inklusive `images`. Jedes Layout-Default in einem verschachtelten Feld wirkt also nur fuer Seiten, die das Feld **gar nicht** anfassen.
+
+Die Klasse trat im SEO-Audit (18.08.2026) **fuenfmal** auf, ueber zwei Properties, und wurde von Build, `tsc` und keinem der bestehenden Ratchets gefangen:
+
+| Feld | Symptom | PR |
+|---|---|---|
+| `alternates.canonical` | `/impressum`, `/datenschutz`, `/agb`, `/nutzungsbedingungen` canonicalisierten auf die **Startseite** = De-Indexierung | #5352 |
+| `alternates.types` | RSS-Feeds nur auf **10 von 343** Seiten (Impressum/AGB/noindex — nicht die Startseite) | #5357 |
+| `openGraph.images` | **167 Seiten** ohne Vorschaubild (26 Files) | #5369 |
+| `twitter.images` | 3 Seiten; `/werkstatt-finden` verlor **beides** | #5369 |
+| dieselbe auf autounfall.io | **~200 von 254** Seiten (3 Fundstellen) | #5384 |
+
+**Fix:** das Default-Bild mitgeben — `images: OG_DEFAULT_IMAGES` (aus `@/lib/seo/jsonld`) bzw. `images: [OG_IMAGE]` (aus `@/lib/site`, autounfall). Fuer ein Default, das **jede** Seite erreichen soll, ist die Metadata-API der falsche Ort: die Feed-Links liegen seit #5357 als `<link>` im `<head>`-JSX des Root-Layouts — der einzige Weg, der die Merge-Semantik umgeht.
+
+CI faehrt `npm run check:metadata-merge -- --ratchet`. **Baseline 0** — keine grandfatherte Schuld, jede neue Verletzung blockt. Lokal (ohne Flag) `--warn` (exit 0). Pure Logik: `scripts/lib/metadata-merge-scan.mjs` (unit-getestet, 14 Faelle).
+
+**⭐ Der Scanner faengt auch den Fall, den ein Grep NICHT sieht:** `...(cond ? { images } : {})`. Ein „enthaelt `images`"-Grep sagt dort *wahr* — garantiert ist es trotzdem nicht. Genau daran hingen die letzten 31 Seiten auf autounfall.io: nach zwei Fixes meldete die Stichprobe 8/8 gruen, die Vollpruefung 223/254. Der Scanner entfernt Spread-Conditionals vor der Pruefung. Direkte Ternaries (`images: x ? [a] : [b]`) sind dagegen sauber und werden nicht geflaggt.
+
+**Abgrenzung (0 False-Positives):** Root-Layouts, die den Default **definieren**, werden nie geflaggt (Erkennung ueber `metadataBase`). Kommentare und String-Literale werden gestrippt. Gescannt werden nur die Marketing-Builds (`claimondo-marketing`, `autounfall-io`, `kfz-gutachter-*`) — die App (`src/`) hat kein solches Default-Layout. Echter Sonderfall → `// metadata-merge-skip: <grund>` am File-Anfang.
+
+**Nachweis, dass das Gate die reale Klasse faengt:** gegen den Stand vor #5352 laufen gelassen → **31 Verletzer-Files**, darunter alle fuenf Instanzen inkl. `autounfall-io/lib/rest.ts` (die zentrale Helper-Funktion, die ein `app/**`-Grep gar nicht sieht) und `app/[article]/page.tsx` (der bedingte Fall).
+<!-- END:metadata-merge-gate -->
+
 <!-- BEGIN:redirect-stub-gate -->
 # Redirect-Stub-Gate (Ratchet)
 
@@ -524,7 +552,7 @@ CI fährt `npm run check:anthropic-stop-reason -- --ratchet`. Lokal (ohne Flag) 
 
 **Nur erzwungene Tool-Antworten** (`tool_choice`) — bewusst nicht jeder `messages.create`-Aufruf: Freitext bricht sichtbar mitten im Satz ab, ein halbes Tool-JSON sieht dagegen aus wie „das Modell hatte nichts". 28 Aufrufer gäbe es insgesamt; die gefährliche Kombination trugen genau zwei. Pure Logik: `scripts/lib/anthropic-stop-reason-scan.mjs` (unit-getestet, 10 Fälle). **Kommentare werden gestrippt** — sonst blendet ein `// TODO: stop_reason später` das Gate.
 
-**Baseline 1** (`flow-intake/extract.ts`, wird von #5377 behoben → danach auf 0 senken mit `-- --update-baseline`). Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
+**Baseline 0** — kein Bestand, kein Grandfathering. Jeder neue erzwungene Tool-Aufruf ohne `stop_reason`-Prüfung blockt sofort (nachgemessen: Probe-Datei eingebaut → exit 1, entfernt → exit 0). Der einzige Alt-Verstoß (`flow-intake/extract.ts`) ist mit #5377 behoben. Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
 
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
