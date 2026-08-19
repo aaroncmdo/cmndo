@@ -59,6 +59,9 @@ export function faqSchema(city: City) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    // Aktualitaets-Signal: FAQPage ist ein WebPage-Subtyp, dateModified dort gueltig.
+    // Quelle ist die gepflegte Konstante in site.ts (kein new Date()).
+    dateModified: SITE.contentLastUpdated,
     mainEntity: [
       ...lokal,
       ...FAQ.map((item) => ({
