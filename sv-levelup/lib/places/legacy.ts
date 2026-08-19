@@ -3,6 +3,7 @@ import {
   type AdapterOpts,
   type Betrieb,
   type PlacesAdapter,
+  type Profil,
   type Umkreis,
 } from './adapter'
 
@@ -16,6 +17,11 @@ export const MAX_SEITEN = 3
 /** Nur diese beiden Zustaende sind ein Ergebnis. Alles andere ist ein Fehler. */
 const OK_ZUSTAENDE = ['OK', 'ZERO_RESULTS']
 
+/** Die Felder, die `Betrieb` fuellen. */
+const GRUND_FELDER = 'place_id,name,formatted_address,geometry,website,rating,user_ratings_total'
+/** Zusaetzlich fuer `Profil` — was `gbp` beurteilt. */
+const PROFIL_FELDER = 'photos,opening_hours,formatted_phone_number,business_status'
+
 type RohOrt = {
   place_id?: string
   name?: string
@@ -25,6 +31,13 @@ type RohOrt = {
   website?: string
   rating?: number
   user_ratings_total?: number
+}
+
+type RohProfil = RohOrt & {
+  photos?: unknown[]
+  opening_hours?: unknown
+  formatted_phone_number?: string
+  business_status?: string
 }
 
 function zuBetrieb(o: RohOrt): Betrieb | null {
@@ -117,12 +130,38 @@ export function erzeugeLegacy(apiKey: string, opts: AdapterOpts = {}): PlacesAda
       try {
         const daten = await hole('/details/json', {
           place_id: placeId,
-          fields: 'place_id,name,formatted_address,geometry,website,rating,user_ratings_total',
+          fields: GRUND_FELDER,
           language: 'de',
         })
         return zuBetrieb((daten.result as RohOrt) ?? {})
       } catch (err) {
         // NOT_FOUND ist eine Antwort ("den Ort gibt es nicht"), kein Fehler.
+        if (err instanceof PlacesFehler && err.status === 'NOT_FOUND') return null
+        throw err
+      }
+    },
+
+    async profil(placeId) {
+      try {
+        // ⚠ Nicht angeforderte Felder liefert Google gar nicht — ein
+        // vergessenes `photos` saehe still aus wie ein Profil ohne Bilder.
+        const daten = await hole('/details/json', {
+          place_id: placeId,
+          fields: `${GRUND_FELDER},${PROFIL_FELDER}`,
+          language: 'de',
+        })
+        const roh = (daten.result as RohProfil) ?? {}
+        const basis = zuBetrieb(roh)
+        if (!basis) return null
+
+        return {
+          ...basis,
+          fotos: roh.photos?.length ?? 0,
+          oeffnungszeiten: Boolean(roh.opening_hours),
+          telefon: roh.formatted_phone_number ?? null,
+          betriebsstatus: roh.business_status ?? null,
+        } satisfies Profil
+      } catch (err) {
         if (err instanceof PlacesFehler && err.status === 'NOT_FOUND') return null
         throw err
       }

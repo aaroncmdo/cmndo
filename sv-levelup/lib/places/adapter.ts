@@ -28,6 +28,25 @@ export type Betrieb = {
   bewertungen: number | null
 }
 
+/**
+ * Was das Google-Unternehmensprofil ueber die Places-API hergibt.
+ *
+ * ⚠ Was es NICHT hergibt: die vom Inhaber gewaehlte Kategorie. Am 19.08. ueber
+ * acht Muensteraner Betriebe gemessen — ALLE acht tragen dieselben `types`
+ * (`establishment|finance|point_of_interest`). Das Mockup verlangt „Kategorie
+ * steht auf Ingenieurbuero statt Gutachter"; diese Angabe lebt im
+ * Unternehmensprofil, nicht in der API. Was Places `types` nennt, ist Googles
+ * eigene grobe Einordnung. Ein Kriterium darauf zu bauen hiesse, allen
+ * dieselbe Note zu geben und es Messung zu nennen.
+ */
+export type Profil = Betrieb & {
+  /** ⚠ Places liefert hoechstens 10 — der Wert ist eine UNTERGRENZE, keine Zahl. */
+  fotos: number
+  oeffnungszeiten: boolean
+  telefon: string | null
+  betriebsstatus: string | null
+}
+
 export type Umkreis = { lat: number; lng: number; km: number }
 
 export type PlacesAdapter = {
@@ -35,8 +54,10 @@ export type PlacesAdapter = {
   suchText(frage: string, umkreis: Umkreis): Promise<Betrieb[]>
   /** Umkreissuche mit Stichwort — fuer `zuweiser` (Werkstaetten, Anwaelte). */
   suchUmkreis(stichwort: string, umkreis: Umkreis): Promise<Betrieb[]>
-  /** Einzelabruf — fuer `gbp` (das Profil des geprueften Betriebs). */
+  /** Einzelabruf der Grunddaten. */
   details(placeId: string): Promise<Betrieb | null>
+  /** Profilmerkmale des geprueften Betriebs — fuer `gbp`. */
+  profil(placeId: string): Promise<Profil | null>
 }
 
 export type AdapterOpts = {
