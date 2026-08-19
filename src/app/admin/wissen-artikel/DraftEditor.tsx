@@ -15,6 +15,7 @@ export type DraftRow = {
   excerpt: string | null
   body: string
   meta_description: string | null
+  meta_title: string | null
   primary_keyword: string | null
   cluster: string | null
   status: string
@@ -27,6 +28,7 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
   const [slug, setSlug] = useState(draft.slug)
   const [excerpt, setExcerpt] = useState(draft.excerpt ?? '')
   const [metaDescription, setMetaDescription] = useState(draft.meta_description ?? '')
+  const [metaTitle, setMetaTitle] = useState(draft.meta_title ?? '')
   const [body, setBody] = useState(draft.body)
 
   const [isPendingSave, startSave] = useTransition()
@@ -42,6 +44,7 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
         slug,
         excerpt,
         meta_description: metaDescription,
+        meta_title: metaTitle,
         body,
       })
       if (!result.ok) {
@@ -127,6 +130,25 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
             disabled={isAnyPending}
             className="w-full border border-claimondo-border rounded-ios-md px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo disabled:opacity-60"
           />
+        </div>
+
+        {/* Meta-Titel — kurzer Titel fuer die Suchergebnisse. Leer = der
+            Artikel-Titel oben wird genommen (der zugleich die H1 ist). */}
+        <div>
+          <label className="block text-xs font-medium text-claimondo-navy mb-1">
+            Meta-Titel <span className="font-normal text-claimondo-ondo/60">(optional, für Google)</span>
+          </label>
+          <input
+            type="text"
+            value={metaTitle}
+            onChange={e => setMetaTitle(e.target.value)}
+            disabled={isAnyPending}
+            placeholder="Leer lassen = Artikel-Titel verwenden"
+            className="w-full border border-claimondo-border rounded-ios-md px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo disabled:opacity-60"
+          />
+          <p className={`text-[10px] mt-0.5 ${metaTitle.length > 48 ? 'text-danger' : 'text-claimondo-ondo/70'}`}>
+            {metaTitle.length}/48 Zeichen — Google zeigt rund 60, „ | Claimondo" kommt automatisch dazu.
+          </p>
         </div>
 
         {/* Body (Markdown) */}
