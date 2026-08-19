@@ -12,6 +12,10 @@ export type Check = {
   id: string
   token: string
   modus: Modus
+  /** Optional erhoben — `wett` braucht ihn fuer den Rang, F-06 fuer den Lead-Namen. */
+  firmenname: string | null
+  /** Gesetzt, sobald F-06 einen Lead erzeugt hat. Traegt die Idempotenz. */
+  sv_lead_id: string | null
   status: 'neu' | 'laeuft' | 'fertig' | 'fehler'
   website_url: string | null
   gsc_freigabe_am: string | null
@@ -33,9 +37,27 @@ export type Check = {
 
 /** Die Spalten, die der Code braucht — `massnahmen` ist nicht dabei (s.o.). */
 export const CHECK_SPALTEN =
-  'id,token,modus,status,website_url,gsc_freigabe_am,module_gewaehlt,module_gewuenscht,' +
+  'id,token,modus,firmenname,sv_lead_id,status,website_url,gsc_freigabe_am,' +
+  'module_gewaehlt,module_gewuenscht,' +
   'punkte_erhebbar,score,kein_score,befunde,fehlstellen,' +
   'standort_lat,standort_lng,standort_ort,standort_plz,erhoben_am,fehler_text,gueltig_bis'
+
+/**
+ * Die Felder, die `Check` verspricht — zum Abgleich gegen CHECK_SPALTEN.
+ *
+ * ⚠ Warum das als Liste existiert: Ein Feld im Typ, das die Select-Liste nicht
+ * holt, ist zur Laufzeit still `undefined`. Genau das passierte am 19.08. mit
+ * `firmenname` und `sv_lead_id` — der Typ kannte sie, die Abfrage nicht. Die
+ * Idempotenz von F-06 haengt an `sv_lead_id`: ohne sie haette JEDER zweite
+ * Terminwunsch einen zweiten Lead erzeugt, und kein Test haette es gemerkt
+ * (Fakes liefern, was man ihnen sagt).
+ */
+export const CHECK_FELDER = [
+  'id', 'token', 'modus', 'firmenname', 'sv_lead_id', 'status', 'website_url',
+  'gsc_freigabe_am', 'module_gewaehlt', 'module_gewuenscht', 'punkte_erhebbar',
+  'score', 'kein_score', 'befunde', 'fehlstellen', 'standort_lat', 'standort_lng',
+  'standort_ort', 'standort_plz', 'erhoben_am', 'fehler_text', 'gueltig_bis',
+] as const
 
 /**
  * Loest einen Token auf.
