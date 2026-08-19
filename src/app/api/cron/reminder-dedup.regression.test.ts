@@ -18,7 +18,9 @@ const h = vi.hoisted(() => {
   const next = () => state.q.shift() ?? { data: null, error: null }
   const makeBuilder = () => {
     const b: Record<string, unknown> = {}
-    for (const m of ['select', 'eq', 'lte', 'gte', 'lt', 'neq', 'in', 'order', 'limit']) b[m] = () => b
+    // Nur LESE-Kettenglieder — siehe Hinweis in send-reminders/route.test.ts.
+    // `or` fehlte, seit die Bezug-Umstellung bezugOrExpr() in die Query brachte.
+    for (const m of ['select', 'eq', 'lte', 'gte', 'lt', 'neq', 'in', 'or', 'order', 'limit']) b[m] = () => b
     b.single = () => Promise.resolve(next())
     b.maybeSingle = () => Promise.resolve(next())
     b.then = (res: (v: unknown) => unknown) => Promise.resolve(next()).then(res)

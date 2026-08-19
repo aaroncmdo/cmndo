@@ -5,13 +5,22 @@ const getUser = vi.fn(
   async (): Promise<{ data: { user: { id: string } | null } }> => ({ data: { user: { id: 'u1' } } }),
 )
 
+// Die Route liest seit der Makler-Weiche zuerst profiles.rolle und waehlt danach die
+// RPC (pick-rpc.ts). Ohne `from` im Mock starb sie mit "supabase.from is not a function".
+let rolle: string | null = 'admin'
+const from = vi.fn(() => ({
+  select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { rolle } }) }) }),
+}))
+
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: vi.fn(async () => ({ auth: { getUser }, rpc })),
+  createClient: vi.fn(async () => ({ auth: { getUser }, rpc, from })),
 }))
 
 describe('GET /api/search', () => {
   beforeEach(() => {
     rpc.mockReset()
+    from.mockClear()
+    rolle = 'admin'
     getUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
   })
 
@@ -46,5 +55,22 @@ describe('GET /api/search', () => {
     const { GET } = await import('./route')
     const res = await GET(new Request('http://x/api/search?q=CLM'))
     expect(res.status).toBe(401)
+  })
+
+  // Makler haben kein claims-RLS: search_global gaebe ihnen 0 Claims und Leads,
+  // deren Links nach /dispatch/leads zeigen (403). Die Weiche muss halten.
+  it('Makler -> search_makler, alle anderen Rollen -> search_global', async () => {
+    rpc.mockResolvedValue({ data: [], error: null })
+    const { GET } = await import('./route')
+
+    rolle = 'makler'
+    await GET(new Request('http://x/api/search?q=CLM'))
+    expect(rpc.mock.calls.at(-1)?.[0]).toBe('search_makler')
+
+    for (const r of ['admin', 'dispatch', 'sachverstaendiger', 'kunde', null]) {
+      rolle = r
+      await GET(new Request('http://x/api/search?q=CLM'))
+      expect(rpc.mock.calls.at(-1)?.[0]).toBe('search_global')
+    }
   })
 })

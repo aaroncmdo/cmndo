@@ -119,6 +119,16 @@ vi.mock('@/lib/notifications', () => ({
   createNotification: (...args: unknown[]) => createNotificationSpy(...args),
 }))
 
+// CMM-49 hat die KB-Aufloesung auf resolveClaimId + claims umgestellt. Ungemockt
+// zieht resolveClaimId selbst ein bis zwei Eintraege aus der responseQueue und
+// verschiebt damit ALLE folgenden Antworten — der Test brach dann an einer ganz
+// anderen Stelle. Hier gemockt, damit dieser Unit-Test unabhaengig von den Interna
+// der Aufloesung bleibt.
+const resolveClaimIdSpy = vi.fn(async () => 'claim-abc')
+vi.mock('@/lib/claims/get-claim-for-role', () => ({
+  resolveClaimId: (...args: unknown[]) => resolveClaimIdSpy(...(args as [])),
+}))
+
 // ─── Setup ────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
@@ -212,11 +222,11 @@ describe('processInboundMedia', () => {
     // Queue-Reihenfolge entspricht der Ausfuehrungs-Reihenfolge:
     // 1. fall_dokumente.insert (await -> then -> nextResponse)
     setNextResponse({ data: null, error: null })
-    // 2. faelle.select...single() fuer kundenbetreuer_id
+    // 2. claims.select('kundenbetreuer_id, claim_nummer').eq('id', claimId).maybeSingle()
+    //    CMM-49: FLACHE Form direkt aus claims — vorher kam das verschachtelt
+    //    ueber faelle ({ claims: { … } }) und wurde hier nicht nachgezogen.
     setNextResponse({
-      data: {
-        claims: { kundenbetreuer_id: 'kb-uuid', claim_nummer: 'CLM-0042' },
-      },
+      data: { kundenbetreuer_id: 'kb-uuid', claim_nummer: 'CLM-0042' },
       error: null,
     })
     // 3. timeline.insert (await -> then -> nextResponse)
