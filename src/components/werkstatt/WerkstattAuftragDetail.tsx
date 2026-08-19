@@ -85,9 +85,10 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const hatRow = Boolean(terminId)
 
   const status = hatRow ? (auftrag.reparatur_termin_status as ReparaturTerminStatus | null) : 'angefragt'
-  // Der row-lose Fall oben ist per Definition wunschtermin-frei (s. Kommentar) — dann darf
-  // hier nicht „Wunschtermin angefragt" stehen.
-  const phase = reparaturTerminPhase(status, { hatWunschtermin: Boolean(auftrag.reparatur_wunschtermin) })
+  // Bewusst OHNE hatWunschtermin-Option: diese Sicht formuliert den Fall rollenspezifisch
+  // („Terminvorschlag offen" — der Ball liegt bei der Werkstatt) und ueberschreibt das Label
+  // weiter unten selbst. Der neutrale Text der Engine gilt fuer die Kundensicht.
+  const phase = reparaturTerminPhase(status)
   const badgeTone = TON_TO_BADGE_TONE[phase.ton]
 
   const terminIso = auftrag.reparatur_bestaetigter_termin ?? auftrag.reparatur_wunschtermin

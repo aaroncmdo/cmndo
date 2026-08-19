@@ -28,6 +28,10 @@ const MAP: Record<ReparaturTerminStatus, ReparaturTerminPhase> = {
  * `hatWunschtermin: false` schaltet auf den neutralen Text. Ohne die Option bleibt das
  * bisherige Label — die Funktion ist damit rueckwaertskompatibel, und Aufrufer ohne
  * Kenntnis des Wunschtermins behaupten nichts Falsches in die andere Richtung.
+ *
+ * ⚠ Die WERKSTATT-Sicht (WerkstattAuftragDetail) nutzt die Option bewusst NICHT: sie hatte
+ * den Fall schon rollenspezifisch geloest („Terminvorschlag offen" — der Ball liegt bei ihr)
+ * und ueberschreibt das Label lokal. Nur die Kundensicht braucht den neutralen Text hier.
  */
 export function reparaturTerminPhase(
   status: ReparaturTerminStatus | null,
