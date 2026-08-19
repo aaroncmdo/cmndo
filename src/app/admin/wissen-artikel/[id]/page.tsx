@@ -24,7 +24,7 @@ export default async function WissenDraftDetailPage({ params }: { params: Promis
   const admin = createAdminClient()
   const { data: draft } = await admin
     .from('wissen_artikel')
-    .select('id, title, slug, excerpt, body, meta_description, primary_keyword, cluster, status, created_at')
+    .select('id, title, slug, excerpt, body, meta_description, meta_title, primary_keyword, cluster, status, created_at')
     .eq('id', id)
     .eq('status', 'in_review')
     .maybeSingle()

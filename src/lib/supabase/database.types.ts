@@ -22618,6 +22618,7 @@ export type Database = {
           key_facts: string[]
           last_modified: string | null
           meta_description: string | null
+          meta_title: string | null
           primary_keyword: string | null
           quelle: string
           reviewed_am: string | null
@@ -22645,6 +22646,7 @@ export type Database = {
           key_facts?: string[]
           last_modified?: string | null
           meta_description?: string | null
+          meta_title?: string | null
           primary_keyword?: string | null
           quelle?: string
           reviewed_am?: string | null
@@ -22672,6 +22674,7 @@ export type Database = {
           key_facts?: string[]
           last_modified?: string | null
           meta_description?: string | null
+          meta_title?: string | null
           primary_keyword?: string | null
           quelle?: string
           reviewed_am?: string | null
