@@ -36,3 +36,30 @@ export function effektiveBezugIds(t: TerminBezugRow): EffektiveBezugIds {
     claimId: (t.claim_id ?? null) ?? ausBezug('claim'),
   }
 }
+
+/**
+ * Die Fall-/Claim-UUID eines Termins UNTER BEACHTUNG DER Aequivalenzklasse.
+ *
+ * `fall` und `claim` sind dieselbe UUID (claim-first: `fall_id == claims.id`), deshalb
+ * beantwortet diese Funktion beide Fragen — sie taugt als Map-Key fuer `claim_id`- wie
+ * fuer `fall_id`-Zuordnungen.
+ *
+ * ⚠ Warum es das braucht: `effektiveBezugIds` loest strikt pro Typ auf — bei
+ * `bezug_typ='fall'` bleibt `claimId` deshalb NULL (so getestet, so gewollt).
+ * `bezugOrExpr`/`bezugInExpr` filtern dagegen ueber die AEQUIVALENZKLASSE
+ * `bezug_typ.in.(fall,claim)`, weil `fall_id == claims.id` dieselbe UUID ist
+ * (claim-first, siehe bezug-filter.ts).
+ *
+ * Wer also mit `.or(bezugInExpr('claim', ids))` filtert und die Treffer danach
+ * ueber `claim_id` einer Map zuordnet, wirft die neu gewonnenen Zeilen sofort
+ * wieder weg — der Filter-Fix allein bringt dann NICHTS, und der Ratchet-Eintrag
+ * verschwindet trotzdem. Diese Funktion schliesst genau diese Luecke.
+ *
+ * Prod-verifiziert 19.08.: 0 Termine mit `fall_id <> claim_id` (20 mit beiden
+ * gesetzt, alle gleich), alle `bezug_id` bei `bezug_typ='fall'` sind gueltige
+ * `claims.id` — und `bezug_typ='claim'` kommt gar nicht vor (31x 'fall', 0x 'claim').
+ */
+export function effektiveFallClaimId(t: TerminBezugRow): string | null {
+  const eff = effektiveBezugIds(t)
+  return eff.claimId ?? eff.fallId
+}

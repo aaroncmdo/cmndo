@@ -19,6 +19,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import { ladeSvAssigneeName } from '@/lib/termine/termin-assignee-name'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,7 +135,10 @@ export default async function OnboardingPage({
       const { data: termin } = await supabase
         .from('gutachter_termine')
         .select('start_zeit, assignee_typ, assignee_id')
-        .eq('fall_id', fall.id)
+        // bezug-aware: bezug-native Termine tragen fall_id NULL (bezug_typ='fall'+bezug_id).
+        // Ohne das zeigt das Onboarding weder SV-Name noch Termin — genau der Defekt,
+        // den der Kommentar oben fuer die Embed-Variante beschreibt, nur eine Ebene tiefer.
+        .or(bezugOrExpr('fall', fall.id))
         .in('status', ['reserviert', 'bestaetigt'])
         .order('start_zeit', { ascending: false })
         .limit(1)

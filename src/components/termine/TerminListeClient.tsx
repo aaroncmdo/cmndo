@@ -10,6 +10,8 @@ import Link from 'next/link'
 // AAR-892 / f99fdb10: shared createClient (verdrahtet realtime.setAuth) statt direktem
 // createBrowserClient — sonst laueft eine spaeter ergaenzte Realtime-Sub hier als anon.
 import { createClient } from '@/lib/supabase/client'
+import { bezugOrExpr, bezugOrExprKonversion } from '@/lib/termine/bezug-filter'
+import { effektiveBezugIds } from '@/lib/termine/effektive-bezug-ids'
 import { ladeInterneTerminNotizen } from '@/lib/termine/intern-notizen'
 import { PhoneCallIcon, UsersIcon, CalendarIcon, HardHatIcon, VideoIcon } from 'lucide-react'
 
@@ -102,12 +104,15 @@ export default function TerminListeClient({
       {
         let q = supabase
           .from('gutachter_termine')
-          .select('id, typ, start_zeit, status, fall_id, lead_id, kb_id, kanal')
+          // bezug_typ/bezug_id mitladen: bezug-native Termine tragen fall_id/lead_id NULL,
+          // und unten haengt der Link auf die Fallakte an fallId.
+          .select('id, typ, start_zeit, status, fall_id, lead_id, bezug_typ, bezug_id, kb_id, kanal')
           .is('cancelled_at', null)
-        // AAR-956: bezug-native Self-Service-Termine (lead_id NULL, bezug_typ='lead') mitfinden.
-        if (fallId && leadId) q = q.or(`fall_id.eq.${fallId},lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
-        else if (fallId) q = q.eq('fall_id', fallId)
-        else if (leadId) q = q.or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+        // AAR-956 hatte nur den LEAD-Zweig bezug-aware gemacht; der fall-Zweig blieb naiv
+        // (.eq('fall_id')) und uebersah bezug-native Fall-Termine — halb angewendeter Fix.
+        if (fallId && leadId) q = q.or(bezugOrExprKonversion(leadId, fallId))
+        else if (fallId) q = q.or(bezugOrExpr('fall', fallId))
+        else if (leadId) q = q.or(bezugOrExpr('lead', leadId))
         const { data } = await q.order('start_zeit', { ascending: false })
         const internNotizen = await ladeInterneTerminNotizen(supabase, (data ?? []).map(r => r.id))
         for (const r of data ?? []) {
@@ -120,8 +125,11 @@ export default function TerminListeClient({
             start: r.start_zeit,
             status: r.status,
             notizen: internNotizen[r.id] ?? null,
-            fallId: r.fall_id,
-            leadId: r.lead_id,
+            // NICHT r.fall_id/r.lead_id: bei bezug-nativen Terminen sind die NULL, und
+            // der Link unten (`href = r.fallId ? /faelle/... `) bliebe leer — die Zeile
+            // waere in der Liste, aber nicht anklickbar.
+            fallId: effektiveBezugIds(r).fallId,
+            leadId: effektiveBezugIds(r).leadId,
             verantwortlich: null,
             kanal: r.kanal,
           })

@@ -11,6 +11,7 @@ import { getStorageUrl } from '@/lib/storage/url'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { seedeKundenBindungFirstTouch } from '@/lib/netzwerk/bindung'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export type VorschadenAbrechnungsStatus = 'ja' | 'nein' | 'teilweise' | 'unbekannt'
 
@@ -240,7 +241,8 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
     const { data: at } = await admin
       .from('gutachter_termine')
       .select('nachbesichtigung_status')
-      .eq('claim_id', fall.claim_id)
+      // bezug-aware: bezug-native Termine tragen claim_id NULL (bezug_typ='fall'+bezug_id).
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

@@ -144,6 +144,22 @@ describe('stadtMetaDescription — amtliche Bezirks-Praefixe', () => {
     expect(d).toContain('Bezirk 5')
   })
 
+  it('ueberspringt einen zu langen Namen, statt die Ortstiefe ganz aufzugeben', () => {
+    // Real auf prod beobachtet: der Heilungslauf lieferte
+    // "Ortsbezirk 1 – Innenstadt I (Mitte-Ost)" (38 Zeichen) — fuer den Namen
+    // sind aber nur ~30 frei. Weil die Auswahl beim ERSTEN zu langen Namen
+    // abbrach, fiel die ganze Beschreibung auf den Gerichts-Fallback zurueck,
+    // obwohl zwoelf weitere Bezirke dahinterstanden. Der Ausfall sah aus wie
+    // "diese Stadt hat halt keine Ortstiefe".
+    const d = stadtMetaDescription(
+      bocholt,
+      tiefeMit('Ein Aussergewoehnlich Langer Bezirksname Ohne Praefix', 'Nordwest'),
+    )
+    expect(d).toContain('Nordwest')
+    expect(d).not.toContain('Amtsgericht')
+    expect(d.length).toBeLessThanOrEqual(MAX_META_LAENGE)
+  })
+
   it('gewinnt durch das Kuerzen Platz fuer einen zweiten Bezirk', () => {
     const lang = stadtMetaDescription(
       bocholt,

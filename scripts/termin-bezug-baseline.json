@@ -1,17 +1,7 @@
 {
-  "generatedAt": "2026-08-18T12:50:52.292Z",
-  "count": 11,
+  "generatedAt": "2026-08-19T11:15:58.044Z",
+  "count": 1,
   "files": [
-    "src/app/flow/[token]/actions.ts",
-    "src/app/gutachter/auftraege/export-action.ts",
-    "src/app/gutachter/auftraege/page.tsx",
-    "src/app/gutachter/fall/[id]/_actions/konfrontation.ts",
-    "src/app/gutachter/feldmodus/_fallakte/actions.ts",
-    "src/app/gutachter/feldmodus/page.tsx",
-    "src/app/gutachter/heute/page.tsx",
-    "src/app/kunde/nachbesichtigung/page.tsx",
-    "src/app/kunde/onboarding/actions.ts",
-    "src/app/kunde/onboarding/page.tsx",
-    "src/components/termine/TerminListeClient.tsx"
+    "src/app/flow/[token]/actions.ts"
   ]
 }

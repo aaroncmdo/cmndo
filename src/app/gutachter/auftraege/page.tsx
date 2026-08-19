@@ -12,6 +12,8 @@ import TagesvorbereitungButton from './TagesvorbereitungButton'
 import PartnerWerkstattVermittelnButton from './PartnerWerkstattVermittelnButton'
 import { getUrsacheLabel, AUFTRAG_STATUS_LABELS } from '@/lib/statusLabels'
 import EmptyState from '@/components/shared/EmptyState'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
+import { effektiveFallClaimId } from '@/lib/termine/effektive-bezug-ids'
 
 export default async function AuftraegePage({
   searchParams,
@@ -90,8 +92,9 @@ export default async function AuftraegePage({
       .neq('status', 'hochgeladen'),
     admin
       .from('gutachter_termine')
-      .select('id, fall_id, status, start_zeit, vorgeschlagenes_datum, gegenvorschlag_von, created_at')
-      .in('fall_id', fallIds)
+      // bezug_typ/bezug_id mitladen — bezug-native Termine tragen fall_id NULL.
+      .select('id, fall_id, bezug_typ, bezug_id, status, start_zeit, vorgeschlagenes_datum, gegenvorschlag_von, created_at')
+      .or(bezugInExpr('fall', fallIds))
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false }),
   ])
@@ -150,7 +153,10 @@ export default async function AuftraegePage({
 
   type TerminRow = {
     id: string
-    fall_id: string
+    // bezug-nativ: fall_id ist dann NULL, der Fall steckt in bezug_typ/bezug_id.
+    fall_id: string | null
+    bezug_typ: string | null
+    bezug_id: string | null
     status: string
     start_zeit: string | null
     vorgeschlagenes_datum: string | null
@@ -159,7 +165,10 @@ export default async function AuftraegePage({
   }
   const terminMap: Record<string, TerminRow> = {}
   for (const t of (termineRes.data ?? []) as TerminRow[]) {
-    if (!terminMap[t.fall_id]) terminMap[t.fall_id] = t
+    // NICHT t.fall_id — sonst landen bezug-native Termine unter dem Key "null"
+    // und die Auftrags-Karte zeigt keinen Termin an.
+    const fId = effektiveFallClaimId(t)
+    if (fId && !terminMap[fId]) terminMap[fId] = t
   }
 
   const activeFilter = filter ?? 'alle'
