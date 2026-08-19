@@ -29,9 +29,21 @@ export default async function CheckSeite(props: { params: Promise<{ token: strin
   // Roundtrip beim Laden, und der Client braucht keinen Effect, der beim
   // Rendern Zustand setzt (react-hooks/set-state-in-effect).
   let fertigerBefund = null
+  let hatTermin = false
+  let hatFunnel = false
   if (check.status === 'fertig') {
     const r = await baueBefund(db, token)
     if (r.ok) fertigerBefund = r.befund
+
+    // Woran der Nutzer weitermacht, haengt am Zustand — nicht an dem, was er
+    // zuletzt im Browser geklickt hat. Ein neu geoeffneter Link soll dort
+    // fortsetzen, wo der Vorgang steht.
+    const [{ data: termin }, { data: funnel }] = await Promise.all([
+      db.from('levelup_termine').select('id').eq('check_id', check.id).maybeSingle(),
+      db.from('levelup_funnel').select('check_id').eq('check_id', check.id).maybeSingle(),
+    ])
+    hatTermin = Boolean(termin)
+    hatFunnel = Boolean(funnel)
   }
 
   // Die Kacheln kommen VOM SERVER, samt Sperrgrund im Klartext. Der Client
@@ -57,6 +69,8 @@ export default async function CheckSeite(props: { params: Promise<{ token: strin
       vorausgewaehlt={check.module_gewuenscht.length > 0 ? check.module_gewuenscht : vorauswahl(kontext)}
       gewaehlt={check.module_gewaehlt}
       ersterBefund={fertigerBefund}
+      hatTermin={hatTermin}
+      hatFunnel={hatFunnel}
     />
   )
 }

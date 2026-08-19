@@ -33,6 +33,11 @@ export async function umfangSetzen(token: string, module: string[]): Promise<Umf
  * Anfrage.
  */
 export async function messungStarten(token: string): Promise<StartErgebnis> {
+  // Der Firmenname wird EINMAL gelesen und in die Messung gereicht — `wett`
+  // findet damit den eigenen Eintrag in der Kartensuche.
+  const check = await ladeCheck(db(), token)
+  const firmenname = check?.firmenname ?? null
+
   const ergebnis = await starteMessung(db(), token, {
     jetzt: () => new Date(),
     starte: async (t) => {
@@ -43,11 +48,9 @@ export async function messungStarten(token: string): Promise<StartErgebnis> {
         jetzt: () => new Date().toISOString(),
         registry: {
           web: messeWeb,
-          // `wett` braucht den Firmennamen, um den eigenen Eintrag zu finden.
-          // `levelup_checks` fuehrt ihn heute nicht — beim oeffentlichen Check
-          // bleibt er leer, und das Modul weist die Luecke als Fehlstelle aus,
-          // statt einen falschen Rang zu behaupten (R-B).
-          wett: (k) => messeWett({ ...k, firmenname: null }),
+          // Ohne Firmennamen weist `wett` den Rang als Fehlstelle aus, statt
+          // einen falschen zu behaupten (R-B).
+          wett: (k) => messeWett({ ...k, firmenname }),
         },
       })
       // Absichtlich ohne await: der Browser soll nicht auf die Messung warten.
@@ -100,4 +103,73 @@ export async function websiteNachtragen(
 
   revalidatePath(`/check/${token}`)
   return { ok: true }
+}
+
+// ── P4 · Termin, Funnel und Plan ─────────────────────────────────────────────
+
+/** F-07 · Sechs freie Termine. */
+export async function slotsHolen(): Promise<{ start: string; label: string }[]> {
+  const { freieSlots } = await import('@/lib/levelup/slots')
+  return freieSlots(db(), new Date())
+}
+
+/**
+ * F-06 · Termin wählen — hier entsteht der Lead.
+ *
+ * Die IP wird nur als Hash weitergereicht; der Wortlaut der Einwilligung liegt
+ * in `lib/levelup/termin.ts` und wird dort mitgespeichert.
+ */
+export async function terminWaehlen(
+  token: string,
+  slotStart: string,
+  telefon: string,
+  einwilligung: boolean,
+): Promise<{ ok: boolean; error?: string }> {
+  const { waehleTermin } = await import('@/lib/levelup/termin')
+  const { hashIp } = await import('@/lib/levelup/token')
+  const { headers } = await import('next/headers')
+
+  const h = await headers()
+  const ip = (h.get('x-forwarded-for') ?? h.get('x-real-ip') ?? '').split(',')[0]?.trim() || 'unbekannt'
+
+  const r = await waehleTermin(db(), {
+    token, slotStart, telefon, einwilligung,
+    ipHash: await hashIp(ip),
+    userAgent: h.get('user-agent') ?? undefined,
+  })
+
+  if (r.ok) {
+    revalidatePath(`/check/${token}`)
+    return { ok: true }
+  }
+
+  // Interne Kennungen in Klartext uebersetzen — der Nutzer soll erfahren, was
+  // zu tun ist, nicht wie das Feld heisst.
+  const texte: Record<string, string> = {
+    einwilligung_fehlt: 'Bitte bestätigen Sie die Einwilligung, damit wir Sie anrufen dürfen.',
+    telefon_ungueltig: 'Diese Telefonnummer konnten wir nicht lesen. Bitte prüfen Sie die Eingabe.',
+    slot_vergangen: 'Dieser Termin liegt bereits in der Vergangenheit. Bitte wählen Sie einen anderen.',
+    nicht_fertig: 'Die Messung ist noch nicht abgeschlossen.',
+  }
+  return { ok: false, error: texte[r.error] ?? 'Der Termin konnte nicht gespeichert werden.' }
+}
+
+/** F-08 · Funnel — drei Fragen, überspringbar. */
+export async function funnelSpeichern(
+  token: string,
+  antworten: { jahreErfahrung?: string; kiNutzung?: string; marketingPartner?: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const { speichereFunnel } = await import('@/lib/levelup/funnel')
+  const r = await speichereFunnel(db(), token, antworten)
+  if (r.ok) revalidatePath(`/check/${token}`)
+  return r.ok ? { ok: true } : { ok: false, error: 'Die Antworten konnten nicht gespeichert werden.' }
+}
+
+/**
+ * F-09 · Maßnahmen freigeben — der einzige Endpunkt, der sie ausliefert, und
+ * nur mit Termin.
+ */
+export async function planHolen(token: string) {
+  const { gibFrei } = await import('@/lib/levelup/freigabe')
+  return gibFrei(db(), token)
 }

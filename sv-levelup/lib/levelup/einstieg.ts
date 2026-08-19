@@ -7,6 +7,8 @@ export const GUELTIG_TAGE = 90
 
 export type EinstiegEingabe = {
   modus: 'aufbau' | 'bestand'
+  /** Optional. Ohne ihn findet `wett` den eigenen Eintrag in der Kartensuche nicht. */
+  firmenname?: string
   websiteUrl?: string
   ort?: string
   plz?: string
@@ -60,6 +62,7 @@ export async function legeCheckAn(
     .insert({
       token,
       modus: e.modus,
+      firmenname: e.firmenname?.trim() || null,
       website_url: deuteUrl(e.websiteUrl),
       standort_ort: standort.ort,
       standort_plz: standort.plz,

@@ -44,6 +44,7 @@ export async function starteCheck(_vorher: unknown, formData: FormData): Promise
   const db = createAdminClient() as unknown as Db
   const ergebnis = await legeCheckAn(db, {
     modus,
+    firmenname: String(formData.get('firmenname') ?? ''),
     websiteUrl: String(formData.get('website') ?? ''),
     plz: plz || undefined,
     ort: ort || undefined,
