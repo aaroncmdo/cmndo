@@ -36,7 +36,15 @@ export function pruefeBefunde(befunde: Befund[]): PruefErgebnis {
     gueltig,
     fehlstellen,
     istPunkte: gueltig.reduce((s, b) => s + b.punkte, 0),
-    maxPunkte: gueltig.reduce((s, b) => s + b.maximum, 0),
+    // ⚠ NUR die tatsaechlich erhobenen Kriterien zaehlen ins Maximum.
+    //
+    // Ein Kriterium mit `wert: null` wurde NICHT gemessen. Steht sein Maximum
+    // trotzdem im Nenner, wird aus „nicht erhoben" faktisch „null Punkte" —
+    // genau die Gleichsetzung, die R-B verbietet. Am 19.08. im Durchlauf
+    // aufgefallen: derselbe Betrieb kam auf 47 % statt 71 %, weil die
+    // Maxima ungemessener Kriterien mitzaehlten. Der Unterschied ist der
+    // zwischen „mangelhaft" und „solide mit Luecken".
+    maxPunkte: gueltig.reduce((s, b) => s + (b.wert === null ? 0 : b.maximum), 0),
   }
 }
 

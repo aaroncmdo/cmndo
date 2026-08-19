@@ -96,6 +96,47 @@ describe('messeCheck', () => {
     expect(r.ok && r.punkteErhebbar).toBe(24)     // 12 + 12
   })
 
+  /**
+   * ⚠ Der Nenner kommt aus dem, was GEMESSEN wurde — nicht aus dem, was
+   * gewaehlt wurde.
+   *
+   * Am 19.08. im Durchlauf gefunden: Der Check trug `punkte_erhebbar: 116`
+   * (Summe der gewaehlten Module), gemessen wurden aber nur 76 Punkte, weil
+   * acht Module noch keine Messfunktion haben. Ergebnis: 54/116 = 47 % statt
+   * 54/76 = 71 %. Der Sachverstaendige waere fuer Baulücken UNSERES Produkts
+   * abgestraft worden — genau die Gleichsetzung „nicht gemessen = null
+   * Punkte", die R-B verbietet. 435 gruene Tests fingen es nicht.
+   */
+  it('zaehlt Module OHNE Messfunktion nicht in den Nenner', async () => {
+    state.check = check({
+      punkte_erhebbar: 116,                         // die Schaetzung aus F-02
+      module_gewaehlt: ['web', 'verz', 'ads', 'nach'],
+    })
+    // Nur `web` und `verz` koennen messen — `ads` und `nach` fehlen.
+    const r = await messeCheck(db, 'T1', opts())
+
+    expect(r.ok && r.punkteErhebbar).toBe(24)       // 12 + 12, NICHT 116
+    const letzte = state.updates[state.updates.length - 1]
+    expect(letzte.punkte_erhebbar).toBe(24)         // und so steht es auch in der DB
+  })
+
+  it('zaehlt nicht erhobene Kriterien nicht in den Nenner', async () => {
+    state.check = check({ punkte_erhebbar: 100, module_gewaehlt: ['web'] })
+    // Ein Modul, das die Haelfte seiner Kriterien nicht erheben konnte.
+    const halb: Messfunktion = async (k) => ({
+      befunde: [
+        befund('a', 'A', true, 40, 80, 'https://x.de', k.jetzt()),
+        nichtErhoben('b', 'B', 80, 'Die Seite baut ihre Inhalte erst im Browser auf.', 'https://x.de', k.jetzt()),
+      ],
+      fehlstellen: [],
+    })
+    const r = await messeCheck(db, 'T1', { ...opts(), registry: { web: halb } })
+
+    // 80, nicht 160: was niemand gemessen hat, kann niemand erreichen.
+    expect(r.ok && r.punkteErhebbar).toBe(80)
+    expect(r.ok && r.score).toBe(50)                // 40 von 80
+  })
+
   it('schreibt nach JEDEM Modul, damit der Fortschritt echt ist', async () => {
     await messeCheck(db, 'T1', opts())
 
