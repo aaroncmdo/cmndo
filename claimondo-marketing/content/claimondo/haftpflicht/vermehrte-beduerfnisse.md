@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/vermehrte-beduerfnisse
+meta_title: Vermehrte Bedürfnisse nach § 843 BGB
 type: glossar-spoke
 cluster: H3
 nummer: H3.13

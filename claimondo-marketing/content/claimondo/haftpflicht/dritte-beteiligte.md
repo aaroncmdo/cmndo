@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/dritte-beteiligte
+meta_title: Fußgänger, Radfahrer, Kinder — Haftung
 type: glossar-spoke
 cluster: H7
 nummer: H7.8

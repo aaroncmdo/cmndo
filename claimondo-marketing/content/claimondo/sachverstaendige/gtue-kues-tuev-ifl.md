@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/gtue-kues-tuev-ifl
+meta_title: GTÜ, KÜS, TÜV, IFL — Großprüforganisationen
 type: glossar-spoke
 cluster: SV
 nummer: SV.3

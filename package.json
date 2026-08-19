@@ -23,6 +23,7 @@
     "check:i18n-render": "node scripts/i18n/check-render.mjs",
     "check:intake-funnel": "node scripts/check-intake-funnel.mjs",
     "check:knip": "node scripts/check-knip.mjs",
+    "check:migration-files": "node --env-file=.env.local scripts/check-migration-files.mjs",
     "check:metadata-merge": "node scripts/check-metadata-merge.mjs",
     "check:migration-utf8": "node scripts/check-migration-utf8.mjs",
     "check:operative-status-writes": "node scripts/check-operative-status-writes.mjs",

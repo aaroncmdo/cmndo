@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/ergo
+meta_title: ERGO Schadensregulierung — Carexpert
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D11

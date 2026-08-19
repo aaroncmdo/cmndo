@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/da-direkt
+meta_title: DA Direkt Schadensregulierung — Konzern
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D14

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/ihk-bestellung-oebv
+meta_title: öbV — die IHK-Bestellung für Sachverständige
 type: glossar-spoke
 cluster: SV
 nummer: SV.7

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/eigene-kosten
+meta_title: Eigene Kosten nach Unfall — Taxi, Fahrt, Porto
 type: glossar-spoke
 cluster: H3
 nummer: H3.15

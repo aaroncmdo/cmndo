@@ -30,6 +30,12 @@ export type Lokalinhalt = {
   topografieAnker?: string
   /** Fuer die Transparenz-Kennzeichnung generierter Inhalte (UWG). */
   aiGenerated: boolean
+  /**
+   * Wann dieser Inhalt live ging (ISO). Traegt das Freshness-Signal von
+   * Sitemap und JSON-LD — vorher meldeten beide ein hartkodiertes Datum, und
+   * eine an dem Tag frisch erzeugte Stadt sah fuer Google Monate alt aus.
+   */
+  veroeffentlichtAm?: string
 }
 
 /**
@@ -130,12 +136,13 @@ export function mapLokalinhalt(zeile: unknown): Lokalinhalt | null {
     ...(heroAnker ? { heroAnker } : {}),
     ...(topografieAnker ? { topografieAnker } : {}),
     aiGenerated: z.ai_generated !== false,
+    ...(typeof z.veroeffentlicht_am === 'string' ? { veroeffentlichtAm: z.veroeffentlicht_am } : {}),
   }
 }
 
 /** Nur die Spalten, die anon lesen darf (Migration 20260816175742). */
 const SPALTEN =
-  'stadt_slug, status, stadtbezirke, hauptachsen, unfall_hotspots, lokale_faqs, hero_anker, topografie_anker, ai_generated'
+  'stadt_slug, status, stadtbezirke, hauptachsen, unfall_hotspots, lokale_faqs, hero_anker, topografie_anker, ai_generated, veroeffentlicht_am'
 
 // Lazy wie in lib/wissen/db-articles.ts: sonst wirft createAnonClient schon beim
 // Modul-Load in Test-/Build-Kontexten ohne gesetzte Env-Vars, und mapLokalinhalt
@@ -196,3 +203,40 @@ async function ladeLokalinhaltUngecacht(stadtSlug: string): Promise<Lokalinhalt 
  * anders als `fetch` dedupliziert Next Supabase-Aufrufe nicht von selbst.
  */
 export const ladeLokalinhalt = cache(ladeLokalinhaltUngecacht)
+
+/**
+ * Veroeffentlichungsdatum je Stadt-Slug — EINE Query fuer alle Staedte.
+ *
+ * Fuer die Sitemap: dort werden 173 Stadt-Eintraege erzeugt, und 173 einzelne
+ * `ladeLokalinhalt`-Aufrufe waeren 173 Supabase-Roundtrips fuer je ein Datum
+ * (der React-`cache` dedupliziert nur gleiche Slugs, nicht verschiedene).
+ *
+ * Faellt bei jedem Fehler auf eine leere Map zurueck: eine kaputte Sitemap ist
+ * schlimmer als eine mit konservativen Datumsangaben.
+ */
+export async function ladeLokalinhaltStaende(): Promise<Map<string, string>> {
+  const leer = new Map<string, string>()
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    return leer
+  }
+  try {
+    const { data, error } = await anonClient()
+      .from('stadt_lokalinhalte')
+      .select('stadt_slug, veroeffentlicht_am')
+      .eq('status', 'veroeffentlicht')
+    if (error) {
+      console.error('[lokalinhalt] Staende konnten nicht geladen werden:', error.message)
+      return leer
+    }
+    const staende = new Map<string, string>()
+    for (const z of (data ?? []) as Array<Record<string, unknown>>) {
+      const slug = typeof z.stadt_slug === 'string' ? z.stadt_slug : null
+      const am = typeof z.veroeffentlicht_am === 'string' ? z.veroeffentlicht_am : null
+      if (slug && am) staende.set(slug, am)
+    }
+    return staende
+  } catch (err) {
+    console.error('[lokalinhalt] Staende konnten nicht geladen werden:', err)
+    return leer
+  }
+}

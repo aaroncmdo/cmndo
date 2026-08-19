@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/cosmosdirekt
+meta_title: CosmosDirekt Schadensregulierung — Generali
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D9

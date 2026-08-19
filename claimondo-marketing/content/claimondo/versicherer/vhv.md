@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/vhv
+meta_title: VHV Schadensregulierung — Grundsatzentscheidung
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D12

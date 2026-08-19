@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/dekra
+meta_title: DEKRA — Großprüforganisation im Gutachten
 type: glossar-spoke
 cluster: SV
 nummer: SV.2
