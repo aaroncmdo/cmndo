@@ -108,13 +108,25 @@ export async function messeCheck(db: Db, token: string, opts: MessOpts): Promise
     })
   }
 
-  const punkteErhebbar = check.punkte_erhebbar ?? 0
+  // ⚠ Der Nenner steht erst NACH der Messung fest, nicht bei der Modulwahl.
+  //
+  // `check.punkte_erhebbar` ist die Schaetzung aus F-02: die Summe der
+  // gewaehlten Module. Zu dem Zeitpunkt weiss niemand, welche davon wirklich
+  // messen — ein Modul ohne Messfunktion, eine gesperrte robots.txt oder eine
+  // Anwendung, die ihre Inhalte erst im Browser aufbaut, liefern nichts.
+  // Bliebe die Schaetzung der Nenner, zaehlten diese Punkte als NICHT
+  // ERREICHT statt als NICHT GEMESSEN (R-B).
+  //
+  // Am 19.08. im Durchlauf gemessen: 54 von 76 tatsaechlich erhobenen Punkten
+  // ergaben gegen die Schaetzung (116) einen Wert von 47 % statt 71 %.
+  const punkteErhebbar = Object.values(befunde).reduce((s, m) => s + m.maxPunkte, 0)
   const { score, keinScore } = berechneScore(istPunkte, punkteErhebbar)
 
   const { data: zeilen, error } = await db
     .from('levelup_checks')
     .update({
       befunde, fehlstellen,
+      punkte_erhebbar: punkteErhebbar,
       score, kein_score: keinScore,
       status: 'fertig',
       erhoben_am: opts.jetzt(),
