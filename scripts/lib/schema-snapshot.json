@@ -2674,6 +2674,115 @@
     "fahrzeugklasse"
    ]
   },
+  "levelup_anreicherung": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "sv_lead_id",
+    "feld",
+    "wert_vorher",
+    "wert_nachher",
+    "quelle_url",
+    "sicherheit",
+    "lauf_id",
+    "ts"
+   ]
+  },
+  "levelup_auswertungslinks": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "check_id",
+    "token",
+    "erstellt_von",
+    "erstellt_am",
+    "letzter_aufruf",
+    "aufrufe"
+   ]
+  },
+  "levelup_checks": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "token",
+    "sv_lead_id",
+    "modus",
+    "website_url",
+    "standort_ort",
+    "standort_plz",
+    "standort_lat",
+    "standort_lng",
+    "radius_wettbewerb_km",
+    "radius_keywords_km",
+    "module_gewaehlt",
+    "module_gewuenscht",
+    "status",
+    "score",
+    "kein_score",
+    "punkte_erhebbar",
+    "befunde",
+    "massnahmen",
+    "fehlstellen",
+    "zuweiser_treffer",
+    "gsc_property",
+    "gsc_freigabe_am",
+    "erhoben_am",
+    "fehler_text",
+    "quelle",
+    "ip_hash",
+    "user_agent",
+    "erstellt_am",
+    "aktualisiert_am",
+    "gueltig_bis"
+   ]
+  },
+  "levelup_events": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "check_id",
+    "typ",
+    "payload",
+    "ts"
+   ]
+  },
+  "levelup_funnel": {
+   "kind": "t",
+   "columns": [
+    "check_id",
+    "jahre_erfahrung",
+    "ki_nutzung",
+    "marketing_partner",
+    "beantwortet_am"
+   ]
+  },
+  "levelup_praesentationen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "check_id",
+    "token",
+    "erstellt_von",
+    "gueltig_bis",
+    "widerrufen_am",
+    "aufrufe",
+    "letzter_aufruf",
+    "erstellt_am"
+   ]
+  },
+  "levelup_termine": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "check_id",
+    "slot_start",
+    "telefon",
+    "status",
+    "betreuer_id",
+    "notiz",
+    "erstellt_am"
+   ]
+  },
   "linkedin_oauth_tokens": {
    "kind": "t",
    "columns": [
@@ -4045,7 +4154,25 @@
     "konvertiert_am",
     "claim_status",
     "normalized_name",
-    "notizen"
+    "notizen",
+    "levelup_letzter_check_id",
+    "levelup_letzter_score",
+    "website_url",
+    "website_gefunden",
+    "website_sicherheit",
+    "kontakt_quelle",
+    "angereichert_am",
+    "google_place_id",
+    "entdeckt_am",
+    "entdeckt_lauf"
+   ]
+  },
+  "sv_leads_map_pins": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "lat",
+    "lng"
    ]
   },
   "sv_live_location": {
