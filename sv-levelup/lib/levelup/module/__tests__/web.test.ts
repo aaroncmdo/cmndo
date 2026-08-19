@@ -172,6 +172,54 @@ describe('messeWeb', () => {
     expect(zeit?.grund).toBeTruthy()
   })
 
+  /**
+   * ⚠ Am echten Lauf gefunden (19.08., gutachter-yigit.com): eine React-SPA
+   * liefert serverseitig 13 KB HTML mit **53 Bytes** sichtbarem Text und
+   * keinem einzigen Navigationslink — Impressum und Datenschutz werden per
+   * JavaScript nachgeladen.
+   *
+   * Ohne Sonderbehandlung wirft der Check dem Betrieb einen Verstoß gegen
+   * § 5 TMG vor, den es nicht gibt. Ein falscher Abmahn-Vorwurf ist der
+   * schädlichste Fehler, den dieses Produkt machen kann. Nicht feststellbar
+   * ist NICHT dasselbe wie nicht vorhanden (R-B).
+   */
+  it('meldet Impressum bei einer SPA als nicht feststellbar, NICHT als fehlend', async () => {
+    // 13 KB Markup, praktisch kein sichtbarer Text — das Muster einer SPA
+    const spa = `<!doctype html><html><head>
+      <meta name="viewport" content="width=device-width">
+      ${'<link rel="preload" href="/static/chunk.js">'.repeat(120)}
+      </head><body><div id="root"></div>
+      ${'<script src="/static/js/main.js"></script>'.repeat(8)}
+      </body></html>`
+    seiten['https://meyer.de/robots.txt'] = { status: 200, text: '' }
+    seiten['https://meyer.de'] = { status: 200, text: spa, dauerMs: 200 }
+
+    const r = await messeWeb(ctx())
+    const imp = r.befunde.find((b) => b.schluessel === 'impressum')
+    const dat = r.befunde.find((b) => b.schluessel === 'datenschutz')
+
+    expect(imp?.wert).toBeNull()
+    expect(imp?.grund).toContain('JavaScript')
+    expect(dat?.wert).toBeNull()
+    // Die technischen Kriterien bleiben messbar — sie haengen nicht am Inhalt
+    expect(r.befunde.find((b) => b.schluessel === 'https')?.wert).toBe(true)
+    expect(r.befunde.find((b) => b.schluessel === 'antwortzeit')?.wert).toBe(200)
+    expect(r.befunde.find((b) => b.schluessel === 'mobil')?.wert).toBe(true)
+  })
+
+  it('haelt eine kurze, aber serverseitig gerenderte Seite NICHT fuer eine SPA', async () => {
+    const knapp = `<html><head><meta name="viewport" content="w"></head><body>
+      <p>Kfz-Sachverständigenbüro Meyer, Hafenweg 3, 48143 Münster. Wir erstellen
+      Schadengutachten und Wertgutachten für Privat und Gewerbe.</p>
+      <a href="/impressum">Impressum</a></body></html>`
+    seiten['https://meyer.de/robots.txt'] = { status: 200, text: '' }
+    seiten['https://meyer.de'] = { status: 200, text: knapp, dauerMs: 200 }
+
+    const r = await messeWeb(ctx())
+    expect(r.befunde.find((b) => b.schluessel === 'impressum')?.wert).toBe(true)
+    expect(r.befunde.find((b) => b.schluessel === 'datenschutz')?.wert).toBe(false)
+  })
+
   it('erkennt eine fehlende Viewport-Angabe', async () => {
     seiten['https://meyer.de/robots.txt'] = { status: 200, text: '' }
     seiten['https://meyer.de'] = { status: 200, text: '<html><body>ohne viewport</body></html>' }
