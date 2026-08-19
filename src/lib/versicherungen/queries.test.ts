@@ -81,7 +81,10 @@ describe('getVersichererFaelle', () => {
   it('mappt die Faelle des Gegner-Versicherers', async () => {
     from.mockReturnValueOnce(
       makeQuery({
-        data: [{ id: 'c1', claim_nummer: 'CL-1', status: 'offen', created_at: '2026-03-01' }],
+        // Spaltenname wie in der DB: T3-slice-2b hat claims.status -> operative_status
+        // umbenannt. Der Mock lieferte weiter `status`, der Code liest `operative_status`
+        // -> gemappt kam `undefined` heraus. Der Produktionscode war korrekt.
+        data: [{ id: 'c1', claim_nummer: 'CL-1', operative_status: 'offen', created_at: '2026-03-01' }],
         error: null,
       }),
     )

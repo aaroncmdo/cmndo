@@ -272,13 +272,20 @@ er landet zwangslaeufig beim Rueckruf-Fallback. Das deckt sich mit dem Hyperloka
 ```bash
 # Technische Baseline (Saeule 1+2) — ca. 30 s
 node scripts/geo-baseline.mjs --out scripts/.geo-baseline-<YYYY-MM-DD>.json
-node scripts/geo-baseline.mjs --all --out …    # alle 346 Sitemap-URLs, langsam
+node scripts/geo-baseline.mjs --all --out …          # alle 346 Sitemap-URLs, langsam
+node scripts/geo-baseline.mjs --properties --out …   # Sweep ueber ALLE 11 Properties
 
 # Crawler-Zugang
 curl -s -o /dev/null -w "%{http_code}" -A "GPTBot/1.2" https://claimondo.de/
 ```
 
 * Messskript: `scripts/geo-baseline.mjs` (misst rohes HTML mit AI-Bot-User-Agent, kein JS)
+* ⚠ **`--properties` misst je Property nur die STARTSEITE.** Deren „ohne dateModified /
+  ohne FAQPage" ist ein **Prüfauftrag, kein Befund** — beides sitzt typischerweise auf den
+  Unterseiten. Beim ersten Lauf meldete der Sweep `claimondo.de: kein dateModified`, obwohl
+  22 von 27 Seiten eines tragen und B2 auf prod verifiziert ist; ebenso `autounfall.io:
+  kein FAQPage`, obwohl alle 254 Ratgeber-Seiten eines haben. Das Skript gibt diese Warnung
+  bei jedem Lauf aus.
 * Rohdaten dieser Messung: `scripts/.geo-baseline-2026-08-18.json`
 * Saeule 3: die **10 Prompts aus §3 unveraendert** durch eine Websuche geben und zaehlen, bei wie
   vielen `claimondo.de` in den Treffern steht. Set nicht aendern, sonst ist der Vergleich wertlos.

@@ -84,9 +84,21 @@ beforeEach(() => {
   sendMaklerWelcomeMock.mockReset()
 })
 
+// Minimal gueltige Eingabe. Ein NEUES Pflichtfeld der Action gehoert HIER hinein —
+// sonst kippen alle Erfolgs- und Rollback-Tests gleichzeitig und das sieht aus wie
+// ein Code-Defekt. Genau so passiert mit `rechtsform` (AAR-empfehlung: Pflicht fuer
+// die Abrechnung): der Test blieb stehen, brach vor createUser ab, `calls` war leer.
+const GUELTIG = {
+  firma: 'X',
+  email: 'a@b.de',
+  ansprechpartner_vorname: 'Max',
+  ansprechpartner_nachname: 'Muster',
+  rechtsform: 'GmbH',
+}
+
 describe('createMakler', () => {
   it('happy path: user->profile->makler->promo + ok mit Credentials', async () => {
-    const r = await createMakler(fd({ firma: 'Test GmbH', email: 'A@B.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
+    const r = await createMakler(fd({ ...GUELTIG, firma: 'Test GmbH', email: 'A@B.de' }))
     expect(r.ok).toBe(true)
     if (r.ok) { expect(r.email).toBe('a@b.de'); expect(r.password).toBeTruthy() }
     expect(calls).toEqual(['createUser', 'insert:profiles', 'insert:makler', 'insert:promotion_codes'])
@@ -94,7 +106,7 @@ describe('createMakler', () => {
 
   it('Nicht-Admin -> abgelehnt, kein createUser', async () => {
     adminRolle = 'kunde'
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
+    const r = await createMakler(fd(GUELTIG))
     expect(r.ok).toBe(false)
     expect(calls).not.toContain('createUser')
   })
@@ -105,9 +117,18 @@ describe('createMakler', () => {
     if (!r.ok) expect(r.error).toContain('Pflicht')
   })
 
+  it('Rechtsform fehlt oder ist unbekannt -> abgelehnt, kein createUser', async () => {
+    const ohne = await createMakler(fd({ ...GUELTIG, rechtsform: '' }))
+    expect(ohne.ok).toBe(false)
+    if (!ohne.ok) expect(ohne.error).toContain('Rechtsform')
+    const unbekannt = await createMakler(fd({ ...GUELTIG, rechtsform: 'Limited' }))
+    expect(unbekannt.ok).toBe(false)
+    expect(calls).not.toContain('createUser')
+  })
+
   it('profile-Fehler -> deleteUser rollback, ok:false', async () => {
     profileInsertError = { message: 'profile kaputt' }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
+    const r = await createMakler(fd(GUELTIG))
     expect(r.ok).toBe(false)
     expect(calls).toContain('deleteUser')
     expect(calls).not.toContain('insert:makler')
@@ -115,7 +136,7 @@ describe('createMakler', () => {
 
   it('makler-Fehler -> profile-delete + deleteUser rollback', async () => {
     maklerInsertResult = { data: null, error: { message: 'makler kaputt' } }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
+    const r = await createMakler(fd(GUELTIG))
     expect(r.ok).toBe(false)
     expect(calls).toContain('delete:profiles')
     expect(calls).toContain('deleteUser')
@@ -123,7 +144,7 @@ describe('createMakler', () => {
 
   it('promo-Fehler (non-duplicate) ist non-fatal -> ok:true', async () => {
     promoInsertError = { message: 'irgendwas' }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
+    const r = await createMakler(fd(GUELTIG))
     expect(r.ok).toBe(true)
   })
 })
