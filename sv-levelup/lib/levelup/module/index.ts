@@ -1,15 +1,21 @@
 import type { MessRegistry } from '../modul-vertrag'
 import { messeGbp } from './gbp'
+import { messeNach } from './nach'
 import { messeSeo } from './seo'
 import { messeUx } from './ux'
+import { messeVerz } from './verz'
 import { messeWeb } from './web'
 import { messeWett } from './wett'
+import { messeZuweiser } from './zuweiser'
 
 export { messeGbp } from './gbp'
+export { messeNach } from './nach'
 export { messeSeo } from './seo'
 export { messeUx } from './ux'
+export { messeVerz } from './verz'
 export { messeWeb } from './web'
 export { messeWett } from './wett'
+export { messeZuweiser } from './zuweiser'
 
 /**
  * Die Module, die es gibt — an einer Stelle.
@@ -29,9 +35,12 @@ export { messeWett } from './wett'
 export function baueModulRegistry(firmenname: string | null): MessRegistry {
   return {
     gbp: (k) => messeGbp({ ...k, firmenname }),
+    nach: messeNach,
     seo: messeSeo,
     ux: messeUx,
+    verz: (k) => messeVerz({ ...k, firmenname }),
     web: messeWeb,
     wett: (k) => messeWett({ ...k, firmenname }),
+    zuweiser: messeZuweiser,
   }
 }
