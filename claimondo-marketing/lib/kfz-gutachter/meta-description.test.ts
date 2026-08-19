@@ -102,3 +102,55 @@ describe('stadtMetaDescription — mit freigegebener Ortstiefe', () => {
     expect(stadtMetaDescription(bocholt, viele).length).toBeLessThanOrEqual(MAX_META_LAENGE)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Amtliche Nummern-Praefixe (19.08.2026)
+//
+// Beim ersten scharfen Cron-Lauf kam Frankfurt so auf prod:
+//   "… unabhängige Sachverständige für Ortsbezirk 1 - Innenstadt I und Umgebung."
+// Amtlich korrekt (so heissen Frankfurts Bezirke), als Suchergebnis-Text aber
+// schwach — niemand sucht nach "Ortsbezirk 1". Die vier anderen Staedte des
+// Laufs lieferten saubere Namen (Mitte, Hamburg-Mitte, Innenstadt,
+// Altstadt-Lehel); Duesseldorf mit "Stadtbezirk N" steht als naechstes an.
+//
+// Nur die Beschreibung kuerzt — auf der Seite bleibt der amtliche Name stehen,
+// dort ist er richtig.
+// ---------------------------------------------------------------------------
+describe('stadtMetaDescription — amtliche Bezirks-Praefixe', () => {
+  const tiefeMit = (...namen: string[]) => ({ stadtbezirke: namen.map((name) => ({ name })) })
+
+  it('kuerzt "Ortsbezirk 1 - Innenstadt I" auf den sprechenden Teil', () => {
+    const d = stadtMetaDescription(bocholt, tiefeMit('Ortsbezirk 1 - Innenstadt I'))
+    expect(d).toContain('Innenstadt I')
+    expect(d).not.toContain('Ortsbezirk')
+  })
+
+  it('kuerzt auch Stadtbezirk mit Gedankenstrich (Duesseldorf/Muenchen-Schreibweise)', () => {
+    const d = stadtMetaDescription(bocholt, tiefeMit('Stadtbezirk 3 – Maxvorstadt'))
+    expect(d).toContain('Maxvorstadt')
+    expect(d).not.toContain('Stadtbezirk')
+  })
+
+  it('laesst sprechende Namen unangetastet', () => {
+    for (const name of ['Mitte', 'Hamburg-Mitte', 'Altstadt-Lehel', 'Friedrichshain-Kreuzberg']) {
+      expect(stadtMetaDescription(bocholt, tiefeMit(name))).toContain(name)
+    }
+  })
+
+  it('laesst eine Nummer OHNE sprechenden Teil stehen, statt sie zu verschlucken', () => {
+    // "Bezirk 5" ist alles, was diese Stadt hat — wegkuerzen hiesse, die
+    // Ortsangabe ganz zu verlieren. Lieber schwach als leer.
+    const d = stadtMetaDescription(bocholt, tiefeMit('Bezirk 5'))
+    expect(d).toContain('Bezirk 5')
+  })
+
+  it('gewinnt durch das Kuerzen Platz fuer einen zweiten Bezirk', () => {
+    const lang = stadtMetaDescription(
+      bocholt,
+      tiefeMit('Ortsbezirk 1 - Innenstadt I', 'Ortsbezirk 2 - Innenstadt II'),
+    )
+    expect(lang).toContain('Innenstadt I')
+    expect(lang).toContain('Innenstadt II')
+    expect(lang.length).toBeLessThanOrEqual(MAX_META_LAENGE)
+  })
+})

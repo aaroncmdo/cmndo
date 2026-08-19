@@ -61,6 +61,25 @@ function nenneBis(namen: string[], platz: number): string[] {
  * treten Stadtbezirke (bevorzugt) oder Verkehrsachsen an ihre Stelle, weil das
  * die konkretere Ortsangabe ist.
  */
+/**
+ * Streicht amtliche Nummern-Praefixe aus Bezirksnamen — aber nur, wenn ein
+ * sprechender Teil uebrig bleibt.
+ *
+ * "Ortsbezirk 1 - Innenstadt I"  ->  "Innenstadt I"
+ * "Stadtbezirk 3 – Maxvorstadt"  ->  "Maxvorstadt"
+ * "Bezirk 5"                     ->  "Bezirk 5"      (nichts dahinter — lieber
+ *                                                     schwach als gar keine Ortsangabe)
+ * "Hamburg-Mitte"                ->  "Hamburg-Mitte" (kein Praefix-Muster)
+ *
+ * Nur fuer die Beschreibung. Auf der Seite bleibt der amtliche Name stehen,
+ * dort ist er richtig — hier steht er im Suchergebnis, und niemand sucht nach
+ * "Ortsbezirk 1" (real so auf prod, Frankfurt, 19.08.2026).
+ */
+function ohneNummernPraefix(name: string): string {
+  const gekuerzt = name.replace(/^(?:orts|stadt)?bezirk\s+\d+\s*[-–—:]\s*/i, '').trim()
+  return gekuerzt || name
+}
+
 export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): string {
   const kopf = `Kfz-Gutachter ${stadt.h1Anker} nach Unfall:`
   // Bewusst knapp: die erste Fassung war 61 Zeichen lang und fiel damit bei
@@ -70,7 +89,7 @@ export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): st
   // der auf der Haelfte der Seiten fehlt.
   const schluss = 'Termin unter 48 h, 0 € nach §249 BGB.'
 
-  const bezirke = (tiefe?.stadtbezirke ?? []).map((b) => b.name).filter(Boolean)
+  const bezirke = (tiefe?.stadtbezirke ?? []).map((b) => ohneNummernPraefix(b.name)).filter(Boolean)
   const achsen = [
     ...(tiefe?.hauptachsen?.autobahnen ?? []),
     ...(tiefe?.hauptachsen?.bundesstrassen ?? []),
