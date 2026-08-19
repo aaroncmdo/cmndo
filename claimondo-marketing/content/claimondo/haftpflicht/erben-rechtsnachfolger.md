@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/erben-rechtsnachfolger
+meta_title: Erben und Rechtsnachfolge nach Unfalltod
 type: glossar-spoke
 cluster: H2
 nummer: H2.9

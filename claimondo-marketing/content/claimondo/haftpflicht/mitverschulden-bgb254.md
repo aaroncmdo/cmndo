@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/mitverschulden-bgb254
+meta_title: Mitverschulden § 254 BGB — wie viel es kürzt
 type: glossar-spoke
 cluster: H1
 nummer: H1.4

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/auffahrunfall
+meta_title: Auffahrunfall — wer haftet, welche Quote
 type: glossar-spoke
 cluster: H6
 nummer: H6.1

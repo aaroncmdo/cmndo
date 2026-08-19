@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/axa
+meta_title: AXA Schadensregulierung — Regresswelle
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D6

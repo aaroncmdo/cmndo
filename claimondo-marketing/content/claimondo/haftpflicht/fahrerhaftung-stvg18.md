@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/fahrerhaftung-stvg18
+meta_title: Fahrerhaftung § 18 StVG — Entlastungsbeweis
 type: glossar-spoke
 cluster: H1
 nummer: H1.8

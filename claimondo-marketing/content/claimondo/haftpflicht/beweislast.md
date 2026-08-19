@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/beweislast
+meta_title: Beweislast im Verkehrsunfall
 type: glossar-spoke
 cluster: H1
 nummer: H1.5

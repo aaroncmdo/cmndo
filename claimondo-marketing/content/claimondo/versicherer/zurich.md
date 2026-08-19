@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/zurich
+meta_title: Zurich Schadensregulierung — Mietwagen-Kürzung
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D13

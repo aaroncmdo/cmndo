@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/lvm
+meta_title: LVM Schadensregulierung — BGH-Zitate
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D10

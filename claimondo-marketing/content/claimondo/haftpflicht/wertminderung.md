@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/wertminderung
+meta_title: Wertminderung nach Unfall berechnen
 type: glossar-spoke
 cluster: H3
 nummer: H3.3

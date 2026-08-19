@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /ratgeber
+meta_title: Ratgeber Verkehrsunfall — was Sie wissen müssen
 type: cornerstone-ratgeber
 cluster: PILLAR-RATGEBER
 primary_keyword: "ratgeber nach autounfall"

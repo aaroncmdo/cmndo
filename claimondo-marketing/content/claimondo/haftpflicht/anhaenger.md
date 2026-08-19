@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anhaenger
+meta_title: Anhänger und Wohnwagen — Haftung
 type: glossar-spoke
 cluster: H7
 nummer: H7.4
