@@ -10,6 +10,21 @@ export const SITE = {
   locale: 'de_DE',
   lang: 'de',
 
+  /**
+   * Stand der Cluster-Inhalte (ISO) — speist `dateModified` im FAQPage-Schema.
+   *
+   * WARUM: Ohne das Feld trug keine Seite dieser Property ein Aktualitaets-Signal;
+   * fuer KI-Antwortmaschinen ist Aktualitaet ein dokumentierter Zitations-Faktor
+   * (GEO-Baseline 18.08.2026, Befund B2 — auf claimondo.de und autounfall.io bereits
+   * behoben). Die Seiten sind template-generiert und haben kein individuelles Datum,
+   * deshalb eine gepflegte Konstante fuer Vorlage + Stadtdaten gemeinsam.
+   * Startwert = git-Datum der Property-Inhalte, nachweisbar statt geschaetzt.
+   *
+   * ⚠ PFLEGE: bei inhaltlichen Aenderungen bumpen. Bewusst KEIN new Date() —
+   * ein Datum, das ohne Aenderung mitwandert, entwertet das Signal.
+   */
+  contentLastUpdated: '2026-08-18',
+
   /** Betreiber-Block (Footer-Impressum-Kurzform). */
   operator: {
     name: 'Kitta & Sprafke UG (haftungsbeschränkt)',
