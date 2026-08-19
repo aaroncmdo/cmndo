@@ -180,6 +180,90 @@ export const VORLAGEN: Record<string, Vorlage> = {
     w: 'Nach einem Unfall zählt, wie schnell jemand kommt. Ein Satz wie „Besichtigung in der Regel binnen 24 Stunden" ist oft der Grund, warum angerufen wird — vorausgesetzt, er stimmt.',
     minuten: 15,
   },
+
+  // ── verz ───────────────────────────────────────────────────────────────
+  adresseDa: {
+    t: 'Anschrift sichtbar auf die Website setzen',
+    w: 'Die vollständige Anschrift gehört in den Fußbereich jeder Seite, als Text und nicht als Bild. Kunden und Suchmaschinen lesen sie dort — im Impressum allein findet sie kaum jemand.',
+    minuten: 20,
+  },
+  adresseGleich: {
+    t: 'Anschrift auf Website und Profil angleichen',
+    w: 'Zwei verschiedene Anschriften kann Google nicht zu einem Betrieb zusammenführen — die Signale verteilen sich auf zwei Einträge, und keiner davon rankt gut. Entscheiden Sie sich für eine Schreibweise und ziehen Sie sie überall durch, bis in die Verzeichnisse.',
+    minuten: 60,
+  },
+  telefonGleich: {
+    t: 'Telefonnummer überall gleich schreiben',
+    w: 'Verschiedene Nummern auf Website und Profil führen Anrufer je nach Weg woanders hin — und schwächen zusätzlich die örtliche Auffindbarkeit. Eine Nummer, überall dieselbe.',
+    minuten: 20,
+  },
+  nameGleich: {
+    t: 'Firmennamen vereinheitlichen',
+    w: 'Der Name im Unternehmensprofil sollte derselbe sein wie auf der Website und im Handelsregister. Zusätze wie „Ihr Gutachter in Münster" im Profilnamen verstoßen zudem gegen Googles Richtlinien.',
+    minuten: 15,
+  },
+
+  // ── zuweiser ───────────────────────────────────────────────────────────
+  werkstatt: {
+    t: 'Werkstätten auf der Website ansprechen',
+    w: 'Werkstätten sind die häufigste Quelle für Aufträge. Ein eigener Absatz, was Sie ihnen bieten — schnelle Besichtigung vor Ort, feste Ansprechpartner, Abrechnung ohne Rückfragen — kostet eine halbe Stunde und ist im Gespräch der Anknüpfungspunkt.',
+    minuten: 45,
+  },
+  anwalt: {
+    t: 'Rechtsanwälte ansprechen',
+    w: 'Kanzleien mit Schwerpunkt Verkehrsrecht suchen einen festen Sachverständigen, dessen Gutachten vor Gericht halten. Ein Absatz dazu, mit einem Wort zu Ihrer Qualifikation, spricht genau diese Leser an.',
+    minuten: 45,
+  },
+  partnerseite: {
+    t: 'Eine Seite für Kooperationen anlegen',
+    w: 'Eine Seite „Für Werkstätten und Kanzleien" ist der Ort, auf den Sie im Gespräch verweisen können — und den ein Interessent findet, ohne Sie zu fragen. Sie zeigt, dass Zusammenarbeit für Sie Routine ist, nicht Ausnahme.',
+    minuten: 90,
+  },
+
+  // ── nach ───────────────────────────────────────────────────────────────
+  // ⚠ Eine Vorlage je Thema waere zu kleinteilig — acht fast gleichlautende
+  // Massnahmen im Plan liest niemand. Deshalb EIN Text, den jedes fehlende
+  // Thema ausloest; welches gemeint ist, steht in der Quellenzeile.
+  kosten: {
+    t: 'Erklären, wer das Gutachten bezahlt',
+    w: 'Die meistgestellte Frage nach einem Unfall. Ein kurzer Abschnitt „Wer zahlt das Gutachten?" mit der Antwort — bei unverschuldetem Unfall die Haftpflicht des Gegners — holt genau diese Suchanfragen ab.',
+    minuten: 45,
+  },
+  wertminderung: {
+    t: 'Wertminderung erklären',
+    w: 'Viele Geschädigte wissen nicht, dass ihnen eine merkantile Wertminderung zusteht. Wer es auf seiner Seite erklärt, wird zu dieser Frage gefunden — und zeigt zugleich Sachkunde.',
+    minuten: 45,
+  },
+  nutzungsausfall: {
+    t: 'Nutzungsausfall und Mietwagen behandeln',
+    w: 'Die Wahl zwischen Mietwagen und Nutzungsausfallentschädigung ist für Geschädigte oft neu und finanziell spürbar. Ein Abschnitt dazu beantwortet eine häufige Suchanfrage.',
+    minuten: 45,
+  },
+  restwert: {
+    t: 'Restwert und Wiederbeschaffungswert erklären',
+    w: 'Zwei Begriffe, die im Gutachten stehen und die kaum jemand kennt. Wer sie auf seiner Seite erklärt, wird bei genau diesen Suchanfragen gefunden.',
+    minuten: 45,
+  },
+  ablauf: {
+    t: 'Ablauf und Dauer beschreiben',
+    w: '„Wie lange dauert ein Gutachten" wird häufig gesucht. Drei Sätze zum Ablauf — Anruf, Besichtigung, Gutachten binnen soundso viel Tagen — beantworten die Frage und nehmen die Unsicherheit.',
+    minuten: 30,
+  },
+  freieWahl: {
+    t: 'Auf die freie Wahl des Sachverständigen hinweisen',
+    w: 'Viele Geschädigte glauben, die Versicherung des Gegners bestimme den Gutachter. Der Hinweis, dass sie frei wählen dürfen, ist zugleich Aufklärung und Ihr stärkstes Verkaufsargument.',
+    minuten: 30,
+  },
+  totalschaden: {
+    t: 'Reparatur und Totalschaden gegenüberstellen',
+    w: 'Wann lohnt die Reparatur, wann liegt ein wirtschaftlicher Totalschaden vor? Die 130-Prozent-Grenze ist ein häufig gesuchter Begriff und ein guter Anlass, Ihre Rolle dabei zu erklären.',
+    minuten: 45,
+  },
+  kasko: {
+    t: 'Kaskoschäden behandeln',
+    w: 'Nicht jeder Schaden ist ein Haftpflichtfall. Ein Abschnitt zu Teil- und Vollkasko spricht eine Gruppe an, die sonst gar nicht erst nach einem Sachverständigen sucht.',
+    minuten: 45,
+  },
 }
 
 /** Aufwand in Minuten → Anzeigeform. */

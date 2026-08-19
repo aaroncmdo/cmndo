@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { VORLAGEN } from '../massnahmen'
 import { GEWICHTE as GBP } from '../module/gbp'
+import { THEMEN } from '../module/nach'
 import { GEWICHTE as SEO } from '../module/seo'
 import { GEWICHTE as UX } from '../module/ux'
+import { GEWICHTE as VERZ } from '../module/verz'
 import { GEWICHTE as WEB } from '../module/web'
 import { GEWICHTE as WETT } from '../module/wett'
+import { GEWICHTE as ZUWEISER } from '../module/zuweiser'
 
 /**
  * Die Kriterien aller Module, die Punkte vergeben — nach Modul getrennt,
@@ -12,10 +15,15 @@ import { GEWICHTE as WETT } from '../module/wett'
  */
 const NACH_MODUL: Record<string, string[]> = {
   gbp: Object.keys(GBP),
+  nach: THEMEN.map((t) => t.id),
   seo: Object.keys(SEO),
   ux: Object.keys(UX),
+  // `potenzial` traegt 0 Punkte (Marktbild, keine Leistung) — ohne Punkte
+  // entsteht nie eine Massnahme, also braucht es auch keine Vorlage.
+  verz: Object.keys(VERZ),
   web: Object.keys(WEB),
   wett: Object.keys(WETT),
+  zuweiser: Object.keys(ZUWEISER).filter((s) => ZUWEISER[s as keyof typeof ZUWEISER] > 0),
 }
 
 /**
