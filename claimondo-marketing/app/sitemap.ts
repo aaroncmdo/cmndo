@@ -1,7 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL, GUTACHTER_LANDING_URL, MAKLER_LANDING_URL, WERKSTATT_LANDING_URL, FLOTTE_LANDING_URL } from '@/lib/seo/jsonld'
 import { STAEDTE, isHubCity } from '@/lib/kfz-gutachter/staedte'
-import { getStadtLastUpdated } from '@/lib/kfz-gutachter/freshness'
+import { stadtLastModified } from '@/lib/kfz-gutachter/freshness'
+import { ladeLokalinhaltStaende } from '@/lib/kfz-gutachter/lokalinhalt'
 import { getRouteLastUpdated } from '@/lib/seo/freshness'
 import {
   getCornerstones,
@@ -20,7 +21,18 @@ function langAlternates(path: string): Record<string, string> {
   return buildLanguageAlternates(path).languages
 }
 
+// Stuendlich neu erzeugen statt nur beim Build: der Ortsinhalt-Cron laeuft
+// taeglich, Deploys nicht garantiert. Ohne das traegt die Sitemap die Staende
+// vom letzten Deploy — an einem Wochenende ohne Release also veraltete
+// lastmod-Werte fuer genau die Seiten, die frisch geworden sind.
+export const revalidate = 3600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Eine Query fuer alle Staedte: das echte Veroeffentlichungsdatum des
+  // generierten Ortsinhalts. Ohne das meldeten 169 von 182 Stadtseiten den
+  // hartkodierten Default aus freshness.ts (19.08.2026 gemessen) — auch die,
+  // die am selben Tag frischen Inhalt bekommen hatten.
+  const lokalStaende = await ladeLokalinhaltStaende()
   const now = new Date()
   const wissenArtikel = await getPublishedArtikel()
 
@@ -183,7 +195,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const isHub = isHubCity(s.slug)
       return {
         url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-        lastModified: getStadtLastUpdated(s.slug),
+        lastModified: stadtLastModified(s.slug, lokalStaende.get(s.slug)),
         changeFrequency: isHub ? ('weekly' as const) : ('monthly' as const),
         priority: isHub ? 0.9 : 0.85,
         ...(isHub ? { alternates: { languages: langAlternates(`/kfz-gutachter/${s.slug}`) } } : {}),
