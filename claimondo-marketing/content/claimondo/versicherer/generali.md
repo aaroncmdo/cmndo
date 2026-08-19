@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/generali
+meta_title: Generali Schadensregulierung — Werkstattwahl
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D8

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/schmerzensgeld-bgb253
+meta_title: Schmerzensgeld § 253 BGB — Anspruch und Höhe
 type: glossar-spoke
 cluster: H3
 nummer: H3.9

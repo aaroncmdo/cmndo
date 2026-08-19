@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/allianz
+meta_title: Allianz Schadensregulierung — ControlExpert
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D4

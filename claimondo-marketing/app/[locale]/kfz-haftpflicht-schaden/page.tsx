@@ -40,7 +40,9 @@ export function generateMetadata(): Metadata {
   const a = getAsset()
   if (!a) return {}
   return {
-    title: a.title,
+    // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
+    // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
+    title: a.metaTitle || a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: `/${SLUG}` },
     openGraph: {

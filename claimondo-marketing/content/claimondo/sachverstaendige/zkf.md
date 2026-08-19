@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/zkf
+meta_title: ZKF — Zentralverband Karosserietechnik
 type: glossar-spoke
 cluster: SV
 nummer: SV.4

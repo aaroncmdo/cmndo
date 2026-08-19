@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/kfz-gutachter-kosten-tabelle
+meta_title: Kfz-Gutachter Kosten-Tabelle (BVSK 2025)
 type: decoder
 cluster: H8
 nummer: H8.11

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/parkplatz
+meta_title: Parkplatz-Unfall — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.8

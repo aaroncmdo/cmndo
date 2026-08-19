@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/mitverschulden-stvg17
+meta_title: § 17 StVG — Mithaftung und Quotelung
 type: glossar-spoke
 cluster: H1
 nummer: H1.3

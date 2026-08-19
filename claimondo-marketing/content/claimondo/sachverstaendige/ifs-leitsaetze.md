@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/ifs-leitsaetze
+meta_title: IfS-Leitsätze — Standard für Kfz-Gutachten
 type: glossar-spoke
 cluster: SV
 nummer: SV.5

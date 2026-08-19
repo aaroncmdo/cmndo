@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/fahrerflucht
+meta_title: Fahrerflucht — was Geschädigte tun können
 type: glossar-spoke
 cluster: H7
 nummer: H7.6

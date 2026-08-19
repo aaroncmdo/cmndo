@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/wir-pruefen-sachverhalt
+meta_title: „Wir prüfen den Sachverhalt" — was das heißt
 type: decoder
 cluster: H8
 nummer: H8.1

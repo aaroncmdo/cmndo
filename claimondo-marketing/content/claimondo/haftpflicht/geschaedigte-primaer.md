@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/geschaedigte-primaer
+meta_title: Wer ist geschädigt — Anspruchsberechtigung
 type: glossar-spoke
 cluster: H2
 nummer: H2.1

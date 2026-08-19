@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/wiederbeschaffungswert
+meta_title: Wiederbeschaffungswert nach Unfall berechnen
 type: glossar-spoke
 cluster: H3
 nummer: H3.2

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/erwerbsminderungsschaden
+meta_title: Erwerbsminderungs-Schaden nach § 843 BGB
 type: glossar-spoke
 cluster: H3
 nummer: H3.16
