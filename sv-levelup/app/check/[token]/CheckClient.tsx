@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { befundHolen, fortschritt, messungStarten, umfangSetzen, websiteNachtragen } from './actions'
 import type { BefundAntwort } from '@/lib/levelup/befund'
 import type { Modulzustand } from '@/lib/levelup/messung'
+import { TerminClient } from './TerminClient'
 
 const GRUPPEN = [
   { id: 'auftritt', titel: 'Ihr Auftritt' },
@@ -33,6 +34,8 @@ type Props = {
   gewaehlt: string[]
   /** Vom Server geladen, wenn der Check beim Aufruf schon fertig war. */
   ersterBefund: BefundAntwort | null
+  hatTermin: boolean
+  hatFunnel: boolean
 }
 
 const AMPEL_FARBE: Record<string, string> = {
@@ -126,7 +129,13 @@ export function CheckClient(p: Props) {
         {status === 'laeuft' && <Pruefliste kacheln={p.kacheln} auswahl={auswahl} zustaende={zustaende} />}
 
         {status === 'fertig' && (befund
-          ? <Befundansicht befund={befund} modus={p.modus} />
+          ? (
+            <>
+              <Befundansicht befund={befund} modus={p.modus} />
+              {/* Zustaende 5-7: Termin, Funnel, Plan */}
+              <TerminClient token={p.token} hatTermin={p.hatTermin} hatFunnel={p.hatFunnel} />
+            </>
+          )
           : <p className="text-muted">Der Befund wird geladen …</p>)}
 
         {status === 'fehler' && (

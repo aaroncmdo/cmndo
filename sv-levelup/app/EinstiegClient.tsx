@@ -97,6 +97,23 @@ export function EinstiegClient() {
             </div>
 
             <div>
+              <label htmlFor="firmenname" className="block text-sm text-white/70">
+                Name Ihres Büros <span className="text-white/40">(empfohlen)</span>
+              </label>
+              <input
+                id="firmenname"
+                name="firmenname"
+                autoComplete="organization"
+                placeholder="Sachverständigenbüro Meyer"
+                className="mt-2 w-full rounded-[12px] border border-white/20 bg-nacht px-4 py-3 text-white placeholder:text-white/30 focus:border-signal focus:outline-none"
+              />
+              <p className="mt-2 text-xs text-white/45">
+                Damit finden wir Ihren Eintrag in der Kartensuche — ohne ihn bleibt Ihre
+                Position im Wettbewerb ungemessen.
+              </p>
+            </div>
+
+            <div>
               <label htmlFor="website" className="block text-sm text-white/70">
                 Ihre Website{' '}
                 <span className="text-white/40">
