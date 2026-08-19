@@ -30,6 +30,27 @@ const ZEIT_MITTEL = 2500
 const IMPRESSUM_MUSTER = /impressum|imprint|legal[-\s]?notice|anbieterkennzeichnung/i
 const DATENSCHUTZ_MUSTER = /datenschutz|privacy|dsgvo|gdpr/i
 
+/** Unter beiden Schwellen zugleich liefert eine Seite ihren Inhalt nicht serverseitig. */
+const MIN_TEXT_BYTES = 500
+const MIN_TEXT_ANTEIL = 0.03
+
+/**
+ * Erkennt clientseitig gerenderte Seiten.
+ *
+ * Am echten Bestand gemessen (19.08.):
+ *   gutachter-yigit.com   13.145 B HTML,    53 B Text = 0,4 %   → SPA
+ *   sv-bergk.de           10.493 B HTML, 3.136 B Text = 29,9 %  → serverseitig
+ *
+ * BEIDE Schwellen muessen zutreffen: eine knappe, aber echt gerenderte Seite
+ * hat wenig Text UND einen hohen Anteil — sie darf nicht als SPA gelten.
+ */
+export function istClientseitig(html: string): boolean {
+  const ohneCode = html.replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, ' ')
+  const text = ohneCode.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+  if (html.length === 0) return false
+  return text.length < MIN_TEXT_BYTES && text.length / html.length < MIN_TEXT_ANTEIL
+}
+
 /**
  * Modul `web` — Website: Technik und Recht.
  *
@@ -99,21 +120,34 @@ export async function messeWeb(k: Messkontext): Promise<Messergebnis> {
     hatHttps ? undefined : 'Ohne HTTPS markieren Browser die Seite sichtbar als „nicht sicher".',
   ))
 
-  // 2 · Impressum (§ 5 TMG)
-  const hatImpressum = IMPRESSUM_MUSTER.test(html)
-  befunde.push(befund(
-    'impressum', 'Impressum verlinkt', hatImpressum,
-    hatImpressum ? GEWICHTE.impressum : 0, GEWICHTE.impressum, url, erhoben,
-    hatImpressum ? undefined : 'Für geschäftsmäßige Websites nach § 5 TMG verpflichtend; Fehlen ist abmahnfähig.',
-  ))
+  // 2 + 3 · Impressum (§ 5 TMG) und Datenschutzerklärung (Art. 13 DSGVO)
+  //
+  // ⚠ Nur wenn die Seite ihren Inhalt SERVERSEITIG ausliefert. Bei einer
+  // clientseitig gerenderten Seite steht im HTML kein einziger Link — daraus
+  // „kein Impressum" zu folgern, wirft dem Betrieb einen abmahnfähigen Verstoß
+  // vor, den es nicht gibt. Der schädlichste Fehler, den dieses Produkt machen
+  // kann. Nicht feststellbar ≠ nicht vorhanden (R-B).
+  if (istClientseitig(html)) {
+    const grund =
+      'Die Seite lädt ihre Inhalte per JavaScript nach — ob Impressum und ' +
+      'Datenschutzerklärung verlinkt sind, ist ohne Browser nicht feststellbar.'
+    befunde.push(nichtErhoben('impressum', 'Impressum verlinkt', GEWICHTE.impressum, grund, url, erhoben))
+    befunde.push(nichtErhoben('datenschutz', 'Datenschutzerklärung verlinkt', GEWICHTE.datenschutz, grund, url, erhoben))
+  } else {
+    const hatImpressum = IMPRESSUM_MUSTER.test(html)
+    befunde.push(befund(
+      'impressum', 'Impressum verlinkt', hatImpressum,
+      hatImpressum ? GEWICHTE.impressum : 0, GEWICHTE.impressum, url, erhoben,
+      hatImpressum ? undefined : 'Für geschäftsmäßige Websites nach § 5 TMG verpflichtend; Fehlen ist abmahnfähig.',
+    ))
 
-  // 3 · Datenschutzerklaerung (Art. 13 DSGVO)
-  const hatDatenschutz = DATENSCHUTZ_MUSTER.test(html)
-  befunde.push(befund(
-    'datenschutz', 'Datenschutzerklärung verlinkt', hatDatenschutz,
-    hatDatenschutz ? GEWICHTE.datenschutz : 0, GEWICHTE.datenschutz, url, erhoben,
-    hatDatenschutz ? undefined : 'Nach Art. 13 DSGVO verpflichtend, sobald personenbezogene Daten verarbeitet werden.',
-  ))
+    const hatDatenschutz = DATENSCHUTZ_MUSTER.test(html)
+    befunde.push(befund(
+      'datenschutz', 'Datenschutzerklärung verlinkt', hatDatenschutz,
+      hatDatenschutz ? GEWICHTE.datenschutz : 0, GEWICHTE.datenschutz, url, erhoben,
+      hatDatenschutz ? undefined : 'Nach Art. 13 DSGVO verpflichtend, sobald personenbezogene Daten verarbeitet werden.',
+    ))
+  }
 
   // 4 · Antwortzeit
   //
