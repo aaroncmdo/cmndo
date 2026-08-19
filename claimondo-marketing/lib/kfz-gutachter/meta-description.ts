@@ -40,13 +40,26 @@ function baue(kopf: string, mitte: string, schluss: string): string {
   return `${kopf} ${schluss}`.replace(/\s+/g, ' ').trim()
 }
 
-/** Die ersten n Namen, die zusammen noch in die Grenze passen. */
+/**
+ * Die Namen in Reihenfolge, die zusammen noch in die Grenze passen.
+ *
+ * Ein zu langer Name wird UEBERSPRUNGEN, nicht als Abbruch gewertet. Vorher
+ * stand hier `break` — mit der Folge, dass ein einziger langer Name am Anfang
+ * die ganze Ortsangabe kostete: real auf prod lieferte das Modell
+ * "Ortsbezirk 1 – Innenstadt I (Mitte-Ost)" (38 Zeichen, Platz ~30), und die
+ * Beschreibung fiel auf den Gerichts-Fallback zurueck, obwohl zwoelf weitere
+ * Bezirke dahinterstanden. Der Ausfall sah aus wie "diese Stadt hat keine
+ * Ortstiefe" — deshalb faellt so etwas ohne Messung nie auf.
+ *
+ * Die Reihenfolge bleibt erhalten; es ist eine Auswahl, keine Aufzaehlung —
+ * "und Umgebung" sagt das im Satz auch.
+ */
 function nenneBis(namen: string[], platz: number): string[] {
   const gewaehlt: string[] = []
   let laenge = 0
   for (const n of namen) {
     const zusatz = gewaehlt.length ? n.length + 2 : n.length
-    if (laenge + zusatz > platz) break
+    if (laenge + zusatz > platz) continue
     gewaehlt.push(n)
     laenge += zusatz
   }
