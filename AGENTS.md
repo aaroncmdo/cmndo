@@ -34,6 +34,8 @@ Ablauf:
 
 **Pflicht: Schritt 3+4** — die getrackte Version ablesen und das committete File exakt danach benennen. Sonst **Twin-Drift** (File-Timestamp ≠ getrackte Version): `db reset` bzw. ein künftiges CLI-`db push` sähe das File als „nicht appliziert" und führte die DDL erneut aus → Fehler.
 
+⚠ **Der häufigere Fehler ist Schritt 4 ganz auszulassen** — Migration appliziert, File nie committet. Am 19.08. **zweimal an einem Tag** passiert (7 Files aus 5 Lanes, PRs #5393 + #5412). Das fällt verzögert auf: fehlende Files sind additiv und stürzen den Supabase-Preview-Replay *nicht sofort* ab — er stirbt erst, wenn eine **spätere** Migration eines der fehlenden Objekte anfasst, dann mit `42P01` auf **jedem** PR mit Migrations-Diff, nicht nur beim Verursacher. `npm run check:migration-files` (läuft in CI als `--warn`) listet getrackte Migrationen ohne File. Behebung ohne neues DDL: Statement aus `schema_migrations.statements` holen, Datei 1:1 schreiben, **per md5 gegenprüfen** (gleiche Zeichenzahl beweist nichts). Details: `memory/BROADCAST-getrackte-migration-ohne-file-im-repo.md`.
+
 **Verboten:**
 * **raw `execute_sql` mit DDL-Payload** (oder `POST /v1/projects/{ref}/database/query`) — bypasst das Migrations-Tracking → Drift. `execute_sql` nur für READ-Queries.
 * **`npx supabase db push` / sonstige CLI-DDL** — die Auth-/Link-/Drift-Probleme aus unserem Setup (s. o.).
