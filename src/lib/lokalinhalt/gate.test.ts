@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   MIN_SUBSTANZ_SCORE,
+  findeAsciiUmlautErsatz,
   istBelastbareQuelle,
   pruefeLokalinhalt,
   type LokalinhaltEntwurf,
@@ -165,5 +166,101 @@ describe('pruefeLokalinhalt — Robustheit gegen unvollstaendige Modell-Antworte
     const b = pruefeLokalinhalt(e, 'Herne')
     expect(b.bereinigt.stadtbezirke).toHaveLength(1)
     expect(b.bereinigt.lokaleFaqs).toHaveLength(1)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Umlaut-Pflicht (19.08.2026)
+//
+// Der erste scharfe Cron-Lauf erzeugte fuenf Staedte. Das Modell schrieb
+// NICHT-DETERMINISTISCH mal mit, mal ohne Umlaute — gemessen an den echten
+// Zeilen auf prod:
+//
+//   berlin / koeln / muenchen : 43-124 echte Umlaute je Sorte   ✅
+//   hamburg                   : 74x ä, ABER "Elbstrasse",
+//                               "Fahrradstrassen", sogar
+//                               "Strassenbaulasttraeger" + ä im selben Wort  ⚠
+//   frankfurt                 : 0 ä, 0 ö, 0 ü, 0 ß auf 11.836 Zeichen        🔴
+//                               ("buendelt", "koennen", "Kaiserstrasse", ...)
+//
+// Frankfurt ging so live. Der Prompt bittet bereits um Umlaute — deshalb muss
+// das Gate es erzwingen, sonst wiederholt es sich taeglich (Muster wie beim
+// Quellenzwang: bitten reicht nicht).
+// ---------------------------------------------------------------------------
+describe('findeAsciiUmlautErsatz', () => {
+  it('findet die Muster aus dem echten frankfurt-Entwurf', () => {
+    const treffer = findeAsciiUmlautErsatz('Frankfurt buendelt koennen haeufig Kaiserstrasse Fuer')
+    expect(treffer).toEqual(expect.arrayContaining(['buendelt', 'koennen', 'haeufig', 'Kaiserstrasse', 'Fuer']))
+  })
+
+  it('laesst korrekt geschriebenen Text in Ruhe', () => {
+    expect(findeAsciiUmlautErsatz('Die Straße führt über den Königsplatz — häufig größere Schäden.')).toEqual([])
+  })
+
+  it('flaggt NICHT das legitime ss nach kurzem Vokal', () => {
+    // "Fluss", "muss", "Schloss", "Essen", "Kassel" sind korrekt mit ss.
+    // Ein Scan auf blosses `ss` waere unbrauchbar.
+    expect(findeAsciiUmlautErsatz('Der Fluss bei Schloss Essen, Kassel, dass es passt.')).toEqual([])
+  })
+})
+
+describe('pruefeLokalinhalt — Umlaut-Pflicht', () => {
+  /** Baut einen Entwurf mit genug Fliesstext, dass die Laengenschwelle greift. */
+  function langerEntwurf(satz: string): LokalinhaltEntwurf {
+    const e = guterEntwurf()
+    e.lokaleFaqs = Array.from({ length: 12 }, (_, i) => ({
+      frage: `Frage ${i} zu Herne?`,
+      antwort: `${satz} ${satz} ${satz}`,
+    }))
+    return e
+  }
+
+  it('lehnt einen Entwurf ohne EINEN einzigen Umlaut ab (der frankfurt-Fall)', () => {
+    const e = langerEntwurf(
+      'Herne buendelt den Verkehr, Fahrzeuge koennen haeufig ueber die Kaiserstrasse fahren und Schaeden entstehen fuer Halter.',
+    )
+    const b = pruefeLokalinhalt(e, 'Herne')
+
+    expect(b.ok).toBe(false)
+    expect(b.gruende.join(' ')).toMatch(/Umlaut/i)
+  })
+
+  it('lehnt auch den GEMISCHTEN Fall ab (hamburg: echte Umlaute UND Strassen)', () => {
+    const e = guterEntwurf()
+    e.hauptachsen.knoten = ['Kreuzung Elbstrasse', 'Fahrradstrassen-Knoten']
+    e.lokaleFaqs = [{ frage: 'Wer zahlt in Herne?', antwort: 'Die gegnerische Haftpflicht zahlt für Schäden.' }]
+
+    const b = pruefeLokalinhalt(e, 'Herne')
+
+    expect(b.ok).toBe(false)
+    expect(b.gruende.join(' ')).toContain('Elbstrasse')
+  })
+
+  it('laesst korrekt geschriebene Entwuerfe durch (berlin/koeln/muenchen)', () => {
+    const e = langerEntwurf(
+      'In Herne führt die Straße über den Ring; häufig entstehen größere Schäden, die für Halter zählen.',
+    )
+    expect(pruefeLokalinhalt(e, 'Herne').ok).toBe(true)
+  })
+
+  it('schlaegt bei KURZEN Entwuerfen ohne Umlaut NICHT an', () => {
+    // "Bonn, A565, B9, Nord" ist legitim umlautfrei. Die 0-Umlaut-Regel darf
+    // erst greifen, wo deutscher Fliesstext ohne Umlaut praktisch unmoeglich ist.
+    const e: LokalinhaltEntwurf = {
+      stadtbezirke: [{ name: 'Bonn-Nord', ortsteile: ['Castell'] }],
+      hauptachsen: { autobahnen: ['A565'], bundesstrassen: ['B9'], knoten: [] },
+      unfallHotspots: [],
+      lokaleFaqs: [{ frage: 'Wer zahlt in Bonn?', antwort: 'Die gegnerische Haftpflicht in Bonn.' }],
+    }
+    expect(pruefeLokalinhalt(e, 'Bonn').ok).toBe(true)
+  })
+
+  it('prueft die WERTE, nicht die JSON-Schluessel', () => {
+    // `hauptachsen.bundesstrassen` ist ein Schluesselname im Schema und taucht
+    // in JEDEM Entwurf auf — ein Scan ueber JSON.stringify() haette alle fuenf
+    // Staedte geflaggt, auch die drei einwandfreien.
+    const e = guterEntwurf()
+    e.lokaleFaqs = [{ frage: 'Welche Straße in Herne?', antwort: 'Die B226 führt durch Herne.' }]
+    expect(pruefeLokalinhalt(e, 'Herne').ok).toBe(true)
   })
 })
