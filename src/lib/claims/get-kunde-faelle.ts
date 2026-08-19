@@ -227,6 +227,24 @@ export async function getKundeFaelle(
 
   if (claimIds.size === 0) return []
 
+  // ─── 1d. Deaktivierte Testfaelle ausschliessen ──────────────────────────
+  // `ist_aktiv=false` wird ausschliesslich fuer Smoke-/Testdaten gesetzt
+  // (`deaktiviert_grund='testfall'`; auf prod gibt es keinen anderen Grund) — die Smokes
+  // koppeln ihre Claims beim Aufraeumen ab, statt sie hart zu loeschen. Ohne diesen Filter
+  // erscheinen sie in der Fallliste des Kunden: real betroffen war ein Konto, das
+  // NULL echte, aber einen deaktivierten Fall traegt.
+  // Einmal hier statt in den drei Sammel-Quellen oben — sonst muss jede neue Quelle daran denken.
+  const { data: inaktive, error: inaktivFehler } = await admin
+    .from('claims')
+    .select('id')
+    .in('id', Array.from(claimIds))
+    .is('ist_aktiv', false)
+  if (inaktivFehler) {
+    console.error('[getKundeFaelle] Inaktiv-Filter fehlgeschlagen — zeige alle Faelle:', inaktivFehler.message)
+  }
+  for (const c of (inaktive ?? []) as Array<{ id: string }>) claimIds.delete(c.id)
+  if (claimIds.size === 0) return []
+
   const claimIdArr = Array.from(claimIds)
 
   // ─── 2. Claims + Faelle parallel laden ─────────────────────────────────

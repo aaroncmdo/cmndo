@@ -3,6 +3,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import NachbesichtigungClient from './NachbesichtigungClient'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
+import { effektiveFallClaimId } from '@/lib/termine/effektive-bezug-ids'
 
 export default async function NachbesichtigungPage() {
   const supabase = await createClient()
@@ -27,8 +29,9 @@ export default async function NachbesichtigungPage() {
     // Aktuellen Termin pro Claim laden und nach nachbesichtigung_status='angefordert' filtern
     const { data: termine } = await supabase
       .from('gutachter_termine')
-      .select('claim_id, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am')
-      .in('claim_id', claimIds)
+      // bezug_typ/bezug_id mitladen — bezug-native Termine tragen claim_id NULL.
+      .select('claim_id, bezug_typ, bezug_id, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am')
+      .or(bezugInExpr('claim', claimIds))
       .eq('nachbesichtigung_status', 'angefordert')
       .order('start_zeit', { ascending: false })
 
@@ -37,8 +40,10 @@ export default async function NachbesichtigungPage() {
       const seenClaims = new Set<string>()
       const matchingClaims = new Map<string, { nachbesichtigung_status: string | null; nachbesichtigung_termin_datum: string | null; nachbesichtigung_angefordert_am: string | null }>()
       for (const t of termine) {
-        const cid = t.claim_id as string
-        if (!seenClaims.has(cid)) {
+        // NICHT t.claim_id — bezug-native Zeilen haetten dort NULL und der Fall
+        // verschwaende aus der Nachbesichtigungs-Liste, obwohl er angefordert ist.
+        const cid = effektiveFallClaimId(t)
+        if (cid && !seenClaims.has(cid)) {
           seenClaims.add(cid)
           matchingClaims.set(cid, {
             nachbesichtigung_status: t.nachbesichtigung_status as string | null,

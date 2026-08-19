@@ -1,4 +1,6 @@
 import type { Metadata } from 'next'
+import { Fragment } from 'react'
+import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { GutachterFindenSection } from '@/components/gutachter-finden/GutachterFindenSection'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
@@ -51,6 +53,23 @@ export async function generateMetadata(): Promise<Metadata> {
 // JSON-LD (Service/Breadcrumb/ImageObject) und die sr-only-H1 beschreiben die Seite weiterhin
 // crawler-lesbar. FAQ-/HowTo-JSON-LD wurde entfernt, weil deren SICHTBARER Inhalt wegfällt
 // (Google verlangt sichtbaren Content für FAQ-/HowTo-Rich-Results).
+// Ziele des Crawl-Pfads: der Pillar, seine drei Themen-Spokes und die sieben
+// Hub-Staedte (die mit hyperlocaler Tiefe, `HYPERLOCAL_DATA` in staedte.ts).
+// Bewusst kurz gehalten — ein Navigations-Block, keine Linkliste.
+const FINDER_LINKS = [
+  { href: '/kfz-gutachter', label: 'Kfz-Gutachter' },
+  { href: '/kfz-gutachter/kosten', label: 'Kosten' },
+  { href: '/kfz-gutachter/ablauf', label: 'Ablauf' },
+  { href: '/kfz-gutachter/wertminderung', label: 'Wertminderung' },
+  { href: '/kfz-gutachter/koeln', label: 'Köln' },
+  { href: '/kfz-gutachter/duesseldorf', label: 'Düsseldorf' },
+  { href: '/kfz-gutachter/bonn', label: 'Bonn' },
+  { href: '/kfz-gutachter/wuppertal', label: 'Wuppertal' },
+  { href: '/kfz-gutachter/hamburg', label: 'Hamburg' },
+  { href: '/kfz-gutachter/berlin', label: 'Berlin' },
+  { href: '/kfz-gutachter/muenchen', label: 'München' },
+] as const
+
 export default async function GutachterFindenPage({
   searchParams,
 }: {
@@ -111,13 +130,49 @@ export default async function GutachterFindenPage({
       />
       <h1 className="sr-only">{t('sr_h1')}</h1>
 
-      {/* Vollbild-Finder (Karte + Finder + Wizard). initialCenter aus ?stadt/?plz/?lat&lng.
-          Embed-only: bewusst KEIN Content darunter (sauberer Mobile-Scroll). */}
+      {/* Finder-Karte. initialCenter aus ?stadt/?plz/?lat&lng.
+          Embed-only: bewusst KEIN Marketing-Content darunter (Trust-Strip, FAQ,
+          Bottom-CTA) — der erzeugte auf Mobil den Scroll-Konflikt (AAR-956).
+          Die Hoehe laesst bewusst 5rem frei: der sichtbare Anschnitt des
+          Link-Blocks signalisiert, dass es weitergeht, statt Content hinter
+          einer randlosen 100dvh-Karte zu verstecken. */}
       <GutachterFindenSection
-        height="100dvh"
+        height="calc(100dvh - 5rem)"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
       />
+
+      {/* Crawl-Pfad. Die Seite lieferte zuvor 0 Woerter und 0 interne Links —
+          eine Sackgasse: sie nimmt Link-Equity auf (priority 0.95) und gibt
+          nichts weiter. Bewusst nur Navigation, kein Fliesstext: die
+          Content-Tiefe liegt im Pillar /kfz-gutachter (1.711 Woerter).
+          Labels sind Seiten-/Ortsnamen und bleiben deutsch — wie die Ziele
+          und wie die uebrigen internen Links des Builds (next/link,
+          prefix-frei, etablierte Praxis der Stadtseiten). */}
+      <nav
+        aria-label="Weitere Seiten zu Kfz-Gutachtern"
+        className="flex h-20 items-center overflow-x-auto border-t border-claimondo-border bg-claimondo-bg px-4 sm:px-6"
+      >
+        <ul className="flex items-center gap-x-3 gap-y-1 whitespace-nowrap text-body-sm text-claimondo-shield/80">
+          {FINDER_LINKS.map((l, i) => (
+            <Fragment key={l.href}>
+              {i > 0 && (
+                <li aria-hidden className="text-claimondo-shield/30">
+                  ·
+                </li>
+              )}
+              <li>
+                <Link
+                  href={l.href}
+                  className="underline-offset-2 transition-colors hover:text-claimondo-ondo hover:underline"
+                >
+                  {l.label}
+                </Link>
+              </li>
+            </Fragment>
+          ))}
+        </ul>
+      </nav>
     </>
   )
 }

@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 interface BestaetigenInput {
   fallId: string
@@ -50,7 +51,8 @@ async function loadFallFuerSv(
     const { data: at } = await db
       .from('gutachter_termine')
       .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
-      .eq('claim_id', fall.claim_id)
+      // bezug-aware: bezug-native Termine tragen claim_id NULL (bezug_typ='fall'+bezug_id).
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
