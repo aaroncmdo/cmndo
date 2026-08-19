@@ -1,3 +1,14 @@
+-- Kurzer SERP-Titel fuer die Wissens-Artikel.
+--
+-- Hintergrund (SEO-Audit 19.08.2026): 58 der 65 veroeffentlichten Artikel
+-- trugen Titel ueber 60 Zeichen (Median 67, Maximum 91) — Google zeigt rund 60.
+-- `title` ist zugleich die sichtbare H1 des Artikels; ein Kuerzen haette die
+-- Ueberschrift verstuemmelt. Daher ein eigenes Feld, exakt analog zu
+-- `meta_description` in derselben Tabelle und zum `meta_title`-Frontmatter der
+-- MDX-Assets (claimondo-marketing/lib/content/claimondo-mdx.ts).
+--
+-- NULL = Fallback auf `title` (rueckwaertskompatibel, kein Backfill noetig).
+
 alter table public.wissen_artikel
   add column if not exists meta_title text;
 

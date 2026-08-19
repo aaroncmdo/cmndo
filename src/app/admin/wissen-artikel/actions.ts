@@ -197,6 +197,8 @@ export async function updateArtikel(
     excerpt?: string
     key_facts?: string[]
     meta_description?: string
+    /** Kurzer SERP-Titel; leer = `title` wird genommen (der zugleich die H1 ist). */
+    meta_title?: string
     slug?: string
     primary_keyword?: string
     cluster?: string
