@@ -2,8 +2,18 @@ import type { Holer } from '../anreicherung/lauf'
 import type { PlacesAdapter } from '../places'
 import type { ModulId, Modus } from './registry'
 
-/** Ampelschwellen aus GESAMTSPEC §6: <40 % rot, 40–70 % gelb, >70 % gruen. */
-export type Ampel = 'rot' | 'gelb' | 'gruen'
+/**
+ * Ampelschwellen aus GESAMTSPEC §6: <40 % rot, 40–70 % gelb, >70 % gruen.
+ *
+ * ⚠ `offen` ist eine ERGAENZUNG zum Mockup-Vertrag (der nur drei Farben kennt)
+ * und inhaltlich notwendig: Ein nicht erhobener Wert darf nicht rot sein. Rot
+ * heisst „schlecht" — bei einer Fehlstelle wuerde die Ampel genau die
+ * Unterscheidung wieder einebnen, die R-B verlangt („nicht erhoben" ist kein
+ * Mangel des Betriebs, sondern eine Grenze der Messung). Am echten Lauf
+ * aufgefallen (19.08.): „Impressum nicht erhoben" stand rot neben einem echten
+ * „Impressum fehlt" — optisch nicht unterscheidbar.
+ */
+export type Ampel = 'rot' | 'gelb' | 'gruen' | 'offen'
 
 export function ampelFuer(ist: number, maximum: number): Ampel {
   if (maximum <= 0) return 'gruen'
@@ -92,7 +102,7 @@ export function nichtErhoben(
 ): Befund {
   return {
     schluessel, label, wert: null, punkte: 0, maximum,
-    ampel: 'rot', grund, quelle, erhoben,
+    ampel: 'offen', grund, quelle, erhoben,
   }
 }
 
