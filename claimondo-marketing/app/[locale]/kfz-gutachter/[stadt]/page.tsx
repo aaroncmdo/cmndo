@@ -31,7 +31,7 @@ import {
   getStadtByName, getStadtBySlug,
   type LokaleFaq, type Stadt,
 } from '@/lib/kfz-gutachter/staedte'
-import { getStadtLastUpdatedISO } from '@/lib/kfz-gutachter/freshness'
+import { stadtLastModifiedISO } from '@/lib/kfz-gutachter/freshness'
 import { ladeLokalinhalt } from '@/lib/kfz-gutachter/lokalinhalt'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { finderHrefFuerStadt } from '@/lib/kfz-gutachter/finder-link'
@@ -268,11 +268,16 @@ export default async function KfzGutachterStadtPage({
             totalTime: 'P32D',
             step: PROZESS_STEPS.map((p) => ({ '@type': 'HowToStep', position: p.nr, name: p.titel, text: p.text })),
           },
-          // dateModified aus der gepflegten Stadt-Freshness-Map (dieselbe Quelle,
-          // die die Sitemap nutzt). Ohne das trug KEINE der ~160 Stadt-Seiten ein
-          // Aktualitaets-Signal — GEO-Baseline 18.08.2026, Befund B2.
+          // dateModified aus derselben Quelle wie die Sitemap. Ohne das trug
+          // KEINE der ~160 Stadt-Seiten ein Aktualitaets-Signal — GEO-Baseline
+          // 18.08.2026, Befund B2.
           faqPageSchema(faqs, {
-            dateModified: getStadtLastUpdatedISO(s.slug),
+            // Seit 19.08. das SPAETERE von gepflegtem Eintrag und tatsaechlicher
+            // Veroeffentlichung des Ortsinhalts. Die Map allein wird von Hand
+            // gepflegt — seit der Cron taeglich zwei Staedte aendert, traegt das
+            // nicht mehr: gemessen meldeten 169 von 182 Stadtseiten den
+            // Mai-Default, darunter Staedte mit Inhalt VON DEMSELBEN TAG.
+            dateModified: stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm),
             url: `/kfz-gutachter/${s.slug}`,
           }),
           breadcrumbsSchema([
