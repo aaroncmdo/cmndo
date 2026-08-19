@@ -39,7 +39,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     a.title
 
   return {
-    title: a.title,
+    // Kurzer SERP-Titel wenn in der DB gepflegt; sonst der volle Artikel-Titel
+    // (= die sichtbare H1). openGraph.title unten behaelt bewusst den vollen —
+    // dort ist mehr Platz. Spalte: wissen_artikel.meta_title.
+    title: a.meta_title || a.title,
     description,
     alternates: { canonical: `/wissen/${slug}` },
     openGraph: {
