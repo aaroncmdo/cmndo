@@ -159,7 +159,8 @@ export default function WerkstattCard({ claimId, werkstatt, termin }: WerkstattC
 
   // Termin-Phase ermitteln (null = noch kein Termin)
   const status = termin ? (termin.status as ReparaturTerminStatus) : null
-  const phase = reparaturTerminPhase(status)
+  // Ohne genannte Wunschzeit darf hier nicht „Wunschtermin angefragt" stehen.
+  const phase = reparaturTerminPhase(status, { hatWunschtermin: termin?.wunschtermin != null })
   const badgeTone = TON_TO_BADGE_TONE[phase.ton]
 
   // Zeitanzeige: bestätigter Termin bevorzugt, sonst Wunschtermin

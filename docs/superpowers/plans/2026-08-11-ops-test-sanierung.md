@@ -106,15 +106,35 @@ git log -1 --format="%h %ad" --date=short   # muss 2026-08-12 oder neuer sein
 > | **R2** UI-Klickwege (E/F3/C1/B) | ✅ **erledigt** — alle vier Specs liegen seit 13.08. auf staging (#5237) |
 > | **R3** Lane-A-Wunschzeit | ⚠ vermutlich erledigt (#5213 „Smoke GRÜN" liegt auf staging) · Lane von `9f54b5bf` |
 > | **R5-H0** §2-Nachzug | 🟢 offen, reine Doku |
-> | **R5-H3** C2b create-case | ⚪ **gegenstandslos** — 6 Wege (nicht 9), aber **0 echte Kundenleads ohne FlowLink** in 90 Tagen |
-> | **R6-C2** Wunschzeit-Text | ⚪ **gegenstandslos** — genau 1 Termin `sv_gesucht` auf prod, `pending`-Flag greift bereits |
+> | **R5-H3** C2b create-case | 🟡 **teils abgedeckt, teils ungeprüft** — s. Korrektur unten (die „gegenstandslos"-Einstufung von 18.08. war falsch begründet) |
+> | **R6-C2** Wunschzeit-Text | 🔴 **echter Bug, gefixt** — 7 betroffene Fälle, nicht 1 (falsche Tabelle gemessen) |
 > | **R6-F4** Fahrzeuge-Einstieg | 🔴 braucht Aaron (Produktentscheid) |
 >
 > **⇒ Der Bau-Scope der Sanierung ist damit durch.** Übrig bleiben ein Doku-Nachzug (R5-H0) und ein Produktentscheid (R6-F4). Wer „noch etwas bauen" sucht, findet hier nichts mehr.
 >
 > ⚠ **In eigener Sache:** In der ersten Fassung dieses Blocks stand R2 als „echt offen — einziger substanzieller Rest". Das war **ungeprüft aus dem Plantext übernommen**, während ich alle anderen Zeilen gemessen habe. Tatsächlich liegen alle vier Specs (`werkstatt-haftpflicht-gate-smoke`, `kunde-termin-aufgabe-f3-smoke`, `quali-gutachter-bindung-c1-smoke`, `vehicles-nachzug-b-smoke`) seit dem 13.08. auf staging. Derselbe Fehler, den dieser Block verhindern soll — und der Grund, warum unten in R2 jetzt die Dateinamen stehen statt einer Statusfarbe.
 >
-> ⭐ **Methodischer Kern beider ⚪-Befunde:** Eine Rohzahl („9 Wege ohne createCase", „Text ist irreführend") ist noch kein Auftrag. Erst die Frage *„betrifft das einen echten Nutzer?"* entscheidet — und beide Male lautete die Antwort nach dem Join auf Test-/Smoke-Daten bzw. auf die Fallzahl: nein.
+> ## 🔴 Korrektur 19.08. — die beiden „gegenstandslos"-Urteile waren FALSCH
+>
+> Auf Nachfrage gegengeprüft. Beide kippen, aus **je einem Messfehler**:
+>
+> **R6-C2 — falsche Tabelle gemessen.** Ich zählte `gutachter_termine` (1 Zeile `sv_gesucht`). Die Kunden-Anzeige liest aber **`reparatur_termine`** — dort stehen **7× `angefragt`**, jüngste von gestern, darunter die vier bekannten Hänger `CLM-2026-00932/-00939/-00977/-00991`. Exakt die Falle, die der Marker für F3 dokumentiert (*„gemessen wurde an `gutachter_termine` … die Kunden-Aufgabe liest aber `reparatur_termine`"*) — ich bin hineingelaufen, obwohl sie aufgeschrieben war.
+> **Der Bug ist real:** `reparaturTerminPhase('angefragt')` gab pauschal „**Wunschtermin angefragt**" zurück — bei **allen 7** ist `wunschtermin IS NULL`. Der Kunde las von einer Wunschzeit, die er nie genannt hat. ✅ Gefixt (Label „Terminanfrage läuft", Kunden- **und** Werkstatt-Sicht, 3 Unit-Tests).
+>
+> **R5-H3 — `source_channel` bildet die Code-Wege nicht ab.** Ich hatte über den Kanal gruppiert, ohne zu prüfen, welchen Kanal die sechs Verletzer wirklich setzen. Tatsächlich:
+>
+> | Verletzer | `source_channel` | Stand |
+> |---|---|---|
+> | `flotte/schaden-fortsetzung` | `flotte-manuell` | ✅ ruft `ensureCanonicalFlowLinkForLead` **selbst** (3×) — Migration redundant |
+> | `gutachter-vermittlung` | `gutachter-vermittlung` | ✅ dito (Z. 150) |
+> | `makler/erstelle-anfrage` | `makler-anfrage-flowlink` | ⚠ **0** FlowLink-Bezüge im Code, Leads haben trotzdem welche → ungeklärt |
+> | `dispatch/leads/actions.ts` | **Parameter**, kein Literal | 🔴 **0 FlowLink-Bezüge** — echter ungedeckter Weg, über den Kanal **nicht messbar** |
+> | `admin/faelle/anlegen` | `admin-direkt` | ⚪ **0 Leads/90 d** — ungenutzt, also latent (nicht „harmlos") |
+> | `dispatch/kalender/spontan` | `dispatch_spontan` | ⚪ **0 Leads/90 d** — dito |
+>
+> ⇒ Nicht gegenstandslos: zwei Wege sind strukturell abgedeckt, zwei ungenutzt-latent, **zwei ungeklärt**. Wer H3 aufnimmt, beginnt bei `dispatch/leads/actions.ts`.
+>
+> ⭐ **Methodische Lehre (teurer als die beiden Befunde):** Die Frage *„betrifft das einen echten Nutzer?"* ist richtig — aber sie taugt nur, wenn **am richtigen Objekt** gemessen wird. Beide Fehlurteile entstanden nicht aus der Frage, sondern aus einem ungeprüften Proxy: eine Tabelle, die plausibel klang, und ein Kanal-Feld, das die Code-Wege gar nicht abbildet. **Vor der Messung belegen, dass das Messobjekt das ist, was der Code liest.**
 >
 > ⚠ Gegenprobe nicht vergessen: `leads.created_at` (nicht `erstellt_am`), und `schaden-karte` ist **by design** ohne FlowLink (Gegner-Flow, Allowlist im Intake-Gate).
 

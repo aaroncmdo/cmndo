@@ -85,7 +85,9 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const hatRow = Boolean(terminId)
 
   const status = hatRow ? (auftrag.reparatur_termin_status as ReparaturTerminStatus | null) : 'angefragt'
-  const phase = reparaturTerminPhase(status)
+  // Der row-lose Fall oben ist per Definition wunschtermin-frei (s. Kommentar) — dann darf
+  // hier nicht „Wunschtermin angefragt" stehen.
+  const phase = reparaturTerminPhase(status, { hatWunschtermin: Boolean(auftrag.reparatur_wunschtermin) })
   const badgeTone = TON_TO_BADGE_TONE[phase.ton]
 
   const terminIso = auftrag.reparatur_bestaetigter_termin ?? auftrag.reparatur_wunschtermin

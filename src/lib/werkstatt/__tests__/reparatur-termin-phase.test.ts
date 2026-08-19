@@ -24,3 +24,23 @@ describe('reparaturTerminPhase', () => {
     expect(reparaturTerminPhase('storniert')).toEqual({ key: 'storniert', label: 'Termin storniert', ton: 'neutral' })
   })
 })
+
+// Ops-Test C2-Rest (19.08.): `angefragt` behauptete pauschal einen Wunschtermin.
+// Auf prod hatten ALLE sieben offenen Anfragen wunschtermin=NULL.
+describe('reparaturTerminPhase — angefragt ohne genannte Wunschzeit', () => {
+  it('nennt keinen Wunschtermin, wenn keiner vorliegt', () => {
+    expect(reparaturTerminPhase('angefragt', { hatWunschtermin: false })).toEqual({
+      key: 'angefragt',
+      label: 'Terminanfrage läuft',
+      ton: 'info',
+    })
+  })
+
+  it('bleibt beim Wunschtermin-Text, wenn einer vorliegt', () => {
+    expect(reparaturTerminPhase('angefragt', { hatWunschtermin: true }).label).toBe('Wunschtermin angefragt')
+  })
+
+  it('ist ohne Option rueckwaertskompatibel', () => {
+    expect(reparaturTerminPhase('angefragt').label).toBe('Wunschtermin angefragt')
+  })
+})

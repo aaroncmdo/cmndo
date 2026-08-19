@@ -17,8 +17,25 @@ const MAP: Record<ReparaturTerminStatus, ReparaturTerminPhase> = {
   storniert:     { key: 'storniert',     label: 'Termin storniert',          ton: 'neutral' },
 }
 
-/** Leitet die Anzeige-Phase aus dem Reparaturtermin-Status ab. null = noch kein Termin. */
-export function reparaturTerminPhase(status: ReparaturTerminStatus | null): ReparaturTerminPhase {
+/**
+ * Leitet die Anzeige-Phase aus dem Reparaturtermin-Status ab. null = noch kein Termin.
+ *
+ * Ops-Test C2-Rest (19.08.): `angefragt` hiess pauschal „Wunschtermin angefragt" — auch
+ * dann, wenn gar keine Wunschzeit genannt wurde. Auf prod trifft das ALLE sieben offenen
+ * Anfragen (`wunschtermin IS NULL`, u.a. die vier bekannten Haenger CLM-2026-00932/-00939/
+ * -00977/-00991). Der Kunde las dort von einem Wunschtermin, den er nie angegeben hat.
+ *
+ * `hatWunschtermin: false` schaltet auf den neutralen Text. Ohne die Option bleibt das
+ * bisherige Label — die Funktion ist damit rueckwaertskompatibel, und Aufrufer ohne
+ * Kenntnis des Wunschtermins behaupten nichts Falsches in die andere Richtung.
+ */
+export function reparaturTerminPhase(
+  status: ReparaturTerminStatus | null,
+  opts?: { hatWunschtermin?: boolean },
+): ReparaturTerminPhase {
   if (status === null) return { key: 'kein_termin', label: 'Kein Reparaturtermin', ton: 'neutral' }
+  if (status === 'angefragt' && opts?.hatWunschtermin === false) {
+    return { key: 'angefragt', label: 'Terminanfrage läuft', ton: 'info' }
+  }
   return MAP[status]
 }
