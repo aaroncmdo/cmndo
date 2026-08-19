@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anwaltskosten-erstattung
+meta_title: Anwaltskosten nach Unfall — wer zahlt
 type: glossar-spoke
 cluster: H3
 nummer: H3.8

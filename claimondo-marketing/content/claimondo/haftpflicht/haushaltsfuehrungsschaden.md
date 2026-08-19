@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/haushaltsfuehrungsschaden
+meta_title: Haushaltsführungsschaden nach Unfall
 type: glossar-spoke
 cluster: H3
 nummer: H3.12

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /kfz-haftpflicht-schaden
+meta_title: Kfz-Haftpflichtschaden — das Handbuch
 type: cornerstone-pillar
 cluster: PILLAR-B
 primary_keyword: "kfz haftpflicht schaden"

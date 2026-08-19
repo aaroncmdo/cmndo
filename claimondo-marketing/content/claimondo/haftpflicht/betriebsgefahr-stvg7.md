@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/betriebsgefahr-stvg7
+meta_title: Betriebsgefahr § 7 StVG — Halterhaftung
 type: glossar-spoke
 cluster: H1
 nummer: H1.1

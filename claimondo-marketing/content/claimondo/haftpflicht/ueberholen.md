@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/ueberholen
+meta_title: Überholen-Unfall — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.11

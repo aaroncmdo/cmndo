@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/pauschal-abgeltung
+meta_title: „Alle Ansprüche abgegolten" — was das heißt
 type: decoder
 cluster: H8
 nummer: H8.6

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/unser-sachverstaendiger
+meta_title: „Unser Vertrauens-Sachverständiger" — was tun
 type: decoder
 cluster: H8
 nummer: H8.7

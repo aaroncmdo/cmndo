@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/unterhaltsschaden
+meta_title: Unterhaltsschaden § 844 BGB — Hinterbliebene
 type: glossar-spoke
 cluster: H2
 nummer: H2.5

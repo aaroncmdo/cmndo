@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/huk24
+meta_title: HUK24 Schadensregulierung — Direktmarke
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D3

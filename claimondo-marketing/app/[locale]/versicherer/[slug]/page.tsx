@@ -40,7 +40,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!a) return {}
   const description = a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title
   return {
-    title: a.title,
+    // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
+    // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
+    title: a.metaTitle || a.title,
     description,
     alternates: { canonical: a.url },
     openGraph: {

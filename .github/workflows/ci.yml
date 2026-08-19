@@ -374,6 +374,24 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Migration-File-Drift (19.08.2026): faengt die GEGENRICHTUNG der ueblichen Twin-Drift —
+      # eine Migration ist getrackt + auf prod appliziert, aber ihr File fehlt im Repo (Regel 2
+      # Schritt 4 vergessen). Das Schema ist dann nicht reproduzierbar, und der Preview-Replay
+      # stirbt mit 42P01, sobald eine SPAETERE Migration eines der fehlenden Objekte anfasst —
+      # auf JEDEM PR mit Migrations-Diff, nicht nur beim Verursacher. Am 19.08. zweimal
+      # passiert (7 Files, PRs #5393 + #5412).
+      # ⚠ BEWUSST --warn, NICHT --ratchet: die Drift entsteht AUSSERHALB eines PRs (per
+      # apply_migration), ein blockierendes Gate wuerde also unbeteiligte Lanes rot faerben.
+      # Die Warnung erreicht den Verursacher trotzdem — sie erscheint in JEDEM PR, also auch
+      # in seinem naechsten. Nach einer Beobachtungsphase kann daraus --ratchet werden.
+      # Backing-RPC audit_migration_versions(). Ohne Secrets: sauberer Skip (exit 0).
+      # Siehe scripts/check-migration-files.mjs + scripts/migration-files-baseline.json.
+      - name: Migration-File-Drift (warn)
+        run: node scripts/check-migration-files.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       # Query-Parse-Drift-Bremse (14.07.2026): faengt tote PostgREST-Queries, die still HTTP 300/400
       # liefern (tote Spalte / fehlende Relation / mehrdeutiger Embed / fehlende Tabelle) und deren
       # Fehler im Code verschluckt wird (`const { data } = await …`). Ausloeser: ein FK machte einen

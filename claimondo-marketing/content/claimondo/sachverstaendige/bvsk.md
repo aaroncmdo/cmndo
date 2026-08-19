@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/bvsk
+meta_title: BVSK — Bundesverband freier Kfz-Gutachter
 type: glossar-spoke
 cluster: SV
 nummer: SV.1

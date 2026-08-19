@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verzugszinsen-bgb288
+meta_title: Verzugszinsen nach § 288 BGB
 type: glossar-spoke
 cluster: H4
 nummer: H4.3

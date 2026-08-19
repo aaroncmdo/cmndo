@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/vorfahrt-rechts-vor-links
+meta_title: Rechts vor links — Haftung und Quoten
 type: glossar-spoke
 cluster: H6
 nummer: H6.2

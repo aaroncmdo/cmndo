@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/mehrere-schaediger
+meta_title: Kettenunfall — Gesamtschuldner nach § 421 BGB
 type: glossar-spoke
 cluster: H7
 nummer: H7.7

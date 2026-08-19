@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/reparatur-unwirtschaftlich
+meta_title: „Reparatur wirtschaftlich nicht sinnvoll"
 type: decoder
 cluster: H8
 nummer: H8.3

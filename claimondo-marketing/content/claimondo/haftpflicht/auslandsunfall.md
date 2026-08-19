@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/auslandsunfall
+meta_title: Auslandsunfall — Regulierung Grüne Karte
 type: glossar-spoke
 cluster: H7
 nummer: H7.3
