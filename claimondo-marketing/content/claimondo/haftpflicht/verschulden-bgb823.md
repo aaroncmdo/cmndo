@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verschulden-bgb823
+meta_title: § 823 BGB — Verschuldenshaftung nach Unfall
 type: glossar-spoke
 cluster: H1
 nummer: H1.2

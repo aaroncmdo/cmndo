@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/reparaturkosten
+meta_title: Reparaturkosten nach Unfall — was erstattet wird
 type: glossar-spoke
 cluster: H3
 nummer: H3.1

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/tueroeffnen
+meta_title: Türöffnen-Unfall — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.9

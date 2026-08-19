@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/glatteis-aquaplaning
+meta_title: Glatteis und Aquaplaning — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.13

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/schmerzensgeld-angemessen
+meta_title: „1.500 € Schmerzensgeld angemessen" — was tun
 type: decoder
 cluster: H8
 nummer: H8.5

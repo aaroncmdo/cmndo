@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verjaehrung-bgb195
+meta_title: Verjährung nach § 195 BGB — Unfall-Ansprüche
 type: glossar-spoke
 cluster: H4
 nummer: H4.4

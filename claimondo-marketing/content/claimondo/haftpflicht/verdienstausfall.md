@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verdienstausfall
+meta_title: Verdienstausfall nach Unfall berechnen
 type: glossar-spoke
 cluster: H3
 nummer: H3.11

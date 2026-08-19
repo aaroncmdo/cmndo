@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anscheinsbeweis
+meta_title: Anscheinsbeweis im Verkehrsunfall
 type: glossar-spoke
 cluster: H1
 nummer: H1.6

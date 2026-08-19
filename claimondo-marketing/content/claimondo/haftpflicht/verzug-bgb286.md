@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/verzug-bgb286
+meta_title: Verzug nach § 286 BGB — Regulierung
 type: glossar-spoke
 cluster: H4
 nummer: H4.2

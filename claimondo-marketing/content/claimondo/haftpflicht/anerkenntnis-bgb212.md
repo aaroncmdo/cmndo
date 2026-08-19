@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anerkenntnis-bgb212
+meta_title: Anerkenntnis § 212 BGB vs. Vergleich § 779 BGB
 type: glossar-spoke
 cluster: H4
 nummer: H4.7

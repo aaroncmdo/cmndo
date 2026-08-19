@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/pruefdienstleister
+meta_title: Prüfdienstleister — wie Versicherer kürzen
 type: glossar-spoke
 cluster: SV
 nummer: SV.8

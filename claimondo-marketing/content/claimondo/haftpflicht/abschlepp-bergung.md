@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/abschlepp-bergung
+meta_title: Abschlepp- und Bergungskosten
 type: glossar-spoke
 cluster: H3
 nummer: H3.7

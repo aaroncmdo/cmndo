@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/produkthaftung
+meta_title: Produkthaftung bei Fahrzeugfehlern
 type: glossar-spoke
 cluster: H7
 nummer: H7.5
