@@ -1,8 +1,7 @@
 {
-  "generatedAt": "2026-08-19T10:57:44.769Z",
-  "count": 2,
+  "generatedAt": "2026-08-19T11:15:58.044Z",
+  "count": 1,
   "files": [
-    "src/app/flow/[token]/actions.ts",
-    "src/components/termine/TerminListeClient.tsx"
+    "src/app/flow/[token]/actions.ts"
   ]
 }
