@@ -18,6 +18,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildKatalogContext, evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
 import type { DokumentSlotStatus } from '@/components/fall/DokumentSlot'
+import { bezugOrExpr } from '@/lib/termine/bezug-filter'
 
 export type FeldmodusFallakteFall = {
   id: string
@@ -140,7 +141,8 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
     const { data: at } = await admin
       .from('gutachter_termine')
       .select('besichtigungsort_adresse')
-      .eq('claim_id', fall.claim_id)
+      // bezug-aware: bezug-native Termine tragen claim_id NULL (bezug_typ='fall'+bezug_id).
+      .or(bezugOrExpr('claim', fall.claim_id))
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()

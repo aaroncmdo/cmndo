@@ -7,7 +7,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
-import { effektiveBezugIds } from '@/lib/termine/effektive-bezug-ids'
+import { effektiveBezugIds, effektiveFallClaimId } from '@/lib/termine/effektive-bezug-ids'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 import HeuteClient from './HeuteClient'
 import type { TagesroutePflichtStat } from './TagesrouteSidebar'
 import { listPrivatStopsForDate } from './private-stops-actions'
@@ -197,12 +198,16 @@ export default async function HeutePage() {
       const admin = createAdminClient()
       const { data: gtHeute } = await admin
         .from('gutachter_termine')
-        .select('claim_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
-        .in('claim_id', heuteClaimIds)
+        // bezug_typ/bezug_id mitladen: der Filter unten findet bezug-native Termine
+        // (claim_id NULL), und ohne diese Spalten liesse sich ihr Claim nicht bestimmen.
+        .select('claim_id, bezug_typ, bezug_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
+        .or(bezugInExpr('claim', heuteClaimIds))
         .order('start_zeit', { ascending: false })
       const gtHeuteMap = new Map<string, Record<string, unknown>>()
       for (const gt of (gtHeute ?? []) as Array<Record<string, unknown>>) {
-        const cId = gt.claim_id as string | null
+        // NICHT gt.claim_id: bezug-native Zeilen haben dort NULL und wuerden hier
+        // wieder verworfen — der Filter-Fix allein waere dann wirkungslos.
+        const cId = effektiveFallClaimId(gt)
         if (cId && !gtHeuteMap.has(cId)) gtHeuteMap.set(cId, gt)
       }
       for (const [, f] of fallMap.entries()) {
