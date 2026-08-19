@@ -99,9 +99,11 @@ export async function setTermin(
     ])
   }
 
-  // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
+  // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt.
+  // (Dieser Block stand hier zweimal byte-identisch — der zweite Durchlauf war ein
+  // reiner No-Op auf denselben Ids. Dublette entfernt.)
   if (altere.length > 0) {
-    await supabase
+    const { error: stornoFehler } = await supabase
       .from('gutachter_termine')
       .update({
         status: 'storniert',
@@ -109,18 +111,9 @@ export async function setTermin(
         sv_ablehnung_grund: 'Vom SV durch neuen Termin ersetzt (manuelle Verschiebung)',
       })
       .in('id', altere.map((t) => t.id as string))
-  }
-
-  // AAR-704C: ältere aktive Termine cancellen damit nur einer aktiv bleibt
-  if (altere.length > 0) {
-    await supabase
-      .from('gutachter_termine')
-      .update({
-        status: 'storniert',
-        cancelled_at: new Date().toISOString(),
-        sv_ablehnung_grund: 'Vom SV durch neuen Termin ersetzt (manuelle Verschiebung)',
-      })
-      .in('id', altere.map((t) => t.id as string))
+    if (stornoFehler) {
+      console.error(`[AAR-704C] Alt-Termine nicht storniert (${altere.length} Stk.) — mehrere aktive Termine moeglich:`, stornoFehler.message)
+    }
   }
 
   // KFZ-202: State-Machine statt direktem status-Update

@@ -88,7 +88,8 @@ export async function POST(req: NextRequest) {
 
   // Bei Ablehnung: Task fuer KB
   if (body.status === 'abgelehnt' || body.status === 'nachfrage') {
-    await db.from('tasks').insert({
+    // Ohne diesen Task erfaehrt niemand, dass die Vollmacht beanstandet wurde.
+    const { error: vollmachtTaskFehler } = await db.from('tasks').insert({
       fall_id: fallId,
       typ: 'lexdrive_vollmacht',
       titel: `Vollmacht ${body.status} - Fall ${body.claim_nummer ?? fallId.slice(0, 8)}`,
@@ -96,6 +97,9 @@ export async function POST(req: NextRequest) {
       prioritaet: 'dringend',
       auto_erstellt: true,
     })
+    if (vollmachtTaskFehler) {
+      console.error(`[lexdrive] Vollmacht-Task NICHT erstellt (Fall ${fallId}):`, vollmachtTaskFehler.message)
+    }
   }
 
   return NextResponse.json({ ok: true, fall_id: fallId, status: body.status })

@@ -141,7 +141,12 @@ export async function triggerDokumenteUploadRequest(
   // läuft komplett über `dokument_upload_anfragen.status` + das jsonb-Array
   // leads.schadensfoto_urls (Fotos = vorhanden). Spart eine Migration.
   if (Object.keys(legacyUpdate).length > 1) {
-    await db.from('leads').update(legacyUpdate).eq('id', leadId)
+    // Enthaelt die Versand-Marker (u.a. polizeibericht_gesendet_am). Bleiben sie aus,
+    // gilt die Anforderung als nicht verschickt — obwohl die Nachricht gleich rausgeht.
+    const { error: markerFehler } = await db.from('leads').update(legacyUpdate).eq('id', leadId)
+    if (markerFehler) {
+      console.error(`[dokumente-anfordern] Versand-Marker nicht gesetzt (Lead ${leadId}):`, markerFehler.message)
+    }
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'

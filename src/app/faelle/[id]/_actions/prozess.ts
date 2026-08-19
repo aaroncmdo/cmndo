@@ -183,7 +183,10 @@ export async function startRuege(
   if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
   // CMM-65: updated_at-Bump von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT)
   // gezogen. ruegeClaimId ist hier garantiert non-null (oben geguarded).
-  await db.from('claims').update({ updated_at: now }).eq('id', ruegeClaimId)
+  const { error: recencyFehler } = await db.from('claims').update({ updated_at: now }).eq('id', ruegeClaimId)
+  if (recencyFehler) {
+    console.error(`[prozess] Recency-Bump fehlgeschlagen (Claim ${ruegeClaimId}):`, recencyFehler.message)
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,
@@ -227,10 +230,16 @@ export async function uebergebeFallKlage(
   }
 
   // CMM-44 SP-B PR2a: geschlossen_grund lebt auf claims (SSoT). fallClaimId von oben.
-  await db.from('claims').update({
+  // Der Status wurde oben ueber die State-Machine gesetzt; hier folgt nur noch der
+  // Grund. Bleibt er aus, steht der Fall geschlossen da, ohne dass ersichtlich waere,
+  // dass er an LexDrive zur Klage ging.
+  const { error: grundFehler } = await db.from('claims').update({
     geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
     updated_at: now,
   }).eq('id', fallClaimId)
+  if (grundFehler) {
+    console.error(`[prozess] geschlossen_grund nicht gesetzt (Claim ${fallClaimId}):`, grundFehler.message)
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,

@@ -65,9 +65,14 @@ export async function POST(request: Request) {
     }).catch(() => {})
   }
 
-  await db.from('gutachter_termine').update({
+  // Dedup-Marker NACH dem Versand. Der Cron trifft dasselbe Zeitfenster mehrfach —
+  // ohne den Marker bekommt der Kunde die Nachricht erneut.
+  const { error: markerFehler } = await db.from('gutachter_termine').update({
     notification_5min_gesendet_am: new Date().toISOString(),
   }).eq('id', termin.id)
+  if (markerFehler) {
+    console.error(`[5min-notification] Marker nicht gesetzt (Termin ${termin.id}) — Doppel-Versand moeglich:`, markerFehler.message)
+  }
 
   return NextResponse.json({ success: true })
 }

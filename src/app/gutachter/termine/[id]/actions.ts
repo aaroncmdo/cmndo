@@ -369,7 +369,9 @@ export async function uploadPolizeiberichtAsSv(
   }
 
   // AAR-553: fall_dokumente-Row für Fallakte-Übersicht
-  await adminDb.from('fall_dokumente').insert({
+  // Der frühere `.then(() => {}, () => {})` verwarf den Fehler aktiv — die
+  // hochgeladene Datei wäre in keiner Akte aufgetaucht, ohne jede Spur.
+  const { error: polizeiDokFehler } = await adminDb.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: 'polizeibericht',
     storage_path: path,
@@ -381,7 +383,10 @@ export async function uploadPolizeiberichtAsSv(
     hochgeladen_von_user_id: user.id,
     uploaded_by_sv: true,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
-  }).then(() => {}, () => {})
+  })
+  if (polizeiDokFehler) {
+    console.error(`[AAR-553] Polizeibericht-Eintrag NICHT erstellt (Fall ${fallId}) — Datei liegt nur im Storage:`, polizeiDokFehler.message)
+  }
 
   // Aktenzeichen optional nachpflegen wenn vorhanden.
   // CMM-48 PR-E: polizei_aktenzeichen ist eine faelle<->claims-Duplikat-Spalte
@@ -394,10 +399,13 @@ export async function uploadPolizeiberichtAsSv(
     // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
     const claimId = await resolveClaimId(adminDb, fallId)
     if (claimId) {
-      await adminDb
+      const { error: akzFehler } = await adminDb
         .from('claims')
         .update({ polizei_aktenzeichen: aktenzeichen })
         .eq('id', claimId)
+      if (akzFehler) {
+        console.error(`[CMM-48] Aktenzeichen nicht gespeichert (Claim ${claimId}):`, akzFehler.message)
+      }
     }
   }
 

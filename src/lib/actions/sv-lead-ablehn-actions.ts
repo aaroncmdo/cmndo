@@ -101,7 +101,12 @@ export async function lehneLeadAb(
   // kanonisch in der Termin-Engine (gutachter_termine, AAR-552); kein faelle-Write mehr.
   const fallClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
   if (fallClaimId) {
-    await db.from('claims').update({ sv_id: null, sv_zugewiesen_am: null }).eq('id', fallClaimId)
+    // Ohne das Clearing bleibt der ablehnende Gutachter am Fall haengen — Dispatch
+    // kann dann nicht neu zuweisen.
+    const { error: clearFehler } = await db.from('claims').update({ sv_id: null, sv_zugewiesen_am: null }).eq('id', fallClaimId)
+    if (clearFehler) {
+      console.error(`[sv-lead-ablehn] SV-Felder nicht geleert (Claim ${fallClaimId}) — Neuzuweisung blockiert:`, clearFehler.message)
+    }
   }
 
   // 4. Dispatch-Task fuer Re-Allocation

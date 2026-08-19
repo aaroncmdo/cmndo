@@ -7,7 +7,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { getVersicherer } from '@/lib/content/claimondo-mdx'
 import { BAFIN_BRANCHENSCHNITT_2024 } from '@/data/versicherer-mapping'
 import { getInitials } from '@/lib/initials'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -26,6 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description: META_DESC,
       locale: 'de_DE',
       siteName: 'Claimondo',
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }

@@ -109,7 +109,9 @@ export async function applyKanzleiPaket(
     // upload_url in den Payload-Shape der C3-Handler spiegeln
     values.upload_url = url
 
-    await supabase.from('fall_dokumente').insert({
+    // Die Datei liegt an dieser Stelle bereits im Storage und ihre URL geht mit dem
+    // Paket raus. Ohne diesen Eintrag taucht sie in keiner Akte auf.
+    const { error: paketDokFehler } = await supabase.from('fall_dokumente').insert({
       fall_id: fallId,
       dokument_typ: paket.file_upload.slot_id,
       original_filename: file.name,
@@ -119,6 +121,9 @@ export async function applyKanzleiPaket(
       hochgeladen_von_user_id: user.id,
       quelle: 'kanzlei-paket',
     })
+    if (paketDokFehler) {
+      console.error(`[kanzlei-paket] Dokumenteneintrag NICHT erstellt (Fall ${fallId}, ${file.name}):`, paketDokFehler.message)
+    }
   }
 
   // Computed-Felder aus Config auswerten

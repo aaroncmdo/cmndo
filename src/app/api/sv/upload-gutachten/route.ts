@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     }
 
     // fall_dokumente-Eintrag (für Listen-Sicht & Kanzleipaket-Bündelung)
-    await db.from('fall_dokumente').insert({
+    const { error: gutachtenDokFehler } = await db.from('fall_dokumente').insert({
       fall_id: auftrag.fall_id,
       dokument_typ: istHauptgutachten ? 'gutachten' : 'gutachten_anlage',
       storage_path: storagePath,
@@ -74,6 +74,11 @@ export async function POST(req: NextRequest) {
       uploaded_by_sv: true,
       hochgeladen_am: new Date().toISOString(),
     })
+    if (gutachtenDokFehler) {
+      // Ohne diesen Eintrag taucht das Gutachten weder in der Listen-Sicht noch im
+      // Kanzleipaket auf, obwohl die Datei im Storage liegt.
+      console.error(`[upload-gutachten] Dokumenteneintrag NICHT erstellt (Fall ${auftrag.fall_id}):`, gutachtenDokFehler.message)
+    }
 
     // Beim Hauptgutachten: gutachten_url + status='gutachten' setzen
     if (istHauptgutachten || (!auftrag.gutachten_url && ext === 'pdf')) {

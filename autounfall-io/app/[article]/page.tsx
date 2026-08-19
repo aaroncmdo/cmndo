@@ -1,3 +1,4 @@
+import { OG_IMAGE } from '@/lib/site'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getArticle, getArticleSlugs } from '@/lib/articles'
@@ -39,28 +40,31 @@ export async function generateMetadata({
     title: metaTitle(article.title),
     description: article.description,
     alternates: { canonical: url },
+    // Hero-Bild wenn vorhanden, sonst das Standard-Bild. Der Fallback ist
+    // noetig, weil dieser openGraph-Block den des Layouts ERSETZT (Next merged
+    // `metadata` nur flach) — ohne ihn hatten die 31 Artikel ohne Hero gar kein
+    // Vorschaubild. Gemessen 18.08.: 223 von 254 Sitemap-URLs hatten eins.
     openGraph: {
       type: 'article',
       url,
       title: article.title,
       description: article.description,
-      ...(article.hero
-        ? {
-            images: [
-              {
-                url: article.hero.src,
-                width: article.hero.width,
-                height: article.hero.height,
-                alt: article.hero.alt,
-              },
-            ],
-          }
-        : {}),
+      images: article.hero
+        ? [
+            {
+              url: article.hero.src,
+              width: article.hero.width,
+              height: article.hero.height,
+              alt: article.hero.alt,
+            },
+          ]
+        : [OG_IMAGE],
     },
     twitter: {
       card: 'summary_large_image',
       title: article.title,
       description: article.description,
+      images: article.hero ? [article.hero.src] : [OG_IMAGE],
     },
   }
 }

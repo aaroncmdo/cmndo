@@ -47,10 +47,17 @@ export async function waehleNachbesichtigungsTermin(
   }
 
   // CMM-44 SP-D PR2b: nachbesichtigung_termin_datum + _status → gutachter_termine (aktueller Termin, SSoT).
-  await db.from('gutachter_termine').update({
+  // Die Terminwahl des Kunden. Bleibt der Status auf 'angefordert', ist seine Wahl
+  // verloren und der Guard oben laesst ihn erneut waehlen — ohne dass jemand merkt,
+  // dass die erste Wahl nie ankam.
+  const { error: wahlFehler } = await db.from('gutachter_termine').update({
     nachbesichtigung_termin_datum: datum,
     nachbesichtigung_status: 'termin-gewaehlt',
   }).eq('id', aktTermin.id)
+  if (wahlFehler) {
+    console.error(`[nachbesichtigung] Terminwahl nicht gespeichert (Termin ${aktTermin.id}):`, wahlFehler.message)
+    return { success: false, error: 'Der Termin konnte nicht gespeichert werden — bitte erneut versuchen.' }
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,

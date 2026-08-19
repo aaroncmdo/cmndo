@@ -327,7 +327,7 @@ die profitieren alle vom Datums-Fix. Am Server-Response verifiziert (nicht nur �
   zusaetzlich zum Hero-H1. Beide tragen **denselben** Text. Ein Fix beruehrt 105 Seiten
   Rendering (TOC-Anker haengen daran) bei marginalem GEO-Nutzen. Eigenstaendige
   Design-Entscheidung, kein GEO-Blocker.
-* **B4 (Text-Anteil 2,5 %)** — RSC-Payload-Overhead, architektonisch. Nicht nebenbei zu machen.
+* ~~**B4 (Text-Anteil 2,5 %)**~~ — **nachgezogen, siehe §8.**
 * **B5 (duenne Cornerstones)** — Redaktionsarbeit, kein Code.
 
 ## 7 · Offene Punkte
@@ -339,6 +339,197 @@ die profitieren alle vom Datums-Fix. Am Server-Response verifiziert (nicht nur �
   einzige Loesung, die aus dem Proxy eine echte Messung macht.
 * **Diese Messung enthaelt bewusst keine Massnahmen** — sie ist die Nullmessung. Die Befunde B1–B6
   sind priorisierbar, sobald gewuenscht.
+
+---
+
+## 8 · B4 nachgezogen — 46 % des HTML waren ungenutzte Übersetzungen
+
+Der Befund B4 („Text-Anteil 2,5 %") war zunächst als „architektonisch, nicht nebenbei zu
+machen" zurückgestellt. Eine Analyse der HTML-Zusammensetzung zeigte eine konkrete,
+behebbare Ursache. Gemessen auf `/kfz-gutachter/koeln`:
+
+| Bestandteil | Größe | Anteil |
+|---|---|---|
+| HTML gesamt | 615 KB | 100 % |
+| `<script>` gesamt | 482 KB | 78 % |
+| davon RSC-Flight-Payload | 466 KB | 76 % |
+| **davon i18n-Messages** | **280 KB** | **46 %** |
+| sichtbarer Text | 24 KB | 3,9 % |
+
+Der `NextIntlClientProvider` bekam `messages={messages}` — **alle 51 Namespaces** (265 KB),
+serialisiert in das HTML **jeder** Seite. Darunter `flow` (14,8 KB), `upload` (6,8 KB) und
+`page_meta` (18,3 KB), die eine Stadtseite nie anfasst.
+
+**Server-Komponenten brauchen den Provider gar nicht** — sie übersetzen mit
+`getTranslations()` direkt auf dem Server. Nur `useTranslations()` in `'use client'`
+benötigt die Messages im Browser. Gemessen über alle 76 Client-Dateien: **12 Namespaces**
+(72 KB statt 265 KB). Keine dynamischen Aufrufe, kein `useMessages()`, nur ein Provider —
+die Whitelist ist damit vollständig belegbar, nicht geraten.
+
+**Umgesetzt:** `i18n/client-namespaces.ts` (Whitelist + `pickClientMessages`), Filter im
+`[locale]/layout.tsx`.
+
+**Abgesichert:** `i18n/client-namespaces.test.ts` scannt alle Client-Dateien und schlägt
+fehl, sobald ein genutzter Namespace in der Liste fehlt — läuft in CI (Job `build` →
+„Marketing-Unit-Tests"), ohne Ratchet, rot blockt sofort. Der Guard wurde **gegengeprüft**:
+mit entferntem `faq` wird er rot und benennt die Datei (`app/[locale]/faq/FaqClient.tsx`).
+Ein dritter Test hält die Liste klein (meldet Namespaces, die niemand nutzt), ein vierter
+ist die Positiv-Kontrolle gegen einen toten Scanner.
+
+Nötig ist der Guard, weil der Fehlerfall sonst still wäre: Fehlt ein Namespace, zeigt die
+UI zur Laufzeit den **rohen Key** — kein Build- und kein `tsc`-Fehler.
+
+### Ergebnis, gemessen über 15 Seiten
+
+| Kennzahl | vorher (prod) | nachher (Build) | Δ |
+|---|---|---|---|
+| HTML gesamt | 7.594 KB | **4.496 KB** | **−41 %** |
+| sichtbarer Text | 226,6 KB | 226,5 KB | **unverändert** |
+| Text-Anteil | 3,0 % | **5,0 %** | +67 % |
+| rohe i18n-Keys | 0 | **0** | ✓ |
+
+**Der Text ist identisch** — entfernt wurde ausschließlich Ballast, kein Inhalt. Einzelne
+Seiten: `/faq` 467 → 261 KB (−44 %), `/haftpflicht/4-wochen-frist` 454 → 248 KB (−45 %),
+`/kfz-gutachter/koeln` 615 → 409 KB (−33 %).
+
+Die Vorher-Werte stammen von prod (ohne die Fixes aus §6), die Nachher-Werte vom lokalen
+Build (mit). Da §6 JSON-LD *hinzufügt*, ist der ausgewiesene Vorteil eher zu klein als zu
+groß.
+
+Der Detektor auf rohe Keys prüft den sichtbaren Text gegen alle 51 echten Namespace-Namen
+(präziser als eine Punkt-Heuristik, die auch Domains träfe) und lief auf beiden Ständen
+sauber — auf prod als Positiv-Kontrolle, dass er keine Fehlalarme wirft.
+
+### Wo der Payload danach steht
+
+`/kfz-gutachter/koeln`, erneut zerlegt: **409 KB** (vorher 615 KB). Der Flight-Payload fiel
+von 466 auf 260 KB, der Messages-Block darin von 280 auf **75,7 KB** — exakt die 12
+benötigten Namespaces. Der Rest ist funktional notwendige RSC-Serialisierung der
+Komponenten; ein zweiter Hebel dieser Größenordnung ist dort **nicht** mehr erkennbar.
+
+Weiter ginge nur noch eine Filterung **pro Route** statt global. Das Layout kennt die Route
+aber nicht ohne `headers()` — was Static Rendering für 346 Seiten kosten würde. Für
+geschätzte 40 KB ist das ein schlechtes Geschäft; bewusst nicht gemacht.
+
+---
+
+## 9 · Stand nach allen Fixes (dieselben 27 Seiten, dasselbe Instrument)
+
+| Kennzahl | Ausgangsmessung | nach B1–B4 |
+|---|---|---|
+| **Ø GEO-Score** | 59,2 / 100 | **67,7 / 100** |
+| Ø Text-Anteil im HTML | 2,5 % | **4,5 %** |
+| Ø HTML pro Seite | 456,6 KB | **250,3 KB** |
+| Seiten mit Aktualitäts-Signal | 13 / 27 | **22 / 27** |
+| Seiten mit Quelle | 15 / 27 | 15 / 27 |
+| FAQPage-Schema | 20 / 27 | 20 / 27 |
+| JSON-LD-Parse-Fehler | 0 | 0 |
+
+**Was das nicht ist:** eine Aussage über die Sichtbarkeit. Die Prompt-Abdeckung (2/10)
+hängt an Autorität und Wettbewerb, nicht an der Seitentechnik — sie wird sich erst über
+Wochen bewegen und ist beim nächsten Durchlauf des Prompt-Sets aus §3 zu messen.
+
+**Offen aus der Baseline:** B5 — siehe §10. B6 (doppelte H1) — bewusst zurückgestellt, §6.
+
+---
+
+## 10 · B5 nachgeschärft: nicht „zu wenig geschrieben", sondern **aufgeteilt**
+
+B5 lautete „Cornerstones sind dünner als ihre Spokes". Die Nachprüfung am gerenderten HTML
+bestätigt die Zahlen — und zeigt, dass es **kein Rendering-Problem** ist (Absätze, Listen und
+H2 sind vorhanden, es ist real weniger Inhalt):
+
+| Seite | Wörter | H2 | Absätze |
+|---|---|---|---|
+| `/haftpflicht/4-wochen-frist` (Spoke) | **1.839** | 15 | 41 |
+| `/unfall-was-tun-als-geschaedigter` (Cornerstone) | 1.032 | 8 | 49 |
+| `/gegnerische-versicherung-zahlt-nicht` | 620 | 6 | 20 |
+| `/unverschuldeter-unfall-rechte` | 541 | 5 | 24 |
+| `/kosten-kfz-gutachten` | 540 | 5 | **8** |
+
+Ein einzelner Spoke trägt das 3,4-fache seiner Cornerstone. Strategisch ist das verkehrt
+herum: Die Cornerstone soll die Themenautorität bündeln und auf die Spokes verteilen.
+
+### Der eigentliche Befund: zwei Seiten beantworten dieselbe Frage
+
+| URL | `<title>` | Wörter |
+|---|---|---|
+| `/kosten-kfz-gutachten` | „Was kostet ein Kfz-**Gutachten**? Für Geschädigte 0 €" | 540 |
+| `/kfz-gutachter/kosten` | „Was kostet ein Kfz-**Gutachter**? — 0 € bei Fremdverschulden (§ 249 BGB)" | 841 |
+
+Für einen Nutzer — und für ein Antwortsystem — ist das **dieselbe Frage**. Zwei URLs
+konkurrieren darum, beide mittelmäßig ausgestattet; keine gewinnt klar. Das erklärt B5
+besser als „zu wenig geschrieben": die Substanz ist auf zwei Seiten **verteilt**.
+
+(Nicht betroffen: `/decoder/kfz-gutachter-kosten-tabelle` — die BVSK-Tabelle ist ein eigenes
+Format mit eigenem Zweck und war in der Messung die stärkste Seite überhaupt, 71/100.)
+
+### Empfehlung
+
+**Zusammenführen statt beides ausbauen.** Eine Seite trägt die Frage „Was kostet das?"
+vollständig (Honorarspannen, wer zahlt, § 249, Kürzungsfälle, Verweis auf die BVSK-Tabelle),
+die andere wird darauf umgeleitet. Das verdoppelt die Substanz der bleibenden Seite, ohne
+dass eine Zeile neu erfunden werden muss — der Stoff existiert bereits, nur eben zweigeteilt.
+
+⚠ Das ist eine **Redaktions- und SEO-Entscheidung**, keine technische: Welche URL bleibt,
+hängt an Rankings und Backlinks, die außerhalb dieser Messung liegen. Vor dem Umbau mit der
+SEO-Lane abstimmen — dort läuft parallel ein Audit der Marketing-Seiten.
+
+---
+
+## 11 · Blinder Fleck der Baseline: die sechs weiteren Properties
+
+Die Messung galt ausschließlich `claimondo.de`. Im Repo liegen aber **sechs eigenständige
+Top-Level-Builds** mit je eigener `robots.ts`, `sitemap.ts` und `llms.txt` — sie wurden nie
+gemessen. Nachgeholt am 18.08.2026:
+
+| Property | Start | robots | llms.txt | sitemap | HTML | Text-Anteil |
+|---|---|---|---|---|---|---|
+| autounfall.io | 200 | 200 | 200 | 200 | 49 KB | 5,7 % |
+| kfz-unfallgutachter-aachen.de | 200 | 200 | 200 | 200 | 316 KB | **8,0 %** |
+| kfz-unfallgutachter-bonn.de | 200 | 200 | 200 | 200 | 305 KB | 6,8 % |
+| kfz-unfallgutachter-duesseldorf.de | 200 | 200 | 200 | 200 | 305 KB | 6,8 % |
+| kfz-unfallgutachter-koeln.de | 200 | 200 | 200 | 200 | 317 KB | **8,0 %** |
+| kfz-unfallgutachter-wuppertal.de | 200 | 200 | 200 | 200 | 307 KB | 6,7 % |
+
+**Alle sechs sind live und technisch besser aufgestellt als die Hauptdomain** — der
+Text-Anteil liegt bei 6,7–8,0 % gegenüber 4,4 % auf `claimondo.de` nach allen Fixes. Das
+Schema ist solide: 5 JSON-LD-Blöcke je Cluster-Seite (`AutomotiveBusiness`, `FAQPage`,
+`AggregateRating`, `GeoCoordinates`, `OpeningHoursSpecification`).
+
+### Befund 1 — kein Aktualitäts-Signal (B2 gilt hier genauso)
+
+**Keine der sechs Properties setzt `dateModified`.** Das ist derselbe Befund, der auf
+`claimondo.de` als B2 behoben wurde. Der Fix wäre analog (`dateModified` in `faqSchema()`,
+`lib/schema.ts`) — vier der fünf Cluster-`schema.ts` sind byte-identisch, Aachen weicht ab.
+
+Bewusst **nicht** blind umgesetzt: Jede Property ist ein eigener Next-Build mit eigenem
+Deploy, das wären fünf Build-/Verifikationszyklen. Und die Frage darunter wiegt schwerer:
+
+### Befund 2 🔴 — zwei Cluster-Domains ohne buchbaren Gutachter
+
+Gemessen über `GET /api/v1/gutachter-termine` — also über genau den Weg, den ein Besucher
+dieser Domains nimmt:
+
+| Cluster-Domain für | PLZ | buchbare Gutachter | freie Slots |
+|---|---|---|---|
+| **Aachen** | 52062 | **0** | **0** |
+| **Bonn** | 53111 | **0** | **0** |
+| Düsseldorf | 40213 | 1 | 3 |
+| Köln | 50670 | 2 | 3 |
+| Wuppertal | 42103 | 2 | 3 |
+
+Für Aachen und Bonn existiert je eine **eigene Domain mit eigenem Deployment und eigener
+SEO-Arbeit** — für Städte, in denen aktuell kein Termin vergeben werden kann. Wer dort
+ankommt und bucht, landet zwangsläufig im Rückruf-Fallback.
+
+*Einschränkung:* Gemessen sind **buchbare Slots**, nicht bloße SV-Präsenz — ein
+Sachverständiger ohne freie Termine erscheint hier ebenfalls als 0. Die Richtung deckt sich
+aber mit der unabhängigen Erhebung, nach der Bonn zu den 101 unabgedeckten Städten zählt.
+
+**Empfehlung:** Diese beiden Domains sind der schärfste Beleg dafür, dass SV-Akquise vor
+weiterer Reichweitenarbeit kommt. Ein `dateModified`-Fix auf einer Domain ohne Gutachter
+verbessert die Zitierfähigkeit einer Antwort, die keinen Termin anbieten kann.
 
 ---
 

@@ -11,6 +11,7 @@ import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBloc
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
+  OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -40,6 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
       title: t('gegnerische_versicherung_zahlt_nicht.og_title'),
       description: t('gegnerische_versicherung_zahlt_nicht.og_description'),

@@ -7,7 +7,7 @@ import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { SnippetText } from '@/components/content/SnippetText'
 import { getDecoder } from '@/lib/content/claimondo-mdx'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -32,6 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
       description: t('decoder.og_description'),
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }

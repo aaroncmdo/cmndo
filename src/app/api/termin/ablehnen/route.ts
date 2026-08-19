@@ -39,11 +39,19 @@ export async function GET(req: NextRequest) {
   }
 
   // 2. Termin ablehnen
-  await svc.from('gutachter_termine').update({
+  // Der Gutachter sieht gleich die Bestaetigungsseite. Bleibt dieser Write aus, gilt
+  // der Termin weiter als aktiv — die Seite verspricht dann etwas, das nicht passiert ist.
+  const { error: ablehnFehler } = await svc.from('gutachter_termine').update({
     status: 'abgelehnt',
     abgelehnt_am: new Date().toISOString(),
     abgelehnt_grund: grund,
   }).eq('id', termin.id)
+  if (ablehnFehler) {
+    console.error(`[termin/ablehnen] Ablehnung NICHT gespeichert (Termin ${termin.id}):`, ablehnFehler.message)
+    return new NextResponse(htmlPage('Fehler', 'Die Ablehnung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut oder melden Sie sich bei Claimondo.', false), {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
+    })
+  }
 
   // KFZ-136: Reminder stornieren
   try { const { cancelRemindersForTermin } = await import('@/lib/reminders/generate'); await cancelRemindersForTermin(termin.id) } catch (err) { console.error('[KFZ-136] Reminder-Cancel:', err) }

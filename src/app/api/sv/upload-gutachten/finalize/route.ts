@@ -59,7 +59,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL-Generierung fehlgeschlagen' }, { status: 500 })
     }
 
-    await db.from('fall_dokumente').insert({
+    // Dieser Insert ist der EINZIGE Effekt der Route (s. Kommentar unten). Schlaegt er
+    // fehl, meldet sie trotzdem ok:true — das hochgeladene Gutachten liegt dann im
+    // Storage und ist in keiner Akte verzeichnet.
+    const { error: gutachtenDokFehler } = await db.from('fall_dokumente').insert({
       fall_id: auftrag.fall_id,
       dokument_typ: body.istHauptgutachten ? 'gutachten' : 'gutachten_anlage',
       storage_path: body.storagePath,
@@ -71,6 +74,10 @@ export async function POST(req: NextRequest) {
       uploaded_by_sv: true,
       hochgeladen_am: new Date().toISOString(),
     })
+    if (gutachtenDokFehler) {
+      console.error(`[upload-gutachten/finalize] Dokumenteneintrag NICHT erstellt (Fall ${auftrag.fall_id}):`, gutachtenDokFehler.message)
+      return NextResponse.json({ error: 'Das Gutachten konnte nicht in der Akte hinterlegt werden.' }, { status: 500 })
+    }
 
     // CMM-32e: finalize updated nur noch fall_dokumente. Der explizite Submit-
     // Button löst die QC-Pipeline aus (siehe gutachtenAbgeben in lib/auftrag/qc).

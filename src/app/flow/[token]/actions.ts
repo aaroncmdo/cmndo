@@ -48,7 +48,14 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
     return { success: false, error: 'Flow-Link abgelaufen' }
   }
 
-  await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
+  // Ohne Pruefung meldet die Funktion unten `success: true`, auch wenn die FIN nie
+  // ankam — der Kunde sieht "gespeichert", und die spaetere (kostenpflichtige)
+  // Cardentity-Abfrage findet keine FIN vor.
+  const { error: finFehler } = await admin.from('leads').update({ fin: cleaned }).eq('id', flow.lead_id)
+  if (finFehler) {
+    console.error(`[enrichFlowLeadByFin] FIN nicht gespeichert (Lead ${flow.lead_id}):`, finFehler.message)
+    return { success: false, error: 'FIN konnte nicht gespeichert werden — bitte erneut versuchen.' }
+  }
 
   // FIN wird gespeichert; die kostenpflichtige Cardentity-Abfrage (Vorschaden +
   // Fahrzeugdaten) feuert NICHT automatisch — Staff ruft sie manuell ueber den
@@ -57,7 +64,11 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
   try {
     const { ensureVehicleFromFin } = await import('@/lib/vehicles/ensure-vehicle')
     const veh = await ensureVehicleFromFin({ fin: cleaned, snapshot: { finQuelle: 'kunde_flow', finExtrahiertAm: new Date().toISOString() }, db: admin })
-    if (veh.ok) await admin.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', flow.lead_id)
+    if (veh.ok) {
+      // Das umschliessende try faengt diesen Write nicht (supabase-js wirft nicht).
+      const { error: vehFehler } = await admin.from('leads').update({ vehicle_id: veh.vehicleId }).eq('id', flow.lead_id)
+      if (vehFehler) console.warn('[enrichFlowLeadByFin] vehicle_id nicht verknuepft:', vehFehler.message)
+    }
   } catch (err) {
     console.warn('[saveFinFromFlow] vehicles-Anlage (non-fatal):', err)
   }
@@ -179,11 +190,19 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
   // CMM-44 SP-B PR2b: abtretung_pdf lebt auf claims (SSoT) — Write nach claims
   // verschoben (kein faelle-Write mehr, faelle-Spalte wird in Phase 6 gedroppt).
   if (claimId) {
-    await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
+    // Die Sicherungsabtretung ist die Grundlage der Abrechnung gegenueber der
+    // Versicherung. Bleibt dieser Write aus, liegt das unterschriebene Dokument im
+    // Storage, waehrend der Claim keine Abtretung kennt.
+    const { error: abtretungFehler } = await admin.from('claims').update({ abtretung_pdf: publicUrl }).eq('id', claimId)
+    if (abtretungFehler) {
+      console.error(`[generateSAPdf] abtretung_pdf NICHT gesetzt (Claim ${claimId}) — SA liegt nur im Storage:`, abtretungFehler.message)
+    }
   }
 
   // AAR-553: fall_dokumente-Eintrag (dokumente-Tabelle gedroppt)
-  await admin.from('fall_dokumente').insert({
+  // Ohne diesen Eintrag ist die unterschriebene SA in KEINER Akte sichtbar — weder
+  // fuer Admin/KB/SV/Kanzlei noch fuer den Kunden (s. sichtbar_fuer unten).
+  const { error: saDokFehler } = await admin.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: 'sicherungsabtretung',
     storage_path: path,
@@ -196,6 +215,9 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
     // BACKFILL: aeltere Rows ohne 'sachverstaendiger' muessen per Data-Update nachgezogen werden.
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
   })
+  if (saDokFehler) {
+    console.error(`[generateSAPdf] SA-Dokumenteneintrag NICHT erstellt (Fall ${fallId}) — Unterschrift in keiner Akte sichtbar:`, saDokFehler.message)
+  }
 
   return { pdfUrl: publicUrl }
 }
@@ -523,10 +545,16 @@ async function finalizeKundeSetup(
     // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
     const claimId = await resolveClaimId(admin, fallId)
     if (claimId) {
-      await admin
+      // Siehe Kommentar oben: ohne diesen Write bleibt geschaedigter_user_id null und
+      // die RLS-Policy sperrt den Kunden aus seinem EIGENEN Claim aus. Das umschliessende
+      // try faengt ihn nicht (supabase-js wirft nicht).
+      const { error: ownerFehler } = await admin
         .from('claims')
         .update({ geschaedigter_user_id: userId })
         .eq('id', claimId)
+      if (ownerFehler) {
+        console.error(`[finalizeKundeSetup] geschaedigter_user_id NICHT gesetzt (Claim ${claimId}) — Kunde sieht seinen Fall nicht:`, ownerFehler.message)
+      }
 
       // CMM-19: claim_parties.user_id der Geschädigter-Party nachziehen
       // damit der Kunde via cp_co_party_select / cp_user_own_select RLS-
@@ -1048,7 +1076,10 @@ export async function signSAandCreateFall(
   // sobald die SA unterschrieben ist — der Lead ist damit faktisch zum Fall
   // konvertiert, egal ob noch ein offener Rückruf existiert.
   const nowIsoSa = new Date().toISOString()
-  await admin.from('leads').update({
+  // Der zentrale Konversions-Marker. Bleibt er aus, steht der Lead weiter offen in der
+  // Dispatch-Liste, die Verknuepfung zum Fall (konvertiert_zu_fall_id) fehlt, und
+  // sa_unterschrieben bleibt false — waehrend die GA4-Conversion unten trotzdem feuert.
+  const { error: konvFehler } = await admin.from('leads').update({
     status: 'umgewandelt',
     qualifizierungs_phase: 'konvertiert',
     sa_unterschrieben: true,
@@ -1058,6 +1089,9 @@ export async function signSAandCreateFall(
     konvertiert_zu_fall_id: fall.id,
     updated_at: nowIsoSa,
   }).eq('id', leadId)
+  if (konvFehler) {
+    console.error(`[signSAandCreateFall] Lead-Konversion NICHT gespeichert (Lead ${leadId}, Fall ${fall.id}) — Lead bleibt offen:`, konvFehler.message)
+  }
 
   // GA4 sa_signed-Conversion (fire-and-forget). client_id aus dem gespeicherten
   // leads.ga_client_id — /flow laeuft auf app.* (host-gated, kein gtag/_ga live).
@@ -1082,11 +1116,14 @@ export async function signSAandCreateFall(
   // damit der Vereinbarende den Termin weiterhin in seinem Kalender + im
   // Fall-Kontext sieht. Status bleibt 'offen' (nicht erledigt) — der
   // Rückruf-Anlass kann auch nach SA-Unterschrift noch existieren.
-  await admin.from('admin_termine')
+  const { error: rueckrufFehler } = await admin.from('admin_termine')
     .update({ fall_id: fall.id, updated_at: nowIsoSa })
     .eq('lead_id', leadId)
     .eq('typ', 'rueckruf')
     .eq('status', 'offen')
+  if (rueckrufFehler) {
+    console.error(`[signSAandCreateFall] Offene Rueckrufe nicht an den Fall gehaengt (Lead ${leadId}):`, rueckrufFehler.message)
+  }
 
   // AAR-694b: SA-Status propagieren — `syncSvCalendarEvent` liest
   // sa_unterschrieben + vollmacht_signiert_am für die Entscheidung ob ein
@@ -1101,7 +1138,13 @@ export async function signSAandCreateFall(
       sa_unterschrieben_am: nowIsoSa,
     }
     if (svDsWiderrufZugestimmt) claimsSaUpdate.sv_datenschutz_widerruf_zugestimmt_am = nowIsoSa
-    await admin.from('claims').update(claimsSaUpdate).eq('id', convClaimId)
+    const { error: claimsSaFehler } = await admin.from('claims').update(claimsSaUpdate).eq('id', convClaimId)
+    if (claimsSaFehler) {
+      // Der Kalender-Sync sechs Zeilen weiter unten liest GENAU dieses Feld, um zu
+      // entscheiden, ob ein Termin in den Kalender des Gutachters geschrieben wird.
+      // Fehlt es, laeuft der Sync gleich darauf ins Leere.
+      console.error(`[signSAandCreateFall] sa_unterschrieben NICHT auf dem Claim gesetzt (${convClaimId}) — Kalender-Sync bleibt wirkungslos:`, claimsSaFehler.message)
+    }
   }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
@@ -1248,7 +1291,13 @@ export async function signSAandCreateFall(
       const existingPaths = new Set((existing ?? []).map((d) => d.storage_path as string))
       const fresh = docInserts.filter((d) => !existingPaths.has(d.storage_path as string))
       if (fresh.length > 0) {
-        await admin.from('fall_dokumente').insert(fresh)
+        // Das umschliessende try faengt diesen Insert nicht. Ohne ihn liegen die vom
+        // Kunden per WhatsApp geschickten Unterlagen (u.a. die polizeiliche
+        // Unfallmitteilung) nicht in der Akte.
+        const { error: dispatchDokFehler } = await admin.from('fall_dokumente').insert(fresh)
+        if (dispatchDokFehler) {
+          console.error(`[AAR-263] Dispatch-Uploads NICHT in der Akte (Fall ${fall.id}, ${fresh.length} Dok.):`, dispatchDokFehler.message)
+        }
       }
     }
   } catch (err) {
@@ -1351,7 +1400,11 @@ export async function signSAandCreateFall(
       const telefon = (leadAny.telefon as string) ?? '—'
       const gegnerVS = (leadAny.gegner_versicherung as string) ?? '—'
       const schadensDatum = leadAny.unfalldatum ? String(leadAny.unfalldatum).slice(0, 10) : '—'
-      await admin.from('tasks').insert({
+      // ⚠ An GENAU dieser Stelle hat die Klasse schon einmal zugeschlagen (s. Kommentar
+      // bei prioritaet unten): ein CHECK-invalider Wert liess den Insert still scheitern,
+      // der Task wurde NIE erstellt — aufgefallen erst Wochen spaeter im Prod-Log. Der
+      // falsche Wert wurde korrigiert, die Pruefung fehlte bis jetzt.
+      const { error: vsTaskFehler } = await admin.from('tasks').insert({
         fall_id: fall.id,
         typ: 'system',
         task_typ: 'versicherung-anrufen',
@@ -1370,6 +1423,9 @@ export async function signSAandCreateFall(
         prioritaet: 'dringend',
         phase: 'fallakten-start',
       })
+      if (vsTaskFehler) {
+        console.error(`[AAR-306] Task 'versicherung-anrufen' NICHT erstellt (Fall ${fall.id}) — niemand holt die Schadennummer:`, vsTaskFehler.message)
+      }
     }
   } catch (err) {
     console.error('[AAR-306] Auto-Task versicherung-anrufen fehlgeschlagen:', err)
@@ -1493,10 +1549,15 @@ export async function signSAandCreateFall(
       // AAR-193: Termin-Status von reserviert auf bestaetigt heben — ein
       // reservierter Termin wird durch die SA verbindlich.
       if (terminRow?.id) {
-        await admin.from('gutachter_termine')
+        // Durch die SA wird der reservierte Termin verbindlich. Bleibt er 'reserviert',
+        // gilt er weiter als unverbindlich — obwohl der Kunde gerade unterschrieben hat.
+        const { error: terminFehler } = await admin.from('gutachter_termine')
           .update({ status: 'bestaetigt' })
           .eq('id', terminRow.id)
           .eq('status', 'reserviert')
+        if (terminFehler) {
+          console.error(`[signSAandCreateFall] Termin ${terminRow.id} nicht auf 'bestaetigt' gehoben:`, terminFehler.message)
+        }
       }
 
       // CMM-21: nur Vorname an den Kunden — Vor-/Nachname zusammen würde
@@ -1593,10 +1654,15 @@ export async function signSAandCreateFall(
             if (!currentFall?.sv_id) {
               // CMM-49 (faelle-Drop-Runway): sv_id claims-direkt (SSoT) statt faelle.sv_id;
               // claims.id == fall_id. claims.updated_at bumpt automatisch (+ claims-Realtime).
-              await admin
+              // Scheitert dieser Write still, laeuft die Status-Transition unten trotzdem:
+              // der Fall stuende dann auf 'sv-zugewiesen', ohne dass ein Gutachter zugewiesen ist.
+              const { error: svZuweisungFehler } = await admin
                 .from('claims')
                 .update({ sv_id: topSv.svId, sv_zugewiesen_am: new Date().toISOString() })
                 .eq('id', fall.id)
+              if (svZuweisungFehler) {
+                console.error(`[flow findBestSV] sv_id NICHT gesetzt (Claim ${fall.id}):`, svZuweisungFehler.message)
+              }
               // Engine-Funnel (Diagnose 05.08.): der sv_id-Direkt-Write allein liess den
               // operative_status auf 'ersterfassung' einfrieren (Prod: 6 Claims mit sv_id,
               // trans_n=0, Stepper dauerhaft "Erfassung" trotz zugewiesenem SV). Den Uebergang

@@ -301,10 +301,13 @@ export async function terminVerlegungVorschlagen(input: {
   }
   const neu = { id: verlegeRes.neuerTerminId }
   // Paritaet: SV-Flow markiert den neuen Slot als kunde-benachrichtigt.
-  await supabase
+  const { error: benachrichtigtFehler } = await supabase
     .from('gutachter_termine')
     .update({ verlegung_kunde_benachrichtigt_an: new Date().toISOString() })
     .eq('id', neu.id)
+  if (benachrichtigtFehler) {
+    console.error(`[termin-verlegung] Benachrichtigungs-Marker nicht gesetzt (Termin ${neu.id}):`, benachrichtigtFehler.message)
+  }
 
   if (alt.fall_id) {
     revalidatePath(`/gutachter/fall/${alt.fall_id}`)

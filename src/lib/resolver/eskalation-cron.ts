@@ -119,11 +119,15 @@ export async function runEskalationsCron(): Promise<EskalationsResult> {
       })
 
       if (task_id) {
-        // Original-Task als eskaliert markieren
-        await db
+        // Original-Task als eskaliert markieren. Der Marker ist der Wiederholungs-Schutz
+        // des Crons: bleibt er aus, eskaliert derselbe Task bei jedem weiteren Lauf erneut.
+        const { error: eskMarkerFehler } = await db
           .from('tasks')
           .update({ eskaliert_am: new Date().toISOString() })
           .eq('id', task.id)
+        if (eskMarkerFehler) {
+          console.error(`[eskalation-cron] eskaliert_am nicht gesetzt (Task ${task.id}) — Eskalation wiederholt sich:`, eskMarkerFehler.message)
+        }
 
         result.task_ids.push(task_id)
         result.eskaliert++

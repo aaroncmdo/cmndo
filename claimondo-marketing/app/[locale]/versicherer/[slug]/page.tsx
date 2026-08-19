@@ -28,7 +28,7 @@ import {
 import { BAFIN_BRANCHENSCHNITT_2024, getKonzernSiblings } from '@/data/versicherer-mapping'
 import { getKuerzungen } from '@/data/decoder-versicherer-cross'
 import { getVersichererDetail } from '@/data/versicherer-detail'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -50,6 +50,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
@@ -156,7 +158,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
           {narrative && (
             <article>
-              <MarkdownRenderer body={narrative} />
+              <MarkdownRenderer body={narrative} pageHasOwnH1 />
             </article>
           )}
 

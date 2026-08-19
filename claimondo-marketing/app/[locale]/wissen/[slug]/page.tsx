@@ -19,7 +19,7 @@ import {
   extractFaqPairs,
 } from '@/lib/content/claimondo-mdx'
 import { getPublishedArtikelBySlug } from '@/lib/wissen/db-articles'
-import { SITE_URL, WHATSAPP_HREF, articleSchema, autoSchemaGraph } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, articleSchema, autoSchemaGraph, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { ArticleComments } from '@/components/community/ArticleComments'
 
@@ -49,6 +49,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: description ?? undefined,
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
@@ -129,7 +131,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <div className="grid grid-cols-1 gap-12 pt-9 lg:grid-cols-[230px_1fr]">
           <TableOfContents headings={headings} />
           <article>
-            <MarkdownRenderer body={cleaned} />
+            <MarkdownRenderer body={cleaned} pageHasOwnH1 />
             <ArticleComments articleSlug={`wissen/${slug}`} />
           </article>
         </div>
