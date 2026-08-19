@@ -1,4 +1,5 @@
 import { istErlaubt, parseRobots } from '../../anreicherung/robots'
+import { istClientseitig } from '../html'
 import { befund, nichtErhoben, type Befund, type Fehlstelle, type Messergebnis, type Messkontext } from '../modul-vertrag'
 
 /** Muss der Modulpunktzahl aus der Registry entsprechen (`web: 12`). */
@@ -29,27 +30,6 @@ const ZEIT_MITTEL = 2500
 
 const IMPRESSUM_MUSTER = /impressum|imprint|legal[-\s]?notice|anbieterkennzeichnung/i
 const DATENSCHUTZ_MUSTER = /datenschutz|privacy|dsgvo|gdpr/i
-
-/** Unter beiden Schwellen zugleich liefert eine Seite ihren Inhalt nicht serverseitig. */
-const MIN_TEXT_BYTES = 500
-const MIN_TEXT_ANTEIL = 0.03
-
-/**
- * Erkennt clientseitig gerenderte Seiten.
- *
- * Am echten Bestand gemessen (19.08.):
- *   gutachter-yigit.com   13.145 B HTML,    53 B Text = 0,4 %   → SPA
- *   sv-bergk.de           10.493 B HTML, 3.136 B Text = 29,9 %  → serverseitig
- *
- * BEIDE Schwellen muessen zutreffen: eine knappe, aber echt gerenderte Seite
- * hat wenig Text UND einen hohen Anteil — sie darf nicht als SPA gelten.
- */
-export function istClientseitig(html: string): boolean {
-  const ohneCode = html.replace(/<(script|style|noscript)[\s\S]*?<\/\1>/gi, ' ')
-  const text = ohneCode.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-  if (html.length === 0) return false
-  return text.length < MIN_TEXT_BYTES && text.length / html.length < MIN_TEXT_ANTEIL
-}
 
 /**
  * Modul `web` — Website: Technik und Recht.
