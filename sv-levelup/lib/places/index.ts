@@ -3,7 +3,7 @@ import { erzeugeNeu } from './neu'
 import type { AdapterOpts, PlacesAdapter } from './adapter'
 
 export { PlacesFehler } from './adapter'
-export type { Betrieb, PlacesAdapter, Umkreis } from './adapter'
+export type { Betrieb, PlacesAdapter, Profil, Umkreis } from './adapter'
 
 /**
  * Der EINZIGE Schaltpunkt zwischen Legacy und New.

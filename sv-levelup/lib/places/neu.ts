@@ -1,4 +1,4 @@
-import type { AdapterOpts, Betrieb, PlacesAdapter, Umkreis } from './adapter'
+import type { AdapterOpts, Betrieb, PlacesAdapter, Profil, Umkreis } from './adapter'
 
 /**
  * Places API (New) — `places.googleapis.com`.
@@ -31,5 +31,10 @@ export function erzeugeNeu(_apiKey: string, _opts: AdapterOpts = {}): PlacesAdap
     async suchText(_frage: string, _umkreis: Umkreis): Promise<Betrieb[]> { return nichtBereit() },
     async suchUmkreis(_stichwort: string, _umkreis: Umkreis): Promise<Betrieb[]> { return nichtBereit() },
     async details(_placeId: string): Promise<Betrieb | null> { return nichtBereit() },
+    // ⚠ Beim Ausbauen: `photos`, `regularOpeningHours` und
+    // `nationalPhoneNumber` liegen in New auf getrennten Preisstufen —
+    // `photos` ist Pro, die Oeffnungszeiten Enterprise. Eine FieldMask, die
+    // alles auf einmal holt, kostet fuer JEDEN Abruf den Enterprise-Satz.
+    async profil(_placeId: string): Promise<Profil | null> { return nichtBereit() },
   }
 }
