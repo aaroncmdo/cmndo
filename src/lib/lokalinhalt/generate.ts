@@ -92,8 +92,8 @@ const TOOL: Anthropic.Tool = {
         // acht belegbare Fragen als vierzehn, von denen sechs erfunden sind.
         description:
           'Ortsspezifische Fragen mit ausfuehrlichen Antworten (je 60-100 Woerter). ' +
-          'Ziel: 10-14 Stueck. Nichts, was auf jeder Stadtseite Deutschlands stehen ' +
-          'koennte. Lieber weniger als erfundene — Substanz vor Menge.',
+          'Ziel: 10-14 Stück. Nichts, was auf jeder Stadtseite Deutschlands stehen ' +
+          'könnte. Lieber weniger als erfundene — Substanz vor Menge.',
         items: {
           type: 'object',
           properties: { frage: { type: 'string' }, antwort: { type: 'string' } },
@@ -107,7 +107,7 @@ const TOOL: Anthropic.Tool = {
       topografieAnker: {
         type: 'string',
         description:
-          'Lagebesonderheit der Stadt und was sie fuer Unfallgeschehen und Schadensbild ' +
+          'Lagebesonderheit der Stadt und was sie für Unfallgeschehen und Schadensbild ' +
           'bedeutet (40-70 Woerter). Optional.',
       },
     },
@@ -117,7 +117,7 @@ const TOOL: Anthropic.Tool = {
 
 function systemPrompt(): string {
   return [
-    'Du recherchierst hyperlokale Fakten fuer die Standortseite eines Kfz-Gutachter-Dienstes.',
+    'Du recherchierst hyperlokale Fakten für die Standortseite eines Kfz-Gutachter-Dienstes.',
     '',
     'OBERSTE REGEL — Belege:',
     '- Unfallschwerpunkte NUR mit echter, absoluter http(s)-Quell-URL (Polizeipresse, Stadt, Unfallatlas).',
@@ -126,14 +126,24 @@ function systemPrompt(): string {
     '- Nenne KEINE Statistiken oder Zahlen, die du nicht belegen kannst.',
     '',
     'Inhaltliche Regeln:',
-    '- Alles muss extern ueberpruefbar sein: amtliche Stadtbezirke, tatsaechlich vorhandene Autobahnen/Bundesstrassen.',
-    '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollstaendig ist besser als falsch.',
-    '- Die lokalen FAQ muessen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen koennte, gehoert nicht hierher.',
+    '- Alles muss extern überprüfbar sein: amtliche Stadtbezirke, tatsächlich vorhandene Autobahnen/Bundesstraßen.',
+    '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollständig ist besser als falsch.',
+    '- Die lokalen FAQ müssen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen könnte, gehört nicht hierher.',
     '- Nenne den Stadtnamen in den Texten. Kein Baukasten-Text mit austauschbarem Ort.',
     '- Keine Werbesprache, keine Superlative. Sachlich, wie ein Nachschlagewerk.',
     '',
-    'Sprache: Deutsch mit korrekten Umlauten (ä, ö, ü, ß).',
-    'Die vorgegebenen Kontext-Fakten sind bereits geprueft — wiederhole sie nicht als FAQ und widersprich ihnen nicht.',
+    // 19.08.2026: Diese Zeile stand schon da — und half nicht. Von fünf erzeugten
+    // Städten kam frankfurt mit NULL Umlauten auf 11.836 Zeichen zurück, hamburg
+    // gemischt ("Elbstrasse" neben "Straßenbaulastträger"). Der wahrscheinliche
+    // Grund stand direkt darüber: der Prompt selbst war durchgängig in
+    // ASCII-Ersatz geschrieben ("Bundesstrassen", "ueberpruefbar") — das Modell
+    // folgte dem Beispiel, nicht der Anweisung. Deshalb ist der Prompt jetzt
+    // selbst korrekt geschrieben und die Regel steht als Verbot mit Beispielen.
+    // Erzwungen wird sie ohnehin erst vom Gate (pruefeLokalinhalt).
+    'Sprache: Deutsch mit ECHTEN Umlauten — ä, ö, ü, ß.',
+    'NIEMALS ae/oe/ue/ss als Ersatz: "Straße" nicht "Strasse", "für" nicht "fuer", "bündelt" nicht "buendelt", "häufig" nicht "haeufig".',
+    'Das gilt auch für Eigennamen und Straßennamen. Ein Entwurf mit Ersatzschreibweisen wird abgelehnt.',
+    'Die vorgegebenen Kontext-Fakten sind bereits geprüft — wiederhole sie nicht als FAQ und widersprich ihnen nicht.',
   ].join('\n')
 }
 
@@ -141,7 +151,7 @@ function userMessage(k: StadtKontext): string {
   return [
     `Stadt: ${k.name} (${k.bundesland}), PLZ-Bereich ${k.plzPrefix}, ${k.bevoelkerung} Einwohner.`,
     '',
-    'Bereits geprueft und auf der Seite vorhanden (nicht wiederholen):',
+    'Bereits geprüft und auf der Seite vorhanden (nicht wiederholen):',
     `- Zustaendige Gerichte: ${k.amtsgericht} (bis 5.000 € Streitwert), ${k.landgericht} darueber`,
     `- Naechstgelegene Orte: ${k.nachbarorte.join(', ') || '—'}`,
     '',
@@ -188,7 +198,7 @@ export async function generateLokalinhaltDraft(
         ok: false,
         error:
           `Ausgabe am Token-Limit abgeschnitten (${MAX_OUTPUT_TOKENS}). ` +
-          'Der Entwurf waere unvollstaendig — lieber kein Inhalt als ein halber.',
+          'Der Entwurf wäre unvollständig — lieber kein Inhalt als ein halber.',
       }
     }
 
