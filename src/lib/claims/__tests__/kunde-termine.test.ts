@@ -1,12 +1,15 @@
 import { describe, it, expect } from 'vitest'
 import { getKundeTermine } from '../kunde-termine'
 
-// Awaitable query-builder mock: jede Kette (.select().in().is().not().order() bzw.
+// Awaitable query-builder mock: jede Kette (.select().or().is().not().order() bzw.
 // .neq().order()) endet in einem thenable, das { data } aufloest.
+// Nur LESE-Kettenglieder — `or` kam mit der Bezug-Umstellung dazu
+// (kunde-termine.ts -> bezugInExpr) und fehlte hier, wodurch die Query mit
+// ".or is not a function" starb und der Test nichts mehr geprueft hat.
 function builder(data: unknown[]) {
   const b: Record<string, unknown> = {}
   const chain = () => b
-  for (const m of ['select', 'in', 'is', 'not', 'neq', 'order']) b[m] = chain
+  for (const m of ['select', 'in', 'is', 'not', 'neq', 'or', 'order']) b[m] = chain
   ;(b as { then: (r: (v: { data: unknown[] }) => unknown) => unknown }).then = (r) =>
     r({ data })
   return b
