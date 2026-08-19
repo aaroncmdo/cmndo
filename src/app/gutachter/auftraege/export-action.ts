@@ -17,6 +17,8 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { berlinIsoDate, berlinDayRangeForIsoDates } from '@/lib/time/berlin-day'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
+import { effektiveFallClaimId } from '@/lib/termine/effektive-bezug-ids'
 
 type Result =
   | { ok: true; csv: string; filename: string; rowCount: number }
@@ -158,12 +160,15 @@ export async function exportTagesvorbereitung({
     // Supabase unterstuetzt kein DISTINCT ON — wir laden alle und nehmen pro claim_id den ersten.
     const { data: terminLocs } = await admin
       .from('gutachter_termine')
-      .select('claim_id, besichtigungsort_adresse')
-      .in('claim_id', exportClaimIds)
+      // bezug_typ/bezug_id mitladen — bezug-native Termine tragen claim_id NULL.
+      .select('claim_id, bezug_typ, bezug_id, besichtigungsort_adresse')
+      .or(bezugInExpr('claim', exportClaimIds))
       .order('start_zeit', { ascending: false })
-    for (const t of (terminLocs ?? []) as Array<{ claim_id: string | null; besichtigungsort_adresse: string | null }>) {
-      if (t.claim_id && !besichtigungsortMap.has(t.claim_id)) {
-        besichtigungsortMap.set(t.claim_id, t.besichtigungsort_adresse)
+    for (const t of (terminLocs ?? []) as Array<{ claim_id: string | null; bezug_typ: string | null; bezug_id: string | null; besichtigungsort_adresse: string | null }>) {
+      // NICHT t.claim_id — sonst faellt genau der neu gewonnene Treffer wieder raus.
+      const cId = effektiveFallClaimId(t)
+      if (cId && !besichtigungsortMap.has(cId)) {
+        besichtigungsortMap.set(cId, t.besichtigungsort_adresse)
       }
     }
   }
