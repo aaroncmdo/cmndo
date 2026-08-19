@@ -1,0 +1,12 @@
+{
+  "note": "Getrackte Migrationen OHNE File im Repo. Der Ratchet blockt NEUE. Eintragen nur mit Begruendung, WARUM die Luecke folgenlos ist — sonst gehoert das File nachgezogen (Statement steht in supabase_migrations.schema_migrations.statements, md5-Abgleich machen).",
+  "count": 2,
+  "versions": [
+    "20260810122514_0001_messwerte",
+    "20260810125715_0002_messwerte_rls"
+  ],
+  "begruendung": {
+    "20260810122514_0001_messwerte": "create table if not exists public.messwerte — die Tabelle existiert auf prod NICHT (gemessen 19.08. gegen information_schema, mit Positiv-Kontrolle). Ohne Ziel-Objekt kann keine spaetere Migration daran scheitern; der Replay bleibt konsistent mit prod, weil beide die Tabelle nicht haben.",
+    "20260810125715_0002_messwerte_rls": "alter table public.messwerte enable row level security — setzt dieselbe, nicht existierende Tabelle voraus. Identische Begruendung."
+  }
+}
