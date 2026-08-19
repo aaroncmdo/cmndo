@@ -83,7 +83,15 @@ export function deNum(n: number): string {
 // FAQPage-Schema garantiert uebereinstimmen (Google-Richtlinie).
 export function pseoMeta(p: PseoPage): { title: string; description: string } {
   return {
-    title: `${p.type.label} in ${p.city.name} · Sachverständigen finden + Schaden abrechnen`,
+    // Der fruehere Zusatz "· Sachverstaendigen finden + Schaden abrechnen" kostete
+    // allein 44 Zeichen. Folge (18.08. gemessen): ALLE 100 PSEO-Titel lagen ueber
+    // 60 Zeichen, Median 70 — und weil metaTitle() den Marken-Suffix ab 60 Zeichen
+    // weglaesst, erschien "autounfall.io" auf KEINER der 100 Seiten im Titel.
+    // Ohne den Zusatz: Median 40, alle unter 60, Marke auf allen 100 sichtbar.
+    // Der Zusatz war Fuellmaterial, das Google in der Anzeige ohnehin abschnitt;
+    // uebrig bleibt das exakte Suchwort. (Aaron-Entscheidung, Variante C aus 4.)
+    // Die H1 ist NICHT betroffen — sie baut sich unabhaengig aus type/city.
+    title: `${p.type.label} in ${p.city.name}`,
     description: `${p.type.label} in ${p.city.name}: ${p.type.pct}% aller Unfälle, Ø ${p.type.schaden} Schaden. BGH ${p.type.bgh}. Unabhängige Sachverständige in Ihrer Region.`,
   }
 }

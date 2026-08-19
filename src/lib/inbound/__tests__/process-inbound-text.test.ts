@@ -178,8 +178,11 @@ describe('processInboundText', () => {
       ],
       error: null,
     })
-    // kunde_id aus faelle
-    setNextResponse({ data: { kunde_id: 'kunde-uuid' }, error: null })
+    // CMM-49: die byUserId-Attribution kommt jetzt aus claims.geschaedigter_user_id,
+    // nicht mehr aus faelle.kunde_id. Der Mock lieferte weiter `kunde_id` -> byUserId
+    // wurde still `null`, der Aufruf fand aber statt (also kein Crash, nur eine
+    // verlorene Zuordnung im Test). Produktionscode ist korrekt.
+    setNextResponse({ data: { geschaedigter_user_id: 'kunde-uuid' }, error: null })
 
     const { processInboundText } = await import('../process-inbound-text')
     const result = await processInboundText(mockAdmin as never, {

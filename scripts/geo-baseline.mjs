@@ -12,6 +12,7 @@
  * Usage:
  *   node geo-baseline.mjs                      # Standard-Sample
  *   node geo-baseline.mjs --all                # alle Sitemap-URLs (346, langsam)
+ *   node geo-baseline.mjs --properties         # Sweep ueber ALLE 11 Web-Properties
  *   node geo-baseline.mjs --out report.json
  */
 
@@ -272,10 +273,119 @@ async function fetchPage(path) {
   return { url, html, meta: { status: res.status, ms: Date.now() - t0, bytes: Buffer.byteLength(html, 'utf8'), finalUrl: res.url } }
 }
 
+/**
+ * Alle Web-Properties des Hauses. Die Baseline mass urspruenglich NUR claimondo.de —
+ * die uebrigen zehn wurden am 18.08.2026 ad hoc nachgemessen und dabei zwei Befunde
+ * gefunden (fehlendes `dateModified` auf allen, `werkstatt.claimondo.de` in keiner
+ * Sitemap). Damit das wiederholbar ist statt jedes Mal neu zusammengesucht:
+ */
+const PROPERTIES = [
+  ['claimondo.de', 'https://claimondo.de', 'Hauptdomain'],
+  ['autounfall.io', 'https://autounfall.io', 'Ratgeber'],
+  ['kfz-unfallgutachter-aachen.de', 'https://kfz-unfallgutachter-aachen.de', 'Cluster'],
+  ['kfz-unfallgutachter-bonn.de', 'https://kfz-unfallgutachter-bonn.de', 'Cluster'],
+  ['kfz-unfallgutachter-duesseldorf.de', 'https://kfz-unfallgutachter-duesseldorf.de', 'Cluster'],
+  ['kfz-unfallgutachter-koeln.de', 'https://kfz-unfallgutachter-koeln.de', 'Cluster'],
+  ['kfz-unfallgutachter-wuppertal.de', 'https://kfz-unfallgutachter-wuppertal.de', 'Cluster'],
+  ['gutachter.claimondo.de', 'https://gutachter.claimondo.de', 'B2B-Recruiting'],
+  ['makler.claimondo.de', 'https://makler.claimondo.de', 'B2B-Recruiting'],
+  ['werkstatt.claimondo.de', 'https://werkstatt.claimondo.de', 'B2B-Recruiting'],
+  ['flotte.claimondo.de', 'https://flotte.claimondo.de', 'B2B-Recruiting'],
+]
+
+/**
+ * Property-Sweep: prueft je Domain die GEO-Grundausstattung — erreichbar, Crawler-
+ * Direktiven, Discovery-Dateien, Text-Anteil und Schema.
+ *
+ * ⚠⚠ GRENZE, DIE MAN KENNEN MUSS: gemessen wird NUR DIE STARTSEITE jeder Property.
+ * Fuer Content-lastige Properties ist sie NICHT repraesentativ — Startseiten tragen
+ * typischerweise Organization+WebSite, waehrend FAQPage/Article/dateModified auf den
+ * Unterseiten sitzen. Konkret beim ersten Lauf (19.08.2026):
+ *
+ *   claimondo.de   -> "KEIN dateModified", obwohl 22 von 27 gemessenen Seiten eins
+ *                     tragen (B2 ist gefixt und auf prod verifiziert). Die Startseite
+ *                     hat schlicht kein FAQ-Schema.
+ *   autounfall.io  -> "kein FAQPage", obwohl die 254 Ratgeber-Seiten alle eines haben.
+ *
+ * Der Sweep beantwortet also **„ist diese Property ueberhaupt aufgestellt und
+ * erreichbar"** — NICHT „wie gut ist ihr Content". Fuer Aussagen ueber Content-Qualitaet
+ * ist der Seiten-Modus zustaendig (Standard-Aufruf ohne --properties).
+ * Ein „KEIN dateModified" hier ist ein PRUEFAUFTRAG, kein Befund.
+ */
+async function propertySweep() {
+  const rows = []
+  for (const [name, base, art] of PROPERTIES) {
+    const row = { name, base, art }
+    const code = async (p) => {
+      try {
+        const r = await fetch(base + p, { headers: { 'User-Agent': UA }, redirect: 'follow' })
+        return r.status
+      } catch { return 0 }
+    }
+    row.start = await code('/')
+    row.robots = await code('/robots.txt')
+    row.llms = await code('/llms.txt')
+    row.sitemap = await code('/sitemap.xml')
+
+    if (row.start === 200) {
+      try {
+        const html = await (await fetch(base + '/', { headers: { 'User-Agent': UA }, redirect: 'follow' })).text()
+        const total = Buffer.byteLength(html, 'utf8')
+        const text = stripTags(html)
+        const ld = jsonLdTypes(html)
+        row.htmlKB = +(total / 1024).toFixed(0)
+        row.textKB = +(Buffer.byteLength(text, 'utf8') / 1024).toFixed(1)
+        row.textRatioPct = +((Buffer.byteLength(text, 'utf8') / total) * 100).toFixed(1)
+        row.ldBlocks = ld.blocks
+        row.ldTypes = [...new Set(ld.types)]
+        row.hasFAQ = ld.types.includes('FAQPage')
+        row.dateModified = (html.match(/"dateModified"\s*:\s*"([^"]+)"/) || [])[1] || null
+      } catch (e) { row.error = String(e) }
+    }
+    rows.push(row)
+    process.stderr.write(
+      `  ${name.padEnd(36)} ${String(row.start).padStart(3)} ` +
+      `${String(row.textRatioPct ?? '-').padStart(5)}%  ` +
+      `ld=${String(row.ldBlocks ?? '-').padStart(2)}  ` +
+      `${row.dateModified ? 'dateModified ' + row.dateModified : 'KEIN dateModified'}\n`,
+    )
+  }
+  return rows
+}
+
 async function main() {
   const args = process.argv.slice(2)
   const outIdx = args.indexOf('--out')
   const outFile = outIdx >= 0 ? args[outIdx + 1] : 'geo-baseline-report.json'
+
+  // --properties: Sweep ueber ALLE Web-Properties statt der Seiten einer Domain.
+  if (args.includes('--properties')) {
+    console.error('Property-Sweep ueber ' + PROPERTIES.length + ' Domains …')
+    const rows = await propertySweep()
+    const ok = rows.filter((r) => r.start === 200)
+    const summary = {
+      measuredAt: new Date().toISOString(),
+      _hinweis:
+        'Gemessen wurde je Property NUR die Startseite. Die Listen unten sind ' +
+        'PRUEFAUFTRAEGE, keine Befunde: Startseiten tragen selten FAQPage/dateModified, ' +
+        'das sitzt auf den Unterseiten. Vor jeder Schlussfolgerung eine Unterseite ' +
+        'derselben Property gegenpruefen.',
+      properties: rows.length,
+      erreichbar: ok.length,
+      startseiteOhneDateModified: ok.filter((r) => !r.dateModified).map((r) => r.name),
+      ohneLlmsTxt: rows.filter((r) => r.llms !== 200).map((r) => r.name),
+      startseiteOhneFaqSchema: ok.filter((r) => !r.hasFAQ).map((r) => r.name),
+      avgTextRatioPct: +(ok.reduce((s, r) => s + (r.textRatioPct || 0), 0) / ok.length).toFixed(1),
+    }
+    writeFileSync(outFile, JSON.stringify({ summary, rows }, null, 2))
+    console.log(JSON.stringify(summary, null, 2))
+    console.error(
+      '\n⚠ Nur Startseiten gemessen — "ohne dateModified/FAQPage" ist ein Pruefauftrag,\n' +
+      '  kein Befund. Gegenprobe auf einer Unterseite derselben Property noetig.\n',
+    )
+    console.error(`Details -> ${outFile}`)
+    return
+  }
 
   let targets = SAMPLE
   if (args.includes('--all')) {
