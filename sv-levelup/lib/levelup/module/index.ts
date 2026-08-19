@@ -1,9 +1,13 @@
 import type { MessRegistry } from '../modul-vertrag'
 import { messeGbp } from './gbp'
+import { messeSeo } from './seo'
+import { messeUx } from './ux'
 import { messeWeb } from './web'
 import { messeWett } from './wett'
 
 export { messeGbp } from './gbp'
+export { messeSeo } from './seo'
+export { messeUx } from './ux'
 export { messeWeb } from './web'
 export { messeWett } from './wett'
 
@@ -25,6 +29,8 @@ export { messeWett } from './wett'
 export function baueModulRegistry(firmenname: string | null): MessRegistry {
   return {
     gbp: (k) => messeGbp({ ...k, firmenname }),
+    seo: messeSeo,
+    ux: messeUx,
     web: messeWeb,
     wett: (k) => messeWett({ ...k, firmenname }),
   }

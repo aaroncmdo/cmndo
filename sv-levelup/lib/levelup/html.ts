@@ -57,6 +57,54 @@ export function attribut(html: string, tag: string, name: string): string[] {
   return werte
 }
 
+/**
+ * Der `content` eines `<meta>`-Elements mit bestimmtem `name` (oder `property`).
+ *
+ * ⚠ NICHT ueber zwei `attribut()`-Listen und deren Listenplatz zusammenfuehren:
+ * die Listen enthalten nur Elemente, die das jeweilige Attribut TRAGEN. Ein
+ * `<meta charset="utf-8">` dazwischen verschiebt die eine Liste gegen die
+ * andere, und die Beschreibung waere pltzlich der Wert eines fremden
+ * Elements. Deshalb wird jedes Element als Ganzes gelesen.
+ */
+export function metaInhalt(html: string, name: string): string | null {
+  for (const t of html.matchAll(/<meta\b[^>]*>/gi)) {
+    const tag = t[0]
+    const n = tag.match(/\b(?:name|property)\s*=\s*["']([^"']*)["']/i)?.[1]
+    if (!n || n.toLowerCase() !== name.toLowerCase()) continue
+    const c = tag.match(/\bcontent\s*=\s*["']([^"']*)["']/i)?.[1]
+    if (c !== undefined) return deuteEntities(c)
+  }
+  return null
+}
+
+/**
+ * Der Anfang eines Rumpfs, gemessen an SICHTBAREM Text statt an Markup.
+ *
+ * ⚠ Am echten Bestand gefunden (19.08.): Ein fester Ausschnitt von 2500
+ * Zeichen misst nicht „oben auf der Seite", sondern „in den ersten 2500 Byte
+ * Auszeichnung" — und das ist bei Baukasten-Seiten etwas voellig anderes.
+ * `kfz-sachverstaendigenbuero-stanoksei.de` liefert 1 MB HTML; in den ersten
+ * 2500 Rumpf-Zeichen stehen 50 Zeichen sichtbarer Text (der Rest ist
+ * eingebettetes CSS). Die Telefonnummer steht bei 1 % der Seite — also ganz
+ * oben — und waere trotzdem als „erst weiter unten" gemeldet worden.
+ *
+ * Das Fenster verdoppelt sich, bis genug sichtbarer Text zusammenkommt —
+ * logarithmisch viele Durchlaeufe statt eines je Schritt.
+ *
+ * ⚠ Der Startwert muss KLEIN sein. Mit 4000 galten bei einer 4200 Zeichen
+ * langen Seite 95 % als „oben", und eine Nummer im Fussbereich waere als
+ * „oben sichtbar" durchgegangen. Und ⚠ keine kuenstliche Obergrenze: bleibt
+ * eine Seite auch nach dem ganzen Rumpf unter der Textmenge, ist sie so
+ * textarm, dass `istClientseitig` sie ohnehin von der Messung ausnimmt.
+ */
+export function obererBereich(rumpf: string, textZeichen: number): string {
+  let ende = Math.min(1000, rumpf.length)
+  while (ende < rumpf.length && sichtbarerText(rumpf.slice(0, ende)).length < textZeichen) {
+    ende = Math.min(rumpf.length, ende * 2)
+  }
+  return rumpf.slice(0, ende)
+}
+
 /** Unter beiden Schwellen zugleich liefert eine Seite ihren Inhalt nicht serverseitig. */
 const MIN_TEXT_BYTES = 500
 const MIN_TEXT_ANTEIL = 0.03

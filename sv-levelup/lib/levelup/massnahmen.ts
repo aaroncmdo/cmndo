@@ -41,46 +41,144 @@ type Vorlage = {
  * Ein Kriterium OHNE Vorlage erzeugt bewusst keine Massnahme: lieber eine
  * Luecke im Plan als ein erfundener Ratschlag.
  */
-const VORLAGEN: Record<string, Vorlage> = {
+export const VORLAGEN: Record<string, Vorlage> = {
+  // ── web ────────────────────────────────────────────────────────────────
   impressum: {
     t: 'Impressum verlinken',
-    w: 'Ein Impressum nach § 5 TMG ist fuer geschaeftsmaessige Websites Pflicht; sein Fehlen ist abmahnfaehig. Der Link gehoert in den Fussbereich jeder Seite.',
+    w: 'Ein Impressum nach § 5 TMG ist für geschäftsmäßige Websites Pflicht; sein Fehlen ist abmahnfähig. Der Link gehört in den Fußbereich jeder Seite.',
     minuten: 30,
   },
   datenschutz: {
-    t: 'Datenschutzerklaerung ergaenzen',
-    w: 'Nach Art. 13 DSGVO verpflichtend, sobald personenbezogene Daten verarbeitet werden — das gilt bereits fuer Server-Protokolle und Kontaktformulare.',
+    t: 'Datenschutzerklärung ergänzen',
+    w: 'Nach Art. 13 DSGVO verpflichtend, sobald personenbezogene Daten verarbeitet werden — das gilt bereits für Server-Protokolle und Kontaktformulare.',
     minuten: 60,
   },
   https: {
     t: 'Website auf HTTPS umstellen',
-    w: 'Ohne Verschluesselung markieren Browser die Seite sichtbar als „nicht sicher". Ein Zertifikat ist bei jedem Anbieter kostenlos enthalten.',
+    w: 'Ohne Verschlüsselung markieren Browser die Seite sichtbar als „nicht sicher". Ein Zertifikat ist bei jedem Anbieter kostenlos enthalten.',
     minuten: 45,
   },
   antwortzeit: {
     t: 'Ladezeit der Startseite senken',
-    w: 'Bilder in zeitgemaessen Formaten ausliefern und ungenutzte Skripte entfernen. Wer laenger als drei Sekunden wartet, ist meist schon wieder weg.',
+    w: 'Bilder in zeitgemäßen Formaten ausliefern und ungenutzte Skripte entfernen. Wer länger als drei Sekunden wartet, ist meist schon wieder weg.',
     minuten: 180,
   },
   mobil: {
-    t: 'Seite fuer Mobilgeraete auslegen',
-    w: 'Ohne Viewport-Angabe zeigen Mobilgeraete die Desktop-Fassung verkleinert. Die Mehrheit der Suchanfragen nach einem Gutachter kommt vom Telefon.',
+    t: 'Seite für Mobilgeräte auslegen',
+    w: 'Ohne Viewport-Angabe zeigen Mobilgeräte die Desktop-Fassung verkleinert. Die Mehrheit der Suchanfragen nach einem Gutachter kommt vom Telefon.',
     minuten: 120,
   },
+
+  // ── wett ───────────────────────────────────────────────────────────────
   sichtbar: {
     t: 'Unternehmensprofil in der Kartensuche anlegen',
-    w: 'Ohne Profil erscheint das Buero in der Kartensuche gar nicht — unabhaengig davon, wie gut die Website ist.',
+    w: 'Ohne Profil erscheint das Büro in der Kartensuche gar nicht — unabhängig davon, wie gut die Website ist.',
     minuten: 60,
   },
   rang: {
     t: 'Bewertungen systematisch einsammeln',
-    w: 'Die Position in der Kartensuche haengt stark an der Zahl der Bewertungen. Ein fester Schritt bei der Gutachten-Uebergabe wirkt mehr als eine einmalige Aktion.',
+    w: 'Die Position in der Kartensuche hängt stark an der Zahl der Bewertungen. Ein fester Schritt bei der Gutachten-Übergabe wirkt mehr als eine einmalige Aktion.',
     minuten: 90,
   },
   median: {
-    t: 'Zum Bewertungs-Median des Gebiets aufschliessen',
-    w: 'Der Abstand zum Median ist die Groesse, die im direkten Vergleich sichtbar wird — er laesst sich mit einem wiederkehrenden Ablauf schliessen.',
+    t: 'Zum Bewertungs-Median des Gebiets aufschließen',
+    w: 'Der Abstand zum Median ist die Größe, die im direkten Vergleich sichtbar wird — er lässt sich mit einem wiederkehrenden Ablauf schließen.',
     minuten: 90,
+  },
+  dynamik: {
+    // ⚠ Greift beim ERSTEN Check nie: eine Rate braucht zwei Messzeitpunkte,
+    // der Befund ist dort „nicht erhoben" und erzeugt keine Massnahme. Die
+    // Vorlage steht fuer den Wiederholungs-Check (Design-Spec § 3.5) bereit —
+    // nicht, um Vollstaendigkeit vorzutaeuschen.
+    t: 'Bewertungen stetig sammeln statt in Schüben',
+    w: 'Gewertet wird die Rate, nicht der Bestand: Wer im Quartal fünf Bewertungen dazugewinnt, steigt — auch von einem niedrigen Stand aus. Eine Aktion mit zwanzig Bewertungen auf einen Schlag verpufft dagegen und fällt auf.',
+    minuten: 60,
+  },
+
+  // ── gbp ────────────────────────────────────────────────────────────────
+  fotos: {
+    t: 'Fotos ins Unternehmensprofil laden',
+    w: 'Zehn Aufnahmen genügen: Außenansicht, Empfang, Messplatz, Team und ein Fahrzeug in der Begutachtung. Profile mit Bildern werden deutlich häufiger angeklickt als solche ohne — und die Bilder liegen meist schon auf dem Telefon.',
+    minuten: 60,
+  },
+  oeffnungszeiten: {
+    t: 'Öffnungszeiten im Profil hinterlegen',
+    w: 'Ohne sie fehlt in der Kartensuche der Hinweis „jetzt geöffnet", und Anrufer wissen nicht, wann jemand rangeht. Fünf Minuten Arbeit im Unternehmensprofil.',
+    minuten: 10,
+  },
+  bewertungszahl: {
+    t: 'Mehr Bewertungen sammeln',
+    w: 'Die Anzahl trennt die Büros im Umkreis stärker als jede andere Größe — der Durchschnitt liegt bei fast allen über 4,5. Bitten Sie bei der Gutachten-Übergabe um eine Bewertung, am besten mit einem QR-Code auf dem Übergabeblatt.',
+    minuten: 90,
+  },
+  bewertungsschnitt: {
+    t: 'Auf den Bewertungsschnitt achten',
+    w: 'In Ihrem Umkreis hat die Mehrheit glatte 5,0 — ein guter Schnitt ist hier die Regel, kein Vorsprung. Antworten Sie auf jede Bewertung, auch auf kritische; das hebt den Schnitt über die Zeit und wirkt auf Mitlesende.',
+    minuten: 45,
+  },
+  telefon: {
+    t: 'Telefonnummer ins Profil eintragen',
+    w: 'Ohne Nummer im Profil kann aus der Kartensuche heraus niemand direkt anrufen — der häufigste Weg, auf dem ein Geschädigter Sie erreicht.',
+    minuten: 5,
+  },
+  website: {
+    t: 'Website im Profil verlinken',
+    w: 'Der Link führt Interessenten von der Kartensuche auf Ihre Seite. Ohne ihn endet der Weg beim Profil.',
+    minuten: 5,
+  },
+
+  // ── seo ────────────────────────────────────────────────────────────────
+  titel: {
+    t: 'Seitentitel um Leistung und Ort ergänzen',
+    w: 'Der Titel ist die Überschrift in der Trefferliste. „Kfz-Gutachter <Ort> — <Ihr Büro>" nennt beides und bleibt unter 65 Zeichen. Wer nur den Firmennamen führt, wird von Suchenden nicht gefunden, die den Namen noch nicht kennen.',
+    minuten: 20,
+  },
+  beschreibung: {
+    t: 'Beschreibung für die Trefferliste setzen',
+    w: 'Zwei Sätze mit Leistung, Ort und einem Grund, gerade Sie anzurufen — 70 bis 160 Zeichen. Fehlt sie, schneidet Google sich selbst einen Satz aus der Seite, oft einen unpassenden.',
+    minuten: 20,
+  },
+  h1: {
+    t: 'Eine Hauptüberschrift setzen',
+    w: 'Genau eine Überschrift, die sagt, worum es auf der Seite geht — „Ihr Kfz-Gutachter in <Ort>". Viele Baukästen setzen stattdessen nur formatierten Text; dann fehlt die Überschrift technisch, obwohl sie aussieht wie eine.',
+    minuten: 30,
+  },
+  ortsbezug: {
+    t: 'Ort im Seitentext nennen',
+    w: 'Gutachter werden örtlich gesucht. Steht der Ortsname nirgends im Text, kann die Seite diese Suchanfragen nicht gewinnen — auch wenn sie sonst gut ist.',
+    minuten: 45,
+  },
+  daten: {
+    t: 'Strukturierte Daten ergänzen',
+    w: 'Ein kleiner Datenblock (schema.org LocalBusiness) sagt Google, dass Ihre Adresse eine Adresse ist und Ihre Zeiten Öffnungszeiten sind. Damit erscheinen sie in der Trefferliste, statt nur im Text zu stehen.',
+    minuten: 60,
+  },
+
+  // ── ux ─────────────────────────────────────────────────────────────────
+  telefonLink: {
+    t: 'Telefonnummer anklickbar machen',
+    w: 'Die Nummer als Telefonlink auszeichnen, damit ein Fingertipp wählt. Ohne das muss sie abgeschrieben werden — genau am Unfallort, mit einer Hand am Lenkrad.',
+    minuten: 15,
+  },
+  kontaktweg: {
+    t: 'Zweiten Kontaktweg anbieten',
+    w: 'Ein kurzes Formular oder eine verlinkte E-Mail-Adresse. Wer abends schreibt oder nicht telefonieren mag, hat sonst keinen Weg zu Ihnen.',
+    minuten: 45,
+  },
+  oben: {
+    t: 'Telefonnummer nach oben holen',
+    w: 'Die Nummer gehört in den Kopfbereich, sichtbar ohne Scrollen. Wer nach einem Unfall sucht, hat es eilig und liest keine Unterseite.',
+    minuten: 20,
+  },
+  zeiten: {
+    t: 'Erreichbarkeit auf der Seite nennen',
+    w: 'Ein Satz genügt: wann Sie erreichbar sind und wie schnell Sie zurückrufen. Ohne Angabe bleibt offen, ob überhaupt jemand rangeht.',
+    minuten: 15,
+  },
+  notfall: {
+    t: 'Kurzfristige Termine sichtbar zusagen',
+    w: 'Nach einem Unfall zählt, wie schnell jemand kommt. Ein Satz wie „Besichtigung in der Regel binnen 24 Stunden" ist oft der Grund, warum angerufen wird — vorausgesetzt, er stimmt.',
+    minuten: 15,
   },
 }
 
