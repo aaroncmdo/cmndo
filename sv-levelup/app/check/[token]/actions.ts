@@ -8,8 +8,7 @@ import { setzePruefumfang, type UmfangErgebnis } from '@/lib/levelup/pruefumfang
 import { starteMessung, holeFortschritt, type StartErgebnis, type FortschrittErgebnis } from '@/lib/levelup/messung'
 import { messeCheck } from '@/lib/levelup/messmaschine'
 import { baueBefund, type BefundErgebnis } from '@/lib/levelup/befund'
-import { messeWeb } from '@/lib/levelup/module/web'
-import { messeWett } from '@/lib/levelup/module/wett'
+import { baueModulRegistry } from '@/lib/levelup/module'
 import { ladeCheck } from '@/lib/levelup/check'
 import type { Db } from '@/lib/anreicherung/schreiben'
 
@@ -33,8 +32,8 @@ export async function umfangSetzen(token: string, module: string[]): Promise<Umf
  * Anfrage.
  */
 export async function messungStarten(token: string): Promise<StartErgebnis> {
-  // Der Firmenname wird EINMAL gelesen und in die Messung gereicht — `wett`
-  // findet damit den eigenen Eintrag in der Kartensuche.
+  // Der Firmenname wird EINMAL gelesen und in die Messung gereicht — `gbp`
+  // und `wett` finden damit den eigenen Eintrag in der Kartensuche.
   const check = await ladeCheck(db(), token)
   const firmenname = check?.firmenname ?? null
 
@@ -46,12 +45,9 @@ export async function messungStarten(token: string): Promise<StartErgebnis> {
         hole: erzeugeHoler({ cachen: true }),
         places: holeAdapter(),
         jetzt: () => new Date().toISOString(),
-        registry: {
-          web: messeWeb,
-          // Ohne Firmennamen weist `wett` den Rang als Fehlstelle aus, statt
-          // einen falschen zu behaupten (R-B).
-          wett: (k) => messeWett({ ...k, firmenname }),
-        },
+        // Ohne Firmennamen weisen `gbp` und `wett` ihre Werte als Fehlstelle
+        // aus, statt falsche zu behaupten (R-B).
+        registry: baueModulRegistry(firmenname),
       })
       // Absichtlich ohne await: der Browser soll nicht auf die Messung warten.
       void auftrag.catch((err) => console.error('Messung fehlgeschlagen:', err))
