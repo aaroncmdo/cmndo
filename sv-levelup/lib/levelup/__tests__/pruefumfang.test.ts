@@ -51,6 +51,7 @@ const db = {
 function check(over: Partial<Check> & Record<string, unknown> = {}): Check {
   return {
     id: 'C1', token: 'T1', modus: 'bestand' as const, status: 'neu' as const,
+    firmenname: null, sv_lead_id: null,
     website_url: null, gsc_freigabe_am: null,
     module_gewaehlt: [], module_gewuenscht: [],
     punkte_erhebbar: null, score: null, kein_score: false,
@@ -215,5 +216,29 @@ describe('setzePruefumfang', () => {
     const r = await setzePruefumfang(db, 'T1', ['verz'])
     expect(r.ok).toBe(false)
     expect(state.events).toHaveLength(0)      // kein Ereignis ohne wirksamen Write
+  })
+})
+
+/**
+ * ⚠ Die Fassade: Ein Feld im `Check`-Typ, das `CHECK_SPALTEN` nicht holt, ist
+ * zur Laufzeit still `undefined` — und KEIN Test merkt es, weil Fakes liefern,
+ * was man ihnen sagt.
+ *
+ * Am 19.08. genau passiert: `firmenname` und `sv_lead_id` standen im Typ, aber
+ * nicht in der Select-Liste. Die Idempotenz von F-06 haengt an `sv_lead_id` —
+ * jeder zweite Terminwunsch haette einen zweiten Lead erzeugt.
+ */
+describe('CHECK_SPALTEN', () => {
+  it('holt jedes Feld, das der Check-Typ verspricht', async () => {
+    const { CHECK_SPALTEN, CHECK_FELDER } = await import('../check')
+    const geholt = new Set(CHECK_SPALTEN.split(','))
+    const fehlend = CHECK_FELDER.filter((f) => !geholt.has(f))
+    expect(fehlend).toEqual([])
+  })
+
+  /** R-E: `massnahmen` darf NICHT gelesen werden — was nicht da ist, rutscht nicht durch. */
+  it('holt massnahmen nicht', async () => {
+    const { CHECK_SPALTEN } = await import('../check')
+    expect(CHECK_SPALTEN).not.toContain('massnahmen')
   })
 })

@@ -46,6 +46,7 @@ const db = {
 function check(over: Partial<Check> = {}): Check {
   return {
     id: 'C1', token: 'T1', modus: 'bestand', status: 'laeuft',
+    firmenname: null, sv_lead_id: null,
     website_url: 'https://x.de', gsc_freigabe_am: null,
     module_gewaehlt: ['web', 'verz'], module_gewuenscht: ['web', 'verz'],
     punkte_erhebbar: 24, score: null, kein_score: false,
