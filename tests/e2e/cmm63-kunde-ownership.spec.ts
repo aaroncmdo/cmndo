@@ -14,7 +14,7 @@ import { test, expect, type Page } from '@playwright/test'
  * Lauf-Voraussetzungen (sonst test.skip — KEIN false-pass):
  *   PLAYWRIGHT_BASE_URL   – Ziel (lokal: http://localhost:3000 = dieser Branch;
  *                           staging erst NACH Merge, sonst testet man Alt-Code!)
- *   TEST_KUNDE_EMAIL / TEST_KUNDE_PASSWORD – ein kunde-Login (Default test-kunde@claimondo.de / Test1234!)
+ *   TEST_KUNDE_EMAIL / TEST_KUNDE_PASSWORD – ein kunde-Login (Default smoke-kunde@claimondo.de / Claimondo2026!)
  *   CMM63_CLAIM_ID        – claim_id eines Falls den dieser Kunde besitzt
  *   CMM63_FALL_ID         – die faelle.id desselben Falls (Alt-Bookmark-Pfad)
  *   CMM63_FOREIGN_CLAIM_ID – claim_id eines FREMDEN Falls (Stranger-Abwehr)
@@ -23,8 +23,13 @@ import { test, expect, type Page } from '@playwright/test'
  * scripts/smoke-cmm63-ownership.mjs — dort werden dieselben Invarianten datenseitig geprüft.
  */
 
-const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'test-kunde@claimondo.de'
-const KUNDE_PW = process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!'
+// ⚠ Bis 20.08. standen hier `test-kunde@` + `Test1234!` — das Konto existiert seit dem
+// Golive-Accounts-Cleanup nicht mehr, und `Test1234!` gilt auf prod nur noch fuer
+// test-dispatch@. Der Login konnte also nie gelingen. Weil `haveCreds` unten aber aus den
+// Defaults gebildet wird, war es auch nie ein Skip: der Test lief und lief in den Timeout.
+// Quelle der Credentials + Messung: tests/e2e/flows/_golden-path-lib.ts (ROLES).
+const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de'
+const KUNDE_PW = process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!'
 const CLAIM_ID = process.env.CMM63_CLAIM_ID
 const FALL_ID = process.env.CMM63_FALL_ID
 const FOREIGN_CLAIM_ID = process.env.CMM63_FOREIGN_CLAIM_ID
