@@ -14,7 +14,10 @@ import { SITE } from '@/lib/site'
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: {
-    default: 'autounfall.io — Unfall-Assistance: Ratgeber, Decoder & Rechner',
+    // 62 Zeichen und damit abgeschnitten. `default` durchlaeuft das `template`
+    // unten NICHT — hier steht also der fertig angezeigte Titel, Ziel <= 60.
+    // Er gilt fuer die Startseite und jede Seite ohne eigenen Titel (auch 404).
+    default: 'autounfall.io — Unfall-Assistance: Ratgeber & Rechner',
     template: '%s · autounfall.io',
   },
   description: SITE.description,
