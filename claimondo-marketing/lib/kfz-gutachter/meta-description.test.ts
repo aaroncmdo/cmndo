@@ -137,11 +137,52 @@ describe('stadtMetaDescription — amtliche Bezirks-Praefixe', () => {
     }
   })
 
-  it('laesst eine Nummer OHNE sprechenden Teil stehen, statt sie zu verschlucken', () => {
-    // "Bezirk 5" ist alles, was diese Stadt hat — wegkuerzen hiesse, die
-    // Ortsangabe ganz zu verlieren. Lieber schwach als leer.
+  it('faellt bei einer nackten Nummer auf den Gerichts-Anker zurueck', () => {
+    // ⚠ KEHRTWENDE gegenueber dem 19.08. Dieser Test verlangte urspruenglich
+    // das Gegenteil ("Bezirk 5" stehen lassen), begruendet mit "lieber schwach
+    // als leer". Die Annahme war falsch: es wird nicht leer. Faellt der Bezirk
+    // weg, greift der Gerichts-Anker — "im Raum 46 (Amtsgericht Bocholt)" ist
+    // im Suchergebnis konkreter als "Bezirk 5", und PLZ-Raum plus Gericht
+    // unterscheiden die Seiten voneinander.
+    //
+    // Aufgefallen ist es erst, als Duesseldorf am 20.08. real
+    // "fuer Bezirk 1, Bezirk 2, Bezirk 3 und Umgebung" ausspielte. Der Fall
+    // war 2026-08-19 nur gedacht, nicht gesehen.
     const d = stadtMetaDescription(bocholt, tiefeMit('Bezirk 5'))
-    expect(d).toContain('Bezirk 5')
+    expect(d).not.toContain('Bezirk 5')
+    expect(d).toContain(bocholt.lokal.amtsgericht)
+  })
+
+  it('nennt rein nummerierte Bezirke NICHT — die sagen im Suchergebnis nichts', () => {
+    // Duesseldorf, real auf prod (20.08.): sowohl der Hub-Snapshot ("Bezirk 1"
+    // … "Bezirk 10") als auch der generierte DB-Inhalt ("Stadtbezirk 1" …)
+    // tragen reine Nummern. Die Beschreibung lautete damit
+    //   "… unabhaengige Sachverstaendige fuer Bezirk 1, Bezirk 2, Bezirk 3 …"
+    // Niemand sucht nach "Bezirk 2", und es liest sich wie ein Automat.
+    // Die Achsen sind die konkretere Aussage — der Zweig existiert bereits.
+    const d = stadtMetaDescription(bocholt, {
+      stadtbezirke: [{ name: 'Bezirk 1' }, { name: 'Stadtbezirk 2' }, { name: 'Ortsbezirk 3' }],
+      hauptachsen: { autobahnen: ['A3', 'A46'], bundesstrassen: ['B8'], knoten: [] },
+    })
+    expect(d).not.toMatch(/Bezirk \d/)
+    expect(d).toContain('A3')
+  })
+
+  it('nimmt die sprechenden Bezirke, wenn nur EINZELNE nur Nummern sind', () => {
+    const d = stadtMetaDescription(bocholt, {
+      stadtbezirke: [{ name: 'Bezirk 1' }, { name: 'Altstadt' }, { name: 'Bezirk 3' }],
+    })
+    expect(d).toContain('Altstadt')
+    expect(d).not.toMatch(/Bezirk \d/)
+  })
+
+  it('haelt roemische Nummerierung genauso fuer nichtssagend (Essen: Stadtbezirk IX)', () => {
+    const d = stadtMetaDescription(bocholt, {
+      stadtbezirke: [{ name: 'Stadtbezirk IX' }, { name: 'Stadtbezirk I' }],
+      hauptachsen: { autobahnen: ['A40'], bundesstrassen: [], knoten: [] },
+    })
+    expect(d).not.toContain('Stadtbezirk')
+    expect(d).toContain('A40')
   })
 
   it('ueberspringt einen zu langen Namen, statt die Ortstiefe ganz aufzugeben', () => {
