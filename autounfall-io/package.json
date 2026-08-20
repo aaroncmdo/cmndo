@@ -13,7 +13,8 @@
     "verify:rechner": "node scripts/verify-rechner.mjs",
     "smoke": "node scripts/smoke.mjs",
     "check:pseo-similarity": "node scripts/check-pseo-similarity.mjs",
-    "indexnow": "node scripts/indexnow-ping.mjs"
+    "indexnow": "node scripts/indexnow-ping.mjs",
+    "check:serp-titel": "node scripts/check-serp-titel.mjs"
   },
   "dependencies": {
     "@microsoft/clarity": "^1.0.2",

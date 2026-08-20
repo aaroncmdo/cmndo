@@ -25,12 +25,24 @@ export default async function KanzleiBoardContent() {
   const kfKanzleiIds = Array.from(new Set((kanzleiFaelle ?? []).map(k => k.kanzlei_id).filter((x): x is string => !!x)))
   const claimMap = new Map<string, { claim_nummer: string | null; kennzeichen: string | null }>()
   const kanzleiMap = new Map<string, { name: string | null; email: string | null; ansprechpartner: string | null }>()
+  // Claims, die als Testfall deaktiviert wurden (ist_aktiv=false). v_claim_full filtert das NICHT
+  // selbst — gemessen 20.08.: 1 der 7 Kanzlei-Faelle auf prod haengt an einem Testfall und zaehlte
+  // sowohl in der Liste als auch in der StatCard-Zahl mit.
+  const deaktivierteClaimIds = new Set<string>()
   if (kfClaimIds.length > 0) {
     // v_claim_full ist claims-anchored: id = Claim-ID (es gibt KEINE claim_id-Spalte). Join-Test
     // (admin-JWT) bestaetigt: vcf.id = kanzlei_faelle.claim_id matcht alle 14 Kanzlei-Faelle.
-    const { data } = await db.from('v_claim_full').select('id, claim_nummer, kennzeichen').in('id', kfClaimIds)
-    for (const c of data ?? []) claimMap.set(c.id as string, { claim_nummer: c.claim_nummer as string | null, kennzeichen: c.kennzeichen as string | null })
+    const { data } = await db.from('v_claim_full').select('id, claim_nummer, kennzeichen, ist_aktiv').in('id', kfClaimIds)
+    for (const c of data ?? []) {
+      if (c.ist_aktiv === false) { deaktivierteClaimIds.add(c.id as string); continue }
+      claimMap.set(c.id as string, { claim_nummer: c.claim_nummer as string | null, kennzeichen: c.kennzeichen as string | null })
+    }
   }
+  // Bewusst nur NACHWEISLICH deaktivierte aussortieren — nicht "alles, was nicht in claimMap steht".
+  // Sonst wuerde ein per RLS unsichtbarer Claim seine Kanzlei-Zeile mitreissen (Verhaltensaenderung).
+  const sichtbareKanzleiFaelle = (kanzleiFaelle ?? []).filter(
+    k => !k.claim_id || !deaktivierteClaimIds.has(k.claim_id as string),
+  )
   if (kfKanzleiIds.length > 0) {
     const { data } = await db.from('kanzleien').select('id, name, email, ansprechpartner').in('id', kfKanzleiIds)
     for (const k of data ?? []) kanzleiMap.set(k.id as string, { name: k.name as string | null, email: k.email as string | null, ansprechpartner: k.ansprechpartner as string | null })
@@ -57,7 +69,7 @@ export default async function KanzleiBoardContent() {
     <>
       {/* KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard size="sm" icon={ScaleIcon} tone="ondo" label="Kanzlei-Fälle" value={kanzleiFaelle?.length ?? 0} />
+        <StatCard size="sm" icon={ScaleIcon} tone="ondo" label="Kanzlei-Fälle" value={sichtbareKanzleiFaelle.length} />
         <StatCard size="sm" icon={MailIcon} tone="ondo" label="LexDrive-Events" value={webhookEvents?.length ?? 0} />
         <StatCard size="sm" icon={AlertCircleIcon} tone="warning" label="Offene LexDrive-Tasks" value={lexdriveTasks?.length ?? 0} />
       </div>
@@ -79,7 +91,7 @@ export default async function KanzleiBoardContent() {
               </Tr>
             </Thead>
             <Tbody>
-              {(kanzleiFaelle ?? []).map(kf => {
+              {sichtbareKanzleiFaelle.map(kf => {
                 const claim = kf.claim_id ? claimMap.get(kf.claim_id as string) : undefined
                 const kanzlei = kf.kanzlei_id ? kanzleiMap.get(kf.kanzlei_id as string) : undefined
                 const linkId = (kf.fall_id ?? kf.claim_id) as string | null
@@ -109,7 +121,7 @@ export default async function KanzleiBoardContent() {
                   </Tr>
                 )
               })}
-              {(!kanzleiFaelle || kanzleiFaelle.length === 0) && (
+              {sichtbareKanzleiFaelle.length === 0 && (
                 <Tr><Td colSpan={5} className="py-8 text-center !text-claimondo-ondo/70 text-sm">Keine Kanzlei-Fälle</Td></Tr>
               )}
             </Tbody>
