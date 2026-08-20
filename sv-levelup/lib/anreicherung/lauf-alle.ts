@@ -45,6 +45,14 @@ export async function laufeAn(
     laufId: string
     hole: Holer
     limit?: number
+    /**
+     * Nur Leads dieser Herkunft.
+     *
+     * Gebraucht, um gezielt die frisch ENTDECKTEN anzureichern: die Abfrage
+     * sortiert nach Alter, und die Bestandsleads sind aelter — ohne Filter
+     * kaeme man an die neuen erst nach allen anderen.
+     */
+    quelle?: string
     dryRun?: boolean
     fortschritt?: (nr: number, gesamt: number, zeile: string) => void
   },
@@ -55,7 +63,22 @@ export async function laufeAn(
   let abfrage = db
     .from('sv_leads')
     .select('id,firma,name,ort,plz,website_url')
-    .eq('ist_aktiv', true)
+    // ⚠ HIER STAND `.eq('ist_aktiv', true)`. Entfernt am 20.08., weil die
+    // Spalte zwei verschiedene Dinge bedeutete:
+    //
+    //   fuer den Finder   „erscheint als Stift auf der oeffentlichen Karte"
+    //   hier              „ist ein Lead, den man bearbeiten soll"
+    //
+    // Die Lead-Discovery legt neue Bueros bewusst INAKTIV an, damit sie nicht
+    // ungefragt auf zwei oeffentlichen Karten erscheinen — eine davon im Embed
+    // auf FREMDEN Websites. Zusammen mit diesem Filter hiess das: entdeckte
+    // Leads werden nie angereichert und bleiben fuer immer ohne Kontaktdaten.
+    // Die ganze Kette Discovery → Anreicherung waere still gerissen.
+    //
+    // Gemessen: von 74 Leads ist KEIN EINZIGER inaktiv ausser den 10 gerade
+    // entdeckten. Der Filter schloss also genau sie aus und sonst nichts.
+    // Wofuer ein Lead noch offen ist, sagt `claim_status` — und der steht
+    // darunter.
     .eq('claim_status', 'offen')
     .or('email.is.null,telefon.is.null,website_url.is.null,vorname.is.null')
     .order('erstellt_am', { ascending: true })
@@ -67,6 +90,7 @@ export async function laufeAn(
     // (P6) nicht fortsetzbar.
     .order('id', { ascending: true })
 
+  if (opts.quelle) abfrage = abfrage.eq('quelle', opts.quelle)
   if (opts.limit) abfrage = abfrage.limit(opts.limit)
 
   const { data: leads, error } = await abfrage

@@ -24,6 +24,7 @@ const wert = (n: string) => {
 
 const schreiben = hatFlag('schreiben')
 const limit = wert('limit') ? Number(wert('limit')) : undefined
+const quelle = wert('quelle')
 const zurueck = wert('zurueck')
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -64,7 +65,7 @@ async function main() {
   const hole = erzeugeHoler({ cachen: true })
 
   const r = await laufeAn(db, {
-    laufId, hole, limit, dryRun: !schreiben,
+    laufId, hole, limit, quelle, dryRun: !schreiben,
     fortschritt: (nr, gesamt, zeile) =>
       console.log(`[${String(nr).padStart(3)}/${gesamt}] ${zeile}`),
   })

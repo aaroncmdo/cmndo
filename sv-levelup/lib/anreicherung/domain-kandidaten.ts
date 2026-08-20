@@ -23,13 +23,35 @@ export function domainKandidaten(firma: string, ort: string | null): string[] {
   const ortSlug = ort ? umlauteAuf(ort).toLowerCase().replace(/[^a-z0-9]/g, '') : null
   const mehrteilig = teile.length > 1
 
+  /**
+   * ⚠ Eine Domain, die GENAU dem Ort des Leads entspricht, gehoert praktisch
+   * immer der STADT.
+   *
+   * Am 20.08. an echten Daten gefunden: „Kfz Gutachter Herne / Ingenieurbüro
+   * für Fahrzeugtechnik" ergab `herne.de` — die Website der Stadt Herne. Der
+   * Lead bekam daraus E-Mail und Telefon der Stadtverwaltung, und zwar mit
+   * Zuordnungssicherheit **90**: die Stadtseite nennt naturgemaess „Herne" und
+   * die Postleitzahl 44623, genau wie der Lead. Die Pruefung konnte den
+   * Unterschied nicht sehen — sie sucht ja Firmenname und PLZ, und beides
+   * stand da. Dieselbe Falle bei „… Jürgen Schmidt Werne" → `werne.de`.
+   *
+   * Betroffen ist nur die BLANKE Form. `sv-herne.de` oder
+   * `kfz-gutachter-herne.de` gehoeren plausibel einem Buero in Herne und
+   * bleiben Kandidaten.
+   */
+  const istOrt = (wort: string) =>
+    ortSlug !== null && umlauteAuf(wort).toLowerCase().replace(/[^a-z0-9]/g, '') === ortSlug
+
+  const blank = (wort: string) => (istOrt(wort) ? null : `${wort}.de`)
+
   const kandidaten = [
-    `${erstes}.de`,
+    blank(erstes),
     `sv-${erstes}.de`,
-    mehrteilig ? `${letztes}.de` : null,
+    mehrteilig ? blank(letztes) : null,
     mehrteilig ? `sv-${letztes}.de` : null,
-    mehrteilig ? `${zusammen}.de` : `kfz-gutachter-${erstes}.de`,
-    ortSlug ? `${erstes}-${ortSlug}.de` : null,
+    mehrteilig ? blank(zusammen) : `kfz-gutachter-${erstes}.de`,
+    // `herne-herne.de` waere Unsinn — es entstand, wenn der Kern selbst der Ort ist.
+    ortSlug && !istOrt(erstes) ? `${erstes}-${ortSlug}.de` : null,
   ].filter((d): d is string => d !== null)
 
   return [...new Set(kandidaten)].slice(0, 5)
