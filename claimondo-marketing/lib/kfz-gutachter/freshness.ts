@@ -15,6 +15,12 @@
 // und dem echten Veroeffentlichungsdatum. Die Map bleibt fuer alles, was NICHT
 // aus der Pipeline kommt (Hub-Cities, Handarbeit an staedte.ts).
 
+import STADT_ANLAGEDATUM_JSON from './staedte-anlagedatum.json'
+
+/** Tag, an dem eine Stadt ins Repo kam — generiert, nicht gepflegt.
+ *  Quelle: scripts/generate-stadt-anlagedatum.mjs (Git-Historie gegen origin/main). */
+const STADT_ANLAGEDATUM: Record<string, string> = STADT_ANLAGEDATUM_JSON
+
 const STADT_LASTMOD_DEFAULT = '2026-05-24'
 
 const STADT_LASTMOD_OVERRIDES: Record<string, string> = {
@@ -51,14 +57,23 @@ export function getStadtLastUpdated(slug: string): Date {
  * aelteren Generatorlauf zurueckdatiert werden.
  */
 export function stadtLastModifiedISO(slug: string, dbISO?: string | null): string {
-  const gepflegt = getStadtLastUpdatedISO(slug)
-  if (!dbISO) return gepflegt
+  // Untergrenze: eine Seite kann nicht aelter sein als der Tag, an dem sie
+  // entstand. Ohne diese Quelle meldete JEDE Stadt ohne eigenen Override den
+  // Default 2026-05-24 — die aeltesten kamen aber erst am 01.06. ins Repo, die
+  // neuesten am 19.08. Ein Datum VOR der eigenen Entstehung ist nicht bloss
+  // veraltet, und ausgerechnet die neuesten Seiten bekamen so das schwaechste
+  // Recrawl-Signal. Erzeugt von scripts/generate-stadt-anlagedatum.mjs.
+  const anlage = STADT_ANLAGEDATUM[slug]
+  let neuestes = getStadtLastUpdatedISO(slug)
+  if (anlage && anlage > neuestes) neuestes = anlage
+
+  if (!dbISO) return neuestes
   const db = new Date(dbISO)
   // Ein `Invalid Date` im <lastmod> macht die Sitemap fuer Google ungueltig —
   // schlimmer als ein zu altes Datum. Im Zweifel der gepflegte Wert.
-  if (Number.isNaN(db.getTime())) return gepflegt
+  if (Number.isNaN(db.getTime())) return neuestes
   const dbTag = db.toISOString().slice(0, 10)
-  return dbTag > gepflegt ? dbTag : gepflegt
+  return dbTag > neuestes ? dbTag : neuestes
 }
 
 /** Als Date — fuer sitemap `lastModified`. */
