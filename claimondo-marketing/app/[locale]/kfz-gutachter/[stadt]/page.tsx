@@ -1,4 +1,5 @@
 import { localeAlternates } from '@/lib/seo/alternates'
+import { titelMitZusatz } from '@/lib/seo/title'
 import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
@@ -87,13 +88,29 @@ export async function generateMetadata({
   //
   // "Unabhaengig & " ist am 18.08. entfallen (Aaron-Entscheidung): mit dem
   // Zusatz lagen ALLE 158 Stadt-Titel ueber 60 Zeichen (Median 72), also
-  // jenseits dessen, was Google in der Anzeige zeigt. Ohne ihn sind es 43
-  // (Median 59) — die Restlichen sind lange Ortsnamen ("Ludwigshafen am
-  // Rhein"), die sich nicht weiter kuerzen lassen. Die Aussage bleibt sonst
+  // jenseits dessen, was Google in der Anzeige zeigt. Die Aussage bleibt sonst
   // unveraendert: "unabhaengig" steht weiterhin in der Description und 7x im
   // Seitentext (auf /kfz-gutachter/koeln nachgezaehlt) — nur nicht in der H1,
   // die ist die Conversion-Headline "Unfall gehabt?".
-  const title = `Kfz-Gutachter ${s.name} — kostenfrei nach Unfall`
+  //
+  // KORREKTUR 20.08.: hier stand, die Restlichen seien lange Ortsnamen, "die
+  // sich nicht weiter kuerzen lassen". Der ORTSNAME nicht — der ZUSATZ schon.
+  // Gemessen auf prod: 46 der 173 Stadtseiten (26,6 %) lagen ueber 60, alle
+  // wegen langer Ortsnamen ("Ludwigshafen am Rhein", 21 Zeichen). Statt den
+  // Zusatz fuer ALLE zu opfern oder ihn bei jedem Vierten abschneiden zu
+  // lassen, waehlt `titelMitZusatz` je Stadt die laengste Fassung, die noch
+  // vollstaendig angezeigt wird. Die Kernaussage "kostenfrei" bleibt damit
+  // ueberall erhalten — nur "nach Unfall" faellt bei den langen Namen weg.
+  const title = titelMitZusatz(`Kfz-Gutachter ${s.name}`, [
+    ' — kostenfrei nach Unfall',
+    ' — kostenfrei',
+    '',
+  ])
+
+  // Social-Vorschauen (Facebook/LinkedIn/WhatsApp) zeigen deutlich mehr Zeichen
+  // als die Suchergebnisliste — dort bleibt die vollstaendige Aussage stehen,
+  // auch bei langen Ortsnamen. Gleiches Muster wie in /wissen/[slug].
+  const ogTitle = `Kfz-Gutachter ${s.name} — kostenfrei nach Unfall`
 
   // Die Beschreibung war bis 18.08.2026 fuer JEDE Stadt derselbe Satz mit
   // ausgetauschtem Ortsnamen — bei 173 Seiten ein Duplicate-Signal. Sie zog
@@ -125,7 +142,7 @@ export async function generateMetadata({
       locale: 'de_DE',
       siteName: 'Claimondo',
       url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-      title,
+      title: ogTitle,
       description,
       images: [{ url: '/marketing-landing-koeln/hero-woman.png', width: 1200, height: 630, alt: `Kfz-Gutachter ${s.name}` }],
     },
