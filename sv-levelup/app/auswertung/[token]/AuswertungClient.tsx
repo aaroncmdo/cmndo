@@ -6,6 +6,7 @@ import { leiteAb, type Massnahme } from '@/lib/levelup/massnahmen'
 import { baueGespraech, type Gespraech } from '@/lib/levelup/gespraech'
 import type { ModulErgebnis } from '@/lib/levelup/messmaschine'
 import type { Befund, Fehlstelle } from '@/lib/levelup/modul-vertrag'
+import { PlanFreigabe, type PlanStand } from './PlanFreigabe'
 
 type ModulKachel = {
   id: string
@@ -48,6 +49,10 @@ type Props = {
   terminAm: string | null
   terminTelefon: string | null
   funnel: Record<string, string> | null
+  checkId: string
+  auswertungsToken: string
+  basis: string
+  planStand: PlanStand
 }
 
 type Ansicht = 'gesamt' | 'plan' | 'gespraech'
@@ -179,7 +184,17 @@ export function AuswertungClient(p: Props) {
           />
         )}
 
-        {ansicht === 'plan' && <Plan massnahmen={gefiltert.massnahmen} />}
+        {ansicht === 'plan' && (
+          <>
+            <Plan massnahmen={gefiltert.massnahmen} />
+            <PlanFreigabe
+              checkId={p.checkId}
+              auswertungsToken={p.auswertungsToken}
+              stand={p.planStand}
+              basis={p.basis}
+            />
+          </>
+        )}
 
         {ansicht === 'gespraech' && (
           <GespraechsAnsicht

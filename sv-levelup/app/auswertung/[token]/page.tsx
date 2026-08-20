@@ -1,3 +1,4 @@
+import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -29,6 +30,9 @@ type LeadZeile = {
 
 export default async function AuswertungSeite(props: { params: Promise<{ token: string }> }) {
   const { token } = await props.params
+  // Ein Zeitpunkt fuer die ganze Anfrage — sonst koennte der Aufruf-Vermerk
+  // eine andere Sekunde tragen als die Ablauf-Pruefung.
+  const jetzt = new Date()
 
   // Schranke 1 — Mitarbeiter.
   const sitzung = await createClient()
@@ -61,7 +65,7 @@ export default async function AuswertungSeite(props: { params: Promise<{ token: 
   // aufhalten.
   const { error: zaehlFehler } = await db
     .from('levelup_auswertungslinks')
-    .update({ aufrufe: linkZeile.aufrufe + 1, letzter_aufruf: new Date().toISOString() })
+    .update({ aufrufe: linkZeile.aufrufe + 1, letzter_aufruf: jetzt.toISOString() })
     .eq('id', linkZeile.id)
     .select()
   if (zaehlFehler) console.error('Aufruf nicht vermerkt:', zaehlFehler.message)
@@ -113,6 +117,37 @@ export default async function AuswertungSeite(props: { params: Promise<{ token: 
   if (funnelZeile?.ki_nutzung) funnel.kiNutzung = funnelZeile.ki_nutzung
   if (funnelZeile?.marketing_partner) funnel.marketingPartner = funnelZeile.marketing_partner
 
+  // Stand des Praesentationslinks — der neueste zaehlt, auch ein
+  // zurueckgezogener: „am 19.08. zurueckgezogen" ist eine Auskunft, ein leerer
+  // Kasten ist keine.
+  const { data: planZeile, error: planFehler } = await db
+    .from('levelup_praesentationen')
+    .select('token,gueltig_bis,widerrufen_am,aufrufe,letzter_aufruf')
+    .eq('check_id', check.id)
+    .order('erstellt_am', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (planFehler) console.error('Planlink nicht lesbar:', planFehler.message)
+
+  const plan = planZeile as {
+    token: string
+    gueltig_bis: string
+    widerrufen_am: string | null
+    aufrufe: number
+    letzter_aufruf: string | null
+  } | null
+
+  // ⚠ Der Ablauf wird VOR dem JSX ausgerechnet. Die Regel „Cannot call
+  // impure function during render" verbietet `Date.now()` INNERHALB der
+  // Ausgabe — auch in einer Server-Komponente, weil auch die vorgerendert
+  // werden kann und das Ergebnis dann eingefroren waere.
+  const planAbgelaufen = plan ? Date.parse(plan.gueltig_bis) <= jetzt.getTime() : false
+
+  // Die oeffentliche Adresse — aus dem Kopf der Anfrage, nicht geraten.
+  const kopf = await headers()
+  const schema = kopf.get('x-forwarded-proto') ?? 'http'
+  const basis = `${schema}://${kopf.get('host') ?? 'sv-levelup.claimondo.de'}`
+
   // Modulliste für die Filterleiste — nur Module, die tatsächlich etwas
   // geliefert haben (gemessen ODER als Fehlstelle vermerkt).
   const modulIds = [...new Set([...Object.keys(befunde), ...Object.keys(fehlstellen)])] as ModulId[]
@@ -147,6 +182,17 @@ export default async function AuswertungSeite(props: { params: Promise<{ token: 
       terminAm={termin?.slot_start ?? null}
       terminTelefon={termin?.telefon ?? null}
       funnel={Object.keys(funnel).length > 0 ? funnel : null}
+      checkId={check.id}
+      auswertungsToken={token}
+      basis={basis}
+      planStand={plan ? {
+        token: plan.token,
+        gueltigBis: plan.gueltig_bis,
+        widerrufenAm: plan.widerrufen_am,
+        aufrufe: plan.aufrufe,
+        letzterAufruf: plan.letzter_aufruf,
+        abgelaufen: planAbgelaufen,
+      } : null}
     />
   )
 }
