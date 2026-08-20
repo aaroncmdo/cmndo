@@ -56,6 +56,12 @@ export function BghAuthorityGrid({
               <Link
                 key={u.az}
                 href={u.href}
+                // Ohne aria-label heisst der Link fuer Screenreader nur "Im Cluster
+                // ansehen →" — der letzte Textknoten. Aktenzeichen und Thema stehen
+                // zwar sichtbar in der Karte, sind aber nicht Teil des Link-Namens.
+                // Ging beim Umbau CardLink -> eigenes <Link> verloren (Doc 41 §3.4);
+                // `doc40-cards-clickable` meldete es, war nur stummgeschaltet.
+                aria-label={`${u.az} — ${u.titel}`}
                 className="group block rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
                 data-tracking={`card-bgh-${u.az.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
               >
