@@ -21,6 +21,7 @@ function adapter(profil: Profil | null): PlacesAdapter {
     suchUmkreis: async () => [],
     details: async () => null,
     profil: async () => profil,
+    websiteVon: async () => null,
   }
 }
 

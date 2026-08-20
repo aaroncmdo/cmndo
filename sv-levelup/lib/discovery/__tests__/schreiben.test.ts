@@ -158,3 +158,49 @@ describe('schreibeFund', () => {
     expect(aktualisiert).toHaveLength(0)
   })
 })
+
+describe('Ortsnamen mit Sonderzeichen', () => {
+  it('liest Orte mit Schraegstrich und Klammern', () => {
+    // ⚠ Am echten Scrape gefunden (20.08.): 46 deutsche Betriebe blieben ohne
+    // Ort, weil das Muster weder `/` noch Klammern erlaubte. Beides ist in
+    // amtlichen Ortsnamen voellig normal.
+    expect(plzUndOrt('Ernst-Thälmann-Straße 114D, 15517 Fürstenwalde/Spree'))
+      .toEqual({ plz: '15517', ort: 'Fürstenwalde/Spree' })
+    expect(plzUndOrt('Wiggensbacher Str. 57, 87439 Kempten (Allgäu)'))
+      .toEqual({ plz: '87439', ort: 'Kempten (Allgäu)' })
+    expect(plzUndOrt('Hans-Lingl-Str. 15 B, 86381 Krumbach (Schwaben)').ort)
+      .toBe('Krumbach (Schwaben)')
+  })
+
+  it('liest weiterhin gewoehnliche Orte', () => {
+    expect(plzUndOrt('Nunnensteig 5, 78052 Villingen-Schwenningen').ort)
+      .toBe('Villingen-Schwenningen')
+    expect(plzUndOrt('Stuttgarter Str. 79, 73312 Geislingen an der Steige').ort)
+      .toBe('Geislingen an der Steige')
+  })
+})
+
+describe('Betriebe im Ausland', () => {
+  it('verwirft sie', () => {
+    // ⚠ Der Deutschland-Rahmen ist ein RECHTECK und schliesst die Nachbarlaender
+    // ein. Der Scrape holte 92 oesterreichische, 3 Schweizer und einen
+    // tschechischen Betrieb — sie gehoeren nicht in einen deutschen
+    // Gutachter-Bestand und erst recht nicht auf eine deutsche Karte.
+    for (const adresse of [
+      'Hochsteingasse 13, 8010 Graz, Österreich',
+      'Judendorf 19, 9360 Friesach, Österreich',
+      'Bahnhofstrasse 1, 8001 Zürich, Schweiz',
+      'Nádražní 1, 110 00 Praha, Tschechien',
+    ]) {
+      expect(beurteile({ ...FUND, adresse, placeId: `p-${adresse}` }, []), adresse)
+        .toBe('unbrauchbar')
+    }
+  })
+
+  it('laesst deutsche Anschriften durch — auch ohne „Deutschland" am Ende', () => {
+    // Google haengt das Land bei einer Anfrage aus Deutschland oft NICHT an.
+    // Wer auf „Deutschland" besteht, verwirft fast alles.
+    expect(beurteile({ ...FUND, adresse: 'Nunnensteig 5, 78052 Villingen-Schwenningen' }, []))
+      .toBe('neu')
+  })
+})

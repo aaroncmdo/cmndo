@@ -68,12 +68,39 @@ export function erzeugeLegacy(apiKey: string, opts: AdapterOpts = {}): PlacesAda
   const f = opts.fetchImpl ?? fetch
   const warte = opts.warte ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
 
+  /**
+   * Ein Abruf mit Wiederholung bei NETZ-Fehlern.
+   *
+   * ⚠ Am Deutschland-Lauf gemessen (20.08.): von rund 1.392 Versuchen kamen
+   * nur 273 an — **1.119 Mal „fetch failed"**, eine Ausfallquote von 80 %. Der
+   * Adapter feuerte ohne jede Pause und ohne zweiten Versuch, waehrend der
+   * Website-Holer in `netz.ts` beides laengst hat. Der Lauf sah dabei gesund
+   * aus: er lieferte 2.864 Betriebe und meldete die Fehler brav im Bericht —
+   * nur waren vier Fuenftel des Landes nie abgefragt worden.
+   *
+   * Wiederholt wird NUR bei Netzfehlern. Ein `REQUEST_DENIED` oder
+   * `OVER_QUERY_LIMIT` ist eine Antwort, keine Stoerung: sie zu wiederholen
+   * verbrennt Kontingent und aendert nichts.
+   */
+  async function mitWiederholung(url: string): Promise<Response> {
+    let letzter: unknown
+    for (let versuch = 0; versuch < 3; versuch++) {
+      if (versuch > 0) await warte(500 * 2 ** versuch)   // 1 s, dann 2 s
+      try {
+        return await f(url)
+      } catch (err) {
+        letzter = err
+      }
+    }
+    throw new PlacesFehler('NETZ', letzter instanceof Error ? letzter.message : String(letzter))
+  }
+
   async function hole(pfad: string, params: Record<string, string>): Promise<Record<string, unknown>> {
     const u = new URL(`${BASIS}${pfad}`)
     for (const [k, v] of Object.entries(params)) u.searchParams.set(k, v)
     u.searchParams.set('key', apiKey)
 
-    const res = await f(u.toString())
+    const res = await mitWiederholung(u.toString())
     if (!res.ok) throw new PlacesFehler(`HTTP_${res.status}`)
 
     const daten = (await res.json()) as Record<string, unknown>
@@ -136,6 +163,18 @@ export function erzeugeLegacy(apiKey: string, opts: AdapterOpts = {}): PlacesAda
         return zuBetrieb((daten.result as RohOrt) ?? {})
       } catch (err) {
         // NOT_FOUND ist eine Antwort ("den Ort gibt es nicht"), kein Fehler.
+        if (err instanceof PlacesFehler && err.status === 'NOT_FOUND') return null
+        throw err
+      }
+    },
+
+    async websiteVon(placeId) {
+      try {
+        // Nur EIN Feld — die Preisstufe richtet sich nach dem, was man
+        // anfragt. Wer Grunddaten mitbestellt und wegwirft, zahlt dafuer.
+        const daten = await hole('/details/json', { place_id: placeId, fields: 'website' })
+        return ((daten.result as RohOrt)?.website) ?? null
+      } catch (err) {
         if (err instanceof PlacesFehler && err.status === 'NOT_FOUND') return null
         throw err
       }

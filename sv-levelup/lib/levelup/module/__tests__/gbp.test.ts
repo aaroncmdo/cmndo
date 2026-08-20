@@ -15,6 +15,7 @@ function adapter(treffer: Betrieb[], profil: Profil | null): PlacesAdapter {
     suchUmkreis: async () => treffer,
     details: async () => null,
     profil: async () => profil,
+    websiteVon: async () => null,
   }
 }
 
@@ -92,6 +93,7 @@ describe('messeGbp', () => {
       suchUmkreis: async () => [],
       details: async () => null,
       profil: async () => null,
+    websiteVon: async () => null,
     }
     const e = await messeGbp(kontext({ firmenname: 'Meyer', places: kaputt }))
     expect(e.fehlstellen.length).toBeGreaterThan(0)

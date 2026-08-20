@@ -20,6 +20,7 @@ function adapter(treffer: Betrieb[] | ((umkreis: { km: number }) => Betrieb[])):
     suchUmkreis: async () => [],
     details: async () => null,
     profil: async () => null,
+    websiteVon: async () => null,
   }
 }
 
@@ -42,6 +43,8 @@ function db() {
 const BASIS = {
   gebiet: KLEIN, begriffe: ['Kfz-Sachverständiger'], maxTiefe: 2,
   schreiben: false, laufId: 'lauf-1', bestand: [], jetzt: () => 1000,
+  // Die Drossel ist im Lauf echt — im Test injiziert, sonst wartet die Suite mit.
+  warte: async () => {},
 }
 
 describe('entdecke', () => {
@@ -114,6 +117,7 @@ describe('entdecke', () => {
         return [betrieb(1)]
       },
       suchUmkreis: async () => [], details: async () => null, profil: async () => null,
+    websiteVon: async () => null,
     }
     const gross: Kachel = { sued: 51.0, west: 6.0, nord: 53.0, ost: 9.0, tiefe: 0 }
     const { db: v } = db()
