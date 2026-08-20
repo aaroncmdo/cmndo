@@ -12,8 +12,10 @@ import fs from 'node:fs'
 const BASE = process.env.STAGING_APP_URL ?? 'https://app.staging.claimondo.de'
 const BASIC_USER = process.env.STAGING_BASIC_AUTH_USER ?? 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_AUTH_PASS ?? ''
-const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'test-kunde@claimondo.de'
-const KUNDE_PASS = process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!'
+// Credentials-Quelle + Messung: tests/e2e/flows/_golden-path-lib.ts (ROLES).
+// `test-kunde@` gibt es seit dem Golive-Accounts-Cleanup nicht mehr.
+const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de'
+const KUNDE_PASS = process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!'
 const KUNDE_STORAGE =
   process.env.KUNDE_STORAGE ?? path.resolve(__dirname, '..', '..', 'playwright', '.auth', 'kunde.json')
 

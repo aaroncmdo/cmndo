@@ -49,14 +49,38 @@ if (!url || !key) {
 }
 
 const db = createClient(url, key, { auth: { persistSession: false } })
-const { data, error } = await db.rpc('audit_migration_versions')
-if (error) {
-  console.error('[migration-files] RPC audit_migration_versions() fehlgeschlagen:', error.message)
-  process.exit(mode === 'ratchet' ? 1 : 0)
+
+// ⚠ PostgREST deckelt JEDE Antwort bei 1000 Zeilen — auch die einer set-returning RPC,
+// und ohne jede Fehlermeldung. Die RPC selbst hat kein LIMIT; der Deckel sitzt davor.
+//
+// Warum das hier toedlich war: `audit_migration_versions()` sortiert `ORDER BY version`,
+// also lieferte der einzelne Aufruf die 1000 AELTESTEN Migrationen — und liess die
+// NEUESTEN weg. Genau dort entstehen fehlende Files. Am 20.08. gemessen: 1236 getrackt,
+// 1000 gesehen, 236 im blinden Fleck (11.07.–19.08.). Der Check meldete "0 ohne File",
+// obwohl 2 fehlten — beide lagen im ungesehenen Rest.
+//
+// ⭐ Das Instrument war also nicht kaputt, sondern TEILBLIND — und teilblind meldet
+// Entwarnung, nicht Fehler. Die Positiv-Kontrolle unten fing nur den Totalausfall
+// (0 Zeilen); "genau voll" sah aus wie ein gueltiges Ergebnis.
+const SEITE = 1000
+const data = []
+for (let von = 0; ; von += SEITE) {
+  const { data: seite, error } = await db.rpc('audit_migration_versions').range(von, von + SEITE - 1)
+  if (error) {
+    console.error('[migration-files] RPC audit_migration_versions() fehlgeschlagen:', error.message)
+    process.exit(mode === 'ratchet' ? 1 : 0)
+  }
+  data.push(...seite)
+  // Eine NICHT volle Seite ist der einzige verlaessliche Beweis, dass es nichts mehr gibt.
+  if (seite.length < SEITE) break
+  if (data.length > 100_000) {
+    console.error('[migration-files] > 100.000 Zeilen — Abbruch (Endlosschleife?). Instrument pruefen.')
+    process.exit(mode === 'ratchet' ? 1 : 0)
+  }
 }
 
 // Positiv-Kontrolle: eine leere Liste heisst hier "RPC kaputt", nicht "keine Migrationen".
-if (!Array.isArray(data) || data.length === 0) {
+if (data.length === 0) {
   console.error('[migration-files] RPC lieferte 0 Versionen — das kann nicht stimmen. Instrument pruefen.')
   process.exit(mode === 'ratchet' ? 1 : 0)
 }

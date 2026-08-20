@@ -24,7 +24,10 @@ const BASIC_AUTH = process.env.STAGING_BASIC
   ? { username: 'aaroncmdo', password: process.env.STAGING_BASIC_PASS ?? '' }
   : undefined
 
-const KUNDE = { email: process.env.KUNDE_EMAIL ?? 'test-kunde@claimondo.de', pass: process.env.KUNDE_PASS ?? '' }
+// `test-kunde@` gibt es seit dem Golive-Accounts-Cleanup nicht mehr — Konto s.
+// tests/e2e/flows/_golden-path-lib.ts (ROLES). Der leere Passwort-Default bleibt Absicht:
+// er haelt den Test opt-in (die Selektoren sind laut Header noch ungeprueft, s. o.).
+const KUNDE = { email: process.env.KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.KUNDE_PASS ?? '' }
 const FLOTTE = { email: process.env.FLOTTE_EMAIL ?? 'flotte.test@claimondo.de', pass: process.env.FLOTTE_PASS ?? '' }
 
 // Labels aus src/lib/termine/termin-typ.ts (i18n kunde.termine.typ.*) — de.

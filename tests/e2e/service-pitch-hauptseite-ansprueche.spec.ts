@@ -3,10 +3,13 @@ import { test, expect } from '@playwright/test'
 // Doc 45 Task 3: ANSPRUECHE-Section auf Cluster-1 reframed.
 // CardLink rendert <a> (kein <article>) — daher Text-basierte Assertions.
 
+// ⚠ „unsere Partnerkanzlei führt sie", nicht „wir führen sie" — wer mit der gegnerischen
+// Versicherung verhandelt, ist eine rechtliche Aussage (RDG). Die Seite trägt diese
+// Fassung seit der i18n-Umstellung; der Test hing auf der alten und war rot.
 test('Hauptseite ANSPRUECHE-Section heißt "Vier Gespräche"', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('#ansprueche-heading')).toContainText(
-    'Vier Gespräche — wir führen sie, nicht Sie.',
+    'Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie.',
   )
 })
 
