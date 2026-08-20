@@ -40,9 +40,19 @@ export const test = base.extend<{
   adminPage: Page
   svPage: Page
 }>({
+  // ⚠ Passwort-Default: `Claimondo2026!`, NICHT `Test1234!`.
+  // Konvention (memory/reference-internal-test-account-logins.md): test-*@ = Claimondo2026!,
+  // AUSNAHME test-dispatch = Test1234!. Genau diese Ausnahme stand hier als Default fuer
+  // ALLE Rollen — nachgemessen 20.08. per echtem Login gegen prod:
+  //   test-admin@ + Claimondo2026! -> /admin        test-sv@ + Claimondo2026! -> /gutachter/heute
+  // Wirkung des falschen Defaults: greift kein CI-Secret, scheitert der Login. Beim SV war
+  // genau das der Fall — ALLE 8 `Gutachter Routes`-Tests in routes.spec.ts liefen dadurch in
+  // den 15s-Timeout (Lauf 32362782482), waehrend die Admin-Routen gruen blieben, weil dort
+  // ein Secret greift. Der Default ist also kein Detail, sondern der Fallback, der traegt,
+  // wenn ein Secret fehlt oder leer ist.
   adminPage: async ({ browser }, use) => {
     const email = process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de'
-    const password = process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!'
+    const password = process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!'
     const ctx = await browser.newContext({ storageState: ADMIN_STORAGE }).catch(async () => {
       // First run — no stored state, login fresh
       const freshCtx = await browser.newContext()
@@ -59,7 +69,8 @@ export const test = base.extend<{
 
   svPage: async ({ browser }, use) => {
     const email = process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de'
-    const password = process.env.TEST_SV_PASSWORD ?? 'Test1234!'
+    // s. Kommentar bei adminPage — DIESER Default war der, der die 8 Gutachter-Routen kippte.
+    const password = process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!'
     const ctx = await browser.newContext({ storageState: SV_STORAGE }).catch(async () => {
       const freshCtx = await browser.newContext()
       const page = await freshCtx.newPage()
