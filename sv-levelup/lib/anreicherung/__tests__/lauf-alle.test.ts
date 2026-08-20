@@ -17,11 +17,14 @@ let updateRows = 1
 const hole = async (url: string): Promise<Antwort> => seiten[url] ?? { status: 404, text: '' }
 
 let sortierung: string[] = []
+/** Welche Spalten die Arbeitsmengen-Abfrage filtert — nicht nur, dass sie es tut. */
+let filter: string[] = []
 
 // Nachbildung der PostgREST-Kette, soweit laufeAn und schreibeFunde sie nutzen.
 const kette = () => {
   const k: Record<string, unknown> = {}
-  for (const m of ['eq', 'or', 'limit', 'in']) {
+  k.eq = (spalte: string) => { filter.push(spalte); return k }
+  for (const m of ['or', 'limit', 'in']) {
     k[m] = () => k
   }
   k.order = (spalte: string) => { sortierung.push(spalte); return k }
@@ -79,6 +82,7 @@ const TREFFER_HTML =
 beforeEach(() => {
   leads = []
   sortierung = []
+  filter = []
   leadFehler = null
   seiten = {}
   updates = []
@@ -86,6 +90,20 @@ beforeEach(() => {
 })
 
 describe('laufeAn', () => {
+  it('uebergeht INAKTIVE Leads NICHT', async () => {
+    // ⚠ Am 20.08. gefunden: die Abfrage filterte auf `ist_aktiv = true`.
+    // Die Lead-Discovery legt neue Bueros bewusst INAKTIV an, damit sie nicht
+    // ungefragt auf zwei oeffentlichen Karten erscheinen — eine davon im
+    // Embed auf FREMDEN Websites. Zusammen hiess das: entdeckte Leads werden
+    // nie angereichert und bleiben fuer immer ohne Kontaktdaten.
+    //
+    // `ist_aktiv` sagt „erscheint auf der Karte", nicht „ist zu bearbeiten".
+    // Wofuer ein Lead noch offen ist, sagt `claim_status`.
+    await laufeAn(db, { laufId: 'X', hole })
+    expect(filter).not.toContain('ist_aktiv')
+    expect(filter).toContain('claim_status')
+  })
+
   it('meldet einen leeren Bericht, wenn es nichts zu tun gibt', async () => {
     const r = await laufeAn(db, { laufId: 'X', hole })
     expect(r.ok).toBe(true)

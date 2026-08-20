@@ -104,3 +104,39 @@ describe('domainKandidaten', () => {
       .toBeLessThanOrEqual(5)
   })
 })
+
+describe('Ortsnamen als Domain', () => {
+  it('erzeugt KEINE blanke Ort-Domain', () => {
+    // ⚠ Am 20.08. im scharfen Blick auf die Werte gefunden: „Kfz Gutachter
+    // Herne" ergab den Kandidaten `herne.de` — die Website der STADT Herne.
+    // Der Lead haette E-Mail und Telefon der Stadtverwaltung bekommen, mit
+    // Zuordnungssicherheit 90: die Stadtseite nennt naturgemaess „Herne" und
+    // die PLZ 44623, genau wie der Lead. Dieselbe Falle bei „… Schmidt Werne"
+    // → `werne.de`.
+    const herne = domainKandidaten('Kfz Gutachter Herne / Ingenieurbüro für Fahrzeugtechnik', 'Herne')
+    expect(herne).not.toContain('herne.de')
+
+    const werne = domainKandidaten('KFZ-Sachverständigenbüro Jürgen Schmidt Werne', 'Werne')
+    expect(werne).not.toContain('werne.de')
+  })
+
+  it('behaelt Ort-Domains MIT Praefix', () => {
+    // `sv-herne.de` gehoert plausibel einem Buero in Herne — nur die blanke
+    // Form gehoert der Stadt.
+    const k = domainKandidaten('Kfz Gutachter Herne / Ingenieurbüro für Fahrzeugtechnik', 'Herne')
+    expect(k).toContain('sv-herne.de')
+  })
+
+  it('erzeugt keinen doppelten Ortsnamen', () => {
+    // `herne-herne.de` entstand, wenn der Kern selbst der Ort ist.
+    const k = domainKandidaten('Kfz Gutachter Herne', 'Herne')
+    expect(k).not.toContain('herne-herne.de')
+  })
+
+  it('laesst einen Firmennamen, der zufaellig wie ein Ort klingt, in Ruhe', () => {
+    // Nur der EIGENE Ort des Leads ist verdaechtig. „Stanoksei" in Münster
+    // bleibt unangetastet.
+    const k = domainKandidaten('Kfz-Sachverständigenbüro Stanoksei', 'Münster')
+    expect(k).toContain('stanoksei.de')
+  })
+})
