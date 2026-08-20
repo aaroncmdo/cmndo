@@ -16,8 +16,10 @@ export const metadata: Metadata = {
   // rund 60. "Fuhrpark" bleibt als Keyword drin, gekuerzt wird der Nachsatz.
   // openGraph.title unten behaelt die ausfuehrliche Fassung, dort ist mehr Platz.
   title: 'Flottenpartner werden — Fuhrpark-Schäden regeln',
+  // 204 Zeichen — Google zeigt rund 160. Gekuerzt wird der Nachsatz, die
+  // Leistungsaufzaehlung bleibt.
   description:
-    'Schadenmanagement für Firmen-Flotten: Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden lassen, unabhängige Gutachten und Regulierung über die gegnerische Haftpflicht. Kostenlos registrieren.',
+    'Schadenmanagement für Firmen-Flotten: Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden lassen, Gutachten und Regulierung über die Gegenseite.',
   keywords: [
     'Flottenpartner werden',
     'Fuhrpark Schadenmanagement',
