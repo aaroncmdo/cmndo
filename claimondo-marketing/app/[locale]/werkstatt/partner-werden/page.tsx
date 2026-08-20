@@ -12,7 +12,11 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, 
 const REGISTRIEREN_URL = 'https://app.claimondo.de/werkstatt/registrieren'
 
 export const metadata: Metadata = {
-  title: 'Werkstatt Partner werden — Reparaturaufträge über Claimondo',
+  // 71 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
+  // rund 60. Der Zusatz "über Claimondo" nannte die Marke ausserdem ein zweites
+  // Mal (dieselbe Doppelung wie in #5352). openGraph.title unten behaelt die
+  // ausfuehrliche Fassung, dort ist mehr Platz.
+  title: 'Werkstatt Partner werden — Reparaturaufträge',
   description:
     'Als Kfz-Werkstatt Reparaturaufträge aus dem Claimondo-Netzwerk erhalten. Kostenlos im Werkstatt-Finder gelistet, Provision nur auf tatsächlich vermittelte Aufträge, rechtssichere Haftpflicht-Abwicklung.',
   keywords: [
