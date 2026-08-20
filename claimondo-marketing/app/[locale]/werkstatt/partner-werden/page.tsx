@@ -17,8 +17,11 @@ export const metadata: Metadata = {
   // Mal (dieselbe Doppelung wie in #5352). openGraph.title unten behaelt die
   // ausfuehrliche Fassung, dort ist mehr Platz.
   title: 'Werkstatt Partner werden — Reparaturaufträge',
+  // 202 Zeichen — Google zeigt rund 160, der Rest wird abgeschnitten. Die
+  // Provisions-Aussage bleibt vollstaendig ("nur auf tatsaechlich vermittelte"),
+  // weil sie ohne ihre Einschraenkung eine andere Zusage waere.
   description:
-    'Als Kfz-Werkstatt Reparaturaufträge aus dem Claimondo-Netzwerk erhalten. Kostenlos im Werkstatt-Finder gelistet, Provision nur auf tatsächlich vermittelte Aufträge, rechtssichere Haftpflicht-Abwicklung.',
+    'Als Kfz-Werkstatt Reparaturaufträge aus dem Claimondo-Netzwerk erhalten. Kostenlos gelistet, Provision nur auf tatsächlich vermittelte Aufträge.',
   keywords: [
     'Werkstatt Partner werden',
     'Kfz-Werkstatt Aufträge',
