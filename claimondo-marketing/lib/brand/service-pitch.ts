@@ -160,7 +160,12 @@ export const ANSPRUECHE_REFRAMED = [
 // ─── Section-Headlines (Schärfungen) ───────────────────────────
 
 export const SECTION_HEADLINES = {
-  anspruecheReframed: 'Vier Gespräche — wir führen sie, nicht Sie.',
+  // ⚠ „unsere Partnerkanzlei führt sie" — NICHT „wir führen sie". Wer die Gespräche mit
+  // der gegnerischen Versicherung führt, ist eine rechtliche Aussage (RDG), keine
+  // Stilfrage. Die Seite trägt die Partnerkanzlei-Fassung seit der i18n-Umstellung
+  // (i18n/messages/de.json), diese Konstante speist die llms.txt-Feeds — sie hing
+  // zurück, sodass der KI-Feed etwas anderes sagte als die Seite.
+  anspruecheReframed: 'Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie.',
   misstrauenReframed:
     'Wenn die Versicherung schreibt „Wir kümmern uns". Was die Übersetzung ist.',
   schadensreportReframed:

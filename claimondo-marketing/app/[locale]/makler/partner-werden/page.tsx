@@ -12,7 +12,9 @@ import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUT
 const REGISTRIEREN_URL = `${process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'}/makler/registrieren`
 
 export const metadata: Metadata = {
-  title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln',
+  // 65 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
+  // rund 60. openGraph.title unten behaelt die ausfuehrliche Fassung.
+  title: 'Makler Partner werden — Kfz-Schäden vermitteln',
   description:
     'Als Versicherungsmakler Ihren Kunden bei Kfz-Unfallschäden helfen. Claimondo übernimmt Gutachter-Koordination und Regulierung. Kostenlose Kooperation.',
   keywords: [
