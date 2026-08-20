@@ -2733,7 +2733,8 @@
     "user_agent",
     "erstellt_am",
     "aktualisiert_am",
-    "gueltig_bis"
+    "gueltig_bis",
+    "firmenname"
    ]
   },
   "levelup_events": {
@@ -2780,7 +2781,10 @@
     "status",
     "betreuer_id",
     "notiz",
-    "erstellt_am"
+    "erstellt_am",
+    "einwilligung_am",
+    "einwilligung_ip_hash",
+    "einwilligung_text"
    ]
   },
   "linkedin_oauth_tokens": {
@@ -6603,7 +6607,8 @@
     "audience",
     "quelle",
     "tags",
-    "source_url"
+    "source_url",
+    "meta_title"
    ]
   },
   "wissen_themen": {
