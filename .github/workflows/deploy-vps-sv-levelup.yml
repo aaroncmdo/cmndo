@@ -1,0 +1,173 @@
+name: Deploy → VPS (sv-levelup.claimondo.de :3009)
+
+# Auto-Deploy des Sichtbarkeits-Checks (sv-levelup/). Spiegelt
+# deploy-vps-marketing.yml: Build in CI + ATOMARER Verzeichnis-Switch, damit es
+# kein 502-Fenster gibt, Runtime-Env frisch aus dem kanonischen
+# /etc/claimondo/.env.local, Auto-Rollback bei rotem Health-Check.
+#
+# ⚠ VORAUSSETZUNGEN, die NICHT dieser Workflow erfuellt (Stand 20.08.2026):
+#   1. `sv-levelup.claimondo.de` zeigt auf 217.160.0.101 — das ist NICHT der
+#      VPS (212.132.119.110). Solange der A-Record nicht umgestellt ist,
+#      erreicht niemand die Anwendung, auch wenn sie laeuft.
+#   2. Es gibt keine NGINX-Site und kein Zertifikat fuer die Subdomain.
+#      Muster: siehe die uebrigen Subdomains (Site-Datei + certbot).
+#   3. Der Branch muss nach `main` gemergt sein — der Workflow haengt an
+#      `push: branches: [main]`.
+# Erst danach ist ein Prod-Smoke nach Regel 4 ueberhaupt moeglich.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'sv-levelup/**'
+      - '.github/workflows/deploy-vps-sv-levelup.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install (sv-levelup)
+        working-directory: sv-levelup
+        # npm ci: das Lockfile ist frisch erzeugt und vollstaendig — anders als
+        # beim Marketing, wo eine @swc-Transitive den ci-Pfad brach.
+        run: npm ci --no-audit --no-fund
+
+      - name: Build (standalone)
+        working-directory: sv-levelup
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+
+      - name: Statische Dateien ins Standalone kopieren
+        working-directory: sv-levelup
+        # ⚠ sv-levelup hat KEIN postbuild-Skript (anders als das Marketing mit
+        # copy-standalone.mjs). Ohne diesen Schritt startet der Server, liefert
+        # aber jede Seite OHNE CSS und ohne Client-Bundle aus — er sieht dabei
+        # vollkommen gesund aus und der Health-Check waere gruen.
+        run: cp -r .next/static .next/standalone/.next/
+
+      - name: Artefakt packen
+        working-directory: sv-levelup
+        run: tar -czf ../deploy-sv-levelup.tar.gz -C .next/standalone .
+
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-sv-levelup.tar.gz
+          target: /tmp/
+
+      - name: Atomic switch + restart :3009 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+
+            # 1. Runtime-Env aus dem kanonischen /etc/claimondo/.env.local.
+            #
+            # ⚠ Dieser Block schreibt die Datei mit ">" NEU — was dort von Hand
+            # eingetragen wurde, ist nach dem naechsten Deploy weg. Ein neuer
+            # server-only Key muss BEIDES: in /etc/claimondo/.env.local stehen
+            # UND hier gelistet sein. Sonst fehlt er zur Laufzeit, meist ohne
+            # Fehler und mit stiller Funktionslosigkeit.
+            if [ ! -f /etc/claimondo/.env.local ]; then
+              echo "FATAL: /etc/claimondo/.env.local fehlt — Deploy abgebrochen."
+              exit 1
+            fi
+            mkdir -p /etc/sv-levelup
+            {
+              for k in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
+                       SUPABASE_SERVICE_ROLE_KEY GOOGLE_PLACES_API_KEY; do
+                grep "^${k}=" /etc/claimondo/.env.local || true
+              done
+              # Discovery und Messung teilen sich heute EINEN Schluessel. Der
+              # eigene Discovery-Key aus der Design-Spec faellt hier zurueck,
+              # solange keiner hinterlegt ist.
+              grep "^GOOGLE_PLACES_DISCOVERY_KEY=" /etc/claimondo/.env.local \
+                || grep "^GOOGLE_PLACES_API_KEY=" /etc/claimondo/.env.local \
+                | sed 's/^GOOGLE_PLACES_API_KEY=/GOOGLE_PLACES_DISCOVERY_KEY=/' || true
+            } > /etc/sv-levelup/.env.local
+            chmod 600 /etc/sv-levelup/.env.local
+
+            # 2. Neues Standalone daneben entpacken — live bleibt unberuehrt.
+            rm -rf /var/www/sv-levelup-new
+            mkdir -p /var/www/sv-levelup-new
+            tar -xzf /tmp/deploy-sv-levelup.tar.gz -C /var/www/sv-levelup-new
+            ln -sf /etc/sv-levelup/.env.local /var/www/sv-levelup-new/.env.local
+
+            # 3. Atomarer Switch.
+            rm -rf /var/www/sv-levelup-old 2>/dev/null || true
+            mv /var/www/sv-levelup /var/www/sv-levelup-old 2>/dev/null || true
+            mv /var/www/sv-levelup-new /var/www/sv-levelup
+
+            # 4. Restart auf :3009 (3001–3008 sind belegt).
+            pm2 delete sv-levelup 2>/dev/null || true
+            PORT=3009 pm2 start /var/www/sv-levelup/server.js \
+              --name sv-levelup \
+              --max-memory-restart 1000M \
+              --cwd /var/www/sv-levelup
+            pm2 save
+            sleep 5
+
+            # 5. Health-Check + Auto-Rollback.
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3009/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH-CHECK FAILED ($code) — ROLLBACK auf das vorige Verzeichnis."
+              pm2 delete sv-levelup 2>/dev/null || true
+              rm -rf /var/www/sv-levelup
+              mv /var/www/sv-levelup-old /var/www/sv-levelup
+              PORT=3009 pm2 start /var/www/sv-levelup/server.js \
+                --name sv-levelup \
+                --max-memory-restart 1000M \
+                --cwd /var/www/sv-levelup
+              pm2 save
+              echo "Rollback abgeschlossen — Deploy fehlgeschlagen."
+              exit 1
+            fi
+
+            # 6. Die zwei Schranken pruefen, nicht nur die Startseite.
+            #
+            # ⚠ /auswertung MUSS 307 auf /anmelden liefern. Eine 200 dort hiesse,
+            # dass der Gespraechsleitfaden samt Einwandbehandlung ohne Anmeldung
+            # abrufbar ist — der Deploy waere dann schlimmer als kein Deploy.
+            ausw=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3009/auswertung")
+            echo "  /auswertung ohne Sitzung -> HTTP $ausw (erwartet 307)"
+            if [ "$ausw" = "200" ]; then
+              echo "FATAL: /auswertung ist ohne Anmeldung erreichbar — ROLLBACK."
+              pm2 delete sv-levelup 2>/dev/null || true
+              rm -rf /var/www/sv-levelup
+              mv /var/www/sv-levelup-old /var/www/sv-levelup
+              PORT=3009 pm2 start /var/www/sv-levelup/server.js \
+                --name sv-levelup --max-memory-restart 1000M --cwd /var/www/sv-levelup
+              pm2 save
+              exit 1
+            fi
+
+            for p in /anmelden "/plan/unbekannt" "/check/unbekannt"; do
+              c=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3009$p")
+              echo "  $p -> HTTP $c"
+            done
+
+            rm -f /tmp/deploy-sv-levelup.tar.gz
+            echo "SV-LevelUp-Deploy $(date) OK (HTTP $code)"
