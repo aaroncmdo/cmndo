@@ -527,7 +527,22 @@ jobs:
     # Der urspruengliche Grund fuer das enge Cap ist mit #5165 entfallen: der Job haengt nicht
     # mehr an jedem push, sondern laeuft nightly 03:30 + on-demand -> er blockiert keinen
     # PR-Build mehr. Runaway-Schutz bleibt (45 min statt GH-6h).
-    timeout-minutes: 45
+    #
+    # 45 -> 90 (20.08.): Das 45er-Cap hat den Sammel-Step WEITER systematisch abgeschnitten —
+    # dieselbe Diagnose wie beim 20er, nur eine Stufe spaeter. Belegt an BEIDEN bisherigen
+    # nightly-Laeufen (19.08. Run 32271... / 20.08. Run 32330526194), in beiden identisch:
+    #   Setup+Journeys ~6:00 (alle 10 Journeys GRUEN) | "Run E2E Tests" 39:30 -> Kill bei 45.
+    # Der Grund ist Wachstum, nicht Haengen: die Kalibrierung oben rechnet mit **110 Tests**,
+    # das Log vom 20.08. meldet "Running 199 tests using 1 worker" (+81 %). Bei workers:1
+    # skaliert die Laufzeit linear -> 40 min * 199/110 = ~72 min. 90 = 72 + Puffer fuer
+    # retries:1 und Wachstum bis zur naechsten Nachfuehrung.
+    # ⚠ Diese Zahl ist eine HOCHRECHNUNG, keine Messung — die Suite ist nie fertig geworden,
+    # also ist ihre echte Dauer unbekannt. Sie wird jetzt erstmals messbar (list-Reporter +
+    # Artefakt-Upload auch bei `cancelled`). Nach dem ersten durchgelaufenen Nightly hier
+    # die ECHTE Dauer eintragen und das Cap darauf nachziehen.
+    # ⚠ Und die eigentliche Lehre: ein Cap, das an einer Testzahl kalibriert wurde, veraltet
+    # mit jedem neuen Spec. Wer Tests ergaenzt, prueft diese Rechnung mit.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 
@@ -806,9 +821,14 @@ jobs:
           SV_EMAIL: ${{ secrets.SV_EMAIL }}
           SV_PASS: ${{ secrets.SV_PASS }}
 
+      # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
+      # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
+      # am dringendsten braucht. Belegt am 19. + 20.08.: beide nightly-Laeufe liefen in das
+      # 45-min-Cap, beide Uploads standen auf `skipped`, es gab keinerlei Diagnose darueber,
+      # wie weit die Suite gekommen war. `cancelled()` deckt genau diesen Fall mit ab.
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() || cancelled()
         with:
           name: playwright-report
           path: playwright-report/
@@ -816,7 +836,7 @@ jobs:
 
       - name: Upload Traces
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() || cancelled()
         with:
           name: playwright-traces
           path: test-results/
