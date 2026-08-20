@@ -105,15 +105,23 @@ const KAPUTT = {
   hero_anker: 'Ein Text ohne jeden Ortsbezug, der buendelt und koennen schreibt.',
   topografie_anker: null,
 }
-if (selbsttest) {
-  zeilen.push(KAPUTT as Record<string, any>, { ...KAPUTT, stadt_slug: '__selbsttest_b' } as Record<string, any>)
-}
+// Getrennt halten, NICHT in `zeilen` mischen: die Proben sind absichtlich
+// duenn und identisch. Untergemischt verfaelschen sie genau die Kennzahlen,
+// wegen derer man das Skript aufruft — beim ersten scharfen Lauf meldete es
+// mit --selbsttest `min 39 Woerter` statt 1282 und 2,90 % statt 0,20 %
+// Ueberlappung. Ein Selbsttest, der den Messwert verschiebt, den er absichern
+// soll, ist schlimmer als keiner.
+const proben: Array<Record<string, any>> = selbsttest
+  ? [KAPUTT as Record<string, any>, { ...KAPUTT, stadt_slug: '__selbsttest_b' } as Record<string, any>]
+  : []
+/** Echte Zeilen + Proben — nur fuer die BEFUNDE, nie fuer die Statistik. */
+const zeilenMitProben = [...zeilen, ...proben]
 
 console.log(`\nLOKALINHALT-QUALITAET   (env: ${envPfad})${selbsttest ? '   [SELBSTTEST aktiv]' : ''}\n`)
 
 // --- 1) Wuerde jede Zeile heute noch durchs Gate gehen? ---------------------
 const durchgefallen: { slug: string; status: string; gruende: string[] }[] = []
-for (const z of zeilen) {
+for (const z of zeilenMitProben) {
   const befund = pruefeLokalinhalt(
     {
       stadtbezirke: z.stadtbezirke ?? [],
@@ -138,14 +146,16 @@ console.log(`  ohne FAQs                ${v.ohne.faqs}`)
 console.log(`  ohne Unfallschwerpunkte  ${v.ohne.hotspots}${v.ohne.hotspots === v.staedte ? '   (alle — der Quellenzwang laesst praktisch keine durch)' : ''}`)
 
 // --- 3) Near-Duplicate ------------------------------------------------------
-const mitGrammen = zeilen.map((z) => ({
-  slug: z.stadt_slug,
-  gramme: viergramme(textAusZeile(z), z.stadt_slug),
-}))
-const p = paarBefunde(mitGrammen, GRENZE)
-console.log(`\n  Textueberlappung (${p.paare} Paare, Grenze ${GRENZE} %)`)
-console.log(`    Durchschnitt           ${p.schnitt.toFixed(2)} %`)
-console.log(`    Maximum                ${p.max.toFixed(1)} %${p.schlimmstes ? `  (${p.schlimmstes})` : ''}`)
+const grammeVon = (liste: Array<Record<string, any>>) =>
+  liste.map((z) => ({ slug: z.stadt_slug, gramme: viergramme(textAusZeile(z), z.stadt_slug) }))
+// Zwei Laeufe, bewusst: `p` findet die BEFUNDE (inkl. Proben), `pEcht` liefert
+// die ZAHLEN, die im Bericht stehen. Bei 173 Staedten sind das 2x ~15.000
+// Mengenvergleiche — Millisekunden, und dafuer stimmen beide Aussagen.
+const p = paarBefunde(grammeVon(zeilenMitProben), GRENZE)
+const pEcht = selbsttest ? paarBefunde(grammeVon(zeilen), GRENZE) : p
+console.log(`\n  Textueberlappung (${pEcht.paare} Paare, Grenze ${GRENZE} %)`)
+console.log(`    Durchschnitt           ${pEcht.schnitt.toFixed(2)} %`)
+console.log(`    Maximum                ${pEcht.max.toFixed(1)} %${pEcht.schlimmstes ? `  (${pEcht.schlimmstes})` : ''}`)
 
 console.log('\nBEFUNDE\n')
 console.log(`  ueber der Grenze         ${p.ueberGrenze.length}`)
