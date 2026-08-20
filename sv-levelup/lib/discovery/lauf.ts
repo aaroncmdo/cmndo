@@ -12,6 +12,17 @@ import { beurteile, schreibeFund, type BestandsZeile, type Entscheidung, type Fu
  * genauso viel wie ein scharfer.
  */
 
+/**
+ * Pause zwischen zwei Kachel-Abrufen.
+ *
+ * ⚠ Am Deutschland-Lauf gemessen: ohne Pause fielen 1.119 von 1.392
+ * Abrufen mit „fetch failed" aus — 80 %. Der Lauf meldete die Fehler zwar,
+ * lieferte aber trotzdem 2.864 Betriebe und sah damit erfolgreich aus.
+ * Eine Viertelsekunde je Kachel kostet bei 700 Kacheln knapp drei Minuten
+ * und rettet den Rest des Landes.
+ */
+export const PAUSE_MS = 250
+
 /** Ab so vielen Treffern gilt die Kartensuche als gedeckelt (Legacy: 3 Seiten à 20). */
 export const DECKEL = 60
 
@@ -63,11 +74,14 @@ export type LaufOpts = {
    */
   maxNeu?: number
   jetzt?: () => number
+  /** Injizierbar, damit Tests nicht warten. */
+  warte?: (ms: number) => Promise<void>
   fortschritt?: (s: Stand) => void
 }
 
 export async function entdecke(o: LaufOpts): Promise<Bericht> {
   const uhr = o.jetzt ?? (() => Date.now())
+  const warte = o.warte ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
   const start = uhr()
 
   const bericht: Bericht = {
@@ -105,6 +119,7 @@ export async function entdecke(o: LaufOpts): Promise<Bericht> {
     let gedeckelt = false
 
     for (const begriff of o.begriffe) {
+      if (bericht.abrufe > 0) await warte(PAUSE_MS)
       let treffer: Betrieb[]
       try {
         treffer = await o.places.suchText(begriff, umkreis)

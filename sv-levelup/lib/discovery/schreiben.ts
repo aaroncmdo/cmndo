@@ -57,10 +57,33 @@ const MIN_NAME = 4
  */
 export function plzUndOrt(adresse: string | null): { plz: string | null; ort: string | null } {
   if (!adresse) return { plz: null, ort: null }
-  const m = adresse.match(/\b(\d{5})\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\- ]{1,40}?)(?:,|$)/)
+  // ⚠ Schraegstrich und Klammern gehoeren dazu. Am echten Scrape gefunden
+  // (20.08.): 46 deutsche Betriebe blieben ohne Ort, weil das Muster sie nicht
+  // zuliess — „Fürstenwalde/Spree", „Kempten (Allgäu)", „Krumbach (Schwaben)"
+  // sind voellig gewoehnliche amtliche Ortsnamen.
+  const m = adresse.match(/\b(\d{5})\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\-/() ]{1,44}?)(?:,|$)/)
   if (!m) return { plz: null, ort: null }
   return { plz: m[1], ort: m[2].trim() }
 }
+
+/**
+ * Nachbarlaender, die im Deutschland-Rechteck liegen.
+ *
+ * ⚠ Der Suchrahmen ist ein RECHTECK von 47,27° bis 55,06° Nord und 5,87° bis
+ * 15,04° Ost — darin liegen grosse Teile Oesterreichs, der Schweiz, Tschechiens
+ * und der Beneluxlaender. Der erste Deutschland-Lauf holte 92 oesterreichische,
+ * 3 Schweizer und einen tschechischen Betrieb. Sie gehoeren nicht in einen
+ * deutschen Gutachter-Bestand und erst recht nicht auf eine deutsche Karte.
+ *
+ * ⚠ Umgekehrt NICHT auf „Deutschland" bestehen: Google haengt das Land bei
+ * einer Anfrage aus Deutschland meist gar nicht an. Wer es verlangt, verwirft
+ * fast alles — von 1.252 Funden trugen es nur 4.
+ */
+// ⚠ KEIN `\b` vor dem Laendernamen. `Ö` ist in JavaScript-Regex ohne `u`-Flag
+// kein Wortzeichen — zwischen Leerzeichen und „Ö" gibt es also gar keine
+// Wortgrenze, und das Muster traf NIE. Dieselbe Umlaut-Falle, die im Projekt
+// schon einmal zugeschlagen hat.
+const AUSLAND = /(?:^|[\s,])(Österreich|Austria|Schweiz|Switzerland|Suisse|Tschechien|Czech|Polen|Poland|Niederlande|Netherlands|Nederland|Belgien|Belgium|België|Luxemburg|Luxembourg|Frankreich|France|Dänemark|Denmark|Danmark)\s*$/i
 
 /**
  * Gehoert dieser Fund schon zum Bestand?
@@ -75,6 +98,7 @@ export function beurteile(f: Fund, bestand: BestandsZeile[]): Entscheidung {
   if (f.lat === 0 && f.lng === 0) return 'unbrauchbar'
   if (!Number.isFinite(f.lat) || !Number.isFinite(f.lng)) return 'unbrauchbar'
   if (f.name.trim().length < MIN_NAME) return 'unbrauchbar'
+  if (f.adresse && AUSLAND.test(f.adresse.trim())) return 'unbrauchbar'
 
   if (bestand.some((b) => b.googlePlaceId === f.placeId)) return 'dublette_place_id'
 

@@ -28,7 +28,7 @@ export function EinstiegClient() {
   )
 
   return (
-    <form action={absenden} className="mt-12">
+    <form action={absenden} className="auf-dunkel mt-12">
       <fieldset className="grid gap-4 md:grid-cols-2">
         <legend className="sr-only">Welcher Weg trifft auf Sie zu?</legend>
 
@@ -38,9 +38,9 @@ export function EinstiegClient() {
             <label
               key={w.id}
               className={[
-                'group cursor-pointer rounded-[20px] border p-6 transition',
+                'group cursor-pointer rounded-[var(--r-gross)] border-2 p-6 transition',
                 gewaehlt
-                  ? 'border-signal bg-white/[0.07]'
+                  ? 'border-signal bg-white/[0.08]'
                   : 'border-white/15 bg-white/[0.03] hover:border-white/35',
               ].join(' ')}
             >
@@ -83,13 +83,13 @@ export function EinstiegClient() {
                 inputMode="numeric"
                 autoComplete="postal-code"
                 placeholder="48143"
-                className="mt-2 w-full rounded-[12px] border border-white/20 bg-nacht px-4 py-3 text-white placeholder:text-white/30 focus:border-signal focus:outline-none"
+                className="feld-dunkel mt-2"
               />
               <input
                 name="ort"
                 placeholder="oder: Münster"
                 autoComplete="address-level2"
-                className="mt-2 w-full rounded-[12px] border border-white/20 bg-nacht px-4 py-3 text-white placeholder:text-white/30 focus:border-signal focus:outline-none"
+                className="feld-dunkel mt-2"
               />
               <p className="mt-2 text-xs text-white/45">
                 Bestimmt den Umkreis, in dem gemessen wird.
@@ -105,7 +105,7 @@ export function EinstiegClient() {
                 name="firmenname"
                 autoComplete="organization"
                 placeholder="Sachverständigenbüro Meyer"
-                className="mt-2 w-full rounded-[12px] border border-white/20 bg-nacht px-4 py-3 text-white placeholder:text-white/30 focus:border-signal focus:outline-none"
+                className="feld-dunkel mt-2"
               />
               <p className="mt-2 text-xs text-white/45">
                 Damit finden wir Ihren Eintrag in der Kartensuche — ohne ihn bleibt Ihre
@@ -125,7 +125,7 @@ export function EinstiegClient() {
                 name="website"
                 inputMode="url"
                 placeholder="meine-kanzlei.de"
-                className="mt-2 w-full rounded-[12px] border border-white/20 bg-nacht px-4 py-3 text-white placeholder:text-white/30 focus:border-signal focus:outline-none"
+                className="feld-dunkel mt-2"
               />
               <p className="mt-2 text-xs text-white/45">
                 Ohne Website entfallen die Module, die eine Seite prüfen — sie erscheinen
@@ -143,7 +143,7 @@ export function EinstiegClient() {
           <button
             type="submit"
             disabled={laeuft}
-            className="display mt-6 w-full rounded-[12px] bg-signal px-6 py-4 text-[1.05rem] text-white transition hover:bg-signal-tief disabled:opacity-60 md:w-auto"
+            className="btn-haupt display mt-7 w-full rounded-[12px] px-8 py-4 text-[1.05rem] uppercase tracking-[0.01em] disabled:opacity-60 md:w-auto"
           >
             {laeuft ? 'Einen Moment …' : 'Prüfumfang wählen'}
           </button>

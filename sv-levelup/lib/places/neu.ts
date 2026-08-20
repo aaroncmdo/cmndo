@@ -36,5 +36,6 @@ export function erzeugeNeu(_apiKey: string, _opts: AdapterOpts = {}): PlacesAdap
     // `photos` ist Pro, die Oeffnungszeiten Enterprise. Eine FieldMask, die
     // alles auf einmal holt, kostet fuer JEDEN Abruf den Enterprise-Satz.
     async profil(_placeId: string): Promise<Profil | null> { return nichtBereit() },
+    async websiteVon(_placeId: string): Promise<string | null> { return nichtBereit() },
   }
 }

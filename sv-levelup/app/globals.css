@@ -127,3 +127,117 @@ body {
     color: #555;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+ * Bausteine aus `mockup-levelup_3` — woertlich uebernommen.
+ *
+ * ⚠ Die TOKENS stimmten von Anfang an, die BAUSTEINE fehlten. Die Seite war
+ * durchgehend dunkel; im Mockup ist nur der Hero dunkel und liegt als Block
+ * auf heller Flaeche, zwischen einem dunklen Kopf und hellen Abschnitten. Der
+ * Kontrast IST die Gestaltung — ohne ihn wirkt dieselbe Palette voellig anders.
+ * ═══════════════════════════════════════════════════════════════════════ */
+
+.huelle { max-width: 1140px; margin: 0 auto; padding: 0 26px; }
+
+/* Der Kopf bleibt stehen — dunkel, damit er gegen den hellen Inhalt steht. */
+.kopf { background: var(--nacht); position: sticky; top: 0; z-index: 400; }
+.kopf .huelle { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+
+.logo {
+  display: flex; align-items: center; gap: 11px;
+  font-family: var(--display, "Archivo"), sans-serif; font-style: italic; font-weight: 800;
+  color: #fff; font-size: 1.35rem; letter-spacing: -0.035em; text-transform: uppercase;
+}
+.plakette {
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px;
+  background: var(--signal); color: #fff; font-size: 0.86rem; letter-spacing: 0;
+  box-shadow: 0 2px 0 var(--signal-tief);
+}
+
+/*
+ * Der Signalstreifen — Lack und Warnleuchte, sieben Pixel hoch.
+ * Das einzige rein dekorative Element der Seite und ihr Wiedererkennungsmerkmal.
+ */
+.streifen {
+  height: 7px;
+  background: repeating-linear-gradient(
+    115deg,
+    var(--signal) 0 22px, var(--signal-tief) 22px 44px,
+    var(--nacht) 44px 62px, var(--asphalt) 62px 84px
+  );
+}
+
+.hero { background: var(--nacht); color: #fff; padding: 80px 0 92px; position: relative; overflow: hidden; }
+/*
+ * Zwei angeschnittene Lichtbahnen, wie Leuchtstoffroehren ueber einer
+ * Hebebuehne. Sie tragen keine Aussage — sie geben dem dunklen Block Tiefe,
+ * damit er nicht als flaeche wirkt.
+ */
+.hero::before {
+  /* ⚠ Weiter nach rechts und schmaler als im Mockup: dort ist der Hero-Text
+     schmal, hier laufen die Wegwahl-Karten ueber die volle Breite. Mit den
+     Mockup-Werten lag die rechte Karte mitten in der blauen Bahn. */
+  content: ""; position: absolute; top: -30%; right: -20%; width: 46%; height: 170%;
+  background: linear-gradient(120deg,
+    transparent 0 42%,
+    color-mix(in srgb, var(--blau) 22%, transparent) 42% 56%,
+    transparent 56% 68%,
+    color-mix(in srgb, var(--signal) 18%, transparent) 68% 82%,
+    transparent 82%);
+  transform: skewX(-16deg);
+  pointer-events: none;
+}
+.hero > * { position: relative; }
+
+.augbraue {
+  font-family: var(--display, "Archivo"), sans-serif; font-style: italic; font-weight: 700;
+  font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--signal);
+}
+
+.abschnitt { padding: 80px 0; }
+.abschnitt-hell { background: var(--flaeche-2); border-block: 1px solid var(--linie); }
+
+/*
+ * Der Hauptknopf traegt eine Kante statt eines Verlaufs: 3px in Signal-tief
+ * darunter, wie ein gefraester Schalter. Kein Farbverlauf im Text, kein Glas.
+ */
+.btn-haupt {
+  background: var(--signal); color: #fff;
+  box-shadow: 0 3px 0 var(--signal-tief), 0 14px 28px -14px color-mix(in srgb, var(--signal) 85%, transparent);
+  transition: transform 0.16s var(--takt), box-shadow 0.16s var(--takt);
+}
+.btn-haupt:hover { transform: translateY(-1px); }
+.btn-haupt:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--signal-tief); }
+
+/* Felder im dunklen Hero: heller Rand statt weisser Kasten. */
+.feld-dunkel {
+  width: 100%; font: inherit; font-size: 1.02rem; padding: 17px 19px; border-radius: var(--r);
+  border: 2px solid color-mix(in srgb, #fff 16%, transparent);
+  background: color-mix(in srgb, #fff 6%, transparent);
+  color: #fff; transition: border-color 0.16s var(--takt);
+}
+.feld-dunkel::placeholder { color: color-mix(in srgb, #fff 38%, transparent); }
+.feld-dunkel:focus { outline: none; border-color: var(--signal); }
+
+/*
+ * ⚠ Der Hero faerbt seine Schrift SELBST.
+ *
+ * `.display` setzt `color: var(--ink)` — fast schwarz. Auf dem dunklen Hero
+ * war davon nichts zu sehen: Im ersten Deploy stand dort sichtbar nur das
+ * orange „LEVEL", weil `<em>` eine eigene Farbe trug. „Auf welchem" und
+ * „steht Ihr Büro?" waren vorhanden, ausgeliefert und unlesbar — schwarz auf
+ * schwarz. Kein Test faengt das, kein Statuscode; nur der Blick auf das Bild.
+ *
+ * Woertlich aus dem Mockup (Zeilen 145-149).
+ */
+.hero .huelle { position: relative; z-index: 1; }
+.hero h1 { color: #fff; }
+.hero h1 em { font-style: italic; color: var(--signal); white-space: nowrap; }
+.hero .augbraue { margin-bottom: 20px; }
+
+/* Überschriften auf dunklem Grund — dieselbe Falle, andere Stelle. */
+.hero .display,
+.kopf .display,
+.auf-dunkel .display,
+.auf-dunkel h2,
+.auf-dunkel h3 { color: #fff; }

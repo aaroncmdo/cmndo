@@ -13,6 +13,7 @@ function adapter(treffer: Betrieb[]): PlacesAdapter {
     suchUmkreis: async () => treffer,
     details: async () => null,
     profil: async () => null,
+    websiteVon: async () => null,
   }
 }
 
@@ -71,6 +72,7 @@ describe('messeZuweiser', () => {
       suchUmkreis: async () => { throw new PlacesFehler('REQUEST_DENIED') },
       details: async () => null,
       profil: async () => null,
+    websiteVon: async () => null,
     }
     const e = await messeZuweiser(kontext(GUT, kaputt))
     // Das Marktbild fehlt — die drei Wertungen brauchen nur die Website.

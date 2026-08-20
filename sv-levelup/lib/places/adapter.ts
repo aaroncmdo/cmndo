@@ -58,6 +58,20 @@ export type PlacesAdapter = {
   details(placeId: string): Promise<Betrieb | null>
   /** Profilmerkmale des geprueften Betriebs — fuer `gbp`. */
   profil(placeId: string): Promise<Profil | null>
+  /**
+   * NUR die Website eines Betriebs.
+   *
+   * ⚠ Bewusst ein eigener Aufruf mit `fields=website` statt `details()`: die
+   * Preisstufe richtet sich nach den angefragten Feldern. Wer Grunddaten
+   * mitbestellt, die er wegwirft, zahlt dafuer.
+   *
+   * Der Grund fuer diesen Weg: Die Textsuche liefert bei Legacy KEINE Website,
+   * und das Raten aus dem Firmennamen scheitert bei den entdeckten Betrieben
+   * fast vollstaendig — Google fuehrt sie unter Beschreibungen statt
+   * Firmennamen („Kfz Gutachter Herne / Ingenieurbüro für Fahrzeugtechnik").
+   * Gemessen am 20.08.: 0 von 10 belastbare Websites aus dem Raten.
+   */
+  websiteVon(placeId: string): Promise<string | null>
 }
 
 export type AdapterOpts = {
