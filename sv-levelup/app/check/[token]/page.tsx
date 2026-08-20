@@ -9,6 +9,20 @@ import type { Db } from '@/lib/anreicherung/schreiben'
 import { CheckClient } from './CheckClient'
 
 /** Der Check-Zustand haengt an der Datenbank, nicht am Cache. */
+import type { Metadata } from 'next'
+
+/**
+ * ⚠ NICHT INDEXIEREN. Diese Seite traegt den Befund eines namentlich genannten
+ * Betriebs und ist nur durch einen Token geschuetzt. Ein geteilter Link genuegt
+ * sonst, damit ein fremder Befund in der Suche auftaucht.
+ *
+ * Zweite Ebene neben `app/robots.ts`: eine robots.txt ist eine Bitte, dieser
+ * Kopf ist eine Anweisung. Beide zusammen, weil die eine ausfallen kann.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
+
 export const dynamic = 'force-dynamic'
 
 export default async function CheckSeite(props: { params: Promise<{ token: string }> }) {

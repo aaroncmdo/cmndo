@@ -14,10 +14,17 @@ export default function Startseite() {
           Sichtbarkeits-Check für Kfz-Sachverständige
         </p>
 
+        {/*
+          ⚠ Die Ueberschrift traegt das Suchwort, nicht nur die Frage.
+          „Wo stehen Sie gerade?" war gestalterisch stark und fuer die Suche
+          wertlos — kein einziges Wort, nach dem jemand sucht. Die H1 ist das
+          staerkste Signal einer Seite; sie darf die Frage stellen, muss aber
+          sagen, worum es geht.
+        */}
         <h1 className="display mt-3 text-white" style={{ fontSize: 'clamp(2.3rem, 5.6vw, 4.2rem)' }}>
-          Wo stehen Sie
+          Wo steht Ihr
           <br />
-          gerade?
+          Sachverständigenbüro?
         </h1>
 
         <p className="mt-4 max-w-[62ch] text-[1.14rem] leading-relaxed text-white/80">

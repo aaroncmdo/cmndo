@@ -12,6 +12,20 @@ import type { Fehlstelle } from '@/lib/levelup/modul-vertrag'
 import type { Db } from '@/lib/anreicherung/schreiben'
 import { AuswertungClient } from './AuswertungClient'
 
+import type { Metadata } from 'next'
+
+/**
+ * ⚠ NICHT INDEXIEREN. Diese Seite traegt Befund, Massnahmenplan UND Gespraechsleitfaden eines namentlich genannten
+ * Betriebs und ist nur durch einen Token geschuetzt. Ein geteilter Link genuegt
+ * sonst, damit ein fremder Befund in der Suche auftaucht.
+ *
+ * Zweite Ebene neben `app/robots.ts`: eine robots.txt ist eine Bitte, dieser
+ * Kopf ist eine Anweisung. Beide zusammen, weil die eine ausfallen kann.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
+
 export const dynamic = 'force-dynamic'
 
 type LeadZeile = {
