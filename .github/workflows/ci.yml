@@ -536,10 +536,19 @@ jobs:
     # das Log vom 20.08. meldet "Running 199 tests using 1 worker" (+81 %). Bei workers:1
     # skaliert die Laufzeit linear -> 40 min * 199/110 = ~72 min. 90 = 72 + Puffer fuer
     # retries:1 und Wachstum bis zur naechsten Nachfuehrung.
-    # ⚠ Diese Zahl ist eine HOCHRECHNUNG, keine Messung — die Suite ist nie fertig geworden,
-    # also ist ihre echte Dauer unbekannt. Sie wird jetzt erstmals messbar (list-Reporter +
-    # Artefakt-Upload auch bei `cancelled`). Nach dem ersten durchgelaufenen Nightly hier
-    # die ECHTE Dauer eintragen und das Cap darauf nachziehen.
+    # ✅ NACHGEMESSEN (20.08., dispatch-Lauf 32362782482 mit genau diesen Aenderungen) —
+    # die Hochrechnung oben (~72 min) ist damit erledigt:
+    #   Sammel-Step "Run E2E Tests"  11:28:01 → 12:14:14  =  46:13
+    #   e2e-Job gesamt               11:22:58 → 12:14:26  =  51:28
+    # Die Suite lief ERSTMALS vollstaendig durch. Das alte 45er-Cap war um gut EINE Minute
+    # zu knapp — deshalb sah es wie „haengt" aus, obwohl sie fast fertig war.
+    # 90 bleibt: 51:28 + Puffer fuer Retry-Durchlaeufe (die Suite ist aktuell rot, retries:1
+    # kostet zusaetzliche Zeit) und fuer weiteres Testwachstum.
+    # ⚠ Bilanz desselben Laufs: 55 passed / 45 failed / 95 skipped. Die 45 sind NEU SICHTBAR,
+    # nicht neu entstanden — sie lagen hinter dem Timeout. Grobe Einordnung: ~14 sind
+    # Marketing-Specs, die gegen PLAYWRIGHT_BASE_URL=app.claimondo.de laufen, obwohl sie
+    # claimondo.de pruefen (llms.txt liefert dort 404 -> HTML); ~13 sind App-Specs mit
+    # bisher UNUNTERSUCHTER Ursache.
     # ⚠ Und die eigentliche Lehre: ein Cap, das an einer Testzahl kalibriert wurde, veraltet
     # mit jedem neuen Spec. Wer Tests ergaenzt, prueft diese Rechnung mit.
     timeout-minutes: 90
