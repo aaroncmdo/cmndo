@@ -540,5 +540,60 @@ verbessert die Zitierfähigkeit einer Antwort, die keinen Termin anbieten kann.
 
 ---
 
+## 12 · Der Weg für ChatGPT **ohne** installierte App — Deep-Link statt Sackgasse
+
+§4b hat gezeigt: Die Buchung aus dem Chat existiert vollständig — **für Clients mit
+Tool-Zugriff** (MCP-Connector oder importierte ChatGPT-Action). Das ist die Minderheit.
+Der normale ChatGPT-Nutzer ohne App liest die öffentliche API bestenfalls indirekt und
+bekommt am Ende einen Link. Genau dort war die Kette gebrochen.
+
+**Gemessen am 20.08. auf prod, vor der Änderung:**
+
+```
+GET /api/v1/gutachter-termine?plz=50670
+  anzahl_gutachter:      2
+  Felder je Gutachter:   id, vorname, profilbild, bewertung_*, entfernung,
+                         ist_top_partner, wunschtermin_frei, termine
+  interaktive_karte_url: https://claimondo.de/gutachter-finden?plz=50670
+```
+
+Die Antwort nennt einen konkreten Gutachter mit konkreten Slots — und verlinkt dann auf die
+**allgemeine Karte ohne jede Auswahl**. Wer im Chat „Gutachter X hat Donnerstag frei" liest
+und klickt, steht wieder am Anfang der Suche. Die Empfehlung, die die KI gerade gegeben hat,
+geht im Klick verloren.
+
+**Gebaut (PR `kitta/geo-deeplink-sv-vorauswahl`)** — fünf Schichten, eine davon war dank
+`Omit<…>` im Wrapper gratis:
+
+| Schicht | Änderung |
+|---|---|
+| `api/v1/gutachter-termine` | **`gutachter[].buchungs_url`** — fertiger Link je Gutachter |
+| `api/v1/openapi.json` | Feld im Schema + `required` — sonst filtern ChatGPT-Actions es weg |
+| `llms.txt` | Anweisung: *diesen* Link ausgeben, **nicht** `interaktive_karte_url` |
+| Marketing `/gutachter-finden` → `EmbedFinderSection` | `?sv=` bis in die iframe-URL |
+| `FinderWizard` | `waehleVorauswahl()` ersetzt `svs[0]` an allen drei Matching-Stellen |
+
+**Zwei bewusste Verengungen**, beide im Code begründet:
+
+* **Kein Slot im Link.** Zwischen KI-Antwort und Klick vergehen Minuten; der Slot kann weg
+  sein. Eine Vorauswahl, die ins Leere zeigt, ist schlechter als keine. Der Gutachter ist
+  die Information aus dem Chat, die erhalten bleiben muss — der Slot ist ein Klick.
+* **Kein schreibender GET.** Ein Endpunkt, der per Link einen Termin bucht, würde von jedem
+  Crawler ausgelöst. Der Kunde bestätigt weiterhin selbst.
+
+**Robust nach beiden Seiten:** Ist der SV beim Klick belegt oder unbekannt, fällt die
+Vorauswahl still auf den bestgerankten zurück — gültige Liste statt Fehlerseite. Und schon
+vor dem Deploy gemessen: `?sv=<unbekannte-uuid>` liefert HTTP **200**, ein unbekannter
+Parameter wird ignoriert.
+
+**Offen:** Der MCP-Server (`mcp.claimondo.de`) liegt **nicht in diesem Repo** — ob
+`buchungs_url` dort ankommt, hängt daran, ob er die API-Antwort durchreicht oder die Felder
+selbst mappt. Ungeprüft. Dazu der Regel-4-Prod-Smoke nach dem Deploy.
+
+> Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
+> ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
+
+---
+
 *Messung: 18.08.2026, 14:51 UTC · Seiten-Sample: 27 · User-Agent: OAI-SearchBot/1.0 ·
-Skript: `scripts/geo-baseline.mjs`*
+Skript: `scripts/geo-baseline.mjs` · §12 ergänzt 21.08.2026*

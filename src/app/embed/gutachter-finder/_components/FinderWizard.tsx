@@ -83,6 +83,29 @@ function fmtWunsch(lokal: string): string {
   )
 }
 
+/**
+ * Welcher Partner-SV ist nach dem Matching vorausgewaehlt?
+ *
+ * Default ist der bestgerankte (`svs[0]`) — das war bis hierher die einzige Regel.
+ * Kommt der Nutzer ueber einen Deep-Link (`?sv=<id>`, z.B. aus einer KI-Antwort, die
+ * zuvor `GET /api/v1/gutachter-termine` gelesen hat), soll GENAU der dort genannte
+ * Gutachter vorausgewaehlt sein — sonst landet der Kunde bei einem anderen als dem,
+ * der ihm im Chat empfohlen wurde.
+ *
+ * ⚠ Bewusst nur, wenn die ID im aktuellen Matching-Ergebnis VORKOMMT: Zwischen der
+ * KI-Antwort und dem Klick koennen Minuten liegen; der SV kann ausgelastet, deaktiviert
+ * oder ausserhalb des eingegebenen Orts sein. Eine ID ins Blaue zu setzen wuerde eine
+ * leere Auswahl erzeugen. Faellt sie durch, greift still der normale Default — der
+ * Nutzer sieht eine gueltige Liste statt eines Fehlers.
+ */
+function waehleVorauswahl(
+  svs: { svId: string }[],
+  gewuenscht: string | null | undefined,
+): string | null {
+  if (gewuenscht && svs.some((s) => s.svId === gewuenscht)) return gewuenscht
+  return svs[0]?.svId ?? null
+}
+
 export function FinderWizard({
   forceFallback = false,
   werkstattId,
@@ -91,6 +114,7 @@ export function FinderWizard({
   promotionCodeId,
   schaetzungSessionId,
   ownerProfilId = null,
+  vorauswahlSvId = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -107,6 +131,11 @@ export function FinderWizard({
    *  Werkstatt-Einstieg resolveVermittlerOwnerProfil). Gesetzt → dessen zahlende Freund-SVs
    *  ranken im Matching oben (imNetzwerk-Badge). null (Default, anon-Embed) = kein Boost. */
   ownerProfilId?: string | null
+  /** GEO-Deep-Link (`?sv=<id>`): profiles.id des Gutachters, den eine KI-Antwort
+   *  (oder ein Verzeichnis-Link) bereits genannt hat. Ist er im Matching-Ergebnis,
+   *  wird er statt des bestgerankten vorausgewaehlt — siehe waehleVorauswahl().
+   *  Keine Buchung, kein Write: der Kunde bestaetigt weiterhin selbst. */
+  vorauswahlSvId?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -191,7 +220,7 @@ export function FinderWizard({
       if (matchReqRef.current !== req) return
       setMatching(res)
       setMatchLoading(false)
-      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
     })
   }
@@ -214,7 +243,7 @@ export function FinderWizard({
       setMatching(res)
       setMatchLoading(false)
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
-      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
     })
   }
@@ -316,7 +345,7 @@ export function FinderWizard({
         if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
         setMatching(res)
         setMatchLoading(false)
-        if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+        if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
         else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
       })
     }
