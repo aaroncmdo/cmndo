@@ -8,6 +8,19 @@ import type { Db } from '@/lib/anreicherung/schreiben'
 import { abmelden } from '../anmelden/actions'
 import { LinkKnopf } from './LinkKnopf'
 
+import type { Metadata } from 'next'
+
+/**
+ * ⚠ NICHT INDEXIEREN. Die Liste aller Auswertungen mit Firmennamen, Orten
+ * und Ergebnissen — ein interner Vertriebsbestand.
+ *
+ * Zweite Ebene neben `app/robots.ts`: eine robots.txt ist eine Bitte, dieser
+ * Kopf ist eine Anweisung. Beide zusammen, weil die eine ausfallen kann.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
+
 export const dynamic = 'force-dynamic'
 
 type CheckZeile = {

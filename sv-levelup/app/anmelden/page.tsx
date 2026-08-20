@@ -3,6 +3,20 @@ import { createClient } from '@/lib/supabase/server'
 import { pruefeStaff, type StaffDb } from '@/lib/levelup/staff'
 import { AnmeldenClient } from './AnmeldenClient'
 
+import type { Metadata } from 'next'
+
+/**
+ * ⚠ NICHT INDEXIEREN. Eine Anmeldemaske gehoert in keinen Suchindex — sie
+ * fuehrt zu nichts, was ein Suchender lesen koennte, und macht den internen
+ * Bereich unnoetig auffindbar.
+ *
+ * Zweite Ebene neben `app/robots.ts`: eine robots.txt ist eine Bitte, dieser
+ * Kopf ist eine Anweisung. Beide zusammen, weil die eine ausfallen kann.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
+
 /** Die Sitzung haengt an Cookies, nicht am Cache. */
 export const dynamic = 'force-dynamic'
 
