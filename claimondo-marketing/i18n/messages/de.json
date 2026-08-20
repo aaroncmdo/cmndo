@@ -642,7 +642,7 @@
   "page_meta": {
     "check": {
       "title": "Kostenlose Anspruchs-Prüfung nach Kfz-Unfall",
-      "description": "In 3 Fragen prüfen: Welche Ansprüche haben Sie nach Ihrem unverschuldeten Kfz-Unfall? Schadensgutachten, Wertminderung, Nutzungsausfall, Anwaltskosten — kostenlos und ohne Kostenrisiko.",
+      "description": "In 3 Fragen prüfen, welche Ansprüche Sie nach einem unverschuldeten Kfz-Unfall haben: Gutachten, Wertminderung, Nutzungsausfall — kostenlos.",
       "og_description": "In 60 Sekunden prüfen, was Ihnen nach dem Unfall zusteht. Kostenlos, unverbindlich.",
       "twitter_title": "Kostenlose Anspruchs-Prüfung nach Kfz-Unfall",
       "twitter_description": "In 60 Sekunden prüfen, was Ihnen zusteht — kostenlos."
@@ -760,7 +760,7 @@
     },
     "ersteinschaetzung": {
       "title": "Kfz-Schaden: kostenlose KI-Ersteinschätzung",
-      "description": "Fotos hochladen, in Minuten sehen was Ihnen zusteht: Reparaturkosten, Wiederbeschaffungswert, Totalschaden, volle Positionen. Unverschuldet? 0 € für Sie (§ 249 BGB). Kostenlos und unverbindlich.",
+      "description": "Fotos hochladen, in Minuten sehen was Ihnen zusteht: Reparaturkosten, Wiederbeschaffungswert, Totalschaden. Unverschuldet? 0 € für Sie (§ 249 BGB).",
       "og_title": "KI-Ersteinschätzung — Kfz-Schaden kostenlos bewerten lassen",
       "og_description": "Foto hochladen, KI analysiert sofort. Reparaturkosten, Wiederbeschaffungswert, Gutachten-Empfehlung — in unter 15 Minuten.",
       "twitter_description": "Kostenlos, sofort, unverbindlich."
@@ -779,7 +779,7 @@
     },
     "versicherung_schickt_gutachter": {
       "title": "Versicherung schickt Gutachter: Ihre Rechte",
-      "description": "Die gegnerische Versicherung will „ihren\" Gutachter schicken? Sie müssen ihn nicht akzeptieren: Nach § 249 BGB wählen Sie Ihren eigenen, unabhängigen Sachverständigen frei. Die Kosten trägt bei unverschuldetem Unfall die Gegenseite (BGH VI ZR 67/06) — für Sie 0 €.",
+      "description": "Die gegnerische Versicherung will „ihren\" Gutachter schicken? Sie müssen ihn nicht akzeptieren — nach § 249 BGB wählen Sie Ihren eigenen frei.",
       "og_title": "Versicherung schickt Gutachter — muss ich das akzeptieren?",
       "og_description": "Nein. Freie Wahl des eigenen, unabhängigen Sachverständigen nach § 249 BGB. Kosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06)."
     },
@@ -820,7 +820,7 @@
     },
     "kfz_gutachter_online": {
       "title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist",
-      "description": "„Online-Kfz-Gutachten in 5 Minuten\" — geht das überhaupt? Das LG Bremen hat im Januar 2026 klare Grenzen gezogen. Was zulässig ist, was nicht, und worauf Geschädigte achten sollten.",
+      "description": "„Online-Kfz-Gutachten in 5 Minuten\" — geht das? Das LG Bremen hat 2026 Grenzen gezogen. Was zulässig ist und worauf Geschädigte achten sollten.",
       "og_title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist und was nicht (LG Bremen 2026)",
       "og_description": "Das LG-Bremen-Urteil 9 O 1720/24 (16.01.2026) und seine Folgen für Online-Kfz-Gutachten — sachlich eingeordnet aus Vermittler-Sicht."
     },
@@ -838,7 +838,7 @@
     },
     "gutachter_partner_leads": {
       "title": "Leads für Kfz-Gutachter — planbare Aufträge",
-      "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich. Vorqualifizierte Geschädigten-Anfragen über das Claimondo-Partnernetzwerk — ohne eigenes Marketing-Budget.",
+      "description": "Wie Kfz-Sachverständige planbar neue Aufträge gewinnen: lokale SEO, Google Ads und Plattform-Distribution im Vergleich — ohne eigenes Werbebudget.",
       "og_title": "Leads für Kfz-Gutachter generieren — ohne eigenes Werbebudget",
       "og_description": "Lokale SEO, Ads und Plattform-Distribution im Vergleich — vorqualifizierte Anfragen über Claimondo."
     },
@@ -856,7 +856,7 @@
     },
     "kfz_gutachter_sv_vs_gutachter": {
       "title": "Sachverständiger oder Gutachter? Der Unterschied",
-      "description": "Kfz-Sachverständiger vs. Gutachter: Im Schadenfall meinen beide dasselbe. Was »öffentlich bestellt« bedeutet, warum Unabhängigkeit zählt und dass Sie frei wählen dürfen (BGH VI ZR 67/06).",
+      "description": "Kfz-Sachverständiger oder Gutachter? Im Schadenfall meint beides dasselbe. Was »öffentlich bestellt« heißt und warum Sie frei wählen (BGH VI ZR 67/06).",
       "og_title": "Sachverständiger oder Gutachter — wo ist der Unterschied?",
       "og_description": "Im Kfz-Schaden synonym — entscheidend sind Unabhängigkeit und Ihre freie Gutachterwahl."
     },
@@ -870,7 +870,7 @@
   "ueber_uns": {
     "metadata": {
       "title": "Über Claimondo — Schadensregulierung aus Köln",
-      "description": "2025 in Köln gegründete Plattform für Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) + Aaron Sprafke (COO). Zertifiziertes Partner-Netzwerk, kostenfrei nach §249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer)."
+      "description": "2025 in Köln gegründete Plattform für Kfz-Schadensregulierung. Gründer: Nicolas Kitta (CEO) und Aaron Sprafke (COO). Zertifiziertes Partner-Netzwerk."
     },
     "hero": {
       "eyebrow": "Über Claimondo",
