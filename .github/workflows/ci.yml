@@ -530,6 +530,16 @@ jobs:
       - name: SV-LevelUp-Unit-Tests
         run: npx vitest run
         working-directory: sv-levelup
+      # Der Lint stand hier zuerst nicht — und fand am 20.08. zwei Fehler, die
+      # `npm run build` GRUEN durchliess:
+      #   · `Date.now()` waehrend des Renders (bricht die Hydration, weil
+      #     Server und Browser verschiedene Zeitpunkte sehen)
+      #   · eine Variable namens `module` (Next verbietet den Namen)
+      # Beides haette erst auf prod gestoert. Der Build prueft Kompilierbarkeit,
+      # der Lint prueft Regeln — das sind zwei verschiedene Fragen.
+      - name: SV-LevelUp-Lint
+        run: npm run lint
+        working-directory: sv-levelup
 
   e2e:
     # E2E laeuft gegen den DEPLOYTEN Stand auf app.claimondo.de — deshalb NIE auf pull_request:
