@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { generateLokalinhaltDraft } from './generate'
 import { pruefeLokalinhalt } from './gate'
 import { STAEDTE_STAMMDATEN, getStadtKontext, getStadtStammdaten } from './staedte'
+import { laufGeglueckt } from './lauf-status'
 
 // Erzeugt hyperlokale Ortsinhalte im Batch — die Automatik hinter dem
 // Auto-Publish.
@@ -82,6 +83,18 @@ export async function runLokalinhaltePipeline(
     else if (treffer.art === 'review') ergebnis.imReview.push({ slug: stadt.slug, grund: treffer.grund })
     else ergebnis.fehler.push({ slug: stadt.slug, grund: treffer.grund })
   }
+
+  // ⭐ TOTALAUSFALL ist kein Erfolg. Am 20.08.2026 war das Anthropic-Guthaben
+  // aufgebraucht; die Route antwortete trotzdem `ok:true` / HTTP 200, weil der
+  // Fehler nur im `fehler`-Array stand — und `cron-call.sh` loggte brav
+  // "ok http=200". Der Cron waere ab da JEDE NACHT gelaufen, haette Erfolg
+  // gemeldet und nichts erzeugt. Genau das Muster, das zwei andere prod-Crons
+  // ueber 8.600-mal produziert haben, bevor es jemand bemerkte.
+  //
+  // Schwelle bewusst "alles gescheitert", nicht "irgendetwas gescheitert": eine
+  // einzelne Stadt, die am Substanz-Gate haengenbleibt, ist Normalbetrieb und
+  // darf den Lauf nicht rot faerben.
+  ergebnis.ok = laufGeglueckt(ergebnis)
 
   return ergebnis
 }
