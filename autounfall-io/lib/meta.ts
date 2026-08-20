@@ -1,4 +1,5 @@
 import { SITE } from './site'
+import { SERP_KURZTITEL } from './serp-titel'
 
 // Title-Helper (Defekt-8, Bing-Site-Scan 14.06.). Das Layout-Template haengt
 // site-weit „ · autounfall.io" an (`%s · ${SITE.name}` in app/layout.tsx). Zwei
@@ -18,5 +19,11 @@ export function metaTitle(raw: string): string | { absolute: string } {
   let t = (raw ?? '').trim()
   const low = SUFFIX.toLowerCase()
   while (t.toLowerCase().endsWith(low)) t = t.slice(0, -SUFFIX.length).trim()
+
+  // Kurzfassung fuer die Trefferliste, falls hinterlegt (20.08.: 71 Titel lagen
+  // ueber 60 Zeichen und wurden abgeschnitten). NACH dem Suffix-Strippen, damit
+  // der Schluessel der reine Titel ist. Siehe ./serp-titel.ts.
+  t = SERP_KURZTITEL[t] ?? t
+
   return (t + SUFFIX).length <= MAX ? t : { absolute: t }
 }
