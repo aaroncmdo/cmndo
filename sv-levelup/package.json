@@ -10,7 +10,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "anreicherung": "node --env-file=../.env.local --import tsx scripts/anreicherung.ts"
+    "anreicherung": "node --env-file=../.env.local --import tsx scripts/anreicherung.ts",
+    "discovery": "node --env-file=../.env.local --import tsx scripts/discovery.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
