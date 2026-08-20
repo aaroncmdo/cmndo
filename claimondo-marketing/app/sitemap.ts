@@ -52,6 +52,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: langAlternates('/gutachter-finden') },
     },
     {
+      // Pendant zu /gutachter-finden, war bis 20.08. nicht angemeldet: die
+      // Seite liefert 200, setzt `robots: index, follow` und ein Canonical auf
+      // sich selbst — sie WILL indexiert werden, stand aber in keiner Sitemap.
+      // Eine handgepflegte Liste vergisst neue Seiten still.
+      url: `${SITE_URL}/werkstatt-finden`,
+      lastModified: getRouteLastUpdated('/werkstatt-finden'),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/werkstatt-finden') },
+    },
+    {
       url: `${SITE_URL}/vorteile`,
       lastModified: getRouteLastUpdated('/vorteile'),
       changeFrequency: 'monthly',
