@@ -3892,7 +3892,12 @@
     "faq_130_antwort": "The 130% rule (BGH VI ZR 67/91) allows repair costs of up to 130 % of the replacement value — provided the vehicle is professionally repaired in accordance with the assessment and is used for at least 6 months after.",
     "cta_h2": "Accident {ort}? We take care of it.",
     "cta_p": "Report online in 5 minutes — we refer a free independent appraiser {ort} in under 48 h.",
-    "cta_karte": "View on map"
+    "cta_karte": "View on map",
+    "kfzbestand_eyebrow": "Official figures",
+    "kfzbestand_h2": "Registered vehicles in {stadt}",
+    "kfzbestand_text": "{pkw} passenger cars are registered in {stadt}, {gewerblich} of them to commercial owners. In addition there are {lkw} trucks and {kraftraeder} motorcycles.",
+    "kfzbestand_quote": "That is {proTausend} cars per 1,000 inhabitants.",
+    "kfzbestand_quelle": "Federal Motor Transport Authority (KBA), {stand}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Appointment successfully requested!",
