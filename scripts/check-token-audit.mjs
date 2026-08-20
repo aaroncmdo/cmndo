@@ -153,7 +153,7 @@ console.log(`✓ ${files.length} Files geprüft, keine Token-Audit-Verstöße.`)
 // 14.05.2026: 351 → 355 (+4) durch PRs #1130 (Liquid-Glass-Cockpit) und
 // #1140 (Mini-Wizard SV-Auto-Match) eingebracht, nicht im verursachenden
 // PR ge-ratchetet. Hier auf den neuen Stand angehoben.
-const RADII_BASELINE_OCCURRENCES = 355
+const RADII_BASELINE_OCCURRENCES = 236
 const RADII_RE = /\brounded-(none|sm|md|lg|xl|2xl|3xl)\b/g
 
 let radiiOccurrences = 0
@@ -294,7 +294,7 @@ if (accentDelta < 0) {
 // Vertraege, SLA, Kanzlei-Pages, Kalender, admin-Tail-Cleanup, finance-(hub)).
 // LEAVE (grandfathered): Data-Viz/Geld (finance -400-Palette, Charts, KPI-Metriken)
 // + Typ-/Rollen-Identitaets-Maps + Delete-Hovers + inline-hex Map-Paint.
-const STATUS_BASELINE_OCCURRENCES = 1919
+const STATUS_BASELINE_OCCURRENCES = 494
 const STATUS_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:green|emerald|red|rose|amber|yellow|orange|lime)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
 
 let statusOccurrences = 0
