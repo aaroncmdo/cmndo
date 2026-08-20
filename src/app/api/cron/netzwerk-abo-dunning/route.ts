@@ -49,6 +49,7 @@ export async function GET(request: Request) {
         .maybeSingle()
       if (existing) continue
       // Mail non-fatal (dedizierter Registry-Trigger — sv_monatsabrechnung NICHT zweckentfremden).
+      let versandOk = false
       try {
         const { data: sv } = await db
           .from('sachverstaendige').select('profile_id').eq('id', abo.sv_id).single()
@@ -57,16 +58,25 @@ export async function GET(request: Request) {
           : { data: null }
         if (p?.email) {
           const { sendCommunication } = await import('@/lib/communications/send')
-          await sendCommunication('netzwerk_abo_dunning', {
+          const res = await sendCommunication('netzwerk_abo_dunning', {
             email: p.email,
             vorname: p.vorname ?? 'Partner',
             subject: 'Zahlung Netzwerkpartner-Abo ausstehend',
             html: `<p>Hallo ${p.vorname ?? 'Partner'},</p><p>deine Netzwerkpartner-Zahlung ist noch offen. Bitte aktualisiere deine Zahlungsmethode im Portal (Einstellungen → Netzwerkpartner → „Abo verwalten"), damit dein Netzwerk-Vorteil aktiv bleibt.</p>`,
           })
+          versandOk = res.ok
+          if (!res.ok) console.error(`[netzwerk-dunning] Mahnung an SV ${abo.sv_id} NICHT zugestellt:`, res.error)
+        } else {
+          console.error(`[netzwerk-dunning] keine E-Mail-Adresse fuer SV ${abo.sv_id} — Mahnung unzustellbar`)
         }
       } catch (err) {
         console.error('[netzwerk-dunning] mail', err)
       }
+      // Der Marker bedeutet "gemahnt", und die Dedup-Sperre oben (`if (existing) continue`)
+      // haengt daran: wurde er trotz fehlgeschlagener Mail gesetzt, versucht KEIN weiterer
+      // Lauf es erneut — der Partner bliebe dauerhaft ungemahnt, waehrend das System ihn als
+      // gemahnt fuehrt. Deshalb nur bei tatsaechlichem Versand; sonst greift der naechste Lauf.
+      if (!versandOk) continue
       const { error: insErr } = await db
         .from('sv_payment_reminders')
         .insert({ sv_id: abo.sv_id, reminder_typ: stufe.typ })
