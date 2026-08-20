@@ -93,6 +93,26 @@ function ohneNummernPraefix(name: string): string {
   return gekuerzt || name
 }
 
+/**
+ * Ist der Bezirksname im Suchergebnis ueberhaupt eine Aussage?
+ *
+ * "Bezirk 2" ist keine: niemand sucht danach, und drei davon hintereinander
+ * lesen sich wie ein Automat. Real auf prod (Duesseldorf, 20.08.2026) — dort
+ * tragen BEIDE Quellen reine Nummern, der Hub-Snapshot ("Bezirk 1" … "Bezirk
+ * 10") wie der generierte DB-Inhalt ("Stadtbezirk 1" …). Die Beschreibung
+ * lautete: "… unabhaengige Sachverstaendige fuer Bezirk 1, Bezirk 2, Bezirk 3
+ * und Umgebung."
+ *
+ * Faellt so ein Name weg und bleibt keiner uebrig, greift automatisch der
+ * Achsen-Zweig weiter unten — "Unfallaufnahme an A46, A52 und im Stadtgebiet"
+ * sagt ueber den Ort mehr aus als jede Bezirksnummer.
+ *
+ * Roemische Ziffern zaehlen mit: Essen nummeriert seine Stadtbezirke I–IX.
+ */
+function istSprechenderBezirk(name: string): boolean {
+  return !/^(?:orts|stadt)?bezirk\s*(?:\d+|[IVXLC]+)$/i.test(name.trim())
+}
+
 export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): string {
   const kopf = `Kfz-Gutachter ${stadt.h1Anker} nach Unfall:`
   // Bewusst knapp: die erste Fassung war 61 Zeichen lang und fiel damit bei
@@ -102,7 +122,9 @@ export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): st
   // der auf der Haelfte der Seiten fehlt.
   const schluss = 'Termin unter 48 h, 0 € nach §249 BGB.'
 
-  const bezirke = (tiefe?.stadtbezirke ?? []).map((b) => ohneNummernPraefix(b.name)).filter(Boolean)
+  const bezirke = (tiefe?.stadtbezirke ?? [])
+    .map((b) => ohneNummernPraefix(b.name))
+    .filter((n) => Boolean(n) && istSprechenderBezirk(n))
   const achsen = [
     ...(tiefe?.hauptachsen?.autobahnen ?? []),
     ...(tiefe?.hauptachsen?.bundesstrassen ?? []),
@@ -123,7 +145,11 @@ export function stadtMetaDescription(stadt: Stadt, tiefe?: Ortstiefe | null): st
 
   if (achsen.length) {
     const rahmen = 'Unfallaufnahme an  und im Stadtgebiet.'.length
-    const genannt = nenneBis(achsen, Math.max(platzFuerMitte - rahmen, 0))
+    // Hoechstens vier: Duesseldorf haette sonst "A46, A52, A57, A59, A524, A44,
+    // A3, B1, B7" ausgespielt — passt zwar in die Laenge, liest sich aber als
+    // Aufzaehlung und damit wie Keyword-Stuffing. Vier Achsen sind eine Aussage,
+    // neun sind ein Datenbank-Dump.
+    const genannt = nenneBis(achsen.slice(0, 4), Math.max(platzFuerMitte - rahmen, 0))
     if (genannt.length) {
       return baue(kopf, `Unfallaufnahme an ${genannt.join(', ')} und im Stadtgebiet.`, schluss)
     }

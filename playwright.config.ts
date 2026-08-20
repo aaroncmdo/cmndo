@@ -29,7 +29,13 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [['html', { open: 'never' }], ['github']] : 'html',
+  // `list` steht bewusst VORNE: html schreibt seinen Report erst am Ende, `github` gibt nur
+  // Annotations bei Fehlern aus. Laeuft der Job in ein Timeout (endet als `cancelled`), kam
+  // bisher KEINE Zeile ins Log — man sah nicht einmal, bei welchem Test die Suite stand.
+  // Belegt am 19. + 20.08.: beide nightly-Laeufe wurden nach 39,5 min gekillt, im Log stand
+  // nur "Running 199 tests using 1 worker" und danach nichts mehr bis zum Kill.
+  // `list` gibt pro Test eine Zeile -> der Fortschritt ist im Live-Log ablesbar.
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }], ['github']] : 'html',
   timeout: 30_000,
 
   use: {
