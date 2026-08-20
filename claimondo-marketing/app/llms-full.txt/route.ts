@@ -259,8 +259,8 @@ const HAUPTSEITE_KERN = `
 - < 15 Min bis zum ersten Rückruf
 - < 48 h bis Gutachter vor Ort — bundesweit
 
-### Vier Gespräche — wir führen sie, nicht Sie (ANSPRUECHE, §249 BGB)
-Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Wir führen sie alle. BGH-konform.
+### Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie (ANSPRUECHE, §249 BGB)
+Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Unsere Partnerkanzlei führt sie alle. BGH-konform.
 ${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** — ${a.text}`).join('\n')}
 
 ### Ihr Fall. Immer in der Tasche. (Service-Realität, 6 Cards)
