@@ -79,3 +79,51 @@ body {
   line-height: 1.02;
   text-transform: uppercase;
 }
+
+/*
+ * Druckansicht — vor allem fuer /plan/[token].
+ *
+ * Der Sachverstaendige druckt den Plan aus oder legt ihn seinem Webbetreuer
+ * vor. Ohne diese Regeln druckt der Browser Rahmen und Flaechen mit, die auf
+ * Papier nichts beitragen und Tinte kosten; abgeschnittene Massnahmen mitten
+ * am Seitenumbruch machen den Plan zudem schwer lesbar.
+ */
+@media print {
+  :root {
+    --flaeche: #ffffff;
+    --linie: #d0d0d0;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000;
+  }
+
+  /* Flaechen und Rahmen weg — die Gliederung traegt die Typografie. */
+  main div[class*="rounded-"],
+  main section[class*="rounded-"],
+  main li[class*="rounded-"] {
+    border: 0 !important;
+    border-top: 1px solid #d0d0d0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* Eine Massnahme gehoert nicht ueber den Seitenumbruch. */
+  li, section {
+    break-inside: avoid;
+  }
+
+  h1, h2, h3 {
+    break-after: avoid;
+  }
+
+  /* Ein Link, dessen Ziel man auf Papier nicht sieht, ist eine leere Stelle. */
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #555;
+  }
+}
