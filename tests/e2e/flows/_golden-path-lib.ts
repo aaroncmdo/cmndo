@@ -12,16 +12,39 @@ const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
-// Fixture-Accounts (Passwörter: Test1234! grandfathered, sv per env).
+// Fixture-Accounts. DIES IST DIE QUELLE fuer Test-Credentials in tests/e2e — neue Specs
+// importieren `ROLES` von hier, statt eigene Defaults zu schreiben (genau daraus entstand
+// die Drift unten).
+//
+// ⚠ `Test1234!` gilt auf prod NUR NOCH fuer test-dispatch@. Die frueher hier notierte
+// Annahme „Test1234! grandfathered" ist widerlegt — GoTrue lehnt das Passwort seit der
+// pwned-Password-Policy ab, die uebrigen Konten wurden auf `Claimondo2026!` gezogen.
+// Gemessen 20.08. gegen app.claimondo.de, jede Zelle ein echter Browser-Login:
+//
+//   admin     test-admin@      Claimondo2026! -> /admin              Test1234! = falsch
+//   dispatch  test-dispatch@   Claimondo2026! = falsch               Test1234! -> /dispatch/dashboard
+//   kb        test-kb@         Claimondo2026! -> /mitarbeiter        Test1234! = falsch
+//   kanzlei   test-kanzlei@    Claimondo2026! -> /kanzlei/mandate    Test1234! = falsch
+//   sv        test-sv@         Claimondo2026! -> /gutachter/heute    Test1234! = falsch
+//   kunde     smoke-kunde@     Claimondo2026! -> /kunde              Test1234! = falsch
+//
+// ⭐ Die eine Rolle, die `Test1234!` behielt, ist die dokumentierte AUSNAHME — und genau
+// sie wurde verallgemeinert. Wer eine Sonderregel abschreibt, schreibt oft die Sonderregel
+// ab, nicht die Regel.
+//
+// ⚠ Der falsche Default schlaegt genau dort durch, wo KEIN CI-Secret ihn deckt: ci.yml
+// reicht nur TEST_ADMIN_* und TEST_SV_* durch. Fuer kb/kanzlei/kunde gibt es kein
+// wirksames Secret — dort IST der Default das, was laeuft.
 export const ROLES = {
-  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
+  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!' },
+  // Einzige Rolle mit Test1234! — nicht "korrigieren".
   dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!' },
   // 17.07.: test-kunde@ existiert seit dem Golive-Accounts-Cleanup nicht mehr; dediziertes
   // Smoke-Konto = smoke-kunde@ (reference-internal-test-account-logins, Aaron-Go).
   kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!' },
-  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Test1234!' },
-  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!' },
-  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!' },
+  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Claimondo2026!' },
+  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Claimondo2026!' },
+  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!' },
 } as const
 
 export type RoleKey = keyof typeof ROLES

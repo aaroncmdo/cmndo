@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { ROLES as BASIS } from './_golden-path-lib'
 
 // Golden-Path Journey E2E — PARTNER-SICHER, gegen Prod (oder env-Override).
 //
@@ -20,13 +21,17 @@ import { test, expect, type Page } from '@playwright/test'
 const FUNNEL = process.env.GOLDEN_FUNNEL_URL ?? 'https://claimondo.de'
 const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 
+// Credentials kommen aus _golden-path-lib (die Quelle), hier nur die Erwartungen je Rolle.
+// Vorher stand hier eine eigene Kopie — und genau die driftete: sie trug noch
+// `test-kunde@` (Konto seit dem Golive-Cleanup geloescht) und `Test1234!` fuer
+// admin/kb/kunde (auf prod nur noch bei test-dispatch@ gueltig). Die Messung, die das
+// belegt, steht im Kommentar an ROLES in _golden-path-lib.ts.
 const ROLES = {
-  admin: { email: process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!', landing: /\/admin/, marker: /Dashboard|Fälle|Aufgaben/i },
-  dispatch: { email: process.env.TEST_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!', landing: /\/dispatch/, marker: /Leads|Rückrufe|Gutachter/i },
-  kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'test-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Test1234!', landing: /\/kunde/, marker: /Mein Fall|Termine|Nachrichten/i },
-  kb: { email: process.env.TEST_KB_EMAIL ?? 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Test1234!', landing: /\/mitarbeiter/, marker: /Meine Fälle|Tasks|Termine/i },
-  // Der SV-Account (test-sv@) hat ein starkes Passwort (Supabase lehnt Test1234! als schwach ab) → env.
-  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '', landing: /\/gutachter/, marker: /Aufträge|Termine|Fälle|Gutachten/i },
+  admin: { ...BASIS.admin, landing: /\/admin/, marker: /Dashboard|Fälle|Aufgaben/i },
+  dispatch: { ...BASIS.dispatch, landing: /\/dispatch/, marker: /Leads|Rückrufe|Gutachter/i },
+  kunde: { ...BASIS.kunde, landing: /\/kunde/, marker: /Mein Fall|Termine|Nachrichten/i },
+  kb: { ...BASIS.kb, landing: /\/mitarbeiter/, marker: /Meine Fälle|Tasks|Termine/i },
+  sv: { ...BASIS.sv, landing: /\/gutachter/, marker: /Aufträge|Termine|Fälle|Gutachten/i },
 } as const
 
 test.describe.configure({ mode: 'serial' })
