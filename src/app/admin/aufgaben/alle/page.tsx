@@ -19,7 +19,11 @@ export default async function TasksPage() {
       supabase
         .from('tasks')
         .select(
-          'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund, claim_id',
+          // `auto_erstellt` wird im Board gebraucht: System-Aufgaben ohne Objekt-Bezug
+          // bleiben sichtbar, manuelle nicht (s. KanbanBoard, Filter `linked`).
+          // ⚠ Der Typ allein reicht nicht — fehlt das Feld hier im select, ist es zur
+          // Laufzeit `undefined` und der Filter greift still ins Leere.
+          'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_erstellt, auto_resolved_am, auto_resolved_grund, claim_id',
         )
         .order('created_at', { ascending: false }),
       // CMM-49: faelle-frei — fall_id->claim_nummer via Bridge+claims (shared helper).

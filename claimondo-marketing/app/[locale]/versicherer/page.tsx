@@ -11,8 +11,11 @@ import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
+// 203 Zeichen — Google zeigt rund 160. „journalistisch eingeordnet, mit Quellen"
+// faellt weg: es beschreibt die Machart, nicht den Inhalt, und stand ganz am Ende
+// (also im abgeschnittenen Teil). Die Belege selbst bleiben auf der Seite.
 const META_DESC =
-  'Schadensregulierung der größten deutschen Kfz-Haftpflichtversicherer: BaFin-Beschwerdequoten 2024, dokumentierte Kürzungspraxis und Ihre Rechte als Geschädigter — journalistisch eingeordnet, mit Quellen.'
+  'Schadensregulierung der größten deutschen Kfz-Haftpflichtversicherer: BaFin-Beschwerdequoten 2024, Kürzungspraxis und Ihre Rechte als Geschädigter.'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
