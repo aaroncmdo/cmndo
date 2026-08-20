@@ -794,6 +794,38 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Read-only-Opt-in-Smokes (20.08.2026): zwei Specs, die bisher NIE automatisch liefen.
+      #
+      # Die Suite hat 26 `RUN_*`-Schalter, dieser Job setzt 9 — die uebrigen 16 (20 Specs)
+      # liefen automatisch nie. Ob das gewollt ist, war offen. Am 20.08. jede Spec einzeln
+      # geprueft (DB-Write / HTTP-Write / service-role / mutierender Klick):
+      #   18 von 20 mutieren auf prod -> Deaktivierung BERECHTIGT, bleiben opt-in.
+      #    1 laeuft ohnehin nicht (kunde-auth-setup steht im testIgnore der Config).
+      #    2 sind read-only — genau diese beiden hier.
+      #
+      # Beide vorher gegen prod gefahren, damit hier kein ungeprueftes Rot einzieht:
+      #   smoke-vertrieb-prod       gruen, 23,0 s  (/admin/vertrieb: Switch, Rolle-Filter,
+      #                             Roster 96 Zellen, Liste/Karte-Toggle)
+      #   phone-login-card-smoke    gruen,  3,8 s  (Telefon-Login-Karte im KontoSicherheitPanel)
+      # Zusammen ~27 s — der Job hat seit dem Cap-Fix (#5422) reichlich Luft.
+      #
+      # ⚠ Kein Secret fuer phone-login: der Spec faellt auf test-dispatch@ + `Test1234!`
+      # zurueck, und genau das ist dort korrekt (die dokumentierte Ausnahme, s. #5442).
+      # Ein durchgereichtes Secret mit veraltetem Wert wuerde den korrekten Default
+      # ueberschreiben — deshalb bewusst NICHT gesetzt.
+      #
+      # ⚠ NICHT hier aufnehmen: smoke-orchestrator-prod. Er klickt "Verwerfen" (mutiert) und
+      # ist gegen prod rot — er findet die Vorschlags-Karten, laeuft danach aber in den
+      # Test-Timeout. Befund fuer die Admin-/AI-Lane, kein CI-Kandidat.
+      - name: Read-only-Prod-Smokes (Vertrieb-Konsole + Telefon-Login-Karte)
+        run: npx playwright test smoke-vertrieb-prod phone-login-card-smoke --project=chromium --reporter=line --workers=1
+        env:
+          RUN_VERTRIEB_SMOKE: '1'
+          RUN_PHONE_LOGIN_CARD_SMOKE: '1'
+          PLAYWRIGHT_BASE_URL: https://app.claimondo.de
+          TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+          TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
