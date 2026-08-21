@@ -4,7 +4,7 @@ import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -33,6 +33,7 @@ import {
   type LokaleFaq, type Stadt,
 } from '@/lib/kfz-gutachter/staedte'
 import { stadtLastModifiedISO } from '@/lib/kfz-gutachter/freshness'
+import { getAmtsdaten, pkwJeTausendEinwohner } from '@/lib/kfz-gutachter/amtsdaten'
 import { ladeLokalinhalt } from '@/lib/kfz-gutachter/lokalinhalt'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { finderHrefFuerStadt } from '@/lib/kfz-gutachter/finder-link'
@@ -244,6 +245,9 @@ export default async function KfzGutachterStadtPage({
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
   const t = await getTranslations('kfz_gutachter_stadt')
+  // Fuer die Zahlformatierung in Sektion 4f: 36.636 (de) vs 36,636 (en).
+  // Hartcodiertes 'de-DE' waere auf fuenf von sechs Sprachversionen falsch.
+  const locale = await getLocale()
   const ort = s.h1Anker
 
   const heroBullets = t.raw('hero_bullets') as string[]
@@ -660,6 +664,49 @@ export default async function KfzGutachterStadtPage({
           </div>
         </section>
       )}
+
+      {/* 4f — Amtlicher Fahrzeugbestand (KBA FZ 3).
+          ⭐ Rendert fuer ALLE Staedte, nicht nur die mit gepflegter oder
+          generierter Ortstiefe — das unterscheidet diese Sektion von 4b-4e.
+          Gemessen am 20.08.2026 waren 166 von 173 Stadtseiten untereinander
+          ~93 % identisch (nur 3 von 135 Textbloecken eigenstaendig). Harte
+          amtliche Zahlen wirken sofort auf allen Seiten, waehrend der
+          KI-Lokalinhalt mit ~2 Staedten pro Nacht nachwaechst. */}
+      {(() => {
+        const amt = getAmtsdaten(s.slug)
+        if (!amt) return null
+        const zahl = (n: number) => n.toLocaleString(locale)
+        const proTausend = pkwJeTausendEinwohner(amt.kfz.pkw, s.bevoelkerung)
+        return (
+          <section className="bg-white py-16 sm:py-20" aria-labelledby="kfzbestand-stadt-heading">
+            <div className="mx-auto max-w-3xl px-5">
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                  {t('kfzbestand_eyebrow')}
+                </p>
+                <h2
+                  id="kfzbestand-stadt-heading"
+                  className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl"
+                >
+                  {t('kfzbestand_h2', { stadt: s.name })}
+                </h2>
+              </div>
+              <div className="mt-8">
+                <AnswerCapsule quelle={t('kfzbestand_quelle', { stand: amt.stand })}>
+                  {t('kfzbestand_text', {
+                    stadt: s.name,
+                    pkw: zahl(amt.kfz.pkw),
+                    gewerblich: zahl(amt.kfz.pkwGewerblich),
+                    lkw: zahl(amt.kfz.lkw),
+                    kraftraeder: zahl(amt.kfz.kraftraeder),
+                  })}
+                  {proTausend !== null ? ` ${t('kfzbestand_quote', { proTausend: zahl(proTausend) })}` : ''}
+                </AnswerCapsule>
+              </div>
+            </div>
+          </section>
+        )
+      })()}
 
       {/* 4e — Spoke-Town: Anbindung an die Hub-City (Doc 38 P5, minimal-unique) */}
       {s.spokeLocal && (

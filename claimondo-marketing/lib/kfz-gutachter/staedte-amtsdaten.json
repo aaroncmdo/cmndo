@@ -1,0 +1,2251 @@
+{
+  "aachen": {
+    "ags": "05334002",
+    "kbaName": "AACHEN, STADT",
+    "kfz": {
+      "pkw": 115874,
+      "pkwGewerblich": 19484,
+      "lkw": 6977,
+      "kraftraeder": 10104,
+      "anhaenger": 10743
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ahaus": {
+    "ags": "05554004",
+    "kbaName": "AHAUS,ST.",
+    "kfz": {
+      "pkw": 25706,
+      "pkwGewerblich": 3441,
+      "lkw": 2650,
+      "kraftraeder": 2006,
+      "anhaenger": 6358
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ahlen": {
+    "ags": "05570004",
+    "kbaName": "AHLEN,ST.",
+    "kfz": {
+      "pkw": 33648,
+      "pkwGewerblich": 5176,
+      "lkw": 1976,
+      "kraftraeder": 2323,
+      "anhaenger": 4433
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "alfter": {
+    "ags": "05382004",
+    "kbaName": "ALFTER",
+    "kfz": {
+      "pkw": 14371,
+      "pkwGewerblich": 893,
+      "lkw": 776,
+      "kraftraeder": 1625,
+      "anhaenger": 1786
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "alsdorf": {
+    "ags": "05334004",
+    "kbaName": "ALSDORF, STADT",
+    "kfz": {
+      "pkw": 27565,
+      "pkwGewerblich": 2316,
+      "lkw": 2080,
+      "kraftraeder": 2357,
+      "anhaenger": 3601
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "arnsberg": {
+    "ags": "05958004",
+    "kbaName": "ARNSBERG,ST.",
+    "kfz": {
+      "pkw": 47828,
+      "pkwGewerblich": 4736,
+      "lkw": 2769,
+      "kraftraeder": 3972,
+      "anhaenger": 6880
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "augsburg": {
+    "ags": "09761000",
+    "kbaName": "AUGSBURG",
+    "kfz": {
+      "pkw": 142329,
+      "pkwGewerblich": 21040,
+      "lkw": 9683,
+      "kraftraeder": 13763,
+      "anhaenger": 12683
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bad-honnef": {
+    "ags": "05382008",
+    "kbaName": "BAD HONNEF,ST.",
+    "kfz": {
+      "pkw": 15979,
+      "pkwGewerblich": 1319,
+      "lkw": 847,
+      "kraftraeder": 1549,
+      "anhaenger": 1539
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bad-oeynhausen": {
+    "ags": "05770004",
+    "kbaName": "BAD OEYNHAUSEN,ST.",
+    "kfz": {
+      "pkw": 32199,
+      "pkwGewerblich": 2665,
+      "lkw": 2264,
+      "kraftraeder": 2624,
+      "anhaenger": 5061
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bad-salzuflen": {
+    "ags": "05766008",
+    "kbaName": "BAD SALZUFLEN,ST.",
+    "kfz": {
+      "pkw": 34444,
+      "pkwGewerblich": 3735,
+      "lkw": 2619,
+      "kraftraeder": 2956,
+      "anhaenger": 5084
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bergheim": {
+    "ags": "05362008",
+    "kbaName": "BERGHEIM,ST.",
+    "kfz": {
+      "pkw": 37962,
+      "pkwGewerblich": 2913,
+      "lkw": 2950,
+      "kraftraeder": 3569,
+      "anhaenger": 4929
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bergisch-gladbach": {
+    "ags": "05378004",
+    "kbaName": "BERGISCH GLADBACH,ST.",
+    "kfz": {
+      "pkw": 67986,
+      "pkwGewerblich": 7004,
+      "lkw": 3587,
+      "kraftraeder": 6277,
+      "anhaenger": 6073
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bergkamen": {
+    "ags": "05978004",
+    "kbaName": "BERGKAMEN,ST.",
+    "kfz": {
+      "pkw": 29151,
+      "pkwGewerblich": 1241,
+      "lkw": 1291,
+      "kraftraeder": 2713,
+      "anhaenger": 3497
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "berlin": {
+    "ags": "11000000",
+    "kbaName": "BERLIN",
+    "kfz": {
+      "pkw": 1222641,
+      "pkwGewerblich": 178913,
+      "lkw": 118506,
+      "kraftraeder": 123033,
+      "anhaenger": 101328
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bielefeld": {
+    "ags": "05711000",
+    "kbaName": "BIELEFELD",
+    "kfz": {
+      "pkw": 183561,
+      "pkwGewerblich": 27157,
+      "lkw": 12288,
+      "kraftraeder": 13486,
+      "anhaenger": 18072
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bocholt": {
+    "ags": "05554008",
+    "kbaName": "BOCHOLT,ST.",
+    "kfz": {
+      "pkw": 43694,
+      "pkwGewerblich": 5716,
+      "lkw": 3762,
+      "kraftraeder": 3261,
+      "anhaenger": 9018
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bochum": {
+    "ags": "05911000",
+    "kbaName": "BOCHUM",
+    "kfz": {
+      "pkw": 208037,
+      "pkwGewerblich": 33854,
+      "lkw": 16577,
+      "kraftraeder": 16839,
+      "anhaenger": 15932
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bonn": {
+    "ags": "05314000",
+    "kbaName": "BONN",
+    "kfz": {
+      "pkw": 175089,
+      "pkwGewerblich": 40129,
+      "lkw": 87656,
+      "kraftraeder": 12401,
+      "anhaenger": 13052
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "borken": {
+    "ags": "05554012",
+    "kbaName": "BORKEN,ST.",
+    "kfz": {
+      "pkw": 29341,
+      "pkwGewerblich": 5241,
+      "lkw": 2969,
+      "kraftraeder": 2168,
+      "anhaenger": 6166
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bornheim": {
+    "ags": "05382012",
+    "kbaName": "BORNHEIM,ST.",
+    "kfz": {
+      "pkw": 30558,
+      "pkwGewerblich": 2093,
+      "lkw": 2015,
+      "kraftraeder": 3447,
+      "anhaenger": 4015
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bottrop": {
+    "ags": "05512000",
+    "kbaName": "BOTTROP",
+    "kfz": {
+      "pkw": 70798,
+      "pkwGewerblich": 5103,
+      "lkw": 4069,
+      "kraftraeder": 6896,
+      "anhaenger": 6539
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "braunschweig": {
+    "ags": "03101000",
+    "kbaName": "BRAUNSCHWEIG",
+    "kfz": {
+      "pkw": 140672,
+      "pkwGewerblich": 29710,
+      "lkw": 8445,
+      "kraftraeder": 11104,
+      "anhaenger": 14157
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bremen": {
+    "ags": "04011000",
+    "kbaName": "BREMEN,STADT",
+    "kfz": {
+      "pkw": 248662,
+      "pkwGewerblich": 35744,
+      "lkw": 17478,
+      "kraftraeder": 17796,
+      "anhaenger": 30704
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bremerhaven": {
+    "ags": "04012000",
+    "kbaName": "BREMERHAVEN",
+    "kfz": {
+      "pkw": 52986,
+      "pkwGewerblich": 6233,
+      "lkw": 4018,
+      "kraftraeder": 3420,
+      "anhaenger": 6607
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "bruehl": {
+    "ags": "05362012",
+    "kbaName": "BRUEHL,ST.",
+    "kfz": {
+      "pkw": 24886,
+      "pkwGewerblich": 2161,
+      "lkw": 1445,
+      "kraftraeder": 2222,
+      "anhaenger": 2275
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "buende": {
+    "ags": "05758004",
+    "kbaName": "BUENDE,ST.",
+    "kfz": {
+      "pkw": 30282,
+      "pkwGewerblich": 2393,
+      "lkw": 1834,
+      "kraftraeder": 2459,
+      "anhaenger": 4735
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "castrop-rauxel": {
+    "ags": "05562004",
+    "kbaName": "CASTROP-RAUXEL,ST.",
+    "kfz": {
+      "pkw": 43619,
+      "pkwGewerblich": 2655,
+      "lkw": 2490,
+      "kraftraeder": 4276,
+      "anhaenger": 4795
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "chemnitz": {
+    "ags": "14511000",
+    "kbaName": "CHEMNITZ, STADT",
+    "kfz": {
+      "pkw": 125972,
+      "pkwGewerblich": 16787,
+      "lkw": 11225,
+      "kraftraeder": 9894,
+      "anhaenger": 13963
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "cottbus": {
+    "ags": "12052000",
+    "kbaName": "COTTBUS",
+    "kfz": {
+      "pkw": 48416,
+      "pkwGewerblich": 5567,
+      "lkw": 4662,
+      "kraftraeder": 3862,
+      "anhaenger": 8357
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "darmstadt": {
+    "ags": "06411000",
+    "kbaName": "DARMSTADT",
+    "kfz": {
+      "pkw": 74223,
+      "pkwGewerblich": 13077,
+      "lkw": 4830,
+      "kraftraeder": 5768,
+      "anhaenger": 4973
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "detmold": {
+    "ags": "05766020",
+    "kbaName": "DETMOLD,ST.",
+    "kfz": {
+      "pkw": 45491,
+      "pkwGewerblich": 5155,
+      "lkw": 2724,
+      "kraftraeder": 3501,
+      "anhaenger": 6879
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dinslaken": {
+    "ags": "05170008",
+    "kbaName": "DINSLAKEN,ST.",
+    "kfz": {
+      "pkw": 43363,
+      "pkwGewerblich": 3090,
+      "lkw": 2349,
+      "kraftraeder": 3599,
+      "anhaenger": 4273
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dormagen": {
+    "ags": "05162004",
+    "kbaName": "DORMAGEN,ST.",
+    "kfz": {
+      "pkw": 39245,
+      "pkwGewerblich": 2443,
+      "lkw": 2120,
+      "kraftraeder": 3902,
+      "anhaenger": 3987
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dorsten": {
+    "ags": "05562012",
+    "kbaName": "DORSTEN,ST.",
+    "kfz": {
+      "pkw": 47558,
+      "pkwGewerblich": 3572,
+      "lkw": 2846,
+      "kraftraeder": 4568,
+      "anhaenger": 7932
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dortmund": {
+    "ags": "05913000",
+    "kbaName": "DORTMUND",
+    "kfz": {
+      "pkw": 304056,
+      "pkwGewerblich": 32637,
+      "lkw": 18293,
+      "kraftraeder": 24726,
+      "anhaenger": 28437
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dresden": {
+    "ags": "14612000",
+    "kbaName": "DRESDEN, STADT",
+    "kfz": {
+      "pkw": 229638,
+      "pkwGewerblich": 32087,
+      "lkw": 21587,
+      "kraftraeder": 18480,
+      "anhaenger": 24068
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "duelmen": {
+    "ags": "05558016",
+    "kbaName": "DUELMEN,ST.",
+    "kfz": {
+      "pkw": 30147,
+      "pkwGewerblich": 2317,
+      "lkw": 1917,
+      "kraftraeder": 2922,
+      "anhaenger": 5877
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "dueren": {
+    "ags": "05358008",
+    "kbaName": "DUEREN,ST.",
+    "kfz": {
+      "pkw": 50762,
+      "pkwGewerblich": 5974,
+      "lkw": 4031,
+      "kraftraeder": 4149,
+      "anhaenger": 6213
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "duesseldorf": {
+    "ags": "05111000",
+    "kbaName": "DUESSELDORF",
+    "kfz": {
+      "pkw": 329679,
+      "pkwGewerblich": 96071,
+      "lkw": 24919,
+      "kraftraeder": 25863,
+      "anhaenger": 18251
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "duisburg": {
+    "ags": "05112000",
+    "kbaName": "DUISBURG",
+    "kfz": {
+      "pkw": 242289,
+      "pkwGewerblich": 20929,
+      "lkw": 15534,
+      "kraftraeder": 19902,
+      "anhaenger": 23354
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ennepetal": {
+    "ags": "05954008",
+    "kbaName": "ENNEPETAL,ST.",
+    "kfz": {
+      "pkw": 21070,
+      "pkwGewerblich": 2807,
+      "lkw": 1298,
+      "kraftraeder": 2462,
+      "anhaenger": 2624
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "erftstadt": {
+    "ags": "05362020",
+    "kbaName": "ERFTSTADT,ST.",
+    "kfz": {
+      "pkw": 33211,
+      "pkwGewerblich": 2243,
+      "lkw": 1986,
+      "kraftraeder": 3486,
+      "anhaenger": 4178
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "erfurt": {
+    "ags": "16051000",
+    "kbaName": "ERFURT",
+    "kfz": {
+      "pkw": 98561,
+      "pkwGewerblich": 13020,
+      "lkw": 9924,
+      "kraftraeder": 8457,
+      "anhaenger": 12471
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "erkelenz": {
+    "ags": "05370004",
+    "kbaName": "ERKELENZ,ST.",
+    "kfz": {
+      "pkw": 29566,
+      "pkwGewerblich": 2276,
+      "lkw": 2190,
+      "kraftraeder": 3005,
+      "anhaenger": 5108
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "erkrath": {
+    "ags": "05158004",
+    "kbaName": "ERKRATH,ST.",
+    "kfz": {
+      "pkw": 26398,
+      "pkwGewerblich": 3668,
+      "lkw": 1497,
+      "kraftraeder": 2219,
+      "anhaenger": 1873
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "erlangen": {
+    "ags": "09562000",
+    "kbaName": "ERLANGEN",
+    "kfz": {
+      "pkw": 56360,
+      "pkwGewerblich": 6776,
+      "lkw": 2929,
+      "kraftraeder": 5451,
+      "anhaenger": 4986
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "eschweiler": {
+    "ags": "05334012",
+    "kbaName": "ESCHWEILER, STADT",
+    "kfz": {
+      "pkw": 32632,
+      "pkwGewerblich": 2936,
+      "lkw": 2242,
+      "kraftraeder": 2866,
+      "anhaenger": 4044
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "essen": {
+    "ags": "05113000",
+    "kbaName": "ESSEN",
+    "kfz": {
+      "pkw": 300335,
+      "pkwGewerblich": 42735,
+      "lkw": 20716,
+      "kraftraeder": 23554,
+      "anhaenger": 22698
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "euskirchen": {
+    "ags": "05366016",
+    "kbaName": "EUSKIRCHEN,ST.",
+    "kfz": {
+      "pkw": 72481,
+      "pkwGewerblich": 39013,
+      "lkw": 7198,
+      "kraftraeder": 3102,
+      "anhaenger": 5852
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "frankfurt": {
+    "ags": "06412000",
+    "kbaName": "FRANKFURT AM MAIN",
+    "kfz": {
+      "pkw": 347937,
+      "pkwGewerblich": 99878,
+      "lkw": 29752,
+      "kraftraeder": 25410,
+      "anhaenger": 16524
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "frechen": {
+    "ags": "05362024",
+    "kbaName": "FRECHEN,ST.",
+    "kfz": {
+      "pkw": 30857,
+      "pkwGewerblich": 3604,
+      "lkw": 3149,
+      "kraftraeder": 2737,
+      "anhaenger": 2637
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "freiburg": {
+    "ags": "08311000",
+    "kbaName": "FREIBURG IM BREISGAU",
+    "kfz": {
+      "pkw": 95432,
+      "pkwGewerblich": 17465,
+      "lkw": 7572,
+      "kraftraeder": 9213,
+      "anhaenger": 8237
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "fuerth": {
+    "ags": "09563000",
+    "kbaName": "FUERTH",
+    "kfz": {
+      "pkw": 65070,
+      "pkwGewerblich": 7098,
+      "lkw": 4434,
+      "kraftraeder": 6776,
+      "anhaenger": 6203
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "gelsenkirchen": {
+    "ags": "05513000",
+    "kbaName": "GELSENKIRCHEN",
+    "kfz": {
+      "pkw": 127361,
+      "pkwGewerblich": 12090,
+      "lkw": 9250,
+      "kraftraeder": 9862,
+      "anhaenger": 10131
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "gevelsberg": {
+    "ags": "05954012",
+    "kbaName": "GEVELSBERG,ST.",
+    "kfz": {
+      "pkw": 20090,
+      "pkwGewerblich": 1836,
+      "lkw": 1429,
+      "kraftraeder": 1985,
+      "anhaenger": 2070
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "gladbeck": {
+    "ags": "05562014",
+    "kbaName": "GLADBECK,ST.",
+    "kfz": {
+      "pkw": 41647,
+      "pkwGewerblich": 2503,
+      "lkw": 2177,
+      "kraftraeder": 3777,
+      "anhaenger": 3554
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "goettingen": {
+    "ags": "03159016",
+    "kbaName": "GÖTTINGEN, STADT",
+    "kfz": {
+      "pkw": 52932,
+      "pkwGewerblich": 7224,
+      "lkw": 3531,
+      "kraftraeder": 3663,
+      "anhaenger": 4616
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "grevenbroich": {
+    "ags": "05162008",
+    "kbaName": "GREVENBROICH,ST.",
+    "kfz": {
+      "pkw": 41045,
+      "pkwGewerblich": 3436,
+      "lkw": 2496,
+      "kraftraeder": 4061,
+      "anhaenger": 5625
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "gronau": {
+    "ags": "05554020",
+    "kbaName": "GRONAU (WESTF.),ST.",
+    "kfz": {
+      "pkw": 29366,
+      "pkwGewerblich": 2793,
+      "lkw": 1942,
+      "kraftraeder": 2057,
+      "anhaenger": 5129
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "guetersloh": {
+    "ags": "05754008",
+    "kbaName": "GUETERSLOH,ST.",
+    "kfz": {
+      "pkw": 64147,
+      "pkwGewerblich": 7830,
+      "lkw": 4845,
+      "kraftraeder": 4495,
+      "anhaenger": 7753
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "gummersbach": {
+    "ags": "05374012",
+    "kbaName": "GUMMERSBACH,ST.",
+    "kfz": {
+      "pkw": 34400,
+      "pkwGewerblich": 4455,
+      "lkw": 2295,
+      "kraftraeder": 2858,
+      "anhaenger": 4292
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "haan": {
+    "ags": "05158008",
+    "kbaName": "HAAN,ST.",
+    "kfz": {
+      "pkw": 19801,
+      "pkwGewerblich": 2317,
+      "lkw": 1275,
+      "kraftraeder": 1908,
+      "anhaenger": 1769
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hagen": {
+    "ags": "05914000",
+    "kbaName": "HAGEN",
+    "kfz": {
+      "pkw": 100423,
+      "pkwGewerblich": 9317,
+      "lkw": 6298,
+      "kraftraeder": 9395,
+      "anhaenger": 9031
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "halle": {
+    "ags": "15002000",
+    "kbaName": "HALLE (SAALE)",
+    "kfz": {
+      "pkw": 95134,
+      "pkwGewerblich": 11893,
+      "lkw": 8055,
+      "kraftraeder": 6613,
+      "anhaenger": 10899
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hamburg": {
+    "ags": "02000000",
+    "kbaName": "HAMBURG-STADT",
+    "kfz": {
+      "pkw": 807162,
+      "pkwGewerblich": 168155,
+      "lkw": 68482,
+      "kraftraeder": 60971,
+      "anhaenger": 78059
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hamm": {
+    "ags": "05915000",
+    "kbaName": "HAMM",
+    "kfz": {
+      "pkw": 102193,
+      "pkwGewerblich": 8341,
+      "lkw": 6207,
+      "kraftraeder": 8109,
+      "anhaenger": 14478
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hannover": {
+    "ags": "03241001",
+    "kbaName": "HANNOVER",
+    "kfz": {
+      "pkw": 223947,
+      "pkwGewerblich": 41027,
+      "lkw": 16343,
+      "kraftraeder": 16738,
+      "anhaenger": 19516
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hattingen": {
+    "ags": "05954016",
+    "kbaName": "HATTINGEN,ST.",
+    "kfz": {
+      "pkw": 33444,
+      "pkwGewerblich": 2492,
+      "lkw": 1845,
+      "kraftraeder": 3583,
+      "anhaenger": 3825
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "heidelberg": {
+    "ags": "08221000",
+    "kbaName": "HEIDELBERG",
+    "kfz": {
+      "pkw": 61585,
+      "pkwGewerblich": 11306,
+      "lkw": 3945,
+      "kraftraeder": 5262,
+      "anhaenger": 4607
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "heilbronn": {
+    "ags": "08121000",
+    "kbaName": "HEILBRONN",
+    "kfz": {
+      "pkw": 70353,
+      "pkwGewerblich": 10605,
+      "lkw": 5354,
+      "kraftraeder": 5464,
+      "anhaenger": 7766
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "heinsberg": {
+    "ags": "05370016",
+    "kbaName": "HEINSBERG,ST.",
+    "kfz": {
+      "pkw": 28411,
+      "pkwGewerblich": 3101,
+      "lkw": 2128,
+      "kraftraeder": 2517,
+      "anhaenger": 5703
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hennef": {
+    "ags": "05382020",
+    "kbaName": "HENNEF (SIEG),ST.",
+    "kfz": {
+      "pkw": 30953,
+      "pkwGewerblich": 2396,
+      "lkw": 2024,
+      "kraftraeder": 3388,
+      "anhaenger": 4574
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "herford": {
+    "ags": "05758012",
+    "kbaName": "HERFORD,ST.",
+    "kfz": {
+      "pkw": 42782,
+      "pkwGewerblich": 6889,
+      "lkw": 3089,
+      "kraftraeder": 3101,
+      "anhaenger": 5641
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "herne": {
+    "ags": "05916000",
+    "kbaName": "HERNE",
+    "kfz": {
+      "pkw": 80701,
+      "pkwGewerblich": 6609,
+      "lkw": 5696,
+      "kraftraeder": 6857,
+      "anhaenger": 6716
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "herten": {
+    "ags": "05562020",
+    "kbaName": "HERTEN,ST.",
+    "kfz": {
+      "pkw": 35994,
+      "pkwGewerblich": 2623,
+      "lkw": 1962,
+      "kraftraeder": 3313,
+      "anhaenger": 4066
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "herzogenrath": {
+    "ags": "05334016",
+    "kbaName": "HERZOGENRATH, STADT",
+    "kfz": {
+      "pkw": 27673,
+      "pkwGewerblich": 1649,
+      "lkw": 1292,
+      "kraftraeder": 2915,
+      "anhaenger": 3314
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hilden": {
+    "ags": "05158016",
+    "kbaName": "HILDEN,ST.",
+    "kfz": {
+      "pkw": 33809,
+      "pkwGewerblich": 4358,
+      "lkw": 2782,
+      "kraftraeder": 3372,
+      "anhaenger": 2893
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "hueckelhoven": {
+    "ags": "05370020",
+    "kbaName": "HUECKELHOVEN,ST.",
+    "kfz": {
+      "pkw": 24875,
+      "pkwGewerblich": 1506,
+      "lkw": 1408,
+      "kraftraeder": 2188,
+      "anhaenger": 3964
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "huerth": {
+    "ags": "05362028",
+    "kbaName": "HUERTH,ST.",
+    "kfz": {
+      "pkw": 36636,
+      "pkwGewerblich": 3930,
+      "lkw": 2840,
+      "kraftraeder": 3805,
+      "anhaenger": 3563
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ibbenbueren": {
+    "ags": "05566028",
+    "kbaName": "IBBENBUEREN,ST.",
+    "kfz": {
+      "pkw": 34345,
+      "pkwGewerblich": 3448,
+      "lkw": 2194,
+      "kraftraeder": 3046,
+      "anhaenger": 6533
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ingolstadt": {
+    "ags": "09161000",
+    "kbaName": "INGOLSTADT",
+    "kfz": {
+      "pkw": 103921,
+      "pkwGewerblich": 36496,
+      "lkw": 4267,
+      "kraftraeder": 8903,
+      "anhaenger": 9711
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "iserlohn": {
+    "ags": "05962024",
+    "kbaName": "ISERLOHN,ST.",
+    "kfz": {
+      "pkw": 56966,
+      "pkwGewerblich": 5224,
+      "lkw": 3867,
+      "kraftraeder": 4844,
+      "anhaenger": 6815
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "jena": {
+    "ags": "16053000",
+    "kbaName": "JENA",
+    "kfz": {
+      "pkw": 44928,
+      "pkwGewerblich": 5615,
+      "lkw": 3305,
+      "kraftraeder": 3405,
+      "anhaenger": 4687
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kaarst": {
+    "ags": "05162016",
+    "kbaName": "KAARST",
+    "kfz": {
+      "pkw": 27797,
+      "pkwGewerblich": 2665,
+      "lkw": 1374,
+      "kraftraeder": 2430,
+      "anhaenger": 2260
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kamen": {
+    "ags": "05978020",
+    "kbaName": "KAMEN,ST.",
+    "kfz": {
+      "pkw": 26603,
+      "pkwGewerblich": 2028,
+      "lkw": 1263,
+      "kraftraeder": 2415,
+      "anhaenger": 3358
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "karlsruhe": {
+    "ags": "08212000",
+    "kbaName": "KARLSRUHE",
+    "kfz": {
+      "pkw": 140612,
+      "pkwGewerblich": 27824,
+      "lkw": 10877,
+      "kraftraeder": 13214,
+      "anhaenger": 14343
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kassel": {
+    "ags": "06611000",
+    "kbaName": "KASSEL",
+    "kfz": {
+      "pkw": 91782,
+      "pkwGewerblich": 14189,
+      "lkw": 8023,
+      "kraftraeder": 6336,
+      "anhaenger": 9826
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kerpen": {
+    "ags": "05362032",
+    "kbaName": "KERPEN,ST.",
+    "kfz": {
+      "pkw": 41638,
+      "pkwGewerblich": 4215,
+      "lkw": 2782,
+      "kraftraeder": 3870,
+      "anhaenger": 4534
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kiel": {
+    "ags": "01002000",
+    "kbaName": "KIEL",
+    "kfz": {
+      "pkw": 111902,
+      "pkwGewerblich": 16609,
+      "lkw": 9009,
+      "kraftraeder": 8763,
+      "anhaenger": 11732
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "kleve": {
+    "ags": "05154036",
+    "kbaName": "KLEVE,ST.",
+    "kfz": {
+      "pkw": 31597,
+      "pkwGewerblich": 3620,
+      "lkw": 2018,
+      "kraftraeder": 2007,
+      "anhaenger": 3954
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "koblenz": {
+    "ags": "07111000",
+    "kbaName": "KOBLENZ",
+    "kfz": {
+      "pkw": 64908,
+      "pkwGewerblich": 12948,
+      "lkw": 5283,
+      "kraftraeder": 5130,
+      "anhaenger": 6557
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "koeln": {
+    "ags": "05315000",
+    "kbaName": "KOELN",
+    "kfz": {
+      "pkw": 501926,
+      "pkwGewerblich": 97757,
+      "lkw": 38859,
+      "kraftraeder": 45181,
+      "anhaenger": 32644
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "koenigswinter": {
+    "ags": "05382024",
+    "kbaName": "KOENIGSWINTER,ST.",
+    "kfz": {
+      "pkw": 26129,
+      "pkwGewerblich": 1425,
+      "lkw": 1447,
+      "kraftraeder": 2966,
+      "anhaenger": 3400
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "korschenbroich": {
+    "ags": "05162020",
+    "kbaName": "KORSCHENBROICH",
+    "kfz": {
+      "pkw": 22962,
+      "pkwGewerblich": 1649,
+      "lkw": 1508,
+      "kraftraeder": 2220,
+      "anhaenger": 2880
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "krefeld": {
+    "ags": "05114000",
+    "kbaName": "KREFELD",
+    "kfz": {
+      "pkw": 123741,
+      "pkwGewerblich": 14114,
+      "lkw": 8132,
+      "kraftraeder": 10295,
+      "anhaenger": 18741
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "langenfeld": {
+    "ags": "05158020",
+    "kbaName": "LANGENFELD,ST.",
+    "kfz": {
+      "pkw": 39924,
+      "pkwGewerblich": 5514,
+      "lkw": 2902,
+      "kraftraeder": 3741,
+      "anhaenger": 4141
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "leipzig": {
+    "ags": "14713000",
+    "kbaName": "LEIPZIG",
+    "kfz": {
+      "pkw": 233738,
+      "pkwGewerblich": 29839,
+      "lkw": 19623,
+      "kraftraeder": 16932,
+      "anhaenger": 24374
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "leverkusen": {
+    "ags": "05316000",
+    "kbaName": "LEVERKUSEN",
+    "kfz": {
+      "pkw": 93243,
+      "pkwGewerblich": 12225,
+      "lkw": 5810,
+      "kraftraeder": 8213,
+      "anhaenger": 8100
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "lippstadt": {
+    "ags": "05974028",
+    "kbaName": "LIPPSTADT,ST.",
+    "kfz": {
+      "pkw": 42076,
+      "pkwGewerblich": 3347,
+      "lkw": 2534,
+      "kraftraeder": 3572,
+      "anhaenger": 6264
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "loehne": {
+    "ags": "05758024",
+    "kbaName": "LOEHNE,ST.",
+    "kfz": {
+      "pkw": 26852,
+      "pkwGewerblich": 1879,
+      "lkw": 1597,
+      "kraftraeder": 2387,
+      "anhaenger": 4848
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "lohmar": {
+    "ags": "05382028",
+    "kbaName": "LOHMAR",
+    "kfz": {
+      "pkw": 21381,
+      "pkwGewerblich": 1617,
+      "lkw": 1489,
+      "kraftraeder": 2450,
+      "anhaenger": 3287
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ludwigshafen": {
+    "ags": "07314000",
+    "kbaName": "LUDWIGSHAFEN A.RH.",
+    "kfz": {
+      "pkw": 85000,
+      "pkwGewerblich": 10838,
+      "lkw": 5972,
+      "kraftraeder": 7598,
+      "anhaenger": 6464
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "luebeck": {
+    "ags": "01003000",
+    "kbaName": "LUEBECK",
+    "kfz": {
+      "pkw": 103083,
+      "pkwGewerblich": 13604,
+      "lkw": 8464,
+      "kraftraeder": 8910,
+      "anhaenger": 15785
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "luedenscheid": {
+    "ags": "05962032",
+    "kbaName": "LUEDENSCHEID,ST.",
+    "kfz": {
+      "pkw": 41779,
+      "pkwGewerblich": 3981,
+      "lkw": 2649,
+      "kraftraeder": 3243,
+      "anhaenger": 3467
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "luenen": {
+    "ags": "05978024",
+    "kbaName": "LUENEN,ST.",
+    "kfz": {
+      "pkw": 49214,
+      "pkwGewerblich": 3850,
+      "lkw": 2920,
+      "kraftraeder": 4292,
+      "anhaenger": 5226
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "magdeburg": {
+    "ags": "15003000",
+    "kbaName": "MAGDEBURG, LANDESHAUPTSTADT",
+    "kfz": {
+      "pkw": 112378,
+      "pkwGewerblich": 14559,
+      "lkw": 9595,
+      "kraftraeder": 6890,
+      "anhaenger": 12922
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "mainz": {
+    "ags": "07315000",
+    "kbaName": "MAINZ",
+    "kfz": {
+      "pkw": 103067,
+      "pkwGewerblich": 16529,
+      "lkw": 6231,
+      "kraftraeder": 8123,
+      "anhaenger": 7194
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "mannheim": {
+    "ags": "08222000",
+    "kbaName": "MANNHEIM,STADT",
+    "kfz": {
+      "pkw": 160073,
+      "pkwGewerblich": 31474,
+      "lkw": 14441,
+      "kraftraeder": 13335,
+      "anhaenger": 13718
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "marl": {
+    "ags": "05562024",
+    "kbaName": "MARL,ST.",
+    "kfz": {
+      "pkw": 49730,
+      "pkwGewerblich": 2756,
+      "lkw": 2616,
+      "kraftraeder": 4681,
+      "anhaenger": 5873
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "meckenheim": {
+    "ags": "05382032",
+    "kbaName": "MECKENHEIM,ST.",
+    "kfz": {
+      "pkw": 16400,
+      "pkwGewerblich": 2184,
+      "lkw": 1305,
+      "kraftraeder": 1181,
+      "anhaenger": 1854
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "meerbusch": {
+    "ags": "05162022",
+    "kbaName": "MEERBUSCH,ST.",
+    "kfz": {
+      "pkw": 36566,
+      "pkwGewerblich": 4208,
+      "lkw": 1850,
+      "kraftraeder": 3373,
+      "anhaenger": 2756
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "menden": {
+    "ags": "05962040",
+    "kbaName": "MENDEN (SAUERLAND),ST.",
+    "kfz": {
+      "pkw": 34316,
+      "pkwGewerblich": 2368,
+      "lkw": 1888,
+      "kraftraeder": 2951,
+      "anhaenger": 4723
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "mettmann": {
+    "ags": "05158024",
+    "kbaName": "METTMANN,ST.",
+    "kfz": {
+      "pkw": 23462,
+      "pkwGewerblich": 2126,
+      "lkw": 2185,
+      "kraftraeder": 2498,
+      "anhaenger": 2332
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "minden": {
+    "ags": "05770024",
+    "kbaName": "MINDEN,ST.",
+    "kfz": {
+      "pkw": 51817,
+      "pkwGewerblich": 6048,
+      "lkw": 4586,
+      "kraftraeder": 3729,
+      "anhaenger": 8584
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "moenchengladbach": {
+    "ags": "05116000",
+    "kbaName": "MOENCHENGLADBACH",
+    "kfz": {
+      "pkw": 145526,
+      "pkwGewerblich": 15790,
+      "lkw": 10553,
+      "kraftraeder": 11642,
+      "anhaenger": 14027
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "moers": {
+    "ags": "05170024",
+    "kbaName": "MOERS,ST.",
+    "kfz": {
+      "pkw": 65290,
+      "pkwGewerblich": 5815,
+      "lkw": 3923,
+      "kraftraeder": 5515,
+      "anhaenger": 6990
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "monheim-am-rhein": {
+    "ags": "05158026",
+    "kbaName": "MONHEIM,ST.",
+    "kfz": {
+      "pkw": 25631,
+      "pkwGewerblich": 4129,
+      "lkw": 2328,
+      "kraftraeder": 2056,
+      "anhaenger": 2310
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "muelheim-an-der-ruhr": {
+    "ags": "05117000",
+    "kbaName": "MUELHEIM A.D.RUHR",
+    "kfz": {
+      "pkw": 96621,
+      "pkwGewerblich": 10347,
+      "lkw": 5880,
+      "kraftraeder": 8256,
+      "anhaenger": 7985
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "muenchen": {
+    "ags": "09162000",
+    "kbaName": "MUENCHEN",
+    "kfz": {
+      "pkw": 790359,
+      "pkwGewerblich": 267502,
+      "lkw": 55622,
+      "kraftraeder": 72104,
+      "anhaenger": 43505
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "muenster": {
+    "ags": "05515000",
+    "kbaName": "MUENSTER",
+    "kfz": {
+      "pkw": 153225,
+      "pkwGewerblich": 27867,
+      "lkw": 12752,
+      "kraftraeder": 11185,
+      "anhaenger": 18207
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "nettetal": {
+    "ags": "05166016",
+    "kbaName": "NETTETAL,ST.",
+    "kfz": {
+      "pkw": 27665,
+      "pkwGewerblich": 1995,
+      "lkw": 1796,
+      "kraftraeder": 2408,
+      "anhaenger": 4228
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "neuss": {
+    "ags": "05162024",
+    "kbaName": "NEUSS,ST.",
+    "kfz": {
+      "pkw": 89189,
+      "pkwGewerblich": 13603,
+      "lkw": 9889,
+      "kraftraeder": 7356,
+      "anhaenger": 7848
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "niederkassel": {
+    "ags": "05382044",
+    "kbaName": "NIEDERKASSEL,ST.",
+    "kfz": {
+      "pkw": 23963,
+      "pkwGewerblich": 1316,
+      "lkw": 1456,
+      "kraftraeder": 2641,
+      "anhaenger": 2486
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "nuernberg": {
+    "ags": "09564000",
+    "kbaName": "NUERNBERG",
+    "kfz": {
+      "pkw": 248462,
+      "pkwGewerblich": 41013,
+      "lkw": 21420,
+      "kraftraeder": 24416,
+      "anhaenger": 23830
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "oberhausen": {
+    "ags": "05119000",
+    "kbaName": "OBERHAUSEN",
+    "kfz": {
+      "pkw": 114931,
+      "pkwGewerblich": 9286,
+      "lkw": 7358,
+      "kraftraeder": 9895,
+      "anhaenger": 9966
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "offenbach": {
+    "ags": "06413000",
+    "kbaName": "OFFENBACH AM MAIN",
+    "kfz": {
+      "pkw": 60769,
+      "pkwGewerblich": 11204,
+      "lkw": 4254,
+      "kraftraeder": 4563,
+      "anhaenger": 3951
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "oldenburg": {
+    "ags": "03403000",
+    "kbaName": "OLDENBURG (OLDB),STADT",
+    "kfz": {
+      "pkw": 92480,
+      "pkwGewerblich": 12780,
+      "lkw": 6864,
+      "kraftraeder": 6428,
+      "anhaenger": 12342
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "osnabrueck": {
+    "ags": "03404000",
+    "kbaName": "OSNABRUECK",
+    "kfz": {
+      "pkw": 89854,
+      "pkwGewerblich": 16325,
+      "lkw": 7511,
+      "kraftraeder": 6064,
+      "anhaenger": 11021
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "paderborn": {
+    "ags": "05774032",
+    "kbaName": "PADERBORN,ST.",
+    "kfz": {
+      "pkw": 86961,
+      "pkwGewerblich": 10077,
+      "lkw": 5489,
+      "kraftraeder": 6461,
+      "anhaenger": 10187
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "pforzheim": {
+    "ags": "08231000",
+    "kbaName": "PFORZHEIM,ST.",
+    "kfz": {
+      "pkw": 63973,
+      "pkwGewerblich": 8495,
+      "lkw": 3897,
+      "kraftraeder": 5110,
+      "anhaenger": 6265
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "potsdam": {
+    "ags": "12054000",
+    "kbaName": "POTSDAM",
+    "kfz": {
+      "pkw": 77649,
+      "pkwGewerblich": 9483,
+      "lkw": 5912,
+      "kraftraeder": 6529,
+      "anhaenger": 8505
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "pulheim": {
+    "ags": "05362036",
+    "kbaName": "PULHEIM,ST.",
+    "kfz": {
+      "pkw": 35128,
+      "pkwGewerblich": 2579,
+      "lkw": 2555,
+      "kraftraeder": 3523,
+      "anhaenger": 3258
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "radevormwald": {
+    "ags": "05374036",
+    "kbaName": "RADEVORMWALD,ST.",
+    "kfz": {
+      "pkw": 14431,
+      "pkwGewerblich": 1268,
+      "lkw": 906,
+      "kraftraeder": 1489,
+      "anhaenger": 2087
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ratingen": {
+    "ags": "05158028",
+    "kbaName": "RATINGEN,ST.",
+    "kfz": {
+      "pkw": 55713,
+      "pkwGewerblich": 8759,
+      "lkw": 3643,
+      "kraftraeder": 4931,
+      "anhaenger": 4141
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "recklinghausen": {
+    "ags": "05562032",
+    "kbaName": "RECKLINGHAUSEN,ST.",
+    "kfz": {
+      "pkw": 66211,
+      "pkwGewerblich": 4317,
+      "lkw": 4152,
+      "kraftraeder": 6057,
+      "anhaenger": 6111
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "regensburg": {
+    "ags": "09362000",
+    "kbaName": "REGENSBURG",
+    "kfz": {
+      "pkw": 84123,
+      "pkwGewerblich": 18811,
+      "lkw": 6561,
+      "kraftraeder": 7732,
+      "anhaenger": 8273
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "remscheid": {
+    "ags": "05120000",
+    "kbaName": "REMSCHEID",
+    "kfz": {
+      "pkw": 65073,
+      "pkwGewerblich": 7235,
+      "lkw": 4461,
+      "kraftraeder": 6035,
+      "anhaenger": 6251
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "reutlingen": {
+    "ags": "08415061",
+    "kbaName": "REUTLINGEN,ST.",
+    "kfz": {
+      "pkw": 67358,
+      "pkwGewerblich": 8188,
+      "lkw": 3861,
+      "kraftraeder": 6972,
+      "anhaenger": 8710
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "rheda-wiedenbrueck": {
+    "ags": "05754028",
+    "kbaName": "RHEDA-WIEDENBRUECK,ST.",
+    "kfz": {
+      "pkw": 29680,
+      "pkwGewerblich": 2721,
+      "lkw": 2042,
+      "kraftraeder": 2596,
+      "anhaenger": 6015
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "rheinbach": {
+    "ags": "05382048",
+    "kbaName": "RHEINBACH,ST.",
+    "kfz": {
+      "pkw": 17328,
+      "pkwGewerblich": 1383,
+      "lkw": 1059,
+      "kraftraeder": 1687,
+      "anhaenger": 2663
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "rheine": {
+    "ags": "05566076",
+    "kbaName": "RHEINE,ST.",
+    "kfz": {
+      "pkw": 46552,
+      "pkwGewerblich": 5486,
+      "lkw": 4018,
+      "kraftraeder": 3753,
+      "anhaenger": 8862
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "roesrath": {
+    "ags": "05378028",
+    "kbaName": "ROESRATH",
+    "kfz": {
+      "pkw": 18570,
+      "pkwGewerblich": 1155,
+      "lkw": 1099,
+      "kraftraeder": 2012,
+      "anhaenger": 1966
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "rostock": {
+    "ags": "13003000",
+    "kbaName": "ROSTOCK",
+    "kfz": {
+      "pkw": 86483,
+      "pkwGewerblich": 9798,
+      "lkw": 6637,
+      "kraftraeder": 5549,
+      "anhaenger": 23392
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "saarbruecken": {
+    "ags": "10041100",
+    "kbaName": "SAARBRUECKEN,ST.",
+    "kfz": {
+      "pkw": 96810,
+      "pkwGewerblich": 14330,
+      "lkw": 7558,
+      "kraftraeder": 8566,
+      "anhaenger": 10292
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "sankt-augustin": {
+    "ags": "05382056",
+    "kbaName": "SANKT AUGUSTIN,ST.",
+    "kfz": {
+      "pkw": 32098,
+      "pkwGewerblich": 2453,
+      "lkw": 1894,
+      "kraftraeder": 2949,
+      "anhaenger": 3019
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "schwelm": {
+    "ags": "05954024",
+    "kbaName": "SCHWELM,ST.",
+    "kfz": {
+      "pkw": 17472,
+      "pkwGewerblich": 2050,
+      "lkw": 1030,
+      "kraftraeder": 1811,
+      "anhaenger": 1872
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "schwerin": {
+    "ags": "13004000",
+    "kbaName": "SCHWERIN,LANDESHAUPTSTADT",
+    "kfz": {
+      "pkw": 45354,
+      "pkwGewerblich": 6108,
+      "lkw": 3986,
+      "kraftraeder": 2576,
+      "anhaenger": 6308
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "schwerte": {
+    "ags": "05978028",
+    "kbaName": "SCHWERTE,ST.",
+    "kfz": {
+      "pkw": 28950,
+      "pkwGewerblich": 1780,
+      "lkw": 1494,
+      "kraftraeder": 2822,
+      "anhaenger": 3527
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "siegburg": {
+    "ags": "05382060",
+    "kbaName": "SIEGBURG,ST.",
+    "kfz": {
+      "pkw": 23931,
+      "pkwGewerblich": 3540,
+      "lkw": 2066,
+      "kraftraeder": 2046,
+      "anhaenger": 2342
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "siegen": {
+    "ags": "05970040",
+    "kbaName": "SIEGEN,ST.",
+    "kfz": {
+      "pkw": 61925,
+      "pkwGewerblich": 9348,
+      "lkw": 3907,
+      "kraftraeder": 4490,
+      "anhaenger": 6942
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "soest": {
+    "ags": "05974040",
+    "kbaName": "SOEST,ST.",
+    "kfz": {
+      "pkw": 30343,
+      "pkwGewerblich": 3387,
+      "lkw": 1727,
+      "kraftraeder": 2373,
+      "anhaenger": 4358
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "solingen": {
+    "ags": "05122000",
+    "kbaName": "SOLINGEN",
+    "kfz": {
+      "pkw": 93350,
+      "pkwGewerblich": 8539,
+      "lkw": 5684,
+      "kraftraeder": 9799,
+      "anhaenger": 8570
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "sprockhoevel": {
+    "ags": "05954028",
+    "kbaName": "SPROCKHOEVEL,ST.",
+    "kfz": {
+      "pkw": 17941,
+      "pkwGewerblich": 1304,
+      "lkw": 1076,
+      "kraftraeder": 2177,
+      "anhaenger": 2424
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "stolberg-rheinland": {
+    "ags": "05334032",
+    "kbaName": "STOLBERG (RHLD), STADT",
+    "kfz": {
+      "pkw": 33901,
+      "pkwGewerblich": 2382,
+      "lkw": 2121,
+      "kraftraeder": 3204,
+      "anhaenger": 5250
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "stuttgart": {
+    "ags": "08111000",
+    "kbaName": "STUTTGART,LANDESHAUPTSTADT",
+    "kfz": {
+      "pkw": 299197,
+      "pkwGewerblich": 77004,
+      "lkw": 18607,
+      "kraftraeder": 28550,
+      "anhaenger": 19734
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "swisttal": {
+    "ags": "05382064",
+    "kbaName": "SWISTTAL",
+    "kfz": {
+      "pkw": 12309,
+      "pkwGewerblich": 543,
+      "lkw": 749,
+      "kraftraeder": 1352,
+      "anhaenger": 2182
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "trier": {
+    "ags": "07211000",
+    "kbaName": "TRIER,ST.",
+    "kfz": {
+      "pkw": 54533,
+      "pkwGewerblich": 6636,
+      "lkw": 4369,
+      "kraftraeder": 4994,
+      "anhaenger": 5780
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "troisdorf": {
+    "ags": "05382068",
+    "kbaName": "TROISDORF,ST.",
+    "kfz": {
+      "pkw": 45128,
+      "pkwGewerblich": 5006,
+      "lkw": 3529,
+      "kraftraeder": 4024,
+      "anhaenger": 4336
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "ulm": {
+    "ags": "08421000",
+    "kbaName": "ULM,STADT",
+    "kfz": {
+      "pkw": 68839,
+      "pkwGewerblich": 13331,
+      "lkw": 5154,
+      "kraftraeder": 6547,
+      "anhaenger": 8618
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "unna": {
+    "ags": "05978036",
+    "kbaName": "UNNA,ST.",
+    "kfz": {
+      "pkw": 37206,
+      "pkwGewerblich": 3458,
+      "lkw": 2481,
+      "kraftraeder": 3416,
+      "anhaenger": 5173
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "velbert": {
+    "ags": "05158032",
+    "kbaName": "VELBERT,ST.",
+    "kfz": {
+      "pkw": 50271,
+      "pkwGewerblich": 5584,
+      "lkw": 3281,
+      "kraftraeder": 5092,
+      "anhaenger": 4843
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "viersen": {
+    "ags": "05166032",
+    "kbaName": "VIERSEN,ST.",
+    "kfz": {
+      "pkw": 47894,
+      "pkwGewerblich": 4597,
+      "lkw": 3712,
+      "kraftraeder": 4046,
+      "anhaenger": 6166
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wachtberg": {
+    "ags": "05382072",
+    "kbaName": "WACHTBERG",
+    "kfz": {
+      "pkw": 13405,
+      "pkwGewerblich": 641,
+      "lkw": 914,
+      "kraftraeder": 1430,
+      "anhaenger": 2445
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wesel": {
+    "ags": "05170048",
+    "kbaName": "WESEL,ST.",
+    "kfz": {
+      "pkw": 37704,
+      "pkwGewerblich": 3731,
+      "lkw": 2601,
+      "kraftraeder": 3262,
+      "anhaenger": 6083
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wesseling": {
+    "ags": "05362040",
+    "kbaName": "WESSELING,ST.",
+    "kfz": {
+      "pkw": 22422,
+      "pkwGewerblich": 2197,
+      "lkw": 1978,
+      "kraftraeder": 2005,
+      "anhaenger": 2092
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wiesbaden": {
+    "ags": "06414000",
+    "kbaName": "WIESBADEN",
+    "kfz": {
+      "pkw": 223018,
+      "pkwGewerblich": 100302,
+      "lkw": 20012,
+      "kraftraeder": 12707,
+      "anhaenger": 15867
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "willich": {
+    "ags": "05166036",
+    "kbaName": "WILLICH,ST.",
+    "kfz": {
+      "pkw": 34358,
+      "pkwGewerblich": 4157,
+      "lkw": 3629,
+      "kraftraeder": 3200,
+      "anhaenger": 9959
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "witten": {
+    "ags": "05954036",
+    "kbaName": "WITTEN,ST.",
+    "kfz": {
+      "pkw": 55511,
+      "pkwGewerblich": 4410,
+      "lkw": 3248,
+      "kraftraeder": 6025,
+      "anhaenger": 5807
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wolfsburg": {
+    "ags": "03103000",
+    "kbaName": "WOLFSBURG",
+    "kfz": {
+      "pkw": 126648,
+      "pkwGewerblich": 68516,
+      "lkw": 3711,
+      "kraftraeder": 6157,
+      "anhaenger": 7356
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wuelfrath": {
+    "ags": "05158036",
+    "kbaName": "WUELFRATH,ST.",
+    "kfz": {
+      "pkw": 13228,
+      "pkwGewerblich": 1054,
+      "lkw": 689,
+      "kraftraeder": 1533,
+      "anhaenger": 1525
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wuerselen": {
+    "ags": "05334036",
+    "kbaName": "WUERSELEN, STADT",
+    "kfz": {
+      "pkw": 23352,
+      "pkwGewerblich": 2220,
+      "lkw": 1463,
+      "kraftraeder": 2150,
+      "anhaenger": 3111
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wuerzburg": {
+    "ags": "09663000",
+    "kbaName": "WUERZBURG",
+    "kfz": {
+      "pkw": 64650,
+      "pkwGewerblich": 12046,
+      "lkw": 6135,
+      "kraftraeder": 6370,
+      "anhaenger": 6740
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  },
+  "wuppertal": {
+    "ags": "05124000",
+    "kbaName": "WUPPERTAL",
+    "kfz": {
+      "pkw": 179369,
+      "pkwGewerblich": 21448,
+      "lkw": 11332,
+      "kraftraeder": 18228,
+      "anhaenger": 14390
+    },
+    "stand": "FZ 3 (KBA), 1. Januar 2026",
+    "quelle": "https://www.kba.de/DE/Statistik/Produktkatalog/produkte/Fahrzeuge/fz3_b_uebersicht.html"
+  }
+}
