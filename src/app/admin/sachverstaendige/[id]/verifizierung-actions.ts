@@ -7,15 +7,14 @@ import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
 import { TIER2_SLOTS, tier2FreigabeErlaubt } from '@/lib/sv/tier2-docs'
+import { istAdminUploadbar } from '@/lib/sv/admin-upload-slots'
 import { revalidatePath } from 'next/cache'
 import { logPartnerEvent } from '@/lib/partner/log-partner-event'
 
-const ADMIN_UPLOADBARE_SLOTS = [
-  'sv_sicherungsabtretung',
-  'sv_honorarvereinbarung',
-  'sv_datenschutzerklaerung',
-  'sv_widerrufsbelehrung',
-] as const
+// Liste + Begruendung stehen in @/lib/sv/admin-upload-slots (aus einem 'use server'-File
+// darf keine Konstante exportiert werden, und ohne Export waere sie nicht testbar).
+// Seit 20.08. sind die beiden Tier-2-Nachweise enthalten — die UI bot den Upload fuer
+// JEDEN Slot an, der Server lehnte genau diese beiden ab.
 
 // AAR-359 W6: Admin-Actions für Verifizierungs-Tab.
 //
@@ -564,7 +563,7 @@ export async function uploadAdminPflichtdokument(
   const slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
   const file = formData.get('datei') as File | null
   if (!slotId) return { success: false, error: 'Kein Slot angegeben' }
-  if (!ADMIN_UPLOADBARE_SLOTS.includes(slotId as typeof ADMIN_UPLOADBARE_SLOTS[number])) {
+  if (!istAdminUploadbar(slotId)) {
     return { success: false, error: `Slot "${slotId}" ist nicht admin-uploadbar` }
   }
   if (!file || file.size === 0) return { success: false, error: 'Keine Datei ausgewählt' }
