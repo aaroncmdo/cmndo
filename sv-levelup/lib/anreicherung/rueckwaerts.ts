@@ -1,4 +1,5 @@
 import { FELDER, type AnreicherungsFeld, type Db } from './schreiben'
+import { alleSeiten, inBloecken } from '../db/alle-seiten'
 
 const KONTAKTFELDER: AnreicherungsFeld[] = ['email', 'telefon', 'vorname', 'nachname']
 
@@ -30,14 +31,24 @@ function leer(w: unknown): boolean {
  * Idempotent: ein zweiter Aufruf setzt dieselben Werte erneut.
  */
 export async function dreheLaufZurueck(db: Db, laufId: string): Promise<RueckErgebnis> {
-  const { data: zeilen, error: ladeFehler } = await db
-    .from('levelup_anreicherung')
-    .select('sv_lead_id,feld,wert_vorher,wert_nachher')
-    .eq('lauf_id', laufId)
-    .order('ts', { ascending: true })
+  // ⚠ SEITENWEISE. Ein Lauf schreibt eine Audit-Zeile je (Lead × Feld); bei
+  // fünf Feldern reicht ein Lauf über 200 Leads, um die 1.000-Zeilen-Grenze zu
+  // reissen. Ein einfaches `.select()` lieferte dann die ersten 1.000 — und
+  // dieser Rückwärtsgang meldete einen VOLLSTÄNDIGEN Rollback, während der Rest
+  // des Laufs unverändert stehen bliebe.
+  const gelesen = await alleSeiten<{ sv_lead_id: string; feld: string; wert_vorher: string | null }>(
+    (von, bis) =>
+      db.from('levelup_anreicherung')
+        .select('sv_lead_id,feld,wert_vorher,wert_nachher')
+        .eq('lauf_id', laufId)
+        .order('ts', { ascending: true })
+        .order('sv_lead_id', { ascending: true })
+        .range(von, bis),
+  )
 
-  if (ladeFehler) return { ok: false, error: `Lauf ${laufId} nicht lesbar: ${ladeFehler.message}` }
-  if (!zeilen || zeilen.length === 0) return { ok: true, zurueckgesetzt: 0, leads: 0 }
+  if (!gelesen.ok) return { ok: false, error: `Lauf ${laufId} nicht lesbar: ${gelesen.error}` }
+  const zeilen = gelesen.zeilen
+  if (zeilen.length === 0) return { ok: true, zurueckgesetzt: 0, leads: 0 }
 
   // Je Lead ein Update statt eines pro Feld — weniger Writes, ein Row-Check.
   const jeLead = new Map<string, Record<string, unknown>>()
@@ -54,14 +65,43 @@ export async function dreheLaufZurueck(db: Db, laufId: string): Promise<RueckErg
   if (jeLead.size === 0) return { ok: true, zurueckgesetzt: 0, leads: 0 }
 
   // Ist-Zustand laden, um den Zielzustand zu kennen (s. Begleitspalten oben).
+  //
+  // ⚠⚠ IN BLÖCKEN, UND DIE MENGE MUSS VOLLSTÄNDIG SEIN. Hier ist eine
+  // unvollständige Lesemenge kein Anzeigefehler, sondern ein falsches
+  // SCHREIBEN: fehlt ein Lead in `jeId`, liefert `ziel()` für jedes seiner
+  // Felder `undefined`, `leer(undefined)` ist `true` — und die Abräum-Zweige
+  // unten nullen `website_gefunden`, `website_sicherheit`, `kontakt_quelle` und
+  // `angereichert_am` an einem Lead, der diese Werte aus einem ANDEREN Lauf
+  // trägt. Genau der Schaden, den der Kommentar oben verhindern soll.
+  //
+  // Zwei Grenzen zugleich: `.in()` mit tausenden Kennungen sprengt die
+  // Query-Zeichenkette in der URL, und ohne `range` kämen höchstens 1.000
+  // Zeilen zurück.
   const ids = [...jeLead.keys()]
-  const { data: leads, error: leadFehler } = await db
-    .from('sv_leads')
-    .select('id,email,telefon,website_url,vorname,nachname')
-    .in('id', ids)
+  const geladen = await inBloecken<{ id: string }>(ids, (block, von, bis) =>
+    db.from('sv_leads')
+      .select('id,email,telefon,website_url,vorname,nachname')
+      .in('id', block)
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
 
-  if (leadFehler) return { ok: false, error: `Leads nicht lesbar: ${leadFehler.message}` }
-  const jeId = new Map((leads ?? []).map((l: { id: string }) => [l.id, l as Record<string, unknown>]))
+  if (!geladen.ok) return { ok: false, error: `Leads nicht lesbar: ${geladen.error}` }
+
+  // ⚠ Gegenprobe: kam für JEDE Kennung eine Zeile zurück? Ein Lead, der aus
+  // dem Audit stammt, aber nicht mehr in `sv_leads` steht, ist gelöscht worden
+  // — dann ist dieser Rückwärtsgang nicht zuständig und darf nicht raten.
+  const jeId = new Map(geladen.zeilen.map((l) => [l.id, l as Record<string, unknown>]))
+  const fehlend = ids.filter((id) => !jeId.has(id))
+  if (fehlend.length > 0) {
+    return {
+      ok: false,
+      error:
+        `${fehlend.length} von ${ids.length} Leads des Laufs sind nicht mehr in sv_leads ` +
+        `(erste: ${fehlend.slice(0, 3).join(', ')}). Rueckdreh abgebrochen — ohne den ` +
+        `Ist-Zustand liesse sich nicht unterscheiden, ob ein Wert aus einem anderen Lauf stammt.`,
+    }
+  }
 
   for (const [leadId, werte] of jeLead) {
     const ist = jeId.get(leadId) ?? {}

@@ -1,5 +1,6 @@
 import { verarbeiteLead, type Holer, type Lead, type RobotsCache } from './lauf'
 import { schreibeFunde, type AnreicherungsFeld, type Db } from './schreiben'
+import { alleSeiten } from '../db/alle-seiten'
 
 export const ANREICHERBARE_FELDER: AnreicherungsFeld[] =
   ['website_url', 'email', 'telefon', 'vorname', 'nachname']
@@ -91,11 +92,27 @@ export async function laufeAn(
     .order('id', { ascending: true })
 
   if (opts.quelle) abfrage = abfrage.eq('quelle', opts.quelle)
-  if (opts.limit) abfrage = abfrage.limit(opts.limit)
 
-  const { data: leads, error } = await abfrage
-  if (error) return { ok: false, error: `Leads nicht lesbar: ${error.message}` }
-  if (!leads || leads.length === 0) return { ok: true, bericht }
+  // ⚠ OHNE `--limit` MUSS SEITENWEISE GELESEN WERDEN. Ein einfaches `.select()`
+  // liefert höchstens 1.000 Zeilen — ohne Fehler, ohne Warnung. Der Massenlauf
+  // hätte still 1.000 statt aller Leads bearbeitet und im Bericht „1000 Leads
+  // betrachtet" als Vollzug gemeldet. Bei 7.000 Leads wären sechs Siebtel nie
+  // angefasst worden, und niemand hätte es an der Ausgabe gesehen.
+  //
+  // Mit `--limit` bleibt es beim einfachen Abruf: dort IST die Begrenzung
+  // gewollt und sichtbar.
+  let leads: Lead[]
+  if (opts.limit) {
+    const { data, error } = await abfrage.limit(opts.limit)
+    if (error) return { ok: false, error: `Leads nicht lesbar: ${error.message}` }
+    leads = (data ?? []) as Lead[]
+  } else {
+    const gelesen = await alleSeiten<Lead>((von, bis) => abfrage.range(von, bis))
+    if (!gelesen.ok) return { ok: false, error: `Leads nicht lesbar: ${gelesen.error}` }
+    leads = gelesen.zeilen
+  }
+
+  if (leads.length === 0) return { ok: true, bericht }
 
   const robotsCache: RobotsCache = new Map()
 

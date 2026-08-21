@@ -23,14 +23,22 @@ let filter: string[] = []
 // Nachbildung der PostgREST-Kette, soweit laufeAn und schreibeFunde sie nutzen.
 const kette = () => {
   const k: Record<string, unknown> = {}
+  // ⚠ `range` gibt WIRKLICH den Ausschnitt zurueck, nicht die ganze Liste. Ein
+  // Mock, der jede Seite vollstaendig beantwortet, kann nicht zeigen, ob der
+  // Aufrufer die Seiten korrekt zusammensetzt — und genau darum geht es seit
+  // dem 1000-Zeilen-Fund vom 21.08.
+  let bereich: [number, number] | null = null
   k.eq = (spalte: string) => { filter.push(spalte); return k }
   for (const m of ['or', 'limit', 'in']) {
     k[m] = () => k
   }
+  k.range = (von: number, bis: number) => { bereich = [von, bis]; return k }
   k.order = (spalte: string) => { sortierung.push(spalte); return k }
   ;(k as { then: unknown }).then = (aufl: (v: unknown) => unknown) =>
     Promise.resolve(
-      leadFehler ? { data: null, error: { message: leadFehler } } : { data: leads, error: null },
+      leadFehler
+        ? { data: null, error: { message: leadFehler } }
+        : { data: bereich ? leads.slice(bereich[0], bereich[1] + 1) : leads, error: null },
     ).then(aufl)
   return k
 }

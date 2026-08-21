@@ -20,6 +20,7 @@ import { createClient } from '@supabase/supabase-js'
 import { holeAdapter } from '../lib/places'
 import { entdecke } from '../lib/discovery/lauf'
 import { DEUTSCHLAND, MAX_RADIUS_KM, startKacheln, type Kachel } from '../lib/discovery/kacheln'
+import { alleSeiten } from '../lib/db/alle-seiten'
 import type { BestandsZeile } from '../lib/discovery/schreiben'
 import type { Db } from '../lib/anreicherung/schreiben'
 
@@ -100,15 +101,27 @@ async function main() {
   console.log(`    Mit Verfeinerung koennen es deutlich mehr werden.\n`)
 
   // Der Bestand einmal laden, nicht je Fund abfragen.
-  const { data: rohBestand, error } = await db
-    .from('sv_leads')
-    .select('id,firma,lat,lng,google_place_id')
-    .not('lat', 'is', null)
+  //
+  // ⚠ SEITENWEISE. Ein einfaches `.select()` liefert höchstens 1.000 Zeilen —
+  // ohne Fehler, ohne Warnung. Genau das passierte am 21.08. dreimal: der Lauf
+  // meldete „Bestand 1000 Leads", während 6.988 in der Tabelle standen. Er
+  // kannte ein Siebtel und hielt jeden der übrigen für einen NEUEN Betrieb.
+  // Dass daraus kein Datenschaden wurde, verdankt sich allein dem partiellen
+  // Unique-Index auf `google_place_id` — die Datenbank war die Schranke, nicht
+  // dieser Code.
+  const gelesen = await alleSeiten<Record<string, unknown>>((von, bis) =>
+    db.from('sv_leads')
+      .select('id,firma,lat,lng,google_place_id')
+      .not('lat', 'is', null)
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
 
-  if (error) {
-    console.error('Bestand nicht lesbar:', error.message)
+  if (!gelesen.ok) {
+    console.error('Bestand nicht lesbar:', gelesen.error)
     process.exit(1)
   }
+  const rohBestand = gelesen.zeilen
 
   const bestand: BestandsZeile[] = (rohBestand ?? []).map((z: Record<string, unknown>) => ({
     id: String(z.id),

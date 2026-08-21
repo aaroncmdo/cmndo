@@ -24,7 +24,7 @@ const state = {
 function leseKette() {
   const genutzt: string[] = []
   const k: Record<string, unknown> = {}
-  for (const m of ['not', 'ilike', 'gte', 'lte', 'eq', 'is', 'order']) {
+  for (const m of ['not', 'ilike', 'gte', 'lte', 'eq', 'is', 'order', 'range']) {
     k[m] = () => { genutzt.push(m); return k }
   }
   k.then = (aufloesen: (w: unknown) => void) => {
