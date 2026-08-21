@@ -2210,7 +2210,12 @@
       "sv_popup_bewertungen": "Reviews",
       "sv_popup_cta": "Request via Wizard →",
       "beratung_label": "Consultation"
-    }
+    },
+    "sprung_staedte": "Cities",
+    "sprung_ratgeber": "Guides",
+    "sprung_schliessen": "Close",
+    "sprung_hinweis": "Tapping centres the map — you stay in the finder. The arrow opens the city page.",
+    "sprung_infos": "City page"
   },
   "werkstatt_finden": {
     "sr_h1": "Find a car repair shop near you — interactive map of vetted partner workshops, ranked by brand and damage type"
@@ -3898,11 +3903,15 @@
     "kfzbestand_text": "{pkw} passenger cars are registered in {stadt}, {gewerblich} of them to commercial owners. In addition there are {lkw} trucks and {kraftraeder} motorcycles.",
     "kfzbestand_quote": "That is {proTausend} cars per 1,000 inhabitants.",
     "kfzbestand_quelle": "Federal Motor Transport Authority (KBA), {stand}",
-    "amtlich_eyebrow": "Official accident statistics",
-    "amtlich_h2": "Where accidents cluster in {ort}",
+    "amtlich_eyebrow": "Official figures",
+    "amtlich_h2": "Traffic and accidents in {ort}",
     "amtlich_intro": "The accident atlas published by Germany's federal and state statistical offices records every road traffic accident involving personal injury, down to the exact location. For {ort}, the following clusters emerge over {zeitraum}:",
     "amtlich_hinweis": "Each location covers an area of roughly 100 metres. The figures do not identify causes — a busy main road records more accidents than a side street.",
-    "amtlich_quelle": "Source: <link>{quelle}</link> — {lizenz}"
+    "amtlich_quelle": "Source: <link>{quelle}</link> — {lizenz}",
+    "verkehr_h3": "How much traffic passes through",
+    "verkehr_intro": "Germany's Federal Highway Research Institute continuously measures traffic on motorways and federal roads. These counting stations are closest to {ort} (annual figures for {jahr}):",
+    "verkehr_zaehlstelle": "Counting station {name}, {km} km away",
+    "verkehr_quelle": "Source: <link>BASt permanent counting stations</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Appointment successfully requested!",
@@ -4069,10 +4078,10 @@
       "og_description": "Full compensation in 5 steps — 32 days on average. Advisor callback <15 min, independent assessor <48 h."
     },
     "gutachter_finden": {
-      "title": "Find a car assessor near you — map & appointment within 48 h",
-      "description": "Interactive map of certified partner assessors nationwide. See an appointment, on site within 48 h. €0 if the crash was not your fault (§249 BGB).",
-      "og_title": "Find a car assessor — map of independent assessors",
-      "og_description": "Interactive map of all available independent assessors in Germany. Appointment within 48 h. Free of charge for those not at fault under §249 BGB.",
+      "title": "Find a car accident assessor — map covering {anzahl} cities",
+      "description": "Certified car damage assessors across {anzahl} German cities on one map — see open appointments, on site within 48 h. Free of charge under § 249 BGB.",
+      "og_title": "Find a car accident assessor — map covering {anzahl} cities",
+      "og_description": "Certified assessors in {anzahl} German cities with open appointments. On site within 48 h, no cost for non-fault claims (§ 249 BGB).",
       "twitter_title": "Find a car assessor — map of independent assessors",
       "twitter_description": "Map of all available assessors in Germany. Appointment within 48h."
     },

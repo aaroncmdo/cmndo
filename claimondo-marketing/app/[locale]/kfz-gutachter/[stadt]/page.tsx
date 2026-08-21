@@ -2,6 +2,7 @@ import { localeAlternates } from '@/lib/seo/alternates'
 import { titelMitZusatz } from '@/lib/seo/title'
 import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
 import { getUnfallhotspots, hotspotOrt, hotspotSatz } from '@/lib/kfz-gutachter/unfallhotspots'
+import { getVerkehrsmengen, zaehlstelleSatz } from '@/lib/kfz-gutachter/verkehrsmengen'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -249,6 +250,15 @@ export default async function KfzGutachterStadtPage({
   // `null` für die 13 Städte ohne ausreichende Häufung: lieber keine Sektion
   // als eine mit erfundener Substanz.
   const unfalldaten = getUnfallhotspots(s.slug)
+  // Verkehrsmenge (BASt) — der Kontext zu den Unfallzahlen. Wird innerhalb der
+  // Unfall-Sektion gerendert, direkt unter dem Hinweis, dass die Unfalldaten
+  // die Verkehrsmenge NICHT kennen.
+  const verkehr = getVerkehrsmengen(s.slug)
+  // Gemessen 21.08.: 151 Städte haben beides, 11 nur Unfalldaten, 11 nur
+  // Verkehrsmengen — und KEINE hat gar nichts. Zusammen decken die zwei
+  // amtlichen Quellen also alle 173 Stadtseiten ab.
+  const hatUnfalldaten = Boolean(unfalldaten && unfalldaten.hotspots.length > 0)
+  const hatVerkehr = Boolean(verkehr && verkehr.zaehlstellen.length > 0)
 
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
@@ -623,7 +633,7 @@ export default async function KfzGutachterStadtPage({
           für die wenigsten Städte. Diese hier gilt für 160 von 173 Städten
           sofort — sie wartet auf keine Freigabe und kostet kein Token.
           Sie ist damit für die meisten Seiten der erste echte Ortsinhalt. */}
-      {unfalldaten && unfalldaten.hotspots.length > 0 && (
+      {(hatUnfalldaten || hatVerkehr) && (
         <section className="border-t border-claimondo-border bg-claimondo-bg py-14 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-claimondo-ondo">
@@ -632,49 +642,110 @@ export default async function KfzGutachterStadtPage({
             <h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-claimondo-navy sm:text-3xl">
               {t('amtlich_h2', { ort: s.name })}
             </h2>
-            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
-              {t('amtlich_intro', { ort: s.name, zeitraum: unfalldaten.zeitraum })}
-            </p>
 
-            <ul className="mt-6 space-y-3">
-              {unfalldaten.hotspots.map((h) => (
-                <li
-                  key={`${h.lat},${h.lng}`}
-                  className="rounded-ios-md border border-claimondo-border bg-white p-5"
-                >
-                  <p className="text-sm font-bold text-claimondo-navy">{hotspotOrt(h)}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
-                    {hotspotSatz(h, unfalldaten.zeitraum)}
-                  </p>
-                </li>
-              ))}
-            </ul>
+            {/* Beide Blöcke einzeln bedingt: 11 Städte haben NUR Unfalldaten,
+                11 andere NUR Verkehrsmengen — zusammen aber deckt eine der
+                beiden Quellen alle 173 Städte ab. Hinge der Verkehr in der
+                Unfall-Bedingung, sähen 11 Städte nichts, obwohl Daten da sind. */}
+            {/* `unfalldaten &&` steht hier zusätzlich zum Flag, damit TypeScript
+                selbst narrowt. Ein `!` wäre ein Versprechen über eine Bedingung,
+                die woanders steht — und bräche still, sobald das Flag anders
+                berechnet wird. */}
+            {unfalldaten && hatUnfalldaten && (
+              <>
+                <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+                  {t('amtlich_intro', { ort: s.name, zeitraum: unfalldaten.zeitraum })}
+                </p>
 
-            {/* Der Hinweis ist nicht Zierde: die Daten nennen keine Ursachen und
-                keine Verkehrsmenge. Ohne diesen Satz liest sich eine hohe Zahl
-                als Werturteil über die Stelle — genau die Tatsachenbehauptung,
-                die der Quellenzwang verhindern soll. */}
-            <p className="mt-5 text-sm leading-relaxed text-claimondo-shield/85">
-              {t('amtlich_hinweis')}
-            </p>
-            <p className="mt-3 text-xs text-claimondo-shield/75">
-              {t.rich('amtlich_quelle', {
-                lizenz: unfalldaten.lizenz,
-                quelle: new URL(unfalldaten.quelle).hostname.replace(/^www\./, ''),
-                // Tag-Syntax, nicht {platzhalter}: t.rich ersetzt <link>…</link>.
-                // Eine Funktion für einen Variablen-Platzhalter greift nicht.
-                link: (chunks) => (
-                  <a
-                    href={unfalldaten.quelle}
-                    target="_blank"
-                    rel="nofollow noopener noreferrer"
-                    className="underline hover:text-claimondo-navy"
-                  >
-                    {chunks}
-                  </a>
-                ),
-              })}
-            </p>
+                <ul className="mt-6 space-y-3">
+                  {unfalldaten.hotspots.map((h) => (
+                    <li
+                      key={`${h.lat},${h.lng}`}
+                      className="rounded-ios-md border border-claimondo-border bg-white p-5"
+                    >
+                      <p className="text-sm font-bold text-claimondo-navy">{hotspotOrt(h)}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                        {hotspotSatz(h, unfalldaten.zeitraum)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Der Hinweis ist nicht Zierde: die Daten nennen keine Ursachen
+                    und keine Verkehrsmenge. Ohne diesen Satz liest sich eine hohe
+                    Zahl als Werturteil über die Stelle — genau die
+                    Tatsachenbehauptung, die der Quellenzwang verhindern soll. */}
+                <p className="mt-5 text-sm leading-relaxed text-claimondo-shield/85">
+                  {t('amtlich_hinweis')}
+                </p>
+                <p className="mt-3 text-xs text-claimondo-shield/75">
+                  {t.rich('amtlich_quelle', {
+                    lizenz: unfalldaten.lizenz,
+                    quelle: new URL(unfalldaten.quelle).hostname.replace(/^www\./, ''),
+                    // Tag-Syntax, nicht {platzhalter}: t.rich ersetzt <link>…</link>.
+                    // Eine Funktion für einen Variablen-Platzhalter greift nicht.
+                    link: (chunks) => (
+                      <a
+                        href={unfalldaten.quelle}
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        className="underline hover:text-claimondo-navy"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              </>
+            )}
+
+            {/* Verkehrsmenge (BASt) — bewusst HIER und nicht als eigene Sektion:
+                der Hinweis oben sagt, dass die Unfallzahlen die Verkehrsmenge
+                NICHT kennen. Genau die steht jetzt direkt darunter. Getrennt
+                platziert müsste der Leser die beiden Hälften selbst
+                zusammensetzen. */}
+            {hatVerkehr && verkehr && (
+              <div className="mt-8 border-t border-claimondo-border pt-6">
+                <h3 className="text-base font-bold text-claimondo-navy">{t('verkehr_h3')}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
+                  {t('verkehr_intro', { ort: s.name, jahr: verkehr.jahr })}
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {verkehr.zaehlstellen.map((z) => (
+                    <li key={`${z.strasse}-${z.name}`} className="rounded-ios-md bg-white p-4">
+                      <p className="text-sm font-bold text-claimondo-navy">
+                        {z.strasse}
+                        <span className="font-normal text-claimondo-shield">
+                          {' · '}
+                          {t('verkehr_zaehlstelle', {
+                            name: z.name,
+                            km: z.entfernungKm.toLocaleString(locale),
+                          })}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                        {zaehlstelleSatz(z, locale)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-claimondo-shield/75">
+                  {t.rich('verkehr_quelle', {
+                    lizenz: verkehr.lizenz,
+                    link: (chunks) => (
+                      <a
+                        href={verkehr.quelle}
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        className="underline hover:text-claimondo-navy"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}
