@@ -53,6 +53,12 @@ export async function signAndStoreContract(ctx: SignContext): Promise<SignResult
   }
 
   // 2. vertraege_unterzeichnet-Eintrag (ohne pdf_storage_path — wird gleich nachgezogen)
+  //
+  // ⭐ Die Signatur wird MITGESCHRIEBEN, nicht nur ins PDF eingebettet (21.08.2026):
+  // 5 Vertrags-PDFs waren aus dem Storage verschwunden — Name, Datum, IP und User-Agent
+  // standen weiter hier, aber das Signaturbild existierte AUSSCHLIESSLICH im PDF und war
+  // damit weg. Der bildliche Beleg haengt so nicht mehr am Storage, und das PDF ist
+  // jederzeit originalgetreu rekonstruierbar.
   const { data: vertrag, error: vertragErr } = await db.from('vertraege_unterzeichnet').insert({
     sv_id: ctx.sv_id ?? null,
     organisation_id: ctx.organisation_id ?? null,
@@ -62,6 +68,7 @@ export async function signAndStoreContract(ctx: SignContext): Promise<SignResult
     unterschrift_name: ctx.unterschrift_name,
     unterschrift_ip: ctx.unterschrift_ip ?? null,
     unterschrift_user_agent: ctx.unterschrift_user_agent ?? null,
+    signature_png_data_uri: ctx.signature_png_data_uri ?? null,
   }).select('id').single()
   if (vertragErr || !vertrag) {
     throw new Error(`vertraege_unterzeichnet insert fehlgeschlagen: ${vertragErr?.message}`)
