@@ -109,7 +109,7 @@ export function RatgeberSection() {
             Ziel sonst widersprüchlich). Konsistent mit dem Footer-Ratgeber-Link. */}
         <p className="text-center mt-8 text-muted text-sm font-medium">
           Alle Ratgeber-Artikel:{' '}
-          <a href="https://autounfall.io/gutachter/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
+          <a href="https://autounfall.io/gutachter-ratgeber" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
             autounfall.io →
           </a>
         </p>

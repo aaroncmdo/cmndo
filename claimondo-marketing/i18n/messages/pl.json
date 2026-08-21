@@ -2204,7 +2204,12 @@
       "sv_popup_bewertungen": "Opinie",
       "sv_popup_cta": "Wyślij zapytanie przez Wizard →",
       "beratung_label": "Doradztwo"
-    }
+    },
+    "sprung_staedte": "Miasta",
+    "sprung_ratgeber": "Poradnik",
+    "sprung_schliessen": "Zamknij",
+    "sprung_hinweis": "Kliknięcie centruje mapę — pozostajesz w wyszukiwarce. Strzałka otwiera stronę miasta.",
+    "sprung_infos": "Strona miasta"
   },
   "werkstatt_finden": {
     "sr_h1": "Znajdź warsztat samochodowy w pobliżu — interaktywna mapa sprawdzonych warsztatów partnerskich"
@@ -3892,11 +3897,15 @@
     "kfzbestand_text": "W {stadt} zarejestrowanych jest {pkw} samochodów osobowych, w tym {gewerblich} na właścicieli firmowych. Do tego dochodzi {lkw} samochodów ciężarowych i {kraftraeder} motocykli.",
     "kfzbestand_quote": "To {proTausend} samochodów na 1000 mieszkańców.",
     "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}",
-    "amtlich_eyebrow": "Oficjalne statystyki wypadków",
-    "amtlich_h2": "Gdzie w mieście {ort} kumulują się wypadki",
+    "amtlich_eyebrow": "Dane urzędowe",
+    "amtlich_h2": "Ruch drogowy i wypadki w mieście {ort}",
     "amtlich_intro": "Atlas wypadków niemieckich urzędów statystycznych federacji i krajów związkowych rejestruje każdy wypadek drogowy z obrażeniami ciała wraz z dokładną lokalizacją. Dla miasta {ort} w okresie {zeitraum} wynikają z niego następujące skupiska:",
     "amtlich_hinweis": "Dla każdego miejsca oceniono obszar o wielkości około 100 metrów. Liczby nie wskazują przyczyn — ruchliwa droga główna notuje więcej wypadków niż ulica boczna.",
-    "amtlich_quelle": "Źródło: <link>{quelle}</link> — {lizenz}"
+    "amtlich_quelle": "Źródło: <link>{quelle}</link> — {lizenz}",
+    "verkehr_h3": "Jakie natężenie ruchu tam panuje",
+    "verkehr_intro": "Federalny Instytut Badawczy Dróg mierzy ruch na autostradach i drogach krajowych w sposób ciągły. Te punkty pomiarowe znajdują się najbliżej miasta {ort} (dane roczne za {jahr}):",
+    "verkehr_zaehlstelle": "Punkt pomiarowy {name}, odległość {km} km",
+    "verkehr_quelle": "Źródło: <link>stałe punkty pomiarowe BASt</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin pomyślnie zarejestrowany!",
@@ -4063,10 +4072,10 @@
       "og_description": "W 5 krokach do pełnego odszkodowania — śr. 32 dni. Oddzwonienie doradcy <15 min, rzeczoznawca <48 h."
     },
     "gutachter_finden": {
-      "title": "Znajdź rzeczoznawcę Kfz w pobliżu — mapa & termin poniżej 48 h",
-      "description": "Interaktywna mapa z certyfikowanymi rzeczoznawcami partnerskimi w całych Niemczech. Proszę zobaczyć termin, na miejscu poniżej 48 h. 0 € przy niezawinionej kolizji (§249 BGB).",
-      "og_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
-      "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
+      "title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "description": "Certyfikowani rzeczoznawcy samochodowi w {anzahl} niemieckich miastach na jednej mapie — wolne terminy, na miejscu w niecałe 48 h. Bez kosztów wg § 249 BGB.",
+      "og_title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "og_description": "Certyfikowani rzeczoznawcy w {anzahl} miastach Niemiec z wolnymi terminami. Na miejscu w 48 h, bezpłatnie wg § 249 BGB.",
       "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
       "twitter_description": "Mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h."
     },
