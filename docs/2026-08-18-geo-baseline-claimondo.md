@@ -633,6 +633,26 @@ FALL 1 (API liefert das Feld):     → Termin bei Gaith buchen: …?plz=50670&sv
 FALL 2 (ältere API, heute):        Interaktive Karte / Buchung: …?plz=50670   ← unverändert
 ```
 
+### 12b · Die Klasse einmal durchgezählt — sie trat genau zweimal auf
+
+Nachdem derselbe Bruch in zwei Kanälen unabhängig auftrat, war die Frage: **Wo noch?**
+Alle Ausgabepfade geprüft, die Sachverständige nennen:
+
+| Pfad | Nennt Namen? | Verlinkt auf | Bewertung |
+|---|---|---|---|
+| `gutachter-termine` (REST) | **ja** — voller Vorname | vorher Sammelkarte | 🔴 Bruch → gefixt |
+| `claimondo_finde_gutachter_termine` (MCP) | **ja** — voller Vorname | vorher Sammelkarte | 🔴 Bruch → gefixt |
+| `sv-in-naehe` (REST) | nein — nur `vorname_initiale` („G.") | Sammelkarte | ✅ konsistent |
+| `claimondo_finde_sachverstaendige` (MCP) | nein — nur Entfernung/Stadt/Bewertung | Sammelkarte | ✅ konsistent |
+| `pruefe-anspruch`, `decode-brief`, `rueckruf` | nennen keine SVs | — | ✅ nicht betroffen |
+
+**Das Muster ist scharf:** Der Bruch entstand **genau dort, wo ein voller Vorname genannt
+wurde**. Die anonymen Pfade sind korrekt — eine anonyme Liste darf auf eine anonyme Karte
+zeigen, dort geht keine Empfehlung verloren. Beide Bruchstellen sind zu; weitere gibt es nicht.
+
+> ⭐ Merkregel für neue Ausgabepfade: **Sobald eine Ausgabe eine Person benennt, muss ihr Link
+> zu genau dieser Person führen.** Sonst entwertet der Klick die Empfehlung.
+
 **Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
 sein Regel-4-Nachweis ist ein eigener `tools/call` gegen `mcp.claimondo.de` **nach** beiden
 Deploys. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
