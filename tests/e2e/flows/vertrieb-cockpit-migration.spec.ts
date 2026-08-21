@@ -10,7 +10,17 @@ import { test, expect, type Page } from '@playwright/test'
 // Run prod:   CI=1 RUN_VERTRIEB_SMOKE=1 PLAYWRIGHT_BASE_URL=https://app.claimondo.de \
 //             npx playwright test vertrieb-cockpit-migration --project=chromium --reporter=line
 
-const ADMIN = { email: 'smoke-admin@claimondo.test', pw: 'Sm0ke-Admin-Cl@im!2026' }
+// ⚠ Hier stand hardcodiert `smoke-admin@claimondo.test` — dieses Konto EXISTIERT NICHT
+// (0 Rows in auth.users, seit dem Golive-Accounts-Cleanup). Der Login lief damit in
+// `/login?error=E-Mail+oder+Passwort+ist+falsch`, und ALLE 11 Tests dieser Datei fielen
+// daran — auch dann, wenn man TEST_ADMIN_* setzte, denn die wurden gar nicht gelesen.
+// Prod-Admin ist `test-admin@claimondo.de` / `Claimondo2026!` (per echtem Login gemessen).
+// ENV-Override wie ueberall sonst; `||` statt `??`, damit ein leer gesetztes CI-Secret
+// nicht den funktionierenden Default ueberschreibt.
+const ADMIN = {
+  email: process.env.TEST_ADMIN_EMAIL || 'test-admin@claimondo.de',
+  pw: process.env.TEST_ADMIN_PASSWORD || 'Claimondo2026!',
+}
 
 async function login(page: Page, email: string, pw: string) {
   await page.goto('/login', { waitUntil: 'domcontentloaded' })
