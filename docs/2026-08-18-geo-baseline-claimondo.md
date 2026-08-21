@@ -719,8 +719,47 @@ Dokumentierter Ausgangszustand (21.08., vor dem Deploy):
 Nach beiden Deploys muss daraus **Exit 0** werden. Aufruf:
 `node scripts/verify-deeplink-kette.mjs [--plz 40213]`
 
+### 12f · Regel 4 erbracht — auf prod, durch die UI, mit Gegenprobe
+
+PR #5462 ist gemergt und **live**. Die REST-Kette meldet **Exit 0**; entscheidend ist aber der
+Beweis *durch die Oberfläche*: HTTP 200 sagt nur, dass die Seite lädt.
+
+**Testkonstruktion (der Kern):** Verlinkt wird bewusst der **zweite** Gutachter. Beim ersten
+wäre das Ergebnis nicht von der Default-Logik (`svs[0]`) unterscheidbar — der Test zeigte
+auch dann grün, wenn die Vorauswahl gar nicht wirkte.
+
+```
+API-Reihenfolge:  [0] Gaith    [1] Kelvin Tyron  ← Ziel
+
+A) MIT  ?sv=<Kelvin Tyron>  → "Kelvin Tyron · SILBER-PARTNER · Ausgewählt"        ✓
+B) OHNE ?sv=                → "Gaith · SILBER-PARTNER · Empfohlen · Ausgewählt"   ✓
+```
+
+Beide Zwischenschichten sind auf prod einzeln nachgewiesen — sie sind **getrennte Deployments**:
+
+```
+Deep-Link   claimondo.de/gutachter-finden?plz=50670&sv=eae70f94-…
+iframe-URL  app.claimondo.de/embed/gutachter-finder?lat=…&lng=…&sv=eae70f94-…   ID identisch ✓
+```
+
+Schön zu sehen in Fall B: Gaith trägt *beide* Marker („Empfohlen" **und** „Ausgewählt") —
+Positions-Hervorhebung (`i === 0`) und Auswahl sind sauber getrennt, die Änderung fasst nur
+letztere an.
+
+> ⚠ **Ein roter Lauf ist ein Verdacht, kein Befund.** Der erste Durchgang war rot — in *beiden*
+> Fällen, auch der Gegenprobe. Ursache war der Test: Der Klick auf den ersten Google-Autocomplete-
+> Vorschlag traf **Düren statt Köln**, worauf der Finder in den Dead-Pin-Fallback ging (dort gibt
+> es die Partner-Karten gar nicht). Mit eindeutiger Adresse und gezielt gewähltem Vorschlag ist
+> die Kette grün. Hätte ich den ersten Lauf als Befund gemeldet, wäre ein funktionierendes
+> Feature als kaputt gemeldet worden — dass **auch die Gegenprobe** rot war, war das Warnsignal.
+
+*Beobachtung ohne Zuordnung:* Der Headless-Browser meldete „Karte konnte nicht geladen werden —
+Mapbox-Style-Timeout nach 12 s". Das trat in **jedem** Lauf auf, auch ohne Deep-Link, und ist
+vermutlich ein Headless-/Netzwerk-Artefakt dieser Umgebung. Der Wizard funktioniert unabhängig
+davon. Nicht als Prod-Befund verbucht — nicht sauber zuzuordnen.
+
 **Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
-sein Regel-4-Nachweis ist Schicht 5 oben. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
+sein Regel-4-Nachweis ist Schicht 5 des Skripts, sie steht bis dahin auf `warn`.
 
 > Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
 > ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
