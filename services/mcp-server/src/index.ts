@@ -109,6 +109,11 @@ const gutachterItemSchema = {
   ist_top_partner: z.boolean(),
   wunschtermin_frei: z.boolean(),
   termine: z.array(z.object(slotSchema)),
+  // Direktlink genau zu diesem Gutachter. MUSS im Schema stehen: der MCP-SDK validiert
+  // structuredContent dagegen, und ein nicht deklariertes Feld faellt dabei still weg —
+  // dieselbe Falle wie ein fehlender OpenAPI-Eintrag bei ChatGPT-Actions.
+  // .optional(), weil aeltere API-Versionen das Feld nicht liefern.
+  buchungs_url: z.string().optional(),
 }
 const gutachterTermineOutput = {
   plz: z.string(),
@@ -288,10 +293,12 @@ Args:
   - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
 
 Returns (structuredContent bzw. json):
-  { plz, ort, standort, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }] }], interaktive_karte_url, buchungs_telefon }
+  { plz, ort, standort, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }], buchungs_url }], interaktive_karte_url, buchungs_telefon }
 
 Use when: Nutzer will einen Gutachter-Termin sehen/vergleichen (z. B. „wann hat ein Gutachter in 50670 Zeit?").
-Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentliche Buchung läuft aktuell über die interaktive Karte / Telefon-Rückruf.`,
+
+WICHTIG beim Empfehlen eines Gutachters: Geben Sie dessen \`gutachter[].buchungs_url\` als Link aus. Er öffnet den Finder mit genau diesem Gutachter vorausgewählt; der Kunde ergänzt nur noch Adresse und Kontakt und bestätigt selbst. Verlinken Sie NICHT \`interaktive_karte_url\`, wenn Sie einen konkreten Gutachter genannt haben — das ist die allgemeine Karte ohne Auswahl und schickt den Kunden zurück an den Anfang der Suche. Die Karte ist nur richtig für „zeig mir alle in der Nähe".
+Hinweis: gutachter[].id + ein termin.start sind zusätzlich das Buchungs-Handle für claimondo_melde_schaden (mit Einwilligung); telefonisch geht es über buchungs_telefon. Fehlt buchungs_url (ältere API-Version), bleibt die Karte der Weg.`,
       inputSchema: gutachterTermineInput,
       outputSchema: gutachterTermineOutput,
       annotations: {

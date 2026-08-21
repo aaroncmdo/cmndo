@@ -117,10 +117,28 @@ export async function GET(req: Request) {
     wunschterminIso,
   })
 
+  // Ort-Teil aller Deep-Links (einmal gebaut, unten von interaktive_karte_url mitbenutzt).
+  const ortQuery = plz
+    ? `plz=${encodeURIComponent(plz)}`
+    : `stadt=${encodeURIComponent(ort ?? '')}`
+
   // OeffentlichesSvProfil ist bereits die anon-kundensichere Projektion (kein
   // score/ETA/Nachname); svId ist ein opakes, RLS-geschuetztes Buchungs-Handle.
   const gutachter = profile.map((p) => ({
     id: p.svId,
+    /**
+     * Fertiger Buchungs-Link GENAU fuer diesen Gutachter — der Grund, warum dieses Feld
+     * existiert: `interaktive_karte_url` (unten) zeigt auf die Karte, verliert dabei aber
+     * die Auswahl. Eine KI-Antwort, die "Gutachter X hat Donnerstag frei" sagt und dann
+     * auf die allgemeine Karte verlinkt, schickt den Kunden zurueck an den Anfang.
+     *
+     * Der Link setzt den Gutachter im Finder vor; Adresse, Schadenart und Kontaktdaten
+     * gibt der Kunde weiterhin selbst ein und bestaetigt die Buchung selbst. Bewusst KEIN
+     * Buchungs-Endpunkt: ein GET, das einen Termin schreibt, wuerde von jedem Crawler
+     * ausgeloest. Ist der SV bis zum Klick belegt, faellt die Vorauswahl still auf den
+     * bestgerankten zurueck — der Kunde sieht eine gueltige Liste, keinen Fehler.
+     */
+    buchungs_url: `${SITE_URL}/gutachter-finden?${ortQuery}&sv=${encodeURIComponent(p.svId)}`,
     vorname: p.vorname,
     profilbild: p.profilbild,
     bewertung_schnitt: p.bewertungDurchschnitt,
@@ -139,12 +157,10 @@ export async function GET(req: Request) {
     center: { lat: center.lat, lng: center.lng },
     anzahl_gutachter: gutachter.length,
     gutachter,
-    interaktive_karte_url: plz
-      ? `${SITE_URL}/gutachter-finden?plz=${plz}`
-      : `${SITE_URL}/gutachter-finden?stadt=${encodeURIComponent(ort ?? '')}`,
+    interaktive_karte_url: `${SITE_URL}/gutachter-finden?${ortQuery}`,
     buchungs_telefon: PHONE_DISPLAY,
     buchungs_hinweis:
-      'Termin buchen aktuell über die interaktive Karte (interaktive_karte_url) oder telefonischen Rückruf (buchungs_telefon). Die gutachter[].id + ein termin.start sind das Buchungs-Handle für den späteren Schaden-melden-Schritt.',
+      'Zum Buchen den `buchungs_url` des gewählten Gutachters verlinken — er öffnet den Finder mit genau diesem Gutachter vorausgewählt. `interaktive_karte_url` zeigt nur die allgemeine Karte ohne Auswahl; telefonisch geht es über `buchungs_telefon`. Adresse, Schadenart und Kontaktdaten gibt der Kunde selbst ein und bestätigt die Buchung selbst — es gibt bewusst keinen Endpunkt, der einen Termin ohne diese Bestätigung schreibt.',
     _meta: {
       quelle: 'Claimondo Public API',
       stand: new Date().toISOString().slice(0, 10),
