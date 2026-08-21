@@ -104,6 +104,38 @@ TRANSPORT=http PORT=4002 node dist/index.js
 2. **DNS:** `mcp.claimondo.de` braucht einen **expliziten A-Record** auf die VPS-IP — `*.claimondo.de` ist KEIN Wildcard (nur `*.staging` ist es).
 3. **nginx** `mcp.claimondo.de` → `proxy_pass http://127.0.0.1:4002;` (POST `/mcp` + `/health`), SSL via certbot.
 
+**Update eines bereits laufenden Servers** (der Normalfall — bis 21.08.2026 stand hier nur der Erststart):
+
+```bash
+cd services/mcp-server && git pull && npm ci && npm run build
+pm2 restart claimondo-mcp
+```
+
+> ⚠ **Dieser Dienst hängt an KEINER Pipeline.** Es gibt keinen `deploy-vps-mcp.yml` (anders als
+> App, Marketing, autounfall und die fünf Cluster), und `tsconfig.json` der App führt `services`
+> in `exclude` — die CI **baut und typecheckt ihn nicht**. Ein grüner CI-Lauf ist für diesen
+> Server **kein Beleg**; ein Merge bringt ihn **nicht** live. Vor dem Restart deshalb lokal
+> `npx tsc --noEmit && npm run build` fahren (beides muss exit 0 liefern).
+
+**Verifikation nach dem Restart** — der Dienst antwortet auch dann noch mit dem alten Verhalten,
+wenn `pm2 restart` still fehlschlägt; ein `pm2 status` allein beweist nichts:
+
+```bash
+node scripts/verify-deeplink-kette.mjs      # aus dem Repo-Root
+```
+
+Schicht 5 muss von `! MCP zeigt noch die Sammelkarte` auf `✓ MCP nennt Gutachter MIT Direktlink`
+springen. Zum Gegenlesen ohne Skript:
+
+```bash
+curl -s -X POST https://mcp.claimondo.de/mcp \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"claimondo_finde_gutachter_termine","arguments":{"plz":"50670"}}}'
+```
+
+Erwartet: pro Gutachter eine Zeile `→ Termin bei <Name> buchen: …?plz=…&sv=…` und am Ende
+`Alle Gutachter auf der Karte:` statt `Interaktive Karte / Buchung:`.
+
 > **Auth & Abuse-Schutz:** der Endpoint ist **ohne Auth** (anonyme Public-API). Zusätzlich zum bestehenden Per-IP-Limit sind die **Schreib**-Pfade (`melde-schaden`/`rueckruf`) durch die serverseitige **Write-Abuse-Härtung** gedeckelt: globaler Circuit-Breaker (`MCP_WRITE_CAP_PER_HOUR`, Default 120) + Per-Telefon-Velocity (`MCP_WRITE_CAP_PER_PHONE_24H`, Default 3), beide fail-open — s. `src/lib/api-v1/write-abuse-guard.ts`. Nötig, weil externe KI-Calls von den Egress-IPs der Plattform kommen (Per-IP allein greift dort nicht). Per-Plattform-API-Keys (`mcp_api_keys`) bleiben Roadmap für authentifizierten/priorisierten Traffic.
 
 ## Testen
