@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
-// Anbieterkennzeichnung nach § 5 DDG = FESTNETZ, bewusst nicht die primaere
-// Marketing-Nummer: die Pflichtangabe nennt den Geschaeftssitz-Anschluss und
-// wechselt nicht als Nebeneffekt einer Kanal-Entscheidung (21.08.2026).
-import { PHONE_FESTNETZ_DISPLAY, PHONE_FESTNETZ_E164,
-} from '@/lib/seo/jsonld'
+// Anbieterkennzeichnung nach § 5 DDG traegt dieselbe Nummer wie die CTAs
+// (Aaron-Entscheid 21.08.2026). Das Gesetz verlangt eine Nummer, unter der man
+// ankommt — keine bestimmte Nummernart. Zwei verschiedene Nummern auf einem
+// Auftritt waeren dagegen genau die Inkonsistenz, die der Wechsel abstellt.
+import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Impressum',
@@ -55,7 +55,7 @@ export default function ImpressumPage() {
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Kontakt</h2>
             <p>
               E-Mail: <a href="mailto:aaron.sprafke@claimondo.de" className="text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy transition-colors">aaron.sprafke@claimondo.de</a><br />
-              Telefon: <a href={`tel:${PHONE_FESTNETZ_E164}`} className="text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy transition-colors">{PHONE_FESTNETZ_DISPLAY}</a>
+              Telefon: <a href={`tel:${PHONE_E164}`} className="text-claimondo-ondo underline underline-offset-2 hover:text-claimondo-navy transition-colors">{PHONE_DISPLAY}</a>
             </p>
           </div>
 
