@@ -14,15 +14,26 @@ const state = {
 const db = {
   from: (tabelle: string) => {
     if (tabelle === 'levelup_anreicherung') {
+      // ⚠ Die Kette endet seit dem 1000-Zeilen-Fund (21.08.) auf `.range()` —
+      // und der Mock gibt WIRKLICH den Ausschnitt zurueck. Ein Mock, der jede
+      // Seite vollstaendig beantwortet, kann nicht zeigen, ob der Aufrufer die
+      // Seiten korrekt zusammensetzt.
+      const leseKette = () => {
+        let bereich: [number, number] | null = null
+        const k: Record<string, unknown> = {}
+        k.eq = () => k
+        k.order = () => k
+        k.range = (von: number, bis: number) => { bereich = [von, bis]; return k }
+        k.then = (aufl: (v: unknown) => void) =>
+          aufl(
+            state.ladeFehler
+              ? { data: null, error: { message: state.ladeFehler } }
+              : { data: bereich ? state.zeilen.slice(bereich[0], bereich[1] + 1) : state.zeilen, error: null },
+          )
+        return k
+      }
       return {
-        select: () => ({
-          eq: () => ({
-            order: async () =>
-              state.ladeFehler
-                ? { data: null, error: { message: state.ladeFehler } }
-                : { data: state.zeilen, error: null },
-          }),
-        }),
+        select: leseKette,
         // Wird absichtlich NIE aufgerufen: der Log ist append-only.
         delete: () => {
           state.gelöschteAuditZeilen += 1
@@ -31,10 +42,23 @@ const db = {
       }
     }
     if (tabelle === 'sv_leads') {
+      const istKette = () => {
+        let block: string[] = []
+        let bereich: [number, number] | null = null
+        const k: Record<string, unknown> = {}
+        k.in = (_spalte: string, werte: string[]) => { block = werte; return k }
+        k.order = () => k
+        k.range = (von: number, bis: number) => { bereich = [von, bis]; return k }
+        k.then = (aufl: (v: unknown) => void) => {
+          // Nur die Zeilen des angefragten Blocks — sonst zeigt der Mock nicht,
+          // ob der Aufrufer alle Bloecke zusammenfuehrt.
+          const passend = state.leads.filter((l) => block.includes(l.id as string))
+          aufl({ data: bereich ? passend.slice(bereich[0], bereich[1] + 1) : passend, error: null })
+        }
+        return k
+      }
       return {
-        select: () => ({
-          in: async () => ({ data: state.leads, error: null }),
-        }),
+        select: istKette,
         update: (werte: Record<string, unknown>) => ({
           eq: (_spalte: string, id: string) => ({
             select: async () => {
@@ -203,5 +227,52 @@ describe('dreheLaufZurueck', () => {
     const r = await dreheLaufZurueck(db, 'LAUF1')
     expect(r.ok && r.zurueckgesetzt).toBe(0)
     expect(state.updates).toHaveLength(0)
+  })
+})
+
+describe('dreheLaufZurueck — die Ist-Menge MUSS vollstaendig sein', () => {
+  /**
+   * ⭐⭐ Die teuerste Falle des 21.08.: `.in('id', ids)` ohne `range` liefert
+   * hoechstens 1.000 Zeilen. Fehlt ein Lead in `jeId`, liefert `ziel()` fuer
+   * jedes seiner Felder `undefined`, `leer(undefined)` ist `true` — und die
+   * Abraeum-Zweige nullen `website_gefunden`, `website_sicherheit`,
+   * `kontakt_quelle` und `angereichert_am` an einem Lead, der diese Werte aus
+   * einem ANDEREN Lauf traegt.
+   *
+   * Eine unvollstaendige LESEmenge wird hier zu einem falschen SCHREIBEN. Das
+   * ist keine Anzeigefrage, sondern Datenverlust.
+   */
+  it('bricht ab, wenn ein Lead des Laufs nicht mehr in sv_leads steht', async () => {
+    state.zeilen = [
+      { sv_lead_id: 'L1', feld: 'email', wert_vorher: null, wert_nachher: 'a@b.de' },
+      { sv_lead_id: 'VERSCHWUNDEN', feld: 'email', wert_vorher: null, wert_nachher: 'c@d.de' },
+    ]
+    // Nur L1 kommt zurueck — VERSCHWUNDEN fehlt.
+    state.leads = [{ id: 'L1', email: 'a@b.de', telefon: null, website_url: null, vorname: null, nachname: null }]
+
+    const r = await dreheLaufZurueck(db, 'lauf-1')
+
+    expect(r.ok).toBe(false)
+    if (r.ok) throw new Error('unerwartet')
+    expect(r.error).toContain('VERSCHWUNDEN')
+    // ⚠ Und vor allem: NICHTS wurde geschrieben. Ein Teil-Rollback waere
+    // schlimmer als keiner.
+    expect(state.updates).toHaveLength(0)
+  })
+
+  it('holt die Ist-Zustaende auch bei vielen Leads vollstaendig', async () => {
+    // Mehr als ein Block (300) und mehr als eine Seite (1.000).
+    const n = 1200
+    state.zeilen = Array.from({ length: n }, (_, i) => ({
+      sv_lead_id: `L${i}`, feld: 'email', wert_vorher: null, wert_nachher: `m${i}@b.de`,
+    }))
+    state.leads = Array.from({ length: n }, (_, i) => ({
+      id: `L${i}`, email: `m${i}@b.de`, telefon: null, website_url: null, vorname: null, nachname: null,
+    }))
+
+    const r = await dreheLaufZurueck(db, 'lauf-gross')
+
+    expect(r.ok).toBe(true)
+    expect(state.updates).toHaveLength(n)
   })
 })

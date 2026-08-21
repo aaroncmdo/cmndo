@@ -1,5 +1,6 @@
 import type { Db } from '../anreicherung/schreiben'
 import { DUBLETTEN_KM, entfernungKm, istDublette } from './dubletten'
+import { alleSeiten } from '../db/alle-seiten'
 
 /**
  * Welcher Bestandslead gehoert zu dieser Messung?
@@ -174,16 +175,28 @@ export async function sucheTreffer(db: Db, check: CheckAngabe): Promise<Zuordnun
 
   let imUmkreis: LeadKandidat[] = []
   if (check.lat !== null && check.lng !== null) {
-    const { data, error } = await db
-      .from('sv_leads')
-      .select(KANDIDAT_SPALTEN)
-      .gte('lat', check.lat - BOX_GRAD)
-      .lte('lat', check.lat + BOX_GRAD)
-      .gte('lng', check.lng - BOX_GRAD)
-      .lte('lng', check.lng + BOX_GRAD)
+    const lat = check.lat
+    const lng = check.lng
 
-    if (error) return { ok: false, error: `Umkreis-Abgleich fehlgeschlagen: ${error.message}` }
-    imUmkreis = (data ?? []) as LeadKandidat[]
+    // ⚠ SEITENWEISE. Die Box ist rund 33 × 21 km — heute liegen dort weniger
+    // als 1.000 Leads, aber der Bestand wuchs binnen Tagen von 74 auf 6.988,
+    // und Sachverständigenbüros ballen sich in Ballungsräumen. Ein stiller
+    // Schnitt bei 1.000 würde die Zuordnung schweigend am falschen Ende
+    // abschneiden: `waehleTreffer` meldete dann „kein Treffer", obwohl der
+    // Betrieb im Bestand steht.
+    const gelesen = await alleSeiten<LeadKandidat>((von, bis) =>
+      db.from('sv_leads')
+        .select(KANDIDAT_SPALTEN)
+        .gte('lat', lat - BOX_GRAD)
+        .lte('lat', lat + BOX_GRAD)
+        .gte('lng', lng - BOX_GRAD)
+        .lte('lng', lng + BOX_GRAD)
+        .order('id', { ascending: true })
+        .range(von, bis),
+    )
+
+    if (!gelesen.ok) return { ok: false, error: `Umkreis-Abgleich fehlgeschlagen: ${gelesen.error}` }
+    imUmkreis = gelesen.zeilen
   }
 
   return { ok: true, treffer: waehleTreffer(check, mitDomain, imUmkreis) }

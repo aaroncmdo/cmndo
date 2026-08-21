@@ -47,7 +47,7 @@ const db = {
     // Zuordnung nichts findet und nichts schreibt.
     if (tabelle === 'sv_leads') {
       const kette: Record<string, unknown> = {}
-      for (const m of ['select', 'not', 'ilike', 'gte', 'lte', 'eq']) kette[m] = () => kette
+      for (const m of ['select', 'not', 'ilike', 'gte', 'lte', 'eq', 'order', 'range']) kette[m] = () => kette
       kette.update = (w: Record<string, unknown>) => { state.leadUpdates.push(w); return kette }
       kette.then = (aufloesen: (w: unknown) => void) =>
         aufloesen({ data: state.leadTreffer, error: null })

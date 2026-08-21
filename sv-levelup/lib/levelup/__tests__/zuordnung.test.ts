@@ -129,7 +129,7 @@ function db(opts: {
   const from = (tabelle: string) => {
     const kette: Record<string, unknown> = {}
     const gib = () => kette
-    for (const m of ['select', 'not', 'ilike', 'gte', 'lte', 'eq']) {
+    for (const m of ['select', 'not', 'ilike', 'gte', 'lte', 'eq', 'order', 'range']) {
       kette[m] = vi.fn(gib)
     }
     kette.update = vi.fn((werte: Record<string, unknown>) => {
