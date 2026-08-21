@@ -96,6 +96,11 @@ export async function POST(request: Request) {
 
   const { error } = await db.from('nachrichten').insert({
     fall_id: fallId,
+    // matchInboundToFall liefert den Lead auch dann, wenn (noch) kein Fall dranhaengt
+    // (Interessent vor der Konversion). Ohne diese Spalte war der Bezug nur im
+    // HTTP-Response sichtbar und ging verloren — die Zeile blieb dauerhaft
+    // unverknuepft. Gemessen 21.08.: 200/200 inbound-WA-Nachrichten ohne jeden Bezug.
+    lead_id: leadId,
     thread_id: threadId,
     kanal: 'whatsapp',
     sender_id: null,
