@@ -3897,7 +3897,12 @@
     "kfzbestand_h2": "Registered vehicles in {stadt}",
     "kfzbestand_text": "{pkw} passenger cars are registered in {stadt}, {gewerblich} of them to commercial owners. In addition there are {lkw} trucks and {kraftraeder} motorcycles.",
     "kfzbestand_quote": "That is {proTausend} cars per 1,000 inhabitants.",
-    "kfzbestand_quelle": "Federal Motor Transport Authority (KBA), {stand}"
+    "kfzbestand_quelle": "Federal Motor Transport Authority (KBA), {stand}",
+    "amtlich_eyebrow": "Official accident statistics",
+    "amtlich_h2": "Where accidents cluster in {ort}",
+    "amtlich_intro": "The accident atlas published by Germany's federal and state statistical offices records every road traffic accident involving personal injury, down to the exact location. For {ort}, the following clusters emerge over {zeitraum}:",
+    "amtlich_hinweis": "Each location covers an area of roughly 100 metres. The figures do not identify causes — a busy main road records more accidents than a side street.",
+    "amtlich_quelle": "Source: <link>{quelle}</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Appointment successfully requested!",

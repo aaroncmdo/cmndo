@@ -1,0 +1,2726 @@
+{
+ "54.30303,10.12819": {
+  "strasse": "Theodor-Heuss-Ring",
+  "stadtteil": "Gaarden-Süd",
+  "ort": "Kiel",
+  "plz": "24113"
+ },
+ "54.32878,10.19057": {
+  "strasse": "Schönkirchener Straße",
+  "stadtteil": "Neumühlen",
+  "ort": "Kiel",
+  "plz": "24149"
+ },
+ "54.30304,10.13703": {
+  "strasse": "Diedrichstraße",
+  "stadtteil": "Gaarden-Süd",
+  "ort": "Kiel",
+  "plz": "24143"
+ },
+ "53.86622,10.67446": {
+  "strasse": "Moislinger Allee",
+  "stadtteil": "Saint Lorenz Süd",
+  "ort": "Lübeck",
+  "plz": "23558"
+ },
+ "53.85116,10.68276": {
+  "strasse": "Berliner Straße",
+  "stadtteil": "Hüxtertor",
+  "ort": "Lübeck",
+  "plz": "23560"
+ },
+ "53.85826,10.69164": {
+  "strasse": "Ratzeburger Allee",
+  "stadtteil": "Hüxtertor",
+  "ort": "Lübeck",
+  "plz": "23564"
+ },
+ "52.26807,8.04590": {
+  "strasse": "Johannistorwall",
+  "stadtteil": "Innenstadt",
+  "ort": "Osnabrück",
+  "plz": "49074"
+ },
+ "52.28120,8.04440": {
+  "strasse": "Erich-Maria-Remarque-Ring",
+  "stadtteil": "Innenstadt",
+  "ort": "Osnabrück",
+  "plz": "49074"
+ },
+ "52.26804,8.05656": {
+  "strasse": "Petersburger Wall",
+  "stadtteil": "Innenstadt",
+  "ort": "Osnabrück",
+  "plz": "49074"
+ },
+ "52.37810,9.72298": {
+  "strasse": "Königsworther Platz",
+  "stadtteil": "Königsworther Platz",
+  "ort": "Hannover",
+  "plz": "30167"
+ },
+ "52.38196,9.73801": {
+  "strasse": "Celler Straße",
+  "stadtteil": "Fernmeldeturm",
+  "ort": "Hannover",
+  "plz": "30161"
+ },
+ "52.37712,9.69774": {
+  "strasse": "Westschnellweg",
+  "stadtteil": "Linden-Nord",
+  "ort": "Hannover",
+  "plz": "30451"
+ },
+ "53.14342,8.19304": {
+  "strasse": "Ofener Straße",
+  "stadtteil": "Haarenesch",
+  "ort": "Oldenburg",
+  "plz": "26121"
+ },
+ "53.14320,8.21415": {
+  "strasse": "Staulinie",
+  "stadtteil": "Innenstadt",
+  "ort": "Oldenburg",
+  "plz": "26122"
+ },
+ "53.14000,8.21822": {
+  "strasse": "Poststraße",
+  "stadtteil": "Bahnhofsviertel",
+  "ort": "Oldenburg",
+  "plz": "26122"
+ },
+ "51.53480,9.92221": {
+  "strasse": "Bahnhofsallee",
+  "stadtteil": "Weststadt",
+  "ort": "Göttingen",
+  "plz": "37081"
+ },
+ "51.55989,9.93184": {
+  "strasse": "Hannoversche Straße",
+  "stadtteil": "Weende",
+  "ort": "Göttingen",
+  "plz": "37077"
+ },
+ "51.54122,9.92758": {
+  "strasse": "Maschmühlenweg",
+  "stadtteil": "Weststadt",
+  "ort": "Göttingen",
+  "plz": "37081"
+ },
+ "52.42813,10.78190": {
+  "strasse": "Heinrich-Nordhoff-Straße",
+  "stadtteil": "Stadtmitte",
+  "ort": "Wolfsburg",
+  "plz": "38440"
+ },
+ "52.42433,10.79730": {
+  "strasse": "Am Mühlengraben",
+  "stadtteil": "Hellwinkel",
+  "ort": "Wolfsburg",
+  "plz": "38440"
+ },
+ "52.42794,10.79099": {
+  "strasse": "Porschestraße",
+  "stadtteil": "Stadtmitte",
+  "ort": "Wolfsburg",
+  "plz": "38440"
+ },
+ "52.26512,10.52561": {
+  "strasse": "Dankwardstraße",
+  "stadtteil": "Innenstadt",
+  "ort": "Braunschweig",
+  "plz": "38100"
+ },
+ "52.24594,10.50748": {
+  "strasse": "Theodor-Heuss-Straße",
+  "stadtteil": "Weststadt",
+  "ort": "Braunschweig",
+  "plz": "38120"
+ },
+ "52.26136,10.52261": {
+  "strasse": "Friedrich-Wilhelm-Straße",
+  "stadtteil": "Innenstadt",
+  "ort": "Braunschweig",
+  "plz": "38100"
+ },
+ "51.26079,6.39478": {
+  "strasse": "Freiheitsstraße",
+  "stadtteil": "Hülsdonk",
+  "ort": "Viersen",
+  "plz": "41747"
+ },
+ "51.24821,6.40365": {
+  "strasse": "Gereonstraße",
+  "stadtteil": null,
+  "ort": "Viersen",
+  "plz": "41747"
+ },
+ "51.25284,6.39947": {
+  "strasse": "Freiheitsstraße",
+  "stadtteil": null,
+  "ort": "Viersen",
+  "plz": "41747"
+ },
+ "51.33330,6.19534": {
+  "strasse": "An der Kleinbahn",
+  "stadtteil": "Kaldenkirchen",
+  "ort": "Nettetal",
+  "plz": "41334"
+ },
+ "51.29582,6.25338": {
+  "strasse": "Schaager Straße",
+  "stadtteil": "Breyell",
+  "ort": "Nettetal",
+  "plz": "41334"
+ },
+ "51.07729,6.30608": {
+  "strasse": "Antwerpener Straße",
+  "stadtteil": null,
+  "ort": "Erkelenz",
+  "plz": "41812"
+ },
+ "51.07937,6.32033": {
+  "strasse": "Hermann-Josef-Gormanns-Straße",
+  "stadtteil": null,
+  "ort": "Erkelenz",
+  "plz": "41812"
+ },
+ "51.07506,6.31835": {
+  "strasse": "Goswinstraße",
+  "stadtteil": null,
+  "ort": "Erkelenz",
+  "plz": "41812"
+ },
+ "51.78283,6.13071": {
+  "strasse": "Lindenallee",
+  "stadtteil": null,
+  "ort": "Kleve",
+  "plz": "47533"
+ },
+ "51.77140,6.11603": {
+  "strasse": "Querallee",
+  "stadtteil": "Materborn",
+  "ort": "Kleve",
+  "plz": "47533"
+ },
+ "51.77594,6.12035": {
+  "strasse": "Königsallee",
+  "stadtteil": "Materborn",
+  "ort": "Kleve",
+  "plz": "47533"
+ },
+ "53.53586,8.59758": {
+  "strasse": "Friedrich-Ebert-Straße",
+  "stadtteil": "Geestendorf",
+  "ort": "Bremerhaven",
+  "plz": "27570"
+ },
+ "53.56093,8.58601": {
+  "strasse": "Hafenstraße",
+  "stadtteil": "Twischkamp",
+  "ort": "Bremerhaven",
+  "plz": "27568"
+ },
+ "53.53320,8.59811": {
+  "strasse": "Friedrich-Ebert-Straße",
+  "stadtteil": "Geestendorf",
+  "ort": "Bremerhaven",
+  "plz": "27570"
+ },
+ "53.08431,8.82483": {
+  "strasse": "Am Stern",
+  "stadtteil": "Schwachhausen",
+  "ort": "Bremen",
+  "plz": "28209"
+ },
+ "53.08297,8.80846": {
+  "strasse": "Bürgermeister-Smidt-Straße",
+  "stadtteil": "Mitte",
+  "ort": "Bremen",
+  "plz": "28195"
+ },
+ "53.07879,8.80065": {
+  "strasse": "Bürgermeister-Smidt-Straße",
+  "stadtteil": "Mitte",
+  "ort": "Bremen",
+  "plz": "28195"
+ },
+ "51.19114,6.44220": {
+  "strasse": "Berliner Platz",
+  "stadtteil": "Gladbach",
+  "ort": "Mönchengladbach",
+  "plz": "41061"
+ },
+ "51.16628,6.44717": {
+  "strasse": "Limitenstraße",
+  "stadtteil": "Rheydt",
+  "ort": "Mönchengladbach",
+  "plz": "41236"
+ },
+ "51.16894,6.44698": {
+  "strasse": "Gartenstraße",
+  "stadtteil": "Rheydt",
+  "ort": "Mönchengladbach",
+  "plz": "41236"
+ },
+ "50.77818,6.09442": {
+  "strasse": "Heinrichsallee",
+  "stadtteil": "Hansemannplatz",
+  "ort": "Aachen",
+  "plz": "52062"
+ },
+ "50.77479,6.09604": {
+  "strasse": "Heinrichsallee",
+  "stadtteil": "Kaiserplatz",
+  "ort": "Aachen",
+  "plz": "52062"
+ },
+ "50.77216,6.11299": {
+  "strasse": "Adalbertsteinweg",
+  "stadtteil": "Adalbertsteinweg",
+  "ort": "Aachen",
+  "plz": "52066"
+ },
+ "50.80940,6.47956": {
+  "strasse": "Josef-Schregel-Straße",
+  "stadtteil": null,
+  "ort": "Düren",
+  "plz": "52349"
+ },
+ "50.83310,6.45906": {
+  "strasse": "B 56",
+  "stadtteil": "Birkesdorf",
+  "ort": "Düren",
+  "plz": "52353"
+ },
+ "50.81244,6.51400": {
+  "strasse": "Kölner Landstraße",
+  "stadtteil": "Distelrath",
+  "ort": "Düren",
+  "plz": "52351"
+ },
+ "50.87797,6.17003": {
+  "strasse": "Schaufenberger Straße",
+  "stadtteil": "Schaufenberg",
+  "ort": "Alsdorf",
+  "plz": "52477"
+ },
+ "50.87772,6.20287": {
+  "strasse": "L 240",
+  "stadtteil": "Hoengen",
+  "ort": "Alsdorf",
+  "plz": "52477"
+ },
+ "50.88082,6.17116": {
+  "strasse": "Am Heggeströfer",
+  "stadtteil": "Schaufenberg",
+  "ort": "Alsdorf",
+  "plz": "52477"
+ },
+ "50.80886,6.14410": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Weiden",
+  "ort": "Würselen",
+  "plz": "52146"
+ },
+ "50.82500,6.12767": {
+  "strasse": "Aachener Straße",
+  "stadtteil": null,
+  "ort": "Würselen",
+  "plz": "52146"
+ },
+ "50.80522,6.14739": {
+  "strasse": "Willy-Brandt-Ring",
+  "stadtteil": "Weiden",
+  "ort": "Würselen",
+  "plz": "52146"
+ },
+ "50.82489,6.24649": {
+  "strasse": "Rue de Wattrelos",
+  "stadtteil": null,
+  "ort": "Eschweiler",
+  "plz": "52249"
+ },
+ "50.81720,6.27293": {
+  "strasse": "Peilsgasse",
+  "stadtteil": "Röthgen b. Eschweiler",
+  "ort": "Eschweiler",
+  "plz": "52249"
+ },
+ "50.81988,6.26306": {
+  "strasse": "Langwahn",
+  "stadtteil": "Röthgen b. Eschweiler",
+  "ort": "Eschweiler",
+  "plz": "52249"
+ },
+ "50.83969,6.07522": {
+  "strasse": "Forensberger Straße",
+  "stadtteil": "Kohlscheid",
+  "ort": "Herzogenrath",
+  "plz": "52134"
+ },
+ "50.87168,6.10202": {
+  "strasse": "Geilenkirchener Straße",
+  "stadtteil": "Bierstraß",
+  "ort": "Herzogenrath",
+  "plz": "52134"
+ },
+ "51.07039,6.11010": {
+  "strasse": "Unterbrucher Straße",
+  "stadtteil": null,
+  "ort": "Heinsberg",
+  "plz": "52525"
+ },
+ "51.06927,6.09885": {
+  "strasse": "L 230",
+  "stadtteil": null,
+  "ort": "Heinsberg",
+  "plz": "52525"
+ },
+ "50.75917,6.21584": {
+  "strasse": "Aachener Straße",
+  "stadtteil": null,
+  "ort": "Stolberg",
+  "plz": "52223"
+ },
+ "51.23111,6.53547": {
+  "strasse": "Korschenbroicher Straße",
+  "stadtteil": "Schiefbahn",
+  "ort": "Willich",
+  "plz": "47877"
+ },
+ "51.26629,6.54346": {
+  "strasse": "Korschenbroicher Straße",
+  "stadtteil": null,
+  "ort": "Willich",
+  "plz": "47877"
+ },
+ "51.32240,6.59403": {
+  "strasse": "Untergath",
+  "stadtteil": "Fischeln",
+  "ort": "Krefeld",
+  "plz": "47805"
+ },
+ "51.33392,6.56555": {
+  "strasse": "Ostwall",
+  "stadtteil": "Cracau",
+  "ort": "Krefeld",
+  "plz": "47798"
+ },
+ "51.36595,6.61014": {
+  "strasse": "Europaring",
+  "stadtteil": "Gartenstadt",
+  "ort": "Krefeld",
+  "plz": "47800"
+ },
+ "51.52719,6.74273": {
+  "strasse": "Friedrich-Ebert-Straße",
+  "stadtteil": "Aldenrade",
+  "ort": "Duisburg",
+  "plz": "47179"
+ },
+ "51.43318,6.77568": {
+  "strasse": "Saarstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Duisburg",
+  "plz": "47058"
+ },
+ "51.45471,6.74103": {
+  "strasse": "L 140",
+  "stadtteil": "Ruhrort",
+  "ort": "Duisburg",
+  "plz": "47119"
+ },
+ "51.21612,6.80355": {
+  "strasse": "Kölner Straße",
+  "stadtteil": "Oberbilk",
+  "ort": "Düsseldorf",
+  "plz": "40227"
+ },
+ "51.25084,6.80084": {
+  "strasse": "Grashofstraße",
+  "stadtteil": "Düsseltal",
+  "ort": "Düsseldorf",
+  "plz": "40470"
+ },
+ "51.20005,6.77060": {
+  "strasse": "Aachener Straße",
+  "stadtteil": "Bilk",
+  "ort": "Düsseldorf",
+  "plz": "40223"
+ },
+ "51.20304,6.68389": {
+  "strasse": "Gielenstraße",
+  "stadtteil": "Innenstadt",
+  "ort": "Neuss",
+  "plz": "41460"
+ },
+ "51.19827,6.68846": {
+  "strasse": "Hamtorwall",
+  "stadtteil": "Innenstadt",
+  "ort": "Neuss",
+  "plz": "41460"
+ },
+ "51.20615,6.67842": {
+  "strasse": "Further Straße",
+  "stadtteil": "Furth-Süd",
+  "ort": "Neuss",
+  "plz": "41462"
+ },
+ "51.83912,6.60913": {
+  "strasse": "Ravardistraße",
+  "stadtteil": null,
+  "ort": "Bocholt",
+  "plz": "46399"
+ },
+ "51.83516,6.62071": {
+  "strasse": "Theodor-Heuss-Ring",
+  "stadtteil": null,
+  "ort": "Bocholt",
+  "plz": "46395"
+ },
+ "51.83812,6.62888": {
+  "strasse": "Münsterstraße",
+  "stadtteil": null,
+  "ort": "Bocholt",
+  "plz": "46397"
+ },
+ "51.56370,6.74276": {
+  "strasse": "Wilhelm-Lantermann-Straße",
+  "stadtteil": null,
+  "ort": "Dinslaken",
+  "plz": "46535"
+ },
+ "51.57000,6.74964": {
+  "strasse": "Hünxer Straße",
+  "stadtteil": "Blumenviertel",
+  "ort": "Dinslaken",
+  "plz": "46537"
+ },
+ "51.56929,6.73094": {
+  "strasse": "Willy-Brandt-Straße",
+  "stadtteil": null,
+  "ort": "Dinslaken",
+  "plz": "46535"
+ },
+ "50.91327,6.82794": {
+  "strasse": "Bonnstraße",
+  "stadtteil": null,
+  "ort": "Frechen",
+  "plz": "50226"
+ },
+ "50.92407,6.82284": {
+  "strasse": "Bonnstraße",
+  "stadtteil": null,
+  "ort": "Frechen",
+  "plz": "50226"
+ },
+ "50.90906,6.83095": {
+  "strasse": "Holzstraße",
+  "stadtteil": "Bachem",
+  "ort": "Frechen",
+  "plz": "50226"
+ },
+ "51.19161,6.50548": {
+  "strasse": "L 382",
+  "stadtteil": null,
+  "ort": "Korschenbroich",
+  "plz": "41352"
+ },
+ "51.21900,6.52212": {
+  "strasse": "Willicher Straße",
+  "stadtteil": "Kleinenbroich",
+  "ort": "Korschenbroich",
+  "plz": "41352"
+ },
+ "51.16627,6.57757": {
+  "strasse": "Bachstraße",
+  "stadtteil": "Glehn",
+  "ort": "Korschenbroich",
+  "plz": "41352"
+ },
+ "51.44000,6.62127": {
+  "strasse": "Filder Straße",
+  "stadtteil": "Moers-Vinn",
+  "ort": "Moers",
+  "plz": "47447"
+ },
+ "51.44332,6.61242": {
+  "strasse": "Venloer Straße",
+  "stadtteil": "Moers-Vinn",
+  "ort": "Moers",
+  "plz": "47447"
+ },
+ "51.45087,6.63879": {
+  "strasse": "Klever Straße",
+  "stadtteil": "Moers",
+  "ort": "Moers",
+  "plz": "47441"
+ },
+ "51.65910,6.62537": {
+  "strasse": "B 58",
+  "stadtteil": null,
+  "ort": "Wesel",
+  "plz": "46483"
+ },
+ "51.66609,6.63031": {
+  "strasse": "Brüner Landstraße",
+  "stadtteil": null,
+  "ort": "Wesel",
+  "plz": "46485"
+ },
+ "51.66990,6.61362": {
+  "strasse": "Nordstraße",
+  "stadtteil": "Feldmark",
+  "ort": "Wesel",
+  "plz": "46483"
+ },
+ "50.75816,6.71939": {
+  "strasse": "B 265",
+  "stadtteil": "Erp",
+  "ort": "Erftstadt",
+  "plz": "50374"
+ },
+ "50.95410,6.80208": {
+  "strasse": "Bonnstraße",
+  "stadtteil": "Freimersdorf",
+  "ort": "Pulheim",
+  "plz": "50259"
+ },
+ "50.99867,6.80075": {
+  "strasse": "Farehamstraße",
+  "stadtteil": null,
+  "ort": "Pulheim",
+  "plz": "50259"
+ },
+ "51.24687,6.69458": {
+  "strasse": "Düsseldorfer Straße",
+  "stadtteil": "Büderich",
+  "ort": "Meerbusch",
+  "plz": "40667"
+ },
+ "51.25431,6.70016": {
+  "strasse": "Dorfstraße",
+  "stadtteil": "Büderich",
+  "ort": "Meerbusch",
+  "plz": "40667"
+ },
+ "51.25121,6.68949": {
+  "strasse": "Düsseldorfer Straße",
+  "stadtteil": "Büderich",
+  "ort": "Meerbusch",
+  "plz": "40667"
+ },
+ "51.08120,6.61242": {
+  "strasse": "Kolpingstraße",
+  "stadtteil": null,
+  "ort": "Grevenbroich",
+  "plz": "41515"
+ },
+ "51.07804,6.59690": {
+  "strasse": "Neuenhausener Straße",
+  "stadtteil": "Neuenhausen",
+  "ort": "Grevenbroich",
+  "plz": "41515"
+ },
+ "50.91504,6.70962": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Horrem",
+  "ort": "Kerpen",
+  "plz": "50169"
+ },
+ "50.89694,6.68378": {
+  "strasse": "Kerpener Straße",
+  "stadtteil": "Sindorf",
+  "ort": "Kerpen",
+  "plz": "50170"
+ },
+ "50.87269,6.69278": {
+  "strasse": "Hahnenstraße",
+  "stadtteil": null,
+  "ort": "Kerpen",
+  "plz": "50171"
+ },
+ "51.10101,6.79748": {
+  "strasse": "L 380",
+  "stadtteil": "Nievenheim",
+  "ort": "Dormagen",
+  "plz": "41542"
+ },
+ "51.11132,6.82229": {
+  "strasse": "Krefelder Straße",
+  "stadtteil": "Zons",
+  "ort": "Dormagen",
+  "plz": "41539"
+ },
+ "51.09586,6.81295": {
+  "strasse": "Am Rath",
+  "stadtteil": "Horrem",
+  "ort": "Dormagen",
+  "plz": "41540"
+ },
+ "50.95104,6.62514": {
+  "strasse": "Aachener Straße",
+  "stadtteil": "Zieverich",
+  "ort": "Bergheim",
+  "plz": "50126"
+ },
+ "50.95003,6.63590": {
+  "strasse": "Gutenbergstraße",
+  "stadtteil": null,
+  "ort": "Bergheim",
+  "plz": "50126"
+ },
+ "50.94169,6.65373": {
+  "strasse": "L 276",
+  "stadtteil": "Kenten",
+  "ort": "Bergheim",
+  "plz": "50127"
+ },
+ "51.22276,6.60805": {
+  "strasse": "Neersener Straße",
+  "stadtteil": "Holzbüttgen",
+  "ort": "Kaarst",
+  "plz": "41564"
+ },
+ "51.22677,6.62050": {
+  "strasse": "Maubisstraße",
+  "stadtteil": null,
+  "ort": "Kaarst",
+  "plz": "41564"
+ },
+ "51.24140,6.62214": {
+  "strasse": "L 30",
+  "stadtteil": null,
+  "ort": "Kaarst",
+  "plz": "41564"
+ },
+ "50.63626,6.79519": {
+  "strasse": "L 119",
+  "stadtteil": "Stotzheim",
+  "ort": "Euskirchen",
+  "plz": "53879"
+ },
+ "50.65971,6.78162": {
+  "strasse": "Gerberstraße",
+  "stadtteil": null,
+  "ort": "Euskirchen",
+  "plz": "53879"
+ },
+ "50.65779,6.78748": {
+  "strasse": "Wilhelmstraße",
+  "stadtteil": null,
+  "ort": "Euskirchen",
+  "plz": "53879"
+ },
+ "51.84600,6.86350": {
+  "strasse": "Heidener Straße",
+  "stadtteil": null,
+  "ort": "Borken",
+  "plz": "46325"
+ },
+ "51.84487,6.85472": {
+  "strasse": "Butenwall",
+  "stadtteil": null,
+  "ort": "Borken",
+  "plz": "46325"
+ },
+ "51.84146,6.84812": {
+  "strasse": "Lange Stiege",
+  "stadtteil": null,
+  "ort": "Borken",
+  "plz": "46325"
+ },
+ "50.93106,6.94066": {
+  "strasse": "Hohenstaufenring",
+  "stadtteil": "Neustadt",
+  "ort": "Köln",
+  "plz": "50674"
+ },
+ "50.93667,6.92423": {
+  "strasse": "Aachener Straße",
+  "stadtteil": "Lindenthal",
+  "ort": "Köln",
+  "plz": "50931"
+ },
+ "50.93527,6.95287": {
+  "strasse": "Cäcilienstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Köln",
+  "plz": "50667"
+ },
+ "51.57071,6.99427": {
+  "strasse": "Horster Straße",
+  "stadtteil": null,
+  "ort": "Gladbeck",
+  "plz": "45964"
+ },
+ "51.57562,6.97988": {
+  "strasse": "Mühlenstraße",
+  "stadtteil": null,
+  "ort": "Gladbeck",
+  "plz": "45964"
+ },
+ "51.55587,6.98387": {
+  "strasse": "Essener Straße",
+  "stadtteil": "Butendorf",
+  "ort": "Gladbeck",
+  "plz": "45964"
+ },
+ "50.82370,6.96298": {
+  "strasse": "Mühlenweg",
+  "stadtteil": null,
+  "ort": "Wesseling",
+  "plz": "50389"
+ },
+ "50.82096,6.97704": {
+  "strasse": "Flach-Fengler-Straße",
+  "stadtteil": null,
+  "ort": "Wesseling",
+  "plz": "50389"
+ },
+ "50.82718,6.97365": {
+  "strasse": "Am Bungert",
+  "stadtteil": null,
+  "ort": "Wesseling",
+  "plz": "50389"
+ },
+ "51.49622,6.86379": {
+  "strasse": "Konrad-Adenauer-Allee",
+  "stadtteil": "Vondern",
+  "ort": "Oberhausen",
+  "plz": "46117"
+ },
+ "51.47770,6.84029": {
+  "strasse": "Duisburger Straße",
+  "stadtteil": "Lirich",
+  "ort": "Oberhausen",
+  "plz": "46049"
+ },
+ "51.47582,6.86382": {
+  "strasse": "Mülheimer Straße",
+  "stadtteil": "Marlenviertel Ost",
+  "ort": "Oberhausen",
+  "plz": "46045"
+ },
+ "52.07388,6.99733": {
+  "strasse": "Wüllener Straße",
+  "stadtteil": null,
+  "ort": "Ahaus",
+  "plz": "48683"
+ },
+ "52.07621,7.00490": {
+  "strasse": "Wessumer Straße",
+  "stadtteil": null,
+  "ort": "Ahaus",
+  "plz": "48683"
+ },
+ "52.08277,7.01523": {
+  "strasse": "Bahnhofstraße",
+  "stadtteil": null,
+  "ort": "Ahaus",
+  "plz": "48683"
+ },
+ "50.83411,6.90387": {
+  "strasse": "Kaiserstraße",
+  "stadtteil": null,
+  "ort": "Brühl",
+  "plz": "50321"
+ },
+ "50.79681,6.87051": {
+  "strasse": "Phantasialandstraße",
+  "stadtteil": "Badorf",
+  "ort": "Brühl",
+  "plz": "50321"
+ },
+ "50.81516,6.90743": {
+  "strasse": "Otto-Wels-Straße",
+  "stadtteil": "Pingsdorf",
+  "ort": "Brühl",
+  "plz": "50321"
+ },
+ "51.43198,6.88620": {
+  "strasse": "Eppinghofer Straße",
+  "stadtteil": "Altstadt II",
+  "ort": "Mülheim",
+  "plz": "45468"
+ },
+ "51.43586,6.88851": {
+  "strasse": "Eppinghofer Straße",
+  "stadtteil": "Altstadt II",
+  "ort": "Mülheim",
+  "plz": "45468"
+ },
+ "51.42630,6.88161": {
+  "strasse": "Friedrichstraße",
+  "stadtteil": "Altstadt I",
+  "ort": "Mülheim",
+  "plz": "45468"
+ },
+ "51.51928,6.93176": {
+  "strasse": "Prosperstraße",
+  "stadtteil": "Süd-West",
+  "ort": "Bottrop",
+  "plz": "46236"
+ },
+ "51.52369,6.93009": {
+  "strasse": "Horster Straße",
+  "stadtteil": "Altstadt",
+  "ort": "Bottrop",
+  "plz": "46236"
+ },
+ "51.53625,6.98489": {
+  "strasse": "Horster Straße",
+  "stadtteil": "Boy",
+  "ort": "Bottrop",
+  "plz": "46240"
+ },
+ "51.44736,7.00313": {
+  "strasse": "Ruhrschnellweg",
+  "stadtteil": "Südviertel",
+  "ort": "Essen",
+  "plz": "45128"
+ },
+ "51.44268,7.03386": {
+  "strasse": "Ruhrallee",
+  "stadtteil": "Huttrop",
+  "ort": "Essen",
+  "plz": "45136"
+ },
+ "51.45007,7.01282": {
+  "strasse": "Ruhrschnellweg",
+  "stadtteil": "Südviertel",
+  "ort": "Essen",
+  "plz": "45128"
+ },
+ "51.29498,6.91103": {
+  "strasse": "Brachter Straße",
+  "stadtteil": "Homberg",
+  "ort": "Ratingen",
+  "plz": "40882"
+ },
+ "51.29595,6.82966": {
+  "strasse": "Lise-Meitner-Straße",
+  "stadtteil": null,
+  "ort": "Ratingen",
+  "plz": "40878"
+ },
+ "51.29598,6.86714": {
+  "strasse": "Homberger Straße",
+  "stadtteil": null,
+  "ort": "Ratingen",
+  "plz": "40882"
+ },
+ "51.11922,6.92869": {
+  "strasse": "Berghausener Straße",
+  "stadtteil": "Berghausen",
+  "ort": "Langenfeld",
+  "plz": "40764"
+ },
+ "51.11330,6.93556": {
+  "strasse": "Düsseldorfer Straße",
+  "stadtteil": "Berghausen",
+  "ort": "Langenfeld",
+  "plz": "40764"
+ },
+ "51.11697,6.96619": {
+  "strasse": "L 402",
+  "stadtteil": "Immigrath",
+  "ort": "Langenfeld",
+  "plz": "40764"
+ },
+ "51.16504,6.93441": {
+  "strasse": "Klotzstraße",
+  "stadtteil": "Karnap",
+  "ort": "Hilden",
+  "plz": "40721"
+ },
+ "51.17677,6.92723": {
+  "strasse": "Gerresheimer Straße",
+  "stadtteil": "Meide",
+  "ort": "Hilden",
+  "plz": "40721"
+ },
+ "51.18180,6.92572": {
+  "strasse": "Gerresheimer Straße",
+  "stadtteil": null,
+  "ort": "Hilden",
+  "plz": "40721"
+ },
+ "51.24931,6.97901": {
+  "strasse": "Brückerstraße",
+  "stadtteil": null,
+  "ort": "Mettmann",
+  "plz": "40822"
+ },
+ "51.25575,6.94954": {
+  "strasse": "Südring",
+  "stadtteil": "Metzkausen",
+  "ort": "Mettmann",
+  "plz": "40822"
+ },
+ "50.76202,6.97476": {
+  "strasse": "Rankenberg",
+  "stadtteil": null,
+  "ort": "Bornheim",
+  "plz": "53332"
+ },
+ "50.75993,7.02290": {
+  "strasse": "L 281",
+  "stadtteil": "Roisdorf",
+  "ort": "Bornheim",
+  "plz": "53332"
+ },
+ "50.77579,6.92993": {
+  "strasse": "Bonn-Brühler-Straße",
+  "stadtteil": "Merten",
+  "ort": "Bornheim",
+  "plz": "53332"
+ },
+ "50.62882,6.94457": {
+  "strasse": "Aachener Straße",
+  "stadtteil": null,
+  "ort": "Rheinbach",
+  "plz": "53359"
+ },
+ "51.20177,6.94600": {
+  "strasse": "Max-Planck-Straße",
+  "stadtteil": "Trills",
+  "ort": "Erkrath",
+  "plz": "40699"
+ },
+ "51.22639,6.94994": {
+  "strasse": "Talstraße",
+  "stadtteil": "Hochdahl",
+  "ort": "Erkrath",
+  "plz": "40822"
+ },
+ "51.68430,7.02043": {
+  "strasse": "L 509",
+  "stadtteil": "Hervest",
+  "ort": "Dorsten",
+  "plz": "46284"
+ },
+ "51.66582,6.96546": {
+  "strasse": "Crawleystraße",
+  "stadtteil": null,
+  "ort": "Dorsten",
+  "plz": "46282"
+ },
+ "51.66939,6.96729": {
+  "strasse": "Bismarckstraße",
+  "stadtteil": "Hervest",
+  "ort": "Dorsten",
+  "plz": "46284"
+ },
+ "50.87421,6.88666": {
+  "strasse": "Peremyschljanystraße",
+  "stadtteil": "Hermülheim",
+  "ort": "Hürth",
+  "plz": "50354"
+ },
+ "50.89778,6.84497": {
+  "strasse": "Kölner Straße",
+  "stadtteil": "Gleuel",
+  "ort": "Hürth",
+  "plz": "50354"
+ },
+ "50.89411,6.90319": {
+  "strasse": "Kaulardstraße",
+  "stadtteil": "Efferen",
+  "ort": "Hürth",
+  "plz": "50354"
+ },
+ "50.70906,6.87792": {
+  "strasse": "L 182",
+  "stadtteil": "Straßfeld",
+  "ort": "Swisttal",
+  "plz": "53913"
+ },
+ "51.11569,6.89998": {
+  "strasse": "Helene-Lange-Straße",
+  "stadtteil": "Baumberg",
+  "ort": "Monheim am Rhein",
+  "plz": "40789"
+ },
+ "51.12011,6.89591": {
+  "strasse": "Hegelstraße",
+  "stadtteil": "Baumberg",
+  "ort": "Monheim am Rhein",
+  "plz": "40789"
+ },
+ "51.20895,7.03234": {
+  "strasse": "Gruitener Straße",
+  "stadtteil": null,
+  "ort": "Haan",
+  "plz": "42781"
+ },
+ "51.19231,7.01083": {
+  "strasse": "Kaiserstraße",
+  "stadtteil": null,
+  "ort": "Haan",
+  "plz": "42781"
+ },
+ "51.19307,6.99749": {
+  "strasse": "Dieker Straße",
+  "stadtteil": null,
+  "ort": "Haan",
+  "plz": "42781"
+ },
+ "51.02413,7.01540": {
+  "strasse": "Willy-Brandt-Ring",
+  "stadtteil": "Manfort",
+  "ort": "Leverkusen",
+  "plz": "51377"
+ },
+ "51.02704,7.01094": {
+  "strasse": "A 3",
+  "stadtteil": "Manfort",
+  "ort": "Leverkusen",
+  "plz": "51377"
+ },
+ "51.04628,6.99421": {
+  "strasse": "Küppersteger Straße",
+  "stadtteil": "Küppersteg",
+  "ort": "Leverkusen",
+  "plz": "51373"
+ },
+ "52.20789,7.02794": {
+  "strasse": "Eper Straße",
+  "stadtteil": null,
+  "ort": "Gronau",
+  "plz": "48599"
+ },
+ "52.21238,7.01910": {
+  "strasse": "Enscheder Straße",
+  "stadtteil": null,
+  "ort": "Gronau",
+  "plz": "48599"
+ },
+ "52.21481,7.04675": {
+  "strasse": "Vereinsstraße",
+  "stadtteil": null,
+  "ort": "Gronau",
+  "plz": "48599"
+ },
+ "51.17487,7.08456": {
+  "strasse": "Mummstraße",
+  "stadtteil": "Solingen Mitte",
+  "ort": "Solingen",
+  "plz": "42651"
+ },
+ "51.17194,7.08313": {
+  "strasse": "Kölner Straße",
+  "stadtteil": "Solingen Mitte",
+  "ort": "Solingen",
+  "plz": "42651"
+ },
+ "51.17902,7.07839": {
+  "strasse": "Kronprinzenstraße",
+  "stadtteil": "Solingen Mitte",
+  "ort": "Solingen",
+  "plz": "42655"
+ },
+ "51.57673,7.14451": {
+  "strasse": "Ewaldstraße",
+  "stadtteil": null,
+  "ort": "Herten",
+  "plz": "45699"
+ },
+ "51.55671,7.17612": {
+  "strasse": "Cranger Straße",
+  "stadtteil": null,
+  "ort": "Herten",
+  "plz": "45699"
+ },
+ "51.60778,7.12387": {
+  "strasse": "Westerholter Straße",
+  "stadtteil": "Langenbochum",
+  "ort": "Herten",
+  "plz": "45699"
+ },
+ "50.71371,7.02871": {
+  "strasse": "Schöntalweg",
+  "stadtteil": "Oedekoven",
+  "ort": "Alfter",
+  "plz": "53347"
+ },
+ "50.99007,7.13097": {
+  "strasse": "Konrad-Adenauer-Platz",
+  "stadtteil": "Stadtmitte",
+  "ort": "Bergisch Gladbach",
+  "plz": "51465"
+ },
+ "50.98969,7.12353": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Stadtmitte",
+  "ort": "Bergisch Gladbach",
+  "plz": "51465"
+ },
+ "50.98206,7.13708": {
+  "strasse": "Bensberger Straße",
+  "stadtteil": "Heidkamp",
+  "ort": "Bergisch Gladbach",
+  "plz": "51469"
+ },
+ "51.66384,7.12230": {
+  "strasse": "Lipper Weg",
+  "stadtteil": "Drewer-Nord",
+  "ort": "Marl",
+  "plz": "45770"
+ },
+ "51.67905,7.12382": {
+  "strasse": "Bachackerweg",
+  "stadtteil": "Hüls-Nord",
+  "ort": "Marl",
+  "plz": "45772"
+ },
+ "51.66597,7.15188": {
+  "strasse": "Victoriastraße",
+  "stadtteil": "Hüls-Nord",
+  "ort": "Marl",
+  "plz": "45772"
+ },
+ "51.56406,7.05920": {
+  "strasse": "Kurt-Schumacher-Straße",
+  "stadtteil": "Buer",
+  "ort": "Gelsenkirchen",
+  "plz": "45897"
+ },
+ "51.50629,7.10455": {
+  "strasse": "Wildenbruchstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Gelsenkirchen",
+  "plz": "45879"
+ },
+ "51.51277,7.08949": {
+  "strasse": "Overwegstraße",
+  "stadtteil": "Schalke",
+  "ort": "Gelsenkirchen",
+  "plz": "45879"
+ },
+ "51.25892,7.15315": {
+  "strasse": "K 9",
+  "stadtteil": "Ostersbaum",
+  "ort": "Wuppertal",
+  "plz": "42107"
+ },
+ "51.26985,7.19697": {
+  "strasse": "Steinweg",
+  "stadtteil": "Barmen-Mitte",
+  "ort": "Wuppertal",
+  "plz": "42275"
+ },
+ "51.25614,7.15074": {
+  "strasse": "Morianstraße",
+  "stadtteil": "Elberfeld",
+  "ort": "Wuppertal",
+  "plz": "42103"
+ },
+ "50.81475,7.16552": {
+  "strasse": "Römerstraße",
+  "stadtteil": null,
+  "ort": "Troisdorf",
+  "plz": "53840"
+ },
+ "50.81298,7.15381": {
+  "strasse": "Theodor-Heuss-Ring",
+  "stadtteil": null,
+  "ort": "Troisdorf",
+  "plz": "53840"
+ },
+ "50.81410,7.17713": {
+  "strasse": "Frankfurter Straße",
+  "stadtteil": null,
+  "ort": "Troisdorf",
+  "plz": "53840"
+ },
+ "51.33160,7.03686": {
+  "strasse": "Heidestraße",
+  "stadtteil": null,
+  "ort": "Velbert",
+  "plz": "42549"
+ },
+ "51.34672,7.02849": {
+  "strasse": "Werdener Straße",
+  "stadtteil": null,
+  "ort": "Velbert",
+  "plz": "42551"
+ },
+ "51.49505,7.26191": {
+  "strasse": "Harpener Hellweg",
+  "stadtteil": "Kornharpen-Voede-Abzweig",
+  "ort": "Bochum",
+  "plz": "44791"
+ },
+ "51.47295,7.12972": {
+  "strasse": "Berliner Straße",
+  "stadtteil": "Leithe",
+  "ort": "Bochum",
+  "plz": "44867"
+ },
+ "51.47876,7.22114": {
+  "strasse": "Kurt-Schumacher-Platz",
+  "stadtteil": "Gleisdreieck",
+  "ort": "Bochum",
+  "plz": "44787"
+ },
+ "50.73902,7.11590": {
+  "strasse": "Konrad-Adenauer-Platz",
+  "stadtteil": "Beuel-Mitte",
+  "ort": "Bonn",
+  "plz": "53225"
+ },
+ "50.73771,7.10565": {
+  "strasse": "Berliner Freiheit",
+  "stadtteil": "Bonn-Zentrum",
+  "ort": "Bonn",
+  "plz": "53111"
+ },
+ "50.73996,7.12314": {
+  "strasse": "Doktor-Weis-Platz",
+  "stadtteil": "Beuel-Mitte",
+  "ort": "Bonn",
+  "plz": "53225"
+ },
+ "51.61461,7.20332": {
+  "strasse": "Dortmunder Straße",
+  "stadtteil": "Ostviertel",
+  "ort": "Recklinghausen",
+  "plz": "45665"
+ },
+ "51.56979,7.21204": {
+  "strasse": "Bochumer Straße",
+  "stadtteil": "Süd",
+  "ort": "Recklinghausen",
+  "plz": "45661"
+ },
+ "51.61086,7.20851": {
+  "strasse": "Castroper Straße",
+  "stadtteil": "Hillen",
+  "ort": "Recklinghausen",
+  "plz": "45665"
+ },
+ "51.52482,7.18934": {
+  "strasse": "Dorstener Straße",
+  "stadtteil": "Holsterhausen",
+  "ort": "Herne",
+  "plz": "44652"
+ },
+ "51.53588,7.22694": {
+  "strasse": "Sodinger Straße",
+  "stadtteil": "Herne-Mitte",
+  "ort": "Herne",
+  "plz": "44623"
+ },
+ "51.54409,7.21590": {
+  "strasse": "Westring",
+  "stadtteil": "Baukau",
+  "ort": "Herne",
+  "plz": "44629"
+ },
+ "50.63085,7.02575": {
+  "strasse": "Gudenauer Allee",
+  "stadtteil": null,
+  "ort": "Meckenheim",
+  "plz": "53340"
+ },
+ "50.63302,7.05583": {
+  "strasse": "Merler Bahn",
+  "stadtteil": "Merl",
+  "ort": "Meckenheim",
+  "plz": "53340"
+ },
+ "50.62866,7.04060": {
+  "strasse": "Gudenauer Allee",
+  "stadtteil": null,
+  "ort": "Meckenheim",
+  "plz": "53340"
+ },
+ "50.90893,7.18958": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Volberg",
+  "ort": "Rösrath",
+  "plz": "51503"
+ },
+ "51.39762,7.17998": {
+  "strasse": "Martin-Luther-Straße",
+  "stadtteil": null,
+  "ort": "Hattingen",
+  "plz": "45525"
+ },
+ "51.39960,7.17563": {
+  "strasse": "Kreisstraße",
+  "stadtteil": null,
+  "ort": "Hattingen",
+  "plz": "45525"
+ },
+ "51.40777,7.16992": {
+  "strasse": "Bochumer Straße",
+  "stadtteil": "Baak",
+  "ort": "Hattingen",
+  "plz": "45529"
+ },
+ "51.17822,7.19995": {
+  "strasse": "Willy-Brandt-Platz",
+  "stadtteil": "Stachelhausen",
+  "ort": "Remscheid",
+  "plz": "42859"
+ },
+ "51.19169,7.17094": {
+  "strasse": "Hastener Straße",
+  "stadtteil": "Schöne Aussicht",
+  "ort": "Remscheid",
+  "plz": "42855"
+ },
+ "51.18075,7.25411": {
+  "strasse": "Borner Straße",
+  "stadtteil": "Trecknase",
+  "ort": "Remscheid",
+  "plz": "42897"
+ },
+ "50.79405,7.17320": {
+  "strasse": "B 56",
+  "stadtteil": "Obermenden",
+  "ort": "Sankt Augustin",
+  "plz": "53757"
+ },
+ "50.77986,7.19196": {
+  "strasse": "Bonner Straße",
+  "stadtteil": "Siegburg-Mülldorf",
+  "ort": "Sankt Augustin",
+  "plz": "53757"
+ },
+ "50.78499,7.19684": {
+  "strasse": "Bonner Straße",
+  "stadtteil": "Siegburg-Mülldorf",
+  "ort": "Sankt Augustin",
+  "plz": "53757"
+ },
+ "50.70486,7.24491": {
+  "strasse": "Dollendorfer Straße",
+  "stadtteil": "Thomasberg",
+  "ort": "Königswinter",
+  "plz": "53639"
+ },
+ "50.71398,7.27888": {
+  "strasse": "Niederbach",
+  "stadtteil": "Oberpleis",
+  "ort": "Königswinter",
+  "plz": "53639"
+ },
+ "51.83604,7.28402": {
+  "strasse": "Münsterstraße",
+  "stadtteil": "Dülmen-Mitte",
+  "ort": "Dülmen",
+  "plz": "48249"
+ },
+ "51.84097,7.28857": {
+  "strasse": "Nordlandwehr",
+  "stadtteil": "Dülmen-Mitte",
+  "ort": "Dülmen",
+  "plz": "48249"
+ },
+ "50.79130,7.20485": {
+  "strasse": "Bonner Straße",
+  "stadtteil": null,
+  "ort": "Siegburg",
+  "plz": "53721"
+ },
+ "50.78720,7.22053": {
+  "strasse": "Frankfurter Straße",
+  "stadtteil": null,
+  "ort": "Siegburg",
+  "plz": "53721"
+ },
+ "50.79798,7.21489": {
+  "strasse": "Kleiberg",
+  "stadtteil": null,
+  "ort": "Siegburg",
+  "plz": "53721"
+ },
+ "51.35672,7.45418": {
+  "strasse": "Bahnhofshinterfahrung",
+  "stadtteil": "Wehringhausen",
+  "ort": "Hagen",
+  "plz": "58089"
+ },
+ "51.34300,7.40873": {
+  "strasse": "L 807",
+  "stadtteil": "Haspe-West",
+  "ort": "Hagen",
+  "plz": "58135"
+ },
+ "51.36195,7.46672": {
+  "strasse": "Körnerstraße",
+  "stadtteil": "Mittelstadt",
+  "ort": "Hagen",
+  "plz": "58095"
+ },
+ "51.51008,7.46235": {
+  "strasse": "Hohe Straße",
+  "stadtteil": "City",
+  "ort": "Dortmund",
+  "plz": "44139"
+ },
+ "51.51927,7.45352": {
+  "strasse": "Schützenstraße",
+  "stadtteil": "Hafen",
+  "ort": "Dortmund",
+  "plz": "44147"
+ },
+ "51.51710,7.46887": {
+  "strasse": "Bornstraße",
+  "stadtteil": "City",
+  "ort": "Dortmund",
+  "plz": "44135"
+ },
+ "50.78227,7.25674": {
+  "strasse": "Stoßdorfer Straße",
+  "stadtteil": "Stoßdorf",
+  "ort": "Hennef",
+  "plz": "53773"
+ },
+ "50.76765,7.31124": {
+  "strasse": "Europaallee",
+  "stadtteil": "Geisbach",
+  "ort": "Hennef",
+  "plz": "53773"
+ },
+ "50.77695,7.27962": {
+  "strasse": "Frankfurter Straße",
+  "stadtteil": null,
+  "ort": "Hennef",
+  "plz": "53773"
+ },
+ "51.29301,7.28786": {
+  "strasse": "Hattinger Straße",
+  "stadtteil": "Loh",
+  "ort": "Schwelm",
+  "plz": "58332"
+ },
+ "50.84108,7.21191": {
+  "strasse": "Hauptstraße",
+  "stadtteil": null,
+  "ort": "Lohmar",
+  "plz": "53797"
+ },
+ "50.85108,7.22350": {
+  "strasse": "Sülztalstraße",
+  "stadtteil": null,
+  "ort": "Lohmar",
+  "plz": "53797"
+ },
+ "50.82223,7.20532": {
+  "strasse": "B 484",
+  "stadtteil": null,
+  "ort": "Lohmar",
+  "plz": "53797"
+ },
+ "52.27985,7.43420": {
+  "strasse": "Neuenkirchener Straße",
+  "stadtteil": "Rheine-Stadt",
+  "ort": "Rheine",
+  "plz": "48431"
+ },
+ "52.27695,7.44141": {
+  "strasse": "Münsterstraße",
+  "stadtteil": "Rheine-Stadt",
+  "ort": "Rheine",
+  "plz": "48431"
+ },
+ "52.28696,7.44103": {
+  "strasse": "Hansaallee",
+  "stadtteil": "Rheine-Stadt",
+  "ort": "Rheine",
+  "plz": "48429"
+ },
+ "51.42912,7.33599": {
+  "strasse": "Ruhrstraße",
+  "stadtteil": null,
+  "ort": "Witten",
+  "plz": "58452"
+ },
+ "51.44397,7.33817": {
+  "strasse": "Ardeystraße",
+  "stadtteil": "Sonnenschein",
+  "ort": "Witten",
+  "plz": "58452"
+ },
+ "51.42408,7.28212": {
+  "strasse": "Vormholzer Straße",
+  "stadtteil": "Ostherbede",
+  "ort": "Witten",
+  "plz": "58456"
+ },
+ "51.55822,7.31420": {
+  "strasse": "Habinghorster Straße",
+  "stadtteil": "Rauxel",
+  "ort": "Castrop-Rauxel",
+  "plz": "44575"
+ },
+ "51.56596,7.31474": {
+  "strasse": "Habinghorster Straße",
+  "stadtteil": "Rauxel",
+  "ort": "Castrop-Rauxel",
+  "plz": "44575"
+ },
+ "51.57293,7.30491": {
+  "strasse": "Berliner Platz",
+  "stadtteil": "Rauxel",
+  "ort": "Castrop-Rauxel",
+  "plz": "44579"
+ },
+ "51.31304,7.27373": {
+  "strasse": "B 326",
+  "stadtteil": "Halloh",
+  "ort": "Sprockhövel",
+  "plz": "45549"
+ },
+ "51.32306,7.28815": {
+  "strasse": "Gevelsberger Straße",
+  "stadtteil": "Haßlinghausen",
+  "ort": "Sprockhövel",
+  "plz": "45549"
+ },
+ "51.59139,7.47733": {
+  "strasse": "Dortmunder Straße",
+  "stadtteil": "Brambauer",
+  "ort": "Lünen",
+  "plz": "44536"
+ },
+ "51.60910,7.52579": {
+  "strasse": "Kamener Straße",
+  "stadtteil": "Horstmar",
+  "ort": "Lünen",
+  "plz": "44532"
+ },
+ "51.61863,7.52425": {
+  "strasse": "Konrad-Adenauer-Straße",
+  "stadtteil": null,
+  "ort": "Lünen",
+  "plz": "44534"
+ },
+ "51.95590,7.62607": {
+  "strasse": "Ludgeriplatz",
+  "stadtteil": "Josef",
+  "ort": "Münster",
+  "plz": "48151"
+ },
+ "51.95385,7.63206": {
+  "strasse": "Hafenstraße",
+  "stadtteil": "Bahnhof",
+  "ort": "Münster",
+  "plz": "48153"
+ },
+ "51.96015,7.63358": {
+  "strasse": "Salzstraße",
+  "stadtteil": "Bahnhof",
+  "ort": "Münster",
+  "plz": "48143"
+ },
+ "52.27926,7.71256": {
+  "strasse": "Weststraße",
+  "stadtteil": null,
+  "ort": "Ibbenbüren",
+  "plz": "49477"
+ },
+ "52.23842,7.69389": {
+  "strasse": "Münsterstraße",
+  "stadtteil": "Dörenthe",
+  "ort": "Ibbenbüren",
+  "plz": "49479"
+ },
+ "52.27533,7.69923": {
+  "strasse": "Gravenhorster Straße",
+  "stadtteil": null,
+  "ort": "Ibbenbüren",
+  "plz": "49477"
+ },
+ "51.67129,7.84931": {
+  "strasse": "Ahornallee",
+  "stadtteil": "Stadtbezirk Rhynern",
+  "ort": "Hamm",
+  "plz": "59063"
+ },
+ "51.69083,7.80937": {
+  "strasse": "Münsterstraße",
+  "stadtteil": "Stadtbezirk Heessen",
+  "ort": "Hamm",
+  "plz": "59065"
+ },
+ "51.62875,7.84663": {
+  "strasse": "Werler Straße",
+  "stadtteil": "Stadtbezirk Rhynern",
+  "ort": "Hamm",
+  "plz": "59069"
+ },
+ "51.37278,7.69343": {
+  "strasse": "Bahnhofsplatz",
+  "stadtteil": null,
+  "ort": "Iserlohn",
+  "plz": "58636"
+ },
+ "51.39834,7.69388": {
+  "strasse": "Leckingser Straße",
+  "stadtteil": null,
+  "ort": "Iserlohn",
+  "plz": "58640"
+ },
+ "51.38514,7.69643": {
+  "strasse": "A 46",
+  "stadtteil": "Nußberg",
+  "ort": "Iserlohn",
+  "plz": "58638"
+ },
+ "51.54105,7.68772": {
+  "strasse": "Hansastraße",
+  "stadtteil": null,
+  "ort": "Unna",
+  "plz": "59425"
+ },
+ "51.55505,7.68427": {
+  "strasse": "Kamener Straße",
+  "stadtteil": "Königsborn",
+  "ort": "Unna",
+  "plz": "59425"
+ },
+ "51.52214,7.65840": {
+  "strasse": "A 44",
+  "stadtteil": "Massen",
+  "ort": "Unna",
+  "plz": "59427"
+ },
+ "51.44163,7.96900": {
+  "strasse": "Stembergstraße",
+  "stadtteil": "Neheim",
+  "ort": "Arnsberg",
+  "plz": "59755"
+ },
+ "51.45610,7.96172": {
+  "strasse": "L 745",
+  "stadtteil": "Neheim",
+  "ort": "Arnsberg",
+  "plz": "59755"
+ },
+ "51.43204,7.98796": {
+  "strasse": "Kleinbahnstraße",
+  "stadtteil": "Hüsten",
+  "ort": "Arnsberg",
+  "plz": "59759"
+ },
+ "51.75389,7.89790": {
+  "strasse": "Europaplatz",
+  "stadtteil": null,
+  "ort": "Ahlen",
+  "plz": "59229"
+ },
+ "51.76282,7.88078": {
+  "strasse": "Buschhoffplatz",
+  "stadtteil": null,
+  "ort": "Ahlen",
+  "plz": "59227"
+ },
+ "51.76293,7.89744": {
+  "strasse": "Oststraße",
+  "stadtteil": null,
+  "ort": "Ahlen",
+  "plz": "59227"
+ },
+ "51.22742,7.63502": {
+  "strasse": "Altenaer Straße",
+  "stadtteil": "Lüdenscheid-Stadt",
+  "ort": "Lüdenscheid",
+  "plz": "58507"
+ },
+ "51.22105,7.64121": {
+  "strasse": "Kluser Straße",
+  "stadtteil": "Lüdenscheid-Stadt",
+  "ort": "Lüdenscheid",
+  "plz": "58511"
+ },
+ "51.21117,7.64420": {
+  "strasse": "Herscheider Landstraße",
+  "stadtteil": "Lüdenscheid-Stadt",
+  "ort": "Lüdenscheid",
+  "plz": "58511"
+ },
+ "51.59216,7.65384": {
+  "strasse": "Hochstraße",
+  "stadtteil": null,
+  "ort": "Kamen",
+  "plz": "59174"
+ },
+ "51.57772,7.66894": {
+  "strasse": "Zollpost",
+  "stadtteil": null,
+  "ort": "Kamen",
+  "plz": "59174"
+ },
+ "51.59390,7.66805": {
+  "strasse": "Oststraße",
+  "stadtteil": null,
+  "ort": "Kamen",
+  "plz": "59174"
+ },
+ "50.87175,8.01609": {
+  "strasse": "Berliner Straße",
+  "stadtteil": "Siegen-Kernband",
+  "ort": "Siegen",
+  "plz": "57072"
+ },
+ "50.89514,8.02778": {
+  "strasse": "Weidenauer Straße",
+  "stadtteil": "Weidenau-West",
+  "ort": "Siegen",
+  "plz": "57076"
+ },
+ "50.88874,8.02852": {
+  "strasse": "Weidenauer Straße",
+  "stadtteil": "Weidenau-West",
+  "ort": "Siegen",
+  "plz": "57076"
+ },
+ "51.44317,7.57340": {
+  "strasse": "Bethunestraße",
+  "stadtteil": null,
+  "ort": "Schwerte",
+  "plz": "58239"
+ },
+ "51.45680,7.56007": {
+  "strasse": "Hansalinie",
+  "stadtteil": "Schwerterheide",
+  "ort": "Schwerte",
+  "plz": "58239"
+ },
+ "51.44597,7.56414": {
+  "strasse": "Hörder Straße",
+  "stadtteil": null,
+  "ort": "Schwerte",
+  "plz": "58239"
+ },
+ "51.44127,7.78220": {
+  "strasse": "Märkische Straße",
+  "stadtteil": null,
+  "ort": "Menden",
+  "plz": "58706"
+ },
+ "51.72281,8.75836": {
+  "strasse": "Heierswall",
+  "stadtteil": "Nordstadt",
+  "ort": "Paderborn",
+  "plz": "33098"
+ },
+ "51.71612,8.75996": {
+  "strasse": "Kasseler Straße",
+  "stadtteil": "Oststadt",
+  "ort": "Paderborn",
+  "plz": "33098"
+ },
+ "51.70909,8.71992": {
+  "strasse": "Bahnhofstraße",
+  "stadtteil": "Südstadt",
+  "ort": "Paderborn",
+  "plz": "33106"
+ },
+ "51.91403,8.37175": {
+  "strasse": "Brockhäger Straße",
+  "stadtteil": null,
+  "ort": "Gütersloh",
+  "plz": "33330"
+ },
+ "51.91270,8.36594": {
+  "strasse": "Marienfelder Straße",
+  "stadtteil": null,
+  "ort": "Gütersloh",
+  "plz": "33330"
+ },
+ "51.89137,8.38399": {
+  "strasse": "Südring",
+  "stadtteil": null,
+  "ort": "Gütersloh",
+  "plz": "33332"
+ },
+ "51.99102,8.60732": {
+  "strasse": "Oerlinghauser Straße",
+  "stadtteil": "Stieghorst",
+  "ort": "Bielefeld",
+  "plz": "33699"
+ },
+ "52.02410,8.56539": {
+  "strasse": "Heeper Straße",
+  "stadtteil": "Mitte",
+  "ort": "Bielefeld",
+  "plz": "33607"
+ },
+ "52.02288,8.52912": {
+  "strasse": "Elsa-Brändström-Straße",
+  "stadtteil": "Mitte",
+  "ort": "Bielefeld",
+  "plz": "33602"
+ },
+ "52.21589,8.80154": {
+  "strasse": "Eidinghausener Straße",
+  "stadtteil": "Eidinghausen",
+  "ort": "Bad Oeynhausen",
+  "plz": "32549"
+ },
+ "52.20899,8.84145": {
+  "strasse": "Vlothoer Straße",
+  "stadtteil": "Babbenhausen",
+  "ort": "Bad Oeynhausen",
+  "plz": "32547"
+ },
+ "52.21918,8.81824": {
+  "strasse": "Siriusweg",
+  "stadtteil": "Dehme",
+  "ort": "Bad Oeynhausen",
+  "plz": "32549"
+ },
+ "51.56488,8.11828": {
+  "strasse": "Niederbergheimer Straße",
+  "stadtteil": null,
+  "ort": "Soest",
+  "plz": "59494"
+ },
+ "51.56429,8.09858": {
+  "strasse": "Wisbyring",
+  "stadtteil": null,
+  "ort": "Soest",
+  "plz": "59494"
+ },
+ "51.56594,8.10787": {
+  "strasse": "Ulrichertor",
+  "stadtteil": null,
+  "ort": "Soest",
+  "plz": "59494"
+ },
+ "51.67996,8.34564": {
+  "strasse": "Lippertor",
+  "stadtteil": null,
+  "ort": "Lippstadt",
+  "plz": "59555"
+ },
+ "51.67398,8.34907": {
+  "strasse": "Woldemei",
+  "stadtteil": null,
+  "ort": "Lippstadt",
+  "plz": "59555"
+ },
+ "51.66993,8.34595": {
+  "strasse": "Südertor",
+  "stadtteil": null,
+  "ort": "Lippstadt",
+  "plz": "59557"
+ },
+ "52.11731,8.67630": {
+  "strasse": "Lübberstraße",
+  "stadtteil": "Stiftberg",
+  "ort": "Herford",
+  "plz": "32052"
+ },
+ "52.11766,8.66371": {
+  "strasse": "Bahnhofstraße",
+  "stadtteil": "Radewiger Feldmark",
+  "ort": "Herford",
+  "plz": "32052"
+ },
+ "52.07781,8.61840": {
+  "strasse": "Bielefelder Straße",
+  "stadtteil": "Stedefreund",
+  "ort": "Herford",
+  "plz": "32051"
+ },
+ "52.06796,8.73902": {
+  "strasse": "Am Zubringer",
+  "stadtteil": "Aspe",
+  "ort": "Bad Salzuflen",
+  "plz": "32107"
+ },
+ "52.05222,8.74049": {
+  "strasse": "Ostwestfalenstraße",
+  "stadtteil": "Wülfer-Bexten",
+  "ort": "Bad Salzuflen",
+  "plz": "32107"
+ },
+ "52.07916,8.72373": {
+  "strasse": "Am Zubringer",
+  "stadtteil": "Werl",
+  "ort": "Bad Salzuflen",
+  "plz": "32107"
+ },
+ "52.20315,8.56797": {
+  "strasse": "Borriesstraße",
+  "stadtteil": "Ennigloh",
+  "ort": "Bünde",
+  "plz": "32257"
+ },
+ "52.19408,8.54864": {
+  "strasse": "A 30",
+  "stadtteil": "Ennigloh",
+  "ort": "Bünde",
+  "plz": "32257"
+ },
+ "51.95524,8.85810": {
+  "strasse": "Lagesche Straße",
+  "stadtteil": "Jerxen-Orbke",
+  "ort": "Detmold",
+  "plz": "32758"
+ },
+ "51.93805,8.87497": {
+  "strasse": "Bismarckstraße",
+  "stadtteil": null,
+  "ort": "Detmold",
+  "plz": "32756"
+ },
+ "51.94904,8.82846": {
+  "strasse": "Bielefelder Straße",
+  "stadtteil": "Heidenoldendorf",
+  "ort": "Detmold",
+  "plz": "32758"
+ },
+ "51.83331,8.30532": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Wiedenbrück",
+  "ort": "Rheda-Wiedenbrück",
+  "plz": "33378"
+ },
+ "51.83815,8.31432": {
+  "strasse": "Bielefelder Straße",
+  "stadtteil": "Wiedenbrück",
+  "ort": "Rheda-Wiedenbrück",
+  "plz": "33378"
+ },
+ "51.85607,8.28629": {
+  "strasse": "Ringstraße",
+  "stadtteil": "Rheda",
+  "ort": "Rheda-Wiedenbrück",
+  "plz": "33378"
+ },
+ "52.28980,8.92229": {
+  "strasse": "Klausenwall",
+  "stadtteil": "Dioecese of Minden",
+  "ort": "Minden",
+  "plz": "32423"
+ },
+ "52.28888,8.93366": {
+  "strasse": "Am Fort C",
+  "stadtteil": "Rechtes Weserufer",
+  "ort": "Minden",
+  "plz": "32423"
+ },
+ "52.28899,8.93823": {
+  "strasse": "Viktoriastraße",
+  "stadtteil": "Rechtes Weserufer",
+  "ort": "Minden",
+  "plz": "32423"
+ },
+ "50.07132,8.24070": {
+  "strasse": "Kaiser-Friedrich-Ring",
+  "stadtteil": "Mitte",
+  "ort": "Wiesbaden",
+  "plz": "65185"
+ },
+ "50.08134,8.21885": {
+  "strasse": "Klarenthaler Straße",
+  "stadtteil": "Rheingauviertel",
+  "ort": "Wiesbaden",
+  "plz": "65197"
+ },
+ "50.04788,8.24096": {
+  "strasse": "Herzogsplatz",
+  "stadtteil": "Biebrich",
+  "ort": "Wiesbaden",
+  "plz": "65203"
+ },
+ "51.31898,9.50868": {
+  "strasse": "Kurt-Wolters-Straße",
+  "stadtteil": "Wesertor",
+  "ort": "Kassel",
+  "plz": "34125"
+ },
+ "51.33116,9.49985": {
+  "strasse": "Eisenschmiede",
+  "stadtteil": "Nord",
+  "ort": "Kassel",
+  "plz": "34127"
+ },
+ "51.32105,9.50224": {
+  "strasse": "Untere Königsstraße",
+  "stadtteil": "Nord",
+  "ort": "Kassel",
+  "plz": "34117"
+ },
+ "50.10717,8.68777": {
+  "strasse": "Brückenstraße",
+  "stadtteil": "Frankfurt-Sachsenhausen",
+  "ort": "Frankfurt",
+  "plz": "60594"
+ },
+ "50.10978,8.68784": {
+  "strasse": "Kurt-Schumacher-Straße",
+  "stadtteil": "Innenstadt",
+  "ort": "Frankfurt",
+  "plz": "60311"
+ },
+ "50.13175,8.67179": {
+  "strasse": "Eschersheimer Landstraße",
+  "stadtteil": "Westend-Nord",
+  "ort": "Frankfurt",
+  "plz": "60320"
+ },
+ "49.85898,8.63502": {
+  "strasse": "Eschollbrücker Straße",
+  "stadtteil": "Darmstadt-Bessungen",
+  "ort": "Darmstadt",
+  "plz": "64295"
+ },
+ "49.88972,8.65330": {
+  "strasse": "Martin-Luther-King-Ring",
+  "stadtteil": "Gewerbegebiet Nord",
+  "ort": "Darmstadt",
+  "plz": "64293"
+ },
+ "49.86779,8.68777": {
+  "strasse": "B 26",
+  "stadtteil": "Ost",
+  "ort": "Darmstadt",
+  "plz": "64287"
+ },
+ "50.10704,8.73787": {
+  "strasse": "Strahlenbergerstraße",
+  "stadtteil": "Kaiserlei",
+  "ort": "Offenbach",
+  "plz": "63067"
+ },
+ "50.10571,8.76448": {
+  "strasse": "Schloßstraße",
+  "stadtteil": "Hochschule für Gestaltung",
+  "ort": "Offenbach",
+  "plz": "63065"
+ },
+ "50.10314,8.76878": {
+  "strasse": "Bleichstraße",
+  "stadtteil": "Wilhelmschule",
+  "ort": "Offenbach",
+  "plz": "63065"
+ },
+ "49.49155,8.39220": {
+  "strasse": "Sternstraße",
+  "stadtteil": "Friesenheim",
+  "ort": "Ludwigshafen",
+  "plz": "67063"
+ },
+ "49.48899,8.38333": {
+  "strasse": "Sternstraße",
+  "stadtteil": "Oggersheim",
+  "ort": "Ludwigshafen",
+  "plz": "67071"
+ },
+ "49.45795,8.40317": {
+  "strasse": "Maudacher Straße",
+  "stadtteil": "Gartenstadt",
+  "ort": "Ludwigshafen",
+  "plz": "67065"
+ },
+ "49.77303,6.66657": {
+  "strasse": "Zurmaiener Straße",
+  "stadtteil": "Nells Ländchen",
+  "ort": "Trier",
+  "plz": "54292"
+ },
+ "49.76210,6.63322": {
+  "strasse": "Martinsufer",
+  "stadtteil": "Altstadt",
+  "ort": "Trier",
+  "plz": "54292"
+ },
+ "49.74989,6.63722": {
+  "strasse": "Südallee",
+  "stadtteil": "Altstadt",
+  "ort": "Trier",
+  "plz": "54290"
+ },
+ "50.00020,8.26051": {
+  "strasse": "Alicenplatz",
+  "stadtteil": "Mainz-Neustadt",
+  "ort": "Mainz",
+  "plz": "55116"
+ },
+ "49.99787,8.25632": {
+  "strasse": "Binger Straße",
+  "stadtteil": "Hartenberg-Münchfeld",
+  "ort": "Mainz",
+  "plz": "55122"
+ },
+ "50.00091,8.26512": {
+  "strasse": "Große Bleiche",
+  "stadtteil": "Mainz-Altstadt",
+  "ort": "Mainz",
+  "plz": "55116"
+ },
+ "50.36099,7.58831": {
+  "strasse": "Saarplatz",
+  "stadtteil": "Rauental",
+  "ort": "Koblenz",
+  "plz": "56068"
+ },
+ "50.35500,7.59389": {
+  "strasse": "Friedrich-Ebert-Ring",
+  "stadtteil": "Mitte",
+  "ort": "Koblenz",
+  "plz": "56068"
+ },
+ "50.35796,7.58849": {
+  "strasse": "Thielenstraße",
+  "stadtteil": "Goldgrube",
+  "ort": "Koblenz",
+  "plz": "56073"
+ },
+ "48.89095,8.69519": {
+  "strasse": "Goethestraße",
+  "stadtteil": "Innenstadt",
+  "ort": "Pforzheim",
+  "plz": "75173"
+ },
+ "48.88936,8.66690": {
+  "strasse": "Habermehlstraße",
+  "stadtteil": "Brötzingen",
+  "ort": "Pforzheim",
+  "plz": "75172"
+ },
+ "48.91508,8.71331": {
+  "strasse": "A 8",
+  "stadtteil": "Nordstadt",
+  "ort": "Pforzheim",
+  "plz": "75177"
+ },
+ "48.40182,9.97907": {
+  "strasse": "Mörikestraße",
+  "stadtteil": "Weststadt",
+  "ort": "Ulm",
+  "plz": "89077"
+ },
+ "48.40124,9.95698": {
+  "strasse": "Blaubeurer Straße",
+  "stadtteil": "Söflingen",
+  "ort": "Ulm",
+  "plz": "89077"
+ },
+ "48.40686,9.97311": {
+  "strasse": "Mähringer Weg",
+  "stadtteil": "Eselsberg",
+  "ort": "Ulm",
+  "plz": "89075"
+ },
+ "49.00302,8.42410": {
+  "strasse": "Oststadtkreisel",
+  "stadtteil": "Südstadt",
+  "ort": "Karlsruhe",
+  "plz": "76131"
+ },
+ "49.02335,8.39664": {
+  "strasse": "Adenauerring",
+  "stadtteil": "Nordstadt",
+  "ort": "Karlsruhe",
+  "plz": "76131"
+ },
+ "49.00998,8.39535": {
+  "strasse": "Kaiserstraße",
+  "stadtteil": "Innenstadt-West",
+  "ort": "Karlsruhe",
+  "plz": "76133"
+ },
+ "49.16911,9.21897": {
+  "strasse": "Austraße",
+  "stadtteil": "Heilbronn-Äussere Bezirke",
+  "ort": "Heilbronn",
+  "plz": "74076"
+ },
+ "49.15800,9.22544": {
+  "strasse": "Grimmstraße",
+  "stadtteil": "Heilbronn-Äussere Bezirke",
+  "ort": "Heilbronn",
+  "plz": "74076"
+ },
+ "49.14599,9.21884": {
+  "strasse": "Turmstraße",
+  "stadtteil": "Heilbronn-Innenstadt",
+  "ort": "Heilbronn",
+  "plz": "74072"
+ },
+ "48.78418,9.17872": {
+  "strasse": "Friedrichstraße",
+  "stadtteil": "Hauptbahnhof",
+  "ort": "Stuttgart",
+  "plz": "70174"
+ },
+ "48.80371,9.21946": {
+  "strasse": "Waiblinger Straße",
+  "stadtteil": "Kurpark",
+  "ort": "Stuttgart",
+  "plz": "70372"
+ },
+ "48.77597,9.18290": {
+  "strasse": "Charlottenplatz",
+  "stadtteil": "Rathaus",
+  "ort": "Stuttgart",
+  "plz": "70173"
+ },
+ "49.41111,8.69237": {
+  "strasse": "Bismarckstraße",
+  "stadtteil": "Bergheim",
+  "ort": "Heidelberg",
+  "plz": "69115"
+ },
+ "49.40397,8.67739": {
+  "strasse": "Willy-Brandt-Platz",
+  "stadtteil": "Weststadt",
+  "ort": "Heidelberg",
+  "plz": "69115"
+ },
+ "49.40012,8.67774": {
+  "strasse": "Speyerer Straße",
+  "stadtteil": "Alte Stadtgärtnerei",
+  "ort": "Heidelberg",
+  "plz": "69115"
+ },
+ "47.98616,7.83605": {
+  "strasse": "Basler Straße",
+  "stadtteil": "Unterwiehre-Nord",
+  "ort": "Freiburg im Breisgau",
+  "plz": "79100"
+ },
+ "47.99194,7.85413": {
+  "strasse": "Schwabentorring",
+  "stadtteil": "Altstadt",
+  "ort": "Freiburg im Breisgau",
+  "plz": "79098"
+ },
+ "48.02200,7.85104": {
+  "strasse": "Engesserstraße",
+  "stadtteil": "Brühl",
+  "ort": "Freiburg im Breisgau",
+  "plz": "79108"
+ },
+ "49.48381,8.47381": {
+  "strasse": "Kunststraße",
+  "stadtteil": "Innenstadt",
+  "ort": "Mannheim",
+  "plz": "68161"
+ },
+ "49.54990,8.44959": {
+  "strasse": "Frankenthaler Straße",
+  "stadtteil": "Sandhofen",
+  "ort": "Mannheim",
+  "plz": "68307"
+ },
+ "49.49301,8.47161": {
+  "strasse": "Kurpfalzkreisel",
+  "stadtteil": "Oststadt",
+  "ort": "Mannheim",
+  "plz": "68161"
+ },
+ "48.51110,9.22842": {
+  "strasse": "Am Heilbrunnen",
+  "stadtteil": "Sondelfingen",
+  "ort": "Reutlingen",
+  "plz": "72766"
+ },
+ "48.49305,9.20704": {
+  "strasse": "Eberhardstraße",
+  "stadtteil": null,
+  "ort": "Reutlingen",
+  "plz": "72762"
+ },
+ "48.49360,9.19360": {
+  "strasse": "Bantlinstraße",
+  "stadtteil": null,
+  "ort": "Reutlingen",
+  "plz": "72762"
+ },
+ "49.44485,11.05503": {
+  "strasse": "Rothenburger Straße",
+  "stadtteil": "Sündersbühl",
+  "ort": "Nürnberg",
+  "plz": "90439"
+ },
+ "49.47290,11.10335": {
+  "strasse": "Äußere Bayreuther Straße",
+  "stadtteil": "Schoppershof",
+  "ort": "Nürnberg",
+  "plz": "90409"
+ },
+ "49.42794,11.06554": {
+  "strasse": "Dianastraße",
+  "stadtteil": "Dianastraße",
+  "ort": "Nürnberg",
+  "plz": "90441"
+ },
+ "48.12028,11.62015": {
+  "strasse": "Bad-Schachener-Straße",
+  "stadtteil": "Ramersdorf",
+  "ort": "München",
+  "plz": "81671"
+ },
+ "48.14126,11.51864": {
+  "strasse": "Elsenheimerstraße",
+  "stadtteil": "Friedenheim",
+  "ort": "München",
+  "plz": "80687"
+ },
+ "48.11209,11.50235": {
+  "strasse": "Fürstenrieder Straße",
+  "stadtteil": "Am Waldfriedhof",
+  "ort": "München",
+  "plz": "81377"
+ },
+ "48.37065,10.90070": {
+  "strasse": "Schmiedgasse",
+  "stadtteil": "Jakobervorstadt - Nord",
+  "ort": "Augsburg",
+  "plz": "86150"
+ },
+ "48.38175,10.90226": {
+  "strasse": "Stadtbachstraße",
+  "stadtteil": "Rechts der Wertach",
+  "ort": "Augsburg",
+  "plz": "86153"
+ },
+ "48.35488,10.90852": {
+  "strasse": "Inverness-Allee",
+  "stadtteil": "Spickel",
+  "ort": "Augsburg",
+  "plz": "86161"
+ },
+ "48.77231,11.46350": {
+  "strasse": "B 16a",
+  "stadtteil": "Mailing",
+  "ort": "Ingolstadt",
+  "plz": "85055"
+ },
+ "48.76677,11.43929": {
+  "strasse": "Schillerstraße",
+  "stadtteil": "Nordost",
+  "ort": "Ingolstadt",
+  "plz": "85055"
+ },
+ "48.77920,11.43453": {
+  "strasse": "Theodor-Heuss-Straße",
+  "stadtteil": "Nordost",
+  "ort": "Ingolstadt",
+  "plz": "85055"
+ },
+ "49.48330,10.96313": {
+  "strasse": "Würzburger Straße",
+  "stadtteil": "Hardhöhe",
+  "ort": "Fürth",
+  "plz": "90766"
+ },
+ "49.46696,11.00058": {
+  "strasse": "Karolinenstraße",
+  "stadtteil": "Südstadt Industriegebiet",
+  "ort": "Fürth",
+  "plz": "90763"
+ },
+ "49.46693,10.99353": {
+  "strasse": "Karlstraße",
+  "stadtteil": "Nördliche Südstadt",
+  "ort": "Fürth",
+  "plz": "90763"
+ },
+ "49.79801,9.94321": {
+  "strasse": "Berliner Platz",
+  "stadtteil": "Altstadt",
+  "ort": "Würzburg",
+  "plz": "97080"
+ },
+ "49.79813,9.92099": {
+  "strasse": "Luitpoldstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Würzburg",
+  "plz": "97082"
+ },
+ "49.79309,9.92867": {
+  "strasse": "Domstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Würzburg",
+  "plz": "97070"
+ },
+ "49.59414,11.00355": {
+  "strasse": "Goethestraße",
+  "stadtteil": "Markgrafenstadt",
+  "ort": "Erlangen",
+  "plz": "91054"
+ },
+ "49.58530,10.96811": {
+  "strasse": "Frauenauracher Straße",
+  "stadtteil": "Industriehafen",
+  "ort": "Erlangen",
+  "plz": "91056"
+ },
+ "49.58884,11.00698": {
+  "strasse": "Nürnberger Straße",
+  "stadtteil": "Rathausplatz",
+  "ort": "Erlangen",
+  "plz": "91052"
+ },
+ "49.01328,12.10183": {
+  "strasse": "Hemauerstraße",
+  "stadtteil": "Innenstadt",
+  "ort": "Regensburg",
+  "plz": "93047"
+ },
+ "49.01003,12.10185": {
+  "strasse": "Galgenbergstraße",
+  "stadtteil": "Galgenberg",
+  "ort": "Regensburg",
+  "plz": "93053"
+ },
+ "49.02709,12.12322": {
+  "strasse": "Vilsstraße",
+  "stadtteil": "Weichs",
+  "ort": "Regensburg",
+  "plz": "93059"
+ },
+ "49.24307,6.98212": {
+  "strasse": "Westspange",
+  "stadtteil": "Malstatt",
+  "ort": "Saarbrücken",
+  "plz": "66113"
+ },
+ "49.23808,6.99749": {
+  "strasse": "Dudweilerstraße",
+  "stadtteil": "Saint Johann",
+  "ort": "Saarbrücken",
+  "plz": "66111"
+ },
+ "49.23337,6.99037": {
+  "strasse": "Stengelstraße",
+  "stadtteil": "Alt-Saarbrücken",
+  "ort": "Saarbrücken",
+  "plz": "66117"
+ },
+ "52.39683,13.04364": {
+  "strasse": "Zeppelinstraße",
+  "stadtteil": "Brandenburger Vorstadt",
+  "ort": "Potsdam",
+  "plz": "14471"
+ },
+ "52.39414,13.06090": {
+  "strasse": "Humboldtstraße",
+  "stadtteil": "Nördliche Innenstadt",
+  "ort": "Potsdam",
+  "plz": "14467"
+ },
+ "52.39986,13.05760": {
+  "strasse": "Friedrich-Ebert-Straße",
+  "stadtteil": "Nördliche Innenstadt",
+  "ort": "Potsdam",
+  "plz": "14467"
+ },
+ "51.75717,14.32800": {
+  "strasse": "Bahnhofstraße",
+  "stadtteil": "Mitte",
+  "ort": "Cottbus",
+  "plz": "03046"
+ },
+ "51.74899,14.33246": {
+  "strasse": "Straße der Jugend",
+  "stadtteil": "Spremberger Vorstadt",
+  "ort": "Cottbus",
+  "plz": "03050"
+ },
+ "51.72835,14.34115": {
+  "strasse": "An der Priormühle",
+  "stadtteil": "Madlow",
+  "ort": "Cottbus",
+  "plz": "03050"
+ },
+ "54.13816,12.05725": {
+  "strasse": "Warnowallee",
+  "stadtteil": "Lütten Klein",
+  "ort": "Rostock",
+  "plz": "18107"
+ },
+ "54.09240,12.09895": {
+  "strasse": "Hans-Sachs-Allee",
+  "stadtteil": "Hansaviertel",
+  "ort": "Rostock",
+  "plz": "18057"
+ },
+ "54.09309,12.10815": {
+  "strasse": "Lübecker Straße",
+  "stadtteil": "Kröpeliner-Tor-Vorstadt",
+  "ort": "Rostock",
+  "plz": "18057"
+ },
+ "53.62725,11.41053": {
+  "strasse": "Goethestraße",
+  "stadtteil": "Schweriner Altstadt",
+  "ort": "Schwerin",
+  "plz": "19053"
+ },
+ "53.63017,11.41021": {
+  "strasse": "Wismarsche Straße",
+  "stadtteil": "Schweriner Altstadt",
+  "ort": "Schwerin",
+  "plz": "19053"
+ },
+ "53.64704,11.37741": {
+  "strasse": "Grevesmühlener Straße",
+  "stadtteil": "Lankow",
+  "ort": "Schwerin",
+  "plz": "19057"
+ },
+ "50.83384,12.92649": {
+  "strasse": "Brückenstraße",
+  "stadtteil": "Zentrum",
+  "ort": "Chemnitz",
+  "plz": "09111"
+ },
+ "50.82790,12.91227": {
+  "strasse": "Reichsstraße",
+  "stadtteil": "Kaßberg",
+  "ort": "Chemnitz",
+  "plz": "09112"
+ },
+ "50.83116,12.92230": {
+  "strasse": "Bahnhofstraße",
+  "stadtteil": "Zentrum",
+  "ort": "Chemnitz",
+  "plz": "09111"
+ },
+ "51.33818,12.38511": {
+  "strasse": "Johannisplatz",
+  "stadtteil": "Zentrum-Südost",
+  "ort": "Leipzig",
+  "plz": "04103"
+ },
+ "51.33625,12.37096": {
+  "strasse": "Martin-Luther-Ring",
+  "stadtteil": "Zentrum-West",
+  "ort": "Leipzig",
+  "plz": "04109"
+ },
+ "51.33294,12.37364": {
+  "strasse": "Peterssteinweg",
+  "stadtteil": "Zentrum-Süd",
+  "ort": "Leipzig",
+  "plz": "04107"
+ },
+ "51.06005,13.77719": {
+  "strasse": "Fetscherstraße",
+  "stadtteil": "Johannstadt",
+  "ort": "Dresden",
+  "plz": "01307"
+ },
+ "51.05591,13.75598": {
+  "strasse": "Sachsenplatz",
+  "stadtteil": "Johannstadt",
+  "ort": "Dresden",
+  "plz": "01307"
+ },
+ "51.06476,13.74180": {
+  "strasse": "Antonstraße",
+  "stadtteil": "Innere Neustadt",
+  "ort": "Dresden",
+  "plz": "01097"
+ },
+ "52.13911,11.63979": {
+  "strasse": "Universitätsplatz",
+  "stadtteil": "Altstadt",
+  "ort": "Magdeburg",
+  "plz": "39106"
+ },
+ "52.12096,11.62800": {
+  "strasse": "Breiter Weg",
+  "stadtteil": "Altstadt",
+  "ort": "Magdeburg",
+  "plz": "39104"
+ },
+ "52.13925,11.63543": {
+  "strasse": "Walther-Rathenau-Straße",
+  "stadtteil": "Altstadt",
+  "ort": "Magdeburg",
+  "plz": "39106"
+ },
+ "51.47395,11.96973": {
+  "strasse": "Rannischer Platz",
+  "stadtteil": "Südliche Innenstadt",
+  "ort": "Halle (Saale)",
+  "plz": "06110"
+ },
+ "51.47882,11.98625": {
+  "strasse": "Delitzscher Straße",
+  "stadtteil": "Gebiet Der DB",
+  "ort": "Halle (Saale)",
+  "plz": "06112"
+ },
+ "51.48386,11.97007": {
+  "strasse": "Große Steinstraße",
+  "stadtteil": "Altstadt",
+  "ort": "Halle (Saale)",
+  "plz": "06108"
+ },
+ "50.97290,11.04271": {
+  "strasse": "Stauffenbergallee",
+  "stadtteil": "Daberstedt",
+  "ort": "Erfurt",
+  "plz": "99099"
+ },
+ "50.97601,11.03866": {
+  "strasse": "Juri-Gagarin-Ring",
+  "stadtteil": "Altstadt",
+  "ort": "Erfurt",
+  "plz": "99084"
+ },
+ "50.98390,11.03441": {
+  "strasse": "Schlachthofstraße",
+  "stadtteil": "Johannesvorstadt",
+  "ort": "Erfurt",
+  "plz": "99085"
+ },
+ "50.90609,11.58945": {
+  "strasse": "Stadtrodaer Straße",
+  "stadtteil": "Wöllnitz",
+  "ort": "Jena",
+  "plz": "07749"
+ },
+ "50.89858,11.59250": {
+  "strasse": "Keßlerstraße",
+  "stadtteil": "Burgau",
+  "ort": "Jena",
+  "plz": "07745"
+ },
+ "50.92409,11.59048": {
+  "strasse": "Stadtrodaer Straße",
+  "stadtteil": "Kernberge",
+  "ort": "Jena",
+  "plz": "07749"
+ },
+ "53.54774,9.98667": {
+  "strasse": "Rödingsmarkt",
+  "stadtteil": "Hamburg-Altstadt"
+ },
+ "53.59224,9.92869": {
+  "strasse": "Sportplatzring",
+  "stadtteil": "Stellingen"
+ },
+ "53.55404,10.00383": {
+  "strasse": "Wallringtunnel",
+  "stadtteil": "Hamburg-Altstadt"
+ },
+ "52.51582,13.45398": {
+  "strasse": "Warschauer Straße",
+  "stadtteil": "Friedrichshain"
+ },
+ "52.53824,13.32616": {
+  "strasse": "A 100",
+  "stadtteil": "Charlottenburg-Nord"
+ },
+ "52.49791,13.38893": {
+  "strasse": "Mehringbrücke",
+  "stadtteil": "Kreuzberg"
+ }
+}
