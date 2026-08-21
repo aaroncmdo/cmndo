@@ -48,6 +48,8 @@ export default async function MitarbeiterNachrichten({
 
   return (
     <ClaimChatInbox
+      // Kein PageHeader auf dieser Seite — die Inbox-Ueberschrift IST der Seitentitel.
+      titleLevel={1}
       eintraege={faelle.map(f => ({
         claimId: f.id,
         title: f.lead_id ? (kundenMap[f.lead_id] ?? 'Kunde') : 'Kunde',

@@ -69,6 +69,8 @@ export default async function PosteingangPage({
   const unread = unreadRes.ok ? unreadRes.data : {}
   return (
     <ClaimChatInbox
+      // Kein PageHeader auf dieser Seite — die Inbox-Ueberschrift IST der Seitentitel.
+      titleLevel={1}
       eintraege={faelle.map(f => ({
         claimId: f.id,
         title: f.lead_id ? (kundenMap[f.lead_id] ?? 'Kunde') : 'Kunde',
