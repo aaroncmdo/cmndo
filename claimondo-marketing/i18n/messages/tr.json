@@ -3892,7 +3892,12 @@
     "faq_130_antwort": "%130 kuralı (BGH VI ZR 67/91), tamir maliyetlerinin yeniden temin değerinin %130'una kadar çıkmasına izin vermektedir — bilirkişi raporuna göre usulüne uygun tamir yapılmış olması ve aracın 6 ay daha kullanılması koşuluyla.",
     "cta_h2": "{ort} kaza mı? Biz hallederiz.",
     "cta_p": "5 dakikada çevrimiçi bildirin — 48 saat içinde {ort} için serbest bir bilirkişiyle sizi buluşturalım.",
-    "cta_karte": "Haritada görüntüle"
+    "cta_karte": "Haritada görüntüle",
+    "kfzbestand_eyebrow": "Resmî veriler",
+    "kfzbestand_h2": "{stadt} şehrindeki kayıtlı araçlar",
+    "kfzbestand_text": "{stadt} şehrinde {pkw} otomobil kayıtlı, bunların {gewerblich} tanesi ticari sahiplere ait. Ayrıca {lkw} kamyon ve {kraftraeder} motosiklet bulunuyor.",
+    "kfzbestand_quote": "Bu, 1.000 kişiye {proTausend} otomobil anlamına geliyor.",
+    "kfzbestand_quelle": "Federal Motorlu Taşıtlar Dairesi (KBA), {stand}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Randevu talebiniz başarıyla alındı!",

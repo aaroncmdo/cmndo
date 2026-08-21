@@ -9,6 +9,7 @@
 //   node scripts/i18n/translate.mjs en tr        → nur diese Sprachen
 //   node scripts/i18n/translate.mjs --force      → komplett neu übersetzen
 //   node scripts/i18n/translate.mjs --section=ueber_uns  → nur ein Top-Level-Key
+//   node scripts/i18n/translate.mjs --marketing             → claimondo-marketing/ statt src/
 //
 // Setzt voraus: ANTHROPIC_API_KEY in Env (.env.local oder export).
 
@@ -18,7 +19,17 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const MESSAGES_DIR = path.resolve(__dirname, '../../src/i18n/messages')
+// ⚠ ZWEI Message-Baeume: die App unter src/, das Marketing unter
+// claimondo-marketing/. Bis 20.08.2026 kannte dieses Skript nur den ersten —
+// wer einen Marketing-Key ergaenzte, hatte ihn danach nur auf Deutsch, und
+// `check:i18n` prueft dort die Vollstaendigkeit NICHT (es liest ebenfalls nur
+// src/). Beides zusammen heisst: fehlende Marketing-Uebersetzungen fielen
+// weder beim Uebersetzen noch im CI auf.
+const MARKETING = process.argv.includes('--marketing')
+const MESSAGES_DIR = path.resolve(
+  __dirname,
+  MARKETING ? '../../claimondo-marketing/i18n/messages' : '../../src/i18n/messages',
+)
 const GLOSSARY_PATH = path.resolve(__dirname, 'glossary.md')
 
 const ALL_TARGETS = ['en', 'tr', 'pl', 'ru', 'ar']
@@ -37,7 +48,7 @@ const onlySection = sectionArg ? sectionArg.split('=')[1] : null
 const targets = args.filter((a) => !a.startsWith('--') && ALL_TARGETS.includes(a))
 const targetLocales = targets.length > 0 ? targets : ALL_TARGETS
 
-console.log(`[i18n] targets: ${targetLocales.join(', ')}${force ? ' (force)' : ''}${onlySection ? ` section=${onlySection}` : ''}`)
+console.log(`[i18n] baum: ${MARKETING ? 'claimondo-marketing' : 'src'} · targets: ${targetLocales.join(', ')}${force ? ' (force)' : ''}${onlySection ? ` section=${onlySection}` : ''}`)
 
 if (!process.env.ANTHROPIC_API_KEY) {
   console.error('[i18n] ANTHROPIC_API_KEY nicht in Env — abbrechen')
