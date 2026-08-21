@@ -1,7 +1,42 @@
 import { test, expect } from './fixtures'
+import type { Page } from '@playwright/test'
 
-// KFZ-185: Route Smoke-Tests — prüft dass alle kritischen Routes
-// rendern ohne 500-Error oder 'Application Error'.
+// KFZ-185: Route Smoke-Tests — prüft, dass alle kritischen Routen rendern,
+// ohne 500er und ohne in die Fehlergrenze zu fallen.
+//
+// 21.08.2026 — die Textprüfung war doppelt wirkungslos:
+//   1. Sie hing an einem leeren `.catch(() => {})`. Eine Zusicherung, deren
+//      Fehlschlag verschluckt wird, ist Dekoration — sie KANN nicht rot werden.
+//   2. Sie suchte nach "Application Error". Dieser String kommt im Produktcode
+//      NIRGENDS vor (0 Treffer in src/); die Fehlergrenzen rendern deutsch
+//      ("Etwas ist schiefgelaufen" / "Da ist etwas schiefgelaufen", siehe
+//      src/components/shared/ErrorState.tsx und src/app/error.tsx).
+//
+// Übrig blieb `status < 500` als einzige lebende Zusicherung. Eine Next.js-
+// Fehlergrenze ist aber eine gerenderte SEITE, kein 5xx. Der Absturz vom
+// 20.08. auf /admin/aufgaben/alle wäre deshalb selbst dann grün geblieben,
+// wenn die Route in der Liste gestanden hätte — sie stand nicht einmal drin.
+
+/** Was die Fehlergrenzen tatsächlich rendern — beide Varianten. */
+const FEHLERGRENZE = /etwas (ist )?schiefgelaufen/i
+
+async function erwarteGerendert(page: Page, route: string): Promise<void> {
+  const response = await page.goto(route)
+  const status = response?.status() ?? 200
+  expect(status, `${route} antwortete mit HTTP ${status}`).toBeLessThan(500)
+
+  // Die Fehlergrenze rendert client-seitig — erst auf Ruhe warten, dann prüfen,
+  // sonst misst man, bevor der Fehler überhaupt da ist.
+  // ⚠ Der catch hängt bewusst NUR am Warten (networkidle läuft auf Seiten mit
+  // Polling in den Timeout), NICHT an der Zusicherung darunter. Genau diese
+  // Verwechslung hat die Prüfung vorher entwertet.
+  await page.waitForLoadState('networkidle', { timeout: 8000 }).catch(() => {})
+
+  await expect(
+    page.getByText(FEHLERGRENZE),
+    `${route} zeigt die Fehlergrenze statt Inhalt`,
+  ).toHaveCount(0)
+}
 
 const ADMIN_ROUTES = [
   '/admin',
@@ -18,6 +53,13 @@ const ADMIN_ROUTES = [
   '/admin/communities',
   '/admin/statistiken',
   '/admin/team',
+  // 21.08.2026 nachgetragen — alle drei fehlten, obwohl /alle am 20.08. abstürzte.
+  '/admin/aufgaben/alle',
+  '/admin/aufgaben/meine',
+  '/admin/aufgaben/vorschlaege',
+  // SV-Leads-Liste. Die Komponenten liegen unter src/app/admin/sv-leads/,
+  // die ROUTE ist eine andere — nicht vom Ordnernamen ableiten.
+  '/admin/vertrieb/sachverstaendige/leads',
 ]
 
 const SV_ROUTES = [
@@ -38,13 +80,54 @@ const PUBLIC_ROUTES = [
   '/passwort-vergessen',
 ]
 
+/**
+ * Listen prüfen nur die Übersicht. Die Detailansicht ist die andere
+ * Risikoklasse: dort werden verschachtelte Beziehungen aufgelöst und
+ * Null-Fälle sichtbar. Der Weg dorthin führt über die Liste — kein
+ * hartkodiertes Prod-Objekt, das morgen weg sein kann.
+ *
+ * `praefix` ist am Listen-Code verifiziert, nicht geraten: /admin/faelle
+ * verlinkt auf /faelle/<id>, NICHT auf /admin/faelle/<id>.
+ */
+const DETAIL_WEGE: Array<{ liste: string; praefix: string }> = [
+  { liste: '/admin/faelle', praefix: '/faelle/' },
+  { liste: '/admin/organisationen', praefix: '/admin/organisationen/' },
+  { liste: '/admin/team', praefix: '/admin/team/' },
+  { liste: '/admin/versicherungen', praefix: '/admin/versicherungen/' },
+]
+
+/** Detail-Links tragen eine UUID; /admin/team/leaderboard ist keine Detailansicht. */
+const HAT_ID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+
 test.describe('Admin Routes', () => {
   for (const route of ADMIN_ROUTES) {
     test(`GET ${route} → renders without error`, async ({ adminPage }) => {
-      const response = await adminPage.goto(route)
-      expect(response?.status()).toBeLessThan(500)
-      await expect(adminPage.locator('text=Application Error')).not.toBeVisible({ timeout: 3000 }).catch(() => {})
-      await expect(adminPage.locator('text=Internal Server Error')).not.toBeVisible({ timeout: 1000 }).catch(() => {})
+      await erwarteGerendert(adminPage, route)
+    })
+  }
+})
+
+test.describe('Admin Detailansichten (über die Liste, nicht über feste IDs)', () => {
+  for (const { liste, praefix } of DETAIL_WEGE) {
+    test(`${liste} → erste Detailansicht rendert`, async ({ adminPage }) => {
+      await erwarteGerendert(adminPage, liste)
+
+      const hrefs = await adminPage
+        .locator(`a[href^="${praefix}"]`)
+        .evaluateAll((els) =>
+          els.map((el) => el.getAttribute('href')).filter((h): h is string => Boolean(h)),
+        )
+      const detail = hrefs.find((h) => HAT_ID.test(h))
+
+      // Bewusst KEIN test.skip(): eine leere Liste würde den Lauf grün färben
+      // und genau den Beweis unterschlagen, für den dieser Test existiert.
+      expect(
+        detail,
+        `${liste}: kein Detail-Link nach ${praefix}<uuid> gefunden (${hrefs.length} Links mit diesem Präfix) — Detailansicht nicht prüfbar`,
+      ).toBeTruthy()
+      if (!detail) return
+
+      await erwarteGerendert(adminPage, detail)
     })
   }
 })
@@ -52,11 +135,9 @@ test.describe('Admin Routes', () => {
 test.describe('Gutachter Routes', () => {
   for (const route of SV_ROUTES) {
     test(`GET ${route} → renders without error`, async ({ svPage }) => {
-      const response = await svPage.goto(route)
-      // SV routes may redirect to /gutachter/willkommen if not onboarded
-      const status = response?.status() ?? 200
-      expect(status).toBeLessThan(500)
-      await expect(svPage.locator('text=Application Error')).not.toBeVisible({ timeout: 3000 }).catch(() => {})
+      // SV-Routen leiten ggf. auf /gutachter/willkommen um, wenn nicht onboarded —
+      // das ist kein Fehler, deshalb prüft erwarteGerendert nur auf 5xx + Fehlergrenze.
+      await erwarteGerendert(svPage, route)
     })
   }
 })
@@ -64,9 +145,7 @@ test.describe('Gutachter Routes', () => {
 test.describe('Public Routes', () => {
   for (const route of PUBLIC_ROUTES) {
     test(`GET ${route} → renders without error`, async ({ page }) => {
-      const response = await page.goto(route)
-      expect(response?.status()).toBeLessThan(500)
-      await expect(page.locator('text=Application Error')).not.toBeVisible({ timeout: 3000 }).catch(() => {})
+      await erwarteGerendert(page, route)
     })
   }
 })

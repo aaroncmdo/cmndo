@@ -134,3 +134,8 @@ marketing-strategy/
 # playwright-cli-Skill: Session-Artefakte (pro Browser-Aktion Snapshot-YAML + Console-Log).
 # Entstehen bei jedem Prod-Smoke via playwright-cli; nie versionieren.
 /.playwright-cli/
+
+# Unfallatlas-Rohdaten (62 MB, 5 Jahrgaenge) — reproduzierbar via
+# scripts/generate-stadt-unfallhotspots.mjs. Der Geocode-Cache daneben ist
+# BEWUSST committet: er spart 450 Mapbox-Aufrufe beim naechsten Lauf.
+scripts/.unfallatlas-cache/

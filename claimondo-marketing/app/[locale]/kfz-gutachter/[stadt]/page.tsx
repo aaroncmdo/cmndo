@@ -1,6 +1,7 @@
 import { localeAlternates } from '@/lib/seo/alternates'
 import { titelMitZusatz } from '@/lib/seo/title'
 import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
+import { getUnfallhotspots, hotspotOrt, hotspotSatz } from '@/lib/kfz-gutachter/unfallhotspots'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -241,6 +242,13 @@ export default async function KfzGutachterStadtPage({
   // Das Einsatzgebiet-Bild ist eine NRW-Karte — nur dort zeigt es die Region,
   // um die es auf der Seite geht (P3-A5).
   const zeigtNrwKarte = s.bundesland === 'Nordrhein-Westfalen'
+
+  // Amtliche Unfallhäufungen (Unfallatlas). Statisch aus dem Repo, kein
+  // DB-Zugriff und keine Freigabe nötig — deshalb für 160 von 173 Städten
+  // sofort da, während der KI-Lokalinhalt mit ~2 Städten pro Nacht wächst.
+  // `null` für die 13 Städte ohne ausreichende Häufung: lieber keine Sektion
+  // als eine mit erfundener Substanz.
+  const unfalldaten = getUnfallhotspots(s.slug)
 
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
@@ -605,6 +613,68 @@ export default async function KfzGutachterStadtPage({
                 ))}
               </ul>
             )}
+          </div>
+        </section>
+      )}
+
+      {/* 4c-2 — Amtliche Unfallhäufungen (Unfallatlas der Statistischen Ämter).
+          BEWUSST EIGENE SEKTION, unabhängig von 4c: die Hotspots dort stammen
+          aus gepflegten Hub-Daten oder freigegebenem KI-Inhalt und existieren
+          für die wenigsten Städte. Diese hier gilt für 160 von 173 Städten
+          sofort — sie wartet auf keine Freigabe und kostet kein Token.
+          Sie ist damit für die meisten Seiten der erste echte Ortsinhalt. */}
+      {unfalldaten && unfalldaten.hotspots.length > 0 && (
+        <section className="border-t border-claimondo-border bg-claimondo-bg py-14 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-claimondo-ondo">
+              {t('amtlich_eyebrow')}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-claimondo-navy sm:text-3xl">
+              {t('amtlich_h2', { ort: s.name })}
+            </h2>
+            <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+              {t('amtlich_intro', { ort: s.name, zeitraum: unfalldaten.zeitraum })}
+            </p>
+
+            <ul className="mt-6 space-y-3">
+              {unfalldaten.hotspots.map((h) => (
+                <li
+                  key={`${h.lat},${h.lng}`}
+                  className="rounded-ios-md border border-claimondo-border bg-white p-5"
+                >
+                  <p className="text-sm font-bold text-claimondo-navy">{hotspotOrt(h)}</p>
+                  <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                    {hotspotSatz(h, unfalldaten.zeitraum)}
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            {/* Der Hinweis ist nicht Zierde: die Daten nennen keine Ursachen und
+                keine Verkehrsmenge. Ohne diesen Satz liest sich eine hohe Zahl
+                als Werturteil über die Stelle — genau die Tatsachenbehauptung,
+                die der Quellenzwang verhindern soll. */}
+            <p className="mt-5 text-sm leading-relaxed text-claimondo-shield/85">
+              {t('amtlich_hinweis')}
+            </p>
+            <p className="mt-3 text-xs text-claimondo-shield/75">
+              {t.rich('amtlich_quelle', {
+                lizenz: unfalldaten.lizenz,
+                quelle: new URL(unfalldaten.quelle).hostname.replace(/^www\./, ''),
+                // Tag-Syntax, nicht {platzhalter}: t.rich ersetzt <link>…</link>.
+                // Eine Funktion für einen Variablen-Platzhalter greift nicht.
+                link: (chunks) => (
+                  <a
+                    href={unfalldaten.quelle}
+                    target="_blank"
+                    rel="nofollow noopener noreferrer"
+                    className="underline hover:text-claimondo-navy"
+                  >
+                    {chunks}
+                  </a>
+                ),
+              })}
+            </p>
           </div>
         </section>
       )}

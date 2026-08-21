@@ -4032,7 +4032,12 @@
     "kfzbestand_h2": "Fahrzeugbestand in {stadt}",
     "kfzbestand_text": "In {stadt} sind {pkw} Pkw zugelassen, davon {gewerblich} auf gewerbliche Halter. Dazu kommen {lkw} Lkw und {kraftraeder} Krafträder.",
     "kfzbestand_quote": "Das entspricht {proTausend} Pkw je 1.000 Einwohner.",
-    "kfzbestand_quelle": "Kraftfahrt-Bundesamt, {stand}"
+    "kfzbestand_quelle": "Kraftfahrt-Bundesamt, {stand}",
+    "amtlich_eyebrow": "Amtliche Unfallstatistik",
+    "amtlich_h2": "Wo sich Unfälle in {ort} häufen",
+    "amtlich_intro": "Der Unfallatlas der Statistischen Ämter des Bundes und der Länder erfasst jeden Straßenverkehrsunfall mit Personenschaden punktgenau. Für {ort} ergeben sich daraus im Zeitraum {zeitraum} diese Häufungen:",
+    "amtlich_hinweis": "Ausgewertet wurde je Stelle ein Bereich von rund 100 Metern. Die Zahlen benennen keine Ursachen — eine stark befahrene Hauptachse verzeichnet mehr Unfälle als eine Nebenstraße.",
+    "amtlich_quelle": "Quelle: <link>{quelle}</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin erfolgreich angefragt!",
