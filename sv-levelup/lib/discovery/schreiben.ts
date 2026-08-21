@@ -57,11 +57,16 @@ const MIN_NAME = 4
  */
 export function plzUndOrt(adresse: string | null): { plz: string | null; ort: string | null } {
   if (!adresse) return { plz: null, ort: null }
-  // ⚠ Schraegstrich und Klammern gehoeren dazu. Am echten Scrape gefunden
-  // (20.08.): 46 deutsche Betriebe blieben ohne Ort, weil das Muster sie nicht
-  // zuliess — „Fürstenwalde/Spree", „Kempten (Allgäu)", „Krumbach (Schwaben)"
-  // sind voellig gewoehnliche amtliche Ortsnamen.
-  const m = adresse.match(/\b(\d{5})\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß.\-/() ]{1,44}?)(?:,|$)/)
+  // ⚠ Schraegstrich, Klammern und ZIFFERN gehoeren dazu. Am echten Scrape
+  // gefunden (20.08.): 111 deutsche Betriebe blieben ohne Ort, weil das Muster
+  // sie nicht zuliess — „Fürstenwalde/Spree", „Kempten (Allgäu)", „Dachsberg
+  // (Südschwarzwald)" sind voellig gewoehnliche amtliche Ortsnamen.
+  //
+  // Die Ziffern kamen beim Heilungslauf dazu: „40235 Düsseldorf-Stadtbezirk 2"
+  // brach am Leerzeichen-Ziffer-Ende ab. Nur die FORTSETZUNG erlaubt Ziffern —
+  // das erste Zeichen bleibt ein Buchstabe, sonst verschluckt das Muster bei
+  // „12345 67890" die zweite Zahl als Ortsnamen.
+  const m = adresse.match(/\b(\d{5})\s+([A-Za-zÄÖÜäöüß][A-Za-zÄÖÜäöüß0-9.\-/() ]{1,44}?)(?:,|$)/)
   if (!m) return { plz: null, ort: null }
   return { plz: m[1], ort: m[2].trim() }
 }
@@ -83,7 +88,7 @@ export function plzUndOrt(adresse: string | null): { plz: string | null; ort: st
 // kein Wortzeichen — zwischen Leerzeichen und „Ö" gibt es also gar keine
 // Wortgrenze, und das Muster traf NIE. Dieselbe Umlaut-Falle, die im Projekt
 // schon einmal zugeschlagen hat.
-const AUSLAND = /(?:^|[\s,])(Österreich|Austria|Schweiz|Switzerland|Suisse|Tschechien|Czech|Polen|Poland|Niederlande|Netherlands|Nederland|Belgien|Belgium|België|Luxemburg|Luxembourg|Frankreich|France|Dänemark|Denmark|Danmark)\s*$/i
+export const AUSLAND = /(?:^|[\s,])(Österreich|Austria|Schweiz|Switzerland|Suisse|Tschechien|Czech|Polen|Poland|Niederlande|Netherlands|Nederland|Belgien|Belgium|België|Luxemburg|Luxembourg|Frankreich|France|Dänemark|Denmark|Danmark)\s*$/i
 
 /**
  * Gehoert dieser Fund schon zum Bestand?
