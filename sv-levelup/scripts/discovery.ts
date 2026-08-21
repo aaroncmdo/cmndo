@@ -5,6 +5,7 @@
  *   npm run discovery -- --gebiet deutschland  # das ganze Land
  *   npm run discovery -- --schreiben           # SCHARF: legt Leads in sv_leads an
  *   npm run discovery -- --max-tiefe 3
+ *   npm run discovery -- --gebiet deutschland --schreiben --fortsetzen   # Rest eines abgebrochenen Laufs
  *
  * ⚠ Der Trockenlauf ist ABSICHT der Default — wie bei `npm run anreicherung`.
  * Ein Massenlauf, der von sich aus schreibt, ist ein Massenlauf, den niemand
@@ -14,6 +15,7 @@
  * die Abrufe. Ein Trockenlauf ueber Deutschland kostet genauso viel wie ein
  * scharfer.
  */
+import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
 import { holeAdapter } from '../lib/places'
 import { entdecke } from '../lib/discovery/lauf'
@@ -36,6 +38,15 @@ const GEBIETE: Record<string, Kachel> = {
 }
 
 const BEGRIFFE = ['Kfz-Sachverständiger', 'Kfz-Gutachter']
+
+/**
+ * Wo der Fortschritt liegt.
+ *
+ * ⚠ Je Gebiet eine eigene Datei. Eine gemeinsame Datei liesse den Rest eines
+ * Deutschland-Laufs in einem Ruhrgebiet-Lauf fortsetzen — Kacheln, die gar
+ * nicht zum gewaehlten Gebiet gehoeren, und niemand saehe es am Aufruf.
+ */
+const fortschrittDatei = (gebiet: string) => `.discovery-fortschritt-${gebiet}.json`
 
 const gebietName = wert('gebiet') ?? 'muensterland'
 const gebiet = GEBIETE[gebietName]
@@ -62,7 +73,21 @@ function prozent(teil: number, ganzes: number): string {
 }
 
 async function main() {
-  const kacheln = startKacheln(gebiet, MAX_RADIUS_KM)
+  const datei = fortschrittDatei(gebietName)
+  const fortsetzen = hatFlag('fortsetzen')
+
+  let offeneKacheln: Kachel[] | undefined
+  if (fortsetzen) {
+    if (!existsSync(datei)) {
+      console.error(`Kein Fortschritt fuer „${gebietName}" — ${datei} fehlt.`)
+      console.error('Ohne die Datei waere „fortsetzen" ein vollstaendiger Lauf, der nur so heisst.')
+      process.exit(1)
+    }
+    offeneKacheln = JSON.parse(readFileSync(datei, 'utf8')).offen as Kachel[]
+    console.log(`\n  Fortsetzen    ${offeneKacheln.length} Kacheln aus ${datei}`)
+  }
+
+  const kacheln = offeneKacheln ?? startKacheln(gebiet, MAX_RADIUS_KM)
   const abrufeMin = kacheln.length * BEGRIFFE.length
 
   console.log(`\n  Gebiet        ${gebietName}`)
@@ -105,8 +130,14 @@ async function main() {
     laufId,
     bestand,
     maxNeu,
+    offeneKacheln,
     fortschritt: (s) => {
       process.stdout.write(`\r  Kachel ${s.kachel}/${s.vonKacheln}+ · ${s.funde} eindeutige Funde   `)
+    },
+    // ⚠ Nach JEDER Kachel schreiben, nicht alle N. Ein Lauf wird nicht zu einem
+    // gewaehlten Zeitpunkt abgebrochen, sondern zu einem beliebigen.
+    sichere: (offen) => {
+      writeFileSync(datei, JSON.stringify({ gebiet: gebietName, offen }, null, 0))
     },
   })
 
@@ -153,6 +184,11 @@ async function main() {
     console.log(`\n  Trockenlauf — es wurde nichts geschrieben.`)
     console.log(`  Scharf:  npm run discovery -- --gebiet ${gebietName} --schreiben`)
   }
+  // Der Lauf ist durch — die Fortschrittsdatei hat ihren Zweck erfuellt.
+  // Sie liegen zu lassen hiesse, dass ein spaeteres `--fortsetzen` eine
+  // abgeschlossene Warteschlange fortsetzt und sofort fertig meldet.
+  if (existsSync(datei)) unlinkSync(datei)
+
   if (schreiben) {
     console.log(`\n  Zuruecknehmen:`)
     console.log(`    delete from sv_leads where entdeckt_lauf = '${laufId}';`)

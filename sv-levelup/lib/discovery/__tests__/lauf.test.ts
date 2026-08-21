@@ -153,3 +153,61 @@ describe('entdecke', () => {
     expect(eingefuegt).toHaveLength(1)
   })
 })
+
+describe('entdecke — Fortsetzen nach Abbruch', () => {
+  /**
+   * ⚠ Am 21.08. wurde ein Deutschland-Lauf bei Kachel 233 von 256 abgebrochen.
+   * Die gefundenen Betriebe standen in der Datenbank — sie werden sofort
+   * geschrieben. Die WARTESCHLANGE aber war weg, und mit ihr jede Verfeinerung,
+   * die noch ausstand. Verfeinert werden genau die dichten Kacheln, also die
+   * Staedte. Ein Neustart haette alle 256 Kacheln erneut abgefragt und bezahlt.
+   */
+  it('sichert die Warteschlange nach jeder Kachel', async () => {
+    const staende: number[] = []
+    await entdecke({
+      ...BASIS,
+      places: adapter([betrieb(1)]),
+      db: db().db,
+      sichere: (offen) => staende.push(offen.length),
+    })
+    // Eine Startkachel, keine Verfeinerung: genau ein Aufruf mit leerer Schlange.
+    expect(staende).toEqual([0])
+  })
+
+  it('sichert ERST NACH der Verfeinerung — sonst gehen die neuen Kacheln verloren', async () => {
+    // ⭐ Die Reihenfolge ist der eigentliche Test. Wer vor dem Vierteilen
+    // sichert, schreibt eine Warteschlange OHNE die gerade erzeugten Kacheln —
+    // und der Lauf laeuft dabei fehlerfrei weiter, sodass nichts auffaellt.
+    const voll = Array.from({ length: DECKEL }, (_, i) => betrieb(i))
+    const staende: number[] = []
+    let abruf = 0
+    await entdecke({
+      ...BASIS,
+      maxTiefe: 1,
+      // Nur der ERSTE Abruf deckelt — er loest die Vierteilung aus. Die vier
+      // Viertel liefern nichts und verfeinern nicht weiter.
+      places: adapter(() => (++abruf === 1 ? voll : [])),
+      db: db().db,
+      sichere: (offen) => staende.push(offen.length),
+    })
+    // Nach der ersten Kachel muessen die vier Viertel in der Schlange stehen.
+    expect(staende[0]).toBe(4)
+  })
+
+  it('nimmt eine uebergebene Warteschlange, statt von vorn zu beginnen', async () => {
+    const rest: Kachel[] = [{ sued: 51.9, west: 7.5, nord: 51.95, ost: 7.6, tiefe: 1 }]
+    const b = await entdecke({
+      ...BASIS,
+      places: adapter([betrieb(1)]),
+      db: db().db,
+      offeneKacheln: rest,
+    })
+    expect(b.kacheln).toBe(1)
+  })
+
+  it('bleibt ohne Sicherungshaken unveraendert', async () => {
+    const b = await entdecke({ ...BASIS, places: adapter([betrieb(1)]), db: db().db })
+    expect(b.kacheln).toBe(1)
+    expect(b.eindeutig).toBe(1)
+  })
+})

@@ -31,3 +31,6 @@ yarn-debug.log*
 *.tsbuildinfo
 next-env.d.ts
 .playwright-cli/
+
+# Fortschritt abgebrochener Discovery-Laeufe — Zwischenstand, kein Quelltext
+.discovery-fortschritt-*.json

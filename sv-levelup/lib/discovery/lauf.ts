@@ -77,6 +77,23 @@ export type LaufOpts = {
   /** Injizierbar, damit Tests nicht warten. */
   warte?: (ms: number) => Promise<void>
   fortschritt?: (s: Stand) => void
+  /**
+   * Fortsetzen: die noch offene Warteschlange eines abgebrochenen Laufs.
+   *
+   * Ohne sie beginnt der Lauf bei `startKacheln(gebiet)`.
+   */
+  offeneKacheln?: Kachel[]
+  /**
+   * Wird nach JEDER Kachel gerufen — mit dem, was noch aussteht.
+   *
+   * ⚠ Der Deutschland-Lauf dauert ueber eine Stunde. Am 21.08. wurde einer bei
+   * Kachel 233 von 256 abgebrochen: die gefundenen Betriebe standen in der
+   * Datenbank (sie werden sofort geschrieben), aber die WARTESCHLANGE war weg —
+   * und damit jede Verfeinerung, die noch ausstand. Verfeinert werden genau die
+   * dichten Kacheln, also die Staedte. Ein Neustart haette alle 256 Kacheln
+   * erneut abgefragt und bezahlt, nur um an dieselbe Stelle zu kommen.
+   */
+  sichere?: (offen: Kachel[], bericht: Bericht) => void
 }
 
 export async function entdecke(o: LaufOpts): Promise<Bericht> {
@@ -104,7 +121,8 @@ export async function entdecke(o: LaufOpts): Promise<Bericht> {
   const bestand = [...o.bestand]
   const gesehen = new Set<string>(bestand.map((b) => b.googlePlaceId).filter((x): x is string => Boolean(x)))
 
-  const offen: Kachel[] = startKacheln(o.gebiet, MAX_RADIUS_KM)
+  // Fortsetzen, wenn eine Warteschlange uebergeben wurde — sonst von vorn.
+  const offen: Kachel[] = o.offeneKacheln ?? startKacheln(o.gebiet, MAX_RADIUS_KM)
   const gesamtStart = offen.length
   let geschrieben = 0
 
@@ -188,6 +206,11 @@ export async function entdecke(o: LaufOpts): Promise<Bericht> {
         bericht.gedeckeltAmEnde++
       }
     }
+
+    // ⚠ ERST NACH der Verfeinerung sichern. Wer vorher sichert, verliert genau
+    // die Kacheln, die diese hier gerade erzeugt hat — und das faellt nicht
+    // auf, weil der Lauf ohne Fehler weiterlaeuft.
+    o.sichere?.(offen, bericht)
   }
 
   bericht.dauerMs = uhr() - start
