@@ -3,9 +3,9 @@ import type { Map as MapboxMap } from 'mapbox-gl'
 import {
   DEADPIN_ICON,
   DEADPIN_SOURCE,
-  LAYER_CLUSTER,
-  LAYER_CLUSTER_ZAHL,
   LAYER_EINZELN,
+  LAYER_WOLKE,
+  ZOOM_UMSCHLAG,
   entferneDeadPinEbene,
   setzeDeadPinEbene,
 } from '../deadpin-layer'
@@ -45,31 +45,63 @@ const PINS = [
 ]
 
 describe('setzeDeadPinEbene', () => {
-  it('legt eine GECLUSTERTE Quelle an', () => {
-    // ⚠ Der Grund für den ganzen Umbau: 7.000 DOM-Marker macht mapbox bei jedem
-    // Pan-Frame neu — ohne Fehler, einfach nur zäh.
+  it('legt KEINE Cluster an — eine Zahl im Kreis las sich als Angebot', () => {
+    // ⭐ Auf der Karte stehen ~10 buchbare Partner gegen ueber 8.000
+    // unbeanspruchte Eintraege. Cluster-Kreise mit Anzahl („72") waren dunkler
+    // als die Partner-Marker und zogen den Blick ausgerechnet auf das
+    // Nicht-Verfuegbare.
     const k = karte()
     setzeDeadPinEbene(k.map, PINS, NAVY, icon)
-
-    const q = k.quellen.get(DEADPIN_SOURCE)
-    expect(q?.opts.cluster).toBe(true)
-    expect(q?.opts.clusterMaxZoom).toBeGreaterThan(0)
+    expect(k.quellen.get(DEADPIN_SOURCE)?.opts.cluster).toBeUndefined()
   })
 
-  it('legt drei Ebenen an: Cluster, Zahl, Einzelpin', () => {
+  it('legt zwei Ebenen an: Wolke UNTEN, Einzelpins darueber', () => {
+    // Die Reihenfolge ist die Zeichenreihenfolge — die Wolke darf die Pins
+    // nicht verdecken.
     const k = karte()
     setzeDeadPinEbene(k.map, PINS, NAVY, icon)
-    expect(k.ebenen.map((e) => e.id)).toEqual([LAYER_CLUSTER, LAYER_CLUSTER_ZAHL, LAYER_EINZELN])
+    expect(k.ebenen.map((e) => e.id)).toEqual([LAYER_WOLKE, LAYER_EINZELN])
   })
 
-  it('trennt Cluster und Einzelpins ueber den Filter — sonst zeichnet es doppelt', () => {
+  it('TRENNT die beiden ueber den Zoom', () => {
+    // Herausgezoomt nur die Wolke (zeigt WO, nicht WIE VIELE), hineingezoomt
+    // die Pins. Ohne Trennung laege beides uebereinander.
     const k = karte()
     setzeDeadPinEbene(k.map, PINS, NAVY, icon)
+    const wolke = k.ebenen.find((e) => e.id === LAYER_WOLKE)
+    const pins = k.ebenen.find((e) => e.id === LAYER_EINZELN)
+    expect(pins?.minzoom).toBe(ZOOM_UMSCHLAG)
+    expect(wolke?.maxzoom).toBeGreaterThan(ZOOM_UMSCHLAG)
+  })
 
-    const cluster = k.ebenen.find((e) => e.id === LAYER_CLUSTER)
-    const einzeln = k.ebenen.find((e) => e.id === LAYER_EINZELN)
-    expect(cluster?.filter).toEqual(['has', 'point_count'])
-    expect(einzeln?.filter).toEqual(['!', ['has', 'point_count']])
+  it('UEBERLAPPT den Uebergang — sonst waere die Karte kurz leer', () => {
+    const k = karte()
+    setzeDeadPinEbene(k.map, PINS, NAVY, icon)
+    const wolke = k.ebenen.find((e) => e.id === LAYER_WOLKE) as { maxzoom: number }
+    const pins = k.ebenen.find((e) => e.id === LAYER_EINZELN) as { minzoom: number }
+    expect(wolke.maxzoom).toBeGreaterThan(pins.minzoom)
+  })
+
+  it('haelt das Gewicht je Punkt NIEDRIG', () => {
+    // ⚠ Die fruehere Wolke war auf 62 Pins abgestimmt. Mit ueber 8.000 waere
+    // bei gleichem Gewicht (1.0) ganz Deutschland zugedeckt, und eine Flaeche
+    // ohne Struktur sagt nichts mehr aus.
+    const k = karte()
+    setzeDeadPinEbene(k.map, PINS, NAVY, icon)
+    const wolke = k.ebenen.find((e) => e.id === LAYER_WOLKE)
+    expect((wolke?.paint as Record<string, number>)['heatmap-weight']).toBeLessThan(0.3)
+  })
+
+  it('haelt den Radius GROSS genug, dass ueberhaupt Dichte entsteht', () => {
+    // ⭐ Der Prueflauf mit den echten 8.323 Punkten zeigte: bei Radius 10 blieb
+    // die Wolke bei JEDEM Gewicht unsichtbar — ohne Ueberlappung keine Dichte.
+    // Der Radius ist die entscheidende Achse, nicht das Gewicht.
+    const k = karte()
+    setzeDeadPinEbene(k.map, PINS, NAVY, icon)
+    const wolke = k.ebenen.find((e) => e.id === LAYER_WOLKE)
+    const radius = (wolke?.paint as Record<string, unknown>)['heatmap-radius'] as unknown[]
+    // ['interpolate', ['exponential',2], ['zoom'], 5, <r>, …] → der Wert bei Zoom 5
+    expect(Number(radius[4])).toBeGreaterThanOrEqual(18)
   })
 
   it('traegt die Kennung an jedem Punkt — der gewaehlte Pin wird darueber gefunden', () => {
@@ -91,43 +123,24 @@ describe('setzeDeadPinEbene', () => {
     expect((einzeln?.layout as Record<string, unknown>)['icon-allow-overlap']).toBe(true)
   })
 
-  it('laesst den Cluster-Kreis mit der Anzahl WACHSEN', () => {
-    // Sonst sieht ein Cluster aus 5 genauso aus wie einer aus 500 — die Karte
-    // verschwiege die Dichte.
-    const k = karte()
-    setzeDeadPinEbene(k.map, PINS, NAVY, icon)
-    const cluster = k.ebenen.find((e) => e.id === LAYER_CLUSTER)
-    const radius = (cluster?.paint as Record<string, unknown>)['circle-radius'] as unknown[]
-    expect(radius[0]).toBe('step')
-    expect(radius.length).toBeGreaterThan(3)
-  })
-
-  it('nennt eine Schrift, die der Standard-Style mitbringt', () => {
-    // ⚠ Ein nicht vorhandener Schriftname laesst die Cluster-Zahl
-    // STILLSCHWEIGEND verschwinden — der Kreis bleibt, die Zahl fehlt.
-    const k = karte()
-    setzeDeadPinEbene(k.map, PINS, NAVY, icon)
-    const zahl = k.ebenen.find((e) => e.id === LAYER_CLUSTER_ZAHL)
-    expect((zahl?.layout as Record<string, unknown>)['text-font']).toContain('DIN Offc Pro Medium')
-  })
-
   it('aktualisiert beim ZWEITEN Aufruf nur die Daten, statt doppelt anzulegen', () => {
     const k = karte()
     setzeDeadPinEbene(k.map, PINS, NAVY, icon)
     setzeDeadPinEbene(k.map, [...PINS, { id: 'c', lat: 48.1, lng: 11.6 }], NAVY, icon)
 
-    expect(k.ebenen).toHaveLength(3)
+    expect(k.ebenen).toHaveLength(2)
     expect(k.quellen.get(DEADPIN_SOURCE)?.setData).toHaveBeenCalledTimes(1)
   })
 
-  it('legt GAR KEINE Ebene an, wenn das Icon nicht gezeichnet werden kann', () => {
+  it('legt die WOLKE auch dann an, wenn das Icon fehlt — nur die Pins entfallen', () => {
     // ⚠ Ein `symbol`-Layer mit fehlendem `icon-image` rendert nichts und wirft
-    // dabei nicht — die Pins waeren schlicht weg, ohne jede Spur.
+    // dabei nicht. Die Wolke braucht kein Icon und soll deshalb trotzdem
+    // erscheinen — sonst waere die Karte auf Uebersichtszoom voellig leer.
     const k = karte()
     setzeDeadPinEbene(k.map, PINS, NAVY, () => null)
 
-    expect(k.ebenen).toHaveLength(0)
-    expect(k.quellen.size).toBe(0)
+    expect(k.ebenen.map((e) => e.id)).toEqual([LAYER_WOLKE])
+    expect(k.bilder.has(DEADPIN_ICON)).toBe(false)
   })
 })
 

@@ -1,30 +1,46 @@
 import type { Map as MapboxMap } from 'mapbox-gl'
 
 /**
- * Dead-Pins als geclusterte Kartenebene statt als DOM-Marker.
+ * Dead-Pins auf der Karte: Dichte-Wolke beim Überblick, einzelne Pins beim
+ * Hineinzoomen.
  *
- * ⚠ Der Anlass: Die Lead-Discovery hat den Bestand von 62 auf über 7.000
- * Betriebe gebracht. Jeder Dead-Pin war bisher ein eigenes DOM-Element, das
- * mapbox-gl bei JEDEM Pan- und Zoom-Frame neu positioniert. Bei 62 ist das
- * unauffällig, bei 7.000 wird das Ziehen der Karte zäh — und zwar ohne Fehler,
- * ohne Log, einfach nur langsam.
+ * ⚠ Der Anlass war Leistung: Die Lead-Discovery hat den Bestand von 62 auf über
+ * 8.000 Betriebe gebracht. Jeder Dead-Pin war ein eigenes DOM-Element, das
+ * mapbox-gl bei JEDEM Pan- und Zoom-Frame neu positioniert — bei 62
+ * unauffällig, bei tausenden zäh.
  *
- * ⭐ Die Optik bleibt EXAKT dieselbe (Aaron, 21.08.: „im gleichen Format wie die
- * dead pins"). Das Icon wird deshalb nicht als mapbox-`circle` nachempfunden,
- * sondern als Bild gezeichnet — mit demselben Durchmesser, demselben Rand,
- * demselben Schatten und demselben „C" wie das bisherige DOM-Element. Ein
- * `circle`-Layer könnte den Schatten gar nicht.
+ * ⭐ Der zweite, wichtigere Grund ist HALTUNG (Aaron, 21.08.: „das design der
+ * bubbles ist sehr sehr aufdringlich entgegen der wirklich verfügbaren
+ * partnern"). Auf der Karte stehen ~10 buchbare Partner gegen über 8.000
+ * unbeanspruchte Einträge — ein Verhältnis von 1:800. Cluster-Kreise mit
+ * Anzahl („72") lasen sich als Angebot, obwohl keiner davon buchbar ist: sie
+ * waren dunkler als die Partner-Marker und zogen damit ausgerechnet auf das
+ * Nicht-Verfügbare den Blick.
  *
- * Neu ist nur, was beim HERAUSZOOMEN passiert: Statt tausender überlappender
- * Punkte zeigt die Karte Cluster-Kreise mit Anzahl, die beim Hineinzoomen
- * aufgehen.
+ * ⭐⭐ Der ursprüngliche Zweck der Dead-Pins war laut Entscheid vom 12.06.
+ * „Marker-Dichte ohne SV-Identität" — DICHTE, nicht Anzahl. Eine Zahl im
+ * Cluster machte daraus eine Zusage. Deshalb gibt es hier keine Cluster mehr:
+ *
+ *   · herausgezoomt  → nur die weiche Abdeckungs-Wolke (zeigt WO, nicht WIE VIELE)
+ *   · hineingezoomt  → die einzelnen Pins, unverändert in ihrer bisherigen Optik
+ *
+ * Die Partner-Marker bleiben dadurch der einzige harte Punkt auf der Karte.
  */
 
 export const DEADPIN_SOURCE = 'sv-deadpins'
 export const DEADPIN_ICON = 'sv-deadpin-icon'
-export const LAYER_CLUSTER = 'sv-deadpins-cluster'
-export const LAYER_CLUSTER_ZAHL = 'sv-deadpins-cluster-zahl'
+export const LAYER_WOLKE = 'sv-deadpins-wolke'
 export const LAYER_EINZELN = 'sv-deadpins-einzeln'
+
+/**
+ * Ab hier lösen sich Wolke und Einzelpins ab.
+ *
+ * Zoom 9 zeigt etwa einen Landkreis. Darunter wäre ein einzelner Punkt je
+ * Betrieb Konfetti; darüber ist die Wolke zu grob, um noch etwas auszusagen.
+ * Der Übergang überlappt bewusst um eine halbe Stufe, damit nie eine Lücke
+ * entsteht, in der die Karte leer wirkt.
+ */
+export const ZOOM_UMSCHLAG = 9
 
 /** Die Maße des bisherigen DOM-Markers — Änderungen hier ändern die Optik. */
 const DURCHMESSER = 18
@@ -38,9 +54,9 @@ export type DeadPin = { id: string; lat: number; lng: number }
  * Zeichnet das Pin-Bild — pixelgenau wie das bisherige DOM-Element.
  *
  * ⚠ `pixelRatio: 2`: ohne das wirkt das Bild auf Bildschirmen mit hoher
- * Auflösung weich, während die DOM-Marker daneben scharf blieben. Der
- * Unterschied fällt genau dann auf, wenn beide gleichzeitig sichtbar sind —
- * also beim hervorgehobenen Pin.
+ * Auflösung weich, während der DOM-Marker des gewählten Pins daneben scharf
+ * bliebe. Der Unterschied fällt genau dann auf, wenn beide gleichzeitig
+ * sichtbar sind.
  */
 export function zeichneDeadPin(navy: string): { data: Uint8Array; width: number; height: number } | null {
   if (typeof document === 'undefined') return null
@@ -101,6 +117,10 @@ function alsFeatures(pins: DeadPin[]): GeoJSON.FeatureCollection {
 /**
  * Legt Quelle und Ebenen an. Idempotent: ein zweiter Aufruf aktualisiert nur
  * die Daten.
+ *
+ * @param vorLayer Die Ebene, VOR der eingefügt wird — so bleiben die
+ *   Partner-Marker und die Einsatzgebiete darüber. Ohne Angabe landet alles
+ *   obenauf, und die Wolke legte sich über die Partnerflächen.
  */
 export function setzeDeadPinEbene(
   map: MapboxMap,
@@ -117,75 +137,76 @@ export function setzeDeadPinEbene(
 
   if (!map.hasImage(DEADPIN_ICON)) {
     const bild = zeichne(navy)
-    // ⚠ Ohne Bild KEINE Ebene: ein `symbol`-Layer mit fehlendem `icon-image`
-    // rendert nichts und wirft dabei nicht — die Pins wären schlicht weg.
-    if (!bild) return
-    map.addImage(DEADPIN_ICON, bild, { pixelRatio: 2 })
+    // ⚠ Ohne Bild KEINE Pin-Ebene: ein `symbol`-Layer mit fehlendem
+    // `icon-image` rendert nichts und wirft dabei nicht — die Pins wären
+    // schlicht weg. Die Wolke kommt trotzdem, sie braucht kein Icon.
+    if (bild) map.addImage(DEADPIN_ICON, bild, { pixelRatio: 2 })
   }
 
-  map.addSource(DEADPIN_SOURCE, {
-    type: 'geojson',
-    data: alsFeatures(pins),
-    cluster: true,
-    // Ab dieser Stufe keine Cluster mehr — darunter sind die Punkte weit genug
-    // auseinander, um einzeln lesbar zu sein.
-    clusterMaxZoom: 11,
-    clusterRadius: 45,
-  })
+  // ⚠ KEIN `cluster: true` mehr. Cluster erzeugen Kreise mit Anzahl — genau
+  // das, was als Angebot missverstanden wurde.
+  map.addSource(DEADPIN_SOURCE, { type: 'geojson', data: alsFeatures(pins) })
 
+  // ── Die Wolke: zeigt WO das Netz dicht ist, nicht wie viele es sind ──
   map.addLayer({
-    id: LAYER_CLUSTER,
-    type: 'circle',
+    id: LAYER_WOLKE,
+    type: 'heatmap',
     source: DEADPIN_SOURCE,
-    filter: ['has', 'point_count'],
+    maxzoom: ZOOM_UMSCHLAG + 0.5,
     paint: {
-      'circle-color': navy,
-      'circle-opacity': 0.92,
-      'circle-stroke-width': 2,
-      'circle-stroke-color': '#fff',
-      // Der Kreis wächst mit der Anzahl — sonst sieht ein Cluster aus 5 genauso
-      // aus wie einer aus 500, und die Karte verschweigt die Dichte.
-      'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 50, 22, 200, 28],
+      // ⚠ Diese Werte sind GEMESSEN, nicht geschätzt. Am 21.08. mit den echten
+      // 8.323 Punkten in einem Prüfstand gerendert und verglichen:
+      //
+      //   Gewicht 0.09 / Radius 10  → praktisch unsichtbar
+      //   Gewicht 0.16 / Radius 10  → immer noch kaum sichtbar
+      //   Gewicht 0.12 / Radius 22  → Ballungsräume erkennbar, Land hell  ← das hier
+      //   Gewicht 0.12 / Radius 32  → verwischt zu einer Fläche ohne Struktur
+      //
+      // ⭐ Die entscheidende Achse ist der RADIUS, nicht das Gewicht: bei Zoom 5
+      // überlappen 10-Pixel-Punkte kaum, und ohne Überlappung entsteht gar keine
+      // Dichte — dann bleibt die Wolke bei JEDEM Gewicht blass. Die frühere
+      // Einstellung war auf 62 Pins abgestimmt und ließ sich nicht hochrechnen.
+      'heatmap-weight': 0.12,
+      'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 5, 0.6, 9, 1],
+      'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 5, 22, 7, 46, 9, 130],
+      'heatmap-color': [
+        'interpolate', ['linear'], ['heatmap-density'],
+        0, 'rgba(123,163,204,0)',
+        0.08, 'rgba(123,163,204,0.18)',
+        0.35, 'rgba(123,163,204,0.30)',
+        1, 'rgba(69,115,162,0.42)',
+      ],
+      // Sanft ausblenden, statt an der Zoomgrenze zu verschwinden.
+      'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], ZOOM_UMSCHLAG - 0.5, 0.9, ZOOM_UMSCHLAG + 0.5, 0],
     },
   })
 
-  map.addLayer({
-    id: LAYER_CLUSTER_ZAHL,
-    type: 'symbol',
-    source: DEADPIN_SOURCE,
-    filter: ['has', 'point_count'],
-    layout: {
-      'text-field': ['get', 'point_count_abbreviated'],
-      // ⚠ Schriften müssen im Mapbox-Style vorhanden sein. „DIN Offc Pro Medium"
-      // mit „Arial Unicode MS Bold" als Rückfall ist das Paar, das die
-      // Standard-Styles (streets-v12) garantiert mitbringen — ein nicht
-      // vorhandener Name lässt die Beschriftung stillschweigend verschwinden.
-      'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
-      'text-size': ['step', ['get', 'point_count'], 11, 50, 12, 200, 13],
-      'text-allow-overlap': true,
-    },
-    paint: { 'text-color': '#fff' },
-  })
-
-  map.addLayer({
-    id: LAYER_EINZELN,
-    type: 'symbol',
-    source: DEADPIN_SOURCE,
-    filter: ['!', ['has', 'point_count']],
-    layout: {
-      'icon-image': DEADPIN_ICON,
-      // Überlappen erlauben: die Pins zeigen DICHTE. Mapbox würde sonst
-      // einander verdeckende Punkte weglassen, und die Karte sähe leerer aus,
-      // als das Netz ist.
-      'icon-allow-overlap': true,
-      'icon-ignore-placement': true,
-    },
-  })
+  // ── Die einzelnen Pins: erst wenn man nah genug ist, dass sie etwas heissen ──
+  if (map.hasImage(DEADPIN_ICON)) {
+    map.addLayer({
+      id: LAYER_EINZELN,
+      type: 'symbol',
+      source: DEADPIN_SOURCE,
+      minzoom: ZOOM_UMSCHLAG,
+      layout: {
+        'icon-image': DEADPIN_ICON,
+        // Überlappen erlauben: die Pins zeigen DICHTE. Mapbox würde sonst
+        // einander verdeckende Punkte weglassen, und die Karte sähe leerer aus,
+        // als das Netz ist.
+        'icon-allow-overlap': true,
+        'icon-ignore-placement': true,
+      },
+      paint: {
+        // Sanft einblenden — dieselbe halbe Zoomstufe, in der die Wolke geht.
+        'icon-opacity': ['interpolate', ['linear'], ['zoom'], ZOOM_UMSCHLAG, 0, ZOOM_UMSCHLAG + 0.5, 1],
+      },
+    })
+  }
 }
 
 /** Entfernt Ebenen und Quelle — für den Neuaufbau nach einem Style-Wechsel. */
 export function entferneDeadPinEbene(map: MapboxMap): void {
-  for (const id of [LAYER_EINZELN, LAYER_CLUSTER_ZAHL, LAYER_CLUSTER]) {
+  for (const id of [LAYER_EINZELN, LAYER_WOLKE]) {
     if (map.getLayer(id)) map.removeLayer(id)
   }
   if (map.getSource(DEADPIN_SOURCE)) map.removeSource(DEADPIN_SOURCE)

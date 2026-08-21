@@ -2038,7 +2038,7 @@
       "h1": "Yakınızdaki Kfz Bilirkişisini Bulun.",
       "sub": "4 kısa soru — sizi en uygun bilirkişiyle buluşturuyoruz.",
       "pill_near": "Yakınınızda {count} bilirkişi",
-      "pill_bundesweit": "Tüm Almanya'da {count} bilirkişi mevcut",
+      "pill_bundesweit": "Ağımızda {count} bilirkişi",
       "pill_short_near": "Yakınınızda {count} bilirkişi",
       "pill_short_bundesweit": "{count} bilirkişi mevcut",
       "sheet_open": "Haritayı Göster",
