@@ -50,9 +50,11 @@ export function Footer({ city }: { city: City }) {
               Gutachten nach BVSK-Standard
             </p>
             {/* 08k A5: Ratgeber-Link aus der Ablauf-Section hierher (war dort
-                der einzige autounfall.io/gutachter/-Treffer — Strategie 27c). */}
+                der einzige Treffer — Strategie 27c). Ziel 21.08.2026 von
+                /gutachter/ auf /gutachter-ratgeber korrigiert: der alte Pfad
+                war 404 und dieser Footer trug ihn auf 50 Seiten. */}
             <a
-              href="https://autounfall.io/gutachter/"
+              href="https://autounfall.io/gutachter-ratgeber"
               target="_blank"
               rel="noopener"
               className="inline-block mt-2 text-[12.5px] text-white/70 underline underline-offset-2 hover:text-white transition"

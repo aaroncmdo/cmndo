@@ -201,7 +201,7 @@ export function AblaufSection() {
           {/* 08k A5 (Aaron-Entscheid): Powered-by-Block + LexDrive-Logo-Zeile
               entfernt (zu viel unter dem CTA). SEO-Link-Verbleib: claimondo.de
               bleibt via ClaimondoLink in Hero/Netzwerk/UeberUns/Footer;
-              autounfall.io/gutachter/ war NUR hier -> in den Footer aufgenommen
+              der Ratgeber-Link war NUR hier -> in den Footer aufgenommen
               (Verlinkungs-Strategie 27c). LexDrive bleibt in der 08k-Team-Kette
               + Vergleichstabelle praesent. */}
         </div>

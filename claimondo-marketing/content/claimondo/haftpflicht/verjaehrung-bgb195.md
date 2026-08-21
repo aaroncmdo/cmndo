@@ -28,8 +28,6 @@ last_legal_review: pending
 related:
   - /haftpflicht/verzug-bgb286
   - /haftpflicht/anerkenntnis-bgb212
-  - /haftpflicht/hemmung-bgb203
-  - /haftpflicht/fruehe-beweissicherung
 meta_description: "Verjährung von Unfall-Ansprüchen: 3 Jahre nach §195 BGB ab dem 31.12. des Kenntnisjahres, 30 Jahre bei Personenschäden. So vermeiden Sie den Verlust."
 ---
 
@@ -49,7 +47,7 @@ Verjährung nach § 195 BGB bedeutet: Ohne aktive Geltendmachung verlierst du na
 
 ## In drei Sätzen erklärt
 
-Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem du Schaden und Schädiger erkannt hast — nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch [Verhandlungen](/haftpflicht/hemmung-bgb203) hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten — sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
+Die regelmäßige Verjährungsfrist von **3 Jahren** läuft nach § 199 Abs. 1 BGB ab dem **Ende des Jahres**, in dem du Schaden und Schädiger erkannt hast — nicht ab dem Unfalltag. Bei Personenschäden mit nicht erkennbaren Spätfolgen schützt § 199 Abs. 2 BGB durch eine **30-Jahres-Höchstfrist**, bei verdeckten Sachschäden gilt § 199 Abs. 3 BGB mit **10 Jahren**. Verjährung lässt sich durch Verhandlungen hemmen und durch ein [Anerkenntnis des Versicherers](/haftpflicht/anerkenntnis-bgb212) komplett neu starten — sie ist also kein passiver Countdown, sondern ein aktiv steuerbares Risiko.
 
 ## Die fünf Schlüsselzahlen
 
@@ -185,8 +183,6 @@ Mindestens 3 Monate (§ 203 Satz 2 BGB), oft länger, abhängig von der Dauer de
 
 - [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) — Druckmittel innerhalb der Frist
 - [§ 212 BGB Anerkenntnis](/haftpflicht/anerkenntnis-bgb212) — Neustart der Verjährung
-- [§ 203 BGB Verhandlungs-Hemmung](/haftpflicht/hemmung-bgb203) — Pause der Frist
-- [Frühe Beweissicherung](/haftpflicht/fruehe-beweissicherung) — Vorbereitung auf späten Streit
 
 ---
 

@@ -66,7 +66,7 @@ Uznanie zgodnie z § 212 BGB rozpoczęłoby przedawnienie na nowo — pełne trz
 
 ### 3. Wytwarzanie zmęczenia negocjacjami
 
-Poszkodowani w wypadkach drogowych w pierwszych tygodniach są aktywni i bojowo nastawieni. Po 6–8 tygodniach milczenia w sposób dający się wykazać następuje [zmęczenie negocjacjami](/glossar/verhandlungs-erschoepfung) — gotowość do przyjęcia złych propozycji ugody wzrasta o szacunkowo 30–40%. Ubezpieczyciele to wiedzą. Planują z tym.
+Poszkodowani w wypadkach drogowych w pierwszych tygodniach są aktywni i bojowo nastawieni. Po 6–8 tygodniach milczenia w sposób dający się wykazać następuje zmęczenie negocjacjami — gotowość do przyjęcia złych propozycji ugody wzrasta o szacunkowo 30–40%. Ubezpieczyciele to wiedzą. Planują z tym.
 
 ### 4. Test podporządkowania (Compliance-Test)
 
