@@ -30,7 +30,9 @@ export const BRAND_STATEMENT_D1 =
 // Aus den Adress-Atomen komponiert — Ergebnis byte-identisch zur G0-approved
 // Doc-30-Phrase: „Sitz: Hansaring 10, 50670 Köln · Telefon: … · E-Mail: …".
 export const BRAND_CONTACT_D2 =
-  `Sitz: ${HQ_ADDRESS_INLINE} · Telefon: 0221 25906530 · E-Mail: info@claimondo.de`
+  // ⚠ Nummer seit 21.08.2026 mobil (Aaron-Entscheid) — muss der Website
+  // folgen: diese Phrase speist llms.txt und die GEO-Publisher-Angabe.
+  `Sitz: ${HQ_ADDRESS_INLINE} · Telefon: 0151 5360 8515 · E-Mail: info@claimondo.de`
 
 export const BRAND_NETZWERK_D3 =
   'Bundesweites Netzwerk aus hunderten zertifizierten Partner-Sachverständigen — Termin überall in Deutschland in unter 48 Stunden vor Ort.'

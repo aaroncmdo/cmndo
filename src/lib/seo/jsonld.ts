@@ -11,12 +11,29 @@ export const SITE_URL = 'https://claimondo.de'
 export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
 export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
 export const SITE_NAME = 'Claimondo'
-export const PHONE_E164 = '+4922125906530'
-export const PHONE_DISPLAY = '0221 25906530'
+/**
+ * PRIMAERE Kontaktnummer = Mobil (Aaron-Entscheid 21.08.2026).
+ *
+ * WARUM DIESE DATEI MITZIEHT, obwohl der Entscheid der Marketing-Site galt:
+ * `app/api/v1/sv-in-naehe/route.ts` gibt PHONE_DISPLAY als `buchungs_telefon`
+ * und `_meta.kontakt` in der OEFFENTLICHEN API aus — genau der Endpunkt, den
+ * KI-Systeme abfragen. Bliebe er auf Festnetz, naennten sie eine andere Nummer
+ * als jeder CTA der Website.
+ *
+ * ⚠ Die Festnetznummer war die matelso/aircall-Tracking-Nummer (Beleg:
+ * `src/lib/schemas/__tests__/matelso-event.test.ts` — `angerufene_nummer:
+ * '+4922125906530'` mit `quelle: 'Google Ads Kampagne X'`). Mit dem Wechsel
+ * entfaellt diese Kampagnen-Zuordnung fuer Anrufe von der Website.
+ */
+export const PHONE_E164 = '+4915153608515'
+export const PHONE_DISPLAY = '0151 5360 8515'
+/** Festnetz = Anbieterkennzeichnung + matelso/aircall-Anschluss. Der Weg
+ *  zurueck, falls das Call-Tracking wieder greifen soll. */
+export const PHONE_FESTNETZ_E164 = '+4922125906530'
+export const PHONE_FESTNETZ_DISPLAY = '0221 25906530'
 export const CONTACT_EMAIL = 'info@claimondo.de'
-/** WhatsApp-Nummer = Mobil (WhatsApp-faehig) — bewusst getrennt von PHONE_E164/
- *  PHONE_DISPLAY (Festnetz 0221 = matelso/aircall Call-Tracking-Nummer, NICHT anfassen).
- *  Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23; Nummer korrigiert 2026-05-27). */
+/** WhatsApp-Deep-Link — dieselbe Mobilnummer wie PHONE_E164, aber eigener
+ *  Kanal (wa.me statt tel:). Einzige Code-Quelle (Sweep 2026-05-23). */
 export const WHATSAPP_E164 = '+4915153608515'
 export const WHATSAPP_HREF = 'https://wa.me/4915153608515'
 

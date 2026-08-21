@@ -11,7 +11,7 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -401,7 +401,7 @@ export default function KfzGutachterPillarPage() {
               {t('cta_karte')}
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-5 w-5" />
