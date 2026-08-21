@@ -14,6 +14,7 @@ import {
   type EmbedSiteConfig,
 } from '@/lib/embed/anfrage'
 import { verifySiteToken } from '@/lib/embed/jwt'
+import { herkunftAusReferer } from '@/lib/analytics/herkunft'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 
 /**
@@ -143,9 +144,31 @@ export async function POST(req: NextRequest) {
     return json({ ok: false, error: 'rate_limit_unavailable' }, 503)
   }
 
+  // ── 3b. Attribution serverseitig ergaenzen ───────────────────────────────
+  // `buildAnfrageColumns` schreibt page_url + die fuenf utm_* seit jeher — aber
+  // nur, was der CLIENT mitschickt. Gemessen am 21.08.2026 ueber alle 44 Zeilen
+  // von `gutachter_finder_anfragen`: page_url in **einer**, utm_* in **keiner**.
+  // Der Weg war also da, es lief nur nichts hindurch, und damit liess sich keine
+  // der 678 Marketingseiten einer Anfrage zuordnen.
+  //
+  // Der Referer sagt dasselbe, ohne dass ein Client daran denken muss. Client hat
+  // Vorrang (er kennt die Landing-URL vor internen Navigationen), der Referer
+  // fuellt nur die Luecken — bestehendes Verhalten bleibt damit unveraendert.
+  // Datensparsam: nur origin+pathname + die fuenf UTM (s. lib/analytics/herkunft.ts).
+  const herkunft = herkunftAusReferer(req.headers.get('referer'))
+  const payloadMitHerkunft = {
+    ...payload,
+    page_url: payload.page_url ?? herkunft.page_url ?? undefined,
+    utm_source: payload.utm_source ?? herkunft.utm_source ?? undefined,
+    utm_medium: payload.utm_medium ?? herkunft.utm_medium ?? undefined,
+    utm_campaign: payload.utm_campaign ?? herkunft.utm_campaign ?? undefined,
+    utm_term: payload.utm_term ?? herkunft.utm_term ?? undefined,
+    utm_content: payload.utm_content ?? herkunft.utm_content ?? undefined,
+  }
+
   // ── 4. Insert ────────────────────────────────────────────────────────────
   const result = await insertAnfrage({
-    payload,
+    payload: payloadMitHerkunft,
     variante,
     embedSiteId: site?.id ?? null,
     originDomain: originHost,
