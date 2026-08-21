@@ -329,7 +329,10 @@ async function run() {
   // ==========================================
   // STEP 4: Kunden-Login
   // ==========================================
-  log('\n--- STEP 4: Kunden-Login (test-kunde@claimondo.de) ---')
+  // Nicht hartcodieren: hier stand fest 'test-kunde@claimondo.de', waehrend real KUNDE_EMAIL
+  // aus dem Secret benutzt wurde. Wer den Log las, suchte den Fehler beim falschen Konto —
+  // und sah nicht, dass das Secret auf ein gar nicht existierendes zeigte (21.08.2026).
+  log(`\n--- STEP 4: Kunden-Login (${KUNDE_EMAIL}) ---`)
   let kundeLoginOk = false
   try {
     const emailInput = await pageStaging.$('input[type="email"], input[name="email"]')
