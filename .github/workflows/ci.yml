@@ -615,8 +615,16 @@ jobs:
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
           TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
           TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
-          TEST_SV_EMAIL: ${{ secrets.TEST_SV_EMAIL }}
-          TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+          # 21.08.: TEST_SV_EMAIL/_PASSWORD BEWUSST NICHT MEHR durchgereicht — aus genau dem
+          # Grund, der zwei Bloecke weiter unten schon fuer KB/Dispatch/Kanzlei steht: ein
+          # unbesetztes Secret rendert als '' und ueberschreibt damit den (korrekten) Default.
+          # Belegt am ersten vollstaendig durchgelaufenen nightly (Lauf 32445807331): genau die
+          # 8 `Gutachter Routes` in routes.spec.ts rot, je ~17 s Timeout — waehrend dieselben
+          # 8 Tests LOKAL gegen dieselbe prod-Instanz in 20,1 s gruen sind (frischer Login,
+          # playwright/.auth geloescht). Gleicher Code, gleiche Seiten; der einzige Unterschied
+          # war dieses Secret. Admin bleibt durchgereicht — dort traegt es nachweislich einen
+          # gueltigen Wert (Admin-Routen sind gruen).
+          # Das TOTP-Secret bleibt: es ist ein echtes no-op, solange unbesetzt (undefined -> MFA-Skip).
           TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
 
       # Fundament Journey-Suite J9 (Honorar/Provision) — DB-harte Smokes: provisionen-verrechnung
@@ -846,13 +854,22 @@ jobs:
           # solange unbesetzt (undefined -> MFA-Skip). Passwoerter BEWUSST NICHT hier durchreichen —
           # ein unbesetztes Secret rendert als '' und `?? 'Test1234!'` faengt '' NICHT ab, wuerde also
           # den Default ueberschreiben. KB/Dispatch/Admin nutzen so den grandfatherten Default
-          # 'Test1234!' (bzw. TEST_ADMIN_PASSWORD/TEST_SV_PASSWORD, die schon oben stehen).
+          # 'Test1234!' (bzw. TEST_ADMIN_PASSWORD, das oben steht; TEST_SV_PASSWORD wurde am
+          # 21.08. entfernt — s. Begruendung dort).
           # Setup (Secrets + Prod-Test-Accounts): docs/2026-07-14-regel4-e2e-totp-secrets-setup.md
           TEST_ADMIN_TOTP_SECRET: ${{ secrets.TEST_ADMIN_TOTP_SECRET }}
           TEST_KB_TOTP_SECRET: ${{ secrets.TEST_KB_TOTP_SECRET }}
           TEST_DISPATCH_TOTP_SECRET: ${{ secrets.TEST_DISPATCH_TOTP_SECRET }}
-          TEST_SV_EMAIL: ${{ secrets.TEST_SV_EMAIL }}
-          TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+          # 21.08.: TEST_SV_EMAIL/_PASSWORD BEWUSST NICHT MEHR durchgereicht — aus genau dem
+          # Grund, der zwei Bloecke weiter unten schon fuer KB/Dispatch/Kanzlei steht: ein
+          # unbesetztes Secret rendert als '' und ueberschreibt damit den (korrekten) Default.
+          # Belegt am ersten vollstaendig durchgelaufenen nightly (Lauf 32445807331): genau die
+          # 8 `Gutachter Routes` in routes.spec.ts rot, je ~17 s Timeout — waehrend dieselben
+          # 8 Tests LOKAL gegen dieselbe prod-Instanz in 20,1 s gruen sind (frischer Login,
+          # playwright/.auth geloescht). Gleicher Code, gleiche Seiten; der einzige Unterschied
+          # war dieses Secret. Admin bleibt durchgereicht — dort traegt es nachweislich einen
+          # gueltigen Wert (Admin-Routen sind gruen).
+          # Das TOTP-Secret bleibt: es ist ein echtes no-op, solange unbesetzt (undefined -> MFA-Skip).
           TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           # CalDAV-Smoke (smoke-caldav-*.spec.ts) — ohne diese ENVs werden die
