@@ -16,7 +16,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
-import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
+import { zaehleSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
 const STAND = '04.08.2026'
@@ -93,13 +93,16 @@ export default async function VermittlungsportaleVergleichPage() {
   // SV-Netz live aus der DB — identische Definition wie /gutachter-finden
   // (aktive sv_leads + qualifizierte Sachverständige). Nie hardcoden, damit die
   // Zahl automatisch konsistent + UWG-belegbar bleibt.
-  const [svLeadsResult, aktiveSVsResult] = await Promise.all([
-    ladeSvLeads(),
+  // ⚠ Die Dead-Pins werden GEZÄHLT, nicht geladen. `ladeSvLeads().data.length`
+  // hätte bei über 1.000 aktiven Pins den PostgREST-Deckel geliefert statt der
+  // Wahrheit — in einer Zahl, die hier ausdrücklich als UWG-belegbar geführt
+  // wird. Und für eine Zahl tausende Zeilen zu übertragen wäre auch ohne den
+  // Fehler verschwenderisch.
+  const [svLeadsAnzahl, aktiveSVsResult] = await Promise.all([
+    zaehleSvLeads(),
     ladeAktiveSVs(),
   ])
-  const svNetz =
-    (svLeadsResult.ok ? svLeadsResult.data.length : 0) +
-    (aktiveSVsResult.ok ? aktiveSVsResult.data.length : 0)
+  const svNetz = svLeadsAnzahl + (aktiveSVsResult.ok ? aktiveSVsResult.data.length : 0)
 
   // Verifizierte Vergleichstabelle — Texte aus i18n, Claimondo-SV-Netz live.
   // Index 2 = SV-Netz-Größe: claimondo-Zelle wird live aus DB gerendert.
