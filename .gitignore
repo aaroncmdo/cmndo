@@ -143,3 +143,6 @@ scripts/.unfallatlas-cache/
 # BASt-Jahresauswertung (1,8 MB) — reproduzierbar via
 # scripts/generate-stadt-verkehrsmengen.mjs
 scripts/.bast-cache/
+
+# Backfill-Backups enthalten echte Kundendaten (Telefonnummern) — nie committen
+scripts/.backfill-*-backup-*.json

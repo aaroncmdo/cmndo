@@ -185,12 +185,33 @@ const nextConfig: NextConfig = {
       {
         // AAR-956 WS6: der Gutachter-Finder-Embed wird per <iframe> auf claimondo.de
         // (Apex) + *.claimondo.de (www/app/staging) eingebettet. KEIN X-Frame-Options
-        // hier; frame-ancestors erlaubt genau diese Origins (Partner-Domains spaeter).
+        // hier; frame-ancestors erlaubt genau diese Origins.
+        //
+        // 21.08.2026 — die fuenf Cluster-Domains kamen dazu ("Partner-Domains
+        // spaeter" aus dem urspruenglichen Kommentar ist jetzt hier): Aaron hat
+        // entschieden, dass der Gutachter-Finder dort EIGENSTAENDIG laeuft
+        // statt auf claimondo.de zu verlinken (`/gutachter-finden` je Domain).
+        //
+        // ⚠ WAS PASSIERT, WENN EINE DOMAIN HIER FEHLT: der Browser blockt den
+        // iframe stumm. Die Seite antwortet mit HTTP 200 und rendert eine LEERE
+        // FLAECHE — kein Server-Fehler, kein roter Build, nichts im Log ausser
+        // einer CSP-Meldung in der Browser-Konsole. Genau so sah es beim
+        // lokalen Test aus. Neue Cluster-Domain => diese Liste ergaenzen.
         source: '/embed/:path*',
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self' https://claimondo.de https://*.claimondo.de",
+            value: [
+              'frame-ancestors',
+              "'self'",
+              'https://claimondo.de',
+              'https://*.claimondo.de',
+              'https://kfz-unfallgutachter-koeln.de',
+              'https://kfz-unfallgutachter-duesseldorf.de',
+              'https://kfz-unfallgutachter-aachen.de',
+              'https://kfz-unfallgutachter-bonn.de',
+              'https://kfz-unfallgutachter-wuppertal.de',
+            ].join(' '),
           },
         ],
       },
