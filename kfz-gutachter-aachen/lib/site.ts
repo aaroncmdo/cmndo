@@ -57,6 +57,24 @@ export const SITE = {
 
   /** Monika-Embed (Plan 2 / Phase 2). */
   embedBase: process.env.NEXT_PUBLIC_EMBED_BASE ?? 'https://claimondo.de',
+
+  /**
+   * Gutachter-Finder als Embed — laeuft unter DIESER Domain, nicht auf claimondo.de.
+   *
+   * WARUM EIGENSTAENDIG (Aaron-Entscheid 21.08.2026): Der Finder ist das
+   * Versprechen dieser Domain. Ein Link auf claimondo.de bricht es sichtbar —
+   * der Besucher, der "Kfz-Gutachter Koeln" gesucht hat, landet bei einer
+   * anderen Marke. Als Embed bleibt er hier, waehrend die Daten aus dem
+   * Claimondo-Backend kommen.
+   *
+   * ⚠ NICHT `embedBase`: das zeigt auf claimondo.de (fuer monika.js). Der
+   * Finder-Embed liegt auf app.claimondo.de.
+   * ⚠ Die Domain muss in der `frame-ancestors`-CSP der App stehen
+   * (src/next.config.ts) — sonst blockt der Browser den iframe stumm und die
+   * Seite zeigt eine leere Flaeche.
+   */
+  finderEmbedUrl:
+    process.env.NEXT_PUBLIC_FINDER_EMBED_URL ?? 'https://app.claimondo.de/embed/gutachter-finder',
   monikaEnabled: process.env.NEXT_PUBLIC_MONIKA_EMBED_ENABLED === 'true',
 
   /** Tracking (Stubs — befuellt bei Live-Schaltung). */
