@@ -139,3 +139,7 @@ marketing-strategy/
 # scripts/generate-stadt-unfallhotspots.mjs. Der Geocode-Cache daneben ist
 # BEWUSST committet: er spart 450 Mapbox-Aufrufe beim naechsten Lauf.
 scripts/.unfallatlas-cache/
+
+# BASt-Jahresauswertung (1,8 MB) — reproduzierbar via
+# scripts/generate-stadt-verkehrsmengen.mjs
+scripts/.bast-cache/

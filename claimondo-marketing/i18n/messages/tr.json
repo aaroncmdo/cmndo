@@ -3898,11 +3898,15 @@
     "kfzbestand_text": "{stadt} şehrinde {pkw} otomobil kayıtlı, bunların {gewerblich} tanesi ticari sahiplere ait. Ayrıca {lkw} kamyon ve {kraftraeder} motosiklet bulunuyor.",
     "kfzbestand_quote": "Bu, 1.000 kişiye {proTausend} otomobil anlamına geliyor.",
     "kfzbestand_quelle": "Federal Motorlu Taşıtlar Dairesi (KBA), {stand}",
-    "amtlich_eyebrow": "Resmî kaza istatistikleri",
-    "amtlich_h2": "{ort} şehrinde kazaların yoğunlaştığı yerler",
+    "amtlich_eyebrow": "Resmî veriler",
+    "amtlich_h2": "{ort} şehrinde trafik ve kazalar",
     "amtlich_intro": "Almanya Federal ve Eyalet İstatistik Dairelerinin kaza atlası, yaralanmayla sonuçlanan her trafik kazasını tam konumuyla kaydeder. {ort} için {zeitraum} döneminde şu yoğunlaşmalar ortaya çıkmaktadır:",
     "amtlich_hinweis": "Her nokta için yaklaşık 100 metrelik bir alan değerlendirilmiştir. Rakamlar nedenleri belirtmez — yoğun trafikli bir ana yol, bir ara sokaktan daha fazla kaza kaydeder.",
-    "amtlich_quelle": "Kaynak: <link>{quelle}</link> — {lizenz}"
+    "amtlich_quelle": "Kaynak: <link>{quelle}</link> — {lizenz}",
+    "verkehr_h3": "Oradan ne kadar trafik geçiyor",
+    "verkehr_intro": "Almanya Federal Karayolu Araştırma Enstitüsü, otoyollardaki ve federal yollardaki trafiği sürekli ölçmektedir. {ort} şehrine en yakın sayım noktaları şunlardır ({jahr} yılı değerlendirmesi):",
+    "verkehr_zaehlstelle": "{name} sayım noktası, {km} km uzaklıkta",
+    "verkehr_quelle": "Kaynak: <link>BASt sürekli sayım noktaları</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Randevu talebiniz başarıyla alındı!",
