@@ -6,6 +6,7 @@ import type { Db } from '../../anreicherung/schreiben'
 const state = {
   check: null as Check | null,
   kandidaten: [] as Record<string, unknown>[],
+  domainKandidaten: [] as Record<string, unknown>[],
   angefasst: [] as string[],
   inserts: {} as Record<string, Record<string, unknown>>,
   updates: {} as Record<string, Record<string, unknown>>,
@@ -52,12 +53,20 @@ const db = {
       }
     }
     if (tabelle === 'sv_leads') {
-      return {
-        select: () => ({
-          gte: () => ({ lte: () => ({ gte: () => ({ lte: async () => ({ data: state.kandidaten, error: null }) }) }) }),
-        }),
-        insert, update,
+      // Der Abgleich fährt seit 21.08. ZWEI Abfragen: Domain (`.not().ilike()`,
+      // bundesweit) und Umkreis (`.gte().lte()`). Eine fest verdrahtete Kette
+      // bricht bei jeder neuen Bedingung — deshalb eine, die alles annimmt.
+      const leseKette = () => {
+        const genutzt: string[] = []
+        const k: Record<string, unknown> = {}
+        for (const m of ['not', 'ilike', 'gte', 'lte', 'eq', 'is', 'order']) {
+          k[m] = () => { genutzt.push(m); return k }
+        }
+        k.then = (aufl: (w: unknown) => void) =>
+          aufl({ data: genutzt.includes('ilike') ? state.domainKandidaten : state.kandidaten, error: null })
+        return k
       }
+      return { select: leseKette, insert, update }
     }
     if (tabelle === 'levelup_termine') {
       return {
@@ -99,6 +108,7 @@ const basis = {
 beforeEach(() => {
   state.check = check()
   state.kandidaten = []
+  state.domainKandidaten = []
   state.angefasst = []
   state.inserts = {}
   state.updates = {}
