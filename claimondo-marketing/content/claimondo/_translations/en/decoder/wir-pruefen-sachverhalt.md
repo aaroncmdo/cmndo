@@ -66,7 +66,7 @@ An acknowledgement under § 212 BGB would restart the limitation period — thre
 
 ### 3. Generating negotiation fatigue
 
-Road-accident victims are active and combative in the first weeks. After 6–8 weeks of silence, [negotiation fatigue](/glossar/verhandlungs-erschoepfung) demonstrably sets in — the willingness to accept poor settlement offers rises by an estimated 30–40%. Insurers know this. They plan for it.
+Road-accident victims are active and combative in the first weeks. After 6–8 weeks of silence, negotiation fatigue demonstrably sets in — the willingness to accept poor settlement offers rises by an estimated 30–40%. Insurers know this. They plan for it.
 
 ### 4. A compliance test
 

@@ -29,7 +29,6 @@ last_legal_review: pending
 related:
   - /haftpflicht/verjaehrung-bgb195
   - /haftpflicht/verzug-bgb286
-  - /haftpflicht/teilanerkenntnis-abschlag
   - /decoder/pauschal-abgeltung
 meta_description: "Anerkenntnis (§212 BGB) vs. Vergleich (§779 BGB): eines startet die Verjährung neu, das andere beendet alle Ansprüche. Nicht vorschnell unterschreiben."
 ---
@@ -229,7 +228,6 @@ Vergleiche mit minderjährigen Geschädigten brauchen oft die Genehmigung des Fa
 
 - [§ 195 BGB Verjährung](/haftpflicht/verjaehrung-bgb195) — Frist, die durch Anerkenntnis neu startet
 - [§ 286 BGB Verzug](/haftpflicht/verzug-bgb286) — Druckmittel vor Vergleichs-Verhandlungen
-- [Teilanerkenntnis und Abschlag](/haftpflicht/teilanerkenntnis-abschlag) — Häufige Versicherer-Praxis
 - [Decoder „Pauschal-Abgeltung"](/decoder/pauschal-abgeltung) — Antwort auf Standard-Vergleichsklausel
 
 ---

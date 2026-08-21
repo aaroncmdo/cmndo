@@ -701,10 +701,10 @@
       "twitter_description": "Passende Werkstatt in der Nähe: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten."
     },
     "gutachter_finden": {
-      "title": "Kfz-Gutachter finden in Ihrer Nähe — mit Karte",
-      "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
-      "og_title": "Kfz-Gutachter finden — Karte mit Kfz-Sachverständigen",
-      "og_description": "Interaktive Karte aller verfügbaren Kfz-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
+      "title": "Kfz-Gutachter finden — Karte für {anzahl} Städte",
+      "description": "Kfz-Gutachter in {anzahl} Städten auf einer Karte — freie Termine sehen, in unter 48 h vor Ort. Für unverschuldet Geschädigte 0 € (§ 249 BGB).",
+      "og_title": "Kfz-Gutachter finden — Karte für {anzahl} Städte",
+      "og_description": "Zertifizierte Kfz-Sachverständige in {anzahl} deutschen Städten, mit freien Terminen. Gutachter in unter 48 h vor Ort, 0 € nach § 249 BGB.",
       "twitter_title": "Kfz-Gutachter finden — Karte mit Kfz-SVs",
       "twitter_description": "Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h."
     },
@@ -2098,7 +2098,12 @@
       "sv_popup_bewertungen": "Bewertungen",
       "sv_popup_cta": "Über Wizard anfragen →",
       "beratung_label": "Beratung"
-    }
+    },
+    "sprung_staedte": "Städte",
+    "sprung_ratgeber": "Ratgeber",
+    "sprung_schliessen": "Schließen",
+    "sprung_hinweis": "Ein Tippen zentriert die Karte — Sie bleiben im Finder. Der Pfeil öffnet die Stadtseite.",
+    "sprung_infos": "Stadtseite"
   },
   "beratung_anfragen": {
     "badge": "0 € · Kein Callcenter · Direkter Kontakt",
@@ -4033,11 +4038,15 @@
     "kfzbestand_text": "In {stadt} sind {pkw} Pkw zugelassen, davon {gewerblich} auf gewerbliche Halter. Dazu kommen {lkw} Lkw und {kraftraeder} Krafträder.",
     "kfzbestand_quote": "Das entspricht {proTausend} Pkw je 1.000 Einwohner.",
     "kfzbestand_quelle": "Kraftfahrt-Bundesamt, {stand}",
-    "amtlich_eyebrow": "Amtliche Unfallstatistik",
-    "amtlich_h2": "Wo sich Unfälle in {ort} häufen",
+    "amtlich_eyebrow": "Amtliche Zahlen",
+    "amtlich_h2": "Verkehr und Unfallgeschehen in {ort}",
     "amtlich_intro": "Der Unfallatlas der Statistischen Ämter des Bundes und der Länder erfasst jeden Straßenverkehrsunfall mit Personenschaden punktgenau. Für {ort} ergeben sich daraus im Zeitraum {zeitraum} diese Häufungen:",
     "amtlich_hinweis": "Ausgewertet wurde je Stelle ein Bereich von rund 100 Metern. Die Zahlen benennen keine Ursachen — eine stark befahrene Hauptachse verzeichnet mehr Unfälle als eine Nebenstraße.",
-    "amtlich_quelle": "Quelle: <link>{quelle}</link> — {lizenz}"
+    "amtlich_quelle": "Quelle: <link>{quelle}</link> — {lizenz}",
+    "verkehr_h3": "Wie viel Verkehr dort unterwegs ist",
+    "verkehr_intro": "Die Bundesanstalt für Straßenwesen misst den Verkehr auf Autobahnen und Bundesstraßen dauerhaft. Diese Zählstellen liegen {ort} am nächsten (Jahresauswertung {jahr}):",
+    "verkehr_zaehlstelle": "Zählstelle {name}, {km} km entfernt",
+    "verkehr_quelle": "Quelle: <link>BASt-Dauerzählstellen</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin erfolgreich angefragt!",

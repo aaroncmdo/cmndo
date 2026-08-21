@@ -3,6 +3,7 @@ import { AUTHORS, type Article, type ArticleAuthorId } from '@/lib/article-types
 import { DECODER_LAST_UPDATED, type Decoder } from '@/lib/decoder-types'
 import { PSEO_LAST_UPDATED, type PseoPage } from '@/lib/pseo'
 import type { RestPage } from '@/lib/rest-types'
+import { pillarRoute } from '@/lib/pillar-route'
 
 // JSON-LD-Graph-Builder · STANDALONE (ENTITY-MODELL-LOCK v2).
 // publisher/author = ausschliesslich Kitta & Sprafke UG. #legal-reviewer =
@@ -86,7 +87,9 @@ function personSchema(authorId: ArticleAuthorId): JsonLdNode {
 
 function breadcrumbSchema(article: Article): JsonLdNode {
   const items = [{ name: 'Start', url: `${SITE.url}/` }]
-  if (article.pillar) items.push({ name: article.pillar.name, url: `${SITE.url}/${article.pillar.slug}` })
+  // pillarRoute() statt roher Slug: sonst steht im BreadcrumbList, den Google
+  // liest, ein 404 (Broken-Link-Crawl 21.08.2026).
+  if (article.pillar) items.push({ name: article.pillar.name, url: `${SITE.url}${pillarRoute(article.pillar.slug)}` })
   items.push({ name: article.h1Accent ?? article.title, url: `${SITE.url}/${article.slug}` })
   return {
     '@type': 'BreadcrumbList',

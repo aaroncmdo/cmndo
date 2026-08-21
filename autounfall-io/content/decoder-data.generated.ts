@@ -2,6 +2,22 @@ import type { Decoder } from '@/lib/decoder-types'
 
 // AUTO-GENERIERT (WP-3) aus decoder_content.py via scripts/port-decoders.py.
 // HTML-Felder = kontrollierter Content (dangerouslySetInnerHTML), hrefs umgeschrieben.
+//
+// ⚠ Der Generator existiert nicht mehr — weder scripts/port-decoders.py noch die
+// Quelle decoder_content.py liegen im Repo. Dieses File IST die Quelle und wird
+// nicht regeneriert; Handedits sind hier also erlaubt, anders als "AUTO-GENERIERT"
+// nahelegt.
+//
+// 21.08.2026 (Broken-Link-Crawl): "hrefs umgeschrieben" galt nur fuer die
+// HTML-Felder. Die strukturierten next.links trugen weiterhin die
+// Prototyp-Dateinamen (ARTICLE-*/HUB-*/DECODER-*.html) und liefen damit
+// ausnahmslos in 404 — 33 Vorkommen ueber 27 Ziele. Jetzt auf Routen umgezogen,
+// jedes Ziel gegen die Live-Sitemap geprueft.
+// ⚠ Die naheliegende Regel <name>.html -> /<name> traegt NICHT durchgaengig:
+// DECODER-wir-pruefen-sachverhalt liegt auf /versicherer-decoder/wir-pruefen-DEN-
+// sachverhalt, und ARTICLE-nutzungsausfall-vs-mietwagen auf
+// /nutzungsausfall/mietwagen-oder-ausfall. Wer ableitet statt nachzusehen,
+// tauscht dort 404 gegen 404.
 
 export const decoders: Decoder[] = [
   {
@@ -49,11 +65,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-totalschaden-130-prozent-regel.html",
+          "href": "/totalschaden-130-prozent-regel",
           "label": "130-%-Regel im Detail"
         },
         {
-          "href": "ARTICLE-wbw-130-prozent-grenze.html",
+          "href": "/wbw-130-prozent-grenze",
           "label": "WBW & 130-%-Grenze"
         }
       ]
@@ -118,11 +134,11 @@ export const decoders: Decoder[] = [
       "text": "Passende Detail-Artikel:",
       "links": [
         {
-          "href": "ARTICLE-controlexpert-versicherer-pruefdienst.html",
+          "href": "/controlexpert-versicherer-pruefdienst",
           "label": "ControlExpert erklärt"
         },
         {
-          "href": "ARTICLE-werkstattrisiko-bgh-2024.html",
+          "href": "/werkstattrisiko-bgh-2024",
           "label": "Werkstattrisiko (BGH)"
         }
       ]
@@ -203,11 +219,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-gutachter-versicherungs-pruefdienst.html",
+          "href": "/gutachter-versicherungs-pruefdienst",
           "label": "VS-Prüfdienst vs. eigener Gutachter"
         },
         {
-          "href": "ARTICLE-gutachter-wer-beauftragt.html",
+          "href": "/gutachter-wer-beauftragt",
           "label": "Wer beauftragt den Gutachter?"
         }
       ]
@@ -267,11 +283,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-gutachter-lohnt-sich.html",
+          "href": "/gutachter-lohnt-sich",
           "label": "Wann sich ein Gutachter lohnt"
         },
         {
-          "href": "ARTICLE-bagatellschaden.html",
+          "href": "/bagatellschaden",
           "label": "Bagatellschaden — die Grenze"
         }
       ]
@@ -331,11 +347,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-hws-schleudertrauma.html",
+          "href": "/hws-schleudertrauma",
           "label": "HWS-Schleudertrauma"
         },
         {
-          "href": "ARTICLE-schmerzensgeld-hws-schleudertrauma.html",
+          "href": "/schmerzensgeld-hws-schleudertrauma",
           "label": "Schmerzensgeld bei HWS"
         }
       ]
@@ -419,7 +435,7 @@ export const decoders: Decoder[] = [
       "text": "Mehr zur Verzögerungs-Masche:",
       "links": [
         {
-          "href": "/versicherer-decoder/DECODER-wir-pruefen-sachverhalt.html",
+          "href": "/versicherer-decoder/wir-pruefen-den-sachverhalt",
           "label": "„Wir prüfen den Sachverhalt“"
         },
         {
@@ -508,11 +524,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-gutachten-oder-kostenvoranschlag.html",
+          "href": "/gutachten-oder-kostenvoranschlag",
           "label": "Gutachten oder KVA?"
         },
         {
-          "href": "ARTICLE-gutachter-lohnt-sich.html",
+          "href": "/gutachter-lohnt-sich",
           "label": "Wann sich ein Gutachter lohnt"
         }
       ]
@@ -571,11 +587,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-mietwagen-anspruch.html",
+          "href": "/mietwagen-anspruch",
           "label": "Mietwagen-Anspruch"
         },
         {
-          "href": "ARTICLE-nutzungsausfall-vs-mietwagen.html",
+          "href": "/nutzungsausfall/mietwagen-oder-ausfall",
           "label": "Mietwagen oder Nutzungsausfall?"
         }
       ]
@@ -640,11 +656,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "HUB-nutzungsausfall.html",
+          "href": "/nutzungsausfall",
           "label": "Nutzungsausfall-Hub"
         },
         {
-          "href": "ARTICLE-nutzungsausfall-vs-mietwagen.html",
+          "href": "/nutzungsausfall/mietwagen-oder-ausfall",
           "label": "Nutzungsausfall vs. Mietwagen"
         }
       ]
@@ -704,11 +720,11 @@ export const decoders: Decoder[] = [
       "text": "Vertiefung:",
       "links": [
         {
-          "href": "ARTICLE-werkstattwahl-recht.html",
+          "href": "/werkstattwahl-recht",
           "label": "Freie Werkstattwahl"
         },
         {
-          "href": "ARTICLE-verweisrecht-versicherung.html",
+          "href": "/verweisrecht-versicherung",
           "label": "Verweisung auf günstigere Werkstatt"
         }
       ]
@@ -767,11 +783,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-wbw-restwert-streit.html",
+          "href": "/wbw-restwert-streit",
           "label": "Restwert-Streit"
         },
         {
-          "href": "ARTICLE-totalschaden-130-prozent-regel.html",
+          "href": "/totalschaden-130-prozent-regel",
           "label": "Totalschaden & 130 %"
         }
       ]
@@ -831,11 +847,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-schmerzensgeld-hoehe-tabelle.html",
+          "href": "/schmerzensgeld-hoehe-tabelle",
           "label": "Schmerzensgeld-Tabelle"
         },
         {
-          "href": "ARTICLE-schmerzensgeld-versicherung-verweigert.html",
+          "href": "/schmerzensgeld-versicherung-verweigert",
           "label": "Wenn die VS verweigert"
         }
       ]
@@ -922,7 +938,7 @@ export const decoders: Decoder[] = [
           "label": "Kürzungs-Checker"
         },
         {
-          "href": "ARTICLE-schuldanerkenntnis-vermeiden.html",
+          "href": "/schuldanerkenntnis-vermeiden",
           "label": "Abfindungsquittung vermeiden"
         }
       ]
@@ -988,11 +1004,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-verweisrecht-versicherung.html",
+          "href": "/verweisrecht-versicherung",
           "label": "Verweisrecht erklärt"
         },
         {
-          "href": "ARTICLE-fiktive-abrechnung.html",
+          "href": "/fiktive-abrechnung",
           "label": "Fiktive Abrechnung"
         }
       ]
@@ -1052,7 +1068,7 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-wbw-vs-zeitwert.html",
+          "href": "/wbw-vs-zeitwert",
           "label": "Wiederbeschaffungswert vs. Zeitwert"
         },
         {
@@ -1121,7 +1137,7 @@ export const decoders: Decoder[] = [
       "text": "Verwandte Kürzungen:",
       "links": [
         {
-          "href": "HUB-upe-aufschlaege.html",
+          "href": "/upe-aufschlaege",
           "label": "UPE-Aufschläge-Hub"
         },
         {
@@ -1190,7 +1206,7 @@ export const decoders: Decoder[] = [
       "text": "Verwandte Kürzungen:",
       "links": [
         {
-          "href": "HUB-verbringungskosten.html",
+          "href": "/verbringungskosten",
           "label": "Verbringungskosten-Hub"
         },
         {
@@ -1259,11 +1275,11 @@ export const decoders: Decoder[] = [
       "text": "Mehr dazu:",
       "links": [
         {
-          "href": "ARTICLE-merkantile-wertminderung.html",
+          "href": "/merkantile-wertminderung",
           "label": "Merkantile Wertminderung"
         },
         {
-          "href": "ARTICLE-wertminderung-249-bgb.html",
+          "href": "/wertminderung-249-bgb",
           "label": "Wertminderung & §249 BGB"
         }
       ]
@@ -1356,7 +1372,7 @@ export const decoders: Decoder[] = [
           "label": "Kürzungs-Checker"
         },
         {
-          "href": "/versicherer-decoder/DECODER-wir-pruefen-sachverhalt.html",
+          "href": "/versicherer-decoder/wir-pruefen-den-sachverhalt",
           "label": "„Wir prüfen den Sachverhalt“"
         }
       ]
@@ -1446,7 +1462,7 @@ export const decoders: Decoder[] = [
           "label": "Kürzungs-Checker"
         },
         {
-          "href": "/versicherer-decoder/DECODER-wir-pruefen-sachverhalt.html",
+          "href": "/versicherer-decoder/wir-pruefen-den-sachverhalt",
           "label": "„Wir prüfen den Sachverhalt“"
         }
       ]

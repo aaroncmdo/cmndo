@@ -52,9 +52,19 @@ const nextConfig: NextConfig = {
   // AAR 08.07.2026: Artikel /gutachter-dat-expert entfernt (Marken-
   // Zertifizierungs-Claim) -> 301 auf den Gutachter-Ratgeber-Pillar (kein 404,
   // Link-Equity bleibt).
+  //
+  // Broken-Link-Crawl 21.08.2026: /gutachter/ war der meistverlinkte tote Link
+  // ueberhaupt — der Footer + die RatgeberSection JEDER Cluster-LP zeigten
+  // darauf (50 Seiten). Die Call-Sites zeigen jetzt direkt auf
+  // /gutachter-ratgeber; dieser Redirect faengt zusaetzlich EXTERNE Backlinks,
+  // die wir nicht umschreiben koennen. Exact-Match ohne :path* -> die
+  // Geschwister /gutachter-ratgeber und /gutachter-finden bleiben unberuehrt.
+  // Die Slash-Variante /gutachter/ normalisiert Next (trailingSlash=false)
+  // vorher per 308 auf /gutachter, faellt also mit hier rein.
   async redirects() {
     return [
       { source: '/gutachter-dat-expert', destination: '/gutachter-ratgeber', permanent: true },
+      { source: '/gutachter', destination: '/gutachter-ratgeber', permanent: true },
     ]
   },
 }
