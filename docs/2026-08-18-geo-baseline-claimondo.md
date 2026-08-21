@@ -673,9 +673,54 @@ Fixtures oben. Das ist belastbar, aber es ist eine Einzelmessung, keine dauerhaf
 > Das ist eine Infrastruktur-Entscheidung, kein Nebenprodukt eines Feature-PRs. Vorschlag zur
 > Entscheidung, nicht eigenmächtig gebaut.
 
+### 12d · Vorher geprüft: Darf ein KI-Agent die API überhaupt abrufen?
+
+Der gewählte Fall ist *ChatGPT **ohne** installierte App*. So ein Client hat kein Tool — er
+erreicht die API nur per Browsing, und das entscheidet `robots.txt`. Wäre `/api/` dort
+gesperrt, wäre die ganze `buchungs_url`-Kette für genau diesen Fall tot. Vollständig geprüft
+(nicht per Zeilen-Grep — der hätte hier **falschen Alarm** gegeben):
+
+| Prüfpunkt | Ergebnis |
+|---|---|
+| `claimondo.de/robots.txt` → `Disallow: /api/` in **allen 26 Gruppen** | betrifft die **Marketing**-Domain; dort liegt keine öffentliche API |
+| `app.claimondo.de/robots.txt` → **`Allow: /api/v1/`** | genau die API ist frei, obwohl `Disallow: /` den Rest der App sperrt |
+| API-Antwort für ChatGPT-User, GPTBot, OAI-SearchBot, ClaudeBot, PerplexityBot, Google-Extended | **6 × HTTP 200**, `application/json` — kein WAF dazwischen |
+
+> ⭐ Ein `grep -i "disallow: /api"` hätte einen Blocker gemeldet, den es nicht gibt: Der
+> Treffer steht auf dem **falschen Host**. `robots.txt` gilt pro Host und pro Agenten-Gruppe —
+> beides muss mitgelesen werden.
+
+### 12e · Das Werkzeug für den Regel-4-Nachweis
+
+`scripts/verify-deeplink-kette.mjs` prüft die **ganze** Kette in fünf Schichten: robots-Erlaubnis →
+API liefert `buchungs_url` (und der Link trägt die eigene `id`) → Deep-Link antwortet 200 →
+Gegenprobe mit unbekannter ID → MCP-Ausgabe enthält den Direktlink.
+
+Drei Eigenschaften, die es belastbar machen:
+
+* **Es unterscheidet drei Zustände**, nicht zwei: `rot` (defekt), `warn` (erwarteter
+  Zwischenstand, z. B. MCP noch nicht deployed) und `?` = **nicht messbar** → **Exit 2**.
+  Ein Netzfehler wird nie als grün *oder* als Defekt verbucht.
+* **Es wertet `robots.txt` mit Gruppen- und Längen-Logik aus** statt per Grep — sonst
+  produzierte es genau den Fehlalarm aus §12d.
+* **Vor dem Deploy gemessen: Exit 1** — es meldet rot, wo es rot sein muss. Ein Prüfwerkzeug,
+  das grün meldet, bevor es etwas zu messen gibt, wäre wertlos.
+
+Dokumentierter Ausgangszustand (21.08., vor dem Deploy):
+
+```
+1) robots       ✓ /api/v1/ erlaubt · ✓ llms.txt erlaubt
+2) REST-API     ✓ HTTP 200, 2 Gutachter · ✗ KEIN buchungs_url   ← erwartet
+4) Gegenprobe   ✓ unbekannte ID → HTTP 200
+5) MCP          ! zeigt noch die Sammelkarte                     ← erwartet
+→ Exit 1
+```
+
+Nach beiden Deploys muss daraus **Exit 0** werden. Aufruf:
+`node scripts/verify-deeplink-kette.mjs [--plz 40213]`
+
 **Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
-sein Regel-4-Nachweis ist ein eigener `tools/call` gegen `mcp.claimondo.de` **nach** beiden
-Deploys. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
+sein Regel-4-Nachweis ist Schicht 5 oben. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
 
 > Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
 > ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
