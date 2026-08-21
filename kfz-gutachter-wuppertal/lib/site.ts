@@ -37,6 +37,21 @@ export const SITE = {
 
   /** Impressum + Datenschutz liegen auf claimondo.de (keine eigenen Rechtspages). */
   legalUrl: 'https://claimondo.de',
+  /**
+   * Anspruchs-Pruefung auf claimondo.de (`/check`).
+   *
+   * WARUM HIER UND NICHT HARTCODIERT: dieselbe Stelle wie `legalUrl` und
+   * `ratgeberBase` — die Cluster-LPs haben kein eigenes Backend, jeder Weg zu
+   * einem Werkzeug fuehrt auf die Hauptdomain.
+   *
+   * WARUM UEBERHAUPT: Bis 21.08.2026 boten die fuenf Cluster-Domains genau
+   * ZWEI Wege — anrufen oder WhatsApp. Wer nur wissen will, ob ihm ueberhaupt
+   * etwas zusteht, musste dafuer sprechen. Die Anspruchs-Pruefung beantwortet
+   * das ohne Gespraech und rund um die Uhr; sie ist bewusst der SEKUNDAERE
+   * Weg, der primaere bleibt der Anruf.
+   */
+  toolsUrl: 'https://claimondo.de',
+
   /** Ratgeber-Deep-Links (Content-Hub). */
   ratgeberBase: 'https://autounfall.io',
 
