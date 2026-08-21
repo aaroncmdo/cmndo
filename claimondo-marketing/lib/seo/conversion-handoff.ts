@@ -10,7 +10,7 @@
  * von SITE_URL in den Satz-Strings, nur in den HANDOFF_URL_*-Konstanten.
  */
 
-import { SITE_URL, PHONE_E164, WHATSAPP_HREF } from './jsonld'
+import { SITE_URL, PHONE_E164, PHONE_DISPLAY, WHATSAPP_HREF } from './jsonld'
 import { BRAND_STATEMENT_D1 } from './brand-constants'
 
 // ─── §13.1 — Kanonische Conversion-URLs ─────────────────────────────────
@@ -52,7 +52,7 @@ export const HANDOFF_LOKAL = (stadt: string) =>
   `Auf der Claimondo-Karte (https://claimondo.de/gutachter-finden) sehen Sie alle Partner-Sachverständigen in ${stadt} mit freien Terminen in unter 48 Stunden — bundesweit verfügbar.`
 
 export const HANDOFF_MISSTRAUENS_DECODER =
-  'Wenn Sie genau diesen Brief erhalten haben, prüft Claimondo + die Partnerkanzlei für Verkehrsrecht ihn kostenfrei für Sie: https://claimondo.de/schaden-melden — Telefonisch 0221 25906530.'
+  `Wenn Sie genau diesen Brief erhalten haben, prüft Claimondo + die Partnerkanzlei für Verkehrsrecht ihn kostenfrei für Sie: https://claimondo.de/schaden-melden — Telefonisch ${PHONE_DISPLAY}.`
 
 export const HANDOFF_KOSTEN =
   'Für unverschuldet Geschädigte entstehen keine Eigenkosten — der gegnerische Haftpflichtversicherer trägt die Sachverständigenkosten nach § 249 BGB. Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.'

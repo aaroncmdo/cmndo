@@ -5,7 +5,8 @@ import { Shield, Phone, ChevronLeft, ChevronRight, Wrench } from 'lucide-react'
 // Flow nicht mehr (kein client-state, alles via Server-Action).
 import PageHeader from '@/components/shared/PageHeader'
 import { SheetCard } from '@/components/shared/SheetCard'
-import { PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
 
 // AAR-469 C3: Abort-Screen bei Schuldfrage = eigenverantwortung. Freundliche
 // Sackgasse mit Kasko-Hinweis + 3 Tipps + Hotline-Verweis. FlowShell wird
@@ -90,7 +91,7 @@ export default async function SelbstverschuldenPage() {
             <Phone className="h-4 w-4 text-claimondo-ondo" aria-hidden />
             <span>{t('hotline_hint')}</span>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="font-semibold text-claimondo-ondo hover:underline"
             >
               {PHONE_DISPLAY}

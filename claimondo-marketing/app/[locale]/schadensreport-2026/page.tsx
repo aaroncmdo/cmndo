@@ -14,7 +14,7 @@ import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/component
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import {
   articleSchema, datasetSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
 
@@ -520,7 +520,7 @@ export default function SchadensreportPage() {
               <span>
                 <strong className="text-claimondo-navy">{t('methodik_hinweis_strong')}</strong>
                 {t('methodik_hinweis_text')}
-                <a href="tel:+4922125906530" className="underline">{PHONE_DISPLAY}</a>.
+                <a href={`tel:${PHONE_E164}`} className="underline">{PHONE_DISPLAY}</a>.
               </span>
             </li>
           </ul>
@@ -585,7 +585,7 @@ export default function SchadensreportPage() {
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-5 w-5" />
