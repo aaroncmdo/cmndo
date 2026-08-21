@@ -32,6 +32,8 @@ export default async function GutachterFinderEmbedPage({
     schaetzung?: string
     /** GEO-Deep-Link: profiles.id des im Chat/Verzeichnis genannten Gutachters. */
     sv?: string
+    /** GEO-Deep-Link: ISO-Start des genannten Termins (nur mit sv sinnvoll). */
+    slot?: string
   }>
 }) {
   const sp = await searchParams
@@ -74,6 +76,9 @@ export default async function GutachterFinderEmbedPage({
   // reicht hier dieselbe schlichte Typpruefung wie bei `schaetzung`: der Wert wird nie
   // als Kennung vertraut, nie geschrieben und nie in eine Query gegeben.
   const vorauswahlSv = typeof sp.sv === 'string' ? sp.sv : undefined
+  // Gleiche Logik wie oben: der Wert wird nur GEGEN das Matching-Ergebnis geprueft,
+  // nie als Kennung vertraut und nie geschrieben.
+  const vorauswahlSlot = typeof sp.slot === 'string' ? sp.slot : undefined
 
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
@@ -109,6 +114,7 @@ export default async function GutachterFinderEmbedPage({
             forceFallback={sp.fallback === '1'}
             schaetzungSessionId={schaetzung}
             vorauswahlSvId={vorauswahlSv}
+            vorauswahlSlotStart={vorauswahlSlot}
           />
         }
       />

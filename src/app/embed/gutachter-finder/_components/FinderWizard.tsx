@@ -115,6 +115,7 @@ export function FinderWizard({
   schaetzungSessionId,
   ownerProfilId = null,
   vorauswahlSvId = null,
+  vorauswahlSlotStart = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -136,6 +137,10 @@ export function FinderWizard({
    *  wird er statt des bestgerankten vorausgewaehlt — siehe waehleVorauswahl().
    *  Keine Buchung, kein Write: der Kunde bestaetigt weiterhin selbst. */
   vorauswahlSvId?: string | null
+  /** GEO-Deep-Link (`?slot=<ISO-Start>`): der Termin, den die KI-Antwort genannt hat.
+   *  Nur zusammen mit vorauswahlSvId wirksam. Trifft er zu, springt der Wizard direkt
+   *  zur Schadensangabe — sonst bleibt die normale Terminauswahl stehen. */
+  vorauswahlSlotStart?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -154,6 +159,10 @@ export function FinderWizard({
   // ladeEmbedMatching-Antwort darf den State setzen (Stale-Race-Guard bei schnellem Ort-Wechsel:
   // eine späte Antwort eines früheren Orts überschrieb sonst das aktuelle Matching).
   const matchReqRef = useRef(0)
+  // Die Slot-Vorauswahl aus dem Deep-Link darf GENAU EINMAL greifen. Ohne diese Sperre
+  // wuerde jeder erneute Matching-Lauf (Ortwechsel, Wunschtermin, "zurueck zur Terminwahl")
+  // den Kunden wieder nach vorn katapultieren — er kaeme nie an die Terminliste heran.
+  const slotVorauswahlVerbrauchtRef = useRef(false)
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
   const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
   const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
@@ -222,6 +231,7 @@ export function FinderWizard({
       setMatchLoading(false)
       if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      versucheSlotVorauswahl(res)
     })
   }
 
@@ -245,10 +255,43 @@ export function FinderWizard({
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
       if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      versucheSlotVorauswahl(res)
     })
   }
 
   // Step 2: Slot gewählt → merken + weiter zu Schaden (Reservierung erst am Ende).
+  /**
+   * Deep-Link-Abkuerzung: hat die KI-Antwort einen KONKRETEN Termin genannt
+   * (`?sv=…&slot=<ISO>`), diesen direkt uebernehmen und zur Schadensangabe springen.
+   *
+   * Der Kunde spart damit den Schritt, den Termin erneut aus der Liste zu suchen — obwohl
+   * er ihn im Chat schon gewaehlt hat. Er sieht die Auswahl auf den Folgeschritten und
+   * kann jederzeit zurueck.
+   *
+   * ⚠ Drei Bedingungen, sonst passiert NICHTS (und die normale Terminauswahl bleibt
+   * stehen): der Deep-Link muss beide Werte tragen, der Gutachter muss im aktuellen
+   * Matching sein, und der Slot muss dort noch frei sein. Slots sind fluechtig — zwischen
+   * KI-Antwort und Klick koennen Minuten liegen. Ein belegter Slot darf niemals zu einer
+   * Fehlerseite fuehren, nur zur normalen Auswahl.
+   */
+  function versucheSlotVorauswahl(res: PlaneTerminMitFallbackResult) {
+    if (slotVorauswahlVerbrauchtRef.current) return
+    if (!vorauswahlSvId || !vorauswahlSlotStart) return
+    if (res.kind !== 'partner') return
+    const sv = res.svs.find((s) => s.svId === vorauswahlSvId)
+    if (!sv) return
+    // Zeitpunkt-Vergleich statt String-Vergleich: dieselbe Zeit kann als "…T09:00:00+02:00"
+    // oder "…T07:00:00Z" geschrieben sein — ein String-Match wuerde sie fuer verschieden
+    // halten und die Abkuerzung still verschlucken.
+    const ziel = Date.parse(vorauswahlSlotStart)
+    const slot = Number.isFinite(ziel)
+      ? sv.slots.find((sl) => Date.parse(sl.start) === ziel)
+      : undefined
+    if (!slot) return
+    slotVorauswahlVerbrauchtRef.current = true
+    waehleSvSlot(sv, slot)
+  }
+
   function waehleSvSlot(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
     setAuswahl({ kind: 'partner', sv, slot })
     setSelectedSvId(sv.svId)
