@@ -33,7 +33,7 @@ ${spokes}
 - Telefon (24/7): ${CLUSTER.phone.displayNational}
 - Betreiber: Kitta & Sprafke UG (haftungsbeschränkt)
 - Netzwerk: https://claimondo.de
-- Ratgeber: https://autounfall.io/gutachter/
+- Ratgeber: https://autounfall.io/gutachter-ratgeber
 `
   return new Response(body, { headers: { 'Content-Type': 'text/plain; charset=utf-8' } })
 }
