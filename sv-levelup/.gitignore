@@ -34,3 +34,6 @@ next-env.d.ts
 
 # Fortschritt abgebrochener Discovery-Laeufe — Zwischenstand, kein Quelltext
 .discovery-fortschritt-*.json
+
+# Fortschritt der Website-Anreicherung — Zwischenstand, kein Quelltext
+.websites-fortschritt.json
