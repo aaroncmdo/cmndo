@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -67,13 +68,46 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
   // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
   // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
   // identifizierenden Felder raus (kein name, firma, adresse, telefon, email).
+  //
+  // ⚠ SEITENWEISE. PostgREST deckelt ohne `range` bei 1.000 Zeilen, ohne Fehler.
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const gelesen = await alleSeiten<SvLeadPublic>((von, bis) =>
+    supabase
+      .from('sv_leads')
+      .select('id,lat,lng')
+      .eq('ist_aktiv', true)
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!gelesen.ok) return { ok: false, error: gelesen.error }
+  return { ok: true, data: gelesen.zeilen }
+}
+
+/**
+ * Wie viele Dead-Pins es gibt — als ZAHL, ohne die Zeilen zu holen.
+ *
+ * ⭐ Der Anlass ist ein stiller Rechenfehler in einer WERBLICHEN Aussage: die
+ * Netzgrösse auf `/kfz-gutachter/vermittlungsportale-vergleich` entstand aus
+ * `ladeSvLeads().data.length`. Solange 62 Pins aktiv waren, stimmte das. Mit
+ * über 7.000 entdeckten Betrieben hätte dieselbe Zeile **1.000** geliefert —
+ * der Deckel von PostgREST, nicht die Wahrheit. Eine Zahl, die im Quelltext
+ * ausdrücklich als „UWG-belegbar" bezeichnet wird, darf nicht an einem
+ * unsichtbaren Limit hängen.
+ *
+ * `head: true` holt ausserdem KEINE Zeilen — 7.500 Datensätze für eine Zahl zu
+ * übertragen wäre auch ohne den Fehler verschwenderisch.
+ */
+export async function zaehleSvLeads(): Promise<number> {
+  const supabase = await createClient()
+  const { count, error } = await supabase
     .from('sv_leads')
-    .select('id,lat,lng')
+    .select('id', { count: 'exact', head: true })
     .eq('ist_aktiv', true)
-  if (error) return { ok: false, error: error.message }
-  return { ok: true, data: data as SvLeadPublic[] }
+  if (error) {
+    console.error('[zaehleSvLeads]', error.message)
+    return 0
+  }
+  return count ?? 0
 }
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
