@@ -41,6 +41,14 @@ const MANUELLE_LIVE_SMOKES = [
   'flows/smoke-final-startseite.spec.ts',
   'flows/smoke-final-vollstaendig.spec.ts',
   'flows/smoke-mini-wizard-strecke.spec.ts',
+  // 21.08. nachgetragen: erfuellt zwei Kriterien der Liste exakt — Zeile 5 der Spec sagt
+  // "Mandanten-End-to-End gegen staging.claimondo.de", sie braucht STAGING_BASIC_PASS
+  // (nginx-Basic-Auth) und hat 20 Klick-/Submit-Stellen, schreibt also Daten. Beim Bau
+  // dieser Liste uebersehen, weil sie in CI ohnehin skippt: Phase 1 skippt ohne
+  // STAGING_BASIC_PASS und `describe.configure({mode:'serial'})` reisst Phase 4 mit.
+  // ⚠ Diese Sicherung ist aber eine FEHLENDE ENV-Variable, nicht die Liste — wer
+  // STAGING_BASIC_PASS fuer irgendetwas anderes in CI setzt, laesst sie scharf laufen.
+  'flows/smoke-vollstrecke.spec.ts',
 ]
 
 export default defineConfig({
