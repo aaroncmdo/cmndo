@@ -62,6 +62,15 @@ export function clusterAllowlist(): string[] {
     'kfz-unfallgutachter-bonn.de',
     'kfz-unfallgutachter-koeln.de',
     'kfz-unfallgutachter-aachen.de',
+    // claimondo.de: die 173 Stadtseiten /kfz-gutachter/<stadt> sind inhaltlich
+    // dieselbe Gattung wie die Cluster-LPs und POSTen seit 21.08.2026 ebenfalls
+    // hierher (source='kfz_gutachter_lp'). Vorher liefen sie ueber eine eigene
+    // Server-Action gegen LEAD_WEBHOOK_URL — die Variable war nie gesetzt, also
+    // bekam JEDER Absender "Konfigurationsfehler", und der Lead landete nirgends.
+    // BEWUSST hardcoded statt via MONIKA_CLUSTER_DOMAINS: genau der Env-Weg hat
+    // schon zweimal still ausgesperrt (Koeln/Aachen-Incident oben) bzw. gar nicht
+    // existiert (LEAD_WEBHOOK_URL steht in KEINEM Deploy-Workflow).
+    'claimondo.de',
   ]
   const env = process.env.MONIKA_CLUSTER_DOMAINS
   const extra = env ? env.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean) : []

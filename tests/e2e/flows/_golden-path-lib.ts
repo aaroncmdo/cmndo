@@ -79,7 +79,21 @@ async function completeMfa(
   const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: authHeaders })
   const user = (await userRes.json()) as { factors?: { id: string; factor_type: string; status: string }[] }
   const factor = (user.factors ?? []).find((f) => f.factor_type === 'totp' && f.status === 'verified')
-  if (!factor) throw new Error(`Kein verifizierter TOTP-Faktor für ${roleKey}`)
+  if (!factor) {
+    // KEIN Fehler, sondern der Normalfall: das Konto hat gar keine MFA, also ist aal1 die
+    // hoechste erreichbare Stufe und die Session bereits vollstaendig. Hier stand ein
+    // `throw` — und der war die Ursache dafuer, dass J1-deep im nightly nur halb lief.
+    //
+    // Die Kette: ci.yml reicht TEST_*_TOTP_SECRET durch (Kommentar dort: „echte no-ops
+    // solange unbesetzt"). Ist ein Secret aber BESETZT, versucht loginContext() MFA —
+    // obwohl das Konto keinen Faktor hat. Der Throw landete in loginContextOrSkip(), das
+    // ihn als „2FA-Wand" ausgab. Ein Secret zu BESITZEN wurde damit als „das Konto hat
+    // 2FA" gelesen, und der Skip-Text nannte einen Grund, den es nicht gab.
+    //
+    // Gemessen 21.08. gegen prod: test-admin/-sv/-dispatch/-kb/-kanzlei haben je 0
+    // verifizierte Faktoren; der password-grant liefert eine aal1-Session.
+    return session
+  }
 
   const chRes = await fetch(`${SUPABASE_URL}/auth/v1/factors/${factor.id}/challenge`, {
     method: 'POST',
