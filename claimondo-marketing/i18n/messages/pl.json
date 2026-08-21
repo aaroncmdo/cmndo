@@ -3886,7 +3886,12 @@
     "faq_130_antwort": "Reguła 130% (BGH VI ZR 67/91) pozwala na koszty naprawy do 130 % wartości odtworzeniowej pojazdu — pod warunkiem fachowej naprawy zgodnie z ekspertyzą i dalszego użytkowania pojazdu przez 6 miesięcy.",
     "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
     "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę {ort} w ciągu 48 h.",
-    "cta_karte": "Pokaż na mapie"
+    "cta_karte": "Pokaż na mapie",
+    "kfzbestand_eyebrow": "Dane urzędowe",
+    "kfzbestand_h2": "Zarejestrowane pojazdy w {stadt}",
+    "kfzbestand_text": "W {stadt} zarejestrowanych jest {pkw} samochodów osobowych, w tym {gewerblich} na właścicieli firmowych. Do tego dochodzi {lkw} samochodów ciężarowych i {kraftraeder} motocykli.",
+    "kfzbestand_quote": "To {proTausend} samochodów na 1000 mieszkańców.",
+    "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin pomyślnie zarejestrowany!",
