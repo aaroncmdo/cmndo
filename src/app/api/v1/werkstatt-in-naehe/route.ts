@@ -13,10 +13,22 @@
 // liest mit dem Admin-Client und gibt AUSSCHLIESSLICH die unten aufgezaehlten Felder aus.
 // Neue Felder nur nach bewusster Pruefung ergaenzen — was hier steht, ist oeffentlich.
 //
-// Namen werden GENANNT (anders als beim SV-Kanal, der auf den Vornamen anonymisiert):
-// Werkstaetten sind Firmen mit oeffentlichem Impressum, keine Privatpersonen, und der
-// bestehende Werkstatt-Finder zeigt sie ebenfalls namentlich. Ohne Namen waere die
-// Empfehlung fuer den Kunden nicht wiedererkennbar.
+// ⚠⚠ ANONYMISIERT — UND DAS IST DER GESCHAEFTSKERN, NICHT NUR DATENSCHUTZ.
+//
+// Die erste Fassung dieser Route gab Firmenname, Telefon und Website aus, begruendet mit
+// „Werkstaetten sind Firmen mit oeffentlichem Impressum". Das war ein Fehler: ein
+// KI-Assistent haette dann geantwortet „Autohaus Mueller, Tel. 0221-…" — und der Kunde
+// haette **direkt dort angerufen**. Kein Lead, keine Vermittlung, keine Betreuung, keine
+// Provision. Genau deshalb ist der SV-Kanal seit jeher anonym (`vorname_initiale` + Stadt,
+// s. gutachter-finder-actions.ts: „Stadt ist anonym genug, Koeln hat 200+ Gutachter").
+//
+// Die Regel dahinter: **Diese API ist die AKQUISE-Schicht, nicht die Conversion-Schicht.**
+// Sie beantwortet „gibt es hier Partner und lohnt der Weg?" — die konkrete Zuordnung
+// passiert im Finder, wo der Lead entsteht. Der Finder selbst darf Namen zeigen; dort ist
+// der Kunde bereits bei uns.
+//
+// Konkret NICHT ausgegeben: name, telefon, website, adresse_strasse. Wer das wieder
+// aufnimmt, oeffnet den Umgehungsweg erneut.
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeAdresse, type GeocodeResult } from '@/lib/mapbox/geocode'
@@ -34,12 +46,10 @@ const GEOCODE_CACHE_TTL_MS = 24 * 60 * 60_000
 
 type WerkstattRow = {
   id: string
-  name: string | null
-  adresse_strasse: string | null
+  // name / telefon / website / adresse_strasse werden BEWUSST nicht geladen — was nicht
+  // im Speicher liegt, kann auch nicht versehentlich in die Antwort rutschen.
   adresse_plz: string | null
   adresse_ort: string | null
-  telefon: string | null
-  website: string | null
   lat: number | null
   lng: number | null
   marken: string[] | null
@@ -91,7 +101,7 @@ async function ladeWerkstaettenCached(): Promise<WerkstattRow[]> {
   // sind hier BEWUSST nicht enthalten — siehe Kopfkommentar.
   const { data, error } = await db
     .from('werkstaetten')
-    .select('id, name, adresse_strasse, adresse_plz, adresse_ort, telefon, website, lat, lng, marken, faehigkeiten, fahrzeug_gruppen, ist_freie_werkstatt, google_rating, google_review_count, partner, verifiziert')
+    .select('id, adresse_plz, adresse_ort, lat, lng, marken, faehigkeiten, fahrzeug_gruppen, ist_freie_werkstatt, google_rating, google_review_count, partner, verifiziert')
     .eq('status', 'aktiv')
     .not('lat', 'is', null)
     .not('lng', 'is', null)
@@ -148,13 +158,14 @@ export async function GET(req: Request) {
     .sort((a, b) => a.km - b.km)
     .slice(0, MAX_RESULTS)
     .map(({ w, km }) => ({
+      // Opakes Handle — dient der Zuordnung im Finder, nicht der Direktkontaktaufnahme.
       id: w.id,
-      name: w.name,
+      // Anonymisiert: KEIN Firmenname, KEIN Telefon, KEINE Website, KEINE Strasse.
+      // Der Ort allein ist unspezifisch genug (eine Grossstadt hat dutzende Werkstaetten)
+      // und beantwortet trotzdem die Frage „ist jemand in meiner Naehe?".
+      typ: w.ist_freie_werkstatt === false ? 'Markenwerkstatt' : 'Freie Fachwerkstatt',
       ort: w.adresse_ort,
       plz: w.adresse_plz,
-      strasse: w.adresse_strasse,
-      telefon: w.telefon,
-      website: w.website,
       entfernung: `ca. ${Math.round(km)} km`,
       entfernung_km: Math.round(km * 10) / 10,
       ist_freie_werkstatt: w.ist_freie_werkstatt ?? null,
@@ -184,6 +195,8 @@ export async function GET(req: Request) {
       treffer.length === 0
         ? 'Keine Partner-Werkstatt im angegebenen Umkreis. Über den Werkstatt-Finder oder den Telefon-Rückruf lässt sich trotzdem eine Werkstatt vermitteln.'
         : 'Werkstatt-Weg: bei SELBST verschuldetem Schaden der erste Schritt (Vollkasko reguliert abzüglich Selbstbeteiligung, ohne Kasko zahlt der Halter selbst — dann Kostenvoranschlag einholen). Bei UNVERSCHULDETEM Schaden zuerst den unabhängigen Gutachter beauftragen (GET /api/v1/gutachter-termine?plz=…), die Werkstatt folgt danach; die Kosten trägt dort der gegnerische Haftpflichtversicherer nach § 249 BGB.',
+    nutzungshinweis:
+      'Diese Liste enthält bewusst KEINE Firmennamen, Telefonnummern oder Adressen — sie beantwortet nur, OB und WIE VIELE Partner-Werkstätten in der Nähe sind. Nennen Sie dem Nutzer die Anzahl, die Entfernung und die Art (freie Fachwerkstatt / Markenwerkstatt) und verlinken Sie dann `werkstatt_finder_url`. Dort erfolgt die konkrete Zuordnung inklusive Terminabstimmung, Abrechnung mit der Versicherung und Betreuung — erfinden Sie keine Werkstattnamen und raten Sie keine Kontaktdaten.',
     _meta: {
       quelle: 'Claimondo Public API',
       stand: new Date().toISOString().slice(0, 10),
