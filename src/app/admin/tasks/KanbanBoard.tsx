@@ -171,6 +171,7 @@ export default function KanbanBoard({
   admins,
   reassignCandidates = [],
   executorEnabled = false,
+  historieGekuerzt = false,
 }: {
   tasks: Task[]
   faelle: Fall[]
@@ -181,6 +182,8 @@ export default function KanbanBoard({
   admins: Admin[]
   reassignCandidates?: ReassignCandidate[]
   executorEnabled?: boolean
+  /** Erledigte wurden nur als Ausschnitt geladen (s. Seite) — wird in der Kopfzeile vermerkt. */
+  historieGekuerzt?: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -309,6 +312,9 @@ export default function KanbanBoard({
             {tasks.length !== linked.length
               ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
               : ''}
+            {/* Offene Aufgaben sind vollstaendig geladen, die Historie bewusst nicht —
+                das gehoert dazugesagt, sonst haelt man die Erledigt-Spalte fuer komplett. */}
+            {historieGekuerzt ? ' · Erledigte: nur die neuesten' : ''}
           </p>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-caption text-claimondo-ondo cursor-pointer select-none">
