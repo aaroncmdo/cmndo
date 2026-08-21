@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test'
+import { CLAIMS } from '../../scripts/test-fixtures/ids'
 
 /**
  * CMM-63 — kunde-Portal Ownership + Route-Key accept-both (PR1 + PR2-Foundation).
@@ -30,8 +31,27 @@ import { test, expect, type Page } from '@playwright/test'
 // Quelle der Credentials + Messung: tests/e2e/flows/_golden-path-lib.ts (ROLES).
 const KUNDE_EMAIL = process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de'
 const KUNDE_PW = process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!'
-const CLAIM_ID = process.env.CMM63_CLAIM_ID
-const FALL_ID = process.env.CMM63_FALL_ID
+// 21.08.: Die drei CMM63_*-Variablen werden NIRGENDS gesetzt (0 Treffer in ci.yml) — die
+// Owner-Tests skippten daher seit jeher. Der Owner-Fall braucht aber keine CI-Variable: die
+// Fixture-Registry `scripts/test-fixtures/ids.ts` haelt genau dafuer stabile UUIDs, und
+// CLAIMS.c1 gehoert nachweislich smoke-kunde@ (claim_parties, prod gemessen). Als Default
+// eingesetzt laufen die drei Owner-Tests ab sofort in jedem Lauf mit.
+//
+// `||` statt `??` ist Absicht: ein gesetztes-aber-leeres CI-Secret rendert als '' und wuerde
+// mit `??` den Default ueberschreiben (dieselbe Klasse wie #5465).
+const CLAIM_ID = process.env.CMM63_CLAIM_ID || CLAIMS.c1
+// Auf prod ist `faelle_claim_bridge.fall_id` bei ALLEN 76 Zeilen gleich der claim_id
+// (21.08. gezaehlt: 0 abweichend) — der accept-both-Test prueft damit aktuell dieselbe URL
+// wie der Test darueber. Er haelt den Transitionspfad offen, beweist aber nichts Zusaetzliches,
+// solange keine abweichende fall_id existiert. Bewusst so belassen, nicht als Beweis lesen.
+const FALL_ID = process.env.CMM63_FALL_ID || CLAIMS.c1
+// Kein Default: der Deny-Test braucht einen EXISTIERENDEN fremden Claim. Auf prod gibt es
+// dafuer derzeit keinen stabilen Anker — alle 4 Fixture-Claims gehoeren smoke-kunde, und die
+// einzigen fremden Test-Claims sind `throwaway-*@claimondo.test` aus Smoke-Laeufen. Eine
+// Wegwerf-ID hier einzutragen waere schlimmer als der Skip: verschwindet der Claim, wird der
+// Test GRUEN aus dem falschen Grund (not-found weil geloescht, nicht weil abgewehrt).
+// Der Pfad selbst funktioniert — 21.08. scharf gegen prod mit einem throwaway-Claim
+// verifiziert (5/5 passed). Es fehlt nur ein dauerhafter Zweit-Kunde als Fixture.
 const FOREIGN_CLAIM_ID = process.env.CMM63_FOREIGN_CLAIM_ID
 
 const haveIds = Boolean(CLAIM_ID && FALL_ID)
