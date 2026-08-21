@@ -172,6 +172,20 @@ describe('ordneCheckZu', () => {
     })
   })
 
+  it('LOESCHT MIT EINEM TEILBEFUND NICHT DEN VORHANDENEN SCORE', async () => {
+    // ⭐ Am Prod-Smoke gefunden: eine Messung ohne Wertung setzte den Score auf
+    // null und loeschte die 10 der Vormessung. Der Betrieb ist nicht schlechter
+    // geworden — die Messung war unvollstaendig. Die Spalte dient der
+    // Vertriebssortierung; ein `null` ist dort unbrauchbar, ein aelterer echter
+    // Wert ist es nicht.
+    const { db: d, aufrufe } = db({ domainTreffer: [lead({ id: 'L7' })] })
+    await ordneCheckZu(d, { ...CHECK, score: null })
+
+    const amLead = aufrufe.find((a) => a.tabelle === 'sv_leads')
+    expect(amLead?.werte).toEqual({ levelup_letzter_check_id: 'C1' })
+    expect(amLead?.werte).not.toHaveProperty('levelup_letzter_score')
+  })
+
   it('LEGT NIEMALS EINEN LEAD AN, wenn nichts passt', async () => {
     // ⭐ Die Startseite sagt zu: „kein Eintrag in einer Interessentenliste."
     // Ein bestehender Eintrag darf ergaenzt werden — ein neuer entsteht nicht.
