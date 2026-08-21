@@ -23,8 +23,11 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'https://app.claimondo.de'
 
 async function login(page: import('@playwright/test').Page, email: string, passwort: string) {
   await page.goto(`${BASE}/login`)
-  await page.getByLabel(/e-?mail/i).fill(email)
-  await page.getByLabel(/passwort/i).first().fill(passwort)
+  // `.first()` haette hier gereicht, ist aber nur so lange richtig, wie der Toggle-Button
+  // des PasswordInput (aria-label="Passwort anzeigen") im DOM NACH dem Feld steht — er
+  // matcht /passwort/i ebenfalls. Eindeutiger Selektor statt Reihenfolge-Annahme.
+  await page.locator('input[type="email"], input[name="email"]').first().fill(email)
+  await page.locator('input[type="password"], input[name="password"]').first().fill(passwort)
   await page.getByRole('button', { name: /anmelden|einloggen/i }).click()
   await page.waitForURL((u) => !u.pathname.includes('/login'), { timeout: 30_000 })
 }
