@@ -10,6 +10,7 @@ import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } fro
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
 import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import type { Tier } from '@/lib/partner-rang/types'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -123,13 +124,25 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
   // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
   // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
   // identifizierenden Felder raus (kein name, firma, adresse, telefon, email).
+  // ⚠ SEITENWEISE. PostgREST deckelt ohne `range` bei 1.000 Zeilen — ohne
+  // Fehler, ohne Log. Solange 62 Dead-Pins aktiv waren, fiel das nicht auf; mit
+  // über 7.000 entdeckten Betrieben zeigte jede Karte, die diesen Pfad nutzt,
+  // stillschweigend 1.000 von 7.500. Dieser Pfad hat die größte Reichweite im
+  // Repo: Embed (läuft auf FREMDEN Websites), claimondo.de/gutachter-finden,
+  // die Werkstatt- und Makler-Einstiege sowie zwei JSON-Schnittstellen.
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('sv_leads')
-    .select('id,lat,lng')
-    .eq('ist_aktiv', true)
-  if (error) return { ok: false, error: error.message }
-  return { ok: true, data: data as SvLeadPublic[] }
+  const gelesen = await alleSeiten<SvLeadPublic>((von, bis) =>
+    supabase
+      .from('sv_leads')
+      .select('id,lat,lng')
+      .eq('ist_aktiv', true)
+      // Ein Zweitschlüssel ist Pflicht: ohne stabile Reihenfolge kann dieselbe
+      // Zeile auf zwei Seiten erscheinen — oder auf keiner.
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!gelesen.ok) return { ok: false, error: gelesen.error }
+  return { ok: true, data: gelesen.zeilen }
 }
 
 export async function ladeAktiveSVs(

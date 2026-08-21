@@ -13,6 +13,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { createHash } from 'crypto'
 import { randomBytes } from 'crypto'
 import { headers } from 'next/headers'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 import {
   istClaimbar,
   buildSvInsertAusLead,
@@ -680,17 +681,27 @@ export async function registriereSvBasicNeu(input: {
 export async function ladeClaimbarePinLeads(): Promise<
   { ok: true; data: Array<{ id: string; lat: number; lng: number }> } | { ok: false; error: string }
 > {
+  // ⚠ SEITENWEISE. PostgREST deckelt ohne `range` bei 1.000 Zeilen — ohne
+  // Fehler, ohne Log. Der Kommentar oben nennt 62 Pins; mit den über 7.000
+  // entdeckten Betrieben (Lead-Discovery, 21.08.) zeigte diese Karte
+  // stillschweigend 1.000 von 7.500.
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('sv_leads')
-    .select('id,lat,lng')
-    .eq('ist_aktiv', true)
-    .eq('claim_status', 'offen')
-    .neq('quelle', 'gutachter-partner-page')
-    .not('lat', 'is', null)
-    .not('lng', 'is', null)
-  if (error) return { ok: false, error: error.message }
-  const rows = (data ?? []).map((r) => ({
+  const gelesen = await alleSeiten<{ id: string; lat: number; lng: number }>((von, bis) =>
+    admin
+      .from('sv_leads')
+      .select('id,lat,lng')
+      .eq('ist_aktiv', true)
+      .eq('claim_status', 'offen')
+      .neq('quelle', 'gutachter-partner-page')
+      .not('lat', 'is', null)
+      .not('lng', 'is', null)
+      // Ohne stabile Reihenfolge kann dieselbe Zeile auf zwei Seiten erscheinen
+      // — oder auf keiner.
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!gelesen.ok) return { ok: false, error: gelesen.error }
+  const rows = gelesen.zeilen.map((r) => ({
     id: r.id as string,
     lat: Number(r.lat),
     lng: Number(r.lng),
