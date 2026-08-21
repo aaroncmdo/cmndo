@@ -217,9 +217,26 @@ export async function ordneCheckZu(
     return { ok: false, error: 'Verknuepfung wirkungslos — keine Zeile getroffen.' }
   }
 
+  // ⚠ Ein TEILBEFUND ueberschreibt den Score NICHT.
+  //
+  // Am Prod-Smoke gefunden (21.08.): eine Messung, die zu wenig erheben konnte
+  // (`kein_score`), setzte `levelup_letzter_score` auf null und loeschte damit
+  // die 10 der Vormessung. Formal war das „der Score der letzten Messung" —
+  // praktisch war es ein Verlust: der Betrieb ist nicht schlechter geworden,
+  // die Messung war nur unvollstaendig. Und die Spalte hat genau EINEN Zweck:
+  // der Vertrieb sortiert danach, wer den groessten Nachholbedarf hat. Ein
+  // `null` ist dort unbrauchbar, ein aelterer echter Wert ist es nicht.
+  //
+  // Die Kennung des letzten Checks wird trotzdem gesetzt — sie zeigt auf die
+  // letzte MESSUNG, der Score auf die letzte WERTUNG. Zwei Spalten, zwei
+  // Zwecke; der Spaltenname sagt „letzter Score", nicht „Score des letzten
+  // Checks".
+  const nachtrag: Record<string, unknown> = { levelup_letzter_check_id: check.id }
+  if (check.score !== null) nachtrag.levelup_letzter_score = check.score
+
   const { data: leadZeilen, error: leadFehler } = await db
     .from('sv_leads')
-    .update({ levelup_letzter_check_id: check.id, levelup_letzter_score: check.score })
+    .update(nachtrag)
     .eq('id', treffer.leadId)
     .select()
 
