@@ -586,9 +586,34 @@ Vorauswahl still auf den bestgerankten zurück — gültige Liste statt Fehlerse
 vor dem Deploy gemessen: `?sv=<unbekannte-uuid>` liefert HTTP **200**, ein unbekannter
 Parameter wird ignoriert.
 
-**Offen:** Der MCP-Server (`mcp.claimondo.de`) liegt **nicht in diesem Repo** — ob
-`buchungs_url` dort ankommt, hängt daran, ob er die API-Antwort durchreicht oder die Felder
-selbst mappt. Ungeprüft. Dazu der Regel-4-Prod-Smoke nach dem Deploy.
+### 12a · Der MCP-Server hat dieselbe Lücke — und der Fix erreicht ihn **nicht**
+
+Zunächst als „ungeprüft" notiert, dann gemessen. `tools/call` auf
+`claimondo_finde_gutachter_termine`, PLZ 50670, liefert **Markdown-Freitext**, kein JSON:
+
+```
+## Gaith · 5★ (119) · ca. 5 km · Empfohlener Partner
+- Fr., 21.08., 09:00
+- Fr., 21.08., 09:40
+## Kelvin Tyron · 5★ (23) · ca. 10 km · Empfohlener Partner
+- Fr., 21.08., 09:00
+
+Interaktive Karte / Buchung: https://claimondo.de/gutachter-finden?plz=50670
+```
+
+Der Server nennt zwei Gutachter **namentlich mit Slots** — und verlinkt dann auf die anonyme
+Sammelkarte. **Exakt dieselbe Sackgasse wie in der REST-API**, nur im Pfad mit dem
+qualitativ besten Zugang (Claude.ai-Connectors, ChatGPT-Developer-Mode).
+
+Weil er die Felder selbst rendert und die URL selbst baut, **greift `buchungs_url` dort
+nicht automatisch mit**. Sein Code liegt nicht in diesem Repo (kein `src/**/mcp/`, kein
+zweites Repo unter dem Account) — er braucht dieselbe Änderung an seiner eigenen Stelle:
+statt der Sammelkarte je Gutachter `…/gutachter-finden?plz=<plz>&sv=<id>`.
+
+> ⚠ Der Server nennt Namen, verlinkt aber anonym — das ist genau der Bruch, der die
+> Empfehlung entwertet. Ein Einzeiler an seinem Renderer, aber nicht von hier aus.
+
+**Weiter offen:** der Regel-4-Prod-Smoke nach dem Deploy (Soll + Plan stehen in PR #5462).
 
 > Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
 > ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
