@@ -11,7 +11,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import {
   personSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -454,7 +454,7 @@ export default async function UeberUnsPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-base font-bold text-claimondo-navy shadow-[0_8px_28px_rgba(255,255,255,0.18)] transition-all duration-200 hover:bg-claimondo-light-blue/90 active:scale-[0.98]"
             >
               <Phone className="h-5 w-5 text-claimondo-ondo" />

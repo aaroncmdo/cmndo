@@ -5,7 +5,8 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
 
 // Seit #4451 live: oeffentliche Werkstatt-Selbstregistrierung in der App —
 // die CTAs zeigen dorthin statt auf mailto (sofort aktives Konto statt Mail-Pingpong).
@@ -155,7 +156,7 @@ export default function WerkstattPartnerWerdenPage() {
               <ChevronRight className="h-5 w-5" />
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-claimondo-border bg-white/70 px-7 py-3.5 text-base font-semibold text-claimondo-navy backdrop-blur-sm transition-all hover:bg-white"
             >
               <Phone className="h-4 w-4" />
@@ -355,7 +356,7 @@ export default function WerkstattPartnerWerdenPage() {
               Kostenlos registrieren
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />

@@ -29,12 +29,15 @@ export default function ClaimChatInbox({
   istStaff = false,
   initialClaimId,
   emptyHint,
+  titleLevel,
 }: {
   eintraege: ClaimInboxEintrag[]
   currentUserId: string
   istStaff?: boolean
   initialClaimId?: string | null
   emptyHint?: string
+  /** Durchgereicht an ChatInboxLayout — `1`, wenn die Seite keinen eigenen Page-H1 hat. */
+  titleLevel?: 1 | 2
 }) {
   const threads: InboxThread[] = eintraege.map((e) => ({
     id: e.claimId,
@@ -52,6 +55,7 @@ export default function ClaimChatInbox({
       initialThreadId={initialClaimId}
       emptyHint={emptyHint ?? 'Noch keine Chats'}
       searchPlaceholder="Fall suchen…"
+      titleLevel={titleLevel}
       renderDetail={(id) => {
         const e = byId.get(id)
         if (!e) return null

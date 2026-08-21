@@ -1,5 +1,7 @@
 import { Phone } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
+import { PHONE_E164,
+} from '@/lib/seo/jsonld'
 
 // Portal-Mockup „Wie Uber — nur für Ihren Kfz-Schaden" aus prototype.html §6.
 // 5 nummerierte Features links + Glass-Card-Mockup rechts mit Fall-ID,
@@ -116,7 +118,7 @@ export async function PortalMockupSection() {
                 <p className="text-xs text-claimondo-shield">{t('mockup_berater_antwort')}</p>
               </div>
               <a
-                href="tel:+4922125906530"
+                href={`tel:${PHONE_E164}`}
                 className="rounded-full bg-claimondo-navy p-2 text-white hover:bg-claimondo-shield"
                 data-tracking="portal-mock-call"
                 aria-label={t('mockup_berater_aria')}

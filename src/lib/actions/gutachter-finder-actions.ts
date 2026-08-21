@@ -8,6 +8,7 @@ import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { herkunftAusRequest } from '@/lib/analytics/herkunft'
 import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import type { Tier } from '@/lib/partner-rang/types'
 
@@ -313,10 +314,19 @@ export async function erstelleGutachterFinderAnfrage(
   // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
   const gaClientId = await getConsentedGaClientId()
 
+  // Welche SEITE hat die Anfrage gebracht? Bis 21.08.2026 wusste das niemand:
+  // von 44 Anfragen trug **eine** eine `page_url`, keine einzige ein utm_*.
+  // Die Spalten gibt es seit ihrer Migration — sie wurden nur nie gesetzt.
+  // Datensparsam: nur origin+pathname und die fuenf UTM-Parameter, alle uebrigen
+  // Query-Parameter werden verworfen (s. lib/analytics/herkunft.ts).
+  // ⚠ `source` bleibt bewusst ungesetzt — s. den RLS-Hinweis oben.
+  const herkunft = await herkunftAusRequest()
+
   const { data, error } = await supabase
     .from('gutachter_finder_anfragen')
     .insert({
       ga_client_id: gaClientId,
+      ...herkunft,
       vorname: payload.vorname,
       nachname: payload.nachname,
       email: payload.email,

@@ -5,7 +5,10 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MapPinIcon, MailIcon, PlusIcon, UploadIcon, RefreshCwIcon } from 'lucide-react'
 import { createSvLead, importSvLeadsAction, sendeSvLeadEinladung, sendeAlleOffenenEinladungen, datSyncAusfuehren } from './actions'
-import type { SvLeadRow } from './types'
+import type { SvLeadSeite } from './types'
+import type { SvLeadFilter } from '@/lib/sv-leads/liste-filter'
+import SvLeadsFilterleiste from './SvLeadsFilterleiste'
+import SvLeadsBlaetterleiste from './SvLeadsBlaetterleiste'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td, DataTableMobileCard } from '@/components/shared/DataTable'
@@ -34,13 +37,27 @@ function formatDatum(iso: string | null) {
 }
 
 export default function SvLeadsClient({
-  svLeads,
+  seite,
+  filter,
+  zaehlung,
   hideHeader = false,
 }: {
-  svLeads: SvLeadRow[]
+  /**
+   * EINE Seite der Trefferliste — nicht der ganze Bestand.
+   *
+   * ⚠ Bis zum 21.08.2026 bekam diese Komponente ein Array aus höchstens 200
+   * Zeilen und zeigte dessen Länge als Gesamtzahl an. Nach dem Deutschland-
+   * Scrape standen 4.644 Leads in der Tabelle; die Liste zeigte 200 davon und
+   * behauptete, das seien alle. Deshalb kommt jetzt `gesamt` mit — die
+   * Kopfzeile nennt die echte Zahl, nicht die Länge des geladenen Ausschnitts.
+   */
+  seite: SvLeadSeite
+  filter: SvLeadFilter
+  zaehlung: { gepflegt: number; entdeckt: number }
   /** true = kein PageHeader-Titel (der Drawer liefert den Titel), nur die Aktions-Buttons. */
   hideHeader?: boolean
 }) {
+  const svLeads = seite.zeilen
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -251,12 +268,17 @@ export default function SvLeadsClient({
           <div className="mb-6">
             <PageHeader
               title="SV-Leads"
-              description={`${svLeads.length} Dead-Pin${svLeads.length === 1 ? '' : 's'}`}
+              // ⚠ Die ECHTE Gesamtzahl, nicht die Länge des geladenen
+              // Ausschnitts. „200 Dead-Pins" war die Aussage, die 4.444
+              // weitere verschwiegen hat.
+              description={`${seite.gesamt.toLocaleString('de-DE')} Einträge`}
               icon={MapPinIcon}
               actions={aktionen}
             />
           </div>
         )}
+
+        <SvLeadsFilterleiste filter={filter} zaehlung={zaehlung} gesamt={seite.gesamt} />
 
         <DataTableContainer
           variant="plain"
@@ -309,6 +331,7 @@ export default function SvLeadsClient({
                 <Th className="text-left text-claimondo-ondo!">Name / Firma</Th>
                 <Th className="text-left text-claimondo-ondo!">Ort</Th>
                 <Th className="text-left text-claimondo-ondo!">Status</Th>
+                <Th className="text-left text-claimondo-ondo!">Sichtbarkeit</Th>
                 <Th className="text-left text-claimondo-ondo!">Quelle</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktualisiert</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktion</Th>
@@ -346,6 +369,25 @@ export default function SvLeadsClient({
                     )}
                   </Td>
                   <Td>
+                    {/*
+                      ⚠ Ein Strich, keine Null. `levelup_letzter_score === null`
+                      heisst „nie gemessen" — eine 0 wäre die Behauptung, der
+                      Betrieb sei nirgends sichtbar.
+                    */}
+                    {lead.levelup_letzter_score === null ? (
+                      <span className="text-claimondo-ondo text-sm">—</span>
+                    ) : (
+                      <span className="text-claimondo-navy text-sm font-medium">
+                        {lead.levelup_letzter_score}
+                      </span>
+                    )}
+                    {lead.website_url && (
+                      <div className="text-claimondo-ondo text-xs truncate max-w-[180px]">
+                        {lead.website_url.replace(/^https?:\/\/(www\.)?/i, '')}
+                      </div>
+                    )}
+                  </Td>
+                  <Td>
                     <span className="text-claimondo-ondo text-sm">{lead.quelle ?? '—'}</span>
                   </Td>
                   <Td>
@@ -368,14 +410,29 @@ export default function SvLeadsClient({
               ))}
               {svLeads.length === 0 && (
                 <Tr>
-                  <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
-                    Noch keine SV-Leads vorhanden.
+                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
+                    {/*
+                      ⚠ „Keine Treffer" und „keine Leads" sind verschiedene
+                      Aussagen. Wer bei aktivem Filter „noch keine SV-Leads"
+                      liest, sucht den Fehler im Bestand statt im Filter.
+                    */}
+                    {seite.gesamt === 0 && !filter.suche && filter.bestand === 'alle' && !filter.status
+                      ? 'Noch keine SV-Leads vorhanden.'
+                      : 'Keine Treffer für diesen Filter.'}
                   </Td>
                 </Tr>
               )}
             </Tbody>
           </Table>
         </DataTableContainer>
+
+        <SvLeadsBlaetterleiste
+          filter={filter}
+          seite={seite.seite}
+          seiten={seite.seiten}
+          gesamt={seite.gesamt}
+          proSeite={seite.proSeite}
+        />
 
         <Modal open={showImportDialog} onClose={() => setShowImportDialog(false)} maxWidth={480} ariaLabel="Bulk-Import CSV">
           <h2 className="text-claimondo-navy font-semibold text-lg mb-2">Bulk-Import (CSV)</h2>
