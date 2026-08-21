@@ -107,9 +107,24 @@ TRANSPORT=http PORT=4002 node dist/index.js
 **Update eines bereits laufenden Servers** (der Normalfall — bis 21.08.2026 stand hier nur der Erststart):
 
 ```bash
-cd services/mcp-server && git pull && npm ci && npm run build
+cd /opt/claimondo-mcp/source && git pull --ff-only        # ← DORT liegt der Checkout
+cd services/mcp-server && npm ci && npm run build          # beide exit 0 prüfen
 pm2 restart claimondo-mcp
 ```
+
+> ⚠ **Der Checkout liegt in `/opt/claimondo-mcp/source`** — **nicht** in `/var/www/claimondo-v2`
+> (das ist die App, per tar deployt). `pm2 describe claimondo-mcp` zeigt den Pfad im Zweifel an.
+
+> 🕳️ **Am 21.08.2026 war der Pull-Pfad seit ~19 Tagen kaputt — still.** `git pull` brach ab mit
+> `fatal: couldn't find remote ref refs/heads/kitta/mcp-server-http`: Der Checkout ist ein
+> **shallow single-branch-Clone**, dessen Refspec noch auf den längst gelöschten Feature-Branch
+> zeigte. Folge: Jeder Update-Versuch scheiterte, ohne dass es jemand bemerkte — es gibt ja
+> keinen Workflow, der es melden würde. **Repariert** (Refspec → `main`, Upstream gesetzt);
+> `git pull` läuft seitdem normal. Tritt es wieder auf (z. B. nach einem neuen Clone):
+> ```bash
+> git config remote.origin.fetch '+refs/heads/main:refs/remotes/origin/main'
+> git fetch origin && git branch --set-upstream-to=origin/main main
+> ```
 
 > ⚠ **Dieser Dienst hängt an KEINER Pipeline.** Es gibt keinen `deploy-vps-mcp.yml` (anders als
 > App, Marketing, autounfall und die fünf Cluster), und `tsconfig.json` der App führt `services`
