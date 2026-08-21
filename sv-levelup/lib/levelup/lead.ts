@@ -1,5 +1,6 @@
 import type { Db } from '../anreicherung/schreiben'
-import { DUBLETTEN_KM, istDublette, nameAusQuelle } from './dubletten'
+import { DUBLETTEN_KM, nameAusQuelle } from './dubletten'
+import { sucheTreffer } from './zuordnung'
 
 /**
  * Der Status eines frisch entstandenen Leads.
@@ -11,9 +12,6 @@ import { DUBLETTEN_KM, istDublette, nameAusQuelle } from './dubletten'
  * Spaltenkommentar genau das Gemeinte: „neu eingetragen".
  */
 export const WARTELISTE_NEU = 'ausstehend'
-
-/** Grobfilter fuer die Kandidaten — ~0,15° sind rund 15 km, also mehr als DUBLETTEN_KM. */
-const BOX_GRAD = 0.15
 
 export type LeadEingabe = {
   firma: string | null
@@ -43,37 +41,44 @@ type Kandidat = {
 /**
  * Verknuepft einen bestehenden `sv_leads`-Datensatz oder legt einen neuen an.
  *
- * Der Abgleich laeuft in ZWEI Stufen: ein grober Rechteck-Filter in SQL (damit
- * nicht alle Leads geladen werden) und der eigentliche Vergleich in
- * TypeScript. Warum nicht alles in SQL: der Namensabgleich braucht
- * `kernName()`, und die entsprechende DB-Spalte leistet das nicht (siehe
- * `dubletten.ts`).
+ * Der Abgleich liegt in `zuordnung.ts` und laeuft ueber ZWEI Merkmale: die
+ * Domain (hart, aber bei Ketten mehrdeutig) und Name plus Umkreis.
+ *
+ * ⚠ Bis zum 21.08. pruefte dieser Pfad NUR Name und Umkreis — und legte
+ * dadurch eine Dublette an, die auf prod stand: „Bergk Sachverständige GmbH"
+ * (Altenkirchen, Excel-Import Mai) bekam einen zweiten Datensatz in Münster,
+ * weil ein Check ohne Firmennamen dort gemessen wurde. Beide Bedingungen des
+ * Namensabgleichs versagten zugleich: ohne Firma ist der Namenskern leer, und
+ * 150 km sind kein Umkreis. Der zweite Eintrag war `ist_aktiv=true` und damit
+ * auf der oeffentlichen Karte sichtbar — ein Betrieb an einem Ort, an dem er
+ * nicht sitzt.
+ *
+ * ⭐ Der Standort im Check ist der GESUCHTE Ort, nicht der Betriebssitz. Wer
+ * beide gleichsetzt, legt fuer jeden Betrieb, der ausserhalb seiner Heimatstadt
+ * prueft, einen neuen Datensatz an. Die Domain kennt diesen Unterschied nicht
+ * und traegt deshalb weiter.
  *
  * ⚠ Sind die Kandidaten nicht lesbar, wird ABGEBROCHEN statt angelegt. Blind
  * anzulegen erzeugte genau die Dubletten, die diese Funktion verhindern soll —
  * und zwar unbemerkt.
  */
 export async function findeOderLegeAn(db: Db, e: LeadEingabe): Promise<LeadErgebnis> {
-  const { data, error } = await db
-    .from('sv_leads')
-    .select('id,firma,name,lat,lng,telefon,email,website_url')
-    .gte('lat', e.lat - BOX_GRAD)
-    .lte('lat', e.lat + BOX_GRAD)
-    .gte('lng', e.lng - BOX_GRAD)
-    .lte('lng', e.lng + BOX_GRAD)
+  const gefunden = await sucheTreffer(db, {
+    firmenname: e.firma,
+    website_url: e.websiteUrl,
+    lat: e.lat,
+    lng: e.lng,
+  })
 
-  if (error) {
-    return { ok: false, error: `Bestandsleads nicht lesbar: ${error.message}` }
+  if (!gefunden.ok) return { ok: false, error: gefunden.error }
+
+  if (gefunden.treffer) {
+    const k = gefunden.treffer.lead
+    return verknuepfe(db, {
+      id: k.id, firma: k.firma, name: k.name, lat: k.lat, lng: k.lng,
+      telefon: k.telefon ?? null, email: k.email ?? null, website_url: k.website_url,
+    }, e)
   }
-
-  const treffer = ((data ?? []) as Kandidat[]).find((k) =>
-    istDublette(
-      { firma: e.firma, lat: e.lat, lng: e.lng },
-      { firma: k.firma ?? k.name, lat: k.lat, lng: k.lng },
-    ),
-  )
-
-  if (treffer) return verknuepfe(db, treffer, e)
 
   const { data: neu, error: insertFehler } = await db
     .from('sv_leads')

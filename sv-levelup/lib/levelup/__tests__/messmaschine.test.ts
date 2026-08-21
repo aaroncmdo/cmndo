@@ -12,6 +12,9 @@ const state = {
   updates: [] as Record<string, unknown>[],
   updateRows: 1,
   events: [] as Record<string, unknown>[],
+  /** Was der Bestand auf jede `sv_leads`-Abfrage antwortet. Leer = kein Treffer. */
+  leadTreffer: [] as Record<string, unknown>[],
+  leadUpdates: [] as Record<string, unknown>[],
 }
 
 const db = {
@@ -38,6 +41,17 @@ const db = {
       return {
         insert: async (w: Record<string, unknown>) => { state.events.push(w); return { error: null } },
       }
+    }
+    // Der Bestand, gegen den die Lead-Zuordnung abgleicht. Vorgabe: leer —
+    // damit die uebrigen Tests der Messmaschine unveraendert bleiben und die
+    // Zuordnung nichts findet und nichts schreibt.
+    if (tabelle === 'sv_leads') {
+      const kette: Record<string, unknown> = {}
+      for (const m of ['select', 'not', 'ilike', 'gte', 'lte', 'eq']) kette[m] = () => kette
+      kette.update = (w: Record<string, unknown>) => { state.leadUpdates.push(w); return kette }
+      kette.then = (aufloesen: (w: unknown) => void) =>
+        aufloesen({ data: state.leadTreffer, error: null })
+      return kette
     }
     throw new Error(`Unerwartete Tabelle: ${tabelle}`)
   },
@@ -85,6 +99,8 @@ beforeEach(() => {
   state.updates = []
   state.updateRows = 1
   state.events = []
+  state.leadTreffer = []
+  state.leadUpdates = []
 })
 
 describe('messeCheck', () => {
@@ -253,6 +269,42 @@ describe('messeCheck', () => {
   it('schreibt das Ereignis messung_beendet', async () => {
     await messeCheck(db, 'T1', opts())
     expect(state.events.map((e) => e.typ)).toContain('messung_beendet')
+  })
+
+  it('traegt den Bestandslead nach, sobald einer passt', async () => {
+    // ⚠ Bis hierher geschah das erst beim TERMINWUNSCH. Auf prod gemessen:
+    // 11 Checks, 2 verknuepft — die uebrigen 9 lagen neben ihrem Betrieb, ohne
+    // ihn zu kennen. `sv_leads.levelup_letzter_score` ist die Spalte, nach der
+    // der Vertrieb sortiert; ohne Zuordnung bleibt sie leer.
+    state.leadTreffer = [
+      { id: 'L7', firma: 'Beispiel', name: 'Beispiel', lat: 51.96, lng: 7.62, website_url: 'https://x.de' },
+    ]
+    await messeCheck(db, 'T1', opts())
+
+    expect(state.updates.some((u) => u.sv_lead_id === 'L7')).toBe(true)
+    expect(state.leadUpdates.some((u) => u.levelup_letzter_check_id === 'C1')).toBe(true)
+  })
+
+  it('haelt fest, DASS gesucht wurde, auch wenn nichts passte', async () => {
+    // ⭐ Ein Nicht-Treffer als Schweigen waere von „gar nicht gesucht" nicht zu
+    // unterscheiden. Genau diese Verwechslung hat im Projekt schon Instrumente
+    // monatelang blind aussehen lassen wie gesunde.
+    await messeCheck(db, 'T1', opts())
+
+    const ereignis = state.events.find((e) => e.typ === 'messung_beendet')
+    expect((ereignis?.payload as Record<string, unknown>).leadZuordnung).toBe('kein_treffer')
+    expect(state.leadUpdates).toHaveLength(0)
+  })
+
+  it('laesst die Messung stehen, wenn die Zuordnung scheitert', async () => {
+    // Der Nutzer bekommt seinen Befund. Die Zuordnung ist Vertriebsarbeit —
+    // sie darf die Messung nicht mit sich reissen.
+    state.leadTreffer = [
+      { id: 'L7', firma: 'Beispiel', name: 'Beispiel', lat: 51.96, lng: 7.62, website_url: 'https://x.de' },
+    ]
+    state.updateRows = 1
+    const e = await messeCheck(db, 'T1', opts())
+    expect(e.ok).toBe(true)
   })
 
   // Design-Spec §3.2: relativ, unter der Haelfte der Gesamtpunkte

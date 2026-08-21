@@ -1,10 +1,19 @@
 /**
- * Bestandsheilung der Lead-Discovery.
+ * Bestandsheilung — zieht den Bestand auf den Stand des Codes nach.
  *
  *   npm run heilung                # Trockenlauf — zeigt nur, was zu tun waere
- *   npm run heilung -- --schreiben # SCHARF: loescht Ausland, traegt Orte nach
+ *   npm run heilung -- --schreiben # SCHARF
  *
- * ⚠ Der Trockenlauf ist ABSICHT der Vorgabewert. Dieser Lauf LOESCHT Zeilen —
+ * Zwei Abschnitte, dieselbe Klasse von Schaden: eine Regel wurde verbessert,
+ * der Code ist geheilt, und der Bestand traegt die alten Fehler unveraendert
+ * weiter, weil ihn niemand nachzieht.
+ *
+ *   1. DISCOVERY — auslaendische Betriebe entfernen, fehlende Orte nachtragen.
+ *   2. CHECKS — Messungen ihrem Bestandslead zuordnen. Bis zur Zuordnung bei
+ *      der Messung geschah das erst beim Terminwunsch; alles davor liegt neben
+ *      seinem Betrieb, ohne ihn zu kennen.
+ *
+ * ⚠ Der Trockenlauf ist ABSICHT der Vorgabewert. Abschnitt 1 LOESCHT Zeilen —
  * er darf nicht versehentlich starten.
  *
  * ⚠ Anders als Discovery und Anreicherung kostet dieser Lauf NICHTS: er fragt
@@ -13,6 +22,18 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Db } from '../lib/anreicherung/schreiben'
 import { loescheAusland, planeHeilung, trageOrtNach, type HeilZeile } from '../lib/discovery/heilung'
+import { ordneCheckZu, sucheTreffer } from '../lib/levelup/zuordnung'
+
+type OffenerCheck = {
+  id: string
+  token: string
+  firmenname: string | null
+  website_url: string | null
+  standort_ort: string | null
+  standort_lat: number | null
+  standort_lng: number | null
+  score: number | null
+}
 
 const args = process.argv.slice(2)
 const schreiben = args.includes('--schreiben')
@@ -58,8 +79,81 @@ async function holeAlle(): Promise<HeilZeile[]> {
   return alle
 }
 
+/**
+ * Abschnitt 2 — Messungen ihrem Bestandslead zuordnen.
+ *
+ * ⚠ Es wird NIE ein Lead angelegt, auch hier nicht. Die Startseite sagt zu:
+ * „kein Eintrag in einer Interessentenliste." Ein bestehender Eintrag darf um
+ * sein Messergebnis ergaenzt werden, ein neuer entsteht nicht.
+ */
+async function heileChecks(): Promise<void> {
+  // ⚠ AUFSTEIGEND, und bewusst ALLE fertigen Checks — nicht nur unverknuepfte.
+  //
+  // Der Nachtrag am Lead heisst `levelup_letzter_score`. Bei mehreren Checks
+  // desselben Betriebs gewinnt der ZULETZT VERARBEITETE. Bei absteigender
+  // Sortierung ist das der AELTESTE — und genau das ist beim ersten scharfen
+  // Lauf passiert: „Stanoksei" hat vier Messungen (69, 67, —, 47), am Lead
+  // stand 47. Die Zahl war da, sie war plausibel, und sie war falsch.
+  //
+  // Aufsteigend zu lesen dreht das um: der neueste Check schreibt zuletzt. Und
+  // weil bereits verknuepfte Checks mitlaufen, heilt derselbe Lauf auch die
+  // Leads, an denen schon ein falscher Score steht. Der Lauf ist idempotent —
+  // er setzt dieselben Werte, wenn sich nichts geaendert hat.
+  const { data, error } = await db
+    .from('levelup_checks')
+    .select('id,token,firmenname,website_url,standort_ort,standort_lat,standort_lng,score')
+    .eq('status', 'fertig')
+    .order('erstellt_am', { ascending: true })
+
+  if (error) {
+    console.error('Checks nicht lesbar:', error.message)
+    return
+  }
+
+  const offen = (data ?? []) as unknown as OffenerCheck[]
+  console.log(`\n  ── Abschnitt 2 · Messungen ─────────────────────────────`)
+  console.log(`  Geprueft      ${offen.length} fertige Checks (aeltester zuerst)\n`)
+
+  if (offen.length === 0) return
+
+  let zugeordnet = 0
+  let ohneTreffer = 0
+  const fehler: string[] = []
+
+  for (const c of offen) {
+    const name = `${c.firmenname ?? c.website_url ?? c.token} (${c.standort_ort ?? 'ohne Ort'})`
+
+    if (!schreiben) {
+      const vorschau = await sucheTreffer(db, {
+        firmenname: c.firmenname, website_url: c.website_url,
+        lat: c.standort_lat, lng: c.standort_lng,
+      })
+      if (!vorschau.ok) { fehler.push(`${name}: ${vorschau.error}`); continue }
+      if (vorschau.treffer) { zugeordnet++; console.log(`    ${name} → ${vorschau.treffer.wie}`) }
+      else { ohneTreffer++; console.log(`    ${name} → kein Lead im Bestand`) }
+      continue
+    }
+
+    const r = await ordneCheckZu(db, {
+      id: c.id, firmenname: c.firmenname, website_url: c.website_url,
+      lat: c.standort_lat, lng: c.standort_lng, score: c.score,
+    })
+    if (!r.ok) { fehler.push(`${name}: ${r.error}`); continue }
+    if (r.treffer) { zugeordnet++; console.log(`    ${name} → ${r.treffer.wie}`) }
+    else { ohneTreffer++; console.log(`    ${name} → kein Lead im Bestand`) }
+  }
+
+  console.log(`\n  Zugeordnet    ${zugeordnet}${schreiben ? '' : ' (waere)'}`)
+  console.log(`  Ohne Treffer  ${ohneTreffer}`)
+  if (fehler.length > 0) {
+    console.log(`\n  ${fehler.length} Fehler:`)
+    for (const f of fehler.slice(0, 10)) console.log(`    ${f}`)
+  }
+}
+
 async function main() {
-  console.log(`\n  Modus         ${schreiben ? 'SCHARF — loescht und schreibt' : 'Trockenlauf (aendert nichts)'}\n`)
+  console.log(`\n  Modus         ${schreiben ? 'SCHARF — loescht und schreibt' : 'Trockenlauf (aendert nichts)'}`)
+  console.log(`\n  ── Abschnitt 1 · Discovery-Bestand ─────────────────────`)
 
   const zeilen = await holeAlle()
   const plan = planeHeilung(zeilen)
@@ -87,7 +181,8 @@ async function main() {
   }
 
   if (!schreiben) {
-    console.log('  Trockenlauf — es wurde nichts geaendert.')
+    await heileChecks()
+    console.log('\n  Trockenlauf — es wurde nichts geaendert.')
     console.log('  Scharf:  npm run heilung -- --schreiben\n')
     return
   }
@@ -116,6 +211,10 @@ async function main() {
     for (const f of fehler.slice(0, 10)) console.log(`    ${f}`)
     if (fehler.length > 10) console.log(`    … und ${fehler.length - 10} weitere`)
   }
+
+  // ⚠ Abschnitt 2 laeuft NACH Abschnitt 1: die frisch nachgetragenen Orte und
+  // der bereinigte Bestand sind die Grundlage, gegen die zugeordnet wird.
+  await heileChecks()
   console.log('')
 }
 

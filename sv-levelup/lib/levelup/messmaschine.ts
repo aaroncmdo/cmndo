@@ -6,6 +6,7 @@ import type { Befund, Fehlstelle, MessRegistry, Messkontext } from './modul-vert
 import type { ModulId } from './registry'
 import { berechneScore } from './score'
 import { pruefeBefunde } from './validator'
+import { ordneCheckZu } from './zuordnung'
 
 /** Was je Modul in `levelup_checks.befunde` landet. */
 export type ModulErgebnis = {
@@ -137,10 +138,33 @@ export async function messeCheck(db: Db, token: string, opts: MessOpts): Promise
   if (error) return { ok: false, error: `Abschluss fehlgeschlagen: ${error.message}` }
   if (!zeilen || zeilen.length === 0) return { ok: false, error: 'abschluss_wirkungslos' }
 
+  // Den Bestandslead nachtragen, wenn es einen gibt.
+  //
+  // ⚠ NICHT kritisch: die Messung steht auch ohne Zuordnung, und der Nutzer
+  // sieht seinen Befund. Aber der Fehlschlag MUSS auftauchen — ohne die
+  // Zuordnung bleibt `sv_leads.levelup_letzter_score` leer, und genau danach
+  // sortiert der Vertrieb.
+  //
+  // ⚠ Ein Treffer wird protokolliert, ein Nicht-Treffer AUCH. „Kein Lead
+  // gefunden" ist eine Auskunft ueber den Bestand; als Schweigen waere sie von
+  // „gar nicht gesucht" nicht zu unterscheiden.
+  const zuordnung = await ordneCheckZu(db, {
+    id: check.id,
+    firmenname: check.firmenname,
+    website_url: check.website_url,
+    lat: check.standort_lat,
+    lng: check.standort_lng,
+    score,
+  })
+  if (!zuordnung.ok) console.error('Lead-Zuordnung fehlgeschlagen:', zuordnung.error)
+
   const { error: evFehler } = await db.from('levelup_events').insert({
     check_id: check.id,
     typ: 'messung_beendet',
-    payload: { istPunkte, punkteErhebbar, score, keinScore },
+    payload: {
+      istPunkte, punkteErhebbar, score, keinScore,
+      leadZuordnung: zuordnung.ok ? (zuordnung.treffer?.wie ?? 'kein_treffer') : 'fehlgeschlagen',
+    },
   })
   if (evFehler) console.error('levelup_events:', evFehler.message)
 

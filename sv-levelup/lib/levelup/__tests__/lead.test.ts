@@ -5,6 +5,8 @@ import type { Db } from '../../anreicherung/schreiben'
 
 const state = {
   kandidaten: [] as Record<string, unknown>[],
+  /** Antwort auf die DOMAIN-Abfrage — getrennt, weil sie bundesweit sucht. */
+  domainKandidaten: [] as Record<string, unknown>[],
   ladeFehler: null as string | null,
   inserts: [] as Record<string, unknown>[],
   updates: [] as Record<string, unknown>[],
@@ -13,23 +15,35 @@ const state = {
   angefasst: [] as string[],
 }
 
+/**
+ * Die Lesekette — flexibel, weil der Abgleich seit 21.08. ZWEI verschiedene
+ * Abfragen fährt: Domain (`.not().ilike()`, bundesweit) und Umkreis
+ * (`.gte().lte()`). Ein Mock mit fest verdrahteter Reihenfolge bricht bei jeder
+ * neuen Bedingung — und zwar so, dass er die Absicht des Tests verdeckt.
+ */
+function leseKette() {
+  const genutzt: string[] = []
+  const k: Record<string, unknown> = {}
+  for (const m of ['not', 'ilike', 'gte', 'lte', 'eq', 'is', 'order']) {
+    k[m] = () => { genutzt.push(m); return k }
+  }
+  k.then = (aufloesen: (w: unknown) => void) => {
+    if (state.ladeFehler) return aufloesen({ data: null, error: { message: state.ladeFehler } })
+    const istDomainAbfrage = genutzt.includes('ilike')
+    return aufloesen({
+      data: istDomainAbfrage ? state.domainKandidaten : state.kandidaten,
+      error: null,
+    })
+  }
+  return k
+}
+
 const db = {
   from: (tabelle: string) => {
     state.angefasst.push(tabelle)
     if (tabelle === 'sv_leads') {
       return {
-        select: () => ({
-          gte: () => ({
-            lte: () => ({
-              gte: () => ({
-                lte: async () =>
-                  state.ladeFehler
-                    ? { data: null, error: { message: state.ladeFehler } }
-                    : { data: state.kandidaten, error: null },
-              }),
-            }),
-          }),
-        }),
+        select: () => leseKette(),
         insert: (w: Record<string, unknown>) => ({
           select: () => ({
             single: async () => {
@@ -69,6 +83,7 @@ function lead(over: Record<string, unknown> = {}) {
 
 beforeEach(() => {
   state.kandidaten = []
+  state.domainKandidaten = []
   state.ladeFehler = null
   state.inserts = []
   state.updates = []
@@ -201,6 +216,29 @@ describe('findeOderLegeAn', () => {
 
     expect(r.ok && r.neu).toBe(false)
     expect(r.ok && r.leadId).toBe('L1')
+    expect(state.inserts).toHaveLength(0)
+  })
+
+  it('FINDET DEN BETRIEB UEBER DIE DOMAIN, auch 150 km entfernt und ohne Firmennamen', async () => {
+    // ⭐ Der reale Fall, der auf prod eine Dublette erzeugt hat: „Bergk
+    // Sachverständige GmbH" sitzt in Altenkirchen, der Check lief mit Standort
+    // Münster und OHNE Firmennamen. Beide Bedingungen des Namensabgleichs
+    // versagten zugleich — leerer Namenskern, 150 km Abstand — und es entstand
+    // ein zweiter Datensatz, sichtbar auf der oeffentlichen Karte an einem Ort,
+    // an dem der Betrieb nicht sitzt.
+    //
+    // ⭐ Der Standort im Check ist der GESUCHTE Ort, nicht der Betriebssitz.
+    state.domainKandidaten = [
+      lead({ id: 'ALTENKIRCHEN', firma: 'Bergk Sachverständige GmbH', ort: 'Altenkirchen',
+             lat: 50.6867, lng: 7.6407, website_url: 'https://sv-bergk.de' }),
+    ]
+    const r = await findeOderLegeAn(db, {
+      firma: null, plz: '48143', ort: 'Münster',
+      lat: MUENSTER.lat, lng: MUENSTER.lng,
+      telefon: null, websiteUrl: 'https://sv-bergk.de',
+    })
+
+    expect(r.ok && r.leadId).toBe('ALTENKIRCHEN')
     expect(state.inserts).toHaveLength(0)
   })
 
