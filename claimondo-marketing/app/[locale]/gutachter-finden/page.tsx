@@ -78,6 +78,10 @@ export default async function GutachterFindenPage({
     // AAR-956: Google-Ads-Click-IDs (Ad-Klick landet auf dieser Parent-URL) → an den
     // Embed-iframe weiterreichen, damit der Conversion-Linker im Container _gcl_aw schreibt.
     gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+    // GEO-Deep-Link: `?sv=<profiles.id>` — der Gutachter, den eine KI-Antwort bereits
+    // genannt hat (aus `gutachter[].buchungs_url` der oeffentlichen Termin-API). Wird an
+    // den Embed durchgereicht und dort NUR als Vorauswahl genutzt.
+    sv?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -140,6 +144,7 @@ export default async function GutachterFindenPage({
         height="calc(100dvh - 5rem)"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+        svId={sp.sv}
       />
 
       {/* Crawl-Pfad. Die Seite lieferte zuvor 0 Woerter und 0 interne Links —

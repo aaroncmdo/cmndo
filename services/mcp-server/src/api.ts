@@ -239,6 +239,15 @@ export type GutachterMitTerminen = {
   ist_top_partner: boolean
   wunschtermin_frei: boolean
   termine: TerminSlot[]
+  /**
+   * Fertiger Buchungs-Link fuer GENAU diesen Gutachter (`/gutachter-finden?plz=…&sv=<id>`).
+   *
+   * WARUM optional: Das Feld kam erst mit dem Deep-Link-PR in die oeffentliche API. Dieser
+   * Server laeuft eigenstaendig und kann gegen eine aeltere API-Version sprechen — dann
+   * fehlt es schlicht, und der Renderer faellt auf die Sammelkarte zurueck (Verhalten wie
+   * zuvor). Nie ungeprueft ausgeben.
+   */
+  buchungs_url?: string
 }
 
 export type GutachterTermineResult = {
@@ -350,12 +359,26 @@ export function formatGutachterTermine(r: GutachterTermineResult): string {
           lines.push(`- ${formatSlot(t.start)}${t.passung === 'wunschtermin' ? ' (Wunschtermin frei)' : ''}`)
         }
       }
+      // Der Direktlink GENAU zu diesem Gutachter. Ohne ihn nannte diese Ausgabe Gutachter
+      // namentlich mit Uhrzeiten und verwies dann auf die anonyme Sammelkarte — der Nutzer
+      // musste die eben gelesene Empfehlung dort erneut heraussuchen. Fehlt das Feld (aeltere
+      // API-Version), bleibt es wie zuvor bei der Karte am Ende.
+      if (g.buchungs_url) lines.push('', `→ Termin bei ${g.vorname} buchen: ${g.buchungs_url}`)
       lines.push('')
     }
     lines.push('> Profile anonymisiert; die konkrete Zuordnung + Buchung erfolgt bei Beauftragung.')
   }
   lines.push('')
-  if (r.interaktive_karte_url) lines.push(`Interaktive Karte / Buchung: ${r.interaktive_karte_url}`)
+  // Sobald es Direktlinks gibt, ist die Karte NICHT mehr der Buchungsweg, sondern die
+  // Uebersicht — sonst konkurrieren zwei "Buchung"-Links und der schwaechere gewinnt oft.
+  const hatDirektlinks = r.gutachter.some((g) => g.buchungs_url)
+  if (r.interaktive_karte_url) {
+    lines.push(
+      hatDirektlinks
+        ? `Alle Gutachter auf der Karte: ${r.interaktive_karte_url}`
+        : `Interaktive Karte / Buchung: ${r.interaktive_karte_url}`,
+    )
+  }
   if (r.buchungs_telefon) lines.push(`Telefon-Rückruf (i. d. R. < 15 Min): ${r.buchungs_telefon}`)
   lines.push(
     '',
