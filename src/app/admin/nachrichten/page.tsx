@@ -71,5 +71,7 @@ export default async function NachrichtenPage() {
       }
     })
   }
-  return <ClaimChatInbox eintraege={eintraege} currentUserId={user.id} istStaff emptyHint="Noch keine Chat-Threads." />
+  // titleLevel={1}: diese Seite hat keinen PageHeader, die Inbox-Ueberschrift IST der
+  // Seitentitel. Ohne das bleibt die Seite ganz ohne h1 (21.08. live gemessen).
+  return <ClaimChatInbox titleLevel={1} eintraege={eintraege} currentUserId={user.id} istStaff emptyHint="Noch keine Chat-Threads." />
 }

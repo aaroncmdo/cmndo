@@ -36,6 +36,13 @@ type Props = {
   renderDetail: (threadId: string) => ReactNode
   /** Header der Sidebar (default: "Nachrichten") */
   title?: string
+  /**
+   * Überschrift-Ebene des Sidebar-Headers. `1`, wenn die Inbox der EINZIGE Titel der
+   * Seite ist (admin/nachrichten, gutachter/posteingang, mitarbeiter/nachrichten —
+   * dort gibt es keinen PageHeader). Default `2` für Seiten mit eigenem Page-H1
+   * (kunde/chat) — dort wäre ein zweites h1 eine strict-mode-violation.
+   */
+  titleLevel?: 1 | 2
   /** Hint im Empty-State der Sidebar */
   emptyHint?: string
   /** Placeholder im Such-Input (default: "Suchen…") */
@@ -47,6 +54,7 @@ export default function ChatInboxLayout({
   initialThreadId,
   renderDetail,
   title = 'Nachrichten',
+  titleLevel = 2,
   emptyHint = 'Noch keine Chats',
   searchPlaceholder = 'Suchen…',
 }: Props) {
@@ -68,11 +76,24 @@ export default function ChatInboxLayout({
           ist, blendet sie aus (md+ immer sichtbar als Spalte). */}
       <aside className={`${activeId ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-claimondo-border flex-col bg-white md:shrink-0`}>
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
-          {/* h2, nicht h1 — die Seite hat ihren Page-H1 schon über PageHeader.
-              Sidebar-Header ist semantisch ein Section-Header. (Re-Fix von #489,
-              das beim Design-System-Merge verloren ging — Doppel-h1 brach den
-              E2E-Test admin-nachrichten mit strict-mode-violation.) */}
-          <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
+          {/* Ebene steuerbar, weil die vier Consumer NICHT gleich aufgebaut sind.
+              Historie: ursprünglich h1 → Doppel-h1 mit dem PageHeader → strict-mode-
+              violation, die genau den E2E-Test admin-nachrichten brach (#489). Der
+              Re-Fix machte daraus pauschal h2, mit der Begründung „die Seite hat ihren
+              Page-H1 schon über PageHeader".
+              ⚠ Diese Annahme stimmt nur für EINEN der vier Consumer. Gemessen 21.08.:
+                kunde/chat            → hat PageHeader-h1  ✔ h2 ist hier korrekt
+                admin/nachrichten     → KEIN h1 auf der Seite
+                gutachter/posteingang → KEIN h1
+                mitarbeiter/nachrichten → KEIN h1
+              Live gegen prod bestätigt: /admin/nachrichten liefert `document.querySelectorAll('h1')`
+              = leer. Derselbe Test war also erst rot wegen ZWEI h1 und danach rot wegen KEINEM —
+              beide Male diese Zeile. Deshalb kein neuer Pauschalwert, sondern ein Schalter. */}
+          {titleLevel === 1 ? (
+            <h1 className="text-lg font-semibold text-claimondo-navy">{title}</h1>
+          ) : (
+            <h2 className="text-lg font-semibold text-claimondo-navy">{title}</h2>
+          )}
           <div className="relative mt-2">
             <SearchIcon className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-claimondo-ondo/70" />
             <input
