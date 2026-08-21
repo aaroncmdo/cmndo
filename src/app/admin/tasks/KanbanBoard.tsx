@@ -377,7 +377,7 @@ export default function KanbanBoard({
                               >
                                 <TaskCard
                                   task={task}
-                                  link={resolveObjectLink(task, fallMap, leadMap, svMap)!}
+                                  link={resolveObjectLink(task, fallMap, leadMap, svMap)}
                                   adminMap={adminMap}
                                   onDelete={handleDelete}
                                   reassignCandidates={reassignCandidates}
@@ -424,7 +424,13 @@ function TaskCard({
   executorEnabled = false,
 }: {
   task: Task
-  link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
+  /**
+   * null = Aufgabe ohne verlinkbares Objekt (System-Meldungen wie `konsistenz_check`
+   * oder `reliability`). Vor #5457 konnte das nicht vorkommen, weil der Filter solche
+   * Aufgaben gar nicht durchliess — die Karte trug deshalb eine Non-null-Assertion.
+   * Seit die System-Meldungen sichtbar sind, ist `null` ein regulaerer Fall.
+   */
+  link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' } | null
   adminMap: Record<string, string>
   onDelete: (taskId: string) => void
   reassignCandidates: ReassignCandidate[]
@@ -500,7 +506,12 @@ function TaskCard({
       )}
 
       {/* AAR-154: Prominenter Objekt-Link statt früher nur dem Fall-Label-Span.
-          onClick stoppt propagation damit das Drag-Handle nicht auslöst. */}
+          onClick stoppt propagation damit das Drag-Handle nicht auslöst.
+          ⚠ `link` kann null sein (System-Meldungen ohne Objekt-Bezug). Ohne diese Abfrage
+          stirbt die GANZE Seite an „Cannot read properties of null (reading 'href')",
+          nicht nur die eine Karte — genau so ist /admin/aufgaben/alle nach #5457 auf
+          prod ausgefallen. */}
+      {link && (
       <Link
         href={link.href}
         onClick={(e) => e.stopPropagation()}
@@ -524,6 +535,7 @@ function TaskCard({
         <span className="text-caption uppercase tracking-wider text-claimondo-ondo/70">{link.kind}:</span>
         <span className="text-body-xs font-medium truncate">{link.label}</span>
       </Link>
+      )}
 
       <div className="flex items-center justify-between gap-2 text-body-xs">
         <div className="flex items-center gap-3">
