@@ -1,0 +1,3187 @@
+{
+ "koeln": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A57",
+    "name": "Köln-Longerich",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 97192,
+    "schwerverkehrProTag": 2102
+   },
+   {
+    "strasse": "A3",
+    "name": "Leverkusen",
+    "entfernungKm": 8,
+    "fahrzeugeProTag": 171135,
+    "schwerverkehrProTag": 18250
+   }
+  ]
+ },
+ "duesseldorf": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "Düsseldorf-Flehe",
+    "entfernungKm": 6.3,
+    "fahrzeugeProTag": 84632,
+    "schwerverkehrProTag": 10166
+   },
+   {
+    "strasse": "A57",
+    "name": "Neuss-Augustinusviertel",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 44130,
+    "schwerverkehrProTag": 4247
+   }
+  ]
+ },
+ "bonn": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A565",
+    "name": "AD Bonn-Beuel (W)",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 92287,
+    "schwerverkehrProTag": 5314
+   },
+   {
+    "strasse": "A59",
+    "name": "AD Bonn-Beuel (S)",
+    "entfernungKm": 3.8,
+    "fahrzeugeProTag": 82163,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "aachen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B1",
+    "name": "AC-Vaalserquartier",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 11806,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "B57",
+    "name": "Aachen-Köpfchen",
+    "entfernungKm": 4.1,
+    "fahrzeugeProTag": 7559,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "dortmund": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B236",
+    "name": "Dortmund-Wambeldorf",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 71377,
+    "schwerverkehrProTag": 6591
+   },
+   {
+    "strasse": "A40",
+    "name": "Dortmund",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 78079,
+    "schwerverkehrProTag": 2799
+   }
+  ]
+ },
+ "essen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A40",
+    "name": "AD Essen-Ost (W)",
+    "entfernungKm": 2,
+    "fahrzeugeProTag": 81065,
+    "schwerverkehrProTag": 5679
+   },
+   {
+    "strasse": "A52",
+    "name": "AD Essen Ost (S)",
+    "entfernungKm": 2,
+    "fahrzeugeProTag": 57064,
+    "schwerverkehrProTag": 3549
+   }
+  ]
+ },
+ "duisburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A42",
+    "name": "AK OB-West (W)",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 98217,
+    "schwerverkehrProTag": 12573
+   }
+  ]
+ },
+ "bochum": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A40",
+    "name": "Bochum-Ruhrpark",
+    "entfernungKm": 4.8,
+    "fahrzeugeProTag": 95611,
+    "schwerverkehrProTag": 6080
+   },
+   {
+    "strasse": "B226",
+    "name": "Wanne-Eickel Ost",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 22330,
+    "schwerverkehrProTag": 976
+   }
+  ]
+ },
+ "bielefeld": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B66",
+    "name": "BI-Hillegossen",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 32593,
+    "schwerverkehrProTag": 2798
+   },
+   {
+    "strasse": "A2",
+    "name": "Brönninghausen",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 94141,
+    "schwerverkehrProTag": 17097
+   }
+  ]
+ },
+ "muenster": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A1",
+    "name": "Gievenbeck",
+    "entfernungKm": 5.5,
+    "fahrzeugeProTag": 85901,
+    "schwerverkehrProTag": 13061
+   },
+   {
+    "strasse": "B481",
+    "name": "St. Mauritz",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 12658,
+    "schwerverkehrProTag": 945
+   }
+  ]
+ },
+ "wuppertal": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "W-Sonnborn",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 108496,
+    "schwerverkehrProTag": 8633
+   }
+  ]
+ },
+ "moenchengladbach": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A61",
+    "name": "MG-Wickrath",
+    "entfernungKm": 5.2,
+    "fahrzeugeProTag": 64490,
+    "schwerverkehrProTag": 9118
+   },
+   {
+    "strasse": "B57",
+    "name": "Mönchengladb.-Rheindahlen",
+    "entfernungKm": 7.1,
+    "fahrzeugeProTag": 10185,
+    "schwerverkehrProTag": 479
+   }
+  ]
+ },
+ "krefeld": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B288",
+    "name": "Uerdingen",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 21546,
+    "schwerverkehrProTag": 1511
+   },
+   {
+    "strasse": "A57",
+    "name": "Meerbusch-Bovert",
+    "entfernungKm": 7.5,
+    "fahrzeugeProTag": 83427,
+    "schwerverkehrProTag": 8603
+   }
+  ]
+ },
+ "oberhausen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A42",
+    "name": "AK OB-West (O)",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 76404,
+    "schwerverkehrProTag": 5189
+   },
+   {
+    "strasse": "B224",
+    "name": "Bottrop",
+    "entfernungKm": 9.6,
+    "fahrzeugeProTag": 42908,
+    "schwerverkehrProTag": 2995
+   }
+  ]
+ },
+ "leverkusen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "Leverkusen",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 171135,
+    "schwerverkehrProTag": 18250
+   },
+   {
+    "strasse": "A59",
+    "name": "Langenfeld",
+    "entfernungKm": 4.8,
+    "fahrzeugeProTag": 44051,
+    "schwerverkehrProTag": 2212
+   }
+  ]
+ },
+ "hagen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "Hagen-Hohenlimburg",
+    "entfernungKm": 5.3,
+    "fahrzeugeProTag": 48989,
+    "schwerverkehrProTag": 3160
+   },
+   {
+    "strasse": "A45",
+    "name": "Dortmund Süd",
+    "entfernungKm": 8.8,
+    "fahrzeugeProTag": 73359,
+    "schwerverkehrProTag": 6588
+   }
+  ]
+ },
+ "solingen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B229",
+    "name": "Solingen",
+    "entfernungKm": 6.7,
+    "fahrzeugeProTag": 11724,
+    "schwerverkehrProTag": 569
+   },
+   {
+    "strasse": "A46",
+    "name": "W-Sonnborn",
+    "entfernungKm": 9.2,
+    "fahrzeugeProTag": 108496,
+    "schwerverkehrProTag": 8633
+   }
+  ]
+ },
+ "bergisch-gladbach": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "AD Heumar (S)",
+    "entfernungKm": 8,
+    "fahrzeugeProTag": 105958,
+    "schwerverkehrProTag": 12647
+   },
+   {
+    "strasse": "A59",
+    "name": "AK Heumar (Flughfn.)",
+    "entfernungKm": 9.2,
+    "fahrzeugeProTag": 64221,
+    "schwerverkehrProTag": 4809
+   }
+  ]
+ },
+ "berlin": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A100",
+    "name": "Britz",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 128167,
+    "schwerverkehrProTag": 4540
+   },
+   {
+    "strasse": "A113",
+    "name": "Neukölln",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 125998,
+    "schwerverkehrProTag": 4686
+   }
+  ]
+ },
+ "hamburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B4",
+    "name": "HH-Neue Elbbrücke",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 110505,
+    "schwerverkehrProTag": 6235
+   },
+   {
+    "strasse": "B5",
+    "name": "HH-Fruchtallee",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 46201,
+    "schwerverkehrProTag": 2067
+   }
+  ]
+ },
+ "muenchen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A8",
+    "name": "München-Perlach (S)",
+    "entfernungKm": 4.6,
+    "fahrzeugeProTag": 48054,
+    "schwerverkehrProTag": 1059
+   },
+   {
+    "strasse": "A995",
+    "name": "München-Giesing (S)",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 55472,
+    "schwerverkehrProTag": 2519
+   }
+  ]
+ },
+ "frankfurt": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A661",
+    "name": "Frankfurt-Seckbach",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 83527,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "A648",
+    "name": "Rebstock",
+    "entfernungKm": 4.4,
+    "fahrzeugeProTag": 64039,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "stuttgart": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A81",
+    "name": "Korntal",
+    "entfernungKm": 9.2,
+    "fahrzeugeProTag": 115692,
+    "schwerverkehrProTag": 11728
+   }
+  ]
+ },
+ "nuernberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A73",
+    "name": "Nürnberg/Fürth (N)",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 62704,
+    "schwerverkehrProTag": 4629
+   },
+   {
+    "strasse": "A3",
+    "name": "AS Nürnberg-Nord",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 97959,
+    "schwerverkehrProTag": 18520
+   }
+  ]
+ },
+ "augsburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A8",
+    "name": "Augsburg-Ost",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 99347,
+    "schwerverkehrProTag": 12671
+   },
+   {
+    "strasse": "B300",
+    "name": "Oberzell",
+    "entfernungKm": 8.1,
+    "fahrzeugeProTag": 11239,
+    "schwerverkehrProTag": 464
+   }
+  ]
+ },
+ "wuerzburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B19",
+    "name": "Würzburg/Estenfeld",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 49777,
+    "schwerverkehrProTag": 2038
+   },
+   {
+    "strasse": "A3",
+    "name": "Würzburg-Kist",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 92359,
+    "schwerverkehrProTag": 17330
+   }
+  ]
+ },
+ "regensburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A93",
+    "name": "Rgb.-Pfaffenstein (N)",
+    "entfernungKm": 2.8,
+    "fahrzeugeProTag": 68826,
+    "schwerverkehrProTag": 7465
+   },
+   {
+    "strasse": "A3",
+    "name": "Regensburg-Ost (W)",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 66996,
+    "schwerverkehrProTag": 11527
+   }
+  ]
+ },
+ "ingolstadt": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A9",
+    "name": "Ingolstadt-Nord (S)",
+    "entfernungKm": 2.5,
+    "fahrzeugeProTag": 100149,
+    "schwerverkehrProTag": 11924
+   }
+  ]
+ },
+ "fuerth": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A73",
+    "name": "Nürnberg/Fürth (N)",
+    "entfernungKm": 2,
+    "fahrzeugeProTag": 62704,
+    "schwerverkehrProTag": 4629
+   },
+   {
+    "strasse": "A3",
+    "name": "AK Fürth/Erlangen (O)",
+    "entfernungKm": 7.5,
+    "fahrzeugeProTag": 87906,
+    "schwerverkehrProTag": 16908
+   }
+  ]
+ },
+ "erlangen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A73",
+    "name": "AS Erlangen-Nord",
+    "entfernungKm": 1.4,
+    "fahrzeugeProTag": 79941,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "A3",
+    "name": "AK Fürth/Erlangen (O)",
+    "entfernungKm": 5.5,
+    "fahrzeugeProTag": 87906,
+    "schwerverkehrProTag": 16908
+   }
+  ]
+ },
+ "mannheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A656",
+    "name": "Mannheim-Seckenheim",
+    "entfernungKm": 6.8,
+    "fahrzeugeProTag": 51404,
+    "schwerverkehrProTag": 3003
+   },
+   {
+    "strasse": "A659",
+    "name": "Mannheim-Vogelstang",
+    "entfernungKm": 7.4,
+    "fahrzeugeProTag": 52592,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "karlsruhe": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A5",
+    "name": "Karlsruhe 1",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 140087,
+    "schwerverkehrProTag": 21426
+   },
+   {
+    "strasse": "B3",
+    "name": "Karlsruhe 2",
+    "entfernungKm": 7.3,
+    "fahrzeugeProTag": 11667,
+    "schwerverkehrProTag": 344
+   }
+  ]
+ },
+ "freiburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B31",
+    "name": "Freiburg Ost Tunnel",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 32106,
+    "schwerverkehrProTag": 2775
+   },
+   {
+    "strasse": "A5",
+    "name": "March",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 68688,
+    "schwerverkehrProTag": 9409
+   }
+  ]
+ },
+ "heidelberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A5",
+    "name": "Eppelheim",
+    "entfernungKm": 2.7,
+    "fahrzeugeProTag": 82157,
+    "schwerverkehrProTag": 8723
+   }
+  ]
+ },
+ "heilbronn": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A6",
+    "name": "Neckarsulm 1",
+    "entfernungKm": 4.3,
+    "fahrzeugeProTag": 101187,
+    "schwerverkehrProTag": 18620
+   },
+   {
+    "strasse": "B27",
+    "name": "Neckarsulm 2",
+    "entfernungKm": 5.6,
+    "fahrzeugeProTag": 34425,
+    "schwerverkehrProTag": 1872
+   }
+  ]
+ },
+ "ulm": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B10",
+    "name": "Ulm-Nord",
+    "entfernungKm": 2.5,
+    "fahrzeugeProTag": 56894,
+    "schwerverkehrProTag": 3293
+   }
+  ]
+ },
+ "pforzheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A8",
+    "name": "Wurmberg",
+    "entfernungKm": 6.3,
+    "fahrzeugeProTag": 85613,
+    "schwerverkehrProTag": 14738
+   }
+  ]
+ },
+ "wiesbaden": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A643",
+    "name": "Rheinbrücke Schierstein",
+    "entfernungKm": 6,
+    "fahrzeugeProTag": 59628,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "B455",
+    "name": "Wiesbaden",
+    "entfernungKm": 6.2,
+    "fahrzeugeProTag": 12731,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "kassel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B7",
+    "name": "Vellmar",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 22147,
+    "schwerverkehrProTag": 719
+   },
+   {
+    "strasse": "A7",
+    "name": "Heiligenrode",
+    "entfernungKm": 5.8,
+    "fahrzeugeProTag": 84722,
+    "schwerverkehrProTag": 16628
+   }
+  ]
+ },
+ "darmstadt": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A672",
+    "name": "Darmstadt",
+    "entfernungKm": 3.2,
+    "fahrzeugeProTag": 41877,
+    "schwerverkehrProTag": 1705
+   },
+   {
+    "strasse": "A5",
+    "name": "Griesheim",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 127152,
+    "schwerverkehrProTag": 12992
+   }
+  ]
+ },
+ "offenbach": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A661",
+    "name": "Frankfurt-Oberrad",
+    "entfernungKm": 2.6,
+    "fahrzeugeProTag": 103027,
+    "schwerverkehrProTag": 6805
+   },
+   {
+    "strasse": "A3",
+    "name": "Heusenstamm",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 142794,
+    "schwerverkehrProTag": 19215
+   }
+  ]
+ },
+ "hannover": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Hannover-Bothfeld",
+    "entfernungKm": 8.3,
+    "fahrzeugeProTag": 108628,
+    "schwerverkehrProTag": 21502
+   },
+   {
+    "strasse": "B217",
+    "name": "Ronnenberg",
+    "entfernungKm": 9,
+    "fahrzeugeProTag": 15569,
+    "schwerverkehrProTag": 511
+   }
+  ]
+ },
+ "braunschweig": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A392",
+    "name": "Braunschweig-Ölper",
+    "entfernungKm": 1.6,
+    "fahrzeugeProTag": 25112,
+    "schwerverkehrProTag": 553
+   },
+   {
+    "strasse": "A391",
+    "name": "Braunschweig-Weststadt",
+    "entfernungKm": 2.8,
+    "fahrzeugeProTag": 68459,
+    "schwerverkehrProTag": 5226
+   }
+  ]
+ },
+ "oldenburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A28",
+    "name": "Haarentor",
+    "entfernungKm": 1.5,
+    "fahrzeugeProTag": 78212,
+    "schwerverkehrProTag": 5639
+   },
+   {
+    "strasse": "A293",
+    "name": "Oldenburg-Etzhorn",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 37149,
+    "schwerverkehrProTag": 1766
+   }
+  ]
+ },
+ "osnabrueck": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A33",
+    "name": "Fledder",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 39105,
+    "schwerverkehrProTag": 2863
+   },
+   {
+    "strasse": "A30",
+    "name": "Osnabrück-Hellern",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 75908,
+    "schwerverkehrProTag": 13410
+   }
+  ]
+ },
+ "wolfsburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A39",
+    "name": "Wolfsburg",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 30867,
+    "schwerverkehrProTag": 2819
+   }
+  ]
+ },
+ "goettingen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A7",
+    "name": "Göttingen",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 65615,
+    "schwerverkehrProTag": 11158
+   }
+  ]
+ },
+ "bremen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B6",
+    "name": "HB-Neuenlander Str.",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 44452,
+    "schwerverkehrProTag": 4327
+   },
+   {
+    "strasse": "A27",
+    "name": "HB-Schwarzer Weg",
+    "entfernungKm": 6.4,
+    "fahrzeugeProTag": 81917,
+    "schwerverkehrProTag": 5740
+   }
+  ]
+ },
+ "kiel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A215",
+    "name": "Kiel-West",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 70702,
+    "schwerverkehrProTag": 3054
+   }
+  ]
+ },
+ "luebeck": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A20",
+    "name": "Neddelsteenhof",
+    "entfernungKm": 5.8,
+    "fahrzeugeProTag": 47631,
+    "schwerverkehrProTag": 4575
+   }
+  ]
+ },
+ "mainz": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A60",
+    "name": "AS MZ-Finthen VQ Ost",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 55800,
+    "schwerverkehrProTag": 5053
+   },
+   {
+    "strasse": "A643",
+    "name": "AS MZ-Gonsenheim VQ Süd",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 59621,
+    "schwerverkehrProTag": 4394
+   }
+  ]
+ },
+ "ludwigshafen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A656",
+    "name": "Mannheim-Seckenheim",
+    "entfernungKm": 7.8,
+    "fahrzeugeProTag": 51404,
+    "schwerverkehrProTag": 3003
+   },
+   {
+    "strasse": "A659",
+    "name": "Mannheim-Vogelstang",
+    "entfernungKm": 9.3,
+    "fahrzeugeProTag": 52592,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "koblenz": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B49",
+    "name": "Moselweiß",
+    "entfernungKm": 2.7,
+    "fahrzeugeProTag": 6325,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "B416",
+    "name": "Güls",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 8420,
+    "schwerverkehrProTag": 277
+   }
+  ]
+ },
+ "trier": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B51",
+    "name": "Konz",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 25809,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "saarbruecken": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B41",
+    "name": "Saarbrücken-Rodenhof",
+    "entfernungKm": 1.5,
+    "fahrzeugeProTag": 11451,
+    "schwerverkehrProTag": 13
+   },
+   {
+    "strasse": "A623",
+    "name": "Jägersfreude",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 35234,
+    "schwerverkehrProTag": 1269
+   }
+  ]
+ },
+ "leipzig": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A14",
+    "name": "Breitenfeld",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 69989,
+    "schwerverkehrProTag": 12305
+   }
+  ]
+ },
+ "dresden": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "AD Dresden-Nord (W)",
+    "entfernungKm": 8.3,
+    "fahrzeugeProTag": 97500,
+    "schwerverkehrProTag": 16018
+   },
+   {
+    "strasse": "A17",
+    "name": "Sobrigau",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 43215,
+    "schwerverkehrProTag": 8229
+   }
+  ]
+ },
+ "chemnitz": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B174",
+    "name": "Chemnitz-Altenhain",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 20028,
+    "schwerverkehrProTag": 1932
+   },
+   {
+    "strasse": "A72",
+    "name": "Leukersdorf",
+    "entfernungKm": 9.6,
+    "fahrzeugeProTag": 56822,
+    "schwerverkehrProTag": 8580
+   }
+  ]
+ },
+ "halle": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A14",
+    "name": "Halle-Trotha/Teufelsgrund",
+    "entfernungKm": 8.1,
+    "fahrzeugeProTag": 41663,
+    "schwerverkehrProTag": 10340
+   },
+   {
+    "strasse": "A143",
+    "name": "Halle-Pappelgrund",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 8146,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "magdeburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Magdeburg Kannenstieg",
+    "entfernungKm": 7,
+    "fahrzeugeProTag": 71686,
+    "schwerverkehrProTag": 17487
+   },
+   {
+    "strasse": "A14",
+    "name": "Wanzleben",
+    "entfernungKm": 7.1,
+    "fahrzeugeProTag": 46141,
+    "schwerverkehrProTag": 11033
+   }
+  ]
+ },
+ "erfurt": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B7",
+    "name": "OU Erfurt",
+    "entfernungKm": 4.1,
+    "fahrzeugeProTag": 23274,
+    "schwerverkehrProTag": 2016
+   },
+   {
+    "strasse": "A71",
+    "name": "Mittelhausen",
+    "entfernungKm": 6.4,
+    "fahrzeugeProTag": 28360,
+    "schwerverkehrProTag": 3456
+   }
+  ]
+ },
+ "jena": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "Tunnel Lobdeburg",
+    "entfernungKm": 5.5,
+    "fahrzeugeProTag": 59797,
+    "schwerverkehrProTag": 11954
+   }
+  ]
+ },
+ "potsdam": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B2",
+    "name": "Wilhelmshorst",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 7670,
+    "schwerverkehrProTag": 284
+   },
+   {
+    "strasse": "B1",
+    "name": "Nikolassee",
+    "entfernungKm": 8.5,
+    "fahrzeugeProTag": 18680,
+    "schwerverkehrProTag": 518
+   }
+  ]
+ },
+ "rostock": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A19",
+    "name": "Rostock-Ost",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 36791,
+    "schwerverkehrProTag": 4081
+   },
+   {
+    "strasse": "B103",
+    "name": "Reutershagen",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 27861,
+    "schwerverkehrProTag": 1033
+   }
+  ]
+ },
+ "schwerin": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B321",
+    "name": "Pampow",
+    "entfernungKm": 9.8,
+    "fahrzeugeProTag": 10134,
+    "schwerverkehrProTag": 649
+   }
+  ]
+ },
+ "neuss": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A57",
+    "name": "Neuss-Augustinusviertel",
+    "entfernungKm": 2.2,
+    "fahrzeugeProTag": 44130,
+    "schwerverkehrProTag": 4247
+   },
+   {
+    "strasse": "A46",
+    "name": "AK Neuss Süd (O)",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 70691,
+    "schwerverkehrProTag": 8925
+   }
+  ]
+ },
+ "ratingen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A52",
+    "name": "AK Breitscheid (W)",
+    "entfernungKm": 5.6,
+    "fahrzeugeProTag": 90707,
+    "schwerverkehrProTag": 0
+   },
+   {
+    "strasse": "A3",
+    "name": "AK Breitscheid (S)",
+    "entfernungKm": 5.7,
+    "fahrzeugeProTag": 108016,
+    "schwerverkehrProTag": 12066
+   }
+  ]
+ },
+ "hilden": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "AK Hilden (W)",
+    "entfernungKm": 2.8,
+    "fahrzeugeProTag": 122148,
+    "schwerverkehrProTag": 11271
+   },
+   {
+    "strasse": "A59",
+    "name": "Düsseldorf-Urdenbach",
+    "entfernungKm": 4.5,
+    "fahrzeugeProTag": 45568,
+    "schwerverkehrProTag": 2625
+   }
+  ]
+ },
+ "langenfeld": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A59",
+    "name": "Düsseldorf-Urdenbach",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 45568,
+    "schwerverkehrProTag": 2625
+   },
+   {
+    "strasse": "B229",
+    "name": "Solingen",
+    "entfernungKm": 4.8,
+    "fahrzeugeProTag": 11724,
+    "schwerverkehrProTag": 569
+   }
+  ]
+ },
+ "dormagen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B9",
+    "name": "Dormagen",
+    "entfernungKm": 3.2,
+    "fahrzeugeProTag": 10758,
+    "schwerverkehrProTag": 937
+   },
+   {
+    "strasse": "A59",
+    "name": "Düsseldorf-Urdenbach",
+    "entfernungKm": 6.3,
+    "fahrzeugeProTag": 45568,
+    "schwerverkehrProTag": 2625
+   }
+  ]
+ },
+ "velbert": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A44",
+    "name": "Birth (Tunnel Velbert)",
+    "entfernungKm": 2.1,
+    "fahrzeugeProTag": 21229,
+    "schwerverkehrProTag": 704
+   }
+  ]
+ },
+ "schwelm": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "W-Oberbarmen",
+    "entfernungKm": 4.4,
+    "fahrzeugeProTag": 76637,
+    "schwerverkehrProTag": 8500
+   },
+   {
+    "strasse": "B483",
+    "name": "Radevormwald-Rochollsberg",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 8082,
+    "schwerverkehrProTag": 782
+   }
+  ]
+ },
+ "haan": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "AK Hilden (W)",
+    "entfernungKm": 5.6,
+    "fahrzeugeProTag": 122148,
+    "schwerverkehrProTag": 11271
+   },
+   {
+    "strasse": "B229",
+    "name": "Solingen",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 11724,
+    "schwerverkehrProTag": 569
+   }
+  ]
+ },
+ "siegburg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B56",
+    "name": "Siegburg-Stallberg",
+    "entfernungKm": 2.1,
+    "fahrzeugeProTag": 22897,
+    "schwerverkehrProTag": 642
+   },
+   {
+    "strasse": "A59",
+    "name": "AD St.Augustin (S)",
+    "entfernungKm": 4.1,
+    "fahrzeugeProTag": 107843,
+    "schwerverkehrProTag": 5592
+   }
+  ]
+ },
+ "troisdorf": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A59",
+    "name": "AD St. Augustin (N)",
+    "entfernungKm": 1.2,
+    "fahrzeugeProTag": 91689,
+    "schwerverkehrProTag": 5732
+   },
+   {
+    "strasse": "B56",
+    "name": "Siegburg-Stallberg",
+    "entfernungKm": 4.5,
+    "fahrzeugeProTag": 22897,
+    "schwerverkehrProTag": 642
+   }
+  ]
+ },
+ "sankt-augustin": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A59",
+    "name": "AD St.Augustin (S)",
+    "entfernungKm": 3.2,
+    "fahrzeugeProTag": 107843,
+    "schwerverkehrProTag": 5592
+   },
+   {
+    "strasse": "A565",
+    "name": "AD Bonn-Beuel (W)",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 92287,
+    "schwerverkehrProTag": 5314
+   }
+  ]
+ },
+ "hennef": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A560",
+    "name": "Hennef",
+    "entfernungKm": 1,
+    "fahrzeugeProTag": 41778,
+    "schwerverkehrProTag": 1910
+   },
+   {
+    "strasse": "B56",
+    "name": "Siegburg-Stallberg",
+    "entfernungKm": 6.8,
+    "fahrzeugeProTag": 22897,
+    "schwerverkehrProTag": 642
+   }
+  ]
+ },
+ "meckenheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A565",
+    "name": "Meckenheim-Merl",
+    "entfernungKm": 2.4,
+    "fahrzeugeProTag": 32915,
+    "schwerverkehrProTag": 3217
+   },
+   {
+    "strasse": "A61",
+    "name": "Miel",
+    "entfernungKm": 7.9,
+    "fahrzeugeProTag": 51098,
+    "schwerverkehrProTag": 12021
+   }
+  ]
+ },
+ "bornheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B56",
+    "name": "Swisttal-Buschhoven",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 12856,
+    "schwerverkehrProTag": 411
+   },
+   {
+    "strasse": "A565",
+    "name": "AD Bonn-Beuel (W)",
+    "entfernungKm": 8.7,
+    "fahrzeugeProTag": 92287,
+    "schwerverkehrProTag": 5314
+   }
+  ]
+ },
+ "gelsenkirchen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A42",
+    "name": "GE-Hessler",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 63689,
+    "schwerverkehrProTag": 3569
+   },
+   {
+    "strasse": "A2",
+    "name": "Gelsenkirchen-Erle",
+    "entfernungKm": 5.2,
+    "fahrzeugeProTag": 85080,
+    "schwerverkehrProTag": 13620
+   }
+  ]
+ },
+ "hamm": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B63",
+    "name": "Hamm-Heessen",
+    "entfernungKm": 5.1,
+    "fahrzeugeProTag": 9536,
+    "schwerverkehrProTag": 271
+   },
+   {
+    "strasse": "A2",
+    "name": "Rhynern",
+    "entfernungKm": 6.1,
+    "fahrzeugeProTag": 79342,
+    "schwerverkehrProTag": 15989
+   }
+  ]
+ },
+ "muelheim-an-der-ruhr": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A42",
+    "name": "AK OB-West (O)",
+    "entfernungKm": 7.9,
+    "fahrzeugeProTag": 76404,
+    "schwerverkehrProTag": 5189
+   },
+   {
+    "strasse": "A52",
+    "name": "AK Breitscheid (O)",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 84478,
+    "schwerverkehrProTag": 4944
+   }
+  ]
+ },
+ "herne": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B226",
+    "name": "Wanne-Eickel Ost",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 22330,
+    "schwerverkehrProTag": 976
+   },
+   {
+    "strasse": "A42",
+    "name": "Wanne-Eickel",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 66937,
+    "schwerverkehrProTag": 4660
+   }
+  ]
+ },
+ "bottrop": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B224",
+    "name": "Bottrop",
+    "entfernungKm": 4.3,
+    "fahrzeugeProTag": 42908,
+    "schwerverkehrProTag": 2995
+   },
+   {
+    "strasse": "A42",
+    "name": "GE-Hessler",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 63689,
+    "schwerverkehrProTag": 3569
+   }
+  ]
+ },
+ "recklinghausen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Recklinghausen-Ost",
+    "entfernungKm": 3.8,
+    "fahrzeugeProTag": 83858,
+    "schwerverkehrProTag": 13720
+   },
+   {
+    "strasse": "A42",
+    "name": "Wanne-Eickel",
+    "entfernungKm": 8.5,
+    "fahrzeugeProTag": 66937,
+    "schwerverkehrProTag": 4660
+   }
+  ]
+ },
+ "moers": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A40",
+    "name": "AK Moers (W)",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 58309,
+    "schwerverkehrProTag": 11272
+   },
+   {
+    "strasse": "A57",
+    "name": "AK Moers (S)",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 76543,
+    "schwerverkehrProTag": 7939
+   }
+  ]
+ },
+ "siegen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A45",
+    "name": "Freudenberg",
+    "entfernungKm": 7.8,
+    "fahrzeugeProTag": 46542,
+    "schwerverkehrProTag": 6912
+   },
+   {
+    "strasse": "B54",
+    "name": "Kreuztal-Buschhütten",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 28676,
+    "schwerverkehrProTag": 1497
+   }
+  ]
+ },
+ "erkelenz": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B57",
+    "name": "Mönchengladb.-Rheindahlen",
+    "entfernungKm": 8.7,
+    "fahrzeugeProTag": 10185,
+    "schwerverkehrProTag": 479
+   },
+   {
+    "strasse": "A61",
+    "name": "MG-Wickrath",
+    "entfernungKm": 9.7,
+    "fahrzeugeProTag": 64490,
+    "schwerverkehrProTag": 9118
+   }
+  ]
+ },
+ "heinsberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B221",
+    "name": "Heinsberg",
+    "entfernungKm": 3.6,
+    "fahrzeugeProTag": 15263,
+    "schwerverkehrProTag": 835
+   }
+  ]
+ },
+ "guetersloh": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Sürenheide",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 88940,
+    "schwerverkehrProTag": 15917
+   },
+   {
+    "strasse": "B61",
+    "name": "Linteler See",
+    "entfernungKm": 5.7,
+    "fahrzeugeProTag": 13183,
+    "schwerverkehrProTag": 728
+   }
+  ]
+ },
+ "dueren": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B264",
+    "name": "Langerwehe",
+    "entfernungKm": 6.8,
+    "fahrzeugeProTag": 11879,
+    "schwerverkehrProTag": 469
+   },
+   {
+    "strasse": "A4",
+    "name": "Buir / Merzenich",
+    "entfernungKm": 7.3,
+    "fahrzeugeProTag": 75844,
+    "schwerverkehrProTag": 12025
+   }
+  ]
+ },
+ "witten": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A44",
+    "name": "Witten",
+    "entfernungKm": 2.3,
+    "fahrzeugeProTag": 63155,
+    "schwerverkehrProTag": 4907
+   },
+   {
+    "strasse": "A45",
+    "name": "Dortmund-Eichlinghofen",
+    "entfernungKm": 5.9,
+    "fahrzeugeProTag": 53629,
+    "schwerverkehrProTag": 0
+   }
+  ]
+ },
+ "marl": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A52",
+    "name": "Gelsenkirchen-Polsum",
+    "entfernungKm": 4.5,
+    "fahrzeugeProTag": 38682,
+    "schwerverkehrProTag": 4858
+   },
+   {
+    "strasse": "A2",
+    "name": "Gelsenkirchen-Erle",
+    "entfernungKm": 9.3,
+    "fahrzeugeProTag": 85080,
+    "schwerverkehrProTag": 13620
+   }
+  ]
+ },
+ "luenen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B54",
+    "name": "Werne-Langern",
+    "entfernungKm": 4.1,
+    "fahrzeugeProTag": 5557,
+    "schwerverkehrProTag": 310
+   },
+   {
+    "strasse": "A2",
+    "name": "Waltrop-Brambauer",
+    "entfernungKm": 5.4,
+    "fahrzeugeProTag": 95437,
+    "schwerverkehrProTag": 16611
+   }
+  ]
+ },
+ "minden": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B61",
+    "name": "Barkhausen",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 28441,
+    "schwerverkehrProTag": 1568
+   },
+   {
+    "strasse": "B65",
+    "name": "Bückeburg",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 23229,
+    "schwerverkehrProTag": 1745
+   }
+  ]
+ },
+ "viersen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A52",
+    "name": "Willich-Schiefbahn",
+    "entfernungKm": 9.3,
+    "fahrzeugeProTag": 54551,
+    "schwerverkehrProTag": 3904
+   }
+  ]
+ },
+ "rheine": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A30",
+    "name": "Rheine-Kanalhafen",
+    "entfernungKm": 5.4,
+    "fahrzeugeProTag": 46826,
+    "schwerverkehrProTag": 12792
+   },
+   {
+    "strasse": "B70",
+    "name": "Lünne",
+    "entfernungKm": 9.6,
+    "fahrzeugeProTag": 7085,
+    "schwerverkehrProTag": 1150
+   }
+  ]
+ },
+ "gladbeck": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B224",
+    "name": "Bottrop",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 42908,
+    "schwerverkehrProTag": 2995
+   },
+   {
+    "strasse": "A31",
+    "name": "Feldhausen",
+    "entfernungKm": 4.6,
+    "fahrzeugeProTag": 51448,
+    "schwerverkehrProTag": 5633
+   }
+  ]
+ },
+ "dorsten": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A31",
+    "name": "Hardtbergsee",
+    "entfernungKm": 2.5,
+    "fahrzeugeProTag": 47849,
+    "schwerverkehrProTag": 5518
+   },
+   {
+    "strasse": "B58",
+    "name": "Dorsten (O)",
+    "entfernungKm": 5.2,
+    "fahrzeugeProTag": 12827,
+    "schwerverkehrProTag": 1429
+   }
+  ]
+ },
+ "arnsberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "Oeventrop",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 22748,
+    "schwerverkehrProTag": 2245
+   }
+  ]
+ },
+ "detmold": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B239",
+    "name": "Detmold-Heidenoldendorf",
+    "entfernungKm": 5.4,
+    "fahrzeugeProTag": 11770,
+    "schwerverkehrProTag": 494
+   },
+   {
+    "strasse": "B1",
+    "name": "Horn 2",
+    "entfernungKm": 9,
+    "fahrzeugeProTag": 13020,
+    "schwerverkehrProTag": 1079
+   }
+  ]
+ },
+ "castrop-rauxel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A42",
+    "name": "Bladenhorst",
+    "entfernungKm": 0.7,
+    "fahrzeugeProTag": 51582,
+    "schwerverkehrProTag": 4570
+   },
+   {
+    "strasse": "A45",
+    "name": "Dortmund-Mengede-West",
+    "entfernungKm": 4.1,
+    "fahrzeugeProTag": 65886,
+    "schwerverkehrProTag": 7410
+   }
+  ]
+ },
+ "luedenscheid": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B229",
+    "name": "Lüdenscheid-Brügge",
+    "entfernungKm": 4,
+    "fahrzeugeProTag": 14840,
+    "schwerverkehrProTag": 762
+   },
+   {
+    "strasse": "B54",
+    "name": "Kierspe-Volme",
+    "entfernungKm": 5.9,
+    "fahrzeugeProTag": 7502,
+    "schwerverkehrProTag": 505
+   }
+  ]
+ },
+ "herford": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B239",
+    "name": "Bad Salzuflen",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 22074,
+    "schwerverkehrProTag": 1424
+   },
+   {
+    "strasse": "A30",
+    "name": "Kirchlengern",
+    "entfernungKm": 8.5,
+    "fahrzeugeProTag": 44688,
+    "schwerverkehrProTag": 8635
+   }
+  ]
+ },
+ "dinslaken": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "Hünxe",
+    "entfernungKm": 7.3,
+    "fahrzeugeProTag": 58206,
+    "schwerverkehrProTag": 6750
+   },
+   {
+    "strasse": "A42",
+    "name": "DU Beeckerwerth",
+    "entfernungKm": 9.4,
+    "fahrzeugeProTag": 80698,
+    "schwerverkehrProTag": 10600
+   }
+  ]
+ },
+ "kerpen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "AK Kerpen (O)",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 100775,
+    "schwerverkehrProTag": 11770
+   },
+   {
+    "strasse": "A1",
+    "name": "Hürth",
+    "entfernungKm": 8,
+    "fahrzeugeProTag": 56167,
+    "schwerverkehrProTag": 6613
+   }
+  ]
+ },
+ "grevenbroich": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "Neuss-Holzheim",
+    "entfernungKm": 7.6,
+    "fahrzeugeProTag": 70570,
+    "schwerverkehrProTag": 8573
+   },
+   {
+    "strasse": "B477",
+    "name": "Gohr",
+    "entfernungKm": 8.6,
+    "fahrzeugeProTag": 6027,
+    "schwerverkehrProTag": 224
+   }
+  ]
+ },
+ "bergheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B55",
+    "name": "Elsdorf",
+    "entfernungKm": 3.3,
+    "fahrzeugeProTag": 9534,
+    "schwerverkehrProTag": 784
+   },
+   {
+    "strasse": "A4",
+    "name": "AK Kerpen (O)",
+    "entfernungKm": 7.6,
+    "fahrzeugeProTag": 100775,
+    "schwerverkehrProTag": 11770
+   }
+  ]
+ },
+ "wesel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B57",
+    "name": "Menzeler Heide (N)",
+    "entfernungKm": 8.9,
+    "fahrzeugeProTag": 9742,
+    "schwerverkehrProTag": 457
+   },
+   {
+    "strasse": "B58",
+    "name": "Menzeler Heide (W)",
+    "entfernungKm": 9.1,
+    "fahrzeugeProTag": 13073,
+    "schwerverkehrProTag": 1503
+   }
+  ]
+ },
+ "herten": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Gelsenkirchen-Erle",
+    "entfernungKm": 5.5,
+    "fahrzeugeProTag": 85080,
+    "schwerverkehrProTag": 13620
+   },
+   {
+    "strasse": "A42",
+    "name": "Wanne-Eickel",
+    "entfernungKm": 5.8,
+    "fahrzeugeProTag": 66937,
+    "schwerverkehrProTag": 4660
+   }
+  ]
+ },
+ "euskirchen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A61",
+    "name": "Miel",
+    "entfernungKm": 9.9,
+    "fahrzeugeProTag": 51098,
+    "schwerverkehrProTag": 12021
+   }
+  ]
+ },
+ "unna": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A44",
+    "name": "Unna-Süd",
+    "entfernungKm": 1.7,
+    "fahrzeugeProTag": 81747,
+    "schwerverkehrProTag": 12613
+   },
+   {
+    "strasse": "A1",
+    "name": "Hengsen",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 102197,
+    "schwerverkehrProTag": 16050
+   }
+  ]
+ },
+ "eschweiler": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "AK Aachen (O)",
+    "entfernungKm": 4.3,
+    "fahrzeugeProTag": 77840,
+    "schwerverkehrProTag": 10835
+   },
+   {
+    "strasse": "B264",
+    "name": "Langerwehe",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 11879,
+    "schwerverkehrProTag": 469
+   }
+  ]
+ },
+ "stolberg-rheinland": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "AK Aachen (O)",
+    "entfernungKm": 5.6,
+    "fahrzeugeProTag": 77840,
+    "schwerverkehrProTag": 10835
+   },
+   {
+    "strasse": "A44",
+    "name": "Aachen-Brand",
+    "entfernungKm": 8.7,
+    "fahrzeugeProTag": 45196,
+    "schwerverkehrProTag": 8191
+   }
+  ]
+ },
+ "ahlen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B63",
+    "name": "Hamm-Heessen",
+    "entfernungKm": 8.3,
+    "fahrzeugeProTag": 9536,
+    "schwerverkehrProTag": 271
+   }
+  ]
+ },
+ "soest": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B516",
+    "name": "Ense-Möhnesee",
+    "entfernungKm": 8.6,
+    "fahrzeugeProTag": 5639,
+    "schwerverkehrProTag": 208
+   },
+   {
+    "strasse": "B229",
+    "name": "Delecke 2",
+    "entfernungKm": 9.3,
+    "fahrzeugeProTag": 3950,
+    "schwerverkehrProTag": 136
+   }
+  ]
+ },
+ "ibbenbueren": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A30",
+    "name": "Schierloh",
+    "entfernungKm": 2.2,
+    "fahrzeugeProTag": 51018,
+    "schwerverkehrProTag": 13107
+   }
+  ]
+ },
+ "gummersbach": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B55",
+    "name": "Derschlag",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 15697,
+    "schwerverkehrProTag": 794
+   },
+   {
+    "strasse": "B256",
+    "name": "Marienheide",
+    "entfernungKm": 9.2,
+    "fahrzeugeProTag": 5792,
+    "schwerverkehrProTag": 416
+   }
+  ]
+ },
+ "gronau": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B54",
+    "name": "Gronau-Amtsvenn",
+    "entfernungKm": 4.4,
+    "fahrzeugeProTag": 17912,
+    "schwerverkehrProTag": 1945
+   },
+   {
+    "strasse": "A31",
+    "name": "Ochtrup",
+    "entfernungKm": 7.6,
+    "fahrzeugeProTag": 33614,
+    "schwerverkehrProTag": 5474
+   }
+  ]
+ },
+ "rheda-wiedenbrueck": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B61",
+    "name": "Linteler See",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 13183,
+    "schwerverkehrProTag": 728
+   },
+   {
+    "strasse": "A2",
+    "name": "Rheda-Wiedenbrück",
+    "entfernungKm": 3.8,
+    "fahrzeugeProTag": 83546,
+    "schwerverkehrProTag": 15491
+   }
+  ]
+ },
+ "borken": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B70",
+    "name": "Raesfeld West",
+    "entfernungKm": 9.3,
+    "fahrzeugeProTag": 2457,
+    "schwerverkehrProTag": 145
+   }
+  ]
+ },
+ "ahaus": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A31",
+    "name": "Nienborg",
+    "entfernungKm": 8.4,
+    "fahrzeugeProTag": 34230,
+    "schwerverkehrProTag": 5157
+   }
+  ]
+ },
+ "hattingen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A43",
+    "name": "Sprockhövel",
+    "entfernungKm": 5.8,
+    "fahrzeugeProTag": 64125,
+    "schwerverkehrProTag": 5232
+   }
+  ]
+ },
+ "koenigswinter": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "Bad Honnef/Linz",
+    "entfernungKm": 7.2,
+    "fahrzeugeProTag": 85282,
+    "schwerverkehrProTag": 12499
+   }
+  ]
+ },
+ "erftstadt": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B265",
+    "name": "Lechenich 2",
+    "entfernungKm": 2.6,
+    "fahrzeugeProTag": 11168,
+    "schwerverkehrProTag": 732
+   },
+   {
+    "strasse": "A1",
+    "name": "Hürth",
+    "entfernungKm": 3.3,
+    "fahrzeugeProTag": 56167,
+    "schwerverkehrProTag": 6613
+   }
+  ]
+ },
+ "meerbusch": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A57",
+    "name": "Meerbusch-Bovert",
+    "entfernungKm": 3.1,
+    "fahrzeugeProTag": 83427,
+    "schwerverkehrProTag": 8603
+   },
+   {
+    "strasse": "B288",
+    "name": "Uerdingen",
+    "entfernungKm": 9.1,
+    "fahrzeugeProTag": 21546,
+    "schwerverkehrProTag": 1511
+   }
+  ]
+ },
+ "kaarst": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A57",
+    "name": "Neuss-Morgensternsheide",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 116381,
+    "schwerverkehrProTag": 10800
+   },
+   {
+    "strasse": "B230",
+    "name": "Holzheim",
+    "entfernungKm": 6.3,
+    "fahrzeugeProTag": 10009,
+    "schwerverkehrProTag": 648
+   }
+  ]
+ },
+ "alsdorf": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B57",
+    "name": "Alsdorf-Ofden",
+    "entfernungKm": 1.4,
+    "fahrzeugeProTag": 17900,
+    "schwerverkehrProTag": 462
+   },
+   {
+    "strasse": "A4",
+    "name": "AK Aachen (O)",
+    "entfernungKm": 7.5,
+    "fahrzeugeProTag": 77840,
+    "schwerverkehrProTag": 10835
+   }
+  ]
+ },
+ "herzogenrath": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B57",
+    "name": "Alsdorf-Ofden",
+    "entfernungKm": 3.8,
+    "fahrzeugeProTag": 17900,
+    "schwerverkehrProTag": 462
+   },
+   {
+    "strasse": "A4",
+    "name": "AC-Vetschau",
+    "entfernungKm": 7.5,
+    "fahrzeugeProTag": 38009,
+    "schwerverkehrProTag": 6052
+   }
+  ]
+ },
+ "wuerselen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B57",
+    "name": "Alsdorf-Ofden",
+    "entfernungKm": 5.1,
+    "fahrzeugeProTag": 17900,
+    "schwerverkehrProTag": 462
+   },
+   {
+    "strasse": "A4",
+    "name": "AK Aachen (O)",
+    "entfernungKm": 5.5,
+    "fahrzeugeProTag": 77840,
+    "schwerverkehrProTag": 10835
+   }
+  ]
+ },
+ "erkrath": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "AK Hilden (N)",
+    "entfernungKm": 1.1,
+    "fahrzeugeProTag": 136990,
+    "schwerverkehrProTag": 13369
+   },
+   {
+    "strasse": "A46",
+    "name": "AK Hilden (W)",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 122148,
+    "schwerverkehrProTag": 11271
+   }
+  ]
+ },
+ "monheim-am-rhein": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A59",
+    "name": "Düsseldorf-Urdenbach",
+    "entfernungKm": 4.9,
+    "fahrzeugeProTag": 45568,
+    "schwerverkehrProTag": 2625
+   },
+   {
+    "strasse": "B9",
+    "name": "Dormagen",
+    "entfernungKm": 6.1,
+    "fahrzeugeProTag": 10758,
+    "schwerverkehrProTag": 937
+   }
+  ]
+ },
+ "bergkamen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B54",
+    "name": "Werne-Langern",
+    "entfernungKm": 5.3,
+    "fahrzeugeProTag": 5557,
+    "schwerverkehrProTag": 310
+   },
+   {
+    "strasse": "A2",
+    "name": "Altenbögge",
+    "entfernungKm": 5.9,
+    "fahrzeugeProTag": 96914,
+    "schwerverkehrProTag": 17486
+   }
+  ]
+ },
+ "willich": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A52",
+    "name": "Willich-Schiefbahn",
+    "entfernungKm": 3.7,
+    "fahrzeugeProTag": 54551,
+    "schwerverkehrProTag": 3904
+   },
+   {
+    "strasse": "A57",
+    "name": "Meerbusch-Bovert",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 83427,
+    "schwerverkehrProTag": 8603
+   }
+  ]
+ },
+ "pulheim": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B59",
+    "name": "Pulheim",
+    "entfernungKm": 3,
+    "fahrzeugeProTag": 18531,
+    "schwerverkehrProTag": 1068
+   },
+   {
+    "strasse": "A57",
+    "name": "Köln-Longerich",
+    "entfernungKm": 7.1,
+    "fahrzeugeProTag": 97192,
+    "schwerverkehrProTag": 2102
+   }
+  ]
+ },
+ "frechen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A4",
+    "name": "AK Kerpen (O)",
+    "entfernungKm": 7.6,
+    "fahrzeugeProTag": 100775,
+    "schwerverkehrProTag": 11770
+   },
+   {
+    "strasse": "A1",
+    "name": "Hürth",
+    "entfernungKm": 7.9,
+    "fahrzeugeProTag": 56167,
+    "schwerverkehrProTag": 6613
+   }
+  ]
+ },
+ "bad-salzuflen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B239",
+    "name": "Bad Salzuflen",
+    "entfernungKm": 2.3,
+    "fahrzeugeProTag": 22074,
+    "schwerverkehrProTag": 1424
+   }
+  ]
+ },
+ "bad-oeynhausen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Borstenbach",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 73387,
+    "schwerverkehrProTag": 15370
+   },
+   {
+    "strasse": "B514",
+    "name": "Babbenhausen",
+    "entfernungKm": 4.3,
+    "fahrzeugeProTag": 9040,
+    "schwerverkehrProTag": 425
+   }
+  ]
+ },
+ "loehne": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A30",
+    "name": "Kirchlengern",
+    "entfernungKm": 6.2,
+    "fahrzeugeProTag": 44688,
+    "schwerverkehrProTag": 8635
+   },
+   {
+    "strasse": "A2",
+    "name": "Borstenbach",
+    "entfernungKm": 7.3,
+    "fahrzeugeProTag": 73387,
+    "schwerverkehrProTag": 15370
+   }
+  ]
+ },
+ "mettmann": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "AK Hilden (N)",
+    "entfernungKm": 5.2,
+    "fahrzeugeProTag": 136990,
+    "schwerverkehrProTag": 13369
+   },
+   {
+    "strasse": "A46",
+    "name": "AK Hilden (W)",
+    "entfernungKm": 7.2,
+    "fahrzeugeProTag": 122148,
+    "schwerverkehrProTag": 11271
+   }
+  ]
+ },
+ "korschenbroich": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A52",
+    "name": "Willich-Schiefbahn",
+    "entfernungKm": 5,
+    "fahrzeugeProTag": 54551,
+    "schwerverkehrProTag": 3904
+   },
+   {
+    "strasse": "B230",
+    "name": "Holzheim",
+    "entfernungKm": 7,
+    "fahrzeugeProTag": 10009,
+    "schwerverkehrProTag": 648
+   }
+  ]
+ },
+ "gevelsberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A46",
+    "name": "W-Oberbarmen",
+    "entfernungKm": 7.2,
+    "fahrzeugeProTag": 76637,
+    "schwerverkehrProTag": 8500
+   },
+   {
+    "strasse": "A43",
+    "name": "Sprockhövel",
+    "entfernungKm": 8.5,
+    "fahrzeugeProTag": 64125,
+    "schwerverkehrProTag": 5232
+   }
+  ]
+ },
+ "ennepetal": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B483",
+    "name": "Radevormwald-Rochollsberg",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 8082,
+    "schwerverkehrProTag": 782
+   },
+   {
+    "strasse": "A46",
+    "name": "W-Oberbarmen",
+    "entfernungKm": 9.2,
+    "fahrzeugeProTag": 76637,
+    "schwerverkehrProTag": 8500
+   }
+  ]
+ },
+ "roesrath": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A59",
+    "name": "Flughafen Köln/Bonn",
+    "entfernungKm": 6.4,
+    "fahrzeugeProTag": 109605,
+    "schwerverkehrProTag": 7117
+   },
+   {
+    "strasse": "A3",
+    "name": "AD Heumar (S)",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 105958,
+    "schwerverkehrProTag": 12647
+   }
+  ]
+ },
+ "sprockhoevel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A43",
+    "name": "Sprockhövel",
+    "entfernungKm": 1.5,
+    "fahrzeugeProTag": 64125,
+    "schwerverkehrProTag": 5232
+   },
+   {
+    "strasse": "A46",
+    "name": "W-Oberbarmen",
+    "entfernungKm": 6.9,
+    "fahrzeugeProTag": 76637,
+    "schwerverkehrProTag": 8500
+   }
+  ]
+ },
+ "radevormwald": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B483",
+    "name": "Radevormwald-Rochollsberg",
+    "entfernungKm": 3.6,
+    "fahrzeugeProTag": 8082,
+    "schwerverkehrProTag": 782
+   }
+  ]
+ },
+ "wuelfrath": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A44",
+    "name": "Birth (Tunnel Velbert)",
+    "entfernungKm": 5.7,
+    "fahrzeugeProTag": 21229,
+    "schwerverkehrProTag": 704
+   },
+   {
+    "strasse": "A46",
+    "name": "W-Sonnborn",
+    "entfernungKm": 6,
+    "fahrzeugeProTag": 108496,
+    "schwerverkehrProTag": 8633
+   }
+  ]
+ },
+ "huerth": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A1",
+    "name": "Hürth",
+    "entfernungKm": 7.2,
+    "fahrzeugeProTag": 56167,
+    "schwerverkehrProTag": 6613
+   },
+   {
+    "strasse": "A555",
+    "name": "Godorf",
+    "entfernungKm": 7.8,
+    "fahrzeugeProTag": 67116,
+    "schwerverkehrProTag": 3770
+   }
+  ]
+ },
+ "bruehl": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A555",
+    "name": "Godorf",
+    "entfernungKm": 4.5,
+    "fahrzeugeProTag": 67116,
+    "schwerverkehrProTag": 3770
+   },
+   {
+    "strasse": "A553",
+    "name": "Bliesheim",
+    "entfernungKm": 7.3,
+    "fahrzeugeProTag": 34175,
+    "schwerverkehrProTag": 2552
+   }
+  ]
+ },
+ "niederkassel": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A555",
+    "name": "Godorf",
+    "entfernungKm": 5.6,
+    "fahrzeugeProTag": 67116,
+    "schwerverkehrProTag": 3770
+   },
+   {
+    "strasse": "A59",
+    "name": "AD St. Augustin (N)",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 91689,
+    "schwerverkehrProTag": 5732
+   }
+  ]
+ },
+ "wesseling": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A555",
+    "name": "Godorf",
+    "entfernungKm": 2,
+    "fahrzeugeProTag": 67116,
+    "schwerverkehrProTag": 3770
+   }
+  ]
+ },
+ "lohmar": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B56",
+    "name": "Siegburg-Stallberg",
+    "entfernungKm": 2.8,
+    "fahrzeugeProTag": 22897,
+    "schwerverkehrProTag": 642
+   },
+   {
+    "strasse": "A59",
+    "name": "AD St. Augustin (N)",
+    "entfernungKm": 6.5,
+    "fahrzeugeProTag": 91689,
+    "schwerverkehrProTag": 5732
+   }
+  ]
+ },
+ "rheinbach": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A61",
+    "name": "Miel",
+    "entfernungKm": 3.4,
+    "fahrzeugeProTag": 51098,
+    "schwerverkehrProTag": 12021
+   },
+   {
+    "strasse": "A565",
+    "name": "Meckenheim-Merl",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 32915,
+    "schwerverkehrProTag": 3217
+   }
+  ]
+ },
+ "bad-honnef": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A3",
+    "name": "Bad Honnef/Linz",
+    "entfernungKm": 5.9,
+    "fahrzeugeProTag": 85282,
+    "schwerverkehrProTag": 12499
+   },
+   {
+    "strasse": "B9",
+    "name": "Remagen",
+    "entfernungKm": 7.6,
+    "fahrzeugeProTag": 17007,
+    "schwerverkehrProTag": 791
+   }
+  ]
+ },
+ "alfter": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B56",
+    "name": "Swisttal-Buschhoven",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 12856,
+    "schwerverkehrProTag": 411
+   },
+   {
+    "strasse": "A565",
+    "name": "AD Bonn-Beuel (W)",
+    "entfernungKm": 8.8,
+    "fahrzeugeProTag": 92287,
+    "schwerverkehrProTag": 5314
+   }
+  ]
+ },
+ "wachtberg": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A565",
+    "name": "Meckenheim-Merl",
+    "entfernungKm": 5.8,
+    "fahrzeugeProTag": 32915,
+    "schwerverkehrProTag": 3217
+   },
+   {
+    "strasse": "B9",
+    "name": "Remagen",
+    "entfernungKm": 8.7,
+    "fahrzeugeProTag": 17007,
+    "schwerverkehrProTag": 791
+   }
+  ]
+ },
+ "swisttal": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A61",
+    "name": "Miel",
+    "entfernungKm": 7.1,
+    "fahrzeugeProTag": 51098,
+    "schwerverkehrProTag": 12021
+   },
+   {
+    "strasse": "B56",
+    "name": "Swisttal-Buschhoven",
+    "entfernungKm": 7.7,
+    "fahrzeugeProTag": 12856,
+    "schwerverkehrProTag": 411
+   }
+  ]
+ },
+ "buende": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A30",
+    "name": "Kirchlengern",
+    "entfernungKm": 3.5,
+    "fahrzeugeProTag": 44688,
+    "schwerverkehrProTag": 8635
+   }
+  ]
+ },
+ "schwerte": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A45",
+    "name": "Dortmund Süd",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 73359,
+    "schwerverkehrProTag": 6588
+   },
+   {
+    "strasse": "B236",
+    "name": "Dortmund-Berghofen",
+    "entfernungKm": 3.9,
+    "fahrzeugeProTag": 32377,
+    "schwerverkehrProTag": 2375
+   }
+  ]
+ },
+ "kamen": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A2",
+    "name": "Altenbögge",
+    "entfernungKm": 4.2,
+    "fahrzeugeProTag": 96914,
+    "schwerverkehrProTag": 17486
+   },
+   {
+    "strasse": "A44",
+    "name": "Unna-Süd",
+    "entfernungKm": 8.1,
+    "fahrzeugeProTag": 81747,
+    "schwerverkehrProTag": 12613
+   }
+  ]
+ },
+ "nettetal": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "A61",
+    "name": "Schwanenhaus",
+    "entfernungKm": 6.6,
+    "fahrzeugeProTag": 34493,
+    "schwerverkehrProTag": 7561
+   },
+   {
+    "strasse": "A40",
+    "name": "Straelen (Niederdorf)",
+    "entfernungKm": 7.8,
+    "fahrzeugeProTag": 34038,
+    "schwerverkehrProTag": 10698
+   }
+  ]
+ },
+ "hueckelhoven": {
+  "jahr": 2024,
+  "quelle": "https://www.bast.de/DE/Themen/Digitales/HF_1/Massnahmen/verkehrszaehlung/zaehl_node.html",
+  "lizenz": "Bundesanstalt für Straßenwesen (BASt), Automatische Dauerzählstellen",
+  "zaehlstellen": [
+   {
+    "strasse": "B221",
+    "name": "Heinsberg",
+    "entfernungKm": 8.5,
+    "fahrzeugeProTag": 15263,
+    "schwerverkehrProTag": 835
+   }
+  ]
+ }
+}

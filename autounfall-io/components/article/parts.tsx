@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import type { Article } from '@/lib/article-types'
 import { SITE } from '@/lib/site'
 import { ctaVarianteFuerRoute, ctaHref } from '@/lib/cta/article-cta-varianten'
+import { pillarRoute } from '@/lib/pillar-route'
 
 // Markdown-Renderer (RSC): interne /-Links → next/link, externe → neuer Tab.
 const mdComponents: Components = {
@@ -48,7 +49,7 @@ export function ArticleBreadcrumb({ article }: { article: Article }) {
           <>
             <li aria-hidden className="text-au-sand-dark">›</li>
             <li>
-              <Link href={`/${article.pillar.slug}`} className="transition-colors hover:text-au-amber">
+              <Link href={pillarRoute(article.pillar.slug)} className="transition-colors hover:text-au-amber">
                 {article.pillar.name}
               </Link>
             </li>

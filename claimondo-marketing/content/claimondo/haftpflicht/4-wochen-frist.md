@@ -160,7 +160,7 @@ Mit freundlichen Grüßen
 ## Häufige Fragen
 
 **Gilt die 4-Wochen-Frist auch bei meiner eigenen Vollkaskoversicherung?**
-Nein. Die hier dargestellten Fristen beziehen sich auf den **gegnerischen Haftpflichtversicherer** bei unverschuldetem Unfall. Für die eigene Kasko gelten die [vertraglichen Anzeigefristen](/haftpflicht/anzeigefristen-kasko), nicht die BGH-Linie zur Prüfungszeit.
+Nein. Die hier dargestellten Fristen beziehen sich auf den **gegnerischen Haftpflichtversicherer** bei unverschuldetem Unfall. Für die eigene Kasko gelten die [vertraglichen Anzeigefristen](/haftpflicht/kasko-versicherung), nicht die BGH-Linie zur Prüfungszeit.
 
 **Was, wenn der Versicherer eine längere Frist verlangt?**
 Konkrete Begründung verlangen. Bei nachvollziehbarem Aufklärungsbedarf maximal 2 zusätzliche Wochen schriftlich gewähren — und das nur **einmal**. Bei wiederholter Verlängerungsbitte: Anwalt einschalten.

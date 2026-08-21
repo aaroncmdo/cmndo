@@ -1,6 +1,7 @@
 import { getAllArticles } from '@/lib/articles'
 import { getAllRestPages } from '@/lib/rest'
 import { getAllDecoders } from '@/lib/decoders'
+import { pillarRoute } from '@/lib/pillar-route'
 
 // Relations-Layer (BRIEF-04 Teil A): datengetriebener Pillar<->Spoke- + Cluster-/
 // Prefix-Geschwister-Graph für den "Verwandte Themen"-Block. Ziel: jede Live-Route
@@ -52,15 +53,14 @@ for (const t of ORPHAN_TOOLS) for (const h of t.hosts) (TOOL_INBOUND[h] ??= []).
 function buildNodes(): Node[] {
   const out: Node[] = []
   for (const a of getAllArticles()) {
-    // Pillar-Slug normalisieren: einige Quell-Artikel tragen den rohen Prototyp-Slug
-    // (z.B. "pillar-06-spezialfaelle") statt der echten Route ("spezialfaelle") —
-    // das spaltet sonst die Gruppe + erzeugt einen toten Parent-Link.
-    const ps = a.pillar?.slug ? a.pillar.slug.replace(/^pillar-\d+-/, '') : null
+    // Pillar-Slug normalisieren (siehe lib/pillar-route.ts — dieselbe Regel gilt fuer
+    // den Brotkrumen und den BreadcrumbList-JSON-LD; sie stand frueher NUR hier).
+    const ps = a.pillar?.slug ? pillarRoute(a.pillar.slug) : null
     out.push({
       route: '/' + a.slug,
       title: a.title,
-      group: 'pillar:' + (ps ?? 'ratgeber'),
-      parent: ps ? '/' + ps : null,
+      group: 'pillar:' + (ps?.slice(1) ?? 'ratgeber'),
+      parent: ps,
     })
   }
   for (const p of getAllRestPages()) {

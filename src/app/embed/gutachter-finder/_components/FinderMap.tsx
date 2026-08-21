@@ -39,6 +39,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
 import { istHervorgehobenerPartner } from './partner-pin'
 import { empfehleSvFuerOrt } from '../actions'
+import { setzeDeadPinEbene } from './deadpin-layer'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
@@ -249,7 +250,13 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
   // AAR-956 #4 (Aaron 12.06.): Marker-Elemente nach ID, um den GEWÄHLTEN Gutachter
   // hervorzuheben (Partner via svId, Dead-Pin via deadPinId) + letzter Ort für die Re-Route.
   const svMarkerElsRef = useRef<Map<string, HTMLElement>>(new Map())
-  const deadPinElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  /**
+   * Nur der GEWÄHLTE Dead-Pin ist noch ein DOM-Marker — die übrigen liegen seit
+   * dem Cluster-Umbau (21.08.) in einer Kartenebene. Die frühere Map aller
+   * Dead-Pin-Elemente ist damit entfallen; sie wurde nur für die
+   * Hervorhebungsklasse gebraucht, und die trägt jetzt dieser eine Marker.
+   */
+  const gewaehlterDeadPinRef = useRef<Marker | null>(null)
   const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
@@ -546,11 +553,16 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
       // trotzdem gerendert werden"). Die 15-km-Ghost-Isochrone filtert NUR die Buchung + das
       // Route-Ziel, NICHT die Karten-Darstellung. El nach ID (= sv_leads.id = deadPinId)
       // merken → den gematchten/gewählten Dead-Pin hervorheben.
-      deadPinElsRef.current.clear()
-      svLeads.forEach((sv) => {
-        const m = addDeadPin(map, deadPinMarkersRef.current, sv.lng, sv.lat)
-        deadPinElsRef.current.set(sv.id, m.getElement())
-      })
+      // ⚠ Seit der Lead-Discovery (21.08.) sind es über 7.000 statt 62. Ein
+      // DOM-Element je Pin liess mapbox-gl bei JEDEM Pan- und Zoom-Frame
+      // tausende Knoten neu positionieren — kein Fehler, kein Log, nur eine
+      // zähe Karte. Die Pins liegen deshalb jetzt in einer geclusterten
+      // Kartenebene; das Icon ist pixelgenau dasselbe.
+      //
+      // Der GEWÄHLTE Pin bleibt ein DOM-Marker (siehe `highlightDeadPin`) —
+      // nur so trägt er weiterhin die Hervorhebungsklasse, und er ist auch dann
+      // sichtbar, wenn er sonst in einem Cluster steckte.
+      setzeDeadPinEbene(map, svLeads, COL_NAVY)
     })
 
     // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
@@ -592,11 +604,33 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
     // Dead-Pin, gegenseitig exklusiv). CSS-Regeln im <style>-Block unten.
     function highlightSv(svId: string | null) {
       svMarkerElsRef.current.forEach((el, id) => el.classList.toggle('sv-marker-selected', id === svId))
-      deadPinElsRef.current.forEach((el) => el.classList.remove('deadpin-selected'))
+      loeseGewaehltenDeadPin()
     }
+
+    /**
+     * Der gewählte Dead-Pin als EINZELNER DOM-Marker.
+     *
+     * ⚠ Die übrigen Pins liegen seit dem Cluster-Umbau in einer Kartenebene und
+     * haben kein DOM-Element mehr, an das sich eine Klasse hängen liesse. Für
+     * genau einen Pin ist ein Marker aber unbedenklich — und er hat einen
+     * zweiten Vorteil: er ist auch dann sichtbar, wenn er sonst in einem
+     * Cluster verschwände.
+     */
+    function loeseGewaehltenDeadPin() {
+      gewaehlterDeadPinRef.current?.remove()
+      gewaehlterDeadPinRef.current = null
+    }
+
     function highlightDeadPin(deadPinId: string | null) {
-      deadPinElsRef.current.forEach((el, id) => el.classList.toggle('deadpin-selected', id === deadPinId))
+      loeseGewaehltenDeadPin()
       svMarkerElsRef.current.forEach((el) => el.classList.remove('sv-marker-selected'))
+      if (!deadPinId) return
+
+      const lead = svLeads.find((l) => l.id === deadPinId)
+      if (!lead) return
+      const marker = addDeadPin(map, [], lead.lng, lead.lat)
+      marker.getElement().classList.add('deadpin-selected')
+      gewaehlterDeadPinRef.current = marker
     }
 
     // AAR-956 #4: Fahr-Route vom Besichtigungsort zum Ziel + Kamera + onArrive (Popup). EINE
@@ -761,7 +795,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
       deadPinMarkersRef.current.forEach((m) => m.remove())
       deadPinMarkersRef.current = []
       svMarkerElsRef.current.clear()
-      deadPinElsRef.current.clear()
+      gewaehlterDeadPinRef.current?.remove()
+      gewaehlterDeadPinRef.current = null
       userMarkerRef.current?.remove()
       carMarkerRef.current?.remove()
       routePulseRef.current?.remove()
