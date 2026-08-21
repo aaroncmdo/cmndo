@@ -758,8 +758,46 @@ Mapbox-Style-Timeout nach 12 s". Das trat in **jedem** Lauf auf, auch ohne Deep-
 vermutlich ein Headless-/Netzwerk-Artefakt dieser Umgebung. Der Wizard funktioniert unabhängig
 davon. Nicht als Prod-Befund verbucht — nicht sauber zuzuordnen.
 
-**Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
-sein Regel-4-Nachweis ist Schicht 5 des Skripts, sie steht bis dahin auf `warn`.
+### 12g · MCP deployt — die Kette ist **vollständig grün**
+
+Aaron hat den VPS-Zugang freigegeben (überschreibt die README-Konvention „lokaler Claude fasst
+den VPS nicht an"), also wurde der Deploy nachgezogen. Ergebnis desselben Aufrufs, der zuvor
+die Sackgasse zeigte:
+
+```
+## Gaith · 5★ (119) · ca. 5 km · Empfohlener Partner
+- Fr., 21.08., 14:20
+→ Termin bei Gaith buchen: https://claimondo.de/gutachter-finden?plz=50670&sv=b2754f9c-…
+
+## Kelvin Tyron · 5★ (23) · ca. 10 km · Empfohlener Partner
+→ Termin bei Kelvin Tyron buchen: https://claimondo.de/gutachter-finden?plz=50670&sv=eae70f94-…
+
+Alle Gutachter auf der Karte: https://claimondo.de/gutachter-finden?plz=50670
+```
+
+`verify-deeplink-kette.mjs`: **alle fünf Schichten ✓, Exit 0** — Schicht 5 sprang von
+`! zeigt noch die Sammelkarte` auf `✓ MCP nennt Gutachter MIT Direktlink`.
+
+### 🕳️ Der eigentliche Fund beim Deployen: Der Update-Pfad war seit ~19 Tagen tot
+
+`git pull` im MCP-Checkout brach ab:
+
+```
+fatal: couldn't find remote ref refs/heads/kitta/mcp-server-http
+```
+
+Der Checkout (`/opt/claimondo-mcp/source`) ist ein **shallow single-branch-Clone**, dessen
+Refspec noch auf den längst **gelöschten** Feature-Branch zeigte. Jeder Update-Versuch
+scheiterte — **still**, denn dieser Dienst hat keinen Workflow, der etwas melden würde (§12c).
+Die 19 Tage Prozess-Uptime waren das einzige sichtbare Symptom, und Uptime liest sich wie
+Stabilität.
+
+> ⭐ **Drei Schichten mussten stimmen, und jede hätte still versagen können:** der Pull (tot),
+> der Build (`dist/` muss den Fix wirklich enthalten — geprüft, nicht angenommen) und der
+> Restart. **`pm2 status: online` beweist keine davon** — nur die Antwort des Dienstes tut das.
+
+Refspec und Upstream sind repariert (`git pull` läuft wieder), der Weg ist im README
+dokumentiert.
 
 > Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
 > ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.

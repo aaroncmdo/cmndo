@@ -46,11 +46,17 @@ export const PHONE_E164 = '+4915153608515'
 export const PHONE_DISPLAY = '0151 5360 8515'
 
 /**
- * Festnetz = Anbieterkennzeichnung + Call-Tracking-Anschluss.
+ * Festnetz = der alte matelso/aircall-Call-Tracking-Anschluss.
  *
- * Bleibt in Impressum und Datenschutz stehen: Pflichtangabe nach § 5 DDG zum
- * Geschäftssitz, keine Marketing-CTA. Eine rechtliche Angabe wechselt man
- * nicht als Nebeneffekt einer Kanal-Entscheidung.
+ * ⚠ SEIT 21.08.2026 OHNE CONSUMER — und das ist Absicht, kein toter Code.
+ * Zuerst hielt diese Konstante Impressum + Datenschutz auf dem Festnetz; auf
+ * Nachfrage hat Aaron entschieden, dass auch die Pflichtangaben die
+ * Mobilnummer führen (der Anschluss ist erreichbar, § 5 DDG verlangt keine
+ * bestimmte Nummernart — nur eine, unter der man ankommt).
+ *
+ * Sie bleibt stehen, weil sie der RÜCKWEG ist: soll das Call-Tracking wieder
+ * greifen, ist es ein Wert statt einer Recherche, welche Nummer es war.
+ * Vor dem Löschen: `PROJECT-mobilnummer-primaer-call-tracking-weg` lesen.
  */
 export const PHONE_FESTNETZ_E164 = '+4922125906530'
 export const PHONE_FESTNETZ_DISPLAY = '0221 25906530'
