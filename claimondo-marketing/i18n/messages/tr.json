@@ -2210,7 +2210,12 @@
       "sv_popup_bewertungen": "Değerlendirmeler",
       "sv_popup_cta": "Wizard ile Talep Oluştur →",
       "beratung_label": "Danışmanlık"
-    }
+    },
+    "sprung_staedte": "Şehirler",
+    "sprung_ratgeber": "Rehber",
+    "sprung_schliessen": "Kapat",
+    "sprung_hinweis": "Dokunmak haritayı ortalar — arayıcıda kalırsınız. Ok, şehir sayfasını açar.",
+    "sprung_infos": "Şehir sayfası"
   },
   "werkstatt_finden": {
     "sr_h1": "Yakınınızda oto tamir servisi bulun — onaylı partner servislerin interaktif haritası"
@@ -4073,10 +4078,10 @@
       "og_description": "5 adımda tam tazminata — ort. 32 gün. Danışman geri araması <15 dk, bilirkişi <48 saat."
     },
     "gutachter_finden": {
-      "title": "Yakınınızda araç bilirkişisi bulun — Harita & 48 saat altında randevu",
-      "description": "Ülke genelinde sertifikalı partner bilirkişilerle etkileşimli harita. Randevuyu görün, 48 saat altında yerinde. Suçsuz kazada 0 € (§249 BGB).",
-      "og_title": "Araç bilirkişisi bulun — bilirkişilerle harita",
-      "og_description": "Almanya'daki tüm uygun bilirkişilerin etkileşimli haritası. 48 saat altında randevu. Suçsuz zarar görenler için §249 BGB uyarınca ücretsiz.",
+      "title": "{anzahl} şehir için harita — Kfz bilirkişisi bulun",
+      "description": "{anzahl} Alman şehrinde sertifikalı Kfz bilirkişileri tek haritada — boş randevuları görün, 48 saat içinde yerinde. Kusursuz kazazedeler için 0 € (§ 249 BGB).",
+      "og_title": "{anzahl} şehir için harita — Kfz bilirkişisi bulun",
+      "og_description": "{anzahl} Alman şehrinde sertifikalı bilirkişiler ve boş randevular. 48 saat içinde yerinde, § 249 BGB uyarınca ücretsiz.",
       "twitter_title": "Araç bilirkişisi bulun — bilirkişilerle harita",
       "twitter_description": "Almanya'daki tüm uygun bilirkişilerin haritası. 48 saat altında randevu."
     },

@@ -701,10 +701,10 @@
       "twitter_description": "Passende Werkstatt in der Nähe: nach Marke, Schadensbild und Entfernung gerankt. Anfrage in wenigen Minuten."
     },
     "gutachter_finden": {
-      "title": "Kfz-Gutachter finden in Ihrer Nähe — mit Karte",
-      "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
-      "og_title": "Kfz-Gutachter finden — Karte mit Kfz-Sachverständigen",
-      "og_description": "Interaktive Karte aller verfügbaren Kfz-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
+      "title": "Kfz-Gutachter finden — Karte für {anzahl} Städte",
+      "description": "Kfz-Gutachter in {anzahl} Städten auf einer Karte — freie Termine sehen, in unter 48 h vor Ort. Für unverschuldet Geschädigte 0 € (§ 249 BGB).",
+      "og_title": "Kfz-Gutachter finden — Karte für {anzahl} Städte",
+      "og_description": "Zertifizierte Kfz-Sachverständige in {anzahl} deutschen Städten, mit freien Terminen. Gutachter in unter 48 h vor Ort, 0 € nach § 249 BGB.",
       "twitter_title": "Kfz-Gutachter finden — Karte mit Kfz-SVs",
       "twitter_description": "Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h."
     },
@@ -2098,7 +2098,12 @@
       "sv_popup_bewertungen": "Bewertungen",
       "sv_popup_cta": "Über Wizard anfragen →",
       "beratung_label": "Beratung"
-    }
+    },
+    "sprung_staedte": "Städte",
+    "sprung_ratgeber": "Ratgeber",
+    "sprung_schliessen": "Schließen",
+    "sprung_hinweis": "Ein Tippen zentriert die Karte — Sie bleiben im Finder. Der Pfeil öffnet die Stadtseite.",
+    "sprung_infos": "Stadtseite"
   },
   "beratung_anfragen": {
     "badge": "0 € · Kein Callcenter · Direkter Kontakt",

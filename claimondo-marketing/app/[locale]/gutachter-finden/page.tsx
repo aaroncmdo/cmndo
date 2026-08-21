@@ -1,17 +1,22 @@
 import type { Metadata } from 'next'
-import { Fragment } from 'react'
-import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { GutachterFindenSection } from '@/components/gutachter-finden/GutachterFindenSection'
+import { FinderSprungPanel } from '@/components/gutachter-finden/FinderSprungPanel'
+import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
+  // Der Umfang steht in Title und Description und macht die Seite als HUB
+  // erkennbar — statt nur als „Karte". Bewusst aus STAEDTE.length statt
+  // hartcodiert: eine feste Zahl waere nach dem naechsten Stadt-Rollout still
+  // falsch, und in einer Meta-Description prueft das niemand nach.
+  const anzahl = STAEDTE.length
   return {
-    title: t('gutachter_finden.title'),
-    description: t('gutachter_finden.description'),
+    title: t('gutachter_finden.title', { anzahl }),
+    description: t('gutachter_finden.description', { anzahl }),
     keywords: [
       'Kfz-Gutachter finden',
       'Sachverständiger in der Nähe',
@@ -34,8 +39,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
       images: OG_DEFAULT_IMAGES,
       url: `${SITE_URL}/gutachter-finden`,
-      title: t('gutachter_finden.og_title'),
-      description: t('gutachter_finden.og_description'),
+      title: t('gutachter_finden.og_title', { anzahl }),
+      description: t('gutachter_finden.og_description', { anzahl }),
     },
     twitter: {
       card: 'summary_large_image',
@@ -53,21 +58,17 @@ export async function generateMetadata(): Promise<Metadata> {
 // JSON-LD (Service/Breadcrumb/ImageObject) und die sr-only-H1 beschreiben die Seite weiterhin
 // crawler-lesbar. FAQ-/HowTo-JSON-LD wurde entfernt, weil deren SICHTBARER Inhalt wegfällt
 // (Google verlangt sichtbaren Content für FAQ-/HowTo-Rich-Results).
-// Ziele des Crawl-Pfads: der Pillar, seine drei Themen-Spokes und die sieben
-// Hub-Staedte (die mit hyperlocaler Tiefe, `HYPERLOCAL_DATA` in staedte.ts).
-// Bewusst kurz gehalten — ein Navigations-Block, keine Linkliste.
-const FINDER_LINKS = [
-  { href: '/kfz-gutachter', label: 'Kfz-Gutachter' },
-  { href: '/kfz-gutachter/kosten', label: 'Kosten' },
-  { href: '/kfz-gutachter/ablauf', label: 'Ablauf' },
+// Ratgeber-Ziele des Crawl-Pfads: der Pillar und seine Themen-Spokes.
+// Die Staedte kommen nicht mehr aus einer Handliste, sondern aus STAEDTE —
+// statt 7 ausgewaehlter sind damit ALLE 173 Stadtseiten verlinkt (s.u.).
+const RATGEBER_LINKS = [
+  { href: '/kfz-gutachter', label: 'Kfz-Gutachter (Übersicht)' },
+  { href: '/kfz-gutachter/kosten', label: 'Was ein Gutachten kostet' },
+  { href: '/kfz-gutachter/ablauf', label: 'Ablauf nach dem Unfall' },
   { href: '/kfz-gutachter/wertminderung', label: 'Wertminderung' },
-  { href: '/kfz-gutachter/koeln', label: 'Köln' },
-  { href: '/kfz-gutachter/duesseldorf', label: 'Düsseldorf' },
-  { href: '/kfz-gutachter/bonn', label: 'Bonn' },
-  { href: '/kfz-gutachter/wuppertal', label: 'Wuppertal' },
-  { href: '/kfz-gutachter/hamburg', label: 'Hamburg' },
-  { href: '/kfz-gutachter/berlin', label: 'Berlin' },
-  { href: '/kfz-gutachter/muenchen', label: 'München' },
+  { href: '/kfz-gutachter/nutzungsausfall', label: 'Nutzungsausfall' },
+  { href: '/kfz-gutachter/gutachten-service', label: 'Gutachten-Service' },
+  { href: '/kfz-gutachter/online-kfz-gutachten', label: 'Online-Gutachten' },
 ] as const
 
 export default async function GutachterFindenPage({
@@ -137,47 +138,42 @@ export default async function GutachterFindenPage({
       {/* Finder-Karte. initialCenter aus ?stadt/?plz/?lat&lng.
           Embed-only: bewusst KEIN Marketing-Content darunter (Trust-Strip, FAQ,
           Bottom-CTA) — der erzeugte auf Mobil den Scroll-Konflikt (AAR-956).
-          Die Hoehe laesst bewusst 5rem frei: der sichtbare Anschnitt des
-          Link-Blocks signalisiert, dass es weitergeht, statt Content hinter
-          einer randlosen 100dvh-Karte zu verstecken. */}
+          Die Karte nutzt wieder die VOLLE Hoehe: die 5rem waren fuer die
+          Linkleiste reserviert, die es seit 21.08. nicht mehr gibt (Aaron:
+          „so eine Bar passt mir nicht"). Der Crawl-Pfad haengt jetzt am
+          FinderSprungPanel darunter. */}
       <GutachterFindenSection
-        height="calc(100dvh - 5rem)"
+        height="100dvh"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
         svId={sp.sv}
       />
 
-      {/* Crawl-Pfad. Die Seite lieferte zuvor 0 Woerter und 0 interne Links —
-          eine Sackgasse: sie nimmt Link-Equity auf (priority 0.95) und gibt
-          nichts weiter. Bewusst nur Navigation, kein Fliesstext: die
-          Content-Tiefe liegt im Pillar /kfz-gutachter (1.711 Woerter).
-          Labels sind Seiten-/Ortsnamen und bleiben deutsch — wie die Ziele
-          und wie die uebrigen internen Links des Builds (next/link,
-          prefix-frei, etablierte Praxis der Stadtseiten). */}
-      <nav
-        aria-label="Weitere Seiten zu Kfz-Gutachtern"
-        className="flex h-20 items-center overflow-x-auto border-t border-claimondo-border bg-claimondo-bg px-4 sm:px-6"
-      >
-        <ul className="flex items-center gap-x-3 gap-y-1 whitespace-nowrap text-body-sm text-claimondo-shield/80">
-          {FINDER_LINKS.map((l, i) => (
-            <Fragment key={l.href}>
-              {i > 0 && (
-                <li aria-hidden className="text-claimondo-shield/30">
-                  ·
-                </li>
-              )}
-              <li>
-                <Link
-                  href={l.href}
-                  className="underline-offset-2 transition-colors hover:text-claimondo-ondo hover:underline"
-                >
-                  {l.label}
-                </Link>
-              </li>
-            </Fragment>
-          ))}
-        </ul>
-      </nav>
+      {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:
+          statt 7 ausgewaehlter Staedte sind ALLE 173 verlinkt, und der Klick
+          zieht den Kunden nicht mehr aus dem Finder heraus, sondern zentriert
+          die Karte auf seine Stadt.
+
+          ⚠ Die Links stehen im server-gerenderten HTML (nur per CSS verborgen),
+          nicht hinter `{offen && …}` — sonst waere der SEO-Zweck weg, ohne dass
+          die Seite anders aussaehe. */}
+      <FinderSprungPanel
+        staedte={STAEDTE.map((s) => ({
+          slug: s.slug,
+          name: s.name,
+          bundesland: s.bundesland,
+          lat: s.lat,
+          lng: s.lng,
+        }))}
+        ratgeber={[...RATGEBER_LINKS]}
+        labels={{
+          staedte: t('sprung_staedte'),
+          ratgeber: t('sprung_ratgeber'),
+          schliessen: t('sprung_schliessen'),
+          hinweis: t('sprung_hinweis'),
+          infos: t('sprung_infos'),
+        }}
+      />
     </>
   )
 }

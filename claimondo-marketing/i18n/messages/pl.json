@@ -2204,7 +2204,12 @@
       "sv_popup_bewertungen": "Opinie",
       "sv_popup_cta": "Wyślij zapytanie przez Wizard →",
       "beratung_label": "Doradztwo"
-    }
+    },
+    "sprung_staedte": "Miasta",
+    "sprung_ratgeber": "Poradnik",
+    "sprung_schliessen": "Zamknij",
+    "sprung_hinweis": "Kliknięcie centruje mapę — pozostajesz w wyszukiwarce. Strzałka otwiera stronę miasta.",
+    "sprung_infos": "Strona miasta"
   },
   "werkstatt_finden": {
     "sr_h1": "Znajdź warsztat samochodowy w pobliżu — interaktywna mapa sprawdzonych warsztatów partnerskich"
@@ -4067,10 +4072,10 @@
       "og_description": "W 5 krokach do pełnego odszkodowania — śr. 32 dni. Oddzwonienie doradcy <15 min, rzeczoznawca <48 h."
     },
     "gutachter_finden": {
-      "title": "Znajdź rzeczoznawcę Kfz w pobliżu — mapa & termin poniżej 48 h",
-      "description": "Interaktywna mapa z certyfikowanymi rzeczoznawcami partnerskimi w całych Niemczech. Proszę zobaczyć termin, na miejscu poniżej 48 h. 0 € przy niezawinionej kolizji (§249 BGB).",
-      "og_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
-      "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
+      "title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "description": "Certyfikowani rzeczoznawcy samochodowi w {anzahl} niemieckich miastach na jednej mapie — wolne terminy, na miejscu w niecałe 48 h. Bez kosztów wg § 249 BGB.",
+      "og_title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "og_description": "Certyfikowani rzeczoznawcy w {anzahl} miastach Niemiec z wolnymi terminami. Na miejscu w 48 h, bezpłatnie wg § 249 BGB.",
       "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
       "twitter_description": "Mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h."
     },
