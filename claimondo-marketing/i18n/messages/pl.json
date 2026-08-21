@@ -3891,7 +3891,12 @@
     "kfzbestand_h2": "Zarejestrowane pojazdy w {stadt}",
     "kfzbestand_text": "W {stadt} zarejestrowanych jest {pkw} samochodów osobowych, w tym {gewerblich} na właścicieli firmowych. Do tego dochodzi {lkw} samochodów ciężarowych i {kraftraeder} motocykli.",
     "kfzbestand_quote": "To {proTausend} samochodów na 1000 mieszkańców.",
-    "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}"
+    "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}",
+    "amtlich_eyebrow": "Oficjalne statystyki wypadków",
+    "amtlich_h2": "Gdzie w mieście {ort} kumulują się wypadki",
+    "amtlich_intro": "Atlas wypadków niemieckich urzędów statystycznych federacji i krajów związkowych rejestruje każdy wypadek drogowy z obrażeniami ciała wraz z dokładną lokalizacją. Dla miasta {ort} w okresie {zeitraum} wynikają z niego następujące skupiska:",
+    "amtlich_hinweis": "Dla każdego miejsca oceniono obszar o wielkości około 100 metrów. Liczby nie wskazują przyczyn — ruchliwa droga główna notuje więcej wypadków niż ulica boczna.",
+    "amtlich_quelle": "Źródło: <link>{quelle}</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin pomyślnie zarejestrowany!",
