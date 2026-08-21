@@ -3788,6 +3788,7 @@
     "form_consent": "Wysyłając formularz, akceptuję <link>politykę prywatności</link>.",
     "form_toast_success": "Dziękujemy! Oddzwonimy w ciągu 15 minut.",
     "form_toast_error": "Wysłanie nie powiodło się",
+    "form_toast_rate_limit": "Zbyt wiele zgłoszeń. Spróbuj ponownie za kilka minut.",
     "trust_kpis": [
       {
         "wert": "2.000+",

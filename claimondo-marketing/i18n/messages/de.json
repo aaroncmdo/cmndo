@@ -3929,6 +3929,7 @@
     "form_consent": "Mit dem Absenden akzeptiere ich die <link>Datenschutzerklärung</link>.",
     "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück.",
     "form_toast_error": "Übermittlung fehlgeschlagen",
+    "form_toast_rate_limit": "Zu viele Anfragen. Bitte in ein paar Minuten erneut versuchen.",
     "trust_kpis": [
       {
         "wert": "2.000+",

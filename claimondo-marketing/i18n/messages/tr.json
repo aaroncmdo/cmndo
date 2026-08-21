@@ -3794,6 +3794,7 @@
     "form_consent": "Göndererek <link>Gizlilik Politikası</link>'nı kabul ediyorum.",
     "form_toast_success": "Teşekkürler! 15 dakika içinde sizi arayacağız.",
     "form_toast_error": "Gönderim başarısız oldu",
+    "form_toast_rate_limit": "Çok fazla istek. Lütfen birkaç dakika sonra tekrar deneyin.",
     "trust_kpis": [
       {
         "wert": "2.000+",

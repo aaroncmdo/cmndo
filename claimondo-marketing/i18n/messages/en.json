@@ -3794,6 +3794,7 @@
     "form_consent": "By submitting I accept the <link>Privacy Policy</link>.",
     "form_toast_success": "Thank you! We will get back to you within 15 minutes.",
     "form_toast_error": "Submission failed",
+    "form_toast_rate_limit": "Too many requests. Please try again in a few minutes.",
     "trust_kpis": [
       {
         "wert": "2,000+",
