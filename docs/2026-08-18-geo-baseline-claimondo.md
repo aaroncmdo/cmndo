@@ -653,6 +653,26 @@ zeigen, dort geht keine Empfehlung verloren. Beide Bruchstellen sind zu; weitere
 > ⭐ Merkregel für neue Ausgabepfade: **Sobald eine Ausgabe eine Person benennt, muss ihr Link
 > zu genau dieser Person führen.** Sonst entwertet der Klick die Empfehlung.
 
+### 12c · Nebenbefund: Der MCP-Server ist ein **CI-blinder Fleck**
+
+Beim Absichern der Änderung aufgefallen und nachgeprüft:
+
+* **Kein Workflow** unter `.github/workflows/` referenziert `services/mcp-server` — die CI
+  baut ihn nicht.
+* Der App-`tsconfig.json` führt `services` in **`exclude`** — der CI-`typecheck` sieht ihn
+  ebenfalls nicht.
+
+**Folge:** Ein Typfehler oder Build-Bruch im MCP-Server fällt in der gesamten Pipeline nicht
+auf; er zeigt sich erst beim manuellen VPS-Deploy. Für diesen PR ist der Nachweis deshalb der
+**lokale** Lauf — `tsc --noEmit` exit 0 und `npm run build` exit 0, plus der Renderer-Test mit
+Fixtures oben. Das ist belastbar, aber es ist eine Einzelmessung, keine dauerhafte Absicherung.
+
+> **Bewusst NICHT in diesem PR gelöst.** Ein zusätzlicher CI-Step (`tsc` für
+> `services/mcp-server`) wäre klein und naheliegend — aber er ändert die Pipeline für **alle**
+> parallel laufenden Sessions, und ein neu eingeführter roter Step blockiert sie sämtlich.
+> Das ist eine Infrastruktur-Entscheidung, kein Nebenprodukt eines Feature-PRs. Vorschlag zur
+> Entscheidung, nicht eigenmächtig gebaut.
+
 **Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
 sein Regel-4-Nachweis ist ein eigener `tools/call` gegen `mcp.claimondo.de` **nach** beiden
 Deploys. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
