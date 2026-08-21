@@ -540,5 +540,147 @@ verbessert die Zitierfähigkeit einer Antwort, die keinen Termin anbieten kann.
 
 ---
 
+## 12 · Der Weg für ChatGPT **ohne** installierte App — Deep-Link statt Sackgasse
+
+§4b hat gezeigt: Die Buchung aus dem Chat existiert vollständig — **für Clients mit
+Tool-Zugriff** (MCP-Connector oder importierte ChatGPT-Action). Das ist die Minderheit.
+Der normale ChatGPT-Nutzer ohne App liest die öffentliche API bestenfalls indirekt und
+bekommt am Ende einen Link. Genau dort war die Kette gebrochen.
+
+**Gemessen am 20.08. auf prod, vor der Änderung:**
+
+```
+GET /api/v1/gutachter-termine?plz=50670
+  anzahl_gutachter:      2
+  Felder je Gutachter:   id, vorname, profilbild, bewertung_*, entfernung,
+                         ist_top_partner, wunschtermin_frei, termine
+  interaktive_karte_url: https://claimondo.de/gutachter-finden?plz=50670
+```
+
+Die Antwort nennt einen konkreten Gutachter mit konkreten Slots — und verlinkt dann auf die
+**allgemeine Karte ohne jede Auswahl**. Wer im Chat „Gutachter X hat Donnerstag frei" liest
+und klickt, steht wieder am Anfang der Suche. Die Empfehlung, die die KI gerade gegeben hat,
+geht im Klick verloren.
+
+**Gebaut (PR `kitta/geo-deeplink-sv-vorauswahl`)** — fünf Schichten, eine davon war dank
+`Omit<…>` im Wrapper gratis:
+
+| Schicht | Änderung |
+|---|---|
+| `api/v1/gutachter-termine` | **`gutachter[].buchungs_url`** — fertiger Link je Gutachter |
+| `api/v1/openapi.json` | Feld im Schema + `required` — sonst filtern ChatGPT-Actions es weg |
+| `llms.txt` | Anweisung: *diesen* Link ausgeben, **nicht** `interaktive_karte_url` |
+| Marketing `/gutachter-finden` → `EmbedFinderSection` | `?sv=` bis in die iframe-URL |
+| `FinderWizard` | `waehleVorauswahl()` ersetzt `svs[0]` an allen drei Matching-Stellen |
+
+**Zwei bewusste Verengungen**, beide im Code begründet:
+
+* **Kein Slot im Link.** Zwischen KI-Antwort und Klick vergehen Minuten; der Slot kann weg
+  sein. Eine Vorauswahl, die ins Leere zeigt, ist schlechter als keine. Der Gutachter ist
+  die Information aus dem Chat, die erhalten bleiben muss — der Slot ist ein Klick.
+* **Kein schreibender GET.** Ein Endpunkt, der per Link einen Termin bucht, würde von jedem
+  Crawler ausgelöst. Der Kunde bestätigt weiterhin selbst.
+
+**Robust nach beiden Seiten:** Ist der SV beim Klick belegt oder unbekannt, fällt die
+Vorauswahl still auf den bestgerankten zurück — gültige Liste statt Fehlerseite. Und schon
+vor dem Deploy gemessen: `?sv=<unbekannte-uuid>` liefert HTTP **200**, ein unbekannter
+Parameter wird ignoriert.
+
+### 12a · Der MCP-Server hatte dieselbe Lücke — **gefunden, korrigiert, mitgefixt**
+
+Zunächst als „ungeprüft" notiert, dann gemessen. `tools/call` auf
+`claimondo_finde_gutachter_termine`, PLZ 50670, liefert **Markdown-Freitext**, kein JSON:
+
+```
+## Gaith · 5★ (119) · ca. 5 km · Empfohlener Partner
+- Fr., 21.08., 09:00
+- Fr., 21.08., 09:40
+## Kelvin Tyron · 5★ (23) · ca. 10 km · Empfohlener Partner
+- Fr., 21.08., 09:00
+
+Interaktive Karte / Buchung: https://claimondo.de/gutachter-finden?plz=50670
+```
+
+Der Server nennt zwei Gutachter **namentlich mit Slots** — und verlinkt dann auf die anonyme
+Sammelkarte. **Exakt dieselbe Sackgasse wie in der REST-API**, nur im Pfad mit dem
+qualitativ besten Zugang (Claude.ai-Connectors, ChatGPT-Developer-Mode).
+
+Weil er die Felder selbst rendert und die URL selbst baut, greift `buchungs_url` dort **nicht
+automatisch** mit.
+
+> ⚠ **Korrektur einer Fehlaussage.** Zuerst stand hier: „Sein Code liegt nicht in diesem Repo."
+> Das war falsch. Er liegt in **`services/mcp-server/`** — ich hatte nur in `src/` gesucht
+> (`Grep`, `Glob **/mcp/**`), und der einzige breite `find` lief in den **Timeout**, sagte also
+> gar nichts. Aus zwei Nulltreffern **am falschen Ort** plus einem toten Instrument wurde eine
+> Gewissheit. ⭐ Die bekannte Regel greift auch hier, nur in einer Variante: *das Instrument
+> lebte, aber es zeigte auf das falsche Verzeichnis* — eine Null aus dem falschen Ordner ist
+> keine Aussage über das Repo.
+
+**Damit im selben PR mitgefixt** (drei Stellen, alle in `services/mcp-server/`):
+
+| Stelle | Änderung |
+|---|---|
+| `src/api.ts` — Typ | `buchungs_url?: string` (optional: der Server kann gegen eine ältere API laufen) |
+| `src/api.ts` — Renderer | Direktlink je Gutachter; die Karte firmiert dann als „Alle Gutachter auf der Karte" statt als zweiter „Buchung"-Link |
+| `src/index.ts` — Zod-`outputSchema` | `buchungs_url` deklariert — **dieselbe Falle wie beim OpenAPI-Schema**: nicht deklarierte Felder fallen bei der Validierung still weg |
+| `src/index.ts` — Werkzeugbeschreibung | „diesen Link ausgeben, **nicht** `interaktive_karte_url`" — vorher stand dort wörtlich „die eigentliche Buchung läuft über die interaktive Karte", die Beschreibung **lenkte das LLM aktiv falsch** |
+
+Verhalten beider Fälle gemessen (Renderer gebaut + mit Fixtures aufgerufen, nicht nur kompiliert):
+
+```
+FALL 1 (API liefert das Feld):     → Termin bei Gaith buchen: …?plz=50670&sv=a1
+                                   Alle Gutachter auf der Karte: …?plz=50670
+FALL 2 (ältere API, heute):        Interaktive Karte / Buchung: …?plz=50670   ← unverändert
+```
+
+### 12b · Die Klasse einmal durchgezählt — sie trat genau zweimal auf
+
+Nachdem derselbe Bruch in zwei Kanälen unabhängig auftrat, war die Frage: **Wo noch?**
+Alle Ausgabepfade geprüft, die Sachverständige nennen:
+
+| Pfad | Nennt Namen? | Verlinkt auf | Bewertung |
+|---|---|---|---|
+| `gutachter-termine` (REST) | **ja** — voller Vorname | vorher Sammelkarte | 🔴 Bruch → gefixt |
+| `claimondo_finde_gutachter_termine` (MCP) | **ja** — voller Vorname | vorher Sammelkarte | 🔴 Bruch → gefixt |
+| `sv-in-naehe` (REST) | nein — nur `vorname_initiale` („G.") | Sammelkarte | ✅ konsistent |
+| `claimondo_finde_sachverstaendige` (MCP) | nein — nur Entfernung/Stadt/Bewertung | Sammelkarte | ✅ konsistent |
+| `pruefe-anspruch`, `decode-brief`, `rueckruf` | nennen keine SVs | — | ✅ nicht betroffen |
+
+**Das Muster ist scharf:** Der Bruch entstand **genau dort, wo ein voller Vorname genannt
+wurde**. Die anonymen Pfade sind korrekt — eine anonyme Liste darf auf eine anonyme Karte
+zeigen, dort geht keine Empfehlung verloren. Beide Bruchstellen sind zu; weitere gibt es nicht.
+
+> ⭐ Merkregel für neue Ausgabepfade: **Sobald eine Ausgabe eine Person benennt, muss ihr Link
+> zu genau dieser Person führen.** Sonst entwertet der Klick die Empfehlung.
+
+### 12c · Nebenbefund: Der MCP-Server ist ein **CI-blinder Fleck**
+
+Beim Absichern der Änderung aufgefallen und nachgeprüft:
+
+* **Kein Workflow** unter `.github/workflows/` referenziert `services/mcp-server` — die CI
+  baut ihn nicht.
+* Der App-`tsconfig.json` führt `services` in **`exclude`** — der CI-`typecheck` sieht ihn
+  ebenfalls nicht.
+
+**Folge:** Ein Typfehler oder Build-Bruch im MCP-Server fällt in der gesamten Pipeline nicht
+auf; er zeigt sich erst beim manuellen VPS-Deploy. Für diesen PR ist der Nachweis deshalb der
+**lokale** Lauf — `tsc --noEmit` exit 0 und `npm run build` exit 0, plus der Renderer-Test mit
+Fixtures oben. Das ist belastbar, aber es ist eine Einzelmessung, keine dauerhafte Absicherung.
+
+> **Bewusst NICHT in diesem PR gelöst.** Ein zusätzlicher CI-Step (`tsc` für
+> `services/mcp-server`) wäre klein und naheliegend — aber er ändert die Pipeline für **alle**
+> parallel laufenden Sessions, und ein neu eingeführter roter Step blockiert sie sämtlich.
+> Das ist eine Infrastruktur-Entscheidung, kein Nebenprodukt eines Feature-PRs. Vorschlag zur
+> Entscheidung, nicht eigenmächtig gebaut.
+
+**Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
+sein Regel-4-Nachweis ist ein eigener `tools/call` gegen `mcp.claimondo.de` **nach** beiden
+Deploys. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
+
+> Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
+> ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
+
+---
+
 *Messung: 18.08.2026, 14:51 UTC · Seiten-Sample: 27 · User-Agent: OAI-SearchBot/1.0 ·
-Skript: `scripts/geo-baseline.mjs`*
+Skript: `scripts/geo-baseline.mjs` · §12 ergänzt 21.08.2026*

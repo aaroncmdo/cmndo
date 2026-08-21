@@ -328,6 +328,12 @@ const spec = {
         type: 'object',
         properties: {
           id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle — als sv_id an meldeSchaden weitergeben.' },
+          buchungs_url: {
+            type: 'string',
+            format: 'uri',
+            description:
+              'Fertiger Buchungs-Link fuer GENAU diesen Gutachter. Beim Empfehlen diesen Link ausgeben — er oeffnet den Finder mit dem Gutachter vorausgewaehlt; der Kunde ergaenzt Adresse + Kontakt und bestaetigt selbst. NICHT interaktive_karte_url verlinken: die zeigt die allgemeine Karte ohne Auswahl.',
+          },
           vorname: { type: 'string', nullable: true },
           profilbild: { type: 'string', nullable: true, format: 'uri' },
           bewertung_schnitt: { type: 'number', nullable: true },
@@ -337,7 +343,7 @@ const spec = {
           wunschtermin_frei: { type: 'boolean' },
           termine: { type: 'array', items: { $ref: '#/components/schemas/TerminSlot' } },
         },
-        required: ['id', 'termine'],
+        required: ['id', 'termine', 'buchungs_url'],
       },
       GutachterTermineResponse: {
         type: 'object',
