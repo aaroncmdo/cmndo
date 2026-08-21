@@ -71,9 +71,14 @@ export function FinderSprungPanel({ staedte, ratgeber, labels }: Props) {
 
   return (
     <>
-      {/* Freischwebende Knöpfe — bewusst zurückhaltend: klein, halbtransparent,
-          unten links, damit sie die Karte nicht dominieren. */}
-      <div className="pointer-events-none fixed bottom-4 left-4 z-30 flex gap-2 sm:bottom-5 sm:left-5">
+      {/* Freischwebende Knöpfe — bewusst zurückhaltend: klein, halbtransparent.
+          ⚠ AB `sm` RECHTS, nicht links: links liegt der Lead-Wizard („4 kurze
+          Fragen"). Auf dem Prod-Screenshot verdeckte das geöffnete Panel ihn
+          vollständig — ein Panel über dem Conversion-Element zieht den Kunden
+          genauso weg wie ein Link. Rechts ist nur Karte.
+          `sm:bottom-10` hält Abstand zur Mapbox-Attribution unten rechts.
+          Mobil bleibt es unten links: dort endet der Wizard darüber. */}
+      <div className="pointer-events-none fixed bottom-4 left-4 z-30 flex gap-2 sm:bottom-10 sm:left-auto sm:right-5">
         {(
           [
             ['staedte', labels.staedte],
@@ -110,9 +115,10 @@ export function FinderSprungPanel({ staedte, ratgeber, labels }: Props) {
           aria-modal={offen === key}
           aria-label={key === 'staedte' ? labels.staedte : labels.ratgeber}
           // Mobil Bottom-Sheet über die volle Breite, ab sm ein Panel unten
-          // links. Sichtbarkeit über translate/opacity — das Markup bleibt im
-          // DOM (s. Kopfkommentar).
-          className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[75dvh] flex-col rounded-t-ios-xl border border-claimondo-border bg-white shadow-sheet transition-transform duration-300 ease-out sm:inset-x-auto sm:bottom-5 sm:left-5 sm:max-h-[70dvh] sm:w-[24rem] sm:rounded-ios-xl ${
+          // RECHTS (links liegt der Lead-Wizard, s. Kommentar an den Knöpfen).
+          // Sichtbarkeit über translate/opacity — das Markup bleibt im DOM
+          // (s. Kopfkommentar).
+          className={`fixed inset-x-0 bottom-0 z-50 flex max-h-[75dvh] flex-col rounded-t-ios-xl border border-claimondo-border bg-white shadow-sheet transition-transform duration-300 ease-out sm:inset-x-auto sm:bottom-10 sm:left-auto sm:right-5 sm:max-h-[70dvh] sm:w-[24rem] sm:rounded-ios-xl ${
             offen === key ? 'translate-y-0' : 'pointer-events-none translate-y-[110%]'
           }`}
         >

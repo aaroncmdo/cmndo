@@ -54,6 +54,12 @@ export type EmbedFinderSectionProps = {
    * Unbekanntem still auf den bestgerankten SV zurueck.
    */
   svId?: string
+  /**
+   * GEO-Deep-Link (`?slot=<ISO-Start>`): der Termin, den die KI-Antwort genannt hat.
+   * Nur zusammen mit `svId` sinnvoll. Ist der Slot beim Klick belegt, faellt der Embed
+   * still auf die normale Terminauswahl zurueck.
+   */
+  slot?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -72,6 +78,7 @@ export function EmbedFinderSection({
   clickIds,
   promoCode,
   svId,
+  slot,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -91,6 +98,8 @@ export function EmbedFinderSection({
   if (promoCode) params.set('promo', promoCode)
   // GEO-Deep-Link: den im Chat genannten Gutachter als Vorauswahl weiterreichen.
   if (svId) params.set('sv', svId)
+  // Nur mit svId sinnvoll: der Slot gehoert zu genau diesem Gutachter.
+  if (svId && slot) params.set('slot', slot)
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 

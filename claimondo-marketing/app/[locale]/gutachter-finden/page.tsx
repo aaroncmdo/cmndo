@@ -83,6 +83,8 @@ export default async function GutachterFindenPage({
     // genannt hat (aus `gutachter[].buchungs_url` der oeffentlichen Termin-API). Wird an
     // den Embed durchgereicht und dort NUR als Vorauswahl genutzt.
     sv?: string
+    /** GEO-Deep-Link: ISO-Start des genannten Termins (nur mit ?sv= sinnvoll). */
+    slot?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -147,6 +149,7 @@ export default async function GutachterFindenPage({
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
         svId={sp.sv}
+        slot={sp.slot}
       />
 
       {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:

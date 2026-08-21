@@ -22,6 +22,11 @@ const MARKETING_SPECS = [/service-pitch-.*\.spec\.ts/, /doc40-.*\.spec\.ts/]
 // Gemessen 20.08. beim Bau des marketing-Projekts: die Testzahl stieg von 199 auf 221,
 // und die 22 zusaetzlichen waren exakt diese Files — inklusive derer, die echte Leads
 // in die Prod-DB schreiben. Die Zahl war der einzige Hinweis; gruen war es trotzdem.
+// Zeigt PLAYWRIGHT_BASE_URL auf einen entfernten Host (Prod/Staging), ist der lokale
+// Dev-Server ueberfluessig — siehe webServer unten.
+const ZIEL_URL = process.env.PLAYWRIGHT_BASE_URL ?? ''
+const ZIEL_IST_REMOTE = ZIEL_URL !== '' && !/localhost|127\.0\.0\.1/.test(ZIEL_URL)
+
 const MANUELLE_LIVE_SMOKES = [
   'staging-clickthrough.spec.ts',
   'kunde-auth-setup.spec.ts',
@@ -100,8 +105,16 @@ export default defineConfig({
     },
   ],
 
-  // Dev server (only locally)
-  ...(process.env.CI ? {} : {
+  // Dev server — nur lokal UND nur wenn wirklich gegen localhost getestet wird.
+  //
+  // Die Bedingung hing bis 21.08. allein an `CI`, nicht daran, WOHIN getestet wird. Damit
+  // sabotierte die Config genau den Lauf, den Regel 4 vorschreibt: ein lokaler Prod-Smoke
+  // (`PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test …`) startete erst
+  // `npm run dev` und starb nach 120 s mit „Timed out waiting 120000ms from
+  // config.webServer" — bevor ein einziger Test lief. Der Workaround war, `CI=1`
+  // davorzusetzen; das schaltet aber nebenbei Retries/Worker/forbidOnly um und ist damit
+  // ein anderer Lauf als der, den man fahren wollte.
+  ...(process.env.CI || ZIEL_IST_REMOTE ? {} : {
     webServer: {
       command: 'npm run dev',
       url: 'http://localhost:3000',
