@@ -35,6 +35,32 @@ async function login(
   await page.context().storageState({ path: storageFile })
 }
 
+/**
+ * Env-Wert mit Fallback — bewusst NICHT `??`.
+ *
+ * ⚠ `??` faengt keine leere Zeichenkette. Ein in GitHub **nicht konfiguriertes** Secret
+ * setzt die Variable trotzdem: auf `''`. `process.env.X ?? 'default'` liefert dann `''`,
+ * und der Login laeuft mit leerem Passwort ins Timeout — der „sichere Default" greift in
+ * CI also genau dann nicht, wenn man ihn braucht.
+ *
+ * Zusaetzlich wird der Zustand GEMELDET, statt ihn zu verschlucken: ein gesetztes, aber
+ * leeres Secret ist im Log sonst nicht von einem gesetzten, aber FALSCHEN zu unterscheiden
+ * — beide enden im selben stummen Timeout. Genau daran haben die 8 `Gutachter Routes` in
+ * routes.spec.ts zwei Naechte lang gehangen (zuletzt Lauf 32445807331, 21.08.), obwohl der
+ * Default nachweislich stimmt (per echtem Login gegen prod gemessen).
+ */
+function envOderDefault(name: string, fallback: string): string {
+  const wert = process.env[name]
+  if (wert && wert.trim() !== '') return wert
+  if (wert !== undefined) {
+    console.warn(
+      `[fixtures] ${name} ist gesetzt, aber LEER — nutze den Default. ` +
+        `In CI heisst das: das Secret existiert nicht (oder ist leer gepflegt).`,
+    )
+  }
+  return fallback
+}
+
 // Fixtures that provide pre-authenticated pages
 export const test = base.extend<{
   adminPage: Page
@@ -51,8 +77,8 @@ export const test = base.extend<{
   // ein Secret greift. Der Default ist also kein Detail, sondern der Fallback, der traegt,
   // wenn ein Secret fehlt oder leer ist.
   adminPage: async ({ browser }, use) => {
-    const email = process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de'
-    const password = process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!'
+    const email = envOderDefault('TEST_ADMIN_EMAIL', 'test-admin@claimondo.de')
+    const password = envOderDefault('TEST_ADMIN_PASSWORD', 'Claimondo2026!')
     const ctx = await browser.newContext({ storageState: ADMIN_STORAGE }).catch(async () => {
       // First run — no stored state, login fresh
       const freshCtx = await browser.newContext()
@@ -68,9 +94,9 @@ export const test = base.extend<{
   },
 
   svPage: async ({ browser }, use) => {
-    const email = process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de'
+    const email = envOderDefault('TEST_SV_EMAIL', 'test-sv@claimondo.de')
     // s. Kommentar bei adminPage — DIESER Default war der, der die 8 Gutachter-Routen kippte.
-    const password = process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!'
+    const password = envOderDefault('TEST_SV_PASSWORD', 'Claimondo2026!')
     const ctx = await browser.newContext({ storageState: SV_STORAGE }).catch(async () => {
       const freshCtx = await browser.newContext()
       const page = await freshCtx.newPage()
