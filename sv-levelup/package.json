@@ -12,7 +12,8 @@
     "test": "vitest run",
     "anreicherung": "node --env-file=.env.local --import tsx scripts/anreicherung.ts",
     "discovery": "node --env-file=.env.local --import tsx scripts/discovery.ts",
-    "heilung": "node --env-file=.env.local --import tsx scripts/heilung.ts"
+    "heilung": "node --env-file=.env.local --import tsx scripts/heilung.ts",
+    "websites": "node --env-file=.env.local --import tsx scripts/websites.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",
