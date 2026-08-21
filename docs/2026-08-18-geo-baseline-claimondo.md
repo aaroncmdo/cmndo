@@ -586,7 +586,7 @@ Vorauswahl still auf den bestgerankten zurück — gültige Liste statt Fehlerse
 vor dem Deploy gemessen: `?sv=<unbekannte-uuid>` liefert HTTP **200**, ein unbekannter
 Parameter wird ignoriert.
 
-### 12a · Der MCP-Server hat dieselbe Lücke — und der Fix erreicht ihn **nicht**
+### 12a · Der MCP-Server hatte dieselbe Lücke — **gefunden, korrigiert, mitgefixt**
 
 Zunächst als „ungeprüft" notiert, dann gemessen. `tools/call` auf
 `claimondo_finde_gutachter_termine`, PLZ 50670, liefert **Markdown-Freitext**, kein JSON:
@@ -605,15 +605,37 @@ Der Server nennt zwei Gutachter **namentlich mit Slots** — und verlinkt dann a
 Sammelkarte. **Exakt dieselbe Sackgasse wie in der REST-API**, nur im Pfad mit dem
 qualitativ besten Zugang (Claude.ai-Connectors, ChatGPT-Developer-Mode).
 
-Weil er die Felder selbst rendert und die URL selbst baut, **greift `buchungs_url` dort
-nicht automatisch mit**. Sein Code liegt nicht in diesem Repo (kein `src/**/mcp/`, kein
-zweites Repo unter dem Account) — er braucht dieselbe Änderung an seiner eigenen Stelle:
-statt der Sammelkarte je Gutachter `…/gutachter-finden?plz=<plz>&sv=<id>`.
+Weil er die Felder selbst rendert und die URL selbst baut, greift `buchungs_url` dort **nicht
+automatisch** mit.
 
-> ⚠ Der Server nennt Namen, verlinkt aber anonym — das ist genau der Bruch, der die
-> Empfehlung entwertet. Ein Einzeiler an seinem Renderer, aber nicht von hier aus.
+> ⚠ **Korrektur einer Fehlaussage.** Zuerst stand hier: „Sein Code liegt nicht in diesem Repo."
+> Das war falsch. Er liegt in **`services/mcp-server/`** — ich hatte nur in `src/` gesucht
+> (`Grep`, `Glob **/mcp/**`), und der einzige breite `find` lief in den **Timeout**, sagte also
+> gar nichts. Aus zwei Nulltreffern **am falschen Ort** plus einem toten Instrument wurde eine
+> Gewissheit. ⭐ Die bekannte Regel greift auch hier, nur in einer Variante: *das Instrument
+> lebte, aber es zeigte auf das falsche Verzeichnis* — eine Null aus dem falschen Ordner ist
+> keine Aussage über das Repo.
 
-**Weiter offen:** der Regel-4-Prod-Smoke nach dem Deploy (Soll + Plan stehen in PR #5462).
+**Damit im selben PR mitgefixt** (drei Stellen, alle in `services/mcp-server/`):
+
+| Stelle | Änderung |
+|---|---|
+| `src/api.ts` — Typ | `buchungs_url?: string` (optional: der Server kann gegen eine ältere API laufen) |
+| `src/api.ts` — Renderer | Direktlink je Gutachter; die Karte firmiert dann als „Alle Gutachter auf der Karte" statt als zweiter „Buchung"-Link |
+| `src/index.ts` — Zod-`outputSchema` | `buchungs_url` deklariert — **dieselbe Falle wie beim OpenAPI-Schema**: nicht deklarierte Felder fallen bei der Validierung still weg |
+| `src/index.ts` — Werkzeugbeschreibung | „diesen Link ausgeben, **nicht** `interaktive_karte_url`" — vorher stand dort wörtlich „die eigentliche Buchung läuft über die interaktive Karte", die Beschreibung **lenkte das LLM aktiv falsch** |
+
+Verhalten beider Fälle gemessen (Renderer gebaut + mit Fixtures aufgerufen, nicht nur kompiliert):
+
+```
+FALL 1 (API liefert das Feld):     → Termin bei Gaith buchen: …?plz=50670&sv=a1
+                                   Alle Gutachter auf der Karte: …?plz=50670
+FALL 2 (ältere API, heute):        Interaktive Karte / Buchung: …?plz=50670   ← unverändert
+```
+
+**Weiter offen:** Der MCP-Server wird **separat deployed** (VPS/pm2, nicht der App-Deploy) —
+sein Regel-4-Nachweis ist ein eigener `tools/call` gegen `mcp.claimondo.de` **nach** beiden
+Deploys. Dazu der Prod-Smoke der App (Soll + Plan in PR #5462).
 
 > Die Einschränkung aus §4b bleibt unberührt: Der Deep-Link verbessert den Weg dorthin, wo
 > ein Gutachter sitzt. In den 9 von 12 Großstädten ohne buchbaren SV ändert er nichts.
