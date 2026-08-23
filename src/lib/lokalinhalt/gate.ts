@@ -339,7 +339,13 @@ export function pruefeLokalinhalt(
   }
 
   // --- Ortsbezug -------------------------------------------------------------
-  const stadt = stadtName.trim().toLowerCase()
+  // ⚠ Gegen die NAMENSVARIANTEN, nicht nur den vollen Namen. Die Stammdaten
+  // fuehren "Stolberg (Rheinland)" und "Frankfurt am Main", jeder Fliesstext
+  // schreibt "Stolberg" bzw. "Frankfurt" — ein Vergleich auf den vollen Namen
+  // lehnt einwandfreie Entwuerfe ab. Am 23.08. an einer echten Charge
+  // aufgeschlagen, NACHDEM ich dieselbe Klasse eine Funktion weiter oben schon
+  // gefixt hatte: derselbe Fehler an zwei Stellen, eine davon uebersehen.
+  const varianten = namensVarianten(stadtName).map((v) => v.toLowerCase())
   const textkorpus = [
     ...bereinigt.stadtbezirke.map((b) => b.name),
     ...bereinigt.lokaleFaqs.flatMap((f) => [f.frage, f.antwort]),
@@ -350,7 +356,7 @@ export function pruefeLokalinhalt(
     .join(' ')
     .toLowerCase()
 
-  if (stadt && !textkorpus.includes(stadt)) {
+  if (varianten.length > 0 && !varianten.some((v) => textkorpus.includes(v))) {
     gruende.push(`Ortsbezug fehlt — "${stadtName}" kommt im Inhalt nicht vor`)
   }
 

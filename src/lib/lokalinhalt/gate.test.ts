@@ -398,3 +398,41 @@ describe('istOrtsspezifischeFaq — mehrteilige Stadtnamen', () => {
     ).toBe(false)
   })
 })
+
+describe('pruefeLokalinhalt — Ortsbezug bei Klammer-/Zusatznamen', () => {
+  it('akzeptiert die Kurzform eines Namens mit Klammerzusatz', () => {
+    // Die Stammdaten fuehren "Stolberg (Rheinland)", jeder Fliesstext schreibt
+    // "Stolberg". Der Ortsbezug-Check verglich gegen den VOLLEN Namen und lehnte
+    // deshalb einen einwandfreien Entwurf ab — gemessen 23.08. an einer echten
+    // Charge. Dieselbe Klasse wie "Frankfurt am Main" eine Funktion weiter oben;
+    // ich hatte nur eine der beiden Stellen gefixt.
+    const e: LokalinhaltEntwurf = {
+      stadtbezirke: [{ name: 'Stolberg-Mitte', ortsteile: ['Altstadt'] }],
+      hauptachsen: { autobahnen: ['A44'], bundesstrassen: ['B264'], knoten: [] },
+      unfallHotspots: [],
+      lokaleFaqs: [
+        {
+          frage: 'Was ist an der Vichtbachtalstraße besonders?',
+          antwort: 'Die Talstraße windet sich durch Stolberg und ist bei Nässe rutschig.',
+        },
+      ],
+      heroAnker: 'Kfz-Gutachten in Stolberg.',
+      topografieAnker: 'Stolberg liegt im Vichttal am Nordrand der Eifel.',
+    }
+    const b = pruefeLokalinhalt(e, 'Stolberg (Rheinland)')
+    expect(b.gruende).toEqual([])
+    expect(b.ok).toBe(true)
+  })
+
+  it('lehnt weiterhin ab, wenn der Ort NIRGENDS vorkommt', () => {
+    const e: LokalinhaltEntwurf = {
+      stadtbezirke: [{ name: 'Mitte', ortsteile: [] }],
+      hauptachsen: { autobahnen: ['A44'], bundesstrassen: [], knoten: [] },
+      unfallHotspots: [],
+      lokaleFaqs: [{ frage: 'Was gilt?', antwort: 'Auf der A44 sind Auffahrschäden typisch.' }],
+      heroAnker: 'Ein Text ohne Ortsnamen.',
+      topografieAnker: 'Flaches Gelände.',
+    }
+    expect(pruefeLokalinhalt(e, 'Stolberg (Rheinland)').ok).toBe(false)
+  })
+})

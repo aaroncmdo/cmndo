@@ -64,11 +64,21 @@ const sb = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
 )
+// ⚠ ARCHIVIERTE Zeilen ausschliessen. Ein archivierter Stand ist per Definition
+// von seinem Nachfolger abgeloest — beide gegeneinander zu messen liefert einen
+// garantierten Volltreffer. Am 23.08. gemessen, direkt nachdem der
+// `--ersetzen`-Import die ersten archivierten Zeilen erzeugt hatte: der Bericht
+// meldete "185 Staedte" (statt 173) und "Maximum 100,0 % (bornheim ↔ bornheim)"
+// — eine Stadt gegen sich selbst. Vorher gab es keine archivierten Zeilen,
+// deshalb fiel die fehlende Filterung nie auf.
+// Entwuerfe bleiben drin: bei denen ist die Frage "ginge das heute durchs Gate?"
+// noch offen und daher interessant.
 const { data, error } = await sb
   .from('stadt_lokalinhalte')
   .select(
     'stadt_slug, status, substanz_score, stadtbezirke, hauptachsen, unfall_hotspots, lokale_faqs, hero_anker, topografie_anker',
   )
+  .neq('status', 'archiviert')
   .order('stadt_slug')
 
 if (error) {
