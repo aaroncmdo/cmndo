@@ -84,16 +84,24 @@ const TOOL: Anthropic.Tool = {
       },
       lokaleFaqs: {
         type: 'array',
-        // Menge bewusst benannt (18.08.2026): ohne Angabe lieferte das Modell
-        // fuenf Fragen = 349 Woerter, gemessen an Solingen. Die FAQ tragen ~80 %
-        // des Ortstextes; bei ~2.800 Woertern Seitenumfang braucht eine Seite
-        // grob 1.200 Woerter Eigenes, um unter die 40-%-Aehnlichkeitsschwelle
-        // der Spec zu kommen. Die Untergrenze steht bewusst NICHT drin — lieber
-        // acht belegbare Fragen als vierzehn, von denen sechs erfunden sind.
+        // 🔴 MENGENVORGABE ENTFERNT (23.08.2026). Hier stand „Ziel: 10-14 Stück"
+        // mit dem Zusatz „Lieber weniger als erfundene — Substanz vor Menge".
+        // Die Zahl hat gewonnen: eine konkrete Vorgabe schlaegt eine weiche
+        // Einschraenkung. Gibt ein Ort nur drei echte Themen her, fuellt das
+        // Modell auf — mit allgemeinen Rechtsfragen. Ergebnis waren 103
+        // Stadtseiten, auf denen dieselbe Antwort bis zu 158-mal stand, und
+        // zwei Fragen, die der zentrale Basis-Block ohnehin schon beantwortet.
+        //
+        // Der Umfang, den die Menge sichern sollte, kommt jetzt aus der TIEFE
+        // je Frage (100-140 statt 60-100 Woerter) statt aus ihrer Zahl. Das
+        // Gate verwirft ohnehin jede FAQ ohne Ortsbezug in der ANTWORT, eine
+        // hohe Zahl brachte also nur noch Ausschuss.
         description:
-          'Ortsspezifische Fragen mit ausfuehrlichen Antworten (je 60-100 Woerter). ' +
-          'Ziel: 10-14 Stück. Nichts, was auf jeder Stadtseite Deutschlands stehen ' +
-          'könnte. Lieber weniger als erfundene — Substanz vor Menge.',
+          'Fragen, die AUSSCHLIESSLICH an diesem Ort Sinn ergeben, mit ausführlichen ' +
+          'Antworten (je 100-140 Wörter). Jede Antwort muss einen konkreten Ortsbezug ' +
+          'enthalten — Stadtteil, benannte Straße, Autobahn oder Knotenpunkt. Es gibt ' +
+          'keine Zielzahl: zwei Fragen mit echter Ortskenntnis sind besser als zehn, ' +
+          'von denen acht überall stehen könnten. Gib nur so viele, wie der Ort hergibt.',
         items: {
           type: 'object',
           properties: { frage: { type: 'string' }, antwort: { type: 'string' } },
@@ -129,7 +137,22 @@ function systemPrompt(): string {
     '- Alles muss extern überprüfbar sein: amtliche Stadtbezirke, tatsächlich vorhandene Autobahnen/Bundesstraßen.',
     '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollständig ist besser als falsch.',
     '- Die lokalen FAQ müssen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen könnte, gehört nicht hierher.',
+    '- Der Ortsbezug muss in der ANTWORT stehen, nicht nur in der Frage. Eine Frage mit',
+    '  eingesetztem Stadtnamen über einer Antwort, die überall gilt, ist kein lokaler Inhalt.',
     '- Nenne den Stadtnamen in den Texten. Kein Baukasten-Text mit austauschbarem Ort.',
+    '',
+    // ⚠ Bewusst eine THEMEN-Liste (Substantive), keine Beispielfragen: Der Prompt
+    // lehrt durch Beispiel. Ein Negativbeispiel („schreibe nicht: Bekomme ich einen
+    // Mietwagen?") liefert dem Modell genau die Formulierung, die es vermeiden soll —
+    // dieselbe Falle wie beim Umlaut-Beispiel weiter unten, wo ein in ASCII-Ersatz
+    // geschriebener Prompt umlautfreie Antworten erzeugte.
+    'BEREITS ZENTRAL BEANTWORTET — diese Themen gehören NICHT in die lokalen FAQ:',
+    'Gutachterkosten und wer sie trägt · einen Sachverständigen finden · Gerichtsstand und',
+    'Streitwert · freie Wahl des Gutachters · Kostenvoranschlag statt Gutachten · Kürzungen',
+    'durch den Versicherer · Sicherungsabtretung · Wertminderung · Mietwagen und',
+    'Nutzungsausfall · freie Werkstattwahl · 130-Prozent-Regel · Dauer bis zum Vor-Ort-Termin.',
+    'Die Stadtseite beantwortet sie bereits in einem eigenen Block. Eine Wiederholung stünde',
+    'zweimal auf derselben Seite.',
     '- Keine Werbesprache, keine Superlative. Sachlich, wie ein Nachschlagewerk.',
     '',
     // 19.08.2026: Diese Zeile stand schon da — und half nicht. Von fünf erzeugten

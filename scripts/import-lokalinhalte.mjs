@@ -12,6 +12,8 @@
 //
 // LAUF:  node --experimental-strip-types lokalinhalte-import.mjs [--scharf]
 //        Ohne --scharf: nur pruefen, nichts schreiben.
+//        --ersetzen: bestehende veroeffentlichte Fassung archivieren statt am
+//        Unique-Index zu scheitern (fuer Nachbesserungen an Bestandsstaedten).
 
 import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
@@ -21,6 +23,7 @@ import { createClient } from '@supabase/supabase-js'
 import { pruefeLokalinhalt } from '../src/lib/lokalinhalt/gate.ts'
 
 const SCHARF = process.argv.includes('--scharf')
+const ERSETZEN = process.argv.includes('--ersetzen')
 const REPO = 'C:/Users/Aaron Sprafke/stampit-app/stampit-app/claimondo-v2'
 const WT = '.'
 
@@ -81,6 +84,33 @@ for (const [slug, entwurf] of Object.entries(inhalte)) {
 
   if (SCHARF) {
     const jetzt = new Date().toISOString()
+
+    // ⚠ Ein partieller Unique-Index laesst nur EINE veroeffentlichte Zeile je
+    // Stadt zu. Ohne --ersetzen scheitert daher jeder zweite Lauf fuer dieselbe
+    // Stadt an `stadt_lokalinhalte_ein_veroeffentlichter` — und weil das Skript
+    // den Schreibfehler in dieselbe Zaehlung wie eine Gate-Ablehnung wirft, las
+    // sich das als „12 abgelehnt", obwohl der Trockenlauf direkt davor
+    // „12 bestanden" meldete. Zwei verschiedene Ursachen, eine Zahl.
+    //
+    // `--ersetzen` archiviert die alte Fassung VOR dem Insert (dasselbe Vorgehen
+    // wie `veroeffentliche` in den Admin-Actions) — noetig fuer jede
+    // Nachbesserung an einer bereits veroeffentlichten Stadt.
+    if (ERSETZEN) {
+      const { data: alt, error: archivFehler } = await db
+        .from('stadt_lokalinhalte')
+        .update({ status: 'archiviert' })
+        .eq('stadt_slug', slug)
+        .eq('status', 'veroeffentlicht')
+        .select('id')
+      if (archivFehler) {
+        console.log(`  🔴 Archivieren fehlgeschlagen: ${archivFehler.message}`)
+        gruen--
+        rot++
+        continue
+      }
+      if (alt?.length) console.log(`  ↻ ${alt.length} alte Fassung archiviert`)
+    }
+
     const { error } = await db.from('stadt_lokalinhalte').insert({
       stadt_slug: slug,
       stadtbezirke: befund.bereinigt.stadtbezirke,

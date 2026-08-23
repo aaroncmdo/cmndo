@@ -90,6 +90,111 @@ export function findeAsciiUmlautErsatz(text: string): string[] {
 }
 
 /**
+ * Schablonen: dieselbe Aussage mit eingesetztem DATENWERT.
+ *
+ * Diese Klasse entkommt jeder Haeufigkeitspruefung. Die Gerichts-FAQ stand auf
+ * 96 Staedten in identischer Bauweise — weil zwei Gerichtsnamen variieren, ist
+ * jede Antwort ein Unikat und bleibt unter jeder Schwelle. Sie ist trotzdem
+ * doppelt: der zentrale Basis-Block der Stadtseite beantwortet beide Fragen
+ * bereits, ausfuehrlicher und mit denselben Werten als Variablen.
+ *
+ * ⚠ Bewusst als ausgeschriebene Muster und NICHT als Negativbeispiele im
+ * Generator-Prompt: ein Prompt lehrt durch Beispiel, und ein Negativbeispiel
+ * liefert dem Modell genau die Formulierung, die es vermeiden soll.
+ */
+const BASIS_BLOCK_SCHABLONEN: { name: string; trifft: (frage: string, antwort: string) => boolean }[] = [
+  {
+    name: 'Gerichtsstand (Basis-Block: faq_gericht)',
+    trifft: (frage, antwort) =>
+      /welches gericht|gericht ist .{0,40}zust[äa]e?ndig/i.test(frage) &&
+      /amtsgericht|landgericht/i.test(antwort),
+  },
+  {
+    name: 'Frist bis vor Ort (Basis-Block: faq_finden)',
+    trifft: (frage, antwort) =>
+      /wie schnell|wie lange dauert/i.test(frage) && /\d+\s*bis\s*\d+\s*Stunden/i.test(antwort),
+  },
+]
+
+/**
+ * Namensteile, die allein KEIN Ortsbezug sind.
+ *
+ * "Frankfurt am Main" in Teile zu zerlegen ist noetig (der Fliesstext schreibt
+ * "Frankfurt"), macht aber "am", "an" und "der" zu Kandidaten — und die stehen
+ * in fast jedem deutschen Satz. Ohne diese Liste bestuende jede beliebige
+ * Antwort den Ortsbezug-Test, sobald die Stadt einen Praepositions-Namen traegt.
+ * "Bad" und "Sankt" stehen aus demselben Grund hier: sie tragen den Ort nicht.
+ */
+const NAMENS_FUELLWOERTER = new Set([
+  'am', 'an', 'der', 'die', 'das', 'im', 'in', 'bei', 'vor', 'auf', 'zur', 'zum',
+  'und', 'ob', 'aus', 'bad', 'sankt', 'st', 'saale', 'westf', 'rheinland',
+])
+
+/**
+ * Der volle Stadtname plus seine tragenden Bestandteile.
+ *
+ * Die Stammdaten fuehren "Mülheim an der Ruhr", der Fliesstext schreibt
+ * "Mülheim". Eine Pruefung nur auf den vollen Namen blockte einwandfreie
+ * Ortsfragen — am echten Bestand gemessen (frankfurt, 23.08.).
+ */
+function namensVarianten(stadtName: string): string[] {
+  const voll = stadtName.trim()
+  const teile = voll
+    .split(/[\s\-–(),.]+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 3 && !NAMENS_FUELLWOERTER.has(t.toLowerCase()))
+  return [...new Set([voll, ...teile])].filter(Boolean)
+}
+
+/** Regex-sichere Fassung eines Ortsnamens. */
+function alsWortmuster(wert: string, ganzesWort: boolean): RegExp | null {
+  const roh = wert.trim()
+  if (roh.length < 2) return null
+  const escaped = roh.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // Kein Lookahead beim Ortsnamen: "Dormagens" soll als Bezug zaehlen.
+  const ende = ganzesWort ? '(?![\\p{L}\\p{N}])' : ''
+  return new RegExp(`(?<![\\p{L}\\p{N}])${escaped}${ende}`, 'iu')
+}
+
+/**
+ * Traegt eine FAQ echten Ortsbezug — oder ist sie eine austauschbare Rechtsfrage?
+ *
+ * Das entscheidende Kriterium liegt in der ANTWORT, nicht in der Frage. Genau
+ * dort lag der Fehler, der 103 Stadtseiten betraf: der Ortsname wanderte in die
+ * Frage ("Darf ich meine Werkstatt in Herne frei waehlen?"), waehrend die
+ * Antwort fuer jede Stadt Deutschlands wortgleich blieb. Die Frage sieht dann
+ * lokal aus, der Inhalt ist es nie.
+ *
+ * Als Bezug zaehlt: der Stadtname, ein Bezirk/Ortsteil oder eine Achse aus
+ * DIESEM Entwurf. Damit misst sich die FAQ an den Ortsdaten, die daneben
+ * stehen — es braucht keine gepflegte Stichwortliste, die veraltet.
+ */
+export function istOrtsspezifischeFaq(
+  faq: { frage?: unknown; antwort?: unknown },
+  ort: { stadtName: string; bezirke: string[]; achsen: string[] },
+): boolean {
+  const frage = typeof faq?.frage === 'string' ? faq.frage : ''
+  const antwort = typeof faq?.antwort === 'string' ? faq.antwort : ''
+  if (!antwort.trim()) return false
+
+  // Schablonen zuerst: sie tragen den Ortsnamen oft mit und wuerden das
+  // Bezug-Kriterium sonst bestehen.
+  if (BASIS_BLOCK_SCHABLONEN.some((s) => s.trifft(frage, antwort))) return false
+
+  const kandidaten = [...namensVarianten(ort.stadtName), ...ort.bezirke]
+  for (const k of kandidaten) {
+    const re = alsWortmuster(k, false)
+    if (re?.test(antwort)) return true
+  }
+  // Achsen als ganzes Wort — "A57" darf nicht in "A570" treffen.
+  for (const a of ort.achsen) {
+    const re = alsWortmuster(a, true)
+    if (re?.test(antwort)) return true
+  }
+  return false
+}
+
+/**
  * Belastbare Quelle = absolute http(s)-URL mit echtem Host.
  *
  * Bewusst streng: relative Pfade, `example.com`, blosse Behoerdennamen ohne Link
@@ -179,7 +284,44 @@ export function pruefeLokalinhalt(
     })
   }
 
-  const bereinigt: LokalinhaltEntwurf = { ...roh, unfallHotspots: hotspots }
+  // --- Generische FAQ verwerfen ---------------------------------------------
+  // Wie beim Quellenzwang oben: die einzelne Angabe faellt weg, der Entwurf
+  // bleibt gueltig. Eine austauschbare Rechtsfrage macht die uebrigen Ortsdaten
+  // nicht wertlos — sie gehoert nur nicht in ein Feld fuer STADT-Daten.
+  //
+  // ⚠ Diese Pruefung fehlte bis 23.08., und der Prompt allein hat sie nicht
+  // ersetzt: Er sagt seit jeher „Die lokalen FAQ muessen ORTSSPEZIFISCH sein",
+  // gibt daneben aber eine MENGE vor („Ziel: 10-14 Stueck"). Eine konkrete Zahl
+  // schlaegt eine weiche Einschraenkung — gibt ein Ort nicht genug her, fuellt
+  // das Modell mit Allgemeinem auf. Ergebnis waren 103 Stadtseiten, auf denen
+  // dieselbe Antwort bis zu 158-mal stand. Ein Prompt ist eine Bitte, ein Gate
+  // ist eine Regel; deshalb steht die Pruefung hier.
+  const ortFuerFaq = {
+    stadtName,
+    bezirke: roh.stadtbezirke.flatMap((b) => [b.name, ...alsListe<string>(b.ortsteile)]),
+    achsen: [
+      ...roh.hauptachsen.autobahnen,
+      ...roh.hauptachsen.bundesstrassen,
+      ...roh.hauptachsen.knoten,
+    ],
+  }
+  const ortsFaqs: LokaleFaq[] = []
+  for (const f of roh.lokaleFaqs) {
+    if (istOrtsspezifischeFaq(f, ortFuerFaq)) {
+      ortsFaqs.push(f)
+      continue
+    }
+    verworfen.push(
+      `FAQ "${String(f?.frage ?? '').slice(0, 60)}" verworfen — ohne Ortsbezug in der ANTWORT ` +
+        `(oder Schablone, die der zentrale Basis-Block bereits beantwortet)`,
+    )
+  }
+
+  const bereinigt: LokalinhaltEntwurf = {
+    ...roh,
+    unfallHotspots: hotspots,
+    lokaleFaqs: ortsFaqs,
+  }
 
   // --- Substanz-Score: gefuellte Kategorien ---------------------------------
   const hatBezirke = bereinigt.stadtbezirke.length > 0
