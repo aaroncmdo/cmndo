@@ -886,7 +886,7 @@
       },
       {
         "frage": "Was ist an der A672 westlich von Darmstadt besonders?",
-        "antwort": "Die A672 ist nur wenige Kilometer lang und verbindet das Kreuz Darmstadt an der A5 mit der A67 in der Rheinebene. Auf dieser kurzen Strecke liegen Kreuz Darmstadt, Dreieck Darmstadt und Kreuz Darmstadt-Nord dicht beieinander, dazu die Übergänge zur B26 und B42. Der Verkehr wechselt deshalb fast durchgehend die Spur, statt einmal einzufädeln und zu bleiben. Typisch sind Streifkollisionen in den Verflechtungsbereichen, bei denen sich zwei Fahrzeuge über mehrere Meter berühren. Die Kontaktspur über die Fahrzeuglänge ist dabei das wichtigste Beweismittel, weil ihr Verlauf und ihre Höhe zeigen, welches Fahrzeug sich in die Spur des anderen bewegt hat. Sensorik in Außenspiegel und Kotflügel ist regelmäßig mitbetroffen."
+        "antwort": "Die A672 ist nur wenige Kilometer lang: Sie zweigt am Griesheimer Dreieck von der A67 ab, quert am Darmstädter Nordkreuz die A5 und geht an der Anschlussstelle Darmstadt-West in die B26 über. Abzweig, Kreuzung und Übergang folgen so dicht aufeinander, dass der Verkehr fast durchgehend die Spur wechselt, statt einmal einzufädeln und zu bleiben. Das Darmstädter Kreuz, an dem sich A5 und A67 treffen, ist ein davon getrennter Knoten. Typisch sind Streifkollisionen in den Verflechtungsbereichen, bei denen sich zwei Fahrzeuge über mehrere Meter berühren. Die Kontaktspur über die Fahrzeuglänge ist dabei das wichtigste Beweismittel, weil ihr Verlauf und ihre Höhe zeigen, welches Fahrzeug sich in die Spur des anderen bewegt hat. Sensorik in Außenspiegel und Kotflügel ist regelmäßig mitbetroffen."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden am Luisenplatz oder Zusammenstoß in Eberstadt — der Sachverständige kommt zu Ihnen nach Darmstadt.",
@@ -1016,8 +1016,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Was ist an der A33 und dem Kreuz Paderborn-Elsen zu beachten?",
-        "antwort": "Die A33 führt westlich an Paderborn vorbei und verbindet die Stadt über das Kreuz Paderborn-Elsen und das Dreieck Paderborn mit dem übrigen Netz. Weil sie erst spät durchgehend fertiggestellt wurde, ist sie für viele die neue Hauptachse, während der örtliche Verkehr weiterhin die alten Bundesstraßen B1, B64 und B68 nutzt. An den Übergängen zwischen beiden Systemen prallt Autobahntempo auf Landstraßen- und Ortsdurchfahrtstempo. Genau dort entstehen Auffahrunfälle mit deutlichem Geschwindigkeitsunterschied. Für die Begutachtung heißt das, den Heckbereich nicht auf die sichtbare Verformung zu reduzieren — Querträger, Prallabsorber und das Bodenblech im Reserveradbereich nehmen die Energie auf und sind erst nach Demontage beurteilbar."
+        "frage": "Was ist an der A33 und den Paderborner Anschlussstellen zu beachten?",
+        "antwort": "Die A33 führt westlich an Paderborn vorbei und erschließt die Stadt über die Anschlussstellen Paderborn-Elsen, Paderborn-Zentrum und Paderborn-Schloß Neuhaus. Ein Autobahnkreuz gibt es im Stadtgebiet nicht — das nächste liegt mit Wünnenberg-Haaren am Südende der A33. Weil die A33 erst spät durchgehend fertiggestellt wurde, ist sie für viele die neue Hauptachse, während der örtliche Verkehr weiterhin die alten Bundesstraßen B1, B64 und B68 nutzt. An den Übergängen zwischen beiden Systemen prallt Autobahntempo auf Landstraßen- und Ortsdurchfahrtstempo. Genau dort entstehen Auffahrunfälle mit deutlichem Geschwindigkeitsunterschied. Für die Begutachtung heißt das, den Heckbereich nicht auf die sichtbare Verformung zu reduzieren — Querträger, Prallabsorber und das Bodenblech im Reserveradbereich nehmen die Energie auf und sind erst nach Demontage beurteilbar."
       },
       {
         "frage": "Welche Besonderheit bringt der Truppenübungsplatz Senne für den Verkehr um Sennelager?",
@@ -1231,8 +1231,7 @@
       {
         "name": "Lengfeld",
         "ortsteile": [
-          "Lengfeld",
-          "Estenfeld-Grenze"
+          "Lengfeld"
         ]
       }
     ],
@@ -1596,15 +1595,13 @@
         "name": "Ost",
         "ortsteile": [
           "Sieglitzhof",
-          "Röthelheim",
-          "Buckenhof-Grenze"
+          "Röthelheim"
         ]
       },
       {
         "name": "Nord",
         "ortsteile": [
           "Dechsendorf",
-          "Möhrendorf-Grenze",
           "Sieglitzhof-Nord"
         ]
       }
@@ -2079,7 +2076,6 @@
         "name": "West",
         "ortsteile": [
           "Ströbitz",
-          "Kolkwitz-Grenze",
           "Neu Schmellwitz"
         ]
       }
@@ -2684,8 +2680,7 @@
         "name": "Süd",
         "ortsteile": [
           "Eickum",
-          "Herringhausen",
-          "Hiddenhausen-Grenze"
+          "Herringhausen"
         ]
       }
     ],
@@ -4458,8 +4453,7 @@
         "name": "Süd",
         "ortsteile": [
           "Merklinde",
-          "Frohlinde",
-          "Bövinghausen-Grenze"
+          "Frohlinde"
         ]
       }
     ],
@@ -4528,8 +4522,7 @@
         "name": "Haaren",
         "ortsteile": [
           "Haaren",
-          "Verlautenheide",
-          "Würselen-Grenze"
+          "Verlautenheide"
         ]
       },
       {
@@ -5217,8 +5210,7 @@
         "name": "Neviges",
         "ortsteile": [
           "Neviges",
-          "Rützkausen",
-          "Dönberg-Grenze"
+          "Rützkausen"
         ]
       }
     ],

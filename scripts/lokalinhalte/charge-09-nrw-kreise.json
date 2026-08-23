@@ -1,15 +1,49 @@
 {
   "hilden": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Kalstert", "Hoffeld"] },
-      { "name": "Nord", "ortsteile": ["Nordstadt", "Karnap"] },
-      { "name": "Süd", "ortsteile": ["Südstadt", "Meide"] },
-      { "name": "West", "ortsteile": ["Westring", "Hildener Heide"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Kalstert",
+          "Hoffeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nordstadt",
+          "Karnap"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Südstadt",
+          "Meide"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Westring",
+          "Hildener Heide"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A46"],
-      "bundesstrassen": ["B228"],
-      "knoten": ["Autobahnkreuz Hilden (A3/A46)", "Anschlussstelle Hilden", "Anschlussstelle Haan-Ost"]
+      "autobahnen": [
+        "A3",
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B228"
+      ],
+      "knoten": [
+        "Autobahnkreuz Hilden (A3/A46)",
+        "Anschlussstelle Hilden",
+        "Anschlussstelle Haan-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -27,15 +61,48 @@
   },
   "langenfeld": {
     "stadtbezirke": [
-      { "name": "Immigrath", "ortsteile": ["Immigrath", "Landwehr"] },
-      { "name": "Richrath", "ortsteile": ["Richrath", "Gieslenberg"] },
-      { "name": "Reusrath", "ortsteile": ["Reusrath", "Berghausen"] },
-      { "name": "Wiescheid", "ortsteile": ["Wiescheid"] }
+      {
+        "name": "Immigrath",
+        "ortsteile": [
+          "Immigrath",
+          "Landwehr"
+        ]
+      },
+      {
+        "name": "Richrath",
+        "ortsteile": [
+          "Richrath",
+          "Gieslenberg"
+        ]
+      },
+      {
+        "name": "Reusrath",
+        "ortsteile": [
+          "Reusrath",
+          "Berghausen"
+        ]
+      },
+      {
+        "name": "Wiescheid",
+        "ortsteile": [
+          "Wiescheid"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A542"],
-      "bundesstrassen": ["B8", "B229"],
-      "knoten": ["Autobahnkreuz Langenfeld (A3/A542)", "Anschlussstelle Langenfeld", "Anschlussstelle Langenfeld-Immigrath"]
+      "autobahnen": [
+        "A3",
+        "A542"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B229"
+      ],
+      "knoten": [
+        "Autobahnkreuz Langenfeld (A3/A542)",
+        "Anschlussstelle Langenfeld",
+        "Anschlussstelle Langenfeld-Immigrath"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -53,15 +120,53 @@
   },
   "dormagen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Dormagen-Mitte", "Hackenbroich", "Horrem"] },
-      { "name": "Nord", "ortsteile": ["Delhoven", "Straberg", "Broich"] },
-      { "name": "Rheinschiene", "ortsteile": ["Zons", "Stürzelberg", "Rheinfeld", "Piwipp"] },
-      { "name": "Süd", "ortsteile": ["Nievenheim", "Gohr", "Delrath", "Knechtsteden"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Dormagen-Mitte",
+          "Hackenbroich",
+          "Horrem"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Delhoven",
+          "Straberg",
+          "Broich"
+        ]
+      },
+      {
+        "name": "Rheinschiene",
+        "ortsteile": [
+          "Zons",
+          "Stürzelberg",
+          "Rheinfeld",
+          "Piwipp"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Nievenheim",
+          "Gohr",
+          "Delrath",
+          "Knechtsteden"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A57"],
-      "bundesstrassen": ["B9"],
-      "knoten": ["Anschlussstelle Dormagen", "Anschlussstelle Dormagen-Nord", "Kreuzung B9/Chempark-Zufahrt"]
+      "autobahnen": [
+        "A57"
+      ],
+      "bundesstrassen": [
+        "B9"
+      ],
+      "knoten": [
+        "Anschlussstelle Dormagen",
+        "Anschlussstelle Dormagen-Nord",
+        "Kreuzung B9/Chempark-Zufahrt"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -79,14 +184,43 @@
   },
   "schwelm": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Oehde", "Ossenkamp"] },
-      { "name": "Nord", "ortsteile": ["Möllenkotten", "Winterberg"] },
-      { "name": "Süd", "ortsteile": ["Linderhausen", "Loh"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Oehde",
+          "Ossenkamp"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Möllenkotten",
+          "Winterberg"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Linderhausen",
+          "Loh"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A46"],
-      "bundesstrassen": ["B7", "B483"],
-      "knoten": ["Anschlussstelle Schwelm (A1)", "Anschlussstelle Wuppertal-Langerfeld", "Kreuzung B7/B483"]
+      "autobahnen": [
+        "A1",
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B7",
+        "B483"
+      ],
+      "knoten": [
+        "Anschlussstelle Schwelm (A1)",
+        "Anschlussstelle Wuppertal-Langerfeld",
+        "Kreuzung B7/B483"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -104,13 +238,34 @@
   },
   "haan": {
     "stadtbezirke": [
-      { "name": "Haan-Mitte", "ortsteile": ["Innenstadt", "Unterhaan"] },
-      { "name": "Gruiten", "ortsteile": ["Gruiten", "Gruiten-Dorf", "Schöller-Grenze"] }
+      {
+        "name": "Haan-Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Unterhaan"
+        ]
+      },
+      {
+        "name": "Gruiten",
+        "ortsteile": [
+          "Gruiten",
+          "Gruiten-Dorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A46", "A3"],
-      "bundesstrassen": ["B228"],
-      "knoten": ["Anschlussstelle Haan-Ost", "Anschlussstelle Haan-West", "Autobahnkreuz Hilden (A3/A46)"]
+      "autobahnen": [
+        "A46",
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B228"
+      ],
+      "knoten": [
+        "Anschlussstelle Haan-Ost",
+        "Anschlussstelle Haan-West",
+        "Autobahnkreuz Hilden (A3/A46)"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -128,15 +283,52 @@
   },
   "siegburg": {
     "stadtbezirke": [
-      { "name": "Zentrum", "ortsteile": ["Innenstadt", "Mühlenstraße", "Nordstadt"] },
-      { "name": "Nord", "ortsteile": ["Wolsdorf", "Zange", "Brückberg"] },
-      { "name": "Ost", "ortsteile": ["Kaldauen", "Braschoß", "Seligenthal"] },
-      { "name": "Süd", "ortsteile": ["Stallberg", "Deichhaus"] }
+      {
+        "name": "Zentrum",
+        "ortsteile": [
+          "Innenstadt",
+          "Mühlenstraße",
+          "Nordstadt"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Wolsdorf",
+          "Zange",
+          "Brückberg"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Kaldauen",
+          "Braschoß",
+          "Seligenthal"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Stallberg",
+          "Deichhaus"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A560"],
-      "bundesstrassen": ["B56", "B484"],
-      "knoten": ["Autobahnkreuz Bonn/Siegburg (A3/A560)", "Anschlussstelle Siegburg", "Bahnhofsumfeld Siegburg/Bonn"]
+      "autobahnen": [
+        "A3",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B56",
+        "B484"
+      ],
+      "knoten": [
+        "Autobahnkreuz Bonn/Siegburg (A3/A560)",
+        "Anschlussstelle Siegburg",
+        "Bahnhofsumfeld Siegburg/Bonn"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -154,14 +346,43 @@
   },
   "sankt-augustin": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Mülldorf", "Ort", "Menden"] },
-      { "name": "Nord", "ortsteile": ["Hangelar", "Meindorf"] },
-      { "name": "Ost", "ortsteile": ["Niederpleis", "Birlinghoven", "Buisdorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Mülldorf",
+          "Ort",
+          "Menden"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Hangelar",
+          "Meindorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Niederpleis",
+          "Birlinghoven",
+          "Buisdorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A59", "A560"],
-      "bundesstrassen": ["B56"],
-      "knoten": ["Autobahnkreuz Sankt Augustin-West (A59/A560)", "Anschlussstelle Sankt Augustin", "Kreuzung B56/Hochschulzufahrt"]
+      "autobahnen": [
+        "A59",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B56"
+      ],
+      "knoten": [
+        "Autobahnkreuz Sankt Augustin-West (A59/A560)",
+        "Anschlussstelle Sankt Augustin",
+        "Kreuzung B56/Hochschulzufahrt"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -179,15 +400,54 @@
   },
   "hennef": {
     "stadtbezirke": [
-      { "name": "Zentrum", "ortsteile": ["Hennef-Mitte", "Geistingen", "Warth", "Geisbach"] },
-      { "name": "West", "ortsteile": ["Allner", "Weldergoven", "Lauthausen", "Stoßdorf"] },
-      { "name": "Ost", "ortsteile": ["Uckerath", "Söven", "Happerschoß"] },
-      { "name": "Süd", "ortsteile": ["Bödingen", "Stadt Blankenberg"] }
+      {
+        "name": "Zentrum",
+        "ortsteile": [
+          "Hennef-Mitte",
+          "Geistingen",
+          "Warth",
+          "Geisbach"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Allner",
+          "Weldergoven",
+          "Lauthausen",
+          "Stoßdorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Uckerath",
+          "Söven",
+          "Happerschoß"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Bödingen",
+          "Stadt Blankenberg"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A560", "A3"],
-      "bundesstrassen": ["B8", "B478"],
-      "knoten": ["Anschlussstelle Hennef-West", "Anschlussstelle Hennef-Ost", "Kreuzung B8/B478"]
+      "autobahnen": [
+        "A560",
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B478"
+      ],
+      "knoten": [
+        "Anschlussstelle Hennef-West",
+        "Anschlussstelle Hennef-Ost",
+        "Kreuzung B8/B478"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -205,15 +465,46 @@
   },
   "meckenheim": {
     "stadtbezirke": [
-      { "name": "Merl", "ortsteile": ["Merl", "Neuer Markt"] },
-      { "name": "Altstadt", "ortsteile": ["Meckenheim-Altstadt"] },
-      { "name": "Ersdorf/Altendorf", "ortsteile": ["Ersdorf", "Altendorf"] },
-      { "name": "Lüftelberg", "ortsteile": ["Lüftelberg"] }
+      {
+        "name": "Merl",
+        "ortsteile": [
+          "Merl",
+          "Neuer Markt"
+        ]
+      },
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Meckenheim-Altstadt"
+        ]
+      },
+      {
+        "name": "Ersdorf/Altendorf",
+        "ortsteile": [
+          "Ersdorf",
+          "Altendorf"
+        ]
+      },
+      {
+        "name": "Lüftelberg",
+        "ortsteile": [
+          "Lüftelberg"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A61", "A565"],
-      "bundesstrassen": ["B257"],
-      "knoten": ["Autobahnkreuz Meckenheim (A61/A565)", "Anschlussstelle Meckenheim", "Anschlussstelle Meckenheim-Merl"]
+      "autobahnen": [
+        "A61",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B257"
+      ],
+      "knoten": [
+        "Autobahnkreuz Meckenheim (A61/A565)",
+        "Anschlussstelle Meckenheim",
+        "Anschlussstelle Meckenheim-Merl"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -231,15 +522,55 @@
   },
   "bornheim": {
     "stadtbezirke": [
-      { "name": "Vorgebirge", "ortsteile": ["Bornheim", "Brenig", "Rösberg", "Botzdorf"] },
-      { "name": "Rheinschiene", "ortsteile": ["Hersel", "Uedorf", "Widdig", "Urfeld"] },
-      { "name": "Nord", "ortsteile": ["Sechtem", "Walberberg", "Kardorf"] },
-      { "name": "Süd", "ortsteile": ["Roisdorf", "Merten", "Dersdorf", "Waldorf"] }
+      {
+        "name": "Vorgebirge",
+        "ortsteile": [
+          "Bornheim",
+          "Brenig",
+          "Rösberg",
+          "Botzdorf"
+        ]
+      },
+      {
+        "name": "Rheinschiene",
+        "ortsteile": [
+          "Hersel",
+          "Uedorf",
+          "Widdig",
+          "Urfeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Sechtem",
+          "Walberberg",
+          "Kardorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Roisdorf",
+          "Merten",
+          "Dersdorf",
+          "Waldorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A555", "A565"],
-      "bundesstrassen": ["B9"],
-      "knoten": ["Anschlussstelle Bornheim (A555)", "Anschlussstelle Sechtem", "Kreuzung B9/Ortsdurchfahrt Hersel"]
+      "autobahnen": [
+        "A555",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B9"
+      ],
+      "knoten": [
+        "Anschlussstelle Bornheim (A555)",
+        "Anschlussstelle Sechtem",
+        "Kreuzung B9/Ortsdurchfahrt Hersel"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -257,15 +588,52 @@
   },
   "erkelenz": {
     "stadtbezirke": [
-      { "name": "Kernstadt", "ortsteile": ["Erkelenz-Mitte", "Oestrich", "Terheeg"] },
-      { "name": "Nord", "ortsteile": ["Gerderath", "Golkrath", "Granterath"] },
-      { "name": "West", "ortsteile": ["Lövenich", "Katzem", "Kückhoven"] },
-      { "name": "Süd", "ortsteile": ["Holzweiler", "Venrath", "Kaulhausen"] }
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Erkelenz-Mitte",
+          "Oestrich",
+          "Terheeg"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Gerderath",
+          "Golkrath",
+          "Granterath"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Lövenich",
+          "Katzem",
+          "Kückhoven"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Holzweiler",
+          "Venrath",
+          "Kaulhausen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A46", "A61"],
-      "bundesstrassen": ["B57"],
-      "knoten": ["Anschlussstelle Erkelenz (A46)", "Anschlussstelle Erkelenz-Ost", "Kreuzung B57/Tagebau-Zufahrt"]
+      "autobahnen": [
+        "A46",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B57"
+      ],
+      "knoten": [
+        "Anschlussstelle Erkelenz (A46)",
+        "Anschlussstelle Erkelenz-Ost",
+        "Kreuzung B57/Tagebau-Zufahrt"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -283,15 +651,53 @@
   },
   "heinsberg": {
     "stadtbezirke": [
-      { "name": "Kernstadt", "ortsteile": ["Heinsberg-Mitte", "Unterbruch", "Grebben"] },
-      { "name": "Nord", "ortsteile": ["Karken", "Kempen", "Porselen"] },
-      { "name": "Ost", "ortsteile": ["Oberbruch", "Dremmen", "Horst"] },
-      { "name": "Süd", "ortsteile": ["Kirchhoven", "Waldenrath", "Randerath", "Uetterath"] }
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Heinsberg-Mitte",
+          "Unterbruch",
+          "Grebben"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Karken",
+          "Kempen",
+          "Porselen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Oberbruch",
+          "Dremmen",
+          "Horst"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Kirchhoven",
+          "Waldenrath",
+          "Randerath",
+          "Uetterath"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A46"],
-      "bundesstrassen": ["B56", "B221"],
-      "knoten": ["Anschlussstelle Heinsberg (A46-Ende)", "Kreuzung B56/B221", "Grenzübergang Richtung Roermond"]
+      "autobahnen": [
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B56",
+        "B221"
+      ],
+      "knoten": [
+        "Anschlussstelle Heinsberg (A46-Ende)",
+        "Kreuzung B56/B221",
+        "Grenzübergang Richtung Roermond"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
