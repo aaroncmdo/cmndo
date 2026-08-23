@@ -139,8 +139,9 @@ export function GewinnspielFormClient({ praemien }: { praemien: PraemienOption[]
       >
         <p className="text-2xl font-bold text-[var(--gs-cream)]">Sie sind dabei.</p>
         <p className="mt-3 text-[15px] leading-relaxed text-white/75">
-          Wir schicken Ihnen gleich eine WhatsApp zur Bestätigung. Die Ziehung läuft täglich,
-          Gewinner benachrichtigen wir direkt.
+          Wir schicken Ihnen gleich eine WhatsApp zur Bestätigung. Danach sind Sie bei jeder
+          Ziehung dabei, ohne sich erneut anmelden zu müssen. Gewinner benachrichtigen wir
+          direkt.
         </p>
         <p className="mt-4 text-[13px] leading-relaxed text-white/55">
           Unabhängig vom Gewinnspiel meldet sich ein Berater zu Ihrem Schaden.

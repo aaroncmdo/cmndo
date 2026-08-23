@@ -9027,6 +9027,7 @@ export type Database = {
           werkstatt_id: string | null
           whatsapp_geprueft_am: string | null
           whatsapp_verfuegbar: boolean | null
+          wiederholung_erkannt_am: string | null
           wunsch_tag: string | null
           wunsch_zeit: string | null
           wunschtermin: string | null
@@ -9132,6 +9133,7 @@ export type Database = {
           werkstatt_id?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           wunsch_tag?: string | null
           wunsch_zeit?: string | null
           wunschtermin?: string | null
@@ -9237,6 +9239,7 @@ export type Database = {
           werkstatt_id?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           wunsch_tag?: string | null
           wunsch_zeit?: string | null
           wunschtermin?: string | null
@@ -12478,6 +12481,7 @@ export type Database = {
           werkstatt_seit_datum: string | null
           whatsapp_geprueft_am: string | null
           whatsapp_verfuegbar: boolean | null
+          wiederholung_erkannt_am: string | null
           winback_opt_out: boolean
           winback_sent_at: string | null
           wunschtermin: string | null
@@ -12699,6 +12703,7 @@ export type Database = {
           werkstatt_seit_datum?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           winback_opt_out?: boolean
           winback_sent_at?: string | null
           wunschtermin?: string | null
@@ -12920,6 +12925,7 @@ export type Database = {
           werkstatt_seit_datum?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           winback_opt_out?: boolean
           winback_sent_at?: string | null
           wunschtermin?: string | null

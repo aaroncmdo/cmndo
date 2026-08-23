@@ -56,16 +56,19 @@ const PARAGRAPHEN: { titel: string; text: string }[] = [
       'Die Teilnahme ist kostenlos und unabhängig vom Erwerb einer Ware oder Dienstleistung. ' +
       'Sie erfolgt durch Absenden des Teilnahmeformulars mit Name und Mobilnummer. Die ' +
       'Teilnahme wird wirksam, sobald die angegebene Mobilnummer per WhatsApp bestätigt wurde. ' +
-      'Pro Person und Tag ist eine Teilnahme möglich; maßgeblich ist die Mobilnummer.',
+      'Je Person ist eine Teilnahme möglich; maßgeblich ist die Mobilnummer. Eine erneute ' +
+      'Anmeldung ist nicht erforderlich: Wer einmal teilnimmt, ist bei jeder weiteren Ziehung ' +
+      'dabei, bis er gewinnt oder die Aktion endet.',
   },
   {
     titel: '§ 4 Gewinne und Ziehung',
     text:
       'Verlost werden täglich bis zu drei Gutscheine im Wert von je 50 Euro. Die Ziehung ' +
-      'erfolgt an jedem Werktag unter allen bestätigten Teilnahmen des Vortages nach dem ' +
-      'Zufallsprinzip. Liegen weniger bestätigte Teilnahmen als Gutscheine vor, werden ' +
-      'entsprechend weniger Gewinne vergeben. Der Gewinner wählt die Art des Gutscheins aus ' +
-      'dem jeweils angebotenen Sortiment.',
+      'erfolgt nach dem Zufallsprinzip unter allen bestätigten Teilnahmen, die noch nicht ' +
+      'gewonnen haben. Liegen weniger bestätigte Teilnahmen als Gutscheine vor, werden ' +
+      'entsprechend weniger Gewinne vergeben. Wer bereits gezogen wurde, nimmt an weiteren ' +
+      'Ziehungen nicht mehr teil. Die Art des Gutscheins wählen Teilnehmer bei der Anmeldung ' +
+      'aus dem jeweils angebotenen Sortiment.',
   },
   {
     titel: '§ 5 Benachrichtigung und Nachweis',

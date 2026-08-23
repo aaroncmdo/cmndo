@@ -13,6 +13,9 @@ const kampagneErgebnis = { wert: null as unknown }
 const praemieErgebnis = { wert: null as unknown }
 const insertMock = vi.fn()
 const insertErgebnis = { wert: { data: { id: 'teilnahme-1' }, error: null } as unknown }
+/** Erfasst (tabelle, werte) jedes Wiederholungs-Markers. */
+const markerMock = vi.fn()
+const markerErgebnis = { wert: { data: [{ id: 'x' }], error: null } as unknown }
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
@@ -29,6 +32,14 @@ vi.mock('@/lib/supabase/admin', () => ({
           }),
         }
       }
+      if (tabelle === 'gutachter_finder_anfragen' || tabelle === 'leads') {
+        return {
+          update: (werte: unknown) => {
+            markerMock(tabelle, werte)
+            return { eq: () => ({ select: async () => markerErgebnis.wert }) }
+          },
+        }
+      }
       return {
         insert: (werte: unknown) => {
           insertMock(werte)
@@ -43,9 +54,11 @@ import { registriereTeilnahme } from '../registriere-teilnahme'
 
 beforeEach(() => {
   insertMock.mockClear()
+  markerMock.mockClear()
   kampagneErgebnis.wert = { data: { id: 'kampagne-1' }, error: null }
   praemieErgebnis.wert = { data: { id: 'praemie-1' }, error: null }
   insertErgebnis.wert = { data: { id: 'teilnahme-1' }, error: null }
+  markerErgebnis.wert = { data: [{ id: 'x' }], error: null }
 })
 
 describe('registriereTeilnahme', () => {
@@ -134,6 +147,50 @@ describe('registriereTeilnahme', () => {
     insertErgebnis.wert = { data: null, error: { code: '23505', message: 'duplicate key' } }
     const r = await registriereTeilnahme({
       quelle: { leadId: 'lead-6' },
+      telefon: '0175 1234567',
+      schuldfrage: 'gegner',
+    })
+    expect(r.ok).toBe(true)
+    expect(r.uebersprungen).toBe('bereits_teilgenommen')
+  })
+
+  it('markiert bei einer Dublette den Lead als Wiederholung (Sichtbarkeit fuer Dispatch)', async () => {
+    insertErgebnis.wert = { data: null, error: { code: '23505', message: 'duplicate key' } }
+    await registriereTeilnahme({
+      quelle: { leadId: 'lead-6' },
+      telefon: '0175 1234567',
+      schuldfrage: 'gegner',
+    })
+    expect(markerMock).toHaveBeenCalledWith(
+      'leads',
+      expect.objectContaining({ wiederholung_erkannt_am: expect.any(String) }),
+    )
+  })
+
+  it('markiert bei Finder-Anfragen die richtige Tabelle', async () => {
+    insertErgebnis.wert = { data: null, error: { code: '23505', message: 'duplicate key' } }
+    await registriereTeilnahme({
+      quelle: { anfrageId: 'anfrage-9' },
+      telefon: '0175 1234567',
+      schuldEinschaetzung: 'unverschuldet',
+    })
+    expect(markerMock).toHaveBeenCalledWith('gutachter_finder_anfragen', expect.anything())
+  })
+
+  it('markiert NICHT, wenn die Teilnahme normal angelegt wurde', async () => {
+    await registriereTeilnahme({
+      quelle: { leadId: 'lead-10' },
+      telefon: '0175 1234567',
+      schuldfrage: 'gegner',
+    })
+    expect(markerMock).not.toHaveBeenCalled()
+  })
+
+  it('bleibt ok, wenn der Marker selbst fehlschlaegt (non-fatal)', async () => {
+    insertErgebnis.wert = { data: null, error: { code: '23505', message: 'duplicate key' } }
+    markerErgebnis.wert = { data: null, error: { message: 'permission denied' } }
+    const r = await registriereTeilnahme({
+      quelle: { leadId: 'lead-11' },
       telefon: '0175 1234567',
       schuldfrage: 'gegner',
     })

@@ -92,11 +92,41 @@ export async function registriereTeilnahme(
 
   if (error) {
     // 23505 = Unique-Verletzung: diese Nummer nimmt in dieser Kampagne schon
-    // teil. Erwarteter Normalfall, kein Fehler.
-    if (error.code === '23505') return { ok: true, uebersprungen: 'bereits_teilgenommen' }
+    // teil. Erwarteter Normalfall, kein Fehler — aber ein verwertbarer Hinweis:
+    // die AKTUELLE Anfrage ist nachweislich eine Wiederholung derselben Person.
+    // Das Gewinnspiel ist dagegen geschuetzt (nur ein Los), die Dispatch-Queue
+    // bekommt aber trotzdem einen zweiten Lead. Aaron 23.08.: "jetzt nur
+    // sichtbar machen" — deshalb Marker statt Zusammenlegen.
+    if (error.code === '23505') {
+      await markiereWiederholung(supabase, input.quelle)
+      return { ok: true, uebersprungen: 'bereits_teilgenommen' }
+    }
     console.error('[gewinnspiel] Teilnahme anlegen:', error)
     return { ok: false, error: error.message }
   }
 
   return { ok: true, teilnahmeId: data.id }
+}
+
+/**
+ * Setzt den Wiederholungs-Marker auf der Quelle (Anfrage oder Lead).
+ *
+ * Non-fatal: der Marker ist ein Hinweis fuer Dispatch, keine Steuerung. Schlaegt
+ * er fehl, ist die Meldung trotzdem vollstaendig — deshalb nur geloggt.
+ */
+async function markiereWiederholung(
+  supabase: ReturnType<typeof createAdminClient>,
+  quelle: RegistriereInput['quelle'],
+): Promise<void> {
+  const jetzt = new Date().toISOString()
+  const tabelle = 'anfrageId' in quelle ? 'gutachter_finder_anfragen' : 'leads'
+  const id = 'anfrageId' in quelle ? quelle.anfrageId : quelle.leadId
+
+  const { error } = await supabase
+    .from(tabelle)
+    .update({ wiederholung_erkannt_am: jetzt })
+    .eq('id', id)
+    .select('id')
+
+  if (error) console.error('[gewinnspiel] Wiederholungs-Marker (non-fatal):', error)
 }

@@ -73,7 +73,7 @@ const KAMPAGNEN_VARS = { '--gs-cream': '#F5F1E8' } as React.CSSProperties
 const SCHRITTE = [
   { nr: '1', titel: 'Teilnehmen', text: 'Name und Mobilnummer, mehr nicht.' },
   { nr: '2', titel: 'Bestätigen', text: 'Kurz auf unsere WhatsApp antworten.' },
-  { nr: '3', titel: 'Gewinnen', text: 'Täglich ziehen wir bis zu 3 Gewinner.' },
+  { nr: '3', titel: 'Dabei bleiben', text: 'Sie sind bei jeder Ziehung dabei, ohne erneutes Anmelden.' },
 ]
 
 const TRUST = [
@@ -311,10 +311,10 @@ export default async function GewinnspielPage() {
         <div className="mx-auto max-w-3xl text-[12px] leading-relaxed text-white/60">
           <p>
             Veranstalter: Claimondo GmbH. Teilnahme ab 18 Jahren, kostenlos und ohne Kaufzwang.
-            Pro Person und Tag ist eine Teilnahme möglich. Täglich werden bis zu 3 Gewinner
-            gezogen und über die angegebene Mobilnummer benachrichtigt. Der Gewinn wird nach
-            Nachweis eines unverschuldeten Unfallschadens versendet. Eine Barauszahlung ist
-            ausgeschlossen, der Rechtsweg ist ausgeschlossen.
+            Je Person ist eine Teilnahme möglich; eine erneute Anmeldung ist nicht nötig. Täglich
+            werden bis zu 3 Gewinner gezogen und über die angegebene Mobilnummer benachrichtigt.
+            Der Gewinn wird nach Nachweis eines unverschuldeten Unfallschadens versendet. Eine
+            Barauszahlung ist ausgeschlossen, der Rechtsweg ist ausgeschlossen.
           </p>
           <p className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
             <Link href="/gewinnspiel/teilnahmebedingungen" className="underline hover:text-white/70">
