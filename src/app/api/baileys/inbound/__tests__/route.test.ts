@@ -20,6 +20,9 @@ const state = {
   partnerBezeichnung: null as string | null,
   createCaseOk: true,
   insertError: null as { message: string } | null,
+  /** Anzahl inbound-WA-Nachrichten dieser Nummer NACH dem Insert. 1 = Erstkontakt. */
+  nachrichtenCount: 1 as number,
+  countError: null as { message: string } | null,
 }
 
 const inserts: Array<Record<string, unknown>> = []
@@ -37,6 +40,10 @@ vi.mock('@/lib/supabase/admin', () => ({
         inserts.push(row)
         return { error: state.insertError }
       }
+      // Die Erstkontakt-Zaehlung endet ohne .maybeSingle()/.insert() — die Kette
+      // selbst wird awaited. Deshalb ist der Builder thenable.
+      b.then = (resolve: (v: unknown) => void) =>
+        resolve({ count: state.nachrichtenCount, error: state.countError })
       return b
     },
   }),
@@ -92,6 +99,8 @@ beforeEach(() => {
   state.partnerBezeichnung = null
   state.createCaseOk = true
   state.insertError = null
+  state.nachrichtenCount = 1
+  state.countError = null
 })
 
 describe('baileys/inbound — Erstkontakt-Verzweigung', () => {
@@ -123,7 +132,8 @@ describe('baileys/inbound — Erstkontakt-Verzweigung', () => {
     expect(createCaseCalls[0].mode).toBe('lead-first')
     expect((createCaseCalls[0].base as Record<string, unknown>).source_channel).toBe('whatsapp-inbound')
     expect(inserts[0]?.lead_id).toBe('lead-neu')
-    expect(waTexte[0]).toContain('Erstkontakt')
+    expect(waTexte[0]).toContain('neuer Interessent')
+    expect(waTexte[0]).toContain('/dispatch/leads/lead-neu')
   })
 
   it('createCase schlaegt fehl: Nachricht wird trotzdem gespeichert', async () => {
@@ -138,6 +148,53 @@ describe('baileys/inbound — Erstkontakt-Verzweigung', () => {
     state.insertError = { message: 'db weg' }
     const res = await POST(anfrage({ phone: '491701234567', text: 'Hallo' }))
     expect(res.status).toBe(500)
+    expect(waTexte).toHaveLength(0)
+  })
+})
+
+describe('baileys/inbound — Team-WA nur EINMALIG bei Neukontakt', () => {
+  it('erste Nachricht dieser Nummer -> genau eine Team-WA', async () => {
+    state.nachrichtenCount = 1
+    await POST(anfrage({ phone: '491701234567', text: 'Hallo, ich hatte einen Unfall' }))
+    expect(waTexte).toHaveLength(1)
+    expect(waTexte[0]).toContain('491701234567')
+  })
+
+  it('FOLGEnachricht derselben Nummer -> KEINE weitere Team-WA', async () => {
+    state.nachrichtenCount = 4
+    await POST(anfrage({ phone: '491701234567', text: 'noch eine Frage' }))
+    expect(waTexte).toHaveLength(0)
+  })
+
+  it('Partner-Folgenachricht meldet auch nicht erneut (kein Lead = kein Marker)', async () => {
+    // Der Fall, den die alte Logik falsch machte: ein Partner bekommt nie einen
+    // Lead, also fand matchInboundToFall ihn nie -> jede Nachricht meldete.
+    state.istPartner = true
+    state.partnerBezeichnung = 'sachverstaendiger Gaith Hamed'
+    state.nachrichtenCount = 6
+    await POST(anfrage({ phone: '491735633541', text: 'dritte Nachricht' }))
+    expect(waTexte).toHaveLength(0)
+  })
+
+  it('Partner-ERSTkontakt meldet einmal, mit Bezeichnung', async () => {
+    state.istPartner = true
+    state.partnerBezeichnung = 'sachverstaendiger Gaith Hamed'
+    state.nachrichtenCount = 1
+    await POST(anfrage({ phone: '491735633541', text: 'Hallo' }))
+    expect(waTexte).toHaveLength(1)
+    expect(waTexte[0]).toContain('Gaith Hamed')
+  })
+
+  it('Bestandskunde mit Fall, der erstmals per WhatsApp schreibt -> meldet einmal', async () => {
+    state.match = { fallId: 'fall-1', leadId: null, multipleCandidates: false, candidates: [] }
+    state.nachrichtenCount = 1
+    await POST(anfrage({ phone: '4915759392549', text: 'Bitte um das Gutachten' }))
+    expect(waTexte).toHaveLength(1)
+  })
+
+  it('Zaehlung schlaegt fehl -> lieber nicht melden als bei jeder Nachricht melden', async () => {
+    state.countError = { message: 'zaehlung kaputt' }
+    await POST(anfrage({ phone: '491701234567', text: 'Hallo' }))
     expect(waTexte).toHaveLength(0)
   })
 })

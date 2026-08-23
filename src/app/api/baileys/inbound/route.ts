@@ -162,30 +162,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'db_error', detail: error.message }, { status: 500 })
   }
 
-  // Team-Benachrichtigung — bewusst NACH der Fehlerpruefung: sonst meldeten wir
-  // eine Nachricht, die gar nicht gespeichert wurde. Beide Faelle melden: ein
-  // neuer Interessent, damit ihn jemand aufnimmt; ein Partner, damit seine
-  // Nachricht nicht liegenbleibt (er bekommt bewusst keinen Lead, waere sonst
-  // aber vollstaendig unsichtbar).
+  // ─── Team-Benachrichtigung bei NEUKONTAKT (Aaron 23.08.) ─────────────────
+  // Regel: genau EINE WhatsApp an WA_TEAM_EMPFAENGER, wenn eine Nummer zum
+  // ERSTEN MAL schreibt. Folgenachrichten derselben Nummer melden nicht erneut.
+  //
+  // Der Erstkontakt wird am Nachrichten-Bestand gemessen, NICHT daran, ob ein
+  // Lead entstand: ein Partner bekommt bewusst keinen Lead, also faende
+  // matchInboundToFall ihn auch beim naechsten Mal nicht — er wuerde bei JEDER
+  // Nachricht erneut melden. Der Zaehler ist der einzige Marker, der fuer alle
+  // drei Faelle (neuer Lead, Partner, Bestandskunde) gleich funktioniert.
+  //
+  // Bewusst NACH der Fehlerpruefung: sonst meldeten wir eine Nachricht, die gar
+  // nicht gespeichert wurde. Die soeben eingefuegte Zeile zaehlt mit -> beim
+  // echten Erstkontakt ist das Ergebnis exakt 1.
   // Non-critical: Fehler werden geloggt, brechen die Route nie.
-  if (neuerLead || partnerBezeichnung) {
-    try {
-      const auszug = (text || '[Medien-Nachricht]').slice(0, 120)
+  try {
+    const { count, error: zaehlFehler } = await db
+      .from('nachrichten')
+      .select('id', { count: 'exact', head: true })
+      .eq('kanal', 'whatsapp')
+      .eq('richtung', 'inbound')
+      .eq('empfaenger_kontakt', phone)
+
+    if (zaehlFehler) {
+      // Lieber nicht melden als bei jeder Folgenachricht zu melden — eine
+      // Benachrichtigung, die zu oft kommt, wird ignoriert wie die Task-Liste.
+      console.error('[baileys/inbound] Erstkontakt-Zaehlung fehlgeschlagen:', zaehlFehler.message)
+    } else if (count === 1) {
+      const auszug = (text || '[Medien-Nachricht]').slice(0, 160)
       const basis = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-      const zeilen = partnerBezeichnung
-        ? [`🏢 WhatsApp von ${partnerBezeichnung}`, '', `📞 ${phone}`, `💬 ${auszug}`]
-        : [
-            '🆕 WhatsApp-Erstkontakt (neuer Lead)',
-            '',
-            `📞 ${phone}`,
-            `💬 ${auszug}`,
-            '',
-            leadId ? `${basis}/dispatch/leads/${leadId}` : '',
-          ]
-      await notifyTeamWhatsApp(zeilen.filter(Boolean).join('\n'))
-    } catch (err) {
-      console.error('[baileys/inbound] Team-WA fehlgeschlagen (nicht kritisch):', err)
+      const kopf = partnerBezeichnung
+        ? `🏢 Neue WhatsApp von ${partnerBezeichnung}`
+        : neuerLead
+          ? '🆕 Neue WhatsApp — neuer Interessent'
+          : '💬 Neue WhatsApp von einem bekannten Kontakt'
+      const ziel = neuerLead && leadId ? `${basis}/dispatch/leads/${leadId}` : null
+      await notifyTeamWhatsApp(
+        [kopf, '', `📞 ${phone}`, `💬 ${auszug}`, ziel ? '' : null, ziel].filter(Boolean).join('\n'),
+      )
     }
+  } catch (err) {
+    console.error('[baileys/inbound] Team-WA fehlgeschlagen (nicht kritisch):', err)
   }
 
   // Text-Intents (JA/NEIN/Umtermin) — embed-B-Resolution + Termin-Bestaetigung.
