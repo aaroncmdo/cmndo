@@ -884,14 +884,27 @@ export default async function KfzGutachterStadtPage({
             <p className="mt-6 text-center text-base leading-relaxed text-claimondo-shield">
               {s.spokeLocal.anekdote}
             </p>
+            {/* ⚠ Die Spoke-Box entstand, als es den Marketing-Read (P3-B1) noch nicht
+                gab — sie war die EINZIGE Ortstiefe eines Spokes. Seit eine freigegebene
+                `stadt_lokalinhalte`-Zeile dieselben Felder liefert, stehen Achsen,
+                Stadtteile und Hotspot bei Spokes mit Ortsinhalt ZWEIMAL auf der Seite.
+                Am 23.08. auf prod nachgemessen (sichtbarer Text, ohne JSON-LD): Solingen
+                nennt „Ohligs" und „Gräfrath" je einmal in der Bezirksliste aus der DB und
+                erneut in der Zeile „Stadtteile: …"; bei Ratingen ebenso Lintorf/Homberg.
+                Betroffen sind die 6 Spokes mit Ortsinhalt — und es waeren 10 weitere
+                geworden, sobald die offenen Spoke-Staedte Inhalte bekommen.
+                Deshalb: die Spoke-Box zeigt nur noch, was der Ortsinhalt NICHT liefert.
+                Die `anekdote` und der Hub-Link bleiben immer — sie haben dort kein Pendant. */}
             <div className="mt-6 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 text-sm leading-relaxed text-claimondo-shield">
-              <p>
-                {t.rich('spoke_achsen', {
-                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
-                  hauptachsen: s.spokeLocal.hauptachsen.join(', '),
-                })}
-              </p>
-              {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && (
+              {!hauptachsen && (
+                <p>
+                  {t.rich('spoke_achsen', {
+                    strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                    hauptachsen: s.spokeLocal.hauptachsen.join(', '),
+                  })}
+                </p>
+              )}
+              {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && stadtbezirke.length === 0 && (
                 <p className="mt-2">
                   {t.rich('spoke_stadtteile', {
                     strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
@@ -922,7 +935,7 @@ export default async function KfzGutachterStadtPage({
                 })}
               </p>
             </div>
-            {s.spokeLocal.hotspot && (
+            {s.spokeLocal.hotspot && unfallHotspots.length === 0 && (
               <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
                 <p>
                   <strong className="text-claimondo-navy">
