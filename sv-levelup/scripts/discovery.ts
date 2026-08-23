@@ -14,10 +14,27 @@
  * ⚠ KOSTEN FALLEN AUCH IM TROCKENLAUF AN. Er unterdrueckt das Schreiben, nicht
  * die Abrufe. Ein Trockenlauf ueber Deutschland kostet genauso viel wie ein
  * scharfer.
+ *
+ * ⚠⚠ 21.08.2026 — DIESER LAUF KOSTETE 2.798 EUR AN EINEM TAG.
+ *
+ * Der Grund war nicht die Datenmenge, sondern die Vervielfachung: 1.876 Kacheln
+ * ×2 Begriffe ×bis 16 (Verfeinerung Tiefe 2) ×bis 3 Seiten ×3 Wiederholungen.
+ * Rund 87.000 berechnete Abrufe fuer 10.019 Datensaetze — neun bezahlte Abrufe
+ * je nutzbarem Datensatz. Der groesste Anteil lieferte GAR NICHTS: 80 % der
+ * Abrufe scheiterten am Netz und wurden dreimal gefeuert, und Google berechnet
+ * den Abruf, sobald er ankommt.
+ *
+ * ⭐ Die Warnung oben stand damals schon da. Sie half nicht, weil sie keinen
+ * BETRAG nannte. Seitdem gilt:
+ *   · Der Lauf zeigt vor dem ersten Abruf, was er hoechstens kostet — in Euro.
+ *   · Ohne `--budget` startet nur, was ins Vorgabe-Budget passt (1.000 Abrufe,
+ *     unter Googles Gratis-Kontingent). Alles darueber muss man entscheiden.
+ *   · Der Adapter bricht bei anhaltender Fehlerquote ab, statt weiterzufeuern.
  */
 import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
-import { holeAdapter } from '../lib/places'
+import { holeAdapter, schaetzeKosten, VORGABE_BUDGET } from '../lib/places'
+import { MAX_SEITEN as MAX_SEITEN_JE_SUCHE } from '../lib/places/legacy'
 import { entdecke } from '../lib/discovery/lauf'
 import { DEUTSCHLAND, MAX_RADIUS_KM, startKacheln, type Kachel } from '../lib/discovery/kacheln'
 import { alleSeiten } from '../lib/db/alle-seiten'
@@ -91,14 +108,49 @@ async function main() {
   const kacheln = offeneKacheln ?? startKacheln(gebiet, MAX_RADIUS_KM)
   const abrufeMin = kacheln.length * BEGRIFFE.length
 
+  // ── Die Kostenschau VOR dem ersten Abruf ─────────────────────────────────
+  //
+  // ⚠ 21.08.2026: derselbe Lauf kostete 2.798 EUR. Die Warnung stand schon hier
+  // („sie kosten"), nur ohne BETRAG — und eine Warnung ohne Zahl liest man weg.
+  //
+  // ⭐ Der teure Anteil ist die Verfeinerung: jede volle Kachel wird in vier
+  // geteilt und erneut gefragt. Bei Tiefe 2 sind das bis zu 16 Abrufe je Kachel
+  // statt einem, mal Paging (bis 3 Seiten), mal Wiederholung (bis 3 Versuche).
+  // Die alte Zeile nannte nur `abrufeMin` — die UNTERGRENZE. Der reale Lauf lag
+  // beim ~46-fachen davon.
+  const schlimmstenfalls = abrufeMin * 4 ** maxTiefe * MAX_SEITEN_JE_SUCHE
+  const budget = wert('budget') ? Number(wert('budget')) : VORGABE_BUDGET
+  const k = schaetzeKosten(Math.min(schlimmstenfalls, budget), 'nearby')
+
   console.log(`\n  Gebiet        ${gebietName}`)
   console.log(`  Kacheln       ${kacheln.length}`)
   console.log(`  Begriffe      ${BEGRIFFE.join(', ')}`)
   console.log(`  Max. Tiefe    ${maxTiefe}`)
   console.log(`  Modus         ${schreiben ? 'SCHARF — legt Leads an' : 'Trockenlauf (schreibt nichts)'}`)
   if (schreiben && maxNeu !== undefined) console.log(`  Begrenzung    hoechstens ${maxNeu} neue Leads`)
-  console.log(`\n  ⚠ Mindestens ${abrufeMin} Abrufe — auch im Trockenlauf, sie kosten.`)
-  console.log(`    Mit Verfeinerung koennen es deutlich mehr werden.\n`)
+
+  console.log(`\n  ── Kosten ─────────────────────────────────────────────`)
+  console.log(`  Abrufe        ${abrufeMin} mindestens · bis ${schlimmstenfalls.toLocaleString('de-DE')} mit Verfeinerung`)
+  console.log(`  Budget        ${budget.toLocaleString('de-DE')} Abrufe (harte Bremse)`)
+  console.log(`  davon gratis  ${k.gratis.toLocaleString('de-DE')} (Googles Monatskontingent)`)
+  console.log(`  berechnet     ${k.berechnet.toLocaleString('de-DE')} Abrufe`)
+  console.log(`  ≈ Kosten      ${k.euro.toFixed(2)} EUR   (Schaetzung, nicht die Rechnung)`)
+  console.log(`  ⚠ Auch der Trockenlauf kostet — er unterdrueckt das Schreiben, nicht die Abrufe.\n`)
+
+  // ⭐ Der Lauf startet NICHT, wenn das Vorgabe-Budget nicht reicht. Wer mehr
+  // will, setzt `--budget` und hat den Betrag oben gesehen. Das ist der ganze
+  // Unterschied zum 21.08.: damals musste man nichts entscheiden, um viel
+  // auszugeben — jetzt muss man etwas entscheiden, um ueberhaupt weiterzukommen.
+  if (schlimmstenfalls > budget && !hatFlag('budget')) {
+    console.error(`  ABBRUCH — dieser Lauf kann bis ${schlimmstenfalls.toLocaleString('de-DE')} Abrufe brauchen,`)
+    console.error(`  das Vorgabe-Budget deckt ${budget.toLocaleString('de-DE')}.`)
+    console.error(``)
+    console.error(`  Kleiner fahren:   --gebiet muensterland   oder   --max-tiefe 0`)
+    console.error(`  Bewusst freigeben: --budget ${schlimmstenfalls}`)
+    console.error(`    (das waeren ~${schaetzeKosten(schlimmstenfalls, 'nearby').euro.toFixed(0)} EUR)`)
+    console.error(``)
+    process.exit(1)
+  }
 
   // Der Bestand einmal laden, nicht je Fund abfragen.
   //
@@ -134,7 +186,9 @@ async function main() {
 
   const laufId = crypto.randomUUID()
   const bericht = await entdecke({
-    places: holeAdapter(),
+    // Die Bremse haengt am Adapter, nicht an der Schleife — so zaehlt sie auch
+    // die Abrufe, die Paging und Wiederholung INNERHALB einer Suche ausloesen.
+    places: holeAdapter({ budget }),
     db,
     gebiet,
     begriffe: BEGRIFFE,

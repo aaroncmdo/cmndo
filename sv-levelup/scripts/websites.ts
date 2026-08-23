@@ -19,7 +19,7 @@
  */
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
-import { holeAdapter } from '../lib/places'
+import { holeAdapter, schaetzeKosten, VORGABE_BUDGET } from '../lib/places'
 import { holeWebsitesAusPlaces } from '../lib/anreicherung/website-aus-places'
 import type { Db } from '../lib/anreicherung/schreiben'
 
@@ -85,17 +85,43 @@ async function main() {
   if (quelle) offenQuery = offenQuery.eq('quelle', quelle)
   const { count: offen } = await offenQuery
 
+  // ── Die Kostenschau VOR dem ersten Abruf ─────────────────────────────────
+  //
+  // ⚠ Hier ist die Rechnung ehrlich einfach: EIN Details-Abruf je Kandidat.
+  // Genau deshalb gehoert der Betrag hin — nicht weil er hoch ist, sondern weil
+  // „je Kandidat ein Abruf" bei 7.500 Kandidaten eben doch eine Zahl ergibt,
+  // die man vorher kennen will. (Am 21.08. fehlte diese Zahl ueberall.)
+  const abrufe = limit ?? offen ?? 0
+  const budget = wert('budget') ? Number(wert('budget')) : VORGABE_BUDGET
+  const k = schaetzeKosten(Math.min(abrufe, budget), 'details')
+
   console.log(`\n  Quelle        ${quelle}`)
   console.log(`  Kandidaten    ${offen ?? '?'} ohne Website, mit Place-Kennung`)
   console.log(`  Diesmal       ${limit ?? 'ALLE'}`)
   if (abId) console.log(`  Fortsetzen    ab Kennung > ${abId}`)
   console.log(`  Modus         ${schreiben ? 'SCHARF — schreibt website_url' : 'Trockenlauf (schreibt nichts)'}`)
-  console.log(`\n  ⚠ Je Kandidat EIN Details-Abruf — auch im Trockenlauf, sie kosten.\n`)
+
+  console.log(`\n  ── Kosten ─────────────────────────────────────────────`)
+  console.log(`  Abrufe        ${abrufe.toLocaleString('de-DE')} (je Kandidat EINER)`)
+  console.log(`  Budget        ${budget.toLocaleString('de-DE')} Abrufe (harte Bremse)`)
+  console.log(`  davon gratis  ${k.gratis.toLocaleString('de-DE')} (Googles Monatskontingent)`)
+  console.log(`  ≈ Kosten      ${k.euro.toFixed(2)} EUR   (Schaetzung, nicht die Rechnung)`)
+  console.log(`  ⚠ Auch der Trockenlauf kostet — er unterdrueckt das Schreiben, nicht die Abrufe.\n`)
+
+  if (abrufe > budget && !hatFlag('budget')) {
+    console.error(`  ABBRUCH — ${abrufe.toLocaleString('de-DE')} Abrufe geplant, Vorgabe-Budget deckt ${budget.toLocaleString('de-DE')}.`)
+    console.error(``)
+    console.error(`  Kleiner fahren:    --limit ${budget}`)
+    console.error(`  Bewusst freigeben: --budget ${abrufe}`)
+    console.error(`    (das waeren ~${schaetzeKosten(abrufe, 'details').euro.toFixed(0)} EUR)`)
+    console.error(``)
+    process.exit(1)
+  }
 
   const laufId = crypto.randomUUID()
   const r = await holeWebsitesAusPlaces({
     db,
-    places: holeAdapter(),
+    places: holeAdapter({ budget }),
     laufId,
     dryRun: !schreiben,
     quelle,

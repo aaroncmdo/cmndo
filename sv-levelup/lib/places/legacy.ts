@@ -67,6 +67,31 @@ function zuBetrieb(o: RohOrt): Betrieb | null {
 export function erzeugeLegacy(apiKey: string, opts: AdapterOpts = {}): PlacesAdapter {
   const f = opts.fetchImpl ?? fetch
   const warte = opts.warte ?? ((ms: number) => new Promise<void>((r) => setTimeout(r, ms)))
+  const zaehler = opts.zaehler
+
+  // ── Notbremse gegen den Fehlersturm ──────────────────────────────────────
+  //
+  // ⚠ Am 21.08. kostete genau diese Konstellation 2.798 EUR: 80 % der Abrufe
+  // scheiterten am Netz, jeder wurde dreimal gefeuert, und Google berechnete
+  // alle drei — die Antwort kam nie an, der Abruf schon.
+  //
+  // ⭐ Eine hohe Fehlerquote ist KEIN Grund, es oefter zu versuchen. Sie ist ein
+  // Grund aufzuhoeren: wenn vier von fuenf Abrufen sterben, ist etwas
+  // grundsaetzlich kaputt (Netz, Drossel, Sperre), und Weiterfeuern kauft nur
+  // Rechnungsposten. Die alte Logik tat das Gegenteil.
+  const FENSTER = 20
+  const MAX_FEHLERQUOTE = 0.5
+  const letzte: boolean[] = []   // true = Fehler
+
+  function merke(fehler: boolean): void {
+    letzte.push(fehler)
+    if (letzte.length > FENSTER) letzte.shift()
+  }
+
+  function stuermtEs(): boolean {
+    if (letzte.length < FENSTER) return false
+    return letzte.filter(Boolean).length / letzte.length > MAX_FEHLERQUOTE
+  }
 
   /**
    * Ein Abruf mit Wiederholung bei NETZ-Fehlern.
@@ -83,12 +108,27 @@ export function erzeugeLegacy(apiKey: string, opts: AdapterOpts = {}): PlacesAda
    * verbrennt Kontingent und aendert nichts.
    */
   async function mitWiederholung(url: string): Promise<Response> {
+    if (stuermtEs()) {
+      throw new PlacesFehler(
+        'FEHLERSTURM',
+        `mehr als ${MAX_FEHLERQUOTE * 100} % der letzten ${FENSTER} Abrufe scheiterten — ` +
+          `Lauf gestoppt, bevor er weiter Abrufe bezahlt, die nichts liefern`,
+      )
+    }
+
     let letzter: unknown
     for (let versuch = 0; versuch < 3; versuch++) {
       if (versuch > 0) await warte(500 * 2 ** versuch)   // 1 s, dann 2 s
+      // ⚠ VOR dem Abruf melden, nicht danach. Google berechnet den Abruf, sobald
+      // er ankommt — auch wenn uns die Antwort nie erreicht. Wer erst nach einer
+      // erfolgreichen Antwort zaehlt, zaehlt genau die teuren Faelle nicht.
+      zaehler?.melde()
       try {
-        return await f(url)
+        const res = await f(url)
+        merke(false)
+        return res
       } catch (err) {
+        merke(true)
         letzter = err
       }
     }
