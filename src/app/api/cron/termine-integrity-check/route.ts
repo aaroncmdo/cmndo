@@ -17,8 +17,11 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { runTermineIntegrityChecks } from '@/lib/termine/termine-integrity-checks'
+import { meldeFindingsAlsTask } from '@/lib/watchdog/finding-task'
 
 export const dynamic = 'force-dynamic'
+
+const TASK_CODE = 'termine-integrity-finding'
 
 export async function GET(request: Request) {
   if (!assertCronAuth(request)) {
@@ -28,9 +31,24 @@ export async function GET(request: Request) {
   const db = createAdminClient()
   const report = await runTermineIntegrityChecks(db)
 
+  let taskAngelegt = false
   if (!report.ok) {
     // Doppelbuchungs-Verletzung — laut loggen, damit VPS-Log-Monitoring anschlaegt.
     console.error(`[termine-integrity] ${report.findings.length} FINDING(S):`, JSON.stringify(report.findings))
+
+    // ⭐ Das Log allein reicht NICHT: Die Route antwortet auch mit Findings HTTP 200.
+    // Eine Doppelbuchung, die niemand sieht, wird zum Termin, zu dem zwei Leute kommen.
+    const ergebnis = await meldeFindingsAlsTask(db, {
+      taskCode: TASK_CODE,
+      titel: `${report.findings.length} Termin-Integritaets-Verletzung(en)`,
+      einleitung:
+        'SV-Buchungen ueberschneiden sich oder widersprechen Kalender bzw. Urlaub. ' +
+        'Unentdeckt fuehrt das zu Doppelterminen beim Kunden — der teuerste Zeitpunkt, ' +
+        'es zu bemerken, ist vor Ort.',
+      zeilen: report.findings.map((f) => `${f.check} (${f.severity}, ${f.count}× in ${f.tabelle}): ${f.detail}`),
+      prioritaet: report.findings.some((f) => f.severity === 'critical') ? 'kritisch' : 'dringend',
+    })
+    taskAngelegt = ergebnis.angelegt
   }
 
   return NextResponse.json({
@@ -38,5 +56,6 @@ export async function GET(request: Request) {
     geprueft: report.geprueft,
     findings_count: report.findings.length,
     findings: report.findings,
+    task_angelegt: taskAngelegt,
   })
 }
