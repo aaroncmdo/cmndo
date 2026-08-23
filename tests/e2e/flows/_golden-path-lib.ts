@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
 import { totp } from './totp'
+import { basicAuthFuerZiel } from '../lib/ziel'
 
 export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, PFLICHTDOK, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
 
@@ -151,10 +152,16 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
 
   const projectRef = new URL(SUPABASE_URL).hostname.split('.')[0]
   const cookies = sessionToCookies(effectiveSession, { projectRef, cookieDomain: '.claimondo.de' })
+  // httpCredentials nur, wenn das ZIEL sie braucht (staging liegt hinter nginx-Basic-Auth,
+  // prod und localhost nicht). Das ist der EINZIGE Unterschied zwischen einem prod- und
+  // einem staging-Lauf dieser Harness: die Session-Cookies oben tragen cookieDomain
+  // '.claimondo.de' und gelten damit ohnehin fuer beide Hosts.
+  // `undefined` = keine Basic-Auth (Playwright behandelt es genau so).
   const ctx = await browser.newContext({
     baseURL: APP,
     serviceWorkers: 'block',
     viewport: { width: 1440, height: 1200 },
+    httpCredentials: basicAuthFuerZiel(),
   })
   // cookie.mjs (untyped .mjs) liefert sameSite:string; Playwright will "Lax"|"Strict"|"None".
   await ctx.addCookies(cookies as Parameters<typeof ctx.addCookies>[0])

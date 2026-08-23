@@ -53,6 +53,14 @@ const MANUELLE_LIVE_SMOKES = [
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // Playwright sammelt per Default AUCH `*.test.ts` ein. Damit reine Helfer unter
+  // `tests/e2e/lib/` einen echten Unit-Test haben koennen, laeuft die Trennung ab
+  // 23.08. ueber die Endung: `.spec.ts` = Playwright (Browser), `.test.ts` = vitest.
+  // Faktisch war es schon so (alle 89 Playwright-Dateien sind `.spec.ts`), jetzt steht
+  // es auch in der Config. Ohne diese Zeile wuerde Playwright `ziel.test.ts` einsammeln
+  // und an dessen vitest-Imports scheitern.
+  // ⚠ Gegenstueck in vitest.config.ts — beide muessen zusammen geaendert werden.
+  testMatch: '**/*.spec.ts',
   testIgnore: MANUELLE_LIVE_SMOKES,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
