@@ -1,7 +1,13 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
+import {
+  OG_DEFAULT_IMAGES,
+  SITE_URL,
+  breadcrumbsSchema,
+  jsonLdScript,
+} from '@/lib/seo/jsonld'
+import { localeAlternates } from '@/lib/seo/alternates'
 import { GewinnspielFormClient } from './GewinnspielFormClient'
 import { PraemienFaecher } from './PraemienFaecher'
 
@@ -29,21 +35,34 @@ import { PraemienFaecher } from './PraemienFaecher'
 // Faecher = Wahlfreiheit). Ein einziger heller Akzent traegt Zahl und CTA, damit
 // die Karten die einzige Buntheit bleiben.
 
-export const metadata: Metadata = {
-  title: 'Täglich 3 × 50 € gewinnen | Claimondo',
-  description:
-    'Unverschuldeter Unfall? Nehmen Sie täglich an der Verlosung von 3 × 50 € Gutschein teil. Kostenlos, in 30 Sekunden, ohne Kaufzwang.',
-  // Kampagnenseite: nach Kampagnenende waere indexierter Inhalt veraltet und
-  // wuerde fuer ein beendetes Gewinnspiel werben. Umschalten ist ein Einzeiler,
-  // sobald das Programm dauerhaft laeuft.
-  robots: { index: false, follow: false },
-  // ⚠ Metadata-Merge-Gate (Baseline 0): Next merged `openGraph` nur FLACH — ein
-  // eigener Block ohne `images` wuerde das Default-Bild des Layouts loeschen.
-  openGraph: {
-    title: 'Täglich 3 × 50 € gewinnen',
-    description: 'Unverschuldeter Unfall? Jeden Tag verlosen wir 3 × 50 € Gutschein.',
-    images: OG_DEFAULT_IMAGES,
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Täglich 3 × 50 € Gutschein gewinnen | Claimondo',
+    description:
+      'Unverschuldeter Unfall? Nehmen Sie täglich an der Verlosung von 3 × 50 € Gutschein teil. Kostenlos, in 30 Sekunden, ohne Kaufzwang.',
+    // Indexierbar: Das Gewinnspiel laeuft dauerhaft ("jeden Tag") und wird
+    // site-weit verlinkt — eine noindex-Seite als Ziel hunderter interner Links
+    // waere verschenkt. Endet die Kampagne, wird die Seite umgestellt statt
+    // stillschweigend weiterzuwerben.
+    robots: { index: true, follow: true },
+    alternates: await localeAlternates('/gewinnspiel'),
+    // ⚠ Metadata-Merge-Gate (Baseline 0): Next merged `openGraph` nur FLACH — ein
+    // eigener Block ohne `images` wuerde das Default-Bild des Layouts loeschen.
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      title: 'Täglich 3 × 50 € Gutschein gewinnen',
+      description: 'Unverschuldeter Unfall? Jeden Tag verlosen wir 3 × 50 € Gutschein.',
+      url: `${SITE_URL}/gewinnspiel`,
+      images: OG_DEFAULT_IMAGES,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: 'Täglich 3 × 50 € Gutschein gewinnen',
+      description: 'Unverschuldeter Unfall? Jeden Tag verlosen wir 3 × 50 € Gutschein.',
+      images: OG_DEFAULT_IMAGES,
+    },
+  }
 }
 
 /** Kampagnen-Palette. Lokal auf dem Wrapper statt global in globals.css: das ist
@@ -63,9 +82,68 @@ const TRUST = [
   { zahl: 'Ø 32 Tage', label: 'von der Meldung bis zur Auszahlung' },
 ]
 
-export default function GewinnspielPage() {
+/**
+ * Strukturierte Daten. schema.org hat keinen Typ fuer Gewinnspiele — deshalb
+ * WebPage statt einer erfundenen Auszeichnung, plus Breadcrumbs. Die
+ * Teilnahmebedingungen haengen als `significantLink` daran; das ist die
+ * ehrlichste verfuegbare Modellierung und valide.
+ */
+function schemaGraph() {
+  return [
+    breadcrumbsSchema([
+      { name: 'Startseite', url: '/' },
+      { name: 'Gewinnspiel', url: '/gewinnspiel' },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebPage',
+      name: 'Täglich 3 × 50 € Gutschein gewinnen',
+      description:
+        'Tägliche Verlosung von 3 Gutscheinen à 50 € unter Teilnehmern mit unverschuldetem Unfallschaden. Kostenlos und ohne Kaufzwang.',
+      url: `${SITE_URL}/gewinnspiel`,
+      inLanguage: 'de-DE',
+      isPartOf: { '@type': 'WebSite', url: SITE_URL, name: 'Claimondo' },
+      significantLink: `${SITE_URL}/gewinnspiel/teilnahmebedingungen`,
+      publisher: { '@type': 'Organization', name: 'Claimondo', url: SITE_URL },
+    },
+  ]
+}
+
+/** Endpunkt der Kampagnen-API. BEWUSST fest, nicht NEXT_PUBLIC_APP_URL —
+ *  die zeigt im Marketing-Build auf claimondo.de, und /api/* wird von NGINX
+ *  nicht an die App weitergeleitet (404). Gleiche Begruendung wie beim
+ *  Anfrage-Endpunkt im Formular. */
+const KAMPAGNE_API = 'https://app.claimondo.de/api/kampagne/aktiv'
+
+type KampagneAntwort = {
+  aktiv: boolean
+  betragEur?: number
+  praemien?: Array<{ id: string; name: string; beschreibung: string | null }>
+}
+
+/** Holt den Kampagnen-Stand. Faellt die API aus, rendert die Seite ohne
+ *  Praemien-Auswahl weiter — eine tote Landingpage waere die schlechtere
+ *  Antwort auf einen API-Fehler als eine reduzierte. */
+async function ladeKampagne(): Promise<KampagneAntwort> {
+  try {
+    const res = await fetch(KAMPAGNE_API, { next: { revalidate: 60 } })
+    if (!res.ok) return { aktiv: false }
+    return (await res.json()) as KampagneAntwort
+  } catch {
+    return { aktiv: false }
+  }
+}
+
+export default async function GewinnspielPage() {
+  const kampagne = await ladeKampagne()
+  const praemien = kampagne.praemien ?? []
+
   return (
     <main style={KAMPAGNEN_VARS} className="min-h-screen bg-claimondo-navy text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={jsonLdScript(schemaGraph())}
+      />
       {/* ── 1 · Preis-Fold ────────────────────────────────────────────────
           Kein Header, keine Navigation: jeder Link, der nicht zum Formular
           fuehrt, ist auf einer Ad-Landeseite ein Leck. */}
@@ -123,14 +201,14 @@ export default function GewinnspielPage() {
               </p>
 
               <div className="mt-9">
-                <PraemienFaecher />
+                <PraemienFaecher praemien={praemien} />
               </div>
             </div>
 
             {/* Formular ueber der Falte: auf Mobil steht es direkt unter der
                 Zahl, ohne Scrollen erreichbar. */}
             <div className="lg:sticky lg:top-8">
-              <GewinnspielFormClient />
+              <GewinnspielFormClient praemien={praemien} />
             </div>
           </div>
         </div>

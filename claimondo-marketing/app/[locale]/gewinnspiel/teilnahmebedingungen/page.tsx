@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
+import { localeAlternates } from '@/lib/seo/alternates'
 
 // Teilnahmebedingungen zum taeglichen Gewinnspiel.
 //
@@ -14,16 +15,24 @@ import { OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 // Zusage von genau drei Gewinnern waere ein Versprechen, das an den meisten
 // Tagen nicht erfuellbar ist.
 
-export const metadata: Metadata = {
-  title: 'Teilnahmebedingungen Gewinnspiel | Claimondo',
-  description: 'Teilnahmebedingungen für das tägliche Gewinnspiel von Claimondo.',
-  robots: { index: false, follow: false },
-  // Metadata-Merge-Gate: eigener openGraph-Block MUSS images mitgeben.
-  openGraph: {
-    title: 'Teilnahmebedingungen Gewinnspiel',
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: 'Teilnahmebedingungen Gewinnspiel | Claimondo',
     description: 'Teilnahmebedingungen für das tägliche Gewinnspiel von Claimondo.',
-    images: OG_DEFAULT_IMAGES,
-  },
+    // Indexierbar wie die uebrigen Rechtstexte (Impressum, Datenschutz, AGB):
+    // Teilnahmebedingungen muessen auffindbar sein, das ist Teil der
+    // Transparenzpflicht.
+    robots: { index: true, follow: true },
+    alternates: await localeAlternates('/gewinnspiel/teilnahmebedingungen'),
+    // Metadata-Merge-Gate: eigener openGraph-Block MUSS images mitgeben.
+    openGraph: {
+      type: 'website',
+      locale: 'de_DE',
+      title: 'Teilnahmebedingungen Gewinnspiel',
+      description: 'Teilnahmebedingungen für das tägliche Gewinnspiel von Claimondo.',
+      images: OG_DEFAULT_IMAGES,
+    },
+  }
 }
 
 const PARAGRAPHEN: { titel: string; text: string }[] = [

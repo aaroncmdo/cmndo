@@ -55,11 +55,17 @@ function attributionAusUrl(): Record<string, string> {
 
 type Schuld = 'unverschuldet' | 'nicht_sicher'
 
-export function GewinnspielFormClient() {
+export type PraemienOption = { id: string; name: string; beschreibung: string | null }
+
+export function GewinnspielFormClient({ praemien }: { praemien: PraemienOption[] }) {
   const [pending, setPending] = useState(false)
   const [fertig, setFertig] = useState(false)
   const [schuld, setSchuld] = useState<Schuld | null>(null)
   const [anrufOk, setAnrufOk] = useState(false)
+  // Vorbelegt mit der ersten Prämie: Der Nutzer soll wählen können, aber nicht
+  // müssen. Ein Pflichtfeld mehr kostet Abschlüsse, und "keine Wahl" wäre für
+  // ihn die schlechtere Voreinstellung als die erste Option.
+  const [praemieId, setPraemieId] = useState<string | null>(praemien[0]?.id ?? null)
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -94,6 +100,9 @@ export function GewinnspielFormClient() {
           // Nachweis der Einwilligung (Art. 7 DSGVO). Die Route legt daraus
           // dsgvo_zustimmung_am an.
           consent_ts: new Date().toISOString(),
+          // Gewaehlter Gutschein. Serverseitig gegen die Praemien der aktiven
+          // Kampagne geprueft; eine fremde ID wird verworfen, nicht uebernommen.
+          ...(praemieId ? { gewinnspiel_praemie_id: praemieId } : {}),
           ...attributionAusUrl(),
           honeypot: String(fd.get('honeypot') ?? ''),
         }),
@@ -171,6 +180,57 @@ export function GewinnspielFormClient() {
           disabled={pending}
           hint="Über diese Nummer bestätigen wir Ihre Teilnahme per WhatsApp."
         />
+
+        {/* Gutschein-Wahl. Bewusst KEIN Pflichtfeld: vorbelegt mit der ersten
+            Option, damit sie Verkaufsargument bleibt und keine Hürde wird. */}
+        {praemien.length > 0 ? (
+          <fieldset className="pt-1">
+            <legend className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/70">
+              Welchen Gutschein möchten Sie?
+            </legend>
+            <div className="space-y-2">
+              {praemien.map((p) => {
+                const aktiv = praemieId === p.id
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => setPraemieId(p.id)}
+                    disabled={pending}
+                    aria-pressed={aktiv}
+                    className={[
+                      'flex w-full items-start gap-3 rounded-ios-md border px-3 py-2.5 text-left transition-all',
+                      'disabled:cursor-not-allowed disabled:opacity-60',
+                      aktiv
+                        ? 'border-[var(--gs-cream)] bg-white/15'
+                        : 'border-white/20 bg-white/5 hover:border-white/40',
+                    ].join(' ')}
+                  >
+                    <span
+                      aria-hidden
+                      className={[
+                        'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-ios-sm border text-[11px] font-bold',
+                        aktiv
+                          ? 'border-[var(--gs-cream)] bg-[var(--gs-cream)] text-claimondo-navy'
+                          : 'border-white/40 text-transparent',
+                      ].join(' ')}
+                    >
+                      ✓
+                    </span>
+                    <span>
+                      <span className="block text-[13px] font-semibold text-white">{p.name}</span>
+                      {p.beschreibung ? (
+                        <span className="block text-[11px] leading-snug text-white/55">
+                          {p.beschreibung}
+                        </span>
+                      ) : null}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </fieldset>
+        ) : null}
 
         <fieldset className="pt-1">
           <legend className="mb-2 block text-xs font-semibold uppercase tracking-wider text-white/70">

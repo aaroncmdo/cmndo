@@ -52,6 +52,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: langAlternates('/gutachter-finden') },
     },
     {
+      // Kampagnen-Landeseite des taeglichen Gewinnspiels. Setzt index/follow
+      // und wird site-weit verlinkt — gehoert also angemeldet. Hohe Frequenz,
+      // weil die Kampagnen-Parameter (Preise/Tag, Betrag) aus der DB kommen
+      // und sich ohne Deploy aendern koennen.
+      url: `${SITE_URL}/gewinnspiel`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/gewinnspiel') },
+    },
+    {
       // Pendant zu /gutachter-finden, war bis 20.08. nicht angemeldet: die
       // Seite liefert 200, setzt `robots: index, follow` und ein Canonical auf
       // sich selbst — sie WILL indexiert werden, stand aber in keiner Sitemap.
