@@ -79,26 +79,6 @@
       {
         "frage": "Ich wurde als Radfahrer in Münster von einem Auto erfasst. Brauche ich ein Gutachten?",
         "antwort": "Ja, auch für ein beschädigtes Fahrrad und Ihre Ausrüstung. In einer Stadt mit derart hohem Radverkehrsanteil sind solche Unfälle häufig — der Sachverständige beziffert Rad-, Kleidungs- und Helmschaden ebenso wie den Wertverlust am Rahmen."
-      },
-      {
-        "frage": "Unfall auf der A1 oder A43 bei Münster — wer zahlt den Gutachter?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ändert daran nichts."
-      },
-      {
-        "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?",
-        "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst — der Gutachter der Gegenseite arbeitet in deren Auftrag."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Münster?",
-        "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag grundsätzlich nicht vorkommen."
-      },
-      {
-        "frage": "Bekomme ich für die Reparaturzeit einen Mietwagen?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält Nutzungsausfall in bar ausgezahlt."
-      },
-      {
-        "frage": "Was ist merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug künftig als Unfallwagen gilt — auch nach fachgerechter Reparatur. Sie steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A1, Kollision mit einem Radfahrer am Ring oder Parkschaden in der Altstadt — der Sachverständige kommt zu Ihnen nach Münster.",
@@ -297,10 +277,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — alternativ Nutzungsausfall in bar."
-      },
-      {
         "frage": "Was bedeutet Wertminderung nach einem Unfall?",
         "antwort": "Ihr Fahrzeug gilt künftig als Unfallwagen und bringt beim Verkauf weniger. Diese Differenz steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
       }
@@ -387,18 +363,6 @@
       {
         "frage": "Kann ich den Gutachter selbst bestimmen?",
         "antwort": "Ja, als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung."
-      },
-      {
-        "frage": "Darf ich meine Werkstatt in Augsburg frei wählen?",
-        "antwort": "Ja. Die freie Werkstattwahl bleibt Ihnen, auch wenn die Versicherung eine Partnerwerkstatt vorschlägt."
-      },
-      {
-        "frage": "Steht mir ein Mietwagen zu?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse — oder Nutzungsausfall in bar."
-      },
-      {
-        "frage": "Was ist die merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, der allein daraus entsteht, dass Ihr Fahrzeug als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur bestehen."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A8, Parkschaden in der Maximilianstraße oder Zusammenstoß auf der B17 — der Sachverständige kommt zu Ihnen nach Augsburg.",
@@ -649,14 +613,6 @@
       {
         "frage": "Muss ich den Gutachter der Versicherung akzeptieren?",
         "antwort": "Nein, Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt frei wählen?",
-        "antwort": "Ja. Auch der Vorschlag einer Partnerwerkstatt durch die Versicherung ändert daran nichts."
-      },
-      {
-        "frage": "Was ist Wertminderung?",
-        "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zu."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in Buer oder Zusammenstoß an der Kurt-Schumacher-Straße — der Sachverständige kommt zu Ihnen nach Gelsenkirchen.",

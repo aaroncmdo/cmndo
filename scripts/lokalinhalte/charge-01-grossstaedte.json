@@ -122,28 +122,12 @@
         "antwort": "Bei Fahrerflucht zahlt Ihre eigene Teil- oder Vollkaskoversicherung, sofern vorhanden. Melden Sie den Schaden bei der Polizei und lassen Sie ihn dokumentieren — ein Gutachten hält Schadenbild und Reparaturkosten fest, auch wenn der Verursacher unbekannt bleibt."
       },
       {
-        "frage": "Reicht der Kostenvoranschlag der Werkstatt in Leipzig aus?",
-        "antwort": "Bei einem Bagatellschaden unter etwa 750 Euro ja. Darüber lohnt das Gutachten: Nur der Sachverständige beziffert Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag schlicht fehlen und die Ihnen sonst verloren gehen."
-      },
-      {
         "frage": "Was kostet mich das Gutachten in Leipzig, wenn ich schuld bin?",
         "antwort": "Bei selbst verschuldeten Schäden tragen Sie die Kosten oder Ihre Kaskoversicherung. Sprechen Sie vorher mit uns: Wir sagen Ihnen offen, ob sich ein Gutachten für Ihren Fall rechnet oder ob ein Kostenvoranschlag genügt."
       },
       {
-        "frage": "Kann ich meine Werkstatt in Leipzig selbst wählen?",
-        "antwort": "Ja. Bei unverschuldetem Unfall haben Sie freie Werkstattwahl — auch wenn die gegnerische Versicherung eine Partnerwerkstatt vorschlägt. Sie dürfen zu Ihrer Vertragswerkstatt in Leipzig, und die Versicherung muss die dortigen Stundensätze erstatten."
-      },
-      {
-        "frage": "Bekomme ich in Leipzig einen Mietwagen für die Reparaturzeit?",
-        "antwort": "Bei unverschuldetem Unfall ja, in der Klasse Ihres Fahrzeugs. Alternativ steht Ihnen Nutzungsausfall in bar zu, wenn Sie auf den Mietwagen verzichten — bei der Leipziger Verkehrsanbindung mit S-Bahn und Straßenbahn für viele die attraktivere Wahl."
-      },
-      {
         "frage": "Wie lange habe ich nach einem Unfall in Leipzig Zeit?",
         "antwort": "Ansprüche verjähren nach drei Jahren zum Jahresende. Warten Sie trotzdem nicht: Je später das Gutachten, desto schwerer wird die Zuordnung des Schadens — und Spuren am Fahrzeug verschwinden mit jeder Reparatur."
-      },
-      {
-        "frage": "Was ist eine Wertminderung und bekomme ich sie in Leipzig auch?",
-        "antwort": "Ein repariertes Unfallfahrzeug ist beim Verkauf weniger wert als ein unfallfreies — diese Differenz heißt merkantile Wertminderung und steht Ihnen zusätzlich zu. Sie wird nur im Gutachten beziffert, nicht im Kostenvoranschlag, und wird in der Praxis oft übersehen."
       }
     ],
     "heroAnker": "Ob nach einem Auffahrunfall auf dem Leipziger Ring, einem Parkschaden in der Innenstadt oder einem Zusammenstoß auf der A14 — der Sachverständige kommt zu Ihnen.",
@@ -278,31 +262,15 @@
       ],
       "knoten": [
         "Kreuz Dortmund-Nordwest",
-        "Kreuz Dortmund-Unna",
+        "Autobahnkreuz Dortmund/Unna",
         "Dreieck Dortmund/Witten"
       ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der B1 mitten durch Dortmund — wer zahlt den Gutachter?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer, unabhängig davon, ob es auf der B1, der A45 oder im Kreuzviertel passiert ist. Grundlage ist § 249 BGB, nicht der Unfallort."
-      },
-      {
         "frage": "Die Versicherung schickt mir einen eigenen Gutachter nach Dortmund. Muss ich das annehmen?",
         "antwort": "Nein. Bei unverschuldetem Unfall wählen Sie den Sachverständigen selbst — das ist Ihr gutes Recht. Der Gutachter der gegnerischen Versicherung arbeitet in deren Auftrag, und seine Zahlen fallen erfahrungsgemäß niedriger aus."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Dortmund?",
-        "antwort": "Unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag genau die Positionen, die Geld bringen: Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert bei wirtschaftlichem Totalschaden."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt in Dortmund frei wählen?",
-        "antwort": "Ja. Auch wenn die gegnerische Versicherung eine Partnerwerkstatt empfiehlt, dürfen Sie zu Ihrer Vertragswerkstatt — und die Versicherung muss deren Stundensätze erstatten, nicht die günstigeren einer Vertragswerkstatt am anderen Ende des Ruhrgebiets."
-      },
-      {
-        "frage": "Bekomme ich einen Mietwagen, während mein Auto in Dortmund repariert wird?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse. Wer auf den Mietwagen verzichtet, bekommt stattdessen Nutzungsausfall in bar — im dicht getakteten Nahverkehr des Ruhrgebiets für viele die bessere Rechnung."
       },
       {
         "frage": "Mein Wagen wurde am Borsigplatz zerkratzt, niemand hat etwas gesehen. Was tun?",
@@ -311,10 +279,6 @@
       {
         "frage": "Wie lange habe ich nach einem Unfall in Dortmund Zeit für meine Ansprüche?",
         "antwort": "Drei Jahre, gerechnet ab dem Ende des Unfalljahres. Warten Sie dennoch nicht: Ein spätes Gutachten macht die Zuordnung des Schadens schwerer, und nach einer Reparatur ist der Zustand nicht mehr rekonstruierbar."
-      },
-      {
-        "frage": "Was ist Wertminderung und steht sie mir in Dortmund zu?",
-        "antwort": "Ein repariertes Unfallfahrzeug bringt beim Verkauf weniger als ein unfallfreies. Diese Differenz — die merkantile Wertminderung — steht Ihnen zusätzlich zur Reparatur zu, wird aber nur im Gutachten beziffert."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der B1, Parkschaden in der City oder Zusammenstoß am Kreuz Dortmund-Nordwest — der Sachverständige kommt zu Ihnen.",
@@ -423,32 +387,12 @@
         "B227"
       ],
       "knoten": [
-        "Kreuz Essen-Nord",
+        "Anschlussstelle Essen-Nord",
         "Dreieck Essen-Ost"
       ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Unfall auf der A40 mitten durch Essen — wer trägt die Gutachterkosten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob der Unfall auf der A40, der A52 oder an einer Kreuzung in Altenessen passiert ist, spielt für diesen Anspruch keine Rolle."
-      },
-      {
-        "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?",
-        "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind. Der Gutachter der Gegenseite arbeitet in deren Interesse — und kommt erfahrungsgemäß zu niedrigeren Schadenhöhen."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Essen?",
-        "antwort": "Bei Bagatellschäden unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die schnell vierstellig werden."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt in Essen selbst aussuchen?",
-        "antwort": "Ja, Sie haben freie Werkstattwahl. Auch ein Verweis der Versicherung auf eine günstigere Partnerwerkstatt ändert daran nichts — bei einem fachgerecht gewarteten Fahrzeug dürfen Sie zu Ihrer Vertragswerkstatt."
-      },
-      {
-        "frage": "Steht mir während der Reparatur in Essen ein Mietwagen zu?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält Nutzungsausfall in bar — angesichts der dichten Verbindungen von Bahn und Straßenbahn in Essen oft die lohnendere Variante."
-      },
       {
         "frage": "Mein Auto wurde in der Innenstadt beschädigt und der Verursacher ist weg. Was jetzt?",
         "antwort": "Erstatten Sie Anzeige und lassen Sie den Schaden dokumentieren. Für die Kosten kommt bei Fahrerflucht Ihre Teil- oder Vollkasko auf; ein Gutachten hält fest, was tatsächlich beschädigt wurde."
@@ -546,36 +490,12 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der A1 bei Bremen — wer zahlt das Gutachten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ändert daran nichts, ob A1, A27 oder eine Kreuzung in Hemelingen."
-      },
-      {
-        "frage": "Kann ich den Gutachter in Bremen selbst wählen?",
-        "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die Versicherung der Gegenseite. Deren eigener Gutachter vertritt naturgemäß deren Interessen."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bremen aus?",
-        "antwort": "Unter etwa 750 Euro genügt er. Darüber fehlen die Positionen, die den Unterschied machen: Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert bei Totalschaden."
-      },
-      {
-        "frage": "Darf ich meine Werkstatt in Bremen frei wählen?",
-        "antwort": "Ja. Die freie Werkstattwahl bleibt auch dann bestehen, wenn die Versicherung eine Partnerwerkstatt vorschlägt — bei scheckheftgepflegten Fahrzeugen dürfen Sie zur Vertragswerkstatt."
-      },
-      {
-        "frage": "Bekomme ich in Bremen einen Mietwagen für die Reparaturdauer?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Alternativ steht Ihnen Nutzungsausfall in bar zu — wer in Bremen ohnehin viel mit der Straßenbahn fährt, wählt oft diese Variante."
-      },
-      {
         "frage": "Fahrerflucht in Bremen — was kann ich tun?",
         "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Die Kosten übernimmt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko; das Gutachten belegt Umfang und Höhe des Schadens."
       },
       {
         "frage": "Wie lange habe ich nach einem Unfall in Bremen Zeit?",
         "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Handeln Sie trotzdem zügig — ist das Fahrzeug erst repariert, lässt sich der ursprüngliche Schaden kaum noch nachweisen."
-      },
-      {
-        "frage": "Was ist die merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, den Ihr Fahrzeug allein dadurch erleidet, dass es als Unfallwagen gilt — auch nach fachgerechter Reparatur. Diesen Betrag können Sie zusätzlich fordern, er steht nur im Gutachten."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden in der Überseestadt oder Zusammenstoß in Vegesack — der Sachverständige kommt zu Ihnen.",
@@ -695,24 +615,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der A17 Richtung Prag — wer zahlt den Gutachter?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Das gilt auf der A17 ebenso wie auf der A4 oder im Dresdner Stadtverkehr."
-      },
-      {
         "frage": "Die gegnerische Versicherung will einen eigenen Gutachter schicken. Muss ich zustimmen?",
         "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst. Der Gutachter der Gegenseite arbeitet in deren Auftrag — mit entsprechend zurückhaltenden Zahlen."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Dresden?",
-        "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — und damit oft ein vierstelliger Betrag."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt in Dresden frei wählen?",
-        "antwort": "Ja. Auch ein Verweis der Versicherung auf eine Partnerwerkstatt hebt Ihre freie Werkstattwahl nicht auf; bei gepflegtem Fahrzeug dürfen Sie zur Vertragswerkstatt."
-      },
-      {
-        "frage": "Steht mir während der Reparatur ein Mietwagen zu?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse. Wer verzichtet, bekommt Nutzungsausfall in bar ausgezahlt."
       },
       {
         "frage": "Mein Auto wurde in der Äußeren Neustadt beschädigt, niemand war da. Was tun?",
@@ -721,10 +625,6 @@
       {
         "frage": "Wie lange habe ich nach einem Unfall in Dresden Zeit?",
         "antwort": "Drei Jahre bis zum Ende des dritten Jahres nach dem Unfall. Warten Sie dennoch nicht — mit jeder Reparatur wird die Beweislage schlechter."
-      },
-      {
-        "frage": "Was ist Wertminderung und steht sie mir zu?",
-        "antwort": "Ein repariertes Unfallfahrzeug bringt beim Verkauf weniger als ein unfallfreies. Diese merkantile Wertminderung können Sie zusätzlich verlangen — beziffert wird sie nur im Gutachten."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Äußeren Neustadt oder Zusammenstoß auf der Elbbrücke — der Sachverständige kommt zu Ihnen.",
@@ -855,7 +755,7 @@
       ],
       "knoten": [
         "Kreuz Hannover-Ost",
-        "Kreuz Hannover-Kirchhorst",
+        "Autobahnkreuz Hannover/Kirchhorst",
         "Dreieck Hannover-Süd",
         "Dreieck Hannover-West"
       ]
@@ -863,24 +763,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der A2 oder A7 bei Hannover — wer trägt die Gutachterkosten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort spielt keine Rolle, entscheidend ist die Haftungsfrage."
-      },
-      {
         "frage": "Muss ich den Gutachter der Versicherung akzeptieren?",
         "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind — der Gutachter der Gegenseite arbeitet für deren Interessen."
-      },
-      {
-        "frage": "Reicht der Kostenvoranschlag einer Werkstatt in Hannover?",
-        "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag grundsätzlich nicht auftauchen."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt in Hannover selbst wählen?",
-        "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen. Auch wenn die Versicherung eine günstigere Partnerwerkstatt vorschlägt, dürfen Sie zur Vertragswerkstatt Ihres Vertrauens."
-      },
-      {
-        "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält stattdessen Nutzungsausfall als Geldbetrag."
       },
       {
         "frage": "Fahrerflucht in Hannover — wer zahlt meinen Schaden?",
@@ -1001,24 +885,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall am Kreuz Nürnberg — wer zahlt das Gutachten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig davon, ob es auf der A3, der A9 oder innerorts passiert ist."
-      },
-      {
         "frage": "Kann ich den Gutachter in Nürnberg selbst bestimmen?",
         "antwort": "Ja. Als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung, deren Gutachter naturgemäß deren Interessen vertritt."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt?",
-        "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — häufig ein vierstelliger Unterschied."
-      },
-      {
-        "frage": "Darf ich meine Werkstatt in Nürnberg frei wählen?",
-        "antwort": "Ja. Die freie Werkstattwahl gilt auch dann, wenn die Versicherung eine Partnerwerkstatt nennt — bei gepflegtem Fahrzeug dürfen Sie zur Vertragswerkstatt."
-      },
-      {
-        "frage": "Steht mir ein Mietwagen zu, während mein Auto repariert wird?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Alternativ zahlt die Versicherung Nutzungsausfall in bar."
       },
       {
         "frage": "Parkschaden in der Nürnberger Altstadt, Verursacher unbekannt — was tun?",
@@ -1027,10 +895,6 @@
       {
         "frage": "Wie lange habe ich nach einem Unfall in Nürnberg Zeit?",
         "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Zögern Sie trotzdem nicht: Ein repariertes Fahrzeug lässt sich nicht mehr begutachten."
-      },
-      {
-        "frage": "Was ist die merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, der allein daraus entsteht, dass Ihr Fahrzeug als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur bestehen und wird nur im Gutachten beziffert."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A9, Parkschaden in der Altstadt oder Zusammenstoß am Frankenschnellweg — der Sachverständige kommt zu Ihnen.",
@@ -1129,36 +993,12 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall am Kreuz Kaiserberg — wer zahlt den Gutachter?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob A3, A40 oder eine Kreuzung in Meiderich, ändert daran nichts."
-      },
-      {
-        "frage": "Muss ich den Gutachter der gegnerischen Versicherung nehmen?",
-        "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt waren — das ist Ihr Recht als Geschädigter."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Duisburg?",
-        "antwort": "Unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert."
-      },
-      {
-        "frage": "Kann ich meine Werkstatt in Duisburg selbst wählen?",
-        "antwort": "Ja. Auch ein Verweis auf eine Partnerwerkstatt der Versicherung ändert nichts an Ihrer freien Werkstattwahl."
-      },
-      {
-        "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse — oder wahlweise Nutzungsausfall in bar."
-      },
-      {
         "frage": "Mein Fahrzeug wurde in Duisburg beschädigt, der Verursacher ist weg. Was tun?",
         "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die eigene Teil- oder Vollkasko einschalten. Das Gutachten hält fest, was beschädigt wurde und was die Instandsetzung kostet."
       },
       {
         "frage": "Wie lange habe ich nach einem Unfall in Duisburg Zeit?",
         "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie aber vor jeder Reparatur handeln."
-      },
-      {
-        "frage": "Was ist Wertminderung?",
-        "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zur Reparatur zu und wird nur im Gutachten ausgewiesen."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Altstadt oder Zusammenstoß am Kreuz Kaiserberg — der Sachverständige kommt zu Ihnen.",
@@ -1244,36 +1084,12 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der A40 in Bochum — wer zahlt das Gutachten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ist dafür unerheblich."
-      },
-      {
-        "frage": "Kann ich den Gutachter selbst wählen?",
-        "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen. Der Gutachter der gegnerischen Versicherung arbeitet in deren Auftrag."
-      },
-      {
-        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bochum?",
-        "antwort": "Bei Bagatellschäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert."
-      },
-      {
-        "frage": "Darf ich meine Werkstatt in Bochum frei wählen?",
-        "antwort": "Ja. Auch wenn die Versicherung eine Partnerwerkstatt vorschlägt, bleibt Ihnen die freie Werkstattwahl erhalten."
-      },
-      {
-        "frage": "Steht mir ein Mietwagen zu?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder alternativ Nutzungsausfall als Geldbetrag."
-      },
-      {
         "frage": "Fahrerflucht in Bochum — was kann ich tun?",
         "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei unbekanntem Verursacher zahlt die Teil- oder Vollkasko."
       },
       {
         "frage": "Wie lange habe ich nach einem Unfall in Bochum Zeit?",
         "antwort": "Drei Jahre ab dem Jahresende. Handeln Sie dennoch früh — nach der Reparatur ist der Schaden nicht mehr nachweisbar."
-      },
-      {
-        "frage": "Was ist merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt — auch nach fachgerechter Reparatur. Sie steht Ihnen zusätzlich zu."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Innenstadt oder Zusammenstoß am Kreuz Bochum — der Sachverständige kommt zu Ihnen.",
@@ -1378,20 +1194,13 @@
         "B326"
       ],
       "knoten": [
+        "Sonnborner Kreuz (A46/A535)",
         "Kreuz Wuppertal-Nord",
-        "Kreuz Wuppertal-Oberbarmen"
+        "Anschlussstelle Wuppertal-Oberbarmen"
       ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Kann ich meine Werkstatt in Wuppertal selbst wählen?",
-        "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch gegen den Vorschlag einer Partnerwerkstatt der Versicherung."
-      },
-      {
-        "frage": "Bekomme ich einen Mietwagen während der Reparatur?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer verzichtet, bekommt Nutzungsausfall ausgezahlt — in einer Stadt mit Schwebebahn für manche die bessere Wahl."
-      },
       {
         "frage": "Parkschaden in Wuppertal, Verursacher unbekannt — was tun?",
         "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die Teil- oder Vollkasko einschalten."
@@ -1399,10 +1208,6 @@
       {
         "frage": "Wie lange habe ich nach einem Unfall in Wuppertal Zeit?",
         "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Warten Sie dennoch nicht bis zur Reparatur."
-      },
-      {
-        "frage": "Was ist Wertminderung?",
-        "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur und steht Ihnen zusätzlich zu."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in Elberfeld oder Zusammenstoß an der B7 — der Sachverständige kommt zu Ihnen.",
@@ -1516,32 +1321,12 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall auf der A2 oder A33 — wer zahlt das Gutachten?",
-        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, ganz gleich wo der Unfall geschah."
-      },
-      {
-        "frage": "Kann ich den Gutachter selbst wählen?",
-        "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen, nicht die Versicherung der Gegenseite."
-      },
-      {
-        "frage": "Darf ich meine Werkstatt in Bielefeld frei wählen?",
-        "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen auch dann, wenn die Versicherung eine Partnerwerkstatt vorschlägt."
-      },
-      {
-        "frage": "Steht mir ein Mietwagen zu?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder wahlweise Nutzungsausfall in bar."
-      },
-      {
         "frage": "Fahrerflucht in Bielefeld — was tun?",
         "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; die Kosten trägt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko."
       },
       {
         "frage": "Wie lange habe ich nach einem Unfall in Bielefeld Zeit?",
         "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — handeln Sie dennoch vor der Reparatur."
-      },
-      {
-        "frage": "Was ist Wertminderung?",
-        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt. Er wird nur im Gutachten beziffert und steht Ihnen zusätzlich zu."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Altstadt oder Zusammenstoß am Ostwestfalendamm — der Sachverständige kommt zu Ihnen.",
@@ -1623,20 +1408,12 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?",
-        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder alternativ Nutzungsausfall in bar."
-      },
-      {
         "frage": "Mein Auto wurde in Bonn beschädigt, der Verursacher ist weg. Was tun?",
         "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; bei Fahrerflucht zahlt Ihre Teil- oder Vollkasko."
       },
       {
         "frage": "Wie lange habe ich nach einem Unfall in Bonn Zeit?",
         "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie vor der Reparatur handeln."
-      },
-      {
-        "frage": "Was ist die merkantile Wertminderung?",
-        "antwort": "Der Wertverlust, den Ihr Fahrzeug erleidet, weil es künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A565, Parkschaden in der Südstadt oder Zusammenstoß auf der Kennedybrücke — der Sachverständige kommt zu Ihnen.",
