@@ -109,6 +109,40 @@ const DECODER_KATALOG: Decoder[] = [
     norm: '§ 249 BGB, BGH VI ZR 53/09',
   },
   {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/beilackierung.md
+    // (veroeffentlicht, insurer_phrases + keyFacts). Nicht frei formuliert.
+    slug: 'beilackierung-nicht-erforderlich',
+    phrase: 'Die Beilackierung ist technisch nicht erforderlich.',
+    trigger: ['beilackierung', 'farbtonangleichung', 'lackangleichung', 'mitlackierung', 'angrenzende teile'],
+    bedeutet:
+      'Kürzung aus dem Prüfbericht — fast immer nach Aktenlage, ohne dass jemand das Fahrzeug gesehen hat. Betroffen sind vor allem Metallic-, Perleffekt- und Mehrschichtlacke, bei denen ein einzeln lackiertes Teil sichtbar absticht.',
+    recht:
+      'Geschuldet ist der Zustand vor dem Unfall, nicht „irgendwie lackiert" (§ 249 Abs. 2 BGB). Der BGH hat die Erstattungsfähigkeit bei modernen Lacken bestätigt (VI ZR 174/24). Ob sie nötig war, beurteilt der Sachverständige am Fahrzeug — nicht der Prüfdienst am Schreibtisch. Auch bei fiktiver Abrechnung: ersetzt wird der objektiv erforderliche Aufwand, nicht der tatsächlich angefallene.',
+    norm: '§ 249 Abs. 2 BGB, BGH VI ZR 174/24',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/adas-kalibrierung.md
+    slug: 'adas-kalibrierung-nicht-erforderlich',
+    phrase: 'Eine Kalibrierung der Assistenzsysteme ist nicht erforderlich.',
+    trigger: ['kalibrierung', 'justage', 'assistenzsystem', 'fahrerassistenz', 'einmessung', 'adas'],
+    bedeutet:
+      'Eine sicherheitsrelevante Position wird als Pauschale abgetan („im Stundensatz enthalten") oder auf den Kameratausch verengt. Ausgelöst wird die Kalibrierung aber auch durch Scheibentausch sowie Stoßfänger-, Spiegel- und Fahrwerksarbeiten.',
+    recht:
+      'Erforderlich ist, was zur fachgerechten Instandsetzung gehört (§ 249 Abs. 2 BGB) — und das bestimmt die Herstellervorgabe, nicht die Kürzungsvorgabe des Versicherers. Die Werkstatt haftet für die Fachgerechtigkeit. Ein dejustierter Notbremsassistent bremst zu früh, zu spät oder gar nicht; lassen Sie die Kalibrierung dokumentieren.',
+    norm: '§ 249 Abs. 2 BGB',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/ersatzteil-qualitaet.md
+    slug: 'ersatzteil-qualitaet-gleichwertig',
+    phrase: 'Gleichwertige Ersatzteile sind ausreichend — Originalteile nicht erforderlich.',
+    trigger: ['identteil', 'gebrauchtteil', 'gleichwertige ersatzteile', 'original-ersatzteile', 'originalteile', 'teilequalität', 'gebrauchte ersatzteile'],
+    bedeutet:
+      'Der Kalkulationsposten wird auf ein billigeres Teil heruntergerechnet. Ein Identteil kommt zwar vom selben Zulieferer, aber ohne Herstellerlogo und ohne Freigabe; ein Gebrauchtteil hat keine Neuteil-Gewährleistung und eine meist unbekannte Historie.',
+    recht:
+      'Den Anspruch auf Original-Ersatzteile hat der BGH in VI ZR 302/08 behandelt; bei jungen, scheckheftgepflegten Fahrzeugen besteht zudem Anspruch auf die Markenwerkstatt (VI ZR 53/09). Die Teilequalität bestimmt die Reparatur — nicht die Kürzungsvorgabe. Lassen Sie die verbaute Teilequalität in der Rechnung ausweisen.',
+    norm: '§ 249 Abs. 2 BGB, BGH VI ZR 302/08, BGH VI ZR 53/09',
+  },
+  {
     slug: 'wertminderung-nicht',
     phrase: 'Eine Wertminderung ist nicht angefallen.',
     trigger: ['wertminderung', 'merkantile', 'wertverlust'],
