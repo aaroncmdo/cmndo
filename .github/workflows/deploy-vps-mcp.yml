@@ -1,0 +1,168 @@
+name: Deploy → VPS (mcp.claimondo.de :4002)
+
+# Auto-Deploy des MCP-Servers (services/mcp-server), der Claimondos oeffentliche
+# /api/v1 als Tools fuer LLM-Clients bereitstellt.
+#
+# WARUM ES DIESEN WORKFLOW BRAUCHT:
+# Der Dienst hing bis 23.08.2026 an KEINER Pipeline. Folgen, beide belegt:
+#   * Ein Merge brachte ihn NICHT live. Am 23.08. lief er auf R383, waehrend R384
+#     mit dem neuen Tool `claimondo_finde_werkstatt` schon auf main stand —
+#     gemergt, gebaut, gruen, und trotzdem nicht ausgeliefert.
+#   * Am 21.08. war der Update-Pfad ~19 Tage lang STILL kaputt (shallow
+#     single-branch-Clone mit Refspec auf einen geloeschten Feature-Branch).
+#     Jeder Versuch scheiterte, ohne dass es jemand meldete — es gab ja nichts,
+#     das es haette melden koennen.
+#
+# ZWEI DINGE, DIE DIESER WORKFLOW ANDERS MACHT ALS DIE UEBRIGEN DEPLOYS:
+#
+#   1. Build-Gate VOR dem VPS. Die App-CI schliesst `services` in tsconfig
+#      `exclude` aus — sie typecheckt und baut diesen Server NICHT. Ein gruener
+#      CI-Lauf ist fuer ihn also kein Beleg. Job `pruefen` holt das nach; erst
+#      wenn tsc UND build gruen sind, wird der VPS ueberhaupt angefasst.
+#
+#   2. Verifikation am PROTOKOLL, nicht an pm2. `pm2 status` sagt "online", auch
+#      wenn der Prozess mit dem alten Bundle laeuft; ein blosser Health-200 sagt
+#      nur, dass ein Port antwortet. Deshalb wird `tools/list` per JSON-RPC
+#      abgefragt und gezaehlt — antwortet der Server ohne Tools, gilt der Deploy
+#      als gescheitert und wird zurueckgerollt.
+#
+# Der Checkout liegt in /opt/claimondo-mcp/source (NICHT /var/www/claimondo-v2)
+# und wird per `git pull` aktualisiert — anders als App/Marketing, die ein
+# CI-Artefakt per tar ausliefern. Das ist der etablierte Aufbau dieses Dienstes;
+# pm2 zeigt den Pfad mit `pm2 describe claimondo-mcp`.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/mcp-server/**'
+      - '.github/workflows/deploy-vps-mcp.yml'
+  workflow_dispatch:
+
+# Zwei parallele Laeufe wuerden sich im selben Checkout und beim pm2-Restart
+# trampeln. `cancel-in-progress: false` — ein laufender Deploy wird zu Ende
+# gefahren (Abbruch mitten im Build hinterliesse ein halbes dist/), der neuere
+# wartet.
+concurrency:
+  group: deploy-vps-mcp
+  cancel-in-progress: false
+
+jobs:
+  pruefen:
+    name: Build-Gate (das die App-CI nicht faehrt)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install
+        working-directory: services/mcp-server
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        working-directory: services/mcp-server
+        run: npx tsc --noEmit
+
+      - name: Build
+        working-directory: services/mcp-server
+        run: npm run build
+
+      - name: Artefakt vorhanden?
+        working-directory: services/mcp-server
+        # Ein gruener tsc-Lauf beweist nicht, dass ein Bundle entstanden ist.
+        run: |
+          test -s dist/index.js || { echo "dist/index.js fehlt oder ist leer"; exit 1; }
+          echo "dist/index.js: $(stat -c%s dist/index.js) Bytes"
+
+  deploy:
+    name: Pull + Restart + Protokoll-Verifikation
+    needs: pruefen
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Deploy → VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 15m
+          script: |
+            set -euo pipefail
+
+            SRC=/opt/claimondo-mcp/source
+            PKG=$SRC/services/mcp-server
+
+            cd "$SRC"
+
+            # Vorherigen Stand merken — Basis fuer den Rollback.
+            VORHER=$(git rev-parse HEAD)
+            echo "Vorher: $(git rev-parse --short HEAD) $(git log -1 --format=%s | cut -c1-60)"
+
+            # ⚠ Der Clone ist shallow + single-branch. Faellt die Refspec erneut
+            #    auf einen geloeschten Branch zurueck, bricht `git pull` ab —
+            #    `set -e` macht daraus einen roten Lauf statt eines stillen No-ops.
+            git pull --ff-only
+            NACHHER=$(git rev-parse HEAD)
+            echo "Nachher: $(git rev-parse --short HEAD) $(git log -1 --format=%s | cut -c1-60)"
+
+            cd "$PKG"
+            npm ci --no-audit --no-fund
+            npm run build
+            test -s dist/index.js || { echo "FATAL: dist/index.js fehlt nach dem Build"; exit 1; }
+
+            pm2 restart claimondo-mcp
+            pm2 save
+            sleep 5
+
+            # ── Verifikation ────────────────────────────────────────────────
+            # Gegen localhost, nicht gegen die oeffentliche URL: sonst wuerde ein
+            # nginx-/DNS-Problem einen gesunden Deploy zurueckrollen. Die
+            # oeffentliche Kette wird danach nur protokolliert.
+            pruefe() {
+              code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "http://127.0.0.1:4002/health" || echo 000)
+              echo "  /health -> HTTP $code"
+              [ "$code" = "200" ] || return 1
+
+              # Der eigentliche Beweis: spricht der Server MCP und liefert Tools?
+              antwort=$(curl -s -X POST "http://127.0.0.1:4002/mcp" \
+                -H 'Content-Type: application/json' \
+                -H 'Accept: application/json, text/event-stream' \
+                --max-time 25 \
+                -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' || echo '')
+              anzahl=$(printf '%s' "$antwort" | grep -o '"name":"claimondo_[a-z_]*"' | sort -u | wc -l)
+              echo "  tools/list -> $anzahl Tools"
+              [ "$anzahl" -ge 1 ] || return 1
+              printf '%s' "$antwort" | grep -o '"name":"claimondo_[a-z_]*"' | sed 's/.*:"//;s/"$//' | sort -u | sed 's/^/    - /'
+              return 0
+            }
+
+            if pruefe; then
+              echo "MCP-Deploy $(date) OK — $(git -C "$SRC" rev-parse --short HEAD)"
+            else
+              echo "VERIFIKATION FEHLGESCHLAGEN — Rollback auf $VORHER"
+              cd "$SRC"
+              git reset --hard "$VORHER"
+              cd "$PKG"
+              npm ci --no-audit --no-fund
+              npm run build
+              pm2 restart claimondo-mcp
+              pm2 save
+              sleep 5
+              if pruefe; then
+                echo "Rollback erfolgreich — der alte Stand laeuft wieder. Deploy fehlgeschlagen."
+              else
+                echo "⚠ ROLLBACK LIEF, ABER DER DIENST ANTWORTET IMMER NOCH NICHT — Handarbeit noetig."
+              fi
+              exit 1
+            fi
+
+            # Oeffentliche Kette nur informativ (nginx + DNS + SSL).
+            oeff=$(curl -s -o /dev/null -w "%{http_code}" --max-time 20 "https://mcp.claimondo.de/health" || echo 000)
+            echo "  oeffentlich https://mcp.claimondo.de/health -> HTTP $oeff"
