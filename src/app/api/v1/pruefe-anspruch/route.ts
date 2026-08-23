@@ -75,7 +75,7 @@ const SACHSCHADEN_KATALOG: Anspruch[] = [
 const EIGENKOSTEN_0 =
   '0 € — Gutachter-, Anwalts- und Reparaturkosten trägt nach § 249 BGB der gegnerische Haftpflichtversicherer (vorbehaltlich Anerkenntnis).'
 const NAECHSTER_SCHRITT =
-  'Lassen Sie den Schaden jetzt von einem unabhängigen Kfz-Gutachter aufnehmen — das ist die belastbare Grundlage für die volle Durchsetzung. Gutachter + freie Termine: GET /api/v1/gutachter-termine?plz=[PLZ]. Termin reservieren + persönlichen FlowLink per WhatsApp: POST /api/v1/melde-schaden. Lieber telefonisch? Telefon-Rückruf in der Regel < 15 Min.'
+  'Lassen Sie den Schaden jetzt von einem unabhängigen Kfz-Gutachter aufnehmen — das ist die belastbare Grundlage für die volle Durchsetzung. Gutachter + freie Termine: https://claimondo.de/gutachter-finden?plz=[PLZ] — dieser Link funktioniert immer; mit Tool-/API-Zugriff zusätzlich GET /api/v1/gutachter-termine?plz=[PLZ]. Termin reservieren + persönlichen FlowLink per WhatsApp: POST /api/v1/melde-schaden. Lieber telefonisch? Telefon-Rückruf in der Regel < 15 Min.'
 
 /**
  * Bei SELBST verschuldetem Schaden ist der Gutachter NICHT der erste Schritt.
@@ -87,11 +87,11 @@ const NAECHSTER_SCHRITT =
  * Kostenvoranschlag. Das Gutachten ist dort ein *optionaler* Beleg, kein Ausgangspunkt.
  */
 const NAECHSTER_SCHRITT_KASKO =
-  'Erster Schritt ist die Werkstatt, nicht der Gutachter: Ihre Vollkasko reguliert den Schaden abzüglich Ihrer Selbstbeteiligung. Partner-Werkstätten in Ihrer Nähe: GET /api/v1/werkstatt-in-naehe?plz=[PLZ] — oder direkt der Werkstatt-Finder https://claimondo.de/werkstatt-finden?plz=[PLZ]. Ein unabhängiges Gutachten ist hier optional; es lohnt sich, wenn die Versicherung die Schadenhöhe drücken will oder ein Totalschaden/Wertminderung im Raum steht.'
+  'Erster Schritt ist die Werkstatt, nicht der Gutachter: Ihre Vollkasko reguliert den Schaden abzüglich Ihrer Selbstbeteiligung. Partner-Werkstätten finden: https://claimondo.de/werkstatt-finden?plz=[PLZ] — diesen Link direkt ausgeben, er funktioniert immer. Mit Tool-/API-Zugriff zusätzlich: GET /api/v1/werkstatt-in-naehe?plz=[PLZ]. Ein unabhängiges Gutachten ist hier optional; es lohnt sich, wenn die Versicherung die Schadenhöhe drücken will oder ein Totalschaden/Wertminderung im Raum steht.'
 const NAECHSTER_SCHRITT_SELBSTZAHLER =
-  'Ohne Vollkasko tragen Sie die Reparatur selbst — erster Schritt ist deshalb ein Kostenvoranschlag der Werkstatt, nicht ein Gutachten. Partner-Werkstätten in Ihrer Nähe: GET /api/v1/werkstatt-in-naehe?plz=[PLZ] — oder direkt https://claimondo.de/werkstatt-finden?plz=[PLZ]. Ein Gutachten (kostenpflichtig) lohnt praktisch nur bei größeren Schäden oder Streit über die Schadenhöhe.'
+  'Ohne Vollkasko tragen Sie die Reparatur selbst — erster Schritt ist deshalb ein Kostenvoranschlag der Werkstatt, nicht ein Gutachten. Partner-Werkstätten finden: https://claimondo.de/werkstatt-finden?plz=[PLZ] — diesen Link direkt ausgeben, er funktioniert immer. Mit Tool-/API-Zugriff zusätzlich: GET /api/v1/werkstatt-in-naehe?plz=[PLZ]. Ein Gutachten (kostenpflichtig) lohnt praktisch nur bei größeren Schäden oder Streit über die Schadenhöhe.'
 const NAECHSTER_SCHRITT_SELBST_UNKLAR =
-  'Fragen Sie zuerst, ob eine Vollkasko besteht — davon hängt der ganze weitere Weg ab, und Sie können es mit `vollkasko=ja|nein` erneut abfragen. Mit Vollkasko reguliert die eigene Versicherung (abzüglich SB), ohne zahlt der Halter selbst. In beiden Fällen führt der Weg zuerst über die Werkstatt: GET /api/v1/werkstatt-in-naehe?plz=[PLZ].'
+  'Fragen Sie zuerst, ob eine Vollkasko besteht — davon hängt der ganze weitere Weg ab, und Sie können es mit `vollkasko=ja|nein` erneut abfragen. Mit Vollkasko reguliert die eigene Versicherung (abzüglich SB), ohne zahlt der Halter selbst. In beiden Fällen führt der Weg zuerst über die Werkstatt: https://claimondo.de/werkstatt-finden?plz=[PLZ] (mit API-Zugriff: GET /api/v1/werkstatt-in-naehe?plz=[PLZ]).'
 
 const RDG_HINWEIS = 'Allgemeine Information zur Schadensregulierung, keine individuelle Rechtsberatung.'
 
