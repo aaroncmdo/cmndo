@@ -1,0 +1,440 @@
+{
+  "alfter": {
+    "_name": "Alfter",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B56"
+    ],
+    "knoten": [
+      "B56 durch das Gemeindegebiet Richtung Bonn und Euskirchen",
+      "Anschlussstelle Bonn-Hardtberg (A565) als Anbindung",
+      "Anschlussstelle Bornheim (A555) als Anbindung"
+    ],
+    "_urteil": ""
+  },
+  "bergheim": {
+    "_name": "Bergheim",
+    "autobahnen": [
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B477"
+    ],
+    "knoten": [
+      "Anschlussstelle Bergheim-Süd (A61)",
+      "B477 am Kraftwerk Niederaußem",
+      "L91 über Oberaußem und Glessen"
+    ],
+    "_urteil": ""
+  },
+  "bonn": {
+    "_name": "Bonn",
+    "autobahnen": [
+      "A59",
+      "A555",
+      "A562",
+      "A565"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B42",
+      "B56"
+    ],
+    "knoten": [
+      "Kreuz Bonn-Nord",
+      "Kreuz Bonn-Ost",
+      "Dreieck Bonn-Nordost",
+      "Kreuz Bonn/Siegburg"
+    ],
+    "_urteil": ""
+  },
+  "bruehl": {
+    "_name": "Brühl",
+    "autobahnen": [
+      "A553"
+    ],
+    "bundesstrassen": [
+      "B51"
+    ],
+    "knoten": [
+      "Autobahnkreuz Bliesheim als Beginn der A553",
+      "Anschlussstelle Brühl-Süd (Zufahrt Phantasialand)",
+      "Anschlussstelle Brühl-Ost",
+      "Anschlussstelle Brühl-Nord"
+    ],
+    "_urteil": ""
+  },
+  "dinslaken": {
+    "_name": "Dinslaken",
+    "autobahnen": [
+      "A3",
+      "A59"
+    ],
+    "bundesstrassen": [
+      "B8"
+    ],
+    "knoten": [
+      "Kreuz Oberhausen-West",
+      "Anschlussstelle Dinslaken-Nord",
+      "Anschlussstelle Dinslaken-Süd"
+    ],
+    "_urteil": ""
+  },
+  "duesseldorf": {
+    "_name": "Düsseldorf",
+    "autobahnen": [
+      "A3",
+      "A44",
+      "A46",
+      "A52",
+      "A57",
+      "A59",
+      "A524"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B7",
+      "B8",
+      "B8n",
+      "B228",
+      "B326"
+    ],
+    "knoten": [
+      "Autobahnkreuz Düsseldorf-Süd (A46/A59)",
+      "Autobahnkreuz Kaarst (A52/A57)",
+      "Autobahnkreuz Neuss-West (A46/A57)",
+      "Autobahnkreuz Hilden (A3/A46)",
+      "Autobahnkreuz Breitscheid (A3/A52)",
+      "Autobahnkreuz Ratingen-Ost (A3/A44)",
+      "Autobahndreieck Neuss-Süd (A46/A57)",
+      "Rheinalleetunnel und Rheinufertunnel (B1/B7)",
+      "Anschlussstelle Düsseldorf-Flughafen (A44)"
+    ],
+    "_urteil": ""
+  },
+  "erlangen": {
+    "_name": "Erlangen",
+    "autobahnen": [
+      "A3",
+      "A73"
+    ],
+    "bundesstrassen": [
+      "B4"
+    ],
+    "knoten": [
+      "Kreuz Fürth/Erlangen",
+      "Anschlussstelle Erlangen-West"
+    ],
+    "_urteil": ""
+  },
+  "fuerth": {
+    "_name": "Fürth",
+    "autobahnen": [
+      "A73",
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B14"
+    ],
+    "knoten": [
+      "Dreieck Fürth/Erlangen",
+      "Kreuz Fürth-Erlangen",
+      "Anschlussstelle Fürth-Poppenreuth"
+    ],
+    "_urteil": ""
+  },
+  "guetersloh": {
+    "_name": "Gütersloh",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B513"
+    ],
+    "knoten": [
+      "Anschlussstelle Gütersloh",
+      "Anschlussstelle Rheda-Wiedenbrück",
+      "Kreuz Bielefeld"
+    ],
+    "_urteil": ""
+  },
+  "hannover": {
+    "_name": "Hannover",
+    "autobahnen": [
+      "A2",
+      "A7",
+      "A37",
+      "A352"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B6",
+      "B65",
+      "B217",
+      "B443"
+    ],
+    "knoten": [
+      "Kreuz Hannover-Ost",
+      "Kreuz Hannover-Kirchhorst",
+      "Dreieck Hannover-Süd",
+      "Dreieck Hannover-West"
+    ],
+    "_urteil": ""
+  },
+  "herne": {
+    "_name": "Herne",
+    "autobahnen": [
+      "A42",
+      "A43"
+    ],
+    "bundesstrassen": [
+      "B226"
+    ],
+    "knoten": [
+      "Kreuz Herne",
+      "Dreieck Herne",
+      "Anschlussstelle Herne-Baukau"
+    ],
+    "_urteil": ""
+  },
+  "ingolstadt": {
+    "_name": "Ingolstadt",
+    "autobahnen": [
+      "A9"
+    ],
+    "bundesstrassen": [
+      "B13",
+      "B16",
+      "B16a",
+      "B300"
+    ],
+    "knoten": [
+      "Kreuz Ingolstadt-Nord",
+      "Anschlussstelle Ingolstadt-Süd",
+      "Anschlussstelle Ingolstadt-Ost"
+    ],
+    "_urteil": ""
+  },
+  "kerpen": {
+    "_name": "Kerpen",
+    "autobahnen": [
+      "A4",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B55",
+      "B264",
+      "B477"
+    ],
+    "knoten": [
+      "Kreuz Kerpen",
+      "Anschlussstelle Kerpen-Sindorf",
+      "Anschlussstelle Kerpen-Türnich"
+    ],
+    "_urteil": ""
+  },
+  "krefeld": {
+    "_name": "Krefeld",
+    "autobahnen": [
+      "A44",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B57",
+      "B288"
+    ],
+    "knoten": [
+      "Kreuz Krefeld-Süd",
+      "Kreuz Kaarst",
+      "Anschlussstelle Krefeld-Zentrum"
+    ],
+    "_urteil": ""
+  },
+  "ludwigshafen": {
+    "_name": "Ludwigshafen am Rhein",
+    "autobahnen": [
+      "A6",
+      "A61",
+      "A65",
+      "A650"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B37",
+      "B44"
+    ],
+    "knoten": [
+      "Kreuz Ludwigshafen",
+      "Dreieck Ludwigshafen",
+      "Kreuz Frankenthal"
+    ],
+    "_urteil": ""
+  },
+  "marl": {
+    "_name": "Marl",
+    "autobahnen": [
+      "A43",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B225"
+    ],
+    "knoten": [
+      "Kreuz Marl-Nord",
+      "Anschlussstelle Marl-Zentrum",
+      "Dreieck Marl-Nord"
+    ],
+    "_urteil": ""
+  },
+  "moers": {
+    "_name": "Moers",
+    "autobahnen": [
+      "A40",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B57"
+    ],
+    "knoten": [
+      "Kreuz Moers",
+      "Anschlussstelle Moers-Zentrum",
+      "Kreuz Kamp-Lintfort"
+    ],
+    "_urteil": ""
+  },
+  "niederkassel": {
+    "_name": "Niederkassel",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [
+      "L269 durch die Ortsdurchfahrten",
+      "Ortsumgehung L269n",
+      "Rheinfähre Mondorf–Bonn-Graurheindorf"
+    ],
+    "_urteil": ""
+  },
+  "pforzheim": {
+    "_name": "Pforzheim",
+    "autobahnen": [
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B10",
+      "B294",
+      "B463"
+    ],
+    "knoten": [
+      "Anschlussstelle Pforzheim-West",
+      "Anschlussstelle Pforzheim-Ost",
+      "Anschlussstelle Pforzheim-Nord"
+    ],
+    "_urteil": ""
+  },
+  "remscheid": {
+    "_name": "Remscheid",
+    "autobahnen": [
+      "A1"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B229",
+      "B237"
+    ],
+    "knoten": [
+      "Anschlussstelle Remscheid",
+      "Anschlussstelle Remscheid-Lennep",
+      "Kreuz Wuppertal-Nord"
+    ],
+    "_urteil": ""
+  },
+  "saarbruecken": {
+    "_name": "Saarbrücken",
+    "autobahnen": [
+      "A1",
+      "A6",
+      "A620",
+      "A623"
+    ],
+    "bundesstrassen": [
+      "B41",
+      "B51",
+      "B268",
+      "B406"
+    ],
+    "knoten": [
+      "Kreuz Saarbrücken",
+      "Dreieck Friedrichsthal",
+      "Anschlussstelle Saarbrücken-Mitte"
+    ],
+    "_urteil": ""
+  },
+  "soest": {
+    "_name": "Soest",
+    "autobahnen": [
+      "A44"
+    ],
+    "bundesstrassen": [
+      "B229",
+      "B475"
+    ],
+    "knoten": [
+      "Anschlussstelle Soest (A44/B229)",
+      "Anschlussstelle Soest-Ost (A44/B475)"
+    ],
+    "_urteil": ""
+  },
+  "troisdorf": {
+    "_name": "Troisdorf",
+    "autobahnen": [
+      "A59",
+      "A560"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B56",
+      "B484"
+    ],
+    "knoten": [
+      "Kreuz Bonn/Siegburg",
+      "Anschlussstelle Troisdorf",
+      "Dreieck Sankt Augustin-West"
+    ],
+    "_urteil": ""
+  },
+  "wesseling": {
+    "_name": "Wesseling",
+    "autobahnen": [
+      "A555"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "A555 zwischen Köln und Bonn",
+      "Werkszufahrten der Rheinschiene",
+      "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"
+    ],
+    "_urteil": ""
+  },
+  "wuerzburg": {
+    "_name": "Würzburg",
+    "autobahnen": [
+      "A3",
+      "A7",
+      "A81"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B13",
+      "B19",
+      "B27"
+    ],
+    "knoten": [
+      "Kreuz Biebelried",
+      "Dreieck Würzburg-West",
+      "Kreuz Würzburg-Heidingsfeld"
+    ],
+    "_urteil": ""
+  }
+}

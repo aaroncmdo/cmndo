@@ -1,0 +1,404 @@
+{
+  "alsdorf": {
+    "_name": "Alsdorf",
+    "autobahnen": [
+      "A44"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Alsdorf"
+    ],
+    "_urteil": ""
+  },
+  "bergisch-gladbach": {
+    "_name": "Bergisch Gladbach",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B506"
+    ],
+    "knoten": [
+      "Kreuz Köln-Ost",
+      "Anschlussstelle Bensberg",
+      "Anschlussstelle Refrath"
+    ],
+    "_urteil": ""
+  },
+  "borken": {
+    "_name": "Borken",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B67",
+      "B70"
+    ],
+    "knoten": [
+      "Anschlussstelle Borken (A31, rund zwölf Kilometer östlich)",
+      "Umgehung B67/B70 um die Kernstadt"
+    ],
+    "_urteil": ""
+  },
+  "buende": {
+    "_name": "Bünde",
+    "autobahnen": [
+      "A30"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Bünde (A30)",
+      "Anschlussstelle Hiddenhausen (A30)",
+      "L557 Richtung Bielefeld",
+      "L545 Richtung Herford"
+    ],
+    "_urteil": ""
+  },
+  "dormagen": {
+    "_name": "Dormagen",
+    "autobahnen": [
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B9"
+    ],
+    "knoten": [
+      "Anschlussstelle Dormagen",
+      "Anschlussstelle Dormagen-Nord",
+      "Kreuzung B9/Chempark-Zufahrt"
+    ],
+    "_urteil": ""
+  },
+  "duisburg": {
+    "_name": "Duisburg",
+    "autobahnen": [
+      "A3",
+      "A40",
+      "A42",
+      "A59"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B288"
+    ],
+    "knoten": [
+      "Kreuz Duisburg-Kaiserberg",
+      "Kreuz Duisburg-Nord",
+      "Kreuz Duisburg-Süd",
+      "Dreieck Duisburg-Kaiserberg"
+    ],
+    "_urteil": ""
+  },
+  "eschweiler": {
+    "_name": "Eschweiler",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B264"
+    ],
+    "knoten": [
+      "Anschlussstelle Eschweiler-West",
+      "Anschlussstelle Eschweiler-Ost",
+      "Anschlussstelle Weisweiler"
+    ],
+    "_urteil": ""
+  },
+  "gelsenkirchen": {
+    "_name": "Gelsenkirchen",
+    "autobahnen": [
+      "A2",
+      "A40",
+      "A42",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B226",
+      "B227"
+    ],
+    "knoten": [
+      "Kreuz Gelsenkirchen",
+      "Dreieck Bottrop",
+      "Kreuz Herne"
+    ],
+    "_urteil": ""
+  },
+  "gummersbach": {
+    "_name": "Gummersbach",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Gummersbach (A4)"
+    ],
+    "_urteil": ""
+  },
+  "hattingen": {
+    "_name": "Hattingen",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B51"
+    ],
+    "knoten": [],
+    "_urteil": ""
+  },
+  "herten": {
+    "_name": "Herten",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Herten (A2)",
+      "Anschlussstelle Recklinghausen/Herten (A43)",
+      "Münsterstraße als A2-Zubringer"
+    ],
+    "_urteil": ""
+  },
+  "iserlohn": {
+    "_name": "Iserlohn",
+    "autobahnen": [
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B233",
+      "B236"
+    ],
+    "knoten": [
+      "Anschlussstelle Iserlohn-Zentrum",
+      "Anschlussstelle Iserlohn-Letmathe"
+    ],
+    "_urteil": ""
+  },
+  "kiel": {
+    "_name": "Kiel",
+    "autobahnen": [
+      "A7",
+      "A210",
+      "A215"
+    ],
+    "bundesstrassen": [
+      "B76",
+      "B202",
+      "B404",
+      "B503"
+    ],
+    "knoten": [
+      "Kreuz Kiel-West",
+      "Dreieck Bordesholm",
+      "Anschlussstelle Kiel-Mitte"
+    ],
+    "_urteil": ""
+  },
+  "langenfeld": {
+    "_name": "Langenfeld",
+    "autobahnen": [
+      "A3",
+      "A542"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B229"
+    ],
+    "knoten": [
+      "Autobahnkreuz Langenfeld (A3/A542)",
+      "Anschlussstelle Langenfeld",
+      "Anschlussstelle Langenfeld-Immigrath"
+    ],
+    "_urteil": ""
+  },
+  "luebeck": {
+    "_name": "Lübeck",
+    "autobahnen": [
+      "A1",
+      "A20",
+      "A226"
+    ],
+    "bundesstrassen": [
+      "B75",
+      "B104",
+      "B207"
+    ],
+    "knoten": [
+      "Kreuz Lübeck",
+      "Dreieck Bad Schwartau",
+      "Anschlussstelle Lübeck-Zentrum"
+    ],
+    "_urteil": ""
+  },
+  "meckenheim": {
+    "_name": "Meckenheim",
+    "autobahnen": [
+      "A61",
+      "A565"
+    ],
+    "bundesstrassen": [
+      "B257"
+    ],
+    "knoten": [
+      "Autobahnkreuz Meckenheim (A61/A565)",
+      "Anschlussstelle Meckenheim",
+      "Anschlussstelle Meckenheim-Merl"
+    ],
+    "_urteil": ""
+  },
+  "monheim-am-rhein": {
+    "_name": "Monheim am Rhein",
+    "autobahnen": [
+      "A59",
+      "A542"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Autobahnkreuz Monheim-Süd (A59/A542)"
+    ],
+    "_urteil": ""
+  },
+  "nuernberg": {
+    "_name": "Nürnberg",
+    "autobahnen": [
+      "A3",
+      "A6",
+      "A9",
+      "A73"
+    ],
+    "bundesstrassen": [
+      "B4",
+      "B8",
+      "B14"
+    ],
+    "knoten": [
+      "Kreuz Nürnberg",
+      "Dreieck Nürnberg-Ost",
+      "Kreuz Nürnberg-Süd",
+      "Dreieck Fürth/Erlangen"
+    ],
+    "_urteil": ""
+  },
+  "potsdam": {
+    "_name": "Potsdam",
+    "autobahnen": [
+      "A10",
+      "A115"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B2",
+      "B273"
+    ],
+    "knoten": [
+      "Dreieck Potsdam",
+      "Dreieck Nuthetal",
+      "Anschlussstelle Potsdam-Zentrum"
+    ],
+    "_urteil": ""
+  },
+  "reutlingen": {
+    "_name": "Reutlingen",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B27",
+      "B28",
+      "B312",
+      "B464"
+    ],
+    "knoten": [
+      "Kreuzung B27/B28 Reutlingen-Nord",
+      "Scheibengipfeltunnel",
+      "Anschluss B312 Reutlingen-Ost"
+    ],
+    "_urteil": ""
+  },
+  "sankt-augustin": {
+    "_name": "Sankt Augustin",
+    "autobahnen": [
+      "A59",
+      "A560"
+    ],
+    "bundesstrassen": [
+      "B56"
+    ],
+    "knoten": [
+      "Autobahnkreuz Sankt Augustin-West (A59/A560)",
+      "Anschlussstelle Sankt Augustin",
+      "Kreuzung B56/Hochschulzufahrt"
+    ],
+    "_urteil": ""
+  },
+  "solingen": {
+    "_name": "Solingen",
+    "autobahnen": [
+      "A3",
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B229"
+    ],
+    "knoten": [
+      "Anschlussstelle Solingen",
+      "Anschlussstelle Solingen-Ohligs"
+    ],
+    "_urteil": ""
+  },
+  "ulm": {
+    "_name": "Ulm",
+    "autobahnen": [
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B10",
+      "B19",
+      "B28",
+      "B30",
+      "B311"
+    ],
+    "knoten": [
+      "Kreuz Ulm/Elchingen",
+      "Anschlussstelle Ulm-West",
+      "Anschlussstelle Ulm-Ost"
+    ],
+    "_urteil": ""
+  },
+  "wiesbaden": {
+    "_name": "Wiesbaden",
+    "autobahnen": [
+      "A3",
+      "A66",
+      "A643",
+      "A671"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B262",
+      "B417",
+      "B455"
+    ],
+    "knoten": [
+      "Dreieck Wiesbaden",
+      "Kreuz Wiesbaden-Schierstein",
+      "Dreieck Mainz"
+    ],
+    "_urteil": ""
+  },
+  "wuppertal": {
+    "_name": "Wuppertal",
+    "autobahnen": [
+      "A1",
+      "A46",
+      "A535"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B228",
+      "B326"
+    ],
+    "knoten": [
+      "Kreuz Wuppertal-Nord",
+      "Kreuz Wuppertal-Oberbarmen",
+      "Dreieck Wuppertal-Nord"
+    ],
+    "_urteil": ""
+  }
+}

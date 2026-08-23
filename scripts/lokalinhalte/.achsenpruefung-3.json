@@ -1,0 +1,414 @@
+{
+  "ahlen": {
+    "_name": "Ahlen",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B58"
+    ],
+    "knoten": [
+      "B58-Ost-West-Achse durch das Stadtgebiet",
+      "A2-Anschlussstelle Beckum (rund 10 km östlich)"
+    ],
+    "_urteil": "FALSCH: \"A2-Anschlussstelle Beckum\" — die AS Beckum existiert (A2, Nr. 23), liegt aber auf Beckumer Stadtgebiet. Der Eintrag benennt die Entfernung selbst; nach dem Maßstab (im Stadtgebiet oder unmittelbar erschließend) gehört sie nicht in Ahlens Liste. Wikipedia-Ahlen sagt ausdrücklich: \"Autobahnanschlüsse bestehen an der A 2 jeweils rund 10 km östlich und südöstlich von Ahlen sowie an der A 1 etwa 20 km westlich\" — also keine Autobahnanbindung im Stadtgebiet. Leeres autobahnen-Feld ist damit richtig. Rest ok: B58 belegt (\"führt in Ost-West-Richtung durch das Stadtgebiet\"), auch der Verlaufseintrag trifft zu."
+  },
+  "bad-salzuflen": {
+    "_name": "Bad Salzuflen",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B239"
+    ],
+    "knoten": [
+      "Anschlussstelle Ostwestfalen-Lippe (A2)",
+      "Anschlussstelle Herford/Bad Salzuflen (A2)",
+      "B239-Ostumgehung der Innenstadt"
+    ],
+    "_urteil": "Keine Fehleinträge. Beide Anschlussstellen existieren und tragen exakt diese Namen (A2: Nr. 31 \"Ostwestfalen/Lippe\", Nr. 32 \"Herford/Bad Salzuflen\"); Schreibweise mit Schrägstrich statt Bindestrich. A2 und B239 belegt — die B239 führt durch Bad Salzuflen und kreuzt die A2 zwischen Bad Salzuflen und Herford. UNBELEGT: die Himmelsrichtung in \"B239-Ostumgehung\" — der B239-Artikel kennt eine \"Ortsumgehung Bad Salzuflen\" ohne Richtungsangabe. UNBELEGT außerdem, ob die AS Ostwestfalen/Lippe auf Bad Salzufler Gebiet liegt; der Name gibt darüber keinen Aufschluss."
+  },
+  "bochum": {
+    "_name": "Bochum",
+    "autobahnen": [
+      "A40",
+      "A43",
+      "A44",
+      "A448"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B226"
+    ],
+    "knoten": [
+      "Kreuz Bochum",
+      "Kreuz Bochum/Witten",
+      "Dreieck Bochum-West"
+    ],
+    "_urteil": "FALSCH: A44 — sie verläuft nicht durch Bochum. Der A44-Artikel führt im Ruhrgebiet nur Knoten Richtung Essen (Dreieck Essen-Bergerhausen, Ende bei Essen-Heisingen) und nennt keinen Bochumer Abschnitt. Die Verwechslung liegt nahe, weil das Kreuz Bochum/Witten wie ein A44-Knoten klingt — es verbindet aber A43 und A448. Alle drei Knoten sind dagegen korrekt und richtig benannt: Kreuz Bochum (A43/A40), Kreuz Bochum/Witten (A43/A448), Dreieck Bochum-West (A448/A40, 2015 fertiggestellt). A40, A43, A448 belegt. FEHLT (nachrangig): die Anschlussstellen Bochum-Riemke, Bochum-Laer und Bochum-Querenburg an der A43. UNBELEGT: B51 und B226 — der Verkehrsabschnitt des Bochum-Artikels war nicht abrufbar."
+  },
+  "bremerhaven": {
+    "_name": "Bremerhaven",
+    "autobahnen": [
+      "A27"
+    ],
+    "bundesstrassen": [
+      "B6",
+      "B71",
+      "B212"
+    ],
+    "knoten": [
+      "Anschlussstelle Bremerhaven-Mitte",
+      "Anschlussstelle Bremerhaven-Überseehäfen",
+      "Dreieck Bremerhaven"
+    ],
+    "_urteil": "FALSCH: \"Dreieck Bremerhaven\" — existiert nicht. Die A27 hat im Bremerhavener Abschnitt ausschließlich Anschlussstellen; ihr einziges Dreieck liegt am Südende (Dreieck Walsrode, A7). FALSCH: \"Anschlussstelle Bremerhaven-Mitte\" — die AS heißt Bremerhaven-Zentrum (A27, Nr. 7); \"Mitte\" ist kein aktueller Name. Richtig ist dagegen \"Bremerhaven-Überseehäfen\" (Nr. 6). A27 belegt, ebenso alle drei Bundesstraßen — sie hängen jeweils an einer eigenen Anschlussstelle: B6 an Überseehäfen, B212 an Zentrum, B71 an Wulsdorf. FEHLT (nachrangig): die Anschlussstellen Bremerhaven-Geestemünde und Bremerhaven-Wulsdorf."
+  },
+  "detmold": {
+    "_name": "Detmold",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B238",
+      "B239"
+    ],
+    "knoten": [
+      "Kreuzung B238/B239 Detmold-Nord",
+      "Anschluss B239 Detmold-Süd",
+      "Auffahrt A2 bei Bad Salzuflen"
+    ],
+    "_urteil": "FALSCH: \"Auffahrt A2 bei Bad Salzuflen\" — liegt rund 20 km entfernt auf fremdem Stadtgebiet und ist kein Detmolder Knoten. Das leere autobahnen-Feld ist richtig; genau deshalb gehört auch die Autobahn-Auffahrt der Nachbarstadt nicht in die Knotenliste. UNBELEGT: \"Anschluss B239 Detmold-Süd\" — nicht auffindbar. Richtig ist dagegen \"Kreuzung B238/B239 Detmold-Nord\": Die B238 endet in Detmold an der B239, laut B238-Artikel an der Nordstraße/Ernst-Hilker-Straße, und die B239 verläuft dort auf der Umgehung \"Nordring\" statt durch die Innenstadt. Beide Bundesstraßen belegt."
+  },
+  "dueren": {
+    "_name": "Düren",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B56",
+      "B264",
+      "B399"
+    ],
+    "knoten": [
+      "Anschlussstelle Düren",
+      "Anschlussstelle Langerwehe",
+      "Kreuz Kerpen"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Kerpen\" — existiert (A4, Nr. 8), liegt aber auf Kerpener Stadtgebiet, zwei Anschlussstellen östlich von Düren. Das ist derselbe Knoten, der bereits in Kerpens eigener Liste steht; dort gehört er hin, hier nicht. FALSCH: \"Anschlussstelle Langerwehe\" — existiert (A4, Nr. 5d), liegt aber in der Nachbargemeinde Langerwehe. Richtig: A4 und \"Anschlussstelle Düren\" (A4, Nr. 6, Anschluss an die B56) — damit ist auch die B56 belegt. UNBELEGT: B264 und B399."
+  },
+  "erkrath": {
+    "_name": "Erkrath",
+    "autobahnen": [
+      "A46",
+      "A3"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Erkrath (A46)"
+    ],
+    "_urteil": "UNBELEGT: A3 — und das ist meine eigene Angabe aus Charge 10-C, die ich hier zurücknehmen muss. Der Erkrath-Artikel sagt lediglich, die A3 verlaufe \"in der Nähe von Unterfeldhaus\"; die A3-Anschlussstellenliste kennt zwischen Kreuz Hilden (19) und AS Mettmann (18) keine Erkrather Anschlussstelle. Ob die A3 Erkrather Stadtgebiet überhaupt berührt, ist damit offen — \"in der Nähe\" ist kein Beleg für einen Verlauf im Stadtgebiet. Richtig: A46 (bildet laut Artikel die Stadtgrenze zu Hilden und Haan) und \"Anschlussstelle Erkrath\" (A46, zwischen Düsseldorf-Eller und Hilden). Leeres bundesstrassen-Feld ist korrekt; der Artikel nennt keine."
+  },
+  "freiburg": {
+    "_name": "Freiburg im Breisgau",
+    "autobahnen": [
+      "A5"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B31",
+      "B294"
+    ],
+    "knoten": [
+      "Anschlussstelle Freiburg-Mitte",
+      "Anschlussstelle Freiburg-Nord",
+      "Anschlussstelle Freiburg-Süd"
+    ],
+    "_urteil": "UNBELEGT — hier konnte ich nichts verifizieren, weder bestätigend noch widerlegend. Die Anschlussstellenliste der A5 war weder im deutschen noch im englischen Artikel abrufbar (beide brechen vor dem Südabschnitt ab), und der Verkehrsabschnitt des Freiburg-Artikels ebenfalls nicht. Betrifft alle drei Anschlussstellen sowie B3, B31 und B294. Dass die A5 an Freiburg vorbeiführt, ist belegt. Diese Stadt sollte jemand mit einer anderen Quelle nachziehen — sie ist die einzige im Paket, zu der ich gar keine Aussage treffen kann."
+  },
+  "gronau": {
+    "_name": "Gronau (Westf.)",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B54"
+    ],
+    "knoten": [
+      "Grenzübergang Gronau (B54)",
+      "Glanerbrücke (Übergang nach Enschede)",
+      "Übergang Losserstraße (nach Losser)"
+    ],
+    "_urteil": "ok. Alle drei Übergänge sind belegt: \"Grenzübergang Gronau an der B 54 (Schnellstraße)\", \"Glanerbrücke an der ehemaligen B 54 über Glanerbrug nach Enschede\", \"Losserstraße über Glane nach Losser\". Präzisierung: Die Glanerbrücke liegt an der ehemaligen, nicht an der heutigen B54. Das leere autobahnen-Feld ist richtig — A30 und A31 werden im Artikel nur als Erreichbarkeit genannt, keine verläuft im Stadtgebiet. FEHLT (nachrangig): der vierte Übergang Tiekerhook über Overdinkel nach Losser."
+  },
+  "hamm": {
+    "_name": "Hamm",
+    "autobahnen": [
+      "A1",
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B63",
+      "B233"
+    ],
+    "knoten": [
+      "Kreuz Kamen",
+      "Anschlussstelle Hamm-Bockum-Hövel",
+      "Anschlussstelle Hamm-Uentrop"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Kamen\" — doppelt daneben. Das Bauwerk heißt Kamener Kreuz (A1/A2), nicht \"Kreuz Kamen\", und es liegt in Kamen, nordöstlich von Dortmund, nicht in Hamm. FEHLT: das Autobahndreieck Hamm (A2/A445) — es steht in der A2-Liste zwischen AS Bönen und AS Hamm und ist der echte Autobahnknoten mit Hamm-Bezug, der hier statt des Kamener Kreuzes stehen müsste. FEHLT ebenso die AS Hamm (A2, Nr. 21) und die A445 selbst. Richtig: A2 und \"Anschlussstelle Hamm-Uentrop\" (A2, Nr. 22). UNBELEGT: \"Anschlussstelle Hamm-Bockum-Hövel\" — in keiner erreichbaren A1-Liste auffindbar (Bockum-Hövel ist Hammer Stadtteil, die A1 verläuft westlich; plausibel, aber ungeprüft). UNBELEGT: B61, B63, B233."
+  },
+  "herford": {
+    "_name": "Herford",
+    "autobahnen": [
+      "A2",
+      "A30"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B239"
+    ],
+    "knoten": [
+      "Kreuz Bad Oeynhausen",
+      "Anschlussstelle Herford-Ost",
+      "Anschlussstelle Herford-Zentrum"
+    ],
+    "_urteil": "FALSCH: \"Anschlussstelle Herford-Zentrum\" — existiert nicht, weder in der A2- noch in der A30-Anschlussstellenliste. An der A2 heißt der stadtnahe Anschluss \"Herford/Bad Salzuflen\" (Nr. 32). FALSCH: \"Kreuz Bad Oeynhausen\" — existiert (A2/A30), liegt aber rund 15 km entfernt in Bad Oeynhausen. Ein \"Kreuz Herford\" gibt es nicht; die A2 hat auf Herforder Höhe nur Anschlussstellen. UNBELEGT: A30 — sie verläuft über Bünde, Hiddenhausen, Kirchlengern und Löhne nördlich an Herford vorbei, ohne eine Herforder Anschlussstelle. Richtig: A2, \"Anschlussstelle Herford-Ost\" (A2, Nr. 33, dort \"Herford Ost\") und B239, die Herford laut Artikel auf einer Umgehung umfährt. UNBELEGT: B61."
+  },
+  "ibbenbueren": {
+    "_name": "Ibbenbüren",
+    "autobahnen": [
+      "A30"
+    ],
+    "bundesstrassen": [
+      "B219"
+    ],
+    "knoten": [
+      "Anschlussstelle Ibbenbüren-West (A30)",
+      "Anschlussstelle Ibbenbüren (A30)",
+      "Anschlussstelle Laggenbeck (A30)",
+      "Autobahnkreuz Lotte/Osnabrück (A30/A1)"
+    ],
+    "_urteil": "FALSCH: \"Autobahnkreuz Lotte/Osnabrück\" — existiert (A30, AK 14, Anschluss A1), liegt aber bei Lotte, zwei Anschlussstellen östlich; kein Ibbenbürener Knoten. Die übrigen drei stimmen samt Nummernfolge: Ibbenbüren-West (11a, 2005 eröffnet), Ibbenbüren (11b), Laggenbeck (12) — Laggenbeck ist Ibbenbürener Ortsteil, gehört also zu Recht dazu. A30 belegt. UNBELEGT: B219."
+  },
+  "kassel": {
+    "_name": "Kassel",
+    "autobahnen": [
+      "A7",
+      "A44",
+      "A49"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B7",
+      "B83",
+      "B251"
+    ],
+    "knoten": [
+      "Kreuz Kassel-Mitte",
+      "Dreieck Kassel-Süd",
+      "Kreuz Kassel-West"
+    ],
+    "_urteil": "ok — als einzige Stadt im Paket mit drei fehlerfreien Knoten, auch in der Gattung. Alle drei bestätigt: Kreuz Kassel-Mitte (A7/A49, dort zweigt die A49 von der A7 ab), Dreieck Kassel-Süd (A44/A7), Kreuz Kassel-West (A44/A49). Ich hatte \"Kreuz Kassel-Mitte\" zunächst für erfunden gehalten, weil es im A7-Artikel nicht auftauchte — der A49-Artikel weist es eindeutig nach. A7, A44, A49 belegt. UNBELEGT: B3, B7, B83, B251 — der Verkehrsabschnitt des Kassel-Artikels war nicht abrufbar."
+  },
+  "korschenbroich": {
+    "_name": "Korschenbroich",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B7",
+      "B230"
+    ],
+    "knoten": [],
+    "_urteil": "ok. Die beiden Bundesstraßen sind belegt (\"Korschenbroich liegt an den Bundesstraßen 7 und 230\"). Die leeren Felder halten der Gegenprobe stand: Weder die A57- noch die A52-Anschlussstellenliste kennt eine Anschlussstelle Korschenbroich; die im Stadtartikel genannten Anschlüsse (Kapellen, Schiefbahn, Neuss/Büttgen, Mönchengladbach-Ost) liegen sämtlich in Nachbarstädten und sind eine Erreichbarkeits-, keine Verlaufsangabe. UNBELEGT bleibt allein, ob die A52 den Nordrand des Stadtgebiets zwischen Kleinenbroich und Neersbroich quert — dafür fand ich keinen Beleg, und ohne Anschlussstelle wäre sie für die Seite ohnehin ohne Wert."
+  },
+  "lohmar": {
+    "_name": "Lohmar",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B484",
+      "B507"
+    ],
+    "knoten": [
+      "Anschlussstelle Lohmar (A3)",
+      "Anschlussstelle Lohmar-Nord (A3, nur Fahrtrichtung Frankfurt)",
+      "B484 durch Donrath und an Wahlscheid vorbei"
+    ],
+    "_urteil": "ok, mit einer bemerkenswert genauen Angabe: Beide Anschlussstellen existieren (A3, Nr. 31 Lohmar und Nr. 30b Lohmar-Nord), und die A3-Liste bestätigt für Lohmar-Nord tatsächlich die Fahrtrichtungsabhängigkeit — dieses Detail ist korrekt und wird sonst gern weggelassen. A3 belegt. UNBELEGT: der Verlauf der B484 über Donrath und an Wahlscheid vorbei (beides sind Lohmarer Ortsteile, der Straßenverlauf ist aber ungeprüft) sowie die B507."
+  },
+  "mannheim": {
+    "_name": "Mannheim",
+    "autobahnen": [
+      "A5",
+      "A6",
+      "A656",
+      "A659"
+    ],
+    "bundesstrassen": [
+      "B36",
+      "B37",
+      "B38",
+      "B44"
+    ],
+    "knoten": [
+      "Kreuz Mannheim",
+      "Dreieck Mannheim-Nord",
+      "Kreuz Viernheimer Dreieck"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Viernheimer Dreieck\" — der Name vermengt zwei verschiedene, real existierende Bauwerke, die an der A6 nur zwei Nummern auseinanderliegen: das Viernheimer Dreieck (Nr. 25, A6/A67) und das Viernheimer Kreuz (Nr. 26, A6/A659). Beide liegen bei Viernheim in Hessen, also außerhalb Mannheims. FALSCH: \"Dreieck Mannheim-Nord\" — weder in der A6- noch in der A659-Liste auffindbar; die A659 führt vom Kreuz Weinheim zum Viernheimer Kreuz und endet in Mannheim-Käfertal, ohne ein solches Dreieck. Richtig: \"Kreuz Mannheim\" (A6, Nr. 27, Anschluss A656). A6, A656 und A659 belegt. UNBELEGT: ob die A5 Mannheimer Stadtgebiet berührt (sie verläuft östlich), sowie B36, B37, B38 und B44."
+  },
+  "moenchengladbach": {
+    "_name": "Mönchengladbach",
+    "autobahnen": [
+      "A44",
+      "A46",
+      "A52",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B57",
+      "B59",
+      "B230"
+    ],
+    "knoten": [
+      "Kreuz Mönchengladbach",
+      "Kreuz Wanlo",
+      "Dreieck Holz"
+    ],
+    "_urteil": "FALSCH: \"Dreieck Holz\" — gleich zweifach. Das Bauwerk heißt Autobahnkreuz Holz (A44/A46), ist also ein Kreuz, und es liegt in der Gemeinde Jüchen im Rhein-Kreis Neuss, rund 12 km südlich von Mönchengladbach — nicht im Stadtgebiet. (\"Autobahndreieck Holz\" war nur eine vorübergehende Bezeichnung während des Umbaus, was die Verwechslung erklärt.) FALSCH: \"Kreuz Wanlo\" — es ist das Autobahndreieck Mönchengladbach-Wanlo (A46/A61), ein Dreieck, kein Kreuz; die Lage stimmt hier immerhin, Wanlo ist Mönchengladbacher Stadtteil. Richtig: \"Kreuz Mönchengladbach\" (A61, Nr. 9, Anschluss A52). Alle vier Autobahnen belegt. UNBELEGT: B57, B59, B230."
+  },
+  "neuss": {
+    "_name": "Neuss",
+    "autobahnen": [
+      "A46",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B9",
+      "B477"
+    ],
+    "knoten": [
+      "Kreuz Neuss-West",
+      "Kreuz Neuss-Süd",
+      "Dreieck Neuss-Süd"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Neuss-Süd\" — es gibt kein Kreuz dieses Namens. Das Bauwerk im Süden ist das Autobahndreieck Neuss-Süd (A46/A57), und genau das steht in derselben Liste bereits als dritter Eintrag. Der Eintrag ist damit eine Dublette mit falscher Gattung und sollte ersatzlos entfallen. Richtig: \"Kreuz Neuss-West\" (A46/A57) und \"Dreieck Neuss-Süd\" (A46/A57) — beide in der A57-Liste bestätigt, kurioserweise verbinden beide dasselbe Autobahnpaar. A46 und A57 belegt. FEHLT (nachrangig): die Anschlussstellen Neuss-Reuschenberg und Neuss-Hafen an der A57. UNBELEGT: B1, B9, B477."
+  },
+  "paderborn": {
+    "_name": "Paderborn",
+    "autobahnen": [
+      "A33"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B64",
+      "B68"
+    ],
+    "knoten": [
+      "Kreuz Paderborn-Elsen",
+      "Dreieck Paderborn",
+      "Anschlussstelle Paderborn-Zentrum"
+    ],
+    "_urteil": "FALSCH: \"Dreieck Paderborn\" — in der A33-Liste nicht auffindbar. Der nächstgelegene echte Knoten ist das Kreuz Wünnenberg-Haaren (A33/A44) am Südende der A33 bei Bad Wünnenberg, also außerhalb Paderborns. FALSCH: \"Kreuz Paderborn-Elsen\" — Paderborn-Elsen ist eine Anschlussstelle (A33, Nr. 26), kein Autobahnkreuz; die Gattung ist hier hochgestuft worden. Richtig: \"Anschlussstelle Paderborn-Zentrum\" (Nr. 27). A33 belegt. FEHLT (nachrangig): die Anschlussstellen Paderborn-Schloß Neuhaus (25) und Paderborn-Mönkeloh (28). UNBELEGT: B1, B64, B68."
+  },
+  "regensburg": {
+    "_name": "Regensburg",
+    "autobahnen": [
+      "A3",
+      "A93"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B15",
+      "B16"
+    ],
+    "knoten": [
+      "Kreuz Regensburg",
+      "Anschlussstelle Regensburg-Ost",
+      "Anschlussstelle Regensburg-Nord"
+    ],
+    "_urteil": "FALSCH: \"Anschlussstelle Regensburg-Ost\" — in drei unabhängigen Quellen nicht auffindbar (A93-Liste, A3-Liste, Artikel zum Kreuz Regensburg). Die A93 führt Regensburg-Nord, -Pfaffenstein, -West, -Prüfening, -Königswiesen, -Kumpfmühl, -Süd und -Universität, aber kein \"Ost\"; an der A3 heißt der stadtnahe Anschluss Rosenhof. Richtig: \"Kreuz Regensburg\" (A3/A93) und \"Anschlussstelle Regensburg-Nord\" (A93, Nr. 38, Anschluss B16) — damit ist auch die B16 belegt. Präzisierung zur Lage: Das Kreuz Regensburg liegt auf dem Gebiet der Gemeinde Pentling; die Stadt grenzt unmittelbar nördlich an, es erschließt sie also direkt und darf bleiben. UNBELEGT: B8, B15."
+  },
+  "rostock": {
+    "_name": "Rostock",
+    "autobahnen": [
+      "A19",
+      "A20"
+    ],
+    "bundesstrassen": [
+      "B103",
+      "B105",
+      "B110"
+    ],
+    "knoten": [
+      "Kreuz Rostock",
+      "Anschlussstelle Rostock-Ost",
+      "Anschlussstelle Rostock-Süd"
+    ],
+    "_urteil": "ok. Alle drei Knoten bestätigt: Kreuz Rostock (A19/A20), Anschlussstelle Rostock-Ost (A19, Nr. 6, Anschluss B105) und Rostock-Süd (Nr. 7, Anschluss B110) — damit sind zugleich B105 und B110 belegt. A19 und A20 belegt; die A19 beginnt im Norden am östlichen Ausgang des Warnowtunnels südlich des Überseehafens. FEHLT (nachrangig): die Anschlussstellen Rostock-Überseehafen, Rostock-Industriehafen und Rostock-Nord an der A19 — für eine Hafenstadt durchaus einschlägig. UNBELEGT: B103."
+  },
+  "siegen": {
+    "_name": "Siegen",
+    "autobahnen": [
+      "A45"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B62"
+    ],
+    "knoten": [
+      "Anschlussstelle Siegen",
+      "Anschlussstelle Siegen-Süd",
+      "Kreuz Olpe-Süd"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Olpe-Süd\" — existiert (A45/A4), liegt aber im Raum Olpe/Wenden, rund 25 km nordwestlich von Siegen und durch mehrere Anschlussstellen getrennt. Kein Siegener Knoten. Richtig: \"Anschlussstelle Siegen\" (A45, Nr. 21, Anschluss B62) und \"Anschlussstelle Siegen-Süd\" (Nr. 22) — laut A45-Artikel die einzigen beiden im unmittelbaren Siegener Raum, es fehlt also keine. A45 belegt, B62 über die AS Siegen belegt, B54 ebenfalls (sie verbindet Gronau–Münster–Dortmund–Siegen–Wiesbaden)."
+  },
+  "trier": {
+    "_name": "Trier",
+    "autobahnen": [
+      "A1",
+      "A64",
+      "A602"
+    ],
+    "bundesstrassen": [
+      "B49",
+      "B51",
+      "B52",
+      "B53"
+    ],
+    "knoten": [
+      "Dreieck Moseltal",
+      "Kreuz Trier",
+      "Anschlussstelle Trier-Verteilerkreis"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Trier\" — existiert nicht. Zwei unabhängige Quellen sagen das ausdrücklich: Der A602-Artikel hält fest, der Verkehr werde stattdessen über Verteilerkreis und Moseltal-Dreieck geführt, der A64-Artikel, es gebe keine direkte Kreuz-Verbindung zur A1. FALSCH (Lage): \"Dreieck Moseltal\" — existiert (A1/A602), liegt aber bei Longuich und Schweich im Landkreis Trier-Saarburg, nicht auf Trierer Stadtgebiet. Namensungenauigkeit: \"Anschlussstelle Trier-Verteilerkreis\" heißt schlicht Verteilerkreis Trier (Anschlussstelle 1 der A602, Anschluss B49) — das Bauwerk gibt es, nur der Name ist verdreht. Alle drei Autobahnen belegt; die A64 geht an ihrem Ostende in die A64a über, die bei Trier-Ehrang die A602 erreicht. B49 (Verteilerkreis), B51 (A64) und B52 (Trier-Ehrang) belegt. UNBELEGT: B53."
+  },
+  "wesel": {
+    "_name": "Wesel",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B58",
+      "B70",
+      "B473"
+    ],
+    "knoten": [
+      "Anschlussstelle Wesel (A3)",
+      "Anschlussstelle Hamminkeln (A3)",
+      "Niederrheinbrücke Wesel (B58)"
+    ],
+    "_urteil": "FALSCH: \"Anschlussstelle Hamminkeln (A3)\" — existiert (A3, Nr. 5), liegt aber auf dem Gebiet der Nachbarstadt Hamminkeln. Richtig: \"Anschlussstelle Wesel\" (A3, Nr. 6) und \"Niederrheinbrücke Wesel\" — der Brückenname stimmt wörtlich, die B58 quert dort auf 773 Metern den Rhein. A3 und B58 belegt (die B58 führt über Geldern, Wesel, Haltern, Lüdinghausen, Ahlen, Beckum). UNBELEGT: B8, B70, B473."
+  },
+  "wuerselen": {
+    "_name": "Würselen",
+    "autobahnen": [
+      "A4",
+      "A44"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Autobahnkreuz Aachen",
+      "Anschlussstelle Broichweiden"
+    ],
+    "_urteil": "FEHLT: B57 und B264 — das bundesstrassen-Feld ist leer, obwohl der Würselen-Artikel ausdrücklich sagt: \"Die Bundesstraßen 57 und 264 durchziehen Würselen und Broichweiden.\" Das ist hier der eigentliche Befund. Sonst keine Fehleinträge: \"Anschlussstelle Broichweiden\" ist belegt (A44, Nr. 5a, dort \"Broichweiden/Würselen\"), und das Autobahnkreuz Aachen existiert (A4/A44/A544). Zur Lage des Kreuzes formuliert der Artikel vorsichtig, Würselen \"liegt am Autobahnkreuz Aachen in unmittelbarer Nähe\", ohne es dem Stadtgebiet zuzuordnen — nach dem Maßstab \"erschließt die Stadt unmittelbar\" darf es bleiben. A4 und A44 belegt. FEHLT (nachrangig): die A544 mit dem Anschluss Würselen/Verlautenheide, der dritte der drei Würselener Autobahnanschlüsse."
+  }
+}
