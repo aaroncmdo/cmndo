@@ -7,6 +7,7 @@
 // ist kanonisch, radius_km wurde gedropt.
 
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
@@ -14,8 +15,7 @@ import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 async function ensureAdmin(request?: Request) {
   // CRON_SECRET-Header erlaubt VPS-Aufrufe ohne Browser-Session
   if (request) {
-    const auth = request.headers.get('authorization')
-    if (auth === `Bearer ${process.env.CRON_SECRET}`) return { ok: true as const }
+    if (assertCronAuth(request)) return { ok: true as const }
   }
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
