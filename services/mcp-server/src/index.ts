@@ -98,7 +98,10 @@ const gutachterTermineInput = {
     .describe("Ausgabeformat: 'markdown' (menschenlesbar) oder 'json' (strukturiert)."),
 }
 
-const slotSchema = { start: z.string(), end: z.string(), passung: z.string() }
+// `buchungs_url` MUSS hier stehen: der Renderer verlinkt jeden Slot damit. Undeklariert
+// ueberlebte das Feld nur, weil die Validierung unbekannte Keys durchlaesst — kein Zustand,
+// auf den sich ein Buchungsweg stuetzen sollte.
+const slotSchema = { start: z.string(), end: z.string(), passung: z.string(), buchungs_url: z.string().optional() }
 const gutachterItemSchema = {
   id: z.string(),
   vorname: z.string(),
