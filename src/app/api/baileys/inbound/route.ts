@@ -33,6 +33,15 @@ export async function POST(request: Request) {
     message_id?: string
     timestamp?: number
     has_media?: boolean
+    /**
+     * true = die Nachricht wurde von UNS gesendet (Handy, WhatsApp-Web oder ein
+     * App-Send, der als Echo zurueckkommt). `phone` ist dann der EMPFAENGER.
+     * Bis 23.08.2026 verwarf der Baileys-Service diese Nachrichten komplett
+     * (`if (msg.key.fromMe) continue`) — im System sah jeder Verlauf einseitig
+     * aus, und die 11 Direkt-Sender (FlowLink, Terminbestaetigung, …) hinter-
+     * liessen ueberhaupt keine Spur: 800 Sends standen 36 DB-Zeilen gegenueber.
+     */
+    from_me?: boolean
     // Task C: Media-Entries mit bereits aufgeloesten oder aufloesbarenBytes.
     // Mindestens eine Quelle muss vorhanden sein: storage_path | url | base64.
     // Fehlendes Feld = Eintrag wird beim Resolve uebersprungen.
@@ -53,6 +62,11 @@ export async function POST(request: Request) {
   const phone = typeof body.phone === 'string' ? body.phone.trim() : ''
   const text = typeof body.text === 'string' ? body.text.trim() : ''
   const messageId = typeof body.message_id === 'string' ? body.message_id : null
+  // Eigene Nachricht (vom Handy/Web/App-Echo) -> outbound. Sie wird gespeichert
+  // und zugeordnet, loest aber KEINEN der Inbound-Effekte aus (kein Lead, keine
+  // Team-WA, keine Text-Intents) — sonst wuerde ein eigenes "JA" einen Termin
+  // bestaetigen und jede Antwort einen Interessenten erzeugen.
+  const fromMe = body.from_me === true
 
   if (!phone || phone.length < 8) {
     return NextResponse.json({ error: 'missing_phone' }, { status: 400 })
@@ -90,7 +104,7 @@ export async function POST(request: Request) {
   // Spec: docs/superpowers/specs/2026-08-23-whatsapp-erstkontakt-lead-design.md
   let partnerBezeichnung: string | null = null
   let neuerLead = false
-  if (!fallId && !leadId) {
+  if (!fromMe && !fallId && !leadId) {
     const partner = await istPartnerNummer(db, phone)
     if (partner.istPartner) {
       partnerBezeichnung = partner.bezeichnung
@@ -147,8 +161,10 @@ export async function POST(request: Request) {
     thread_id: threadId,
     kanal: 'whatsapp',
     sender_id: null,
-    sender_rolle: 'kunde',
-    richtung: 'inbound',
+    // 'system' ist der etablierte Wert fuer von uns ausgehende Nachrichten
+    // (120 Bestandszeilen); 'kunde'/'inbound' bleibt der Eingangsfall.
+    sender_rolle: fromMe ? 'system' : 'kunde',
+    richtung: fromMe ? 'outbound' : 'inbound',
     nachricht: text || '[Medien-Nachricht]',
     hat_anhang: body.has_media === true,
     gelesen: false,
@@ -176,7 +192,13 @@ export async function POST(request: Request) {
   // nicht gespeichert wurde. Die soeben eingefuegte Zeile zaehlt mit -> beim
   // echten Erstkontakt ist das Ergebnis exakt 1.
   // Non-critical: Fehler werden geloggt, brechen die Route nie.
-  try {
+  //
+  // `!fromMe` als aeussere Bedingung — NICHT als frueher `return` im try-Block:
+  // das haette die ganze Route beendet (keine Text-Intents, kein Medien-Block,
+  // keine Response). Wir benachrichtigen uns nicht ueber das, was wir selbst
+  // geschrieben haben.
+  if (!fromMe) {
+    try {
     const { count, error: zaehlFehler } = await db
       .from('nachrichten')
       .select('id', { count: 'exact', head: true })
@@ -201,16 +223,23 @@ export async function POST(request: Request) {
         [kopf, '', `📞 ${phone}`, `💬 ${auszug}`, ziel ? '' : null, ziel].filter(Boolean).join('\n'),
       )
     }
-  } catch (err) {
-    console.error('[baileys/inbound] Team-WA fehlgeschlagen (nicht kritisch):', err)
+    } catch (err) {
+      console.error('[baileys/inbound] Team-WA fehlgeschlagen (nicht kritisch):', err)
+    }
   }
 
   // Text-Intents (JA/NEIN/Umtermin) — embed-B-Resolution + Termin-Bestaetigung.
   // Shared-Helper identisch zur (legacy) Twilio-Route.
-  try {
-    await processInboundText(db, { fromPhone: phone, body: text, match })
-  } catch (e) {
-    console.error('[baileys/inbound] text-intent:', e instanceof Error ? e.message : e)
+  //
+  // NUR fuer eingehende Nachrichten: ein von UNS geschriebenes "JA" wuerde sonst
+  // einen Termin im Namen des Kunden bestaetigen. Genau deshalb ist `fromMe`
+  // nicht bloss ein Anzeige-Detail, sondern eine Weiche.
+  if (!fromMe) {
+    try {
+      await processInboundText(db, { fromPhone: phone, body: text, match })
+    } catch (e) {
+      console.error('[baileys/inbound] text-intent:', e instanceof Error ? e.message : e)
+    }
   }
 
   // ─── Medien-Block (Task C) ─────────────────────────────────────────────────
