@@ -50,7 +50,6 @@
         "B321"
       ],
       "knoten": [
-        "Dreieck Schwerin",
         "Anschlussstelle Schwerin-Nord",
         "Anschlussstelle Schwerin-Ost"
       ]
@@ -110,9 +109,7 @@
         "B399"
       ],
       "knoten": [
-        "Anschlussstelle Düren",
-        "Anschlussstelle Langerwehe",
-        "Kreuz Kerpen"
+        "Anschlussstelle Düren"
       ]
     },
     "unfallHotspots": [],
@@ -166,8 +163,8 @@
         "B226"
       ],
       "knoten": [
-        "Kreuz Witten",
-        "Kreuz Dortmund/Witten",
+        "Kreuz Bochum/Witten",
+        "Dreieck Dortmund/Witten",
         "Anschlussstelle Witten-Herbede"
       ]
     },
@@ -387,9 +384,7 @@
         "B236"
       ],
       "knoten": [
-        "Anschlussstelle Lünen-Nord",
-        "Anschlussstelle Lünen-Süd",
-        "Kreuz Dortmund-Nordost"
+        "Anschlussstelle Lünen-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -445,11 +440,7 @@
         "B65",
         "B482"
       ],
-      "knoten": [
-        "Anschlussstelle Bad Oeynhausen",
-        "Kreuz Bad Oeynhausen",
-        "Anschlussstelle Porta Westfalica"
-      ]
+      "knoten": []
     },
     "unfallHotspots": [],
     "lokaleFaqs": [],
@@ -493,9 +484,8 @@
         "B227"
       ],
       "knoten": [
-        "Anschlussstelle Velbert-Zentrum",
-        "Kreuz Velbert-Nord",
-        "Anschlussstelle Heiligenhaus"
+        "Anschlussstelle Velbert",
+        "Dreieck Velbert-Nord"
       ]
     },
     "unfallHotspots": [],
@@ -541,9 +531,7 @@
         "B509"
       ],
       "knoten": [
-        "Kreuz Viersen",
-        "Anschlussstelle Viersen-Süchteln",
-        "Kreuz Mönchengladbach"
+        "Anschlussstelle Viersen"
       ]
     },
     "unfallHotspots": [],
@@ -592,9 +580,7 @@
         "B481"
       ],
       "knoten": [
-        "Anschlussstelle Rheine-Nord",
-        "Anschlussstelle Rheine-Süd",
-        "Kreuz Rheine"
+        "Anschlussstelle Rheine-Nord"
       ]
     },
     "unfallHotspots": [],

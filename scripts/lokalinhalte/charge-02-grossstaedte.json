@@ -70,9 +70,8 @@
         "B481"
       ],
       "knoten": [
-        "Kreuz Münster-Nord",
-        "Kreuz Münster-Süd",
-        "Dreieck Bocholt-Nord"
+        "Anschlussstelle Münster-Nord",
+        "Kreuz Münster-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -194,9 +193,7 @@
         "B44"
       ],
       "knoten": [
-        "Kreuz Mannheim",
-        "Dreieck Mannheim-Nord",
-        "Kreuz Viernheimer Dreieck"
+        "Kreuz Mannheim"
       ]
     },
     "unfallHotspots": [],
@@ -294,9 +291,7 @@
         "B293"
       ],
       "knoten": [
-        "Dreieck Karlsruhe",
-        "Kreuz Karlsruhe-Nord",
-        "Dreieck Karlsruhe-Süd"
+        "Dreieck Karlsruhe"
       ]
     },
     "unfallHotspots": [],
@@ -384,7 +379,6 @@
       ],
       "knoten": [
         "Kreuz Augsburg-West",
-        "Dreieck Augsburg-West",
         "Anschlussstelle Augsburg-Ost"
       ]
     },
@@ -560,14 +554,13 @@
       ],
       "knoten": [
         "Kreuz Mönchengladbach",
-        "Kreuz Wanlo",
-        "Dreieck Holz"
+        "Autobahndreieck Mönchengladbach-Wanlo"
       ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Unfall am Kreuz Wanlo — wer zahlt das Gutachten?",
+        "frage": "Unfall am Dreieck Mönchengladbach-Wanlo — wer zahlt das Gutachten?",
         "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig davon, ob es auf der A46, A61 oder innerorts geschah."
       },
       {
@@ -749,8 +742,7 @@
       ],
       "knoten": [
         "Kreuz Aachen",
-        "Dreieck Aachen-Europaplatz",
-        "Kreuz Aachen-Nord"
+        "Anschlussstelle Aachen-Europaplatz"
       ]
     },
     "unfallHotspots": [],
@@ -833,8 +825,7 @@
       "autobahnen": [
         "A2",
         "A39",
-        "A391",
-        "A395"
+        "A391"
       ],
       "bundesstrassen": [
         "B1",
@@ -1006,7 +997,6 @@
       ],
       "knoten": [
         "Kreuz Chemnitz",
-        "Dreieck Chemnitz",
         "Anschlussstelle Chemnitz-Süd"
       ]
     },
@@ -1086,9 +1076,7 @@
         "B100"
       ],
       "knoten": [
-        "Kreuz Halle",
-        "Dreieck Halle-Süd",
-        "Schkeuditzer Kreuz"
+        "Dreieck Halle-Süd"
       ]
     },
     "unfallHotspots": [],

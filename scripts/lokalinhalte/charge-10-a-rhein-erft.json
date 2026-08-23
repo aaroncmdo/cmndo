@@ -1,15 +1,54 @@
 {
   "bergheim": {
     "stadtbezirke": [
-      { "name": "Kernstadt", "ortsteile": ["Bergheim-Mitte", "Kenten", "Zieverich", "Ahe"] },
-      { "name": "Nördliche Stadtteile", "ortsteile": ["Niederaußem", "Oberaußem", "Rheidt-Hüchelhoven", "Auenheim", "Glesch"] },
-      { "name": "Östliche Stadtteile", "ortsteile": ["Fliesteden", "Büsdorf", "Glessen"] },
-      { "name": "Südliche und westliche Stadtteile", "ortsteile": ["Quadrath-Ichendorf", "Paffendorf", "Thorr"] }
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Bergheim-Mitte",
+          "Kenten",
+          "Zieverich",
+          "Ahe"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtteile",
+        "ortsteile": [
+          "Niederaußem",
+          "Oberaußem",
+          "Rheidt-Hüchelhoven",
+          "Auenheim",
+          "Glesch"
+        ]
+      },
+      {
+        "name": "Östliche Stadtteile",
+        "ortsteile": [
+          "Fliesteden",
+          "Büsdorf",
+          "Glessen"
+        ]
+      },
+      {
+        "name": "Südliche und westliche Stadtteile",
+        "ortsteile": [
+          "Quadrath-Ichendorf",
+          "Paffendorf",
+          "Thorr"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A61"],
-      "bundesstrassen": ["B477"],
-      "knoten": ["Anschlussstelle Bergheim-Süd (A61)", "B477 am Kraftwerk Niederaußem", "L91 über Oberaußem und Glessen"]
+      "autobahnen": [
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B477"
+      ],
+      "knoten": [
+        "Anschlussstelle Bergheim-Süd (A61)",
+        "B477 am Kraftwerk Niederaußem",
+        "L91 über Oberaußem und Glessen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -31,15 +70,58 @@
   },
   "erftstadt": {
     "stadtbezirke": [
-      { "name": "Liblar und Ville-Rand", "ortsteile": ["Liblar", "Blessem", "Bliesheim", "Kierdorf", "Köttingen"] },
-      { "name": "Lechenich", "ortsteile": ["Lechenich", "Konradsheim", "Ahrem"] },
-      { "name": "Nördliche Stadtteile", "ortsteile": ["Gymnich", "Dirmerzheim"] },
-      { "name": "Südliche Stadtteile in der Börde", "ortsteile": ["Erp", "Friesheim", "Borr", "Scheuren", "Niederberg", "Herrig", "Frauenthal", "Mellerhöfe"] }
+      {
+        "name": "Liblar und Ville-Rand",
+        "ortsteile": [
+          "Liblar",
+          "Blessem",
+          "Bliesheim",
+          "Kierdorf",
+          "Köttingen"
+        ]
+      },
+      {
+        "name": "Lechenich",
+        "ortsteile": [
+          "Lechenich",
+          "Konradsheim",
+          "Ahrem"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtteile",
+        "ortsteile": [
+          "Gymnich",
+          "Dirmerzheim"
+        ]
+      },
+      {
+        "name": "Südliche Stadtteile in der Börde",
+        "ortsteile": [
+          "Erp",
+          "Friesheim",
+          "Borr",
+          "Scheuren",
+          "Niederberg",
+          "Herrig",
+          "Frauenthal",
+          "Mellerhöfe"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A61"],
-      "bundesstrassen": ["B265"],
-      "knoten": ["Autobahnkreuz Bliesheim (A1/A61)", "Autobahndreieck Erfttal", "B265 in Liblar"]
+      "autobahnen": [
+        "A1",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B265"
+      ],
+      "knoten": [
+        "Autobahnkreuz Bliesheim (A1/A61)",
+        "Autobahndreieck Erfttal",
+        "B265 in Liblar"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -61,16 +143,53 @@
   },
   "pulheim": {
     "stadtbezirke": [
-      { "name": "Brauweiler – Dansweiler – Freimersdorf", "ortsteile": ["Brauweiler", "Dansweiler", "Freimersdorf"] },
-      { "name": "Geyen – Sinthern – Manstedten", "ortsteile": ["Geyen", "Sinthern", "Manstedten"] },
-      { "name": "Pulheim – Orr", "ortsteile": ["Pulheim-Mitte", "Orr"] },
-      { "name": "Sinnersdorf", "ortsteile": ["Sinnersdorf"] },
-      { "name": "Stommeln – Stommelerbusch – Ingendorf", "ortsteile": ["Stommeln", "Stommelerbusch", "Ingendorf"] }
+      {
+        "name": "Brauweiler – Dansweiler – Freimersdorf",
+        "ortsteile": [
+          "Brauweiler",
+          "Dansweiler",
+          "Freimersdorf"
+        ]
+      },
+      {
+        "name": "Geyen – Sinthern – Manstedten",
+        "ortsteile": [
+          "Geyen",
+          "Sinthern",
+          "Manstedten"
+        ]
+      },
+      {
+        "name": "Pulheim – Orr",
+        "ortsteile": [
+          "Pulheim-Mitte",
+          "Orr"
+        ]
+      },
+      {
+        "name": "Sinnersdorf",
+        "ortsteile": [
+          "Sinnersdorf"
+        ]
+      },
+      {
+        "name": "Stommeln – Stommelerbusch – Ingendorf",
+        "ortsteile": [
+          "Stommeln",
+          "Stommelerbusch",
+          "Ingendorf"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B59"],
-      "knoten": ["B59 als radiale Ausfallstraße Richtung Mönchengladbach", "Auffahrten auf A1, A57 und A4 jenseits der Stadtgrenze"]
+      "bundesstrassen": [
+        "B59"
+      ],
+      "knoten": [
+        "B59 als radiale Ausfallstraße Richtung Mönchengladbach",
+        "Auffahrten auf A1, A57 und A4 jenseits der Stadtgrenze"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -88,15 +207,52 @@
   },
   "frechen": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Frechen-Mitte"] },
-      { "name": "Königsdorf", "ortsteile": ["Königsdorf", "Neufreimersdorf", "Neubuschbell"] },
-      { "name": "Bachem", "ortsteile": ["Bachem", "Neuhemmerich"] },
-      { "name": "Weitere Stadtteile", "ortsteile": ["Habbelrath", "Buschbell", "Grube Carl", "Hücheln", "Grefrath", "Benzelrath"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Frechen-Mitte"
+        ]
+      },
+      {
+        "name": "Königsdorf",
+        "ortsteile": [
+          "Königsdorf",
+          "Neufreimersdorf",
+          "Neubuschbell"
+        ]
+      },
+      {
+        "name": "Bachem",
+        "ortsteile": [
+          "Bachem",
+          "Neuhemmerich"
+        ]
+      },
+      {
+        "name": "Weitere Stadtteile",
+        "ortsteile": [
+          "Habbelrath",
+          "Buschbell",
+          "Grube Carl",
+          "Hücheln",
+          "Grefrath",
+          "Benzelrath"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A4"],
-      "bundesstrassen": ["B264"],
-      "knoten": ["Anschlussstelle Frechen (A1) südlich des Kreuzes Köln-West", "Anschlussstelle Frechen-Nord (A4, nur Richtung Aachen)", "B264 als Südumgehung des Stadtkerns"]
+      "autobahnen": [
+        "A1",
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B264"
+      ],
+      "knoten": [
+        "Anschlussstelle Frechen (A1) südlich des Kreuzes Köln-West",
+        "Anschlussstelle Frechen-Nord (A4, nur Richtung Aachen)",
+        "B264 als Südumgehung des Stadtkerns"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -118,15 +274,51 @@
   },
   "huerth": {
     "stadtbezirke": [
-      { "name": "Hermülheim und Efferen", "ortsteile": ["Hermülheim", "Efferen"] },
-      { "name": "Alt-Hürth und Knapsack", "ortsteile": ["Alt-Hürth", "Knapsack"] },
-      { "name": "Westliche Stadtteile", "ortsteile": ["Gleuel", "Berrenrath", "Alstädten-Burbach", "Sielsdorf", "Stotzheim"] },
-      { "name": "Südliche Stadtteile", "ortsteile": ["Fischenich", "Kendenich", "Kalscheuren"] }
+      {
+        "name": "Hermülheim und Efferen",
+        "ortsteile": [
+          "Hermülheim",
+          "Efferen"
+        ]
+      },
+      {
+        "name": "Alt-Hürth und Knapsack",
+        "ortsteile": [
+          "Alt-Hürth",
+          "Knapsack"
+        ]
+      },
+      {
+        "name": "Westliche Stadtteile",
+        "ortsteile": [
+          "Gleuel",
+          "Berrenrath",
+          "Alstädten-Burbach",
+          "Sielsdorf",
+          "Stotzheim"
+        ]
+      },
+      {
+        "name": "Südliche Stadtteile",
+        "ortsteile": [
+          "Fischenich",
+          "Kendenich",
+          "Kalscheuren"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1"],
-      "bundesstrassen": ["B265", "B51"],
-      "knoten": ["Anschlussstelle Hürth (A1)", "Anschlussstelle Hürth-Knapsack (A1)", "B265 Richtung Köln und Schleiden"]
+      "autobahnen": [
+        "A1"
+      ],
+      "bundesstrassen": [
+        "B265",
+        "B51"
+      ],
+      "knoten": [
+        "Anschlussstelle Hürth (A1)",
+        "B265 Richtung Köln und Schleiden"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -148,14 +340,42 @@
   },
   "bruehl": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Brühl-Innenstadt"] },
-      { "name": "Nördliche Stadtbezirke", "ortsteile": ["Vochem", "Kierberg"] },
-      { "name": "Südliche Stadtbezirke", "ortsteile": ["Badorf", "Pingsdorf", "Schwadorf", "Heide"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Brühl-Innenstadt"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtbezirke",
+        "ortsteile": [
+          "Vochem",
+          "Kierberg"
+        ]
+      },
+      {
+        "name": "Südliche Stadtbezirke",
+        "ortsteile": [
+          "Badorf",
+          "Pingsdorf",
+          "Schwadorf",
+          "Heide"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A553"],
-      "bundesstrassen": ["B51"],
-      "knoten": ["Autobahnkreuz Bliesheim als Beginn der A553", "Anschlussstelle Brühl-Süd (Zufahrt Phantasialand)", "Anschlussstelle Brühl-Ost", "Anschlussstelle Brühl-Nord"]
+      "autobahnen": [
+        "A553"
+      ],
+      "bundesstrassen": [
+        "B51"
+      ],
+      "knoten": [
+        "Autobahnkreuz Bliesheim als Beginn der A553",
+        "Anschlussstelle Brühl-Süd (Zufahrt Phantasialand)",
+        "Anschlussstelle Brühl-Ost",
+        "Anschlussstelle Brühl-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -177,15 +397,41 @@
   },
   "wesseling": {
     "stadtbezirke": [
-      { "name": "Wesseling-Mitte", "ortsteile": ["Wesseling-Mitte"] },
-      { "name": "Keldenich", "ortsteile": ["Keldenich"] },
-      { "name": "Berzdorf", "ortsteile": ["Berzdorf"] },
-      { "name": "Urfeld", "ortsteile": ["Urfeld"] }
+      {
+        "name": "Wesseling-Mitte",
+        "ortsteile": [
+          "Wesseling-Mitte"
+        ]
+      },
+      {
+        "name": "Keldenich",
+        "ortsteile": [
+          "Keldenich"
+        ]
+      },
+      {
+        "name": "Berzdorf",
+        "ortsteile": [
+          "Berzdorf"
+        ]
+      },
+      {
+        "name": "Urfeld",
+        "ortsteile": [
+          "Urfeld"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A555"],
+      "autobahnen": [
+        "A555"
+      ],
       "bundesstrassen": [],
-      "knoten": ["A555 zwischen Köln und Bonn", "Werkszufahrten der Rheinschiene", "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"]
+      "knoten": [
+        "A555 zwischen Köln und Bonn",
+        "Werkszufahrten der Rheinschiene",
+        "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -207,14 +453,37 @@
   },
   "niederkassel": {
     "stadtbezirke": [
-      { "name": "Südliche Ortsteile", "ortsteile": ["Mondorf", "Rheidt"] },
-      { "name": "Niederkassel-Mitte", "ortsteile": ["Niederkassel", "Uckendorf", "Stockem"] },
-      { "name": "Nördliche Ortsteile", "ortsteile": ["Lülsdorf", "Ranzel"] }
+      {
+        "name": "Südliche Ortsteile",
+        "ortsteile": [
+          "Mondorf",
+          "Rheidt"
+        ]
+      },
+      {
+        "name": "Niederkassel-Mitte",
+        "ortsteile": [
+          "Niederkassel",
+          "Uckendorf",
+          "Stockem"
+        ]
+      },
+      {
+        "name": "Nördliche Ortsteile",
+        "ortsteile": [
+          "Lülsdorf",
+          "Ranzel"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
       "bundesstrassen": [],
-      "knoten": ["L269 durch die Ortsdurchfahrten", "Ortsumgehung L269n", "Rheinfähre Mondorf–Bonn-Graurheindorf"]
+      "knoten": [
+        "L269 durch die Ortsdurchfahrten",
+        "Ortsumgehung L269n",
+        "Rheinfähre Mondorf–Bonn-Graurheindorf"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [

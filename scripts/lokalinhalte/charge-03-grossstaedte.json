@@ -68,7 +68,6 @@
       ],
       "knoten": [
         "Kreuz Magdeburg",
-        "Dreieck Magdeburg",
         "Anschlussstelle Magdeburg-Zentrum"
       ]
     },
@@ -382,8 +381,7 @@
       ],
       "knoten": [
         "Kreuz Oberhausen",
-        "Kreuz Oberhausen-West",
-        "Dreieck Bottrop"
+        "Kreuz Oberhausen-West"
       ]
     },
     "unfallHotspots": [],
@@ -464,7 +462,6 @@
       ],
       "knoten": [
         "Kreuz Erfurt",
-        "Dreieck Erfurt-Süd",
         "Anschlussstelle Erfurt-West"
       ]
     },

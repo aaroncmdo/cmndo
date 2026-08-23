@@ -1,18 +1,59 @@
 {
   "wesel": {
     "stadtbezirke": [
-      { "name": "Wesel", "ortsteile": ["Altstadt", "Blumenkamp", "Feldmark", "Fusternberg", "Schepersfeld"] },
-      { "name": "Obrighoven-Lackhausen", "ortsteile": ["Obrighoven", "Lackhausen", "Wittenberg"] },
-      { "name": "Büderich", "ortsteile": ["Büderich", "Ginderich", "Werrich/Perrich"] },
-      { "name": "Flüren", "ortsteile": ["Flüren"] },
-      { "name": "Bislich", "ortsteile": ["Bislich", "Bergerfurth", "Diersfordt"] }
+      {
+        "name": "Wesel",
+        "ortsteile": [
+          "Altstadt",
+          "Blumenkamp",
+          "Feldmark",
+          "Fusternberg",
+          "Schepersfeld"
+        ]
+      },
+      {
+        "name": "Obrighoven-Lackhausen",
+        "ortsteile": [
+          "Obrighoven",
+          "Lackhausen",
+          "Wittenberg"
+        ]
+      },
+      {
+        "name": "Büderich",
+        "ortsteile": [
+          "Büderich",
+          "Ginderich",
+          "Werrich/Perrich"
+        ]
+      },
+      {
+        "name": "Flüren",
+        "ortsteile": [
+          "Flüren"
+        ]
+      },
+      {
+        "name": "Bislich",
+        "ortsteile": [
+          "Bislich",
+          "Bergerfurth",
+          "Diersfordt"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3"],
-      "bundesstrassen": ["B8", "B58", "B70", "B473"],
+      "autobahnen": [
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B58",
+        "B70",
+        "B473"
+      ],
       "knoten": [
         "Anschlussstelle Wesel (A3)",
-        "Anschlussstelle Hamminkeln (A3)",
         "Niederrheinbrücke Wesel (B58)"
       ]
     },
@@ -36,17 +77,50 @@
   },
   "kleve": {
     "stadtbezirke": [
-      { "name": "Kernstadt", "ortsteile": ["Kleve-Mitte", "Materborn", "Kellen"] },
-      { "name": "Düffel", "ortsteile": ["Rindern", "Donsbrüggen", "Keeken", "Bimmen", "Düffelward", "Wardhausen", "Warbeyen"] },
-      { "name": "Rheinbogen", "ortsteile": ["Griethausen", "Brienen", "Schenkenschanz", "Salmorth"] },
-      { "name": "Reichswald", "ortsteile": ["Reichswalde"] }
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Kleve-Mitte",
+          "Materborn",
+          "Kellen"
+        ]
+      },
+      {
+        "name": "Düffel",
+        "ortsteile": [
+          "Rindern",
+          "Donsbrüggen",
+          "Keeken",
+          "Bimmen",
+          "Düffelward",
+          "Wardhausen",
+          "Warbeyen"
+        ]
+      },
+      {
+        "name": "Rheinbogen",
+        "ortsteile": [
+          "Griethausen",
+          "Brienen",
+          "Schenkenschanz",
+          "Salmorth"
+        ]
+      },
+      {
+        "name": "Reichswald",
+        "ortsteile": [
+          "Reichswalde"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B9", "B220", "B57"],
+      "bundesstrassen": [
+        "B9",
+        "B220",
+        "B57"
+      ],
       "knoten": [
-        "Anschlussstelle Goch (A57)",
-        "Anschlussstelle Emmerich (A3)",
         "B9 Richtung Nimwegen über Kranenburg"
       ]
     },
@@ -70,16 +144,51 @@
   },
   "nettetal": {
     "stadtbezirke": [
-      { "name": "Lobberich", "ortsteile": ["Lobberich"] },
-      { "name": "Kaldenkirchen", "ortsteile": ["Kaldenkirchen"] },
-      { "name": "Breyell", "ortsteile": ["Breyell"] },
-      { "name": "Hinsbeck", "ortsteile": ["Hinsbeck"] },
-      { "name": "Leuth", "ortsteile": ["Leuth"] },
-      { "name": "Schaag", "ortsteile": ["Schaag"] }
+      {
+        "name": "Lobberich",
+        "ortsteile": [
+          "Lobberich"
+        ]
+      },
+      {
+        "name": "Kaldenkirchen",
+        "ortsteile": [
+          "Kaldenkirchen"
+        ]
+      },
+      {
+        "name": "Breyell",
+        "ortsteile": [
+          "Breyell"
+        ]
+      },
+      {
+        "name": "Hinsbeck",
+        "ortsteile": [
+          "Hinsbeck"
+        ]
+      },
+      {
+        "name": "Leuth",
+        "ortsteile": [
+          "Leuth"
+        ]
+      },
+      {
+        "name": "Schaag",
+        "ortsteile": [
+          "Schaag"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A61"],
-      "bundesstrassen": ["B221", "B509"],
+      "autobahnen": [
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B221",
+        "B509"
+      ],
       "knoten": [
         "Anschlussstelle Nettetal-West (A61)",
         "Grenzübergang Venlo/Nettetal (A61 zur niederländischen A74)"
@@ -105,12 +214,31 @@
   },
   "gronau": {
     "stadtbezirke": [
-      { "name": "Gronau", "ortsteile": ["Innenstadt", "Buterland", "Brook", "Eßseite", "Beckerhook", "Tiekerhook", "Schöttelkotterhook", "Spechtholtshook"] },
-      { "name": "Epe", "ortsteile": ["Epe"] }
+      {
+        "name": "Gronau",
+        "ortsteile": [
+          "Innenstadt",
+          "Buterland",
+          "Brook",
+          "Eßseite",
+          "Beckerhook",
+          "Tiekerhook",
+          "Schöttelkotterhook",
+          "Spechtholtshook"
+        ]
+      },
+      {
+        "name": "Epe",
+        "ortsteile": [
+          "Epe"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B54"],
+      "bundesstrassen": [
+        "B54"
+      ],
       "knoten": [
         "Grenzübergang Gronau (B54)",
         "Glanerbrücke (Übergang nach Enschede)",
@@ -133,16 +261,54 @@
   },
   "borken": {
     "stadtbezirke": [
-      { "name": "Borken", "ortsteile": ["Kernstadt", "Westenborken", "Hoxfeld"] },
-      { "name": "Gemen", "ortsteile": ["Gemen", "Kirchspiel Gemen"] },
-      { "name": "Weseke", "ortsteile": ["Weseke"] },
-      { "name": "Burlo", "ortsteile": ["Burlo", "Borkenwirthe"] },
-      { "name": "Marbeck", "ortsteile": ["Marbeck", "Grütlohn"] },
-      { "name": "Rhedebrügge", "ortsteile": ["Rhedebrügge"] }
+      {
+        "name": "Borken",
+        "ortsteile": [
+          "Kernstadt",
+          "Westenborken",
+          "Hoxfeld"
+        ]
+      },
+      {
+        "name": "Gemen",
+        "ortsteile": [
+          "Gemen",
+          "Kirchspiel Gemen"
+        ]
+      },
+      {
+        "name": "Weseke",
+        "ortsteile": [
+          "Weseke"
+        ]
+      },
+      {
+        "name": "Burlo",
+        "ortsteile": [
+          "Burlo",
+          "Borkenwirthe"
+        ]
+      },
+      {
+        "name": "Marbeck",
+        "ortsteile": [
+          "Marbeck",
+          "Grütlohn"
+        ]
+      },
+      {
+        "name": "Rhedebrügge",
+        "ortsteile": [
+          "Rhedebrügge"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B67", "B70"],
+      "bundesstrassen": [
+        "B67",
+        "B70"
+      ],
       "knoten": [
         "Anschlussstelle Borken (A31, rund zwölf Kilometer östlich)",
         "Umgehung B67/B70 um die Kernstadt"
@@ -164,12 +330,43 @@
   },
   "ahaus": {
     "stadtbezirke": [
-      { "name": "Ahaus", "ortsteile": ["Ahaus", "Ammeln"] },
-      { "name": "Wüllen", "ortsteile": ["Wüllen"] },
-      { "name": "Wessum", "ortsteile": ["Wessum"] },
-      { "name": "Ottenstein", "ortsteile": ["Ottenstein"] },
-      { "name": "Alstätte", "ortsteile": ["Alstätte"] },
-      { "name": "Graes", "ortsteile": ["Graes"] }
+      {
+        "name": "Ahaus",
+        "ortsteile": [
+          "Ahaus",
+          "Ammeln"
+        ]
+      },
+      {
+        "name": "Wüllen",
+        "ortsteile": [
+          "Wüllen"
+        ]
+      },
+      {
+        "name": "Wessum",
+        "ortsteile": [
+          "Wessum"
+        ]
+      },
+      {
+        "name": "Ottenstein",
+        "ortsteile": [
+          "Ottenstein"
+        ]
+      },
+      {
+        "name": "Alstätte",
+        "ortsteile": [
+          "Alstätte"
+        ]
+      },
+      {
+        "name": "Graes",
+        "ortsteile": [
+          "Graes"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
@@ -195,17 +392,57 @@
   },
   "duelmen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Dülmen-Mitte"] },
-      { "name": "Kirchspiel", "ortsteile": ["Kirchspiel"] },
-      { "name": "Buldern", "ortsteile": ["Buldern"] },
-      { "name": "Hausdülmen", "ortsteile": ["Hausdülmen"] },
-      { "name": "Hiddingsel", "ortsteile": ["Hiddingsel"] },
-      { "name": "Merfeld", "ortsteile": ["Merfeld"] },
-      { "name": "Rorup", "ortsteile": ["Rorup"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Dülmen-Mitte"
+        ]
+      },
+      {
+        "name": "Kirchspiel",
+        "ortsteile": [
+          "Kirchspiel"
+        ]
+      },
+      {
+        "name": "Buldern",
+        "ortsteile": [
+          "Buldern"
+        ]
+      },
+      {
+        "name": "Hausdülmen",
+        "ortsteile": [
+          "Hausdülmen"
+        ]
+      },
+      {
+        "name": "Hiddingsel",
+        "ortsteile": [
+          "Hiddingsel"
+        ]
+      },
+      {
+        "name": "Merfeld",
+        "ortsteile": [
+          "Merfeld"
+        ]
+      },
+      {
+        "name": "Rorup",
+        "ortsteile": [
+          "Rorup"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A43"],
-      "bundesstrassen": ["B67", "B474"],
+      "autobahnen": [
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B67",
+        "B474"
+      ],
       "knoten": [
         "Anschlussstelle Dülmen-Nord (A43)",
         "B474n als Zubringer zur A43"
@@ -227,24 +464,75 @@
   },
   "ibbenbueren": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt"] },
-      { "name": "Laggenbeck", "ortsteile": ["Laggenbeck", "Osterledde"] },
-      { "name": "Püsselbüren", "ortsteile": ["Püsselbüren"] },
-      { "name": "Bockraden", "ortsteile": ["Bockraden"] },
-      { "name": "Alstedde", "ortsteile": ["Alstedde", "Schafberg"] },
-      { "name": "Dickenberg", "ortsteile": ["Dickenberg"] },
-      { "name": "Dörenthe", "ortsteile": ["Dörenthe"] },
-      { "name": "Lehen", "ortsteile": ["Lehen", "Schierloh"] },
-      { "name": "Uffeln", "ortsteile": ["Uffeln"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt"
+        ]
+      },
+      {
+        "name": "Laggenbeck",
+        "ortsteile": [
+          "Laggenbeck",
+          "Osterledde"
+        ]
+      },
+      {
+        "name": "Püsselbüren",
+        "ortsteile": [
+          "Püsselbüren"
+        ]
+      },
+      {
+        "name": "Bockraden",
+        "ortsteile": [
+          "Bockraden"
+        ]
+      },
+      {
+        "name": "Alstedde",
+        "ortsteile": [
+          "Alstedde",
+          "Schafberg"
+        ]
+      },
+      {
+        "name": "Dickenberg",
+        "ortsteile": [
+          "Dickenberg"
+        ]
+      },
+      {
+        "name": "Dörenthe",
+        "ortsteile": [
+          "Dörenthe"
+        ]
+      },
+      {
+        "name": "Lehen",
+        "ortsteile": [
+          "Lehen",
+          "Schierloh"
+        ]
+      },
+      {
+        "name": "Uffeln",
+        "ortsteile": [
+          "Uffeln"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A30"],
-      "bundesstrassen": ["B219"],
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B219"
+      ],
       "knoten": [
         "Anschlussstelle Ibbenbüren-West (A30)",
         "Anschlussstelle Ibbenbüren (A30)",
-        "Anschlussstelle Laggenbeck (A30)",
-        "Autobahnkreuz Lotte/Osnabrück (A30/A1)"
+        "Anschlussstelle Laggenbeck (A30)"
       ]
     },
     "unfallHotspots": [],

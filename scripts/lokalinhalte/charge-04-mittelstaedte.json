@@ -73,7 +73,6 @@
         "B233"
       ],
       "knoten": [
-        "Kreuz Kamen",
         "Anschlussstelle Hamm-Bockum-Hövel",
         "Anschlussstelle Hamm-Uentrop"
       ]
@@ -211,7 +210,6 @@
         "B223"
       ],
       "knoten": [
-        "Kreuz Kaiserberg",
         "Anschlussstelle Mülheim-Heißen",
         "Anschlussstelle Mülheim-Styrum"
       ]
@@ -347,8 +345,7 @@
       ],
       "knoten": [
         "Kreuz Leverkusen",
-        "Kreuz Leverkusen-West",
-        "Dreieck Langenfeld"
+        "Kreuz Leverkusen-West"
       ]
     },
     "unfallHotspots": [],
@@ -424,9 +421,9 @@
         "B68"
       ],
       "knoten": [
-        "Kreuz Osnabrück-Nord",
+        "Anschlussstelle Osnabrück-Nord",
         "Kreuz Osnabrück-Süd",
-        "Lotter Kreuz"
+        "Kreuz Lotte/Osnabrück"
       ]
     },
     "unfallHotspots": [],
@@ -574,8 +571,7 @@
       ],
       "knoten": [
         "Kreuz Heidelberg",
-        "Anschlussstelle Heidelberg-Schwetzingen",
-        "Dreieck Heidelberg"
+        "Anschlussstelle Heidelberg-Schwetzingen"
       ]
     },
     "unfallHotspots": [],
@@ -648,9 +644,9 @@
         "B449"
       ],
       "knoten": [
-        "Kreuz Darmstadt",
+        "Darmstädter Kreuz",
         "Dreieck Darmstadt",
-        "Kreuz Darmstadt-Nord"
+        "Darmstädter Nordkreuz"
       ]
     },
     "unfallHotspots": [],
@@ -761,8 +757,7 @@
         "B68"
       ],
       "knoten": [
-        "Kreuz Paderborn-Elsen",
-        "Dreieck Paderborn",
+        "Anschlussstelle Paderborn-Elsen",
         "Anschlussstelle Paderborn-Zentrum"
       ]
     },
@@ -832,7 +827,6 @@
       ],
       "knoten": [
         "Kreuz Regensburg",
-        "Anschlussstelle Regensburg-Ost",
         "Anschlussstelle Regensburg-Nord"
       ]
     },

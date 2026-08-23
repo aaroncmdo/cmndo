@@ -41,8 +41,7 @@
       ],
       "knoten": [
         "Autobahnkreuz Hilden (A3/A46)",
-        "Anschlussstelle Hilden",
-        "Anschlussstelle Haan-Ost"
+        "Anschlussstelle Hilden"
       ]
     },
     "unfallHotspots": [],
@@ -263,8 +262,7 @@
       ],
       "knoten": [
         "Anschlussstelle Haan-Ost",
-        "Anschlussstelle Haan-West",
-        "Autobahnkreuz Hilden (A3/A46)"
+        "Anschlussstelle Haan-West"
       ]
     },
     "unfallHotspots": [],
@@ -560,15 +558,13 @@
     ],
     "hauptachsen": {
       "autobahnen": [
-        "A555",
-        "A565"
+        "A555"
       ],
       "bundesstrassen": [
         "B9"
       ],
       "knoten": [
         "Anschlussstelle Bornheim (A555)",
-        "Anschlussstelle Sechtem",
         "Kreuzung B9/Ortsdurchfahrt Hersel"
       ]
     },
@@ -630,7 +626,7 @@
         "B57"
       ],
       "knoten": [
-        "Anschlussstelle Erkelenz (A46)",
+        "Anschlussstelle Erkelenz-Süd",
         "Anschlussstelle Erkelenz-Ost",
         "Kreuzung B57/Tagebau-Zufahrt"
       ]

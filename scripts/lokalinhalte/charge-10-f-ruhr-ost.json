@@ -118,7 +118,7 @@
         "B233"
       ],
       "knoten": [
-        "Anschlussstelle Bergkamen (A2)"
+        "Anschlussstelle Kamen/Bergkamen"
       ]
     },
     "unfallHotspots": [],
@@ -468,9 +468,7 @@
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": [
-        "B7"
-      ],
+      "bundesstrassen": [],
       "knoten": []
     },
     "unfallHotspots": [],

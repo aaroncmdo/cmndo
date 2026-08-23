@@ -39,8 +39,7 @@
       ],
       "knoten": [
         "Kreuz Gladbeck",
-        "Anschlussstelle Gladbeck-Ellinghorst",
-        "Dreieck Bottrop"
+        "Anschlussstelle Gladbeck-Ellinghorst"
       ]
     },
     "unfallHotspots": [],
@@ -95,8 +94,7 @@
       ],
       "knoten": [
         "Anschlussstelle Dorsten",
-        "Anschlussstelle Dorsten-Lembeck",
-        "Kreuz Gelsenkirchen"
+        "Anschlussstelle Dorsten-Lembeck"
       ]
     },
     "unfallHotspots": [],
@@ -151,9 +149,7 @@
         "B229"
       ],
       "knoten": [
-        "Anschlussstelle Arnsberg-Neheim",
-        "Anschlussstelle Arnsberg-Ost",
-        "Kreuz Werl"
+        "Anschlussstelle Arnsberg-Neheim"
       ]
     },
     "unfallHotspots": [],
@@ -207,8 +203,7 @@
       ],
       "knoten": [
         "Kreuzung B238/B239 Detmold-Nord",
-        "Anschluss B239 Detmold-Süd",
-        "Auffahrt A2 bei Bad Salzuflen"
+        "Anschluss B239 Detmold-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -263,8 +258,7 @@
       ],
       "knoten": [
         "Kreuzung B67/B473 Bocholt",
-        "Anschluss B67 Bocholt-Ost",
-        "Auffahrt A3 bei Hamminkeln"
+        "Anschluss B67 Bocholt-Ost"
       ]
     },
     "unfallHotspots": [],
@@ -328,7 +322,6 @@
       ],
       "knoten": [
         "Kreuz Castrop-Rauxel-Ost",
-        "Kreuz Recklinghausen",
         "Anschlussstelle Castrop-Rauxel-Zentrum"
       ]
     },
@@ -375,8 +368,7 @@
       ],
       "knoten": [
         "Anschlussstelle Lüdenscheid",
-        "Anschlussstelle Lüdenscheid-Nord",
-        "Kreuz Hagen"
+        "Anschlussstelle Lüdenscheid-Nord"
       ]
     },
     "unfallHotspots": [],
@@ -430,11 +422,7 @@
         "B7",
         "B55"
       ],
-      "knoten": [
-        "Anschlussstelle Erwitte/Anröchte",
-        "Anschlussstelle Geseke",
-        "Kreuz Werl"
-      ]
+      "knoten": []
     },
     "unfallHotspots": [],
     "lokaleFaqs": [],
@@ -486,9 +474,7 @@
         "B239"
       ],
       "knoten": [
-        "Kreuz Bad Oeynhausen",
-        "Anschlussstelle Herford-Ost",
-        "Anschlussstelle Herford-Zentrum"
+        "Anschlussstelle Herford-Ost"
       ]
     },
     "unfallHotspots": [],
@@ -644,9 +630,7 @@
         "B230"
       ],
       "knoten": [
-        "Kreuz Jackerath",
-        "Anschlussstelle Grevenbroich-Zentrum",
-        "Dreieck Holz"
+        "Anschlussstelle Grevenbroich"
       ]
     },
     "unfallHotspots": [],

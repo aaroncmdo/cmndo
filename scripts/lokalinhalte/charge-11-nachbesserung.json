@@ -437,7 +437,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Kamen",
         "Anschlussstelle Hamm-Bockum-Hövel",
         "Anschlussstelle Hamm-Uentrop"
       ],
@@ -602,7 +601,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Kaiserberg",
         "Anschlussstelle Mülheim-Heißen",
         "Anschlussstelle Mülheim-Styrum"
       ],
@@ -686,9 +684,9 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Osnabrück-Nord",
+        "Anschlussstelle Osnabrück-Nord",
         "Kreuz Osnabrück-Süd",
-        "Lotter Kreuz"
+        "Kreuz Lotte/Osnabrück"
       ],
       "autobahnen": [
         "A1",
@@ -705,7 +703,7 @@
     "lokaleFaqs": [
       {
         "frage": "In Osnabrück treffen A1, A30 und A33 aufeinander — was folgt daraus?",
-        "antwort": "Die Stadt liegt in einer Senke zwischen Wiehengebirge und Teutoburger Wald, und der Fernverkehr wird an drei Knoten sortiert: Kreuz Osnabrück-Nord, Kreuz Osnabrück-Süd im Südosten und das Lotter Kreuz. Verkehr aus vier Richtungen verteilt sich auf kurzen Abschnitten, sodass Fahrstreifenwechsel und Beschleunigungsvorgänge dicht aufeinanderfolgen. Typisch sind Auffahrschäden im Rückstau vor den Ausfädelungen und Streifkollisionen in den Verflechtungsbereichen. Bei einem Heckaufprall ist neben der sichtbaren Verformung die Stellung von Rückenlehne und Kopfstütze relevant, weil sie die Belastung der Insassen mitbestimmt. Werden Sitze oder deren Verankerung verzogen, ist das kein Ausstattungsdetail, sondern ein sicherheitsrelevanter Befund; er gehört einzeln aufgeführt und nicht in einer pauschalen Sammelposition versteckt."
+        "antwort": "Die Stadt liegt in einer Senke zwischen Wiehengebirge und Teutoburger Wald, und der Fernverkehr wird an zwei Kreuzen sortiert: dem Kreuz Osnabrück-Süd im Südosten, wo A30 und A33 zusammenkommen, und dem Kreuz Lotte/Osnabrück im Westen an der A1; nördlich schließt die Anschlussstelle Osnabrück-Nord an. Verkehr aus vier Richtungen verteilt sich auf kurzen Abschnitten, sodass Fahrstreifenwechsel und Beschleunigungsvorgänge dicht aufeinanderfolgen. Typisch sind Auffahrschäden im Rückstau vor den Ausfädelungen und Streifkollisionen in den Verflechtungsbereichen. Bei einem Heckaufprall ist neben der sichtbaren Verformung die Stellung von Rückenlehne und Kopfstütze relevant, weil sie die Belastung der Insassen mitbestimmt. Werden Sitze oder deren Verankerung verzogen, ist das kein Ausstattungsdetail, sondern ein sicherheitsrelevanter Befund; er gehört einzeln aufgeführt und nicht in einer pauschalen Sammelposition versteckt."
       },
       {
         "frage": "Was ist im Osnabrücker Hafengebiet für Autofahrer besonders?",
@@ -858,9 +856,9 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Darmstadt",
+        "Darmstädter Kreuz",
         "Dreieck Darmstadt",
-        "Kreuz Darmstadt-Nord"
+        "Darmstädter Nordkreuz"
       ],
       "autobahnen": [
         "A5",
@@ -1000,8 +998,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Paderborn-Elsen",
-        "Dreieck Paderborn",
+        "Anschlussstelle Paderborn-Elsen",
         "Anschlussstelle Paderborn-Zentrum"
       ],
       "autobahnen": [
@@ -1082,7 +1079,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Neuss-West",
-        "Kreuz Neuss-Süd",
         "Dreieck Neuss-Süd"
       ],
       "autobahnen": [
@@ -1098,8 +1094,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Was macht die Kreuze Neuss-West und Neuss-Süd für Streifschäden anfällig?",
-        "antwort": "In Neuss treffen die A57 Richtung Köln und die A46 Richtung Düsseldorf aufeinander; zwischen Kreuz Neuss-West und Kreuz Neuss-Süd liegen kurze Abschnitte, auf denen ein- und ausfädelnder Verkehr dieselbe Spur nutzt. Streifschäden beim Spurwechsel sind die Folge. Bei neueren Fahrzeugen entscheidet dabei die Materialfrage: Stoßfängerquerträger und zunehmend auch Türen und Klappen bestehen aus Aluminium. Aluminium lässt sich nicht wie Stahl richten — es verfestigt sich beim Umformen und reißt, und Wärmezufuhr verändert die Festigkeit dauerhaft. Für viele dieser Bauteile schreiben die Hersteller deshalb Austausch statt Instandsetzung vor. Welche Legierung verbaut ist, bestimmt damit unmittelbar den Reparaturweg und gehört festgestellt."
+        "frage": "Was macht den Abschnitt zwischen Kreuz Neuss-West und Dreieck Neuss-Süd für Streifschäden anfällig?",
+        "antwort": "In Neuss treffen die A57 Richtung Köln und die A46 Richtung Düsseldorf aufeinander; zwischen dem Kreuz Neuss-West und dem Dreieck Neuss-Süd liegen kurze Abschnitte, auf denen ein- und ausfädelnder Verkehr dieselbe Spur nutzt. Streifschäden beim Spurwechsel sind die Folge. Bei neueren Fahrzeugen entscheidet dabei die Materialfrage: Stoßfängerquerträger und zunehmend auch Türen und Klappen bestehen aus Aluminium. Aluminium lässt sich nicht wie Stahl richten — es verfestigt sich beim Umformen und reißt, und Wärmezufuhr verändert die Festigkeit dauerhaft. Für viele dieser Bauteile schreiben die Hersteller deshalb Austausch statt Instandsetzung vor. Welche Legierung verbaut ist, bestimmt damit unmittelbar den Reparaturweg und gehört festgestellt."
       },
       {
         "frage": "Worauf kommt es bei Unfällen im Neusser Hafengebiet an?",
@@ -1388,7 +1384,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Offenbach",
-        "Dreieck Offenbach",
         "Anschlussstelle Offenbach-Kaiserlei"
       ],
       "autobahnen": [
@@ -1673,9 +1668,8 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Bremerhaven-Mitte",
-        "Anschlussstelle Bremerhaven-Überseehäfen",
-        "Dreieck Bremerhaven"
+        "Anschlussstelle Bremerhaven-Zentrum",
+        "Anschlussstelle Bremerhaven-Überseehäfen"
       ],
       "autobahnen": [
         "A27"
@@ -1757,8 +1751,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Koblenz",
-        "Dreieck Koblenz-Nord",
-        "Anschlussstelle Koblenz-Zentrum"
+        "Anschlussstelle Koblenz-Nord"
       ],
       "autobahnen": [
         "A48",
@@ -1843,8 +1836,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Recklinghausen",
-        "Anschlussstelle Recklinghausen-Herten",
-        "Dreieck Recklinghausen"
+        "Anschlussstelle Recklinghausen/Herten"
       ],
       "autobahnen": [
         "A2",
@@ -1924,8 +1916,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Dreieck Moseltal",
-        "Kreuz Trier",
         "Anschlussstelle Trier-Verteilerkreis"
       ],
       "autobahnen": [
@@ -2005,8 +1995,7 @@
     "hauptachsen": {
       "knoten": [
         "Anschlussstelle Siegen",
-        "Anschlussstelle Siegen-Süd",
-        "Kreuz Olpe-Süd"
+        "Anschlussstelle Siegen-Süd"
       ],
       "autobahnen": [
         "A45"
@@ -2082,7 +2071,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Dreieck Spreewald",
         "Anschlussstelle Cottbus-West",
         "Anschlussstelle Cottbus-Süd"
       ],
@@ -2104,7 +2092,7 @@
       },
       {
         "frage": "Die A15 führt von Cottbus in Richtung polnische Grenze — was heißt das für den Verkehr?",
-        "antwort": "Auf diesem Abschnitt läuft schwerer Fernverkehr nach Osten, gebündelt zwischen dem Dreieck Spreewald und den Anschlussstellen Cottbus-West und Cottbus-Süd. Lastzüge fahren in dichten Kolonnen mit geringen Abständen, Pkw ordnen sich dazwischen ein. Kommt es zum Stau, entstehen Auffahrunfälle mit sehr ungleichen Massen: Ein Pkw, der auf einen stehenden Sattelzug trifft, schiebt sich unter dessen Aufbau. Der Unterfahrschutz greift dann erst spät, und die Verformung setzt oberhalb der Stoßfängerebene an — Motorhaube, Windlauf und Frontscheibe sind betroffen, während der Querträger darunter unversehrt aussieht. Wer nur auf Stoßfängerhöhe prüft, unterschätzt einen solchen Schaden erheblich. Anstoßhöhe und Eindringtiefe gehören deshalb schon in die erste Aufnahme."
+        "antwort": "Auf diesem Abschnitt läuft schwerer Fernverkehr nach Osten, gebündelt zwischen den Cottbuser Anschlussstellen West, Süd und Ost, die alle an Bundesstraßen anschließen. Lastzüge fahren in dichten Kolonnen mit geringen Abständen, Pkw ordnen sich dazwischen ein. Kommt es zum Stau, entstehen Auffahrunfälle mit sehr ungleichen Massen: Ein Pkw, der auf einen stehenden Sattelzug trifft, schiebt sich unter dessen Aufbau. Der Unterfahrschutz greift dann erst spät, und die Verformung setzt oberhalb der Stoßfängerebene an — Motorhaube, Windlauf und Frontscheibe sind betroffen, während der Querträger darunter unversehrt aussieht. Wer nur auf Stoßfängerhöhe prüft, unterschätzt einen solchen Schaden erheblich. Anstoßhöhe und Eindringtiefe gehören deshalb schon in die erste Aufnahme."
       },
       {
         "frage": "Welche Rolle spielen die Bundesstraßen rund um Cottbus?",
@@ -2156,9 +2144,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Düren",
-        "Anschlussstelle Langerwehe",
-        "Kreuz Kerpen"
+        "Anschlussstelle Düren"
       ],
       "autobahnen": [
         "A4"
@@ -2314,8 +2300,8 @@
         "antwort": "Der Chemiepark Marl zählt zu den größten Industrieparks Deutschlands und ist über Brassertstraße und Paul-Baumann-Straße in Richtung A52 und Marl-Nord angebunden. Ein Teil des Werksverkehrs transportiert Gefahrgut, und bei einer Kollision kommt zum mechanischen Schaden ein zweiter hinzu: Betriebsstoffe, ausgetretene Ladung oder Löschmittel können Lack, Dichtungen und Dämmmaterial angreifen. Diese Einwirkung ist am Unfalltag oft nicht sichtbar und zeigt sich später als Trübung, Blasenbildung oder Geruch im Innenraum. Wird ein Fahrzeug nach einem Einsatz abgespritzt oder mit Bindemittel abgestreut, gehört auch das festgehalten. Entscheidend ist der Zustand vor der Reinigung; ist das Fahrzeug erst einmal gewaschen und ausgesaugt, lässt sich die Ursache kaum noch belegen."
       },
       {
-        "frage": "Warum ist der Bereich um Kreuz und Dreieck Marl-Nord unübersichtlich?",
-        "antwort": "Im Norden von Marl liegen zwei Knotenpunkte dicht beieinander, an denen A43 und A52 zusammengeführt werden. Wer die Verbindung nutzt, muss auf kurzer Strecke zweimal entscheiden und dabei die Spur wechseln; Ortsunkundige erkennen die Reihenfolge oft erst am Schild über der Fahrbahn. Daraus entstehen späte Wechsel und Kollisionen im Verflechtungsbereich, meist als Streifkontakt zwischen zwei nebeneinander fahrenden Fahrzeugen. Solche Schäden wirken symmetrisch, sind es aber nicht: Das eindrehende Fahrzeug hinterlässt Spuren in Fahrtrichtung, das gestreifte zeigt sie entgegengesetzt. Die Verlaufsrichtung der Kratzer ist damit ein technisches Indiz für den Hergang — sie sollte fotografiert werden, bevor jemand die Stelle säubert."
+        "frage": "Warum ist der Bereich um das Kreuz Marl-Nord unübersichtlich?",
+        "antwort": "Im Norden von Marl führt das Kreuz Marl-Nord die A43 und die A52 zusammen, und auf der A52 folgen die Anschlussstellen Marl-Frentrop, Marl-Brassert, Marl-Zentrum und Marl-Hamm unmittelbar aufeinander. Wer die Verbindung nutzt, muss auf kurzer Strecke mehrfach entscheiden und dabei die Spur wechseln; Ortsunkundige erkennen die Reihenfolge oft erst am Schild über der Fahrbahn. Daraus entstehen späte Wechsel und Kollisionen im Verflechtungsbereich, meist als Streifkontakt zwischen zwei nebeneinander fahrenden Fahrzeugen. Solche Schäden wirken symmetrisch, sind es aber nicht: Das eindrehende Fahrzeug hinterlässt Spuren in Fahrtrichtung, das gestreifte zeigt sie entgegengesetzt. Die Verlaufsrichtung der Kratzer ist damit ein technisches Indiz für den Hergang — sie sollte fotografiert werden, bevor jemand die Stelle säubert."
       },
       {
         "frage": "Welche Rolle spielt die B225 innerhalb von Marl?",
@@ -2365,11 +2351,7 @@
       }
     ],
     "hauptachsen": {
-      "knoten": [
-        "Anschlussstelle Bad Oeynhausen",
-        "Kreuz Bad Oeynhausen",
-        "Anschlussstelle Porta Westfalica"
-      ],
+      "knoten": [],
       "autobahnen": [
         "A2"
       ],
@@ -2427,9 +2409,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Viersen",
-        "Anschlussstelle Viersen-Süchteln",
-        "Kreuz Mönchengladbach"
+        "Anschlussstelle Viersen"
       ],
       "autobahnen": [
         "A52",
@@ -2443,8 +2423,8 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Warum ist der Abschnitt zwischen Kreuz Viersen und Kreuz Mönchengladbach anspruchsvoll?",
-        "antwort": "Zwischen dem Kreuz Viersen, wo A52 und A61 zusammentreffen, und dem Kreuz Mönchengladbach liegen nur wenige Kilometer. Wer die Autobahn wechseln will, ordnet sich nahezu durchgehend um. Verliert ein Fahrzeug bei einem Streifkontakt in dieser Situation die Spur, folgt meist ein Anprall gegen die Schutzplanke. Diese hinterlässt ein charakteristisches Bild: waagerechte, parallele Riefen in einer definierten Höhe über der Fahrbahn, weil der Holm auf konstanter Höhe montiert ist. Dieses Höhenprofil ist für die Rekonstruktion wertvoll — es zeigt, mit welcher Fahrzeugseite und in welcher Lage der Kontakt stattfand, und ob Beschädigungen außerhalb dieser Höhe aus einem anderen Anstoß stammen."
+        "frage": "Warum ist der Abschnitt der A61 zwischen Viersen und dem Kreuz Mönchengladbach anspruchsvoll?",
+        "antwort": "Die A61 quert das Viersener Stadtgebiet mit den Anschlussstellen Süchteln und Viersen; bis zum Kreuz Mönchengladbach, wo die A52 hinzukommt, sind es von dort nur wenige Kilometer. Wer die Autobahn wechseln will, ordnet sich nahezu durchgehend um. Verliert ein Fahrzeug bei einem Streifkontakt in dieser Situation die Spur, folgt meist ein Anprall gegen die Schutzplanke. Diese hinterlässt ein charakteristisches Bild: waagerechte, parallele Riefen in einer definierten Höhe über der Fahrbahn, weil der Holm auf konstanter Höhe montiert ist. Dieses Höhenprofil ist für die Rekonstruktion wertvoll — es zeigt, mit welcher Fahrzeugseite und in welcher Lage der Kontakt stattfand, und ob Beschädigungen außerhalb dieser Höhe aus einem anderen Anstoß stammen."
       },
       {
         "frage": "Was ist an der B7 durch Dülken und Süchteln typisch?",
@@ -2559,8 +2539,7 @@
     "hauptachsen": {
       "knoten": [
         "Anschlussstelle Dorsten",
-        "Anschlussstelle Dorsten-Lembeck",
-        "Kreuz Gelsenkirchen"
+        "Anschlussstelle Dorsten-Lembeck"
       ],
       "autobahnen": [
         "A31"
@@ -2620,8 +2599,7 @@
     "hauptachsen": {
       "knoten": [
         "Anschlussstelle Lüdenscheid",
-        "Anschlussstelle Lüdenscheid-Nord",
-        "Kreuz Hagen"
+        "Anschlussstelle Lüdenscheid-Nord"
       ],
       "autobahnen": [
         "A45"
@@ -2686,9 +2664,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Bad Oeynhausen",
-        "Anschlussstelle Herford-Ost",
-        "Anschlussstelle Herford-Zentrum"
+        "Anschlussstelle Herford-Ost"
       ],
       "autobahnen": [
         "A2",
@@ -2711,7 +2687,7 @@
       },
       {
         "frage": "Auffahrunfall mit Anhänger auf der A2 — was ist am Gespann zusätzlich zu prüfen?",
-        "antwort": "Die A2 und das Kreuz Bad Oeynhausen führen einen der stärksten Güterströme Deutschlands an Herford vorbei, und mit dem Berufs- und Handwerksverkehr sind viele Gespanne unterwegs. Bei einem Auffahrvorgang mit Anhänger verteilt sich die Kraft anders als beim Solofahrzeug: Der Anhänger schiebt von hinten nach, die Energie läuft über Deichsel und Zugkugelkupplung in den Kupplungsträger des Zugfahrzeugs und von dort in dessen Bodengruppe. Am Anhänger selbst staucht die Deichsel, und bei ungebremsten wie aufgelaufenen Ausführungen ist zu prüfen, ob die Auflaufeinrichtung noch frei arbeitet. Ein verzogener Anhängerrahmen zeigt sich meist erst an ungleichen Radständen links und rechts. Beide Fahrzeuge gehören daher besichtigt, auch wenn nur eines sichtbar beschädigt aussieht."
+        "antwort": "Die A2 führt einen der stärksten Güterströme Deutschlands an Herford vorbei, angebunden über die Anschlussstellen Herford/Bad Salzuflen und Herford-Ost, und mit dem Berufs- und Handwerksverkehr sind viele Gespanne unterwegs. Bei einem Auffahrvorgang mit Anhänger verteilt sich die Kraft anders als beim Solofahrzeug: Der Anhänger schiebt von hinten nach, die Energie läuft über Deichsel und Zugkugelkupplung in den Kupplungsträger des Zugfahrzeugs und von dort in dessen Bodengruppe. Am Anhänger selbst staucht die Deichsel, und bei ungebremsten wie aufgelaufenen Ausführungen ist zu prüfen, ob die Auflaufeinrichtung noch frei arbeitet. Ein verzogener Anhängerrahmen zeigt sich meist erst an ungleichen Radständen links und rechts. Beide Fahrzeuge gehören daher besichtigt, auch wenn nur eines sichtbar beschädigt aussieht."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Radewig oder Zusammenstoß am Stiftberg — der Sachverständige kommt zu Ihnen nach Herford.",
@@ -2849,7 +2825,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Chemnitz",
-        "Dreieck Chemnitz",
         "Anschlussstelle Chemnitz-Süd"
       ],
       "autobahnen": [
@@ -2940,7 +2915,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Magdeburg",
-        "Dreieck Magdeburg",
         "Anschlussstelle Magdeburg-Zentrum"
       ],
       "autobahnen": [
@@ -3075,8 +3049,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Gladbeck",
-        "Anschlussstelle Gladbeck-Ellinghorst",
-        "Dreieck Bottrop"
+        "Anschlussstelle Gladbeck-Ellinghorst"
       ],
       "autobahnen": [
         "A2",
@@ -3091,7 +3064,7 @@
     "lokaleFaqs": [
       {
         "frage": "Was macht Auffahrunfälle auf der A2 bei Gladbeck so folgenschwer?",
-        "antwort": "Die A2 führt am Rand von Gladbeck entlang und gehört zu den wichtigsten Güterachsen Deutschlands; der Lkw-Anteil ist entsprechend hoch. Vor dem Kreuz Gladbeck und in den Abschnitten Richtung Dreieck Bottrop bilden sich regelmäßig Stauenden, auf die aus hoher Geschwindigkeit aufgefahren wird. Trifft ein Pkw auf das Heck eines Sattelaufliegers, greift die Knautschzone nicht wie konstruiert: Der Aufbau liegt höher als die Längsträger, und das Fahrzeug schiebt sich darunter, sofern der Unterfahrschutz nachgibt. Der Schaden verlagert sich damit von der Front auf Windschutzscheibe, Dachrahmen und A-Säulen. Ein solcher Anstoß ist gutachterlich anders zu beurteilen als ein Frontschaden gleicher Wucht, weil die tragende Struktur des Daches betroffen ist."
+        "antwort": "Die A2 führt am Rand von Gladbeck entlang und gehört zu den wichtigsten Güterachsen Deutschlands; der Lkw-Anteil ist entsprechend hoch. Vor dem Kreuz Gladbeck, wo die A52 auf die A2 trifft, und an der Anschlussstelle Gladbeck-Ellinghorst bilden sich regelmäßig Stauenden, auf die aus hoher Geschwindigkeit aufgefahren wird. Trifft ein Pkw auf das Heck eines Sattelaufliegers, greift die Knautschzone nicht wie konstruiert: Der Aufbau liegt höher als die Längsträger, und das Fahrzeug schiebt sich darunter, sofern der Unterfahrschutz nachgibt. Der Schaden verlagert sich damit von der Front auf Windschutzscheibe, Dachrahmen und A-Säulen. Ein solcher Anstoß ist gutachterlich anders zu beurteilen als ein Frontschaden gleicher Wucht, weil die tragende Struktur des Daches betroffen ist."
       },
       {
         "frage": "Warum häufen sich Streifschäden in den Autobahnbaustellen rund um Gladbeck?",
@@ -3161,7 +3134,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Erfurt",
-        "Dreieck Erfurt-Süd",
         "Anschlussstelle Erfurt-West"
       ],
       "autobahnen": [
@@ -3294,7 +3266,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Bottrop",
         "Dreieck Bottrop",
         "Anschlussstelle Bottrop-Süd"
       ],
@@ -3515,11 +3486,7 @@
       }
     ],
     "hauptachsen": {
-      "knoten": [
-        "Anschlussstelle Erwitte/Anröchte",
-        "Anschlussstelle Geseke",
-        "Kreuz Werl"
-      ],
+      "knoten": [],
       "autobahnen": [
         "A44"
       ],
@@ -3667,9 +3634,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Lünen-Nord",
-        "Anschlussstelle Lünen-Süd",
-        "Kreuz Dortmund-Nordost"
+        "Anschlussstelle Lünen-Süd"
       ],
       "autobahnen": [
         "A2"
@@ -3816,8 +3781,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Heidelberg",
-        "Anschlussstelle Heidelberg-Schwetzingen",
-        "Dreieck Heidelberg"
+        "Anschlussstelle Heidelberg-Schwetzingen"
       ],
       "autobahnen": [
         "A5",
@@ -3899,7 +3863,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Regensburg",
-        "Anschlussstelle Regensburg-Ost",
         "Anschlussstelle Regensburg-Nord"
       ],
       "autobahnen": [
@@ -4258,9 +4221,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Arnsberg-Neheim",
-        "Anschlussstelle Arnsberg-Ost",
-        "Kreuz Werl"
+        "Anschlussstelle Arnsberg-Neheim"
       ],
       "autobahnen": [
         "A46"
@@ -4327,8 +4288,8 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Witten",
-        "Kreuz Dortmund/Witten",
+        "Kreuz Bochum/Witten",
+        "Dreieck Dortmund/Witten",
         "Anschlussstelle Witten-Herbede"
       ],
       "autobahnen": [
@@ -4389,9 +4350,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Rheine-Nord",
-        "Anschlussstelle Rheine-Süd",
-        "Kreuz Rheine"
+        "Anschlussstelle Rheine-Nord"
       ],
       "autobahnen": [
         "A30"
@@ -4460,7 +4419,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Castrop-Rauxel-Ost",
-        "Kreuz Recklinghausen",
         "Anschlussstelle Castrop-Rauxel-Zentrum"
       ],
       "autobahnen": [
@@ -4555,8 +4513,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Aachen",
-        "Dreieck Aachen-Europaplatz",
-        "Kreuz Aachen-Nord"
+        "Anschlussstelle Aachen-Europaplatz"
       ],
       "autobahnen": [
         "A4",
@@ -5070,7 +5027,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Dreieck Schwerin",
         "Anschlussstelle Schwerin-Nord",
         "Anschlussstelle Schwerin-Ost"
       ],
@@ -5095,8 +5051,8 @@
         "antwort": "Die Seen lassen dem Verkehr in Schwerin wenig Raum: Zwischen Schweriner See und Ostorfer See führen nur wenige Achsen nach Zippendorf und zum Großen Dreesch, und sie verlaufen über weite Strecken direkt am Wasser. Am Morgen und am Abend steht die Sonne flach über der Seefläche und wird zusätzlich gespiegelt — die Blendung kommt von vorn und von unten zugleich. Auffahrunfälle auf abbremsende Fahrzeuge häufen sich in diesen Zeitfenstern. Bei einem Frontalanstoß ist neben der Struktur ein Bereich zu prüfen, der gern vergessen wird: Motorhaubenschloss und Fangbügel. Verzieht sich die Verriegelung, kann die Haube während der Fahrt öffnen — ein Mangel, der sich im Stand nicht zeigt."
       },
       {
-        "frage": "Was ist am Dreieck Schwerin bei Unfällen mit Wohnwagen und Anhängern zu beachten?",
-        "antwort": "Über die A24 läuft der Verkehr zwischen Hamburg und Berlin, über die A14 und das Dreieck Schwerin kommt der Reiseverkehr Richtung Ostseeküste dazu — im Sommer mit hohem Anteil an Wohnwagen und Anhängern. Nach einem Unfall wird meist das Zugfahrzeug begutachtet und der Anhänger nur äußerlich betrachtet. Das greift zu kurz: Ein Wohnwagenaufbau ist eine verklebte Sandwichkonstruktion, und schon eine leichte Verwindung des Rahmens lässt Klebenähte und Fensterdichtungen undicht werden. Feuchtigkeit zieht dann in die Dämmschicht, ohne dass innen zunächst etwas zu sehen ist. Eine Feuchtemessung an Wänden und Boden und die Kontrolle der Rahmengeometrie gehören deshalb zur Aufnahme."
+        "frage": "Was ist am Kreuz Schwerin bei Unfällen mit Wohnwagen und Anhängern zu beachten?",
+        "antwort": "Über die A24 läuft der Verkehr zwischen Hamburg und Berlin, über die A14 und das Kreuz Schwerin kommt der Reiseverkehr Richtung Ostseeküste dazu — im Sommer mit hohem Anteil an Wohnwagen und Anhängern. Nach einem Unfall wird meist das Zugfahrzeug begutachtet und der Anhänger nur äußerlich betrachtet. Das greift zu kurz: Ein Wohnwagenaufbau ist eine verklebte Sandwichkonstruktion, und schon eine leichte Verwindung des Rahmens lässt Klebenähte und Fensterdichtungen undicht werden. Feuchtigkeit zieht dann in die Dämmschicht, ohne dass innen zunächst etwas zu sehen ist. Eine Feuchtemessung an Wänden und Boden und die Kontrolle der Rahmengeometrie gehören deshalb zur Aufnahme. Bei älteren Aufbauten kommt hinzu, dass passende Ersatzteile oft nur schwer zu beschaffen sind, was die Instandsetzung erheblich verzögern kann."
       }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A14, Parkschaden in der Altstadt oder Zusammenstoß in Lankow — der Sachverständige kommt zu Ihnen nach Schwerin.",
@@ -5216,9 +5172,8 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Velbert-Zentrum",
-        "Kreuz Velbert-Nord",
-        "Anschlussstelle Heiligenhaus"
+        "Anschlussstelle Velbert",
+        "Dreieck Velbert-Nord"
       ],
       "autobahnen": [
         "A44",
@@ -5233,7 +5188,7 @@
     "lokaleFaqs": [
       {
         "frage": "Strittig, wer gebremst hat — welche Daten sollten in Velbert vor der Reparatur gesichert werden?",
-        "antwort": "Der Berufsverkehr der Velberter Schloss- und Beschlägeindustrie bündelt sich zu den Schichtzeiten auf B224 und B227 sowie an der Anschlussstelle Velbert-Zentrum. In dichten Kolonnen sind Auffahrvorgänge häufig, und regelmäßig steht Aussage gegen Aussage: Hat der Vordermann grundlos gebremst, hat der Hintermann zu spät reagiert? Moderne Fahrzeuge halten dazu Daten vor. Das Airbagsteuergerät speichert die Verzögerung im Auslösefall, Notbremsassistent und Abstandsregelung protokollieren Eingriffe, und viele Modelle legen einen Ereignisdatensatz kurz vor dem Aufprall ab. Diese Speicher werden bei Instandsetzung oder Steuergerätetausch überschrieben. Wer den Hergang belegen will, lässt sie deshalb vor Reparaturbeginn auslesen — zusammen mit Fotos der Endstellung und der Bremsspurlage, sofern noch vorhanden."
+        "antwort": "Der Berufsverkehr der Velberter Schloss- und Beschlägeindustrie bündelt sich zu den Schichtzeiten auf B224 und B227 sowie an der Anschlussstelle Velbert an der A535. In dichten Kolonnen sind Auffahrvorgänge häufig, und regelmäßig steht Aussage gegen Aussage: Hat der Vordermann grundlos gebremst, hat der Hintermann zu spät reagiert? Moderne Fahrzeuge halten dazu Daten vor. Das Airbagsteuergerät speichert die Verzögerung im Auslösefall, Notbremsassistent und Abstandsregelung protokollieren Eingriffe, und viele Modelle legen einen Ereignisdatensatz kurz vor dem Aufprall ab. Diese Speicher werden bei Instandsetzung oder Steuergerätetausch überschrieben. Wer den Hergang belegen will, lässt sie deshalb vor Reparaturbeginn auslesen — zusammen mit Fotos der Endstellung und der Bremsspurlage, sofern noch vorhanden."
       },
       {
         "frage": "Ast auf dem Dach nach einem Sturm — worauf kommt es bei der Besichtigung an?",
@@ -5287,8 +5242,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Leverkusen",
-        "Kreuz Leverkusen-West",
-        "Dreieck Langenfeld"
+        "Kreuz Leverkusen-West"
       ],
       "autobahnen": [
         "A1",
@@ -5433,9 +5387,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Jackerath",
-        "Anschlussstelle Grevenbroich-Zentrum",
-        "Dreieck Holz"
+        "Anschlussstelle Grevenbroich"
       ],
       "autobahnen": [
         "A46",
@@ -5453,8 +5405,8 @@
         "antwort": "Der Nordwesten von Grevenbroich ist vom Tagebaurand und den Kraftwerksanlagen bei Neurath und Frimmersdorf geprägt. Auf den Zufahrts- und Werkstraßen liegt regelmäßig feiner Staub, dazu kommt Erdeintrag von den Feldern. Fahrzeuge, die dort täglich unterwegs sind, tragen deshalb häufig eine matte, fein verkratzte Lackoberfläche — und genau das erschwert die Abgrenzung nach einem Unfall. Hier hilft die Messung der Lackschichtdicke: Weicht sie an einem Bauteil deutlich vom Rest der Karosserie ab, wurde dort schon einmal lackiert. So lässt sich trennen, was aus dem aktuellen Ereignis stammt und was Vorschaden ist. Ohne diese Trennung bleibt der Umfang später angreifbar."
       },
       {
-        "frage": "Warum ist die kurze A540 zwischen Dreieck Holz und Kreuz Jackerath anspruchsvoll?",
-        "antwort": "Die A540 verbindet auf wenigen Kilometern das Dreieck Holz bei Grevenbroich mit dem Kreuz Jackerath. Auffahren, Verflechten und Ausfädeln folgen dicht aufeinander, und weil die Strecke frei über offenes Gelände am Tagebaurand führt, wird schneller gefahren, als es die kurzen Fädelstrecken hergeben. Typisch ist der seitliche Anstoß gegen das vordere Rad beim Spurwechsel. Diese Konstellation ist heikel, weil die Kraft über Rad und Spurstange direkt ins Lenkgetriebe läuft. Ein verbogener Spurstangenkopf ist sichtbar, ein überlastetes Lenkgetriebe nicht — es zeigt sich erst im Spiel oder in ungleichmäßiger Lenkunterstützung. Nach jedem Anstoß auf Radhöhe gehört die Lenkung geprüft, nicht nur die Achsgeometrie."
+        "frage": "Warum sind die Autobahnzufahrten rund um Grevenbroich anspruchsvoll?",
+        "antwort": "Die A46 quert das Grevenbroicher Stadtgebiet und bindet es über die Anschlussstelle Grevenbroich an das Fernstraßennetz an; die Zufahrten führen frei über offenes Gelände am Rand des Tagebaus. Auffahren, Verflechten und Ausfädeln folgen dabei dicht aufeinander, und auf den übersichtlichen Geraden wird schneller gefahren, als es die kurzen Fädelstrecken hergeben. Typisch ist der seitliche Anstoß gegen das vordere Rad beim Spurwechsel. Diese Konstellation ist heikel, weil die Kraft über Rad und Spurstange direkt ins Lenkgetriebe läuft. Ein verbogener Spurstangenkopf ist sichtbar, ein überlastetes Lenkgetriebe nicht — es zeigt sich erst im Spiel oder in ungleichmäßiger Lenkunterstützung. Nach jedem Anstoß auf Radhöhe gehört die Lenkung geprüft, nicht nur die Achsgeometrie."
       },
       {
         "frage": "Warum sind die Erftbrücken bei Wevelinghoven und Kapellen im Winter kritisch?",

@@ -3,21 +3,41 @@
     "stadtbezirke": [
       {
         "name": "Ahlen (Kernstadt)",
-        "ortsteile": ["Innenstadt", "Ester", "Oestrich", "Rosendahl", "Borbein", "Brockhausen", "Halene"]
+        "ortsteile": [
+          "Innenstadt",
+          "Ester",
+          "Oestrich",
+          "Rosendahl",
+          "Borbein",
+          "Brockhausen",
+          "Halene"
+        ]
       },
       {
         "name": "Dolberg",
-        "ortsteile": ["Ostdolberg", "Gemmerich", "Guissen", "Henneberg"]
+        "ortsteile": [
+          "Ostdolberg",
+          "Gemmerich",
+          "Guissen",
+          "Henneberg"
+        ]
       },
       {
         "name": "Vorhelm",
-        "ortsteile": ["Tönnishäuschen", "Isendorf"]
+        "ortsteile": [
+          "Tönnishäuschen",
+          "Isendorf"
+        ]
       }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B58"],
-      "knoten": ["B58-Ost-West-Achse durch das Stadtgebiet", "A2-Anschlussstelle Beckum (rund 10 km östlich)"]
+      "bundesstrassen": [
+        "B58"
+      ],
+      "knoten": [
+        "B58-Ost-West-Achse durch das Stadtgebiet"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -37,17 +57,46 @@
     "stadtbezirke": [
       {
         "name": "Kernstadt Soest",
-        "ortsteile": ["Altstadt innerhalb der Wallanlagen"]
+        "ortsteile": [
+          "Altstadt innerhalb der Wallanlagen"
+        ]
       },
       {
         "name": "Ortsteile in der Soester Börde",
-        "ortsteile": ["Ampen", "Bergede", "Deiringsen", "Enkesen", "Epsingsen", "Hattrop", "Hattropholsen", "Hiddingsen", "Katrop", "Lendringsen", "Meckingsen", "Meiningsen", "Müllingsen", "Ostönnen", "Paradiese", "Röllingsen", "Ruploh", "Thöningsen"]
+        "ortsteile": [
+          "Ampen",
+          "Bergede",
+          "Deiringsen",
+          "Enkesen",
+          "Epsingsen",
+          "Hattrop",
+          "Hattropholsen",
+          "Hiddingsen",
+          "Katrop",
+          "Lendringsen",
+          "Meckingsen",
+          "Meiningsen",
+          "Müllingsen",
+          "Ostönnen",
+          "Paradiese",
+          "Röllingsen",
+          "Ruploh",
+          "Thöningsen"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A44"],
-      "bundesstrassen": ["B229", "B475"],
-      "knoten": ["Anschlussstelle Soest (A44/B229)", "Anschlussstelle Soest-Ost (A44/B475)"]
+      "autobahnen": [
+        "A44"
+      ],
+      "bundesstrassen": [
+        "B229",
+        "B475"
+      ],
+      "knoten": [
+        "Anschlussstelle Soest (A44/B229)",
+        "Anschlussstelle Soest-Ost (A44/B475)"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -71,13 +120,26 @@
     "stadtbezirke": [
       {
         "name": "Rheda-Wiedenbrück",
-        "ortsteile": ["Rheda", "Wiedenbrück", "Batenhorst", "Lintel", "St. Vit"]
+        "ortsteile": [
+          "Rheda",
+          "Wiedenbrück",
+          "Batenhorst",
+          "Lintel",
+          "St. Vit"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
-      "bundesstrassen": ["B61", "B64"],
-      "knoten": ["Anschlussstelle Rheda-Wiedenbrück (A2/B64)"]
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B64"
+      ],
+      "knoten": [
+        "Anschlussstelle Rheda-Wiedenbrück (A2/B64)"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -101,17 +163,39 @@
     "stadtbezirke": [
       {
         "name": "Zusammenhängende Kernstadt",
-        "ortsteile": ["Bad Salzuflen", "Schötmar", "Werl-Aspe", "Holzhausen", "Ehrsen-Breden"]
+        "ortsteile": [
+          "Bad Salzuflen",
+          "Schötmar",
+          "Werl-Aspe",
+          "Holzhausen",
+          "Ehrsen-Breden"
+        ]
       },
       {
         "name": "Ländliche Ortsteile",
-        "ortsteile": ["Biemsen-Ahmsen", "Grastrup-Hölsen", "Lockhausen", "Papenhausen", "Retzen", "Wülfer-Bexten", "Wüsten"]
+        "ortsteile": [
+          "Biemsen-Ahmsen",
+          "Grastrup-Hölsen",
+          "Lockhausen",
+          "Papenhausen",
+          "Retzen",
+          "Wülfer-Bexten",
+          "Wüsten"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
-      "bundesstrassen": ["B239"],
-      "knoten": ["Anschlussstelle Ostwestfalen-Lippe (A2)", "Anschlussstelle Herford/Bad Salzuflen (A2)", "B239-Ostumgehung der Innenstadt"]
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B239"
+      ],
+      "knoten": [
+        "Anschlussstelle Ostwestfalen-Lippe (A2)",
+        "Anschlussstelle Herford/Bad Salzuflen (A2)",
+        "B239-Ostumgehung der Innenstadt"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -135,13 +219,33 @@
     "stadtbezirke": [
       {
         "name": "Bad Oeynhausen",
-        "ortsteile": ["Stadtzentrum", "Rehme", "Werste", "Eidinghausen", "Volmerdingsen", "Dehme", "Lohe", "Wulferdingsen", "Babbenhausen"]
+        "ortsteile": [
+          "Stadtzentrum",
+          "Rehme",
+          "Werste",
+          "Eidinghausen",
+          "Volmerdingsen",
+          "Dehme",
+          "Lohe",
+          "Wulferdingsen",
+          "Babbenhausen"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A30"],
-      "bundesstrassen": ["B61"],
-      "knoten": ["Kreuz Bad Oeynhausen (A2/A30)", "Anschlussstelle Bad Oeynhausen-Nord (A30)", "Anschlussstelle Dehme (A30)", "Anschlussstelle Bad Oeynhausen-Ost (A30)"]
+      "autobahnen": [
+        "A2",
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B61"
+      ],
+      "knoten": [
+        "Kreuz Bad Oeynhausen (A2/A30)",
+        "Anschlussstelle Bad Oeynhausen-Nord (A30)",
+        "Anschlussstelle Dehme (A30)",
+        "Anschlussstelle Bad Oeynhausen-Ost (A30)"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -165,13 +269,28 @@
     "stadtbezirke": [
       {
         "name": "Löhne",
-        "ortsteile": ["Löhne-Ort", "Gohfeld", "Mennighüffen", "Obernbeck", "Ulenburg"]
+        "ortsteile": [
+          "Löhne-Ort",
+          "Gohfeld",
+          "Mennighüffen",
+          "Obernbeck",
+          "Ulenburg"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A30"],
-      "bundesstrassen": ["B61", "B611"],
-      "knoten": ["Anschlussstelle Löhne (A30)", "Anschlussstelle Gohfeld (A30, früheres Dreieck Löhne)", "Beginn der B611 Richtung Vlotho-West"]
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B611"
+      ],
+      "knoten": [
+        "Anschlussstelle Löhne (A30)",
+        "Anschlussstelle Gohfeld (A30, früheres Dreieck Löhne)",
+        "Beginn der B611 Richtung Vlotho-West"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -195,13 +314,33 @@
     "stadtbezirke": [
       {
         "name": "Bünde",
-        "ortsteile": ["Bünde-Mitte", "Ennigloh", "Spradow", "Südlengern", "Hunnebrock", "Ahle", "Bustedt", "Dünne", "Holsen", "Hüffen", "Muckum", "Werfen"]
+        "ortsteile": [
+          "Bünde-Mitte",
+          "Ennigloh",
+          "Spradow",
+          "Südlengern",
+          "Hunnebrock",
+          "Ahle",
+          "Bustedt",
+          "Dünne",
+          "Holsen",
+          "Hüffen",
+          "Muckum",
+          "Werfen"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A30"],
+      "autobahnen": [
+        "A30"
+      ],
       "bundesstrassen": [],
-      "knoten": ["Anschlussstelle Bünde (A30)", "Anschlussstelle Hiddenhausen (A30)", "L557 Richtung Bielefeld", "L545 Richtung Herford"]
+      "knoten": [
+        "Anschlussstelle Bünde (A30)",
+        "Anschlussstelle Hiddenhausen (A30)",
+        "L557 Richtung Bielefeld",
+        "L545 Richtung Herford"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
@@ -221,13 +360,29 @@
     "stadtbezirke": [
       {
         "name": "Herten",
-        "ortsteile": ["Herten-Mitte", "Herten-Südwest", "Herten-Südost", "Disteln", "Langenbochum", "Scherlebeck", "Paschenberg", "Bertlich", "Westerholt"]
+        "ortsteile": [
+          "Herten-Mitte",
+          "Herten-Südwest",
+          "Herten-Südost",
+          "Disteln",
+          "Langenbochum",
+          "Scherlebeck",
+          "Paschenberg",
+          "Bertlich",
+          "Westerholt"
+        ]
       }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
+      "autobahnen": [
+        "A2"
+      ],
       "bundesstrassen": [],
-      "knoten": ["Anschlussstelle Herten (A2)", "Anschlussstelle Recklinghausen/Herten (A43)", "Münsterstraße als A2-Zubringer"]
+      "knoten": [
+        "Anschlussstelle Herten (A2)",
+        "Anschlussstelle Recklinghausen/Herten (A43)",
+        "Münsterstraße als A2-Zubringer"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [

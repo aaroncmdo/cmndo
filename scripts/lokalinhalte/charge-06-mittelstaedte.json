@@ -173,9 +173,8 @@
         "B212"
       ],
       "knoten": [
-        "Anschlussstelle Bremerhaven-Mitte",
-        "Anschlussstelle Bremerhaven-Überseehäfen",
-        "Dreieck Bremerhaven"
+        "Anschlussstelle Bremerhaven-Zentrum",
+        "Anschlussstelle Bremerhaven-Überseehäfen"
       ]
     },
     "unfallHotspots": [],
@@ -246,8 +245,7 @@
       ],
       "knoten": [
         "Kreuz Koblenz",
-        "Dreieck Koblenz-Nord",
-        "Anschlussstelle Koblenz-Zentrum"
+        "Anschlussstelle Koblenz-Nord"
       ]
     },
     "unfallHotspots": [],
@@ -383,8 +381,7 @@
       ],
       "knoten": [
         "Kreuz Recklinghausen",
-        "Anschlussstelle Recklinghausen-Herten",
-        "Dreieck Recklinghausen"
+        "Anschlussstelle Recklinghausen/Herten"
       ]
     },
     "unfallHotspots": [],
@@ -512,8 +509,6 @@
         "B53"
       ],
       "knoten": [
-        "Dreieck Moseltal",
-        "Kreuz Trier",
         "Anschlussstelle Trier-Verteilerkreis"
       ]
     },
@@ -633,8 +628,7 @@
       ],
       "knoten": [
         "Anschlussstelle Siegen",
-        "Anschlussstelle Siegen-Süd",
-        "Kreuz Olpe-Süd"
+        "Anschlussstelle Siegen-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -699,7 +693,6 @@
         "B169"
       ],
       "knoten": [
-        "Dreieck Spreewald",
         "Anschlussstelle Cottbus-West",
         "Anschlussstelle Cottbus-Süd"
       ]

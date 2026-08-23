@@ -106,7 +106,7 @@
       ],
       "knoten": [
         "Schkeuditzer Kreuz",
-        "Kreuz Leipzig-Nord",
+        "Anschlussstelle Leipzig-Nord",
         "Kreuz Leipzig-Süd",
         "Dreieck Parthenaue"
       ]
@@ -277,7 +277,6 @@
         "B236"
       ],
       "knoten": [
-        "Kreuz Dortmund/Witten",
         "Kreuz Dortmund-Nordwest",
         "Kreuz Dortmund-Unna",
         "Dreieck Dortmund/Witten"
@@ -425,7 +424,6 @@
       ],
       "knoten": [
         "Kreuz Essen-Nord",
-        "Kreuz Essen-Ost",
         "Dreieck Essen-Ost"
       ]
     },
@@ -541,9 +539,8 @@
         "B74"
       ],
       "knoten": [
-        "Kreuz Bremen",
-        "Dreieck Bremen-Industriehäfen",
-        "Dreieck Bremen-Nord"
+        "Bremer Kreuz",
+        "Dreieck Bremen-Industriehäfen"
       ]
     },
     "unfallHotspots": [],
@@ -692,8 +689,7 @@
       ],
       "knoten": [
         "Dreieck Dresden-West",
-        "Dreieck Dresden-Nord",
-        "Kreuz Dresden-Süd"
+        "Dreieck Dresden-Nord"
       ]
     },
     "unfallHotspots": [],
@@ -1234,7 +1230,6 @@
       "autobahnen": [
         "A40",
         "A43",
-        "A44",
         "A448"
       ],
       "bundesstrassen": [
@@ -1517,9 +1512,7 @@
         "B68"
       ],
       "knoten": [
-        "Kreuz Bielefeld",
-        "Dreieck Bielefeld",
-        "Kreuz Bielefeld-Ost"
+        "Kreuz Bielefeld"
       ]
     },
     "unfallHotspots": [],

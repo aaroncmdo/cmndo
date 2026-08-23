@@ -59,7 +59,6 @@
       ],
       "knoten": [
         "Kreuz Neuss-West",
-        "Kreuz Neuss-Süd",
         "Dreieck Neuss-Süd"
       ]
     },
@@ -384,7 +383,6 @@
       ],
       "knoten": [
         "Kreuz Offenbach",
-        "Dreieck Offenbach",
         "Anschlussstelle Offenbach-Kaiserlei"
       ]
     },
@@ -734,7 +732,6 @@
         "B224"
       ],
       "knoten": [
-        "Kreuz Bottrop",
         "Dreieck Bottrop",
         "Anschlussstelle Bottrop-Süd"
       ]
