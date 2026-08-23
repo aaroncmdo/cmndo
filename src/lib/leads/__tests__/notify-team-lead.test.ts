@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // notifyTeamWhatsApp mocken — der echte Pfad wuerde eine WhatsApp senden.
-const sendMock = vi.fn(async () => {})
+// Signatur explizit typisiert: ohne Parameter waere der Mock 0-stellig und
+// jeder sendMock(text)-Aufruf ein TS2554.
+const sendMock = vi.fn(async (_text: string): Promise<void> => {})
 vi.mock('@/lib/whatsapp/team-notify', () => ({
   notifyTeamWhatsApp: (text: string) => sendMock(text),
 }))
@@ -10,7 +12,8 @@ const { notifyTeamNeuerLead } = await import('../notify-team-lead')
 
 /** Der an notifyTeamWhatsApp uebergebene Text des letzten Aufrufs. */
 function letzterText(): string {
-  return sendMock.mock.calls.at(-1)?.[0] as string
+  const calls = sendMock.mock.calls
+  return calls.length > 0 ? calls[calls.length - 1][0] : ''
 }
 
 describe('notifyTeamNeuerLead', () => {
