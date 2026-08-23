@@ -1,0 +1,157 @@
+#!/usr/bin/env node
+//
+// Meldet einer Session, welchen GANZEN Lauf ihr PR beruehrt — nicht nur, welche Datei
+// sie geaendert hat.
+//
+// Hintergrund (Aaron, 23.08.2026): "Die Smokes fokussieren sich meistens nur darauf,
+// dass diese eine kleine Funktion, die wir neu eingebaut haben, einzeln gecheckt wird,
+// aber nicht, ob der gesamte Lauf, in dem wir eigentlich gerade arbeiten, dann auch
+// wirklich funktioniert."
+//
+// Die Journey<->Spec-Zuordnung existiert seit 29.07. als docs/fundament/journey-smokes.md,
+// aber nichts forderte sie ein. Dieses Script macht aus dem gelesenen Dokument ein
+// ausgefuehrtes.
+//
+// INFORMATIV, nie blockierend (Exit 0 in jedem Fall). Das Blockieren macht das
+// Journey-Gate am Release-Tor, wo wirklich GEMESSEN wird — hier wuerde nur geraten:
+// eine Journey zu beruehren heisst nicht, sie zu brechen.
+//
+// Modi:
+//   node scripts/check-journey-bezug.mjs                 Diff gegen JOURNEY_DIFF_BASIS
+//   node scripts/check-journey-bezug.mjs --pruefe-pfade  jedes Muster gegen das Repo pruefen
+
+import { execSync } from 'node:child_process'
+import { readFileSync, appendFileSync } from 'node:fs'
+
+const MAP_PFAD = new URL('./journey-map.json', import.meta.url)
+const MAP = JSON.parse(readFileSync(MAP_PFAD, 'utf8'))
+const JOURNEYS = Object.entries(MAP).filter(([id]) => !id.startsWith('_'))
+const BASIS = process.env.JOURNEY_DIFF_BASIS || 'origin/staging'
+
+/**
+ * glob-Muster -> RegExp. Nur `**` und `*` werden gebraucht.
+ *
+ * Reihenfolge ist kritisch: `**` muss ZUERST durch einen Platzhalter ersetzt werden,
+ * sonst frisst die `*`-Regel die erste Haelfte und `a/**` wird zu `a/[^/]*[^/]*`.
+ *
+ * ⚠ Der Platzhalter ist bewusst eine SICHTBARE Zeichenfolge. Ein unsichtbares Zeichen
+ * (Leerzeichen, \0) funktioniert zwar, macht die Datei aber unlesbar und in einem Fall
+ * sogar zu einer Binaerdatei fuer git — dann gibt es keine Diffs und keine Review mehr.
+ */
+const DOPPELSTERN = 'GLOBSTAR'
+
+function musterZuRegex(muster) {
+  const escaped = muster.replace(/[.+^${}()|[\]\\]/g, '\\$&')
+  const body = escaped
+    .split('**')
+    .join(DOPPELSTERN)
+    .replace(/\*/g, '[^/]*')
+    .split(DOPPELSTERN)
+    .join('.*')
+  return new RegExp('^' + body + '$')
+}
+
+function pruefePfade() {
+  let leer = 0
+  for (const [id, j] of JOURNEYS) {
+    for (const muster of j.pfade) {
+      let n = 0
+      try {
+        n = execSync(`git ls-files -- "${muster}"`, { encoding: 'utf8' }).split('\n').filter(Boolean).length
+      } catch {
+        n = 0
+      }
+      if (n === 0) {
+        leer++
+        console.log(`LEER  ${id}  ${muster}`)
+      } else {
+        console.log(`ok    ${id}  ${muster}  (${n})`)
+      }
+    }
+  }
+  if (leer > 0) {
+    console.log(`\n${leer} Muster ohne Treffer. Das sind tote Zeilen — Pfad im Repo NACHSEHEN, nicht raten.`)
+    console.log('(Beispiel 23.08.: `src/lib/reparatur/**` existiert nicht, der Reparatur-Code liegt in `src/lib/werkstatt/`.)')
+    process.exitCode = 1
+    return
+  }
+  console.log('\nAlle Muster treffen im Repo.')
+}
+
+/** Schreibt eine Zeile in die GitHub-Job-Summary, falls wir in CI laufen. */
+function inSummary(text) {
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, text + '\n')
+}
+
+function geaenderteDateien() {
+  try {
+    return execSync(`git diff --name-only ${BASIS}...HEAD`, { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] })
+      .split('\n')
+      .map((z) => z.trim())
+      .filter(Boolean)
+  } catch (err) {
+    // ⚠ Dieser Zweig MUSS sichtbar sein. Beim ersten CI-Lauf (32648323751) lief das Gate
+    // genau hier hinein ("no merge base", flacher Checkout) und der Step meldete trotzdem
+    // `success` — es mass also nichts und sah aus, als haette es gepruet. Das ist exakt die
+    // Fehlerklasse, gegen die dieses Gate gebaut wurde. Eine stille Info-Zeile im Log reicht
+    // dafuer nicht; die Warnung gehoert dorthin, wo auch das Ergebnis stuende.
+    const grund = String(err?.stderr || err?.message || err).split('\n')[0]
+    console.log(`[journey-bezug] ⚠ Diff gegen ${BASIS} NICHT ermittelbar: ${grund}`)
+    console.log('[journey-bezug] ⚠ Es wurde KEINE Journey geprueft. Ursache meist: flacher Checkout.')
+    console.log('[journey-bezug] Fix: `actions/checkout` mit `fetch-depth: 0` im Job.')
+    if (process.env.GITHUB_ACTIONS) {
+      console.log(`::warning title=Journey-Bezug ungeprueft::Diff gegen ${BASIS} nicht ermittelbar (${grund}). Der Job braucht actions/checkout mit fetch-depth: 0.`)
+    }
+    inSummary(
+      `## ⚠ Journey-Bezug ungeprüft\n\nDer Diff gegen \`${BASIS}\` ließ sich nicht ermitteln (\`${grund}\`).\n` +
+        `**Es wurde keine Journey geprüft** — das ist kein "keine Journey betroffen".\n` +
+        'Ursache meist ein flacher Checkout; der Job braucht `actions/checkout` mit `fetch-depth: 0`.',
+    )
+    return []
+  }
+}
+
+function meldeBezug() {
+  const dateien = geaenderteDateien()
+  if (dateien.length === 0) return
+
+  const betroffen = []
+  for (const [id, j] of JOURNEYS) {
+    const regexe = j.pfade.map(musterZuRegex)
+    const treffer = dateien.filter((d) => regexe.some((r) => r.test(d)))
+    if (treffer.length > 0) betroffen.push({ id, ...j, treffer })
+  }
+
+  if (betroffen.length === 0) {
+    console.log(`[journey-bezug] ${dateien.length} geaenderte Datei(en), keine Journey beruehrt.`)
+    return
+  }
+
+  const zeilen = [
+    '## 🧭 Journey-Bezug dieses PRs',
+    '',
+    `Dieser PR beruehrt Code, der zu **${betroffen.length === 1 ? 'einer vollstaendigen Journey' : `${betroffen.length} vollstaendigen Journeys`}** gehoert.`,
+    'Regel 4 verlangt, das operative Soll dieser Journey zu durchdenken und den bewachenden',
+    'Smoke zu fahren — nicht nur die neu gebaute Funktion.',
+    '',
+    '| Journey | Bewachende Spec(s) | Ausloeser |',
+    '|---|---|---|',
+  ]
+  for (const b of betroffen) {
+    const extra = b.treffer.length > 1 ? ` +${b.treffer.length - 1}` : ''
+    zeilen.push(`| **${b.id}** ${b.titel} | \`${b.waechter.join('` · `')}\` | \`${b.treffer[0]}\`${extra} |`)
+  }
+  const nurNightly = betroffen.filter((b) => b.nur_nightly)
+  if (nurNightly.length > 0) {
+    zeilen.push('', '**Hinweis zum Release-Tor:**')
+    for (const b of nurNightly) zeilen.push(`- ${b.id}: ${b.nur_nightly}`)
+  }
+  zeilen.push('', 'Zuordnung + Lauf-Modi: `docs/fundament/journey-smokes.md`')
+
+  const text = zeilen.join('\n')
+  console.log(text)
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, text + '\n')
+}
+
+if (process.argv.includes('--pruefe-pfade')) pruefePfade()
+else meldeBezug()

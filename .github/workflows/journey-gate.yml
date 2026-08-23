@@ -1,0 +1,231 @@
+name: Journey-Gate
+
+# Das Tor vor prod. Greift genau bei Release-Drains (release/rNNN-drain -> main) und
+# prueft die vollstaendigen Journeys auf dem Stand, der nach main SOLL.
+#
+# Warum das noetig war (Erhebung 23.08., Design: docs/superpowers/specs/
+# 2026-08-23-journey-gate-release-tor-design.md):
+# Die Journey-Suite existiert seit Juli vollstaendig und laeuft gruen — aber sie laeuft
+# NACHTS und der Job "GATET NICHTS (laeuft post-merge, informativ)" (ci.yml, woertlich).
+# Ein PR konnte damit jede Journey brechen und wurde trotzdem gruen gemergt; der Bruch
+# zeigte sich fruehestens am naechsten Morgen um 03:30 UTC.
+#
+# Warum gegen STAGING und nicht gegen prod:
+# Auf prod laeuft der ALTE Stand — ein Lauf dagegen beweist nichts ueber den neuen.
+# `app.staging.claimondo.de` traegt genau den Code, der mit diesem Drain nach main geht.
+# Moeglich ist das, weil staging und prod DIESELBE Supabase-Datenbank nutzen (identisches
+# Secret NEXT_PUBLIC_SUPABASE_URL in beiden Deploy-Workflows): Test-Konten, Seeds und
+# Service-Role-Key gelten unveraendert, nur die baseURL wechselt.
+#
+# ⚠ Daraus folgt aber auch: JEDER Lauf hier schreibt in die PRODUKTIONSDATENBANK.
+# staging ist kein isoliertes Environment. Alle Wegwerf-Konten-Guards bleiben Pflicht.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Drains laufen seriell durchs Tor. Die Journey-Seeds teilen sich feste
+# @claimondo.test-Konten auf der prod-DB — zwei parallele Laeufe racen den Seed.
+# Genau diese Klasse machte den nightly-Job cross-run-flaky (ci.yml, 31.07.).
+# cancel-in-progress:false = jeder Drain faehrt sein Tor vollstaendig zu Ende.
+concurrency:
+  group: journey-gate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  # DAS ist der eine Unterschied zum nightly-Job.
+  PLAYWRIGHT_BASE_URL: https://app.staging.claimondo.de
+  STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
+  STAGING_BASIC_AUTH_PASS: ${{ secrets.STAGING_BASIC_AUTH_PASS }}
+  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
+  TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
+  TEST_SV_PASSWORD: ${{ secrets.TEST_SV_PASSWORD }}
+
+jobs:
+  journey-gate:
+    runs-on: ubuntu-latest
+    # Gemessen am nightly-Lauf 32617054709: alle 10 Journeys inkl. Seeds = 212 s,
+    # Setup = 99 s. Die Tor-Suite ist kleiner (ohne J7 und ohne J9-lifecycle).
+    # 20 min ist grosszuegig gepuffert.
+    # ⚠ Wer Journeys ergaenzt, prueft diese Rechnung mit — genau daran ist das Cap des
+    # nightly-Jobs DREIMAL hintereinander zu knapp gewesen (20 -> 45 -> 90).
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      # Vorab-Check: ist das Ziel ueberhaupt sauber per HTTPS erreichbar?
+      #
+      # Ohne diesen Schritt scheitert der erste Journey-Step nach Minuten mit einem
+      # kryptischen `net::ERR_CERT_DATE_INVALID` mitten im Playwright-Log — und das
+      # liest sich wie ein Produktfehler, ist aber ein Infrastruktur-Problem.
+      # Gemessen 23.08.: das Let's-Encrypt-Zertifikat von *.staging.claimondo.de war am
+      # 10.08. abgelaufen und wurde 13 Tage lang nicht erneuert. nginx und App liefen
+      # normal weiter (curl -k -> 401), nur die TLS-Kette war tot.
+      #
+      # ⚠ BEWUSST KEIN `ignoreHTTPSErrors` in der Harness: das wuerde genau diese Klasse
+      # dauerhaft verdecken. Der Fehler soll sichtbar bleiben — nur eben lesbar.
+      - name: Ziel erreichbar? (TLS + Basic-Auth)
+        run: |
+          echo "Ziel: $PLAYWRIGHT_BASE_URL"
+          if ! curl -sS -o /dev/null --max-time 20 "$PLAYWRIGHT_BASE_URL/login" 2>/tmp/curl.err; then
+            echo "::error title=Journey-Gate: Ziel nicht erreichbar::$(cat /tmp/curl.err)"
+            echo ""
+            echo "Der Lauf wurde abgebrochen, BEVOR eine Journey gefahren wurde."
+            echo "Das ist kein Produktfehler und keine gebrochene Journey."
+            echo ""
+            echo "Haeufigste Ursache: abgelaufenes Let's-Encrypt-Zertifikat auf dem VPS."
+            echo "Pruefen mit:"
+            echo "  echo | openssl s_client -servername app.staging.claimondo.de \\"
+            echo "    -connect app.staging.claimondo.de:443 2>/dev/null | openssl x509 -noout -dates"
+            exit 1
+          fi
+          # 401 ist hier der ERWARTETE Wert ohne Credentials — er beweist, dass nginx lebt.
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+            -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" "$PLAYWRIGHT_BASE_URL/login")
+          echo "Mit Basic-Auth: HTTP $status"
+          if [ "$status" = "401" ]; then
+            echo "::error title=Journey-Gate: Basic-Auth abgelehnt::STAGING_BASIC_AUTH_USER/PASS pruefen (Secret gesetzt? leer?)"
+            exit 1
+          fi
+
+      # --- Tor-Suite: 8 Journeys + 2 DB-Teilschritte aus J9 ---
+      #
+      # BEWUSST NICHT IM TOR (beide bleiben nightly):
+      #   J7 Storno/DSGVO       — die DSGVO-Ausfuehrung ist IRREVERSIBEL. Bei 5-10 Toren
+      #                           taeglich statt einem pro Nacht entstuenden taeglich
+      #                           10 Wegwerf-Admin-Konten + 20 Loeschauftraege in der prod-DB.
+      #   J9 provisionen-lifecycle — schiesst den ECHTEN globalen Release-Cron auf echte
+      #                           Provisionen. Der Geld-Guard schuetzt, aber die
+      #                           Trefferwahrscheinlichkeit fremder faelliger Rows steigt
+      #                           mit der Lauf-Frequenz.
+      #
+      # `--retries=0` ueberall: ein stiller Retry verwandelt einen echten Regressionsbefund
+      # in Flakiness-Rauschen. Ein roter Lauf ist hier ein BEFUND, kein Anlass zum Wiederholen.
+
+      - name: Seed J4-Fixture (Reparatur-Weg)
+        run: node scripts/smoke/reparatur-weg-e2e-seed.mjs
+
+      - name: J1 + J4 — Haftpflicht-Vollstrecke + Reparatur-Weg
+        run: npx playwright test golden-path-deep-prod reparatur-weg-e2e-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_GOLDEN_PATH_DEEP: '1'
+          TEST_SV_TOTP_SECRET: ${{ secrets.TEST_SV_TOTP_SECRET }}
+
+      - name: J9 (Teil) — Provisionen, rein DB
+        run: npx playwright test provisionen-verrechnung-smoke provisionen-staffel-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_PROVISION_SMOKE: '1'
+
+      - name: Seed J8-Fixture (2FA-Enroll)
+        run: node scripts/seed-smoke-enroll.mjs
+      - name: J8 — 2FA-Enroll
+        run: npx playwright test 2fa-enroll-smoke --project=chromium --workers=1 --reporter=line --retries=0
+        env:
+          RUN_2FA_ENROLL_SMOKE: '1'
+
+      - name: Seed J5-Fixture (Kasko-Reparatur)
+        run: node scripts/smoke/kasko-reparatur-seed.mjs
+      - name: J5 — Kasko-Reparatur-Phase
+        run: npx playwright test kasko-reparatur-phase-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_KASKO_SMOKE: '1'
+
+      - name: Seed J10-Fixture (Werkstatt-Finder)
+        run: node scripts/smoke/werkstatt-finder-seed.mjs
+      - name: J10 — Werkstatt-Finder
+        run: npx playwright test werkstatt-finder-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_WF_SMOKE: '1'
+
+      - name: Seed J3-Fixture (SA-Vollmacht)
+        run: node scripts/smoke/sa-vollmacht-seed.mjs
+      - name: J3 — SA-Unterschrift
+        run: npx playwright test sa-vollmacht-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_SA_SMOKE: '1'
+
+      - name: Seed J6-Fixture (Kanzlei-Uebergabe)
+        run: node scripts/smoke/kanzlei-uebergabe-seed.mjs
+      - name: J6 — Kanzlei-Uebergabe
+        run: npx playwright test kanzlei-uebergabe-smoke --project=chromium --reporter=line --retries=0
+        env:
+          RUN_KANZLEI_SMOKE: '1'
+
+      - name: Seed J2-Fixture (Meldung alle Kanaele)
+        run: node scripts/smoke/meldung-kanaele-seed.mjs
+      - name: J2 — Meldung alle Kanaele
+        run: npx playwright test meldung-kanaele-smoke --project=chromium --reporter=line --workers=1 --retries=0
+        env:
+          RUN_MELDUNG_SMOKE: '1'
+
+      - name: Trace-Artefakte
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: journey-gate-traces-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+      # Bei Rot: konkreter Befund in den PR, nicht nur "failed".
+      # Aaron-Entscheid 23.08.: "es muss abgesprochen werden" — das Gate blockiert, aber
+      # ueber die Uebersteuerung entscheidet ein Mensch, nicht die Automatik.
+      - name: Befund in den PR schreiben
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const lauf = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: [
+                '## 🚦 Journey-Gate rot',
+                '',
+                'Mindestens eine **vollständige Journey** ist auf `app.staging.claimondo.de` gebrochen —',
+                'also auf genau dem Stand, der mit diesem Drain nach `main` und damit auf prod soll.',
+                '',
+                `**Welcher Schritt:** siehe den rot markierten Step in [Lauf ${context.runId}](${lauf}).`,
+                'Die Playwright-Traces hängen als Artefakt am Lauf.',
+                '',
+                '**Das ist kein Flake-Rauschen:** das Tor fährt mit `--retries=0`. Jeder rote Lauf ist ein Befund.',
+                '',
+                '### Wie weiter',
+                '1. Journey reparieren und neu drainen — der Normalfall.',
+                '2. Oder mit Aaron absprechen: Label `journey-override` setzen und die Begründung',
+                '   als Kommentar hinterlassen. Die Übersteuerung bleibt damit nachvollziehbar.',
+                '',
+                'Zuordnung Journey ↔ bewachende Spec: `docs/fundament/journey-smokes.md`',
+              ].join('\n'),
+            })
