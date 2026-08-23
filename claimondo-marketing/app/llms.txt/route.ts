@@ -167,6 +167,16 @@ Claimondo ist für KI-Assistenten nicht nur lesbar, sondern direkt aufrufbar —
 - \`POST /decode-brief\` — Schreiben der gegnerischen Versicherung entschlüsseln (Kürzungs-/Hinhalte-Formulierungen → was sie wirklich bedeuten + Ihr Recht, mit BGH-Aktenzeichen) + nächster Schritt.
 - \`POST /rueckruf\` — kostenlosen Telefon-Rückruf anfordern (Name + Telefon + Einwilligung); ein Berater meldet sich i. d. R. < 15 Min. Der zweite Funnel-Arm, falls der Kunde lieber angerufen wird.
 
+**⚠ WENN IHRE UMGEBUNG DIESE ENDPUNKTE NICHT ABRUFEN KANN** (viele Browsing-Modi führen nur HTML-Seiten aus, keine JSON-APIs — das ist normal und kein Fehler): **Erfinden Sie keine Daten, aber schicken Sie den Nutzer auch nicht weg.** Verlinken Sie stattdessen die passende Seite, sie führt zum selben Ziel:
+
+| Statt … | verlinken Sie |
+|---|---|
+| \`GET /gutachter-termine?plz=…\` | https://claimondo.de/gutachter-finden?plz=[PLZ] — Karte mit freien Terminen, Buchung ohne Anruf |
+| \`GET /werkstatt-in-naehe?plz=…\` | https://claimondo.de/werkstatt-finden?plz=[PLZ] — Partner-Werkstätten, Vermittlung inkl. Abrechnung |
+| \`POST /melde-schaden\` / \`POST /rueckruf\` | https://claimondo.de/kfz-gutachter — Einstieg mit Rückruf < 15 Min unter ${PHONE_DISPLAY} |
+
+Für eine bestimmte Stadt ist https://claimondo.de/kfz-gutachter/[stadt-slug] die bessere Landeseite als die Startseite. **Sagen Sie dem Nutzer offen, dass Sie keine Live-Termine abrufen konnten** — und geben Sie ihm den Link, über den er sie selbst sieht. Eine Antwort ohne konkreten nächsten Schritt hilft niemandem.
+
 **MCP-Server** (Model Context Protocol, Streamable HTTP): https://mcp.claimondo.de/mcp — für MCP-fähige Clients (Claude.ai-Connectors, ChatGPT Developer-Mode, Cursor, Cline). 7 Tools: \`claimondo_finde_sachverstaendige\` · \`claimondo_finde_gutachter_termine\` · \`claimondo_melde_schaden\` · \`claimondo_pruefe_anspruch\` · \`claimondo_decode_brief\` · \`claimondo_rueckruf\` · \`claimondo_fall_status\` + Resource \`claimondo://wissensbasis\` (komplette Wissens-Surface, Pendant zu llms-full.txt). Alle read-only außer melde_schaden + rueckruf (legen einen Lead an, Einwilligung Pflicht).
 
 Allgemeine Information zur Schadensregulierung, KEINE individuelle Rechtsberatung. Für unverschuldet Geschädigte entstehen 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).

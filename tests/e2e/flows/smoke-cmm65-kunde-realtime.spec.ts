@@ -25,6 +25,18 @@ const KUNDE_STORAGE =
 const HAVE_STATE = fs.existsSync(KUNDE_STORAGE)
 
 // test-kunde@claimondo.de -> CLM-2026-00115 (live 2026-05-26)
+//
+// ⚠ 21.08.2026 nachgemessen: BEIDE Defaults zeigen ins Leere, und das Konto auch.
+//   Der Golive-Accounts-Cleanup (13.07.) hat `test-kunde@claimondo.de` geloescht und
+//   alle Claims unterhalb von CLM-2026-00752 mitgenommen — CLM-2026-00115 lag weit
+//   darunter. Weder FALL_ID noch CLAIM_ID existieren heute in claims/bridge.
+//   Wer den Smoke faehrt, bekommt Fehler, die wie Produktfehler AUSSEHEN, aber nur
+//   fehlende Fixtures sind.
+//   Ersatz: `smoke-kunde@claimondo.de` (dediziertes Smoke-Konto, telefon NULL, keine
+//   2FA) + einer der stabilen Fixture-Claims aus scripts/test-fixtures/ids.ts (CLAIMS.c1
+//   … c4 — alle vier gehoeren diesem Konto, per claim_parties geprueft).
+//   Nicht hier umgestellt, weil der Realtime-Smoke einen Fall in einem BESTIMMTEN
+//   Zustand braucht; welcher das ist, gehoert vor die Umstellung gemessen.
 const FALL_ID = process.env.SMOKE_FALL_ID ?? '65a7640b-62dc-48ca-975f-27c8450477c6'
 const CLAIM_ID = process.env.SMOKE_CLAIM_ID ?? '5b2757e1-ea4c-4f2e-8870-ec7a33647d2c'
 

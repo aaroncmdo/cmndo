@@ -481,6 +481,9 @@ export type Anspruch = { titel: string; norm: string; hinweis: string }
 export type PruefeAnspruchResult = {
   schuldfrage: string
   schadenart: string | null
+  /** haftpflicht | kasko | selbstzahler | null — die Weiche, welchen Weg der Assistent
+   *  anbieten muss. null = Kasko-Frage bei Selbstverschulden noch offen. */
+  abrechnungsweg?: string | null
   anspruchslage: string
   eigenkosten: string
   ansprueche: Anspruch[]
@@ -494,9 +497,12 @@ export async function fetchPruefeAnspruch(
   schuldfrage: string,
   schadenart: string | undefined,
   apiBase: string = DEFAULT_API_BASE,
+  vollkasko?: 'ja' | 'nein',
 ): Promise<PruefeAnspruchResult> {
   const qs = new URLSearchParams({ schuldfrage })
   if (schadenart) qs.set('schadenart', schadenart)
+  // Nur bei Selbstverschulden ausgewertet; ohne den Wert fordert die API zur Rueckfrage auf.
+  if (vollkasko) qs.set('vollkasko', vollkasko)
   const url = `${apiBase.replace(/\/+$/, '')}/api/v1/pruefe-anspruch?${qs.toString()}`
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
@@ -710,4 +716,127 @@ export async function fetchCaseStatus(token: string, apiBase: string = DEFAULT_A
 /** Menschenlesbarer Markdown-Report fuer den Fall-Status. */
 export function formatCaseStatus(r: CaseStatusResult): string {
   return [`# Bearbeitungsstand`, '', `**Status:** ${r.status}`, r.hinweis ? `\n${r.hinweis}` : ''].filter(Boolean).join('\n')
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Werkstatt-Suche (claimondo_finde_werkstatt)
+//
+// WARUM DIESES TOOL: Fuer selbst verschuldete Schaeden ist der Gutachter NICHT der
+// erste Schritt — es gibt keinen Gegner, gegen den man etwas durchsetzt. Der Kunde
+// braucht eine Werkstatt (Vollkasko reguliert abzueglich SB, ohne Kasko zahlt er selbst
+// und will einen Kostenvoranschlag). Ohne dieses Tool endete jede Beratung beim
+// Gutachter — auch dort, wo er dem Kunden nur Kosten verursacht haette.
+//
+// ⚠ Die API liefert BEWUSST keine Firmennamen, Telefonnummern oder Adressen: die
+// konkrete Zuordnung passiert im Finder, wo der Lead entsteht. Wer hier Namen
+// ausgibt, oeffnet den Weg an Claimondo vorbei. Der Renderer haelt sich daran.
+export type WerkstattPublic = {
+  id: string
+  typ: string | null
+  ort: string | null
+  plz: string | null
+  entfernung: string
+  entfernung_km: number | null
+  marken: string[]
+  faehigkeiten: string[]
+  bewertung_schnitt: number | null
+  bewertung_anzahl: number | null
+  ist_partner: boolean
+  finder_url: string
+}
+
+export type WerkstattResult = {
+  plz: string | null
+  ort: string | null
+  radius_km: number
+  anzahl_treffer: number
+  werkstaetten: WerkstattPublic[]
+  werkstatt_finder_url: string
+  buchungs_telefon: string
+  hinweis: string
+  nutzungshinweis: string
+}
+
+export async function fetchWerkstaetten(
+  plz: string | undefined,
+  ort: string | undefined,
+  radius: number,
+  apiBase: string = DEFAULT_API_BASE,
+): Promise<WerkstattResult> {
+  const qs = new URLSearchParams({ radius: String(radius) })
+  if (plz) qs.set('plz', plz)
+  else if (ort) qs.set('ort', ort)
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/werkstatt-in-naehe?${qs.toString()}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      headers: { accept: 'application/json', 'user-agent': MCP_USER_AGENT },
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(
+        `Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten. Bitte später erneut versuchen.`,
+      )
+    }
+    throw new ClaimondoApiError(
+      `Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`,
+    )
+  } finally {
+    clearTimeout(timer)
+  }
+
+  const body = (await res.json().catch(() => ({}))) as Partial<WerkstattResult> & { error?: string }
+  if (!res.ok) {
+    if (res.status === 429) {
+      throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    }
+    throw new ClaimondoApiError(body.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return {
+    plz: body.plz ?? plz ?? null,
+    ort: body.ort ?? ort ?? null,
+    radius_km: body.radius_km ?? radius,
+    anzahl_treffer: body.anzahl_treffer ?? body.werkstaetten?.length ?? 0,
+    werkstaetten: body.werkstaetten ?? [],
+    werkstatt_finder_url: body.werkstatt_finder_url ?? '',
+    buchungs_telefon: body.buchungs_telefon ?? '',
+    hinweis: body.hinweis ?? '',
+    nutzungshinweis: body.nutzungshinweis ?? '',
+  }
+}
+
+/** Menschenlesbare deutsche Zusammenfassung (markdown response_format, user-facing). */
+export function formatWerkstaetten(r: WerkstattResult): string {
+  const standortLabel = r.plz ? `PLZ ${r.plz}` : r.ort || 'der Region'
+  const lines: string[] = [`# Partner-Werkstätten — ${standortLabel} (${r.radius_km} km)`, '']
+
+  if (r.anzahl_treffer === 0) {
+    lines.push(
+      'Aktuell keine Partner-Werkstatt im angegebenen Umkreis. Über den Werkstatt-Finder oder den Telefon-Rückruf lässt sich trotzdem eine Werkstatt vermitteln.',
+    )
+  } else {
+    lines.push(`**${r.anzahl_treffer}** Partner-Werkstätten (sortiert nach Entfernung):`, '')
+    for (const w of r.werkstaetten.slice(0, 8)) {
+      const teile: string[] = [w.entfernung]
+      if (w.ort) teile.push(w.ort)
+      if (w.typ) teile.push(w.typ)
+      if (w.bewertung_schnitt != null) teile.push(`${w.bewertung_schnitt}★ (${w.bewertung_anzahl ?? 0})`)
+      lines.push(`- ${teile.join(' · ')}`)
+      const koennen = [...(w.marken ?? []), ...(w.faehigkeiten ?? [])].slice(0, 4)
+      if (koennen.length > 0) lines.push(`  ${koennen.join(', ')}`)
+    }
+    // Bewusst KEINE Namen/Telefonnummern — die API liefert sie gar nicht erst.
+    lines.push('', '> Konkrete Zuordnung, Terminabstimmung und Abrechnung laufen über Claimondo.')
+  }
+
+  lines.push('')
+  if (r.werkstatt_finder_url) lines.push(`→ Werkstatt finden: ${r.werkstatt_finder_url}`)
+  if (r.buchungs_telefon) lines.push(`Telefon-Rückruf (i. d. R. < 15 Min): ${r.buchungs_telefon}`)
+  if (r.hinweis) lines.push('', r.hinweis)
+  return lines.join('\n')
 }

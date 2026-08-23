@@ -117,6 +117,22 @@ test('Phase 1: /gutachter-finden Wizard → Anfrage submitten', async ({ page })
   // Sachverständige Köln" (test-sv, sv_id=1da11741…). Das popup-CTA macht
   // dasselbe via inline-onclick. Nach Fix muss zugeordneter_sv_id in der
   // Anfrage gesetzt sein + convertLeadToClaim erzeugt Auftrag+Termin+WA.
+  // ⚠ 21.08.2026 nachgemessen: DIESER ABSCHNITT PRUEFT NICHTS MEHR.
+  //   1. Das Event `claimondo:open-wizard` hat KEINEN Listener mehr — die Verdrahtung
+  //      wurde mit WS2 abgeschafft. Der Code sagt es woertlich in
+  //      src/app/embed/gutachter-finder/_components/FinderMap.tsx:568:
+  //      "Die alte claimondo:open-wizard / claimondo:select-sv-Verdrahtung
+  //       (Self-Dispatch der Marketing-Karte) entfaellt — im Embed waehlt das System
+  //       den SV (WS3), Buchung ueber den Inline-Wizard (WS4)."
+  //      Das dispatchEvent unten laeuft also ins Leere.
+  //   2. Die ID hier existiert auf prod in KEINER Tabelle mehr (weder
+  //      sachverstaendige.id noch profiles.id). Der Test-SV lebt, hat aber heute
+  //      andere IDs — beide stehen in scripts/test-fixtures/ids.ts
+  //      (SV_SACHVERSTAENDIGE_ID / ACCOUNTS.sv).
+  //   Bewusst NICHT hier repariert: ob der Self-Dispatch-Weg ueberhaupt noch ein Soll
+  //   hat, ist eine Produktfrage (WS2/WS3 haben ihn ersetzt), keine Test-Frage. Wer den
+  //   Smoke wiederbelebt, entscheidet die zuerst — sonst repariert man einen Waechter
+  //   fuer ein Verhalten, das es nicht mehr geben soll.
   const testSvId = '1da11741-a406-45ce-a27b-c041576cccbb'
   await page.evaluate((svId) => {
     document.dispatchEvent(
