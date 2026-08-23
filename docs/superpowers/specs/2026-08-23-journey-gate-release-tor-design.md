@@ -256,6 +256,20 @@ Der Hook-Mechanismus ist etabliert (`load-memory-digest.mjs`, `update-session-ma
 
 ## 8 · Offene Punkte fuer Aaron
 
+* **🔴 BLOCKER: das TLS-Zertifikat von `*.staging.claimondo.de` ist abgelaufen.**
+  Gemessen 23.08.: gueltig bis **10.08.2026**, seit 13 Tagen tot. Prod laeuft bis 06.10.
+  nginx und App antworten normal (`curl -k` → 401), nur die TLS-Kette ist ungueltig — jeder
+  Browser und jeder Playwright-Lauf bricht mit `ERR_CERT_DATE_INVALID` ab. Der
+  Let's-Encrypt-Renewal auf dem VPS laeuft nicht mehr.
+  **Solange das so ist, kann das Gate nicht gegen staging fahren.** Der Rest ist nachgewiesen
+  (s. u.); es fehlt allein das Zertifikat.
+  ```bash
+  echo | openssl s_client -servername app.staging.claimondo.de \
+    -connect app.staging.claimondo.de:443 2>/dev/null | openssl x509 -noout -dates
+  ```
+  ⚠ Der Workaround `ignoreHTTPSErrors` wurde **bewusst nicht** eingebaut — er wuerde genau
+  diese Klasse dauerhaft verdecken. Stattdessen bricht das Gate mit einer lesbaren Meldung ab.
+
 * **🔴 Branch-Protection auf `main` aktivieren** — ohne sie kann das Gate nur berichten, nicht
   blockieren (3.1). Vorbereitet als `scripts/aktiviere-journey-gate-protection.sh`; ein Befehl,
   reversibel. Nebenwirkung: `main` nimmt danach keine Direct-Pushes mehr an — was Regel 1 ohnehin
@@ -264,6 +278,25 @@ Der Hook-Mechanismus ist etabliert (`load-memory-digest.mjs`, `update-session-ma
   (`tests/e2e/staging-clickthrough.spec.ts:6`) und muss nach dem Umbau gewechselt werden.
 * **Benachrichtigungsweg bei Rot:** PR-Kommentar allein, oder zusaetzlich der Team-Kanal (analog
   #5534)? Vorschlag: erst PR-Kommentar, Kanal nachruesten, wenn das Tor sich bewaehrt hat.
+
+## 9 · Nachweis der Kernannahme (23.08., scharf gemessen)
+
+Die Annahme „die Journey-Harness ist gegen staging fahrbar" wurde nicht angenommen, sondern
+gegen `app.staging.claimondo.de` gemessen (rein lesend, kein Seed, kein Schreibvorgang):
+
+```
+[A] ohne Credentials -> HTTP 401       nginx-Basic-Auth greift
+[B] mit Credentials  -> HTTP 200       tests/e2e/lib/ziel.ts liefert korrekte Credentials
+[C] nach /admin gelandet auf: /admin   die Login-Session gilt gegen staging
+                                       (cookieDomain '.claimondo.de' deckt beide Hosts)
+3 passed
+```
+
+[C] brauchte fuer die Messung ein temporaeres `ignoreHTTPSErrors` — wegen des abgelaufenen
+Zertifikats (§8), **nicht** wegen des Codes. Der Patch wurde zurueckgenommen; er ist nicht
+Teil der Aenderung.
+
+Damit ist belegt: nach der Zertifikats-Erneuerung ist das Tor ohne weitere Anpassung fahrbar.
 
 ---
 

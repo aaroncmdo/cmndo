@@ -83,6 +83,41 @@ jobs:
             npx playwright install --with-deps chromium
           fi
 
+      # Vorab-Check: ist das Ziel ueberhaupt sauber per HTTPS erreichbar?
+      #
+      # Ohne diesen Schritt scheitert der erste Journey-Step nach Minuten mit einem
+      # kryptischen `net::ERR_CERT_DATE_INVALID` mitten im Playwright-Log — und das
+      # liest sich wie ein Produktfehler, ist aber ein Infrastruktur-Problem.
+      # Gemessen 23.08.: das Let's-Encrypt-Zertifikat von *.staging.claimondo.de war am
+      # 10.08. abgelaufen und wurde 13 Tage lang nicht erneuert. nginx und App liefen
+      # normal weiter (curl -k -> 401), nur die TLS-Kette war tot.
+      #
+      # ⚠ BEWUSST KEIN `ignoreHTTPSErrors` in der Harness: das wuerde genau diese Klasse
+      # dauerhaft verdecken. Der Fehler soll sichtbar bleiben — nur eben lesbar.
+      - name: Ziel erreichbar? (TLS + Basic-Auth)
+        run: |
+          echo "Ziel: $PLAYWRIGHT_BASE_URL"
+          if ! curl -sS -o /dev/null --max-time 20 "$PLAYWRIGHT_BASE_URL/login" 2>/tmp/curl.err; then
+            echo "::error title=Journey-Gate: Ziel nicht erreichbar::$(cat /tmp/curl.err)"
+            echo ""
+            echo "Der Lauf wurde abgebrochen, BEVOR eine Journey gefahren wurde."
+            echo "Das ist kein Produktfehler und keine gebrochene Journey."
+            echo ""
+            echo "Haeufigste Ursache: abgelaufenes Let's-Encrypt-Zertifikat auf dem VPS."
+            echo "Pruefen mit:"
+            echo "  echo | openssl s_client -servername app.staging.claimondo.de \\"
+            echo "    -connect app.staging.claimondo.de:443 2>/dev/null | openssl x509 -noout -dates"
+            exit 1
+          fi
+          # 401 ist hier der ERWARTETE Wert ohne Credentials — er beweist, dass nginx lebt.
+          status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
+            -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" "$PLAYWRIGHT_BASE_URL/login")
+          echo "Mit Basic-Auth: HTTP $status"
+          if [ "$status" = "401" ]; then
+            echo "::error title=Journey-Gate: Basic-Auth abgelehnt::STAGING_BASIC_AUTH_USER/PASS pruefen (Secret gesetzt? leer?)"
+            exit 1
+          fi
+
       # --- Tor-Suite: 8 Journeys + 2 DB-Teilschritte aus J9 ---
       #
       # BEWUSST NICHT IM TOR (beide bleiben nightly):
