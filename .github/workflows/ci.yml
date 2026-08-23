@@ -28,7 +28,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 fuer den Journey-Bezug-Step (unten): der Default-Checkout ist FLACH,
+      # und ohne gemeinsamen Vorfahren scheitert `git diff origin/staging...HEAD` mit
+      # "no merge base". Der Step meldete dann `success` und mass NICHTS — gemessen am
+      # ersten CI-Lauf dieses PRs (32648323751). Ein gezieltes
+      # `git fetch --depth=100 origin staging` reicht NICHT: die 100 Commits des
+      # Base-Branch helfen nicht, wenn der eigene HEAD keine Historie hat.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -64,13 +72,12 @@ jobs:
       # Release-Tor (journey-gate.yml), wo wirklich gemessen wird; hier wuerde geraten —
       # eine Journey zu beruehren heisst nicht, sie zu brechen.
       #
-      # Der gezielte `git fetch` statt `fetch-depth: 0` am checkout ist Absicht: die volle
-      # Historie zu klonen kostet jeden PR-Build Zeit, 100 Commits des Base-Branch reichen
-      # fuer den Merge-Base. Schlaegt der fetch fehl, meldet das Script "uebersprungen"
-      # statt zu scheitern.
+      # ⚠ Der Base-Branch muss geholt werden, auch mit fetch-depth: 0 — der Checkout laedt
+      # zwar die volle Historie des PR-Branch, aber `origin/staging` als Ref existiert
+      # danach nicht zwangslaeufig.
       - name: Journey-Bezug
         run: |
-          git fetch --no-tags --depth=100 origin "${{ github.base_ref || 'staging' }}" || true
+          git fetch --no-tags origin "${{ github.base_ref || 'staging' }}" || true
           npm run check:journey-bezug
         env:
           JOURNEY_DIFF_BASIS: origin/${{ github.base_ref || 'staging' }}
