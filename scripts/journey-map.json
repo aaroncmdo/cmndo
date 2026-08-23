@@ -1,0 +1,71 @@
+{
+  "_hinweis": "Journey <-> Code-Pfade <-> bewachende Spec. Gelesen von scripts/check-journey-bezug.mjs. Fachliche Quelle: docs/fundament/journey-smokes.md. ALLE Pfade sind am 23.08. gegen das Repo verifiziert (git ls-files) — nicht geraten. Wer hier ergaenzt, faehrt `npm run check:journey-bezug -- --pruefe-pfade` und darf kein LEER zurueckbekommen.",
+
+  "J1": {
+    "titel": "Haftpflicht end-to-end",
+    "pfade": ["src/app/faelle/**", "src/lib/claims/**", "src/lib/status/**", "src/lib/faelle/**"],
+    "waechter": ["golden-path-deep-prod", "golden-path-completion-prod"]
+  },
+  "J2": {
+    "titel": "Meldung ueber alle Kanaele",
+    "pfade": [
+      "src/app/kunde/schaden-melden/**",
+      "src/app/schaden-melden/**",
+      "src/app/api/v1/melde-schaden/**",
+      "src/app/schaden/**",
+      "src/app/embed/**",
+      "src/lib/embed/**"
+    ],
+    "waechter": ["meldung-kanaele-smoke"]
+  },
+  "J3": {
+    "titel": "SA-Unterschrift + Vollmacht",
+    "pfade": ["src/app/flow/**", "src/lib/flow/**", "src/lib/vollmacht/**"],
+    "waechter": ["sa-vollmacht-smoke"]
+  },
+  "J4": {
+    "titel": "Reparatur-Weg",
+    "pfade": ["src/lib/werkstatt/**", "src/app/werkstatt/**"],
+    "waechter": [
+      "reparatur-weg-e2e-smoke",
+      "reparatur-weg-kva-betrag-pflicht",
+      "reparatur-weg-kva-ablehnung-loop"
+    ]
+  },
+  "J5": {
+    "titel": "Kasko / Selbstzahler",
+    "pfade": ["src/lib/abrechnung/**", "src/lib/abrechnungen/**"],
+    "waechter": ["kasko-reparatur-phase-smoke"]
+  },
+  "J6": {
+    "titel": "Kanzlei-Uebergabe",
+    "pfade": ["src/app/kanzlei/**", "src/lib/kanzlei/**"],
+    "waechter": ["kanzlei-uebergabe-smoke"]
+  },
+  "J7": {
+    "titel": "Storno / DSGVO",
+    "pfade": ["src/lib/dsgvo/**"],
+    "waechter": ["storno-dsgvo-smoke"],
+    "nur_nightly": "DSGVO-Ausfuehrung ist irreversibel — bewusst NICHT im Release-Tor."
+  },
+  "J8": {
+    "titel": "Onboarding je Rolle",
+    "pfade": ["src/lib/onboarding/**", "src/app/gutachter/onboarding/**", "src/lib/auth/**"],
+    "waechter": ["2fa-enroll-smoke", "onboarding-pflichtdok"]
+  },
+  "J9": {
+    "titel": "Honorar / Provision / Zahlung",
+    "pfade": ["src/lib/provisionen/**", "src/lib/finance/**"],
+    "waechter": [
+      "provisionen-verrechnung-smoke",
+      "provisionen-staffel-smoke",
+      "provisionen-lifecycle-smoke"
+    ],
+    "nur_nightly": "provisionen-lifecycle schiesst den ECHTEN globalen Release-Cron — im Tor laufen nur verrechnung + staffel (rein DB)."
+  },
+  "J10": {
+    "titel": "Dispatch / Vermittlung",
+    "pfade": ["src/app/dispatch/**", "src/lib/dispatch/**", "src/lib/finder/**"],
+    "waechter": ["werkstatt-finder-smoke", "golden-path-finder-prod"]
+  }
+}

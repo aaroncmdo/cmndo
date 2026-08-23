@@ -57,6 +57,24 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
+      # Journey-Bezug (23.08.): meldet der Session, welchen GANZEN Lauf ihr PR beruehrt —
+      # nicht nur, welche Datei sie geaendert hat. Ergebnis landet in der Job-Summary.
+      #
+      # INFORMATIV, blockiert nie (das Script endet immer mit Exit 0). Geblockt wird am
+      # Release-Tor (journey-gate.yml), wo wirklich gemessen wird; hier wuerde geraten —
+      # eine Journey zu beruehren heisst nicht, sie zu brechen.
+      #
+      # Der gezielte `git fetch` statt `fetch-depth: 0` am checkout ist Absicht: die volle
+      # Historie zu klonen kostet jeden PR-Build Zeit, 100 Commits des Base-Branch reichen
+      # fuer den Merge-Base. Schlaegt der fetch fehl, meldet das Script "uebersprungen"
+      # statt zu scheitern.
+      - name: Journey-Bezug
+        run: |
+          git fetch --no-tags --depth=100 origin "${{ github.base_ref || 'staging' }}" || true
+          npm run check:journey-bezug
+        env:
+          JOURNEY_DIFF_BASIS: origin/${{ github.base_ref || 'staging' }}
+
       # AAR-token-audit (PR #1025): Drift-Bremse gegen nicht-dokumentierte Hex-
       # Verwendungen in src/. Blockt neue `bg-[#xxx]` Klassen + raw inline-hex
       # in `style={{ }}` ohne `var(--brand-*)` Fallback. Siehe
