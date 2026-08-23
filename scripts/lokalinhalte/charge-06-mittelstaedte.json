@@ -61,10 +61,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Erlangen vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bruck steht, in Büchenbach oder nach einem Unfall auf der A3."
-      },
-      {
         "frage": "Ich wurde als Radfahrer angefahren. Lohnt ein Gutachten?",
         "antwort": "Ja. Erlangen hat einen hohen Radverkehrsanteil, und der Sachverständige beziffert Rahmen, Anbauteile, Kleidung und Helm — Positionen, die eine Werkstattrechnung nicht abbildet."
       }
@@ -129,10 +125,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Reutlingen vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Betzingen steht, in Sondelfingen oder nach einem Unfall auf der B27."
-      },
-      {
         "frage": "Reutlingen hat keine eigene Autobahn — spielt das für mein Gutachten eine Rolle?",
         "antwort": "Nein. Für Ihren Anspruch zählt die Haftungsfrage, nicht der Straßentyp. Die B27 und B28 tragen hier den überörtlichen Verkehr; Unfälle dort werden genauso reguliert wie auf einer Autobahn."
       },
@@ -190,12 +182,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Bremerhaven vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lehe steht, in Wulsdorf oder nach einem Unfall auf der A27."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A27, Parkschaden in der Bürgermeister-Smidt-Straße oder Zusammenstoß in Lehe — der Sachverständige kommt zu Ihnen nach Bremerhaven.",
     "topografieAnker": "Bremerhaven liegt an der Wesermündung zur Nordsee; die A27 endet im Stadtgebiet und bindet die Überseehäfen an."
   },
@@ -269,10 +256,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Koblenz vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf der Karthause steht, in Ehrenbreitstein oder nach einem Unfall auf der A61."
-      },
-      {
         "frage": "Unfall am Kreuz Koblenz — wer zahlt den Gutachter?",
         "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A48 und A61 zusammen."
       }
@@ -342,12 +325,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Jena vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lobeda steht, in Winzerla oder nach einem Unfall auf der A4."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden am Holzmarkt oder Zusammenstoß in Lobeda — der Sachverständige kommt zu Ihnen nach Jena.",
     "topografieAnker": "Jena liegt eingeschnitten im Saaletal zwischen Muschelkalkhängen; die A4 quert das Tal südlich der Stadt auf hohen Brücken."
   },
@@ -413,12 +391,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Recklinghausen vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Suderwich steht, in Hochlarmark oder nach einem Unfall auf der A2."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Altstadt oder Zusammenstoß in Suderwich — der Sachverständige kommt zu Ihnen nach Recklinghausen.",
     "topografieAnker": "Recklinghausen liegt am Nordrand des Ruhrgebiets; die A2 führt nördlich vorbei, die A43 quert das Stadtgebiet Richtung Münster."
   },
@@ -475,12 +448,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Remscheid vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lennep steht, in Lüttringhausen oder nach einem Unfall auf der A1."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden in der Alleestraße oder Zusammenstoß in Lennep — der Sachverständige kommt zu Ihnen nach Remscheid.",
     "topografieAnker": "Remscheid liegt auf den Höhen des Bergischen Landes zwischen Wupper und Ruhr; die A1 quert das Stadtgebiet über die Müngstener Höhen."
   },
@@ -555,10 +523,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Trier vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Ehrang steht, in Tarforst oder nach einem Unfall auf der A602."
-      },
-      {
         "frage": "Mein Unfallgegner kam aus Luxemburg. Was ändert das?",
         "antwort": "Bei einem Unfall auf deutschem Boden gilt deutsches Recht, und der luxemburgische Versicherer hat einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert oft etwas länger — ein Gutachten mit belastbaren Zahlen beschleunigt sie spürbar."
       }
@@ -618,12 +582,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Moers vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Repelen steht, in Asberg oder nach einem Unfall auf der A40."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Altstadt oder Zusammenstoß in Repelen — der Sachverständige kommt zu Ihnen nach Moers.",
     "topografieAnker": "Moers liegt linksrheinisch westlich von Duisburg; die A40 führt zur Rheinbrücke nach Duisburg, die A57 verbindet die Stadt mit Krefeld und Köln."
   },
@@ -682,12 +641,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Siegen vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Weidenau steht, in Eiserfeld oder nach einem Unfall auf der A45."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A45, Parkschaden in der Oberstadt oder Zusammenstoß in Weidenau — der Sachverständige kommt zu Ihnen nach Siegen.",
     "topografieAnker": "Siegen liegt in enger Tallage im Siegerland; die A45 führt als Sauerlandlinie über hohe Talbrücken am Stadtgebiet vorbei."
   },
@@ -755,12 +709,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Cottbus vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sachsendorf steht, in Ströbitz oder nach einem Unfall auf der A15."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A15, Parkschaden in der Spremberger Straße oder Zusammenstoß in Sachsendorf — der Sachverständige kommt zu Ihnen nach Cottbus.",
     "topografieAnker": "Cottbus liegt an der Spree am Rand des Spreewalds; die A15 führt östlich zur polnischen Grenze, mehrere Bundesstraßen bündeln den Regionalverkehr."
   },
@@ -814,12 +763,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Gütersloh vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Avenwedde steht, in Spexard oder nach einem Unfall auf der A2."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Berliner Straße oder Zusammenstoß in Avenwedde — der Sachverständige kommt zu Ihnen nach Gütersloh.",
     "topografieAnker": "Gütersloh liegt in der Emssandebene südwestlich von Bielefeld; die A2 führt nördlich vorbei und verbindet die Stadt mit Dortmund und Hannover."
   }

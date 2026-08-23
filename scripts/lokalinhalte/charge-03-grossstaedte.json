@@ -75,10 +75,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Magdeburg vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Stadtfeld steht, in Buckau oder nach einem Unfall auf der A2."
-      },
-      {
         "frage": "Darf ich meine Werkstatt frei wählen?",
         "antwort": "Ja, die freie Werkstattwahl bleibt auch gegen den Vorschlag einer Partnerwerkstatt bestehen."
       }
@@ -166,10 +162,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Freiburg vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Wiehre steht, in Haslach oder nach einem Unfall auf der A5."
-      },
-      {
         "frage": "Ich wurde in Freiburg als Radfahrer angefahren. Lohnt ein Gutachten?",
         "antwort": "Ja. Bei dem hohen Radverkehrsanteil in Freiburg sind solche Unfälle häufig, und der Sachverständige beziffert nicht nur den Rahmenschaden, sondern auch Kleidung, Helm und Anbauteile — Positionen, die sonst untergehen."
       }
@@ -251,12 +243,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Krefeld vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Uerdingen steht, in Fischeln oder nach einem Unfall auf der A57."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A57, Parkschaden auf dem Ostwall oder Zusammenstoß in Uerdingen — der Sachverständige kommt zu Ihnen nach Krefeld.",
     "topografieAnker": "Krefeld liegt linksrheinisch zwischen A57 im Westen und dem Rhein im Osten; die vier Wälle umschließen die planmäßig angelegte Innenstadt."
   },
@@ -343,10 +330,6 @@
     "unfallHotspots": [],
     "lokaleFaqs": [
       {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Lübeck vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in St. Lorenz steht, in Travemünde oder nach einem Unfall auf der A1."
-      },
-      {
         "frage": "Was ist Wertminderung?",
         "antwort": "Der Wertverlust, weil Ihr Fahrzeug als Unfallwagen gilt. Er steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
       }
@@ -405,10 +388,6 @@
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Oberhausen vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sterkrade steht, in Osterfeld oder nach einem Unfall am Kreuz Oberhausen."
-      },
       {
         "frage": "Unfall am Kreuz Oberhausen — wer zahlt den Gutachter?",
         "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, ob auf der A2, A3 oder A42."
@@ -491,10 +470,6 @@
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Erfurt vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Daberstedt steht, in Ilversgehofen oder nach einem Unfall auf der A4."
-      },
       {
         "frage": "Darf ich meine Werkstatt frei wählen?",
         "antwort": "Ja, auch entgegen dem Vorschlag der Versicherung."
@@ -586,12 +561,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Mainz vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Neustadt steht, in Gonsenheim oder nach einem Unfall auf der A60."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A60, Parkschaden in der Altstadt oder Zusammenstoß auf der Theodor-Heuss-Brücke — der Sachverständige kommt zu Ihnen nach Mainz.",
     "topografieAnker": "Mainz liegt gegenüber der Mainmündung am linken Rheinufer; A60 und A643 umschließen die Stadt, drei Rheinbrücken verbinden sie mit Wiesbaden."
   },
@@ -662,12 +632,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Rostock vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Warnemünde steht, in Lütten Klein oder nach einem Unfall auf der A19."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A19, Parkschaden in der Kröpeliner Straße oder Zusammenstoß in Warnemünde — der Sachverständige kommt zu Ihnen nach Rostock.",
     "topografieAnker": "Die Warnow teilt Rostock und mündet bei Warnemünde in die Ostsee; die A19 endet südlich der Stadt, die A20 führt als Ostseeautobahn westlich vorbei."
   },
@@ -739,10 +704,6 @@
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Kassel vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Wehlheiden steht, in Bettenhausen oder nach einem Unfall auf der A7."
-      },
       {
         "frage": "Darf ich meine Werkstatt frei wählen?",
         "antwort": "Ja, auch gegen den Vorschlag einer Partnerwerkstatt."
@@ -820,12 +781,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Hagen vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Wehringhausen steht, in Hohenlimburg oder nach einem Unfall auf der A45."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A45, Parkschaden in Wehringhausen oder Zusammenstoß in Hohenlimburg — der Sachverständige kommt zu Ihnen nach Hagen.",
     "topografieAnker": "Hagen liegt am Südrand des Ruhrgebiets, wo Volme, Ennepe und Lenne in die Ruhr münden; A1, A45 und A46 treffen im Stadtgebiet aufeinander."
   },
@@ -903,12 +859,7 @@
       ]
     },
     "unfallHotspots": [],
-    "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Potsdam vor Ort?",
-        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Babelsberg steht, in Bornstedt oder nach einem Unfall auf der A115."
-      }
-    ],
+    "lokaleFaqs": [],
     "heroAnker": "Ob Auffahrunfall auf der A115, Parkschaden in der Brandenburger Straße oder Zusammenstoß in Babelsberg — der Sachverständige kommt zu Ihnen nach Potsdam.",
     "topografieAnker": "Potsdam liegt zwischen Havelseen und Parklandschaft; die A115 als AVUS führt nach Berlin, der Berliner Ring A10 umschließt die Region."
   },
@@ -975,10 +926,6 @@
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      {
-        "frage": "Wie schnell ist ein Kfz-Gutachter in Saarbrücken vor Ort?",
-        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in St. Johann steht, in Dudweiler oder nach einem Unfall auf der A620."
-      },
       {
         "frage": "Mein Unfallgegner kam aus Frankreich. Was ändert das?",
         "antwort": "Bei einem Unfall auf deutschem Boden gilt deutsches Recht, und der französische Versicherer hat einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert oft etwas länger — ein Gutachten mit belastbaren Zahlen beschleunigt sie."
