@@ -40,8 +40,19 @@ permissions:
 env:
   # DAS ist der eine Unterschied zum nightly-Job.
   PLAYWRIGHT_BASE_URL: https://app.staging.claimondo.de
-  STAGING_BASIC_AUTH_USER: ${{ secrets.STAGING_BASIC_AUTH_USER }}
-  STAGING_BASIC_AUTH_PASS: ${{ secrets.STAGING_BASIC_AUTH_PASS }}
+  # ⚠ Fuer die staging-Basic-Auth existieren im Repo DREI Secret-Namenspaare nebeneinander:
+  #     SMOKE_BASIC_AUTH_USER / _PASS            (14.05.)
+  #     STAGING_BASIC_USER    / _PASS            (14.05.)
+  #     STAGING_BASIC_AUTH_USERNAME / _PASSWORD  (12.05.)
+  # Der erste Gate-Lauf (32651003780) scheiterte, weil hier `STAGING_BASIC_AUTH_USER`
+  # stand — ausgerechnet die einzige Schreibweise, die es NICHT gibt. Im Log war das
+  # sichtbar als leerer Wert neben lauter `***`.
+  #
+  # SMOKE_BASIC_AUTH_* steht vorn, weil es als einziges Paar einen Wirksamkeitsnachweis
+  # hat: `smoke-staging.yml` faehrt damit taeglich erfolgreich gegen app.staging.claimondo.de.
+  # Die Fallback-Kette deckt die beiden anderen ab, falls jemand aufraeumt.
+  STAGING_BASIC_AUTH_USER: ${{ secrets.SMOKE_BASIC_AUTH_USER || secrets.STAGING_BASIC_USER || secrets.STAGING_BASIC_AUTH_USERNAME }}
+  STAGING_BASIC_AUTH_PASS: ${{ secrets.SMOKE_BASIC_AUTH_PASS || secrets.STAGING_BASIC_PASS || secrets.STAGING_BASIC_AUTH_PASSWORD }}
   NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
   NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -109,12 +120,22 @@ jobs:
             echo "    -connect app.staging.claimondo.de:443 2>/dev/null | openssl x509 -noout -dates"
             exit 1
           fi
-          # 401 ist hier der ERWARTETE Wert ohne Credentials — er beweist, dass nginx lebt.
+          # Leeres Secret VOR dem Request abfangen: sonst ist der 401 nicht von falschen
+          # Credentials zu unterscheiden — und man sucht den Fehler am Server statt an der
+          # Konfiguration. Genau das passierte im ersten Gate-Lauf (32651003780).
+          if [ -z "$STAGING_BASIC_AUTH_USER" ] || [ -z "$STAGING_BASIC_AUTH_PASS" ]; then
+            echo "::error title=Journey-Gate: Basic-Auth-Secret leer::Weder SMOKE_BASIC_AUTH_* noch STAGING_BASIC_* noch STAGING_BASIC_AUTH_USERNAME/PASSWORD lieferten einen Wert."
+            echo "Vorhandene Secrets pruefen mit: gh secret list | grep -iE 'staging|basic'"
+            exit 1
+          fi
+
+          # 401 ist ohne Credentials der ERWARTETE Wert — er beweist, dass nginx lebt.
+          # MIT Credentials waere er ein Befund.
           status=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 \
             -u "$STAGING_BASIC_AUTH_USER:$STAGING_BASIC_AUTH_PASS" "$PLAYWRIGHT_BASE_URL/login")
           echo "Mit Basic-Auth: HTTP $status"
           if [ "$status" = "401" ]; then
-            echo "::error title=Journey-Gate: Basic-Auth abgelehnt::STAGING_BASIC_AUTH_USER/PASS pruefen (Secret gesetzt? leer?)"
+            echo "::error title=Journey-Gate: Basic-Auth abgelehnt::Secret ist gesetzt, aber staging weist es zurueck — Wert veraltet? (nginx: /etc/nginx/.htpasswd-staging)"
             exit 1
           fi
 
