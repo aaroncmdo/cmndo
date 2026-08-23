@@ -70,7 +70,9 @@ Hast du selbst repariert oder in einer Werkstatt, die keine vollständige Rechnu
 
 ### Nutzungsausfall trotz fiktiver Abrechnung
 
-Nutzungsausfall setzt voraus, dass du das Fahrzeug tatsächlich nicht nutzen konntest und ein **Nutzungswille** bestand. Rechnest du fiktiv ab, verlangt die Versicherung regelmäßig einen Nachweis, dass überhaupt repariert wurde — sonst bestreitet sie den Ausfallzeitraum. Die Details zum Anspruch stehen unter [Nutzungsausfall](/haftpflicht/nutzungsausfall).
+Hier ist eine Unterscheidung wichtig, die in Kürzungsschreiben gern verwischt wird: Dass du dein Auto **genutzt** hättest, musst du **nicht** beweisen — bei privat genutzten Fahrzeugen gilt die Eigennutzungs-Vermutung, und der Versicherer müsste eine Nicht-Nutzung belegen (siehe [Nutzungsausfall](/haftpflicht/nutzungsausfall)). Worum es hier geht, ist etwas anderes: die **Dauer** des Ausfalls.
+
+Rechnest du fiktiv ab, sieht die Versicherung keinen Reparaturzeitraum und bestreitet regelmäßig, wie lange das Fahrzeug überhaupt ausgefallen ist. Die Bestätigung belegt genau das — nicht deinen Nutzungswillen.
 
 ### 130-Prozent-Fälle
 
