@@ -13,6 +13,8 @@ function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
     meta_description: 'Nutzungsausfall nach Unfall berechnen — Tabelle, Fristen, BGH.',
     // NULL = der Normalfall: ohne gepflegten SERP-Titel faellt die Seite auf `title` zurueck.
     meta_title: null,
+    // NULL = ohne Tags rendert die Sektion „Passend zum Thema" nichts (WissenVerwandteThemen).
+    tags: null,
     primary_keyword: 'Nutzungsausfall berechnen',
     cluster: 'H3',
     artikel_typ: 'glossar-spoke',

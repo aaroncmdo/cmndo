@@ -52,16 +52,40 @@ const TAG_ZIELE: Record<string, string[]> = {
     '/decoder/pauschal-abgeltung',
     '/decoder/werkstatt-netz',
   ],
-  // 'Markt & News' und 'Tools' bewusst ohne Ziele — zu unspezifisch für einen
-  // fachlichen Verweis. Trägt ein Artikel NUR solche Tags, rendert die Sektion nichts.
+  // 'Markt & News' und 'Tools' stehen bewusst NICHT hier: für einen fachlichen
+  // Spoke-Verweis sind sie zu unspezifisch — ein Branchennews-Artikel passt nicht
+  // zu '/haftpflicht/beilackierung'. Sie greifen stattdessen auf FALLBACK_ZIELE.
 }
+
+/**
+ * Greift nur, wenn KEINES der Artikel-Tags fachliche Ziele liefert.
+ *
+ * Bewusst nicht als weiterer TAG_ZIELE-Eintrag: dort stünden die allgemeinen
+ * Einstiegsseiten gleichrangig neben den Spokes und würden bei gemischt getaggten
+ * Artikeln ('Markt & News' + 'Gutachten') zwei fachliche Ziele verdrängen — der
+ * Verweis würde unschärfer, nicht besser. Als Fallback ändert sich für die 67
+ * fachlich getaggten Artikel nichts.
+ *
+ * Anlass: der Regel-4-Smoke nach #5528 fand 1 von 68 Artikeln ohne jeden
+ * Weiterweg (nur 'Markt & News' getaggt) — also weiterhin eine Sackgasse,
+ * genau das, was die Sektion beenden sollte.
+ *
+ * ⚠ Bewusst NICHT '/ratgeber', obwohl es der zweite Cornerstone ist: die Seite
+ * canonicalisiert auf '/unfall-was-tun-als-geschaedigter' (Stream B.5 — Ranking-
+ * Signal bündeln statt kannibalisieren). Ein interner Link auf die konsolidierte
+ * Dublette arbeitet gegen genau diese Absicht. Beide Ziele hier sind self-canonical
+ * und stehen in der Sitemap; '/sachverstaendige/pruefdienstleister' trifft
+ * Branchen-/Markt-Themen zudem inhaltlich besser als ein Geschädigten-Ratgeber.
+ */
+const FALLBACK_ZIELE = ['/kfz-haftpflicht-schaden', '/sachverstaendige/pruefdienstleister']
 
 export function WissenVerwandteThemen({ tags }: { tags: string[] | null }) {
   if (!tags?.length) return null
 
   // Reihenfolge der Artikel-Tags bestimmt die Priorität; pro Tag reihum ein Ziel,
   // damit bei mehreren Tags nicht ein einziger Tag alle Plätze belegt.
-  const proTag = tags.map((t) => TAG_ZIELE[t] ?? []).filter((l) => l.length > 0)
+  const fachlich = tags.map((t) => TAG_ZIELE[t] ?? []).filter((l) => l.length > 0)
+  const proTag = fachlich.length > 0 ? fachlich : [FALLBACK_ZIELE]
   const urls: string[] = []
   for (let runde = 0; urls.length < MAX_ZIELE; runde++) {
     const vorher = urls.length

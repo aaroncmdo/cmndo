@@ -978,7 +978,27 @@ html { scroll-behavior: smooth; }
  * ⚠ Wird die Karte deutlich hoeher als 275 px (z. B. wenn ProvenExpert das Layout
  * aendert), rutscht ihre Oberkante unter den Header. Dann diesen Wert nachziehen.
  */
+/* Und: unter die Overlay-Schicht. Das Widget setzt inline `z-index: 9999`, damit
+ * lag das Siegel ueber JEDEM eigenen Overlay. Auf /gutachter-finden verdeckte es
+ * das Bottom-Sheet — gemessen 23.08.2026 per document.elementFromPoint() auf der
+ * Mitte jedes Bedienelements (also: was bekaeme den Fingertipp?):
+ *
+ *   iPhone SE · iPhone 12 · Pixel 5 · Galaxy S9+ · Desktop 1440
+ *   7 verdeckte Bedienelemente, ALLE durch .pe-front-page — darunter auf jedem
+ *   Geraet der „Schliessen"-Knopf: das Sheet liess sich nicht mehr zumachen.
+ *   Mit dieser Regel: 0.
+ *
+ * Warum die Messung vom 13.08. („null Ueberlappung mit fixen Elementen") das nicht
+ * sah: ein GESCHLOSSENES Sheet steht per translate-y-[110%] ausserhalb des Bildes
+ * und ueberlappt naturgemaess nichts. Der Konflikt entsteht erst beim Oeffnen.
+ *
+ * 39 = direkt unter der Overlay-Schicht 40 (Backdrop des FinderSprungPanels,
+ * sticky Header, CTA-Leiste) und unter den Sheets (50) — aber weiter ueber allem
+ * normalen Inhalt, das Siegel bleibt also sichtbar. Hoeher zu gehen hiesse, das
+ * Problem nur zu verschieben: jedes kuenftige Overlay haette denselben Konflikt.
+ */
 .pe-pro-seal {
   top: 340px !important;
   bottom: auto !important;
+  z-index: 39 !important;
 }

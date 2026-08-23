@@ -525,6 +525,11 @@ export async function fetchPruefeAnspruch(
   return {
     schuldfrage: data.schuldfrage ?? schuldfrage,
     schadenart: data.schadenart ?? null,
+    // ⚠ Dieses Mapping ist Feld-fuer-Feld: ein hier FEHLENDES Feld faellt still weg,
+    // auch wenn Typ + outputSchema es deklarieren (optional -> tsc schweigt). Genau
+    // das passierte `abrechnungsweg`: die API lieferte 'kasko', die Tool-Description
+    // verwies das Modell ausdruecklich darauf — und es kam nie an.
+    abrechnungsweg: data.abrechnungsweg ?? null,
     anspruchslage: data.anspruchslage ?? 'unklar',
     eigenkosten: data.eigenkosten ?? '',
     ansprueche: data.ansprueche ?? [],
@@ -541,6 +546,16 @@ export function formatPruefeAnspruch(r: PruefeAnspruchResult): string {
     lines.push('**Ihre Ansprüche:**')
     for (const a of r.ansprueche) lines.push(`- **${a.titel}** (${a.norm}) — ${a.hinweis}`)
     lines.push('')
+  }
+  // Den Abrechnungsweg AUCH in den Text: `structuredContent` liest nicht jeder Client,
+  // der Markdown-Text landet dagegen immer im Modell-Kontext.
+  if (r.abrechnungsweg) {
+    const wege: Record<string, string> = {
+      haftpflicht: 'Gegnerische Haftpflicht — Gutachter zuerst, für Sie kostenfrei (§ 249 BGB).',
+      kasko: 'Eigene Vollkasko — Werkstatt zuerst; die Versicherung reguliert abzüglich Selbstbeteiligung.',
+      selbstzahler: 'Selbstzahler — Werkstatt zuerst; ein Kostenvoranschlag genügt meist.',
+    }
+    lines.push(`**Abrechnungsweg:** ${wege[r.abrechnungsweg] ?? r.abrechnungsweg}`, '')
   }
   lines.push(`**Nächster Schritt:** ${r.naechster_schritt}`, '', `_${r.hinweis}_`)
   return lines.join('\n')
