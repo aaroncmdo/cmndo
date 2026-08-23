@@ -1,4 +1,8 @@
-# Gewinnspiel „Tankgutschein" — Design-Spec
+# Gewinnspiel „50 € Gutschein" — Design-Spec
+
+> Dateiname und Branch tragen noch „tankgutschein". Seit E11 ist die Praemie ein
+> **Katalog** verschiedener Gutschein-Arten (Tanken, Laden, Shopping), aus dem
+> der Gewinner waehlt.
 
 **Datum:** 2026-08-23
 **Status:** Design abgestimmt (Aaron), Implementierungsplan folgt
@@ -33,6 +37,8 @@ regulaerer Lead und laeuft durch den bestehenden Funnel.
 | E8 | Nativer Gutachter-Finder | **Nimmt teil** (groesster Kanal, eigene Domaene) |
 | E9 | Topbar-Auslieferung | **Zentrale Kampagnen-API**, Markup lokal je Build |
 | E10 | WhatsApp-Verifikation | **Bestehende Baileys-Nummer**, alle Leads (Aaron: „aktuell laeuft nicht viel darueber") |
+| E11 | Praemie | **Katalog verschiedener Gutschein-Arten** (Tanken, Shopping, …), aus dem der Nutzer waehlt — nicht ein fester Gutschein |
+| E12 | Zeitpunkt der Wahl | **Beim Gewinn**, nicht bei der Teilnahme (Begruendung 5.3) |
 
 ---
 
@@ -197,8 +203,20 @@ Zwei neue Tabellen. **Keine** Aenderung am bestehenden Lead-Modell.
 - `topbar_text`, `topbar_cta_text`, `topbar_aktiv` (bool)
 - `aktiv` (bool), `erstellt_am`
 
+**`gewinnspiel_praemien`** (Katalog, E11)
+- `id`, `kampagne_id` (FK)
+- `name` (z. B. „Tankgutschein", „Shopping-Gutschein")
+- `beschreibung` — wo einloesbar; beim Tankgutschein die sechs Anbieter
+- `bild_pfad`, `betrag_eur`
+- `sortierung`, `aktiv`
+
+Der Katalog ist bewusst datengetrieben: welche Arten angeboten werden, aendert
+sich mit dem Anbieter und der Saison. Ein hartkodierter Gutschein waere bei jeder
+Aenderung ein Deploy — und auf sieben Builds.
+
 **`gewinnspiel_teilnahmen`**
 - `id`, `kampagne_id` (FK)
+- `gewaehlte_praemie_id` (FK → `gewinnspiel_praemien`, nullable — wird erst beim Gewinn gesetzt)
 - `anfrage_id` (FK → `gutachter_finder_anfragen`, nullable)
 - `lead_id` (FK → `leads`, nullable) — genau eine der beiden gesetzt
 - `telefon_normalisiert` (text) — Dedup-Schluessel
@@ -230,10 +248,16 @@ Lead (beliebige Quelle) mit Telefon
   ──────── taeglich, ein Admin-Klick ────────
   → bis zu 3 Gewinner aus den verifizierten Teilnahmen des Vortags
   → Gewinner erhaelt Nachricht + Upload-Link (Muster: /upload/dokumente/[token])
+     Auf derselben Seite: Wahl der Praemie aus dem Katalog (E12)
   → Admin sichtet den Nachweis
-     → bestaetigt ⇒ Gutschein-Code wird eingetragen und versendet
+     → bestaetigt ⇒ Gutschein der gewaehlten Art beschaffen,
+                     Code eintragen, versenden
      → abgelehnt  ⇒ automatisch nachgezogen
 ```
+
+Nachweis und Praemien-Wahl liegen bewusst auf **einer** Seite: der Gewinner
+kommt ohnehin genau einmal dorthin, und die angenehme Aufgabe (waehlen) neben der
+laestigen (Nachweis hochladen) hebt die Abschlussquote.
 
 ### 4.4 Bestehende Infrastruktur, die wiederverwendet wird
 
@@ -274,16 +298,32 @@ Daraus folgt zwingend:
 
 Die naheliegende Wahl waere „Versicherung → Navy + Gold, serioes". Das ist der
 Kategorie-Reflex und wird verworfen. Die Lane kommt stattdessen aus dem Preis
-selbst:
+selbst — und weil der Preis laut E11 **waehlbar** ist, ist die Botschaft nicht
+„Tanken", sondern **Wahlfreiheit**:
 
-**Die Preisanzeige einer Tankstelle bei Nacht.**
+**Der Geschenkkarten-Staender.**
 
-- Sehr grosse, tabulare Ziffern als traegendes Element (`50,00`), nicht ein
-  Icon-plus-Ueberschrift-Block.
-- Warmes Leuchten als einziger Akzent auf tiefem Grund — Farbstrategie
-  **Drenched** (die Flaeche *ist* die Farbe), ein Akzentton ausschliesslich fuer
-  Betrag und CTA.
+Jeder kennt das Bild: die Reihe echter Karten an der Supermarktkasse, aus der man
+sich eine nimmt. Das traegt drei Dinge auf einmal — Konkretheit (echte Karten,
+kein abstraktes Versprechen), die Wahl (mehrere Arten nebeneinander) und den
+Beweis (die Marken sind sichtbar).
+
+- **Die Karten sind die Bildwelt.** Kein Stock-Foto, keine Farbflaeche als
+  Platzhalter: die Karten werden als Vektor gebaut bzw. aus den Produktbildern
+  des Anbieters gesetzt — in jeder Groesse scharf und schnell geladen.
+- **Die Zahl bleibt der Anker.** Sehr grosse, tabulare Ziffern (`50 €`), damit
+  der Betrag den ersten Bildschirm dominiert und die Karten ihn belegen.
+- Farbstrategie **Drenched** (die Flaeche *ist* die Farbe) auf Navy, ein warmer
+  Akzentton ausschliesslich fuer Betrag und CTA. Die Karten bringen ihre eigenen
+  Markenfarben mit — deshalb muss der Rest der Seite ruhig bleiben, sonst wird es
+  bunt.
 - Konkret und alltagsnah statt Konfetti-Scam oder Corporate-Serioesitaet.
+
+⚠ **Markenrecht:** Fremde Logos (ARAL, Esso, Amazon, …) auf der eigenen
+Werbeseite. Die **Nennung** zur Beschreibung des Angebots ist nach § 23 MarkenG
+gedeckt; die **Logo-Abbildung** ist der heiklere Fall. Sicherer Weg: die
+Produktbilder verwenden, die der Gutschein-Anbieter seinen Partnern zur Bewerbung
+bereitstellt (→ O2).
 
 Der Akzentton wird **nicht** aus den Status-Tokens (`warning`/`success`)
 entliehen — die tragen Bedeutung. Die Marketing-Builds liegen ausserhalb des
@@ -297,6 +337,12 @@ Die Design-Entscheidungen, die auf die Conversion einzahlen:
 1. **Formular above the fold.** Kein Scrollen bis zur ersten Eingabe.
 2. **Minimalfelder.** Name, Telefon, „unverschuldet?", Einwilligungen. Jedes
    weitere Feld kostet messbar Abschluesse. Alles Uebrige holt der Anruf.
+   **Deshalb E12:** Die Praemien-Wahl ist ein *Verkaufsargument*, aber kein
+   Formularfeld. Die Karten werden im ersten Bildschirm **gezeigt** („50 € —
+   tanken, laden oder shoppen, du entscheidest"), **gewaehlt** wird erst in der
+   Gewinn-Nachricht. Das haelt die Teilnahme reibungsfrei, macht die Wahl zu
+   einem positiven Moment und erlaubt es, den Gutschein erst nach der
+   Entscheidung zu beschaffen.
 3. **Keine Navigation.** Die LP hat keinen Header mit Ausgaengen; jeder Link,
    der nicht zum Formular fuehrt, ist ein Leck.
 4. **Message Match.** Betrag und Mechanik stehen wortgleich zur Anzeige im
@@ -315,7 +361,7 @@ Formular.
 
 | # | Abschnitt | Inhalt | Zweck |
 |---|---|---|---|
-| 1 | **Preis-Fold** | Die Zahl als Tankstellen-Anzeige, ein Satz Mechanik, direkt darunter das Formular. Kein Header, keine Navigation. | Message Match + Eingabe ohne Scrollen |
+| 1 | **Preis-Fold** | Die Zahl gross, daneben der Karten-Faecher, ein Satz Mechanik, direkt darunter das Formular. Kein Header, keine Navigation. | Message Match + Eingabe ohne Scrollen |
 | 2 | **Drei Schritte** | „Teilnehmen · Gezogen werden · Nachweis zeigen" — als knappe Zeile, nicht als Icon-Karten-Raster | Erwartung setzen, Scam-Verdacht nehmen |
 | 3 | **Wer dahintersteht** | Claimondo in zwei Saetzen, echte Zahlen, Anschrift sichtbar | Der Vertrauensanker; ohne ihn liest sich alles wie Fake |
 | 4 | **Gewinner** | Die des Vortags, anonymisiert („M. K. aus Koeln"). Vor dem ersten Gewinner: entfaellt ersatzlos statt Platzhalter | Sozialer Beweis, sobald echt |
@@ -336,10 +382,29 @@ Eine Zeile, ueber allem, auf allen 7 Builds. Sie muss:
 - Kontrast AA gegen ihren Grund halten,
 - und **verschwinden**, sobald die Kampagne in B1 auf inaktiv steht.
 
-### 5.6 Offene Asset-Frage
+### 5.6 Assets — Stand
 
-Der Skill fordert echte Bildwelt statt Farbflaechen. Zu klaeren mit Aaron
-(→ Abschnitt 9).
+**Vorhanden im Repo** (`claimondo-marketing/public/`), echtes Material statt Stock:
+
+| Zweck | Datei |
+|---|---|
+| Vertrauensabschnitt | `brand/team-founders.png`, `brand/team-office.jpg`, `brand/team-headset.png` |
+| Menschen/Situation | `img/home/hero-paar.webp`, `img/home/berater.webp`, `img/home/sv-vor-ort.webp` |
+
+**Trust-Zahlen** — bereits auf claimondo.de veroeffentlicht und damit freigegeben:
+
+- „Deutschlandweit über 50 Partner-Gutachter"
+- „Kfz-Gutachter unter 48 h vor Ort"
+- „Rückruf in unter 15 Minuten"
+- „Ø 32 Tage von der Unfallmeldung zur Auszahlung"
+- „0 € für Sie (§ 249 BGB)"
+
+**Fehlt noch:** hochaufloesende Produktbilder der Gutscheinkarten. Das von Aaron
+gelieferte Foto ist **310 × 219 px / 13 KB** — als Hero-Element zu klein, auf
+Retina sichtbar unscharf. Zwei Wege: Original-Assets vom Anbieter (→ O2) oder
+die Karten als Vektor nachbauen. Der Vektor ist ohnehin die bessere Loesung fuer
+den Faecher (skalierbar, animierbar, wenige KB) — die Anbieter-Bilder werden dann
+nur fuer die Marken-Kacheln gebraucht.
 
 ---
 
@@ -429,14 +494,18 @@ Bindend fuer die Umsetzung, hier festgehalten damit sie im Plan nicht untergehen
 
 ## 9 · Offene Punkte
 
-| # | Punkt | Wer |
-|---|---|---|
-| O1 | **Assets** fuer die LP: Bildwelt, Gutschein-Visual, Anbieter | Aaron |
-| O2 | Gutschein-Anbieter und Beschaffungsweg (bestimmt, ob P2 einen Code-Pool braucht) | Aaron |
-| O3 | Kampagnen-Laufzeit und Startdatum | Aaron |
-| O4 | Laeuft ueber den GTM-Container bereits ein Meta-/TikTok-Pixel? | Aaron / GTM-Zugriff |
-| O5 | Rechtstexte final (Teilnahmebedingungen) — Entwurf durch uns, Freigabe extern | Aaron |
-| O6 | Schwellwert, ab dem der WhatsApp-Outbound von Baileys auf die offizielle Business-API wechselt | spaeter, mit Volumen |
+| # | Punkt | Wer | Blockiert |
+|---|---|---|---|
+| ~~O1~~ | ~~Bildwelt~~ — **geklaert:** eigene Fotos im Repo, Trust-Zahlen aus dem Bestand (5.6) | — | — |
+| **O2** | **Gutschein-Anbieter**: welche Praemien-Arten stehen zur Wahl, und gibt es ein Partner-Kit mit hochaufloesenden Produktbildern? | Aaron | P3 (Bildqualitaet), P2 (Katalog-Inhalt) |
+| O3 | Kampagnen-Laufzeit und Startdatum | Aaron | nichts — Feld in B1 |
+| O4 | Laeuft ueber den GTM-Container bereits ein Meta-/TikTok-Pixel? | Aaron / GTM-Zugriff | P5 |
+| O5 | Rechtstexte final (Teilnahmebedingungen) — Entwurf durch uns, Freigabe extern | Aaron | Launch, nicht der Bau |
+| O6 | Schwellwert, ab dem der WhatsApp-Outbound von Baileys auf die offizielle Business-API wechselt | spaeter, mit Volumen | nichts |
+
+**Keiner dieser Punkte blockiert P1 oder P2.** Der Praemien-Katalog ist
+datengetrieben (E11) — welche Arten final darin stehen, ist zur Bauzeit
+unerheblich.
 
 ---
 
