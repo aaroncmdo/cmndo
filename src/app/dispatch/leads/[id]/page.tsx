@@ -16,6 +16,7 @@ import { ladeLeadTerminGutachter } from '@/lib/dispatch/lade-lead-termin-gutacht
 import LeadTerminGutachterBanner from './_components/LeadTerminGutachterBanner'
 import { deriveLeadWorkflowState } from './_lib/deriveLeadWorkflowState'
 import LeadWorkflowPanel from './_components/LeadWorkflowPanel'
+import LeadNachrichtenPanel from './_components/LeadNachrichtenPanel'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 import { evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
@@ -203,6 +204,12 @@ export default async function DispatchLeadDetail({
         freigeschalteteSlotIds={freigeschalteteSlotIds}
         currentWerkstatt={currentWerkstatt}
       />
+      {/* Nachrichten des Interessenten — erster Leser von nachrichten.lead_id.
+          Unterhalb des Formulars: die Nachricht ist Kontext fuer die Bearbeitung,
+          kein eigener Arbeitsschritt. */}
+      <div className="mt-4">
+        <LeadNachrichtenPanel leadId={id} />
+      </div>
     </>
   )
 }
