@@ -28,7 +28,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # fetch-depth: 0 fuer den Journey-Bezug-Step (unten): der Default-Checkout ist FLACH,
+      # und ohne gemeinsamen Vorfahren scheitert `git diff origin/staging...HEAD` mit
+      # "no merge base". Der Step meldete dann `success` und mass NICHTS — gemessen am
+      # ersten CI-Lauf dieses PRs (32648323751). Ein gezieltes
+      # `git fetch --depth=100 origin staging` reicht NICHT: die 100 Commits des
+      # Base-Branch helfen nicht, wenn der eigene HEAD keine Historie hat.
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -56,6 +64,23 @@ jobs:
       - name: Lint
         run: npm run lint
         continue-on-error: true
+
+      # Journey-Bezug (23.08.): meldet der Session, welchen GANZEN Lauf ihr PR beruehrt —
+      # nicht nur, welche Datei sie geaendert hat. Ergebnis landet in der Job-Summary.
+      #
+      # INFORMATIV, blockiert nie (das Script endet immer mit Exit 0). Geblockt wird am
+      # Release-Tor (journey-gate.yml), wo wirklich gemessen wird; hier wuerde geraten —
+      # eine Journey zu beruehren heisst nicht, sie zu brechen.
+      #
+      # ⚠ Der Base-Branch muss geholt werden, auch mit fetch-depth: 0 — der Checkout laedt
+      # zwar die volle Historie des PR-Branch, aber `origin/staging` als Ref existiert
+      # danach nicht zwangslaeufig.
+      - name: Journey-Bezug
+        run: |
+          git fetch --no-tags origin "${{ github.base_ref || 'staging' }}" || true
+          npm run check:journey-bezug
+        env:
+          JOURNEY_DIFF_BASIS: origin/${{ github.base_ref || 'staging' }}
 
       # AAR-token-audit (PR #1025): Drift-Bremse gegen nicht-dokumentierte Hex-
       # Verwendungen in src/. Blockt neue `bg-[#xxx]` Klassen + raw inline-hex
@@ -551,7 +576,16 @@ jobs:
     # bisher UNUNTERSUCHTER Ursache.
     # ⚠ Und die eigentliche Lehre: ein Cap, das an einer Testzahl kalibriert wurde, veraltet
     # mit jedem neuen Spec. Wer Tests ergaenzt, prueft diese Rechnung mit.
-    timeout-minutes: 90
+    #
+    # 90 -> 25 (23.08.): Die ganze Cap-Geschichte oben (20 -> 45 -> 90) drehte sich
+    # ausschliesslich um den Sammel-Step — der ist seit 23.08. ein eigener Job (`e2e-rest`,
+    # am Dateiende) und traegt das 90er-Cap dort weiter. Was hier bleibt, sind Setup (99 s)
+    # + die Journey-Steps (212 s) = ~5:11, gemessen am nightly-Lauf 32617054709.
+    # Der Grund fuer die Trennung: der Job war seit 14.08. DURCHGEHEND rot oder cancelled,
+    # obwohl alle 10 Journeys gruen liefen — rot war allein der Sammel-Step. Ein Waechter,
+    # dessen Anzeige sich nicht mehr aendern kann, wacht nicht.
+    # ⚠ Wer Journeys ergaenzt, prueft diese Rechnung mit.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -834,6 +868,76 @@ jobs:
           TEST_ADMIN_EMAIL: ${{ secrets.TEST_ADMIN_EMAIL }}
           TEST_ADMIN_PASSWORD: ${{ secrets.TEST_ADMIN_PASSWORD }}
 
+      # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
+      # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
+      # am dringendsten braucht. Belegt am 19. + 20.08.: beide nightly-Laeufe liefen in das
+      # 45-min-Cap, beide Uploads standen auf `skipped`, es gab keinerlei Diagnose darueber,
+      # wie weit die Suite gekommen war. `cancelled()` deckt genau diesen Fall mit ab.
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: Upload Traces
+        uses: actions/upload-artifact@v4
+        if: failure() || cancelled()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  # Der Sammel-Lauf ueber ALLE uebrigen Specs — seit 23.08. ein EIGENER Job.
+  #
+  # Vorher haing er als letzter Step im `e2e`-Job und faerbte ihn dauerhaft rot, obwohl
+  # alle 10 Journey-Steps gruen waren. Gemessen an den nightly-Laeufen 14.-23.08.:
+  # 7x cancelled, dann 3x failure — kein einziges Mal gruen, waehrend die Journeys
+  # durchgehend durchliefen. Damit war der Journey-Waechter BLIND: braeche J4 wirklich,
+  # aenderte sich an der Anzeige nichts. Ein Alarm, der immer schrillt, ist keiner.
+  #
+  # ⚠ Dieser Job DARF rot sein, ohne dass eine Journey kaputt ist (Marketing-Specs gegen
+  # die falsche Domain, verbrauchte Fixtures, Text-Drift). Wer hier rot sieht, schaut
+  # zuerst auf `e2e` — DER beantwortet die Frage "ist eine Journey gebrochen".
+  #
+  # `needs: e2e` ist Absicht: der Sammel-Lauf fasst dieselben Fixtures ein zweites Mal an
+  # (s. E2E_SEEDS_VERBRAUCHT unten) und muss deshalb NACH den Journey-Steps laufen.
+  e2e-rest:
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    # Gemessen 20.08. (Lauf 32362782482): der Sammel-Step allein braucht 46:13.
+    # 90 = 46 + Puffer fuer retries:1 und Testwachstum.
+    timeout-minutes: 90
+    concurrency:
+      group: prod-e2e-rest
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Playwright Chromium
+        run: |
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" = "true" ]; then
+            npx playwright install-deps chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+
       - name: Run E2E Tests
         run: npx playwright test
         env:
@@ -896,23 +1000,22 @@ jobs:
           SV_EMAIL: ${{ secrets.SV_EMAIL }}
           SV_PASS: ${{ secrets.SV_PASS }}
 
-      # ⚠ `failure()` allein reicht NICHT: ein Job-Timeout endet als `cancelled`, nicht als
-      # `failure` — der Report wurde dabei also gerade dann NICHT hochgeladen, wenn man ihn
-      # am dringendsten braucht. Belegt am 19. + 20.08.: beide nightly-Laeufe liefen in das
-      # 45-min-Cap, beide Uploads standen auf `skipped`, es gab keinerlei Diagnose darueber,
-      # wie weit die Suite gekommen war. `cancelled()` deckt genau diesen Fall mit ab.
-      - name: Upload Playwright Report
+      # `cancelled()` mit abdecken: ein Job-Timeout endet als cancelled, nicht als failure —
+      # der Report fehlte also gerade dann, wenn man ihn am dringendsten braucht.
+      - name: Upload Playwright Report (Rest)
         uses: actions/upload-artifact@v4
         if: failure() || cancelled()
         with:
-          name: playwright-report
+          name: playwright-report-rest
           path: playwright-report/
           retention-days: 7
+          if-no-files-found: warn
 
-      - name: Upload Traces
+      - name: Upload Traces (Rest)
         uses: actions/upload-artifact@v4
         if: failure() || cancelled()
         with:
-          name: playwright-traces
+          name: playwright-traces-rest
           path: test-results/
           retention-days: 7
+          if-no-files-found: warn

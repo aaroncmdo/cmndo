@@ -63,7 +63,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "typecheck:embed": "tsc -p src/embed/monika/tsconfig.json",
-    "typecheck:embed:login": "tsc -p src/embed/login/tsconfig.json"
+    "typecheck:embed:login": "tsc -p src/embed/login/tsconfig.json",
+    "check:journey-bezug": "node scripts/check-journey-bezug.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
