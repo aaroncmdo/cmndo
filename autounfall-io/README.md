@@ -35,8 +35,9 @@ bleibt benannt. **KEIN Claimondo** (kein `#partner-service`, kein Name/Logo/Tele
 claimondo.de-Links). Siehe `ENTITY-MODELL-LOCK v2`.
 
 ## Offen (Aaron — blocken WP-0 nicht)
-- Eigene **au.io-Telefonnummer** (`NEXT_PUBLIC_SITE_PHONE`). `0221 25906530` = kfzgutachter-
-  Footprint → bis dahin Platzhalter (`SITE.phone = null`).
+- ~~Eigene au.io-Telefonnummer~~ — **erledigt/entschieden (Aaron 23.08.2026):** ueberall
+  dieselbe Nummer, `0151 5360 8515`, Default in `lib/site.ts`. Hebt die Vorgabe vom
+  14.06.2026 („au.io-eigene Nummer, kein Claimondo-Footprint") bewusst auf.
 - Eigene **GSC-Property** (am Launch-Tag, nicht mit claimondo verknüpfen).
 - **Repo-Ort** final (Unterordner vs. eigenes Repo) — Default Unterordner, blockt nicht.
 - Datenschutz §7: Auftragsverarbeiter der Formular-Daten (Kevin/Aaron) → WP-1.

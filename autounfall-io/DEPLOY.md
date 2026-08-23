@@ -24,7 +24,7 @@ GETRENNT von `/etc/claimondo/.env.local` (nur au.io-Secrets). `chmod 600`,
 | `NEXT_PUBLIC_SITE_URL` | client | `https://autounfall.io` |
 | `NEXT_PUBLIC_PLAUSIBLE_DOMAIN` | client | `autounfall.io` |
 | `NEXT_PUBLIC_SITE_EMAIL` | client | **au.io-eigene Mail** (Aaron — kein Claimondo-Footprint) |
-| `NEXT_PUBLIC_SITE_PHONE` | client | **au.io-eigene Nummer** (Aaron — nicht 0221 25906530) |
+| `NEXT_PUBLIC_SITE_PHONE` | client | **nicht setzen** — Default in `lib/site.ts` ist `0151 5360 8515` (Aaron 23.08.2026: ueberall dieselbe Nummer, hebt die 14.06.-Vorgabe „au.io-eigene Nummer" auf). Leer setzen ≠ nicht setzen: `??` faengt keinen Leerstring |
 | `NEXT_PUBLIC_SUPABASE_URL` | client | geteiltes Supabase (paizkjajbuxxksdoycev) |
 | `SUPABASE_SERVICE_ROLE_KEY` | **server-only** | geteiltes Supabase — niemals `NEXT_PUBLIC_*` |
 

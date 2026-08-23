@@ -48,9 +48,20 @@ export const SITE = {
     name: 'Verkehrsrechts-Partnerkanzlei',
   },
 
-  // Telefon: au.io-eigene Mobilnr (Entscheidung Aaron 14.06.2026 — ersetzt die
-  // 0221-Festnetznr, die in .env.example als Claimondo-Footprint geflaggt war).
-  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0171 20289514',
+  // Telefon: die zentrale Claimondo-Mobilnummer (Entscheidung Aaron 23.08.2026).
+  //
+  // HEBT DIE ENTSCHEIDUNG VOM 14.06.2026 AUF ("au.io-eigene Mobilnr, um den
+  // Claimondo-Footprint zu vermeiden"). Grund: es soll ueberall EINE Nummer
+  // hinterlegt sein. Die vorherige '0171 20289514' war die einzige Stelle im
+  // gesamten System, an der sie vorkam — sie tauchte in 325 Nachrichten kein
+  // einziges Mal auf, waehrend '0176 20289514' (dieselben acht Endziffern)
+  // 20 Nachrichten traegt. Wer hier wieder eine au.io-eigene Nummer setzen
+  // will, klaert das vorher ab, statt den Wert stillschweigend zu tauschen.
+  //
+  // ⚠ `??` faengt KEINEN Leerstring: ein auf dem VPS gesetztes, aber leeres
+  // NEXT_PUBLIC_SITE_PHONE ergaebe eine leere Telefonzeile im Impressum.
+  // Aktuell ist die Variable nicht gesetzt, der Default hier greift.
+  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0151 5360 8515',
   // Kontakt-Mail team@autounfall.io (LexDrive-Freigabe 12.06.2026). Postfach muss
   // operativ vor Go-Live aktiv sein. Override via NEXT_PUBLIC_SITE_EMAIL.
   contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? 'team@autounfall.io',
