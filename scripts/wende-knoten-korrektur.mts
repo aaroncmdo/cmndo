@@ -27,18 +27,28 @@ for (const p of ['.env.local', 'C:/Users/Aaron Sprafke/stampit-app/stampit-app/c
 }
 
 const scharf = process.argv.includes('--scharf')
-const KORR = JSON.parse(readFileSync('scripts/lokalinhalte/.knoten-korrektur.json', 'utf8'))
+const li = process.argv.indexOf('--liste')
+const LISTE = li > -1 ? process.argv[li + 1] : 'scripts/lokalinhalte/.knoten-korrektur.json'
+const KORR = JSON.parse(readFileSync(LISTE, 'utf8'))
+console.log(`Liste: ${LISTE}\n`)
 
 /** Wendet die Korrektur einer Stadt auf ein hauptachsen-Objekt an. */
 function korrigiere(ha: any, k: any) {
   const weg = new Set(k.knoten_weg ?? [])
   const um: Record<string, string> = k.knoten_um ?? {}
   const abWeg = new Set(k.autobahnen_weg ?? [])
+  const abUm: Record<string, string> = k.autobahnen_um ?? {}
   const bsWeg = new Set(k.bundesstrassen_weg ?? [])
+  // ⚠ `bundesstrassen_um` kam erst mit der zweiten Liste dazu. Der Anlass:
+  // Muenchen fuehrte „B11 (Ingolstaedter Strasse …)" — die Strasse gehoert zur
+  // B13, die B11 selbst fuehrt aber durch Muenchen. Nur die Klammer war falsch.
+  // Ohne Umbenennung haette man eine RICHTIGE Bundesstrasse loeschen muessen,
+  // um eine falsche Klammer loszuwerden.
+  const bsUm: Record<string, string> = k.bundesstrassen_um ?? {}
   return {
     ...ha,
-    autobahnen: (ha?.autobahnen ?? []).filter((x: string) => !abWeg.has(x)),
-    bundesstrassen: (ha?.bundesstrassen ?? []).filter((x: string) => !bsWeg.has(x)),
+    autobahnen: (ha?.autobahnen ?? []).filter((x: string) => !abWeg.has(x)).map((x: string) => abUm[x] ?? x),
+    bundesstrassen: (ha?.bundesstrassen ?? []).filter((x: string) => !bsWeg.has(x)).map((x: string) => bsUm[x] ?? x),
     knoten: (ha?.knoten ?? []).filter((x: string) => !weg.has(x)).map((x: string) => um[x] ?? x),
   }
 }

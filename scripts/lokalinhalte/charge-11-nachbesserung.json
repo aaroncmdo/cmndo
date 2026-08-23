@@ -522,7 +522,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Ludwigshafen",
-        "Dreieck Ludwigshafen",
         "Kreuz Frankenthal"
       ],
       "autobahnen": [
@@ -929,7 +928,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Herne",
-        "Dreieck Herne",
         "Anschlussstelle Herne-Baukau"
       ],
       "autobahnen": [
@@ -1383,7 +1381,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Offenbach",
+        "Offenbacher Kreuz",
         "Anschlussstelle Offenbach-Kaiserlei"
       ],
       "autobahnen": [
@@ -1916,7 +1914,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Trier-Verteilerkreis"
+        "Verteilerkreis Trier"
       ],
       "autobahnen": [
         "A1",
@@ -2282,8 +2280,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Marl-Nord",
-        "Anschlussstelle Marl-Zentrum",
-        "Dreieck Marl-Nord"
+        "Anschlussstelle Marl-Zentrum"
       ],
       "autobahnen": [
         "A43",
@@ -3781,7 +3778,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Heidelberg",
-        "Anschlussstelle Heidelberg-Schwetzingen"
+        "Anschlussstelle Heidelberg/Schwetzingen"
       ],
       "autobahnen": [
         "A5",
@@ -4221,7 +4218,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Anschlussstelle Arnsberg-Neheim"
+        "Anschlussstelle Neheim"
       ],
       "autobahnen": [
         "A46"
@@ -5325,8 +5322,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Dreieck Fürth/Erlangen",
-        "Kreuz Fürth-Erlangen",
+        "Kreuz Fürth/Erlangen",
         "Anschlussstelle Fürth-Poppenreuth"
       ],
       "autobahnen": [
@@ -5390,8 +5386,7 @@
         "Anschlussstelle Grevenbroich"
       ],
       "autobahnen": [
-        "A46",
-        "A540"
+        "A46"
       ],
       "bundesstrassen": [
         "B59",

@@ -147,7 +147,6 @@
       ],
       "knoten": [
         "Kreuz Ludwigshafen",
-        "Dreieck Ludwigshafen",
         "Kreuz Frankenthal"
       ]
     },
@@ -571,7 +570,7 @@
       ],
       "knoten": [
         "Kreuz Heidelberg",
-        "Anschlussstelle Heidelberg-Schwetzingen"
+        "Anschlussstelle Heidelberg/Schwetzingen"
       ]
     },
     "unfallHotspots": [],
@@ -700,7 +699,6 @@
       ],
       "knoten": [
         "Kreuz Herne",
-        "Dreieck Herne",
         "Anschlussstelle Herne-Baukau"
       ]
     },

@@ -39,7 +39,19 @@ for (const m of staedteSrc.matchAll(/slug:\s*'([^']+)'[\s\S]{0,400}?name:\s*'([^
 const ZEICHEN_OK = /^[\p{Script=Latin}\p{N}\p{P}\p{Zs}€§–—·"'()/%+.,:;!?-]*$/u
 
 // Die Themen, die der zentrale Basis-Block der Stadtseite bereits beantwortet.
+//
+// ⚠ DIESE LISTE MUSS ALLE ZWOELF ABDECKEN. Sie hatte anfangs nur acht — es
+// fehlten ausgerechnet „Gutachterkosten", „Sachverstaendigen finden",
+// „Kuerzungen" und „Sicherungsabtretung", darunter Thema Nummer eins. Der
+// Filter meldete deshalb „0 Befunde", waehrend vier Staedte die Schablone
+// „Unfall auf der A40 — wer zahlt das Gutachten?" (15-23 Woerter, Ortsname nur
+// in der Frage) unbehelligt trugen. Ein Pruefwerkzeug, das nur zwei Drittel
+// seiner eigenen Regel kennt, erzeugt genau das falsche Zutrauen.
 const VERBOTEN = [
+  { name: 'Gutachterkosten', re: /wer zahlt (das|den|die) (gutachten|gutachter|sachverst)|was kostet ein (kfz-)?gutacht/i },
+  { name: 'Gutachter finden', re: /wo finde ich (einen|ein)|wie finde ich (einen|ein).{0,30}(gutachter|sachverst)/i },
+  { name: 'Kuerzungen', re: /versicherung das gutachten k[üu]e?rzt|k[üu]e?rzt die versicherung/i },
+  { name: 'Sicherungsabtretung', re: /sicherungsabtretung/i },
   { name: 'Mietwagen', re: /mietwagen|nutzungsausfall in bar/i },
   { name: 'Kostenvoranschlag', re: /reicht ein kostenvoranschlag|kostenvoranschlag der werkstatt/i },
   { name: 'Gutachterwahl', re: /gutachter.{0,20}selbst w[äa]e?hlen|sachverst[äa]ndigen.{0,20}selbst/i },

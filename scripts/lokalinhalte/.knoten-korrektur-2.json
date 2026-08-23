@@ -1,0 +1,136 @@
+{
+  "duisburg": {
+    "knoten_weg": [
+      "Dreieck Duisburg-Kaiserberg"
+    ],
+    "knoten_um": {
+      "Kreuz Duisburg-Kaiserberg": "Kreuz Kaiserberg"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten A3 × A40 ist ein Autobahnkreuz — die Autobahn GmbH führt ihn durchgehend als Autobahnkreuz Kaiserberg, seit Dezember 2022 im Umbau. Zusätzlich zur Gattung ist der Name veraltet: Die Umbenennung von „Duisburg-Kaiserberg\" auf „Kaiserberg\" erfolgte im März 1992, um die Doppelbenennung mit der gleichnamigen Anschlussstelle aufzulösen. Wenn dir der Ortsbezug in der Liste wichtiger ist als der amtliche Name, streich die Umbenennung und behalte nur die Streichung."
+  },
+  "nuernberg": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Dreieck Fürth/Erlangen": "Kreuz Fürth/Erlangen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten A73 × A3 ist das Autobahnkreuz Fürth/Erlangen, in den 1980er Jahren als klassisches Kleeblatt gebaut. OFFEN: Ob der Knoten überhaupt in Nürnbergs Liste gehört, ist eine Maßstabsfrage, die kein Urteil geklärt hat — er liegt zwischen Fürth und Erlangen. Hier nur die Gattung korrigiert."
+  },
+  "fuerth": {
+    "knoten_weg": [
+      "Dreieck Fürth/Erlangen"
+    ],
+    "knoten_um": {
+      "Kreuz Fürth-Erlangen": "Kreuz Fürth/Erlangen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Fürth führt denselben Knoten zweimal und in drei Abweichungen: einmal als Dreieck, einmal mit Bindestrich statt Schrägstrich. Amtlich ist Autobahnkreuz Fürth/Erlangen. Nach Streichung des Dreiecks und Angleichung der Schreibweise bleibt genau ein Eintrag."
+  },
+  "herne": {
+    "knoten_weg": [
+      "Dreieck Herne"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten A42 × A43 ist das Kreuz Herne (A43 Nr. 14), das in derselben Liste bereits korrekt steht — Dublette mit falscher Gattung."
+  },
+  "ludwigshafen": {
+    "knoten_weg": [
+      "Dreieck Ludwigshafen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten A61 × A650 ist das kleeblattförmige Autobahnkreuz Ludwigshafen, das bereits in der Liste steht. Es liegt zwischen dem Stadtteil Ruchheim und Maxdorf, rund 10 km westlich des Stadtkerns — also noch stadtnah."
+  },
+  "marl": {
+    "knoten_weg": [
+      "Dreieck Marl-Nord"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten ist das Kreuz Marl-Nord (A43 Nr. 9), das in derselben Liste bereits korrekt steht — Dublette mit falscher Gattung."
+  },
+  "sankt-augustin": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Autobahnkreuz Sankt Augustin-West (A59/A560)": "Autobahndreieck Sankt Augustin-West (A59/A560)"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Hier liegt die Gattung umgekehrt: Der Knoten A59 × A560 ist ein Autobahndreieck, als linksseitige Trompete gebaut, im Sankt Augustiner Stadtteil Menden östlich der Sieg. Die Autobahn GmbH führt es in ihren Meldungen als „Dreieck Sankt Augustin-West\". Troisdorfs Liste hat die Gattung also richtig, Sankt Augustins eigene falsch."
+  },
+  "wuppertal": {
+    "knoten_weg": [
+      "Dreieck Wuppertal-Nord"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Der Knoten ist das Kreuz Wuppertal-Nord (A43 Nr. 23, Südende der A43), das in derselben Liste bereits korrekt steht — Dublette mit falscher Gattung."
+  },
+  "trier": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Anschlussstelle Trier-Verteilerkreis": "Verteilerkreis Trier"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Nachtrag aus dem ersten Durchgang: Das Bauwerk existiert und ist Anschlussstelle 1 der A602 mit Anschluss an die B49, heißt aber Verteilerkreis Trier — der Name war nur verdreht."
+  },
+  "offenbach": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Kreuz Offenbach": "Offenbacher Kreuz"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Nachtrag aus dem ersten Durchgang: Der Knoten A661 × A3 heißt amtlich Offenbacher Kreuz (A661 Nr. 17). Das gestrichene „Dreieck Offenbach\" meinte dieselbe Stelle."
+  },
+  "heidelberg": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Anschlussstelle Heidelberg-Schwetzingen": "Anschlussstelle Heidelberg/Schwetzingen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Nachtrag aus dem ersten Durchgang: Die Anschlussstelle wird amtlich mit Schrägstrich geführt, weil sie beide Orte bedient — dieselbe Schreibweise wie bei Heilbronn/Untereisesheim oder Recklinghausen/Herten."
+  },
+  "arnsberg": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Anschlussstelle Arnsberg-Neheim": "Anschlussstelle Neheim"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {},
+    "begruendung": "Nachtrag aus dem ersten Durchgang: Die A46-Anschlussstelle heißt amtlich schlicht Neheim, ohne den Zusatz Arnsberg. Neheim ist Arnsberger Stadtteil, der Ortsbezug bleibt also erhalten."
+  },
+  "muenchen": {
+    "knoten_weg": [],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "bundesstrassen_um": {
+      "B11 (Ingolstädter Straße, Deggendorfer Straße)": "B11 (Freisinger Landstraße, Situlistraße, Ungererstraße)"
+    },
+    "begruendung": "Mit dem neuen Feld: Die B11 gehört in Münchens Liste, nur ihr Verlauf war falsch beschrieben. Sie erreicht das Stadtgebiet im Norden an der A99 und führt über Freisinger Landstraße, Situlistraße und Ungererstraße zum Mittleren Ring. Die Ingolstädter Straße gehört zur B13 und steht dort bereits richtig; eine Deggendorfer Straße ließ sich nicht belegen und entfällt mit der neuen Klammer."
+  }
+}

@@ -149,7 +149,7 @@
         "B229"
       ],
       "knoten": [
-        "Anschlussstelle Arnsberg-Neheim"
+        "Anschlussstelle Neheim"
       ]
     },
     "unfallHotspots": [],
@@ -622,8 +622,7 @@
     ],
     "hauptachsen": {
       "autobahnen": [
-        "A46",
-        "A540"
+        "A46"
       ],
       "bundesstrassen": [
         "B59",

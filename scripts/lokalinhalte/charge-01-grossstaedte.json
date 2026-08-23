@@ -995,7 +995,7 @@
         "Kreuz Nürnberg",
         "Dreieck Nürnberg-Ost",
         "Kreuz Nürnberg-Süd",
-        "Dreieck Fürth/Erlangen"
+        "Kreuz Fürth/Erlangen"
       ]
     },
     "unfallHotspots": [],
@@ -1121,10 +1121,9 @@
         "B288"
       ],
       "knoten": [
-        "Kreuz Duisburg-Kaiserberg",
+        "Kreuz Kaiserberg",
         "Kreuz Duisburg-Nord",
-        "Kreuz Duisburg-Süd",
-        "Dreieck Duisburg-Kaiserberg"
+        "Kreuz Duisburg-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -1380,8 +1379,7 @@
       ],
       "knoten": [
         "Kreuz Wuppertal-Nord",
-        "Kreuz Wuppertal-Oberbarmen",
-        "Dreieck Wuppertal-Nord"
+        "Kreuz Wuppertal-Oberbarmen"
       ]
     },
     "unfallHotspots": [],
