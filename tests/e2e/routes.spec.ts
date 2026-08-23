@@ -80,6 +80,45 @@ const PUBLIC_ROUTES = [
   '/passwort-vergessen',
 ]
 
+// 23.08. nachgetragen: bis dahin deckte dieser Smoke NUR admin/gutachter/public ab.
+// Vier Portale hatten gar keine Rollen-Fixture und wurden deshalb NIE geprueft —
+// zusammen ~47 Seiten. Ein 500er oder eine leere Shell waere dort niemandem
+// aufgefallen. Bewusst eine Auswahl der Kern-Arbeitsflaechen je Portal, nicht jede
+// Unterseite: der Smoke soll die Portale abdecken, nicht die Laufzeit sprengen.
+// Alle Pfade sind aus `find src/app/<portal> -name page.tsx` abgeleitet, nicht geraten.
+const DISPATCH_ROUTES = [
+  '/dispatch/dashboard',
+  '/dispatch/leads',
+  '/dispatch/kalender',
+  '/dispatch/rueckrufe',
+  '/dispatch/sachverstaendige',
+  '/dispatch/karte',
+]
+
+const KB_ROUTES = [
+  '/mitarbeiter',
+  '/mitarbeiter/tasks',
+  '/mitarbeiter/termine',
+  '/mitarbeiter/reklamationen',
+  '/mitarbeiter/nachrichten',
+]
+
+// Kunde: bewusst nur Lese-Flaechen. `/kunde/schaden-melden` ist ein Erfassungsweg —
+// reines Laden waere zwar harmlos, der Smoke haette dort aber nichts zu beweisen.
+const KUNDE_ROUTES = [
+  '/kunde',
+  '/kunde/chat',
+  '/kunde/fahrzeuge',
+  '/kunde/profil',
+  '/kunde/nachbesichtigung',
+]
+
+const KANZLEI_ROUTES = [
+  '/kanzlei/mandate',
+  '/kanzlei/kanban',
+  '/kanzlei/konto',
+]
+
 /**
  * Listen prüfen nur die Übersicht. Die Detailansicht ist die andere
  * Risikoklasse: dort werden verschachtelte Beziehungen aufgelöst und
@@ -173,6 +212,38 @@ test.describe('Public Routes', () => {
   for (const route of PUBLIC_ROUTES) {
     test(`GET ${route} → renders without error`, async ({ page }) => {
       await erwarteGerendert(page, route)
+    })
+  }
+})
+
+test.describe('Dispatch Routes', () => {
+  for (const route of DISPATCH_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ dispatchPage }) => {
+      await erwarteGerendert(dispatchPage, route)
+    })
+  }
+})
+
+test.describe('Kundenbetreuer Routes', () => {
+  for (const route of KB_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kbPage }) => {
+      await erwarteGerendert(kbPage, route)
+    })
+  }
+})
+
+test.describe('Kunde Routes', () => {
+  for (const route of KUNDE_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kundePage }) => {
+      await erwarteGerendert(kundePage, route)
+    })
+  }
+})
+
+test.describe('Kanzlei Routes', () => {
+  for (const route of KANZLEI_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kanzleiPage }) => {
+      await erwarteGerendert(kanzleiPage, route)
     })
   }
 })
