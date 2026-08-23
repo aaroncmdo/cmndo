@@ -69,8 +69,15 @@ const TAG_ZIELE: Record<string, string[]> = {
  * Anlass: der Regel-4-Smoke nach #5528 fand 1 von 68 Artikeln ohne jeden
  * Weiterweg (nur 'Markt & News' getaggt) — also weiterhin eine Sackgasse,
  * genau das, was die Sektion beenden sollte.
+ *
+ * ⚠ Bewusst NICHT '/ratgeber', obwohl es der zweite Cornerstone ist: die Seite
+ * canonicalisiert auf '/unfall-was-tun-als-geschaedigter' (Stream B.5 — Ranking-
+ * Signal bündeln statt kannibalisieren). Ein interner Link auf die konsolidierte
+ * Dublette arbeitet gegen genau diese Absicht. Beide Ziele hier sind self-canonical
+ * und stehen in der Sitemap; '/sachverstaendige/pruefdienstleister' trifft
+ * Branchen-/Markt-Themen zudem inhaltlich besser als ein Geschädigten-Ratgeber.
  */
-const FALLBACK_ZIELE = ['/kfz-haftpflicht-schaden', '/ratgeber']
+const FALLBACK_ZIELE = ['/kfz-haftpflicht-schaden', '/sachverstaendige/pruefdienstleister']
 
 export function WissenVerwandteThemen({ tags }: { tags: string[] | null }) {
   if (!tags?.length) return null
