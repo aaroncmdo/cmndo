@@ -1,0 +1,310 @@
+{
+  "hilden": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Kalstert", "Hoffeld"] },
+      { "name": "Nord", "ortsteile": ["Nordstadt", "Karnap"] },
+      { "name": "Süd", "ortsteile": ["Südstadt", "Meide"] },
+      { "name": "West", "ortsteile": ["Westring", "Hildener Heide"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A46"],
+      "bundesstrassen": ["B228"],
+      "knoten": ["Autobahnkreuz Hilden (A3/A46)", "Anschlussstelle Hilden", "Anschlussstelle Haan-Ost"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Auffahrunfälle am Autobahnkreuz Hilden so häufig?",
+        "antwort": "Das Kreuz Hilden führt die A3 und die A46 zusammen und gehört zu den am stärksten belasteten Knoten in Nordrhein-Westfalen. Der Fahrstreifenwechsel in den Verflechtungsbereichen der Verbindungsrampen fällt mit zähfließendem Verkehr zusammen — typisch sind Auffahrschäden am Heck sowie Streifschäden an den Flanken. Beides trifft heute regelmäßig Abstandsradar und Spurhaltesensorik hinter Stoßfänger und Außenspiegel, deren Kalibrierung nach der Reparatur eigens berechnet werden muss."
+      },
+      {
+        "frage": "Was ist bei einem Unfall auf der B228 Richtung Solingen zu beachten?",
+        "antwort": "Die B228 verlässt Hilden nach Osten und steigt zur Bergischen Heideterrasse hin an. Die Kombination aus Steigung, Kurven und Waldrandschatten macht die Strecke bei Nässe und Laub rutschig. Bei Unfällen dort lohnt sich der Blick auf Unterboden und Achsgeometrie: Schäden, die man von außen nicht sieht, zeigen sich erst auf dem Prüfstand — und genau die fehlen in einem Kostenvoranschlag."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hilden — vom Kreuz Hilden über die B228 bis in die Hildener Heide.",
+    "topografieAnker": "Hilden liegt auf der Bergischen Heideterrasse zwischen Düsseldorf und Solingen. Die Stadt ist geprägt vom Autobahnkreuz Hilden, an dem A3 und A46 zusammentreffen, und von den Sandböden der Hildener Heide im Westen."
+  },
+  "langenfeld": {
+    "stadtbezirke": [
+      { "name": "Immigrath", "ortsteile": ["Immigrath", "Landwehr"] },
+      { "name": "Richrath", "ortsteile": ["Richrath", "Gieslenberg"] },
+      { "name": "Reusrath", "ortsteile": ["Reusrath", "Berghausen"] },
+      { "name": "Wiescheid", "ortsteile": ["Wiescheid"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A542"],
+      "bundesstrassen": ["B8", "B229"],
+      "knoten": ["Autobahnkreuz Langenfeld (A3/A542)", "Anschlussstelle Langenfeld", "Anschlussstelle Langenfeld-Immigrath"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Die A542 ist nur wenige Kilometer lang — warum passiert dort trotzdem etwas?",
+        "antwort": "Gerade weil sie kurz ist. Die A542 verbindet das Kreuz Langenfeld mit Monheim und Leverkusen und wird als Abkürzung zwischen A3 und A59 genutzt. Auf wenigen Kilometern folgen Auffahrt, Verflechtung und Ausfahrt dicht aufeinander, sodass der Verkehr ständig die Spur wechselt. Typisch sind seitliche Streifschäden — und die betreffen bei neueren Fahrzeugen fast immer die Sensorik in Außenspiegel und Schweller."
+      },
+      {
+        "frage": "Wer reguliert einen Unfall auf der B8 in Langenfeld?",
+        "antwort": "Wie überall der Haftpflichtversicherer des Verursachers. Die B8 ist in Langenfeld allerdings eine innerörtliche Hauptachse mit Ampeln, Abbiegespuren und Radverkehr — das erhöht die Zahl der Fälle mit strittiger Schuldfrage. Wo die Haftung nicht eindeutig ist, ist ein unabhängiges Gutachten mit dokumentierter Schadenlage die Grundlage, auf der später über eine Quote gesprochen wird."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Langenfeld — zwischen Kreuz Langenfeld, B8 und den Ortslagen Immigrath und Reusrath.",
+    "topografieAnker": "Langenfeld liegt in der Rheinischen Tiefebene auf halbem Weg zwischen Düsseldorf und Köln. Die A3 durchschneidet das Stadtgebiet von Nord nach Süd, die kurze A542 zweigt am Kreuz Langenfeld nach Westen Richtung Monheim ab."
+  },
+  "dormagen": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Dormagen-Mitte", "Hackenbroich", "Horrem"] },
+      { "name": "Nord", "ortsteile": ["Delhoven", "Straberg", "Broich"] },
+      { "name": "Rheinschiene", "ortsteile": ["Zons", "Stürzelberg", "Rheinfeld", "Piwipp"] },
+      { "name": "Süd", "ortsteile": ["Nievenheim", "Gohr", "Delrath", "Knechtsteden"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A57"],
+      "bundesstrassen": ["B9"],
+      "knoten": ["Anschlussstelle Dormagen", "Anschlussstelle Dormagen-Nord", "Kreuzung B9/Chempark-Zufahrt"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei einem Unfall mit einem Lkw an den Chempark-Zufahrten anders?",
+        "antwort": "Der Chempark bringt täglich Schwerlast- und Gefahrgutverkehr auf die B9 und die Zufahrten im Norden Dormagens. Kollidiert ein Pkw mit einem Lkw, ist die Massendifferenz das eigentliche Problem: Die Deformation reicht oft tiefer, als der äußere Blechschaden vermuten lässt — Längsträger, Federbeindome und Rahmenausrichtung gehören dann vermessen. Bei Gefahrgutbeteiligung kommt hinzu, dass die Unfallstelle länger gesperrt bleibt und die Dokumentation vor Ort erschwert ist; umso wichtiger ist eine eigene Beweissicherung."
+      },
+      {
+        "frage": "Warum lohnt in der Zollfeste Zons ein genauer Blick auf Parkschäden?",
+        "antwort": "Die historische Zollfeste Zons hat enge, teils gepflasterte Gassen und schmale Stellflächen mit hohem Besucheraufkommen. Rangierschäden an Stoßfänger, Kotflügel und Felgen sind dort der Regelfall. Sie wirken klein, überschreiten aber mit Lackaufbau, Sensorik und Ersatzteilpreisen schnell die Bagatellgrenze von etwa 750 Euro — ab der ein Kostenvoranschlag Wertminderung und Nutzungsausfall nicht mehr abbildet."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Dormagen — von der A57 über die B9 bis zur Zollfeste Zons.",
+    "topografieAnker": "Dormagen liegt am linken Rheinufer zwischen Neuss und Köln. Die A57 und die parallel verlaufende B9 bilden die Nord-Süd-Achse; östlich davon prägen der Chempark und die Rheinauen mit der Zollfeste Zons das Stadtgebiet."
+  },
+  "schwelm": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Oehde", "Ossenkamp"] },
+      { "name": "Nord", "ortsteile": ["Möllenkotten", "Winterberg"] },
+      { "name": "Süd", "ortsteile": ["Linderhausen", "Loh"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A1", "A46"],
+      "bundesstrassen": ["B7", "B483"],
+      "knoten": ["Anschlussstelle Schwelm (A1)", "Anschlussstelle Wuppertal-Langerfeld", "Kreuzung B7/B483"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Winterschäden im Schwelmer Stadtgebiet ein eigenes Thema?",
+        "antwort": "Schwelm liegt im Bergischen Land, und der Höhenunterschied zwischen Innenstadt und den Hanglagen um Linderhausen und Winterberg beträgt über hundert Meter. Auf den Steigungsstrecken bleibt Nässe länger stehen und gefriert früher als im Tal — Auffahrunfälle an Steigungen und Abrutschen in Kurven häufen sich dort. Bei Aufprallschäden auf abschüssiger Strecke ist zusätzlich zu prüfen, ob Lenkgeometrie und Radaufhängung Schaden genommen haben; das sieht man dem Fahrzeug nicht an."
+      },
+      {
+        "frage": "Unfall auf der B7 mitten in Schwelm — was ist zu tun?",
+        "antwort": "Die B7 führt als Hauptdurchfahrt quer durch Schwelm und verbindet Wuppertal mit Gevelsberg. Sie ist eng, hat viele Einmündungen und wird von Anwohner-, Liefer- und Durchgangsverkehr gleichzeitig genutzt. Sichern Sie die Stelle ab und dokumentieren Sie die Endstellung beider Fahrzeuge, bevor geräumt wird — auf einer Durchfahrtsstraße drängt alles auf schnelle Freigabe, und genau dann gehen die Spuren verloren, die später die Schuldfrage klären."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Schwelm — von der A1 über die B7 bis in die Hanglagen um Linderhausen.",
+    "topografieAnker": "Schwelm liegt am Westrand des Bergischen Landes zwischen Wuppertal und Hagen. Das Schwelmetal trennt die Innenstadt von den deutlich höher gelegenen Ortslagen Linderhausen und Winterberg; die A1 verläuft östlich am Stadtgebiet vorbei."
+  },
+  "haan": {
+    "stadtbezirke": [
+      { "name": "Haan-Mitte", "ortsteile": ["Innenstadt", "Unterhaan"] },
+      { "name": "Gruiten", "ortsteile": ["Gruiten", "Gruiten-Dorf", "Schöller-Grenze"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A46", "A3"],
+      "bundesstrassen": ["B228"],
+      "knoten": ["Anschlussstelle Haan-Ost", "Anschlussstelle Haan-West", "Autobahnkreuz Hilden (A3/A46)"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die Strecken um Gruiten und das Neandertal für Unfälle anfällig?",
+        "antwort": "Gruiten liegt am oberen Rand des Neandertals, und die Verbindungsstraßen dorthin sind schmal, kurvig und von Hangkanten begrenzt. Ausweichmanöver enden dort häufig an Böschung, Leitplanke oder Baum — also mit Schäden, bei denen die Aufprallenergie punktuell wirkt. Solche Anstöße verziehen Achse und Karosserie messbar, ohne dass die Blechhaut stark verformt aussieht. Ein Gutachten hält diese Werte fest, ein Kostenvoranschlag nicht."
+      },
+      {
+        "frage": "Haan liegt zwischen zwei Autobahnen — welche ist bei einem Unfall zuständig?",
+        "antwort": "Für die Schadenregulierung spielt die Straßenklasse keine Rolle: Es zählt, wer den Unfall verursacht hat. Praktisch relevant ist die Lage trotzdem — Haan hat mit den Anschlussstellen Haan-Ost und Haan-West gleich zwei Zufahrten zur A46, und das Kreuz Hilden liegt wenige Kilometer entfernt. Ein Großteil des Verkehrs im Stadtgebiet ist deshalb Durchgangsverkehr, und die Gegenseite wohnt oft nicht vor Ort. Das ändert nichts an Ihrem Anspruch, macht die schriftliche Dokumentation am Unfallort aber wichtiger."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Haan — von den Anschlussstellen an der A46 bis nach Gruiten am Neandertal.",
+    "topografieAnker": "Haan liegt auf der Bergischen Heideterrasse zwischen Düsseldorf, Solingen und Wuppertal. Der Ortsteil Gruiten grenzt an das Neandertal, wo die Düssel sich tief in den Kalkstein eingeschnitten hat; die A46 durchquert das Stadtgebiet von West nach Ost."
+  },
+  "siegburg": {
+    "stadtbezirke": [
+      { "name": "Zentrum", "ortsteile": ["Innenstadt", "Mühlenstraße", "Nordstadt"] },
+      { "name": "Nord", "ortsteile": ["Wolsdorf", "Zange", "Brückberg"] },
+      { "name": "Ost", "ortsteile": ["Kaldauen", "Braschoß", "Seligenthal"] },
+      { "name": "Süd", "ortsteile": ["Stallberg", "Deichhaus"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A560"],
+      "bundesstrassen": ["B56", "B484"],
+      "knoten": ["Autobahnkreuz Bonn/Siegburg (A3/A560)", "Anschlussstelle Siegburg", "Bahnhofsumfeld Siegburg/Bonn"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist am Autobahnkreuz Bonn/Siegburg besonders unfallträchtig?",
+        "antwort": "Am Kreuz Bonn/Siegburg trifft die durchgehende A3 auf die A560, die nach wenigen Kilometern in Richtung Bonn endet. Der Verkehr fädelt hier auf kurzer Strecke ein und aus, und der Rückstau von der A560 reicht bei Berufsverkehr bis auf die Verbindungsrampen. Typisch sind Auffahrunfälle am Stauende und Streifkollisionen beim Fahrstreifenwechsel — bei letzteren ist der Schaden oft über die gesamte Fahrzeugflanke verteilt, was Lackierkosten und Ersatzteile deutlich über die Bagatellgrenze hebt."
+      },
+      {
+        "frage": "Ich hatte einen Unfall am ICE-Bahnhof Siegburg/Bonn — worauf kommt es an?",
+        "antwort": "Das Bahnhofsumfeld bündelt Zubringerverkehr, Taxistände, Bus-Haltebuchten und Kurzzeitparker auf engem Raum. Die meisten Fälle dort sind Rangier- und Türschäden, oft mit unklarer Zeugenlage. Halten Sie die Endstellung fest, bevor die Fahrzeuge bewegt werden, und lassen Sie auch scheinbar kleine Schäden begutachten: An Türen und Schwellern sitzen heute Sensoren und Steuergeräte, deren Ausbau die Reparaturkosten still über die 750-Euro-Grenze trägt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Siegburg — vom Kreuz Bonn/Siegburg über den Michaelsberg bis nach Kaldauen.",
+    "topografieAnker": "Siegburg liegt an der Mündung der Agger in die Sieg, östlich von Bonn. Über der Altstadt erhebt sich der Michaelsberg mit der Abtei; im Norden begrenzt die A3 mit dem Kreuz Bonn/Siegburg das Stadtgebiet, die A560 zweigt dort nach Westen ab."
+  },
+  "sankt-augustin": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Mülldorf", "Ort", "Menden"] },
+      { "name": "Nord", "ortsteile": ["Hangelar", "Meindorf"] },
+      { "name": "Ost", "ortsteile": ["Niederpleis", "Birlinghoven", "Buisdorf"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A59", "A560"],
+      "bundesstrassen": ["B56"],
+      "knoten": ["Autobahnkreuz Sankt Augustin-West (A59/A560)", "Anschlussstelle Sankt Augustin", "Kreuzung B56/Hochschulzufahrt"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum häufen sich Unfälle rund um die Hochschulzufahrt an der B56?",
+        "antwort": "Die B56 führt in Sankt Augustin direkt am Campus der Hochschule Bonn-Rhein-Sieg vorbei. Zu den Vorlesungszeiten treffen dort Autoverkehr, Busse, Radfahrer und querende Fußgänger in dichter Folge aufeinander. Kollisionen mit Zweiradfahrern sind hier die kritische Gruppe: Der Sachschaden am Auto ist meist gering, die Haftungsfrage aber komplex. Ein Gutachten, das Anstoßhöhe, Anstoßrichtung und Schadenbild dokumentiert, ist in solchen Fällen oft das einzige objektive Beweismittel."
+      },
+      {
+        "frage": "Was ist bei einem Wildunfall in der Siegaue zu tun?",
+        "antwort": "Die Siegaue zwischen Menden und Meindorf ist Naturschutzgebiet, und die angrenzenden Straßen führen unmittelbar am Auwald entlang — Wildwechsel ist dort ganzjährig ein Thema. Anders als beim Verkehrsunfall zahlt hier Ihre Teilkaskoversicherung, nicht eine gegnerische Haftpflicht. Lassen Sie sich die Wildunfallbescheinigung vom Jagdausübungsberechtigten oder der Polizei geben und dokumentieren Sie Haare oder Blutspuren am Fahrzeug, bevor Sie es waschen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Sankt Augustin — vom Kreuz Sankt Augustin-West über die B56 bis in die Siegaue.",
+    "topografieAnker": "Sankt Augustin liegt zwischen Bonn und Siegburg am linken Ufer der Sieg. Die A59 und die A560 kreuzen sich im Westen des Stadtgebiets; nach Osten steigt das Gelände zum Pleistal hin an, im Norden liegen die Siegauen mit dem Flugplatz Hangelar."
+  },
+  "hennef": {
+    "stadtbezirke": [
+      { "name": "Zentrum", "ortsteile": ["Hennef-Mitte", "Geistingen", "Warth", "Geisbach"] },
+      { "name": "West", "ortsteile": ["Allner", "Weldergoven", "Lauthausen", "Stoßdorf"] },
+      { "name": "Ost", "ortsteile": ["Uckerath", "Söven", "Happerschoß"] },
+      { "name": "Süd", "ortsteile": ["Bödingen", "Stadt Blankenberg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A560", "A3"],
+      "bundesstrassen": ["B8", "B478"],
+      "knoten": ["Anschlussstelle Hennef-West", "Anschlussstelle Hennef-Ost", "Kreuzung B8/B478"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Die B8 durch das Siegtal ist kurvig — was heißt das für einen Unfall?",
+        "antwort": "Die B8 folgt zwischen Hennef und Eitorf dem Lauf der Sieg und ist entsprechend kurvenreich, streckenweise eng zwischen Hang und Fluss. Überholvorgänge und Kollisionen im Gegenverkehr treffen dort frontal-seitlich auf — ein Schadenbild, bei dem Aufprallwinkel und Kollisionsgeschwindigkeit über die Haftungsverteilung mitentscheiden. Beides lässt sich aus Deformation und Spurenlage rekonstruieren, aber nur solange das Fahrzeug unverändert ist. Vor jeder Reparatur begutachten lassen."
+      },
+      {
+        "frage": "Was ist an Unfällen in den Höhenorten wie Uckerath und Bödingen besonders?",
+        "antwort": "Die Hennefer Höhenorte liegen bis zu zweihundert Meter über dem Siegtal, erreichbar über Steigungsstrecken mit engen Kehren. Im Winter setzt dort Glätte deutlich früher ein als im Tal, und die Anfahrt für Abschleppdienst und Gutachter dauert länger. Wenn Ihr Fahrzeug nicht mehr fahrbereit ist, lassen Sie es an Ort und Stelle begutachten, statt es vorschnell in eine Werkstatt im Tal bringen zu lassen — der Transport kann das Schadenbild verändern."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hennef — vom Siegtal an der B8 bis zu den Höhenorten Uckerath und Bödingen.",
+    "topografieAnker": "Hennef erstreckt sich über das Siegtal und die angrenzenden Höhen des Nutscheids. Zwischen der Talsohle bei Allner und den östlichen Ortslagen um Uckerath liegen rund zweihundert Höhenmeter; die A560 endet am westlichen Stadtrand."
+  },
+  "meckenheim": {
+    "stadtbezirke": [
+      { "name": "Merl", "ortsteile": ["Merl", "Neuer Markt"] },
+      { "name": "Altstadt", "ortsteile": ["Meckenheim-Altstadt"] },
+      { "name": "Ersdorf/Altendorf", "ortsteile": ["Ersdorf", "Altendorf"] },
+      { "name": "Lüftelberg", "ortsteile": ["Lüftelberg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A61", "A565"],
+      "bundesstrassen": ["B257"],
+      "knoten": ["Autobahnkreuz Meckenheim (A61/A565)", "Anschlussstelle Meckenheim", "Anschlussstelle Meckenheim-Merl"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was passiert am Autobahnkreuz Meckenheim, wenn die A565 endet?",
+        "antwort": "Am Kreuz Meckenheim mündet die A565 aus Bonn in die A61. Der Übergang von einer stadtnahen Zubringerautobahn auf eine überregionale Fernstrecke bringt zwei verschiedene Verkehrsarten mit unterschiedlichen Geschwindigkeiten zusammen. Auffahrunfälle entstehen dort typischerweise am Ende der Verzögerungsspur, Streifschäden beim Einfädeln. Bei Aufprall in Fahrtrichtung sind neben dem sichtbaren Heckschaden regelmäßig Quertraverse und Aufnahmepunkte betroffen — Positionen, die eine Werkstatt ohne Vermessung nicht beziffert."
+      },
+      {
+        "frage": "Landwirtschaftlicher Verkehr im Meckenheimer Obstanbaugebiet — wer haftet?",
+        "antwort": "Rund um Meckenheim prägen Obstplantagen die Feldflur, und zur Erntezeit sind Traktoren mit Anhängern auf den Wirtschaftswegen und Verbindungsstraßen unterwegs. Es gilt dasselbe Haftungsrecht wie sonst: Der Verursacher beziehungsweise dessen Haftpflichtversicherung zahlt. Praktisch wichtig sind zwei Punkte — landwirtschaftliche Zugmaschinen sind breiter, als sie wirken, und Erntematerial auf der Fahrbahn kann eine Mitverursachung begründen. Fotografieren Sie deshalb auch den Fahrbahnzustand, nicht nur die Fahrzeuge."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Meckenheim — vom Kreuz Meckenheim bis in die Obstanbauflächen um Lüftelberg.",
+    "topografieAnker": "Meckenheim liegt am Übergang von der Kölner Bucht zur Voreifel, südwestlich von Bonn. Das Gelände steigt nach Süden zur Eifel hin an; das Stadtgebiet ist von Obstanbauflächen umgeben, und im Norden treffen sich A61 und A565 am Kreuz Meckenheim."
+  },
+  "bornheim": {
+    "stadtbezirke": [
+      { "name": "Vorgebirge", "ortsteile": ["Bornheim", "Brenig", "Rösberg", "Botzdorf"] },
+      { "name": "Rheinschiene", "ortsteile": ["Hersel", "Uedorf", "Widdig", "Urfeld"] },
+      { "name": "Nord", "ortsteile": ["Sechtem", "Walberberg", "Kardorf"] },
+      { "name": "Süd", "ortsteile": ["Roisdorf", "Merten", "Dersdorf", "Waldorf"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A555", "A565"],
+      "bundesstrassen": ["B9"],
+      "knoten": ["Anschlussstelle Bornheim (A555)", "Anschlussstelle Sechtem", "Kreuzung B9/Ortsdurchfahrt Hersel"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Die A555 zwischen Bornheim und Köln ist die älteste Autobahn Deutschlands — merkt man das?",
+        "antwort": "Ja, an der Trassierung. Die A555 wurde in den 1930er Jahren als Kraftfahrstraße zwischen Köln und Bonn gebaut und hat entsprechend knapp bemessene Ein- und Ausfädelstreifen sowie einen schmalen Mittelstreifen. Wer heute mit Richtgeschwindigkeit auffährt, hat weniger Beschleunigungsweg als auf modernen Strecken — Auffahr- und Streifkollisionen an den Anschlussstellen sind die Folge. Bei Anstoß gegen die Mittelschutzplanke ist außerdem regelmäßig die komplette Fahrzeugflanke betroffen, samt Radaufhängung auf der Anstoßseite."
+      },
+      {
+        "frage": "Was ist bei Unfällen auf den Vorgebirgsstraßen zu beachten?",
+        "antwort": "Die Ortslagen Brenig, Rösberg und Botzdorf liegen am Hang des Vorgebirges, verbunden durch schmale Straßen zwischen Feldern und Obstflächen. Zur Erntezeit ist dort viel landwirtschaftlicher Verkehr unterwegs, und die Fahrbahnränder sind oft unbefestigt. Wer beim Ausweichen von der Fahrbahn abkommt, holt sich Unterbodenschäden, die man erst auf der Hebebühne sieht. Lassen Sie das Fahrzeug deshalb auch dann begutachten, wenn außen nichts Auffälliges zu sehen ist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bornheim — von der A555 über die B9 bis in die Vorgebirgsorte Brenig und Rösberg.",
+    "topografieAnker": "Bornheim erstreckt sich zwischen dem Rheinufer bei Hersel und dem Höhenzug der Ville, hier Vorgebirge genannt. Die B9 folgt der Rheinschiene, die A555 verläuft parallel dazu auf halber Höhe; nach Westen steigt das Gelände zu den Obst- und Gemüseflächen des Vorgebirges an."
+  },
+  "erkelenz": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Erkelenz-Mitte", "Oestrich", "Terheeg"] },
+      { "name": "Nord", "ortsteile": ["Gerderath", "Golkrath", "Granterath"] },
+      { "name": "West", "ortsteile": ["Lövenich", "Katzem", "Kückhoven"] },
+      { "name": "Süd", "ortsteile": ["Holzweiler", "Venrath", "Kaulhausen"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A46", "A61"],
+      "bundesstrassen": ["B57"],
+      "knoten": ["Anschlussstelle Erkelenz (A46)", "Anschlussstelle Erkelenz-Ost", "Kreuzung B57/Tagebau-Zufahrt"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Der Tagebau Garzweiler verändert Straßen im Erkelenzer Süden — was bedeutet das für Unfälle?",
+        "antwort": "Im Süden von Erkelenz sind Straßenverläufe wegen des Tagebaus mehrfach verlegt worden, und Navigationsdaten hinken diesen Änderungen regelmäßig hinterher. Fahrer folgen einer Route, die es so nicht mehr gibt, und bremsen oder wenden an unerwarteter Stelle. Kommt es dort zum Unfall, ist die Beschilderungslage Teil des Sachverhalts: Fotografieren Sie deshalb auch Verkehrszeichen und Absperrungen, nicht nur die Fahrzeuge. Hinzu kommt schwerer Baustellenverkehr mit entsprechend hoher Massendifferenz bei Kollisionen."
+      },
+      {
+        "frage": "Warum ist bei Erkelenz die Autobahnzuordnung für Gutachtertermine relevant?",
+        "antwort": "Erkelenz liegt zwischen zwei Autobahnen: Die A46 endet wenige Kilometer westlich, die A61 verläuft östlich am Stadtgebiet vorbei. Je nachdem, auf welcher Seite Ihr Fahrzeug steht, sind Abschleppweg und Anfahrt unterschiedlich. Für Ihren Anspruch ändert das nichts — die gegnerische Haftpflicht trägt nach § 249 BGB auch Bergungs- und Standkosten. Wichtig ist nur, dass Sie das Fahrzeug nicht auf eigene Rechnung quer durch den Kreis fahren lassen, bevor der Schaden dokumentiert ist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Erkelenz — zwischen A46, A61 und den Ortslagen am Rand des Tagebaus.",
+    "topografieAnker": "Erkelenz liegt in der Niederrheinischen Bucht zwischen Mönchengladbach und Heinsberg. Das Gelände ist flach und landwirtschaftlich geprägt; im Süden reicht der Tagebau Garzweiler an das Stadtgebiet heran und hat dort mehrere Ortslagen und Straßenverläufe verändert."
+  },
+  "heinsberg": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Heinsberg-Mitte", "Unterbruch", "Grebben"] },
+      { "name": "Nord", "ortsteile": ["Karken", "Kempen", "Porselen"] },
+      { "name": "Ost", "ortsteile": ["Oberbruch", "Dremmen", "Horst"] },
+      { "name": "Süd", "ortsteile": ["Kirchhoven", "Waldenrath", "Randerath", "Uetterath"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A46"],
+      "bundesstrassen": ["B56", "B221"],
+      "knoten": ["Anschlussstelle Heinsberg (A46-Ende)", "Kreuzung B56/B221", "Grenzübergang Richtung Roermond"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Die A46 endet bei Heinsberg — was folgt daraus für den Verkehr?",
+        "antwort": "Am westlichen Ende der A46 wechselt der Verkehr abrupt von der Autobahn auf das Bundesstraßennetz Richtung niederländische Grenze. Dieser Übergang ist die klassische Stelle für Auffahrunfälle: Wer aus Autobahntempo kommt, unterschätzt regelmäßig die Verzögerung bis zur ersten Kreuzung. Bei Heckaufprall mit Geschwindigkeitsdifferenz lohnt sich immer eine Prüfung der Sitz- und Gurtsysteme sowie der Rückhaltesensorik — Positionen, die im Kostenvoranschlag einer Werkstatt üblicherweise fehlen."
+      },
+      {
+        "frage": "Der Unfallgegner kommt aus den Niederlanden — was ist dann anders?",
+        "antwort": "Heinsberg grenzt unmittelbar an die Niederlande, entsprechend häufig ist die Gegenseite dort versichert. Ihr Anspruch bleibt bestehen: Über den Deutschen Büro Grüne Karte lässt sich der zuständige Regulierungsbeauftragte in Deutschland ermitteln, und die Regulierung läuft dann nach deutschem Recht am Unfallort. Notieren Sie sich unbedingt Kennzeichen, Versicherungsname und Grüne-Karte-Nummer — ohne diese Angaben dauert allein die Zuordnung mehrere Wochen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Heinsberg — vom Ende der A46 über die B221 bis an die niederländische Grenze.",
+    "topografieAnker": "Heinsberg liegt im Rurtal an der Grenze zu den Niederlanden. Das Gelände ist flach und von Rur und Wurm durchzogen; die A46 endet am östlichen Stadtrand, sodass der weiterführende Verkehr Richtung Roermond über B56 und B221 läuft."
+  }
+}
