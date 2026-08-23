@@ -50,7 +50,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 45   *  * * *  /usr/local/bin/cron-call.sh /api/cron/send-lead-reminders
 0    7  * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-reminder
 0    7  * * *  /usr/local/bin/cron-call.sh /api/cron/sv-termin-dokument-reminder
-10   8  * * *  /usr/local/bin/cron-call.sh /api/cron/zahlungspruefung
+# DISABLED 2026-08-23 (Claude): Route existiert NICHT mehr in origin/main (mit Positiv-Kontrolle geprueft) -> lieferte taeglich HTTP 404 und verrauschte das Cron-Log. Bewusst entfernt in PR #3604 (obsolete, dead data source); nur der crontab-Eintrag blieb stehen. 10   8  * * *  /usr/local/bin/cron-call.sh /api/cron/zahlungspruefung
 20   8  * * *  /usr/local/bin/cron-call.sh /api/cron/abrechnung-einzug
 5    10 * * *  /usr/local/bin/cron-call.sh /api/cron/sa-reminder
 0    10 * * *  /usr/local/bin/cron-call.sh /api/cron/vollmacht-reminder
@@ -98,8 +98,8 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 30 4 * * * /usr/local/bin/cron-call.sh /api/cron/lead-kalt-cleanup
 
 # --- NACHGETRAGEN 2026-07-02 (Claude): Golden-Path E2E-Sentinel + Test-Daten-Janitor (PR #3443); aktiv nach Deploy (vorher harmloser 404 via curl -f) ---
-45 3 * * * /usr/local/bin/cron-call.sh /api/cron/golden-path
-15 5 * * * /usr/local/bin/cron-call.sh '/api/cron/purge-test-data?confirm=DELETE-TESTDATA'
+# DISABLED 2026-08-23 (Claude): Route existiert NICHT mehr in origin/main (mit Positiv-Kontrolle geprueft) -> lieferte taeglich HTTP 404 und verrauschte das Cron-Log. Lebt heute nur noch als E2E-Spec (tests/e2e/flows/golden-path-*.spec.ts), nicht als Route. 45 3 * * * /usr/local/bin/cron-call.sh /api/cron/golden-path
+# DISABLED 2026-08-23 (Claude): Route existiert NICHT mehr in origin/main (mit Positiv-Kontrolle geprueft) -> lieferte taeglich HTTP 404 und verrauschte das Cron-Log. 15 5 * * * /usr/local/bin/cron-call.sh '/api/cron/purge-test-data?confirm=DELETE-TESTDATA'
 0    *  * * *  cron-call.sh /api/cron/pipeline-health  # Pipeline-Observability #3327 (health_check_runs -> /admin/health)
 
 # --- B2B Content-Pipeline (taeglich 04:00, AI-Artikel; cron-call.sh setzt Bearer) ---
@@ -438,3 +438,34 @@ Delta gegenüber dem alten 2026-06-20-Abzug:
 > Entfernung mit Differenz-Guard (Abbruch wenn ≠ 1 Zeile rausfaellt); `maik-monatsabrechnung` und
 > `monats-abrechnungen` unberuehrt (verifiziert per `crontab -l`-Grep nach der Aenderung).
 
+
+## 2026-08-23 — drei Eintraege liefen ins Leere (404), auf DISABLED gesetzt
+
+Bei einer Inventur des Cron-Bestands (81 Routen im Code · 79 crontab-Zeilen · 25 pg_cron-Jobs)
+fielen drei Eintraege auf, die **taeglich HTTP 404** lieferten:
+
+```
+03:45  /api/cron/golden-path                             FEHLER http=404
+05:15  /api/cron/purge-test-data?confirm=DELETE-TESTDATA FEHLER http=404
+08:10  /api/cron/zahlungspruefung                        FEHLER http=404
+```
+
+Alle drei existieren **nicht** in `origin/main` — geprueft mit `git ls-tree` **und einer
+Positiv-Kontrolle** (`storage-referenz-check` liefert dort 1 Datei, das Instrument lebt also).
+
+* `zahlungspruefung` wurde in **PR #3604** ausdruecklich entfernt („obsolete, dead data
+  source") — nur der crontab-Eintrag blieb stehen.
+* `golden-path` lebt heute als **E2E-Spec** (`tests/e2e/flows/golden-path-*.spec.ts`), nicht
+  als Route.
+* `purge-test-data` hat keinen Nachfolger im Baum.
+
+**Auskommentiert statt geloescht** (Hausregel dieses crontabs, wie bei den FAKE-BACKUP-Zeilen):
+der Eintrag bleibt als Spur lesbar und ist mit einem Handgriff reaktivierbar.
+Sicherung vorher unter `/root/crontab-backup-2026-08-23.txt`.
+
+Verifikation: aktive `cron-call.sh`-Zeilen **79 → 76**, danach **0** aktive Treffer auf die
+drei Namen.
+
+⭐ Sichtbar wurden sie ueberhaupt erst, weil `cron-call.sh` seit dem 18.08. den HTTP-Code
+protokolliert. Vorher verschluckte `curl -sf … >/dev/null 2>&1` jeden Fehlschlag — ein Cron,
+der seit Monaten ins Leere lief, sah aus wie einer, der laeuft.
