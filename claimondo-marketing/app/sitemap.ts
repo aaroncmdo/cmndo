@@ -271,6 +271,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
+    // Community-/Kommentar-Regeln: gehoeren in dieselbe Reihe. Beide liefern 200,
+    // sind `index, follow` und self-canonical — standen aber als einzige der
+    // Legal-Reihe nicht in der Sitemap (gemessen 23.08.2026). Ihre lastModified-
+    // Eintraege in lib/seo/freshness.ts existieren seit jeher: sie waren als
+    // vollwertige Seiten gedacht, der Sitemap-Eintrag fehlte schlicht.
+    {
+      url: `${SITE_URL}/community-regeln`,
+      lastModified: getRouteLastUpdated('/community-regeln'),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/kommentar-regeln`,
+      lastModified: getRouteLastUpdated('/kommentar-regeln'),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
 
     // ─── Content-Library claimondo.de ─────────────────────────────────
     // Konversions-Pages (Stream B / B.2 — Doc 26: Kosten-Hub + Misstrauens-Pages)
