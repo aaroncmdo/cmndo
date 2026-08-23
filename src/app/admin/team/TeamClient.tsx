@@ -141,7 +141,11 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                 const pct = loadMax > 0 ? Math.min(100, Math.round((load / loadMax) * 100)) : 0
                 return (
                   <ClickableTr key={m.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40!" onClick={() => router.push(`/admin/team/${m.id}`)}>
-                    <Td><div className="text-claimondo-navy font-medium">{name(m)}</div><div className="text-claimondo-ondo text-body-xs">{m.email}</div></Td>
+                    {/* Echter Link statt nur ClickableTr-onClick: erlaubt Mittelklick/Strg+Klick
+                        (Detailansicht im neuen Tab), Tastatur-Fokus und Screenreader-Erkennung.
+                        Der Zeilen-Klick bleibt unveraendert — stopPropagation verhindert nur,
+                        dass beide Handler feuern. Muster: FaelleKanban.tsx:235. */}
+                    <Td><Link href={`/admin/team/${m.id}`} onClick={e => e.stopPropagation()} className="block text-claimondo-navy font-medium">{name(m)}</Link><div className="text-claimondo-ondo text-body-xs">{m.email}</div></Td>
                     <Td><span className={`px-2 py-0.5 rounded-full text-body-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></Td>
                     <Td>{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-body-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-body-xs">—</span>}</Td>
                     <Td><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-danger' : pct > 50 ? 'bg-warning' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-body-xs tabular-nums">{load}/{loadMax}</span></div></Td>
