@@ -51,10 +51,22 @@ type QueueZeile = {
   id: string
   telefon_normalisiert: string
   gezogen_am: string | null
-  nachweis_datei_pfad: string | null
   nachweis_hochgeladen_am: string | null
-  nachweis_token: string | null
+  /** Signierter Link auf den hochgeladenen Nachweis (30 Min gueltig). */
+  nachweisUrl: string | null
   praemieName: string | null
+  name: string
+  email: string | null
+}
+
+type HistorieZeile = {
+  id: string
+  telefon_normalisiert: string
+  status: string
+  gezogen_am: string | null
+  gutschein_code: string | null
+  name: string
+  email: string | null
 }
 
 type Props = {
@@ -63,9 +75,17 @@ type Props = {
   praemien: Praemie[]
   kennzahlen: { offen: number; verifiziert: number; unversandt: number; bestaetigt: number }
   queue: QueueZeile[]
+  historie: HistorieZeile[]
 }
 
-export default function GewinnspielClient({ kampagnen, aktive, praemien, kennzahlen, queue }: Props) {
+export default function GewinnspielClient({
+  kampagnen,
+  aktive,
+  praemien,
+  kennzahlen,
+  queue,
+  historie,
+}: Props) {
   const [pending, startTransition] = useTransition()
 
   function lauf(fn: () => Promise<{ ok: boolean; error?: string }>, erfolg: string) {
@@ -157,7 +177,7 @@ export default function GewinnspielClient({ kampagnen, aktive, praemien, kennzah
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Telefon</Th>
+                  <Th>Gewinner</Th>
                   <Th>Gezogen</Th>
                   <Th>Prämie</Th>
                   <Th>Nachweis</Th>
@@ -173,6 +193,52 @@ export default function GewinnspielClient({ kampagnen, aktive, praemien, kennzah
           </DataTableContainer>
         )}
       </SectionCard>
+
+      {/* ── Bisherige Gewinner ──────────────────────────────────────────────
+          Betreiber kontaktiert und kauft manuell — also muss er sehen, wer
+          schon dran war. Zugleich die Dubletten-Kontrolle: dieselbe Person mit
+          einer ZWEITEN Nummer faellt hier am Namen auf, was kein
+          Dedup-Schluessel leisten kann. */}
+      {historie.length > 0 ? (
+        <SectionCard
+          title="Bisherige Gewinner"
+          subtitle="Auch die Dubletten-Kontrolle: derselbe Name mit anderer Nummer fällt hier auf"
+        >
+          <DataTableContainer>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Name</Th>
+                  <Th>Telefon</Th>
+                  <Th>Gezogen</Th>
+                  <Th>Ergebnis</Th>
+                  <Th>Gutschein</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {historie.map((h) => (
+                  <Tr key={h.id}>
+                    <Td>
+                      <span className="font-semibold">{h.name}</span>
+                      {h.email ? (
+                        <span className="block text-body-xs text-claimondo-shield/60">
+                          {h.email}
+                        </span>
+                      ) : null}
+                    </Td>
+                    <Td>{h.telefon_normalisiert}</Td>
+                    <Td>
+                      {h.gezogen_am ? new Date(h.gezogen_am).toLocaleDateString('de-DE') : '—'}
+                    </Td>
+                    <Td>{h.status === 'bestaetigt' ? 'bestätigt' : 'abgelehnt'}</Td>
+                    <Td>{h.gutschein_code ?? '—'}</Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
+        </SectionCard>
+      ) : null}
 
       {/* ── Kampagne ────────────────────────────────────────────────────── */}
       <SectionCard title="Kampagne">
@@ -358,12 +424,32 @@ function QueueZeileView({
 
   return (
     <Tr>
-      <Td>{zeile.telefon_normalisiert}</Td>
+      <Td>
+        <span className="font-semibold">{zeile.name}</span>
+        <a
+          href={`tel:${zeile.telefon_normalisiert}`}
+          className="block text-body-xs text-claimondo-ondo underline"
+        >
+          {zeile.telefon_normalisiert}
+        </a>
+        {zeile.email ? (
+          <span className="block text-body-xs text-claimondo-shield/60">{zeile.email}</span>
+        ) : null}
+      </Td>
       <Td>{zeile.gezogen_am ? new Date(zeile.gezogen_am).toLocaleDateString('de-DE') : '—'}</Td>
       <Td>{zeile.praemieName ?? <span className="text-claimondo-shield/60">keine Wahl</span>}</Td>
       <Td>
-        {zeile.nachweis_datei_pfad ? (
-          <span className="text-success-strong">hochgeladen</span>
+        {zeile.nachweisUrl ? (
+          // Signierter Link, 30 Minuten gueltig. Ohne ihn stuende hier nur
+          // "hochgeladen" — pruefen kann man das nicht.
+          <a
+            href={zeile.nachweisUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-claimondo-ondo underline"
+          >
+            Nachweis öffnen
+          </a>
         ) : (
           <span className="text-claimondo-shield/60">fehlt</span>
         )}

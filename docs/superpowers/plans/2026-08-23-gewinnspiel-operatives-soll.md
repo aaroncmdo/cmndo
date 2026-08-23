@@ -71,8 +71,8 @@ herumbaut.
     vorsieht. Sind weniger Teilnehmer da, gibt es entsprechend weniger Gewinner.
     Das ist der Normalfall, nicht die Ausnahme.
 13. Ein zweiter Klick zieht dieselben Leute nicht noch einmal.
-14. Niemand kann zweimal gewinnen, solange sein erster Gewinn nicht abgeschlossen
-    ist.
+14. **Wer schon gewonnen hat, kommt nicht erneut in den Lostopf** — weder nach
+    einem bestätigten noch nach einem abgelehnten Gewinn (Aaron 23.08.).
 
 ### E · Gewinn einlösen
 
@@ -113,6 +113,8 @@ herumbaut.
 | S11 | Bestätigen mit Code setzt den Status | Admin-UI |
 | S12 | Ablehnen setzt den Status und gibt den Platz frei | Admin-UI |
 | S13 | Nach Pausieren der Kampagne entstehen keine Teilnahmen mehr | Negativprobe |
+| S14 | Ein bestätigter Gewinner erscheint bei der nächsten Ziehung **nicht** erneut | Negativprobe |
+| S15 | Prüf-Queue zeigt Name, Kontakt und einen **öffenbaren** Nachweis | Admin-UI |
 
 **Alles per UI**, echte Klicks, keine per DB geseedeten Zustandsübergänge. Der
 Seed ist nur für den Ausgangszustand erlaubt.
@@ -127,12 +129,51 @@ wiederkehrendes Problem.
 
 ---
 
-## Offene Fragen an Aaron
+## Aaron-Antworten (23.08.2026)
 
-1. **Punkt 14** („niemand gewinnt zweimal") ist meine Herleitung, keine
-   festgelegte Regel. Soll ein bestätigter Gewinner in derselben Kampagne
-   erneut in den Lostopf, oder ist er raus?
-2. **Punkt 20:** Nach welcher Frist gilt ein Nachweis als nicht erbracht? Die
-   Teilnahmebedingungen nennen aktuell **sieben Tage**.
-3. **Punkt 12:** Nicht vergebene Preise — verfallen sie, oder wandern sie in den
+### ✅ Frage 1 — Gewinner nicht zweimal
+
+**Entschieden: Ein Gewinner kommt nicht erneut in den Lostopf.**
+
+Das ist **bereits erfüllt**, ohne Codeänderung, und zwar doppelt abgesichert:
+
+| Mechanismus | Wirkung |
+|---|---|
+| `ziehung.ts:60` filtert `status = 'offen'` | `bestaetigt` und `abgelehnt` sind aus dem Topf |
+| Unique-Index `(kampagne_id, telefon_normalisiert)` | Zweite Teilnahme mit derselben Nummer schlägt fehl |
+
+### ✅ Mehrfach-Registrierung — bewusst kein Automatismus
+
+**Aaron 23.08.: „Wir kontaktieren die Gewinner ja und wir kaufen die Gutscheine
+auch manuell — also muss das nur hinterlegt sein."**
+
+Damit ist die Frage nicht technisch, sondern organisatorisch beantwortet: Ein
+Mensch ist ohnehin in der Schleife. Die Software muss ihm nicht die Entscheidung
+abnehmen, sondern die **Information geben**.
+
+**Was greift automatisch:**
+- Gleiche Nummer → Unique-Index, zweite Teilnahme entsteht gar nicht
+- Fantasie-Nummern → fallen an der WhatsApp-Verifikation durch (unverifiziert =
+  nicht im Lostopf)
+- Übermäßige Submits von einer Quelle → bestehendes IP-Hash-Rate-Limit in
+  `/api/anfrage-from-lp`
+
+**Die verbleibende Lücke — jemand mit MEHREREN Nummern — ist per Datenmodell
+nicht schließbar.** Kein Dedup-Schlüssel, den wir haben, erkennt das. Was sie
+praktisch begrenzt:
+1. **Der Nachweis.** Wer keinen echten Haftpflichtschaden hat, kann keinen
+   vorlegen. Denselben Beleg zweimal einzureichen fällt beim Prüfen auf.
+2. **Sichtbarkeit für den Prüfenden** (dafür gebaut, 23.08.):
+   - Die Prüf-Queue zeigt **Namen und E-Mail**, nicht nur die Telefonnummer
+   - Der Nachweis ist per signiertem Link **öffenbar** statt nur als
+     „hochgeladen" markiert
+   - Eine Liste **„Bisherige Gewinner"** mit Name, Nummer und Ergebnis: derselbe
+     Mensch mit einer zweiten Nummer fällt dort am Namen auf
+
+### ⏳ Offen
+
+1. **Punkt 20:** Nach welcher Frist gilt ein Nachweis als nicht erbracht? Die
+   Teilnahmebedingungen nennen aktuell **sieben Tage** — bislang nicht bestätigt
+   und technisch nicht erzwungen (der Admin lehnt manuell ab).
+2. **Punkt 12:** Nicht vergebene Preise — verfallen sie, oder wandern sie in den
    nächsten Tag?
