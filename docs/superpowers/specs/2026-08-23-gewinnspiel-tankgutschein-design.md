@@ -168,7 +168,31 @@ Package. Eine hartkodierte Topbar waere 7× Copy-Paste und 7 Deploys pro Aenderu
 nicht Bequemlichkeit: eine Topbar, die nach Kampagnenende stehen bleibt, bewirbt
 ein beendetes Gewinnspiel — das ist ein Rechtsproblem, kein Schoenheitsfehler.
 
-### 3.5 Kein Meta-/TikTok-Tracking im Code
+### 3.5 ⚠ Marketing-Routen MUESSEN unter `app/[locale]/` liegen
+
+Beim Bau der LP gefunden. `claimondo-marketing/middleware.ts` schreibt **jeden**
+unpraefixierten Pfad intern auf `/de/<pfad>` um:
+
+```ts
+// middleware.ts:106-108
+const target = pathname === '/' ? `/${DEFAULT_LOCALE}` : `/${DEFAULT_LOCALE}${pathname}`
+response = rememberLocale(NextResponse.rewrite(new URL(`${target}${search}`, req.url), …), …)
+```
+
+Eine Seite unter `app/gewinnspiel/` (ausserhalb `[locale]`) waere auf
+`claimondo.de/gewinnspiel` also **404** — obwohl Build, `tsc` und das
+Routen-Manifest gruen sind. Sichtbar wird das erst im echten Request; dieselbe
+Klasse wie der `.well-known`-Vorfall (`memory/REFERENCE-middleware-matcher-schluckt-well-known.md`).
+
+Das erklaert auch, warum `kfzgutachter-lp` im Repo **doppelt** existiert
+(einmal in `[locale]`, einmal daneben) — die Variante daneben bedient die
+Subdomain, die per `SUBDOMAIN_LANDING`-Rewrite kommt.
+
+→ **Regel fuer P3/P4:** LP, Teilnahmebedingungen und jede weitere Marketing-Route
+liegen unter `app/[locale]/`. Die Texte duerfen trotzdem hart im Markup stehen —
+das i18n-Gate prueft Message-Key-**Paritaet**, nicht ob eine Seite Keys nutzt.
+
+### 3.6 Kein Meta-/TikTok-Tracking im Code
 
 `fbq` / `fbclid` / `ttclid` → **0 Treffer** repo-weit, waehrend `gtag(` mit
 demselben Kommando trifft (das Instrument lebt). In `gutachter_finder_anfragen`
