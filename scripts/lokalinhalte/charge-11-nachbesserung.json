@@ -166,8 +166,7 @@
     "hauptachsen": {
       "knoten": [
         "Dreieck Mainz",
-        "Kreuz Mainz-Süd",
-        "Dreieck Nahetal"
+        "Kreuz Mainz-Süd"
       ],
       "autobahnen": [
         "A60",
@@ -775,7 +774,6 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Hilden",
         "Anschlussstelle Solingen",
         "Anschlussstelle Solingen-Ohligs"
       ],
@@ -1613,8 +1611,7 @@
     ],
     "hauptachsen": {
       "knoten": [
-        "Kreuz Erlangen-Tennenlohe",
-        "Dreieck Fürth/Erlangen",
+        "Kreuz Fürth/Erlangen",
         "Anschlussstelle Erlangen-West"
       ],
       "autobahnen": [
@@ -2235,8 +2232,7 @@
     "hauptachsen": {
       "knoten": [
         "Anschlussstelle Iserlohn-Zentrum",
-        "Anschlussstelle Iserlohn-Letmathe",
-        "Kreuz Hemer"
+        "Anschlussstelle Iserlohn-Letmathe"
       ],
       "autobahnen": [
         "A46"
@@ -3242,8 +3238,7 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Wolfsburg/Königslutter",
-        "Anschlussstelle Wolfsburg-Mitte",
-        "Dreieck Wolfsburg"
+        "Anschlussstelle Wolfsburg-Mitte"
       ],
       "autobahnen": [
         "A2",
@@ -5168,7 +5163,6 @@
     "hauptachsen": {
       "knoten": [
         "Kreuz Hagen",
-        "Dreieck Hagen-West",
         "Anschlussstelle Hagen-Süd"
       ],
       "autobahnen": [

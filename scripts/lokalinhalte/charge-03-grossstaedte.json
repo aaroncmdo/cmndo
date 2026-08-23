@@ -556,8 +556,7 @@
       ],
       "knoten": [
         "Dreieck Mainz",
-        "Kreuz Mainz-Süd",
-        "Dreieck Nahetal"
+        "Kreuz Mainz-Süd"
       ]
     },
     "unfallHotspots": [],
@@ -776,7 +775,6 @@
       ],
       "knoten": [
         "Kreuz Hagen",
-        "Dreieck Hagen-West",
         "Anschlussstelle Hagen-Süd"
       ]
     },
