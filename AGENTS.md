@@ -679,3 +679,52 @@ Das Script erkennt den Header und skippt die Datei komplett.
 
 **Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->
+
+# CI-Runner — self-hosted, und warum welcher Job wo laeuft
+
+Das Repo ist **privat** (23.08.2026). Vorher war es oeffentlich: der komplette
+Code, die Deploy-Runbooks, die VPS-IP mit `root` und der Supabase-Projekt-Ref
+waren ohne Anmeldung lesbar (nachgemessen: anonymer Abruf lieferte HTTP 200 auf
+API, HTML und Rohdatei). Zugangsdaten lagen keine im Repo — es war
+Infrastruktur-Offenlegung, kein Schluessel-Leck.
+
+Privat kosten GitHub-gehostete Actions-Minuten Geld. Gemessen am 23.08.:
+**891 Job-Minuten in 24 h** (90 Laeufe, 189 Jobs) = ~26.700/Monat. Ueber dem
+Team-Kontingent waeren das ~190 USD/Monat. **Selbst-gehostete Runner sind
+dagegen auch bei privaten Repos kostenlos und unbegrenzt** — das ist der Hebel.
+
+## Die Aufteilung
+
+| Wo | Was | Warum |
+|---|---|---|
+| **eigener Runner** (`[self-hosted, claimondo]`) | CI bei PR/Push, alle 9 Deploys, journey-gate, Smokes | 77 % der Last; laufen ohnehin nur, wenn jemand arbeitet |
+| **GitHub** (`ubuntu-latest`) | CI-Nachtlauf (`schedule`), `backup`, `money-integrity-check`, `schema-snapshot-regen` | laufen **unbeaufsichtigt** — muessen auch greifen, wenn die Maschine aus ist |
+
+Rest bei GitHub: ~1.500 (Nachtlauf, 50 Min x 30) + ~64 (Crons) = **~1.564 von
+2.000 Freiminuten**. Also 0 EUR, mit Luft.
+
+`ci.yml` bedient beide Faelle in einer Datei ueber eine Weiche:
+
+```yaml
+runs-on: ${{ github.event_name == 'schedule' && 'ubuntu-latest' || fromJSON('["self-hosted","claimondo"]') }}
+```
+
+Die `e2e`-Jobs laufen ohnehin nur nachts und bleiben deshalb schlicht
+`ubuntu-latest` — ein Ausdruck, der immer dasselbe ergibt, waere nur Rauschen.
+
+## Regeln
+
+* **Ein neuer Workflow, der unbeaufsichtigt laufen muss (`schedule`), gehoert zu
+  GitHub.** Alles andere auf den eigenen Runner. Wer das umdreht, zahlt entweder
+  Geld oder hat einen Cron, der nachts stillsteht.
+* **Nie einen self-hosted Runner an ein oeffentliches Repo haengen.** Jeder
+  Fremde koennte forken, eine PR schicken und damit beliebigen Code auf der
+  Maschine ausfuehren. Beim Umstellen war die Reihenfolge deshalb: Runner
+  einrichten (untaetig) -> Repo privat -> **dann erst** Workflows umstellen.
+* Der Runner laeuft als eigener Benutzer `runner` (nicht root) in WSL2/Ubuntu
+  24.04 mit systemd; Docker ist Pflicht, weil `appleboy/ssh-action` und
+  `scp-action` **Docker-Container-Actions** sind — ohne Docker scheitern alle
+  neun Deploys.
+* Steht der Runner still (Maschine aus/schlafend), **warten** Jobs in der
+  Warteschlange, statt zu scheitern. Das ist gewollt, aber es heisst: kein
+  Merge-Deploy, solange die Maschine aus ist.
