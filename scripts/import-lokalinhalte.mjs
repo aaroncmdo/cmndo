@@ -15,7 +15,10 @@
 
 import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
-import { pruefeLokalinhalt } from './src/lib/lokalinhalt/gate.ts'
+// ⚠ ESM-Importe sind relativ zur SKRIPTDATEI (scripts/), die readFileSync-Pfade
+// weiter unten dagegen relativ zum Arbeitsverzeichnis (Repo-Root). Beide sehen
+// gleich aus und meinen Verschiedenes.
+import { pruefeLokalinhalt } from '../src/lib/lokalinhalt/gate.ts'
 
 const SCHARF = process.argv.includes('--scharf')
 const REPO = 'C:/Users/Aaron Sprafke/stampit-app/stampit-app/claimondo-v2'
