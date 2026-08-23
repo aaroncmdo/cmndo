@@ -1,0 +1,341 @@
+{
+  "hamm": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Norden", "Westen"] },
+      { "name": "Uentrop", "ortsteile": ["Uentrop", "Werries", "Braam-Ostwennemar", "Haaren"] },
+      { "name": "Rhynern", "ortsteile": ["Rhynern", "Berge", "Osttünnen", "Westtünnen", "Freiske"] },
+      { "name": "Pelkum", "ortsteile": ["Pelkum", "Wiescherhöfen", "Lerche", "Weetfeld"] },
+      { "name": "Herringen", "ortsteile": ["Herringen", "Sandbochum", "Nordherringen"] },
+      { "name": "Bockum-Hövel", "ortsteile": ["Bockum", "Hövel", "Geinegge"] },
+      { "name": "Heessen", "ortsteile": ["Heessen", "Frielinghausen", "Kötterberg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A1", "A2"],
+      "bundesstrassen": ["B61", "B63", "B233"],
+      "knoten": ["Kreuz Kamen", "Anschlussstelle Hamm-Bockum-Hövel", "Anschlussstelle Hamm-Uentrop"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Hamm vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Heessen steht, in Rhynern oder nach einem Unfall auf der A2." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Hamm zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Hamm, darüber das Landgericht Dortmund. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
+      { "frage": "Unfall auf der A2 bei Hamm — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Hamm?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch gegen den Vorschlag einer Partnerwerkstatt." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Weststraße oder Zusammenstoß in Heessen — der Sachverständige kommt zu Ihnen nach Hamm.",
+    "topografieAnker": "Hamm liegt an der Lippe am Ostrand des Ruhrgebiets; die A2 führt südlich vorbei, die A1 kreuzt sie westlich bei Kamen."
+  },
+
+  "ludwigshafen": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Süd", "Nord", "Hemshof", "West"] },
+      { "name": "Friesenheim", "ortsteile": ["Friesenheim", "Nördliche Innenstadt"] },
+      { "name": "Oppau", "ortsteile": ["Oppau", "Edigheim", "Pfingstweide"] },
+      { "name": "Oggersheim", "ortsteile": ["Oggersheim", "Melm", "Ruchheim"] },
+      { "name": "Gartenstadt", "ortsteile": ["Gartenstadt", "Maudach", "Niederfeld"] },
+      { "name": "Süd", "ortsteile": ["Mundenheim", "Rheingönheim"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A6", "A61", "A65", "A650"],
+      "bundesstrassen": ["B9", "B37", "B44"],
+      "knoten": ["Kreuz Ludwigshafen", "Dreieck Ludwigshafen", "Kreuz Frankenthal"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Ludwigshafen vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Oggersheim steht, in Friesenheim oder nach einem Unfall auf der A650." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Ludwigshafen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Ludwigshafen am Rhein, darüber das Landgericht Frankenthal." },
+      { "frage": "Unfall auf der A650 oder A6 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Ludwigshafen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A650, Parkschaden in der Innenstadt oder Zusammenstoß in Oggersheim — der Sachverständige kommt zu Ihnen nach Ludwigshafen.",
+    "topografieAnker": "Ludwigshafen liegt Mannheim gegenüber am linken Rheinufer; die A650 führt als Hochstraße in die Stadt, A6 und A61 umschließen sie im Süden und Westen."
+  },
+
+  "muelheim-an-der-ruhr": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Altstadt I", "Altstadt II", "Eppinghofen", "Dümpten"] },
+      { "name": "Styrum", "ortsteile": ["Styrum", "Winkhausen"] },
+      { "name": "Heißen", "ortsteile": ["Heißen", "Fulerum", "Holthausen"] },
+      { "name": "Broich", "ortsteile": ["Broich", "Speldorf", "Saarn"] },
+      { "name": "Menden", "ortsteile": ["Menden", "Raadt", "Selbeck", "Mintard"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A40", "A52"],
+      "bundesstrassen": ["B1", "B223"],
+      "knoten": ["Kreuz Kaiserberg", "Anschlussstelle Mülheim-Heißen", "Anschlussstelle Mülheim-Styrum"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Mülheim an der Ruhr vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Speldorf steht, in Heißen oder nach einem Unfall auf der A40." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Mülheim zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Mülheim an der Ruhr, darüber das Landgericht Duisburg." },
+      { "frage": "Unfall auf der A40 oder A52 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Schloßstraße oder Zusammenstoß in Styrum — der Sachverständige kommt zu Ihnen nach Mülheim an der Ruhr.",
+    "topografieAnker": "Die Ruhr durchfließt Mülheim und trennt Broich und Speldorf von der Altstadt; die A40 quert das Stadtgebiet, die A52 führt nach Essen."
+  },
+
+  "oldenburg": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Bahnhofsviertel", "Haarenesch", "Dobbenviertel", "Ziegelhof"] },
+      { "name": "Nord", "ortsteile": ["Donnerschwee", "Ohmstede", "Etzhorn", "Nadorst"] },
+      { "name": "Süd", "ortsteile": ["Osternburg", "Kreyenbrück", "Drielake", "Bümmerstede"] },
+      { "name": "West", "ortsteile": ["Eversten", "Bloherfelde", "Wechloy", "Haarentor"] },
+      { "name": "Ost", "ortsteile": ["Osternburg-Ost", "Tweelbäke", "Krusenbusch"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A28", "A29", "A293"],
+      "bundesstrassen": ["B69", "B75", "B211", "B401"],
+      "knoten": ["Kreuz Oldenburg-Nord", "Dreieck Oldenburg-West", "Kreuz Oldenburg-Ost"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Oldenburg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Eversten steht, in Osternburg oder nach einem Unfall auf der A28." },
+      { "frage": "Ich wurde in Oldenburg als Radfahrer angefahren. Lohnt ein Gutachten?", "antwort": "Ja. Oldenburg hat einen der höchsten Radverkehrsanteile Deutschlands, entsprechend häufig sind solche Unfälle. Der Sachverständige beziffert Rahmen, Anbauteile, Kleidung und Helm — Positionen, die eine Werkstattrechnung nicht abbildet." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Oldenburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Oldenburg, darüber das Landgericht Oldenburg." },
+      { "frage": "Unfall auf der A28 oder A29 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A28, Kollision mit einem Radfahrer in der Innenstadt oder Parkschaden in Eversten — der Sachverständige kommt zu Ihnen nach Oldenburg.",
+    "topografieAnker": "Oldenburg liegt an der Hunte im nordwestdeutschen Flachland; A28 und A29 kreuzen sich nördlich der Stadt, die A293 führt als Umgehung um das Zentrum."
+  },
+
+  "leverkusen": {
+    "stadtbezirke": [
+      { "name": "Wiesdorf", "ortsteile": ["Wiesdorf", "Manfort", "Küppersteg", "Bürrig"] },
+      { "name": "Opladen", "ortsteile": ["Opladen", "Quettingen", "Bergisch Neukirchen", "Lützenkirchen"] },
+      { "name": "Schlebusch", "ortsteile": ["Schlebusch", "Steinbüchel", "Alkenrath", "Rheindorf"] },
+      { "name": "Hitdorf", "ortsteile": ["Hitdorf", "Bürrig-Nord"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A1", "A3", "A59"],
+      "bundesstrassen": ["B8", "B51", "B229"],
+      "knoten": ["Kreuz Leverkusen", "Kreuz Leverkusen-West", "Dreieck Langenfeld"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Leverkusen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Opladen steht, in Schlebusch oder nach einem Unfall am Kreuz Leverkusen." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Leverkusen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Leverkusen, darüber das Landgericht Köln." },
+      { "frage": "Unfall auf der A1 oder A3 bei Leverkusen — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Das Kreuz Leverkusen gehört zu den meistbefahrenen Knoten Deutschlands." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Leverkusen, Parkschaden in Wiesdorf oder Zusammenstoß in Opladen — der Sachverständige kommt zu Ihnen nach Leverkusen.",
+    "topografieAnker": "Leverkusen liegt rechtsrheinisch zwischen Köln und Düsseldorf; am Kreuz Leverkusen treffen A1 und A3 zusammen, die A59 führt am Rhein entlang."
+  },
+
+  "osnabrueck": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Altstadt", "Westerberg", "Wüste"] },
+      { "name": "Nord", "ortsteile": ["Haste", "Dodesheide", "Sonnenhügel", "Widukindland", "Gartlage"] },
+      { "name": "Ost", "ortsteile": ["Schinkel", "Schinkel-Ost", "Fledder", "Voxtrup", "Darum-Gretesch-Lüstringen"] },
+      { "name": "Süd", "ortsteile": ["Nahne", "Sutthausen", "Kalkhügel", "Schölerberg"] },
+      { "name": "West", "ortsteile": ["Hellern", "Atter", "Eversburg", "Pye", "Hafen"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A1", "A30", "A33"],
+      "bundesstrassen": ["B51", "B65", "B68"],
+      "knoten": ["Kreuz Osnabrück-Nord", "Kreuz Osnabrück-Süd", "Lotter Kreuz"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Osnabrück vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Schinkel steht, in Hellern oder nach einem Unfall auf der A1." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Osnabrück zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Osnabrück, darüber das Landgericht Osnabrück." },
+      { "frage": "Unfall am Kreuz Osnabrück-Süd — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Osnabrück?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden am Neumarkt oder Zusammenstoß im Schinkel — der Sachverständige kommt zu Ihnen nach Osnabrück.",
+    "topografieAnker": "Osnabrück liegt in einer Senke zwischen Wiehengebirge und Teutoburger Wald; A1, A30 und A33 treffen im Stadtgebiet an drei Kreuzen aufeinander."
+  },
+
+  "solingen": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Solingen-Mitte", "Katternberg", "Weyer", "Mangenberg"] },
+      { "name": "Ohligs", "ortsteile": ["Ohligs", "Aufderhöhe", "Merscheid", "Maubes"] },
+      { "name": "Wald", "ortsteile": ["Wald", "Itter", "Central"] },
+      { "name": "Gräfrath", "ortsteile": ["Gräfrath", "Ketzberg", "Fürkeltrath"] },
+      { "name": "Höhscheid", "ortsteile": ["Höhscheid", "Widdert", "Balkhausen"] },
+      { "name": "Burg", "ortsteile": ["Burg an der Wupper", "Unterburg", "Oberburg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A46"],
+      "bundesstrassen": ["B224", "B229"],
+      "knoten": ["Kreuz Hilden", "Anschlussstelle Solingen", "Anschlussstelle Solingen-Ohligs"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Solingen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Ohligs steht, in Gräfrath oder nach einem Unfall auf der A3." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Solingen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Solingen, darüber das Landgericht Wuppertal." },
+      { "frage": "Unfall auf der A3 oder A46 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Solingen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A3, Parkschaden in der Hauptstraße oder Zusammenstoß in Ohligs — der Sachverständige kommt zu Ihnen nach Solingen.",
+    "topografieAnker": "Solingen liegt im Bergischen Land auf den Höhen über der Wupper; die A3 führt westlich vorbei, die A46 verbindet die Stadt mit Wuppertal und Düsseldorf."
+  },
+
+  "heidelberg": {
+    "stadtbezirke": [
+      { "name": "Altstadt", "ortsteile": ["Altstadt", "Schlossberg"] },
+      { "name": "Bergheim", "ortsteile": ["Bergheim", "Bahnstadt"] },
+      { "name": "Weststadt", "ortsteile": ["Weststadt", "Südstadt"] },
+      { "name": "Neuenheim", "ortsteile": ["Neuenheim", "Handschuhsheim", "Neuenheimer Feld"] },
+      { "name": "Rohrbach", "ortsteile": ["Rohrbach", "Boxberg", "Emmertsgrund"] },
+      { "name": "Kirchheim", "ortsteile": ["Kirchheim", "Pfaffengrund", "Wieblingen"] },
+      { "name": "Ziegelhausen", "ortsteile": ["Ziegelhausen", "Peterstal", "Schlierbach"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A5", "A656"],
+      "bundesstrassen": ["B3", "B37", "B535"],
+      "knoten": ["Kreuz Heidelberg", "Anschlussstelle Heidelberg-Schwetzingen", "Dreieck Heidelberg"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Heidelberg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Neuenheim steht, in Kirchheim oder nach einem Unfall auf der A5." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Heidelberg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Heidelberg, darüber das Landgericht Heidelberg." },
+      { "frage": "Unfall auf der A5 oder A656 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Heidelberg?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden in der Altstadt oder Zusammenstoß auf der Ernst-Walz-Brücke — der Sachverständige kommt zu Ihnen nach Heidelberg.",
+    "topografieAnker": "Heidelberg liegt am Austritt des Neckars aus dem Odenwald in die Rheinebene; die A5 führt westlich vorbei, die A656 verbindet die Stadt mit Mannheim."
+  },
+
+  "darmstadt": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Martinsviertel", "Johannesviertel", "Woogsviertel"] },
+      { "name": "Bessungen", "ortsteile": ["Bessungen", "Heimstättensiedlung", "Paulusviertel"] },
+      { "name": "Nord", "ortsteile": ["Arheilgen", "Wixhausen", "Nordbahnhof"] },
+      { "name": "Ost", "ortsteile": ["Kranichstein", "Dornheimer Weg", "Am Oberfeld"] },
+      { "name": "West", "ortsteile": ["Weststadt", "Riedbahn", "Am Kavalleriesand"] },
+      { "name": "Süd", "ortsteile": ["Eberstadt", "Waldkolonie", "Nieder-Ramstädter Straße"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A5", "A67", "A672"],
+      "bundesstrassen": ["B3", "B26", "B42", "B449"],
+      "knoten": ["Kreuz Darmstadt", "Dreieck Darmstadt", "Kreuz Darmstadt-Nord"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Darmstadt vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bessungen steht, in Eberstadt oder nach einem Unfall auf der A5." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Darmstadt zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Darmstadt, darüber das Landgericht Darmstadt." },
+      { "frage": "Unfall am Kreuz Darmstadt — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Darmstadt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden am Luisenplatz oder Zusammenstoß in Eberstadt — der Sachverständige kommt zu Ihnen nach Darmstadt.",
+    "topografieAnker": "Darmstadt liegt am Westrand des Odenwalds; die A5 führt westlich vorbei, die A672 verbindet sie mit der A67 in der Rheinebene."
+  },
+
+  "herne": {
+    "stadtbezirke": [
+      { "name": "Herne-Mitte", "ortsteile": ["Herne-Mitte", "Baukau", "Horsthausen"] },
+      { "name": "Sodingen", "ortsteile": ["Sodingen", "Börnig", "Holthausen"] },
+      { "name": "Eickel", "ortsteile": ["Eickel", "Holsterhausen", "Röhlinghausen"] },
+      { "name": "Wanne", "ortsteile": ["Wanne", "Crange", "Unser Fritz", "Bickern"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A42", "A43"],
+      "bundesstrassen": ["B226"],
+      "knoten": ["Kreuz Herne", "Dreieck Herne", "Anschlussstelle Herne-Baukau"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Herne vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Wanne steht, in Baukau oder nach einem Unfall auf der A42." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Herne zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Herne, darüber das Landgericht Bochum." },
+      { "frage": "Unfall am Kreuz Herne — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Herne frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in der Bahnhofstraße oder Zusammenstoß in Wanne — der Sachverständige kommt zu Ihnen nach Herne.",
+    "topografieAnker": "Herne liegt im Zentrum des Ruhrgebiets zwischen Rhein-Herne-Kanal und A43; am Kreuz Herne treffen A42 und A43 aufeinander."
+  },
+
+  "paderborn": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Innenstadt", "Nordstadt", "Oststadt", "Südstadt", "Riemekeviertel"] },
+      { "name": "Schloß Neuhaus", "ortsteile": ["Schloß Neuhaus", "Sennelager", "Sande", "Mastbruch"] },
+      { "name": "Elsen", "ortsteile": ["Elsen", "Wewer", "Dahl"] },
+      { "name": "Ost", "ortsteile": ["Marienloh", "Neuenbeken", "Benhausen"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A33"],
+      "bundesstrassen": ["B1", "B64", "B68"],
+      "knoten": ["Kreuz Paderborn-Elsen", "Dreieck Paderborn", "Anschlussstelle Paderborn-Zentrum"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Paderborn vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Elsen steht, in Schloß Neuhaus oder nach einem Unfall auf der A33." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Paderborn zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Paderborn, darüber das Landgericht Paderborn." },
+      { "frage": "Unfall auf der A33 oder B1 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Paderborn frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A33, Parkschaden am Domplatz oder Zusammenstoß in Elsen — der Sachverständige kommt zu Ihnen nach Paderborn.",
+    "topografieAnker": "Paderborn liegt an den Quellen der Pader am Rand der Senne; die A33 führt westlich vorbei und verbindet die Stadt mit der A2 und der A44."
+  },
+
+  "regensburg": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Ostenviertel", "Westenviertel", "Steinweg"] },
+      { "name": "Nord", "ortsteile": ["Stadtamhof", "Reinhausen", "Weichs", "Sallern-Gallingkofen"] },
+      { "name": "Süd", "ortsteile": ["Galgenberg", "Kumpfmühl", "Ziegetsdorf", "Neuprüll", "Königswiesen"] },
+      { "name": "Ost", "ortsteile": ["Burgweinting", "Harting", "Irl", "Kasernenviertel"] },
+      { "name": "West", "ortsteile": ["Prüfening", "Großprüfening", "Dechbetten", "Oberisling"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A93"],
+      "bundesstrassen": ["B8", "B15", "B16"],
+      "knoten": ["Kreuz Regensburg", "Anschlussstelle Regensburg-Ost", "Anschlussstelle Regensburg-Nord"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Regensburg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Kumpfmühl steht, in Burgweinting oder nach einem Unfall auf der A3." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Regensburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Regensburg, darüber das Landgericht Regensburg." },
+      { "frage": "Unfall am Kreuz Regensburg — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Regensburg frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A3, Parkschaden in der Altstadt oder Zusammenstoß auf der Nibelungenbrücke — der Sachverständige kommt zu Ihnen nach Regensburg.",
+    "topografieAnker": "Regensburg liegt am nördlichsten Punkt der Donau, wo Naab und Regen einmünden; A3 und A93 kreuzen sich östlich der Stadt."
+  }
+}
