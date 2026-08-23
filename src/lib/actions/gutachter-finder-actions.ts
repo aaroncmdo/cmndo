@@ -80,6 +80,10 @@ export type GutachterFinderPayload = {
   schadenort_lat?: number
   schadenort_lng?: number
   wunschtermin?: string
+  /** Kam die Anfrage ueber einen KI-/Verzeichnis-Deeplink (`?sv=…`)? Dann traegt die
+   *  Zeile `utm_source='ki-deeplink'` — sonst ist dieser Weg im Nachhinein NICHT von
+   *  einem normalen Website-Besuch unterscheidbar. Siehe Insert unten. */
+  via_deeplink?: boolean
   zugeordneter_sv_id?: string
   zugeordneter_sv_lead_id?: string
   matching_typ?: string
@@ -340,6 +344,13 @@ export async function erstelleGutachterFinderAnfrage(
     .insert({
       ga_client_id: gaClientId,
       ...herkunft,
+      // KI-/Deeplink-Herkunft: `herkunftAusRequest()` liest den REFERER und behaelt daraus
+      // nur origin+pathname + utm_* — der `?sv=`-Parameter des Deeplinks faellt dabei weg,
+      // und im cross-origin-iframe fehlt der Referer oft ganz (Referrer-Policy). Deshalb
+      // wird die Herkunft hier aus dem PAYLOAD gesetzt, der sie zuverlaessig durchtraegt.
+      // Nur als Fallback: ein echtes utm_source (z. B. aus einer Kampagne) gewinnt.
+      utm_source: herkunft.utm_source ?? (payload.via_deeplink ? 'ki-deeplink' : null),
+      utm_medium: herkunft.utm_medium ?? (payload.via_deeplink ? 'deeplink' : null),
       vorname: payload.vorname,
       nachname: payload.nachname,
       email: payload.email,

@@ -31,6 +31,15 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 const BASIC_USER = process.env.STAGING_BASIC_USER ?? 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
 const IS_LOCAL = BASE.startsWith('http://localhost') || BASE.startsWith('http://127.')
+// Nur STAGING liegt hinter nginx-Basic-Auth. Der Skip unten hing bis 23.08. an
+// `!IS_LOCAL` und behandelte damit PROD wie staging: wer diese Spec lokal gegen
+// app.claimondo.de fuhr — also genau den Lauf, den Regel 4 vorschreibt — bekam einen
+// STILLEN Skip statt eines Ergebnisses. In CI faellt das nicht auf, weil dort
+// STAGING_BASIC_PASS gesetzt ist. Gemessen 23.08.: mit gesetzter Variable lief der
+// Test gegen prod in 7,4 s durch (1 passed) — es fehlte also nur das Gate, nicht die
+// Lauffaehigkeit. Gleiche Klasse wie der webServer-Fix in #5512: die Bedingung prueft
+// jetzt, ob das ZIEL Basic-Auth braucht, statt ob es "nicht localhost" ist.
+const BRAUCHT_BASIC_AUTH = /staging/i.test(BASE)
 const RUN_ID = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14)
 
 let stepIdx = 0
@@ -78,7 +87,7 @@ function field(page: Page, key: string) {
 
 test('Phase 1: Public /gutachter-finden lädt + Wizard-Einstieg + fehlerfrei', async ({ page }) => {
   test.setTimeout(90_000)
-  if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+  if (BRAUCHT_BASIC_AUTH && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt (Ziel = staging)')
   const { pageErrors, consoleErrors } = wireConsole(page, 'gf')
 
   await page.goto('/gutachter-finden', { waitUntil: 'domcontentloaded' })
@@ -129,7 +138,7 @@ const ROLLEN: Array<{ name: string; email: string; pass: string; pfad: string; m
 for (const rolle of ROLLEN) {
   test(`Rolle ${rolle.name}: Login + Portal ${rolle.pfad} erreichbar + fehlerfrei`, async ({ page }) => {
     test.setTimeout(120_000)
-    if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+    if (BRAUCHT_BASIC_AUTH && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt (Ziel = staging)')
     const { pageErrors, consoleErrors } = wireConsole(page, rolle.name)
 
     const ok = await login(page, rolle.email, rolle.pass)
