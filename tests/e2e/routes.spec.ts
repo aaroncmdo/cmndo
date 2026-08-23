@@ -89,9 +89,20 @@ const PUBLIC_ROUTES = [
  * `praefix` ist am Listen-Code verifiziert, nicht geraten: /admin/faelle
  * verlinkt auf /faelle/<id>, NICHT auf /admin/faelle/<id>.
  */
-const DETAIL_WEGE: Array<{ liste: string; praefix: string }> = [
+const DETAIL_WEGE: Array<{ liste: string; praefix: string; leerErwartet?: string }> = [
   { liste: '/admin/faelle', praefix: '/faelle/' },
-  { liste: '/admin/organisationen', praefix: '/admin/organisationen/' },
+  {
+    liste: '/admin/organisationen',
+    praefix: '/admin/organisationen/',
+    // 23.08. auf prod gemessen: 0 Zeilen in `organisationen`, 0 von 22 SVs mit
+    // `organisation_id`, 0 Parent-Accounts. Die Org-Ebene (Buero mit Sub-SVs) wurde nie
+    // benutzt — in /admin/organisationen gibt es nicht einmal einen Anlege-Weg; Orgs
+    // entstehen nur als Nebenprodukt beim Admin-SV-Anlegen. Eine leere Liste ist hier
+    // also der DAUERZUSTAND, kein Verdacht.
+    leerErwartet:
+      'organisationen ist auf prod dauerhaft leer (0 Zeilen, kein Anlege-Weg in der UI) — ' +
+      'Marker: audit-organisationen-struktur-auf-prod-ungenutzt',
+  },
   { liste: '/admin/team', praefix: '/admin/team/' },
   { liste: '/admin/versicherungen', praefix: '/admin/versicherungen/' },
 ]
@@ -108,7 +119,7 @@ test.describe('Admin Routes', () => {
 })
 
 test.describe('Admin Detailansichten (über die Liste, nicht über feste IDs)', () => {
-  for (const { liste, praefix } of DETAIL_WEGE) {
+  for (const { liste, praefix, leerErwartet } of DETAIL_WEGE) {
     test(`${liste} → erste Detailansicht rendert`, async ({ adminPage }) => {
       await erwarteGerendert(adminPage, liste)
 
@@ -117,13 +128,29 @@ test.describe('Admin Detailansichten (über die Liste, nicht über feste IDs)', 
         .evaluateAll((els) =>
           els.map((el) => el.getAttribute('href')).filter((h): h is string => Boolean(h)),
         )
+      // Zeilenzahl trennt die beiden Null-Faelle, die sonst identisch aussehen:
+      // „Liste leer" vs. „Liste voll, aber ohne Detail-Links" (genau der Bug, den #5529
+      // behoben hat). Eine leere Liste rendert einen EmptyState statt einer Tabelle,
+      // dort ist die Zahl 0.
+      const zeilen = await adminPage.locator('tbody tr').count()
       const detail = hrefs.find((h) => HAT_ID.test(h))
 
-      // Bewusst KEIN test.skip(): eine leere Liste würde den Lauf grün färben
-      // und genau den Beweis unterschlagen, für den dieser Test existiert.
+      // Bewusst KEIN test.skip() bei UNERWARTET leerer Liste: die wuerde den Lauf gruen
+      // faerben und genau den Beweis unterschlagen, fuer den dieser Test existiert.
+      //
+      // Ausnahme (23.08.): Wege mit `leerErwartet`, deren Leere gemessen und dokumentiert
+      // ist — UND nur solange die Liste nachweislich 0 Zeilen hat. Grund: ein DAUERHAFT
+      // roter Waechter verliert seine Signalwirkung; er faerbt jeden nightly rot, ohne je
+      // etwas Neues zu sagen, und gewoehnt daran, ueber rote Zeilen hinwegzulesen.
+      // ⚠ Selbstheilend: sobald Daten existieren (zeilen > 0), greift die Ausnahme NICHT
+      // mehr — fehlende Detail-Links sind dann wieder ein harter Fehler.
+      if (!detail && leerErwartet && zeilen === 0) {
+        test.skip(true, `${liste}: ${leerErwartet}`)
+      }
+
       expect(
         detail,
-        `${liste}: kein Detail-Link nach ${praefix}<uuid> gefunden (${hrefs.length} Links mit diesem Präfix) — Detailansicht nicht prüfbar`,
+        `${liste}: kein Detail-Link nach ${praefix}<uuid> gefunden (${hrefs.length} Links mit diesem Präfix, ${zeilen} Tabellenzeilen) — Detailansicht nicht prüfbar`,
       ).toBeTruthy()
       if (!detail) return
 
