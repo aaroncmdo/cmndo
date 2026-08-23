@@ -47,6 +47,25 @@ const SCHABLONEN = [
       /welches gericht|gericht ist .*zust[äa]ndig/i.test(String(f?.frage ?? '')) &&
       /amtsgericht|landgericht/i.test(String(f?.antwort ?? '')),
   },
+  {
+    // "Meist innerhalb von 24 bis 48 Stunden. Der Sachverstaendige kommt zu
+    // Ihnen — ob das Fahrzeug in <Ortsteil> steht, in <Ortsteil> oder nach
+    // einem Unfall auf der <Autobahn>."
+    //
+    // Unabhaengig zweimal als austauschbar befunden: einmal hier ueber die
+    // Feldmessung, einmal von der Marker-Lane, die die Cron-Staedte gegen eine
+    // Kontrollgruppe stellte (FAQ-Aehnlichkeit 19,6 % vs 0,0 %) und genau
+    // diesen Satz als Beleg zitierte.
+    //
+    // Sie fuegt NICHTS hinzu: die Frist steht im Basis-Block (faq_finden:
+    // "Termin vor Ort in unter 48 Stunden"), die Ortsteile stehen im
+    // Bezirks-Feld, die Autobahn im Achsen-Feld — alles auf derselben Seite.
+    // Uebrig bleibt Satzbau um bereits vorhandene Daten.
+    name: 'vor-Ort-Frist (Basis-Block deckt es ab: faq_finden)',
+    trifft: (f) =>
+      /wie schnell|wie lange dauert/i.test(String(f?.frage ?? '')) &&
+      /\d+\s*bis\s*\d+\s*Stunden/i.test(String(f?.antwort ?? '')),
+  },
 ]
 
 const args = process.argv.slice(2)
