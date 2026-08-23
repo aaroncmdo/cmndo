@@ -146,8 +146,19 @@ console.log(`  ohne FAQs                ${v.ohne.faqs}`)
 console.log(`  ohne Unfallschwerpunkte  ${v.ohne.hotspots}${v.ohne.hotspots === v.staedte ? '   (alle — der Quellenzwang laesst praktisch keine durch)' : ''}`)
 
 // --- 3) Near-Duplicate ------------------------------------------------------
+// ⚠ Der NAME, nicht der Slug — derselbe Fehler wie oben beim Gate, hier aber
+// mit umgekehrtem Vorzeichen: `viergramme` soll den Ortsnamen ENTFERNEN, damit
+// zwei Baukasten-Texte, die sich nur in ihm unterscheiden, als das erkannt
+// werden, was sie sind. Mit dem Slug ("koeln") greift die Ersetzung bei jeder
+// Umlaut-Stadt nicht, denn im Text steht "Köln" — der Ortsname bleibt drin und
+// laesst die Paare kuenstlich VERSCHIEDEN aussehen. Gemessen 23.08.: Slug 333
+// Paare ueber der Grenze, Name 478. Ein Messfehler, der beruhigt, ist der
+// gefaehrlichste — genau davor warnt auch der Kommentar in `viergramme`.
 const grammeVon = (liste: Array<Record<string, any>>) =>
-  liste.map((z) => ({ slug: z.stadt_slug, gramme: viergramme(textAusZeile(z), z.stadt_slug) }))
+  liste.map((z) => ({
+    slug: z.stadt_slug,
+    gramme: viergramme(textAusZeile(z), getStadtStammdaten(z.stadt_slug)?.name ?? z.stadt_slug),
+  }))
 // Zwei Laeufe, bewusst: `p` findet die BEFUNDE (inkl. Proben), `pEcht` liefert
 // die ZAHLEN, die im Bericht stehen. Bei 173 Staedten sind das 2x ~15.000
 // Mengenvergleiche — Millisekunden, und dafuer stimmen beide Aussagen.

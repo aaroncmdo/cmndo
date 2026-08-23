@@ -1,328 +1,824 @@
 {
   "erlangen": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Markgrafenstadt", "Rathausplatz", "Burgberg"] },
-      { "name": "Süd", "ortsteile": ["Bruck", "Eltersdorf", "Frauenaurach", "Tennenlohe"] },
-      { "name": "West", "ortsteile": ["Büchenbach", "Alterlangen", "Steudach"] },
-      { "name": "Ost", "ortsteile": ["Sieglitzhof", "Röthelheim", "Buckenhof-Grenze"] },
-      { "name": "Nord", "ortsteile": ["Dechsendorf", "Möhrendorf-Grenze", "Sieglitzhof-Nord"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Markgrafenstadt",
+          "Rathausplatz",
+          "Burgberg"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Bruck",
+          "Eltersdorf",
+          "Frauenaurach",
+          "Tennenlohe"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Büchenbach",
+          "Alterlangen",
+          "Steudach"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Sieglitzhof",
+          "Röthelheim",
+          "Buckenhof-Grenze"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Dechsendorf",
+          "Möhrendorf-Grenze",
+          "Sieglitzhof-Nord"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A73"],
-      "bundesstrassen": ["B4"],
-      "knoten": ["Kreuz Erlangen-Tennenlohe", "Dreieck Fürth/Erlangen", "Anschlussstelle Erlangen-West"]
+      "autobahnen": [
+        "A3",
+        "A73"
+      ],
+      "bundesstrassen": [
+        "B4"
+      ],
+      "knoten": [
+        "Kreuz Erlangen-Tennenlohe",
+        "Dreieck Fürth/Erlangen",
+        "Anschlussstelle Erlangen-West"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Erlangen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bruck steht, in Büchenbach oder nach einem Unfall auf der A3." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Erlangen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Erlangen, darüber das Landgericht Nürnberg-Fürth." },
-      { "frage": "Unfall auf der A3 oder A73 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Ich wurde als Radfahrer angefahren. Lohnt ein Gutachten?", "antwort": "Ja. Erlangen hat einen hohen Radverkehrsanteil, und der Sachverständige beziffert Rahmen, Anbauteile, Kleidung und Helm — Positionen, die eine Werkstattrechnung nicht abbildet." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Erlangen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Erlangen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bruck steht, in Büchenbach oder nach einem Unfall auf der A3."
+      },
+      {
+        "frage": "Ich wurde als Radfahrer angefahren. Lohnt ein Gutachten?",
+        "antwort": "Ja. Erlangen hat einen hohen Radverkehrsanteil, und der Sachverständige beziffert Rahmen, Anbauteile, Kleidung und Helm — Positionen, die eine Werkstattrechnung nicht abbildet."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A73, Kollision mit einem Radfahrer in der Innenstadt oder Parkschaden in Bruck — der Sachverständige kommt zu Ihnen nach Erlangen.",
     "topografieAnker": "Erlangen liegt an der Regnitz zwischen Nürnberg und Bamberg; die A73 durchquert das Stadtgebiet, die A3 führt südlich am Kreuz Tennenlohe vorbei."
   },
-
   "reutlingen": {
     "stadtbezirke": [
-      { "name": "Kernstadt", "ortsteile": ["Innenstadt", "Oststadt", "Weststadt", "Nordstadt", "Storlach"] },
-      { "name": "Nord", "ortsteile": ["Betzingen", "Orschel-Hagen", "Rommelsbach", "Sondelfingen"] },
-      { "name": "Ost", "ortsteile": ["Altenburg", "Sickenhausen", "Degerschlacht", "Reicheneck"] },
-      { "name": "Süd", "ortsteile": ["Ohmenhausen", "Gönningen", "Bronnweiler", "Oferdingen"] }
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Oststadt",
+          "Weststadt",
+          "Nordstadt",
+          "Storlach"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Betzingen",
+          "Orschel-Hagen",
+          "Rommelsbach",
+          "Sondelfingen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Altenburg",
+          "Sickenhausen",
+          "Degerschlacht",
+          "Reicheneck"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Ohmenhausen",
+          "Gönningen",
+          "Bronnweiler",
+          "Oferdingen"
+        ]
+      }
     ],
     "hauptachsen": {
       "autobahnen": [],
-      "bundesstrassen": ["B27", "B28", "B312", "B464"],
-      "knoten": ["Kreuzung B27/B28 Reutlingen-Nord", "Scheibengipfeltunnel", "Anschluss B312 Reutlingen-Ost"]
+      "bundesstrassen": [
+        "B27",
+        "B28",
+        "B312",
+        "B464"
+      ],
+      "knoten": [
+        "Kreuzung B27/B28 Reutlingen-Nord",
+        "Scheibengipfeltunnel",
+        "Anschluss B312 Reutlingen-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Reutlingen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Betzingen steht, in Sondelfingen oder nach einem Unfall auf der B27." },
-      { "frage": "Reutlingen hat keine eigene Autobahn — spielt das für mein Gutachten eine Rolle?", "antwort": "Nein. Für Ihren Anspruch zählt die Haftungsfrage, nicht der Straßentyp. Die B27 und B28 tragen hier den überörtlichen Verkehr; Unfälle dort werden genauso reguliert wie auf einer Autobahn." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Reutlingen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Reutlingen, darüber das Landgericht Tübingen." },
-      { "frage": "Wer zahlt den Gutachter nach einem unverschuldeten Unfall?", "antwort": "Der gegnerische Haftpflichtversicherer nach § 249 BGB — unabhängig davon, wo der Unfall passiert ist." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Reutlingen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Betzingen steht, in Sondelfingen oder nach einem Unfall auf der B27."
+      },
+      {
+        "frage": "Reutlingen hat keine eigene Autobahn — spielt das für mein Gutachten eine Rolle?",
+        "antwort": "Nein. Für Ihren Anspruch zählt die Haftungsfrage, nicht der Straßentyp. Die B27 und B28 tragen hier den überörtlichen Verkehr; Unfälle dort werden genauso reguliert wie auf einer Autobahn."
+      },
+      {
+        "frage": "Wer zahlt den Gutachter nach einem unverschuldeten Unfall?",
+        "antwort": "Der gegnerische Haftpflichtversicherer nach § 249 BGB — unabhängig davon, wo der Unfall passiert ist."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der B27, Parkschaden in der Wilhelmstraße oder Zusammenstoß in Betzingen — der Sachverständige kommt zu Ihnen nach Reutlingen.",
     "topografieAnker": "Reutlingen liegt am Fuß der Schwäbischen Alb an der Echaz. Eine eigene Autobahn hat die Stadt nicht — den überörtlichen Verkehr tragen B27 und B28, die A8 verläuft rund zwanzig Kilometer nördlich."
   },
-
   "bremerhaven": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Mitte", "Geestemünde", "Geestendorf", "Twischkamp"] },
-      { "name": "Nord", "ortsteile": ["Lehe", "Leherheide", "Weddewarden", "Speckenbüttel"] },
-      { "name": "Süd", "ortsteile": ["Wulsdorf", "Surheide", "Schiffdorferdamm", "Fischereihafen"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Mitte",
+          "Geestemünde",
+          "Geestendorf",
+          "Twischkamp"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Lehe",
+          "Leherheide",
+          "Weddewarden",
+          "Speckenbüttel"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Wulsdorf",
+          "Surheide",
+          "Schiffdorferdamm",
+          "Fischereihafen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A27"],
-      "bundesstrassen": ["B6", "B71", "B212"],
-      "knoten": ["Anschlussstelle Bremerhaven-Mitte", "Anschlussstelle Bremerhaven-Überseehäfen", "Dreieck Bremerhaven"]
+      "autobahnen": [
+        "A27"
+      ],
+      "bundesstrassen": [
+        "B6",
+        "B71",
+        "B212"
+      ],
+      "knoten": [
+        "Anschlussstelle Bremerhaven-Mitte",
+        "Anschlussstelle Bremerhaven-Überseehäfen",
+        "Dreieck Bremerhaven"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bremerhaven vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lehe steht, in Wulsdorf oder nach einem Unfall auf der A27." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bremerhaven zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bremerhaven, darüber das Landgericht Bremen." },
-      { "frage": "Unfall auf der A27 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Bremerhaven vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lehe steht, in Wulsdorf oder nach einem Unfall auf der A27."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A27, Parkschaden in der Bürgermeister-Smidt-Straße oder Zusammenstoß in Lehe — der Sachverständige kommt zu Ihnen nach Bremerhaven.",
     "topografieAnker": "Bremerhaven liegt an der Wesermündung zur Nordsee; die A27 endet im Stadtgebiet und bindet die Überseehäfen an."
   },
-
   "koblenz": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Mitte", "Süd", "Rauental", "Goldgrube"] },
-      { "name": "Nord", "ortsteile": ["Lützel", "Neuendorf", "Wallersheim", "Kesselheim"] },
-      { "name": "West", "ortsteile": ["Moselweiß", "Metternich", "Güls", "Bubenheim", "Rübenach"] },
-      { "name": "Süd", "ortsteile": ["Karthause", "Oberwerth", "Stolzenfels"] },
-      { "name": "Rechtsrheinisch", "ortsteile": ["Ehrenbreitstein", "Pfaffendorf", "Horchheim", "Arenberg", "Immendorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Mitte",
+          "Süd",
+          "Rauental",
+          "Goldgrube"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Lützel",
+          "Neuendorf",
+          "Wallersheim",
+          "Kesselheim"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Moselweiß",
+          "Metternich",
+          "Güls",
+          "Bubenheim",
+          "Rübenach"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Karthause",
+          "Oberwerth",
+          "Stolzenfels"
+        ]
+      },
+      {
+        "name": "Rechtsrheinisch",
+        "ortsteile": [
+          "Ehrenbreitstein",
+          "Pfaffendorf",
+          "Horchheim",
+          "Arenberg",
+          "Immendorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A48", "A61"],
-      "bundesstrassen": ["B9", "B42", "B49", "B327"],
-      "knoten": ["Kreuz Koblenz", "Dreieck Koblenz-Nord", "Anschlussstelle Koblenz-Zentrum"]
+      "autobahnen": [
+        "A48",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B9",
+        "B42",
+        "B49",
+        "B327"
+      ],
+      "knoten": [
+        "Kreuz Koblenz",
+        "Dreieck Koblenz-Nord",
+        "Anschlussstelle Koblenz-Zentrum"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Koblenz vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf der Karthause steht, in Ehrenbreitstein oder nach einem Unfall auf der A61." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Koblenz zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Koblenz, darüber das Landgericht Koblenz." },
-      { "frage": "Unfall am Kreuz Koblenz — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A48 und A61 zusammen." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Koblenz frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Koblenz vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf der Karthause steht, in Ehrenbreitstein oder nach einem Unfall auf der A61."
+      },
+      {
+        "frage": "Unfall am Kreuz Koblenz — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A48 und A61 zusammen."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A61, Parkschaden am Deutschen Eck oder Zusammenstoß in Ehrenbreitstein — der Sachverständige kommt zu Ihnen nach Koblenz.",
     "topografieAnker": "Koblenz liegt am Zusammenfluss von Rhein und Mosel; beide Flüsse zwingen den Verkehr auf wenige Brücken, A48 und A61 kreuzen sich westlich der Stadt."
   },
-
   "jena": {
     "stadtbezirke": [
-      { "name": "Zentrum", "ortsteile": ["Zentrum", "Damenviertel", "Wenigenjena"] },
-      { "name": "Nord", "ortsteile": ["Nord", "Zwätzen", "Löbstedt", "Closewitz"] },
-      { "name": "West", "ortsteile": ["West", "Lichtenhain", "Ammerbach", "Winzerla"] },
-      { "name": "Süd", "ortsteile": ["Lobeda-Ost", "Lobeda-West", "Göschwitz", "Burgau"] },
-      { "name": "Ost", "ortsteile": ["Wöllnitz", "Ziegenhain", "Kernberge", "Jenaprießnitz"] }
+      {
+        "name": "Zentrum",
+        "ortsteile": [
+          "Zentrum",
+          "Damenviertel",
+          "Wenigenjena"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nord",
+          "Zwätzen",
+          "Löbstedt",
+          "Closewitz"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "West",
+          "Lichtenhain",
+          "Ammerbach",
+          "Winzerla"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Lobeda-Ost",
+          "Lobeda-West",
+          "Göschwitz",
+          "Burgau"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Wöllnitz",
+          "Ziegenhain",
+          "Kernberge",
+          "Jenaprießnitz"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4"],
-      "bundesstrassen": ["B7", "B88"],
-      "knoten": ["Anschlussstelle Jena-Göschwitz", "Anschlussstelle Jena-Zentrum", "Anschlussstelle Jena-Lobeda"]
+      "autobahnen": [
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B7",
+        "B88"
+      ],
+      "knoten": [
+        "Anschlussstelle Jena-Göschwitz",
+        "Anschlussstelle Jena-Zentrum",
+        "Anschlussstelle Jena-Lobeda"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Jena vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lobeda steht, in Winzerla oder nach einem Unfall auf der A4." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Jena zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Jena, darüber das Landgericht Gera." },
-      { "frage": "Unfall auf der A4 bei Jena — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Jena frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Jena vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lobeda steht, in Winzerla oder nach einem Unfall auf der A4."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden am Holzmarkt oder Zusammenstoß in Lobeda — der Sachverständige kommt zu Ihnen nach Jena.",
     "topografieAnker": "Jena liegt eingeschnitten im Saaletal zwischen Muschelkalkhängen; die A4 quert das Tal südlich der Stadt auf hohen Brücken."
   },
-
   "recklinghausen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Innenstadt", "Paulusviertel"] },
-      { "name": "Süd", "ortsteile": ["Süd", "Hochlarmark", "König Ludwig", "Grullbad"] },
-      { "name": "Ost", "ortsteile": ["Ostviertel", "Suderwich", "Röllinghausen", "Essel"] },
-      { "name": "West", "ortsteile": ["Westviertel", "Hillerheide", "Hillen", "Stuckenbusch"] },
-      { "name": "Nord", "ortsteile": ["Nordviertel", "Speckhorn", "Bockholt", "Börste"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Innenstadt",
+          "Paulusviertel"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Süd",
+          "Hochlarmark",
+          "König Ludwig",
+          "Grullbad"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Ostviertel",
+          "Suderwich",
+          "Röllinghausen",
+          "Essel"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Westviertel",
+          "Hillerheide",
+          "Hillen",
+          "Stuckenbusch"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nordviertel",
+          "Speckhorn",
+          "Bockholt",
+          "Börste"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A43"],
-      "bundesstrassen": ["B225"],
-      "knoten": ["Kreuz Recklinghausen", "Anschlussstelle Recklinghausen-Herten", "Dreieck Recklinghausen"]
+      "autobahnen": [
+        "A2",
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B225"
+      ],
+      "knoten": [
+        "Kreuz Recklinghausen",
+        "Anschlussstelle Recklinghausen-Herten",
+        "Dreieck Recklinghausen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Recklinghausen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Suderwich steht, in Hochlarmark oder nach einem Unfall auf der A2." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Recklinghausen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Recklinghausen, darüber das Landgericht Bochum." },
-      { "frage": "Unfall auf der A2 oder A43 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Recklinghausen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Suderwich steht, in Hochlarmark oder nach einem Unfall auf der A2."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Altstadt oder Zusammenstoß in Suderwich — der Sachverständige kommt zu Ihnen nach Recklinghausen.",
     "topografieAnker": "Recklinghausen liegt am Nordrand des Ruhrgebiets; die A2 führt nördlich vorbei, die A43 quert das Stadtgebiet Richtung Münster."
   },
-
   "remscheid": {
     "stadtbezirke": [
-      { "name": "Alt-Remscheid", "ortsteile": ["Innenstadt", "Stachelhausen", "Honsberg", "Vieringhausen", "Hasten"] },
-      { "name": "Lennep", "ortsteile": ["Lennep", "Lüdorf", "Bergisch Born"] },
-      { "name": "Lüttringhausen", "ortsteile": ["Lüttringhausen", "Klausen", "Goldenberg"] },
-      { "name": "Süd", "ortsteile": ["Reinshagen", "Hackenberg", "Küppelstein"] }
+      {
+        "name": "Alt-Remscheid",
+        "ortsteile": [
+          "Innenstadt",
+          "Stachelhausen",
+          "Honsberg",
+          "Vieringhausen",
+          "Hasten"
+        ]
+      },
+      {
+        "name": "Lennep",
+        "ortsteile": [
+          "Lennep",
+          "Lüdorf",
+          "Bergisch Born"
+        ]
+      },
+      {
+        "name": "Lüttringhausen",
+        "ortsteile": [
+          "Lüttringhausen",
+          "Klausen",
+          "Goldenberg"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Reinshagen",
+          "Hackenberg",
+          "Küppelstein"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1"],
-      "bundesstrassen": ["B51", "B229", "B237"],
-      "knoten": ["Anschlussstelle Remscheid", "Anschlussstelle Remscheid-Lennep", "Kreuz Wuppertal-Nord"]
+      "autobahnen": [
+        "A1"
+      ],
+      "bundesstrassen": [
+        "B51",
+        "B229",
+        "B237"
+      ],
+      "knoten": [
+        "Anschlussstelle Remscheid",
+        "Anschlussstelle Remscheid-Lennep",
+        "Kreuz Wuppertal-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Remscheid vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lennep steht, in Lüttringhausen oder nach einem Unfall auf der A1." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Remscheid zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Remscheid, darüber das Landgericht Wuppertal." },
-      { "frage": "Unfall auf der A1 bei Remscheid — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Remscheid frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Remscheid vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lennep steht, in Lüttringhausen oder nach einem Unfall auf der A1."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden in der Alleestraße oder Zusammenstoß in Lennep — der Sachverständige kommt zu Ihnen nach Remscheid.",
     "topografieAnker": "Remscheid liegt auf den Höhen des Bergischen Landes zwischen Wupper und Ruhr; die A1 quert das Stadtgebiet über die Müngstener Höhen."
   },
-
   "trier": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Mitte-Gartenfeld", "Nells Ländchen"] },
-      { "name": "Nord", "ortsteile": ["Nord", "Pfalzel", "Biewer", "Ruwer", "Ehrang", "Quint"] },
-      { "name": "Süd", "ortsteile": ["Süd", "Feyen", "Weismark", "Heiligkreuz"] },
-      { "name": "West", "ortsteile": ["Pallien", "Euren", "Zewen", "Trier-West"] },
-      { "name": "Ost", "ortsteile": ["Kürenz", "Tarforst", "Olewig", "Filsch", "Irsch"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Mitte-Gartenfeld",
+          "Nells Ländchen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nord",
+          "Pfalzel",
+          "Biewer",
+          "Ruwer",
+          "Ehrang",
+          "Quint"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Süd",
+          "Feyen",
+          "Weismark",
+          "Heiligkreuz"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Pallien",
+          "Euren",
+          "Zewen",
+          "Trier-West"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Kürenz",
+          "Tarforst",
+          "Olewig",
+          "Filsch",
+          "Irsch"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A64", "A602"],
-      "bundesstrassen": ["B49", "B51", "B52", "B53"],
-      "knoten": ["Dreieck Moseltal", "Kreuz Trier", "Anschlussstelle Trier-Verteilerkreis"]
+      "autobahnen": [
+        "A1",
+        "A64",
+        "A602"
+      ],
+      "bundesstrassen": [
+        "B49",
+        "B51",
+        "B52",
+        "B53"
+      ],
+      "knoten": [
+        "Dreieck Moseltal",
+        "Kreuz Trier",
+        "Anschlussstelle Trier-Verteilerkreis"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Trier vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Ehrang steht, in Tarforst oder nach einem Unfall auf der A602." },
-      { "frage": "Mein Unfallgegner kam aus Luxemburg. Was ändert das?", "antwort": "Bei einem Unfall auf deutschem Boden gilt deutsches Recht, und der luxemburgische Versicherer hat einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert oft etwas länger — ein Gutachten mit belastbaren Zahlen beschleunigt sie spürbar." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Trier zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Trier, darüber das Landgericht Trier." },
-      { "frage": "Unfall auf der A64 Richtung Luxemburg — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Trier vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Ehrang steht, in Tarforst oder nach einem Unfall auf der A602."
+      },
+      {
+        "frage": "Mein Unfallgegner kam aus Luxemburg. Was ändert das?",
+        "antwort": "Bei einem Unfall auf deutschem Boden gilt deutsches Recht, und der luxemburgische Versicherer hat einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert oft etwas länger — ein Gutachten mit belastbaren Zahlen beschleunigt sie spürbar."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A602, Parkschaden an der Porta Nigra oder Zusammenstoß nahe der luxemburgischen Grenze — der Sachverständige kommt zu Ihnen nach Trier.",
     "topografieAnker": "Trier liegt im Moseltal nahe der Grenze zu Luxemburg; die A64 führt dorthin, die A602 endet als Zubringer mitten in der Stadt."
   },
-
   "moers": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Moers-Mitte", "Altstadt", "Hülsdonk", "Vinn"] },
-      { "name": "Asberg", "ortsteile": ["Asberg", "Schwafheim", "Hochstraß"] },
-      { "name": "Rheinkamp", "ortsteile": ["Repelen", "Meerbeck", "Utfort", "Eick"] },
-      { "name": "Kapellen", "ortsteile": ["Kapellen", "Holderberg", "Scherpenberg"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Moers-Mitte",
+          "Altstadt",
+          "Hülsdonk",
+          "Vinn"
+        ]
+      },
+      {
+        "name": "Asberg",
+        "ortsteile": [
+          "Asberg",
+          "Schwafheim",
+          "Hochstraß"
+        ]
+      },
+      {
+        "name": "Rheinkamp",
+        "ortsteile": [
+          "Repelen",
+          "Meerbeck",
+          "Utfort",
+          "Eick"
+        ]
+      },
+      {
+        "name": "Kapellen",
+        "ortsteile": [
+          "Kapellen",
+          "Holderberg",
+          "Scherpenberg"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A40", "A57"],
-      "bundesstrassen": ["B57"],
-      "knoten": ["Kreuz Moers", "Anschlussstelle Moers-Zentrum", "Kreuz Kamp-Lintfort"]
+      "autobahnen": [
+        "A40",
+        "A57"
+      ],
+      "bundesstrassen": [
+        "B57"
+      ],
+      "knoten": [
+        "Kreuz Moers",
+        "Anschlussstelle Moers-Zentrum",
+        "Kreuz Kamp-Lintfort"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Moers vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Repelen steht, in Asberg oder nach einem Unfall auf der A40." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Moers zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Moers, darüber das Landgericht Kleve." },
-      { "frage": "Unfall auf der A40 oder A57 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Moers frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Moers vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Repelen steht, in Asberg oder nach einem Unfall auf der A40."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Altstadt oder Zusammenstoß in Repelen — der Sachverständige kommt zu Ihnen nach Moers.",
     "topografieAnker": "Moers liegt linksrheinisch westlich von Duisburg; die A40 führt zur Rheinbrücke nach Duisburg, die A57 verbindet die Stadt mit Krefeld und Köln."
   },
-
   "siegen": {
     "stadtbezirke": [
-      { "name": "Kernband", "ortsteile": ["Siegen-Mitte", "Oberstadt", "Unterstadt", "Hammerhütte"] },
-      { "name": "Nord", "ortsteile": ["Geisweid", "Weidenau", "Weidenau-West", "Sohlbach", "Birlenbach"] },
-      { "name": "Ost", "ortsteile": ["Kaan-Marienborn", "Bürbach", "Feuersbach", "Volnsberg"] },
-      { "name": "Süd", "ortsteile": ["Eiserfeld", "Niederschelden", "Gosenbach", "Eisern"] }
+      {
+        "name": "Kernband",
+        "ortsteile": [
+          "Siegen-Mitte",
+          "Oberstadt",
+          "Unterstadt",
+          "Hammerhütte"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Geisweid",
+          "Weidenau",
+          "Weidenau-West",
+          "Sohlbach",
+          "Birlenbach"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Kaan-Marienborn",
+          "Bürbach",
+          "Feuersbach",
+          "Volnsberg"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Eiserfeld",
+          "Niederschelden",
+          "Gosenbach",
+          "Eisern"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A45"],
-      "bundesstrassen": ["B54", "B62"],
-      "knoten": ["Anschlussstelle Siegen", "Anschlussstelle Siegen-Süd", "Kreuz Olpe-Süd"]
+      "autobahnen": [
+        "A45"
+      ],
+      "bundesstrassen": [
+        "B54",
+        "B62"
+      ],
+      "knoten": [
+        "Anschlussstelle Siegen",
+        "Anschlussstelle Siegen-Süd",
+        "Kreuz Olpe-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Siegen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Weidenau steht, in Eiserfeld oder nach einem Unfall auf der A45." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Siegen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Siegen, darüber das Landgericht Siegen." },
-      { "frage": "Unfall auf der A45 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Siegen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Siegen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Weidenau steht, in Eiserfeld oder nach einem Unfall auf der A45."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A45, Parkschaden in der Oberstadt oder Zusammenstoß in Weidenau — der Sachverständige kommt zu Ihnen nach Siegen.",
     "topografieAnker": "Siegen liegt in enger Tallage im Siegerland; die A45 führt als Sauerlandlinie über hohe Talbrücken am Stadtgebiet vorbei."
   },
-
   "cottbus": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Mitte", "Spremberger Vorstadt", "Ostrow", "Brunschwig"] },
-      { "name": "Nord", "ortsteile": ["Schmellwitz", "Saspow", "Sielow", "Willmersdorf"] },
-      { "name": "Süd", "ortsteile": ["Sachsendorf", "Madlow", "Gallinchen", "Groß Gaglow"] },
-      { "name": "Ost", "ortsteile": ["Sandow", "Branitz", "Dissenchen", "Merzdorf"] },
-      { "name": "West", "ortsteile": ["Ströbitz", "Kolkwitz-Grenze", "Neu Schmellwitz"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Mitte",
+          "Spremberger Vorstadt",
+          "Ostrow",
+          "Brunschwig"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Schmellwitz",
+          "Saspow",
+          "Sielow",
+          "Willmersdorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Sachsendorf",
+          "Madlow",
+          "Gallinchen",
+          "Groß Gaglow"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Sandow",
+          "Branitz",
+          "Dissenchen",
+          "Merzdorf"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Ströbitz",
+          "Kolkwitz-Grenze",
+          "Neu Schmellwitz"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A15"],
-      "bundesstrassen": ["B97", "B115", "B168", "B169"],
-      "knoten": ["Dreieck Spreewald", "Anschlussstelle Cottbus-West", "Anschlussstelle Cottbus-Süd"]
+      "autobahnen": [
+        "A15"
+      ],
+      "bundesstrassen": [
+        "B97",
+        "B115",
+        "B168",
+        "B169"
+      ],
+      "knoten": [
+        "Dreieck Spreewald",
+        "Anschlussstelle Cottbus-West",
+        "Anschlussstelle Cottbus-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Cottbus vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sachsendorf steht, in Ströbitz oder nach einem Unfall auf der A15." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Cottbus zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Cottbus, darüber das Landgericht Cottbus." },
-      { "frage": "Unfall auf der A15 Richtung polnische Grenze — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Cottbus frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Cottbus vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sachsendorf steht, in Ströbitz oder nach einem Unfall auf der A15."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A15, Parkschaden in der Spremberger Straße oder Zusammenstoß in Sachsendorf — der Sachverständige kommt zu Ihnen nach Cottbus.",
     "topografieAnker": "Cottbus liegt an der Spree am Rand des Spreewalds; die A15 führt östlich zur polnischen Grenze, mehrere Bundesstraßen bündeln den Regionalverkehr."
   },
-
   "guetersloh": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Kattenstroth", "Blankenhagen"] },
-      { "name": "Nord", "ortsteile": ["Isselhorst", "Niehorst", "Ebbesloh"] },
-      { "name": "Süd", "ortsteile": ["Spexard", "Pavenstädt", "Sundern"] },
-      { "name": "Ost", "ortsteile": ["Avenwedde", "Friedrichsdorf", "Nordhorn"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Kattenstroth",
+          "Blankenhagen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Isselhorst",
+          "Niehorst",
+          "Ebbesloh"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Spexard",
+          "Pavenstädt",
+          "Sundern"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Avenwedde",
+          "Friedrichsdorf",
+          "Nordhorn"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
-      "bundesstrassen": ["B61", "B513"],
-      "knoten": ["Anschlussstelle Gütersloh", "Anschlussstelle Rheda-Wiedenbrück", "Kreuz Bielefeld"]
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B513"
+      ],
+      "knoten": [
+        "Anschlussstelle Gütersloh",
+        "Anschlussstelle Rheda-Wiedenbrück",
+        "Kreuz Bielefeld"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Gütersloh vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Avenwedde steht, in Spexard oder nach einem Unfall auf der A2." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Gütersloh zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Gütersloh, darüber das Landgericht Bielefeld." },
-      { "frage": "Unfall auf der A2 bei Gütersloh — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Gütersloh frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Gütersloh vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Avenwedde steht, in Spexard oder nach einem Unfall auf der A2."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Berliner Straße oder Zusammenstoß in Avenwedde — der Sachverständige kommt zu Ihnen nach Gütersloh.",
     "topografieAnker": "Gütersloh liegt in der Emssandebene südwestlich von Bielefeld; die A2 führt nördlich vorbei und verbindet die Stadt mit Dortmund und Hannover."

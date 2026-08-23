@@ -1,349 +1,1156 @@
 {
   "muenster": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Bahnhofsviertel", "Kreuzviertel", "Hansaviertel", "Südviertel", "Josefsviertel", "Erphoviertel"] },
-      { "name": "Nord", "ortsteile": ["Coerde", "Kinderhaus", "Sprakel"] },
-      { "name": "Ost", "ortsteile": ["Handorf", "Mauritz-Ost", "Gelmer", "Dyckburg"] },
-      { "name": "West", "ortsteile": ["Gievenbeck", "Nienberge", "Roxel", "Sentruper Höhe", "Mecklenbeck"] },
-      { "name": "Süd-Ost", "ortsteile": ["Angelmodde", "Gremmendorf", "Wolbeck"] },
-      { "name": "Hiltrup", "ortsteile": ["Hiltrup-Mitte", "Hiltrup-Ost", "Amelsbüren", "Berg Fidel"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Bahnhofsviertel",
+          "Kreuzviertel",
+          "Hansaviertel",
+          "Südviertel",
+          "Josefsviertel",
+          "Erphoviertel"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Coerde",
+          "Kinderhaus",
+          "Sprakel"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Handorf",
+          "Mauritz-Ost",
+          "Gelmer",
+          "Dyckburg"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Gievenbeck",
+          "Nienberge",
+          "Roxel",
+          "Sentruper Höhe",
+          "Mecklenbeck"
+        ]
+      },
+      {
+        "name": "Süd-Ost",
+        "ortsteile": [
+          "Angelmodde",
+          "Gremmendorf",
+          "Wolbeck"
+        ]
+      },
+      {
+        "name": "Hiltrup",
+        "ortsteile": [
+          "Hiltrup-Mitte",
+          "Hiltrup-Ost",
+          "Amelsbüren",
+          "Berg Fidel"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A43"],
-      "bundesstrassen": ["B51", "B54", "B219", "B481"],
-      "knoten": ["Kreuz Münster-Nord", "Kreuz Münster-Süd", "Dreieck Bocholt-Nord"]
+      "autobahnen": [
+        "A1",
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B51",
+        "B54",
+        "B219",
+        "B481"
+      ],
+      "knoten": [
+        "Kreuz Münster-Nord",
+        "Kreuz Münster-Süd",
+        "Dreieck Bocholt-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Münster vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Kreuzviertel steht, in Hiltrup oder nach einem Unfall auf der A1 in der Werkstatt." },
-      { "frage": "Ich wurde als Radfahrer in Münster von einem Auto erfasst. Brauche ich ein Gutachten?", "antwort": "Ja, auch für ein beschädigtes Fahrrad und Ihre Ausrüstung. In einer Stadt mit derart hohem Radverkehrsanteil sind solche Unfälle häufig — der Sachverständige beziffert Rad-, Kleidungs- und Helmschaden ebenso wie den Wertverlust am Rahmen." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Münster zuständig?", "antwort": "Bis 5.000 Euro Streitwert das Amtsgericht Münster, darüber das Landgericht Münster. Mit einem unabhängigen Gutachten reguliert die gegnerische Versicherung meist außergerichtlich." },
-      { "frage": "Unfall auf der A1 oder A43 bei Münster — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ändert daran nichts." },
-      { "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?", "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst — der Gutachter der Gegenseite arbeitet in deren Auftrag." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Münster?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag grundsätzlich nicht vorkommen." },
-      { "frage": "Bekomme ich für die Reparaturzeit einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält Nutzungsausfall in bar ausgezahlt." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug künftig als Unfallwagen gilt — auch nach fachgerechter Reparatur. Sie steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Münster vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Kreuzviertel steht, in Hiltrup oder nach einem Unfall auf der A1 in der Werkstatt."
+      },
+      {
+        "frage": "Ich wurde als Radfahrer in Münster von einem Auto erfasst. Brauche ich ein Gutachten?",
+        "antwort": "Ja, auch für ein beschädigtes Fahrrad und Ihre Ausrüstung. In einer Stadt mit derart hohem Radverkehrsanteil sind solche Unfälle häufig — der Sachverständige beziffert Rad-, Kleidungs- und Helmschaden ebenso wie den Wertverlust am Rahmen."
+      },
+      {
+        "frage": "Unfall auf der A1 oder A43 bei Münster — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ändert daran nichts."
+      },
+      {
+        "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?",
+        "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst — der Gutachter der Gegenseite arbeitet in deren Auftrag."
+      },
+      {
+        "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Münster?",
+        "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag grundsätzlich nicht vorkommen."
+      },
+      {
+        "frage": "Bekomme ich für die Reparaturzeit einen Mietwagen?",
+        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält Nutzungsausfall in bar ausgezahlt."
+      },
+      {
+        "frage": "Was ist merkantile Wertminderung?",
+        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug künftig als Unfallwagen gilt — auch nach fachgerechter Reparatur. Sie steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A1, Kollision mit einem Radfahrer am Ring oder Parkschaden in der Altstadt — der Sachverständige kommt zu Ihnen nach Münster.",
     "topografieAnker": "Der Promenadenring umschließt die Altstadt von Münster und trennt sie vom Durchgangsverkehr; A1 und A43 führen westlich und südlich am Stadtgebiet vorbei."
   },
-
   "mannheim": {
     "stadtbezirke": [
-      { "name": "Innenstadt/Jungbusch", "ortsteile": ["Quadrate", "Jungbusch", "Filsbach"] },
-      { "name": "Neckarstadt", "ortsteile": ["Neckarstadt-West", "Neckarstadt-Ost", "Wohlgelegen"] },
-      { "name": "Käfertal", "ortsteile": ["Käfertal-Süd", "Käfertal-Mitte", "Vogelstang"] },
-      { "name": "Feudenheim", "ortsteile": ["Feudenheim", "Wallstadt"] },
-      { "name": "Seckenheim", "ortsteile": ["Seckenheim", "Hochstätt", "Friedrichsfeld"] },
-      { "name": "Lindenhof", "ortsteile": ["Lindenhof", "Niederfeld"] },
-      { "name": "Neckarau", "ortsteile": ["Neckarau", "Almenhof", "Casterfeld"] },
-      { "name": "Rheinau", "ortsteile": ["Rheinau-Mitte", "Pfingstberg", "Hochstätt"] },
-      { "name": "Waldhof", "ortsteile": ["Waldhof-Ost", "Waldhof-West", "Luzenberg", "Sandhofen", "Schönau"] }
+      {
+        "name": "Innenstadt/Jungbusch",
+        "ortsteile": [
+          "Quadrate",
+          "Jungbusch",
+          "Filsbach"
+        ]
+      },
+      {
+        "name": "Neckarstadt",
+        "ortsteile": [
+          "Neckarstadt-West",
+          "Neckarstadt-Ost",
+          "Wohlgelegen"
+        ]
+      },
+      {
+        "name": "Käfertal",
+        "ortsteile": [
+          "Käfertal-Süd",
+          "Käfertal-Mitte",
+          "Vogelstang"
+        ]
+      },
+      {
+        "name": "Feudenheim",
+        "ortsteile": [
+          "Feudenheim",
+          "Wallstadt"
+        ]
+      },
+      {
+        "name": "Seckenheim",
+        "ortsteile": [
+          "Seckenheim",
+          "Hochstätt",
+          "Friedrichsfeld"
+        ]
+      },
+      {
+        "name": "Lindenhof",
+        "ortsteile": [
+          "Lindenhof",
+          "Niederfeld"
+        ]
+      },
+      {
+        "name": "Neckarau",
+        "ortsteile": [
+          "Neckarau",
+          "Almenhof",
+          "Casterfeld"
+        ]
+      },
+      {
+        "name": "Rheinau",
+        "ortsteile": [
+          "Rheinau-Mitte",
+          "Pfingstberg",
+          "Hochstätt"
+        ]
+      },
+      {
+        "name": "Waldhof",
+        "ortsteile": [
+          "Waldhof-Ost",
+          "Waldhof-West",
+          "Luzenberg",
+          "Sandhofen",
+          "Schönau"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A5", "A6", "A656", "A659"],
-      "bundesstrassen": ["B36", "B37", "B38", "B44"],
-      "knoten": ["Kreuz Mannheim", "Dreieck Mannheim-Nord", "Kreuz Viernheimer Dreieck"]
+      "autobahnen": [
+        "A5",
+        "A6",
+        "A656",
+        "A659"
+      ],
+      "bundesstrassen": [
+        "B36",
+        "B37",
+        "B38",
+        "B44"
+      ],
+      "knoten": [
+        "Kreuz Mannheim",
+        "Dreieck Mannheim-Nord",
+        "Kreuz Viernheimer Dreieck"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Mannheim vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in den Quadraten steht, in Neckarau oder nach einem Unfall auf der A6." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Mannheim zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Mannheim, darüber das Landgericht Mannheim. Liegt ein unabhängiges Gutachten vor, reguliert die Gegenseite meist ohne Klage." },
-      { "frage": "Unfall am Kreuz Mannheim — wer trägt die Gutachterkosten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, egal ob auf der A5, der A6 oder innerorts." },
-      { "frage": "Kann ich den Gutachter in Mannheim selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Mannheim frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt auch dann bestehen, wenn die Versicherung eine Partnerwerkstatt vorschlägt." },
-      { "frage": "Steht mir während der Reparatur ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder wahlweise Nutzungsausfall als Geldbetrag." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zur Reparatur zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Mannheim vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in den Quadraten steht, in Neckarau oder nach einem Unfall auf der A6."
+      },
+      {
+        "frage": "Unfall am Kreuz Mannheim — wer trägt die Gutachterkosten?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, egal ob auf der A5, der A6 oder innerorts."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt in Mannheim frei wählen?",
+        "antwort": "Ja, die freie Werkstattwahl bleibt auch dann bestehen, wenn die Versicherung eine Partnerwerkstatt vorschlägt."
+      },
+      {
+        "frage": "Steht mir während der Reparatur ein Mietwagen zu?",
+        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder wahlweise Nutzungsausfall als Geldbetrag."
+      },
+      {
+        "frage": "Was ist Wertminderung?",
+        "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zur Reparatur zu."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A6, Parkschaden in den Quadraten oder Zusammenstoß am Kreuz Mannheim — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Mannheim liegt am Zusammenfluss von Rhein und Neckar; am Kreuz Mannheim treffen A5 und A6 aufeinander, die A656 führt direkt nach Heidelberg."
   },
-
   "karlsruhe": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt-West", "Innenstadt-Ost", "Südstadt", "Südweststadt"] },
-      { "name": "Weststadt", "ortsteile": ["Weststadt", "Mühlburg", "Grünwinkel"] },
-      { "name": "Nordstadt", "ortsteile": ["Nordstadt", "Nordweststadt", "Neureut"] },
-      { "name": "Oststadt", "ortsteile": ["Oststadt", "Rintheim", "Hagsfeld"] },
-      { "name": "Durlach", "ortsteile": ["Durlach", "Aue", "Grötzingen"] },
-      { "name": "Rheinhäfen", "ortsteile": ["Daxlanden", "Knielingen", "Rheinhafen"] },
-      { "name": "Südost", "ortsteile": ["Oberreut", "Bulach", "Beiertheim", "Weiherfeld"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt-West",
+          "Innenstadt-Ost",
+          "Südstadt",
+          "Südweststadt"
+        ]
+      },
+      {
+        "name": "Weststadt",
+        "ortsteile": [
+          "Weststadt",
+          "Mühlburg",
+          "Grünwinkel"
+        ]
+      },
+      {
+        "name": "Nordstadt",
+        "ortsteile": [
+          "Nordstadt",
+          "Nordweststadt",
+          "Neureut"
+        ]
+      },
+      {
+        "name": "Oststadt",
+        "ortsteile": [
+          "Oststadt",
+          "Rintheim",
+          "Hagsfeld"
+        ]
+      },
+      {
+        "name": "Durlach",
+        "ortsteile": [
+          "Durlach",
+          "Aue",
+          "Grötzingen"
+        ]
+      },
+      {
+        "name": "Rheinhäfen",
+        "ortsteile": [
+          "Daxlanden",
+          "Knielingen",
+          "Rheinhafen"
+        ]
+      },
+      {
+        "name": "Südost",
+        "ortsteile": [
+          "Oberreut",
+          "Bulach",
+          "Beiertheim",
+          "Weiherfeld"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A5", "A8"],
-      "bundesstrassen": ["B3", "B10", "B36", "B293"],
-      "knoten": ["Dreieck Karlsruhe", "Kreuz Karlsruhe-Nord", "Dreieck Karlsruhe-Süd"]
+      "autobahnen": [
+        "A5",
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B10",
+        "B36",
+        "B293"
+      ],
+      "knoten": [
+        "Dreieck Karlsruhe",
+        "Kreuz Karlsruhe-Nord",
+        "Dreieck Karlsruhe-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Karlsruhe vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Durlach steht, in der Weststadt oder nach einem Unfall auf der A5." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Karlsruhe zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Karlsruhe, darüber das Landgericht Karlsruhe. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der A5 oder A8 bei Karlsruhe — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
-      { "frage": "Muss ich den Gutachter der Versicherung nehmen?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Karlsruhe?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert im Kostenvoranschlag." },
-      { "frage": "Kann ich meine Werkstatt frei wählen?", "antwort": "Ja. Auch ein Verweis der Versicherung auf eine Partnerwerkstatt ändert nichts an Ihrer freien Werkstattwahl." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — alternativ Nutzungsausfall in bar." },
-      { "frage": "Was bedeutet Wertminderung nach einem Unfall?", "antwort": "Ihr Fahrzeug gilt künftig als Unfallwagen und bringt beim Verkauf weniger. Diese Differenz steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Karlsruhe vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Durlach steht, in der Weststadt oder nach einem Unfall auf der A5."
+      },
+      {
+        "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?",
+        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — alternativ Nutzungsausfall in bar."
+      },
+      {
+        "frage": "Was bedeutet Wertminderung nach einem Unfall?",
+        "antwort": "Ihr Fahrzeug gilt künftig als Unfallwagen und bringt beim Verkauf weniger. Diese Differenz steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden in der Südstadt oder Zusammenstoß an der Kriegsstraße — der Sachverständige kommt zu Ihnen nach Karlsruhe.",
     "topografieAnker": "Karlsruhe ist fächerförmig um das Schloss angelegt; die A5 führt östlich vorbei, die A8 zweigt am Dreieck Karlsruhe Richtung Stuttgart ab."
   },
-
   "augsburg": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Bahnhofsviertel", "Bleich", "Georgsviertel", "Domviertel"] },
-      { "name": "Oberhausen", "ortsteile": ["Oberhausen-Nord", "Oberhausen-Süd", "Bärenkeller"] },
-      { "name": "Lechhausen", "ortsteile": ["Lechhausen-Ost", "Lechhausen-West", "Hammerschmiede"] },
-      { "name": "Hochzoll", "ortsteile": ["Hochzoll-Nord", "Hochzoll-Süd"] },
-      { "name": "Haunstetten", "ortsteile": ["Haunstetten", "Siebenbrunn", "Universitätsviertel"] },
-      { "name": "Göggingen", "ortsteile": ["Göggingen", "Inningen", "Bergheim"] },
-      { "name": "Pfersee", "ortsteile": ["Pfersee", "Kriegshaber", "Antonsviertel"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Bahnhofsviertel",
+          "Bleich",
+          "Georgsviertel",
+          "Domviertel"
+        ]
+      },
+      {
+        "name": "Oberhausen",
+        "ortsteile": [
+          "Oberhausen-Nord",
+          "Oberhausen-Süd",
+          "Bärenkeller"
+        ]
+      },
+      {
+        "name": "Lechhausen",
+        "ortsteile": [
+          "Lechhausen-Ost",
+          "Lechhausen-West",
+          "Hammerschmiede"
+        ]
+      },
+      {
+        "name": "Hochzoll",
+        "ortsteile": [
+          "Hochzoll-Nord",
+          "Hochzoll-Süd"
+        ]
+      },
+      {
+        "name": "Haunstetten",
+        "ortsteile": [
+          "Haunstetten",
+          "Siebenbrunn",
+          "Universitätsviertel"
+        ]
+      },
+      {
+        "name": "Göggingen",
+        "ortsteile": [
+          "Göggingen",
+          "Inningen",
+          "Bergheim"
+        ]
+      },
+      {
+        "name": "Pfersee",
+        "ortsteile": [
+          "Pfersee",
+          "Kriegshaber",
+          "Antonsviertel"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A8"],
-      "bundesstrassen": ["B2", "B17", "B300"],
-      "knoten": ["Kreuz Augsburg-West", "Dreieck Augsburg-West", "Anschlussstelle Augsburg-Ost"]
+      "autobahnen": [
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B2",
+        "B17",
+        "B300"
+      ],
+      "knoten": [
+        "Kreuz Augsburg-West",
+        "Dreieck Augsburg-West",
+        "Anschlussstelle Augsburg-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Augsburg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lechhausen steht, in Göggingen oder nach einem Unfall auf der A8." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Augsburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Augsburg, darüber das Landgericht Augsburg. Ein unabhängiges Gutachten führt meist zur außergerichtlichen Regulierung." },
-      { "frage": "Unfall auf der A8 zwischen München und Ulm — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort spielt keine Rolle." },
-      { "frage": "Kann ich den Gutachter selbst bestimmen?", "antwort": "Ja, als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Augsburg?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Augsburg frei wählen?", "antwort": "Ja. Die freie Werkstattwahl bleibt Ihnen, auch wenn die Versicherung eine Partnerwerkstatt vorschlägt." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist die merkantile Wertminderung?", "antwort": "Der Wertverlust, der allein daraus entsteht, dass Ihr Fahrzeug als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur bestehen." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Augsburg vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lechhausen steht, in Göggingen oder nach einem Unfall auf der A8."
+      },
+      {
+        "frage": "Kann ich den Gutachter selbst bestimmen?",
+        "antwort": "Ja, als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt in Augsburg frei wählen?",
+        "antwort": "Ja. Die freie Werkstattwahl bleibt Ihnen, auch wenn die Versicherung eine Partnerwerkstatt vorschlägt."
+      },
+      {
+        "frage": "Steht mir ein Mietwagen zu?",
+        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse — oder Nutzungsausfall in bar."
+      },
+      {
+        "frage": "Was ist die merkantile Wertminderung?",
+        "antwort": "Der Wertverlust, der allein daraus entsteht, dass Ihr Fahrzeug als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur bestehen."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A8, Parkschaden in der Maximilianstraße oder Zusammenstoß auf der B17 — der Sachverständige kommt zu Ihnen nach Augsburg.",
     "topografieAnker": "Augsburg liegt zwischen Lech und Wertach; die B17 führt als Schnellstraße von Nord nach Süd durch das Stadtgebiet, die A8 verläuft nördlich Richtung München."
   },
-
   "wiesbaden": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Nordost", "Südost", "Rheingauviertel", "Westend"] },
-      { "name": "Biebrich", "ortsteile": ["Biebrich", "Amöneburg"] },
-      { "name": "Schierstein", "ortsteile": ["Schierstein", "Frauenstein"] },
-      { "name": "Dotzheim", "ortsteile": ["Dotzheim", "Kohlheck", "Freudenberg"] },
-      { "name": "Bierstadt", "ortsteile": ["Bierstadt", "Kloppenheim", "Heßloch"] },
-      { "name": "Erbenheim", "ortsteile": ["Erbenheim", "Nordenstadt", "Delkenheim"] },
-      { "name": "Auringen und Umland", "ortsteile": ["Auringen", "Naurod", "Sonnenberg", "Rambach"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Nordost",
+          "Südost",
+          "Rheingauviertel",
+          "Westend"
+        ]
+      },
+      {
+        "name": "Biebrich",
+        "ortsteile": [
+          "Biebrich",
+          "Amöneburg"
+        ]
+      },
+      {
+        "name": "Schierstein",
+        "ortsteile": [
+          "Schierstein",
+          "Frauenstein"
+        ]
+      },
+      {
+        "name": "Dotzheim",
+        "ortsteile": [
+          "Dotzheim",
+          "Kohlheck",
+          "Freudenberg"
+        ]
+      },
+      {
+        "name": "Bierstadt",
+        "ortsteile": [
+          "Bierstadt",
+          "Kloppenheim",
+          "Heßloch"
+        ]
+      },
+      {
+        "name": "Erbenheim",
+        "ortsteile": [
+          "Erbenheim",
+          "Nordenstadt",
+          "Delkenheim"
+        ]
+      },
+      {
+        "name": "Auringen und Umland",
+        "ortsteile": [
+          "Auringen",
+          "Naurod",
+          "Sonnenberg",
+          "Rambach"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A66", "A643", "A671"],
-      "bundesstrassen": ["B54", "B262", "B417", "B455"],
-      "knoten": ["Dreieck Wiesbaden", "Kreuz Wiesbaden-Schierstein", "Dreieck Mainz"]
+      "autobahnen": [
+        "A3",
+        "A66",
+        "A643",
+        "A671"
+      ],
+      "bundesstrassen": [
+        "B54",
+        "B262",
+        "B417",
+        "B455"
+      ],
+      "knoten": [
+        "Dreieck Wiesbaden",
+        "Kreuz Wiesbaden-Schierstein",
+        "Dreieck Mainz"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Wiesbaden vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Biebrich steht, in Dotzheim oder nach einem Unfall auf der A66." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Wiesbaden zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Wiesbaden, darüber das Landgericht Wiesbaden. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der Schiersteiner Brücke — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob auf der A643, der A66 oder innerorts, ändert daran nichts." },
-      { "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt waren." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Wiesbaden?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Kann ich meine Werkstatt frei wählen?", "antwort": "Ja, auch gegen den Vorschlag einer Partnerwerkstatt der Versicherung." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturdauer?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Wiesbaden vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Biebrich steht, in Dotzheim oder nach einem Unfall auf der A66."
+      },
+      {
+        "frage": "Unfall auf der Schiersteiner Brücke — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob auf der A643, der A66 oder innerorts, ändert daran nichts."
+      },
+      {
+        "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?",
+        "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt waren."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A66, Parkschaden in der Innenstadt oder Zusammenstoß auf der Schiersteiner Brücke — der Sachverständige kommt zu Ihnen nach Wiesbaden.",
     "topografieAnker": "Wiesbaden liegt am Fuß des Taunus zwischen Rhein und Höhenzug; die A66 führt östlich Richtung Frankfurt, die A643 quert bei Schierstein den Rhein nach Mainz."
   },
-
   "moenchengladbach": {
     "stadtbezirke": [
-      { "name": "Nord", "ortsteile": ["Gladbach", "Waldhausen", "Windberg", "Hardterbroich", "Eicken"] },
-      { "name": "Ost", "ortsteile": ["Giesenkirchen", "Schelsen", "Bettrath-Hoven", "Neuwerk", "Uedding"] },
-      { "name": "Süd", "ortsteile": ["Rheydt", "Odenkirchen", "Mülfort", "Bonnenbroich", "Geneicken"] },
-      { "name": "West", "ortsteile": ["Hardt", "Rheindahlen", "Wickrath", "Wanlo", "Holt"] }
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Gladbach",
+          "Waldhausen",
+          "Windberg",
+          "Hardterbroich",
+          "Eicken"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Giesenkirchen",
+          "Schelsen",
+          "Bettrath-Hoven",
+          "Neuwerk",
+          "Uedding"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Rheydt",
+          "Odenkirchen",
+          "Mülfort",
+          "Bonnenbroich",
+          "Geneicken"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Hardt",
+          "Rheindahlen",
+          "Wickrath",
+          "Wanlo",
+          "Holt"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A44", "A46", "A52", "A61"],
-      "bundesstrassen": ["B57", "B59", "B230"],
-      "knoten": ["Kreuz Mönchengladbach", "Kreuz Wanlo", "Dreieck Holz"]
+      "autobahnen": [
+        "A44",
+        "A46",
+        "A52",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B57",
+        "B59",
+        "B230"
+      ],
+      "knoten": [
+        "Kreuz Mönchengladbach",
+        "Kreuz Wanlo",
+        "Dreieck Holz"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Mönchengladbach vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Rheydt steht, in Rheindahlen oder nach einem Unfall auf der A61." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Mönchengladbach zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Mönchengladbach, darüber das Landgericht Mönchengladbach. Mit einem unabhängigen Gutachten reguliert die Gegenseite meist außergerichtlich." },
-      { "frage": "Unfall am Kreuz Wanlo — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig davon, ob es auf der A46, A61 oder innerorts geschah." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Mönchengladbach frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch bei einem Verweis auf eine Partnerwerkstatt." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse, oder wahlweise Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt — auch nach fachgerechter Reparatur." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Mönchengladbach vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Rheydt steht, in Rheindahlen oder nach einem Unfall auf der A61."
+      },
+      {
+        "frage": "Unfall am Kreuz Wanlo — wer zahlt das Gutachten?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig davon, ob es auf der A46, A61 oder innerorts geschah."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt in Mönchengladbach frei wählen?",
+        "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch bei einem Verweis auf eine Partnerwerkstatt."
+      },
+      {
+        "frage": "Steht mir ein Mietwagen zu?",
+        "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse, oder wahlweise Nutzungsausfall in bar."
+      },
+      {
+        "frage": "Was ist merkantile Wertminderung?",
+        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt — auch nach fachgerechter Reparatur."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A61, Parkschaden in Rheydt oder Zusammenstoß am Kreuz Mönchengladbach — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Mönchengladbach besteht aus den gewachsenen Zentren Gladbach und Rheydt; A44, A46, A52 und A61 umschließen das Stadtgebiet von allen Seiten."
   },
-
   "gelsenkirchen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Neustadt", "Bulmke-Hüllen", "Feldmark", "Schalke", "Schalke-Nord"] },
-      { "name": "Nord", "ortsteile": ["Buer", "Erle", "Resse", "Resser Mark", "Scholven", "Hassel", "Horst", "Beckhausen"] },
-      { "name": "Ost", "ortsteile": ["Bismarck", "Erle-Ost", "Rotthausen"] },
-      { "name": "Süd", "ortsteile": ["Ückendorf", "Rotthausen", "Neustadt-Süd"] },
-      { "name": "West", "ortsteile": ["Horst", "Beckhausen", "Heßler"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Neustadt",
+          "Bulmke-Hüllen",
+          "Feldmark",
+          "Schalke",
+          "Schalke-Nord"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Buer",
+          "Erle",
+          "Resse",
+          "Resser Mark",
+          "Scholven",
+          "Hassel",
+          "Horst",
+          "Beckhausen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Bismarck",
+          "Erle-Ost",
+          "Rotthausen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Ückendorf",
+          "Rotthausen",
+          "Neustadt-Süd"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Horst",
+          "Beckhausen",
+          "Heßler"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A40", "A42", "A52"],
-      "bundesstrassen": ["B224", "B226", "B227"],
-      "knoten": ["Kreuz Gelsenkirchen", "Dreieck Bottrop", "Kreuz Herne"]
+      "autobahnen": [
+        "A2",
+        "A40",
+        "A42",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B224",
+        "B226",
+        "B227"
+      ],
+      "knoten": [
+        "Kreuz Gelsenkirchen",
+        "Dreieck Bottrop",
+        "Kreuz Herne"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Gelsenkirchen vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Buer steht, in Ückendorf oder nach einem Unfall auf der A42." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Gelsenkirchen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Gelsenkirchen, darüber das Landgericht Essen. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der A2 oder A42 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
-      { "frage": "Muss ich den Gutachter der Versicherung akzeptieren?", "antwort": "Nein, Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Gelsenkirchen?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Kann ich meine Werkstatt frei wählen?", "antwort": "Ja. Auch der Vorschlag einer Partnerwerkstatt durch die Versicherung ändert daran nichts." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Gelsenkirchen vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Buer steht, in Ückendorf oder nach einem Unfall auf der A42."
+      },
+      {
+        "frage": "Muss ich den Gutachter der Versicherung akzeptieren?",
+        "antwort": "Nein, Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind."
+      },
+      {
+        "frage": "Kann ich meine Werkstatt frei wählen?",
+        "antwort": "Ja. Auch der Vorschlag einer Partnerwerkstatt durch die Versicherung ändert daran nichts."
+      },
+      {
+        "frage": "Was ist Wertminderung?",
+        "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zu."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in Buer oder Zusammenstoß an der Kurt-Schumacher-Straße — der Sachverständige kommt zu Ihnen nach Gelsenkirchen.",
     "topografieAnker": "Gelsenkirchen liegt mitten im Ruhrgebiet zwischen A2 im Norden und A40 im Süden; die A42 als Emscherschnellweg quert das Stadtgebiet von West nach Ost."
   },
-
   "aachen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Frankenberger Viertel", "Burtscheid", "Forst", "Rothe Erde", "Westpark"] },
-      { "name": "Brand", "ortsteile": ["Brand", "Freund", "Niederforstbach"] },
-      { "name": "Eilendorf", "ortsteile": ["Eilendorf", "Nirm"] },
-      { "name": "Haaren", "ortsteile": ["Haaren", "Verlautenheide", "Würselen-Grenze"] },
-      { "name": "Kornelimünster/Walheim", "ortsteile": ["Kornelimünster", "Walheim", "Oberforstbach", "Sief"] },
-      { "name": "Laurensberg", "ortsteile": ["Laurensberg", "Vaalserquartier", "Seffent", "Orsbach"] },
-      { "name": "Richterich", "ortsteile": ["Richterich", "Horbach", "Huf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Frankenberger Viertel",
+          "Burtscheid",
+          "Forst",
+          "Rothe Erde",
+          "Westpark"
+        ]
+      },
+      {
+        "name": "Brand",
+        "ortsteile": [
+          "Brand",
+          "Freund",
+          "Niederforstbach"
+        ]
+      },
+      {
+        "name": "Eilendorf",
+        "ortsteile": [
+          "Eilendorf",
+          "Nirm"
+        ]
+      },
+      {
+        "name": "Haaren",
+        "ortsteile": [
+          "Haaren",
+          "Verlautenheide",
+          "Würselen-Grenze"
+        ]
+      },
+      {
+        "name": "Kornelimünster/Walheim",
+        "ortsteile": [
+          "Kornelimünster",
+          "Walheim",
+          "Oberforstbach",
+          "Sief"
+        ]
+      },
+      {
+        "name": "Laurensberg",
+        "ortsteile": [
+          "Laurensberg",
+          "Vaalserquartier",
+          "Seffent",
+          "Orsbach"
+        ]
+      },
+      {
+        "name": "Richterich",
+        "ortsteile": [
+          "Richterich",
+          "Horbach",
+          "Huf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4", "A44", "A544"],
-      "bundesstrassen": ["B1", "B57", "B258", "B264"],
-      "knoten": ["Kreuz Aachen", "Dreieck Aachen-Europaplatz", "Kreuz Aachen-Nord"]
+      "autobahnen": [
+        "A4",
+        "A44",
+        "A544"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B57",
+        "B258",
+        "B264"
+      ],
+      "knoten": [
+        "Kreuz Aachen",
+        "Dreieck Aachen-Europaplatz",
+        "Kreuz Aachen-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Aachen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Burtscheid steht, in Brand oder nach einem Unfall auf der A4." },
-      { "frage": "Mein Unfallgegner kam aus Belgien oder den Niederlanden. Was ändert das?", "antwort": "Für Sie zunächst wenig: Bei einem Unfall in Deutschland gilt deutsches Recht, und ausländische Versicherer haben einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert erfahrungsgemäß etwas länger — ein Gutachten mit klaren Zahlen beschleunigt sie spürbar." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Aachen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Aachen, darüber das Landgericht Aachen. Mit einem unabhängigen Gutachten kommt es meist gar nicht so weit." },
-      { "frage": "Unfall auf der A4 Richtung Grenze — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Aachen?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Aachen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Burtscheid steht, in Brand oder nach einem Unfall auf der A4."
+      },
+      {
+        "frage": "Mein Unfallgegner kam aus Belgien oder den Niederlanden. Was ändert das?",
+        "antwort": "Für Sie zunächst wenig: Bei einem Unfall in Deutschland gilt deutsches Recht, und ausländische Versicherer haben einen deutschen Schadenregulierungsbeauftragten. Die Abwicklung dauert erfahrungsgemäß etwas länger — ein Gutachten mit klaren Zahlen beschleunigt sie spürbar."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden am Frankenberger Viertel oder Zusammenstoß nahe der belgischen Grenze — der Sachverständige kommt zu Ihnen nach Aachen.",
     "topografieAnker": "Aachen liegt im Dreiländereck zu Belgien und den Niederlanden; die A4 führt zur belgischen Grenze, die A44 nach Norden, und der Alleenring umschließt die Altstadt."
   },
-
   "braunschweig": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Magniviertel", "Hagenmarkt", "Bohlweg"] },
-      { "name": "Nordstadt", "ortsteile": ["Nordstadt", "Schunteraue", "Bienrode", "Waggum", "Bevenrode"] },
-      { "name": "Östliches Ringgebiet", "ortsteile": ["Östliches Ringgebiet", "Gliesmarode", "Riddagshausen"] },
-      { "name": "Südstadt", "ortsteile": ["Südstadt", "Rautheim", "Mascherode", "Stöckheim", "Leiferde"] },
-      { "name": "Westliches Ringgebiet", "ortsteile": ["Westliches Ringgebiet", "Weststadt", "Rüningen"] },
-      { "name": "Lehndorf-Watenbüttel", "ortsteile": ["Lehndorf", "Watenbüttel", "Kanzlerfeld", "Ölper"] },
-      { "name": "Wabe-Schunter-Beberbach", "ortsteile": ["Volkmarode", "Querum", "Hondelage", "Dibbesdorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Magniviertel",
+          "Hagenmarkt",
+          "Bohlweg"
+        ]
+      },
+      {
+        "name": "Nordstadt",
+        "ortsteile": [
+          "Nordstadt",
+          "Schunteraue",
+          "Bienrode",
+          "Waggum",
+          "Bevenrode"
+        ]
+      },
+      {
+        "name": "Östliches Ringgebiet",
+        "ortsteile": [
+          "Östliches Ringgebiet",
+          "Gliesmarode",
+          "Riddagshausen"
+        ]
+      },
+      {
+        "name": "Südstadt",
+        "ortsteile": [
+          "Südstadt",
+          "Rautheim",
+          "Mascherode",
+          "Stöckheim",
+          "Leiferde"
+        ]
+      },
+      {
+        "name": "Westliches Ringgebiet",
+        "ortsteile": [
+          "Westliches Ringgebiet",
+          "Weststadt",
+          "Rüningen"
+        ]
+      },
+      {
+        "name": "Lehndorf-Watenbüttel",
+        "ortsteile": [
+          "Lehndorf",
+          "Watenbüttel",
+          "Kanzlerfeld",
+          "Ölper"
+        ]
+      },
+      {
+        "name": "Wabe-Schunter-Beberbach",
+        "ortsteile": [
+          "Volkmarode",
+          "Querum",
+          "Hondelage",
+          "Dibbesdorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A39", "A391", "A395"],
-      "bundesstrassen": ["B1", "B4", "B248"],
-      "knoten": ["Kreuz Braunschweig-Nord", "Dreieck Braunschweig-Südwest", "Kreuz Braunschweig-Süd"]
+      "autobahnen": [
+        "A2",
+        "A39",
+        "A391",
+        "A395"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B4",
+        "B248"
+      ],
+      "knoten": [
+        "Kreuz Braunschweig-Nord",
+        "Dreieck Braunschweig-Südwest",
+        "Kreuz Braunschweig-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Braunschweig vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Magniviertel steht, in Stöckheim oder nach einem Unfall auf der A2." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Braunschweig zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Braunschweig, darüber das Landgericht Braunschweig. Ein unabhängiges Gutachten führt meist zur außergerichtlichen Einigung." },
-      { "frage": "Unfall auf der A2 oder A39 — wer trägt die Gutachterkosten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Muss ich den Gutachter der Versicherung nehmen?", "antwort": "Nein, Sie wählen den Sachverständigen selbst." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Braunschweig?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, auch entgegen dem Vorschlag der gegnerischen Versicherung." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Braunschweig vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Magniviertel steht, in Stöckheim oder nach einem Unfall auf der A2."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt frei wählen?",
+        "antwort": "Ja, auch entgegen dem Vorschlag der gegnerischen Versicherung."
+      },
+      {
+        "frage": "Was ist Wertminderung?",
+        "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt. Er wird nur im Gutachten beziffert."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Innenstadt oder Zusammenstoß auf dem Stadtring — der Sachverständige kommt zu Ihnen nach Braunschweig.",
     "topografieAnker": "Braunschweig wird vom Okerumflutgraben umschlossen; die A2 führt nördlich vorbei, während A391 und A395 als Stadtautobahnen den Ring ergänzen."
   },
-
   "kiel": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Vorstadt", "Exerzierplatz", "Brunswik", "Düsternbrook"] },
-      { "name": "Nord", "ortsteile": ["Wik", "Holtenau", "Pries", "Friedrichsort", "Schilksee"] },
-      { "name": "Ost", "ortsteile": ["Gaarden-Ost", "Gaarden-Süd", "Ellerbek", "Wellingdorf", "Neumühlen-Dietrichsdorf"] },
-      { "name": "Süd", "ortsteile": ["Elmschenhagen", "Kroog", "Moorsee", "Meimersdorf", "Wellsee"] },
-      { "name": "West", "ortsteile": ["Mettenhof", "Hasseldieksdamm", "Russee", "Hassee", "Suchsdorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Vorstadt",
+          "Exerzierplatz",
+          "Brunswik",
+          "Düsternbrook"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Wik",
+          "Holtenau",
+          "Pries",
+          "Friedrichsort",
+          "Schilksee"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Gaarden-Ost",
+          "Gaarden-Süd",
+          "Ellerbek",
+          "Wellingdorf",
+          "Neumühlen-Dietrichsdorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Elmschenhagen",
+          "Kroog",
+          "Moorsee",
+          "Meimersdorf",
+          "Wellsee"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Mettenhof",
+          "Hasseldieksdamm",
+          "Russee",
+          "Hassee",
+          "Suchsdorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A7", "A210", "A215"],
-      "bundesstrassen": ["B76", "B202", "B404", "B503"],
-      "knoten": ["Kreuz Kiel-West", "Dreieck Bordesholm", "Anschlussstelle Kiel-Mitte"]
+      "autobahnen": [
+        "A7",
+        "A210",
+        "A215"
+      ],
+      "bundesstrassen": [
+        "B76",
+        "B202",
+        "B404",
+        "B503"
+      ],
+      "knoten": [
+        "Kreuz Kiel-West",
+        "Dreieck Bordesholm",
+        "Anschlussstelle Kiel-Mitte"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Kiel vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Gaarden steht, in Holtenau oder nach einem Unfall auf der A215." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Kiel zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Kiel, darüber das Landgericht Kiel. Mit einem unabhängigen Gutachten reguliert die Gegenseite meist außergerichtlich." },
-      { "frage": "Unfall auf der B76 oder A215 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter in Kiel selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Kiel frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt — auch nach fachgerechter Reparatur." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Kiel vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Gaarden steht, in Holtenau oder nach einem Unfall auf der A215."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A215, Parkschaden an der Kiellinie oder Zusammenstoß auf der B76 — der Sachverständige kommt zu Ihnen nach Kiel.",
     "topografieAnker": "Die Kieler Förde teilt die Stadt in Ost- und Westufer; die A215 endet mitten im Stadtgebiet, und der Nord-Ostsee-Kanal wird bei Holtenau gequert."
   },
-
   "chemnitz": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Zentrum", "Schloßchemnitz", "Kaßberg", "Sonnenberg", "Lutherviertel"] },
-      { "name": "Nord", "ortsteile": ["Hilbersdorf", "Furth", "Ebersdorf", "Glösa-Draisdorf", "Borna-Heinersdorf"] },
-      { "name": "Ost", "ortsteile": ["Gablenz", "Yorckgebiet", "Adelsberg", "Euba", "Kleinolbersdorf-Altenhain"] },
-      { "name": "Süd", "ortsteile": ["Altchemnitz", "Bernsdorf", "Helbersdorf", "Morgenleite", "Markersdorf", "Hutholz"] },
-      { "name": "West", "ortsteile": ["Kappel", "Siegmar", "Rottluff", "Rabenstein", "Grüna", "Stelzendorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Zentrum",
+          "Schloßchemnitz",
+          "Kaßberg",
+          "Sonnenberg",
+          "Lutherviertel"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Hilbersdorf",
+          "Furth",
+          "Ebersdorf",
+          "Glösa-Draisdorf",
+          "Borna-Heinersdorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Gablenz",
+          "Yorckgebiet",
+          "Adelsberg",
+          "Euba",
+          "Kleinolbersdorf-Altenhain"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Altchemnitz",
+          "Bernsdorf",
+          "Helbersdorf",
+          "Morgenleite",
+          "Markersdorf",
+          "Hutholz"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Kappel",
+          "Siegmar",
+          "Rottluff",
+          "Rabenstein",
+          "Grüna",
+          "Stelzendorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4", "A72"],
-      "bundesstrassen": ["B95", "B107", "B169", "B173", "B174"],
-      "knoten": ["Kreuz Chemnitz", "Dreieck Chemnitz", "Anschlussstelle Chemnitz-Süd"]
+      "autobahnen": [
+        "A4",
+        "A72"
+      ],
+      "bundesstrassen": [
+        "B95",
+        "B107",
+        "B169",
+        "B173",
+        "B174"
+      ],
+      "knoten": [
+        "Kreuz Chemnitz",
+        "Dreieck Chemnitz",
+        "Anschlussstelle Chemnitz-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Chemnitz vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf dem Kaßberg steht, in Altchemnitz oder nach einem Unfall auf der A4." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Chemnitz zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Chemnitz, darüber das Landgericht Chemnitz. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der A4 oder A72 — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
-      { "frage": "Muss ich den Gutachter der Versicherung akzeptieren?", "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Chemnitz?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Kann ich meine Werkstatt frei wählen?", "antwort": "Ja, auch wenn die Versicherung eine Partnerwerkstatt vorschlägt." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt. Er steht Ihnen zusätzlich zur Reparatur zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Chemnitz vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf dem Kaßberg steht, in Altchemnitz oder nach einem Unfall auf der A4."
+      },
+      {
+        "frage": "Kann ich meine Werkstatt frei wählen?",
+        "antwort": "Ja, auch wenn die Versicherung eine Partnerwerkstatt vorschlägt."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden auf dem Kaßberg oder Zusammenstoß am Südring — der Sachverständige kommt zu Ihnen nach Chemnitz.",
     "topografieAnker": "Chemnitz liegt am Nordrand des Erzgebirges; die A4 führt nördlich vorbei, die A72 verbindet die Stadt mit Zwickau und Hof."
   },
-
   "halle": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Südliche Innenstadt", "Nördliche Innenstadt", "Paulusviertel", "Giebichenstein"] },
-      { "name": "Nord", "ortsteile": ["Trotha", "Kröllwitz", "Heide-Nord", "Seeben", "Mötzlich"] },
-      { "name": "Ost", "ortsteile": ["Diemitz", "Freiimfelde", "Reideburg", "Büschdorf", "Kanena"] },
-      { "name": "Süd", "ortsteile": ["Südstadt", "Damaschkestraße", "Radewell", "Ammendorf", "Beesen"] },
-      { "name": "West", "ortsteile": ["Neustadt", "Silberhöhe", "Nietleben", "Dölau", "Lettin"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Südliche Innenstadt",
+          "Nördliche Innenstadt",
+          "Paulusviertel",
+          "Giebichenstein"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Trotha",
+          "Kröllwitz",
+          "Heide-Nord",
+          "Seeben",
+          "Mötzlich"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Diemitz",
+          "Freiimfelde",
+          "Reideburg",
+          "Büschdorf",
+          "Kanena"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Südstadt",
+          "Damaschkestraße",
+          "Radewell",
+          "Ammendorf",
+          "Beesen"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Neustadt",
+          "Silberhöhe",
+          "Nietleben",
+          "Dölau",
+          "Lettin"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A9", "A14", "A143"],
-      "bundesstrassen": ["B6", "B80", "B91", "B100"],
-      "knoten": ["Kreuz Halle", "Dreieck Halle-Süd", "Schkeuditzer Kreuz"]
+      "autobahnen": [
+        "A9",
+        "A14",
+        "A143"
+      ],
+      "bundesstrassen": [
+        "B6",
+        "B80",
+        "B91",
+        "B100"
+      ],
+      "knoten": [
+        "Kreuz Halle",
+        "Dreieck Halle-Süd",
+        "Schkeuditzer Kreuz"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Halle vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Paulusviertel steht, in Neustadt oder nach einem Unfall auf der A14." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Halle zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Halle (Saale), darüber das Landgericht Halle. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der A14 oder A9 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Halle?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja. Die freie Werkstattwahl bleibt auch gegen den Vorschlag einer Partnerwerkstatt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert und steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Halle vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug im Paulusviertel steht, in Neustadt oder nach einem Unfall auf der A14."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt frei wählen?",
+        "antwort": "Ja. Die freie Werkstattwahl bleibt auch gegen den Vorschlag einer Partnerwerkstatt bestehen."
+      },
+      {
+        "frage": "Was ist merkantile Wertminderung?",
+        "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert und steht Ihnen zusätzlich zu."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A14, Parkschaden im Paulusviertel oder Zusammenstoß auf der Magistrale — der Sachverständige kommt zu Ihnen nach Halle.",
     "topografieAnker": "Halle liegt an der Saale, die das Stadtgebiet von Süd nach Nord durchzieht; A14 und A9 verbinden die Stadt mit Leipzig und Magdeburg."

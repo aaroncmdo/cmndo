@@ -1,318 +1,713 @@
 {
   "schwerin": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Paulsstadt", "Feldstadt", "Schelfstadt", "Werdervorstadt"] },
-      { "name": "West", "ortsteile": ["Lankow", "Weststadt", "Neumühle", "Lewenberg"] },
-      { "name": "Süd", "ortsteile": ["Großer Dreesch", "Neu Zippendorf", "Mueßer Holz", "Zippendorf"] },
-      { "name": "Ost", "ortsteile": ["Krebsförden", "Görries", "Wüstmark", "Ostorf"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Paulsstadt",
+          "Feldstadt",
+          "Schelfstadt",
+          "Werdervorstadt"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Lankow",
+          "Weststadt",
+          "Neumühle",
+          "Lewenberg"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Großer Dreesch",
+          "Neu Zippendorf",
+          "Mueßer Holz",
+          "Zippendorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Krebsförden",
+          "Görries",
+          "Wüstmark",
+          "Ostorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A14", "A24"],
-      "bundesstrassen": ["B104", "B106", "B321"],
-      "knoten": ["Dreieck Schwerin", "Anschlussstelle Schwerin-Nord", "Anschlussstelle Schwerin-Ost"]
+      "autobahnen": [
+        "A14",
+        "A24"
+      ],
+      "bundesstrassen": [
+        "B104",
+        "B106",
+        "B321"
+      ],
+      "knoten": [
+        "Dreieck Schwerin",
+        "Anschlussstelle Schwerin-Nord",
+        "Anschlussstelle Schwerin-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Schwerin vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lankow steht, am Großen Dreesch oder nach einem Unfall auf der A14." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Schwerin zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Schwerin, darüber das Landgericht Schwerin." },
-      { "frage": "Unfall auf der A14 oder A24 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Schwerin frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Schwerin vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lankow steht, am Großen Dreesch oder nach einem Unfall auf der A14."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A14, Parkschaden in der Altstadt oder Zusammenstoß in Lankow — der Sachverständige kommt zu Ihnen nach Schwerin.",
     "topografieAnker": "Schwerin liegt zwischen Schweriner See und Ostorfer See; die A14 endet nördlich der Stadt, die A24 führt Richtung Hamburg und Berlin."
   },
-
   "dueren": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Nord", "Ost", "Süd", "West"] },
-      { "name": "Nord", "ortsteile": ["Birkesdorf", "Merken", "Echtz", "Distelrath"] },
-      { "name": "Süd", "ortsteile": ["Rölsdorf", "Lendersdorf", "Niederau", "Krauthausen"] },
-      { "name": "Ost", "ortsteile": ["Gürzenich", "Arnoldsweiler", "Derichsweiler", "Mariaweiler"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Nord",
+          "Ost",
+          "Süd",
+          "West"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Birkesdorf",
+          "Merken",
+          "Echtz",
+          "Distelrath"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Rölsdorf",
+          "Lendersdorf",
+          "Niederau",
+          "Krauthausen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Gürzenich",
+          "Arnoldsweiler",
+          "Derichsweiler",
+          "Mariaweiler"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4"],
-      "bundesstrassen": ["B56", "B264", "B399"],
-      "knoten": ["Anschlussstelle Düren", "Anschlussstelle Langerwehe", "Kreuz Kerpen"]
+      "autobahnen": [
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B56",
+        "B264",
+        "B399"
+      ],
+      "knoten": [
+        "Anschlussstelle Düren",
+        "Anschlussstelle Langerwehe",
+        "Kreuz Kerpen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Düren vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Birkesdorf steht, in Rölsdorf oder nach einem Unfall auf der A4." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Düren zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Düren, darüber das Landgericht Aachen." },
-      { "frage": "Unfall auf der A4 zwischen Köln und Aachen — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Düren frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Düren vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Birkesdorf steht, in Rölsdorf oder nach einem Unfall auf der A4."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Wirtelstraße oder Zusammenstoß in Birkesdorf — der Sachverständige kommt zu Ihnen nach Düren.",
     "topografieAnker": "Düren liegt an der Rur zwischen Aachen und Köln; die A4 führt nördlich am Stadtgebiet vorbei und verbindet beide Städte."
   },
-
   "witten": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Sonnenschein", "Crengeldanz", "Wullen"] },
-      { "name": "Annen", "ortsteile": ["Annen", "Rüdinghausen", "Stockum"] },
-      { "name": "Herbede", "ortsteile": ["Herbede", "Ostherbede", "Durchholz", "Vormholz"] },
-      { "name": "Bommern", "ortsteile": ["Bommern", "Heven", "Buchholz"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Sonnenschein",
+          "Crengeldanz",
+          "Wullen"
+        ]
+      },
+      {
+        "name": "Annen",
+        "ortsteile": [
+          "Annen",
+          "Rüdinghausen",
+          "Stockum"
+        ]
+      },
+      {
+        "name": "Herbede",
+        "ortsteile": [
+          "Herbede",
+          "Ostherbede",
+          "Durchholz",
+          "Vormholz"
+        ]
+      },
+      {
+        "name": "Bommern",
+        "ortsteile": [
+          "Bommern",
+          "Heven",
+          "Buchholz"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A43", "A44"],
-      "bundesstrassen": ["B226"],
-      "knoten": ["Kreuz Witten", "Kreuz Dortmund/Witten", "Anschlussstelle Witten-Herbede"]
+      "autobahnen": [
+        "A43",
+        "A44"
+      ],
+      "bundesstrassen": [
+        "B226"
+      ],
+      "knoten": [
+        "Kreuz Witten",
+        "Kreuz Dortmund/Witten",
+        "Anschlussstelle Witten-Herbede"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Witten vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Annen steht, in Herbede oder nach einem Unfall auf der A43." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Witten zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Witten, darüber das Landgericht Bochum." },
-      { "frage": "Unfall auf der A43 oder A44 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Witten frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Witten vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Annen steht, in Herbede oder nach einem Unfall auf der A43."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A43, Parkschaden in der Bahnhofstraße oder Zusammenstoß in Herbede — der Sachverständige kommt zu Ihnen nach Witten.",
     "topografieAnker": "Witten liegt an der Ruhr am Südrand des Ruhrgebiets; A43 und A44 kreuzen sich östlich der Stadt."
   },
-
   "iserlohn": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Nußberg", "Gerlingsen", "Grüne"] },
-      { "name": "Letmathe", "ortsteile": ["Letmathe", "Oestrich", "Genna", "Lasbeck"] },
-      { "name": "Nord", "ortsteile": ["Sümmern", "Kalthof", "Dröschede", "Bremke"] },
-      { "name": "Ost", "ortsteile": ["Hennen", "Rheinen", "Kesbern"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Nußberg",
+          "Gerlingsen",
+          "Grüne"
+        ]
+      },
+      {
+        "name": "Letmathe",
+        "ortsteile": [
+          "Letmathe",
+          "Oestrich",
+          "Genna",
+          "Lasbeck"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Sümmern",
+          "Kalthof",
+          "Dröschede",
+          "Bremke"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Hennen",
+          "Rheinen",
+          "Kesbern"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A46"],
-      "bundesstrassen": ["B7", "B233", "B236"],
-      "knoten": ["Anschlussstelle Iserlohn-Zentrum", "Anschlussstelle Iserlohn-Letmathe", "Kreuz Hemer"]
+      "autobahnen": [
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B7",
+        "B233",
+        "B236"
+      ],
+      "knoten": [
+        "Anschlussstelle Iserlohn-Zentrum",
+        "Anschlussstelle Iserlohn-Letmathe",
+        "Kreuz Hemer"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Iserlohn vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Letmathe steht, in Sümmern oder nach einem Unfall auf der A46." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Iserlohn zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Iserlohn, darüber das Landgericht Hagen." },
-      { "frage": "Unfall auf der A46 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Iserlohn frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Iserlohn vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Letmathe steht, in Sümmern oder nach einem Unfall auf der A46."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in der Wermingser Straße oder Zusammenstoß in Letmathe — der Sachverständige kommt zu Ihnen nach Iserlohn.",
     "topografieAnker": "Iserlohn liegt am Nordrand des Sauerlands über dem Lennetal; die A46 endet östlich der Stadt, B7 und B236 tragen den Regionalverkehr."
   },
-
   "ratingen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Ratingen-Mitte", "Ost", "West", "Tiefenbroich"] },
-      { "name": "Lintorf", "ortsteile": ["Lintorf", "Breitscheid", "Eggerscheidt"] },
-      { "name": "Hösel", "ortsteile": ["Hösel", "Homberg", "Schwarzbach"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Ratingen-Mitte",
+          "Ost",
+          "West",
+          "Tiefenbroich"
+        ]
+      },
+      {
+        "name": "Lintorf",
+        "ortsteile": [
+          "Lintorf",
+          "Breitscheid",
+          "Eggerscheidt"
+        ]
+      },
+      {
+        "name": "Hösel",
+        "ortsteile": [
+          "Hösel",
+          "Homberg",
+          "Schwarzbach"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A44", "A52"],
-      "bundesstrassen": ["B8", "B227"],
-      "knoten": ["Kreuz Ratingen-Ost", "Kreuz Breitscheid", "Anschlussstelle Ratingen-Schwarzbach"]
+      "autobahnen": [
+        "A3",
+        "A44",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B227"
+      ],
+      "knoten": [
+        "Kreuz Ratingen-Ost",
+        "Kreuz Breitscheid",
+        "Anschlussstelle Ratingen-Schwarzbach"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Ratingen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lintorf steht, in Hösel oder nach einem Unfall am Kreuz Breitscheid." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Ratingen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Ratingen, darüber das Landgericht Düsseldorf." },
-      { "frage": "Unfall am Kreuz Breitscheid — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A3 und A52 zusammen." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Ratingen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Ratingen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Lintorf steht, in Hösel oder nach einem Unfall am Kreuz Breitscheid."
+      },
+      {
+        "frage": "Unfall am Kreuz Breitscheid — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A3 und A52 zusammen."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall am Kreuz Breitscheid, Parkschaden in der Altstadt oder Zusammenstoß in Lintorf — der Sachverständige kommt zu Ihnen nach Ratingen.",
     "topografieAnker": "Ratingen liegt nordöstlich von Düsseldorf am Rand des Bergischen Landes; A3, A44 und A52 umschließen das Stadtgebiet."
   },
-
   "marl": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Marl-Mitte", "Alt-Marl", "Drewer-Nord", "Drewer-Süd"] },
-      { "name": "Hüls", "ortsteile": ["Hüls-Nord", "Hüls-Süd", "Sinsen-Lenkerbeck"] },
-      { "name": "West", "ortsteile": ["Brassert", "Polsum", "Sickingmühle"] },
-      { "name": "Ost", "ortsteile": ["Hamm", "Chemiepark", "Löntrop"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Marl-Mitte",
+          "Alt-Marl",
+          "Drewer-Nord",
+          "Drewer-Süd"
+        ]
+      },
+      {
+        "name": "Hüls",
+        "ortsteile": [
+          "Hüls-Nord",
+          "Hüls-Süd",
+          "Sinsen-Lenkerbeck"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Brassert",
+          "Polsum",
+          "Sickingmühle"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Hamm",
+          "Chemiepark",
+          "Löntrop"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A43", "A52"],
-      "bundesstrassen": ["B225"],
-      "knoten": ["Kreuz Marl-Nord", "Anschlussstelle Marl-Zentrum", "Dreieck Marl-Nord"]
+      "autobahnen": [
+        "A43",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B225"
+      ],
+      "knoten": [
+        "Kreuz Marl-Nord",
+        "Anschlussstelle Marl-Zentrum",
+        "Dreieck Marl-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Marl vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Hüls steht, in Brassert oder nach einem Unfall auf der A43." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Marl zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Marl, darüber das Landgericht Essen." },
-      { "frage": "Unfall auf der A43 oder A52 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Marl frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Marl vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Hüls steht, in Brassert oder nach einem Unfall auf der A43."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A43, Parkschaden am Marler Stern oder Zusammenstoß in Hüls — der Sachverständige kommt zu Ihnen nach Marl.",
     "topografieAnker": "Marl liegt am Nordrand des Ruhrgebiets zwischen Lippe und Emscher; die A43 quert das Stadtgebiet Richtung Münster."
   },
-
   "luenen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Lünen-Mitte", "Gahmen", "Wethmar"] },
-      { "name": "Brambauer", "ortsteile": ["Brambauer", "Beckinghausen", "Osterfeld"] },
-      { "name": "Nord", "ortsteile": ["Altlünen", "Nordlünen", "Alstedde", "Wethmar-Nord"] },
-      { "name": "Ost", "ortsteile": ["Horstmar", "Niederaden", "Lippholthausen"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Lünen-Mitte",
+          "Gahmen",
+          "Wethmar"
+        ]
+      },
+      {
+        "name": "Brambauer",
+        "ortsteile": [
+          "Brambauer",
+          "Beckinghausen",
+          "Osterfeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Altlünen",
+          "Nordlünen",
+          "Alstedde",
+          "Wethmar-Nord"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Horstmar",
+          "Niederaden",
+          "Lippholthausen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
-      "bundesstrassen": ["B54", "B236"],
-      "knoten": ["Anschlussstelle Lünen-Nord", "Anschlussstelle Lünen-Süd", "Kreuz Dortmund-Nordost"]
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B54",
+        "B236"
+      ],
+      "knoten": [
+        "Anschlussstelle Lünen-Nord",
+        "Anschlussstelle Lünen-Süd",
+        "Kreuz Dortmund-Nordost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Lünen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brambauer steht, in Horstmar oder nach einem Unfall auf der A2." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Lünen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Lünen, darüber das Landgericht Dortmund." },
-      { "frage": "Unfall auf der A2 bei Lünen — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Lünen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Lünen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brambauer steht, in Horstmar oder nach einem Unfall auf der A2."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Langen Straße oder Zusammenstoß in Brambauer — der Sachverständige kommt zu Ihnen nach Lünen.",
     "topografieAnker": "Lünen liegt an der Lippe nördlich von Dortmund; die A2 führt südlich vorbei, die B54 verbindet die Stadt mit dem Ruhrgebiet."
   },
-
   "minden": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Innenstadt", "Rodenbeck", "Hahlen"] },
-      { "name": "Rechtes Weserufer", "ortsteile": ["Rechtes Weserufer", "Meißen", "Dankersen", "Leteln"] },
-      { "name": "Süd", "ortsteile": ["Dützen", "Bölhorst", "Häverstädt", "Aminghausen"] },
-      { "name": "Nord", "ortsteile": ["Todtenhausen", "Kutenhausen", "Stemmer", "Päpinghausen"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Innenstadt",
+          "Rodenbeck",
+          "Hahlen"
+        ]
+      },
+      {
+        "name": "Rechtes Weserufer",
+        "ortsteile": [
+          "Rechtes Weserufer",
+          "Meißen",
+          "Dankersen",
+          "Leteln"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Dützen",
+          "Bölhorst",
+          "Häverstädt",
+          "Aminghausen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Todtenhausen",
+          "Kutenhausen",
+          "Stemmer",
+          "Päpinghausen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2"],
-      "bundesstrassen": ["B61", "B65", "B482"],
-      "knoten": ["Anschlussstelle Bad Oeynhausen", "Kreuz Bad Oeynhausen", "Anschlussstelle Porta Westfalica"]
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B65",
+        "B482"
+      ],
+      "knoten": [
+        "Anschlussstelle Bad Oeynhausen",
+        "Kreuz Bad Oeynhausen",
+        "Anschlussstelle Porta Westfalica"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Minden vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Dützen steht, in Todtenhausen oder nach einem Unfall auf der B61." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Minden zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Minden, darüber das Landgericht Bielefeld." },
-      { "frage": "Unfall auf der A2 oder B61 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Minden frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Minden vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Dützen steht, in Todtenhausen oder nach einem Unfall auf der B61."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der B61, Parkschaden am Markt oder Zusammenstoß in Dankersen — der Sachverständige kommt zu Ihnen nach Minden.",
     "topografieAnker": "Minden liegt an der Weser nördlich der Porta Westfalica; die A2 führt südlich vorbei, die B61 und B65 kreuzen sich im Stadtgebiet."
   },
-
   "velbert": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Velbert-Mitte", "Birth", "Losenburg", "Tönisheide"] },
-      { "name": "Langenberg", "ortsteile": ["Langenberg", "Bonsfeld", "Nierenhof"] },
-      { "name": "Neviges", "ortsteile": ["Neviges", "Rützkausen", "Dönberg-Grenze"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Velbert-Mitte",
+          "Birth",
+          "Losenburg",
+          "Tönisheide"
+        ]
+      },
+      {
+        "name": "Langenberg",
+        "ortsteile": [
+          "Langenberg",
+          "Bonsfeld",
+          "Nierenhof"
+        ]
+      },
+      {
+        "name": "Neviges",
+        "ortsteile": [
+          "Neviges",
+          "Rützkausen",
+          "Dönberg-Grenze"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A44", "A535"],
-      "bundesstrassen": ["B224", "B227"],
-      "knoten": ["Anschlussstelle Velbert-Zentrum", "Kreuz Velbert-Nord", "Anschlussstelle Heiligenhaus"]
+      "autobahnen": [
+        "A44",
+        "A535"
+      ],
+      "bundesstrassen": [
+        "B224",
+        "B227"
+      ],
+      "knoten": [
+        "Anschlussstelle Velbert-Zentrum",
+        "Kreuz Velbert-Nord",
+        "Anschlussstelle Heiligenhaus"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Velbert vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Langenberg steht, in Neviges oder nach einem Unfall auf der A44." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Velbert zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Velbert, darüber das Landgericht Wuppertal." },
-      { "frage": "Unfall auf der A44 oder A535 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Velbert frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Velbert vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Langenberg steht, in Neviges oder nach einem Unfall auf der A44."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A44, Parkschaden in der Friedrichstraße oder Zusammenstoß in Neviges — der Sachverständige kommt zu Ihnen nach Velbert.",
     "topografieAnker": "Velbert liegt auf den Höhen zwischen Ruhrgebiet und Bergischem Land; die A44 führt nördlich vorbei, die A535 verbindet die Stadt mit Wuppertal."
   },
-
   "viersen": {
     "stadtbezirke": [
-      { "name": "Viersen-Mitte", "ortsteile": ["Innenstadt", "Rahser", "Hamm", "Bockert"] },
-      { "name": "Dülken", "ortsteile": ["Dülken", "Boisheim", "Ummer"] },
-      { "name": "Süchteln", "ortsteile": ["Süchteln", "Vorst", "Hagenbroich"] }
+      {
+        "name": "Viersen-Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Rahser",
+          "Hamm",
+          "Bockert"
+        ]
+      },
+      {
+        "name": "Dülken",
+        "ortsteile": [
+          "Dülken",
+          "Boisheim",
+          "Ummer"
+        ]
+      },
+      {
+        "name": "Süchteln",
+        "ortsteile": [
+          "Süchteln",
+          "Vorst",
+          "Hagenbroich"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A52", "A61"],
-      "bundesstrassen": ["B7", "B509"],
-      "knoten": ["Kreuz Viersen", "Anschlussstelle Viersen-Süchteln", "Kreuz Mönchengladbach"]
+      "autobahnen": [
+        "A52",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B7",
+        "B509"
+      ],
+      "knoten": [
+        "Kreuz Viersen",
+        "Anschlussstelle Viersen-Süchteln",
+        "Kreuz Mönchengladbach"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Viersen vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Dülken steht, in Süchteln oder nach einem Unfall auf der A61." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Viersen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Viersen, darüber das Landgericht Mönchengladbach." },
-      { "frage": "Unfall auf der A52 oder A61 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Viersen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Viersen vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Dülken steht, in Süchteln oder nach einem Unfall auf der A61."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A61, Parkschaden in der Hauptstraße oder Zusammenstoß in Dülken — der Sachverständige kommt zu Ihnen nach Viersen.",
     "topografieAnker": "Viersen liegt am Niederrhein westlich von Mönchengladbach; A52 und A61 umschließen das Stadtgebiet, die B7 führt zur niederländischen Grenze."
   },
-
   "rheine": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Dorenkamp", "Eschendorf", "Schotthock"] },
-      { "name": "Links der Ems", "ortsteile": ["Gellendorf", "Elte", "Wietesch", "Hauenhorst"] },
-      { "name": "Rechts der Ems", "ortsteile": ["Mesum", "Altenrheine", "Rodde", "Catenhorn"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Dorenkamp",
+          "Eschendorf",
+          "Schotthock"
+        ]
+      },
+      {
+        "name": "Links der Ems",
+        "ortsteile": [
+          "Gellendorf",
+          "Elte",
+          "Wietesch",
+          "Hauenhorst"
+        ]
+      },
+      {
+        "name": "Rechts der Ems",
+        "ortsteile": [
+          "Mesum",
+          "Altenrheine",
+          "Rodde",
+          "Catenhorn"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A30"],
-      "bundesstrassen": ["B54", "B70", "B475", "B481"],
-      "knoten": ["Anschlussstelle Rheine-Nord", "Anschlussstelle Rheine-Süd", "Kreuz Rheine"]
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B54",
+        "B70",
+        "B475",
+        "B481"
+      ],
+      "knoten": [
+        "Anschlussstelle Rheine-Nord",
+        "Anschlussstelle Rheine-Süd",
+        "Kreuz Rheine"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Rheine vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Mesum steht, in Gellendorf oder nach einem Unfall auf der A30." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Rheine zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Rheine, darüber das Landgericht Münster." },
-      { "frage": "Unfall auf der A30 oder B70 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Rheine frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Rheine vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Mesum steht, in Gellendorf oder nach einem Unfall auf der A30."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A30, Parkschaden in der Emsstraße oder Zusammenstoß in Mesum — der Sachverständige kommt zu Ihnen nach Rheine.",
     "topografieAnker": "Rheine liegt an der Ems im nördlichen Münsterland; die A30 führt südlich vorbei Richtung niederländische Grenze."
   },
-
   "troisdorf": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Troisdorf-Mitte", "Friedrich-Wilhelms-Hütte", "Oberlar"] },
-      { "name": "Sieglar", "ortsteile": ["Sieglar", "Eschmar", "Kriegsdorf", "Müllekoven"] },
-      { "name": "Spich", "ortsteile": ["Spich", "Altenrath", "Bergheim"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Troisdorf-Mitte",
+          "Friedrich-Wilhelms-Hütte",
+          "Oberlar"
+        ]
+      },
+      {
+        "name": "Sieglar",
+        "ortsteile": [
+          "Sieglar",
+          "Eschmar",
+          "Kriegsdorf",
+          "Müllekoven"
+        ]
+      },
+      {
+        "name": "Spich",
+        "ortsteile": [
+          "Spich",
+          "Altenrath",
+          "Bergheim"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A59", "A560"],
-      "bundesstrassen": ["B8", "B56", "B484"],
-      "knoten": ["Kreuz Bonn/Siegburg", "Anschlussstelle Troisdorf", "Dreieck Sankt Augustin-West"]
+      "autobahnen": [
+        "A59",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B56",
+        "B484"
+      ],
+      "knoten": [
+        "Kreuz Bonn/Siegburg",
+        "Anschlussstelle Troisdorf",
+        "Dreieck Sankt Augustin-West"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Troisdorf vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sieglar steht, in Spich oder nach einem Unfall auf der A59." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Troisdorf zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Siegburg, darüber das Landgericht Bonn." },
-      { "frage": "Unfall auf der A59 oder A560 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Troisdorf frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Troisdorf vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sieglar steht, in Spich oder nach einem Unfall auf der A59."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A59, Parkschaden in der Kölner Straße oder Zusammenstoß in Sieglar — der Sachverständige kommt zu Ihnen nach Troisdorf.",
     "topografieAnker": "Troisdorf liegt zwischen Köln und Bonn an der Sieg; die A59 quert das Stadtgebiet, die A560 verbindet es mit der A3."

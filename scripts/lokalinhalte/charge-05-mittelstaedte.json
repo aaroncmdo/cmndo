@@ -1,327 +1,803 @@
 {
   "neuss": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Barbaraviertel", "Augustinusviertel", "Hafengebiet"] },
-      { "name": "Nordwest", "ortsteile": ["Furth-Nord", "Furth-Süd", "Furth-Mitte", "Weckhoven"] },
-      { "name": "Südost", "ortsteile": ["Grimlinghausen", "Uedesheim", "Gnadental", "Erfttal"] },
-      { "name": "Süd", "ortsteile": ["Norf", "Rosellen", "Reuschenberg", "Selikum"] },
-      { "name": "West", "ortsteile": ["Holzheim", "Grefrath", "Hoisten", "Vogelsang"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Barbaraviertel",
+          "Augustinusviertel",
+          "Hafengebiet"
+        ]
+      },
+      {
+        "name": "Nordwest",
+        "ortsteile": [
+          "Furth-Nord",
+          "Furth-Süd",
+          "Furth-Mitte",
+          "Weckhoven"
+        ]
+      },
+      {
+        "name": "Südost",
+        "ortsteile": [
+          "Grimlinghausen",
+          "Uedesheim",
+          "Gnadental",
+          "Erfttal"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Norf",
+          "Rosellen",
+          "Reuschenberg",
+          "Selikum"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Holzheim",
+          "Grefrath",
+          "Hoisten",
+          "Vogelsang"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A46", "A57"],
-      "bundesstrassen": ["B1", "B9", "B477"],
-      "knoten": ["Kreuz Neuss-West", "Kreuz Neuss-Süd", "Dreieck Neuss-Süd"]
+      "autobahnen": [
+        "A46",
+        "A57"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B9",
+        "B477"
+      ],
+      "knoten": [
+        "Kreuz Neuss-West",
+        "Kreuz Neuss-Süd",
+        "Dreieck Neuss-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Neuss vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Furth steht, in Grimlinghausen oder nach einem Unfall auf der A57." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Neuss zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Neuss, darüber das Landgericht Düsseldorf." },
-      { "frage": "Unfall auf der A46 oder A57 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Neuss?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch gegen den Vorschlag einer Partnerwerkstatt." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Neuss vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Furth steht, in Grimlinghausen oder nach einem Unfall auf der A57."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A57, Parkschaden am Markt oder Zusammenstoß in Furth — der Sachverständige kommt zu Ihnen nach Neuss.",
     "topografieAnker": "Neuss liegt Düsseldorf gegenüber am linken Rheinufer; die A57 führt nach Köln, die A46 quert die Stadt Richtung Bergisches Land."
   },
-
   "ingolstadt": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Nordost", "Nordwest", "Südost", "Südwest"] },
-      { "name": "Nord", "ortsteile": ["Mailing", "Etting", "Oberhaunstadt", "Friedrichshofen"] },
-      { "name": "Süd", "ortsteile": ["Haunwöhr", "Unsernherrn", "Zuchering", "Hundszell"] },
-      { "name": "West", "ortsteile": ["Gerolfing", "Dünzlau", "Irgertsheim"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Nordost",
+          "Nordwest",
+          "Südost",
+          "Südwest"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Mailing",
+          "Etting",
+          "Oberhaunstadt",
+          "Friedrichshofen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Haunwöhr",
+          "Unsernherrn",
+          "Zuchering",
+          "Hundszell"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Gerolfing",
+          "Dünzlau",
+          "Irgertsheim"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A9"],
-      "bundesstrassen": ["B13", "B16", "B16a", "B300"],
-      "knoten": ["Kreuz Ingolstadt-Nord", "Anschlussstelle Ingolstadt-Süd", "Anschlussstelle Ingolstadt-Ost"]
+      "autobahnen": [
+        "A9"
+      ],
+      "bundesstrassen": [
+        "B13",
+        "B16",
+        "B16a",
+        "B300"
+      ],
+      "knoten": [
+        "Kreuz Ingolstadt-Nord",
+        "Anschlussstelle Ingolstadt-Süd",
+        "Anschlussstelle Ingolstadt-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Ingolstadt vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Mailing steht, in Haunwöhr oder nach einem Unfall auf der A9." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Ingolstadt zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Ingolstadt, darüber das Landgericht Ingolstadt." },
-      { "frage": "Unfall auf der A9 zwischen München und Nürnberg — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Ingolstadt frei wählen?", "antwort": "Ja. Auch wenn die Versicherung eine Partnerwerkstatt vorschlägt, dürfen Sie zu Ihrer Vertragswerkstatt." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Ingolstadt vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Mailing steht, in Haunwöhr oder nach einem Unfall auf der A9."
+      },
+      {
+        "frage": "Darf ich meine Werkstatt in Ingolstadt frei wählen?",
+        "antwort": "Ja. Auch wenn die Versicherung eine Partnerwerkstatt vorschlägt, dürfen Sie zu Ihrer Vertragswerkstatt."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A9, Parkschaden in der Altstadt oder Zusammenstoß auf der B16 — der Sachverständige kommt zu Ihnen nach Ingolstadt.",
     "topografieAnker": "Ingolstadt liegt an der Donau zwischen Nürnberg und München; die A9 führt östlich vorbei, B13 und B16 bündeln den regionalen Verkehr."
   },
-
   "wuerzburg": {
     "stadtbezirke": [
-      { "name": "Altstadt", "ortsteile": ["Altstadt", "Dom", "Innere Pleich"] },
-      { "name": "Zellerau", "ortsteile": ["Zellerau", "Dürrbachtal", "Unterdürrbach"] },
-      { "name": "Grombühl", "ortsteile": ["Grombühl", "Lindleinsmühle", "Versbach"] },
-      { "name": "Sanderau", "ortsteile": ["Sanderau", "Frauenland", "Keesburg"] },
-      { "name": "Heidingsfeld", "ortsteile": ["Heidingsfeld", "Heuchelhof", "Rottenbauer"] },
-      { "name": "Lengfeld", "ortsteile": ["Lengfeld", "Estenfeld-Grenze"] }
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Dom",
+          "Innere Pleich"
+        ]
+      },
+      {
+        "name": "Zellerau",
+        "ortsteile": [
+          "Zellerau",
+          "Dürrbachtal",
+          "Unterdürrbach"
+        ]
+      },
+      {
+        "name": "Grombühl",
+        "ortsteile": [
+          "Grombühl",
+          "Lindleinsmühle",
+          "Versbach"
+        ]
+      },
+      {
+        "name": "Sanderau",
+        "ortsteile": [
+          "Sanderau",
+          "Frauenland",
+          "Keesburg"
+        ]
+      },
+      {
+        "name": "Heidingsfeld",
+        "ortsteile": [
+          "Heidingsfeld",
+          "Heuchelhof",
+          "Rottenbauer"
+        ]
+      },
+      {
+        "name": "Lengfeld",
+        "ortsteile": [
+          "Lengfeld",
+          "Estenfeld-Grenze"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A7", "A81"],
-      "bundesstrassen": ["B8", "B13", "B19", "B27"],
-      "knoten": ["Kreuz Biebelried", "Dreieck Würzburg-West", "Kreuz Würzburg-Heidingsfeld"]
+      "autobahnen": [
+        "A3",
+        "A7",
+        "A81"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B13",
+        "B19",
+        "B27"
+      ],
+      "knoten": [
+        "Kreuz Biebelried",
+        "Dreieck Würzburg-West",
+        "Kreuz Würzburg-Heidingsfeld"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Würzburg vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Sanderau steht, in Heidingsfeld oder nach einem Unfall auf der A3." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Würzburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Würzburg, darüber das Landgericht Würzburg." },
-      { "frage": "Unfall am Kreuz Biebelried — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort kreuzen sich A3 und A7." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Würzburg?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Würzburg vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Sanderau steht, in Heidingsfeld oder nach einem Unfall auf der A3."
+      },
+      {
+        "frage": "Unfall am Kreuz Biebelried — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort kreuzen sich A3 und A7."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A3, Parkschaden in der Altstadt oder Zusammenstoß auf der Talavera — der Sachverständige kommt zu Ihnen nach Würzburg.",
     "topografieAnker": "Würzburg liegt im Maintal zwischen Weinbergen; am Kreuz Biebelried treffen A3 und A7 zusammen, die A81 zweigt Richtung Stuttgart ab."
   },
-
   "fuerth": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Innenstadt", "Gustavstraße"] },
-      { "name": "Südstadt", "ortsteile": ["Nördliche Südstadt", "Südliche Südstadt", "Dambach"] },
-      { "name": "West", "ortsteile": ["Hardhöhe", "Burgfarrnbach", "Unterfarrnbach", "Oberfürberg"] },
-      { "name": "Nord", "ortsteile": ["Poppenreuth", "Ronhof", "Stadeln", "Vach", "Mannhof"] },
-      { "name": "Ost", "ortsteile": ["Espan", "Sack", "Kronach"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Innenstadt",
+          "Gustavstraße"
+        ]
+      },
+      {
+        "name": "Südstadt",
+        "ortsteile": [
+          "Nördliche Südstadt",
+          "Südliche Südstadt",
+          "Dambach"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Hardhöhe",
+          "Burgfarrnbach",
+          "Unterfarrnbach",
+          "Oberfürberg"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Poppenreuth",
+          "Ronhof",
+          "Stadeln",
+          "Vach",
+          "Mannhof"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Espan",
+          "Sack",
+          "Kronach"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A73", "A3"],
-      "bundesstrassen": ["B8", "B14"],
-      "knoten": ["Dreieck Fürth/Erlangen", "Kreuz Fürth-Erlangen", "Anschlussstelle Fürth-Poppenreuth"]
+      "autobahnen": [
+        "A73",
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B14"
+      ],
+      "knoten": [
+        "Dreieck Fürth/Erlangen",
+        "Kreuz Fürth-Erlangen",
+        "Anschlussstelle Fürth-Poppenreuth"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Fürth vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf der Hardhöhe steht, in Stadeln oder nach einem Unfall auf der A73." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Fürth zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Fürth, darüber das Landgericht Nürnberg-Fürth." },
-      { "frage": "Unfall auf der A73 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Fürth frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Fürth vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug auf der Hardhöhe steht, in Stadeln oder nach einem Unfall auf der A73."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A73, Parkschaden in der Gustavstraße oder Zusammenstoß auf der Südwesttangente — der Sachverständige kommt zu Ihnen nach Fürth.",
     "topografieAnker": "Fürth liegt am Zusammenfluss von Rednitz und Pegnitz zur Regnitz, unmittelbar westlich von Nürnberg; die A73 durchquert das Stadtgebiet."
   },
-
   "ulm": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Oststadt", "Weststadt", "Söflingen"] },
-      { "name": "Nord", "ortsteile": ["Böfingen", "Jungingen", "Lehr", "Mähringen"] },
-      { "name": "West", "ortsteile": ["Eselsberg", "Grimmelfingen", "Einsingen", "Ermingen"] },
-      { "name": "Süd", "ortsteile": ["Wiblingen", "Donaustetten", "Gögglingen", "Unterweiler"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Oststadt",
+          "Weststadt",
+          "Söflingen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Böfingen",
+          "Jungingen",
+          "Lehr",
+          "Mähringen"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Eselsberg",
+          "Grimmelfingen",
+          "Einsingen",
+          "Ermingen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Wiblingen",
+          "Donaustetten",
+          "Gögglingen",
+          "Unterweiler"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A8"],
-      "bundesstrassen": ["B10", "B19", "B28", "B30", "B311"],
-      "knoten": ["Kreuz Ulm/Elchingen", "Anschlussstelle Ulm-West", "Anschlussstelle Ulm-Ost"]
+      "autobahnen": [
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B10",
+        "B19",
+        "B28",
+        "B30",
+        "B311"
+      ],
+      "knoten": [
+        "Kreuz Ulm/Elchingen",
+        "Anschlussstelle Ulm-West",
+        "Anschlussstelle Ulm-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Ulm vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Söflingen steht, in Wiblingen oder nach einem Unfall auf der A8." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Ulm zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Ulm, darüber das Landgericht Ulm." },
-      { "frage": "Unfall auf der A8 bei Ulm — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Ulm?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Ulm vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Söflingen steht, in Wiblingen oder nach einem Unfall auf der A8."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A8, Parkschaden am Münsterplatz oder Zusammenstoß in Söflingen — der Sachverständige kommt zu Ihnen nach Ulm.",
     "topografieAnker": "Ulm liegt an der Donau gegenüber dem bayerischen Neu-Ulm; die A8 führt nördlich vorbei, mehrere Bundesstraßen bündeln den Verkehr aus der Schwäbischen Alb."
   },
-
   "offenbach": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Kaiserlei", "Wilhelmschule", "Nordend"] },
-      { "name": "West", "ortsteile": ["Westend", "Lauterborn", "Tempelsee"] },
-      { "name": "Ost", "ortsteile": ["Bieber", "Bürgel", "Waldheim"] },
-      { "name": "Nord", "ortsteile": ["Rumpenheim", "Mühlheimer Straße", "Rosenhöhe"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Kaiserlei",
+          "Wilhelmschule",
+          "Nordend"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Westend",
+          "Lauterborn",
+          "Tempelsee"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Bieber",
+          "Bürgel",
+          "Waldheim"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Rumpenheim",
+          "Mühlheimer Straße",
+          "Rosenhöhe"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A661"],
-      "bundesstrassen": ["B43", "B448"],
-      "knoten": ["Kreuz Offenbach", "Dreieck Offenbach", "Anschlussstelle Offenbach-Kaiserlei"]
+      "autobahnen": [
+        "A3",
+        "A661"
+      ],
+      "bundesstrassen": [
+        "B43",
+        "B448"
+      ],
+      "knoten": [
+        "Kreuz Offenbach",
+        "Dreieck Offenbach",
+        "Anschlussstelle Offenbach-Kaiserlei"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Offenbach vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bieber steht, am Kaiserlei oder nach einem Unfall auf der A661." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Offenbach zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Offenbach am Main, darüber das Landgericht Darmstadt." },
-      { "frage": "Unfall am Kaiserleikreisel — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Offenbach frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Offenbach vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bieber steht, am Kaiserlei oder nach einem Unfall auf der A661."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A661, Parkschaden in der Innenstadt oder Zusammenstoß am Kaiserlei — der Sachverständige kommt zu Ihnen nach Offenbach.",
     "topografieAnker": "Offenbach grenzt östlich unmittelbar an Frankfurt; am Kaiserlei verbinden A661 und B43 beide Städte über den Main hinweg."
   },
-
   "bergisch-gladbach": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Heidkamp", "Gronau", "Hand"] },
-      { "name": "Bensberg", "ortsteile": ["Bensberg", "Refrath", "Frankenforst", "Moitzfeld"] },
-      { "name": "Nord", "ortsteile": ["Paffrath", "Schildgen", "Katterbach", "Hebborn"] },
-      { "name": "Ost", "ortsteile": ["Herkenrath", "Sand", "Bärbroich", "Asselborn"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Stadtmitte",
+          "Heidkamp",
+          "Gronau",
+          "Hand"
+        ]
+      },
+      {
+        "name": "Bensberg",
+        "ortsteile": [
+          "Bensberg",
+          "Refrath",
+          "Frankenforst",
+          "Moitzfeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Paffrath",
+          "Schildgen",
+          "Katterbach",
+          "Hebborn"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Herkenrath",
+          "Sand",
+          "Bärbroich",
+          "Asselborn"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4"],
-      "bundesstrassen": ["B506"],
-      "knoten": ["Kreuz Köln-Ost", "Anschlussstelle Bensberg", "Anschlussstelle Refrath"]
+      "autobahnen": [
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B506"
+      ],
+      "knoten": [
+        "Kreuz Köln-Ost",
+        "Anschlussstelle Bensberg",
+        "Anschlussstelle Refrath"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bergisch Gladbach vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bensberg steht, in Refrath oder nach einem Unfall auf der A4." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bergisch Gladbach zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bergisch Gladbach, darüber das Landgericht Köln." },
-      { "frage": "Unfall auf der A4 Richtung Köln — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Bergisch Gladbach vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Bensberg steht, in Refrath oder nach einem Unfall auf der A4."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Stadtmitte oder Zusammenstoß in Bensberg — der Sachverständige kommt zu Ihnen nach Bergisch Gladbach.",
     "topografieAnker": "Bergisch Gladbach liegt östlich von Köln am Rand des Bergischen Landes; die A4 führt südlich vorbei, die B506 verbindet die Stadtteile im Tal der Strunde."
   },
-
   "heilbronn": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Nordstadt", "Oststadt", "Südstadt"] },
-      { "name": "Böckingen", "ortsteile": ["Böckingen", "Klingenberg", "Neckargartach"] },
-      { "name": "Sontheim", "ortsteile": ["Sontheim", "Horkheim"] },
-      { "name": "West", "ortsteile": ["Frankenbach", "Kirchhausen", "Biberach"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Nordstadt",
+          "Oststadt",
+          "Südstadt"
+        ]
+      },
+      {
+        "name": "Böckingen",
+        "ortsteile": [
+          "Böckingen",
+          "Klingenberg",
+          "Neckargartach"
+        ]
+      },
+      {
+        "name": "Sontheim",
+        "ortsteile": [
+          "Sontheim",
+          "Horkheim"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Frankenbach",
+          "Kirchhausen",
+          "Biberach"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A6", "A81"],
-      "bundesstrassen": ["B27", "B39", "B293"],
-      "knoten": ["Kreuz Weinsberg", "Anschlussstelle Heilbronn-Untereisesheim", "Anschlussstelle Heilbronn-Neckarsulm"]
+      "autobahnen": [
+        "A6",
+        "A81"
+      ],
+      "bundesstrassen": [
+        "B27",
+        "B39",
+        "B293"
+      ],
+      "knoten": [
+        "Kreuz Weinsberg",
+        "Anschlussstelle Heilbronn-Untereisesheim",
+        "Anschlussstelle Heilbronn-Neckarsulm"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Heilbronn vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Böckingen steht, in Sontheim oder nach einem Unfall auf der A6." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Heilbronn zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Heilbronn, darüber das Landgericht Heilbronn." },
-      { "frage": "Unfall am Kreuz Weinsberg — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A6 und A81 aufeinander." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Heilbronn frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Heilbronn vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Böckingen steht, in Sontheim oder nach einem Unfall auf der A6."
+      },
+      {
+        "frage": "Unfall am Kreuz Weinsberg — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A6 und A81 aufeinander."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A6, Parkschaden am Kiliansplatz oder Zusammenstoß in Böckingen — der Sachverständige kommt zu Ihnen nach Heilbronn.",
     "topografieAnker": "Heilbronn liegt im Neckartal zwischen Weinbergen; am Kreuz Weinsberg östlich der Stadt treffen A6 und A81 zusammen."
   },
-
   "pforzheim": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Nordstadt", "Oststadt", "Weststadt", "Südoststadt"] },
-      { "name": "Brötzingen", "ortsteile": ["Brötzingen", "Arlinger", "Sonnenhof"] },
-      { "name": "Buckenberg", "ortsteile": ["Buckenberg", "Haidach", "Hohenwart"] },
-      { "name": "Süd", "ortsteile": ["Dillweißenstein", "Huchenfeld", "Würm"] },
-      { "name": "Ost", "ortsteile": ["Eutingen", "Hohenwart-Ost"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Nordstadt",
+          "Oststadt",
+          "Weststadt",
+          "Südoststadt"
+        ]
+      },
+      {
+        "name": "Brötzingen",
+        "ortsteile": [
+          "Brötzingen",
+          "Arlinger",
+          "Sonnenhof"
+        ]
+      },
+      {
+        "name": "Buckenberg",
+        "ortsteile": [
+          "Buckenberg",
+          "Haidach",
+          "Hohenwart"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Dillweißenstein",
+          "Huchenfeld",
+          "Würm"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Eutingen",
+          "Hohenwart-Ost"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A8"],
-      "bundesstrassen": ["B10", "B294", "B463"],
-      "knoten": ["Anschlussstelle Pforzheim-West", "Anschlussstelle Pforzheim-Ost", "Anschlussstelle Pforzheim-Nord"]
+      "autobahnen": [
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B10",
+        "B294",
+        "B463"
+      ],
+      "knoten": [
+        "Anschlussstelle Pforzheim-West",
+        "Anschlussstelle Pforzheim-Ost",
+        "Anschlussstelle Pforzheim-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Pforzheim vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brötzingen steht, in Eutingen oder nach einem Unfall auf der A8." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Pforzheim zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Pforzheim, darüber das Landgericht Karlsruhe." },
-      { "frage": "Unfall auf der A8 zwischen Karlsruhe und Stuttgart — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Pforzheim frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Pforzheim vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brötzingen steht, in Eutingen oder nach einem Unfall auf der A8."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A8, Parkschaden in der Innenstadt oder Zusammenstoß in Brötzingen — der Sachverständige kommt zu Ihnen nach Pforzheim.",
     "topografieAnker": "Pforzheim liegt am Nordrand des Schwarzwalds, wo Enz, Nagold und Würm zusammenfließen; die A8 führt nördlich vorbei."
   },
-
   "wolfsburg": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Hellwinkel", "Rabenberg", "Hesslingen"] },
-      { "name": "West", "ortsteile": ["Detmerode", "Westhagen", "Fallersleben", "Sülfeld"] },
-      { "name": "Ost", "ortsteile": ["Vorsfelde", "Hehlingen", "Almke", "Neindorf"] },
-      { "name": "Nord", "ortsteile": ["Nordstadt", "Wendschott", "Brackstedt", "Velstove"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Stadtmitte",
+          "Hellwinkel",
+          "Rabenberg",
+          "Hesslingen"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Detmerode",
+          "Westhagen",
+          "Fallersleben",
+          "Sülfeld"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Vorsfelde",
+          "Hehlingen",
+          "Almke",
+          "Neindorf"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nordstadt",
+          "Wendschott",
+          "Brackstedt",
+          "Velstove"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A39"],
-      "bundesstrassen": ["B188", "B248"],
-      "knoten": ["Kreuz Wolfsburg/Königslutter", "Anschlussstelle Wolfsburg-Mitte", "Dreieck Wolfsburg"]
+      "autobahnen": [
+        "A2",
+        "A39"
+      ],
+      "bundesstrassen": [
+        "B188",
+        "B248"
+      ],
+      "knoten": [
+        "Kreuz Wolfsburg/Königslutter",
+        "Anschlussstelle Wolfsburg-Mitte",
+        "Dreieck Wolfsburg"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Wolfsburg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Fallersleben steht, in Vorsfelde oder nach einem Unfall auf der A39." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Wolfsburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Wolfsburg, darüber das Landgericht Braunschweig." },
-      { "frage": "Unfall auf der A2 oder A39 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Muss ich das Gutachten in einer Vertragswerkstatt machen lassen?", "antwort": "Nein — Gutachten und Reparatur sind zwei Paar Schuhe. Der Sachverständige ist unabhängig, und Sie behalten die freie Werkstattwahl, auch wenn Ihr Fahrzeug noch Garantie hat." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Wolfsburg vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Fallersleben steht, in Vorsfelde oder nach einem Unfall auf der A39."
+      },
+      {
+        "frage": "Muss ich das Gutachten in einer Vertragswerkstatt machen lassen?",
+        "antwort": "Nein — Gutachten und Reparatur sind zwei Paar Schuhe. Der Sachverständige ist unabhängig, und Sie behalten die freie Werkstattwahl, auch wenn Ihr Fahrzeug noch Garantie hat."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A39, Parkschaden in der Porschestraße oder Zusammenstoß in Fallersleben — der Sachverständige kommt zu Ihnen nach Wolfsburg.",
     "topografieAnker": "Wolfsburg liegt am Mittellandkanal und an der Aller; die A2 führt südlich vorbei, die A39 endet im Stadtgebiet."
   },
-
   "goettingen": {
     "stadtbezirke": [
-      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Ostviertel", "Südstadt"] },
-      { "name": "Weststadt", "ortsteile": ["Weststadt", "Grone", "Elliehausen"] },
-      { "name": "Nord", "ortsteile": ["Weende", "Nikolausberg", "Nordstadt"] },
-      { "name": "Ost", "ortsteile": ["Herberhausen", "Roringen", "Geismar"] }
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Ostviertel",
+          "Südstadt"
+        ]
+      },
+      {
+        "name": "Weststadt",
+        "ortsteile": [
+          "Weststadt",
+          "Grone",
+          "Elliehausen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Weende",
+          "Nikolausberg",
+          "Nordstadt"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Herberhausen",
+          "Roringen",
+          "Geismar"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A7"],
-      "bundesstrassen": ["B3", "B27", "B446"],
-      "knoten": ["Anschlussstelle Göttingen", "Anschlussstelle Göttingen-Nord", "Dreieck Drammetal"]
+      "autobahnen": [
+        "A7"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B27",
+        "B446"
+      ],
+      "knoten": [
+        "Anschlussstelle Göttingen",
+        "Anschlussstelle Göttingen-Nord",
+        "Dreieck Drammetal"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Göttingen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Weende steht, in Geismar oder nach einem Unfall auf der A7." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Göttingen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Göttingen, darüber das Landgericht Göttingen." },
-      { "frage": "Unfall auf der A7 bei Göttingen — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Göttingen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Göttingen vor Ort?",
+        "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Weende steht, in Geismar oder nach einem Unfall auf der A7."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A7, Parkschaden am Gänseliesel oder Zusammenstoß in Weende — der Sachverständige kommt zu Ihnen nach Göttingen.",
     "topografieAnker": "Göttingen liegt im Leinetal zwischen Harz und Solling; die A7 führt östlich vorbei und verbindet die Stadt mit Kassel und Hannover."
   },
-
   "bottrop": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Altstadt", "Fuhlenbrock", "Eigen"] },
-      { "name": "Süd", "ortsteile": ["Batenbrock", "Welheim", "Welheimer Mark", "Boy"] },
-      { "name": "Kirchhellen", "ortsteile": ["Kirchhellen", "Grafenwald", "Feldhausen", "Ekel"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Stadtmitte",
+          "Altstadt",
+          "Fuhlenbrock",
+          "Eigen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Batenbrock",
+          "Welheim",
+          "Welheimer Mark",
+          "Boy"
+        ]
+      },
+      {
+        "name": "Kirchhellen",
+        "ortsteile": [
+          "Kirchhellen",
+          "Grafenwald",
+          "Feldhausen",
+          "Ekel"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A31", "A42"],
-      "bundesstrassen": ["B223", "B224"],
-      "knoten": ["Kreuz Bottrop", "Dreieck Bottrop", "Anschlussstelle Bottrop-Süd"]
+      "autobahnen": [
+        "A2",
+        "A31",
+        "A42"
+      ],
+      "bundesstrassen": [
+        "B223",
+        "B224"
+      ],
+      "knoten": [
+        "Kreuz Bottrop",
+        "Dreieck Bottrop",
+        "Anschlussstelle Bottrop-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bottrop vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Kirchhellen steht, in Batenbrock oder nach einem Unfall auf der A42." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bottrop zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bottrop, darüber das Landgericht Essen." },
-      { "frage": "Unfall am Kreuz Bottrop — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Bottrop frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
-      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er wird nur im Gutachten beziffert." }
+      {
+        "frage": "Wie schnell ist ein Kfz-Gutachter in Bottrop vor Ort?",
+        "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Kirchhellen steht, in Batenbrock oder nach einem Unfall auf der A42."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in der Stadtmitte oder Zusammenstoß in Kirchhellen — der Sachverständige kommt zu Ihnen nach Bottrop.",
     "topografieAnker": "Bottrop liegt am Nordrand des Ruhrgebiets zwischen Emscher und Lippe; A2, A31 und A42 begrenzen das Stadtgebiet nach Norden, Westen und Süden."
