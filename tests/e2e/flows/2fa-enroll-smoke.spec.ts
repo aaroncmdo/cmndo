@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
 import { computeTotp } from '../lib/totp.mjs'
+import { basicAuthFuerZiel } from '../lib/ziel'
 
 // 2FA-Enroll-Smoke (AAR-audit-2fa) — POST-DEPLOY, opt-in, gegen Prod.
 //
@@ -40,7 +41,7 @@ test('frischer User richtet 2FA (TOTP) selbst ein + wird danach beim Login gecha
   test.setTimeout(90_000)
 
   // 1. Frischer, faktorfreier User -> direkt ins Portal (kein 2FA, da optional).
-  const ctxA = await browser.newContext({ serviceWorkers: 'block' })
+  const ctxA = await browser.newContext({ serviceWorkers: 'block', httpCredentials: basicAuthFuerZiel() })
   const pageA = await ctxA.newPage()
   await login(pageA)
   expect(pageA.url(), 'faktorfrei -> direkt ins Portal').not.toContain('/login/2fa')
@@ -70,7 +71,7 @@ test('frischer User richtet 2FA (TOTP) selbst ein + wird danach beim Login gecha
   // 5. Enforcement: ein frischer Login wird jetzt 2FA-gechallenged. Bewusst OHNE
   //    zweiten TOTP-Verify (der Code aus Schritt 3 wäre im selben 30s-Fenster
   //    replay-gesperrt) — der Challenge-Redirect allein beweist das Enforcement.
-  const ctxB = await browser.newContext({ serviceWorkers: 'block' })
+  const ctxB = await browser.newContext({ serviceWorkers: 'block', httpCredentials: basicAuthFuerZiel() })
   const pageB = await ctxB.newPage()
   await login(pageB)
   expect(pageB.url(), 'nach Enroll: Login ist jetzt 2FA-gated').toContain('/login/2fa')
