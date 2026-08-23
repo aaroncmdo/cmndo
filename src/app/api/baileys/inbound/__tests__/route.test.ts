@@ -76,7 +76,12 @@ vi.mock('@/lib/whatsapp/team-notify', () => ({
   },
 }))
 
-vi.mock('@/lib/inbound/process-inbound-text', () => ({ processInboundText: async () => {} }))
+const intentCalls: Array<Record<string, unknown>> = []
+vi.mock('@/lib/inbound/process-inbound-text', () => ({
+  processInboundText: async (_db: unknown, args: Record<string, unknown>) => {
+    intentCalls.push(args)
+  },
+}))
 vi.mock('@/lib/inbound/process-inbound-media', () => ({ processInboundMedia: async () => {} }))
 vi.mock('@/lib/claims/get-claim-for-role', () => ({ resolveClaimId: async () => null }))
 
@@ -94,6 +99,7 @@ beforeEach(() => {
   inserts.length = 0
   createCaseCalls.length = 0
   waTexte.length = 0
+  intentCalls.length = 0
   state.match = { fallId: null, leadId: null, multipleCandidates: false, candidates: [] }
   state.istPartner = false
   state.partnerBezeichnung = null
@@ -196,5 +202,44 @@ describe('baileys/inbound — Team-WA nur EINMALIG bei Neukontakt', () => {
     state.countError = { message: 'zaehlung kaputt' }
     await POST(anfrage({ phone: '491701234567', text: 'Hallo' }))
     expect(waTexte).toHaveLength(0)
+  })
+})
+
+describe('baileys/inbound — eigene Nachrichten (vom Handy/Web/App-Echo)', () => {
+  it('from_me speichert als outbound mit sender_rolle system', async () => {
+    await POST(anfrage({ phone: '491701234567', text: 'Wir melden uns gleich', from_me: true }))
+    expect(inserts).toHaveLength(1)
+    expect(inserts[0]?.richtung).toBe('outbound')
+    expect(inserts[0]?.sender_rolle).toBe('system')
+    // phone ist bei from_me der EMPFAENGER — dort gehoert er auch hin.
+    expect(inserts[0]?.empfaenger_kontakt).toBe('491701234567')
+  })
+
+  it('from_me legt KEINEN Lead an', async () => {
+    await POST(anfrage({ phone: '491701234567', text: 'Antwort von uns', from_me: true }))
+    expect(createCaseCalls).toHaveLength(0)
+  })
+
+  it('from_me loest KEINE Team-WA aus', async () => {
+    state.nachrichtenCount = 1
+    await POST(anfrage({ phone: '491701234567', text: 'Antwort von uns', from_me: true }))
+    expect(waTexte).toHaveLength(0)
+  })
+
+  it('from_me loest KEINE Text-Intents aus — ein eigenes "JA" darf nichts bestaetigen', async () => {
+    await POST(anfrage({ phone: '491701234567', text: 'JA', from_me: true }))
+    expect(intentCalls).toHaveLength(0)
+  })
+
+  it('eingehendes "JA" loest die Intents weiterhin aus', async () => {
+    await POST(anfrage({ phone: '491701234567', text: 'JA' }))
+    expect(intentCalls).toHaveLength(1)
+    expect(intentCalls[0].body).toBe('JA')
+  })
+
+  it('ohne from_me bleibt alles inbound (Default unveraendert)', async () => {
+    await POST(anfrage({ phone: '491701234567', text: 'Hallo' }))
+    expect(inserts[0]?.richtung).toBe('inbound')
+    expect(inserts[0]?.sender_rolle).toBe('kunde')
   })
 })
