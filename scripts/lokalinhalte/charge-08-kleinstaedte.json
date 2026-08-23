@@ -1,0 +1,320 @@
+{
+  "gladbeck": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Butendorf", "Rosenhügel", "Schultendorf"] },
+      { "name": "Nord", "ortsteile": ["Zweckel", "Rentfort", "Rentfort-Nord", "Ellinghorst"] },
+      { "name": "Süd", "ortsteile": ["Brauck", "Rosenhügel-Süd", "Alt-Rentfort"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A2", "A31", "A52"],
+      "bundesstrassen": ["B224"],
+      "knoten": ["Kreuz Gladbeck", "Anschlussstelle Gladbeck-Ellinghorst", "Dreieck Bottrop"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Gladbeck vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Butendorf steht, in Zweckel oder nach einem Unfall auf der A2." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Gladbeck zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Gladbeck, darüber das Landgericht Essen." },
+      { "frage": "Unfall auf der A2 oder A31 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Gladbeck frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Hochstraße oder Zusammenstoß in Zweckel — der Sachverständige kommt zu Ihnen nach Gladbeck.",
+    "topografieAnker": "Gladbeck liegt am Nordrand des Ruhrgebiets; A2, A31 und A52 begrenzen das Stadtgebiet und treffen am Kreuz Gladbeck zusammen."
+  },
+
+  "dorsten": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Altstadt", "Feldmark", "Hardt", "Östrich"] },
+      { "name": "Hervest", "ortsteile": ["Hervest", "Holsterhausen", "Barkenberg"] },
+      { "name": "Wulfen", "ortsteile": ["Wulfen", "Deuten", "Rhade", "Lembeck"] },
+      { "name": "West", "ortsteile": ["Altendorf-Ulfkotte", "Wienbach"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A31"],
+      "bundesstrassen": ["B58", "B224", "B225"],
+      "knoten": ["Anschlussstelle Dorsten", "Anschlussstelle Dorsten-Lembeck", "Kreuz Gelsenkirchen"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Dorsten vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Hervest steht, in Wulfen oder nach einem Unfall auf der A31." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Dorsten zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Dorsten, darüber das Landgericht Essen." },
+      { "frage": "Unfall auf der A31 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Dorsten frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A31, Parkschaden in der Altstadt oder Zusammenstoß in Wulfen — der Sachverständige kommt zu Ihnen nach Dorsten.",
+    "topografieAnker": "Dorsten liegt an der Lippe am Übergang vom Ruhrgebiet ins Münsterland; die A31 quert das Stadtgebiet von Süd nach Nord."
+  },
+
+  "arnsberg": {
+    "stadtbezirke": [
+      { "name": "Neheim", "ortsteile": ["Neheim", "Hüsten", "Moosfelde", "Bergheim"] },
+      { "name": "Alt-Arnsberg", "ortsteile": ["Altstadt", "Uentrop", "Rumbeck", "Bruchhausen"] },
+      { "name": "Ost", "ortsteile": ["Oeventrop", "Breitenbruch", "Niedereimer"] },
+      { "name": "West", "ortsteile": ["Herdringen", "Müschede", "Voßwinkel", "Holzen"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A46"],
+      "bundesstrassen": ["B7", "B229"],
+      "knoten": ["Anschlussstelle Arnsberg-Neheim", "Anschlussstelle Arnsberg-Ost", "Kreuz Werl"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Arnsberg vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Neheim steht, in Hüsten oder nach einem Unfall auf der A46." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Arnsberg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Arnsberg, darüber das Landgericht Arnsberg." },
+      { "frage": "Unfall auf der A46 im Sauerland — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Arnsberg frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in Neheim oder Zusammenstoß in Hüsten — der Sachverständige kommt zu Ihnen nach Arnsberg.",
+    "topografieAnker": "Arnsberg zieht sich weit durch das Ruhrtal im Sauerland; die A46 verbindet die Stadtteile Neheim und Hüsten mit dem Ruhrgebiet."
+  },
+
+  "detmold": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Nord", "Süd", "Hakedahl"] },
+      { "name": "West", "ortsteile": ["Heidenoldendorf", "Jerxen-Orbke", "Pivitsheide"] },
+      { "name": "Süd", "ortsteile": ["Hiddesen", "Berlebeck", "Heiligenkirchen", "Hornoldendorf"] },
+      { "name": "Ost", "ortsteile": ["Remmighausen", "Brokhausen", "Nienhagen", "Bentrup"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": ["B238", "B239"],
+      "knoten": ["Kreuzung B238/B239 Detmold-Nord", "Anschluss B239 Detmold-Süd", "Auffahrt A2 bei Bad Salzuflen"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Detmold vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Heidenoldendorf steht, in Hiddesen oder nach einem Unfall auf der B239." },
+      { "frage": "Detmold hat keine eigene Autobahn — ändert das etwas an meinem Anspruch?", "antwort": "Nein. Für die Regulierung zählt die Haftungsfrage, nicht der Straßentyp. Den überörtlichen Verkehr tragen hier B238 und B239; die nächsten Autobahnauffahrten liegen an der A2 bei Bad Salzuflen und an der A33 bei Bielefeld." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Detmold zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Detmold, darüber das Landgericht Detmold." },
+      { "frage": "Wer zahlt den Gutachter nach einem unverschuldeten Unfall?", "antwort": "Der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der B239, Parkschaden in der Langen Straße oder Zusammenstoß in Hiddesen — der Sachverständige kommt zu Ihnen nach Detmold.",
+    "topografieAnker": "Detmold liegt am Teutoburger Wald in Lippe. Eine eigene Autobahn hat die Stadt nicht — B238 und B239 tragen den überörtlichen Verkehr, die A2 verläuft rund fünfundzwanzig Kilometer nördlich."
+  },
+
+  "bocholt": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Innenstadt", "Stenern", "Lowick", "Mussum"] },
+      { "name": "Nord", "ortsteile": ["Biemenhorst", "Barlo", "Suderwick", "Hemden"] },
+      { "name": "Süd", "ortsteile": ["Spork", "Holtwick", "Liedern", "Werth"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": ["B67", "B473"],
+      "knoten": ["Kreuzung B67/B473 Bocholt", "Anschluss B67 Bocholt-Ost", "Auffahrt A3 bei Hamminkeln"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bocholt vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Biemenhorst steht, in Spork oder nach einem Unfall auf der B67." },
+      { "frage": "Bocholt hat keine Autobahn — spielt das für die Regulierung eine Rolle?", "antwort": "Nein, entscheidend ist die Haftungsfrage. Den überörtlichen Verkehr tragen B67 und B473; die nächste Autobahnauffahrt liegt an der A3 bei Hamminkeln." },
+      { "frage": "Mein Unfallgegner kam aus den Niederlanden. Was ändert das?", "antwort": "Bei einem Unfall auf deutschem Boden gilt deutsches Recht, und der niederländische Versicherer hat einen deutschen Schadenregulierungsbeauftragten. Nahe der Grenze ist das Alltag — ein Gutachten mit klaren Zahlen beschleunigt die Abwicklung." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bocholt zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bocholt, darüber das Landgericht Münster." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der B67, Parkschaden in der Innenstadt oder Zusammenstoß nahe der niederländischen Grenze — der Sachverständige kommt zu Ihnen nach Bocholt.",
+    "topografieAnker": "Bocholt liegt an der Bocholter Aa im westlichen Münsterland, direkt an der niederländischen Grenze. Eine Autobahn führt nicht durch das Stadtgebiet; B67 und B473 übernehmen diese Rolle."
+  },
+
+  "castrop-rauxel": {
+    "stadtbezirke": [
+      { "name": "Castrop", "ortsteile": ["Altstadt", "Obercastrop", "Bladenhorst", "Behringhausen"] },
+      { "name": "Rauxel", "ortsteile": ["Rauxel", "Habinghorst", "Deininghausen", "Dingen"] },
+      { "name": "Ickern", "ortsteile": ["Ickern", "Henrichenburg", "Pöppinghausen"] },
+      { "name": "Süd", "ortsteile": ["Merklinde", "Frohlinde", "Bövinghausen-Grenze"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A2", "A42", "A45"],
+      "bundesstrassen": ["B235"],
+      "knoten": ["Kreuz Castrop-Rauxel-Ost", "Kreuz Recklinghausen", "Anschlussstelle Castrop-Rauxel-Zentrum"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Castrop-Rauxel vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Ickern steht, in Habinghorst oder nach einem Unfall auf der A42." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Castrop-Rauxel zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Castrop-Rauxel, darüber das Landgericht Dortmund." },
+      { "frage": "Unfall auf der A2 oder A42 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in der Altstadt oder Zusammenstoß in Ickern — der Sachverständige kommt zu Ihnen nach Castrop-Rauxel.",
+    "topografieAnker": "Castrop-Rauxel liegt zwischen Dortmund und Herne am Rhein-Herne-Kanal; A2, A42 und A45 begrenzen das Stadtgebiet."
+  },
+
+  "luedenscheid": {
+    "stadtbezirke": [
+      { "name": "Stadtmitte", "ortsteile": ["Stadtmitte", "Wehberg", "Piepersloh", "Gevelndorf"] },
+      { "name": "Brügge", "ortsteile": ["Brügge", "Oberrahmede", "Bierbaum"] },
+      { "name": "Süd", "ortsteile": ["Hellersen", "Buckesfeld", "Kluse"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A45"],
+      "bundesstrassen": ["B54", "B229"],
+      "knoten": ["Anschlussstelle Lüdenscheid", "Anschlussstelle Lüdenscheid-Nord", "Kreuz Hagen"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Lüdenscheid vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brügge steht, in Wehberg oder nach einem Unfall auf der A45." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Lüdenscheid zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Lüdenscheid, darüber das Landgericht Hagen." },
+      { "frage": "Unfall auf der A45 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Lüdenscheid frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A45, Parkschaden in der Wilhelmstraße oder Zusammenstoß in Brügge — der Sachverständige kommt zu Ihnen nach Lüdenscheid.",
+    "topografieAnker": "Lüdenscheid liegt auf einem Höhenrücken im Märkischen Sauerland; die A45 führt als Sauerlandlinie über hohe Talbrücken am Stadtgebiet vorbei."
+  },
+
+  "lippstadt": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Innenstadt", "Cappel", "Lipperode", "Lipperbruch"] },
+      { "name": "Nord", "ortsteile": ["Bad Waldliesborn", "Overhagen", "Herringhausen"] },
+      { "name": "Süd", "ortsteile": ["Benninghausen", "Eickelborn", "Esbeck", "Hörste"] },
+      { "name": "Ost", "ortsteile": ["Dedinghausen", "Rixbeck", "Rebbeke", "Garfeln"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A44"],
+      "bundesstrassen": ["B7", "B55"],
+      "knoten": ["Anschlussstelle Erwitte/Anröchte", "Anschlussstelle Geseke", "Kreuz Werl"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Lippstadt vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Cappel steht, in Bad Waldliesborn oder nach einem Unfall auf der A44." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Lippstadt zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Lippstadt, darüber das Landgericht Paderborn." },
+      { "frage": "Unfall auf der A44 oder B7 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Lippstadt frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A44, Parkschaden am Rathausplatz oder Zusammenstoß in Cappel — der Sachverständige kommt zu Ihnen nach Lippstadt.",
+    "topografieAnker": "Lippstadt liegt an der Lippe in der Soester Börde; die A44 führt südlich vorbei und verbindet die Stadt mit Dortmund und Kassel."
+  },
+
+  "herford": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Altstadt", "Neuer Markt", "Radewig", "Stiftberg"] },
+      { "name": "West", "ortsteile": ["Elverdissen", "Falkendiek", "Stedefreund"] },
+      { "name": "Ost", "ortsteile": ["Schwarzenmoor", "Diebrock", "Laar"] },
+      { "name": "Süd", "ortsteile": ["Eickum", "Herringhausen", "Hiddenhausen-Grenze"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A2", "A30"],
+      "bundesstrassen": ["B61", "B239"],
+      "knoten": ["Kreuz Bad Oeynhausen", "Anschlussstelle Herford-Ost", "Anschlussstelle Herford-Zentrum"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Herford vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug am Stiftberg steht, in Elverdissen oder nach einem Unfall auf der A2." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Herford zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Herford, darüber das Landgericht Bielefeld." },
+      { "frage": "Unfall auf der A2 oder A30 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Herford frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Radewig oder Zusammenstoß am Stiftberg — der Sachverständige kommt zu Ihnen nach Herford.",
+    "topografieAnker": "Herford liegt am Zusammenfluss von Werre und Aa; A2 und A30 kreuzen sich nordöstlich bei Bad Oeynhausen."
+  },
+
+  "dinslaken": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Blumenviertel", "Averbruch", "Bruch"] },
+      { "name": "Hiesfeld", "ortsteile": ["Hiesfeld", "Barmingholten", "Oberlohberg"] },
+      { "name": "Nord", "ortsteile": ["Eppinghoven", "Hühnerheide", "Lohberg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3", "A59"],
+      "bundesstrassen": ["B8"],
+      "knoten": ["Kreuz Oberhausen-West", "Anschlussstelle Dinslaken-Nord", "Anschlussstelle Dinslaken-Süd"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Dinslaken vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Hiesfeld steht, im Blumenviertel oder nach einem Unfall auf der A59." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Dinslaken zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Dinslaken, darüber das Landgericht Duisburg." },
+      { "frage": "Unfall auf der A3 oder A59 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Dinslaken frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A59, Parkschaden in der Neustraße oder Zusammenstoß in Hiesfeld — der Sachverständige kommt zu Ihnen nach Dinslaken.",
+    "topografieAnker": "Dinslaken liegt am Niederrhein nördlich von Duisburg; die A59 endet im Stadtgebiet, die A3 führt östlich vorbei."
+  },
+
+  "kerpen": {
+    "stadtbezirke": [
+      { "name": "Kerpen", "ortsteile": ["Kerpen-Mitte", "Mödrath", "Brüggen", "Balkhausen"] },
+      { "name": "Sindorf", "ortsteile": ["Sindorf", "Buir", "Manheim"] },
+      { "name": "Horrem", "ortsteile": ["Horrem", "Neu-Bottenbroich", "Götzenkirchen"] },
+      { "name": "Türnich", "ortsteile": ["Türnich", "Blatzheim", "Langenich"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A4", "A61"],
+      "bundesstrassen": ["B55", "B264", "B477"],
+      "knoten": ["Kreuz Kerpen", "Anschlussstelle Kerpen-Sindorf", "Anschlussstelle Kerpen-Türnich"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Kerpen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Sindorf steht, in Horrem oder nach einem Unfall auf der A4." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Kerpen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Kerpen, darüber das Landgericht Köln." },
+      { "frage": "Unfall am Kreuz Kerpen — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Dort treffen A4 und A61 zusammen." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Kerpen frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen erhalten." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Kerpen, Parkschaden in Horrem oder Zusammenstoß in Sindorf — der Sachverständige kommt zu Ihnen nach Kerpen.",
+    "topografieAnker": "Kerpen liegt in der Kölner Bucht westlich der Stadt; am Kreuz Kerpen treffen A4 und A61 zusammen."
+  },
+
+  "grevenbroich": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Stadtmitte", "Neuenhausen", "Elsen", "Gustorf"] },
+      { "name": "Nord", "ortsteile": ["Kapellen", "Hemmerden", "Wevelinghoven"] },
+      { "name": "Süd", "ortsteile": ["Frimmersdorf", "Neurath", "Noithausen", "Allrath"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A46", "A540"],
+      "bundesstrassen": ["B59", "B230"],
+      "knoten": ["Kreuz Jackerath", "Anschlussstelle Grevenbroich-Zentrum", "Dreieck Holz"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      { "frage": "Wie schnell ist ein Kfz-Gutachter in Grevenbroich vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Neuenhausen steht, in Kapellen oder nach einem Unfall auf der A46." },
+      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Grevenbroich zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Grevenbroich, darüber das Landgericht Mönchengladbach." },
+      { "frage": "Unfall auf der A46 oder A540 — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB." },
+      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen." },
+      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
+      { "frage": "Darf ich meine Werkstatt in Grevenbroich frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen." },
+      { "frage": "Bekomme ich einen Mietwagen?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder Nutzungsausfall in bar." },
+      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt." }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in der Innenstadt oder Zusammenstoß in Kapellen — der Sachverständige kommt zu Ihnen nach Grevenbroich.",
+    "topografieAnker": "Grevenbroich liegt an der Erft zwischen Düsseldorf und Mönchengladbach; die A46 quert das Stadtgebiet, die A540 zweigt Richtung Jackerath ab."
+  }
+}
