@@ -50,6 +50,59 @@ const db = SCHARF
     })
   : null
 
+// ⚠⚠ RUECKSCHRITT-WAECHTER (23.08.2026, nach einem echten Unfall).
+//
+// Ein `--ersetzen`-Import ueberschreibt VOLLSTAENDIG. Steht in der Datei ein
+// aelterer Stand als in der Datenbank, nimmt der Import Inhalte weg, die dort
+// laengst besser waren. Genau so sind zehn Grossstaedte auf null FAQs gefallen:
+// Ich reimportierte `charge-02`, um eine einzelne Schablone zu loeschen — und
+// setzte damit alles zurueck, was die Nachbesserung in `charge-11` erzeugt hatte.
+//
+// Der strukturelle Grund: **19 Staedte stehen mit FAQs in mehr als einer
+// Chargendatei.** Solange das so ist, ist jeder Reimport einer alten Datei ein
+// Risiko — unabhaengig davon, wie sorgfaeltig man ist.
+//
+// Deshalb kein Merkzettel, sondern ein Waechter: Vor dem Schreiben wird
+// verglichen, was in der DB steht. Wo die Datei WENIGER FAQs mitbringt, bricht
+// der Lauf ab. `--rueckschritt-ok` ueberstimmt ihn bewusst.
+const RUECKSCHRITT_OK = process.argv.includes('--rueckschritt-ok')
+let abbruch = false
+if (SCHARF) {
+  const slugs = Object.keys(inhalte)
+  const { data: bestand, error: bFehler } = await db
+    .from('stadt_lokalinhalte')
+    .select('stadt_slug, lokale_faqs')
+    .eq('status', 'veroeffentlicht')
+    .in('stadt_slug', slugs)
+  if (bFehler) {
+    console.error(`🔴 Bestandspruefung fehlgeschlagen: ${bFehler.message}`)
+    process.exit(1)
+  }
+  const rueckschritt = []
+  for (const z of bestand ?? []) {
+    const jetzt = Array.isArray(z.lokale_faqs) ? z.lokale_faqs.length : 0
+    const kommt = (inhalte[z.stadt_slug]?.lokaleFaqs ?? []).length
+    if (kommt < jetzt) rueckschritt.push(`${z.stadt_slug}: DB hat ${jetzt}, Datei bringt ${kommt}`)
+  }
+  if (rueckschritt.length > 0 && !RUECKSCHRITT_OK) {
+    console.error(`\n🔴 RUECKSCHRITT — die Datei ist an ${rueckschritt.length} Stellen aermer als die Datenbank:\n`)
+    for (const r of rueckschritt) console.error(`  ${r}`)
+    console.error(
+      `\nDas Gate verwirft zusaetzlich FAQs ohne Ortsbezug, der echte Verlust kann also groesser sein.\n` +
+        `Gewollt? Dann mit --rueckschritt-ok wiederholen.\n`,
+    )
+    // ⚠ `process.exitCode` + return, NICHT `process.exit(1)`: Ein harter Exit
+    // reisst den offenen Supabase-Client mit und quittiert das unter Windows mit
+    // einer libuv-Assertion — die den Code auf 0 dreht. Ein Waechter, der
+    // abbricht aber Erfolg meldet, ist in jeder Pipeline blind. Beim Selbsttest
+    // genau so passiert: Meldung korrekt, Exit-Code 0.
+    process.exitCode = 1
+    abbruch = true
+  }
+}
+
+if (!abbruch) {
+
 console.log(SCHARF ? '— SCHARF (schreibt in die DB) —\n' : '— TROCKENLAUF (schreibt nichts) —\n')
 console.log('Stadt            Score  Gate    Bezirke  FAQs  Befund')
 console.log('─'.repeat(96))
@@ -142,3 +195,4 @@ if (fehlerhaft.length) {
   for (const f of fehlerhaft) console.log(`  ${f.slug}: ${f.gruende.join(' · ')}`)
 }
 if (!SCHARF && gruen > 0) console.log('\nMit --scharf schreiben.')
+}
