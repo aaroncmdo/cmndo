@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // POST /api/lexoffice/sync — Lexoffice Zahlungseingang-Abgleich.
 // Env: LEXOFFICE_API_KEY. Ohne Key: graceful skip.
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
