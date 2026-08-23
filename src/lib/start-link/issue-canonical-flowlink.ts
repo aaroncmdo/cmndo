@@ -1,4 +1,5 @@
 import 'server-only'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 
 // AAR-956 Phase A · Task 3 — anon kanonischer Issue-Pfad.
 //
@@ -195,6 +196,18 @@ export async function issueCanonicalFlowLinkForAnfrage(
     )
     if (!created.ok) return { ok: false, error: created.error }
     leadId = created.leadId
+
+    // Team-WA bei NEUEM Lead (Audit 23.08.): bisher ging hier nur der FlowLink
+    // an den Kunden raus — das Team erfuhr von der Anfrage nichts. Nur im
+    // Neu-Zweig: ein erneut ausgestellter Link zu einem bestehenden Lead ist
+    // kein neuer Interessent.
+    await notifyTeamNeuerLead({
+      leadId,
+      quelle: `Start-Link (${(gfa.source as string | null) ?? 'self_service'})`,
+      name: [gfa.vorname as string | null, gfa.nachname as string | null].filter(Boolean).join(' '),
+      telefon: (gfa.telefon as string | null) ?? null,
+      email: (gfa.email as string | null) ?? null,
+    })
 
     // gfa-Marker (read-only Capture): Verweis + Status. Best-effort.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

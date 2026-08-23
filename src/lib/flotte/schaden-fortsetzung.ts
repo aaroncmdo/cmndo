@@ -12,6 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { createLead } from '@/lib/leads/create-lead'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { DRAFT_STATUSES } from '@/lib/flotte/fahrzeug-schaeden'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -115,6 +116,17 @@ export async function erstelleFlottenSchadenLead(params: {
     )
     if (!created.ok) return { ok: false, error: created.error }
     leadId = created.leadId
+
+    // Team-WA bei NEUEM Flotten-Lead (Audit 23.08.: war stumm). Nur im
+    // Neu-Zweig — die Fortsetzung eines bestehenden Entwurfs ist kein neuer Fall.
+    await notifyTeamNeuerLead({
+      leadId,
+      quelle: `Flotte — ${firma.name}`,
+      zusatz: [
+        veh?.kennzeichen_aktuell ? `🚗 ${veh.kennzeichen_aktuell}` : null,
+        [veh?.hersteller, veh?.modell_haupttyp].filter(Boolean).join(' ') || null,
+      ],
+    })
   }
 
   const fl = await ensureCanonicalFlowLinkForLead(leadId, { serviceTyp: 'komplett', admin })

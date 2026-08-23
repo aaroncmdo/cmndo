@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { qualiAusSchadensart } from '@/lib/werkstatt/abrechnungsweg'
@@ -92,6 +93,17 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     return { success: false, error: `Lead-Anlage fehlgeschlagen: ${created.error}` }
   }
   const lead = { id: created.leadId }
+
+  // Team-WA (Audit 23.08.). intern:true — Admin legt hier selbst an.
+  await notifyTeamNeuerLead({
+    leadId: created.leadId,
+    quelle: 'Admin — Fall direkt angelegt',
+    intern: true,
+    name: [data.vorname, data.nachname].filter(Boolean).join(' ').trim(),
+    telefon: data.telefon.trim(),
+    email: data.email?.trim() || null,
+    zusatz: [data.kennzeichen?.trim() ? `🚗 ${data.kennzeichen.trim()}` : null],
+  })
 
   // 2. (CMM-49 Phase 6) Kanonische Lead->Claim-Konversion. anlegeFall erzeugt oben einen Lead
   //    (source_channel='admin-direkt') und konvertiert ihn jetzt ueber denselben kanonischen Pfad
