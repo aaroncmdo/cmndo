@@ -115,7 +115,7 @@ Ein Kfz-Sachverständiger bewertet nach einem Unfall den Wert Ihres Fahrzeugs un
     title: 'Stundenverrechnungssatz nach Unfall: welcher Satz erstattungsfähig ist',
     h1: 'Stundenverrechnungssatz: welcher Werkstatt-Satz nach dem Unfall zählt',
     description:
-      'Stundenverrechnungssatz nach unverschuldetem Unfall: was der Satz umfasst, warum die Marken-Fachwerkstatt zählt und wann die Versicherung nicht auf eine freie Werkstatt verweisen darf (BGH VI ZR 53/09).',
+      'Stundenverrechnungssatz nach unverschuldetem Unfall: warum die Marken-Fachwerkstatt zählt und wann die Versicherung nicht auf freie Werkstätten verweisen darf (BGH VI ZR 53/09).',
     eyebrow: 'Reparaturkosten · § 249 BGB · 7 Min Lesezeit · Aktualisiert 12.06.2026',
     pillar: { name: 'Reparatur', slug: 'reparatur' },
     datePublished: '2026-06-12',
