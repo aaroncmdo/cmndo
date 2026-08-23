@@ -351,6 +351,11 @@ export function FinderWizard({
         promotion_code_id: promotionCodeId ?? null,
         maklerCode,
         schaetzungSessionId: schaetzungSessionId ?? null,
+        // Herkunft, nicht Ergebnis: gesetzt, sobald der Kunde MIT einem `?sv=` hier
+        // ankam — auch wenn er am Ende einen anderen Gutachter waehlt. Gebracht hat
+        // ihn der Deeplink. Ohne diesen Marker ist eine KI-vermittelte Buchung im
+        // Nachhinein nicht von einem normalen Website-Besuch zu unterscheiden.
+        viaDeeplink: !!vorauswahlSvId,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
