@@ -4,6 +4,9 @@ import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { processInboundText } from '@/lib/inbound/process-inbound-text'
 import { processInboundMedia, type InboundMediaFile } from '@/lib/inbound/process-inbound-media'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { istPartnerNummer } from '@/lib/inbound/ist-partner-nummer'
+import { createCase } from '@/lib/intake/create-case'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
@@ -75,7 +78,47 @@ export async function POST(request: Request) {
   // matchInboundToFall kapselt die (CMM-74-konforme) Fall-Auswahl. Ein einziger SSoT.
   const match = await matchInboundToFall(db, phone)
   const fallId = match.fallId
-  const leadId = match.leadId
+  let leadId = match.leadId
+
+  // ─── Erstkontakt von unbekannter Nummer ──────────────────────────────────
+  // Weder Fall noch Lead: entweder ein Interessent, der zum ersten Mal schreibt,
+  // oder ein Partner/Staff. `matchInboundToFall` prueft nur `rolle='kunde'` —
+  // ein SV oder Admin gilt dort als „unbekannt" und wuerde sonst als Kunden-Lead
+  // in der Dispatch-Warteschlange landen (gemessen 23.08.: 4 von 20 Absendern).
+  //
+  // MUSS vor dem nachrichten-Insert stehen, sonst bleibt lead_id auf der Zeile leer.
+  // Spec: docs/superpowers/specs/2026-08-23-whatsapp-erstkontakt-lead-design.md
+  let partnerBezeichnung: string | null = null
+  let neuerLead = false
+  if (!fallId && !leadId) {
+    const partner = await istPartnerNummer(db, phone)
+    if (partner.istPartner) {
+      partnerBezeichnung = partner.bezeichnung
+    } else {
+      // mode 'lead-first': eine Nachricht ist noch kein Fall — die Konversion
+      // laeuft spaeter ueber /flow. Kein dedup-Key: der generische ist ohne
+      // Kennzeichen unbrauchbar (dedupKeyIsUsable), und der praezisere
+      // Telefon-Abgleich lief eine Zeile vorher ueber matchInboundToFall — beim
+      // zweiten Kontakt findet der den hier erzeugten Lead. Identische
+      // Begruendung wie im matelso-/Aircall-Pfad.
+      const created = await createCase(db, {
+        mode: 'lead-first',
+        base: { source_channel: 'whatsapp-inbound', status: 'neu', telefon: phone },
+        extra: {
+          qualifizierungs_phase: 'neu',
+          notiz: `Auto-erstellt durch WhatsApp-Erstkontakt. Erste Nachricht: ${
+            text ? `"${text.slice(0, 200)}"` : '[Medien-Nachricht]'
+          }`,
+        },
+      })
+      if (created.ok) {
+        leadId = created.leadId
+        neuerLead = true
+      } else {
+        console.error('[baileys/inbound] createCase fehlgeschlagen (non-fatal):', created.error)
+      }
+    }
+  }
 
   // Zustellungs-Routing (Inbound): die eingehende WhatsApp am kunde_gruppe-Thread des Claims
   // verankern -> in v1 (kanal) UND v2 (thread) sichtbar (Datenmodell A). Get-or-create via Service
@@ -117,6 +160,32 @@ export async function POST(request: Request) {
   if (error) {
     console.error('[baileys/inbound] DB-Insert-Fehler:', error)
     return NextResponse.json({ error: 'db_error', detail: error.message }, { status: 500 })
+  }
+
+  // Team-Benachrichtigung — bewusst NACH der Fehlerpruefung: sonst meldeten wir
+  // eine Nachricht, die gar nicht gespeichert wurde. Beide Faelle melden: ein
+  // neuer Interessent, damit ihn jemand aufnimmt; ein Partner, damit seine
+  // Nachricht nicht liegenbleibt (er bekommt bewusst keinen Lead, waere sonst
+  // aber vollstaendig unsichtbar).
+  // Non-critical: Fehler werden geloggt, brechen die Route nie.
+  if (neuerLead || partnerBezeichnung) {
+    try {
+      const auszug = (text || '[Medien-Nachricht]').slice(0, 120)
+      const basis = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const zeilen = partnerBezeichnung
+        ? [`🏢 WhatsApp von ${partnerBezeichnung}`, '', `📞 ${phone}`, `💬 ${auszug}`]
+        : [
+            '🆕 WhatsApp-Erstkontakt (neuer Lead)',
+            '',
+            `📞 ${phone}`,
+            `💬 ${auszug}`,
+            '',
+            leadId ? `${basis}/dispatch/leads/${leadId}` : '',
+          ]
+      await notifyTeamWhatsApp(zeilen.filter(Boolean).join('\n'))
+    } catch (err) {
+      console.error('[baileys/inbound] Team-WA fehlgeschlagen (nicht kritisch):', err)
+    }
   }
 
   // Text-Intents (JA/NEIN/Umtermin) — embed-B-Resolution + Termin-Bestaetigung.
