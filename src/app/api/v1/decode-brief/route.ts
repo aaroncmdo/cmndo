@@ -61,7 +61,7 @@ const DECODER_KATALOG: Decoder[] = [
   {
     slug: 'reparatur-unwirtschaftlich',
     phrase: 'Eine Reparatur ist wirtschaftlich nicht sinnvoll (Totalschaden).',
-    trigger: ['unwirtschaftlich', 'totalschaden', 'wiederbeschaffungswert', 'restwert', 'restwertbörse', ' 130'],
+    trigger: ['unwirtschaftlich', 'totalschaden', 'wiederbeschaffungswert', 'restwert', 'restwertbörse', ' 130', 'vergleichbare fahrzeuge', 'wiederbeschaffung in', 'wiederbeschaffungsdauer'],
     bedeutet:
       'Niedrig angesetzter Wiederbeschaffungswert + hoch angesetzter Restwert drängen Sie zur Aufgabe des Fahrzeugs statt zur Reparatur.',
     recht:
@@ -81,7 +81,7 @@ const DECODER_KATALOG: Decoder[] = [
   {
     slug: 'pauschal-abgeltung',
     phrase: 'Mit dieser Zahlung sind alle Ansprüche abgegolten.',
-    trigger: ['abgegolten', 'abgefunden', 'abfindung', 'erledigung', 'sämtliche ansprüche', 'alle ansprüche', 'erledigungsvergleich'],
+    trigger: ['abgegolten', 'abgefunden', 'abfindung', 'erledigung', 'sämtliche ansprüche', 'alle ansprüche', 'erledigungsvergleich', 'dem grunde nach', 'vergleichsweise einigung', 'vergleichsweise erledigung'],
     bedeutet:
       'Eine Abgeltungsklausel ist ein bindender Vergleich (§ 779 BGB), der auch spätere Spätfolgen (z. B. chronische Schmerzen) erlöschen lässt — eine Anfechtung ist danach kaum möglich.',
     recht:
@@ -143,6 +143,61 @@ const DECODER_KATALOG: Decoder[] = [
     norm: '§ 249 Abs. 2 BGB, BGH VI ZR 302/08, BGH VI ZR 53/09',
   },
   {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/reparaturkosten.md
+    slug: 'reparaturkosten-gekuerzt',
+    phrase: 'Die Reparaturkosten sind überhöht — Stundensatz und UPE-Aufschlag werden gekürzt.',
+    trigger: ['upe-aufschlag', 'upe aufschlag', 'stundensatz', 'stundenverrechnungssatz', 'verbringungskosten', 'reparaturkosten überhöht', 'kalkulation gekürzt'],
+    bedeutet:
+      'Die Kalkulation des Sachverständigen wird Position für Position heruntergerechnet — meist am Schreibtisch, ohne Besichtigung. Betroffen sind vor allem Stundenverrechnungssätze, die Aufschläge auf Ersatzteile (UPE) und die Verbringung zur Lackiererei.',
+    recht:
+      'Geschuldet ist der zur Wiederherstellung erforderliche Betrag (§ 249 Abs. 2 BGB). UPE-Aufschläge von 10–20 % sind vom BGH anerkannt; bei Fahrzeugen unter drei Jahren besteht Anspruch auf die Stundensätze der Markenwerkstatt (BGH VI ZR 53/09). Sie wählen frei zwischen fiktiver Abrechnung (ohne MwSt) und konkreter Abrechnung (mit MwSt) — bis zur 130-%-Grenze des Wiederbeschaffungswerts (BGH VI ZR 70/04).',
+    norm: '§ 249 Abs. 2 BGB, BGH VI ZR 53/09, BGH VI ZR 70/04',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/reparaturbestaetigung.md
+    slug: 'reparaturnachweis-gefordert',
+    phrase: 'Ohne Rechnung keine Zahlung — der Reparaturweg ist nicht nachgewiesen.',
+    trigger: ['ohne rechnung', 'nachweis der reparatur', 'reparaturnachweis', 'reparaturbestätigung', 'reparaturweg', 'reparatur nicht nachgewiesen'],
+    bedeutet:
+      'Eine Position wird an eine Werkstattrechnung geknüpft, die es in diesem Abrechnungsweg gar nicht gibt — etwa bei Eigenreparatur, bei Nutzungsausfall nach fiktiver Abrechnung oder bei der 130-%-Weiterbenutzung.',
+    recht:
+      'Hängt ein Anspruch an der tatsächlichen Reparatur, genügt eine Reparaturbestätigung des Sachverständigen — eine kurze Nachbesichtigung, kein zweites Vollgutachten. Fotos allein ersetzen sie nicht: beurteilt wird die Fachgerechtigkeit, nicht die Optik. Ihre Kosten sind als Teil der Rechtsverfolgung dem Grunde nach erstattungsfähig.',
+    norm: '§ 249 BGB',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/verzug-bgb286.md
+    slug: 'verzug-bestritten',
+    phrase: 'Wir sind nicht in Verzug — eine Mahnung haben wir nicht erhalten.',
+    trigger: ['in verzug', 'keine mahnung', 'mahnung erhalten', 'verzögerung war unverschuldet', 'nicht in verzug', 'verzugszinsen'],
+    bedeutet:
+      'Der Verzug wird an eine förmliche Mahnung geknüpft, um Zinsen und Anwaltskosten abzuwehren — und um weiter Zeit zu gewinnen.',
+    recht:
+      'Verzug tritt auch ohne Mahnung ein: bei ernsthafter und endgültiger Leistungsverweigerung sofort (§ 286 Abs. 2 Nr. 3 BGB), sonst nach angemessener Prüffrist. Ab Verzug schuldet der Versicherer 5 Prozentpunkte über Basiszinssatz (§ 288 BGB); Anwaltskosten sind eigenständiger Verzugsschaden (BGH VI ZR 235/13), ebenso alle weiteren Schäden aus der Verzögerung (§ 280 BGB). Setzen Sie eine konkrete Frist.',
+    norm: '§ 286 BGB, § 288 BGB, § 280 BGB, BGH VI ZR 235/13',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/anwaltskosten-erstattung.md
+    slug: 'anwalt-nicht-erforderlich',
+    phrase: 'Eine anwaltliche Vertretung ist nicht erforderlich.',
+    trigger: ['anwaltskosten', 'anwaltliche vertretung', 'rechtsanwaltskosten', 'geschäftsgebühr', 'anwalt ist nicht erforderlich', 'ohne anwalt'],
+    bedeutet:
+      'Sie sollen ohne rechtlichen Beistand mit einer Abteilung verhandeln, die genau das täglich tut. Die Variante „nur bei tatsächlicher Beauftragung" ist dabei kein Gegenargument, sondern eine Selbstverständlichkeit.',
+    recht:
+      'Bei klarer Haftung sind die Anwaltskosten des Geschädigten erstattungsfähiger Schaden; die Erforderlichkeit ist nach BGH weit auszulegen (§ 249 BGB, BGH VI ZR 235/13). Die Regel-Geschäftsgebühr beträgt 1,3 nach RVG — bei Personenschäden mit Spätfolgen bis 2,3. Ein Mitverschulden kürzt nur anteilig.',
+    norm: '§ 249 BGB, RVG, BGH VI ZR 235/13',
+  },
+  {
+    // Quelle: claimondo-marketing/content/claimondo/haftpflicht/abschlepp-bergung.md
+    slug: 'abschlepp-standkosten-gekuerzt',
+    phrase: 'Die Abschleppkosten sind überhöht, Standkosten sind nicht erforderlich.',
+    trigger: ['abschleppkosten', 'bergungskosten', 'standkosten', 'standgeld', 'abschleppen überhöht', 'notdienst-aufschlag'],
+    bedeutet:
+      'Zwei Positionen, die unmittelbar nach dem Unfall entstehen und die niemand in Ruhe vergleichen konnte, werden nachträglich am Markt gemessen — als hätte man in der Notlage Angebote einholen können.',
+    recht:
+      'Geschuldet ist die volle Naturalrestitution (§ 249 BGB). Maßstab ist der ortsübliche Tarif, nicht der günstigste denkbare; Notdienst-Aufschläge sind wegen der unfallbedingten Notlage erstattbar. Standkosten laufen berechtigt weiter, solange das Gutachten oder die Freigabe des Versicherers aussteht — diese Zeit haben Sie nicht zu vertreten.',
+    norm: '§ 249 BGB',
+  },
+  {
     slug: 'wertminderung-nicht',
     phrase: 'Eine Wertminderung ist nicht angefallen.',
     trigger: ['wertminderung', 'merkantile', 'wertverlust'],
@@ -175,7 +230,7 @@ const DECODER_KATALOG: Decoder[] = [
   {
     slug: 'gutachterhonorar-nicht-ortsueblich',
     phrase: 'Das Sachverständigenhonorar ist nicht ortsüblich.',
-    trigger: ['sachverständigenhonorar', 'gutachterhonorar', 'bvsk', 'honorarkürzung', 'nebenkosten überhöht', 'honorar nicht'],
+    trigger: ['sachverständigenhonorar', 'gutachterhonorar', 'bvsk', 'honorarkürzung', 'nebenkosten überhöht', 'honorar nicht', 'sv-kosten', 'gutachterkosten überhöht'],
     bedeutet:
       'Kürzung des SV-Honorars mit „nicht ortsüblich" und pauschalem Streichen von Nebenkosten — eine Taktik, kein rechtlich haltbarer Maßstab.',
     recht:
