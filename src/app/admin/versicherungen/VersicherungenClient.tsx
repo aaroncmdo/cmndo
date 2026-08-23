@@ -8,6 +8,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { SearchIcon, MailIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Modal } from '@/components/primitives/Modal'
@@ -125,7 +126,15 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
             {filtered.map(v => (
               <ClickableTr key={v.id} onClick={() => router.push(`/admin/versicherungen/${v.id}`)}
                 className={`border-b border-claimondo-border ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
-                <Td className="py-2.5! font-medium text-body-xs">{v.name}</Td>
+                {/* Echter Link statt nur ClickableTr-onClick: erlaubt Mittelklick/Strg+Klick
+                    (Detailansicht im neuen Tab), Tastatur-Fokus und Screenreader-Erkennung.
+                    Der Zeilen-Klick bleibt unveraendert — stopPropagation verhindert nur, dass
+                    beide Handler feuern. Muster: FaelleKanban.tsx:235. */}
+                <Td className="py-2.5! font-medium text-body-xs">
+                  <Link href={`/admin/versicherungen/${v.id}`} onClick={e => e.stopPropagation()}>
+                    {v.name}
+                  </Link>
+                </Td>
                 <Td className="py-2.5! text-body-xs">
                   {v.schaden_telefon ? (
                     <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />
