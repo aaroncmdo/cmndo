@@ -14,6 +14,213 @@ export type Database = {
   }
   public: {
     Tables: {
+      _backup_smoke_residue_dok_20260812: {
+        Row: {
+          ab_phase: string | null
+          abgelehnt_am: string | null
+          beschreibung: string | null
+          claim_id: string | null
+          discrepancy_flag: boolean | null
+          dokument_typ: string | null
+          fall_id: string | null
+          geloescht_am: string | null
+          groesse_bytes: number | null
+          hochgeladen_am: string | null
+          hochgeladen_von_user_id: string | null
+          id: string | null
+          idempotency_key: string | null
+          ist_pflicht: boolean | null
+          kategorie: string | null
+          kb_gesehen_am: string | null
+          lead_id: string | null
+          mime_type: string | null
+          ocr_extracted_data: Json | null
+          ocr_processed_at: string | null
+          ocr_result: Json | null
+          ocr_status: string | null
+          original_filename: string | null
+          pflichtdokument_id: string | null
+          position_id: string | null
+          quelle: string | null
+          schaden_position: string | null
+          sichtbar_fuer: string[] | null
+          storage_path: string | null
+          uploaded_by_kunde: boolean | null
+          uploaded_by_sv: boolean | null
+          zurueckweisung_kommentar: string | null
+        }
+        Insert: {
+          ab_phase?: string | null
+          abgelehnt_am?: string | null
+          beschreibung?: string | null
+          claim_id?: string | null
+          discrepancy_flag?: boolean | null
+          dokument_typ?: string | null
+          fall_id?: string | null
+          geloescht_am?: string | null
+          groesse_bytes?: number | null
+          hochgeladen_am?: string | null
+          hochgeladen_von_user_id?: string | null
+          id?: string | null
+          idempotency_key?: string | null
+          ist_pflicht?: boolean | null
+          kategorie?: string | null
+          kb_gesehen_am?: string | null
+          lead_id?: string | null
+          mime_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_processed_at?: string | null
+          ocr_result?: Json | null
+          ocr_status?: string | null
+          original_filename?: string | null
+          pflichtdokument_id?: string | null
+          position_id?: string | null
+          quelle?: string | null
+          schaden_position?: string | null
+          sichtbar_fuer?: string[] | null
+          storage_path?: string | null
+          uploaded_by_kunde?: boolean | null
+          uploaded_by_sv?: boolean | null
+          zurueckweisung_kommentar?: string | null
+        }
+        Update: {
+          ab_phase?: string | null
+          abgelehnt_am?: string | null
+          beschreibung?: string | null
+          claim_id?: string | null
+          discrepancy_flag?: boolean | null
+          dokument_typ?: string | null
+          fall_id?: string | null
+          geloescht_am?: string | null
+          groesse_bytes?: number | null
+          hochgeladen_am?: string | null
+          hochgeladen_von_user_id?: string | null
+          id?: string | null
+          idempotency_key?: string | null
+          ist_pflicht?: boolean | null
+          kategorie?: string | null
+          kb_gesehen_am?: string | null
+          lead_id?: string | null
+          mime_type?: string | null
+          ocr_extracted_data?: Json | null
+          ocr_processed_at?: string | null
+          ocr_result?: Json | null
+          ocr_status?: string | null
+          original_filename?: string | null
+          pflichtdokument_id?: string | null
+          position_id?: string | null
+          quelle?: string | null
+          schaden_position?: string | null
+          sichtbar_fuer?: string[] | null
+          storage_path?: string | null
+          uploaded_by_kunde?: boolean | null
+          uploaded_by_sv?: boolean | null
+          zurueckweisung_kommentar?: string | null
+        }
+        Relationships: []
+      }
+      _backup_smoke_residue_tasks_20260812: {
+        Row: {
+          auto_erstellt: boolean | null
+          auto_resolved_am: string | null
+          auto_resolved_grund: string | null
+          beschreibung: string | null
+          claim_id: string | null
+          created_at: string | null
+          deadline: string | null
+          empfaenger_rolle: string | null
+          empfaenger_user_id: string | null
+          entity_id: string | null
+          entity_type: string | null
+          erinnerung_gesendet: boolean | null
+          erledigt_am: string | null
+          erstellt_von_id: string | null
+          eskaliert_am: string | null
+          faellig_am: string | null
+          fall_id: string | null
+          gate_task_id: string | null
+          id: string | null
+          lead_id: string | null
+          phase: string | null
+          prioritaet: string | null
+          sort_order: number | null
+          status: Database["public"]["Enums"]["task_status"] | null
+          task_code: string | null
+          task_typ: string | null
+          titel: string | null
+          trigger_event: string | null
+          typ: string | null
+          updated_at: string | null
+          zugewiesen_an: string | null
+        }
+        Insert: {
+          auto_erstellt?: boolean | null
+          auto_resolved_am?: string | null
+          auto_resolved_grund?: string | null
+          beschreibung?: string | null
+          claim_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          empfaenger_rolle?: string | null
+          empfaenger_user_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          erinnerung_gesendet?: boolean | null
+          erledigt_am?: string | null
+          erstellt_von_id?: string | null
+          eskaliert_am?: string | null
+          faellig_am?: string | null
+          fall_id?: string | null
+          gate_task_id?: string | null
+          id?: string | null
+          lead_id?: string | null
+          phase?: string | null
+          prioritaet?: string | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          task_code?: string | null
+          task_typ?: string | null
+          titel?: string | null
+          trigger_event?: string | null
+          typ?: string | null
+          updated_at?: string | null
+          zugewiesen_an?: string | null
+        }
+        Update: {
+          auto_erstellt?: boolean | null
+          auto_resolved_am?: string | null
+          auto_resolved_grund?: string | null
+          beschreibung?: string | null
+          claim_id?: string | null
+          created_at?: string | null
+          deadline?: string | null
+          empfaenger_rolle?: string | null
+          empfaenger_user_id?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          erinnerung_gesendet?: boolean | null
+          erledigt_am?: string | null
+          erstellt_von_id?: string | null
+          eskaliert_am?: string | null
+          faellig_am?: string | null
+          fall_id?: string | null
+          gate_task_id?: string | null
+          id?: string | null
+          lead_id?: string | null
+          phase?: string | null
+          prioritaet?: string | null
+          sort_order?: number | null
+          status?: Database["public"]["Enums"]["task_status"] | null
+          task_code?: string | null
+          task_typ?: string | null
+          titel?: string | null
+          trigger_event?: string | null
+          typ?: string | null
+          updated_at?: string | null
+          zugewiesen_an?: string | null
+        }
+        Relationships: []
+      }
       abrechnung_positionen: {
         Row: {
           abrechnung_id: string
@@ -5337,6 +5544,39 @@ export type Database = {
         }
         Relationships: []
       }
+      e2e_test_fixtures: {
+        Row: {
+          angelegt_am: string
+          notiz: string | null
+          sv_id: string
+        }
+        Insert: {
+          angelegt_am?: string
+          notiz?: string | null
+          sv_id: string
+        }
+        Update: {
+          angelegt_am?: string
+          notiz?: string | null
+          sv_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "e2e_test_fixtures_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: true
+            referencedRelation: "sachverstaendige"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "e2e_test_fixtures_sv_id_fkey"
+            columns: ["sv_id"]
+            isOneToOne: true
+            referencedRelation: "v_live_ops_sv"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_log: {
         Row: {
           attachments: Json | null
@@ -8986,6 +9226,13 @@ export type Database = {
             referencedRelation: "sv_leads"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "gutachter_finder_anfragen_zugeordneter_sv_lead_id_fkey"
+            columns: ["zugeordneter_sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads_map_pins"
+            referencedColumns: ["id"]
+          },
         ]
       }
       gutachter_monatsabrechnungen: {
@@ -9598,6 +9845,13 @@ export type Database = {
             columns: ["sv_lead_id"]
             isOneToOne: false
             referencedRelation: "sv_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gutachter_termine_sv_lead_id_fkey"
+            columns: ["sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads_map_pins"
             referencedColumns: ["id"]
           },
           {
@@ -12673,6 +12927,394 @@ export type Database = {
             columns: ["zugewiesen_an"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_anreicherung: {
+        Row: {
+          feld: string
+          id: number
+          lauf_id: string
+          quelle_url: string
+          sicherheit: number
+          sv_lead_id: string
+          ts: string
+          wert_nachher: string | null
+          wert_vorher: string | null
+        }
+        Insert: {
+          feld: string
+          id?: number
+          lauf_id: string
+          quelle_url: string
+          sicherheit: number
+          sv_lead_id: string
+          ts?: string
+          wert_nachher?: string | null
+          wert_vorher?: string | null
+        }
+        Update: {
+          feld?: string
+          id?: number
+          lauf_id?: string
+          quelle_url?: string
+          sicherheit?: number
+          sv_lead_id?: string
+          ts?: string
+          wert_nachher?: string | null
+          wert_vorher?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_anreicherung_sv_lead_id_fkey"
+            columns: ["sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levelup_anreicherung_sv_lead_id_fkey"
+            columns: ["sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads_map_pins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_auswertungslinks: {
+        Row: {
+          aufrufe: number
+          check_id: string
+          erstellt_am: string
+          erstellt_von: string | null
+          id: string
+          letzter_aufruf: string | null
+          token: string
+        }
+        Insert: {
+          aufrufe?: number
+          check_id: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          letzter_aufruf?: string | null
+          token: string
+        }
+        Update: {
+          aufrufe?: number
+          check_id?: string
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          letzter_aufruf?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_auswertungslinks_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "levelup_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levelup_auswertungslinks_erstellt_von_fkey"
+            columns: ["erstellt_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_checks: {
+        Row: {
+          aktualisiert_am: string
+          befunde: Json
+          erhoben_am: string | null
+          erstellt_am: string
+          fehler_text: string | null
+          fehlstellen: Json
+          firmenname: string | null
+          gsc_freigabe_am: string | null
+          gsc_property: string | null
+          gueltig_bis: string
+          id: string
+          ip_hash: string | null
+          kein_score: boolean
+          massnahmen: Json
+          module_gewaehlt: string[]
+          module_gewuenscht: string[]
+          modus: string
+          punkte_erhebbar: number | null
+          quelle: string
+          radius_keywords_km: number
+          radius_wettbewerb_km: number
+          score: number | null
+          standort_lat: number | null
+          standort_lng: number | null
+          standort_ort: string | null
+          standort_plz: string | null
+          status: string
+          sv_lead_id: string | null
+          token: string
+          user_agent: string | null
+          website_url: string | null
+          zuweiser_treffer: Json
+        }
+        Insert: {
+          aktualisiert_am?: string
+          befunde?: Json
+          erhoben_am?: string | null
+          erstellt_am?: string
+          fehler_text?: string | null
+          fehlstellen?: Json
+          firmenname?: string | null
+          gsc_freigabe_am?: string | null
+          gsc_property?: string | null
+          gueltig_bis?: string
+          id?: string
+          ip_hash?: string | null
+          kein_score?: boolean
+          massnahmen?: Json
+          module_gewaehlt?: string[]
+          module_gewuenscht?: string[]
+          modus: string
+          punkte_erhebbar?: number | null
+          quelle?: string
+          radius_keywords_km?: number
+          radius_wettbewerb_km?: number
+          score?: number | null
+          standort_lat?: number | null
+          standort_lng?: number | null
+          standort_ort?: string | null
+          standort_plz?: string | null
+          status?: string
+          sv_lead_id?: string | null
+          token: string
+          user_agent?: string | null
+          website_url?: string | null
+          zuweiser_treffer?: Json
+        }
+        Update: {
+          aktualisiert_am?: string
+          befunde?: Json
+          erhoben_am?: string | null
+          erstellt_am?: string
+          fehler_text?: string | null
+          fehlstellen?: Json
+          firmenname?: string | null
+          gsc_freigabe_am?: string | null
+          gsc_property?: string | null
+          gueltig_bis?: string
+          id?: string
+          ip_hash?: string | null
+          kein_score?: boolean
+          massnahmen?: Json
+          module_gewaehlt?: string[]
+          module_gewuenscht?: string[]
+          modus?: string
+          punkte_erhebbar?: number | null
+          quelle?: string
+          radius_keywords_km?: number
+          radius_wettbewerb_km?: number
+          score?: number | null
+          standort_lat?: number | null
+          standort_lng?: number | null
+          standort_ort?: string | null
+          standort_plz?: string | null
+          status?: string
+          sv_lead_id?: string | null
+          token?: string
+          user_agent?: string | null
+          website_url?: string | null
+          zuweiser_treffer?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_checks_sv_lead_id_fkey"
+            columns: ["sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levelup_checks_sv_lead_id_fkey"
+            columns: ["sv_lead_id"]
+            isOneToOne: false
+            referencedRelation: "sv_leads_map_pins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_events: {
+        Row: {
+          check_id: string | null
+          id: number
+          payload: Json
+          ts: string
+          typ: string
+        }
+        Insert: {
+          check_id?: string | null
+          id?: number
+          payload?: Json
+          ts?: string
+          typ: string
+        }
+        Update: {
+          check_id?: string | null
+          id?: number
+          payload?: Json
+          ts?: string
+          typ?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_events_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "levelup_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_funnel: {
+        Row: {
+          beantwortet_am: string
+          check_id: string
+          jahre_erfahrung: string | null
+          ki_nutzung: string | null
+          marketing_partner: string | null
+        }
+        Insert: {
+          beantwortet_am?: string
+          check_id: string
+          jahre_erfahrung?: string | null
+          ki_nutzung?: string | null
+          marketing_partner?: string | null
+        }
+        Update: {
+          beantwortet_am?: string
+          check_id?: string
+          jahre_erfahrung?: string | null
+          ki_nutzung?: string | null
+          marketing_partner?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_funnel_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: true
+            referencedRelation: "levelup_checks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_praesentationen: {
+        Row: {
+          aufrufe: number
+          check_id: string
+          erstellt_am: string
+          erstellt_von: string
+          gueltig_bis: string
+          id: string
+          letzter_aufruf: string | null
+          token: string
+          widerrufen_am: string | null
+        }
+        Insert: {
+          aufrufe?: number
+          check_id: string
+          erstellt_am?: string
+          erstellt_von: string
+          gueltig_bis?: string
+          id?: string
+          letzter_aufruf?: string | null
+          token: string
+          widerrufen_am?: string | null
+        }
+        Update: {
+          aufrufe?: number
+          check_id?: string
+          erstellt_am?: string
+          erstellt_von?: string
+          gueltig_bis?: string
+          id?: string
+          letzter_aufruf?: string | null
+          token?: string
+          widerrufen_am?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_praesentationen_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "levelup_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levelup_praesentationen_erstellt_von_fkey"
+            columns: ["erstellt_von"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      levelup_termine: {
+        Row: {
+          betreuer_id: string | null
+          check_id: string
+          einwilligung_am: string | null
+          einwilligung_ip_hash: string | null
+          einwilligung_text: string | null
+          erstellt_am: string
+          id: string
+          notiz: string | null
+          slot_start: string
+          status: string
+          telefon: string
+        }
+        Insert: {
+          betreuer_id?: string | null
+          check_id: string
+          einwilligung_am?: string | null
+          einwilligung_ip_hash?: string | null
+          einwilligung_text?: string | null
+          erstellt_am?: string
+          id?: string
+          notiz?: string | null
+          slot_start: string
+          status?: string
+          telefon: string
+        }
+        Update: {
+          betreuer_id?: string | null
+          check_id?: string
+          einwilligung_am?: string | null
+          einwilligung_ip_hash?: string | null
+          einwilligung_text?: string | null
+          erstellt_am?: string
+          id?: string
+          notiz?: string | null
+          slot_start?: string
+          status?: string
+          telefon?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "levelup_termine_betreuer_id_fkey"
+            columns: ["betreuer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "levelup_termine_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "levelup_checks"
             referencedColumns: ["id"]
           },
         ]
@@ -18737,6 +19379,66 @@ export type Database = {
           },
         ]
       }
+      stadt_lokalinhalte: {
+        Row: {
+          ai_generated: boolean
+          ai_model: string | null
+          created_at: string
+          hauptachsen: Json
+          hero_anker: string | null
+          id: string
+          lokale_faqs: Json
+          reviewed_am: string | null
+          reviewed_von: string | null
+          stadt_slug: string
+          stadtbezirke: Json
+          status: string
+          substanz_score: number
+          topografie_anker: string | null
+          unfall_hotspots: Json
+          updated_at: string
+          veroeffentlicht_am: string | null
+        }
+        Insert: {
+          ai_generated?: boolean
+          ai_model?: string | null
+          created_at?: string
+          hauptachsen?: Json
+          hero_anker?: string | null
+          id?: string
+          lokale_faqs?: Json
+          reviewed_am?: string | null
+          reviewed_von?: string | null
+          stadt_slug: string
+          stadtbezirke?: Json
+          status?: string
+          substanz_score?: number
+          topografie_anker?: string | null
+          unfall_hotspots?: Json
+          updated_at?: string
+          veroeffentlicht_am?: string | null
+        }
+        Update: {
+          ai_generated?: boolean
+          ai_model?: string | null
+          created_at?: string
+          hauptachsen?: Json
+          hero_anker?: string | null
+          id?: string
+          lokale_faqs?: Json
+          reviewed_am?: string | null
+          reviewed_von?: string | null
+          stadt_slug?: string
+          stadtbezirke?: Json
+          status?: string
+          substanz_score?: number
+          topografie_anker?: string | null
+          unfall_hotspots?: Json
+          updated_at?: string
+          veroeffentlicht_am?: string | null
+        }
+        Relationships: []
+      }
       stripe_events: {
         Row: {
           empfangen_am: string
@@ -19115,6 +19817,7 @@ export type Database = {
         Row: {
           adresse: string
           aktualisiert_am: string
+          angereichert_am: string | null
           auftraege_monat: number | null
           bvsk_nr: string | null
           claim_status: string
@@ -19122,17 +19825,23 @@ export type Database = {
           dat_id: string | null
           dat_url: string | null
           email: string | null
+          entdeckt_am: string | null
+          entdeckt_lauf: string | null
           erstellt_am: string
           fachschwerpunkte: string | null
           firma: string | null
+          google_place_id: string | null
           id: string
           ihk_zertifikat: boolean | null
           isochrone_polygon: Json | null
           ist_aktiv: boolean
           jahre_erfahrung: number | null
+          kontakt_quelle: string | null
           konvertiert_am: string | null
           konvertiert_zu_sv_id: string | null
           lat: number
+          levelup_letzter_check_id: string | null
+          levelup_letzter_score: number | null
           lng: number
           nachname: string | null
           name: string
@@ -19149,10 +19858,14 @@ export type Database = {
           vorname: string | null
           warteliste_am: string | null
           warteliste_status: string
+          website_gefunden: string | null
+          website_sicherheit: number | null
+          website_url: string | null
         }
         Insert: {
           adresse: string
           aktualisiert_am?: string
+          angereichert_am?: string | null
           auftraege_monat?: number | null
           bvsk_nr?: string | null
           claim_status?: string
@@ -19160,17 +19873,23 @@ export type Database = {
           dat_id?: string | null
           dat_url?: string | null
           email?: string | null
+          entdeckt_am?: string | null
+          entdeckt_lauf?: string | null
           erstellt_am?: string
           fachschwerpunkte?: string | null
           firma?: string | null
+          google_place_id?: string | null
           id?: string
           ihk_zertifikat?: boolean | null
           isochrone_polygon?: Json | null
           ist_aktiv?: boolean
           jahre_erfahrung?: number | null
+          kontakt_quelle?: string | null
           konvertiert_am?: string | null
           konvertiert_zu_sv_id?: string | null
           lat: number
+          levelup_letzter_check_id?: string | null
+          levelup_letzter_score?: number | null
           lng: number
           nachname?: string | null
           name: string
@@ -19187,10 +19906,14 @@ export type Database = {
           vorname?: string | null
           warteliste_am?: string | null
           warteliste_status?: string
+          website_gefunden?: string | null
+          website_sicherheit?: number | null
+          website_url?: string | null
         }
         Update: {
           adresse?: string
           aktualisiert_am?: string
+          angereichert_am?: string | null
           auftraege_monat?: number | null
           bvsk_nr?: string | null
           claim_status?: string
@@ -19198,17 +19921,23 @@ export type Database = {
           dat_id?: string | null
           dat_url?: string | null
           email?: string | null
+          entdeckt_am?: string | null
+          entdeckt_lauf?: string | null
           erstellt_am?: string
           fachschwerpunkte?: string | null
           firma?: string | null
+          google_place_id?: string | null
           id?: string
           ihk_zertifikat?: boolean | null
           isochrone_polygon?: Json | null
           ist_aktiv?: boolean
           jahre_erfahrung?: number | null
+          kontakt_quelle?: string | null
           konvertiert_am?: string | null
           konvertiert_zu_sv_id?: string | null
           lat?: number
+          levelup_letzter_check_id?: string | null
+          levelup_letzter_score?: number | null
           lng?: number
           nachname?: string | null
           name?: string
@@ -19225,6 +19954,9 @@ export type Database = {
           vorname?: string | null
           warteliste_am?: string | null
           warteliste_status?: string
+          website_gefunden?: string | null
+          website_sicherheit?: number | null
+          website_url?: string | null
         }
         Relationships: [
           {
@@ -19239,6 +19971,13 @@ export type Database = {
             columns: ["konvertiert_zu_sv_id"]
             isOneToOne: false
             referencedRelation: "v_live_ops_sv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sv_leads_levelup_letzter_check_id_fkey"
+            columns: ["levelup_letzter_check_id"]
+            isOneToOne: false
+            referencedRelation: "levelup_checks"
             referencedColumns: ["id"]
           },
         ]
@@ -21501,6 +22240,7 @@ export type Database = {
           organisation_id: string | null
           pdf_generiert_am: string | null
           pdf_storage_path: string | null
+          signature_png_data_uri: string | null
           sv_id: string | null
           unterschrift_datum: string
           unterschrift_ip: string | null
@@ -21517,6 +22257,7 @@ export type Database = {
           organisation_id?: string | null
           pdf_generiert_am?: string | null
           pdf_storage_path?: string | null
+          signature_png_data_uri?: string | null
           sv_id?: string | null
           unterschrift_datum?: string
           unterschrift_ip?: string | null
@@ -21533,6 +22274,7 @@ export type Database = {
           organisation_id?: string | null
           pdf_generiert_am?: string | null
           pdf_storage_path?: string | null
+          signature_png_data_uri?: string | null
           sv_id?: string | null
           unterschrift_datum?: string
           unterschrift_ip?: string | null
@@ -23263,6 +24005,24 @@ export type Database = {
           },
         ]
       }
+      sv_leads_map_pins: {
+        Row: {
+          id: string | null
+          lat: number | null
+          lng: number | null
+        }
+        Insert: {
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+        }
+        Update: {
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+        }
+        Relationships: []
+      }
       v_belegung: {
         Row: {
           assignee_id: string | null
@@ -23677,14 +24437,14 @@ export type Database = {
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["kunde_id"]
+            columns: ["geschaedigter_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
             foreignKeyName: "claims_geschaedigter_user_id_fkey"
-            columns: ["geschaedigter_user_id"]
+            columns: ["kunde_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -26475,6 +27235,13 @@ export type Database = {
         }[]
       }
       audit_enum_check_constraints: { Args: never; Returns: Json }
+      audit_migration_versions: {
+        Args: never
+        Returns: {
+          name: string
+          version: string
+        }[]
+      }
       audit_rls_function_grants: {
         Args: never
         Returns: {
