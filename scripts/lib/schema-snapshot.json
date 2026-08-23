@@ -6362,7 +6362,8 @@
     "email_log_id",
     "created_at",
     "organisation_id",
-    "pdf_generiert_am"
+    "pdf_generiert_am",
+    "signature_png_data_uri"
    ]
   },
   "vertragsvorlagen": {
