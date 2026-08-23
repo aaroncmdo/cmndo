@@ -77,6 +77,15 @@ export type PlacesAdapter = {
 export type AdapterOpts = {
   fetchImpl?: typeof fetch
   warte?: (ms: number) => Promise<void>
+  /**
+   * Die Kostenbremse. Zaehlt JEDEN HTTP-Abruf, auch jeden Wiederholversuch.
+   *
+   * ⚠ Ohne sie ist ein Lauf unbegrenzt teuer — siehe `budget.ts`. Der Zaehler
+   * gehoert hier hin und nicht nur um die Methoden herum, weil eine einzige
+   * `suchUmkreis`-Methode intern bis zu 9 Abrufe ausloest (3 Seiten × 3
+   * Versuche) und die Rechnung alle neun kennt.
+   */
+  zaehler?: { melde(): void }
 }
 
 /**
