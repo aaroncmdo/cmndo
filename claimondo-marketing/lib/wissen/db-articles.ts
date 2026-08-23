@@ -68,10 +68,16 @@ export type WissenArtikel = {
   author: string
   audience: string
   quelle: string
+  /** Redaktionelle Schlagworte. Anders als `cluster` (Freitext, ~20 Varianten für
+   *  69 Artikel — teils Dubletten, teils Quellennamen wie „Captain-HUK") ist das
+   *  eine saubere, geschlossene Menge: Schadenregulierung · Recht & Urteile ·
+   *  Gutachten · Werkstatt · Versicherer · Markt & News · Tools. Deshalb steuert
+   *  sie die Verwandt-Verlinkung (WissenVerwandteThemen), nicht `cluster`. */
+  tags: string[] | null
 }
 
 const SELECT_COLUMNS =
-  'id,slug,title,body,excerpt,key_facts,meta_description,meta_title,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle'
+  'id,slug,title,body,excerpt,key_facts,meta_description,meta_title,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle,tags'
 
 /**
  * Einen veroeffentlichten Artikel per Slug laden (anon-Client, RLS-gated).
