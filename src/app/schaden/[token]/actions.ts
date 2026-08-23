@@ -15,6 +15,7 @@ import { createClient } from '@/lib/supabase/server'
 import { resolveSchadenTokenContext } from '@/lib/schadenkarte/gegner-flow'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { notifyFlottenmanagerSchadenGemeldet } from '@/lib/flotte/fm-schaden-notif'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import {
   resolveSchadenkarteToFahrzeug,
   bindeSchadenkarteAnFahrzeug,
@@ -283,6 +284,21 @@ export async function submitSchadenGegner(
       console.error('[schaden-gegner] FM-WA-Notif fehlgeschlagen:', err)
     }
   }
+
+  // Team-WA zusaetzlich zur FM-Benachrichtigung (Audit 23.08.): der Flottenmanager
+  // erfaehrt es bereits, das Claimondo-Team bisher nicht. Beide brauchen es —
+  // der FM wegen seines Fahrzeugs, das Team wegen der Fallbearbeitung.
+  await notifyTeamNeuerLead({
+    leadId: res.leadId,
+    quelle: `Schadenkarte (Gegner-Flow) — ${ctx.context.firmaName ?? 'Flotte'}`,
+    name: data.name.trim() || null,
+    telefon: data.telefon || null,
+    zusatz: [
+      ctx.context.kennzeichen ? `🚗 Flotte: ${ctx.context.kennzeichen}` : null,
+      data.kennzeichen ? `🚙 Gegner: ${data.kennzeichen}` : null,
+    ],
+    linkPfad: claimId ? `/faelle/${claimId}` : null,
+  })
 
   // 7. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
   revalidatePath('/flotte/fahrzeug/' + ctx.context.fahrzeugId)

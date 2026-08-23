@@ -9,6 +9,7 @@
 // Gutachten, die Gates spiegeln den Kunden.
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -82,6 +83,18 @@ export async function vermittlePartnerWerkstatt(formData: FormData): Promise<Ver
   )
   if (!leadRes.ok) return { ok: false, error: `Vorgang konnte nicht angelegt werden: ${leadRes.error}` }
   const leadId = leadRes.leadId
+
+  // Team-WA (Audit 23.08.). intern:true — der SV legt den Vorgang selbst an;
+  // der Ausloeser ist ein Partner, nicht der Endkunde.
+  await notifyTeamNeuerLead({
+    leadId,
+    quelle: 'SV — Partner-Werkstatt vermittelt',
+    intern: true,
+    name: [vorname, nachname].filter(Boolean).join(' ').trim(),
+    telefon: telefon || null,
+    email: email || null,
+    zusatz: [kennzeichen ? `🚗 ${kennzeichen}` : null],
+  })
 
   // 4. Sofort-Claim (P4 T1: Direkt-INSERT in 'gutachten-eingegangen', Effekte aufgeschoben).
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')

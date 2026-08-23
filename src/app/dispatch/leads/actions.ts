@@ -3,6 +3,7 @@
 // AAR-110: Manuelle Lead-Anlage
 // AAR-1480: Eingang-Validation via ManualLeadSchema (src/lib/schemas/manual-lead.ts)
 import { createClient } from '@/lib/supabase/server'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { ManualLeadSchema } from '@/lib/schemas/manual-lead'
@@ -125,6 +126,20 @@ export async function createManualLead(
   )
 
   if (!created.ok) return { ok: false, error: created.error }
+
+  // Team-WA (Audit 23.08.). intern:true — Dispatch legt hier selbst an, die
+  // Meldung geht also auch an den Ausloeser zurueck. Bewusst so (Aaron 23.08.:
+  // alle stummen Quellen melden); der Marker macht sie unterscheidbar, falls
+  // die internen Anlagen spaeter wieder stummgeschaltet werden sollen.
+  await notifyTeamNeuerLead({
+    leadId: created.leadId,
+    quelle: `Dispatch — manuelle Anlage (${data.source_channel})`,
+    intern: true,
+    name: [data.vorname, data.nachname].filter(Boolean).join(' '),
+    telefon: data.telefon || null,
+    email: data.email || null,
+    zusatz: [data.kennzeichen?.trim() ? `🚗 ${data.kennzeichen.trim()}` : null],
+  })
 
   revalidatePath('/dispatch/leads')
   return { ok: true, leadId: created.leadId }
