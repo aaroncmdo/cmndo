@@ -10,6 +10,7 @@
 //   - POST: x-internal-token: ${CRON_SECRET} (emit-helper-Fire-and-Forget)
 
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { computeRecipients } from '@/lib/notifications/fan-out'
 import { CHANNEL_HANDLERS } from '@/lib/notifications/channels'
@@ -242,10 +243,20 @@ async function processSingleById(eventId: string): Promise<{ processed: number; 
 }
 
 export async function POST(req: Request) {
+  // ⚠ Vorher stand hier `const expected = process.env.CRON_SECRET ?? ''`. Fehlt die
+  // Variable, wird daraus der LEERE String — und `token === ''` ist wahr, sobald jemand
+  // den Header `x-internal-token:` ohne Wert schickt. Der Vergleich haette also
+  // ausgerechnet dann geoeffnet, wenn gar kein Secret konfiguriert ist.
+  // Deshalb fail-closed: ohne Secret niemals durchlassen.
+  const secret = process.env.CRON_SECRET
+  if (!secret) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
   const token = req.headers.get('x-internal-token')
   const authHeader = req.headers.get('authorization')
-  const expected = process.env.CRON_SECRET ?? ''
-  const ok = token === expected || authHeader === `Bearer ${expected}`
+  // Beide Wege bleiben erhalten: der emit-Helper schickt `x-internal-token`,
+  // der Cron `Authorization: Bearer …`.
+  const ok = token === secret || authHeader === `Bearer ${secret}`
   if (!ok) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
@@ -268,8 +279,7 @@ export async function POST(req: Request) {
 }
 
 export async function GET(req: Request) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(req)) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
   const result = await processBatch()
