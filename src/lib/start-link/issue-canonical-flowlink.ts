@@ -194,11 +194,18 @@ export async function issueCanonicalFlowLinkForAnfrage(
     // Deshalb: `source` bleibt unangetastet (RLS!), die Herkunft kommt aus `utm_source`.
     // Bewusst per Allowlist statt Durchreichen — sonst schriebe jeder beliebige
     // Kampagnen-Parameter in ein Feld, nach dem intern gefiltert und gezaehlt wird.
-    const KI_KANAELE = new Set(['ki-deeplink'])
-    const utmQuelle = (gfa.utm_source as string | null)?.trim().toLowerCase() ?? null
+    // Der stabile Marker ist `utm_medium='deeplink'` — den setzen WIR selbst bei jeder
+    // Buchung ueber einen `?sv=`-Deeplink. `utm_source` traegt nur das Detail: entweder
+    // unser generisches 'ki-deeplink' oder, wenn die KI sich selbst nennt, ihren Host
+    // ('chatgpt.com'). Eine Allowlist auf utm_source waere die falsche Achse — sie
+    // muesste jeden neuen KI-Anbieter kennen, sonst faellt ein echter KI-Lead still auf
+    // 'self_service' zurueck. Genau das waere passiert, sobald ChatGPTs eigenes
+    // `utm_source=chatgpt.com` durchgereicht wird.
+    const istKiDeeplink = ((gfa.utm_medium as string | null) ?? '').trim().toLowerCase() === 'deeplink'
+    const utmQuelle = (gfa.utm_source as string | null)?.trim().toLowerCase() || null
     const herkunftsKanal =
       (gfa.source as string | null) ??
-      (utmQuelle && KI_KANAELE.has(utmQuelle) ? utmQuelle : null) ??
+      (istKiDeeplink ? (utmQuelle ?? 'ki-deeplink') : null) ??
       'self_service'
 
     const created = await createLead(
