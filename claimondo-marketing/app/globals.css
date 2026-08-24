@@ -143,6 +143,60 @@ p, li, blockquote, article, .prose {
   --shadow-glass-pill: var(--shadow-glass-pill);
   --font-apple: var(--font-apple);
   --ease-ios: var(--ease-ios);
+
+  /* ⚠ NACHGEZOGEN 24.08.2026 — diese Datei ist ein Fork, der VOR der
+     Token-Foundation (10.06.2026) abgezweigt ist. Die Typo-Skala und die
+     semantischen Farbtokens gab es hier nie, obwohl Komponenten sie benutzen.
+     Tailwind erzeugt fuer eine Klasse ohne Token keine Regel — sie faellt
+     ersatzlos aus, ohne Fehler, ohne Warnung.
+
+     Auf prod gemessen, bevor dieser Block entstand:
+       • 376 Elemente auf /gutachter-finden rendern 16px statt 11/13px
+         (text-body-* im FinderSprungPanel) — die Hierarchie im Staedte-Panel
+         ist dadurch vollstaendig flach
+       • 8 Fehlermeldungen im Community-Bereich rendern NICHT rot
+         (text-danger-strong = 0 Regeln im ausgelieferten CSS)
+
+     Gegenprobe am live geladenen prod-CSS: `danger-strong` → 0 Treffer,
+     `text-body-xs` → 0, waehrend `claimondo-navy` und `rounded-ios` treffen.
+     Das Token-System ist also da, nur diese Haelfte fehlte.
+
+     Werte 1:1 aus src/app/globals.css — bewusst KEINE eigene Fassung: zwei
+     Skalen, die dasselbe meinen, laufen garantiert auseinander. */
+  --text-caption: 10px;
+  --text-caption--line-height: 14px;
+  --text-caption--font-weight: 600;
+  --text-caption--letter-spacing: 0.6px;
+  --text-body-xs: 11px;
+  --text-body-xs--line-height: 16px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+  --text-body: 14px;
+  --text-body--line-height: 22px;
+  --text-heading-sm: 16px;
+  --text-heading-sm--line-height: 22px;
+  --text-heading-sm--font-weight: 600;
+  --text-heading-md: 18px;
+  --text-heading-md--line-height: 26px;
+  --text-heading-md--font-weight: 600;
+  --text-heading-lg: 24px;
+  --text-heading-lg--line-height: 32px;
+  --text-heading-lg--font-weight: 700;
+
+  /* Semantische Statusfarben. `-strong` ist die Textfarbe (kontrastreich),
+     `-soft` die Flaeche, der Basiston die Akzentlinie. */
+  --color-success: #10B981;
+  --color-success-soft: #ecfdf5;
+  --color-success-strong: #047857;
+  --color-warning: #F59E0B;
+  --color-warning-soft: #fffbeb;
+  --color-warning-strong: #92400e;
+  --color-danger: #F43F5E;
+  --color-danger-soft: #fff1f2;
+  --color-danger-strong: #9f1239;
+  --color-info: #4573A2;
+  --color-info-soft: #eef3f9;
+  --color-info-strong: #0D1B3E;
 }
 
 :root {
