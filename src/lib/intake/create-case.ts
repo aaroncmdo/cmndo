@@ -5,6 +5,7 @@ import { createLead, type LeadBase, type LeadExtra } from '@/lib/leads/create-le
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { convertLeadToFall } from '@/lib/leads/convert-lead-to-fall'
 import { findRecentIntakeLead } from './recent-intake-lead'
+import { registriereTeilnahme } from '@/lib/gewinnspiel/registriere-teilnahme'
 import type { DedupKeyInput } from './dedup-key'
 
 // C2 (Fundament, Ein Intake): kapselt DIE Meldung mit garantierten, idempotenten Nachwirkungen.
@@ -56,6 +57,19 @@ export async function createCase(
   })
   const flowLinkToken = fl.ok ? fl.token : null
   if (!fl.ok) console.error('[intake/createCase] FlowLink fehlgeschlagen (non-fatal):', fl.error)
+
+  // 3b. Gewinnspiel-Teilnahme (non-fatal). Kein Aufrufer darf hieran scheitern:
+  //     jeder Pfad hierher ist eine Schadenmeldung. Die Registrierung prueft
+  //     selbst, ob eine Kampagne laeuft und ob der Lead qualifiziert.
+  try {
+    await registriereTeilnahme({
+      quelle: { leadId },
+      telefon: input.base.telefon,
+      schuldfrage: (input.extra?.schuldfrage as string | null | undefined) ?? null,
+    })
+  } catch (err) {
+    console.error('[intake/createCase] Gewinnspiel-Teilnahme (non-fatal):', err)
+  }
 
   // 4. direct-claim: Konversion ueber den Wrapper (Kern + Pflichtdok + Kunde-WA + KB + link-data).
   //    convertLeadToFall WIRFT -> hier abfangen und in ein Result-Object uebersetzen.

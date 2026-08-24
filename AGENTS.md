@@ -680,51 +680,53 @@ Das Script erkennt den Header und skippt die Datei komplett.
 **Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->
 
-# CI-Runner — self-hosted, und warum welcher Job wo laeuft
+# CI-Runner — warum GitHub-gehostet, und was der Selbstversuch gekostet hat
 
-Das Repo ist **privat** (23.08.2026). Vorher war es oeffentlich: der komplette
-Code, die Deploy-Runbooks, die VPS-IP mit `root` und der Supabase-Projekt-Ref
-waren ohne Anmeldung lesbar (nachgemessen: anonymer Abruf lieferte HTTP 200 auf
-API, HTML und Rohdatei). Zugangsdaten lagen keine im Repo — es war
-Infrastruktur-Offenlegung, kein Schluessel-Leck.
+**Stand: alle Workflows laufen auf `ubuntu-latest`, das Repo ist oeffentlich.**
+Oeffentliche Repos bekommen unbegrenzte Actions-Minuten auf Standard-Runnern —
+das ist der Grund, warum CI hier nichts kostet.
 
-Privat kosten GitHub-gehostete Actions-Minuten Geld. Gemessen am 23.08.:
-**891 Job-Minuten in 24 h** (90 Laeufe, 189 Jobs) = ~26.700/Monat. Ueber dem
-Team-Kontingent waeren das ~190 USD/Monat. **Selbst-gehostete Runner sind
-dagegen auch bei privaten Repos kostenlos und unbegrenzt** — das ist der Hebel.
+Am 23./24.08.2026 wurde das Gegenteil versucht: Repo privat + self-hosted Runner
+in WSL. Es funktionierte technisch, wurde aber nach einem Tag zurueckgedreht.
+Die Zahlen, damit es niemand blind wiederholt:
 
-## Die Aufteilung
-
-| Wo | Was | Warum |
+| | GitHub-gehostet | self-hosted (WSL, 20 Kerne, 24 GB) |
 |---|---|---|
-| **eigener Runner** (`[self-hosted, claimondo]`) | CI bei PR/Push, alle 9 Deploys, journey-gate, Smokes | 77 % der Last; laufen ohnehin nur, wenn jemand arbeitet |
-| **GitHub** (`ubuntu-latest`) | CI-Nachtlauf (`schedule`), `backup`, `money-integrity-check`, `schema-snapshot-regen` | laufen **unbeaufsichtigt** — muessen auch greifen, wenn die Maschine aus ist |
+| `vitest` | **3 Min** | 8–16 Min |
+| `build` | **11 Min** | ~22 Min |
+| parallel | praktisch unbegrenzt | 6 (Speicher-Grenze) |
+| Kosten oeffentlich | 0 | 0 |
+| Kosten privat | ~150 USD/Monat bei Flotten-Last | 0 |
 
-Rest bei GitHub: ~1.500 (Nachtlauf, 50 Min x 30) + ~64 (Crons) = **~1.564 von
-2.000 Freiminuten**. Also 0 EUR, mit Luft.
+Bei fuenf parallel arbeitenden Sessions war der Durchsatz der Engpass, nicht das
+Geld: die Warteschlange wuchs auf 20 Jobs, PRs standen Stunden.
 
-`ci.yml` bedient beide Faelle in einer Datei ueber eine Weiche:
+## Vier Fallen, die dabei aufgetreten sind
 
-```yaml
-runs-on: ${{ github.event_name == 'schedule' && 'ubuntu-latest' || fromJSON('["self-hosted","claimondo"]') }}
-```
+* ⭐ **Zeitzone.** GitHub-Runner laufen **UTC**, eine WSL-Maschine per Default in
+  der lokalen Zone (`Europe/Berlin`). Zwei zeitabhaengige Test-Files wurden dadurch
+  rot — auf **jeder** PR, auch reinen Doku-PRs. Der Beweis war die Gegenueber-
+  stellung: 4 Laeufe self-hosted alle rot, 2 auf GitHub beide gruen. Wer je wieder
+  einen eigenen Runner aufsetzt: **`timedatectl set-timezone UTC` zuerst.**
+* ⛔ **Ein self-hosted Runner an einem OEFFENTLICHEN Repo ist gefaehrlich** — jeder
+  Fremde kann forken und beliebigen Code auf der Maschine ausfuehren. Deshalb gilt
+  die Reihenfolge: Workflows zuerst zurueck auf `ubuntu-latest`, DANN oeffentlich,
+  DANN die Runner deregistrieren. Nie umgekehrt.
+* **WSL beendet seine VM**, sobald keine Sitzung mehr daran haengt — der Runner-
+  Dienst stirbt mit, Jobs bleiben stumm in der Warteschlange. Gegenmittel waren
+  `vmIdleTimeout=-1` in `.wslconfig` **und** eine dauerhaft offene Sitzung.
+* **Ein `wsl --shutdown` erschlaegt laufende Jobs.** Das ist dreimal passiert und
+  sah jedes Mal wie ein Testfehler aus: `npm ci` auf `in_progress`, alle folgenden
+  Schritte `pending`, kein Test gelaufen. Diese Signatur erkennen, statt den Code
+  zu verdaechtigen.
 
-Die `e2e`-Jobs laufen ohnehin nur nachts und bleiben deshalb schlicht
-`ubuntu-latest` — ein Ausdruck, der immer dasselbe ergibt, waere nur Rauschen.
+## Was unabhaengig davon gilt
 
-## Regeln
+**Privat auf dem Free-Plan gibt es weder Branch-Protection noch Regelsaetze**
+(beides HTTP 403). Wer das Journey-Gate je als Pflicht-Check verdrahten will,
+braucht dafuer ein oeffentliches Repo oder GitHub Pro.
 
-* **Ein neuer Workflow, der unbeaufsichtigt laufen muss (`schedule`), gehoert zu
-  GitHub.** Alles andere auf den eigenen Runner. Wer das umdreht, zahlt entweder
-  Geld oder hat einen Cron, der nachts stillsteht.
-* **Nie einen self-hosted Runner an ein oeffentliches Repo haengen.** Jeder
-  Fremde koennte forken, eine PR schicken und damit beliebigen Code auf der
-  Maschine ausfuehren. Beim Umstellen war die Reihenfolge deshalb: Runner
-  einrichten (untaetig) -> Repo privat -> **dann erst** Workflows umstellen.
-* Der Runner laeuft als eigener Benutzer `runner` (nicht root) in WSL2/Ubuntu
-  24.04 mit systemd; Docker ist Pflicht, weil `appleboy/ssh-action` und
-  `scp-action` **Docker-Container-Actions** sind — ohne Docker scheitern alle
-  neun Deploys.
-* Steht der Runner still (Maschine aus/schlafend), **warten** Jobs in der
-  Warteschlange, statt zu scheitern. Das ist gewollt, aber es heisst: kein
-  Merge-Deploy, solange die Maschine aus ist.
+**Kein Workflow hat einen `concurrency`-Guard** (ausser `deploy-vps-mcp.yml`).
+Jeder Push auf denselben Branch startet einen weiteren vollstaendigen Lauf,
+waehrend der alte weiterlaeuft. Das ist der groesste ungenutzte Hebel gegen
+Warteschlangen — und er wirkt unabhaengig davon, wo die Runner stehen.

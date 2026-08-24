@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   feld-smoke:
-    runs-on: [self-hosted, claimondo]
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
