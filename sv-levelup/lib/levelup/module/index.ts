@@ -1,5 +1,6 @@
 import type { MessRegistry } from '../modul-vertrag'
 import { messeGbp } from './gbp'
+import { messeKi } from './ki'
 import { messeNach } from './nach'
 import { messeSeo } from './seo'
 import { messeUx } from './ux'
@@ -9,6 +10,7 @@ import { messeWett } from './wett'
 import { messeZuweiser } from './zuweiser'
 
 export { messeGbp } from './gbp'
+export { messeKi } from './ki'
 export { messeNach } from './nach'
 export { messeSeo } from './seo'
 export { messeUx } from './ux'
@@ -35,6 +37,7 @@ export { messeZuweiser } from './zuweiser'
 export function baueModulRegistry(firmenname: string | null): MessRegistry {
   return {
     gbp: (k) => messeGbp({ ...k, firmenname }),
+    ki: messeKi,
     nach: messeNach,
     seo: messeSeo,
     ux: messeUx,

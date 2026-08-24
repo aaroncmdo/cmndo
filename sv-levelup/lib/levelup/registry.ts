@@ -1,5 +1,5 @@
 export type ModulId =
-  | 'gbp' | 'web' | 'seo' | 'ux' | 'gsc'
+  | 'gbp' | 'web' | 'seo' | 'ux' | 'gsc' | 'ki'
   | 'wett' | 'verz' | 'zuweiser' | 'ads'
   | 'kwg' | 'kwm' | 'nach' | 'ortsseiten'
   | 'markt' | 'nische' | 'volumen' | 'gebiet'
@@ -27,8 +27,16 @@ export type Modul = {
  * ACHTUNG: Die Registry in mockup-levelup-v2.html ist VERALTET — sie kennt nur
  * 11 Module (kwg und kwm fehlen) und ein eigenes Punktesystem (Summe 165).
  * Maszgeblich sind GESAMTSPEC §5 + mockup-levelup-auswertung.html (13 Module,
- * 124 Punkte), erweitert um vier neue Module (zuweiser, gsc, gebiet,
- * ortsseiten) und die Bewertungs-Dynamik.
+ * 124 Punkte), erweitert um fuenf neue Module (zuweiser, gsc, gebiet,
+ * ortsseiten, ki) und die Bewertungs-Dynamik.
+ *
+ * ⚠ `TEILBEFUND_SCHWELLE` ist die HAELFTE der Summe hier. Wer ein Modul mit
+ * Punkten ergaenzt, hebt damit die Schwelle, ab der es ueberhaupt einen Score
+ * gibt. Vor der Aufnahme von `ki` (10 Punkte, Schwelle 75 -> 80) an den 16
+ * echten Checks geprueft: die sechs mit Score liegen bei 104 und 116 erhebbaren
+ * Punkten, die uebrigen unter 75 — die Verschiebung aendert bei keinem etwas.
+ * Der Score wird ausserdem GESPEICHERT (`levelup_checks.score`), nicht beim
+ * Anzeigen neu gerechnet; bestehende Auswertungen bleiben unberuehrt.
  *
  * gbp 22 statt 20 und wett 18 statt 16: die je zwei Zusatzpunkte vergibt die
  * Bewertungs-Dynamik — die RATE statt des Bestands (Design-Spec §3.5).
@@ -39,6 +47,7 @@ export const MODULE: Modul[] = [
   { id: 'seo',        titel: 'SEO & Inhalte',                 punkte: 12, dauerMin: 2, modi: ['aufbau','bestand'],  braucht: 'url',        gruppe: 'auftritt',  saeule: 'SEO — On-Page & Keywords' },
   { id: 'ux',         titel: 'Nutzererlebnis',                punkte: 12, dauerMin: 2, modi: ['bestand'],           braucht: 'url',        gruppe: 'auftritt',  saeule: 'Nutzererlebnis' },
   { id: 'gsc',        titel: 'Search Console',                punkte: 12, dauerMin: 2, modi: ['bestand'],           braucht: 'gsc',        gruppe: 'auftritt',  saeule: 'SEO — On-Page & Keywords' },
+  { id: 'ki',         titel: 'Sichtbarkeit in KI-Antworten',  punkte: 10, dauerMin: 1, modi: ['aufbau','bestand'],  braucht: 'url',        gruppe: 'auftritt',  saeule: 'Sichtbarkeit in KI-Antworten' },
   { id: 'wett',       titel: 'Wettbewerber im 50-km-Umkreis', punkte: 18, dauerMin: 3, modi: ['aufbau','bestand'],  braucht: 'places',     gruppe: 'umfeld',    saeule: 'Auffindbarkeit & Wettbewerbsposition' },
   { id: 'verz',       titel: 'Branchenverzeichnisse & NAP',   punkte: 12, dauerMin: 2, modi: ['aufbau','bestand'],  braucht: null,         gruppe: 'umfeld',    saeule: 'Branchenverzeichnisse & NAP' },
   { id: 'zuweiser',   titel: 'Zuweiser-Netzwerk · 25 km',     punkte: 10, dauerMin: 2, modi: ['aufbau','bestand'],  braucht: 'places',     gruppe: 'umfeld',    saeule: 'Auffindbarkeit & Wettbewerbsposition' },
