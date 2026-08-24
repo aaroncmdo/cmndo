@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { istErlaubt, parseRobots } from '../robots'
+import { istAgentErlaubt, istErlaubt, parseRobots } from '../robots'
 
 const erlaubt = (txt: string, pfad: string) => istErlaubt(parseRobots(txt), pfad)
 
@@ -45,5 +45,63 @@ describe('robots.txt', () => {
 
   it('verarbeitet CRLF-Dateien', () => {
     expect(erlaubt('User-agent: *\r\nDisallow: /\r\n', '/impressum')).toBe(false)
+  })
+})
+
+// Gruppentreue Auswertung je Agent — Grundlage des Moduls `ki`.
+describe('istAgentErlaubt', () => {
+  // Die haeufigste Sperrform ueberhaupt: alles offen, EIN Dienst ausgesperrt.
+  const GESPERRT = 'User-agent: *\nAllow: /\n\nUser-agent: GPTBot\nDisallow: /'
+
+  it('erkennt die Sperre eines einzelnen Dienstes', () => {
+    expect(istAgentErlaubt(GESPERRT, 'GPTBot')).toBe(false)
+  })
+
+  it('laesst andere Dienste dabei unberuehrt', () => {
+    expect(istAgentErlaubt(GESPERRT, 'PerplexityBot')).toBe(true)
+  })
+
+  // ⚠ Der eigentliche Grund, warum es diese Funktion gibt. parseRobots fuehrt
+  // die `*`-Gruppe mit der Agenten-Gruppe zusammen und kehrt die Aussage damit
+  // um. Der Test haelt die Abweichung fest, damit niemand die eine Funktion
+  // spaeter fuer die andere haelt.
+  it('weicht hier bewusst von parseRobots ab', () => {
+    expect(istErlaubt(parseRobots(GESPERRT, 'GPTBot'), '/')).toBe(true)  // falsch
+    expect(istAgentErlaubt(GESPERRT, 'GPTBot')).toBe(false)              // richtig
+  })
+
+  it('laesst die eigene Gruppe auch dann gelten, wenn sie GROSSZUEGIGER ist', () => {
+    const txt = 'User-agent: *\nDisallow: /\n\nUser-agent: ClaudeBot\nAllow: /'
+    expect(istAgentErlaubt(txt, 'ClaudeBot')).toBe(true)
+    expect(istAgentErlaubt(txt, 'GPTBot')).toBe(false)
+  })
+
+  it('faellt auf die Sternchen-Gruppe zurueck, wenn es keine eigene gibt', () => {
+    expect(istAgentErlaubt('User-agent: *\nDisallow: /', 'GPTBot')).toBe(false)
+  })
+
+  it('erlaubt alles, wenn keine Gruppe zutrifft', () => {
+    expect(istAgentErlaubt('User-agent: Googlebot\nDisallow: /', 'GPTBot')).toBe(true)
+    expect(istAgentErlaubt('', 'GPTBot')).toBe(true)
+  })
+
+  it('teilt aufeinanderfolgende User-agent-Zeilen dieselben Regeln zu', () => {
+    const txt = 'User-agent: GPTBot\nUser-agent: ChatGPT-User\nDisallow: /'
+    expect(istAgentErlaubt(txt, 'GPTBot')).toBe(false)
+    expect(istAgentErlaubt(txt, 'ChatGPT-User')).toBe(false)
+  })
+
+  it('vergleicht Agentennamen ohne Ruecksicht auf Gross-/Kleinschreibung', () => {
+    expect(istAgentErlaubt('User-agent: gptbot\nDisallow: /', 'GPTBot')).toBe(false)
+  })
+
+  it('wertet ein leeres Disallow als „alles erlaubt"', () => {
+    expect(istAgentErlaubt('User-agent: GPTBot\nDisallow:', 'GPTBot')).toBe(true)
+  })
+
+  it('beachtet Pfad-Ausnahmen innerhalb der Agenten-Gruppe', () => {
+    const txt = 'User-agent: GPTBot\nDisallow: /\nAllow: /leistungen'
+    expect(istAgentErlaubt(txt, 'GPTBot', '/leistungen')).toBe(true)
+    expect(istAgentErlaubt(txt, 'GPTBot', '/preise')).toBe(false)
   })
 })
