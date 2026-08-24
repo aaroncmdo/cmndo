@@ -139,7 +139,7 @@ export default async function CommunityDashboardPage() {
                   const isMe = row.sv_id === sv.id
                   const name = [row.vorname, row.nachname].filter(Boolean).join(' ') || 'Anonym'
                   return (
-                    <Tr key={row.sv_id} className={isMe ? 'bg-[var(--brand-secondary)]/5 border-l-4 border-l-[var(--brand-secondary)]' : ''}>
+                    <Tr key={row.sv_id} className={isMe ? 'bg-[var(--brand-secondary)]/10' : ''}>
                       <Td>
                         <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-xs font-bold ${
                           row.rang === 1 ? 'bg-amber-100 text-amber-700'

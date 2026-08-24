@@ -294,7 +294,11 @@ if (accentDelta < 0) {
 // Vertraege, SLA, Kanzlei-Pages, Kalender, admin-Tail-Cleanup, finance-(hub)).
 // LEAVE (grandfathered): Data-Viz/Geld (finance -400-Palette, Charts, KPI-Metriken)
 // + Typ-/Rollen-Identitaets-Maps + Delete-Hovers + inline-hex Map-Paint.
-const STATUS_BASELINE_OCCURRENCES = 494
+// 24.08.2026: 494 -> 489. Zwei Warnhinweise im Gutachter-Portal (termine/[id]
+// und PolizeiberichtUpload) trugen `bg-amber-50 border-l-4 border-amber-500` —
+// raw Status-Scale UND Side-Stripe. Beim Entfernen des Side-Stripes (impeccable
+// „absolute ban") gleich auf die warning-Tokens gezogen: Boy-Scout.
+const STATUS_BASELINE_OCCURRENCES = 489
 const STATUS_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:green|emerald|red|rose|amber|yellow|orange|lime)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
 
 let statusOccurrences = 0
