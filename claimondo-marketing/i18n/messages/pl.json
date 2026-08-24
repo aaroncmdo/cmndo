@@ -3914,7 +3914,12 @@
     "verkehr_h3": "Jakie natężenie ruchu tam panuje",
     "verkehr_intro": "Federalny Instytut Badawczy Dróg mierzy ruch na autostradach i drogach krajowych w sposób ciągły. Te punkty pomiarowe znajdują się najbliżej miasta {ort} (dane roczne za {jahr}):",
     "verkehr_zaehlstelle": "Punkt pomiarowy {name}, odległość {km} km",
-    "verkehr_quelle": "Źródło: <link>stałe punkty pomiarowe BASt</link> — {lizenz}"
+    "verkehr_quelle": "Źródło: <link>stałe punkty pomiarowe BASt</link> — {lizenz}",
+    "ratgeber_eyebrow": "Więcej na ten temat",
+    "ratgeber_fehler": "7 błędów, których należy unikać po wypadku",
+    "ratgeber_taktiken": "Taktyki ubezpieczycieli – i co na nie pomaga",
+    "ratgeber_wertminderung": "Obliczanie utraty wartości: Sanden/Danner wyjaśnione",
+    "ratgeber_eauto": "Tesla, Polestar, Lucid: pułapki przy autach elektrycznych"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin pomyślnie zarejestrowany!",

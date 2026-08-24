@@ -99,12 +99,15 @@ export default async function WerkstattFindenPage({
 
       {/* Vollbild-Finder (Karte + 4-Schritt-Wizard). initialCenter aus ?stadt/?plz/?lat&lng.
           Embed-only: bewusst KEIN Content darunter (sauberer Mobile-Scroll). */}
+      {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
+      <main id="main-content">
       <WerkstattFindenSection
         height="100dvh"
         initialCenter={initialCenter}
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
         promoCode={sp.promo?.trim() || undefined}
       />
-    </>
+      </main>
+</>
   )
 }

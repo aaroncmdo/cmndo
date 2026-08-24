@@ -3920,7 +3920,12 @@
     "verkehr_h3": "How much traffic passes through",
     "verkehr_intro": "Germany's Federal Highway Research Institute continuously measures traffic on motorways and federal roads. These counting stations are closest to {ort} (annual figures for {jahr}):",
     "verkehr_zaehlstelle": "Counting station {name}, {km} km away",
-    "verkehr_quelle": "Source: <link>BASt permanent counting stations</link> — {lizenz}"
+    "verkehr_quelle": "Source: <link>BASt permanent counting stations</link> — {lizenz}",
+    "ratgeber_eyebrow": "More on this topic",
+    "ratgeber_fehler": "7 mistakes to avoid after an accident",
+    "ratgeber_taktiken": "Insurer tactics — and what works against them",
+    "ratgeber_wertminderung": "Calculating diminished value: Sanden/Danner explained",
+    "ratgeber_eauto": "Tesla, Polestar, Lucid: the pitfalls with EVs"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Appointment successfully requested!",
