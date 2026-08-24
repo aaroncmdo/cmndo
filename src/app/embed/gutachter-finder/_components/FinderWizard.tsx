@@ -447,6 +447,36 @@ export function FinderWizard({
       {schaetzungSessionId && phase === 'ort' ? (
         <AufnahmeFlowHinweis text="Weiter aus Ihrer Anspruchs-Prüfung: jetzt Gutachter & Termin." className="mb-0" />
       ) : null}
+      {/* Aaron 24.08.: Der haeufigste Irrtum beim Einstieg ist die Annahme, man muesse
+          das Fahrzeug irgendwo hinbringen. Genau das ist NICHT so — der Gutachter faehrt
+          zum Fahrzeug. Das gehoert an den Anfang, nicht ins Kleingedruckte: wer glaubt,
+          er muesse ein womoeglich nicht fahrbereites Auto transportieren, bricht ab,
+          bevor er ueberhaupt eine Adresse eintippt.
+          Nur auf dem Einstiegs-Schritt (ort) — ab der Terminwahl ist die Frage geklaert
+          und der Kasten waere nur noch Rauschen.
+          Farben ueber die Status-Tokens (bg-success-soft / text-success-strong), nicht
+          roh green-* — der Status-Ratchet blockt rohe Scales, siehe AGENTS.md. */}
+      {phase === 'ort' && (
+        <div className="flex items-start gap-3 rounded-ios-lg bg-success-soft px-4 py-3">
+          <svg
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+            className="mt-0.5 h-5 w-5 shrink-0 text-success-strong"
+          >
+            <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+            <circle cx="12" cy="10" r="3" />
+          </svg>
+          <div>
+            <p className="text-body font-bold text-success-strong">
+              Der Gutachter kommt zu Ihnen
+            </p>
+            <p className="mt-0.5 text-[0.8125rem] text-success-strong/90">
+              Sie müssen nirgendwo hinfahren. Die Begutachtung findet dort statt, wo das
+              Fahrzeug steht — zu Hause, in der Werkstatt oder am Unfallort.
+            </p>
+          </div>
+        </div>
+      )}
       {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
