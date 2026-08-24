@@ -1,0 +1,41 @@
+import { ladeNaechstenTermin } from '@/lib/termine/naechster-termin'
+
+// Der naechste buchbare Vor-Ort-Termin einer Stadt — als echtes, server-gerendertes HTML.
+//
+// Zweck: einem browsenden LLM (ChatGPT-Suche, Perplexity, Gemini) UND einem Menschen
+// dieselbe konkrete Tatsache geben — wann der naechste Termin frei ist und wo man ihn
+// bucht. Bis hierher stand diese Information ausschliesslich in der JSON-API und im
+// cross-origin-iframe des Finders; beides liest ein Crawler nicht. Gemessen 24.08.2026:
+// die Stadtseite Koeln enthielt NULL Uhrzeiten und NULL Buchungs-Deeplinks.
+//
+// Bewusst nur der FRUEHESTE Termin, kein Kalender: eine Liste aller freien Slots wuerde
+// die Auslastung des Netzes offenlegen (Aaron-Entscheidung 24.08.). Der Satz wirkt
+// souveraen, verraet nichts — und traegt trotzdem den vollstaendigen Deeplink.
+//
+// Faellt der Termin weg (keine Slots, API stumm, Timeout), rendert die Komponente
+// `null` — die Seite bleibt unveraendert, statt eine leere Sektion zu zeigen.
+
+export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
+  const termin = await ladeNaechstenTermin(stadt)
+  if (!termin) return null
+
+  return (
+    <div className="mt-8 rounded-ios-md border border-claimondo-border bg-white p-5">
+      <p className="text-caption font-bold uppercase tracking-wide text-claimondo-shield/70">
+        Nächster freier Vor-Ort-Termin in {stadt}
+      </p>
+      <p className="mt-1 text-heading-sm font-bold text-claimondo-navy">{termin.label}</p>
+      <p className="mt-2 text-body-sm text-claimondo-shield">
+        Ein unabhängiger Kfz-Sachverständiger begutachtet Ihr Fahrzeug vor Ort. Für unverschuldet
+        Geschädigte entstehen keine Eigenkosten (§ 249 BGB, vorbehaltlich Anerkenntnis durch den
+        gegnerischen Haftpflichtversicherer).
+      </p>
+      <a
+        href={termin.buchungsUrl}
+        className="mt-4 inline-flex items-center gap-2 rounded-ios-sm bg-claimondo-navy px-5 py-2.5 text-body-sm font-bold text-white transition-colors hover:bg-claimondo-ondo"
+      >
+        Diesen Termin sichern
+      </a>
+    </div>
+  )
+}

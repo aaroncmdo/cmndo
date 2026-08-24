@@ -6,6 +6,7 @@ import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { ladeUebersichtsTermine } from '@/lib/termine/naechster-termin'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -105,6 +106,17 @@ export default async function GutachterFindenPage({
     }
   }
 
+  // Naechste freie Termine der Kernstaedte — server-geladen, damit die BUCHBARKEIT im
+  // HTML steht. Gemessen 24.08.2026 lieferte diese Seite 232 KB HTML mit null Gutachtern
+  // und null Terminen (mit UA GPTBot/PerplexityBot/ClaudeBot identisch): der gesamte
+  // Finder liegt im cross-origin-iframe, den kein Crawler liest. Ein LLM konnte uns also
+  // empfehlen, aber keinen Termin nennen. Faellt die Abfrage aus, ist das Array leer und
+  // das Panel sieht exakt aus wie bisher.
+  const uebersichtsTermine = await ladeUebersichtsTermine()
+  const termineNachStadt = Object.fromEntries(
+    uebersichtsTermine.map((t) => [t.stadt, { label: t.label, buchungsUrl: t.buchungsUrl }]),
+  )
+
   return (
     <>
       <script
@@ -169,6 +181,7 @@ export default async function GutachterFindenPage({
           lng: s.lng,
         }))}
         ratgeber={[...RATGEBER_LINKS]}
+        termine={termineNachStadt}
         labels={{
           staedte: t('sprung_staedte'),
           ratgeber: t('sprung_ratgeber'),

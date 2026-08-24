@@ -37,9 +37,21 @@ export type SprungStadt = {
 
 export type SprungLink = { href: string; label: string }
 
+/** Naechster freier Termin je Stadt-NAME (z.B. "Köln"), server-geladen. */
+export type SprungTermine = Record<string, { label: string; buchungsUrl: string }>
+
 type Props = {
   staedte: SprungStadt[]
   ratgeber: SprungLink[]
+  /**
+   * Optionale Termin-Badges. Der Grund, warum sie hier haengen und nicht in einem
+   * eigenen Abschnitt unter der Karte: `/gutachter-finden` ist seit 16.06. embed-only,
+   * weil Content unter der 100dvh-Karte auf Mobil einen Scroll-Konflikt erzeugte. Dieses
+   * Panel liegt off-canvas — sein Markup steht IMMER im server-gerenderten HTML (nicht
+   * hinter `{offen && …}`), also sehen Crawler und LLMs die Deeplinks, ohne dass sich
+   * am Layout etwas aendert. Kein Cloaking: Menschen erreichen dieselben Links.
+   */
+  termine?: SprungTermine
   labels: {
     staedte: string
     ratgeber: string
@@ -49,7 +61,7 @@ type Props = {
   }
 }
 
-export function FinderSprungPanel({ staedte, ratgeber, labels }: Props) {
+export function FinderSprungPanel({ staedte, ratgeber, labels, termine }: Props) {
   const [offen, setOffen] = useState<'staedte' | 'ratgeber' | null>(null)
   const router = useRouter()
 
@@ -176,6 +188,17 @@ export function FinderSprungPanel({ staedte, ratgeber, labels }: Props) {
                           >
                             {s.name}
                           </a>
+                          {/* Naechster freier Termin — echter <a> mit dem vollstaendigen
+                              Deeplink (`?stadt=&sv=&slot=`). Damit steht die buchbare
+                              Tatsache im HTML, statt nur im iframe und in der JSON-API. */}
+                          {termine?.[s.name] ? (
+                            <a
+                              href={termine[s.name].buchungsUrl}
+                              className="shrink-0 rounded-full bg-claimondo-bg px-2 py-1 text-body-xs font-medium text-claimondo-ondo transition hover:bg-claimondo-light-blue/20"
+                            >
+                              {termine[s.name].label} frei
+                            </a>
+                          ) : null}
                           <Link
                             href={`/kfz-gutachter/${s.slug}`}
                             aria-label={`${labels.infos} ${s.name}`}
