@@ -1,5 +1,5 @@
 import { PlacesFehler, type Betrieb } from '../../places'
-import { kernName } from '../../anreicherung/kern-name'
+import { findeEigenen } from '../eigener-betrieb'
 import { befund, nichtErhoben, type Befund, type Fehlstelle, type Messergebnis, type Messkontext } from '../modul-vertrag'
 
 /** Muss der Modulpunktzahl aus der Registry entsprechen (`wett: 18`). */
@@ -17,9 +17,6 @@ export const SUCHBEGRIFF = 'Kfz-Sachverständiger'
  * auch wenn der Bestand niedrig ist.
  */
 export const GEWICHTE = { sichtbar: 4, rang: 8, median: 4, dynamik: 2 }
-
-/** Kuerzere Namenskerne sind fuer einen Abgleich nicht belastbar. */
-const MIN_KERN = 4
 
 /**
  * Median der Bewertungszahlen — auf eine ganze Zahl gerundet.
@@ -51,44 +48,16 @@ function perzentil(zahlen: number[], p: number): number {
   return s[Math.min(s.length - 1, Math.ceil((s.length - 1) * p))]
 }
 
-/**
- * Vergleichbarer Name — ueber den KERN, nicht ueber die ganze Zeichenkette.
- *
- * ⚠ Am echten Lauf gefunden (18.08.): Google fuehrt den Betrieb als
- * „KFZ Sachverständigenbüro Berkay Yigit Münster", der Nutzer tippt
- * „Gutachter Yigit". Ein Substring-Vergleich scheitert, weil die
- * GATTUNGSWOERTER verschieden sind — und genau die entfernt `kernName`
- * (samt Unicode-Schmuckschrift, die im Bestand vorkommt).
- */
-function vergleichbar(s: string): string {
-  return kernName(s).replace(/\s+/g, '')
-}
-
-/**
- * Findet den eigenen Betrieb in der Trefferliste.
- *
- * ⚠ Braucht den Firmennamen. `levelup_checks` fuehrt ihn NICHT (nur
- * `sv_lead_id`) — beim Massenlauf kommt er aus `sv_leads.firma`, beim
- * oeffentlichen Check ist er unbekannt. Dann bleibt das Modul fuer
- * `modus='bestand'` unmessbar, und genau das steht als Fehlstelle im Befund
- * statt als schlechter Rang (R-B).
- */
-function findeEigenen(betriebe: Betrieb[], firmenname: string | null): Betrieb | null {
-  if (!firmenname?.trim()) return null
-  const gesucht = vergleichbar(firmenname)
-  if (gesucht.length < MIN_KERN) return null
-
-  return betriebe.find((b) => {
-    const kandidat = vergleichbar(b.name)
-    // ⚠ Kurze und leere Kerne MÜSSEN ausgeschlossen werden, bevor verglichen
-    // wird: `'meyer'.includes('')` ist true. Ein Betrieb, dessen Name nur aus
-    // Gattungswörtern besteht ("Sachverständigenbüro"), hat einen leeren Kern
-    // und würde als JEDER Betrieb erkannt. Am eigenen Test aufgefallen, wo
-    // "Buero 0" sich als gesuchter Betrieb ausgab.
-    if (kandidat.length < MIN_KERN) return false
-    return kandidat.includes(gesucht) || gesucht.includes(kandidat)
-  }) ?? null
-}
+// `vergleichbar` und `findeEigenen` leben jetzt in ../eigener-betrieb — sie
+// standen wortgleich hier UND in gbp.ts. Der dortige Kommentar verlangte, dass
+// beide Module denselben Betrieb finden ("sonst widersprechen sich zwei Teile
+// desselben Befunds"); zwei Kopien konnten das nur hoffen, ein Import
+// garantiert es.
+//
+// Der Befund, der die Logik geformt hat, bleibt festgehalten: am echten Lauf
+// (18.08.) fuehrt Google den Betrieb als „KFZ Sachverständigenbüro Berkay Yigit
+// Münster", waehrend der Nutzer „Gutachter Yigit" tippt. Ein Substring-Vergleich
+// scheitert an den GATTUNGSWOERTERN — genau die entfernt `kernName`.
 
 /**
  * Modul `wett` — Wettbewerber im 50-km-Umkreis.
