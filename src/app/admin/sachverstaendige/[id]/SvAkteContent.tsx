@@ -5,6 +5,7 @@ import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
 import TestAccountToggle from './TestAccountToggle'
+import KiSichtbarkeitToggle from './KiSichtbarkeitToggle'
 import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
 import AbrechnungsTab from './AbrechnungsTab'
 import { getSvStatus } from '@/lib/sv-status'
@@ -63,13 +64,17 @@ export default async function SvDetailPage({
   // typisierte Select oben wuerde sonst tsc brechen. Defensive: bei fehlendem
   // SERVICE_ROLE_KEY nicht die ganze Seite crashen (default false).
   let istTestaccount = false
+  let kiSichtbar = true
   try {
     const { data: testFlagRow } = await createAdminClient()
       .from('sachverstaendige')
-      .select('ist_testaccount')
+      .select('ist_testaccount, ki_sichtbar')
       .eq('id', id)
       .maybeSingle()
     istTestaccount = Boolean((testFlagRow as { ist_testaccount?: boolean } | null)?.ist_testaccount)
+    // Default TRUE: die Spalte ist neu, und „nicht gesetzt" heisst sichtbar — sonst
+    // stuenden alle SVs nach dem Deploy auf „nicht im KI-Kanal".
+    kiSichtbar = (testFlagRow as { ki_sichtbar?: boolean } | null)?.ki_sichtbar !== false
   } catch (err) {
     console.error('[admin/sv-detail] ist_testaccount-Read:', err)
   }
@@ -382,6 +387,10 @@ export default async function SvDetailPage({
                 />
                 {/* Gutachter-Onboarding-Audit (Befund #6): Test-Account-Toggle */}
                 <TestAccountToggle svId={sv.id} istTestaccount={istTestaccount} />
+                {/* Admin-Toggle: erscheint der SV im KI-/GEO-Kanal? (Stadtseiten-Termine,
+                    Verfuegbarkeits-Streifen, oeffentliche Termin-API). Dispatch bleibt
+                    davon unberuehrt. */}
+                <KiSichtbarkeitToggle svId={sv.id} kiSichtbar={kiSichtbar} />
                 {/* KFZ-153: Gutachten-Mängel Warnung */}
                 {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-warning-soft text-warning" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
