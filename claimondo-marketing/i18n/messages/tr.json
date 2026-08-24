@@ -1116,7 +1116,7 @@
         },
         {
           "titel": "Bilirkişiyi ayarlıyoruz",
-          "text": "En yakın müsait bilirkişi — üç hafta sonrasına randevusu olan değil. 48 saatten kısa sürede yerinde.",
+          "text": "Üç hafta sonra boşta olan değil, en yakın müsait bilirkişi. 48 saat içinde aracınızın yanına gelir.",
           "href": "/sachverstaendige",
           "nr": 2
         },
@@ -1163,8 +1163,8 @@
           "antwort": "Kusursunuz ve hasar 750 €'nun üzerindeyse 0 € ödersiniz. Karşı tarafın Haftpflicht sigortası, §249 BGB uyarınca tüm masrafları karşılar. BVSK-Honorartabelle'ye göre ücretler, hasar miktarına bağlı olarak 300 € ile 1.200 € arasında değişir."
         },
         {
-          "frage": "Bir Kfz bilirkişi ne kadar sürede yerinde olabilir?",
-          "antwort": "Claimondo ağındaki sertifikalı ortak bilirkişiler, aracınızı Almanya genelinde 48 saatten kısa sürede — çoğunlukla aynı veya ertesi iş günü — yerinde inceler."
+          "frage": "Bir araç bilirkişisi aracıma ne kadar sürede gelir?",
+          "antwort": "Claimondo ağındaki sertifikalı bilirkişiler Almanya genelinde 48 saat içinde aracınızın yanına gelir: evinize, iş yerinize veya servise. Hiçbir yere gitmeniz gerekmez."
         },
         {
           "frage": "Sigorta bilirkişi raporunu kesintiye uğratırsa ne olur?",
@@ -1209,7 +1209,7 @@
     "pruefdienst_kontrast": {
       "eyebrow": "Masada değil, yerinde",
       "heading": "Yerinde değerlendirilir. Masada kesilmez.",
-      "sub": "Sigortacılar hasarları, aracı hiç görmeden masa başında değerlendiren çevrimiçi kontrol hizmetlerine yönlendirir. Bağımsız bir eksper yerinde, onların yok ettiğini görür.",
+      "sub": "Sigortacılar hasarı, aracı hiç görmeden masa başında değerlendiren çevrimiçi ekspertiz hizmetlerine devreder. Bağımsız bir bilirkişi aracınızın bulunduğu yere gelir ve bu şekilde kaybolanı görür.",
       "wir_badge": "Biz nasıl değerlendiririz",
       "wir_label": "Bağımsız eksper — yerinde",
       "wir_punkte": [
@@ -2116,7 +2116,7 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — Kfz-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
+    "sr_h1": "Yakınınızdaki araç bilirkişisini bulun – bilirkişi aracınızın yanına gelir, §249 BGB uyarınca ücretsiz",
     "kpis": [
       {
         "wert": "BVSK",
@@ -2124,7 +2124,7 @@
       },
       {
         "wert": "< 48 sa",
-        "label": "yerinde randevuya kadar"
+        "label": "bilirkişi size ulaşana kadar"
       },
       {
         "wert": "0 €",

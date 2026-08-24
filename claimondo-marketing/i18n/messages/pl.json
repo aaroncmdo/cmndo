@@ -1110,7 +1110,7 @@
         },
         {
           "titel": "Dysponujemy rzeczoznawcą",
-          "text": "Najbliższy wolny rzeczoznawca — nie ten, który ma czas za trzy tygodnie. Wizyta w < 48 h.",
+          "text": "Najbliższy wolny rzeczoznawca, a nie ten, który ma czas za trzy tygodnie. Przyjedzie do Twojego pojazdu w niecałe 48 godzin.",
           "href": "/sachverstaendige",
           "nr": 2
         },
@@ -1157,8 +1157,8 @@
           "antwort": "Przy niezawinionej kolizji ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczenie sprawcy (OC) pokrywa wszystkie koszty na podstawie §249 BGB. Honoraria wg BVSK-Honorartabelle wynoszą — w zależności od wysokości szkody — od 300 € do 1.200 €."
         },
         {
-          "frage": "Jak szybko rzeczoznawca samochodowy może być na miejscu?",
-          "antwort": "Certyfikowani rzeczoznawcy partnerzy z sieci Claimondo oględziny pojazdu przeprowadzają w całych Niemczech w czasie poniżej 48 godzin — zazwyczaj tego samego lub następnego dnia roboczego."
+          "frage": "Jak szybko rzeczoznawca przyjedzie do mojego samochodu?",
+          "antwort": "Certyfikowani rzeczoznawcy z sieci Claimondo przyjeżdżają do Twojego pojazdu w całych Niemczech w niecałe 48 godzin: do domu, do pracy lub do warsztatu. Nie musisz nigdzie jechać."
         },
         {
           "frage": "Co się dzieje, gdy ubezpieczenie zakwestionuje ekspertyzę?",
@@ -1203,7 +1203,7 @@
     "pruefdienst_kontrast": {
       "eyebrow": "Na miejscu, nie zza biurka",
       "heading": "Oceniane na miejscu. Nie cięte zza biurka.",
-      "sub": "Ubezpieczyciele przekazują szkody internetowym serwisom kontrolnym, które wyceniają auto, nigdy go nie widząc. Niezależny rzeczoznawca na miejscu widzi to, co tamci każą zniknąć.",
+      "sub": "Ubezpieczyciele przekazują szkody serwisom online, które oceniają zza biurka, nigdy nie widząc auta. Niezależny rzeczoznawca przyjeżdża tam, gdzie stoi Twój samochód, i widzi to, co przy tym ginie.",
       "wir_badge": "Tak oceniamy my",
       "wir_label": "Niezależny rzeczoznawca — na miejscu",
       "wir_punkte": [
@@ -2110,7 +2110,7 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z Kfz-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
+    "sr_h1": "Znajdź rzeczoznawcę w pobliżu – rzeczoznawca przyjedzie do Twojego pojazdu, bezpłatnie zgodnie z §249 BGB",
     "kpis": [
       {
         "wert": "BVSK",
@@ -2118,7 +2118,7 @@
       },
       {
         "wert": "< 48 h",
-        "label": "do terminu wizyty na miejscu"
+        "label": "zanim rzeczoznawca do Ciebie dotrze"
       },
       {
         "wert": "0 €",

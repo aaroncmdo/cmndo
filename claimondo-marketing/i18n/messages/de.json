@@ -1264,7 +1264,7 @@
         {
           "nr": 2,
           "titel": "Wir disponieren den Gutachter",
-          "text": "Nächster freier Sachverständiger – nicht der, der in drei Wochen Zeit hat. < 48 h vor Ort.",
+          "text": "Nächster freier Sachverständiger – nicht der, der in drei Wochen Zeit hat. In unter 48 Stunden kommt er zu Ihrem Fahrzeug.",
           "href": "/sachverstaendige"
         },
         {
@@ -1310,8 +1310,8 @@
           "antwort": "Bei einem unverschuldeten Unfall mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen je nach Schadenshöhe typisch zwischen 300 € und 1.200 €, bei hohen Schäden bis ca. 2.500 €."
         },
         {
-          "frage": "Wie schnell kann ein Kfz-Gutachter vor Ort sein?",
-          "antwort": "Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk besichtigen Ihr Fahrzeug bundesweit in unter 48 Stunden – meist am selben oder folgenden Werktag."
+          "frage": "Wie schnell kommt ein Kfz-Gutachter zu meinem Fahrzeug?",
+          "antwort": "Zertifizierte Partner-Sachverständige aus dem Claimondo-Netzwerk kommen bundesweit in unter 48 Stunden zu Ihrem Fahrzeug – nach Hause, zur Arbeit oder in die Werkstatt. Sie müssen nirgendwo hinfahren."
         },
         {
           "frage": "Was passiert, wenn die Versicherung das Gutachten kürzt?",
@@ -1356,7 +1356,7 @@
     "pruefdienst_kontrast": {
       "eyebrow": "Vor Ort statt Schreibtisch",
       "heading": "Vor Ort begutachtet. Nicht am Schreibtisch gekürzt.",
-      "sub": "Versicherer leiten Schäden an Online-Prüfdienste weiter, die ohne Fahrzeug am Schreibtisch bewerten. Ein unabhängiger Sachverständiger sieht vor Ort, was dabei verschwindet.",
+      "sub": "Versicherer leiten Schäden an Online-Prüfdienste weiter, die ohne Fahrzeug am Schreibtisch bewerten. Ein unabhängiger Sachverständiger kommt dorthin, wo Ihr Auto steht, und sieht, was dabei verschwindet.",
       "wir_badge": "So begutachten wir",
       "wir_label": "Unabhängiger Sachverständiger – vor Ort",
       "wir_punkte": [
@@ -2004,7 +2004,7 @@
     "sr_h1": "Kfz-Werkstatt in Ihrer Nähe finden – interaktive Karte mit geprüften Partner-Werkstätten, gerankt nach Marke und Schadensbild"
   },
   "gutachter_finden": {
-    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden – Karte mit Kfz-Sachverständigen, kostenfrei nach §249 BGB",
+    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden – der Sachverständige kommt zu Ihrem Fahrzeug, kostenfrei nach §249 BGB",
     "kpis": [
       {
         "wert": "BVSK",
@@ -2012,7 +2012,7 @@
       },
       {
         "wert": "< 48 h",
-        "label": "bis zum Termin vor Ort"
+        "label": "bis der Gutachter bei Ihnen ist"
       },
       {
         "wert": "0 €",

@@ -1116,7 +1116,7 @@
         },
         {
           "titel": "We dispatch the expert",
-          "text": "Next available appraiser — not the one free in three weeks. On-site in under 48 h.",
+          "text": "The next available expert, not the one free in three weeks. He comes to your vehicle within 48 hours.",
           "href": "/sachverstaendige",
           "nr": 2
         },
@@ -1163,8 +1163,8 @@
           "antwort": "In a no-fault accident with damage exceeding 750 €, you pay 0 €. The opposing liability insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle range from 300 € to 1,200 € depending on the extent of damage."
         },
         {
-          "frage": "How quickly can a vehicle expert be on-site?",
-          "antwort": "Certified partner appraisers from the Claimondo network inspect your vehicle nationwide in under 48 hours — usually the same or the following business day."
+          "frage": "How quickly does a vehicle appraiser come to my car?",
+          "antwort": "Certified partner experts from the Claimondo network come to your vehicle anywhere in Germany within 48 hours: at home, at work or at the garage. You do not have to drive anywhere."
         },
         {
           "frage": "What happens if the insurance reduces the expert report?",
@@ -1209,7 +1209,7 @@
     "pruefdienst_kontrast": {
       "eyebrow": "On site, not at a desk",
       "heading": "Assessed on site. Not cut at a desk.",
-      "sub": "Insurers route claims to online desk-check services that value your car without ever seeing it. An independent expert on site spots what they make disappear.",
+      "sub": "Insurers pass damage on to online assessment services that evaluate from a desk without ever seeing the car. An independent expert comes to wherever your car is and sees what gets lost that way.",
       "wir_badge": "How we assess",
       "wir_label": "Independent expert — on site",
       "wir_punkte": [
@@ -2116,7 +2116,7 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Find a vehicle appraiser near you — map of qualified appraisers, no cost under §249 BGB",
+    "sr_h1": "Find a vehicle appraiser near you – the expert comes to your vehicle, free of charge under §249 BGB",
     "kpis": [
       {
         "wert": "BVSK",
@@ -2124,7 +2124,7 @@
       },
       {
         "wert": "< 48 h",
-        "label": "until the on-site appointment"
+        "label": "until the appraiser reaches you"
       },
       {
         "wert": "0 €",
