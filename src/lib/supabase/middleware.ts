@@ -264,6 +264,14 @@ export function isPublicPath(pathname: string): boolean {
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
     // Account beim OCR-Upload; Token-Validierung läuft in der Action selbst
     '/upload',
+    // Gewinnspiel-Gewinnerseite (/gewinn/[token]): der Gewinner ist per
+    // Definition NICHT eingeloggt — er kommt aus einer WhatsApp. Ohne diesen
+    // Eintrag lief die gesamte Einloese-Strecke in 307 -> /login (lokal gegen
+    // die echte Middleware gemessen, nicht abgeleitet). Token-Pruefung passiert
+    // in page.tsx und in beiden Actions selbst.
+    // MIT Slash wie '/embed/' und '/g/': ohne wuerde startsWith ein kuenftiges
+    // '/gewinn-intern' faelschlich mitoeffnen (Auth-Bypass).
+    '/gewinn/',
     '/agb',
     '/nutzungsbedingungen',
     '/datenschutz',

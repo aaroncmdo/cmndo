@@ -30,6 +30,12 @@ describe('isPublicPath — Magic-Link-Routen bleiben public', () => {
     ['/', 'Root'],
     ['/sitemap.xml', 'SEO-Crawler-Endpunkt'],
     ['/robots.txt', 'SEO-Crawler-Endpunkt'],
+    // 24.08.2026: fehlte in der Allowlist. Der Gewinner kommt aus einer
+    // WhatsApp und ist per Definition NICHT eingeloggt — ohne Eintrag lief die
+    // gesamte Einloese-Strecke in 307 -> /login. Gefunden nur durch einen
+    // anonymen Request gegen die echte Middleware; Build, tsc und 127 Tests
+    // waren gruen, und ein eingeloggter Playwright-Lauf sah 200.
+    ['/gewinn/abc-token-123', 'Gewinnspiel-Einloeseseite (WhatsApp-Magic-Link)'],
   ])('%s ist public (%s)', (pfad) => {
     expect(isPublicPath(pfad)).toBe(true)
   })
@@ -50,6 +56,7 @@ describe('isPublicPath — geschuetzte Portal-Routen bleiben hinter dem Auth-Gat
     ['/makler/leads', "darf nicht durch '/makler/*-Registrierung' fallen"],
     ['/admin/faelle', 'Admin-Portal'],
     ['/dispatch/leads', 'Dispatch-Portal'],
+    ['/gewinn-intern', "darf nicht durch '/gewinn/' fallen"],
   ])('%s ist geschuetzt (%s)', (pfad) => {
     expect(isPublicPath(pfad)).toBe(false)
   })
