@@ -117,6 +117,7 @@ export function FinderWizard({
   ownerProfilId = null,
   vorauswahlSvId = null,
   vorauswahlSlotStart = null,
+  utmSource = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -142,6 +143,9 @@ export function FinderWizard({
    *  Nur zusammen mit vorauswahlSvId wirksam. Trifft er zu, springt der Wizard direkt
    *  zur Schadensangabe — sonst bleibt die normale Terminauswahl stehen. */
   vorauswahlSlotStart?: string | null
+  /** `utm_source` der Einstiegs-URL — ChatGPT haengt `chatgpt.com` selbst an. Wird bis
+   *  auf die Anfrage durchgereicht, damit sichtbar wird, WELCHE KI den Kunden schickte. */
+  utmSource?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -357,6 +361,7 @@ export function FinderWizard({
         // ihn der Deeplink. Ohne diesen Marker ist eine KI-vermittelte Buchung im
         // Nachhinein nicht von einem normalen Website-Besuch zu unterscheiden.
         viaDeeplink: !!vorauswahlSvId,
+        utmSource,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {

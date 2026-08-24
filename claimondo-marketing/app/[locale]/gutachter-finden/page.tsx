@@ -85,6 +85,9 @@ export default async function GutachterFindenPage({
     sv?: string
     /** GEO-Deep-Link: ISO-Start des genannten Termins (nur mit ?sv= sinnvoll). */
     slot?: string
+    /** ChatGPT haengt an jeden ausgegebenen Link `utm_source=chatgpt.com` an — der Wert
+     *  wandert bis auf die Anfrage, damit sichtbar wird, WELCHE KI den Kunden brachte. */
+    utm_source?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -161,6 +164,7 @@ export default async function GutachterFindenPage({
         clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
         svId={sp.sv}
         slot={sp.slot}
+        utmSource={sp.utm_source}
       />
 
       {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:

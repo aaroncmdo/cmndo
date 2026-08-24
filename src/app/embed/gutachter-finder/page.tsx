@@ -34,6 +34,8 @@ export default async function GutachterFinderEmbedPage({
     sv?: string
     /** GEO-Deep-Link: ISO-Start des genannten Termins (nur mit sv sinnvoll). */
     slot?: string
+    /** `utm_source` der Einstiegs-URL (z.B. `chatgpt.com`) — reine Attribution. */
+    utm_source?: string
   }>
 }) {
   const sp = await searchParams
@@ -79,6 +81,10 @@ export default async function GutachterFinderEmbedPage({
   // Gleiche Logik wie oben: der Wert wird nur GEGEN das Matching-Ergebnis geprueft,
   // nie als Kennung vertraut und nie geschrieben.
   const vorauswahlSlot = typeof sp.slot === 'string' ? sp.slot : undefined
+  // Attribution, kein Steuerwert: `utm_source` wird nur gespeichert, nie als Kennung
+  // vertraut und nie in eine Query gegeben. Laenge gekappt wie in der Anfrage-Spalte
+  // (utm_* max 150), damit ein absurd langer Parameter nicht bis zum Insert durchlaeuft.
+  const utmSource = typeof sp.utm_source === 'string' ? sp.utm_source.slice(0, 150) : undefined
 
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
@@ -115,6 +121,7 @@ export default async function GutachterFinderEmbedPage({
             schaetzungSessionId={schaetzung}
             vorauswahlSvId={vorauswahlSv}
             vorauswahlSlotStart={vorauswahlSlot}
+            utmSource={utmSource}
           />
         }
       />
