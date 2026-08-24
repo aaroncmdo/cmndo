@@ -45,7 +45,7 @@ export default function PolizeiberichtUpload({
   }
 
   return (
-    <div className="bg-amber-50 border-l-4 border-amber-500 rounded-ios-lg p-4">
+    <div className="bg-warning-soft border border-warning rounded-ios-lg p-4">
       <div className="flex items-start gap-3">
         <ClipboardCheckIcon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">

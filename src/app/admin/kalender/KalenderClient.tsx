@@ -452,7 +452,7 @@ export default function KalenderClient({
                       return isAdminTermin ? (
                         <button key={entry.id} onClick={() => setModal({ mode: 'edit', termin: entry })}
                           className="block w-full text-left px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors"
-                          style={{ backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` }}>
+                          style={{ backgroundColor: entry.farbe + '15', color: entry.farbe, border: `1px solid ${entry.farbe}` }}>
                           <span className="truncate block">{entry.titel}</span>
                         </button>
                       ) : entry.link ? (
@@ -460,7 +460,7 @@ export default function KalenderClient({
                           className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors ${
                             entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
                           }`}
-                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` } : { borderLeft: '3px solid #ef4444' }}>
+                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, border: `1px solid ${entry.farbe}` } : { border: '1px solid var(--brand-danger, #ef4444)' }}>
                           <span className="truncate block">{entry.titel}</span>
                           {entry.gutachterName && viewMode === 'week' && (
                             <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>
@@ -472,7 +472,7 @@ export default function KalenderClient({
                           className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate ${
                             entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
                           }`}
-                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` } : { borderLeft: '3px solid #ef4444' }}>
+                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, border: `1px solid ${entry.farbe}` } : { border: '1px solid var(--brand-danger, #ef4444)' }}>
                           <span className="truncate block">{entry.titel}</span>
                           {entry.gutachterName && viewMode === 'week' && (
                             <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>

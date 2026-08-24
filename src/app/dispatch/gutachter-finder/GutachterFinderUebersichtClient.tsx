@@ -56,7 +56,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
   }
 
   return (
-    <div className={`bg-white rounded-ios-lg shadow-ios-md overflow-hidden border-l-4 ${istOffen ? 'border-claimondo-ondo' : 'border-claimondo-border'}`}>
+    <div className={`bg-white rounded-ios-lg shadow-ios-md overflow-hidden border ${istOffen ? 'border-claimondo-ondo' : 'border-claimondo-border'}`}>
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
