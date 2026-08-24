@@ -82,6 +82,9 @@ export default async function GutachterPartnerPage() {
 
   return (
     <>
+      {/* Sprungziel des Skip-Links aus dem Layout — diese Seite rendert
+          keine LandingTopbar, die es sonst liefert. */}
+      <div id="main-content" tabIndex={-1} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
