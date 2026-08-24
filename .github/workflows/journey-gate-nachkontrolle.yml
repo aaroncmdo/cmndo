@@ -31,7 +31,7 @@ permissions:
 
 jobs:
   nachkontrolle:
-    runs-on: [self-hosted, claimondo]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: War das Journey-Gate fuer diesen Stand gruen?
