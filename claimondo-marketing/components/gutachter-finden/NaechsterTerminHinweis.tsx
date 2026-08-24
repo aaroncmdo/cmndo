@@ -19,8 +19,37 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
   const termin = await ladeNaechstenTermin(stadt)
   if (!termin) return null
 
+  // Der Buchungslink MASCHINENLESBAR — der eigentliche Grund fuer diesen Block.
+  //
+  // Gemessen 24.08.2026: die URL stand ausschliesslich im `href`, der Ankertext lautete
+  // „Diesen Termin sichern". Ein Modell, das die Seite als TEXT verarbeitet, sah damit
+  // den Termin und den Gutachter — aber nie die URL dorthin. Folge: ChatGPT nannte
+  // Datum und Namen korrekt und gab dann die allgemeine Seiten-URL aus, weil es die
+  // einzige war, die es kannte. `ReserveAction` ist die schema.org-Form fuer genau
+  // diesen Fall: „hier wird reserviert, und zwar unter dieser Adresse".
+  const buchungsSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: `Kfz-Gutachter-Termin in ${stadt}`,
+    serviceType: 'Kfz-Schadensgutachten (Vor-Ort-Besichtigung)',
+    provider: { '@type': 'Organization', name: 'Claimondo' },
+    areaServed: { '@type': 'City', name: stadt },
+    potentialAction: {
+      '@type': 'ReserveAction',
+      name: termin.vorname
+        ? `Termin am ${termin.label} bei ${termin.vorname} in ${stadt} reservieren`
+        : `Termin am ${termin.label} in ${stadt} reservieren`,
+      target: { '@type': 'EntryPoint', urlTemplate: termin.buchungsUrl, actionPlatform: 'https://schema.org/DesktopWebPlatform' },
+      result: { '@type': 'Reservation', name: `Vor-Ort-Besichtigung ${termin.label}` },
+    },
+  }
+
   return (
     <div className="mt-8 rounded-ios-md border border-claimondo-border bg-white p-5">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buchungsSchema) }}
+      />
       <p className="text-caption font-bold uppercase tracking-wide text-claimondo-shield/70">
         Nächster freier Vor-Ort-Termin in {stadt}
       </p>
@@ -49,7 +78,9 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
         href={termin.buchungsUrl}
         className="mt-4 inline-flex items-center gap-2 rounded-ios-sm bg-claimondo-navy px-5 py-2.5 text-body-sm font-bold text-white transition-colors hover:bg-claimondo-ondo"
       >
-        Diesen Termin sichern
+        {termin.vorname
+          ? `Termin am ${termin.label} bei ${termin.vorname} buchen`
+          : `Termin am ${termin.label} buchen`}
       </a>
     </div>
   )
