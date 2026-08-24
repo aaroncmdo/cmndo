@@ -128,6 +128,16 @@ for (const [slug, entwurf] of Object.entries(inhalte)) {
       (befund.ok ? '' : befund.gruende.join(' · ').slice(0, 60)),
   )
 
+  // ⚠ Das Gate LEHNT einen Entwurf nicht ab, wenn einzelne Teile unbrauchbar
+  // sind — es ENTFERNT sie und laeuft weiter (gate.ts §Quellenzwang: `continue`).
+  // Ein Hotspot ohne belastbare Quell-URL verschwindet also, waehrend der Import
+  // „bestanden" meldet. Ohne diese Zeilen sieht man den Verlust nirgends: nicht
+  // im Exit-Code, nicht in der Tabelle, nicht in der DB (dort fehlt er ja).
+  // Das Gate sammelt die Verluste selbst — sie wurden hier nur nie ausgegeben.
+  if (befund.verworfen?.length) {
+    for (const v of befund.verworfen) console.log(`  ⚠ ${v}`)
+  }
+
   if (!befund.ok) {
     rot++
     fehlerhaft.push({ slug, gruende: befund.gruende })

@@ -2722,5 +2722,225 @@
  "52.49791,13.38893": {
   "strasse": "Mehringbrücke",
   "stadtteil": "Kreuzberg"
+ },
+ "50.74530,7.08599": {
+  "strasse": "Kölnstraße",
+  "stadtteil": "Nordstadt"
+ },
+ "50.76033,7.11471": {
+  "strasse": "L 16",
+  "stadtteil": "Schwarzrheindorf"
+ },
+ "50.73720,7.09788": {
+  "strasse": "Wilhelmstraße",
+  "stadtteil": "Bonn-Zentrum"
+ },
+ "50.78880,7.19997": {
+  "strasse": "Bonner Straße",
+  "stadtteil": "Siegburg-Mülldorf"
+ },
+ "50.78204,7.16875": {
+  "strasse": "L 143",
+  "stadtteil": "Obermenden"
+ },
+ "50.77040,7.20258": {
+  "strasse": "Alte Heerstraße",
+  "stadtteil": "Niederpleis"
+ },
+ "50.82682,7.28069": {
+  "strasse": "Zeithstraße",
+  "stadtteil": "Braschoß"
+ },
+ "50.79006,7.21296": {
+  "strasse": "L 333",
+  "stadtteil": null
+ },
+ "50.80368,7.20910": {
+  "strasse": "Aulgasse",
+  "stadtteil": null
+ },
+ "50.79906,7.16677": {
+  "strasse": "Mendener Straße",
+  "stadtteil": null
+ },
+ "50.80726,7.13078": {
+  "strasse": "Larstraße",
+  "stadtteil": "Sieglar"
+ },
+ "50.80010,7.12540": {
+  "strasse": "Pastor-Böhm-Straße",
+  "stadtteil": "Sieglar"
+ },
+ "50.67728,7.19109": {
+  "strasse": "Hauptstraße",
+  "stadtteil": null
+ },
+ "50.70434,7.17507": {
+  "strasse": "Hauptstraße",
+  "stadtteil": "Oberdollendorf"
+ },
+ "50.68592,7.27508": {
+  "strasse": "L 331",
+  "stadtteil": "Ittenbach"
+ },
+ "50.69891,7.19091": {
+  "strasse": "Heisterbacher Straße",
+  "stadtteil": "Oberdollendorf"
+ },
+ "50.64028,7.22688": {
+  "strasse": "Menzenberger Straße",
+  "stadtteil": null
+ },
+ "50.66891,7.30669": {
+  "strasse": "A 3",
+  "stadtteil": "Aegidienberg"
+ },
+ "50.65013,7.32870": {
+  "strasse": "Rottbitzer Straße",
+  "stadtteil": "Rottbitze"
+ },
+ "50.64121,7.22207": {
+  "strasse": "Menzenberger Straße",
+  "stadtteil": null
+ },
+ "50.67178,7.30161": {
+  "strasse": "A 3",
+  "stadtteil": "Aegidienberg"
+ },
+ "50.67482,7.29593": {
+  "strasse": "A 3",
+  "stadtteil": "Aegidienberg"
+ },
+ "50.72210,7.37819": {
+  "strasse": "Krautscheider Straße",
+  "stadtteil": "Uckerath"
+ },
+ "50.77305,7.30033": {
+  "strasse": "Emil-Langen-Straße",
+  "stadtteil": "Edgoven"
+ },
+ "50.76843,7.00491": {
+  "strasse": "L 281",
+  "stadtteil": null
+ },
+ "50.62801,6.98537": {
+  "strasse": "L 471",
+  "stadtteil": "Wormersdorf"
+ },
+ "50.62486,6.93715": {
+  "strasse": "Münstereifeler Straße",
+  "stadtteil": null
+ },
+ "50.64793,6.94840": {
+  "strasse": "L 493",
+  "stadtteil": "Peppenhoven"
+ },
+ "50.63552,6.94946": {
+  "strasse": "B 266",
+  "stadtteil": null
+ },
+ "50.63969,7.03681": {
+  "strasse": "Sängerhof",
+  "stadtteil": "Merl"
+ },
+ "50.70390,7.05881": {
+  "strasse": "Josef-Wirmer-Straße",
+  "stadtteil": "Brüser Berg"
+ },
+ "50.69706,7.14120": {
+  "strasse": "Godesberger Allee",
+  "stadtteil": "Hochkreuz"
+ },
+ "50.73901,7.07824": {
+  "strasse": "Bornheimer Straße",
+  "stadtteil": "Nordstadt"
+ },
+ "50.75274,7.15683": {
+  "strasse": "Bundesgrenzschutzstraße",
+  "stadtteil": "Vilich- Müldorf"
+ },
+ "50.74366,7.09005": {
+  "strasse": "Kölnstraße",
+  "stadtteil": "Bonn-Castell"
+ },
+ "50.73202,7.09944": {
+  "strasse": "Maximilianstraße",
+  "stadtteil": "Bonn-Zentrum"
+ },
+ "50.70119,7.13704": {
+  "strasse": "Godesberger Allee",
+  "stadtteil": "Friesdorf"
+ },
+ "50.69426,7.13427": {
+  "strasse": "Hochkreuzallee",
+  "stadtteil": "Friesdorf"
+ },
+ "50.78980,7.22722": {
+  "strasse": "Wahnbachtalstraße",
+  "stadtteil": "Wolsdorf"
+ },
+ "50.80727,7.23042": {
+  "strasse": "Zeithstraße",
+  "stadtteil": "Wolsdorf"
+ },
+ "50.69929,7.27819": {
+  "strasse": "L 268",
+  "stadtteil": "Oberpleis"
+ },
+ "50.67956,7.19788": {
+  "strasse": "Ferdinand-Mülhens-Straße",
+  "stadtteil": null
+ },
+ "50.71086,7.24503": {
+  "strasse": "A 3",
+  "stadtteil": "Thomasberg"
+ },
+ "50.69585,7.18500": {
+  "strasse": "Tunnel Oberdollendorf",
+  "stadtteil": "Oberdollendorf"
+ },
+ "50.64372,7.22880": {
+  "strasse": "Linzer Straße",
+  "stadtteil": null
+ },
+ "50.64928,7.22101": {
+  "strasse": "Hauptstraße",
+  "stadtteil": null
+ },
+ "50.64622,7.22496": {
+  "strasse": "Hauptstraße",
+  "stadtteil": null
+ },
+ "50.65209,7.30190": {
+  "strasse": "Aegidienberger Straße",
+  "stadtteil": "Aegidienberg"
+ },
+ "50.62881,7.22872": {
+  "strasse": "Drieschweg",
+  "stadtteil": null
+ },
+ "50.76322,7.02935": {
+  "strasse": "Roisdorfer Straße",
+  "stadtteil": "Hersel"
+ },
+ "50.77065,7.04285": {
+  "strasse": "Moselstraße",
+  "stadtteil": "Hersel"
+ },
+ "50.80036,6.91445": {
+  "strasse": "Walberberger Straße",
+  "stadtteil": "Walberberg"
+ },
+ "50.62601,7.04206": {
+  "strasse": "Schumannstraße",
+  "stadtteil": null
+ },
+ "50.64162,7.02064": {
+  "strasse": "Lüftelberger Straße",
+  "stadtteil": null
+ },
+ "50.62712,7.01076": {
+  "strasse": "Rheinbacher Landstraße",
+  "stadtteil": null
  }
 }
