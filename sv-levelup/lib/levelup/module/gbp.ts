@@ -1,5 +1,5 @@
 import { PlacesFehler, type Betrieb, type Profil } from '../../places'
-import { kernName } from '../../anreicherung/kern-name'
+import { findeEigenen } from '../eigener-betrieb'
 import { befund, nichtErhoben, type Befund, type Fehlstelle, type Messergebnis, type Messkontext } from '../modul-vertrag'
 
 /** Muss der Modulpunktzahl aus der Registry entsprechen (`gbp: 22`). */
@@ -43,38 +43,13 @@ const LABEL: Record<keyof typeof GEWICHTE, string> = {
 
 const SCHLUESSEL = Object.keys(GEWICHTE) as (keyof typeof GEWICHTE)[]
 
-/** Kuerzere Namenskerne sind fuer einen Abgleich nicht belastbar. */
-const MIN_KERN = 4
-
 /** Ab hier gilt ein Schnitt als „im oberen Feld" — an der gemessenen Verteilung. */
 const SCHNITT_HOCH = 4.8
 const SCHNITT_MITTEL = 4.3
 
-function vergleichbar(s: string): string {
-  return kernName(s).replace(/\s+/g, '')
-}
-
-/**
- * Findet den eigenen Betrieb in der Trefferliste.
- *
- * Bewusst dieselbe Logik wie in `wett`: Beide Module muessen denselben Betrieb
- * finden, sonst widersprechen sich zwei Teile desselben Befunds.
- */
-function findeEigenen(betriebe: Betrieb[], firmenname: string | null): Betrieb | null {
-  if (!firmenname?.trim()) return null
-  const gesucht = vergleichbar(firmenname)
-  if (gesucht.length < MIN_KERN) return null
-
-  return betriebe.find((b) => {
-    const kandidat = vergleichbar(b.name)
-    // ⚠ Leere und kurze Kerne AUSSCHLIESSEN, bevor verglichen wird:
-    // `'meyer'.includes('')` ist true. Ein Betrieb, dessen Name nur aus
-    // Gattungswoertern besteht, haette einen leeren Kern und gaebe sich als
-    // jeder Betrieb aus.
-    if (kandidat.length < MIN_KERN) return false
-    return kandidat.includes(gesucht) || gesucht.includes(kandidat)
-  }) ?? null
-}
+// `findeEigenen` lebt jetzt in ../eigener-betrieb — es stand wortgleich hier
+// UND in wett.ts. Der alte Kommentar verlangte, dass beide dieselbe Logik
+// haben; eine Kopie kann das nur hoffen, ein Import garantiert es.
 
 /** Stufenweise Punkte: der hoechste erreichte Schwellenwert gewinnt. */
 function stufe(wert: number, schwellen: number[], punkte: number[]): number {

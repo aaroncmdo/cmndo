@@ -1,5 +1,7 @@
 import type { Db } from '../anreicherung/schreiben'
+import type { PlacesAdapter } from '../places'
 import { ladeCheck, type Check } from './check'
+import { schlageWebsiteNach } from './eigener-betrieb'
 import type { ModulId } from './registry'
 import { bereinigeAuswahl, type Kontext } from './sperrlogik'
 
@@ -9,6 +11,8 @@ export type UmfangErgebnis =
       moduleAkzeptiert: ModulId[]
       moduleVerworfen: { id: ModulId; grund: string }[]
       punkteErhebbar: number
+      /** Gesetzt, wenn die Website aus dem Google-Profil uebernommen wurde. */
+      websiteUebernommen?: string
     }
   | { ok: false; error: string }
 
@@ -54,6 +58,7 @@ export async function setzePruefumfang(
   db: Db,
   token: string,
   moduleGewuenscht: string[],
+  opts: { places?: PlacesAdapter } = {},
 ): Promise<UmfangErgebnis> {
   if (moduleGewuenscht.length === 0) return { ok: false, error: 'kein_modul' }
 
@@ -61,9 +66,14 @@ export async function setzePruefumfang(
   if (!check) return { ok: false, error: 'unbekannt' }
   if (check.status !== 'neu') return { ok: false, error: 'falscher_status' }
 
+  const websiteUebernommen = await holeWebsiteFallsLeer(check, opts.places)
+
   const { akzeptiert, verworfen, punkteErhebbar } = bereinigeAuswahl(
     moduleGewuenscht as ModulId[],
-    baueKontext(check),
+    // ⚠ Der Kontext MUSS die nachgeschlagene Website kennen — sonst sperrt
+    // `bereinigeAuswahl` die URL-Module, obwohl die Adresse gerade gefunden
+    // wurde. Genau diese Reihenfolge ist der Kern des Fixes.
+    baueKontext({ ...check, website_url: websiteUebernommen ?? check.website_url }),
   )
 
   // Ein Check ohne messbares Modul wuerde einen leeren Befund erzeugen und
@@ -76,6 +86,9 @@ export async function setzePruefumfang(
       module_gewuenscht: moduleGewuenscht,
       module_gewaehlt: akzeptiert,
       punkte_erhebbar: punkteErhebbar,
+      // Nur schreiben, wenn wirklich nachgeschlagen wurde — sonst wuerde eine
+      // vom Nutzer getippte Adresse ueberschrieben.
+      ...(websiteUebernommen ? { website_url: websiteUebernommen } : {}),
     })
     .eq('token', token)
     .select()
@@ -89,9 +102,72 @@ export async function setzePruefumfang(
   const { error: evFehler } = await db.from('levelup_events').insert({
     check_id: check.id,
     typ: 'umfang_bestaetigt',
-    payload: { module: akzeptiert, verworfen },
+    payload: {
+      module: akzeptiert,
+      verworfen,
+      // Im Ereignis festhalten, WOHER die Adresse kam — sonst sieht ein
+      // spaeterer Leser eine Website im Check und weiss nicht, ob der Nutzer
+      // sie getippt hat oder wir sie aus dem Google-Profil uebernommen haben.
+      ...(websiteUebernommen ? { website_aus_profil: websiteUebernommen } : {}),
+    },
   })
   if (evFehler) console.error('levelup_events:', evFehler.message)
 
-  return { ok: true, moduleAkzeptiert: akzeptiert, moduleVerworfen: verworfen, punkteErhebbar }
+  return {
+    ok: true,
+    moduleAkzeptiert: akzeptiert,
+    moduleVerworfen: verworfen,
+    punkteErhebbar,
+    ...(websiteUebernommen ? { websiteUebernommen } : {}),
+  }
+}
+
+/**
+ * Schlaegt die Website im Google-Profil nach — aber NUR, wenn der Nutzer keine
+ * angegeben hat.
+ *
+ * ⚠ DER BEFUND, DER DAS NOETIG MACHT (24.08.2026): Ohne Website sperrt
+ * `bereinigeAuswahl` die Module `web` (12), `seo` (12) und `ux` (12) — 36 der
+ * 106 gebauten Punkte. Uebrig bleiben 70, die Score-Schwelle liegt bei 75.
+ * **Der Check erzeugt dann gar keinen Score**, nur einen Teilbefund. Gemessen
+ * an echten Checks: die mit Website kamen auf 104 Punkte und Score 67/69, die
+ * ohne auf 66 bzw. 57 — und blieben ohne Score.
+ *
+ * Gleichzeitig ruft `gbp` wenige Sekunden spaeter dasselbe Google-Profil ab, in
+ * dem die Website steht, und bewertet sie mit EINEM Punkt statt sie zu nutzen.
+ *
+ * ⚠ Fehlschlaege sind hier IMMER harmlos: ohne Treffer bleibt alles wie zuvor,
+ * die URL-Module werden gesperrt und der Nutzer sieht den Grund. Ein Fehler der
+ * Kartensuche darf den Pruefumfang nicht kippen — deshalb der try/catch.
+ *
+ * ⚠ KOSTEN: zwei Places-Abrufe, aber NUR fuer Checks ohne getippte Website.
+ * Wer eine Adresse eingibt, loest nichts aus. Die Suche laeuft genau einmal je
+ * Check (`setzePruefumfang` ist durch `status='neu'` geschuetzt) und ein zweiter
+ * Aufruf faende die Website bereits gesetzt vor.
+ */
+async function holeWebsiteFallsLeer(
+  check: Check,
+  places: PlacesAdapter | undefined,
+): Promise<string | null> {
+  if (check.website_url?.trim()) return null
+  if (!check.firmenname?.trim()) return null
+  if (check.standort_lat == null || check.standort_lng == null) return null
+  if (!places && !systemFaehigkeiten().hatPlacesZugang) return null
+
+  try {
+    const adapter = places ?? (await import('../places')).holeAdapter()
+    const nachschlag = await schlageWebsiteNach(
+      adapter,
+      { lat: check.standort_lat, lng: check.standort_lng },
+      check.firmenname,
+    )
+    if (nachschlag.gefunden) return nachschlag.website
+    console.info('[pruefumfang] Website nicht nachschlagbar:', nachschlag.grund)
+    return null
+  } catch (err) {
+    // Kein Grund, den Pruefumfang scheitern zu lassen — der Nutzer bekommt
+    // dann eben die Sperrgruende, die er ohne Nachschlag auch bekommen haette.
+    console.error('[pruefumfang] Website-Nachschlag fehlgeschlagen:', err)
+    return null
+  }
 }
