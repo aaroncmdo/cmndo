@@ -1,0 +1,37 @@
+{
+  "stand": "24/Aug/2026",
+  "gesamt": 12813,
+  "aufLp": 109,
+  "gecrawlt": 18,
+  "orte": {
+    "alsdorf": 1,
+    "baesweiler": 1,
+    "bergisch-gladbach": 1,
+    "bornheim": 2,
+    "bruehl": 1,
+    "frechen": 1,
+    "heiligenhaus": 1,
+    "huerth": 1,
+    "langenfeld": 1,
+    "leverkusen": 1,
+    "meerbusch": 1,
+    "monheim": 1,
+    "pulheim": 1,
+    "ratingen": 1,
+    "remscheid": 1,
+    "solingen": 1,
+    "sprockhoevel": 1,
+    "wesseling": 1
+  },
+  "tage": {
+    "11/Aug/2026": 2,
+    "14/Aug/2026": 14,
+    "15/Aug/2026": 5,
+    "19/Aug/2026": 12,
+    "20/Aug/2026": 48,
+    "21/Aug/2026": 1,
+    "22/Aug/2026": 16,
+    "23/Aug/2026": 4,
+    "24/Aug/2026": 7
+  }
+}
