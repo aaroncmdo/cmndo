@@ -153,25 +153,55 @@ async function ladeEinsatzStaedte(): Promise<string[]> {
     const svs = (data ?? []) as Array<{ standort_lat: number | null; standort_lng: number | null }>
     if (svs.length === 0) return []
 
-    // Eine Stadt zaehlt als Einsatzgebiet, wenn ein SV im Umkreis sitzt. 30 km ist die
-    // Distanz, mit der auch das Matching arbeitet.
+    // JE SV die naechstgelegene Stadt — nicht "die ersten N Staedte mit einem SV im Umkreis".
+    //
+    // ⚠ Der erste Entwurf lief ueber STAEDTE und brach nach MAX_UEBERSICHT Treffern ab.
+    // Das Array beginnt mit NRW, also waren die Plaetze voll, bevor Bremerhaven ueberhaupt
+    // geprueft wurde — obwohl dort ein SV sitzt. Am 24.08. auf prod gesehen: der Streifen
+    // zeigte Koeln, Duesseldorf, Duisburg, Wuppertal und Bremerhaven NICHT. Die Grenze
+    // kappte nach Array-POSITION statt nach Relevanz.
+    //
+    // Jetzt bestimmt jeder SV genau einen Eintrag: seine naechste Stadt. Damit ist jeder
+    // Standort des Netzes vertreten, die Liste waechst mit den Partnern statt mit der
+    // Laenge einer Handliste, und Dubletten (zwei Koelner SVs) fallen zusammen.
+    const gesehen = new Set<string>()
     const treffer: string[] = []
-    for (const stadt of STAEDTE) {
-      const nah = svs.some(
-        (sv) => distanzKm(Number(sv.standort_lat), Number(sv.standort_lng), stadt.lat, stadt.lng) <= 30,
-      )
-      if (nah) treffer.push(stadt.name)
-      if (treffer.length >= MAX_UEBERSICHT) break
+    for (const sv of svs) {
+      let beste: { name: string; km: number } | null = null
+      for (const stadt of STAEDTE) {
+        const km = distanzKm(Number(sv.standort_lat), Number(sv.standort_lng), stadt.lat, stadt.lng)
+        if (km <= 30 && (!beste || km < beste.km)) beste = { name: stadt.name, km }
+      }
+      if (beste && !gesehen.has(beste.name)) {
+        gesehen.add(beste.name)
+        treffer.push(beste.name)
+      }
     }
-    return treffer
+    // Reihenfolge = die von STAEDTE (dort stehen die grossen NRW-Staedte vorn, wo das Netz
+    // dicht ist). Ohne das haenge die Anzeige an der SV-Sortierung — eine Kleinstadt stuende
+    // dann vor Koeln, nur weil ihr Gutachter alphabetisch frueher kommt.
+    const rang = new Map(STAEDTE.map((s, i) => [s.name, i]))
+    treffer.sort((a, b) => (rang.get(a) ?? 9999) - (rang.get(b) ?? 9999))
+    return treffer.slice(0, MAX_UEBERSICHT)
   } catch {
     return []
   }
 }
 
-/** Obergrenze: jede Stadt kostet eine API-Abfrage. Gemessen 24.08. — acht parallel im
- *  kalten Zustand 4,28 s, fuenf rund die Haelfte. Mehr als sechs waere den TTFB nicht wert. */
-const MAX_UEBERSICHT = 6
+/**
+ * Obergrenze der Uebersicht.
+ *
+ * ⚠ Sie war auf 6 — und hat damit AUSGERECHNET die Standorte gekappt, die neu dazukamen.
+ * Am 24.08. auf prod: das Netz arbeitet an neun Orten, der Streifen zeigte vier, und
+ * Bremerhaven fehlte trotz frisch freigeschaltetem SV. Eine Grenze unterhalb der Zahl
+ * echter Standorte ist keine Sparmassnahme, sondern eine Zufallsauswahl.
+ *
+ * 12 deckt das Netz mit Luft nach oben. Der Preis ist vertretbar: acht parallele
+ * Abfragen kosten warm 0,44 s (kalt 4,28 s), und BEIDE Konsumenten des Streifens
+ * (Startseite, Pillar-Seite) liegen in `<Suspense>` — der Kaltstart blockiert also
+ * keinen TTFB mehr. Die Stadtseiten fragen ohnehin nur ihre eine Stadt ab.
+ */
+const MAX_UEBERSICHT = 12
 
 /** Haversine in km — genau genug fuer eine 30-km-Entscheidung, ohne PostGIS-Roundtrip. */
 function distanzKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
