@@ -84,9 +84,19 @@ const STRUKTURDATEN = {
  * fremden Sachverstaendigen genau diese beiden Angaben prueft und dessen
  * Gespraechsleitfaden vor der Abmahnkanzlei warnt.
  *
- * Die Texte liegen auf claimondo.de (derselbe Betreiber, sv-levelup ist eine
- * Subdomain). Abschnitt 9.6 der Datenschutzerklaerung deckt das ProvenExpert-
- * Siegel ab, das auf dieser Seite die Besucher-IP an einen Dritten uebermittelt.
+ * ENTSCHEIDUNG Aaron 24.08.2026: Der Verweis auf das Claimondo-Impressum
+ * GENUEGT — kein eigenes Impressum fuer diese Subdomain. Betreiber und
+ * Anbieterkennzeichnung sind identisch; sv-levelup.claimondo.de ist keine
+ * eigene Rechtsperson. Bitte nicht erneut aufrollen.
+ *
+ * Abschnitt 9.6 der Datenschutzerklaerung deckt das ProvenExpert-Siegel ab, das
+ * auf dieser Seite die Besucher-IP an einen Dritten uebermittelt.
+ *
+ * ⚠ DAVON UNBERUEHRT: Die Datenschutzerklaerung ist etwas anderes als das
+ * Impressum — sie muss beschreiben, WAS hier verarbeitet wird (Pruefauftraege,
+ * Ergebnisse, Token-Links, gespeicherte Standortangaben). Deckt der Text auf
+ * claimondo.de das nicht ab, ist der Verweis formal richtig und inhaltlich
+ * unvollstaendig. Nicht geprueft.
  */
 function RechtsFuss() {
   return (
