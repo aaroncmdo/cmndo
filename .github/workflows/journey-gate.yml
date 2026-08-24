@@ -62,7 +62,7 @@ env:
 
 jobs:
   journey-gate:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, claimondo]
     # Gemessen am nightly-Lauf 32617054709: alle 10 Journeys inkl. Seeds = 212 s,
     # Setup = 99 s. Die Tor-Suite ist kleiner (ohne J7 und ohne J9-lifecycle).
     # 20 min ist grosszuegig gepuffert.
