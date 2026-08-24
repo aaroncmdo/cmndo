@@ -720,6 +720,18 @@ Geld: die Warteschlange wuchs auf 20 Jobs, PRs standen Stunden.
   Schritte `pending`, kein Test gelaufen. Diese Signatur erkennen, statt den Code
   zu verdaechtigen.
 
+## Harte Regel fuer neue Workflows
+
+**Kein Workflow darf `runs-on: self-hosted` verwenden.** Es sind keine
+self-hosted Runner mehr registriert — ein solcher Job wartet stumm in der
+Warteschlange, ohne Fehler, ohne Meldung, unbegrenzt lange.
+
+Genau das ist am 24.08. passiert: die frisch gemergte `journey-gate-nachkontrolle`
+kam mit `runs-on: [self-hosted, claimondo]` auf main und stand 34 Minuten queued.
+Ein Waechter, der ein rotes Journey-Gate melden soll und selbst nie laeuft — die
+Klasse, gegen die er gebaut wurde. Der Drain-Vorab-Scan prueft seither
+Workflow-Diffs zusaetzlich auf `runs-on:.*self-hosted`.
+
 ## Was unabhaengig davon gilt
 
 **Privat auf dem Free-Plan gibt es weder Branch-Protection noch Regelsaetze**
