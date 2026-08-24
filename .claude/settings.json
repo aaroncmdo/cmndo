@@ -35,6 +35,11 @@
             "type": "command",
             "command": "node .claude/hooks/update-session-marker.mjs prompt",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/skill-radar.mjs",
+            "timeout": 10
           }
         ]
       }
