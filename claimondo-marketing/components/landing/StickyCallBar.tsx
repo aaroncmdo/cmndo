@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Phone, X, Send, Check, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -42,6 +42,32 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Am Seitenende ausblenden. Die Leiste ist `fixed` und verdeckte dort
+  // Footer-Inhalt — gemessen 24.08.2026 auf vier Seiten und zwei Breiten je
+  // 1 bis 6 Elemente, darunter die TELEFONNUMMER und die E-Mail-Adresse.
+  // Also ausgerechnet die Kontaktwege, zu denen sie selbst führen will.
+  //
+  // ⚠ Platz am Seitenende zu reservieren löst das NICHT (erst versucht, wieder
+  // verworfen): der Footer ist auf manchen Seiten höher als der Viewport
+  // (1128 px bei 664 px Bildschirm auf /kfz-haftpflicht-schaden). Am Seitenende
+  // füllt er den Bildschirm, und zusätzlicher Platz verschiebt nur, WELCHER
+  // Teil des Footers unter der Leiste liegt. Auf zwei von vier Seiten wurde es
+  // dadurch schlechter statt besser.
+  //
+  // Wer den Footer erreicht hat, braucht die schwebende CTA ohnehin nicht mehr:
+  // dort stehen Telefon und E-Mail im Klartext.
+  const [footerSichtbar, setFooterSichtbar] = useState(false)
+  useEffect(() => {
+    const footer = document.querySelector('footer')
+    if (!footer || typeof IntersectionObserver === 'undefined') return
+    const beobachter = new IntersectionObserver(
+      ([eintrag]) => setFooterSichtbar(eintrag.isIntersecting),
+      { threshold: 0.01 },
+    )
+    beobachter.observe(footer)
+    return () => beobachter.disconnect()
+  }, [])
+
   function submit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
@@ -60,7 +86,12 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref, finderHref 
   return (
     <>
       {/* Sticky Bar — Floating-Pill mit Glass-Backdrop */}
-      <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 sm:left-auto sm:right-6 sm:translate-x-0">
+      <div
+        aria-hidden={footerSichtbar}
+        className={`fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 transition-opacity duration-200 sm:left-auto sm:right-6 sm:translate-x-0 ${
+          footerSichtbar ? 'pointer-events-none opacity-0' : 'opacity-100'
+        }`}
+      >
         {/* Gutachter finden — Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
         <Link
           href={finderHref}
