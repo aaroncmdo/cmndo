@@ -285,6 +285,21 @@ export default async function KfzGutachterStadtPage({
   const locale = await getLocale()
   const ort = s.h1Anker
 
+  // Aktualitaets-Datum EINMAL berechnen — Schema und sichtbarer Text muessen
+  // denselben Wert tragen. Zwei getrennte Aufrufe waeren die Sorte Drift, die
+  // erst auffaellt, wenn jemand beide vergleicht.
+  //
+  // WARUM SICHTBAR UND NICHT NUR IM SCHEMA: AI-Systeme extrahieren PASSAGEN,
+  // nicht Seiten — ein Datum, das nur im JSON-LD steht, reist beim Zitieren
+  // nicht mit. Undatierter Inhalt verliert gegen datierten, weil Aktualitaet
+  // stark gewichtet wird (ai-seo-Methodik, GEO-Baseline 18.08.2026 Befund B2).
+  const standISO = stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm)
+  const standLesbar = new Intl.DateTimeFormat(locale, {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }).format(new Date(standISO))
+
   const heroBullets = t.raw('hero_bullets') as string[]
   const trustKpis = t.raw('trust_kpis') as Array<{ wert: string; label: string }>
   const prozessSteps = t.raw('prozess_steps') as Array<{ titel: string; text: string }>
@@ -337,7 +352,7 @@ export default async function KfzGutachterStadtPage({
             // gepflegt — seit der Cron taeglich zwei Staedte aendert, traegt das
             // nicht mehr: gemessen meldeten 169 von 182 Stadtseiten den
             // Mai-Default, darunter Staedte mit Inhalt VON DEMSELBEN TAG.
-            dateModified: stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm),
+            dateModified: standISO,
             url: `/kfz-gutachter/${s.slug}`,
           }),
           breadcrumbsSchema([
@@ -1104,6 +1119,16 @@ export default async function KfzGutachterStadtPage({
               </details>
             ))}
           </div>
+          {/* Sichtbares Aktualitaets-Signal, gleiche Quelle wie dateModified im
+              FAQPage-Schema. <time> gibt dem Datum eine maschinenlesbare Form,
+              ohne dass ein Leser das ISO-Format sieht. */}
+          {/* Label und Datum getrennt: `t.rich` nimmt fuer WERT-Platzhalter nur
+              Primitives, ein ReactNode ginge nur ueber eine Tag-Funktion — und
+              die bekaeme die Chunks aus der Message, nicht diesen Wert. */}
+          <p className="mt-8 text-center text-xs text-claimondo-shield/70">
+            {t('stand_label')}{' '}
+            <time dateTime={standISO}>{standLesbar}</time>
+          </p>
         </div>
       </section>
 
