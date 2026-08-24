@@ -25,6 +25,21 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
         Nächster freier Vor-Ort-Termin in {stadt}
       </p>
       <p className="mt-1 text-heading-sm font-bold text-claimondo-navy">{termin.label}</p>
+      {/* WER den Termin anbietet. Ohne diese Zeile konnte ein LLM zwar den Tag nennen,
+          aber nicht die Person — und eine Empfehlung ohne Gegenüber ist schwächer.
+          Nur Vorname + öffentliche Kennzahlen (die anon-sichere Projektion der API):
+          kein Nachname, keine Adresse, keine Rufnummer — der Lead läuft über uns. */}
+      {termin.vorname ? (
+        <p className="mt-1 text-body-sm font-medium text-claimondo-shield">
+          {termin.vorname}
+          {termin.bewertungSchnitt != null
+            ? ` · ${termin.bewertungSchnitt.toLocaleString('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}★${
+                termin.bewertungAnzahl ? ` (${termin.bewertungAnzahl} Bewertungen)` : ''
+              }`
+            : ''}
+          {termin.entfernung ? ` · ${termin.entfernung}` : ''}
+        </p>
+      ) : null}
       <p className="mt-2 text-body-sm text-claimondo-shield">
         Ein unabhängiger Kfz-Sachverständiger begutachtet Ihr Fahrzeug vor Ort. Für unverschuldet
         Geschädigte entstehen keine Eigenkosten (§ 249 BGB, vorbehaltlich Anerkenntnis durch den
