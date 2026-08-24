@@ -75,37 +75,37 @@
     "unfallHotspots": [
       {
         "ort": "Kölnstraße (Nordstadt)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 46 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (14 von 46). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 46 Fällen war in 22 ein Fahrrad, in 2 ein Fußgänger, in 10 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Godesberger Allee (Hochkreuz)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 42 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (18 von 42). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 42 Fällen war in 12 ein Fahrrad, in 3 ein Fußgänger, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Konrad-Adenauer-Platz (Beuel-Mitte)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 33 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (12 von 33). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 33 Fällen war in 20 ein Fahrrad, in 1 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Berliner Freiheit (Bonn-Zentrum)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 30 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (18 von 30). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 30 Fällen war in 24 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Doktor-Weis-Platz (Beuel-Mitte)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 29 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (20 von 29). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 29 Fällen war in 24 ein Fahrrad, in 2 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 16 (Schwarzrheindorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 25 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 25). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 25 Fällen war in 6 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
@@ -192,25 +192,25 @@
     "unfallHotspots": [
       {
         "ort": "Bonner Straße (Mülldorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 40 erfassten Unfällen, verteilt auf 3 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (19 von 40). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 40 Fällen war in 17 ein Fahrrad, in 6 ein Fußgänger, in 3 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "B 56 (Obermenden)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 16 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (8 von 16). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 16 Fällen war in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 143 (Obermenden)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (3 von 11). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 11 Fällen war in 7 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Alte Heerstraße (Niederpleis)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 11). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 11 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -296,37 +296,37 @@
     "unfallHotspots": [
       {
         "ort": "Bonner Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 19 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (8 von 19). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 19 Fällen war in 7 ein Fahrrad, in 1 ein Fußgänger, in 3 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Zeithstraße (Braschoß)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 17 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 17). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 17 Fällen war in 5 ein Fahrrad, in 2 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Frankfurter Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 2 ein Fahrrad, in 1 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Kleiberg",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 5 ein Fahrrad, in 2 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 333",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 9). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 9 Fällen war in 4 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Aulgasse",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (4 von 9). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 9 Fällen war in 1 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -407,37 +407,37 @@
     "unfallHotspots": [
       {
         "ort": "Römerstraße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der sonstiger Unfall (4 von 15). Der Hergang lässt sich hier nicht auf einen Standardtyp reduzieren — umso mehr zählt die Spurenlage am Fahrzeug. Von den 15 Fällen war in 6 ein Fahrrad, in 2 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Theodor-Heuss-Ring",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 13). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 13 Fällen war in 7 ein Fahrrad, in 1 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Frankfurter Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 12 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (9 von 12). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 12 Fällen war in 2 ein Fahrrad, in 5 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Larstraße (Sieglar)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 4 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Mendener Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (6 von 10). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 10 Fällen war in 6 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Pastor-Böhm-Straße (Sieglar)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (5 von 10). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 10 Fällen war in 8 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -518,37 +518,37 @@
     "unfallHotspots": [
       {
         "ort": "Hauptstraße (Oberdollendorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 16 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 16). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 16 Fällen war in 3 ein Fahrrad, in 5 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Dollendorfer Straße (Thomasberg)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 13). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 13 Fällen war in 5 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Niederbach (Oberpleis)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (9 von 10). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 10 Fällen war in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 331 (Ittenbach)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (4 von 6). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 6 Fällen war in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Tunnel Oberdollendorf (Oberdollendorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (2 von 6). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 6 Fällen war in 2 ein Fahrrad, in 2 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Ferdinand-Mülhens-Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (3 von 6). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 6 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -644,37 +644,37 @@
     "unfallHotspots": [
       {
         "ort": "A 3 (Aegidienberg)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 21 erfassten Unfällen, verteilt auf 3 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (17 von 21). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 21 Fällen war in 1 ein Fußgänger, in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Menzenberger Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (5 von 15). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 15 Fällen war in 3 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Hauptstraße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (4 von 10). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 10 Fällen war in 4 ein Fahrrad, in 4 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Rottbitzer Straße (Rottbitze)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (3 von 8). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 8 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Linzer Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 5 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (3 von 5). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 5 Fällen war in 2 ein Fahrrad, in 3 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Aegidienberger Straße (Aegidienberg)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 5 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (2 von 5). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 5 Fällen war in 2 ein Fahrrad, in 1 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -770,31 +770,31 @@
     "unfallHotspots": [
       {
         "ort": "Stoßdorfer Straße (Stoßdorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 14 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (9 von 14). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 14 Fällen war in 4 ein Fahrrad, in 2 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Europaallee (Geisbach)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (7 von 13). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 13 Fällen war in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Frankfurter Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (4 von 11). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 11 Fällen war in 4 ein Fahrrad, in 1 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Krautscheider Straße (Uckerath)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (5 von 9). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 9 Fällen war in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Emil-Langen-Straße (Edgoven)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (3 von 9). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 9 Fällen war in 2 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -881,37 +881,37 @@
     "unfallHotspots": [
       {
         "ort": "L 281 (Roisdorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 25 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (13 von 25). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 25 Fällen war in 2 ein Fahrrad, in 1 ein Motorrad, in 4 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Rankenberg",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 19 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (14 von 19). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 19 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Bonn-Brühler-Straße (Merten)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 14 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (8 von 14). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 14 Fällen war in 8 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Roisdorfer Straße (Hersel)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (6 von 9). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 9 Fällen war in 1 ein Motorrad, in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Walberberger Straße (Walberberg)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 3 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Moselstraße (Hersel)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (2 von 8). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 8 Fällen war in 1 ein Fahrrad, in 2 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -994,31 +994,31 @@
     "unfallHotspots": [
       {
         "ort": "Aachener Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 15). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 15 Fällen war in 4 ein Fahrrad, in 2 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "B 266",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (7 von 8). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 8 Fällen war in 1 ein Fußgänger, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 493 (Peppenhoven)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 2 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "L 471 (Wormersdorf)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 6 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Münstereifeler Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 7 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
@@ -1106,37 +1106,37 @@
     "unfallHotspots": [
       {
         "ort": "Gudenauer Allee",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 30 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (14 von 30). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 30 Fällen war in 4 ein Fahrrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Merler Bahn (Merl)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (4 von 11). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 11 Fällen war in 5 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Sängerhof (Merl)",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 5 ein Fahrrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Schumannstraße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 7 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 7). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Lüftelberger Straße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (2 von 6). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 6 Fällen war in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       },
       {
         "ort": "Rheinbacher Landstraße",
-        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/",
+        "quelle": "https://unfallatlas.statistikportal.de/",
         "einzelfall": false,
         "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 6). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
       }
