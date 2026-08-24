@@ -84,6 +84,18 @@ export type GutachterFinderPayload = {
    *  Zeile `utm_source='ki-deeplink'` — sonst ist dieser Weg im Nachhinein NICHT von
    *  einem normalen Website-Besuch unterscheidbar. Siehe Insert unten. */
   via_deeplink?: boolean
+  /**
+   * WELCHE KI den Kunden geschickt hat, wenn sie es selbst verraet.
+   *
+   * ChatGPT haengt an jeden Link, den es ausgibt, `utm_source=chatgpt.com` an. Dieser
+   * Wert ueberlebte bisher nicht bis hierher: der Embed-Wrapper reicht nur
+   * `gclid/gbraid/wbraid/gclsrc`, `promo`, `sv` und `slot` in den iframe durch, und
+   * `herkunftAusRequest()` liest den REFERER — der ist im iframe unsere eigene Domain.
+   * Ergebnis: wir zaehlten KI-Buchungen, wussten aber nicht, WELCHE KI. Gemessen am
+   * 24.08.2026 kamen alle 36 KI-Klicks von Perplexity und keiner von ChatGPT — genau
+   * die Art Unterschied, die man ohne diesen Wert nicht sieht.
+   */
+  utm_source?: string | null
   zugeordneter_sv_id?: string
   zugeordneter_sv_lead_id?: string
   matching_typ?: string
@@ -349,7 +361,15 @@ export async function erstelleGutachterFinderAnfrage(
       // und im cross-origin-iframe fehlt der Referer oft ganz (Referrer-Policy). Deshalb
       // wird die Herkunft hier aus dem PAYLOAD gesetzt, der sie zuverlaessig durchtraegt.
       // Nur als Fallback: ein echtes utm_source (z. B. aus einer Kampagne) gewinnt.
-      utm_source: herkunft.utm_source ?? (payload.via_deeplink ? 'ki-deeplink' : null),
+      // Reihenfolge mit Absicht: ein DURCHGEREICHTER Wert (die KI nennt sich selbst)
+      // schlaegt den Referer, der wiederum den generischen Marker schlaegt.
+      utm_source:
+        payload.utm_source?.trim() ||
+        herkunft.utm_source ||
+        (payload.via_deeplink ? 'ki-deeplink' : null),
+      // `utm_medium` bleibt bewusst UNABHAENGIG davon auf 'deeplink': das ist der stabile
+      // Zaehlschluessel fuer „kam ueber einen KI-Deeplink". Wuerde man nur nach utm_source
+      // zaehlen, zerfiele der Kanal in so viele Toepfe, wie es KI-Anbieter gibt.
       utm_medium: herkunft.utm_medium ?? (payload.via_deeplink ? 'deeplink' : null),
       vorname: payload.vorname,
       nachname: payload.nachname,
