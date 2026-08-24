@@ -26,10 +26,7 @@ permissions:
 
 jobs:
   build:
-    # Runner-Weiche: der NAECHTLICHE Lauf (schedule) bleibt GitHub-gehostet, damit er
-    # auch dann laeuft, wenn die self-hosted Maschine aus ist. PR/Push laufen auf dem
-    # eigenen Runner -> 0 abgerechnete Minuten. Siehe AGENTS.md §ci-runner.
-    runs-on: ${{ github.event_name == 'schedule' && 'ubuntu-latest' || fromJSON('["self-hosted","claimondo"]') }}
+    runs-on: ubuntu-latest
     steps:
       # fetch-depth: 0 fuer den Journey-Bezug-Step (unten): der Default-Checkout ist FLACH,
       # und ohne gemeinsamen Vorfahren scheitert `git diff origin/staging...HEAD` mit
@@ -463,8 +460,7 @@ jobs:
     # 31 Tests, wachsend). Laeuft PARALLEL zum build (kein needs), auf PRs + push. Blockt
     # NEUE rote Test-Files ggue. scripts/vitest-baseline.json (file-level, --retry=2 gegen
     # Flake). Boy-Scout: File fixen + Baseline senken. Siehe AGENTS.md §test-gate.
-    # Runner-Weiche wie beim build-Job (Begruendung dort).
-    runs-on: ${{ github.event_name == 'schedule' && 'ubuntu-latest' || fromJSON('["self-hosted","claimondo"]') }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
