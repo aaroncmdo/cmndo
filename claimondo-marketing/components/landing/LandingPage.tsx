@@ -15,7 +15,7 @@ import { FaqSection } from './sections/FaqSection'
 import { BottomCtaSection } from './sections/BottomCtaSection'
 import { WissensRatgeberSection } from './sections/WissensRatgeberSection'
 import { VerfuegbarkeitStreifen } from './sections/VerfuegbarkeitStreifen'
-import { CommunityFeedSection } from '../community/CommunityFeedSection'
+import { CommunityTeaserSection } from '../community/CommunityTeaserSection'
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
@@ -61,7 +61,7 @@ export async function LandingPage({ authenticatedUser }: Props) {
         <SvFinderSection />
         <SchadensreportSection />
         <WissensRatgeberSection />
-        <CommunityFeedSection />
+        <CommunityTeaserSection />
         <FaqSection />
         <BottomCtaSection />
         <LandingFooter />
