@@ -60,6 +60,16 @@ export type EmbedFinderSectionProps = {
    * still auf die normale Terminauswahl zurueck.
    */
   slot?: string
+  /**
+   * `utm_source` der Einstiegs-URL — z.B. `chatgpt.com`, das ChatGPT an jeden von ihm
+   * ausgegebenen Link selbst anhaengt.
+   *
+   * WARUM EIGENS DURCHGEREICHT: der Embed laeuft cross-origin im iframe. Die
+   * Attributions-Mechanik der App liest den REFERER, und der ist dort unsere eigene
+   * Domain — der urspruengliche Wert geht also verloren. Ohne diese Zeile zaehlen wir
+   * KI-Buchungen, wissen aber nicht, WELCHE KI sie gebracht hat.
+   */
+  utmSource?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -79,6 +89,7 @@ export function EmbedFinderSection({
   promoCode,
   svId,
   slot,
+  utmSource,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -100,6 +111,8 @@ export function EmbedFinderSection({
   if (svId) params.set('sv', svId)
   // Nur mit svId sinnvoll: der Slot gehoert zu genau diesem Gutachter.
   if (svId && slot) params.set('slot', slot)
+  // Welche KI den Kunden geschickt hat — reine Attribution, nie ein Steuerwert.
+  if (utmSource) params.set('utm_source', utmSource.slice(0, 150))
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 
