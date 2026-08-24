@@ -37,3 +37,10 @@ next-env.d.ts
 
 # Fortschritt der Website-Anreicherung — Zwischenstand, kein Quelltext
 .websites-fortschritt.json
+
+# Laufprotokolle und PID der Massenlaeufe — Betriebsspuren, kein Quelltext.
+# (Der Anreicherungslauf vom 23./24.08. schrieb ein 900-KB-Log; solche Dateien
+# gehoeren nicht in die Historie, sind aber zum Nachvollziehen wertvoll.)
+*-lauf.log
+.anreicherung-pid
+.discovery-pid
