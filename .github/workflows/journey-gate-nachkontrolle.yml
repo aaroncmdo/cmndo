@@ -1,0 +1,131 @@
+name: Journey-Gate Nachkontrolle
+
+# Die Zaehne, die dem Journey-Gate fehlen.
+#
+# Das Gate (journey-gate.yml) laeuft an jedem Drain-PR und faerbt den Check rot, wenn eine
+# vollstaendige Journey gebrochen ist. Es kann den Merge aber NICHT verhindern:
+# Branch-Protection ist auf einem privaten Repo im Free-Plan nicht verfuegbar
+# (`gh api …/branches/main/protection` -> 403 "Upgrade to GitHub Pro or make this
+# repository public"; Rulesets ebenso). Wie real das ist, hat sich am 23.08. gezeigt —
+# Drain #5554 wurde gemergt, waehrend das Gate rot war.
+#
+# Dieser Workflow schliesst die Luecke, so weit sie ohne Plan-Upgrade zu schliessen ist:
+# er verhindert nichts, aber er sorgt dafuer, dass es nicht UNBEMERKT bleibt. Landet auf
+# `main` ein Stand, dessen Gate nicht gruen war, entsteht ein GitHub-Issue.
+#
+# ⚠ Bewusst KEIN automatischer Revert: ein Auto-Revert auf `main` waere ein Eingriff mit
+# Prod-Wirkung, ausgeloest von einem Signal, das laut Aaron-Entscheid 23.08. „abgesprochen
+# werden" muss. Der Wachhund bellt, er beisst nicht.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+  actions: read
+  checks: read
+
+jobs:
+  nachkontrolle:
+    runs-on: [self-hosted, claimondo]
+    timeout-minutes: 10
+    steps:
+      - name: War das Journey-Gate fuer diesen Stand gruen?
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Der Push auf main ist der Merge eines Drain-PRs. Ueber den Merge-Commit
+          # finden wir den PR und damit dessen Check-Ergebnisse.
+          PR=$(gh api "repos/$REPO/commits/$SHA/pulls" \
+                 -H "Accept: application/vnd.github.groot-preview+json" \
+                 --jq '.[0].number // empty' || true)
+
+          if [ -z "$PR" ]; then
+            echo "Kein PR zu $SHA gefunden (Direct-Push oder API-Verzoegerung)."
+            echo "ergebnis=kein-pr" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "Drain-PR: #$PR"
+          echo "pr=$PR" >> "$GITHUB_ENV"
+
+          # Alle Check-Runs des PR-Kopfes einsammeln und den Gate-Eintrag herausziehen.
+          HEAD=$(gh api "repos/$REPO/pulls/$PR" --jq .head.sha)
+          STATUS=$(gh api "repos/$REPO/commits/$HEAD/check-runs" \
+                     --jq '[.check_runs[] | select(.name | test("journey-gate"; "i"))] | .[0].conclusion // "fehlt"')
+
+          echo "Journey-Gate war: $STATUS"
+          echo "ergebnis=$STATUS" >> "$GITHUB_ENV"
+
+      - name: Issue anlegen, wenn das Gate nicht gruen war
+        if: ${{ env.ergebnis != 'success' && env.ergebnis != 'kein-pr' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TITEL="Journey-Gate war nicht gruen beim Merge nach main (PR #${pr})"
+
+          # Dedup: laeuft ein Vorfall noch offen, kein zweites Issue. Sonst wird der
+          # Waechter selbst zur Laermquelle und man klickt ihn irgendwann weg —
+          # genau das Ende, das die toten Postfaecher genommen haben.
+          OFFEN=$(gh issue list --repo "$REPO" --state open --label journey-gate \
+                    --search "in:title Journey-Gate war nicht gruen" --json number --jq 'length')
+          if [ "$OFFEN" != "0" ]; then
+            echo "Es ist bereits ein offener Journey-Gate-Vorfall vorhanden — kein zweites Issue."
+            exit 0
+          fi
+
+          # Body in eine Datei statt inline: `gh --body "$(cat <<EOF …)"` bricht hier die
+          # YAML-Struktur (der Heredoc-Inhalt muss die Block-Einrueckung mittragen, sonst
+          # liest YAML die Markdown-Tabelle als Mapping). --body-file ist ohnehin der
+          # sichere Weg — Backticks im Body wuerden bei --body ausgefuehrt.
+          {
+            printf 'Auf `main` ist ein Stand gelandet, dessen **Journey-Gate nicht grün war**.\n\n'
+            printf '| | |\n|---|---|\n'
+            printf '| Drain-PR | #%s |\n' "$pr"
+            printf '| Gate-Ergebnis | `%s` |\n' "$ergebnis"
+            printf '| Merge-Commit | %s |\n\n' "$GITHUB_SHA"
+            printf '`fehlt` bedeutet: Das Gate hat für diesen PR **gar nicht gemeldet** — es lief\n'
+            printf 'nicht, oder es starb vor dem ersten Journey-Step. Das ist kein Freibrief,\n'
+            printf 'sondern ein ungeprüfter Stand.\n\n'
+            printf '### Warum das kein Merge-Block war\n\n'
+            printf 'Branch-Protection ist auf diesem Plan nicht verfügbar (privates Repo,\n'
+            printf 'Free-Plan → 403 für Branch Protection *und* Rulesets). Das Gate kann nur\n'
+            printf 'berichten. Dieser Wächter sorgt dafür, dass ein Bericht nicht untergeht.\n\n'
+            printf '### Was jetzt zu tun ist\n\n'
+            printf '1. Den Gate-Lauf am PR öffnen und nachsehen, **welche Journey** rot war.\n'
+            printf '2. Echter Bruch → Fix nachschieben, er ist bereits auf prod.\n'
+            printf '3. Infrastruktur (Zertifikat, Secret, Runner) → beheben, damit das Gate misst.\n'
+            printf '4. Dieses Issue schließen — es dedupliziert, solange es offen ist.\n\n'
+            printf 'Zuordnung Journey ↔ bewachende Spec: `docs/fundament/journey-smokes.md`\n'
+          } > /tmp/journey-gate-issue.md
+
+          gh issue create --repo "$REPO" \
+            --title "$TITEL" \
+            --label journey-gate \
+            --body-file /tmp/journey-gate-issue.md
+          echo "Issue angelegt."
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          {
+            echo "## Journey-Gate Nachkontrolle"
+            echo ""
+            echo "- Ergebnis des Gates: \`${ergebnis:-unbekannt}\`"
+            if [ "${ergebnis:-}" = "success" ]; then
+              echo "- ✅ Der Stand auf \`main\` war durchs Tor."
+            elif [ "${ergebnis:-}" = "kein-pr" ]; then
+              echo "- ℹ️ Kein PR zum Commit gefunden (Direct-Push oder API-Verzögerung)."
+            else
+              echo "- 🚦 **Nicht grün** — Issue angelegt (oder bereits offen)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
