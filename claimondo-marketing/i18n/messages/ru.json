@@ -3914,7 +3914,12 @@
     "verkehr_h3": "Какова интенсивность движения",
     "verkehr_intro": "Федеральный институт дорожного дела Германии постоянно измеряет транспортный поток на автобанах и федеральных трассах. Эти пункты учёта расположены ближе всего к городу {ort} (годовые данные за {jahr}):",
     "verkehr_zaehlstelle": "Пункт учёта {name}, в {km} км",
-    "verkehr_quelle": "Источник: <link>пункты учёта BASt</link> — {lizenz}"
+    "verkehr_quelle": "Источник: <link>пункты учёта BASt</link> — {lizenz}",
+    "ratgeber_eyebrow": "Подробнее по теме",
+    "ratgeber_fehler": "7 ошибок, которых стоит избежать после ДТП",
+    "ratgeber_taktiken": "Тактика страховщиков — и что против неё помогает",
+    "ratgeber_wertminderung": "Расчёт утраты стоимости: Sanden/Danner объяснение",
+    "ratgeber_eauto": "Tesla, Polestar, Lucid: подводные камни электромобилей"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Запрос на приём успешно отправлен!",

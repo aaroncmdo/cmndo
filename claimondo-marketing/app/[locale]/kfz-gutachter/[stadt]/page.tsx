@@ -19,11 +19,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { FounderSection } from '@/components/landing/FounderSection'
-import { VersichererTaktikenSection } from '@/components/landing/VersichererTaktikenSection'
-import { SiebenFehlerSection } from '@/components/landing/SiebenFehlerSection'
 import { PortalMockupSection } from '@/components/landing/sections/PortalMockupSection'
-import { WertminderungSandenDannerSection } from '@/components/landing/sections/WertminderungSandenDannerSection'
-import { TeslaEAutoSection } from '@/components/landing/sections/TeslaEAutoSection'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 import { BghAuthorityGrid } from '@/components/landing/sections/BghAuthorityGrid'
 import { TrackingHooks } from '@/components/marketing/TrackingHooks'
@@ -979,9 +975,6 @@ export default async function KfzGutachterStadtPage({
       {/* 5b — Portal-Mockup (Wie Uber) */}
       <PortalMockupSection />
 
-      {/* 5c — Versicherer-Taktiken (Wissensdatenbank §2, §15) */}
-      <VersichererTaktikenSection />
-
       {/* 6 — Prozess */}
       <section className="bg-claimondo-bg py-16 sm:py-24" aria-labelledby="prozess-stadt-heading">
         <div className="mx-auto max-w-6xl px-5">
@@ -1010,11 +1003,45 @@ export default async function KfzGutachterStadtPage({
         </div>
       </section>
 
-      {/* 6b — Wertminderung Sanden/Danner-Tabelle */}
-      <WertminderungSandenDannerSection />
-
-      {/* 6c — 7 Fehler nach Unfall (Wissensdatenbank §12) */}
-      <SiebenFehlerSection />
+      {/* 6b — Statt vier Ratgeber-Bloecken: vier Verweise.
+          Gemessen am 24.08.2026 an der Live-Seite: von 2.965 Woertern einer
+          Stadtseite standen 1.461 wortgleich auf ALLEN 294 Stadtseiten. Die
+          vier groessten Rahmen-Bloecke waren reiner Ratgeber-Text —
+          SiebenFehler (412 W), Versicherer-Taktiken (291 W), Wertminderung
+          (128 W), Tesla/E-Auto (61 W) = 892 Woerter, die jede Stadtseite
+          identisch wiederholte, obwohl sie auf /vorteile vollstaendig stehen.
+          Google indexiert 131 dieser Seiten nicht ("Gecrawlt — zurzeit nicht
+          indexiert"); ein Seitentyp, der zur Haelfte aus wiederholtem Text
+          besteht, ist genau der Fall, den Google als thin content einstuft.
+          Der Inhalt geht nicht verloren, er steht weiter auf /vorteile bzw.
+          /wie-es-funktioniert — die Stadtseite verweist jetzt darauf und
+          staerkt damit zugleich deren interne Verlinkung. */}
+      <section className="bg-white py-12" aria-labelledby="ratgeber-stadt-heading">
+        <div className="mx-auto max-w-6xl px-5">
+          <h2 id="ratgeber-stadt-heading" className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+            {t('ratgeber_eyebrow')}
+          </h2>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            {([
+              { href: '/vorteile', text: t('ratgeber_fehler') },
+              { href: '/vorteile', text: t('ratgeber_taktiken') },
+              { href: '/vorteile', text: t('ratgeber_wertminderung') },
+              { href: '/vorteile', text: t('ratgeber_eauto') },
+            ] as const).map((r) => (
+              <Link
+                key={r.text}
+                href={r.href}
+                className="group flex items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-5 py-4 transition-colors hover:border-claimondo-ondo"
+              >
+                <span className="text-sm font-semibold text-claimondo-navy">{r.text}</span>
+                <span className="flex-shrink-0 text-claimondo-ondo transition-transform group-hover:translate-x-0.5" aria-hidden>
+                  &rarr;
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* 7 — Einsatzgebiet / Cross-City */}
       <section className="bg-white py-16 sm:py-24" aria-labelledby="einsatzgebiet-stadt-heading">
@@ -1071,9 +1098,6 @@ export default async function KfzGutachterStadtPage({
           </div>
         </div>
       </section>
-
-      {/* 7b — Tesla / E-Auto Spezial */}
-      <TeslaEAutoSection />
 
       {/* 7c — Gründer Trust-Anker */}
       <FounderSection />

@@ -4055,7 +4055,12 @@
     "verkehr_h3": "Wie viel Verkehr dort unterwegs ist",
     "verkehr_intro": "Die Bundesanstalt für Straßenwesen misst den Verkehr auf Autobahnen und Bundesstraßen dauerhaft. Diese Zählstellen liegen {ort} am nächsten (Jahresauswertung {jahr}):",
     "verkehr_zaehlstelle": "Zählstelle {name}, {km} km entfernt",
-    "verkehr_quelle": "Quelle: <link>BASt-Dauerzählstellen</link> – {lizenz}"
+    "verkehr_quelle": "Quelle: <link>BASt-Dauerzählstellen</link> – {lizenz}",
+    "ratgeber_eyebrow": "Mehr zum Thema",
+    "ratgeber_fehler": "7 Fehler, die Sie nach einem Unfall vermeiden",
+    "ratgeber_taktiken": "Die Taktiken der Versicherer – und was dagegen hilft",
+    "ratgeber_wertminderung": "Wertminderung berechnen: Sanden/Danner erklärt",
+    "ratgeber_eauto": "Tesla, Polestar, Lucid: die Fallstricke bei E-Autos"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin erfolgreich angefragt!",
