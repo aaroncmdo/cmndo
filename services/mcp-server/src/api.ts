@@ -227,7 +227,20 @@ export async function fetchWissensbasis(apiBase: string = DEFAULT_API_BASE): Pro
 // Partner-Gutachter MIT freien Slots (anders als sv-in-naehe = nur anonymisierte
 // Liste). Vorstufe zum Buchen. Read-only, sendet keine Nutzerdaten.
 
-export type TerminSlot = { start: string; end: string; passung: string }
+export type TerminSlot = {
+  start: string
+  end: string
+  passung: string
+  /**
+   * Buchungs-Link fuer GENAU DIESEN Slot bei GENAU DIESEM Gutachter — der Link, der die
+   * Termin-Auswahl im Finder ueberspringt. Optional aus demselben Grund wie
+   * `GutachterMitTerminen.buchungs_url`: gegen eine aeltere API-Version fehlt er.
+   *
+   * ⚠ Er kam bisher NUR ZUFAELLIG bis zum Client: weder Typ noch `slotSchema` kannten ihn,
+   * er ueberlebte lediglich, weil die SDK-Validierung unbekannte Keys nicht strippt.
+   */
+  buchungs_url?: string
+}
 
 export type GutachterMitTerminen = {
   id: string
@@ -356,7 +369,14 @@ export function formatGutachterTermine(r: GutachterTermineResult): string {
         lines.push('_keine freien Slots_')
       } else {
         for (const t of g.termine) {
-          lines.push(`- ${formatSlot(t.start)}${t.passung === 'wunschtermin' ? ' (Wunschtermin frei)' : ''}`)
+          const label = `${formatSlot(t.start)}${t.passung === 'wunschtermin' ? ' (Wunschtermin frei)' : ''}`
+          // Jeder Slot traegt SEINEN eigenen Buchungslink. Vorher standen hier nur die
+          // Uhrzeiten und darunter EIN Link auf den Gutachter — der Kunde landete also im
+          // Finder und musste den Termin, den die KI ihm gerade genannt hatte, erneut
+          // heraussuchen. Der Slot-Link ueberspringt genau diesen Schritt.
+          // ⚠ Der Wert steckt im structuredContent laengst drin; er fehlte nur im TEXT —
+          // und den liest ein Modell zuverlaessiger als das strukturierte Feld.
+          lines.push(t.buchungs_url ? `- [${label}](${t.buchungs_url})` : `- ${label}`)
         }
       }
       // Der Direktlink GENAU zu diesem Gutachter. Ohne ihn nannte diese Ausgabe Gutachter
@@ -366,6 +386,12 @@ export function formatGutachterTermine(r: GutachterTermineResult): string {
       if (g.buchungs_url) lines.push('', `→ Termin bei ${g.vorname} buchen: ${g.buchungs_url}`)
       lines.push('')
     }
+    // Die Anleitung, was ein Termin-Link TUT. Sie stand bisher nur im API-Feld
+    // `buchungs_hinweis`, das der MCP-Weg gar nicht ausgibt — das Modell sah also Links,
+    // ohne zu wissen, dass sie den Termin bereits mitbringen.
+    lines.push(
+      '> Ein Termin-Link öffnet den Finder mit Gutachter UND Termin vorausgewählt — der Kunde ergänzt nur noch Adresse, Schadenart und Kontaktdaten und bestätigt selbst. Ist der Slot bis dahin belegt, fällt der Finder still auf die normale Auswahl zurück.',
+    )
     lines.push('> Profile anonymisiert; die konkrete Zuordnung + Buchung erfolgt bei Beauftragung.')
   }
   lines.push('')

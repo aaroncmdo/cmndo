@@ -1,11 +1,29 @@
-import { test as base, type Page } from '@playwright/test'
+import { test as base, type Browser, type Page } from '@playwright/test'
 import path from 'path'
 import { computeTotp } from './lib/totp.mjs'
 
 // KFZ-185: Test fixtures with auth-state caching.
 
-const ADMIN_STORAGE = path.join(__dirname, '../../playwright/.auth/admin.json')
-const SV_STORAGE = path.join(__dirname, '../../playwright/.auth/sv.json')
+/**
+ * Rollen-Stammdaten an EINER Stelle.
+ *
+ * ⚠ Die Passwoerter sind gemessen, nicht angenommen: Konvention ist `test-*@` =
+ * `Claimondo2026!` mit der EINEN Ausnahme `test-dispatch` = `Test1234!`
+ * (memory/reference-internal-test-account-logins.md). Genau diese Ausnahme stand hier
+ * frueher als Default fuer ALLE Rollen und liess die Logins scheitern — die Portale
+ * waren dadurch ungeprueft, ohne dass ein Test rot wurde.
+ *
+ * ⚠ Der Kunde heisst `smoke-kunde@`, NICHT `test-kunde@` — letzteren hat der
+ * Golive-Accounts-Cleanup (13.07.) geloescht.
+ */
+const ROLLEN = {
+  admin: { datei: 'admin.json', emailVar: 'TEST_ADMIN_EMAIL', email: 'test-admin@claimondo.de', passVar: 'TEST_ADMIN_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_ADMIN_TOTP_SECRET' },
+  sv: { datei: 'sv.json', emailVar: 'TEST_SV_EMAIL', email: 'test-sv@claimondo.de', passVar: 'TEST_SV_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_SV_TOTP_SECRET' },
+  dispatch: { datei: 'dispatch.json', emailVar: 'TEST_DISPATCH_EMAIL', email: 'test-dispatch@claimondo.de', passVar: 'TEST_DISPATCH_PASSWORD', pass: 'Test1234!', totpVar: 'TEST_DISPATCH_TOTP_SECRET' },
+  kb: { datei: 'kb.json', emailVar: 'TEST_KB_EMAIL', email: 'test-kb@claimondo.de', passVar: 'TEST_KB_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KB_TOTP_SECRET' },
+  kunde: { datei: 'kunde.json', emailVar: 'TEST_KUNDE_EMAIL', email: 'smoke-kunde@claimondo.de', passVar: 'TEST_KUNDE_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KUNDE_TOTP_SECRET' },
+  kanzlei: { datei: 'kanzlei.json', emailVar: 'TEST_KANZLEI_EMAIL', email: 'test-kanzlei@claimondo.de', passVar: 'TEST_KANZLEI_PASSWORD', pass: 'Claimondo2026!', totpVar: 'TEST_KANZLEI_TOTP_SECRET' },
+} as const
 
 async function login(
   page: Page,
@@ -61,54 +79,46 @@ function envOderDefault(name: string, fallback: string): string {
   return fallback
 }
 
-// Fixtures that provide pre-authenticated pages
+// Fixtures that provide pre-authenticated pages.
+//
+// 23.08.: als Factory gebaut statt sechsmal kopiert. Vorher gab es die Logik nur fuer
+// admin + sv — die uebrigen vier Portale (dispatch/mitarbeiter/kunde/kanzlei, zusammen
+// ~47 Seiten) hatten GAR KEINE Fixture und wurden vom Routen-Smoke deshalb nie erfasst.
+function rollenSeite(rolle: keyof typeof ROLLEN) {
+  const k = ROLLEN[rolle]
+  const speicher = path.join(__dirname, '../../playwright/.auth/', k.datei)
+  return async ({ browser }: { browser: Browser }, use: (p: Page) => Promise<void>) => {
+    const email = envOderDefault(k.emailVar, k.email)
+    const password = envOderDefault(k.passVar, k.pass)
+    const ctx = await browser.newContext({ storageState: speicher }).catch(async () => {
+      // Erster Lauf — noch kein gespeicherter Zustand, also frisch einloggen.
+      const frisch = await browser.newContext()
+      const seite = await frisch.newPage()
+      await login(seite, email, password, speicher, process.env[k.totpVar])
+      await seite.close()
+      await frisch.close()
+      return browser.newContext({ storageState: speicher })
+    })
+    const seite = await ctx.newPage()
+    await use(seite)
+    await ctx.close()
+  }
+}
+
 export const test = base.extend<{
   adminPage: Page
   svPage: Page
+  dispatchPage: Page
+  kbPage: Page
+  kundePage: Page
+  kanzleiPage: Page
 }>({
-  // ⚠ Passwort-Default: `Claimondo2026!`, NICHT `Test1234!`.
-  // Konvention (memory/reference-internal-test-account-logins.md): test-*@ = Claimondo2026!,
-  // AUSNAHME test-dispatch = Test1234!. Genau diese Ausnahme stand hier als Default fuer
-  // ALLE Rollen — nachgemessen 20.08. per echtem Login gegen prod:
-  //   test-admin@ + Claimondo2026! -> /admin        test-sv@ + Claimondo2026! -> /gutachter/heute
-  // Wirkung des falschen Defaults: greift kein CI-Secret, scheitert der Login. Beim SV war
-  // genau das der Fall — ALLE 8 `Gutachter Routes`-Tests in routes.spec.ts liefen dadurch in
-  // den 15s-Timeout (Lauf 32362782482), waehrend die Admin-Routen gruen blieben, weil dort
-  // ein Secret greift. Der Default ist also kein Detail, sondern der Fallback, der traegt,
-  // wenn ein Secret fehlt oder leer ist.
-  adminPage: async ({ browser }, use) => {
-    const email = envOderDefault('TEST_ADMIN_EMAIL', 'test-admin@claimondo.de')
-    const password = envOderDefault('TEST_ADMIN_PASSWORD', 'Claimondo2026!')
-    const ctx = await browser.newContext({ storageState: ADMIN_STORAGE }).catch(async () => {
-      // First run — no stored state, login fresh
-      const freshCtx = await browser.newContext()
-      const page = await freshCtx.newPage()
-      await login(page, email, password, ADMIN_STORAGE, process.env.TEST_ADMIN_TOTP_SECRET)
-      await page.close()
-      await freshCtx.close()
-      return browser.newContext({ storageState: ADMIN_STORAGE })
-    })
-    const page = await ctx.newPage()
-    await use(page)
-    await ctx.close()
-  },
-
-  svPage: async ({ browser }, use) => {
-    const email = envOderDefault('TEST_SV_EMAIL', 'test-sv@claimondo.de')
-    // s. Kommentar bei adminPage — DIESER Default war der, der die 8 Gutachter-Routen kippte.
-    const password = envOderDefault('TEST_SV_PASSWORD', 'Claimondo2026!')
-    const ctx = await browser.newContext({ storageState: SV_STORAGE }).catch(async () => {
-      const freshCtx = await browser.newContext()
-      const page = await freshCtx.newPage()
-      await login(page, email, password, SV_STORAGE, process.env.TEST_SV_TOTP_SECRET)
-      await page.close()
-      await freshCtx.close()
-      return browser.newContext({ storageState: SV_STORAGE })
-    })
-    const page = await ctx.newPage()
-    await use(page)
-    await ctx.close()
-  },
+  adminPage: rollenSeite('admin'),
+  svPage: rollenSeite('sv'),
+  dispatchPage: rollenSeite('dispatch'),
+  kbPage: rollenSeite('kb'),
+  kundePage: rollenSeite('kunde'),
+  kanzleiPage: rollenSeite('kanzlei'),
 })
 
 export { expect } from '@playwright/test'

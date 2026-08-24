@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test'
+import { basicAuthFuerZiel } from './tests/e2e/lib/ziel'
 
 // KFZ-185: Playwright E2E Smoke-Tests.
 
@@ -79,6 +80,19 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Basic-Auth fuer das ZIEL — nur staging liegt hinter nginx-Basic-Auth, prod und
+    // localhost nicht. `undefined` = keine Basic-Auth (Playwright behandelt es genau so).
+    //
+    // Hier in der Config, weil das JEDE Spec abdeckt, die die Standard-Fixtures (`page`,
+    // `context`, `request`) nutzt — das sind die meisten. Gemessen am ersten scharfen
+    // Gate-Lauf gegen staging (32652552356): golden-path-deep lief gruen (nutzt
+    // _golden-path-lib mit eigener Basic-Auth), reparatur-weg-e2e lief in einen
+    // 180-s-Timeout im Schritt „Logins" — es baut `browser.newContext()` SELBST und
+    // stand damit vor der 401-Wand. Ein Fix nur in der Lib deckt solche Specs nicht ab.
+    //
+    // ⚠ `browser.newContext()` erbt diese Option NICHT — wer einen eigenen Kontext baut,
+    // muss `httpCredentials: basicAuthFuerZiel()` mitgeben.
+    httpCredentials: basicAuthFuerZiel(),
   },
 
   projects: [
