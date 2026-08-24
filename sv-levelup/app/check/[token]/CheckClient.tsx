@@ -186,7 +186,7 @@ function Auswahl(p: Props & {
             <input
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
-              placeholder="meine-kanzlei.de"
+              placeholder="mein-sachverstaendigenbuero.de"
               className="flex-1 rounded-[12px] border border-linie-stark bg-flaeche px-4 py-2.5 focus:border-signal focus:outline-none"
             />
             <button
