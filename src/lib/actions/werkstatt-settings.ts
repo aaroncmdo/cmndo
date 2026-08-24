@@ -6,6 +6,7 @@
 // { ok, error } zurueck, nie als throw.
 
 import { z } from 'zod'
+import { istUnbekannterPasswortFehler, uebersetzePasswortFehler } from '@/lib/auth/passwort-fehler'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
@@ -200,7 +201,13 @@ export async function changeWerkstattPasswort(
   const { error } = await supabase.auth.updateUser({
     password: parsed.data.next,
   })
-  if (error) return { ok: false, error: error.message }
+  if (error) {
+    // Supabase antwortet englisch (u.a. eigener HIBP-Check) — nie roh anzeigen.
+    if (istUnbekannterPasswortFehler(error.message)) {
+      console.error('[werkstatt-settings] unbekannter Supabase-Fehler:', error.message)
+    }
+    return { ok: false, error: uebersetzePasswortFehler(error.message) }
+  }
   return { ok: true }
 }
 
