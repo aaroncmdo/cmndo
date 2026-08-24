@@ -165,6 +165,24 @@ export async function issueCanonicalFlowLinkForAnfrage(
         (gfa.besichtigungsort_adresse as string | null) ??
         (gfa.schadenort as string | null) ??
         null,
+      // ⚠ DENSELBEN Ort AUCH auf die besichtigungsort_*-Achse schreiben.
+      //
+      // Der Finder fragt „Wo steht das Fahrzeug?" — und genau dorthin faehrt der
+      // Gutachter. Fahrzeugstandort und Besichtigungsort sind hier also dasselbe.
+      // Bisher fuellte diese Uebergabe nur `fahrzeug_standort_*`; der Flow legt sein
+      // Standort-Feld aber aus `besichtigungsort_adresse` vor. Folge (24.08. am echten
+      // Testlead gesehen): der Kunde kam aus dem Finder, hatte Bremerhaven laengst
+      // eingegeben, der Termin stand — und im FlowLink klappte trotzdem eine leere
+      // Ortsauswahl mit fuenf Vorschlaegen auf. Er musste denselben Ort ein zweites
+      // Mal waehlen. `ladeMatchingFlow` hat den Fallback bereits (Zeile ~411), das
+      // Formular nicht — deshalb wird der Wert HIER an der Quelle gesetzt, damit
+      // jeder Consumer ihn sieht statt jeden einzeln nachzuruesten.
+      besichtigungsort_lat: (gfa.schadenort_lat as number | null) ?? null,
+      besichtigungsort_lng: (gfa.schadenort_lng as number | null) ?? null,
+      besichtigungsort_adresse:
+        (gfa.besichtigungsort_adresse as string | null) ??
+        (gfa.schadenort as string | null) ??
+        null,
       fin: (gfa.fin_vin as string | null) ?? null,
       kennzeichen: (gfa.kennzeichen as string | null) ?? null,
       hsn: (gfa.hsn as string | null) ?? null,
