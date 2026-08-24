@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { ProSealWidget } from './ProSealWidget'
 
 const BASIS = 'https://sv-levelup.claimondo.de'
 
@@ -69,6 +70,44 @@ const STRUKTURDATEN = {
   },
 }
 
+/**
+ * Pflichtangaben-Fuss.
+ *
+ * ⚠ WARUM ER IM LAYOUT STEHT und nicht in den einzelnen Seiten: § 5 DDG
+ * verlangt, dass das Impressum „leicht erkennbar, unmittelbar erreichbar und
+ * STAENDIG VERFUEGBAR" ist. Ein Link nur auf der Startseite erfuellt das nicht —
+ * ein Check-Ergebnis wird per Token-Link geteilt und ist oft die erste Seite,
+ * die jemand von uns sieht.
+ *
+ * ⚠ BEFUND 24.08.2026: Diese Seite hatte WEDER Impressum NOCH Datenschutz-
+ * Verweis — und das ausgerechnet auf einem Auftritt, dessen Modul `web` bei
+ * fremden Sachverstaendigen genau diese beiden Angaben prueft und dessen
+ * Gespraechsleitfaden vor der Abmahnkanzlei warnt.
+ *
+ * Die Texte liegen auf claimondo.de (derselbe Betreiber, sv-levelup ist eine
+ * Subdomain). Abschnitt 9.6 der Datenschutzerklaerung deckt das ProvenExpert-
+ * Siegel ab, das auf dieser Seite die Besucher-IP an einen Dritten uebermittelt.
+ */
+function RechtsFuss() {
+  return (
+    <footer className="abschnitt">
+      <div className="huelle">
+        <p className="text-sm text-muted">
+          <a href="https://claimondo.de/impressum" className="underline hover:no-underline">
+            Impressum
+          </a>
+          {' · '}
+          <a href="https://claimondo.de/datenschutz" className="underline hover:no-underline">
+            Datenschutz
+          </a>
+          {' · '}
+          <span>Ein Angebot der Claimondo GmbH i. Gr.</span>
+        </p>
+      </div>
+    </footer>
+  )
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="de">
@@ -79,7 +118,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUKTURDATEN) }}
         />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <RechtsFuss />
+        <ProSealWidget />
+      </body>
     </html>
   )
 }
