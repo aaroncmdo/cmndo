@@ -124,7 +124,7 @@ export function EinstiegClient() {
                 id="website"
                 name="website"
                 inputMode="url"
-                placeholder="meine-kanzlei.de"
+                placeholder="mein-sachverstaendigenbuero.de"
                 className="feld-dunkel mt-2"
               />
               <p className="mt-2 text-xs text-white/45">
