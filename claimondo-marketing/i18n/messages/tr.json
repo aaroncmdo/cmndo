@@ -3920,7 +3920,12 @@
     "verkehr_h3": "Oradan ne kadar trafik geçiyor",
     "verkehr_intro": "Almanya Federal Karayolu Araştırma Enstitüsü, otoyollardaki ve federal yollardaki trafiği sürekli ölçmektedir. {ort} şehrine en yakın sayım noktaları şunlardır ({jahr} yılı değerlendirmesi):",
     "verkehr_zaehlstelle": "{name} sayım noktası, {km} km uzaklıkta",
-    "verkehr_quelle": "Kaynak: <link>BASt sürekli sayım noktaları</link> — {lizenz}"
+    "verkehr_quelle": "Kaynak: <link>BASt sürekli sayım noktaları</link> — {lizenz}",
+    "ratgeber_eyebrow": "Konu hakkında daha fazlası",
+    "ratgeber_fehler": "Kazadan sonra kaçınmanız gereken 7 hata",
+    "ratgeber_taktiken": "Sigortacıların taktikleri – ve buna karşı ne işe yarar",
+    "ratgeber_wertminderung": "Değer kaybı hesaplama: Sanden/Danner açıklaması",
+    "ratgeber_eauto": "Tesla, Polestar, Lucid: elektrikli araçlardaki tuzaklar"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Randevu talebiniz başarıyla alındı!",
