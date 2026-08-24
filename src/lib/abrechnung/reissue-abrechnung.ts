@@ -116,7 +116,12 @@ export async function reissueAbrechnung(
     // CMM-49 (faelle-Drop): abrechnung_id ist CLAIM_OWNED -> faelleUpdate war leer, toter faelle-Write entfernt.
     const { claimsUpdate } = splitOrKeepFaelleUpdate({ abrechnung_id: neue.id }, fClaimId)
     if (fClaimId && Object.keys(claimsUpdate).length > 0) {
-      await db.from('claims').update(claimsUpdate).eq('id', fClaimId)
+      // Verknuepft den Fall mit der NEUEN Abrechnung. Bleibt der Write aus, zeigt der
+      // Fall weiter auf die stornierte alte.
+      const { error: abrFehler } = await db.from('claims').update(claimsUpdate).eq('id', fClaimId)
+      if (abrFehler) {
+        console.error(`[reissue-abrechnung] Neue Abrechnung nicht verknuepft (Claim ${fClaimId}):`, abrFehler.message)
+      }
     }
   }
 

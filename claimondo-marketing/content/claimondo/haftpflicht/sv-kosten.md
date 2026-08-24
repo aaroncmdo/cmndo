@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/sv-kosten
+meta_title: Sachverständigen-Kosten — wer zahlt, wie hoch
 type: glossar-spoke
 cluster: H3
 nummer: H3.4

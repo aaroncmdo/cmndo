@@ -1,25 +1,21 @@
--- Explizite Karten-Projektion fuer den oeffentlichen Gutachter-Finder.
+-- Schritt 1 von 2 zum Schliessen des sv_leads-Leselecks.
 --
--- KONTEXT / KORREKTUR: Diese View war als Schritt 1 zum Schliessen eines
--- angenommenen Leselecks gedacht (CONTEXT §9: "anon kann alle 62 Zeilen
--- vollstaendig lesen"). Beim Verifizieren mit dem echten anon-Key zeigte sich,
--- dass es dieses Leck NICHT GIBT: anon hat auf sv_leads nur Spalten-GRANTs auf
--- id, lat, lng, ist_aktiv. Jeder Zugriff auf email/telefon/notizen scheitert
--- mit `permission denied for table sv_leads`. Neue Spalten erben von sich aus
--- keinen Grant, die Anreicherung exponiert also nichts.
+-- Der oeffentliche Gutachter-Finder (src/app/embed/gutachter-finder + die
+-- Marketing-Seite vermittlungsportale-vergleich) rendert die 62 sv_leads als
+-- Dead-Pins auf der Karte. ladeSvLeads() liest dafuer heute die BASISTABELLE
+-- ueber den anon-Client und braucht dazu die Policy-Klausel `OR ist_aktiv = true`.
 --
--- Die View bleibt trotzdem sinnvoll — aber als HAERTUNG, nicht als Fix:
---   1. Sie macht den Vertrag explizit (drei Spalten, nicht "die Tabelle minus
---      dem, was der Grant gerade verbietet").
---   2. Sie entkoppelt den Finder von der Policy-Klausel `OR ist_aktiv = true`.
---      Erst damit laesst sich diese Klausel spaeter ueberhaupt entfernen, ohne
---      die Dead-Pins im Kunden-Embed zu loeschen.
+-- Diese View gibt genau die drei Spalten frei, die die Karte braucht — und
+-- waechst NICHT mit der Anreicherung mit: email, telefon, notizen und alle
+-- kuenftigen Kontaktfelder bleiben aussen vor.
 --
 -- security_invoker = off (Postgres-Default, hier explizit): die View liest mit
--- Owner-Rechten. anon bekommt Zugriff auf die VIEW, nie auf die Tabelle.
+-- den Rechten des Owners, anon bekommt Zugriff auf die VIEW und nie auf die
+-- Tabelle. Genau deshalb kann Schritt 2 die Tabellen-Policy zumachen.
 --
--- Verifiziert 18.08.2026 mit dem anon-Key: View liefert 62 Zeilen,
--- sv_leads.email liefert permission denied.
+-- ⚠ Schritt 2 (Policy-Verschaerfung) darf ERST NACH dem Deploy des
+-- umgestellten ladeSvLeads() laufen. Sonst ist die Karte im Kunden-Embed
+-- zwischen Migration und Deploy leer.
 --
 -- Spec: docs/superpowers/specs/2026-08-18-sv-levelup-design.md §2.6
 
@@ -29,7 +25,7 @@ create view public.sv_leads_map_pins with (security_invoker = off) as
   where ist_aktiv = true;
 
 comment on view public.sv_leads_map_pins is
-  'Dead-Pins fuer den oeffentlichen Gutachter-Finder. NUR id/lat/lng — nie Kontaktdaten. Haertung, kein Leck-Fix (Design-Spec §2.6).';
+  'Dead-Pins fuer den oeffentlichen Gutachter-Finder. NUR id/lat/lng — nie Kontaktdaten. Ersetzt den anon-Lesezugriff auf sv_leads (Design-Spec §2.6).';
 
 -- Neue public-Objekte granten anon von sich aus NICHTS (Default-Privileges),
 -- deshalb ist dieses GRANT Pflicht.

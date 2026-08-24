@@ -5,7 +5,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
 import { getWissenData } from '@/lib/feed/wissen'
-import { SITE_URL, WHATSAPP_HREF, jsonLdScript } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, jsonLdScript, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import type { FeedItem } from '@/lib/feed/types'
 
 // Lesbare Wissens-Uebersicht — die menschliche Zwillingsseite des Maschinen-Feeds
@@ -17,7 +17,7 @@ const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
 export const metadata: Metadata = {
-  title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung | Claimondo',
+  title: 'Wissen & Ratgeber zur Kfz-Schadenregulierung',
   description:
     'Alle Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständigen-Themen rund um den unverschuldeten Kfz-Schaden — verständlich erklärt, mit BGH-Bezug.',
   alternates: { canonical: '/wissen' },
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
       'Verständlich erklärtes Wissen rund um den unverschuldeten Kfz-Schaden: Ratgeber, Versicherer-Brief-Decoder, Versicherer-Profile und Sachverständige.',
     locale: 'de_DE',
     siteName: 'Claimondo',
+    images: OG_DEFAULT_IMAGES,
   },
 }
 

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /sachverstaendige/zak
+meta_title: ZAK e.V. — Zertifizierung für Kfz-Gutachter
 type: glossar-spoke
 cluster: SV
 nummer: SV.6

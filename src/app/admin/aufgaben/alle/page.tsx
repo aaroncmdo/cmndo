@@ -11,17 +11,53 @@ import KanbanBoard from '@/app/admin/tasks/KanbanBoard'
 // Objekt-Verlinkung (entity_type='lead' / 'gutachter' / 'fall').
 // Tasks ohne referenziertes Objekt (weder fall_id noch entity_id) werden
 // clientseitig gefiltert — die sind typisch Alt-System-Einträge ohne Bezug.
+// `auto_erstellt` wird im Board gebraucht: System-Aufgaben ohne Objekt-Bezug bleiben
+// sichtbar, manuelle nicht (s. KanbanBoard, Filter `linked`).
+// ⚠ Der Typ allein reicht nicht — fehlt ein Feld hier im select, ist es zur Laufzeit
+// `undefined` und ein Filter darauf greift still ins Leere.
+const TASK_FELDER =
+  'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_erstellt, auto_resolved_am, auto_resolved_grund, claim_id'
+
+// PostgREST deckelt JEDE Antwort bei 1000 Zeilen — ohne Fehler, ohne Hinweis. Vorher lud
+// diese Seite ALLE Status in EINEM Aufruf, absteigend nach created_at. Gemessen 20.08.:
+// 1815 Aufgaben in der DB, 1000 geladen — und weil 1245 davon `erledigt` sind, frass die
+// Historie das Fenster. Sichtbar waren 339 von 569 OFFENEN Aufgaben; nach dem
+// Objekt-Bezug-Filter zeigte das Board 291. Also waren 278 offene Aufgaben (49 %)
+// unerreichbar — Arbeit, die niemand sieht.
+//
+// Getrennt laden statt hoeher deckeln: offene Aufgaben sind operativ, erledigte sind
+// Historie. Ein Cap auf die Historie kostet nichts, ein Cap auf die offenen kostet Arbeit.
+const NICHT_ERLEDIGT_CAP = 2000
+const ERLEDIGT_CAP = 300
+
 export default async function TasksPage() {
   const supabase = await createClient()
 
-  const [{ data: tasks }, faelleRaw, { data: admins }, { data: leads }, { data: svs }, { data: reassignProfiles }] =
+  const [
+    { data: offeneTasks },
+    { data: erledigteTasks },
+    faelleRaw,
+    { data: admins },
+    { data: leads },
+    { data: svs },
+    { data: reassignProfiles },
+  ] =
     await Promise.all([
+      // Alles Nicht-Erledigte: vollstaendig. Der Cap ist eine Reissleine, keine Auswahl —
+      // greift er, fehlen wieder Aufgaben, und das wird unten sichtbar gemeldet.
       supabase
         .from('tasks')
-        .select(
-          'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund, claim_id',
-        )
-        .order('created_at', { ascending: false }),
+        .select(TASK_FELDER)
+        .neq('status', 'erledigt')
+        .order('created_at', { ascending: false })
+        .limit(NICHT_ERLEDIGT_CAP),
+      // Erledigte: bewusst nur ein Ausschnitt (Historie).
+      supabase
+        .from('tasks')
+        .select(TASK_FELDER)
+        .eq('status', 'erledigt')
+        .order('created_at', { ascending: false })
+        .limit(ERLEDIGT_CAP),
       // CMM-49: faelle-frei — fall_id->claim_nummer via Bridge+claims (shared helper).
       // Liefert das Array direkt (kein { data }); faelleNormalized unten formt es.
       claimNummernForFaelle(supabase),
@@ -39,6 +75,11 @@ export default async function TasksPage() {
         .not('aktiv', 'is', false)
         .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
+
+  // Beide Teilmengen wieder zu EINER Liste — das Board gruppiert selbst nach Status.
+  const tasks = [...(offeneTasks ?? []), ...(erledigteTasks ?? [])]
+  // Reissleine gerissen? Dann fehlen offene Aufgaben, und das darf nicht still passieren.
+  const offeneAbgeschnitten = (offeneTasks?.length ?? 0) >= NICHT_ERLEDIGT_CAP
 
   // CMM-49: faelleNormalized aus dem Bridge+claims-Resultat (id == fall_id).
   const faelleNormalized = faelleRaw.map((r) => ({ id: r.fall_id, claim_nummer: r.claim_nummer }))
@@ -79,16 +120,26 @@ export default async function TasksPage() {
   const executorEnabled = isExecutorEnabled()
 
   return (
-    <KanbanBoard
-      tasks={tasks ?? []}
-      faelle={faelleNormalized}
-      fallMap={fallMap}
-      adminMap={adminMap}
-      leadMap={leadMap}
-      svMap={svMap}
-      admins={admins ?? []}
-      reassignCandidates={reassignCandidates}
-      executorEnabled={executorEnabled}
-    />
+    <>
+      {offeneAbgeschnitten && (
+        // Sichtbar statt still: greift der Cap, fehlen offene Aufgaben im Board.
+        <div className="mb-4 rounded-ios-lg border border-warning bg-warning-soft px-4 py-3 text-body-sm text-warning-strong">
+          Es sind mehr als {NICHT_ERLEDIGT_CAP} offene Aufgaben vorhanden — das Board zeigt
+          nicht alle. Bitte Aufgaben abarbeiten oder die Ansicht filtern.
+        </div>
+      )}
+      <KanbanBoard
+        tasks={tasks}
+        faelle={faelleNormalized}
+        fallMap={fallMap}
+        adminMap={adminMap}
+        leadMap={leadMap}
+        svMap={svMap}
+        admins={admins ?? []}
+        reassignCandidates={reassignCandidates}
+        executorEnabled={executorEnabled}
+        historieGekuerzt={(erledigteTasks?.length ?? 0) >= ERLEDIGT_CAP}
+      />
+    </>
   )
 }

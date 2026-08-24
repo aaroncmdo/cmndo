@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/spurwechsel
+meta_title: Spurwechsel-Unfall — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.5

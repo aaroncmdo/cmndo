@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/vorfahrt-schilder
+meta_title: Vorfahrt-Schilder missachtet — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.3

@@ -26,7 +26,7 @@ import {
   extractTrustChips,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 
 const SLUG = 'kfz-haftpflicht-schaden'
@@ -40,7 +40,9 @@ export function generateMetadata(): Metadata {
   const a = getAsset()
   if (!a) return {}
   return {
-    title: `${a.title} · Claimondo`,
+    // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
+    // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
+    title: a.metaTitle || a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: `/${SLUG}` },
     openGraph: {
@@ -50,6 +52,8 @@ export function generateMetadata(): Metadata {
       description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
@@ -85,7 +89,7 @@ export default function Page() {
         <CitationBox sentences={getFakten(getMappingFor(SLUG))} />
         <ClusterHubGrid />
         <article className="pt-2">
-          <MarkdownRenderer body={cleaned} />
+          <MarkdownRenderer body={cleaned} pageHasOwnH1 />
           <FaqStems stems={FAQ_STEMS_MAPPING[SLUG] ?? []} />
           <VrBaitBlock items={VR_BAIT_MAPPING[SLUG] ?? []} />
           <ConversionAnchorBlock variant="cornerstone" />

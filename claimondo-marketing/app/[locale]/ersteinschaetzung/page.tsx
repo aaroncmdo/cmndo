@@ -9,7 +9,8 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
-import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
@@ -138,7 +139,7 @@ export default function ErsteinschaetzungPage() {
               <ChevronRight className="h-5 w-5" aria-hidden />
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 px-6 py-3.5 text-sm font-semibold text-white/90 backdrop-blur-sm transition-all hover:bg-white/10"
               data-tracking="call-ee-hero"
             >
@@ -284,7 +285,7 @@ export default function ErsteinschaetzungPage() {
               <ChevronRight className="h-5 w-5" />
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />

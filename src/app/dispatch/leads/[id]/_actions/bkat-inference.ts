@@ -64,10 +64,16 @@ export async function analyzeBkatForLead(
 
   // Aktenzeichen automatisch auf Lead speichern wenn noch keins gesetzt ist
   if (result.aktenzeichen && !lead.polizei_aktenzeichen) {
-    await supabase
+    // Das Aktenzeichen stammt aus einer kostenpflichtigen KI-Auswertung des
+    // Polizeiberichts. Geht der Write verloren, ist das Ergebnis weg und muss neu
+    // erzeugt werden — die Bedingung oben ist zugleich der Wiederholungs-Schutz.
+    const { error: akzFehler } = await supabase
       .from('leads')
       .update({ polizei_aktenzeichen: result.aktenzeichen })
       .eq('id', leadId)
+    if (akzFehler) {
+      console.error(`[bkat-inference] Aktenzeichen nicht gespeichert (Lead ${leadId}):`, akzFehler.message)
+    }
     revalidatePath(`/dispatch/leads/${leadId}`)
   }
 

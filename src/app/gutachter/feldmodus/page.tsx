@@ -7,7 +7,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getTagesSession } from '@/lib/sv/tages-session'
-import { effektiveBezugIds, type TerminBezugRow } from '@/lib/termine/effektive-bezug-ids'
+import { effektiveBezugIds, effektiveFallClaimId, type TerminBezugRow } from '@/lib/termine/effektive-bezug-ids'
+import { bezugInExpr } from '@/lib/termine/bezug-filter'
 import { weavePrivatStops } from '@/lib/feldmodus/weave-privat-stops'
 import FeldmodusClient from './FeldmodusClient'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
@@ -218,13 +219,17 @@ export default async function FeldmodusPage() {
     if (feldClaimIds.length) {
       const { data: gtLocs } = await admin
         .from('gutachter_termine')
-        .select('claim_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
-        .in('claim_id', feldClaimIds)
+        // bezug_typ/bezug_id mitladen — sonst laesst sich der Claim der bezug-nativen
+        // Treffer (claim_id NULL) unten nicht bestimmen.
+        .select('claim_id, bezug_typ, bezug_id, besichtigungsort_adresse, besichtigungsort_place_id, besichtigungsort_lat, besichtigungsort_lng')
+        .or(bezugInExpr('claim', feldClaimIds))
         .order('start_zeit', { ascending: false })
-      // Merge: pro claim_id den ersten (neuesten) Treffer in den fallMap-Eintrag einmergen.
+      // Merge: pro Claim den ersten (neuesten) Treffer in den fallMap-Eintrag einmergen.
       const gtFeldMap = new Map<string, { besichtigungsort_adresse: string | null; besichtigungsort_place_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>()
-      for (const gt of (gtLocs ?? []) as Array<{ claim_id: string | null; besichtigungsort_adresse: string | null; besichtigungsort_place_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>) {
-        if (gt.claim_id && !gtFeldMap.has(gt.claim_id)) gtFeldMap.set(gt.claim_id, gt)
+      for (const gt of (gtLocs ?? []) as Array<{ claim_id: string | null; bezug_typ: string | null; bezug_id: string | null; besichtigungsort_adresse: string | null; besichtigungsort_place_id: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null }>) {
+        // NICHT gt.claim_id — bezug-native Zeilen haetten dort NULL.
+        const cId = effektiveFallClaimId(gt)
+        if (cId && !gtFeldMap.has(cId)) gtFeldMap.set(cId, gt)
       }
       for (const [fallId2, f] of fallMap.entries()) {
         const claimId2 = (f as Record<string, unknown>).claim_id as string | null

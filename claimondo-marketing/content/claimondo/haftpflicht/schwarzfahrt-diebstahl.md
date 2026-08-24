@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/schwarzfahrt-diebstahl
+meta_title: Schwarzfahrt und Kfz-Diebstahl — Haftung
 type: glossar-spoke
 cluster: H7
 nummer: H7.2

@@ -56,6 +56,16 @@ export function BghAuthorityGrid({
               <Link
                 key={u.az}
                 href={u.href}
+                // Ohne aria-label heisst der Link fuer Screenreader nur "Im Cluster
+                // ansehen →" — der letzte Textknoten. Aktenzeichen und Thema stehen
+                // zwar sichtbar in der Karte, sind aber nicht Teil des Link-Namens.
+                //
+                // Es war nie da: der anlegende Commit (93f794c) setzte nur
+                // `aria-labelledby` auf die <section>, nichts auf die Links. Der Test
+                // `doc40-cards-clickable` erwartet `a[aria-label*="BGH VI ZR"]` und war
+                // damit von Anfang an rot — gemerkt hat es niemand, weil die Suite
+                // stumm war (falsche Domain #5441, davor Timeout=cancelled #5422).
+                aria-label={`${u.az} — ${u.titel}`}
                 className="group block rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-claimondo-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-claimondo-ondo"
                 data-tracking={`card-bgh-${u.az.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}`}
               >

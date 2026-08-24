@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/beweislast
+meta_title: Beweislast im Verkehrsunfall
 type: glossar-spoke
 cluster: H1
 nummer: H1.5
@@ -27,7 +28,6 @@ last_legal_review: pending
 related:
   - /haftpflicht/anscheinsbeweis
   - /haftpflicht/mitverschulden-bgb254
-  - /haftpflicht/fruehe-beweissicherung
   - /haftpflicht/verschulden-bgb823
 meta_description: "Beweislast im Verkehrsunfall: Sie beweisen Unfall, Schaden und Kausalität (§286 ZPO), der Versicherer das Mitverschulden (§254 BGB). Wer was tragen muss."
 ---
@@ -212,7 +212,6 @@ Ja, der BGH (VI ZR 233/17) hat Dashcam-Aufnahmen als gerichtlich verwertbar aner
 
 - [Anscheinsbeweis](/haftpflicht/anscheinsbeweis) — Beweis-Erleichterung in Standard-Fällen
 - [§ 254 BGB Mitverschulden](/haftpflicht/mitverschulden-bgb254) — Beweis-Last des Versicherers
-- [Frühe Beweissicherung](/haftpflicht/fruehe-beweissicherung) — Praktische Schritte in 48h
 - [§ 823 BGB Deliktsanspruch](/haftpflicht/verschulden-bgb823) — Anspruchsgrundlage
 
 ---

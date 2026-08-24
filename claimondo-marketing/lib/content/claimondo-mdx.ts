@@ -66,6 +66,14 @@ export interface ClaimondoAsset {
   /** Aus Frontmatter `meta_description` — handgetextete SERP-Description (<=160).
    *  Fallback wenn leer: metaDescriptionFromSnippet(snippet). */
   metaDescription?: string
+  /** Aus Frontmatter `meta_title` — kurzer SERP-Titel (<=48 Zeichen, das Layout
+   *  haengt " | Claimondo" an = 60). Fallback wenn leer: `title`.
+   *
+   *  Noetig, weil `title` die H1 des Bodys IST (s. extractTitle) und damit die
+   *  sichtbare Artikel-Ueberschrift. Die darf lang und beschreibend bleiben —
+   *  ein Kuerzen haette sie verstuemmelt. Gemessen 19.08.: 78 der 90 Assets
+   *  lagen ueber 60 Zeichen, Maximum 99. Analog zu `metaDescription`. */
+  metaTitle?: string
   /** Voller Markdown-Body (für llms-full.txt) */
   body: string
   /** Aus Frontmatter `related` — verwandte interne URLs (optional) */
@@ -217,6 +225,10 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
           typeof meta.meta_description === 'string' && meta.meta_description.trim()
             ? meta.meta_description.trim()
             : undefined,
+        metaTitle:
+          typeof meta.meta_title === 'string' && meta.meta_title.trim()
+            ? meta.meta_title.trim()
+            : undefined,
         body,
         related: Array.isArray(meta.related) ? (meta.related as string[]) : undefined,
         excerpt: typeof meta.excerpt === 'string' ? meta.excerpt : '',
@@ -276,6 +288,13 @@ export function localizeAsset(
         typeof meta.meta_description === 'string' && meta.meta_description.trim()
           ? meta.meta_description.trim()
           : base.metaDescription,
+      // Kein de-Fallback: ein deutscher Kurz-Titel auf einer uebersetzten Seite
+      // waere schlechter als deren eigene (uebersetzte) H1. Ohne `meta_title` in
+      // der Uebersetzung greift also die uebersetzte H1 aus `title` oben.
+      metaTitle:
+        typeof meta.meta_title === 'string' && meta.meta_title.trim()
+          ? meta.meta_title.trim()
+          : undefined,
       excerpt: typeof meta.excerpt === 'string' && meta.excerpt.trim() ? meta.excerpt.trim() : base.excerpt,
       keyFacts: Array.isArray(meta.keyFacts) ? (meta.keyFacts as string[]) : base.keyFacts,
       body,

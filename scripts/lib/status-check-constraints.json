@@ -568,6 +568,13 @@
       "wbw",
       "wertminderung"
     ],
+    "gewinnspiel_teilnahmen.status": [
+      "abgelehnt",
+      "bestaetigt",
+      "gezogen",
+      "nachweis_offen",
+      "offen"
+    ],
     "gutachten.gutachten_kalkulationssystem": [
       "audatex",
       "autoixpert",
@@ -999,6 +1006,42 @@
       "geoeffnet",
       "gesendet",
       "hochgeladen"
+    ],
+    "levelup_checks.modus": [
+      "aufbau",
+      "bestand"
+    ],
+    "levelup_checks.status": [
+      "abgelaufen",
+      "fehler",
+      "fertig",
+      "laeuft",
+      "neu"
+    ],
+    "levelup_funnel.jahre_erfahrung": [
+      "2bis10",
+      "start",
+      "ueber10",
+      "unter2"
+    ],
+    "levelup_funnel.ki_nutzung": [
+      "gelegentlich",
+      "nein",
+      "taeglich",
+      "unklar"
+    ],
+    "levelup_funnel.marketing_partner": [
+      "agentur",
+      "nebenbei",
+      "niemand",
+      "selbst"
+    ],
+    "levelup_termine.status": [
+      "abgesagt",
+      "bestaetigt",
+      "gewuenscht",
+      "nicht_erschienen",
+      "stattgefunden"
     ],
     "linkedin_posts.status": [
       "entwurf",

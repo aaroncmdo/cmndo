@@ -1,9 +1,20 @@
 import { test, type Page } from '@playwright/test'
 import path from 'path'
+import { credentialsAus } from './lib/ziel'
 
 const SCREENSHOT_DIR = path.join(process.cwd(), 'docs', '14.05.2026', 'staging-clickthrough')
 const BASE = 'https://app.staging.claimondo.de'
-const BASIC_AUTH = { username: 'aaroncmdo', password: 'ClaimondoSuperuser123789!!' }
+
+// Bis 23.08. stand hier das Basic-Auth-Passwort im KLARTEXT. Es liegt damit dauerhaft in
+// der Git-Historie und muss rotiert werden (Aaron-Aufgabe, docs/superpowers/specs/
+// 2026-08-23-journey-gate-release-tor-design.md §8).
+//
+// `credentialsAus(process.env)` statt `basicAuthFuerZiel()`: diese Spec setzt ihr Ziel
+// SELBST (BASE oben, hardcodet auf staging) und richtet sich nicht nach
+// PLAYWRIGHT_BASE_URL. Die ziel-abhaengige Variante lieferte hier `undefined`, sobald
+// jemand die Datei ohne gesetzte PLAYWRIGHT_BASE_URL faehrt — und ein Kontext ohne
+// Credentials bekommt von nginx 401, was wie ein kaputtes Deployment aussaehe.
+const BASIC_AUTH = credentialsAus(process.env)
 
 async function loginApp(page: Page, email: string, password: string) {
   await page.goto(`${BASE}/login`)
@@ -20,6 +31,10 @@ async function shoot(page: Page, name: string) {
 }
 
 test.describe('Staging Clickthrough', () => {
+  // Sichtbarer Skip statt 401: ohne Credentials liefe der Test gegen die nginx-Wand und
+  // meldete einen Produktfehler, den es nicht gibt.
+  test.skip(!BASIC_AUTH, 'STAGING_BASIC_AUTH_USER/PASS nicht gesetzt (Ziel = staging)')
+
   test('Admin/Dispatch Journey', async ({ browser }) => {
     test.setTimeout(420_000)
     const ctx = await browser.newContext({

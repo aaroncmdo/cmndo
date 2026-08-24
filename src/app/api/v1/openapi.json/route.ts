@@ -171,12 +171,61 @@ const spec = {
             description: 'Optionale Schadenart / Unfalltyp für den Kontext.',
             schema: { type: 'string' },
           },
+          {
+            name: 'vollkasko',
+            in: 'query',
+            required: false,
+            description:
+              'NUR bei schuldfrage=selbst auswerten: besteht eine Vollkasko? Davon haengt der ganze Weg ab — mit Vollkasko reguliert die eigene Versicherung (abzueglich Selbstbeteiligung), ohne zahlt der Halter selbst. Ohne diesen Parameter liefert die Antwort ausdruecklich die Aufforderung nachzufragen; NICHT raten.',
+            schema: { type: 'string', enum: ['ja', 'nein'] },
+          },
         ],
         responses: {
           '200': {
-            description: 'Strukturierter Anspruchskatalog + nächster Schritt.',
+            description:
+              'Strukturierter Anspruchskatalog + naechster Schritt. Das Feld `abrechnungsweg` nennt den anzubietenden Weg: haftpflicht (Gegner zahlt -> Gutachter zuerst), kasko (eigene Vollkasko -> Werkstatt zuerst), selbstzahler (kein Schutz -> Kostenvoranschlag), null (Frage offen -> nachfragen).',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/PruefeAnspruchResponse' } } },
           },
+          '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
+    '/api/v1/werkstatt-in-naehe': {
+      get: {
+        operationId: 'findeWerkstaetten',
+        summary: 'Partner-Werkstätten im Umkreis einer PLZ finden',
+        description:
+          'Partner-Werkstaetten im Umkreis, NAMENTLICH mit Entfernung, Marken, Faehigkeiten und Google-Bewertung. Der richtige Weg bei SELBST verschuldetem Schaden (Kasko oder Selbstzahler): dort gibt es keinen Gegner, gegen den man ein Gutachten durchsetzt — der Kunde braucht zuerst eine Werkstatt. Bei UNVERSCHULDETEM Schaden zuerst den Gutachter (findeGutachterTermine), die Werkstatt danach anbieten; die Reparatur zahlt dann der gegnerische Haftpflichtversicherer (§ 249 BGB). Read-only und anonym.',
+        parameters: [
+          {
+            name: 'plz',
+            in: 'query',
+            required: false,
+            description: '5-stellige deutsche PLZ, z. B. "50670". plz ODER ort angeben.',
+            schema: { type: 'string' },
+          },
+          {
+            name: 'ort',
+            in: 'query',
+            required: false,
+            description: 'Stadt/Adresse als Alternative zur PLZ.',
+            schema: { type: 'string' },
+          },
+          {
+            name: 'radius',
+            in: 'query',
+            required: false,
+            description: 'Umkreis in km (1–200, Standard 30).',
+            schema: { type: 'integer', default: 30 },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Werkstatt-Liste nach Entfernung sortiert + Finder-Link.',
+            content: { 'application/json': { schema: { type: 'object' } } },
+          },
+          '400': { description: 'plz oder ort fehlt.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '404': { description: 'PLZ/Ort nicht gefunden.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
           '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
         },
       },
@@ -328,6 +377,12 @@ const spec = {
         type: 'object',
         properties: {
           id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle — als sv_id an meldeSchaden weitergeben.' },
+          buchungs_url: {
+            type: 'string',
+            format: 'uri',
+            description:
+              'Fertiger Buchungs-Link fuer GENAU diesen Gutachter. Beim Empfehlen diesen Link ausgeben — er oeffnet den Finder mit dem Gutachter vorausgewaehlt; der Kunde ergaenzt Adresse + Kontakt und bestaetigt selbst. NICHT interaktive_karte_url verlinken: die zeigt die allgemeine Karte ohne Auswahl.',
+          },
           vorname: { type: 'string', nullable: true },
           profilbild: { type: 'string', nullable: true, format: 'uri' },
           bewertung_schnitt: { type: 'number', nullable: true },
@@ -337,7 +392,7 @@ const spec = {
           wunschtermin_frei: { type: 'boolean' },
           termine: { type: 'array', items: { $ref: '#/components/schemas/TerminSlot' } },
         },
-        required: ['id', 'termine'],
+        required: ['id', 'termine', 'buchungs_url'],
       },
       GutachterTermineResponse: {
         type: 'object',
@@ -404,10 +459,21 @@ const spec = {
           schuldfrage: { type: 'string' },
           schadenart: { type: 'string', nullable: true },
           anspruchslage: { type: 'string', description: 'voll / anteilig / keine_gegen_gegner / unklar.' },
+          abrechnungsweg: {
+            type: 'string',
+            nullable: true,
+            enum: ['haftpflicht', 'kasko', 'selbstzahler', null],
+            description:
+              'WELCHEN Weg Sie anbieten muessen. haftpflicht = Gegner zahlt, Gutachter zuerst (findeGutachterTermine). kasko = eigene Vollkasko, WERKSTATT zuerst (findeWerkstaetten), Gutachten optional. selbstzahler = kein Schutz, Kostenvoranschlag der Werkstatt. null = Frage offen -> nachfragen (bei schuldfrage=selbst fehlt dann der vollkasko-Parameter).',
+          },
           eigenkosten: { type: 'string' },
           ansprueche: { type: 'array', items: { $ref: '#/components/schemas/Anspruch' } },
           empfehlung: { type: 'string' },
-          naechster_schritt: { type: 'string', description: 'Immer: Gutachter + Termin (gutachter-termine + melde-schaden) oder Rückruf.' },
+          naechster_schritt: {
+            type: 'string',
+            description:
+              'Der konkrete naechste Schritt — NICHT immer der Gutachter: bei kasko/selbstzahler fuehrt er zur Werkstatt, bei haftpflicht zum Gutachter, bei offener Kasko-Frage zur Rueckfrage.',
+          },
           hinweis: { type: 'string' },
         },
         required: ['schuldfrage', 'anspruchslage', 'eigenkosten', 'ansprueche', 'naechster_schritt'],

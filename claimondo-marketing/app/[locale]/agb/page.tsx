@@ -3,6 +3,11 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export const metadata: Metadata = {
   title: 'Allgemeine Geschäftsbedingungen',
+  description:
+    'Allgemeine Geschäftsbedingungen von Claimondo für die Vermittlung unabhängiger Kfz-Sachverständiger und die Abwicklung von Unfallschäden.',
+  // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
+  // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
+  alternates: { canonical: '/agb' },
 }
 
 export default function AGBPage() {

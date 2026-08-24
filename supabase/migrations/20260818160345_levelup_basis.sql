@@ -1,15 +1,3 @@
--- SV-LevelUp — Basistabellen
---
--- Sieben Tabellen fuer den Sichtbarkeits-Check. RLS ist von Anfang an
--- geschlossen: Lesen nur fuer Vertriebsrollen, Schreiben ausschliesslich ueber
--- service_role in Server Actions. Keine anon-Policy, nirgends.
---
--- levelup_funnel und levelup_events bekommen bewusst GAR KEINE Lese-Policy —
--- der Zugriff laeuft dort nur ueber service_role (Design-Spec §6, CONTEXT §3.4).
---
--- Spec: docs/superpowers/specs/2026-08-18-sv-levelup-design.md
--- Plan: docs/superpowers/plans/2026-08-18-sv-levelup-p1-fundament.md (Task 1)
-
 create table public.levelup_checks (
   id                    uuid primary key default gen_random_uuid(),
   token                 text not null unique,
@@ -128,10 +116,6 @@ alter table public.levelup_praesentationen   enable row level security;
 alter table public.levelup_auswertungslinks  enable row level security;
 alter table public.levelup_anreicherung      enable row level security;
 
--- Lesen: Vertriebsrollen. leadbearbeiter ist NICHT in is_staff() enthalten
--- (geprueft 18.08.2026) und wird deshalb ausgeschrieben.
--- Jede Policy hat ein explizites TO — ohne das waere sie PUBLIC und damit
--- auch fuer anon wirksam (RLS-Policy-Ratchet).
 create policy levelup_checks_vertrieb_sel on public.levelup_checks for select to authenticated
   using (exists (select 1 from public.profiles p where p.id = (select auth.uid())
                  and p.rolle in ('admin','dispatch','leadbearbeiter','kundenbetreuer')));

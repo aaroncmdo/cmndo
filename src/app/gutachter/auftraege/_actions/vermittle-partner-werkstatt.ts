@@ -9,6 +9,7 @@
 // Gutachten, die Gates spiegeln den Kunden.
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -83,6 +84,18 @@ export async function vermittlePartnerWerkstatt(formData: FormData): Promise<Ver
   if (!leadRes.ok) return { ok: false, error: `Vorgang konnte nicht angelegt werden: ${leadRes.error}` }
   const leadId = leadRes.leadId
 
+  // Team-WA (Audit 23.08.). intern:true — der SV legt den Vorgang selbst an;
+  // der Ausloeser ist ein Partner, nicht der Endkunde.
+  await notifyTeamNeuerLead({
+    leadId,
+    quelle: 'SV — Partner-Werkstatt vermittelt',
+    intern: true,
+    name: [vorname, nachname].filter(Boolean).join(' ').trim(),
+    telefon: telefon || null,
+    email: email || null,
+    zusatz: [kennzeichen ? `🚗 ${kennzeichen}` : null],
+  })
+
   // 4. Sofort-Claim (P4 T1: Direkt-INSERT in 'gutachten-eingegangen', Effekte aufgeschoben).
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
   const conv = await convertLeadToClaim({
@@ -93,7 +106,13 @@ export async function vermittlePartnerWerkstatt(formData: FormData): Promise<Ver
   })
   if (!conv.ok) {
     // Aufraeumen: der frisch angelegte Lead ohne Claim ist Muell (kein Kunde-Kontaktpunkt).
-    await admin.from('leads').delete().eq('id', leadId)
+    // Rollback nach fehlgeschlagener Konversion. Scheitert er (typisch: ein
+    // Fremdschluessel haengt am Lead), bleibt ein verwaister Lead zurueck — genau die
+    // Konstellation, mit der der J2-Seed 88 Leads auf prod liegen liess.
+    const { error: rollbackFehler } = await admin.from('leads').delete().eq('id', leadId)
+    if (rollbackFehler) {
+      console.error(`[vermittle-partner-werkstatt] Rollback-DELETE fehlgeschlagen — Lead ${leadId} bleibt verwaist:`, rollbackFehler.message)
+    }
     return { ok: false, error: `Vorgang konnte nicht angelegt werden: ${conv.error}` }
   }
 
@@ -102,11 +121,16 @@ export async function vermittlePartnerWerkstatt(formData: FormData): Promise<Ver
   // firmen_flotte — der SV-Flow-Lead hat keinen Inbound-Vermittler) -> expliziter Seed,
   // write-once via IS-NULL-Guard (frischer Claim). Non-fatal wie alle Bindungs-Seeds.
   try {
-    await admin
+    // Das try faengt diesen Write nicht. Ohne die Bindung fehlt dem vermittelnden
+    // Gutachter sein eigener Vorgang im Netzwerk.
+    const { error: bindungFehler } = await admin
       .from('claims')
       .update({ netzwerk_owner_id: user.id } as never)
       .eq('id', conv.claimId)
       .is('netzwerk_owner_id', null)
+    if (bindungFehler) {
+      console.error(`[vermittle-partner-werkstatt] Netzwerk-Bindung nicht gesetzt (Claim ${conv.claimId}):`, bindungFehler.message)
+    }
   } catch (err) {
     console.warn('[vermittlePartnerWerkstatt] netzwerk_owner_id-Seed non-fatal:', err)
   }

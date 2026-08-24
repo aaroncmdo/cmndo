@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/sozialtraeger-regress
+meta_title: Sozialträger-Regress nach § 116 SGB X
 type: glossar-spoke
 cluster: H2
 nummer: H2.8

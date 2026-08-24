@@ -1,0 +1,21 @@
+-- Nachtrag zu 20260818194727: die Umstellung war semantisch richtig, aber fuer den
+-- Guard textuell unsichtbar.
+--
+-- `audit_ungated_definer_views()` prueft die Schreibweise WOERTLICH:
+--     AND COALESCE(c.reloptions::text ILIKE '%security_invoker=true%', false) = false
+--
+-- Postgres speichert in pg_class.reloptions genau die Schreibweise, die man setzt.
+-- `set (security_invoker = on)` legt `{security_invoker=on}` ab — semantisch identisch
+-- zu `true`, vom ILIKE-Filter aber NICHT getroffen. Die View blieb deshalb im Bericht,
+-- obwohl die Definer-Semantik bereits weg war.
+--
+-- Belegt vor diesem Nachtrag:
+--   reloptions = {security_invoker=on}   ILIKE '%security_invoker=true%' -> false
+-- Danach:
+--   reloptions = {security_invoker=true} -> guard matcht, audit_ungated_definer_views() = 0 Zeilen
+--   anon unveraendert 62 Zeilen (set local role anon), lat 49.7703 .. 51.7649
+--
+-- ⚠ Konsequenz fuer kuenftige Views: IMMER `security_invoker = true` schreiben.
+-- `on`, `1` und `yes` sind gueltiges Postgres und werden vom Guard STILL uebersehen —
+-- die View gilt dann weiter als Definer-View, obwohl sie keine mehr ist.
+alter view public.sv_leads_map_pins set (security_invoker = true);

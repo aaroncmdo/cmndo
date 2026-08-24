@@ -17,7 +17,12 @@ import { AI_MODELS } from '@/lib/ai/models'
 import type { LokalinhaltEntwurf } from './gate'
 
 export const LOKALINHALT_MODEL = AI_MODELS.sv_briefing_struktur
-const MAX_OUTPUT_TOKENS = 4096
+// 4096 reichten fuer den urspruenglichen Umfang (5 FAQs), nicht fuer den
+// angestrebten (10-14 mit ausfuehrlichen Antworten). Gemessen 18.08.2026: bei
+// der hoeheren Anforderung riss die Ausgabe und lieferte einen Rumpf. Der Wert
+// deckt jetzt den vollen Entwurf mit Reserve; die Pruefung auf `stop_reason`
+// unten faengt den Rest, falls eine Stadt trotzdem darueber liegt.
+const MAX_OUTPUT_TOKENS = 16_000
 
 /** Verifizierte Fakten, die die Seite bereits traegt — als Kontext in den Prompt. */
 export type StadtKontext = {
@@ -79,15 +84,32 @@ const TOOL: Anthropic.Tool = {
       },
       lokaleFaqs: {
         type: 'array',
-        description: 'Ortsspezifische Fragen. Nichts, was auf jeder Stadtseite stehen koennte.',
+        // Menge bewusst benannt (18.08.2026): ohne Angabe lieferte das Modell
+        // fuenf Fragen = 349 Woerter, gemessen an Solingen. Die FAQ tragen ~80 %
+        // des Ortstextes; bei ~2.800 Woertern Seitenumfang braucht eine Seite
+        // grob 1.200 Woerter Eigenes, um unter die 40-%-Aehnlichkeitsschwelle
+        // der Spec zu kommen. Die Untergrenze steht bewusst NICHT drin — lieber
+        // acht belegbare Fragen als vierzehn, von denen sechs erfunden sind.
+        description:
+          'Ortsspezifische Fragen mit ausfuehrlichen Antworten (je 60-100 Woerter). ' +
+          'Ziel: 10-14 Stück. Nichts, was auf jeder Stadtseite Deutschlands stehen ' +
+          'könnte. Lieber weniger als erfundene — Substanz vor Menge.',
         items: {
           type: 'object',
           properties: { frage: { type: 'string' }, antwort: { type: 'string' } },
           required: ['frage', 'antwort'],
         },
       },
-      heroAnker: { type: 'string', description: 'Ein Satz mit konkretem Ortsbezug. Optional.' },
-      topografieAnker: { type: 'string', description: 'Lagebesonderheit. Optional.' },
+      heroAnker: {
+        type: 'string',
+        description: 'Ein bis zwei Saetze mit konkretem Ortsbezug (25-45 Woerter). Optional.',
+      },
+      topografieAnker: {
+        type: 'string',
+        description:
+          'Lagebesonderheit der Stadt und was sie für Unfallgeschehen und Schadensbild ' +
+          'bedeutet (40-70 Woerter). Optional.',
+      },
     },
     required: ['stadtbezirke', 'hauptachsen', 'unfallHotspots', 'lokaleFaqs'],
   },
@@ -95,7 +117,7 @@ const TOOL: Anthropic.Tool = {
 
 function systemPrompt(): string {
   return [
-    'Du recherchierst hyperlokale Fakten fuer die Standortseite eines Kfz-Gutachter-Dienstes.',
+    'Du recherchierst hyperlokale Fakten für die Standortseite eines Kfz-Gutachter-Dienstes.',
     '',
     'OBERSTE REGEL — Belege:',
     '- Unfallschwerpunkte NUR mit echter, absoluter http(s)-Quell-URL (Polizeipresse, Stadt, Unfallatlas).',
@@ -104,14 +126,24 @@ function systemPrompt(): string {
     '- Nenne KEINE Statistiken oder Zahlen, die du nicht belegen kannst.',
     '',
     'Inhaltliche Regeln:',
-    '- Alles muss extern ueberpruefbar sein: amtliche Stadtbezirke, tatsaechlich vorhandene Autobahnen/Bundesstrassen.',
-    '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollstaendig ist besser als falsch.',
-    '- Die lokalen FAQ muessen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen koennte, gehoert nicht hierher.',
+    '- Alles muss extern überprüfbar sein: amtliche Stadtbezirke, tatsächlich vorhandene Autobahnen/Bundesstraßen.',
+    '- Bist du bei einer Angabe unsicher, lass sie weg. Unvollständig ist besser als falsch.',
+    '- Die lokalen FAQ müssen ORTSSPEZIFISCH sein. Was auf jeder Stadtseite Deutschlands stehen könnte, gehört nicht hierher.',
     '- Nenne den Stadtnamen in den Texten. Kein Baukasten-Text mit austauschbarem Ort.',
     '- Keine Werbesprache, keine Superlative. Sachlich, wie ein Nachschlagewerk.',
     '',
-    'Sprache: Deutsch mit korrekten Umlauten (ä, ö, ü, ß).',
-    'Die vorgegebenen Kontext-Fakten sind bereits geprueft — wiederhole sie nicht als FAQ und widersprich ihnen nicht.',
+    // 19.08.2026: Diese Zeile stand schon da — und half nicht. Von fünf erzeugten
+    // Städten kam frankfurt mit NULL Umlauten auf 11.836 Zeichen zurück, hamburg
+    // gemischt ("Elbstrasse" neben "Straßenbaulastträger"). Der wahrscheinliche
+    // Grund stand direkt darüber: der Prompt selbst war durchgängig in
+    // ASCII-Ersatz geschrieben ("Bundesstrassen", "ueberpruefbar") — das Modell
+    // folgte dem Beispiel, nicht der Anweisung. Deshalb ist der Prompt jetzt
+    // selbst korrekt geschrieben und die Regel steht als Verbot mit Beispielen.
+    // Erzwungen wird sie ohnehin erst vom Gate (pruefeLokalinhalt).
+    'Sprache: Deutsch mit ECHTEN Umlauten — ä, ö, ü, ß.',
+    'NIEMALS ae/oe/ue/ss als Ersatz: "Straße" nicht "Strasse", "für" nicht "fuer", "bündelt" nicht "buendelt", "häufig" nicht "haeufig".',
+    'Das gilt auch für Eigennamen und Straßennamen. Ein Entwurf mit Ersatzschreibweisen wird abgelehnt.',
+    'Die vorgegebenen Kontext-Fakten sind bereits geprüft — wiederhole sie nicht als FAQ und widersprich ihnen nicht.',
   ].join('\n')
 }
 
@@ -119,7 +151,7 @@ function userMessage(k: StadtKontext): string {
   return [
     `Stadt: ${k.name} (${k.bundesland}), PLZ-Bereich ${k.plzPrefix}, ${k.bevoelkerung} Einwohner.`,
     '',
-    'Bereits geprueft und auf der Seite vorhanden (nicht wiederholen):',
+    'Bereits geprüft und auf der Seite vorhanden (nicht wiederholen):',
     `- Zustaendige Gerichte: ${k.amtsgericht} (bis 5.000 € Streitwert), ${k.landgericht} darueber`,
     `- Naechstgelegene Orte: ${k.nachbarorte.join(', ') || '—'}`,
     '',
@@ -150,6 +182,25 @@ export async function generateLokalinhaltDraft(
       tools: [TOOL],
       tool_choice: { type: 'tool', name: 'erfasse_ortsinhalt' },
     })
+
+    // 🔴 STILLER DATENVERLUST, gemessen am 18.08.2026: Reisst die Antwort das
+    // Token-Limit, liefert die API einen UNVOLLSTAENDIGEN tool_use-Block. Die
+    // Zuweisungen unten fangen das mit `?? []` ab — aus abgeschnittenen Feldern
+    // werden dann still LEERE, und der Generator meldet trotzdem Erfolg.
+    //
+    // Konkret gemessen: mit einer hoeheren FAQ-Anforderung fielen von 436
+    // Woertern 399 weg (0 FAQs, 0 Anker), waehrend der Aufruf `ok: true`
+    // zurueckgab. Ohne diese Pruefung landet so ein Rumpf in der DB, besteht
+    // womoeglich sogar das Gate — und niemand sieht, dass zwei Drittel fehlen.
+    // Dieselbe Klasse wie #5354 (Structured-Outputs-Limit in der OCR).
+    if (response.stop_reason === 'max_tokens') {
+      return {
+        ok: false,
+        error:
+          `Ausgabe am Token-Limit abgeschnitten (${MAX_OUTPUT_TOKENS}). ` +
+          'Der Entwurf wäre unvollständig — lieber kein Inhalt als ein halber.',
+      }
+    }
 
     const block = response.content.find((c) => c.type === 'tool_use')
     if (!block || block.type !== 'tool_use') {

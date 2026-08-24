@@ -13,6 +13,7 @@ import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createCase } from '@/lib/intake/create-case'
 import { ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
 import { buildSchadenLeadInput, type SchadenMeldenForm } from '@/lib/kunde/schaden-melden'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 
 export async function meldeNeuenSchaden(
   form: SchadenMeldenForm,
@@ -55,6 +56,19 @@ export async function meldeNeuenSchaden(
   })
   if (!result.ok) return { ok: false, error: result.error }
   const fallId = result.claimId ?? result.leadId
+
+  // Team-WA (Audit 23.08.: dieser Eintrittspunkt war stumm — ein eingeloggter
+  // Kunde meldete hier einen Schaden und niemand erfuhr davon). direct-claim ->
+  // der Link zeigt auf die Fallakte, nicht auf den Lead.
+  await notifyTeamNeuerLead({
+    leadId: result.leadId,
+    quelle: 'Kunde-Portal (Schaden melden)',
+    name: [built.base.vorname, built.base.nachname].filter(Boolean).join(' '),
+    telefon: built.base.telefon ?? null,
+    email: built.base.email ?? null,
+    zusatz: [built.extra.kennzeichen ? `🚗 ${built.extra.kennzeichen}` : null],
+    linkPfad: `/faelle/${fallId}`,
+  })
 
   // Fahrzeug ohne FIN -> Stub, setzt claims.vehicle_id. Non-critical (Fall steht bereits).
   if (built.extra.kennzeichen) {

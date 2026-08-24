@@ -5,16 +5,22 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, FLOTTE_LANDING_URL, WERKSTATT_LANDING_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, FLOTTE_LANDING_URL, WERKSTATT_LANDING_URL, PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
 
 // Seit #5010 live: oeffentliche Flotten-Selbstregistrierung in der App —
 // die CTAs zeigen direkt auf den Self-Signup (sofort aktives Flotten-Portal).
 const REGISTRIEREN_URL = 'https://app.claimondo.de/flotte/registrieren'
 
 export const metadata: Metadata = {
-  title: 'Flottenpartner werden — Schadenmanagement für Ihren Fuhrpark | Claimondo',
+  // 72 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
+  // rund 60. "Fuhrpark" bleibt als Keyword drin, gekuerzt wird der Nachsatz.
+  // openGraph.title unten behaelt die ausfuehrliche Fassung, dort ist mehr Platz.
+  title: 'Flottenpartner werden — Fuhrpark-Schäden regeln',
+  // 204 Zeichen — Google zeigt rund 160. Gekuerzt wird der Nachsatz, die
+  // Leistungsaufzaehlung bleibt.
   description:
-    'Schadenmanagement für Firmen-Flotten: Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden lassen, unabhängige Gutachten und Regulierung über die gegnerische Haftpflicht. Kostenlos registrieren.',
+    'Schadenmanagement für Firmen-Flotten: Fahrzeuge zentral verwalten, Schäden direkt am Fahrzeug melden lassen, Gutachten und Regulierung über die Gegenseite.',
   keywords: [
     'Flottenpartner werden',
     'Fuhrpark Schadenmanagement',
@@ -148,7 +154,7 @@ export default function FlottePartnerWerdenPage() {
               <ChevronRight className="h-5 w-5" />
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-claimondo-border bg-white/70 px-7 py-3.5 text-base font-semibold text-claimondo-navy backdrop-blur-sm transition-all hover:bg-white"
             >
               <Phone className="h-4 w-4" />
@@ -347,7 +353,7 @@ export default function FlottePartnerWerdenPage() {
               Kostenlos registrieren
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />

@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/linksabbieger
+meta_title: Linksabbieger-Unfall — wer haftet
 type: glossar-spoke
 cluster: H6
 nummer: H6.6

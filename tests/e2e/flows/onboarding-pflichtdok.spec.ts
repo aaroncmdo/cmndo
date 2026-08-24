@@ -31,6 +31,15 @@ const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
 const BASIC_USER = process.env.STAGING_BASIC_USER ?? 'aaroncmdo'
 const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
 const IS_LOCAL = BASE.startsWith('http://localhost') || BASE.startsWith('http://127.')
+// Nur STAGING liegt hinter nginx-Basic-Auth. Der Skip unten hing bis 23.08. an
+// `!IS_LOCAL` und behandelte damit PROD wie staging: wer diese Spec lokal gegen
+// app.claimondo.de fuhr — also genau den Lauf, den Regel 4 vorschreibt — bekam einen
+// STILLEN Skip statt eines Ergebnisses. In CI faellt das nicht auf, weil dort
+// STAGING_BASIC_PASS gesetzt ist. Gemessen 23.08.: mit gesetzter Variable lief der
+// Test gegen prod in 7,4 s durch (1 passed) — es fehlte also nur das Gate, nicht die
+// Lauffaehigkeit. Gleiche Klasse wie der webServer-Fix in #5512: die Bedingung prueft
+// jetzt, ob das ZIEL Basic-Auth braucht, statt ob es "nicht localhost" ist.
+const BRAUCHT_BASIC_AUTH = /staging/i.test(BASE)
 const RUN_ID = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14)
 
 let stepIdx = 0
@@ -78,7 +87,7 @@ function field(page: Page, key: string) {
 
 test('Phase 1: Public /gutachter-finden lädt + Wizard-Einstieg + fehlerfrei', async ({ page }) => {
   test.setTimeout(90_000)
-  if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+  if (BRAUCHT_BASIC_AUTH && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt (Ziel = staging)')
   const { pageErrors, consoleErrors } = wireConsole(page, 'gf')
 
   await page.goto('/gutachter-finden', { waitUntil: 'domcontentloaded' })
@@ -108,24 +117,46 @@ test('Phase 1: Public /gutachter-finden lädt + Wizard-Einstieg + fehlerfrei', a
 })
 
 // Rollen-Portal-Erreichbarkeit: jede Rolle einloggen + Portal lädt fehlerfrei.
+// ⚠ Die Defaults waren fuer 3 von 4 Rollen FALSCH — nachgemessen 20.08. gegen prod:
+//   SV       Test1234!            -> richtig Claimondo2026!   (Login -> /gutachter/heute)
+//   KB       test-kb-anna@ + TestKB2026!  -> der Account EXISTIERT NICHT; richtig ist
+//            test-kb@claimondo.de + Claimondo2026!            (Login -> /mitarbeiter)
+//   Kanzlei  Test1234!            -> richtig Claimondo2026!   (Login -> /kanzlei/mandate)
+//   Dispatch Test1234!            -> war als einziges korrekt
+// Konvention (memory/reference-internal-test-account-logins.md): test-*@ = Claimondo2026!,
+// AUSNAHME test-dispatch = Test1234!. Genau diese Ausnahme wurde offenbar verallgemeinert.
+// Folge: die betroffenen Rollen loggten nie ein, der Test uebersprang sich (siehe unten)
+// und war deshalb GRUEN — er hat die Portale seit jeher nicht geprueft.
+// ENV-Override bleibt vorrangig; fuer SV existiert ein CI-Secret (ci.yml), fuer KB/Kanzlei nicht.
 const ROLLEN: Array<{ name: string; email: string; pass: string; pfad: string; marker: RegExp }> = [
-  { name: 'SV', email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Test1234!', pfad: '/gutachter', marker: /gutachter|fälle|aufträge|termine/i },
-  { name: 'KB', email: process.env.TEST_KB_EMAIL ?? 'test-kb-anna@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'TestKB2026!', pfad: '/mitarbeiter', marker: /dashboard|fälle|aufgaben/i },
+  { name: 'SV', email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!', pfad: '/gutachter', marker: /gutachter|fälle|aufträge|termine/i },
+  { name: 'KB', email: process.env.TEST_KB_EMAIL ?? 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Claimondo2026!', pfad: '/mitarbeiter', marker: /dashboard|fälle|aufgaben/i },
   { name: 'Dispatch', email: process.env.TEST_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!', pfad: '/dispatch', marker: /leads|kalender|karte|gutachter/i },
-  { name: 'Kanzlei', email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!', pfad: '/kanzlei', marker: /fälle|mandat|kanzlei/i },
+  { name: 'Kanzlei', email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Claimondo2026!', pfad: '/kanzlei', marker: /fälle|mandat|kanzlei/i },
 ]
 
 for (const rolle of ROLLEN) {
   test(`Rolle ${rolle.name}: Login + Portal ${rolle.pfad} erreichbar + fehlerfrei`, async ({ page }) => {
     test.setTimeout(120_000)
-    if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+    if (BRAUCHT_BASIC_AUTH && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt (Ziel = staging)')
     const { pageErrors, consoleErrors } = wireConsole(page, rolle.name)
 
     const ok = await login(page, rolle.email, rolle.pass)
     if (!ok) {
       await shot(page, `${rolle.name.toLowerCase()}-login-fehlgeschlagen`)
-      console.log(`[${rolle.name}] Login fehlgeschlagen (Account fehlt auf staging?) — Skip`)
-      test.skip(true, `${rolle.name}-Account nicht verfügbar`)
+      // ⚠ FRUEHER: test.skip() — der Test war damit GRUEN und hat nie etwas geprueft.
+      // Genau so blieben SV/KB/Kanzlei ueber Wochen unbemerkt ungetestet (falsche
+      // Default-Credentials, s. o.). Die urspruengliche Annahme „Account fehlt auf staging"
+      // ist widerlegt: alle vier Konten existieren auf prod, sind bestaetigt und ohne MFA
+      // (20.08. gegen auth.users gemessen + je ein echter Login im Browser).
+      // Ein fehlgeschlagener Rollen-Login ist deshalb ein BEFUND, kein Grund zum Ueberspringen.
+      // Der Job laeuft nightly und gatet nichts — ein rotes Ergebnis blockiert keinen PR.
+      expect(
+        ok,
+        `${rolle.name}-Login fehlgeschlagen (${rolle.email}). Konto existiert? Passwort aktuell? ` +
+          `Konvention: test-*@ = Claimondo2026!, AUSNAHME test-dispatch = Test1234!. ` +
+          `Override via TEST_${rolle.name.toUpperCase()}_EMAIL / _PASSWORD.`,
+      ).toBe(true)
       return
     }
     await page.goto(rolle.pfad, { waitUntil: 'domcontentloaded' })

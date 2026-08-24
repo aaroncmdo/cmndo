@@ -502,9 +502,14 @@ export async function bestaetigeVollmachtKunde(
   // Lead synchronisieren (manche Loader lesen aus leads, nicht faelle).
   // leads.vollmacht_signiert_am ist die eigene Lead-Spalte (kein SP-B-Ziel).
   if (claim.lead_id) {
-    await admin.from('leads').update({
+    // Spiegel der Vollmacht auf den Lead — mehrere Loader lesen von dort (s. Kommentar
+    // oben). Bleibt er aus, sehen diese Sichten die Vollmacht als fehlend an.
+    const { error: spiegelFehler } = await admin.from('leads').update({
       vollmacht_signiert_am: nowIso,
     }).eq('id', claim.lead_id as string)
+    if (spiegelFehler) {
+      console.error(`[kanzlei-wunsch] Vollmacht nicht auf den Lead gespiegelt (${claim.lead_id}):`, spiegelFehler.message)
+    }
   }
 
   // Side-Effects (Termin-Bestaetigung, Kalender-Sync) im Hintergrund —

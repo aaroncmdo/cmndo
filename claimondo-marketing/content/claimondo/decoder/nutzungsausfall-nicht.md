@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/nutzungsausfall-nicht
+meta_title: „Nutzungsausfall nicht erstattbar" — was tun
 type: decoder
 cluster: H8
 nummer: H8.10

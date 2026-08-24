@@ -8,12 +8,14 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { SearchIcon, MailIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
 import { createVersicherung, type VersicherungInput } from './actions'
 
@@ -84,24 +86,28 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Header */}
-      <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Versicherer</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${filtered.length} von ${versicherungen.length}`}</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
-              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-                className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
+      {/* Header — Phase-2-Migration (23.08.), Muster identisch zu /admin/vertraege.
+          KEIN border-b mehr: die PageHeader-Floating-Card ersetzt das frühere eckige Band
+          (eine harte Kante direkt unter der weichen Card sah falsch aus, und der
+          Phase-2-Wächter prüft genau darauf — portal-header-phase2.spec.ts). */}
+      <div className="px-4 py-3 shrink-0">
+        <PageHeader
+          title="Versicherer"
+          description={`${filtered.length} von ${versicherungen.length}`}
+          size="lg"
+          actions={
+            <div className="flex items-center gap-2">
+              <div className="relative">
+                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
+                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
+                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
+              </div>
+              <Button variant="ondo" size="sm" onClick={() => { setCreating(true); setForm(LEER); setError(null) }}>
+                <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
+              </Button>
             </div>
-            <Button variant="ondo" size="sm" onClick={() => { setCreating(true); setForm(LEER); setError(null) }}>
-              <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
-            </Button>
-          </div>
-        </div>
+          }
+        />
       </div>
 
       {/* Tabelle — Zeile fuehrt in die Detail-View */}
@@ -120,7 +126,15 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
             {filtered.map(v => (
               <ClickableTr key={v.id} onClick={() => router.push(`/admin/versicherungen/${v.id}`)}
                 className={`border-b border-claimondo-border ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
-                <Td className="py-2.5! font-medium text-body-xs">{v.name}</Td>
+                {/* Echter Link statt nur ClickableTr-onClick: erlaubt Mittelklick/Strg+Klick
+                    (Detailansicht im neuen Tab), Tastatur-Fokus und Screenreader-Erkennung.
+                    Der Zeilen-Klick bleibt unveraendert — stopPropagation verhindert nur, dass
+                    beide Handler feuern. Muster: FaelleKanban.tsx:235. */}
+                <Td className="py-2.5! font-medium text-body-xs">
+                  <Link href={`/admin/versicherungen/${v.id}`} onClick={e => e.stopPropagation()}>
+                    {v.name}
+                  </Link>
+                </Td>
                 <Td className="py-2.5! text-body-xs">
                   {v.schaden_telefon ? (
                     <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />

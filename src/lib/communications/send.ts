@@ -12,16 +12,39 @@ function buildMessage(description: string, data: Record<string, string>): string
   return lines.join('\n')
 }
 
+/**
+ * Zentraler Versand über das COMMUNICATION_REGISTRY.
+ *
+ * ⚠ Die beiden Kanäle verhalten sich im Fehlerfall UNTERSCHIEDLICH — bewusst, aus Bestand:
+ *  - **WhatsApp wirft** (s.u., AAR-117). 38 der 53 Trigger laufen darüber, und Aufrufer wie
+ *    `sendFlowLink` verlassen sich darauf, dass sie `wa_gesendet` NICHT auf true setzen.
+ *  - **Email wirft NICHT.** Ein Wurf würde hier echten Schaden anrichten: Ein Teil der 19
+ *    Aufrufstellen der 15 email-only-Trigger steht in Schleifen OHNE try (z.B.
+ *    `cron/abrechnungen-faellig-check` — verschachtelt über Abrechnungen × Admins). Ein
+ *    Abbruch dort ließe die restlichen Fälle der Schleife ungesendet — schlimmer als der
+ *    bisherige Zustand.
+ *
+ * Stattdessen liefert die Funktion das Ergebnis ZURÜCK. Rückwärtskompatibel: Wer den Wert
+ * ignoriert, verhält sich exakt wie bisher; wer ihn prüft, kann Versand-Marker an den
+ * Erfolg koppeln (siehe `cron/netzwerk-abo-dunning`).
+ *
+ * Hintergrund: Die 15 email-only-Trigger waren im Fehlerfall zuvor spurlos — nur eine
+ * Logzeile auf dem VPS, keine DB-Zeile, kein Retry. Betroffen sind u.a. beide
+ * Monatsabrechnungen, die Abo-Mahnung und die Admin-Alarme für Backup-/Einzugsfehler.
+ * Details: Marker `AUDIT-email-sends-schlagen-still-fehl`.
+ */
+export type SendResult = { ok: boolean; error?: string }
+
 export async function sendCommunication(
   triggerName: string,
   data: Record<string, string>,
   options?: { forceEmail?: boolean; skipWhatsapp?: boolean; locale?: string; allowInternalRecipient?: boolean },
-): Promise<void> {
+): Promise<SendResult> {
   // options is intentionally simple — Baileys routing is transparent to callers
   const config = COMMUNICATION_REGISTRY[triggerName]
   if (!config) {
     console.warn(`[COMM] Unknown trigger: ${triggerName}`)
-    return
+    return { ok: false, error: `Unknown trigger: ${triggerName}` }
   }
 
   // ─── WhatsApp ──────────────────────────────────────────────────────────
@@ -80,9 +103,14 @@ export async function sendCommunication(
         allowInternalRecipient: options?.allowInternalRecipient,
       })
     } catch (err) {
+      // Kein throw — s. Kopf-Kommentar (Schleifen ohne try). Der Aufrufer bekommt den
+      // Fehlschlag stattdessen im Rückgabewert und kann seinen Versand-Marker daran binden.
+      const msg = err instanceof Error ? err.message : String(err)
       console.error(`[COMM] Email failed for ${triggerName}:`, err)
+      return { ok: false, error: msg }
     }
   }
 
   console.log(`[COMM] ${triggerName} → ${config.channel} an ${config.recipient}`)
+  return { ok: true }
 }

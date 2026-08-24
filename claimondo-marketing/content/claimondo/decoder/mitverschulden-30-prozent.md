@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/mitverschulden-30-prozent
+meta_title: „Mitverschulden von 30 %" — was tun
 type: decoder
 cluster: H8
 nummer: H8.2

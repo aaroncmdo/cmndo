@@ -9,6 +9,7 @@
 // Besichtigungsort + markiert Busy-Slots aus gutachter_termine.
 
 import { createClient } from '@/lib/supabase/server'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import { revalidatePath } from 'next/cache'
 import { createLead } from '@/lib/leads/create-lead'
 import { reserveSvTerminForLead } from '@/app/dispatch/leads/[id]/_actions/sv-termin'
@@ -76,6 +77,17 @@ export async function createSpontanTermin(
     return { ok: false, error: created.error }
   }
   const leadId = created.leadId
+
+  // Team-WA (Audit 23.08.). intern:true — spontane Disposition aus dem
+  // Dispatch-Kalender, der Ausloeser sitzt im Team.
+  await notifyTeamNeuerLead({
+    leadId,
+    quelle: 'Dispatch — spontane Disposition',
+    intern: true,
+    name: [input.vorname, input.nachname].filter(Boolean).join(' ').trim(),
+    telefon: input.telefon.trim(),
+    email: input.email?.trim() || null,
+  })
 
   // 2. Termin reservieren (nutzt bestehende Action mit Konfliktcheck +
   //    Baseline-Fahrtzeit + In-App-Mitteilung an SV)

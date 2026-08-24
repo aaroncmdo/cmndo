@@ -78,6 +78,42 @@ export function ladeSeedFixture<T extends object = Record<string, string>>(
   return {
     daten,
     guard() {
+      // Dritter Fall, den die Datei-Pruefung NICHT erfasst: Datei da, DB-Zustand VERBRAUCHT.
+      // Der `e2e`-Job faehrt erst die Journey-Steps (mit frischem Seed), danach den
+      // Sammel-Lauf `npx playwright test` — und der fasst dieselben Specs ein ZWEITES Mal an.
+      // Der Seed-Zustand ist da laengst aufgebraucht: J4 laedt den KVA hoch UND gibt ihn frei,
+      // also fehlt beim zweiten Durchgang der Button „Kostenvoranschlag hochladen".
+      // Belegt am nightly 21.08. (Lauf 32445807331): J4-Journey-Step GRUEN, im Sammel-Lauf
+      // dieselbe Spec rot — Page-Snapshot zeigt „KVA freigegeben". Ebenso die beiden
+      // kva-Specs, die sich dieselbe Fixture teilen.
+      //
+      // Skip ist hier NICHT der gefaehrliche stille Skip aus dem Kopfkommentar: die Journey
+      // ist in diesem Lauf bereits scharf gelaufen. Gefaehrlich waere ein Skip, wenn sie GAR
+      // NICHT liefe — deshalb wird der Grund benannt und nur explizit gelistete Fixtures
+      // betroffen, nie pauschal alle.
+      const verbraucht = (process.env.E2E_SEEDS_VERBRAUCHT ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+      // ⚠ 24.08.: Die Bedingung hing hier an `roh` — die Datei musste also noch DA sein.
+      // Das stimmte, solange alles in EINEM Job lief (Datei vorhanden, Zustand verbraucht).
+      // Seit der Aufteilung in `e2e` + `e2e-rest` laeuft der Sammel-Lauf auf einem EIGENEN
+      // Runner: dort erzeugt kein Seed-Step die Datei, sie fehlt schlicht. Der Skip griff
+      // dadurch nicht mehr, und der harte Throw darunter schlug zu — nightly 24.08.,
+      // 3 rote Specs (reparatur-weg-e2e-smoke, -kva-betrag-pflicht, -kva-ablehnung-loop)
+      // mit „Seed-Fixture fehlt", obwohl E2E_SEEDS_VERBRAUCHT korrekt gesetzt war (ci.yml).
+      //
+      // Richtig ist die Liste als Trennlinie, nicht die Existenz der Datei: steht eine
+      // Fixture in E2E_SEEDS_VERBRAUCHT, ist ihr Zustand in DIESEM Lauf bereits von einem
+      // Journey-Step scharf verbraucht worden. Ob die Datei danach noch auf der Platte
+      // liegt, sagt darueber nichts aus — sie liegt auf dem Runner, der geseedet hat.
+      if (verbraucht.includes(dateiname)) {
+        test.skip(
+          true,
+          `${dateiname}: Zustand wurde in diesem Lauf bereits von einem Journey-Step verbraucht ` +
+            `(E2E_SEEDS_VERBRAUCHT). Diese Spec laeuft scharf im dedizierten Journey-Step, nicht im Sammel-Lauf.`,
+        )
+      }
       if (roh) return
       const basis = `Seed-Fixture ${dateiname} fehlt oder ist unlesbar — erzeugen mit: node ${generator}`
       if (opts.ciErzeugt && process.env.CI) {

@@ -66,7 +66,7 @@ Sigortacı sorumluluğu ne kabul ettiği **ne de** reddettiği sürece, [§ 195 
 
 ### 3. Pazarlık yorgunluğu yaratmak
 
-Trafik kazasında zarar görenler ilk haftalarda aktif ve mücadelecidir. 6–8 hafta süren sessizlikten sonra kanıtlanabilir biçimde [pazarlık yorgunluğu](/glossar/verhandlungs-erschoepfung) ortaya çıkar — kötü sulh tekliflerini kabul etme isteği tahminen %30–40 artar. Sigortacılar bunu bilir. Buna göre planlar yaparlar.
+Trafik kazasında zarar görenler ilk haftalarda aktif ve mücadelecidir. 6–8 hafta süren sessizlikten sonra kanıtlanabilir biçimde pazarlık yorgunluğu ortaya çıkar — kötü sulh tekliflerini kabul etme isteği tahminen %30–40 artar. Sigortacılar bunu bilir. Buna göre planlar yaparlar.
 
 ### 4. Uyum testi
 

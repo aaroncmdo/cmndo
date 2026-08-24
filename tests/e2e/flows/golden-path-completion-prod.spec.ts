@@ -18,6 +18,20 @@ import { resolveTestSvId } from '../lib/test-sv'
 
 const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 // Smoke-Fixture CLM-2026-00121 (fall_id != claim_id, post-CMM-49 Bridge) + Test-SV "Schmidt Köln".
+//
+// ⚠ 21.08.2026 nachgemessen: BEIDE Defaults existieren auf prod nicht mehr. Der
+//   Golive-Accounts-Cleanup (13.07.) hat alle Claims unterhalb von CLM-2026-00752
+//   geloescht; CLM-2026-00121 lag darunter. Ohne gesetztes GOLDEN_CLAIM_ID/-FALL_ID
+//   laeuft dieser Smoke gegen Geister — und weil er scharf Events feuert, sieht das
+//   Scheitern nach Produktfehler aus.
+//
+// ⭐ Und die Fixture war mehr als ein Datensatz: sie war die EINZIGE Konstellation mit
+//   `fall_id != claim_id`. Heute stimmen auf prod ALLE 76 Bridge-Zeilen ueberein (0
+//   abweichend, gezaehlt). Damit ist der accept-both-Pfad (Alt-Bookmark unter faelle.id)
+//   auf prod nicht mehr unterscheidbar testbar — betrifft auch
+//   tests/e2e/cmm63-kunde-ownership.spec.ts, wo derselbe Umstand vermerkt ist.
+//   Wer den Weg wieder absichern will, braucht eine NEUE Fixture mit abweichender
+//   fall_id; ein beliebiger heutiger Claim genuegt dafuer nicht.
 const CLAIM = process.env.GOLDEN_CLAIM_ID ?? 'afb349eb-5681-4b01-ac40-b5431cf88e80'
 const FALL = process.env.GOLDEN_FALL_ID ?? 'eeac8379-0aed-463b-bf13-953a23f7a791'
 // TEST_SV wird im Test ueber die stabile Email aufgeloest (Row-id churnt — s. resolveTestSvId).
@@ -68,7 +82,8 @@ test('Manueller Abschluss via Panel — Claim bis fall_geschlossen', async ({ pa
   // Admin-Login → Fallakte → Endpoint-Register.
   await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded', timeout: 30_000 })
   await page.locator('input[type="email"]').first().fill(process.env.TEST_ADMIN_EMAIL ?? 'test-admin@claimondo.de')
-  await page.locator('input[type="password"]').first().fill(process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!')
+  // `Test1234!` gilt auf prod nur noch fuer test-dispatch@ — Messung s. _golden-path-lib.ts (ROLES).
+  await page.locator('input[type="password"]').first().fill(process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!')
   await page.locator('button[type="submit"]').first().click()
   await page.waitForTimeout(5_000)
   await page.goto(`${APP}/faelle/${FALL}`, { waitUntil: 'domcontentloaded', timeout: 30_000 })

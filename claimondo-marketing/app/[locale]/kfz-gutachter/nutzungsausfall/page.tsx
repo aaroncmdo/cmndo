@@ -12,8 +12,9 @@ import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema, webApplicationSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 import { NA_KLASSEN } from '@/lib/tools/nutzungsausfall'
 import NutzungsausfallRechnerClient from './NutzungsausfallRechnerClient'
@@ -95,7 +96,10 @@ export default function NutzungsausfallPage() {
               'Interaktiver Rechner für die Nutzungsausfallentschädigung nach Unfall — Tagessatz nach Fahrzeugklasse × Ausfalldauer, inklusive Alters-Rückstufung. Kostenlos.',
             url: `${SITE_URL}/kfz-gutachter/nutzungsausfall`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/nutzungsausfall'),
+            url: '/kfz-gutachter/nutzungsausfall',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -218,7 +222,7 @@ export default function NutzungsausfallPage() {
               {t('cta_schaden')}
               <ChevronRight className="h-5 w-5" />
             </Link>
-            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
+            <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
             </a>

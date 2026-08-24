@@ -11,7 +11,9 @@ import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBloc
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
+  OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.1 (Doc 26) — Konversions-Hub „Kosten Kfz-Gutachten". Fängt die
@@ -38,6 +40,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: `${SITE_URL}/kosten-kfz-gutachten`,
       title: t('kosten_kfz_gutachten.og_title'),
       description: t('kosten_kfz_gutachten.og_description'),
@@ -95,7 +99,10 @@ export default function Page() {
               'Unabhängiges Kfz-Schadensgutachten nach unverschuldetem Unfall. Honorar nach BVSK-Honorartabelle, für unverschuldet Geschädigte 0 € (§ 249 BGB, gegnerischer Haftpflichtversicherer trägt die Kosten).',
             url: `${SITE_URL}/kosten-kfz-gutachten`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/kosten-kfz-gutachten'),
+            url: '/kosten-kfz-gutachten',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Kosten Kfz-Gutachten', url: '/kosten-kfz-gutachten' },

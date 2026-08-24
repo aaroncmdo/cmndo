@@ -13,10 +13,10 @@ import {
 } from '@/components/shared/DataTable'
 import {
   articleSchema, vermittlerVergleichSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { localeAlternates } from '@/lib/seo/alternates'
-import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
+import { zaehleSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
 const STAND = '04.08.2026'
@@ -93,13 +93,16 @@ export default async function VermittlungsportaleVergleichPage() {
   // SV-Netz live aus der DB — identische Definition wie /gutachter-finden
   // (aktive sv_leads + qualifizierte Sachverständige). Nie hardcoden, damit die
   // Zahl automatisch konsistent + UWG-belegbar bleibt.
-  const [svLeadsResult, aktiveSVsResult] = await Promise.all([
-    ladeSvLeads(),
+  // ⚠ Die Dead-Pins werden GEZÄHLT, nicht geladen. `ladeSvLeads().data.length`
+  // hätte bei über 1.000 aktiven Pins den PostgREST-Deckel geliefert statt der
+  // Wahrheit — in einer Zahl, die hier ausdrücklich als UWG-belegbar geführt
+  // wird. Und für eine Zahl tausende Zeilen zu übertragen wäre auch ohne den
+  // Fehler verschwenderisch.
+  const [svLeadsAnzahl, aktiveSVsResult] = await Promise.all([
+    zaehleSvLeads(),
     ladeAktiveSVs(),
   ])
-  const svNetz =
-    (svLeadsResult.ok ? svLeadsResult.data.length : 0) +
-    (aktiveSVsResult.ok ? aktiveSVsResult.data.length : 0)
+  const svNetz = svLeadsAnzahl + (aktiveSVsResult.ok ? aktiveSVsResult.data.length : 0)
 
   // Verifizierte Vergleichstabelle — Texte aus i18n, Claimondo-SV-Netz live.
   // Index 2 = SV-Netz-Größe: claimondo-Zelle wird live aus DB gerendert.
@@ -473,7 +476,7 @@ export default async function VermittlungsportaleVergleichPage() {
               {t('cta_anfrage')}
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-5 w-5" />

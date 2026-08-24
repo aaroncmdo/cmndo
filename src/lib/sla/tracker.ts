@@ -79,10 +79,15 @@ export async function completeSla(fallId: string, typ: SlaTyp): Promise<void> {
       for (const row of updated) {
         const taskId = (row as { id: string; eskalation_task_id: string | null }).eskalation_task_id
         if (!taskId) continue
-        await db.from('tasks')
+        // Das umschliessende try faengt den Write nicht. Bleibt er aus, steht der
+        // Eskalations-Task weiter offen, obwohl die SLA erfuellt ist.
+        const { error: cancelFehler } = await db.from('tasks')
           .update(resolveSlaBreachTaskCancel(now, 'SLA erfüllt — Fall weitergelaufen'))
           .eq('id', taskId)
           .eq('status', 'offen')
+        if (cancelFehler) {
+          console.error(`[SLA] Eskalations-Task ${taskId} nicht aufgeloest:`, cancelFehler.message)
+        }
       }
     } catch (err) {
       console.error('[SLA] completeSla task-cancel:', err)

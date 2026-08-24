@@ -51,6 +51,18 @@ test.afterAll(async () => {
   // Leichen frueherer Laeufe (Marker + >1 h alt) — parallel-sicher.
   const alt = new Date(Date.now() - 3600e3).toISOString()
   await db.from('leads').delete().like('email', 'throwaway-c1-%@claimondo.test').lt('created_at', alt)
+
+  // Der Claim MUSS ueber den Marker gehen, nicht ueber lead_id: `claims.lead_id` ist
+  // SET NULL — nach dem Lead-Delete oben ist der Claim nicht mehr zuzuordnen und bliebe
+  // als Waise liegen. Real passiert: CLM-2026-04325 lag ab 13.08. sechs Tage AKTIV auf
+  // prod (Status 'ersterfassung'), weil dieser Block hier fehlte.
+  const { data: claims } = await db.from('claims').select('id').eq('schadenort_adresse', MARKER)
+  for (const c of (claims ?? []) as Array<{ id: string }>) {
+    await db.from('timeline').delete().eq('fall_id', c.id)
+    await db.from('phase_transitions').delete().eq('fall_id', c.id)
+    const { error } = await db.from('claims').delete().eq('id', c.id) // CASCADE -> faelle_claim_bridge
+    if (error) console.warn(`[cleanup] Claim ${c.id} nicht entfernt — bleibt auf prod:`, error.message)
+  }
 })
 
 test('Soll: Quali ohne SV-Gutachten löst Termin UND SV-Zuordnung', async ({ page }) => {

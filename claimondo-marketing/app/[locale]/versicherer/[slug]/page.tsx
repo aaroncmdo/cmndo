@@ -23,11 +23,12 @@ import {
   stripSchemaSection,
   stripLeadingSnippet,
   extractFaqPairs,
+  extractCitations,
 } from '@/lib/content/claimondo-mdx'
 import { BAFIN_BRANCHENSCHNITT_2024, getKonzernSiblings } from '@/data/versicherer-mapping'
 import { getKuerzungen } from '@/data/decoder-versicherer-cross'
 import { getVersichererDetail } from '@/data/versicherer-detail'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -39,7 +40,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!a) return {}
   const description = a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title
   return {
-    title: `${a.title} · Claimondo`,
+    // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
+    // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
+    title: a.metaTitle || a.title,
     description,
     alternates: { canonical: a.url },
     openGraph: {
@@ -49,6 +52,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
@@ -62,6 +67,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
   const detail = getVersichererDetail(slug)
   const kuerzungen = getKuerzungen(slug)
   const faqPairs = extractFaqPairs(a.body)
+  const citations = extractCitations(a.body)
 
   // Narrativ = Prosa vor der "## Häufige Fragen"-Sektion (FAQ wird separat gerendert).
   const cleaned = stripLeadingSnippet(stripSchemaSection(a.body))
@@ -83,6 +89,16 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
       publisher: { '@type': 'Organization', name: 'Claimondo' },
       about: { '@id': orgId },
       mainEntityOfPage: `${SITE_URL}${a.url}`,
+      // Urteils-Az. + §§ aus dem Body als citation — legt die Primaerquellen
+      // maschinenlesbar offen (Princeton-GEO-Hebel "Cite Sources"). Die uebrigen
+      // Content-Routen (/haftpflicht, /decoder, /sachverstaendige) liefern das
+      // ueber ContentJsonLd bereits; die Versicherer-Hubs bauen ihren @graph
+      // selbst und waren als einzige ohne — GEO-Baseline 18.08.2026, Befund B3.
+      // Ausgerechnet hier zaehlt es am meisten: die Kuerzungs-Streitthemen sind
+      // die Prompts, in denen reine Urteilssammlungen die Zitate abraeumen.
+      ...(citations.length > 0 && {
+        citation: citations.map((c) => ({ '@type': 'CreativeWork', name: c })),
+      }),
     },
     {
       '@type': 'Organization',
@@ -144,7 +160,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
           {narrative && (
             <article>
-              <MarkdownRenderer body={narrative} />
+              <MarkdownRenderer body={narrative} pageHasOwnH1 />
             </article>
           )}
 

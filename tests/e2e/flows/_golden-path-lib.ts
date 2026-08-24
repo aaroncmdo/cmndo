@@ -4,24 +4,66 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
 import { totp } from './totp'
+import { basicAuthFuerZiel } from '../lib/ziel'
 
 export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, PFLICHTDOK, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
 
-export const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
+// ⚠ 23.08.: `PLAYWRIGHT_BASE_URL` als Fallback ergaenzt — vorher hing hier NUR
+// GOLDEN_APP_URL, und der Kontext aus `loginContextOrSkip` setzt `baseURL: APP` (s.u.).
+// Damit war `PLAYWRIGHT_BASE_URL` fuer ALLE 11 Specs, die diesen Helper importieren,
+// WIRKUNGSLOS: wer lokal `PLAYWRIGHT_BASE_URL=http://localhost:3000` setzte, fuhr in
+// Wahrheit weiter scharf gegen prod — ohne jeden Hinweis. Beim Verifizieren der
+// PageHeader-Migration liefen so drei Laeufe gegen app.claimondo.de, waehrend der
+// lokale Dev-Server NULL Requests sah (sein Log blieb bei 758 Bytes). Bei einem
+// LESENDEN Smoke ist das nur irrefuehrend; bei einem schreibenden waere es ein
+// echter Prod-Write, den niemand beabsichtigt hat.
+//
+// Reihenfolge: explizites GOLDEN_APP_URL schlaegt alles, sonst das allgemeine
+// PLAYWRIGHT_BASE_URL, sonst prod. In CI aendert das NICHTS — dort ist
+// PLAYWRIGHT_BASE_URL auf https://app.claimondo.de gesetzt (ci.yml) und
+// GOLDEN_APP_URL gar nicht, beide Wege enden also beim selben Ziel.
+//
+// `||` statt `??` ist Absicht: ein gesetztes-aber-leeres CI-Secret rendert als ''
+// und wuerde mit `??` als gueltiger Wert durchgehen (Klasse aus #5465).
+export const APP =
+  process.env.GOLDEN_APP_URL || process.env.PLAYWRIGHT_BASE_URL || 'https://app.claimondo.de'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
-// Fixture-Accounts (Passwörter: Test1234! grandfathered, sv per env).
+// Fixture-Accounts. DIES IST DIE QUELLE fuer Test-Credentials in tests/e2e — neue Specs
+// importieren `ROLES` von hier, statt eigene Defaults zu schreiben (genau daraus entstand
+// die Drift unten).
+//
+// ⚠ `Test1234!` gilt auf prod NUR NOCH fuer test-dispatch@. Die frueher hier notierte
+// Annahme „Test1234! grandfathered" ist widerlegt — GoTrue lehnt das Passwort seit der
+// pwned-Password-Policy ab, die uebrigen Konten wurden auf `Claimondo2026!` gezogen.
+// Gemessen 20.08. gegen app.claimondo.de, jede Zelle ein echter Browser-Login:
+//
+//   admin     test-admin@      Claimondo2026! -> /admin              Test1234! = falsch
+//   dispatch  test-dispatch@   Claimondo2026! = falsch               Test1234! -> /dispatch/dashboard
+//   kb        test-kb@         Claimondo2026! -> /mitarbeiter        Test1234! = falsch
+//   kanzlei   test-kanzlei@    Claimondo2026! -> /kanzlei/mandate    Test1234! = falsch
+//   sv        test-sv@         Claimondo2026! -> /gutachter/heute    Test1234! = falsch
+//   kunde     smoke-kunde@     Claimondo2026! -> /kunde              Test1234! = falsch
+//
+// ⭐ Die eine Rolle, die `Test1234!` behielt, ist die dokumentierte AUSNAHME — und genau
+// sie wurde verallgemeinert. Wer eine Sonderregel abschreibt, schreibt oft die Sonderregel
+// ab, nicht die Regel.
+//
+// ⚠ Der falsche Default schlaegt genau dort durch, wo KEIN CI-Secret ihn deckt: ci.yml
+// reicht nur TEST_ADMIN_* und TEST_SV_* durch. Fuer kb/kanzlei/kunde gibt es kein
+// wirksames Secret — dort IST der Default das, was laeuft.
 export const ROLES = {
-  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? '' },
+  sv: { email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Claimondo2026!' },
+  // Einzige Rolle mit Test1234! — nicht "korrigieren".
   dispatch: { email: 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!' },
   // 17.07.: test-kunde@ existiert seit dem Golive-Accounts-Cleanup nicht mehr; dediziertes
   // Smoke-Konto = smoke-kunde@ (reference-internal-test-account-logins, Aaron-Go).
   kunde: { email: process.env.TEST_KUNDE_EMAIL ?? 'smoke-kunde@claimondo.de', pass: process.env.TEST_KUNDE_PASSWORD ?? 'Claimondo2026!' },
-  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Test1234!' },
-  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!' },
-  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Test1234!' },
+  kb: { email: 'test-kb@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'Claimondo2026!' },
+  kanzlei: { email: 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Claimondo2026!' },
+  admin: { email: 'test-admin@claimondo.de', pass: process.env.TEST_ADMIN_PASSWORD ?? 'Claimondo2026!' },
 } as const
 
 export type RoleKey = keyof typeof ROLES
@@ -56,7 +98,21 @@ async function completeMfa(
   const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: authHeaders })
   const user = (await userRes.json()) as { factors?: { id: string; factor_type: string; status: string }[] }
   const factor = (user.factors ?? []).find((f) => f.factor_type === 'totp' && f.status === 'verified')
-  if (!factor) throw new Error(`Kein verifizierter TOTP-Faktor für ${roleKey}`)
+  if (!factor) {
+    // KEIN Fehler, sondern der Normalfall: das Konto hat gar keine MFA, also ist aal1 die
+    // hoechste erreichbare Stufe und die Session bereits vollstaendig. Hier stand ein
+    // `throw` — und der war die Ursache dafuer, dass J1-deep im nightly nur halb lief.
+    //
+    // Die Kette: ci.yml reicht TEST_*_TOTP_SECRET durch (Kommentar dort: „echte no-ops
+    // solange unbesetzt"). Ist ein Secret aber BESETZT, versucht loginContext() MFA —
+    // obwohl das Konto keinen Faktor hat. Der Throw landete in loginContextOrSkip(), das
+    // ihn als „2FA-Wand" ausgab. Ein Secret zu BESITZEN wurde damit als „das Konto hat
+    // 2FA" gelesen, und der Skip-Text nannte einen Grund, den es nicht gab.
+    //
+    // Gemessen 21.08. gegen prod: test-admin/-sv/-dispatch/-kb/-kanzlei haben je 0
+    // verifizierte Faktoren; der password-grant liefert eine aal1-Session.
+    return session
+  }
 
   const chRes = await fetch(`${SUPABASE_URL}/auth/v1/factors/${factor.id}/challenge`, {
     method: 'POST',
@@ -96,10 +152,16 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
 
   const projectRef = new URL(SUPABASE_URL).hostname.split('.')[0]
   const cookies = sessionToCookies(effectiveSession, { projectRef, cookieDomain: '.claimondo.de' })
+  // httpCredentials nur, wenn das ZIEL sie braucht (staging liegt hinter nginx-Basic-Auth,
+  // prod und localhost nicht). Das ist der EINZIGE Unterschied zwischen einem prod- und
+  // einem staging-Lauf dieser Harness: die Session-Cookies oben tragen cookieDomain
+  // '.claimondo.de' und gelten damit ohnehin fuer beide Hosts.
+  // `undefined` = keine Basic-Auth (Playwright behandelt es genau so).
   const ctx = await browser.newContext({
     baseURL: APP,
     serviceWorkers: 'block',
     viewport: { width: 1440, height: 1200 },
+    httpCredentials: basicAuthFuerZiel(),
   })
   // cookie.mjs (untyped .mjs) liefert sameSite:string; Playwright will "Lax"|"Strict"|"None".
   await ctx.addCookies(cookies as Parameters<typeof ctx.addCookies>[0])

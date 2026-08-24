@@ -15,6 +15,7 @@ import { ladeWerkstattVorschlaege } from '@/lib/werkstatt/matching/lade-vorschla
 import { HART_SCHWELLE, type WerkstattVorschlag } from '@/lib/werkstatt/matching/rank-vorschlaege'
 import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
 import { getStorageUrl } from '@/lib/storage/url'
+import { notifyTeamNeuerLead } from '@/lib/leads/notify-team-lead'
 import type { Reparaturbedarf, Fit } from '@/lib/werkstatt/bedarf/types'
 
 export type WerkstattFinderLeadPayload = {
@@ -271,6 +272,18 @@ export async function erstelleWerkstattFinderLead(
     if (!result.ok) return { ok: false, error: result.error }
     leadId = result.leadId
     flowTokenAusIntake = result.flowLinkToken
+
+    // Team-WA bei NEUEM Lead (Audit 23.08.: dieser Eintrittspunkt war stumm —
+    // ein Kunde meldete hier einen Schaden und niemand erfuhr davon). Bewusst
+    // nur im !leadId-Zweig: der Re-Entry ueber einen bestehenden FlowLink-Token
+    // ist kein neuer Interessent und wuerde sonst bei jedem Schritt melden.
+    await notifyTeamNeuerLead({
+      leadId,
+      quelle: 'Werkstatt-Finder',
+      name: [payload.vorname, payload.nachname].filter(Boolean).join(' '),
+      telefon: payload.telefon ?? null,
+      email: payload.email,
+    })
   }
 
   // T5: Foto + Bedarf nicht-kritisch persistieren (vor FlowLink-Return).
@@ -321,7 +334,12 @@ export async function erstelleWerkstattFinderLead(
       updatePayload.bedarf_ermittelt_am = new Date().toISOString()
     }
     if (Object.keys(updatePayload).length > 0) {
-      await admin.from('leads').update(updatePayload as never).eq('id', leadId)
+      // Das try faengt den Write nicht. Ohne ihn fehlen Fotos und ermittelter Bedarf
+      // am Lead — die Werkstatt-Vermittlung liefe dann auf leerer Grundlage.
+      const { error: bedarfFehler } = await admin.from('leads').update(updatePayload as never).eq('id', leadId)
+      if (bedarfFehler) {
+        console.error(`[werkstatt-finder] Foto/Bedarf nicht gespeichert (Lead ${leadId}):`, bedarfFehler.message)
+      }
     }
   } catch (err) {
     console.error('[werkstatt-finder] Foto/Bedarf-Persistenz fehlgeschlagen (non-fatal):', err)

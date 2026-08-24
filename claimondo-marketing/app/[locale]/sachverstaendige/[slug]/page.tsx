@@ -31,7 +31,7 @@ import {
   extractCitations,
   readingTimeMin,
 } from '@/lib/content/claimondo-mdx'
-import { SITE_URL, WHATSAPP_HREF } from '@/lib/seo/jsonld'
+import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 
 const WA = WHATSAPP_HREF
 
@@ -47,7 +47,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const a = getAsset(slug)
   if (!a) return {}
   return {
-    title: `${a.title} · Claimondo`,
+    // Kurzer SERP-Titel wenn im Frontmatter gesetzt; sonst die H1 (= a.title).
+    // openGraph.title unten behaelt bewusst den vollen Titel — dort ist mehr Platz.
+    title: a.metaTitle || a.title,
     description: a.metaDescription || metaDescriptionFromSnippet(a.snippet) || a.title,
     alternates: { canonical: a.url },
     openGraph: {
@@ -57,6 +59,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
     },
   }
 }
@@ -96,7 +100,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         <div className="grid grid-cols-1 gap-12 pt-9 lg:grid-cols-[230px_1fr]">
           <TableOfContents headings={headings} />
           <article>
-            <MarkdownRenderer body={cleaned} />
+            <MarkdownRenderer body={cleaned} pageHasOwnH1 />
             <FaqStems stems={FAQ_STEMS_MAPPING[a.slug] ?? []} />
             <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
             <ConversionAnchorBlock variant="spoke" />

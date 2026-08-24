@@ -35,10 +35,22 @@ export default function LokalContentActions({ stadtSlug, eintragId, status }: Pr
       const res = await generiereEntwurf(stadtSlug)
       meldeVerworfene(res.verworfen)
       if (!res.ok) {
-        toast.error(res.error ?? 'Entwurf konnte nicht erstellt werden')
+        toast.error(res.error ?? 'Inhalt konnte nicht erzeugt werden')
         return
       }
-      toast.success(`Entwurf erstellt (Substanz-Score ${res.substanzScore ?? 0}) — bereit zur Prüfung.`)
+      // Seit 18.08.2026 geht ein Entwurf, der das Gate besteht, direkt live.
+      // Der Review-Fall ist kein Fehler mehr, sondern das erwartete Ergebnis
+      // eines arbeitenden Gates — deshalb ein Hinweis-Toast, kein roter.
+      if (res.veroeffentlicht) {
+        toast.success(
+          `Veröffentlicht (Substanz-Score ${res.substanzScore ?? 0}) — die Stadtseite zeigt den Inhalt beim nächsten Aufbau.`,
+        )
+        return
+      }
+      toast.warning('Nicht automatisch veröffentlicht — liegt zur Prüfung bereit.', {
+        description: res.hinweis,
+        duration: 12_000,
+      })
     })
   }
 
@@ -84,7 +96,7 @@ export default function LokalContentActions({ stadtSlug, eintragId, status }: Pr
 
   return (
     <Button variant="ondo" size="sm" loading={isPending} onClick={handleGenerieren}>
-      {status === 'veroeffentlicht' ? 'Neu erzeugen' : 'Entwurf erzeugen'}
+      {status === 'veroeffentlicht' ? 'Neu erzeugen' : 'Erzeugen & veröffentlichen'}
     </Button>
   )
 }

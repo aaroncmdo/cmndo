@@ -1,0 +1,5240 @@
+{
+ "kiel": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Theodor-Heuss-Ring",
+    "stadtteil": "Gaarden-Süd",
+    "unfaelle": 28,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 54.30303,
+    "lng": 10.12819
+   },
+   {
+    "strasse": "Schönkirchener Straße",
+    "stadtteil": "Neumühlen",
+    "unfaelle": 28,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 54.32878,
+    "lng": 10.19057
+   },
+   {
+    "strasse": "Diedrichstraße",
+    "stadtteil": "Gaarden-Süd",
+    "unfaelle": 25,
+    "schwerverletzte": 0,
+    "getoetete": 2,
+    "lat": 54.30304,
+    "lng": 10.13703
+   }
+  ]
+ },
+ "luebeck": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Moislinger Allee",
+    "stadtteil": "Saint Lorenz Süd",
+    "unfaelle": 73,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 53.86622,
+    "lng": 10.67446
+   },
+   {
+    "strasse": "Berliner Straße",
+    "stadtteil": "Hüxtertor",
+    "unfaelle": 62,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 53.85116,
+    "lng": 10.68276
+   },
+   {
+    "strasse": "Ratzeburger Allee",
+    "stadtteil": "Hüxtertor",
+    "unfaelle": 47,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 53.85826,
+    "lng": 10.69164
+   }
+  ]
+ },
+ "hamburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Rödingsmarkt",
+    "stadtteil": "Hamburg-Altstadt",
+    "unfaelle": 60,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 53.54774,
+    "lng": 9.98667
+   },
+   {
+    "strasse": "Sportplatzring",
+    "stadtteil": "Stellingen",
+    "unfaelle": 50,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 53.59224,
+    "lng": 9.92869
+   },
+   {
+    "strasse": "Wallringtunnel",
+    "stadtteil": "Hamburg-Altstadt",
+    "unfaelle": 48,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 53.55404,
+    "lng": 10.00383
+   }
+  ]
+ },
+ "osnabrueck": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Johannistorwall",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.26807,
+    "lng": 8.0459
+   },
+   {
+    "strasse": "Erich-Maria-Remarque-Ring",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 23,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.2812,
+    "lng": 8.0444
+   },
+   {
+    "strasse": "Petersburger Wall",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 22,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.26804,
+    "lng": 8.05656
+   }
+  ]
+ },
+ "hannover": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Königsworther Platz",
+    "stadtteil": "Königsworther Platz",
+    "unfaelle": 69,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.3781,
+    "lng": 9.72298
+   },
+   {
+    "strasse": "Celler Straße",
+    "stadtteil": "Fernmeldeturm",
+    "unfaelle": 51,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.38196,
+    "lng": 9.73801
+   },
+   {
+    "strasse": "Westschnellweg",
+    "stadtteil": "Linden-Nord",
+    "unfaelle": 49,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 52.37712,
+    "lng": 9.69774
+   }
+  ]
+ },
+ "oldenburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ofener Straße",
+    "stadtteil": "Haarenesch",
+    "unfaelle": 29,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 53.14342,
+    "lng": 8.19304
+   },
+   {
+    "strasse": "Staulinie",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 22,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 53.1432,
+    "lng": 8.21415
+   },
+   {
+    "strasse": "Poststraße",
+    "stadtteil": "Bahnhofsviertel",
+    "unfaelle": 21,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 53.14,
+    "lng": 8.21822
+   }
+  ]
+ },
+ "goettingen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bahnhofsallee",
+    "stadtteil": "Weststadt",
+    "unfaelle": 27,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.5348,
+    "lng": 9.92221
+   },
+   {
+    "strasse": "Hannoversche Straße",
+    "stadtteil": "Weende",
+    "unfaelle": 23,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.55989,
+    "lng": 9.93184
+   },
+   {
+    "strasse": "Maschmühlenweg",
+    "stadtteil": "Weststadt",
+    "unfaelle": 22,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.54122,
+    "lng": 9.92758
+   }
+  ]
+ },
+ "wolfsburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Heinrich-Nordhoff-Straße",
+    "stadtteil": "Stadtmitte",
+    "unfaelle": 12,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 52.42813,
+    "lng": 10.7819
+   },
+   {
+    "strasse": "Am Mühlengraben",
+    "stadtteil": "Hellwinkel",
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 52.42433,
+    "lng": 10.7973
+   },
+   {
+    "strasse": "Porschestraße",
+    "stadtteil": "Stadtmitte",
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.42794,
+    "lng": 10.79099
+   }
+  ]
+ },
+ "braunschweig": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Dankwardstraße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.26512,
+    "lng": 10.52561
+   },
+   {
+    "strasse": "Theodor-Heuss-Straße",
+    "stadtteil": "Weststadt",
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.24594,
+    "lng": 10.50748
+   },
+   {
+    "strasse": "Friedrich-Wilhelm-Straße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 15,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.26136,
+    "lng": 10.52261
+   }
+  ]
+ },
+ "viersen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Freiheitsstraße",
+    "stadtteil": "Hülsdonk",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.26079,
+    "lng": 6.39478
+   },
+   {
+    "strasse": "Gereonstraße",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.24821,
+    "lng": 6.40365
+   },
+   {
+    "strasse": "Freiheitsstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.25284,
+    "lng": 6.39947
+   }
+  ]
+ },
+ "nettetal": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "An der Kleinbahn",
+    "stadtteil": "Kaldenkirchen",
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.3333,
+    "lng": 6.19534
+   },
+   {
+    "strasse": "Schaager Straße",
+    "stadtteil": "Breyell",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.29582,
+    "lng": 6.25338
+   }
+  ]
+ },
+ "erkelenz": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Antwerpener Straße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.07729,
+    "lng": 6.30608
+   },
+   {
+    "strasse": "Hermann-Josef-Gormanns-Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.07937,
+    "lng": 6.32033
+   },
+   {
+    "strasse": "Goswinstraße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.07506,
+    "lng": 6.31835
+   }
+  ]
+ },
+ "kleve": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Lindenallee",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.78283,
+    "lng": 6.13071
+   },
+   {
+    "strasse": "Querallee",
+    "stadtteil": "Materborn",
+    "unfaelle": 17,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.7714,
+    "lng": 6.11603
+   },
+   {
+    "strasse": "Königsallee",
+    "stadtteil": "Materborn",
+    "unfaelle": 16,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.77594,
+    "lng": 6.12035
+   }
+  ]
+ },
+ "bremerhaven": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Friedrich-Ebert-Straße",
+    "stadtteil": "Geestendorf",
+    "unfaelle": 26,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 53.53586,
+    "lng": 8.59758
+   },
+   {
+    "strasse": "Hafenstraße",
+    "stadtteil": "Twischkamp",
+    "unfaelle": 23,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 53.56093,
+    "lng": 8.58601
+   },
+   {
+    "strasse": "Friedrich-Ebert-Straße",
+    "stadtteil": "Geestendorf",
+    "unfaelle": 21,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 53.5332,
+    "lng": 8.59811
+   }
+  ]
+ },
+ "bremen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Am Stern",
+    "stadtteil": "Schwachhausen",
+    "unfaelle": 86,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 53.08431,
+    "lng": 8.82483
+   },
+   {
+    "strasse": "Bürgermeister-Smidt-Straße",
+    "stadtteil": "Mitte",
+    "unfaelle": 41,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 53.08297,
+    "lng": 8.80846
+   },
+   {
+    "strasse": "Bürgermeister-Smidt-Straße",
+    "stadtteil": "Mitte",
+    "unfaelle": 38,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 53.07879,
+    "lng": 8.80065
+   }
+  ]
+ },
+ "moenchengladbach": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Berliner Platz",
+    "stadtteil": "Gladbach",
+    "unfaelle": 30,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.19114,
+    "lng": 6.4422
+   },
+   {
+    "strasse": "Limitenstraße",
+    "stadtteil": "Rheydt",
+    "unfaelle": 28,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.16628,
+    "lng": 6.44717
+   },
+   {
+    "strasse": "Gartenstraße",
+    "stadtteil": "Rheydt",
+    "unfaelle": 22,
+    "schwerverletzte": 1,
+    "getoetete": 1,
+    "lat": 51.16894,
+    "lng": 6.44698
+   }
+  ]
+ },
+ "aachen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Heinrichsallee",
+    "stadtteil": "Hansemannplatz",
+    "unfaelle": 53,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.77818,
+    "lng": 6.09442
+   },
+   {
+    "strasse": "Heinrichsallee",
+    "stadtteil": "Kaiserplatz",
+    "unfaelle": 40,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 50.77479,
+    "lng": 6.09604
+   },
+   {
+    "strasse": "Adalbertsteinweg",
+    "stadtteil": "Adalbertsteinweg",
+    "unfaelle": 38,
+    "schwerverletzte": 6,
+    "getoetete": 1,
+    "lat": 50.77216,
+    "lng": 6.11299
+   }
+  ]
+ },
+ "dueren": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Josef-Schregel-Straße",
+    "stadtteil": null,
+    "unfaelle": 21,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.8094,
+    "lng": 6.47956
+   },
+   {
+    "strasse": "B 56",
+    "stadtteil": "Birkesdorf",
+    "unfaelle": 20,
+    "schwerverletzte": 2,
+    "getoetete": 1,
+    "lat": 50.8331,
+    "lng": 6.45906
+   },
+   {
+    "strasse": "Kölner Landstraße",
+    "stadtteil": "Distelrath",
+    "unfaelle": 19,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 50.81244,
+    "lng": 6.514
+   }
+  ]
+ },
+ "alsdorf": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Schaufenberger Straße",
+    "stadtteil": "Schaufenberg",
+    "unfaelle": 15,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.87797,
+    "lng": 6.17003
+   },
+   {
+    "strasse": "L 240",
+    "stadtteil": "Hoengen",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.87772,
+    "lng": 6.20287
+   },
+   {
+    "strasse": "Am Heggeströfer",
+    "stadtteil": "Schaufenberg",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.88082,
+    "lng": 6.17116
+   }
+  ]
+ },
+ "wuerselen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": "Weiden",
+    "unfaelle": 19,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.80886,
+    "lng": 6.1441
+   },
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.825,
+    "lng": 6.12767
+   },
+   {
+    "strasse": "Willy-Brandt-Ring",
+    "stadtteil": "Weiden",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.80522,
+    "lng": 6.14739
+   }
+  ]
+ },
+ "eschweiler": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Rue de Wattrelos",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.82489,
+    "lng": 6.24649
+   },
+   {
+    "strasse": "Peilsgasse",
+    "stadtteil": "Röthgen b. Eschweiler",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.8172,
+    "lng": 6.27293
+   },
+   {
+    "strasse": "Langwahn",
+    "stadtteil": "Röthgen b. Eschweiler",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.81988,
+    "lng": 6.26306
+   }
+  ]
+ },
+ "herzogenrath": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Forensberger Straße",
+    "stadtteil": "Kohlscheid",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.83969,
+    "lng": 6.07522
+   },
+   {
+    "strasse": "Geilenkirchener Straße",
+    "stadtteil": "Bierstraß",
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.87168,
+    "lng": 6.10202
+   }
+  ]
+ },
+ "heinsberg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Unterbrucher Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.07039,
+    "lng": 6.1101
+   },
+   {
+    "strasse": "L 230",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.06927,
+    "lng": 6.09885
+   }
+  ]
+ },
+ "stolberg-rheinland": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.75917,
+    "lng": 6.21584
+   }
+  ]
+ },
+ "willich": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Korschenbroicher Straße",
+    "stadtteil": "Schiefbahn",
+    "unfaelle": 14,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.23111,
+    "lng": 6.53547
+   },
+   {
+    "strasse": "Korschenbroicher Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.26629,
+    "lng": 6.54346
+   }
+  ]
+ },
+ "krefeld": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Untergath",
+    "stadtteil": "Fischeln",
+    "unfaelle": 26,
+    "schwerverletzte": 7,
+    "getoetete": 0,
+    "lat": 51.3224,
+    "lng": 6.59403
+   },
+   {
+    "strasse": "Ostwall",
+    "stadtteil": "Cracau",
+    "unfaelle": 21,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.33392,
+    "lng": 6.56555
+   },
+   {
+    "strasse": "Europaring",
+    "stadtteil": "Gartenstadt",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 1,
+    "lat": 51.36595,
+    "lng": 6.61014
+   }
+  ]
+ },
+ "duisburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Friedrich-Ebert-Straße",
+    "stadtteil": "Aldenrade",
+    "unfaelle": 25,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.52719,
+    "lng": 6.74273
+   },
+   {
+    "strasse": "Saarstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.43318,
+    "lng": 6.77568
+   },
+   {
+    "strasse": "L 140",
+    "stadtteil": "Ruhrort",
+    "unfaelle": 23,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.45471,
+    "lng": 6.74103
+   }
+  ]
+ },
+ "duesseldorf": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kölner Straße",
+    "stadtteil": "Oberbilk",
+    "unfaelle": 46,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 51.21612,
+    "lng": 6.80355
+   },
+   {
+    "strasse": "Grashofstraße",
+    "stadtteil": "Düsseltal",
+    "unfaelle": 41,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.25084,
+    "lng": 6.80084
+   },
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": "Bilk",
+    "unfaelle": 40,
+    "schwerverletzte": 9,
+    "getoetete": 1,
+    "lat": 51.20005,
+    "lng": 6.7706
+   }
+  ]
+ },
+ "neuss": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Gielenstraße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.20304,
+    "lng": 6.68389
+   },
+   {
+    "strasse": "Hamtorwall",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 23,
+    "schwerverletzte": 9,
+    "getoetete": 0,
+    "lat": 51.19827,
+    "lng": 6.68846
+   },
+   {
+    "strasse": "Further Straße",
+    "stadtteil": "Furth-Süd",
+    "unfaelle": 18,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.20615,
+    "lng": 6.67842
+   }
+  ]
+ },
+ "bocholt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ravardistraße",
+    "stadtteil": null,
+    "unfaelle": 23,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.83912,
+    "lng": 6.60913
+   },
+   {
+    "strasse": "Theodor-Heuss-Ring",
+    "stadtteil": null,
+    "unfaelle": 20,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.83516,
+    "lng": 6.62071
+   },
+   {
+    "strasse": "Münsterstraße",
+    "stadtteil": null,
+    "unfaelle": 17,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.83812,
+    "lng": 6.62888
+   }
+  ]
+ },
+ "dinslaken": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Wilhelm-Lantermann-Straße",
+    "stadtteil": null,
+    "unfaelle": 24,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.5637,
+    "lng": 6.74276
+   },
+   {
+    "strasse": "Hünxer Straße",
+    "stadtteil": "Blumenviertel",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.57,
+    "lng": 6.74964
+   },
+   {
+    "strasse": "Willy-Brandt-Straße",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.56929,
+    "lng": 6.73094
+   }
+  ]
+ },
+ "frechen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bonnstraße",
+    "stadtteil": null,
+    "unfaelle": 20,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.91327,
+    "lng": 6.82794
+   },
+   {
+    "strasse": "Bonnstraße",
+    "stadtteil": null,
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.92407,
+    "lng": 6.82284
+   },
+   {
+    "strasse": "Holzstraße",
+    "stadtteil": "Bachem",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.90906,
+    "lng": 6.83095
+   }
+  ]
+ },
+ "korschenbroich": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "L 382",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.19161,
+    "lng": 6.50548
+   },
+   {
+    "strasse": "Willicher Straße",
+    "stadtteil": "Kleinenbroich",
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.219,
+    "lng": 6.52212
+   },
+   {
+    "strasse": "Bachstraße",
+    "stadtteil": "Glehn",
+    "unfaelle": 10,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.16627,
+    "lng": 6.57757
+   }
+  ]
+ },
+ "moers": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Filder Straße",
+    "stadtteil": "Moers-Vinn",
+    "unfaelle": 17,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.44,
+    "lng": 6.62127
+   },
+   {
+    "strasse": "Venloer Straße",
+    "stadtteil": "Moers-Vinn",
+    "unfaelle": 14,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.44332,
+    "lng": 6.61242
+   },
+   {
+    "strasse": "Klever Straße",
+    "stadtteil": "Moers",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.45087,
+    "lng": 6.63879
+   }
+  ]
+ },
+ "wesel": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "B 58",
+    "stadtteil": null,
+    "unfaelle": 24,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.6591,
+    "lng": 6.62537
+   },
+   {
+    "strasse": "Brüner Landstraße",
+    "stadtteil": null,
+    "unfaelle": 21,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.66609,
+    "lng": 6.63031
+   },
+   {
+    "strasse": "Nordstraße",
+    "stadtteil": "Feldmark",
+    "unfaelle": 19,
+    "schwerverletzte": 0,
+    "getoetete": 1,
+    "lat": 51.6699,
+    "lng": 6.61362
+   }
+  ]
+ },
+ "erftstadt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "B 265",
+    "stadtteil": "Erp",
+    "unfaelle": 16,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.75816,
+    "lng": 6.71939
+   }
+  ]
+ },
+ "pulheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bonnstraße",
+    "stadtteil": "Freimersdorf",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.9541,
+    "lng": 6.80208
+   },
+   {
+    "strasse": "Farehamstraße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.99867,
+    "lng": 6.80075
+   }
+  ]
+ },
+ "meerbusch": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Düsseldorfer Straße",
+    "stadtteil": "Büderich",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 2,
+    "lat": 51.24687,
+    "lng": 6.69458
+   },
+   {
+    "strasse": "Dorfstraße",
+    "stadtteil": "Büderich",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.25431,
+    "lng": 6.70016
+   },
+   {
+    "strasse": "Düsseldorfer Straße",
+    "stadtteil": "Büderich",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.25121,
+    "lng": 6.68949
+   }
+  ]
+ },
+ "grevenbroich": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kolpingstraße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.0812,
+    "lng": 6.61242
+   },
+   {
+    "strasse": "Neuenhausener Straße",
+    "stadtteil": "Neuenhausen",
+    "unfaelle": 10,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.07804,
+    "lng": 6.5969
+   }
+  ]
+ },
+ "kerpen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": "Horrem",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 1,
+    "lat": 50.91504,
+    "lng": 6.70962
+   },
+   {
+    "strasse": "Kerpener Straße",
+    "stadtteil": "Sindorf",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.89694,
+    "lng": 6.68378
+   },
+   {
+    "strasse": "Hahnenstraße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.87269,
+    "lng": 6.69278
+   }
+  ]
+ },
+ "dormagen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "L 380",
+    "stadtteil": "Nievenheim",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.10101,
+    "lng": 6.79748
+   },
+   {
+    "strasse": "Krefelder Straße",
+    "stadtteil": "Zons",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.11132,
+    "lng": 6.82229
+   },
+   {
+    "strasse": "Am Rath",
+    "stadtteil": "Horrem",
+    "unfaelle": 13,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.09586,
+    "lng": 6.81295
+   }
+  ]
+ },
+ "bergheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": "Zieverich",
+    "unfaelle": 17,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.95104,
+    "lng": 6.62514
+   },
+   {
+    "strasse": "Gutenbergstraße",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.95003,
+    "lng": 6.6359
+   },
+   {
+    "strasse": "L 276",
+    "stadtteil": "Kenten",
+    "unfaelle": 12,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.94169,
+    "lng": 6.65373
+   }
+  ]
+ },
+ "kaarst": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Neersener Straße",
+    "stadtteil": "Holzbüttgen",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.22276,
+    "lng": 6.60805
+   },
+   {
+    "strasse": "Maubisstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.22677,
+    "lng": 6.6205
+   },
+   {
+    "strasse": "L 30",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.2414,
+    "lng": 6.62214
+   }
+  ]
+ },
+ "euskirchen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "L 119",
+    "stadtteil": "Stotzheim",
+    "unfaelle": 13,
+    "schwerverletzte": 0,
+    "getoetete": 1,
+    "lat": 50.63626,
+    "lng": 6.79519
+   },
+   {
+    "strasse": "Gerberstraße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.65971,
+    "lng": 6.78162
+   },
+   {
+    "strasse": "Wilhelmstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.65779,
+    "lng": 6.78748
+   }
+  ]
+ },
+ "borken": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Heidener Straße",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.846,
+    "lng": 6.8635
+   },
+   {
+    "strasse": "Butenwall",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.84487,
+    "lng": 6.85472
+   },
+   {
+    "strasse": "Lange Stiege",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.84146,
+    "lng": 6.84812
+   }
+  ]
+ },
+ "koeln": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hohenstaufenring",
+    "stadtteil": "Neustadt",
+    "unfaelle": 64,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 50.93106,
+    "lng": 6.94066
+   },
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": "Lindenthal",
+    "unfaelle": 60,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 50.93667,
+    "lng": 6.92423
+   },
+   {
+    "strasse": "Cäcilienstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 55,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 50.93527,
+    "lng": 6.95287
+   }
+  ]
+ },
+ "gladbeck": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Horster Straße",
+    "stadtteil": null,
+    "unfaelle": 20,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.57071,
+    "lng": 6.99427
+   },
+   {
+    "strasse": "Mühlenstraße",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 9,
+    "getoetete": 0,
+    "lat": 51.57562,
+    "lng": 6.97988
+   },
+   {
+    "strasse": "Essener Straße",
+    "stadtteil": "Butendorf",
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.55587,
+    "lng": 6.98387
+   }
+  ]
+ },
+ "wesseling": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Mühlenweg",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.8237,
+    "lng": 6.96298
+   },
+   {
+    "strasse": "Flach-Fengler-Straße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.82096,
+    "lng": 6.97704
+   },
+   {
+    "strasse": "Am Bungert",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.82718,
+    "lng": 6.97365
+   }
+  ]
+ },
+ "oberhausen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Konrad-Adenauer-Allee",
+    "stadtteil": "Vondern",
+    "unfaelle": 23,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.49622,
+    "lng": 6.86379
+   },
+   {
+    "strasse": "Duisburger Straße",
+    "stadtteil": "Lirich",
+    "unfaelle": 21,
+    "schwerverletzte": 3,
+    "getoetete": 1,
+    "lat": 51.4777,
+    "lng": 6.84029
+   },
+   {
+    "strasse": "Mülheimer Straße",
+    "stadtteil": "Marlenviertel Ost",
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.47582,
+    "lng": 6.86382
+   }
+  ]
+ },
+ "ahaus": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Wüllener Straße",
+    "stadtteil": null,
+    "unfaelle": 23,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.07388,
+    "lng": 6.99733
+   },
+   {
+    "strasse": "Wessumer Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.07621,
+    "lng": 7.0049
+   },
+   {
+    "strasse": "Bahnhofstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.08277,
+    "lng": 7.01523
+   }
+  ]
+ },
+ "bruehl": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kaiserstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.83411,
+    "lng": 6.90387
+   },
+   {
+    "strasse": "Phantasialandstraße",
+    "stadtteil": "Badorf",
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.79681,
+    "lng": 6.87051
+   },
+   {
+    "strasse": "Otto-Wels-Straße",
+    "stadtteil": "Pingsdorf",
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.81516,
+    "lng": 6.90743
+   }
+  ]
+ },
+ "muelheim-an-der-ruhr": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Eppinghofer Straße",
+    "stadtteil": "Altstadt II",
+    "unfaelle": 18,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.43198,
+    "lng": 6.8862
+   },
+   {
+    "strasse": "Eppinghofer Straße",
+    "stadtteil": "Altstadt II",
+    "unfaelle": 18,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.43586,
+    "lng": 6.88851
+   },
+   {
+    "strasse": "Friedrichstraße",
+    "stadtteil": "Altstadt I",
+    "unfaelle": 17,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.4263,
+    "lng": 6.88161
+   }
+  ]
+ },
+ "bottrop": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Prosperstraße",
+    "stadtteil": "Süd-West",
+    "unfaelle": 22,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.51928,
+    "lng": 6.93176
+   },
+   {
+    "strasse": "Horster Straße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 19,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.52369,
+    "lng": 6.93009
+   },
+   {
+    "strasse": "Horster Straße",
+    "stadtteil": "Boy",
+    "unfaelle": 18,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.53625,
+    "lng": 6.98489
+   }
+  ]
+ },
+ "essen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ruhrschnellweg",
+    "stadtteil": "Südviertel",
+    "unfaelle": 38,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.44736,
+    "lng": 7.00313
+   },
+   {
+    "strasse": "Ruhrallee",
+    "stadtteil": "Huttrop",
+    "unfaelle": 33,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.44268,
+    "lng": 7.03386
+   },
+   {
+    "strasse": "Ruhrschnellweg",
+    "stadtteil": "Südviertel",
+    "unfaelle": 33,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.45007,
+    "lng": 7.01282
+   }
+  ]
+ },
+ "ratingen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Brachter Straße",
+    "stadtteil": "Homberg",
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.29498,
+    "lng": 6.91103
+   },
+   {
+    "strasse": "Lise-Meitner-Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.29595,
+    "lng": 6.82966
+   },
+   {
+    "strasse": "Homberger Straße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.29598,
+    "lng": 6.86714
+   }
+  ]
+ },
+ "langenfeld": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Berghausener Straße",
+    "stadtteil": "Berghausen",
+    "unfaelle": 42,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.11922,
+    "lng": 6.92869
+   },
+   {
+    "strasse": "Düsseldorfer Straße",
+    "stadtteil": "Berghausen",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.1133,
+    "lng": 6.93556
+   },
+   {
+    "strasse": "L 402",
+    "stadtteil": "Immigrath",
+    "unfaelle": 18,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.11697,
+    "lng": 6.96619
+   }
+  ]
+ },
+ "hilden": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Klotzstraße",
+    "stadtteil": "Karnap",
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.16504,
+    "lng": 6.93441
+   },
+   {
+    "strasse": "Gerresheimer Straße",
+    "stadtteil": "Meide",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.17677,
+    "lng": 6.92723
+   },
+   {
+    "strasse": "Gerresheimer Straße",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.1818,
+    "lng": 6.92572
+   }
+  ]
+ },
+ "mettmann": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Brückerstraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.24931,
+    "lng": 6.97901
+   },
+   {
+    "strasse": "Südring",
+    "stadtteil": "Metzkausen",
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.25575,
+    "lng": 6.94954
+   }
+  ]
+ },
+ "bornheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Rankenberg",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.76202,
+    "lng": 6.97476
+   },
+   {
+    "strasse": "L 281",
+    "stadtteil": "Roisdorf",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.75993,
+    "lng": 7.0229
+   },
+   {
+    "strasse": "Bonn-Brühler-Straße",
+    "stadtteil": "Merten",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.77579,
+    "lng": 6.92993
+   }
+  ]
+ },
+ "rheinbach": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Aachener Straße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.62882,
+    "lng": 6.94457
+   }
+  ]
+ },
+ "erkrath": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Max-Planck-Straße",
+    "stadtteil": "Trills",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.20177,
+    "lng": 6.946
+   },
+   {
+    "strasse": "Talstraße",
+    "stadtteil": "Hochdahl",
+    "unfaelle": 10,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.22639,
+    "lng": 6.94994
+   }
+  ]
+ },
+ "dorsten": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "L 509",
+    "stadtteil": "Hervest",
+    "unfaelle": 15,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.6843,
+    "lng": 7.02043
+   },
+   {
+    "strasse": "Crawleystraße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.66582,
+    "lng": 6.96546
+   },
+   {
+    "strasse": "Bismarckstraße",
+    "stadtteil": "Hervest",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.66939,
+    "lng": 6.96729
+   }
+  ]
+ },
+ "huerth": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Peremyschljanystraße",
+    "stadtteil": "Hermülheim",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.87421,
+    "lng": 6.88666
+   },
+   {
+    "strasse": "Kölner Straße",
+    "stadtteil": "Gleuel",
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 1,
+    "lat": 50.89778,
+    "lng": 6.84497
+   },
+   {
+    "strasse": "Kaulardstraße",
+    "stadtteil": "Efferen",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.89411,
+    "lng": 6.90319
+   }
+  ]
+ },
+ "swisttal": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "L 182",
+    "stadtteil": "Straßfeld",
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.70906,
+    "lng": 6.87792
+   }
+  ]
+ },
+ "monheim-am-rhein": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Helene-Lange-Straße",
+    "stadtteil": "Baumberg",
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.11569,
+    "lng": 6.89998
+   },
+   {
+    "strasse": "Hegelstraße",
+    "stadtteil": "Baumberg",
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.12011,
+    "lng": 6.89591
+   }
+  ]
+ },
+ "haan": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Gruitener Straße",
+    "stadtteil": null,
+    "unfaelle": 24,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 51.20895,
+    "lng": 7.03234
+   },
+   {
+    "strasse": "Kaiserstraße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.19231,
+    "lng": 7.01083
+   },
+   {
+    "strasse": "Dieker Straße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.19307,
+    "lng": 6.99749
+   }
+  ]
+ },
+ "leverkusen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Willy-Brandt-Ring",
+    "stadtteil": "Manfort",
+    "unfaelle": 21,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.02413,
+    "lng": 7.0154
+   },
+   {
+    "strasse": "A 3",
+    "stadtteil": "Manfort",
+    "unfaelle": 20,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.02704,
+    "lng": 7.01094
+   },
+   {
+    "strasse": "Küppersteger Straße",
+    "stadtteil": "Küppersteg",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.04628,
+    "lng": 6.99421
+   }
+  ]
+ },
+ "gronau": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Eper Straße",
+    "stadtteil": null,
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.20789,
+    "lng": 7.02794
+   },
+   {
+    "strasse": "Enscheder Straße",
+    "stadtteil": null,
+    "unfaelle": 17,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.21238,
+    "lng": 7.0191
+   },
+   {
+    "strasse": "Vereinsstraße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.21481,
+    "lng": 7.04675
+   }
+  ]
+ },
+ "solingen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Mummstraße",
+    "stadtteil": "Solingen Mitte",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.17487,
+    "lng": 7.08456
+   },
+   {
+    "strasse": "Kölner Straße",
+    "stadtteil": "Solingen Mitte",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.17194,
+    "lng": 7.08313
+   },
+   {
+    "strasse": "Kronprinzenstraße",
+    "stadtteil": "Solingen Mitte",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.17902,
+    "lng": 7.07839
+   }
+  ]
+ },
+ "herten": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ewaldstraße",
+    "stadtteil": null,
+    "unfaelle": 17,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.57673,
+    "lng": 7.14451
+   },
+   {
+    "strasse": "Cranger Straße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 51.55671,
+    "lng": 7.17612
+   },
+   {
+    "strasse": "Westerholter Straße",
+    "stadtteil": "Langenbochum",
+    "unfaelle": 14,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.60778,
+    "lng": 7.12387
+   }
+  ]
+ },
+ "alfter": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Schöntalweg",
+    "stadtteil": "Oedekoven",
+    "unfaelle": 11,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.71371,
+    "lng": 7.02871
+   }
+  ]
+ },
+ "bergisch-gladbach": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Konrad-Adenauer-Platz",
+    "stadtteil": "Stadtmitte",
+    "unfaelle": 23,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.99007,
+    "lng": 7.13097
+   },
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": "Stadtmitte",
+    "unfaelle": 18,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.98969,
+    "lng": 7.12353
+   },
+   {
+    "strasse": "Bensberger Straße",
+    "stadtteil": "Heidkamp",
+    "unfaelle": 16,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.98206,
+    "lng": 7.13708
+   }
+  ]
+ },
+ "marl": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Lipper Weg",
+    "stadtteil": "Drewer-Nord",
+    "unfaelle": 19,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.66384,
+    "lng": 7.1223
+   },
+   {
+    "strasse": "Bachackerweg",
+    "stadtteil": "Hüls-Nord",
+    "unfaelle": 13,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.67905,
+    "lng": 7.12382
+   },
+   {
+    "strasse": "Victoriastraße",
+    "stadtteil": "Hüls-Nord",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.66597,
+    "lng": 7.15188
+   }
+  ]
+ },
+ "gelsenkirchen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kurt-Schumacher-Straße",
+    "stadtteil": "Buer",
+    "unfaelle": 27,
+    "schwerverletzte": 1,
+    "getoetete": 1,
+    "lat": 51.56406,
+    "lng": 7.0592
+   },
+   {
+    "strasse": "Wildenbruchstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.50629,
+    "lng": 7.10455
+   },
+   {
+    "strasse": "Overwegstraße",
+    "stadtteil": "Schalke",
+    "unfaelle": 22,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.51277,
+    "lng": 7.08949
+   }
+  ]
+ },
+ "wuppertal": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "K 9",
+    "stadtteil": "Ostersbaum",
+    "unfaelle": 30,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.25892,
+    "lng": 7.15315
+   },
+   {
+    "strasse": "Steinweg",
+    "stadtteil": "Barmen-Mitte",
+    "unfaelle": 29,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.26985,
+    "lng": 7.19697
+   },
+   {
+    "strasse": "Morianstraße",
+    "stadtteil": "Elberfeld",
+    "unfaelle": 28,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.25614,
+    "lng": 7.15074
+   }
+  ]
+ },
+ "troisdorf": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Römerstraße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.81475,
+    "lng": 7.16552
+   },
+   {
+    "strasse": "Theodor-Heuss-Ring",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.81298,
+    "lng": 7.15381
+   },
+   {
+    "strasse": "Frankfurter Straße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.8141,
+    "lng": 7.17713
+   }
+  ]
+ },
+ "velbert": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Heidestraße",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.3316,
+    "lng": 7.03686
+   },
+   {
+    "strasse": "Werdener Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.34672,
+    "lng": 7.02849
+   }
+  ]
+ },
+ "bochum": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Harpener Hellweg",
+    "stadtteil": "Kornharpen-Voede-Abzweig",
+    "unfaelle": 23,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.49505,
+    "lng": 7.26191
+   },
+   {
+    "strasse": "Berliner Straße",
+    "stadtteil": "Leithe",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.47295,
+    "lng": 7.12972
+   },
+   {
+    "strasse": "Kurt-Schumacher-Platz",
+    "stadtteil": "Gleisdreieck",
+    "unfaelle": 16,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.47876,
+    "lng": 7.22114
+   }
+  ]
+ },
+ "bonn": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Konrad-Adenauer-Platz",
+    "stadtteil": "Beuel-Mitte",
+    "unfaelle": 33,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.73902,
+    "lng": 7.1159
+   },
+   {
+    "strasse": "Berliner Freiheit",
+    "stadtteil": "Bonn-Zentrum",
+    "unfaelle": 30,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.73771,
+    "lng": 7.10565
+   },
+   {
+    "strasse": "Doktor-Weis-Platz",
+    "stadtteil": "Beuel-Mitte",
+    "unfaelle": 29,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.73996,
+    "lng": 7.12314
+   }
+  ]
+ },
+ "recklinghausen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Dortmunder Straße",
+    "stadtteil": "Ostviertel",
+    "unfaelle": 19,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 51.61461,
+    "lng": 7.20332
+   },
+   {
+    "strasse": "Bochumer Straße",
+    "stadtteil": "Süd",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.56979,
+    "lng": 7.21204
+   },
+   {
+    "strasse": "Castroper Straße",
+    "stadtteil": "Hillen",
+    "unfaelle": 14,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.61086,
+    "lng": 7.20851
+   }
+  ]
+ },
+ "herne": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Dorstener Straße",
+    "stadtteil": "Holsterhausen",
+    "unfaelle": 20,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.52482,
+    "lng": 7.18934
+   },
+   {
+    "strasse": "Sodinger Straße",
+    "stadtteil": "Herne-Mitte",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.53588,
+    "lng": 7.22694
+   },
+   {
+    "strasse": "Westring",
+    "stadtteil": "Baukau",
+    "unfaelle": 16,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.54409,
+    "lng": 7.2159
+   }
+  ]
+ },
+ "meckenheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Gudenauer Allee",
+    "stadtteil": null,
+    "unfaelle": 20,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.63085,
+    "lng": 7.02575
+   },
+   {
+    "strasse": "Merler Bahn",
+    "stadtteil": "Merl",
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.63302,
+    "lng": 7.05583
+   },
+   {
+    "strasse": "Gudenauer Allee",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.62866,
+    "lng": 7.0406
+   }
+  ]
+ },
+ "roesrath": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": "Volberg",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.90893,
+    "lng": 7.18958
+   }
+  ]
+ },
+ "hattingen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Martin-Luther-Straße",
+    "stadtteil": null,
+    "unfaelle": 22,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.39762,
+    "lng": 7.17998
+   },
+   {
+    "strasse": "Kreisstraße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.3996,
+    "lng": 7.17563
+   },
+   {
+    "strasse": "Bochumer Straße",
+    "stadtteil": "Baak",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.40777,
+    "lng": 7.16992
+   }
+  ]
+ },
+ "remscheid": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Willy-Brandt-Platz",
+    "stadtteil": "Stachelhausen",
+    "unfaelle": 15,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.17822,
+    "lng": 7.19995
+   },
+   {
+    "strasse": "Hastener Straße",
+    "stadtteil": "Schöne Aussicht",
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.19169,
+    "lng": 7.17094
+   },
+   {
+    "strasse": "Borner Straße",
+    "stadtteil": "Trecknase",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.18075,
+    "lng": 7.25411
+   }
+  ]
+ },
+ "sankt-augustin": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "B 56",
+    "stadtteil": "Obermenden",
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.79405,
+    "lng": 7.1732
+   },
+   {
+    "strasse": "Bonner Straße",
+    "stadtteil": "Siegburg-Mülldorf",
+    "unfaelle": 15,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.77986,
+    "lng": 7.19196
+   },
+   {
+    "strasse": "Bonner Straße",
+    "stadtteil": "Siegburg-Mülldorf",
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.78499,
+    "lng": 7.19684
+   }
+  ]
+ },
+ "koenigswinter": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Dollendorfer Straße",
+    "stadtteil": "Thomasberg",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.70486,
+    "lng": 7.24491
+   },
+   {
+    "strasse": "Niederbach",
+    "stadtteil": "Oberpleis",
+    "unfaelle": 10,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.71398,
+    "lng": 7.27888
+   }
+  ]
+ },
+ "duelmen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Münsterstraße",
+    "stadtteil": "Dülmen-Mitte",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.83604,
+    "lng": 7.28402
+   },
+   {
+    "strasse": "Nordlandwehr",
+    "stadtteil": "Dülmen-Mitte",
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.84097,
+    "lng": 7.28857
+   }
+  ]
+ },
+ "siegburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bonner Straße",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.7913,
+    "lng": 7.20485
+   },
+   {
+    "strasse": "Frankfurter Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.7872,
+    "lng": 7.22053
+   },
+   {
+    "strasse": "Kleiberg",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.79798,
+    "lng": 7.21489
+   }
+  ]
+ },
+ "hagen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bahnhofshinterfahrung",
+    "stadtteil": "Wehringhausen",
+    "unfaelle": 32,
+    "schwerverletzte": 1,
+    "getoetete": 1,
+    "lat": 51.35672,
+    "lng": 7.45418
+   },
+   {
+    "strasse": "L 807",
+    "stadtteil": "Haspe-West",
+    "unfaelle": 25,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.343,
+    "lng": 7.40873
+   },
+   {
+    "strasse": "Körnerstraße",
+    "stadtteil": "Mittelstadt",
+    "unfaelle": 23,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.36195,
+    "lng": 7.46672
+   }
+  ]
+ },
+ "dortmund": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hohe Straße",
+    "stadtteil": "City",
+    "unfaelle": 30,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.51008,
+    "lng": 7.46235
+   },
+   {
+    "strasse": "Schützenstraße",
+    "stadtteil": "Hafen",
+    "unfaelle": 28,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.51927,
+    "lng": 7.45352
+   },
+   {
+    "strasse": "Bornstraße",
+    "stadtteil": "City",
+    "unfaelle": 28,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.5171,
+    "lng": 7.46887
+   }
+  ]
+ },
+ "hennef": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Stoßdorfer Straße",
+    "stadtteil": "Stoßdorf",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.78227,
+    "lng": 7.25674
+   },
+   {
+    "strasse": "Europaallee",
+    "stadtteil": "Geisbach",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.76765,
+    "lng": 7.31124
+   },
+   {
+    "strasse": "Frankfurter Straße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.77695,
+    "lng": 7.27962
+   }
+  ]
+ },
+ "schwelm": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hattinger Straße",
+    "stadtteil": "Loh",
+    "unfaelle": 13,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.29301,
+    "lng": 7.28786
+   }
+  ]
+ },
+ "lohmar": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": null,
+    "unfaelle": 14,
+    "schwerverletzte": 0,
+    "getoetete": 1,
+    "lat": 50.84108,
+    "lng": 7.21191
+   },
+   {
+    "strasse": "Sülztalstraße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.85108,
+    "lng": 7.2235
+   },
+   {
+    "strasse": "B 484",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.82223,
+    "lng": 7.20532
+   }
+  ]
+ },
+ "rheine": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Neuenkirchener Straße",
+    "stadtteil": "Rheine-Stadt",
+    "unfaelle": 32,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.27985,
+    "lng": 7.4342
+   },
+   {
+    "strasse": "Münsterstraße",
+    "stadtteil": "Rheine-Stadt",
+    "unfaelle": 22,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.27695,
+    "lng": 7.44141
+   },
+   {
+    "strasse": "Hansaallee",
+    "stadtteil": "Rheine-Stadt",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 52.28696,
+    "lng": 7.44103
+   }
+  ]
+ },
+ "witten": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ruhrstraße",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.42912,
+    "lng": 7.33599
+   },
+   {
+    "strasse": "Ardeystraße",
+    "stadtteil": "Sonnenschein",
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.44397,
+    "lng": 7.33817
+   },
+   {
+    "strasse": "Vormholzer Straße",
+    "stadtteil": "Ostherbede",
+    "unfaelle": 12,
+    "schwerverletzte": 3,
+    "getoetete": 1,
+    "lat": 51.42408,
+    "lng": 7.28212
+   }
+  ]
+ },
+ "castrop-rauxel": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Habinghorster Straße",
+    "stadtteil": "Rauxel",
+    "unfaelle": 17,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.55822,
+    "lng": 7.3142
+   },
+   {
+    "strasse": "Habinghorster Straße",
+    "stadtteil": "Rauxel",
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.56596,
+    "lng": 7.31474
+   },
+   {
+    "strasse": "Berliner Platz",
+    "stadtteil": "Rauxel",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.57293,
+    "lng": 7.30491
+   }
+  ]
+ },
+ "sprockhoevel": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "B 326",
+    "stadtteil": "Halloh",
+    "unfaelle": 16,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.31304,
+    "lng": 7.27373
+   },
+   {
+    "strasse": "Gevelsberger Straße",
+    "stadtteil": "Haßlinghausen",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.32306,
+    "lng": 7.28815
+   }
+  ]
+ },
+ "luenen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Dortmunder Straße",
+    "stadtteil": "Brambauer",
+    "unfaelle": 26,
+    "schwerverletzte": 5,
+    "getoetete": 1,
+    "lat": 51.59139,
+    "lng": 7.47733
+   },
+   {
+    "strasse": "Kamener Straße",
+    "stadtteil": "Horstmar",
+    "unfaelle": 18,
+    "schwerverletzte": 1,
+    "getoetete": 1,
+    "lat": 51.6091,
+    "lng": 7.52579
+   },
+   {
+    "strasse": "Konrad-Adenauer-Straße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.61863,
+    "lng": 7.52425
+   }
+  ]
+ },
+ "muenster": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ludgeriplatz",
+    "stadtteil": "Josef",
+    "unfaelle": 42,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.9559,
+    "lng": 7.62607
+   },
+   {
+    "strasse": "Hafenstraße",
+    "stadtteil": "Bahnhof",
+    "unfaelle": 31,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 51.95385,
+    "lng": 7.63206
+   },
+   {
+    "strasse": "Salzstraße",
+    "stadtteil": "Bahnhof",
+    "unfaelle": 26,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.96015,
+    "lng": 7.63358
+   }
+  ]
+ },
+ "ibbenbueren": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Weststraße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.27926,
+    "lng": 7.71256
+   },
+   {
+    "strasse": "Münsterstraße",
+    "stadtteil": "Dörenthe",
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.23842,
+    "lng": 7.69389
+   },
+   {
+    "strasse": "Gravenhorster Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.27533,
+    "lng": 7.69923
+   }
+  ]
+ },
+ "hamm": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Ahornallee",
+    "stadtteil": "Stadtbezirk Rhynern",
+    "unfaelle": 19,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.67129,
+    "lng": 7.84931
+   },
+   {
+    "strasse": "Münsterstraße",
+    "stadtteil": "Stadtbezirk Heessen",
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.69083,
+    "lng": 7.80937
+   },
+   {
+    "strasse": "Werler Straße",
+    "stadtteil": "Stadtbezirk Rhynern",
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.62875,
+    "lng": 7.84663
+   }
+  ]
+ },
+ "iserlohn": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bahnhofsplatz",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.37278,
+    "lng": 7.69343
+   },
+   {
+    "strasse": "Leckingser Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.39834,
+    "lng": 7.69388
+   },
+   {
+    "strasse": "A 46",
+    "stadtteil": "Nußberg",
+    "unfaelle": 10,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.38514,
+    "lng": 7.69643
+   }
+  ]
+ },
+ "unna": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hansastraße",
+    "stadtteil": null,
+    "unfaelle": 17,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.54105,
+    "lng": 7.68772
+   },
+   {
+    "strasse": "Kamener Straße",
+    "stadtteil": "Königsborn",
+    "unfaelle": 12,
+    "schwerverletzte": 0,
+    "getoetete": 1,
+    "lat": 51.55505,
+    "lng": 7.68427
+   },
+   {
+    "strasse": "A 44",
+    "stadtteil": "Massen",
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.52214,
+    "lng": 7.6584
+   }
+  ]
+ },
+ "arnsberg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Stembergstraße",
+    "stadtteil": "Neheim",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.44163,
+    "lng": 7.969
+   },
+   {
+    "strasse": "L 745",
+    "stadtteil": "Neheim",
+    "unfaelle": 11,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.4561,
+    "lng": 7.96172
+   },
+   {
+    "strasse": "Kleinbahnstraße",
+    "stadtteil": "Hüsten",
+    "unfaelle": 10,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.43204,
+    "lng": 7.98796
+   }
+  ]
+ },
+ "ahlen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Europaplatz",
+    "stadtteil": null,
+    "unfaelle": 25,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.75389,
+    "lng": 7.8979
+   },
+   {
+    "strasse": "Buschhoffplatz",
+    "stadtteil": null,
+    "unfaelle": 23,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.76282,
+    "lng": 7.88078
+   },
+   {
+    "strasse": "Oststraße",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.76293,
+    "lng": 7.89744
+   }
+  ]
+ },
+ "luedenscheid": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Altenaer Straße",
+    "stadtteil": "Lüdenscheid-Stadt",
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.22742,
+    "lng": 7.63502
+   },
+   {
+    "strasse": "Kluser Straße",
+    "stadtteil": "Lüdenscheid-Stadt",
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.22105,
+    "lng": 7.64121
+   },
+   {
+    "strasse": "Herscheider Landstraße",
+    "stadtteil": "Lüdenscheid-Stadt",
+    "unfaelle": 11,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.21117,
+    "lng": 7.6442
+   }
+  ]
+ },
+ "kamen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hochstraße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.59216,
+    "lng": 7.65384
+   },
+   {
+    "strasse": "Zollpost",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.57772,
+    "lng": 7.66894
+   },
+   {
+    "strasse": "Oststraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.5939,
+    "lng": 7.66805
+   }
+  ]
+ },
+ "siegen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Berliner Straße",
+    "stadtteil": "Siegen-Kernband",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.87175,
+    "lng": 8.01609
+   },
+   {
+    "strasse": "Weidenauer Straße",
+    "stadtteil": "Weidenau-West",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.89514,
+    "lng": 8.02778
+   },
+   {
+    "strasse": "Weidenauer Straße",
+    "stadtteil": "Weidenau-West",
+    "unfaelle": 11,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.88874,
+    "lng": 8.02852
+   }
+  ]
+ },
+ "schwerte": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bethunestraße",
+    "stadtteil": null,
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.44317,
+    "lng": 7.5734
+   },
+   {
+    "strasse": "Hansalinie",
+    "stadtteil": "Schwerterheide",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.4568,
+    "lng": 7.56007
+   },
+   {
+    "strasse": "Hörder Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.44597,
+    "lng": 7.56414
+   }
+  ]
+ },
+ "menden": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Märkische Straße",
+    "stadtteil": null,
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.44127,
+    "lng": 7.7822
+   }
+  ]
+ },
+ "paderborn": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Heierswall",
+    "stadtteil": "Nordstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 51.72281,
+    "lng": 8.75836
+   },
+   {
+    "strasse": "Kasseler Straße",
+    "stadtteil": "Oststadt",
+    "unfaelle": 20,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.71612,
+    "lng": 8.75996
+   },
+   {
+    "strasse": "Bahnhofstraße",
+    "stadtteil": "Südstadt",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.70909,
+    "lng": 8.71992
+   }
+  ]
+ },
+ "guetersloh": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Brockhäger Straße",
+    "stadtteil": null,
+    "unfaelle": 22,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.91403,
+    "lng": 8.37175
+   },
+   {
+    "strasse": "Marienfelder Straße",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.9127,
+    "lng": 8.36594
+   },
+   {
+    "strasse": "Südring",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.89137,
+    "lng": 8.38399
+   }
+  ]
+ },
+ "bielefeld": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Oerlinghauser Straße",
+    "stadtteil": "Stieghorst",
+    "unfaelle": 24,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.99102,
+    "lng": 8.60732
+   },
+   {
+    "strasse": "Heeper Straße",
+    "stadtteil": "Mitte",
+    "unfaelle": 22,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 52.0241,
+    "lng": 8.56539
+   },
+   {
+    "strasse": "Elsa-Brändström-Straße",
+    "stadtteil": "Mitte",
+    "unfaelle": 21,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 52.02288,
+    "lng": 8.52912
+   }
+  ]
+ },
+ "bad-oeynhausen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Eidinghausener Straße",
+    "stadtteil": "Eidinghausen",
+    "unfaelle": 11,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 52.21589,
+    "lng": 8.80154
+   },
+   {
+    "strasse": "Vlothoer Straße",
+    "stadtteil": "Babbenhausen",
+    "unfaelle": 10,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.20899,
+    "lng": 8.84145
+   },
+   {
+    "strasse": "Siriusweg",
+    "stadtteil": "Dehme",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 52.21918,
+    "lng": 8.81824
+   }
+  ]
+ },
+ "soest": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Niederbergheimer Straße",
+    "stadtteil": null,
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.56488,
+    "lng": 8.11828
+   },
+   {
+    "strasse": "Wisbyring",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.56429,
+    "lng": 8.09858
+   },
+   {
+    "strasse": "Ulrichertor",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.56594,
+    "lng": 8.10787
+   }
+  ]
+ },
+ "lippstadt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Lippertor",
+    "stadtteil": null,
+    "unfaelle": 24,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.67996,
+    "lng": 8.34564
+   },
+   {
+    "strasse": "Woldemei",
+    "stadtteil": null,
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.67398,
+    "lng": 8.34907
+   },
+   {
+    "strasse": "Südertor",
+    "stadtteil": null,
+    "unfaelle": 13,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.66993,
+    "lng": 8.34595
+   }
+  ]
+ },
+ "herford": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Lübberstraße",
+    "stadtteil": "Stiftberg",
+    "unfaelle": 16,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.11731,
+    "lng": 8.6763
+   },
+   {
+    "strasse": "Bahnhofstraße",
+    "stadtteil": "Radewiger Feldmark",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.11766,
+    "lng": 8.66371
+   },
+   {
+    "strasse": "Bielefelder Straße",
+    "stadtteil": "Stedefreund",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.07781,
+    "lng": 8.6184
+   }
+  ]
+ },
+ "bad-salzuflen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Am Zubringer",
+    "stadtteil": "Aspe",
+    "unfaelle": 17,
+    "schwerverletzte": 8,
+    "getoetete": 0,
+    "lat": 52.06796,
+    "lng": 8.73902
+   },
+   {
+    "strasse": "Ostwestfalenstraße",
+    "stadtteil": "Wülfer-Bexten",
+    "unfaelle": 12,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 52.05222,
+    "lng": 8.74049
+   },
+   {
+    "strasse": "Am Zubringer",
+    "stadtteil": "Werl",
+    "unfaelle": 12,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.07916,
+    "lng": 8.72373
+   }
+  ]
+ },
+ "buende": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Borriesstraße",
+    "stadtteil": "Ennigloh",
+    "unfaelle": 15,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.20315,
+    "lng": 8.56797
+   },
+   {
+    "strasse": "A 30",
+    "stadtteil": "Ennigloh",
+    "unfaelle": 10,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 52.19408,
+    "lng": 8.54864
+   }
+  ]
+ },
+ "detmold": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Lagesche Straße",
+    "stadtteil": "Jerxen-Orbke",
+    "unfaelle": 14,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.95524,
+    "lng": 8.8581
+   },
+   {
+    "strasse": "Bismarckstraße",
+    "stadtteil": null,
+    "unfaelle": 11,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.93805,
+    "lng": 8.87497
+   },
+   {
+    "strasse": "Bielefelder Straße",
+    "stadtteil": "Heidenoldendorf",
+    "unfaelle": 10,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.94904,
+    "lng": 8.82846
+   }
+  ]
+ },
+ "rheda-wiedenbrueck": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hauptstraße",
+    "stadtteil": "Wiedenbrück",
+    "unfaelle": 15,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.83331,
+    "lng": 8.30532
+   },
+   {
+    "strasse": "Bielefelder Straße",
+    "stadtteil": "Wiedenbrück",
+    "unfaelle": 13,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.83815,
+    "lng": 8.31432
+   },
+   {
+    "strasse": "Ringstraße",
+    "stadtteil": "Rheda",
+    "unfaelle": 11,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.85607,
+    "lng": 8.28629
+   }
+  ]
+ },
+ "minden": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Klausenwall",
+    "stadtteil": "Dioecese of Minden",
+    "unfaelle": 17,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.2898,
+    "lng": 8.92229
+   },
+   {
+    "strasse": "Am Fort C",
+    "stadtteil": "Rechtes Weserufer",
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 52.28888,
+    "lng": 8.93366
+   },
+   {
+    "strasse": "Viktoriastraße",
+    "stadtteil": "Rechtes Weserufer",
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.28899,
+    "lng": 8.93823
+   }
+  ]
+ },
+ "wiesbaden": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kaiser-Friedrich-Ring",
+    "stadtteil": "Mitte",
+    "unfaelle": 51,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 50.07132,
+    "lng": 8.2407
+   },
+   {
+    "strasse": "Klarenthaler Straße",
+    "stadtteil": "Rheingauviertel",
+    "unfaelle": 43,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.08134,
+    "lng": 8.21885
+   },
+   {
+    "strasse": "Herzogsplatz",
+    "stadtteil": "Biebrich",
+    "unfaelle": 39,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.04788,
+    "lng": 8.24096
+   }
+  ]
+ },
+ "kassel": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kurt-Wolters-Straße",
+    "stadtteil": "Wesertor",
+    "unfaelle": 39,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.31898,
+    "lng": 9.50868
+   },
+   {
+    "strasse": "Eisenschmiede",
+    "stadtteil": "Nord",
+    "unfaelle": 27,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.33116,
+    "lng": 9.49985
+   },
+   {
+    "strasse": "Untere Königsstraße",
+    "stadtteil": "Nord",
+    "unfaelle": 26,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.32105,
+    "lng": 9.50224
+   }
+  ]
+ },
+ "frankfurt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Brückenstraße",
+    "stadtteil": "Frankfurt-Sachsenhausen",
+    "unfaelle": 44,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 50.10717,
+    "lng": 8.68777
+   },
+   {
+    "strasse": "Kurt-Schumacher-Straße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 37,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.10978,
+    "lng": 8.68784
+   },
+   {
+    "strasse": "Eschersheimer Landstraße",
+    "stadtteil": "Westend-Nord",
+    "unfaelle": 35,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.13175,
+    "lng": 8.67179
+   }
+  ]
+ },
+ "darmstadt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Eschollbrücker Straße",
+    "stadtteil": "Darmstadt-Bessungen",
+    "unfaelle": 29,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 49.85898,
+    "lng": 8.63502
+   },
+   {
+    "strasse": "Martin-Luther-King-Ring",
+    "stadtteil": "Gewerbegebiet Nord",
+    "unfaelle": 29,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 49.88972,
+    "lng": 8.6533
+   },
+   {
+    "strasse": "B 26",
+    "stadtteil": "Ost",
+    "unfaelle": 21,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.86779,
+    "lng": 8.68777
+   }
+  ]
+ },
+ "offenbach": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Strahlenbergerstraße",
+    "stadtteil": "Kaiserlei",
+    "unfaelle": 29,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.10704,
+    "lng": 8.73787
+   },
+   {
+    "strasse": "Schloßstraße",
+    "stadtteil": "Hochschule für Gestaltung",
+    "unfaelle": 21,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.10571,
+    "lng": 8.76448
+   },
+   {
+    "strasse": "Bleichstraße",
+    "stadtteil": "Wilhelmschule",
+    "unfaelle": 18,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.10314,
+    "lng": 8.76878
+   }
+  ]
+ },
+ "ludwigshafen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Sternstraße",
+    "stadtteil": "Friesenheim",
+    "unfaelle": 34,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 49.49155,
+    "lng": 8.3922
+   },
+   {
+    "strasse": "Sternstraße",
+    "stadtteil": "Oggersheim",
+    "unfaelle": 27,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.48899,
+    "lng": 8.38333
+   },
+   {
+    "strasse": "Maudacher Straße",
+    "stadtteil": "Gartenstadt",
+    "unfaelle": 23,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.45795,
+    "lng": 8.40317
+   }
+  ]
+ },
+ "trier": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Zurmaiener Straße",
+    "stadtteil": "Nells Ländchen",
+    "unfaelle": 31,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.77303,
+    "lng": 6.66657
+   },
+   {
+    "strasse": "Martinsufer",
+    "stadtteil": "Altstadt",
+    "unfaelle": 21,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.7621,
+    "lng": 6.63322
+   },
+   {
+    "strasse": "Südallee",
+    "stadtteil": "Altstadt",
+    "unfaelle": 18,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.74989,
+    "lng": 6.63722
+   }
+  ]
+ },
+ "mainz": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Alicenplatz",
+    "stadtteil": "Mainz-Neustadt",
+    "unfaelle": 34,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.0002,
+    "lng": 8.26051
+   },
+   {
+    "strasse": "Binger Straße",
+    "stadtteil": "Hartenberg-Münchfeld",
+    "unfaelle": 26,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.99787,
+    "lng": 8.25632
+   },
+   {
+    "strasse": "Große Bleiche",
+    "stadtteil": "Mainz-Altstadt",
+    "unfaelle": 20,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.00091,
+    "lng": 8.26512
+   }
+  ]
+ },
+ "koblenz": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Saarplatz",
+    "stadtteil": "Rauental",
+    "unfaelle": 36,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.36099,
+    "lng": 7.58831
+   },
+   {
+    "strasse": "Friedrich-Ebert-Ring",
+    "stadtteil": "Mitte",
+    "unfaelle": 27,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 50.355,
+    "lng": 7.59389
+   },
+   {
+    "strasse": "Thielenstraße",
+    "stadtteil": "Goldgrube",
+    "unfaelle": 17,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.35796,
+    "lng": 7.58849
+   }
+  ]
+ },
+ "pforzheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Goethestraße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 33,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 48.89095,
+    "lng": 8.69519
+   },
+   {
+    "strasse": "Habermehlstraße",
+    "stadtteil": "Brötzingen",
+    "unfaelle": 28,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 48.88936,
+    "lng": 8.6669
+   },
+   {
+    "strasse": "A 8",
+    "stadtteil": "Nordstadt",
+    "unfaelle": 17,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 48.91508,
+    "lng": 8.71331
+   }
+  ]
+ },
+ "ulm": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Mörikestraße",
+    "stadtteil": "Weststadt",
+    "unfaelle": 34,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 48.40182,
+    "lng": 9.97907
+   },
+   {
+    "strasse": "Blaubeurer Straße",
+    "stadtteil": "Söflingen",
+    "unfaelle": 21,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 48.40124,
+    "lng": 9.95698
+   },
+   {
+    "strasse": "Mähringer Weg",
+    "stadtteil": "Eselsberg",
+    "unfaelle": 16,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 48.40686,
+    "lng": 9.97311
+   }
+  ]
+ },
+ "karlsruhe": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Oststadtkreisel",
+    "stadtteil": "Südstadt",
+    "unfaelle": 42,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.00302,
+    "lng": 8.4241
+   },
+   {
+    "strasse": "Adenauerring",
+    "stadtteil": "Nordstadt",
+    "unfaelle": 33,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.02335,
+    "lng": 8.39664
+   },
+   {
+    "strasse": "Kaiserstraße",
+    "stadtteil": "Innenstadt-West",
+    "unfaelle": 31,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.00998,
+    "lng": 8.39535
+   }
+  ]
+ },
+ "heilbronn": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Austraße",
+    "stadtteil": "Heilbronn-Äussere Bezirke",
+    "unfaelle": 22,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.16911,
+    "lng": 9.21897
+   },
+   {
+    "strasse": "Grimmstraße",
+    "stadtteil": "Heilbronn-Äussere Bezirke",
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.158,
+    "lng": 9.22544
+   },
+   {
+    "strasse": "Turmstraße",
+    "stadtteil": "Heilbronn-Innenstadt",
+    "unfaelle": 19,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.14599,
+    "lng": 9.21884
+   }
+  ]
+ },
+ "stuttgart": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Friedrichstraße",
+    "stadtteil": "Hauptbahnhof",
+    "unfaelle": 35,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 48.78418,
+    "lng": 9.17872
+   },
+   {
+    "strasse": "Waiblinger Straße",
+    "stadtteil": "Kurpark",
+    "unfaelle": 33,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 48.80371,
+    "lng": 9.21946
+   },
+   {
+    "strasse": "Charlottenplatz",
+    "stadtteil": "Rathaus",
+    "unfaelle": 28,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 48.77597,
+    "lng": 9.1829
+   }
+  ]
+ },
+ "heidelberg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bismarckstraße",
+    "stadtteil": "Bergheim",
+    "unfaelle": 30,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.41111,
+    "lng": 8.69237
+   },
+   {
+    "strasse": "Willy-Brandt-Platz",
+    "stadtteil": "Weststadt",
+    "unfaelle": 27,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.40397,
+    "lng": 8.67739
+   },
+   {
+    "strasse": "Speyerer Straße",
+    "stadtteil": "Alte Stadtgärtnerei",
+    "unfaelle": 24,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.40012,
+    "lng": 8.67774
+   }
+  ]
+ },
+ "freiburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Basler Straße",
+    "stadtteil": "Unterwiehre-Nord",
+    "unfaelle": 33,
+    "schwerverletzte": 7,
+    "getoetete": 0,
+    "lat": 47.98616,
+    "lng": 7.83605
+   },
+   {
+    "strasse": "Schwabentorring",
+    "stadtteil": "Altstadt",
+    "unfaelle": 32,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 47.99194,
+    "lng": 7.85413
+   },
+   {
+    "strasse": "Engesserstraße",
+    "stadtteil": "Brühl",
+    "unfaelle": 30,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 48.022,
+    "lng": 7.85104
+   }
+  ]
+ },
+ "mannheim": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Kunststraße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.48381,
+    "lng": 8.47381
+   },
+   {
+    "strasse": "Frankenthaler Straße",
+    "stadtteil": "Sandhofen",
+    "unfaelle": 24,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.5499,
+    "lng": 8.44959
+   },
+   {
+    "strasse": "Kurpfalzkreisel",
+    "stadtteil": "Oststadt",
+    "unfaelle": 23,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.49301,
+    "lng": 8.47161
+   }
+  ]
+ },
+ "reutlingen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Am Heilbrunnen",
+    "stadtteil": "Sondelfingen",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 48.5111,
+    "lng": 9.22842
+   },
+   {
+    "strasse": "Eberhardstraße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 48.49305,
+    "lng": 9.20704
+   },
+   {
+    "strasse": "Bantlinstraße",
+    "stadtteil": null,
+    "unfaelle": 16,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 48.4936,
+    "lng": 9.1936
+   }
+  ]
+ },
+ "nuernberg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Rothenburger Straße",
+    "stadtteil": "Sündersbühl",
+    "unfaelle": 42,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.44485,
+    "lng": 11.05503
+   },
+   {
+    "strasse": "Äußere Bayreuther Straße",
+    "stadtteil": "Schoppershof",
+    "unfaelle": 31,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.4729,
+    "lng": 11.10335
+   },
+   {
+    "strasse": "Dianastraße",
+    "stadtteil": "Dianastraße",
+    "unfaelle": 30,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.42794,
+    "lng": 11.06554
+   }
+  ]
+ },
+ "muenchen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bad-Schachener-Straße",
+    "stadtteil": "Ramersdorf",
+    "unfaelle": 44,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 48.12028,
+    "lng": 11.62015
+   },
+   {
+    "strasse": "Elsenheimerstraße",
+    "stadtteil": "Friedenheim",
+    "unfaelle": 44,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 48.14126,
+    "lng": 11.51864
+   },
+   {
+    "strasse": "Fürstenrieder Straße",
+    "stadtteil": "Am Waldfriedhof",
+    "unfaelle": 42,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 48.11209,
+    "lng": 11.50235
+   }
+  ]
+ },
+ "augsburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Schmiedgasse",
+    "stadtteil": "Jakobervorstadt - Nord",
+    "unfaelle": 45,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 48.37065,
+    "lng": 10.9007
+   },
+   {
+    "strasse": "Stadtbachstraße",
+    "stadtteil": "Rechts der Wertach",
+    "unfaelle": 43,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 48.38175,
+    "lng": 10.90226
+   },
+   {
+    "strasse": "Inverness-Allee",
+    "stadtteil": "Spickel",
+    "unfaelle": 36,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 48.35488,
+    "lng": 10.90852
+   }
+  ]
+ },
+ "ingolstadt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "B 16a",
+    "stadtteil": "Mailing",
+    "unfaelle": 26,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 48.77231,
+    "lng": 11.4635
+   },
+   {
+    "strasse": "Schillerstraße",
+    "stadtteil": "Nordost",
+    "unfaelle": 23,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 48.76677,
+    "lng": 11.43929
+   },
+   {
+    "strasse": "Theodor-Heuss-Straße",
+    "stadtteil": "Nordost",
+    "unfaelle": 23,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 48.7792,
+    "lng": 11.43453
+   }
+  ]
+ },
+ "fuerth": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Würzburger Straße",
+    "stadtteil": "Hardhöhe",
+    "unfaelle": 16,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.4833,
+    "lng": 10.96313
+   },
+   {
+    "strasse": "Karolinenstraße",
+    "stadtteil": "Südstadt Industriegebiet",
+    "unfaelle": 14,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.46696,
+    "lng": 11.00058
+   },
+   {
+    "strasse": "Karlstraße",
+    "stadtteil": "Nördliche Südstadt",
+    "unfaelle": 14,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.46693,
+    "lng": 10.99353
+   }
+  ]
+ },
+ "wuerzburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Berliner Platz",
+    "stadtteil": "Altstadt",
+    "unfaelle": 31,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.79801,
+    "lng": 9.94321
+   },
+   {
+    "strasse": "Luitpoldstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 25,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.79813,
+    "lng": 9.92099
+   },
+   {
+    "strasse": "Domstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 22,
+    "schwerverletzte": 2,
+    "getoetete": 1,
+    "lat": 49.79309,
+    "lng": 9.92867
+   }
+  ]
+ },
+ "erlangen": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Goethestraße",
+    "stadtteil": "Markgrafenstadt",
+    "unfaelle": 24,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.59414,
+    "lng": 11.00355
+   },
+   {
+    "strasse": "Frauenauracher Straße",
+    "stadtteil": "Industriehafen",
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.5853,
+    "lng": 10.96811
+   },
+   {
+    "strasse": "Nürnberger Straße",
+    "stadtteil": "Rathausplatz",
+    "unfaelle": 17,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.58884,
+    "lng": 11.00698
+   }
+  ]
+ },
+ "regensburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Hemauerstraße",
+    "stadtteil": "Innenstadt",
+    "unfaelle": 23,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.01328,
+    "lng": 12.10183
+   },
+   {
+    "strasse": "Galgenbergstraße",
+    "stadtteil": "Galgenberg",
+    "unfaelle": 19,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 49.01003,
+    "lng": 12.10185
+   },
+   {
+    "strasse": "Vilsstraße",
+    "stadtteil": "Weichs",
+    "unfaelle": 16,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 49.02709,
+    "lng": 12.12322
+   }
+  ]
+ },
+ "saarbruecken": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Westspange",
+    "stadtteil": "Malstatt",
+    "unfaelle": 25,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.24307,
+    "lng": 6.98212
+   },
+   {
+    "strasse": "Dudweilerstraße",
+    "stadtteil": "Saint Johann",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 49.23808,
+    "lng": 6.99749
+   },
+   {
+    "strasse": "Stengelstraße",
+    "stadtteil": "Alt-Saarbrücken",
+    "unfaelle": 18,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 49.23337,
+    "lng": 6.99037
+   }
+  ]
+ },
+ "berlin": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Warschauer Straße",
+    "stadtteil": "Friedrichshain",
+    "unfaelle": 136,
+    "schwerverletzte": 16,
+    "getoetete": 0,
+    "lat": 52.51582,
+    "lng": 13.45398
+   },
+   {
+    "strasse": "A 100",
+    "stadtteil": "Charlottenburg-Nord",
+    "unfaelle": 98,
+    "schwerverletzte": 11,
+    "getoetete": 0,
+    "lat": 52.53824,
+    "lng": 13.32616
+   },
+   {
+    "strasse": "Mehringbrücke",
+    "stadtteil": "Kreuzberg",
+    "unfaelle": 84,
+    "schwerverletzte": 11,
+    "getoetete": 0,
+    "lat": 52.49791,
+    "lng": 13.38893
+   }
+  ]
+ },
+ "potsdam": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Zeppelinstraße",
+    "stadtteil": "Brandenburger Vorstadt",
+    "unfaelle": 42,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 52.39683,
+    "lng": 13.04364
+   },
+   {
+    "strasse": "Humboldtstraße",
+    "stadtteil": "Nördliche Innenstadt",
+    "unfaelle": 26,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 52.39414,
+    "lng": 13.0609
+   },
+   {
+    "strasse": "Friedrich-Ebert-Straße",
+    "stadtteil": "Nördliche Innenstadt",
+    "unfaelle": 25,
+    "schwerverletzte": 3,
+    "getoetete": 1,
+    "lat": 52.39986,
+    "lng": 13.0576
+   }
+  ]
+ },
+ "cottbus": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Bahnhofstraße",
+    "stadtteil": "Mitte",
+    "unfaelle": 19,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 51.75717,
+    "lng": 14.328
+   },
+   {
+    "strasse": "Straße der Jugend",
+    "stadtteil": "Spremberger Vorstadt",
+    "unfaelle": 19,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 51.74899,
+    "lng": 14.33246
+   },
+   {
+    "strasse": "An der Priormühle",
+    "stadtteil": "Madlow",
+    "unfaelle": 18,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 51.72835,
+    "lng": 14.34115
+   }
+  ]
+ },
+ "rostock": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Warnowallee",
+    "stadtteil": "Lütten Klein",
+    "unfaelle": 26,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 54.13816,
+    "lng": 12.05725
+   },
+   {
+    "strasse": "Hans-Sachs-Allee",
+    "stadtteil": "Hansaviertel",
+    "unfaelle": 17,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 54.0924,
+    "lng": 12.09895
+   },
+   {
+    "strasse": "Lübecker Straße",
+    "stadtteil": "Kröpeliner-Tor-Vorstadt",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 54.09309,
+    "lng": 12.10815
+   }
+  ]
+ },
+ "schwerin": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Goethestraße",
+    "stadtteil": "Schweriner Altstadt",
+    "unfaelle": 18,
+    "schwerverletzte": 2,
+    "getoetete": 1,
+    "lat": 53.62725,
+    "lng": 11.41053
+   },
+   {
+    "strasse": "Wismarsche Straße",
+    "stadtteil": "Schweriner Altstadt",
+    "unfaelle": 17,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 53.63017,
+    "lng": 11.41021
+   },
+   {
+    "strasse": "Grevesmühlener Straße",
+    "stadtteil": "Lankow",
+    "unfaelle": 15,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 53.64704,
+    "lng": 11.37741
+   }
+  ]
+ },
+ "chemnitz": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Brückenstraße",
+    "stadtteil": "Zentrum",
+    "unfaelle": 34,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.83384,
+    "lng": 12.92649
+   },
+   {
+    "strasse": "Reichsstraße",
+    "stadtteil": "Kaßberg",
+    "unfaelle": 22,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.8279,
+    "lng": 12.91227
+   },
+   {
+    "strasse": "Bahnhofstraße",
+    "stadtteil": "Zentrum",
+    "unfaelle": 18,
+    "schwerverletzte": 3,
+    "getoetete": 1,
+    "lat": 50.83116,
+    "lng": 12.9223
+   }
+  ]
+ },
+ "leipzig": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Johannisplatz",
+    "stadtteil": "Zentrum-Südost",
+    "unfaelle": 35,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.33818,
+    "lng": 12.38511
+   },
+   {
+    "strasse": "Martin-Luther-Ring",
+    "stadtteil": "Zentrum-West",
+    "unfaelle": 35,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.33625,
+    "lng": 12.37096
+   },
+   {
+    "strasse": "Peterssteinweg",
+    "stadtteil": "Zentrum-Süd",
+    "unfaelle": 30,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.33294,
+    "lng": 12.37364
+   }
+  ]
+ },
+ "dresden": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Fetscherstraße",
+    "stadtteil": "Johannstadt",
+    "unfaelle": 54,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 51.06005,
+    "lng": 13.77719
+   },
+   {
+    "strasse": "Sachsenplatz",
+    "stadtteil": "Johannstadt",
+    "unfaelle": 45,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.05591,
+    "lng": 13.75598
+   },
+   {
+    "strasse": "Antonstraße",
+    "stadtteil": "Innere Neustadt",
+    "unfaelle": 39,
+    "schwerverletzte": 7,
+    "getoetete": 0,
+    "lat": 51.06476,
+    "lng": 13.7418
+   }
+  ]
+ },
+ "magdeburg": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Universitätsplatz",
+    "stadtteil": "Altstadt",
+    "unfaelle": 43,
+    "schwerverletzte": 6,
+    "getoetete": 0,
+    "lat": 52.13911,
+    "lng": 11.63979
+   },
+   {
+    "strasse": "Breiter Weg",
+    "stadtteil": "Altstadt",
+    "unfaelle": 29,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.12096,
+    "lng": 11.628
+   },
+   {
+    "strasse": "Walther-Rathenau-Straße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 26,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 52.13925,
+    "lng": 11.63543
+   }
+  ]
+ },
+ "halle": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Rannischer Platz",
+    "stadtteil": "Südliche Innenstadt",
+    "unfaelle": 41,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.47395,
+    "lng": 11.96973
+   },
+   {
+    "strasse": "Delitzscher Straße",
+    "stadtteil": "Gebiet Der DB",
+    "unfaelle": 30,
+    "schwerverletzte": 4,
+    "getoetete": 0,
+    "lat": 51.47882,
+    "lng": 11.98625
+   },
+   {
+    "strasse": "Große Steinstraße",
+    "stadtteil": "Altstadt",
+    "unfaelle": 29,
+    "schwerverletzte": 5,
+    "getoetete": 0,
+    "lat": 51.48386,
+    "lng": 11.97007
+   }
+  ]
+ },
+ "erfurt": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Stauffenbergallee",
+    "stadtteil": "Daberstedt",
+    "unfaelle": 22,
+    "schwerverletzte": 1,
+    "getoetete": 0,
+    "lat": 50.9729,
+    "lng": 11.04271
+   },
+   {
+    "strasse": "Juri-Gagarin-Ring",
+    "stadtteil": "Altstadt",
+    "unfaelle": 18,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.97601,
+    "lng": 11.03866
+   },
+   {
+    "strasse": "Schlachthofstraße",
+    "stadtteil": "Johannesvorstadt",
+    "unfaelle": 16,
+    "schwerverletzte": 2,
+    "getoetete": 0,
+    "lat": 50.9839,
+    "lng": 11.03441
+   }
+  ]
+ },
+ "jena": {
+  "zeitraum": "2021–2025",
+  "quelle": "https://unfallatlas.statistikportal.de/",
+  "lizenz": "Statistische Ämter des Bundes und der Länder, Unfallatlas — Datenlizenz Deutschland 2.0",
+  "hotspots": [
+   {
+    "strasse": "Stadtrodaer Straße",
+    "stadtteil": "Wöllnitz",
+    "unfaelle": 16,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.90609,
+    "lng": 11.58945
+   },
+   {
+    "strasse": "Keßlerstraße",
+    "stadtteil": "Burgau",
+    "unfaelle": 15,
+    "schwerverletzte": 3,
+    "getoetete": 0,
+    "lat": 50.89858,
+    "lng": 11.5925
+   },
+   {
+    "strasse": "Stadtrodaer Straße",
+    "stadtteil": "Kernberge",
+    "unfaelle": 11,
+    "schwerverletzte": 0,
+    "getoetete": 0,
+    "lat": 50.92409,
+    "lng": 11.59048
+   }
+  ]
+ }
+}

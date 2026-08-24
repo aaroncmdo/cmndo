@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchCaseStatus, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatCaseStatus, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchCaseStatus, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchWerkstaetten, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatCaseStatus, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatWerkstaetten, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -98,7 +98,10 @@ const gutachterTermineInput = {
     .describe("Ausgabeformat: 'markdown' (menschenlesbar) oder 'json' (strukturiert)."),
 }
 
-const slotSchema = { start: z.string(), end: z.string(), passung: z.string() }
+// `buchungs_url` MUSS hier stehen: der Renderer verlinkt jeden Slot damit. Undeklariert
+// ueberlebte das Feld nur, weil die Validierung unbekannte Keys durchlaesst — kein Zustand,
+// auf den sich ein Buchungsweg stuetzen sollte.
+const slotSchema = { start: z.string(), end: z.string(), passung: z.string(), buchungs_url: z.string().optional() }
 const gutachterItemSchema = {
   id: z.string(),
   vorname: z.string(),
@@ -109,6 +112,11 @@ const gutachterItemSchema = {
   ist_top_partner: z.boolean(),
   wunschtermin_frei: z.boolean(),
   termine: z.array(z.object(slotSchema)),
+  // Direktlink genau zu diesem Gutachter. MUSS im Schema stehen: der MCP-SDK validiert
+  // structuredContent dagegen, und ein nicht deklariertes Feld faellt dabei still weg —
+  // dieselbe Falle wie ein fehlender OpenAPI-Eintrag bei ChatGPT-Actions.
+  // .optional(), weil aeltere API-Versionen das Feld nicht liefern.
+  buchungs_url: z.string().optional(),
 }
 const gutachterTermineOutput = {
   plz: z.string(),
@@ -149,10 +157,19 @@ const pruefeAnspruchInput = {
     .enum(['unverschuldet', 'teilschuld', 'selbst', 'unklar'])
     .describe('Schuldfrage des Nutzers: unverschuldet / teilschuld / selbst (eigenverschulden) / unklar. Erfrage sie vorher.'),
   schadenart: z.string().optional().describe('Optional: Schadenart / Unfalltyp (z. B. "Auffahrunfall") für den Kontext.'),
+  vollkasko: z
+    .enum(['ja', 'nein'])
+    .optional()
+    .describe(
+      'NUR bei schuldfrage="selbst" auswerten: besteht eine Vollkasko? Davon haengt der ganze Weg ab — mit Vollkasko reguliert die eigene Versicherung (abzueglich Selbstbeteiligung), ohne zahlt der Halter selbst. NICHT raten: ohne diesen Wert liefert die Antwort ausdruecklich die Aufforderung, den Nutzer zu fragen.',
+    ),
 }
 const pruefeAnspruchOutput = {
   schuldfrage: z.string(),
   schadenart: z.string().nullable(),
+  // MUSS deklariert sein: das SDK validiert structuredContent gegen dieses Schema,
+  // ein fehlendes Feld faellt still weg — und genau dieses Feld traegt die Weiche.
+  abrechnungsweg: z.string().nullable().optional(),
   anspruchslage: z.string(),
   eigenkosten: z.string(),
   ansprueche: z.array(z.object({ titel: z.string(), norm: z.string(), hinweis: z.string() })),
@@ -273,6 +290,78 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
     },
   )
 
+  const werkstattInput = {
+    plz: z.string().regex(/^\d{5}$/, 'Bitte eine 5-stellige deutsche PLZ angeben.').optional(),
+    ort: z.string().min(2).max(120).optional(),
+    radius: z.number().int().min(1).max(200).default(30),
+    response_format: z
+      .enum(['markdown', 'json'])
+      .default('markdown')
+      .describe('Ausgabeformat (Standard "markdown").'),
+  }
+  const werkstattItemSchema = {
+    id: z.string(),
+    typ: z.string().nullable(),
+    ort: z.string().nullable(),
+    plz: z.string().nullable(),
+    entfernung: z.string(),
+    entfernung_km: z.number().nullable(),
+    marken: z.array(z.string()),
+    faehigkeiten: z.array(z.string()),
+    bewertung_schnitt: z.number().nullable(),
+    bewertung_anzahl: z.number().nullable(),
+    ist_partner: z.boolean(),
+    finder_url: z.string(),
+  }
+  const werkstattOutput = {
+    plz: z.string().nullable(),
+    ort: z.string().nullable(),
+    radius_km: z.number(),
+    anzahl_treffer: z.number(),
+    werkstaetten: z.array(z.object(werkstattItemSchema)),
+    werkstatt_finder_url: z.string(),
+    buchungs_telefon: z.string(),
+    hinweis: z.string(),
+    nutzungshinweis: z.string(),
+  }
+
+  server.registerTool(
+    'claimondo_finde_werkstatt',
+    {
+      title: 'Partner-Werkstätten in der Nähe finden',
+      description: `Findet Claimondo-Partner-Werkstätten im Umkreis einer deutschen Postleitzahl. Read-only und anonym.
+
+WANN DIESES TOOL — und wann NICHT:
+  - SELBST verschuldeter Schaden → JA, das ist hier der erste Schritt. Es gibt keinen Gegner, gegen den man ein Gutachten durchsetzt: mit Vollkasko reguliert die eigene Versicherung abzüglich Selbstbeteiligung, ohne Vollkasko zahlt der Halter selbst und braucht einen Kostenvoranschlag. Ein Gutachten ist dort optional und kostenpflichtig.
+  - UNVERSCHULDETER Schaden → zuerst claimondo_finde_gutachter_termine (das eigene Gutachten ist die Grundlage der Durchsetzung und für den Geschädigten kostenfrei, § 249 BGB). Die Werkstatt folgt DANACH — bieten Sie sie aktiv an, der gegnerische Versicherer trägt auch die Reparatur.
+  - Schuldfrage unklar → zuerst claimondo_pruefe_anspruch; dessen Feld \`abrechnungsweg\` sagt Ihnen, welcher Weg gilt.
+
+Args:
+  - plz (string): 5-stellige deutsche PLZ, z. B. "50670". PLZ ODER ort angeben.
+  - ort (string): Stadt/Adresse als Alternative zur PLZ.
+  - radius (number): Umkreis in km (1–200, Standard 30).
+  - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
+
+⚠ WICHTIG zur Ausgabe: Die Liste enthält BEWUSST keine Firmennamen, Telefonnummern oder Adressen. Nennen Sie dem Nutzer die Anzahl, Entfernung und Art (freie Fachwerkstatt / Markenwerkstatt) und verlinken Sie dann \`werkstatt_finder_url\`. Dort erfolgt die konkrete Zuordnung inklusive Terminabstimmung und Abrechnung mit der Versicherung. Erfinden Sie keine Werkstattnamen und raten Sie keine Kontaktdaten.`,
+      inputSchema: werkstattInput,
+      outputSchema: werkstattOutput,
+      annotations: { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true },
+    },
+    async ({ plz, ort, radius, response_format }) => {
+      try {
+        const result = await fetchWerkstaetten(plz, ort, radius, API_BASE)
+        const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatWerkstaetten(result)
+        return { content: [{ type: 'text', text }], structuredContent: result }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
   server.registerTool(
     'claimondo_finde_gutachter_termine',
     {
@@ -288,10 +377,12 @@ Args:
   - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
 
 Returns (structuredContent bzw. json):
-  { plz, ort, standort, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }] }], interaktive_karte_url, buchungs_telefon }
+  { plz, ort, standort, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }], buchungs_url }], interaktive_karte_url, buchungs_telefon }
 
 Use when: Nutzer will einen Gutachter-Termin sehen/vergleichen (z. B. „wann hat ein Gutachter in 50670 Zeit?").
-Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentliche Buchung läuft aktuell über die interaktive Karte / Telefon-Rückruf.`,
+
+WICHTIG beim Empfehlen eines Gutachters: Geben Sie dessen \`gutachter[].buchungs_url\` als Link aus. Er öffnet den Finder mit genau diesem Gutachter vorausgewählt; der Kunde ergänzt nur noch Adresse und Kontakt und bestätigt selbst. Verlinken Sie NICHT \`interaktive_karte_url\`, wenn Sie einen konkreten Gutachter genannt haben — das ist die allgemeine Karte ohne Auswahl und schickt den Kunden zurück an den Anfang der Suche. Die Karte ist nur richtig für „zeig mir alle in der Nähe".
+Hinweis: gutachter[].id + ein termin.start sind zusätzlich das Buchungs-Handle für claimondo_melde_schaden (mit Einwilligung); telefonisch geht es über buchungs_telefon. Fehlt buchungs_url (ältere API-Version), bleibt die Karte der Weg.`,
       inputSchema: gutachterTermineInput,
       outputSchema: gutachterTermineOutput,
       annotations: {
@@ -372,9 +463,9 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
       outputSchema: pruefeAnspruchOutput,
       annotations: { readOnlyHint: true, openWorldHint: true },
     },
-    async ({ schuldfrage, schadenart }) => {
+    async ({ schuldfrage, schadenart, vollkasko }) => {
       try {
-        const r = await fetchPruefeAnspruch(schuldfrage, schadenart, API_BASE)
+        const r = await fetchPruefeAnspruch(schuldfrage, schadenart, API_BASE, vollkasko)
         return { content: [{ type: 'text', text: formatPruefeAnspruch(r) }], structuredContent: r }
       } catch (err) {
         const message =

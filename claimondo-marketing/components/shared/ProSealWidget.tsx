@@ -46,7 +46,25 @@ const PROSEAL_CONFIG = {
   showReviews: true,
   hideDate: true,
   hideName: false,
-  hideOnMobile: false,
+  // Mobil AUS. Gemessen 24.08.2026 per document.elementFromPoint auf der H1-Flaeche
+  // von fuenf Seiten (/, /kosten-kfz-gutachten, /unfall-was-tun-als-geschaedigter,
+  // /kfz-haftpflicht-schaden, /check):
+  //
+  //   390px Viewport   H1 zu 15-33 % verdeckt
+  //   320px Viewport   H1 zu  7-33 % verdeckt
+  //   1440px Desktop   0 %
+  //
+  // Das ausgeklappte Siegel misst 260x232 px und sitzt per `top: 340px`
+  // (globals.css) mitten im Hero. Auf Desktop steht daneben genug Platz, auf
+  // Mobil schneidet es die Kernbotschaft an: „Unverschulde[t im] Unfall?".
+  // Eine andere Position loest das nicht — bei 40 % der Viewport-Breite und
+  // 35 % der Hoehe gibt es keine Stelle, an der es nichts Wichtiges verdeckt.
+  //
+  // Das Trust-Signal geht dadurch nicht verloren: <ProvenExpertSiegel> rendert
+  // Note und Anzahl serverseitig im Claimondo-Design (HomeTrustStripSection).
+  // Nebeneffekt: auf Mobil entfaellt der Drittanbieter-Request an
+  // s.provenexpert.net — genau dort, wo die Verbindung am haeufigsten schlecht ist.
+  hideOnMobile: true,
   bottom: '30px',
   stickyToSide: 'right',
   googleStars: true,

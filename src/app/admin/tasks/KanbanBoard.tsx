@@ -30,6 +30,7 @@ type Task = {
   created_at: string
   entity_type: string | null
   entity_id: string | null
+  auto_erstellt: boolean | null
   auto_resolved_am: string | null
   auto_resolved_grund: string | null
   claim_id: string | null
@@ -55,6 +56,9 @@ const TYP_LABEL: Record<string, string> = {
   'sv-termin': 'SV Termin',
   'zahlung-pruefen': 'Zahlung prüfen',
   sv_basic_claim_review: 'Basic-Freigabe',
+  // Kommt vom taeglichen Cron `cron_konsistenz_check()`, nicht aus TASK_TYPES —
+  // solche Aufgaben legt niemand von Hand an, deshalb bewusst NICHT im Anlage-Dropdown.
+  konsistenz_check: 'Konsistenz-Prüfung',
 }
 
 // Token-Audit-LEAVE: TYP_COLOR ist Task-TYP-Identitaet (Kategorie-Palette), KEIN Status.
@@ -70,6 +74,8 @@ const TYP_COLOR: Record<string, string> = {
   'sv-termin': 'bg-claimondo-shield/[0.15] text-claimondo-ondo',
   'zahlung-pruefen': 'bg-amber-50 text-amber-600',
   sv_basic_claim_review: 'bg-amber-50 text-amber-700',
+  // Claimondo-Ton statt roher Tailwind-Skala — kein neuer Verstoss gegen den Status-Ratchet.
+  konsistenz_check: 'bg-claimondo-navy/10 text-claimondo-navy',
 }
 
 const TASK_TYPES = [
@@ -165,6 +171,7 @@ export default function KanbanBoard({
   admins,
   reassignCandidates = [],
   executorEnabled = false,
+  historieGekuerzt = false,
 }: {
   tasks: Task[]
   faelle: Fall[]
@@ -175,6 +182,8 @@ export default function KanbanBoard({
   admins: Admin[]
   reassignCandidates?: ReassignCandidate[]
   executorEnabled?: boolean
+  /** Erledigte wurden nur als Ausschnitt geladen (s. Seite) — wird in der Kopfzeile vermerkt. */
+  historieGekuerzt?: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -186,8 +195,22 @@ export default function KanbanBoard({
   // AAR-620/612: useMemo damit visibleTasks nicht bei jedem Render als neue
   // Array-Referenz erzeugt wird — das hat die Sync-Schleife unten in eine
   // Endlos-Rerender-Loop gezwungen (React Error #301).
+  //
+  // 20.08.2026 — AUSNAHME fuer auto-erstellte Aufgaben: Der Filter sollte die
+  // „Abkommen"/Alt-System-Eintraege verstecken (s. Kopfkommentar). Die gibt es nicht
+  // mehr — gemessen: von 68 Aufgaben ohne jeden Objekt-Bezug (weder fall_id noch
+  // lead_id noch entity_id) sind **alle 68** `auto_erstellt`. Der Filter blendete
+  // damit ausschliesslich SYSTEM-MELDUNGEN aus, also das Gegenteil seiner Absicht:
+  // 63 offene, darunter `reliability`, `partner_aktivierung` und der taegliche
+  // `konsistenz_check`. Ein Waechter, dessen Befund niemand sieht, ist kein Waechter.
+  //
+  // Manuell angelegte Aufgaben ohne Bezug bleiben ausgeblendet — dafuer war der
+  // Filter da, und dabei bleibt es.
   const linked = useMemo(
-    () => tasks.filter((t) => resolveObjectLink(t, fallMap, leadMap, svMap) !== null),
+    () =>
+      tasks.filter(
+        (t) => t.auto_erstellt === true || resolveObjectLink(t, fallMap, leadMap, svMap) !== null,
+      ),
     [tasks, fallMap, leadMap, svMap],
   )
   const visibleTasks = useMemo(
@@ -289,6 +312,9 @@ export default function KanbanBoard({
             {tasks.length !== linked.length
               ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
               : ''}
+            {/* Offene Aufgaben sind vollstaendig geladen, die Historie bewusst nicht —
+                das gehoert dazugesagt, sonst haelt man die Erledigt-Spalte fuer komplett. */}
+            {historieGekuerzt ? ' · Erledigte: nur die neuesten' : ''}
           </p>
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 text-caption text-claimondo-ondo cursor-pointer select-none">
@@ -357,7 +383,7 @@ export default function KanbanBoard({
                               >
                                 <TaskCard
                                   task={task}
-                                  link={resolveObjectLink(task, fallMap, leadMap, svMap)!}
+                                  link={resolveObjectLink(task, fallMap, leadMap, svMap)}
                                   adminMap={adminMap}
                                   onDelete={handleDelete}
                                   reassignCandidates={reassignCandidates}
@@ -404,7 +430,13 @@ function TaskCard({
   executorEnabled = false,
 }: {
   task: Task
-  link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
+  /**
+   * null = Aufgabe ohne verlinkbares Objekt (System-Meldungen wie `konsistenz_check`
+   * oder `reliability`). Vor #5457 konnte das nicht vorkommen, weil der Filter solche
+   * Aufgaben gar nicht durchliess — die Karte trug deshalb eine Non-null-Assertion.
+   * Seit die System-Meldungen sichtbar sind, ist `null` ein regulaerer Fall.
+   */
+  link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' } | null
   adminMap: Record<string, string>
   onDelete: (taskId: string) => void
   reassignCandidates: ReassignCandidate[]
@@ -480,7 +512,12 @@ function TaskCard({
       )}
 
       {/* AAR-154: Prominenter Objekt-Link statt früher nur dem Fall-Label-Span.
-          onClick stoppt propagation damit das Drag-Handle nicht auslöst. */}
+          onClick stoppt propagation damit das Drag-Handle nicht auslöst.
+          ⚠ `link` kann null sein (System-Meldungen ohne Objekt-Bezug). Ohne diese Abfrage
+          stirbt die GANZE Seite an „Cannot read properties of null (reading 'href')",
+          nicht nur die eine Karte — genau so ist /admin/aufgaben/alle nach #5457 auf
+          prod ausgefallen. */}
+      {link && (
       <Link
         href={link.href}
         onClick={(e) => e.stopPropagation()}
@@ -504,6 +541,7 @@ function TaskCard({
         <span className="text-caption uppercase tracking-wider text-claimondo-ondo/70">{link.kind}:</span>
         <span className="text-body-xs font-medium truncate">{link.label}</span>
       </Link>
+      )}
 
       <div className="flex items-center justify-between gap-2 text-body-xs">
         <div className="flex items-center gap-3">

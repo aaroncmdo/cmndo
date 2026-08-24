@@ -1,8 +1,12 @@
 import { localeAlternates } from '@/lib/seo/alternates'
+import { titelMitZusatz } from '@/lib/seo/title'
+import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
+import { getUnfallhotspots, hotspotOrt, hotspotSatz } from '@/lib/kfz-gutachter/unfallhotspots'
+import { getVerkehrsmengen, zaehlstelleSatz } from '@/lib/kfz-gutachter/verkehrsmengen'
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -10,6 +14,7 @@ import {
 } from 'lucide-react'
 import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { NaechsterTerminHinweis } from '@/components/gutachter-finden/NaechsterTerminHinweis'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -30,6 +35,8 @@ import {
   getStadtByName, getStadtBySlug,
   type LokaleFaq, type Stadt,
 } from '@/lib/kfz-gutachter/staedte'
+import { stadtLastModifiedISO } from '@/lib/kfz-gutachter/freshness'
+import { getAmtsdaten, pkwJeTausendEinwohner } from '@/lib/kfz-gutachter/amtsdaten'
 import { ladeLokalinhalt } from '@/lib/kfz-gutachter/lokalinhalt'
 import { naechsteStaedte } from '@/lib/kfz-gutachter/nachbarstaedte'
 import { finderHrefFuerStadt } from '@/lib/kfz-gutachter/finder-link'
@@ -80,8 +87,46 @@ export async function generateMetadata({
   const s = getStadtBySlug(stadt)
   if (!s) return { title: 'Stadt nicht gefunden' }
 
-  const title = `Kfz-Gutachter ${s.name} — Unabhängig & kostenfrei nach Unfall · Claimondo`
-  const description = `Unabhängiger Kfz-Sachverständiger ${s.h1Anker} nach Unfall. Zertifizierte Partner, Termin unter 48 h, 0 € bei unverschuldetem Unfall (§249 BGB).`
+  // Title OHNE Brand-Suffix — das kam aus #5352 ("doppelter Brand im Title"),
+  // weil das Layout den Marken-Namen bereits anhaengt. Nicht zurueckdrehen.
+  //
+  // "Unabhaengig & " ist am 18.08. entfallen (Aaron-Entscheidung): mit dem
+  // Zusatz lagen ALLE 158 Stadt-Titel ueber 60 Zeichen (Median 72), also
+  // jenseits dessen, was Google in der Anzeige zeigt. Die Aussage bleibt sonst
+  // unveraendert: "unabhaengig" steht weiterhin in der Description und 7x im
+  // Seitentext (auf /kfz-gutachter/koeln nachgezaehlt) — nur nicht in der H1,
+  // die ist die Conversion-Headline "Unfall gehabt?".
+  //
+  // KORREKTUR 20.08.: hier stand, die Restlichen seien lange Ortsnamen, "die
+  // sich nicht weiter kuerzen lassen". Der ORTSNAME nicht — der ZUSATZ schon.
+  // Gemessen auf prod: 46 der 173 Stadtseiten (26,6 %) lagen ueber 60, alle
+  // wegen langer Ortsnamen ("Ludwigshafen am Rhein", 21 Zeichen). Statt den
+  // Zusatz fuer ALLE zu opfern oder ihn bei jedem Vierten abschneiden zu
+  // lassen, waehlt `titelMitZusatz` je Stadt die laengste Fassung, die noch
+  // vollstaendig angezeigt wird. Die Kernaussage "kostenfrei" bleibt damit
+  // ueberall erhalten — nur "nach Unfall" faellt bei den langen Namen weg.
+  const title = titelMitZusatz(`Kfz-Gutachter ${s.name}`, [
+    ' — kostenfrei nach Unfall',
+    ' — kostenfrei',
+    '',
+  ])
+
+  // Social-Vorschauen (Facebook/LinkedIn/WhatsApp) zeigen deutlich mehr Zeichen
+  // als die Suchergebnisliste — dort bleibt die vollstaendige Aussage stehen,
+  // auch bei langen Ortsnamen. Gleiches Muster wie in /wissen/[slug].
+  const ogTitle = `Kfz-Gutachter ${s.name} — kostenfrei nach Unfall`
+
+  // Die Beschreibung war bis 18.08.2026 fuer JEDE Stadt derselbe Satz mit
+  // ausgetauschtem Ortsnamen — bei 173 Seiten ein Duplicate-Signal. Sie zog
+  // ausserdem die freigegebene Ortstiefe nicht heran: die Seite zeigte
+  // Stadtbezirke, die Suchergebnis-Vorschau nicht.
+  //
+  // Dieselbe Vorrang-Regel wie im Seiten-Render unten (Hub-Daten schlagen DB),
+  // damit Vorschau und Seite denselben Ort beschreiben. `ladeLokalinhalt` ist
+  // per React-cache dedupliziert — der Render unten loest keinen zweiten
+  // Supabase-Call aus.
+  const tiefeFuerMeta = s.hyperlocal ?? (await ladeLokalinhalt(s.slug))
+  const description = stadtMetaDescription(s, tiefeFuerMeta)
 
   return {
     title,
@@ -101,7 +146,7 @@ export async function generateMetadata({
       locale: 'de_DE',
       siteName: 'Claimondo',
       url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
-      title,
+      title: ogTitle,
       description,
       images: [{ url: '/marketing-landing-koeln/hero-woman.png', width: 1200, height: 630, alt: `Kfz-Gutachter ${s.name}` }],
     },
@@ -200,9 +245,28 @@ export default async function KfzGutachterStadtPage({
   // um die es auf der Seite geht (P3-A5).
   const zeigtNrwKarte = s.bundesland === 'Nordrhein-Westfalen'
 
+  // Amtliche Unfallhäufungen (Unfallatlas). Statisch aus dem Repo, kein
+  // DB-Zugriff und keine Freigabe nötig — deshalb für 160 von 173 Städten
+  // sofort da, während der KI-Lokalinhalt mit ~2 Städten pro Nacht wächst.
+  // `null` für die 13 Städte ohne ausreichende Häufung: lieber keine Sektion
+  // als eine mit erfundener Substanz.
+  const unfalldaten = getUnfallhotspots(s.slug)
+  // Verkehrsmenge (BASt) — der Kontext zu den Unfallzahlen. Wird innerhalb der
+  // Unfall-Sektion gerendert, direkt unter dem Hinweis, dass die Unfalldaten
+  // die Verkehrsmenge NICHT kennen.
+  const verkehr = getVerkehrsmengen(s.slug)
+  // Gemessen 21.08.: 151 Städte haben beides, 11 nur Unfalldaten, 11 nur
+  // Verkehrsmengen — und KEINE hat gar nichts. Zusammen decken die zwei
+  // amtlichen Quellen also alle 173 Stadtseiten ab.
+  const hatUnfalldaten = Boolean(unfalldaten && unfalldaten.hotspots.length > 0)
+  const hatVerkehr = Boolean(verkehr && verkehr.zaehlstellen.length > 0)
+
   // i18n: async Server-Page (await params) → getTranslations, NICHT useTranslations
   // (i18n-Lesson 7). `ort` = h1Anker ("in Köln") bleibt deutsch (Eigenname, Doc 48 §5.3).
   const t = await getTranslations('kfz_gutachter_stadt')
+  // Fuer die Zahlformatierung in Sektion 4f: 36.636 (de) vs 36,636 (en).
+  // Hartcodiertes 'de-DE' waere auf fuenf von sechs Sprachversionen falsch.
+  const locale = await getLocale()
   const ort = s.h1Anker
 
   const heroBullets = t.raw('hero_bullets') as string[]
@@ -244,7 +308,18 @@ export default async function KfzGutachterStadtPage({
             totalTime: 'P32D',
             step: PROZESS_STEPS.map((p) => ({ '@type': 'HowToStep', position: p.nr, name: p.titel, text: p.text })),
           },
-          faqPageSchema(faqs),
+          // dateModified aus derselben Quelle wie die Sitemap. Ohne das trug
+          // KEINE der ~160 Stadt-Seiten ein Aktualitaets-Signal — GEO-Baseline
+          // 18.08.2026, Befund B2.
+          faqPageSchema(faqs, {
+            // Seit 19.08. das SPAETERE von gepflegtem Eintrag und tatsaechlicher
+            // Veroeffentlichung des Ortsinhalts. Die Map allein wird von Hand
+            // gepflegt — seit der Cron taeglich zwei Staedte aendert, traegt das
+            // nicht mehr: gemessen meldeten 169 von 182 Stadtseiten den
+            // Mai-Default, darunter Staedte mit Inhalt VON DEMSELBEN TAG.
+            dateModified: stadtLastModifiedISO(s.slug, freigegeben?.veroeffentlichtAm),
+            url: `/kfz-gutachter/${s.slug}`,
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -359,6 +434,16 @@ export default async function KfzGutachterStadtPage({
 
       {/* 3 — Trust-Strip */}
       <TrustStripSection kpis={trustKpis} methodikNote={t('trust_methodik')} />
+
+      {/* 3b — Naechster buchbarer Termin (server-gerendert = fuer Crawler UND LLMs lesbar).
+          Die Buchbarkeit stand bis 24.08.2026 NUR in der JSON-API und im cross-origin-
+          iframe des Finders — ein browsendes LLM sah auf dieser Seite null Termine und
+          konnte deshalb keinen nennen. Rendert `null`, wenn gerade nichts frei ist. */}
+      <section className="bg-claimondo-bg pt-10" aria-label="Terminverfügbarkeit">
+        <div className="mx-auto max-w-3xl px-5">
+          <NaechsterTerminHinweis stadt={s.name} />
+        </div>
+      </section>
 
       {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">
@@ -553,6 +638,129 @@ export default async function KfzGutachterStadtPage({
         </section>
       )}
 
+      {/* 4c-2 — Amtliche Unfallhäufungen (Unfallatlas der Statistischen Ämter).
+          BEWUSST EIGENE SEKTION, unabhängig von 4c: die Hotspots dort stammen
+          aus gepflegten Hub-Daten oder freigegebenem KI-Inhalt und existieren
+          für die wenigsten Städte. Diese hier gilt für 160 von 173 Städten
+          sofort — sie wartet auf keine Freigabe und kostet kein Token.
+          Sie ist damit für die meisten Seiten der erste echte Ortsinhalt. */}
+      {(hatUnfalldaten || hatVerkehr) && (
+        <section className="border-t border-claimondo-border bg-claimondo-bg py-14 sm:py-20">
+          <div className="mx-auto max-w-4xl px-4 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-claimondo-ondo">
+              {t('amtlich_eyebrow')}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold tracking-[-.02em] text-claimondo-navy sm:text-3xl">
+              {t('amtlich_h2', { ort: s.name })}
+            </h2>
+
+            {/* Beide Blöcke einzeln bedingt: 11 Städte haben NUR Unfalldaten,
+                11 andere NUR Verkehrsmengen — zusammen aber deckt eine der
+                beiden Quellen alle 173 Städte ab. Hinge der Verkehr in der
+                Unfall-Bedingung, sähen 11 Städte nichts, obwohl Daten da sind. */}
+            {/* `unfalldaten &&` steht hier zusätzlich zum Flag, damit TypeScript
+                selbst narrowt. Ein `!` wäre ein Versprechen über eine Bedingung,
+                die woanders steht — und bräche still, sobald das Flag anders
+                berechnet wird. */}
+            {unfalldaten && hatUnfalldaten && (
+              <>
+                <p className="mt-4 text-base leading-relaxed text-claimondo-shield">
+                  {t('amtlich_intro', { ort: s.name, zeitraum: unfalldaten.zeitraum })}
+                </p>
+
+                <ul className="mt-6 space-y-3">
+                  {unfalldaten.hotspots.map((h) => (
+                    <li
+                      key={`${h.lat},${h.lng}`}
+                      className="rounded-ios-md border border-claimondo-border bg-white p-5"
+                    >
+                      <p className="text-sm font-bold text-claimondo-navy">{hotspotOrt(h)}</p>
+                      <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                        {hotspotSatz(h, unfalldaten.zeitraum)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+
+                {/* Der Hinweis ist nicht Zierde: die Daten nennen keine Ursachen
+                    und keine Verkehrsmenge. Ohne diesen Satz liest sich eine hohe
+                    Zahl als Werturteil über die Stelle — genau die
+                    Tatsachenbehauptung, die der Quellenzwang verhindern soll. */}
+                <p className="mt-5 text-sm leading-relaxed text-claimondo-shield/85">
+                  {t('amtlich_hinweis')}
+                </p>
+                <p className="mt-3 text-xs text-claimondo-shield/75">
+                  {t.rich('amtlich_quelle', {
+                    lizenz: unfalldaten.lizenz,
+                    quelle: new URL(unfalldaten.quelle).hostname.replace(/^www\./, ''),
+                    // Tag-Syntax, nicht {platzhalter}: t.rich ersetzt <link>…</link>.
+                    // Eine Funktion für einen Variablen-Platzhalter greift nicht.
+                    link: (chunks) => (
+                      <a
+                        href={unfalldaten.quelle}
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        className="underline hover:text-claimondo-navy"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              </>
+            )}
+
+            {/* Verkehrsmenge (BASt) — bewusst HIER und nicht als eigene Sektion:
+                der Hinweis oben sagt, dass die Unfallzahlen die Verkehrsmenge
+                NICHT kennen. Genau die steht jetzt direkt darunter. Getrennt
+                platziert müsste der Leser die beiden Hälften selbst
+                zusammensetzen. */}
+            {hatVerkehr && verkehr && (
+              <div className="mt-8 border-t border-claimondo-border pt-6">
+                <h3 className="text-base font-bold text-claimondo-navy">{t('verkehr_h3')}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">
+                  {t('verkehr_intro', { ort: s.name, jahr: verkehr.jahr })}
+                </p>
+                <ul className="mt-4 space-y-3">
+                  {verkehr.zaehlstellen.map((z) => (
+                    <li key={`${z.strasse}-${z.name}`} className="rounded-ios-md bg-white p-4">
+                      <p className="text-sm font-bold text-claimondo-navy">
+                        {z.strasse}
+                        <span className="font-normal text-claimondo-shield">
+                          {' · '}
+                          {t('verkehr_zaehlstelle', {
+                            name: z.name,
+                            km: z.entfernungKm.toLocaleString(locale),
+                          })}
+                        </span>
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-claimondo-shield">
+                        {zaehlstelleSatz(z, locale)}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-3 text-xs text-claimondo-shield/75">
+                  {t.rich('verkehr_quelle', {
+                    lizenz: verkehr.lizenz,
+                    link: (chunks) => (
+                      <a
+                        href={verkehr.quelle}
+                        target="_blank"
+                        rel="nofollow noopener noreferrer"
+                        className="underline hover:text-claimondo-navy"
+                      >
+                        {chunks}
+                      </a>
+                    ),
+                  })}
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* 4d — Hyperlokal: Praktische Hilfe nach dem Unfall (öffentliche Stellen, Doc 38 §6.5) */}
       {s.hyperlocal?.oeffentlicheStellen && (
         <section className="bg-white py-16 sm:py-20" aria-labelledby="hilfe-stadt-heading">
@@ -608,6 +816,49 @@ export default async function KfzGutachterStadtPage({
           </div>
         </section>
       )}
+
+      {/* 4f — Amtlicher Fahrzeugbestand (KBA FZ 3).
+          ⭐ Rendert fuer ALLE Staedte, nicht nur die mit gepflegter oder
+          generierter Ortstiefe — das unterscheidet diese Sektion von 4b-4e.
+          Gemessen am 20.08.2026 waren 166 von 173 Stadtseiten untereinander
+          ~93 % identisch (nur 3 von 135 Textbloecken eigenstaendig). Harte
+          amtliche Zahlen wirken sofort auf allen Seiten, waehrend der
+          KI-Lokalinhalt mit ~2 Staedten pro Nacht nachwaechst. */}
+      {(() => {
+        const amt = getAmtsdaten(s.slug)
+        if (!amt) return null
+        const zahl = (n: number) => n.toLocaleString(locale)
+        const proTausend = pkwJeTausendEinwohner(amt.kfz.pkw, s.bevoelkerung)
+        return (
+          <section className="bg-white py-16 sm:py-20" aria-labelledby="kfzbestand-stadt-heading">
+            <div className="mx-auto max-w-3xl px-5">
+              <div className="text-center">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-claimondo-ondo">
+                  {t('kfzbestand_eyebrow')}
+                </p>
+                <h2
+                  id="kfzbestand-stadt-heading"
+                  className="mt-3 text-3xl font-extrabold text-claimondo-navy sm:text-4xl"
+                >
+                  {t('kfzbestand_h2', { stadt: s.name })}
+                </h2>
+              </div>
+              <div className="mt-8">
+                <AnswerCapsule quelle={t('kfzbestand_quelle', { stand: amt.stand })}>
+                  {t('kfzbestand_text', {
+                    stadt: s.name,
+                    pkw: zahl(amt.kfz.pkw),
+                    gewerblich: zahl(amt.kfz.pkwGewerblich),
+                    lkw: zahl(amt.kfz.lkw),
+                    kraftraeder: zahl(amt.kfz.kraftraeder),
+                  })}
+                  {proTausend !== null ? ` ${t('kfzbestand_quote', { proTausend: zahl(proTausend) })}` : ''}
+                </AnswerCapsule>
+              </div>
+            </div>
+          </section>
+        )
+      })()}
 
       {/* 4e — Spoke-Town: Anbindung an die Hub-City (Doc 38 P5, minimal-unique) */}
       {s.spokeLocal && (

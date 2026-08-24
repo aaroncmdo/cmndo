@@ -9,8 +9,9 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { buildLanguageAlternates } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -82,7 +83,10 @@ export default function LeadsGenerierenPage() {
               'Vorqualifizierte Geschädigten-Anfragen für verifizierte Kfz-Sachverständige. Zentrales Marketing, planbare Auftragslage, kein eigenes Werbebudget nötig.',
             url: `${SITE_URL}/gutachter-partner/leads-generieren`,
           }),
-          faqPageSchema(FAQS_SCHEMA),
+          faqPageSchema(FAQS_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/gutachter-partner/leads-generieren'),
+            url: '/gutachter-partner/leads-generieren',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Gutachter-Partner', url: '/gutachter-partner' },
@@ -176,7 +180,7 @@ export default function LeadsGenerierenPage() {
               {t('cta_partner')}
               <ChevronRight className="h-5 w-5" />
             </Link>
-            <a href="tel:+4922125906530" className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
+            <a href={`tel:${PHONE_E164}`} className="inline-flex items-center gap-2 rounded-ios-md border border-white/20 px-8 py-4 text-base font-semibold text-white/85 hover:border-white/40 hover:text-white">
               <Phone className="h-5 w-5" />
               {PHONE_DISPLAY}
             </a>

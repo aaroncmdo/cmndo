@@ -2,12 +2,15 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_COUNTRY } from '@/lib/seo/brand-constants'
+import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, HQ_COUNTRY, PHONE_DISPLAY } from '@/lib/seo/brand-constants'
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung',
   description:
     'Datenschutzerklärung der Claimondo GmbH gemäß Art. 13 und 14 DSGVO — Verarbeitung personenbezogener Daten bei Lead-Anfrage, Schadenabwicklung und Webseitenbesuch.',
+  // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
+  // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
+  alternates: { canonical: '/datenschutz' },
 }
 
 // Wiederverwendbare Link-Styles (Claimondo-Token, kein Inline-Hex).
@@ -113,8 +116,10 @@ export default function DatenschutzPage() {
               </dd>
               <dt className="font-semibold text-claimondo-navy">Geschäftsführer</dt>
               <dd>Nicolas Kitta, Aaron Benjamin Sprafke</dd>
+              {/* Verantwortlicher nach Art. 13 DSGVO — dieselbe Nummer wie
+                  ueberall sonst (Aaron-Entscheid 21.08.2026). */}
               <dt className="font-semibold text-claimondo-navy">Telefon</dt>
-              <dd>0221 25906530</dd>
+              <dd>{PHONE_DISPLAY}</dd>
               <dt className="font-semibold text-claimondo-navy">E-Mail (Datenschutz)</dt>
               <dd>
                 <a href="mailto:datenschutz@claimondo.de" className={linkCls}>

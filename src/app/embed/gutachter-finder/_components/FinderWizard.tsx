@@ -27,6 +27,7 @@ import { track, reservierungConversion, rueckrufConversion } from '../_lib/track
 import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
 import { resolveWerkstattOrt } from './werkstatt-ort'
+import { TeilnahmeHinweis } from '@/components/gewinnspiel/TeilnahmeHinweis'
 import type {
   DeadPinOeffentlich,
   OeffentlichesSvProfil,
@@ -83,6 +84,29 @@ function fmtWunsch(lokal: string): string {
   )
 }
 
+/**
+ * Welcher Partner-SV ist nach dem Matching vorausgewaehlt?
+ *
+ * Default ist der bestgerankte (`svs[0]`) — das war bis hierher die einzige Regel.
+ * Kommt der Nutzer ueber einen Deep-Link (`?sv=<id>`, z.B. aus einer KI-Antwort, die
+ * zuvor `GET /api/v1/gutachter-termine` gelesen hat), soll GENAU der dort genannte
+ * Gutachter vorausgewaehlt sein — sonst landet der Kunde bei einem anderen als dem,
+ * der ihm im Chat empfohlen wurde.
+ *
+ * ⚠ Bewusst nur, wenn die ID im aktuellen Matching-Ergebnis VORKOMMT: Zwischen der
+ * KI-Antwort und dem Klick koennen Minuten liegen; der SV kann ausgelastet, deaktiviert
+ * oder ausserhalb des eingegebenen Orts sein. Eine ID ins Blaue zu setzen wuerde eine
+ * leere Auswahl erzeugen. Faellt sie durch, greift still der normale Default — der
+ * Nutzer sieht eine gueltige Liste statt eines Fehlers.
+ */
+function waehleVorauswahl(
+  svs: { svId: string }[],
+  gewuenscht: string | null | undefined,
+): string | null {
+  if (gewuenscht && svs.some((s) => s.svId === gewuenscht)) return gewuenscht
+  return svs[0]?.svId ?? null
+}
+
 export function FinderWizard({
   forceFallback = false,
   werkstattId,
@@ -91,6 +115,8 @@ export function FinderWizard({
   promotionCodeId,
   schaetzungSessionId,
   ownerProfilId = null,
+  vorauswahlSvId = null,
+  vorauswahlSlotStart = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -107,6 +133,15 @@ export function FinderWizard({
    *  Werkstatt-Einstieg resolveVermittlerOwnerProfil). Gesetzt → dessen zahlende Freund-SVs
    *  ranken im Matching oben (imNetzwerk-Badge). null (Default, anon-Embed) = kein Boost. */
   ownerProfilId?: string | null
+  /** GEO-Deep-Link (`?sv=<id>`): profiles.id des Gutachters, den eine KI-Antwort
+   *  (oder ein Verzeichnis-Link) bereits genannt hat. Ist er im Matching-Ergebnis,
+   *  wird er statt des bestgerankten vorausgewaehlt — siehe waehleVorauswahl().
+   *  Keine Buchung, kein Write: der Kunde bestaetigt weiterhin selbst. */
+  vorauswahlSvId?: string | null
+  /** GEO-Deep-Link (`?slot=<ISO-Start>`): der Termin, den die KI-Antwort genannt hat.
+   *  Nur zusammen mit vorauswahlSvId wirksam. Trifft er zu, springt der Wizard direkt
+   *  zur Schadensangabe — sonst bleibt die normale Terminauswahl stehen. */
+  vorauswahlSlotStart?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -125,6 +160,10 @@ export function FinderWizard({
   // ladeEmbedMatching-Antwort darf den State setzen (Stale-Race-Guard bei schnellem Ort-Wechsel:
   // eine späte Antwort eines früheren Orts überschrieb sonst das aktuelle Matching).
   const matchReqRef = useRef(0)
+  // Die Slot-Vorauswahl aus dem Deep-Link darf GENAU EINMAL greifen. Ohne diese Sperre
+  // wuerde jeder erneute Matching-Lauf (Ortwechsel, Wunschtermin, "zurueck zur Terminwahl")
+  // den Kunden wieder nach vorn katapultieren — er kaeme nie an die Terminliste heran.
+  const slotVorauswahlVerbrauchtRef = useRef(false)
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
   const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
   const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
@@ -191,8 +230,9 @@ export function FinderWizard({
       if (matchReqRef.current !== req) return
       setMatching(res)
       setMatchLoading(false)
-      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      versucheSlotVorauswahl(res)
     })
   }
 
@@ -214,12 +254,45 @@ export function FinderWizard({
       setMatching(res)
       setMatchLoading(false)
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
-      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
       else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      versucheSlotVorauswahl(res)
     })
   }
 
   // Step 2: Slot gewählt → merken + weiter zu Schaden (Reservierung erst am Ende).
+  /**
+   * Deep-Link-Abkuerzung: hat die KI-Antwort einen KONKRETEN Termin genannt
+   * (`?sv=…&slot=<ISO>`), diesen direkt uebernehmen und zur Schadensangabe springen.
+   *
+   * Der Kunde spart damit den Schritt, den Termin erneut aus der Liste zu suchen — obwohl
+   * er ihn im Chat schon gewaehlt hat. Er sieht die Auswahl auf den Folgeschritten und
+   * kann jederzeit zurueck.
+   *
+   * ⚠ Drei Bedingungen, sonst passiert NICHTS (und die normale Terminauswahl bleibt
+   * stehen): der Deep-Link muss beide Werte tragen, der Gutachter muss im aktuellen
+   * Matching sein, und der Slot muss dort noch frei sein. Slots sind fluechtig — zwischen
+   * KI-Antwort und Klick koennen Minuten liegen. Ein belegter Slot darf niemals zu einer
+   * Fehlerseite fuehren, nur zur normalen Auswahl.
+   */
+  function versucheSlotVorauswahl(res: PlaneTerminMitFallbackResult) {
+    if (slotVorauswahlVerbrauchtRef.current) return
+    if (!vorauswahlSvId || !vorauswahlSlotStart) return
+    if (res.kind !== 'partner') return
+    const sv = res.svs.find((s) => s.svId === vorauswahlSvId)
+    if (!sv) return
+    // Zeitpunkt-Vergleich statt String-Vergleich: dieselbe Zeit kann als "…T09:00:00+02:00"
+    // oder "…T07:00:00Z" geschrieben sein — ein String-Match wuerde sie fuer verschieden
+    // halten und die Abkuerzung still verschlucken.
+    const ziel = Date.parse(vorauswahlSlotStart)
+    const slot = Number.isFinite(ziel)
+      ? sv.slots.find((sl) => Date.parse(sl.start) === ziel)
+      : undefined
+    if (!slot) return
+    slotVorauswahlVerbrauchtRef.current = true
+    waehleSvSlot(sv, slot)
+  }
+
   function waehleSvSlot(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
     setAuswahl({ kind: 'partner', sv, slot })
     setSelectedSvId(sv.svId)
@@ -279,6 +352,11 @@ export function FinderWizard({
         promotion_code_id: promotionCodeId ?? null,
         maklerCode,
         schaetzungSessionId: schaetzungSessionId ?? null,
+        // Herkunft, nicht Ergebnis: gesetzt, sobald der Kunde MIT einem `?sv=` hier
+        // ankam — auch wenn er am Ende einen anderen Gutachter waehlt. Gebracht hat
+        // ihn der Deeplink. Ohne diesen Marker ist eine KI-vermittelte Buchung im
+        // Nachhinein nicht von einem normalen Website-Besuch zu unterscheiden.
+        viaDeeplink: !!vorauswahlSvId,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
@@ -316,7 +394,7 @@ export function FinderWizard({
         if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
         setMatching(res)
         setMatchLoading(false)
-        if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+        if (res.kind === 'partner') setSelectedSvId(waehleVorauswahl(res.svs, vorauswahlSvId))
         else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
       })
     }
@@ -577,6 +655,10 @@ export function FinderWizard({
             />
             <span>Ich willige ein, dass Claimondo mich zur Schadenabwicklung kontaktiert.</span>
           </label>
+          {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
+              zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
+              sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
+          <TeilnahmeHinweis />
           {fehler && (
             <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
               {fehler}

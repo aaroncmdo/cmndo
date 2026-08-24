@@ -34,6 +34,8 @@ Ablauf:
 
 **Pflicht: Schritt 3+4** — die getrackte Version ablesen und das committete File exakt danach benennen. Sonst **Twin-Drift** (File-Timestamp ≠ getrackte Version): `db reset` bzw. ein künftiges CLI-`db push` sähe das File als „nicht appliziert" und führte die DDL erneut aus → Fehler.
 
+⚠ **Der häufigere Fehler ist Schritt 4 ganz auszulassen** — Migration appliziert, File nie committet. Am 19.08. **zweimal an einem Tag** passiert (7 Files aus 5 Lanes, PRs #5393 + #5412). Das fällt verzögert auf: fehlende Files sind additiv und stürzen den Supabase-Preview-Replay *nicht sofort* ab — er stirbt erst, wenn eine **spätere** Migration eines der fehlenden Objekte anfasst, dann mit `42P01` auf **jedem** PR mit Migrations-Diff, nicht nur beim Verursacher. `npm run check:migration-files` (läuft in CI als `--warn`) listet getrackte Migrationen ohne File. Behebung ohne neues DDL: Statement aus `schema_migrations.statements` holen, Datei 1:1 schreiben, **per md5 gegenprüfen** (gleiche Zeichenzahl beweist nichts). Details: `memory/BROADCAST-getrackte-migration-ohne-file-im-repo.md`.
+
 **Verboten:**
 * **raw `execute_sql` mit DDL-Payload** (oder `POST /v1/projects/{ref}/database/query`) — bypasst das Migrations-Tracking → Drift. `execute_sql` nur für READ-Queries.
 * **`npx supabase db push` / sonstige CLI-DDL** — die Auth-/Link-/Drift-Probleme aus unserem Setup (s. o.).
@@ -369,6 +371,34 @@ CI faehrt jetzt einen **parallelen `vitest`-Job** (`npm run check:vitest -- --ra
 Pure-Logik: `scripts/check-vitest.mjs` (analog `check-knip.mjs`). **Kein prod-DB-Zugriff** — die vitest-Suite ist Unit/pure (kein `--env-file`), der Job braucht keine DB-Secrets und saettigt daher **nicht** den prod-Pool (anders als die `check:rls-*`-Checks).
 <!-- END:test-gate -->
 
+<!-- BEGIN:metadata-merge-gate -->
+# Metadata-Merge-Gate (Ratchet)
+
+**Wer in einer Marketing-Route einen eigenen `openGraph`- oder `twitter`-Block setzt, MUSS `images` mitgeben.**
+
+Next.js merged `metadata` aus Layout und Page nur **flach** — die Doku sagt es woertlich (`generate-metadata.md`, „Merging"): *„Metadata objects exported from multiple segments … are **shallowly** merged … nested fields … are **overwritten** by the last segment to define them."* Ein eigener `openGraph`-Block ersetzt damit den des Layouts **komplett**, inklusive `images`. Jedes Layout-Default in einem verschachtelten Feld wirkt also nur fuer Seiten, die das Feld **gar nicht** anfassen.
+
+Die Klasse trat im SEO-Audit (18.08.2026) **fuenfmal** auf, ueber zwei Properties, und wurde von Build, `tsc` und keinem der bestehenden Ratchets gefangen:
+
+| Feld | Symptom | PR |
+|---|---|---|
+| `alternates.canonical` | `/impressum`, `/datenschutz`, `/agb`, `/nutzungsbedingungen` canonicalisierten auf die **Startseite** = De-Indexierung | #5352 |
+| `alternates.types` | RSS-Feeds nur auf **10 von 343** Seiten (Impressum/AGB/noindex — nicht die Startseite) | #5357 |
+| `openGraph.images` | **167 Seiten** ohne Vorschaubild (26 Files) | #5369 |
+| `twitter.images` | 3 Seiten; `/werkstatt-finden` verlor **beides** | #5369 |
+| dieselbe auf autounfall.io | **~200 von 254** Seiten (3 Fundstellen) | #5384 |
+
+**Fix:** das Default-Bild mitgeben — `images: OG_DEFAULT_IMAGES` (aus `@/lib/seo/jsonld`) bzw. `images: [OG_IMAGE]` (aus `@/lib/site`, autounfall). Fuer ein Default, das **jede** Seite erreichen soll, ist die Metadata-API der falsche Ort: die Feed-Links liegen seit #5357 als `<link>` im `<head>`-JSX des Root-Layouts — der einzige Weg, der die Merge-Semantik umgeht.
+
+CI faehrt `npm run check:metadata-merge -- --ratchet`. **Baseline 0** — keine grandfatherte Schuld, jede neue Verletzung blockt. Lokal (ohne Flag) `--warn` (exit 0). Pure Logik: `scripts/lib/metadata-merge-scan.mjs` (unit-getestet, 14 Faelle).
+
+**⭐ Der Scanner faengt auch den Fall, den ein Grep NICHT sieht:** `...(cond ? { images } : {})`. Ein „enthaelt `images`"-Grep sagt dort *wahr* — garantiert ist es trotzdem nicht. Genau daran hingen die letzten 31 Seiten auf autounfall.io: nach zwei Fixes meldete die Stichprobe 8/8 gruen, die Vollpruefung 223/254. Der Scanner entfernt Spread-Conditionals vor der Pruefung. Direkte Ternaries (`images: x ? [a] : [b]`) sind dagegen sauber und werden nicht geflaggt.
+
+**Abgrenzung (0 False-Positives):** Root-Layouts, die den Default **definieren**, werden nie geflaggt (Erkennung ueber `metadataBase`). Kommentare und String-Literale werden gestrippt. Gescannt werden nur die Marketing-Builds (`claimondo-marketing`, `autounfall-io`, `kfz-gutachter-*`) — die App (`src/`) hat kein solches Default-Layout. Echter Sonderfall → `// metadata-merge-skip: <grund>` am File-Anfang.
+
+**Nachweis, dass das Gate die reale Klasse faengt:** gegen den Stand vor #5352 laufen gelassen → **31 Verletzer-Files**, darunter alle fuenf Instanzen inkl. `autounfall-io/lib/rest.ts` (die zentrale Helper-Funktion, die ein `app/**`-Grep gar nicht sieht) und `app/[article]/page.tsx` (der bedingte Fall).
+<!-- END:metadata-merge-gate -->
+
 <!-- BEGIN:redirect-stub-gate -->
 # Redirect-Stub-Gate (Ratchet)
 
@@ -495,11 +525,36 @@ if (error) { … }
 * **J2-Seed (16.08.):** FK-Verletzung beim Lead-DELETE. Der Seed meldete **13 Tage lang** Erfolg und löschte nichts; 88 Leads liefen auf und verzerrten Messungen.
 * **Skizzen-Korrektur (16.08.):** Task-Insert in einem `try/catch` (fängt nichts, da kein `throw`) + Update ohne Prüfung — im selben File, am selben Tag wie der J2-Fix. ⚠ **Ein `try/catch` um einen Supabase-Call ist reine Dekoration.**
 
-CI fährt `npm run check:silent-writes -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/silent-write-baseline.json` (**Baseline 214 Stellen in 106 Files**, grandfathered → Boy-Scout: wer ein File anfasst, zieht die Prüfung nach und senkt mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0).
+CI fährt `npm run check:silent-writes -- --ratchet`. **Die Baseline ist 0** — der Bestand von ursprünglich **214 Stellen in 106 Files** wurde in neun Boy-Scout-Blöcken vollständig abgebaut (#5320 → #5372, 18.08.). Das ist damit keine Drift-Bremse mehr, sondern eine **harte Regel: jeder neue ungeprüfte Write auf eine kritische Tabelle blockt sofort.** Lokal (ohne Flag) `--warn` (exit 0).
+
+⚠ **Die Baseline nicht wieder aufblähen.** `--update-baseline` war für den Abbau da, nicht zum Eintragen neuer Verstöße. Echter fire-and-forget-Fall → `// silent-write-skip: <grund>` (s.u.); alles andere bekommt die Fehlerprüfung.
 
 **Nur `KRITISCHE_TABELLEN`** (`claims`, `leads`, `tasks`, `faelle`, `fall_dokumente`, `pflichtdokumente`, `gutachter_termine`) — bewusst nicht alle ~684 Write-Stellen des Repos: Dort ist ein stiller Fehlschlag ein Datenverlust, der erst Wochen später auffällt. Die Liste darf wachsen, jede Erweiterung hebt aber die Baseline.
 
 **0 False-Positives by design:** Gescannt wird **nur die Statement-Form** — eine Zeile, die (nach Whitespace) mit `await` beginnt. `const { error } = await …`, `return await …`, Reads und Ketten mit mehreren `.from()` (Zuordnung uneindeutig) werden per Konstruktion nie geflaggt. Pure Logik: `scripts/lib/silent-write-scan.mjs` (unit-getestet, 13 Fälle, davon 7 Negativ-Fälle). Bewusst fire-and-forget → `// silent-write-skip: <grund>` am File-Anfang.
+
+# stop_reason-Gate (Ratchet)
+
+**Ein erzwungener Tool-Aufruf an die Anthropic-API (`tool_choice`) muss `stop_reason` prüfen.** Reißt die Antwort das Token-Limit, liefert die API einen **unvollständigen `tool_use`-Block** — kein Fehler, keine Exception. Wer ihn danach mit Fallbacks ausliest, macht daraus stillschweigend leere Werte:
+
+```ts
+const block = res.content.find((b) => b.type === 'tool_use')
+return { ok: true, deltas: block.input.deltas ?? {} }          // ❌ leer statt Fehler
+
+if (res.stop_reason === 'max_tokens') return { ok: false, … }  // ✅ VOR dem Auslesen
+```
+
+**Zwei belegte Vorfälle, beide 18.08.2026:**
+* **Lokalinhalt-Generator** (#5372): Bei höherer Anforderung fielen von 436 Wörtern 399 weg (0 FAQs, 0 Anker) — der Aufruf meldete `ok: true`. Drei Messläufe zeigten 436 → 37 → 1151 Wörter; ohne die Messung wäre es nie aufgefallen, die Seite hätte einfach fast nichts gezeigt.
+* **`flow-intake/extract`** (#5377): `deltas: {}` + `naechste_frage: ''` bei `ok: true`. Im Kundenfluss heißt das: **Schadenmeldung getippt, nichts gespeichert** (die Route überspringt den Write bei leeren Deltas), keine Rückfrage, kein Fehler.
+
+⚠ **Ein größeres `max_tokens` ist KEIN Ersatz für die Prüfung** — es verschiebt nur, ab welcher Eingabe es still bricht. Genau das blieb bei der Gutachten-OCR (#5354) offen: dort wurde das Limit erhöht, `stop_reason` nie geprüft. **Reihenfolge:** erst den stillen Fehlschlag sichtbar machen, dann das Limit anheben.
+
+CI fährt `npm run check:anthropic-stop-reason -- --ratchet`. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Nur erzwungene Tool-Antworten** (`tool_choice`) — bewusst nicht jeder `messages.create`-Aufruf: Freitext bricht sichtbar mitten im Satz ab, ein halbes Tool-JSON sieht dagegen aus wie „das Modell hatte nichts". 28 Aufrufer gäbe es insgesamt; die gefährliche Kombination trugen genau zwei. Pure Logik: `scripts/lib/anthropic-stop-reason-scan.mjs` (unit-getestet, 10 Fälle). **Kommentare werden gestrippt** — sonst blendet ein `// TODO: stop_reason später` das Gate.
+
+**Baseline 0** — kein Bestand, kein Grandfathering. Jeder neue erzwungene Tool-Aufruf ohne `stop_reason`-Prüfung blockt sofort (nachgemessen: Probe-Datei eingebaut → exit 1, entfernt → exit 0). Der einzige Alt-Verstoß (`flow-intake/extract.ts`) ist mit #5377 behoben. Vollständige Liste aller API-Aufrufer + Messkommando: Marker `broadcast-anthropic-stop-reason-nie-geprueft`.
 
 # Zugriffs-Doktrin (Server-first) — Dach über die Zugriffs-Gates
 
@@ -624,3 +679,54 @@ Das Script erkennt den Header und skippt die Datei komplett.
 
 **Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->
+
+# CI-Runner — warum GitHub-gehostet, und was der Selbstversuch gekostet hat
+
+**Stand: alle Workflows laufen auf `ubuntu-latest`, das Repo ist oeffentlich.**
+Oeffentliche Repos bekommen unbegrenzte Actions-Minuten auf Standard-Runnern —
+das ist der Grund, warum CI hier nichts kostet.
+
+Am 23./24.08.2026 wurde das Gegenteil versucht: Repo privat + self-hosted Runner
+in WSL. Es funktionierte technisch, wurde aber nach einem Tag zurueckgedreht.
+Die Zahlen, damit es niemand blind wiederholt:
+
+| | GitHub-gehostet | self-hosted (WSL, 20 Kerne, 24 GB) |
+|---|---|---|
+| `vitest` | **3 Min** | 8–16 Min |
+| `build` | **11 Min** | ~22 Min |
+| parallel | praktisch unbegrenzt | 6 (Speicher-Grenze) |
+| Kosten oeffentlich | 0 | 0 |
+| Kosten privat | ~150 USD/Monat bei Flotten-Last | 0 |
+
+Bei fuenf parallel arbeitenden Sessions war der Durchsatz der Engpass, nicht das
+Geld: die Warteschlange wuchs auf 20 Jobs, PRs standen Stunden.
+
+## Vier Fallen, die dabei aufgetreten sind
+
+* ⭐ **Zeitzone.** GitHub-Runner laufen **UTC**, eine WSL-Maschine per Default in
+  der lokalen Zone (`Europe/Berlin`). Zwei zeitabhaengige Test-Files wurden dadurch
+  rot — auf **jeder** PR, auch reinen Doku-PRs. Der Beweis war die Gegenueber-
+  stellung: 4 Laeufe self-hosted alle rot, 2 auf GitHub beide gruen. Wer je wieder
+  einen eigenen Runner aufsetzt: **`timedatectl set-timezone UTC` zuerst.**
+* ⛔ **Ein self-hosted Runner an einem OEFFENTLICHEN Repo ist gefaehrlich** — jeder
+  Fremde kann forken und beliebigen Code auf der Maschine ausfuehren. Deshalb gilt
+  die Reihenfolge: Workflows zuerst zurueck auf `ubuntu-latest`, DANN oeffentlich,
+  DANN die Runner deregistrieren. Nie umgekehrt.
+* **WSL beendet seine VM**, sobald keine Sitzung mehr daran haengt — der Runner-
+  Dienst stirbt mit, Jobs bleiben stumm in der Warteschlange. Gegenmittel waren
+  `vmIdleTimeout=-1` in `.wslconfig` **und** eine dauerhaft offene Sitzung.
+* **Ein `wsl --shutdown` erschlaegt laufende Jobs.** Das ist dreimal passiert und
+  sah jedes Mal wie ein Testfehler aus: `npm ci` auf `in_progress`, alle folgenden
+  Schritte `pending`, kein Test gelaufen. Diese Signatur erkennen, statt den Code
+  zu verdaechtigen.
+
+## Was unabhaengig davon gilt
+
+**Privat auf dem Free-Plan gibt es weder Branch-Protection noch Regelsaetze**
+(beides HTTP 403). Wer das Journey-Gate je als Pflicht-Check verdrahten will,
+braucht dafuer ein oeffentliches Repo oder GitHub Pro.
+
+**Kein Workflow hat einen `concurrency`-Guard** (ausser `deploy-vps-mcp.yml`).
+Jeder Push auf denselben Branch startet einen weiteren vollstaendigen Lauf,
+waehrend der alte weiterlaeuft. Das ist der groesste ungenutzte Hebel gegen
+Warteschlangen — und er wirkt unabhaengig davon, wo die Runner stehen.

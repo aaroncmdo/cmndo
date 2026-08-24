@@ -1,10 +1,19 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
+// Anbieterkennzeichnung nach § 5 DDG traegt dieselbe Nummer wie die CTAs
+// (Aaron-Entscheid 21.08.2026). Das Gesetz verlangt eine Nummer, unter der man
+// ankommt — keine bestimmte Nummernart. Zwei verschiedene Nummern auf einem
+// Auftritt waeren dagegen genau die Inkonsistenz, die der Wechsel abstellt.
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
 export const metadata: Metadata = {
   title: 'Impressum',
+  description:
+    'Impressum von Claimondo — Anbieterkennzeichnung nach § 5 DDG mit Anschrift, Vertretungsberechtigten und Kontaktdaten.',
+  // Eigenes Canonical: ohne dieses erbt die Seite den Layout-Default und
+  // erklaerte sich damit zur Kopie der Startseite (= De-Indexierung).
+  alternates: { canonical: '/impressum' },
 }
 
 export default function ImpressumPage() {

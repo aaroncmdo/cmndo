@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/kasko-versicherung
+meta_title: Kasko oder gegnerische Haftpflicht — wann was
 type: glossar-spoke
 cluster: H7
 nummer: H7.9

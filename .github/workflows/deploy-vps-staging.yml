@@ -85,12 +85,35 @@ jobs:
             # (root:root, 600, geteilt mit Prod — staging unterscheidet sich
             # nur via NEXT_PUBLIC_APP_URL_STAGING, das zur Build-Zeit gebaked
             # wird, nicht zur Laufzeit gelesen).
+            #
+            # ⚠ Das "geteilt mit Prod" war am 13.05. harmlos — Stripe lief im
+            # Test-Mode. Seit dem Live-Cutover (27.07.) traegt dieselbe Datei
+            # sk_live: staging fuehrt damit ECHTE Zahlungen aus. Gemessen 20.08.
+            # Deshalb: optionales Override. Existiert /etc/claimondo/.env.staging,
+            # gewinnt sie — sonst unveraendertes Verhalten (nichts bricht).
             if [ ! -f /etc/claimondo/.env.local ]; then
               echo "FATAL: /etc/claimondo/.env.local fehlt — Staging-Deploy abgebrochen."
               echo "Behebung: Aaron muss das File einmalig aus dem letzten guten Backup nach /etc/claimondo/.env.local kopieren (chmod 600, chown root:root)."
               exit 1
             fi
-            ln -sf /etc/claimondo/.env.local /var/www/claimondo-v2-staging-new/.env.local
+            ENVFILE=/etc/claimondo/.env.local
+            if [ -f /etc/claimondo/.env.staging ]; then
+              ENVFILE=/etc/claimondo/.env.staging
+              echo "Staging-Env: eigenes File (/etc/claimondo/.env.staging)."
+            elif grep -q "^STRIPE_SECRET_KEY=sk_live" /etc/claimondo/.env.local 2>/dev/null; then
+              # Bewusst nur ein Hinweis, kein exit 1: der Deploy selbst ist in
+              # Ordnung, und ein harter Stopp wuerde staging lahmlegen, ohne das
+              # eigentliche Problem zu loesen.
+              #
+              # ⚠ HIER bewusst KEIN "::warning::" — aus der SSH-Sitzung wird es
+              # NICHT zur Annotation. appleboy/ssh-action stellt jeder entfernten
+              # Zeile "out: " voran, und GitHub parst Workflow-Kommandos nur am
+              # ZEILENANFANG. Gemessen 20.08. an Run 32399568140: die Zeile stand
+              # im Log, die einzige Annotation des Jobs war "Node.js 20 is
+              # deprecated". Die echte Warnung entsteht im Runner-Schritt unten.
+              echo "HINWEIS: staging laeuft mit STRIPE-LIVE-KEY (Details siehe Job-Annotation)."
+            fi
+            ln -sf "$ENVFILE" /var/www/claimondo-v2-staging-new/.env.local
             rm -rf /var/www/claimondo-v2-staging-old 2>/dev/null || true
             mv /var/www/claimondo-v2-staging /var/www/claimondo-v2-staging-old 2>/dev/null || true
             mv /var/www/claimondo-v2-staging-new /var/www/claimondo-v2-staging
@@ -107,3 +130,33 @@ jobs:
             pm2 save
             rm -f /tmp/deploy-staging.tar.gz
             echo "Staging-Deploy $(date) abgeschlossen"
+
+      # ── Stripe-Live-Key-Warnung ────────────────────────────────────────────
+      # Zweistufig, weil ein "::warning::" AUS der SSH-Sitzung nie ankommt:
+      # appleboy/ssh-action praefixt jede entfernte Zeile mit "out: ", und
+      # GitHub erkennt Workflow-Kommandos nur am Zeilenanfang. Belegt am
+      # 20.08. (Run 32399568140): 2 ausgegebene "::warning::"-Zeilen im Log,
+      # 0 davon in der Annotations-API des Jobs.
+      #
+      # Deshalb: der Check laeuft remote und signalisiert nur ueber seinen
+      # EXIT-CODE; die Warnung selbst entsteht im Runner-Schritt danach.
+      # continue-on-error, damit dieser Check den Deploy nie kippen kann —
+      # der Deploy ist in Ordnung, es fehlt nur ein Test-Key.
+      - name: Stripe-Key auf staging pruefen
+        id: stripecheck
+        continue-on-error: true
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            if [ -f /etc/claimondo/.env.staging ]; then exit 0; fi
+            if grep -q "^STRIPE_SECRET_KEY=sk_live" /etc/claimondo/.env.local 2>/dev/null; then exit 42; fi
+            exit 0
+
+      - name: Warnung — staging faehrt mit Stripe-LIVE-Key
+        if: steps.stripecheck.outcome == 'failure'
+        run: |
+          echo "::warning::STAGING LAEUFT MIT STRIPE-LIVE-KEY. Eine Test-Zahlung auf staging.app.claimondo.de ist eine ECHTE Zahlung auf dem K&S-UG-Live-Konto. Insbesondere der offene J8-Checkout-Smoke wuerde eine echte Abbuchung ausloesen."
+          echo "::warning::Behebung: /etc/claimondo/.env.staging anlegen (Kopie der .env.local mit STRIPE_SECRET_KEY / NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY / STRIPE_WEBHOOK_SECRET auf Test-Werte). Der Deploy nimmt sie dann automatisch."

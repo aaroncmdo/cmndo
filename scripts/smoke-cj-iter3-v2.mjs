@@ -329,7 +329,10 @@ async function run() {
   // ==========================================
   // STEP 4: Kunden-Login
   // ==========================================
-  log('\n--- STEP 4: Kunden-Login (test-kunde@claimondo.de) ---')
+  // Nicht hartcodieren: hier stand fest 'test-kunde@claimondo.de', waehrend real KUNDE_EMAIL
+  // aus dem Secret benutzt wurde. Wer den Log las, suchte den Fehler beim falschen Konto —
+  // und sah nicht, dass das Secret auf ein gar nicht existierendes zeigte (21.08.2026).
+  log(`\n--- STEP 4: Kunden-Login (${KUNDE_EMAIL}) ---`)
   let kundeLoginOk = false
   try {
     const emailInput = await pageStaging.$('input[type="email"], input[name="email"]')
@@ -646,9 +649,27 @@ async function run() {
   // AAR-smoke-ci: Exit-Code für CI. Failures = Stop-on-Fail oder /kunde-Crash
   // oder unbehandelte pageerror-Events. Console-Errors allein lösen keinen
   // Fail aus (Mapbox-Tile-Warnings o.ä. — zu flaky), aber pageerror schon.
+  //
+  // ⭐ 21.08.2026 ergänzt: auch ein als ❌ aufgezeichneter SCHRITT lässt den Lauf failen.
+  // Vorher hing alles allein an pageErrors — ein Lauf, in dem der Kunden-Login mit
+  // "E-Mail oder Passwort ist falsch" scheiterte, meldete trotzdem "✅ SMOKE PASSED",
+  // weil die Seite ja nicht abstürzte. Ein Customer-Journey-Smoke, der die Journey nicht
+  // schafft, ist nicht grün. ⚠ `⚠️`-Schritte zählen bewusst NICHT (KEIN_INPUT,
+  // REDIRECT_ZU_LOGIN, ÜBERSPRUNGEN sind als Warnung gemeint) — nur `❌`.
+  const fehlgeschlageneSchritte = stepResults.filter((s) => String(s.status).startsWith('❌'))
+  if (fehlgeschlageneSchritte.length > 0) {
+    log(`\n❌ Fehlgeschlagene Schritte (${fehlgeschlageneSchritte.length}):`)
+    for (const s of fehlgeschlageneSchritte) log(`   • ${s.step} — ${s.status}`)
+  }
+
   return {
-    failed: stopOnFail.triggered || hasCrash || pageErrors.length > 0,
+    failed:
+      stopOnFail.triggered ||
+      hasCrash ||
+      pageErrors.length > 0 ||
+      fehlgeschlageneSchritte.length > 0,
     pageErrorCount: pageErrors.length,
+    fehlgeschlageneSchritte: fehlgeschlageneSchritte.map((s) => `${s.step} (${s.status})`),
   }
 }
 
@@ -901,7 +922,10 @@ ${timingLog.slice(0, 60).map(t => `${t.ts}  ${t.msg}`).join('\n')}
 run()
   .then((result) => {
     if (result?.failed) {
-      console.error(`\n❌ SMOKE FAILED — pageErrors=${result.pageErrorCount}`)
+      const schritte = result.fehlgeschlageneSchritte?.length
+        ? ` · fehlgeschlagene Schritte: ${result.fehlgeschlageneSchritte.join(', ')}`
+        : ''
+      console.error(`\n❌ SMOKE FAILED — pageErrors=${result.pageErrorCount}${schritte}`)
       process.exit(1)
     }
     console.log('\n✅ SMOKE PASSED')

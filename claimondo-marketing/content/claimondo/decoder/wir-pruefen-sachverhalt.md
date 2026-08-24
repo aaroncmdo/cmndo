@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/wir-pruefen-sachverhalt
+meta_title: „Wir prüfen den Sachverhalt" — was das heißt
 type: decoder
 cluster: H8
 nummer: H8.1
@@ -66,7 +67,7 @@ Ein Anerkenntnis nach § 212 BGB würde die Verjährung neu starten — drei vol
 
 ### 3. Verhandlungs-Erschöpfung erzeugen
 
-Verkehrsunfall-Geschädigte sind in den ersten Wochen aktiv und kämpferisch. Nach 6–8 Wochen Schweigen tritt nachweisbar [Verhandlungs-Erschöpfung](/glossar/verhandlungs-erschoepfung) ein — die Bereitschaft, schlechte Vergleichsangebote anzunehmen, steigt um geschätzte 30–40 %. Versicherer wissen das. Sie planen damit.
+Verkehrsunfall-Geschädigte sind in den ersten Wochen aktiv und kämpferisch. Nach 6–8 Wochen Schweigen tritt nachweisbar Verhandlungs-Erschöpfung ein — die Bereitschaft, schlechte Vergleichsangebote anzunehmen, steigt um geschätzte 30–40 %. Versicherer wissen das. Sie planen damit.
 
 ### 4. Compliance-Test
 

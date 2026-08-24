@@ -11,7 +11,9 @@ import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBloc
 import {
   serviceSchema, faqPageSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
+  OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Versicherung schickt Gutachter".
@@ -40,6 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       locale: 'de_DE',
       siteName: 'Claimondo',
+
+      images: OG_DEFAULT_IMAGES,
       url: `${SITE_URL}/versicherung-schickt-gutachter`,
       title: t('versicherung_schickt_gutachter.og_title'),
       description: t('versicherung_schickt_gutachter.og_description'),
@@ -108,7 +112,10 @@ export default function Page() {
               'Nach unverschuldetem Unfall wählen Geschädigte ihren eigenen, unabhängigen Sachverständigen frei (§ 249 BGB) — der „Vertrauens-Gutachter" der gegnerischen Versicherung ist nicht verpflichtend. Die Gutachterkosten trägt der gegnerische Haftpflichtversicherer (BGH VI ZR 67/06).',
             url: `${SITE_URL}/versicherung-schickt-gutachter`,
           }),
-          faqPageSchema(FAQS),
+          faqPageSchema(FAQS, {
+            dateModified: getRouteLastUpdatedISO('/versicherung-schickt-gutachter'),
+            url: '/versicherung-schickt-gutachter',
+          }),
           breadcrumbsSchema([
             { name: 'Start', url: '/' },
             { name: 'Versicherung schickt Gutachter', url: '/versicherung-schickt-gutachter' },

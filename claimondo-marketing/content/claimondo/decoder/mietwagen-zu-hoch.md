@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /decoder/mietwagen-zu-hoch
+meta_title: „Mietwagen-Tagessatz über ortsüblich" — was tun
 type: decoder
 cluster: H8
 nummer: H8.4

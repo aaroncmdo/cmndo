@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
 import { loadGoogleMaps } from '@/lib/maps/load-google-maps'
 import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
@@ -118,10 +119,20 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   async function handleAccept() {
     setResponding(true)
     const supabase = createClient()
-    await supabase
+    // Läuft über den RLS-Client: Ein gefiltertes UPDATE trifft 0 Zeilen OHNE Fehler.
+    // Deshalb zusätzlich die getroffenen Zeilen prüfen — sonst meldet die Oberfläche
+    // Erfolg (refresh), während der Termin unverändert bleibt.
+    const { data, error } = await supabase
       .from('gutachter_termine')
       .update({ status: 'bestaetigt' })
       .eq('id', termin.id)
+      .select('id')
+    if (error || !data?.length) {
+      console.error('[ProfilClient] Termin-Zusage nicht gespeichert:', error?.message ?? '0 Zeilen (RLS)')
+      toast.error('Die Zusage konnte nicht gespeichert werden. Bitte erneut versuchen.')
+      setResponding(false)
+      return
+    }
     router.refresh()
   }
 
@@ -129,7 +140,7 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
     if (!gegenvorschlag) return
     setResponding(true)
     const supabase = createClient()
-    await supabase
+    const { data, error } = await supabase
       .from('gutachter_termine')
       .update({
         status: 'abgelehnt',
@@ -137,6 +148,13 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
         gegenvorschlag_zeit: gegenvorschlag,
       })
       .eq('id', termin.id)
+      .select('id')
+    if (error || !data?.length) {
+      console.error('[ProfilClient] Termin-Absage nicht gespeichert:', error?.message ?? '0 Zeilen (RLS)')
+      toast.error('Die Absage konnte nicht gespeichert werden. Bitte erneut versuchen.')
+      setResponding(false)
+      return
+    }
     router.refresh()
   }
 

@@ -1,16 +1,3 @@
--- SV-LevelUp — zehn additive Spalten auf sv_leads
---
--- Alle nullable und ohne Default: kein Tabellen-Rewrite, kein langer Lock.
--- sv_leads enthaelt 62 echte Vertriebsdatensaetze, deshalb eine eigene
--- Migration mit eindeutiger Zeilenzahl-Gegenprobe (62 vorher == 62 nachher).
---
--- google_place_id ist der haerteste Dedup-Schluessel fuer die Discovery
--- (Design-Spec §5.5.2): stabil, waehrend Firmennamen variieren. Der Index ist
--- partiell, damit die 62 Bestandszeilen ohne place_id nicht kollidieren.
---
--- Spec: docs/superpowers/specs/2026-08-18-sv-levelup-design.md §6
--- Plan: docs/superpowers/plans/2026-08-18-sv-levelup-p1-fundament.md (Task 2)
-
 alter table public.sv_leads
   add column levelup_letzter_check_id uuid references public.levelup_checks(id) on delete set null,
   add column levelup_letzter_score    smallint,

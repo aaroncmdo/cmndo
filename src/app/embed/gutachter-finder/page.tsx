@@ -24,7 +24,17 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string; schaetzung?: string }>
+  searchParams: Promise<{
+    lat?: string
+    lng?: string
+    zoom?: string
+    fallback?: string
+    schaetzung?: string
+    /** GEO-Deep-Link: profiles.id des im Chat/Verzeichnis genannten Gutachters. */
+    sv?: string
+    /** GEO-Deep-Link: ISO-Start des genannten Termins (nur mit sv sinnvoll). */
+    slot?: string
+  }>
 }) {
   const sp = await searchParams
 
@@ -59,6 +69,17 @@ export default async function GutachterFinderEmbedPage({
   // Anspruch-pruefen handoff: schaetzung=<sessionToken> → FinderWizard verknuepft Buchung mit Schaetzung.
   const schaetzung = typeof sp.schaetzung === 'string' ? sp.schaetzung : undefined
 
+  // GEO-Deep-Link: `?sv=<profiles.id>` — der Gutachter, den eine KI-Antwort (oder ein
+  // Verzeichnis-Link) bereits genannt hat. Wird NUR als Vorauswahl im Wizard genutzt und
+  // ausschliesslich gegen das Matching-Ergebnis geprueft (waehleVorauswahl) — ein
+  // unbekannter/abgelaufener Wert faellt still auf den bestgerankten SV zurueck. Deshalb
+  // reicht hier dieselbe schlichte Typpruefung wie bei `schaetzung`: der Wert wird nie
+  // als Kennung vertraut, nie geschrieben und nie in eine Query gegeben.
+  const vorauswahlSv = typeof sp.sv === 'string' ? sp.sv : undefined
+  // Gleiche Logik wie oben: der Wert wird nur GEGEN das Matching-Ergebnis geprueft,
+  // nie als Kennung vertraut und nie geschrieben.
+  const vorauswahlSlot = typeof sp.slot === 'string' ? sp.slot : undefined
+
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
@@ -88,7 +109,14 @@ export default async function GutachterFinderEmbedPage({
         initialCenter={initialCenter}
         initialZoom={initialZoom}
         forceFallback={sp.fallback === '1'}
-        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} schaetzungSessionId={schaetzung} />}
+        wizardSlot={
+          <FinderWizard
+            forceFallback={sp.fallback === '1'}
+            schaetzungSessionId={schaetzung}
+            vorauswahlSvId={vorauswahlSv}
+            vorauswahlSlotStart={vorauswahlSlot}
+          />
+        }
       />
     </>
   )

@@ -104,6 +104,69 @@ TRANSPORT=http PORT=4002 node dist/index.js
 2. **DNS:** `mcp.claimondo.de` braucht einen **expliziten A-Record** auf die VPS-IP — `*.claimondo.de` ist KEIN Wildcard (nur `*.staging` ist es).
 3. **nginx** `mcp.claimondo.de` → `proxy_pass http://127.0.0.1:4002;` (POST `/mcp` + `/health`), SSL via certbot.
 
+**Update eines bereits laufenden Servers** (der Normalfall — bis 21.08.2026 stand hier nur der Erststart):
+
+```bash
+cd /opt/claimondo-mcp/source && git pull --ff-only        # ← DORT liegt der Checkout
+cd services/mcp-server && npm ci && npm run build          # beide exit 0 prüfen
+pm2 restart claimondo-mcp
+```
+
+> ⚠ **Der Checkout liegt in `/opt/claimondo-mcp/source`** — **nicht** in `/var/www/claimondo-v2`
+> (das ist die App, per tar deployt). `pm2 describe claimondo-mcp` zeigt den Pfad im Zweifel an.
+
+> 🕳️ **Am 21.08.2026 war der Pull-Pfad seit ~19 Tagen kaputt — still.** `git pull` brach ab mit
+> `fatal: couldn't find remote ref refs/heads/kitta/mcp-server-http`: Der Checkout ist ein
+> **shallow single-branch-Clone**, dessen Refspec noch auf den längst gelöschten Feature-Branch
+> zeigte. Folge: Jeder Update-Versuch scheiterte, ohne dass es jemand bemerkte — es gibt ja
+> keinen Workflow, der es melden würde. **Repariert** (Refspec → `main`, Upstream gesetzt);
+> `git pull` läuft seitdem normal. Tritt es wieder auf (z. B. nach einem neuen Clone):
+> ```bash
+> git config remote.origin.fetch '+refs/heads/main:refs/remotes/origin/main'
+> git fetch origin && git branch --set-upstream-to=origin/main main
+> ```
+
+> ✅ **Seit 23.08.2026 hängt der Dienst an einer eigenen Pipeline:**
+> `.github/workflows/deploy-vps-mcp.yml`. Sie greift bei jedem Push auf `main`, der
+> `services/mcp-server/**` berührt, und ist auch manuell auslösbar
+> (`gh workflow run deploy-vps-mcp.yml --ref main`). Die Handschritte unten sind
+> damit der **Notfall-/Handbetrieb**, nicht mehr der Normalweg.
+>
+> Die Pipeline macht zwei Dinge, die die App-CI nicht tut:
+> 1. **Build-Gate vor dem VPS** — `npm ci` + `npx tsc --noEmit` + `npm run build`
+>    laufen in CI, bevor irgendetwas auf dem Server passiert. Nötig, weil
+>    `tsconfig.json` der App `services` in `exclude` führt: ein grüner App-CI-Lauf
+>    ist für diesen Server **kein Beleg**.
+> 2. **Verifikation am Protokoll, nicht an pm2** — nach dem Restart wird
+>    `tools/list` per JSON-RPC abgefragt und gezählt. `pm2 status` sagt „online",
+>    auch wenn der Prozess das alte Bundle fährt; ein Health-200 sagt nur, dass ein
+>    Port antwortet. Liefert der Server keine Tools, rollt der Workflow auf den
+>    vorherigen Commit zurück (`git reset --hard` + Rebuild + Restart) und schlägt
+>    fehl.
+>
+> ⚠ Wer den Dienst **von Hand** anfasst, fährt vorher trotzdem lokal
+> `npx tsc --noEmit && npm run build` (beides exit 0) — die Pipeline schützt nur
+> den Weg über `main`.
+
+**Verifikation nach dem Restart** — der Dienst antwortet auch dann noch mit dem alten Verhalten,
+wenn `pm2 restart` still fehlschlägt; ein `pm2 status` allein beweist nichts:
+
+```bash
+node scripts/verify-deeplink-kette.mjs      # aus dem Repo-Root
+```
+
+Schicht 5 muss von `! MCP zeigt noch die Sammelkarte` auf `✓ MCP nennt Gutachter MIT Direktlink`
+springen. Zum Gegenlesen ohne Skript:
+
+```bash
+curl -s -X POST https://mcp.claimondo.de/mcp \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"claimondo_finde_gutachter_termine","arguments":{"plz":"50670"}}}'
+```
+
+Erwartet: pro Gutachter eine Zeile `→ Termin bei <Name> buchen: …?plz=…&sv=…` und am Ende
+`Alle Gutachter auf der Karte:` statt `Interaktive Karte / Buchung:`.
+
 > **Auth & Abuse-Schutz:** der Endpoint ist **ohne Auth** (anonyme Public-API). Zusätzlich zum bestehenden Per-IP-Limit sind die **Schreib**-Pfade (`melde-schaden`/`rueckruf`) durch die serverseitige **Write-Abuse-Härtung** gedeckelt: globaler Circuit-Breaker (`MCP_WRITE_CAP_PER_HOUR`, Default 120) + Per-Telefon-Velocity (`MCP_WRITE_CAP_PER_PHONE_24H`, Default 3), beide fail-open — s. `src/lib/api-v1/write-abuse-guard.ts`. Nötig, weil externe KI-Calls von den Egress-IPs der Plattform kommen (Per-IP allein greift dort nicht). Per-Plattform-API-Keys (`mcp_api_keys`) bleiben Roadmap für authentifizierten/priorisierten Traffic.
 
 ## Testen

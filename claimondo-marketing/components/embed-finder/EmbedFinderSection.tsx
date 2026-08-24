@@ -47,6 +47,19 @@ export type EmbedFinderSectionProps = {
    * damit der Embed ihn am Lead attribuiert (promotion_code_id, Provision-Spur).
    */
   promoCode?: string
+  /**
+   * GEO-Deep-Link (`?sv=<profiles.id>`): der Gutachter, den eine KI-Antwort oder ein
+   * Verzeichnis-Link bereits genannt hat → im Embed als Vorauswahl im Wizard. Rein
+   * darstellend: der Embed prueft die ID gegen sein Matching-Ergebnis und faellt bei
+   * Unbekanntem still auf den bestgerankten SV zurueck.
+   */
+  svId?: string
+  /**
+   * GEO-Deep-Link (`?slot=<ISO-Start>`): der Termin, den die KI-Antwort genannt hat.
+   * Nur zusammen mit `svId` sinnvoll. Ist der Slot beim Klick belegt, faellt der Embed
+   * still auf die normale Terminauswahl zurueck.
+   */
+  slot?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -64,6 +77,8 @@ export function EmbedFinderSection({
   height = '100dvh',
   clickIds,
   promoCode,
+  svId,
+  slot,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -81,6 +96,10 @@ export function EmbedFinderSection({
   }
   // Promo-Code (Makler-/Partner-Attribution) — der Embed resolved + persistiert ihn am Lead.
   if (promoCode) params.set('promo', promoCode)
+  // GEO-Deep-Link: den im Chat genannten Gutachter als Vorauswahl weiterreichen.
+  if (svId) params.set('sv', svId)
+  // Nur mit svId sinnvoll: der Slot gehoert zu genau diesem Gutachter.
+  if (svId && slot) params.set('slot', slot)
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 

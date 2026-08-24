@@ -190,9 +190,14 @@ export async function waehleReTerminSlot(
         .limit(1)
         .maybeSingle()
       if (t?.id) {
-        await db.from('gutachter_termine')
+        // Siehe Kommentar oben: das ist die Entwertung des Magic-Links. Schlaegt sie
+        // fehl, bleibt der Token gueltig und wiederverwendbar.
+        const { error: entwertungFehler } = await db.from('gutachter_termine')
           .update({ re_termin_token_eingelaufen_am: new Date().toISOString() })
           .eq('id', t.id)
+        if (entwertungFehler) {
+          console.error(`[re-termin] Token NICHT entwertet (Termin ${t.id}) — Link bleibt nutzbar:`, entwertungFehler.message)
+        }
       }
     }
   }

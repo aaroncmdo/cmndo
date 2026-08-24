@@ -21,20 +21,41 @@ Exit-Code 0 = alles ok, 1 = ≥1 Fixture-Fehler (Details im Report), 2 = Crash.
 
 ## Kanonische Test-Accounts
 
-| Rolle | Email | Passwort |
-|---|---|---|
-| Admin | test-admin@claimondo.de | `Test1234!` |
-| Dispatch | test-dispatch@claimondo.de | `Test1234!` |
-| Kundenbetreuer | test-kb@claimondo.de | `Test1234!` |
-| Kunde | test-kunde@claimondo.de | `Test1234!` |
-| Makler | test-makler@claimondo.de | `Test1234!` |
-| Kanzlei | test-kanzlei@claimondo.de | `Test1234!` |
-| Sachverständiger | test-sv@claimondo.de | `Claimondo-SV-Smoke-2026` |
+Stand **20.08.2026** — jede Zeile ist ein echter Browser-Login gegen `app.claimondo.de`,
+nicht abgeschrieben:
 
-**Passwort-Grandfathering:** `Test1234!` ist bei den 6 Accounts historisch gültig
-(HIBP-Leaked-Password-Schutz blockt es nur bei *neuen* Sets/Resets). test-sv wurde
-resettet → **`Claimondo-SV-Smoke-2026`**. Der Provisioner setzt **keine** Passwörter
-(kein Reset → kein HIBP-Trip → keine Kollision mit laufenden Smokes).
+| Rolle | Email | Passwort | Landet auf |
+|---|---|---|---|
+| Admin | test-admin@claimondo.de | `Claimondo2026!` | `/admin` |
+| Dispatch | test-dispatch@claimondo.de | `Test1234!` | `/dispatch/dashboard` |
+| Kundenbetreuer | test-kb@claimondo.de | `Claimondo2026!` | `/mitarbeiter` |
+| Kunde | **smoke**-kunde@claimondo.de | `Claimondo2026!` | `/kunde` |
+| Makler | test-makler@claimondo.de | *unbekannt* (s. u.) | — |
+| Kanzlei | test-kanzlei@claimondo.de | `Claimondo2026!` | `/kanzlei/mandate` |
+| Sachverständiger | test-sv@claimondo.de | `Claimondo2026!` | `/gutachter/heute` |
+
+⚠ **Die frühere Angabe „`Test1234!` ist bei den 6 Accounts historisch gültig" ist
+widerlegt.** Sie gilt nur noch bei **test-dispatch@** — bei allen anderen scheitert der
+Login. Ebenso ist das hier notierte `Claimondo-SV-Smoke-2026` für test-sv nicht mehr
+gültig. Die Konten wurden offenbar gezogen, als GoTrue `Test1234!` per
+pwned-Password-Policy ablehnte; die Doku ist nicht mitgewandert.
+
+⭐ **Die eine Ausnahme (dispatch) wurde zur Regel verallgemeinert** — in `fixtures.ts`,
+in `_golden-path-lib.ts` und in vier weiteren Specs stand `Test1234!` als Default für
+*alle* Rollen. Wer eine Sonderregel abschreibt, schreibt oft die Sonderregel ab.
+
+⚠ **test-makler@**: Das Konto existiert (bestätigt, letzter Login 15.07.), aber weder
+`Claimondo2026!` noch `Test1234!` greifen. Das Passwort ist unbekannt — hier steht bewusst
+*unbekannt* statt eines geratenen Werts, damit die nächste Suche nicht in die Irre läuft.
+
+⚠ **test-kunde@ existiert nicht mehr** (Golive-Accounts-Cleanup, 17.07.). Das Kunden-Konto
+ist **smoke-kunde@**. Alle sechs Konten haben `telefon = NULL` → ein Smoke löst keine
+echten SMS/WhatsApp aus (Regel 4).
+
+Der Provisioner setzt **keine** Passwörter (kein Reset → kein HIBP-Trip → keine Kollision
+mit laufenden Smokes). Verbindliche Quelle für Test-Credentials in `tests/e2e` ist
+`tests/e2e/flows/_golden-path-lib.ts` (`ROLES`) — neue Specs importieren von dort, statt
+eigene Defaults zu schreiben.
 
 ## Stage-Claims (Seed-Graph)
 

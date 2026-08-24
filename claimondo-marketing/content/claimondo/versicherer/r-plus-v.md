@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /versicherer/r-plus-v
+meta_title: R+V Schadensregulierung — Anwalts-Fragebogen
 type: versicherer-hub
 cluster: PILLAR-D
 nummer: D7

@@ -97,6 +97,27 @@ git log -1 --format="%h %ad" --date=short   # muss 2026-08-12 oder neuer sein
 
 # Reststand — hier geht es weiter
 
+> ## ⚡ Stand 18.08. — was WIRKLICH offen ist (nachgemessen, nicht aus Markern)
+>
+> Der Reststand unten war an drei Stellen überholt. Wer hier einsteigt, liest zuerst diese Tabelle — der Plan hat schon einmal drei Sessions in bereits gebaute Arbeit geschickt (s. R5-Kasten).
+>
+> | Punkt | verifizierter Stand 18.08. |
+> |---|---|
+> | **R2** UI-Klickwege (E/F3/C1/B) | ✅ **erledigt** — alle vier Specs liegen seit 13.08. auf staging (#5237) |
+> | **R3** Lane-A-Wunschzeit | ⚠ vermutlich erledigt (#5213 „Smoke GRÜN" liegt auf staging) · Lane von `9f54b5bf` |
+> | **R5-H0** §2-Nachzug | 🟢 offen, reine Doku |
+> | **R5-H3** C2b create-case | ⚪ **gegenstandslos** — 6 Wege (nicht 9), aber **0 echte Kundenleads ohne FlowLink** in 90 Tagen |
+> | **R6-C2** Wunschzeit-Text | ⚪ **gegenstandslos** — genau 1 Termin `sv_gesucht` auf prod, `pending`-Flag greift bereits |
+> | **R6-F4** Fahrzeuge-Einstieg | 🔴 braucht Aaron (Produktentscheid) |
+>
+> **⇒ Der Bau-Scope der Sanierung ist damit durch.** Übrig bleiben ein Doku-Nachzug (R5-H0) und ein Produktentscheid (R6-F4). Wer „noch etwas bauen" sucht, findet hier nichts mehr.
+>
+> ⚠ **In eigener Sache:** In der ersten Fassung dieses Blocks stand R2 als „echt offen — einziger substanzieller Rest". Das war **ungeprüft aus dem Plantext übernommen**, während ich alle anderen Zeilen gemessen habe. Tatsächlich liegen alle vier Specs (`werkstatt-haftpflicht-gate-smoke`, `kunde-termin-aufgabe-f3-smoke`, `quali-gutachter-bindung-c1-smoke`, `vehicles-nachzug-b-smoke`) seit dem 13.08. auf staging. Derselbe Fehler, den dieser Block verhindern soll — und der Grund, warum unten in R2 jetzt die Dateinamen stehen statt einer Statusfarbe.
+>
+> ⭐ **Methodischer Kern beider ⚪-Befunde:** Eine Rohzahl („9 Wege ohne createCase", „Text ist irreführend") ist noch kein Auftrag. Erst die Frage *„betrifft das einen echten Nutzer?"* entscheidet — und beide Male lautete die Antwort nach dem Join auf Test-/Smoke-Daten bzw. auf die Fallzahl: nein.
+>
+> ⚠ Gegenprobe nicht vergessen: `leads.created_at` (nicht `erstellt_am`), und `schaden-karte` ist **by design** ohne FlowLink (Gegner-Flow, Allowlist im Intake-Gate).
+
 ## R1 · ~~Drei PRs mergen~~ ✅ erledigt (12.08.)
 
 #5197 (09:55), #5201 (09:46) und #5207 (10:40) sind **alle gemergt**, inkl. der Releases R290/R291/R293. Nichts mehr zu tun.
@@ -114,7 +135,24 @@ Die vier operativen Solls (Regel 4, Schritt 1) fehlten komplett und stehen jetzt
 
 ⭐ **Kernbefund:** Von 15 Hängern haben 4 eine Werkstatt — und **alle 4 waren vom KVA-Gate blockiert** (`CLM-2026-00932/-00939/-00977/-00991`, 16–26 Tage still). E ist damit nicht nur ein UI-Blocker-Fix, sondern löst reale Hänger auf.
 
-**Verbleibend:** die UI-Klickwege. Hürden je Lane im Marker.
+**✅ Erledigt (13.08., #5237) — nachgeprüft 18.08.:** Alle vier UI-Klickwege haben eine grüne Spec auf staging:
+
+| Lane | Spec |
+|---|---|
+| E | `tests/e2e/flows/werkstatt-haftpflicht-gate-smoke.spec.ts` |
+| F3 | `tests/e2e/flows/kunde-termin-aufgabe-f3-smoke.spec.ts` |
+| C1 | `tests/e2e/flows/quali-gutachter-bindung-c1-smoke.spec.ts` |
+| B | `tests/e2e/flows/vehicles-nachzug-b-smoke.spec.ts` |
+
+Der E-Smoke trifft dabei genau den wunden Punkt: Das Gate sitzt **serverseitig** in `schlageWerkstattTerminVor`, der Button ist also immer klickbar — ein „ist der Button da"-Test wäre wertlos gewesen. Geprüft wird das Absenden, gegengeprüft mit Selbstzahler (Gate bleibt zu).
+
+⚠ Bekannte Rest-Lücke (im Marker dokumentiert, bewusst offen): Bei **B** ist der Dispatch-Weg gedeckt, die **Kunden-ZB1-Variante** (`confirmZb1Korrekturen`) nicht — sie bräuchte echten Upload + OCR-Lauf.
+
+<details><summary>Ursprünglicher Text: „Verbleibend: die UI-Klickwege"</summary>
+
+Hürden je Lane im Marker. (Überholt — s. Tabelle oben.)
+
+</details>
 
 Pro Lane: **operatives Soll zuerst formulieren**, dann per UI auf prod nachstellen, dann Residue aufräumen.
 
@@ -132,6 +170,8 @@ Bekannte Fallen (`BROADCAST-prod-playwright-smoke-drei-fallen`):
 🔴 Der Wizard springt nach der Ortsauswahl **automatisch** von Schritt 1 zu Schritt 2 — der `WunschterminPicker` lebt aber in **Schritt 1** (`FinderWizard.tsx:382`). Beim Chip-Klick ist er weg. Zu klären: vor dem Sprung bedienen, oder über „‹ Anderer Ort" zurück.
 
 > Session `9f54b5bf` ist hier dran. Vor Aufnahme abstimmen.
+
+> **⚠ Stand 18.08. — vermutlich überholt, vor Aufnahme prüfen:** Auf `staging` liegen die Commits `1247ea420` / `581bd0c10` **„Wunschzeit-Prod-Smoke GRUEN — Lane A (RC-1) Regel-4-Nachweis (#5213)"**, und die Spec enthält zwei Tests, die die Wunschzeit-Slots erwarten. Der oben beschriebene Blocker ist damit wahrscheinlich gelöst. Nicht selbst nachgefahren (Fremd-Lane, opt-in `RUN_WUNSCHZEIT_SMOKE=1`) — deshalb Hinweis, keine Statusänderung.
 
 ⭐ Nebenbefund, der den Fix stützt: die auf prod angebotenen Zeiten liegen sauber im **40-Minuten-Engine-Raster** (12:20/13:00/13:40/14:20); der alte synthetische Pfad bot volle Stunden. Indiz, **kein** Beweis — der Wunschzeit-Zweig selbst ist noch nicht gefahren.
 
@@ -151,7 +191,9 @@ PR #5212 erweitert den Constraint additiv (17→18) **und** stellt die Zeile um 
 
 - **H0 · C4-Formalabschluss + §2/§9-Sync** — 🟡 **teilweise erledigt.** §9-#7 ist gehakt (#5288, 14.08.: alle sechs Rollen-Detailsichten am Kern), C4 steht in §2 auf ✅. Offen bleibt der Rest des §2-Nachzugs (C2/C3 stehen auf 🟡 „Code läuft") — reine Doku-Arbeit.
 - **H2 · C3c SA-Moment WhatsApp** — ✅ **erledigt (#5296, 14.08.).** Es waren **vier** Kunden-Nachrichten, nicht 6–7 (Team- und SV-Nachricht wurden mitgezählt); zwei davon sagten dasselbe. Jetzt **zwei**: Zugangsdaten (bewusst getrennt) + eine gebündelte Fall-Nachricht in 6 Sprachen. ⚠ Nicht am DB-Zustand verifizierbar — der Baileys-Pfad protokolliert nirgends (0 ausgehende WA in `nachrichten`).
-- **H3 · C2b create-case-Lücken** — 🟢 **einziger echter Bau-Rest, aber KEINE mechanische Migration.** Ist-Stand 16.08.: **5 Wege über `createCase`** (aircall · matelso · dispatch-stammdaten · embed-werkstatt-finder · kunde/schaden-melden), **9 daneben** (admin/anlegen · dispatch/spontan · dispatch/leads · gutachter-vermittlung · schaden/[token] · public-rueckruf · flotte-fortsetzung · makler · start-link). Der Plan sagte „~15" bzw. „1 von 15" — beides überholt.
+- **H3 · C2b create-case-Lücken** — ⚪ **nachgemessen 18.08.: aktuell OHNE messbaren Nutzen, kein Bau-Rest.** Es sind **6** Verletzer, nicht 9 (Gate-Lauf: admin/anlegen · dispatch/spontan · dispatch/leads · gutachter-vermittlung · flotte-fortsetzung · makler) — deckungsgleich mit der `check:intake-funnel`-Baseline.
+  **Entscheidend ist nicht die Zahl der Wege, sondern ob real ein Kunde ohne Rückweg entsteht.** Messung über 90 Tage (`leads` ⟕ `flow_links`, je `source_channel`): 14 Leads ohne FlowLink, davon **5 `schaden-karte` = by design** (Gegner-Flow, Allowlist). Von den übrigen 9 sind **8 Test-/Smoke-Daten** (`throwaway-…@claimondo.test`, `claude.smoke.…`, `test-kunde+c1..c4`, `nicolas.kitta+tesst`) und **1 ist ein Sachverständigen-Interessent** (`info@sv-klug.com` über `/gutachter/willkommen`) — der braucht per Definition keinen Kunden-FlowLink.
+  ⇒ **Kein einziger echter Endkunde ohne Rückweg.** Die Migration bleibt fachlich richtig, hat aber heute keinen Nutzen-Beleg; sie lohnt erst, wenn ein betroffener Weg messbar echte Kundenleads erzeugt. Vorher pro Weg klären, **wer** der Lead ist (Kunde/Gegner/interner Stub) — s. AGENTS.md §Intake-Funnel-Gate.
   ⚠ **Vor jeder Migration fachlich prüfen, ob `createCase`s Garantien dort passen.** Beispiel `schaden/[token]` (FlowLink-Quote nur 29 %, sieht nach Lücke aus): Dort meldet der **Gegner** über eine NFC-Karte, er bekommt `inviteGegnerViaAirdrop` und der Flottenmanager eine eigene Benachrichtigung. Ein erzwungener FlowLink wäre dort ein verwirrender Zusatzlink, keine Verbesserung. Die niedrige Quote ist erklärbar, kein Bug.
 - **H4 · C1-Rest** — ✅ **erledigt.** `manual_status_override` schreibt sein Event-Log: `process-event.ts:790-851` liest den Cursor vor dem Write und schreibt `phase_transitions` mit `from_phase`/`to_phase`/`trigger_type='manual'`. Prod-Beleg: **180 Zeilen** mit `trigger_type='manual'`, davon 134 in den letzten 30 Tagen.
 - **H5 · Unaufgenommene Handoffs** — ✅ **erledigt.** #4804 KVA-Pflicht **gemergt 27.07.** (der Abgleich mit E ist erfüllt: `reparaturGate` prüft `abrechnungsweg === 'haftpflicht'` als ERSTE Bedingung, #5196) · Ortseingaben P3/P4 **#5154 + #5170 gemergt 11.08.** · Partner-Cockpit **#5027 gemergt 05.08.** · C5-Folgetranche läuft (#5297, 14.08. — 4 Files; Rest in Arbeit auf `kitta/aar-956-c5-doppel-reads`).
@@ -161,7 +203,8 @@ PR #5212 erweitert den Constraint additiv (17→18) **und** stellt die Zeile um 
 - **D2** Unfallskizze im Kunden-Flow — ✅ **erledigt.** #5238 (Flow-Feststellung) + **#5249** (zentral an `createLead`, deckt alle 6 Meldewege ab). Regel-4 grün: 933-Byte-SVG erzeugt, Gegenprobe „Unfall" (6 Zeichen) erzeugt keine, 0 Residue. Auslöser war die Messung **18 Leads mit Hergang, 0 mit Skizze** — das Feature war gebaut und wurde nie ausgelöst.
 - **E3a** „Partnerwerkstatt vermitteln" — ❌ **gegenstandslos** (#5247, Bestandsaufnahme 13.08.). **E3b** (OCR-Einstieg) lief separat auf `kitta/aar-956-e3b-ocr-extract`.
 - **F4** Kunden-Einstieg auf Fahrzeuge (#26) — 🔴 **offen, braucht Aaron.** Teil 2 des „gestaffelt"-Entscheids (Teil 1 = F5, erledigt). Produktarbeit an Navigation + Routenstruktur, eigener Scope.
-- **C2-Rest**: #21 ist mit #5176 überwiegend erledigt (der Text hing an `termin === null`); Rest-Fall: Wunschzeit nur angefragt → Text weiterhin irreführend
+- **C2-Rest**: #21 ist mit #5176 überwiegend erledigt (der Text hing an `termin === null`); Rest-Fall: Wunschzeit nur angefragt → Text weiterhin irreführend.
+  ⚪ **Nachgemessen 18.08.: praktisch gegenstandslos.** Auf prod existiert **genau 1** Termin im Status `sv_gesucht` (14.08.), und `StatusZone` behandelt ihn bereits über das `pending`-Flag (`dispatch_pending`/`sv_gesucht` → „wird bestätigt"-Badge statt Live-Status, T1). Ein Fix hätte heute einen einzigen Adressaten. Erst wieder aufnehmen, wenn der Portal-Wunschtermin-Funnel real genutzt wird.
 
 ---
 

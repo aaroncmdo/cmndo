@@ -7,7 +7,7 @@ import { siteGraph, pseoGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
 import { PSEO_LOCAL } from '@/content/pseo-local'
 import { PSEO_INDEXABLE } from '@/content/pseo-indexable.mjs'
-import { SITE } from '@/lib/site'
+import { SITE, OG_IMAGE } from '@/lib/site'
 import { metaTitle } from '@/lib/meta'
 
 // WP-5 · Programmatic-SEO-Stadtseiten /kfz-unfall/[stadt]/[typ] (20×5 = 100).
@@ -35,7 +35,7 @@ export async function generateMetadata({
     alternates: { canonical: `/kfz-unfall/${stadt}/${typ}` },
     // WP-5: noindex bis Lokal-Content je Stadt steht; gesteuert über PSEO_INDEXABLE.
     robots: { index: PSEO_INDEXABLE, follow: true },
-    openGraph: { type: 'article', url: `/kfz-unfall/${stadt}/${typ}`, title: meta.title, description: meta.description },
+    openGraph: { type: 'article', url: `/kfz-unfall/${stadt}/${typ}`, title: meta.title, description: meta.description, images: [OG_IMAGE] },
   }
 }
 

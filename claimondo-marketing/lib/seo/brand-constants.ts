@@ -22,15 +22,58 @@ export const HQ_COUNTRY = 'Deutschland'
 /** Einzeilige Prosa-Form für Fließtext/llms/Footer: „Hansaring 10, 50670 Köln". */
 export const HQ_ADDRESS_INLINE = `${HQ_STREET}, ${HQ_POSTAL_CODE} ${HQ_CITY}`
 
+// ─── Telefon ──────────────────────────────────────────────────────────────
+// Die Nummern leben HIER und nicht in jsonld.ts, obwohl dort die Consumer
+// hängen: brand-constants importiert nichts (dokumentiertes Zirkel-Verbot),
+// also kann nur diese Richtung funktionieren. `jsonld.ts` re-exportiert sie,
+// damit die ~48 bestehenden `from '@/lib/seo/jsonld'`-Importe unverändert
+// bleiben — und die Nummer trotzdem an genau EINER Stelle steht.
+
+/**
+ * PRIMAERE Kontaktnummer = Mobil (Aaron-Entscheid 21.08.2026).
+ *
+ * Vorher Festnetz 0221, dort vermerkt mit „NICHT anfassen" — es ist die
+ * matelso/aircall-Call-Tracking-Nummer. Aaron hat den Wechsel in Kenntnis
+ * dieser Konsequenz entschieden: die fünf Cluster-Domains führten längst die
+ * Mobilnummer, damit stand auf zwei Auftritten eine verschiedene Hauptnummer.
+ *
+ * ⚠ WAS DER WECHSEL KOSTET: Anrufe von der Website laufen nicht mehr über
+ * matelso/aircall — die Zuordnung „welche Seite hat diesen Anruf ausgelöst"
+ * entfällt. Am teuersten auf `/kfzgutachter-lp` (reine Paid-Traffic-Seite:
+ * dort WAR der Anruf die Ads-Conversion).
+ */
+export const PHONE_E164 = '+4915153608515'
+export const PHONE_DISPLAY = '0151 5360 8515'
+
+/**
+ * Festnetz = der alte matelso/aircall-Call-Tracking-Anschluss.
+ *
+ * ⚠ SEIT 21.08.2026 OHNE CONSUMER — und das ist Absicht, kein toter Code.
+ * Zuerst hielt diese Konstante Impressum + Datenschutz auf dem Festnetz; auf
+ * Nachfrage hat Aaron entschieden, dass auch die Pflichtangaben die
+ * Mobilnummer führen (der Anschluss ist erreichbar, § 5 DDG verlangt keine
+ * bestimmte Nummernart — nur eine, unter der man ankommt).
+ *
+ * Sie bleibt stehen, weil sie der RÜCKWEG ist: soll das Call-Tracking wieder
+ * greifen, ist es ein Wert statt einer Recherche, welche Nummer es war.
+ * Vor dem Löschen: `PROJECT-mobilnummer-primaer-call-tracking-weg` lesen.
+ */
+export const PHONE_FESTNETZ_E164 = '+4922125906530'
+export const PHONE_FESTNETZ_DISPLAY = '0221 25906530'
+
 // ─── §3 — 12 kanonische Datenpunkt-Saetze (D1–D12) ────────────────────────
 
 export const BRAND_STATEMENT_D1 =
   'Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland.'
 
-// Aus den Adress-Atomen komponiert — Ergebnis byte-identisch zur G0-approved
+// Aus den Adress-Atomen komponiert — Form byte-identisch zur G0-approved
 // Doc-30-Phrase: „Sitz: Hansaring 10, 50670 Köln · Telefon: … · E-Mail: …".
+// ⚠ Die NUMMER darin ist seit 21.08.2026 die Mobilnummer (Aaron-Entscheid).
+// Sie muss der Website folgen: diese Phrase speist llms.txt und die
+// GEO-Publisher-Angabe — nennt sie eine andere Nummer als die Seite selbst,
+// zitieren KI-Systeme eine Nummer, die auf keinem CTA steht.
 export const BRAND_CONTACT_D2 =
-  `Sitz: ${HQ_ADDRESS_INLINE} · Telefon: 0221 25906530 · E-Mail: info@claimondo.de`
+  `Sitz: ${HQ_ADDRESS_INLINE} · Telefon: ${PHONE_DISPLAY} · E-Mail: info@claimondo.de`
 
 export const BRAND_NETZWERK_D3 =
   'Bundesweites Netzwerk aus hunderten zertifizierten Partner-Sachverständigen — Termin überall in Deutschland in unter 48 Stunden vor Ort.'

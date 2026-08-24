@@ -2204,7 +2204,12 @@
       "sv_popup_bewertungen": "Opinie",
       "sv_popup_cta": "Wyślij zapytanie przez Wizard →",
       "beratung_label": "Doradztwo"
-    }
+    },
+    "sprung_staedte": "Miasta",
+    "sprung_ratgeber": "Poradnik",
+    "sprung_schliessen": "Zamknij",
+    "sprung_hinweis": "Kliknięcie centruje mapę — pozostajesz w wyszukiwarce. Strzałka otwiera stronę miasta.",
+    "sprung_infos": "Strona miasta"
   },
   "werkstatt_finden": {
     "sr_h1": "Znajdź warsztat samochodowy w pobliżu — interaktywna mapa sprawdzonych warsztatów partnerskich"
@@ -3788,6 +3793,7 @@
     "form_consent": "Wysyłając formularz, akceptuję <link>politykę prywatności</link>.",
     "form_toast_success": "Dziękujemy! Oddzwonimy w ciągu 15 minut.",
     "form_toast_error": "Wysłanie nie powiodło się",
+    "form_toast_rate_limit": "Zbyt wiele zgłoszeń. Spróbuj ponownie za kilka minut.",
     "trust_kpis": [
       {
         "wert": "2.000+",
@@ -3886,7 +3892,21 @@
     "faq_130_antwort": "Reguła 130% (BGH VI ZR 67/91) pozwala na koszty naprawy do 130 % wartości odtworzeniowej pojazdu — pod warunkiem fachowej naprawy zgodnie z ekspertyzą i dalszego użytkowania pojazdu przez 6 miesięcy.",
     "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
     "cta_p": "Zgłoś online w 5 minut — wyznaczymy wolnego rzeczoznawcę {ort} w ciągu 48 h.",
-    "cta_karte": "Pokaż na mapie"
+    "cta_karte": "Pokaż na mapie",
+    "kfzbestand_eyebrow": "Dane urzędowe",
+    "kfzbestand_h2": "Zarejestrowane pojazdy w {stadt}",
+    "kfzbestand_text": "W {stadt} zarejestrowanych jest {pkw} samochodów osobowych, w tym {gewerblich} na właścicieli firmowych. Do tego dochodzi {lkw} samochodów ciężarowych i {kraftraeder} motocykli.",
+    "kfzbestand_quote": "To {proTausend} samochodów na 1000 mieszkańców.",
+    "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}",
+    "amtlich_eyebrow": "Dane urzędowe",
+    "amtlich_h2": "Ruch drogowy i wypadki w mieście {ort}",
+    "amtlich_intro": "Atlas wypadków niemieckich urzędów statystycznych federacji i krajów związkowych rejestruje każdy wypadek drogowy z obrażeniami ciała wraz z dokładną lokalizacją. Dla miasta {ort} w okresie {zeitraum} wynikają z niego następujące skupiska:",
+    "amtlich_hinweis": "Dla każdego miejsca oceniono obszar o wielkości około 100 metrów. Liczby nie wskazują przyczyn — ruchliwa droga główna notuje więcej wypadków niż ulica boczna.",
+    "amtlich_quelle": "Źródło: <link>{quelle}</link> — {lizenz}",
+    "verkehr_h3": "Jakie natężenie ruchu tam panuje",
+    "verkehr_intro": "Federalny Instytut Badawczy Dróg mierzy ruch na autostradach i drogach krajowych w sposób ciągły. Te punkty pomiarowe znajdują się najbliżej miasta {ort} (dane roczne za {jahr}):",
+    "verkehr_zaehlstelle": "Punkt pomiarowy {name}, odległość {km} km",
+    "verkehr_quelle": "Źródło: <link>stałe punkty pomiarowe BASt</link> — {lizenz}"
   },
   "onboarding_wizard": {
     "erfolg_titel": "Termin pomyślnie zarejestrowany!",
@@ -4023,7 +4043,7 @@
   },
   "page_meta": {
     "check": {
-      "title": "Bezpłatne sprawdzenie roszczenia po wypadku | Claimondo",
+      "title": "Bezpłatne sprawdzenie roszczenia po wypadku",
       "description": "Sprawdź w 3 pytaniach: co Ci się należy po wypadku nie z Twojej winy? Ekspertyza szkody, utrata wartości, przestój, koszty adwokata — bezpłatnie i bez ryzyka kosztów.",
       "og_description": "W 60 sekund sprawdź, co Ci się należy po wypadku. Bezpłatnie, bez zobowiązań.",
       "twitter_title": "Bezpłatne sprawdzenie roszczenia po wypadku",
@@ -4036,7 +4056,7 @@
       "twitter_description": "Po wypadku: ekspertyza, prawnik, warsztat & wypłata — koordynowane z jednej ręki. 0 € dla niezawinienie poszkodowanych."
     },
     "vorteile": {
-      "title": "Korzyści — odzyskane potrącenia ubezpieczyciela · Claimondo",
+      "title": "Korzyści — odzyskane potrącenia ubezpieczyciela",
       "description": "0 € udziału własnego przy niezawinionej kolizji (§249 BGB). Niezależny rzeczoznawca zamiast potrącenia przez serwis kontrolny. Proszę zobaczyć, co rzeczywiście Panu/Pani przysługuje.",
       "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 % wg NDR/BGH) odzyskujemy."
     },
@@ -4048,15 +4068,15 @@
       "twitter_description": "Utrata wartości, potrącenia, reguła 130 % — wszystkie odpowiedzi w przeglądzie."
     },
     "wie_es_funktioniert": {
-      "title": "Jak to działa — od kolizji do wypłaty w 5 krokach · Claimondo",
+      "title": "Jak to działa — od kolizji do wypłaty w 5 krokach",
       "description": "W 5 krokach od zgłoszenia kolizji do wypłaty — śr. 32 dni. Oddzwonienie poniżej 15 min, rzeczoznawca na miejscu poniżej 48 h. Śledzenie na żywo w portalu.",
       "og_description": "W 5 krokach do pełnego odszkodowania — śr. 32 dni. Oddzwonienie doradcy <15 min, rzeczoznawca <48 h."
     },
     "gutachter_finden": {
-      "title": "Znajdź rzeczoznawcę Kfz w pobliżu — mapa & termin poniżej 48 h",
-      "description": "Interaktywna mapa z certyfikowanymi rzeczoznawcami partnerskimi w całych Niemczech. Proszę zobaczyć termin, na miejscu poniżej 48 h. 0 € przy niezawinionej kolizji (§249 BGB).",
-      "og_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
-      "og_description": "Interaktywna mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h. Bezpłatnie dla niezawinienie poszkodowanych wg §249 BGB.",
+      "title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "description": "Certyfikowani rzeczoznawcy samochodowi w {anzahl} niemieckich miastach na jednej mapie — wolne terminy, na miejscu w niecałe 48 h. Bez kosztów wg § 249 BGB.",
+      "og_title": "Znajdź rzeczoznawcę — mapa dla {anzahl} miast",
+      "og_description": "Certyfikowani rzeczoznawcy w {anzahl} miastach Niemiec z wolnymi terminami. Na miejscu w 48 h, bezpłatnie wg § 249 BGB.",
       "twitter_title": "Znajdź rzeczoznawcę Kfz — mapa z rzeczoznawcami",
       "twitter_description": "Mapa wszystkich dostępnych rzeczoznawców w Niemczech. Termin poniżej 48 h."
     },
@@ -4083,25 +4103,25 @@
       "twitter_description": "Zlecenia bez akwizycji. Proszę dopisać się do sieci rzeczoznawców Claimondo."
     },
     "e_auto_gutachter": {
-      "title": "Rzeczoznawca aut elektrycznych po kolizji — prawidłowa ocena szkody wysokonapięciowej · Claimondo",
+      "title": "Rzeczoznawca aut elektrycznych po kolizji — prawidłowa ocena szkody wysokonapięciowej",
       "description": "Ekspertyza auta elektrycznego po niezawinionej kolizji: rzeczoznawca z diagnostyką baterii wysokonapięciowej i prawidłową utratą wartości. Koszty ponosi strona przeciwna.",
       "og_title": "Rzeczoznawca aut elektrycznych po kolizji — prawidłowa ocena szkody wysokonapięciowej",
       "og_description": "Wyspecjalizowany rzeczoznawca z diagnostyką baterii wysokonapięciowej, utratą wartości & oceną opłacalności. Koszty ponosi OC sprawcy (§ 249 BGB)."
     },
     "lkw_gutachter": {
-      "title": "Rzeczoznawca ciężarówek & pojazdów użytkowych po kolizji · Claimondo",
+      "title": "Rzeczoznawca ciężarówek & pojazdów użytkowych po kolizji",
       "description": "Ekspertyza ciężarówki i pojazdu użytkowego po niezawinionej kolizji: własny rzeczoznawca, prawidłowa ocena zabudowy. Koszty ponosi strona przeciwna (§249 BGB).",
       "og_title": "Rzeczoznawca ciężarówek & pojazdów użytkowych po kolizji",
       "og_description": "Własny rzeczoznawca, gospodarcza szkoda z tytułu przestoju (koszty utrzymania / utracony zysk) zamiast ryczałtu jak dla auta osobowego, prawidłowo wyceniona zabudowa. Koszty ponosi OC sprawcy (§ 249 BGB)."
     },
     "motorrad_gutachter": {
-      "title": "Rzeczoznawca motocyklowy po kolizji — niezależny & bezpłatny · Claimondo",
+      "title": "Rzeczoznawca motocyklowy po kolizji — niezależny & bezpłatny",
       "description": "Rzeczoznawca motocyklowy po niezawinionej kolizji: niezależny rzeczoznawca, prawidłowa ocena szkód po upadku i uszkodzeń ramy. Koszty ponosi strona przeciwna.",
       "og_title": "Rzeczoznawca motocyklowy po kolizji — niezależny & bezpłatny",
       "og_description": "Własny rzeczoznawca, odzież ochronna jako pozycja szkody, prawidłowo wyceniona utrata wartości & szkoda całkowita. Koszty ponosi OC sprawcy (§ 249 BGB)."
     },
     "kosten_kfz_gutachten": {
-      "title": "Ile kosztuje ekspertyza Kfz? Dla poszkodowanych 0 € · Claimondo",
+      "title": "Ile kosztuje ekspertyza Kfz? Dla poszkodowanych 0 €",
       "description": "Ile kosztuje ekspertyza Kfz po kolizji? Honoraria wg tabeli BVSK (zwykle 300–1.200 €). Przy niezawinionej kolizji płaci strona przeciwna — 0 €.",
       "og_title": "Ile kosztuje ekspertyza Kfz? Dla poszkodowanych 0 €",
       "og_description": "Objaśniona tabela honorariów BVSK + dlaczego niezawinienie poszkodowani płacą 0 € (§ 249 BGB, BGH VI ZR 67/06)."
@@ -4114,7 +4134,7 @@
       "twitter_description": "Bezpłatnie, natychmiast, niezobowiązująco."
     },
     "unfallskizze": {
-      "title": "Szkic kolizji — bezpłatny wzór (PDF) + 8 wskazówek · Claimondo",
+      "title": "Szkic kolizji — bezpłatny wzór (PDF) + 8 wskazówek",
       "description": "Jak prawidłowo sporządzić szkic kolizji: bezpłatny wzór PDF, instrukcja krok po kroku i wskazówki best-practice. Często decydujący dowód.",
       "og_title": "Szkic kolizji — bezpłatny wzór (PDF) + 8 wskazówek",
       "og_description": "Bezpłatny wzór PDF do wydruku + instrukcja krok po kroku. Szkic kolizji to często decydujący dowód na przebieg zdarzenia."
@@ -4126,25 +4146,25 @@
       "og_description": "Które pozycje ubezpieczyciele potrącają najczęściej? Co mówi BGH? Dane źródłowe + publiczne dowody."
     },
     "versicherung_schickt_gutachter": {
-      "title": "Ubezpieczyciel przysyła rzeczoznawcę — czy muszę to zaakceptować? · Claimondo",
+      "title": "Ubezpieczyciel przysyła rzeczoznawcę — czy muszę to zaakceptować?",
       "description": "OC sprawcy chce przysłać „swojego\" rzeczoznawcę? Nie musi go Pan/Pani akceptować: wg § 249 BGB swobodnie wybiera Pan/Pani własnego, niezależnego rzeczoznawcę. Koszty przy niezawinionej kolizji ponosi strona przeciwna (BGH VI ZR 67/06) — dla Pana/Pani 0 €.",
       "og_title": "Ubezpieczyciel przysyła rzeczoznawcę — czy muszę to zaakceptować?",
       "og_description": "Nie. Swobodny wybór własnego, niezależnego rzeczoznawcy wg § 249 BGB. Koszty ponosi OC sprawcy (BGH VI ZR 67/06)."
     },
     "gegnerische_versicherung_zahlt_nicht": {
-      "title": "OC sprawcy nie płaci — co robić? · Claimondo",
+      "title": "OC sprawcy nie płaci — co robić?",
       "description": "OC sprawcy nie płaci lub potrąca? Po terminie weryfikacji następuje zwłoka (§286 BGB), wraz z odsetkami i kosztami prawnika. Dla Pana/Pani 0 €.",
       "og_title": "OC sprawcy nie płaci — co robić?",
       "og_description": "Zwłoka wg § 286 BGB, odsetki za zwłokę wg § 288 BGB, podlegające zwrotowi koszty prawnika — i dlaczego potrącenia są zwykle nieuprawnione (BGH VI ZR 280/22)."
     },
     "unfall_was_tun": {
-      "title": "Kolizja — co robić jako poszkodowany? Kroki & prawa · Claimondo",
+      "title": "Kolizja — co robić jako poszkodowany? Kroki & prawa",
       "description": "Niezawiniona kolizja — co robić? Działania natychmiastowe, kto odpowiada i Pana/Pani roszczenia wg §249 BGB. Prawnika i ekspertyzę pokrywa strona przeciwna — 0 €.",
       "og_title": "Kolizja — co robić jako poszkodowany? Kroki & prawa",
       "og_description": "Działania natychmiastowe, odpowiedzialność wg typu kolizji, Pana/Pani roszczenia (§ 249 BGB) i sztuczki ubezpieczycieli — zwięźle objaśnione. Dla niezawinienie poszkodowanych 0 €."
     },
     "unverschuldeter_unfall_rechte": {
-      "title": "Niezawiniona kolizja — Pana/Pani prawa & roszczenia · Claimondo",
+      "title": "Niezawiniona kolizja — Pana/Pani prawa & roszczenia",
       "description": "Po niezawinionej kolizji przysługuje Panu/Pani pełne przywrócenie stanu (§249 BGB): ekspertyza, utrata wartości, utrata możliwości korzystania, auto zastępcze, prawnik. Dla Pana/Pani 0 €.",
       "og_title": "Niezawiniona kolizja — Pana/Pani prawa & roszczenia",
       "og_description": "Pełne przywrócenie stanu wg § 249 BGB: ekspertyza, naprawa, utrata wartości, utrata możliwości korzystania, auto zastępcze, prawnik, zadośćuczynienie — pokrywane przez OC sprawcy."
@@ -4185,19 +4205,19 @@
       "og_description": "Claimondo, Neogutachter, Unfallpaten i Unfallgiganten w obiektywnym bezpośrednim porównaniu — koszty, świadczenia, pewność prawna."
     },
     "decoder": {
-      "title": "Dekoder pism ubezpieczyciela — odpowiedź na każde pismo o cięciach · Claimondo",
+      "title": "Dekoder pism ubezpieczyciela — odpowiedź na każde pismo o cięciach",
       "description": "Ubezpieczyciel obniża utratę wartości, auto zastępcze lub utratę możliwości korzystania? Nasze dekodery rozkładają standardowe pisma ubezpieczycieli i dają odpowiedź zgodną z BGH.",
       "og_title": "Dekoder pism ubezpieczyciela",
       "og_description": "Co ubezpieczyciel pisze → co ma na myśli → kontrargument zgodny z BGH. Wzory odpowiedzi na najczęstsze pisma o cięciach i pisma standardowe."
     },
     "haftpflicht": {
-      "title": "Słownik szkód z OC Kfz — pojęcia, roszczenia & kwoty · Claimondo",
+      "title": "Słownik szkód z OC Kfz — pojęcia, roszczenia & kwoty",
       "description": "Słownik szkody z OC Kfz: podstawy odpowiedzialności, pozycje szkody i terminy — każde pojęcie z odniesieniem do BGH. Bez Pana/Pani winy? §249 BGB.",
       "og_title": "Słownik szkód z OC Kfz",
       "og_description": "Wszystkie pojęcia dotyczące szkody z OC Kfz — uporządkowane według klastrów, z odniesieniem do BGH i typowymi kwotami odpowiedzialności."
     },
     "sachverstaendige": {
-      "title": "Rzeczoznawcy Kfz & stowarzyszenia — BVSK, DEKRA, IfS, öbV · Claimondo",
+      "title": "Rzeczoznawcy Kfz & stowarzyszenia — BVSK, DEKRA, IfS, öbV",
       "description": "Jakie są stowarzyszenia i certyfikaty rzeczoznawców Kfz — BVSK, DEKRA, GTÜ, KÜS, TÜV, ZKF? I dlaczego wg §249 BGB swobodnie wybiera Pan/Pani własnego.",
       "og_title": "Rzeczoznawcy Kfz & stowarzyszenia w Niemczech",
       "og_description": "BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV i usługodawcy kontrolni — wyjaśnione przystępnie, z Pana/Pani prawami wg § 249 BGB."
@@ -4243,7 +4263,7 @@
       "og_description": "W szkodzie samochodowej synonimy — decydują niezależność i Twój wolny wybór rzeczoznawcy."
     },
     "kfz_gutachter_nutzungsausfall": {
-      "title": "Oblicz odszkodowanie za brak możliwości korzystania z pojazdu | Claimondo",
+      "title": "Oblicz odszkodowanie za brak możliwości korzystania z pojazdu",
       "description": "Nutzungsausfall nach Unfall berechnen — Tagessatz nach Fahrzeugklasse (23–219 €) × Ausfalldauer, mit Alters-Rückstufung. Kostenloser Rechner + Tabelle aller Klassen.",
       "og_title": "Oblicz odszkodowanie za brak możliwości korzystania z pojazdu",
       "og_description": "Wie viel Geld steht Ihnen pro Ausfalltag zu? Tagessätze aller Fahrzeugklassen und sofortige Schätzung."

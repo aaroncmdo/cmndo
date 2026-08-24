@@ -4,21 +4,50 @@
 
 // HQ-Adresse aus dem Brand-SOT (Doc 30 §3) — kein Hardcode mehr hier.
 // brand-constants importiert nichts → kein Zirkel (jsonld → brand-constants ist einseitig).
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from './brand-constants'
+import {
+  HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME,
+  PHONE_E164, PHONE_DISPLAY,
+} from './brand-constants'
 
 export const SITE_URL = 'https://claimondo.de'
 // Marketing-Subdomains für B2B-Recruiting — kanonische Roots der jeweiligen Landingpages.
 export const GUTACHTER_LANDING_URL = 'https://gutachter.claimondo.de'
 export const MAKLER_LANDING_URL = 'https://makler.claimondo.de'
+
+/**
+ * Standard-Vorschaubild fuer `openGraph.images`.
+ *
+ * Muss von jeder Seite mitgegeben werden, die einen EIGENEN `openGraph`-Block
+ * setzt: Next merged `metadata` nur FLACH (Doku "Merging") — ein eigener
+ * openGraph-Block ersetzt den des Layouts komplett, inklusive `images`. Genau
+ * so verloren 167 Seiten ihr Vorschaubild, obwohl das Layout eines definiert.
+ */
+export const OG_DEFAULT_IMAGES = [
+  { url: '/og-default.png', width: 1200, height: 630, alt: 'Claimondo' },
+]
 export const WERKSTATT_LANDING_URL = 'https://werkstatt.claimondo.de'
 export const FLOTTE_LANDING_URL = 'https://flotte.claimondo.de'
 export const SITE_NAME = 'Claimondo'
-export const PHONE_E164 = '+4922125906530'
-export const PHONE_DISPLAY = '0221 25906530'
+/**
+ * Telefon-Konstanten — DEFINIERT in `brand-constants.ts`, hier nur
+ * durchgereicht.
+ *
+ * WARUM DER UMWEG: die Nummern gehoeren in den Brand-SOT, aber dort haengen
+ * keine Consumer — die ~48 Call-Sites importieren historisch aus `jsonld`.
+ * Und `brand-constants` darf nichts importieren (Zirkel-Verbot, s. oben), die
+ * Richtung ist also vorgegeben. Der Re-Export haelt beide Seiten gluecklich:
+ * bestehende Importe bleiben unveraendert, die Nummer steht trotzdem an genau
+ * EINER Stelle.
+ *
+ * PHONE_E164 ist seit 21.08.2026 die MOBILNUMMER (Aaron-Entscheid);
+ * PHONE_FESTNETZ_* traegt weiter die Anbieterkennzeichnung. Begruendung und
+ * die Kosten des Wechsels stehen an der Definition.
+ */
+export { PHONE_E164, PHONE_DISPLAY, PHONE_FESTNETZ_E164, PHONE_FESTNETZ_DISPLAY } from './brand-constants'
+
 export const CONTACT_EMAIL = 'info@claimondo.de'
-/** WhatsApp-Nummer = Mobil (WhatsApp-faehig) — bewusst getrennt von PHONE_E164/
- *  PHONE_DISPLAY (Festnetz 0221 = matelso/aircall Call-Tracking-Nummer, NICHT anfassen).
- *  Einzige Code-Quelle des WhatsApp-Deep-Links (Sweep 2026-05-23; Nummer korrigiert 2026-05-27). */
+/** WhatsApp-Deep-Link — dieselbe Mobilnummer wie PHONE_E164, aber eigener Kanal
+ *  (wa.me statt tel:). Einzige Code-Quelle (Sweep 2026-05-23; korrigiert 2026-05-27). */
 export const WHATSAPP_E164 = '+4915153608515'
 export const WHATSAPP_HREF = 'https://wa.me/4915153608515'
 
@@ -260,10 +289,23 @@ export function serviceSchema(args: {
 }
 
 // FAQPage — Princeton GEO: +40% AI-Visibility
-export function faqPageSchema(faqs: Array<{ frage: string; antwort: string }>) {
+//
+// `opts.dateModified` liefert das Aktualitaets-Signal (GEO-Baseline 18.08.2026,
+// Befund B2: 14 von 27 Seiten trugen keinerlei Datum). FAQPage ist ein WebPage-
+// Subtyp, `dateModified`/`url` sind dort gueltige Properties. Datum kommt aus
+// lib/seo/freshness.ts (Routen) bzw. lib/kfz-gutachter/freshness.ts (Staedte) —
+// beide gepflegt, nie `new Date()`: ein Datum, das ohne inhaltliche Aenderung
+// mitwandert, entwertet das Signal.
+export function faqPageSchema(
+  faqs: Array<{ frage: string; antwort: string }>,
+  opts?: { dateModified?: string; url?: string },
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    ...(opts?.url && { url: opts.url.startsWith('http') ? opts.url : `${SITE_URL}${opts.url}` }),
+    ...(opts?.dateModified && { dateModified: opts.dateModified }),
+    inLanguage: 'de-DE',
     mainEntity: faqs.map((f) => ({
       '@type': 'Question',
       name: f.frage,

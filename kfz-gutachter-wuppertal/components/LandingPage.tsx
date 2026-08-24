@@ -13,6 +13,7 @@ import { EinsatzgebietSection } from './EinsatzgebietSection'
 import { FaqAccordion } from './FaqAccordion'
 import { RatgeberSection } from './RatgeberSection'
 import { SeoBodySection } from './SeoBodySection'
+import { LokalinhaltSection } from './LokalinhaltSection'
 import { FinalCta } from './FinalCta'
 import { Footer } from './Footer'
 import { FabStack } from './FabStack'
@@ -55,6 +56,7 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
             ans Block-Ende (Swap Ratgeber<->SeoBody; keine Copy-Aenderungen). */}
         <FaqAccordion city={city} />
         <SeoBodySection stadtSlug={city.slug} stadtName={city.name} />
+        <LokalinhaltSection stadtSlug={city.slug} stadtName={city.name} />
         <RatgeberSection />
         <FinalCta city={city} />
       </main>

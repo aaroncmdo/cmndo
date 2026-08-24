@@ -40,6 +40,53 @@ let sock = null
 let connectionState = 'disconnected' // disconnected | connecting | open
 let lastQr = null
 
+/** Device-Suffix abschneiden: "4915153608515:4" → "4915153608515". */
+function stripDevice(id) {
+  return String(id ?? '').split(':')[0]
+}
+
+/**
+ * Telefon-Nummer aus dem Absender-JID gewinnen.
+ *
+ * WhatsApp liefert seit Juni 2026 zunehmend LID-JIDs ("<lid>@lid") statt der
+ * frueheren "<nummer>@s.whatsapp.net". Das alte split('@')[0] gab dann die LID
+ * als vermeintliche Telefonnummer weiter — die App findet damit keinen Fall
+ * mehr (matchInboundToFall matcht auf die letzten 9 Ziffern). Ab 10.07.2026 kam
+ * dadurch keine einzige zuordenbare Nummer mehr an; auf prod waren 200 von 200
+ * inbound-Nachrichten ohne Fall-/Lead-Bezug und damit in keiner UI sichtbar.
+ *
+ * Reihenfolge: klassischer PN-JID → key.remoteJidAlt → persistenter LID-Store.
+ * Laesst sich nichts aufloesen, wird die LID durchgereicht (Nachricht geht
+ * nicht verloren) und geloggt — via kennzeichnet den Pfad.
+ */
+async function resolvePhoneFromJid(msg, remoteJid) {
+  if (remoteJid.endsWith('@s.whatsapp.net')) {
+    return { phone: stripDevice(remoteJid.split('@')[0]), via: 'pn_jid' }
+  }
+
+  if (remoteJid.endsWith('@lid')) {
+    const lid = stripDevice(remoteJid.split('@')[0])
+
+    // remoteJidAlt traegt bei LID-Nachrichten die PN-Variante mit.
+    const alt = msg.key?.remoteJidAlt
+    if (alt && alt.endsWith('@s.whatsapp.net')) {
+      return { phone: stripDevice(alt.split('@')[0]), via: 'remoteJidAlt' }
+    }
+
+    // Persistenter LID→PN-Store (auth_info_baileys/lid-mapping-*_reverse.json).
+    try {
+      const pn = await sock?.signalRepository?.lidMapping?.getPNForLID(`${lid}@lid`)
+      if (pn) return { phone: stripDevice(String(pn).split('@')[0]), via: 'lid_store' }
+    } catch (err) {
+      logger.warn({ err, lid }, 'LID→PN-Lookup fehlgeschlagen')
+    }
+
+    return { phone: lid, via: 'unresolved_lid' }
+  }
+
+  return { phone: stripDevice(remoteJid.split('@')[0]), via: 'other_jid' }
+}
+
 async function startSock() {
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_DIR)
 
@@ -62,18 +109,53 @@ async function startSock() {
 
   sock.ev.on('creds.update', saveCreds)
 
+  // Eingehende Nachrichten kommen als 'notify'. EIGENE Nachrichten (Handy,
+  // WhatsApp-Web, App-Send-Echo) kommen als 'append' — am 23.08. gemessen:
+  //   {"type":"append","anzahl":1,"from_me":[true]}
+  // Der frühere `if (type !== 'notify') return` verwarf sie deshalb ALLE, auch
+  // nachdem der fromMe-Skip weiter unten entfernt war. Ein Filter vor der
+  // eigentlichen Weiche — die Umstellung wirkte dadurch nicht.
+  const ERLAUBTE_TYPEN = new Set(['notify', 'append'])
+  /** 'append' liefert nach einem Reconnect auch ALTE Nachrichten (Verlaufs-Sync).
+   *  Nur frische durchlassen, sonst flutet ein Reconnect die Akten mit Historie. */
+  const APPEND_MAX_ALTER_MS = 10 * 60_000
+
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return
+    if (!ERLAUBTE_TYPEN.has(type)) return
     for (const msg of messages) {
-      // Nur eingehende Nachrichten (nicht eigene Sends)
-      if (msg.key.fromMe) continue
+      if (type === 'append') {
+        // Fremde Nachrichten kommen als 'notify'; ein fremdes 'append' ist
+        // Verlaufs-Sync und wurde entweder schon erfasst oder ist alt.
+        if (!msg.key.fromMe) continue
+        const tsMs = Number(msg.messageTimestamp ?? 0) * 1000
+        if (tsMs && Date.now() - tsMs > APPEND_MAX_ALTER_MS) continue
+      }
+      // Eigene Nachrichten werden MITGENOMMEN (Aaron 23.08.). Frueher stand hier
+      // `if (msg.key.fromMe) continue` — dadurch fehlte im System alles, was vom
+      // Handy oder WhatsApp-Web geschrieben wurde, und der Verlauf jeder Akte war
+      // einseitig. Zugleich schliesst das die groessere Luecke: 11 App-Stellen
+      // senden direkt ueber sendWhatsAppText, ohne in `nachrichten` zu schreiben
+      // (800 Sends standen 36 DB-Zeilen gegenueber). Ihr Echo laeuft hier durch —
+      // der Kanal erfasst sich damit selbst, statt dass jeder Sender daran denken
+      // muss. Doppelte werden App-seitig ueber external_message_id verworfen.
+      const fromMe = !!msg.key.fromMe
 
       const remoteJid = msg.key.remoteJid ?? ''
       // Gruppen-Nachrichten ignorieren (JID endet auf @g.us)
       if (remoteJid.endsWith('@g.us')) continue
+      // Status-/Broadcast-Updates ignorieren ("status@broadcast"). Sie liefen
+      // bisher als vermeintliche Kundennachricht durch und endeten in einem 400
+      // (`phone: "status"`), sichtbar im Log am 21.08.
+      if (remoteJid.endsWith('@broadcast')) continue
 
-      // Telefon-Nummer aus JID extrahieren: "4915123456789@s.whatsapp.net" → "4915123456789"
-      const phone = remoteJid.split('@')[0]
+      // Telefon-Nummer aus JID gewinnen — haelt LID-JIDs ("<lid>@lid") aus.
+      const { phone, via } = await resolvePhoneFromJid(msg, remoteJid)
+      if (via === 'unresolved_lid') {
+        logger.warn(
+          { remote_jid: remoteJid, phone },
+          'LID nicht aufloesbar — LID wird als phone durchgereicht, Fall-Match wird fehlschlagen',
+        )
+      }
 
       // Nachrichtentext — unterstützt conversation + extendedTextMessage
       const text =
@@ -137,6 +219,10 @@ async function startSock() {
               ? Number(msg.messageTimestamp)
               : Date.now(),
             has_media: hasMedia,
+            // Bei fromMe ist `phone` der EMPFAENGER, nicht der Absender — die
+            // App speichert die Zeile dann als outbound und loest keinen der
+            // Inbound-Effekte aus (kein Lead, keine Team-WA, keine Text-Intents).
+            from_me: fromMe,
             ...(media ? { media } : {}),
           }),
         })
@@ -144,7 +230,10 @@ async function startSock() {
           const body = await res.text().catch(() => '')
           logger.warn({ phone, status: res.status, body }, 'inbound-callback fehlgeschlagen')
         } else {
-          logger.info({ phone, message_id: msg.key.id }, 'inbound-nachricht geloggt')
+          logger.info(
+            { phone, via, from_me: fromMe, message_id: msg.key.id },
+            fromMe ? 'eigene nachricht geloggt' : 'inbound-nachricht geloggt',
+          )
         }
       } catch (err) {
         logger.error({ err, phone }, 'inbound-callback Netzwerk-Fehler')

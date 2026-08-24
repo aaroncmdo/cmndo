@@ -13,6 +13,29 @@ import {
 // scripts/port-pseo.py).
 export * from '@/content/pseo-data.generated'
 
+/**
+ * Stand der pSEO-Vorlage (ISO, YYYY-MM-DD) — speist `datePublished`/`dateModified`
+ * im Article-Schema der ~100 Stadt-x-Typ-Seiten.
+ *
+ * WARUM: `pseoGraph()` erzeugt einen `Article`-Node, und die Route deklariert
+ * `openGraph: { type: 'article' }` — ohne Datum ist das ein Artikel ohne
+ * Erscheinungsdatum. `articleGraph()` und `restGraph()` in derselben Datei setzen
+ * beide Felder laengst; nur dieser Pfad hatte sie nie. Aktualitaet ist ein
+ * dokumentierter Zitations-Faktor fuer KI-Antwortmaschinen (GEO-Baseline
+ * 18.08.2026, Befund B2 — auf claimondo.de bereits behoben).
+ *
+ * Die Seiten sind template-generiert, haben also kein individuelles Datum: Dieser
+ * Wert beschreibt den Stand von Vorlage UND Stadtdaten gemeinsam. Startwert ist
+ * das git-Datum von `lib/pseo.ts`, `lib/jsonld.ts` und der Route (alle 2026-07-18)
+ * — nachweisbar, nicht geschaetzt.
+ *
+ * ⚠ PFLEGE: Wer die Vorlage oder `content/pseo-data.generated` inhaltlich aendert,
+ * bumpt diesen Wert. Bewusst KEIN `new Date()`: ein Datum, das ohne inhaltliche
+ * Aenderung mitwandert, ist kein Aktualitaetssignal, sondern Rauschen — und
+ * entwertet das Signal fuer die ganze Domain.
+ */
+export const PSEO_LAST_UPDATED = '2026-07-18'
+
 // Hoechster Anteil ueber alle Typen → Intro-Wording „haeufigste" vs „eine der haeufigsten".
 const MAX_PCT = Math.max(...Object.values(PSEO_TYPES).map((t) => t.pct))
 
@@ -60,7 +83,15 @@ export function deNum(n: number): string {
 // FAQPage-Schema garantiert uebereinstimmen (Google-Richtlinie).
 export function pseoMeta(p: PseoPage): { title: string; description: string } {
   return {
-    title: `${p.type.label} in ${p.city.name} · Sachverständigen finden + Schaden abrechnen`,
+    // Der fruehere Zusatz "· Sachverstaendigen finden + Schaden abrechnen" kostete
+    // allein 44 Zeichen. Folge (18.08. gemessen): ALLE 100 PSEO-Titel lagen ueber
+    // 60 Zeichen, Median 70 — und weil metaTitle() den Marken-Suffix ab 60 Zeichen
+    // weglaesst, erschien "autounfall.io" auf KEINER der 100 Seiten im Titel.
+    // Ohne den Zusatz: Median 40, alle unter 60, Marke auf allen 100 sichtbar.
+    // Der Zusatz war Fuellmaterial, das Google in der Anzeige ohnehin abschnitt;
+    // uebrig bleibt das exakte Suchwort. (Aaron-Entscheidung, Variante C aus 4.)
+    // Die H1 ist NICHT betroffen — sie baut sich unabhaengig aus type/city.
+    title: `${p.type.label} in ${p.city.name}`,
     description: `${p.type.label} in ${p.city.name}: ${p.type.pct}% aller Unfälle, Ø ${p.type.schaden} Schaden. BGH ${p.type.bgh}. Unabhängige Sachverständige in Ihrer Region.`,
   }
 }

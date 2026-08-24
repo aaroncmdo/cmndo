@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/anwaltskosten-erstattung
+meta_title: Anwaltskosten nach Unfall — wer zahlt
 type: glossar-spoke
 cluster: H3
 nummer: H3.8
@@ -147,7 +148,7 @@ Bei unverschuldetem Unfall: **Anwalt einschalten kostet dich nichts**. Du gehst 
 - Bei **jedem Personenschaden** — auch bei vermeintlich leichten Verletzungen (Spätfolgen!)
 - Bei **Sachschaden über 1.000 €**
 - Bei **strittiger Schuldfrage** oder Mitverschuldens-Behauptung
-- Bei **Versicherer-Strategien** (Verzögerung, Pauschal-Kürzungen, [Restwert-Streit](/decoder/restwertboersen-angebot))
+- Bei **Versicherer-Strategien** (Verzögerung, Pauschal-Kürzungen, Restwert-Streit)
 - Bei **Vergleichs-Angebot** vom Versicherer
 
 ### 🛠 Wie Anwalt finden

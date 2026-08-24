@@ -11,8 +11,9 @@ import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import {
   onlineGutachtenSchema, faqPageSchema, breadcrumbsSchema,
-  jsonLdScript, SITE_URL, PHONE_DISPLAY,
+  jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
+import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
 import { localeAlternates } from '@/lib/seo/alternates'
 
 const PAGE_PATH = '/kfz-gutachter/online-kfz-gutachten'
@@ -81,7 +82,10 @@ export default function OnlineKfzGutachtenPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={jsonLdScript([
           onlineGutachtenSchema({ modified: '2026-05-25' }),
-          faqPageSchema(FAQ_SCHEMA),
+          faqPageSchema(FAQ_SCHEMA, {
+            dateModified: getRouteLastUpdatedISO('/kfz-gutachter/online-kfz-gutachten'),
+            url: '/kfz-gutachter/online-kfz-gutachten',
+          }),
           breadcrumbsSchema([
             { name: 'Startseite', url: '/' },
             { name: 'Kfz-Gutachter', url: '/kfz-gutachter' },
@@ -177,7 +181,9 @@ export default function OnlineKfzGutachtenPage() {
           </p>
 
           {/* Zitat-Karte */}
-          <blockquote className="my-6 rounded-ios-md border-l-4 border-claimondo-navy bg-white p-5 shadow-glass-card">
+          {/* Kein farbiger Balken links: bg-white plus Schatten grenzen die Karte
+              gegen den hellen Seitenhintergrund bereits ab. */}
+          <blockquote className="my-6 rounded-ios-md bg-white p-5 shadow-glass-card">
             <p className="text-[15px] italic leading-relaxed text-claimondo-navy">
               {t('urteil_zitat')}
             </p>
@@ -359,7 +365,7 @@ export default function OnlineKfzGutachtenPage() {
               {t('cta_anfrage')}
             </Link>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-5 w-5" />

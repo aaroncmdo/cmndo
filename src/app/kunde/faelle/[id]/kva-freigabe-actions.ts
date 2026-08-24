@@ -73,7 +73,10 @@ export async function genehmigeKvaPortal(
             .eq('claim_id', claimId)
             .maybeSingle()
           const fallId = (bridge as { fall_id: string } | null)?.fall_id ?? claimId
-          await svc.from('fall_dokumente').insert({
+          // Die unterschriebene Freigabe liegt hier bereits im Storage. Ohne diesen
+          // Eintrag ist sie in keiner Akte auffindbar — das umschliessende try
+          // faengt den Insert nicht.
+          const { error: freigabeDokFehler } = await svc.from('fall_dokumente').insert({
             fall_id: fallId,
             claim_id: claimId,
             dokument_typ: 'reparaturauftrag',
@@ -87,6 +90,9 @@ export async function genehmigeKvaPortal(
             uploaded_by_kunde: true,
             sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
           } as never)
+          if (freigabeDokFehler) {
+            console.error(`[genehmigeKvaPortal] Reparaturauftrag-Eintrag NICHT erstellt (Fall ${fallId}):`, freigabeDokFehler.message)
+          }
         }
       }
     } catch (e) {

@@ -43,6 +43,15 @@ for f in SRC.glob("*.html"):
         pass
 
 # Spezial-Routen (Tools/Lead/Home/Decoder-Hub)
+#
+# WARNUNG (Broken-Link-Crawl 21.08.2026): dieses Mapping greift NUR ueber
+# rewrite_href(), also nur fuer href-ATTRIBUTE. Steht eine autounfall.io-Adresse
+# als KLARTEXT im Fliesstext (z.B. in einer WhatsApp-Vorlage zum Kopieren), faellt
+# sie durch und bleibt auf dem alten Prototyp-Pfad stehen. Real passiert mit
+# "autounfall.io/ihre-rechte?..." auf /schadenfreiheitsklasse -> 404 in einem Text,
+# den Nutzer an ihren Unfallgegner schicken. In content/rest-pages.generated.ts
+# von Hand korrigiert; wer diesen Generator neu laufen laesst, muss rohe URLs
+# im Textkoerper mit derselben Tabelle ersetzen, sonst kommt der 404 zurueck.
 SPECIAL = {
     "SACHVERSTAENDIGE-FINDEN.html": "/gutachter-finden",
     "PROTOTYP-AUTOUNFALL-HUB.html": "/",

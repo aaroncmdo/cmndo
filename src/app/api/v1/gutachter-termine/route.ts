@@ -117,10 +117,28 @@ export async function GET(req: Request) {
     wunschterminIso,
   })
 
+  // Ort-Teil aller Deep-Links (einmal gebaut, unten von interaktive_karte_url mitbenutzt).
+  const ortQuery = plz
+    ? `plz=${encodeURIComponent(plz)}`
+    : `stadt=${encodeURIComponent(ort ?? '')}`
+
   // OeffentlichesSvProfil ist bereits die anon-kundensichere Projektion (kein
   // score/ETA/Nachname); svId ist ein opakes, RLS-geschuetztes Buchungs-Handle.
   const gutachter = profile.map((p) => ({
     id: p.svId,
+    /**
+     * Fertiger Buchungs-Link GENAU fuer diesen Gutachter — der Grund, warum dieses Feld
+     * existiert: `interaktive_karte_url` (unten) zeigt auf die Karte, verliert dabei aber
+     * die Auswahl. Eine KI-Antwort, die "Gutachter X hat Donnerstag frei" sagt und dann
+     * auf die allgemeine Karte verlinkt, schickt den Kunden zurueck an den Anfang.
+     *
+     * Der Link setzt den Gutachter im Finder vor; Adresse, Schadenart und Kontaktdaten
+     * gibt der Kunde weiterhin selbst ein und bestaetigt die Buchung selbst. Bewusst KEIN
+     * Buchungs-Endpunkt: ein GET, das einen Termin schreibt, wuerde von jedem Crawler
+     * ausgeloest. Ist der SV bis zum Klick belegt, faellt die Vorauswahl still auf den
+     * bestgerankten zurueck — der Kunde sieht eine gueltige Liste, keinen Fehler.
+     */
+    buchungs_url: `${SITE_URL}/gutachter-finden?${ortQuery}&sv=${encodeURIComponent(p.svId)}`,
     vorname: p.vorname,
     profilbild: p.profilbild,
     bewertung_schnitt: p.bewertungDurchschnitt,
@@ -128,7 +146,24 @@ export async function GET(req: Request) {
     entfernung: p.distanzGerundet,
     ist_top_partner: p.istTopPartner,
     wunschtermin_frei: p.istWunschterminFrei,
-    termine: p.slots.map((s) => ({ start: s.start, end: s.end, passung: s.matchType })),
+    termine: p.slots.map((s) => ({
+      start: s.start,
+      end: s.end,
+      passung: s.matchType,
+      /**
+       * Buchungs-Link fuer GENAU DIESEN Termin bei GENAU DIESEM Gutachter.
+       *
+       * Der Unterschied zu `gutachter[].buchungs_url` (eine Ebene hoeher): dort ist nur der
+       * Gutachter vorgewaehlt, der Kunde muss den Termin erneut aus der Liste suchen —
+       * obwohl die KI ihn gerade genannt hat. Mit diesem Link springt der Finder direkt zur
+       * Schadens-/Kontaktangabe; danach ist die Buchung abgeschlossen.
+       *
+       * ⚠ Slots sind fluechtig. Ist der Termin beim Klick belegt, faellt der Finder still
+       * auf die normale Auswahl beim selben Gutachter zurueck — nie auf eine Fehlerseite.
+       * Deshalb ist die Slot-Vorauswahl eine Abkuerzung, kein Versprechen.
+       */
+      buchungs_url: `${SITE_URL}/gutachter-finden?${ortQuery}&sv=${encodeURIComponent(p.svId)}&slot=${encodeURIComponent(s.start)}`,
+    })),
   }))
 
   const payload = {
@@ -139,12 +174,10 @@ export async function GET(req: Request) {
     center: { lat: center.lat, lng: center.lng },
     anzahl_gutachter: gutachter.length,
     gutachter,
-    interaktive_karte_url: plz
-      ? `${SITE_URL}/gutachter-finden?plz=${plz}`
-      : `${SITE_URL}/gutachter-finden?stadt=${encodeURIComponent(ort ?? '')}`,
+    interaktive_karte_url: `${SITE_URL}/gutachter-finden?${ortQuery}`,
     buchungs_telefon: PHONE_DISPLAY,
     buchungs_hinweis:
-      'Termin buchen aktuell über die interaktive Karte (interaktive_karte_url) oder telefonischen Rückruf (buchungs_telefon). Die gutachter[].id + ein termin.start sind das Buchungs-Handle für den späteren Schaden-melden-Schritt.',
+      'Nennen Sie einen konkreten Termin, dann verlinken Sie dessen `termine[].buchungs_url` — dieser Link öffnet den Finder mit Gutachter UND Termin vorausgewählt, der Kunde ergänzt nur noch Adresse, Schadenart und Kontaktdaten und bestätigt. Nennen Sie nur den Gutachter ohne Termin, nehmen Sie `gutachter[].buchungs_url`. `interaktive_karte_url` ist die allgemeine Karte OHNE Auswahl — sie schickt den Kunden zurück an den Anfang; telefonisch geht es über `buchungs_telefon`. Es gibt bewusst keinen Endpunkt, der einen Termin ohne die Bestätigung des Kunden schreibt (ein GET, das bucht, würde jeder Crawler auslösen); ist der Slot beim Klick belegt, fällt der Finder still auf die normale Auswahl zurück.',
     _meta: {
       quelle: 'Claimondo Public API',
       stand: new Date().toISOString().slice(0, 10),

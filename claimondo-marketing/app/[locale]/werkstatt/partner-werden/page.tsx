@@ -5,16 +5,24 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, WERKSTATT_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, PHONE_E164,
+} from '@/lib/seo/jsonld'
 
 // Seit #4451 live: oeffentliche Werkstatt-Selbstregistrierung in der App —
 // die CTAs zeigen dorthin statt auf mailto (sofort aktives Konto statt Mail-Pingpong).
 const REGISTRIEREN_URL = 'https://app.claimondo.de/werkstatt/registrieren'
 
 export const metadata: Metadata = {
-  title: 'Werkstatt Partner werden — Reparaturaufträge über Claimondo',
+  // 71 Zeichen mit dem " | Claimondo", das das Layout anhaengt — Google zeigt
+  // rund 60. Der Zusatz "über Claimondo" nannte die Marke ausserdem ein zweites
+  // Mal (dieselbe Doppelung wie in #5352). openGraph.title unten behaelt die
+  // ausfuehrliche Fassung, dort ist mehr Platz.
+  title: 'Werkstatt Partner werden — Reparaturaufträge',
+  // 202 Zeichen — Google zeigt rund 160, der Rest wird abgeschnitten. Die
+  // Provisions-Aussage bleibt vollstaendig ("nur auf tatsaechlich vermittelte"),
+  // weil sie ohne ihre Einschraenkung eine andere Zusage waere.
   description:
-    'Als Kfz-Werkstatt Reparaturaufträge aus dem Claimondo-Netzwerk erhalten. Kostenlos im Werkstatt-Finder gelistet, Provision nur auf tatsächlich vermittelte Aufträge, rechtssichere Haftpflicht-Abwicklung.',
+    'Als Kfz-Werkstatt Reparaturaufträge aus dem Claimondo-Netzwerk erhalten. Kostenlos gelistet, Provision nur auf tatsächlich vermittelte Aufträge.',
   keywords: [
     'Werkstatt Partner werden',
     'Kfz-Werkstatt Aufträge',
@@ -148,7 +156,7 @@ export default function WerkstattPartnerWerdenPage() {
               <ChevronRight className="h-5 w-5" />
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-claimondo-border bg-white/70 px-7 py-3.5 text-base font-semibold text-claimondo-navy backdrop-blur-sm transition-all hover:bg-white"
             >
               <Phone className="h-4 w-4" />
@@ -348,7 +356,7 @@ export default function WerkstattPartnerWerdenPage() {
               Kostenlos registrieren
             </a>
             <a
-              href="tel:+4922125906530"
+              href={`tel:${PHONE_E164}`}
               className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/5 px-7 py-3.5 text-base font-semibold text-white/85 backdrop-blur-sm transition-all hover:border-white/50 hover:bg-white/10 hover:text-white"
             >
               <Phone className="h-4 w-4" />

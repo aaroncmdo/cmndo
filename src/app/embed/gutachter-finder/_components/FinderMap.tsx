@@ -39,6 +39,7 @@ import { createRoot, type Root } from 'react-dom/client'
 import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
 import { istHervorgehobenerPartner } from './partner-pin'
 import { empfehleSvFuerOrt } from '../actions'
+import { setzeDeadPinEbene } from './deadpin-layer'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
@@ -164,7 +165,12 @@ const MAP_STRINGS: Record<string, string> = {
   h1: 'Kfz-Gutachter in Ihrer Nähe finden.',
   sub: '4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.',
   pill_near: '{count} Gutachter in Ihrer Nähe',
-  pill_bundesweit: '{count} Gutachter bundesweit verfügbar',
+  // ⚠ KEINE Verfügbarkeits-Zusage. Von den über 8.000 Einträgen sind rund zehn
+  // buchbare Partner; der Rest ist unbeanspruchtes Lead-Material aus der
+  // Discovery. „verfügbar" versprach etwas, das die Karte für 99,9 % der Pins
+  // nicht einlöst — die Zahl selbst stimmt und trägt das Vertrauen auch ohne
+  // das Wort (Aaron, 21.08.).
+  pill_bundesweit: '{count} Kfz-Sachverständige im Netz',
   pill_short_near: '{count} Gutachter in Ihrer Nähe',
   pill_short_bundesweit: '{count} Gutachter verfügbar',
   attribution: 'Mapbox · OpenStreetMap',
@@ -249,7 +255,13 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
   // AAR-956 #4 (Aaron 12.06.): Marker-Elemente nach ID, um den GEWÄHLTEN Gutachter
   // hervorzuheben (Partner via svId, Dead-Pin via deadPinId) + letzter Ort für die Re-Route.
   const svMarkerElsRef = useRef<Map<string, HTMLElement>>(new Map())
-  const deadPinElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  /**
+   * Nur der GEWÄHLTE Dead-Pin ist noch ein DOM-Marker — die übrigen liegen seit
+   * dem Cluster-Umbau (21.08.) in einer Kartenebene. Die frühere Map aller
+   * Dead-Pin-Elemente ist damit entfallen; sie wurde nur für die
+   * Hervorhebungsklasse gebraucht, und die trägt jetzt dieser eine Marker.
+   */
+  const gewaehlterDeadPinRef = useRef<Marker | null>(null)
   const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
@@ -468,40 +480,16 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
       window.clearTimeout(loadTimeout)
       map.resize() // 2026-05-12: nochmal resize beim load, falls der Container zwischenzeitlich gewachsen ist
 
-      // ── Dead-Pin-Reichweite (heller, UNTEN) — als weiche Heatmap-Wolke statt harter
+      // ── Dead-Pin-Reichweite (heller, UNTEN) — als weiche Wolke statt harter
       //    15-km-Kreise (die stapeln sich fleckig übereinander). Reine Optik: der
       //    Abdeckungs-/Nearest-SV-Check laeuft server-seitig (empfehleSvFuerOrt).
-      //    Flacher Farbverlauf → gleichmäßige helle Fläche, kein Hotspot-Look.
+      //
+      // ⚠ Wolke UND Einzelpins kommen seit 21.08. aus EINER Quelle
+      // (`deadpin-layer.ts`). Vorher lagen dieselben Punkte zweimal im Speicher
+      // — bei 62 belanglos, bei über 8.000 nicht mehr. Ausserdem waren die
+      // Zoom-Schwellen sonst auf zwei Dateien verteilt und liefen auseinander.
       if (svLeads.length > 0) {
-        map.addSource('coverage-deadpins', {
-          type: 'geojson',
-          data: {
-            type: 'FeatureCollection',
-            features: svLeads.map((l) => ({
-              type: 'Feature' as const,
-              properties: {},
-              geometry: { type: 'Point' as const, coordinates: [l.lng, l.lat] },
-            })),
-          },
-        })
-        map.addLayer({
-          id: 'coverage-deadpins-heat',
-          type: 'heatmap',
-          source: 'coverage-deadpins',
-          paint: {
-            'heatmap-weight': 1,
-            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 5, 0.7, 9, 1.1],
-            // Radius ~ 15 km über den Zoom (verdoppelt sich pro Zoomstufe wie die Karte).
-            'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 5, 8, 7, 32, 9, 128, 11, 512],
-            'heatmap-color': [
-              'interpolate', ['linear'], ['heatmap-density'],
-              0, 'rgba(123,163,204,0)',
-              0.03, 'rgba(123,163,204,0.30)',
-              1, 'rgba(123,163,204,0.42)',
-            ],
-            'heatmap-opacity': 0.85,
-          },
-        })
+        setzeDeadPinEbene(map, svLeads, COL_NAVY)
       }
 
       // ── Partner-Einsatzgebiet (kräftig, OBEN) — server-seitig vorberechnete Union ──
@@ -544,13 +532,17 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
 
       // ─── Tier-3 sv_leads — als Dead-Pins gerendert (Aaron 12.06.: „die Dead-Pins müssen
       // trotzdem gerendert werden"). Die 15-km-Ghost-Isochrone filtert NUR die Buchung + das
-      // Route-Ziel, NICHT die Karten-Darstellung. El nach ID (= sv_leads.id = deadPinId)
-      // merken → den gematchten/gewählten Dead-Pin hervorheben.
-      deadPinElsRef.current.clear()
-      svLeads.forEach((sv) => {
-        const m = addDeadPin(map, deadPinMarkersRef.current, sv.lng, sv.lat)
-        deadPinElsRef.current.set(sv.id, m.getElement())
-      })
+      // Route-Ziel, NICHT die Karten-Darstellung.
+      //
+      // ⚠ Die Dead-Pin-Ebenen entstehen WEITER OBEN, zusammen mit den
+      // Abdeckungsflächen — und zwar dort, weil die Reihenfolge im Style die
+      // Zeichenreihenfolge ist. Hier angelegt lägen Wolke und Pins ÜBER den
+      // Partner-Markern, und ausgerechnet das Nicht-Buchbare verdeckte das
+      // Buchbare.
+      //
+      // Der GEWÄHLTE Pin bleibt ein DOM-Marker (siehe `highlightDeadPin`) — nur
+      // so trägt er die Hervorhebungsklasse, und er ist auch dann sichtbar,
+      // wenn die Einzelpins auf dieser Zoomstufe noch ausgeblendet sind.
     })
 
     // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
@@ -592,11 +584,33 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
     // Dead-Pin, gegenseitig exklusiv). CSS-Regeln im <style>-Block unten.
     function highlightSv(svId: string | null) {
       svMarkerElsRef.current.forEach((el, id) => el.classList.toggle('sv-marker-selected', id === svId))
-      deadPinElsRef.current.forEach((el) => el.classList.remove('deadpin-selected'))
+      loeseGewaehltenDeadPin()
     }
+
+    /**
+     * Der gewählte Dead-Pin als EINZELNER DOM-Marker.
+     *
+     * ⚠ Die übrigen Pins liegen seit dem Cluster-Umbau in einer Kartenebene und
+     * haben kein DOM-Element mehr, an das sich eine Klasse hängen liesse. Für
+     * genau einen Pin ist ein Marker aber unbedenklich — und er hat einen
+     * zweiten Vorteil: er ist auch dann sichtbar, wenn er sonst in einem
+     * Cluster verschwände.
+     */
+    function loeseGewaehltenDeadPin() {
+      gewaehlterDeadPinRef.current?.remove()
+      gewaehlterDeadPinRef.current = null
+    }
+
     function highlightDeadPin(deadPinId: string | null) {
-      deadPinElsRef.current.forEach((el, id) => el.classList.toggle('deadpin-selected', id === deadPinId))
+      loeseGewaehltenDeadPin()
       svMarkerElsRef.current.forEach((el) => el.classList.remove('sv-marker-selected'))
+      if (!deadPinId) return
+
+      const lead = svLeads.find((l) => l.id === deadPinId)
+      if (!lead) return
+      const marker = addDeadPin(map, [], lead.lng, lead.lat)
+      marker.getElement().classList.add('deadpin-selected')
+      gewaehlterDeadPinRef.current = marker
     }
 
     // AAR-956 #4: Fahr-Route vom Besichtigungsort zum Ziel + Kamera + onArrive (Popup). EINE
@@ -761,7 +775,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizar
       deadPinMarkersRef.current.forEach((m) => m.remove())
       deadPinMarkersRef.current = []
       svMarkerElsRef.current.clear()
-      deadPinElsRef.current.clear()
+      gewaehlterDeadPinRef.current?.remove()
+      gewaehlterDeadPinRef.current = null
       userMarkerRef.current?.remove()
       carMarkerRef.current?.remove()
       routePulseRef.current?.remove()

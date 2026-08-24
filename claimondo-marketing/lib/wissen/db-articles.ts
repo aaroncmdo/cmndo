@@ -55,6 +55,11 @@ export type WissenArtikel = {
   excerpt: string | null
   key_facts: string[]
   meta_description: string | null
+  /** Kurzer SERP-Titel (<=48 Zeichen, das Layout haengt " | Claimondo" an = 60).
+   *  Fallback bei NULL: `title`. Noetig, weil `title` zugleich die sichtbare H1
+   *  des Artikels ist und lang/beschreibend bleiben soll. Analog zum
+   *  meta_title-Frontmatter der MDX-Assets (claimondo-mdx.ts). */
+  meta_title: string | null
   primary_keyword: string | null
   cluster: string | null
   artikel_typ: string | null
@@ -63,10 +68,16 @@ export type WissenArtikel = {
   author: string
   audience: string
   quelle: string
+  /** Redaktionelle Schlagworte. Anders als `cluster` (Freitext, ~20 Varianten für
+   *  69 Artikel — teils Dubletten, teils Quellennamen wie „Captain-HUK") ist das
+   *  eine saubere, geschlossene Menge: Schadenregulierung · Recht & Urteile ·
+   *  Gutachten · Werkstatt · Versicherer · Markt & News · Tools. Deshalb steuert
+   *  sie die Verwandt-Verlinkung (WissenVerwandteThemen), nicht `cluster`. */
+  tags: string[] | null
 }
 
 const SELECT_COLUMNS =
-  'id,slug,title,body,excerpt,key_facts,meta_description,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle'
+  'id,slug,title,body,excerpt,key_facts,meta_description,meta_title,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author,audience,quelle,tags'
 
 /**
  * Einen veroeffentlichten Artikel per Slug laden (anon-Client, RLS-gated).

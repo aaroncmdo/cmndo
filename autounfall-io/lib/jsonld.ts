@@ -1,8 +1,9 @@
 import { SITE } from '@/lib/site'
 import { AUTHORS, type Article, type ArticleAuthorId } from '@/lib/article-types'
-import type { Decoder } from '@/lib/decoder-types'
-import type { PseoPage } from '@/lib/pseo'
+import { DECODER_LAST_UPDATED, type Decoder } from '@/lib/decoder-types'
+import { PSEO_LAST_UPDATED, type PseoPage } from '@/lib/pseo'
 import type { RestPage } from '@/lib/rest-types'
+import { pillarRoute } from '@/lib/pillar-route'
 
 // JSON-LD-Graph-Builder · STANDALONE (ENTITY-MODELL-LOCK v2).
 // publisher/author = ausschliesslich Kitta & Sprafke UG. #legal-reviewer =
@@ -86,7 +87,9 @@ function personSchema(authorId: ArticleAuthorId): JsonLdNode {
 
 function breadcrumbSchema(article: Article): JsonLdNode {
   const items = [{ name: 'Start', url: `${SITE.url}/` }]
-  if (article.pillar) items.push({ name: article.pillar.name, url: `${SITE.url}/${article.pillar.slug}` })
+  // pillarRoute() statt roher Slug: sonst steht im BreadcrumbList, den Google
+  // liest, ein 404 (Broken-Link-Crawl 21.08.2026).
+  if (article.pillar) items.push({ name: article.pillar.name, url: `${SITE.url}${pillarRoute(article.pillar.slug)}` })
   items.push({ name: article.h1Accent ?? article.title, url: `${SITE.url}/${article.slug}` })
   return {
     '@type': 'BreadcrumbList',
@@ -167,6 +170,11 @@ export function decoderGraph(decoder: Decoder): JsonLdNode[] {
       headline: decoder.title,
       description: decoder.metaDesc,
       url,
+      // Wie bei pseoGraph: der Article-Node hatte nie ein Datum, obwohl
+      // articleGraph()/restGraph() beide Felder setzen. Der Decoder-Typ traegt
+      // keins, deshalb die gepflegte Konstante (Stand der Inhalte in content/).
+      datePublished: DECODER_LAST_UPDATED,
+      dateModified: DECODER_LAST_UPDATED,
       author: { '@id': ORG_ID },
       publisher: { '@id': ORG_ID },
       reviewedBy: { '@id': LEGAL_REVIEWER_ID },
@@ -279,6 +287,12 @@ export function pseoGraph(
       headline: meta.title,
       description: meta.description,
       url,
+      // Ohne diese beiden Felder war das hier ein Artikel ohne Erscheinungsdatum —
+      // articleGraph() und restGraph() setzen sie laengst, nur dieser Pfad nie.
+      // Template-generierte Seiten haben kein individuelles Datum; PSEO_LAST_UPDATED
+      // beschreibt den Stand von Vorlage + Stadtdaten (gepflegt, kein new Date()).
+      datePublished: PSEO_LAST_UPDATED,
+      dateModified: PSEO_LAST_UPDATED,
       author: { '@id': ORG_ID },
       publisher: { '@id': ORG_ID },
       reviewedBy: { '@id': LEGAL_REVIEWER_ID },

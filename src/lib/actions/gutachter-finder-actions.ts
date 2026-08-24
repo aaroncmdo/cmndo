@@ -8,8 +8,10 @@ import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import { herkunftAusRequest } from '@/lib/analytics/herkunft'
 import { ladeZahlendeSvSet } from '@/lib/netzwerk/entitlement'
 import type { Tier } from '@/lib/partner-rang/types'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -78,6 +80,10 @@ export type GutachterFinderPayload = {
   schadenort_lat?: number
   schadenort_lng?: number
   wunschtermin?: string
+  /** Kam die Anfrage ueber einen KI-/Verzeichnis-Deeplink (`?sv=…`)? Dann traegt die
+   *  Zeile `utm_source='ki-deeplink'` — sonst ist dieser Weg im Nachhinein NICHT von
+   *  einem normalen Website-Besuch unterscheidbar. Siehe Insert unten. */
+  via_deeplink?: boolean
   zugeordneter_sv_id?: string
   zugeordneter_sv_lead_id?: string
   matching_typ?: string
@@ -123,13 +129,25 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
   // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
   // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
   // identifizierenden Felder raus (kein name, firma, adresse, telefon, email).
+  // ⚠ SEITENWEISE. PostgREST deckelt ohne `range` bei 1.000 Zeilen — ohne
+  // Fehler, ohne Log. Solange 62 Dead-Pins aktiv waren, fiel das nicht auf; mit
+  // über 7.000 entdeckten Betrieben zeigte jede Karte, die diesen Pfad nutzt,
+  // stillschweigend 1.000 von 7.500. Dieser Pfad hat die größte Reichweite im
+  // Repo: Embed (läuft auf FREMDEN Websites), claimondo.de/gutachter-finden,
+  // die Werkstatt- und Makler-Einstiege sowie zwei JSON-Schnittstellen.
   const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('sv_leads')
-    .select('id,lat,lng')
-    .eq('ist_aktiv', true)
-  if (error) return { ok: false, error: error.message }
-  return { ok: true, data: data as SvLeadPublic[] }
+  const gelesen = await alleSeiten<SvLeadPublic>((von, bis) =>
+    supabase
+      .from('sv_leads')
+      .select('id,lat,lng')
+      .eq('ist_aktiv', true)
+      // Ein Zweitschlüssel ist Pflicht: ohne stabile Reihenfolge kann dieselbe
+      // Zeile auf zwei Seiten erscheinen — oder auf keiner.
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  if (!gelesen.ok) return { ok: false, error: gelesen.error }
+  return { ok: true, data: gelesen.zeilen }
 }
 
 export async function ladeAktiveSVs(
@@ -313,10 +331,26 @@ export async function erstelleGutachterFinderAnfrage(
   // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
   const gaClientId = await getConsentedGaClientId()
 
+  // Welche SEITE hat die Anfrage gebracht? Bis 21.08.2026 wusste das niemand:
+  // von 44 Anfragen trug **eine** eine `page_url`, keine einzige ein utm_*.
+  // Die Spalten gibt es seit ihrer Migration — sie wurden nur nie gesetzt.
+  // Datensparsam: nur origin+pathname und die fuenf UTM-Parameter, alle uebrigen
+  // Query-Parameter werden verworfen (s. lib/analytics/herkunft.ts).
+  // ⚠ `source` bleibt bewusst ungesetzt — s. den RLS-Hinweis oben.
+  const herkunft = await herkunftAusRequest()
+
   const { data, error } = await supabase
     .from('gutachter_finder_anfragen')
     .insert({
       ga_client_id: gaClientId,
+      ...herkunft,
+      // KI-/Deeplink-Herkunft: `herkunftAusRequest()` liest den REFERER und behaelt daraus
+      // nur origin+pathname + utm_* — der `?sv=`-Parameter des Deeplinks faellt dabei weg,
+      // und im cross-origin-iframe fehlt der Referer oft ganz (Referrer-Policy). Deshalb
+      // wird die Herkunft hier aus dem PAYLOAD gesetzt, der sie zuverlaessig durchtraegt.
+      // Nur als Fallback: ein echtes utm_source (z. B. aus einer Kampagne) gewinnt.
+      utm_source: herkunft.utm_source ?? (payload.via_deeplink ? 'ki-deeplink' : null),
+      utm_medium: herkunft.utm_medium ?? (payload.via_deeplink ? 'deeplink' : null),
       vorname: payload.vorname,
       nachname: payload.nachname,
       email: payload.email,

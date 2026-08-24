@@ -1,6 +1,25 @@
 // Decoder-Content-Typen (WP-3). HTML-Felder = kontrollierter Content
 // (dangerouslySetInnerHTML im Template), hrefs bereits umgeschrieben. Keine Imports.
 
+/**
+ * Stand der Decoder-Inhalte (ISO, YYYY-MM-DD) — speist `datePublished`/`dateModified`
+ * im Article-Schema der Decoder-Seiten.
+ *
+ * WARUM: `decoderGraph()` erzeugt einen `Article`-Node ohne Datum, waehrend
+ * `articleGraph()` und `restGraph()` in derselben Datei beide Felder laengst setzen.
+ * Aktualitaet ist ein dokumentierter Zitations-Faktor fuer KI-Antwortmaschinen
+ * (GEO-Baseline 18.08.2026, Befund B2). Ein `Article` ohne Erscheinungsdatum ist
+ * ausserdem fuer Rich Results unvollstaendig.
+ *
+ * Der Decoder-Typ traegt kein eigenes Datum (die Inhalte liegen gebuendelt in
+ * `content/`), deshalb hier eine gepflegte Konstante. Startwert = git-Datum von
+ * `content/` (2026-07-19) — nachweisbar, nicht geschaetzt.
+ *
+ * ⚠ PFLEGE: Wer Decoder-Inhalte aendert, bumpt diesen Wert. Bewusst KEIN `new Date()`:
+ * ein Datum, das ohne inhaltliche Aenderung mitwandert, entwertet das Signal.
+ */
+export const DECODER_LAST_UPDATED = '2026-07-19'
+
 export interface DecoderSection {
   h2: string
   html: string

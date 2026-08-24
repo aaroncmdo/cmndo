@@ -1,4 +1,5 @@
 import { createServiceClient } from '@/lib/supabase/server'
+import { alleSeiten } from '@/lib/db/alle-seiten'
 
 // Native, footprint-safe Finder-Pins fuer autounfall.io. Liest server-seitig aus
 // der GETEILTEN Supabase (wie submitAutounfallLead) — NUR anonyme Felder gehen an
@@ -58,10 +59,19 @@ export async function ladeFinderPins(): Promise<FinderPins> {
   const sb = createServiceClient()
 
   // Tier-3 Dead-Pins (sv_leads, Excel-Import): nur id/lat/lng, kein Popup, anonym.
-  const { data: leads } = await sb.from('sv_leads').select('id,lat,lng').eq('ist_aktiv', true)
-  const deadPins: DeadPin[] = (leads ?? [])
-    .filter((l: { lat: number | null; lng: number | null }) => l.lat != null && l.lng != null)
-    .map((l: { id: string; lat: number; lng: number }) => ({ id: l.id, lat: Number(l.lat), lng: Number(l.lng) }))
+  //
+  // ⚠ SEITENWEISE. PostgREST deckelt ohne `range` bei 1.000 Zeilen — ohne
+  // Fehler, ohne Log. Solange 62 Dead-Pins aktiv waren, fiel das nicht auf; mit
+  // den über 7.000 entdeckten Betrieben (Lead-Discovery, 21.08.) zeigte diese
+  // Karte stillschweigend 1.000 von 7.500.
+  const gelesen = await alleSeiten<{ id: string; lat: number | null; lng: number | null }>((von, bis) =>
+    sb.from('sv_leads').select('id,lat,lng').eq('ist_aktiv', true)
+      .order('id', { ascending: true })
+      .range(von, bis),
+  )
+  const deadPins: DeadPin[] = (gelesen.ok ? gelesen.zeilen : [])
+    .filter((l) => l.lat != null && l.lng != null)
+    .map((l) => ({ id: l.id, lat: Number(l.lat), lng: Number(l.lng) }))
 
   // Tier-1 SVs (sachverstaendige) — EXPLIZITER map_ready-Filter (Service bypassed RLS!).
   const { data: svRows } = await sb

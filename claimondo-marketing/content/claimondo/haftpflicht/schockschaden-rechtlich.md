@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/schockschaden-rechtlich
+meta_title: Schockschaden — Ansprüche der Angehörigen
 type: glossar-spoke
 cluster: H2
 nummer: H2.4

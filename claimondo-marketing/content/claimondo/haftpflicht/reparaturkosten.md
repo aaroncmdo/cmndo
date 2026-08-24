@@ -2,6 +2,7 @@
 publish_status: live
 brand: claimondo.de
 url: /haftpflicht/reparaturkosten
+meta_title: Reparaturkosten nach Unfall — was erstattet wird
 type: glossar-spoke
 cluster: H3
 nummer: H3.1
@@ -74,10 +75,21 @@ Bei Beschädigung deines Fahrzeugs schuldet der Versicherer die vollständige Er
 - **UPE-Aufschläge** (Unverbindliche Preis-Empfehlungs-Aufschläge) typisch 10–20 % auf Listenpreis — vom BGH als üblich anerkannt
 - **Identteile / Refabrikate** nur bei deiner ausdrücklichen Zustimmung
 
+→ Worin sich Original-, Ident- und Gebrauchtteile unterscheiden und wann dir welche zustehen: [Ersatzteil-Qualität](/haftpflicht/ersatzteil-qualitaet).
+
 ### Lackier-Kosten
 - Lackier-Stunden + Material
 - Bei moderner 3-Schicht-Lackierung: höher
 - Spezial-Lacke (Perlmutt, Metallic): Aufschlag berechtigt
+
+→ Bei Metallic- und Effektlacken kommt die **Beilackierung** angrenzender Teile dazu — technisch meist unvermeidbar und einer der am häufigsten gestrichenen Posten: [Beilackierung](/haftpflicht/beilackierung).
+
+### Kalibrierung der Assistenzsysteme
+- Nach Arbeiten an Windschutzscheibe, Stoßfänger, Spiegeln oder Fahrwerk vorgeschrieben
+- Eigener Arbeitsgang mit eigener Ausrüstung — nicht im Stundensatz enthalten
+- Sicherheitsrelevant: ein dejustierter Notbremsassistent meldet keinen Fehler
+
+→ Wann sie fällig wird und warum die Herstellervorgabe zählt: [Assistenzsysteme kalibrieren](/haftpflicht/adas-kalibrierung).
 
 ### Verbringungs-Kosten
 - Transport zwischen Karosserie- und Lackierbetrieb
@@ -125,6 +137,8 @@ Du entscheidest, **wie** du abrechnest — beide Wege sind nach BGH-Linie zuläs
 
 ### Praktische Konsequenz
 Bei 15.000 € fiktiver Abrechnung „kostet" dich die MwSt-Differenz ca. 2.400 € — d. h. konkrete Abrechnung in der Markenwerkstatt bringt finanziell mehr, ist aber an die Reparatur gebunden.
+
+→ Rechnest du fiktiv ab, machst aber Nutzungsausfall oder die 130-%-Regel geltend, verlangt die Versicherung einen Nachweis, dass tatsächlich repariert wurde: [Reparaturbestätigung](/haftpflicht/reparaturbestaetigung).
 
 ---
 

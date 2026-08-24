@@ -13,6 +13,7 @@ import { Button } from '@/components/primitives'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { createLeadFromMiniWizard } from '@/lib/actions/create-lead-from-mini-wizard'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { TeilnahmeHinweis } from '@/components/gewinnspiel/TeilnahmeHinweis'
 
 // AAR-902 Prototyp: 4-Felder-Mini-Wizard. Eine Seite, kein Step-by-Step.
 // Konzept: docs/14.05.2026/mini-wizard-magic-link-konzept.md Section "Phase 1".
@@ -292,6 +293,11 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
           {serverError}
         </div>
       ) : null}
+
+      {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung zu
+          einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert sich
+          selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
+      <TeilnahmeHinweis />
 
       <div className="flex justify-end">
         <Button type="submit" variant="ondo" disabled={isPending}>
