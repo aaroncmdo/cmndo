@@ -288,6 +288,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Eintraege in lib/seo/freshness.ts existieren seit jeher: sie waren als
     // vollwertige Seiten gedacht, der Sitemap-Eintrag fehlte schlicht.
     {
+      // Der B2B-Feed hat seit 24.08.2026 eine eigene Seite. Vorher lebte er nur
+      // auf der Startseite und war fuer Suchmaschinen kein eigenes Dokument —
+      // 2.243 Woerter Fachinhalt ohne eigene URL, ohne eigenen Titel.
+      url: `${SITE_URL}/community`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.6,
+      alternates: { languages: langAlternates('/community') },
+    },
+    {
       url: `${SITE_URL}/community-regeln`,
       lastModified: getRouteLastUpdated('/community-regeln'),
       changeFrequency: 'yearly',
