@@ -297,7 +297,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
                   fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger-soft, #fef2f2)'
                   : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning-soft, #fffbeb)'
                   : 'var(--brand-background, #f8f9fb)',
-                borderLeft: `3px solid ${
+                border: `1px solid ${
                   fall.mitteilung.prioritaet === 'dringend' ? 'var(--brand-danger, #dc2626)'
                   : fall.mitteilung.prioritaet === 'hoch' ? 'var(--brand-warning, #d97706)'
                   : 'var(--brand-secondary, #4573A2)'

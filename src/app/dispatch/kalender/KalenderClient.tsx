@@ -473,7 +473,7 @@ export default function KalenderClient({
                         left: `calc(${leftPct}% + 2px)`,
                         width: `calc(${widthPct}% - 4px)`,
                         backgroundColor: col.bg,
-                        borderLeft: `3px solid ${col.border}`,
+                        border: `1px solid ${col.border}`,
                         color: col.text,
                         opacity: termin.status === 'reserviert' ? 0.75 : 1,
                       }}

@@ -105,7 +105,7 @@ function addDeadPin(
   el.setAttribute('aria-hidden', 'true')
   el.innerHTML = `
     <div class="sv-deadpin" style="width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:${COL_NAVY};box-shadow:0 2px 6px rgba(13,27,62,0.30);border:2px solid #fff">
-      <span style="font-family:Montserrat,system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span>
+      <span style="font-family:var(--brand-font-heading, var(--font-montserrat), Montserrat),system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span>
     </div>
   `
   const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
@@ -140,7 +140,7 @@ function addClickableMarker(
   el.style.cursor = 'pointer'
   el.innerHTML = `
     <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${rand};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:${schatten};position:relative">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${rand};background:#fff;display:grid;place-items:center;font-family:var(--brand-font-heading, var(--font-montserrat), Montserrat),system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:${schatten};position:relative">
         ${initiale}
         ${sternBadge}
         <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
