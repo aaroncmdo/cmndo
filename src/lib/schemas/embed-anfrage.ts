@@ -54,6 +54,12 @@ export const EmbedAnfrageSchema = z.object({
   embed_site_slug: z.string().max(120).optional(),
   page_url: z.string().max(500).optional(),
 
+  // Gewinnspiel: die vom Teilnehmer im Formular gewaehlte Praemie. Landet NICHT
+  // in gutachter_finder_anfragen (dort gibt es keine Spalte dafuer und
+  // buildAnfrageColumns mappt explizit), sondern in gewinnspiel_teilnahmen.
+  // Die ID wird serverseitig gegen die Praemien der aktiven Kampagne geprueft.
+  gewinnspiel_praemie_id: z.string().uuid().optional(),
+
   // Attribution
   gclid: z.string().max(300).optional(),
   utm_source: z.string().max(150).optional(),
