@@ -337,8 +337,10 @@ export default function SchadensreportPage() {
             ))}
           </div>
 
+          {/* Kein farbiger Balken links: der Flaechen-Tint traegt dieselbe Farbe
+              und grenzt bereits ab. */}
           <div
-            className="mt-6 rounded-ios-md border-l-4 border-claimondo-light-blue bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
+            className="mt-6 rounded-ios-md bg-claimondo-light-blue/10 p-5 text-sm leading-relaxed text-claimondo-shield"
           >
             <p className="font-bold text-claimondo-navy">{t('markt_erkenntnis_h')}</p>
             <p className="mt-1">
