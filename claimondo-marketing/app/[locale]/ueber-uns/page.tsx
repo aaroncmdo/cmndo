@@ -344,9 +344,11 @@ export default async function UeberUnsPage() {
                 {msg?.bio_lang}
               </p>
 
+              {/* Kein farbiger Balken links: der Flaechen-Tint grenzt ab, das
+                  Quote-Icon daneben ist der Marker. */}
               <blockquote
                 className="mt-6 flex gap-3 rounded-ios-md px-4 py-3.5"
-                style={{ background: 'rgba(69,115,162,0.06)', borderLeft: '3px solid var(--color-claimondo-light-blue)' }}
+                style={{ background: 'rgba(69,115,162,0.06)' }}
               >
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <div>

@@ -116,6 +116,13 @@ docs/**/smoke-screenshots-authd/
 .agents/
 .claude/skills/*
 !.claude/skills/bibliothekar/
+# 2026-08-24: drei portable Projekt-Skills zum Journey-Gate. Echte Dateien, keine
+# Symlinks — also genau der Ausnahmefall oben. Sie waren am 23.08. committet worden,
+# `git add` hat sie aber STILL verworfen (der Commit meldete Erfolg und enthielt nur
+# das Nachbar-Script). Ohne Whitelist hat keine Worktree-Session sie.
+!.claude/skills/regel4-smoke/
+!.claude/skills/journey-verifikation/
+!.claude/skills/release-drain/
 
 # 2026-05-15: Private Kunden-PDFs / Gutachten-Originale (Datenschutz)
 docs/PICS-private/

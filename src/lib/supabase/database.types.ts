@@ -7713,6 +7713,235 @@ export type Database = {
           },
         ]
       }
+      gewinnspiel_kampagnen: {
+        Row: {
+          aktiv: boolean
+          ende_am: string | null
+          erstellt_am: string
+          id: string
+          name: string
+          preis_betrag_eur: number
+          preise_pro_tag: number
+          start_am: string
+          topbar_aktiv: boolean
+          topbar_cta_text: string | null
+          topbar_text: string | null
+        }
+        Insert: {
+          aktiv?: boolean
+          ende_am?: string | null
+          erstellt_am?: string
+          id?: string
+          name: string
+          preis_betrag_eur?: number
+          preise_pro_tag?: number
+          start_am: string
+          topbar_aktiv?: boolean
+          topbar_cta_text?: string | null
+          topbar_text?: string | null
+        }
+        Update: {
+          aktiv?: boolean
+          ende_am?: string | null
+          erstellt_am?: string
+          id?: string
+          name?: string
+          preis_betrag_eur?: number
+          preise_pro_tag?: number
+          start_am?: string
+          topbar_aktiv?: boolean
+          topbar_cta_text?: string | null
+          topbar_text?: string | null
+        }
+        Relationships: []
+      }
+      gewinnspiel_praemien: {
+        Row: {
+          aktiv: boolean
+          beschreibung: string | null
+          betrag_eur: number
+          bild_pfad: string | null
+          erstellt_am: string
+          id: string
+          kampagne_id: string
+          name: string
+          sortierung: number
+        }
+        Insert: {
+          aktiv?: boolean
+          beschreibung?: string | null
+          betrag_eur?: number
+          bild_pfad?: string | null
+          erstellt_am?: string
+          id?: string
+          kampagne_id: string
+          name: string
+          sortierung?: number
+        }
+        Update: {
+          aktiv?: boolean
+          beschreibung?: string | null
+          betrag_eur?: number
+          bild_pfad?: string | null
+          erstellt_am?: string
+          id?: string
+          kampagne_id?: string
+          name?: string
+          sortierung?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gewinnspiel_praemien_kampagne_id_fkey"
+            columns: ["kampagne_id"]
+            isOneToOne: false
+            referencedRelation: "gewinnspiel_kampagnen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gewinnspiel_teilnahmen: {
+        Row: {
+          ablehnung_grund: string | null
+          anfrage_id: string | null
+          erstellt_am: string
+          gewaehlte_praemie_id: string | null
+          gezogen_am: string | null
+          gezogen_von_user_id: string | null
+          gutschein_code: string | null
+          gutschein_versendet_am: string | null
+          id: string
+          kampagne_id: string
+          lead_id: string | null
+          nachweis_datei_pfad: string | null
+          nachweis_geprueft_am: string | null
+          nachweis_geprueft_von: string | null
+          nachweis_hochgeladen_am: string | null
+          nachweis_token: string | null
+          status: string
+          telefon_normalisiert: string
+          whatsapp_gesendet_am: string | null
+          whatsapp_verifiziert_am: string | null
+          ziehung_lostopf_groesse: number | null
+        }
+        Insert: {
+          ablehnung_grund?: string | null
+          anfrage_id?: string | null
+          erstellt_am?: string
+          gewaehlte_praemie_id?: string | null
+          gezogen_am?: string | null
+          gezogen_von_user_id?: string | null
+          gutschein_code?: string | null
+          gutschein_versendet_am?: string | null
+          id?: string
+          kampagne_id: string
+          lead_id?: string | null
+          nachweis_datei_pfad?: string | null
+          nachweis_geprueft_am?: string | null
+          nachweis_geprueft_von?: string | null
+          nachweis_hochgeladen_am?: string | null
+          nachweis_token?: string | null
+          status?: string
+          telefon_normalisiert: string
+          whatsapp_gesendet_am?: string | null
+          whatsapp_verifiziert_am?: string | null
+          ziehung_lostopf_groesse?: number | null
+        }
+        Update: {
+          ablehnung_grund?: string | null
+          anfrage_id?: string | null
+          erstellt_am?: string
+          gewaehlte_praemie_id?: string | null
+          gezogen_am?: string | null
+          gezogen_von_user_id?: string | null
+          gutschein_code?: string | null
+          gutschein_versendet_am?: string | null
+          id?: string
+          kampagne_id?: string
+          lead_id?: string | null
+          nachweis_datei_pfad?: string | null
+          nachweis_geprueft_am?: string | null
+          nachweis_geprueft_von?: string | null
+          nachweis_hochgeladen_am?: string | null
+          nachweis_token?: string | null
+          status?: string
+          telefon_normalisiert?: string
+          whatsapp_gesendet_am?: string | null
+          whatsapp_verifiziert_am?: string | null
+          ziehung_lostopf_groesse?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_anfrage_id_fkey"
+            columns: ["anfrage_id"]
+            isOneToOne: false
+            referencedRelation: "gutachter_finder_anfragen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_anfrage_id_fkey"
+            columns: ["anfrage_id"]
+            isOneToOne: false
+            referencedRelation: "v_embed_billing_faellig"
+            referencedColumns: ["anfrage_id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_anfrage_id_fkey"
+            columns: ["anfrage_id"]
+            isOneToOne: false
+            referencedRelation: "v_offene_anfragen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_anfrage_id_fkey"
+            columns: ["anfrage_id"]
+            isOneToOne: false
+            referencedRelation: "v_sv_inbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_gewaehlte_praemie_id_fkey"
+            columns: ["gewaehlte_praemie_id"]
+            isOneToOne: false
+            referencedRelation: "gewinnspiel_praemien"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_kampagne_id_fkey"
+            columns: ["kampagne_id"]
+            isOneToOne: false
+            referencedRelation: "gewinnspiel_kampagnen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_lead_termin_gutachter"
+            referencedColumns: ["lead_id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_lead_workstate"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gewinnspiel_teilnahmen_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "v_werkstatt_lead"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gfa_rate_limit: {
         Row: {
           created_at: string
@@ -8798,6 +9027,7 @@ export type Database = {
           werkstatt_id: string | null
           whatsapp_geprueft_am: string | null
           whatsapp_verfuegbar: boolean | null
+          wiederholung_erkannt_am: string | null
           wunsch_tag: string | null
           wunsch_zeit: string | null
           wunschtermin: string | null
@@ -8903,6 +9133,7 @@ export type Database = {
           werkstatt_id?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           wunsch_tag?: string | null
           wunsch_zeit?: string | null
           wunschtermin?: string | null
@@ -9008,6 +9239,7 @@ export type Database = {
           werkstatt_id?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           wunsch_tag?: string | null
           wunsch_zeit?: string | null
           wunschtermin?: string | null
@@ -12249,6 +12481,7 @@ export type Database = {
           werkstatt_seit_datum: string | null
           whatsapp_geprueft_am: string | null
           whatsapp_verfuegbar: boolean | null
+          wiederholung_erkannt_am: string | null
           winback_opt_out: boolean
           winback_sent_at: string | null
           wunschtermin: string | null
@@ -12470,6 +12703,7 @@ export type Database = {
           werkstatt_seit_datum?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           winback_opt_out?: boolean
           winback_sent_at?: string | null
           wunschtermin?: string | null
@@ -12691,6 +12925,7 @@ export type Database = {
           werkstatt_seit_datum?: string | null
           whatsapp_geprueft_am?: string | null
           whatsapp_verfuegbar?: boolean | null
+          wiederholung_erkannt_am?: string | null
           winback_opt_out?: boolean
           winback_sent_at?: string | null
           wunschtermin?: string | null
