@@ -70,6 +70,9 @@ export type EmbedFinderSectionProps = {
    * KI-Buchungen, wissen aber nicht, WELCHE KI sie gebracht hat.
    */
   utmSource?: string
+  /** Standort des Fahrzeugs aus dem Deeplink — die KI hat ihn im Gespraech erfragt.
+   *  Der Embed ueberspringt damit den Ort-Schritt (nur wirksam mit initialCenter). */
+  adresse?: string
 }
 
 /** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
@@ -90,6 +93,7 @@ export function EmbedFinderSection({
   svId,
   slot,
   utmSource,
+  adresse,
 }: EmbedFinderSectionProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
@@ -113,6 +117,8 @@ export function EmbedFinderSection({
   if (svId && slot) params.set('slot', slot)
   // Welche KI den Kunden geschickt hat — reine Attribution, nie ein Steuerwert.
   if (utmSource) params.set('utm_source', utmSource.slice(0, 150))
+  // Nur MIT Koordinaten sinnvoll: ohne initialCenter kann der Embed nichts damit anfangen.
+  if (adresse && initialCenter) params.set('adresse', adresse.slice(0, 200))
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}${embedPath}${qs ? `?${qs}` : ''}`
 
