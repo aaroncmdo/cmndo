@@ -23,15 +23,36 @@ const BASELINE = 'scripts/cluster-crawl-baseline.json'
 const SCHREIBEN = process.argv.includes('--baseline')
 const KEY = `${homedir()}/.ssh/claimondo_vps`.replace(/\\/g, '/')
 
-// ⚠ Der nginx-Log fuehrt KEINE Domain (Standard-combined-Format). Das ist hier
-// unschaedlich: `/lp/<ort>` ist ueber alle fuenf Cluster hinweg eindeutig, weil
-// kein Ort auf zwei Domains liegt.
+// ⚠ ZWEI MESSFALLEN, beide beim Selbsttest aufgefallen:
+//
+// 1. Der nginx-Log fuehrt KEINEN Host (Standard-combined, kein `$host`). Alle
+//    Domains des VPS landen in derselben Datei. Fuer `/lp/<ort>` ist das
+//    unschaedlich — den Pfad gibt es nur auf den Cluster-Domains, und kein Ort
+//    liegt auf zwei. Eine GESAMTZAHL waere dagegen der ganze VPS: Ich hatte
+//    "0,85 % des Budgets gehen auf /lp/" gemeldet — der Nenner enthielt
+//    app.claimondo.de und claimondo.de mit. Die Zahl ist bedeutungslos und
+//    wird deshalb nicht mehr als Anteil ausgewiesen.
+//
+// 2. `grep -i Googlebot` zaehlt GEFAELSCHTE User-Agents mit. Im Log stehen unter
+//    diesem UA je ~33 Abrufe auf `/.env`, `/.env.backup`, `/.git/config` und
+//    `/backend/.env` — Googlebot fragt so etwas nie ab, das sind Secret-Scans.
+//    (Geprueft: alle liefern 404/307, nichts wird ausgeliefert.) Die
+//    /lp/-Zahlen sind davon nicht betroffen — Scanner zielen nicht auf
+//    Content-Pfade —, aber verifiziert wird jetzt trotzdem per Reverse-DNS.
 const FERN = `
 { cat /var/log/nginx/access.log /var/log/nginx/access.log.1 2>/dev/null; zcat /var/log/nginx/access.log.*.gz 2>/dev/null; } > /tmp/.crawlmess
 echo '###ORTE'
 grep -i 'Googlebot' /tmp/.crawlmess | grep -oE 'GET /lp/[a-z-]+' | sed 's|GET /lp/||' | sort | uniq -c
 echo '###TAGE'
 grep -i 'Googlebot' /tmp/.crawlmess | grep '/lp/' | grep -oE '\\[[0-9]{2}/[A-Za-z]{3}/[0-9]{4}' | tr -d '[' | sort | uniq -c
+echo '###IPS'
+grep -i 'Googlebot' /tmp/.crawlmess | grep '/lp/' | awk '{print \$1}' | sort | uniq -c | sort -rn | head -8
+echo '###ECHT'
+for ip in \$(grep -i 'Googlebot' /tmp/.crawlmess | grep '/lp/' | awk '{print \$1}' | sort -u | head -12); do
+  host \$ip 2>/dev/null | grep -qE '\\.(googlebot|google)\\.com' && echo "OK \$ip" || echo "FAKE \$ip"
+done
+echo '###ANDERE'
+for b in bingbot GPTBot ClaudeBot PerplexityBot; do printf '%s ' \$b; grep -i \$b /tmp/.crawlmess | grep -c '/lp/'; done
 echo '###SUMMEN'
 grep -ci 'Googlebot' /tmp/.crawlmess
 grep -i 'Googlebot' /tmp/.crawlmess | grep -c '/lp/'
@@ -67,19 +88,33 @@ const paare = (t) =>
 
 const orte = paare(teil('ORTE'))
 const tage = paare(teil('TAGE'))
-const [gesamt, aufLp] = teil('SUMMEN').split('\n').map(Number)
+const [gesamtVps, aufLp] = teil('SUMMEN').split('\n').map(Number)
+const echt = teil('ECHT').split('\n').filter((z) => z.startsWith('OK ')).length
+const fake = teil('ECHT').split('\n').filter((z) => z.startsWith('FAKE ')).length
+const andere = Object.fromEntries(
+  teil('ANDERE')
+    .split('\n')
+    .map((z) => z.trim().split(/\s+/))
+    .filter((p) => p.length === 2),
+)
 
 // ⚠ Eine leere Menge ist erst ein Befund, wenn das Instrument lebt.
-if (!gesamt) {
+if (!gesamtVps) {
   console.error('🔴 0 Googlebot-Requests im gesamten Log — das ist ein Instrumentenfehler, kein Befund.')
   process.exit(1)
 }
 
 const gecrawlt = Object.keys(orte).length
-console.log('\nCLUSTER-CRAWLING  ·  Googlebot, nginx-Log des VPS (14 Tage)\n')
-console.log(`  Googlebot-Requests gesamt   ${gesamt}`)
-console.log(`  davon auf /lp/              ${aufLp}  (${((100 * aufLp) / gesamt).toFixed(2)} %)`)
-console.log(`  verschiedene Orte gecrawlt  ${gecrawlt}`)
+console.log('\nCLUSTER-CRAWLING  ·  Googlebot auf /lp/, nginx-Log des VPS (14 Tage)\n')
+console.log(`  /lp/-Abrufe                 ${aufLp}`)
+console.log(`  verschiedene Orte           ${gecrawlt}`)
+console.log(`  IP-Stichprobe verifiziert   ${echt} echt${fake ? `, 🔴 ${fake} gefaelscht` : ''} (Reverse-DNS auf googlebot.com)`)
+console.log(`\n  ⚠ Nicht als Anteil lesen: der Log fuehrt keinen Host, die ${gesamtVps} Googlebot-`)
+console.log('     Zeilen des VPS enthalten alle Domains — und Secret-Scans mit gefaelschtem UA.')
+if (Object.keys(andere).length) {
+  console.log('\n  Andere Bots auf /lp/:')
+  for (const [b, n] of Object.entries(andere)) console.log(`    ${b.padEnd(16)} ${n}`)
+}
 console.log('\n  Je Tag:')
 for (const [t, n] of Object.entries(tage)) console.log(`    ${t}  ${'█'.repeat(Math.min(n, 50))} ${n}`)
 
