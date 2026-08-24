@@ -95,7 +95,19 @@ export function ladeSeedFixture<T extends object = Record<string, string>>(
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean)
-      if (roh && verbraucht.includes(dateiname)) {
+      // ⚠ 24.08.: Die Bedingung hing hier an `roh` — die Datei musste also noch DA sein.
+      // Das stimmte, solange alles in EINEM Job lief (Datei vorhanden, Zustand verbraucht).
+      // Seit der Aufteilung in `e2e` + `e2e-rest` laeuft der Sammel-Lauf auf einem EIGENEN
+      // Runner: dort erzeugt kein Seed-Step die Datei, sie fehlt schlicht. Der Skip griff
+      // dadurch nicht mehr, und der harte Throw darunter schlug zu — nightly 24.08.,
+      // 3 rote Specs (reparatur-weg-e2e-smoke, -kva-betrag-pflicht, -kva-ablehnung-loop)
+      // mit „Seed-Fixture fehlt", obwohl E2E_SEEDS_VERBRAUCHT korrekt gesetzt war (ci.yml).
+      //
+      // Richtig ist die Liste als Trennlinie, nicht die Existenz der Datei: steht eine
+      // Fixture in E2E_SEEDS_VERBRAUCHT, ist ihr Zustand in DIESEM Lauf bereits von einem
+      // Journey-Step scharf verbraucht worden. Ob die Datei danach noch auf der Platte
+      // liegt, sagt darueber nichts aus — sie liegt auf dem Runner, der geseedet hat.
+      if (verbraucht.includes(dateiname)) {
         test.skip(
           true,
           `${dateiname}: Zustand wurde in diesem Lauf bereits von einem Journey-Step verbraucht ` +

@@ -181,7 +181,9 @@ export default function OnlineKfzGutachtenPage() {
           </p>
 
           {/* Zitat-Karte */}
-          <blockquote className="my-6 rounded-ios-md border-l-4 border-claimondo-navy bg-white p-5 shadow-glass-card">
+          {/* Kein farbiger Balken links: bg-white plus Schatten grenzen die Karte
+              gegen den hellen Seitenhintergrund bereits ab. */}
+          <blockquote className="my-6 rounded-ios-md bg-white p-5 shadow-glass-card">
             <p className="text-[15px] italic leading-relaxed text-claimondo-navy">
               {t('urteil_zitat')}
             </p>

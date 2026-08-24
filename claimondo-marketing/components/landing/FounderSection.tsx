@@ -111,7 +111,9 @@ export function FounderSection() {
                 {f.bio}
               </p>
 
-              <blockquote className="glass-card-sm mt-5 flex gap-3 rounded-ios-md border-l-4 border-claimondo-ondo p-4">
+              {/* Kein farbiger Balken links: die Glass-Flaeche grenzt bereits ab,
+                  und das Quote-Icon rechts daneben ist der Marker. */}
+              <blockquote className="glass-card-sm mt-5 flex gap-3 rounded-ios-md p-4">
                 <Quote className="h-4 w-4 flex-shrink-0 text-claimondo-light-blue" />
                 <p className="text-sm italic text-claimondo-shield">{f.quote}</p>
               </blockquote>
