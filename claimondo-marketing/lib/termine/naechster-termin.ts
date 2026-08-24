@@ -10,6 +10,9 @@
 //
 // KEIN Cloaking: ausgeliefert wird fuer alle dasselbe Markup — Crawler wie Menschen.
 
+import { createAdminClient } from '@/lib/supabase/admin'
+import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
+
 /** Was die Stadtseite anzeigt. `null` = nichts anzeigen (kein Termin, API stumm). */
 export type NaechsterTermin = {
   /** „Montag, 25.08." — Berlin-Zeit, nicht UTC. */
@@ -123,34 +126,69 @@ export async function ladeNaechstenTermin(stadt: string): Promise<NaechsterTermi
 export type StadtTermin = NaechsterTermin & { stadt: string }
 
 /**
- * Die Staedte, deren Verfuegbarkeit im Sprung-Panel als Badge erscheint.
+ * WO das Netz gerade arbeitet — abgeleitet aus den aktiven Sachverstaendigen, NICHT
+ * aus einer Handliste.
  *
- * Bewusst der NRW-Kern: dort sitzt das Partnernetz. Staedte ohne freien Slot fallen unten
- * still raus — die Liste behauptet also nie mehr, als das Netz gerade leisten kann.
+ * Vorher standen hier fuenf feste NRW-Staedte. Ein ChatGPT-Lauf am 24.08.2026 hat den
+ * Konstruktionsfehler offengelegt: kurz zuvor war ein SV in BREMERHAVEN freigeschaltet
+ * worden, seine Stadtseite trug den Termin sofort — die Uebersicht aber nicht, und das
+ * Modell bemerkte es woertlich („zeigt Termine fuer Koeln, Duesseldorf und Duisburg,
+ * fuer Bremerhaven aber nicht"). Eine Handliste veraltet mit jedem neuen Partner.
  *
- * WARUM NUR FUENF: gemessen am 24.08.2026 gegen prod kosten acht parallele Abfragen im
- * KALTEN Zustand 4,28 s (warm 0,44 s) — als TTFB einer Marketingseite zu viel, auch wenn
- * es nur den ersten Aufruf je Cache-Fenster traefe. Fuenf halbieren das grob, ohne die
- * Aussage zu schwaechen: im selben Lauf lieferten ueberhaupt nur zwei bis vier Staedte
- * einen freien Slot. Die Liste darf wachsen, wenn das Netz waechst — dann aber neu messen.
+ * Jetzt: SV-Standorte laden, jede der 173 gepflegten Staedte auf Naehe pruefen, die
+ * Treffer nehmen. Ein neuer Partner erscheint damit ueberall automatisch.
  */
-const UEBERSICHT_STAEDTE: readonly string[] = ['Köln', 'Düsseldorf', 'Dortmund', 'Essen', 'Duisburg']
+async function ladeEinsatzStaedte(): Promise<string[]> {
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin
+      .from('sachverstaendige')
+      .select('standort_lat, standort_lng')
+      .eq('ist_aktiv', true)
+      .eq('verifiziert', true)
+      .eq('ist_testaccount', false)
+      .not('isochrone_polygon', 'is', null)
+      .not('standort_lat', 'is', null)
+      .not('standort_lng', 'is', null)
+    const svs = (data ?? []) as Array<{ standort_lat: number | null; standort_lng: number | null }>
+    if (svs.length === 0) return []
 
-/**
- * Naechster Termin je Uebersichts-Stadt, parallel geholt.
- *
- * Reihenfolge = die von `UEBERSICHT_STAEDTE` (stabil, groesste Stadt zuerst) — bewusst
- * NICHT nach Zeit sortiert: die Liste soll bei jedem Aufruf gleich aussehen, sonst
- * springen die Eintraege, sobald irgendwo ein Slot wegfaellt.
- *
- * Parallel, nicht sequenziell: acht Abfragen à ~0,2 s waeren nacheinander ~1,6 s und
- * damit ein spuerbarer TTFB-Aufschlag; nebeneinander bleibt es bei der langsamsten.
- * Jede einzelne faellt fuer sich weich aus (siehe `ladeNaechstenTermin`), eine stumme
- * Stadt nimmt also die anderen nicht mit.
- */
+    // Eine Stadt zaehlt als Einsatzgebiet, wenn ein SV im Umkreis sitzt. 30 km ist die
+    // Distanz, mit der auch das Matching arbeitet.
+    const treffer: string[] = []
+    for (const stadt of STAEDTE) {
+      const nah = svs.some(
+        (sv) => distanzKm(Number(sv.standort_lat), Number(sv.standort_lng), stadt.lat, stadt.lng) <= 30,
+      )
+      if (nah) treffer.push(stadt.name)
+      if (treffer.length >= MAX_UEBERSICHT) break
+    }
+    return treffer
+  } catch {
+    return []
+  }
+}
+
+/** Obergrenze: jede Stadt kostet eine API-Abfrage. Gemessen 24.08. — acht parallel im
+ *  kalten Zustand 4,28 s, fuenf rund die Haelfte. Mehr als sechs waere den TTFB nicht wert. */
+const MAX_UEBERSICHT = 6
+
+/** Haversine in km — genau genug fuer eine 30-km-Entscheidung, ohne PostGIS-Roundtrip. */
+function distanzKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371
+  const dLat = ((bLat - aLat) * Math.PI) / 180
+  const dLng = ((bLng - aLng) * Math.PI) / 180
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((aLat * Math.PI) / 180) * Math.cos((bLat * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(x))
+}
+
 export async function ladeUebersichtsTermine(): Promise<StadtTermin[]> {
+  const staedte = await ladeEinsatzStaedte()
+  if (staedte.length === 0) return []
   const ergebnisse = await Promise.all(
-    UEBERSICHT_STAEDTE.map(async (stadt) => {
+    staedte.map(async (stadt) => {
       const t = await ladeNaechstenTermin(stadt)
       return t ? { ...t, stadt } : null
     }),

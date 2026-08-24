@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -9,6 +10,7 @@ import { ReviewerByline } from '@/components/landing/ReviewerByline'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
+import { VerfuegbarkeitStreifen } from '@/components/landing/sections/VerfuegbarkeitStreifen'
 import {
   serviceSchema, breadcrumbsSchema, faqPageSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
@@ -130,6 +132,16 @@ export default function KfzGutachterPillarPage() {
       />
 
       <LandingTopbar authenticatedUser={null} />
+
+      {/* Freie Termine — DIESE Seite ist die, die ein browsendes LLM bei „Kfz-Gutachter
+          <Stadt>" oeffnet. Zwei ChatGPT-Laeufe am 24.08.2026 belegten es: das Modell
+          zitierte /kfz-gutachter und /haftpflicht/sv-kosten, aber NIE die Stadtseite —
+          und musste deshalb schreiben, es koenne „keinen konkreten Slot verifizieren",
+          obwohl der Termin auf der Stadtseite stand. Der Streifen bringt die Aussage
+          dorthin, wo sie gelesen wird. Rendert `null`, wenn nichts frei ist. */}
+      <Suspense fallback={null}>
+        <VerfuegbarkeitStreifen />
+      </Suspense>
 
       {/* Hero — Navy mit Spotlights für Tiefe */}
       <section className="relative isolate overflow-hidden bg-claimondo-navy py-20 text-white">
