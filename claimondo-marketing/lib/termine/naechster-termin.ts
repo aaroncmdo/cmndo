@@ -92,3 +92,42 @@ export async function ladeNaechstenTermin(stadt: string): Promise<NaechsterTermi
     clearTimeout(timer)
   }
 }
+
+/** Eine Stadt mit ihrem naechsten freien Termin — fuer die Uebersicht auf /gutachter-finden. */
+export type StadtTermin = NaechsterTermin & { stadt: string }
+
+/**
+ * Die Staedte, deren Verfuegbarkeit im Sprung-Panel als Badge erscheint.
+ *
+ * Bewusst der NRW-Kern: dort sitzt das Partnernetz. Staedte ohne freien Slot fallen unten
+ * still raus — die Liste behauptet also nie mehr, als das Netz gerade leisten kann.
+ *
+ * WARUM NUR FUENF: gemessen am 24.08.2026 gegen prod kosten acht parallele Abfragen im
+ * KALTEN Zustand 4,28 s (warm 0,44 s) — als TTFB einer Marketingseite zu viel, auch wenn
+ * es nur den ersten Aufruf je Cache-Fenster traefe. Fuenf halbieren das grob, ohne die
+ * Aussage zu schwaechen: im selben Lauf lieferten ueberhaupt nur zwei bis vier Staedte
+ * einen freien Slot. Die Liste darf wachsen, wenn das Netz waechst — dann aber neu messen.
+ */
+const UEBERSICHT_STAEDTE: readonly string[] = ['Köln', 'Düsseldorf', 'Dortmund', 'Essen', 'Duisburg']
+
+/**
+ * Naechster Termin je Uebersichts-Stadt, parallel geholt.
+ *
+ * Reihenfolge = die von `UEBERSICHT_STAEDTE` (stabil, groesste Stadt zuerst) — bewusst
+ * NICHT nach Zeit sortiert: die Liste soll bei jedem Aufruf gleich aussehen, sonst
+ * springen die Eintraege, sobald irgendwo ein Slot wegfaellt.
+ *
+ * Parallel, nicht sequenziell: acht Abfragen à ~0,2 s waeren nacheinander ~1,6 s und
+ * damit ein spuerbarer TTFB-Aufschlag; nebeneinander bleibt es bei der langsamsten.
+ * Jede einzelne faellt fuer sich weich aus (siehe `ladeNaechstenTermin`), eine stumme
+ * Stadt nimmt also die anderen nicht mit.
+ */
+export async function ladeUebersichtsTermine(): Promise<StadtTermin[]> {
+  const ergebnisse = await Promise.all(
+    UEBERSICHT_STAEDTE.map(async (stadt) => {
+      const t = await ladeNaechstenTermin(stadt)
+      return t ? { ...t, stadt } : null
+    }),
+  )
+  return ergebnisse.filter((x): x is StadtTermin => x !== null)
+}
