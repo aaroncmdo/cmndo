@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Versicherung schickt Gutachter".
 // Faengt die freie-Gutachterwahl-Keywords (versicherung schickt gutachter /
@@ -40,11 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/versicherung-schickt-gutachter'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/versicherung-schickt-gutachter`,
+      ...(await localeOpenGraph(`/versicherung-schickt-gutachter`)),
       title: t('versicherung_schickt_gutachter.og_title'),
       description: t('versicherung_schickt_gutachter.og_description'),
     },

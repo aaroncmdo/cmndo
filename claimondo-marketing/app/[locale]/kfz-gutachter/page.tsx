@@ -14,7 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,9 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/kfz-gutachter'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/kfz-gutachter`,
+      ...(await localeOpenGraph(`/kfz-gutachter`)),
       title: t('kfz_gutachter.title'),
       description: t('kfz_gutachter.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter finden' }],

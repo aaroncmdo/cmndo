@@ -15,7 +15,7 @@ import {
   articleSchema, vermittlerVergleichSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { zaehleSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
 
 const PAGE_PATH = '/kfz-gutachter/vermittlungsportale-vergleich'
@@ -42,9 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates(PAGE_PATH),
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}${PAGE_PATH}`,
+      ...(await localeOpenGraph(PAGE_PATH)),
       title: t('kfz_gutachter_vergleich.og_title'),
       description: t('kfz_gutachter_vergleich.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Kfz-Gutachter-Vermittlungsportale im Vergleich' }],

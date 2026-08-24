@@ -18,7 +18,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // /wie-es-funktioniert — Premium-Layout. Conversion-Page mit Fokus auf
 // Prozess + Portal + Berater + Trust-Anker. Folgt der Köln-Handoff-
@@ -37,9 +37,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/wie-es-funktioniert'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/wie-es-funktioniert`,
+      ...(await localeOpenGraph(`/wie-es-funktioniert`)),
       title: t('wie_es_funktioniert.title'),
       description: t('wie_es_funktioniert.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'So funktioniert Claimondo' }],

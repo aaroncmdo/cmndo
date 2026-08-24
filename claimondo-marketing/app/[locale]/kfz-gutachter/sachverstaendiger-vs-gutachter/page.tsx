@@ -13,7 +13,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -31,9 +31,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/kfz-gutachter/sachverstaendiger-vs-gutachter'),
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/kfz-gutachter/sachverstaendiger-vs-gutachter`,
+      ...(await localeOpenGraph(`/kfz-gutachter/sachverstaendiger-vs-gutachter`)),
       title: t('kfz_gutachter_sv_vs_gutachter.og_title'),
       description: t('kfz_gutachter_sv_vs_gutachter.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Sachverständiger oder Gutachter' }],

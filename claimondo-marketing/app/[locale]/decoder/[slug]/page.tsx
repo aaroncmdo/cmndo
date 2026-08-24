@@ -1,4 +1,4 @@
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
@@ -51,10 +51,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     alternates: await localeAlternates(a.url),
     openGraph: {
       type: 'article',
-      url: `${SITE_URL}${a.url}`,
+      ...(await localeOpenGraph(a.url)),
       title: a.title,
       description: a.metaDescription || metaDescriptionFromSnippet(a.snippet),
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,

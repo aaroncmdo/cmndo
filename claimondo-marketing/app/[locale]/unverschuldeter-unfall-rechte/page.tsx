@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Unverschuldeter Unfall: Ihre Rechte".
 // Rechte-Pillar: Ueberblick aller Ansprueche nach § 249 ff. BGB, jeder Punkt
@@ -38,11 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/unverschuldeter-unfall-rechte'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/unverschuldeter-unfall-rechte`,
+      ...(await localeOpenGraph(`/unverschuldeter-unfall-rechte`)),
       title: t('unverschuldeter_unfall_rechte.og_title'),
       description: t('unverschuldeter_unfall_rechte.og_description'),
     },

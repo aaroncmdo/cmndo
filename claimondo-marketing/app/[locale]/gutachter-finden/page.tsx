@@ -4,7 +4,7 @@ import { GutachterFindenSection } from '@/components/gutachter-finden/GutachterF
 import { FinderSprungPanel } from '@/components/gutachter-finden/FinderSprungPanel'
 import { STAEDTE } from '@/lib/kfz-gutachter/staedte'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { ladeUebersichtsTermine } from '@/lib/termine/naechster-termin'
 
@@ -35,11 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/gutachter-finden'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/gutachter-finden`,
+      ...(await localeOpenGraph(`/gutachter-finden`)),
       title: t('gutachter_finden.og_title', { anzahl }),
       description: t('gutachter_finden.og_description', { anzahl }),
     },
