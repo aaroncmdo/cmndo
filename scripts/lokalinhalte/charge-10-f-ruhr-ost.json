@@ -1,0 +1,668 @@
+{
+  "unna": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Alte Heide"
+        ]
+      },
+      {
+        "name": "Königsborn",
+        "ortsteile": [
+          "Königsborn",
+          "Afferde"
+        ]
+      },
+      {
+        "name": "Massen",
+        "ortsteile": [
+          "Massen"
+        ]
+      },
+      {
+        "name": "Unna-Ost",
+        "ortsteile": [
+          "Hemmerde",
+          "Westhemmerde",
+          "Lünern",
+          "Stockum",
+          "Mühlhausen",
+          "Uelzen"
+        ]
+      },
+      {
+        "name": "Unna-Süd",
+        "ortsteile": [
+          "Billmerich",
+          "Kessebüren"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A44"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B233"
+      ],
+      "knoten": [
+        "Kreuz Dortmund/Unna (A1/A44)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht das Kreuz Dortmund/Unna für Pendler zum Schadensschwerpunkt?",
+        "antwort": "Am Kreuz Dortmund/Unna treffen die A1 und die A44 zusammen — für viele Unnaer ist das der tägliche Arbeitsweg. Zwischen Ausfahrt und Auffahrt bleiben auf den Verbindungsrampen nur kurze Verflechtungsstrecken, auf denen sich einfädelnder und ausfahrender Verkehr kreuzt. Typisch sind Auffahrschäden am Heck und Streifschäden entlang der Flanke, oft mit Kontakt zur Betonschutzwand. Bei der Aufnahme kommt es darauf an, beide Anstöße sauber zu trennen. Hinzu kommt: Der Heckstoßfänger verdeckt heute in der Regel Abstandsradar oder Parksensorik, deren Ausbau, Erneuerung und anschließende Kalibrierung eigene Positionen in der Reparaturkalkulation sind. Wer den Wagen anschließend noch selbst bewegt, sollte auf Warnmeldungen im Display achten: Ein abgeschalteter Abstandsregler ist ein deutlicher Hinweis darauf, dass die Sensorhalterung verzogen ist — auch dann, wenn der Stoßfänger äußerlich unbeschädigt aussieht."
+      },
+      {
+        "frage": "Welche Rolle spielt die B1 im Unnaer Unfallgeschehen?",
+        "antwort": "Die B1 durchquert Unna von West nach Ost und verbindet Dortmund mit der Soester Börde. Innerhalb des Stadtgebiets wechseln zügige Abschnitte mit Ampelkreuzungen und Abbiegespuren Richtung Massen und Königsborn — eine Kombination, bei der hohe Geschwindigkeit und plötzliches Abbremsen aufeinandertreffen. Häufig sind seitliche Zusammenstöße beim Linksabbiegen. Anders als beim Auffahrunfall wirkt die Kraft quer auf Türen, B-Säule und Sitzquerträger; Seitenairbags und Gurtstraffer lösen aus. Für die Bewertung ist wichtig, dass ausgelöste Rückhaltesysteme grundsätzlich erneuert und die Steuergeräte neu bedatet werden — Positionen, die aus einer kleinen sichtbaren Delle schnell einen vierstelligen Schaden machen. Ob überhaupt ausgelöst wurde, ist dabei nicht die einzige Frage: Auch die Crashsensoren in Türen und Schwellern werden bei einem Seitenanstoß belastet und lassen sich nur über das Auslesen der Steuergeräte beurteilen, nicht durch Ansehen."
+      },
+      {
+        "frage": "Worauf kommt es bei einem Wildunfall auf den Landstraßen um Hemmerde und Lünern an?",
+        "antwort": "Der Osten Unnas gehört schon zur Börde. Zwischen Hemmerde, Lünern und Mühlhausen führen die Landstraßen an Feldrändern und Waldstücken entlang und werden in der Dämmerung stark von Pendlern befahren. Wildunfälle enden fast immer mit einem Frontschaden: Kühlerpaket, Klimakondensator, Scheinwerfer und die Halterungen dahinter. Bei LED- oder Matrix-Scheinwerfern liegt allein dort ein erheblicher Teil der Kosten. Wichtig ist die Dokumentation am Fahrzeug selbst — Haare, Gewebespuren, Anstoßhöhe und Verformungsrichtung —, weil sie den Hergang belegt und einen Wildschaden von einem Anstoß gegen ein festes Hindernis unterscheidet. Sinnvoll ist außerdem, die Fundstelle an der Landstraße vor dem Abtransport zu fotografieren und die Wildunfallbescheinigung des zuständigen Reviers einzuholen. Papiere und technischer Befund müssen zusammenpassen, sonst bleibt der Hergang später angreifbar."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Unna: zwischen dem Kreuz Dortmund/Unna, der B1 quer durch die Stadt und den Bördedörfern Hemmerde, Lünern und Mühlhausen. Schadenaufnahme vor Ort — in Königsborn, Massen oder in der Altstadt.",
+    "topografieAnker": "Unna liegt am Übergang vom Ruhrgebiet zur Hellwegbörde: im Westen flaches, dicht bebautes Stadtgebiet mit A1, A44 und der B1, im Osten offene Feldflur um Hemmerde und Lünern. Der Hellweg bündelt seit jeher den Ost-West-Verkehr — entsprechend hoch ist die Dichte auf B1 und Zubringern, während die Bördestraßen weit und schnell sind und in der Dämmerung Wildwechsel bringen."
+  },
+  "bergkamen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Bergkamen-Mitte"
+        ]
+      },
+      {
+        "name": "Oberaden",
+        "ortsteile": [
+          "Oberaden"
+        ]
+      },
+      {
+        "name": "Rünthe",
+        "ortsteile": [
+          "Rünthe"
+        ]
+      },
+      {
+        "name": "Weddinghofen",
+        "ortsteile": [
+          "Weddinghofen"
+        ]
+      },
+      {
+        "name": "Overberge",
+        "ortsteile": [
+          "Overberge"
+        ]
+      },
+      {
+        "name": "Heil",
+        "ortsteile": [
+          "Heil"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B233"
+      ],
+      "knoten": [
+        "Anschlussstelle Kamen/Bergkamen"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Bergsenkungen in Oberaden und Weddinghofen — warum ist das für die Schadenaufnahme wichtig?",
+        "antwort": "Bergkamen liegt in einem alten Bergbaurevier; in Oberaden, Weddinghofen und Rünthe haben sich Straßen über Jahrzehnte ungleichmäßig gesetzt. Übergänge an Brücken, Schachtdeckeln und Fahrbahnrändern bilden dadurch Kanten und Wellen, die man bei Dunkelheit kaum sieht. Setzt ein Fahrzeug dort auf oder trifft eine Kante mit der Felgenflanke, entsteht ein Schaden, der von außen unauffällig bleibt: verzogene Querlenker, beschädigte Radlager, Risse in Unterbodenverkleidung oder Ölwanne. Solche Schäden zeigen sich erst auf der Hebebühne und bei einer Achsvermessung — und nur dort trennt sich sauber, was Unfallfolge ist und was Verschleiß eines älteren Fahrzeugs. Genau diese Trennung ist in Bergkamen der Knackpunkt: Ein Querlenker kann ausgeschlagen sein, weil er alt ist — oder weil er an einer Bergsenkungskante in Oberaden einen Schlag bekommen hat. Der Unterschied zeigt sich an der Verformungsrichtung und am Zustand der Gummilager."
+      },
+      {
+        "frage": "Welche Schäden sind rund um die Anschlussstelle Bergkamen und die Gewerbeflächen typisch?",
+        "antwort": "Über die A2 und die Anschlussstelle Bergkamen läuft der Schwerverkehr zu den Industrie- und Gewerbeflächen im Stadtgebiet. Auf den Zufahrten mischen sich Lkw, Werksverkehr und Pkw; beim Abbiegen und beim Rangieren an Werkstoren kommt es regelmäßig zu Kollisionen. Der Anstoß eines Lkw liegt konstruktionsbedingt hoch: Er trifft nicht den Stoßfänger, sondern Kotflügel, A-Säule oder Dachrahmen. Solche Schäden verziehen tragende Teile der Karosserie, ohne dass die Türen sofort klemmen. Ob die Struktur noch maßhaltig ist, zeigt erst eine Karosserievermessung gegen die Herstellerdaten — sie gehört bei jedem Lkw-Anstoß dazu. Dazu kommt eine praktische Besonderheit der Bergkamener Werkszufahrten: Auf Privatgelände wird der Unfall häufig nicht polizeilich aufgenommen. Die Beweislage hängt dann allein an Fotos, Zeugen und der technischen Dokumentation, die unmittelbar danach entsteht."
+      },
+      {
+        "frage": "Was passiert typischerweise auf den schmalen Kanalbrücken in Rünthe?",
+        "antwort": "Der Datteln-Hamm-Kanal trennt Rünthe und Heil vom übrigen Stadtgebiet; die Brücken darüber sind schmal, und an der Marina Rünthe kommt am Wochenende Ausflugsverkehr dazu. Begegnen sich zwei breite Fahrzeuge auf der Brücke, weicht man instinktiv nach rechts aus — Ergebnis ist ein langer Streifschaden über Vorderkotflügel, Tür und Schweller, gelegentlich mit Kontakt zum Geländer. Bei solchen Längsschäden entscheidet die Zahl der betroffenen Bauteile, weil Lackierung und Farbtonangleichung sich über mehrere Felder ziehen. Hinzu kommt: Schweller sind bei vielen Modellen geklebt und genietet statt geschweißt, was den Reparaturweg deutlich verändert. Häufig fahren nach einer solchen Begegnung beide Beteiligten zunächst weiter. Auch dann lohnt die Aufnahme: Kratzverlauf und Anstoßhöhe zeigen, in welche Richtung sich die Fahrzeuge bewegt haben und auf welcher Seite der schmalen Brücke der Kontakt entstanden ist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bergkamen: zwischen der A2, dem Datteln-Hamm-Kanal in Rünthe und den Bergbausiedlungen in Oberaden und Weddinghofen. Schadenaufnahme vor Ort — auch dort, wo Bergsenkungen die Fahrbahn seit Jahrzehnten in Bewegung halten.",
+    "topografieAnker": "Bergkamen liegt flach im östlichen Ruhrgebiet südlich der Lippe. Prägend sind der Datteln-Hamm-Kanal mit der Marina Rünthe, die Halde Großes Holz und die Spuren des Steinkohlenbergbaus: Ganze Straßenzüge in Oberaden und Weddinghofen liegen in altem Bergsenkungsgebiet, in dem sich Fahrbahnen über Jahre unregelmäßig setzen und Kanten bilden."
+  },
+  "kamen": {
+    "stadtbezirke": [
+      {
+        "name": "Kamen-Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Südkamen"
+        ]
+      },
+      {
+        "name": "Methler",
+        "ortsteile": [
+          "Westick",
+          "Wasserkurl",
+          "Kaiserau"
+        ]
+      },
+      {
+        "name": "Heeren-Werve",
+        "ortsteile": [
+          "Heeren",
+          "Werve"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B233"
+      ],
+      "knoten": [
+        "Kamener Kreuz (A1/A2)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum gilt das Kamener Kreuz als besonders anspruchsvoll?",
+        "antwort": "Das Kamener Kreuz verbindet A1 und A2 und stammt aus den dreißiger Jahren — gebaut für einen Bruchteil des heutigen Verkehrs. Die Kleeblattschleifen haben enge Radien, und zwischen Ausfahrt und folgender Auffahrt liegt nur eine kurze Verflechtung. Wer zu schnell in die Schleife geht, kommt am Innenrand auf den Bordstein; Reifenflanke und Felgenhorn nehmen das übel. Im Verflechtungsbereich sind seitliche Kollisionen mit Lkw häufig. Für die Begutachtung heißt das oft: mehrere Anstöße an einem Fahrzeug. Sie müssen einzeln erfasst und dem Hergang zugeordnet werden, sonst wird aus zwei Ereignissen rechnerisch ein einziger Schaden. Das gilt besonders bei Kontakt zur Leitplanke in den Schleifen des Kamener Kreuzes: Deren verzinkte Oberfläche hinterlässt charakteristische helle Abriebspuren, die sich von der Lackantragung eines anderen Fahrzeugs eindeutig unterscheiden lassen."
+      },
+      {
+        "frage": "Wie wird ein Kettenauffahrunfall im Rückstau vor dem Kamener Kreuz bewertet?",
+        "antwort": "Staut sich der Verkehr am Kamener Kreuz zurück, steht die Kolonne weit auf die A1 oder die A2 hinaus — Auffahrunfälle mit drei und mehr Beteiligten sind dort Alltag. Für das mittlere Fahrzeug bedeutet das zwei Schäden: einen am Heck durch den Nachfolgenden, einen an der Front durch das Aufschieben. Beide Anstöße gehören unterschiedlichen Verursachern. In der Begutachtung werden sie getrennt erfasst und kalkuliert, mit Blick auf Deformationsrichtung, Höhe der Anstoßspuren und Lackantragungen. Ohne diese Trennung lässt sich später nicht mehr belegen, welcher Teil des Schadens zu welchem Beteiligten gehört. Praktisch heißt das: nicht nur das eigene Auto fotografieren, sondern auch die Endstellung aller Fahrzeuge, solange sie noch so stehen. Im Rückstau vor dem Kamener Kreuz bleibt dafür meist nur ein sehr kurzer Moment, bevor geräumt wird."
+      },
+      {
+        "frage": "Unbekannter Verursacher auf einem Parkplatz in Kamen — was hilft dann?",
+        "antwort": "Rund um den Bahnhof Kamen, die Innenstadt und die Sportschule in Kaiserau sind die Stellplätze eng, und Parkrempler bleiben häufig ohne Verursacher. Auch dann lohnt die technische Aufnahme: Anstoßhöhe, Richtung der Kratzspuren und vor allem Fremdlack auf der eigenen Karosserie lassen sich sichern. Eine Schichtdickenmessung zeigt zusätzlich, ob an der Stelle bereits früher lackiert wurde — das trennt den neuen Schaden von einem Vorschaden. Selbst kleine Anstöße am Stoßfänger sind heute selten günstig, weil Parksensoren, Kameras und ihre Halter mitbetroffen sind und die Sensorik nach dem Einbau neu eingelernt werden muss. Findet sich kein Verursacher, bleibt die technische Aufnahme die Grundlage, um Umfang und Zeitpunkt des Schadens später nachvollziehbar zu belegen — auch gegenüber einem Käufer, wenn das Fahrzeug irgendwann verkauft wird."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Kamen: rund um das Kamener Kreuz, wo A1 und A2 seit den dreißiger Jahren zusammentreffen, sowie in Methler, Heeren-Werve und Südkamen. Schadenaufnahme vor Ort, auch am Straßenrand nach einem Auffahrunfall.",
+    "topografieAnker": "Kamen liegt flach am Nordrand des Hellwegs, wo sich mit A1 und A2 zwei der wichtigsten Fernstraßen Europas kreuzen. Das Kamener Kreuz gehört zu den ältesten und am stärksten belasteten Autobahnkreuzen Deutschlands; sein Verkehr färbt bis in die Ortsdurchfahrten ab, weil Ausweichverkehr bei Stau regelmäßig durch Methler und Heeren-Werve rollt."
+  },
+  "schwerte": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Wandhofen",
+          "Schwerterheide"
+        ]
+      },
+      {
+        "name": "Westhofen",
+        "ortsteile": [
+          "Westhofen"
+        ]
+      },
+      {
+        "name": "Ergste",
+        "ortsteile": [
+          "Ergste",
+          "Bürenbruch"
+        ]
+      },
+      {
+        "name": "Villigst",
+        "ortsteile": [
+          "Villigst",
+          "Geisecke"
+        ]
+      },
+      {
+        "name": "Holzen",
+        "ortsteile": [
+          "Holzen",
+          "Lichtendorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A45"
+      ],
+      "bundesstrassen": [
+        "B236"
+      ],
+      "knoten": [
+        "Westhofener Kreuz (A1/A45)",
+        "Anschlussstelle Schwerte (A1)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei Unfällen in den Baustellenabschnitten am Westhofener Kreuz zu beachten?",
+        "antwort": "Rund um das Westhofener Kreuz wird auf A1 und A45 regelmäßig gebaut; Brückenerneuerungen an der Sauerlandlinie sind seit Jahren ein Dauerthema. Die Folge sind verschwenkte Spuren, schmale Fahrstreifen und dicht stehende Betonschutzwände. Typisch ist dort der Streifschaden über die gesamte Fahrzeugseite — Vorderkotflügel, beide Türen, Schweller, Hinterachsbereich. Solche Längsschäden sehen nach reinem Lackschaden aus, sind es aber selten: Die Spaltmaße zwischen den Türen verschieben sich, Scharniere und Anschläge nehmen Kraft auf. Eine Kontrolle der Spaltmaße und, wo nötig, eine Vermessung gehören deshalb dazu, bevor über Instandsetzen oder Ersetzen entschieden wird. Hinzu kommt die Beweisfrage: In einer Wanderbaustelle verschiebt sich die Verkehrsführung von Woche zu Woche. Wer den Spurverlauf und die Beschilderung am Unfalltag fotografiert, kann später belegen, wie eng es an dieser Stelle des Westhofener Kreuzes tatsächlich war."
+      },
+      {
+        "frage": "Warum sind die Steigungen nach Ergste und Holzen bei Nässe kritisch?",
+        "antwort": "Südlich der Ruhr klettert Schwerte nach Ergste, Holzen und Bürenbruch ins Sauerland hinauf. Die Straßen sind schmal, verlaufen an Waldrändern, und im Herbst liegt nasses Laub in den Kurven — dazu kommt Feuchtigkeit aus dem Ruhrtal, die dort länger steht. Wer abkommt, trifft Bankett, Böschung oder Leitplanke, meist mit der Front und schräg von unten. Der sichtbare Schaden am Stoßfänger ist dann der harmlose Teil: Zu prüfen sind Unterboden, Achsgeometrie, Lenkgetriebe und die Aufnahmen der Vorderachse. Ohne Vermessung bleibt offen, ob das Fahrzeug hinterher wieder geradeaus läuft. Bei Allradfahrzeugen, die im Schwerter Süden häufig gefahren werden, kommt der Blick auf Kardanwelle und Zwischenlager dazu — ein Aufsetzer auf der Bordkante überträgt sich dort weiter nach hinten, als man von außen vermutet."
+      },
+      {
+        "frage": "Ein Fahrzeug stand in Villigst oder Geisecke im Hochwasser — wie wird das begutachtet?",
+        "antwort": "Die Ruhr tritt im Schwerter Talraum bei Dauerregen über die Ufer; Stellplätze in Villigst, Geisecke und Wandhofen liegen tief. Ein Wasserschaden wird anders aufgenommen als ein Aufprallschaden: Entscheidend ist die höchste Wasserstandsmarke im Innen- und Motorraum. Von ihr hängt ab, welche Steuergeräte, Stecker, Sitzkonsolen und Dämmmaterialien betroffen sind. Süßwasser wirkt langsamer als Salzwasser, aber Korrosion an Kontakten zeigt sich oft erst Wochen später. Deshalb werden Wasserstand, Trocknungsschritte und Zustand der Elektrik dokumentiert, bevor das Fahrzeug bewegt oder gestartet wird — ein Startversuch nach Wassereintritt kann den Schaden erst vollenden. Wichtig ist zudem, den Pegelstand am Stellplatz zu belegen — eine Aufnahme der Wasserlinie an Hauswand oder Gartenmauer in Geisecke sagt später mehr aus als jede Schätzung aus der Erinnerung."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Schwerte: vom Westhofener Kreuz, wo A1 und A45 zusammentreffen, über das Ruhrtal bis nach Ergste, Villigst und Holzen. Schadenaufnahme vor Ort — in der Werkstatt, zu Hause oder am Stellplatz.",
+    "topografieAnker": "Schwerte liegt dort, wo die Ruhr das Ruhrgebiet vom Sauerland trennt. Nördlich des Flusses flaches Stadtgebiet, südlich davon steigt das Gelände nach Ergste, Holzen und Bürenbruch spürbar an. Am Westhofener Kreuz treffen A1 und A45 aufeinander; die Sauerlandlinie bringt zusätzlich Schwerverkehr Richtung Hagen und Siegen an die Talkante."
+  },
+  "menden": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Platte Heide"
+        ]
+      },
+      {
+        "name": "Lendringsen",
+        "ortsteile": [
+          "Lendringsen",
+          "Hüingsen",
+          "Barge"
+        ]
+      },
+      {
+        "name": "Bösperde",
+        "ortsteile": [
+          "Bösperde",
+          "Halingen"
+        ]
+      },
+      {
+        "name": "Schwitten",
+        "ortsteile": [
+          "Schwitten",
+          "Oesbern"
+        ]
+      },
+      {
+        "name": "Asbeck",
+        "ortsteile": [
+          "Asbeck"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B7",
+        "B515"
+      ],
+      "knoten": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die B515 im Hönnetal für Autofahrer schwierig?",
+        "antwort": "Die B515 führt von Menden aus in das enge Hönnetal, das an vielen Stellen von steilen Kalkfelsen gesäumt wird. Die Fahrbahn folgt dem Fluss in engen Kurven, hat kaum Seitenraum und wird von schweren Fahrzeugen der Kalkbetriebe mitbenutzt. Wer in der Kurve zu weit rechts kommt, streift Felskante, Fangzaun oder Leitplanke — ein Schaden, der sich über Kotflügel, Tür und Außenspiegel zieht und tiefe, unregelmäßige Kratzer statt einer glatten Delle hinterlässt. Für die Kalkulation ist entscheidend, ob der Lack bis aufs Blech durchtrennt ist; bei Kunststoffteilen entscheidet die Tiefe über Instandsetzen oder Ersatz. Der Kalkstaub aus dem Hönnetal spielt dabei eine eigene Rolle: Er setzt sich in frische Kratzer und lässt sie heller wirken, als sie sind. Beurteilt wird deshalb am gereinigten Bauteil, nicht am staubigen Fahrzeug direkt nach der Fahrt."
+      },
+      {
+        "frage": "Warum passieren auf den Gefällstrecken zur Platte Heide so viele Auffahrunfälle?",
+        "antwort": "Zwischen der Platte Heide, Lendringsen und der Mendener Innenstadt geht es dauernd bergauf und bergab. Im Berufsverkehr steht auf den Gefällstrecken eine Kolonne, und wer bergab zu dicht auffährt, hat einen deutlich längeren Anhalteweg als in der Ebene — das Fahrzeuggewicht drückt zusätzlich nach vorn. Typisch ist ein Auffahrschaden mit stärkerer Vorderwagenverformung, als die niedrige Geschwindigkeit vermuten lässt: Querträger, Schlossträger und die Prallelemente hinter dem Stoßfänger geben nach. Genau diese Teile sind bei der Aufnahme entscheidend, weil sie hinter der Verkleidung liegen und nur bei demontiertem Stoßfänger beurteilt werden können. Bei bergab stehenden Kolonnen kommt hinzu, dass das auffahrende Fahrzeug meist leicht schräg trifft. Die Kraft geht dann in eine Fahrzeugecke statt mittig in beide Längsträger — ein Unterschied, der den Reparaturumfang deutlich verschiebt."
+      },
+      {
+        "frage": "Ausweichen auf den schmalen Straßen um Asbeck und Oesbern — welche Schäden bleiben?",
+        "antwort": "Die Verbindungen zwischen Asbeck, Oesbern und Schwitten sind schmal, kurvig und haben Kuppen, hinter denen der Gegenverkehr spät sichtbar wird; landwirtschaftlicher Verkehr kommt dazu. Wer ausweicht, landet mit den rechten Rädern auf unbefestigtem Bankett oder an der Bordkante — und das trifft zuerst Reifen und Felge. Ein verzogenes Felgenhorn, eine Beule in der Reifenflanke oder ein verbogener Achsschenkel sind von außen unauffällig, verändern aber Spur und Sturz. Nach einem solchen Anstoß gehört die Vermessung von Spur und Sturz dazu, ebenso der Blick auf Radlager und Spurstange; sonst zeigt sich der Schaden erst später als einseitiger Reifenverschleiß. Kommt es beim Ausweichen zum Kontakt mit dem Gegenverkehr, ist außerdem die Fahrbahnbreite an der konkreten Stelle zwischen Asbeck und Oesbern von Bedeutung — sie entscheidet mit darüber, ob überhaupt eine gefahrlose Begegnung möglich war."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Menden: von der Ruhr bei Bösperde und Halingen über die Innenstadt und die Platte Heide bis ins Hönnetal Richtung Lendringsen. Schadenaufnahme vor Ort — in der Werkstatt, zu Hause oder am Unfallort an der B7.",
+    "topografieAnker": "Menden liegt am Nordrand des Sauerlands, wo die Hönne die Stadt durchfließt und kurz darauf die Ruhr erreicht. Zwischen der Ruhraue bei Halingen und den Höhen um Asbeck und Oesbern liegen deutliche Höhenunterschiede. Der überörtliche Verkehr läuft über die B7 in Ost-West-Richtung und über die B515, die dem engen Hönnetal nach Süden folgt."
+  },
+  "hattingen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Winz-Baak"
+        ]
+      },
+      {
+        "name": "Blankenstein",
+        "ortsteile": [
+          "Blankenstein",
+          "Welper"
+        ]
+      },
+      {
+        "name": "Niederwenigern",
+        "ortsteile": [
+          "Niederwenigern"
+        ]
+      },
+      {
+        "name": "Bredenscheid",
+        "ortsteile": [
+          "Bredenscheid-Stüter",
+          "Oberstüter"
+        ]
+      },
+      {
+        "name": "Holthausen",
+        "ortsteile": [
+          "Holthausen",
+          "Elfringhausen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B51"
+      ],
+      "knoten": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Motorradunfall in der Elfringhauser Schweiz — was ist bei der Begutachtung anders?",
+        "antwort": "Die Elfringhauser Schweiz südlich von Hattingen ist mit ihren engen Kurven und Steigungen an Wochenenden eine beliebte Motorradstrecke. Stürzt eine Maschine, sieht man zuerst Verkleidung, Lenkerenden und Fußrasten — entscheidend ist aber, was darunter passiert ist. Rahmen, Gabelholme, Gabelbrücke und Schwinge nehmen den Aufprall auf und lassen sich nur durch Vermessung beurteilen; ein leicht verzogener Gabelholm ist mit bloßem Auge nicht zu erkennen und macht das Fahrzeug unsicher. Dazu kommt die Frage, welche Anbauteile aus Sicherheitsgründen erneuert statt instand gesetzt werden müssen. Ein Motorrad wird deshalb grundsätzlich anders aufgenommen als ein Pkw. Bei Stürzen auf den Kurvenstrecken um Elfringhausen und Oberstüter gehört zusätzlich die Schutzkleidung in die Aufnahme: Helm, Protektoren und Kombi sind nach einem Aufprall in der Regel nicht mehr verwendbar und gehören zum Schadenumfang."
+      },
+      {
+        "frage": "Zusammenstoß mit einem Radfahrer am Ruhrufer — worauf kommt es an?",
+        "antwort": "Entlang der Ruhr zwischen Blankenstein, Welper und dem Kemnader See ist an schönen Tagen viel Rad- und Fußverkehr unterwegs, und die Zufahrten zu den Uferparkplätzen kreuzen den Weg. Zusammenstöße passieren dort bei geringer Geschwindigkeit, hinterlassen am Auto aber klare Spuren: Eindrücke von Lenkerende oder Pedal in Tür und Kotflügel, Gummiabrieb, gebrochene Spiegelgläser. Diese Spuren sind für die Rekonstruktion wichtig, weil sich aus Höhe und Richtung ableiten lässt, wie die Beteiligten zueinander standen. Sie sollten fotografiert werden, bevor das Fahrzeug gewaschen oder bewegt wird. Hinzu kommt: Zwischen den Uferparkplätzen in Welper und Blankenstein sind viele Pedelecs unterwegs, die deutlich schneller fahren als klassische Räder. Die Aufprallenergie ist entsprechend höher — sichtbare Dellen in Blechteilen sind dort keine Seltenheit."
+      },
+      {
+        "frage": "Warum sind Rangierschäden in der Hattinger Altstadt so teuer?",
+        "antwort": "Die Fachwerkaltstadt von Hattingen ist eng: schmale Zufahrten, Poller, Lieferzonen und Kopfsteinpflaster. Beim Rangieren entstehen Anstöße an Pollern, Hauskanten und Absperrungen — meist mit geringer Geschwindigkeit und trotzdem mit spürbaren Kosten. Der Grund liegt in der Bauweise moderner Stoßfänger: Hinter der lackierten Schale sitzen Ultraschallsensoren, Kamerahalter und Träger aus Schaum oder Aluminium. Wird die Schale getauscht, müssen die Sensoren umgebaut und anschließend eingelernt werden. Hinzu kommt, dass ein Poller punktuell trifft und die Kraft konzentriert in den Querträger leitet — der Schaden reicht deshalb oft tiefer, als der Kratzer vermuten lässt. Das Kopfsteinpflaster der Altstadt macht die Sache nicht leichter: Beim Rangieren über die unebene Fläche wird das Fahrzeug leicht verschränkt, sodass ein Anstoß an ungewöhnlicher Höhe entsteht und der Verlauf der Spuren erklärungsbedürftig wird."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hattingen: zwischen der Ruhr bei Blankenstein und Welper, der Altstadt mit ihren engen Gassen und den Kurven der Elfringhauser Schweiz. Schadenaufnahme vor Ort, auch am Hang und ohne Autobahn in der Nähe.",
+    "topografieAnker": "Hattingen liegt im Ruhrtal am Südrand des Ruhrgebiets, dort wo das Bergische Land beginnt. Zwischen der Ruhraue bei Welper und den Höhen der Elfringhauser Schweiz im Süden liegen rund zweihundert Höhenmeter. Durch das Stadtgebiet führt keine Autobahn — der Verkehr verteilt sich auf die Ruhrtalachse nach Bochum und Witten und auf schmale, kurvige Höhenstraßen."
+  },
+  "gevelsberg": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt"
+        ]
+      },
+      {
+        "name": "Silschede",
+        "ortsteile": [
+          "Silschede"
+        ]
+      },
+      {
+        "name": "Berge",
+        "ortsteile": [
+          "Berge"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1"
+      ],
+      "bundesstrassen": [
+        "B7"
+      ],
+      "knoten": [
+        "Anschlussstelle Gevelsberg (A1)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die Auffahrt zur A1 bei Gevelsberg für Lkw und Pkw schwierig?",
+        "antwort": "Die A1 verläuft bei Gevelsberg in einem Abschnitt mit spürbaren Steigungen; schwere Fahrzeuge verlieren dort Tempo, während der übrige Verkehr weiterrollt. Wer über die Anschlussstelle Gevelsberg auffährt, muss sich in eine Kolonne einfädeln, die selbst gerade überholt. Typisch sind seitliche Kollisionen am Ende des Beschleunigungsstreifens: Der Anstoß trifft die vordere Fahrzeugecke und schiebt sie zur Seite. Solche Schrägaufprälle verformen Längsträger und Radhaus, ohne dass die Motorhaube dramatisch aussieht. Bei der Aufnahme wird deshalb geprüft, ob das Rad noch mittig im Radhaus steht — eine einfache, aber verlässliche erste Kontrolle auf verzogene Vorbauten. Für den Hergang ist außerdem wichtig, aus welcher Richtung der Anstoß kam: Beim Einfädeln bei Gevelsberg liegt der Kontaktpunkt meist an der linken vorderen Ecke, bei einem Spurwechsel des anderen Fahrzeugs dagegen weiter hinten an Tür oder Radlauf."
+      },
+      {
+        "frage": "Warum kommt es in der engen Gevelsberger Talsohle so oft zu Streifschäden an parkenden Autos?",
+        "antwort": "Die Hauptachse durch Gevelsberg folgt der Ennepe im Tal; links und rechts stehen Häuser dicht an der Straße, dazwischen parken Fahrzeuge am Fahrbahnrand. Begegnen sich zwei Transporter, bleibt kaum Platz — Ergebnis ist ein Streifschaden am stehenden Fahrzeug. Für die Zuordnung ist die Anstoßhöhe entscheidend: Sie verrät, ob ein Pkw, ein Transporter mit hoher Stoßstange oder ein Außenspiegel im Spiel war. Ob eine Delle im Türblech gedrückt oder die Tür ersetzt wird, hängt danach von Tiefe, Lage zur Sicke und Material ab — Aluminiumtüren lassen sich nicht wie Stahl richten. Weil in der Gevelsberger Talsohle viele Fahrzeuge halb auf dem Gehweg stehen, ist zusätzlich die Standposition zu erfassen: Sie erklärt, warum der Kratzer schräg von unten nach oben verläuft, statt auf gleicher Höhe durchzulaufen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Gevelsberg: zwischen der A1 am Stadtrand, der B7 durch das Tal der Ennepe und den Höhenorten Silschede und Berge. Schadenaufnahme vor Ort — in der Werkstatt, am Arbeitsplatz oder zu Hause.",
+    "topografieAnker": "Gevelsberg liegt im Tal der Ennepe zwischen Wuppertal und Hagen, eingeklemmt zwischen bewaldeten Höhenrücken. Die Kernstadt zieht sich schmal am Fluss entlang, während Silschede und Berge deutlich höher liegen. Fast jede Verbindung aus dem Tal heraus ist eine Steigung mit Kurven — die A1 verläuft am Rand des Stadtgebiets auf halber Höhe."
+  },
+  "ennepetal": {
+    "stadtbezirke": [
+      {
+        "name": "Milspe",
+        "ortsteile": [
+          "Milspe",
+          "Altenvoerde"
+        ]
+      },
+      {
+        "name": "Voerde",
+        "ortsteile": [
+          "Voerde",
+          "Büttenberg"
+        ]
+      },
+      {
+        "name": "Rüggeberg",
+        "ortsteile": [
+          "Rüggeberg"
+        ]
+      },
+      {
+        "name": "Königsfeld",
+        "ortsteile": [
+          "Königsfeld",
+          "Oberbauer"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [],
+      "knoten": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Woher kommen die vielen Steinschläge auf der Talstrecke durch Milspe und Voerde?",
+        "antwort": "Ennepetal liegt im Massenkalkzug; die Kalkbetriebe im Stadtgebiet verschicken ihr Material per Lkw, und die Talstrecke durch Milspe und Voerde ist die Route dafür. Loses Material auf der Ladefläche und Splitt auf der Fahrbahn bedeuten Steinschläge an Frontscheibe, Motorhaube und Frontschürze. Bei der Scheibe entscheidet die Lage: Im Sichtfeld des Fahrers ist eine Reparatur meist ausgeschlossen, es wird getauscht. Und weil hinter der Scheibe fast jedes neuere Fahrzeug eine Kamera für Notbremsassistent und Spurhaltung trägt, gehört nach dem Scheibentausch eine Kalibrierung dazu — ohne sie arbeiten die Assistenzsysteme mit falschem Blickwinkel. Für Lackschäden durch Splitt gilt eine andere Logik: Viele kleine Einschläge auf Motorhaube und Frontschürze entstehen über Monate und sind Verschleiß. Ein einzelner, frischer Einschlag mit klarem Krater unterscheidet sich davon deutlich und lässt sich einem konkreten Ereignis auf der Talstrecke zuordnen."
+      },
+      {
+        "frage": "Zwischen Milspe und Rüggeberg liegen rund zweihundert Höhenmeter — was bedeutet das für Unfälle?",
+        "antwort": "Wer in Ennepetal von Milspe nach Rüggeberg fährt, wechselt auf wenigen Kilometern die Wetterlage: Unten regnet es, oben liegt in kalten Nächten Reif auf der Fahrbahn. Verliert ein Fahrzeug in einer Kurve der Steigungsstrecke die Haftung, folgt selten ein einzelner Anstoß — typisch ist ein Schleudervorgang mit Kontakt an Böschung, Leitplanke und Gegenfahrbahn. Für die Begutachtung heißt das: mehrere Anstoßstellen rund ums Fahrzeug, in unterschiedlichen Richtungen, teils versteckt an Unterboden und Radhäusern. Erst wenn alle erfasst sind, lässt sich der Reparaturweg verlässlich planen; übersehene Stellen tauchen sonst nach dem Zerlegen als Nachtrag auf. Bei einem Schleudervorgang lohnt sich außerdem der Blick auf die Räder: Seitliche Kräfte verbiegen Felgenhörner und verschieben Sturzwerte, was sich am stehenden Fahrzeug in Rüggeberg oder Milspe nur mit einer Vermessung feststellen lässt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Ennepetal: von Milspe und Voerde im engen Tal der Ennepe bis hinauf nach Rüggeberg und Königsfeld. Schadenaufnahme vor Ort — auf dem Werkstatthof, am Wohnhaus oder direkt an der B7.",
+    "topografieAnker": "Ennepetal zieht sich langgestreckt durch das enge Tal der Ennepe: Milspe und Voerde liegen unten am Fluss, Rüggeberg und Königsfeld rund zweihundert Meter höher auf den Hochflächen. Der Untergrund ist Massenkalk — daher die Kluterthöhle und die Steinbrüche, deren Schwerverkehr die Talstraßen mitbenutzt und Splitt in die Kurven trägt."
+  },
+  "sprockhoevel": {
+    "stadtbezirke": [
+      {
+        "name": "Haßlinghausen",
+        "ortsteile": [
+          "Haßlinghausen",
+          "Halloh"
+        ]
+      },
+      {
+        "name": "Niedersprockhövel",
+        "ortsteile": [
+          "Niedersprockhövel",
+          "Hiddinghausen"
+        ]
+      },
+      {
+        "name": "Obersprockhövel",
+        "ortsteile": [
+          "Obersprockhövel"
+        ]
+      },
+      {
+        "name": "Gennebreck",
+        "ortsteile": [
+          "Gennebreck"
+        ]
+      },
+      {
+        "name": "Herzkamp",
+        "ortsteile": [
+          "Herzkamp"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A43"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Sprockhövel (A43)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was passiert typischerweise auf der A43 im Bereich Sprockhövel?",
+        "antwort": "Die A43 nimmt bei Sprockhövel den Verkehr aus dem Ruhrgebiet auf und führt ihn zur A1 — morgens und nachmittags ist der Abschnitt dicht. An der Anschlussstelle Sprockhövel wechseln viele Fahrzeuge kurz hintereinander die Spur, weil sie sich früh einordnen wollen. Daraus entstehen seitliche Kollisionen im Bereich der hinteren Tür und des Radlaufs, oft mit anschließendem Kontakt zur Schutzwand auf der anderen Seite. Zwei gegenüberliegende Anstöße an einem Fahrzeug wirken zunächst widersprüchlich; sie gehören aber zum selben Ereignis und müssen als Kette dokumentiert werden, damit später niemand den zweiten Anstoß als Vorschaden einordnet. Weil die A43 bei Sprockhövel über weite Strecken keinen Standstreifen mit viel Platz bietet, stehen beschädigte Fahrzeuge oft dicht am Verkehr. Fotos entstehen dann besser hinter der Schutzplanke — und der Rest der Aufnahme in Ruhe auf dem Werkstatthof."
+      },
+      {
+        "frage": "Warum treffen sich auf den Verbindungen zwischen Haßlinghausen und Herzkamp so oft die Außenspiegel?",
+        "antwort": "Die Straßen zwischen Haßlinghausen, Gennebreck und Herzkamp sind schmal, führen über Kuppen und an Böschungen entlang; für zwei breite Fahrzeuge ist es an vielen Stellen zu eng. Der klassische Schaden ist der Spiegelanstoß, oft begleitet von einem Streifer über die Fahrertür. Was früher ein Ersatzglas für wenige Euro war, ist heute ein Bauteil mit Blinker, Umfeldkamera, Totwinkelsensor, Anklappmotor und Heizung. Nach dem Tausch muss das Gehäuse justiert und die Kamera im System angelernt werden. Deshalb lohnt es sich, auch bei einem kleinen Spiegelschaden die tatsächliche Ausstattung des Fahrzeugs zu erfassen. Häufig bleibt zudem unklar, wer wie weit rechts gefahren ist. Reste des Spiegelgehäuses auf der Fahrbahn und die Lage der Bruchstücke geben darüber Auskunft — sie sollten notiert werden, bevor der nächste Wagen darüberfährt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Sprockhövel: zwischen Haßlinghausen auf der Höhe, Niedersprockhövel im Tal und der A43, die das Stadtgebiet durchquert. Schadenaufnahme vor Ort — auch auf den schmalen Verbindungen zwischen den Ortsteilen.",
+    "topografieAnker": "Sprockhövel liegt auf dem hügeligen Übergang vom Ruhrgebiet ins Bergische: Haßlinghausen und Herzkamp auf den Höhen, Niedersprockhövel und Hiddinghausen deutlich tiefer. Die A43 quert das Gebiet und trifft südlich davon auf die A1. Zwischen den Ortsteilen verlaufen schmale, kurvige Straßen mit Kuppen und alten Hohlwegen aus der Bergbauzeit."
+  },
+  "radevormwald": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Bergerhof"
+        ]
+      },
+      {
+        "name": "Wupperorte",
+        "ortsteile": [
+          "Dahlerau",
+          "Vogelsmühle",
+          "Wilhelmstal"
+        ]
+      },
+      {
+        "name": "Remlingrade",
+        "ortsteile": [
+          "Remlingrade"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B229",
+        "B483"
+      ],
+      "knoten": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Nach einem Unfall auf einer Landstraße bei Remlingrade dauert alles länger — was heißt das praktisch?",
+        "antwort": "Radevormwald liegt abseits der Autobahnen; zwischen Remlingrade, Bergerhof und den Wupperorten sind Fahrzeuge auf schmalen Straßen mit Bäumen und Böschungen unterwegs. Kommt ein Auto von der Fahrbahn ab, steht es oft in der Böschung, und Bergung wie Abschleppdienst brauchen ihre Zeit. Für die spätere Bewertung ist entscheidend, dass der Zustand vor der Bergung festgehalten wird: Endlage des Fahrzeugs, Spuren auf der Fahrbahn, Kontaktstellen an Bäumen oder Leitpfosten. Beim Herausziehen entstehen fast immer zusätzliche Schäden an Unterboden, Schwellern und Anschlagpunkten — ohne Fotos von vorher lassen sie sich später kaum vom Unfallschaden trennen. Sinnvoll ist deshalb, dem Bergungsunternehmen die Anschlagpunkte vorzugeben, wenn es die Situation zulässt, und sich den Bergungsauftrag mit Uhrzeit und Ort geben zu lassen — im ländlichen Radevormwald ist das oft der einzige zeitliche Anker der ganzen Akte."
+      },
+      {
+        "frage": "Warum ist die Hochfläche um Radevormwald bei Nebel und Nässe so tückisch?",
+        "antwort": "Radevormwald gehört zu den niederschlagsreichsten Ecken des Bergischen Landes und liegt hoch genug, dass Nebel und der erste Frost hier früher ankommen als im Tal. Auf den Kuppen zwischen Innenstadt, Remlingrade und der B229 wechseln nasse und trockene Abschnitte kleinräumig. Wer in der Kurve die Haftung verliert, trifft meist Bankett und Böschung — Fahrzeugfront und Unterboden zuerst. Neben dem sichtbaren Blechschaden ist deshalb der Blick unter das Auto entscheidend: Ölwanne, Getriebeglocke, Achsträger und Auspuffanlage nehmen bei einem Aufsetzer Schaden, der beim Rangieren auf ebenem Hof nicht auffällt. Dazu kommt die Steigung selbst: Wer auf dem Weg von den Wupperorten hinauf in die Innenstadt ins Rutschen gerät, trifft die Böschung nicht frontal, sondern schräg von der Seite. Diese Richtung ist am Verlauf der Verformung ablesbar und gehört in die Dokumentation."
+      },
+      {
+        "frage": "Ausflugsverkehr an der Wupper-Talsperre — welche Schäden sind dort typisch?",
+        "antwort": "An schönen Wochenenden parken rund um die Wupper-Talsperre bei Radevormwald viele Fahrzeuge dicht an der Fahrbahnkante, weil die offiziellen Flächen schnell voll sind. Wer dann unachtsam die Tür öffnet, während ein Auto vorbeifährt, verursacht einen typischen Schaden: aufgebogene Türkante am eigenen Fahrzeug, ein langer Kratzer mit Eindruck über Tür und Kotflügel am vorbeifahrenden. Höhe und Form des Eindrucks zeigen, welche Tür beteiligt war. Wichtig ist außerdem, ob die Türkante gestaucht ist — dann sind Scharnier und Türfangband mit zu prüfen, sonst schließt die Tür später nicht mehr sauber. An den Uferstraßen der Talsperre kommt hinzu, dass die Fahrzeuge dort meist im Schräghang stehen. Die Tür fällt beim Öffnen von selbst weiter auf, als der Fahrer beabsichtigt — ein Umstand, der den Hergang erklärt und deshalb zur Aufnahme gehört."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Radevormwald: auf der bergischen Höhe rund um die Innenstadt, unten in den Wupperorten Dahlerau und Vogelsmühle und entlang der B229 Richtung Remscheid. Schadenaufnahme vor Ort, auch abseits der Autobahnen.",
+    "topografieAnker": "Radevormwald liegt auf einer bergischen Hochfläche um vierhundert Meter, während die Wupperorte Dahlerau, Vogelsmühle und Wilhelmstal gut zweihundert Meter tiefer im engen Wupper-Tal liegen. Eine Autobahn gibt es im Stadtgebiet nicht; den Verkehr tragen die B229 Richtung Remscheid und Halver sowie die kurvigen Verbindungen hinunter ins Tal."
+  },
+  "gummersbach": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Strombach",
+          "Rospe",
+          "Bernberg"
+        ]
+      },
+      {
+        "name": "Dieringhausen",
+        "ortsteile": [
+          "Dieringhausen",
+          "Vollmerhausen"
+        ]
+      },
+      {
+        "name": "Niederseßmar",
+        "ortsteile": [
+          "Niederseßmar",
+          "Lantenbach"
+        ]
+      },
+      {
+        "name": "Derschlag",
+        "ortsteile": [
+          "Derschlag"
+        ]
+      },
+      {
+        "name": "Hülsenbusch",
+        "ortsteile": [
+          "Hülsenbusch",
+          "Lieberhausen"
+        ]
+      },
+      {
+        "name": "Windhagen",
+        "ortsteile": [
+          "Windhagen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A4"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Gummersbach (A4)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die tägliche Fahrt über die A4 Richtung Köln für Gummersbacher riskant?",
+        "antwort": "Viele Gummersbacher pendeln über die Anschlussstelle Gummersbach auf die A4 nach Köln. Der Abschnitt durch das Oberbergische hat lange Steigungen und Gefällstrecken, auf denen Lkw kriechen und Pkw überholen; im Berufsverkehr bilden sich Stauenden hinter Kuppen, die man erst spät sieht. Auffahrunfälle laufen dort mit höherer Geschwindigkeit ab als im Stadtverkehr — Front und Heck werden deutlich verformt, häufig lösen Airbags aus. Bei der Aufnahme gehören dann Sitzposition, Gurtstraffer und der Zustand der Deformationselemente hinter den Stoßfängern dazu; sie sind Einwegteile und bestimmen mit, wie umfangreich die Instandsetzung wird. Wer auf der A4 zwischen Gummersbach und Engelskirchen in ein Stauende fährt, sollte außerdem an die Ladung denken: Gegenstände aus dem Kofferraum können nach vorn durchschlagen und Schäden verursachen, die nicht zum äußeren Anstoßbild passen."
+      },
+      {
+        "frage": "Welche Rolle spielen das Aggertal und die Talsperren im örtlichen Unfallgeschehen?",
+        "antwort": "Die Straßen im Aggertal südlich von Gummersbach und rund um die Aggertalsperre und die Genkeltalsperre sind an Wochenenden Ausflugsstrecken: Radfahrer, Motorräder und Pkw teilen sich schmale Fahrbahnen mit wenig Seitenraum, dazu kommen Wald- und Uferabschnitte im Schatten, die nach Regen lange feucht bleiben. Typisch sind Kollisionen beim Überholen. Trifft ein Fahrzeug dabei Fels oder Baumstamm am Fahrbahnrand, wirkt die Kraft punktuell statt flächig — die Verformung ist tief, aber schmal und erreicht häufig einen Längsträger. Ob er gerichtet werden darf oder ersetzt werden muss, gibt der Hersteller vor; diese Vorgabe bestimmt den gesamten Reparaturweg. An den Uferstrecken der Aggertalsperre kommt erschwerend hinzu, dass Mobilfunk und Beleuchtung stellenweise schlecht sind. Fotos gelingen dort nur mit zusätzlicher Lichtquelle, und die genaue Unfallstelle sollte anhand fester Punkte beschrieben werden, nicht nur nach Gefühl."
+      },
+      {
+        "frage": "Warum enden Fahrten in die Gummersbacher Innenstadt öfter mit einem Schaden am eigenen Auto?",
+        "antwort": "Die Innenstadt von Gummersbach liegt in Hanglage, entsprechend steil und eng sind Zufahrten und Rampen der Parkdecks; Hochschule, Klinikum und Veranstaltungen erzeugen zusätzlich Parksuchverkehr. An Rampenübergängen setzen tiefergelegte Fahrzeuge mit Frontschürze oder Auspuff auf, in den Kurven der Parkdecks streifen Felgen an Bordsteinen und Karosserien an Betonstützen. Solche selbst verursachten Schäden werden gern kleingeredet, sind aber der Klassiker für spätere Streitigkeiten über Vorschäden: Wer Umfang und Lage mit Fotos und einer sachlichen Beschreibung festhält, kann bei einem späteren Fremdschaden sauber trennen, was alt und was neu ist. Für die Rampen in Gummersbach gilt zudem: Ein Aufsetzer klingt harmlos, kann aber den Unterfahrschutz oder die Halterung des Ladeluftkühlers verformen. Beides fällt erst auf, wenn das Fahrzeug ohnehin auf der Hebebühne steht."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Gummersbach: von der A4 im Süden über das Aggertal mit Dieringhausen und Vollmerhausen bis zu den Höhenorten Lieberhausen und Hülsenbusch. Schadenaufnahme vor Ort im gesamten Oberbergischen.",
+    "topografieAnker": "Gummersbach liegt im Oberbergischen, wo sich die Agger und ihre Nebentäler tief in die Hochflächen eingeschnitten haben. Die Stadtteile verteilen sich entsprechend: Dieringhausen und Vollmerhausen unten im Aggertal, Lieberhausen und Hülsenbusch deutlich höher. Angebunden ist die Kreisstadt über die A4 im Süden — der übrige Verkehr folgt den Tälern und ihren Kurven."
+  }
+}

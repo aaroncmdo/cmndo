@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.6 (Doc 26) — Tool-Page „Unfallskizze". Faengt die Tool-/Vorlage-
 // Keywords (unfallskizze vorlage / muster / erstellen). Liefert eine
@@ -39,11 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/unfallskizze'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/unfallskizze`,
+      ...(await localeOpenGraph(`/unfallskizze`)),
       title: t('unfallskizze.og_title'),
       description: t('unfallskizze.og_description'),
     },

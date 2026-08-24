@@ -10,7 +10,7 @@ import { groupSpokesByCluster, clusterLabel } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25 Gap 3): Index-Hub fuer das Kfz-Haftpflichtschaden-Glossar.
 // Bisher waren die 57 Spokes nur unter /haftpflicht/[slug] erreichbar — /haftpflicht
@@ -42,10 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/haftpflicht'),
     openGraph: {
       type: 'website',
-      url: `${SITE_URL}/haftpflicht`,
+      ...(await localeOpenGraph(`/haftpflicht`)),
       title: t('haftpflicht.og_title'),
       description: t('haftpflicht.og_description'),
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,

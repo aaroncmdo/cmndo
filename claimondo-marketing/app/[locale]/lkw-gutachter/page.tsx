@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.4 (Doc 26) — Fahrzeugtyp-Page „LKW-/Nutzfahrzeug-Gutachter".
 // Konversions-Framing mit nutzfahrzeug-spezifischen USPs: gewerblicher
@@ -38,11 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/lkw-gutachter'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/lkw-gutachter`,
+      ...(await localeOpenGraph(`/lkw-gutachter`)),
       title: t('lkw_gutachter.og_title'),
       description: t('lkw_gutachter.og_description'),
     },

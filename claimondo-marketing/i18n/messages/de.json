@@ -94,7 +94,7 @@
     "insight_kasko": "Auch im Kasko-Fall lohnt sich ein unabhängiges Gutachten — es schützt Sie vor einer zu niedrigen Regulierung.",
     "ranges_heading": "Was das ungefähr wert ist",
     "range_auslagen": "Auslagenpauschale: 25–30 € pauschal",
-    "range_nutzungsausfall": "Nutzungsausfall: ca. 35–175 € pro Tag (je nach Fahrzeugklasse)",
+    "range_nutzungsausfall": "Nutzungsausfall: ca. 23–219 € pro Tag (je nach Fahrzeugklasse)",
     "range_wertminderung": "Wertminderung: bei jüngeren Fahrzeugen oft im vierstelligen Bereich",
     "range_kostenlos": "Gutachten & Anwalt: 0 € für Sie — zahlt die gegnerische Versicherung",
     "ranges_disclaimer": "Typische Größenordnungen, kein verbindliches Angebot.",
@@ -583,7 +583,7 @@
       "decoder_heading": "Sie haben genau diesen Brief bekommen?",
       "decoder_text": "Unsere Partnerkanzlei für Verkehrsrecht antwortet kostenfrei für Sie — mit BGH-fundierter Gegenargumentation, koordiniert über Claimondo. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).",
       "cornerstone_heading": "Was Sie jetzt konkret tun können",
-      "cornerstone_closing": "Claimondo ist die bundesweit größte digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden in Deutschland. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
+      "cornerstone_closing": "Claimondo begleitet Kfz-Haftpflichtschäden von der Schadenmeldung bis zur Auszahlung — eigener Sachverständiger, Partnerkanzlei, Werkstatt und Fallakte an einer Stelle. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).",
       "lokal_heading": "Sachverständigen in {stadt} finden",
       "lokal_text": "Auf der Claimondo-Karte sehen Sie alle Partner-Sachverständigen in {stadt} und Umgebung mit freien Terminen.",
       "lokal_fallback_region": "Ihrer Region",
@@ -808,15 +808,15 @@
     },
     "kfz_gutachter_ablauf": {
       "title": "Ablauf der Kfz-Schadensregulierung erklärt",
-      "description": "Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster. Dauer typisch 6–8 Wochen.",
+      "description": "Wie läuft eine Kfz-Schadensregulierung ab? Vom Unfall über Gutachten und Anwalt bis zur Auszahlung — jeder Schritt mit Zeitfenster. Im Schnitt 32 Tage.",
       "og_title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt",
-      "og_description": "Vom Unfall bis zur Auszahlung in 6–8 Wochen — alle Schritte erklärt."
+      "og_description": "Vom Unfall bis zur Auszahlung in durchschnittlich 32 Tagen — alle Schritte erklärt."
     },
     "kfz_gutachter_kosten": {
       "title": "Was kostet ein Kfz-Gutachter? 0 € nach Unfall",
       "description": "Kfz-Gutachter-Kosten: BVSK-Honorartabelle, Sicherungsabtretung (§398 BGB), Bagatellgrenze 750 €. Bei unverschuldetem Unfall zahlt die Gegnerseite — 0 €.",
       "og_title": "Was kostet ein Kfz-Gutachter? — 0 € bei Fremdverschulden",
-      "og_description": "Honorar nach BVSK 600–2.600 €, bei Fremdverschulden 0 € für Sie."
+      "og_description": "Honorar nach BVSK typisch 300–1.200 €, bei Fremdverschulden 0 € für Sie."
     },
     "kfz_gutachter_online": {
       "title": "Online-Kfz-Gutachten: was rechtlich erlaubt ist",
@@ -917,7 +917,7 @@
         },
         {
           "titel": "Schnelligkeit",
-          "text": "Antwort unter 15 Minuten. Termin in unter 48 Stunden. Gutachten in 48 Stunden. Auszahlung im Schnitt nach 6–8 Wochen."
+          "text": "Antwort unter 15 Minuten. Termin in unter 48 Stunden. Gutachten in 48 Stunden. Auszahlung im Schnitt nach 32 Tagen, typisch zwischen Tag 30 und 60."
         },
         {
           "titel": "Transparenz",
@@ -1141,7 +1141,7 @@
       "h1_accent": "Wir haben's im Griff.",
       "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
       "cta_primary": "Lassen Sie uns mit der Versicherung reden →",
-      "cta_call": "Jetzt anrufen — Rückruf in 5 Min",
+      "cta_call": "Jetzt anrufen — oder Rückruf in 15 Minuten",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonyme Beratung · Keine Bindung · DSGVO-konform"
     },
@@ -1201,18 +1201,18 @@
       "card_cta": "Anspruch im Detail",
       "cards": [
         {
-          "titel": "Reparatur oder Wiederbeschaffungswert",
-          "text": "Unsere Partnerkanzlei verhandelt vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "titel": "Reparatur — oder Geld für ein gleichwertiges Auto",
+          "text": "Repariert wird auf Kosten der Gegenseite — mitsamt der Posten, die Versicherer zuerst streichen: Aufschlag auf Original-Ersatzteile (UPE), Transport zum Lackierer (Verbringung) und das Angleichen der Nachbarteile, damit der Farbton stimmt (Beilackierung). Lohnt die Reparatur nicht mehr, gibt es den Wiederbeschaffungswert — was ein gleichwertiges Fahrzeug heute kosten würde. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
-          "titel": "Merkantile Wertminderung",
-          "text": "Unsere Partnerkanzlei setzt die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
+          "titel": "Wertverlust, weil Ihr Auto jetzt ein Unfallwagen ist",
+          "text": "Auch perfekt repariert bringt Ihr Fahrzeug beim Verkauf weniger als ein unfallfreies — diese Differenz heißt merkantile Wertminderung und muss die Gegenseite ersetzen. Unsere Partnerkanzlei setzt sie nach der Sanden/Danner-Formel durch, auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
-          "titel": "Mietwagen oder Nutzungsausfall",
-          "text": "Unsere Partnerkanzlei verhandelt Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–175 €/Tag nach Sanden/Danner-Klasse.",
+          "titel": "Mietwagen — oder Geld für jeden Tag ohne Auto",
+          "text": "Unsere Partnerkanzlei verhandelt einen Mietwagen für die gesamte Reparaturdauer. Wollen Sie keinen, gibt es stattdessen Geld für jeden Tag ohne Fahrzeug — den Nutzungsausfall, 23–219 € pro Tag je nach Fahrzeugklasse.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
@@ -1307,7 +1307,7 @@
       "items": [
         {
           "frage": "Was kostet ein Kfz-Gutachter nach einem unverschuldeten Unfall?",
-          "antwort": "Bei einem unverschuldeten Unfall mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen je nach Schadenshöhe zwischen 550 € und 2.600 €."
+          "antwort": "Bei einem unverschuldeten Unfall mit Schaden über 750 € zahlen Sie 0 €. Die gegnerische Haftpflichtversicherung trägt nach §249 BGB alle Kosten. Honorare nach BVSK-Honorartabelle liegen je nach Schadenshöhe typisch zwischen 300 € und 1.200 €, bei hohen Schäden bis ca. 2.500 €."
         },
         {
           "frage": "Wie schnell kann ein Kfz-Gutachter vor Ort sein?",
@@ -1319,7 +1319,7 @@
         },
         {
           "frage": "Gilt der kostenlose Service auch bei Teilschuld?",
-          "antwort": "Ja. Bei Teilschuld trägt die gegnerische Versicherung den prozentualen Anteil. Bei 50:50 zahlt Ihre eigene Kasko über das Quotenvorrecht die bevorrechtigten Positionen (Reparatur, Wertminderung, Sachverständige, Abschleppkosten) bis zu 100 %."
+          "antwort": "Ja. Bei Teilschuld trägt die gegnerische Versicherung ihren prozentualen Anteil. Bei 50:50 springt Ihre eigene Kaskoversicherung für den Rest ein und zahlt die wichtigsten Positionen (Reparatur, Wertminderung, Sachverständiger, Abschleppkosten) bis zu 100 % — das nennt sich Quotenvorrecht: Ihre Kasko wird zuerst für die Posten verwendet, die Ihnen der Höhe nach zustehen."
         },
         {
           "frage": "Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?",
@@ -1327,11 +1327,11 @@
         },
         {
           "frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
-          "antwort": "Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03."
+          "antwort": "Die merkantile Wertminderung — der Wertverlust, weil Ihr Auto künftig als Unfallwagen gilt — liegt nach der Sanden/Danner-Formel meist zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03."
         },
         {
           "frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
-          "antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird."
+          "antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — also dessen, was ein gleichwertiges Fahrzeug heute kosten würde. Voraussetzung: fachgerecht repariert nach Gutachten, und das Fahrzeug wird 6 Monate weitergenutzt."
         },
         {
           "frage": "Was ist das Werkstattrisiko nach den BGH-Urteilen 2024?",
@@ -1339,7 +1339,7 @@
         },
         {
           "frage": "Was ist die HIS-Datei und warum ist sie wichtig?",
-          "antwort": "Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung."
+          "antwort": "Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet — sich also den Schaden auszahlen lässt, ohne zu reparieren — und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung."
         },
         {
           "frage": "Werden Tesla- und E-Auto-Schäden gleich behandelt?",
@@ -1418,7 +1418,7 @@
           "versicherer": "alle großen",
           "pruefdienstleister": "überregionale Internet-Restwertbörse",
           "kuerzung": "Restwert künstlich hoch → Auszahlung gedrückt um bis zu 3.000 €",
-          "gegenargument": "Restwert = regionaler Markt. Sie müssen das Versicherer-Angebot nicht annehmen.",
+          "gegenargument": "Der Restwert ist das, was Ihr beschädigtes Auto noch einbringt — maßgeblich ist Ihr regionaler Markt. Ein Angebot aus einer bundesweiten Börse müssen Sie nicht annehmen.",
           "bgh": "BGH VI ZR 119/04",
           "href": "/haftpflicht/wiederbeschaffungswert"
         },
@@ -1506,7 +1506,7 @@
           "href": "/decoder/wertminderung-nicht"
         },
         {
-          "titel": "Fiktiv abrechnen ohne Beweissicherung",
+          "titel": "Sich den Schaden auszahlen lassen, ohne ihn zu dokumentieren",
           "warum": "Bei einem späteren Zweitunfall an gleicher Stelle ohne Reparaturnachweis kann die Versicherung die Regulierung komplett verweigern (HIS-Datei).",
           "besser": "Zwei-Foto-Regel: Fahrzeug nach Reparatur fotografieren mit Tageszeitung im Bild. Fernaufnahme + Nahaufnahme der reparierten Stelle.",
           "href": "/haftpflicht/anscheinsbeweis"
@@ -1553,7 +1553,7 @@
       ]
     },
     "lead_form": {
-      "rueckruf_badge": "Rückruf in 5 Minuten",
+      "rueckruf_badge": "Rückruf in 15 Minuten · 8–20 Uhr",
       "heading": "Schaden melden in 30 Sekunden",
       "sub": "Drei Felder. Ohne Anmeldung. DSGVO-konform.",
       "field_name_label": "Ihr Name",
@@ -1565,7 +1565,7 @@
       "submit": "Jetzt kostenlosen Rückruf erhalten →",
       "submit_pending": "Wird gesendet …",
       "success_heading": "Danke{name, select, empty{} other{, {name}}} — wir melden uns gleich.",
-      "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück. Bitte halten Sie das Telefon bereit — die Nummer kann unterdrückt sein.",
+      "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück — täglich zwischen 8 und 20 Uhr, außerhalb dieser Zeiten am nächsten Morgen. Bitte halten Sie das Telefon bereit, die Nummer kann unterdrückt sein.",
       "success_no_response": "Sie hören nichts? Rufen Sie uns direkt an:",
       "success_another": "Noch eine Anfrage senden",
       "error_no_response": "Klappt nicht? Rufen Sie uns direkt an —",
@@ -1578,7 +1578,7 @@
       "btn_rueckruf": "Rückruf",
       "btn_schliessen": "Schließen",
       "modal_heading": "Rückruf anfordern",
-      "modal_sub": "0 € Beratung — wir melden uns innerhalb der Geschäftszeiten unter 15 Minuten.",
+      "modal_sub": "0 € Beratung — wir melden uns in unter 15 Minuten, täglich zwischen 8 und 20 Uhr.",
       "label_name": "Name *",
       "placeholder_name": "Max Mustermann",
       "label_telefon": "Telefonnummer *",
@@ -1682,7 +1682,7 @@
     "vor_ort_kontakt": {
       "step_label": "Schritt 2 von 2 · Kontakt",
       "heading": "Wie erreichen wir Sie?",
-      "sub": "Wir rufen Sie in den nächsten 5 Minuten zurück und schicken einen Gutachter.",
+      "sub": "Wir rufen Sie in den nächsten 15 Minuten zurück (8–20 Uhr) und schicken einen Gutachter.",
       "placeholder_vorname": "Vorname",
       "placeholder_nachname": "Nachname",
       "placeholder_telefon": "Telefonnummer",
@@ -1693,7 +1693,7 @@
     },
     "vor_ort_erfolg": {
       "heading": "Soforthilfe ist unterwegs",
-      "sub": "Wir rufen Sie in den nächsten 5 Minuten unter {telefon} zurück.",
+      "sub": "Wir rufen Sie in den nächsten 15 Minuten unter {telefon} zurück (8–20 Uhr).",
       "fotos_gespeichert": "{count} {count, plural, one {Foto} other {Fotos}} gespeichert",
       "gps_label": "GPS"
     },
@@ -2222,7 +2222,7 @@
           },
           {
             "frage": "Was streichen Versicherungen am häufigsten?",
-            "antwort": "1. Stundenverrechnungssätze (Verweis auf billigere Werkstatt), 2. UPE-Aufschläge (trotz BGH VI ZR 65/18 erstattungsfähig), 3. Verbringungskosten (trotz BGH-Recht), 4. Beilackierungskosten (BGH VI ZR 174/24 aus 2025 gilt), 5. Sachverständigenkosten (\"überhöht\"), 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
+            "antwort": "1. Stundenverrechnungssätze — der Stundenlohn der Werkstatt, gekürzt per Verweis auf eine billigere. 2. UPE-Aufschläge — der Zuschlag auf Original-Ersatzteile (trotz BGH VI ZR 65/18 erstattungsfähig). 3. Verbringungskosten — der Transport zum Lackierer (trotz BGH-Recht). 4. Beilackierung — das Angleichen der Nachbarteile, damit der Farbton stimmt (BGH VI ZR 174/24 aus 2025 gilt). 5. Sachverständigenkosten (\"überhöht\"). 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
           },
           {
             "frage": "HUK, LVM, AXA — macht das einen Unterschied?",
@@ -2260,7 +2260,7 @@
           },
           {
             "frage": "Mietwagen oder Nutzungsausfall — was ist besser für mich?",
-            "antwort": "Hängt von Ihrer Situation ab. Pendler, die täglich auf das Auto angewiesen sind: Mietwagen. Zweitwagen vorhanden oder unklare Schuldfrage: Nutzungsausfall (Sanden/Danner-Tabelle, Gruppe A bis L, ~23 € bis 175 € pro Tag). Bei langer Reparaturdauer ist Nutzungsausfall oft günstiger. Wir beraten Sie dazu konkret."
+            "antwort": "Hängt von Ihrer Situation ab. Pendler, die täglich auf das Auto angewiesen sind: Mietwagen. Zweitwagen vorhanden oder unklare Schuldfrage: Nutzungsausfall (Sanden/Danner-Tabelle, Gruppe A bis L, ~23 € bis 219 € pro Tag). Bei langer Reparaturdauer ist Nutzungsausfall oft günstiger. Wir beraten Sie dazu konkret."
           }
         ]
       },
@@ -2298,7 +2298,7 @@
           },
           {
             "frage": "Wann bekomme ich mein Geld?",
-            "antwort": "Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt — kürzt die Versicherung trotzdem, Klage. Bundesweiter Durchschnitt: 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung."
+            "antwort": "Die Reparaturkosten zahlt die Versicherung in der Regel 4–8 Wochen nach Gutachten-Eingang. Wertminderung, Mietwagen und Nutzungsausfall folgen meist innerhalb derselben Frist. Bei Verzögerung oder Kürzung schreibt unser Anwalt — kürzt die Versicherung trotzdem, Klage. Bei Claimondo im Schnitt 32 Tage vom Unfall bis zur vollständigen Auszahlung, typisch zwischen Tag 30 und 60."
           },
           {
             "frage": "Muss ich mein Auto vor der Begutachtung waschen oder reparieren?",
@@ -2370,11 +2370,11 @@
         "fragen": [
           {
             "frage": "Mein Fahrzeug ist Totalschaden — was jetzt?",
-            "antwort": "Bei Totalschaden bekommen Sie den Wiederbeschaffungswert minus Restwert. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich."
+            "antwort": "Bei Totalschaden bekommen Sie den Wiederbeschaffungswert — was ein gleichwertiges Fahrzeug heute kosten würde — minus den Restwert, also das, was Ihr beschädigtes Auto noch einbringt. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich."
           },
           {
             "frage": "Was ist mit Mietwagen während der Reparatur?",
-            "antwort": "Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 175 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf \"vergleichbare Klasse\" was nicht immer gerechtfertigt ist."
+            "antwort": "Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 219 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf \"vergleichbare Klasse\" was nicht immer gerechtfertigt ist."
           },
           {
             "frage": "Ich habe einen Schaden mit einem Firmenfahrzeug. Geht das auch?",
@@ -3304,7 +3304,7 @@
       },
       {
         "titel": "Ablauf",
-        "lead": "Schritt für Schritt vom Unfall bis zur Auszahlung — durchschnittlich 6–8 Wochen."
+        "lead": "Schritt für Schritt vom Unfall bis zur Auszahlung — im Schnitt 32 Tage."
       },
       {
         "titel": "Wertminderung",
@@ -3393,8 +3393,8 @@
     "breadcrumb_hub": "Kfz-Gutachter",
     "breadcrumb_current": "Ablauf",
     "hero_h1": "Ablauf der Kfz-Schadensregulierung",
-    "hero_intro": "Schritt für Schritt — vom Unfall bis zur vollständigen Auszahlung in <strong>6–8 Wochen</strong>",
-    "antwort_capsule": "<strong>Eine vollständige Kfz-Schadensregulierung dauert typisch 6–8 Wochen.</strong> Tag 0 = Unfall. Tag 1–2 = Gutachter-Termin. Tag 5 = schriftlicher Bericht. Woche 2 = Anwalts-Forderungsschreiben. Woche 6–8 = Auszahlung. Bei Klage-Verfahren verlängert sich der Prozess um 6–18 Monate, die Auszahlung wird aber durch Vorschuss-Zahlung der Versicherung oft beschleunigt.",
+    "hero_intro": "Schritt für Schritt — vom Unfall bis zur vollständigen Auszahlung in <strong>durchschnittlich 32 Tagen</strong>",
+    "antwort_capsule": "<strong>Eine vollständige Kfz-Schadensregulierung dauert im Schnitt 32 Tage — typisch liegt die Auszahlung zwischen Tag 30 und Tag 60.</strong> Tag 0 = Unfall. Tag 1–2 = Gutachter-Termin. Tag 5 = schriftlicher Bericht. Woche 2 = Anwalts-Forderungsschreiben. Tag 30–60 = Auszahlung. Bei Klage-Verfahren verlängert sich der Prozess um 6–18 Monate, die Auszahlung wird aber durch Vorschuss-Zahlung der Versicherung oft beschleunigt.",
     "schritte": [
       {
         "titel": "Unfall sichern",
@@ -3413,7 +3413,7 @@
       },
       {
         "titel": "Auszahlung",
-        "dauer": "Ø 6–8 Wochen ab Gutachten",
+        "dauer": "Ø 32 Tage ab Unfall",
         "text": "Die gegnerische Versicherung überweist innerhalb von 4–8 Wochen. Bei Verzögerung oder Kürzung schreibt der Anwalt nach. Bei Streit: Klage. Auch Klage-Kosten trägt bei Erfolg die Gegenseite. Sie zahlen 0 €."
       }
     ],
@@ -3421,7 +3421,7 @@
     "faqs": [
       {
         "frage": "Wie lange dauert eine komplette Kfz-Schadensregulierung?",
-        "antwort": "Im Durchschnitt 6–8 Wochen vom Unfall bis zur vollständigen Auszahlung. Aufschlüsselung: Tag 0 = Unfall, Tag 1–2 = Gutachter-Termin, Tag 3–5 = Bericht, Tag 5–10 = Forderungsschreiben Anwalt, Tag 30–60 = Auszahlung. Bei Klage zusätzlich 6–18 Monate. In komplexen Fällen (Personenschaden, Streit, Tesla) auch länger."
+        "antwort": "Im Durchschnitt 32 Tage vom Unfall bis zur vollständigen Auszahlung. Aufschlüsselung: Tag 0 = Unfall, Tag 1–2 = Gutachter-Termin, Tag 3–5 = Bericht, Tag 5–10 = Forderungsschreiben Anwalt, Tag 30–60 = Auszahlung. Bei Klage zusätzlich 6–18 Monate. In komplexen Fällen (Personenschaden, Streit, Tesla) auch länger."
       },
       {
         "frage": "Was ist der erste Schritt nach einem Unfall?",
@@ -3437,7 +3437,7 @@
       },
       {
         "frage": "Wann bekomme ich einen Mietwagen oder Nutzungsausfall?",
-        "antwort": "Mietwagen ab dem ersten Tag der Reparatur — gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–175 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation."
+        "antwort": "Mietwagen ab dem ersten Tag der Reparatur — gleichwertige Klasse oder klassentiefer mit Eigenanteil-Erstattung. Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (23–219 €/Tag je nach Fahrzeugklasse). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation."
       }
     ],
     "crosslinks_h2": "Mehr zum Thema",
@@ -3453,8 +3453,8 @@
     "breadcrumb_start": "Kfz-Gutachter",
     "breadcrumb_current": "Kosten",
     "hero_h1": "Was kostet ein Kfz-Gutachter?",
-    "hero_intro": "Bei unverschuldetem Unfall: <strong>0 € für Sie</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €",
-    "antwort_capsule": "<strong>Bei einem unverschuldeten Verkehrsunfall mit Schaden über 750 €</strong> trägt die gegnerische Haftpflichtversicherung das Gutachter-Honorar zu 100 %. Die Höhe richtet sich nach der BVSK-Honorartabelle (Wiederbeschaffungswert-basiert) und liegt zwischen 550 € und 2.600 €. Sie zahlen nichts: der Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.",
+    "hero_intro": "Bei unverschuldetem Unfall: <strong>0 € für Sie</strong> · §249 BGB · BVSK-Honorartabelle typisch 300–1.200 €",
+    "antwort_capsule": "<strong>Bei einem unverschuldeten Verkehrsunfall mit Schaden über 750 €</strong> trägt die gegnerische Haftpflichtversicherung das Gutachter-Honorar zu 100 %. Die Höhe richtet sich nach der BVSK-Honorartabelle (Wiederbeschaffungswert-basiert): typisch 300–1.200 €, bei hohen Schäden bis ca. 2.500 €. Sie zahlen nichts: der Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.",
     "bvsk_h2": "BVSK-Honorartabelle — wie wird das Honorar berechnet?",
     "bvsk_capsule": "Die BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) staffelt das Honorar nach Wiederbeschaffungswert. Beispiel: Schaden 5.000 € → ca. 700 €. Schaden 15.000 € → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Plus Nebenkosten (Lichtbilder, Schreibgebühren, Fahrtkosten). Die Tabelle wird jährlich aktualisiert.",
     "bvsk_beispiele": [
@@ -3486,7 +3486,7 @@
     "faqs": [
       {
         "frage": "Wie viel kostet ein Kfz-Gutachter konkret?",
-        "antwort": "Die Honorare richten sich nach der BVSK-Honorartabelle und skalieren mit dem Wiederbeschaffungswert des Fahrzeugs. Spannen je nach Region: 550–2.600 €. Beispiele: Schaden 5.000 € → ca. 700 € Gutachterhonorar. Schaden 15.000 € → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Die Berechnung folgt der HB-V-Befragung des BVSK aus 2025."
+        "antwort": "Die Honorare richten sich nach der BVSK-Honorartabelle und skalieren mit dem Wiederbeschaffungswert des Fahrzeugs. Typisch 300–1.200 €, bei hohen Schäden bis ca. 2.500 €. Beispiele: Schaden 5.000 € → ca. 700 € Gutachterhonorar. Schaden 15.000 € → ca. 1.400 €. Schaden 30.000 € → ca. 2.200 €. Die Berechnung folgt der HB-V-Befragung des BVSK aus 2025."
       },
       {
         "frage": "Wer zahlt den Gutachter bei einem Unfall?",
@@ -3918,9 +3918,9 @@
       "32 Tage statt 4 Monate. Im Schnitt.",
       "0 € für Sie. (§ 249 BGB)."
     ],
-    "hero_cta_call": "Jetzt anrufen — Rückruf in 5 Min",
+    "hero_cta_call": "Jetzt anrufen — oder Rückruf in 15 Minuten",
     "hero_trust_line": "Anonyme Beratung · Keine Bindung · DSGVO-konform",
-    "form_badge": "Rückruf in 5 Minuten",
+    "form_badge": "Rückruf in 15 Minuten · 8–20 Uhr",
     "form_h2": "Schaden melden — in 30 Sekunden",
     "form_sub": "Drei Felder. Ohne Anmeldung. DSGVO-konform.",
     "form_name_label": "Ihr Name",
@@ -3932,7 +3932,7 @@
     "form_submit_idle": "Jetzt kostenlosen Rückruf erhalten →",
     "form_submit_pending": "Wird gesendet …",
     "form_consent": "Mit dem Absenden akzeptiere ich die <link>Datenschutzerklärung</link>.",
-    "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück.",
+    "form_toast_success": "Danke! Wir melden uns in unter 15 Minuten zurück — täglich zwischen 8 und 20 Uhr.",
     "form_toast_error": "Übermittlung fehlgeschlagen",
     "form_toast_rate_limit": "Zu viele Anfragen. Bitte in ein paar Minuten erneut versuchen.",
     "trust_kpis": [
@@ -4028,9 +4028,17 @@
     "faq_sa_frage": "Was ist eine Sicherungsabtretung — und ist sie sicher?",
     "faq_sa_antwort": "Bei der Sicherungsabtretung gemäß §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.",
     "faq_wertminderung_frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
-    "faq_wertminderung_antwort": "Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.",
+    "faq_wertminderung_antwort": "Die merkantile Wertminderung — der Wertverlust, weil Ihr Auto künftig als Unfallwagen gilt — liegt nach der Sanden/Danner-Formel meist zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.",
+    "faq_gutachterwahl_frage": "Kann ich den Gutachter selbst wählen?",
+    "faq_gutachterwahl_antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung. Deren Angebot, einen eigenen Prüfer zu schicken, müssen Sie nicht annehmen: Ein von der Gegenseite beauftragter Gutachter arbeitet nicht in Ihrem Interesse.",
+    "faq_kva_frage": "Reicht ein Kostenvoranschlag der Werkstatt?",
+    "faq_kva_antwort": "Unter etwa 750 € Schaden ja — das ist der Bagatellbereich. Darüber nicht: Ein Kostenvoranschlag beziffert allein die Reparatur. Wertminderung, Nutzungsausfall, Wiederbeschaffungs- und Restwert fehlen darin, und genau diese Positionen machen einen erheblichen Teil der Entschädigung aus.",
+    "faq_mietwagen_frage": "Bekomme ich nach dem Unfall einen Mietwagen?",
+    "faq_mietwagen_antwort": "Bei unverschuldetem Unfall ja — die gegnerische Haftpflicht trägt nach § 249 BGB einen Mietwagen vergleichbarer Klasse für die Dauer der Reparatur oder Wiederbeschaffung. Alternativ zahlt sie Nutzungsausfall in bar, gestaffelt nach Fahrzeuggruppe und Ausfalltagen. Wer wenig fährt, fährt mit der Barzahlung häufig besser.",
+    "faq_werkstattwahl_frage": "Darf ich meine Werkstatt frei wählen?",
+    "faq_werkstattwahl_antwort": "Ja, die freie Werkstattwahl bleibt bestehen. Die gegnerische Versicherung darf Sie nicht auf eine Partnerwerkstatt verweisen, wenn Sie in einer markengebundenen Fachwerkstatt reparieren lassen wollen — das gilt besonders bei jungen oder scheckheftgepflegten Fahrzeugen.",
     "faq_130_frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
-    "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.",
+    "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — also dessen, was ein gleichwertiges Fahrzeug heute kosten würde. Voraussetzung: fachgerecht repariert nach Gutachten, und das Fahrzeug wird 6 Monate weitergenutzt.",
     "cta_h2": "Schaden {ort}? Wir regeln das.",
     "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien Kfz-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen",
@@ -4159,7 +4167,7 @@
     "trust_kpi_kuerzung_label": "Versicherer-Kürzung typisch¹",
     "trust_kpi_bgh_wert": "8",
     "trust_kpi_bgh_label": "BGH-Aktenzeichen 1992–2025",
-    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle Spanne",
     "trust_methodikNote": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Executive Summary",

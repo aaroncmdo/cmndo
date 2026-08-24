@@ -1,0 +1,1330 @@
+{
+  "aachen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Frankenberger Viertel",
+          "Burtscheid",
+          "Forst",
+          "Rothe Erde",
+          "Westpark"
+        ]
+      },
+      {
+        "name": "Brand",
+        "ortsteile": [
+          "Brand",
+          "Freund",
+          "Niederforstbach"
+        ]
+      },
+      {
+        "name": "Eilendorf",
+        "ortsteile": [
+          "Eilendorf",
+          "Nirm"
+        ]
+      },
+      {
+        "name": "Haaren",
+        "ortsteile": [
+          "Haaren",
+          "Verlautenheide"
+        ]
+      },
+      {
+        "name": "Kornelimünster/Walheim",
+        "ortsteile": [
+          "Kornelimünster",
+          "Walheim",
+          "Oberforstbach",
+          "Sief"
+        ]
+      },
+      {
+        "name": "Laurensberg",
+        "ortsteile": [
+          "Laurensberg",
+          "Vaalserquartier",
+          "Seffent",
+          "Orsbach"
+        ]
+      },
+      {
+        "name": "Richterich",
+        "ortsteile": [
+          "Richterich",
+          "Horbach",
+          "Huf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Aachen",
+        "Anschlussstelle Aachen-Europaplatz"
+      ],
+      "autobahnen": [
+        "A4",
+        "A44",
+        "A544"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B57",
+        "B258",
+        "B264"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist an der A544 zum Europaplatz besonders?",
+        "antwort": "Die A544 ist mit rund fünfeinhalb Kilometern eine reine Stadtautobahn: Sie führt vom Autobahnkreuz Aachen direkt bis an den Europaplatz am Rand der Innenstadt, wo sie auf die B1 und die B264 trifft. Zwischen Autobahnniveau und innerstädtischem Verkehr liegen damit nur wenige hundert Meter, und obwohl durchgehend Tempo 100 gilt, wird der Übergang regelmäßig unterschätzt. Wer zu spät bremst, fährt am Rückstau vor der Einmündung auf. Bei solchen Auffahrschäden lohnt der Blick über die Stoßfängerhaut hinaus: Der Querträger dahinter und die Prallabsorber leisten die eigentliche Verformungsarbeit, und ob das Bodenblech im Reserveradbereich gestaucht ist, zeigt sich erst nach der Demontage. Die halbseitig ausgebaute Anschlussstelle Rothe Erde sorgt zusätzlich für Fehlfahrten von Ortsunkundigen. Auch die Scheinwerferhalterungen gehören geprüft: Sie sind bei vielen Modellen aus Kunststoff und brechen, ohne dass das Gehäuse selbst beschädigt aussieht."
+      },
+      {
+        "frage": "Aachen liegt im Dreiländereck — was bedeutet das bei einem Unfall?",
+        "antwort": "Über das Aachener Stadtgebiet läuft täglicher Berufspendlerverkehr aus Belgien und den Niederlanden, und entsprechend hoch ist der Anteil an Fahrzeugen mit ausländischer Zulassung. Für die Schadenaufnahme heißt das vor allem eines: Kennzeichen, Fahrzeugidentifikationsnummer und Versicherungsdaten vollständig festhalten, solange beide Beteiligten noch an der Unfallstelle sind. Eine spätere Ermittlung über die Grenze hinweg ist deutlich aufwendiger. Technisch kommt hinzu, dass Fahrzeuge aus dem Ausland in Ausstattung und Bauteilstand von der deutschen Modellpflege abweichen können — dieselbe Baureihe trägt dann andere Scheinwerfer oder eine andere Stoßfängerausführung. Für die Kalkulation ist deshalb die Fahrzeugidentifikationsnummer die verlässliche Grundlage, nicht die Modellbezeichnung, und sie gehört auf jeden Fall fotografisch gesichert. Auch die Beleuchtungseinrichtungen weichen je nach Zulassungsland ab, was bei der Zuordnung der Ersatzteile eine Rolle spielt."
+      },
+      {
+        "frage": "Warum entstehen rund um den Aachener Alleenring so viele kleine Schäden?",
+        "antwort": "Der Alleenring umschließt die Aachener Altstadt und nimmt den Verkehr auf, der nicht durch das historische Zentrum darf. Auf den Ring münden zahlreiche Straßen in kurzen Abständen, und dahinter beginnt sofort ein weitläufiges Einbahnstraßensystem. Ortsunkundige verpassen die richtige Abzweigung, halten unvermittelt an oder biegen aus der falschen Spur ab. In den Gassen dahinter geht es zwischen Frankenberger Viertel und Altstadt eng weiter, mit Lieferverkehr und Kopfsteinpflaster. Typisch sind Anstöße an Stoßfängerecken, abgerissene Außenspiegel und Kratzer über mehrere Bauteile. Solche Schäden wirken klein, betreffen aber fast immer lackierte Anbauteile mit Parksensoren und Kamera im Spiegelgehäuse, die als Baugruppe getauscht und anschließend eingelernt werden müssen. Auf Kopfsteinpflaster kommt hinzu, dass sich Fahrzeuge beim Rangieren seitlich neigen und Schwellerkanten dadurch früher aufsetzen als auf ebenem Belag."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden am Frankenberger Viertel oder Zusammenstoß nahe der belgischen Grenze — der Sachverständige kommt zu Ihnen nach Aachen.",
+    "topografieAnker": "Aachen liegt im Dreiländereck zu Belgien und den Niederlanden; die A4 führt zur belgischen Grenze, die A44 nach Norden, und der Alleenring umschließt die Altstadt."
+  },
+  "augsburg": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Bahnhofsviertel",
+          "Bleich",
+          "Georgsviertel",
+          "Domviertel"
+        ]
+      },
+      {
+        "name": "Oberhausen",
+        "ortsteile": [
+          "Oberhausen-Nord",
+          "Oberhausen-Süd",
+          "Bärenkeller"
+        ]
+      },
+      {
+        "name": "Lechhausen",
+        "ortsteile": [
+          "Lechhausen-Ost",
+          "Lechhausen-West",
+          "Hammerschmiede"
+        ]
+      },
+      {
+        "name": "Hochzoll",
+        "ortsteile": [
+          "Hochzoll-Nord",
+          "Hochzoll-Süd"
+        ]
+      },
+      {
+        "name": "Haunstetten",
+        "ortsteile": [
+          "Haunstetten",
+          "Siebenbrunn",
+          "Universitätsviertel"
+        ]
+      },
+      {
+        "name": "Göggingen",
+        "ortsteile": [
+          "Göggingen",
+          "Inningen",
+          "Bergheim"
+        ]
+      },
+      {
+        "name": "Pfersee",
+        "ortsteile": [
+          "Pfersee",
+          "Kriegshaber",
+          "Antonsviertel"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Augsburg-West",
+        "Anschlussstelle Augsburg-Ost"
+      ],
+      "autobahnen": [
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B2",
+        "B17",
+        "B300"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum laufen Auffahrunfälle auf der B17 anders ab als im übrigen Stadtverkehr?",
+        "antwort": "Die B17 ist in Augsburg keine gewöhnliche Bundesstraße, sondern eine kreuzungsfreie Stadtautobahn: vierstreifig, planfrei ausgebaut, mit Lärmschutzwänden, Tunnelabschnitten bei Bärenkeller und Kriegshaber und einer Streckenbeeinflussungsanlage, die das Tempo je nach Lage absenkt. Genau daraus entsteht die typische Konstellation. Wer mit Autobahngeschwindigkeit unterwegs ist und auf eine dynamisch angezeigte Reduzierung trifft, bremst spät, und der Nachfolgende reagiert noch später. Die Aufprallenergie liegt deutlich über der eines innerstädtischen Auffahrunfalls. Bei der Aufnahme lohnt der Blick über den Stoßfänger hinaus: Ein Heckanstoß dieser Größenordnung verzieht regelmäßig die Heckklappe samt Dichtungsebene. Das fällt zunächst nicht auf und zeigt sich Monate später als Feuchtigkeit im Kofferraum oder in der Reserveradmulde. Ein Wasserfleck unter der Seitenverkleidung ist deshalb kein Nebenbefund, sondern der Hinweis auf einen Heckschaden, der zu knapp erfasst wurde."
+      },
+      {
+        "frage": "Was macht die Lechbrücken zwischen Hochzoll, Lechhausen und der Innenstadt so heikel?",
+        "antwort": "Augsburg liegt zwischen Lech und Wertach, und der Lech trennt Hochzoll und Lechhausen vom Stadtkern. Der gesamte Verkehr aus dem Osten bündelt sich daher auf wenigen Querungen, die zu den Spitzenzeiten dauerhaft belegt sind. In solchen stehenden Kolonnen fahren motorisierte Zweiräder und Radfahrer rechts oder zwischen den Reihen vorbei — und genau dort öffnet jemand eine Tür oder ein Fahrzeug schert zur Lücke aus. Die Schäden sind klein in der Fläche und heikel in der Sache: eine verbogene Türkante, ein abgerissener Außenspiegel, ein Kratzer über der Sicke. Weil bei solchen Vorgängen fast immer Personenschaden im Raum steht, zählt die Anstoßhöhe: Sie zeigt, ob der Kontakt von einem Zweirad oder einem Fahrzeug stammt. Auch die Endlage der geöffneten Tür gehört ins Protokoll, denn der Öffnungswinkel lässt sich später nicht mehr rekonstruieren."
+      },
+      {
+        "frage": "Was ist zu tun, wenn das Fahrzeug bei Starkregen in einer Augsburger Unterführung liegen bleibt?",
+        "antwort": "Zwischen Lech und Wertach liegen in Augsburg zahlreiche Bahn- und Straßenunterführungen als tiefste Punkte im Straßennetz. Bei Starkregen laufen sie innerhalb von Minuten voll, und die Wassertiefe ist von außen kaum zu schätzen, weil die Fahrbahn gleichmäßig absinkt. Wer hineinfährt und weiterbeschleunigt, riskiert den teuersten Motorschaden überhaupt: Saugt der Motor Wasser an, lässt sich dieses nicht verdichten, und die Pleuel verbiegen oder brechen — der sogenannte Wasserschlag. Entscheidend für die Begutachtung ist, ob der Motor beim Wassereintritt lief und ob nach dem Abwürgen erneut gestartet wurde. Beides lässt sich an Pleueln, Zylinderkopfdichtung und Luftfilter ablesen und trennt den reinen Nässeschaden vom Motorschaden. Für die Bewertung ist diese Trennung entscheidend: Ein durchnässter Innenraum lässt sich trocknen und reinigen, ein Wasserschlag bedeutet dagegen, den Motor zu öffnen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A8, Parkschaden in der Maximilianstraße oder Zusammenstoß auf der B17 — der Sachverständige kommt zu Ihnen nach Augsburg.",
+    "topografieAnker": "Augsburg liegt zwischen Lech und Wertach; die B17 führt als Schnellstraße von Nord nach Süd durch das Stadtgebiet, die A8 verläuft nördlich Richtung München."
+  },
+  "braunschweig": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Magniviertel",
+          "Hagenmarkt",
+          "Bohlweg"
+        ]
+      },
+      {
+        "name": "Nordstadt",
+        "ortsteile": [
+          "Nordstadt",
+          "Schunteraue",
+          "Bienrode",
+          "Waggum",
+          "Bevenrode"
+        ]
+      },
+      {
+        "name": "Östliches Ringgebiet",
+        "ortsteile": [
+          "Östliches Ringgebiet",
+          "Gliesmarode",
+          "Riddagshausen"
+        ]
+      },
+      {
+        "name": "Südstadt",
+        "ortsteile": [
+          "Südstadt",
+          "Rautheim",
+          "Mascherode",
+          "Stöckheim",
+          "Leiferde"
+        ]
+      },
+      {
+        "name": "Westliches Ringgebiet",
+        "ortsteile": [
+          "Westliches Ringgebiet",
+          "Weststadt",
+          "Rüningen"
+        ]
+      },
+      {
+        "name": "Lehndorf-Watenbüttel",
+        "ortsteile": [
+          "Lehndorf",
+          "Watenbüttel",
+          "Kanzlerfeld",
+          "Ölper"
+        ]
+      },
+      {
+        "name": "Wabe-Schunter-Beberbach",
+        "ortsteile": [
+          "Volkmarode",
+          "Querum",
+          "Hondelage",
+          "Dibbesdorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Braunschweig-Nord",
+        "Dreieck Braunschweig-Südwest",
+        "Kreuz Braunschweig-Süd"
+      ],
+      "autobahnen": [
+        "A2",
+        "A39",
+        "A391"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B4",
+        "B248"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht den Autobahnring um Braunschweig für Auffahrschäden anfällig?",
+        "antwort": "Braunschweig ist von einem Ring aus drei Autobahnen umschlossen: Die A2 führt im Norden vorbei, die A391 bildet die westliche Stadtautobahn, die A39 die östliche. Verbunden sind sie über das Kreuz Braunschweig-Nord, das Dreieck Braunschweig-Südwest und das Kreuz Braunschweig-Süd. Auf der A391 folgen die Anschlussstellen so dicht aufeinander, dass Auffahrende und Ausfahrende sich auf wenigen hundert Metern kreuzen — Stadtverkehr auf Autobahnquerschnitt, mit Tempowechseln, die aus dem Berufsverkehr kommen und nicht aus der Beschilderung. Auffahrschäden an der Front sind entsprechend die Regel. Teuer wird dabei weniger das Blech als die Beleuchtung: Adaptive Matrix-Scheinwerfer sitzen weit vorn im Anstoßbereich und übersteigen im Ersatz oft den Wert der gesamten übrigen Frontpartie. Nach dem Tausch müssen sie codiert und die Leuchtweite neu eingestellt werden, sonst blendet die Lichtverteilung den Gegenverkehr — ein Prüfpunkt, der in Kalkulationen regelmäßig fehlt."
+      },
+      {
+        "frage": "Warum sind Bordsteinschäden in den Braunschweiger Ringgebieten ein eigenes Thema?",
+        "antwort": "Das Östliche und das Westliche Ringgebiet sind dicht bebaute Gründerzeitviertel mit beidseitigem Längsparken und schmalen Fahrgassen. Wer dort einparkt, setzt regelmäßig mit dem Rad auf hohem Bordstein auf — im Magniviertel und rund um den Hagenmarkt kommt historisches Pflaster dazu, das die Kanten noch unregelmäßiger macht. Sichtbar bleibt davon oft nur eine Schramme an der Felge, und genau deshalb wird der Vorgang als Bagatelle abgetan. Die eigentliche Folge liegt darunter: Die Gummimanschette am Antriebs- oder Achsgelenk reißt bei seitlichem Anstoß ein, Fett tritt aus und Straßenwasser dringt ein. Das Gelenk läuft danach noch Monate weiter und fällt erst später mit Knackgeräuschen beim Einlenken auf, wenn der Zusammenhang zum Parkvorgang nicht mehr zu belegen ist. Bei jedem Bordsteinanstoß gehört deshalb eine Sichtprüfung der Manschetten auf der Hebebühne dazu."
+      },
+      {
+        "frage": "Was ist bei Unfällen auf den Braunschweiger Ausfallstraßen B1, B4 und B248 zu beachten?",
+        "antwort": "B1, B4 und B248 führen als Radialen aus Braunschweig heraus und durchqueren dabei Ortslagen wie Waggum, Bevenrode, Hondelage und Dibbesdorf. Dort wechseln sich Tempo 50, Ortsausgang und freie Strecke rasch ab, Grundstückszufahrten münden direkt auf die Fahrbahn, und landwirtschaftliche Fahrzeuge biegen ohne eigene Abbiegespur ab. Typisch sind Einmündungsunfälle mit seitlichem Anstoß im Bereich des vorderen Radlaufs. Was dabei gern übersehen wird: Hinter der Innenkotflügelschale verlaufen bei vielen Modellen Kabelbäume für Sensorik, Beleuchtung und ABS, teils zusammen mit Leitungen der Scheibenwaschanlage. Wird die Schale eingedrückt, entsteht eine Scheuerstelle, die im ersten Moment nichts bewirkt und Monate später als sporadischer Fehler auftaucht — mal spricht das ABS grundlos an, mal fällt ein Abstandssensor aus. Ein Gutachten sollte den Verlegeweg deshalb ausdrücklich mit aufnehmen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Innenstadt oder Zusammenstoß auf dem Stadtring — der Sachverständige kommt zu Ihnen nach Braunschweig.",
+    "topografieAnker": "Braunschweig wird vom Okerumflutgraben umschlossen; die A2 führt nördlich vorbei, während A391 und A395 als Stadtautobahnen den Ring ergänzen."
+  },
+  "chemnitz": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Zentrum",
+          "Schloßchemnitz",
+          "Kaßberg",
+          "Sonnenberg",
+          "Lutherviertel"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Hilbersdorf",
+          "Furth",
+          "Ebersdorf",
+          "Glösa-Draisdorf",
+          "Borna-Heinersdorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Gablenz",
+          "Yorckgebiet",
+          "Adelsberg",
+          "Euba",
+          "Kleinolbersdorf-Altenhain"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Altchemnitz",
+          "Bernsdorf",
+          "Helbersdorf",
+          "Morgenleite",
+          "Markersdorf",
+          "Hutholz"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Kappel",
+          "Siegmar",
+          "Rottluff",
+          "Rabenstein",
+          "Grüna",
+          "Stelzendorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Chemnitz",
+        "Anschlussstelle Chemnitz-Süd"
+      ],
+      "autobahnen": [
+        "A4",
+        "A72"
+      ],
+      "bundesstrassen": [
+        "B95",
+        "B107",
+        "B169",
+        "B173",
+        "B174"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht das Autobahnkreuz Chemnitz für den Verkehr der Stadt so wichtig?",
+        "antwort": "Das Autobahnkreuz Chemnitz liegt im Westen auf Chemnitzer Stadtgebiet, zwischen Röhrsdorf, Rabenstein und Rottluff, und führt dort die A4 und die A72 zusammen. Über die A4 läuft der durchgehende Ost-West-Verkehr zwischen Dresden und Thüringen mit hohem Lastwagenanteil, über die A72 kommt der Verkehr aus Richtung Zwickau und Hof hinzu. In den Verflechtungsbereichen fällt der Fahrstreifenwechsel regelmäßig mit zähfließendem Verkehr zusammen; typisch sind Auffahrschäden am Stauende und Streifschäden an den Flanken. Beides trifft heute Abstandsradar und Spurhaltesensorik hinter Stoßfänger und Außenspiegel. Deren Kalibrierung nach der Reparatur ist ein eigener Arbeitsschritt und gehört gesondert erfasst — sie ist mit der Lackierung nicht abgegolten. Für die Zuordnung ist außerdem hilfreich, ob der Anstoß im fließenden Verkehr oder im Stillstand erfolgte: Ein stehendes Fahrzeug nimmt die Energie anders auf, weil es nicht ausweichen kann."
+      },
+      {
+        "frage": "Warum sind die breiten Ausfallstraßen im Chemnitzer Süden unfallträchtig?",
+        "antwort": "Die Wohngebiete im Süden von Chemnitz — Markersdorf, Morgenleite, Helbersdorf und Hutholz — wurden als Großsiedlung geplant und über entsprechend großzügige Magistralen erschlossen. Die Fahrbahnen sind mehrspurig, die Kreuzungen weit, und genau das verleitet innerorts zu Geschwindigkeiten, die dort nicht hingehören. Gleichzeitig queren Fußgänger zwischen den Wohnblöcken, und Linksabbieger müssen den Gegenverkehr über mehrere Spuren hinweg einschätzen. Die häufigste Folge sind Abbiegekollisionen im rechten Winkel, bei denen ein Fahrzeug seitlich getroffen wird. Solche Seitenanstöße verformen Schweller und B-Säule, und dort verlaufen bei aktuellen Modellen die Leitungen für Seitenairbags und Sitzbelegungserkennung. Ob deren Auslöseschwelle erreicht wurde, klärt allein das Auslesen des Fehlerspeichers. Für die Rekonstruktion ist die Endstellung beider Fahrzeuge wichtig, weil sie bei rechtwinkligen Zusammenstößen Rückschlüsse auf die jeweilige Ausgangsgeschwindigkeit erlaubt."
+      },
+      {
+        "frage": "Was ist im Kaßberg-Viertel beim Parken und Rangieren zu beachten?",
+        "antwort": "Der Kaßberg ist eines der größten zusammenhängenden Gründerzeitviertel Deutschlands und liegt auf einer Anhöhe über dem Chemnitztal. Die Straßen sind dicht bebaut, beidseitig zugeparkt und fallen zum Tal hin spürbar ab — rangiert wird hier fast immer im Gefälle und mit wenig Abstand zu Bordsteinen und Mauern. Häufig sind Anstöße an Stoßfängerecken sowie Felgen- und Reifenschäden an hohen Kanten. Beim Felgenschaden ist wichtig, dass die Reifenflanke fast immer mitbetroffen ist: Ein Aufsetzen an der Kante erzeugt innenliegende Strukturschäden, die von außen wie ein harmloser Schürfer aussehen, den Reifen aber unbrauchbar machen. Wer im Gefälle anfährt, sollte zudem den kurzen Rückrollweg einkalkulieren. Bei Parkschäden durch unbekannte Verursacher wird zudem die Abgrenzung zu älteren Beschädigungen wichtig, die an denselben Kanten bereits vorhanden waren."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden auf dem Kaßberg oder Zusammenstoß am Südring — der Sachverständige kommt zu Ihnen nach Chemnitz.",
+    "topografieAnker": "Chemnitz liegt am Nordrand des Erzgebirges; die A4 führt nördlich vorbei, die A72 verbindet die Stadt mit Zwickau und Hof."
+  },
+  "gelsenkirchen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Neustadt",
+          "Bulmke-Hüllen",
+          "Feldmark",
+          "Schalke",
+          "Schalke-Nord"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Buer",
+          "Erle",
+          "Resse",
+          "Resser Mark",
+          "Scholven",
+          "Hassel",
+          "Horst",
+          "Beckhausen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Bismarck",
+          "Erle-Ost",
+          "Rotthausen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Ückendorf",
+          "Rotthausen",
+          "Neustadt-Süd"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Horst",
+          "Beckhausen",
+          "Heßler"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Gelsenkirchen",
+        "Dreieck Bottrop",
+        "Kreuz Herne"
+      ],
+      "autobahnen": [
+        "A2",
+        "A40",
+        "A42",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B224",
+        "B226",
+        "B227"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die A40 durch Gelsenkirchen so unfallträchtig?",
+        "antwort": "Die A40 begrenzt Gelsenkirchen im Süden und gehört zu den am dichtesten befahrenen Strecken des Ruhrgebiets; im Norden übernimmt die A2 dieselbe Rolle, dazwischen quert die A42 als Emscherschnellweg das Stadtgebiet, und am Kreuz Gelsenkirchen wechselt der Verkehr zwischen den Ebenen. Auf allen Achsen wird laufend saniert, sodass Fahrstreifen verschwenkt werden und Stauenden unvorhersehbar wandern. Auffahren am Stauende ist die häufigste Folge. Beim Heckaufprall lohnt der Blick über das Blech hinaus auf die Sitzanlage: Kopfstützen, Lehnenverstellung und Gurtkraftbegrenzer sind auf einen definierten Krafteintrag ausgelegt, und ein ausgelöster Gurtstraffer ist ein Einwegbauteil, das sich nicht zurücksetzen lässt. Eine verbogene Sitzschiene sieht man von außen gar nicht, sie beeinträchtigt aber die Rückhaltewirkung beim nächsten Anstoß — deshalb gehört sie in die Feststellung, auch wenn der Sitz sich noch normal verstellen lässt."
+      },
+      {
+        "frage": "Was ist an Spieltagen rund um die Arena in Gelsenkirchen anders?",
+        "antwort": "An Veranstaltungstagen kommen Zehntausende Fahrzeuge in den Norden Gelsenkirchens, nach Erle und Schalke-Nord, und werden auf Schotter-, Wiesen- und Behelfsflächen eingewiesen, die im Alltag keine Parkplätze sind. Zwei Schadensbilder häufen sich dort, die im normalen Straßenverkehr kaum vorkommen. Das erste entsteht beim Ausparken auf weichem Grund: Die Räder graben sich ein, das Fahrzeug setzt mit Unterbodenverkleidung und Auspuffanlage auf, und beim Freifahren schleudern Steine gegen Radläufe und Schweller. Das zweite betrifft die Lackflächen — beim Anfahren in dichten Reihen trifft aufgewirbelter Schotter die Fahrzeuge dahinter flächig, oft über eine ganze Seite. Weil beides ohne Zusammenstoß mit einem anderen Fahrzeug entsteht, ist es kein Haftpflichtfall, sondern eine Frage der Kaskodeckung. Und die verlangt eine saubere Dokumentation von Standort und Untergrund, weil sich der Hergang sonst nicht belegen lässt."
+      },
+      {
+        "frage": "Was bedeutet der Schwerverkehr auf der A42 für Handwerkerfahrzeuge in Gelsenkirchen?",
+        "antwort": "Die A42 verbindet als Emscherschnellweg die Industrie- und Gewerbeflächen im Gelsenkirchener Norden mit den Nachbarstädten, und über die B224, B226 und B227 fließt der Verkehr weiter in die Stadtteile bis nach Buer und Horst. Unterwegs sind dort überdurchschnittlich viele Transporter mit Dachlast — Leitern, Rohre, Dachboxen, Gerüstteile. Bei einem Auffahrunfall wirkt diese Last wie ein zusätzlicher Hebel: Die Dachreling wird nach vorn gedrückt, ihre Aufnahmepunkte sitzen in der Dachkante, und dort verzieht sich das Blech oder die Verschraubung reißt aus. Sichtbar ist zunächst nur ein leicht abstehender Trägerfuß, und das Fahrzeug fährt weiter wie zuvor. Undicht wird es Wochen später, wenn die Dichtmasse an der Aufnahme gerissen ist und Wasser in den Dachhimmel läuft — dann ist der Zusammenhang zum Unfall kaum noch nachzuweisen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in Buer oder Zusammenstoß an der Kurt-Schumacher-Straße — der Sachverständige kommt zu Ihnen nach Gelsenkirchen.",
+    "topografieAnker": "Gelsenkirchen liegt mitten im Ruhrgebiet zwischen A2 im Norden und A40 im Süden; die A42 als Emscherschnellweg quert das Stadtgebiet von West nach Ost."
+  },
+  "halle": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Südliche Innenstadt",
+          "Nördliche Innenstadt",
+          "Paulusviertel",
+          "Giebichenstein"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Trotha",
+          "Kröllwitz",
+          "Heide-Nord",
+          "Seeben",
+          "Mötzlich"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Diemitz",
+          "Freiimfelde",
+          "Reideburg",
+          "Büschdorf",
+          "Kanena"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Südstadt",
+          "Damaschkestraße",
+          "Radewell",
+          "Ammendorf",
+          "Beesen"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Neustadt",
+          "Silberhöhe",
+          "Nietleben",
+          "Dölau",
+          "Lettin"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Dreieck Halle-Süd"
+      ],
+      "autobahnen": [
+        "A9",
+        "A14",
+        "A143"
+      ],
+      "bundesstrassen": [
+        "B6",
+        "B80",
+        "B91",
+        "B100"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Rolle spielen die Straßenbahnschienen im Halleschen Straßenraum?",
+        "antwort": "Halle hat ein dichtes Straßenbahnnetz, und auf vielen Achsen liegen die Gleise nicht auf eigenem Bahnkörper, sondern mitten im Fahrbahnbelag. Daraus ergeben sich zwei verschiedene Gefahren. Für Zweiräder ist die Gleisrille das Problem: Wer sie in spitzem Winkel überfährt, verliert die Spur, und bei Nässe wirkt der glatte Schienenkopf zusätzlich wie eine Eisfläche. Für den übrigen Verkehr sind es die Haltestellen ohne bauliches Kap — dort steigen Fahrgäste unmittelbar auf die Fahrbahn und queren zwischen wartenden Fahrzeugen hindurch. Kollisionen mit ungeschützten Verkehrsteilnehmern hinterlassen am Fahrzeug oft nur Eindellungen an Haube oder Kotflügel, sind aber aufwendig, weil Fußgängerschutzsysteme und Sensorik im Stoßfänger zusammenhängend geprüft werden müssen. Wichtig ist außerdem, den Zustand der Gleiseindeckung festzuhalten: Ausgefahrene Rillen und abgesackter Belag neben dem Schienenkopf verändern das Sturzrisiko und sind nach einer Sanierung nicht mehr nachweisbar."
+      },
+      {
+        "frage": "Was bedeutet die Lage zwischen A9 und A14 für den Verkehr in Halle?",
+        "antwort": "Halle liegt zwischen zwei stark belasteten Fernachsen: der A9 als Nord-Süd-Verbindung Richtung Berlin und München und der A14 in Richtung Leipzig und Magdeburg. Der Verkehr zwischen beiden und der Stadt läuft über die Bundesstraßen B6, B80, B91 und B100, die als Ausfallstraßen bis weit in die Wohngebiete hineinreichen. Auf diesen Achsen überlagern sich Pendler-, Güter- und Lieferverkehr mit Ampeln, Abbiegespuren und Grundstückszufahrten in dichter Folge. Das Ergebnis sind Abbiege- und Auffahrkollisionen bei eher niedriger Geschwindigkeit. Gerade die werden unterschätzt: Die Stoßfängerhaut federt in ihre Form zurück, während Querträger und Prallelemente dahinter bereits plastisch verformt sind — sichtbar erst nach Demontage der Verkleidung. Kommt Radverkehr auf den Ausfallstraßen hinzu, entstehen zusätzlich Abbiegekollisionen mit ungünstiger Krafteinleitung gegen Tür und Kotflügelkante, bei denen die Türmechanik verklemmt."
+      },
+      {
+        "frage": "Was macht die Saalehänge bei Giebichenstein und Kröllwitz anspruchsvoll?",
+        "antwort": "Nördlich der Altstadt schneidet sich die Saale zwischen Giebichenstein und Kröllwitz in den Porphyrfelsen ein. Die Straßen folgen dort dem Ufer und der Hangkante, sind schmal, kurvig und stellenweise ohne Ausweichraum; auf der einen Seite steht Fels, auf der anderen fällt das Gelände zum Wasser ab. Bei Nässe und Laub bleibt der Belag im Hangschatten länger feucht als anderswo im Stadtgebiet. Kommt ein Fahrzeug von der Fahrbahn ab, trifft es Mauer, Fels oder Bordstein seitlich. Bei solchen Anstößen ist der Unterboden entscheidend: Querlenker, Spurstangen und Radträger nehmen die Energie auf, ohne dass die Karosserie außen viel davon zeigt — sichtbar wird das erst bei der Achsvermessung. Bei einem Anprall gegen Fels ist zusätzlich zu prüfen, ob Gestein in Radhaus oder Unterboden eingeschlagen ist — solche Einschläge beschädigen Leitungen, ohne die Karosserie zu verformen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A14, Parkschaden im Paulusviertel oder Zusammenstoß auf der Magistrale — der Sachverständige kommt zu Ihnen nach Halle.",
+    "topografieAnker": "Halle liegt an der Saale, die das Stadtgebiet von Süd nach Nord durchzieht; A14 und A9 verbinden die Stadt mit Leipzig und Magdeburg."
+  },
+  "karlsruhe": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt-West",
+          "Innenstadt-Ost",
+          "Südstadt",
+          "Südweststadt"
+        ]
+      },
+      {
+        "name": "Weststadt",
+        "ortsteile": [
+          "Weststadt",
+          "Mühlburg",
+          "Grünwinkel"
+        ]
+      },
+      {
+        "name": "Nordstadt",
+        "ortsteile": [
+          "Nordstadt",
+          "Nordweststadt",
+          "Neureut"
+        ]
+      },
+      {
+        "name": "Oststadt",
+        "ortsteile": [
+          "Oststadt",
+          "Rintheim",
+          "Hagsfeld"
+        ]
+      },
+      {
+        "name": "Durlach",
+        "ortsteile": [
+          "Durlach",
+          "Aue",
+          "Grötzingen"
+        ]
+      },
+      {
+        "name": "Rheinhäfen",
+        "ortsteile": [
+          "Daxlanden",
+          "Knielingen",
+          "Rheinhafen"
+        ]
+      },
+      {
+        "name": "Südost",
+        "ortsteile": [
+          "Oberreut",
+          "Bulach",
+          "Beiertheim",
+          "Weiherfeld"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Dreieck Karlsruhe"
+      ],
+      "autobahnen": [
+        "A5",
+        "A8"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B10",
+        "B36",
+        "B293"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Rheinbrücke bei Maxau ein eigener Schadenschwerpunkt?",
+        "antwort": "Die B10 quert den Rhein bei Maxau im Karlsruher Stadtteil Knielingen und verbindet die Stadt mit Wörth auf der pfälzischen Seite. Das Bauwerk war für gut 32.000 Fahrzeuge am Tag ausgelegt und trägt heute ein Vielfaches davon — es gilt seit Jahren als einer der schwersten Engpässe im deutschen Straßennetz. Praktisch heißt das: dauerhafter Kolonnenverkehr mit hohem Lkw-Anteil und ohne Ausweichfläche, denn auf der Brücke gibt es keinen Standstreifen. Aufgefahren wird entsprechend bei niedrigem Tempo, aber auf schwere Fahrzeuge. Für die Begutachtung heißt das, hinter die Verkleidung zu schauen: Bei modernen Fahrzeugen sitzt das Frontradar mittig hinter Emblem oder Grill, und schon ein leichter Versatz macht eine Neukalibrierung erforderlich. Unterbleibt sie, arbeitet der Abstandsregler mit verschobenem Bezugspunkt, und zwar ohne jede Anzeige im Kombiinstrument."
+      },
+      {
+        "frage": "Was hat der Karlsruher Straßenfächer mit Kreuzungsunfällen zu tun?",
+        "antwort": "Karlsruhe ist als Fächer um das Schloss angelegt: Die Hauptachsen laufen strahlenförmig auf einen Punkt zu, statt sich rechtwinklig zu schneiden. Für den Verkehr bedeutet das Kreuzungen und Einmündungen in ungewöhnlich spitzen Winkeln, etwa im Übergang von der Innenstadt zur Weststadt und zur Nordstadt. Ein spitzer Winkel verschlechtert die Sicht messbar, weil der Fahrer den Kopf weit drehen muss und die A-Säule genau im kritischen Bereich steht. Die typische Kollision trifft deshalb nicht die Flanke, sondern die vordere Fahrzeugecke — schräg, mit kleiner Kontaktfläche und hoher örtlicher Verformung. Solche Eckanstöße belasten den Längsträger einseitig, weshalb die Vermessung beide Seiten vergleichen muss. Erst der Seitenvergleich zeigt einen verzogenen Vorbau: Ein einseitig gestauchter Träger bleibt in absoluten Werten oft noch innerhalb der Toleranz und fällt nur im Bezug zur Gegenseite auf."
+      },
+      {
+        "frage": "Was ist bei Unfällen im Bereich der Karlsruher Rheinhäfen zu beachten?",
+        "antwort": "Rund um die Rheinhäfen von Karlsruhe zwischen Daxlanden und Knielingen prägt Schwerverkehr das Bild: Sattelzüge, Silofahrzeuge und Schwertransporte auf Straßen, die für den Betriebsverkehr gebaut wurden und nicht für Begegnungsverkehr mit Pkw. Dazu kommen Gleisanschlüsse der Hafenbetriebe, die die Fahrbahn queren, sowie unebene Übergänge zwischen Betriebsgelände und öffentlicher Straße. Für Pkw entstehen hier zwei Schadentypen nebeneinander: Streifkontakte beim Ausschwenken langer Fahrzeuge und Aufsetzschäden an Unterboden und Frontschürze. Letztere werden unterschätzt, weil sie beim Rangieren mit Schrittgeschwindigkeit passieren. Getroffen werden trotzdem tragende Teile — Motorschutz, Ölwanne und die vorderen Aufnahmepunkte des Fahrschemels, die man ohne Hebebühne nicht beurteilen kann. Ein Aufsetzer bei Schrittgeschwindigkeit genügt, um die Ölwanne haarfein anzureißen — der Verlust zeigt sich erst Tage später als Fleck auf dem Stellplatz."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden in der Südstadt oder Zusammenstoß an der Kriegsstraße — der Sachverständige kommt zu Ihnen nach Karlsruhe.",
+    "topografieAnker": "Karlsruhe ist fächerförmig um das Schloss angelegt; die A5 führt östlich vorbei, die A8 zweigt am Dreieck Karlsruhe Richtung Stuttgart ab."
+  },
+  "kiel": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Vorstadt",
+          "Exerzierplatz",
+          "Brunswik",
+          "Düsternbrook"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Wik",
+          "Holtenau",
+          "Pries",
+          "Friedrichsort",
+          "Schilksee"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Gaarden-Ost",
+          "Gaarden-Süd",
+          "Ellerbek",
+          "Wellingdorf",
+          "Neumühlen-Dietrichsdorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Elmschenhagen",
+          "Kroog",
+          "Moorsee",
+          "Meimersdorf",
+          "Wellsee"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Mettenhof",
+          "Hasseldieksdamm",
+          "Russee",
+          "Hassee",
+          "Suchsdorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Kiel-West",
+        "Dreieck Bordesholm",
+        "Anschlussstelle Kiel-Mitte"
+      ],
+      "autobahnen": [
+        "A7",
+        "A210",
+        "A215"
+      ],
+      "bundesstrassen": [
+        "B76",
+        "B202",
+        "B404",
+        "B503"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was bedeutet die Kieler Förde für Unfälle im Stadtverkehr?",
+        "antwort": "Die Förde schneidet tief ins Kieler Stadtgebiet und trennt das Ostufer mit Gaarden, Ellerbek und Neumühlen-Dietrichsdorf vom Westufer mit Innenstadt, Wik und Düsternbrook. Wer von einer Seite zur anderen will, muss um das Fördeende herum durch die Innenstadt — der Verkehr bündelt sich dadurch auf wenigen Achsen und steht in den Spitzenzeiten dicht, mit entsprechend vielen Auffahr- und Spurwechselschäden. Für die Schadenbewertung kommt in einer Küstenstadt ein Faktor hinzu, den Binnenstädte nicht kennen: Salzhaltige Luft und intensiver Winterdienst hinterlassen an älteren Fahrzeugen Korrosion in Falzen, an Blechkanten und in den Radläufen. Ein verformtes Blech mit Rostansatz lässt sich nicht mehr sauber richten, weil die geschwächte Stelle beim Ausbeulen einreißt. Der Korrosionsbefund entscheidet damit unmittelbar darüber, ob instand gesetzt oder ersetzt werden muss — und er gehört dokumentiert, bevor die Werkstatt beginnt."
+      },
+      {
+        "frage": "Worauf kommt es bei Schäden rund um den Kieler Fährhafen an?",
+        "antwort": "Kiel ist Fährhafen für den Ostseeverkehr, und die Fahrzeuge, die dort auf- und ablaufen, bilden einen eigenen Schadenstyp. Beim Befahren der Rampen setzen tiefer gelegte Fahrzeuge, Reisemobile mit langem Überhang und beladene Anhänger regelmäßig auf: Frontschürze, Auspuffendrohr und Unterbodenverkleidung tragen dann Schleifspuren, die in einer geraden Linie quer über das Bauteil verlaufen und sich dadurch gut von anderen Beschädigungen unterscheiden lassen. Das zweite typische Bild entsteht an Bord, wo die Fahrzeuge für die Überfahrt gezurrt werden — zu straff gesetzte Gurte hinterlassen Druckstellen an Felgenhörnern, Schwellerverkleidungen und Achsteilen, und bei langen Überfahrten arbeitet die Bewegung des Schiffs zusätzlich. Beides sind keine klassischen Kollisionsschäden, verlangen aber dieselbe Sorgfalt bei der Feststellung, weil sie sonst bei einem späteren Unfall als Vorschaden gegen den Halter ausgelegt werden."
+      },
+      {
+        "frage": "Was ist am Ende der A215 im Kieler Stadtgebiet zu beachten?",
+        "antwort": "Die A215 führt aus Richtung Süden bis mitten nach Kiel und endet dort im Stadtgebiet; der Verkehr läuft anschließend über die B76 weiter Richtung Innenstadt und Ostufer. Auf kurzer Strecke wechseln Autobahnquerschnitt, Aufweitung und Stadtstraße mit Ampeln — Ortsunkundige bremsen spät, Ortskundige ordnen sich früh ein, und in genau dieser Aufweitung entstehen Streifkollisionen beim Spurwechsel. Sie treffen meist Tür und Schweller auf ganzer Länge. Wichtig ist dabei der Seitenaufprallträger, der in jeder Tür verbaut ist und im Ernstfall den Innenraum schützt: Er kann verformt sein, während das Außenblech nur zerkratzt aussieht. Beurteilen lässt er sich ausschließlich bei ausgebauter Türverkleidung, weshalb die Demontage in die Feststellung gehört — andernfalls bleibt ein sicherheitsrelevantes Bauteil ungeprüft und die Tür gilt als bloßer Lackschaden."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A215, Parkschaden an der Kiellinie oder Zusammenstoß auf der B76 — der Sachverständige kommt zu Ihnen nach Kiel.",
+    "topografieAnker": "Die Kieler Förde teilt die Stadt in Ost- und Westufer; die A215 endet mitten im Stadtgebiet, und der Nord-Ostsee-Kanal wird bei Holtenau gequert."
+  },
+  "moenchengladbach": {
+    "stadtbezirke": [
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Gladbach",
+          "Waldhausen",
+          "Windberg",
+          "Hardterbroich",
+          "Eicken"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Giesenkirchen",
+          "Schelsen",
+          "Bettrath-Hoven",
+          "Neuwerk",
+          "Uedding"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Rheydt",
+          "Odenkirchen",
+          "Mülfort",
+          "Bonnenbroich",
+          "Geneicken"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Hardt",
+          "Rheindahlen",
+          "Wickrath",
+          "Wanlo",
+          "Holt"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Mönchengladbach",
+        "Autobahndreieck Mönchengladbach-Wanlo"
+      ],
+      "autobahnen": [
+        "A44",
+        "A46",
+        "A52",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B57",
+        "B59",
+        "B230"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Schäden entstehen typischerweise rund um Heimspiele im Nordpark?",
+        "antwort": "Der Borussia-Park im Nordpark fasst zu Bundesligaspielen knapp 55.000 Zuschauer, und ein großer Teil davon reist mit dem Auto an. Die Stellflächen im Umfeld füllen sich in kurzer Zeit und leeren sich noch schneller — genau dabei entsteht das typische Mönchengladbacher Schadenbild dieser Tage: der Anstoß beim gleichzeitigen Ausparken zweier Fahrzeuge aus gegenüberliegenden Reihen. Beide sind in Bewegung, beide rückwärts, keiner hat die Vorfahrt. Für die Bewertung ist deshalb nicht nur der Schaden aufzunehmen, sondern seine Geometrie: Die Höhe der Kontaktstelle und der Verlauf der Kratzspur zeigen, welches Fahrzeug quer stand und welches noch in seiner Lücke war. Ohne diese Zuordnung bleibt es bei geteilter Haftung. Fotos der Endstellung beider Fahrzeuge, aufgenommen bevor jemand wegfährt, sind dafür mehr wert als jede spätere Schilderung."
+      },
+      {
+        "frage": "Was folgt daraus, dass Mönchengladbach zwei gleichrangige Zentren hat?",
+        "antwort": "Mönchengladbach ist aus zwei gewachsenen Städten zusammengefügt: Gladbach im Norden und Rheydt im Süden. Beide haben eine eigene Innenstadt mit eigenem Ring, eigenem Einbahnstraßensystem und eigenen Parkhäusern, und dazwischen läuft ein dichter Binnenverkehr über B57 und B230. Ortsfremde unterschätzen das regelmäßig — sie verlassen sich auf ein Zentrum, landen im anderen und korrigieren spontan. Aus diesen Korrekturen entstehen die unfallträchtigsten Manöver überhaupt: das Wenden über mehrere Fahrstreifen und das Zurücksetzen in einer Einbahnstraße. Wer rückwärts in eine Einbahnstraße hineinfährt, wird von hinten mit voller Fahrgeschwindigkeit getroffen, und der Anstoß trifft die Fahrzeugfront statt der dafür ausgelegten Knautschzone am Heck. Für die Aufnahme heißt das, beide Fahrzeuge zusammen zu betrachten: Die Höhe der Anstoßspuren verrät, welches von beiden sich rückwärts bewegt hat."
+      },
+      {
+        "frage": "Welche Rolle spielt tiefstehende Sonne auf den West-Ost-Achsen der Stadt?",
+        "antwort": "Das Mönchengladbacher Straßennetz zieht sich vom Westen um Rheindahlen und Hardt bis in den Osten nach Giesenkirchen und Neuwerk, also weitgehend in West-Ost-Richtung, und der Niederrhein bietet dabei kaum Relief, das die Sonne abschirmt. In den Morgen- und Abendstunden von Herbst bis Frühjahr steht sie deshalb genau in der Fahrtachse. Eine verschmutzte oder von Steinschlag zerkratzte Scheibe streut das Licht zusätzlich, und die Sicht bricht für Sekunden vollständig weg. Auffahrunfälle und Kollisionen an Fußgängerüberwegen häufen sich in diesen Zeitfenstern. Für die Aufnahme sind Datum, Uhrzeit und Fahrtrichtung deshalb keine Formalie — sie sind der Ansatzpunkt, um die Vermeidbarkeit überhaupt beurteilen zu können. Hilfreich ist zusätzlich ein Foto der Windschutzscheibe im Gegenlicht, denn wie stark Kratzer und Schmutzfilm das Licht streuen, lässt sich anders kaum dokumentieren."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A61, Parkschaden in Rheydt oder Zusammenstoß am Kreuz Mönchengladbach — der Sachverständige kommt zu Ihnen.",
+    "topografieAnker": "Mönchengladbach besteht aus den gewachsenen Zentren Gladbach und Rheydt; A44, A46, A52 und A61 umschließen das Stadtgebiet von allen Seiten."
+  },
+  "muenster": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Bahnhofsviertel",
+          "Kreuzviertel",
+          "Hansaviertel",
+          "Südviertel",
+          "Josefsviertel",
+          "Erphoviertel"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Coerde",
+          "Kinderhaus",
+          "Sprakel"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Handorf",
+          "Mauritz-Ost",
+          "Gelmer",
+          "Dyckburg"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Gievenbeck",
+          "Nienberge",
+          "Roxel",
+          "Sentruper Höhe",
+          "Mecklenbeck"
+        ]
+      },
+      {
+        "name": "Süd-Ost",
+        "ortsteile": [
+          "Angelmodde",
+          "Gremmendorf",
+          "Wolbeck"
+        ]
+      },
+      {
+        "name": "Hiltrup",
+        "ortsteile": [
+          "Hiltrup-Mitte",
+          "Hiltrup-Ost",
+          "Amelsbüren",
+          "Berg Fidel"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Münster-Nord",
+        "Kreuz Münster-Süd"
+      ],
+      "autobahnen": [
+        "A1",
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B51",
+        "B54",
+        "B219",
+        "B481"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei Unfällen zwischen Auto und Fahrrad in Münster besonders?",
+        "antwort": "Münster hat einen der höchsten Radverkehrsanteile Deutschlands, und auf der Promenade rund um die Altstadt sowie auf den Zufahrten aus Gievenbeck, Kinderhaus und Hiltrup begegnen sich Rad und Auto ununterbrochen. Bei einer Kollision ist der Fahrzeugschaden meist klein und die Beweisfrage groß, weil beide Seiten den Hergang unterschiedlich schildern. Entscheidend ist dann, ob die Spuren am Fahrzeug überhaupt zum geschilderten Ablauf passen: Ein Fahrrad hinterlässt Anstoßspuren in Lenker- und Pedalhöhe, also in einem schmalen Höhenband, dazu Gummiabrieb vom Reifen und häufig Lackantragungen vom Rahmen. Eine Delle, die deutlich höher oder tiefer sitzt, gehört nicht dazu und stammt aus einem anderen Vorgang. Diese Kompatibilitätsprüfung entscheidet, welcher Teil des Schadens dem Unfall zuzurechnen ist und welcher bereits vorher vorhanden war — bei älteren Fahrzeugen macht das oft den größeren Teil aus."
+      },
+      {
+        "frage": "Warum sind Höhenschäden in der Münsteraner Altstadt so häufig?",
+        "antwort": "Die Altstadt von Münster liegt innerhalb des Promenadenrings, der den Durchgangsverkehr fernhält — was hineinfährt, ist Liefer- und Anliegerverkehr. Am Prinzipalmarkt führen die Bogengänge dicht an die Fahrbahn, dazu kommen Hofdurchfahrten und Toreinfahrten aus einer Zeit, in der niemand mit Transportern rechnete, und Durchfahrtshöhen, die nicht überall ausgeschildert sind. Deshalb sind hier nicht Front und Heck die kritischen Stellen, sondern die Oberkante des Fahrzeugs. Ein Kastenwagen, der eine zu niedrige Durchfahrt nimmt, staucht Dachkante, Dachreling und den vorderen Dachrahmen — und der Dachrahmen gehört zur tragenden Struktur, nicht zu den Anbauteilen. Solche Schäden werden unterschätzt, weil man sie vom Fahrersitz aus nicht sieht und das Fahrzeug normal weiterfährt. Das Ausmaß zeigt sich erst, wenn die Schiebetür nicht mehr sauber in ihrer Schiene läuft oder die Heckklappe klemmt."
+      },
+      {
+        "frage": "Was ist am Kreuz Münster-Süd und an der Anschlussstelle Münster-Nord zu beachten?",
+        "antwort": "Am Kreuz Münster-Süd trifft die A1 auf die A43, die dort beginnt und nach Süden ins Ruhrgebiet führt; im Norden bindet die Anschlussstelle Münster-Nord die Stadt an die A1 an. Beide Punkte tragen einen hohen Lkw-Anteil, weil der Fernverkehr zwischen Ruhrgebiet und Nordwesten hier gebündelt wird, und in den Verflechtungsbereichen wird kurzfristig die Spur gewechselt. Seitliche Kollisionen treffen dabei häufig den hinteren Bereich des Fahrzeugs. Bei modernen Mehrlenker-Hinterachsen genügt bereits ein leicht verbogener Lenker, um die Spur der Hinterachse zu verstellen — das Fahrzeug zieht dann zu einer Seite oder der Reifen fährt einseitig ab, obwohl vorne alles unauffällig wirkt und die Karosserie gerade steht. Eine Vermessung beider Achsen gehört deshalb zur Feststellung, nicht nur die der Vorderachse, an die man zuerst denkt."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A1, Kollision mit einem Radfahrer am Ring oder Parkschaden in der Altstadt — der Sachverständige kommt zu Ihnen nach Münster.",
+    "topografieAnker": "Der Promenadenring umschließt die Altstadt von Münster und trennt sie vom Durchgangsverkehr; A1 und A43 führen westlich und südlich am Stadtgebiet vorbei."
+  },
+  "wiesbaden": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Nordost",
+          "Südost",
+          "Rheingauviertel",
+          "Westend"
+        ]
+      },
+      {
+        "name": "Biebrich",
+        "ortsteile": [
+          "Biebrich",
+          "Amöneburg"
+        ]
+      },
+      {
+        "name": "Schierstein",
+        "ortsteile": [
+          "Schierstein",
+          "Frauenstein"
+        ]
+      },
+      {
+        "name": "Dotzheim",
+        "ortsteile": [
+          "Dotzheim",
+          "Kohlheck",
+          "Freudenberg"
+        ]
+      },
+      {
+        "name": "Bierstadt",
+        "ortsteile": [
+          "Bierstadt",
+          "Kloppenheim",
+          "Heßloch"
+        ]
+      },
+      {
+        "name": "Erbenheim",
+        "ortsteile": [
+          "Erbenheim",
+          "Nordenstadt",
+          "Delkenheim"
+        ]
+      },
+      {
+        "name": "Auringen und Umland",
+        "ortsteile": [
+          "Auringen",
+          "Naurod",
+          "Sonnenberg",
+          "Rambach"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Dreieck Wiesbaden",
+        "Kreuz Wiesbaden-Schierstein",
+        "Dreieck Mainz"
+      ],
+      "autobahnen": [
+        "A3",
+        "A66",
+        "A643",
+        "A671"
+      ],
+      "bundesstrassen": [
+        "B54",
+        "B262",
+        "B417",
+        "B455"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die Wiesbadener Hanglagen am Taunusrand für Auffahrunfälle kritisch?",
+        "antwort": "Wiesbaden steigt von der Innenstadt zum Taunus hin deutlich an; Sonnenberg, Rambach, Naurod und Auringen liegen erkennbar höher als Biebrich oder Schierstein am Rhein. Die Verbindungsstraßen dorthin führen über anhaltende Gefällestrecken mit engen Kurven und wechselnden Sichtverhältnissen. Bergab verlängert sich der Anhalteweg spürbar, und Auffahrunfälle bekommen dort eine besondere Geometrie: Das auffahrende Fahrzeug taucht durch die Nickbewegung beim Bremsen mit der Front unter das Heck des vorderen. Der Schaden verteilt sich dann auf zwei Ebenen — am vorderen Fahrzeug wird der Heckträger von unten angehoben, was sich als klemmende Heckklappe zeigt, am hinteren trifft es die Frontpartie oberhalb der Stoßfängerebene bis zur Motorhaube. Wer nur die beiden Stoßfänger miteinander vergleicht, unterschätzt beide Seiten und hält den Vorgang für harmloser, als er war."
+      },
+      {
+        "frage": "Warum ist der Pendlerverkehr über die Wiesbadener Autobahnen ein eigener Fall?",
+        "antwort": "Wiesbaden hängt mit A3, A66, A643 und A671 an gleich vier Autobahnen, und über das Dreieck Wiesbaden sowie das Kreuz Wiesbaden-Schierstein läuft täglich der Berufsverkehr in Richtung Rhein-Main. Das bedeutet stundenlanges Stop-and-Go, und genau dort greifen Notbremsassistent und Abstandsregelung immer wieder ein, oft ohne dass der Fahrer es bewusst wahrnimmt. Nach einem Unfall lohnt deshalb ein Blick in die Steuergeräte: Moderne Fahrzeuge legen bei einer Assistenzauslösung Einträge ab, und viele Modelle speichern zusätzlich Fahrdaten aus den Sekunden vor einem Aufprall — Geschwindigkeit, Bremsdruck, Lenkwinkel. Diese Daten sind flüchtig, weil sie nach einer bestimmten Zahl von Zündzyklen überschrieben werden. Wer den Hergang später rekonstruieren will, muss das Auslesen früh veranlassen und nicht erst dann, wenn die Reparatur bereits begonnen hat."
+      },
+      {
+        "frage": "Welche Schäden entstehen typischerweise in den Wiesbadener Tiefgaragen?",
+        "antwort": "Als Landeshauptstadt und Kurstadt zieht Wiesbaden viel Besucher- und Behördenverkehr in die Innenstadt rund um das Rheingauviertel und das Westend, und weil oberirdischer Raum dort knapp ist, endet ein großer Teil davon in Tiefgaragen. Neben den üblichen Anstößen an Stützen und Rampenkanten gibt es ein Schadensbild, das regelmäßig unterschätzt wird: Schranken- und Torbalken, die auf ein anfahrendes oder zu dicht auffahrendes Fahrzeug niedergehen. Sie treffen Dach, Heckklappe oder den Rahmen der Frontscheibe und hinterlassen flache, langgezogene Dellen, oft ohne nennenswerte Lackverletzung — was den Eindruck erweckt, es sei nichts passiert. Ausgerechnet diese Bauteile sind aber schwierig: Dachbleche sind große, gewölbte Sichtflächen mit gleichmäßiger Spiegelung, die sich kaum ausbeulen lassen, ohne dass die Reparaturstelle im Streiflicht später sichtbar bleibt."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A66, Parkschaden in der Innenstadt oder Zusammenstoß auf der Schiersteiner Brücke — der Sachverständige kommt zu Ihnen nach Wiesbaden.",
+    "topografieAnker": "Wiesbaden liegt am Fuß des Taunus zwischen Rhein und Höhenzug; die A66 führt östlich Richtung Frankfurt, die A643 quert bei Schierstein den Rhein nach Mainz."
+  },
+  "oberhausen": {
+    "stadtbezirke": [
+      {
+        "name": "Alt-Oberhausen",
+        "ortsteile": [
+          "Innenstadt",
+          "Lirich",
+          "Styrum",
+          "Alstaden"
+        ]
+      },
+      {
+        "name": "Sterkrade",
+        "ortsteile": [
+          "Sterkrade-Mitte",
+          "Sterkrade-Nord",
+          "Schmachtendorf",
+          "Holten",
+          "Königshardt",
+          "Barmingholten"
+        ]
+      },
+      {
+        "name": "Osterfeld",
+        "ortsteile": [
+          "Osterfeld-Mitte",
+          "Osterfeld-Ost",
+          "Vondern",
+          "Klosterhardt",
+          "Tackenberg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Oberhausen",
+        "Kreuz Oberhausen-West"
+      ],
+      "autobahnen": [
+        "A2",
+        "A3",
+        "A42",
+        "A516"
+      ],
+      "bundesstrassen": [
+        "B223"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht das Autobahnkreuz Oberhausen zu einem so belasteten Knoten?",
+        "antwort": "Im Norden Oberhausens, im Stadtteil Sterkrade, treffen am Autobahnkreuz Oberhausen die A2 in Richtung Hannover und Berlin, die A3 zwischen Emmerich und Köln sowie die A516 zusammen. Auf dem stärksten Abschnitt zwischen dem Kreuz und der Anschlussstelle Oberhausen-Königshardt wurden rund 123.700 Fahrzeuge täglich gezählt, davon etwa sechzehn Prozent Schwerverkehr. Bei diesem Lkw-Anteil sind die typischen Schadenbilder entsprechend: Auffahren am Stauende und Streifkollisionen beim Fahrstreifenwechsel. Fährt ein Pkw auf einen Sattelauflieger auf, liegt die Anstoßstelle oberhalb der Längsträger, und die Verformung setzt an Haube, Windlauf und Frontscheibe an, während der Querträger darunter unversehrt aussieht. Anstoßhöhe und Eindringtiefe gehören deshalb schon in die erste Aufnahme. Erschwerend kommt hinzu, dass sich Stauenden auf diesem Abschnitt hinter Kuppen und in Kurven bilden und deshalb erst spät erkennbar sind."
+      },
+      {
+        "frage": "Welche Schäden entstehen rund um das CentrO und die Neue Mitte?",
+        "antwort": "Das CentrO an der Neuen Mitte Oberhausens zieht Besucher aus dem gesamten Ruhrgebiet an, und an Wochenenden sowie in der Vorweihnachtszeit ist der Zufahrtsverkehr entsprechend dicht. Ein großer Teil davon sind ortsunkundige Fahrer, die eine Ausfahrt oder eine Parkhauseinfahrt suchen, spät die Spur wechseln oder unvermittelt abbremsen. In den Parkdecks selbst geht es dann eng weiter: schmale Stellplätze, kurze Fahrgassen, schlechte Sicht an den Rampen. Typisch sind Anstöße an Stoßfängerecken, Kratzer über mehrere Bauteile und Schäden an Außenspiegeln. Häufig bleibt der Verursacher unbekannt, sodass die Zuordnung der einzelnen Beschädigungen zu einem bestimmten Ereignis Teil der Bewertung wird — auch deshalb lohnt eine zeitnahe fotografische Dokumentation. Für die Bewertung von Parkschäden ist die Höhe der Beschädigung über der Fahrbahn aufschlussreich, weil sie zwischen Türkante, Stoßfängerecke und dem Anstoß durch einen Einkaufswagen unterscheidet."
+      },
+      {
+        "frage": "Warum sind die Unterführungen in Oberhausen ein eigenes Risiko?",
+        "antwort": "Oberhausen ist von Bahntrassen, ehemaligen Zechenbahnen und Kanälen durchzogen, und zwischen Alt-Oberhausen, Osterfeld und Sterkrade führen die Straßen entsprechend oft unter Brücken hindurch. Viele dieser Unterführungen stammen aus der Industriezeit, sind schmal und mit einer Höhenbegrenzung ausgeschildert. Für Transporter, Wohnmobile und Fahrzeuge mit Dachaufbau ist das eine unterschätzte Gefahr: Wer die Beschilderung übersieht, setzt mit dem Dach auf. Solche Schäden sind gutachterlich anspruchsvoll, weil die Kraft flächig über den Dachrahmen eingeleitet wird — Dachhaut, Dachholme und die oberen Enden der Säulen verformen sich gemeinsam. Ob die tragende Struktur betroffen ist, lässt sich nur durch Vermessen klären, nicht durch Betrachten. Hinzu kommt, dass ein Fahrzeug nach einem Dachanstoß oft noch fahrbereit wirkt, während Dachholme und Windschutzscheibenrahmen ihre Steifigkeit bereits eingebüßt haben."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Oberhausen, Parkschaden am CentrO oder Zusammenstoß in Sterkrade — der Sachverständige kommt zu Ihnen.",
+    "topografieAnker": "Am Kreuz Oberhausen treffen A2, A3 und A42 zusammen — einer der am stärksten befahrenen Knoten des Ruhrgebiets; die A516 führt als Stichautobahn in die Innenstadt."
+  },
+  "mannheim": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt/Jungbusch",
+        "ortsteile": [
+          "Quadrate",
+          "Jungbusch",
+          "Filsbach"
+        ]
+      },
+      {
+        "name": "Neckarstadt",
+        "ortsteile": [
+          "Neckarstadt-West",
+          "Neckarstadt-Ost",
+          "Wohlgelegen"
+        ]
+      },
+      {
+        "name": "Käfertal",
+        "ortsteile": [
+          "Käfertal-Süd",
+          "Käfertal-Mitte",
+          "Vogelstang"
+        ]
+      },
+      {
+        "name": "Feudenheim",
+        "ortsteile": [
+          "Feudenheim",
+          "Wallstadt"
+        ]
+      },
+      {
+        "name": "Seckenheim",
+        "ortsteile": [
+          "Seckenheim",
+          "Hochstätt",
+          "Friedrichsfeld"
+        ]
+      },
+      {
+        "name": "Lindenhof",
+        "ortsteile": [
+          "Lindenhof",
+          "Niederfeld"
+        ]
+      },
+      {
+        "name": "Neckarau",
+        "ortsteile": [
+          "Neckarau",
+          "Almenhof",
+          "Casterfeld"
+        ]
+      },
+      {
+        "name": "Rheinau",
+        "ortsteile": [
+          "Rheinau-Mitte",
+          "Pfingstberg",
+          "Hochstätt"
+        ]
+      },
+      {
+        "name": "Waldhof",
+        "ortsteile": [
+          "Waldhof-Ost",
+          "Waldhof-West",
+          "Luzenberg",
+          "Sandhofen",
+          "Schönau"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Mannheim"
+      ],
+      "autobahnen": [
+        "A5",
+        "A6",
+        "A656",
+        "A659"
+      ],
+      "bundesstrassen": [
+        "B36",
+        "B37",
+        "B38",
+        "B44"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Kreuzungsunfälle in den Mannheimer Quadraten so häufig?",
+        "antwort": "Die Mannheimer Innenstadt ist als rechtwinkliges Raster angelegt, und die Quadrate tragen statt Straßennamen Buchstaben-Zahlen-Kombinationen. Verkehrlich bedeutet das eine ungewöhnliche Häufung gleichartiger Kreuzungen auf engem Raum, ohne die sonst übliche Hierarchie aus Hauptstraße und Nebenstraße, an der man sich orientieren könnte. Die Blockränder sind geschlossen und bis an die Ecke bebaut, sodass das Sichtdreieck erst freigibt, wenn man bereits in die Kreuzung eingefahren ist. Typisch ist deshalb der rechtwinklige Zusammenstoß mit Anstoß auf Höhe der vorderen Tür. Bei dieser Konstellation gehört neben dem Blech die B-Säule geprüft, weil dort die Leitungen für Seitenairbags und Sitzbelegungserkennung verlaufen und ihre Auslöseschwelle betroffen sein kann. Für die Rekonstruktion ist die Anstoßhöhe über der Fahrbahn hilfreich, weil sie zeigt, ob ein Pkw oder ein höher bauendes Fahrzeug beteiligt war."
+      },
+      {
+        "frage": "Was ist am Autobahnkreuz Mannheim zu beachten?",
+        "antwort": "Das Autobahnkreuz Mannheim liegt rund sechs Kilometer südöstlich der Innenstadt im Stadtteil Seckenheim und verknüpft die A6 mit der A656 in Richtung Heidelberg. Es zählt mit etwa 153.000 Fahrzeugen täglich zu den am stärksten belasteten Knoten der Region, und ein erheblicher Teil des Schwerverkehrs nutzt es als Ausweichroute zur häufig überlasteten A5. Aus dieser Mischung entstehen Auffahrschäden am Stauende und Streifkollisionen in den Verflechtungsbereichen. Trifft ein Pkw auf das Heck eines Sattelaufliegers, greift die Knautschzone nicht wie konstruiert: Der Aufbau liegt höher als die Längsträger, und das Fahrzeug schiebt sich darunter. Der Schaden verlagert sich damit auf Windschutzscheibe, Dachrahmen und A-Säulen. Ob der Unterfahrschutz des Aufliegers seiner Funktion nachgekommen ist, gehört mit dokumentiert, weil sich daraus die Eindringtiefe erklärt."
+      },
+      {
+        "frage": "Welche Besonderheiten bringt der Mannheimer Hafen für den Straßenverkehr mit?",
+        "antwort": "Mannheim liegt am Zusammenfluss von Rhein und Neckar und betreibt einen der größten Binnenhäfen Europas. In den Hafen- und Industriegebieten rund um Jungbusch, Neckarstadt und Rheinau prägt Schwerlastverkehr das Bild: Sattelzüge rangieren rückwärts über die Fahrbahn in Werkszufahrten, und Hafenbahngleise queren die Straßen häufig höhengleich. Diese Gleise liegen oft schräg zur Fahrtrichtung und stehen witterungsbedingt unterschiedlich weit über dem Belag. Für Zweiräder sind sie eine echte Sturzgefahr, für Pkw eine Belastung von Fahrwerk und Reifen. Nach einem harten Überfahren gehören Felgenhörner, Reifenflanken und die Achsgeometrie geprüft, denn eine verstellte Spur zeigt sich nicht am Blech, sondern erst auf dem Prüfstand. Rangiert ein Sattelzug rückwärts über die Fahrbahn, ist zudem festzuhalten, ob ein Einweiser beteiligt war und wo beide Fahrzeuge zum Stehen kamen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A6, Parkschaden in den Quadraten oder Zusammenstoß am Kreuz Mannheim — der Sachverständige kommt zu Ihnen.",
+    "topografieAnker": "Mannheim liegt am Zusammenfluss von Rhein und Neckar; am Kreuz Mannheim treffen A5 und A6 aufeinander, die A656 führt direkt nach Heidelberg."
+  },
+  "detmold": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Nord",
+          "Süd",
+          "Hakedahl"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Heidenoldendorf",
+          "Jerxen-Orbke",
+          "Pivitsheide"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Hiddesen",
+          "Berlebeck",
+          "Heiligenkirchen",
+          "Hornoldendorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Remmighausen",
+          "Brokhausen",
+          "Nienhagen",
+          "Bentrup"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuzung B238/B239 Detmold-Nord",
+        "Anschluss B239 Detmold-Süd"
+      ],
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B238",
+        "B239"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Detmold hat keine eigene Autobahn — ändert das etwas an meinem Anspruch?",
+        "antwort": "Nein. Für die Regulierung zählt die Haftungsfrage, nicht der Straßentyp. Den überörtlichen Verkehr tragen hier B238 und B239; die nächsten Autobahnauffahrten liegen an der A2 bei Bad Salzuflen und an der A33 bei Bielefeld."
+      },
+      {
+        "frage": "Warum häufen sich an Ausflugswochenenden Schäden auf den Waldstraßen bei Hiddesen und Berlebeck?",
+        "antwort": "Die Detmolder Ortsteile Hiddesen, Berlebeck und Heiligenkirchen liegen am Teutoburger Wald und ziehen an schönen Wochenenden erheblichen Ausflugsverkehr an. Die Zufahrtsstraßen sind schmal und kurvig, feste Stellflächen gibt es kaum, also wird auf dem unbefestigten Seitenstreifen geparkt — halb im Gras, oft schräg und dicht hintereinander. Beim Wiederanfahren fehlt die Sicht nach hinten, weil Böschung und Bewuchs sie nehmen, und das Fahrzeug muss zugleich die Höhenstufe zur Fahrbahn überwinden. Typisch ist deshalb der Anstoß mit der vorderen Ecke gegen ein durchfahrendes Fahrzeug: Scheinwerfer, Kotflügel und Radlauf auf einmal. Weil das Fahrzeug dabei schräg steht, verläuft die Kontaktspur ansteigend — ein Detail, das den Hergang später belegt. Ebenso aufschlussreich ist der Seitenstreifen selbst: Reifenspuren im weichen Grund zeigen, wie weit das Fahrzeug beim Anfahren schon ausgeschert war."
+      },
+      {
+        "frage": "Was passiert am Knoten, an dem die B238 in Detmold auf die B239 trifft?",
+        "antwort": "Die B238 endet in Detmold, wo sie im Norden auf die B239 trifft, die dort als Nordring um die Innenstadt geführt wird. An einem solchen Endpunkt wechselt die Fahrlogik abrupt: Aus einer durchgehenden Bundesstraße wird ein wartepflichtiger Anschluss an eine übergeordnete Achse. Wer sich darauf nicht einstellt, bremst spät, und die Rückstaus in den Spitzenzeiten reichen weiter zurück, als es die freie Strecke davor vermuten lässt. Die Folge sind Heckaufpralle auf stehende Fahrzeuge. Bei der Aufnahme verdient die Heckklappe besondere Aufmerksamkeit: Verzieht sie sich, liegt die Dichtung nicht mehr sauber an, und der Kofferraum zieht Feuchtigkeit — ein Folgeschaden, der erst nach Monaten auffällt und dann schwer zuzuordnen ist. Ein einfacher Test hilft: Lässt sich ein Blatt Papier ringsum gleich schwer aus der geschlossenen Klappe ziehen, sitzt sie noch in ihrer Sollposition."
+      },
+      {
+        "frage": "Welche Schäden entstehen typischerweise beim Liefern in der Detmolder Innenstadt?",
+        "antwort": "Der historische Grundriss der Detmolder Innenstadt lässt schmale Gassen und wenig Rangierfläche, und die Zufahrten zur Fußgängerzone sind mit Sperrpfosten und Pollern gesichert. Lieferfahrzeuge halten deshalb dicht an der Kante, oft mit einer Achse auf dem Bordstein, und setzen anschließend im Rückwärtsgang wieder heraus. Zwei Schadenbilder dominieren: der Kontakt mit dem Poller, der sich außen als kleiner Kratzer zeigt, während darunter Frontschürze, Unterfahrschutz oder Auspuffhalterung Druck bekommen haben, und das Aufsetzen des Schwellers an der Bordsteinkante. Beides gehört auf die Hebebühne, denn ein Poller trifft punktuell und mit voller Fahrzeugmasse. Die Verkleidung federt zurück, die dahinterliegende Halterung bleibt verformt. Sichtbar wird das erst bei abgenommener Schürze — bleibt sie montiert, sitzt das Bauteil nur noch lose und löst sich bei der nächsten Bodenwelle vollends."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der B239, Parkschaden in der Langen Straße oder Zusammenstoß in Hiddesen — der Sachverständige kommt zu Ihnen nach Detmold.",
+    "topografieAnker": "Detmold liegt am Teutoburger Wald in Lippe. Eine eigene Autobahn hat die Stadt nicht — B238 und B239 tragen den überörtlichen Verkehr, die A2 verläuft rund fünfundzwanzig Kilometer nördlich."
+  },
+  "reutlingen": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Oststadt",
+          "Weststadt",
+          "Nordstadt",
+          "Storlach"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Betzingen",
+          "Orschel-Hagen",
+          "Rommelsbach",
+          "Sondelfingen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Altenburg",
+          "Sickenhausen",
+          "Degerschlacht",
+          "Reicheneck"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Ohmenhausen",
+          "Gönningen",
+          "Bronnweiler",
+          "Oferdingen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuzung B27/B28 Reutlingen-Nord",
+        "Scheibengipfeltunnel",
+        "Anschluss B312 Reutlingen-Ost"
+      ],
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B27",
+        "B28",
+        "B312",
+        "B464"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Reutlingen hat keine eigene Autobahn — spielt das für mein Gutachten eine Rolle?",
+        "antwort": "Nein. Für Ihren Anspruch zählt die Haftungsfrage, nicht der Straßentyp. Die B27 und B28 tragen hier den überörtlichen Verkehr; Unfälle dort werden genauso reguliert wie auf einer Autobahn."
+      },
+      {
+        "frage": "Worauf kommt es bei Unfällen im Scheibengipfeltunnel an?",
+        "antwort": "Der Scheibengipfeltunnel führt die B312 und B313 auf rund 1.910 Metern unter dem Scheibengipfel hindurch, von Sondelfingen bis zur Gemarkungsgrenze nach Eningen, und hält seit seiner Eröffnung 2017 etwa 20.000 Fahrzeuge täglich aus der Innenstadt von Reutlingen heraus. Zwei Eigenheiten prägen das Geschehen: Im Tunnel bleibt die Fahrbahn trocken, während sie am Portal je nach Wetter nass, verschneit oder überfroren sein kann — der Kraftschluss ändert sich also schlagartig, ausgerechnet dort, wo das Auge sich noch an die Helligkeit gewöhnt. Dazu fehlt in der Röhre der Ausweichraum. Ein erster Anstoß führt deshalb oft zu einem zweiten an der Tunnelwand, und beide sind getrennt aufzunehmen. Wer sie in einer Position zusammenfasst, verliert die Information, welche Kraftrichtung welches Bauteil getroffen hat — und damit die Grundlage für die Reparaturfolge."
+      },
+      {
+        "frage": "Warum sind Kollisionen mit Motorrädern auf den Albsteigen bei Gönningen ein eigenes Thema?",
+        "antwort": "Die zu Reutlingen gehörenden Ortsteile Gönningen, Bronnweiler und Reicheneck liegen am Albtrauf, und die Steigen hinauf auf die Schwäbische Alb sind an schönen Wochenenden eine beliebte Motorradstrecke. Trifft ein Motorrad einen Pkw, entsteht ein Schadenbild, das viele unterschätzen: Der Zweiradfahrer bringt zwar wenig Masse ein, dafür konzentriert sich diese auf sehr kleine Flächen. Lenkerende, Fußraste oder Gabelholm treffen die Fahrzeugflanke punktuell und drücken tief ein, während die Fläche daneben unversehrt aussieht. Solche Eindrückungen lassen sich selten ausbeulen, weil das Blech überdehnt ist. Für die Bewertung heißt das: Tiefe und Kantenschärfe des Eindrucks entscheiden über Instandsetzung oder Ersatz des Bauteils, nicht seine Größe. Hinzu kommt, dass die Lackschicht an solchen Kanten aufreißt und das blanke Blech zu rosten beginnt, sobald es einige Wochen ungeschützt bleibt."
+      },
+      {
+        "frage": "Was ist nach einem Auffahrunfall am Knoten B27/B28 im Norden zu beachten?",
+        "antwort": "Am Knoten von B27 und B28 im Norden von Reutlingen bündelt sich der Verkehr aus Richtung Tübingen und Stuttgart mit dem örtlichen Berufsverkehr; die Rückstaus in den Spitzenzeiten machen Heckaufpralle zur häufigsten Konstellation. Bei diesen Anstößen richtet sich der Blick meist auf das Blech, während die Rückhaltesysteme übersehen werden. Ausgelöste Gurtstraffer sind Einwegbauteile, und auch Gurte, die eine hohe Belastung aufgenommen haben, gehören ersetzt. Besonders wichtig sind Kindersitze: Sie sind nach einem Unfall mit nennenswerter Aufprallenergie auszutauschen, weil Haarrisse in der Schale von außen nicht erkennbar sind. Wer sie nicht in die Aufnahme aufnimmt, lässt eine sicherheitsrelevante Position aus der Kalkulation fallen. Das gilt auch dann, wenn der Sitz äußerlich unversehrt wirkt und das Kind unverletzt geblieben ist — viele Hersteller schreiben den Austausch unabhängig von sichtbaren Schäden vor."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der B27, Parkschaden in der Wilhelmstraße oder Zusammenstoß in Betzingen — der Sachverständige kommt zu Ihnen nach Reutlingen.",
+    "topografieAnker": "Reutlingen liegt am Fuß der Schwäbischen Alb an der Echaz. Eine eigene Autobahn hat die Stadt nicht — den überörtlichen Verkehr tragen B27 und B28, die A8 verläuft rund zwanzig Kilometer nördlich."
+  }
+}

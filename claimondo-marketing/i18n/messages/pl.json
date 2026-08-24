@@ -94,7 +94,7 @@
     "insight_kasko": "Również w przypadku AC niezależna ekspertyza się opłaca — chroni Cię przed zbyt niskim odszkodowaniem.",
     "ranges_heading": "Ile to mniej więcej jest warte",
     "range_auslagen": "Ryczałt na wydatki: 25–30 € ryczałtem",
-    "range_nutzungsausfall": "Utrata możliwości korzystania z pojazdu: ok. 35–175 € dziennie (w zależności od klasy pojazdu)",
+    "range_nutzungsausfall": "Utrata możliwości korzystania z pojazdu: ok. 23–219 € dziennie (w zależności od klasy pojazdu)",
     "range_wertminderung": "Utrata wartości: w przypadku nowszych pojazdów często w kwotach czterocyfrowych",
     "range_kostenlos": "Ekspertyza i prawnik: 0 € dla Ciebie — płaci ubezpieczyciel drugiej strony",
     "ranges_disclaimer": "Typowe rzędy wielkości, nie wiążąca oferta.",
@@ -988,7 +988,7 @@
       "h1_accent": "Zajmiemy się wszystkim.",
       "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — a negocjacje z ubezpieczeniem sprawcy prowadzi kancelaria partnerska. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
       "cta_primary": "Pozwól, że porozmawiamy z ubezpieczycielem →",
-      "cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
+      "cta_call": "Zadzwoń teraz — oddzwonimy w 15 minut",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonimowa porada · Bez zobowiązań · Zgodność z RODO"
     },
@@ -1059,7 +1059,7 @@
         },
         {
           "titel": "Wynajem auta lub utrata możliwości użytkowania",
-          "text": "Nasza kancelaria partnerska negocjuje wynajem auta na cały czas naprawy lub ryczałt za utratę możliwości użytkowania 23–175 €/dzień według klasy Sanden/Danner.",
+          "text": "Nasza kancelaria partnerska negocjuje wynajem auta na cały czas naprawy lub ryczałt za utratę możliwości użytkowania 23–219 €/dzień według klasy Sanden/Danner.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
@@ -1154,7 +1154,7 @@
       "items": [
         {
           "frage": "Ile kosztuje rzeczoznawca samochodowy po niezawinionej kolizji?",
-          "antwort": "Przy niezawinionej kolizji ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczenie sprawcy (OC) pokrywa wszystkie koszty na podstawie §249 BGB. Honoraria wg BVSK-Honorartabelle wynoszą — w zależności od wysokości szkody — od 550 € do 2.600 €."
+          "antwort": "Przy niezawinionej kolizji ze szkodą powyżej 750 € płacisz 0 €. Ubezpieczenie sprawcy (OC) pokrywa wszystkie koszty na podstawie §249 BGB. Honoraria wg BVSK-Honorartabelle wynoszą — w zależności od wysokości szkody — od 300 € do 1.200 €."
         },
         {
           "frage": "Jak szybko rzeczoznawca samochodowy może być na miejscu?",
@@ -1427,7 +1427,7 @@
       "datenschutz_note": "Wysyłając formularz, wyrażają Państwo zgodę na kontakt zwrotny. Ochrona danych zgodnie z RODO."
     },
     "lead_form": {
-      "rueckruf_badge": "Oddzwonienie w 5 minut",
+      "rueckruf_badge": "Oddzwonienie w 15 minut · 8–20",
       "heading": "Zgłoś szkodę w 30 sekund",
       "sub": "Trzy pola. Bez rejestracji. Zgodnie z RODO.",
       "field_name_label": "Imię i nazwisko",
@@ -1786,7 +1786,7 @@
           },
           {
             "frage": "Wynajem auta czy utrata możliwości użytkowania — co jest dla mnie korzystniejsze?",
-            "antwort": "Zależy od Twojej sytuacji. Osoby dojeżdżające do pracy, które codziennie potrzebują auta: wynajem auta. Posiadasz drugi samochód lub kwestia winy jest niejasna: utrata możliwości użytkowania (tabela Sanden/Danner, grupy A do L, ~23 € do 175 € za dzień). Przy długim czasie naprawy utrata możliwości użytkowania jest często korzystniejsza. Doradzamy Ci konkretnie."
+            "antwort": "Zależy od Twojej sytuacji. Osoby dojeżdżające do pracy, które codziennie potrzebują auta: wynajem auta. Posiadasz drugi samochód lub kwestia winy jest niejasna: utrata możliwości użytkowania (tabela Sanden/Danner, grupy A do L, ~23 € do 219 € za dzień). Przy długim czasie naprawy utrata możliwości użytkowania jest często korzystniejsza. Doradzamy Ci konkretnie."
           }
         ]
       },
@@ -1900,7 +1900,7 @@
           },
           {
             "frage": "A kiralık araç podczas naprawy?",
-            "antwort": "Przysługuje Ci prawo do równorzędnego pojazdu zastępczego (kiralık araç) na cały czas naprawy (linia orzecznicza BGH: niższa klasa jest akceptowalna z refundacją udziału własnego). Alternatywnie: ryczałt za utratę możliwości użytkowania (Nutzungsausfall) według tabeli Sanden/Danner (grupy A do L, ok. 23 € do 175 €/dzień). Dla dojeżdżających do pracy wynajem auta jest niemal zawsze korzystniejszy. Doradzamy w konkretnej sytuacji — ubezpieczyciele często obcinają do „porównywalnej klasy\", co nie zawsze jest uzasadnione."
+            "antwort": "Przysługuje Ci prawo do równorzędnego pojazdu zastępczego (kiralık araç) na cały czas naprawy (linia orzecznicza BGH: niższa klasa jest akceptowalna z refundacją udziału własnego). Alternatywnie: ryczałt za utratę możliwości użytkowania (Nutzungsausfall) według tabeli Sanden/Danner (grupy A do L, ok. 23 € do 219 €/dzień). Dla dojeżdżających do pracy wynajem auta jest niemal zawsze korzystniejszy. Doradzamy w konkretnej sytuacji — ubezpieczyciele często obcinają do „porównywalnej klasy\", co nie zawsze jest uzasadnione."
           },
           {
             "frage": "Mam szkodę w pojeździe służbowym. Czy to również jest możliwe?",
@@ -3017,7 +3017,7 @@
       },
       {
         "frage": "Kiedy przysługuje mi wynajem auta lub utrata możliwości użytkowania?",
-        "antwort": "Wynajem auta od pierwszego dnia naprawy — równorzędna klasa lub niższa z refundacją udziału własnego. Alternatywnie: ryczałt za utratę możliwości użytkowania według tabeli Sanden/Danner (23–175 €/dzień w zależności od klasy pojazdu). Dla dojeżdżających do pracy wynajem auta jest prawie zawsze korzystniejszy. Doradzamy w konkretnej sytuacji."
+        "antwort": "Wynajem auta od pierwszego dnia naprawy — równorzędna klasa lub niższa z refundacją udziału własnego. Alternatywnie: ryczałt za utratę możliwości użytkowania według tabeli Sanden/Danner (23–219 €/dzień w zależności od klasy pojazdu). Dla dojeżdżających do pracy wynajem auta jest prawie zawsze korzystniejszy. Doradzamy w konkretnej sytuacji."
       }
     ],
     "crosslinks_h2": "Więcej na ten temat",
@@ -3033,8 +3033,8 @@
     "breadcrumb_start": "Rzeczoznawca Kfz",
     "breadcrumb_current": "Koszty",
     "hero_h1": "Ile kosztuje rzeczoznawca Kfz?",
-    "hero_intro": "Przy niezawinionej kolizji: <strong>0 € dla Ciebie</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €",
-    "antwort_capsule": "<strong>Przy niezawinionym wypadku drogowym ze szkodą powyżej 750 €</strong> ubezpieczenie OC sprawcy pokrywa honorarium rzeczoznawcy w 100%. Wysokość określa BVSK-Honorartabelle (oparta na wartości odtworzeniowej) i wynosi od 550 € do 2.600 €. Poszkodowany nic nie płaci: rzeczoznawca rozlicza się bezpośrednio z ubezpieczeniem sprawcy na podstawie Sicherungsabtretung (§398 BGB).",
+    "hero_intro": "Przy niezawinionej kolizji: <strong>0 € dla Ciebie</strong> · §249 BGB · BVSK-Honorartabelle 300–1.200 €",
+    "antwort_capsule": "<strong>Przy niezawinionym wypadku drogowym ze szkodą powyżej 750 €</strong> ubezpieczenie OC sprawcy pokrywa honorarium rzeczoznawcy w 100%. Wysokość określa BVSK-Honorartabelle (oparta na wartości odtworzeniowej) i wynosi od 300 € do 1.200 €. Poszkodowany nic nie płaci: rzeczoznawca rozlicza się bezpośrednio z ubezpieczeniem sprawcy na podstawie Sicherungsabtretung (§398 BGB).",
     "bvsk_h2": "BVSK-Honorartabelle — jak obliczane jest honorarium?",
     "bvsk_capsule": "BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) określa honorarium stopniowo według wartości odtworzeniowej. Przykład: szkoda 5.000 € → ok. 700 €. Szkoda 15.000 € → ok. 1.400 €. Szkoda 30.000 € → ok. 2.200 €. Plus koszty dodatkowe (zdjęcia, opłaty kancelaryjne, koszty dojazdu). Tabela jest aktualizowana corocznie.",
     "bvsk_beispiele": [
@@ -3066,7 +3066,7 @@
     "faqs": [
       {
         "frage": "Ile konkretnie kosztuje rzeczoznawca samochodowy?",
-        "antwort": "Honoraria ustalane są według BVSK-Honorartabelle i skalują się z wartością odtworzeniową pojazdu. Przedziały w zależności od regionu: 550–2.600 €. Przykłady: szkoda 5.000 € → ok. 700 € honorarium rzeczoznawcy. Szkoda 15.000 € → ok. 1.400 €. Szkoda 30.000 € → ok. 2.200 €. Obliczenia opierają się na badaniu HB-V przeprowadzonym przez BVSK w 2025 roku."
+        "antwort": "Honoraria ustalane są według BVSK-Honorartabelle i skalują się z wartością odtworzeniową pojazdu. Przedziały w zależności od regionu: 300–1.200 €. Przykłady: szkoda 5.000 € → ok. 700 € honorarium rzeczoznawcy. Szkoda 15.000 € → ok. 1.400 €. Szkoda 30.000 € → ok. 2.200 €. Obliczenia opierają się na badaniu HB-V przeprowadzonym przez BVSK w 2025 roku."
       },
       {
         "frage": "Kto płaci za rzeczoznawcę po wypadku?",
@@ -3527,7 +3527,7 @@
     "trust_kpi_kuerzung_label": "typowa redukcja ubezpieczyciela¹",
     "trust_kpi_bgh_wert": "8",
     "trust_kpi_bgh_label": "sygnatury BGH 1992–2025",
-    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "Rozpiętość BVSK-Honorartabelle",
     "trust_methodikNote": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Streszczenie wykonawcze",
@@ -3777,9 +3777,9 @@
       "32 dni zamiast 4 miesięcy. Średnio.",
       "0 € dla Ciebie. (§ 249 BGB)."
     ],
-    "hero_cta_call": "Zadzwoń teraz — oddzwonimy w 5 min",
+    "hero_cta_call": "Zadzwoń teraz — oddzwonimy w 15 minut",
     "hero_trust_line": "Anonimowa porada · Bez zobowiązań · Zgodnie z DSGVO (RODO)",
-    "form_badge": "Oddzwonienie w 5 minut",
+    "form_badge": "Oddzwonienie w 15 minut · 8–20",
     "form_h2": "Zgłoś szkodę — w 30 sekund",
     "form_sub": "Trzy pola. Bez rejestracji. Zgodnie z DSGVO (RODO).",
     "form_name_label": "Imię i nazwisko",
@@ -3888,6 +3888,14 @@
     "faq_sa_antwort": "Przy Sicherungsabtretung zgodnie z §398 BGB poszkodowany przenosi roszczenie wobec ubezpieczyciela sprawcy w wysokości wynagrodzenia rzeczoznawcy na rzeczoznawcę. Podpisujesz raz — rzeczoznawca rozlicza się następnie bezpośrednio z ubezpieczycielem. Nie płacisz ani centa z góry. Branżowy standard.",
     "faq_wertminderung_frage": "Jaką utratę wartości (Wertminderung) uzyskam po wypadku?",
     "faq_wertminderung_antwort": "Merkantylna utrata wartości według formuły Sanden/Danner wynosi od 500 € do 2.500 €. Przybliżona zasada: 1. rok 25 %, 2. rok 20 %, 3. rok 15 %, 4. rok 10 % kosztów naprawy. Brak sztywnej granicy wieku według BGH VI ZR 357/03.",
+    "faq_gutachterwahl_frage": "Czy mogę sam wybrać rzeczoznawcę?",
+    "faq_gutachterwahl_antwort": "Tak. Jako poszkodowany bez własnej winy to Pan/Pani wyznacza rzeczoznawcę — nie ubezpieczyciel sprawcy. Nie trzeba przyjmować jego propozycji przysłania własnego kontrolera: rzeczoznawca zlecony przez stronę przeciwną nie działa w Państwa interesie.",
+    "faq_kva_frage": "Czy wystarczy kosztorys warsztatu?",
+    "faq_kva_antwort": "Przy szkodzie poniżej około 750 € tak — to próg szkody bagatelnej. Powyżej nie: kosztorys wycenia wyłącznie naprawę. Brakuje w nim utraty wartości handlowej, rekompensaty za brak możliwości korzystania z pojazdu oraz wartości odtworzeniowej i pozostałości, a właśnie te pozycje stanowią znaczną część odszkodowania.",
+    "faq_mietwagen_frage": "Czy po wypadku przysługuje mi samochód zastępczy?",
+    "faq_mietwagen_antwort": "Przy wypadku bez własnej winy tak — ubezpieczyciel OC sprawcy pokrywa zgodnie z § 249 BGB samochód zastępczy porównywalnej klasy na czas naprawy lub odtworzenia pojazdu. Alternatywnie wypłaca rekompensatę za brak możliwości korzystania z pojazdu w gotówce, stopniowaną według grupy pojazdu i liczby dni. Kto jeździ mało, często wychodzi lepiej na wypłacie gotówkowej.",
+    "faq_werkstattwahl_frage": "Czy mogę swobodnie wybrać warsztat?",
+    "faq_werkstattwahl_antwort": "Tak, swoboda wyboru warsztatu pozostaje zachowana. Ubezpieczyciel sprawcy nie może kierować Państwa do warsztatu partnerskiego, jeśli chcą Państwo naprawić pojazd w autoryzowanym serwisie marki — dotyczy to zwłaszcza pojazdów młodych lub z pełną historią serwisową.",
     "faq_130_frage": "Co oznacza reguła 130% przy szkodzie całkowitej?",
     "faq_130_antwort": "Reguła 130% (BGH VI ZR 67/91) pozwala na koszty naprawy do 130 % wartości odtworzeniowej pojazdu — pod warunkiem fachowej naprawy zgodnie z ekspertyzą i dalszego użytkowania pojazdu przez 6 miesięcy.",
     "cta_h2": "Szkoda {ort}? Zajmujemy się tym.",
@@ -4184,7 +4192,7 @@
       "title": "Ile kosztuje rzeczoznawca Kfz? — 0 € przy winie osoby trzeciej (§249 BGB)",
       "description": "Koszty rzeczoznawcy Kfz: tabela honorariów BVSK, cesja na zabezpieczenie (§398 BGB), granica bagateli 750 €. Przy niezawinionej kolizji płaci strona przeciwna — 0 €.",
       "og_title": "Ile kosztuje rzeczoznawca Kfz? — 0 € przy winie osoby trzeciej",
-      "og_description": "Honorarium wg BVSK 600–2.600 €, przy winie osoby trzeciej 0 € dla Pana/Pani."
+      "og_description": "Honorarium wg BVSK 300–1.200 €, przy winie osoby trzeciej 0 € dla Pana/Pani."
     },
     "kfz_gutachter_online": {
       "title": "„Ekspertyza Kfz online\" — co jest prawnie dozwolone, a co nie (LG Bremen 2026)",

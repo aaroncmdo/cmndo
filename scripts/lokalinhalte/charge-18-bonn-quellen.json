@@ -1,0 +1,1177 @@
+{
+  "bonn": {
+    "stadtbezirke": [
+      {
+        "name": "Bonn",
+        "ortsteile": [
+          "Zentrum",
+          "Nordstadt",
+          "Südstadt",
+          "Weststadt",
+          "Castell",
+          "Gronau",
+          "Poppelsdorf",
+          "Endenich",
+          "Kessenich",
+          "Dottendorf"
+        ]
+      },
+      {
+        "name": "Bad Godesberg",
+        "ortsteile": [
+          "Godesberg-Villenviertel",
+          "Godesberg-Nord",
+          "Plittersdorf",
+          "Rüngsdorf",
+          "Muffendorf",
+          "Mehlem",
+          "Lannesdorf",
+          "Friesdorf"
+        ]
+      },
+      {
+        "name": "Beuel",
+        "ortsteile": [
+          "Beuel-Mitte",
+          "Beuel-Ost",
+          "Limperich",
+          "Küdinghoven",
+          "Oberkassel",
+          "Holzlar",
+          "Vilich",
+          "Pützchen"
+        ]
+      },
+      {
+        "name": "Hardtberg",
+        "ortsteile": [
+          "Duisdorf",
+          "Lengsdorf",
+          "Brüser Berg",
+          "Lessenich",
+          "Meßdorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Bonn-Nord",
+        "Kreuz Bonn-Ost",
+        "Dreieck Bonn-Nordost",
+        "Kreuz Bonn/Siegburg"
+      ],
+      "autobahnen": [
+        "A59",
+        "A555",
+        "A562",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B9",
+        "B42",
+        "B56"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Kölnstraße (Nordstadt)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 46 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (14 von 46). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 46 Fällen war in 22 ein Fahrrad, in 2 ein Fußgänger, in 10 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Godesberger Allee (Hochkreuz)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 42 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (18 von 42). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 42 Fällen war in 12 ein Fahrrad, in 3 ein Fußgänger, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Konrad-Adenauer-Platz (Beuel-Mitte)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 33 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (12 von 33). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 33 Fällen war in 20 ein Fahrrad, in 1 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Berliner Freiheit (Bonn-Zentrum)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 30 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (18 von 30). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 30 Fällen war in 24 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Doktor-Weis-Platz (Beuel-Mitte)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 29 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (20 von 29). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 29 Fällen war in 24 ein Fahrrad, in 2 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 16 (Schwarzrheindorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 25 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 25). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 25 Fällen war in 6 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Bertha-von-Suttner-Platz (Bonn-Zentrum)",
+        "quelle": "https://www.bonn.de/themen-entdecken/verkehr-mobilitaet/umgestaltung-der-verkehrsfuehrung-am-bertha-von-suttner-platz.php",
+        "einzelfall": false,
+        "beschreibung": "Die Stadt Bonn benennt die Ost-West-Achse über den Bertha-von-Suttner-Platz ausdrücklich als eine der unfallträchtigsten Routen für den Radverkehr; im Bonner Rad-Dialog wurde der Platz mit am häufigsten als besonders unsicher genannt. Die Stadt hat deshalb eine Neuaufteilung des Straßenraums angekündigt, im August 2022 wurde der angrenzende Bereich Am Alten Friedhof und Oxfordstraße bereits neu aufgeteilt. Für Betroffene heißt das: An dieser Stelle sind Auto-Rad-Kollisionen der Regelfall, und dabei steht dem oft geringen Blechschaden ein erheblicher Personenschaden gegenüber. Anstoßhöhe und Verformungsrichtung am Fahrzeug sind dann das einzige objektive Beweismittel zum Hergang. Quelle: Bundesstadt Bonn, „Umgestaltung der Verkehrsführung am Bertha-von-Suttner-Platz\", abgerufen am 24.08.2026."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind die Bonner Rheinbrücken im Winter früher glatt als die Straßen davor?",
+        "antwort": "Zwischen der linksrheinischen Innenstadt und Beuel gibt es genau drei Straßenverbindungen: die Friedrich-Ebert-Brücke im Norden, die Kennedybrücke in der Mitte und die Konrad-Adenauer-Brücke im Süden. Ein Brückenbauwerk kühlt anders aus als eine Straße auf gewachsenem Boden — unter der Fahrbahn liegt kein Erdreich, das Wärme speichert, sondern Luft. Bei Temperaturen knapp über null kann die Fahrbahn auf der Brücke deshalb bereits überfroren sein, während die Zufahrt in Beuel-Mitte nur nass ist. Der Wechsel kommt ohne Vorwarnung und mitten in einer Kurvenfahrt auf die Rampe. Typisch ist dann kein Zusammenstoß, sondern das Abkommen zur Seite: eine langgezogene Streifkollision an Betonkappe oder Geländer über Front, Vorderrad und Flanke. Weil das Rad dabei seitlich gegen die Kante gedrückt wird, gehört die Achse anschließend vermessen. Halten Sie außerdem Profiltiefe, Alter und Kennzeichnung der Reifen fest — bei Glätte wird die Bereifung regelmäßig zum Streitpunkt."
+      },
+      {
+        "frage": "Was ist nach einem Unfall mit einem Elektroauto auf der A565 anders?",
+        "antwort": "Die A565 führt als Stadtautobahn mitten durch Bonn, von Hardtberg und Endenich bis zum Kreuz Bonn-Nord — Auffahr- und Streifschäden im dichten Berufsverkehr sind dort Alltag. Bei einem Elektrofahrzeug ändert sich danach der gesamte Ablauf. Sobald der Unterboden Kontakt hatte oder die Fahrzeugmitte verformt ist, gilt der Hochvoltspeicher als möglicherweise beschädigt. Ein solches Fahrzeug wird nicht in eine enge Halle gestellt, sondern auf eine Fläche mit Sicherheitsabstand, und es wird über Stunden bis Tage thermisch beobachtet, weil eine geschädigte Zelle verzögert reagieren kann. Für die Besichtigung heißt das: Das System muss zuvor von einer dafür qualifizierten Person freigeschaltet sein. Geprüft werden Batteriegehäuse und Unterfahrschutz von unten, die orangefarbenen Leitungen und Steckverbindungen sowie das Batteriemanagement auf Isolationsfehler und hinterlegtes Crash-Signal. Dass ein E-Auto nach dem Unfall noch fährt, sagt über den Zustand des Speichers nichts aus."
+      },
+      {
+        "frage": "Warum vergleicht ein Sachverständiger die Schäden beider Fahrzeuge miteinander?",
+        "antwort": "In den dicht geparkten Bonner Vierteln — Nordstadt, Südstadt, Poppelsdorf, Kessenich — entstehen viele Schäden beim Ausparken und Vorbeifahren, und Zeugen gibt es selten. Deshalb gehört zu einer sauberen Begutachtung die Frage, ob die beiden Schadenbilder überhaupt zueinander passen. Geprüft wird das an harten Merkmalen: Liegen die Kontaktzonen auf derselben Höhe über der Fahrbahn? Passt die Form der Eindrückung zur Gegenkontur, also etwa eine runde Delle zu einer Stoßfängerecke? Findet sich Lack des einen Fahrzeugs auf dem anderen, und in welcher Schichtenfolge? Läuft die Kratzrichtung zur behaupteten Bewegungsrichtung? Passt etwas davon nicht zusammen, heißt das keineswegs, dass jemand täuschen wollte — weit häufiger stammt ein Teil der Beschädigung aus einem früheren Ereignis, an das im Moment der Aufregung niemand denkt. Genau diese Trennung zwischen aktuellem Anstoß und Altschaden ist die eigentliche Arbeit."
+      },
+      {
+        "frage": "Warum ist die Kölnstraße in der Bonner Nordstadt eine der stärksten Unfallstellen der Stadt?",
+        "antwort": "Die Kölnstraße bündelt in der Bonner Nordstadt Durchgangsverkehr, Anliegerverkehr und einen breiten Radverkehr auf derselben Achse, dazu Grundstückszufahrten und Querstraßen in dichter Folge. Der amtliche Unfallatlas führt hier für 2021 bis 2025 die höchste Häufung im Bonner Stadtgebiet, und der häufigste Typ ist der Einbiegen- oder Kreuzen-Unfall. Für die Begutachtung heißt das: Der Anstoß sitzt meist an der Fahrzeugflanke, zwischen Vorderrad und Tür. Dort verlaufen Türverstärkung und Schweller, und die Verformungsrichtung des Blechs zeigt, welches Fahrzeug sich in die Bahn des anderen bewegt hat. Genau daran hängt die Haftungsquote, und genau das ist nach der Instandsetzung nicht mehr rekonstruierbar."
+      },
+      {
+        "frage": "Ein Radfahrer ist gegen mein Auto gefahren — warum lohnt sich die Aufnahme trotz Minischaden?",
+        "antwort": "Weil in Bonn an den Häufungsstellen wie Kölnstraße und Berliner Freiheit ein erheblicher Teil der erfassten Unfälle mit Radbeteiligung abläuft, und dort steht dem kleinen Blechschaden oft ein großer Personenschaden gegenüber. Am Auto bleibt vielleicht nur eine Delle im Türblatt oder ein verbogener Spiegel. Deren Höhe über der Fahrbahn und die Richtung des Eindrucks sind aber das einzige objektive Beweismittel dafür, ob der Radfahrer von der Seite kam, gestreift wurde oder gegen das stehende Fahrzeug fuhr. Bleibt das undokumentiert, steht später Aussage gegen Aussage — mit einer Haftungsfrage, an der auch Schmerzensgeldansprüche hängen."
+      },
+      {
+        "frage": "Konrad-Adenauer-Platz und Doktor-Weis-Platz in Beuel: Was macht diese Plätze so schadensträchtig?",
+        "antwort": "Beide Plätze liegen in Beuel-Mitte nah beieinander und bündeln, was sich sonst auf mehrere Straßen verteilt: Buslinien, Stadtbahn, Radverkehr, Fußgänger, Lieferverkehr und Parksuchverkehr auf engem Raum. Der Unfallatlas weist für beide zusammen über fünfzig Unfälle mit Personenschaden in fünf Jahren aus. Platzsituationen sind für die Rekonstruktion besonders undankbar, weil es keine klare Vorfahrtachse gibt und die Fahrzeuge nach dem Zusammenstoß fast immer bewegt werden, bevor jemand ein Foto macht. Halten Sie in Beuel deshalb zuerst die Endstellung fest — sie sagt mehr über den Hergang als jede spätere Schilderung."
+      },
+      {
+        "frage": "Was ist auf der Godesberger Allee anders als in der Bonner Innenstadt?",
+        "antwort": "Die Godesberger Allee führt am Hochkreuz mehrspurig und mit höherem Tempo durch den Bonner Süden, während in der Innenstadt der Kreuzungsverkehr dominiert. Entsprechend verschiebt sich das Schadensbild: Statt Einbiegen und Kreuzen überwiegen hier Auffahren und seitliches Streifen beim Spurwechsel. Beim Heckanstoß wandert die Kraft in Querträger, Längsträger und Kofferraumboden, und die Verformung ist von außen oft nicht zu sehen, solange die Stoßfängerhaut zurückfedert. Bei Streifschäden zieht sich die Kontaktspur dagegen über mehrere Bauteile — Türen, Schweller und Radlauf gehören dann gemeinsam auf Verzug und Spaltmaße geprüft."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A565, Parkschaden in der Südstadt oder Zusammenstoß auf der Kennedybrücke — der Sachverständige kommt zu Ihnen.",
+    "topografieAnker": "Der Rhein teilt Bonn in die linksrheinische Innenstadt und Beuel; die A565 führt als Stadtautobahn mitten hindurch, die B9 folgt dem Strom nach Süden."
+  },
+  "sankt-augustin": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Mülldorf",
+          "Ort",
+          "Menden"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Hangelar",
+          "Meindorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Niederpleis",
+          "Birlinghoven",
+          "Buisdorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahndreieck Sankt Augustin-West (A59/A560)",
+        "Anschlussstelle Sankt Augustin",
+        "Kreuzung B56/Hochschulzufahrt"
+      ],
+      "autobahnen": [
+        "A59",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B56"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Bonner Straße (Mülldorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 40 erfassten Unfällen, verteilt auf 3 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (19 von 40). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 40 Fällen war in 17 ein Fahrrad, in 6 ein Fußgänger, in 3 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "B 56 (Obermenden)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 16 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (8 von 16). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 16 Fällen war in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 143 (Obermenden)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (3 von 11). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 11 Fällen war in 7 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Alte Heerstraße (Niederpleis)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 11). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 11 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum häufen sich Unfälle rund um die Hochschulzufahrt an der B56?",
+        "antwort": "Die B56 führt in Sankt Augustin direkt am Campus der Hochschule Bonn-Rhein-Sieg vorbei. Zu den Vorlesungszeiten treffen dort Autoverkehr, Busse, Radfahrer und querende Fußgänger in dichter Folge aufeinander. Kollisionen mit Zweiradfahrern sind hier die kritische Gruppe: Der Sachschaden am Auto ist meist gering, die Haftungsfrage aber komplex. Ein Gutachten, das Anstoßhöhe, Anstoßrichtung und Schadenbild dokumentiert, ist in solchen Fällen oft das einzige objektive Beweismittel."
+      },
+      {
+        "frage": "Was ist bei einem Wildunfall in der Siegaue zu tun?",
+        "antwort": "Die Siegaue zwischen Menden und Meindorf ist Naturschutzgebiet, und die angrenzenden Straßen führen unmittelbar am Auwald entlang — Wildwechsel ist dort ganzjährig ein Thema. Anders als beim Verkehrsunfall zahlt hier Ihre Teilkaskoversicherung, nicht eine gegnerische Haftpflicht. Lassen Sie sich die Wildunfallbescheinigung vom Jagdausübungsberechtigten oder der Polizei geben und dokumentieren Sie Haare oder Blutspuren am Fahrzeug, bevor Sie es waschen."
+      },
+      {
+        "frage": "Die Bonner Straße in Mülldorf ist die stärkste Unfallstelle in Sankt Augustin — woran liegt das?",
+        "antwort": "Die Bonner Straße ist die historische Verbindung zwischen Siegburg und Bonn und führt heute mitten durch Mülldorf, mit Geschäften, Zufahrten und Querstraßen direkt an der Fahrbahn. Der Unfallatlas weist dort für 2021 bis 2025 gleich mehrere Häufungsstellen entlang derselben Achse aus, zusammen rund vierzig Unfälle mit Personenschaden. Häufigster Typ ist der Abbiegeunfall. Für die Begutachtung ist das aussagekräftig, denn beim Abbiegen trifft es fast immer die vordere Seitenpartie: Kotflügel, Radaufhängung und Scheinwerfer mit der darin verbauten Sensorik. Deren Erneuerung samt Einstellung macht bei aktuellen Fahrzeugen regelmäßig den größeren Teil der Instandsetzung aus."
+      },
+      {
+        "frage": "Abbiegeunfall mit einem Radfahrer in Sankt Augustin — worauf kommt es bei der Aufnahme an?",
+        "antwort": "In Sankt Augustin war an einem erheblichen Teil der erfassten Unfälle entlang der Bonner Straße ein Fahrrad beteiligt, und Abbiegeunfälle sind dort der häufigste Typ. Diese Kombination ist die konfliktträchtigste überhaupt: Der Abbiegende muss den geradeaus fahrenden Radverkehr durchlassen, der Radfahrer darf aber nicht unbeleuchtet oder auf der falschen Seite unterwegs sein. Am Fahrzeug entscheidet die Anstoßstelle: Ein Kontakt an der vorderen Tür spricht für ein anderes Bewegungsbild als einer am Kotflügel oder am Radlauf. Wir dokumentieren die Höhe über der Fahrbahn zentimetergenau, weil sich daraus die Sitzposition und damit die Bewegungsrichtung des Rades ableiten lässt."
+      },
+      {
+        "frage": "Was ist an der Alten Heerstraße in Niederpleis und der L 143 anders als im Zentrum?",
+        "antwort": "Beide Achsen verbinden die östlichen Sankt Augustiner Ortslagen und führen aus dem verdichteten Zentrum heraus Richtung Pleistal. Mit dem Ortsausgang steigen die gefahrenen Geschwindigkeiten, während die Fahrbahn schmaler und die Sicht in den Kurven schlechter wird. Das verschiebt das Schadensbild vom Kreuzungsunfall zum Fahrunfall und zum Zusammenstoß mit dem Gegenverkehr. Bei höherer Aufprallenergie ist die Frage nach tragenden Teilen entscheidend: Längsträger, Federbeindome und Achsträger nehmen die Kraft auf, ohne dass die Karosserie außen viel davon zeigt. Ohne Vermessung wird so ein Schaden regelmäßig zu niedrig kalkuliert."
+      },
+      {
+        "frage": "Wie wirkt sich der Einkaufs- und Campusverkehr in Sankt Augustin auf das Schadensbild aus?",
+        "antwort": "In Sankt Augustin liegen Einkaufszentrum, Rathaus und Hochschulcampus dicht beieinander, und der Verkehr dorthin verteilt sich nicht gleichmäßig über den Tag, sondern ballt sich zu Stoßzeiten. Auf den Zufahrten und Parkflächen entstehen dann die typischen Niedriggeschwindigkeitsschäden: Rangierkontakte, Anstöße an Stoßfängerecken, aufgerissene Spiegel. Solche Schäden wirken geringfügig und sind es selten, weil moderne Stoßfänger Träger, Halter und Abstandssensorik verdecken. Wichtig ist die Abgrenzung: Wo viele kleine Kontakte über Monate zusammenkommen, muss das Gutachten sauber trennen, welcher Kratzer zum aktuellen Ereignis gehört und welcher älter ist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Sankt Augustin — vom Kreuz Sankt Augustin-West über die B56 bis in die Siegaue.",
+    "topografieAnker": "Sankt Augustin liegt zwischen Bonn und Siegburg am linken Ufer der Sieg. Die A59 und die A560 kreuzen sich im Westen des Stadtgebiets; nach Osten steigt das Gelände zum Pleistal hin an, im Norden liegen die Siegauen mit dem Flugplatz Hangelar."
+  },
+  "siegburg": {
+    "stadtbezirke": [
+      {
+        "name": "Zentrum",
+        "ortsteile": [
+          "Innenstadt",
+          "Mühlenstraße",
+          "Nordstadt"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Wolsdorf",
+          "Zange",
+          "Brückberg"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Kaldauen",
+          "Braschoß",
+          "Seligenthal"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Stallberg",
+          "Deichhaus"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Bonn/Siegburg (A3/A560)",
+        "Anschlussstelle Siegburg",
+        "Bahnhofsumfeld Siegburg/Bonn"
+      ],
+      "autobahnen": [
+        "A3",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B56",
+        "B484"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Bonner Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 19 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (8 von 19). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 19 Fällen war in 7 ein Fahrrad, in 1 ein Fußgänger, in 3 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Zeithstraße (Braschoß)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 17 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 17). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 17 Fällen war in 5 ein Fahrrad, in 2 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Frankfurter Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 2 ein Fahrrad, in 1 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Kleiberg",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 5 ein Fahrrad, in 2 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 333",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 9). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 9 Fällen war in 4 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Aulgasse",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (4 von 9). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 9 Fällen war in 1 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist am Autobahnkreuz Bonn/Siegburg besonders unfallträchtig?",
+        "antwort": "Am Kreuz Bonn/Siegburg trifft die durchgehende A3 auf die A560, die nach wenigen Kilometern in Richtung Bonn endet. Der Verkehr fädelt hier auf kurzer Strecke ein und aus, und der Rückstau von der A560 reicht bei Berufsverkehr bis auf die Verbindungsrampen. Typisch sind Auffahrunfälle am Stauende und Streifkollisionen beim Fahrstreifenwechsel — bei letzteren ist der Schaden oft über die gesamte Fahrzeugflanke verteilt, was Lackierkosten und Ersatzteile deutlich über die Bagatellgrenze hebt."
+      },
+      {
+        "frage": "Ich hatte einen Unfall am ICE-Bahnhof Siegburg/Bonn — worauf kommt es an?",
+        "antwort": "Der ICE-Halt Siegburg/Bonn zieht Pendlerverkehr aus dem gesamten Rhein-Sieg-Kreis an; Zubringer, Taxistände und Kurzzeitparker drängen sich nördlich der Innenstadt zwischen Bahnhofstraße und Zange auf engem Raum. Die meisten Fälle dort sind Rangier- und Türschäden, oft mit unklarer Zeugenlage. Halten Sie die Endstellung fest, bevor die Fahrzeuge bewegt werden, und lassen Sie auch scheinbar kleine Schäden begutachten: An Türen und Schwellern sitzen heute Sensoren und Steuergeräte, deren Ausbau die Reparaturkosten still über die 750-Euro-Grenze trägt."
+      },
+      {
+        "frage": "Warum häufen sich Unfälle auf der Siegburger Bonner Straße und der Frankfurter Straße?",
+        "antwort": "Beide Straßen sind in Siegburg Hauptausfallachsen, die den Verkehr aus der Innenstadt in Richtung Autobahn und Umland führen. Sie tragen Durchgangs-, Liefer- und Pendlerverkehr auf derselben Spur wie den örtlichen Anliegerverkehr, unterbrochen von Ampeln, Abbiegespuren und Grundstückszufahrten. Der Unfallatlas führt beide unter den stärksten Häufungen im Stadtgebiet. Für die Begutachtung ist die Mischung aus niedrigem Tempo und hoher Ereignisdichte typisch: viele Anstöße mit geringer Aufprallgeschwindigkeit, bei denen die Stoßfängerhaut zurückfedert und unbeschädigt aussieht, während Querträger und Prallabsorber dahinter bereits verformt sind."
+      },
+      {
+        "frage": "Kleiberg und Aulgasse liegen in der Siegburger Altstadt — was ist dort typisch?",
+        "antwort": "Kleiberg und Aulgasse gehören zum gewachsenen Siegburger Straßennetz rund um die Innenstadt: schmale Fahrbahnen, beidseitiges Parken, kurze Sichtachsen und Fußgänger, die zwischen Fahrzeugen queren. Der Unfallatlas weist beide als Häufungsstellen aus. Charakteristisch sind Anstöße beim Ein- und Ausparken sowie beim Vorbeifahren an haltenden Fahrzeugen. Am Auto bleiben Kratzer über mehrere Bauteile hinweg, abgerissene Spiegel und Dellen in Türen. Für die Abrechnung zählt, dass eine durchgehende Kontaktspur über Tür, Schweller und Radlauf nicht in Einzelpositionen zerfällt: Sie gehört als ein Schadensereignis kalkuliert, sonst wird die Lackfläche zu klein angesetzt."
+      },
+      {
+        "frage": "Die Zeithstraße in Braschoß führt aus Siegburg ins Bergische — was ändert sich dort?",
+        "antwort": "Mit Braschoß verlässt man das verdichtete Siegburger Stadtgebiet und erreicht den Anstieg ins Bergische Land. Die Zeithstraße wird dort zur Landstraße mit Steigung, Kurven und wechselndem Fahrbahnzustand, und der Unfallatlas führt sie als eigene Häufungsstelle. Das Schadensbild verschiebt sich entsprechend: weg vom Kreuzungsunfall, hin zum Abkommen von der Fahrbahn und zum Zusammenstoß im Gegenverkehr. Nach einem Abkommen ins Bankett gehören Radaufhängung, Felgenhörner und Reifenflanken zwingend geprüft — ein seitlicher Anprall gegen die Bordsteinkante verstellt die Spur, ohne außen sichtbare Spuren zu hinterlassen."
+      },
+      {
+        "frage": "Was ist bei einem Unfall mit einem Lieferfahrzeug in Siegburg zu beachten?",
+        "antwort": "Die Siegburger Innenstadt wird über schmale Achsen beliefert, und Lieferfahrzeuge halten dort regelmäßig in zweiter Reihe oder rangieren rückwärts in Zufahrten. Zwei Dinge sind dann wichtig. Erstens die Anstoßhöhe: Ein Transporter oder Lkw trifft auf anderer Höhe als ein Pkw, und dieser Unterschied ist am Schadensbild ablesbar und belegt, wer wen getroffen hat. Zweitens die Haftungsfrage, denn bei gewerblichen Fahrzeugen fallen Halter, Fahrer und Versicherungsnehmer oft auseinander. Wir nehmen Halterdaten, Aufbau und Anstoßhöhe zusammen auf, damit der Anspruch an die richtige Stelle adressiert wird."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Siegburg — vom Kreuz Bonn/Siegburg über den Michaelsberg bis nach Kaldauen.",
+    "topografieAnker": "Siegburg liegt an der Mündung der Agger in die Sieg, östlich von Bonn. Über der Altstadt erhebt sich der Michaelsberg mit der Abtei; im Norden begrenzt die A3 mit dem Kreuz Bonn/Siegburg das Stadtgebiet, die A560 zweigt dort nach Westen ab."
+  },
+  "troisdorf": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Troisdorf-Mitte",
+          "Friedrich-Wilhelms-Hütte",
+          "Oberlar"
+        ]
+      },
+      {
+        "name": "Sieglar",
+        "ortsteile": [
+          "Sieglar",
+          "Eschmar",
+          "Kriegsdorf",
+          "Müllekoven"
+        ]
+      },
+      {
+        "name": "Spich",
+        "ortsteile": [
+          "Spich",
+          "Altenrath",
+          "Bergheim"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Bonn/Siegburg",
+        "Anschlussstelle Troisdorf",
+        "Dreieck Sankt Augustin-West"
+      ],
+      "autobahnen": [
+        "A59",
+        "A560"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B56",
+        "B484"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Römerstraße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der sonstiger Unfall (4 von 15). Der Hergang lässt sich hier nicht auf einen Standardtyp reduzieren — umso mehr zählt die Spurenlage am Fahrzeug. Von den 15 Fällen war in 6 ein Fahrrad, in 2 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Theodor-Heuss-Ring",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 13). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 13 Fällen war in 7 ein Fahrrad, in 1 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Frankfurter Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 12 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (9 von 12). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 12 Fällen war in 2 ein Fahrrad, in 5 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Larstraße (Sieglar)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 10). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 10 Fällen war in 4 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Mendener Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (6 von 10). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 10 Fällen war in 6 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Pastor-Böhm-Straße (Sieglar)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (5 von 10). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 10 Fällen war in 8 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Knotendichte rund um Troisdorf ungewöhnlich hoch?",
+        "antwort": "Auf engem Raum treffen bei Troisdorf die A59 und die A560 zusammen, dazu kommen das Kreuz Bonn/Siegburg und das Dreieck Sankt Augustin-West. Die A59 quert das Stadtgebiet und erschließt Spich, Troisdorf-Mitte und Sieglar über mehrere Anschlussstellen, die dicht aufeinanderfolgen. Wer von einer Autobahn auf die andere wechselt, hat für Verflechtung und Spurwahl nur kurze Strecken zur Verfügung. Typisch sind Streifkollisionen beim Fahrstreifenwechsel und Auffahrschäden am Stauende. An der Fahrzeugflanke sitzen dabei Spurwechselassistenz und Umfeldsensorik in Kotflügel und Stoßfängerecken — nach der Reparatur ist deren Neuausrichtung ein eigener Arbeitsschritt, der gesondert zu erfassen ist. Kommt es dabei zu einem Anstoß gegen die Betongleitwand, wird die Flanke über die gesamte Länge geschürft; Türen und Schweller sind dann auf Verzug zu prüfen, weil sich die Spaltmaße verändern."
+      },
+      {
+        "frage": "Wie wirkt sich die Nähe zum Flughafen Köln/Bonn auf den Troisdorfer Verkehr aus?",
+        "antwort": "Troisdorf grenzt im Westen an das Areal des Flughafens Köln/Bonn, und die Zubringerwege über Spich und Altenrath tragen einen erheblichen Anteil ortsunkundiger Fahrer. Weil der Flughafen auch nachts angeflogen wird, verteilt sich dieser Verkehr über den ganzen Tag, einschließlich der frühen Morgen- und späten Nachtstunden. Fahrer, die eine Ausfahrt suchen, wechseln spät die Spur oder bremsen unvermittelt ab; hinzu kommt Übermüdung nach langen Anreisen. Auffahrunfälle bei mittlerem Tempo sind die Folge. Bei Heckanstößen lohnt der Blick auf beladene Fahrzeuge: Ein voll besetzter Kofferraum verlagert die Krafteinleitung, und die Rückwand sowie die Aufnahmen der Rücksitzlehne gehören dann mit geprüft. Bei stark beladenen Fahrzeugen verschiebt sich zudem der Schwerpunkt nach hinten, was die Eintauchbewegung beim Bremsen verringert und das Schadenbild verändert."
+      },
+      {
+        "frage": "Welche Schäden entstehen typischerweise auf den Troisdorfer Ortsdurchfahrten?",
+        "antwort": "Zwischen den Stadtteilen übernehmen in Troisdorf die B8, die B56 und die B484 den Verteilerverkehr, und sie führen mitten durch Sieglar, Oberlar, Spich und Troisdorf-Mitte. Auf diesen Achsen liegen Ampeln, Abbiegespuren, Bushaltestellen und Grundstückszufahrten dicht beieinander, während gleichzeitig Zulieferverkehr zu den Gewerbeflächen rollt. Die häufigste Folge sind Abbiegekollisionen und seitliche Anstöße beim Einfahren aus Zufahrten. Bei einem seitlichen Treffer auf Höhe der B-Säule ist mehr betroffen als das Blech: Dort verlaufen die Leitungen für Seitenairbags und Sitzbelegungserkennung, und ob deren Auslöseschwelle erreicht wurde, lässt sich nur über das Auslesen des Fehlerspeichers klären. Bushaltestellen an diesen Achsen bringen eine weitere Konstellation mit sich: Fußgänger queren vor und hinter dem haltenden Bus, wo sie für den fließenden Verkehr nicht zu sehen sind."
+      },
+      {
+        "frage": "Römerstraße, Frankfurter Straße, Theodor-Heuss-Ring — warum liegen Troisdorfs Häufungen so dicht beieinander?",
+        "antwort": "Alle drei Achsen liegen im Troisdorfer Kernbereich und verteilen dort den Verkehr zwischen Innenstadt, Bahnhof, Gewerbeflächen und Autobahnanschluss. Auf engem Raum treffen damit Berufs-, Liefer- und Einkaufsverkehr aufeinander, unterbrochen von Ampeln, Abbiegespuren und Zufahrten. Der Unfallatlas führt alle drei unter den stärksten Häufungsstellen der Stadt. Für die Begutachtung folgt daraus ein wiederkehrendes Muster: Anstöße bei mittlerem Tempo, bei denen die sichtbare Verformung klein bleibt, während Träger und Halter dahinter plastisch nachgeben. Ohne Blick hinter die Verkleidung wird ein solcher Schaden zu niedrig beziffert."
+      },
+      {
+        "frage": "Larstraße und Pastor-Böhm-Straße in Sieglar — was passiert in diesen Wohnlagen?",
+        "antwort": "Sieglar ist wohngeprägt, und genau das erzeugt ein eigenes Schadensbild: parkende Fahrzeuge beidseitig, Kinder und Fußgänger zwischen ihnen, Zufahrten in kurzer Folge und Rangiervorgänge auf engem Raum. Der Unfallatlas weist beide Troisdorfer Straßen als Häufungsstellen mit Personenschaden aus, was für Wohnstraßen bemerkenswert ist. Bei niedrigen Geschwindigkeiten entscheidet die Spurenlage: Anstoßhöhe, Lackantrag in Fremdfarbe und Kratzrichtung zeigen, ob ein Fahrzeug stand oder fuhr. Wird erst nach dem Bewegen der Fahrzeuge dokumentiert, ist genau diese Information verloren."
+      },
+      {
+        "frage": "Die Mendener Straße verbindet Troisdorf mit dem Nachbarort — was ist dort typisch?",
+        "antwort": "Die Mendener Straße führt aus Troisdorf heraus Richtung Sieg und Sankt Augustin und wechselt dabei vom innerörtlichen Charakter in einen Landstraßenabschnitt. Solche Übergänge sind unfallträchtig, weil sich Geschwindigkeit und Erwartungshaltung ändern, die Zufahrten und Querungen aber bleiben. Der Unfallatlas führt die Straße als Häufungsstelle. Für den Geschädigten ist wichtig, dass bei höherem Tempo die Insassenbelastung steigt, auch wenn das Fahrzeug wenig zerstört aussieht. Wer danach über Nacken- oder Rückenbeschwerden klagt, sollte den Zusammenhang früh ärztlich festhalten lassen — die Gegenseite argumentiert sonst mit dem geringen Sachschaden."
+      },
+      {
+        "frage": "Wie wirkt sich der Gewerbeverkehr in Troisdorf auf die Regulierung aus?",
+        "antwort": "Troisdorf ist die einwohnerstärkste Stadt des Rhein-Sieg-Kreises und hat gewachsene Gewerbe- und Industrieflächen mitten im Stadtgebiet. Entsprechend hoch ist der Anteil von Transportern, Lkw und Firmenfahrzeugen im Alltagsverkehr, was der Unfallatlas an mehreren Häufungsstellen mit beteiligten Güterkraftfahrzeugen zeigt. Für die Abwicklung heißt das zweierlei: Bei einem beteiligten Firmenfahrzeug muss die Haftung sauber zugeordnet werden, weil Halter, Fahrer und Versicherer auseinanderfallen. Und ist Ihr eigenes Fahrzeug gewerblich genutzt, gehört der Ausfall in die Aufstellung — bei einem Arbeitsmittel wiegt er meist schwerer als die Reparatur selbst."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A59, Parkschaden in der Kölner Straße oder Zusammenstoß in Sieglar — der Sachverständige kommt zu Ihnen nach Troisdorf.",
+    "topografieAnker": "Troisdorf liegt zwischen Köln und Bonn an der Sieg; die A59 quert das Stadtgebiet, die A560 verbindet es mit der A3."
+  },
+  "koenigswinter": {
+    "stadtbezirke": [
+      {
+        "name": "Talstadt",
+        "ortsteile": [
+          "Königswinter-Altstadt",
+          "Niederdollendorf",
+          "Oberdollendorf"
+        ]
+      },
+      {
+        "name": "Siebengebirge",
+        "ortsteile": [
+          "Ittenbach",
+          "Heisterbacherrott"
+        ]
+      },
+      {
+        "name": "Pleiser Ländchen",
+        "ortsteile": [
+          "Oberpleis",
+          "Thomasberg",
+          "Stieldorf",
+          "Eudenbach"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Siebengebirge (A3)",
+        "B42 Rheinuferstraße Nieder- und Oberdollendorf",
+        "Talstation der Drachenfelsbahn, Königswinter-Altstadt"
+      ],
+      "autobahnen": [
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B42"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Hauptstraße (Oberdollendorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 16 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 16). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 16 Fällen war in 3 ein Fahrrad, in 5 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Dollendorfer Straße (Thomasberg)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 13). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 13 Fällen war in 5 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Niederbach (Oberpleis)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (9 von 10). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 10 Fällen war in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 331 (Ittenbach)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (4 von 6). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 6 Fällen war in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Tunnel Oberdollendorf (Oberdollendorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (2 von 6). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 6 Fällen war in 2 ein Fahrrad, in 2 ein Fußgänger beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Ferdinand-Mülhens-Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (3 von 6). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 6 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Bergabfahrt aus dem Siebengebirge in die Talstadt für Bremsen und Fahrwerk kritisch?",
+        "antwort": "Zwischen den Höhenorten Ittenbach und Heisterbacherrott und der Talstadt am Rhein liegt ein Höhenunterschied von deutlich über hundert Metern, verteilt auf wenige Kilometer kurviger Strecke. Wer die Motorbremse nicht nutzt, fährt die Beläge heiß; die Bremswirkung lässt dann genau in der Kurve nach, in der sie gebraucht wird. Kommt ein Fahrzeug von der Fahrbahn ab, trifft es meist Leitplanke oder Felsböschung. Der sichtbare Streifschaden an der Flanke ist dabei oft der kleinere Teil des Problems. Entscheidend für die Begutachtung sind Achsgeometrie, Lenkung und Unterboden, denn ein seitlicher Anprall gegen Bordstein oder Böschungskante verstellt die Spur, ohne außen erkennbare Spuren zu hinterlassen. Auch die Bremsscheiben selbst gehören dokumentiert, weil thermischer Verzug sich erst beim Bremsen aus höherer Geschwindigkeit als Rubbeln bemerkbar macht."
+      },
+      {
+        "frage": "Was macht den Ausflugsverkehr rund um Drachenfels und Petersberg für Parkschäden anfällig?",
+        "antwort": "An Wochenenden mit gutem Wetter füllt sich die Königswinterer Altstadt mit ortsunkundigen Besuchern, die Drachenfels und Petersberg ansteuern. Die Straßen zwischen Rheinufer und der Talstation der Drachenfelsbahn sind eng, historisch gewachsen und beidseitig zugeparkt; der Suchverkehr rangiert dort, wo eigentlich kein Platz zum Rangieren ist. Typisch sind Anstoßschäden an Stoßfängerecken, abgerissene Außenspiegel und Kratzer über mehrere Bauteile hinweg. Solche Schäden wirken geringfügig, betreffen aber fast immer lackierte Kunststoffanbauteile mit verbauten Parksensoren und Umfeldkameras. Deren Erneuerung samt Einlernen macht bei aktuellen Fahrzeugen regelmäßig den größeren Teil der Instandsetzung aus. Hinzu kommt, dass viele Anstöße in der Altstadt von unbekannten Verursachern stammen; dann ist die Zuordnung der einzelnen Kratzer zu einem konkreten Ereignis Teil der Bewertung."
+      },
+      {
+        "frage": "Worauf kommt es bei einem Unfall auf der B42 zwischen Niederdollendorf und der Altstadt an?",
+        "antwort": "Die B42 zieht sich in Königswinter als schmales Band zwischen Rhein und Siebengebirgshang entlang, eingeklemmt zwischen der rechten Rheinstrecke der Bahn und den Hangfüßen unterhalb von Ober- und Niederdollendorf. Ausweichraum gibt es kaum, und bei Nässe, Laub oder herabgewehtem Hangmaterial verlängert sich der Bremsweg spürbar. Auffahrunfälle am Stauende laufen hier deshalb oft mit höherer Restgeschwindigkeit ab als im übrigen Stadtverkehr. Für die Begutachtung heißt das: Neben der sichtbaren Heckverformung gehören Längsträger, Schlossträger und die Aufnahmepunkte einer vorhandenen Anhängevorrichtung auf die Prüfliste. Stauchungen im Rahmenbereich zeigen sich erst beim Vermessen. Hinzu kommt die Zwangslage der Örtlichkeit: Zwischen Bahndamm und Hangfuß lässt sich ein verunfalltes Fahrzeug kaum seitlich abstellen, sodass die Spurenlage verändert wird, bevor sie aufgenommen werden kann."
+      },
+      {
+        "frage": "Die Hauptstraße in Oberdollendorf und die Heisterbacher Straße sind Königswinters Häufungsstellen im Tal — warum?",
+        "antwort": "Beide Straßen erschließen Oberdollendorf zwischen Rheinufer und Hangfuß, und beide sind eng, gewachsen und beidseitig zugeparkt. Durchgangsverkehr, Anliegerverkehr und Besucher des Siebengebirges nutzen dieselbe Fahrbahn, oft mit ortsunkundigen Fahrern, die eine Zufahrt oder einen Parkplatz suchen. Der Unfallatlas weist beide Königswinterer Achsen als Häufungsstellen mit Personenschaden aus. Typisch sind Anstöße beim Rangieren und beim Vorbeifahren. Weil dabei fast immer lackierte Anbauteile mit Parksensoren betroffen sind, liegt der Schwerpunkt der Kosten nicht im Blech, sondern in Ersatzteil und Einstellung."
+      },
+      {
+        "frage": "Dollendorfer Straße in Thomasberg und L 331 bei Ittenbach: Was macht die Bergstrecken gefährlich?",
+        "antwort": "Diese Königswinterer Achsen verbinden die Talstadt mit den Höhenorten im Siebengebirge und überwinden dabei auf wenigen Kilometern einen erheblichen Höhenunterschied. Steigung, enge Kurven und wechselnde Fahrbahnverhältnisse treffen auf Fahrzeuge, die bergauf deutlich langsamer unterwegs sind als erwartet. Der Unfallatlas führt beide als Häufungsstellen, an denen auch Schwerverletzte erfasst wurden. Kommt ein Fahrzeug von der Fahrbahn ab, trifft es meist Leitplanke oder Böschung. Der sichtbare Streifschaden ist dann der kleinere Teil: Entscheidend sind Achsgeometrie und Unterboden, weil ein seitlicher Anprall die Spur verstellt, ohne außen viel zu hinterlassen."
+      },
+      {
+        "frage": "Im Pleiser Ländchen um Oberpleis liegen gleich mehrere Häufungsstellen — was ist dort anders?",
+        "antwort": "Oberpleis und die umliegenden Königswinterer Ortslagen sind ländlich geprägt, und die Verbindungsstraßen dorthin tragen zugleich Pendler-, Anlieger- und landwirtschaftlichen Verkehr. Der Unfallatlas weist im Pleiser Ländchen mehrere Häufungsstellen mit Personenschaden aus, teils mit Schwerverletzten. Auf Landstraßen dieser Art überwiegen Fahrunfälle und Zusammenstöße im Gegenverkehr, also Konstellationen mit höherer Aufprallenergie. Für die Begutachtung heißt das: Aufprallwinkel und Kollisionsgeschwindigkeit lassen sich aus Deformation und Spurenlage rekonstruieren, aber nur solange das Fahrzeug unverändert ist. Vor jeder Reparatur begutachten lassen."
+      },
+      {
+        "frage": "Ich bin als Ausflugsgast in Königswinter verunfallt — kann ich zu Hause reparieren lassen?",
+        "antwort": "Ja. Maßgeblich für die Begutachtung ist, wo das Fahrzeug steht, nicht wo Sie gemeldet sind — und in Königswinter sind ortsfremde Fahrer an den Häufungsstellen in der Talstadt und im Siebengebirge stark vertreten. Sinnvoll ist die Aufnahme trotzdem vor der Abreise: Ein Fahrzeug, das erst am Wohnort begutachtet wird, hat die Rückfahrt hinter sich, und bei Schäden an Achse, Rad oder Unterboden ist dann nicht mehr trennbar, was aus dem Unfall stammt und was aus der Weiterfahrt. Die Reparatur können Sie anschließend zu Hause durchführen lassen; das Gutachten gilt bundesweit als dieselbe Grundlage."
+      },
+      {
+        "frage": "Was bedeutet es, wenn eine Straße in Königswinter als Unfallschwerpunkt bezeichnet wird?",
+        "antwort": "Es kommt darauf an, wer das sagt. Die amtliche Unfallhäufungsstelle ist ein definierter Begriff: Eine Unfallkommission prüft nach festen Schwellenwerten und ordnet gegebenenfalls eine bauliche Maßnahme an. Viele Städte in der Größe von Königswinter haben nach dieser Prüfung keine einzige solche Stelle. Etwas anderes ist die statistische Häufung aus den Rohdaten des Unfallatlas — dort zeigen sich in Königswinter etwa entlang der Hauptstraße in Oberdollendorf, der Dollendorfer Straße in Thomasberg und auf den Verbindungen ins Pleiser Ländchen mehr aufgenommene Unfälle als im übrigen Stadtgebiet. Für die Regulierung Ihres Schadens spielt keine der beiden Einstufungen eine Rolle: Es zählt der konkrete Hergang."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Königswinter — von der Talstadt am Rhein und der B42 über die Siebengebirgsorte Ittenbach und Heisterbacherrott bis hinauf ins Pleiser Ländchen um Oberpleis, Thomasberg und Eudenbach.",
+    "topografieAnker": "Königswinter reicht vom Rheinufer bei Niederdollendorf auf knapp 50 Metern bis zum Großen Ölberg auf 461 Metern, dem höchsten Punkt im Rhein-Sieg-Kreis. Dazwischen liegt das Siebengebirge mit Steigungen, engen Kurven und starkem Ausflugsverkehr. Die A3 quert das Stadtgebiet im Osten an der Anschlussstelle Siebengebirge, die B42 folgt im Westen dem Rhein."
+  },
+  "bad-honnef": {
+    "stadtbezirke": [
+      {
+        "name": "Stadtmitte",
+        "ortsteile": [
+          "Mülheim",
+          "Beuel",
+          "Bondorf",
+          "Rommersdorf",
+          "Reitersdorf",
+          "Lohfeld"
+        ]
+      },
+      {
+        "name": "Rheinlage",
+        "ortsteile": [
+          "Rhöndorf",
+          "Selhof"
+        ]
+      },
+      {
+        "name": "Aegidienberg",
+        "ortsteile": [
+          "Aegidienberg",
+          "Himberg",
+          "Orscheid",
+          "Rottbitze",
+          "Retscheid",
+          "Brüngsberg",
+          "Hövel",
+          "Wülscheid",
+          "Neichen",
+          "Wintersberg",
+          "Siefenhoven",
+          "Efferoth"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Bad Honnef/Linz (A3)",
+        "B42 Ortsdurchfahrt Bad Honnef",
+        "Schmelztal als Verbindung zwischen Stadtmitte und Aegidienberg"
+      ],
+      "autobahnen": [
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B42"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "A 3 (Aegidienberg)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 21 erfassten Unfällen, verteilt auf 3 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (17 von 21). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 21 Fällen war in 1 ein Fußgänger, in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Menzenberger Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (5 von 15). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 15 Fällen war in 3 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Hauptstraße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 10 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (4 von 10). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 10 Fällen war in 4 ein Fahrrad, in 4 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Rottbitzer Straße (Rottbitze)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (3 von 8). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 8 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Linzer Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 5 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Überschreiten-Unfall (3 von 5). Der Überschreiten-Unfall betrifft querende Fußgänger. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Scheibe, die Instandsetzung ist wegen Fußgängerschutz-Systemen und verklebter Frontscheibe trotzdem aufwendig. Von den 5 Fällen war in 2 ein Fahrrad, in 3 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Aegidienberger Straße (Aegidienberg)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 5 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (2 von 5). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 5 Fällen war in 2 ein Fahrrad, in 1 ein Fußgänger, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum unterscheiden sich die Straßenverhältnisse in Bad Honnef und Aegidienberg im Winter so stark?",
+        "antwort": "Die Stadtmitte von Bad Honnef liegt am Rhein auf rund 75 Metern, der Stadtbezirk Aegidienberg dagegen auf der Hochfläche des Westerwaldvorlands mehrere hundert Meter darüber. Verbunden sind beide über steile Strecken wie das Schmelztal. Bei einer Wetterlage um den Gefrierpunkt regnet es im Tal, während oben in Himberg, Orscheid oder Rottbitze bereits Schnee oder überfrierende Nässe liegt — und der Übergang kommt mitten in der Steigung. Fahrzeuge brechen dann seitlich aus und treffen Böschung, Bordstein oder Leitplanke. Bei solchen Anstößen lohnt der Blick unter das Fahrzeug: Querlenker, Spurstangen und Radträger nehmen die Energie auf, ohne dass die Karosserie außen viel davon zeigt. Ebenso gehört die Bereifung ins Protokoll, denn Profiltiefe und Reifenart sind bei Glättefällen regelmäßig Teil der Sachverhaltsklärung."
+      },
+      {
+        "frage": "Was ist an der A3 im Bereich Aegidienberg besonders?",
+        "antwort": "Die A3 quert das Bad Honnefer Stadtgebiet im Osten über die Höhe von Aegidienberg und steigt dort aus dem Rheintal zum Westerwald an. Die Anschlussstelle Bad Honnef/Linz ist der einzige Autobahnzugang der Stadt, und der Abschnitt trägt einen hohen Lkw-Anteil auf einer Dauersteigung. Langsame Schwerfahrzeuge auf dem rechten Fahrstreifen und deutlich schnellerer Pkw-Verkehr daneben erzeugen große Geschwindigkeitsunterschiede beim Überholen. Typisch sind Streifkollisionen beim Fahrstreifenwechsel und Auffahrschäden am Stauende. An der Fahrzeugflanke sitzen Spurwechselassistenz und Umfeldsensorik in Kotflügel, Außenspiegel und Stoßfängerecken — deren Neuausrichtung ist eigens zu erfassen. Bei Streifkollisionen gehört zudem die Kontaktspur über die gesamte Fahrzeuglänge dokumentiert, weil ihr Verlauf zeigt, welches Fahrzeug sich in die Spur des anderen bewegt hat."
+      },
+      {
+        "frage": "Warum häufen sich in der Bad Honnefer Rheinlage Unfälle mit Fußgängern und Radfahrern?",
+        "antwort": "Zwischen der Insel Grafenwerth, der Rheinpromenade und der B42 treffen in Bad Honnef Durchgangs- und Freizeitverkehr auf engem Raum aufeinander. An warmen Wochenenden queren Fußgänger und Radfahrer zwischen parkenden Fahrzeugen hindurch zum Ufer, während der Verkehr auf der B42 mit Landstraßentempo läuft. Aus dem verdeckten Bereich zwischen zwei Fahrzeugen bleibt kaum Reaktionszeit. Kollisionen mit ungeschützten Verkehrsteilnehmern hinterlassen am Fahrzeug oft nur Eindellungen an Fronthaube, Kotflügel oder Windschutzscheibe. Für die Begutachtung sind sie trotzdem aufwendig: Aktive Fußgängerschutzsysteme, die Sensorik im Stoßfänger und die verklebte Frontscheibe mit dahinterliegender Kamera müssen zusammenhängend geprüft werden. Eine ausgelöste aktive Fronthaube lässt sich zudem nicht zurückdrücken, weil ihre pyrotechnischen Aktuatoren Einwegbauteile sind."
+      },
+      {
+        "frage": "Die Menzenberger Straße ist eine der stärksten Unfallstellen in Bad Honnef — was passiert dort?",
+        "antwort": "Die Menzenberger Straße führt aus der Bad Honnefer Stadtmitte den Hang hinauf und verbindet die Tallage mit den höher gelegenen Wohnlagen. Der Unfallatlas weist dort für 2021 bis 2025 mehrere Häufungsstellen entlang derselben Achse aus, mit einem auffällig hohen Anteil an Unfällen mit Schwerverletzten. Steigungsstrecken mit Kurven und Grundstückszufahrten sind eine ungünstige Kombination: Wer bergab kommt, braucht länger zum Anhalten, und wer aus einer Zufahrt kommt, sieht den Verkehr spät. Bei solchen Anstößen lohnt der Blick unter das Fahrzeug, weil Querlenker und Radträger die Energie aufnehmen, ohne dass die Karosserie außen viel zeigt."
+      },
+      {
+        "frage": "Rottbitzer Straße und Aegidienberger Straße: Was ist auf der Bad Honnefer Höhe typisch?",
+        "antwort": "Beide Straßen erschließen die Bad Honnefer Höhenlagen um Rottbitze und Aegidienberg, und beide führt der Unfallatlas als Häufungsstellen mit Personenschaden. Oben auf dem Plateau ist die Bebauung lockerer, die Strecken sind schneller, und landwirtschaftlicher Verkehr mischt sich unter den Pendlerverkehr. Das verschiebt das Schadensbild weg vom Rangierkontakt hin zu Zusammenstößen mit höherer Aufprallenergie. Für die Abwicklung ist dabei ein praktischer Punkt wichtig: Ein nicht fahrbereites Fahrzeug steht hier oft tagelang, bis der Abtransport organisiert ist. Standort, Standdauer und Fahrbereitschaft gehören deshalb ins Gutachten, weil Standgeld und Bergung sonst später bestritten werden."
+      },
+      {
+        "frage": "Warum ist die Hauptstraße in Bad Honnef trotz niedriger Geschwindigkeit eine Häufungsstelle?",
+        "antwort": "Die Hauptstraße bündelt in Bad Honnef Einkaufs-, Besucher- und Anliegerverkehr auf einer gewachsenen Achse, an der beidseitig geparkt wird und Fußgänger häufig zwischen Fahrzeugen queren. Der Unfallatlas führt sie als Häufungsstelle mit Personenschaden, und der Kurort-Charakter bringt zusätzlich viele ortsunkundige Fahrer mit. Bei niedrigem Tempo entstehen Schäden, die harmlos aussehen: Dellen in Türen, abgerissene Spiegel, Kratzer über mehrere Bauteile. Die Aufprallenergie reicht aber, um Fußgänger erheblich zu verletzen, weshalb die Anstoßhöhe am Fahrzeug hier oft das einzige objektive Beweismittel zum Hergang ist."
+      },
+      {
+        "frage": "Was gilt für die Linzer Straße als Verbindung Richtung Rheinland-Pfalz?",
+        "antwort": "Die Linzer Straße gehört zu den Bad Honnefer Achsen, die den Verkehr nach Süden und damit Richtung Landesgrenze führen; der Unfallatlas weist sie als Häufungsstelle mit Personenschaden aus. Weil Bad Honnef die südlichste Stadt Nordrhein-Westfalens ist, ist der Anteil überregionaler Beteiligter hier höher als im Landesinneren. Für Ihre Ansprüche ändert die Landesgrenze nichts: Es gilt dasselbe Schadenersatzrecht, und reguliert wird über die Haftpflicht des Verursachers. Praktisch wichtig ist nur, dass Kennzeichen und Versicherungsdaten am Unfallort festgehalten werden — die Nachermittlung über eine Landesgrenze hinweg kostet Wochen."
+      },
+      {
+        "frage": "Gibt es in Bad Honnef offiziell ausgewiesene Unfallschwerpunkte?",
+        "antwort": "Das sind zwei verschiedene Dinge, die oft verwechselt werden. Eine Unfallhäufungsstelle im amtlichen Sinn wird von der Unfallkommission aus Polizei, Straßenbaubehörde und Straßenverkehrsbehörde festgestellt, nach festen Schwellenwerten, und zieht meist einen Umbau nach sich. Für kleinere Städte wie Bad Honnef ergibt diese Prüfung häufig gar keine solche Stelle. Davon zu unterscheiden ist die statistische Häufung: Wertet man die Rohdaten des Unfallatlas aus, treten entlang der Menzenberger Straße, der Hauptstraße und auf der Höhe um Aegidienberg mehr polizeilich aufgenommene Unfälle auf als anderswo im Stadtgebiet. Das ist ein Hinweis auf die Verkehrslage, keine behördliche Feststellung — und für Ihren Schadenfall ohnehin nicht entscheidend."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bad Honnef — vom Rheinufer bei Rhöndorf, Selhof und der Insel Grafenwerth über die B42 bis hinauf nach Aegidienberg mit Himberg, Orscheid und Rottbitze an der A3.",
+    "topografieAnker": "Bad Honnef ist die südlichste Stadt Nordrhein-Westfalens und zerfällt in zwei Welten: das Rheintal bei rund 53 Metern mit Stadtmitte, Rhöndorf und der Insel Grafenwerth, und die Höhe von Aegidienberg auf dem Westerwaldvorland, über die die A3 verläuft. Im Norden steigt das Stadtgebiet bis zur Löwenburg auf 455 Meter an."
+  },
+  "hennef": {
+    "stadtbezirke": [
+      {
+        "name": "Zentrum",
+        "ortsteile": [
+          "Hennef-Mitte",
+          "Geistingen",
+          "Warth",
+          "Geisbach"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Allner",
+          "Weldergoven",
+          "Lauthausen",
+          "Stoßdorf"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Uckerath",
+          "Söven",
+          "Happerschoß"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Bödingen",
+          "Stadt Blankenberg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Hennef-West",
+        "Anschlussstelle Hennef-Ost",
+        "Kreuzung B8/B478"
+      ],
+      "autobahnen": [
+        "A560",
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B478"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Stoßdorfer Straße (Stoßdorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 14 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (9 von 14). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 14 Fällen war in 4 ein Fahrrad, in 2 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Europaallee (Geisbach)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 13 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (7 von 13). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 13 Fällen war in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Frankfurter Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (4 von 11). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 11 Fällen war in 4 ein Fahrrad, in 1 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Krautscheider Straße (Uckerath)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (5 von 9). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 9 Fällen war in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Emil-Langen-Straße (Edgoven)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (3 von 9). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 9 Fällen war in 2 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Die B8 durch das Siegtal ist kurvig — was heißt das für einen Unfall?",
+        "antwort": "Die B8 folgt zwischen Hennef und Eitorf dem Lauf der Sieg und ist entsprechend kurvenreich, streckenweise eng zwischen Hang und Fluss. Überholvorgänge und Kollisionen im Gegenverkehr treffen dort frontal-seitlich auf — ein Schadenbild, bei dem Aufprallwinkel und Kollisionsgeschwindigkeit über die Haftungsverteilung mitentscheiden. Beides lässt sich aus Deformation und Spurenlage rekonstruieren, aber nur solange das Fahrzeug unverändert ist. Vor jeder Reparatur begutachten lassen."
+      },
+      {
+        "frage": "Was ist an Unfällen in den Höhenorten wie Uckerath und Bödingen besonders?",
+        "antwort": "Die Hennefer Höhenorte liegen bis zu zweihundert Meter über dem Siegtal, erreichbar über Steigungsstrecken mit engen Kehren. Im Winter setzt dort Glätte deutlich früher ein als im Tal, und die Anfahrt für Abschleppdienst und Gutachter dauert länger. Wenn Ihr Fahrzeug nicht mehr fahrbereit ist, lassen Sie es an Ort und Stelle begutachten, statt es vorschnell in eine Werkstatt im Tal bringen zu lassen — der Transport kann das Schadenbild verändern."
+      },
+      {
+        "frage": "Die Stoßdorfer Straße ist Hennefs stärkste Unfallstelle — woran liegt das?",
+        "antwort": "Stoßdorf liegt im Westen von Hennef dort, wo der Verkehr aus dem Stadtgebiet auf die Achsen Richtung Autobahn und Siegtal trifft. Die Stoßdorfer Straße bündelt damit Pendler-, Anlieger- und Gewerbeverkehr, unterbrochen von Zufahrten und Querstraßen. Der Unfallatlas weist sie für 2021 bis 2025 als stärkste Häufungsstelle im Hennefer Stadtgebiet aus. Für die Begutachtung ist die Konstellation typisch: Anstöße bei mittlerem Tempo, oft seitlich beim Einbiegen. Dort entscheidet die Höhe der Anstoßstelle über die Haftungsfrage, und sie ist nach der Instandsetzung nicht mehr feststellbar."
+      },
+      {
+        "frage": "Europaallee und Emil-Langen-Straße liegen im Hennefer Osten — was ist dort anders?",
+        "antwort": "Beide Achsen erschließen in Hennef Gewerbe- und Wohnlagen östlich des Zentrums und tragen entsprechend gemischten Verkehr aus Anlieferung, Berufspendlern und Anwohnern. Der Unfallatlas führt beide als Häufungsstellen mit Personenschaden. Wo Lieferfahrzeuge rangieren und rückwärts in Zufahrten setzen, entstehen Anstöße mit einem klaren Merkmal: Transporter und Lkw treffen auf anderer Höhe als ein Pkw. Diese Höhendifferenz ist am Schadensbild ablesbar und belegt, wer wen getroffen hat — vorausgesetzt, sie wird gemessen und nicht nur fotografiert."
+      },
+      {
+        "frage": "Die Krautscheider Straße führt durch Uckerath — worauf kommt es dort an?",
+        "antwort": "Uckerath liegt auf den Höhen östlich von Hennef, und die Krautscheider Straße ist eine der Verbindungen, die dort Ortsdurchfahrt und Landstraße zugleich sind. Der Unfallatlas weist sie als Häufungsstelle mit Personenschaden aus. Solche Übergänge sind heikel, weil die zulässige Geschwindigkeit wechselt, die Zufahrten und Querungen aber bleiben. Kommt es zum Zusammenstoß, ist die Entfernung zur nächsten Werkstatt größer als im Tal — ein nicht fahrbereites Fahrzeug sollte deshalb an Ort und Stelle begutachtet werden, bevor es transportiert wird. Der Transport selbst kann das Schadensbild verändern."
+      },
+      {
+        "frage": "Was bedeutet die Frankfurter Straße für den Durchgangsverkehr in Hennef?",
+        "antwort": "Die Frankfurter Straße gehört zu den Hennefer Hauptachsen und verteilt den Verkehr zwischen Zentrum, Siegtal und den östlichen Ortslagen. Der Unfallatlas führt sie als Häufungsstelle mit Personenschaden. Auf einer solchen Verteilerachse liegen Ampeln, Abbiegespuren und Bushaltestellen dicht beieinander, und die häufigste Folge sind Auffahr- und Abbiegekollisionen. Beim Heckanstoß gehört mehr als die Stoßstange geprüft: Querträger, Längsträger und Kofferraumboden nehmen die Kraft auf, und bei beladenem Fahrzeug verschiebt sich die Krafteinleitung zusätzlich. Ohne Vermessung bleibt dieser Teil des Schadens unbeziffert."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hennef — vom Siegtal an der B8 bis zu den Höhenorten Uckerath und Bödingen.",
+    "topografieAnker": "Hennef erstreckt sich über das Siegtal und die angrenzenden Höhen des Nutscheids. Zwischen der Talsohle bei Allner und den östlichen Ortslagen um Uckerath liegen rund zweihundert Höhenmeter; die A560 endet am westlichen Stadtrand."
+  },
+  "bornheim": {
+    "stadtbezirke": [
+      {
+        "name": "Vorgebirge",
+        "ortsteile": [
+          "Bornheim",
+          "Brenig",
+          "Rösberg",
+          "Botzdorf"
+        ]
+      },
+      {
+        "name": "Rheinschiene",
+        "ortsteile": [
+          "Hersel",
+          "Uedorf",
+          "Widdig",
+          "Urfeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Sechtem",
+          "Walberberg",
+          "Kardorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Roisdorf",
+          "Merten",
+          "Dersdorf",
+          "Waldorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Bornheim (A555)",
+        "Kreuzung B9/Ortsdurchfahrt Hersel"
+      ],
+      "autobahnen": [
+        "A555"
+      ],
+      "bundesstrassen": [
+        "B9"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "L 281 (Roisdorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 25 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (13 von 25). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 25 Fällen war in 2 ein Fahrrad, in 1 ein Motorrad, in 4 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Rankenberg",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 19 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (14 von 19). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 19 Fällen war in 1 ein Fahrrad, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Bonn-Brühler-Straße (Merten)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 14 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (8 von 14). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 14 Fällen war in 8 ein Fahrrad, in 3 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Roisdorfer Straße (Hersel)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 9 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (6 von 9). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 9 Fällen war in 1 ein Motorrad, in 2 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Walberberger Straße (Walberberg)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 3 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Moselstraße (Hersel)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (2 von 8). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 8 Fällen war in 1 ein Fahrrad, in 2 ein Fußgänger, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Die A555 zwischen Bornheim und Köln ist die älteste Autobahn Deutschlands — merkt man das?",
+        "antwort": "Ja, an der Trassierung. Die A555 wurde in den 1930er Jahren als Kraftfahrstraße zwischen Köln und Bonn gebaut und hat entsprechend knapp bemessene Ein- und Ausfädelstreifen sowie einen schmalen Mittelstreifen. Wer heute mit Richtgeschwindigkeit auffährt, hat weniger Beschleunigungsweg als auf modernen Strecken — Auffahr- und Streifkollisionen an den Anschlussstellen sind die Folge. Bei Anstoß gegen die Mittelschutzplanke ist außerdem regelmäßig die komplette Fahrzeugflanke betroffen, samt Radaufhängung auf der Anstoßseite."
+      },
+      {
+        "frage": "Was ist bei Unfällen auf den Vorgebirgsstraßen zu beachten?",
+        "antwort": "Die Ortslagen Brenig, Rösberg und Botzdorf liegen am Hang des Vorgebirges, verbunden durch schmale Straßen zwischen Feldern und Obstflächen. Zur Erntezeit ist dort viel landwirtschaftlicher Verkehr unterwegs, und die Fahrbahnränder sind oft unbefestigt. Wer beim Ausweichen von der Fahrbahn abkommt, holt sich Unterbodenschäden, die man erst auf der Hebebühne sieht. Lassen Sie das Fahrzeug deshalb auch dann begutachten, wenn außen nichts Auffälliges zu sehen ist."
+      },
+      {
+        "frage": "Die L 281 bei Roisdorf ist Bornheims stärkste Unfallstelle — warum gerade dort?",
+        "antwort": "Die L 281 verbindet in Bornheim die Rheinschiene mit den Vorgebirgsorten und trägt dabei Pendlerverkehr Richtung Bonn und Köln. Roisdorf liegt am Übergang, mit Bahnhaltepunkt, Zufahrten und dem Wechsel von Ortsdurchfahrt zu freier Strecke. Der Unfallatlas weist die Achse für 2021 bis 2025 als stärkste Häufungsstelle im Stadtgebiet aus. Für die Begutachtung ist der Geschwindigkeitswechsel entscheidend: Bei höherer Aufprallenergie sitzt der Schaden in tragenden Teilen, während die Außenhaut wenig zeigt. Federbeindome, Längsträger und Achsträger gehören dann vermessen, nicht nur besichtigt."
+      },
+      {
+        "frage": "Roisdorfer Straße und Moselstraße in Hersel: Was ist an der Rheinschiene typisch?",
+        "antwort": "Hersel liegt in Bornheim direkt am Rhein, und die dortigen Achsen tragen Durchgangsverkehr durch eine gewachsene Ortslage mit schmalen Fahrbahnen und beidseitigem Parken. Der Unfallatlas führt beide Straßen als Häufungsstellen mit Personenschaden. Charakteristisch sind Anstöße beim Ein- und Ausparken sowie beim Vorbeifahren an haltenden Fahrzeugen. Solche Schäden ziehen sich häufig über mehrere Bauteile — Tür, Schweller, Radlauf — und gehören als ein durchgehendes Ereignis kalkuliert. Zerfällt die Kontaktspur in Einzelpositionen, wird die Lackfläche zu klein angesetzt und die Erstattung fällt entsprechend niedriger aus."
+      },
+      {
+        "frage": "Bonn-Brühler-Straße in Merten und Walberberger Straße: Was prägt den Bornheimer Norden?",
+        "antwort": "Merten und Walberberg liegen im Norden von Bornheim, wo die Verbindungen Richtung Brühl und Köln verlaufen. Der Unfallatlas weist beide Achsen als Häufungsstellen mit Personenschaden aus. Hier mischen sich Pendlerverkehr und landwirtschaftlicher Verkehr aus den umliegenden Anbauflächen, und die Fahrbahnränder sind streckenweise unbefestigt. Wer beim Ausweichen von der Fahrbahn abkommt, holt sich Unterbodenschäden, die erst auf der Hebebühne sichtbar werden. Lassen Sie das Fahrzeug deshalb auch dann prüfen, wenn außen nichts Auffälliges zu sehen ist — Auspuffanlage, Tank und Achsträger liegen dort ungeschützt."
+      },
+      {
+        "frage": "Der Rankenberg gehört zu den Bornheimer Häufungsstellen — was ist dort das Problem?",
+        "antwort": "Der Rankenberg liegt in Bornheim am Anstieg vom Rheintal auf die Vorgebirgsterrasse. Steigungs- und Gefällstrecken verändern das Fahrverhalten: Bergab verlängert sich der Bremsweg, bergauf sind Fahrzeuge langsamer unterwegs, als der Nachfolgende erwartet. Der Unfallatlas führt die Stelle als Häufungsstelle mit Personenschaden, darunter Fälle mit Schwerverletzten. Nach einem Auffahrunfall im Gefälle ist die Aufprallgeschwindigkeit oft höher als im ebenen Stadtverkehr, und die Insassenbelastung entsprechend größer. Beschwerden, die erst Stunden später auftreten, sollten deshalb früh ärztlich dokumentiert werden."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bornheim — von der A555 über die B9 bis in die Vorgebirgsorte Brenig und Rösberg.",
+    "topografieAnker": "Bornheim erstreckt sich zwischen dem Rheinufer bei Hersel und dem Höhenzug der Ville, hier Vorgebirge genannt. Die B9 folgt der Rheinschiene, die A555 verläuft parallel dazu auf halber Höhe; nach Westen steigt das Gelände zu den Obst- und Gemüseflächen des Vorgebirges an."
+  },
+  "rheinbach": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Rheinbach"
+        ]
+      },
+      {
+        "name": "Swistniederung",
+        "ortsteile": [
+          "Flerzheim",
+          "Ramershoven",
+          "Oberdrees",
+          "Niederdrees"
+        ]
+      },
+      {
+        "name": "Östliche Ortschaften",
+        "ortsteile": [
+          "Wormersdorf"
+        ]
+      },
+      {
+        "name": "Voreifel-Höhe",
+        "ortsteile": [
+          "Todenfeld",
+          "Hilberath",
+          "Neukirchen",
+          "Queckenberg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "B266 Ortsdurchfahrt Rheinbach",
+        "B266 Richtung Todenfeld und Ahrgebirge",
+        "A61 im westlichen Stadtgebiet"
+      ],
+      "autobahnen": [
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B266"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Aachener Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 15 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 15). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 15 Fällen war in 4 ein Fahrrad, in 2 ein Fußgänger, in 4 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "B 266",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (7 von 8). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 8 Fällen war in 1 ein Fußgänger, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 493 (Peppenhoven)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (6 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 2 ein Fahrrad, in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "L 471 (Wormersdorf)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 6 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Münstereifeler Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 7 ein Fahrrad, in 1 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum liegen die Straßenverhältnisse zwischen der Rheinbacher Kernstadt und Todenfeld oft weit auseinander?",
+        "antwort": "Die Rheinbacher Kernstadt liegt bei etwa 173 Metern in der Swistbucht, der Ortsteil Todenfeld im Süden erreicht gut 406 Meter am Rand des Ahrgebirges. Auf einer einzigen Fahrt über Hilberath und Neukirchen überwindet man damit mehr als zweihundert Höhenmeter. Im Winter beginnt oberhalb von Queckenberg regelmäßig eine andere Wetterzone, im Herbst steht in den Hanglagen Nebel, während unten die Sicht frei ist. Beides führt zu Abkommen von der Fahrbahn und zu Auffahrunfällen an unerwartet langsamem Verkehr. Nach einem Abkommen ins Bankett gehören Radaufhängung, Felgenhörner und Reifenflanken zwingend geprüft. Hinzu kommt der Reifenzustand: Wer im Tal auf Sommerreifen losfährt, findet oberhalb von Hilberath völlig andere Bedingungen vor, als beim Start absehbar war."
+      },
+      {
+        "frage": "Was ist an einem Fahrzeug zu prüfen, das in Rheinbach im Wasser gestanden hat?",
+        "antwort": "Die Swist und ihre Zuflüsse sammeln das Wasser der Voreifel-Hänge und führen es durch das Rheinbacher Stadtgebiet. Bei Starkregen laufen tiefliegende Straßen, Unterführungen und Tiefgaragen in der Kernstadt und in Flerzheim schnell voll. Ein Fahrzeug, das im Wasser stand, ist mit einer Reinigung selten erledigt. Maßgeblich ist die Wasserstandslinie im Innenraum: Steuergeräte sitzen bei vielen Modellen im Fußraum oder unter den Sitzen, Steckverbindungen ziehen Feuchtigkeit, Dämmmaterial speichert sie über Monate. Korrosion an Kontakten zeigt sich erst Wochen später als sporadischer Fehler. Wichtig ist deshalb die Dokumentation des Wasserstands möglichst am Fundort, weil sich die Linie im Innenraum nach dem Trocknen kaum noch nachweisen lässt."
+      },
+      {
+        "frage": "Wo entstehen in Rheinbach die meisten Schäden im Alltagsverkehr?",
+        "antwort": "Rheinbach ist über die A61 und die B266 an den Fernverkehr angebunden, und beide bündeln den Pendlerverkehr Richtung Bonn und Köln. Die B266 führt als Ortsdurchfahrt mitten durch die Kernstadt und weiter zu den Ortsteilen — mit Ampeln, Abbiegespuren, Grundstückszufahrten und Radverkehr auf derselben Achse. In dieser Mischung entstehen die klassischen Abbiege- und Auffahrkollisionen bei niedrigem Tempo. Gerade dort lohnt Genauigkeit: Bei geringen Aufprallgeschwindigkeiten federt die Stoßfängerhaut zurück und sieht unbeschädigt aus, während Querträger und Prallabsorber dahinter bereits plastisch verformt sind. Bei Beteiligung von Radfahrern bleibt am Pkw häufig nur eine kleine Delle im Türblatt zurück, deren Höhe über der Fahrbahn den Hergang rekonstruierbar macht."
+      },
+      {
+        "frage": "Die Aachener Straße ist die stärkste Unfallstelle in Rheinbach — was passiert dort?",
+        "antwort": "Die Aachener Straße gehört zu den Rheinbacher Hauptachsen und führt den Verkehr durch die Kernstadt Richtung Westen. Der Unfallatlas weist sie für 2021 bis 2025 als stärkste Häufungsstelle im Stadtgebiet aus, mit dem Einbiegen- und Kreuzen-Unfall als häufigstem Typ. Das ist die Konstellation, bei der es die Fahrzeugflanke trifft: zwischen Vorderrad und Tür, wo Türverstärkung und Schweller verlaufen. Für die Haftungsfrage zählt, auf welcher Höhe der Anstoß sitzt und wohin das Blech verformt ist — daraus ergibt sich, welches Fahrzeug sich in die Bahn des anderen bewegt hat."
+      },
+      {
+        "frage": "L 471 bei Wormersdorf und L 493 bei Peppenhoven — was ist auf den Rheinbacher Landstraßen anders?",
+        "antwort": "Beide Landstraßen verbinden die Rheinbacher Ortschaften untereinander und mit der Kernstadt, und der Unfallatlas führt beide als Häufungsstellen mit Personenschaden, teils mit Schwerverletzten. Auf Landstraßen zwischen Feldern gibt es kaum bauliche Trennung, dafür Einmündungen ohne Sichtbeziehung und landwirtschaftlichen Verkehr, der langsam einbiegt. Die Aufprallenergie liegt deutlich über der im Ortsverkehr. Für die Begutachtung heißt das: Aufprallwinkel und Kollisionsgeschwindigkeit lassen sich aus Deformation und Spurenlage rekonstruieren, aber nur am unveränderten Fahrzeug. Vor jeder Reparatur begutachten lassen."
+      },
+      {
+        "frage": "Die Münstereifeler Straße führt aus Rheinbach in die Voreifel — worauf kommt es an?",
+        "antwort": "Die Münstereifeler Straße verlässt Rheinbach nach Süden in Richtung Voreifel, und mit ihr beginnt der Anstieg aus der Swistniederung. Der Unfallatlas führt sie als Häufungsstelle mit Personenschaden. Solche Ausfallstraßen sind unfallträchtig, weil sich mit dem Ortsausgang Geschwindigkeit und Erwartungshaltung ändern, während Zufahrten und Feldwege weiter einmünden. Kommt ein Fahrzeug dabei ins Bankett, gehören Radaufhängung, Felgenhörner und Reifenflanken geprüft: Ein seitlicher Anprall gegen die Bordsteinkante verstellt die Spur, ohne außen erkennbare Spuren zu hinterlassen, und fällt erst später als ungleichmäßiger Reifenverschleiß auf."
+      },
+      {
+        "frage": "Die B 266 durchquert Rheinbach — welche Rolle spielt sie im Unfallgeschehen?",
+        "antwort": "Die B 266 ist die Hauptschlagader in Rheinbach: Sie führt als Ortsdurchfahrt mitten durch die Kernstadt und weiter Richtung Ahrgebirge. Der Unfallatlas weist sie als eigene Häufungsstelle mit Personenschaden aus. Auf einer solchen Achse liegen Ampeln, Abbiegespuren, Grundstückszufahrten und Radverkehr auf derselben Strecke, und die Folge sind Abbiege- und Auffahrkollisionen bei mäßigem Tempo. Gerade dort lohnt Genauigkeit, denn bei geringer Aufprallgeschwindigkeit federt die Stoßfängerhaut zurück und sieht unbeschädigt aus, während Querträger und Prallabsorber dahinter bereits plastisch verformt sind."
+      },
+      {
+        "frage": "Wo häufen sich Unfälle in Rheinbach — und wer stellt das eigentlich fest?",
+        "antwort": "Festgestellt wird eine Unfallhäufungsstelle von der Unfallkommission, einem Gremium aus Polizei, Straßenbau- und Straßenverkehrsbehörde. Sie arbeitet mit festen Schwellenwerten, und bei Städten in der Größenordnung von Rheinbach kommt dabei oft keine einzige Stelle heraus. Unabhängig davon lässt sich aus den frei verfügbaren Rohdaten des Unfallatlas ablesen, wo sich polizeilich aufgenommene Unfälle ballen: in Rheinbach entlang der Aachener Straße, der B 266 als Ortsdurchfahrt sowie auf den Landstraßen Richtung Wormersdorf und Peppenhoven. Das ist eine Beobachtung aus Daten, keine amtliche Einstufung — und für Ihren Anspruch nach einem unverschuldeten Unfall ändert sie nichts."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Rheinbach — von der Kernstadt in der Swistbucht über Flerzheim, Wormersdorf und die Dreesorte bis hinauf zu den Höhenorten Todenfeld, Hilberath und Neukirchen am Rand des Ahrgebirges.",
+    "topografieAnker": "Rheinbach liegt in der Voreifel, wo die Swistbucht der Niederrheinischen Bucht an das Ahrgebirge stößt. Vom Stadtkern auf rund 173 Metern steigt das Gebiet nach Süden bis auf 406 Meter bei Todenfeld an — über zweihundert Höhenmeter innerhalb einer Stadt. Die A61 und die B266 erschließen das Gebiet, die Ortsteile hängen an Landstraßen durch die Hanglagen."
+  },
+  "meckenheim": {
+    "stadtbezirke": [
+      {
+        "name": "Merl",
+        "ortsteile": [
+          "Merl",
+          "Neuer Markt"
+        ]
+      },
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Meckenheim-Altstadt"
+        ]
+      },
+      {
+        "name": "Ersdorf/Altendorf",
+        "ortsteile": [
+          "Ersdorf",
+          "Altendorf"
+        ]
+      },
+      {
+        "name": "Lüftelberg",
+        "ortsteile": [
+          "Lüftelberg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Meckenheim (A61/A565)",
+        "Anschlussstelle Meckenheim",
+        "Anschlussstelle Meckenheim-Merl"
+      ],
+      "autobahnen": [
+        "A61",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B257"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Gudenauer Allee",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 30 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (14 von 30). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 30 Fällen war in 4 ein Fahrrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Merler Bahn (Merl)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 11 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (4 von 11). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 11 Fällen war in 5 ein Fahrrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Sängerhof (Merl)",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 8 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (5 von 8). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 8 Fällen war in 5 ein Fahrrad, in 1 ein Güterkraftfahrzeug beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Schumannstraße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 7 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (7 von 7). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Lüftelberger Straße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (2 von 6). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 6 Fällen war in 2 ein Motorrad beteiligt. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      },
+      {
+        "ort": "Rheinbacher Landstraße",
+        "quelle": "https://unfallatlas.statistikportal.de/",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 6 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (4 von 6). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Datengrundlage: Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021–2025 (Datenlizenz Deutschland Namensnennung 2.0), eigene Auswertung."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Was passiert am Autobahnkreuz Meckenheim, wenn die A565 endet?",
+        "antwort": "Am Kreuz Meckenheim mündet die A565 aus Bonn in die A61. Der Übergang von einer stadtnahen Zubringerautobahn auf eine überregionale Fernstrecke bringt zwei verschiedene Verkehrsarten mit unterschiedlichen Geschwindigkeiten zusammen. Auffahrunfälle entstehen dort typischerweise am Ende der Verzögerungsspur, Streifschäden beim Einfädeln. Bei Aufprall in Fahrtrichtung sind neben dem sichtbaren Heckschaden regelmäßig Quertraverse und Aufnahmepunkte betroffen — Positionen, die eine Werkstatt ohne Vermessung nicht beziffert."
+      },
+      {
+        "frage": "Landwirtschaftlicher Verkehr im Meckenheimer Obstanbaugebiet — wer haftet?",
+        "antwort": "Rund um Meckenheim prägen Obstplantagen die Feldflur, und zur Erntezeit sind Traktoren mit Anhängern auf den Wirtschaftswegen und Verbindungsstraßen unterwegs. Es gilt dasselbe Haftungsrecht wie sonst: Der Verursacher beziehungsweise dessen Haftpflichtversicherung zahlt. Praktisch wichtig sind zwei Punkte — landwirtschaftliche Zugmaschinen sind breiter, als sie wirken, und Erntematerial auf der Fahrbahn kann eine Mitverursachung begründen. Fotografieren Sie deshalb auch den Fahrbahnzustand, nicht nur die Fahrzeuge."
+      },
+      {
+        "frage": "Die Gudenauer Allee ist mit Abstand Meckenheims stärkste Unfallstelle — woran liegt das?",
+        "antwort": "Die Gudenauer Allee ist eine der zentralen Verteilerachsen in Meckenheim und verbindet Wohn-, Einkaufs- und Gewerbelagen miteinander. Der Unfallatlas weist entlang dieser Achse für 2021 bis 2025 mehrere Häufungsstellen mit Personenschaden aus, zusammen die höchste Zahl im Stadtgebiet. Wo Zufahrten, Querstraßen und Parkplatzein- und -ausfahrten dicht aufeinanderfolgen, dominieren Einbiegen- und Abbiegevorgänge. Der Anstoß sitzt dann typischerweise an der vorderen Seitenpartie, wo Kotflügel, Radaufhängung und Scheinwerfer mit Sensorik zusammentreffen — die Position, an der die Kalkulation am schnellsten anwächst."
+      },
+      {
+        "frage": "Merler Bahn und Sängerhof liegen in Merl — was ist dort typisch?",
+        "antwort": "Merl ist der einwohnerstärkste Teil von Meckenheim und wohngeprägt, mit dem Neuen Markt als Versorgungszentrum. Der Unfallatlas führt beide Straßen als Häufungsstellen mit Personenschaden. In solchen Lagen entstehen Schäden überwiegend bei niedriger Geschwindigkeit: Ein- und Ausparken, Rangieren auf begrenzter Fläche, Anstöße an haltenden Fahrzeugen. Am Auto bleiben Kratzer und Dellen, die geringfügig wirken, aber fast immer lackierte Kunststoffanbauteile mit verbauten Abstandssensoren betreffen. Deren Erneuerung samt Einstellung übersteigt bei aktuellen Fahrzeugen regelmäßig die Lackierkosten."
+      },
+      {
+        "frage": "Lüftelberger Straße und Rheinbacher Landstraße: Was ändert sich außerhalb von Meckenheim?",
+        "antwort": "Beide Achsen führen aus Meckenheim heraus in die offene Feldflur Richtung Lüftelberg und Rheinbach, und der Unfallatlas führt beide als Häufungsstellen mit Personenschaden. Mit dem Ortsausgang steigen die Geschwindigkeiten, während Feldzufahrten und Wirtschaftswege weiter einmünden und der Fahrbahnrand unbefestigt ist. Zwischen den Obstanbauflächen kommt Wildwechsel hinzu, besonders in der Dämmerung. Kommt es zum Abkommen von der Fahrbahn, gehören Unterboden, Achsträger und Auspuffanlage geprüft — Schäden, die von oben unsichtbar bleiben und erst auf der Hebebühne auffallen."
+      },
+      {
+        "frage": "Die Schumannstraße gehört zu den Meckenheimer Häufungsstellen — was steckt dahinter?",
+        "antwort": "Die Schumannstraße liegt im Meckenheimer Siedlungsbereich und trägt Anlieger- und Durchgangsverkehr zugleich. Der Unfallatlas weist sie als Häufungsstelle mit Personenschaden aus, was für eine Straße dieser Größenordnung bemerkenswert ist. In Wohnlagen entstehen Personenschäden überwiegend im Konflikt mit ungeschützten Verkehrsteilnehmern: Fußgänger, die zwischen parkenden Fahrzeugen queren, und Radfahrer im Längsverkehr. Am Fahrzeug bleiben oft nur Eindellungen an Haube, Kotflügel oder Windschutzscheibe. Aufwendig ist die Instandsetzung trotzdem, weil Fußgängerschutz-Systeme und die verklebte Frontscheibe mit dahinterliegender Kamera zusammenhängend geprüft werden müssen."
+      },
+      {
+        "frage": "Ist die Gudenauer Allee in Meckenheim ein amtlicher Unfallschwerpunkt?",
+        "antwort": "Nach den Rohdaten des Unfallatlas ballen sich entlang der Gudenauer Allee in Meckenheim mehr polizeilich aufgenommene Unfälle als anderswo im Stadtgebiet, ebenso in Merl und auf den Verbindungen Richtung Lüftelberg und Rheinbach. Ob daraus eine amtliche Unfallhäufungsstelle wird, entscheidet allerdings nicht die Statistik, sondern die Unfallkommission aus Polizei, Straßenbau- und Straßenverkehrsbehörde — und die stellt für kleinere Städte häufig keine fest. Beides ist für Ihren Schadenfall nicht ausschlaggebend: Ersatz bekommen Sie nicht, weil eine Stelle als gefährlich gilt, sondern weil ein anderer den Unfall verursacht hat."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Meckenheim — vom Kreuz Meckenheim bis in die Obstanbauflächen um Lüftelberg.",
+    "topografieAnker": "Meckenheim liegt am Übergang von der Kölner Bucht zur Voreifel, südwestlich von Bonn. Das Gelände steigt nach Süden zur Eifel hin an; das Stadtgebiet ist von Obstanbauflächen umgeben, und im Norden treffen sich A61 und A565 am Kreuz Meckenheim."
+  }
+}

@@ -83,3 +83,49 @@ export async function localeAlternates(
 ): Promise<{ canonical: string; languages: Record<string, string> }> {
   return buildLocaleAlternates(path, await getLocale())
 }
+
+/** og:locale erwartet Unterstrich-Notation (de_DE), hreflang den Bindestrich (de-DE). */
+const LOCALE_TO_OG: Record<Locale, string> = {
+  de: 'de_DE',
+  en: 'en_US',
+  ar: 'ar_AR',
+  tr: 'tr_TR',
+  pl: 'pl_PL',
+  ru: 'ru_RU',
+}
+
+/**
+ * `url` + `locale` fuer den openGraph-Block einer UEBERSETZTEN Seite —
+ * das Gegenstueck zu `localeAlternates` auf der Open-Graph-Seite.
+ *
+ * Warum das noetig ist: Beide Felder waren in den Pages hartkodiert
+ * (`url: \`${SITE_URL}/kfz-gutachter/x\``, `locale: 'de_DE'`), waehrend der
+ * Canonical daneben ueber localeAlternates korrekt die Locale-URL trug. Jede
+ * fremdsprachige Seite behauptete damit zwei sich widersprechende Dinge:
+ *
+ *   canonical  https://claimondo.de/tr/kfz-gutachter/trier   „ich bin tuerkisch"
+ *   og:url     https://claimondo.de/kfz-gutachter/trier      „ich bin die deutsche Seite"
+ *
+ * Ahrefs meldete dafuer 1.005 Seiten („Open Graph URL not matching canonical",
+ * Site-Audit 24.08.2026) — das entspricht 5 Sprachen mal rund 200 Seiten.
+ * Widerspruechliche Kanonisierungssignale sind ein bekannter Ausloeser fuer
+ * „Gecrawlt, zurzeit nicht indexiert", und genau dieser Status betraf zu 71 %
+ * fremdsprachige URLs.
+ *
+ * ⚠ Nur fuer Seiten mit `localeAlternates`. Der untranslated Cluster
+ * (haftpflicht/sachverstaendige/versicherer [slug], rein deutscher Body)
+ * canonicalisiert bewusst auf die de-Version — dort ist die praefixfreie
+ * og:url richtig und darf NICHT umgestellt werden.
+ *
+ * @example
+ * openGraph: { type: 'website', siteName: 'Claimondo', ...(await localeOpenGraph('/vorteile')), title, description, images }
+ */
+export async function localeOpenGraph(
+  path: string,
+): Promise<{ url: string; locale: string }> {
+  const locale = await getLocale()
+  return {
+    url: localeUrl(locale, path),
+    locale: LOCALE_TO_OG[locale as Locale] ?? LOCALE_TO_OG[DEFAULT_LOCALE],
+  }
+}

@@ -1,0 +1,417 @@
+{
+  "erkrath": {
+    "stadtbezirke": [
+      {
+        "name": "Alt-Erkrath",
+        "ortsteile": [
+          "Trills"
+        ]
+      },
+      {
+        "name": "Hochdahl",
+        "ortsteile": []
+      },
+      {
+        "name": "Unterfeldhaus",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A46",
+        "A3"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Erkrath (A46)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei einem Wildunfall im Neandertal zwischen Erkrath und Mettmann zu beachten?",
+        "antwort": "Das Neandertal durchzieht Erkrath als bewaldetes Tal der Düssel, und die Talstraße verläuft über weite Abschnitte unmittelbar am Naturschutzgebiet. In der Dämmerung queren dort Rehe und Wildschweine die Fahrbahn, die durch Böschung und Baumbestand erst spät einsehbar ist. Typisch ist ein Aufprall auf Frontschürze, Kühlergrill und Motorhaube, oft verbunden mit Schäden am Kühlerpaket und am Scheinwerfergehäuse. Für die Begutachtung zählt zweierlei: die Wildschadenbescheinigung des Jagdausübungsberechtigten oder der Polizei, weil die Teilkasko nur bei bestätigtem Haarwild eintritt, und die genaue Aufnahme der verdeckten Anbauteile hinter der Stoßfängerverkleidung. Gerade Radarsensorik und Kühlerpaket werden bei Wildschäden regelmäßig übersehen, weil die Verkleidung nach dem Anstoß wieder zurückfedert."
+      },
+      {
+        "frage": "Warum häufen sich Auffahrschäden auf den Steigungsstrecken zwischen Alt-Erkrath und Hochdahl?",
+        "antwort": "Zwischen dem Düsseltal bei Alt-Erkrath auf rund 46 Metern und den Willbecker Höhen bei Hochdahl auf 162 Metern liegen gut 115 Höhenmeter auf kurzer Strecke. Die Verbindungsstraßen steigen entsprechend steil an, wechseln zwischen Wohnbebauung und Waldrand und bleiben im Winter länger vereist als die Talsohle, weil die Kuppen früher auskühlen. Auf Gefällabschnitten verlängert sich der Bremsweg, und ein Auffahrunfall läuft dort mit deutlich höherer Aufprallenergie ab als im ebenen Stadtverkehr. Für die Bewertung heißt das: Neben dem sichtbaren Heckschaden gehören Längsträger, Rückwandblech und der Bereich der Reserveradmulde auf den Prüfstand. Stauchungen an der Bodengruppe bleiben von außen unauffällig und zeigen sich erst beim Vermessen."
+      },
+      {
+        "frage": "Welche Rolle spielt die Anschlussstelle Erkrath an der A46 im örtlichen Unfallgeschehen?",
+        "antwort": "Die A46 bildet über weite Strecken die Stadtgrenze Erkraths zu Hilden und Haan; über die Anschlussstelle Erkrath fädelt der Pendlerverkehr Richtung Düsseldorf ein. Morgens reicht der Rückstau von der Rampe bis in das nachgelagerte Straßennetz zurück, sodass wartende Fahrzeuge von hinten getroffen werden, während der einfädelnde Verkehr auf der Beschleunigungsspur bereits Tempo aufnimmt. Daraus entstehen zwei sehr unterschiedliche Schadenbilder: der Heckaufprall im Stillstand und der flache Streifschaden über Tür, Schweller und Radlauf beim Fahrstreifenwechsel. Streifschäden werden dabei gern unterschätzt. Betroffen sind meist mehrere aneinandergrenzende Bauteile, deren Farbangleichung eine Beilackierung der Nachbarflächen nötig macht, damit der Farbton über die Fahrzeugseite hinweg stimmt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Erkrath: von Alt-Erkrath im Düsseltal über Hochdahl bis Unterfeldhaus nahe der A3. Das Unfallgeschehen reicht von der Anschlussstelle Erkrath an der A46 bis zur Talstraße durch das Neandertal.",
+    "topografieAnker": "Erkrath liegt im Übergang vom Niederrheinischen Tiefland zum Niederbergischen Land. Die Düssel durchfließt das Stadtgebiet in natürlichem Bett und bildet im Osten das Neandertal. Zwischen dem tiefsten Punkt an der Westgrenze auf 46 Metern und den Willbecker Höhen auf 162 Metern liegen über hundert Höhenmeter — für eine Stadt dieser Größe ein bewegtes Relief mit Steigungen, Kurven und kleinräumigen Glättewechseln im Winter."
+  },
+  "mettmann": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt",
+        "ortsteile": []
+      },
+      {
+        "name": "Metzkausen",
+        "ortsteile": []
+      },
+      {
+        "name": "Obschwarzbach",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B7"
+      ],
+      "knoten": [
+        "Anschlussstelle Mettmann (A3)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum kommt es auf der B7 in Mettmann so häufig zu Abbiegeunfällen?",
+        "antwort": "Die B7 führt als Ortsdurchfahrt mitten durch Mettmann und bündelt den Durchgangsverkehr zwischen Düsseldorf und Wuppertal mit dem örtlichen Ziel- und Quellverkehr. An den Einmündungen wechseln Tempolimits, Grundstückszufahrten und Haltestellen einander auf kurzer Strecke ab; wer links abbiegt, muss den Gegenverkehr über zwei Fahrstreifen hinweg einschätzen. Die typische Kollision trifft das Fahrzeug seitlich im Bereich von A-Säule, Vorderrad und Fahrertür. Anders als beim Heckaufprall verformt sich hier die Fahrgastzelle unmittelbar: Türverstärkung, Schweller und die Sensorik des Seitenairbags gehören zwingend in die Aufnahme. Dazu kommt die Achsgeometrie der getroffenen Vorderachse, die nach einem seitlichen Stoß fast immer aus der Spur läuft."
+      },
+      {
+        "frage": "Was macht die Hanglagen zwischen Metzkausen und dem Neandertal bei Nässe so heikel?",
+        "antwort": "Metzkausen liegt deutlich höher als die Talsohle der Düssel, und die Verbindungsstraßen hinunter ins Neandertal überwinden das Gefälle in engen Kurven. Der Lößboden der Mettmanner Terrassen wird bei Dauerregen von den angrenzenden Feldern auf die Fahrbahn geschwemmt und bildet einen schmierigen Film, der sich anders verhält als nasser Asphalt: Das Fahrzeug bricht seitlich aus, statt geradeaus zu schieben. Häufig endet das am Bordstein oder in der Böschung. Für die Begutachtung sind dann weniger die Blechschäden entscheidend als Felgenhörner, Reifenflanken, Spurstangen und Querlenker. Ein Bordsteinanprall aus der Kurve verzieht die Achse regelmäßig, ohne außen eine erkennbare Delle zu hinterlassen. Ein bei Geradeausfahrt schief stehendes Lenkrad ist der deutlichste Hinweis, den man ohne Messgerät überhaupt bekommt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Mettmann: von der Kernstadt über Metzkausen bis Obschwarzbach. Die B7 quert die Stadt als Ortsdurchfahrt, die A3 bindet sie über die Anschlussstelle Mettmann an, und im Süden fällt das Gelände ins Neandertal ab.",
+    "topografieAnker": "Mettmann liegt auf den Mettmanner Lößterrassen am Westrand des Rheinischen Schiefergebirges. Zwischen dem tiefsten Punkt im Neandertal auf 75 Metern und der Höhe an der Wülfrather Stadtgrenze auf 203 Metern liegen 128 Höhenmeter. Die Düssel durchfließt das Stadtgebiet im Bereich des Neandertals. Lößböden, Hanglagen und die enge Kernstadt prägen das örtliche Verkehrsgeschehen."
+  },
+  "wuelfrath": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Heumarkt"
+        ]
+      },
+      {
+        "name": "Flandersbach",
+        "ortsteile": []
+      },
+      {
+        "name": "Rohdenhaus",
+        "ortsteile": []
+      },
+      {
+        "name": "Kocherscheidt",
+        "ortsteile": []
+      },
+      {
+        "name": "Schlupkothen",
+        "ortsteile": []
+      },
+      {
+        "name": "Düssel",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A535",
+        "A44"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Wülfrath (A535)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Schäden entstehen typischerweise durch den Werksverkehr nach Flandersbach und Rohdenhaus?",
+        "antwort": "Der Kalksteinabbau bei Flandersbach und Rohdenhaus bringt schweren Muldenkipper- und Silofahrzeugverkehr auf vergleichsweise schmale Zufahrtsstraßen im Wülfrather Osten. Zwei Schadenbilder treten dort überdurchschnittlich oft auf: Steinschlag an Frontscheibe, Haube und Frontschürze durch Ladungsreste sowie Streifkollisionen im Begegnungsverkehr, wenn ein breites Nutzfahrzeug den eigenen Fahrstreifen nicht halten kann. Beim Steinschlag kommt es auf die Abgrenzung an — eine Einschlagstelle im Sichtfeld des Fahrers macht die Scheibe reparaturunfähig, und sitzt eine Frontkamera hinter dem Spiegelfuß, zieht der Scheibentausch deren Kalibrierung nach sich. Streifschäden an Nutzfahrzeugen wiederum betreffen häufig Aufbau und Rahmen und nicht nur die Außenhaut, weshalb bei Transportern der Blick unter die Verkleidung des Aufbaus zur Aufnahme gehört."
+      },
+      {
+        "frage": "Wie wirkt sich aus, dass durch Wülfrath keine Bundesstraße führt?",
+        "antwort": "Wülfrath gehört zu den wenigen Städten im Kreis Mettmann, durch die keine Bundesstraße verläuft. Der überörtliche Verkehr verteilt sich stattdessen auf Landstraßen, die sich durch das Angertal und über die Höhen Richtung Velbert, Mettmann und Wuppertal winden, sowie auf die A535 mit der Anschlussstelle Wülfrath. Diese Landstraßen haben schmale Fahrbahnen, keine baulich getrennten Richtungen und oft Bäume oder Böschungen dicht am Rand. Kommt ein Fahrzeug dort von der Fahrbahn ab, entsteht kein flacher Streifschaden, sondern eine punktuelle Deformation mit hoher Energie. Solche Anstöße reichen bis in Federbeindom und Längsträger, weshalb eine Vermessung der Fahrzeugstruktur dazugehört. Ob ein Fahrzeug nach einem Baumanprall überhaupt wieder richtungsstabil läuft, entscheidet sich an genau diesen Werten."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Wülfrath: von der Innenstadt am Heumarkt über Düssel bis zu den Werksstandorten Flandersbach und Rohdenhaus. Durch die Stadt führt keine Bundesstraße — der Verkehr läuft über Landstraßen und die A535 im Osten.",
+    "topografieAnker": "Wülfrath liegt im Niederbergischen Land, der alte Ortskern in einem engen Tal, das der Anger durchfließt; die neueren Stadtteile ziehen sich die Talhänge hinauf. Prägend ist der Kalksteinabbau — das Werk Flandersbach gilt als größter Kalksteinbruch Europas. Bundesstraßen gibt es hier keine: Im Norden streift die A44 auf einem kurzen Teilstück das Stadtgebiet, im Osten verläuft die A535."
+  },
+  "monheim-am-rhein": {
+    "stadtbezirke": [
+      {
+        "name": "Monheim",
+        "ortsteile": [
+          "Altstadt",
+          "Berliner Viertel",
+          "Musikantenviertel",
+          "Österreichviertel",
+          "Sandberg",
+          "Blee",
+          "Zaunswinkel",
+          "Henkelsiedlung"
+        ]
+      },
+      {
+        "name": "Baumberg",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A59",
+        "A542"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Autobahnkreuz Monheim-Süd (A59/A542)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei Fahrzeugschäden durch Rheinhochwasser in Monheim zu beachten?",
+        "antwort": "Monheim am Rhein liegt auf 40 Metern über dem Meeresspiegel und damit tiefer als jede andere Stadt im Kreis Mettmann; die Rheinaue reicht bis nahe an die Bebauung der Altstadt heran. Steigt der Pegel, stehen zuerst ufernahe Stellplätze und Tiefgaragenzufahrten unter Wasser. Ein Wasserschaden ist gutachterlich etwas grundlegend anderes als ein Aufprallschaden, denn entscheidend ist die Eindringhöhe. Reicht sie über die Türschweller, sind Sitzkonsolen, Gurtstraffer und die in vielen Modellen im Fußraum verbauten Steuergeräte betroffen; bei Elektrofahrzeugen kommt das Hochvoltsystem hinzu. Wasserstandslinie, Schlammablagerungen und erste Korrosionsspuren müssen dokumentiert werden — sie entscheiden, welche Bauteile ersetzt und nicht bloß getrocknet werden."
+      },
+      {
+        "frage": "Warum sind Auffahrunfälle in Monheim an Herbstmorgen besonders häufig?",
+        "antwort": "Die Rheinniederung bei Monheim kühlt nachts schneller aus als das Umland, sodass sich im Herbst über den Wiesen zwischen Rheinufer und Baumberg dichter Bodennebel bildet. Er liegt oft nur in einzelnen Senken und löst sich wenige hundert Meter weiter wieder auf; genau dieser abrupte Sichtwechsel führt zu Auffahrunfällen, weil die Geschwindigkeit aus dem klaren Abschnitt mitgenommen wird. Typisch ist eine Kette aus mehreren Fahrzeugen. Bei Kettenauffahrunfällen ist die Zuordnung das eigentliche Thema: Front- und Heckschaden desselben Fahrzeugs stammen aus zwei verschiedenen Anstößen. Nur eine getrennte Aufnahme mit Höhenvergleich der Anstoßspuren lässt erkennen, welcher Schaden welchem Beteiligten zuzurechnen ist. Fehlt diese Trennung, wandert der Schaden aus dem zweiten Anstoß stillschweigend in die Abrechnung des ersten."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Monheim am Rhein: vom Berliner Viertel über die Altstadt bis Baumberg. Als tiefstgelegene Stadt im Kreis Mettmann liegt Monheim unmittelbar am Strom — mit allem, was Hochwasser und Nebel aus der Rheinniederung für Fahrzeuge bedeuten.",
+    "topografieAnker": "Monheim am Rhein liegt auf 40 Metern über dem Meeresspiegel unmittelbar am rechten Rheinufer und ist damit die tiefstgelegene Stadt im Kreis Mettmann. Das Stadtgebiet ist flach, die Rheinaue reicht bis an die Wohnbebauung heran. Eine Autobahn quert den Stadtkern nicht: Die A59 verläuft am östlichen Stadtrand, das Autobahnkreuz Monheim-Süd verbindet sie mit der A542 Richtung A3."
+  },
+  "meerbusch": {
+    "stadtbezirke": [
+      {
+        "name": "Büderich",
+        "ortsteile": [
+          "Bovert"
+        ]
+      },
+      {
+        "name": "Osterath",
+        "ortsteile": []
+      },
+      {
+        "name": "Lank-Latum",
+        "ortsteile": []
+      },
+      {
+        "name": "Strümp",
+        "ortsteile": []
+      },
+      {
+        "name": "Ossum-Bösinghoven",
+        "ortsteile": []
+      },
+      {
+        "name": "Langst-Kierst",
+        "ortsteile": []
+      },
+      {
+        "name": "Nierst",
+        "ortsteile": []
+      },
+      {
+        "name": "Ilverich",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A44",
+        "A57",
+        "A52"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Autobahnkreuz Meerbusch (A44/A57)",
+        "Anschlussstelle Büderich (A52)",
+        "Anschlussstelle Bovert (A57)",
+        "Anschlussstelle Lank-Latum (A44)",
+        "Anschlussstelle Osterath (A44)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Erntezeit auf den Landstraßen zwischen Nierst, Ilverich und Lank-Latum eine eigene Unfallursache?",
+        "antwort": "Rund siebzig Prozent der Meerbuscher Fläche sind Acker, Wald und Wasser, und die Verbindungsstraßen zwischen Nierst, Ilverich und Lank-Latum führen mitten hindurch. In der Ernte- und Rübenkampagne tragen Traktoren und Anhänger feuchte Erde auf den Asphalt; auf dieser Schicht verliert ein Pkw bei Regen schon bei mäßigem Tempo die Bodenhaftung. Dazu kommen langsame, breite Gespanne, die auf schmaler Fahrbahn überholt werden. Die Schadenbilder reichen vom Abkommen in den Straßengraben bis zum Streifkontakt mit Anbaugeräten, deren scharfe Kanten Türen und Kotflügel tief aufreißen. Nach einer Grabenfahrt gehört das Fahrzeug auf die Hebebühne — Tankschutz, Leitungen und Abgasanlage tragen den Schaden, nicht das Blech."
+      },
+      {
+        "frage": "Warum spielt Seitenwind auf der A44 bei Ilverich eine Rolle?",
+        "antwort": "Die A44 verlässt Meerbusch bei Ilverich über die Rheinbrücke, und der Übergang von der windgeschützten Auenlandschaft auf das freie Bauwerk erfolgt abrupt. Böen greifen dort seitlich an, was vor allem hohe Aufbauten trifft: Kastenwagen, Wohnwagen und leere Anhänger reagieren mit einem Ausbrechen der Hinterachse, und wer gegensteuert, landet häufig an der Schutzplanke. Charakteristisch ist ein langgezogener Streifschaden über die gesamte Fahrzeugflanke, oft mit gestauchtem Radlauf am Kontaktpunkt. Bei Gespannen ist zusätzlich die Anhängerkupplung samt Trägerrahmen zu begutachten: Die Kräfte beim Ausbrechen wirken auf Kugelhals und Verschraubung am Heckträger, und ein verzogener Träger zeigt sich nicht mit bloßem Auge, sondern erst im Vergleich mit den Sollmaßen des Herstellers."
+      },
+      {
+        "frage": "Was bedeutet die Abstufung der alten B9 zur Landesstraße für Unfälle in Büderich?",
+        "antwort": "Durch Meerbusch führt seit Januar 2008 keine Bundesstraße mehr: Die frühere B9 und die B222 wurden zur Landesstraße 137 herabgestuft. An der Verkehrsmenge hat das wenig geändert. Die Achse durch Büderich bleibt die Hauptverbindung Richtung Düsseldorf und Neuss und trägt weiter Pendler- und Schwerverkehr, nun aber mit Ortsdurchfahrtscharakter, Querungsstellen und Grundstückszufahrten. Die Folge sind einbiegende und kreuzende Kollisionen statt reiner Längsunfälle. Getroffen wird meist die vordere Seitenpartie mit Kotflügel, Scheinwerfer und Radaufhängung. Da moderne Scheinwerfer Sensorik und ein eigenes Steuergerät für die Leuchtweitenregulierung enthalten, wiegt ihr Ersatz schwerer, als die sichtbare Delle vermuten lässt. Ähnliches gilt für die Radaufhängung: Nach einem seitlichen Anstoß auf das Vorderrad ist häufiger der Achsschenkel verzogen als der Kotflügel eingedrückt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Meerbusch: von Büderich und Osterath über Strümp bis Lank-Latum, Nierst und Ilverich. Zwischen dem Autobahnkreuz Meerbusch und den weiten Agrarflächen am Rheinufer ist das Unfallgeschehen zweigeteilt.",
+    "topografieAnker": "Meerbusch liegt linksrheinisch zwischen Düsseldorf und Krefeld und misst zwölf Kilometer von Nord nach Süd. Rund siebzig Prozent der Fläche sind Landwirtschaft, Wald und Wasser; die acht Stadtteile liegen als eigenständige Ortslagen darin verstreut. A44 und A57 kreuzen sich im Stadtgebiet. Bundesstraßen gibt es seit der Abstufung von B9 und B222 zur Landesstraße 137 im Januar 2008 nicht mehr."
+  },
+  "kaarst": {
+    "stadtbezirke": [
+      {
+        "name": "Kaarst",
+        "ortsteile": []
+      },
+      {
+        "name": "Büttgen",
+        "ortsteile": []
+      },
+      {
+        "name": "Holzbüttgen",
+        "ortsteile": []
+      },
+      {
+        "name": "Vorst",
+        "ortsteile": []
+      },
+      {
+        "name": "Driesch",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A52",
+        "A57"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Autobahnkreuz Kaarst (A52/A57)",
+        "Anschlussstelle Kaarst-Nord (A52)",
+        "Anschlussstelle Holzbüttgen"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Kollisionen zwischen Auto und Fahrrad in Kaarst überdurchschnittlich häufig?",
+        "antwort": "Kaarst liegt auf 39 Metern in der Ebene, ohne nennenswerte Steigungen, und ist nach der Kreisstadt Neuss die am dichtesten besiedelte Stadt des Rhein-Kreises. Beides zusammen erzeugt viel Radverkehr auf denselben schmalen Ortsstraßen, an denen längs geparkt wird — in der Kernstadt ebenso wie in Büttgen und Holzbüttgen. Zwei Konstellationen dominieren: die geöffnete Fahrertür im Weg des Radfahrers und der abbiegende Pkw, der den geradeaus fahrenden Radverkehr übersieht. Am Fahrzeug bleibt oft wenig zurück, eine verbogene Türkante, ein Kratzer am Kotflügel. Genau darin liegt die Falle: Der Sachschaden wirkt geringfügig, während Anstoßhöhe und Spurenlage die Haftungsfrage überhaupt erst klären. Hinzu kommt die Beschädigung am Rad selbst — Laufräder, Rahmen und Gabel gehören in dieselbe Aufnahme wie die Türkante."
+      },
+      {
+        "frage": "Welche Schäden entstehen typischerweise im Rückstau vor dem Autobahnkreuz Kaarst?",
+        "antwort": "Im Autobahnkreuz Kaarst treffen die A52 aus Richtung Mönchengladbach und die A57 zwischen Köln und Krefeld aufeinander. Vor den Übergängen bildet sich im Berufsverkehr regelmäßig Rückstau bis zurück zur Anschlussstelle Kaarst-Nord. Auffahrunfälle laufen dort im Stop-and-go bei niedrigem Tempo ab, was den Schaden aber nicht harmlos macht: Bei geringer Aufprallgeschwindigkeit federt der Stoßfänger zurück und sieht unauffällig aus, während der dahinterliegende Querträger und die Deformationselemente bereits gestaucht sind. Beides sind Einwegbauteile. Ohne Demontage der Verkleidung lässt sich das nicht beurteilen, und bei Fahrzeugen mit Heckradar im Stoßfänger kommt die Kontrolle der Sensorlage hinzu. Schon eine Verschiebung im Millimeterbereich verstellt den Erfassungswinkel, ohne dass eine Warnleuchte darauf hinweist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Kaarst: von der Kernstadt über Büttgen und Holzbüttgen bis Vorst und Driesch. Das Autobahnkreuz Kaarst führt A52 und A57 zusammen, während der Alltagsverkehr flach und radverkehrsstark über die Ortsstraßen läuft.",
+    "topografieAnker": "Kaarst liegt auf 39 Metern in der Rheinebene westlich von Neuss und ist die flächenkleinste Stadt des Rhein-Kreises Neuss, nach der Kreisstadt zugleich die am dichtesten besiedelte. Der Nordkanal durchzieht das Stadtgebiet. Die Ebene ohne nennenswerte Steigungen begünstigt einen hohen Radverkehrsanteil; gleichzeitig treffen im Autobahnkreuz Kaarst zwei Fernstrecken aufeinander."
+  },
+  "korschenbroich": {
+    "stadtbezirke": [
+      {
+        "name": "Korschenbroich",
+        "ortsteile": []
+      },
+      {
+        "name": "Kleinenbroich",
+        "ortsteile": []
+      },
+      {
+        "name": "Glehn",
+        "ortsteile": []
+      },
+      {
+        "name": "Liedberg",
+        "ortsteile": []
+      },
+      {
+        "name": "Pesch",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B7",
+        "B230"
+      ],
+      "knoten": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind die Ortsdurchfahrten der B230 in Korschenbroich unfallträchtig?",
+        "antwort": "Die B230 verbindet Korschenbroich mit den Nachbarstädten und führt dabei durch geschlossene Ortslagen, in denen sich Tempo 50, Querungsstellen und Einmündungen mit freieren Abschnitten abwechseln. Weil keine Autobahn das Stadtgebiet quert, nimmt diese Achse zusammen mit der B7 auch den Durchgangs- und Schwerverkehr auf, der andernorts über eine Umgehung liefe. Am Ortseingang trifft zügig fahrender Verkehr auf abbiegende und einfahrende Fahrzeuge, und die Aufprallgeschwindigkeiten sind für innerörtliche Verhältnisse hoch. Bei solchen Anstößen lösen Front- und Seitenairbags aus. Dann gehören die Rückhaltesysteme vollständig in die Kalkulation: Gurtstraffer, Airbagmodule, Verkleidungsteile und das Steuergerät, das nach Auslösung getauscht und nicht zurückgesetzt wird. Diese Position übersteigt bei älteren Fahrzeugen nicht selten den gesamten sichtbaren Blechschaden."
+      },
+      {
+        "frage": "Was macht die Landstraßen um Liedberg und Pesch bei Dunkelheit gefährlich?",
+        "antwort": "Um Liedberg und Pesch liegt ein weitmaschiges Netz schmaler Landstraßen zwischen Feldern, ohne Beleuchtung und über weite Strecken ohne Randmarkierung. Der Quarzitrücken bei Liedberg bringt anders als im flachen Norden Korschenbroichs Kuppen und Senken mit sich, hinter denen die Sicht endet. Nachts und bei Nebel wird die Fahrbahnbreite regelmäßig überschätzt; man weicht nach rechts aus und erwischt das Bankett. Der weiche Randstreifen zieht das Fahrzeug dann vollends von der Straße. Weil solche Abkommensunfälle mit Überschlag oder Baumanprall enden können, ist die Aufnahme umfangreicher als bei reinen Blechschäden: Sitzschienen, Dachrahmen und Säulen zeigen an, ob die tragende Struktur belastet wurde. Ein Überschlag hinterlässt am Dachrahmen oft nur feine Falten, die unter der Himmelverkleidung verborgen bleiben."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Korschenbroich: von Kleinenbroich über Glehn und Pesch bis zum Quarzitrücken bei Liedberg. Ohne Autobahn im Stadtgebiet trägt der überörtliche Verkehr sich über die Bundesstraßen 7 und 230 und ein weitmaschiges Landstraßennetz.",
+    "topografieAnker": "Korschenbroich liegt zwischen Neuss und Mönchengladbach, das Gelände fällt generell nach Norden ab. Im Süden liegen die Höhen bei rund 60 Metern, der Quarzitrücken bei Liedberg erreicht 80 Meter, im Norden am Nordkanal sind es noch 37 Meter. Eine Autobahn quert das Stadtgebiet nicht — die Bundesstraßen 7 und 230 übernehmen den überörtlichen Verkehr."
+  },
+  "willich": {
+    "stadtbezirke": [
+      {
+        "name": "Willich",
+        "ortsteile": [
+          "Wekeln",
+          "Münchheide",
+          "Hardt",
+          "Willicher Heide",
+          "Dickerheide"
+        ]
+      },
+      {
+        "name": "Schiefbahn",
+        "ortsteile": [
+          "Niederheide",
+          "Knickelsdorf",
+          "Klein-Jerusalem",
+          "Bertz"
+        ]
+      },
+      {
+        "name": "Anrath",
+        "ortsteile": [
+          "Donk"
+        ]
+      },
+      {
+        "name": "Neersen",
+        "ortsteile": [
+          "Vennheide",
+          "Hagwinkel",
+          "Unterbruch"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A44",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B57"
+      ],
+      "knoten": [
+        "Autobahnkreuz Neersen (A44/A52)",
+        "Anschlussstelle Neersen (A44)",
+        "Anschlussstelle Münchheide (A44)",
+        "Anschlussstelle Schiefbahn (A52)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was passiert im Autobahnkreuz Neersen besonders häufig?",
+        "antwort": "Im Autobahnkreuz Neersen südlich von Willich kreuzt die A44 die A52. Die Verbindungsfahrbahnen sind eng radiiert, und wer von der freien Strecke kommt, unterschätzt regelmäßig, wie stark in der Kurve verzögert werden muss. Für hoch beladene Transporter mit verlagertem Schwerpunkt endet das in Kipp- oder Schleuderbewegungen, für Pkw an der Schutzplanke. Ein Anprall in der Rampenkurve trifft das Fahrzeug schräg von vorn, sodass Rad, Achsschenkel und Federbein die Hauptlast tragen. Danach ist die Achsvermessung nicht optional: Bleibt ein Sturz- oder Spurfehler unbemerkt, verschleißen die Reifen einseitig, und Assistenzsysteme, die auf der Lenkwinkelsensorik aufsetzen, rechnen mit falschen Referenzwerten weiter. Die Fahrwerksgeometrie gehört deshalb auch dann in den Umfang, wenn das Fahrzeug äußerlich nur gestreift wirkt."
+      },
+      {
+        "frage": "Welche Rolle spielt das Gewerbegebiet Münchheide für das Schadengeschehen in Willich?",
+        "antwort": "Das Gewerbegebiet Münchheide liegt direkt an der A44 und zieht viel Lkw-Verkehr in die Zufahrtsstraßen von Willich. Rangieren auf engen Betriebshöfen und Abbiegen aus dem toten Winkel sind dort die häufigsten Schadensursachen, meist bei sehr niedriger Geschwindigkeit. Genau deshalb werden sie unterschätzt: Ein Sattelauflieger, der beim Ausschwenken eine Pkw-Flanke touchiert, bringt trotz Schrittgeschwindigkeit erhebliche Masse ein. Die Tür lässt sich hinterher oft noch öffnen, doch Säule und Schwellerbereich haben Druck aufgenommen. Bei der Aufnahme ist die Kontrolle der Spaltmaße rund um Tür und Rahmen deshalb aussagekräftiger als der sichtbare Lackschaden, der das Ausmaß eher verharmlost. Schließt die Tür schwergängig oder steht sie versetzt zum Rahmen, hat sich die Seitenstruktur bereits gesetzt."
+      },
+      {
+        "frage": "Wie wirkt sich die ebene Lage des Willicher Stadtgebietes auf Winterunfälle aus?",
+        "antwort": "Auf dem Willicher Stadtgebiet ändert sich die Höhe um höchstens sieben Meter. Es gibt keine Hänge, die den Wind bremsen, und keine Senken, in denen Kaltluft steht. Über den offenen Ackerflächen zwischen Anrath, Neersen und der Niers weht es ungehindert, und bei Frost trägt der Wind Schnee auf die Fahrbahn, der stellenweise zu einer festgefahrenen glatten Schicht wird. Da nichts die Sicht gliedert, sind solche Abschnitte kaum vorhersehbar. Kommt ein Fahrzeug ins Rutschen, endet es überwiegend im Graben oder am Randstein eines Feldwegs. Für die Bewertung zählen dann die verdeckten Teile: Radhausschalen, Parksensoren in den Stoßfängerecken und die Unterfahrschutzverkleidung, die beim Kontakt mit der Bankettkante reißt, ohne dass von außen etwas zu sehen wäre."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Willich: von der Kernstadt über Schiefbahn und Anrath bis Neersen. Am Autobahnkreuz Neersen treffen A44 und A52 aufeinander, während die B57 den Verkehr zwischen Krefeld und Mönchengladbach durch die Ortslagen führt.",
+    "topografieAnker": "Das Willicher Stadtgebiet ist typisch niederrheinisch: große, ebene Ackerflächen, über die sich die Höhe um höchstens sieben Meter ändert. Im Südwesten bildet die Niers die Stadtgrenze. Willich liegt siebzehn Kilometer westlich von Düsseldorf und wird von drei Autobahnen umschlossen — der A44 im Westen und Norden, der A52 im Süden und der A57 im Osten."
+  }
+}

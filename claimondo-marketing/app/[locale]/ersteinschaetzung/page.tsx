@@ -11,7 +11,7 @@ import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { serviceSchema, howToSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,9 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/ersteinschaetzung'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/ersteinschaetzung`,
+      ...(await localeOpenGraph(`/ersteinschaetzung`)),
       title: t('ersteinschaetzung.og_title'),
       description: t('ersteinschaetzung.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'KI-Ersteinschätzung Claimondo' }],

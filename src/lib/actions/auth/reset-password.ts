@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
+import { istUnbekannterPasswortFehler, uebersetzePasswortFehler } from '@/lib/auth/passwort-fehler'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { buildWelcomeConfirmLink } from '@/lib/auth/welcome-link'
 
@@ -140,7 +141,12 @@ export async function confirmPasswordReset(
     password: neuesPasswort,
   })
   if (updateError) {
-    return { success: false, error: updateError.message }
+    // Dieselbe Falle wie in /passwort-aendern: Supabase antwortet englisch und
+    // prueft selbst gegen HIBP (fail-closed), waehrend unsere Policy fail-open ist.
+    if (istUnbekannterPasswortFehler(updateError.message)) {
+      console.error('[reset-password] unbekannter Supabase-Fehler:', updateError.message)
+    }
+    return { success: false, error: uebersetzePasswortFehler(updateError.message) }
   }
 
   // Onboarding (frisch angelegter Account, force_password_change war true) vs.

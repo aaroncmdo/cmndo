@@ -1,0 +1,836 @@
+{
+  "hamm": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Norden",
+          "Westen"
+        ]
+      },
+      {
+        "name": "Uentrop",
+        "ortsteile": [
+          "Uentrop",
+          "Werries",
+          "Braam-Ostwennemar",
+          "Haaren"
+        ]
+      },
+      {
+        "name": "Rhynern",
+        "ortsteile": [
+          "Rhynern",
+          "Berge",
+          "Osttünnen",
+          "Westtünnen",
+          "Freiske"
+        ]
+      },
+      {
+        "name": "Pelkum",
+        "ortsteile": [
+          "Pelkum",
+          "Wiescherhöfen",
+          "Lerche",
+          "Weetfeld"
+        ]
+      },
+      {
+        "name": "Herringen",
+        "ortsteile": [
+          "Herringen",
+          "Sandbochum",
+          "Nordherringen"
+        ]
+      },
+      {
+        "name": "Bockum-Hövel",
+        "ortsteile": [
+          "Bockum",
+          "Hövel",
+          "Geinegge"
+        ]
+      },
+      {
+        "name": "Heessen",
+        "ortsteile": [
+          "Heessen",
+          "Frielinghausen",
+          "Kötterberg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B63",
+        "B233"
+      ],
+      "knoten": [
+        "Anschlussstelle Hamm-Bockum-Hövel",
+        "Anschlussstelle Hamm-Uentrop"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Weststraße oder Zusammenstoß in Heessen — der Sachverständige kommt zu Ihnen nach Hamm.",
+    "topografieAnker": "Hamm liegt an der Lippe am Ostrand des Ruhrgebiets; die A2 führt südlich vorbei, die A1 kreuzt sie westlich bei Kamen."
+  },
+  "ludwigshafen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Süd",
+          "Nord",
+          "Hemshof",
+          "West"
+        ]
+      },
+      {
+        "name": "Friesenheim",
+        "ortsteile": [
+          "Friesenheim",
+          "Nördliche Innenstadt"
+        ]
+      },
+      {
+        "name": "Oppau",
+        "ortsteile": [
+          "Oppau",
+          "Edigheim",
+          "Pfingstweide"
+        ]
+      },
+      {
+        "name": "Oggersheim",
+        "ortsteile": [
+          "Oggersheim",
+          "Melm",
+          "Ruchheim"
+        ]
+      },
+      {
+        "name": "Gartenstadt",
+        "ortsteile": [
+          "Gartenstadt",
+          "Maudach",
+          "Niederfeld"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Mundenheim",
+          "Rheingönheim"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A6",
+        "A61",
+        "A65",
+        "A650"
+      ],
+      "bundesstrassen": [
+        "B9",
+        "B37",
+        "B44"
+      ],
+      "knoten": [
+        "Kreuz Ludwigshafen",
+        "Kreuz Frankenthal"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A650, Parkschaden in der Innenstadt oder Zusammenstoß in Oggersheim — der Sachverständige kommt zu Ihnen nach Ludwigshafen.",
+    "topografieAnker": "Ludwigshafen liegt Mannheim gegenüber am linken Rheinufer; die A650 führt als Hochstraße in die Stadt, A6 und A61 umschließen sie im Süden und Westen."
+  },
+  "muelheim-an-der-ruhr": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt I",
+          "Altstadt II",
+          "Eppinghofen",
+          "Dümpten"
+        ]
+      },
+      {
+        "name": "Styrum",
+        "ortsteile": [
+          "Styrum",
+          "Winkhausen"
+        ]
+      },
+      {
+        "name": "Heißen",
+        "ortsteile": [
+          "Heißen",
+          "Fulerum",
+          "Holthausen"
+        ]
+      },
+      {
+        "name": "Broich",
+        "ortsteile": [
+          "Broich",
+          "Speldorf",
+          "Saarn"
+        ]
+      },
+      {
+        "name": "Menden",
+        "ortsteile": [
+          "Menden",
+          "Raadt",
+          "Selbeck",
+          "Mintard"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A40",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B223"
+      ],
+      "knoten": [
+        "Anschlussstelle Mülheim-Heißen",
+        "Anschlussstelle Mülheim-Styrum"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Schloßstraße oder Zusammenstoß in Styrum — der Sachverständige kommt zu Ihnen nach Mülheim an der Ruhr.",
+    "topografieAnker": "Die Ruhr durchfließt Mülheim und trennt Broich und Speldorf von der Altstadt; die A40 quert das Stadtgebiet, die A52 führt nach Essen."
+  },
+  "oldenburg": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Bahnhofsviertel",
+          "Haarenesch",
+          "Dobbenviertel",
+          "Ziegelhof"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Donnerschwee",
+          "Ohmstede",
+          "Etzhorn",
+          "Nadorst"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Osternburg",
+          "Kreyenbrück",
+          "Drielake",
+          "Bümmerstede"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Eversten",
+          "Bloherfelde",
+          "Wechloy",
+          "Haarentor"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Osternburg-Ost",
+          "Tweelbäke",
+          "Krusenbusch"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A28",
+        "A29",
+        "A293"
+      ],
+      "bundesstrassen": [
+        "B69",
+        "B75",
+        "B211",
+        "B401"
+      ],
+      "knoten": [
+        "Kreuz Oldenburg-Nord",
+        "Dreieck Oldenburg-West",
+        "Kreuz Oldenburg-Ost"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Ich wurde in Oldenburg als Radfahrer angefahren. Lohnt ein Gutachten?",
+        "antwort": "Ja. Oldenburg hat einen der höchsten Radverkehrsanteile Deutschlands, entsprechend häufig sind solche Unfälle. Der Sachverständige beziffert Rahmen, Anbauteile, Kleidung und Helm — Positionen, die eine Werkstattrechnung nicht abbildet."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A28, Kollision mit einem Radfahrer in der Innenstadt oder Parkschaden in Eversten — der Sachverständige kommt zu Ihnen nach Oldenburg.",
+    "topografieAnker": "Oldenburg liegt an der Hunte im nordwestdeutschen Flachland; A28 und A29 kreuzen sich nördlich der Stadt, die A293 führt als Umgehung um das Zentrum."
+  },
+  "leverkusen": {
+    "stadtbezirke": [
+      {
+        "name": "Wiesdorf",
+        "ortsteile": [
+          "Wiesdorf",
+          "Manfort",
+          "Küppersteg",
+          "Bürrig"
+        ]
+      },
+      {
+        "name": "Opladen",
+        "ortsteile": [
+          "Opladen",
+          "Quettingen",
+          "Bergisch Neukirchen",
+          "Lützenkirchen"
+        ]
+      },
+      {
+        "name": "Schlebusch",
+        "ortsteile": [
+          "Schlebusch",
+          "Steinbüchel",
+          "Alkenrath",
+          "Rheindorf"
+        ]
+      },
+      {
+        "name": "Hitdorf",
+        "ortsteile": [
+          "Hitdorf",
+          "Bürrig-Nord"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A3",
+        "A59"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B51",
+        "B229"
+      ],
+      "knoten": [
+        "Kreuz Leverkusen",
+        "Kreuz Leverkusen-West"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Unfall auf der A1 oder A3 bei Leverkusen — wer zahlt den Gutachter?",
+        "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Das Kreuz Leverkusen gehört zu den meistbefahrenen Knoten Deutschlands."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Leverkusen, Parkschaden in Wiesdorf oder Zusammenstoß in Opladen — der Sachverständige kommt zu Ihnen nach Leverkusen.",
+    "topografieAnker": "Leverkusen liegt rechtsrheinisch zwischen Köln und Düsseldorf; am Kreuz Leverkusen treffen A1 und A3 zusammen, die A59 führt am Rhein entlang."
+  },
+  "osnabrueck": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Altstadt",
+          "Westerberg",
+          "Wüste"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Haste",
+          "Dodesheide",
+          "Sonnenhügel",
+          "Widukindland",
+          "Gartlage"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Schinkel",
+          "Schinkel-Ost",
+          "Fledder",
+          "Voxtrup",
+          "Darum-Gretesch-Lüstringen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Nahne",
+          "Sutthausen",
+          "Kalkhügel",
+          "Schölerberg"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Hellern",
+          "Atter",
+          "Eversburg",
+          "Pye",
+          "Hafen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A1",
+        "A30",
+        "A33"
+      ],
+      "bundesstrassen": [
+        "B51",
+        "B65",
+        "B68"
+      ],
+      "knoten": [
+        "Anschlussstelle Osnabrück-Nord",
+        "Kreuz Osnabrück-Süd",
+        "Kreuz Lotte/Osnabrück"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden am Neumarkt oder Zusammenstoß im Schinkel — der Sachverständige kommt zu Ihnen nach Osnabrück.",
+    "topografieAnker": "Osnabrück liegt in einer Senke zwischen Wiehengebirge und Teutoburger Wald; A1, A30 und A33 treffen im Stadtgebiet an drei Kreuzen aufeinander."
+  },
+  "solingen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Solingen-Mitte",
+          "Katternberg",
+          "Weyer",
+          "Mangenberg"
+        ]
+      },
+      {
+        "name": "Ohligs",
+        "ortsteile": [
+          "Ohligs",
+          "Aufderhöhe",
+          "Merscheid",
+          "Maubes"
+        ]
+      },
+      {
+        "name": "Wald",
+        "ortsteile": [
+          "Wald",
+          "Itter",
+          "Central"
+        ]
+      },
+      {
+        "name": "Gräfrath",
+        "ortsteile": [
+          "Gräfrath",
+          "Ketzberg",
+          "Fürkeltrath"
+        ]
+      },
+      {
+        "name": "Höhscheid",
+        "ortsteile": [
+          "Höhscheid",
+          "Widdert",
+          "Balkhausen"
+        ]
+      },
+      {
+        "name": "Burg",
+        "ortsteile": [
+          "Burg an der Wupper",
+          "Unterburg",
+          "Oberburg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A3",
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B224",
+        "B229"
+      ],
+      "knoten": [
+        "Anschlussstelle Solingen",
+        "Anschlussstelle Solingen-Ohligs"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A3, Parkschaden in der Hauptstraße oder Zusammenstoß in Ohligs — der Sachverständige kommt zu Ihnen nach Solingen.",
+    "topografieAnker": "Solingen liegt im Bergischen Land auf den Höhen über der Wupper; die A3 führt westlich vorbei, die A46 verbindet die Stadt mit Wuppertal und Düsseldorf."
+  },
+  "heidelberg": {
+    "stadtbezirke": [
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Schlossberg"
+        ]
+      },
+      {
+        "name": "Bergheim",
+        "ortsteile": [
+          "Bergheim",
+          "Bahnstadt"
+        ]
+      },
+      {
+        "name": "Weststadt",
+        "ortsteile": [
+          "Weststadt",
+          "Südstadt"
+        ]
+      },
+      {
+        "name": "Neuenheim",
+        "ortsteile": [
+          "Neuenheim",
+          "Handschuhsheim",
+          "Neuenheimer Feld"
+        ]
+      },
+      {
+        "name": "Rohrbach",
+        "ortsteile": [
+          "Rohrbach",
+          "Boxberg",
+          "Emmertsgrund"
+        ]
+      },
+      {
+        "name": "Kirchheim",
+        "ortsteile": [
+          "Kirchheim",
+          "Pfaffengrund",
+          "Wieblingen"
+        ]
+      },
+      {
+        "name": "Ziegelhausen",
+        "ortsteile": [
+          "Ziegelhausen",
+          "Peterstal",
+          "Schlierbach"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A5",
+        "A656"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B37",
+        "B535"
+      ],
+      "knoten": [
+        "Kreuz Heidelberg",
+        "Anschlussstelle Heidelberg/Schwetzingen"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden in der Altstadt oder Zusammenstoß auf der Ernst-Walz-Brücke — der Sachverständige kommt zu Ihnen nach Heidelberg.",
+    "topografieAnker": "Heidelberg liegt am Austritt des Neckars aus dem Odenwald in die Rheinebene; die A5 führt westlich vorbei, die A656 verbindet die Stadt mit Mannheim."
+  },
+  "darmstadt": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Martinsviertel",
+          "Johannesviertel",
+          "Woogsviertel"
+        ]
+      },
+      {
+        "name": "Bessungen",
+        "ortsteile": [
+          "Bessungen",
+          "Heimstättensiedlung",
+          "Paulusviertel"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Arheilgen",
+          "Wixhausen",
+          "Nordbahnhof"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Kranichstein",
+          "Dornheimer Weg",
+          "Am Oberfeld"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Weststadt",
+          "Riedbahn",
+          "Am Kavalleriesand"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Eberstadt",
+          "Waldkolonie",
+          "Nieder-Ramstädter Straße"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A5",
+        "A67",
+        "A672"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B26",
+        "B42",
+        "B449"
+      ],
+      "knoten": [
+        "Darmstädter Kreuz",
+        "Dreieck Darmstadt",
+        "Darmstädter Nordkreuz"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A5, Parkschaden am Luisenplatz oder Zusammenstoß in Eberstadt — der Sachverständige kommt zu Ihnen nach Darmstadt.",
+    "topografieAnker": "Darmstadt liegt am Westrand des Odenwalds; die A5 führt westlich vorbei, die A672 verbindet sie mit der A67 in der Rheinebene."
+  },
+  "herne": {
+    "stadtbezirke": [
+      {
+        "name": "Herne-Mitte",
+        "ortsteile": [
+          "Herne-Mitte",
+          "Baukau",
+          "Horsthausen"
+        ]
+      },
+      {
+        "name": "Sodingen",
+        "ortsteile": [
+          "Sodingen",
+          "Börnig",
+          "Holthausen"
+        ]
+      },
+      {
+        "name": "Eickel",
+        "ortsteile": [
+          "Eickel",
+          "Holsterhausen",
+          "Röhlinghausen"
+        ]
+      },
+      {
+        "name": "Wanne",
+        "ortsteile": [
+          "Wanne",
+          "Crange",
+          "Unser Fritz",
+          "Bickern"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A42",
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B226"
+      ],
+      "knoten": [
+        "Kreuz Herne",
+        "Anschlussstelle Herne-Baukau"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A42, Parkschaden in der Bahnhofstraße oder Zusammenstoß in Wanne — der Sachverständige kommt zu Ihnen nach Herne.",
+    "topografieAnker": "Herne liegt im Zentrum des Ruhrgebiets zwischen Rhein-Herne-Kanal und A43; am Kreuz Herne treffen A42 und A43 aufeinander."
+  },
+  "paderborn": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Nordstadt",
+          "Oststadt",
+          "Südstadt",
+          "Riemekeviertel"
+        ]
+      },
+      {
+        "name": "Schloß Neuhaus",
+        "ortsteile": [
+          "Schloß Neuhaus",
+          "Sennelager",
+          "Sande",
+          "Mastbruch"
+        ]
+      },
+      {
+        "name": "Elsen",
+        "ortsteile": [
+          "Elsen",
+          "Wewer",
+          "Dahl"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Marienloh",
+          "Neuenbeken",
+          "Benhausen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A33"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B64",
+        "B68"
+      ],
+      "knoten": [
+        "Anschlussstelle Paderborn-Elsen",
+        "Anschlussstelle Paderborn-Zentrum"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A33, Parkschaden am Domplatz oder Zusammenstoß in Elsen — der Sachverständige kommt zu Ihnen nach Paderborn.",
+    "topografieAnker": "Paderborn liegt an den Quellen der Pader am Rand der Senne; die A33 führt westlich vorbei und verbindet die Stadt mit der A2 und der A44."
+  },
+  "regensburg": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt",
+          "Ostenviertel",
+          "Westenviertel",
+          "Steinweg"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Stadtamhof",
+          "Reinhausen",
+          "Weichs",
+          "Sallern-Gallingkofen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Galgenberg",
+          "Kumpfmühl",
+          "Ziegetsdorf",
+          "Neuprüll",
+          "Königswiesen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Burgweinting",
+          "Harting",
+          "Irl",
+          "Kasernenviertel"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Prüfening",
+          "Großprüfening",
+          "Dechbetten",
+          "Oberisling"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A3",
+        "A93"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B15",
+        "B16"
+      ],
+      "knoten": [
+        "Kreuz Regensburg",
+        "Anschlussstelle Regensburg-Nord"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [],
+    "heroAnker": "Ob Auffahrunfall auf der A3, Parkschaden in der Altstadt oder Zusammenstoß auf der Nibelungenbrücke — der Sachverständige kommt zu Ihnen nach Regensburg.",
+    "topografieAnker": "Regensburg liegt am nördlichsten Punkt der Donau, wo Naab und Regen einmünden; A3 und A93 kreuzen sich östlich der Stadt."
+  }
+}

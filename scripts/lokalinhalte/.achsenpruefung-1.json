@@ -1,0 +1,492 @@
+{
+  "aachen": {
+    "_name": "Aachen",
+    "autobahnen": [
+      "A4",
+      "A44",
+      "A544"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B57",
+      "B258",
+      "B264"
+    ],
+    "knoten": [
+      "Kreuz Aachen",
+      "Dreieck Aachen-Europaplatz",
+      "Kreuz Aachen-Nord"
+    ],
+    "_urteil": "FALSCH: „Dreieck Aachen-Europaplatz\" — kein Autobahndreieck. Die A544 beginnt am Europaplatz, einem Kreisverkehr mit Anschluss an B1 und B264, und endet nach rund fünf Kilometern am Kreuz Aachen. Richtig wäre „Anschlussstelle Aachen-Europaplatz\". (Ein Dreieck Rothe Erde war zur A545 geplant, wurde nie gebaut.) FALSCH: „Kreuz Aachen-Nord\" — weder in der Knotenliste der A4 noch der A44 enthalten. Der einzige Autobahnknoten im Raum ist das Kreuz Aachen (A4/A44/A544, A4 Nr. 4); daneben liegen nur Anschlussstellen (Aachen-Lichtenbusch, Aachen-Brand). UNBELEGT: B1, B57, B258, B264 nicht einzeln nachgeprüft. Übrige Angaben ok: A4, A44, A544 und Kreuz Aachen bestätigt."
+  },
+  "bad-honnef": {
+    "_name": "Bad Honnef",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B42"
+    ],
+    "knoten": [
+      "Anschlussstelle Bad Honnef/Linz (A3)",
+      "B42 Ortsdurchfahrt Bad Honnef",
+      "Schmelztal als Verbindung zwischen Stadtmitte und Aegidienberg"
+    ],
+    "_urteil": "ok. Anschlussstelle Bad Honnef/Linz existiert an der A3 unter exakt dieser Doppelbezeichnung (Nr. 34). Die A3 berührt über Aegidienberg das Stadtgebiet. „B42 Ortsdurchfahrt\" und „Schmelztal\" sind örtliche Beschreibungen, keine Autobahnknoten — nicht widerlegbar und plausibel, aber auch nicht einzeln verifiziert."
+  },
+  "bielefeld": {
+    "_name": "Bielefeld",
+    "autobahnen": [
+      "A2",
+      "A33"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B66",
+      "B68"
+    ],
+    "knoten": [
+      "Kreuz Bielefeld",
+      "Dreieck Bielefeld",
+      "Kreuz Bielefeld-Ost"
+    ],
+    "_urteil": "FALSCH: „Dreieck Bielefeld\" — der Knoten A2/A33 ist ein Autobahnkreuz (Kleeblattform), kein Dreieck; er heißt Kreuz Bielefeld. Die Anschlussstellenlisten von A2 und A33 führen kein Dreieck Bielefeld. FALSCH: „Kreuz Bielefeld-Ost\" — in keiner der beiden Listen enthalten. Die A33 hat im Stadtgebiet nur Anschlussstellen (Bielefeld-Zentrum Nr. 19, Bielefeld-Senne Nr. 20) neben dem Kreuz Bielefeld (Nr. 21). Übrige Angaben ok: A2, A33 und Kreuz Bielefeld bestätigt (A2 Nr. 25)."
+  },
+  "braunschweig": {
+    "_name": "Braunschweig",
+    "autobahnen": [
+      "A2",
+      "A39",
+      "A391",
+      "A395"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B4",
+      "B248"
+    ],
+    "knoten": [
+      "Kreuz Braunschweig-Nord",
+      "Dreieck Braunschweig-Südwest",
+      "Kreuz Braunschweig-Süd"
+    ],
+    "_urteil": "FALSCH: „A395\" — diese Autobahn gibt es nicht mehr. Der Abschnitt Braunschweig–Dreieck Vienenburg wurde zum 1. Januar 2019 in A36 umbenannt (Nordharzautobahn), gleichzeitig wurde die B6 zur A36 hochgestuft. Entsprechend verbindet das Kreuz Braunschweig-Süd heute A39 und A36. FEHLT: A392 samt Kreuz Ölper (A391/A392) — ein Autobahnknoten im Stadtgebiet. Übrige Knoten ok: Kreuz Braunschweig-Nord (A391/A2), Dreieck Braunschweig-Südwest (A391/A39) und Kreuz Braunschweig-Süd sind alle bestätigt, auch die Gattungen stimmen."
+  },
+  "cottbus": {
+    "_name": "Cottbus",
+    "autobahnen": [
+      "A15"
+    ],
+    "bundesstrassen": [
+      "B97",
+      "B115",
+      "B168",
+      "B169"
+    ],
+    "knoten": [
+      "Dreieck Spreewald",
+      "Anschlussstelle Cottbus-West",
+      "Anschlussstelle Cottbus-Süd"
+    ],
+    "_urteil": "FALSCH nach Maßstab: „Dreieck Spreewald\" (A13/A15) liegt am nordwestlichen Anfang der A15, rund 30 Kilometer von Cottbus entfernt (die A15 misst 64 km, Cottbus liegt etwa mittig) — es erschließt die Stadt nicht unmittelbar. FEHLT: Anschlussstelle Cottbus-Ost, am 19. August 2026 eröffnet, mit Anschluss an die B97-Umfahrung. Übrige Angaben ok: A15, Anschlussstelle Cottbus-West (B169) und Cottbus-Süd (B97) bestätigt."
+  },
+  "dresden": {
+    "_name": "Dresden",
+    "autobahnen": [
+      "A4",
+      "A13",
+      "A17"
+    ],
+    "bundesstrassen": [
+      "B6",
+      "B97",
+      "B170",
+      "B172",
+      "B173"
+    ],
+    "knoten": [
+      "Dreieck Dresden-West",
+      "Dreieck Dresden-Nord",
+      "Kreuz Dresden-Süd"
+    ],
+    "_urteil": "FALSCH: „Kreuz Dresden-Süd\" — existiert nicht. Die A17 führt vom Dreieck Dresden-West nach Süden und hat dort ausschließlich Anschlussstellen (Dresden-Gorbitz, Dresden-Südvorstadt, Dresden-Prohlis), kein Autobahnkreuz. Übrige Knoten ok: Dreieck Dresden-West (A4/A17) und Dreieck Dresden-Nord (A4/A13) sind bestätigt, beide mit korrekter Gattung."
+  },
+  "erfurt": {
+    "_name": "Erfurt",
+    "autobahnen": [
+      "A4",
+      "A71"
+    ],
+    "bundesstrassen": [
+      "B4",
+      "B7"
+    ],
+    "knoten": [
+      "Kreuz Erfurt",
+      "Dreieck Erfurt-Süd",
+      "Anschlussstelle Erfurt-West"
+    ],
+    "_urteil": "FALSCH: „Dreieck Erfurt-Süd\" — weder in der Knotenliste der A4 noch der A71 enthalten. Die A71 führt im Raum Erfurt nur Anschlussstellen (Erfurt-Nord, Erfurt-Stotternheim, Erfurt-Mittelhausen, Erfurt-Gispersleben, Erfurt-Bindersleben) bis zum Kreuz Erfurt. Übrige Angaben ok: Kreuz Erfurt (A4/A71, A4 Nr. 45) und Anschlussstelle Erfurt-West (Nr. 46) bestätigt."
+  },
+  "frankfurt": {
+    "_name": "Frankfurt am Main",
+    "autobahnen": [
+      "A3 (Köln–Frankfurter Kreuz–Würzburg, Abschnitt an Flughafen und Offenbacher Stadtgrenze)",
+      "A5 (Basel–Frankfurter Kreuz–Bad Homburger Kreuz–Kassel)",
+      "A66 (Wiesbaden–Höchst–Miquelallee–Erlenbruch–Hanau)",
+      "A661 (Egelsbach–Offenbacher Kreuz–Riederwald–Bad Homburger Kreuz)",
+      "A648 (Katharinenkreisel/Theodor-Heuss-Allee – Anschluss Frankfurt-Westkreuz)"
+    ],
+    "bundesstrassen": [
+      "B3 (Eschersheimer Landstraße Richtung Bad Homburg)",
+      "B8 (Hanauer Landstraße / Richtung Hanau bzw. Königstein)",
+      "B40 (Mainzer Landstraße Richtung Rüsselsheim/Mainz)",
+      "B43 (Kelsterbach–Flughafen–Zeppelinheim)",
+      "B44 (Richtung Rüsselsheim/Groß-Gerau, über Schwanheim/Höchst)",
+      "B44a",
+      "B455 (Richtung Kronberg/Oberursel)",
+      "B521 (Richtung Bad Vilbel/Nidderau)",
+      "B3a"
+    ],
+    "knoten": [
+      "Frankfurter Kreuz (A3/A5)",
+      "Nordwestkreuz Frankfurt (A5/A66)",
+      "Bad Homburger Kreuz (A5/A661)",
+      "Offenbacher Kreuz (A3/A661)",
+      "Westkreuz Frankfurt (A5/A648)",
+      "Autobahndreieck Frankfurt-Süd (A3/A5 Zubringer B44/Zeppelinheim-Bereich)",
+      "Erlenbruch/Riederwaldtunnel-Baustelle (A66/A661)",
+      "Miquelallee-Adickesallee (A66-Ende, Anschluss Innenstadt)",
+      "Katharinenkreisel (A648/Theodor-Heuss-Allee)",
+      "Friedberger Landstraße / Alleenring",
+      "Alleenring als innerstädtischer Ringschluss (Miquelallee–Friedberger Landstraße–Ratsweg)"
+    ],
+    "_urteil": "FALSCH: „Autobahndreieck Frankfurt-Süd (A3/A5 …)\" — nicht belegbar. Der A3/A5-Knoten ist das bereits gelistete Frankfurter Kreuz; der nächste eigenständige A3-Knoten südwestlich davon ist das Mönchhof-Dreieck (A3/A67) bei Kelsterbach. FALSCH nach Maßstab: „Offenbacher Kreuz\" liegt im Stadtgebiet von Offenbach am Main, nicht in Frankfurt. FALSCH: „B3a\" — diese Bezeichnung wurde nur zwischen 1995 und 2001 geführt (Friedberger Landstraße bis Preungesheimer Dreieck) und ist heute nicht mehr aktuell. UNBELEGT: „B44a\" nicht auffindbar; „Erlenbruch/Riederwaldtunnel-Baustelle\" ist ein Bauzustand, kein benannter Knoten. Formhinweis: „Friedberger Landstraße / Alleenring\" und „Alleenring als innerstädtischer Ringschluss\" sind dieselbe Sache in zwei Einträgen; anders als bei allen übrigen Städten stehen in autobahnen und bundesstrassen lange Klammer-Beschreibungen statt reiner Kennungen. Übrige Knoten ok: Frankfurter Kreuz (A3/A5), Nordwestkreuz Frankfurt (A5/A66), Westkreuz Frankfurt (A5/A648) und Bad Homburger Kreuz (A5/A661) bestätigt — letzteres liegt auf der Stadtgrenze Frankfurt/Bad Homburg und ist damit zulässig."
+  },
+  "goettingen": {
+    "_name": "Göttingen",
+    "autobahnen": [
+      "A7"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B27",
+      "B446"
+    ],
+    "knoten": [
+      "Anschlussstelle Göttingen",
+      "Anschlussstelle Göttingen-Nord",
+      "Dreieck Drammetal"
+    ],
+    "_urteil": "ok, mit einem Hinweis. Anschlussstelle Göttingen und Anschlussstelle Göttingen-Nord sind an der A7 bestätigt. Das Dreieck Drammetal (A7/A38, A7 Nr. 74) existiert ebenfalls, liegt aber in der Gemeinde Rosdorf rund 10 Kilometer südlich von Göttingen, also außerhalb des Stadtgebiets — es erschließt die Stadt allerdings unmittelbar und ist deshalb vertretbar. Die dort abzweigende A38 ist folgerichtig nicht als Stadt-Autobahn gelistet."
+  },
+  "halle": {
+    "_name": "Halle (Saale)",
+    "autobahnen": [
+      "A9",
+      "A14",
+      "A143"
+    ],
+    "bundesstrassen": [
+      "B6",
+      "B80",
+      "B91",
+      "B100"
+    ],
+    "knoten": [
+      "Kreuz Halle",
+      "Dreieck Halle-Süd",
+      "Schkeuditzer Kreuz"
+    ],
+    "_urteil": "FALSCH: „Kreuz Halle\" — existiert nicht. Der Knoten A14/A143 heißt Dreieck Halle-Nord; die A14 führt im Raum Halle kein Autobahnkreuz. FALSCH nach Maßstab: „Schkeuditzer Kreuz\" (A9/A14) liegt bei Schkeuditz im Freistaat Sachsen, rund 20 Kilometer entfernt, also in einer anderen Stadt und einem anderen Bundesland. Richtig dagegen: „Dreieck Halle-Süd\" existiert (A143/A38) — mein anfänglicher Verdacht war falsch. Hinweis: Die A143 ist nur teilweise in Betrieb; der Nordabschnitt zum Dreieck Halle-Nord ist im Bau (Fertigstellung nicht vor 2030)."
+  },
+  "heinsberg": {
+    "_name": "Heinsberg",
+    "autobahnen": [
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B56",
+      "B221"
+    ],
+    "knoten": [
+      "Anschlussstelle Heinsberg (A46-Ende)",
+      "Kreuzung B56/B221",
+      "Grenzübergang Richtung Roermond"
+    ],
+    "_urteil": "ok. Die Anschlussstelle Heinsberg existiert an der A46 (Nr. 4) und bindet dort tatsächlich B56 und B221 an — die Angabe „Kreuzung B56/B221\" deckt sich damit. Die A46 hat bei Heinsberg ihren westlichen Endpunkt, der Zusatz „A46-Ende\" ist insofern zutreffend, auch wenn die Autobahn dort streng genommen beginnt. „Grenzübergang Richtung Roermond\" ist eine Richtungsangabe, kein benannter Knoten — nicht widerlegt."
+  },
+  "hueckelhoven": {
+    "_name": "Hückelhoven",
+    "autobahnen": [
+      "A46"
+    ],
+    "bundesstrassen": [],
+    "knoten": [],
+    "_urteil": "FEHLT: Die Knotenliste ist leer, obwohl die A46 zwei Anschlussstellen im Stadtgebiet hat — Hückelhoven-West (Nr. 6) und Hückelhoven-Ost (Nr. 7). Beide gehören eindeutig zur Stadt. Die Angabe A46 selbst ist richtig. Auch die leere Bundesstraßenliste ist nicht zu beanstanden: eine Bundesstraße durch Hückelhoven ließ sich nicht belegen."
+  },
+  "kamen": {
+    "_name": "Kamen",
+    "autobahnen": [
+      "A1",
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B233"
+    ],
+    "knoten": [
+      "Kamener Kreuz (A1/A2)"
+    ],
+    "_urteil": "ok. Das Kamener Kreuz (A1/A2, A2 Nr. 16) existiert und liegt im Stadtgebiet von Kamen — der Knoten trägt den Stadtnamen zu Recht. A1, A2 bestätigt. UNBELEGT: B61 und B233 nicht einzeln nachgeprüft."
+  },
+  "koeln": {
+    "_name": "Köln",
+    "autobahnen": [
+      "A1",
+      "A3",
+      "A4",
+      "A57",
+      "A59",
+      "A555",
+      "A559",
+      "A560 (Anschluss über Kreuz Bonn-Ost, Region)",
+      "A61 (im Umland)"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B9",
+      "B51",
+      "B55",
+      "B55a",
+      "B59",
+      "B264",
+      "B265",
+      "B506"
+    ],
+    "knoten": [
+      "Autobahnkreuz Köln-West (A1/A4)",
+      "Autobahnkreuz Köln-Nord (A1/A57)",
+      "Autobahnkreuz Köln-Ost (A3/A4)",
+      "Autobahnkreuz Köln-Süd (A4/A555)",
+      "Autobahndreieck Köln-Heumar (A3/A4/A59)",
+      "Autobahndreieck Köln-Porz (A59/A559)",
+      "Autobahnkreuz Leverkusen-West (A1/A59)",
+      "Kölner Ring (A1/A3/A4/A57)",
+      "Zoobrücke (B55a)",
+      "Severinsbrücke",
+      "Deutzer Brücke",
+      "Mülheimer Brücke",
+      "Rodenkirchener Autobahnbrücke (A4)",
+      "Leverkusener Autobahnbrücke (A1)",
+      "Köln-Bonner Flughafen-Anschluss (A59)",
+      "Barbarossaplatz",
+      "Ebertplatz",
+      "Kölner Ringe (Innenstadt)"
+    ],
+    "_urteil": "FALSCH nach Maßstab, drei Einträge: „Autobahnkreuz Leverkusen-West (A1/A59)\" liegt in Leverkusen; „A560 (Anschluss über Kreuz Bonn-Ost, Region)\" verläuft bei Sankt Augustin/Hennef und berührt Köln nicht; „A61 (im Umland)\" führt nicht durch das Stadtgebiet — beide Einträge kennzeichnen sich mit „Region\" bzw. „im Umland\" selbst als auswärtig und gehören nach dem Maßstab nicht in die Liste. FEHLT: Kreuz Köln-Gremberg (A4/A559, A4 Nr. 14) — ein Autobahnkreuz im Stadtgebiet, das zwischen Köln-Süd und Heumar liegt. Formhinweis: „Kölner Ring (A1/A3/A4/A57)\" und „Kölner Ringe (Innenstadt)\" bezeichnen zwei völlig verschiedene Dinge unter fast gleichem Namen — der Autobahnring und die innerstädtischen Ringe. Übrige Knoten ok: Kreuz Köln-West (A1/A4, Nr. 10), Kreuz Köln-Nord (A1/A57), Kreuz Köln-Ost (A4/A3, Nr. 16), Kreuz Köln-Süd (A4/A555, Nr. 12), Dreieck Köln-Heumar (A4/A3/A59, Nr. 15) und Dreieck Köln-Porz (A59/A559) sind alle bestätigt, auch die Autobahnzuordnungen stimmen. B506 (Köln-Mülheim Richtung Bergisch Gladbach) und B55a (Zoobrücke) bestätigt."
+  },
+  "lippstadt": {
+    "_name": "Lippstadt",
+    "autobahnen": [
+      "A44"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B55"
+    ],
+    "knoten": [
+      "Anschlussstelle Erwitte/Anröchte",
+      "Anschlussstelle Geseke",
+      "Kreuz Werl"
+    ],
+    "_urteil": "FALSCH nach Maßstab, alle drei Knoten: Anschlussstelle Erwitte/Anröchte (A44 Nr. 58), Anschlussstelle Geseke (Nr. 59) und Kreuz Werl (Nr. 54, A44/A445) liegen sämtlich in Nachbarorten, nicht in Lippstadt. Die A44 führt südlich an der Stadt vorbei und hat keine Anschlussstelle, die den Namen Lippstadt trägt — das ist in der A44-Knotenliste nachgeprüft. Wenn die Liste ehrlich bleiben soll, müsste sie für Lippstadt leer sein oder ausdrücklich als „nächstgelegene Auffahrten der Nachbarorte\" ausgewiesen werden. Die Angaben A44, B7 und B55 selbst sind nicht zu beanstanden (die B55 bindet die AS Erwitte/Anröchte an)."
+  },
+  "magdeburg": {
+    "_name": "Magdeburg",
+    "autobahnen": [
+      "A2",
+      "A14"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B71",
+      "B81",
+      "B184",
+      "B189"
+    ],
+    "knoten": [
+      "Kreuz Magdeburg",
+      "Dreieck Magdeburg",
+      "Anschlussstelle Magdeburg-Zentrum"
+    ],
+    "_urteil": "FALSCH: „Dreieck Magdeburg\" — in der Knotenliste der A14 nicht enthalten; dort ist für Magdeburg ausschließlich das Kreuz Magdeburg verzeichnet. Übrige Angaben ok: Kreuz Magdeburg (A2/A14) und Anschlussstelle Magdeburg-Zentrum (A2) sind beide bestätigt, A2 und A14 ebenfalls."
+  },
+  "mettmann": {
+    "_name": "Mettmann",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B7"
+    ],
+    "knoten": [
+      "Anschlussstelle Mettmann (A3)"
+    ],
+    "_urteil": "ok. Die Anschlussstelle Mettmann existiert an der A3 (Nr. 18) und bindet dort die B7 an — Gattung und Zuordnung stimmen. Die A3 verläuft am östlichen Rand des Stadtgebiets."
+  },
+  "muenster": {
+    "_name": "Münster",
+    "autobahnen": [
+      "A1",
+      "A43"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B54",
+      "B219",
+      "B481"
+    ],
+    "knoten": [
+      "Kreuz Münster-Nord",
+      "Kreuz Münster-Süd",
+      "Dreieck Bocholt-Nord"
+    ],
+    "_urteil": "FALSCH nach Gattung: „Kreuz Münster-Nord\" — an dieser Stelle liegt eine Anschlussstelle Münster-Nord an der A1, kein Autobahnkreuz. Der nächste echte Knoten nördlich davon ist das Kreuz Lotte/Osnabrück. FALSCH: „Dreieck Bocholt-Nord\" — gehört nicht zu Münster. Bocholt liegt rund 70 Kilometer westlich; in der Knotenliste der A43 kommt ein solcher Knoten nicht vor. Übrige Angaben ok: Kreuz Münster-Süd (A1/A43) ist bestätigt — dort beginnt die A43 —, A1 und A43 stimmen."
+  },
+  "oldenburg": {
+    "_name": "Oldenburg",
+    "autobahnen": [
+      "A28",
+      "A29",
+      "A293"
+    ],
+    "bundesstrassen": [
+      "B69",
+      "B75",
+      "B211",
+      "B401"
+    ],
+    "knoten": [
+      "Kreuz Oldenburg-Nord",
+      "Dreieck Oldenburg-West",
+      "Kreuz Oldenburg-Ost"
+    ],
+    "_urteil": "ok. Alle drei Knoten sind bestätigt und tragen die richtige Gattung: Kreuz Oldenburg-Nord (A29/A293, dazu B211), Kreuz Oldenburg-Ost (A29/A28) und Dreieck Oldenburg-West (A293/A28) — letzteres war mein Anfangsverdacht und hat sich als korrekt erwiesen. Die A293 verbindet als städtische Umgehung genau diese beiden Punkte; A28, A29 und A293 stimmen alle."
+  },
+  "ratingen": {
+    "_name": "Ratingen",
+    "autobahnen": [
+      "A3",
+      "A44",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B227"
+    ],
+    "knoten": [
+      "Kreuz Ratingen-Ost",
+      "Kreuz Breitscheid",
+      "Anschlussstelle Ratingen-Schwarzbach"
+    ],
+    "_urteil": "ok. Alle drei Knoten bestätigt: Kreuz Ratingen-Ost (A3/A44, A3 Nr. 17), Kreuz Breitscheid (A3 Nr. 16, verbindet A52 und A524) im Stadtteil Breitscheid und die Anschlussstelle Ratingen-Schwarzbach (A44 Nr. 33). Gattungen und Lage stimmen jeweils; A3, A44 und A52 sind richtig zugeordnet."
+  },
+  "rheine": {
+    "_name": "Rheine",
+    "autobahnen": [
+      "A30"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B70",
+      "B475",
+      "B481"
+    ],
+    "knoten": [
+      "Anschlussstelle Rheine-Nord",
+      "Anschlussstelle Rheine-Süd",
+      "Kreuz Rheine"
+    ],
+    "_urteil": "FALSCH: „Kreuz Rheine\" — existiert nicht. Die A30 hat im Raum Rheine ausschließlich Anschlussstellen; der nächste echte Knoten ist das Kreuz Lotte/Osnabrück. FALSCH: „Anschlussstelle Rheine-Süd\" — nicht belegbar. Die A30 führt dort Rheine-Nord (Nr. 7, B70), Rheine (Nr. 8) und Rheine-Kanalhafen. Gemeint sein dürfte schlicht „Rheine\". Hinweis: Die A30 verläuft südlich an der Stadt vorbei, nicht hindurch. Anschlussstelle Rheine-Nord ist korrekt."
+  },
+  "schwerte": {
+    "_name": "Schwerte",
+    "autobahnen": [
+      "A1",
+      "A45"
+    ],
+    "bundesstrassen": [
+      "B236"
+    ],
+    "knoten": [
+      "Westhofener Kreuz (A1/A45)",
+      "Anschlussstelle Schwerte (A1)"
+    ],
+    "_urteil": "ok. Das Westhofener Kreuz (A1 Nr. 86 / A45 Nr. 9) liegt im Stadtgebiet von Schwerte — die Zuordnung A1/A45 stimmt. Die Anschlussstelle Schwerte an der A1 ist ebenfalls bestätigt. A1, A45 und B236 sind nicht zu beanstanden."
+  },
+  "stuttgart": {
+    "_name": "Stuttgart",
+    "autobahnen": [
+      "A8 (Karlsruhe – Stuttgart – München, mit Anschlussstellen Stuttgart-Vaihingen, Stuttgart-Degerloch, Stuttgart-Möhringen, Flughafen/Messe)",
+      "A81 (Würzburg – Stuttgart – Singen, mit Anschlussstellen Stuttgart-Zuffenhausen, Stuttgart-Feuerbach)",
+      "A831 (Autobahnzubringer Stuttgart-Vaihingen zur A8)",
+      "A8/A81-Verbindung über das Autobahnkreuz Stuttgart"
+    ],
+    "bundesstrassen": [
+      "B10 (Neckartalstraße, Cannstatter Straße, Richtung Esslingen bzw. Vaihingen)",
+      "B14 (Heilbronner Straße, Willy-Brandt-Straße/Kulturmeile, Schwanenplatztunnel, Richtung Waiblingen)",
+      "B27 (Heilbronner Straße Richtung Ludwigsburg bzw. Degerloch–Filderstadt, Wagenburgtunnel-Zulauf)",
+      "B29 (Richtung Waiblingen/Schwäbisch Gmünd, Anschluss über Bad Cannstatt)",
+      "B295 (Richtung Leonberg/Weilimdorf)",
+      "B312 (Zulauf über die Filder Richtung Reutlingen)"
+    ],
+    "knoten": [
+      "Autobahnkreuz Stuttgart (A8/A81) bei Leonberg",
+      "Echterdinger Ei (B27/A8, Flughafen/Messe)",
+      "Pragsattel (B10/B27, Zusammenführung Heilbronner Straße/Löwentorstraße)",
+      "Neckartor (B14/B27, Kreuzung Cannstatter Straße/Willy-Brandt-Straße)",
+      "Charlottenplatz (B14/B27 im Innenstadtring)",
+      "Österreichischer Platz (Paulinenbrücke, B14/B27)",
+      "Wilhelmsplatz und Wilhelma-/Rosensteinknoten in Bad Cannstatt",
+      "Vaihinger Kreuz / Anschluss A831–B14",
+      "Wagenburgtunnel (B14 Richtung Osten)",
+      "Heslacher Tunnel (B14 Richtung Süden)",
+      "Engelbergtunnel (A81) als nördlicher Zulauf"
+    ],
+    "_urteil": "FALSCH in der Ortsangabe: „Autobahnkreuz Stuttgart (A8/A81) bei Leonberg\" — das Autobahnkreuz Stuttgart liegt südlich der Stadt auf der Stadtgrenze zu Sindelfingen, rund 10 km südwestlich des Zentrums, und bindet A8, A81 und A831 ein. Bei Leonberg liegt ein anderer Knoten, das Autobahndreieck Leonberg (das früher „Autobahndreieck Stuttgart\" hieß und gerade zur Vermeidung dieser Verwechslung umbenannt wurde). FALSCH: „Vaihinger Kreuz / Anschluss A831–B14\" — diesen Namen gibt es nicht. „Autobahnkreuz Stuttgart-Vaihingen\" war die frühere Bezeichnung genau des Knotens, der bereits als „Autobahnkreuz Stuttgart\" gelistet ist; der Eintrag doppelt ihn also unter einem veralteten Namen. Hinweis nach Maßstab: Engelbergtunnel (A81) liegt bei Leonberg, das Echterdinger Ei in Leinfelden-Echterdingen — beide außerhalb Stuttgarts, wenn auch stadtnah. Formhinweis: „A8/A81-Verbindung über das Autobahnkreuz Stuttgart\" steht in der Autobahnliste, ist aber keine Autobahn. UNBELEGT: die innerstädtischen Knoten Pragsattel, Neckartor, Charlottenplatz, Österreichischer Platz und Wilhelmsplatz sowie Wagenburg- und Heslacher Tunnel wurden nicht einzeln geprüft; sie sind ortsüblich benannt und nicht auffällig."
+  },
+  "viersen": {
+    "_name": "Viersen",
+    "autobahnen": [
+      "A52",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B509"
+    ],
+    "knoten": [
+      "Kreuz Viersen",
+      "Anschlussstelle Viersen-Süchteln",
+      "Kreuz Mönchengladbach"
+    ],
+    "_urteil": "FALSCH: „Kreuz Viersen\" — existiert weder an der A52 noch an der A61. FALSCH: „Anschlussstelle Viersen-Süchteln\" — es gibt zwei getrennte Anschlussstellen an der A61, Süchteln (Nr. 6) und Viersen (Nr. 7); der Eintrag zieht sie zu einem Namen zusammen, den es nicht gibt. FALSCH nach Maßstab: „Kreuz Mönchengladbach\" (A61/A52, A61 Nr. 9) liegt in Mönchengladbach. Hinweis: Die A61 führt durch das Viersener Stadtgebiet; die A52 dagegen berührt Viersen laut Streckenbeschreibung nicht direkt — ihre Nennung sollte geprüft werden. Nach dieser Prüfung bliebe für Viersen kein einziger korrekter Knoten übrig; die Anschlussstelle Viersen (A61 Nr. 7) wäre der richtige Ersatz."
+  },
+  "wolfsburg": {
+    "_name": "Wolfsburg",
+    "autobahnen": [
+      "A2",
+      "A39"
+    ],
+    "bundesstrassen": [
+      "B188",
+      "B248"
+    ],
+    "knoten": [
+      "Kreuz Wolfsburg/Königslutter",
+      "Anschlussstelle Wolfsburg-Mitte"
+    ],
+    "_urteil": "UNBELEGT: „Anschlussstelle Wolfsburg-Mitte\" — ließ sich nicht auffinden. Belegt sind an der A39 die Anschlussstellen Wolfsburg-West (Nr. 3, B188) und Wolfsburg-Mörse; eine vollständige Anschlussstellenliste der A39 lag mir nicht vor, deshalb widerlege ich den Eintrag nicht, halte ihn aber für falsch benannt. Übrige Angaben ok: Kreuz Wolfsburg/Königslutter (A2/A39, A39 Nr. 28) ist unter exakt diesem Doppelnamen bestätigt; A2 und A39 stimmen."
+  }
+}

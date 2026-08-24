@@ -20,7 +20,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164, WHATSAPP_HREF,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // /vorteile — Premium-Layout. Conversion-Page mit Fokus auf USPs + BGH-
 // Authority + Versicherer-Kürzungs-Konter + Wissensdatenbank-Tiefe.
@@ -42,9 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/vorteile'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/vorteile`,
+      ...(await localeOpenGraph(`/vorteile`)),
       title: t('vorteile.title'),
       description: t('vorteile.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Vorteile Claimondo' }],

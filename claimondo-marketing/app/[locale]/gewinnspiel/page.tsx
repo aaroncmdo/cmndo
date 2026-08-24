@@ -7,7 +7,7 @@ import {
   breadcrumbsSchema,
   jsonLdScript,
 } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { GewinnspielFormClient } from './GewinnspielFormClient'
 import { PraemienFaecher } from './PraemienFaecher'
 
@@ -50,10 +50,9 @@ export async function generateMetadata(): Promise<Metadata> {
     // eigener Block ohne `images` wuerde das Default-Bild des Layouts loeschen.
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       title: 'Täglich 3 × 50 € Gutschein gewinnen',
       description: 'Unverschuldeter Unfall? Jeden Tag verlosen wir 3 × 50 € Gutschein.',
-      url: `${SITE_URL}/gewinnspiel`,
+      ...(await localeOpenGraph(`/gewinnspiel`)),
       images: OG_DEFAULT_IMAGES,
     },
     twitter: {

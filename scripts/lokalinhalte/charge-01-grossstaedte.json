@@ -1,404 +1,1420 @@
 {
   "leipzig": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Zentrum", "Zentrum-Süd", "Zentrum-Nord", "Zentrum-West", "Zentrum-Südost"] },
-      { "name": "Nordost", "ortsteile": ["Schönefeld-Abtnaundorf", "Mockau-Süd", "Thekla"] },
-      { "name": "Ost", "ortsteile": ["Neustadt-Neuschönefeld", "Volkmarsdorf", "Anger-Crottendorf", "Sellerhausen-Stünz"] },
-      { "name": "Südost", "ortsteile": ["Reudnitz-Thonberg", "Stötteritz", "Probstheida", "Meusdorf"] },
-      { "name": "Süd", "ortsteile": ["Südvorstadt", "Connewitz", "Marienbrunn", "Lößnig"] },
-      { "name": "Südwest", "ortsteile": ["Schleußig", "Plagwitz", "Kleinzschocher", "Großzschocher"] },
-      { "name": "West", "ortsteile": ["Lindenau", "Altlindenau", "Neulindenau", "Leutzsch"] },
-      { "name": "Alt-West", "ortsteile": ["Schönau", "Grünau-Ost", "Grünau-Mitte", "Grünau-Siedlung"] },
-      { "name": "Nordwest", "ortsteile": ["Möckern", "Wahren", "Lützschena-Stahmeln"] },
-      { "name": "Nord", "ortsteile": ["Gohlis-Süd", "Gohlis-Mitte", "Gohlis-Nord", "Eutritzsch"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Zentrum",
+          "Zentrum-Süd",
+          "Zentrum-Nord",
+          "Zentrum-West",
+          "Zentrum-Südost"
+        ]
+      },
+      {
+        "name": "Nordost",
+        "ortsteile": [
+          "Schönefeld-Abtnaundorf",
+          "Mockau-Süd",
+          "Thekla"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Neustadt-Neuschönefeld",
+          "Volkmarsdorf",
+          "Anger-Crottendorf",
+          "Sellerhausen-Stünz"
+        ]
+      },
+      {
+        "name": "Südost",
+        "ortsteile": [
+          "Reudnitz-Thonberg",
+          "Stötteritz",
+          "Probstheida",
+          "Meusdorf"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Südvorstadt",
+          "Connewitz",
+          "Marienbrunn",
+          "Lößnig"
+        ]
+      },
+      {
+        "name": "Südwest",
+        "ortsteile": [
+          "Schleußig",
+          "Plagwitz",
+          "Kleinzschocher",
+          "Großzschocher"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Lindenau",
+          "Altlindenau",
+          "Neulindenau",
+          "Leutzsch"
+        ]
+      },
+      {
+        "name": "Alt-West",
+        "ortsteile": [
+          "Schönau",
+          "Grünau-Ost",
+          "Grünau-Mitte",
+          "Grünau-Siedlung"
+        ]
+      },
+      {
+        "name": "Nordwest",
+        "ortsteile": [
+          "Möckern",
+          "Wahren",
+          "Lützschena-Stahmeln"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Gohlis-Süd",
+          "Gohlis-Mitte",
+          "Gohlis-Nord",
+          "Eutritzsch"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A9", "A14", "A38"],
-      "bundesstrassen": ["B2", "B6", "B87", "B181", "B186"],
-      "knoten": ["Schkeuditzer Kreuz", "Kreuz Leipzig-Nord", "Kreuz Leipzig-Süd", "Dreieck Parthenaue"]
+      "autobahnen": [
+        "A9",
+        "A14",
+        "A38"
+      ],
+      "bundesstrassen": [
+        "B2",
+        "B6",
+        "B87",
+        "B181",
+        "B186"
+      ],
+      "knoten": [
+        "Schkeuditzer Kreuz",
+        "Anschlussstelle Leipzig-Nord",
+        "Kreuz Leipzig-Süd",
+        "Dreieck Parthenaue"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Leipzig vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden — im Stadtgebiet Leipzig meist am Folgetag. Der Sachverständige kommt zu Ihnen, egal ob das Fahrzeug in Connewitz steht, in der Werkstatt in Plagwitz oder nach einem Unfall auf der A14 abgeschleppt wurde." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Leipzig zuständig?", "antwort": "Für Schadensersatzklagen bis 5.000 Euro das Amtsgericht Leipzig, darüber das Landgericht Leipzig. In der Praxis kommt es selten so weit: Die gegnerische Haftpflichtversicherung reguliert bei klarer Haftung meist außergerichtlich, sobald ein unabhängiges Gutachten vorliegt." },
-      { "frage": "Zahlt die Versicherung den Gutachter auch bei einem Unfall auf der A9 oder A14?", "antwort": "Ja. Entscheidend ist nicht der Unfallort, sondern die Haftungsfrage. Waren Sie unverschuldet beteiligt, trägt der gegnerische Haftpflichtversicherer die Gutachterkosten nach § 249 BGB — auf der Autobahn genauso wie im Leipziger Stadtverkehr." },
-      { "frage": "Mein Auto wurde am Leipziger Ring beschädigt, der Verursacher ist weg. Was nun?", "antwort": "Bei Fahrerflucht zahlt Ihre eigene Teil- oder Vollkaskoversicherung, sofern vorhanden. Melden Sie den Schaden bei der Polizei und lassen Sie ihn dokumentieren — ein Gutachten hält Schadenbild und Reparaturkosten fest, auch wenn der Verursacher unbekannt bleibt." },
-      { "frage": "Reicht der Kostenvoranschlag der Werkstatt in Leipzig aus?", "antwort": "Bei einem Bagatellschaden unter etwa 750 Euro ja. Darüber lohnt das Gutachten: Nur der Sachverständige beziffert Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag schlicht fehlen und die Ihnen sonst verloren gehen." },
-      { "frage": "Was kostet mich das Gutachten in Leipzig, wenn ich schuld bin?", "antwort": "Bei selbst verschuldeten Schäden tragen Sie die Kosten oder Ihre Kaskoversicherung. Sprechen Sie vorher mit uns: Wir sagen Ihnen offen, ob sich ein Gutachten für Ihren Fall rechnet oder ob ein Kostenvoranschlag genügt." },
-      { "frage": "Kann ich meine Werkstatt in Leipzig selbst wählen?", "antwort": "Ja. Bei unverschuldetem Unfall haben Sie freie Werkstattwahl — auch wenn die gegnerische Versicherung eine Partnerwerkstatt vorschlägt. Sie dürfen zu Ihrer Vertragswerkstatt in Leipzig, und die Versicherung muss die dortigen Stundensätze erstatten." },
-      { "frage": "Bekomme ich in Leipzig einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in der Klasse Ihres Fahrzeugs. Alternativ steht Ihnen Nutzungsausfall in bar zu, wenn Sie auf den Mietwagen verzichten — bei der Leipziger Verkehrsanbindung mit S-Bahn und Straßenbahn für viele die attraktivere Wahl." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Leipzig Zeit?", "antwort": "Ansprüche verjähren nach drei Jahren zum Jahresende. Warten Sie trotzdem nicht: Je später das Gutachten, desto schwerer wird die Zuordnung des Schadens — und Spuren am Fahrzeug verschwinden mit jeder Reparatur." },
-      { "frage": "Was ist eine Wertminderung und bekomme ich sie in Leipzig auch?", "antwort": "Ein repariertes Unfallfahrzeug ist beim Verkauf weniger wert als ein unfallfreies — diese Differenz heißt merkantile Wertminderung und steht Ihnen zusätzlich zu. Sie wird nur im Gutachten beziffert, nicht im Kostenvoranschlag, und wird in der Praxis oft übersehen." }
+      {
+        "frage": "Zahlt die Versicherung den Gutachter auch bei einem Unfall auf der A9 oder A14?",
+        "antwort": "Ja. Entscheidend ist nicht der Unfallort, sondern die Haftungsfrage. Waren Sie unverschuldet beteiligt, trägt der gegnerische Haftpflichtversicherer die Gutachterkosten nach § 249 BGB — auf der Autobahn genauso wie im Leipziger Stadtverkehr."
+      },
+      {
+        "frage": "Mein Auto wurde am Leipziger Ring beschädigt, der Verursacher ist weg. Was nun?",
+        "antwort": "Bei Fahrerflucht zahlt Ihre eigene Teil- oder Vollkaskoversicherung, sofern vorhanden. Melden Sie den Schaden bei der Polizei und lassen Sie ihn dokumentieren — ein Gutachten hält Schadenbild und Reparaturkosten fest, auch wenn der Verursacher unbekannt bleibt."
+      },
+      {
+        "frage": "Was kostet mich das Gutachten in Leipzig, wenn ich schuld bin?",
+        "antwort": "Bei selbst verschuldeten Schäden tragen Sie die Kosten oder Ihre Kaskoversicherung. Sprechen Sie vorher mit uns: Wir sagen Ihnen offen, ob sich ein Gutachten für Ihren Fall rechnet oder ob ein Kostenvoranschlag genügt."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Leipzig Zeit?",
+        "antwort": "Ansprüche verjähren nach drei Jahren zum Jahresende. Warten Sie trotzdem nicht: Je später das Gutachten, desto schwerer wird die Zuordnung des Schadens — und Spuren am Fahrzeug verschwinden mit jeder Reparatur."
+      }
     ],
     "heroAnker": "Ob nach einem Auffahrunfall auf dem Leipziger Ring, einem Parkschaden in der Innenstadt oder einem Zusammenstoß auf der A14 — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Leipzig verbindet mit A9, A14 und A38 drei Autobahnen zu einem Ring um die Stadt; der Verkehr aus Halle, Dresden und Berlin trifft am Schkeuditzer Kreuz zusammen."
   },
-
   "dortmund": {
     "stadtbezirke": [
-      { "name": "Innenstadt-West", "ortsteile": ["City", "Dorstfelder Brücke", "Kreuzviertel", "Westfalenhalle"] },
-      { "name": "Innenstadt-Ost", "ortsteile": ["Kaiserbrunnen", "Ruhrallee", "Westfalendamm"] },
-      { "name": "Innenstadt-Nord", "ortsteile": ["Borsigplatz", "Hafen", "Nordmarkt"] },
-      { "name": "Eving", "ortsteile": ["Brechten", "Holthausen", "Lindenhorst", "Kemminghausen"] },
-      { "name": "Scharnhorst", "ortsteile": ["Alt-Scharnhorst", "Derne", "Husen", "Kurl", "Lanstrop"] },
-      { "name": "Brackel", "ortsteile": ["Asseln", "Neuasseln", "Wambel", "Wickede"] },
-      { "name": "Aplerbeck", "ortsteile": ["Berghofen", "Schüren", "Sölde", "Sölderholz"] },
-      { "name": "Hörde", "ortsteile": ["Benninghofen", "Höchsten", "Holzen", "Syburg", "Wellinghofen"] },
-      { "name": "Hombruch", "ortsteile": ["Barop", "Brünninghausen", "Eichlinghofen", "Kirchhörde", "Löttringhausen"] },
-      { "name": "Lütgendortmund", "ortsteile": ["Bövinghausen", "Kley", "Marten", "Oespel", "Westrich"] },
-      { "name": "Huckarde", "ortsteile": ["Deusen", "Jungferntal", "Kirchlinde", "Rahm"] },
-      { "name": "Mengede", "ortsteile": ["Bodelschwingh", "Nette", "Oestrich", "Schwieringhausen", "Westerfilde"] }
+      {
+        "name": "Innenstadt-West",
+        "ortsteile": [
+          "City",
+          "Dorstfelder Brücke",
+          "Kreuzviertel",
+          "Westfalenhalle"
+        ]
+      },
+      {
+        "name": "Innenstadt-Ost",
+        "ortsteile": [
+          "Kaiserbrunnen",
+          "Ruhrallee",
+          "Westfalendamm"
+        ]
+      },
+      {
+        "name": "Innenstadt-Nord",
+        "ortsteile": [
+          "Borsigplatz",
+          "Hafen",
+          "Nordmarkt"
+        ]
+      },
+      {
+        "name": "Eving",
+        "ortsteile": [
+          "Brechten",
+          "Holthausen",
+          "Lindenhorst",
+          "Kemminghausen"
+        ]
+      },
+      {
+        "name": "Scharnhorst",
+        "ortsteile": [
+          "Alt-Scharnhorst",
+          "Derne",
+          "Husen",
+          "Kurl",
+          "Lanstrop"
+        ]
+      },
+      {
+        "name": "Brackel",
+        "ortsteile": [
+          "Asseln",
+          "Neuasseln",
+          "Wambel",
+          "Wickede"
+        ]
+      },
+      {
+        "name": "Aplerbeck",
+        "ortsteile": [
+          "Berghofen",
+          "Schüren",
+          "Sölde",
+          "Sölderholz"
+        ]
+      },
+      {
+        "name": "Hörde",
+        "ortsteile": [
+          "Benninghofen",
+          "Höchsten",
+          "Holzen",
+          "Syburg",
+          "Wellinghofen"
+        ]
+      },
+      {
+        "name": "Hombruch",
+        "ortsteile": [
+          "Barop",
+          "Brünninghausen",
+          "Eichlinghofen",
+          "Kirchhörde",
+          "Löttringhausen"
+        ]
+      },
+      {
+        "name": "Lütgendortmund",
+        "ortsteile": [
+          "Bövinghausen",
+          "Kley",
+          "Marten",
+          "Oespel",
+          "Westrich"
+        ]
+      },
+      {
+        "name": "Huckarde",
+        "ortsteile": [
+          "Deusen",
+          "Jungferntal",
+          "Kirchlinde",
+          "Rahm"
+        ]
+      },
+      {
+        "name": "Mengede",
+        "ortsteile": [
+          "Bodelschwingh",
+          "Nette",
+          "Oestrich",
+          "Schwieringhausen",
+          "Westerfilde"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A2", "A40", "A44", "A45"],
-      "bundesstrassen": ["B1", "B54", "B236"],
-      "knoten": ["Kreuz Dortmund/Witten", "Kreuz Dortmund-Nordwest", "Kreuz Dortmund-Unna", "Dreieck Dortmund/Witten"]
+      "autobahnen": [
+        "A1",
+        "A2",
+        "A40",
+        "A44",
+        "A45"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B54",
+        "B236"
+      ],
+      "knoten": [
+        "Kreuz Dortmund-Nordwest",
+        "Autobahnkreuz Dortmund/Unna",
+        "Dreieck Dortmund/Witten"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Dortmund vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Hörde steht, in einer Werkstatt in Hombruch oder nach einem Unfall auf der A40 abgeschleppt wurde." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Dortmund zuständig?", "antwort": "Bis 5.000 Euro Streitwert das Amtsgericht Dortmund, darüber das Landgericht Dortmund. Meist bleibt es außergerichtlich: Liegt ein unabhängiges Gutachten vor und ist die Haftung klar, reguliert die gegnerische Versicherung ohne Klage." },
-      { "frage": "Unfall auf der B1 mitten durch Dortmund — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer, unabhängig davon, ob es auf der B1, der A45 oder im Kreuzviertel passiert ist. Grundlage ist § 249 BGB, nicht der Unfallort." },
-      { "frage": "Die Versicherung schickt mir einen eigenen Gutachter nach Dortmund. Muss ich das annehmen?", "antwort": "Nein. Bei unverschuldetem Unfall wählen Sie den Sachverständigen selbst — das ist Ihr gutes Recht. Der Gutachter der gegnerischen Versicherung arbeitet in deren Auftrag, und seine Zahlen fallen erfahrungsgemäß niedriger aus." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Dortmund?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag genau die Positionen, die Geld bringen: Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert bei wirtschaftlichem Totalschaden." },
-      { "frage": "Kann ich meine Werkstatt in Dortmund frei wählen?", "antwort": "Ja. Auch wenn die gegnerische Versicherung eine Partnerwerkstatt empfiehlt, dürfen Sie zu Ihrer Vertragswerkstatt — und die Versicherung muss deren Stundensätze erstatten, nicht die günstigeren einer Vertragswerkstatt am anderen Ende des Ruhrgebiets." },
-      { "frage": "Bekomme ich einen Mietwagen, während mein Auto in Dortmund repariert wird?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse. Wer auf den Mietwagen verzichtet, bekommt stattdessen Nutzungsausfall in bar — im dicht getakteten Nahverkehr des Ruhrgebiets für viele die bessere Rechnung." },
-      { "frage": "Mein Wagen wurde am Borsigplatz zerkratzt, niemand hat etwas gesehen. Was tun?", "antwort": "Bei Fahrerflucht springt die Teil- oder Vollkasko ein, sofern vorhanden. Melden Sie den Schaden der Polizei und lassen Sie ihn dokumentieren — ein Gutachten hält Schadenbild und Kosten fest, auch ohne bekannten Verursacher." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Dortmund Zeit für meine Ansprüche?", "antwort": "Drei Jahre, gerechnet ab dem Ende des Unfalljahres. Warten Sie dennoch nicht: Ein spätes Gutachten macht die Zuordnung des Schadens schwerer, und nach einer Reparatur ist der Zustand nicht mehr rekonstruierbar." },
-      { "frage": "Was ist Wertminderung und steht sie mir in Dortmund zu?", "antwort": "Ein repariertes Unfallfahrzeug bringt beim Verkauf weniger als ein unfallfreies. Diese Differenz — die merkantile Wertminderung — steht Ihnen zusätzlich zur Reparatur zu, wird aber nur im Gutachten beziffert." }
+      {
+        "frage": "Die Versicherung schickt mir einen eigenen Gutachter nach Dortmund. Muss ich das annehmen?",
+        "antwort": "Nein. Bei unverschuldetem Unfall wählen Sie den Sachverständigen selbst — das ist Ihr gutes Recht. Der Gutachter der gegnerischen Versicherung arbeitet in deren Auftrag, und seine Zahlen fallen erfahrungsgemäß niedriger aus."
+      },
+      {
+        "frage": "Mein Wagen wurde am Borsigplatz zerkratzt, niemand hat etwas gesehen. Was tun?",
+        "antwort": "Bei Fahrerflucht springt die Teil- oder Vollkasko ein, sofern vorhanden. Melden Sie den Schaden der Polizei und lassen Sie ihn dokumentieren — ein Gutachten hält Schadenbild und Kosten fest, auch ohne bekannten Verursacher."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Dortmund Zeit für meine Ansprüche?",
+        "antwort": "Drei Jahre, gerechnet ab dem Ende des Unfalljahres. Warten Sie dennoch nicht: Ein spätes Gutachten macht die Zuordnung des Schadens schwerer, und nach einer Reparatur ist der Zustand nicht mehr rekonstruierbar."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der B1, Parkschaden in der City oder Zusammenstoß am Kreuz Dortmund-Nordwest — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Durch Dortmund laufen mit A1, A2, A40, A44 und A45 fünf Autobahnen; die B1 quert die Stadt als innerstädtische Hauptachse von West nach Ost."
   },
-
   "essen": {
     "stadtbezirke": [
-      { "name": "Stadtbezirk I — Stadtkern", "ortsteile": ["Stadtkern", "Ostviertel", "Nordviertel", "Westviertel", "Südviertel", "Südostviertel", "Huttrop", "Frillendorf"] },
-      { "name": "Stadtbezirk II — Rüttenscheid", "ortsteile": ["Rüttenscheid", "Rellinghausen", "Bergerhausen", "Stadtwald"] },
-      { "name": "Stadtbezirk III — West", "ortsteile": ["Altendorf", "Frohnhausen", "Holsterhausen", "Fulerum", "Margarethenhöhe"] },
-      { "name": "Stadtbezirk IV — Borbeck", "ortsteile": ["Borbeck-Mitte", "Bochold", "Bedingrade", "Frintrop", "Dellwig", "Gerschede"] },
-      { "name": "Stadtbezirk V — Altenessen", "ortsteile": ["Altenessen-Nord", "Altenessen-Süd", "Karnap", "Vogelheim"] },
-      { "name": "Stadtbezirk VI — Zollverein", "ortsteile": ["Katernberg", "Schonnebeck", "Stoppenberg"] },
-      { "name": "Stadtbezirk VII — Steele", "ortsteile": ["Steele", "Kray", "Freisenbruch", "Horst", "Leithe"] },
-      { "name": "Stadtbezirk VIII — Ruhrhalbinsel", "ortsteile": ["Überruhr", "Burgaltendorf", "Byfang", "Kupferdreh"] },
-      { "name": "Stadtbezirk IX — Werden", "ortsteile": ["Werden", "Bredeney", "Heidhausen", "Fischlaken", "Schuir"] }
+      {
+        "name": "Stadtbezirk I — Stadtkern",
+        "ortsteile": [
+          "Stadtkern",
+          "Ostviertel",
+          "Nordviertel",
+          "Westviertel",
+          "Südviertel",
+          "Südostviertel",
+          "Huttrop",
+          "Frillendorf"
+        ]
+      },
+      {
+        "name": "Stadtbezirk II — Rüttenscheid",
+        "ortsteile": [
+          "Rüttenscheid",
+          "Rellinghausen",
+          "Bergerhausen",
+          "Stadtwald"
+        ]
+      },
+      {
+        "name": "Stadtbezirk III — West",
+        "ortsteile": [
+          "Altendorf",
+          "Frohnhausen",
+          "Holsterhausen",
+          "Fulerum",
+          "Margarethenhöhe"
+        ]
+      },
+      {
+        "name": "Stadtbezirk IV — Borbeck",
+        "ortsteile": [
+          "Borbeck-Mitte",
+          "Bochold",
+          "Bedingrade",
+          "Frintrop",
+          "Dellwig",
+          "Gerschede"
+        ]
+      },
+      {
+        "name": "Stadtbezirk V — Altenessen",
+        "ortsteile": [
+          "Altenessen-Nord",
+          "Altenessen-Süd",
+          "Karnap",
+          "Vogelheim"
+        ]
+      },
+      {
+        "name": "Stadtbezirk VI — Zollverein",
+        "ortsteile": [
+          "Katernberg",
+          "Schonnebeck",
+          "Stoppenberg"
+        ]
+      },
+      {
+        "name": "Stadtbezirk VII — Steele",
+        "ortsteile": [
+          "Steele",
+          "Kray",
+          "Freisenbruch",
+          "Horst",
+          "Leithe"
+        ]
+      },
+      {
+        "name": "Stadtbezirk VIII — Ruhrhalbinsel",
+        "ortsteile": [
+          "Überruhr",
+          "Burgaltendorf",
+          "Byfang",
+          "Kupferdreh"
+        ]
+      },
+      {
+        "name": "Stadtbezirk IX — Werden",
+        "ortsteile": [
+          "Werden",
+          "Bredeney",
+          "Heidhausen",
+          "Fischlaken",
+          "Schuir"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A40", "A42", "A52"],
-      "bundesstrassen": ["B224", "B227"],
-      "knoten": ["Kreuz Essen-Nord", "Kreuz Essen-Ost", "Dreieck Essen-Ost"]
+      "autobahnen": [
+        "A40",
+        "A42",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B224",
+        "B227"
+      ],
+      "knoten": [
+        "Anschlussstelle Essen-Nord",
+        "Dreieck Essen-Ost"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Essen vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Rüttenscheid steht, in Werden oder nach einem Unfall auf der A40 in einer Werkstatt gelandet ist." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Essen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Essen, darüber das Landgericht Essen. In den meisten Fällen genügt jedoch ein unabhängiges Gutachten, damit die gegnerische Versicherung außergerichtlich reguliert." },
-      { "frage": "Unfall auf der A40 mitten durch Essen — wer trägt die Gutachterkosten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob der Unfall auf der A40, der A52 oder an einer Kreuzung in Altenessen passiert ist, spielt für diesen Anspruch keine Rolle." },
-      { "frage": "Muss ich den Gutachter der gegnerischen Versicherung akzeptieren?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind. Der Gutachter der Gegenseite arbeitet in deren Interesse — und kommt erfahrungsgemäß zu niedrigeren Schadenhöhen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Essen?", "antwort": "Bei Bagatellschäden unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die schnell vierstellig werden." },
-      { "frage": "Kann ich meine Werkstatt in Essen selbst aussuchen?", "antwort": "Ja, Sie haben freie Werkstattwahl. Auch ein Verweis der Versicherung auf eine günstigere Partnerwerkstatt ändert daran nichts — bei einem fachgerecht gewarteten Fahrzeug dürfen Sie zu Ihrer Vertragswerkstatt." },
-      { "frage": "Steht mir während der Reparatur in Essen ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält Nutzungsausfall in bar — angesichts der dichten Verbindungen von Bahn und Straßenbahn in Essen oft die lohnendere Variante." },
-      { "frage": "Mein Auto wurde in der Innenstadt beschädigt und der Verursacher ist weg. Was jetzt?", "antwort": "Erstatten Sie Anzeige und lassen Sie den Schaden dokumentieren. Für die Kosten kommt bei Fahrerflucht Ihre Teil- oder Vollkasko auf; ein Gutachten hält fest, was tatsächlich beschädigt wurde." },
-      { "frage": "Wie lange habe ich in Essen Zeit, meine Ansprüche geltend zu machen?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Praktisch sollten Sie deutlich früher handeln — nach einer Reparatur lässt sich der Schadenumfang kaum noch belegen." },
-      { "frage": "Was bedeutet Wertminderung nach einem Unfall in Essen?", "antwort": "Ein repariertes Unfallfahrzeug erzielt beim Verkauf weniger als ein unfallfreies. Diese Differenz können Sie zusätzlich verlangen — sie taucht ausschließlich im Gutachten auf." }
+      {
+        "frage": "Mein Auto wurde in der Innenstadt beschädigt und der Verursacher ist weg. Was jetzt?",
+        "antwort": "Erstatten Sie Anzeige und lassen Sie den Schaden dokumentieren. Für die Kosten kommt bei Fahrerflucht Ihre Teil- oder Vollkasko auf; ein Gutachten hält fest, was tatsächlich beschädigt wurde."
+      },
+      {
+        "frage": "Wie lange habe ich in Essen Zeit, meine Ansprüche geltend zu machen?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Praktisch sollten Sie deutlich früher handeln — nach einer Reparatur lässt sich der Schadenumfang kaum noch belegen."
+      },
+      {
+        "frage": "Was bedeutet Wertminderung nach einem Unfall in Essen?",
+        "antwort": "Ein repariertes Unfallfahrzeug erzielt beim Verkauf weniger als ein unfallfreies. Diese Differenz können Sie zusätzlich verlangen — sie taucht ausschließlich im Gutachten auf."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in Rüttenscheid oder Zusammenstoß an der Kreuzung in Altenessen — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Die A40 durchquert Essen als Ruhrschnellweg mitten durch das Stadtgebiet; nördlich verläuft die A42 als Emscherschnellweg, südlich die A52 Richtung Düsseldorf."
   },
-
   "bremen": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Bahnhofsvorstadt", "Ostertor", "Fesenfeld", "Steintor"] },
-      { "name": "Süd", "ortsteile": ["Neustadt", "Buntentor", "Hohentor", "Huckelriede", "Woltmershausen"] },
-      { "name": "Ost", "ortsteile": ["Schwachhausen", "Horn-Lehe", "Hastedt", "Hemelingen", "Osterholz", "Vahr"] },
-      { "name": "West", "ortsteile": ["Walle", "Gröpelingen", "Findorff", "Oslebshausen"] },
-      { "name": "Nord", "ortsteile": ["Vegesack", "Blumenthal", "Burglesum", "Grohn", "Aumund"] },
-      { "name": "Häfen", "ortsteile": ["Industriehäfen", "Überseestadt", "Neustädter Hafen"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Bahnhofsvorstadt",
+          "Ostertor",
+          "Fesenfeld",
+          "Steintor"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Neustadt",
+          "Buntentor",
+          "Hohentor",
+          "Huckelriede",
+          "Woltmershausen"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Schwachhausen",
+          "Horn-Lehe",
+          "Hastedt",
+          "Hemelingen",
+          "Osterholz",
+          "Vahr"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Walle",
+          "Gröpelingen",
+          "Findorff",
+          "Oslebshausen"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Vegesack",
+          "Blumenthal",
+          "Burglesum",
+          "Grohn",
+          "Aumund"
+        ]
+      },
+      {
+        "name": "Häfen",
+        "ortsteile": [
+          "Industriehäfen",
+          "Überseestadt",
+          "Neustädter Hafen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A27", "A270", "A281"],
-      "bundesstrassen": ["B6", "B75", "B74"],
-      "knoten": ["Kreuz Bremen", "Dreieck Bremen-Industriehäfen", "Dreieck Bremen-Nord"]
+      "autobahnen": [
+        "A1",
+        "A27",
+        "A270",
+        "A281"
+      ],
+      "bundesstrassen": [
+        "B6",
+        "B75",
+        "B74"
+      ],
+      "knoten": [
+        "Bremer Kreuz",
+        "Dreieck Bremen-Industriehäfen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bremen vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Neustadt steht, in Vegesack oder nach einem Unfall auf der A1 abgeschleppt wurde." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bremen zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bremen, darüber das Landgericht Bremen. Mit einem unabhängigen Gutachten reguliert die gegnerische Versicherung in aller Regel ohne Gerichtsverfahren." },
-      { "frage": "Unfall auf der A1 bei Bremen — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ändert daran nichts, ob A1, A27 oder eine Kreuzung in Hemelingen." },
-      { "frage": "Kann ich den Gutachter in Bremen selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die Versicherung der Gegenseite. Deren eigener Gutachter vertritt naturgemäß deren Interessen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bremen aus?", "antwort": "Unter etwa 750 Euro genügt er. Darüber fehlen die Positionen, die den Unterschied machen: Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert bei Totalschaden." },
-      { "frage": "Darf ich meine Werkstatt in Bremen frei wählen?", "antwort": "Ja. Die freie Werkstattwahl bleibt auch dann bestehen, wenn die Versicherung eine Partnerwerkstatt vorschlägt — bei scheckheftgepflegten Fahrzeugen dürfen Sie zur Vertragswerkstatt." },
-      { "frage": "Bekomme ich in Bremen einen Mietwagen für die Reparaturdauer?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Alternativ steht Ihnen Nutzungsausfall in bar zu — wer in Bremen ohnehin viel mit der Straßenbahn fährt, wählt oft diese Variante." },
-      { "frage": "Fahrerflucht in Bremen — was kann ich tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Die Kosten übernimmt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko; das Gutachten belegt Umfang und Höhe des Schadens." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Bremen Zeit?", "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Handeln Sie trotzdem zügig — ist das Fahrzeug erst repariert, lässt sich der ursprüngliche Schaden kaum noch nachweisen." },
-      { "frage": "Was ist die merkantile Wertminderung?", "antwort": "Der Wertverlust, den Ihr Fahrzeug allein dadurch erleidet, dass es als Unfallwagen gilt — auch nach fachgerechter Reparatur. Diesen Betrag können Sie zusätzlich fordern, er steht nur im Gutachten." }
+      {
+        "frage": "Fahrerflucht in Bremen — was kann ich tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Die Kosten übernimmt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko; das Gutachten belegt Umfang und Höhe des Schadens."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Bremen Zeit?",
+        "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Handeln Sie trotzdem zügig — ist das Fahrzeug erst repariert, lässt sich der ursprüngliche Schaden kaum noch nachweisen."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A1, Parkschaden in der Überseestadt oder Zusammenstoß in Vegesack — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Bremen liegt am Kreuz von A1 und A27; die A281 schließt die Häfen an, während die Weser Stadtteile im Norden und Süden voneinander trennt."
   },
-
   "dresden": {
     "stadtbezirke": [
-      { "name": "Altstadt", "ortsteile": ["Innere Altstadt", "Wilsdruffer Vorstadt", "Seevorstadt", "Johannstadt", "Striesen", "Blasewitz"] },
-      { "name": "Neustadt", "ortsteile": ["Innere Neustadt", "Äußere Neustadt", "Albertstadt", "Radeberger Vorstadt", "Leipziger Vorstadt"] },
-      { "name": "Pieschen", "ortsteile": ["Pieschen-Süd", "Pieschen-Nord", "Trachau", "Kaditz", "Mickten"] },
-      { "name": "Klotzsche", "ortsteile": ["Klotzsche", "Hellerau", "Wilschdorf", "Rähnitz"] },
-      { "name": "Loschwitz", "ortsteile": ["Loschwitz", "Weißer Hirsch", "Bühlau", "Rochwitz", "Pillnitz"] },
-      { "name": "Leuben", "ortsteile": ["Leuben", "Laubegast", "Kleinzschachwitz", "Niedersedlitz", "Dobritz"] },
-      { "name": "Prohlis", "ortsteile": ["Prohlis", "Reick", "Strehlen", "Torna", "Lockwitz"] },
-      { "name": "Plauen", "ortsteile": ["Plauen", "Südvorstadt", "Räcknitz", "Zschertnitz", "Coschütz"] },
-      { "name": "Cotta", "ortsteile": ["Cotta", "Löbtau", "Gorbitz", "Briesnitz", "Naußlitz"] }
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Innere Altstadt",
+          "Wilsdruffer Vorstadt",
+          "Seevorstadt",
+          "Johannstadt",
+          "Striesen",
+          "Blasewitz"
+        ]
+      },
+      {
+        "name": "Neustadt",
+        "ortsteile": [
+          "Innere Neustadt",
+          "Äußere Neustadt",
+          "Albertstadt",
+          "Radeberger Vorstadt",
+          "Leipziger Vorstadt"
+        ]
+      },
+      {
+        "name": "Pieschen",
+        "ortsteile": [
+          "Pieschen-Süd",
+          "Pieschen-Nord",
+          "Trachau",
+          "Kaditz",
+          "Mickten"
+        ]
+      },
+      {
+        "name": "Klotzsche",
+        "ortsteile": [
+          "Klotzsche",
+          "Hellerau",
+          "Wilschdorf",
+          "Rähnitz"
+        ]
+      },
+      {
+        "name": "Loschwitz",
+        "ortsteile": [
+          "Loschwitz",
+          "Weißer Hirsch",
+          "Bühlau",
+          "Rochwitz",
+          "Pillnitz"
+        ]
+      },
+      {
+        "name": "Leuben",
+        "ortsteile": [
+          "Leuben",
+          "Laubegast",
+          "Kleinzschachwitz",
+          "Niedersedlitz",
+          "Dobritz"
+        ]
+      },
+      {
+        "name": "Prohlis",
+        "ortsteile": [
+          "Prohlis",
+          "Reick",
+          "Strehlen",
+          "Torna",
+          "Lockwitz"
+        ]
+      },
+      {
+        "name": "Plauen",
+        "ortsteile": [
+          "Plauen",
+          "Südvorstadt",
+          "Räcknitz",
+          "Zschertnitz",
+          "Coschütz"
+        ]
+      },
+      {
+        "name": "Cotta",
+        "ortsteile": [
+          "Cotta",
+          "Löbtau",
+          "Gorbitz",
+          "Briesnitz",
+          "Naußlitz"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A4", "A13", "A17"],
-      "bundesstrassen": ["B6", "B97", "B170", "B172", "B173"],
-      "knoten": ["Dreieck Dresden-West", "Dreieck Dresden-Nord", "Kreuz Dresden-Süd"]
+      "autobahnen": [
+        "A4",
+        "A13",
+        "A17"
+      ],
+      "bundesstrassen": [
+        "B6",
+        "B97",
+        "B170",
+        "B172",
+        "B173"
+      ],
+      "knoten": [
+        "Dreieck Dresden-West",
+        "Dreieck Dresden-Nord"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Dresden vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Neustadt steht, in Blasewitz oder nach einem Unfall auf der A4 in der Werkstatt." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Dresden zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Dresden, darüber das Landgericht Dresden. Meist bleibt es außergerichtlich, sobald ein unabhängiges Gutachten die Schadenhöhe belegt." },
-      { "frage": "Unfall auf der A17 Richtung Prag — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Das gilt auf der A17 ebenso wie auf der A4 oder im Dresdner Stadtverkehr." },
-      { "frage": "Die gegnerische Versicherung will einen eigenen Gutachter schicken. Muss ich zustimmen?", "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst. Der Gutachter der Gegenseite arbeitet in deren Auftrag — mit entsprechend zurückhaltenden Zahlen." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Dresden?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — und damit oft ein vierstelliger Betrag." },
-      { "frage": "Kann ich meine Werkstatt in Dresden frei wählen?", "antwort": "Ja. Auch ein Verweis der Versicherung auf eine Partnerwerkstatt hebt Ihre freie Werkstattwahl nicht auf; bei gepflegtem Fahrzeug dürfen Sie zur Vertragswerkstatt." },
-      { "frage": "Steht mir während der Reparatur ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse. Wer verzichtet, bekommt Nutzungsausfall in bar ausgezahlt." },
-      { "frage": "Mein Auto wurde in der Äußeren Neustadt beschädigt, niemand war da. Was tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei Fahrerflucht zahlt Ihre Teil- oder Vollkasko; das Gutachten hält Schadenbild und Kosten fest." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Dresden Zeit?", "antwort": "Drei Jahre bis zum Ende des dritten Jahres nach dem Unfall. Warten Sie dennoch nicht — mit jeder Reparatur wird die Beweislage schlechter." },
-      { "frage": "Was ist Wertminderung und steht sie mir zu?", "antwort": "Ein repariertes Unfallfahrzeug bringt beim Verkauf weniger als ein unfallfreies. Diese merkantile Wertminderung können Sie zusätzlich verlangen — beziffert wird sie nur im Gutachten." }
+      {
+        "frage": "Die gegnerische Versicherung will einen eigenen Gutachter schicken. Muss ich zustimmen?",
+        "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst. Der Gutachter der Gegenseite arbeitet in deren Auftrag — mit entsprechend zurückhaltenden Zahlen."
+      },
+      {
+        "frage": "Mein Auto wurde in der Äußeren Neustadt beschädigt, niemand war da. Was tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei Fahrerflucht zahlt Ihre Teil- oder Vollkasko; das Gutachten hält Schadenbild und Kosten fest."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Dresden Zeit?",
+        "antwort": "Drei Jahre bis zum Ende des dritten Jahres nach dem Unfall. Warten Sie dennoch nicht — mit jeder Reparatur wird die Beweislage schlechter."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Äußeren Neustadt oder Zusammenstoß auf der Elbbrücke — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Die A4 führt westlich an Dresden vorbei, die A17 verbindet die Stadt mit Tschechien; die Elbe teilt Dresden in Altstadt und Neustadt und bündelt den Verkehr auf wenige Brücken."
   },
-
   "hannover": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Mitte", "Calenberger Neustadt", "Oststadt", "Zooviertel"] },
-      { "name": "Vahrenwald-List", "ortsteile": ["Vahrenwald", "List"] },
-      { "name": "Bothfeld-Vahrenheide", "ortsteile": ["Bothfeld", "Vahrenheide", "Isernhagen-Süd", "Lahe", "Sahlkamp"] },
-      { "name": "Buchholz-Kleefeld", "ortsteile": ["Buchholz", "Kleefeld", "Groß-Buchholz", "Heideviertel"] },
-      { "name": "Misburg-Anderten", "ortsteile": ["Misburg-Nord", "Misburg-Süd", "Anderten"] },
-      { "name": "Kirchrode-Bemerode-Wülferode", "ortsteile": ["Kirchrode", "Bemerode", "Wülferode"] },
-      { "name": "Döhren-Wülfel", "ortsteile": ["Döhren", "Wülfel", "Mittelfeld", "Waldheim", "Seelhorst"] },
-      { "name": "Ricklingen", "ortsteile": ["Ricklingen", "Oberricklingen", "Mühlenberg", "Wettbergen", "Bornum"] },
-      { "name": "Linden-Limmer", "ortsteile": ["Linden-Nord", "Linden-Mitte", "Linden-Süd", "Limmer"] },
-      { "name": "Herrenhausen-Stöcken", "ortsteile": ["Herrenhausen", "Stöcken", "Burg", "Ledeburg", "Marienwerder"] },
-      { "name": "Nord", "ortsteile": ["Nordstadt", "Hainholz", "Vinnhorst", "Brink-Hafen"] },
-      { "name": "Südstadt-Bult", "ortsteile": ["Südstadt", "Bult"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Mitte",
+          "Calenberger Neustadt",
+          "Oststadt",
+          "Zooviertel"
+        ]
+      },
+      {
+        "name": "Vahrenwald-List",
+        "ortsteile": [
+          "Vahrenwald",
+          "List"
+        ]
+      },
+      {
+        "name": "Bothfeld-Vahrenheide",
+        "ortsteile": [
+          "Bothfeld",
+          "Vahrenheide",
+          "Isernhagen-Süd",
+          "Lahe",
+          "Sahlkamp"
+        ]
+      },
+      {
+        "name": "Buchholz-Kleefeld",
+        "ortsteile": [
+          "Buchholz",
+          "Kleefeld",
+          "Groß-Buchholz",
+          "Heideviertel"
+        ]
+      },
+      {
+        "name": "Misburg-Anderten",
+        "ortsteile": [
+          "Misburg-Nord",
+          "Misburg-Süd",
+          "Anderten"
+        ]
+      },
+      {
+        "name": "Kirchrode-Bemerode-Wülferode",
+        "ortsteile": [
+          "Kirchrode",
+          "Bemerode",
+          "Wülferode"
+        ]
+      },
+      {
+        "name": "Döhren-Wülfel",
+        "ortsteile": [
+          "Döhren",
+          "Wülfel",
+          "Mittelfeld",
+          "Waldheim",
+          "Seelhorst"
+        ]
+      },
+      {
+        "name": "Ricklingen",
+        "ortsteile": [
+          "Ricklingen",
+          "Oberricklingen",
+          "Mühlenberg",
+          "Wettbergen",
+          "Bornum"
+        ]
+      },
+      {
+        "name": "Linden-Limmer",
+        "ortsteile": [
+          "Linden-Nord",
+          "Linden-Mitte",
+          "Linden-Süd",
+          "Limmer"
+        ]
+      },
+      {
+        "name": "Herrenhausen-Stöcken",
+        "ortsteile": [
+          "Herrenhausen",
+          "Stöcken",
+          "Burg",
+          "Ledeburg",
+          "Marienwerder"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nordstadt",
+          "Hainholz",
+          "Vinnhorst",
+          "Brink-Hafen"
+        ]
+      },
+      {
+        "name": "Südstadt-Bult",
+        "ortsteile": [
+          "Südstadt",
+          "Bult"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A7", "A37", "A352"],
-      "bundesstrassen": ["B3", "B6", "B65", "B217", "B443"],
-      "knoten": ["Kreuz Hannover-Ost", "Kreuz Hannover-Kirchhorst", "Dreieck Hannover-Süd", "Dreieck Hannover-West"]
+      "autobahnen": [
+        "A2",
+        "A7",
+        "A37",
+        "A352"
+      ],
+      "bundesstrassen": [
+        "B3",
+        "B6",
+        "B65",
+        "B217",
+        "B443"
+      ],
+      "knoten": [
+        "Kreuz Hannover-Ost",
+        "Autobahnkreuz Hannover/Kirchhorst",
+        "Dreieck Hannover-Süd",
+        "Dreieck Hannover-West"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Hannover vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der List steht, in Linden oder nach einem Unfall auf der A2 abgeschleppt wurde." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Hannover zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Hannover, darüber das Landgericht Hannover. Mit einem unabhängigen Gutachten reguliert die gegnerische Versicherung meist außergerichtlich." },
-      { "frage": "Unfall auf der A2 oder A7 bei Hannover — wer trägt die Gutachterkosten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort spielt keine Rolle, entscheidend ist die Haftungsfrage." },
-      { "frage": "Muss ich den Gutachter der Versicherung akzeptieren?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind — der Gutachter der Gegenseite arbeitet für deren Interessen." },
-      { "frage": "Reicht der Kostenvoranschlag einer Werkstatt in Hannover?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — Positionen, die im Kostenvoranschlag grundsätzlich nicht auftauchen." },
-      { "frage": "Kann ich meine Werkstatt in Hannover selbst wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen. Auch wenn die Versicherung eine günstigere Partnerwerkstatt vorschlägt, dürfen Sie zur Vertragswerkstatt Ihres Vertrauens." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer darauf verzichtet, erhält stattdessen Nutzungsausfall als Geldbetrag." },
-      { "frage": "Fahrerflucht in Hannover — wer zahlt meinen Schaden?", "antwort": "Bleibt der Verursacher unbekannt, greift Ihre Teil- oder Vollkasko. Erstatten Sie Anzeige und lassen Sie den Schaden dokumentieren, bevor Sie reparieren." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Hannover Zeit?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Praktisch sollten Sie deutlich früher handeln, weil der Schaden nach der Reparatur nicht mehr belegbar ist." },
-      { "frage": "Was bedeutet Wertminderung nach einem Unfall?", "antwort": "Ihr Fahrzeug gilt nach dem Unfall als Unfallwagen und bringt beim Verkauf weniger — auch fachgerecht repariert. Diese Differenz steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Muss ich den Gutachter der Versicherung akzeptieren?",
+        "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind — der Gutachter der Gegenseite arbeitet für deren Interessen."
+      },
+      {
+        "frage": "Fahrerflucht in Hannover — wer zahlt meinen Schaden?",
+        "antwort": "Bleibt der Verursacher unbekannt, greift Ihre Teil- oder Vollkasko. Erstatten Sie Anzeige und lassen Sie den Schaden dokumentieren, bevor Sie reparieren."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Hannover Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Praktisch sollten Sie deutlich früher handeln, weil der Schaden nach der Reparatur nicht mehr belegbar ist."
+      },
+      {
+        "frage": "Was bedeutet Wertminderung nach einem Unfall?",
+        "antwort": "Ihr Fahrzeug gilt nach dem Unfall als Unfallwagen und bringt beim Verkauf weniger — auch fachgerecht repariert. Diese Differenz steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Nordstadt oder Zusammenstoß am Messeschnellweg — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Hannover liegt am Schnittpunkt von A2 und A7; der Messeschnellweg als B6 führt den Verkehr aus dem Süden direkt an die Innenstadt heran."
   },
-
   "nuernberg": {
     "stadtbezirke": [
-      { "name": "Altstadt", "ortsteile": ["Sebalder Altstadt", "Lorenzer Altstadt"] },
-      { "name": "Gostenhof", "ortsteile": ["Gostenhof", "Sündersbühl", "Muggenhof"] },
-      { "name": "St. Johannis", "ortsteile": ["St. Johannis", "Bielingplatz", "Wetzendorf"] },
-      { "name": "Wöhrd", "ortsteile": ["Wöhrd", "Tullnau"] },
-      { "name": "Gleißhammer", "ortsteile": ["Gleißhammer", "Dutzendteich", "Zabo"] },
-      { "name": "Langwasser", "ortsteile": ["Langwasser-Nord", "Langwasser-Südwest", "Langwasser-Südost"] },
-      { "name": "Eibach", "ortsteile": ["Eibach", "Reichelsdorf", "Krottenbach"] },
-      { "name": "Röthenbach", "ortsteile": ["Röthenbach bei Schweinau", "Gaismannshof", "Höfen"] },
-      { "name": "Schweinau", "ortsteile": ["Schweinau", "Sandreuth", "Gibitzenhof"] },
-      { "name": "Ziegelstein", "ortsteile": ["Ziegelstein", "Buchenbühl", "Marienberg"] }
+      {
+        "name": "Altstadt",
+        "ortsteile": [
+          "Sebalder Altstadt",
+          "Lorenzer Altstadt"
+        ]
+      },
+      {
+        "name": "Gostenhof",
+        "ortsteile": [
+          "Gostenhof",
+          "Sündersbühl",
+          "Muggenhof"
+        ]
+      },
+      {
+        "name": "St. Johannis",
+        "ortsteile": [
+          "St. Johannis",
+          "Bielingplatz",
+          "Wetzendorf"
+        ]
+      },
+      {
+        "name": "Wöhrd",
+        "ortsteile": [
+          "Wöhrd",
+          "Tullnau"
+        ]
+      },
+      {
+        "name": "Gleißhammer",
+        "ortsteile": [
+          "Gleißhammer",
+          "Dutzendteich",
+          "Zabo"
+        ]
+      },
+      {
+        "name": "Langwasser",
+        "ortsteile": [
+          "Langwasser-Nord",
+          "Langwasser-Südwest",
+          "Langwasser-Südost"
+        ]
+      },
+      {
+        "name": "Eibach",
+        "ortsteile": [
+          "Eibach",
+          "Reichelsdorf",
+          "Krottenbach"
+        ]
+      },
+      {
+        "name": "Röthenbach",
+        "ortsteile": [
+          "Röthenbach bei Schweinau",
+          "Gaismannshof",
+          "Höfen"
+        ]
+      },
+      {
+        "name": "Schweinau",
+        "ortsteile": [
+          "Schweinau",
+          "Sandreuth",
+          "Gibitzenhof"
+        ]
+      },
+      {
+        "name": "Ziegelstein",
+        "ortsteile": [
+          "Ziegelstein",
+          "Buchenbühl",
+          "Marienberg"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A6", "A9", "A73"],
-      "bundesstrassen": ["B4", "B8", "B14"],
-      "knoten": ["Kreuz Nürnberg", "Dreieck Nürnberg-Ost", "Kreuz Nürnberg-Süd", "Dreieck Fürth/Erlangen"]
+      "autobahnen": [
+        "A3",
+        "A6",
+        "A9",
+        "A73"
+      ],
+      "bundesstrassen": [
+        "B4",
+        "B8",
+        "B14"
+      ],
+      "knoten": [
+        "Kreuz Nürnberg",
+        "Dreieck Nürnberg-Ost",
+        "Kreuz Nürnberg-Süd",
+        "Kreuz Fürth/Erlangen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Nürnberg vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in der Altstadt steht, in Langwasser oder nach einem Unfall auf der A3." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Nürnberg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Nürnberg, darüber das Landgericht Nürnberg-Fürth. Mit einem unabhängigen Gutachten kommt es meist gar nicht erst zur Klage." },
-      { "frage": "Unfall am Kreuz Nürnberg — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig davon, ob es auf der A3, der A9 oder innerorts passiert ist." },
-      { "frage": "Kann ich den Gutachter in Nürnberg selbst bestimmen?", "antwort": "Ja. Als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung, deren Gutachter naturgemäß deren Interessen vertritt." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert — häufig ein vierstelliger Unterschied." },
-      { "frage": "Darf ich meine Werkstatt in Nürnberg frei wählen?", "antwort": "Ja. Die freie Werkstattwahl gilt auch dann, wenn die Versicherung eine Partnerwerkstatt nennt — bei gepflegtem Fahrzeug dürfen Sie zur Vertragswerkstatt." },
-      { "frage": "Steht mir ein Mietwagen zu, während mein Auto repariert wird?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Alternativ zahlt die Versicherung Nutzungsausfall in bar." },
-      { "frage": "Parkschaden in der Nürnberger Altstadt, Verursacher unbekannt — was tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei Fahrerflucht übernimmt die Teil- oder Vollkasko; das Gutachten belegt den Umfang." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Nürnberg Zeit?", "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Zögern Sie trotzdem nicht: Ein repariertes Fahrzeug lässt sich nicht mehr begutachten." },
-      { "frage": "Was ist die merkantile Wertminderung?", "antwort": "Der Wertverlust, der allein daraus entsteht, dass Ihr Fahrzeug als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur bestehen und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Kann ich den Gutachter in Nürnberg selbst bestimmen?",
+        "antwort": "Ja. Als unverschuldet Geschädigter wählen Sie den Sachverständigen — nicht die gegnerische Versicherung, deren Gutachter naturgemäß deren Interessen vertritt."
+      },
+      {
+        "frage": "Parkschaden in der Nürnberger Altstadt, Verursacher unbekannt — was tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei Fahrerflucht übernimmt die Teil- oder Vollkasko; das Gutachten belegt den Umfang."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Nürnberg Zeit?",
+        "antwort": "Drei Jahre ab dem Ende des Unfalljahres. Zögern Sie trotzdem nicht: Ein repariertes Fahrzeug lässt sich nicht mehr begutachten."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A9, Parkschaden in der Altstadt oder Zusammenstoß am Frankenschnellweg — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Am Kreuz Nürnberg treffen A3, A6 und A9 aufeinander; der Frankenschnellweg führt als A73 mitten durch das Stadtgebiet."
   },
-
   "duisburg": {
     "stadtbezirke": [
-      { "name": "Walsum", "ortsteile": ["Alt-Walsum", "Aldenrade", "Vierlinden", "Overbruch", "Wehofen"] },
-      { "name": "Hamborn", "ortsteile": ["Alt-Hamborn", "Marxloh", "Neumühl", "Obermarxloh", "Röttgersbach"] },
-      { "name": "Meiderich/Beeck", "ortsteile": ["Meiderich", "Beeck", "Bruckhausen", "Laar", "Beeckerwerth"] },
-      { "name": "Homberg/Ruhrort/Baerl", "ortsteile": ["Homberg", "Ruhrort", "Baerl", "Hochheide"] },
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Neuenkamp", "Kaßlerfeld", "Duissern", "Neudorf", "Dellviertel"] },
-      { "name": "Rheinhausen", "ortsteile": ["Friemersheim", "Hochemmerich", "Bergheim", "Rumeln-Kaldenhausen"] },
-      { "name": "Süd", "ortsteile": ["Buchholz", "Wanheimerort", "Großenbaum", "Rahm", "Huckingen", "Ungelsheim"] }
+      {
+        "name": "Walsum",
+        "ortsteile": [
+          "Alt-Walsum",
+          "Aldenrade",
+          "Vierlinden",
+          "Overbruch",
+          "Wehofen"
+        ]
+      },
+      {
+        "name": "Hamborn",
+        "ortsteile": [
+          "Alt-Hamborn",
+          "Marxloh",
+          "Neumühl",
+          "Obermarxloh",
+          "Röttgersbach"
+        ]
+      },
+      {
+        "name": "Meiderich/Beeck",
+        "ortsteile": [
+          "Meiderich",
+          "Beeck",
+          "Bruckhausen",
+          "Laar",
+          "Beeckerwerth"
+        ]
+      },
+      {
+        "name": "Homberg/Ruhrort/Baerl",
+        "ortsteile": [
+          "Homberg",
+          "Ruhrort",
+          "Baerl",
+          "Hochheide"
+        ]
+      },
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Neuenkamp",
+          "Kaßlerfeld",
+          "Duissern",
+          "Neudorf",
+          "Dellviertel"
+        ]
+      },
+      {
+        "name": "Rheinhausen",
+        "ortsteile": [
+          "Friemersheim",
+          "Hochemmerich",
+          "Bergheim",
+          "Rumeln-Kaldenhausen"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Buchholz",
+          "Wanheimerort",
+          "Großenbaum",
+          "Rahm",
+          "Huckingen",
+          "Ungelsheim"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A3", "A40", "A42", "A59"],
-      "bundesstrassen": ["B8", "B288"],
-      "knoten": ["Kreuz Duisburg-Kaiserberg", "Kreuz Duisburg-Nord", "Kreuz Duisburg-Süd", "Dreieck Duisburg-Kaiserberg"]
+      "autobahnen": [
+        "A3",
+        "A40",
+        "A42",
+        "A59"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B288"
+      ],
+      "knoten": [
+        "Kreuz Kaiserberg",
+        "Kreuz Duisburg-Nord",
+        "Kreuz Duisburg-Süd"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Duisburg vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Rheinhausen steht, in Marxloh oder nach einem Unfall am Kaiserberg." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Duisburg zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Duisburg, darüber das Landgericht Duisburg. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall am Kreuz Kaiserberg — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Ob A3, A40 oder eine Kreuzung in Meiderich, ändert daran nichts." },
-      { "frage": "Muss ich den Gutachter der gegnerischen Versicherung nehmen?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt waren — das ist Ihr Recht als Geschädigter." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Duisburg?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen im Kostenvoranschlag Wertminderung, Nutzungsausfall und der Wiederbeschaffungswert." },
-      { "frage": "Kann ich meine Werkstatt in Duisburg selbst wählen?", "antwort": "Ja. Auch ein Verweis auf eine Partnerwerkstatt der Versicherung ändert nichts an Ihrer freien Werkstattwahl." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Fahrzeugklasse — oder wahlweise Nutzungsausfall in bar." },
-      { "frage": "Mein Fahrzeug wurde in Duisburg beschädigt, der Verursacher ist weg. Was tun?", "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die eigene Teil- oder Vollkasko einschalten. Das Gutachten hält fest, was beschädigt wurde und was die Instandsetzung kostet." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Duisburg Zeit?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie aber vor jeder Reparatur handeln." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Betrag, um den Ihr Fahrzeug beim Verkauf weniger wert ist, weil es einen Unfall hatte. Er steht Ihnen zusätzlich zur Reparatur zu und wird nur im Gutachten ausgewiesen." }
+      {
+        "frage": "Mein Fahrzeug wurde in Duisburg beschädigt, der Verursacher ist weg. Was tun?",
+        "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die eigene Teil- oder Vollkasko einschalten. Das Gutachten hält fest, was beschädigt wurde und was die Instandsetzung kostet."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Duisburg Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie aber vor jeder Reparatur handeln."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Altstadt oder Zusammenstoß am Kreuz Kaiserberg — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Am Kreuz Duisburg-Kaiserberg treffen A3 und A40 aufeinander; Rhein und Ruhr teilen das Stadtgebiet und bündeln den Verkehr auf wenige Brücken."
   },
-
   "bochum": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Innenstadt", "Hamme", "Hofstede", "Grumme", "Altenbochum", "Wiemelhausen"] },
-      { "name": "Wattenscheid", "ortsteile": ["Wattenscheid-Mitte", "Höntrop", "Westenfeld", "Günnigfeld", "Leithe"] },
-      { "name": "Nord", "ortsteile": ["Riemke", "Bergen", "Hiltrop", "Gerthe", "Harpen", "Grumme"] },
-      { "name": "Ost", "ortsteile": ["Werne", "Langendreer", "Laer"] },
-      { "name": "Süd", "ortsteile": ["Wiemelhausen", "Querenburg", "Stiepel", "Steinkuhl"] },
-      { "name": "Südwest", "ortsteile": ["Weitmar", "Linden", "Dahlhausen", "Sundern"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Hamme",
+          "Hofstede",
+          "Grumme",
+          "Altenbochum",
+          "Wiemelhausen"
+        ]
+      },
+      {
+        "name": "Wattenscheid",
+        "ortsteile": [
+          "Wattenscheid-Mitte",
+          "Höntrop",
+          "Westenfeld",
+          "Günnigfeld",
+          "Leithe"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Riemke",
+          "Bergen",
+          "Hiltrop",
+          "Gerthe",
+          "Harpen",
+          "Grumme"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Werne",
+          "Langendreer",
+          "Laer"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Wiemelhausen",
+          "Querenburg",
+          "Stiepel",
+          "Steinkuhl"
+        ]
+      },
+      {
+        "name": "Südwest",
+        "ortsteile": [
+          "Weitmar",
+          "Linden",
+          "Dahlhausen",
+          "Sundern"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A40", "A43", "A44", "A448"],
-      "bundesstrassen": ["B51", "B226"],
-      "knoten": ["Kreuz Bochum", "Kreuz Bochum/Witten", "Dreieck Bochum-West"]
+      "autobahnen": [
+        "A40",
+        "A43",
+        "A448"
+      ],
+      "bundesstrassen": [
+        "B51",
+        "B226"
+      ],
+      "knoten": [
+        "Kreuz Bochum",
+        "Kreuz Bochum/Witten",
+        "Dreieck Bochum-West"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bochum vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Langendreer steht, in Wattenscheid oder nach einem Unfall auf der A40." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bochum zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bochum, darüber das Landgericht Bochum. Mit einem unabhängigen Gutachten reguliert die Gegenseite meist ohne Gerichtsverfahren." },
-      { "frage": "Unfall auf der A40 in Bochum — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort ist dafür unerheblich." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja, als unverschuldet Geschädigter bestimmen Sie den Sachverständigen. Der Gutachter der gegnerischen Versicherung arbeitet in deren Auftrag." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bochum?", "antwort": "Bei Bagatellschäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Bochum frei wählen?", "antwort": "Ja. Auch wenn die Versicherung eine Partnerwerkstatt vorschlägt, bleibt Ihnen die freie Werkstattwahl erhalten." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder alternativ Nutzungsausfall als Geldbetrag." },
-      { "frage": "Fahrerflucht in Bochum — was kann ich tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei unbekanntem Verursacher zahlt die Teil- oder Vollkasko." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Bochum Zeit?", "antwort": "Drei Jahre ab dem Jahresende. Handeln Sie dennoch früh — nach der Reparatur ist der Schaden nicht mehr nachweisbar." },
-      { "frage": "Was ist merkantile Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt — auch nach fachgerechter Reparatur. Sie steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Fahrerflucht in Bochum — was kann ich tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen. Bei unbekanntem Verursacher zahlt die Teil- oder Vollkasko."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Bochum Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende. Handeln Sie dennoch früh — nach der Reparatur ist der Schaden nicht mehr nachweisbar."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A40, Parkschaden in der Innenstadt oder Zusammenstoß am Kreuz Bochum — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Die A40 durchquert Bochum als Ruhrschnellweg von West nach Ost; die A43 kreuzt sie in Nord-Süd-Richtung und verbindet das Münsterland mit dem Sauerland."
   },
-
   "wuppertal": {
     "stadtbezirke": [
-      { "name": "Elberfeld", "ortsteile": ["Elberfeld-Mitte", "Nordstadt", "Ostersbaum", "Grifflenberg"] },
-      { "name": "Elberfeld-West", "ortsteile": ["Zoo", "Varresbeck", "Sonnborn", "Buchenhofen"] },
-      { "name": "Barmen", "ortsteile": ["Barmen-Mitte", "Wupperfeld", "Rott", "Clausen"] },
-      { "name": "Oberbarmen", "ortsteile": ["Wichlinghausen", "Nächstebreck", "Hilgershöhe"] },
-      { "name": "Vohwinkel", "ortsteile": ["Vohwinkel", "Schöller-Dornap", "Osterholz", "Tesche"] },
-      { "name": "Cronenberg", "ortsteile": ["Cronenberg", "Küllenhahn", "Hahnerberg", "Sudberg"] },
-      { "name": "Ronsdorf", "ortsteile": ["Ronsdorf", "Erbschlö", "Blombach"] },
-      { "name": "Uellendahl-Katernberg", "ortsteile": ["Uellendahl", "Katernberg", "Dönberg"] },
-      { "name": "Heckinghausen", "ortsteile": ["Heckinghausen", "Hesselnberg"] },
-      { "name": "Langerfeld-Beyenburg", "ortsteile": ["Langerfeld", "Beyenburg", "Jesinghausen"] }
+      {
+        "name": "Elberfeld",
+        "ortsteile": [
+          "Elberfeld-Mitte",
+          "Nordstadt",
+          "Ostersbaum",
+          "Grifflenberg"
+        ]
+      },
+      {
+        "name": "Elberfeld-West",
+        "ortsteile": [
+          "Zoo",
+          "Varresbeck",
+          "Sonnborn",
+          "Buchenhofen"
+        ]
+      },
+      {
+        "name": "Barmen",
+        "ortsteile": [
+          "Barmen-Mitte",
+          "Wupperfeld",
+          "Rott",
+          "Clausen"
+        ]
+      },
+      {
+        "name": "Oberbarmen",
+        "ortsteile": [
+          "Wichlinghausen",
+          "Nächstebreck",
+          "Hilgershöhe"
+        ]
+      },
+      {
+        "name": "Vohwinkel",
+        "ortsteile": [
+          "Vohwinkel",
+          "Schöller-Dornap",
+          "Osterholz",
+          "Tesche"
+        ]
+      },
+      {
+        "name": "Cronenberg",
+        "ortsteile": [
+          "Cronenberg",
+          "Küllenhahn",
+          "Hahnerberg",
+          "Sudberg"
+        ]
+      },
+      {
+        "name": "Ronsdorf",
+        "ortsteile": [
+          "Ronsdorf",
+          "Erbschlö",
+          "Blombach"
+        ]
+      },
+      {
+        "name": "Uellendahl-Katernberg",
+        "ortsteile": [
+          "Uellendahl",
+          "Katernberg",
+          "Dönberg"
+        ]
+      },
+      {
+        "name": "Heckinghausen",
+        "ortsteile": [
+          "Heckinghausen",
+          "Hesselnberg"
+        ]
+      },
+      {
+        "name": "Langerfeld-Beyenburg",
+        "ortsteile": [
+          "Langerfeld",
+          "Beyenburg",
+          "Jesinghausen"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A1", "A46", "A535"],
-      "bundesstrassen": ["B7", "B228", "B326"],
-      "knoten": ["Kreuz Wuppertal-Nord", "Kreuz Wuppertal-Oberbarmen", "Dreieck Wuppertal-Nord"]
+      "autobahnen": [
+        "A1",
+        "A46",
+        "A535"
+      ],
+      "bundesstrassen": [
+        "B7",
+        "B228",
+        "B326"
+      ],
+      "knoten": [
+        "Sonnborner Kreuz (A46/A535)",
+        "Kreuz Wuppertal-Nord",
+        "Anschlussstelle Wuppertal-Oberbarmen"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Wuppertal vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Elberfeld steht, in Barmen oder nach einem Unfall auf der A46." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Wuppertal zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Wuppertal, darüber das Landgericht Wuppertal. Mit einem unabhängigen Gutachten bleibt es meist außergerichtlich." },
-      { "frage": "Unfall auf der A46 durch das Tal — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, unabhängig vom Unfallort." },
-      { "frage": "Muss ich den Gutachter der Versicherung akzeptieren?", "antwort": "Nein. Als unverschuldet Geschädigter wählen Sie den Sachverständigen selbst." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Wuppertal?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Kann ich meine Werkstatt in Wuppertal selbst wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt bestehen — auch gegen den Vorschlag einer Partnerwerkstatt der Versicherung." },
-      { "frage": "Bekomme ich einen Mietwagen während der Reparatur?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse. Wer verzichtet, bekommt Nutzungsausfall ausgezahlt — in einer Stadt mit Schwebebahn für manche die bessere Wahl." },
-      { "frage": "Parkschaden in Wuppertal, Verursacher unbekannt — was tun?", "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die Teil- oder Vollkasko einschalten." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Wuppertal Zeit?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Warten Sie dennoch nicht bis zur Reparatur." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, weil Ihr Fahrzeug künftig als Unfallwagen gilt. Er bleibt auch nach fachgerechter Reparatur und steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Parkschaden in Wuppertal, Verursacher unbekannt — was tun?",
+        "antwort": "Anzeige erstatten, Schaden dokumentieren lassen und die Teil- oder Vollkasko einschalten."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Wuppertal Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres. Warten Sie dennoch nicht bis zur Reparatur."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in Elberfeld oder Zusammenstoß an der B7 — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Wuppertal zieht sich als Bandstadt durch das Tal der Wupper; die B7 folgt dem Talgrund, während die A46 den Verkehr oberhalb der Hänge führt."
   },
-
   "bielefeld": {
     "stadtbezirke": [
-      { "name": "Mitte", "ortsteile": ["Altstadt", "Nordpark", "Sieker", "Sudbrack", "Siegfriedplatz"] },
-      { "name": "Schildesche", "ortsteile": ["Schildesche", "Gellershagen", "Sudbrack", "Vilsendorf", "Theesen"] },
-      { "name": "Gadderbaum", "ortsteile": ["Gadderbaum", "Bethel", "Bielefelder Berg"] },
-      { "name": "Brackwede", "ortsteile": ["Brackwede", "Quelle", "Ummeln", "Holtkamp"] },
-      { "name": "Dornberg", "ortsteile": ["Babenhausen", "Dornberg", "Hoberge-Uerentrup", "Schröttinghausen"] },
-      { "name": "Jöllenbeck", "ortsteile": ["Jöllenbeck", "Theenhausen", "Vilsendorf"] },
-      { "name": "Heepen", "ortsteile": ["Heepen", "Altenhagen", "Brake", "Milse", "Oldentrup"] },
-      { "name": "Stieghorst", "ortsteile": ["Stieghorst", "Hillegossen", "Lämershagen", "Ubbedissen"] },
-      { "name": "Sennestadt", "ortsteile": ["Sennestadt", "Eckardtsheim"] },
-      { "name": "Senne", "ortsteile": ["Senne", "Windelsbleiche", "Buschkamp"] }
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Altstadt",
+          "Nordpark",
+          "Sieker",
+          "Sudbrack",
+          "Siegfriedplatz"
+        ]
+      },
+      {
+        "name": "Schildesche",
+        "ortsteile": [
+          "Schildesche",
+          "Gellershagen",
+          "Sudbrack",
+          "Vilsendorf",
+          "Theesen"
+        ]
+      },
+      {
+        "name": "Gadderbaum",
+        "ortsteile": [
+          "Gadderbaum",
+          "Bethel",
+          "Bielefelder Berg"
+        ]
+      },
+      {
+        "name": "Brackwede",
+        "ortsteile": [
+          "Brackwede",
+          "Quelle",
+          "Ummeln",
+          "Holtkamp"
+        ]
+      },
+      {
+        "name": "Dornberg",
+        "ortsteile": [
+          "Babenhausen",
+          "Dornberg",
+          "Hoberge-Uerentrup",
+          "Schröttinghausen"
+        ]
+      },
+      {
+        "name": "Jöllenbeck",
+        "ortsteile": [
+          "Jöllenbeck",
+          "Theenhausen",
+          "Vilsendorf"
+        ]
+      },
+      {
+        "name": "Heepen",
+        "ortsteile": [
+          "Heepen",
+          "Altenhagen",
+          "Brake",
+          "Milse",
+          "Oldentrup"
+        ]
+      },
+      {
+        "name": "Stieghorst",
+        "ortsteile": [
+          "Stieghorst",
+          "Hillegossen",
+          "Lämershagen",
+          "Ubbedissen"
+        ]
+      },
+      {
+        "name": "Sennestadt",
+        "ortsteile": [
+          "Sennestadt",
+          "Eckardtsheim"
+        ]
+      },
+      {
+        "name": "Senne",
+        "ortsteile": [
+          "Senne",
+          "Windelsbleiche",
+          "Buschkamp"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A2", "A33"],
-      "bundesstrassen": ["B61", "B66", "B68"],
-      "knoten": ["Kreuz Bielefeld", "Dreieck Bielefeld", "Kreuz Bielefeld-Ost"]
+      "autobahnen": [
+        "A2",
+        "A33"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B66",
+        "B68"
+      ],
+      "knoten": [
+        "Kreuz Bielefeld"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bielefeld vor Ort?", "antwort": "Meist innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Brackwede steht, in Heepen oder nach einem Unfall auf der A2." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bielefeld zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bielefeld, darüber das Landgericht Bielefeld. Ein unabhängiges Gutachten führt meist zur außergerichtlichen Regulierung." },
-      { "frage": "Unfall auf der A2 oder A33 — wer zahlt das Gutachten?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB, ganz gleich wo der Unfall geschah." },
-      { "frage": "Kann ich den Gutachter selbst wählen?", "antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen, nicht die Versicherung der Gegenseite." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bielefeld?", "antwort": "Bei Schäden unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert." },
-      { "frage": "Darf ich meine Werkstatt in Bielefeld frei wählen?", "antwort": "Ja, die freie Werkstattwahl bleibt Ihnen auch dann, wenn die Versicherung eine Partnerwerkstatt vorschlägt." },
-      { "frage": "Steht mir ein Mietwagen zu?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder wahlweise Nutzungsausfall in bar." },
-      { "frage": "Fahrerflucht in Bielefeld — was tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; die Kosten trägt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Bielefeld Zeit?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — handeln Sie dennoch vor der Reparatur." },
-      { "frage": "Was ist Wertminderung?", "antwort": "Der Wertverlust, der bleibt, weil Ihr Fahrzeug als Unfallwagen gilt. Er wird nur im Gutachten beziffert und steht Ihnen zusätzlich zu." }
+      {
+        "frage": "Fahrerflucht in Bielefeld — was tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; die Kosten trägt bei unbekanntem Verursacher Ihre Teil- oder Vollkasko."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Bielefeld Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — handeln Sie dennoch vor der Reparatur."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A2, Parkschaden in der Altstadt oder Zusammenstoß am Ostwestfalendamm — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Bielefeld liegt am Durchbruch des Teutoburger Waldes; die A2 führt nördlich vorbei, die A33 quert den Höhenzug und der Ostwestfalendamm als B61 durchschneidet die Stadt."
   },
-
   "bonn": {
     "stadtbezirke": [
-      { "name": "Bonn", "ortsteile": ["Zentrum", "Nordstadt", "Südstadt", "Weststadt", "Castell", "Gronau", "Poppelsdorf", "Endenich", "Kessenich", "Dottendorf"] },
-      { "name": "Bad Godesberg", "ortsteile": ["Godesberg-Villenviertel", "Godesberg-Nord", "Plittersdorf", "Rüngsdorf", "Muffendorf", "Mehlem", "Lannesdorf", "Friesdorf"] },
-      { "name": "Beuel", "ortsteile": ["Beuel-Mitte", "Beuel-Ost", "Limperich", "Küdinghoven", "Oberkassel", "Holzlar", "Vilich", "Pützchen"] },
-      { "name": "Hardtberg", "ortsteile": ["Duisdorf", "Lengsdorf", "Brüser Berg", "Lessenich", "Meßdorf"] }
+      {
+        "name": "Bonn",
+        "ortsteile": [
+          "Zentrum",
+          "Nordstadt",
+          "Südstadt",
+          "Weststadt",
+          "Castell",
+          "Gronau",
+          "Poppelsdorf",
+          "Endenich",
+          "Kessenich",
+          "Dottendorf"
+        ]
+      },
+      {
+        "name": "Bad Godesberg",
+        "ortsteile": [
+          "Godesberg-Villenviertel",
+          "Godesberg-Nord",
+          "Plittersdorf",
+          "Rüngsdorf",
+          "Muffendorf",
+          "Mehlem",
+          "Lannesdorf",
+          "Friesdorf"
+        ]
+      },
+      {
+        "name": "Beuel",
+        "ortsteile": [
+          "Beuel-Mitte",
+          "Beuel-Ost",
+          "Limperich",
+          "Küdinghoven",
+          "Oberkassel",
+          "Holzlar",
+          "Vilich",
+          "Pützchen"
+        ]
+      },
+      {
+        "name": "Hardtberg",
+        "ortsteile": [
+          "Duisdorf",
+          "Lengsdorf",
+          "Brüser Berg",
+          "Lessenich",
+          "Meßdorf"
+        ]
+      }
     ],
     "hauptachsen": {
-      "autobahnen": ["A59", "A555", "A562", "A565"],
-      "bundesstrassen": ["B9", "B42", "B56"],
-      "knoten": ["Kreuz Bonn-Nord", "Kreuz Bonn-Ost", "Dreieck Bonn-Nordost", "Kreuz Bonn/Siegburg"]
+      "autobahnen": [
+        "A59",
+        "A555",
+        "A562",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B9",
+        "B42",
+        "B56"
+      ],
+      "knoten": [
+        "Kreuz Bonn-Nord",
+        "Kreuz Bonn-Ost",
+        "Dreieck Bonn-Nordost",
+        "Kreuz Bonn/Siegburg"
+      ]
     },
     "unfallHotspots": [],
     "lokaleFaqs": [
-      { "frage": "Wie schnell ist ein Kfz-Gutachter in Bonn vor Ort?", "antwort": "In der Regel innerhalb von 24 bis 48 Stunden. Der Sachverständige kommt zu Ihnen — ob das Fahrzeug in Beuel steht, in Bad Godesberg oder nach einem Unfall auf der A565." },
-      { "frage": "Welches Gericht ist bei einem Verkehrsunfall in Bonn zuständig?", "antwort": "Bis 5.000 Euro das Amtsgericht Bonn, darüber das Landgericht Bonn. Liegt ein unabhängiges Gutachten vor, reguliert die gegnerische Versicherung meist außergerichtlich." },
-      { "frage": "Unfall auf der A565 oder dem Tausendfüßler — wer zahlt den Gutachter?", "antwort": "Bei unverschuldetem Unfall der gegnerische Haftpflichtversicherer nach § 249 BGB. Der Unfallort spielt keine Rolle." },
-      { "frage": "Muss ich den Gutachter der gegnerischen Versicherung nehmen?", "antwort": "Nein. Sie wählen den Sachverständigen selbst, wenn Sie unverschuldet beteiligt sind." },
-      { "frage": "Reicht ein Kostenvoranschlag der Werkstatt in Bonn?", "antwort": "Unter etwa 750 Euro ja. Darüber fehlen Wertminderung, Nutzungsausfall und Wiederbeschaffungswert im Kostenvoranschlag." },
-      { "frage": "Kann ich meine Werkstatt in Bonn frei wählen?", "antwort": "Ja. Auch ein Verweis der Versicherung auf eine Partnerwerkstatt ändert nichts an Ihrer freien Werkstattwahl." },
-      { "frage": "Bekomme ich einen Mietwagen für die Reparaturzeit?", "antwort": "Bei unverschuldetem Unfall ja, in vergleichbarer Klasse — oder alternativ Nutzungsausfall in bar." },
-      { "frage": "Mein Auto wurde in Bonn beschädigt, der Verursacher ist weg. Was tun?", "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; bei Fahrerflucht zahlt Ihre Teil- oder Vollkasko." },
-      { "frage": "Wie lange habe ich nach einem Unfall in Bonn Zeit?", "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie vor der Reparatur handeln." },
-      { "frage": "Was ist die merkantile Wertminderung?", "antwort": "Der Wertverlust, den Ihr Fahrzeug erleidet, weil es künftig als Unfallwagen gilt. Er steht Ihnen zusätzlich zu und wird nur im Gutachten beziffert." }
+      {
+        "frage": "Mein Auto wurde in Bonn beschädigt, der Verursacher ist weg. Was tun?",
+        "antwort": "Anzeige erstatten und den Schaden dokumentieren lassen; bei Fahrerflucht zahlt Ihre Teil- oder Vollkasko."
+      },
+      {
+        "frage": "Wie lange habe ich nach einem Unfall in Bonn Zeit?",
+        "antwort": "Drei Jahre ab dem Jahresende des Unfalljahres — praktisch sollten Sie vor der Reparatur handeln."
+      }
     ],
     "heroAnker": "Ob Auffahrunfall auf der A565, Parkschaden in der Südstadt oder Zusammenstoß auf der Kennedybrücke — der Sachverständige kommt zu Ihnen.",
     "topografieAnker": "Der Rhein teilt Bonn in die linksrheinische Innenstadt und Beuel; die A565 führt als Stadtautobahn mitten hindurch, die B9 folgt dem Strom nach Süden."

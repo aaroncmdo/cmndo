@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
+import { istUnbekannterPasswortFehler, uebersetzePasswortFehler } from '@/lib/auth/passwort-fehler'
 
 // AAR-auth-haertung: Passwort-Wechsel als Server-Action.
 //
@@ -56,7 +57,16 @@ export async function setzeNeuesPasswort(
 
   const { error: updateError } = await supabase.auth.updateUser({ password: neuesPasswort })
   if (updateError) {
-    return { ok: false, error: updateError.message }
+    // ⚠ Supabase antwortet auf ENGLISCH und prueft zusaetzlich SELBST gegen
+    // Have-I-Been-Pwned (password_hibp_enabled=true) — anders als unsere Policy
+    // oben aber fail-CLOSED. Faellt HIBP kurz aus, laesst unsere Pruefung durch
+    // und Supabase lehnt ab; der Nutzer sah bis 24.08. die rohe englische
+    // Meldung und blieb mit force_password_change=true haengen (Prod-Vorfall
+    // 23.08., frisch registrierter Sachverstaendiger).
+    if (istUnbekannterPasswortFehler(updateError.message)) {
+      console.error('[passwort-aendern] unbekannter Supabase-Fehler:', updateError.message)
+    }
+    return { ok: false, error: uebersetzePasswortFehler(updateError.message) }
   }
 
   // force_password_change zuruecksetzen — GARANTIERT via Service-Role (nicht dem
