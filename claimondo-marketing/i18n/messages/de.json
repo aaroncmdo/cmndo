@@ -163,8 +163,8 @@
         "description": "Kostenlos, in Sekunden. Reparaturkosten + Wiederbeschaffungswert."
       },
       "step3": {
-        "title": "Gutachter vor Ort",
-        "description": "Termin in Ihrer Region, Gutachten in 48 Stunden."
+        "title": "Gutachter kommt zu Ihnen",
+        "description": "Wir kommen dorthin, wo Ihr Auto steht. Gutachten in 48 Stunden."
       },
       "cta": "Jetzt Schaden melden",
       "duration_hint": "Dauert ca. 3 Minuten"
@@ -964,7 +964,7 @@
         },
         {
           "kpi": "< 48 h",
-          "label": "Termin mit Gutachter vor Ort"
+          "label": "Termin bei Ihrem Fahrzeug"
         },
         {
           "kpi": "BVSK",
@@ -2445,7 +2445,7 @@
       "badge": "In 32 Tagen zum Geld · Live im Portal",
       "h1_plain": "Vom Unfall zur Auszahlung —",
       "h1_accent": "in 5 Schritten.",
-      "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter vor Ort in unter 48 Stunden, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
+      "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter kommt in unter 48 Stunden zu Ihrem Fahrzeug, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
       "cta_primary": "Schaden online melden"
     },
     "kpis": [
@@ -2455,7 +2455,7 @@
       },
       {
         "wert": "< 48 h",
-        "label": "bis zum Gutachter vor Ort"
+        "label": "bis der Gutachter bei Ihnen ist"
       },
       {
         "wert": "5 Werktage",
