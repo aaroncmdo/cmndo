@@ -31,7 +31,10 @@ export async function WertminderungSandenDannerSection() {
             })}
           </p>
 
-          <div className="mt-6 rounded-2xl border-l-4 border-claimondo-ondo bg-claimondo-bg p-5">
+          {/* Voller Rahmen statt Balken links (KI-Erkennungszeichen); noetig, weil
+              bg-claimondo-bg der Seitenhintergrund ist. rounded-2xl -> rounded-ios-lg
+              nach der Radius-Konvention aus AGENTS.md. */}
+          <div className="mt-6 rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-5">
             <p className="text-xs font-bold uppercase tracking-wider text-claimondo-ondo">
               {t('wertminderung.rechenbeispiel_eyebrow')}
             </p>

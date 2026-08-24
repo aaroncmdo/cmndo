@@ -13,8 +13,12 @@ type Props = {
 
 export function AnswerCapsule({ children, quelle }: Props) {
   const t = useTranslations('shared')
+  // Voller Rahmen statt farbigem Balken links: der Balken ist das bekannteste
+  // Erkennungszeichen KI-generierter Oberflaechen. Ein Rahmen ist hier noetig,
+  // weil bg-claimondo-bg dieselbe Farbe hat wie der Seitenhintergrund (#f8f9fb) —
+  // ohne ihn haette die Karte gar keine Kante.
   return (
-    <div className="my-6 rounded-ios-md border-l-4 border-claimondo-ondo bg-claimondo-bg p-5 shadow-sm">
+    <div className="my-6 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 shadow-sm">
       {quelle && (
         <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-claimondo-ondo">
           {t('antwort_label')} · {quelle}
