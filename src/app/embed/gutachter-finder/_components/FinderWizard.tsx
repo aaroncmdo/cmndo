@@ -27,6 +27,7 @@ import { track, reservierungConversion, rueckrufConversion } from '../_lib/track
 import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
 import { resolveWerkstattOrt } from './werkstatt-ort'
+import { TeilnahmeHinweis } from '@/components/gewinnspiel/TeilnahmeHinweis'
 import type {
   DeadPinOeffentlich,
   OeffentlichesSvProfil,
@@ -654,6 +655,10 @@ export function FinderWizard({
             />
             <span>Ich willige ein, dass Claimondo mich zur Schadenabwicklung kontaktiert.</span>
           </label>
+          {/* Spec 6.3: automatische Gewinnspiel-Teilnahme ist eine Verarbeitung
+              zu einem neuen Zweck und braucht einen sichtbaren Hinweis. Rendert
+              sich selbst nur, wenn tatsaechlich eine Kampagne laeuft. */}
+          <TeilnahmeHinweis />
           {fehler && (
             <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
               {fehler}

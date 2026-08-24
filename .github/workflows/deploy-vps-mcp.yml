@@ -50,7 +50,7 @@ concurrency:
 jobs:
   pruefen:
     name: Build-Gate (das die App-CI nicht faehrt)
-    runs-on: [self-hosted, claimondo]
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -83,7 +83,7 @@ jobs:
   deploy:
     name: Pull + Restart + Protokoll-Verifikation
     needs: pruefen
-    runs-on: [self-hosted, claimondo]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Deploy → VPS
