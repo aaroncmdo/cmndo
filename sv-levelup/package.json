@@ -1,0 +1,37 @@
+{
+  "name": "sv-levelup",
+  "version": "0.1.0",
+  "private": true,
+  "description": "sv-levelup.claimondo.de — Sichtbarkeits-Check für Kfz-Sachverständige (STANDALONE-Build, eigener Release-Zyklus, eigene Marke).",
+  "scripts": {
+    "dev": "next dev -p 3011",
+    "build": "next build",
+    "start": "next start -p 3011",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "anreicherung": "node --env-file=.env.local --import tsx scripts/anreicherung.ts",
+    "discovery": "node --env-file=.env.local --import tsx scripts/discovery.ts",
+    "heilung": "node --env-file=.env.local --import tsx scripts/heilung.ts",
+    "websites": "node --env-file=.env.local --import tsx scripts/websites.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.106.1",
+    "next": "16.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.23.12",
+    "typescript": "^5",
+    "vitest": "^4.1.4"
+  }
+}

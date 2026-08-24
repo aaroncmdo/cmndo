@@ -1,0 +1,46 @@
+# sv-levelup · standalone Next.js — eigener .gitignore. Die Root-.gitignore von
+# claimondo-v2 nutzt `/node_modules` und `/.next/` mit fuehrendem Slash und
+# matcht damit NUR Root-Level, nicht dieses Unterprojekt. Ohne diese Datei
+# landen ~23.000 Build-Artefakte im Commit (beim Anlegen per Dry-Run gefangen).
+# Gleiches Muster wie claimondo-marketing/.gitignore.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+!.env.example
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+.playwright-cli/
+
+# Fortschritt abgebrochener Discovery-Laeufe — Zwischenstand, kein Quelltext
+.discovery-fortschritt-*.json
+
+# Fortschritt der Website-Anreicherung — Zwischenstand, kein Quelltext
+.websites-fortschritt.json
+
+# Laufprotokolle und PID der Massenlaeufe — Betriebsspuren, kein Quelltext.
+# (Der Anreicherungslauf vom 23./24.08. schrieb ein 900-KB-Log; solche Dateien
+# gehoeren nicht in die Historie, sind aber zum Nachvollziehen wertvoll.)
+*-lauf.log
+.anreicherung-pid
+.discovery-pid
