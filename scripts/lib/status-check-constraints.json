@@ -568,6 +568,13 @@
       "wbw",
       "wertminderung"
     ],
+    "gewinnspiel_teilnahmen.status": [
+      "abgelehnt",
+      "bestaetigt",
+      "gezogen",
+      "nachweis_offen",
+      "offen"
+    ],
     "gutachten.gutachten_kalkulationssystem": [
       "audatex",
       "autoixpert",
