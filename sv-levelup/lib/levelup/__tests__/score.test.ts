@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { berechneScore } from '../score'
 import { istGueltig } from '../messwert'
+import { TEILBEFUND_SCHWELLE } from '../registry'
 
 describe('Score und Teilbefund', () => {
   it('rechnet den Score auf die erhebbaren Punkte, nicht auf die Gesamtpunkte', () => {
@@ -8,17 +9,17 @@ describe('Score und Teilbefund', () => {
   })
 
   it('gibt bei Weg B ohne Ads-/Meta-Konto und ohne GSC einen Score aus', () => {
-    // 150 - 14 (kwg) - 8 (kwm) - 12 (gsc) = 116
-    expect(berechneScore(40, 116).keinScore).toBe(false)
+    // 160 - 14 (kwg) - 8 (kwm) - 12 (gsc) = 126
+    expect(berechneScore(40, 126).keinScore).toBe(false)
   })
 
   it('gibt bei Weg A ohne Website einen Score aus', () => {
-    // 80 erhebbar, knapp ueber der Schwelle von 75
-    expect(berechneScore(30, 80).keinScore).toBe(false)
+    // 90 erhebbar, ueber der Schwelle
+    expect(berechneScore(30, 90).keinScore).toBe(false)
   })
 
   it('verweigert den Score beim Massenlauf-Teilbefund', () => {
-    // web 12 + seo 12 + ux 12 + verz 12 = 48 -> unter 75
+    // web 12 + seo 12 + ux 12 + verz 12 = 48 -> unter der Schwelle
     expect(berechneScore(20, 48)).toEqual({ score: null, keinScore: true })
   })
 
@@ -27,7 +28,11 @@ describe('Score und Teilbefund', () => {
   })
 
   it('gibt bei genau der Schwelle noch einen Score aus', () => {
-    expect(berechneScore(50, 75).keinScore).toBe(false)
+    // ⚠ An die Konstante gebunden: die Schwelle ist die Haelfte der
+    // Modulpunkte und wandert mit jedem neuen Modul. Eine abgeschriebene Zahl
+    // wuerde hier nicht die Grenze pruefen, sondern eine von gestern.
+    expect(berechneScore(50, TEILBEFUND_SCHWELLE).keinScore).toBe(false)
+    expect(berechneScore(50, TEILBEFUND_SCHWELLE - 1).keinScore).toBe(true)
   })
 
   it('faengt punkteErhebbar = 0 ab, statt durch null zu teilen', () => {
