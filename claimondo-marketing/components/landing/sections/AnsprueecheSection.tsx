@@ -1,8 +1,6 @@
 import Link from 'next/link'
 import { ChevronRight } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { SiebenFehlerSection } from '../SiebenFehlerSection'
-import { TeslaEAutoSection } from './TeslaEAutoSection'
 
 // Phase B1 (21->12 Section-Komponenten): AnsprueecheSection bündelt den
 // „Was Ihnen zusteht"-Block. Sie komponiert die vormals Inline-Sektion #4
@@ -115,11 +113,40 @@ export async function AnsprueecheSection() {
         </div>
       </section>
 
-      {/* 19 — Sieben Fehler (Wissensdatenbank §12) */}
-      <SiebenFehlerSection />
-
-      {/* 14 — Tesla / E-Auto (Sub-Block) */}
-      <TeslaEAutoSection />
+      {/* Statt der beiden Bloecke: zwei Verweise.
+          SiebenFehlerSection (3.147 Zeichen) und TeslaEAutoSection standen hier
+          UND auf /wie-es-funktioniert, /vorteile sowie jeder der 294 Stadtseiten
+          — gemessen 24.08.2026 zu 100 % identisch. Auf der Startseite kosteten
+          sie zusammen 3.750 px, ohne etwas beizutragen, was nicht anderswo steht.
+          Der Inhalt bleibt vollstaendig erhalten, die Startseite verweist darauf. */}
+      <section className="bg-claimondo-bg py-10" aria-label="Weiterfuehrende Ratgeber">
+        <div className="mx-auto grid max-w-6xl gap-3 px-4 sm:grid-cols-2 sm:px-6">
+          <Link
+            href="/wie-es-funktioniert"
+            className="group flex items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-white px-5 py-4 transition-colors hover:border-claimondo-ondo"
+          >
+            <span className="text-sm font-semibold text-claimondo-navy">
+              7 Fehler, die Sie nach einem Unfall vermeiden
+            </span>
+            <ChevronRight
+              className="h-4 w-4 flex-shrink-0 text-claimondo-ondo transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </Link>
+          <Link
+            href="/vorteile"
+            className="group flex items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-white px-5 py-4 transition-colors hover:border-claimondo-ondo"
+          >
+            <span className="text-sm font-semibold text-claimondo-navy">
+              Tesla, Polestar, Lucid: die Fallstricke bei E-Autos
+            </span>
+            <ChevronRight
+              className="h-4 w-4 flex-shrink-0 text-claimondo-ondo transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </Link>
+        </div>
+      </section>
     </>
   )
 }
