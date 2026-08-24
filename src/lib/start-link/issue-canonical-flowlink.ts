@@ -182,10 +182,29 @@ export async function issueCanonicalFlowLinkForAnfrage(
     // NIE der SV-Gutachten-Wert (claims.schadens_hoehe_netto). Record-Cast wg. Type-Lag (AGENTS §6).
     ;(extra as Record<string, unknown>).kostenvoranschlag_netto = (gfa.kostenvoranschlag_netto as number | null) ?? null
     ;(extra as Record<string, unknown>).kostenvoranschlag_brutto = (gfa.kostenvoranschlag_brutto as number | null) ?? null
+    // Woher kam dieser Interessent WIRKLICH?
+    //
+    // Bisher stand hier nur `gfa.source ?? 'self_service'`. `source` ist aber KEIN
+    // Attributionsfeld, sondern die RLS-Steuerspalte der Anfrage-Tabelle (die anon-INSERT-
+    // Policy lautet `with_check (source IS NULL)`) — bei jeder anonymen Finder-Anfrage ist
+    // sie deshalb zwingend NULL, und JEDER Lead landete als `self_service`. Ein ueber einen
+    // KI-Deeplink gewonnener Kunde war damit im Lead nicht mehr von einem normalen
+    // Website-Besucher zu unterscheiden; die Herkunft stand nur auf der Anfrage.
+    //
+    // Deshalb: `source` bleibt unangetastet (RLS!), die Herkunft kommt aus `utm_source`.
+    // Bewusst per Allowlist statt Durchreichen — sonst schriebe jeder beliebige
+    // Kampagnen-Parameter in ein Feld, nach dem intern gefiltert und gezaehlt wird.
+    const KI_KANAELE = new Set(['ki-deeplink'])
+    const utmQuelle = (gfa.utm_source as string | null)?.trim().toLowerCase() ?? null
+    const herkunftsKanal =
+      (gfa.source as string | null) ??
+      (utmQuelle && KI_KANAELE.has(utmQuelle) ? utmQuelle : null) ??
+      'self_service'
+
     const created = await createLead(
       admin,
       {
-        source_channel: (gfa.source as string | null) ?? 'self_service',
+        source_channel: herkunftsKanal,
         status: 'neu',
         vorname: (gfa.vorname as string | null) ?? null,
         nachname: (gfa.nachname as string | null) ?? null,
@@ -203,7 +222,7 @@ export async function issueCanonicalFlowLinkForAnfrage(
     // kein neuer Interessent.
     await notifyTeamNeuerLead({
       leadId,
-      quelle: `Start-Link (${(gfa.source as string | null) ?? 'self_service'})`,
+      quelle: `Start-Link (${herkunftsKanal})`,
       name: [gfa.vorname as string | null, gfa.nachname as string | null].filter(Boolean).join(' '),
       telefon: (gfa.telefon as string | null) ?? null,
       email: (gfa.email as string | null) ?? null,
