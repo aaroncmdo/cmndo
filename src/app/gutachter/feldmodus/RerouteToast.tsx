@@ -93,12 +93,17 @@ export default function RerouteToast({ proposed, onAccept, onDismiss }: RerouteT
             Behalten
           </button>
         </div>
+        {/* Fortschritt ueber transform statt width: eine width-Animation loest
+            in jedem Frame Layout aus (Skill „don't animate CSS layout properties").
+            scaleX laeuft auf dem Compositor. transformOrigin links, damit der
+            Balken von links waechst und nicht aus der Mitte. */}
         <div
-          className="h-1"
+          className="h-1 w-full"
           style={{
-            width: `${progressPct}%`,
+            transform: `scaleX(${progressPct / 100})`,
+            transformOrigin: 'left',
             backgroundColor: accentColor,
-            transition: 'width 100ms linear',
+            transition: 'transform 100ms linear',
           }}
         />
       </div>

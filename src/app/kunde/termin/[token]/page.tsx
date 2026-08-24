@@ -69,7 +69,7 @@ export default async function KundeTerminPage({
       return (
         <div className="relative min-h-screen flex items-center justify-center bg-claimondo-bg px-6 overflow-hidden" style={{ background: 'radial-gradient(60% 50% at 80% 0%, color-mix(in srgb, var(--brand-accent, #7BA3CC) 18%, transparent), transparent 60%), radial-gradient(50% 50% at 0% 100%, color-mix(in srgb, var(--brand-secondary, #4573A2) 8%, transparent), transparent 70%), var(--brand-background, #f8f9fb)' }}>
           <SheetCard className="text-center">
-            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-success to-success-strong grid place-items-center shadow-[0_8px_24px_rgba(52,199,89,.30)] animate-[popMark_.55s_cubic-bezier(.34,1.56,.64,1)_both]">
+            <div className="w-16 h-16 mx-auto mb-5 rounded-full bg-gradient-to-br from-success to-success-strong grid place-items-center shadow-[0_8px_24px_rgba(52,199,89,.30)] animate-[popMark_.55s_cubic-bezier(.25,1,.5,1)_both]">
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden>
                 <path d="M20 6 9 17l-5-5" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
