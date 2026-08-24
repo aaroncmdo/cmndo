@@ -1,0 +1,440 @@
+{
+  "alfter": {
+    "_name": "Alfter",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B56"
+    ],
+    "knoten": [
+      "B56 durch das Gemeindegebiet Richtung Bonn und Euskirchen",
+      "Anschlussstelle Bonn-Hardtberg (A565) als Anbindung",
+      "Anschlussstelle Bornheim (A555) als Anbindung"
+    ],
+    "_urteil": "Sachlich nichts erfunden. B56 durch Alfter belegt (der B56-Artikel nennt eine Unterführung in Alfter), keine Autobahn im Gemeindegebiet — korrekt. Beide Anschlussstellen existieren: Bonn-Hardtberg als AS 9 der A565, Bornheim als AS 6 der A555. ANMERKUNG Gattung: Eintrag 1 ist eine Streckenbeschreibung, kein Knoten. ANMERKUNG Maßstab: Die AS Bonn-Hardtberg liegt in Bonn, die AS Bornheim in Bornheim — beide sind Nachbarstadt-Anschlüsse und nach der Regel eigentlich zu streichen; sie sind immerhin ausdrücklich als „Anbindung\" gekennzeichnet."
+  },
+  "bergheim": {
+    "_name": "Bergheim",
+    "autobahnen": [
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B477"
+    ],
+    "knoten": [
+      "Anschlussstelle Bergheim-Süd (A61)",
+      "B477 am Kraftwerk Niederaußem",
+      "L91 über Oberaußem und Glessen"
+    ],
+    "_urteil": "A61, B477 und die Anschlussstelle Bergheim-Süd (A61, AS 19) sind belegt. ANMERKUNG Gattung: Eintrag 2 und 3 sind Streckenbeschreibungen, keine Knoten; die L91 ist zudem eine Landesstraße. FEHLT: die Anschlussstelle Bergheim (A61, AS 18) — sie ist der Hauptanschluss der Stadt und trägt dort zugleich B55 und B477. UNBELEGT: Verlauf der L91 über Oberaußem und Glessen (Landesstraßen sind über die genutzten Quellen nicht prüfbar); beide Orte sind Bergheimer Stadtteile."
+  },
+  "bonn": {
+    "_name": "Bonn",
+    "autobahnen": [
+      "A59",
+      "A555",
+      "A562",
+      "A565"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B42",
+      "B56"
+    ],
+    "knoten": [
+      "Kreuz Bonn-Nord",
+      "Kreuz Bonn-Ost",
+      "Dreieck Bonn-Nordost",
+      "Kreuz Bonn/Siegburg"
+    ],
+    "_urteil": "FALSCH: „Kreuz Bonn/Siegburg\" gehört nicht zu Bonn. Es verbindet A3 und A560 und liegt im Raum Siegburg/Sankt Augustin — die A3 berührt Bonner Stadtgebiet nicht, das Kreuz erschließt die Stadt nicht unmittelbar. Der Name führt hier in die Irre. Die übrigen drei stimmen samt Gattung: Kreuz Bonn-Nord (A555/A565, nördlich der Innenstadt), Kreuz Bonn-Ost (A59/A562/B42, Stadtteil Beuel), Dreieck Bonn-Nordost (A59/A565, bis 2009 Dreieck Beuel-Ost). Autobahnen und Bundesstraßen alle korrekt."
+  },
+  "bruehl": {
+    "_name": "Brühl",
+    "autobahnen": [
+      "A553"
+    ],
+    "bundesstrassen": [
+      "B51"
+    ],
+    "knoten": [
+      "Autobahnkreuz Bliesheim als Beginn der A553",
+      "Anschlussstelle Brühl-Süd (Zufahrt Phantasialand)",
+      "Anschlussstelle Brühl-Ost",
+      "Anschlussstelle Brühl-Nord"
+    ],
+    "_urteil": "Die drei Brühler Anschlussstellen sind alle echt und liegen an der A553: Brühl-Süd (AS 2), Brühl-Ost (AS 4), Brühl-Nord (AS 5). A553 und B51 korrekt. ANMERKUNG Maßstab: Das Autobahnkreuz Bliesheim (A1/A61/A553) liegt südlich des Erftstädter Ortsteils Bliesheim, also in Erftstadt und nicht in Brühl; als Startpunkt der A553 ist es zwar richtig beschrieben, nach der Regel gehört es aber nicht in die Knotenliste der Stadt."
+  },
+  "dinslaken": {
+    "_name": "Dinslaken",
+    "autobahnen": [
+      "A3",
+      "A59"
+    ],
+    "bundesstrassen": [
+      "B8"
+    ],
+    "knoten": [
+      "Kreuz Oberhausen-West",
+      "Anschlussstelle Dinslaken-Nord",
+      "Anschlussstelle Dinslaken-Süd"
+    ],
+    "_urteil": "Dinslaken-Nord (AS 8) und Dinslaken-Süd (AS 9) sind korrekt — sie liegen an der A3, nicht an der A59; da beide Autobahnen gelistet sind, ist das stimmig. ANMERKUNG Maßstab: Das Kreuz Oberhausen-West (A3/A516) liegt in Oberhausen. FEHLT: die beiden A59-Anschlüsse im Stadtgebiet, Dinslaken-West (AS 1) und Dinslaken-Hiesfeld (AS 2) — die A59 beginnt an der Stadtgrenze Dinslaken/Duisburg und ist sonst mit keinem einzigen Knoten vertreten."
+  },
+  "duesseldorf": {
+    "_name": "Düsseldorf",
+    "autobahnen": [
+      "A3",
+      "A44",
+      "A46",
+      "A52",
+      "A57",
+      "A59",
+      "A524"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B7",
+      "B8",
+      "B8n",
+      "B228",
+      "B326"
+    ],
+    "knoten": [
+      "Autobahnkreuz Düsseldorf-Süd (A46/A59)",
+      "Autobahnkreuz Kaarst (A52/A57)",
+      "Autobahnkreuz Neuss-West (A46/A57)",
+      "Autobahnkreuz Hilden (A3/A46)",
+      "Autobahnkreuz Breitscheid (A3/A52)",
+      "Autobahnkreuz Ratingen-Ost (A3/A44)",
+      "Autobahndreieck Neuss-Süd (A46/A57)",
+      "Rheinalleetunnel und Rheinufertunnel (B1/B7)",
+      "Anschlussstelle Düsseldorf-Flughafen (A44)"
+    ],
+    "_urteil": "FALSCH (Gattung): „Autobahnkreuz Düsseldorf-Süd\" ist ein Autobahndreieck — richtig ist Autobahndreieck Düsseldorf-Süd (A46/A59, Kurzform „Kreuz Düsseldorf-Süd\" ist nur Umgangssprache). Die Autobahnen stimmen. FALSCH (Lage): Von neun Einträgen liegen sechs in Nachbarstädten — Kreuz Kaarst in Kaarst, Kreuz Neuss-West und Dreieck Neuss-Süd in Neuss, Kreuz Hilden in Hilden, Kreuz Breitscheid und Kreuz Ratingen-Ost in Ratingen. Kreuz Hilden ist dabei genau der schon anderswo aufgefallene Fall. Alle sechs sind Eckpunkte des „Autobahnrings Düsseldorf\" und werden von Düsseldorfern genutzt, liegen aber nach der Regel außerhalb. FEHLT: das Autobahnkreuz Düsseldorf-Nord (A44/A52) — das einzige echte Autobahnkreuz im Stadtgebiet, das ausgerechnet nicht gelistet ist. Richtig sind: AS Düsseldorf-Flughafen (A44, AS 31) sowie beide Tunnel (Rheinufertunnel und Rheinalleetunnel liegen in Düsseldorf) — ANMERKUNG Gattung: Tunnel sind keine Knoten. B8n belegt (Verlängerung der A59 bis in die Stadtmitte)."
+  },
+  "erlangen": {
+    "_name": "Erlangen",
+    "autobahnen": [
+      "A3",
+      "A73"
+    ],
+    "bundesstrassen": [
+      "B4"
+    ],
+    "knoten": [
+      "Kreuz Fürth/Erlangen",
+      "Anschlussstelle Erlangen-West"
+    ],
+    "_urteil": "ok — beide Einträge stimmen samt Gattung: Kreuz Fürth/Erlangen ist ein Autobahnkreuz (A3/A73), Erlangen-West ist eine Anschlussstelle (A3, AS 81). A3, A73 und B4 korrekt. FEHLT: für eine Stadt dieser Größe sind nur zwei Knoten dünn — im Stadtgebiet liegen außerdem die A73-Anschlussstellen Erlangen-Nord (31), Erlangen-Zentrum (32), Erlangen-Bruck (33) und Erlangen-Eltersdorf (35) sowie an der A3 Erlangen-Frauenaurach (82) und Erlangen-Tennenlohe (84). Der andernorts erfundene Name „Kreuz Erlangen-Tennenlohe\" ist hier korrekt vermieden — Tennenlohe ist eine Anschlussstelle."
+  },
+  "fuerth": {
+    "_name": "Fürth",
+    "autobahnen": [
+      "A73",
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B14"
+    ],
+    "knoten": [
+      "Dreieck Fürth/Erlangen",
+      "Kreuz Fürth-Erlangen",
+      "Anschlussstelle Fürth-Poppenreuth"
+    ],
+    "_urteil": "FALSCH: „Dreieck Fürth/Erlangen\" gibt es nicht — der Knoten ist ein Autobahnkreuz (A3/A73), und der Eintrag ist zugleich eine Dublette des nachfolgenden. Die Volltextsuche liefert für die Dreieck-Schreibweise null Treffer. Eintrag 2 ist sachlich richtig, die amtliche Schreibweise lautet aber „Kreuz Fürth/Erlangen\" mit Schrägstrich, nicht mit Bindestrich. Richtig: Anschlussstelle Fürth-Poppenreuth (A73, AS 38). A3, A73, B8 und B14 korrekt. FEHLT: die weiteren Fürther A73-Anschlüsse Fürth-Steinach (36) und Fürth-Ronhof (37)."
+  },
+  "guetersloh": {
+    "_name": "Gütersloh",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B513"
+    ],
+    "knoten": [
+      "Anschlussstelle Gütersloh",
+      "Anschlussstelle Rheda-Wiedenbrück",
+      "Kreuz Bielefeld"
+    ],
+    "_urteil": "Die Anschlussstelle Gütersloh (A2, AS 24) ist korrekt, ebenso A2, B61 und B513. FALSCH (Lage): Die Anschlussstelle Rheda-Wiedenbrück liegt in Rheda-Wiedenbrück, das Kreuz Bielefeld (A2/A33) liegt in Bielefeld — beides Nachbarstädte, die Gütersloh nicht unmittelbar erschließen. Damit bleibt für Gütersloh nur ein einziger echter Knoten; das ist korrekt so, die Stadt hat an der A2 nicht mehr."
+  },
+  "hannover": {
+    "_name": "Hannover",
+    "autobahnen": [
+      "A2",
+      "A7",
+      "A37",
+      "A352"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B6",
+      "B65",
+      "B217",
+      "B443"
+    ],
+    "knoten": [
+      "Kreuz Hannover-Ost",
+      "Kreuz Hannover-Kirchhorst",
+      "Dreieck Hannover-Süd",
+      "Dreieck Hannover-West"
+    ],
+    "_urteil": "Alle vier existieren mit der angegebenen Gattung: Kreuz Hannover-Ost (A2/A7), Dreieck Hannover-Süd (A7/A37), Dreieck Hannover-West (A2/A352). ANMERKUNG Schreibweise: Der zweite heißt amtlich „Autobahnkreuz Hannover/Kirchhorst\" mit Schrägstrich (A2/A37); mit Bindestrich geschrieben ist er kein erfundener Knoten, aber falsch benannt. FEHLT: das Autobahndreieck Hannover-Nord (A7/A352) — es liegt nach demselben Maßstab wie die anderen drei in der Region Hannover und schließt den Autobahnring nach Norden."
+  },
+  "herne": {
+    "_name": "Herne",
+    "autobahnen": [
+      "A42",
+      "A43"
+    ],
+    "bundesstrassen": [
+      "B226"
+    ],
+    "knoten": [
+      "Kreuz Herne",
+      "Dreieck Herne",
+      "Anschlussstelle Herne-Baukau"
+    ],
+    "_urteil": "FALSCH: „Dreieck Herne\" existiert nicht — die Volltextsuche über die gesamte deutschsprachige Wikipedia liefert null Treffer. Der Eintrag ist eine Dublette des Kreuzes mit falscher Gattung. Richtig sind: Kreuz Herne (A42/A43, AS 21 der A42) und Anschlussstelle Herne-Baukau (A42, AS 22). A42, A43 und B226 korrekt. FEHLT: die weiteren Herner A42-Anschlüsse Herne-Wanne (19), Herne-Crange (20) und Herne-Horsthausen (23) — nur falls die Liste Anschlussstellen überhaupt vollständig führen soll."
+  },
+  "ingolstadt": {
+    "_name": "Ingolstadt",
+    "autobahnen": [
+      "A9"
+    ],
+    "bundesstrassen": [
+      "B13",
+      "B16",
+      "B16a",
+      "B300"
+    ],
+    "knoten": [
+      "Kreuz Ingolstadt-Nord",
+      "Anschlussstelle Ingolstadt-Süd",
+      "Anschlussstelle Ingolstadt-Ost"
+    ],
+    "_urteil": "FALSCH (Gattung): „Kreuz Ingolstadt-Nord\" ist kein Autobahnkreuz. Ingolstadt hat nur eine Autobahn, die A9 — ein Kreuz setzt zwei zusammentreffende Autobahnen voraus. Ingolstadt-Nord ist dort der Knotenpunkt zur B16a; ein Autobahnkreuz dieses Namens ist nirgends belegt. FALSCH: „Anschlussstelle Ingolstadt-Ost\" gibt es an der A9 nicht — die Autobahn hat im Stadtbereich nur Ingolstadt-Nord und Ingolstadt-Süd. „Ingolstadt-Ost\" ist ein Stadtbezirk, keine Anschlussstelle. Richtig: Anschlussstelle Ingolstadt-Süd (A9, AS 62). A9 sowie B13, B16, B16a und B300 sind belegt."
+  },
+  "kerpen": {
+    "_name": "Kerpen",
+    "autobahnen": [
+      "A4",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B55",
+      "B264",
+      "B477"
+    ],
+    "knoten": [
+      "Kreuz Kerpen",
+      "Anschlussstelle Kerpen-Sindorf",
+      "Anschlussstelle Kerpen-Türnich"
+    ],
+    "_urteil": "FALSCH: Die B55 gehört nicht zu Kerpen. Weder nennt der Kerpener Stadtartikel die B55 noch der B55-Artikel Kerpen; die B55 trifft die A61 erst an der Anschlussstelle Bergheim. Richtig: Kreuz Kerpen (A4/A61) und die Anschlussstelle an der A61, die amtlich schlicht „Türnich\" heißt (AS 21) — Türnich ist Kerpener Stadtteil, die Schreibweise mit Stadtpräfix ist vertretbar. ANMERKUNG Bezeichnung: Die A4-Anschlussstelle heißt amtlich „Kerpen\" (AS 8), nicht „Kerpen-Sindorf\"; Sindorf ist ein Kerpener Stadtteil, aber kein Anschlussstellenname. A4, A61, B264 und B477 korrekt."
+  },
+  "krefeld": {
+    "_name": "Krefeld",
+    "autobahnen": [
+      "A44",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B57",
+      "B288"
+    ],
+    "knoten": [
+      "Kreuz Krefeld-Süd",
+      "Kreuz Kaarst",
+      "Anschlussstelle Krefeld-Zentrum"
+    ],
+    "_urteil": "FALSCH: „Kreuz Krefeld-Süd\" existiert nicht — null Treffer in der gesamten deutschsprachigen Wikipedia, und die Anschlussstellenliste der A57 kennt es nicht. Gemeint ist offenbar der Punkt, an dem A44 und A57 zusammentreffen; der heißt Autobahnkreuz Meerbusch (A44, AS 27) und liegt in Meerbusch. FALSCH (Lage): Das Kreuz Kaarst (A52/A57) liegt in Kaarst. Richtig: Anschlussstelle Krefeld-Zentrum (A57, AS 13, dort mit B57 und B288). A44, A57, B9, B57 und B288 korrekt. FEHLT: Krefeld bleibt damit ohne einen einzigen Knoten im Stadtgebiet; belegt sind dort die Anschlussstellen Krefeld-Gartenstadt und Krefeld-Oppum (A57) sowie Krefeld-Forstwald und Krefeld-Fichtenhain (A44)."
+  },
+  "ludwigshafen": {
+    "_name": "Ludwigshafen am Rhein",
+    "autobahnen": [
+      "A6",
+      "A61",
+      "A65",
+      "A650"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B37",
+      "B44"
+    ],
+    "knoten": [
+      "Kreuz Ludwigshafen",
+      "Dreieck Ludwigshafen",
+      "Kreuz Frankenthal"
+    ],
+    "_urteil": "FALSCH (Bezeichnung): Ein „Dreieck Ludwigshafen\" gibt es nicht; das Autobahndreieck an der A65 heißt Dreieck Ludwigshafen-Süd (A65, Knoten 5, Übergang in die B9). Ohne den Zusatz „-Süd\" ist der Name nicht belegt. FALSCH (Lage): Das Kreuz Frankenthal (A6/A61) liegt in Frankenthal. Richtig: Kreuz Ludwigshafen (A61/A650). A6, A61, A65, A650 sowie B9, B37 und B44 sind belegt."
+  },
+  "marl": {
+    "_name": "Marl",
+    "autobahnen": [
+      "A43",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B225"
+    ],
+    "knoten": [
+      "Kreuz Marl-Nord",
+      "Anschlussstelle Marl-Zentrum",
+      "Dreieck Marl-Nord"
+    ],
+    "_urteil": "FALSCH: „Dreieck Marl-Nord\" existiert nicht — derselbe Knoten steht bereits als Kreuz Marl-Nord in der Liste, und der ist ein Autobahnkreuz (A43/A52, zusätzlich L612). Der dritte Eintrag ist eine Dublette mit falscher Gattung. Richtig: Kreuz Marl-Nord und Anschlussstelle Marl-Zentrum (A52, AS 48). A43, A52 und B225 korrekt. FEHLT: die weiteren Marler A52-Anschlüsse Marl-Frentrop (46), Marl-Brassert (47) und Marl-Hamm (49) sowie Marl-Sinsen (A43, AS 10) — nur falls Anschlussstellen vollständig geführt werden sollen."
+  },
+  "moers": {
+    "_name": "Moers",
+    "autobahnen": [
+      "A40",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B57"
+    ],
+    "knoten": [
+      "Kreuz Moers",
+      "Anschlussstelle Moers-Zentrum",
+      "Kreuz Kamp-Lintfort"
+    ],
+    "_urteil": "Kreuz Moers (A40/A57) und Anschlussstelle Moers-Zentrum (A40, AS 9) sind korrekt, ebenso A40, A57 und B57. FALSCH (Lage): Das Kreuz Kamp-Lintfort (A42/A57) liegt in Kamp-Lintfort; die A42 ist zudem für Moers gar nicht gelistet, was den Fremdbezug bestätigt. FEHLT: die Anschlussstelle Moers (A40, AS 8) neben Moers-Zentrum."
+  },
+  "niederkassel": {
+    "_name": "Niederkassel",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [
+      "L269 durch die Ortsdurchfahrten",
+      "Ortsumgehung L269n",
+      "Rheinfähre Mondorf–Bonn-Graurheindorf"
+    ],
+    "_urteil": "Die leeren Autobahn- und Bundesstraßenlisten sind plausibel: Der Niederkasseler Stadtartikel weist keine Bundesstraße aus, auch die B8 verläuft nicht durch das Stadtgebiet. ANMERKUNG Gattung: Keiner der drei Einträge ist ein Autobahnknoten — zwei Landesstraßen und eine Fähre. Als Verkehrsachsen einer Stadt ohne Autobahnanschluss sind sie inhaltlich aber die richtige Auskunft. UNBELEGT: Verlauf von L269 und L269n sowie die Fährverbindung ließen sich mit den genutzten Quellen nicht bestätigen; Mondorf ist ein Niederkasseler Ortsteil, Graurheindorf ein Bonner — die Angabe ist damit zumindest stimmig."
+  },
+  "pforzheim": {
+    "_name": "Pforzheim",
+    "autobahnen": [
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B10",
+      "B294",
+      "B463"
+    ],
+    "knoten": [
+      "Anschlussstelle Pforzheim-West",
+      "Anschlussstelle Pforzheim-Ost",
+      "Anschlussstelle Pforzheim-Nord"
+    ],
+    "_urteil": "ok — alle drei Anschlussstellen liegen an der A8 und sind mit richtiger Gattung benannt: Pforzheim-West (AS 43, dort B10 und B463), Pforzheim-Nord (AS 44, dort B294), Pforzheim-Ost (AS 45a, dort B10). A8, B10, B294 und B463 korrekt. FEHLT: die Anschlussstelle Pforzheim-Süd (A8, AS 45b) — die vierte Anschlussstelle der Stadt."
+  },
+  "remscheid": {
+    "_name": "Remscheid",
+    "autobahnen": [
+      "A1"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B229",
+      "B237"
+    ],
+    "knoten": [
+      "Anschlussstelle Remscheid",
+      "Anschlussstelle Remscheid-Lennep",
+      "Kreuz Wuppertal-Nord"
+    ],
+    "_urteil": "Anschlussstelle Remscheid (A1, AS 95b, dort B229) und Anschlussstelle Remscheid-Lennep (A1, AS 95a) sind korrekt; A1 sowie B51, B229 und B237 sind belegt. FALSCH (Lage): Das Kreuz Wuppertal-Nord (A1/A46) liegt in Wuppertal und erschließt Remscheid nicht unmittelbar — Remscheid hängt über seine beiden eigenen Anschlussstellen an der A1."
+  },
+  "saarbruecken": {
+    "_name": "Saarbrücken",
+    "autobahnen": [
+      "A1",
+      "A6",
+      "A620",
+      "A623"
+    ],
+    "bundesstrassen": [
+      "B41",
+      "B51",
+      "B268",
+      "B406"
+    ],
+    "knoten": [
+      "Kreuz Saarbrücken",
+      "Dreieck Friedrichsthal",
+      "Anschlussstelle Saarbrücken-Mitte"
+    ],
+    "_urteil": "Die auffälligste Stadt dieses Pakets — alle drei Knoten sind zu beanstanden. FALSCH (Lage): Das Autobahnkreuz Saarbrücken (A1/A6) liegt trotz seines Namens nicht in Saarbrücken, sondern auf dem Gebiet der Gemeinden Illingen und Heusweiler, rund 15 Kilometer nördlich der Stadt. FALSCH (Lage): Das Dreieck Friedrichsthal (A8/A623) liegt in Friedrichsthal; die dort beteiligte A8 ist für Saarbrücken zudem gar nicht gelistet. FALSCH: Eine „Anschlussstelle Saarbrücken-Mitte\" ist nicht belegt — die A620 führt im Stadtgebiet Saarbrücken-Klarenthal, -Gersweiler, -Messegelände, -Malstatter Brücke, -Westspangenbrücke und -Luisenbrücke; „Mitte\" ist ein Stadtbezirk, keine Anschlussstelle. FEHLT: das Dreieck Saarbrücken-Westspangenbrücke (A620/A1) — ein Knoten, der tatsächlich im Stadtgebiet liegt. A1, A6, A620, A623 sowie B41, B51, B268 und B406 sind belegt."
+  },
+  "soest": {
+    "_name": "Soest",
+    "autobahnen": [
+      "A44"
+    ],
+    "bundesstrassen": [
+      "B229",
+      "B475"
+    ],
+    "knoten": [
+      "Anschlussstelle Soest (A44/B229)",
+      "Anschlussstelle Soest-Ost (A44/B475)"
+    ],
+    "_urteil": "ok — beide Einträge stimmen bis in die Kreuzungsangabe: Anschlussstelle Soest ist AS 56 der A44 mit B229, Anschlussstelle Soest-Ost ist AS 57 mit B475. A44, B229 und B475 korrekt. FEHLT: die B1 — sie führt als historische Hellweg-Achse durch Soest (der B1-Artikel nennt die Stadt fünfzehnmal) und ist die wichtigste innerörtliche Ost-West-Verbindung; sie fehlt in der Bundesstraßenliste."
+  },
+  "troisdorf": {
+    "_name": "Troisdorf",
+    "autobahnen": [
+      "A59",
+      "A560"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B56",
+      "B484"
+    ],
+    "knoten": [
+      "Kreuz Bonn/Siegburg",
+      "Anschlussstelle Troisdorf",
+      "Dreieck Sankt Augustin-West"
+    ],
+    "_urteil": "FALSCH: Die A560 berührt Troisdorf nicht — sie verläuft vom Dreieck Sankt Augustin-West über Siegburg und Sankt Augustin nach Hennef; der A560-Artikel nennt Troisdorf kein einziges Mal. FALSCH: Die B484 gehört nicht zu Troisdorf (weder nennt der Stadtartikel die B484 noch der B484-Artikel Troisdorf). FALSCH (Lage): Das Kreuz Bonn/Siegburg (A3/A560) liegt im Raum Siegburg, das Dreieck Sankt Augustin-West (A59/A560) laut Beschreibung östlich der Sieg im Stadtgebiet von Sankt Augustin — beide Nachbarstädte. Richtig: Anschlussstelle Troisdorf (A59, AS 38); A59, B8 und B56 sind belegt. FEHLT: die Anschlussstelle Spich (A59, AS 37) — Spich ist Troisdorfer Stadtteil und damit der zweite echte Knoten der Stadt."
+  },
+  "wesseling": {
+    "_name": "Wesseling",
+    "autobahnen": [
+      "A555"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "A555 zwischen Köln und Bonn",
+      "Werkszufahrten der Rheinschiene",
+      "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"
+    ],
+    "_urteil": "Die A555 ist korrekt. ANMERKUNG Gattung: Kein einziger der drei Einträge ist ein Straßenknoten — Eintrag 1 ist eine Streckenbeschreibung, Eintrag 2 unbestimmt, Eintrag 3 nennt Haltestellen des Schienenverkehrs. FEHLT: die Anschlussstelle Wesseling (A555, AS 5) — der einzige echte Autobahnknoten der Stadt fehlt, während drei Nicht-Knoten die Liste füllen. UNBELEGT: „Werkszufahrten der Rheinschiene\" ist zu unbestimmt, um geprüft zu werden; die Stadtbahnhalte wurden nicht verifiziert."
+  },
+  "wuerzburg": {
+    "_name": "Würzburg",
+    "autobahnen": [
+      "A3",
+      "A7",
+      "A81"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B13",
+      "B19",
+      "B27"
+    ],
+    "knoten": [
+      "Kreuz Biebelried",
+      "Dreieck Würzburg-West",
+      "Kreuz Würzburg-Heidingsfeld"
+    ],
+    "_urteil": "FALSCH: Ein „Kreuz Würzburg-Heidingsfeld\" existiert nicht — null Treffer in der gesamten deutschsprachigen Wikipedia. An dieser Stelle liegen die Anschlussstelle Würzburg-Heidingsfeld (A3, AS 70, dort B19) und die Talbrücke Heidingsfeld; ein Autobahnkreuz ist es nicht. FALSCH (Lage): Das Kreuz Biebelried (A3/A7) liegt in der Gemeinde Biebelried östlich der Stadt. Richtig: Dreieck Würzburg-West (A3/A81, südwestlich von Würzburg, dort beginnt die A81) — Gattung stimmt. UNBELEGT: Ob die A7 Würzburger Stadtgebiet berührt, ließ sich nicht bestätigen; der Stadtartikel erwähnt sie nur in Richtung Kreuz Schweinfurt/Werneck, also außerhalb. B8, B13, B19 und B27 sind belegt."
+  }
+}

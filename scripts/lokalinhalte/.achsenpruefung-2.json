@@ -1,0 +1,419 @@
+{
+  "ahaus": {
+    "_name": "Ahaus",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Legden/Ahaus (A31)",
+      "Anschlussstelle Ahaus-Nord/Heek (A31)"
+    ],
+    "_urteil": "ok — beide Anschlussstellen von ortsnaher Quelle wörtlich bestätigt (AS 32 Legden/Ahaus, AS 33 Ahaus-Nord/Heek an der A31); dass Ahaus keine eigene Autobahn hat, stimmt. UNBELEGT: Der Wikipedia-Artikel zur A31 führt die nördliche Ausfahrt abweichend als schlicht \"Heek\" (mit B70-Anschluss) — welche Schreibweise heute amtlich ist, konnte ich nicht klären. FEHLT (möglich): B70 und B474 führten bis zur Umlegung am 01.01.2010 durch Ahaus; die B474 wird bis heute als Verbindung Ahaus–Gronau beschrieben. Die leere Bundesstraßen-Liste ist deshalb prüfenswert, aber nicht sicher falsch."
+  },
+  "bad-oeynhausen": {
+    "_name": "Bad Oeynhausen",
+    "autobahnen": [
+      "A2",
+      "A30"
+    ],
+    "bundesstrassen": [
+      "B61"
+    ],
+    "knoten": [
+      "Kreuz Bad Oeynhausen (A2/A30)",
+      "Anschlussstelle Bad Oeynhausen-Nord (A30)",
+      "Anschlussstelle Dehme (A30)",
+      "Anschlussstelle Bad Oeynhausen-Ost (A30)"
+    ],
+    "_urteil": "ok — alle vier Knoten bestätigt: Kreuz Bad Oeynhausen (A2/A30, AK 35 der A30-Zählung bzw. Nr. 32 der A2-Zählung), AS Bad Oeynhausen-Nord (32), AS Dehme (33), AS Bad Oeynhausen-Ost (34), sämtlich an der A30. FEHLT (gering): An der A2 liegt zusätzlich die AS Bad Oeynhausen (Nr. 33); da die A2 als Autobahn gelistet ist, wäre sie konsequent mitzuführen."
+  },
+  "bocholt": {
+    "_name": "Bocholt",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B67",
+      "B473"
+    ],
+    "knoten": [
+      "Kreuzung B67/B473 Bocholt",
+      "Anschluss B67 Bocholt-Ost",
+      "Auffahrt A3 bei Hamminkeln"
+    ],
+    "_urteil": "FALSCH: \"Auffahrt A3 bei Hamminkeln\" — liegt in Hamminkeln, nicht im Bocholter Stadtgebiet. Die B473 ist zwar der Zubringer dorthin, aber die Anschlussstelle selbst gehört der Nachbarstadt und damit nach dem Maßstab nicht in die Liste. UNBELEGT: \"Kreuzung B67/B473 Bocholt\" und \"Anschluss B67 Bocholt-Ost\" sind keine amtlichen Bezeichnungen und ließen sich als benannte Knoten nicht nachweisen — dass sich beide Bundesstraßen bei Bocholt treffen, ist plausibel, der Name ist konstruiert. Bestätigt: B67 führt durch Bocholt (Goch–Bocholt–Borken–Dülmen), B473 als A3-Zubringer."
+  },
+  "bremen": {
+    "_name": "Bremen",
+    "autobahnen": [
+      "A1",
+      "A27",
+      "A270",
+      "A281"
+    ],
+    "bundesstrassen": [
+      "B6",
+      "B75",
+      "B74"
+    ],
+    "knoten": [
+      "Kreuz Bremen",
+      "Dreieck Bremen-Industriehäfen",
+      "Dreieck Bremen-Nord"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Bremen\" — der amtliche Name des A1/A27-Knotens ist \"Bremer Kreuz\". FALSCH: \"Dreieck Bremen-Nord\" existiert nicht; an dieser Stelle liegt lediglich der Halbanschluss Bremen-Nord zur A270 — also eine Anschlussstelle, kein Dreieck. Bestätigt: Dreieck Bremen-Industriehäfen (A27/A281, seit 1995)."
+  },
+  "darmstadt": {
+    "_name": "Darmstadt",
+    "autobahnen": [
+      "A5",
+      "A67",
+      "A672"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B26",
+      "B42",
+      "B449"
+    ],
+    "knoten": [
+      "Kreuz Darmstadt",
+      "Dreieck Darmstadt",
+      "Kreuz Darmstadt-Nord"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Darmstadt\" — amtlich \"Darmstädter Kreuz\" (A5/A67, Nr. 26). FALSCH: \"Kreuz Darmstadt-Nord\" — amtlich \"Darmstädter Nordkreuz\" (A5/A672, so benannt seit 2016). UNBELEGT: \"Dreieck Darmstadt\" ließ sich weder an der A5 noch an der A672 nachweisen; der Knoten, an dem die A672 von der A67 abzweigt, heißt \"Griesheimer Dreieck\". Vermutlich ist entweder dieses oder das Darmstädter Kreuz gemeint — als eigener dritter Knoten existiert es nicht."
+  },
+  "duelmen": {
+    "_name": "Dülmen",
+    "autobahnen": [
+      "A43"
+    ],
+    "bundesstrassen": [
+      "B67",
+      "B474"
+    ],
+    "knoten": [
+      "Anschlussstelle Dülmen-Nord (A43)",
+      "B474n als Zubringer zur A43"
+    ],
+    "_urteil": "ok — AS Dülmen-Nord (A43, Nr. 5) bestätigt, einschließlich des B474-Anschlusses, was den Eintrag \"B474n als Zubringer zur A43\" trägt. FEHLT: An der A43 liegt zusätzlich die AS Dülmen (Nr. 6) als eigene Anschlussstelle; die Stadt hat also zwei, nicht eine."
+  },
+  "erkelenz": {
+    "_name": "Erkelenz",
+    "autobahnen": [
+      "A46",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B57"
+    ],
+    "knoten": [
+      "Anschlussstelle Erkelenz (A46)",
+      "Anschlussstelle Erkelenz-Ost",
+      "Kreuzung B57/Tagebau-Zufahrt"
+    ],
+    "_urteil": "FALSCH: \"Anschlussstelle Erkelenz (A46)\" — eine so benannte Ausfahrt gibt es nicht. Amtlich sind AS Erkelenz-Süd (A46, Nr. 8, mit B57-Anschluss) und AS Erkelenz-Ost (Nr. 9). Der zweite Listeneintrag \"Anschlussstelle Erkelenz-Ost\" ist damit richtig, der erste ist es nicht. UNBELEGT: \"Kreuzung B57/Tagebau-Zufahrt\" ist keine amtliche Bezeichnung. UNBELEGT: ob die A61 Erkelenzer Stadtgebiet berührt — die A46-Ausfahrten tragen die Anbindung, die A61 verläuft östlich."
+  },
+  "frechen": {
+    "_name": "Frechen",
+    "autobahnen": [
+      "A1",
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B264"
+    ],
+    "knoten": [
+      "Anschlussstelle Frechen (A1) südlich des Kreuzes Köln-West",
+      "Anschlussstelle Frechen-Nord (A4, nur Richtung Aachen)",
+      "B264 als Südumgehung des Stadtkerns"
+    ],
+    "_urteil": "ok — und ungewöhnlich präzise. Bestätigt: Die AS Frechen liegt an der A1 und ist in das Kreuz Köln-West integriert, das direkt an der Frechener Stadtgrenze liegt; die AS Frechen-Nord ist tatsächlich eine Halbanschlussstelle an der A4, die nur Richtung Aachen anbindet. Beide Zusätze in der Liste stimmen. FEHLT (gering): An der A4 liegt zusätzlich die AS Frechen-Königsdorf."
+  },
+  "grevenbroich": {
+    "_name": "Grevenbroich",
+    "autobahnen": [
+      "A46",
+      "A540"
+    ],
+    "bundesstrassen": [
+      "B59",
+      "B230"
+    ],
+    "knoten": [
+      "Kreuz Jackerath",
+      "Anschlussstelle Grevenbroich-Zentrum",
+      "Dreieck Holz"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Jackerath\" — gleich doppelt. Der Knoten heißt amtlich Autobahndreieck Jackerath (A44/A61, 2018 rund einen Kilometer südöstlich neu gebaut) und liegt in der Gemeinde Titz im Kreis Düren, nicht in Grevenbroich. Das historische Autobahnkreuz Jackerath wurde beim Neubau zum Dreieck. FALSCH: \"Dreieck Holz\" — der A44/A46-Knoten wird amtlich als Autobahnkreuz Holz geführt und liegt zwei Anschlussstellen westlich von Grevenbroich (dazwischen Jüchen), also außerhalb des Stadtgebiets. FALSCH: \"Anschlussstelle Grevenbroich-Zentrum\" — die Ausfahrt an der A46 heißt schlicht Grevenbroich (Nr. 13). UNBELEGT: A540 — Verlauf über Grevenbroicher Gebiet nicht geprüft."
+  },
+  "hamburg": {
+    "_name": "Hamburg",
+    "autobahnen": [
+      "A1",
+      "A7",
+      "A23",
+      "A24",
+      "A25",
+      "A26",
+      "A252",
+      "A255"
+    ],
+    "bundesstrassen": [
+      "B4",
+      "B5",
+      "B73",
+      "B75",
+      "B431",
+      "B432",
+      "B447",
+      "B462 (Anschluss)"
+    ],
+    "knoten": [
+      "Elbtunnel (A7)",
+      "Autobahnkreuz Hamburg-Süd (A1/A253/A255)",
+      "Autobahndreieck Hamburg-Südwest (A7/A26)",
+      "Autobahndreieck Hamburg-Nordwest (A7/A23)",
+      "Horner Kreisel (A24/B5)",
+      "Elbbrücken (B4/B75)",
+      "Autobahndreieck Hamburg-Südost (A1/A25)",
+      "Waltershofer Damm/Köhlbrandbrücke",
+      "Neue Elbbrücke / Amsinckstraße",
+      "Anschlussstelle Hamburg-Stellingen (A7)"
+    ],
+    "_urteil": "FALSCH: B462 — liegt vollständig in Baden-Württemberg (Rastatt durch den Nordschwarzwald nach Rottweil) und hat keinerlei Bezug zu Hamburg. Das ist der klarste Fehler im Paket. FALSCH: A252 — wurde am 06.10.2019 mit Eröffnung der neuen Wilhelmsburger Reichsstraße zur B75 herabgestuft und ist keine Autobahn mehr. FALSCH: \"Autobahndreieck Hamburg-Südwest (A7/A26)\" — dieses Dreieck verbindet die A7 mit der A261, nicht mit der A26; der A26-Knoten an der A7 heißt Kreuz Hamburg-Hafen. UNBELEGT: A26 — in Hamburg noch nicht durchgehend, \"A26 West\" im Bau, \"A26 Ost\" in Planung; als bestehende Achse fragwürdig. FEHLT (möglich): A261 und A253 werden in den Knoten mitgenannt (Dreieck Hamburg-Südwest bzw. Kreuz Hamburg-Süd), fehlen aber in der Autobahnliste, obwohl die A255 dort steht. Bestätigt: B432 (beginnt an AS Schnelsen-Nord der A7 im Hamburger Stadtgebiet) und B447 (verläuft vollständig in Hamburg, Hoheluft bis A7 Schnelsen) — beide zu Unrecht verdächtig, sie stimmen. Ebenfalls bestätigt: Dreieck Hamburg-Nordwest (A7/A23), AS Hamburg-Stellingen (A7), Kreuz Hamburg-Süd, Dreieck Hamburg-Südost, Horner Kreisel, Elbtunnel."
+  },
+  "hennef": {
+    "_name": "Hennef",
+    "autobahnen": [
+      "A560",
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B478"
+    ],
+    "knoten": [
+      "Anschlussstelle Hennef-West",
+      "Anschlussstelle Hennef-Ost",
+      "Kreuzung B8/B478"
+    ],
+    "_urteil": "ok — AS Hennef-West (A560, Nr. 6) und AS Hennef-Ost (Nr. 7) bestätigt; die A560 endet rund einen Kilometer hinter Hennef-Ost und geht in die B8 über, was den B8-Eintrag trägt. UNBELEGT: ob die A3 Hennefer Stadtgebiet berührt — das Kreuz Bonn/Siegburg liegt bei Siegburg/Sankt Augustin, die Anbindung Hennefs läuft über die A560. UNBELEGT: \"Kreuzung B8/B478\" als benannter Knoten."
+  },
+  "huerth": {
+    "_name": "Hürth",
+    "autobahnen": [
+      "A1"
+    ],
+    "bundesstrassen": [
+      "B265",
+      "B51"
+    ],
+    "knoten": [
+      "Anschlussstelle Hürth (A1)",
+      "Anschlussstelle Hürth-Knapsack (A1)",
+      "B265 Richtung Köln und Schleiden"
+    ],
+    "_urteil": "FALSCH (Dublette): \"Anschlussstelle Hürth-Knapsack (A1)\" und \"Anschlussstelle Hürth (A1)\" bezeichnen dieselbe Ausfahrt — die AS Hürth hieß früher Knapsack. Zwei Einträge, ein Knoten. FEHLT: die AS Gleuel an der A1, über die Hürth neben der AS Hürth angebunden ist. UNBELEGT: A553 — sie erschließt laut Stadt die östlichen Stadtteile und das Industriegebiet Kalscheuren, fehlt aber in der Autobahnliste. Zur Einordnung: A4 und A1 verlaufen beide rund fünf Kilometer vom Stadtkern entfernt; dass nur die A1 gelistet ist, ist wegen der beiden Hürther Ausfahrten dort vertretbar."
+  },
+  "karlsruhe": {
+    "_name": "Karlsruhe",
+    "autobahnen": [
+      "A5",
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B10",
+      "B36",
+      "B293"
+    ],
+    "knoten": [
+      "Dreieck Karlsruhe",
+      "Kreuz Karlsruhe-Nord",
+      "Dreieck Karlsruhe-Süd"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Karlsruhe-Nord\" und \"Dreieck Karlsruhe-Süd\" — beide existieren nicht. Es gibt nur das Autobahndreieck Karlsruhe (A5 Nr. 46 / A8 Nr. 41), an dem die A8 von der A5 abzweigt, rund fünf Kilometer südöstlich der Stadt; eine Aufteilung in Nord- und Süd-Knoten gibt es nicht. Der nächste eigenständige Knoten an der A5 ist das Kreuz Walldorf (A5/A6) weit nördlich. Bestätigt: Dreieck Karlsruhe."
+  },
+  "koenigswinter": {
+    "_name": "Königswinter",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B42"
+    ],
+    "knoten": [
+      "Anschlussstelle Siebengebirge (A3)",
+      "B42 Rheinuferstraße Nieder- und Oberdollendorf",
+      "Talstation der Drachenfelsbahn, Königswinter-Altstadt"
+    ],
+    "_urteil": "ok in der Sache — die AS Siebengebirge liegt bestätigt in Königswinter, A3 und B42 stimmen. Anmerkung zur Gattung: Die beiden übrigen Einträge sind kein Verkehrsknoten im Sinne der Liste, sondern ein Streckenabschnitt (\"B42 Rheinuferstraße Nieder- und Oberdollendorf\") und eine Ortsmarke (\"Talstation der Drachenfelsbahn\"). Falsch ist daran nichts, sie beantworten nur eine andere Frage. UNBELEGT: ob an der A3 zusätzlich eine AS Königswinter geführt wird."
+  },
+  "loehne": {
+    "_name": "Löhne",
+    "autobahnen": [
+      "A30"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B611"
+    ],
+    "knoten": [
+      "Anschlussstelle Löhne (A30)",
+      "Anschlussstelle Gohfeld (A30, früheres Dreieck Löhne)",
+      "Beginn der B611 Richtung Vlotho-West"
+    ],
+    "_urteil": "ok — AS Löhne (A30, Nr. 30) und AS Gohfeld (Nr. 31) bestätigt. Bemerkenswert: Der Zusatz \"früheres Dreieck Löhne\" ist belegt richtig — beim Ausbau 2016 wurde das bisherige Autobahndreieck Löhne zur Anschlussstelle Gohfeld umgebaut. Solche historischen Zusätze stimmen selten; dieser tut es."
+  },
+  "mainz": {
+    "_name": "Mainz",
+    "autobahnen": [
+      "A60",
+      "A63",
+      "A643"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B40",
+      "B455"
+    ],
+    "knoten": [
+      "Dreieck Mainz",
+      "Kreuz Mainz-Süd"
+    ],
+    "_urteil": "ok — beide Knoten amtlich bestätigt: Autobahndreieck Mainz (A60/A643, Nr. 18) und Autobahnkreuz Mainz-Süd (A60/A63, Nr. 21). Auch die Gattungen stimmen, Dreieck und Kreuz sind hier nicht vertauscht. Ergänzend zur bekannten Fehlerquelle: Das Autobahndreieck Nahetal (A60/A61) liegt rund 30 bis 40 Kilometer westlich bei Bingen und steht in dieser Liste zu Recht nicht mehr."
+  },
+  "minden": {
+    "_name": "Minden",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B65",
+      "B482"
+    ],
+    "knoten": [
+      "Anschlussstelle Bad Oeynhausen",
+      "Kreuz Bad Oeynhausen",
+      "Anschlussstelle Porta Westfalica"
+    ],
+    "_urteil": "FALSCH (Maßstab): Alle drei Knoten liegen außerhalb Mindens. \"Anschlussstelle Bad Oeynhausen\" und \"Kreuz Bad Oeynhausen\" liegen in Bad Oeynhausen, \"Anschlussstelle Porta Westfalica\" in Porta Westfalica. Die A2 führt südlich an Minden vorbei und berührt das Stadtgebiet nicht; eine Ausfahrt Minden gibt es an ihr nicht. Nach dem Maßstab bleibt für Minden damit kein Autobahnknoten übrig — die Bundesstraßen B61, B65 und B482 tragen die Erschließung. UNBELEGT: Eine Anschlussstelle mit dem Namen \"Porta Westfalica\" ist an der A2 nicht geführt; dort liegen AS 33 Bad Oeynhausen und AS 34 Veltheim."
+  },
+  "nettetal": {
+    "_name": "Nettetal",
+    "autobahnen": [
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B221",
+      "B509"
+    ],
+    "knoten": [
+      "Anschlussstelle Nettetal-West (A61)",
+      "Grenzübergang Venlo/Nettetal (A61 zur niederländischen A74)"
+    ],
+    "_urteil": "ok — AS Nettetal-West (A61, Nr. 1b) bestätigt. Auch der zweite Eintrag stimmt: Die A61 beginnt bei Kaldenkirchen, einem Nettetaler Stadtteil, und geht an der Grenze in die niederländische A74 Richtung Venlo über."
+  },
+  "osnabrueck": {
+    "_name": "Osnabrück",
+    "autobahnen": [
+      "A1",
+      "A30",
+      "A33"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B65",
+      "B68"
+    ],
+    "knoten": [
+      "Kreuz Osnabrück-Nord",
+      "Kreuz Osnabrück-Süd",
+      "Lotter Kreuz"
+    ],
+    "_urteil": "FALSCH: \"Kreuz Osnabrück-Nord\" existiert nicht. Die A33 endet nordöstlich von Osnabrück in Belm; die Nordanbindung zur A1 (\"A33 Nord\") ist geplant, aber nicht gebaut. An der A1 gibt es an dieser Stelle eine Anschlussstelle Osnabrück-Nord (Nr. 70) — eine Ausfahrt, kein Kreuz. FALSCH (Benennung): \"Lotter Kreuz\" — amtlich Kreuz Lotte/Osnabrück (A1/A30, AK 14); es liegt zudem in Lotte in Nordrhein-Westfalen, erschließt Osnabrück aber unmittelbar und darf deshalb in der Liste stehen. Bestätigt: Kreuz Osnabrück-Süd (A30/A33, AK 19)."
+  },
+  "recklinghausen": {
+    "_name": "Recklinghausen",
+    "autobahnen": [
+      "A2",
+      "A43"
+    ],
+    "bundesstrassen": [
+      "B225"
+    ],
+    "knoten": [
+      "Kreuz Recklinghausen",
+      "Anschlussstelle Recklinghausen-Herten",
+      "Dreieck Recklinghausen"
+    ],
+    "_urteil": "FALSCH: \"Dreieck Recklinghausen\" existiert nicht — an der A43 gibt es nur einen Recklinghäuser Knoten, das Kreuz Recklinghausen (A2/A43, Nr. 12). Ein zweiter, als Dreieck geführter Knoten ist nicht vorhanden. FALSCH (Benennung): \"Anschlussstelle Recklinghausen-Herten\" — amtlich als Doppelanschluss Recklinghausen/Herten geführt. Bestätigt: Kreuz Recklinghausen."
+  },
+  "roesrath": {
+    "_name": "Rösrath",
+    "autobahnen": [
+      "A3"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Rösrath bei Scharrenbroich (A3, einseitig Richtung Köln)",
+      "Sülztal-Achse Rösrath–Hoffnungsthal",
+      "Waldrandstrecken am Königsforst"
+    ],
+    "_urteil": "ok in der Sache — die einseitige Anschlussstelle bei Scharrenbroich, die nur den Verkehr von und nach Köln bedient, ist bestätigt, ebenso die leere Bundesstraßen-Liste: Die B484 verläuft Overath–Wahlscheid–Donrath–Lohmar–Siegburg und berührt Rösrath nicht. Anmerkung zur Gattung: \"Sülztal-Achse Rösrath–Hoffnungsthal\" und \"Waldrandstrecken am Königsforst\" sind Streckenbeschreibungen, keine benannten Knoten."
+  },
+  "siegburg": {
+    "_name": "Siegburg",
+    "autobahnen": [
+      "A3",
+      "A560"
+    ],
+    "bundesstrassen": [
+      "B56",
+      "B484"
+    ],
+    "knoten": [
+      "Autobahnkreuz Bonn/Siegburg (A3/A560)",
+      "Anschlussstelle Siegburg",
+      "Bahnhofsumfeld Siegburg/Bonn"
+    ],
+    "_urteil": "ok — Autobahnkreuz Bonn/Siegburg (A3/A560) und AS Siegburg (A560, Nr. 2) bestätigt; auch B56 und B484 stimmen, die B484 endet in Siegburg an der B56. Anmerkung zur Gattung: \"Bahnhofsumfeld Siegburg/Bonn\" ist ein Bahnknoten, kein Straßenknoten — inhaltlich richtig, aber in einer Achsenliste ein Fremdkörper."
+  },
+  "swisttal": {
+    "_name": "Swisttal",
+    "autobahnen": [
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B56"
+    ],
+    "knoten": [
+      "Anschlussstelle Heimerzheim (A61)",
+      "Anschlussstelle Miel (A61)",
+      "B56 zwischen Bonn und Euskirchen"
+    ],
+    "_urteil": "ok — AS Heimerzheim (A61, Nr. 26) und AS Miel (Nr. 27) bestätigt, beide auf Swisttaler Gebiet, dazu die B56. Anmerkung: Der dritte Eintrag ist eine Streckenangabe, kein Knoten."
+  },
+  "wachtberg": {
+    "_name": "Wachtberg",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [
+      "Ortsdurchfahrt Berkum",
+      "Anstieg Niederbachem–Berkum",
+      "Ortsverbindung Villip–Gimmersdorf"
+    ],
+    "_urteil": "ok — dass Wachtberg weder Autobahn noch Bundesstraße im Gemeindegebiet hat, ist bestätigt; die leeren Listen sind hier ein Befund, kein Datenmangel. Anmerkung zur Gattung: Die drei Einträge sind Ortsdurchfahrten und Streckenabschnitte statt benannter Knoten — hier zwangsläufig, weil es keine gibt."
+  },
+  "wuelfrath": {
+    "_name": "Wülfrath",
+    "autobahnen": [
+      "A535",
+      "A44"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Wülfrath (A535)"
+    ],
+    "_urteil": "ok — beide Autobahnen bestätigt: Die A44 verläuft auf einem kurzen Abschnitt über Wülfrather Stadtgebiet im Norden, die A535 im Osten; die AS Wülfrath (A535) existiert. Auch die leere Bundesstraßen-Liste stimmt, durch Wülfrath führt keine Bundesstraße, nur Landesstraßen (L74, L355, L403, L422, L426). FEHLT: die AS Hetterscheidt an der A44 — Wülfrath ist über sie und die AS Wülfrath an das Autobahnnetz angebunden."
+  }
+}

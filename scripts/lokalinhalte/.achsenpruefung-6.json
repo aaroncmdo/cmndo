@@ -1,0 +1,370 @@
+{
+  "arnsberg": {
+    "_name": "Arnsberg",
+    "autobahnen": [
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B229"
+    ],
+    "knoten": [
+      "Anschlussstelle Arnsberg-Neheim",
+      "Anschlussstelle Arnsberg-Ost",
+      "Kreuz Werl"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Werl' (A44/A445) liegt bei Werl im Kreis Soest, rund 15 km nördlich — weder im Stadtgebiet noch unmittelbar erschließend. Der Arnsberger Berührungspunkt der A445 ist die Anschlussstelle Neheim, wo die A445 endet und in die A46 übergeht. FALSCH: 'Anschlussstelle Arnsberg-Ost' ist nicht auffindbar; belegte A46-Anschlussstellen im Stadtgebiet sind Neheim, Neheim-Süd, Hüsten und Arnsberg-Altstadt (weiter östlich Wennemen). Vermutlich gemeint ist Arnsberg-Altstadt. FEHLT: A445 — sie reicht bis Arnsberg-Neheim und gehört damit ins Stadtgebiet. OK: A46, B7, B229, Anschlussstelle Neheim (amtlich ohne Zusatz 'Arnsberg-')."
+  },
+  "bergkamen": {
+    "_name": "Bergkamen",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B233"
+    ],
+    "knoten": [
+      "Anschlussstelle Bergkamen (A2)"
+    ],
+    "_urteil": "FALSCH (Benennung): Die A2-Anschlussstelle heißt amtlich 'Kamen/Bergkamen', nicht 'Anschlussstelle Bergkamen' — sie liegt im Süden der Stadt und wird von beiden Städten geteilt. FEHLT: B61 — die Stadt nennt B61 und B233 als ihre Bundesstraßen. OK: A2, B233."
+  },
+  "bornheim": {
+    "_name": "Bornheim",
+    "autobahnen": [
+      "A555",
+      "A565"
+    ],
+    "bundesstrassen": [
+      "B9"
+    ],
+    "knoten": [
+      "Anschlussstelle Bornheim (A555)",
+      "Anschlussstelle Sechtem",
+      "Kreuzung B9/Ortsdurchfahrt Hersel"
+    ],
+    "_urteil": "FALSCH: A565 — sie verläuft in Bonn und trifft die A555 erst am Kreuz Bonn-Nord auf Bonner Gebiet; Bornheim ist darüber nur mittelbar angebunden. FALSCH: 'Anschlussstelle Sechtem' existiert nicht. Die A555-Anschlussstellen lauten Verteilerkreis Köln, Kreuz Köln-Süd, Rodenkirchen, Godorf, Wesseling, Bornheim, Kreuz Bonn-Nord, Verteilerkreis Bonn; der Gewerbepark Bornheim-Sechtem wird laut Stadt über die Ausfahrt Wesseling erschlossen. FORMAT: 'Kreuzung B9/Ortsdurchfahrt Hersel' ist kein Autobahnknoten, inhaltlich aber plausibel. OK: A555, B9, Anschlussstelle Bornheim (erreicht das Stadtgebiet zwischen Hersel und Roisdorf)."
+  },
+  "castrop-rauxel": {
+    "_name": "Castrop-Rauxel",
+    "autobahnen": [
+      "A2",
+      "A42",
+      "A45"
+    ],
+    "bundesstrassen": [
+      "B235"
+    ],
+    "knoten": [
+      "Kreuz Castrop-Rauxel-Ost",
+      "Kreuz Recklinghausen",
+      "Anschlussstelle Castrop-Rauxel-Zentrum"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Recklinghausen' (A2/A43) liegt auf Recklinghäuser Stadtgebiet und erschließt Castrop-Rauxel nicht unmittelbar. UNBELEGT: 'Anschlussstelle Castrop-Rauxel-Zentrum' — im Verkehrsabschnitt der Stadt nicht genannt und nicht verifizierbar. OK: A2, A42, A45 führen laut Stadtartikel alle drei durch das Stadtgebiet; B235; Kreuz Castrop-Rauxel-Ost (A42/A45) liegt formal auf Dortmunder Gebiet im Stadtbezirk Mengede, jedoch direkt an der Stadtgrenze und trägt den Namen der Stadt — nach dem Maßstab der unmittelbaren Erschließung zulässig."
+  },
+  "dorsten": {
+    "_name": "Dorsten",
+    "autobahnen": [
+      "A31"
+    ],
+    "bundesstrassen": [
+      "B58",
+      "B224",
+      "B225"
+    ],
+    "knoten": [
+      "Anschlussstelle Dorsten",
+      "Anschlussstelle Dorsten-Lembeck",
+      "Kreuz Gelsenkirchen"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Gelsenkirchen' liegt in Gelsenkirchen, rund 25 km südlich — keine unmittelbare Erschließung Dorstens. Der nächstgelegene Autobahnknoten im Norden ist das Dreieck Bottrop (A2/A31), aber auch das liegt auf Bottroper Gebiet. UNBELEGT: Anschlussstellen Dorsten und Dorsten-Lembeck an der A31 — plausibel (Lembeck ist Dorstener Ortsteil), aber nicht einzeln verifiziert. OK, soweit prüfbar: A31, B58, B224, B225."
+  },
+  "ennepetal": {
+    "_name": "Ennepetal",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B7"
+    ],
+    "knoten": [],
+    "_urteil": "FALSCH: B7 — im Ennepetaler Stadtgebiet zum 1. Januar 2015 zur Landesstraße herabgestuft, also keine Bundesstraße mehr. FEHLT: B483, die durch das Stadtgebiet führt. OK: Die leeren Autobahn- und Knotenlisten sind korrekt — die A1 berührt Ennepetal nicht, die Anbindung läuft über die rund acht Kilometer entfernte Anschlussstelle Gevelsberg."
+  },
+  "essen": {
+    "_name": "Essen",
+    "autobahnen": [
+      "A40",
+      "A42",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B227"
+    ],
+    "knoten": [
+      "Kreuz Essen-Nord",
+      "Kreuz Essen-Ost",
+      "Dreieck Essen-Ost"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Essen-Ost' — die Verknüpfung von A40 und A52 östlich der Innenstadt ist das DREIECK Essen-Ost, das in derselben Liste bereits steht. Der Eintrag ist eine Dublette mit falscher Gattung; erst der geplante A52-Weiterbau nach Norden würde es zum Kreuz aufwerten. OK: A40, A42, A52, B224, B227, Kreuz Essen-Nord (A42/A52) und Dreieck Essen-Ost. UNBELEGT: ob die A44 Essener Stadtgebiet berührt, wurde nicht geprüft — deshalb kein FEHLT-Vermerk."
+  },
+  "gevelsberg": {
+    "_name": "Gevelsberg",
+    "autobahnen": [
+      "A1"
+    ],
+    "bundesstrassen": [
+      "B7"
+    ],
+    "knoten": [
+      "Anschlussstelle Gevelsberg (A1)"
+    ],
+    "_urteil": "OK: A1 und die Anschlussstelle Gevelsberg sind bestätigt — sie ist zugleich die Autobahnanbindung des Nachbarn Ennepetal. UNBELEGT: Der Status der B7 im Gevelsberger Stadtgebiet wurde nicht geprüft; im benachbarten Ennepetal ist die B7 seit 2015 Landesstraße, eine gleichartige Herabstufung ist hier denkbar und sollte nachgesehen werden."
+  },
+  "haan": {
+    "_name": "Haan",
+    "autobahnen": [
+      "A46",
+      "A3"
+    ],
+    "bundesstrassen": [
+      "B228"
+    ],
+    "knoten": [
+      "Anschlussstelle Haan-Ost",
+      "Anschlussstelle Haan-West",
+      "Autobahnkreuz Hilden (A3/A46)"
+    ],
+    "_urteil": "FALSCH: 'Autobahnkreuz Hilden (A3/A46)' liegt innerhalb der Stadtgrenzen von Hilden, nicht in Haan — derselbe Fehlertyp wie beim bereits gefundenen 'Kreuz Hilden bei Solingen'. UNBELEGT: A3 — dass sie Haaner Stadtgebiet berührt, ließ sich nicht bestätigen; belegt ist für Haan nur die A46. OK: A46 mit den Anschlussstellen Haan-Ost und Haan-West (beide bestätigt), B228."
+  },
+  "heidelberg": {
+    "_name": "Heidelberg",
+    "autobahnen": [
+      "A5",
+      "A656"
+    ],
+    "bundesstrassen": [
+      "B3",
+      "B37",
+      "B535"
+    ],
+    "knoten": [
+      "Kreuz Heidelberg",
+      "Anschlussstelle Heidelberg-Schwetzingen",
+      "Dreieck Heidelberg"
+    ],
+    "_urteil": "FALSCH: 'Dreieck Heidelberg' — ein solches Bauwerk ist nicht auffindbar. Die Verknüpfung von A5 und A656 ist das Autobahnkreuz Heidelberg, das bereits in derselben Liste steht; der Eintrag ist eine Dublette mit falscher Gattung. OK: A5, A656, B3, B37, B535; Kreuz Heidelberg liegt im Stadtgebiet; die Anschlussstelle heißt amtlich 'Heidelberg/Schwetzingen' (mit Schrägstrich, nicht 'Heidelberg-Schwetzingen')."
+  },
+  "herzogenrath": {
+    "_name": "Herzogenrath",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [],
+    "_urteil": "ok — die leeren Listen sind korrekt und ausdrücklich belegt: Durch das Stadtgebiet führt weder eine Autobahn noch eine Bundesstraße. Die nächsten Anschlussstellen (Aachen-Laurensberg an der A4, Broichweiden und Alsdorf an der A44) liegen sämtlich außerhalb und gehören nach dem Maßstab nicht in die Liste."
+  },
+  "jena": {
+    "_name": "Jena",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B88"
+    ],
+    "knoten": [
+      "Anschlussstelle Jena-Göschwitz",
+      "Anschlussstelle Jena-Zentrum",
+      "Anschlussstelle Jena-Lobeda"
+    ],
+    "_urteil": "ok — alle drei Anschlussstellen sind belegte A4-Anschlüsse: Jena-Göschwitz, Jena-Lobeda und Jena-Zentrum. Der Lobdeburgtunnel liegt zwischen Göschwitz und Jena-Zentrum, was die Existenz beider bestätigt. A4, B7 und B88 sind korrekt."
+  },
+  "kleve": {
+    "_name": "Kleve",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B9",
+      "B220",
+      "B57"
+    ],
+    "knoten": [
+      "Anschlussstelle Goch (A57)",
+      "Anschlussstelle Emmerich (A3)",
+      "B9 Richtung Nimwegen über Kranenburg"
+    ],
+    "_urteil": "FALSCH (Maßstab): 'Anschlussstelle Goch (A57)' liegt in Goch und 'Anschlussstelle Emmerich (A3)' in Emmerich — beides Nachbarstädte, die Kleve nur mittelbar anbinden. FORMAT: 'B9 Richtung Nimwegen über Kranenburg' ist kein Knoten, sondern eine Streckenbeschreibung über Gemeindegebiet Dritter. OK und wichtig: Die leere Autobahnliste ist richtig — Kleve hat keine Autobahn im Stadtgebiet; B9, B57 und B220 stimmen."
+  },
+  "leipzig": {
+    "_name": "Leipzig",
+    "autobahnen": [
+      "A9",
+      "A14",
+      "A38"
+    ],
+    "bundesstrassen": [
+      "B2",
+      "B6",
+      "B87",
+      "B181",
+      "B186"
+    ],
+    "knoten": [
+      "Schkeuditzer Kreuz",
+      "Kreuz Leipzig-Nord",
+      "Kreuz Leipzig-Süd",
+      "Dreieck Parthenaue"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Leipzig-Nord' — als Autobahnkreuz nicht belegt. An der A14 gibt es die ANSCHLUSSSTELLE Leipzig-Nord (sowie Leipzig-Nordost); Gattungsfehler. MASSSTAB: Das Schkeuditzer Kreuz (A9/A14) liegt auf Schkeuditzer Gebiet und das Kreuz Leipzig-Süd (A38/A72/B2) bei Markkleeberg — beide außerhalb der Stadtgrenze, erschließen Leipzig aber unmittelbar; als Grenzfälle vertretbar. UNBELEGT: A72 — sie endet am Kreuz Leipzig-Süd, ob sie Leipziger Stadtgebiet berührt, wurde nicht geklärt. OK: A9, A14, A38, Dreieck Parthenaue, B2, B6, B87, B181, B186."
+  },
+  "luedenscheid": {
+    "_name": "Lüdenscheid",
+    "autobahnen": [
+      "A45"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B229"
+    ],
+    "knoten": [
+      "Anschlussstelle Lüdenscheid",
+      "Anschlussstelle Lüdenscheid-Nord",
+      "Kreuz Hagen"
+    ],
+    "_urteil": "FALSCH: 'Kreuz Hagen' (A1/A45) liegt in Hagen, rund 25 km nördlich — keine unmittelbare Erschließung Lüdenscheids. UNBELEGT: Anschlussstellen Lüdenscheid und Lüdenscheid-Nord — plausibel, aber nicht einzeln verifiziert. OK: A45, B54, B229."
+  },
+  "meerbusch": {
+    "_name": "Meerbusch",
+    "autobahnen": [
+      "A44",
+      "A57",
+      "A52"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Autobahnkreuz Meerbusch (A44/A57)",
+      "Anschlussstelle Büderich (A52)",
+      "Anschlussstelle Bovert (A57)",
+      "Anschlussstelle Lank-Latum (A44)",
+      "Anschlussstelle Osterath (A44)"
+    ],
+    "_urteil": "ok — vollständig bestätigt: Das Autobahnkreuz Meerbusch (A44/A57) liegt im Stadtgebiet und ist nach der Stadt benannt; Büderich gehört zur A52, Bovert zur A57 (früher schlicht 'Meerbusch' genannt), Lank-Latum und Osterath zur A44. Hinweis ohne Fehlerwert: Der Name Osterath kommt doppelt vor — zusätzlich als 'Kaarst Nord/Osterath' an der A52; die hier eingetragene Zuordnung zur A44 ist die richtige."
+  },
+  "muelheim-an-der-ruhr": {
+    "_name": "Mülheim an der Ruhr",
+    "autobahnen": [
+      "A40",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B223"
+    ],
+    "knoten": [
+      "Kreuz Kaiserberg",
+      "Anschlussstelle Mülheim-Heißen",
+      "Anschlussstelle Mülheim-Styrum"
+    ],
+    "_urteil": "FALSCH (Maßstab): 'Kreuz Kaiserberg' (A3/A40) liegt auf Duisburger Stadtgebiet — es ist der Duisburger Knoten, auch wenn der anschließende A40-Abschnitt überwiegend auf Mülheimer Gebiet verläuft. OK: A40, A52, B1, B223 sowie die Anschlussstellen Mülheim-Heißen und Mülheim-Styrum, die beide belegt sind (die A40 hat in Mülheim zusätzlich Dümpten, Winkhausen und Heimaterde)."
+  },
+  "oberhausen": {
+    "_name": "Oberhausen",
+    "autobahnen": [
+      "A2",
+      "A3",
+      "A42",
+      "A516"
+    ],
+    "bundesstrassen": [
+      "B223"
+    ],
+    "knoten": [
+      "Kreuz Oberhausen",
+      "Kreuz Oberhausen-West",
+      "Dreieck Bottrop"
+    ],
+    "_urteil": "FALSCH (Maßstab): 'Dreieck Bottrop' (A2/A31) liegt auf dem Stadtgebiet von Bottrop, rund 10 km nordöstlich von Oberhausen. OK: A2, A3, A42, A516, B223 sowie Kreuz Oberhausen und Kreuz Oberhausen-West."
+  },
+  "pulheim": {
+    "_name": "Pulheim",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B59"
+    ],
+    "knoten": [
+      "B59 als radiale Ausfallstraße Richtung Mönchengladbach",
+      "Auffahrten auf A1, A57 und A4 jenseits der Stadtgrenze"
+    ],
+    "_urteil": "FORMAT: Beide Einträge sind Prosa statt Knotennamen — 'B59 als radiale Ausfallstraße' und 'Auffahrten auf A1, A57 und A4 jenseits der Stadtgrenze'. Inhaltlich sind sie korrekt und sogar ehrlich, weil sie die Lage außerhalb selbst benennen; als Knoten taugen sie nicht. Sachlich OK: keine Autobahn im Stadtgebiet, B59 verläuft durch Pulheim; die Anbindung läuft über die A1 (Anschlussstelle Köln-Bocklemünd) und weiter über das Kreuz Köln-Nord zur A57 — alles auf Kölner Gebiet."
+  },
+  "rheda-wiedenbrueck": {
+    "_name": "Rheda-Wiedenbrück",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B61",
+      "B64"
+    ],
+    "knoten": [
+      "Anschlussstelle Rheda-Wiedenbrück (A2/B64)"
+    ],
+    "_urteil": "ok, soweit prüfbar — A2, B61 und B64 sind stimmig, und die Anschlussstelle Rheda-Wiedenbrück verknüpft die A2 mit der B64. Die Anschlussstelle wurde nicht einzeln extern verifiziert; es wurde aber auch nichts gefunden, was dagegen spricht."
+  },
+  "schwelm": {
+    "_name": "Schwelm",
+    "autobahnen": [
+      "A1",
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B483"
+    ],
+    "knoten": [
+      "Anschlussstelle Schwelm (A1)",
+      "Anschlussstelle Wuppertal-Langerfeld",
+      "Kreuzung B7/B483"
+    ],
+    "_urteil": "UNBELEGT: 'Anschlussstelle Schwelm (A1)' ist nicht auffindbar. Das Amtsgericht Schwelm weist die Anfahrt ausdrücklich über die A1-Anschlussstelle Wuppertal-Langerfeld aus — der zweite Listeneintrag ist also der reale Schwelmer Anschluss und trotz Wuppertaler Lage als unmittelbare Erschließung vertretbar. UNBELEGT: A46 im Schwelmer Stadtgebiet — die A46 endet am Kreuz Wuppertal-Nord, und dieses liegt auf Sprockhöveler Gebiet, allerdings direkt an der Schwelmer Grenze. UNBELEGT: Status der B7 (im benachbarten Ennepetal seit 2015 Landesstraße). FORMAT: 'Kreuzung B7/B483' ist kein Autobahnknoten. OK: A1, B483."
+  },
+  "sprockhoevel": {
+    "_name": "Sprockhövel",
+    "autobahnen": [
+      "A43"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Sprockhövel (A43)"
+    ],
+    "_urteil": "FEHLT (gewichtig): Das Autobahnkreuz Wuppertal-Nord liegt auf dem Stadtgebiet von Sprockhövel — trotz seines Namens — und verbindet A1, A43 und A46 samt B326. Es ist mit über 175.000 Fahrzeugen täglich der bedeutendste Knoten der Stadt und fehlt in der Liste. FEHLT: A1 und A46, die über dieses Kreuz Sprockhöveler Gebiet berühren; der Stadtartikel nennt ausdrücklich drei Autobahnen (A1, A43, A46). OK: A43 mit der Anschlussstelle Sprockhövel im Hammertal. Die leere Bundesstraßenliste ist korrekt — die frühere B51 ist seit 1. Januar 2010 Landesstraße L651."
+  },
+  "unna": {
+    "_name": "Unna",
+    "autobahnen": [
+      "A1",
+      "A44"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B233"
+    ],
+    "knoten": [
+      "Kreuz Dortmund/Unna (A1/A44)"
+    ],
+    "_urteil": "ok — bestätigt: Das Autobahnkreuz Dortmund/Unna liegt auf Unnaer Stadtgebiet und verbindet A1, A44 und B1; Name und Gattung stimmen. A1, A44, B1 und B233 sind korrekt. Nicht geprüft und deshalb nicht als FEHLT vermerkt: ob weitere Anschlussstellen im Stadtgebiet (etwa Unna-Zentrum oder Unna-Ost) ergänzt werden sollten."
+  },
+  "willich": {
+    "_name": "Willich",
+    "autobahnen": [
+      "A44",
+      "A52",
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B57"
+    ],
+    "knoten": [
+      "Autobahnkreuz Neersen (A44/A52)",
+      "Anschlussstelle Neersen (A44)",
+      "Anschlussstelle Münchheide (A44)",
+      "Anschlussstelle Schiefbahn (A52)"
+    ],
+    "_urteil": "FALSCH (Maßstab): A57 — sie verläuft nahe der östlichen Stadtgrenze, aber nicht durch Willicher Gebiet; die Stadt wird von A44, A52 und A57 lediglich umschlossen. OK: A44 und A52 kreuzen sich im Stadtgebiet im Autobahnkreuz Neersen, das nach dem Willicher Ortsteil benannt ist und an der Grenze zu Mönchengladbach liegt; B57 verläuft in Nord-Süd-Richtung durch die Stadt. Die Anschlussstellen Neersen, Münchheide und Schiefbahn sind plausibel, wurden aber nicht einzeln verifiziert."
+  }
+}

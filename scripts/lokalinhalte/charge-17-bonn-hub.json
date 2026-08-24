@@ -1,0 +1,151 @@
+{
+  "bonn": {
+    "stadtbezirke": [
+      {
+        "name": "Bonn",
+        "ortsteile": [
+          "Zentrum",
+          "Nordstadt",
+          "Südstadt",
+          "Weststadt",
+          "Castell",
+          "Gronau",
+          "Poppelsdorf",
+          "Endenich",
+          "Kessenich",
+          "Dottendorf"
+        ]
+      },
+      {
+        "name": "Bad Godesberg",
+        "ortsteile": [
+          "Godesberg-Villenviertel",
+          "Godesberg-Nord",
+          "Plittersdorf",
+          "Rüngsdorf",
+          "Muffendorf",
+          "Mehlem",
+          "Lannesdorf",
+          "Friesdorf"
+        ]
+      },
+      {
+        "name": "Beuel",
+        "ortsteile": [
+          "Beuel-Mitte",
+          "Beuel-Ost",
+          "Limperich",
+          "Küdinghoven",
+          "Oberkassel",
+          "Holzlar",
+          "Vilich",
+          "Pützchen"
+        ]
+      },
+      {
+        "name": "Hardtberg",
+        "ortsteile": [
+          "Duisdorf",
+          "Lengsdorf",
+          "Brüser Berg",
+          "Lessenich",
+          "Meßdorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Bonn-Nord",
+        "Kreuz Bonn-Ost",
+        "Dreieck Bonn-Nordost",
+        "Kreuz Bonn/Siegburg"
+      ],
+      "autobahnen": [
+        "A59",
+        "A555",
+        "A562",
+        "A565"
+      ],
+      "bundesstrassen": [
+        "B9",
+        "B42",
+        "B56"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Kölnstraße (Nordstadt)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 46 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (14 von 46). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 46 Fällen war in 22 ein Fahrrad, in 2 ein Fußgänger, in 10 ein Motorrad beteiligt."
+      },
+      {
+        "ort": "Godesberger Allee (Hochkreuz)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 42 erfassten Unfällen, verteilt auf 2 Stellen entlang derselben Achse. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Unfall im Längsverkehr (18 von 42). Im Längsverkehr dominieren Auffahren und seitliches Streifen. Beim Heckanstoß wandert die Kraft in Querträger und Kofferraumboden, beim Streifen zieht sich die Kontaktspur über mehrere Bauteile, die gemeinsam kalkuliert gehören. Von den 42 Fällen war in 12 ein Fahrrad, in 3 ein Fußgänger, in 1 ein Motorrad, in 1 ein Güterkraftfahrzeug beteiligt."
+      },
+      {
+        "ort": "Konrad-Adenauer-Platz (Beuel-Mitte)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 33 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (12 von 33). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 33 Fällen war in 20 ein Fahrrad, in 1 ein Fußgänger, in 4 ein Motorrad beteiligt."
+      },
+      {
+        "ort": "Berliner Freiheit (Bonn-Zentrum)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 30 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Abbiegeunfall (18 von 30). Abbiegeunfälle treffen das Fahrzeug seitlich vorn. Dort sitzen Kotflügel, Radaufhängung und Scheinwerfer samt Sensorik, deren Erneuerung die Kalkulation schnell dominiert. Von den 30 Fällen war in 24 ein Fahrrad beteiligt."
+      },
+      {
+        "ort": "Doktor-Weis-Platz (Beuel-Mitte)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 29 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Fahrunfall (20 von 29). Beim Fahrunfall verliert jemand ohne Zutun anderer die Kontrolle. Die Anstoßstelle liegt dann meist an Bordstein, Leitplanke oder Böschung, und der Schaden sitzt in Achse und Unterboden statt im sichtbaren Blech — ohne Vermessung bleibt er unbeziffert. Von den 29 Fällen war in 24 ein Fahrrad, in 2 ein Fußgänger beteiligt."
+      },
+      {
+        "ort": "L 16 (Schwarzrheindorf)",
+        "quelle": "https://www.opengeodata.nrw.de/produkte/transport_verkehr/unfallatlas/ (Unfallatlas der Statistischen Ämter des Bundes und der Länder, Rohdaten Unfallorte 2021-2025, Datenlizenz Deutschland Namensnennung 2.0 — eigene Auswertung)",
+        "einzelfall": false,
+        "beschreibung": "Eine eigene Auswertung der Unfallatlas-Rohdaten für 2021 bis 2025 zeigt hier eine Häufung von 25 erfassten Unfällen. Das ist eine statistische Häufung aus den Rohdaten, keine behördlich ausgewiesene Unfallhäufungsstelle — und erfasst sind nur Unfälle, bei denen die Polizei aufgenommen hat, reine Blechschäden fehlen darin. Häufigster Typ war der Einbiegen- oder Kreuzen-Unfall (7 von 25). Beim Einbiegen und Kreuzen trifft es typischerweise die Fahrzeugflanke. Für die Haftungsfrage ist entscheidend, auf welcher Höhe der Anstoß sitzt und in welche Richtung das Blech verformt ist — nach der Reparatur ist das nicht mehr feststellbar. Von den 25 Fällen war in 6 ein Fahrrad, in 1 ein Motorrad beteiligt."
+      },
+      {
+        "ort": "Bertha-von-Suttner-Platz (Bonn-Zentrum)",
+        "beschreibung": "Die Stadt Bonn benennt die Ost-West-Achse über den Bertha-von-Suttner-Platz ausdrücklich als eine der unfallträchtigsten Routen für den Radverkehr; im Bonner Rad-Dialog wurde der Platz mit am häufigsten als besonders unsicher genannt. Die Stadt hat deshalb eine Neuaufteilung des Straßenraums angekündigt, im August 2022 wurde der angrenzende Bereich Am Alten Friedhof und Oxfordstraße bereits neu aufgeteilt. Für Betroffene heißt das: An dieser Stelle sind Auto-Rad-Kollisionen der Regelfall, und dabei steht dem oft geringen Blechschaden ein erheblicher Personenschaden gegenüber. Anstoßhöhe und Verformungsrichtung am Fahrzeug sind dann das einzige objektive Beweismittel zum Hergang.",
+        "quelle": "https://www.bonn.de/themen-entdecken/verkehr-mobilitaet/umgestaltung-der-verkehrsfuehrung-am-bertha-von-suttner-platz.php (Bundesstadt Bonn, Umgestaltung der Verkehrsführung am Bertha-von-Suttner-Platz, abgerufen 24.08.2026)"
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind die Bonner Rheinbrücken im Winter früher glatt als die Straßen davor?",
+        "antwort": "Zwischen der linksrheinischen Innenstadt und Beuel gibt es genau drei Straßenverbindungen: die Friedrich-Ebert-Brücke im Norden, die Kennedybrücke in der Mitte und die Konrad-Adenauer-Brücke im Süden. Ein Brückenbauwerk kühlt anders aus als eine Straße auf gewachsenem Boden — unter der Fahrbahn liegt kein Erdreich, das Wärme speichert, sondern Luft. Bei Temperaturen knapp über null kann die Fahrbahn auf der Brücke deshalb bereits überfroren sein, während die Zufahrt in Beuel-Mitte nur nass ist. Der Wechsel kommt ohne Vorwarnung und mitten in einer Kurvenfahrt auf die Rampe. Typisch ist dann kein Zusammenstoß, sondern das Abkommen zur Seite: eine langgezogene Streifkollision an Betonkappe oder Geländer über Front, Vorderrad und Flanke. Weil das Rad dabei seitlich gegen die Kante gedrückt wird, gehört die Achse anschließend vermessen. Halten Sie außerdem Profiltiefe, Alter und Kennzeichnung der Reifen fest — bei Glätte wird die Bereifung regelmäßig zum Streitpunkt."
+      },
+      {
+        "frage": "Was ist nach einem Unfall mit einem Elektroauto auf der A565 anders?",
+        "antwort": "Die A565 führt als Stadtautobahn mitten durch Bonn, von Hardtberg und Endenich bis zum Kreuz Bonn-Nord — Auffahr- und Streifschäden im dichten Berufsverkehr sind dort Alltag. Bei einem Elektrofahrzeug ändert sich danach der gesamte Ablauf. Sobald der Unterboden Kontakt hatte oder die Fahrzeugmitte verformt ist, gilt der Hochvoltspeicher als möglicherweise beschädigt. Ein solches Fahrzeug wird nicht in eine enge Halle gestellt, sondern auf eine Fläche mit Sicherheitsabstand, und es wird über Stunden bis Tage thermisch beobachtet, weil eine geschädigte Zelle verzögert reagieren kann. Für die Besichtigung heißt das: Das System muss zuvor von einer dafür qualifizierten Person freigeschaltet sein. Geprüft werden Batteriegehäuse und Unterfahrschutz von unten, die orangefarbenen Leitungen und Steckverbindungen sowie das Batteriemanagement auf Isolationsfehler und hinterlegtes Crash-Signal. Dass ein E-Auto nach dem Unfall noch fährt, sagt über den Zustand des Speichers nichts aus."
+      },
+      {
+        "frage": "Warum vergleicht ein Sachverständiger die Schäden beider Fahrzeuge miteinander?",
+        "antwort": "In den dicht geparkten Bonner Vierteln — Nordstadt, Südstadt, Poppelsdorf, Kessenich — entstehen viele Schäden beim Ausparken und Vorbeifahren, und Zeugen gibt es selten. Deshalb gehört zu einer sauberen Begutachtung die Frage, ob die beiden Schadenbilder überhaupt zueinander passen. Geprüft wird das an harten Merkmalen: Liegen die Kontaktzonen auf derselben Höhe über der Fahrbahn? Passt die Form der Eindrückung zur Gegenkontur, also etwa eine runde Delle zu einer Stoßfängerecke? Findet sich Lack des einen Fahrzeugs auf dem anderen, und in welcher Schichtenfolge? Läuft die Kratzrichtung zur behaupteten Bewegungsrichtung? Passt etwas davon nicht zusammen, heißt das keineswegs, dass jemand täuschen wollte — weit häufiger stammt ein Teil der Beschädigung aus einem früheren Ereignis, an das im Moment der Aufregung niemand denkt. Genau diese Trennung zwischen aktuellem Anstoß und Altschaden ist die eigentliche Arbeit."
+      },
+      {
+        "frage": "Warum ist die Kölnstraße in der Bonner Nordstadt eine der stärksten Unfallstellen der Stadt?",
+        "antwort": "Die Kölnstraße bündelt in der Bonner Nordstadt Durchgangsverkehr, Anliegerverkehr und einen breiten Radverkehr auf derselben Achse, dazu Grundstückszufahrten und Querstraßen in dichter Folge. Der amtliche Unfallatlas führt hier für 2021 bis 2025 die höchste Häufung im Bonner Stadtgebiet, und der häufigste Typ ist der Einbiegen- oder Kreuzen-Unfall. Für die Begutachtung heißt das: Der Anstoß sitzt meist an der Fahrzeugflanke, zwischen Vorderrad und Tür. Dort verlaufen Türverstärkung und Schweller, und die Verformungsrichtung des Blechs zeigt, welches Fahrzeug sich in die Bahn des anderen bewegt hat. Genau daran hängt die Haftungsquote, und genau das ist nach der Instandsetzung nicht mehr rekonstruierbar."
+      },
+      {
+        "frage": "Ein Radfahrer ist gegen mein Auto gefahren — warum lohnt sich die Aufnahme trotz Minischaden?",
+        "antwort": "Weil in Bonn an den Häufungsstellen wie Kölnstraße und Berliner Freiheit ein erheblicher Teil der erfassten Unfälle mit Radbeteiligung abläuft, und dort steht dem kleinen Blechschaden oft ein großer Personenschaden gegenüber. Am Auto bleibt vielleicht nur eine Delle im Türblatt oder ein verbogener Spiegel. Deren Höhe über der Fahrbahn und die Richtung des Eindrucks sind aber das einzige objektive Beweismittel dafür, ob der Radfahrer von der Seite kam, gestreift wurde oder gegen das stehende Fahrzeug fuhr. Bleibt das undokumentiert, steht später Aussage gegen Aussage — mit einer Haftungsfrage, an der auch Schmerzensgeldansprüche hängen."
+      },
+      {
+        "frage": "Konrad-Adenauer-Platz und Doktor-Weis-Platz in Beuel: Was macht diese Plätze so schadensträchtig?",
+        "antwort": "Beide Plätze liegen in Beuel-Mitte nah beieinander und bündeln, was sich sonst auf mehrere Straßen verteilt: Buslinien, Stadtbahn, Radverkehr, Fußgänger, Lieferverkehr und Parksuchverkehr auf engem Raum. Der Unfallatlas weist für beide zusammen über fünfzig Unfälle mit Personenschaden in fünf Jahren aus. Platzsituationen sind für die Rekonstruktion besonders undankbar, weil es keine klare Vorfahrtachse gibt und die Fahrzeuge nach dem Zusammenstoß fast immer bewegt werden, bevor jemand ein Foto macht. Halten Sie in Beuel deshalb zuerst die Endstellung fest — sie sagt mehr über den Hergang als jede spätere Schilderung."
+      },
+      {
+        "frage": "Was ist auf der Godesberger Allee anders als in der Bonner Innenstadt?",
+        "antwort": "Die Godesberger Allee führt am Hochkreuz mehrspurig und mit höherem Tempo durch den Bonner Süden, während in der Innenstadt der Kreuzungsverkehr dominiert. Entsprechend verschiebt sich das Schadensbild: Statt Einbiegen und Kreuzen überwiegen hier Auffahren und seitliches Streifen beim Spurwechsel. Beim Heckanstoß wandert die Kraft in Querträger, Längsträger und Kofferraumboden, und die Verformung ist von außen oft nicht zu sehen, solange die Stoßfängerhaut zurückfedert. Bei Streifschäden zieht sich die Kontaktspur dagegen über mehrere Bauteile — Türen, Schweller und Radlauf gehören dann gemeinsam auf Verzug und Spaltmaße geprüft."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A565, Parkschaden in der Südstadt oder Zusammenstoß auf der Kennedybrücke — der Sachverständige kommt zu Ihnen.",
+    "topografieAnker": "Der Rhein teilt Bonn in die linksrheinische Innenstadt und Beuel; die A565 führt als Stadtautobahn mitten hindurch, die B9 folgt dem Strom nach Süden."
+  }
+}

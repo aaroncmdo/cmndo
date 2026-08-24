@@ -1,0 +1,16 @@
+{
+  "wuppertal": {
+    "knoten_um": {
+      "Kreuz Wuppertal-Oberbarmen": "Anschlussstelle Wuppertal-Oberbarmen"
+    },
+    "knoten_weg": [],
+    "begruendung": "An der A46 ist Oberbarmen eine Anschlussstelle, kein Kreuz. Kreuz Wuppertal-Nord stimmt."
+  },
+  "essen": {
+    "knoten_um": {
+      "Kreuz Essen-Nord": "Anschlussstelle Essen-Nord"
+    },
+    "knoten_weg": [],
+    "begruendung": "Heute Anschlussstelle (A52 x A42); die Umbenennung in Kreuz ist erst nach dem B224-Ausbau vorgesehen. Ein Knoten, der seinen Namen erst kuenftig traegt."
+  }
+}

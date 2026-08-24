@@ -1,0 +1,762 @@
+{
+  "leverkusen": {
+    "stadtbezirke": [
+      {
+        "name": "Wiesdorf",
+        "ortsteile": [
+          "Wiesdorf",
+          "Manfort",
+          "Küppersteg",
+          "Bürrig"
+        ]
+      },
+      {
+        "name": "Opladen",
+        "ortsteile": [
+          "Opladen",
+          "Quettingen",
+          "Bergisch Neukirchen",
+          "Lützenkirchen"
+        ]
+      },
+      {
+        "name": "Schlebusch",
+        "ortsteile": [
+          "Schlebusch",
+          "Steinbüchel",
+          "Alkenrath",
+          "Rheindorf"
+        ]
+      },
+      {
+        "name": "Hitdorf",
+        "ortsteile": [
+          "Hitdorf",
+          "Bürrig-Nord"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Leverkusen",
+        "Kreuz Leverkusen-West"
+      ],
+      "autobahnen": [
+        "A1",
+        "A3",
+        "A59"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B51",
+        "B229"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist an der Baustelle der Rheinbrücke Leverkusen für Fahrzeugschäden typisch?",
+        "antwort": "Die erste Hälfte der neuen Rheinbrücke der A1 bei Leverkusen ist seit Februar 2024 in Betrieb, die alte Brücke wurde 2025 abgerissen, und die zweite Hälfte entsteht daneben. Bis sie fertig ist, laufen beide Fahrtrichtungen über ein Bauwerk — mit schmalen Fahrstreifen, versetzter Markierung und Betongleitwänden unmittelbar neben der Spur. Zwei Schadensbilder häufen sich dort. Das erste ist der Spiegelkontakt zwischen zwei Fahrzeugen, die sich in engen Spuren begegnen. Das zweite ist der Kontakt mit der Schutzwand selbst: Weil sie senkrecht und starr ist, schleift ein abkommendes Fahrzeug an Felge, Reifenflanke und Schweller entlang, oft über mehrere Meter. Die Felge trägt dann eine Rille, der Reifen eine Beschädigung der Seitenwand — und die ist auch ohne Luftverlust ein Grund zum Austausch."
+      },
+      {
+        "frage": "Welche Rolle spielt der Werksverkehr rund um den Chempark in Leverkusen?",
+        "antwort": "Der Chempark in Leverkusen prägt Wiesdorf und Bürrig; Werkstore, Lieferverkehr und Schichtbetrieb bestimmen dort den Takt auf den umliegenden Straßen. Wo Sattelzüge und Tankfahrzeuge in Zufahrten zurückstoßen, in denen gleichzeitig Pkw parken und Beschäftigte ihre Fahrzeuge abstellen, sind Rangierschäden die Regel. Auffällig ist, wie oft das Heck betroffen ist und wie selten das teuer aussieht. Ein Anstoß, der die Heckklappe nur leicht eindellt, kann trotzdem die Rückleuchte verspannen, und bei LED-Einheiten mit eingebautem Steuergerät steht deren Preis in keinem Verhältnis zur Größe der Delle. Ebenso wichtig ist die Frage, ob die Klappe nach der Instandsetzung wieder sauber schließt — sonst zieht die Dichtung Wasser in die Reserveradmulde, und das merkt man erst nach Wochen."
+      },
+      {
+        "frage": "Warum verlagert sich der Verkehr bei Staus auf A1 und A3 in Leverkusener Wohnviertel?",
+        "antwort": "Leverkusen liegt zwischen dem Kreuz Leverkusen und dem Kreuz Leverkusen-West, wo A1, A3 und A59 zusammenlaufen. Steht dort etwas, schickt jedes Navigationssystem den Verkehr über die B8 und durch die Stadtteile — Wiesdorf, Küppersteg, Schlebusch und Opladen bekommen dann Fahrzeuge, deren Fahrer die Strecke nicht kennen. Ortsunkundige übersehen Vorfahrtsregelungen, halten an ungeeigneten Stellen und biegen kurzentschlossen ab. Das führt zu Kollisionen, bei denen die Front des einen Fahrzeugs die Flanke des anderen trifft. Diese Konstellation ist deshalb heikel, weil die Kraft über das Rad in die Vorderachse geleitet wird: Querlenker, Achsträger und Lenkung können sich verziehen, ohne dass außen mehr als ein eingedrückter Kotflügel zu sehen ist. Nur eine Fahrwerksvermessung zeigt das."
+      },
+      {
+        "frage": "Was bedeutet der Umbau rund um den Bahnhof Opladen für die Schadenaufnahme?",
+        "antwort": "Rund um den Bahnhof Opladen ist in Leverkusen über Jahre ein ganzes Quartier neu entstanden, mit veränderter Straßenführung, neuen Zufahrten und wechselnden Bauphasen. Wer dort länger nicht gefahren ist, trifft auf Vorfahrtregelungen und Abbiegebeziehungen, die es vorher nicht gab. Für die Aufnahme zählt deshalb die Örtlichkeit am Unfalltag und nicht der Kartenstand: Wir halten Beschilderung und Fahrbahnführung mit fest, weil beides die Haftungsfrage verschieben kann."
+      },
+      {
+        "frage": "Worauf kommt es bei Unfällen auf der B8 an?",
+        "antwort": "Die B8 nimmt in Leverkusen den Verkehr auf, der die Autobahnen meidet oder von ihnen verdrängt wird — besonders dann, wenn auf der A1 oder A3 etwas steht. Sie wechselt dabei zwischen Ortsdurchfahrt mit Ampeln und zügig befahrenem Abschnitt, und genau an diesen Übergängen entstehen Auffahr- und Abbiegeschäden. Bei der Aufnahme klären wir, welche Geschwindigkeit am Unfallort tatsächlich zulässig war, denn davon hängt die Bewertung des Bremswegs ab."
+      },
+      {
+        "frage": "Warum sind Spieltage für Parkschäden ein eigenes Thema?",
+        "antwort": "An Spieltagen füllen sich in Leverkusen nicht nur die ausgewiesenen Parkflächen, sondern auch die Wohnstraßen im Umfeld. Eng geparkte Reihen, ortsunkundige Besucher und Zeitdruck beim Wegfahren ergeben die typische Mischung aus Ausparkschäden und Türanstößen. Bleibt der Verursacher unbekannt, entscheidet die Spurenlage, die vor dem Wegfahren aufgenommen wurde: Anstoßhöhe, Fremdlackreste und Schadensrichtung."
+      },
+      {
+        "frage": "Was ist an den Zufahrten nach Hitdorf besonders?",
+        "antwort": "Hitdorf liegt am nördlichen Rand von Leverkusen direkt am Rhein und ist über wenige Straßen erschlossen. Fällt eine Zufahrt wegen Baustelle oder Sperrung aus, läuft der gesamte Verkehr über die Alternative, und die ist dafür nicht ausgelegt. Solche Umleitungslagen erzeugen Rückstau an Stellen, an denen sonst nie einer steht — ein Auffahrschaden hat dort oft mehr mit der Verkehrsführung zu tun als mit Unaufmerksamkeit, und das gehört dokumentiert."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Leverkusen, Parkschaden in Wiesdorf oder Zusammenstoß in Opladen — der Sachverständige kommt zu Ihnen nach Leverkusen.",
+    "topografieAnker": "Leverkusen liegt rechtsrheinisch zwischen Köln und Düsseldorf; am Kreuz Leverkusen treffen A1 und A3 zusammen, die A59 führt am Rhein entlang."
+  },
+  "bergisch-gladbach": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Stadtmitte",
+          "Heidkamp",
+          "Gronau",
+          "Hand"
+        ]
+      },
+      {
+        "name": "Bensberg",
+        "ortsteile": [
+          "Bensberg",
+          "Refrath",
+          "Frankenforst",
+          "Moitzfeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Paffrath",
+          "Schildgen",
+          "Katterbach",
+          "Hebborn"
+        ]
+      },
+      {
+        "name": "Ost",
+        "ortsteile": [
+          "Herkenrath",
+          "Sand",
+          "Bärbroich",
+          "Asselborn"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Köln-Ost",
+        "Anschlussstelle Bensberg",
+        "Anschlussstelle Refrath"
+      ],
+      "autobahnen": [
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B506"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum verlagern sich Unfälle bei Stau auf der B506 in die Wohnstraßen?",
+        "antwort": "Die B506 ist im Tal der Strunde die durchgehende Ost-West-Achse von Bergisch Gladbach und verbindet Stadtmitte, Heidkamp und Gronau mit dem Kölner Umland. Steht sie, weicht der Verkehr in die parallelen Wohnstraßen aus, die für dieses Aufkommen nie gedacht waren: Tempo-30-Zonen mit beidseitigem Parken, Rechts-vor-links und schlechten Sichtbeziehungen an den Einmündungen. Dort entstehen Kreuzungskollisionen bei niedrigem Tempo, die das Fahrzeug quer treffen. Ein seitlicher Anstoß im Bereich der hinteren Tür verformt den Radlauf mit und verzieht das Türfangband. Ob sich das instandsetzen lässt, hängt davon ab, ob die Türöffnung maßhaltig geblieben ist — deshalb gehören die Spaltmaße an allen vier Ecken der Öffnung in die Aufnahme."
+      },
+      {
+        "frage": "Was macht die Waldstrecken zwischen Herkenrath, Sand und Bärbroich im Herbst gefährlich?",
+        "antwort": "Der Osten von Bergisch Gladbach steigt zum Bergischen Land hin an; zwischen Herkenrath, Sand und Bärbroich führen die Verbindungsstraßen über weite Strecken durch Wald. Im Herbst bleibt dort Laub liegen, das unter Nässe eine glitschige Schicht bildet und den Kraftschluss stärker mindert als Regen allein. Zusammen mit engen Kurven und dem ständigen Wechsel aus Schatten und Sonnenflecken führt das zu Abkommensunfällen, meist mit Anprall auf Böschung oder Erdwall. Solche Anstöße auf weichen Untergrund täuschen: Die Frontschürze federt zurück und wirkt heil, während die Haltelaschen aus Kunststoff hinter dem Bauteil abgeschert sind. Sitzt die Schürze nur noch auf zwei von sechs Befestigungspunkten, ist sie beschädigt, auch wenn kein Kratzer zu sehen ist."
+      },
+      {
+        "frage": "Welche Rolle spielen die Hanglagen um Bensberg bei Schäden ohne Fahrer im Fahrzeug?",
+        "antwort": "Zwischen dem tiefsten Punkt bei rund 51 Metern und dem höchsten bei gut 267 Metern liegen in Bergisch Gladbach über zweihundert Höhenmeter, und die Straßen um Bensberg, Moitzfeld und Frankenforst folgen diesem Gefälle. In solchen Lagen tritt ein Schadentyp auf, den viele unterschätzen: das wegrollende Fahrzeug. Wird beim Abstellen nur die Fahrstufe eingelegt und die Feststellbremse vergessen, setzt sich der Wagen in Bewegung und trifft ungebremst ein parkendes Fahrzeug, eine Mauer oder ein Tor. Die Geschwindigkeit ist gering, die Masse aber voll wirksam. Kennzeichnend sind eine fehlende Bremsspur und eine ungewöhnliche Anstoßhöhe, weil das Fahrzeug beim Rollen nicht eintaucht — beides gehört dokumentiert, weil sich daraus der Hergang belegen lässt."
+      },
+      {
+        "frage": "Worauf ist an der Anschlussstelle Bensberg zu achten?",
+        "antwort": "Die Anschlussstelle Bensberg bindet Bergisch Gladbach an die A4 Richtung Köln an und trägt morgens die Hauptlast des Berufsverkehrs. Der Rückstau reicht regelmäßig auf die Zubringer zurück, sodass das Stauende dort liegt, wo auch Ortskundige es nicht erwarten. Ein Auffahrschaden an dieser Stelle ist selten reine Unaufmerksamkeit; die Sichtverhältnisse auf das Stauende gehören deshalb mit in die Aufnahme."
+      },
+      {
+        "frage": "Was ist bei einem Unfall auf der A4 Richtung Kreuz Köln-Ost anders als im Stadtgebiet?",
+        "antwort": "Wer aus Bergisch Gladbach über die A4 nach Köln fährt, erreicht am Kreuz Köln-Ost den Punkt, an dem sich der Verkehr auf den Kölner Ring verteilt. Die Verflechtungsstrecke ist kurz und der Lkw-Anteil hoch. Kommt es dort zum Schaden, läuft die Aufnahme über die Autobahnpolizei, und das Fahrzeug wird häufig auf einen Verwahrplatz abgeschleppt. Wo es steht, muss man wissen, um es zeitnah begutachten zu lassen."
+      },
+      {
+        "frage": "Warum sind Zusammenstöße mit Radfahrenden hier schwer zu belegen?",
+        "antwort": "In Bergisch Gladbach treffen innerorts viel Radverkehr und enge Fahrbahnen aufeinander. Bei einer Kollision zwischen Auto und Fahrrad ist der Fahrzeugschaden oft gering und die Beweisfrage trotzdem schwierig, weil Anstoßspuren an Kunststoffteilen kaum sichtbar bleiben und sich Lackabrieb schnell abwischt. Wir dokumentieren Anstoßhöhe und Spurenbild auch dann, wenn am Auto auf den ersten Blick nichts zu sehen ist."
+      },
+      {
+        "frage": "Was gilt für Fahrzeuge, die im Bergischen längere Zeit draußen stehen?",
+        "antwort": "Viele Fahrzeuge stehen in Bergisch Gladbach dauerhaft im Freien, oft unter Bäumen am Hang. Nach einem Unfall wird das relevant, weil die gegnerische Versicherung Vorschäden und Witterungsspuren gern mit dem Unfallschaden vermischt: Steinschlag, Astabdrücke und Moosränder sind kein Unfallschaden, sehen auf schlechten Fotos aber danach aus. Deshalb trennen wir bei der Aufnahme sauber zwischen Altzustand und frischem Schaden."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Stadtmitte oder Zusammenstoß in Bensberg — der Sachverständige kommt zu Ihnen nach Bergisch Gladbach.",
+    "topografieAnker": "Bergisch Gladbach liegt östlich von Köln am Rand des Bergischen Landes; die A4 führt südlich vorbei, die B506 verbindet die Stadtteile im Tal der Strunde."
+  },
+  "huerth": {
+    "stadtbezirke": [
+      {
+        "name": "Hermülheim und Efferen",
+        "ortsteile": [
+          "Hermülheim",
+          "Efferen"
+        ]
+      },
+      {
+        "name": "Alt-Hürth und Knapsack",
+        "ortsteile": [
+          "Alt-Hürth",
+          "Knapsack"
+        ]
+      },
+      {
+        "name": "Westliche Stadtteile",
+        "ortsteile": [
+          "Gleuel",
+          "Berrenrath",
+          "Alstädten-Burbach",
+          "Sielsdorf",
+          "Stotzheim"
+        ]
+      },
+      {
+        "name": "Südliche Stadtteile",
+        "ortsteile": [
+          "Fischenich",
+          "Kendenich",
+          "Kalscheuren"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Hürth (A1)",
+        "B265 Richtung Köln und Schleiden"
+      ],
+      "autobahnen": [
+        "A1"
+      ],
+      "bundesstrassen": [
+        "B265",
+        "B51"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Hans-Böckler-Platz",
+        "beschreibung": "Der Hans-Böckler-Platz wurde vom Rhein-Erft-Kreis als Unfallhäufungsstelle geführt. Nach einer Verbesserung der Sichtverhältnisse zählte der Kreis ihn 2019 zu den Stellen, die nicht mehr auffällig sind. Die Angabe beschreibt also einen entschärften Punkt, keine aktuelle Gefahrenstelle. Quelle: Rheinische Anzeigenblaetter, 10.07.2019.",
+        "quelle": "https://www.rheinische-anzeigenblaetter.de/rhein-erft/c-nachrichten/unfallschwerpunkte-im-kreis-reduziert_a155978"
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Rolle spielt der Chemiepark Knapsack für das Unfallgeschehen in Hürth?",
+        "antwort": "Knapsack ist einer der zwölf Hürther Stadtteile und zugleich ein großer Industriestandort. Werks-, Liefer- und Schichtverkehr laufen dort über wenige Zufahrten, und die Zeitfenster des Schichtwechsels verdichten den Verkehr zusätzlich. Zwischen Werksgelände und Wohnbebauung liegen nur wenige Straßenzüge, in denen sich beide Verkehrsarten überlagern. Typisch sind Auffahr- und Einmündungsunfälle an den Zufahrten sowie Anstöße beim Rangieren auf Werks- und Besucherparkflächen. Anders als auf der Autobahn geschieht das bei niedriger Geschwindigkeit — und genau das wird unterschätzt. Ein Anstoß unter zehn Stundenkilometern verformt oft nur die Stoßfängerschale, verschiebt aber Träger, Sensorhalter und Verriegelungen dahinter. Ob dort etwas nachgegeben hat, zeigt erst die Demontage und nicht das Foto. Eine Fernbewertung nach Bildern greift hier regelmäßig zu kurz."
+      },
+      {
+        "frage": "Die Linie 18 hält in Efferen, Hermülheim und Fischenich — worauf muss man dort achten?",
+        "antwort": "Die Stadtbahnlinie 18 durchquert Hürth mit den Halten Efferen, Kiebitzweg, Hermülheim und Fischenich und verbindet die Stadt in rund zwanzig Minuten mit dem Kölner Hauptbahnhof. Um die Haltestellen herum treffen ein- und aussteigende Fahrgäste, haltende Busse, Radverkehr und abbiegende Fahrzeuge auf engem Raum zusammen. Im Berufsverkehr staut es sich zusätzlich vor den Übergängen, sodass Lücken erzwungen statt abgewartet werden. Häufig sind Anstöße beim Anfahren aus zweiter Reihe, Kollisionen mit sich öffnenden Türen und Streifschäden entlang der Fahrzeugflanke. Sind Fußgänger oder Radfahrer beteiligt, kommt es später auf Details an: Anstoßhöhe, Abriebspuren und Deformationsrichtung am Blech. Diese Merkmale verschwinden mit der Reparatur — sie müssen vorher dokumentiert sein, am besten aus mehreren Winkeln mit Maßstab."
+      },
+      {
+        "frage": "Warum ist die B265 durch Hürth so stark belastet?",
+        "antwort": "Die B265 führt von Köln kommend mitten durch Hürth in Richtung Schleiden und wirkt zugleich als schnelle Verbindung zwischen A4 und A1. Wer auf einer der Autobahnen im Stau steht, weicht auf sie aus — Fernverkehr trifft dann auf Anlieger, die aus Hermülheim oder Efferen in die Bundesstraße einfahren. Diese Ausweichbewegung setzt schlagartig ein, sobald eine Sperrung gemeldet wird. Die Folge sind Auffahrschäden im Stop-and-Go und seitliche Anstöße beim Einfädeln. Bei dichter Kolonne mit geringem Tempo entstehen häufig Kettenkollisionen mit Anstoß vorn und hinten. Für die Zuordnung ist wichtig, beide Schadenbilder getrennt zu erfassen: Sie stammen von unterschiedlichen Verursachern und werden auch getrennt reguliert. Wer beides zusammen kalkuliert, verliert die Zuordnung."
+      },
+      {
+        "frage": "Was bedeutet die Nähe zum Kreuz Köln-West für Hürther Autofahrer?",
+        "antwort": "Hürth liegt unmittelbar an dem Punkt, an dem sich A1 und A4 verflechten, und bekommt dessen Rückstau ab: Steht es dort, weicht der Verkehr auf die Zubringer und die B265 aus. Für die Schadenaufnahme heißt das, dass viele Unfälle im Stadtgebiet ihre eigentliche Ursache außerhalb haben. Wir halten Verkehrslage und Umleitungsführung deshalb mit fest, weil sie erklären, warum jemand dort fuhr, wo er sonst nie fährt."
+      },
+      {
+        "frage": "Worauf ist beim Rangieren auf den Parkflächen der Hürther Einkaufslagen zu achten?",
+        "antwort": "Die Einkaufslagen in Hürth ziehen Kundenverkehr aus dem ganzen Umland an, entsprechend voll sind Parkdecks und Zufahrten. Typisch sind dort Anstöße beim Ausparken, Kollisionen an Rampen und Schrammen an Stützen. Weil sich die Beteiligten oft schnell trennen, ist die Dokumentation vor dem Wegfahren entscheidend: Endstellung beider Fahrzeuge, Anstoßhöhe und Umgebung, damit sich der Hergang später rekonstruieren lässt."
+      },
+      {
+        "frage": "Wie wirkt sich der Schwerlastverkehr aus Knapsack auf Fahrzeugschäden aus?",
+        "antwort": "Rund um Alt-Hürth und Knapsack läuft Werks- und Lieferverkehr mit hohem Lkw-Anteil über Straßen, die auch Wohnverkehr tragen. Bei einer Berührung zwischen Lkw und Pkw sitzt der Anstoß häufig oberhalb der Pkw-Struktur, also an Türoberkante, Säule oder Dachrahmen. Der Schaden sieht dann harmlos aus, während oben etwas klemmt. Wir vermessen in Hürth deshalb die Anstoßhöhe, statt nur den Kratzer zu fotografieren."
+      },
+      {
+        "frage": "Was ist bei Unfällen mit Baustellenbezug auf der B265 zu beachten?",
+        "antwort": "Die B265 ist in Hürth seit Jahren Umbau- und Planungsthema, mit wechselnden Abbiegebeziehungen und verlegten Radwegen. Eine Baustelle wandert weiter, und mit ihr verschwindet die Beweislage: Welche Spur galt, wo stand welches Schild, wie breit war die Fahrbahn. Wer den Zustand am Unfalltag nicht festhält, kann ihn Wochen später nicht mehr belegen — deshalb fotografieren wir die Örtlichkeit vollständig und nicht nur das Fahrzeug."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hürth — von der Anschlussstelle Hürth an der A1 über die B265 bis nach Efferen, Hermülheim und Knapsack. Schadenaufnahme vor Ort in allen zwölf Stadtteilen.",
+    "topografieAnker": "Hürth liegt rund zwölf Kilometer südwestlich von Köln auf dem Villerücken. Etwa ein Drittel der Stadtfläche wurde für den Braunkohleabbau abgetragen; der höchste Punkt, die Wilhelmshöhe mit 155 Metern, ist eine Abraumhalde. Zwischen den zwölf Stadtteilen verlaufen B265 und B51, während die A1 das Stadtgebiet im Westen mit den Anschlussstellen Hürth und Hürth-Knapsack erschließt."
+  },
+  "frechen": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Frechen-Mitte"
+        ]
+      },
+      {
+        "name": "Königsdorf",
+        "ortsteile": [
+          "Königsdorf",
+          "Neufreimersdorf",
+          "Neubuschbell"
+        ]
+      },
+      {
+        "name": "Bachem",
+        "ortsteile": [
+          "Bachem",
+          "Neuhemmerich"
+        ]
+      },
+      {
+        "name": "Weitere Stadtteile",
+        "ortsteile": [
+          "Habbelrath",
+          "Buschbell",
+          "Grube Carl",
+          "Hücheln",
+          "Grefrath",
+          "Benzelrath"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Frechen (A1) südlich des Kreuzes Köln-West",
+        "Anschlussstelle Frechen-Nord (A4, nur Richtung Aachen)",
+        "B264 als Südumgehung des Stadtkerns"
+      ],
+      "autobahnen": [
+        "A1",
+        "A4"
+      ],
+      "bundesstrassen": [
+        "B264"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Bonnstraße",
+        "beschreibung": "Die Bonnstraße wurde vom Rhein-Erft-Kreis als Unfallhäufungsstelle geführt. Nach umfangreichem Grünschnitt und einer Optimierung der Ampelanlage zählte der Kreis sie 2019 zu den Stellen, die nicht mehr auffällig sind. Die Angabe beschreibt einen entschärften Punkt, keine aktuelle Gefahrenstelle. Quelle: Rheinische Anzeigenblaetter, 10.07.2019.",
+        "quelle": "https://www.rheinische-anzeigenblaetter.de/rhein-erft/c-nachrichten/unfallschwerpunkte-im-kreis-reduziert_a155978"
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum kommt man an der Anschlussstelle Frechen-Nord nicht in beide Richtungen auf die A4?",
+        "antwort": "Frechen-Nord an der Bonnstraße ist nur in Richtung Aachen angebunden — eine halbe Anschlussstelle. Wer nach Köln will, muss über die A1 südlich des Kreuzes Köln-West oder über die B264 ausweichen. In der Praxis führt das zu Fahrzeugen, die die Auffahrt zu spät als unpassend erkennen, kurz vor der Rampe abbremsen oder auf der Bonnstraße wenden. Dabei muss der Gegenverkehr gequert werden, meist ohne eigene Aufstellfläche. Typische Folgen sind Auffahrschäden am Heck und Kollisionen beim Wenden aus dem Stand. Am Fahrzeug betrifft das häufig den Heckstoßfänger samt Parksensorik und rückwärtiger Radartechnik. Deren Funktion muss nach der Instandsetzung geprüft und kalibriert werden — auch das gehört in die Kalkulation. Ein Sensor, der nur wieder piept, ist damit nicht geprüft."
+      },
+      {
+        "frage": "Die Stadtbahn fährt mitten durch die Frechener Fußgängerzone — was heißt das für Schäden?",
+        "antwort": "In der Kölner Straße ist die Frechener Innenstadt Fußgängerzone, befahren allein von der Stadtbahnlinie 7. Für den übrigen Verkehr bedeutet das eine Umfahrung des Kerns und viel Rangieren in den angrenzenden Seitenstraßen und Parkbereichen. Enge Zufahrten und schräg angeordnete Stellplätze führen dazu, dass beim Ausparken weitgehend auf Sicht manövriert wird. Die Schäden dort sind selten spektakulär, aber zahlreich: Streifschäden an Stoßfängerecken, Türen und Außenspiegeln, dazu Kontakt mit Pollern und Bordsteinen. Unterschätzt wird, was hinter der Kunststoffschale sitzt — Parksensoren, Spiegelkameras und Halterungen brechen häufig, obwohl der Lack nur gestreift wirkt. Genau deshalb lohnt sich die Demontage der Verkleidung schon bei der Besichtigung: Erst dahinter zeigt sich, ob ein Halter gebrochen ist."
+      },
+      {
+        "frage": "Frechen ist Standort für Quarzsand und Braunkohle — merkt man das im Straßenverkehr?",
+        "antwort": "Ja. Die Quarzwerke fördern seit dem späten 19. Jahrhundert im Stadtgebiet, und RWE Power betreibt in Frechen weiterhin einen Kohleveredlungsbetrieb. Beides erzeugt Schwerlastverkehr, der über die B264 südlich um den Stadtkern geführt wird und an den Werkszufahrten in den Verkehr einfädelt. Für andere Verkehrsteilnehmer sind zwei Dinge relevant: der tote Winkel schwerer Fahrzeuge beim Abbiegen und Materialabtrag von der Ladung. Sand und Kies bleiben nach jeder Kurve auf der Fahrbahn liegen und verlängern den Bremsweg spürbar. Steinschlag an Frontscheibe und Haube ist die häufigste Folge. Wo eine Scheibe mit Kameramodul für Assistenzsysteme betroffen ist, ersetzt der Austausch allein nicht die Funktion — die Kamera muss anschließend neu eingelernt werden, sonst weicht die Spurerkennung unbemerkt ab."
+      },
+      {
+        "frage": "Was ändert sich für Frechen durch die Bauarbeiten an der A4?",
+        "antwort": "Zwischen Frechen und dem Kreuz Kerpen wird an der A4 gebaut, und für die Brückenarbeiten war der Abschnitt mehrfach voll gesperrt. Der Verkehr läuft dann über die B264 und das Netz darunter. Genau in solchen Phasen fahren Ortsunkundige durch Frechen, kennen weder Vorfahrt noch Ampelfolge und verursachen Abbiege- und Auffahrschäden. Wir dokumentieren die Umleitungsführung mit, weil sie zur Bewertung des Hergangs gehört."
+      },
+      {
+        "frage": "Warum sind Gewerbezufahrten in Frechen ein eigenes Schadensbild?",
+        "antwort": "In den Gewerbelagen von Frechen münden Betriebshöfe oft direkt auf durchgehende Straßen. Beim Ein- und Ausfahren mit Sattelzug wird über die Gegenspur ausgeholt, und dabei entstehen Streifschäden über mehrere Bauteile hinweg. Entscheidend ist dann nicht die Kratzerlänge, sondern ob sich Spaltmaße verändert haben — das zeigt, ob der Anstoß bis in die Struktur ging. Genau das messen wir."
+      },
+      {
+        "frage": "Was ist bei Unfällen im Frechener Stadtkern mit der Stadtbahn zu beachten?",
+        "antwort": "Im Kern von Frechen teilen sich Bahn, Auto und Fußverkehr wenig Raum. Kommt es zur Kollision mit einer Bahn, ist die Gegenseite ein Verkehrsbetrieb mit eigener Schadenabteilung, und die Beweisfrage entscheidet sich an Details: Lage zum Gleisbereich, Ampelphase, Bremsspur, Endstellung. Wir nehmen die Örtlichkeit so auf, dass die spätere Rekonstruktion nicht allein auf der Darstellung des Betriebs beruht."
+      },
+      {
+        "frage": "Worauf kommt es bei Wildschäden auf den Feldwegen rund um Bachem an?",
+        "antwort": "Zwischen Bachem und der offenen Feldflur westlich von Frechen führen Landstraßen ohne Beleuchtung an Feldern entlang, und in der Dämmerung ist Wildwechsel dort keine Seltenheit. Für die Abwicklung müssen Wildunfallbescheinigung und Spur am Fahrzeug zusammenpassen: Haare, Aufprallpunkt, Bremsweg. Wer das Fahrzeug vorher wäscht oder bewegt, nimmt sich den Beleg — deshalb sollte die Aufnahme vor jeder Reinigung erfolgen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Frechen — von der A1 südlich des Kreuzes Köln-West über die B264 bis nach Königsdorf, Bachem und Grube Carl. Schadenaufnahme vor Ort in allen neun Stadtteilen.",
+    "topografieAnker": "Frechen liegt unmittelbar westlich von Köln am Übergang zur Ville. Braunkohle und Quarzsand haben die Stadt geprägt und tun es weiterhin: Die Abbaugebiete reichen bis an die Wohnbebauung, während der Königsdorfer Wald im Norden vom Bergbau verschont blieb. Die A1 erschließt das Stadtgebiet südlich des Kreuzes Köln-West, die A4 nur mit einer halben Anschlussstelle."
+  },
+  "pulheim": {
+    "stadtbezirke": [
+      {
+        "name": "Brauweiler – Dansweiler – Freimersdorf",
+        "ortsteile": [
+          "Brauweiler",
+          "Dansweiler",
+          "Freimersdorf"
+        ]
+      },
+      {
+        "name": "Geyen – Sinthern – Manstedten",
+        "ortsteile": [
+          "Geyen",
+          "Sinthern",
+          "Manstedten"
+        ]
+      },
+      {
+        "name": "Pulheim – Orr",
+        "ortsteile": [
+          "Pulheim-Mitte",
+          "Orr"
+        ]
+      },
+      {
+        "name": "Sinnersdorf",
+        "ortsteile": [
+          "Sinnersdorf"
+        ]
+      },
+      {
+        "name": "Stommeln – Stommelerbusch – Ingendorf",
+        "ortsteile": [
+          "Stommeln",
+          "Stommelerbusch",
+          "Ingendorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "B59 als radiale Ausfallstraße Richtung Mönchengladbach",
+        "Auffahrten auf A1, A57 und A4 jenseits der Stadtgrenze"
+      ],
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B59"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Pulheim hat keine eigene Autobahnauffahrt — wie wirkt sich das auf den Verkehr aus?",
+        "antwort": "Die Auffahrten auf A1, A57 und A4 liegen sämtlich jenseits der Stadtgrenze auf Kölner beziehungsweise Frechener Gebiet. Der Fernverkehr aus Brauweiler, Sinnersdorf oder Stommeln wird deshalb zunächst über Landes- und Bundesstraßen gebündelt, vor allem über die B59. Diese Achse trägt morgens und abends Berufsverkehr in beide Richtungen und wird zusätzlich zum Ausweichweg, sobald es auf dem Kölner Autobahnring stockt. Ortskundige und Ortsunkundige treffen dann auf derselben Strecke aufeinander: Wer die Gegend kennt, biegt in Nebenstraßen ab, wer dem Navigationsgerät folgt, bremst dafür unvermittelt. Typisch sind Auffahr- und Abbiegeschäden an den Knotenpunkten — Schäden, bei denen die Anstoßrichtung sorgfältig festzuhalten ist, weil sie über den Hergang entscheidet. Bei Abbiegeunfällen zählt zusätzlich, welches Fahrzeug seine Fahrlinie verlassen hat."
+      },
+      {
+        "frage": "Was ist auf den Landstraßen rund um Stommeln und Geyen zu beachten?",
+        "antwort": "Pulheim liegt in einer offenen Ackerlandschaft der linksrheinischen Kölner Bucht. Zwischen Stommeln, Stommelerbusch, Geyen und Sinthern queren landwirtschaftliche Zufahrten die Landesstraßen, und schwere Gespanne biegen dort mit großem Radius ab. Zwei Schadenbilder sind typisch: seitlicher Kontakt beim Überholen eines ausschwenkenden Anhängers, und Verlust der Bodenhaftung auf Erde und Ernterückständen, die von Reifen auf die Fahrbahn getragen werden. Im zweiten Fall endet das Fahrzeug oft im Bankett oder Graben, wo die Böschungskante wie eine Rampe wirkt und den Wagen einseitig anhebt. Dabei entstehen Unterboden- und Achsschäden, die von außen unauffällig bleiben. Hinzu kommt Schlamm, der sich in Radhäusern und Kühlerpaket festsetzt. Ohne Vermessung und Blick von unten wird ein solcher Schaden regelmäßig zu niedrig eingeschätzt."
+      },
+      {
+        "frage": "Was heißt es für die Schadenaufnahme, dass Pulheim zwischen mehreren Autobahnen liegt?",
+        "antwort": "Pulheim hat selbst keine Autobahnanschlussstelle, liegt aber im Einzugsbereich gleich mehrerer Autobahnen. Der Weg dorthin führt über Zubringer und Ortsdurchfahrten, und dort entsteht der Rückstau, der auf der Autobahn beginnt. Für die Bewertung eines Auffahrschadens ist das wichtig: Das Stauende liegt in Pulheim regelmäßig an unübersichtlicher Stelle, und ob es erkennbar war, gehört mit ins Gutachten."
+      },
+      {
+        "frage": "Warum sind Feldeinmündungen rund um Pulheim so unfallträchtig?",
+        "antwort": "Zwischen den Ortsteilen von Pulheim münden Wirtschaftswege ohne Ampel und oft ohne freie Sicht auf Straßen, auf denen zügig gefahren wird. Der typische Zusammenstoß ist ein seitlicher Anprall — und das ist die Richtung, gegen die ein Fahrzeug am wenigsten Struktur hat. Ob Tür, Schweller und Säule nachgegeben haben, zeigt sich an Spaltmaßen und hakenden Fensterhebern, nicht am Lack."
+      },
+      {
+        "frage": "Was ist bei einem Anstoß durch ein landwirtschaftliches Gespann zu klären?",
+        "antwort": "Rund um Pulheim sind breite, langsame Gespanne unterwegs, oft mit Anbaugerät, das über die Fahrzeugkontur hinausragt. Kommt es zur Berührung, ist zuerst zu klären, wer Halter des Zugfahrzeugs und wer des Anhängers ist, denn beide können eigene Versicherungen haben. Wir nehmen die Daten beider Einheiten auf und ordnen den Anstoß dem verursachenden Teil zu, sonst verweisen die Beteiligten später aufeinander."
+      },
+      {
+        "frage": "Wie wirkt sich der Bahnverkehr auf Parkschäden in Pulheim aus?",
+        "antwort": "Wer aus Pulheim nach Köln pendelt, stellt das Auto morgens am Bahnhof ab. Die Flächen sind früh voll, es wird eng und in zweiter Reihe geparkt, und abends wird unter Zeitdruck ausgeparkt. Daraus entstehen Anstöße, deren Verursacher meist längst weg ist. Ohne Foto der Endstellung und der Fremdlackspuren bleibt in solchen Fällen nur die eigene Vollkasko."
+      },
+      {
+        "frage": "Was ist an der B59 als Umgehung besonders?",
+        "antwort": "Die B59 führt als Umgehung an Pulheim vorbei statt hindurch, und genau daraus entsteht ihr Schadensbild: An den Anschlussknoten treffen zügig fahrender Durchgangsverkehr und einfädelnder Ortsverkehr mit großem Geschwindigkeitsunterschied zusammen. Typisch sind Einfädel- und Vorfahrtfehler. Für die Aufnahme ist entscheidend, aus welcher Richtung mit welcher Sicht eingefahren wurde — das lässt sich später nicht rekonstruieren."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Pulheim — entlang der B59 zwischen Köln und Stommeln sowie in Brauweiler, Sinnersdorf, Geyen und Sinthern. Schadenaufnahme vor Ort in allen zwölf Stadtteilen.",
+    "topografieAnker": "Pulheim liegt rund 13 Kilometer westlich von Köln in einer offenen Ackerlandschaft der linksrheinischen Kölner Bucht. Eine Besonderheit: Im Stadtgebiet selbst verläuft keine Autobahn — die Auffahrten auf A1, A57 und A4 liegen alle knapp jenseits der Stadtgrenze. Die B59 als radiale Ausfallstraße Richtung Mönchengladbach trägt deshalb den Hauptteil des überörtlichen Verkehrs."
+  },
+  "bruehl": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Brühl-Innenstadt"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtbezirke",
+        "ortsteile": [
+          "Vochem",
+          "Kierberg"
+        ]
+      },
+      {
+        "name": "Südliche Stadtbezirke",
+        "ortsteile": [
+          "Badorf",
+          "Pingsdorf",
+          "Schwadorf",
+          "Heide"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Bliesheim als Beginn der A553",
+        "Anschlussstelle Brühl-Süd (Zufahrt Phantasialand)",
+        "Anschlussstelle Brühl-Ost",
+        "Anschlussstelle Brühl-Nord"
+      ],
+      "autobahnen": [
+        "A553"
+      ],
+      "bundesstrassen": [
+        "B51"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum wird die A553 auch Phantasialand-Autobahn genannt?",
+        "antwort": "Weil die Zufahrt zum Freizeitpark an der Anschlussstelle Brühl-Süd liegt. Die A553 beginnt am Autobahnkreuz Bliesheim als Fortsetzung der A1 und endet am nördlichen Brühler Stadtrand. Auf dieser kurzen Strecke bündelt sie an Wochenenden und in den Ferien Besucherverkehr, der die Ausfahrt oft erst spät erkennt. Ortsunkundige Fahrer und kurze Verzögerungsstreifen sind hier die Regel, nicht die Ausnahme. Zwei Schadenbilder dominieren: Auffahrschäden im Rückstau auf der Verzögerungsspur und Rangierschäden auf den Parkflächen — Ecken, Türen, Heckklappen. Gerade bei Parkplatzschäden fehlt häufig der Gegner. Dann zählt die technische Rekonstruktion: Lackantragungen, Kratzverlauf und Anstoßhöhe lassen sich einem Fahrzeugtyp zuordnen, wenn sie vor der Reparatur gesichert werden. Nach einer Wäsche ist diese Spur verloren."
+      },
+      {
+        "frage": "Was ist an der Vorgebirgsbahn in Brühl aus Sicht der Schadenaufnahme besonders?",
+        "antwort": "Die Vorgebirgsbahn ist als Linie 18 in das Stadtbahnnetz von Köln und Bonn eingebunden und hat mehrere Halte auf Brühler Gebiet. Sie verläuft über weite Strecken parallel zur Straße und kreuzt sie an definierten Punkten. Dort entstehen Konflikte zwischen abbiegenden Fahrzeugen und der bevorrechtigten Bahn, deren Annäherungsgeschwindigkeit regelmäßig unterschätzt wird. Eine Kollision mit einem Schienenfahrzeug verläuft anders als ein Unfall zwischen zwei Pkw: Die Masse ist ungleich verteilt, das Fahrzeug wird meist seitlich verschoben statt gestaucht. Typisch sind Schäden an Schweller, B-Säule und Radaufhängung einer Seite. Der Rahmen muss dann vermessen werden — die Bodengruppe nimmt solche Querkräfte messbar auf. Türspaltmaße sind dabei das einfachste Indiz für eine verzogene Seitenstruktur."
+      },
+      {
+        "frage": "Was passiert typischerweise in der Brühler Innenstadt rund um Schloss Augustusburg?",
+        "antwort": "Die Innenstadt ist mit Abstand der einwohnerstärkste der sieben Brühler Stadtbezirke, und der Bereich um das Weltkulturerbe Augustusburg zieht ganzjährig Besucherverkehr an. Ortsunkundige suchen Parkraum in Straßenzügen, die dafür nie gebaut wurden. Die Folge sind Rangier- und Ausparkschäden, Kontakt mit Pollern, Randsteinen und geparkten Fahrzeugen. Historisches Pflaster in Teilen des Kerns erschwert das Manövrieren zusätzlich. Solche Schäden wirken gering, betreffen aber oft mehrere Bauteile gleichzeitig — Stoßfänger, Kotflügel, Radlauf und die dahinterliegende Sensorik. Wichtig ist die Abgrenzung zu Vorschäden: An älteren Fahrzeugen mit Gebrauchsspuren muss dokumentiert sein, welche Beschädigung zum aktuellen Ereignis gehört und welche nicht. Ohne diese Trennung lässt sich der neue Schaden nicht sauber beziffern."
+      },
+      {
+        "frage": "Was macht die A553 für Auffahrschäden anfällig?",
+        "antwort": "Die A553 ist kurz und je Richtung nur zweistreifig. Sie nimmt den Verkehr auf, der vom Autobahnkreuz Bliesheim kommt, und gibt ihn am nördlichen Rand von Brühl an die B51 ab. Fällt eine Spur aus, gibt es keine dritte als Puffer: Der Verkehr steht sofort. Am Stauende entstehen dann die Auffahrschäden, bei denen die Frage nach der Erkennbarkeit des Stauendes über die Haftungsquote entscheidet."
+      },
+      {
+        "frage": "Worauf ist beim Rangieren mit Anhänger oder Wohnmobil in Brühl zu achten?",
+        "antwort": "Brühl zieht Ausflugsverkehr an, und ein Teil davon kommt mit Anhänger, Fahrradträger oder Wohnmobil. Beim Rangieren auf vollen Flächen entstehen Anstöße, die zwei Fahrzeuge betreffen und damit womöglich zwei Versicherungen. Beim Anhänger zählt nicht nur das Blech, sondern Deichsel und Rahmen: Verzieht sich dort etwas, ist die Verkehrssicherheit berührt. Wir nehmen Zugfahrzeug und Anhänger getrennt auf."
+      },
+      {
+        "frage": "Was ist bei einem Anstoß in den engen Straßen der Brühler Innenstadt typisch?",
+        "antwort": "In der Brühler Innenstadt rangieren viele Auswärtige mit Fahrzeugen, die für die Straßenbreite zu groß sind. Typisch sind Schrammen an Bordsteinen und Hausecken sowie Anstöße beim Vorbeifahren. Bei Bordsteinkontakt lohnt der Blick unter das Fahrzeug: Felge, Radaufhängung und Spur können betroffen sein, ohne dass außen mehr als ein Kratzer zu sehen ist. Ein Fahrzeug, das danach zieht, hat einen Achsschaden, keinen Lackschaden."
+      },
+      {
+        "frage": "Wie wirkt sich der Übergang ins Vorgebirge südlich von Brühl aus?",
+        "antwort": "Südlich von Brühl steigt das Gelände ins Vorgebirge an, und die Straßen dort tragen neben Pendlerverkehr auch landwirtschaftlichen Verkehr. Feldzufahrten bringen Schmutz auf die Fahrbahn, der bei Nässe die Haftung deutlich verändert. Rutscht ein Fahrzeug deshalb, ist der Fahrbahnzustand ein Beweisthema — und er ist nach dem nächsten Regen verschwunden. Deshalb dokumentieren wir ihn am Unfalltag."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Brühl — von der Anschlussstelle Brühl-Süd an der A553 über die Vorgebirgsbahn bis nach Badorf, Pingsdorf, Kierberg und Vochem. Schadenaufnahme vor Ort in allen sieben Stadtbezirken.",
+    "topografieAnker": "Brühl liegt zwischen Köln und Bonn am Ostrand der Ville, deren frühere Braunkohletagebaue in der Umgebung zu Seen geworden sind. Zwei Ziele bestimmen den auswärtigen Verkehr: das Schloss Augustusburg als Weltkulturerbe und das Phantasialand. Erschlossen wird das Stadtgebiet über die kurze A553, die am Kreuz Bliesheim beginnt und am nördlichen Stadtrand endet."
+  },
+  "wesseling": {
+    "stadtbezirke": [
+      {
+        "name": "Wesseling-Mitte",
+        "ortsteile": [
+          "Wesseling-Mitte"
+        ]
+      },
+      {
+        "name": "Keldenich",
+        "ortsteile": [
+          "Keldenich"
+        ]
+      },
+      {
+        "name": "Berzdorf",
+        "ortsteile": [
+          "Berzdorf"
+        ]
+      },
+      {
+        "name": "Urfeld",
+        "ortsteile": [
+          "Urfeld"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "A555 zwischen Köln und Bonn",
+        "Werkszufahrten der Rheinschiene",
+        "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"
+      ],
+      "autobahnen": [
+        "A555"
+      ],
+      "bundesstrassen": []
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Euro-Kreisel (Flach-Fengler-Straße / Hubertusstraße / Jahnstraße)",
+        "beschreibung": "Der Euro-Kreisel wurde vom Rhein-Erft-Kreis als Unfallhäufungsstelle geführt. Nach besserer Führung des Radverkehrs, verbesserten Sichtverhältnissen und baulichen Änderungen im Kreisel zählte der Kreis ihn 2019 zu den Stellen, die nicht mehr auffällig sind. Die Angabe beschreibt einen entschärften Punkt, keine aktuelle Gefahrenstelle. Quelle: Rheinische Anzeigenblaetter, 10.07.2019.",
+        "quelle": "https://www.rheinische-anzeigenblaetter.de/rhein-erft/c-nachrichten/unfallschwerpunkte-im-kreis-reduziert_a155978"
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Wie prägt die Wesselinger Chemieindustrie das Unfallgeschehen auf den Straßen?",
+        "antwort": "In Wesseling arbeiten Raffinerie- und Chemiebetriebe von Shell, Braskem, Evonik und LyondellBasell auf engem Raum an der Rheinschiene. Der Standort erzeugt Werksverkehr rund um die Uhr: Tankfahrzeuge, Sattelzüge und Schichtverkehr teilen sich die Zufahrtsstraßen mit dem örtlichen Verkehr. Da viele Werkstore unmittelbar an der durchgehenden Fahrbahn liegen, fehlt abbiegenden Fahrzeugen die Aufstellfläche. Typisch sind Abbiegeunfälle mit schweren Fahrzeugen, bei denen der tote Winkel eine Rolle spielt, sowie Anstöße beim Ein- und Ausfahren. Trifft ein Lkw einen Pkw seitlich, wirkt die Kraft meist oberhalb der Stoßfängerebene — Türen, Säulen und Dachrahmen werden dann eingedrückt. Solche Schäden gehören vermessen, weil die Seitenstruktur die Insassensicherheit trägt. Ein optisch gerichteter Türrahmen belegt das nicht."
+      },
+      {
+        "frage": "Die Linie 16 hält an vier Stationen in Wesseling — was bedeutet das für den Straßenverkehr?",
+        "antwort": "Die Stadtbahnlinie 16 fährt seit 1978 auf der Trasse der alten Rheinuferbahn zwischen Köln und Bonn und bedient in Wesseling die Halte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld. Die Strecke durchzieht das Stadtgebiet in Nord-Süd-Richtung und wird vom Querverkehr an mehreren Punkten gekreuzt. An diesen Stellen treffen Fahrzeuge, Fußgänger und die Bahn mit sehr unterschiedlichen Geschwindigkeiten zusammen. Dort entstehen Kollisionen mit querenden oder abbiegenden Fahrzeugen. Für die Begutachtung ist die Aufprallrichtung entscheidend: Ein Anstoß aus der Querrichtung verschiebt das Fahrzeug seitlich und belastet Fahrwerk und Bodengruppe anders als ein Heckaufprall. Ohne Achsvermessung bleibt dieser Teil unsichtbar — bemerkbar wird er später an ungleichmäßigem Reifenbild."
+      },
+      {
+        "frage": "Wesseling liegt an der A555 — warum führt keine Bundesstraße durch die Stadt?",
+        "antwort": "Weil die A555 die frühere Bundesstraße ersetzt hat. Die Verbindung zwischen Köln und Bonn war die erste Autobahn Deutschlands, die für den öffentlichen Verkehr freigegeben wurde; die alte B9 ist auf diesem Abschnitt heute als Landesstraße eingestuft. Für Wesseling heißt das: Der überörtliche Nord-Süd-Verkehr läuft über die A555 und über die parallelen Ortsdurchfahrten in Keldenich, Berzdorf und Urfeld. Bei Sperrungen auf der Autobahn schlägt der Verkehr sofort in die Wohnstraßen durch — dann fahren Sattelzüge durch Straßen, deren Kurvenradien dafür nicht ausgelegt sind. Dort entstehen Schäden im niedrigen Geschwindigkeitsbereich, die trotz geringer Wucht Sensorik hinter der Verkleidung treffen. Ein gestreifter Außenspiegel etwa enthält heute oft Kamera und Totwinkelsensor."
+      },
+      {
+        "frage": "Was ist bei einem Schaden durch verlorenes Ladegut zu tun?",
+        "antwort": "Auf den Zufahrten der Wesselinger Werke und auf der A555 kommt es vor, dass Ladung oder Flüssigkeit auf der Fahrbahn landet. Wer hineinfährt, hat Ansprüche gegen den Verursacher, aber nur wenn sich Ursache und Fahrzeug zuordnen lassen. Fahrbahnzustand, Reifenspuren und Unterbodenschaden müssen dokumentiert sein, bevor die Fahrbahn gereinigt wird — danach ist der Beleg weg."
+      },
+      {
+        "frage": "Warum gehört ein Unterbodenschaden in Wesseling auf die Hebebühne?",
+        "antwort": "Wer in Wesseling über ein verlorenes Bauteil fährt oder auf einer verschmutzten Werkszufahrt aufsetzt, hat oben nichts und unten viel. Hinter der Verkleidung liegen Ölwanne, Getriebegehäuse, Abgasanlage und die Leitungen für Kraftstoff und Bremse. Ein Riss zeigt sich erst nach Kilometern, ein angeschlagenes Bremsrohr unter Umständen erst beim nächsten starken Bremsen. Nur die Aufnahme von unten belegt den Umfang."
+      },
+      {
+        "frage": "Was ist beim Abstellen eines beschädigten Fahrzeugs auf Werksgelände zu klären?",
+        "antwort": "Bleibt ein Fahrzeug nach einem Unfall in Wesseling auf einem Werks- oder Firmengelände stehen, ist der Zutritt geregelt und nicht jeder kommt hinein. Für die Begutachtung muss die Zufahrt vorher abgestimmt sein, sonst läuft Standzeit auf, die später jemand bezahlen soll. Wir klären den Zugang im Vorfeld und halten Abstellort und Datum fest, damit die Standkosten belegbar bleiben."
+      },
+      {
+        "frage": "Wie trennt man Vorschäden von frischem Schaden bei einem Pendlerfahrzeug?",
+        "antwort": "Fahrzeuge, die in Wesseling täglich im Werks- und Pendlerverkehr laufen, tragen fast immer kleinere Vorschäden. Die gegnerische Versicherung nutzt das, um den aktuellen Schaden kleinzurechnen. Deshalb wird bei der Aufnahme sauber getrennt: Was ist Altschaden, was ist neu, wo überlagert sich beides. Nur diese Trennung hält, wenn später über den Reparaturweg gestritten wird."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Wesseling — von der A555 über die Werkszufahrten der Rheinschiene bis nach Keldenich, Berzdorf und Urfeld. Schadenaufnahme vor Ort in allen vier Stadtteilen.",
+    "topografieAnker": "Wesseling liegt direkt am Rhein zwischen Köln und Bonn und ist durch Raffinerie- und Chemieanlagen geprägt, die einen großen Teil des Stadtgebiets einnehmen. Erschlossen wird die Stadt über die A555, die erste für den öffentlichen Verkehr freigegebene Autobahn Deutschlands, sowie über die Stadtbahnlinie 16 auf der Trasse der früheren Rheinuferbahn."
+  },
+  "kerpen": {
+    "stadtbezirke": [
+      {
+        "name": "Kerpen",
+        "ortsteile": [
+          "Kerpen-Mitte",
+          "Mödrath",
+          "Brüggen",
+          "Balkhausen"
+        ]
+      },
+      {
+        "name": "Sindorf",
+        "ortsteile": [
+          "Sindorf",
+          "Buir",
+          "Manheim"
+        ]
+      },
+      {
+        "name": "Horrem",
+        "ortsteile": [
+          "Horrem",
+          "Neu-Bottenbroich",
+          "Götzenkirchen"
+        ]
+      },
+      {
+        "name": "Türnich",
+        "ortsteile": [
+          "Türnich",
+          "Blatzheim",
+          "Langenich"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Kerpen",
+        "Anschlussstelle Kerpen-Sindorf",
+        "Anschlussstelle Kerpen-Türnich"
+      ],
+      "autobahnen": [
+        "A4",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B55",
+        "B264",
+        "B477"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht das Zusammentreffen von B264 und B477 in Blatzheim anspruchsvoll?",
+        "antwort": "In Kerpen-Blatzheim kreuzen sich mit der B264 und der B477 zwei Bundesstraßen, die beide Durchgangsverkehr durch die Kölner Bucht führen. An solchen Knoten am Ortsrand wird zügig gefahren, und wer wartepflichtig ist, muss Lücken im Querverkehr über größere Entfernung abschätzen. Fehleinschätzungen enden im rechtwinkligen Zusammenstoß, bei dem das querende Fahrzeug voll auf die Flanke getroffen wird. Diese Anstöße gehören zu den energiereichsten überhaupt, weil zwischen den Fahrzeugen keine Knautschzone liegt. Zur Begutachtung gehört deshalb der Blick auf Bodenblech und Mitteltunnel: Wird die Fahrgastzelle seitlich eingedrückt, verzieht sich der Boden mit, und das zeigt sich an der Türunterkante früher als am Dachrahmen."
+      },
+      {
+        "frage": "Was ist auf den Landstraßen am Tagebaurand zwischen Buir und Manheim zu beachten?",
+        "antwort": "Im Westen von Kerpen liegen ein Teil des Tagebaus Hambach und ein großer Teil des Hambacher Forsts. Der alte Ortsteil Manheim sollte dem Tagebau weichen und wurde umgesiedelt; die Bewohner zogen nach Kerpen-Dickbusch, das seit 2025 wieder Manheim heißt. Auf den Landstraßen zwischen Buir und dem Tagebaurand fährt seither vor allem Werk- und Rückbauverkehr, also breite, schwere Fahrzeuge auf Strecken ohne Standstreifen. Beim Begegnen weicht man unwillkürlich nach rechts aus. Streift ein Fahrzeug dabei die unbefestigte Bankette, zieht es an der Vorderachse aus der Spur; typische Folge ist ein Anprall mit der Fahrzeugecke, bei dem Querlenker und Radträger die Energie aufnehmen. Ob die Achse noch maßhaltig ist, zeigt erst der Seitenvergleich."
+      },
+      {
+        "frage": "Warum sind Parkschäden an den Bahnhöfen in Sindorf und Horrem ein eigenes Thema?",
+        "antwort": "Sindorf und Horrem sind Pendlerbahnhöfe Richtung Köln, und die Stellflächen dort sind morgens binnen kurzer Zeit belegt. Wer spät kommt, rangiert unter Zeitdruck in enge Restlücken. Entsprechend häufig sind Anstöße an Nachbarfahrzeugen, die den ganzen Tag unbemerkt bleiben, weil der Verursacher längst im Zug sitzt. In Kerpen wie überall gilt dann: Ohne Gegenüber zählt allein die Spurenlage. Fremdlackantragungen, die Höhe der Beschädigung über der Fahrbahn und die Form des Eindrucks lassen Rückschlüsse auf Fahrzeugklasse und Bewegungsrichtung zu. Die Sicherung dieser Antragung gehört deshalb zur Aufnahme — sie ist oft das Einzige, was von dem anderen Fahrzeug überhaupt zurückbleibt. Nachholen lässt sie sich nicht, denn mit der Instandsetzung verschwindet die Spur endgültig."
+      },
+      {
+        "frage": "Was ist am Kreuz Kerpen für die Schadenaufnahme wichtig?",
+        "antwort": "Am Kreuz Kerpen trifft die A61 auf die A4, beide mit hohem Lkw-Anteil und kurzen Verflechtungsstrecken. Typisch sind Auffahrschäden im Stop-and-Go und Kollisionen kurz vor der Verzweigung, wenn jemand die Ausfahrt zu spät erkennt. Bei einem Heckanstoß lohnt der genaue Blick nach hinten: Heckblech, Kofferraumboden und Längsträger nehmen Energie auf, ohne dass außen viel zu sehen sein muss."
+      },
+      {
+        "frage": "Warum stimmen Navigationsdaten am Tagebaurand nicht immer?",
+        "antwort": "Im Westen von Kerpen verändert der Tagebau die Straßenführung: Verbindungen werden gekappt, Ersatztrassen gebaut, Ortslagen umgesiedelt. Kartenmaterial und Navigation hinken dem hinterher. Für die Unfallaufnahme heißt das, dass man die tatsächliche Örtlichkeit dokumentieren muss — Beschilderung, Fahrbahnbreite, Sichtverhältnisse — statt sich auf eine Karte zu verlassen, die den Stand von gestern zeigt."
+      },
+      {
+        "frage": "Was ist bei einem Anstoß durch ein Firmenfahrzeug zu klären?",
+        "antwort": "Auf den Verbindungen rund um Kerpen ist viel Werks- und Lieferverkehr unterwegs. Ob Fahrer, Halter oder auftraggebendes Unternehmen einzustehen hat, entscheidet sich an den Daten, die am Unfallort aufgenommen werden: Halteranschrift, Versicherungsnachweis, Auftragsverhältnis. Fehlt eines davon, verweisen die Beteiligten später aufeinander, und die Regulierung steht still."
+      },
+      {
+        "frage": "Worauf ist auf der B264 durch Kerpen zu achten?",
+        "antwort": "Die B264 trägt in Kerpen Durchgangs- und Ortsverkehr zugleich, mit Ampeln, Grundstückszufahrten und abbiegendem Lieferverkehr auf derselben Strecke. Anders als auf der Autobahn geht es hier fast nie um Abstand, sondern um Vorfahrt und Sicht: Wer durfte fahren, wer hat wen wann gesehen. Das verlangt eine andere Dokumentation — Sichtachsen und Ampelstellung statt Bremsweg."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Kerpen, Parkschaden in Horrem oder Zusammenstoß in Sindorf — der Sachverständige kommt zu Ihnen nach Kerpen.",
+    "topografieAnker": "Kerpen liegt in der Kölner Bucht westlich der Stadt; am Kreuz Kerpen treffen A4 und A61 zusammen."
+  },
+  "erftstadt": {
+    "stadtbezirke": [
+      {
+        "name": "Liblar und Ville-Rand",
+        "ortsteile": [
+          "Liblar",
+          "Blessem",
+          "Bliesheim",
+          "Kierdorf",
+          "Köttingen"
+        ]
+      },
+      {
+        "name": "Lechenich",
+        "ortsteile": [
+          "Lechenich",
+          "Konradsheim",
+          "Ahrem"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtteile",
+        "ortsteile": [
+          "Gymnich",
+          "Dirmerzheim"
+        ]
+      },
+      {
+        "name": "Südliche Stadtteile in der Börde",
+        "ortsteile": [
+          "Erp",
+          "Friesheim",
+          "Borr",
+          "Scheuren",
+          "Niederberg",
+          "Herrig",
+          "Frauenthal",
+          "Mellerhöfe"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Bliesheim (A1/A61)",
+        "Autobahndreieck Erfttal",
+        "B265 in Liblar"
+      ],
+      "autobahnen": [
+        "A1",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B265"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist der Abschnitt zwischen Kreuz Bliesheim und Dreieck Erfttal besonders unfallträchtig?",
+        "antwort": "Zwischen dem Autobahnkreuz Bliesheim im Süden Erftstadts und dem Dreieck Erfttal bei Blessem laufen A1 und A61 auf einer gemeinsamen Trasse. Zwei Fernverkehrsströme teilen sich dort dieselben Fahrstreifen und müssen sich an beiden Enden wieder sortieren. Wer die falsche Spur erwischt, korrigiert kurz vor dem Trennpunkt und zwingt den Nachfolgeverkehr zum Bremsen. Genau in diesen Verflechtungsbereichen häufen sich späte Spurwechsel: typisch sind Streifschäden über Tür und Kotflügel sowie Auffahrschäden im Rückstau. Beides trifft bei aktuellen Fahrzeugen die Assistenzsensorik — Radar hinter dem Stoßfänger, Kamera an der Frontscheibe, Totwinkelsensoren in den Ecken des Hecks. Nach der Instandsetzung ist deren Kalibrierung eine eigene Position, die im Gutachten benannt sein muss. Ohne diesen Hinweis misst ein reparierter Wagen anschließend falsch."
+      },
+      {
+        "frage": "Was ist bei Unfällen auf der B265 in Erftstadt-Liblar zu beachten?",
+        "antwort": "Die B265 verbindet Erftstadt über Hürth mit Köln und dient zugleich als schnelle Querverbindung zwischen A4 und A1/A61. In Liblar bündelt sie damit Fernverkehr und örtlichen Ziel- und Quellverkehr auf derselben Achse. Ortskundige biegen zügig ab, Durchreisende suchen ihre Ausfahrt — die Geschwindigkeitsunterschiede auf derselben Spur sind erheblich. Wo Abbiegespuren, Grundstückszufahrten und Ampeln aufeinandertreffen, ist der Hergang häufiger strittig als auf der Autobahn. Für die Aufnahme heißt das: Endstellungen, Splitterfelder und Anstoßhöhen gehören dokumentiert, nicht nur der Schaden am eigenen Fahrzeug. Auch die Stellung der Räder und der Zustand der Beleuchtung gehören ins Bild, weil beides später bestritten wird. Gerade die Anstoßhöhe entscheidet darüber, welche Version des Ablaufs technisch möglich war."
+      },
+      {
+        "frage": "Erftstadt-Blessem wurde im Juli 2021 überflutet — worauf kommt es bei Wasserschäden am Fahrzeug an?",
+        "antwort": "Die Erft durchzieht das Stadtgebiet von Süden nach Norden, und in Blessem hat das Hochwasser gezeigt, wie schnell Fahrzeuge im Uferbereich betroffen sind. Ein Wasserschaden ist technisch etwas anderes als ein Aufprall: Entscheidend ist die Eintauchhöhe. Sie lässt sich an Schlammrändern, durchfeuchtetem Dämmmaterial und Wasser in Hohlräumen ablesen. Kritisch sind Steuergeräte im Fußraum, Sitzbelegungssensorik, Airbag-Elektronik und bei Elektrofahrzeugen die Hochvoltkomponenten im Unterboden. Ein Fahrzeug, das im Wasser stand, sollte vor der Prüfung nicht mehr gestartet werden — ein Startversuch kann aus einem Elektronikschaden einen Motorschaden machen. Solche Schäden entwickeln sich zudem weiter: Korrosion an Steckverbindern zeigt sich oft erst Wochen später. Die Dokumentation der Eintauchhöhe ist deshalb der wichtigste Befund der Erstbesichtigung."
+      },
+      {
+        "frage": "Was ist an den Landstraßen der Erftstädter Börde besonders?",
+        "antwort": "Zwischen den südlichen Ortschaften von Erftstadt liegen lange, gerade Landstraßen mit hohem Tempo, wenig Beleuchtung und Einmündungen ohne Ampel. Dazu kommen breite, langsame landwirtschaftliche Gespanne. Unfälle sind dort seltener als in der Stadt, die Folgen aber schwerer — und die Beweislage hängt an Details, die eine Nacht später weg sind: Bremsspuren, Splitterfeld, Verschmutzungsbild."
+      },
+      {
+        "frage": "Wann ist nach einem Unfall eine Rahmenvermessung nötig?",
+        "antwort": "Bei den Geschwindigkeiten, die auf den Verbindungen rund um Erftstadt gefahren werden, verteilt sich die Aufprallenergie über die ganze Fahrzeugstruktur. Längsträger können sich stauchen und Federbeindome verschieben, ohne dass es außen auffällt. Ob die Karosserie noch im Sollmaß liegt, beantwortet keine Sichtprüfung, sondern eine Vermessung mit Protokoll gegen die Herstellerdaten."
+      },
+      {
+        "frage": "Was tun, wenn nach einem Unfall in Erftstadt keine Polizei kommt?",
+        "antwort": "Bei Sachschäden ohne Verletzte rückt die Polizei häufig nicht aus, und außerhalb der Ortslagen von Erftstadt ist oft niemand da, der etwas gesehen hat. Dann sind Sie selbst die Beweissicherung: Kennzeichen, Halter und Versicherung des Gegners notieren, beide Fahrzeuge in Endstellung samt Umgebung fotografieren, Bremsspuren und Fahrbahnzustand festhalten, Zeugen mit Anschrift aufschreiben."
+      },
+      {
+        "frage": "Was ist bei Unfällen in der Lechenicher Altstadt typisch?",
+        "antwort": "Lechenich hat einen engen historischen Kern, in dem Durchfahrten schmal sind und Sichtbeziehungen kurz. Typisch sind Abbiege-, Rangier- und Streifschäden an Bordsteinen und Hausecken. Bei Bordsteinkontakt gehört der Blick unter das Fahrzeug dazu: Eine Felge kann unrund laufen und die Spur verstellt sein, ohne dass ein Riss sichtbar ist. Zieht das Fahrzeug danach, ist das kein Verschleiß, sondern Unfallfolge."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Erftstadt — vom Autobahnkreuz Bliesheim über die B265 in Liblar bis in die Ortslagen Lechenich, Gymnich und Blessem. Schadenaufnahme vor Ort in allen 18 Stadtteilen.",
+    "topografieAnker": "Erftstadt liegt in der Jülich-Zülpicher Börde auf 81 bis 151 Metern Höhe, rund 20 Kilometer südwestlich von Köln. Die Erft gab der Stadt den Namen und durchzieht sie von Süden nach Norden. Im Osten steigt das Gelände zur bewaldeten Ville an, deren frühere Braunkohletagebaue heute Seen sind. A1 und A61 vereinigen sich am Kreuz Bliesheim."
+  }
+}

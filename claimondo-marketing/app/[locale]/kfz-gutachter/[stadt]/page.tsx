@@ -168,6 +168,14 @@ function buildStadtFaq(s: Stadt, lokaleFaqs: LokaleFaq[] = []) {
       antwort: `Für Schadensregulierungs-Streitigkeiten ${s.h1Anker} ist bis 5.000 € Streitwert das ${s.lokal.amtsgericht} erstinstanzlich zuständig, darüber das ${s.lokal.landgericht} (§ 23 Nr. 1 und § 71 Abs. 1 GVG). Die meisten Kürzungsstreitigkeiten — gekürzte Gutachterkosten, UPE-Aufschläge, Wertminderung, Nutzungsausfall — liegen unter dieser Grenze und werden daher vor dem Amtsgericht geführt. Kürzt eine Versicherung unrechtmäßig oder geht sie gerichtlich gegen ein Gutachten vor, klagt unsere Partnerkanzlei für Verkehrsrecht vor dem jeweils zuständigen Gericht. Bei Erfolg trägt die Gegenseite Anwalts- und Prozesskosten. Sie zahlen 0 € (nach §249 BGB, vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).`,
     },
     {
+      frage: 'Kann ich den Gutachter selbst wählen?',
+      antwort: 'Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung. Deren Angebot, einen eigenen Prüfer zu schicken, müssen Sie nicht annehmen: Ein von der Gegenseite beauftragter Gutachter arbeitet nicht in Ihrem Interesse.',
+    },
+    {
+      frage: 'Reicht ein Kostenvoranschlag der Werkstatt?',
+      antwort: 'Unter etwa 750 € Schaden ja — das ist der Bagatellbereich. Darüber nicht: Ein Kostenvoranschlag beziffert allein die Reparatur. Wertminderung, Nutzungsausfall, Wiederbeschaffungs- und Restwert fehlen darin, und genau diese Positionen machen einen erheblichen Teil der Entschädigung aus.',
+    },
+    {
       frage: 'Was passiert, wenn die Versicherung das Gutachten kürzt?',
       antwort: 'Versicherer wie HUK, LVM und AXA kürzen über Prüfdienstleister (ControlExpert, K-Expert, DEKRA) typischerweise UPE-Aufschläge, Verbringung und Wertminderung. Der BGH stützt jedoch in den Leitentscheidungen VI ZR 65/18, VI ZR 174/24 und VI ZR 38/22 ff. die Geschädigten. Unsere Partnerkanzlei holt die Kürzungen vollständig zurück.',
     },
@@ -178,6 +186,14 @@ function buildStadtFaq(s: Stadt, lokaleFaqs: LokaleFaq[] = []) {
     {
       frage: 'Wie viel Wertminderung bekomme ich nach einem Unfall?',
       antwort: 'Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.',
+    },
+    {
+      frage: 'Bekomme ich nach dem Unfall einen Mietwagen?',
+      antwort: 'Bei unverschuldetem Unfall ja — die gegnerische Haftpflicht trägt nach § 249 BGB einen Mietwagen vergleichbarer Klasse für die Dauer der Reparatur oder Wiederbeschaffung. Alternativ zahlt sie Nutzungsausfall in bar, gestaffelt nach Fahrzeuggruppe und Ausfalltagen. Wer wenig fährt, fährt mit der Barzahlung häufig besser.',
+    },
+    {
+      frage: 'Darf ich meine Werkstatt frei wählen?',
+      antwort: 'Ja, die freie Werkstattwahl bleibt bestehen. Die gegnerische Versicherung darf Sie nicht auf eine Partnerwerkstatt verweisen, wenn Sie in einer markengebundenen Fachwerkstatt reparieren lassen wollen — das gilt besonders bei jungen oder scheckheftgepflegten Fahrzeugen.',
     },
     {
       frage: 'Was bedeutet die 130%-Regel beim Totalschaden?',
@@ -280,9 +296,13 @@ export default async function KfzGutachterStadtPage({
     { frage: t('faq_kosten_frage', { ort }), antwort: t('faq_kosten_antwort', { ort, stadt: s.name, bvskSpanne: s.bvskHonorarSpanne }) },
     { frage: t('faq_finden_frage', { ort }), antwort: t('faq_finden_antwort', { ort, stadt: s.name, plz: s.plzPrefix, bundesland: s.bundesland }) },
     { frage: t('faq_gericht_frage', { ort }), antwort: t('faq_gericht_antwort', { ort, amtsgericht: s.lokal.amtsgericht, landgericht: s.lokal.landgericht }) },
+    { frage: t('faq_gutachterwahl_frage'), antwort: t('faq_gutachterwahl_antwort') },
+    { frage: t('faq_kva_frage'), antwort: t('faq_kva_antwort') },
     { frage: t('faq_kuerzung_frage'), antwort: t('faq_kuerzung_antwort') },
     { frage: t('faq_sa_frage'), antwort: t('faq_sa_antwort') },
     { frage: t('faq_wertminderung_frage'), antwort: t('faq_wertminderung_antwort') },
+    { frage: t('faq_mietwagen_frage'), antwort: t('faq_mietwagen_antwort') },
+    { frage: t('faq_werkstattwahl_frage'), antwort: t('faq_werkstattwahl_antwort') },
     { frage: t('faq_130_frage'), antwort: t('faq_130_antwort') },
     // Dieselbe Quelle wie das FAQPage-Schema oben — sonst stuende eine
     // freigegebene FAQ im strukturierten Datensatz, aber nicht im Akkordeon.
@@ -875,14 +895,27 @@ export default async function KfzGutachterStadtPage({
             <p className="mt-6 text-center text-base leading-relaxed text-claimondo-shield">
               {s.spokeLocal.anekdote}
             </p>
+            {/* ⚠ Die Spoke-Box entstand, als es den Marketing-Read (P3-B1) noch nicht
+                gab — sie war die EINZIGE Ortstiefe eines Spokes. Seit eine freigegebene
+                `stadt_lokalinhalte`-Zeile dieselben Felder liefert, stehen Achsen,
+                Stadtteile und Hotspot bei Spokes mit Ortsinhalt ZWEIMAL auf der Seite.
+                Am 23.08. auf prod nachgemessen (sichtbarer Text, ohne JSON-LD): Solingen
+                nennt „Ohligs" und „Gräfrath" je einmal in der Bezirksliste aus der DB und
+                erneut in der Zeile „Stadtteile: …"; bei Ratingen ebenso Lintorf/Homberg.
+                Betroffen sind die 6 Spokes mit Ortsinhalt — und es waeren 10 weitere
+                geworden, sobald die offenen Spoke-Staedte Inhalte bekommen.
+                Deshalb: die Spoke-Box zeigt nur noch, was der Ortsinhalt NICHT liefert.
+                Die `anekdote` und der Hub-Link bleiben immer — sie haben dort kein Pendant. */}
             <div className="mt-6 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-5 text-sm leading-relaxed text-claimondo-shield">
-              <p>
-                {t.rich('spoke_achsen', {
-                  strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
-                  hauptachsen: s.spokeLocal.hauptachsen.join(', '),
-                })}
-              </p>
-              {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && (
+              {!hauptachsen && (
+                <p>
+                  {t.rich('spoke_achsen', {
+                    strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
+                    hauptachsen: s.spokeLocal.hauptachsen.join(', '),
+                  })}
+                </p>
+              )}
+              {s.spokeLocal.stadtbezirke && s.spokeLocal.stadtbezirke.length > 0 && stadtbezirke.length === 0 && (
                 <p className="mt-2">
                   {t.rich('spoke_stadtteile', {
                     strong: (chunks) => <strong className="text-claimondo-navy">{chunks}</strong>,
@@ -913,7 +946,7 @@ export default async function KfzGutachterStadtPage({
                 })}
               </p>
             </div>
-            {s.spokeLocal.hotspot && (
+            {s.spokeLocal.hotspot && unfallHotspots.length === 0 && (
               <div className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-5 text-sm leading-relaxed text-claimondo-shield">
                 <p>
                   <strong className="text-claimondo-navy">

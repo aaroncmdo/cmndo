@@ -1,0 +1,636 @@
+{
+  "aachen": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Altstadt", "Frankenberger Viertel", "Burtscheid", "Forst", "Rothe Erde", "Westpark"] },
+      { "name": "Brand", "ortsteile": ["Brand", "Freund", "Niederforstbach"] },
+      { "name": "Eilendorf", "ortsteile": ["Eilendorf", "Nirm"] },
+      { "name": "Haaren", "ortsteile": ["Haaren", "Verlautenheide"] },
+      { "name": "Kornelimünster/Walheim", "ortsteile": ["Kornelimünster", "Walheim", "Oberforstbach", "Sief"] },
+      { "name": "Laurensberg", "ortsteile": ["Laurensberg", "Vaalserquartier", "Seffent", "Orsbach"] },
+      { "name": "Richterich", "ortsteile": ["Richterich", "Horbach", "Huf"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A4", "A44", "A544"],
+      "bundesstrassen": ["B1", "B57", "B258", "B264"],
+      "knoten": ["Kreuz Aachen", "Anschlussstelle Aachen-Europaplatz"]
+    },
+    "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden am Frankenberger Viertel oder Zusammenstoß nahe der belgischen Grenze — der Sachverständige kommt zu Ihnen nach Aachen.",
+    "topografieAnker": "Aachen liegt im Dreiländereck zu Belgien und den Niederlanden; die A4 führt zur belgischen Grenze, die A44 nach Norden, und der Alleenring umschließt die Altstadt.",
+    "unfallHotspots": [
+      {
+        "ort": "Jülicher Straße / Lombardenstraße / Thomashofstraße",
+        "beschreibung": "Von der Unfallkommission der Stadt Aachen als Unfallhäufungslinie geführt (UHL 041/1/21). Beschlossen wurden ein Rückschnitt der Hecke zur Sichtverbesserung und eine vergrößerte Markierung des Linksabbiegebereichs — ein Hinweis darauf, dass hier Sichtbehinderung und Abbiegekonflikte zusammentreffen.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      },
+      {
+        "ort": "Amsterdamer Ring / Preusweg / Hasselholzer Weg",
+        "beschreibung": "Unfallhäufungslinie der Aachener Unfallkommission (UHL 042/3/21). Die beschlossenen Maßnahmen — Freigabe des linksseitigen Radwegs, Rotmarkierung und Piktogramme — zeigen, dass der Konflikt zwischen abbiegendem Kfz-Verkehr und Radverkehr im Vordergrund steht.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      },
+      {
+        "ort": "Berliner Ring / Madrider Ring / von-Coels-Straße",
+        "beschreibung": "Über mehrere Jahre als Unfallhäufungsstelle geführt (UHSt 045/3/17-21). Die Unfallkommission beschloss ein größeres gelbes Blinklicht und eine Überprüfung der Beleuchtung im Knotenpunkt — typisch für Stellen, an denen die Lichtsignalanlage zu spät wahrgenommen wird.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      },
+      {
+        "ort": "Trierer Straße / Königsberger Straße",
+        "beschreibung": "Langjährige Unfallhäufungsstelle (UHSt 059/1/01-21). Beschlossen wurden ein gelbes Blinklicht sowie eine Rotmarkierung des Knotens mit Piktogrammen. Rotmarkierungen werden dort eingesetzt, wo Kfz-Führende die Furt des Radverkehrs regelmäßig übersehen.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      },
+      {
+        "ort": "Boxgraben / Burtscheider Straße / Franzstraße",
+        "beschreibung": "Unfallhäufungslinie im Übergang zwischen Innenstadt und Burtscheid (UHL 004/3/22). Die Kommission untersagte das Rechtsabbiegen aus der Lagerhausstraße und ließ den Radschutzstreifen rot einfärben.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      },
+      {
+        "ort": "Vaalser Straße / Kronenberg",
+        "beschreibung": "Seit 2020 als Unfallhäufungsstelle geführt (UHS 088/3/02-20) auf der Achse Richtung niederländische Grenze. Die Unfallkommission setzte einen gemeinsamen Ortstermin aller Beteiligten an — die Stelle ließ sich also nicht mit einer einzelnen Markierungsmaßnahme entschärfen.",
+        "quelle": "https://ratsinfo.aachen.de/public/vo020?VOLFDNR=26010&refresh=false&TOLFDNR=116023",
+        "einzelfall": false
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist an der A544 zum Europaplatz besonders?",
+        "antwort": "Die A544 ist mit rund fünfeinhalb Kilometern eine reine Stadtautobahn: Sie führt vom Autobahnkreuz Aachen direkt bis an den Europaplatz am Rand der Innenstadt, wo sie auf die B1 und die B264 trifft. Zwischen Autobahnniveau und innerstädtischem Verkehr liegen damit nur wenige hundert Meter, und obwohl durchgehend Tempo 100 gilt, wird der Übergang regelmäßig unterschätzt. Wer zu spät bremst, fährt am Rückstau vor der Einmündung auf. Bei solchen Auffahrschäden lohnt der Blick über die Stoßfängerhaut hinaus: Der Querträger dahinter und die Prallabsorber leisten die eigentliche Verformungsarbeit, und ob das Bodenblech im Reserveradbereich gestaucht ist, zeigt sich erst nach der Demontage. Die halbseitig ausgebaute Anschlussstelle Rothe Erde sorgt zusätzlich für Fehlfahrten von Ortsunkundigen. Auch die Scheinwerferhalterungen gehören geprüft: Sie sind bei vielen Modellen aus Kunststoff und brechen, ohne dass das Gehäuse selbst beschädigt aussieht."
+      },
+      {
+        "frage": "Aachen liegt im Dreiländereck — was bedeutet das bei einem Unfall?",
+        "antwort": "Über das Aachener Stadtgebiet läuft täglicher Berufspendlerverkehr aus Belgien und den Niederlanden, und entsprechend hoch ist der Anteil an Fahrzeugen mit ausländischer Zulassung. Für die Schadenaufnahme heißt das vor allem eines: Kennzeichen, Fahrzeugidentifikationsnummer und Versicherungsdaten vollständig festhalten, solange beide Beteiligten noch an der Unfallstelle sind. Eine spätere Ermittlung über die Grenze hinweg ist deutlich aufwendiger. Technisch kommt hinzu, dass Fahrzeuge aus dem Ausland in Ausstattung und Bauteilstand von der deutschen Modellpflege abweichen können — dieselbe Baureihe trägt dann andere Scheinwerfer oder eine andere Stoßfängerausführung. Für die Kalkulation ist deshalb die Fahrzeugidentifikationsnummer die verlässliche Grundlage, nicht die Modellbezeichnung, und sie gehört auf jeden Fall fotografisch gesichert. Auch die Beleuchtungseinrichtungen weichen je nach Zulassungsland ab, was bei der Zuordnung der Ersatzteile eine Rolle spielt."
+      },
+      {
+        "frage": "Warum entstehen rund um den Aachener Alleenring so viele kleine Schäden?",
+        "antwort": "Der Alleenring umschließt die Aachener Altstadt und nimmt den Verkehr auf, der nicht durch das historische Zentrum darf. Auf den Ring münden zahlreiche Straßen in kurzen Abständen, und dahinter beginnt sofort ein weitläufiges Einbahnstraßensystem. Ortsunkundige verpassen die richtige Abzweigung, halten unvermittelt an oder biegen aus der falschen Spur ab. In den Gassen dahinter geht es zwischen Frankenberger Viertel und Altstadt eng weiter, mit Lieferverkehr und Kopfsteinpflaster. Typisch sind Anstöße an Stoßfängerecken, abgerissene Außenspiegel und Kratzer über mehrere Bauteile. Solche Schäden wirken klein, betreffen aber fast immer lackierte Anbauteile mit Parksensoren und Kamera im Spiegelgehäuse, die als Baugruppe getauscht und anschließend eingelernt werden müssen. Auf Kopfsteinpflaster kommt hinzu, dass sich Fahrzeuge beim Rangieren seitlich neigen und Schwellerkanten dadurch früher aufsetzen als auf ebenem Belag."
+      },
+      {
+        "frage": "Was macht die Vaalser Straße Richtung Kronenberg für Auffahrschäden anfällig?",
+        "antwort": "Die Vaalser Straße ist die direkte Verbindung aus Aachen zur niederländischen Grenze und steigt zum Kronenberg hin spürbar an. Die Aachener Unfallkommission führt den Abschnitt seit Jahren als Unfallhäufungsstelle. Auf einer Steigung mit Lichtsignalanlagen und Grundstückszufahrten entsteht ein wiederkehrendes Muster: Der Vordermann verzögert stärker als erwartet, der Nachfolgende hat unter Last einen längeren Anhalteweg. Am Fahrzeug führt das zu Anstößen mit mäßiger Geschwindigkeit, aber ungünstiger Geometrie, weil das bergauf stehende Fahrzeug hinten leicht angehoben ist. Der Stoß trifft dann unterhalb des Querträgers und geht direkt in Schlossträger und Kühlerpaket. Nach solchen Anstößen gehört geprüft, ob der Kühler Riefen an den Lamellen trägt und ob die Kondensatorbefestigung verzogen ist — beides bleibt bei aufgesetzter Stoßfängerhaut unsichtbar und fällt erst durch Kühlmittelverlust auf."
+      },
+      {
+        "frage": "Zusammenstoß mit einem Rettungswagen im Bereich Laurensberg — wer haftet?",
+        "antwort": "Rund um die Kliniken im Aachener Nordwesten bei Laurensberg und Seffent ist der Anteil an Einsatzfahrzeugen hoch. Ein Fahrzeug mit Blaulicht und Einsatzhorn darf Sonderrechte in Anspruch nehmen, ist damit aber nicht automatisch aus der Haftung: Es muss die Sonderrechte unter gebührender Berücksichtigung der öffentlichen Sicherheit ausüben, und andere Verkehrsteilnehmer müssen es erst wahrnehmen können. Aus dieser Doppelbedingung entstehen häufig Haftungsquoten statt klarer Alleinschuld. Für die technische Aufnahme ist deshalb wichtig, ob Blaulicht und Einsatzhorn zugleich liefen und aus welcher Richtung das Fahrzeug kam. Die Anstoßgeometrie ist dabei der belastbarste Anhaltspunkt: Sie zeigt, ob das Fahrzeug bereits im Kreuzungsbereich war oder erst einfuhr, und damit, ob die Reaktion überhaupt zeitlich möglich war."
+      },
+      {
+        "frage": "Rangierschäden an Laderampen in Haaren und Verlautenheide — was gehört dokumentiert?",
+        "antwort": "In den Gewerbelagen von Haaren und Verlautenheide wird täglich an Rampen rangiert, und die typischen Schäden entstehen nicht im fließenden Verkehr, sondern beim Zurücksetzen an eine feste Kante. Der Anstoß trifft das Heck auf Rampenhöhe, also oberhalb der Stoßfängerebene, und wird von der Anhängerkupplung oder dem Unterfahrschutz nicht abgefangen. Betroffen sind Heckklappe, Klappenscharniere und der Heckabschlussträger; bei Kastenwagen zusätzlich die Türfeststeller. Entscheidend für die Bewertung ist die Anstoßhöhe im Verhältnis zur Rampenkante, weil sie zeigt, ob das Fahrzeug beladen oder leer war — die Höhendifferenz kann mehrere Zentimeter betragen und verändert das Schadenbild. Fotografieren Sie deshalb die Rampe mit, nicht nur das Fahrzeug."
+      },
+      {
+        "frage": "Warum sind Schäden an Fahrzeugen mit Dachträger in Kornelimünster ein eigenes Thema?",
+        "antwort": "Kornelimünster und Walheim liegen am Übergang zur Eifel; Fahrräder, Dachboxen und Anhänger gehören dort zum Wochenendbild. Bei einem Auffahr- oder Seitenanstoß wirkt die Masse auf dem Dach anders als die im Fahrzeug: Sie sitzt weit oben, wird beim Aufprall nach vorn gerissen und belastet die Trägerfüße punktuell. An der Karosserie hinterlässt das Eindrückungen an den Befestigungspunkten im Dachrahmen und gestauchte Dachholme, während der Innenraum unauffällig bleibt. Bei Fahrzeugen mit Panoramadach kommt hinzu, dass die Verklebung der Glasfläche mitträgt und Haarrisse in der Klebefuge von außen nicht erkennbar sind. Ein Dachträgerschaden gehört deshalb ausgemessen und nicht nur abgeschraubt und ersetzt."
+      }
+    ]
+  },
+  "dueren": {
+    "stadtbezirke": [
+      { "name": "Mitte", "ortsteile": ["Innenstadt", "Nord", "Ost", "Süd", "West"] },
+      { "name": "Nord", "ortsteile": ["Birkesdorf", "Merken", "Echtz", "Distelrath"] },
+      { "name": "Süd", "ortsteile": ["Rölsdorf", "Lendersdorf", "Niederau", "Krauthausen"] },
+      { "name": "Ost", "ortsteile": ["Gürzenich", "Arnoldsweiler", "Derichsweiler", "Mariaweiler"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A4"],
+      "bundesstrassen": ["B56", "B264", "B399"],
+      "knoten": ["Anschlussstelle Düren"]
+    },
+    "heroAnker": "Ob Auffahrunfall auf der A4, Parkschaden in der Wirtelstraße oder Zusammenstoß in Birkesdorf — der Sachverständige kommt zu Ihnen nach Düren.",
+    "topografieAnker": "Düren liegt an der Rur zwischen Aachen und Köln; die A4 führt nördlich am Stadtgebiet vorbei und verbindet beide Städte.",
+    "unfallHotspots": [
+      {
+        "ort": "Einmündung Bismarckstraße / Schützenstraße / Wirteltorplatz",
+        "beschreibung": "Am Wirteltorplatz meldete die Polizei innerhalb weniger Tage mehrere Zusammenstöße; der hier belegte Fall vom 16.08.2026 betraf den Einmündungsbereich. Innerstädtische Einmündungen mit mehreren zusammenlaufenden Armen erzeugen typische Abbiege- und Vorfahrtkonflikte bei niedriger Geschwindigkeit.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6334869",
+        "einzelfall": true
+      },
+      {
+        "ort": "B56n / Distelrather Straße / Kölner Landstraße",
+        "beschreibung": "Kreuzungsbereich der Ostumgehung, laut Polizeimeldung vom 15.08.2026 Unfallort in einer Rechtskurve. Kreuzungen auf zügig befahrenen Umgehungsstraßen verbinden hohe Annäherungsgeschwindigkeit mit querendem Verkehr — die Anstoßenergie liegt deutlich über der innerstädtischer Kollisionen.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6334867",
+        "einzelfall": true
+      },
+      {
+        "ort": "B56 / Ringstraße in Birkesdorf",
+        "beschreibung": "In der Nacht zum 02.08.2026 fuhr ein Fahrzeug auf ein stehendes Fahrzeug auf; beide Fahrzeugführer wurden schwer verletzt. Auffahrunfälle auf ein stehendes Hindernis bei Nacht sind ein eigenes Schadenbild, weil die Verzögerung vor dem Aufprall fehlt.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6326143",
+        "einzelfall": true
+      },
+      {
+        "ort": "Kreisverkehr Renkerstraße / Hammerbenden in Lendersdorf",
+        "beschreibung": "Kollision zwischen Motorrad und Pkw im Kreisverkehr am 08.08.2026. In Kreisverkehren treffen Zweiräder und Pkw in engem Radius aufeinander; die Anstoßrichtung verläuft schräg, was die Zuordnung von Verursachungsbeitrag und Schadenbild aufwendiger macht.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6330496",
+        "einzelfall": true
+      },
+      {
+        "ort": "Zufahrt zum Bahnhof Düren, Josef-Schregel-Straße",
+        "beschreibung": "Unfall an der Zufahrt zum Haupteingang des Bahnhofs am 13.08.2026. Bahnhofsvorfahrten mischen haltende Fahrzeuge, ein- und aussteigende Personen sowie durchfahrenden Verkehr — ein Umfeld, in dem Anstöße an geöffneten Türen und Kollisionen beim Anfahren typisch sind.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6333573",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Was passiert häufig auf der A4 zwischen den Anschlussstellen Düren und Langerwehe?",
+        "antwort": "Der Abschnitt bündelt den Pendlerverkehr zwischen Aachen und Köln mit dem Schwerverkehr der Region, darunter viele Baustoff- und Schüttguttransporte. Aus dieser Mischung entstehen zwei typische Schadenbilder: der Auffahrunfall im Rückstau vor der Anschlussstelle Düren und der Steinschlag aus vorausfahrenden Kippern. Letzterer wird gern unterschätzt. Einschläge in der Frontscheibe im Sichtfeld sind nicht reparabel, und hinter dem Markenemblem im Kühlergrill sitzt bei vielen Fahrzeugen das Abstandsradar unter einer eigens abgestimmten Kunststoffabdeckung. Diese Abdeckung darf nicht überlackiert oder mit Folie geflickt werden — schon eine metallhaltige Lackschicht verändert die Durchlässigkeit und damit die Messung des Radars."
+      },
+      {
+        "frage": "Warum kommt es in Birkesdorf, Mariaweiler und Merken oft zu Streifschäden?",
+        "antwort": "Die alten Ortslagen von Birkesdorf, Mariaweiler und Merken entlang der Rur sind eng bebaut, die Fahrbahn reicht bis an die Hauswand, und am Rand parken Fahrzeuge. Kommt Lkw-Verkehr entgegen, wird die Restbreite knapp — Spiegel- und Flankenkontakte gehören dort zum Alltag. Nach einem seitlichen Anstoß lohnt der Blick auf ein unscheinbares Detail: das Türspaltmaß. Läuft der Spalt zwischen Tür und Kotflügel oben und unten unterschiedlich breit, hat nicht nur das Blech gelitten, sondern die Türaufhängung oder die Säule dahinter. Ein Türblech lässt sich instand setzen, ein verzogener Scharnierbereich nicht ohne Weiteres. Das Spaltmaß gehört deshalb gemessen und nicht nur betrachtet, bevor der Umfang feststeht."
+      },
+      {
+        "frage": "Was ist nach einem Bordsteinkontakt in einem der Dürener Kreisverkehre zu beachten?",
+        "antwort": "Düren verteilt den Verkehr zwischen B56, B264 und B399 über zahlreiche Kreisverkehre. Wer die Kreisfahrbahn zu eng nimmt oder von einem Nebenfahrzeug abgedrängt wird, trifft den Innenbord mit dem Rad, oft mit voller Seitenkraft. Am Reifen entsteht dabei eine Beule in der Flanke, die von außen kaum zu sehen ist: Die Karkasse ist eingerissen, der Reifen kann Wochen später ohne Vorwarnung ausfallen. An der Aluminiumfelge ist zwischen Schramme und Riss zu unterscheiden. Eine gerissene Felge darf nicht geschweißt oder gerichtet werden, weil das Gefüge des Gussaluminiums das nicht verzeiht. Beides gehört dokumentiert, dazu die Achsvermessung, denn ein harter Bordsteinstoß verstellt Spur und Sturz."
+      },
+      {
+        "frage": "Auffahren auf ein stehendes Fahrzeug bei Nacht auf der B56 — warum ist das Schadenbild anders?",
+        "antwort": "Auf der B56 im Bereich Birkesdorf hat die Polizei einen nächtlichen Auffahrunfall auf ein bereits stehendes Fahrzeug dokumentiert. Der Unterschied zum Auffahren im fließenden Verkehr liegt in der fehlenden Vorverzögerung: Wer ein stehendes Hindernis erst spät erkennt, trifft es nahezu mit Ausgangsgeschwindigkeit, und die Differenzgeschwindigkeit entspricht dem vollen Tempo. Am getroffenen Fahrzeug wandert die Energie über den Heckabschlussträger direkt in die Längsträger und den Bodenbereich; bei stehendem Fahrzeug ohne eingelegte Bremse verschiebt sich zusätzlich die gesamte Hinterachse. Zu prüfen sind deshalb nicht nur die Anbauteile, sondern die Achsgeometrie und die Sitzbefestigungen, weil die Insassen beim Heckanstoß im Stand ungebremst beschleunigt werden."
+      },
+      {
+        "frage": "Motorrad gegen Pkw im Kreisverkehr Lendersdorf — worauf kommt es bei der Rekonstruktion an?",
+        "antwort": "Im Kreisverkehr Renkerstraße/Hammerbenden in Lendersdorf kam es zur Kollision zwischen einem Motorrad und einem Pkw. Kreisverkehre sind für Zweiräder besonders konfliktträchtig, weil der Pkw-Fahrer beim Blick nach links ein schmales Fahrzeug leicht übersieht und die Schräglage die Silhouette zusätzlich verändert. Für die Bewertung zählen drei Spuren: die Position der Kontaktstelle am Pkw, die Kratzrichtung auf dem Blech und die Schleifspuren des Motorrads auf der Fahrbahn. Aus deren Verlauf lässt sich rekonstruieren, ob das Motorrad bereits im Kreis war oder einfuhr. Am Motorrad selbst sind Rahmen und Gabelstandrohre maßgeblich: Ein verzogener Rahmen ist wirtschaftlich fast immer ein Totalschaden, während Verkleidungsteile den Umfang optisch übertreiben."
+      },
+      {
+        "frage": "Anstoß an einer geöffneten Tür vor dem Dürener Bahnhof — wie wird das bewertet?",
+        "antwort": "An der Zufahrt zum Bahnhof Düren an der Josef-Schregel-Straße halten Fahrzeuge zum Ein- und Aussteigen, während der übrige Verkehr weiterfließt. Wer eine Tür öffnet, muss jede Gefährdung ausschließen — die Anforderung ist streng, und die Haftung liegt deshalb regelmäßig überwiegend beim Öffnenden. Vollständig entlastet ist die vorbeifahrende Seite dennoch selten, weil ein ausreichender Seitenabstand erwartet wird. Technisch ist die Sache klarer, als sie wirkt: Die Tür wird nach vorn aufgebogen, das Scharnier überdehnt und der Türfeststeller ausgerissen. Ob nur das Türblech oder auch die Säule betroffen ist, verrät die Stellung der Tür im geschlossenen Zustand. Klemmt sie oder steht sie über, ist die Aufhängung mitbeschädigt und die Instandsetzung wird deutlich umfangreicher."
+      },
+      {
+        "frage": "Warum entstehen an der Einmündung am Wirteltorplatz so viele Anstöße bei niedrigem Tempo?",
+        "antwort": "Am Wirteltorplatz in Düren laufen Bismarckstraße und Schützenstraße zusammen; die Polizei meldete dort innerhalb weniger Tage mehrere Zusammenstöße. Einmündungen mit mehreren Armen und dichter Randbebauung erzeugen kurze Sichtachsen und viele Entscheidungspunkte auf engem Raum. Die Geschwindigkeiten sind niedrig, das Schadenbild trotzdem nicht trivial: Bei schrägen Anstößen im Frontbereich verschiebt sich der Stoßfängerträger seitlich und zieht den Kotflügel mit, während die Stoßfängerhaut selbst nur gering verformt aussieht. Zusätzlich sitzen an den Ecken Ultraschallsensoren und teils die Nahbereichskamera. Die Halterungen brechen bereits bei geringer Krafteinwirkung, und ein gebrochener Sensorhalter führt zu Fehlmeldungen, die man erst beim Rangieren bemerkt."
+      }
+    ]
+  },
+  "alsdorf": {
+    "stadtbezirke": [
+      { "name": "Alsdorf-Mitte", "ortsteile": ["Stadtmitte", "Ofden", "Busch", "Kellersberg", "Blumenrath", "Duffesheide"] },
+      { "name": "Nordost", "ortsteile": ["Hoengen", "Mariadorf", "Warden", "Bettendorf"] },
+      { "name": "West", "ortsteile": ["Schaufenberg", "Begau"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A44"],
+      "bundesstrassen": ["B57"],
+      "knoten": ["Anschlussstelle Alsdorf"]
+    },
+    "heroAnker": "Alsdorf ist um die Grube Anna gewachsen; bis in die 1990er Jahre wurde hier Steinkohle gefördert. Heute prägen die A44 mit der Anschlussstelle Alsdorf und die engen Wohnstraßen in Ofden, Busch und Kellersberg das Unfallgeschehen.",
+    "topografieAnker": "Das Stadtgebiet ist flachwellig und stark zersiedelt: Alsdorf-Mitte, Mariadorf, Hoengen und Warden sind eigenständige Ortslagen, die über Ortsverbindungsstraßen zusammenhängen. Der Zuschnitt vieler Wohnstraßen stammt noch aus der Bergbauzeit und ist für heutigen Fahrzeugbestand plus beidseitiges Parken zu schmal. Überörtlich hängt Alsdorf an der A44 zwischen Aachen und Jülich.",
+    "unfallHotspots": [
+      {
+        "ort": "B57 zwischen Kreisverkehr Birk und Duffesheider Weg",
+        "beschreibung": "Auffahrunfall mehrerer Fahrzeuge am 30.01.2026 auf Höhe der Bushaltestelle Schleibacher Hof, ausgelöst durch stockenden Verkehr in Fahrtrichtung Alsdorf. Rückstau auf einer zügig befahrenen Bundesstraße erzeugt genau die Kettenkollisionen, bei denen ein Fahrzeug zweimal getroffen wird.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6208765",
+        "einzelfall": true
+      },
+      {
+        "ort": "L240 zwischen Neuweiler und Schaufenberg",
+        "beschreibung": "Frontalzusammenstoß mit zwei Schwerverletzten am 17.08.2026, rund 500 Meter hinter dem Kreisverkehr in Richtung Eschweiler. Auf Landesstraßen ohne bauliche Trennung ist die Kollisionsgeschwindigkeit die Summe beider Fahrzeuge — Schadenbilder erreichen dort regelmäßig den Totalschadenbereich.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6335413",
+        "einzelfall": true
+      },
+      {
+        "ort": "Hoengener Straße",
+        "beschreibung": "Alleinunfall am 10.08.2026: Ein Fahrzeug kam nach rechts von der Fahrbahn ab, kollidierte mit einem Baum und überschlug sich. Bei Anstößen gegen einen feststehenden Baum wirkt die Energie punktuell statt flächig, weshalb die Verformung tiefer in die Struktur reicht als bei einer Fahrzeugkollision.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6331253",
+        "einzelfall": true
+      },
+      {
+        "ort": "Übacher Weg",
+        "beschreibung": "Zusammenstoß zwischen Pkw und Motorrad am 19.06.2026 mit tödlichem Ausgang. Ortsverbindungsstraßen mit freier Sicht verleiten zu höheren Geschwindigkeiten, während einbiegende Fahrzeuge die Annäherungsgeschwindigkeit eines Zweirads regelmäßig unterschätzen.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6307697",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum kommt es in den älteren Alsdorfer Wohnquartieren so oft zu Streifschäden?",
+        "antwort": "Alsdorf ist rund um die Grube Anna gewachsen, und viele Wohnstraßen in Ofden, Busch und Kellersberg stammen aus dieser Zeit — angelegt für Fußwege und wenige Fahrzeuge, heute beidseitig zugeparkt. Zwischen den Spiegeln bleibt oft weniger als eine Fahrzeugbreite, und im Begegnungsverkehr weicht einer aus. Das Ergebnis ist der durchgehende Streifschaden über Außenspiegel, vordere Tür, hintere Tür und Radlauf. Für die Zuordnung ist die Anstoßhöhe entscheidend, weil sie verrät, ob der Gegner ein Pkw, ein Transporter oder ein feststehendes Hindernis war. Am Spiegel hängt zudem mehr als Glas: Totwinkelsensor, Umfeldkamera und Blinkleuchte sind integriert, die Kamera muss nach dem Tausch neu eingelernt werden."
+      },
+      {
+        "frage": "Was ist an Unfällen an der Anschlussstelle Alsdorf der A44 typisch?",
+        "antwort": "Die A44 verläuft am Rand von Alsdorf, die Anschlussstelle Alsdorf bündelt den Verkehr zwischen Aachen und Jülich. An Anschlussstellen konzentrieren sich zwei Konfliktpunkte: das Einfädeln über den Beschleunigungsstreifen und der Rückstau am Ende der Ausfahrt, der bis auf die durchgehende Fahrbahn zurückreichen kann. Wer dort am Stauende auffährt, tut das mit deutlich höherer Differenzgeschwindigkeit als im Stadtverkehr. Am Heck bedeutet das nicht nur eine eingedrückte Klappe: Der Heckabschlussträger verzieht sich, die Spaltmaße stimmen nicht mehr, und bei Fahrzeugen mit Anhängerkupplung wird die Kraft direkt in den Längsträger geleitet. Ob dort eine Vermessung nötig ist, entscheidet sich am aufgebockten Fahrzeug, nicht auf dem Parkplatz."
+      },
+      {
+        "frage": "Kettenauffahrunfall auf der B57 bei Alsdorf — wie wird der eigene Schaden getrennt?",
+        "antwort": "Auf der B57 in Fahrtrichtung Alsdorf hat die Polizei einen Auffahrunfall mehrerer Fahrzeuge im stockenden Verkehr dokumentiert. Steht ein Fahrzeug in der Mitte einer solchen Kette, bekommt es zwei Anstöße: einen von hinten und einen, weil es auf den Vordermann geschoben wird. Für die Regulierung ist die Trennung wesentlich, denn Front- und Heckschaden können unterschiedlichen Verursachern zuzuordnen sein. Technisch hilft die Reihenfolge der Verformungen: Ein aufgeschobener Frontschaden zeigt andere Faltenbildung als ein selbst gefahrener Anstoß, und die Auslösedaten des Airbagsteuergeräts halten Verzögerungsverlauf und Anstoßrichtung fest. Diese Daten gehören ausgelesen, bevor das Steuergerät im Zuge der Instandsetzung getauscht wird."
+      },
+      {
+        "frage": "Frontalzusammenstoß auf der L240 Richtung Schaufenberg — warum ist der Schaden meist größer als erwartet?",
+        "antwort": "Auf der L240 zwischen Neuweiler und Schaufenberg kam es zu einem Frontalzusammenstoß mit zwei Schwerverletzten. Bei einem Frontalunfall ohne bauliche Trennung addieren sich die Geschwindigkeiten beider Fahrzeuge zur wirksamen Aufprallenergie, und die Knautschzone ist für eine solche Belastung nur begrenzt ausgelegt. Die Folge ist eine Verformung, die über den Motorraum hinaus in Stirnwand, Fußraum und Türausschnitte reicht. Für die Bewertung heißt das: Nicht die sichtbar zerstörte Front entscheidet, sondern ob die Fahrgastzelle Maß hält. Das lässt sich nur auf der Richtbank feststellen. Kommt hinzu, dass Gurtstraffer und Airbags ausgelöst haben, ist die wirtschaftliche Grenze zum Totalschaden schnell erreicht, weil das komplette Rückhaltesystem zu erneuern ist."
+      },
+      {
+        "frage": "Baumanstoß auf der Hoengener Straße — was unterscheidet ihn von einer Fahrzeugkollision?",
+        "antwort": "Auf der Hoengener Straße in Alsdorf kam ein Fahrzeug von der Fahrbahn ab, prallte gegen einen Baum und überschlug sich. Ein Baum gibt nicht nach: Die Energie wird auf wenige Zentimeter Breite eingeleitet, statt sich wie bei einem Fahrzeuganstoß über die Fahrzeugbreite zu verteilen. Deshalb dringt die Verformung tiefer ein und trifft häufig nur einen Längsträger, was das Fahrzeug zusätzlich verdreht. Nach einem Überschlag kommt die Prüfung des Dachrahmens und der Säulen hinzu, dazu die Frage, ob Öl oder Kraftstoff ausgetreten sind. Für die Kalkulation ist zudem relevant, dass ein solcher Alleinunfall über die Vollkasko läuft, sofern kein Dritter haftet — die Trennung von Vorschäden ist dann besonders sorgfältig zu dokumentieren."
+      },
+      {
+        "frage": "Warum werden Motorradunfälle am Übacher Weg technisch anders aufgenommen?",
+        "antwort": "Am Übacher Weg in Alsdorf ereignete sich ein tödlicher Zusammenstoß zwischen Pkw und Motorrad. Zweiradunfälle lassen sich nicht wie Pkw-Kollisionen bewerten, weil das Motorrad nach dem Anstoß eigenständig weiterrutscht und die Endlage wenig über die Kollisionsstelle aussagt. Maßgeblich sind stattdessen die Schleif- und Kratzspuren auf der Fahrbahn, ihr Beginn und ihre Richtung. Am Pkw zeigt die Kontaktzone in Höhe und Form, aus welchem Winkel getroffen wurde. Am Motorrad selbst entscheidet die Prüfung von Rahmen, Gabel und Schwinge über den Umfang: Sind die Standrohre verzogen, ist die Instandsetzung wirtschaftlich meist nicht darstellbar, auch wenn die Verkleidung nur zerkratzt aussieht."
+      },
+      {
+        "frage": "Flottenfahrzeug in Mariadorf beschädigt — was gehört zusätzlich in die Aufnahme?",
+        "antwort": "In den Gewerbelagen um Mariadorf und Hoengen sind viele beteiligte Fahrzeuge gewerblich zugelassen. Für die Aufnahme ändert das nichts an der Technik, wohl aber an den Angaben, die später gebraucht werden: Halter und Eigentümer können auseinanderfallen, das Fahrzeug kann geleast oder finanziert sein, und die Abrechnung erfolgt in der Regel netto. Fehlt diese Zuordnung im Gutachten, verzögert sich die Regulierung, weil der Versicherer den Anspruchsinhaber klären lässt. Technisch lohnt bei Transportern der Blick auf den Laderaum: Eine Beschädigung der Bodenverankerungen oder der Trennwand ist von außen unsichtbar, betrifft aber die Ladungssicherung und damit die Betriebssicherheit des Fahrzeugs."
+      }
+    ]
+  },
+  "wuerselen": {
+    "stadtbezirke": [
+      { "name": "Würselen-Mitte", "ortsteile": ["Stadtmitte", "Scherberg", "Morsbach", "Teut", "Elchenrath", "Grevenberg"] },
+      { "name": "Bardenberg", "ortsteile": ["Bardenberg", "Pley"] },
+      { "name": "Broichweiden", "ortsteile": ["Broichweiden", "Euchen", "Linden-Neusen", "Weiden"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A4", "A44"],
+      "bundesstrassen": [],
+      "knoten": ["Autobahnkreuz Aachen", "Anschlussstelle Broichweiden"]
+    },
+    "heroAnker": "Würselen liegt zwischen Aachen und dem Autobahnkreuz Aachen, wo A4 und A44 zusammentreffen. Bardenberg und Broichweiden bilden neben der Kernstadt eigene Schwerpunkte, dazwischen liegt das Wurmtal bei Morsbach.",
+    "topografieAnker": "Würselen hat eine Doppelrolle: innen die gewachsenen Ortslagen Bardenberg, Broichweiden und Würselen-Mitte mit örtlichem Verkehr, außen die Autobahnen. A4 und A44 laufen am Stadtrand im Kreuz Aachen zusammen, dem Übergang vom Kölner Fernverkehr auf die Achsen Richtung Belgien und Niederlande. Der Anteil ausländischer Kennzeichen und schwerer Lkw ist dadurch hoch.",
+    "unfallHotspots": [
+      {
+        "ort": "Krefelder Straße",
+        "beschreibung": "Die Polizei dokumentierte auf der Krefelder Straße in Fahrtrichtung Aachen am 06.08.2026 einen Unfall mit einem Fußgänger, der plötzlich die Fahrbahn betrat. Auf innerörtlichen Durchgangsstraßen mit Randbebauung ist die Sicht auf zwischen Fahrzeugen hervortretende Personen die kritische Größe.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6328943",
+        "einzelfall": true
+      },
+      {
+        "ort": "Einmündung Neusener Straße / Am Siefengraben",
+        "beschreibung": "Zusammenstoß mit einem schwer verletzten Motorradfahrer am 24.06.2026 an der Einmündung im Grenzbereich zwischen Würselen und Alsdorf. Einmündungen von Wirtschafts- und Nebenstraßen auf schneller befahrene Verbindungen sind für Zweiräder besonders konfliktträchtig.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6302324",
+        "einzelfall": true
+      },
+      {
+        "ort": "Hauptstraße in Würselen-Broichweiden",
+        "beschreibung": "Am 20.08.2026 meldete die Polizei einen Unfall im Zusammenhang mit zwei Motorrädern, die auf einen Einzelhandelsparkplatz an der Hauptstraße einfuhren. Ein- und Ausfahrten von Parkplätzen auf Ortsdurchfahrten erzeugen Konflikte zwischen abbiegendem und durchgehendem Verkehr.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6337737",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Unfall mit einem ausländischen Lkw am Autobahnkreuz Aachen — worauf kommt es an?",
+        "antwort": "Am Autobahnkreuz Aachen am Rand des Würselener Stadtgebiets treffen A4 und A44 aufeinander; über diese Achse läuft der Güterverkehr Richtung Belgien und Niederlande, ausländische Kennzeichen sind dort die Regel. Notieren Sie beide Kennzeichen — Zugmaschine und Auflieger können bei unterschiedlichen Gesellschaften versichert sein — sowie Versicherer und Grüne-Karte-Nummer; reguliert wird über das Deutsche Büro Grüne Karte. Halten Sie außerdem die Spedition und den Fahrernamen fest, weil die Zuordnung sonst über Wochen hängt. Technisch ist der Größenunterschied entscheidend: Der Anstoß eines Sattelzuges trifft den Pkw oberhalb der eigenen Stoßfängerebene, die Energie geht an der Knautschzone vorbei direkt in Säulen und Dachrahmen. Ob die Fahrgastzelle verzogen ist, zeigt erst eine Vermessung auf der Richtbank."
+      },
+      {
+        "frage": "Warum reicht nach einem Auffahrunfall auf der A4 bei Würselen ein Foto der Stoßstange nicht?",
+        "antwort": "Auf der A4 bei Würselen und auf der A44 Richtung Broichweiden liegen die Differenzgeschwindigkeiten bei Auffahrunfällen weit über dem, was im Stadtverkehr passiert — auch dann, wenn die Stoßfängerhaut hinterher nur zerkratzt wirkt. Die Haut ist Kunststoff und federt zurück; die Energie nehmen Crashboxen, Querträger und im nächsten Schritt die Längsträger auf. Deren Verformung sieht man erst nach Demontage oder am aufgebockten Fahrzeug, und sie entscheidet darüber, ob gerichtet oder erneuert wird. Dazu kommt die Elektronik: Radarsensor, Frontkamera und Airbagsteuergerät speichern Crashdaten, die ausgelesen gehören, weil sie Aufprallrichtung und Verzögerung belegen — Angaben, die bei strittiger Schuldfrage schwerer wiegen als Erinnerungen. Ein Foto der Stoßstange dokumentiert die Oberfläche, nicht den Schaden."
+      },
+      {
+        "frage": "Fußgängerunfall auf der Krefelder Straße — welche Spuren sind entscheidend?",
+        "antwort": "Auf der Krefelder Straße in Würselen dokumentierte die Polizei einen Unfall, bei dem eine Person unvermittelt auf die Fahrbahn trat. Bei Fußgängerunfällen entscheidet die Rekonstruktion darüber, ob der Zusammenstoß vermeidbar war, und dafür sind drei Größen maßgeblich: die Anstoßhöhe am Fahrzeug, die Wurfweite und die Kollisionsgeschwindigkeit. Die Anstoßhöhe verrät die Körperhaltung im Moment des Kontakts, die Wurfweite lässt auf die Geschwindigkeit schließen. Am Fahrzeug bleiben charakteristische Spuren: Eindellungen in der Motorhaube ohne Lackabtrag, ein gestauchter Frontstoßfänger und häufig ein Riss in der Windschutzscheibe von innen nach außen. Diese Spuren gehören unverändert dokumentiert, bevor das Fahrzeug bewegt oder gereinigt wird."
+      },
+      {
+        "frage": "Warum sind Einmündungen wie Neusener Straße und Am Siefengraben für Motorräder kritisch?",
+        "antwort": "An der Einmündung Neusener Straße/Am Siefengraben an der Grenze zwischen Würselen und Alsdorf wurde ein Motorradfahrer schwer verletzt. Das zugrunde liegende Muster ist bekannt: Ein einbiegender Pkw-Fahrer schaut, sieht ein schmales Fahrzeug und schätzt dessen Entfernung zu groß und dessen Geschwindigkeit zu niedrig ein. Für die Bewertung des Schadens ist die Kontaktzone am Pkw der Schlüssel — sitzt sie an der Fahrzeugfront, war der Pkw bereits in der Bewegung; sitzt sie an der Flanke, kam das Motorrad hinzu. Am Zweirad gehört neben Rahmen und Gabel die Prüfung der Räder dazu: Ein verzogenes Gussrad ist nicht richtbar, und Speichenräder verlieren nach seitlicher Belastung ihren Rundlauf."
+      },
+      {
+        "frage": "Anstoß beim Abbiegen auf einen Parkplatz an der Hauptstraße in Broichweiden — wer haftet?",
+        "antwort": "An der Hauptstraße in Würselen-Broichweiden meldete die Polizei einen Unfall im Zusammenhang mit dem Einfahren auf einen Einzelhandelsparkplatz. Wer nach links über die Gegenfahrbahn in ein Grundstück abbiegt, trägt eine gesteigerte Sorgfaltspflicht und muss eine Gefährdung ausschließen — die Haftungsverteilung fällt deshalb regelmäßig deutlich zulasten des Abbiegenden aus. Ganz entlastet ist die andere Seite selten, etwa wenn überholt wurde oder die Geschwindigkeit unangemessen war. Technisch ist die Winkelbeziehung der Schäden entscheidend: Ein Anstoß in die vordere Fahrzeugflanke des Abbiegenden zeigt, dass er sich bereits quer zur Fahrbahn befand, ein Heckanstoß dagegen, dass der Abbiegevorgang beinahe abgeschlossen war."
+      },
+      {
+        "frage": "Was ist bei Schäden im Wurmtal bei Morsbach zu beachten?",
+        "antwort": "Zwischen Würselen-Mitte und Bardenberg fällt das Gelände zum Wurmtal bei Morsbach hin ab; die Verbindungsstrecken dorthin sind kurvig, teils schmal und im Winter länger feucht als die höher gelegenen Ortslagen. Aus dieser Kombination entstehen Abkommensunfälle mit seitlichem Anstoß gegen Bordstein, Leitpfosten oder Böschung. Das Schadenbild wirkt harmlos, weil die Karosserie oft nur zerkratzt ist, doch die Kräfte wirken auf das Fahrwerk: Querlenker, Spurstange und Radlager nehmen den Seitenstoß auf. Ob dort etwas nachgegeben hat, zeigt keine Sichtprüfung, sondern nur eine Achsvermessung mit Protokoll. Unterbleibt sie, bleibt ein veränderter Sturz unbemerkt und trägt den Reifen einseitig ab."
+      }
+    ]
+  },
+  "baesweiler": {
+    "stadtbezirke": [
+      { "name": "Baesweiler-Mitte", "ortsteile": ["Stadtmitte", "Oidtweiler", "Loverich"] },
+      { "name": "Setterich", "ortsteile": ["Setterich", "Floverich"] },
+      { "name": "Nord", "ortsteile": ["Beggendorf", "Puffendorf"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": ["B57"],
+      "knoten": []
+    },
+    "heroAnker": "Baesweiler liegt im Norden der StädteRegion Aachen, wenige Kilometer von der niederländischen Grenze. Die B57 führt als Nord-Süd-Achse durch das Stadtgebiet, daneben prägen Setterich, Oidtweiler und Beggendorf als eigenständige Ortslagen das Bild.",
+    "topografieAnker": "Baesweiler besteht aus mehreren getrennten Ortslagen in offener Feldflur; zwischen Stadtmitte, Setterich, Oidtweiler und Beggendorf verlaufen Landes- und Ortsverbindungsstraßen mit freier Sicht und entsprechend zügigem Tempo. Innerhalb der Ortslagen stammt der Zuschnitt vieler Wohnstraßen aus der Bergbauzeit und ist für heutige Fahrzeugbreiten knapp. Eine Autobahn führt durch das Stadtgebiet nicht.",
+    "unfallHotspots": [
+      {
+        "ort": "Geilenkirchener Straße zwischen Goethestraße und Ludwig-Erhard-Ring",
+        "beschreibung": "Zusammenstoß zweier Fahrzeuge mit vier Verletzten am 15.07.2026. Der Abschnitt verbindet Wohnbebauung und Gewerbeflächen; auf innerörtlichen Hauptachsen mit dichter Folge von Einmündungen und Zufahrten sind Abbiege- und Vorfahrtkonflikte das bestimmende Muster.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6315722",
+        "einzelfall": true
+      },
+      {
+        "ort": "Goethestraße, Haltestelle Gewerbegebiet IST",
+        "beschreibung": "Am 14.07.2026 wurde ein 16-jähriger Fußgänger beim Überqueren der Fahrbahn an der Haltestelle erfasst. Haltestellenbereiche erzeugen Querungen an nicht gesicherten Stellen, häufig verdeckt durch haltende Fahrzeuge — die Reaktionszeit verkürzt sich dadurch erheblich.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6315363",
+        "einzelfall": true
+      },
+      {
+        "ort": "L50 in Richtung Siersdorf",
+        "beschreibung": "Ein 18-jähriger Pedelecfahrer wurde am 12.12.2025 schwer verletzt, als er aus einem Wirtschaftsweg kommend die Fahrbahn kreuzte. Kreuzende Wirtschaftswege auf freier Strecke sind schwer einsehbar, und Pedelecs erreichen dabei höhere Geschwindigkeiten, als Kraftfahrende von einem Fahrrad erwarten.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6179454",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Zusammenstöße auf der Geilenkirchener Straße in Baesweiler oft folgenreicher als sie aussehen?",
+        "antwort": "Die Geilenkirchener Straße ist die durchgehende Hauptachse von Baesweiler; zwischen Goethestraße und Ludwig-Erhard-Ring dokumentierte die Polizei einen Zusammenstoß mit vier Verletzten. Auf solchen Achsen wird zügiger gefahren als in Wohnstraßen, während Einmündungen und Grundstückszufahrten dicht aufeinander folgen. Trifft ein Fahrzeug seitlich in ein anderes, wirkt die Energie ungefiltert auf die Türen: Der Seitenaufprallschutz im Türblech verformt sich, und die Sitzquerträger nehmen die Kraft auf. Ob der Seitenairbag ausgelöst hat, ist dabei ein wichtiger Hinweis auf die Schwere. Zu prüfen sind außerdem die B-Säule auf Stauchungen und die Türfunktion im geschlossenen Zustand — klemmende Türen zeigen eine Verformung der Rohkarosserie an."
+      },
+      {
+        "frage": "Fußgängerunfall an einer Haltestelle in Baesweiler — was ist bei der Aufnahme wichtig?",
+        "antwort": "An der Goethestraße in Baesweiler wurde ein Jugendlicher beim Überqueren der Fahrbahn im Bereich einer Haltestelle erfasst. Haltestellen sind ein Sonderfall, weil ein haltendes Fahrzeug die Sicht auf querende Personen verdeckt und beide Seiten erst spät reagieren können. An Bussen und Linienfahrzeugen mit eingeschaltetem Warnblinklicht gilt zudem eine besondere Sorgfaltspflicht für den vorbeifahrenden Verkehr. Für die technische Bewertung zählen Anstoßhöhe, Wurfweite und die Frage, ob vor dem Kontakt gebremst wurde — Bremsspuren fehlen bei modernen Fahrzeugen wegen des Antiblockiersystems meist, dafür lassen sich Verzögerungsdaten aus dem Airbagsteuergerät auslesen. Fahrzeug und Fundstelle gehören unverändert fotografiert."
+      },
+      {
+        "frage": "Unfall mit einem Pedelec auf der L50 bei Baesweiler — warum ist die Geschwindigkeit das Thema?",
+        "antwort": "Auf der L50 bei Baesweiler in Richtung Siersdorf wurde ein Pedelecfahrer schwer verletzt, der aus einem Wirtschaftsweg kommend die Fahrbahn kreuzte. Pedelecs sehen aus wie Fahrräder, erreichen aber mit Tretunterstützung deutlich höhere Reisegeschwindigkeiten — Kraftfahrende kalkulieren dennoch mit dem Tempo eines gewöhnlichen Rades und schätzen die Ankunftszeit falsch ein. Für die Rekonstruktion ist deshalb die tatsächliche Annäherungsgeschwindigkeit zu ermitteln, nicht die vermutete. Am Pedelec selbst gehören Rahmen, Gabel und Motorlagerung geprüft; bei Rahmen aus Kohlefaser sind Risse mit bloßem Auge oft nicht erkennbar. Der Akku ist nach einem Anstoß gesondert zu beurteilen, weil eine mechanisch belastete Zelle auch nach Tagen noch ausfallen kann."
+      },
+      {
+        "frage": "Der Unfallgegner in Baesweiler fuhr ein niederländisches Kennzeichen — was ist zu sichern?",
+        "antwort": "Baesweiler liegt wenige Kilometer von der niederländischen Grenze, und Fahrzeuge mit niederländischer Zulassung gehören auf der B57 und den Verbindungen Richtung Setterich und Beggendorf zum normalen Bild. Passiert der Unfall auf deutschem Boden, wird nach deutschem Schadenersatzrecht abgerechnet — mit Wertminderung, Nutzungsausfall und freier Werkstattwahl, unabhängig vom Recht des Heimatlands. Sichern Sie Kennzeichen mit Länderkennung, Versicherungsgesellschaft und, falls vorhanden, die Nummer der Grünen Karte, und zwar fotografisch. Die Regulierung läuft über das Deutsche Büro Grüne Karte beziehungsweise den deutschen Beauftragten des ausländischen Versicherers. Wichtig ist die Eile: Das gegnerische Fahrzeug steht am Folgetag jenseits der Grenze und ist für eine Nachbesichtigung praktisch nicht mehr erreichbar."
+      },
+      {
+        "frage": "Wildwechsel auf den Verbindungsstraßen zwischen Setterich und Beggendorf — was ist zu tun?",
+        "antwort": "Zwischen den Baesweiler Ortslagen liegt offene Feldflur, und die Verbindungsstraßen führen ohne Randbebauung durch freies Gelände. In der Dämmerung queren Rehe und Feldhasen; die Sicht reicht weit, doch das Tier steht erst im Scheinwerferkegel. Nach einem Zusammenstoß gehört die Polizei hinzugezogen und eine Wildschadenbescheinigung angefordert, weil die Teilkaskoabwicklung sonst schwierig wird. Fotografieren Sie Haare und Gewebespuren am Fahrzeug, bevor Sie es bewegen — sie sind der Plausibilitätsnachweis für die spätere Begutachtung. Technisch trifft der Anstoß Frontschürze, Kühlerpaket und Motorhaube; dort sitzen Abstandsradar und Frontkamera, deren Ausrichtung nach der Instandsetzung nachweislich neu eingestellt werden muss."
+      },
+      {
+        "frage": "Warum sind die engen Wohnstraßen in Oidtweiler und Loverich für Streifschäden anfällig?",
+        "antwort": "Die gewachsenen Ortskerne von Oidtweiler und Loverich stammen aus einer Zeit deutlich schmalerer Fahrzeuge; heute wird beidseitig geparkt, und im Begegnungsverkehr bleibt zwischen den Außenspiegeln wenig Raum. Das Ergebnis ist der durchgehende Streifschaden über Spiegel, Türen und Radlauf, häufig ohne dass ein Verursacher bleibt. Für die Zuordnung ist die Anstoßhöhe maßgeblich: Sie unterscheidet Pkw, Transporter und feststehendes Hindernis. Fremdlackantragungen sollten vor der Reinigung gesichert werden, weil sie den Gegner eingrenzen. Am Spiegel hängt zudem mehr als das Glas — Blinkleuchte, Totwinkelsensor und bei vielen Modellen die Umfeldkamera sitzen im Gehäuse und müssen nach dem Tausch neu eingelernt werden."
+      },
+      {
+        "frage": "Kann ein Schaden in Baesweiler auch ohne bekannten Verursacher reguliert werden?",
+        "antwort": "Bleibt nach einem Parkrempler in Baesweiler niemand zurück, ist der Fall nicht automatisch verloren, aber der Weg ist ein anderer. Über die eigene Vollkaskoversicherung lässt sich der Schaden regulieren, allerdings mit Selbstbeteiligung und Rückstufung. Für Schäden durch nicht versicherte oder unbekannt gebliebene Fahrzeuge existiert daneben mit der Verkehrsopferhilfe eine Auffangeinrichtung, deren Voraussetzungen bei unbekanntem Verursacher jedoch deutlich strenger sind. In beiden Fällen gilt: Ohne dokumentierten Schadenumfang lässt sich der Anspruch nicht einmal prüfen. Melden Sie den Vorfall der Polizei und lassen Sie das Fahrzeug aufnehmen, bevor es gewaschen oder repariert wird — Fremdlack, Kratzrichtung und Anstoßhöhe sind die einzigen verbliebenen Spuren."
+      }
+    ]
+  },
+  "eschweiler": {
+    "stadtbezirke": [
+      { "name": "Innenstadt", "ortsteile": ["Stadtmitte", "Bergrath", "Röhe", "Pumpe-Stich", "Hücheln", "Röthgen"] },
+      { "name": "Nordraum", "ortsteile": ["Dürwiß", "Lohn", "Fronhoven", "Kinzweiler", "Hehlrath", "St. Jöris"] },
+      { "name": "Ost", "ortsteile": ["Weisweiler", "Nothberg"] },
+      { "name": "Süd", "ortsteile": ["Hastenrath", "Scherpenseel", "Volkenrath"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A4"],
+      "bundesstrassen": ["B264"],
+      "knoten": ["Anschlussstelle Eschweiler-West", "Anschlussstelle Eschweiler-Ost", "Anschlussstelle Weisweiler"]
+    },
+    "heroAnker": "Eschweiler liegt im Tal der Inde; die A4 quert das Stadtgebiet zwischen den Anschlussstellen Eschweiler-West und Weisweiler. Dazu kommen die B264 als innerörtliche Hauptachse und der Schwerlastverkehr zum Kraftwerk Weisweiler.",
+    "topografieAnker": "Die Innenstadt liegt im Talgrund der Inde, während der Nordraum um Dürwiß, Lohn und Fronhoven flach und offen zum früheren Tagebaugelände hin ausläuft. Die A4 trennt beide Hälften in Ost-West-Richtung, sodass sich der örtliche Verkehr auf wenige Querungen und die B264 bündelt. Bei Starkregen laufen die tiefen Lagen im Talgrund zuerst voll.",
+    "unfallHotspots": [
+      {
+        "ort": "Rue de Wattrelos",
+        "beschreibung": "Die Rue de Wattrelos wird von der Unfallkommission seit Jahren abschnittsweise als Unfallhäufungslinie geführt. Am 08.06.2026 kam es bei einem Überholvorgang zu einem Frontalzusammenstoß mit einem Lastkraftwagen, bei dem der Pkw-Fahrer starb und zwei Insassen des Lkw schwer verletzt wurden.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6291011",
+        "einzelfall": true
+      },
+      {
+        "ort": "Kreisverkehr Alsdorfer Straße / Zum Blauen Stein",
+        "beschreibung": "Unfall im Kreisverkehr am 06.06.2026, beteiligt war ein Fahrzeugführer aus dem niederländischen Kerkrade auf dem Weg Richtung Jülicher Straße. Der Fall zeigt zugleich den hohen Anteil grenzüberschreitenden Verkehrs im Eschweiler Norden.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6290069",
+        "einzelfall": true
+      },
+      {
+        "ort": "Einmündung Stich / Pümpchen",
+        "beschreibung": "Am 25.06.2026 kollidierte ein Einsatzfahrzeug mit Blaulicht und Einsatzhorn auf dem Weg in die Eschweiler Innenstadt an dieser Einmündung. Zusammenstöße mit Einsatzfahrzeugen führen regelmäßig zu Haftungsquoten statt eindeutiger Alleinschuld.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6303016",
+        "einzelfall": true
+      },
+      {
+        "ort": "Eisenbahnstraße im Stadtteil Röthgen",
+        "beschreibung": "Ein sechsjähriges Kind wurde am 20.07.2026 schwer verletzt, als es aus einem Transporter ausstieg und auf die Fahrbahn lief. Haltende Fahrzeuge am Fahrbahnrand verdecken die Sicht auf kleine Personen vollständig — ein Muster, das in Wohnstraßen mit Lieferverkehr wiederkehrt.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6318421",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum häufen sich Auffahrschäden auf der A4 zwischen Eschweiler-West und Weisweiler?",
+        "antwort": "Die A4 quert Eschweiler zwischen den Anschlussstellen Eschweiler-West und Weisweiler. Zum durchgehenden Fernverkehr auf der Achse Köln–Aachen kommt der Ziel- und Quellverkehr des Kraftwerks Weisweiler und der Gewerbeflächen an der Anschlussstelle Eschweiler-Ost — also ein hoher Lkw-Anteil, der über die Beschleunigungsstreifen deutlich langsamer einfädelt als der fließende Verkehr. Bremst die rechte Spur dadurch abrupt ab, entstehen die typischen Kettenauffahrunfälle, bei denen ein Fahrzeug gleich zweimal getroffen wird: einmal von hinten, einmal auf den Vordermann geschoben. Am Fahrzeug betrifft das selten nur die Stoßfängerhaut: Crashboxen und Querträger dahinter verformen sich schon bei mäßiger Geschwindigkeit, und Abstandsradar, Rückfahrkamera sowie Parksensorik sitzen genau in dieser Zone. Ihre Funktion muss nach der Instandsetzung nachweislich neu kalibriert werden, sonst bleibt der Assistent stumm oder warnt falsch."
+      },
+      {
+        "frage": "Warum sind Park- und Rangierschäden am Blausteinsee in Dürwiß so häufig?",
+        "antwort": "Der Blausteinsee bei Eschweiler-Dürwiß ist ein Tagebaurestsee und an warmen Wochenenden ein starkes Ausflugsziel. Der Verkehr dort besteht überwiegend aus Parksuch- und Rangiervorgängen, dazwischen Fahrräder, Anhänger, geöffnete Heckklappen und Fußgänger zwischen den Reihen. Typisch sind deshalb keine Kollisionen bei Tempo, sondern Anstöße an Stoßfängerecken, Türkanten, Radläufen und Außenspiegeln — oft mehrere unabhängige Schäden an einem Fahrzeug, teils aus verschiedenen Besuchen. Für die Begutachtung ist die Trennung entscheidend: Welche Beschädigung stammt aus dem gemeldeten Ereignis, welche ist Vorschaden? Das klärt sich über Anstoßhöhe, Kratzrichtung und Lackantragung, nicht über die Erinnerung des Halters. Hinter der Stoßfängerhaut liegen zudem Ultraschallsensoren, deren Halterungen schon bei geringer Verformung brechen, während die Haut selbst unauffällig aussieht."
+      },
+      {
+        "frage": "Was ist nach einem Wasserschaden im Indetal zu prüfen?",
+        "antwort": "Die Eschweiler Innenstadt liegt im Talgrund der Inde, das Gelände steigt nach Röhe, Nothberg und Dürwiß hin an. Bei Starkregen sammelt sich das Wasser deshalb an den tiefsten Punkten; Unterführungen und talnahe Straßenzüge stehen schneller unter Wasser, als es von der Zufahrt aus erkennbar ist. Wer hineinfährt, riskiert Wasser im Ansaugtrakt und damit einen kapitalen Motorschaden. Für die Bewertung ist die Wasserstandslinie im Innenraum maßgeblich: Sie zeigt, ob nur Teppich und Dämmung betroffen sind oder ob Steuergeräte unter den Vordersitzen, Sitzbelegungsmatten und Gurtstraffer Wasser gezogen haben. Bei Elektrofahrzeugen kommt die Prüfung von Batteriegehäuse und Hochvolt-Verbindungen hinzu — Fachbetriebssache, keine Sichtprüfung."
+      },
+      {
+        "frage": "Überholunfall auf der Rue de Wattrelos — warum ist dieser Streckentyp so kritisch?",
+        "antwort": "Die Rue de Wattrelos verbindet Eschweiler mit dem Alsdorfer Stadtgebiet und wird von der Unfallkommission abschnittsweise als Unfallhäufungslinie geführt. Im Juni 2026 endete dort ein Überholvorgang in einem Frontalzusammenstoß mit einem Lastkraftwagen. Der Streckentyp erklärt viel: lange gerade Abschnitte verleiten zum Überholen, die tatsächlich verfügbare Sichtweite reicht dafür aber häufig nicht, sobald ein langes Fahrzeug vorausfährt. Trifft ein Pkw frontal auf einen Lkw, liegt die Anstoßebene oberhalb der Pkw-Knautschzone; die Energie geht direkt in Stirnwand und Fahrgastzelle. Für die Bewertung heißt das, dass nicht die zerstörte Front den Ausschlag gibt, sondern ob die Zelle vermessen noch Maß hält."
+      },
+      {
+        "frage": "Zusammenstoß im Kreisverkehr Alsdorfer Straße mit einem niederländischen Fahrzeug — was gilt?",
+        "antwort": "Im Kreisverkehr Alsdorfer Straße/Zum Blauen Stein in Eschweiler war ein Fahrzeugführer aus dem niederländischen Kerkrade beteiligt. Der Unfallort entscheidet über das anzuwendende Recht: Weil sich der Zusammenstoß in Deutschland ereignete, wird nach deutschem Schadenersatzrecht abgerechnet, einschließlich Wertminderung und Nutzungsausfall. Die Bearbeitung läuft über das Deutsche Büro Grüne Karte oder den deutschen Beauftragten des ausländischen Versicherers. Technisch sind Kreisverkehrsunfälle durch den schrägen Anstoßwinkel geprägt: Die Kontaktzone wandert während der Kollision über mehrere Bauteile, weshalb Kratzverläufe über Kotflügel, Tür und Schweller hinweg zu dokumentieren sind. Sie belegen die Bewegungsrichtung und damit, wer sich bereits im Kreis befand."
+      },
+      {
+        "frage": "Kind läuft zwischen haltenden Fahrzeugen auf die Fahrbahn — wie wird das bewertet?",
+        "antwort": "In der Eisenbahnstraße im Eschweiler Stadtteil Röthgen wurde ein sechsjähriges Kind schwer verletzt, das aus einem Transporter ausstieg und auf die Straße lief. Gegenüber Kindern gilt eine gesteigerte Sorgfaltspflicht: Wer an haltenden Fahrzeugen vorbeifährt, hinter denen Kinder zu erwarten sind, muss die Geschwindigkeit so wählen, dass er anhalten kann. Kinder unter zehn Jahren haften für Schäden im motorisierten Verkehr zudem grundsätzlich nicht. Für die Rekonstruktion ist die Sichtverdeckung die entscheidende Größe: Aus Standort und Höhe des haltenden Fahrzeugs lässt sich berechnen, ab welcher Entfernung das Kind überhaupt sichtbar war. Diese Berechnung setzt voraus, dass die Position des Transporters dokumentiert wurde, bevor er wegfährt."
+      },
+      {
+        "frage": "Warum ist der Schwerlastverkehr Richtung Weisweiler für die Schadenbewertung relevant?",
+        "antwort": "Über die B264 und die Anschlussstelle Weisweiler läuft in Eschweiler Ziel- und Quellverkehr mit hohem Lkw-Anteil. Für Pkw-Schäden hat das zwei Folgen. Zum einen liegt die Anstoßebene eines schweren Fahrzeugs oberhalb der eigenen Knautschzone, sodass die Energie an den dafür vorgesehenen Strukturen vorbei direkt in Säulen und Dachrahmen geleitet wird — ein Schadenbild, das äußerlich moderat wirkt und dennoch die Fahrgastzelle betrifft. Zum anderen sind Zugmaschine und Auflieger häufig getrennt zugelassen und mitunter unterschiedlich versichert. Notieren Sie deshalb beide Kennzeichen sowie das Fuhrunternehmen; ohne diese Angaben verzögert sich die Zuordnung des Versicherers erheblich."
+      }
+    ]
+  },
+  "juelich": {
+    "stadtbezirke": [
+      { "name": "Jülich-Mitte", "ortsteile": ["Innenstadt", "Nord", "Süd", "West"] },
+      { "name": "Nordost", "ortsteile": ["Stetternich", "Selgersdorf", "Merscher Höhe"] },
+      { "name": "West", "ortsteile": ["Koslar", "Broich", "Kirchberg"] },
+      { "name": "Süd", "ortsteile": ["Barmen", "Bourheim", "Welldorf", "Güsten"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A44"],
+      "bundesstrassen": ["B56"],
+      "knoten": []
+    },
+    "heroAnker": "Jülich liegt an der Rur zwischen Aachen und Düren; die B56 führt als Hauptachse durch das Stadtgebiet, die A44 verbindet Richtung Aachen und Mönchengladbach. Forschungszentrum und Hochschulcampus erzeugen einen ausgeprägten Berufspendlerverkehr.",
+    "topografieAnker": "Jülich ist eine kompakte Stadt an der Rur mit historischem Kern um die Zitadelle und mehreren eigenständigen Ortslagen ringsum — Stetternich und Selgersdorf im Nordosten, Koslar und Broich im Westen, Barmen und Welldorf im Süden. Dazwischen liegt offene Feldflur, durchzogen von Landesstraßen mit freier Sicht. Der Verkehr konzentriert sich stark auf Arbeitsbeginn und Arbeitsende, weil Forschungszentrum und Hochschulcampus einen hohen Anteil einpendelnder Beschäftigter haben.",
+    "unfallHotspots": [
+      {
+        "ort": "B56 zwischen Altenburger Kreuzung und Ortseingang Jülich",
+        "beschreibung": "Am 23.07.2026 scheiterte auf diesem Abschnitt ein Überholvorgang; das Fahrzeug kam von der Fahrbahn ab und kollidierte mit Leitpfosten und einem Baum. Auf Bundesstraßen ohne bauliche Trennung entscheidet die verfügbare Sichtweite über die Machbarkeit eines Überholvorgangs.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6320562",
+        "einzelfall": true
+      },
+      {
+        "ort": "Kreuzungsbereich B56 / L253",
+        "beschreibung": "Beim Linksabbiegen auf die L253 kollidierte am 29.06.2026 ein Fahrzeug mit einem Motorradfahrer. Linksabbiegen über die Gegenfahrbahn auf einer schnell befahrenen Bundesstraße ist eine der konfliktträchtigsten Bewegungen überhaupt, besonders gegenüber Zweirädern.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6305084",
+        "einzelfall": true
+      },
+      {
+        "ort": "Kreuzungsbereich Kreisbahnstraße / Hasenfelder Straße",
+        "beschreibung": "Ein 78-jähriger Pedelecfahrer wurde am 21.07.2026 schwer verletzt, weil ihn ein Linksabbieger übersah. Innerörtliche Kreuzungen mit Radverkehr erzeugen genau dieses Muster — der Abbiegende blickt auf Kraftfahrzeuge und nimmt das schmale Fahrzeug nicht wahr.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6319129",
+        "einzelfall": true
+      },
+      {
+        "ort": "Kurfürstenstraße",
+        "beschreibung": "Alleinunfall eines Kradfahrers am 18.08.2026 mit schweren Verletzungen. Bei Stürzen ohne Fremdbeteiligung entscheidet die Spurenlage auf der Fahrbahn über die Rekonstruktion, weil die Endlage des Fahrzeugs nichts über die Sturzstelle aussagt.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/8/6336165",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Überholunfälle auf der B56 bei Jülich so folgenreich?",
+        "antwort": "Die B56 ist die Hauptachse durch Jülich und führt Richtung Düren und Aachen; zwischen der Altenburger Kreuzung und dem Ortseingang dokumentierte die Polizei einen gescheiterten Überholvorgang mit Abkommen von der Fahrbahn. Auf zweistreifigen Bundesstraßen ohne bauliche Trennung ist der Überholvorgang die risikoreichste Bewegung: Die benötigte Strecke wächst mit der Länge des überholten Fahrzeugs, während die einsehbare Weite gleich bleibt. Kommt es dabei zum Abkommen und zum Anstoß gegen einen Baum, wirkt die Energie punktuell und dringt tief in die Struktur ein. Für die Bewertung ist deshalb die Vermessung der Fahrgastzelle maßgeblich, nicht der Umfang der sichtbaren Frontzerstörung."
+      },
+      {
+        "frage": "Linksabbiegen von der B56 auf die L253 — worauf kommt es bei der Haftung an?",
+        "antwort": "Am Kreuzungsbereich B56/L253 bei Jülich kollidierte ein Linksabbieger mit einem Motorradfahrer. Wer nach links abbiegt, muss entgegenkommende Fahrzeuge durchfahren lassen; die Haftung liegt deshalb regelmäßig überwiegend beim Abbiegenden. Vollständig entlastet ist die entgegenkommende Seite dennoch nicht immer, etwa bei deutlich überhöhter Geschwindigkeit. Genau hier liegt der technische Kern: Die Annäherungsgeschwindigkeit des Motorrads lässt sich aus Wurfweite, Schleifspuren und Deformationstiefe rekonstruieren. Am Pkw zeigt die Lage der Kontaktzone, wie weit der Abbiegevorgang fortgeschritten war — ein Anstoß an der Beifahrerseite spricht für einen bereits weit eingeleiteten Bogen, ein Frontanstoß dagegen."
+      },
+      {
+        "frage": "Pedelec-Unfall an der Kreisbahnstraße in Jülich — was ist bei älteren Fahrenden zu beachten?",
+        "antwort": "Im Kreuzungsbereich Kreisbahnstraße/Hasenfelder Straße in Jülich übersah ein Linksabbieger einen 78-jährigen Pedelecfahrer. Zwei Dinge treffen hier zusammen: Ein Pedelec fährt schneller, als Kraftfahrende von einem Fahrrad erwarten, und ältere Fahrende stürzen schwerer, weil die Sturzfolgen bei geringerer Knochendichte gravierender ausfallen. Für die Schadenaufnahme heißt das, den Zustand des Pedelecs vollständig zu erfassen: Rahmen, Gabel, Motorlagerung und Akku. Ein mechanisch belasteter Akku kann auch Tage nach dem Anstoß ausfallen und gehört deshalb geprüft, nicht nur besichtigt. Bei Rahmen aus Kohlefaser sind Risse mit bloßem Auge häufig nicht erkennbar."
+      },
+      {
+        "frage": "Sturz ohne Fremdbeteiligung auf der Kurfürstenstraße — lohnt dann ein Gutachten?",
+        "antwort": "Auf der Kurfürstenstraße in Jülich stürzte ein Kradfahrer ohne Beteiligung eines anderen Fahrzeugs und verletzte sich schwer. Auch ohne Gegner ist die Dokumentation sinnvoll, denn zwei Fragen entscheiden über die Regulierung: Lag eine Ursache in der Fahrbahn — Rollsplitt, Ölspur, Schlagloch —, kommt eine Haftung des Baulastträgers in Betracht. Und für die eigene Kaskoabrechnung ist der Umfang zu belegen. Am Motorrad zählt dabei nicht die Verkleidung, sondern die tragende Struktur: Rahmen, Gabelstandrohre und Schwinge. Verzogene Standrohre führen wirtschaftlich fast immer zum Totalschaden, während eine zerkratzte Verkleidung den Umfang optisch übertreibt. Beides auseinanderzuhalten ist der eigentliche Zweck der Besichtigung."
+      },
+      {
+        "frage": "Unfall auf dem Weg zum Forschungszentrum in Stetternich — welche Versicherung greift?",
+        "antwort": "Ein großer Teil des Jülicher Verkehrsaufkommens entfällt auf Beschäftigte, die morgens nach Stetternich und abends wieder heraus fahren. Passiert auf diesem Weg ein Unfall, greifen mehrere Systeme nebeneinander. Der Schaden am Fahrzeug bleibt eine zivilrechtliche Sache gegenüber der gegnerischen Kfz-Haftpflicht — daran ändert der Arbeitsweg nichts. Die gesetzliche Unfallversicherung tritt beim Wegeunfall für Personenschäden ein, also Heilbehandlung und Verdienstausfall, nicht für das Fahrzeug. Die eigene Kaskoversicherung kommt nur ins Spiel, wenn niemand haftet. Wer diese Ebenen vermischt, meldet den Fahrzeugschaden bei der falschen Stelle und verliert Wochen — die Zuordnung gehört deshalb vor die Schadenmeldung."
+      },
+      {
+        "frage": "Wildwechsel auf den Landesstraßen um Koslar und Barmen — was ist zu sichern?",
+        "antwort": "Zwischen den Jülicher Ortslagen Koslar, Broich, Barmen und Welldorf liegt offene Feldflur; die Landesstraßen dorthin verlaufen ohne Randbebauung, und in der Dämmerung queren Rehe und Feldhasen. Nach einem Zusammenstoß gehört die Polizei hinzugezogen und eine Wildschadenbescheinigung angefordert, ohne die sich die Teilkaskoabwicklung erheblich erschwert. Sichern Sie Haare und Gewebespuren fotografisch, bevor das Fahrzeug bewegt oder gereinigt wird — sie sind der Plausibilitätsnachweis für die Begutachtung. Technisch trifft der Anstoß Frontschürze, Kühlerpaket und Motorhaube; genau dort sitzen bei neueren Fahrzeugen Abstandsradar und Frontkamera. Deren Ausrichtung muss nach der Instandsetzung nachweislich neu eingestellt werden."
+      },
+      {
+        "frage": "Warum sind die engen Zufahrten rund um die Jülicher Zitadelle ein eigenes Schadenbild?",
+        "antwort": "Der historische Kern von Jülich um die Zitadelle ist eng bebaut, die Zufahrten sind schmal und die Stellplätze knapp. Das erzeugt weniger Kollisionen im fließenden Verkehr als Anstöße beim Rangieren: an Pollern, Mauerecken und Bordsteinkanten. Solche Schäden wirken geringfügig, betreffen aber fast immer lackierte Anbauteile, in denen Ultraschallsensoren und teils die Nahbereichskamera sitzen. Deren Halterungen brechen bereits bei geringer Krafteinwirkung, während die Stoßfängerhaut selbst nur gering verformt aussieht. Trifft der Anstoß tiefer, ist zusätzlich die Unterbodenverkleidung zu prüfen: Sie führt bei vielen Fahrzeugen Luft zum Kühler und beeinflusst nach einer Beschädigung die Kühlleistung, ohne dass eine Warnung erscheint."
+      }
+    ]
+  },
+  "stolberg-rheinland": {
+    "stadtbezirke": [
+      { "name": "Innenstadt und Tallagen", "ortsteile": ["Altstadt", "Mühle", "Atsch", "Velau", "Liester"] },
+      { "name": "Höhenlagen", "ortsteile": ["Donnerberg", "Münsterbusch", "Büsbach", "Werth"] },
+      { "name": "Vichttal und Südost", "ortsteile": ["Vicht", "Zweifall", "Breinig", "Venwegen"] },
+      { "name": "Nordost", "ortsteile": ["Mausbach", "Gressenich", "Schevenhütte"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [],
+      "knoten": []
+    },
+    "heroAnker": "Die Kupferstadt Stolberg liegt im Tal des Vichtbachs. Von der Altstadt am Burgberg steigen die Straßen steil nach Donnerberg, Münsterbusch und Büsbach an, während der Südosten mit Vicht, Zweifall und Schevenhütte im Wald liegt.",
+    "topografieAnker": "Stolberg ist eine Talstadt: Der Kern liegt eingeschnitten am Vichtbach, die Wohnlagen darüber auf den Höhen. Dazwischen verlaufen Steigungsstrecken mit Kurven, die bei Nässe, Laub und Schnee heikel werden. Nach Südosten geht das Stadtgebiet in geschlossene Waldgebiete über — dort bestimmen Wildwechsel und unübersichtliche Kurven das Geschehen, nicht dichter Verkehr. Eine eigene Autobahn-Anschlussstelle hat Stolberg nicht.",
+    "unfallHotspots": [
+      {
+        "ort": "Jägerhausstraße vor dem Ortseingang Zweifall",
+        "beschreibung": "Am 09.07.2026 verunglückte dort ein Motorradfahrer schwer und wurde in den Hasselbach geschleudert. Die Waldstrecken im Stolberger Südosten verbinden Kurven mit wechselndem Fahrbahnzustand durch Laub und Feuchtigkeit — für Zweiräder die kritische Kombination.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6312088",
+        "einzelfall": true
+      },
+      {
+        "ort": "Am Allmannshof im Stadtteil Werth",
+        "beschreibung": "Bei einem Unfall am 15.08.2026 in einer Kurve nach der Einmündung zur Dorfstraße verlor ein Fahrzeug die Kontrolle und überschlug sich über rund 200 Meter mehrfach. Überschläge betreffen Dachrahmen und Säulen und damit tragende Struktur.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6334983",
+        "einzelfall": true
+      },
+      {
+        "ort": "Konrad-Adenauer-Straße in Höhe der Einmündung Atzenach",
+        "beschreibung": "Ein zwölfjähriges Mädchen wurde am 23.07.2026 beim Überqueren der Fahrbahn schwer verletzt. Innerörtliche Hauptachsen mit querenden Fußwegen sind ein wiederkehrendes Konfliktmuster, insbesondere gegenüber Kindern.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6320805",
+        "einzelfall": true
+      },
+      {
+        "ort": "Corneliastraße im Stadtteil Breinig",
+        "beschreibung": "Am 18.08.2026 kam es beim Rückwärtsausfahren aus einer Grundstücksausfahrt auf die Corneliastraße zu einem Unfall. In den Höhen- und Randlagen von Stolberg münden viele private Zufahrten direkt in die Fahrbahn, oft mit eingeschränkter Sicht.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6336097",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind die Steigungsstrecken zwischen Stolberger Altstadt und Donnerberg im Winter kritisch?",
+        "antwort": "Die Stolberger Altstadt liegt im Tal, Donnerberg, Münsterbusch und Büsbach liegen deutlich höher. Die Verbindungen dazwischen sind Steigungsstrecken mit Kurven, und genau dort wird es im Winter heikel: Fahrzeuge bleiben am Berg stehen, rollen beim Anfahren zurück oder rutschen bei Nässe und Schnee in den Gegenverkehr. Auch abwärts verlängert sich der Bremsweg spürbar, während der Abstand zum Vordermann gleich bleibt. Die Geschwindigkeiten sind niedrig, die Schäden trotzdem nicht harmlos. Beim Zurückrollen trifft der Anstoß das dahinterstehende Fahrzeug unterhalb der Stoßfängerlinie — Schlossträger und Kühlerbefestigung nehmen die Kraft auf, außen sieht man oft kaum etwas. Deshalb gehört bei Auffahrschäden am Berg die Demontage der Stoßfängerhaut zur Besichtigung; erst darunter zeigt sich, ob die Trägerstruktur nachgegeben hat."
+      },
+      {
+        "frage": "Was ist nach einem Wildunfall bei Zweifall oder Schevenhütte zu tun?",
+        "antwort": "Zwischen Zweifall, Vicht und Schevenhütte führen die Straßen durch geschlossene Waldgebiete am Südostrand von Stolberg; Wildwechsel ist dort in der Dämmerung Alltag, und hinter einem Tier folgen meist weitere. Ziehen Sie nach einem Zusammenstoß die Polizei hinzu und lassen Sie sich eine Wildschadenbescheinigung geben — ohne sie wird die Teilkaskoabwicklung schwierig. Fotografieren Sie Haare, Blut- oder Gewebespuren am Fahrzeug, bevor Sie es bewegen: Sie sind der Plausibilitätsnachweis, den die spätere Begutachtung braucht. Technisch trifft der Anstoß fast immer Frontschürze, Kühlerpaket und Motorhaube. Dort sitzen heute Radarsensor, Frontkamera und Matrix-Scheinwerfer, deren Steuergeräte einzeln geprüft und eingestellt werden müssen — auch wenn das Gehäuse äußerlich unbeschädigt wirkt."
+      },
+      {
+        "frage": "Warum entstehen in der Stolberger Altstadt so viele Bordstein- und Felgenschäden?",
+        "antwort": "Die Straßen der Stolberger Altstadt rund um den Burgberg sind schmal, kurvig und beidseitig zugeparkt; an den Hängen kommen Gefälle und hohe Bordsteine dazu. Das erzeugt ein eigenes Schadenbild — nicht die Kollision zweier fahrender Autos, sondern der Anstoß an Bordstein, Mauer oder Poller beim Ausweichen und Einparken. Weil das Fahrzeug dabei am Hang steht, trifft die Kante oft nur ein Rad, und zwar mit dem vollen Gewicht darauf. Betroffen sind Felge und Reifenflanke, häufig aber auch Querlenker, Spurstange und Radlager. Ob die Achse etwas abbekommen hat, zeigt keine Sichtprüfung; dafür braucht es eine Achsvermessung mit Protokoll. Bleibt sie aus, wird ein veränderter Sturz nicht bemerkt und frisst später den Reifen einseitig ab."
+      },
+      {
+        "frage": "Motorradsturz auf der Jägerhausstraße bei Zweifall — was zählt bei der Rekonstruktion?",
+        "antwort": "Auf der Jägerhausstraße kurz vor dem Ortseingang Zweifall verunglückte ein Motorradfahrer und wurde in den Hasselbach geschleudert. Auf Waldstrecken kommen mehrere Faktoren zusammen: wechselnde Griffigkeit durch Laub und Feuchtigkeit im Schatten, enge Radien und späte Erkennbarkeit von Hindernissen. Für die Rekonstruktion sagt die Endlage des Fahrzeugs wenig aus, weil ein gestürztes Motorrad weit rutscht. Maßgeblich sind Beginn und Richtung der Schleifspuren auf der Fahrbahn. Am Fahrzeug selbst entscheidet die tragende Struktur über den Umfang: Rahmen, Gabelstandrohre und Schwinge. Ist der Rahmen verzogen, ist eine wirtschaftliche Instandsetzung praktisch ausgeschlossen, unabhängig davon, wie gut die Verkleidung aussieht."
+      },
+      {
+        "frage": "Überschlag auf der Strecke Am Allmannshof in Werth — was ist danach zu prüfen?",
+        "antwort": "Im Stolberger Stadtteil Werth überschlug sich ein Fahrzeug in einer Kurve nach der Einmündung zur Dorfstraße mehrfach über rund 200 Meter. Nach einem Überschlag steht nicht die Blechoptik im Vordergrund, sondern die tragende Struktur: Dachrahmen, A-, B- und C-Säule nehmen die Last auf, und ihre Verformung entscheidet über die Reparaturfähigkeit. Hinzu kommt das Rückhaltesystem — bei einem Überschlag lösen häufig Vorhangairbags und Gurtstraffer aus, deren Erneuerung erheblich zu Buche schlägt. Zu prüfen sind außerdem Betriebsflüssigkeiten und die Batterie, weil ein längeres Liegen auf der Seite Öl in den Ansaugtrakt bringen kann. Bei Elektrofahrzeugen ist zusätzlich das Batteriegehäuse durch einen Fachbetrieb zu beurteilen."
+      },
+      {
+        "frage": "Kind quert die Konrad-Adenauer-Straße — wie wirkt sich das auf die Haftung aus?",
+        "antwort": "An der Konrad-Adenauer-Straße in Höhe der Einmündung Atzenach in Stolberg wurde ein zwölfjähriges Mädchen beim Überqueren schwer verletzt. Kinder genießen im Straßenverkehr besonderen Schutz: Gegenüber Kindern gilt eine gesteigerte Sorgfaltspflicht, und bei Kindern unter zehn Jahren ist eine Haftung für Schäden im motorisierten Verkehr grundsätzlich ausgeschlossen. Bei älteren Kindern kommt es auf die Einsichtsfähigkeit im Einzelfall an. Technisch entscheidet die Rekonstruktion darüber, ob der Zusammenstoß vermeidbar war: Anstoßhöhe am Fahrzeug, Wurfweite und Kollisionsgeschwindigkeit. Weil Bremsspuren durch das Antiblockiersystem meist fehlen, liefern die Verzögerungsdaten aus dem Airbagsteuergerät die belastbarere Grundlage — sie gehören ausgelesen, bevor Bauteile getauscht werden."
+      },
+      {
+        "frage": "Rückwärts aus einer Grundstücksausfahrt in Breinig — wer trägt die Verantwortung?",
+        "antwort": "Auf der Corneliastraße im Stolberger Stadtteil Breinig kam es beim Rückwärtsausfahren aus einer Grundstücksausfahrt zu einem Zusammenstoß. Wer aus einem Grundstück auf die Straße fährt oder rückwärts fährt, muss eine Gefährdung anderer ausschließen — beide Merkmale treffen hier zusammen, und die Haftung liegt deshalb ganz überwiegend beim Ausfahrenden. Vollständig entlastet ist die durchfahrende Seite dennoch nicht immer, etwa bei deutlich überhöhter Geschwindigkeit. Technisch ist die Kontaktzone aufschlussreich: Ein Anstoß am Heck des Ausfahrenden zeigt, dass er bereits weitgehend auf der Fahrbahn stand, ein Treffer an der Fahrzeugflanke dagegen, dass der Vorgang noch lief. Rückfahrkamera und Parksensorik sitzen genau in dieser Zone und sind mitzuprüfen."
+      }
+    ]
+  },
+  "herzogenrath": {
+    "stadtbezirke": [
+      { "name": "Herzogenrath-Mitte", "ortsteile": ["Innenstadt", "Niederbardenberg", "Straß", "Pannesheide", "Klinkheide"] },
+      { "name": "Kohlscheid", "ortsteile": ["Kohlscheid", "Berensberg", "Bank"] },
+      { "name": "Merkstein", "ortsteile": ["Merkstein", "Afden", "Bierstraß", "Ritzerfeld"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [],
+      "knoten": []
+    },
+    "heroAnker": "Herzogenrath liegt im Wurmtal direkt an der niederländischen Grenze: In der Neustraße verläuft die Staatsgrenze mitten durch die Fahrbahn, gegenüber beginnt Kerkrade. Kohlscheid und Merkstein bilden die beiden anderen Schwerpunkte der Stadt.",
+    "topografieAnker": "Die Stadt zieht sich langgestreckt am Wurmtal entlang; Kohlscheid im Süden, die Mitte und Merkstein im Norden sind räumlich getrennte Ortskerne. Prägend ist die Grenze: Ein Teil des Alltagsverkehrs kommt aus Kerkrade und Landgraaf, entsprechend viele Fahrzeuge tragen ein niederländisches Kennzeichen. Für die Schadenabwicklung heißt das, dass grenzüberschreitende Regulierung hier der Normalfall ist. Eine Autobahn führt durch das Stadtgebiet nicht.",
+    "unfallHotspots": [
+      {
+        "ort": "Geilenkirchener Straße / August-Schmidt-Platz in Merkstein",
+        "beschreibung": "Am 06.07.2026 wurde eine Fußgängerin bei einem Verkehrsunfall verletzt, der Verursacher entfernte sich vom Unfallort. Bei Unfallflucht entscheiden die am Fahrzeug und an der Kleidung verbliebenen Spuren über die Zuordnung — sie sind vor jeder Reinigung zu sichern.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6311018",
+        "einzelfall": true
+      },
+      {
+        "ort": "Roermonderstraße an der Einmündung Mevenheide",
+        "beschreibung": "In der Nacht zum 27.06.2026 kollidierte ein Fahrzeug nach Kontrollverlust mit einem geparkten Auto; die Fahrerin stand erheblich unter Alkoholeinfluss. Anstöße auf parkende Fahrzeuge treffen diese ungebremst und verschieben regelmäßig die gesamte Achsgeometrie.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6304230",
+        "einzelfall": true
+      },
+      {
+        "ort": "L223 in Fahrtrichtung Würselen-Bardenberg",
+        "beschreibung": "Am 25.05.2026 kam ein Fahrzeug nach rechts von der Fahrbahn ab, geriet auf den Grünstreifen und prallte gegen einen Baum. Auf Landesstraßen mit Baumbestand am Fahrbahnrand wirkt die Anstoßenergie punktuell und dringt deutlich tiefer in die Fahrzeugstruktur ein.",
+        "quelle": "https://www.presseportal.de/blaulicht/pm/11559/6281562",
+        "einzelfall": true
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Der Unfallgegner in Herzogenrath fuhr mit niederländischem Kennzeichen — was ist jetzt wichtig?",
+        "antwort": "In Herzogenrath ist das Alltag: In der Neustraße verläuft die Staatsgrenze mitten durch die Fahrbahn, gegenüber liegt Kerkrade, und auch in Kohlscheid und Pannesheide gehören niederländische Kennzeichen zum normalen Straßenbild. Passiert der Unfall auf deutschem Boden, gilt deutsches Schadenersatzrecht nach § 249 BGB — Sie müssen also nicht in den Niederlanden vorgehen. Notieren Sie Kennzeichen, Versicherer und die Nummer der Grünen Karte; reguliert wird über das Deutsche Büro Grüne Karte beziehungsweise den deutschen Beauftragten des ausländischen Versicherers. Fotografieren Sie beide Fahrzeuge noch am Unfallort, und zwar die Anstoßstellen mit Höhenbezug, etwa mit dem Bordstein im Bild. Das gegnerische Fahrzeug steht am nächsten Tag jenseits der Grenze und ist für eine Nachbesichtigung praktisch nicht verfügbar."
+      },
+      {
+        "frage": "Parkrempler in der Neustraße und der Verursacher ist weg — was hilft dann?",
+        "antwort": "Die Neustraße in Herzogenrath wird von beiden Seiten der Grenze angefahren; Kurzzeitparken und Fußgängerverkehr zwischen den Geschäften prägen das Bild, und der Verursacher eines Remplers ist oft schon weg. Dasselbe gilt für die Geschäftsstraßen in Kohlscheid. Melden Sie den Schaden der Polizei, ohne Anzeige wird es bei Fahrerflucht schwierig. Für die spätere Zuordnung zählt die Spur selbst: Fremdlack am eigenen Fahrzeug, die Höhe der Kontaktzone über der Fahrbahn und die Richtung der Kratzer verraten Fahrzeugtyp und Bewegungsrichtung. Waschen Sie das Auto vorher nicht, und fotografieren Sie auch die Nachbarfahrzeuge. Liegt der Anstoß in Türhöhe, gehört außerdem geprüft, ob Türinnenverkleidung und Seitenaufprallsensor beschädigt wurden — beides ist von außen nicht sichtbar."
+      },
+      {
+        "frage": "Warum sind Lkw-Streifschäden in Merkstein anders zu bewerten als Pkw-Schäden?",
+        "antwort": "Merkstein ist um die frühere Grube Adolf gewachsen; die Ortsdurchfahrten Richtung Afden und Bierstraß sind entsprechend alt und schmal, während Liefer- und Baustellenverkehr sie weiter nutzt. Trifft ein Lkw oder Transporter im Begegnungsverkehr ein parkendes oder entgegenkommendes Auto, liegt die Kontaktzone anders als bei einem Pkw-Streifschaden: Aufbaukante, Spiegelarm oder Planengestell erwischen das Fahrzeug oberhalb der Gürtellinie — Außenspiegel, A-Säule, Dachkante, im Extremfall die Windschutzscheibe. Solche Anstöße werden regelmäßig unterschätzt, weil unten alles heil aussieht und der Wagen normal fährt. Eine verzogene A-Säule ist jedoch tragende Struktur; sie berührt die Befestigung des Vorhangairbags und die Verklebung der Scheibe. Beides gehört geprüft, bevor über eine Instandsetzung entschieden wird."
+      },
+      {
+        "frage": "Fußgängerin am August-Schmidt-Platz angefahren und der Fahrer flüchtet — was nun?",
+        "antwort": "An der Geilenkirchener Straße am August-Schmidt-Platz in Merkstein wurde eine Fußgängerin verletzt, während sich der Verursacher entfernte. Bei Unfallflucht ist die Spurensicherung das Entscheidende, und sie verfällt schnell. Am Fahrzeug des Verursachers bleiben Textilabdrücke und Faserreste, an der Kleidung der verletzten Person Lackpartikel — beides ordnet später ein bestimmtes Fahrzeug zu. Erstatten Sie deshalb umgehend Anzeige und lassen Sie die Kleidung unverändert. Wird der Verursacher nicht ermittelt, greift für Personenschäden die Verkehrsopferhilfe als Auffangeinrichtung, für reine Sachschäden allerdings nur unter engen Voraussetzungen. Ohne dokumentierten Umfang lässt sich in beiden Fällen kein Anspruch prüfen."
+      },
+      {
+        "frage": "Geparktes Auto in der Roermonderstraße angefahren — warum ist der Schaden oft größer als sichtbar?",
+        "antwort": "An der Einmündung Mevenheide zur Roermonderstraße in Herzogenrath kollidierte ein Fahrzeug nach Kontrollverlust mit einem geparkten Auto. Ein stehendes Fahrzeug kann keine Energie durch Ausweichen oder Nachgeben abbauen; der Anstoß wirkt vollständig auf die Struktur, und das Fahrzeug wird häufig verschoben. Steht dabei die Handbremse an, blockieren die Räder, und die Kraft geht in Radaufhängung, Querlenker und Radlager statt in eine Rollbewegung. Zu prüfen sind deshalb nicht nur die getroffenen Anbauteile, sondern die Achsgeometrie beider Achsen. Trifft der Anstoß seitlich, kommt die Kontrolle des Schwellers hinzu — er ist tragend, und eine Stauchung dort verändert die Türfunktion, was zunächst nicht auffällt."
+      },
+      {
+        "frage": "Abkommen von der L223 Richtung Bardenberg — was macht Baumanstöße besonders?",
+        "antwort": "Auf der L223 aus Herzogenrath in Fahrtrichtung Würselen-Bardenberg kam ein Fahrzeug von der Fahrbahn ab und prallte gegen einen Baum. Ein Baum verhält sich völlig anders als ein Fahrzeug: Er gibt nicht nach, und die Energie wird auf wenige Zentimeter Breite konzentriert statt über die Fahrzeugbreite verteilt. Deshalb dringt die Verformung tief ein und trifft häufig nur einen Längsträger, was das Fahrzeug zusätzlich um die Hochachse verdreht. Für die Bewertung ist die Vermessung auf der Richtbank maßgeblich, weil eine Verwindung der Bodengruppe von außen nicht erkennbar ist. Zu klären ist außerdem, ob der Baum dem Baulastträger zuzurechnen ist — bei erkennbar geschädigten Bäumen kommt eine Mithaftung in Betracht."
+      },
+      {
+        "frage": "Warum lohnt bei Fahrzeugen aus Kohlscheid und Pannesheide der Blick auf die Vorgeschichte?",
+        "antwort": "Im Herzogenrather Süden rund um Kohlscheid, Berensberg und Pannesheide wechseln Fahrzeuge häufig über die Grenze den Besitzer, und ein Teil des Bestands hat eine Zulassungshistorie in mehreren Ländern. Für die Bewertung eines Schadens ist das relevant, weil sich der Wiederbeschaffungswert nach dem regionalen Markt richtet und eine ausländische Vorgeschichte ihn beeinflusst. Ebenso wichtig ist die Trennung von Alt- und Neuschaden: Reparaturen nach ausländischem Standard sind nicht immer dokumentiert und zeigen sich erst in abweichenden Lackschichtdicken oder nachlackierten Anbauteilen. Die Lackmessung gehört deshalb in Herzogenrath besonders sorgfältig ausgeführt — sie trennt, was dem aktuellen Ereignis zuzurechnen ist, von dem, was schon vorher da war."
+      }
+    ]
+  }
+}

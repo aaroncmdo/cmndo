@@ -1,0 +1,268 @@
+{
+  "koenigswinter": {
+    "stadtbezirke": [
+      { "name": "Talstadt", "ortsteile": ["Königswinter-Altstadt", "Niederdollendorf", "Oberdollendorf"] },
+      { "name": "Siebengebirge", "ortsteile": ["Ittenbach", "Heisterbacherrott"] },
+      { "name": "Pleiser Ländchen", "ortsteile": ["Oberpleis", "Thomasberg", "Stieldorf", "Eudenbach"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3"],
+      "bundesstrassen": ["B42"],
+      "knoten": ["Anschlussstelle Siebengebirge (A3)", "B42 Rheinuferstraße Nieder- und Oberdollendorf", "Talstation der Drachenfelsbahn, Königswinter-Altstadt"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Bergabfahrt aus dem Siebengebirge in die Talstadt für Bremsen und Fahrwerk kritisch?",
+        "antwort": "Zwischen den Höhenorten Ittenbach und Heisterbacherrott und der Talstadt am Rhein liegt ein Höhenunterschied von deutlich über hundert Metern, verteilt auf wenige Kilometer kurviger Strecke. Wer die Motorbremse nicht nutzt, fährt die Beläge heiß; die Bremswirkung lässt dann genau in der Kurve nach, in der sie gebraucht wird. Kommt ein Fahrzeug von der Fahrbahn ab, trifft es meist Leitplanke oder Felsböschung. Der sichtbare Streifschaden an der Flanke ist dabei oft der kleinere Teil des Problems. Entscheidend für die Begutachtung sind Achsgeometrie, Lenkung und Unterboden, denn ein seitlicher Anprall gegen Bordstein oder Böschungskante verstellt die Spur, ohne außen erkennbare Spuren zu hinterlassen. Auch die Bremsscheiben selbst gehören dokumentiert, weil thermischer Verzug sich erst beim Bremsen aus höherer Geschwindigkeit als Rubbeln bemerkbar macht."
+      },
+      {
+        "frage": "Was macht den Ausflugsverkehr rund um Drachenfels und Petersberg für Parkschäden anfällig?",
+        "antwort": "An Wochenenden mit gutem Wetter füllt sich die Königswinterer Altstadt mit ortsunkundigen Besuchern, die Drachenfels und Petersberg ansteuern. Die Straßen zwischen Rheinufer und der Talstation der Drachenfelsbahn sind eng, historisch gewachsen und beidseitig zugeparkt; der Suchverkehr rangiert dort, wo eigentlich kein Platz zum Rangieren ist. Typisch sind Anstoßschäden an Stoßfängerecken, abgerissene Außenspiegel und Kratzer über mehrere Bauteile hinweg. Solche Schäden wirken geringfügig, betreffen aber fast immer lackierte Kunststoffanbauteile mit verbauten Parksensoren und Umfeldkameras. Deren Erneuerung samt Einlernen macht bei aktuellen Fahrzeugen regelmäßig den größeren Teil der Instandsetzung aus. Hinzu kommt, dass viele Anstöße in der Altstadt von unbekannten Verursachern stammen; dann ist die Zuordnung der einzelnen Kratzer zu einem konkreten Ereignis Teil der Bewertung."
+      },
+      {
+        "frage": "Worauf kommt es bei einem Unfall auf der B42 zwischen Niederdollendorf und der Altstadt an?",
+        "antwort": "Die B42 zieht sich in Königswinter als schmales Band zwischen Rhein und Siebengebirgshang entlang, eingeklemmt zwischen der rechten Rheinstrecke der Bahn und den Hangfüßen unterhalb von Ober- und Niederdollendorf. Ausweichraum gibt es kaum, und bei Nässe, Laub oder herabgewehtem Hangmaterial verlängert sich der Bremsweg spürbar. Auffahrunfälle am Stauende laufen hier deshalb oft mit höherer Restgeschwindigkeit ab als im übrigen Stadtverkehr. Für die Begutachtung heißt das: Neben der sichtbaren Heckverformung gehören Längsträger, Schlossträger und die Aufnahmepunkte einer vorhandenen Anhängevorrichtung auf die Prüfliste. Stauchungen im Rahmenbereich zeigen sich erst beim Vermessen. Hinzu kommt die Zwangslage der Örtlichkeit: Zwischen Bahndamm und Hangfuß lässt sich ein verunfalltes Fahrzeug kaum seitlich abstellen, sodass die Spurenlage verändert wird, bevor sie aufgenommen werden kann."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Königswinter — von der Talstadt am Rhein und der B42 über die Siebengebirgsorte Ittenbach und Heisterbacherrott bis hinauf ins Pleiser Ländchen um Oberpleis, Thomasberg und Eudenbach.",
+    "topografieAnker": "Königswinter reicht vom Rheinufer bei Niederdollendorf auf knapp 50 Metern bis zum Großen Ölberg auf 461 Metern, dem höchsten Punkt im Rhein-Sieg-Kreis. Dazwischen liegt das Siebengebirge mit Steigungen, engen Kurven und starkem Ausflugsverkehr. Die A3 quert das Stadtgebiet im Osten an der Anschlussstelle Siebengebirge, die B42 folgt im Westen dem Rhein."
+  },
+  "bad-honnef": {
+    "stadtbezirke": [
+      { "name": "Stadtmitte", "ortsteile": ["Mülheim", "Beuel", "Bondorf", "Rommersdorf", "Reitersdorf", "Lohfeld"] },
+      { "name": "Rheinlage", "ortsteile": ["Rhöndorf", "Selhof"] },
+      { "name": "Aegidienberg", "ortsteile": ["Aegidienberg", "Himberg", "Orscheid", "Rottbitze", "Retscheid", "Brüngsberg", "Hövel", "Wülscheid", "Neichen", "Wintersberg", "Siefenhoven", "Efferoth"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3"],
+      "bundesstrassen": ["B42"],
+      "knoten": ["Anschlussstelle Bad Honnef/Linz (A3)", "B42 Ortsdurchfahrt Bad Honnef", "Schmelztal als Verbindung zwischen Stadtmitte und Aegidienberg"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum unterscheiden sich die Straßenverhältnisse in Bad Honnef und Aegidienberg im Winter so stark?",
+        "antwort": "Die Stadtmitte von Bad Honnef liegt am Rhein auf rund 75 Metern, der Stadtbezirk Aegidienberg dagegen auf der Hochfläche des Westerwaldvorlands mehrere hundert Meter darüber. Verbunden sind beide über steile Strecken wie das Schmelztal. Bei einer Wetterlage um den Gefrierpunkt regnet es im Tal, während oben in Himberg, Orscheid oder Rottbitze bereits Schnee oder überfrierende Nässe liegt — und der Übergang kommt mitten in der Steigung. Fahrzeuge brechen dann seitlich aus und treffen Böschung, Bordstein oder Leitplanke. Bei solchen Anstößen lohnt der Blick unter das Fahrzeug: Querlenker, Spurstangen und Radträger nehmen die Energie auf, ohne dass die Karosserie außen viel davon zeigt. Ebenso gehört die Bereifung ins Protokoll, denn Profiltiefe und Reifenart sind bei Glättefällen regelmäßig Teil der Sachverhaltsklärung."
+      },
+      {
+        "frage": "Was ist an der A3 im Bereich Aegidienberg besonders?",
+        "antwort": "Die A3 quert das Bad Honnefer Stadtgebiet im Osten über die Höhe von Aegidienberg und steigt dort aus dem Rheintal zum Westerwald an. Die Anschlussstelle Bad Honnef/Linz ist der einzige Autobahnzugang der Stadt, und der Abschnitt trägt einen hohen Lkw-Anteil auf einer Dauersteigung. Langsame Schwerfahrzeuge auf dem rechten Fahrstreifen und deutlich schnellerer Pkw-Verkehr daneben erzeugen große Geschwindigkeitsunterschiede beim Überholen. Typisch sind Streifkollisionen beim Fahrstreifenwechsel und Auffahrschäden am Stauende. An der Fahrzeugflanke sitzen Spurwechselassistenz und Umfeldsensorik in Kotflügel, Außenspiegel und Stoßfängerecken — deren Neuausrichtung ist eigens zu erfassen. Bei Streifkollisionen gehört zudem die Kontaktspur über die gesamte Fahrzeuglänge dokumentiert, weil ihr Verlauf zeigt, welches Fahrzeug sich in die Spur des anderen bewegt hat."
+      },
+      {
+        "frage": "Warum häufen sich in der Bad Honnefer Rheinlage Unfälle mit Fußgängern und Radfahrern?",
+        "antwort": "Zwischen der Insel Grafenwerth, der Rheinpromenade und der B42 treffen in Bad Honnef Durchgangs- und Freizeitverkehr auf engem Raum aufeinander. An warmen Wochenenden queren Fußgänger und Radfahrer zwischen parkenden Fahrzeugen hindurch zum Ufer, während der Verkehr auf der B42 mit Landstraßentempo läuft. Aus dem verdeckten Bereich zwischen zwei Fahrzeugen bleibt kaum Reaktionszeit. Kollisionen mit ungeschützten Verkehrsteilnehmern hinterlassen am Fahrzeug oft nur Eindellungen an Fronthaube, Kotflügel oder Windschutzscheibe. Für die Begutachtung sind sie trotzdem aufwendig: Aktive Fußgängerschutzsysteme, die Sensorik im Stoßfänger und die verklebte Frontscheibe mit dahinterliegender Kamera müssen zusammenhängend geprüft werden. Eine ausgelöste aktive Fronthaube lässt sich zudem nicht zurückdrücken, weil ihre pyrotechnischen Aktuatoren Einwegbauteile sind."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bad Honnef — vom Rheinufer bei Rhöndorf, Selhof und der Insel Grafenwerth über die B42 bis hinauf nach Aegidienberg mit Himberg, Orscheid und Rottbitze an der A3.",
+    "topografieAnker": "Bad Honnef ist die südlichste Stadt Nordrhein-Westfalens und zerfällt in zwei Welten: das Rheintal bei rund 53 Metern mit Stadtmitte, Rhöndorf und der Insel Grafenwerth, und die Höhe von Aegidienberg auf dem Westerwaldvorland, über die die A3 verläuft. Im Norden steigt das Stadtgebiet bis zur Löwenburg auf 455 Meter an."
+  },
+  "rheinbach": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Rheinbach"] },
+      { "name": "Swistniederung", "ortsteile": ["Flerzheim", "Ramershoven", "Oberdrees", "Niederdrees"] },
+      { "name": "Östliche Ortschaften", "ortsteile": ["Wormersdorf"] },
+      { "name": "Voreifel-Höhe", "ortsteile": ["Todenfeld", "Hilberath", "Neukirchen", "Queckenberg"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A61"],
+      "bundesstrassen": ["B266"],
+      "knoten": ["B266 Ortsdurchfahrt Rheinbach", "B266 Richtung Todenfeld und Ahrgebirge", "A61 im westlichen Stadtgebiet"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum liegen die Straßenverhältnisse zwischen der Rheinbacher Kernstadt und Todenfeld oft weit auseinander?",
+        "antwort": "Die Rheinbacher Kernstadt liegt bei etwa 173 Metern in der Swistbucht, der Ortsteil Todenfeld im Süden erreicht gut 406 Meter am Rand des Ahrgebirges. Auf einer einzigen Fahrt über Hilberath und Neukirchen überwindet man damit mehr als zweihundert Höhenmeter. Im Winter beginnt oberhalb von Queckenberg regelmäßig eine andere Wetterzone, im Herbst steht in den Hanglagen Nebel, während unten die Sicht frei ist. Beides führt zu Abkommen von der Fahrbahn und zu Auffahrunfällen an unerwartet langsamem Verkehr. Nach einem Abkommen ins Bankett gehören Radaufhängung, Felgenhörner und Reifenflanken zwingend geprüft. Hinzu kommt der Reifenzustand: Wer im Tal auf Sommerreifen losfährt, findet oberhalb von Hilberath völlig andere Bedingungen vor, als beim Start absehbar war."
+      },
+      {
+        "frage": "Was ist an einem Fahrzeug zu prüfen, das in Rheinbach im Wasser gestanden hat?",
+        "antwort": "Die Swist und ihre Zuflüsse sammeln das Wasser der Voreifel-Hänge und führen es durch das Rheinbacher Stadtgebiet. Bei Starkregen laufen tiefliegende Straßen, Unterführungen und Tiefgaragen in der Kernstadt und in Flerzheim schnell voll. Ein Fahrzeug, das im Wasser stand, ist mit einer Reinigung selten erledigt. Maßgeblich ist die Wasserstandslinie im Innenraum: Steuergeräte sitzen bei vielen Modellen im Fußraum oder unter den Sitzen, Steckverbindungen ziehen Feuchtigkeit, Dämmmaterial speichert sie über Monate. Korrosion an Kontakten zeigt sich erst Wochen später als sporadischer Fehler. Wichtig ist deshalb die Dokumentation des Wasserstands möglichst am Fundort, weil sich die Linie im Innenraum nach dem Trocknen kaum noch nachweisen lässt."
+      },
+      {
+        "frage": "Wo entstehen in Rheinbach die meisten Schäden im Alltagsverkehr?",
+        "antwort": "Rheinbach ist über die A61 und die B266 an den Fernverkehr angebunden, und beide bündeln den Pendlerverkehr Richtung Bonn und Köln. Die B266 führt als Ortsdurchfahrt mitten durch die Kernstadt und weiter zu den Ortsteilen — mit Ampeln, Abbiegespuren, Grundstückszufahrten und Radverkehr auf derselben Achse. In dieser Mischung entstehen die klassischen Abbiege- und Auffahrkollisionen bei niedrigem Tempo. Gerade dort lohnt Genauigkeit: Bei geringen Aufprallgeschwindigkeiten federt die Stoßfängerhaut zurück und sieht unbeschädigt aus, während Querträger und Prallabsorber dahinter bereits plastisch verformt sind. Bei Beteiligung von Radfahrern bleibt am Pkw häufig nur eine kleine Delle im Türblatt zurück, deren Höhe über der Fahrbahn den Hergang rekonstruierbar macht."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Rheinbach — von der Kernstadt in der Swistbucht über Flerzheim, Wormersdorf und die Dreesorte bis hinauf zu den Höhenorten Todenfeld, Hilberath und Neukirchen am Rand des Ahrgebirges.",
+    "topografieAnker": "Rheinbach liegt in der Voreifel, wo die Swistbucht der Niederrheinischen Bucht an das Ahrgebirge stößt. Vom Stadtkern auf rund 173 Metern steigt das Gebiet nach Süden bis auf 406 Meter bei Todenfeld an — über zweihundert Höhenmeter innerhalb einer Stadt. Die A61 und die B266 erschließen das Gebiet, die Ortsteile hängen an Landstraßen durch die Hanglagen."
+  },
+  "alfter": {
+    "stadtbezirke": [
+      { "name": "Alfter", "ortsteile": ["Alfter"] },
+      { "name": "Oedekoven", "ortsteile": ["Oedekoven"] },
+      { "name": "Impekoven", "ortsteile": ["Impekoven"] },
+      { "name": "Gielsdorf", "ortsteile": ["Gielsdorf"] },
+      { "name": "Witterschlick", "ortsteile": ["Witterschlick", "Volmershoven-Heidgen"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": ["B56"],
+      "knoten": ["B56 durch das Gemeindegebiet Richtung Bonn und Euskirchen", "Anschlussstelle Bonn-Hardtberg (A565) als Anbindung", "Anschlussstelle Bornheim (A555) als Anbindung"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Alfter hat keine eigene Autobahnauffahrt — was bedeutet das für den Verkehr?",
+        "antwort": "Durch das Alfterer Gemeindegebiet führt keine Autobahn. Der Fernverkehr wird über die Anschlussstelle Bonn-Hardtberg an der A565 und die Anschlussstelle Bornheim an der A555 erreicht, beide liegen außerhalb der Gemeinde. Der gesamte Pendlerverkehr aus Oedekoven, Impekoven, Gielsdorf und Witterschlick läuft deshalb über die B56 und die Landesstraßen mitten durch die Ortslagen. Zu den Berufsverkehrszeiten stauen sich diese Ortsdurchfahrten, und es entstehen die typischen Kolonnenschäden: Auffahren am Stauende, Anstoßen beim Einfädeln aus Grundstückszufahrten. Beachtung verdient auch der Rückfahrbereich: Wo Fahrzeuge rückwärts aus Hofeinfahrten auf die B56 setzen, entstehen Kollisionen mit seitlichem Anstoß an der Hinterachse, bei denen sich der Radsturz verändert, ohne dass das Blech verformt wird."
+      },
+      {
+        "frage": "Warum ist die Fahrbahn rund um Witterschlick bei Nässe besonders rutschig?",
+        "antwort": "Witterschlick wurde nach der Entdeckung von Tonvorkommen industrialisiert, und der Tonabbau prägt den Ortsteil bis heute mit Schwerlastverkehr zwischen Gruben, Werken und den Landesstraßen. Feuchter Ton, den Reifen und Ladeflächen auf die Fahrbahn tragen, bildet bei Regen einen glatten Film, der sich vom üblichen Schmutzeintrag unterscheidet: Die Haftung bricht plötzlich und ohne Vorwarnung weg. Fahrzeuge rutschen dann quer und treffen Bordstein oder Baum seitlich. Solche Seitenanstöße verformen Schweller und B-Säule, und dort verlaufen bei aktuellen Modellen die Leitungen für Seitenairbags und Sitzbelegungserkennung. Für die Schadenaufnahme ist es zudem sinnvoll, den Fahrbahnzustand festzuhalten, solange die Verschmutzung vorhanden ist — nach dem nächsten Regen ist sie verschwunden."
+      },
+      {
+        "frage": "Was macht die Wirtschaftswege im Alfterer Vorgebirge zur Erntezeit gefährlich?",
+        "antwort": "Der Südrand des Vorgebirges bei Alfter und Gielsdorf ist seit jeher Obst- und Gemüseanbaugebiet, und das Wegenetz zwischen den Feldern ist auf Traktoren ausgelegt, nicht auf Begegnungsverkehr. Zur Erntezeit fahren dort breite Gespanne mit Anhängern, die die verfügbare Fahrbahnbreite vollständig ausnutzen. Weicht ein Pkw in den unbefestigten Randstreifen aus, sackt die Fahrzeugseite ab. Häufig sind Streifschäden über die gesamte Flanke sowie Felgen- und Reifenschäden an der Bordsteinkante. Wer dabei mit dem Rad hart aufsetzt, verzieht die Spur — sichtbar wird das erst bei der Achsvermessung. Ebenso gehören die Reifen begutachtet: Ein Aufsetzen der Flanke erzeugt innenliegende Strukturschäden, die von außen wie ein harmloser Schürfer aussehen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Alfter — für Oedekoven, Impekoven, Gielsdorf und Witterschlick, zwischen dem Südrand des Vorgebirges, der B56 und dem Kottenforst am westlichen Rand von Bonn.",
+    "topografieAnker": "Alfter liegt am Südrand des Vorgebirges westlich von Bonn, zwischen rund 52 und 175 Metern Höhe. Durch das Gemeindegebiet führt keine Autobahn — angebunden ist Alfter über die B56 und die Anschlussstellen Bonn-Hardtberg und Bornheim. Prägend sind der Obstanbau an den Hanglagen, der Tonabbau in Witterschlick und der Kottenforst im Süden."
+  },
+  "wachtberg": {
+    "stadtbezirke": [
+      { "name": "Rheinseite", "ortsteile": ["Pech", "Niederbachem", "Oberbachem", "Ließem"] },
+      { "name": "Berkumer Höhe", "ortsteile": ["Berkum", "Villip", "Villiprott", "Gimmersdorf", "Holzem"] },
+      { "name": "Südliches Drachenfelser Ländchen", "ortsteile": ["Adendorf", "Klein Villip", "Fritzdorf", "Arzdorf", "Werthhoven", "Kürrighoven", "Züllighoven"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [],
+      "knoten": ["Ortsdurchfahrt Berkum", "Anstieg Niederbachem–Berkum", "Ortsverbindung Villip–Gimmersdorf"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Wachtberg hat weder Autobahn noch Bundesstraße — wie wirkt sich das aus?",
+        "antwort": "Durch das Wachtberger Gemeindegebiet führt tatsächlich keine Bundesfernstraße. Der gesamte Verkehr zwischen den dreizehn Ortschaften — Berkum, Villip, Niederbachem, Adendorf, Werthhoven und den übrigen — läuft über Landesstraßen und Ortsdurchfahrten, die überwiegend historischen Wegeverläufen folgen. Sie sind schmal, unübersichtlich und ohne durchgehende Gehwege. Wo sich Lieferverkehr, landwirtschaftliche Gespanne und Pendler auf derselben Fahrbahn begegnen, entstehen Streifschäden an Außenspiegeln, Türen und Radläufen. Ein Spiegelanstoß gilt schnell als Bagatelle, doch in modernen Außenspiegeln sitzen Kamera, Totwinkelsensor und Blinkeinheit; sie werden als Baugruppe getauscht und eingelernt. Beim Zusammenstoß mit einem Gespann ist zudem die Ausladung des Anbaugeräts zu erfassen, weil sie die tatsächliche Kollisionshöhe bestimmt."
+      },
+      {
+        "frage": "Warum ist die Auffahrt vom Rheintal nach Berkum im Winter kritisch?",
+        "antwort": "Die Wachtberger Ortschaften Pech und Niederbachem liegen noch im Übergang zum Rheintal, der Verwaltungssitz Berkum bereits auf 222 Metern und die Höhen bei Werthhoven auf 269 Metern. Die Verbindungen dorthin steigen auf kurzer Strecke deutlich an und liegen teils im Hangschatten, wo Nässe morgens länger steht und überfriert. Fahrzeuge ohne ausreichende Traktion bleiben in der Steigung stehen und rollen rückwärts an; im Gefälle rutschen sie geradeaus in die Böschung. Bei Anstößen gegen Böschungskanten oder Feldsteine ist die Unterbodenprüfung entscheidend, denn Ölwanne, Achsträger und bei Elektrofahrzeugen das Batteriegehäuse liegen dort weitgehend ungeschützt. Ein Anstoß am Batteriegehäuse zieht eine gesonderte Prüfung nach sich, selbst ohne Fehlermeldung."
+      },
+      {
+        "frage": "Was hat der Ackerboden im Drachenfelser Ländchen mit Unfällen zu tun?",
+        "antwort": "Wachtberg liegt im Drachenfelser Ländchen auf fruchtbaren Lössböden zwischen erloschenen Vulkankuppen wie dem Wachtberg und dem Hohenberg. Zwischen Adendorf, Fritzdorf und Arzdorf queren landwirtschaftliche Fahrzeuge die Landstraßen von Feld zu Feld und tragen dabei Löss auf die Fahrbahn. Der feine Boden wird bei Regen zu einer schmierigen Schicht, die den Bremsweg verlängert, ohne dass die Fahrbahn nass aussieht. Kommt es zur Kollision, gehört die Fahrbahnverschmutzung zur Schadenaufnahme dokumentiert: Sie erklärt Bremsspuren und Kollisionswinkel, die sonst nicht zur angegebenen Geschwindigkeit passen. Hilfreich ist auch, ob Traktoren unmittelbar zuvor gequert haben — ihre Spurbreite zeichnet sich im aufgetragenen Boden ab und lässt sich fotografisch sichern."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Wachtberg — für Berkum, Villip, Niederbachem, Adendorf und die übrigen Ortschaften im Drachenfelser Ländchen, zwischen dem Rheintal bei Pech und den Höhen um Werthhoven.",
+    "topografieAnker": "Wachtberg liegt südwestlich von Bonn im Drachenfelser Ländchen, einer Hügellandschaft aus erloschenen Vulkankuppen — Wachtberg, Hohenberg und der benachbarte Rodderberg. Der Verwaltungssitz Berkum liegt auf 222 Metern, die höchste Stelle bei Werthhoven auf 269 Metern. Durch das Gemeindegebiet führt weder eine Autobahn noch eine Bundesstraße; alles läuft über Landesstraßen."
+  },
+  "swisttal": {
+    "stadtbezirke": [
+      { "name": "Swist-Achse", "ortsteile": ["Heimerzheim", "Odendorf", "Dünstekoven", "Ludendorf"] },
+      { "name": "Kottenforst-Rand", "ortsteile": ["Buschhoven", "Morenhoven"] },
+      { "name": "Börde-Ortschaften", "ortsteile": ["Miel", "Ollheim", "Straßfeld", "Essig"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A61"],
+      "bundesstrassen": ["B56"],
+      "knoten": ["Anschlussstelle Heimerzheim (A61)", "Anschlussstelle Miel (A61)", "B56 zwischen Bonn und Euskirchen"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Swisttal hat gleich zwei Autobahnanschlüsse — warum ist das ein Unfallfaktor?",
+        "antwort": "Die A61 quert das Gemeindegebiet und ist über die Anschlussstellen Heimerzheim und Miel gleich zweifach erschlossen. Für eine Gemeinde dieser Größe bedeutet das viel Zubringerverkehr auf Straßen, die eigentlich reine Ortsverbindungen sind: Wer aus Odendorf, Morenhoven oder Ollheim zur Autobahn will, fährt durch Ortslagen mit Tempo-30-Abschnitten, Schulwegen und landwirtschaftlichen Zufahrten. An den Rampenenden trifft beschleunigender auf abbremsenden Verkehr. Für die Bewertung heißt das, den Heckbereich nicht auf die Stoßfängerhaut zu reduzieren: Querträger, Prallabsorber und das Bodenblech im Reserveradbereich nehmen die Energie auf. Hinzu kommt, dass hier viele Gespanne unterwegs sind — beim Auffahren auf einen Anhänger liegt die Anstoßhöhe oberhalb des Stoßfängers, was zu Unterfahrungen an Haube und Scheibe führt."
+      },
+      {
+        "frage": "Warum ist die Rübenkampagne in der Swisttaler Börde für Autofahrer relevant?",
+        "antwort": "Der Westen Swisttals liegt auf den Lössböden der Zülpicher Börde, einem der ertragreichsten Ackerbaugebiete der Region. Im Herbst rollen Erntetransporte über die Verbindungsstraßen zwischen Ludendorf, Straßfeld, Essig und Dünstekoven — schwer beladen, langsam und mit Bodenschlepp aus den Feldzufahrten. Der aufgetragene Lehm verwandelt die Fahrbahn schon bei Nieselregen in eine rutschige Fläche, und heruntergefallene Rüben liegen als plötzliches Hindernis auf der Spur. Ausweichmanöver enden häufig im Straßengraben. Bei einem Abkommen mit Aufsetzen sind Bodengruppe, Tankaufhängung und Abgasanlage zu prüfen. Auch die Ladung selbst verursacht Schäden: Eine von der Ladefläche gefallene Rübe trifft die Frontpartie mit erheblicher Energie und hinterlässt Einschlagspuren, die sich von Steinschlag unterscheiden lassen."
+      },
+      {
+        "frage": "Wie geht man mit einem Wildunfall am Kottenforst bei Buschhoven um?",
+        "antwort": "Der Kottenforst reicht von Osten bis an Buschhoven und Morenhoven heran, und die Landstraßen an seinem Rand sind klassische Wildwechselstrecken in der Dämmerung. Nach einem Zusammenstoß mit Schalenwild gehört zunächst die Wildunfallbescheinigung des Jagdausübungsberechtigten oder der Polizei zur Akte — sie ist die Grundlage der Teilkaskoabwicklung. Für die technische Begutachtung ist der Anstoßbereich aufschlussreich: Haar-, Blut- und Gewebespuren belegen Höhe und Richtung des Aufpralls. Besonders wichtig ist der Kühlerbereich, weil ein zunächst dicht wirkender Kühler nach einem Wildanstoß häufig Haarrisse trägt, die sich erst im Betrieb als schleichender Kühlmittelverlust zeigen. Auch die Scheinwerfergehäuse verschieben sich in ihren Aufnahmen, ohne dass das Glas zerstört wird — die Leuchtweite stimmt danach nicht mehr."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Swisttal — für Heimerzheim, Odendorf, Buschhoven, Miel und die übrigen Ortschaften der Gemeinde, zwischen den beiden A61-Anschlüssen, dem Lauf der Swist und den Waldrändern des Kottenforsts.",
+    "topografieAnker": "Swisttal liegt in der Voreifel zwischen 126 und 187 Metern, benannt nach der Swist, einem Zufluss der Erft. Im Westen reichen die Lössböden der Zülpicher Börde heran, im Osten der Kottenforst. Die A61 quert das Gemeindegebiet und erschließt es gleich zweifach — über die Anschlussstellen Heimerzheim und Miel. Dazu kommt die B56."
+  },
+  "lohmar": {
+    "stadtbezirke": [
+      { "name": "Kernort", "ortsteile": ["Lohmar", "Donrath"] },
+      { "name": "Wahlscheid", "ortsteile": ["Wahlscheid", "Honrath", "Neuhonrath", "Scheiderhöhe", "Inger"] },
+      { "name": "Östliche Ortsteile", "ortsteile": ["Birk", "Breidt", "Heide"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3"],
+      "bundesstrassen": ["B484", "B507"],
+      "knoten": ["Anschlussstelle Lohmar (A3)", "Anschlussstelle Lohmar-Nord (A3, nur Fahrtrichtung Frankfurt)", "B484 durch Donrath und an Wahlscheid vorbei"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sorgt die Anschlussstelle Lohmar-Nord regelmäßig für Fehlfahrten?",
+        "antwort": "Lohmar hat zwei Zugänge zur A3, aber nur einer davon funktioniert in beide Richtungen. Die Anschlussstelle Lohmar-Nord ist eine halbe Anschlussstelle und lässt ausschließlich Verkehr in Fahrtrichtung Frankfurt zu. Wer ortsunkundig Richtung Köln auffahren will, steht vor einer Rampe, die es nicht gibt, und wendet oder kehrt über die Ortsdurchfahrt zur Anschlussstelle Lohmar zurück. Genau diese unerwarteten Wende- und Rückwärtsmanöver an Rampenköpfen führen zu Kollisionen mit nachfolgendem Verkehr. Bei Anstößen im Rangiertempo sind Heckklappe, Schlossträger und die Ausrichtung der Rückfahrkamera zu prüfen: Eine verzogene Klappe schließt weiterhin, dichtet aber nicht mehr ab. Typisch sind hier auch Anstöße gegen Leitplankenanfänge, bei denen der Querträger einseitig nachgibt."
+      },
+      {
+        "frage": "Was macht die B484 zwischen Donrath und Wahlscheid anspruchsvoll?",
+        "antwort": "Die B484 führt von Siegburg kommend durch Lohmar und Donrath und weiter an Wahlscheid vorbei Richtung Overath — sie ist die Hauptachse durch das Aggertal und verbindet dabei beide A3-Anschlüsse der Stadt. Die Strecke wechselt zwischen gut ausgebauten Abschnitten und kurvigen Talpassagen, was zu stark unterschiedlichen Geschwindigkeiten führt. An trockenen Wochenenden kommt im südlichen Bergischen Land dichter Motorradverkehr hinzu. Bei Kollisionen zwischen Pkw und Zweirad ist die Anstoßstelle am Pkw oft klein und tief gelegen: Kotflügelkante, Türblatt oder vordere Stoßfängerecke. Beim Motorrad selbst ist die Bewertung eine andere — Rahmen, Gabelstandrohre und Schwinge müssen vermessen werden, weil ein Sturz die Geometrie verändert, ohne sichtbare Knicke zu hinterlassen."
+      },
+      {
+        "frage": "Wie hoch ist das Wildrisiko auf den Lohmarer Landstraßen?",
+        "antwort": "Lohmar ist stark bewaldet und wird vom geschützten Naafbachtal durchzogen; dazu kommen die Talzüge von Agger und Sülz, die sich im Stadtgebiet vereinigen. Zwischen Scheiderhöhe, Honrath, Breidt und Inger führen die Landstraßen unmittelbar an Waldrändern und Wiesentälern entlang — die klassische Konstellation für Wildwechsel in Dämmerung und Nacht. Nach einem Wildunfall ist die Bescheinigung des Jagdausübungsberechtigten die Grundlage für die Teilkasko. Technisch lohnt der genaue Blick auf die Frontpartie: Hinter dem Kühlergrill sitzen Radarsensor und Kamerahalterung, beide reagieren empfindlich auf Verschiebung. Zusätzlich gehört der Bereich hinter dem Stoßfänger begutachtet, weil Wildkörper dort Halteklammern und Luftführungen zerstören, die den Ladeluftkühler in Position halten."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Lohmar — für Donrath, Wahlscheid, Honrath, Breidt und Scheiderhöhe, zwischen den beiden A3-Anschlüssen, der B484 im Aggertal und den Wäldern rund um das Naafbachtal.",
+    "topografieAnker": "Lohmar liegt im südlichen Bergischen Land, wo Agger und Sülz zusammenfließen und das geschützte Naafbachtal die Stadt durchzieht. Die A3 quert das Stadtgebiet mit der Anschlussstelle Lohmar und der halben Anschlussstelle Lohmar-Nord, die nur Fahrtrichtung Frankfurt bedient. Dazu kommen die B484 durch das Aggertal und die B507."
+  },
+  "roesrath": {
+    "stadtbezirke": [
+      { "name": "Rösrath", "ortsteile": ["Rösrath", "Kleineichen"] },
+      { "name": "Hoffnungsthal", "ortsteile": ["Hoffnungsthal"] },
+      { "name": "Forsbach", "ortsteile": ["Forsbach"] },
+      { "name": "Weitere Ortslagen", "ortsteile": ["Volberg", "Scharrenbroich", "Bleifeld", "Brand", "Menzlingen", "Rambrücken"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A3"],
+      "bundesstrassen": [],
+      "knoten": ["Anschlussstelle Rösrath bei Scharrenbroich (A3, einseitig Richtung Köln)", "Sülztal-Achse Rösrath–Hoffnungsthal", "Waldrandstrecken am Königsforst"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist der Rösrather Autobahnanschluss nur eingeschränkt nutzbar?",
+        "antwort": "Die A3 quert Rösrath, doch die Anschlussstelle bei Scharrenbroich ist einseitig ausgeführt und bedient allein den Verkehr von und nach Köln. Wer Richtung Frankfurt auffahren möchte, muss über Nachbaranschlüsse ausweichen. Für Ortsunkundige, die dem Navigationsgerät folgen, endet die Fahrt an einer Rampe ohne Fortsetzung — mit Wendemanövern und abruptem Abbremsen im Zufahrtsbereich als Folge. Gerade dieser Bereich verdient Sorgfalt: Rückfahrkamera, Parksensoren und Abstandswarner sitzen im hinteren Stoßfänger, und ihre Halterungen verziehen sich schon bei Verformungen, die das Bauteil äußerlich unbeschadet übersteht. Wer rückwärts auf die Fahrbahn setzt, wird zudem häufig außermittig getroffen, was die Heckquerwand verzieht und die Klappenspaltmaße verändert."
+      },
+      {
+        "frage": "Rösrath ist fast zur Hälfte Wald — was heißt das für Wildunfälle?",
+        "antwort": "Nahezu die Hälfte des Rösrather Stadtgebiets ist bewaldet, und die Stadt reicht in zwei große Naturräume hinein: den Königsforst im Norden und die Wahner Heide im Westen. Die Straßen zwischen Forsbach, Kleineichen und den Waldrändern liegen damit auf durchgehenden Wildwechselachsen, besonders in der Morgen- und Abenddämmerung. Nach dem Zusammenstoß ist die Wildunfallbescheinigung die Grundlage der Teilkaskoabwicklung. Für die Schadenaufnahme ist entscheidend, dass ein Aufprall auf Rehwild anders wirkt als auf ein Wildschwein: Letzteres trifft tiefer und verformt Frontschürze, Unterfahrschutz und Kühlerpaket. Zu vermerken ist außerdem die Anstoßhöhe über der Fahrbahn, weil sie unterscheidet, ob das Tier von der Seite kam oder frontal erfasst wurde."
+      },
+      {
+        "frage": "Was ist bei Starkregen im Sülztal rund um Hoffnungsthal zu beachten?",
+        "antwort": "Die Sülz durchfließt Rösrath und nimmt das Wasser aus den Hängen bis hinauf zum Lüderich auf, der mit gut 260 Metern der höchste Punkt der Stadt ist; der tiefste liegt in der Wahner Heide bei rund 71 Metern. Dieses Gefälle bringt Niederschlag rasch ins Tal, und in Hoffnungsthal staut sich das Wasser in der Talenge. Fahrzeuge, die durch stehendes Wasser gefahren sind oder darin standen, brauchen eine gesonderte Betrachtung. Entscheidend ist, ob Wasser über den Ansaugweg in den Motor gelangt ist: Ein Wasserschlag verbiegt Pleuel, ohne dass äußerlich etwas zu sehen wäre. Ebenso setzen sich nach längerem Stand Bremsscheiben und Sattelführungen fest."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Rösrath — für Hoffnungsthal, Forsbach und Kleineichen, zwischen dem Königsforst, der Wahner Heide und dem Sülztal, mit der A3 und ihrer einseitigen Anschlussstelle bei Scharrenbroich.",
+    "topografieAnker": "Rösrath liegt südöstlich von Köln im Übergang zum Bergischen Land und ist zu fast der Hälfte bewaldet: Königsforst im Norden, Wahner Heide im Westen. Die Sülz durchfließt das Stadtgebiet, das vom Lüderich auf gut 260 Metern bis auf rund 71 Meter in der Heide abfällt. Die A3 quert Rösrath mit einer einseitigen Anschlussstelle bei Scharrenbroich."
+  },
+  "euskirchen": {
+    "stadtbezirke": [
+      { "name": "Kernstadt", "ortsteile": ["Altstadt", "Nordstadt", "Oststadt", "Südstadt", "Weststadt"] },
+      { "name": "Börde-Stadtteile", "ortsteile": ["Großbüllesheim", "Kleinbüllesheim", "Euenheim", "Weidesheim", "Wüschheim", "Dom-Esch", "Elsig", "Frauenberg", "Niederkastenholz", "Billig", "Kessenich", "Oberwichterich"] },
+      { "name": "Erfttal", "ortsteile": ["Roitzheim", "Stotzheim", "Kuchenheim", "Kirchheim", "Wißkirchen"] },
+      { "name": "Voreifel-Stadtteile", "ortsteile": ["Flamersheim", "Palmersheim", "Schweinheim", "Kreuzweingarten", "Rheder"] }
+    ],
+    "hauptachsen": {
+      "autobahnen": ["A1"],
+      "bundesstrassen": ["B51", "B56", "B266"],
+      "knoten": ["Anschlussstelle Euskirchen (A1)", "Anschlussstelle Wißkirchen (A1)", "B56 Innenstadtring mit Erftbrücke Kölner Straße", "B266 Kommerner Straße Richtung Wißkirchen"]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist der Euskirchener Innenstadtring so unfallträchtig?",
+        "antwort": "Drei Bundesstraßen treffen in Euskirchen zusammen: die B51, die B56 und die B266. Die B56 führt als Innenstadtring mitten durch die Kreisstadt und überquert dabei als Kölner Straße die Erft. Auf dieser Achse überlagern sich zu Spitzenzeiten Pendler-, Güter- und landwirtschaftlicher Verkehr, dazu kommen Ampeln, Abbiegebeziehungen und Grundstückszufahrten in dichter Folge. Das Ergebnis sind Abbiege- und Auffahrkollisionen bei niedriger Geschwindigkeit. Solche Anstöße werden leicht unterschätzt: Die Stoßfängerhaut federt zurück, während Querträger und Prallelemente dahinter bereits plastisch verformt sind. Kommt Radverkehr hinzu, der die Abbiegespuren queren muss, entstehen Kollisionen mit ungünstiger Krafteinleitung gegen Tür oder Kotflügelkante, bei denen die Türmechanik verklemmt."
+      },
+      {
+        "frage": "Der Veybach fließt teils verrohrt durch Euskirchen — welche Rolle spielt das?",
+        "antwort": "Euskirchen wird von der Erft durchflossen, und der Veybach verläuft in der Innenstadt streckenweise verrohrt unter der Bebauung. Bei Starkregen fasst dieser Querschnitt die Wassermengen nicht, und das Wasser tritt an unerwarteten Stellen im Stadtgebiet aus — Tiefgaragen und tiefliegende Stellplätze laufen zuerst voll. Für die Fahrzeugbewertung ist die erreichte Wasserstandslinie der wichtigste Anhaltspunkt. Sitzschienen, Fußraumdämmung und Steckverbindungen speichern Feuchtigkeit; Steuergeräte unter Sitz oder Teppich sind bei vielen Modellen die empfindlichste Stelle. Hilfreich ist eine Besichtigung vor der Trocknung, denn danach lässt sich die erreichte Höhe kaum noch belegen — Schlammränder an Sitzunterkonstruktion und Türtaschen sind das aussagekräftigste Merkmal. Hinzu kommt, dass Hochwasser in der Innenstadt Öl- und Kraftstoffreste mitführt, die Dichtungen und Dämmstoffe angreifen."
+      },
+      {
+        "frage": "Was macht die Landstraßen in der Zülpicher Börde bei Euskirchen im Herbst gefährlich?",
+        "antwort": "Nördlich und westlich von Euskirchen liegt die offene Feldflur der Zülpicher Börde mit Ortschaften wie Großbüllesheim, Elsig und Dom-Esch. Über der ausgeräumten Landschaft bilden sich in Herbstnächten Bodennebelfelder, die auf wenigen hundert Metern von freier Sicht zu stark eingeschränkter Sichtweite wechseln. Gleichzeitig läuft die Rübenkampagne mit langsamen, überbreiten Gespannen. Die Kombination erzeugt Auffahrunfälle mit hoher Differenzgeschwindigkeit auf gerader Strecke. Bei Anstößen gegen die Ecke eines Anhängers kommt es zu Unterfahrungen, bei denen die Fahrgastzelle im Bereich A-Säule und Dachrahmen belastet wird — dieser Bereich gehört auch dann vermessen, wenn die Türen noch schließen. Ebenso sind beschädigte Rück- und Nebelschlussleuchten zu erfassen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Euskirchen — von der Innenstadt an Erft und Veybach über die B56, B51 und B266 bis zu den Börde-Orten Großbüllesheim und Elsig und den Voreifel-Stadtteilen Flamersheim und Kreuzweingarten.",
+    "topografieAnker": "Euskirchen liegt in der Zülpicher Börde am Nordrand der Eifel. Durch die Kreisstadt fließen die Erft und der teilweise verrohrte Veybach; nach Süden steigt das Gebiet zur Voreifel hin an. Die A1 begrenzt das Stadtgebiet im Nordwesten mit den Anschlussstellen Euskirchen und Wißkirchen, dazu kommen die Bundesstraßen B51, B56 und B266."
+  }
+}
