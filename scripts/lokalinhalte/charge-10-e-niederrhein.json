@@ -1,0 +1,556 @@
+{
+  "wesel": {
+    "stadtbezirke": [
+      {
+        "name": "Wesel",
+        "ortsteile": [
+          "Altstadt",
+          "Blumenkamp",
+          "Feldmark",
+          "Fusternberg",
+          "Schepersfeld"
+        ]
+      },
+      {
+        "name": "Obrighoven-Lackhausen",
+        "ortsteile": [
+          "Obrighoven",
+          "Lackhausen",
+          "Wittenberg"
+        ]
+      },
+      {
+        "name": "Büderich",
+        "ortsteile": [
+          "Büderich",
+          "Ginderich",
+          "Werrich/Perrich"
+        ]
+      },
+      {
+        "name": "Flüren",
+        "ortsteile": [
+          "Flüren"
+        ]
+      },
+      {
+        "name": "Bislich",
+        "ortsteile": [
+          "Bislich",
+          "Bergerfurth",
+          "Diersfordt"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A3"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B58",
+        "B70",
+        "B473"
+      ],
+      "knoten": [
+        "Anschlussstelle Wesel (A3)",
+        "Niederrheinbrücke Wesel (B58)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht Unfälle auf der Niederrheinbrücke Wesel besonders?",
+        "antwort": "Die Niederrheinbrücke führt die B58 westlich der Innenstadt über den Rhein und ist die einzige Rheinbrücke im Kreis Wesel. Als Schrägseilbrücke mit einem 130 Meter hohen Pylon liegt sie frei über Strom und Vorland — Seitenwind trifft die Fahrzeuge ohne jede Abschirmung, besonders auf der linksrheinischen Vorlandbrücke Richtung Büderich. Betroffen sind vor allem hohe Aufbauten: Transporter, Wohnwagen und Anhängergespanne. Typisch sind Streifschäden an der Flanke und an der Schutzeinrichtung sowie pendelnde Anhänger. Für die Bewertung heißt das: In Seitenwänden und Außenspiegeln sitzen Totwinkelsensorik und Umfeldkameras, die schon bei leichtem Streifkontakt aus der Justage geraten. Beim Gespann kommt die Anhängerkupplung dazu — eine verzogene Deichsel zeigt sich erst beim Vermessen, nicht am Lack."
+      },
+      {
+        "frage": "Warum kommt es auf den Deichstraßen zwischen Bislich und Flüren häufig zu Alleinunfällen?",
+        "antwort": "Im Rheinvorland zwischen Bislich, Flüren und Diersfordt verlaufen schmale Deich- und Wirtschaftswege ohne befestigten Randstreifen; die Böschung fällt direkt neben der Fahrbahn ab. Auf der Deichkrone folgt die Fahrbahn zudem dem Deichverlauf, und Kuppen nehmen die Sicht auf entgegenkommende Fahrzeuge. Auf denselben Strecken sind landwirtschaftliche Gespanne, Ausflugsradler und der Verkehr zur Rheinfähre unterwegs. Bei Begegnungsverkehr weicht man ins Bankett aus, das nach Regen nachgibt — das Fahrzeug rutscht seitlich ab. Der Schaden liegt dann selten dort, wo man ihn sieht: Beim Abrutschen setzt der Unterboden auf der Böschungskante auf, Ölwanne, Achsträger und Schweller nehmen Druck auf, und die Achsgeometrie verstellt sich. Von außen bleibt das unauffällig. Erst Hebebühne und Achsvermessung zeigen, was tatsächlich verformt ist."
+      },
+      {
+        "frage": "Was ist zu beachten, wenn ein Fahrzeug im Weseler Rheinvorland Wasser gezogen hat?",
+        "antwort": "In den Vorländern bei Büderich, Bislich und Flüren steht bei Rheinhochwasser regelmäßig Wasser auf Wirtschaftswegen und Stellflächen. Wer hindurchfährt oder sein Fahrzeug dort stehen lässt, riskiert einen Schaden, der zunächst nicht sichtbar ist. Kritisch sind Ansaugtrakt und Elektronik: Ein Wasserschlag verbiegt Pleuel, ohne dass der Motor sofort ausfällt, und Steuergeräte in Fußraum und Unterboden korrodieren erst Wochen später. Bei Elektro- und Hybridfahrzeugen kommt der Hochvoltspeicher im Unterboden hinzu, dessen Gehäusedichtigkeit gesondert zu prüfen ist. Für die Bewertung zählen die Wasserstandsmarke an Karosserie und Innenraum, Feuchtemessungen in Dämmung und Sitzschaum sowie der Zustand der Steckverbindungen. Das gehört dokumentiert, bevor das Fahrzeug getrocknet und gereinigt wird — danach lässt sich die Eindringhöhe nicht mehr belegen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Wesel — von der Niederrheinbrücke über die B58 bis in die Deichdörfer Bislich und Büderich. Wir nehmen den Schaden dort auf, wo er entstanden ist: zwischen Rheinvorland, Auesee und Feldmark.",
+    "topografieAnker": "Wesel liegt am unteren Niederrhein an der Mündung der Lippe. Die Stadt teilt sich am Strom: Büderich und Ginderich liegen linksrheinisch und sind nur über die Niederrheinbrücke im Zuge der B58 erreichbar, die einzige Rheinbrücke im Kreis. Dazu kommen weite Vorländer mit Deichstraßen ohne Randstreifen und der Diersfordter Wald im Norden — Strecken, auf denen Ausweichen sofort ins Bankett führt."
+  },
+  "kleve": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt",
+        "ortsteile": [
+          "Kleve-Mitte",
+          "Materborn",
+          "Kellen"
+        ]
+      },
+      {
+        "name": "Düffel",
+        "ortsteile": [
+          "Rindern",
+          "Donsbrüggen",
+          "Keeken",
+          "Bimmen",
+          "Düffelward",
+          "Wardhausen",
+          "Warbeyen"
+        ]
+      },
+      {
+        "name": "Rheinbogen",
+        "ortsteile": [
+          "Griethausen",
+          "Brienen",
+          "Schenkenschanz",
+          "Salmorth"
+        ]
+      },
+      {
+        "name": "Reichswald",
+        "ortsteile": [
+          "Reichswalde"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B9",
+        "B220",
+        "B57"
+      ],
+      "knoten": [
+        "B9 Richtung Nimwegen über Kranenburg"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Der Unfallgegner in Kleve hatte ein niederländisches Kennzeichen — worauf kommt es an?",
+        "antwort": "Mit Nimwegen in gut zwanzig Kilometern Entfernung ist das in Kleve Alltag. Weil sich der Unfall hier ereignet hat, gilt deutsches Schadenersatzrecht nach § 249 BGB. Die Abwicklung läuft über das Deutsche Büro Grüne Karte, das für den ausländischen Versicherer einen Regulierungsbeauftragten in Deutschland benennt. Entscheidend ist, was am Unfallort festgehalten wird: vollständiges Kennzeichen, Name der Versicherung und die Nummer der Grünen Karte. Fehlen diese Angaben, dauert allein die Zuordnung des Versicherers Wochen. Ebenso wichtig sind Fotos vom gegnerischen Fahrzeug und von der Endstellung beider Wagen, solange sie noch stehen — nach der Rückfahrt über die Grenze ist das Gegenfahrzeug für eine Plausibilitätsprüfung praktisch nicht mehr zugänglich."
+      },
+      {
+        "frage": "Was ist bei einem Wildunfall am Reichswald bei Kleve zu tun?",
+        "antwort": "Der Reichswald südwestlich von Kleve ist mit rund 5.100 Hektar das größte zusammenhängende Waldgebiet am Niederrhein; die Straßen zwischen Materborn, Reichswalde und Kranenburg führen an seinem Rand entlang, wo in der Dämmerung regelmäßig Wild wechselt. Nach einer Kollision sollten Polizei oder Jagdpächter verständigt werden, denn die Wildschadenbescheinigung ist die Grundlage für die Teilkasko. Für die Schadenaufnahme gilt: Ein Anstoß gegen Reh oder Sau trifft Frontschürze, Kühlergrill und Motorhaube. Das Radar hinter dem Grill wird dabei häufig nur verschoben, nicht zerstört — es meldet keinen Fehler, arbeitet aber mit falschem Bezug. Die Kalibrierung nach der Instandsetzung ist deshalb ebenso zu erfassen wie der Blechschaden."
+      },
+      {
+        "frage": "Warum sind die Straßen in der Düffel bei Kleve im Herbst besonders tückisch?",
+        "antwort": "Die Düffel nordwestlich von Kleve ist eine feuchte Rheinniederung mit Gräben, Poldern und schnurgeraden Straßen zwischen Rindern, Keeken, Düffelward und Bimmen. Im Herbst bilden sich dort Bodennebel und Reifglätte, während es wenige Kilometer weiter oben am Klever Berg trocken bleibt — der Wechsel kommt ohne Vorwarnung. Auf gerader Strecke wird zügig gefahren, der Sichtbereich endet aber nach wenigen Metern; typisch sind das Auffahren auf langsame Gespanne und das Abkommen in den Straßengraben. Rutscht ein Fahrzeug seitlich in den Graben, bekommen Schweller, Türunterkanten und Radhäuser Druck. Beim Bergen kommen häufig Anhebeschäden dazu, wenn nicht an den vorgesehenen Aufnahmepunkten angesetzt wird — auch die gehören in die Aufnahme."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Kleve — zwischen Schwanenburg, Reichswald und der Düffel. Ob auf der B9 Richtung Nimwegen, der B220 nach Emmerich oder in den Rheindörfern Griethausen und Keeken: Wir nehmen den Schaden vor Ort auf.",
+    "topografieAnker": "Kleve liegt am Übergang vom Niederrheinischen Tiefland zum Klever Berg, der mit 106 Metern höchster Punkt im Stadtgebiet ist. Nach Norden fällt das Land in die Rheinniederung der Düffel ab — flach, feucht und im Herbst nebelanfällig. Eine Autobahn gibt es auf Klever Gebiet nicht: B9, B220 und die hier beginnende B57 tragen den Fernverkehr, die nächsten Auffahrten liegen in Goch und Emmerich."
+  },
+  "nettetal": {
+    "stadtbezirke": [
+      {
+        "name": "Lobberich",
+        "ortsteile": [
+          "Lobberich"
+        ]
+      },
+      {
+        "name": "Kaldenkirchen",
+        "ortsteile": [
+          "Kaldenkirchen"
+        ]
+      },
+      {
+        "name": "Breyell",
+        "ortsteile": [
+          "Breyell"
+        ]
+      },
+      {
+        "name": "Hinsbeck",
+        "ortsteile": [
+          "Hinsbeck"
+        ]
+      },
+      {
+        "name": "Leuth",
+        "ortsteile": [
+          "Leuth"
+        ]
+      },
+      {
+        "name": "Schaag",
+        "ortsteile": [
+          "Schaag"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B221",
+        "B509"
+      ],
+      "knoten": [
+        "Anschlussstelle Nettetal-West (A61)",
+        "Grenzübergang Venlo/Nettetal (A61 zur niederländischen A74)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die A61 bei Kaldenkirchen so unfallträchtig?",
+        "antwort": "Die A61 durchquert das weitläufige Stadtgebiet von Nettetal und geht an der Grenze bei Kaldenkirchen seit 2012 direkt in die niederländische A74 über. Damit nimmt sie den Güterverkehr aus dem Logistikraum Venlo auf den ersten Kilometern nach der Grenze auf, wo er sich mit Pendlern und Einkaufsverkehr mischt. Lkw-Kolonnen auf zwei Fahrstreifen, langgezogene Überholvorgänge und Rückstau vor den Anschlussstellen ergeben ein klares Bild: Auffahrschäden am Heck und Streifschäden beim Wiedereinscheren. Wird ein Pkw von einem Sattelzug hinten getroffen, liegt die Anstoßebene höher als die eigene Stoßfängerhöhe — Heckklappe und Dachkante verziehen sich, während die Verkleidung fast heil aussieht. Erst die Diagonalvermessung zeigt, ob die Karosserie mitgenommen wurde."
+      },
+      {
+        "frage": "Was macht die Landstraßen um Hinsbeck und Leuth gefährlich?",
+        "antwort": "Hinsbeck und Leuth liegen mitten im Naturpark Schwalm-Nette, zwischen den Krickenbecker Seen und ausgedehnten Bruchwäldern. Der Wald reicht vielerorts bis an die Fahrbahn, Randmarkierungen fehlen, und an schönen Wochenenden kommt Ausflugsverkehr mit Radfahrern und Motorrädern dazu. Wildwechsel gibt es hier ganzjährig. In den Waldabschnitten um die Krickenbecker Seen bleibt die Fahrbahn nach Regen lange feucht, weil kaum Sonne auf den Belag trifft; Laub und Moos an den Rändern verstärken das. Das typische Ereignis ist die Ausweichreaktion mit anschließendem Anprall gegen Baum oder Graben. Ein solcher Frontalanstoß ist meist ein schmaler Offset-Treffer: Die Kraft läuft über einen einzigen Längsträger, während die andere Fahrzeugseite unversehrt bleibt — deshalb wird der Schaden häufig unterschätzt. Das Airbag-Steuergerät hat die Verzögerungswerte gespeichert; sie auszulesen ordnet den Ablauf und stützt die Bewertung der Verformung."
+      },
+      {
+        "frage": "Warum sind die Feldzufahrten zwischen Breyell und Schaag im Herbst ein Risiko?",
+        "antwort": "Der Raum Nettetal ist Gemüseanbaugebiet; zwischen Breyell, Schaag und Lobberich münden Wirtschaftswege oft ohne Sicht auf die Landstraße. In der Erntezeit ziehen Traktoren mit breiten Anhängern über die Fahrbahn und tragen Erde ein. Eine nasse Lehmschicht wirkt wie ein Schmierfilm — die Haftung bricht ohne Vorankündigung weg. Typisch sind das Abkommen in der Kurve und der Anstoß beim Einbiegen eines Gespanns, das langsam beschleunigt und weiter ausholt als erwartet. Der Kontakt mit einer Anhängerkante hinterlässt keinen flächigen Eindruck, sondern einen scharfkantigen Riss in Seitenwand oder Türblech; ausbeulen scheidet dann aus. Verschmutzte Sensorflächen und Kameralinsen kommen hinzu und sind nach der Instandsetzung zu prüfen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Nettetal — von der A61 am Grenzübergang bei Kaldenkirchen über die Ortsdurchfahrten in Lobberich und Breyell bis zu den Waldstraßen an den Krickenbecker Seen. Wir kommen zum Fahrzeug, auch wenn es nicht mehr fahrbereit ist.",
+    "topografieAnker": "Nettetal ist aus sechs Orten zusammengewachsen — Lobberich, Kaldenkirchen, Breyell, Hinsbeck, Leuth und Schaag — und liegt mitten im Naturpark Schwalm-Nette direkt an der niederländischen Grenze. Zwischen Seenkette, Bruchwald und Gemüsefeldern verlaufen schmale Landstraßen; parallel dazu bündelt die A61 den Güterverkehr aus dem Raum Venlo. Zwei Verkehrswelten auf engem Raum."
+  },
+  "gronau": {
+    "stadtbezirke": [
+      {
+        "name": "Gronau",
+        "ortsteile": [
+          "Innenstadt",
+          "Buterland",
+          "Brook",
+          "Eßseite",
+          "Beckerhook",
+          "Tiekerhook",
+          "Schöttelkotterhook",
+          "Spechtholtshook"
+        ]
+      },
+      {
+        "name": "Epe",
+        "ortsteile": [
+          "Epe"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B54"
+      ],
+      "knoten": [
+        "Grenzübergang Gronau (B54)",
+        "Glanerbrücke (Übergang nach Enschede)",
+        "Übergang Losserstraße (nach Losser)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Der Unfall passierte in Gronau, der Gegner kam aus Enschede — nach welchem Recht wird abgerechnet?",
+        "antwort": "Maßgeblich ist der Unfallort. Ereignet sich der Zusammenstoß auf Gronauer Stadtgebiet, gilt deutsches Schadenersatzrecht nach § 249 BGB, auch wenn Halter und Versicherer ihren Sitz in den Niederlanden haben. Die Abwicklung läuft über das Deutsche Büro Grüne Karte, das einen Regulierungsbeauftragten in Deutschland benennt. Praktisch heißt das in Gronau: An der Glanerbrücke, an der Losserstraße und am Tiekerhook gibt es keine Kontrollen mehr, beide Seiten fahren durch — wer Personalien und Versicherungsdaten nicht vollständig aufnimmt, sucht später einen Halter im Ausland. Für die Bewertung selbst ist der deutsche Reparaturmarkt maßgeblich; eine Kalkulation nach niederländischen Werkstattstrukturen bildet die hier anfallende Instandsetzung nicht ab."
+      },
+      {
+        "frage": "Gronau hat viel Radverkehr — worauf kommt es bei Kollisionen mit Radfahrern an?",
+        "antwort": "Durch die direkte Nachbarschaft zu Enschede ist der Alltagsradverkehr in Gronau und Epe deutlich stärker ausgeprägt als in vergleichbaren Städten des Münsterlands; über die früheren Grenzübergänge fahren Berufspendler und Einkaufsverkehr mit dem Rad. Entsprechend häufig sind Abbiegeunfälle an der B54 und an den Kreuzungen der Innenstadt. Ein Pedelec bringt mehr Masse und Geschwindigkeit ein als ein klassisches Rad: Lenkerenden setzen punktuelle Eindrücke ins Türblech, der Pedalarm zieht eine Riefe über den Schweller. Bei Fahrzeugen neuerer Bauart löst zusätzlich die aktive Motorhaube aus, sobald der Fußgängerschutz einen Personenkontakt erkennt — die Pyro-Aktuatoren sind Einwegteile und zu ersetzen, auch wenn die Haube unversehrt wirkt."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Gronau und Epe — an der B54, an den früheren Grenzübergängen nach Enschede und in den Wohnquartieren der Innenstadt. Auch dann, wenn der Unfallgegner aus den Niederlanden kommt.",
+    "topografieAnker": "Gronau liegt im äußersten Nordwesten des Münsterlands und grenzt westlich unmittelbar an Enschede — der Übergang ist fließend, vier ehemalige Grenzübergänge verbinden beide Städte. Eine Autobahn führt nicht durch das Stadtgebiet; die B54 trägt allein den Verkehr Richtung Münster und Ruhrgebiet. Flaches Land, hoher Radverkehrsanteil und grenzüberschreitender Alltagsverkehr prägen das Unfallbild."
+  },
+  "borken": {
+    "stadtbezirke": [
+      {
+        "name": "Borken",
+        "ortsteile": [
+          "Kernstadt",
+          "Westenborken",
+          "Hoxfeld"
+        ]
+      },
+      {
+        "name": "Gemen",
+        "ortsteile": [
+          "Gemen",
+          "Kirchspiel Gemen"
+        ]
+      },
+      {
+        "name": "Weseke",
+        "ortsteile": [
+          "Weseke"
+        ]
+      },
+      {
+        "name": "Burlo",
+        "ortsteile": [
+          "Burlo",
+          "Borkenwirthe"
+        ]
+      },
+      {
+        "name": "Marbeck",
+        "ortsteile": [
+          "Marbeck",
+          "Grütlohn"
+        ]
+      },
+      {
+        "name": "Rhedebrügge",
+        "ortsteile": [
+          "Rhedebrügge"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B67",
+        "B70"
+      ],
+      "knoten": [
+        "Anschlussstelle Borken (A31, rund zwölf Kilometer östlich)",
+        "Umgehung B67/B70 um die Kernstadt"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Borken liegt nicht an der Autobahn — was heißt das für das Unfallgeschehen?",
+        "antwort": "Die nächste Auffahrt liegt rund zwölf Kilometer östlich an der A31. Der gesamte Fern- und Regionalverkehr läuft deshalb über die B67 in Ost-West- und die B70 in Nord-Süd-Richtung, beide als Umgehung um die Kernstadt geführt. Das prägt das Unfallbild: nicht der Stauunfall im dichten Autobahnverkehr, sondern der Kreuzungs- und Einbiegeunfall an den Knoten der Umgehung, dazu Auffahrer auf abbiegende Lkw und landwirtschaftliche Gespanne. Beim seitlichen Anstoß im Bereich der A-Säule verformt sich die Türöffnung mit. Dass die Tür anschließend noch schließt, ist kein Beleg für einen intakten Rahmen — hier entscheidet die Vermessung der Karosserie, nicht der Blick auf das Blech."
+      },
+      {
+        "frage": "Was macht die Landstraßen um Gemen, Weseke und Marbeck riskant?",
+        "antwort": "Das westliche Münsterland ist geprägt von Alleen mit altem Baumbestand unmittelbar am Fahrbahnrand und von Landstraßen ohne befestigtes Bankett. Zwischen Gemen, Weseke, Marbeck und Rhedebrügge fehlt damit der Fehlerspielraum: Wer ausweicht, trifft Stamm oder Graben. Hinzu kommt landwirtschaftlicher Verkehr, der in Kurven die Sicht nimmt, und im Herbst nasses Laub auf der Fahrbahn. Der Anprall gegen einen Baum ist ein schmaler Offset-Anstoß — die gesamte Energie läuft über einen Längsträger, während die Gegenseite unbeschädigt bleibt. Optisch wirkt die Front dann halb intakt, tatsächlich ist der Vorderwagen einseitig gestaucht. Zur Aufnahme gehören deshalb das Auslesen des Airbag-Steuergeräts und die Vermessung von Vorderachse und Längsträgern."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Borken — an der B67 und der B70, in Gemen, Weseke und Marbeck. Wir nehmen den Schaden dort auf, wo er passiert ist, auch auf den Alleen und Wirtschaftswegen zwischen den Ortsteilen.",
+    "topografieAnker": "Borken liegt im westlichen Münsterland, rund zwölf Kilometer westlich der A31. Ohne Autobahn im Stadtgebiet übernehmen die B67 in Ost-West- und die B70 in Nord-Süd-Richtung den gesamten Fernverkehr, beide als Umgehung um die Kernstadt. Ringsum liegen Alleen mit altem Baumbestand und Landstraßen ohne befestigtes Bankett, auf denen landwirtschaftlicher Verkehr zum Alltag gehört."
+  },
+  "ahaus": {
+    "stadtbezirke": [
+      {
+        "name": "Ahaus",
+        "ortsteile": [
+          "Ahaus",
+          "Ammeln"
+        ]
+      },
+      {
+        "name": "Wüllen",
+        "ortsteile": [
+          "Wüllen"
+        ]
+      },
+      {
+        "name": "Wessum",
+        "ortsteile": [
+          "Wessum"
+        ]
+      },
+      {
+        "name": "Ottenstein",
+        "ortsteile": [
+          "Ottenstein"
+        ]
+      },
+      {
+        "name": "Alstätte",
+        "ortsteile": [
+          "Alstätte"
+        ]
+      },
+      {
+        "name": "Graes",
+        "ortsteile": [
+          "Graes"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Legden/Ahaus (A31)",
+        "Anschlussstelle Ahaus-Nord/Heek (A31)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "In Ahaus gibt es weder eine Autobahn noch eine Bundesstraße — wie wirkt sich das aus?",
+        "antwort": "Seit dem 1. Januar 2010 verlaufen die früheren Bundesstraßen 70 und 474 nicht mehr durch Ahaus; angebunden ist die Stadt über die Anschlussstellen Legden/Ahaus und Ahaus-Nord/Heek der A31. Der Verkehr verteilt sich dadurch auf Landesstraßen und die Ortsdurchfahrten von Wüllen, Wessum, Ottenstein und Alstätte — Tempo 50, parkende Fahrzeuge am Rand, Radfahrer und viele Einmündungen. Das Unfallbild verschiebt sich vom Hochgeschwindigkeitsschaden zum innerörtlichen Anstoß. Genau dort täuscht der erste Eindruck: Bei niedriger Geschwindigkeit federt die Stoßfängerverkleidung zurück und wirkt heil, während Prallkörper und Querträger dahinter gestaucht sind. Ohne Demontage bleibt das unentdeckt und zeigt sich erst, wenn die Werkstatt die Verkleidung abnimmt."
+      },
+      {
+        "frage": "Worauf kommt es bei Auffahrunfällen an den Bahnübergängen in Ahaus an?",
+        "antwort": "Die Bahnstrecke Dortmund–Gronau quert Ahaus und trennt Stadtteile voneinander; an den beschrankten Übergängen bildet sich zu den Zugzeiten regelmäßig Rückstau, in den aufgefahren wird. Häufig entsteht dabei eine Kette über drei Fahrzeuge, wobei die Anstöße kurz nacheinander erfolgen und die Beteiligten den Ablauf hinterher unterschiedlich schildern. Für das mittlere Fahrzeug bedeutet das Front- und Heckschaden zugleich — und genau diese Konstellation muss sauber getrennt werden, sonst vermischen sich beide Anstöße und später ist nicht mehr nachvollziehbar, welcher Schaden aus welchem Ereignis stammt. Hinzu kommt die Sensorik: Am Heck sitzen Parksensoren und häufig die Rückfahrkamera, an der Front Radar und Frontkamera. Nach einem beidseitigen Anstoß sind beide Seiten zu prüfen und zu kalibrieren."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Ahaus — in Wüllen, Wessum, Ottenstein, Graes und Alstätte. Auf Landesstraßen und Ortsdurchfahrten statt auf der Autobahn: Wir nehmen den Schaden dort auf, wo das Fahrzeug steht.",
+    "topografieAnker": "Ahaus liegt im westlichen Münsterland nahe der niederländischen Grenze. Eine Besonderheit: Seit 2010 führt keine Bundesstraße mehr durch das Stadtgebiet, und eine Autobahn gab es nie — angebunden ist die Stadt über die Anschlussstellen Legden/Ahaus und Ahaus-Nord/Heek der A31. Der Verkehr verteilt sich damit auf Landesstraßen und die Ortsdurchfahrten der sechs Ortschaften."
+  },
+  "duelmen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Dülmen-Mitte"
+        ]
+      },
+      {
+        "name": "Kirchspiel",
+        "ortsteile": [
+          "Kirchspiel"
+        ]
+      },
+      {
+        "name": "Buldern",
+        "ortsteile": [
+          "Buldern"
+        ]
+      },
+      {
+        "name": "Hausdülmen",
+        "ortsteile": [
+          "Hausdülmen"
+        ]
+      },
+      {
+        "name": "Hiddingsel",
+        "ortsteile": [
+          "Hiddingsel"
+        ]
+      },
+      {
+        "name": "Merfeld",
+        "ortsteile": [
+          "Merfeld"
+        ]
+      },
+      {
+        "name": "Rorup",
+        "ortsteile": [
+          "Rorup"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A43"
+      ],
+      "bundesstrassen": [
+        "B67",
+        "B474"
+      ],
+      "knoten": [
+        "Anschlussstelle Dülmen-Nord (A43)",
+        "B474n als Zubringer zur A43"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei Wildunfällen rund um den Merfelder Bruch in Dülmen zu beachten?",
+        "antwort": "Der Merfelder Bruch westlich von Dülmen ist ein rund 350 Hektar großes Schutzgebiet, in dem etwa 400 Wildpferde leben. Die Straßen ringsum — zwischen Merfeld, Hausdülmen und den Borkenbergen — führen durch Heide und Bruchwald mit starkem Wildbestand; Rot- und Damwild wechseln hier vor allem in der Dämmerung. Nach einer Kollision ist die Wildschadenbescheinigung von Polizei oder Jagdpächter die Grundlage für die Teilkasko. Bei größerem Wild liegt die Anstoßebene hoch: Getroffen werden nicht nur Frontschürze und Grill, sondern Motorhaube und Windschutzscheibe. Wird die Scheibe erneuert, muss die Frontkamera hinter dem Spiegelfuß neu kalibriert werden — ohne diesen Schritt arbeiten Spurhalte- und Notbremsassistent mit falschem Bezug."
+      },
+      {
+        "frage": "Warum passieren auf der A43 nördlich von Dülmen so oft Auffahrunfälle?",
+        "antwort": "Dülmen bekam seinen Autobahnanschluss erst 1981; seither führt die A43 den Verkehr zwischen Münster und dem Ruhrgebiet an der Stadt vorbei. Der Abschnitt zwischen Dülmen-Nord und Nottuln ist schnurgerade, eben und wird von keiner Brücke überspannt — er war früher als Behelfslandepiste angelegt. Für Fahrende heißt das: kaum optische Bezugspunkte, monotone Streckenführung und dadurch systematisch unterschätzte Differenzgeschwindigkeiten. Trifft das auf den Pendlerverkehr Richtung Münster und die Lkw-Ströme aus dem Ruhrgebiet, entstehen vor den Anschlussstellen Verzögerungswellen, die von hinten spät erkannt werden. Ein Heckanstoß im Kolonnenverkehr wirkt dann harmlos. Ob er es ist, entscheidet die Anstoßhöhe: Steht der Querträger hinter der Verkleidung unter Druck oder wurden Kräfte über eine Anhängerkupplung in den Rahmen geleitet, reicht der Austausch der Verkleidung nicht aus."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Dülmen — von der A43 bei Dülmen-Nord über die B67 bis zu den Heidestraßen am Merfelder Bruch. Auch in Buldern, Hiddingsel, Rorup und Hausdülmen nehmen wir den Schaden vor Ort auf.",
+    "topografieAnker": "Dülmen liegt zwischen Münster und dem nördlichen Ruhrgebiet, dort wo das Münsterland in die Hohe Mark übergeht. Prägend ist der Merfelder Bruch im Westen mit seinen Wildpferden und einer ausgedehnten Heide- und Bruchlandschaft. Die A43 bindet die Stadt seit 1981 an und verläuft nördlich auffällig gerade und eben; B67 und B474 verteilen den Verkehr auf die Ortsteile."
+  },
+  "ibbenbueren": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt"
+        ]
+      },
+      {
+        "name": "Laggenbeck",
+        "ortsteile": [
+          "Laggenbeck",
+          "Osterledde"
+        ]
+      },
+      {
+        "name": "Püsselbüren",
+        "ortsteile": [
+          "Püsselbüren"
+        ]
+      },
+      {
+        "name": "Bockraden",
+        "ortsteile": [
+          "Bockraden"
+        ]
+      },
+      {
+        "name": "Alstedde",
+        "ortsteile": [
+          "Alstedde",
+          "Schafberg"
+        ]
+      },
+      {
+        "name": "Dickenberg",
+        "ortsteile": [
+          "Dickenberg"
+        ]
+      },
+      {
+        "name": "Dörenthe",
+        "ortsteile": [
+          "Dörenthe"
+        ]
+      },
+      {
+        "name": "Lehen",
+        "ortsteile": [
+          "Lehen",
+          "Schierloh"
+        ]
+      },
+      {
+        "name": "Uffeln",
+        "ortsteile": [
+          "Uffeln"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B219"
+      ],
+      "knoten": [
+        "Anschlussstelle Ibbenbüren-West (A30)",
+        "Anschlussstelle Ibbenbüren (A30)",
+        "Anschlussstelle Laggenbeck (A30)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die A30 auf Ibbenbürener Stadtgebiet so stark belastet?",
+        "antwort": "Die A30 ist die durchgehende Ost-West-Achse zwischen den Niederlanden und dem Raum Hannover. Ibbenbüren hat mit Ibbenbüren-West, Ibbenbüren und Laggenbeck gleich drei Anschlussstellen und liegt kurz vor dem Kreuz Lotte/Osnabrück, wo die A1 aufgenommen wird. Vor dem Kreuz verdichtet sich der Verkehr: Lkw ordnen sich früh ein, Pendler wechseln spät. Streifschäden beim Fahrstreifenwechsel und Auffahrschäden im Rückstau sind die Folge. Hinzu kommt der regionale Schwerverkehr, der über die drei Anschlussstellen auffährt und auf dem rechten Fahrstreifen langsamer beschleunigt, als der nachfolgende Verkehr erwartet. Ein Streifschaden über die gesamte Flanke betrifft Bauteile aus unterschiedlichen Materialien — Stahltür, Kunststoffschweller, Aluminiumkotflügel —, die getrennt zu bewerten sind. Im Außenspiegel sitzen zudem Totwinkelsensor und Umfeldkamera; Ersatz und Anlernen gehören eigens erfasst."
+      },
+      {
+        "frage": "Was bedeutet das Bergbau-Erbe am Dickenberg für Schäden an Fahrzeugen?",
+        "antwort": "Der Steinkohlenbergbau prägte Ibbenbüren bis zur Schließung des Bergwerks 2018 und hat am Dickenberg und rund um den Schafberg Bergsenkungen hinterlassen. Straßen zeigen dort Wellen, Setzungsrisse und versetzte Fahrbahnübergänge; dazu kommt die Steigung hinauf zur Ibbenbürener Bergplatte. Bei Nässe und Frost werden diese Sprünge im Fahrbahnverlauf zum Auslöser für Kontrollverlust und Aufsetzer. Betroffen sind vor allem tiefergelegte Fahrzeuge und solche mit langem Radstand, die auf einer Bodenwelle mittig aufsitzen. Wiederholte harte Stöße verstellen die Achsgeometrie, ohne dass ein Bauteil sichtbar bricht: Spur und Sturz laufen aus der Toleranz, die Reifen laufen einseitig ab. Nach einem Aufsetzer gehören Unterboden, Achsträger und die Verschraubung der Hilfsrahmen auf die Hebebühne — eine Sichtprüfung von oben genügt hier nicht."
+      },
+      {
+        "frage": "Was macht die Strecken bei Dörenthe am Teutoburger Wald riskant?",
+        "antwort": "Bei Dörenthe im Süden von Ibbenbüren steigt der Teutoburger Wald zu den Dörenther Klippen an. Die Straßen dorthin sind kurvig, von Bäumen gesäumt und bei gutem Wetter stark von Motorrädern und Ausflugsverkehr befahren; in den Schattenlagen halten sich Laub, Splitt und Feuchtigkeit lange. Typisch sind Kollisionen zwischen Pkw und Krad beim Überholen sowie das Abkommen in Rechtskurven. Bei einer Pkw-Krad-Kollision ist die Berührungsfläche klein und die eingebrachte Energie hoch: Fußrasten, Lenkerenden und Zylinderdeckel hinterlassen tiefe, punktuelle Eindrücke, häufig mit Riss im Blech — ausbeulen scheidet aus. Am Kraftrad selbst entscheidet die Vermessung von Rahmen und Gabel darüber, ob der Schaden vollständig erfasst ist."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Ibbenbüren — an der A30 zwischen Ibbenbüren-West und Laggenbeck, am Dickenberg und an den Kurvenstrecken bei Dörenthe. Wir nehmen den Schaden dort auf, wo das Fahrzeug steht.",
+    "topografieAnker": "Ibbenbüren liegt am Nordwestrand des Teutoburger Waldes; nach Norden steigt die Ibbenbürener Bergplatte mit Schafberg und Dickenberg an, im Süden ziehen sich die Dörenther Klippen hin. Die A30 durchquert das Stadtgebiet mit drei Anschlussstellen kurz vor dem Kreuz Lotte/Osnabrück. Bergsenkungen aus der Zeit des Steinkohlenbergbaus, der 2018 endete, haben sichtbare Spuren im Straßenbild hinterlassen."
+  }
+}

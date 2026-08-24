@@ -1,0 +1,405 @@
+{
+  "ahlen": {
+    "stadtbezirke": [
+      {
+        "name": "Ahlen (Kernstadt)",
+        "ortsteile": [
+          "Innenstadt",
+          "Ester",
+          "Oestrich",
+          "Rosendahl",
+          "Borbein",
+          "Brockhausen",
+          "Halene"
+        ]
+      },
+      {
+        "name": "Dolberg",
+        "ortsteile": [
+          "Ostdolberg",
+          "Gemmerich",
+          "Guissen",
+          "Henneberg"
+        ]
+      },
+      {
+        "name": "Vorhelm",
+        "ortsteile": [
+          "Tönnishäuschen",
+          "Isendorf"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [],
+      "bundesstrassen": [
+        "B58"
+      ],
+      "knoten": [
+        "B58-Ost-West-Achse durch das Stadtgebiet"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum bündelt sich in Ahlen so viel Verkehr auf der B58?",
+        "antwort": "Ahlen hat keine eigene Autobahnanschlussstelle. Die A2 verläuft rund zehn Kilometer östlich und südöstlich, die A1 etwa zwanzig Kilometer westlich — der gesamte überörtliche Verkehr läuft deshalb über die B58, die das Stadtgebiet in Ost-West-Richtung durchzieht und bei Beckum die A2 erreicht. Auf einer solchen zweistreifigen Bündelungsstrecke mischen sich Fernverkehr, Werksverkehr der Ahlener Industrie und Anlieger, die in Feldzufahrten und Nebenstraßen abbiegen. Seit die Ortsumgehung Beckum den östlichen Anschluss beschleunigt hat, wird auf dem Ahlener Abschnitt eher schneller gefahren, nicht langsamer. Häufig sind Front- und Seitenkollisionen mit hoher Geschwindigkeitsdifferenz. Löst dabei ein Airbag aus, reicht die Betrachtung der Blechteile nicht: Gurtstraffer, Aufprallsensoren und das Steuergerät des Rückhaltesystems sind Einwegbauteile, die einzeln erfasst und geprüft werden müssen — sie machen oft den größeren Teil des Aufwands aus."
+      },
+      {
+        "frage": "Was unterscheidet Unfälle in Dolberg und Vorhelm von denen in der Ahlener Kernstadt?",
+        "antwort": "Dolberg und Vorhelm sind ländlich geprägt; zwischen Bauerschaften wie Ostdolberg, Isendorf und Tönnishäuschen verbinden schmale Wirtschafts- und Landstraßen die Höfe. In der Erntezeit teilen sich Pkw die Fahrbahn dort mit Schleppern und Anbaugeräten, die breiter sind als die eigene Spur — Ahlen ist mit Geringhoff selbst ein Standort für Erntetechnik. Dazu kommt Erde, die von Feldausfahrten auf den Asphalt getragen wird und bei Regen wie eine Schmierschicht wirkt. Im Begegnungsverkehr entstehen Streifschäden, die über die gesamte Fahrzeugflanke laufen, und abgerissene Außenspiegel. Zwei Dinge werden dabei regelmäßig unterschätzt: Moderne Spiegelgehäuse enthalten Kameras für Umfeldansicht und Totwinkelwarnung und sind damit Teil eines Assistenzsystems statt bloßes Anbauteil. Und ein Streifschaden über mehrere Bauteile zwingt zur Beilackierung angrenzender Flächen, damit der Farbton bei Metallic überhaupt zusammenpasst."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Ahlen: von der B58, die das Stadtgebiet in Ost-West-Richtung durchzieht, über die Werksstandorte der Kernstadt bis in die ländlichen Ortsteile Dolberg und Vorhelm — die nächste Autobahnauffahrt liegt an der A2 bei Beckum.",
+    "topografieAnker": "Ahlen liegt im südöstlichen Münsterland auf flachem, landwirtschaftlich geprägtem Gelände zwischen Hamm, Beckum und Sendenhorst. Eine Autobahn berührt das Stadtgebiet nicht: Die A2 verläuft rund zehn Kilometer östlich, die A1 etwa zwanzig Kilometer westlich. Damit trägt allein die B58 die überörtliche Ost-West-Verbindung — und mit ihr den Schwerverkehr, der dabei mitten durch bebautes Gebiet fährt."
+  },
+  "soest": {
+    "stadtbezirke": [
+      {
+        "name": "Kernstadt Soest",
+        "ortsteile": [
+          "Altstadt innerhalb der Wallanlagen"
+        ]
+      },
+      {
+        "name": "Ortsteile in der Soester Börde",
+        "ortsteile": [
+          "Ampen",
+          "Bergede",
+          "Deiringsen",
+          "Enkesen",
+          "Epsingsen",
+          "Hattrop",
+          "Hattropholsen",
+          "Hiddingsen",
+          "Katrop",
+          "Lendringsen",
+          "Meckingsen",
+          "Meiningsen",
+          "Müllingsen",
+          "Ostönnen",
+          "Paradiese",
+          "Röllingsen",
+          "Ruploh",
+          "Thöningsen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A44"
+      ],
+      "bundesstrassen": [
+        "B229",
+        "B475"
+      ],
+      "knoten": [
+        "Anschlussstelle Soest (A44/B229)",
+        "Anschlussstelle Soest-Ost (A44/B475)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum kommt es rund um Soest so oft zu Unfällen mit landwirtschaftlichen Fahrzeugen?",
+        "antwort": "Soest liegt mitten in der Soester Börde, einer der ertragreichsten Ackerlandschaften Westfalens. Zwischen Ortsteilen wie Ampen, Ostönnen, Meiningsen und Hattrop führen gerade, gut ausgebaute Landstraßen durch offenes Feld, auf denen von der Getreide- bis zur Rübenernte Gespanne mit Überlänge unterwegs sind. Sie fahren langsam, biegen unvermittelt in Feldwege ab und tragen Erde auf die Fahrbahn, die bei Regen zu einer rutschigen Schicht wird. Die gerade Streckenführung verleitet zusätzlich zum Überholen kurz vor einer Abbiegestelle. Entsprechend häufig sind Auffahr- und Ausweichunfälle in den Seitenraum. Wer dabei durch das Bankett fährt, holt sich Schäden an Radaufhängung, Felge und Lenkgeometrie, die man am stehenden Fahrzeug nicht sieht — dazu Aufsetzspuren am Unterboden, wenn die Bankettkante abgesackt ist. Beides zeigt sich erst auf der Hebebühne und bei der Achsvermessung."
+      },
+      {
+        "frage": "Was ist bei einem Unfall an den Anschlussstellen Soest und Soest-Ost zu beachten?",
+        "antwort": "Die A44 zieht südlich an Soest vorbei und bindet die Stadt mit zwei Anschlussstellen an: Soest an der B229, die im Soester Süden beginnt und ins Sauerland führt, und Soest-Ost an der B475 in Richtung Münsterland. Beide Bundesstraßen sind plangleich ans örtliche Netz geknüpft, mit Ampeln und Einmündungen kurz hinter der Abfahrt. Wer die Autobahn verlässt, trifft deshalb schnell auf stehenden Verkehr, und im Berufsverkehr reicht der Rückstau bis auf die Rampe zurück. Heckschäden sind hier der Regelfall. Sitzt am Fahrzeug eine Anhängerkupplung, leitet sie die Kraft konzentriert in den Längsträger ein: Der Stoßfänger sieht dann fast unbeschädigt aus, während der Träger dahinter gestaucht ist. Bei Fahrzeugen mit Reserveradmulde verformt sich zudem das Bodenblech nach oben, was man nur mit angehobenem Kofferraumboden erkennt."
+      },
+      {
+        "frage": "Warum sind Rangierschäden in der Soester Altstadt so typisch?",
+        "antwort": "Die Altstadt von Soest liegt vollständig innerhalb der erhaltenen Wallanlagen und hat ihren mittelalterlichen Grundriss behalten — enge Gassen, versetzte Häuserfluchten und über 600 denkmalgeschützte Gebäude, viele davon aus dem örtlichen Grünsandstein. Für Fahrzeuge bedeutet das knappe Kurvenradien, Mauervorsprünge dicht an der Fahrbahn und Stellplätze, die für heutige Fahrzeugbreiten nie gedacht waren. Dazu kommt Lieferverkehr, der in denselben Gassen hält und rangiert. Anstöße an Ecken und Kanten beim Ein- und Ausparken sind die Folge. Der weiche Grünsandstein hinterlässt dabei charakteristischen Materialabrieb im Lack, was die Zuordnung eines Schadens erleichtert. Betroffen sind meist Stoßfängerecken samt Parksensoren, deren Halterungen schon bei geringem Anstoß brechen. Weil viele Fahrzeuge in der Soester Innenstadt über Jahre dieselben Engstellen passieren, lohnt vorab eine Schichtdickenmessung, um alte von neuen Beschädigungen zu trennen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Soest — von den Anschlussstellen Soest und Soest-Ost an der A44 über die B229 ins Sauerland und die B475 ins Münsterland bis in die Börde-Ortsteile Ampen, Ostönnen und Hattrop.",
+    "topografieAnker": "Soest liegt in der Soester Börde, dem fruchtbaren Lössgürtel des Hellwegs zwischen Ruhrgebiet und Paderborn; nach Süden steigt das Gelände zum Haarstrang an, das Stadtgebiet überwindet dabei rund 146 Höhenmeter. Die A44 verläuft südlich an der Stadt vorbei, während die Altstadt hinter ihren Wallanlagen eng und verwinkelt geblieben ist — zwei Verkehrswelten auf wenigen Kilometern."
+  },
+  "rheda-wiedenbrueck": {
+    "stadtbezirke": [
+      {
+        "name": "Rheda-Wiedenbrück",
+        "ortsteile": [
+          "Rheda",
+          "Wiedenbrück",
+          "Batenhorst",
+          "Lintel",
+          "St. Vit"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B64"
+      ],
+      "knoten": [
+        "Anschlussstelle Rheda-Wiedenbrück (A2/B64)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Rolle spielt die A2 zwischen den Ortskernen von Rheda und Wiedenbrück?",
+        "antwort": "Die A2 quert das Stadtgebiet zwischen den beiden historischen Kernen — Rheda liegt nördlich, Wiedenbrück südlich der Trasse. Wer zwischen beiden unterwegs ist, nutzt damit dieselben Straßen, über die der Fernverkehr an der Anschlussstelle Rheda-Wiedenbrück auf die B64 abfließt. Ortsverkehr, Pendler und Schwerverkehr verflechten sich auf kurzer Strecke, dazu kommen die häufig wechselnden Baustellenführungen im Bereich der Anschlussstelle, die Fahrstreifen verschwenken und Vorfahrten verändern. Kollisionen mit Lastzügen wiegen hier besonders schwer, weil die Anstoßhöhe nicht zur Knautschzone eines Pkw passt: Der Aufprall trifft oberhalb der Stoßfängerebene auf Motorhaube, Windschutzscheibe und A-Säule — also auf tragende Struktur. Für diese Bereiche geben die Hersteller wegen hochfester Stähle enge Reparaturwege vor; welche Abschnitte getrennt und ersetzt werden dürfen, ist vorgeschrieben und nicht Ermessenssache."
+      },
+      {
+        "frage": "Warum prägt Schwerverkehr die Schadenbilder in Rheda?",
+        "antwort": "Rheda-Wiedenbrück ist Standort großer Fleischverarbeitung und Holzwerkstoffproduktion; entlang der B61 in Rheda liegen ausgedehnte Werksflächen mit eigenen Zufahrten. Kühlsattelzüge und Plattentransporter fahren im Schichtrhythmus an und rangieren genau dann, wenn auch Anwohner und Pendler unterwegs sind. Beim Ausschwenken eines Aufliegers entstehen Streifschäden, die sich über mehrere Türen ziehen. Solche Anstöße wirken flächig statt punktuell: Das Blech wird nicht eingedrückt, sondern verschoben, und der Verzug meldet sich zuerst an ungleichen Spaltmaßen und an Türen, die nicht mehr sauber schließen. Wer allein die zerkratzte Fläche betrachtet, übersieht den verzogenen Türrahmen dahinter. Hinzu kommt, dass in den hinteren Seitenteilen heute Radarsensoren für die Totwinkelüberwachung sitzen — schon eine verschobene Halterung verstellt deren Erfassungsbereich, ohne dass eine Warnleuchte angeht."
+      },
+      {
+        "frage": "Was ist bei Wildunfällen rund um Batenhorst, Lintel und St. Vit zu beachten?",
+        "antwort": "Die Ortsteile Batenhorst, Lintel und St. Vit liegen in der flachen Emssandebene, wo Feldflur, Waldstücke und die Emsaue dicht nebeneinander liegen. Auf den verbindenden Landstraßen gibt es in der Dämmerung regelmäßig Wildwechsel, im Herbst verschiebt er sich in die Zeit des Berufsverkehrs. Beim Anstoß auf Rehwild trifft es die Frontpartie: Stoßfänger, Kühlerpaket, Scheinwerfer und häufig die Sensorik dahinter. Drei Dinge zählen dann. Erstens die Spurenlage, denn Tierhaare und Anstoßspuren belegen den Hergang gegenüber der Kaskoversicherung. Zweitens der Kühlkreislauf: Ein feiner Riss in Kühler oder Kondensator bleibt zunächst unauffällig und meldet sich erst nach einigen Kilometern als Überhitzung. Und drittens der Fall, in dem ausgewichen wurde, ohne dass es zur Berührung kam — dann fehlt jede Anstoßspur, und der Hergang muss aus Endlage, Spurzeichnung und Schadenbild rekonstruiert werden."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Rheda-Wiedenbrück — an der Anschlussstelle Rheda-Wiedenbrück, wo die B64 auf die A2 trifft, entlang der Werksflächen an der B61 und in den Ortsteilen Batenhorst, Lintel und St. Vit.",
+    "topografieAnker": "Rheda-Wiedenbrück liegt in der flachen Emssandebene des Westfälischen Beckens; die Ems durchfließt die Stadt, das Gelände bewegt sich nur zwischen 66 und 105 Metern. Prägend ist die A2, die zwischen den beiden historischen Ortskernen verläuft und dort mit B61 und B64 zwei Bundesstraßen bündelt — Fern- und Werksverkehr treffen auf einen mittelalterlichen Straßengrundriss."
+  },
+  "bad-salzuflen": {
+    "stadtbezirke": [
+      {
+        "name": "Zusammenhängende Kernstadt",
+        "ortsteile": [
+          "Bad Salzuflen",
+          "Schötmar",
+          "Werl-Aspe",
+          "Holzhausen",
+          "Ehrsen-Breden"
+        ]
+      },
+      {
+        "name": "Ländliche Ortsteile",
+        "ortsteile": [
+          "Biemsen-Ahmsen",
+          "Grastrup-Hölsen",
+          "Lockhausen",
+          "Papenhausen",
+          "Retzen",
+          "Wülfer-Bexten",
+          "Wüsten"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [
+        "B239"
+      ],
+      "knoten": [
+        "Anschlussstelle Ostwestfalen-Lippe (A2)",
+        "Anschlussstelle Herford/Bad Salzuflen (A2)",
+        "B239-Ostumgehung der Innenstadt"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum staut sich der Verkehr auf der B239 in Bad Salzuflen so regelmäßig?",
+        "antwort": "Die B239 führt als Umgehung östlich um die Innenstadt von Bad Salzuflen und verbindet sie mit Herford im Westen und Lage im Osten; die A2 erreicht man über die Anschlussstellen Ostwestfalen-Lippe und Herford/Bad Salzuflen. Die Straße ist leistungsfähig ausgebaut, aber über weite Strecken plangleich ans örtliche Netz geknüpft — zahlreiche Kreuzungen und Einmündungen untergeordneter Straßen liegen direkt an der Trasse. In den Morgen- und Nachmittagsspitzen entstehen dadurch wandernde Stauenden, an denen aufgefahren wird. Meist geschieht das mit geringer Differenzgeschwindigkeit, sodass keine Rückhaltesysteme auslösen und der Schaden harmlos wirkt. Der Blick gehört trotzdem auf Schlossträger und Heckklappenführung: Verzieht sich der Träger, schließt die Klappe schief, die Dichtung liegt nicht mehr an, und eine im Griffbereich verbaute Rückfahrkamera verliert ihre Ausrichtung."
+      },
+      {
+        "frage": "Wie wirkt sich der Kurbetrieb auf das Unfallgeschehen in Bad Salzuflen aus?",
+        "antwort": "Bad Salzuflen ist Heilbad, und das prägt den Verkehr in der Kernstadt zwischen Kurpark, Schötmar und den Kliniken. Rund um die Gradierwerke an der Parkstraße und den 120 Hektar großen Kurpark entlang der Salze sind viele Fahrzeuge ortsfremd unterwegs: Kurgäste, Besucher und Reisebusse suchen Parkplätze, halten unvermittelt an oder setzen zurück, während Ortskundige zügig weiterwollen. Das Ergebnis sind zahlreiche Kollisionen bei niedriger Geschwindigkeit, deren Schadenhöhe regelmäßig unterschätzt wird. Hinter der scheinbar nur zerkratzten Kunststoffverkleidung sitzt ein Querträger, der über Deformationselemente mit dem Längsträger verbunden ist, und diese Elemente stauchen sich bereits bei geringer Krafteinwirkung. Ob sie getauscht werden müssen, entscheidet nicht das Lackbild, sondern erst der Befund nach Demontage der Verkleidung — von außen ist der Zustand nicht zu beurteilen."
+      },
+      {
+        "frage": "Was macht die Straßen in den Ortsteilen Wüsten und Papenhausen anspruchsvoll?",
+        "antwort": "Nordöstlich der zusammenhängenden Kernstadt steigt das Gelände von Bad Salzuflen ins bewaldete Lipper Bergland an — zwischen dem tiefsten und dem höchsten Punkt des Stadtgebiets liegen rund 200 Höhenmeter. Die Straßen nach Wüsten und Papenhausen führen entsprechend über Kuppen, durch Gefällestrecken und an Waldrändern entlang, wo die Fahrbahn im Herbst lange feucht bleibt, Laub liegt und die Sonne den Belag den ganzen Tag nicht erreicht. Kommt ein Fahrzeug dort von der Fahrbahn ab und schlägt seitlich gegen Schutzplanke oder Böschung, verzieht sich häufig der Schweller, weil er die Kraft über die gesamte Fahrzeuglänge aufnimmt. Ob die Karosserie danach noch im Sollmaß liegt, klärt allein eine Vermessung am Richtsatz; das Türspaltbild ist dafür nur ein erster Hinweis."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bad Salzuflen — von der B239-Ostumgehung und den A2-Anschlussstellen Ostwestfalen-Lippe und Herford/Bad Salzuflen über die Kernstadt mit Schötmar und Werl-Aspe bis in die Bergortsteile Wüsten und Papenhausen.",
+    "topografieAnker": "Bad Salzuflen liegt am Ostrand der Ravensberger Mulde, dort wo Salze und Bega auf die Werre treffen; nach Nordosten steigt das bewaldete Lipper Bergland bis auf 266 Meter an. Bad Salzuflen, Schötmar, Werl-Aspe, Holzhausen und Ehrsen-Breden sind zu einer durchgehenden Siedlungsfläche zusammengewachsen, die der Durchgangsverkehr über die B239 östlich umfährt — im Kurbereich selbst bleibt Ziel- und Parksuchverkehr."
+  },
+  "bad-oeynhausen": {
+    "stadtbezirke": [
+      {
+        "name": "Bad Oeynhausen",
+        "ortsteile": [
+          "Stadtzentrum",
+          "Rehme",
+          "Werste",
+          "Eidinghausen",
+          "Volmerdingsen",
+          "Dehme",
+          "Lohe",
+          "Wulferdingsen",
+          "Babbenhausen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A2",
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B61"
+      ],
+      "knoten": [
+        "Kreuz Bad Oeynhausen (A2/A30)",
+        "Anschlussstelle Bad Oeynhausen-Nord (A30)",
+        "Anschlussstelle Dehme (A30)",
+        "Anschlussstelle Bad Oeynhausen-Ost (A30)"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was hat sich für den Verkehr in Bad Oeynhausen durch die A30-Nordumgehung geändert?",
+        "antwort": "Bis Ende 2018 endete die A30 westlich vor der Stadt und übergab den Fernverkehr an die B61 — den Straßenzug Kanalstraße/Mindener Straße mitten durch den Kurort. Nach Angaben des Landes Nordrhein-Westfalen fuhren dort bis zu 50.000 Fahrzeuge täglich, jedes vierte davon ein Lkw. Am 9. Dezember 2018 wurde die Nordumgehung freigegeben, nach jahrzehntelanger Planung und rund elf Jahren Bauzeit. Seither führt die Autobahn den Durchgangsverkehr nördlich um Bad Oeynhausen herum, und große Teile der alten Durchfahrt wurden zu Landesstraßen zurückgestuft. Verschwunden ist der Verkehr damit nicht: Ziel-, Quell- und Parksuchverkehr zu Innenstadt, Staatsbad und Kliniken laufen weiter über dieselbe Achse. Das Schadenbild hat sich verschoben — statt Auffahrunfällen im zähen Durchgangsverkehr dominieren heute Abbiege-, Einmündungs- und Rangierschäden mit Streifspuren über Tür und Kotflügel."
+      },
+      {
+        "frage": "Warum ist das Kreuz Bad Oeynhausen für Auffahrschäden anfällig?",
+        "antwort": "Am Kreuz Bad Oeynhausen, seit 1979 in Betrieb, trifft die A30 aus Richtung Osnabrück auf die A2 zwischen Dortmund und Hannover — zwei stark mit Güterverkehr belastete Fernstraßen, über die auch der Verkehr aus den Niederlanden läuft. In den Verbindungsrampen und Verflechtungsbereichen fällt der Fahrstreifenwechsel mit abbremsendem Verkehr zusammen, und das Stauende wandert je nach Tageszeit über mehrere Kilometer. Auffahrschäden an der Fahrzeugfront sind die Folge. Weil dort heute Radarsensor und Frontkamera sitzen, ist es mit dem Erneuern von Stoßfänger und Kühlergrill nicht getan: Die Systeme müssen anschließend auf einer Kalibriervorrichtung neu eingemessen werden. Ob die Sollwerte überhaupt erreicht werden, hängt davon ab, dass der Querträger dahinter wieder exakt im Maß sitzt — sonst lässt sich die Bezugsachse gar nicht einstellen."
+      },
+      {
+        "frage": "Was ist an der B61 zwischen Dehme und Rehme zu beachten?",
+        "antwort": "Die B61 verläuft zweispurig durch den Ortsteil Dehme und wird ab Rehme vierspurig in Richtung Löhne. Genau dieser Querschnittswechsel ist die kritische Stelle: Beim Zusammenführen der Fahrstreifen entstehen Streifkollisionen aus dem toten Winkel, die Kotflügel, Radhaus und Türblech in einem Zug erwischen. Dazu kommt die Lage in der Niederung von Werre und Weser, wo sich Bodennebel länger hält und die Fahrbahn im Winter später abtrocknet als auf den Höhen des Wiehengebirges. Bei einem Streifschaden über mehrere Bauteile entscheidet die Beurteilung zwischen Instandsetzung und Ersatz. Für Außenhaut aus Aluminium gelten dabei engere Grenzen als für Stahlblech, und wo Bauteile geklebt und genietet statt geschweißt sind, gibt der Hersteller Verfahren und Ausrüstung vor — beides gehört in die Kalkulation, nicht ins Augenmaß."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bad Oeynhausen — vom Kreuz Bad Oeynhausen, wo A2 und A30 zusammentreffen, über die Anschlussstellen der Nordumgehung bis zur alten B61-Achse zwischen Kurpark, Kliniken und den Ortsteilen Rehme und Dehme.",
+    "topografieAnker": "Bad Oeynhausen liegt zwischen dem Wiehengebirge im Norden und dem Lipper Bergland im Süden; die Werre durchquert die Stadt von West nach Ost und mündet am östlichen Stadtrand in die Weser, der tiefste Punkt liegt bei 45 Metern. Auf diesem schmalen Talraum bündeln sich zwei Autobahnen, die B61 und der Zielverkehr eines Heilbades mit überregionalem Klinikbetrieb."
+  },
+  "loehne": {
+    "stadtbezirke": [
+      {
+        "name": "Löhne",
+        "ortsteile": [
+          "Löhne-Ort",
+          "Gohfeld",
+          "Mennighüffen",
+          "Obernbeck",
+          "Ulenburg"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [
+        "B61",
+        "B611"
+      ],
+      "knoten": [
+        "Anschlussstelle Löhne (A30)",
+        "Anschlussstelle Gohfeld (A30, früheres Dreieck Löhne)",
+        "Beginn der B611 Richtung Vlotho-West"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Anschlussstelle Gohfeld für Löhne ein besonderer Punkt?",
+        "antwort": "Die A30 durchquert Löhne in West-Ost-Richtung, drei Anschlussstellen erschließen das Stadtgebiet. Die Anschlussstelle Gohfeld war früher das Autobahndreieck Löhne; hier beginnt die B611, die weiter zur Anschlussstelle Vlotho-West der A2 führt. Fahrzeuge wechseln an dieser Stelle zwischen zwei Autobahnen und einer Bundesstraße, mit entsprechend vielen Spurwechseln auf kurzer Distanz und Rampenradien, die noch aus der alten Dreiecksgeometrie stammen. Wer in der Kurve zu weit nach außen läuft, trifft mit dem Rad die Bordsteinkante — ein Anstoß, der Felge, Reifenflanke und Spurstange gleichzeitig belastet. Solche Schäden bleiben oft unbemerkt, bis das Fahrzeug im geraden Lauf zieht oder der Reifen einseitig abfährt. Kritisch ist dabei weniger die sichtbare Schramme an der Felge als die Karkasse des Reifens, die innen reißen kann, ohne dass außen etwas zu sehen ist."
+      },
+      {
+        "frage": "Was bedeutet die Küchenmöbelindustrie für Fahrzeugschäden in Löhne?",
+        "antwort": "Löhne nennt sich Weltstadt der Küchen; Hersteller wie Nolte, SieMatic und Bauformat prägen mit ihren Zulieferern die Gewerbeflächen in Mennighüffen, Obernbeck und Gohfeld. Entsprechend viele Transporter, Monteurfahrzeuge und Sattelzüge sind zwischen Werk, A30 und Baustelle unterwegs, und die Zufahrten sind für rückwärts rangierende Lastzüge oft knapp bemessen. Bei gewerblichen Kastenwagen reicht die Bewertung eines Schadens weiter als beim Pkw: Regalausbauten, Trennwände und Dachträger sind fest mit dem Aufbau verschraubt, und ein seitlicher Anstoß verzieht bei Kastenaufbauten eher den Rahmen als das Blech. Ob der Ausbau demontiert und anschließend wieder eingepasst werden muss, gehört deshalb ebenso in die Kalkulation wie eine Werbebeschriftung, die beim Lackieren zwangsläufig verloren geht und neu erstellt werden muss."
+      },
+      {
+        "frage": "Was ist bei Fahrzeugschäden durch Starkregen in der Werreniederung zu beachten?",
+        "antwort": "Die Werre durchfließt Löhne von West nach Ost und nimmt an der Grenze zu Kirchlengern die Else auf. In solchen Talniederungen sammelt sich Oberflächenwasser bei Starkregen rasch, und tiefliegende Straßen, Unterführungen oder Stellplätze in Gohfeld und Löhne-Ort können kurzzeitig unter Wasser stehen. Für Fahrzeuge sind das keine Blechschäden, sondern elektrische: Steuergeräte im Fußraum, Sitzbelegungsmatten und Steckverbinder ziehen Feuchtigkeit, und die Korrosion meldet sich erst Wochen später als sporadischer Fehler, der sich im Fehlerspeicher kaum eingrenzen lässt. Zwei Regeln helfen. Erstens: die Wasserstandslinie in Innen- und Motorraum dokumentieren, bevor gereinigt und getrocknet wird — danach lässt sich die Eintauchtiefe kaum noch belegen. Zweitens: nicht starten, solange Wasser im Ansaugtrakt stehen kann, weil ein Wasserschlag aus einem Nässeschaden einen Motorschaden macht."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Löhne — an den drei A30-Anschlussstellen der Stadt, an der B611 in Richtung Vlotho und in den Stadtteilen Gohfeld, Mennighüffen, Obernbeck, Ulenburg und Löhne-Ort.",
+    "topografieAnker": "Löhne liegt im Ravensberger Land nordöstlich von Bielefeld, dort wo die Else an der Grenze zu Kirchlengern in die Werre mündet. Die A30 durchquert das Stadtgebiet von West nach Ost und erschließt es mit drei Anschlussstellen; über die B611 am früheren Dreieck Löhne besteht zusätzlich eine Verbindung zur A2 bei Vlotho."
+  },
+  "buende": {
+    "stadtbezirke": [
+      {
+        "name": "Bünde",
+        "ortsteile": [
+          "Bünde-Mitte",
+          "Ennigloh",
+          "Spradow",
+          "Südlengern",
+          "Hunnebrock",
+          "Ahle",
+          "Bustedt",
+          "Dünne",
+          "Holsen",
+          "Hüffen",
+          "Muckum",
+          "Werfen"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A30"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Bünde (A30)",
+        "Anschlussstelle Hiddenhausen (A30)",
+        "L557 Richtung Bielefeld",
+        "L545 Richtung Herford"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum läuft der Verkehr in Bünde überwiegend über Landesstraßen?",
+        "antwort": "Durch Bünde führt keine Bundesstraße. Ans Fernstraßennetz hängt die Stadt über die Anschlussstellen Bünde und Hiddenhausen an der A30; die Verteilung in die Fläche übernehmen die L557 in Richtung Bielefeld und die L545 über Hiddenhausen nach Herford. Landesstraßen dieses Zuschnitts führen mitten durch gewachsene Ortslagen wie Ennigloh, Spradow und Südlengern — mit Tempowechseln, Grundstückszufahrten, Bushaltestellen und Radverkehr auf derselben Fahrbahn. Anders als eine Umgehung nehmen sie den Verkehr nicht aus dem Ort heraus, sie führen ihn hindurch. Das begünstigt Einmündungs- und Abbiegeunfälle mit seitlichem Anstoß. Trifft es den Bereich der B-Säule, gehört neben der Struktur der Seitenairbag auf den Prüfstand: Sein Sensor sitzt in der Tür, und mit ihm löst der Gurtstraffer der Anstoßseite aus — beides Einwegbauteile, die nach der Auslösung ersetzt werden müssen."
+      },
+      {
+        "frage": "Was macht die Strecken zwischen Bünde-Mitte und Dünne im Winter kritisch?",
+        "antwort": "Bünde liegt in der Ravensberger Mulde zwischen Teutoburger Wald und Wiehengebirge; die Else zieht von West nach Ost durch das Stadtgebiet, das von 59 bis 185 Meter reicht. Zwischen der feuchten Elseniederung und höher gelegenen Ortsteilen wie Dünne, Holsen und Muckum liegen kurze, aber deutliche Höhenunterschiede. In klaren Nächten kühlen Kuppen und Brücken schneller aus als die Niederung, sodass Reifglätte streckenweise auftritt statt flächig — genau darauf stellt sich niemand ein, der die ersten Kilometer problemlos gefahren ist. Wer dort ins Rutschen gerät, endet meist am Bordstein oder in der Böschung. Der Schaden sitzt dann an Felge, Reifenflanke und Radaufhängung. Ob Sturz und Spur danach noch stimmen, zeigt erst die Achsvermessung; ein verzogener Achsschenkel darf ohnehin nicht gerichtet, sondern muss ersetzt werden."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Bünde — von der A30-Anschlussstelle Bünde über die Landesstraßen nach Bielefeld und Herford bis in die Ortsteile Ennigloh, Spradow, Südlengern und Dünne. Eine Bundesstraße führt durch das Stadtgebiet nicht.",
+    "topografieAnker": "Bünde liegt in der Ravensberger Mulde zwischen Teutoburger Wald und Wiehengebirge, durchzogen von der Else in West-Ost-Richtung; das Gelände reicht von 59 bis 185 Metern. Eine Bundesstraße gibt es im Stadtgebiet nicht — diese Rolle übernehmen die A30 mit den Anschlussstellen Bünde und Hiddenhausen sowie die Landesstraßen L557 nach Bielefeld und L545 nach Herford."
+  },
+  "herten": {
+    "stadtbezirke": [
+      {
+        "name": "Herten",
+        "ortsteile": [
+          "Herten-Mitte",
+          "Herten-Südwest",
+          "Herten-Südost",
+          "Disteln",
+          "Langenbochum",
+          "Scherlebeck",
+          "Paschenberg",
+          "Bertlich",
+          "Westerholt"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "autobahnen": [
+        "A2"
+      ],
+      "bundesstrassen": [],
+      "knoten": [
+        "Anschlussstelle Herten (A2)",
+        "Anschlussstelle Recklinghausen/Herten (A43)",
+        "Münsterstraße als A2-Zubringer"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Wie ist Herten an das überörtliche Straßennetz angebunden?",
+        "antwort": "Durch Herten führt keine Bundesstraße. Die A2 durchquert den Süden des Stadtgebiets mit der Anschlussstelle Herten; die A43 ist über die Anschlussstelle Recklinghausen/Herten erreichbar, die A42 bei Herne-Wanne — beide liegen außerhalb der Stadtgrenze. Der überörtliche Verkehr sammelt sich deshalb auf städtischen Hauptachsen, allen voran der Münsterstraße als Zubringer zur A2, wo Anliegerverkehr und Lkw dieselbe Spur teilen und die Ampelfolge zu ständigem Anhalten zwingt. Kommt eine Sperrung an der Autobahnbrücke dazu, verlagert sich der Verkehr über Wohnstraßen, die dafür nie gedacht waren. Auffahrschäden bei mäßigem Tempo sind entsprechend häufig. Bei Elektro- und Hybridfahrzeugen verlangt schon ein solcher Anstoß eine dokumentierte Prüfung des Hochvoltspeichers im Unterboden; bis zur Freigabe gehört das Fahrzeug mit Sicherheitsabstand abgestellt, auch wenn die Karosserie unauffällig wirkt."
+      },
+      {
+        "frage": "Welche Rolle spielt das Bergbauerbe für Fahrzeugschäden in Herten?",
+        "antwort": "Herten war über Jahrzehnte einer der größten Bergbaustandorte Europas; die Zechen Schlägel und Eisen, Ewald und Westerholt förderten bis 2008. Geblieben sind die Halden — die Halde Hoheward erreicht 152,5 Meter und überragt jede gewachsene Erhebung im Stadtgebiet — und ein Untergrund, der sich weiter setzt. An der Oberfläche zeigt sich das als Fahrbahnwelle, Setzungsriss oder Kanaldeckel, der nicht mehr auf Höhe liegt. Wer mit Tempo über eine solche Kante fährt, schlägt die Federung durch. Betroffen sind Dämpfer, Federbeindome und Unterbodenverkleidung, bei tiefergelegten Fahrzeugen zusätzlich Ölwanne und Auspuffanlage. Die Tücke solcher Schäden liegt im Zeitverzug: Ein angerissener Dämpfer schlägt erst nach Wochen durch, und ein Haarriss in der Ölwanne fällt oft erst auf, wenn der Ölstand sichtbar gefallen ist."
+      },
+      {
+        "frage": "Warum ist der Parkdruck in Herten-Mitte und Westerholt so hoch?",
+        "antwort": "Herten war von 1983 bis 2022 die größte deutsche Stadt ohne eigenen Personenbahnhof; erst im Dezember 2022 ging wieder ein Bahnhof in Betrieb, der Haltepunkt Westerholt folgte im Dezember 2025. Über vier Jahrzehnte war praktisch jeder Weg ein Autoweg, und die Stellplatzsituation in Herten-Mitte und im historischen Ortskern von Westerholt trägt das bis heute: enge Straßen, Längsparkstände und viel Suchverkehr in Vierteln, deren Grundriss älter ist als das Automobil. Rangierschäden sind hier der Alltagsfall, und weil sie meist ohne Zeugen entstehen, kommt es auf die Rekonstruktion an. Anstoßhöhe, Kratzrichtung und Fremdlackantragungen entscheiden darüber, ob sich ein Hergang belegen lässt. Passt die Anstoßhöhe nicht zur Stoßfängerkante des benannten Fahrzeugs, trägt die Schilderung des Unfallgegners nicht — und das klärt sich nur am Fahrzeug selbst."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Herten — an der A2-Anschlussstelle Herten und dem Zubringer Münsterstraße, zwischen Halde Hoheward und dem alten Zechengelände Ewald, von Herten-Mitte über Disteln bis nach Westerholt und Bertlich.",
+    "topografieAnker": "Herten liegt im nördlichen Ruhrgebiet zwischen Recklinghausen, Gelsenkirchen und Marl. Die A2 trennt im Süden die Hertener Mark ab und verläuft nördlich der Emscher; eine Bundesstraße gibt es im Stadtgebiet nicht. Statt natürlicher Erhebungen prägen Bergehalden das Bild — die Halde Hoheward überragt mit 152,5 Metern die höchste gewachsene Kuppe bei Scherlebeck um mehr als vierzig Meter."
+  }
+}

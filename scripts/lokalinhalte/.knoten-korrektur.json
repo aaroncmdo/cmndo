@@ -1,0 +1,713 @@
+{
+  "aachen": {
+    "knoten_weg": [
+      "Kreuz Aachen-Nord"
+    ],
+    "knoten_um": {
+      "Dreieck Aachen-Europaplatz": "Anschlussstelle Aachen-Europaplatz"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Kreuz Aachen-Nord steht in keiner Knotenliste von A4 oder A44; einziger Autobahnknoten im Raum ist das Kreuz Aachen. Am Europaplatz beginnt die A544 an einem Kreisverkehr — eine Anschlussstelle, kein Dreieck."
+  },
+  "bielefeld": {
+    "knoten_weg": [
+      "Dreieck Bielefeld",
+      "Kreuz Bielefeld-Ost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A2/A33 ist ein Kleeblatt und heißt Kreuz Bielefeld — steht bereits in der Liste, deshalb Streichung statt Umbenennung. Kreuz Bielefeld-Ost kommt in keiner der beiden Anschlussstellenlisten vor."
+  },
+  "braunschweig": {
+    "knoten_weg": [],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A395"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die A395 wurde zum 1. Januar 2019 in A36 umbenannt (Nordharzautobahn). Ersatz wäre A36 — das ist eine Ergänzung und damit ein eigener Schritt, hier nur die Streichung."
+  },
+  "cottbus": {
+    "knoten_weg": [
+      "Dreieck Spreewald"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Dreieck Spreewald (A13/A15) liegt am nordwestlichen Anfang der A15, rund 30 km von Cottbus entfernt, und erschließt die Stadt nicht unmittelbar."
+  },
+  "dresden": {
+    "knoten_weg": [
+      "Kreuz Dresden-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Existiert nicht. Die A17 hat südlich des Dreiecks Dresden-West ausschließlich Anschlussstellen, kein Autobahnkreuz."
+  },
+  "erfurt": {
+    "knoten_weg": [
+      "Dreieck Erfurt-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Weder in der Knotenliste der A4 noch der A71 enthalten; die A71 führt im Raum Erfurt nur Anschlussstellen bis zum Kreuz Erfurt."
+  },
+  "frankfurt": {
+    "knoten_weg": [
+      "Autobahndreieck Frankfurt-Süd (A3/A5 Zubringer B44/Zeppelinheim-Bereich)",
+      "Offenbacher Kreuz (A3/A661)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [
+      "B3a"
+    ],
+    "begruendung": "Ein A3/A5-Dreieck Frankfurt-Süd ist nicht belegbar — der A3/A5-Knoten ist das bereits gelistete Frankfurter Kreuz. Das Offenbacher Kreuz liegt in Offenbach am Main. Die Bezeichnung B3a wurde nur zwischen 1995 und 2001 geführt. OFFEN gelassen: B44a (unbelegt) und die Doppelung Alleenring/Friedberger Landstraße (nur Formhinweis, kein Falschbefund)."
+  },
+  "halle": {
+    "knoten_weg": [
+      "Kreuz Halle",
+      "Schkeuditzer Kreuz"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Kreuz Halle gibt es nicht; der Knoten A14/A143 heißt Dreieck Halle-Nord. Bewusst NICHT umbenannt, weil dessen Nordabschnitt laut Urteil noch im Bau ist (nicht vor 2030) — eine Umbenennung würde einen Knoten eintragen, der noch nicht befahrbar ist. Das Schkeuditzer Kreuz liegt rund 20 km entfernt in Sachsen."
+  },
+  "koeln": {
+    "knoten_weg": [
+      "Autobahnkreuz Leverkusen-West (A1/A59)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A560 (Anschluss über Kreuz Bonn-Ost, Region)",
+      "A61 (im Umland)"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Kreuz Leverkusen-West liegt in Leverkusen. Die A560 verläuft bei Sankt Augustin/Hennef, die A61 nicht durch Kölner Stadtgebiet — beide Einträge weisen sich mit „Region\" und „im Umland\" selbst als auswärtig aus. OFFEN gelassen: die fast namensgleichen Einträge „Kölner Ring\" (Autobahnring) und „Kölner Ringe\" (Innenstadt) — verwirrend, aber beide sachlich vorhanden."
+  },
+  "lippstadt": {
+    "knoten_weg": [
+      "Anschlussstelle Erwitte/Anröchte",
+      "Anschlussstelle Geseke",
+      "Kreuz Werl"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Alle drei Knoten liegen in Nachbarorten; die A44 führt südlich an Lippstadt vorbei und hat keine Anschlussstelle mit dem Namen Lippstadt. Die Knotenliste wird dadurch leer — das ist laut Urteil der ehrliche Zustand."
+  },
+  "magdeburg": {
+    "knoten_weg": [
+      "Dreieck Magdeburg"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "In der Knotenliste der A14 nicht enthalten; für Magdeburg ist dort ausschließlich das Kreuz Magdeburg verzeichnet."
+  },
+  "muenster": {
+    "knoten_weg": [
+      "Dreieck Bocholt-Nord"
+    ],
+    "knoten_um": {
+      "Kreuz Münster-Nord": "Anschlussstelle Münster-Nord"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Münster-Nord ist eine Anschlussstelle der A1, kein Kreuz — der nächste echte Knoten ist das Kreuz Lotte/Osnabrück. Bocholt liegt rund 70 km westlich und hat mit Münster nichts zu tun."
+  },
+  "rheine": {
+    "knoten_weg": [
+      "Kreuz Rheine",
+      "Anschlussstelle Rheine-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Kreuz Rheine existiert nicht; die A30 hat dort nur Anschlussstellen. Rheine-Süd ist nicht belegbar — das Urteil vermutet, gemeint sei schlicht „Rheine\" (Nr. 8), sagt das aber ausdrücklich als Vermutung. Deshalb Streichung statt Umbenennung."
+  },
+  "stuttgart": {
+    "knoten_weg": [
+      "Vaihinger Kreuz / Anschluss A831–B14"
+    ],
+    "knoten_um": {
+      "Autobahnkreuz Stuttgart (A8/A81) bei Leonberg": "Autobahnkreuz Stuttgart (A8/A81)"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Autobahnkreuz Stuttgart liegt an der Stadtgrenze zu Sindelfingen, nicht bei Leonberg — dort liegt das Autobahndreieck Leonberg. Die Umbenennung entfernt nur den falschen Ortszusatz. „Vaihinger Kreuz\" ist der veraltete Name genau dieses Knotens und damit eine Dublette. OFFEN gelassen: Engelbergtunnel und Echterdinger Ei liegen außerhalb Stuttgarts, waren aber nur als Hinweis markiert; ebenso der Eintrag „A8/A81-Verbindung über das Autobahnkreuz Stuttgart\" in der Autobahnliste, der keine Autobahn ist."
+  },
+  "viersen": {
+    "knoten_weg": [
+      "Kreuz Viersen",
+      "Kreuz Mönchengladbach"
+    ],
+    "knoten_um": {
+      "Anschlussstelle Viersen-Süchteln": "Anschlussstelle Viersen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Kreuz Viersen gibt es weder an der A52 noch an der A61; das Kreuz Mönchengladbach liegt in Mönchengladbach. Der zusammengezogene Name Viersen-Süchteln existiert nicht — es sind zwei getrennte Anschlussstellen, Süchteln (A61 Nr. 6) und Viersen (Nr. 7); das Urteil benennt Viersen ausdrücklich als richtigen Ersatz. Die AS Süchteln wäre eine Ergänzung. OFFEN gelassen: ob die A52 Viersener Gebiet überhaupt berührt."
+  },
+  "bocholt": {
+    "knoten_weg": [
+      "Auffahrt A3 bei Hamminkeln"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die Anschlussstelle liegt in Hamminkeln. OFFEN gelassen: „Kreuzung B67/B473 Bocholt\" und „Anschluss B67 Bocholt-Ost\" sind konstruierte, nicht amtliche Namen — als unbelegt markiert, nicht widerlegt."
+  },
+  "bremen": {
+    "knoten_weg": [
+      "Dreieck Bremen-Nord"
+    ],
+    "knoten_um": {
+      "Kreuz Bremen": "Bremer Kreuz"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der A1/A27-Knoten heißt amtlich Bremer Kreuz. An der Stelle „Dreieck Bremen-Nord\" liegt lediglich ein Halbanschluss zur A270, also eine Anschlussstelle."
+  },
+  "darmstadt": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Kreuz Darmstadt": "Darmstädter Kreuz",
+      "Kreuz Darmstadt-Nord": "Darmstädter Nordkreuz"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Beide Knoten existieren, tragen aber andere amtliche Namen (A5/A67 Nr. 26 bzw. A5/A672, so benannt seit 2016). OFFEN gelassen: „Dreieck Darmstadt\" — als unbelegt markiert; der Knoten, an dem die A672 von der A67 abzweigt, heißt Griesheimer Dreieck, aber welcher der beiden gemeint war, ist nicht entscheidbar."
+  },
+  "erkelenz": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Anschlussstelle Erkelenz (A46)": "Anschlussstelle Erkelenz-Süd"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Amtlich sind Erkelenz-Süd (A46 Nr. 8, mit B57-Anschluss) und Erkelenz-Ost (Nr. 9). Da Erkelenz-Ost bereits als eigener Eintrag richtig gelistet ist, kann der erste Eintrag nur Erkelenz-Süd meinen. OFFEN gelassen: „Kreuzung B57/Tagebau-Zufahrt\" (kein amtlicher Name) und die A61-Nennung — beide nur unbelegt."
+  },
+  "grevenbroich": {
+    "knoten_weg": [
+      "Kreuz Jackerath",
+      "Dreieck Holz"
+    ],
+    "knoten_um": {
+      "Anschlussstelle Grevenbroich-Zentrum": "Anschlussstelle Grevenbroich"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Jackerath ist ein Dreieck und liegt in der Gemeinde Titz, Holz ist ein Kreuz und liegt in Jüchen — beide außerhalb, deshalb Streichung statt Umbenennung. Die A46-Ausfahrt heißt schlicht Grevenbroich (Nr. 13). OFFEN gelassen: die A540-Nennung (unbelegt)."
+  },
+  "hamburg": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Autobahndreieck Hamburg-Südwest (A7/A26)": "Autobahndreieck Hamburg-Südwest (A7/A261)"
+    },
+    "autobahnen_weg": [
+      "A252"
+    ],
+    "bundesstrassen_weg": [
+      "B462 (Anschluss)"
+    ],
+    "begruendung": "Das Dreieck existiert, verbindet aber A7 und A261; der A26-Knoten an der A7 heißt Kreuz Hamburg-Hafen. Die A252 wurde am 06.10.2019 zur B75 herabgestuft. Die B462 liegt vollständig in Baden-Württemberg. OFFEN gelassen: die A26-Nennung (in Hamburg noch nicht durchgehend, aber nicht widerlegt)."
+  },
+  "huerth": {
+    "knoten_weg": [
+      "Anschlussstelle Hürth-Knapsack (A1)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Dublette: Die AS Hürth hieß früher Knapsack — zwei Einträge für dieselbe Ausfahrt. Der aktuelle Name bleibt stehen."
+  },
+  "karlsruhe": {
+    "knoten_weg": [
+      "Kreuz Karlsruhe-Nord",
+      "Dreieck Karlsruhe-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Beide existieren nicht. Es gibt nur das Autobahndreieck Karlsruhe (A5 Nr. 46 / A8 Nr. 41), das bereits gelistet ist; eine Aufteilung in Nord- und Süd-Knoten gibt es nicht."
+  },
+  "minden": {
+    "knoten_weg": [
+      "Anschlussstelle Bad Oeynhausen",
+      "Kreuz Bad Oeynhausen",
+      "Anschlussstelle Porta Westfalica"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Alle drei liegen außerhalb Mindens (Bad Oeynhausen bzw. Porta Westfalica); die A2 berührt Mindener Stadtgebiet nicht und hat keine Ausfahrt Minden. Die Knotenliste wird dadurch leer, die Erschließung tragen die Bundesstraßen."
+  },
+  "osnabrueck": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Kreuz Osnabrück-Nord": "Anschlussstelle Osnabrück-Nord",
+      "Lotter Kreuz": "Kreuz Lotte/Osnabrück"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Kreuz Osnabrück-Nord gibt es nicht — die A33-Nordanbindung ist geplant, nicht gebaut; an der A1 liegt dort die Anschlussstelle Osnabrück-Nord (Nr. 70). Das Lotter Kreuz heißt amtlich Kreuz Lotte/Osnabrück; es liegt in Lotte, erschließt Osnabrück laut Urteil aber unmittelbar und darf deshalb bleiben."
+  },
+  "recklinghausen": {
+    "knoten_weg": [
+      "Dreieck Recklinghausen"
+    ],
+    "knoten_um": {
+      "Anschlussstelle Recklinghausen-Herten": "Anschlussstelle Recklinghausen/Herten"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "An der A43 gibt es nur einen Recklinghäuser Knoten, das Kreuz Recklinghausen (Nr. 12); ein zweiter als Dreieck geführter existiert nicht. Der Doppelanschluss wird amtlich mit Schrägstrich geführt."
+  },
+  "ahlen": {
+    "knoten_weg": [
+      "A2-Anschlussstelle Beckum (rund 10 km östlich)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die AS Beckum liegt auf Beckumer Stadtgebiet; der Eintrag nennt die Entfernung selbst. Ahlen hat keine Autobahnanbindung im Stadtgebiet, das leere Autobahnfeld ist richtig."
+  },
+  "bochum": {
+    "knoten_weg": [],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A44"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die A44 verläuft nicht durch Bochum; im Ruhrgebiet endet sie bei Essen-Heisingen. Das Kreuz Bochum/Witten klingt nach A44, verbindet aber A43 und A448."
+  },
+  "bremerhaven": {
+    "knoten_weg": [
+      "Dreieck Bremerhaven"
+    ],
+    "knoten_um": {
+      "Anschlussstelle Bremerhaven-Mitte": "Anschlussstelle Bremerhaven-Zentrum"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die A27 hat im Bremerhavener Abschnitt ausschließlich Anschlussstellen; ihr einziges Dreieck liegt am Südende bei Walsrode. Die Ausfahrt heißt Bremerhaven-Zentrum (Nr. 7), „Mitte\" ist kein aktueller Name."
+  },
+  "detmold": {
+    "knoten_weg": [
+      "Auffahrt A2 bei Bad Salzuflen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt rund 20 km entfernt auf fremdem Stadtgebiet. OFFEN gelassen: „Anschluss B239 Detmold-Süd\" — nicht auffindbar, aber nur als unbelegt markiert."
+  },
+  "dueren": {
+    "knoten_weg": [
+      "Kreuz Kerpen",
+      "Anschlussstelle Langerwehe"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Beide existieren, liegen aber in Kerpen bzw. in der Nachbargemeinde Langerwehe. Das Kreuz Kerpen steht bereits in Kerpens eigener Liste."
+  },
+  "hamm": {
+    "knoten_weg": [
+      "Kreuz Kamen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Doppelt falsch: Das Bauwerk heißt Kamener Kreuz und liegt in Kamen. Deshalb Streichung statt Umbenennung — nach dem Maßstab gehört es ohnehin nicht in Hamms Liste. Das Autobahndreieck Hamm wäre der richtige Knoten, ist aber eine Ergänzung."
+  },
+  "herford": {
+    "knoten_weg": [
+      "Anschlussstelle Herford-Zentrum",
+      "Kreuz Bad Oeynhausen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Herford-Zentrum existiert in keiner der beiden Anschlussstellenlisten. Nicht umbenannt auf „Herford/Bad Salzuflen\" (A2 Nr. 32), weil das eine andere Ausfahrt als das bereits gelistete Herford-Ost (Nr. 33) ist — das wäre eine Ergänzung, keine Korrektur. Das Kreuz Bad Oeynhausen liegt rund 15 km entfernt. OFFEN gelassen: die A30-Nennung (verläuft nördlich vorbei, aber nur als unbelegt markiert)."
+  },
+  "ibbenbueren": {
+    "knoten_weg": [
+      "Autobahnkreuz Lotte/Osnabrück (A30/A1)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt bei Lotte, zwei Anschlussstellen östlich — kein Ibbenbürener Knoten. Die drei übrigen Anschlussstellen stimmen samt Nummernfolge."
+  },
+  "mannheim": {
+    "knoten_weg": [
+      "Kreuz Viernheimer Dreieck",
+      "Dreieck Mannheim-Nord"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "„Kreuz Viernheimer Dreieck\" vermengt zwei reale Bauwerke — Viernheimer Dreieck (A6 Nr. 25) und Viernheimer Kreuz (Nr. 26) —, die beide in Hessen liegen; eine Umbenennung müsste sich für eines entscheiden und beide lägen außerhalb. Ein Dreieck Mannheim-Nord ist weder an der A6 noch an der A659 auffindbar."
+  },
+  "moenchengladbach": {
+    "knoten_weg": [
+      "Dreieck Holz"
+    ],
+    "knoten_um": {
+      "Kreuz Wanlo": "Autobahndreieck Mönchengladbach-Wanlo"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Holz ist ein Kreuz und liegt in Jüchen, rund 12 km südlich — außerhalb, deshalb Streichung. Wanlo dagegen ist Mönchengladbacher Stadtteil, nur die Gattung stimmt nicht: Es ist ein Dreieck (A46/A61)."
+  },
+  "neuss": {
+    "knoten_weg": [
+      "Kreuz Neuss-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Dublette mit falscher Gattung: Das Bauwerk im Süden ist das Dreieck Neuss-Süd, das in derselben Liste bereits steht. Das Urteil empfiehlt ausdrücklich ersatzloses Entfallen."
+  },
+  "paderborn": {
+    "knoten_weg": [
+      "Dreieck Paderborn"
+    ],
+    "knoten_um": {
+      "Kreuz Paderborn-Elsen": "Anschlussstelle Paderborn-Elsen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Dreieck Paderborn ist in der A33-Liste nicht auffindbar; der nächste echte Knoten liegt bei Bad Wünnenberg. Paderborn-Elsen ist eine Anschlussstelle (A33 Nr. 26), die Gattung war hochgestuft."
+  },
+  "regensburg": {
+    "knoten_weg": [
+      "Anschlussstelle Regensburg-Ost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "In drei unabhängigen Quellen nicht auffindbar; die A93 führt Nord, Pfaffenstein, West, Prüfening, Königswiesen, Kumpfmühl, Süd und Universität, aber kein „Ost\". An der A3 heißt der stadtnahe Anschluss Rosenhof."
+  },
+  "siegen": {
+    "knoten_weg": [
+      "Kreuz Olpe-Süd"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt im Raum Olpe/Wenden, rund 25 km nordwestlich und durch mehrere Anschlussstellen getrennt."
+  },
+  "trier": {
+    "knoten_weg": [
+      "Kreuz Trier",
+      "Dreieck Moseltal"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Ein Kreuz Trier existiert nicht — zwei unabhängige Quellen sagen das ausdrücklich; der Verkehr läuft über Verteilerkreis und Moseltal-Dreieck. Das Dreieck Moseltal wiederum liegt bei Longuich und Schweich im Landkreis, nicht auf Trierer Gebiet. OFFEN gelassen: „Anschlussstelle Trier-Verteilerkreis\" heißt richtig „Verteilerkreis Trier\" — das Urteil führt das als Namensungenauigkeit, nicht als Falschbefund, deshalb hier nicht umbenannt."
+  },
+  "wesel": {
+    "knoten_weg": [
+      "Anschlussstelle Hamminkeln (A3)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Existiert (A3 Nr. 5), liegt aber auf dem Gebiet der Nachbarstadt Hamminkeln."
+  },
+  "arnsberg": {
+    "knoten_weg": [
+      "Kreuz Werl",
+      "Anschlussstelle Arnsberg-Ost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Kreuz Werl liegt rund 15 km nördlich im Kreis Soest. Arnsberg-Ost ist nicht auffindbar; das Urteil vermutet Arnsberg-Altstadt, sagt das aber als Vermutung — deshalb Streichung statt Umbenennung. OFFEN gelassen: Die AS Arnsberg-Neheim heißt amtlich nur „Neheim\", war aber als OK geführt."
+  },
+  "bergkamen": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Anschlussstelle Bergkamen (A2)": "Anschlussstelle Kamen/Bergkamen"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die Anschlussstelle heißt amtlich Kamen/Bergkamen und wird von beiden Städten geteilt; sie liegt im Süden Bergkamens und bleibt damit in der Liste."
+  },
+  "bornheim": {
+    "knoten_weg": [
+      "Anschlussstelle Sechtem"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A565"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Eine AS Sechtem gibt es an der A555 nicht; der Gewerbepark Bornheim-Sechtem wird über die Ausfahrt Wesseling erschlossen. Die A565 verläuft in Bonn und trifft die A555 erst am Kreuz Bonn-Nord auf Bonner Gebiet. OFFEN gelassen: „Kreuzung B9/Ortsdurchfahrt Hersel\" ist kein Autobahnknoten, inhaltlich aber plausibel."
+  },
+  "castrop-rauxel": {
+    "knoten_weg": [
+      "Kreuz Recklinghausen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt auf Recklinghäuser Stadtgebiet und erschließt Castrop-Rauxel nicht unmittelbar. OFFEN gelassen: „Anschlussstelle Castrop-Rauxel-Zentrum\" (unbelegt) sowie das Kreuz Castrop-Rauxel-Ost, das formal auf Dortmunder Gebiet liegt, aber direkt an der Stadtgrenze und laut Urteil zulässig ist."
+  },
+  "dorsten": {
+    "knoten_weg": [
+      "Kreuz Gelsenkirchen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt rund 25 km südlich in Gelsenkirchen. OFFEN gelassen: die Anschlussstellen Dorsten und Dorsten-Lembeck — plausibel, aber nicht einzeln verifiziert."
+  },
+  "ennepetal": {
+    "knoten_weg": [],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [
+      "B7"
+    ],
+    "begruendung": "Die B7 wurde im Ennepetaler Stadtgebiet zum 1. Januar 2015 zur Landesstraße herabgestuft und ist dort keine Bundesstraße mehr. Damit bleibt das Bundesstraßenfeld leer; die B483 wäre eine Ergänzung."
+  },
+  "essen": {
+    "knoten_weg": [
+      "Kreuz Essen-Ost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Dublette mit falscher Gattung: Die Verknüpfung von A40 und A52 östlich der Innenstadt ist das Dreieck Essen-Ost, das bereits in der Liste steht. Erst der geplante A52-Weiterbau würde es zum Kreuz aufwerten."
+  },
+  "haan": {
+    "knoten_weg": [
+      "Autobahnkreuz Hilden (A3/A46)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt innerhalb der Stadtgrenzen von Hilden. OFFEN gelassen: die A3-Nennung — dass sie Haaner Gebiet berührt, ließ sich nicht bestätigen, ist aber auch nicht widerlegt."
+  },
+  "heidelberg": {
+    "knoten_weg": [
+      "Dreieck Heidelberg"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Dublette mit falscher Gattung: Die Verknüpfung von A5 und A656 ist das Kreuz Heidelberg, das bereits in der Liste steht. OFFEN gelassen: Die Anschlussstelle heißt amtlich „Heidelberg/Schwetzingen\" mit Schrägstrich statt Bindestrich — das Urteil führt sie unter OK."
+  },
+  "kleve": {
+    "knoten_weg": [
+      "Anschlussstelle Goch (A57)",
+      "Anschlussstelle Emmerich (A3)"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Beide liegen in Nachbarstädten und binden Kleve nur mittelbar an. Die leere Autobahnliste ist richtig — Kleve hat keine Autobahn im Stadtgebiet. OFFEN gelassen: „B9 Richtung Nimwegen über Kranenburg\" ist eine Streckenbeschreibung, kein Knoten, aber kein Falschbefund."
+  },
+  "leipzig": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Kreuz Leipzig-Nord": "Anschlussstelle Leipzig-Nord"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "An der A14 liegt dort die Anschlussstelle Leipzig-Nord, kein Autobahnkreuz — reiner Gattungsfehler. OFFEN gelassen: Schkeuditzer Kreuz und Kreuz Leipzig-Süd liegen außerhalb der Stadtgrenze, erschließen Leipzig laut Urteil aber unmittelbar und gelten als vertretbare Grenzfälle."
+  },
+  "luedenscheid": {
+    "knoten_weg": [
+      "Kreuz Hagen"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt in Hagen, rund 25 km nördlich. OFFEN gelassen: die Anschlussstellen Lüdenscheid und Lüdenscheid-Nord — plausibel, aber nicht einzeln verifiziert."
+  },
+  "muelheim-an-der-ruhr": {
+    "knoten_weg": [
+      "Kreuz Kaiserberg"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Kreuz Kaiserberg (A3/A40) liegt auf Duisburger Stadtgebiet — es ist der Duisburger Knoten, auch wenn der anschließende A40-Abschnitt überwiegend über Mülheimer Gebiet führt."
+  },
+  "oberhausen": {
+    "knoten_weg": [
+      "Dreieck Bottrop"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt auf dem Stadtgebiet von Bottrop, rund 10 km nordöstlich."
+  },
+  "willich": {
+    "knoten_weg": [],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A57"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die A57 verläuft nahe der östlichen Stadtgrenze, aber nicht durch Willicher Gebiet. OFFEN gelassen: die drei Anschlussstellen Neersen, Münchheide und Schiefbahn — plausibel, aber nicht einzeln verifiziert."
+  },
+  "augsburg": {
+    "knoten_weg": [
+      "Dreieck Augsburg-West"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A8 × B2/B17 ist das kleeblattförmige Kreuz Augsburg-West, das bereits in der Liste steht — ein Dreieck gleichen Namens gibt es nicht. OFFEN gelassen: Das Kreuz liegt im Gemeindegebiet Gersthofen, erschließt Augsburg über die B17 aber unmittelbar; ebenso die B300 (unbelegt)."
+  },
+  "berlin": {
+    "knoten_weg": [
+      "Dreieck Oberlandstraße"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [
+      "A 10 (Berliner Ring, im Umland)",
+      "A 12",
+      "A 13",
+      "A 24",
+      "A 9 (über Berliner Ring erreichbar)"
+    ],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die Oberlandstraße ist eine gewöhnliche Anschlussstelle der A100, kein Dreieck. Die fünf gestrichenen Autobahnen liegen sämtlich außerhalb des Stadtgebiets und beginnen an Knoten des Berliner Rings in Brandenburg — zwei Einträge weisen sich selbst als auswärtig aus. OFFEN gelassen: „Spandauer Damm / Klosterstraße\" (unbelegt) und die städtischen Platz-Einträge, die keine Autobahnknoten sind, aber im Stadtgebiet liegen."
+  },
+  "bottrop": {
+    "knoten_weg": [
+      "Kreuz Bottrop"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A2 × A31 ist das Dreieck Bottrop (A2 Nr. 3), das in derselben Liste bereits korrekt steht."
+  },
+  "chemnitz": {
+    "knoten_weg": [
+      "Dreieck Chemnitz"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A4 × A72 ist das Kreuz Chemnitz, das bereits in der Liste steht. Als Dreieck wurde er 1939 angelegt — der Doppeleintrag bildet einen Zustand von vor über 80 Jahren ab."
+  },
+  "dortmund": {
+    "knoten_weg": [
+      "Kreuz Dortmund/Witten"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A45 × A44 ist das Dreieck Dortmund/Witten (A45 Nr. 7), das zwei Zeilen weiter in derselben Liste korrekt steht."
+  },
+  "gladbeck": {
+    "knoten_weg": [
+      "Dreieck Bottrop"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt auf Bottroper Stadtgebiet — derselbe Fall wie Kreuz Hilden bei Solingen."
+  },
+  "hilden": {
+    "knoten_weg": [
+      "Anschlussstelle Haan-Ost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Liegt in Haan (A46) — eine Anschlussstelle der Nachbarstadt, auch wenn Hildener sie nutzen."
+  },
+  "koblenz": {
+    "knoten_weg": [
+      "Anschlussstelle Koblenz-Zentrum"
+    ],
+    "knoten_um": {
+      "Dreieck Koblenz-Nord": "Anschlussstelle Koblenz-Nord"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "An der A48 liegt dort die Anschlussstelle Koblenz-Nord (Nr. 10, Übergang auf die B9), kein Dreieck — das Urteil benennt sie ausdrücklich als Ersatz. Eine AS Koblenz-Zentrum kommt in der vollständigen A48-Liste nicht vor."
+  },
+  "leverkusen": {
+    "knoten_weg": [
+      "Dreieck Langenfeld"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Existiert (A3 Nr. 21, Verbindung zur A542), liegt aber in Langenfeld."
+  },
+  "luenen": {
+    "knoten_weg": [
+      "Anschlussstelle Lünen-Nord",
+      "Kreuz Dortmund-Nordost"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Die A2 verläuft südlich an Lünen vorbei und hat dort nur die AS Lünen-Süd; eine Lünen-Nord ergäbe geografisch keinen Sinn. Dortmund-Nordost liegt auf Dortmunder Gebiet und ist zudem eine Anschlussstelle, kein Kreuz — wegen der Ortslage Streichung statt Umbenennung."
+  },
+  "muenchen": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Autobahndreieck München-Allach (A99/B471)": "Autobahndreieck München-Allach (A99/A99a)"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Das Dreieck verbindet die A99 mit der A99a, dem Zubringer zur A8, nicht mit der B471. OFFEN gelassen: Der Eintrag „B11 (Ingolstädter Straße, Deggendorfer Straße)\" ist falsch zugeordnet — die Ingolstädter Straße gehört zur B13 —, aber die B11 selbst führt durch München; für Bundesstraßen sieht das Format keine Umbenennung vor, und Löschen würde eine richtige Angabe entfernen. Ebenfalls offen: Schleißheimer Straße (steht bei B2 und B13) und die ungeprüfte Tunnelliste."
+  },
+  "offenbach": {
+    "knoten_weg": [
+      "Dreieck Offenbach"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A661 × A3 ist das Offenbacher Kreuz (A661 Nr. 17); ein Dreieck dieses Namens gibt es nicht. OFFEN gelassen: Der Eintrag „Kreuz Offenbach\" meint dieselbe Stelle und müsste amtlich „Offenbacher Kreuz\" heißen — das Urteil führt das als Hinweis, nicht als Falschbefund."
+  },
+  "schwerin": {
+    "knoten_weg": [
+      "Dreieck Schwerin"
+    ],
+    "knoten_um": {},
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A14 × A24 ist das Kreuz Schwerin (A14 Nr. 7). OFFEN gelassen: Die AS Schwerin-Ost wurde später in Schwerin-Mitte umbenannt — welcher Name heute an der Beschilderung steht, war nur als Hinweis markiert und sollte vor Ort geprüft werden."
+  },
+  "velbert": {
+    "knoten_weg": [
+      "Anschlussstelle Heiligenhaus"
+    ],
+    "knoten_um": {
+      "Kreuz Velbert-Nord": "Dreieck Velbert-Nord",
+      "Anschlussstelle Velbert-Zentrum": "Anschlussstelle Velbert"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Der Knoten A44 × A535 ist das Dreieck Velbert-Nord (A44 Nr. 37); die A535 führt die Anschlussstelle Velbert ohne Zusatz. Beide Namen stehen im Urteil, deshalb Umbenennung statt Streichung. Die AS Heiligenhaus liegt in Heiligenhaus, einer eigenen Stadt."
+  },
+  "witten": {
+    "knoten_weg": [],
+    "knoten_um": {
+      "Kreuz Witten": "Kreuz Bochum/Witten",
+      "Kreuz Dortmund/Witten": "Dreieck Dortmund/Witten"
+    },
+    "autobahnen_weg": [],
+    "bundesstrassen_weg": [],
+    "begruendung": "Beide Fehler betreffen nur die Gattung beziehungsweise den Doppelnamen: Der Knoten A43 × A44 heißt Kreuz Bochum/Witten (A43 Nr. 19), der A45-Knoten ist ein Dreieck (Nr. 7). Anders als bei Dortmund entsteht hier keine Dublette, deshalb Umbenennung."
+  }
+}

@@ -6,6 +6,7 @@
 // { success, error } zurück, nie als throw.
 
 import { z } from 'zod'
+import { istUnbekannterPasswortFehler, uebersetzePasswortFehler } from '@/lib/auth/passwort-fehler'
 import { createClient } from '@/lib/supabase/server'
 import { getCurrentMakler } from '@/lib/makler/queries'
 import { istErlaubteRechtsform } from '@/lib/rechtsformen'
@@ -176,7 +177,13 @@ export async function changeMaklerPasswort(
   const { error } = await supabase.auth.updateUser({
     password: parsed.data.next,
   })
-  if (error) return { success: false, error: error.message }
+  if (error) {
+    // Supabase antwortet englisch (u.a. eigener HIBP-Check) — nie roh anzeigen.
+    if (istUnbekannterPasswortFehler(error.message)) {
+      console.error('[makler-settings] unbekannter Supabase-Fehler:', error.message)
+    }
+    return { success: false, error: uebersetzePasswortFehler(error.message) }
+  }
   return { success: true }
 }
 

@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.1 (Doc 26) — Konversions-Hub „Kosten Kfz-Gutachten". Fängt die
 // Kosten-Variant-Keywords (was kostet kfz gutachter / bvsk honorartabelle / wer
@@ -38,11 +38,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/kosten-kfz-gutachten'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/kosten-kfz-gutachten`,
+      ...(await localeOpenGraph(`/kosten-kfz-gutachten`)),
       title: t('kosten_kfz_gutachten.og_title'),
       description: t('kosten_kfz_gutachten.og_description'),
     },

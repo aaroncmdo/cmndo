@@ -1,0 +1,854 @@
+{
+  "duesseldorf": {
+    "stadtbezirke": [
+      {
+        "name": "Stadtbezirk 1",
+        "ortsteile": [
+          "Altstadt",
+          "Carlstadt",
+          "Stadtmitte",
+          "Pempelfort",
+          "Derendorf",
+          "Golzheim"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 2",
+        "ortsteile": [
+          "Flingern Süd",
+          "Flingern Nord",
+          "Düsseltal"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 3",
+        "ortsteile": [
+          "Friedrichstadt",
+          "Unterbilk",
+          "Hafen",
+          "Hamm",
+          "Volmerswerth",
+          "Bilk",
+          "Oberbilk",
+          "Flehe"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 4",
+        "ortsteile": [
+          "Oberkassel",
+          "Heerdt",
+          "Lörick",
+          "Niederkassel"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 5",
+        "ortsteile": [
+          "Stockum",
+          "Lohausen",
+          "Kaiserswerth",
+          "Wittlaer",
+          "Angermund",
+          "Kalkum"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 6",
+        "ortsteile": [
+          "Lichtenbroich",
+          "Unterrath",
+          "Rath",
+          "Mörsenbroich"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 7",
+        "ortsteile": [
+          "Gerresheim",
+          "Grafenberg",
+          "Ludenberg",
+          "Hubbelrath",
+          "Knittkuhl"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 8",
+        "ortsteile": [
+          "Eller",
+          "Lierenfeld",
+          "Vennhausen",
+          "Unterbach"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 9",
+        "ortsteile": [
+          "Wersten",
+          "Himmelgeist",
+          "Holthausen",
+          "Reisholz",
+          "Benrath",
+          "Urdenbach",
+          "Itter",
+          "Hassels"
+        ]
+      },
+      {
+        "name": "Stadtbezirk 10",
+        "ortsteile": [
+          "Garath",
+          "Hellerhof"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Düsseldorf-Süd (A46/A59)",
+        "Autobahnkreuz Kaarst (A52/A57)",
+        "Autobahnkreuz Neuss-West (A46/A57)",
+        "Autobahnkreuz Hilden (A3/A46)",
+        "Autobahnkreuz Breitscheid (A3/A52)",
+        "Autobahnkreuz Ratingen-Ost (A3/A44)",
+        "Autobahndreieck Neuss-Süd (A46/A57)",
+        "Rheinalleetunnel und Rheinufertunnel (B1/B7)",
+        "Anschlussstelle Düsseldorf-Flughafen (A44)"
+      ],
+      "autobahnen": [
+        "A3",
+        "A44",
+        "A46",
+        "A52",
+        "A57",
+        "A59",
+        "A524"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B7",
+        "B8",
+        "B8n",
+        "B228",
+        "B326"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Stockumer Höfe / Danziger Straße (Stockum)",
+        "beschreibung": "Im Unfallatlas 2024 hat IT.NRW diesen Bereich in Flughafennähe als Düsseldorfer Unfallhäufungsstelle hervorgehoben: 14 Unfälle, überwiegend mit Pkw-Beteiligung (Pressemitteilung 200/25 vom 9. Juli 2025). In der Fortschreibung für das Jahr 2025 (Pressemitteilung 192/26 vom 7. Juli 2026) wird für Düsseldorf keine Stelle mehr eigens genannt; die Angabe beschreibt also 2024 und nicht den heutigen Stand.",
+        "quelle": "https://www.it.nrw/nrw-aktualisierter-unfallatlas-zeigt-die-unfallschwerpunkte-2024-127584"
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Schäden im Rheinufertunnel in Düsseldorf gutachterlich oft aufwendiger?",
+        "antwort": "Der Rheinufertunnel unter der Altstadt und Carlstadt ist ein reiner Tunnelabschnitt der B1/B7 ohne Standstreifen. Nach einem Auffahrunfall muss das Fahrzeug meist zügig geräumt werden, eine Beweissicherung vor Ort ist kaum möglich. Für das Gutachten in Düsseldorf sind deshalb Fotos vom Abschleppplatz, die Tunnelkamera-Auswertung über die Polizei und die Bergungs- sowie Standkosten relevant. Auch Verschmutzungen durch Löschmittel oder Bindemittel im Tunnel sollten dokumentiert werden, weil sie Lack- und Unterbodenschäden verursachen können."
+      },
+      {
+        "frage": "Ich hatte einen Unfall auf der Königsallee. Was ist bei der Bewertung besonders zu beachten?",
+        "antwort": "Rund um die Kö in der Düsseldorfer Stadtmitte und Carlstadt sind überdurchschnittlich viele hochwertige Fahrzeuge, Leasing- und Firmenwagen unterwegs. Bei diesen Fahrzeugen entscheidet die Frage nach merkantilem Minderwert, Herstellervorgaben zur Reparatur und Rückgabebedingungen aus dem Leasingvertrag oft über einen größeren Betrag als die reinen Reparaturkosten. Häufig sind es außerdem Parkremplerund Rangierschäden in den Tiefgaragen entlang der Kö, bei denen Anstoßhöhe und Kompatibilität sauber dokumentiert werden müssen."
+      },
+      {
+        "frage": "Was ist bei Unfällen mit der Rheinbahn in Düsseldorf zu beachten?",
+        "antwort": "Die Rheinbahn betreibt in Düsseldorf ein dichtes Netz aus Straßenbahn- und Stadtbahnlinien, teils im Straßenraum mit Gleiskörper in Fahrbahnmitte, etwa auf der Luegallee in Oberkassel oder der Nordstraße in Pempelfort. Kollisionen beim Linksabbiegen über die Gleise oder beim Ausparken sind typisch. Die Rheinbahn reguliert solche Schäden über eine eigene Schadenabteilung beziehungsweise deren Versicherer. Als Geschädigter dürfen Sie auch hier einen eigenen Gutachter beauftragen, wenn kein reiner Bagatellschaden vorliegt."
+      },
+      {
+        "frage": "Wie wirkt sich die Umweltspur beziehungsweise Busspur-Situation in Düsseldorf auf Unfälle aus?",
+        "antwort": "Auf mehreren Einfallstraßen in Düsseldorf, unter anderem im Bereich Merowingerstraße und Prinz-Georg-Straße, gab es in den vergangenen Jahren Fahrstreifenumwidmungen für Bus, Rad und Fahrgemeinschaften. Solche Spurwechsel- und Einfädelvorgänge führen zu seitlichen Streifschäden. Bei der Haftungsfrage kommt es dann darauf an, wer die Spur regelwidrig genutzt hat. Für das Gutachten sind Kratzerverlauf, Anstoßrichtung und Lackantragungen entscheidend, weil sie den Bewegungsablauf der beiden Fahrzeuge rekonstruierbar machen."
+      },
+      {
+        "frage": "Welche Rolle spielen Messe und Esprit Arena beziehungsweise Merkur Spiel-Arena für Unfallschwerpunkte in Düsseldorf?",
+        "antwort": "Im Düsseldorfer Norden zwischen Stockum, Lohausen und Golzheim treffen Messegelände, Merkur Spiel-Arena und Flughafen aufeinander. An Messetagen und bei Veranstaltungen entsteht dichter Zielverkehr auf der A44, der B8 und der Rotterdamer Straße, dazu kommt Parksuchverkehr in den angrenzenden Wohnstraßen. Typisch sind Auffahr- und Parkplatzschäden auf den Messeparkplätzen P1 bis P3. Bei Schäden auf Veranstaltungsparkplätzen ist die Beweislage oft dünn, weshalb Zeugendaten und Fotos vom Endstand besonders wichtig sind."
+      },
+      {
+        "frage": "Mein Auto wurde am Flughafen Düsseldorf beschädigt. Wer haftet und was macht der Gutachter?",
+        "antwort": "Am Flughafen Düsseldorf in Lohausen kommen Schäden in den Parkhäusern P4 bis P7, im Valet-Parking und auf externen Anbieterflächen rund um die Flughafenstraße vor. Bei Valet-Parken haftet regelmäßig der Anbieter aus dem Verwahrvertrag. Wichtig ist ein dokumentierter Fahrzeugzustand bei Übergabe und Rückgabe. Ein Gutachten sollte den Schaden nach Höhe, Anstoßrichtung und Alter der Beschädigung einordnen, damit sich Altschäden von der neuen Beschädigung abgrenzen lassen. Bei unklarer Verursachung ist eine Anzeige gegen Unbekannt sinnvoll."
+      },
+      {
+        "frage": "Wie relevant sind Hochwasser und Rheinpegel für Fahrzeugschäden in Düsseldorf?",
+        "antwort": "Düsseldorf liegt am rechten Rheinufer, Teile von Hamm, Volmerswerth, Flehe, Himmelgeist und Urdenbach liegen tief und werden bei hohen Rheinpegeln teils überflutet oder gesperrt. Auch die Parkflächen am Rheinufer im Bereich Tonhalle und Robert-Lehr-Ufer werden bei Hochwasser geräumt. Wasserschäden am Fahrzeug sind Sache der Teilkaskoversicherung, wenn sie durch Überschwemmung entstehen. Ein Gutachten muss dabei die Eindringhöhe, betroffene Steuergeräte und Sitzstruktur sowie mögliche Korrosionsfolgeschäden festhalten."
+      },
+      {
+        "frage": "Was ist typisch für Unfälle im Bereich Benrath und Garath im Düsseldorfer Süden?",
+        "antwort": "Im Süden von Düsseldorf verläuft die Hauptachse Frankfurter Straße und Kappeler Straße durch Benrath, Hassels und Reisholz, angebunden über die A59 und die A46. Der Bereich ist geprägt von Gewerbeverkehr aus Reisholz und Hassels sowie von Pendlerverkehr Richtung Hilden und Langenfeld. Häufig sind Abbiege- und Vorfahrtsunfälle an den zahlreichen ampelgeregelten Einmündungen. Bei Lkw-Beteiligung ist im Gutachten zusätzlich die Frage nach Ladungsschäden und Standzeitkosten des Nutzfahrzeugs zu klären."
+      },
+      {
+        "frage": "Warum sind die Rheinbrücken in Düsseldorf eine Besonderheit für die Schadenabwicklung?",
+        "antwort": "Düsseldorf ist über die Theodor-Heuss-Brücke, die Oberkasseler Brücke, die Rheinkniebrücke, die Südbrücke, die Fleher Brücke der A46 und die Josef-Kardinal-Frings-Brücke mit der linksrheinischen Seite verbunden. Auf den Brücken gibt es kaum Ausweichflächen, Rückstaus reichen weit in die Zufahrten. Nach einem Unfall dort ist das Fahrzeug oft nicht fahrbereit abzustellen und muss geborgen werden. Bergungs-, Abschlepp- und Standkosten gehören dann zum ersatzfähigen Schaden und sollten im Gutachten mit erfasst werden."
+      },
+      {
+        "frage": "Wie läuft eine Fahrzeugbegutachtung in Düsseldorfer Innenstadtlagen ohne eigenen Stellplatz ab?",
+        "antwort": "In dicht bebauten Düsseldorfer Vierteln wie Flingern, Oberbilk, Bilk, Friedrichstadt und Pempelfort gibt es überwiegend Bewohnerparken und wenig freie Fläche. Für die Besichtigung wird deshalb häufig ein Termin in der Reparaturwerkstatt, auf einem Supermarktparkplatz oder in einer Tiefgarage vereinbart. Wichtig ist ausreichend Platz rund um das Fahrzeug und genug Licht für Detailaufnahmen. Bei nicht fahrbereiten Fahrzeugen erfolgt die Besichtigung am Standort des Abschleppunternehmens oder auf dem Verwahrhof."
+      },
+      {
+        "frage": "Was gilt bei Unfällen im Düsseldorfer Hafen und in den Gewerbegebieten Lierenfeld und Reisholz?",
+        "antwort": "Im Medienhafen sowie in den Gewerbelagen Lierenfeld, Reisholz und Heerdt ist der Anteil an Lieferverkehr, Transportern und Lkw hoch. Typisch sind Rangier- und Rückwärtsfahrschäden an Laderampen sowie Kollisionen beim Abbiegen mit langen Fahrzeugen. Bei gewerblich genutzten Fahrzeugen tritt an die Stelle der Nutzungsausfallentschädigung häufig ein konkreter Verdienstausfall oder Vorhaltekosten. Das Gutachten sollte deshalb neben Reparaturweg und Reparaturdauer auch die Wiederbeschaffungsdauer benennen, damit der Ausfallschaden begründet werden kann."
+      },
+      {
+        "frage": "Welche Besonderheiten gibt es bei Wildunfällen im Osten von Düsseldorf?",
+        "antwort": "In den östlichen Düsseldorfer Stadtteilen Hubbelrath, Knittkuhl, Ludenberg und Unterbach grenzen Wald, Grafenberger Wald, Golfflächen und Felder direkt an Landstraßen und die B7. Dort kommt es besonders in der Dämmerung zu Zusammenstößen mit Rehwild und Wildschweinen. Für die Teilkaskoregulierung wird in der Regel eine Wildunfallbescheinigung der Polizei oder des Jagdpächters verlangt. Im Gutachten müssen Haar- und Blutanhaftungen sowie die Schadenshöhe und -charakteristik festgehalten werden, damit sich der Wildunfall von einem anderen Anstoß abgrenzen lässt."
+      },
+      {
+        "frage": "Werden in Düsseldorf regionale Stundenverrechnungssätze im Gutachten angesetzt?",
+        "antwort": "Ja. Für Düsseldorf werden die ortsüblichen Stundenverrechnungssätze markengebundener Fachwerkstätten im Stadtgebiet und im direkten Umland zugrunde gelegt. Diese liegen im Rheinschienen-Ballungsraum spürbar höher als in ländlichen Regionen. Versicherer verweisen häufig auf günstigere freie Werkstätten. Ein solcher Verweis ist nur unter engen Voraussetzungen zulässig, insbesondere wenn die Werkstatt für Sie in Düsseldorf mühelos erreichbar ist und gleichwertig arbeitet. Bei jungen oder scheckheftgepflegten Fahrzeugen scheidet der Verweis regelmäßig aus."
+      },
+      {
+        "frage": "Was sollte ich nach einem Parkschaden in einer Düsseldorfer Tiefgarage tun?",
+        "antwort": "Düsseldorf hat viele enge Tiefgaragen, etwa unter der Königsallee, dem Schadow Arkaden Areal, dem Kö-Bogen und in den Altbauquartieren von Pempelfort und Unterbilk. Rammschutz, Stützen und schmale Stellplätze führen zu Streif- und Kantenschäden. Entfernen Sie sich nicht, warten Sie eine angemessene Zeit und verständigen Sie die Polizei. Für das Gutachten sind die Stellplatznummer, Fotos der Umgebung inklusive Stützen und Markierungen sowie Hinweise auf Fremdlack an Ihrem Fahrzeug hilfreich."
+      }
+    ],
+    "heroAnker": "Düsseldorf verbindet dichten Innenstadtverkehr zwischen Altstadt, Kö und Medienhafen mit stark belasteten Achsen wie A46, A52 und A57. Für Geschädigte bedeutet das kurze Wege zu Werkstätten, aber auch häufige Rangier-, Auffahr- und Spurwechselschäden.",
+    "topografieAnker": "Düsseldorf liegt beidseits des Rheins an der Mündung der Düssel, mit tief gelegenen Auenlagen in Hamm, Flehe, Himmelgeist und Urdenbach sowie dem höher gelegenen bergischen Rand um Hubbelrath und Gerresheim. Der Rhein bündelt den Verkehr auf wenige Brücken, was Rückstaus und Auffahrschäden begünstigt; in den Auenlagen kommen bei Hochwasser Wasser- und Korrosionsschäden hinzu."
+  },
+  "neuss": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Innenstadt",
+          "Barbaraviertel",
+          "Augustinusviertel",
+          "Hafengebiet"
+        ]
+      },
+      {
+        "name": "Nordwest",
+        "ortsteile": [
+          "Furth-Nord",
+          "Furth-Süd",
+          "Furth-Mitte",
+          "Weckhoven"
+        ]
+      },
+      {
+        "name": "Südost",
+        "ortsteile": [
+          "Grimlinghausen",
+          "Uedesheim",
+          "Gnadental",
+          "Erfttal"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Norf",
+          "Rosellen",
+          "Reuschenberg",
+          "Selikum"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Holzheim",
+          "Grefrath",
+          "Hoisten",
+          "Vogelsang"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Neuss-West",
+        "Dreieck Neuss-Süd"
+      ],
+      "autobahnen": [
+        "A46",
+        "A57"
+      ],
+      "bundesstrassen": [
+        "B1",
+        "B9",
+        "B477"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht den Abschnitt zwischen Kreuz Neuss-West und Dreieck Neuss-Süd für Streifschäden anfällig?",
+        "antwort": "In Neuss treffen die A57 Richtung Köln und die A46 Richtung Düsseldorf aufeinander; zwischen dem Kreuz Neuss-West und dem Dreieck Neuss-Süd liegen kurze Abschnitte, auf denen ein- und ausfädelnder Verkehr dieselbe Spur nutzt. Streifschäden beim Spurwechsel sind die Folge. Bei neueren Fahrzeugen entscheidet dabei die Materialfrage: Stoßfängerquerträger und zunehmend auch Türen und Klappen bestehen aus Aluminium. Aluminium lässt sich nicht wie Stahl richten — es verfestigt sich beim Umformen und reißt, und Wärmezufuhr verändert die Festigkeit dauerhaft. Für viele dieser Bauteile schreiben die Hersteller deshalb Austausch statt Instandsetzung vor. Welche Legierung verbaut ist, bestimmt damit unmittelbar den Reparaturweg und gehört festgestellt."
+      },
+      {
+        "frage": "Worauf kommt es bei Unfällen im Neusser Hafengebiet an?",
+        "antwort": "Der Neusser Hafen ist einer der großen Binnenhäfen am Rhein; im Hafengebiet mischen sich Sattelzüge, Schüttgutverkehr und Werksfahrzeuge auf Straßen mit engen Radien und Gleisen der Hafenbahn. Beim Rangieren zwischen Aufliegern entstehen Anstöße im vorderen Radlauf, die zunächst nur den Kotflügel zu betreffen scheinen. Dahinter sitzt jedoch die Radhausschale, der Innenkotflügel aus Kunststoff. Reißt sie ein oder wird sie aus den Klipsen gedrückt, gelangen Spritzwasser, Streusalz und Schmutz an Bauteile, die dafür nicht ausgelegt sind: Kabelbäume, Steckverbindungen und der Bereich um das Federbeinlager. Der Folgeschaden zeigt sich erst Monate später als Korrosion, weshalb die Schale zum Aufnahmeumfang gehört."
+      },
+      {
+        "frage": "Welche Schäden sind in den Parkhäusern der Neusser Innenstadt typisch?",
+        "antwort": "Rund um Barbaraviertel und Augustinusviertel wird überwiegend in Parkhäusern und Tiefgaragen geparkt. Deren Rampen sind eng gewendelt, die Durchfahrtshöhen niedrig, die Deckenunterzüge oft schlecht ausgeleuchtet. Zwei Schadenbilder wiederholen sich: der Streifschaden an der Rampenwand und der Anstoß mit dem Fahrzeugdach gegen einen Unterzug oder ein Rohr. Der Dachschaden ist der heiklere Fall, weil das Dach bei modernen Fahrzeugen zur tragenden Struktur gehört und mit den Dachrahmen verschweißt oder verklebt ist. Schon eine flache Delle kann den Rahmen eines Panorama- oder Schiebedachs verziehen, sodass es klemmt oder undicht wird. Ein Funktionstest von Dach und Wasserabläufen gehört deshalb dazu."
+      },
+      {
+        "frage": "Die Polizei ist nicht zum Unfallort gekommen — was bedeutet das für die Regulierung?",
+        "antwort": "Bei reinen Blechschäden ohne Verletzte rückt die Polizei häufig nicht aus, auch nicht in der Neusser Innenstadt. Dann ersetzt Ihre eigene Dokumentation das Protokoll: Endstellung beider Fahrzeuge, Schaden aus mehreren Abständen, Kennzeichen, Straßenschilder und Fahrbahnmarkierung. Notieren Sie Name, Anschrift und Versicherungsnummer des Gegners sowie die Kontaktdaten von Zeugen. Die technische Zuordnung des Hergangs übernimmt danach die Schadenaufnahme am Fahrzeug."
+      },
+      {
+        "frage": "Ich hatte einen Zusammenstoß mit einem Radfahrer — was ist bei der Aufnahme anders?",
+        "antwort": "Bei einem Radunfall gibt es auf der Gegenseite kein zweites Schadensbild, an dem sich der Hergang spiegeln lässt. Umso wichtiger sind die Spuren am Auto: Anstoßhöhe, Lack- und Gummiabrieb, Dellenform und die Frage, ob der Kontakt seitlich streifend oder frontal war. In dicht bebauten Lagen wie Furth-Süd kommt hinzu, dass parkende Fahrzeuge die Sicht genommen haben können — auch das gehört fotografiert, solange die Situation unverändert ist."
+      },
+      {
+        "frage": "Auf einem Kundenparkplatz hat mich jemand gerammt — gilt dort überhaupt die Straßenverkehrsordnung?",
+        "antwort": "Auf privaten Parkflächen, wie sie in Reuschenberg und rund um die Neusser Einkaufslagen üblich sind, gilt nicht automatisch die Vorfahrtsregel der Straßenverkehrsordnung. Zwischen Parkgassen gilt in der Regel gegenseitige Rücksichtnahme, was die Haftung häufiger teilt als auf der Straße. Genau deshalb entscheidet hier das Schadensbild: Wer stand, wer fuhr und aus welcher Richtung der Anstoß kam, lässt sich an Verformungsrichtung und Kratzverlauf ablesen."
+      },
+      {
+        "frage": "Der Unfall passierte auf dem Weg zur Arbeit — ändert das etwas an der Abwicklung?",
+        "antwort": "Für den Fahrzeugschaden nichts: Er wird wie jeder andere Verkehrsunfall reguliert, ob auf der B9 oder innerorts in Neuss. Personenschäden auf dem direkten Arbeitsweg laufen dagegen über die gesetzliche Unfallversicherung, nicht über die Kfz-Haftpflicht. Melden Sie den Vorfall deshalb zusätzlich Ihrem Arbeitgeber. Für das Gutachten selbst bleibt es beim gewohnten Weg — es dokumentiert das Fahrzeug, nicht den Personenschaden."
+      },
+      {
+        "frage": "Mein Lack ist durch Rollsplitt in einer Baustelle beschädigt worden — an wen halte ich mich?",
+        "antwort": "Zuerst gilt es festzuhalten, wo es passiert ist: Straße, Baustellenabschnitt und Beschilderung, denn ohne diese Angaben lässt sich später niemand in Anspruch nehmen. In Frage kommt je nach Lage das Bauunternehmen oder der Träger der Straßenbaulast; bei einer Landesstraße in Neuss ist das ein anderer als bei einer Gemeindestraße. Der Schaden selbst wird wie ein Steinschlagschaden bewertet — flächige Einschläge im Lack sind etwas anderes als eine einzelne Stelle."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A57, Parkschaden am Markt oder Zusammenstoß in Furth — der Sachverständige kommt zu Ihnen nach Neuss.",
+    "topografieAnker": "Neuss liegt Düsseldorf gegenüber am linken Rheinufer; die A57 führt nach Köln, die A46 quert die Stadt Richtung Bergisches Land."
+  },
+  "hilden": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Innenstadt",
+          "Kalstert",
+          "Hoffeld"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Nordstadt",
+          "Karnap"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Südstadt",
+          "Meide"
+        ]
+      },
+      {
+        "name": "West",
+        "ortsteile": [
+          "Westring",
+          "Hildener Heide"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Hilden (A3/A46)",
+        "Anschlussstelle Hilden"
+      ],
+      "autobahnen": [
+        "A3",
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B228"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum sind Auffahrunfälle am Autobahnkreuz Hilden so häufig?",
+        "antwort": "Das Kreuz Hilden führt die A3 und die A46 zusammen und gehört zu den am stärksten belasteten Knoten in Nordrhein-Westfalen. Der Fahrstreifenwechsel in den Verflechtungsbereichen der Verbindungsrampen fällt mit zähfließendem Verkehr zusammen — typisch sind Auffahrschäden am Heck sowie Streifschäden an den Flanken. Beides trifft heute regelmäßig Abstandsradar und Spurhaltesensorik hinter Stoßfänger und Außenspiegel, deren Kalibrierung nach der Reparatur eigens berechnet werden muss."
+      },
+      {
+        "frage": "Was ist bei einem Unfall auf der B228 Richtung Solingen zu beachten?",
+        "antwort": "Die B228 verlässt Hilden nach Osten und steigt zur Bergischen Heideterrasse hin an. Die Kombination aus Steigung, Kurven und Waldrandschatten macht die Strecke bei Nässe und Laub rutschig. Bei Unfällen dort lohnt sich der Blick auf Unterboden und Achsgeometrie: Schäden, die man von außen nicht sieht, zeigen sich erst auf dem Prüfstand — und genau die fehlen in einem Kostenvoranschlag."
+      },
+      {
+        "frage": "Zusammenstoß mit einem E-Scooter — wie wird so ein Schaden bewertet?",
+        "antwort": "E-Scooter sind versicherungspflichtig und tragen eine Versicherungsplakette; notieren Sie deren Nummer, sie ersetzt das Kennzeichen. Am Auto hinterlassen sie typischerweise niedrige, schmale Anstoßspuren an Türen und Stoßfängerecken, oft mit Kunststoff- oder Gummiabrieb. Weil in der Hildener Innenstadt Fußgänger-, Rad- und Autoverkehr eng nebeneinander laufen, ist die genaue Anstoßhöhe hier der wichtigste Anhaltspunkt für den Hergang."
+      },
+      {
+        "frage": "Der Unfallgegner ist einfach weitergefahren — was lässt sich noch retten?",
+        "antwort": "Erstatten Sie Anzeige, auch ohne Kennzeichen: Ohne Anzeige verweigert die Kaskoversicherung später regelmäßig die Leistung. Sichern Sie danach die Spuren, bevor das Fahrzeug bewegt oder gewaschen wird. Fremdlack am eigenen Fahrzeug ist der beste Beleg, den es in solchen Fällen gibt — er lässt sich einem Fahrzeugtyp und einer Farbe zuordnen. Fragen Sie in Karnap oder wo immer der Wagen stand nach Kameras an Gewerbebauten und Tankstellen, deren Aufzeichnungen werden schnell überschrieben."
+      },
+      {
+        "frage": "Streugut hat im Winter meinen Lack beschädigt — ist das ein Fall für den Gutachter?",
+        "antwort": "Nur wenn ein konkreter Verursacher greifbar ist, etwa ein Räumfahrzeug, das unmittelbar vor Ihnen gefahren ist. Der allgemeine Winterdienst auf einer Straße in Hilden ist dagegen kein Haftungsfall; Streusalz und aufgewirbelter Splitt gehören zum gewöhnlichen Betriebsrisiko. Anders sieht es aus, wenn ein Fahrzeug Ladung verliert oder ungesichert Material verstreut. Dann zählen Zeitpunkt, Ort und möglichst ein Kennzeichen."
+      },
+      {
+        "frage": "Der Unfallgegner fuhr ein Fahrzeug mit ausländischem Kennzeichen — wer reguliert dann?",
+        "antwort": "Über die A3 läuft viel Fernverkehr, entsprechend häufig sind ausländische Kennzeichen beteiligt. Zuständig ist dann in der Regel ein deutscher Korrespondenzversicherer oder das Deutsche Büro Grüne Karte, das den ausländischen Versicherer hier vertritt. Für Sie heißt das vor allem: Kennzeichen samt Länderkennung, Versicherungsangaben und möglichst ein Foto der Fahrzeugpapiere sichern. Die Abwicklung dauert erfahrungsgemäß länger, weshalb ein vollständiges Gutachten hier besonders wichtig ist."
+      },
+      {
+        "frage": "Im Kreisverkehr hat es gekracht — wie klärt sich die Haftung?",
+        "antwort": "Im Kreisverkehr hat der Verkehr im Kreis Vorrang, das Ausscheren und das Verlassen sind die kritischen Momente. Ob jemand zu früh oder zu spät den Blinker gesetzt hat, lässt sich nachträglich kaum beweisen — das Schadensbild kann es. Streifschäden entlang der Fahrzeugseite und ihre Richtung zeigen, ob ein Fahrzeug bereits im Kreis war oder gerade einfuhr. Halten Sie deshalb in Hilden wie überall die Endstellung fest, bevor die Fahrbahn geräumt wird."
+      },
+      {
+        "frage": "Wie viele ausgewiesene Unfallhäufungsstellen hat Hilden?",
+        "antwort": "Ausgewiesen werden sie nicht von uns, sondern von der Unfallkommission des Kreises Mettmann, die das Unfallgeschehen regelmäßig auswertet. Nach ihrem im Frühjahr 2025 vorgestellten Bericht führt Hilden die Liste im Kreis an, mit mehr ausgewiesenen Stellen als jede andere Kommune. Für die Abwicklung Ihres Schadens ändert das nichts. Es erklärt aber, warum an manchen Knoten regelmäßig mehrere Beteiligte und widersprüchliche Darstellungen zusammenkommen. Und es hat eine praktische Folge: Wo eine Kommission eine Stelle benennt, folgt häufig ein Umbau, und danach sieht die Verkehrsführung anders aus als auf älterem Kartenmaterial."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Hilden — vom Kreuz Hilden über die B228 bis in die Hildener Heide.",
+    "topografieAnker": "Hilden liegt auf der Bergischen Heideterrasse zwischen Düsseldorf und Solingen. Die Stadt ist geprägt vom Autobahnkreuz Hilden, an dem A3 und A46 zusammentreffen, und von den Sandböden der Hildener Heide im Westen."
+  },
+  "erkrath": {
+    "stadtbezirke": [
+      {
+        "name": "Alt-Erkrath",
+        "ortsteile": [
+          "Trills"
+        ]
+      },
+      {
+        "name": "Hochdahl",
+        "ortsteile": []
+      },
+      {
+        "name": "Unterfeldhaus",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Erkrath (A46)"
+      ],
+      "autobahnen": [
+        "A46",
+        "A3"
+      ],
+      "bundesstrassen": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei einem Wildunfall im Neandertal zwischen Erkrath und Mettmann zu beachten?",
+        "antwort": "Das Neandertal durchzieht Erkrath als bewaldetes Tal der Düssel, und die Talstraße verläuft über weite Abschnitte unmittelbar am Naturschutzgebiet. In der Dämmerung queren dort Rehe und Wildschweine die Fahrbahn, die durch Böschung und Baumbestand erst spät einsehbar ist. Typisch ist ein Aufprall auf Frontschürze, Kühlergrill und Motorhaube, oft verbunden mit Schäden am Kühlerpaket und am Scheinwerfergehäuse. Für die Begutachtung zählt zweierlei: die Wildschadenbescheinigung des Jagdausübungsberechtigten oder der Polizei, weil die Teilkasko nur bei bestätigtem Haarwild eintritt, und die genaue Aufnahme der verdeckten Anbauteile hinter der Stoßfängerverkleidung. Gerade Radarsensorik und Kühlerpaket werden bei Wildschäden regelmäßig übersehen, weil die Verkleidung nach dem Anstoß wieder zurückfedert."
+      },
+      {
+        "frage": "Warum häufen sich Auffahrschäden auf den Steigungsstrecken zwischen Alt-Erkrath und Hochdahl?",
+        "antwort": "Zwischen dem Düsseltal bei Alt-Erkrath auf rund 46 Metern und den Willbecker Höhen bei Hochdahl auf 162 Metern liegen gut 115 Höhenmeter auf kurzer Strecke. Die Verbindungsstraßen steigen entsprechend steil an, wechseln zwischen Wohnbebauung und Waldrand und bleiben im Winter länger vereist als die Talsohle, weil die Kuppen früher auskühlen. Auf Gefällabschnitten verlängert sich der Bremsweg, und ein Auffahrunfall läuft dort mit deutlich höherer Aufprallenergie ab als im ebenen Stadtverkehr. Für die Bewertung heißt das: Neben dem sichtbaren Heckschaden gehören Längsträger, Rückwandblech und der Bereich der Reserveradmulde auf den Prüfstand. Stauchungen an der Bodengruppe bleiben von außen unauffällig und zeigen sich erst beim Vermessen."
+      },
+      {
+        "frage": "Welche Rolle spielt die Anschlussstelle Erkrath an der A46 im örtlichen Unfallgeschehen?",
+        "antwort": "Die A46 bildet über weite Strecken die Stadtgrenze Erkraths zu Hilden und Haan; über die Anschlussstelle Erkrath fädelt der Pendlerverkehr Richtung Düsseldorf ein. Morgens reicht der Rückstau von der Rampe bis in das nachgelagerte Straßennetz zurück, sodass wartende Fahrzeuge von hinten getroffen werden, während der einfädelnde Verkehr auf der Beschleunigungsspur bereits Tempo aufnimmt. Daraus entstehen zwei sehr unterschiedliche Schadenbilder: der Heckaufprall im Stillstand und der flache Streifschaden über Tür, Schweller und Radlauf beim Fahrstreifenwechsel. Streifschäden werden dabei gern unterschätzt. Betroffen sind meist mehrere aneinandergrenzende Bauteile, deren Farbangleichung eine Beilackierung der Nachbarflächen nötig macht, damit der Farbton über die Fahrzeugseite hinweg stimmt."
+      },
+      {
+        "frage": "Ein Linienbus war beteiligt — was ist bei so einem Unfall zu beachten?",
+        "antwort": "Busse sind bei Verkehrsbetrieben versichert, die eigene Schadensabteilungen unterhalten und den Vorgang zügig, aber routiniert bearbeiten. Notieren Sie Linie, Wagennummer und Uhrzeit, damit sich die Fahrt zuordnen lässt. Am Pkw liegen die Anstoßspuren durch die Fahrzeughöhe meist oberhalb der üblichen Stoßfängerzone. In Hochdahl und den anderen Erkrather Ortslagen kommt hinzu, dass Haltestellen oft in engen Straßenquerschnitten liegen — die Endstellung ist dann der wichtigste Beleg."
+      },
+      {
+        "frage": "Bei Starkregen bin ich ins Rutschen gekommen — zahlt das jemand?",
+        "antwort": "Aquaplaning allein ist kein Haftungsfall: Wer die Geschwindigkeit nicht den Verhältnissen angepasst hat, trägt den Schaden selbst oder über die Vollkasko. Anders liegt es, wenn Wasser wegen eines defekten Ablaufs oder einer Baustelle stand. Dokumentieren Sie deshalb die Wasserführung auf der Fahrbahn, solange sie noch zu sehen ist. In Erkrath mit seinem bewegten Gelände sammelt sich Wasser vor allem an Tiefpunkten — ein Foto der Stelle ist mehr wert als jede spätere Beschreibung."
+      },
+      {
+        "frage": "Ein Schlagloch hat Felge und Reifen zerstört — wer kommt dafür auf?",
+        "antwort": "Der Träger der Straßenbaulast haftet nur, wenn er seine Verkehrssicherungspflicht verletzt hat, das Loch also bekannt oder offensichtlich war und nicht abgesichert wurde. Melden Sie den Schaden zeitnah der Stadt Erkrath oder dem zuständigen Landesbetrieb und fotografieren Sie das Loch mit einem Größenvergleich. Am Fahrzeug ist die Prüfung breiter, als viele denken: Neben Felge und Reifen sind Radlager, Spurstange und Achsvermessung zu kontrollieren."
+      },
+      {
+        "frage": "Ich hatte einen Anhänger am Haken — ändert das die Schadenaufnahme?",
+        "antwort": "Ja, in zwei Richtungen. Der Anhänger ist ein eigenes Fahrzeug mit eigener Bewertung, und die Anhängerkupplung leitet Kräfte punktuell in die Karosserie des Zugfahrzeugs ein — ein kleiner Blechschaden kann dort einen größeren Strukturschaden verdecken. Beides muss getrennt dokumentiert werden. Wer in Alt-Erkrath oder Unterfeldhaus mit Anhänger rangiert, sollte außerdem darauf achten, ob Zugdeichsel und Auflaufeinrichtung nach dem Anstoß noch spielfrei sind."
+      },
+      {
+        "frage": "Beim Ausparken habe ich ein geparktes Auto touchiert — was ist jetzt zu tun?",
+        "antwort": "Warten Sie am Ort eine angemessene Zeit und hinterlassen Sie nicht nur einen Zettel — ein Zettel allein schützt nicht vor dem Vorwurf des unerlaubten Entfernens. Verständigen Sie im Zweifel die Polizei. Für die Schadenhöhe zählt danach dasselbe wie bei jedem Streifschaden: Anstoßhöhe, Lackübertrag und die Frage, wie viele Bauteile betroffen sind. In den Wohnstraßen von Trills und Hochdahl stehen Fahrzeuge oft dicht, entsprechend häufig ziehen sich solche Schäden über mehrere Teile."
+      },
+      {
+        "frage": "Gibt es in Erkrath ausgewiesene Unfallschwerpunkte?",
+        "antwort": "Das entscheidet nicht die Stadt, sondern die Unfallkommission des Kreises Mettmann. Sie wertet das Unfallgeschehen regelmäßig aus und weist eine Stelle erst dann als Häufungsstelle aus, wenn sich Unfälle gleichen Typs in einem festgelegten Zeitraum häufen. Die Liste ändert sich damit von Bericht zu Bericht, und für Erkrath fällt sie in den öffentlich zugänglichen Auswertungen unterschiedlich aus. Verlassen Sie sich deshalb nicht auf eine Zahl, die irgendwo im Netz steht. Wichtiger für Sie ist ohnehin: Eine fehlende Ausweisung heißt nicht, dass an einer Stelle nichts passiert, und eine vorhandene sagt nichts über die Schuldfrage in Ihrem Fall. Beides klärt erst die Aufnahme am Fahrzeug."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Erkrath: von Alt-Erkrath im Düsseltal über Hochdahl bis Unterfeldhaus nahe der A3. Das Unfallgeschehen reicht von der Anschlussstelle Erkrath an der A46 bis zur Talstraße durch das Neandertal.",
+    "topografieAnker": "Erkrath liegt im Übergang vom Niederrheinischen Tiefland zum Niederbergischen Land. Die Düssel durchfließt das Stadtgebiet in natürlichem Bett und bildet im Osten das Neandertal. Zwischen dem tiefsten Punkt an der Westgrenze auf 46 Metern und den Willbecker Höhen auf 162 Metern liegen über hundert Höhenmeter — für eine Stadt dieser Größe ein bewegtes Relief mit Steigungen, Kurven und kleinräumigen Glättewechseln im Winter."
+  },
+  "langenfeld": {
+    "stadtbezirke": [
+      {
+        "name": "Immigrath",
+        "ortsteile": [
+          "Immigrath",
+          "Landwehr"
+        ]
+      },
+      {
+        "name": "Richrath",
+        "ortsteile": [
+          "Richrath",
+          "Gieslenberg"
+        ]
+      },
+      {
+        "name": "Reusrath",
+        "ortsteile": [
+          "Reusrath",
+          "Berghausen"
+        ]
+      },
+      {
+        "name": "Wiescheid",
+        "ortsteile": [
+          "Wiescheid"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Langenfeld (A3/A542)",
+        "Anschlussstelle Langenfeld",
+        "Anschlussstelle Langenfeld-Immigrath"
+      ],
+      "autobahnen": [
+        "A3",
+        "A542"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B229"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Die A542 ist nur wenige Kilometer lang — warum passiert dort trotzdem etwas?",
+        "antwort": "Gerade weil sie kurz ist. Die A542 verbindet das Kreuz Langenfeld mit Monheim und Leverkusen und wird als Abkürzung zwischen A3 und A59 genutzt. Auf wenigen Kilometern folgen Auffahrt, Verflechtung und Ausfahrt dicht aufeinander, sodass der Verkehr ständig die Spur wechselt. Typisch sind seitliche Streifschäden — und die betreffen bei neueren Fahrzeugen fast immer die Sensorik in Außenspiegel und Schweller."
+      },
+      {
+        "frage": "Wer reguliert einen Unfall auf der B8 in Langenfeld?",
+        "antwort": "Wie überall der Haftpflichtversicherer des Verursachers. Die B8 ist in Langenfeld allerdings eine innerörtliche Hauptachse mit Ampeln, Abbiegespuren und Radverkehr — das erhöht die Zahl der Fälle mit strittiger Schuldfrage. Wo die Haftung nicht eindeutig ist, ist ein unabhängiges Gutachten mit dokumentierter Schadenlage die Grundlage, auf der später über eine Quote gesprochen wird."
+      },
+      {
+        "frage": "Mein Auto wurde an einer Ladesäule oder Parkhausschranke beschädigt — wie läuft das?",
+        "antwort": "Hier haftet nicht der Verkehr, sondern der Betreiber der Anlage, wenn sie fehlerhaft ausgelöst oder nicht ordnungsgemäß gewartet wurde. Wichtig ist der Nachweis des Vorgangs: Beleg, Buchungsbestätigung oder Ladevorgang mit Zeitstempel. Am Fahrzeug sind es meist scharf begrenzte Schäden an Dach, Heckklappe oder Seitenwand. Nennen Sie beim Termin die genaue Anlage in Langenfeld, damit sich Anstoßhöhe und Bauteilgeometrie zuordnen lassen."
+      },
+      {
+        "frage": "Beim Bilden der Rettungsgasse hat es gescheppert — wer trägt den Schaden?",
+        "antwort": "Die Pflicht zur Rettungsgasse entbindet nicht von der Sorgfalt beim Fahrstreifenwechsel; wer beim Ausweichen ein anderes Fahrzeug beschädigt, haftet grundsätzlich. Weil auf der A3 im Bereich Reusrath und Immigrath oft dicht aufgefahren wird, entstehen dabei typischerweise lange, flache Streifschäden über mehrere Bauteile. Deren Verlauf zeigt, welches Fahrzeug sich bewegt hat. Fotografieren Sie die Fahrzeuge möglichst vor dem Weiterfahren, auch wenn der Verkehr drängt."
+      },
+      {
+        "frage": "Von einem vorausfahrenden Fahrzeug ist Ladung heruntergefallen — wie belege ich das?",
+        "antwort": "Ohne Kennzeichen des Verursachers bleibt nur die eigene Kaskoversicherung, deshalb zählt jede Sekunde am Anfang: Kennzeichen, Fahrzeugtyp, Fahrtrichtung. Der Gegenstand selbst ist Beweismittel — heben Sie ihn auf, wenn das gefahrlos möglich ist. Am Fahrzeug entstehen dabei charakteristische Einschläge mit Materialübertrag, die sich von einem gewöhnlichen Steinschlag unterscheiden lassen. Auf der B8 wie auf der A3 gilt: Halten Sie erst an sicherer Stelle, dann dokumentieren."
+      },
+      {
+        "frage": "Ein Reifen ist während der Fahrt geplatzt und hat Schäden verursacht — ist das ein Unfall?",
+        "antwort": "Für die Kaskoversicherung ja, für die Haftpflicht der Gegenseite nur dann, wenn ein Fremdkörper von außen kam und sich der Verursacher benennen lässt. Wichtig ist die Prüfung des Reifens selbst: Ein Einfahrschaden sieht anders aus als ein Alterungs- oder Druckschaden, und diese Unterscheidung entscheidet über die Eintrittspflicht. Dazu kommen die Folgeschäden an Radhaus, Schweller und Leitungen, die in Langenfeld wie überall gern übersehen werden."
+      },
+      {
+        "frage": "Ein Hund ist mir vors Auto gelaufen — wer haftet für den Schaden?",
+        "antwort": "Anders als beim Wild gibt es hier einen Halter, und für dessen Tier gilt die Tierhalterhaftung. Erforderlich ist, dass sich Halter oder Tier identifizieren lassen — ohne das bleibt nur die eigene Versicherung. Sichern Sie deshalb Zeugen und, wenn möglich, die Personalien vor Ort. Am Fahrzeug sind Anstoßhöhe und Haarreste die entscheidenden Spuren; sie belegen den Hergang, wenn es später darum geht, ob überhaupt ein Tier beteiligt war. Das gilt in Berghausen und Wiescheid genauso wie an der Ortsdurchfahrt."
+      },
+      {
+        "frage": "Sind in Langenfeld Unfallhäufungsstellen ausgewiesen?",
+        "antwort": "Ja. Die Unfallkommission des Kreises Mettmann führt Langenfeld in ihrem 2025 vorgestellten Bericht mit sechs ausgewiesenen Stellen, ebenso viele wie Ratingen und deutlich weniger als Hilden. Eine solche Ausweisung ist zunächst ein Verwaltungsvorgang: Sie löst eine Prüfung aus, an deren Ende oft eine bauliche Änderung steht, etwa eine andere Signalisierung oder eine geänderte Abbiegeführung. Für die Schadenaufnahme zählt vor allem eines: Wurde an einer solchen Stelle kurz vor Ihrem Unfall umgebaut, war die Verkehrsführung womöglich eine andere als die, die Beteiligte im Kopf haben. Halten Sie Beschilderung und Markierung deshalb mit auf dem Foto fest."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Langenfeld — zwischen Kreuz Langenfeld, B8 und den Ortslagen Immigrath und Reusrath.",
+    "topografieAnker": "Langenfeld liegt in der Rheinischen Tiefebene auf halbem Weg zwischen Düsseldorf und Köln. Die A3 durchschneidet das Stadtgebiet von Nord nach Süd, die kurze A542 zweigt am Kreuz Langenfeld nach Westen Richtung Monheim ab."
+  },
+  "monheim-am-rhein": {
+    "stadtbezirke": [
+      {
+        "name": "Monheim",
+        "ortsteile": [
+          "Altstadt",
+          "Berliner Viertel",
+          "Musikantenviertel",
+          "Österreichviertel",
+          "Sandberg",
+          "Blee",
+          "Zaunswinkel",
+          "Henkelsiedlung"
+        ]
+      },
+      {
+        "name": "Baumberg",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Monheim-Süd (A59/A542)"
+      ],
+      "autobahnen": [
+        "A59",
+        "A542"
+      ],
+      "bundesstrassen": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was ist bei Fahrzeugschäden durch Rheinhochwasser in Monheim zu beachten?",
+        "antwort": "Monheim am Rhein liegt auf 40 Metern über dem Meeresspiegel und damit tiefer als jede andere Stadt im Kreis Mettmann; die Rheinaue reicht bis nahe an die Bebauung der Altstadt heran. Steigt der Pegel, stehen zuerst ufernahe Stellplätze und Tiefgaragenzufahrten unter Wasser. Ein Wasserschaden ist gutachterlich etwas grundlegend anderes als ein Aufprallschaden, denn entscheidend ist die Eindringhöhe. Reicht sie über die Türschweller, sind Sitzkonsolen, Gurtstraffer und die in vielen Modellen im Fußraum verbauten Steuergeräte betroffen; bei Elektrofahrzeugen kommt das Hochvoltsystem hinzu. Wasserstandslinie, Schlammablagerungen und erste Korrosionsspuren müssen dokumentiert werden — sie entscheiden, welche Bauteile ersetzt und nicht bloß getrocknet werden."
+      },
+      {
+        "frage": "Warum sind Auffahrunfälle in Monheim an Herbstmorgen besonders häufig?",
+        "antwort": "Die Rheinniederung bei Monheim kühlt nachts schneller aus als das Umland, sodass sich im Herbst über den Wiesen zwischen Rheinufer und Baumberg dichter Bodennebel bildet. Er liegt oft nur in einzelnen Senken und löst sich wenige hundert Meter weiter wieder auf; genau dieser abrupte Sichtwechsel führt zu Auffahrunfällen, weil die Geschwindigkeit aus dem klaren Abschnitt mitgenommen wird. Typisch ist eine Kette aus mehreren Fahrzeugen. Bei Kettenauffahrunfällen ist die Zuordnung das eigentliche Thema: Front- und Heckschaden desselben Fahrzeugs stammen aus zwei verschiedenen Anstößen. Nur eine getrennte Aufnahme mit Höhenvergleich der Anstoßspuren lässt erkennen, welcher Schaden welchem Beteiligten zuzurechnen ist. Fehlt diese Trennung, wandert der Schaden aus dem zweiten Anstoß stillschweigend in die Abrechnung des ersten."
+      },
+      {
+        "frage": "Auf einem Radweg oder in einer Fahrradstraße hat es gekracht — was gilt dort?",
+        "antwort": "In einer Fahrradstraße ist der Radverkehr die maßgebliche Verkehrsart; Autos sind dort nur zugelassen, wenn es ausgeschildert ist, und müssen sich anpassen. Für die Schadenaufnahme heißt das: Die Beschilderung am Ort gehört mit aufs Foto, weil sie den Sorgfaltsmaßstab bestimmt. Am Fahrzeug liegen die Spuren niedrig, oft an Türen und Kotflügeln. Notieren Sie in Monheim wie überall den genauen Abschnitt, damit sich die Verkehrsführung später nachvollziehen lässt."
+      },
+      {
+        "frage": "Ein Ast oder Baum ist auf mein geparktes Auto gefallen — wer zahlt?",
+        "antwort": "Bei einem Sturm ab Windstärke acht springt in der Regel die Teilkasko ein; einen Haftungsfall gibt es nur, wenn der Eigentümer des Baums seine Kontrollpflicht verletzt hat, der Baum also erkennbar krank war. Fotografieren Sie deshalb nicht nur das Fahrzeug, sondern auch die Bruchstelle. In den baumbestandenen Wohnlagen von Baumberg ist das der Unterschied zwischen einem Kaskoschaden mit Selbstbeteiligung und einem vollen Ersatzanspruch."
+      },
+      {
+        "frage": "Beim Rückwärtsausparken sind zwei Fahrzeuge zusammengestoßen — wer hat schuld?",
+        "antwort": "Stoßen zwei rückwärts fahrende Fahrzeuge zusammen, wird die Haftung häufig geteilt, weil beide dieselbe erhöhte Sorgfaltspflicht trifft. Entscheidend ist die Frage, ob eines der beiden bereits stand, als es krachte — und genau das lässt sich am Schadensbild ablesen: Ein stehendes Fahrzeug nimmt den Anstoß anders auf als ein rollendes. In den engen Anwohnerstraßen von Monheim ist das der häufigste Streitpunkt überhaupt."
+      },
+      {
+        "frage": "Meine Ladung hat sich gelöst und Schäden verursacht — was folgt daraus?",
+        "antwort": "Für die Ladungssicherung ist der Fahrer verantwortlich, daneben je nach Konstellation auch Halter und Verlader. Entsteht dadurch ein Fremdschaden, reguliert ihn Ihre Haftpflichtversicherung; der Schaden am eigenen Fahrzeug ist ein Kaskofall. Für die Bewertung ist wichtig, ob die Ladung von innen gegen die Karosserie gedrückt hat — solche Schäden an Ladekante, Trennwand und Innenverkleidung werden bei einer reinen Außenbesichtigung übersehen. Nennen Sie den Vorgang deshalb aktiv beim Termin in Monheim."
+      },
+      {
+        "frage": "Ein Lieferfahrzeug hat beim Rangieren mein Auto beschädigt und niemand hat es gesehen — was hilft?",
+        "antwort": "Die Anstoßhöhe. Kleintransporter und Lieferfahrzeuge treffen einen Pkw meist oberhalb der Stoßfängerzone, häufig mit Spuren von Ecken, Ladebordwänden oder Außenspiegeln in ungewöhnlicher Höhe. Diese Merkmale grenzen den Fahrzeugtyp ein, auch wenn niemand etwas gesehen hat. Fragen Sie in der Nachbarschaft nach Kameras und melden Sie den Fall der Polizei; im Berliner Viertel und in der Altstadt sind Lieferzeiten oft regelmäßig, was die Eingrenzung erleichtert."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Monheim am Rhein: vom Berliner Viertel über die Altstadt bis Baumberg. Als tiefstgelegene Stadt im Kreis Mettmann liegt Monheim unmittelbar am Strom — mit allem, was Hochwasser und Nebel aus der Rheinniederung für Fahrzeuge bedeuten.",
+    "topografieAnker": "Monheim am Rhein liegt auf 40 Metern über dem Meeresspiegel unmittelbar am rechten Rheinufer und ist damit die tiefstgelegene Stadt im Kreis Mettmann. Das Stadtgebiet ist flach, die Rheinaue reicht bis an die Wohnbebauung heran. Eine Autobahn quert den Stadtkern nicht: Die A59 verläuft am östlichen Stadtrand, das Autobahnkreuz Monheim-Süd verbindet sie mit der A542 Richtung A3."
+  },
+  "ratingen": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Ratingen-Mitte",
+          "Ost",
+          "West",
+          "Tiefenbroich"
+        ]
+      },
+      {
+        "name": "Lintorf",
+        "ortsteile": [
+          "Lintorf",
+          "Breitscheid",
+          "Eggerscheidt"
+        ]
+      },
+      {
+        "name": "Hösel",
+        "ortsteile": [
+          "Hösel",
+          "Homberg",
+          "Schwarzbach"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Ratingen-Ost",
+        "Kreuz Breitscheid",
+        "Anschlussstelle Ratingen-Schwarzbach"
+      ],
+      "autobahnen": [
+        "A3",
+        "A44",
+        "A52"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B227"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht die A3 am Kreuz Ratingen-Ost so anspruchsvoll?",
+        "antwort": "Am Kreuz Ratingen-Ost zweigt die A44 Richtung Flughafen von der A3 ab, einer der meistbefahrenen Achsen Deutschlands. Verkehr aus den Gewerbegebieten und Flughafenverkehr fädeln in kurzen Abständen ein; Streifschäden beim Auffädeln aus der Beschleunigungsspur sind die häufigste Folge. Bei der Aufnahme solcher Flankenschäden lohnt der Blick auf die Fügestellen: Werksseitig gesetzte Schweißpunkte liegen in gleichmäßigem Abstand und sind unter dem Nahtdichtstoff sauber überzogen. Unregelmäßige Punktreihen, Schleifspuren oder frisch aufgetragene Dichtmasse weisen auf eine frühere Instandsetzung hin. Das ist für die Abgrenzung wichtig, weil ein bereits gerichtetes Seitenteil sich bei erneuter Belastung anders verhält als ein unberührtes."
+      },
+      {
+        "frage": "Wie lässt sich ein Parkplatzschaden in den Gewerbegebieten von Tiefenbroich zuordnen?",
+        "antwort": "In Tiefenbroich und im Ratinger Osten liegen große Büro- und Gewerbeparks; auf ihren Stellplätzen entstehen viele Schäden ohne Zeugen, oft beim Ein- und Ausparken zwischen eng gesetzten Markierungen. Die Zuordnung gelingt über die Kompatibilitätsprüfung: Anstoßhöhe, Verlaufsrichtung und Form des Schadens müssen zu dem Fahrzeug passen, das als Verursacher benannt wird. Eine Schramme, die sechzig Zentimeter über der Fahrbahn liegt, kann nicht von einem tief angesetzten Stoßfänger stammen. Hilfreich sind zudem Fremdlackantragungen, die sich auch nach dem Waschen unter Vergrößerung nachweisen lassen. Ohne diesen Abgleich bleibt bei einem gemeldeten Parkschaden offen, ob Umfang und Ereignis überhaupt zusammenpassen."
+      },
+      {
+        "frage": "Was passiert in Lintorf und Hösel, wenn auf den Autobahnen nichts mehr geht?",
+        "antwort": "Ratingen ist von A3, A44 und A52 umschlossen. Steht eine davon, sucht sich der Verkehr den Weg durch die Ortsdurchfahrten von Lintorf, Breitscheid und Hösel — Straßen, die für dieses Aufkommen nicht ausgelegt sind. Es entsteht eine Vielzahl langsamer Anstöße im Kolonnen- und Rangierverkehr. Bei Kälte verhalten sich die Kunststoffverkleidungen dabei anders als im Sommer: Der Werkstoff wird spröder, sodass ein Stoß, der im Juli eine Delle hinterlässt, im Januar zum Riss oder zum Ausbruch an der Befestigung führt. Für die Bewertung heißt das, dass die Jahreszeit den Reparaturweg beeinflusst — geklebt oder verschweißt werden darf nur, was der Hersteller dafür freigibt."
+      },
+      {
+        "frage": "Im Baustellenbereich hat es gekracht — spielt die Absperrung eine Rolle?",
+        "antwort": "Ja, und zwar erheblich. Verengte Fahrstreifen, versetzte Markierungen und wechselnde Führungen ändern den Sorgfaltsmaßstab, und eine mangelhafte Absicherung kann eine eigene Haftung des Bauträgers begründen. Fotografieren Sie deshalb die Verkehrsführung mit Schildern und Markierung, bevor sie umgebaut wird — sie ist am nächsten Tag oft eine andere. Am Fahrzeug sind es meist Streifschäden über die gesamte Seite, wie sie an Engstellen im Straßennetz von Ratingen entstehen."
+      },
+      {
+        "frage": "Ich bin einem Tier ausgewichen und gegen ein Hindernis gefahren — zahlt das die Versicherung?",
+        "antwort": "Bei einem Ausweichmanöver ohne Berührung gibt es keinen Zusammenstoß, an dem sich der Hergang festmachen lässt. Die Teilkasko leistet in solchen Fällen nur unter engen Voraussetzungen, meist wenn das Ausweichen geboten war. Umso wichtiger sind die Spuren: Bremsspuren, Reifenabrieb, Bodenkontakt am Unterboden und die Endlage. In Homberg und Eggerscheidt mit ihren schmalen Straßen ohne Seitenstreifen sind Böschung und Graben die häufigsten Anstoßpunkte."
+      },
+      {
+        "frage": "Wie unterscheidet sich ein Schaden auf einem Firmengelände von einem auf der Straße?",
+        "antwort": "Auf nicht öffentlich zugänglichem Betriebsgelände gilt die Straßenverkehrsordnung nicht unmittelbar, sondern über die allgemeinen Sorgfaltspflichten und die betriebliche Verkehrsregelung. Das verschiebt die Beweisführung: Statt Vorfahrtsregeln zählen Hallenpläne, Wegeführung und Anweisungen. Für die Bewertung selbst ändert sich nichts. Kommt ein Flurförderzeug ins Spiel, ist die Anstoßhöhe der entscheidende Hinweis — ein Punkt, der in den Gewerbelagen rund um Ratingen West regelmäßig aufkommt."
+      },
+      {
+        "frage": "Beim Rechtsabbiegen habe ich einen Radfahrer übersehen — was wird jetzt geprüft?",
+        "antwort": "Der abbiegende Verkehr muss dem geradeaus fahrenden Rad- und Fußverkehr den Vortritt lassen, und der tote Winkel entlastet nicht automatisch. Geprüft wird, ob eine Radfurt vorhanden war, wie sie markiert ist und aus welcher Richtung der Anstoß kam. Am Fahrzeug zeigen sich die Spuren meist an der rechten Front oder der Beifahrertür. Halten Sie die Kreuzung mit ihrer Markierung fest — an mehrarmigen Knoten in Ratingen-Mitte ist gerade das später schwer zu rekonstruieren."
+      },
+      {
+        "frage": "Der Unfallgegner will die Sache ohne Versicherung regeln — sollte ich darauf eingehen?",
+        "antwort": "Nur mit belastbarer Grundlage. Ohne Gutachten kennt niemand die tatsächliche Höhe, und verdeckte Schäden an Trägern, Sensorik oder Achsgeometrie tauchen erst in der Werkstatt auf — dann ist die Barzahlung längst angenommen. Lassen Sie den Schaden aufnehmen, bevor Sie sich entscheiden; danach steht es Ihnen frei. Notieren Sie in jedem Fall die vollständigen Daten des Gegners, ob in Lintorf, Hösel oder anderswo, damit Sie später nicht ohne Anspruchsgegner dastehen."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Breitscheid, Parkschaden in der Altstadt oder Zusammenstoß in Lintorf — der Sachverständige kommt zu Ihnen nach Ratingen.",
+    "topografieAnker": "Ratingen liegt nordöstlich von Düsseldorf am Rand des Bergischen Landes; A3, A44 und A52 umschließen das Stadtgebiet."
+  },
+  "meerbusch": {
+    "stadtbezirke": [
+      {
+        "name": "Büderich",
+        "ortsteile": [
+          "Bovert"
+        ]
+      },
+      {
+        "name": "Osterath",
+        "ortsteile": []
+      },
+      {
+        "name": "Lank-Latum",
+        "ortsteile": []
+      },
+      {
+        "name": "Strümp",
+        "ortsteile": []
+      },
+      {
+        "name": "Ossum-Bösinghoven",
+        "ortsteile": []
+      },
+      {
+        "name": "Langst-Kierst",
+        "ortsteile": []
+      },
+      {
+        "name": "Nierst",
+        "ortsteile": []
+      },
+      {
+        "name": "Ilverich",
+        "ortsteile": []
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Meerbusch (A44/A57)",
+        "Anschlussstelle Büderich (A52)",
+        "Anschlussstelle Bovert (A57)",
+        "Anschlussstelle Lank-Latum (A44)",
+        "Anschlussstelle Osterath (A44)"
+      ],
+      "autobahnen": [
+        "A44",
+        "A57",
+        "A52"
+      ],
+      "bundesstrassen": []
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist die Erntezeit auf den Landstraßen zwischen Nierst, Ilverich und Lank-Latum eine eigene Unfallursache?",
+        "antwort": "Rund siebzig Prozent der Meerbuscher Fläche sind Acker, Wald und Wasser, und die Verbindungsstraßen zwischen Nierst, Ilverich und Lank-Latum führen mitten hindurch. In der Ernte- und Rübenkampagne tragen Traktoren und Anhänger feuchte Erde auf den Asphalt; auf dieser Schicht verliert ein Pkw bei Regen schon bei mäßigem Tempo die Bodenhaftung. Dazu kommen langsame, breite Gespanne, die auf schmaler Fahrbahn überholt werden. Die Schadenbilder reichen vom Abkommen in den Straßengraben bis zum Streifkontakt mit Anbaugeräten, deren scharfe Kanten Türen und Kotflügel tief aufreißen. Nach einer Grabenfahrt gehört das Fahrzeug auf die Hebebühne — Tankschutz, Leitungen und Abgasanlage tragen den Schaden, nicht das Blech."
+      },
+      {
+        "frage": "Warum spielt Seitenwind auf der A44 bei Ilverich eine Rolle?",
+        "antwort": "Die A44 verlässt Meerbusch bei Ilverich über die Rheinbrücke, und der Übergang von der windgeschützten Auenlandschaft auf das freie Bauwerk erfolgt abrupt. Böen greifen dort seitlich an, was vor allem hohe Aufbauten trifft: Kastenwagen, Wohnwagen und leere Anhänger reagieren mit einem Ausbrechen der Hinterachse, und wer gegensteuert, landet häufig an der Schutzplanke. Charakteristisch ist ein langgezogener Streifschaden über die gesamte Fahrzeugflanke, oft mit gestauchtem Radlauf am Kontaktpunkt. Bei Gespannen ist zusätzlich die Anhängerkupplung samt Trägerrahmen zu begutachten: Die Kräfte beim Ausbrechen wirken auf Kugelhals und Verschraubung am Heckträger, und ein verzogener Träger zeigt sich nicht mit bloßem Auge, sondern erst im Vergleich mit den Sollmaßen des Herstellers."
+      },
+      {
+        "frage": "Was bedeutet die Abstufung der alten B9 zur Landesstraße für Unfälle in Büderich?",
+        "antwort": "Durch Meerbusch führt seit Januar 2008 keine Bundesstraße mehr: Die frühere B9 und die B222 wurden zur Landesstraße 137 herabgestuft. An der Verkehrsmenge hat das wenig geändert. Die Achse durch Büderich bleibt die Hauptverbindung Richtung Düsseldorf und Neuss und trägt weiter Pendler- und Schwerverkehr, nun aber mit Ortsdurchfahrtscharakter, Querungsstellen und Grundstückszufahrten. Die Folge sind einbiegende und kreuzende Kollisionen statt reiner Längsunfälle. Getroffen wird meist die vordere Seitenpartie mit Kotflügel, Scheinwerfer und Radaufhängung. Da moderne Scheinwerfer Sensorik und ein eigenes Steuergerät für die Leuchtweitenregulierung enthalten, wiegt ihr Ersatz schwerer, als die sichtbare Delle vermuten lässt. Ähnliches gilt für die Radaufhängung: Nach einem seitlichen Anstoß auf das Vorderrad ist häufiger der Achsschenkel verzogen als der Kotflügel eingedrückt."
+      },
+      {
+        "frage": "Bei Nebel auf freier Strecke hat es gekracht — was zählt dann?",
+        "antwort": "Die Sichtweite bestimmt die zulässige Geschwindigkeit, und wer schneller fährt, als er sehen kann, trägt regelmäßig die Hauptschuld. Beweisbar ist die Sicht später kaum, deshalb sind Uhrzeit, Ort und ein Foto der Situation so wertvoll. Zwischen den Ortslagen von Meerbusch verlaufen die Straßen offen durch die Feldflur, wo sich Nebel anders verhält als in bebautem Gebiet. Halten Sie außerdem fest, ob Nebelschlussleuchten in Betrieb waren — auch das ist ein Anhaltspunkt."
+      },
+      {
+        "frage": "Ich wurde von tiefstehender Sonne geblendet — entlastet mich das?",
+        "antwort": "In aller Regel nicht. Blendung ist vorhersehbar, wer geblendet wird, muss die Geschwindigkeit anpassen oder anhalten. Für die Aufnahme ist die Fahrtrichtung dennoch wichtig, weil sie den Hergang plausibel macht: Ein Auffahrschaden bei tiefstehender Sonne in Fahrtrichtung West sieht in der Akte anders aus als ohne diesen Umstand. Notieren Sie deshalb Uhrzeit und Richtung, etwa auf der Strecke zwischen Osterath und Büderich, und überlassen Sie die Bewertung dem Gutachten."
+      },
+      {
+        "frage": "Steinschlag in der Windschutzscheibe — reparieren oder tauschen?",
+        "antwort": "Das entscheidet die Lage, nicht die Größe allein. Einschläge im Sichtfeld des Fahrers und Schäden nahe am Scheibenrand schließen eine Reparatur meist aus. Sitzt hinter der Scheibe der Halter einer Frontkamera, kommt nach dem Tausch zwingend eine Kalibrierung hinzu. Reguliert wird über die Teilkasko, für die Reparatur entfällt die Selbstbeteiligung oft ganz. Wer viel zwischen Lank-Latum und der Autobahn unterwegs ist, sollte einen frischen Einschlag nicht liegen lassen — er reißt weiter."
+      },
+      {
+        "frage": "Ein Motorrad war beteiligt — was ist bei der Bewertung anders?",
+        "antwort": "Vieles. Ein Motorrad hat keine Knautschzone, die Energie geht direkt in Rahmen und Gabel, und ein verzogener Rahmen bedeutet fast immer wirtschaftlichen Totalschaden. Verkleidung, Koffersatz und Auspuffanlage machen zudem einen ungewöhnlich hohen Anteil am Wert aus. Auch Schutzkleidung kann ersatzfähig sein. Auf den kurvigen Verbindungen zwischen den Meerbuscher Ortslagen sind Schräglagenstürze mit Folgeschäden an Fußrasten und Lenkerenden das häufigste Bild."
+      },
+      {
+        "frage": "Der Unfallgegner macht keine oder falsche Angaben — was kann ich tun?",
+        "antwort": "Rufen Sie die Polizei; das ist der einzige Weg, die Personalien verbindlich feststellen zu lassen. Fotografieren Sie parallel Kennzeichen, Fahrzeug und wenn möglich die Papiere, und sprechen Sie Zeugen direkt an, statt auf spätere Meldungen zu hoffen. Auch ohne vollständige Angaben lässt sich über das Kennzeichen der Versicherer ermitteln. Für das Fahrzeug selbst ändert sich nichts: In Büderich wie in jeder anderen Ortslage wird der Schaden dokumentiert, sobald Sie den Auftrag erteilen."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Meerbusch: von Büderich und Osterath über Strümp bis Lank-Latum, Nierst und Ilverich. Zwischen dem Autobahnkreuz Meerbusch und den weiten Agrarflächen am Rheinufer ist das Unfallgeschehen zweigeteilt.",
+    "topografieAnker": "Meerbusch liegt linksrheinisch zwischen Düsseldorf und Krefeld und misst zwölf Kilometer von Nord nach Süd. Rund siebzig Prozent der Fläche sind Landwirtschaft, Wald und Wasser; die acht Stadtteile liegen als eigenständige Ortslagen darin verstreut. A44 und A57 kreuzen sich im Stadtgebiet. Bundesstraßen gibt es seit der Abstufung von B9 und B222 zur Landesstraße 137 im Januar 2008 nicht mehr."
+  },
+  "grevenbroich": {
+    "stadtbezirke": [
+      {
+        "name": "Mitte",
+        "ortsteile": [
+          "Stadtmitte",
+          "Neuenhausen",
+          "Elsen",
+          "Gustorf"
+        ]
+      },
+      {
+        "name": "Nord",
+        "ortsteile": [
+          "Kapellen",
+          "Hemmerden",
+          "Wevelinghoven"
+        ]
+      },
+      {
+        "name": "Süd",
+        "ortsteile": [
+          "Frimmersdorf",
+          "Neurath",
+          "Noithausen",
+          "Allrath"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Anschlussstelle Grevenbroich"
+      ],
+      "autobahnen": [
+        "A46"
+      ],
+      "bundesstrassen": [
+        "B59",
+        "B230"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Welche Rolle spielt das Tagebauumfeld bei Neurath und Frimmersdorf für die Schadenaufnahme?",
+        "antwort": "Der Nordwesten von Grevenbroich ist vom Tagebaurand und den Kraftwerksanlagen bei Neurath und Frimmersdorf geprägt. Auf den Zufahrts- und Werkstraßen liegt regelmäßig feiner Staub, dazu kommt Erdeintrag von den Feldern. Fahrzeuge, die dort täglich unterwegs sind, tragen deshalb häufig eine matte, fein verkratzte Lackoberfläche — und genau das erschwert die Abgrenzung nach einem Unfall. Hier hilft die Messung der Lackschichtdicke: Weicht sie an einem Bauteil deutlich vom Rest der Karosserie ab, wurde dort schon einmal lackiert. So lässt sich trennen, was aus dem aktuellen Ereignis stammt und was Vorschaden ist. Ohne diese Trennung bleibt der Umfang später angreifbar."
+      },
+      {
+        "frage": "Warum sind die Autobahnzufahrten rund um Grevenbroich anspruchsvoll?",
+        "antwort": "Die A46 quert das Grevenbroicher Stadtgebiet und bindet es über die Anschlussstelle Grevenbroich an das Fernstraßennetz an; die Zufahrten führen frei über offenes Gelände am Rand des Tagebaus. Auffahren, Verflechten und Ausfädeln folgen dabei dicht aufeinander, und auf den übersichtlichen Geraden wird schneller gefahren, als es die kurzen Fädelstrecken hergeben. Typisch ist der seitliche Anstoß gegen das vordere Rad beim Spurwechsel. Diese Konstellation ist heikel, weil die Kraft über Rad und Spurstange direkt ins Lenkgetriebe läuft. Ein verbogener Spurstangenkopf ist sichtbar, ein überlastetes Lenkgetriebe nicht — es zeigt sich erst im Spiel oder in ungleichmäßiger Lenkunterstützung. Nach jedem Anstoß auf Radhöhe gehört die Lenkung geprüft, nicht nur die Achsgeometrie."
+      },
+      {
+        "frage": "Warum sind die Erftbrücken bei Wevelinghoven und Kapellen im Winter kritisch?",
+        "antwort": "Brücken kühlen von unten aus und sind überfroren, wenn die anschließende Straße noch frei ist. Auf den Erftquerungen zwischen Wevelinghoven, Kapellen und Hemmerden trifft das mit der Feuchtigkeit aus der Flussaue zusammen — Reifglätte entsteht dort früher als im übrigen Stadtgebiet. Bricht ein Fahrzeug aus, folgt selten ein einzelner Anstoß, sondern eine Drehung mit mehreren Kontakten an Leitplanke, Bordstein und womöglich einem zweiten Fahrzeug. Für die Bewertung ist die Reihenfolge entscheidend, und sie lässt sich an Materialübertragungen ablesen: Fremdlack, Gummiabrieb und Metallspuren haften in unterschiedlichen Höhen. Diese Spuren zu sichern, bevor das Fahrzeug gewaschen oder abgeschleppt wird, entscheidet über die spätere Nachvollziehbarkeit."
+      },
+      {
+        "frage": "Die Fahrbahn war durch Erde oder Ernteabfall verschmutzt — haftet dafür jemand?",
+        "antwort": "Ja, wer eine Straße verschmutzt, muss sie reinigen oder die Gefahr absichern; das gilt für landwirtschaftliche Fahrzeuge ebenso wie für Baustellenverkehr. Der Nachweis ist die Hürde: Ohne Kennzeichen oder Zeugen bleibt kein Anspruchsgegner. Fotografieren Sie deshalb die Verschmutzung, ihre Ausdehnung und die Spur, aus der sie stammt. Auf den Verbindungsstraßen zwischen Elsen, Gustorf und Neuenhausen ist das im Herbst der Unterschied zwischen Haftungsfall und Eigenschaden."
+      },
+      {
+        "frage": "Der Unfall passierte nachts auf einer unbeleuchteten Strecke — was ändert das?",
+        "antwort": "Vor allem die Beweislage. Ohne Beleuchtung sind Endlage und Spuren schlechter zu erkennen, und was nicht fotografiert wird, ist am Morgen verschwunden. Nutzen Sie das Fahrzeuglicht und fotografieren Sie großflächig, nicht nur die Delle. Wichtig ist außerdem, ob die eigene Beleuchtung vollständig funktioniert hat — ein defektes Rücklicht kann eine Mithaftung begründen. Auf den Strecken zwischen den Grevenbroicher Ortsteilen ist das ein häufiger Streitpunkt."
+      },
+      {
+        "frage": "An einer Kreuzung ohne Ampel oder Schilder ist es passiert — wer hatte Vorfahrt?",
+        "antwort": "Dort gilt rechts vor links, und zwar auch dann, wenn eine Straße breiter oder scheinbar wichtiger wirkt. Streitig wird meist, ob eine der Straßen als untergeordnet erkennbar war. Für die Klärung zählt die Anstoßstelle: Ein Treffer an der Fahrerseite spricht für ein anderes Bild als einer an der Front. Halten Sie die Kreuzung samt Sichtverhältnissen fest — in gewachsenen Ortslagen wie Wevelinghoven und Hemmerden nehmen Hecken und Mauern die Sicht."
+      },
+      {
+        "frage": "Ein landwirtschaftliches Fahrzeug war beteiligt — worauf kommt es an?",
+        "antwort": "Auf Abmessungen und Anbauten. Traktoren und ihre Anhänger sind breiter und höher, als der Gegenverkehr erwartet, und Anbaugeräte ragen seitlich heraus; entsprechend liegen die Anstoßspuren am Pkw oft ungewöhnlich hoch oder weit außen. Notieren Sie neben dem Kennzeichen auch das Anbaugerät, denn es entscheidet über den Hergang. Ein solcher Schaden wird über die Betriebshaftpflicht oder die Kfz-Haftpflicht des Halters reguliert — in Allrath und Noithausen ebenso wie auf der B59."
+      },
+      {
+        "frage": "Mein Fahrzeug wurde abgeschleppt und ich weiß nicht, wohin — wie geht es weiter?",
+        "antwort": "Fragen Sie bei der Polizei nach, welcher Abschleppdienst beauftragt wurde; von dort erfahren Sie den Abstellort. Wichtig ist Tempo, denn Standkosten laufen täglich weiter und werden nur ersetzt, soweit sie erforderlich waren. Wir nehmen das Fahrzeug auch auf dem Verwahrhof auf, ein Transport vor der Begutachtung ist nicht nötig. Lassen Sie sich den Abschleppbeleg mit Datum, Strecke und Fahrzeugdaten aushändigen, sonst wird die Position später bestritten — in Grevenbroich wie überall."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall auf der A46, Parkschaden in der Innenstadt oder Zusammenstoß in Kapellen — der Sachverständige kommt zu Ihnen nach Grevenbroich.",
+    "topografieAnker": "Grevenbroich liegt an der Erft zwischen Düsseldorf und Mönchengladbach; die A46 quert das Stadtgebiet, die A540 zweigt Richtung Jackerath ab."
+  }
+}

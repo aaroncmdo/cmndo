@@ -1,0 +1,429 @@
+{
+  "kerpen": {
+    "stadtbezirke": [
+      {
+        "name": "Kerpen",
+        "ortsteile": [
+          "Kerpen-Mitte",
+          "Mödrath",
+          "Brüggen",
+          "Balkhausen"
+        ]
+      },
+      {
+        "name": "Sindorf",
+        "ortsteile": [
+          "Sindorf",
+          "Buir",
+          "Manheim"
+        ]
+      },
+      {
+        "name": "Horrem",
+        "ortsteile": [
+          "Horrem",
+          "Neu-Bottenbroich",
+          "Götzenkirchen"
+        ]
+      },
+      {
+        "name": "Türnich",
+        "ortsteile": [
+          "Türnich",
+          "Blatzheim",
+          "Langenich"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Kreuz Kerpen",
+        "Anschlussstelle Kerpen-Sindorf",
+        "Anschlussstelle Kerpen-Türnich"
+      ],
+      "autobahnen": [
+        "A4",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B55",
+        "B264",
+        "B477"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Was macht das Zusammentreffen von B264 und B477 in Blatzheim anspruchsvoll?",
+        "antwort": "In Kerpen-Blatzheim kreuzen sich mit der B264 und der B477 zwei Bundesstraßen, die beide Durchgangsverkehr durch die Kölner Bucht führen. An solchen Knoten am Ortsrand wird zügig gefahren, und wer wartepflichtig ist, muss Lücken im Querverkehr über größere Entfernung abschätzen. Fehleinschätzungen enden im rechtwinkligen Zusammenstoß, bei dem das querende Fahrzeug voll auf die Flanke getroffen wird. Diese Anstöße gehören zu den energiereichsten überhaupt, weil zwischen den Fahrzeugen keine Knautschzone liegt. Zur Begutachtung gehört deshalb der Blick auf Bodenblech und Mitteltunnel: Wird die Fahrgastzelle seitlich eingedrückt, verzieht sich der Boden mit, und das zeigt sich an der Türunterkante früher als am Dachrahmen."
+      },
+      {
+        "frage": "Was ist auf den Landstraßen am Tagebaurand zwischen Buir und Manheim zu beachten?",
+        "antwort": "Im Westen von Kerpen liegen ein Teil des Tagebaus Hambach und ein großer Teil des Hambacher Forsts. Der alte Ortsteil Manheim sollte dem Tagebau weichen und wurde umgesiedelt; die Bewohner zogen nach Kerpen-Dickbusch, das seit 2025 wieder Manheim heißt. Auf den Landstraßen zwischen Buir und dem Tagebaurand fährt seither vor allem Werk- und Rückbauverkehr, also breite, schwere Fahrzeuge auf Strecken ohne Standstreifen. Beim Begegnen weicht man unwillkürlich nach rechts aus. Streift ein Fahrzeug dabei die unbefestigte Bankette, zieht es an der Vorderachse aus der Spur; typische Folge ist ein Anprall mit der Fahrzeugecke, bei dem Querlenker und Radträger die Energie aufnehmen. Ob die Achse noch maßhaltig ist, zeigt erst der Seitenvergleich."
+      },
+      {
+        "frage": "Warum sind Parkschäden an den Bahnhöfen in Sindorf und Horrem ein eigenes Thema?",
+        "antwort": "Sindorf und Horrem sind Pendlerbahnhöfe Richtung Köln, und die Stellflächen dort sind morgens binnen kurzer Zeit belegt. Wer spät kommt, rangiert unter Zeitdruck in enge Restlücken. Entsprechend häufig sind Anstöße an Nachbarfahrzeugen, die den ganzen Tag unbemerkt bleiben, weil der Verursacher längst im Zug sitzt. In Kerpen wie überall gilt dann: Ohne Gegenüber zählt allein die Spurenlage. Fremdlackantragungen, die Höhe der Beschädigung über der Fahrbahn und die Form des Eindrucks lassen Rückschlüsse auf Fahrzeugklasse und Bewegungsrichtung zu. Die Sicherung dieser Antragung gehört deshalb zur Aufnahme — sie ist oft das Einzige, was von dem anderen Fahrzeug überhaupt zurückbleibt. Nachholen lässt sie sich nicht, denn mit der Instandsetzung verschwindet die Spur endgültig."
+      },
+      {
+        "frage": "Was ist am Kreuz Kerpen für die Schadenaufnahme wichtig?",
+        "antwort": "Am Kreuz Kerpen trifft die A61 auf die A4, beide mit hohem Lkw-Anteil und kurzen Verflechtungsstrecken. Typisch sind Auffahrschäden im Stop-and-Go und Kollisionen kurz vor der Verzweigung, wenn jemand die Ausfahrt zu spät erkennt. Bei einem Heckanstoß lohnt der genaue Blick nach hinten: Heckblech, Kofferraumboden und Längsträger nehmen Energie auf, ohne dass außen viel zu sehen sein muss."
+      },
+      {
+        "frage": "Warum stimmen Navigationsdaten am Tagebaurand nicht immer?",
+        "antwort": "Im Westen von Kerpen verändert der Tagebau die Straßenführung: Verbindungen werden gekappt, Ersatztrassen gebaut, Ortslagen umgesiedelt. Kartenmaterial und Navigation hinken dem hinterher. Für die Unfallaufnahme heißt das, dass man die tatsächliche Örtlichkeit dokumentieren muss — Beschilderung, Fahrbahnbreite, Sichtverhältnisse — statt sich auf eine Karte zu verlassen, die den Stand von gestern zeigt."
+      },
+      {
+        "frage": "Wer haftet für einen Schaden durch ein Schlagloch oder eine ungesicherte Baustelle?",
+        "antwort": "Für den Zustand der Fahrbahn ist der jeweilige Baulastträger verantwortlich — bei den Straßen in Kerpen je nach Einstufung die Stadt, der Kreis, das Land oder der Bund. Ein Anspruch entsteht dadurch aber nicht automatisch: Es muss um eine Gefahr gehen, die für Sie nicht rechtzeitig erkennbar war und die der Träger bei zumutbarer Kontrolle hätte beseitigen oder absichern müssen. Deshalb zählt die Aufnahme vor Ort — Tiefe und Ausdehnung der Schadstelle, Beschilderung, Sichtverhältnisse, Tageszeit. Ohne sie bleibt am Ende nur die eigene Kaskoversicherung."
+      },
+      {
+        "frage": "Worauf ist auf der B264 durch Kerpen zu achten?",
+        "antwort": "Die B264 trägt in Kerpen Durchgangs- und Ortsverkehr zugleich, mit Ampeln, Grundstückszufahrten und abbiegendem Lieferverkehr auf derselben Strecke. Anders als auf der Autobahn geht es hier fast nie um Abstand, sondern um Vorfahrt und Sicht: Wer durfte fahren, wer hat wen wann gesehen. Das verlangt eine andere Dokumentation — Sichtachsen und Ampelstellung statt Bremsweg."
+      }
+    ],
+    "heroAnker": "Ob Auffahrunfall am Kreuz Kerpen, Parkschaden in Horrem oder Zusammenstoß in Sindorf — der Sachverständige kommt zu Ihnen nach Kerpen.",
+    "topografieAnker": "Kerpen liegt in der Kölner Bucht westlich der Stadt; am Kreuz Kerpen treffen A4 und A61 zusammen."
+  },
+  "erftstadt": {
+    "stadtbezirke": [
+      {
+        "name": "Liblar und Ville-Rand",
+        "ortsteile": [
+          "Liblar",
+          "Blessem",
+          "Bliesheim",
+          "Kierdorf",
+          "Köttingen"
+        ]
+      },
+      {
+        "name": "Lechenich",
+        "ortsteile": [
+          "Lechenich",
+          "Konradsheim",
+          "Ahrem"
+        ]
+      },
+      {
+        "name": "Nördliche Stadtteile",
+        "ortsteile": [
+          "Gymnich",
+          "Dirmerzheim"
+        ]
+      },
+      {
+        "name": "Südliche Stadtteile in der Börde",
+        "ortsteile": [
+          "Erp",
+          "Friesheim",
+          "Borr",
+          "Scheuren",
+          "Niederberg",
+          "Herrig",
+          "Frauenthal",
+          "Mellerhöfe"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Bliesheim (A1/A61)",
+        "Autobahndreieck Erfttal",
+        "B265 in Liblar"
+      ],
+      "autobahnen": [
+        "A1",
+        "A61"
+      ],
+      "bundesstrassen": [
+        "B265"
+      ]
+    },
+    "unfallHotspots": [],
+    "lokaleFaqs": [
+      {
+        "frage": "Warum ist der Abschnitt zwischen Kreuz Bliesheim und Dreieck Erfttal besonders unfallträchtig?",
+        "antwort": "Zwischen dem Autobahnkreuz Bliesheim im Süden Erftstadts und dem Dreieck Erfttal bei Blessem laufen A1 und A61 auf einer gemeinsamen Trasse. Zwei Fernverkehrsströme teilen sich dort dieselben Fahrstreifen und müssen sich an beiden Enden wieder sortieren. Wer die falsche Spur erwischt, korrigiert kurz vor dem Trennpunkt und zwingt den Nachfolgeverkehr zum Bremsen. Genau in diesen Verflechtungsbereichen häufen sich späte Spurwechsel: typisch sind Streifschäden über Tür und Kotflügel sowie Auffahrschäden im Rückstau. Beides trifft bei aktuellen Fahrzeugen die Assistenzsensorik — Radar hinter dem Stoßfänger, Kamera an der Frontscheibe, Totwinkelsensoren in den Ecken des Hecks. Nach der Instandsetzung ist deren Kalibrierung eine eigene Position, die im Gutachten benannt sein muss. Ohne diesen Hinweis misst ein reparierter Wagen anschließend falsch."
+      },
+      {
+        "frage": "Was ist bei Unfällen auf der B265 in Erftstadt-Liblar zu beachten?",
+        "antwort": "Die B265 verbindet Erftstadt über Hürth mit Köln und dient zugleich als schnelle Querverbindung zwischen A4 und A1/A61. In Liblar bündelt sie damit Fernverkehr und örtlichen Ziel- und Quellverkehr auf derselben Achse. Ortskundige biegen zügig ab, Durchreisende suchen ihre Ausfahrt — die Geschwindigkeitsunterschiede auf derselben Spur sind erheblich. Wo Abbiegespuren, Grundstückszufahrten und Ampeln aufeinandertreffen, ist der Hergang häufiger strittig als auf der Autobahn. Für die Aufnahme heißt das: Endstellungen, Splitterfelder und Anstoßhöhen gehören dokumentiert, nicht nur der Schaden am eigenen Fahrzeug. Auch die Stellung der Räder und der Zustand der Beleuchtung gehören ins Bild, weil beides später bestritten wird. Gerade die Anstoßhöhe entscheidet darüber, welche Version des Ablaufs technisch möglich war."
+      },
+      {
+        "frage": "Erftstadt-Blessem wurde im Juli 2021 überflutet — worauf kommt es bei Wasserschäden am Fahrzeug an?",
+        "antwort": "Die Erft durchzieht das Stadtgebiet von Süden nach Norden, und in Blessem hat das Hochwasser gezeigt, wie schnell Fahrzeuge im Uferbereich betroffen sind. Ein Wasserschaden ist technisch etwas anderes als ein Aufprall: Entscheidend ist die Eintauchhöhe. Sie lässt sich an Schlammrändern, durchfeuchtetem Dämmmaterial und Wasser in Hohlräumen ablesen. Kritisch sind Steuergeräte im Fußraum, Sitzbelegungssensorik, Airbag-Elektronik und bei Elektrofahrzeugen die Hochvoltkomponenten im Unterboden. Ein Fahrzeug, das im Wasser stand, sollte vor der Prüfung nicht mehr gestartet werden — ein Startversuch kann aus einem Elektronikschaden einen Motorschaden machen. Solche Schäden entwickeln sich zudem weiter: Korrosion an Steckverbindern zeigt sich oft erst Wochen später. Die Dokumentation der Eintauchhöhe ist deshalb der wichtigste Befund der Erstbesichtigung."
+      },
+      {
+        "frage": "Ein Ast beschädigt das geparkte Auto — wer kommt dafür auf?",
+        "antwort": "Das hängt daran, warum der Ast nachgegeben hat. Bei einem echten Sturm gilt es als Naturereignis, dann greift die Teilkasko, sofern vorhanden. War der Baum dagegen erkennbar krank oder morsch, trifft den Eigentümer eine Verkehrssicherungspflicht — in den waldnahen Lagen am Ville-Rand von Erftstadt kann das die Stadt, das Land oder ein privater Eigentümer sein. Entscheidend sind Fotos vom Bruchstück und vom Stamm, weil sich daran der Zustand des Holzes zeigt, sowie die Windstärke des Tages. Wer nur das Auto fotografiert und den Ast entsorgen lässt, verliert den Nachweis."
+      },
+      {
+        "frage": "Wann ist nach einem Unfall eine Rahmenvermessung nötig?",
+        "antwort": "Bei den Geschwindigkeiten, die auf den Verbindungen rund um Erftstadt gefahren werden, verteilt sich die Aufprallenergie über die ganze Fahrzeugstruktur. Längsträger können sich stauchen und Federbeindome verschieben, ohne dass es außen auffällt. Ob die Karosserie noch im Sollmaß liegt, beantwortet keine Sichtprüfung, sondern eine Vermessung mit Protokoll gegen die Herstellerdaten."
+      },
+      {
+        "frage": "Was tun, wenn nach einem Unfall in Erftstadt keine Polizei kommt?",
+        "antwort": "Bei Sachschäden ohne Verletzte rückt die Polizei häufig nicht aus, und außerhalb der Ortslagen von Erftstadt ist oft niemand da, der etwas gesehen hat. Dann sind Sie selbst die Beweissicherung: Kennzeichen, Halter und Versicherung des Gegners notieren, beide Fahrzeuge in Endstellung samt Umgebung fotografieren, Bremsspuren und Fahrbahnzustand festhalten, Zeugen mit Anschrift aufschreiben."
+      },
+      {
+        "frage": "Was ist bei Unfällen in der Lechenicher Altstadt typisch?",
+        "antwort": "Lechenich hat einen engen historischen Kern, in dem Durchfahrten schmal sind und Sichtbeziehungen kurz. Typisch sind Abbiege-, Rangier- und Streifschäden an Bordsteinen und Hausecken. Bei Bordsteinkontakt gehört der Blick unter das Fahrzeug dazu: Eine Felge kann unrund laufen und die Spur verstellt sein, ohne dass ein Riss sichtbar ist. Zieht das Fahrzeug danach, ist das kein Verschleiß, sondern Unfallfolge."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Erftstadt — vom Autobahnkreuz Bliesheim über die B265 in Liblar bis in die Ortslagen Lechenich, Gymnich und Blessem. Schadenaufnahme vor Ort in allen 18 Stadtteilen.",
+    "topografieAnker": "Erftstadt liegt in der Jülich-Zülpicher Börde auf 81 bis 151 Metern Höhe, rund 20 Kilometer südwestlich von Köln. Die Erft gab der Stadt den Namen und durchzieht sie von Süden nach Norden. Im Osten steigt das Gelände zur bewaldeten Ville an, deren frühere Braunkohletagebaue heute Seen sind. A1 und A61 vereinigen sich am Kreuz Bliesheim."
+  },
+  "koeln": {
+    "stadtbezirke": [
+      {
+        "name": "Innenstadt",
+        "ortsteile": [
+          "Altstadt-Nord",
+          "Altstadt-Süd",
+          "Neustadt-Nord",
+          "Neustadt-Süd",
+          "Deutz"
+        ]
+      },
+      {
+        "name": "Rodenkirchen",
+        "ortsteile": [
+          "Bayenthal",
+          "Marienburg",
+          "Raderberg",
+          "Raderthal",
+          "Zollstock",
+          "Rondorf",
+          "Hahnwald",
+          "Rodenkirchen",
+          "Weiß",
+          "Sürth",
+          "Godorf",
+          "Immendorf",
+          "Meschenich"
+        ]
+      },
+      {
+        "name": "Lindenthal",
+        "ortsteile": [
+          "Klettenberg",
+          "Sülz",
+          "Lindenthal",
+          "Braunsfeld",
+          "Müngersdorf",
+          "Junkersdorf",
+          "Weiden",
+          "Lövenich",
+          "Widdersdorf"
+        ]
+      },
+      {
+        "name": "Ehrenfeld",
+        "ortsteile": [
+          "Ehrenfeld",
+          "Neuehrenfeld",
+          "Bickendorf",
+          "Vogelsang",
+          "Bocklemünd/Mengenich",
+          "Ossendorf"
+        ]
+      },
+      {
+        "name": "Nippes",
+        "ortsteile": [
+          "Nippes",
+          "Mauenheim",
+          "Riehl",
+          "Niehl",
+          "Weidenpesch",
+          "Longerich",
+          "Bilderstöckchen"
+        ]
+      },
+      {
+        "name": "Chorweiler",
+        "ortsteile": [
+          "Merkenich",
+          "Fühlingen",
+          "Seeberg",
+          "Heimersdorf",
+          "Lindweiler",
+          "Pesch",
+          "Esch/Auweiler",
+          "Volkhoven/Weiler",
+          "Chorweiler",
+          "Blumenberg",
+          "Roggendorf/Thenhoven",
+          "Worringen"
+        ]
+      },
+      {
+        "name": "Porz",
+        "ortsteile": [
+          "Poll",
+          "Westhoven",
+          "Ensen",
+          "Gremberghoven",
+          "Eil",
+          "Porz",
+          "Urbach",
+          "Elsdorf",
+          "Grengel",
+          "Wahnheide",
+          "Wahn",
+          "Lind",
+          "Libur",
+          "Zündorf",
+          "Langel",
+          "Finkenberg"
+        ]
+      },
+      {
+        "name": "Kalk",
+        "ortsteile": [
+          "Humboldt/Gremberg",
+          "Kalk",
+          "Vingst",
+          "Höhenberg",
+          "Ostheim",
+          "Merheim",
+          "Brück",
+          "Rath/Heumar",
+          "Neubrück"
+        ]
+      },
+      {
+        "name": "Mülheim",
+        "ortsteile": [
+          "Mülheim",
+          "Buchforst",
+          "Buchheim",
+          "Holweide",
+          "Dellbrück",
+          "Höhenhaus",
+          "Dünnwald",
+          "Stammheim",
+          "Flittard"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "Autobahnkreuz Köln-West (A1/A4)",
+        "Autobahnkreuz Köln-Nord (A1/A57)",
+        "Autobahnkreuz Köln-Ost (A3/A4)",
+        "Autobahnkreuz Köln-Süd (A4/A555)",
+        "Autobahndreieck Köln-Heumar (A3/A4/A59)",
+        "Autobahndreieck Köln-Porz (A59/A559)",
+        "Kölner Ring (A1/A3/A4/A57)",
+        "Zoobrücke (B55a)",
+        "Severinsbrücke",
+        "Deutzer Brücke",
+        "Mülheimer Brücke",
+        "Rodenkirchener Autobahnbrücke (A4)",
+        "Leverkusener Autobahnbrücke (A1)",
+        "Köln-Bonner Flughafen-Anschluss (A59)",
+        "Barbarossaplatz",
+        "Ebertplatz",
+        "Kölner Ringe (Innenstadt)"
+      ],
+      "autobahnen": [
+        "A1",
+        "A3",
+        "A4",
+        "A57",
+        "A59",
+        "A555",
+        "A559"
+      ],
+      "bundesstrassen": [
+        "B8",
+        "B9",
+        "B51",
+        "B55",
+        "B55a",
+        "B59",
+        "B264",
+        "B265",
+        "B506"
+      ]
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Zoobrücke (B 55a)",
+        "quelle": "https://koeln.t-online.de/region/koeln/id_100519224/koeln-das-ist-die-gefaehrlichste-strasse-in-koeln.html",
+        "einzelfall": false,
+        "beschreibung": "Die Zoobrücke zwischen Riehl und Deutz führt die Statistik der Kölner Polizei für den Verkehrsausschuss für das Jahr 2023 an: achtzehn Unfälle und damit fast doppelt so viele wie an allen anderen erfassten Unfallschwerpunkten der Stadt. Typisch für die Brücke und ihre Zufahrten sind Auffahr- und Spurwechselschäden aus dichtem, zähfließendem Verkehr. Quelle: t-online, 28.10.2024, nach der Statistik der Kölner Polizei für den Verkehrsausschuss."
+      },
+      {
+        "ort": "Militärringstraße / Am Eifeltor (Rodenkirchen)",
+        "quelle": "https://koeln.t-online.de/region/koeln/id_100519224/koeln-das-ist-die-gefaehrlichste-strasse-in-koeln.html",
+        "einzelfall": false,
+        "beschreibung": "Für die Militärringstraße in Höhe Am Eifeltor im Bezirk Rodenkirchen weist dieselbe Auswertung für 2023 zehn Unfälle aus. Die Militärringstraße ist eine zügig befahrene Tangente mit wenigen, dafür stark belasteten Knotenpunkten — ein Muster, das Auffahrschäden am Rückstauende begünstigt. Quelle: t-online, 28.10.2024, nach der Statistik der Kölner Polizei für den Verkehrsausschuss."
+      },
+      {
+        "ort": "Venloer Straße, Abschnitt A-1-Auffahrt Bocklemünd (Ehrenfeld)",
+        "quelle": "https://koeln.t-online.de/region/koeln/id_100519224/koeln-das-ist-die-gefaehrlichste-strasse-in-koeln.html",
+        "einzelfall": false,
+        "beschreibung": "Die Venloer Straße kam 2023 über alle Abschnitte auf fünfundzwanzig Unfälle, davon neun allein in Höhe der A-1-Auffahrt Bocklemünd. Der Abschnitt verbindet innerstädtischen Geschäftsverkehr mit auf- und abfahrendem Autobahnverkehr, was Abbiege- und Einfädelkonflikte begünstigt. Quelle: t-online, 28.10.2024, nach der Statistik der Kölner Polizei für den Verkehrsausschuss."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Wie wirkt sich ein Unfall auf dem Kölner Autobahnring auf die Schadenaufnahme aus?",
+        "antwort": "Der Kölner Ring aus A1, A3, A4 und A57 gehört zu den am stärksten belasteten Abschnitten in Nordrhein-Westfalen. Auffahr- und Stauendeunfälle bei hohem Tempo führen häufig zu Deformationen an Längsträgern, Crashboxen und Sensorik der Assistenzsysteme, die von außen nicht sichtbar sind. Nach dem Abschleppen von der Autobahn steht das Fahrzeug meist bei einem Bergungsunternehmen in Köln oder im Umland. Die Besichtigung sollte dort möglichst vor Beginn der Standgeldfrist erfolgen, damit Ersatzteil- und Reparaturweg vollständig dokumentiert sind."
+      },
+      {
+        "frage": "Was ist bei Unfällen an den Kölner Rheinbrücken zu beachten?",
+        "antwort": "Deutzer Brücke, Severinsbrücke, Zoobrücke, Mülheimer Brücke sowie die Autobahnbrücken Rodenkirchen (A4) und Leverkusen (A1) bündeln den gesamten Ost-West-Verkehr. Auf den Brückenrampen gibt es kaum Seitenraum, sodass Fahrzeuge zügig geräumt werden und die Unfallendlage selten fotografiert werden kann. Für die Rekonstruktion sind daher Spurenlage am Fahrzeug, Schadenhöhe und Anstoßrichtung entscheidend. Bei der Leverkusener Brücke kommen zusätzlich Lkw-Sperrungen und Umleitungsverkehr über Köln-Niehl und Merkenich als Unfallumfeld hinzu."
+      },
+      {
+        "frage": "Welche Rolle spielen die Kölner Ringe und der Barbarossaplatz für Schadensfälle in der Innenstadt?",
+        "antwort": "Die Kölner Ringe zwischen Ubierring und Ebertplatz verbinden mehrspurigen Autoverkehr, Straßenbahngleise der KVB, Radfahrstreifen und beidseitige Parkstände. Am Barbarossaplatz und Rudolfplatz treffen mehrere Linien und Abbiegebeziehungen aufeinander. Typisch sind Streifschäden beim Spurwechsel, Kollisionen mit ausparkenden Fahrzeugen und Konflikte zwischen Rechtsabbiegern und Radverkehr. Solche Schäden wirken gering, betreffen aber oft Sensorik in Stoßfängern und Außenspiegeln. Eine Beweissicherung vor der Reparatur ist bei Teilschuldkonstellationen in diesem Bereich besonders wichtig."
+      },
+      {
+        "frage": "Wie relevant sind Straßenbahnschienen der KVB bei Kölner Verkehrsunfällen?",
+        "antwort": "Ein großer Teil des Kölner Stadtgebiets ist von KVB-Stadtbahnstrecken durchzogen, unter anderem entlang der Aachener Straße, der Venloer Straße, der Bonner Straße und in Kalk. Straßenbündige Gleiskörper führen zu Kollisionen mit Bahnen beim Linksabbiegen oder Wenden sowie zu Sturz- und Streifschäden. Bei Beteiligung einer Stadtbahn tritt die KVB als Anspruchsgegnerin beziehungsweise Anspruchstellerin auf; Schäden am Bahnkörper werden gesondert beziffert. Die Dokumentation der Fahrzeugendlage und der Gleisgeometrie ist hier für die Haftungsfrage wesentlich."
+      },
+      {
+        "frage": "Was ist bei Unfällen rund um den Flughafen Köln/Bonn in Porz zu beachten?",
+        "antwort": "Der Flughafen Köln/Bonn in Porz-Wahn ist über die A59 angebunden und erzeugt Miet-, Leasing- und Firmenwagenverkehr rund um die Uhr. Bei Mietwagen greifen eigene Schadenmeldewege des Vermieters, bei Leasingfahrzeugen ist der Leasinggeber Eigentümer und muss Reparaturweg und Auszahlung freigeben. Kommt es auf den Zufahrten, in den Parkhäusern oder auf der A59 zu einem Schaden, sollte der Fahrzeugstatus früh geklärt werden, weil das über fiktive Abrechnung, Werkstattbindung und Ersatzansprüche entscheidet."
+      },
+      {
+        "frage": "Welche Besonderheiten bringen Karneval und Großveranstaltungen in Köln für Kfz-Schäden mit sich?",
+        "antwort": "Rund um Weiberfastnacht und die Rosenmontagstage werden in der Kölner Innenstadt, in der Südstadt, in Ehrenfeld und in Nippes ganze Straßenzüge gesperrt. Häufig sind Schäden durch anstoßende Passanten, Zugfahrzeuge, umgestellte Absperrungen und Fahrzeuge, die aus Sperrbereichen herausrangieren. Verursacher bleiben oft unbekannt, sodass nur die Teilkasko oder Vollkasko greift. Ähnliches gilt bei Heimspielen im RheinEnergieStadion in Müngersdorf und bei Messen in Köln-Deutz, wo Parksuchverkehr in Wohnstraßen zu Streifschäden führt."
+      },
+      {
+        "frage": "Wie wirkt sich die Rheinlage Kölns auf Fahrzeugschäden aus?",
+        "antwort": "Bei Rheinhochwasser werden in Rodenkirchen, in der Altstadt, in Poll, Zündorf und Langel ufernahe Parkflächen und Uferstraßen gesperrt. Fahrzeuge, die zu spät umgesetzt werden, erleiden Wasserschäden an Unterboden, Steuergeräten und Sitzkonsolen. Solche Schäden fallen unter die Teilkaskoversicherung, sofern es sich um ein benanntes Naturereignis handelt. Für die Bewertung ist die maximale Wasserstandshöhe am Fahrzeug entscheidend, weil daraus folgt, ob eine Instandsetzung wirtschaftlich ist oder ein wirtschaftlicher Totalschaden vorliegt."
+      },
+      {
+        "frage": "Welche Bedeutung hat die Umweltzone Köln für Reparatur und Ersatzbeschaffung?",
+        "antwort": "Köln hat eine großflächige Umweltzone, die weite Teile des Stadtgebiets innerhalb des Autobahnrings umfasst und die grüne Plakette voraussetzt. Bei älteren Fahrzeugen ohne grüne Plakette wirkt sich das auf den Wiederbeschaffungswert und die Verwertbarkeit im Kölner Markt aus. Bei der Ersatzbeschaffung nach einem Totalschaden ist zu prüfen, ob ein vergleichbares Fahrzeug die Zone befahren darf. Auch die Erreichbarkeit einer Werkstatt innerhalb der Zone kann bei nicht mehr verkehrssicheren Fahrzeugen eine Rolle spielen."
+      },
+      {
+        "frage": "Wo stehen unfallbeschädigte Fahrzeuge in Köln typischerweise nach dem Abschleppen?",
+        "antwort": "Nach Einsätzen auf dem Kölner Ring, den Rheinbrücken oder den Zubringern A555, A559 und A57 werden Fahrzeuge meist zu Bergungsbetrieben in den Gewerbegebieten in Ossendorf, Niehl, Kalk, Gremberghoven oder Porz gebracht. Dort fallen ab dem Folgetag häufig Standgebühren an. Sinnvoll ist, den Standort samt Betrieb und Aktenzeichen der Polizei früh festzuhalten und die Besichtigung zeitnah zu terminieren, damit der Wagen nach der Beweissicherung in die gewünschte Werkstatt verbracht werden kann."
+      },
+      {
+        "frage": "Welches Gewicht haben Baustellen und Sanierungen im Kölner Straßennetz?",
+        "antwort": "In Köln laufen dauerhaft Großbaustellen, etwa an Rheinbrücken, an Autobahnabschnitten des Rings und im Zuge des Stadtbahnnetzes. Für Schadensfälle bedeutet das enge Fahrstreifen, verschwenkte Führungen, provisorische Markierungen und häufige Stauenden. Streifschäden an Betonschutzwänden und Auffahrunfälle am Stauende sind typisch. Bei unklarer oder doppelter Markierung ist die Dokumentation der örtlichen Verkehrsführung zum Unfallzeitpunkt wichtig, weil sie sich innerhalb weniger Wochen ändert und später nicht mehr nachvollziehbar ist."
+      },
+      {
+        "frage": "Was gilt bei Parkschäden in dicht bebauten Kölner Veedeln?",
+        "antwort": "In Ehrenfeld, der Südstadt, Sülz, Nippes und Mülheim herrscht enger Straßenraum mit hohem Parkdruck und beidseitigem Längsparken. Streif- und Rangierschäden an Stoßfängern, Kotflügeln und Spiegeln sind hier alltäglich, der Verursacher entfernt sich oft unerkannt. Für die Regulierung ist die Schadenkompatibilität entscheidend: Anstoßhöhe, Lackantragungen und Verformungsrichtung müssen zum geschilderten Vorgang passen. Bei unbekanntem Verursacher greift nur die Vollkasko; ohne diese bleibt die Prüfung von Ansprüchen gegen Dritte oder eine Anzeige bei der Polizei Köln."
+      },
+      {
+        "frage": "Welche Rolle spielen die Kölner Zubringer A555, A559 und A57 im Unfallgeschehen?",
+        "antwort": "Die A555 verbindet Köln-Süd über Rodenkirchen mit Bonn, die A559 führt vom Dreieck Köln-Porz nach Köln-Gremberg, die A57 erschließt den Nordwesten Richtung Chorweiler und Neuss. Alle drei sind Pendlerachsen mit kurzen Ein- und Ausfädelstreifen und regelmäßigen Rückstaus in den Spitzenstunden. Typische Schadensbilder sind Heckkollisionen mit Beteiligung mehrerer Fahrzeuge. Bei Kettenauffahrunfällen ist die Zuordnung der einzelnen Anstöße nur über eine technische Untersuchung der Deformationen möglich."
+      },
+      {
+        "frage": "Welche Behörden und Stellen sind in Köln nach einem Verkehrsunfall relevant?",
+        "antwort": "Die Verkehrsunfallaufnahme übernimmt das Polizeipräsidium Köln, das neben dem Stadtgebiet auch den Rhein-Erft-Kreis und Leverkusen abdeckt; Autobahnunfälle bearbeitet die zuständige Verkehrsdirektion. Die Akteneinsicht in das polizeiliche Unfallprotokoll erfolgt über einen Rechtsanwalt unter Angabe des Aktenzeichens. Für Ordnungswidrigkeiten ist die Stadt Köln zuständig. Bei Schäden an städtischem Eigentum wie Ampeln, Bäumen oder Bordsteinen meldet sich in der Regel die Stadt Köln beziehungsweise deren Versicherer beim Halter."
+      }
+    ],
+    "heroAnker": "Köln verbindet den vierfach befahrenen Autobahnring aus A1, A3, A4 und A57 mit acht innerstädtischen Rheinbrücken und einem dichten KVB-Stadtbahnnetz — eine Kombination, die das Unfallgeschehen zwischen Innenstadt, Porz und Chorweiler prägt.",
+    "topografieAnker": "Köln liegt beidseits des Rheins in der Kölner Bucht, überwiegend flach, mit ausgeprägten Rampen nur an den Brückenzufahrten. Der Fluss zwingt den gesamten Ost-West-Verkehr auf wenige Übergänge, was Stau, Auffahr- und Spurwechselunfälle bündelt. Ufernahe Lagen in Rodenkirchen, Poll und Zündorf sind zusätzlich hochwassergefährdet, mit entsprechenden Wasserschäden an geparkten Fahrzeugen."
+  }
+}

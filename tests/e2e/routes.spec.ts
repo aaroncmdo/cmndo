@@ -130,18 +130,17 @@ const KANZLEI_ROUTES = [
  */
 const DETAIL_WEGE: DetailWeg[] = [
   { liste: '/admin/faelle', praefix: '/faelle/' },
-  {
-    liste: '/admin/organisationen',
-    praefix: '/admin/organisationen/',
-    // 23.08. auf prod gemessen: 0 Zeilen in `organisationen`, 0 von 22 SVs mit
-    // `organisation_id`, 0 Parent-Accounts. Die Org-Ebene (Buero mit Sub-SVs) wurde nie
-    // benutzt — in /admin/organisationen gibt es nicht einmal einen Anlege-Weg; Orgs
-    // entstehen nur als Nebenprodukt beim Admin-SV-Anlegen. Eine leere Liste ist hier
-    // also der DAUERZUSTAND, kein Verdacht.
-    leerErwartet:
-      'organisationen ist auf prod dauerhaft leer (0 Zeilen, kein Anlege-Weg in der UI) — ' +
-      'Marker: audit-organisationen-struktur-auf-prod-ungenutzt',
-  },
+  // ⚠ `/admin/organisationen` stand hier bis 24.08. und ist BEWUSST raus (Aaron-Entscheid:
+  //   „Organisationen lassen wir erstmal raus").
+  //   Auf prod gemessen: 0 Zeilen in `organisationen`, 0 von 22 SVs mit `organisation_id`,
+  //   0 Parent-Accounts — die Org-Ebene (Buero mit Sub-SVs) wurde nie benutzt, es gibt in
+  //   der UI nicht einmal einen Anlege-Weg. Eine leere Liste hat nichts zu verlinken, der
+  //   Weg waere also dauerhaft ohne Aussage.
+  //   Die ROUTE bleibt in ADMIN_ROUTES: dass die Seite ueberhaupt rendert, wird weiter
+  //   geprueft — nur der Detail-Weg entfaellt.
+  //   Wird die Org-Struktur genutzt, gehoert der Eintrag zurueck:
+  //     { liste: '/admin/organisationen', praefix: '/admin/organisationen/' }
+  //   Hintergrund: memory/audit-organisationen-struktur-auf-prod-ungenutzt
   { liste: '/admin/team', praefix: '/admin/team/' },
   { liste: '/admin/versicherungen', praefix: '/admin/versicherungen/' },
 ]

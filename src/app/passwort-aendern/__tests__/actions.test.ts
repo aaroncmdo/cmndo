@@ -125,11 +125,31 @@ describe('setzeNeuesPasswort', () => {
     expect(updateUserMock).not.toHaveBeenCalled()
   })
 
-  it('gibt updateUser-Fehler als Result zurueck (kein throw)', async () => {
-    state.updateUserError = { message: 'Password is too weak' }
+  it('gibt updateUser-Fehler als Result zurueck (kein throw) — auf DEUTSCH', async () => {
+    // ⚠ Bis 24.08. pruefte dieser Test, dass die ROHE englische Supabase-Meldung
+    // durchgereicht wird — und schrieb damit genau das Verhalten fest, das am
+    // 23.08. einen frisch registrierten Sachverstaendigen aussperrte: er sah
+    // "Password is known to be weak..." und blieb mit force_password_change=true
+    // haengen. Der Vertrag dieses Tests ist "Result statt throw"; die Sprache
+    // der Meldung war nur das Vehikel.
+    state.updateUserError = { message: 'Password is known to be weak and easy to guess' }
     const res = await setzeNeuesPasswort('einLangesSicheresPasswort')
     expect(res.ok).toBe(false)
-    if (!res.ok) expect(res.error).toBe('Password is too weak')
+    if (!res.ok) {
+      expect(res.error).toContain('Daten-Leaks')
+      // Kein englisches Bruchstueck darf in der Oberflaeche landen.
+      expect(res.error.toLowerCase()).not.toContain('password')
+    }
+  })
+
+  it('uebersetzt auch unbekannte Supabase-Fehler statt sie roh zu zeigen', async () => {
+    state.updateUserError = { message: 'unexpected_failure: connection reset by peer' }
+    const res = await setzeNeuesPasswort('einLangesSicheresPasswort')
+    expect(res.ok).toBe(false)
+    if (!res.ok) {
+      expect(res.error).not.toContain('connection reset')
+      expect(res.error).toContain('erneut versuchen')
+    }
   })
 
   it('meldet Fehler wenn der force_password_change-Reset scheitert (C2: kein stiller Loop)', async () => {

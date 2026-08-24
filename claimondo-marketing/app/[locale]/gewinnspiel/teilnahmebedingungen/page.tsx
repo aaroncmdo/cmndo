@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Teilnahmebedingungen zum taeglichen Gewinnspiel.
 //
@@ -27,7 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
     // Metadata-Merge-Gate: eigener openGraph-Block MUSS images mitgeben.
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
+      ...(await localeOpenGraph('/gewinnspiel/teilnahmebedingungen')),
       title: 'Teilnahmebedingungen Gewinnspiel',
       description: 'Teilnahmebedingungen für das tägliche Gewinnspiel von Claimondo.',
       images: OG_DEFAULT_IMAGES,

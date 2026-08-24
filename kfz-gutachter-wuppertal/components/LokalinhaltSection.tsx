@@ -70,8 +70,12 @@ export async function LokalinhaltSection({
                     <span className="ml-2 text-xs text-ink/60">(Einzelmeldung, keine Statistik)</span>
                   ) : null}
                   <p className="mt-1 text-ink/80 leading-relaxed">{h.beschreibung}</p>
+                  {/* Nur das erste Token als href: gate.ts erlaubt der Quelle einen Zusatz
+                      ("<url> (Polizei Bonn, 30.01.2025)") und prueft auch nur dieses. Ungeteilt
+                      ergibt das einen toten Link — 57 von 107 veroeffentlichten Hotspots waren
+                      betroffen. Die Trennregel muss dieselbe bleiben wie in gate.ts:211. */}
                   <a
-                    href={h.quelle}
+                    href={h.quelle.split(/\s+/)[0]}
                     rel="nofollow noopener"
                     target="_blank"
                     className="mt-1 inline-block text-sm underline text-ink/60 hover:text-ink"

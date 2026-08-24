@@ -1,0 +1,16 @@
+{
+  "hannover": {
+    "knoten_um": {
+      "Kreuz Hannover-Kirchhorst": "Autobahnkreuz Hannover/Kirchhorst"
+    },
+    "knoten_weg": [],
+    "begruendung": "Amtlich mit Schraegstrich; Kirchhorst gehoert zu Isernhagen, nicht zu Hannover."
+  },
+  "dortmund": {
+    "knoten_um": {
+      "Kreuz Dortmund-Unna": "Autobahnkreuz Dortmund/Unna"
+    },
+    "knoten_weg": [],
+    "begruendung": "Amtlich mit Schraegstrich; Unna ist eine eigene Stadt, kein Dortmunder Stadtteil."
+  }
+}

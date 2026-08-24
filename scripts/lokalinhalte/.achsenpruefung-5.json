@@ -1,0 +1,404 @@
+{
+  "alsdorf": {
+    "_name": "Alsdorf",
+    "autobahnen": [
+      "A44"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Alsdorf"
+    ],
+    "_urteil": "ok"
+  },
+  "bergisch-gladbach": {
+    "_name": "Bergisch Gladbach",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B506"
+    ],
+    "knoten": [
+      "Kreuz Köln-Ost",
+      "Anschlussstelle Bensberg",
+      "Anschlussstelle Refrath"
+    ],
+    "_urteil": "FALSCH: Kreuz Köln-Ost liegt auf Kölner Stadtgebiet (Köln-Buchforst), nicht in Bergisch Gladbach. Der Stadtartikel sagt es ausdrücklich: die A4 kreuze die A3 »im Westen der Stadt bereits auf Kölner Stadtgebiet«. FALSCH: Anschlussstelle Bensberg heißt amtlich »Bergisch Gladbach-Bensberg« (so mehrfach im A4-Artikel). UNBELEGT: Anschlussstelle Refrath — die AS wurde 2019 umbenannt; den heute gültigen Namen konnte ich nicht belegen. FEHLT: B55 — laut Stadtartikel führen »die Bundesstraßen 55 und 506 durch das Stadtgebiet«."
+  },
+  "borken": {
+    "_name": "Borken",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B67",
+      "B70"
+    ],
+    "knoten": [
+      "Anschlussstelle Borken (A31, rund zwölf Kilometer östlich)",
+      "Umgehung B67/B70 um die Kernstadt"
+    ],
+    "_urteil": "FALSCH: »Umgehung B67/B70 um die Kernstadt« ist kein Knoten, sondern eine Streckenbeschreibung; einen so benannten Verkehrsknoten gibt es dort nicht. FALSCH nach eurem Maßstab: Anschlussstelle Borken (A31) liegt zwölf Kilometer außerhalb zwischen Heiden und Reken und erschließt Borken nicht unmittelbar. Der Klammerzusatz benennt die Entfernung zwar ehrlich, nach der Regel gehört der Eintrag aber nicht in die Knotenliste. Korrekt: autobahnen [] sowie B67 und B70 — der Stadtartikel bestätigt, dass keine Autobahn durch Borken führt, die nächste Auffahrt zwölf Kilometer östlich an der A31 liegt und beide Bundesstraßen als Umgehung geführt werden."
+  },
+  "buende": {
+    "_name": "Bünde",
+    "autobahnen": [
+      "A30"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Bünde (A30)",
+      "Anschlussstelle Hiddenhausen (A30)",
+      "L557 Richtung Bielefeld",
+      "L545 Richtung Herford"
+    ],
+    "_urteil": "FALSCH: »L557 Richtung Bielefeld« und »L545 Richtung Herford« sind Landesstraßen, keine Knoten; die Nummern konnte ich zudem nicht belegen. FALSCH nach eurem Maßstab: Anschlussstelle Hiddenhausen (A30, Nr. 28) trägt den Namen der Nachbargemeinde und liegt dort; der Stadtartikel führt sie lediglich als eine der beiden Anbindungen Bündes auf. Korrekt: A30 und Anschlussstelle Bünde (Nr. 27)."
+  },
+  "dormagen": {
+    "_name": "Dormagen",
+    "autobahnen": [
+      "A57"
+    ],
+    "bundesstrassen": [
+      "B9"
+    ],
+    "knoten": [
+      "Anschlussstelle Dormagen",
+      "Anschlussstelle Dormagen-Nord",
+      "Kreuzung B9/Chempark-Zufahrt"
+    ],
+    "_urteil": "FALSCH: Anschlussstelle Dormagen-Nord existiert nicht. Der Stadtartikel nennt allein »A57 (Anschlussstelle 25)«, und der A57-Artikel kennt zwischen Kreuz Neuss-Süd und Kreuz Köln-Nord nur die eine AS Dormagen. FALSCH: »Kreuzung B9/Chempark-Zufahrt« ist kein benannter Verkehrsknoten, sondern eine Umschreibung. FEHLT: B477 — sie durchläuft laut Stadtartikel die Ortschaft Gohr. Korrekt: A57, B9 und Anschlussstelle Dormagen."
+  },
+  "duisburg": {
+    "_name": "Duisburg",
+    "autobahnen": [
+      "A3",
+      "A40",
+      "A42",
+      "A59"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B288"
+    ],
+    "knoten": [
+      "Kreuz Duisburg-Kaiserberg",
+      "Kreuz Duisburg-Nord",
+      "Kreuz Duisburg-Süd",
+      "Dreieck Duisburg-Kaiserberg"
+    ],
+    "_urteil": "FALSCH: Dreieck Duisburg-Kaiserberg gibt es nicht. Kaiserberg ist ein Kreuz (amtlich Autobahnkreuz Kaiserberg, A3/A40) und steht eine Zeile darüber bereits richtig — der Eintrag ist eine Dublette mit falscher Gattung. FALSCH: B8 — laut Stadtartikel wurde sie zur Landesstraße zurückgestuft; Duisburg verfügt demnach »mit der B288 nur noch über eine Bundesstraße«. FEHLT: A57 und A524 — der Stadtartikel führt beide als Duisburger Autobahnen (A57 im Westen, A524 als südliche Anbindung an das Kreuz Breitscheid). Korrekt: A3, A40, A42, A59, B288 sowie Kreuz Duisburg-Nord und Kreuz Duisburg-Süd (beide mit eigenem Artikel)."
+  },
+  "eschweiler": {
+    "_name": "Eschweiler",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [
+      "B264"
+    ],
+    "knoten": [
+      "Anschlussstelle Eschweiler-West",
+      "Anschlussstelle Eschweiler-Ost",
+      "Anschlussstelle Weisweiler"
+    ],
+    "_urteil": "ok"
+  },
+  "gelsenkirchen": {
+    "_name": "Gelsenkirchen",
+    "autobahnen": [
+      "A2",
+      "A40",
+      "A42",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B226",
+      "B227"
+    ],
+    "knoten": [
+      "Kreuz Gelsenkirchen",
+      "Dreieck Bottrop",
+      "Kreuz Herne"
+    ],
+    "_urteil": "FALSCH: A40 — sie berührt Gelsenkirchen nicht. Der A40-Artikel schreibt, die Autobahn berühre Gelsenkirchen »beinahe«, die AS Gelsenkirchen liege »genau auf der Stadtgrenze Essen/Bochum, einen Kilometer von Gelsenkirchen entfernt«. Der Stadtartikel nennt folgerichtig nur A2, A42 und A52. FALSCH: Kreuz Gelsenkirchen existiert nicht — der Begriff findet sich allein im Artikel zur nie vollendeten A41 als Planungsname. FALSCH: Dreieck Bottrop liegt in Bottrop (A2/A31), Kreuz Herne liegt in Herne — beides Nachbarstädte. Damit bleibt kein einziger Gelsenkirchener Knoten übrig. Als Ersatz käme die Anschlussstelle Gelsenkirchen-Schalke an der A42 in Betracht, die der Stadtartikel als neue AS im Stadtgebiet nennt. Korrekt: A2, A42, A52, B224, B226, B227."
+  },
+  "gummersbach": {
+    "_name": "Gummersbach",
+    "autobahnen": [
+      "A4"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Gummersbach (A4)"
+    ],
+    "_urteil": "FEHLT: B256 — laut Stadtartikel ist Gummersbach unter anderem über die »Bundesstraße 256 Wipperfürth–Altenkirchen« erschlossen, das Feld bundesstrassen steht aber leer. Korrekt: A4 und Anschlussstelle Gummersbach (Nr. 25). Anmerkung: Die A45 nennt der Stadtartikel ebenfalls, aber nur über die weit entfernte AS Meinerzhagen — nach eurem Maßstab zu Recht nicht gelistet."
+  },
+  "hattingen": {
+    "_name": "Hattingen",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B51"
+    ],
+    "knoten": [],
+    "_urteil": "Korrekt und gut belegt: autobahnen [] und knoten []. Laut Stadtartikel sind A43, A40 und A44 nur »über die Nachbarstädte« erreichbar, und die einst geplante A44 von Velbert über Hattingen nach Bochum »wurde nicht umgesetzt«. UNBELEGT: B51 — der B51-Artikel spricht für den Hattinger Abschnitt in der Vergangenheitsform (sie »überquerte bei Hattingen die Ruhr«) und bezeichnet die Hattinger Straße als »ehemalige B51«. Ob die B51 heute noch über Hattinger Stadtgebiet führt, konnte ich nicht klären — bitte gegenprüfen."
+  },
+  "herten": {
+    "_name": "Herten",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Anschlussstelle Herten (A2)",
+      "Anschlussstelle Recklinghausen/Herten (A43)",
+      "Münsterstraße als A2-Zubringer"
+    ],
+    "_urteil": "FALSCH: Anschlussstelle Recklinghausen/Herten (A43) — der Stadtartikel führt sie ausdrücklich unter »Außerhalb der Stadtgrenze«. FALSCH: »Münsterstraße als A2-Zubringer« ist eine Stadtstraße, kein Knoten; dass sie zur AS Herten führt, stimmt inhaltlich. Korrekt: A2 und Anschlussstelle Herten — die A2 »durchquert das Stadtgebiet; die Anschlussstelle heißt Herten«."
+  },
+  "iserlohn": {
+    "_name": "Iserlohn",
+    "autobahnen": [
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B233",
+      "B236"
+    ],
+    "knoten": [
+      "Anschlussstelle Iserlohn-Zentrum",
+      "Anschlussstelle Iserlohn-Letmathe"
+    ],
+    "_urteil": "ok"
+  },
+  "kiel": {
+    "_name": "Kiel",
+    "autobahnen": [
+      "A7",
+      "A210",
+      "A215"
+    ],
+    "bundesstrassen": [
+      "B76",
+      "B202",
+      "B404",
+      "B503"
+    ],
+    "knoten": [
+      "Kreuz Kiel-West",
+      "Dreieck Bordesholm",
+      "Anschlussstelle Kiel-Mitte"
+    ],
+    "_urteil": "FALSCH: A7 — sie berührt Kiel nicht. Laut Stadtartikel führen »von Kiel die beiden Bundesautobahnen 210 und 215 auf die A7«; die A7 selbst verläuft westlich an der Stadt vorbei. FALSCH: Dreieck Bordesholm liegt in Bordesholm, rund fünfzehn Kilometer südlich. FALSCH: Anschlussstelle Kiel-Mitte — der Knoten heißt in den Quellen Kreuz Kiel-Mitte (A215/B76), nicht Anschlussstelle. FEHLT: B502 — der Stadtartikel nennt sie neben B404 und B503 als auf Kieler Stadtgebiet beginnend beziehungsweise endend. Korrekt: A210, A215, B76, B202, B404, B503 und Kreuz Kiel-West (eigener Artikel, liegt in Kiel)."
+  },
+  "langenfeld": {
+    "_name": "Langenfeld",
+    "autobahnen": [
+      "A3",
+      "A542"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B229"
+    ],
+    "knoten": [
+      "Autobahnkreuz Langenfeld (A3/A542)",
+      "Anschlussstelle Langenfeld",
+      "Anschlussstelle Langenfeld-Immigrath"
+    ],
+    "_urteil": "FALSCH: Autobahnkreuz Langenfeld (A3/A542) — der Knoten ist ein Dreieck. Der A542-Artikel formuliert, sie verbinde »die A59 am Kreuz Monheim-Süd mit der A3 am Dreieck Langenfeld«; das Lemma lautet Autobahndreieck Langenfeld. FEHLT: A59 — laut Stadtartikel ist Langenfeld »durch die Bundesautobahnen 3, 59 und 542« erschlossen. Korrekt: A3, A542, B8, B229 sowie die Anschlussstellen Langenfeld und Langenfeld-Immigrath. Anmerkung: Die AS Solingen der A3 liegt auf Langenfelder Stadtgebiet (siehe Urteil zu Solingen)."
+  },
+  "luebeck": {
+    "_name": "Lübeck",
+    "autobahnen": [
+      "A1",
+      "A20",
+      "A226"
+    ],
+    "bundesstrassen": [
+      "B75",
+      "B104",
+      "B207"
+    ],
+    "knoten": [
+      "Kreuz Lübeck",
+      "Dreieck Bad Schwartau",
+      "Anschlussstelle Lübeck-Zentrum"
+    ],
+    "_urteil": "Weitgehend korrekt: A1, A20, A226, B75, B104, B207, Kreuz Lübeck und Anschlussstelle Lübeck-Zentrum sind belegt; der Stadtartikel nennt die Abfahrten Lübeck-Moisling und Lübeck-Zentrum an der A1. Grenzfall: Dreieck Bad Schwartau liegt in der Nachbarstadt Bad Schwartau, erschließt Lübeck aber unmittelbar — dort zweigt »im Norden der Stadt« die A226 Richtung Travemünde und Skandinavienkai ab. Gattung und Name stimmen; ob der Knoten nach eurem Maßstab bleiben darf, ist eine Setzung, kein Faktenfehler."
+  },
+  "meckenheim": {
+    "_name": "Meckenheim",
+    "autobahnen": [
+      "A61",
+      "A565"
+    ],
+    "bundesstrassen": [
+      "B257"
+    ],
+    "knoten": [
+      "Autobahnkreuz Meckenheim (A61/A565)",
+      "Anschlussstelle Meckenheim",
+      "Anschlussstelle Meckenheim-Merl"
+    ],
+    "_urteil": "FALSCH: Anschlussstelle Meckenheim heißt korrekt Meckenheim Nord (Nr. 10). Der Stadtartikel nennt für das Stadtgebiet genau zwei Anschlussstellen der A565: »Meckenheim Nord (Nr. 10) und Meckenheim-Merl (Nr. 11)«. Korrekt: A61 und A565 queren das Stadtgebiet, das Kreuz Meckenheim ist real (ein kleines Stück liegt auf dem Gebiet der Nachbargemeinde Grafschaft), Meckenheim-Merl stimmt, und B257 ist richtig — die A565 geht dort in die B257 über."
+  },
+  "monheim-am-rhein": {
+    "_name": "Monheim am Rhein",
+    "autobahnen": [
+      "A59",
+      "A542"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Autobahnkreuz Monheim-Süd (A59/A542)"
+    ],
+    "_urteil": "Korrekt: Kreuz Monheim-Süd existiert und verbindet tatsächlich A59 und A542. Der A542-Artikel sagt, sie verbinde »die A59 am Kreuz Monheim-Süd mit der A3 am Dreieck Langenfeld«; der Knoten hat einen eigenen Artikel. UNBELEGT: Ob A59 und A542 über Monheimer Stadtgebiet laufen, sagt der Stadtartikel nicht — er formuliert nur, Monheim liege »in unmittelbarer Nähe der Autobahn 59«. Weil der Knoten den Stadtnamen trägt, werte ich das nicht als Fehler, aber es bleibt die schwächste Stelle dieses Eintrags."
+  },
+  "nuernberg": {
+    "_name": "Nürnberg",
+    "autobahnen": [
+      "A3",
+      "A6",
+      "A9",
+      "A73"
+    ],
+    "bundesstrassen": [
+      "B4",
+      "B8",
+      "B14"
+    ],
+    "knoten": [
+      "Kreuz Nürnberg",
+      "Dreieck Nürnberg-Ost",
+      "Kreuz Nürnberg-Süd",
+      "Dreieck Fürth/Erlangen"
+    ],
+    "_urteil": "FALSCH: Dreieck Nürnberg-Ost — der Knoten ist ein Kreuz (Autobahnkreuz Nürnberg-Ost, eigener Artikel); ein Dreieck dieses Namens gibt es nicht. FALSCH: Dreieck Fürth/Erlangen — doppelt daneben. Es ist ein Kreuz (Autobahnkreuz Fürth/Erlangen) und es liegt bei Erlangen-Eltersdorf beziehungsweise Fürth, nicht auf Nürnberger Stadtgebiet. FEHLT: B2 — der Stadtartikel führt im Bundesstraßenring B4R vier Bundesstraßen zusammen: B2, B4, B8 und B14. Korrekt: A3, A6, A9, A73, B4, B8, B14 sowie Kreuz Nürnberg und Kreuz Nürnberg-Süd. Anmerkung: Die A73 ist auf Nürnberger Stadtgebiet als Frankenschnellweg zur Kommunalstraße umgewidmet — als Achse bleibt sie richtig, formal ist sie dort keine Autobahn mehr."
+  },
+  "potsdam": {
+    "_name": "Potsdam",
+    "autobahnen": [
+      "A10",
+      "A115"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B2",
+      "B273"
+    ],
+    "knoten": [
+      "Dreieck Potsdam",
+      "Dreieck Nuthetal",
+      "Anschlussstelle Potsdam-Zentrum"
+    ],
+    "_urteil": "FALSCH: Dreieck Nuthetal liegt in der Gemeinde Nuthetal südlich von Potsdam, nicht im Stadtgebiet (eigener Artikel). FALSCH: Anschlussstelle Potsdam-Zentrum — für diesen Namen findet sich kein Beleg, und der Stadtartikel nennt keine solche AS. Korrekt: A10, A115, B1, B2, B273 und Dreieck Potsdam. Der Stadtartikel formuliert, Potsdam sei »im Westen und Süden durch den Berliner Ring der A10 mit dem Autobahndreieck Potsdam und im Osten durch die A115« angeschlossen."
+  },
+  "reutlingen": {
+    "_name": "Reutlingen",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B27",
+      "B28",
+      "B312",
+      "B464"
+    ],
+    "knoten": [
+      "Kreuzung B27/B28 Reutlingen-Nord",
+      "Scheibengipfeltunnel",
+      "Anschluss B312 Reutlingen-Ost"
+    ],
+    "_urteil": "FALSCH: B27 — sie führt nicht durch Reutlingen. Laut Stadtartikel bildet die B464 lediglich »einen Zubringer zur B27«. Damit ist auch der Knoten »Kreuzung B27/B28 Reutlingen-Nord« hinfällig. UNBELEGT: »Kreuzung B27/B28 Reutlingen-Nord« und »Anschluss B312 Reutlingen-Ost« sind keine belegten Eigennamen, sondern Umschreibungen. Korrekt und ausdrücklich belegt: autobahnen [] — Reutlingen hat »als eine von nur zwei deutschen Großstädten (gemeinsam mit Solingen) keinen direkten Autobahnanschluss«. B28, B312 und B464 stimmen, und der Scheibengipfeltunnel ist real (eröffnet am 27. Oktober 2017); als Bauwerk statt Knoten ist er allenfalls Geschmackssache."
+  },
+  "sankt-augustin": {
+    "_name": "Sankt Augustin",
+    "autobahnen": [
+      "A59",
+      "A560"
+    ],
+    "bundesstrassen": [
+      "B56"
+    ],
+    "knoten": [
+      "Autobahnkreuz Sankt Augustin-West (A59/A560)",
+      "Anschlussstelle Sankt Augustin",
+      "Kreuzung B56/Hochschulzufahrt"
+    ],
+    "_urteil": "FALSCH: Autobahnkreuz Sankt Augustin-West (A59/A560) — der Knoten existiert, ist aber ein Dreieck. Der A59-Artikel spricht vom »Dreieck Sankt Augustin-West«. Also Gattung korrigieren, nicht streichen. FALSCH: »Kreuzung B56/Hochschulzufahrt« ist kein benannter Verkehrsknoten. FEHLT: A3 — laut Stadtartikel tangiert sie Sankt Augustin im Osten, und die Stadt ist über das Autobahnkreuz Bonn/Siegburg (A3/A560) »unmittelbar angebunden«. Dieses Kreuz wäre der belegte Knoten, der in der Liste fehlt. UNBELEGT: Anschlussstelle Sankt Augustin — Name und Lage konnte ich nicht bestätigen. Korrekt: A59 und A560."
+  },
+  "solingen": {
+    "_name": "Solingen",
+    "autobahnen": [
+      "A3",
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B229"
+    ],
+    "knoten": [
+      "Anschlussstelle Solingen",
+      "Anschlussstelle Solingen-Ohligs"
+    ],
+    "_urteil": "FALSCH: A3 und A46 — Solingen hat keine Autobahn im Stadtgebiet. Der Stadtartikel ist hier ungewöhnlich eindeutig: »Solingen und Reutlingen sind die einzigen Großstädte in Deutschland, die nicht direkt an das Autobahnnetz angeschlossen sind.« Im gesamten A46-Artikel kommt Solingen an keiner Stelle vor. FALSCH: Anschlussstelle Solingen — sie liegt »wenige Kilometer südlich von Ohligs auf dem Gebiet der Stadt Langenfeld«. FALSCH: Anschlussstelle Solingen-Ohligs existiert nicht; für den Namen gibt es keinen Beleg. Auch die weiteren Anschlüsse Haan-West, Haan-Ost (A46) und Wermelskirchen (A1) liegen laut Stadtartikel »ebenfalls außerhalb des Stadtgebiets«. Damit müssten autobahnen und knoten leer stehen; als reale Achse bliebe die autobahnähnliche L74 zum Sonnborner Kreuz. Korrekt: B224 und B229 — die B224 führt laut ihrem Artikel bis nach Solingen."
+  },
+  "ulm": {
+    "_name": "Ulm",
+    "autobahnen": [
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B10",
+      "B19",
+      "B28",
+      "B30",
+      "B311"
+    ],
+    "knoten": [
+      "Kreuz Ulm/Elchingen",
+      "Anschlussstelle Ulm-West",
+      "Anschlussstelle Ulm-Ost"
+    ],
+    "_urteil": "FEHLT: A7 — der Stadtartikel listet sie gleichrangig neben der A8. Ohne sie ist die Liste zudem in sich widersprüchlich, weil das aufgeführte Kreuz Ulm/Elchingen genau A7 und A8 verbindet. Korrekt: A8, B10, B28, B30, B311 sowie die Anschlussstellen Ulm-West und Ulm-Ost. Auch B19 stimmt, obwohl der Stadtartikel sie nicht aufführt — sie beginnt laut B19-Artikel »an der Anschlussstelle Ulm-Ost wieder neu«. Anmerkung: Das Kreuz Ulm/Elchingen liegt auf bayerischem Gebiet in Elchingen, trägt aber Ulm im Namen und erschließt die Stadt."
+  },
+  "wiesbaden": {
+    "_name": "Wiesbaden",
+    "autobahnen": [
+      "A3",
+      "A66",
+      "A643",
+      "A671"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B262",
+      "B417",
+      "B455"
+    ],
+    "knoten": [
+      "Dreieck Wiesbaden",
+      "Kreuz Wiesbaden-Schierstein",
+      "Dreieck Mainz"
+    ],
+    "_urteil": "FALSCH: Dreieck Wiesbaden — für diesen Namen gibt es keinen Beleg. Der Knoten von A3 und A66 heißt Wiesbadener Kreuz; der Stadtartikel nennt ihn genau so. FALSCH: Dreieck Mainz liegt in Mainz und damit in einem anderen Bundesland. FEHLT: B40, B43 und B263 — der Stadtartikel zählt sieben Bundesstraßen im Stadtgebiet auf: B40, B43, B54, B262, B263, B417 und B455. Korrekt: A3, A66, A643, A671 und Kreuz Wiesbaden-Schierstein (umgangssprachlich Schiersteiner Kreuz), an dem die A643 nach Mainz abzweigt."
+  },
+  "wuppertal": {
+    "_name": "Wuppertal",
+    "autobahnen": [
+      "A1",
+      "A46",
+      "A535"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B228",
+      "B326"
+    ],
+    "knoten": [
+      "Kreuz Wuppertal-Nord",
+      "Kreuz Wuppertal-Oberbarmen",
+      "Dreieck Wuppertal-Nord"
+    ],
+    "_urteil": "FALSCH: Dreieck Wuppertal-Nord gibt es nicht — es ist das Autobahnkreuz Wuppertal-Nord (A1/A46/A43), das eine Zeile darüber bereits richtig steht. Dublette mit falscher Gattung. FALSCH: Kreuz Wuppertal-Oberbarmen — das ist die Anschlussstelle Wuppertal-Oberbarmen an der A46, kein Autobahnkreuz. FEHLT: das Sonnborner Kreuz (A46/A535, früher Autobahnkreuz Wuppertal-Sonnborn). Es liegt in Wuppertal-Sonnborn und ist laut Stadtartikel »eines der größten Autobahnkreuze in Deutschland« — dass ausgerechnet dieser Knoten fehlt, wiegt hier am schwersten. FEHLT: A43 — sie beginnt am Kreuz Wuppertal-Nord im Stadtgebiet und führt über Recklinghausen nach Münster. UNBELEGT: B224 — der Stadtartikel führt sie neben B7 und B228 als durch Wuppertal verlaufend auf, der B224-Artikel erwähnt Wuppertal jedoch nicht. Korrekt: A1, A46, A535, B7, B228, Kreuz Wuppertal-Nord. B326 stimmt ebenfalls, ist aber nur ein wenige hundert Meter langer Abschnitt an der Stadtgrenze zu Sprockhövel."
+  }
+}

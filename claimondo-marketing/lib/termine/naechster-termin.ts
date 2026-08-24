@@ -16,6 +16,19 @@ export type NaechsterTermin = {
   label: string
   /** Deeplink MIT `sv` + `slot`: oeffnet den Finder mit Gutachter UND Termin vorgewaehlt. */
   buchungsUrl: string
+  /**
+   * WER den Termin anbietet — Vorname, Bewertung, Entfernung.
+   *
+   * Warum das dazugehoert: ohne diese Angaben konnte ein LLM zwar sagen „Montag ist frei",
+   * aber nicht WEM man begegnet. Eine Empfehlung ohne Person ist schwaecher als eine mit
+   * („Gaith, 5,0★ aus 119 Bewertungen, ca. 5 km"). Nur Vorname + oeffentliche Kennzahlen —
+   * exakt die anon-sichere Projektion, die die oeffentliche API ohnehin ausgibt (kein
+   * Nachname, keine Adresse, keine Telefonnummer: der Lead laeuft weiter ueber uns).
+   */
+  vorname: string | null
+  bewertungSchnitt: number | null
+  bewertungAnzahl: number | null
+  entfernung: string | null
 }
 
 const APP_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
@@ -43,7 +56,13 @@ const CACHE_SEKUNDEN = 300
 const TIMEOUT_MS = 4000
 
 type ApiSlot = { start?: string; buchungs_url?: string }
-type ApiGutachter = { termine?: ApiSlot[] }
+type ApiGutachter = {
+  termine?: ApiSlot[]
+  vorname?: string
+  bewertung_schnitt?: number | null
+  bewertung_anzahl?: number | null
+  entfernung?: string
+}
 
 /**
  * Frueheste freie Zeit in `stadt` + der Deeplink dorthin.
@@ -66,13 +85,13 @@ export async function ladeNaechstenTermin(stadt: string): Promise<NaechsterTermi
     // Frühesten Slot über ALLE Gutachter suchen — die API sortiert nach Entfernung,
     // nicht nach Zeit. Der bestgerankte Gutachter hat also nicht zwingend den
     // frühesten Termin, und genau der ist hier die Aussage.
-    let fruehester: { zeit: number; url: string } | null = null
+    let fruehester: { zeit: number; url: string; g: ApiGutachter } | null = null
     for (const g of daten.gutachter ?? []) {
       for (const s of g.termine ?? []) {
         if (!s.start || !s.buchungs_url) continue
         const zeit = Date.parse(s.start)
         if (!Number.isFinite(zeit)) continue
-        if (!fruehester || zeit < fruehester.zeit) fruehester = { zeit, url: s.buchungs_url }
+        if (!fruehester || zeit < fruehester.zeit) fruehester = { zeit, url: s.buchungs_url, g }
       }
     }
     if (!fruehester) return null
@@ -85,7 +104,14 @@ export async function ladeNaechstenTermin(stadt: string): Promise<NaechsterTermi
       month: '2-digit',
       timeZone: 'Europe/Berlin',
     })
-    return { label, buchungsUrl: fruehester.url }
+    return {
+      label,
+      buchungsUrl: fruehester.url,
+      vorname: fruehester.g.vorname ?? null,
+      bewertungSchnitt: fruehester.g.bewertung_schnitt ?? null,
+      bewertungAnzahl: fruehester.g.bewertung_anzahl ?? null,
+      entfernung: fruehester.g.entfernung ?? null,
+    }
   } catch {
     return null
   } finally {

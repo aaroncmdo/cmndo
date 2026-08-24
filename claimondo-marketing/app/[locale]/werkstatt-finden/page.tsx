@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { WerkstattFindenSection } from '@/components/werkstatt-finden/WerkstattFindenSection'
 import { serviceSchema, breadcrumbsSchema, jsonLdScript, SITE_URL, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,11 +27,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/werkstatt-finden'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/werkstatt-finden`,
+      ...(await localeOpenGraph(`/werkstatt-finden`)),
       title: t('werkstatt_finden.og_title'),
       description: t('werkstatt_finden.og_description'),
     },

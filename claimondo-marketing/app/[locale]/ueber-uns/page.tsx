@@ -14,7 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, CONTACT_EMAIL, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { TrustStripSection } from '@/components/landing/sections/TrustStripSection'
 
 // 2026-05-09 Brand-Identity Pass für GEO:
@@ -41,9 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/ueber-uns'),
     openGraph: {
       type: 'profile',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/ueber-uns`,
+      ...(await localeOpenGraph(`/ueber-uns`)),
       title: t('title'),
       description: t('description'),
       images: [{ url: '/brand/team-founders.png', width: 1200, height: 600, alt: 'Claimondo Founders' }],

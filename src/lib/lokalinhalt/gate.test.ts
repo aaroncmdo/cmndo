@@ -4,6 +4,7 @@ import {
   MIN_SUBSTANZ_SCORE,
   findeAsciiUmlautErsatz,
   istBelastbareQuelle,
+  istOrtsspezifischeFaq,
   pruefeLokalinhalt,
   type LokalinhaltEntwurf,
 } from './gate'
@@ -161,7 +162,14 @@ describe('pruefeLokalinhalt — Robustheit gegen unvollstaendige Modell-Antworte
   it('filtert leere Eintraege aus Listen', () => {
     const e = guterEntwurf()
     e.stadtbezirke = [{ name: '', ortsteile: [] }, { name: 'Herne-Süd', ortsteile: [] }]
-    e.lokaleFaqs = [{ frage: 'Herne?', antwort: '' }, { frage: 'Wo in Herne?', antwort: 'Hier.' }]
+    // ⚠ Die verbleibende Antwort braucht seit 23.08. einen Ortsbezug, sonst
+    // verwirft sie der Generik-Filter — dieser Test prueft aber das Filtern
+    // LEERER Eintraege, nicht die Generik-Regel. Fixture entsprechend
+    // angepasst; die Aussage des Tests bleibt unveraendert.
+    e.lokaleFaqs = [
+      { frage: 'Herne?', antwort: '' },
+      { frage: 'Wo in Herne?', antwort: 'In Herne-Süd, direkt an der A42.' },
+    ]
 
     const b = pruefeLokalinhalt(e, 'Herne')
     expect(b.bereinigt.stadtbezirke).toHaveLength(1)
@@ -262,5 +270,169 @@ describe('pruefeLokalinhalt — Umlaut-Pflicht', () => {
     const e = guterEntwurf()
     e.lokaleFaqs = [{ frage: 'Welche Straße in Herne?', antwort: 'Die B226 führt durch Herne.' }]
     expect(pruefeLokalinhalt(e, 'Herne').ok).toBe(true)
+  })
+})
+
+describe('istOrtsspezifischeFaq', () => {
+  // Kontext, wie ihn eine echte Stadt-Zeile mitbringt.
+  const ORT = {
+    stadtName: 'Dormagen',
+    bezirke: ['Mitte', 'Zons', 'Nievenheim', 'Hackenbroich'],
+    achsen: ['A57', 'B9'],
+  }
+
+  it('laesst eine Antwort MIT Ortsbezug durch', () => {
+    expect(
+      istOrtsspezifischeFaq(
+        {
+          frage: 'Was ist bei einem Lkw-Unfall an den Chempark-Zufahrten anders?',
+          antwort:
+            'Der Chempark bringt taeglich Schwerlastverkehr auf die B9 und die Zufahrten im Norden Dormagens.',
+        },
+        ORT,
+      ),
+    ).toBe(true)
+  })
+
+  it('blockt eine ortsfreie Antwort — auch wenn die FRAGE den Ort nennt', () => {
+    // Genau das Muster, das 58-79 Mal in der Datenbank stand: der Ortsname
+    // wandert in die Frage, die Antwort bleibt fuer jede Stadt gleich.
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Darf ich meine Werkstatt in Dormagen frei waehlen?', antwort: 'Ja, die freie Werkstattwahl bleibt bestehen.' },
+        ORT,
+      ),
+    ).toBe(false)
+  })
+
+  it('blockt die Gerichts-Schablone, obwohl die Antwort den Ortsnamen traegt', () => {
+    // Die zweite Klasse: eine Schablone mit eingesetztem DATENWERT. Das
+    // Ortsbezug-Kriterium allein greift hier nicht — "Amtsgericht Dormagen"
+    // enthaelt den Stadtnamen. Der Basis-Block beantwortet sie bereits.
+    expect(
+      istOrtsspezifischeFaq(
+        {
+          frage: 'Welches Gericht ist bei einem Verkehrsunfall in Dormagen zustaendig?',
+          antwort: 'Bis 5.000 Euro das Amtsgericht Dormagen, darueber das Landgericht Neuss.',
+        },
+        ORT,
+      ),
+    ).toBe(false)
+  })
+
+  it('blockt die vor-Ort-Frist-Schablone trotz echter Ortsteile', () => {
+    expect(
+      istOrtsspezifischeFaq(
+        {
+          frage: 'Wie schnell ist ein Kfz-Gutachter in Dormagen vor Ort?',
+          antwort:
+            'Meist innerhalb von 24 bis 48 Stunden. Der Sachverstaendige kommt zu Ihnen — ob das Fahrzeug in Zons steht oder in Nievenheim.',
+        },
+        ORT,
+      ),
+    ).toBe(false)
+  })
+
+  it('akzeptiert einen Ortsteil als Bezug, auch ohne den Stadtnamen', () => {
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Was gilt in der Zollfeste?', antwort: 'Die engen Gassen in Zons fuehren zu Rangierschaeden an Felgen und Stossfaenger.' },
+        ORT,
+      ),
+    ).toBe(true)
+  })
+
+  it('akzeptiert eine Achse als Bezug', () => {
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Unfall auf der Autobahn?', antwort: 'Auf der A57 sind Auffahrschaeden am Stauende typisch.' },
+        ORT,
+      ),
+    ).toBe(true)
+  })
+
+  it('zaehlt einen Achsen-Treffer nur als ganzes Wort', () => {
+    // "A57" darf nicht in "A570" oder in einer Hausnummer matchen.
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Was kostet das?', antwort: 'Die Kosten liegen zwischen 550 und 2.200 Euro je nach Schadenhoehe.' },
+        ORT,
+      ),
+    ).toBe(false)
+  })
+})
+
+describe('istOrtsspezifischeFaq — mehrteilige Stadtnamen', () => {
+  it('erkennt die Kurzform eines mehrteiligen Namens', () => {
+    // Die Stammdaten fuehren "Frankfurt am Main", der Fliesstext schreibt
+    // "Frankfurt". Eine Pruefung nur auf den vollen Namen blockte eine
+    // einwandfreie Ortsfrage — gemessen 23.08. am echten Bestand.
+    expect(
+      istOrtsspezifischeFaq(
+        {
+          frage: 'Wie wirkt sich der hohe Anteil an Firmenwagen aus?',
+          antwort: 'Frankfurt ist Banken- und Messestandort; entsprechend haeufig sind Leasingfahrzeuge betroffen.',
+        },
+        { stadtName: 'Frankfurt am Main', bezirke: ['Sachsenhausen'], achsen: ['A5'] },
+      ),
+    ).toBe(true)
+  })
+
+  it('erkennt die Kurzform auch bei Praepositions-Namen', () => {
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Was gilt hier?', antwort: 'In Muelheim sind die Ruhrbruecken der Engpass.' },
+        { stadtName: 'Mülheim an der Ruhr', bezirke: ['Broich'], achsen: ['A40'] },
+      ),
+    ).toBe(true)
+  })
+
+  it('zaehlt Fuellwoerter eines Namens NICHT als Ortsbezug', () => {
+    // "am", "an", "der" stehen in fast jedem deutschen Satz. Wer sie als
+    // Bezug zaehlt, laesst bei "Frankfurt am Main" jede beliebige Antwort durch.
+    expect(
+      istOrtsspezifischeFaq(
+        { frage: 'Wer zahlt?', antwort: 'Der gegnerische Haftpflichtversicherer zahlt an den Geschaedigten.' },
+        { stadtName: 'Frankfurt am Main', bezirke: [], achsen: [] },
+      ),
+    ).toBe(false)
+  })
+})
+
+describe('pruefeLokalinhalt — Ortsbezug bei Klammer-/Zusatznamen', () => {
+  it('akzeptiert die Kurzform eines Namens mit Klammerzusatz', () => {
+    // Die Stammdaten fuehren "Stolberg (Rheinland)", jeder Fliesstext schreibt
+    // "Stolberg". Der Ortsbezug-Check verglich gegen den VOLLEN Namen und lehnte
+    // deshalb einen einwandfreien Entwurf ab — gemessen 23.08. an einer echten
+    // Charge. Dieselbe Klasse wie "Frankfurt am Main" eine Funktion weiter oben;
+    // ich hatte nur eine der beiden Stellen gefixt.
+    const e: LokalinhaltEntwurf = {
+      stadtbezirke: [{ name: 'Stolberg-Mitte', ortsteile: ['Altstadt'] }],
+      hauptachsen: { autobahnen: ['A44'], bundesstrassen: ['B264'], knoten: [] },
+      unfallHotspots: [],
+      lokaleFaqs: [
+        {
+          frage: 'Was ist an der Vichtbachtalstraße besonders?',
+          antwort: 'Die Talstraße windet sich durch Stolberg und ist bei Nässe rutschig.',
+        },
+      ],
+      heroAnker: 'Kfz-Gutachten in Stolberg.',
+      topografieAnker: 'Stolberg liegt im Vichttal am Nordrand der Eifel.',
+    }
+    const b = pruefeLokalinhalt(e, 'Stolberg (Rheinland)')
+    expect(b.gruende).toEqual([])
+    expect(b.ok).toBe(true)
+  })
+
+  it('lehnt weiterhin ab, wenn der Ort NIRGENDS vorkommt', () => {
+    const e: LokalinhaltEntwurf = {
+      stadtbezirke: [{ name: 'Mitte', ortsteile: [] }],
+      hauptachsen: { autobahnen: ['A44'], bundesstrassen: [], knoten: [] },
+      unfallHotspots: [],
+      lokaleFaqs: [{ frage: 'Was gilt?', antwort: 'Auf der A44 sind Auffahrschäden typisch.' }],
+      heroAnker: 'Ein Text ohne Ortsnamen.',
+      topografieAnker: 'Flaches Gelände.',
+    }
+    expect(pruefeLokalinhalt(e, 'Stolberg (Rheinland)').ok).toBe(false)
   })
 })

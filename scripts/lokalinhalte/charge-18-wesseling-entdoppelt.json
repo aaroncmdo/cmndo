@@ -1,0 +1,81 @@
+{
+  "wesseling": {
+    "stadtbezirke": [
+      {
+        "name": "Wesseling-Mitte",
+        "ortsteile": [
+          "Wesseling-Mitte"
+        ]
+      },
+      {
+        "name": "Keldenich",
+        "ortsteile": [
+          "Keldenich"
+        ]
+      },
+      {
+        "name": "Berzdorf",
+        "ortsteile": [
+          "Berzdorf"
+        ]
+      },
+      {
+        "name": "Urfeld",
+        "ortsteile": [
+          "Urfeld"
+        ]
+      }
+    ],
+    "hauptachsen": {
+      "knoten": [
+        "A555 zwischen Köln und Bonn",
+        "Werkszufahrten der Rheinschiene",
+        "Stadtbahnhalte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld"
+      ],
+      "autobahnen": [
+        "A555"
+      ],
+      "bundesstrassen": []
+    },
+    "unfallHotspots": [
+      {
+        "ort": "Euro-Kreisel (Flach-Fengler-Straße / Hubertusstraße / Jahnstraße)",
+        "quelle": "https://www.rheinische-anzeigenblaetter.de/rhein-erft/c-nachrichten/unfallschwerpunkte-im-kreis-reduziert_a155978",
+        "einzelfall": false,
+        "beschreibung": "Der Euro-Kreisel wurde vom Rhein-Erft-Kreis als Unfallhäufungsstelle geführt. Nach besserer Führung des Radverkehrs, verbesserten Sichtverhältnissen und baulichen Änderungen im Kreisel zählte der Kreis ihn 2019 zu den Stellen, die nicht mehr auffällig sind. Die Angabe beschreibt einen entschärften Punkt, keine aktuelle Gefahrenstelle. Quelle: Rheinische Anzeigenblaetter, 10.07.2019."
+      }
+    ],
+    "lokaleFaqs": [
+      {
+        "frage": "Wie prägt die Wesselinger Chemieindustrie das Unfallgeschehen auf den Straßen?",
+        "antwort": "In Wesseling arbeiten Raffinerie- und Chemiebetriebe von Shell, Braskem, Evonik und LyondellBasell auf engem Raum an der Rheinschiene. Der Standort erzeugt Werksverkehr rund um die Uhr: Tankfahrzeuge, Sattelzüge und Schichtverkehr teilen sich die Zufahrtsstraßen mit dem örtlichen Verkehr. Da viele Werkstore unmittelbar an der durchgehenden Fahrbahn liegen, fehlt abbiegenden Fahrzeugen die Aufstellfläche. Typisch sind Abbiegeunfälle mit schweren Fahrzeugen, bei denen der tote Winkel eine Rolle spielt, sowie Anstöße beim Ein- und Ausfahren. Trifft ein Lkw einen Pkw seitlich, wirkt die Kraft meist oberhalb der Stoßfängerebene — Türen, Säulen und Dachrahmen werden dann eingedrückt. Solche Schäden gehören vermessen, weil die Seitenstruktur die Insassensicherheit trägt. Ein optisch gerichteter Türrahmen belegt das nicht."
+      },
+      {
+        "frage": "Die Linie 16 hält an vier Stationen in Wesseling — was bedeutet das für den Straßenverkehr?",
+        "antwort": "Die Stadtbahnlinie 16 fährt seit 1978 auf der Trasse der alten Rheinuferbahn zwischen Köln und Bonn und bedient in Wesseling die Halte Wesseling Nord, Wesseling, Wesseling Süd und Urfeld. Die Strecke durchzieht das Stadtgebiet in Nord-Süd-Richtung und wird vom Querverkehr an mehreren Punkten gekreuzt. An diesen Stellen treffen Fahrzeuge, Fußgänger und die Bahn mit sehr unterschiedlichen Geschwindigkeiten zusammen. Dort entstehen Kollisionen mit querenden oder abbiegenden Fahrzeugen. Für die Begutachtung ist die Aufprallrichtung entscheidend: Ein Anstoß aus der Querrichtung verschiebt das Fahrzeug seitlich und belastet Fahrwerk und Bodengruppe anders als ein Heckaufprall. Ohne Achsvermessung bleibt dieser Teil unsichtbar — bemerkbar wird er später an ungleichmäßigem Reifenbild."
+      },
+      {
+        "frage": "Wesseling liegt an der A555 — warum führt keine Bundesstraße durch die Stadt?",
+        "antwort": "Weil die A555 die frühere Bundesstraße ersetzt hat. Die Verbindung zwischen Köln und Bonn war die erste Autobahn Deutschlands, die für den öffentlichen Verkehr freigegeben wurde; die alte B9 ist auf diesem Abschnitt heute als Landesstraße eingestuft. Für Wesseling heißt das: Der überörtliche Nord-Süd-Verkehr läuft über die A555 und über die parallelen Ortsdurchfahrten in Keldenich, Berzdorf und Urfeld. Bei Sperrungen auf der Autobahn schlägt der Verkehr sofort in die Wohnstraßen durch — dann fahren Sattelzüge durch Straßen, deren Kurvenradien dafür nicht ausgelegt sind. Dort entstehen Schäden im niedrigen Geschwindigkeitsbereich, die trotz geringer Wucht Sensorik hinter der Verkleidung treffen. Ein gestreifter Außenspiegel etwa enthält heute oft Kamera und Totwinkelsensor."
+      },
+      {
+        "frage": "Was ist bei einem Schaden durch verlorenes Ladegut zu tun?",
+        "antwort": "Auf den Zufahrten der Wesselinger Werke und auf der A555 kommt es vor, dass Ladung oder Flüssigkeit auf der Fahrbahn landet. Wer hineinfährt, hat Ansprüche gegen den Verursacher, aber nur wenn sich Ursache und Fahrzeug zuordnen lassen. Fahrbahnzustand, Reifenspuren und Unterbodenschaden müssen dokumentiert sein, bevor die Fahrbahn gereinigt wird — danach ist der Beleg weg."
+      },
+      {
+        "frage": "Steinschlag durch einen vorausfahrenden Lkw — wer kommt dafür auf?",
+        "antwort": "Auf der A555 und den Werkszufahrten in Wesseling fahren viele Lkw mit Schüttgut oder Baustoff. Löst sich davon ein Stein und trifft die Scheibe, haftet grundsätzlich der Verursacher — praktisch scheitert es fast immer daran, dass sich das Fahrzeug nicht mehr zuordnen lässt. Ohne Kennzeichen und Zeugen bleibt die Teilkasko, die Glasschäden ohne Rückstufung trägt. Lässt sich der Lkw dagegen benennen, lohnt die genaue Aufnahme: Einschlagstelle, Richtung und Ladungsart ergeben zusammen ein Bild, das die Gegenseite schwer bestreiten kann."
+      },
+      {
+        "frage": "Was ist beim Abstellen eines beschädigten Fahrzeugs auf Werksgelände zu klären?",
+        "antwort": "Bleibt ein Fahrzeug nach einem Unfall in Wesseling auf einem Werks- oder Firmengelände stehen, ist der Zutritt geregelt und nicht jeder kommt hinein. Für die Begutachtung muss die Zufahrt vorher abgestimmt sein, sonst läuft Standzeit auf, die später jemand bezahlen soll. Wir klären den Zugang im Vorfeld und halten Abstellort und Datum fest, damit die Standkosten belegbar bleiben."
+      },
+      {
+        "frage": "Das Auto wird in fremder Obhut beschädigt — Werkstatt, Waschanlage, Abschleppwagen",
+        "antwort": "Wer sein Fahrzeug in Wesseling in eine Werkstatt, eine Waschanlage oder auf einen Abschleppwagen gibt, übergibt es in fremde Obhut. Entsteht dort ein Schaden, gilt eine Beweiserleichterung zu Ihren Gunsten: Der Betrieb muss darlegen, dass ihn kein Verschulden trifft. Vorausgesetzt, der Zustand bei Übergabe ist festgehalten. Deshalb lohnt es, das Fahrzeug vorher rundum zu fotografieren — und einen neu entdeckten Schaden sofort und schriftlich zu melden, nicht erst Tage später."
+      }
+    ],
+    "heroAnker": "Kfz-Gutachten in Wesseling — von der A555 über die Werkszufahrten der Rheinschiene bis nach Keldenich, Berzdorf und Urfeld. Schadenaufnahme vor Ort in allen vier Stadtteilen.",
+    "topografieAnker": "Wesseling liegt direkt am Rhein zwischen Köln und Bonn und ist durch Raffinerie- und Chemieanlagen geprägt, die einen großen Teil des Stadtgebiets einnehmen. Erschlossen wird die Stadt über die A555, die erste für den öffentlichen Verkehr freigegebene Autobahn Deutschlands, sowie über die Stadtbahnlinie 16 auf der Trasse der früheren Rheinuferbahn."
+  }
+}

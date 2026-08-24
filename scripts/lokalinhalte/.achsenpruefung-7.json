@@ -1,0 +1,443 @@
+{
+  "augsburg": {
+    "_name": "Augsburg",
+    "autobahnen": [
+      "A8"
+    ],
+    "bundesstrassen": [
+      "B2",
+      "B17",
+      "B300"
+    ],
+    "knoten": [
+      "Kreuz Augsburg-West",
+      "Dreieck Augsburg-West",
+      "Anschlussstelle Augsburg-Ost"
+    ],
+    "_urteil": "FALSCH: „Dreieck Augsburg-West\" — der Knoten A8 × B2/B17 ist das Kreuz Augsburg-West, kleeblattförmig ausgebaut. Ein Dreieck gleichen Namens gibt es nicht; der Eintrag steht doppelt, nur die Kreuz-Form ist richtig. HINWEIS: Das Kreuz liegt im Gemeindegebiet Gersthofen und ersetzte dort Anfang der 1990er eine gleichnamige Anschlussstelle. Da die B17 von dort direkt in die Stadt führt, erschließt es Augsburg unmittelbar — nach eurem Maßstab vertretbar, aber es liegt nicht auf Augsburger Grund. UNBELEGT: B300 habe ich nicht bestätigen können; B2 und B17 sind über das Kreuz belegt, A8 und AS Augsburg-Ost ebenfalls."
+  },
+  "berlin": {
+    "_name": "Berlin",
+    "autobahnen": [
+      "A 100 (Stadtring)",
+      "A 111 (Reinickendorf – Landesgrenze Richtung Hamburg)",
+      "A 113 (Neukölln/Treptow – BER/Schönefeld)",
+      "A 114 (Pankow – Anschluss A 10)",
+      "A 115 (AVUS, Zehlendorf/Wannsee)",
+      "A 103 (Steglitzer Zubringer)",
+      "A 10 (Berliner Ring, im Umland)",
+      "A 12",
+      "A 13",
+      "A 24",
+      "A 9 (über Berliner Ring erreichbar)"
+    ],
+    "bundesstrassen": [
+      "B 1",
+      "B 2",
+      "B 5",
+      "B 96",
+      "B 96a",
+      "B 101",
+      "B 109",
+      "B 158",
+      "B 179"
+    ],
+    "knoten": [
+      "Dreieck Funkturm (A 100/A 115)",
+      "Dreieck Charlottenburg (A 100/A 111)",
+      "Dreieck Neukölln (A 100/A 113)",
+      "Dreieck Oberlandstraße",
+      "Kreuz Schöneberg (A 100/A 103)",
+      "Ernst-Reuter-Platz",
+      "Großer Stern",
+      "Potsdamer Platz",
+      "Alexanderplatz / Mollstraße",
+      "Frankfurter Tor",
+      "Hermannplatz",
+      "Rathaus Steglitz (Schloßstraße/Albrechtstraße)",
+      "Tempelhofer Damm / Ullsteinstraße",
+      "Adenauerplatz",
+      "Innsbrucker Platz",
+      "Bundesplatz",
+      "Spandauer Damm / Klosterstraße"
+    ],
+    "_urteil": "FALSCH: „Dreieck Oberlandstraße\" — die Oberlandstraße ist eine gewöhnliche Anschlussstelle der A100, kein Autobahndreieck. FALSCH (Maßstab): A12, A13, A24, A9 und A10 liegen sämtlich außerhalb des Berliner Stadtgebiets; sie beginnen an Knoten des Berliner Rings in Brandenburg. Die Liste räumt das bei zweien selbst ein („im Umland\", „über Berliner Ring erreichbar\") — dann gehören sie nicht in die Achsenliste. BESTÄTIGT: Dreieck Funkturm (A100/A115), Dreieck Charlottenburg (A100/A111), Dreieck Neukölln (A100/A113) und Kreuz Schöneberg (A100/A103) existieren genau in dieser Gattung. UNBELEGT: „Spandauer Damm / Klosterstraße\" — der Spandauer Damm liegt in Charlottenburg, eine Kreuzung mit einer Klosterstraße konnte ich nicht bestätigen. Die übrigen Platz-Einträge sind städtische Knoten statt Autobahnknoten, liegen aber im Stadtgebiet."
+  },
+  "bottrop": {
+    "_name": "Bottrop",
+    "autobahnen": [
+      "A2",
+      "A31",
+      "A42"
+    ],
+    "bundesstrassen": [
+      "B223",
+      "B224"
+    ],
+    "knoten": [
+      "Kreuz Bottrop",
+      "Dreieck Bottrop",
+      "Anschlussstelle Bottrop-Süd"
+    ],
+    "_urteil": "FALSCH: „Kreuz Bottrop\" — der Knoten A2 × A31 ist das Dreieck Bottrop (A2 Nr. 3), das in derselben Liste bereits korrekt steht. Ein Kreuz Bottrop existiert nicht; von den beiden Einträgen ist nur die Dreieck-Form richtig. BESTÄTIGT: A2 mit AS Bottrop (Nr. 3), A31, A42 mit AS Bottrop-Süd (ursprünglich „Bottrop/Essen-Borbeck\"). UNBELEGT: B223 habe ich nicht geprüft; die B224 ist mittelbar belegt — sie überbrückt die A52-Lücke zwischen Essen und Gladbeck durch den Raum Bottrop."
+  },
+  "chemnitz": {
+    "_name": "Chemnitz",
+    "autobahnen": [
+      "A4",
+      "A72"
+    ],
+    "bundesstrassen": [
+      "B95",
+      "B107",
+      "B169",
+      "B173",
+      "B174"
+    ],
+    "knoten": [
+      "Kreuz Chemnitz",
+      "Dreieck Chemnitz",
+      "Anschlussstelle Chemnitz-Süd"
+    ],
+    "_urteil": "FALSCH: „Dreieck Chemnitz\" — der Knoten A4 × A72 ist das Kreuz Chemnitz, das bereits in der Liste steht. Er wurde 1939 als Autobahndreieck in Trompetenform angelegt; der Doppeleintrag bildet damit einen Zustand von vor über 80 Jahren ab. BESTÄTIGT: A4, A72, Kreuz Chemnitz (rund 5 km nordwestlich des Zentrums, bei Röhrsdorf und Rottluff) sowie AS Chemnitz-Süd (A72, mit B173). FEHLT: die Anschlussstellen Chemnitz-Mitte und Chemnitz-Glösa an der A4 sowie Chemnitz-Röhrsdorf und Chemnitz-Rottluff an der A72 — alle im Stadtgebiet und Hauptzufahrten; Chemnitz-Mitte und Chemnitz-Glösa tauchen laufend in den Verkehrsmeldungen der Autobahn GmbH auf."
+  },
+  "dortmund": {
+    "_name": "Dortmund",
+    "autobahnen": [
+      "A1",
+      "A2",
+      "A40",
+      "A44",
+      "A45"
+    ],
+    "bundesstrassen": [
+      "B1",
+      "B54",
+      "B236"
+    ],
+    "knoten": [
+      "Kreuz Dortmund/Witten",
+      "Kreuz Dortmund-Nordwest",
+      "Kreuz Dortmund-Unna",
+      "Dreieck Dortmund/Witten"
+    ],
+    "_urteil": "FALSCH: „Kreuz Dortmund/Witten\" — der Knoten A45 × A44 ist das Dreieck Dortmund/Witten (A45 Nr. 7), das in derselben Liste zwei Zeilen weiter korrekt steht. Der Kreuz-Eintrag ist dieselbe Stelle in falscher Gattung. BESTÄTIGT: Kreuz Dortmund-Nordwest (A45 Nr. 2), Kreuz Dortmund/Unna (A44 Nr. 52, amtlich mit Schrägstrich), Dreieck Dortmund/Witten, dazu A1, A2, A40, A44 und A45. FEHLT: Kreuz Dortmund-West (A45 Nr. 5) und Kreuz Dortmund-Süd (A45 Nr. 8) — beide im Stadtgebiet und mindestens so bedeutend wie die gelisteten."
+  },
+  "erftstadt": {
+    "_name": "Erftstadt",
+    "autobahnen": [
+      "A1",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B265"
+    ],
+    "knoten": [
+      "Autobahnkreuz Bliesheim (A1/A61)",
+      "Autobahndreieck Erfttal",
+      "B265 in Liblar"
+    ],
+    "_urteil": "Weitgehend ok. BESTÄTIGT: Das Autobahnkreuz Bliesheim liegt im Erftstädter Ortsteil Bliesheim, dort vereinigen sich A1 und A61; das Autobahndreieck Erfttal liegt nordöstlich von Blessem, ebenfalls einem Erftstädter Stadtteil, wo sich die Autobahnen wieder gabeln. Erftstadt hat vier Anschlussstellen an A1 und A61. Die B265 führt über Liblar Richtung Brühl und Köln. FEHLT: Am Kreuz Bliesheim endet zusätzlich die A553 (Zubringer aus Brühl) — sie fehlt in der Autobahnliste, obwohl ihr letzter Abschnitt Erftstadt erschließt."
+  },
+  "euskirchen": {
+    "_name": "Euskirchen",
+    "autobahnen": [
+      "A1"
+    ],
+    "bundesstrassen": [
+      "B51",
+      "B56",
+      "B266"
+    ],
+    "knoten": [
+      "Anschlussstelle Euskirchen (A1)",
+      "Anschlussstelle Wißkirchen (A1)",
+      "B56 Innenstadtring mit Erftbrücke Kölner Straße",
+      "B266 Kommerner Straße Richtung Wißkirchen"
+    ],
+    "_urteil": "Weitgehend ok. BESTÄTIGT: A1 mit den Anschlussstellen Euskirchen und Wißkirchen (beide in Verkehrsmeldungen belegt, Wißkirchen ist Euskirchener Stadtteil); B51 nach Köln und Bad Münstereifel, die abschnittsweise auf der A1 verläuft; B56 nach Bonn im Osten sowie Zülpich und Düren im Westen; B266 von Simmerath in der Eifel nach Linz am Rhein. HINWEIS: Die beiden letzten Einträge unter knoten sind Streckenbeschreibungen, keine Knotenpunkte. UNBELEGT und vermutlich irreführend ist dabei „B266 Kommerner Straße Richtung Wißkirchen\": Kommern gehört zu Mechernich und liegt südwestlich — die Straße ist nach ihrem Ziel Kommern benannt, nicht nach Wißkirchen."
+  },
+  "gladbeck": {
+    "_name": "Gladbeck",
+    "autobahnen": [
+      "A2",
+      "A31",
+      "A52"
+    ],
+    "bundesstrassen": [
+      "B224"
+    ],
+    "knoten": [
+      "Kreuz Gladbeck",
+      "Anschlussstelle Gladbeck-Ellinghorst",
+      "Dreieck Bottrop"
+    ],
+    "_urteil": "FALSCH (Maßstab): „Dreieck Bottrop\" liegt auf Bottroper Stadtgebiet (A2 × A31) und gehört damit nicht in Gladbecks Liste — derselbe Fall wie Kreuz Hilden bei Solingen. BESTÄTIGT: Kreuz Gladbeck (A2 Nr. 5 × A52; im A52-Artikel auch als „Kreuz Essen/Gladbeck\" geführt), AS Gladbeck-Ellinghorst (A2 Nr. 4), dazu A2, A31 und A52. HINWEIS zur A52: Sie ist bei Gladbeck nicht durchgehend — zwischen dem Dreieck Essen-Ost an der A40 und der A2 klafft eine Lücke, die von der B224 übernommen wird; das dritte Teilstück beginnt erst bei Gladbeck. B224 damit belegt."
+  },
+  "hagen": {
+    "_name": "Hagen",
+    "autobahnen": [
+      "A1",
+      "A45",
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B7",
+      "B54",
+      "B226"
+    ],
+    "knoten": [
+      "Kreuz Hagen",
+      "Anschlussstelle Hagen-Süd"
+    ],
+    "_urteil": "ok. BESTÄTIGT: Kreuz Hagen (A45 Nr. 11, Verbindung zur A46) und AS Hagen-Süd (A45 Nr. 12) — beide in der A45-Liste; A1, A45 und A46 berühren das Stadtgebiet. HINWEIS: Die AS Hagen-Süd liegt an der A45, nicht an der A46; in der A46-Liste taucht sie folgerichtig nicht auf. Ein möglicher Nachtrag wäre die AS Hagen-Elsey an der A46, ebenfalls im Stadtgebiet. Die Bundesstraßen B7, B54 und B226 habe ich nicht einzeln geprüft."
+  },
+  "heilbronn": {
+    "_name": "Heilbronn",
+    "autobahnen": [
+      "A6",
+      "A81"
+    ],
+    "bundesstrassen": [
+      "B27",
+      "B39",
+      "B293"
+    ],
+    "knoten": [
+      "Kreuz Weinsberg",
+      "Anschlussstelle Heilbronn-Untereisesheim",
+      "Anschlussstelle Heilbronn-Neckarsulm"
+    ],
+    "_urteil": "ok mit zwei Namenshinweisen. BESTÄTIGT: Kreuz Weinsberg (A6 Nr. 38 × A81), AS Heilbronn/Untereisesheim (A6 Nr. 36, mit der Neckartalbrücke Heilbronn) und AS Heilbronn/Neckarsulm (A6 Nr. 37, mit B27). Eine Anschlussstelle, die nur „Heilbronn\" heißt, gibt es nicht. HINWEIS: Beide Anschlussstellen tragen amtlich einen Schrägstrich, nicht den hier gesetzten Bindestrich — sie liegen in den Nachbarorten Untereisesheim und Neckarsulm, führen Heilbronn aber im Namen und sind die Stadtzufahrten. Das Kreuz Weinsberg liegt auf Weinsberger Gemarkung südlich von Neckarsulm; nach strengem Maßstab ein Grenzfall, als Autobahnknoten der Stadt aber sachlich richtig."
+  },
+  "hilden": {
+    "_name": "Hilden",
+    "autobahnen": [
+      "A3",
+      "A46"
+    ],
+    "bundesstrassen": [
+      "B228"
+    ],
+    "knoten": [
+      "Autobahnkreuz Hilden (A3/A46)",
+      "Anschlussstelle Hilden",
+      "Anschlussstelle Haan-Ost"
+    ],
+    "_urteil": "FALSCH (Maßstab): „Anschlussstelle Haan-Ost\" liegt in Haan (A46), nicht in Hilden — eine Anschlussstelle der Nachbarstadt, auch wenn Hildener sie nutzen. BESTÄTIGT: Autobahnkreuz Hilden (A3 × A46) und AS Hilden sind beide in der A46-Liste enthalten, ebenso A3 und A46. B228 habe ich nicht geprüft."
+  },
+  "kaarst": {
+    "_name": "Kaarst",
+    "autobahnen": [
+      "A52",
+      "A57"
+    ],
+    "bundesstrassen": [],
+    "knoten": [
+      "Autobahnkreuz Kaarst (A52/A57)",
+      "Anschlussstelle Kaarst-Nord (A52)",
+      "Anschlussstelle Holzbüttgen"
+    ],
+    "_urteil": "ok. BESTÄTIGT: „Kaarst liegt an den Bundesautobahnen A 52 und A 57\", das Autobahnkreuz Kaarst (A57 Nr. 17 × A52) liegt im Stadtgebiet, und „im Stadtgebiet liegen die Anschlussstellen Kaarst-Nord und Holzbüttgen\" — alle drei Knoten treffen zu, in der richtigen Gattung. Auch die leere Bundesstraßenliste ist plausibel: Der Verkehrsabschnitt des Stadtartikels nennt keine Bundesstraße im Stadtgebiet."
+  },
+  "koblenz": {
+    "_name": "Koblenz",
+    "autobahnen": [
+      "A48",
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B9",
+      "B42",
+      "B49",
+      "B327"
+    ],
+    "knoten": [
+      "Kreuz Koblenz",
+      "Dreieck Koblenz-Nord",
+      "Anschlussstelle Koblenz-Zentrum"
+    ],
+    "_urteil": "FALSCH: „Dreieck Koblenz-Nord\" — an der A48 gibt es die Anschlussstelle Koblenz-Nord (Nr. 10, Übergang auf die B9), kein Dreieck. FALSCH: „Anschlussstelle Koblenz-Zentrum\" — in der vollständigen A48-Liste vom Dreieck Vulkaneifel bis zum Dreieck Dernbach kommt sie nicht vor, ebenso wenig eine AS Koblenz-Metternich. BESTÄTIGT: Kreuz Koblenz (A48 Nr. 9 × A61), A48 und A61. Als Ersatz für die beiden Fehleinträge bietet sich die AS Koblenz-Nord an, die die B9 anbindet. Die Bundesstraßen B9, B42, B49 und B327 habe ich nicht einzeln geprüft."
+  },
+  "leverkusen": {
+    "_name": "Leverkusen",
+    "autobahnen": [
+      "A1",
+      "A3",
+      "A59"
+    ],
+    "bundesstrassen": [
+      "B8",
+      "B51",
+      "B229"
+    ],
+    "knoten": [
+      "Kreuz Leverkusen",
+      "Kreuz Leverkusen-West",
+      "Dreieck Langenfeld"
+    ],
+    "_urteil": "FALSCH (Maßstab): „Dreieck Langenfeld\" (A3 Nr. 21, Verbindung zur A542) existiert, liegt aber in Langenfeld und nicht in Leverkusen. BESTÄTIGT: Kreuz Leverkusen (A3 Nr. 23 × A1) und Kreuz Leverkusen-West, dazu A1, A3 und A59. HINWEIS: Über das Kreuz Leverkusen führt derzeit die neue Rheinbrücke der A1 — die erste Hälfte ist seit Februar 2024 in Betrieb, die zweite im Bau; das ist für Ortsinhalte relevanter als das Dreieck in der Nachbarstadt."
+  },
+  "luenen": {
+    "_name": "Lünen",
+    "autobahnen": [
+      "A2"
+    ],
+    "bundesstrassen": [
+      "B54",
+      "B236"
+    ],
+    "knoten": [
+      "Anschlussstelle Lünen-Nord",
+      "Anschlussstelle Lünen-Süd",
+      "Kreuz Dortmund-Nordost"
+    ],
+    "_urteil": "FALSCH: „Anschlussstelle Lünen-Nord\" — die A2 verläuft südlich an Lünen vorbei und hat dort ausschließlich die AS Lünen-Süd (Nr. 14); eine Lünen-Nord kommt in der A2-Liste zwischen Dortmund-Mengede und Kamen/Bergkamen nicht vor, und geografisch ergäbe sie keinen Sinn. FALSCH (Maßstab und Gattung): „Kreuz Dortmund-Nordost\" liegt auf Dortmunder Stadtgebiet und wird in den Meldungen der Autobahn Westfalen als Anschlussstelle Dortmund-Nordost geführt, nicht als Kreuz. BESTÄTIGT: A2, AS Lünen-Süd, B54 (verbindet Lünen mit Dortmund und über Dortmund-Nordost mit der A2) und B236."
+  },
+  "menden": {
+    "_name": "Menden (Sauerland)",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B7",
+      "B515"
+    ],
+    "knoten": [],
+    "_urteil": "ok, mit einer Einschränkung. BESTÄTIGT: Menden hat keine eigene Autobahn — die A46 endet östlich von Iserlohn bei Hemer und damit außerhalb; die leere Autobahn- und Knotenliste ist richtig. Die B515 ist als Provinzialstraße in Menden durch ein Bauprojekt von Straßen.NRW belegt. UNBELEGT: Die B7 durch Menden konnte ich nicht direkt bestätigen. Sie ist plausibel — die B7 übernimmt am Autobahnende bei Hemer den Verkehr Richtung Osten —, aber ein Beleg für die Führung durch Mendener Stadtgebiet fehlt mir."
+  },
+  "muenchen": {
+    "_name": "München",
+    "autobahnen": [
+      "A8 (Salzburg–Stuttgart, Anschlussstellen München-Ramersdorf bis München-Obermenzing)",
+      "A9 (München–Nürnberg–Berlin, ab Schwabinger Tor/Frankfurter Ring)",
+      "A92 (München–Deggendorf, über Flughafen München)",
+      "A94 (München–Passau, ab Anschlussstelle München-Steinhausen/Kreillerstraße)",
+      "A95 (München–Garmisch-Partenkirchen, ab Anschlussstelle München-Sendling)",
+      "A96 (München–Lindau, ab Anschlussstelle München-Sendling/Laim)",
+      "A99 (Autobahnring München)",
+      "A995 (München-Giesing–Autobahnkreuz München-Süd)"
+    ],
+    "bundesstrassen": [
+      "B2 (Verdistraße/Bodenseestraße, Landsberger Straße, Schleißheimer Straße)",
+      "B2R (Mittlerer Ring)",
+      "B11 (Ingolstädter Straße, Deggendorfer Straße)",
+      "B12 (Kreillerstraße Richtung Passau)",
+      "B13 (Ingolstädter Straße/Schleißheimer Straße Richtung Norden)",
+      "B304 (Wasserburger Landstraße, Rosenheimer Straße)",
+      "B471 (Tangente im Norden/Westen, Dachau–Oberschleißheim)"
+    ],
+    "knoten": [
+      "Autobahnkreuz München-Süd (A8/A995/A99)",
+      "Autobahnkreuz München-West (A8/A99/A96)",
+      "Autobahnkreuz München-Nord (A9/A99)",
+      "Autobahndreieck München-Allach (A99/B471)",
+      "Autobahndreieck München-Eschenried (A8/A99)",
+      "Autobahndreieck München-Feldmoching (A99/A92)",
+      "Mittlerer Ring (B2R) mit Petueltunnel, Richard-Strauss-Tunnel, Luise-Kiesselbach-Platz/Tunnel, Candidtunnel, Brudermühltunnel und Heckenstallertunnel",
+      "Stachus/Karlsplatz",
+      "Isarring/Effnerplatz",
+      "Georg-Brauchle-Ring / Landshuter Allee (Donnersbergerbrücke)",
+      "Föhringer Ring / Autobahnanschluss Frankfurter Ring"
+    ],
+    "_urteil": "FALSCH: „Autobahndreieck München-Allach (A99/B471)\" — das Dreieck verbindet die A99 mit der A99a, dem Zubringer zur A8, nicht mit der B471. Die B471 trifft erst bei Oberschleißheim auf die A92. FALSCH: „B11 (Ingolstädter Straße, Deggendorfer Straße)\" — die Ingolstädter Straße gehört zur B13, die über sie in die Leopoldstraße führt. Die B11 erreicht das Stadtgebiet im Norden an der A99 und läuft über Freisinger Landstraße, Situlistraße und Ungererstraße zum Mittleren Ring. BESTÄTIGT: Dreieck München-Allach und Dreieck München-Feldmoching existieren, dazwischen liegt der Allacher Tunnel der A99; die B13 über die Ingolstädter Straße stimmt. UNBELEGT: die Schleißheimer Straße, die hier gleichzeitig B2 und B13 zugeordnet wird, die „Deggendorfer Straße\", sowie die übrigen Kreuze und die Tunnelliste des Mittleren Rings — die habe ich nicht einzeln geprüft, bei dieser Fehlerdichte lohnt eine eigene Durchsicht."
+  },
+  "offenbach": {
+    "_name": "Offenbach am Main",
+    "autobahnen": [
+      "A3",
+      "A661"
+    ],
+    "bundesstrassen": [
+      "B43",
+      "B448"
+    ],
+    "knoten": [
+      "Kreuz Offenbach",
+      "Dreieck Offenbach",
+      "Anschlussstelle Offenbach-Kaiserlei"
+    ],
+    "_urteil": "FALSCH: „Dreieck Offenbach\" — der Knoten A661 × A3 ist das Offenbacher Kreuz (A661 Nr. 17); ein Autobahndreieck dieses Namens gibt es nicht. HINWEIS: Der Knoten heißt amtlich „Offenbacher Kreuz\", nicht „Kreuz Offenbach\" — der andere Eintrag meint also dieselbe Stelle. BESTÄTIGT: A3 und A661, die nach der Kaiserleibrücke als Hochstraße über Offenbacher Stadtgebiet führt, sowie die AS Offenbach-Kaiserlei (Nr. 15, in Nord und Süd getrennt). FEHLT: die AS Offenbach-Taunusring (A661 Nr. 16), ebenfalls im Stadtgebiet."
+  },
+  "radevormwald": {
+    "_name": "Radevormwald",
+    "autobahnen": [],
+    "bundesstrassen": [
+      "B229",
+      "B483"
+    ],
+    "knoten": [],
+    "_urteil": "ok. BESTÄTIGT: keine Autobahn im Stadtgebiet — die leeren Autobahn- und Knotenlisten sind richtig. Die B229 führt durch Radevormwald und verbindet die Stadt ostwärts Richtung Sauerland und westwärts über Remscheid und Müngsten nach Solingen; die B483 verläuft zwischen Hückeswagen, Radevormwald und weiter nördlich nach Schwelm."
+  },
+  "rheinbach": {
+    "_name": "Rheinbach",
+    "autobahnen": [
+      "A61"
+    ],
+    "bundesstrassen": [
+      "B266"
+    ],
+    "knoten": [
+      "B266 Ortsdurchfahrt Rheinbach",
+      "B266 Richtung Todenfeld und Ahrgebirge",
+      "A61 im westlichen Stadtgebiet"
+    ],
+    "_urteil": "FEHLT: die Anschlussstelle Rheinbach der A61 (Nr. 28, mit Anbindung der B266) — also ausgerechnet der Autobahnzugang der Stadt. Er ist in der A61-Liste zwischen Kreuz Meckenheim und Dreieck Bad Neuenahr-Ahrweiler eindeutig verzeichnet. HINWEIS: Die drei Einträge unter knoten sind keine Knotenpunkte, sondern Streckenbeschreibungen („A61 im westlichen Stadtgebiet\", „B266 Ortsdurchfahrt Rheinbach\"). BESTÄTIGT: A61 und B266; Todenfeld ist ein Rheinbacher Ortsteil, die Richtungsangabe stimmt."
+  },
+  "schwerin": {
+    "_name": "Schwerin",
+    "autobahnen": [
+      "A14",
+      "A24"
+    ],
+    "bundesstrassen": [
+      "B104",
+      "B106",
+      "B321"
+    ],
+    "knoten": [
+      "Dreieck Schwerin",
+      "Anschlussstelle Schwerin-Nord",
+      "Anschlussstelle Schwerin-Ost"
+    ],
+    "_urteil": "FALSCH: „Dreieck Schwerin\" — der Knoten A14 × A24 ist das Kreuz Schwerin (A14 Nr. 7). BESTÄTIGT: A14 und A24, AS Schwerin-Nord (Nr. 4, mit B104) und AS Schwerin-Ost (Nr. 5, mit B321). HINWEIS: Die AS Schwerin-Ost wurde später in Schwerin-Mitte umbenannt — welcher Name heute an der Beschilderung steht, sollte vor der Veröffentlichung geprüft werden. FEHLT: die AS Schwerin-Süd (A14 Nr. 6), die dritte Stadtzufahrt."
+  },
+  "stolberg-rheinland": {
+    "_name": "Stolberg (Rheinland)",
+    "autobahnen": [],
+    "bundesstrassen": [],
+    "knoten": [],
+    "_urteil": "ok. BESTÄTIGT: Durch Stolberg führt keine Autobahn. Die Stadt wird ausschließlich über fremde Anschlussstellen erschlossen — A4 über Eschweiler-West, Eschweiler-Ost und Weisweiler, A44 über Aachen-Brand und Broichweiden, A544 über Würselen/Verlautenheide. Alle liegen außerhalb des Stadtgebiets und gehören nach eurem Maßstab zu Recht nicht in die Liste; die leeren Felder sind also richtig und nicht etwa vergessen. HINWEIS ohne Handlungsbedarf: Der Verkehrsabschnitt nennt als Hauptachse die L238, die den Durchgangsverkehr in Nord-Süd-Richtung führt — eine Landesstraße, die das Schema nicht vorsieht. Eine Bundesstraße im Stadtgebiet wird nicht genannt."
+  },
+  "velbert": {
+    "_name": "Velbert",
+    "autobahnen": [
+      "A44",
+      "A535"
+    ],
+    "bundesstrassen": [
+      "B224",
+      "B227"
+    ],
+    "knoten": [
+      "Anschlussstelle Velbert-Zentrum",
+      "Kreuz Velbert-Nord",
+      "Anschlussstelle Heiligenhaus"
+    ],
+    "_urteil": "Drei Fehler. FALSCH: „Kreuz Velbert-Nord\" — der Knoten A44 × A535 ist das Dreieck Velbert-Nord (A44 Nr. 37). FALSCH: „Anschlussstelle Velbert-Zentrum\" — die A535 führt die AS Velbert ohne jeden Zusatz; eine Velbert-Zentrum ist nicht verzeichnet. FALSCH (Maßstab): „Anschlussstelle Heiligenhaus\" (A44 Nr. 35) liegt in Heiligenhaus, einer eigenen Stadt. BESTÄTIGT: A44 und A535, die vom Dreieck Velbert-Nord zum Sonnborner Kreuz in Wuppertal führt. FEHLT: die AS Tönisheide an der A535 und die AS Langenberg an der A44 (Nr. 38) — beides Velberter Stadtteile und damit die eigentlichen Zufahrten, die in der Liste fehlen."
+  },
+  "witten": {
+    "_name": "Witten",
+    "autobahnen": [
+      "A43",
+      "A44"
+    ],
+    "bundesstrassen": [
+      "B226"
+    ],
+    "knoten": [
+      "Kreuz Witten",
+      "Kreuz Dortmund/Witten",
+      "Anschlussstelle Witten-Herbede"
+    ],
+    "_urteil": "Zwei Fehler, beide in der Gattung. FALSCH: „Kreuz Witten\" — der Knoten A43 × A44 heißt Kreuz Bochum/Witten (A43 Nr. 19); ein Kreuz allein auf Witten gibt es nicht. FALSCH: „Kreuz Dortmund/Witten\" — das ist das Dreieck Dortmund/Witten (A45 Nr. 7), dieselbe Verwechslung wie in Dortmunds Liste. BESTÄTIGT: A43 und A44 sowie die AS Witten-Herbede (A43 Nr. 21), zwischen der und Witten-Heven die Autobahn die Ruhr quert. FEHLT: die AS Witten-Heven (A43 Nr. 20), ebenfalls im Stadtgebiet."
+  }
+}

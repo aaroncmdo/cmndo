@@ -14,7 +14,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 const PAGE_PATH = '/kfz-gutachter/online-kfz-gutachten'
 const STAND = '25.05.2026'
@@ -36,9 +36,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates(PAGE_PATH),
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}${PAGE_PATH}`,
+      ...(await localeOpenGraph(PAGE_PATH)),
       title: t('kfz_gutachter_online.og_title'),
       description: t('kfz_gutachter_online.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'LG Bremen 2026: Grenzen für Online-Kfz-Gutachten' }],

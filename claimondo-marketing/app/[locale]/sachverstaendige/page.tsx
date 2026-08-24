@@ -9,7 +9,7 @@ import { getSachverstaendige } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 const WA = WHATSAPP_HREF
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -22,10 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/sachverstaendige'),
     openGraph: {
       type: 'website',
-      url: `${SITE_URL}/sachverstaendige`,
+      ...(await localeOpenGraph(`/sachverstaendige`)),
       title: t('sachverstaendige.og_title'),
       description: t('sachverstaendige.og_description'),
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
