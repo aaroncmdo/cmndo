@@ -84,7 +84,18 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          # ⚠ KEIN `**/` — der rekursive Glob scannt auf dem self-hosted Runner den
+          # gesamten, PERSISTENTEN Workspace (node_modules, Worktrees, ~100k Dateien)
+          # und lief in den 120-s-Deckel von hashFiles:
+          #   "hashFiles('**/package-lock.json') couldn't finish within 120 seconds"
+          # Gemessen am ersten Drain-Lauf nach der Umstellung auf self-hosted
+          # (32706478578, release/r391): Job rot, ALLE Journey-Steps skipped — das Tor
+          # kam nie zum Messen. Auf GitHub-hosted Runnern fiel es nie auf, weil der
+          # Workspace dort je Lauf frisch und leer ist.
+          # Fachlich aequivalent: Playwright wird aus der ROOT-package-lock.json
+          # installiert; die 9 weiteren Lock-Dateien (Marketing, Cluster-LPs, mcp-server)
+          # beeinflussen die Browser-Version nicht.
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright Chromium
         run: |
