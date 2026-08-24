@@ -52,6 +52,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       alternates: { languages: langAlternates('/gutachter-finden') },
     },
     {
+      // Kampagnen-Landeseite des taeglichen Gewinnspiels. Setzt index/follow
+      // und wird site-weit verlinkt — gehoert also angemeldet. Hohe Frequenz,
+      // weil die Kampagnen-Parameter (Preise/Tag, Betrag) aus der DB kommen
+      // und sich ohne Deploy aendern koennen.
+      url: `${SITE_URL}/gewinnspiel`,
+      lastModified: now,
+      changeFrequency: 'daily',
+      priority: 0.9,
+      alternates: { languages: langAlternates('/gewinnspiel') },
+    },
+    {
       // Pendant zu /gutachter-finden, war bis 20.08. nicht angemeldet: die
       // Seite liefert 200, setzt `robots: index, follow` und ein Canonical auf
       // sich selbst — sie WILL indexiert werden, stand aber in keiner Sitemap.
@@ -268,6 +279,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     {
       url: `${SITE_URL}/nutzungsbedingungen`,
       lastModified: getRouteLastUpdated('/nutzungsbedingungen'),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    // Community-/Kommentar-Regeln: gehoeren in dieselbe Reihe. Beide liefern 200,
+    // sind `index, follow` und self-canonical — standen aber als einzige der
+    // Legal-Reihe nicht in der Sitemap (gemessen 23.08.2026). Ihre lastModified-
+    // Eintraege in lib/seo/freshness.ts existieren seit jeher: sie waren als
+    // vollwertige Seiten gedacht, der Sitemap-Eintrag fehlte schlicht.
+    {
+      url: `${SITE_URL}/community-regeln`,
+      lastModified: getRouteLastUpdated('/community-regeln'),
+      changeFrequency: 'yearly',
+      priority: 0.3,
+    },
+    {
+      url: `${SITE_URL}/kommentar-regeln`,
+      lastModified: getRouteLastUpdated('/kommentar-regeln'),
       changeFrequency: 'yearly',
       priority: 0.3,
     },

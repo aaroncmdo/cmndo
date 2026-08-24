@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { SERVICE_REALITY_BULLETS } from '@/lib/brand/service-pitch'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { NaechsterTerminHinweis } from '@/components/gutachter-finden/NaechsterTerminHinweis'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
@@ -433,6 +434,16 @@ export default async function KfzGutachterStadtPage({
 
       {/* 3 — Trust-Strip */}
       <TrustStripSection kpis={trustKpis} methodikNote={t('trust_methodik')} />
+
+      {/* 3b — Naechster buchbarer Termin (server-gerendert = fuer Crawler UND LLMs lesbar).
+          Die Buchbarkeit stand bis 24.08.2026 NUR in der JSON-API und im cross-origin-
+          iframe des Finders — ein browsendes LLM sah auf dieser Seite null Termine und
+          konnte deshalb keinen nennen. Rendert `null`, wenn gerade nichts frei ist. */}
+      <section className="bg-claimondo-bg pt-10" aria-label="Terminverfügbarkeit">
+        <div className="mx-auto max-w-3xl px-5">
+          <NaechsterTerminHinweis stadt={s.name} />
+        </div>
+      </section>
 
       {/* 4 — Lokal-Block (stadt-spezifische Anker) */}
       <section className="bg-claimondo-bg py-16 sm:py-20" aria-labelledby="lokal-heading">

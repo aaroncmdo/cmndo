@@ -109,9 +109,27 @@ async function startSock() {
 
   sock.ev.on('creds.update', saveCreds)
 
+  // Eingehende Nachrichten kommen als 'notify'. EIGENE Nachrichten (Handy,
+  // WhatsApp-Web, App-Send-Echo) kommen als 'append' — am 23.08. gemessen:
+  //   {"type":"append","anzahl":1,"from_me":[true]}
+  // Der frühere `if (type !== 'notify') return` verwarf sie deshalb ALLE, auch
+  // nachdem der fromMe-Skip weiter unten entfernt war. Ein Filter vor der
+  // eigentlichen Weiche — die Umstellung wirkte dadurch nicht.
+  const ERLAUBTE_TYPEN = new Set(['notify', 'append'])
+  /** 'append' liefert nach einem Reconnect auch ALTE Nachrichten (Verlaufs-Sync).
+   *  Nur frische durchlassen, sonst flutet ein Reconnect die Akten mit Historie. */
+  const APPEND_MAX_ALTER_MS = 10 * 60_000
+
   sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return
+    if (!ERLAUBTE_TYPEN.has(type)) return
     for (const msg of messages) {
+      if (type === 'append') {
+        // Fremde Nachrichten kommen als 'notify'; ein fremdes 'append' ist
+        // Verlaufs-Sync und wurde entweder schon erfasst oder ist alt.
+        if (!msg.key.fromMe) continue
+        const tsMs = Number(msg.messageTimestamp ?? 0) * 1000
+        if (tsMs && Date.now() - tsMs > APPEND_MAX_ALTER_MS) continue
+      }
       // Eigene Nachrichten werden MITGENOMMEN (Aaron 23.08.). Frueher stand hier
       // `if (msg.key.fromMe) continue` — dadurch fehlte im System alles, was vom
       // Handy oder WhatsApp-Web geschrieben wurde, und der Verlauf jeder Akte war

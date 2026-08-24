@@ -7,6 +7,7 @@ import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
 import { buildAnfrageColumns, extractHost, splitName, type AnfrageVariante, type InsertAnfrageInput } from './anfrage-columns'
 import { svBezeichnung, kundenBestaetigungText } from './kunde-bestaetigung'
+import { registriereTeilnahme } from '@/lib/gewinnspiel/registriere-teilnahme'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Anfrage-Verarbeitung (Shared)
@@ -124,6 +125,28 @@ export async function insertAnfrage(input: InsertAnfrageInput): Promise<InsertAn
   if (error || !data) {
     return { ok: false, error: error?.message ?? 'Insert fehlgeschlagen' }
   }
+
+  // Gewinnspiel-Teilnahme (non-fatal). Hier statt im Route-Handler, damit ALLE
+  // drei Aufrufer erfasst sind (anfrage-from-lp, api/v1/melde-schaden,
+  // api/v1/rueckruf) — Aaron: "fuer alle Leads".
+  //
+  // AUSNAHME sv_embed: SV-Embeds bleiben in Phase 1 komplett draussen (Spec E7).
+  // Jede Embed-Anfrage kostet den SV 70 EUR; ein Gewinnspiel, das seine
+  // Conversion hochtreibt, wuerde seine Rechnung erhoehen, ohne dass er
+  // zugestimmt hat.
+  if (input.payload.source !== 'sv_embed') {
+    try {
+      await registriereTeilnahme({
+        quelle: { anfrageId: data.id as string },
+        telefon: input.payload.telefon,
+        schuldEinschaetzung: input.payload.schuld_einschaetzung ?? null,
+        praemieId: input.payload.gewinnspiel_praemie_id ?? null,
+      })
+    } catch (err) {
+      console.error('[embed/insertAnfrage] Gewinnspiel-Teilnahme (non-fatal):', err)
+    }
+  }
+
   return { ok: true, anfrageId: data.id as string, status: columns.status as string }
 }
 

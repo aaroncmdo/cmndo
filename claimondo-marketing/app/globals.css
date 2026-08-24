@@ -1002,3 +1002,25 @@ html { scroll-behavior: smooth; }
   bottom: auto !important;
   z-index: 39 !important;
 }
+
+/* Trefferflaeche des Minimieren-Knopfs. Das Siegel startet ausgeklappt (so gewollt,
+ * Aaron 23.08.2026) und laesst sich zuklappen — der Knopf dafuer ist aber nur
+ * 20x20 px gross, die gemessene Trefferflaeche sogar nur 18x18. Apple nennt 44x44
+ * als Minimum; mit 18 px trifft ein Daumen daneben, und das Siegel wirkt, als
+ * liesse es sich nicht schliessen.
+ *
+ * Das Pseudo-Element vergroessert NUR die Trefferflaeche — Optik und Layout
+ * bleiben unangetastet (gemessen: optisch weiter 20x20, Position unveraendert
+ * bei x362,y197; Trefferflaeche 18x18 -> 38x44, also fuenffache Flaeche).
+ *
+ * ⚠ KEIN `position: relative` auf dem Knopf: er ist bereits `absolute`
+ * (top:0/right:0) — ein relative-Override reisst ihn aus seiner Verankerung und
+ * verschiebt ihn um 50 px nach links (einmal gemessen, wieder verworfen).
+ * Die Eltern haben `overflow: visible`, die groessere Flaeche wird also nicht
+ * beschnitten. In der Breite begrenzt der rechte Bildschirmrand auf ~38 px.
+ */
+.pe-minimizeButton::after {
+  content: '';
+  position: absolute;
+  inset: -13px;
+}

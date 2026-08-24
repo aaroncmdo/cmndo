@@ -7,6 +7,7 @@
 import { test, expect, type Page, type Locator, type BrowserContext } from '@playwright/test'
 import { join } from 'node:path'
 import { ladeSeedFixture } from '../lib/seed-fixture'
+import { basicAuthFuerZiel } from '../lib/ziel'
 
 // Seed crash-sicher laden (Begruendung + skip-vs-fail-Regel: tests/e2e/lib/seed-fixture.ts).
 // ciErzeugt: der e2e-Job legt die Datei im Step "Seed reparatur-weg E2E-Fixture" an.
@@ -48,8 +49,11 @@ test('Selbstzahler-Reparatur-Weg end-to-end per UI (Werkstatt + Kunde)', async (
   let wsCtx: BrowserContext | undefined
   let kdCtx: BrowserContext | undefined
   try {
-    wsCtx = await browser.newContext()
-    kdCtx = await browser.newContext()
+    // httpCredentials: staging liegt hinter nginx-Basic-Auth. Ein selbst gebauter
+    // Kontext erbt die Option aus playwright.config NICHT — ohne sie lief dieser
+    // Test im Journey-Gate in einen 180-s-Timeout im Schritt "Logins".
+    wsCtx = await browser.newContext({ httpCredentials: basicAuthFuerZiel() })
+    kdCtx = await browser.newContext({ httpCredentials: basicAuthFuerZiel() })
     const ws = await wsCtx.newPage()
     const kd = await kdCtx.newPage()
 
