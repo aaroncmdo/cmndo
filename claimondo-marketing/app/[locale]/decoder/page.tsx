@@ -10,7 +10,7 @@ import { getDecoder } from '@/lib/content/claimondo-mdx'
 import { SITE_URL, WHATSAPP_HREF, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { useTranslations } from 'next-intl'
 import { getTranslations } from 'next-intl/server'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream A (Doc 25): Index-Hub für die Versicherer-Brief-Decoder. Bisher waren
 // die 10 Decoder nur unter /decoder/[slug] erreichbar (kein Cluster-Index) —
@@ -27,10 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/decoder'),
     openGraph: {
       type: 'website',
-      url: `${SITE_URL}/decoder`,
+      ...(await localeOpenGraph(`/decoder`)),
       title: t('decoder.og_title'),
       description: t('decoder.og_description'),
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,

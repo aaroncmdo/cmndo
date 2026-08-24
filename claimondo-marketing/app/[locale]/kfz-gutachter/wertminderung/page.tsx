@@ -15,7 +15,7 @@ import {
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import WertminderungRechnerClient from './WertminderungRechnerClient'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -35,9 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/kfz-gutachter/wertminderung'),
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/kfz-gutachter/wertminderung`,
+      ...(await localeOpenGraph(`/kfz-gutachter/wertminderung`)),
       title: t('kfz_gutachter_wertminderung.og_title'),
       description: t('kfz_gutachter_wertminderung.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Wertminderung berechnen' }],

@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.2 (Doc 26) — Misstrauens-Page „Gegnerische Versicherung zahlt nicht".
 // Faengt die Verzugs-/Kuerzungs-Keywords (versicherung zahlt nicht / reagiert
@@ -39,11 +39,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/gegnerische-versicherung-zahlt-nicht'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: `${SITE_URL}/gegnerische-versicherung-zahlt-nicht`,
+      ...(await localeOpenGraph(`/gegnerische-versicherung-zahlt-nicht`)),
       title: t('gegnerische_versicherung_zahlt_nicht.og_title'),
       description: t('gegnerische_versicherung_zahlt_nicht.og_description'),
     },

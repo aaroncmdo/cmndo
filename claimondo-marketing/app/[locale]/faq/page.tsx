@@ -7,7 +7,7 @@ import {
   faqPageSchema, breadcrumbsSchema, jsonLdScript, SITE_URL,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -32,9 +32,8 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/faq'),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/faq`,
+      ...(await localeOpenGraph(`/faq`)),
       title: t('faq.title'),
       description: t('faq.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'FAQ Claimondo' }],

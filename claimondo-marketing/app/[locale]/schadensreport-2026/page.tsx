@@ -16,7 +16,7 @@ import {
   articleSchema, datasetSchema, breadcrumbsSchema,
   jsonLdScript, SITE_URL, PHONE_DISPLAY, PHONE_E164,
 } from '@/lib/seo/jsonld'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // 2026-05-10 Aaron-Briefing Maßnahme 5: "Schadensreport 2026 — Originaldaten
 // veröffentlichen. Kein Wettbewerber hat sowas. Originaldaten = höchster
@@ -51,9 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
     ],
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/schadensreport-2026`,
+      ...(await localeOpenGraph(`/schadensreport-2026`)),
       title: t('schadensreport_2026.og_title'),
       description: t('schadensreport_2026.og_description'),
       images: [{ url: '/og-default.png', width: 1200, height: 630, alt: 'Schadensreport 2026' }],

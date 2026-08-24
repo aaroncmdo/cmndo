@@ -14,7 +14,7 @@ import {
   OG_DEFAULT_IMAGES,
 } from '@/lib/seo/jsonld'
 import { getRouteLastUpdatedISO } from '@/lib/seo/freshness'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 
 // Stream B.5 (Doc 26) — Cornerstone-Pillar „Unfall — was tun als Geschädigter".
 // Primärer „was tun nach unfall"-Pillar (Vol 500, gegen HUK-Position #7). Hub:
@@ -44,11 +44,10 @@ export async function generateMetadata(): Promise<Metadata> {
     alternates: await localeAlternates('/unfall-was-tun-als-geschaedigter'),
     openGraph: {
       type: 'article',
-      locale: 'de_DE',
       siteName: 'Claimondo',
 
       images: OG_DEFAULT_IMAGES,
-      url: URL_SELF,
+      ...(await localeOpenGraph('/unfall-was-tun-als-geschaedigter')),
       title: t('unfall_was_tun.og_title'),
       description: t('unfall_was_tun.og_description'),
     },

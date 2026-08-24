@@ -1,4 +1,4 @@
-import { localeAlternates } from '@/lib/seo/alternates'
+import { localeAlternates, localeOpenGraph } from '@/lib/seo/alternates'
 import { titelMitZusatz } from '@/lib/seo/title'
 import { stadtMetaDescription } from '@/lib/kfz-gutachter/meta-description'
 import { getUnfallhotspots, hotspotOrt, hotspotSatz } from '@/lib/kfz-gutachter/unfallhotspots'
@@ -143,9 +143,8 @@ export async function generateMetadata({
     alternates: await localeAlternates(`/kfz-gutachter/${s.slug}`),
     openGraph: {
       type: 'website',
-      locale: 'de_DE',
       siteName: 'Claimondo',
-      url: `${SITE_URL}/kfz-gutachter/${s.slug}`,
+      ...(await localeOpenGraph(`/kfz-gutachter/${s.slug}`)),
       title: ogTitle,
       description,
       images: [{ url: '/marketing-landing-koeln/hero-woman.png', width: 1200, height: 630, alt: `Kfz-Gutachter ${s.name}` }],
