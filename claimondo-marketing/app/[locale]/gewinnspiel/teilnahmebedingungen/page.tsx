@@ -132,7 +132,7 @@ export default function TeilnahmebedingungenPage() {
           Teilnahmebedingungen
         </h1>
         <p className="mt-3 text-[15px] leading-relaxed text-claimondo-shield/80">
-          Für das tägliche Gewinnspiel „3 × 50 € Gutschein" der Claimondo GmbH.
+          Für das tägliche Gewinnspiel &bdquo;3 &times; 50 &euro; Gutschein&ldquo; der Claimondo GmbH.
         </p>
 
         <div className="mt-10 space-y-8">
