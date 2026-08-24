@@ -126,11 +126,27 @@ pm2 restart claimondo-mcp
 > git fetch origin && git branch --set-upstream-to=origin/main main
 > ```
 
-> ⚠ **Dieser Dienst hängt an KEINER Pipeline.** Es gibt keinen `deploy-vps-mcp.yml` (anders als
-> App, Marketing, autounfall und die fünf Cluster), und `tsconfig.json` der App führt `services`
-> in `exclude` — die CI **baut und typecheckt ihn nicht**. Ein grüner CI-Lauf ist für diesen
-> Server **kein Beleg**; ein Merge bringt ihn **nicht** live. Vor dem Restart deshalb lokal
-> `npx tsc --noEmit && npm run build` fahren (beides muss exit 0 liefern).
+> ✅ **Seit 23.08.2026 hängt der Dienst an einer eigenen Pipeline:**
+> `.github/workflows/deploy-vps-mcp.yml`. Sie greift bei jedem Push auf `main`, der
+> `services/mcp-server/**` berührt, und ist auch manuell auslösbar
+> (`gh workflow run deploy-vps-mcp.yml --ref main`). Die Handschritte unten sind
+> damit der **Notfall-/Handbetrieb**, nicht mehr der Normalweg.
+>
+> Die Pipeline macht zwei Dinge, die die App-CI nicht tut:
+> 1. **Build-Gate vor dem VPS** — `npm ci` + `npx tsc --noEmit` + `npm run build`
+>    laufen in CI, bevor irgendetwas auf dem Server passiert. Nötig, weil
+>    `tsconfig.json` der App `services` in `exclude` führt: ein grüner App-CI-Lauf
+>    ist für diesen Server **kein Beleg**.
+> 2. **Verifikation am Protokoll, nicht an pm2** — nach dem Restart wird
+>    `tools/list` per JSON-RPC abgefragt und gezählt. `pm2 status` sagt „online",
+>    auch wenn der Prozess das alte Bundle fährt; ein Health-200 sagt nur, dass ein
+>    Port antwortet. Liefert der Server keine Tools, rollt der Workflow auf den
+>    vorherigen Commit zurück (`git reset --hard` + Rebuild + Restart) und schlägt
+>    fehl.
+>
+> ⚠ Wer den Dienst **von Hand** anfasst, fährt vorher trotzdem lokal
+> `npx tsc --noEmit && npm run build` (beides exit 0) — die Pipeline schützt nur
+> den Weg über `main`.
 
 **Verifikation nach dem Restart** — der Dienst antwortet auch dann noch mit dem alten Verhalten,
 wenn `pm2 restart` still fehlschlägt; ein `pm2 status` allein beweist nichts:

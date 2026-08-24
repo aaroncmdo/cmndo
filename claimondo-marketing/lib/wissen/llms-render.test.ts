@@ -17,6 +17,10 @@ function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
     excerpt: 'Merkantile Wertminderung nach Unfall — Formel und BGH-Linie.',
     key_facts: ['§ 251 BGB', 'BGH VI ZR 35/22'],
     meta_description: 'Wertminderung nach Unfall berechnen.',
+    // NULL = der Normalfall: ohne gepflegten SERP-Titel faellt die Seite auf `title` zurueck.
+    meta_title: null,
+    // NULL = ohne Tags rendert die Sektion „Passend zum Thema" nichts (WissenVerwandteThemen).
+    tags: null,
     primary_keyword: 'Wertminderung berechnen',
     cluster: 'H3',
     artikel_typ: 'glossar-spoke',

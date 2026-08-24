@@ -26,6 +26,7 @@ import {
   Td,
 } from '@/components/shared/DataTable'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
 // FlowLink-Review C: fiktiv-Szenario-Chip in der Dispatch/KB-Liste.
 import { FiktivAbrechnungBadge } from '@/components/shared/FiktivAbrechnungBadge'
 import { MAIN_PHASE_LABEL, toClaimMainPhase } from '@/lib/claims/lifecycle'
@@ -123,14 +124,23 @@ export default async function FaelleListPage() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-claimondo-navy">Fälle</h1>
-        <Link
-          href="/admin/faelle"
-          className="text-sm text-claimondo-ondo hover:underline"
-        >
-          Zur Kanban-Ansicht →
-        </Link>
+      {/* Phase-2-Migration (23.08.): hand-gerollter Header -> shared/PageHeader, damit
+          `data-page-header-card` gesetzt wird. Der Wrapper haelt bewusst das bisherige
+          `mb-6`: der Container hat drei Kinder, das dritte traegt ein eigenes `mt-4` —
+          ein `space-y-*` am Container wuerde dort die Abstaende verdoppeln. */}
+      <div className="mb-6">
+        <PageHeader
+          title="Fälle"
+          size="lg"
+          actions={
+            <Link
+              href="/admin/faelle"
+              className="text-sm text-claimondo-ondo hover:underline"
+            >
+              Zur Kanban-Ansicht →
+            </Link>
+          }
+        />
       </div>
 
       {error ? (

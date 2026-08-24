@@ -13,7 +13,7 @@ export const decodersExtra: Decoder[] = [
     title: '„Wir prüfen den Sachverhalt" — was die Versicherung damit meint',
     headline: '„Wir prüfen den Sachverhalt" — was die Versicherung damit wirklich meint',
     metaDesc:
-      '„Wir prüfen den Sachverhalt" heißt meist: Zeit gewinnen. Was der Satz bedeutet, wie lange die Versicherung wirklich prüfen darf (4–6 Wochen) und wie Sie Verzug auslösen — mit Verzugszinsen-Rechner.',
+      '„Wir prüfen den Sachverhalt" heißt meist: Zeit gewinnen. Wie lange die Versicherung wirklich prüfen darf (4–6 Wochen) und wie Sie Verzug auslösen — mit Verzugszinsen-Rechner.',
     h1: '„Wir prüfen den Sachverhalt" — was die Versicherung damit wirklich meint',
     lede: 'Dieser Satz steht in fast jedem ersten Schreiben der gegnerischen Haftpflicht. Klingt nach Sorgfalt — ist aber meist eine Formulierung, um Zeit zu gewinnen.',
     tldr: '„Wir prüfen den Sachverhalt" bedeutet bei klarer Schuld meist: <strong>verzögern, ohne sich zu binden</strong>. Bei eindeutiger Haftung hat die Versicherung aber nur eine angemessene Prüfzeit von <strong>4–6 Wochen ab vollständiger Vorlage</strong>. Danach können Sie mit einer Frist Verzug auslösen — ab dann gibt es Verzugszinsen (5 % über Basiszins, § 288 BGB), und die Anwaltskosten trägt die Gegenseite.',

@@ -1032,7 +1032,49 @@ html { scroll-behavior: smooth; }
  * ⚠ Wird die Karte deutlich hoeher als 275 px (z. B. wenn ProvenExpert das Layout
  * aendert), rutscht ihre Oberkante unter den Header. Dann diesen Wert nachziehen.
  */
+/* Und: unter die Overlay-Schicht. Das Widget setzt inline `z-index: 9999`, damit
+ * lag das Siegel ueber JEDEM eigenen Overlay. Auf /gutachter-finden verdeckte es
+ * das Bottom-Sheet — gemessen 23.08.2026 per document.elementFromPoint() auf der
+ * Mitte jedes Bedienelements (also: was bekaeme den Fingertipp?):
+ *
+ *   iPhone SE · iPhone 12 · Pixel 5 · Galaxy S9+ · Desktop 1440
+ *   7 verdeckte Bedienelemente, ALLE durch .pe-front-page — darunter auf jedem
+ *   Geraet der „Schliessen"-Knopf: das Sheet liess sich nicht mehr zumachen.
+ *   Mit dieser Regel: 0.
+ *
+ * Warum die Messung vom 13.08. („null Ueberlappung mit fixen Elementen") das nicht
+ * sah: ein GESCHLOSSENES Sheet steht per translate-y-[110%] ausserhalb des Bildes
+ * und ueberlappt naturgemaess nichts. Der Konflikt entsteht erst beim Oeffnen.
+ *
+ * 39 = direkt unter der Overlay-Schicht 40 (Backdrop des FinderSprungPanels,
+ * sticky Header, CTA-Leiste) und unter den Sheets (50) — aber weiter ueber allem
+ * normalen Inhalt, das Siegel bleibt also sichtbar. Hoeher zu gehen hiesse, das
+ * Problem nur zu verschieben: jedes kuenftige Overlay haette denselben Konflikt.
+ */
 .pe-pro-seal {
   top: 340px !important;
   bottom: auto !important;
+  z-index: 39 !important;
+}
+
+/* Trefferflaeche des Minimieren-Knopfs. Das Siegel startet ausgeklappt (so gewollt,
+ * Aaron 23.08.2026) und laesst sich zuklappen — der Knopf dafuer ist aber nur
+ * 20x20 px gross, die gemessene Trefferflaeche sogar nur 18x18. Apple nennt 44x44
+ * als Minimum; mit 18 px trifft ein Daumen daneben, und das Siegel wirkt, als
+ * liesse es sich nicht schliessen.
+ *
+ * Das Pseudo-Element vergroessert NUR die Trefferflaeche — Optik und Layout
+ * bleiben unangetastet (gemessen: optisch weiter 20x20, Position unveraendert
+ * bei x362,y197; Trefferflaeche 18x18 -> 38x44, also fuenffache Flaeche).
+ *
+ * ⚠ KEIN `position: relative` auf dem Knopf: er ist bereits `absolute`
+ * (top:0/right:0) — ein relative-Override reisst ihn aus seiner Verankerung und
+ * verschiebt ihn um 50 px nach links (einmal gemessen, wieder verworfen).
+ * Die Eltern haben `overflow: visible`, die groessere Flaeche wird also nicht
+ * beschnitten. In der Breite begrenzt der rechte Bildschirmrand auf ~38 px.
+ */
+.pe-minimizeButton::after {
+  content: '';
+  position: absolute;
+  inset: -13px;
 }

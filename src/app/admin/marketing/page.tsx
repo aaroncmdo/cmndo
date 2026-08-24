@@ -6,6 +6,16 @@ export default function MarketingPage() {
   return (
     <div className="space-y-6 py-6">
       <PageHeader title="Marketing" description="Automatisierte Kanäle & Freigaben" size="lg" />
+      {/* Steht oben, weil es als einziges TAEGLICH angefasst wird (Ziehung). */}
+      <Link href="/admin/marketing/gewinnspiel" className="block">
+        <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
+          <h2 className="text-heading-sm font-semibold text-claimondo-navy">Gewinnspiel</h2>
+          <p className="text-body-sm text-claimondo-slate mt-1">
+            Tägliche Verlosung von Gutscheinen unter Leads mit unverschuldetem Unfall. Kampagne
+            und Prämien pflegen, Willkommens-Nachrichten senden, ziehen und Nachweise prüfen.
+          </p>
+        </SectionCard>
+      </Link>
       <Link href="/admin/marketing/linkedin" className="block">
         <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
           <h2 className="text-heading-sm font-semibold text-claimondo-navy">LinkedIn Auto-Posting</h2>

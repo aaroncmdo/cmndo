@@ -80,6 +80,12 @@ const META_TITLES = {
   'vw-klebeexperte-standard-scheibenerneuerung': 'VW-Klebeexperte: Standard Scheibentausch',
   'vorschaden-beweislast-unfallschadenregulierung': 'Vorschaden & Beweislast im Unfallschaden',
   'stundenverrechnungssaetze-unfallregulierung-vergleichswerkstatt': 'Stundenverrechnungssätze bei Unfällen',
+  // Nachtrag 23.08.2026: die drei Artikel, die der Trockenlauf als „zu lang, ohne
+  // Vorschlag" meldete. Gekuerzt nach derselben Regel wie oben — Keyword vorn,
+  // der Nachsatz faellt (er steht ohnehin in der H1).
+  'digitalisierung-werkstatt-kundenservice-dekra-ipsos-studie': 'Werkstatt-Digitalisierung: die große Lücke',
+  'herstellermacht-freie-werkstaetten-recht-auf-reparatur': 'Recht auf Reparatur: Folgen für Werkstätten',
+  'neodigital-uebernahme-hector-digital-assekuradeur-kartellamt': 'Assekuradeur übernommen: Folgen für Schäden',
 }
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL

@@ -679,3 +679,54 @@ Das Script erkennt den Header und skippt die Datei komplett.
 
 **Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->
+
+# CI-Runner — warum GitHub-gehostet, und was der Selbstversuch gekostet hat
+
+**Stand: alle Workflows laufen auf `ubuntu-latest`, das Repo ist oeffentlich.**
+Oeffentliche Repos bekommen unbegrenzte Actions-Minuten auf Standard-Runnern —
+das ist der Grund, warum CI hier nichts kostet.
+
+Am 23./24.08.2026 wurde das Gegenteil versucht: Repo privat + self-hosted Runner
+in WSL. Es funktionierte technisch, wurde aber nach einem Tag zurueckgedreht.
+Die Zahlen, damit es niemand blind wiederholt:
+
+| | GitHub-gehostet | self-hosted (WSL, 20 Kerne, 24 GB) |
+|---|---|---|
+| `vitest` | **3 Min** | 8–16 Min |
+| `build` | **11 Min** | ~22 Min |
+| parallel | praktisch unbegrenzt | 6 (Speicher-Grenze) |
+| Kosten oeffentlich | 0 | 0 |
+| Kosten privat | ~150 USD/Monat bei Flotten-Last | 0 |
+
+Bei fuenf parallel arbeitenden Sessions war der Durchsatz der Engpass, nicht das
+Geld: die Warteschlange wuchs auf 20 Jobs, PRs standen Stunden.
+
+## Vier Fallen, die dabei aufgetreten sind
+
+* ⭐ **Zeitzone.** GitHub-Runner laufen **UTC**, eine WSL-Maschine per Default in
+  der lokalen Zone (`Europe/Berlin`). Zwei zeitabhaengige Test-Files wurden dadurch
+  rot — auf **jeder** PR, auch reinen Doku-PRs. Der Beweis war die Gegenueber-
+  stellung: 4 Laeufe self-hosted alle rot, 2 auf GitHub beide gruen. Wer je wieder
+  einen eigenen Runner aufsetzt: **`timedatectl set-timezone UTC` zuerst.**
+* ⛔ **Ein self-hosted Runner an einem OEFFENTLICHEN Repo ist gefaehrlich** — jeder
+  Fremde kann forken und beliebigen Code auf der Maschine ausfuehren. Deshalb gilt
+  die Reihenfolge: Workflows zuerst zurueck auf `ubuntu-latest`, DANN oeffentlich,
+  DANN die Runner deregistrieren. Nie umgekehrt.
+* **WSL beendet seine VM**, sobald keine Sitzung mehr daran haengt — der Runner-
+  Dienst stirbt mit, Jobs bleiben stumm in der Warteschlange. Gegenmittel waren
+  `vmIdleTimeout=-1` in `.wslconfig` **und** eine dauerhaft offene Sitzung.
+* **Ein `wsl --shutdown` erschlaegt laufende Jobs.** Das ist dreimal passiert und
+  sah jedes Mal wie ein Testfehler aus: `npm ci` auf `in_progress`, alle folgenden
+  Schritte `pending`, kein Test gelaufen. Diese Signatur erkennen, statt den Code
+  zu verdaechtigen.
+
+## Was unabhaengig davon gilt
+
+**Privat auf dem Free-Plan gibt es weder Branch-Protection noch Regelsaetze**
+(beides HTTP 403). Wer das Journey-Gate je als Pflicht-Check verdrahten will,
+braucht dafuer ein oeffentliches Repo oder GitHub Pro.
+
+**Kein Workflow hat einen `concurrency`-Guard** (ausser `deploy-vps-mcp.yml`).
+Jeder Push auf denselben Branch startet einen weiteren vollstaendigen Lauf,
+waehrend der alte weiterlaeuft. Das ist der groesste ungenutzte Hebel gegen
+Warteschlangen — und er wirkt unabhaengig davon, wo die Runner stehen.

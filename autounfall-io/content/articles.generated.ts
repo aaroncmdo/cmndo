@@ -1904,7 +1904,7 @@ export const generatedArticles: Article[] = [
     "slug": "haushaltsfuehrungsschaden",
     "title": "Haushaltsführungsschaden — Berechnung nach Schulz-Borck/Pardey",
     "h1": "Haushaltsführungsschaden — Berechnung erklärt",
-    "description": "Wer durch Unfallverletzungen im eigenen Haushalt nicht mehr arbeiten kann, hat Anspruch auf Haushaltsführungsschaden — auch ohne Erwerbstätigkeit. Berechnung nach Schulz-Borck/Pardey.",
+    "description": "Wer nach einem Unfall den Haushalt nicht mehr führen kann, hat Anspruch auf Haushaltsführungsschaden — auch ohne Erwerbstätigkeit. Berechnung nach Schulz-Borck/Pardey.",
     "eyebrow": "Pillar 05 · Personenschaden · 6 Min Lesezeit",
     "pillar": {
       "name": "Pillar 05 · Personenschaden",

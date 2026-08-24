@@ -22,6 +22,7 @@ import { getPublishedArtikelBySlug } from '@/lib/wissen/db-articles'
 import { SITE_URL, WHATSAPP_HREF, articleSchema, autoSchemaGraph, OG_DEFAULT_IMAGES } from '@/lib/seo/jsonld'
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
 import { ArticleComments } from '@/components/community/ArticleComments'
+import { WissenVerwandteThemen } from '@/components/content/WissenVerwandteThemen'
 
 const WA = WHATSAPP_HREF
 
@@ -135,6 +136,10 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <TableOfContents headings={headings} />
           <article>
             <MarkdownRenderer body={cleaned} pageHasOwnH1 />
+            {/* Brücke in den Fach-Cluster: die Wissen-Artikel waren bis 23.08.2026
+                vollständige Sackgassen (0 interne Links). Gesteuert über `tags`,
+                nicht über `cluster` — Begründung in der Komponente. */}
+            <WissenVerwandteThemen tags={a.tags} />
             <ArticleComments articleSlug={`wissen/${slug}`} />
           </article>
         </div>

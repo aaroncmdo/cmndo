@@ -1650,6 +1650,62 @@
     "created_at"
    ]
   },
+  "gewinnspiel_kampagnen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "name",
+    "start_am",
+    "ende_am",
+    "preise_pro_tag",
+    "preis_betrag_eur",
+    "topbar_text",
+    "topbar_cta_text",
+    "topbar_aktiv",
+    "aktiv",
+    "erstellt_am"
+   ]
+  },
+  "gewinnspiel_praemien": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kampagne_id",
+    "name",
+    "beschreibung",
+    "bild_pfad",
+    "betrag_eur",
+    "sortierung",
+    "aktiv",
+    "erstellt_am"
+   ]
+  },
+  "gewinnspiel_teilnahmen": {
+   "kind": "t",
+   "columns": [
+    "id",
+    "kampagne_id",
+    "anfrage_id",
+    "lead_id",
+    "telefon_normalisiert",
+    "whatsapp_gesendet_am",
+    "whatsapp_verifiziert_am",
+    "status",
+    "gewaehlte_praemie_id",
+    "gezogen_am",
+    "gezogen_von_user_id",
+    "ziehung_lostopf_groesse",
+    "nachweis_token",
+    "nachweis_datei_pfad",
+    "nachweis_hochgeladen_am",
+    "nachweis_geprueft_am",
+    "nachweis_geprueft_von",
+    "ablehnung_grund",
+    "gutschein_code",
+    "gutschein_versendet_am",
+    "erstellt_am"
+   ]
+  },
   "gfa_rate_limit": {
    "kind": "t",
    "columns": [
@@ -1923,7 +1979,8 @@
     "kostenvoranschlag_netto",
     "kostenvoranschlag_brutto",
     "schaetzung_session_id",
-    "abrechnungsweg"
+    "abrechnungsweg",
+    "wiederholung_erkannt_am"
    ]
   },
   "gutachter_monatsabrechnungen": {
@@ -2671,7 +2728,8 @@
     "unfallort_ort",
     "unfallort_place_id",
     "gegner_versicherungsnummer",
-    "fahrzeugklasse"
+    "fahrzeugklasse",
+    "wiederholung_erkannt_am"
    ]
   },
   "levelup_anreicherung": {
@@ -6362,7 +6420,8 @@
     "email_log_id",
     "created_at",
     "organisation_id",
-    "pdf_generiert_am"
+    "pdf_generiert_am",
+    "signature_png_data_uri"
    ]
   },
   "vertragsvorlagen": {

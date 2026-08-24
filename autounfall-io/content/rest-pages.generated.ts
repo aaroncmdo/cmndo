@@ -23,7 +23,7 @@ export const restPages: RestPage[] = [
     "kind": "pillar",
     "title": "Akutphase · Was tun in den ersten 24 Stunden nach einem Unfall",
     "h1": "Akutphase",
-    "description": "Was tun nach einem Unfall? Die Checkliste für die ersten 24 Stunden: Unfallstelle sichern, Polizei rufen, kein Schuldanerkenntnis, 12 Pflichtfotos — so sichern Sie Ihren vollen Schadensersatz.",
+    "description": "Was tun nach einem Unfall? Checkliste für die ersten 24 Stunden: Unfallstelle sichern, Polizei rufen, kein Schuldanerkenntnis, 12 Pflichtfotos — für vollen Schadensersatz.",
     "eyebrow": "Pillar 01",
     "datePublished": "2026-05-18",
     "dateModified": "2026-05-18",

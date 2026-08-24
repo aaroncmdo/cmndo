@@ -4,10 +4,29 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
 import { totp } from './totp'
+import { basicAuthFuerZiel } from '../lib/ziel'
 
 export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, PFLICHTDOK, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
 
-export const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
+// ⚠ 23.08.: `PLAYWRIGHT_BASE_URL` als Fallback ergaenzt — vorher hing hier NUR
+// GOLDEN_APP_URL, und der Kontext aus `loginContextOrSkip` setzt `baseURL: APP` (s.u.).
+// Damit war `PLAYWRIGHT_BASE_URL` fuer ALLE 11 Specs, die diesen Helper importieren,
+// WIRKUNGSLOS: wer lokal `PLAYWRIGHT_BASE_URL=http://localhost:3000` setzte, fuhr in
+// Wahrheit weiter scharf gegen prod — ohne jeden Hinweis. Beim Verifizieren der
+// PageHeader-Migration liefen so drei Laeufe gegen app.claimondo.de, waehrend der
+// lokale Dev-Server NULL Requests sah (sein Log blieb bei 758 Bytes). Bei einem
+// LESENDEN Smoke ist das nur irrefuehrend; bei einem schreibenden waere es ein
+// echter Prod-Write, den niemand beabsichtigt hat.
+//
+// Reihenfolge: explizites GOLDEN_APP_URL schlaegt alles, sonst das allgemeine
+// PLAYWRIGHT_BASE_URL, sonst prod. In CI aendert das NICHTS — dort ist
+// PLAYWRIGHT_BASE_URL auf https://app.claimondo.de gesetzt (ci.yml) und
+// GOLDEN_APP_URL gar nicht, beide Wege enden also beim selben Ziel.
+//
+// `||` statt `??` ist Absicht: ein gesetztes-aber-leeres CI-Secret rendert als ''
+// und wuerde mit `??` als gueltiger Wert durchgehen (Klasse aus #5465).
+export const APP =
+  process.env.GOLDEN_APP_URL || process.env.PLAYWRIGHT_BASE_URL || 'https://app.claimondo.de'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
@@ -133,10 +152,16 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
 
   const projectRef = new URL(SUPABASE_URL).hostname.split('.')[0]
   const cookies = sessionToCookies(effectiveSession, { projectRef, cookieDomain: '.claimondo.de' })
+  // httpCredentials nur, wenn das ZIEL sie braucht (staging liegt hinter nginx-Basic-Auth,
+  // prod und localhost nicht). Das ist der EINZIGE Unterschied zwischen einem prod- und
+  // einem staging-Lauf dieser Harness: die Session-Cookies oben tragen cookieDomain
+  // '.claimondo.de' und gelten damit ohnehin fuer beide Hosts.
+  // `undefined` = keine Basic-Auth (Playwright behandelt es genau so).
   const ctx = await browser.newContext({
     baseURL: APP,
     serviceWorkers: 'block',
     viewport: { width: 1440, height: 1200 },
+    httpCredentials: basicAuthFuerZiel(),
   })
   // cookie.mjs (untyped .mjs) liefert sameSite:string; Playwright will "Lax"|"Strict"|"None".
   await ctx.addCookies(cookies as Parameters<typeof ctx.addCookies>[0])

@@ -52,6 +52,8 @@ export type EmbedBuchungInput = {
   werkstatt_id?: string | null
   /** Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen. */
   schaetzungSessionId?: string | null
+  /** Kam der Kunde ueber einen KI-/Verzeichnis-Deeplink (`?sv=…`)? -> utm_source='ki-deeplink'. */
+  viaDeeplink?: boolean
 }
 
 export async function starteEmbedBuchung(
@@ -88,6 +90,8 @@ export async function starteEmbedBuchung(
     zugeordneter_sv_id: input.zugeordneter_sv_id ?? undefined,
     zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
     matching_typ: input.matching_typ ?? undefined,
+    // KI-Deeplink-Herkunft (?sv=) -> utm_source='ki-deeplink' auf der Anfrage.
+    via_deeplink: input.viaDeeplink ?? undefined,
     werkstatt_id: input.werkstatt_id ?? undefined,
     // Use the resolved row id (not the session_token) — FK to anspruch_schaetzungen(id).
     schaetzung_session_id: schaetzungId,
@@ -304,6 +308,8 @@ export async function reserviereEmbedTermin(input: {
    * falls promotion_code_id nicht explizit gesetzt ist (Funnel Tool -> Finder). */
   maklerCode?: string | null
   schaetzungSessionId?: string | null
+  /** Kam der Kunde ueber einen KI-/Verzeichnis-Deeplink (`?sv=`)? -> utm_source='ki-deeplink'. */
+  viaDeeplink?: boolean
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -351,6 +357,7 @@ export async function reserviereEmbedTermin(input: {
     matching_typ: input.auswahl?.kind ?? null,
     werkstatt_id: input.werkstatt_id ?? null,
     schaetzungSessionId: input.schaetzungSessionId ?? null,
+    viaDeeplink: input.viaDeeplink,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token

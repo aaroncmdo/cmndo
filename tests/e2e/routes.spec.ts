@@ -80,6 +80,45 @@ const PUBLIC_ROUTES = [
   '/passwort-vergessen',
 ]
 
+// 23.08. nachgetragen: bis dahin deckte dieser Smoke NUR admin/gutachter/public ab.
+// Vier Portale hatten gar keine Rollen-Fixture und wurden deshalb NIE geprueft —
+// zusammen ~47 Seiten. Ein 500er oder eine leere Shell waere dort niemandem
+// aufgefallen. Bewusst eine Auswahl der Kern-Arbeitsflaechen je Portal, nicht jede
+// Unterseite: der Smoke soll die Portale abdecken, nicht die Laufzeit sprengen.
+// Alle Pfade sind aus `find src/app/<portal> -name page.tsx` abgeleitet, nicht geraten.
+const DISPATCH_ROUTES = [
+  '/dispatch/dashboard',
+  '/dispatch/leads',
+  '/dispatch/kalender',
+  '/dispatch/rueckrufe',
+  '/dispatch/sachverstaendige',
+  '/dispatch/karte',
+]
+
+const KB_ROUTES = [
+  '/mitarbeiter',
+  '/mitarbeiter/tasks',
+  '/mitarbeiter/termine',
+  '/mitarbeiter/reklamationen',
+  '/mitarbeiter/nachrichten',
+]
+
+// Kunde: bewusst nur Lese-Flaechen. `/kunde/schaden-melden` ist ein Erfassungsweg —
+// reines Laden waere zwar harmlos, der Smoke haette dort aber nichts zu beweisen.
+const KUNDE_ROUTES = [
+  '/kunde',
+  '/kunde/chat',
+  '/kunde/fahrzeuge',
+  '/kunde/profil',
+  '/kunde/nachbesichtigung',
+]
+
+const KANZLEI_ROUTES = [
+  '/kanzlei/mandate',
+  '/kanzlei/kanban',
+  '/kanzlei/konto',
+]
+
 /**
  * Listen prüfen nur die Übersicht. Die Detailansicht ist die andere
  * Risikoklasse: dort werden verschachtelte Beziehungen aufgelöst und
@@ -89,9 +128,20 @@ const PUBLIC_ROUTES = [
  * `praefix` ist am Listen-Code verifiziert, nicht geraten: /admin/faelle
  * verlinkt auf /faelle/<id>, NICHT auf /admin/faelle/<id>.
  */
-const DETAIL_WEGE: Array<{ liste: string; praefix: string }> = [
+const DETAIL_WEGE: DetailWeg[] = [
   { liste: '/admin/faelle', praefix: '/faelle/' },
-  { liste: '/admin/organisationen', praefix: '/admin/organisationen/' },
+  {
+    liste: '/admin/organisationen',
+    praefix: '/admin/organisationen/',
+    // 23.08. auf prod gemessen: 0 Zeilen in `organisationen`, 0 von 22 SVs mit
+    // `organisation_id`, 0 Parent-Accounts. Die Org-Ebene (Buero mit Sub-SVs) wurde nie
+    // benutzt — in /admin/organisationen gibt es nicht einmal einen Anlege-Weg; Orgs
+    // entstehen nur als Nebenprodukt beim Admin-SV-Anlegen. Eine leere Liste ist hier
+    // also der DAUERZUSTAND, kein Verdacht.
+    leerErwartet:
+      'organisationen ist auf prod dauerhaft leer (0 Zeilen, kein Anlege-Weg in der UI) — ' +
+      'Marker: audit-organisationen-struktur-auf-prod-ungenutzt',
+  },
   { liste: '/admin/team', praefix: '/admin/team/' },
   { liste: '/admin/versicherungen', praefix: '/admin/versicherungen/' },
 ]
@@ -107,27 +157,91 @@ test.describe('Admin Routes', () => {
   }
 })
 
+type DetailWeg = { liste: string; praefix: string; leerErwartet?: string }
+
+/**
+ * Ein Detail-Weg: Liste oeffnen, den ersten Detail-Link mit UUID nehmen, Detailansicht
+ * pruefen. Als Helfer herausgezogen (23.08.), weil ihn jetzt drei Rollen brauchen —
+ * vorher lag die Logik nur im Admin-Block.
+ */
+async function pruefeDetailWeg(page: Page, { liste, praefix, leerErwartet }: DetailWeg) {
+  await erwarteGerendert(page, liste)
+
+  const hrefs = await page
+    .locator(`a[href^="${praefix}"]`)
+    .evaluateAll((els) =>
+      els.map((el) => el.getAttribute('href')).filter((h): h is string => Boolean(h)),
+    )
+  // Zeilenzahl trennt die beiden Null-Faelle, die sonst identisch aussehen:
+  // „Liste leer" vs. „Liste voll, aber ohne Detail-Links" (genau der Bug, den #5529
+  // behoben hat). Eine leere Liste rendert einen EmptyState statt einer Tabelle,
+  // dort ist die Zahl 0.
+  const zeilen = await page.locator('tbody tr').count()
+  const detail = hrefs.find((h) => HAT_ID.test(h))
+
+  // Bewusst KEIN test.skip() bei UNERWARTET leerer Liste: die wuerde den Lauf gruen
+  // faerben und genau den Beweis unterschlagen, fuer den dieser Test existiert.
+  //
+  // Ausnahme (23.08.): Wege mit `leerErwartet`, deren Leere gemessen und dokumentiert
+  // ist — UND nur solange die Liste nachweislich 0 Zeilen hat. Grund: ein DAUERHAFT
+  // roter Waechter verliert seine Signalwirkung; er faerbt jeden nightly rot, ohne je
+  // etwas Neues zu sagen, und gewoehnt daran, ueber rote Zeilen hinwegzulesen.
+  // ⚠ Selbstheilend: sobald Daten existieren (zeilen > 0), greift die Ausnahme NICHT
+  // mehr — fehlende Detail-Links sind dann wieder ein harter Fehler.
+  if (!detail && leerErwartet && zeilen === 0) {
+    test.skip(true, `${liste}: ${leerErwartet}`)
+  }
+
+  expect(
+    detail,
+    `${liste}: kein Detail-Link nach ${praefix}<uuid> gefunden (${hrefs.length} Links mit diesem Präfix, ${zeilen} Tabellenzeilen) — Detailansicht nicht prüfbar`,
+  ).toBeTruthy()
+  if (!detail) return
+
+  await erwarteGerendert(page, detail)
+}
+
 test.describe('Admin Detailansichten (über die Liste, nicht über feste IDs)', () => {
-  for (const { liste, praefix } of DETAIL_WEGE) {
-    test(`${liste} → erste Detailansicht rendert`, async ({ adminPage }) => {
-      await erwarteGerendert(adminPage, liste)
+  for (const weg of DETAIL_WEGE) {
+    test(`${weg.liste} → erste Detailansicht rendert`, async ({ adminPage }) => {
+      await pruefeDetailWeg(adminPage, weg)
+    })
+  }
+})
 
-      const hrefs = await adminPage
-        .locator(`a[href^="${praefix}"]`)
-        .evaluateAll((els) =>
-          els.map((el) => el.getAttribute('href')).filter((h): h is string => Boolean(h)),
-        )
-      const detail = hrefs.find((h) => HAT_ID.test(h))
+// 23.08.: Detail-Wege gab es bis dahin NUR fuer admin. Die Detailansicht ist laut
+// Kommentar oben „die andere Risikoklasse" — verschachtelte Beziehungen, Null-Faelle —
+// und genau die blieb in den uebrigen Portalen ungeprueft.
+// Beide Praefixe sind am Listen-Code verifiziert, nicht abgeleitet:
+//   /dispatch/leads   -> <Link href={`/dispatch/leads/${lead.id}`}>   (LeadsViewToggle.tsx:422)
+//   /gutachter/faelle -> <Link href={`/gutachter/fall/${f.fall_id}`}> (die Liste verlinkt auf
+//                        /gutachter/fall/, NICHT auf /gutachter/faelle/)
+test.describe('Dispatch Detailansichten', () => {
+  for (const weg of [{ liste: '/dispatch/leads', praefix: '/dispatch/leads/' }]) {
+    test(`${weg.liste} → erste Detailansicht rendert`, async ({ dispatchPage }) => {
+      await pruefeDetailWeg(dispatchPage, weg)
+    })
+  }
+})
 
-      // Bewusst KEIN test.skip(): eine leere Liste würde den Lauf grün färben
-      // und genau den Beweis unterschlagen, für den dieser Test existiert.
-      expect(
-        detail,
-        `${liste}: kein Detail-Link nach ${praefix}<uuid> gefunden (${hrefs.length} Links mit diesem Präfix) — Detailansicht nicht prüfbar`,
-      ).toBeTruthy()
-      if (!detail) return
-
-      await erwarteGerendert(adminPage, detail)
+test.describe('Gutachter Detailansichten', () => {
+  for (const weg of [{
+    liste: '/gutachter/faelle',
+    praefix: '/gutachter/fall/',
+    // 23.08. nachgemessen, als dieser Weg beim ersten Lauf rot war — es ist KEIN Defekt:
+    // die Seite zeigt ausschliesslich Faelle IN REGULIERUNG. Schritt 2 der Query filtert
+    // ueber `kanzlei_faelle` (page.tsx:71-83), ihr EmptyState heisst woertlich „Noch keine
+    // Faelle in Regulierung." Der Test-SV hat zwar 1 Auftrag mit
+    // `gutachten_final_freigegeben` (aus dem nightly), aber 0 Eintraege in
+    // `kanzlei_faelle` — also ist die leere Liste fachlich korrekt.
+    // ⚠ Selbstheilend: sobald ein Fall des Test-SV in Regulierung geht, prueft der Weg
+    // wieder scharf.
+    leerErwartet:
+      '/gutachter/faelle zeigt nur Faelle in Regulierung (Filter ueber kanzlei_faelle); ' +
+      'der Test-SV hat aktuell keinen — 0 Eintraege gemessen',
+  }]) {
+    test(`${weg.liste} → erste Detailansicht rendert`, async ({ svPage }) => {
+      await pruefeDetailWeg(svPage, weg)
     })
   }
 })
@@ -146,6 +260,38 @@ test.describe('Public Routes', () => {
   for (const route of PUBLIC_ROUTES) {
     test(`GET ${route} → renders without error`, async ({ page }) => {
       await erwarteGerendert(page, route)
+    })
+  }
+})
+
+test.describe('Dispatch Routes', () => {
+  for (const route of DISPATCH_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ dispatchPage }) => {
+      await erwarteGerendert(dispatchPage, route)
+    })
+  }
+})
+
+test.describe('Kundenbetreuer Routes', () => {
+  for (const route of KB_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kbPage }) => {
+      await erwarteGerendert(kbPage, route)
+    })
+  }
+})
+
+test.describe('Kunde Routes', () => {
+  for (const route of KUNDE_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kundePage }) => {
+      await erwarteGerendert(kundePage, route)
+    })
+  }
+})
+
+test.describe('Kanzlei Routes', () => {
+  for (const route of KANZLEI_ROUTES) {
+    test(`GET ${route} → renders without error`, async ({ kanzleiPage }) => {
+      await erwarteGerendert(kanzleiPage, route)
     })
   }
 })

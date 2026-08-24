@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 // Tr = Kopfzeile, ClickableTr = drillbare Body-Zeilen.
@@ -82,7 +83,18 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     <Td>
                       <div className="flex items-center gap-2">
                         <TypeIcon className="w-4 h-4 text-claimondo-ondo flex-shrink-0" />
-                        <span className="font-medium text-claimondo-navy">{o.name}</span>
+                        {/* Echter Link statt nur ClickableTr-onClick: Mittelklick/Strg+Klick
+                            oeffnet die Full-Page im neuen Tab — genau das, was der Kommentar
+                            oben als "Deep-Link" beschreibt. Der normale Klick navigiert
+                            weiterhin client-seitig und trifft dieselbe Intercepting-Route
+                            (Drawer). Muster: FaelleKanban.tsx:235. */}
+                        <Link
+                          href={`/admin/organisationen/${o.id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="font-medium text-claimondo-navy"
+                        >
+                          {o.name}
+                        </Link>
                       </div>
                     </Td>
                     <Td>
