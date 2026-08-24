@@ -13,6 +13,35 @@ Befund. Zu jedem Fund wurde der Consumer gesucht. Zwei kritisch klingende String
 
 ---
 
+## Nachtrag 24.08.2026 — Umsetzung + eine Korrektur an meiner eigenen Messung
+
+Aaron hat vier Punkte freigegeben; sie sind umgesetzt (Details am Ende des Dokuments unter
+„Umsetzungsprotokoll"). **Die vier KPI-Zahlen der Startseite und die Methodik-Fußnote bleiben
+unverändert** — Aaron prüft ihre Herkunft selbst. Befund 2 bleibt deshalb offen, Befund 8
+(750-€-Grenze im Hero) wurde nicht freigegeben und ist offen.
+
+**Korrektur zu Befund 6 und 7.** Ich habe dort „acht Fachbegriffe auf der Startseite" und „neun
+in der FAQ" gemeldet. Diese Zahlen waren zu hoch. Mein Messskript prüfte nur, ob eine Erklärung
+**nach** dem Begriff steht — Erklärungen, die davor stehen oder anders formuliert sind, zählte es
+als Lücke. Mit einem symmetrischen Fenster (±220 Zeichen um jedes Vorkommen) lauten die
+Ausgangswerte:
+
+| Seite | gemeldet | tatsächlich | nach der Umsetzung |
+|---|---|---|---|
+| Startseite (`home`) | 8 | **5** | **0** |
+| FAQ (`faq`) | 9 | **3** | **0** |
+
+Konkret zu Unrecht als Lücke geführt: Die FAQ **erklärt** Wertminderung („Auch nach perfekter
+Reparatur sinkt der Marktwert eines Unfallfahrzeugs — und diese Differenz muss die Gegenseite
+zahlen"), das **Quotenvorrecht** (mit Rechenbeispiel) und die **Abfindungserklärung** („damit
+erlöschen ALLE zukünftigen Ansprüche"). Echte Lücken waren dort nur UPE, Verbringung und
+Beilackierung.
+
+Die Richtung des Befunds bleibt, seine Größe war überzeichnet. Das Messwerkzeug liegt jetzt in
+beiden Fassungen vor; maßgeblich ist die symmetrische.
+
+---
+
 ## Kurzfassung
 
 Die inhaltliche Substanz ist überdurchschnittlich. Die Ratgeberseiten beantworten die Frage des
@@ -584,6 +613,84 @@ Wichtiges nicht zu wissen. Vorbildlich.
 | 10 | Zwei Passivsätze (Befund 12) | 2 Strings | gering |
 
 Die Punkte 1–5 sind zusammen etwa 17 geänderte Strings und eine kleine Komponenten-Ergänzung.
+
+---
+
+## Umsetzungsprotokoll 24.08.2026
+
+Geändert wurden **ausschließlich** die sechs Message-Dateien unter
+`claimondo-marketing/i18n/messages/`. Kein `.ts`/`.tsx` angefasst, keine Keys hinzugefügt oder
+entfernt, CRLF und Zeilenzahl in allen Dateien erhalten, alle sechs Dateien valides JSON,
+Key-Parität unverändert. 144 geänderte Strings über alle Locales durch den echten
+ICU-Parser (`@formatjs/icu-messageformat-parser`) geschickt: 0 Fehler.
+
+**de.json — 44 Strings**
+
+| Aufgabe | Schlüssel |
+|---|---|
+| 1 · Rückruf auf 15 Min + Zeiten | `home.hero.cta_call` · `home.lead_form.rueckruf_badge` · `home.lead_form.success_body` · `home.sticky_call.modal_sub` · `kfz_gutachter_stadt.hero_cta_call` · `kfz_gutachter_stadt.form_badge` · `kfz_gutachter_stadt.form_toast_success` |
+| 2a · Auszahlung → Ø 32 Tage / Tag 30–60 | `ueber_uns.werte.items[2]` · `kfz_gutachter_hub.pillars[1].lead` · `kfz_gutachter_ablauf.{hero_intro, antwort_capsule, schritte[3].dauer, faqs[0].antwort}` · `page_meta.kfz_gutachter_ablauf.{description, og_description}` · `faq.groups[5].fragen[2].antwort` |
+| 2b · BVSK → typisch 300–1.200 € | `kfz_gutachter_kosten.{hero_intro, antwort_capsule, faqs[0].antwort}` · `page_meta.kfz_gutachter_kosten.og_description` · `home.faq.items[0].antwort` · `schadensreport_2026.trust_kpi_bvsk_wert` (kompakt 300–2.500 €) |
+| 2c · Nutzungsausfall → 23–219 €/Tag | `check.range_nutzungsausfall` · `home.ansprueche.cards[2].text` · `kfz_gutachter_ablauf.faqs[4].antwort` · `faq.groups[3].fragen[1].antwort` · `faq.groups[9].fragen[1].antwort` |
+| 3 · Superlativ ersetzt | `content.anchor.cornerstone_closing` (wirkt auf 9 Cornerstone-Seiten) |
+| 4 · Fachbegriffe erklärt | `home.ansprueche.cards[0..2].{titel,text}` · `home.faq.items[3,5,6,8].antwort` · `home.sieben_fehler.fehler[5].titel` · `home.versicherer_taktiken.taktiken[3].gegenargument` · `faq.groups[1].fragen[1].antwort` · `faq.groups[9].fragen[0].antwort` · `kfz_gutachter_stadt.{faq_wertminderung_antwort, faq_130_antwort}` |
+
+**en/pl/ru/tr/ar — 75 Strings**, ausschließlich Ziffern-Korrekturen in bereits übersetzter Prosa
+(Rückruf 5→15, Nutzungsausfall auf 23–219, BVSK auf 300–1.200 bzw. 300–2.500). Einzige
+Nomenänderung: Arabisch, weil das Zählwort ab 11 in den Singular-Akkusativ wechselt
+(`5 دقائق` → `15 دقيقة`).
+
+**Belegbare Referenzen, an denen die Werte ausgerichtet wurden** — jeweils die Tabelle, die die
+Seite selbst rendert, nicht der Fließtext:
+
+* **Nutzungsausfall 23–219 €/Tag** = `lib/tools/nutzungsausfall.ts` → `NA_KLASSEN`, Klasse A ab
+  23 €, Klasse L bis 219 €. Die bisherigen „23–175" und „35–175" lagen darunter.
+* **BVSK 300–1.200 € typisch / bis 2.500 €** = `BVSK_STUFEN` in
+  `app/[locale]/kosten-kfz-gutachten/page.tsx` (HB I ca. 200–280 € … HB V oft 1.000–2.500 €). Die
+  bisherigen „550–2.600" und „600–2.600" lagen außerhalb dieser Tabelle.
+* **Auszahlung Ø 32 Tage** = Vorgabe (Startseiten-KPI gesperrt). Deckt sich mit der
+  Schritt-Aufschlüsselung der Ablauf-Seite selbst („Tag 30–60 = Auszahlung"), die dem dort zuvor
+  behaupteten „6–8 Wochen" widersprach.
+
+### Offen / bewusst nicht angefasst
+
+* **Befund 2** (KPI-Band) und **Befund 8** (750-€-Grenze im Hero) — nicht freigegeben.
+* **Latente Strings** (`landing.hero.trust_badge` „über 50 Partner-Gutachter",
+  `gutachter_finder.vor_ort_*` „5 Minuten") — kein Consumer, deshalb unverändert.
+* **„4–6 Monate Branchen-Durchschnitt"** (`home.hero.sub_headline`, `home.hero_bullets[3]`,
+  `home.schadensreport_teaser.heading`, `kfz_gutachter_stadt.hero_bullets[3]`) — unbelegt und
+  bis eben von der eigenen FAQ mit „Bundesweiter Durchschnitt: 6–8 Wochen" widersprochen. Ich
+  habe die FAQ-Stelle auf die eigene Kennzahl umgestellt und die Branchenbehauptung **nicht**
+  angefasst: sie zu ändern wäre eine Positionierungsentscheidung, keine Vereinheitlichung.
+* **„6–8 Wochen" in en/pl/ru/tr/ar** — Änderung des Einheiten-Nomens in fünf Sprachen; gehört in
+  den Übersetzungslauf, nicht in eine Handkorrektur.
+
+### ⚠ Die Übersetzungs-Pipeline zieht geänderte Werte NICHT nach
+
+`scripts/i18n/translate.mjs` ist im Kopf dokumentiert mit „übersetzt nur fehlende oder
+**geänderte** Keys". Die Änderungserkennung existiert nicht. `collectMissing()`
+(Zeile 75–95) nimmt einen Key nur auf, wenn
+
+```js
+typeof targetNode !== 'string' || force || targetNode === deNode
+```
+
+— also wenn die Übersetzung **fehlt**, `--force` gesetzt ist, oder der Zielwert noch der deutsche
+ist. Ein geänderter deutscher Wert bei vorhandener Übersetzung fällt durch alle drei Bedingungen.
+Folge: Die neuen deutschen Erklärtexte aus Aufgabe 4 erreichen die fünf anderen Sprachen erst mit
+`node scripts/i18n/translate.mjs --marketing --force` (Volllauf) oder nachdem die betroffenen
+Zielwerte auf den deutschen Wert gesetzt wurden. Genau deshalb habe ich die Zahlen dort von Hand
+korrigiert statt mich auf die Pipeline zu verlassen.
+
+### Nebenbefunde aus der Umsetzung
+
+* **`pl.json` → `faq.groups[9].fragen[1].antwort`** enthält ein türkisches Wort im polnischen
+  Satz: „pojazdu zastępczego **(kiralık araç)**". Übersetzungsfehler, nicht von mir angefasst.
+* Die Message-Dateien mischen drei Leerzeichen-Varianten vor dem Euro-Zeichen: U+0020, U+00A0
+  (en) und U+2009 (de). Wer dort per Textmuster sucht, findet je nach Datei nichts — beim ersten
+  Anlauf hier zweimal passiert.
+* **Anrede-Mix (Befund 11)** war nicht Teil der Freigabe und ist unverändert: 45 von 94 deutschen
+  Content-Dateien duzen, 21 mischen innerhalb einer Datei.
 
 ---
 

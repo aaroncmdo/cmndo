@@ -1201,18 +1201,18 @@
       "card_cta": "Anspruch im Detail",
       "cards": [
         {
-          "titel": "Reparatur oder Wiederbeschaffungswert",
-          "text": "Unsere Partnerkanzlei verhandelt vollständige Erstattung inkl. UPE-Aufschläge, Verbringung und Beilackierung mit der Versicherung. BGH VI ZR 65/18 + VI ZR 174/24.",
+          "titel": "Reparatur — oder Geld für ein gleichwertiges Auto",
+          "text": "Repariert wird auf Kosten der Gegenseite — mitsamt der Posten, die Versicherer zuerst streichen: Aufschlag auf Original-Ersatzteile (UPE), Transport zum Lackierer (Verbringung) und das Angleichen der Nachbarteile, damit der Farbton stimmt (Beilackierung). Lohnt die Reparatur nicht mehr, gibt es den Wiederbeschaffungswert — was ein gleichwertiges Fahrzeug heute kosten würde. BGH VI ZR 65/18 + VI ZR 174/24.",
           "href": "/haftpflicht/reparaturkosten"
         },
         {
-          "titel": "Merkantile Wertminderung",
-          "text": "Unsere Partnerkanzlei setzt die Wertminderung nach Sanden/Danner-Formel durch — auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
+          "titel": "Wertverlust, weil Ihr Auto jetzt ein Unfallwagen ist",
+          "text": "Auch perfekt repariert bringt Ihr Fahrzeug beim Verkauf weniger als ein unfallfreies — diese Differenz heißt merkantile Wertminderung und muss die Gegenseite ersetzen. Unsere Partnerkanzlei setzt sie nach der Sanden/Danner-Formel durch, auch wenn die Versicherung „angemessen\" anbietet. BGH VI ZR 357/03.",
           "href": "/haftpflicht/wertminderung"
         },
         {
-          "titel": "Mietwagen oder Nutzungsausfall",
-          "text": "Unsere Partnerkanzlei verhandelt Mietwagen für die gesamte Reparaturdauer oder Nutzungsausfallpauschale 23–219 €/Tag nach Sanden/Danner-Klasse.",
+          "titel": "Mietwagen — oder Geld für jeden Tag ohne Auto",
+          "text": "Unsere Partnerkanzlei verhandelt einen Mietwagen für die gesamte Reparaturdauer. Wollen Sie keinen, gibt es stattdessen Geld für jeden Tag ohne Fahrzeug — den Nutzungsausfall, 23–219 € pro Tag je nach Fahrzeugklasse.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
@@ -1319,7 +1319,7 @@
         },
         {
           "frage": "Gilt der kostenlose Service auch bei Teilschuld?",
-          "antwort": "Ja. Bei Teilschuld trägt die gegnerische Versicherung den prozentualen Anteil. Bei 50:50 zahlt Ihre eigene Kasko über das Quotenvorrecht die bevorrechtigten Positionen (Reparatur, Wertminderung, Sachverständige, Abschleppkosten) bis zu 100 %."
+          "antwort": "Ja. Bei Teilschuld trägt die gegnerische Versicherung ihren prozentualen Anteil. Bei 50:50 springt Ihre eigene Kaskoversicherung für den Rest ein und zahlt die wichtigsten Positionen (Reparatur, Wertminderung, Sachverständiger, Abschleppkosten) bis zu 100 % — das nennt sich Quotenvorrecht: Ihre Kasko wird zuerst für die Posten verwendet, die Ihnen der Höhe nach zustehen."
         },
         {
           "frage": "Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?",
@@ -1327,11 +1327,11 @@
         },
         {
           "frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
-          "antwort": "Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03."
+          "antwort": "Die merkantile Wertminderung — der Wertverlust, weil Ihr Auto künftig als Unfallwagen gilt — liegt nach der Sanden/Danner-Formel meist zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03."
         },
         {
           "frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
-          "antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird."
+          "antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — also dessen, was ein gleichwertiges Fahrzeug heute kosten würde. Voraussetzung: fachgerecht repariert nach Gutachten, und das Fahrzeug wird 6 Monate weitergenutzt."
         },
         {
           "frage": "Was ist das Werkstattrisiko nach den BGH-Urteilen 2024?",
@@ -1339,7 +1339,7 @@
         },
         {
           "frage": "Was ist die HIS-Datei und warum ist sie wichtig?",
-          "antwort": "Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung."
+          "antwort": "Die HIS-Datei (Hinweis- und Informationssystem) speichert jeden gemeldeten Unfall zentral für alle Versicherer. Wer fiktiv abrechnet — sich also den Schaden auszahlen lässt, ohne zu reparieren — und am gleichen Bereich erneut einen Schaden meldet, riskiert die vollständige Verweigerung der Regulierung — empfohlene Beweissicherung: Zwei-Foto-Regel mit aktueller Tageszeitung."
         },
         {
           "frage": "Werden Tesla- und E-Auto-Schäden gleich behandelt?",
@@ -1418,7 +1418,7 @@
           "versicherer": "alle großen",
           "pruefdienstleister": "überregionale Internet-Restwertbörse",
           "kuerzung": "Restwert künstlich hoch → Auszahlung gedrückt um bis zu 3.000 €",
-          "gegenargument": "Restwert = regionaler Markt. Sie müssen das Versicherer-Angebot nicht annehmen.",
+          "gegenargument": "Der Restwert ist das, was Ihr beschädigtes Auto noch einbringt — maßgeblich ist Ihr regionaler Markt. Ein Angebot aus einer bundesweiten Börse müssen Sie nicht annehmen.",
           "bgh": "BGH VI ZR 119/04",
           "href": "/haftpflicht/wiederbeschaffungswert"
         },
@@ -1506,7 +1506,7 @@
           "href": "/decoder/wertminderung-nicht"
         },
         {
-          "titel": "Fiktiv abrechnen ohne Beweissicherung",
+          "titel": "Sich den Schaden auszahlen lassen, ohne ihn zu dokumentieren",
           "warum": "Bei einem späteren Zweitunfall an gleicher Stelle ohne Reparaturnachweis kann die Versicherung die Regulierung komplett verweigern (HIS-Datei).",
           "besser": "Zwei-Foto-Regel: Fahrzeug nach Reparatur fotografieren mit Tageszeitung im Bild. Fernaufnahme + Nahaufnahme der reparierten Stelle.",
           "href": "/haftpflicht/anscheinsbeweis"
@@ -1682,7 +1682,7 @@
     "vor_ort_kontakt": {
       "step_label": "Schritt 2 von 2 · Kontakt",
       "heading": "Wie erreichen wir Sie?",
-      "sub": "Wir rufen Sie in den nächsten 5 Minuten zurück und schicken einen Gutachter.",
+      "sub": "Wir rufen Sie in den nächsten 15 Minuten zurück (8–20 Uhr) und schicken einen Gutachter.",
       "placeholder_vorname": "Vorname",
       "placeholder_nachname": "Nachname",
       "placeholder_telefon": "Telefonnummer",
@@ -1693,7 +1693,7 @@
     },
     "vor_ort_erfolg": {
       "heading": "Soforthilfe ist unterwegs",
-      "sub": "Wir rufen Sie in den nächsten 5 Minuten unter {telefon} zurück.",
+      "sub": "Wir rufen Sie in den nächsten 15 Minuten unter {telefon} zurück (8–20 Uhr).",
       "fotos_gespeichert": "{count} {count, plural, one {Foto} other {Fotos}} gespeichert",
       "gps_label": "GPS"
     },
@@ -2222,7 +2222,7 @@
           },
           {
             "frage": "Was streichen Versicherungen am häufigsten?",
-            "antwort": "1. Stundenverrechnungssätze (Verweis auf billigere Werkstatt), 2. UPE-Aufschläge (trotz BGH VI ZR 65/18 erstattungsfähig), 3. Verbringungskosten (trotz BGH-Recht), 4. Beilackierungskosten (BGH VI ZR 174/24 aus 2025 gilt), 5. Sachverständigenkosten (\"überhöht\"), 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
+            "antwort": "1. Stundenverrechnungssätze — der Stundenlohn der Werkstatt, gekürzt per Verweis auf eine billigere. 2. UPE-Aufschläge — der Zuschlag auf Original-Ersatzteile (trotz BGH VI ZR 65/18 erstattungsfähig). 3. Verbringungskosten — der Transport zum Lackierer (trotz BGH-Recht). 4. Beilackierung — das Angleichen der Nachbarteile, damit der Farbton stimmt (BGH VI ZR 174/24 aus 2025 gilt). 5. Sachverständigenkosten (\"überhöht\"). 6. Wertminderung (wird oft komplett ignoriert). Unser Anwalt kennt alle diese Positionen und fordert sie zurück."
           },
           {
             "frage": "HUK, LVM, AXA — macht das einen Unterschied?",
@@ -2260,7 +2260,7 @@
           },
           {
             "frage": "Mietwagen oder Nutzungsausfall — was ist besser für mich?",
-            "antwort": "Hängt von Ihrer Situation ab. Pendler, die täglich auf das Auto angewiesen sind: Mietwagen. Zweitwagen vorhanden oder unklare Schuldfrage: Nutzungsausfall (Sanden/Danner-Tabelle, Gruppe A bis L, ~23 € bis 175 € pro Tag). Bei langer Reparaturdauer ist Nutzungsausfall oft günstiger. Wir beraten Sie dazu konkret."
+            "antwort": "Hängt von Ihrer Situation ab. Pendler, die täglich auf das Auto angewiesen sind: Mietwagen. Zweitwagen vorhanden oder unklare Schuldfrage: Nutzungsausfall (Sanden/Danner-Tabelle, Gruppe A bis L, ~23 € bis 219 € pro Tag). Bei langer Reparaturdauer ist Nutzungsausfall oft günstiger. Wir beraten Sie dazu konkret."
           }
         ]
       },
@@ -2370,11 +2370,11 @@
         "fragen": [
           {
             "frage": "Mein Fahrzeug ist Totalschaden — was jetzt?",
-            "antwort": "Bei Totalschaden bekommen Sie den Wiederbeschaffungswert minus Restwert. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich."
+            "antwort": "Bei Totalschaden bekommen Sie den Wiederbeschaffungswert — was ein gleichwertiges Fahrzeug heute kosten würde — minus den Restwert, also das, was Ihr beschädigtes Auto noch einbringt. Der Restwert wird auf dem regionalen Markt ermittelt (BGH VI ZR 119/04, NICHT Restwertbörse 200 km weit weg). Die 130%-Regel: Wenn Reparatur bis 30% über Wiederbeschaffungswert kostet, dürfen Sie trotzdem reparieren lassen — Voraussetzung: fachgerechte Reparatur + Fahrzeug 6 Monate weitergenutzt. Praktisches Beispiel: WBW 8.000 € → Reparatur bis 10.400 € möglich."
           },
           {
             "frage": "Was ist mit Mietwagen während der Reparatur?",
-            "antwort": "Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 175 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf \"vergleichbare Klasse\" was nicht immer gerechtfertigt ist."
+            "antwort": "Anspruch auf gleichwertigen Mietwagen für die gesamte Reparaturdauer (BGH-Linie: Klassentiefer ist OK gegen Eigenanteil-Erstattung). Alternativ: Nutzungsausfall-Pauschale nach Sanden/Danner-Tabelle (Gruppe A bis L, ca. 23 € bis 219 €/Tag). Bei Pendlern fast immer Mietwagen sinnvoller. Wir beraten zur konkreten Situation — Versicherer kürzen hier oft auf \"vergleichbare Klasse\" was nicht immer gerechtfertigt ist."
           },
           {
             "frage": "Ich habe einen Schaden mit einem Firmenfahrzeug. Geht das auch?",
@@ -4028,7 +4028,7 @@
     "faq_sa_frage": "Was ist eine Sicherungsabtretung — und ist sie sicher?",
     "faq_sa_antwort": "Bei der Sicherungsabtretung gemäß §398 BGB überträgt der Geschädigte den Anspruch gegen die gegnerische Versicherung in Höhe des Gutachterhonorars an den Sachverständigen. Sie unterzeichnen einmal — der Gutachter rechnet anschließend direkt mit der Versicherung ab. Sie zahlen keinen Cent vor. Branchen-Standard.",
     "faq_wertminderung_frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
-    "faq_wertminderung_antwort": "Die merkantile Wertminderung liegt nach Sanden/Danner-Formel zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.",
+    "faq_wertminderung_antwort": "Die merkantile Wertminderung — der Wertverlust, weil Ihr Auto künftig als Unfallwagen gilt — liegt nach der Sanden/Danner-Formel meist zwischen 500 € und 2.500 €. Faustregel: 1. Jahr 25 %, 2. Jahr 20 %, 3. Jahr 15 %, 4. Jahr 10 % der Reparaturkosten. Keine starre Altersgrenze laut BGH VI ZR 357/03.",
     "faq_gutachterwahl_frage": "Kann ich den Gutachter selbst wählen?",
     "faq_gutachterwahl_antwort": "Ja. Als unverschuldet Geschädigter bestimmen Sie den Sachverständigen — nicht die gegnerische Versicherung. Deren Angebot, einen eigenen Prüfer zu schicken, müssen Sie nicht annehmen: Ein von der Gegenseite beauftragter Gutachter arbeitet nicht in Ihrem Interesse.",
     "faq_kva_frage": "Reicht ein Kostenvoranschlag der Werkstatt?",
@@ -4038,7 +4038,7 @@
     "faq_werkstattwahl_frage": "Darf ich meine Werkstatt frei wählen?",
     "faq_werkstattwahl_antwort": "Ja, die freie Werkstattwahl bleibt bestehen. Die gegnerische Versicherung darf Sie nicht auf eine Partnerwerkstatt verweisen, wenn Sie in einer markengebundenen Fachwerkstatt reparieren lassen wollen — das gilt besonders bei jungen oder scheckheftgepflegten Fahrzeugen.",
     "faq_130_frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
-    "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.",
+    "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — also dessen, was ein gleichwertiges Fahrzeug heute kosten würde. Voraussetzung: fachgerecht repariert nach Gutachten, und das Fahrzeug wird 6 Monate weitergenutzt.",
     "cta_h2": "Schaden {ort}? Wir regeln das.",
     "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien Kfz-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen",

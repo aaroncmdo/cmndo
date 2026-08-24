@@ -94,7 +94,7 @@
     "insight_kasko": "Kasko durumunda da bağımsız bir ekspertiz işe yarar — sizi düşük bir tazminattan korur.",
     "ranges_heading": "Bunun yaklaşık değeri ne kadar",
     "range_auslagen": "Masraf götürü bedeli: 25–30 € götürü",
-    "range_nutzungsausfall": "Kullanım kaybı: günlük yaklaşık 35–175 € (araç sınıfına göre)",
+    "range_nutzungsausfall": "Kullanım kaybı: günlük yaklaşık 23–219 € (araç sınıfına göre)",
     "range_wertminderung": "Değer kaybı: yeni araçlarda çoğu zaman dört haneli tutarlarda",
     "range_kostenlos": "Ekspertiz ve avukat: sizin için 0 € — karşı tarafın sigortası öder",
     "ranges_disclaimer": "Tipik büyüklük aralıkları olup bağlayıcı bir teklif değildir.",
@@ -994,7 +994,7 @@
       "h1_accent": "Biz hallederiz.",
       "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
       "cta_primary": "Sigortayla konuşmamıza izin verin →",
-      "cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
+      "cta_call": "Şimdi arayın — 15 dakikada geri dönüş",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu"
     },
@@ -1065,7 +1065,7 @@
         },
         {
           "titel": "Kiralık Araç veya Kullanım Kaybı",
-          "text": "Ortak hukuk büromuz, tüm tamir süresi için kiralık araç veya Sanden/Danner sınıfına göre günlük 23–175 € kullanım kaybı tazminatı için müzakere yürütür.",
+          "text": "Ortak hukuk büromuz, tüm tamir süresi için kiralık araç veya Sanden/Danner sınıfına göre günlük 23–219 € kullanım kaybı tazminatı için müzakere yürütür.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
@@ -1160,7 +1160,7 @@
       "items": [
         {
           "frage": "Kusursuz bir kazadan sonra Kfz bilirkişi ücreti ne kadar?",
-          "antwort": "Kusursunuz ve hasar 750 €'nun üzerindeyse 0 € ödersiniz. Karşı tarafın Haftpflicht sigortası, §249 BGB uyarınca tüm masrafları karşılar. BVSK-Honorartabelle'ye göre ücretler, hasar miktarına bağlı olarak 550 € ile 2.600 € arasında değişir."
+          "antwort": "Kusursunuz ve hasar 750 €'nun üzerindeyse 0 € ödersiniz. Karşı tarafın Haftpflicht sigortası, §249 BGB uyarınca tüm masrafları karşılar. BVSK-Honorartabelle'ye göre ücretler, hasar miktarına bağlı olarak 300 € ile 1.200 € arasında değişir."
         },
         {
           "frage": "Bir Kfz bilirkişi ne kadar sürede yerinde olabilir?",
@@ -1433,7 +1433,7 @@
       "datenschutz_note": "Formu göndererek geri aranmayı kabul etmiş olursunuz. DSGVO kapsamında veri gizliliği güvencesi."
     },
     "lead_form": {
-      "rueckruf_badge": "5 Dakika İçinde Geri Arama",
+      "rueckruf_badge": "15 Dakika İçinde Geri Arama · 08–20",
       "heading": "30 Saniyede Hasar Bildirin",
       "sub": "Üç alan. Kayıt gerekmez. DSGVO uyumlu.",
       "field_name_label": "Adınız",
@@ -1792,7 +1792,7 @@
           },
           {
             "frage": "Kiralık araç mı yoksa kullanım kaybı tazminatı mı — hangisi benim için daha iyi?",
-            "antwort": "Durumunuza bağlıdır. Her gün arabaya muhtaç olan işe gidip gelenler: kiralık araç. İkinci araç mevcutsa ya da kusur durumu belirsizse: kullanım kaybı tazminatı (Sanden/Danner tablosu, A'dan L'ye grup, günlük ~23 € ile 175 € arasında). Uzun onarım sürelerinde kullanım kaybı tazminatı genellikle daha avantajlıdır. Bu konuda size somut tavsiyelerde bulunuruz."
+            "antwort": "Durumunuza bağlıdır. Her gün arabaya muhtaç olan işe gidip gelenler: kiralık araç. İkinci araç mevcutsa ya da kusur durumu belirsizse: kullanım kaybı tazminatı (Sanden/Danner tablosu, A'dan L'ye grup, günlük ~23 € ile 219 € arasında). Uzun onarım sürelerinde kullanım kaybı tazminatı genellikle daha avantajlıdır. Bu konuda size somut tavsiyelerde bulunuruz."
           }
         ]
       },
@@ -1906,7 +1906,7 @@
           },
           {
             "frage": "Onarım süresince kiralık araç hakkında ne söylenebilir?",
-            "antwort": "Tüm onarım süresi boyunca eşdeğer bir kiralık araç hakkı mevcuttur (BGH ilkesi: daha alt sınıf araç, kendi payı iadesiyle kabul edilebilir). Alternatif: Sanden/Danner tablosuna göre kullanım kaybı (Nutzungsausfall) günlük tazminatı (A'dan L'ye gruplar, yaklaşık 23 € ile 175 €/gün arası). İşe gidip gelenler için kiralık araç neredeyse her zaman daha avantajlıdır. Somut durumunuz için danışmanlık sağlarız — sigortalar burada sıklıkla \"karşılaştırılabilir sınıf\" gerekçesiyle kesinti yapar; bu her zaman haklı değildir."
+            "antwort": "Tüm onarım süresi boyunca eşdeğer bir kiralık araç hakkı mevcuttur (BGH ilkesi: daha alt sınıf araç, kendi payı iadesiyle kabul edilebilir). Alternatif: Sanden/Danner tablosuna göre kullanım kaybı (Nutzungsausfall) günlük tazminatı (A'dan L'ye gruplar, yaklaşık 23 € ile 219 €/gün arası). İşe gidip gelenler için kiralık araç neredeyse her zaman daha avantajlıdır. Somut durumunuz için danışmanlık sağlarız — sigortalar burada sıklıkla \"karşılaştırılabilir sınıf\" gerekçesiyle kesinti yapar; bu her zaman haklı değildir."
           },
           {
             "frage": "Şirket aracıyla yaşanan bir hasarda da yardımcı olabiliyor musunuz?",
@@ -3023,7 +3023,7 @@
       },
       {
         "frage": "Kiralık araç (Mietwagen) veya kullanım kaybı (Nutzungsausfall) ne zaman hakkımdır?",
-        "antwort": "Onarım süresinin ilk gününden itibaren kiralık araç — eşdeğer sınıf veya bir alt sınıf, öz katılım farkı iade edilir. Alternatif olarak: Sanden/Danner tablosuna göre günlük kullanım kaybı tazminatı (araç sınıfına göre 23–175 €/gün). Her gün araç kullananlar için kiralık araç genellikle daha avantajlıdır. Somut durumunuz için sizi bilgilendiririz."
+        "antwort": "Onarım süresinin ilk gününden itibaren kiralık araç — eşdeğer sınıf veya bir alt sınıf, öz katılım farkı iade edilir. Alternatif olarak: Sanden/Danner tablosuna göre günlük kullanım kaybı tazminatı (araç sınıfına göre 23–219 €/gün). Her gün araç kullananlar için kiralık araç genellikle daha avantajlıdır. Somut durumunuz için sizi bilgilendiririz."
       }
     ],
     "crosslinks_h2": "Bu Konuda Daha Fazlası",
@@ -3039,8 +3039,8 @@
     "breadcrumb_start": "Kfz Bilirkişi",
     "breadcrumb_current": "Masraflar",
     "hero_h1": "Kfz bilirkişi ne kadar tutar?",
-    "hero_intro": "Kusursuz kazada: <strong>Sizin için 0 €</strong> · §249 BGB · BVSK-Honorartabelle 550–2.600 €",
-    "antwort_capsule": "<strong>750 € üzerinde hasarlı, kusursuz bir trafik kazasında</strong> bilirkişi honorarını karşı tarafın sorumluluk sigortası (gegnerische Haftpflichtversicherung) %100 öder. Tutar BVSK-Honorartabelle'ye (yeniden edinim değeri bazlı) göre belirlenir ve 550 € ile 2.600 € arasında değişir. Siz hiçbir şey ödemezsiniz: bilirkişi, Sicherungsabtretung (§398 BGB) aracılığıyla doğrudan karşı tarafın sigortasıyla hesaplaşır.",
+    "hero_intro": "Kusursuz kazada: <strong>Sizin için 0 €</strong> · §249 BGB · BVSK-Honorartabelle 300–1.200 €",
+    "antwort_capsule": "<strong>750 € üzerinde hasarlı, kusursuz bir trafik kazasında</strong> bilirkişi honorarını karşı tarafın sorumluluk sigortası (gegnerische Haftpflichtversicherung) %100 öder. Tutar BVSK-Honorartabelle'ye (yeniden edinim değeri bazlı) göre belirlenir ve 300 € ile 1.200 € arasında değişir. Siz hiçbir şey ödemezsiniz: bilirkişi, Sicherungsabtretung (§398 BGB) aracılığıyla doğrudan karşı tarafın sigortasıyla hesaplaşır.",
     "bvsk_h2": "BVSK-Honorartabelle — honorar nasıl hesaplanır?",
     "bvsk_capsule": "BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen), honorarı yeniden edinim değerine göre kademelendirmektedir. Örnek: 5.000 € hasar → yaklaşık 700 €. 15.000 € hasar → yaklaşık 1.400 €. 30.000 € hasar → yaklaşık 2.200 €. Artı yan masraflar (fotoğraf, yazışma, ulaşım). Tablo her yıl güncellenir.",
     "bvsk_beispiele": [
@@ -3072,7 +3072,7 @@
     "faqs": [
       {
         "frage": "Bir Kfz bilirkişisi somut olarak ne kadar tutar?",
-        "antwort": "Honorarlar BVSK-Honorartabelle'ye göre belirlenir ve aracın yeniden edinim değeriyle orantılı olarak artar. Bölgeye göre aralık: 550–2.600 €. Örnekler: 5.000 € hasar → yaklaşık 700 € bilirkişi honorarı. 15.000 € hasar → yaklaşık 1.400 €. 30.000 € hasar → yaklaşık 2.200 €. Hesaplama, BVSK'nın 2025 tarihli HB-V anketine dayanmaktadır."
+        "antwort": "Honorarlar BVSK-Honorartabelle'ye göre belirlenir ve aracın yeniden edinim değeriyle orantılı olarak artar. Bölgeye göre aralık: 300–1.200 €. Örnekler: 5.000 € hasar → yaklaşık 700 € bilirkişi honorarı. 15.000 € hasar → yaklaşık 1.400 €. 30.000 € hasar → yaklaşık 2.200 €. Hesaplama, BVSK'nın 2025 tarihli HB-V anketine dayanmaktadır."
       },
       {
         "frage": "Kaza durumunda bilirkişiyi kim öder?",
@@ -3533,7 +3533,7 @@
     "trust_kpi_kuerzung_label": "tipik sigorta kesintisi¹",
     "trust_kpi_bgh_wert": "8",
     "trust_kpi_bgh_label": "BGH dava numarası 1992–2025",
-    "trust_kpi_bvsk_wert": "550–2.600 €",
+    "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle aralığı",
     "trust_methodikNote": "¹ Kaynak: NDR haberi \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Yönetici Özeti",
@@ -3783,9 +3783,9 @@
       "4 ay yerine 32 gün. Ortalama olarak.",
       "Sizin için 0 €. (§ 249 BGB)."
     ],
-    "hero_cta_call": "Şimdi arayın — 5 dakikada geri dönüş",
+    "hero_cta_call": "Şimdi arayın — 15 dakikada geri dönüş",
     "hero_trust_line": "Anonim danışmanlık · Bağlayıcılık yok · DSGVO uyumlu",
-    "form_badge": "5 dakikada geri dönüş",
+    "form_badge": "15 dakikada geri dönüş · 08–20",
     "form_h2": "Hasarı bildirin — 30 saniyede",
     "form_sub": "Üç alan. Kayıt olmadan. DSGVO uyumlu.",
     "form_name_label": "Adınız",
@@ -4198,7 +4198,7 @@
       "title": "Araç bilirkişisi ne kadar tutar? — Başkasının suçunda 0 € (§249 BGB)",
       "description": "Araç bilirkişi masrafları: BVSK ücret tablosu, teminat amaçlı temlik (§398 BGB), 750 € önemsizlik sınırı. Suçsuz kazada masrafları karşı taraf öder — 0 €.",
       "og_title": "Araç bilirkişisi ne kadar tutar? — Başkasının suçunda 0 €",
-      "og_description": "BVSK'ya göre ücret 600–2.600 €, başkasının suçunda sizin için 0 €."
+      "og_description": "BVSK'ya göre ücret 300–1.200 €, başkasının suçunda sizin için 0 €."
     },
     "kfz_gutachter_online": {
       "title": "„Online araç bilirkişi raporu\" — hukuken neye izin var, neye yok (LG Bremen 2026)",

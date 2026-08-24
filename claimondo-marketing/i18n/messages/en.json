@@ -94,7 +94,7 @@
     "insight_kasko": "Even in a comprehensive-insurance case an independent appraisal pays off — it protects you from a settlement that's too low.",
     "ranges_heading": "Roughly what that's worth",
     "range_auslagen": "Expense flat rate: €25–30 flat",
-    "range_nutzungsausfall": "Loss of use: approx. €35–175 per day (depending on vehicle class)",
+    "range_nutzungsausfall": "Loss of use: approx. €23–219 per day (depending on vehicle class)",
     "range_wertminderung": "Diminished value: often in the four-figure range for newer vehicles",
     "range_kostenlos": "Appraisal & lawyer: €0 for you — paid by the other party's insurer",
     "ranges_disclaimer": "Typical ranges, not a binding offer.",
@@ -994,7 +994,7 @@
       "h1_accent": "We've got you covered.",
       "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
       "cta_primary": "Let us talk to the insurance →",
-      "cta_call": "Call now — callback within 5 min",
+      "cta_call": "Call now — callback within 15 minutes",
       "cta_whatsapp": "WhatsApp",
       "trust_footer": "Anonymous consultation · No commitment · GDPR-compliant"
     },
@@ -1065,7 +1065,7 @@
         },
         {
           "titel": "Rental Car or Loss of Use",
-          "text": "Our partner law firm negotiates a rental car for the full repair period or a loss-of-use flat rate of €23–175/day based on the Sanden/Danner class.",
+          "text": "Our partner law firm negotiates a rental car for the full repair period or a loss-of-use flat rate of €23–219/day based on the Sanden/Danner class.",
           "href": "/haftpflicht/nutzungsausfall"
         },
         {
@@ -1160,7 +1160,7 @@
       "items": [
         {
           "frage": "What does a vehicle expert cost after a no-fault accident?",
-          "antwort": "In a no-fault accident with damage exceeding 750 €, you pay 0 €. The opposing liability insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle range from 550 € to 2,600 € depending on the extent of damage."
+          "antwort": "In a no-fault accident with damage exceeding 750 €, you pay 0 €. The opposing liability insurer covers all costs under §249 BGB. Fees based on the BVSK-Honorartabelle range from 300 € to 1,200 € depending on the extent of damage."
         },
         {
           "frage": "How quickly can a vehicle expert be on-site?",
@@ -1433,7 +1433,7 @@
       "datenschutz_note": "By submitting this form you consent to us calling you back. Privacy protected under DSGVO (GDPR)."
     },
     "lead_form": {
-      "rueckruf_badge": "Callback within 5 minutes",
+      "rueckruf_badge": "Callback within 15 minutes · 8am–8pm",
       "heading": "Report your claim in 30 seconds",
       "sub": "Three fields. No account needed. GDPR-compliant.",
       "field_name_label": "Your name",
@@ -1792,7 +1792,7 @@
           },
           {
             "frage": "Rental car or loss of use — which is better for me?",
-            "antwort": "It depends on your situation. Commuters who rely on their car daily: rental car. If you have a second vehicle or liability is unclear: loss of use (Sanden/Danner table, group A to L, approx. 23 € to 175 € per day). For lengthy repairs, loss of use is often the more favourable option. We will advise you specifically on this."
+            "antwort": "It depends on your situation. Commuters who rely on their car daily: rental car. If you have a second vehicle or liability is unclear: loss of use (Sanden/Danner table, group A to L, approx. 23 € to 219 € per day). For lengthy repairs, loss of use is often the more favourable option. We will advise you specifically on this."
           }
         ]
       },
@@ -1906,7 +1906,7 @@
           },
           {
             "frage": "What about a rental car during repairs?",
-            "antwort": "You are entitled to an equivalent rental car for the entire duration of repairs (BGH line: one class lower is acceptable with partial reimbursement). Alternatively: loss-of-use flat rate per the Sanden/Danner table (Group A to L, approx. €23 to €175/day). For commuters, a rental car is almost always the better option. We advise on your specific situation — insurers frequently cut this to a \"comparable class,\" which is not always justified."
+            "antwort": "You are entitled to an equivalent rental car for the entire duration of repairs (BGH line: one class lower is acceptable with partial reimbursement). Alternatively: loss-of-use flat rate per the Sanden/Danner table (Group A to L, approx. €23 to €219/day). For commuters, a rental car is almost always the better option. We advise on your specific situation — insurers frequently cut this to a \"comparable class,\" which is not always justified."
           },
           {
             "frage": "I have a claim involving a company vehicle. Does this work too?",
@@ -3023,7 +3023,7 @@
       },
       {
         "frage": "When do I get a rental car or loss-of-use compensation?",
-        "antwort": "Rental car from the first day of repairs — equivalent class or one class lower with excess reimbursement. Alternative: flat-rate Nutzungsausfall (loss of use) per the Sanden/Danner table (€23–€175/day depending on vehicle class). For commuters, a rental car is almost always the better option. We advise based on your specific situation."
+        "antwort": "Rental car from the first day of repairs — equivalent class or one class lower with excess reimbursement. Alternative: flat-rate Nutzungsausfall (loss of use) per the Sanden/Danner table (€23–€219/day depending on vehicle class). For commuters, a rental car is almost always the better option. We advise based on your specific situation."
       }
     ],
     "crosslinks_h2": "Learn more",
@@ -3039,8 +3039,8 @@
     "breadcrumb_start": "Kfz Appraiser",
     "breadcrumb_current": "Costs",
     "hero_h1": "What does a Kfz appraiser cost?",
-    "hero_intro": "If you are not at fault: <strong>€0 for you</strong> · §249 BGB · BVSK-Honorartabelle €550–€2,600",
-    "antwort_capsule": "<strong>In a traffic accident you did not cause, with damage exceeding €750</strong>, the opposing liability insurer covers 100% of the appraiser's fee. The amount is based on the BVSK-Honorartabelle (replacement value-based) and ranges from €550 to €2,600. You pay nothing: the appraiser settles directly with the opposing insurer via Sicherungsabtretung (§398 BGB).",
+    "hero_intro": "If you are not at fault: <strong>€0 for you</strong> · §249 BGB · BVSK-Honorartabelle €300–€1,200",
+    "antwort_capsule": "<strong>In a traffic accident you did not cause, with damage exceeding €750</strong>, the opposing liability insurer covers 100% of the appraiser's fee. The amount is based on the BVSK-Honorartabelle (replacement value-based) and ranges from €300 to €1,200. You pay nothing: the appraiser settles directly with the opposing insurer via Sicherungsabtretung (§398 BGB).",
     "bvsk_h2": "BVSK-Honorartabelle — how is the fee calculated?",
     "bvsk_capsule": "The BVSK-Honorartabelle (Bundesverband der freiberuflichen und unabhängigen Sachverständigen für das Kraftfahrzeugwesen) scales the fee according to replacement value. Example: damage €5,000 → approx. €700. Damage €15,000 → approx. €1,400. Damage €30,000 → approx. €2,200. Plus ancillary costs (photographs, documentation fees, travel). The table is updated annually.",
     "bvsk_beispiele": [
@@ -3072,7 +3072,7 @@
     "faqs": [
       {
         "frage": "What does a Kfz expert actually charge?",
-        "antwort": "Fees are based on the BVSK-Honorartabelle and scale with the vehicle's replacement value. Regional ranges: €550–€2,600. Examples: damage €5,000 → approx. €700 expert fee. Damage €15,000 → approx. €1,400. Damage €30,000 → approx. €2,200. The calculation follows the BVSK HB-V survey from 2025."
+        "antwort": "Fees are based on the BVSK-Honorartabelle and scale with the vehicle's replacement value. Regional ranges: €300–€1,200. Examples: damage €5,000 → approx. €700 expert fee. Damage €15,000 → approx. €1,400. Damage €30,000 → approx. €2,200. The calculation follows the BVSK HB-V survey from 2025."
       },
       {
         "frage": "Who pays the expert fee after an accident?",
@@ -3533,7 +3533,7 @@
     "trust_kpi_kuerzung_label": "Typical insurer reduction¹",
     "trust_kpi_bgh_wert": "8",
     "trust_kpi_bgh_label": "BGH case references 1992–2025",
-    "trust_kpi_bvsk_wert": "550–2,600 €",
+    "trust_kpi_bvsk_wert": "300–2,500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle range",
     "trust_methodikNote": "¹ Source: NDR report “Audit service providers” 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Executive Summary",
@@ -3783,9 +3783,9 @@
       "32 days instead of 4 months. On average.",
       "0 € for you. (§ 249 BGB)."
     ],
-    "hero_cta_call": "Call now — callback in 5 min",
+    "hero_cta_call": "Call now — callback in 15 minutes",
     "hero_trust_line": "Anonymous advice · No commitment · DSGVO-compliant (GDPR)",
-    "form_badge": "Callback in 5 minutes",
+    "form_badge": "Callback in 15 minutes · 8am–8pm",
     "form_h2": "Report your claim — in 30 seconds",
     "form_sub": "Three fields. No registration. DSGVO-compliant.",
     "form_name_label": "Your name",
@@ -4198,7 +4198,7 @@
       "title": "What does a car assessor cost? — €0 when someone else is at fault (§249 BGB)",
       "description": "Car assessor costs: the BVSK fee table, security assignment (§398 BGB), the 750 € minor-damage threshold. If the crash was not your fault, the other side pays — €0.",
       "og_title": "What does a car assessor cost? — €0 when someone else is at fault",
-      "og_description": "Fee per BVSK 600–2,600 €, and €0 for you when someone else is at fault."
+      "og_description": "Fee per BVSK 300–1,200 €, and €0 for you when someone else is at fault."
     },
     "kfz_gutachter_online": {
       "title": "“Online car assessment” — what is legally allowed and what is not (LG Bremen 2026)",
