@@ -1,0 +1,162 @@
+import { verarbeiteLead, type Holer, type Lead, type RobotsCache } from './lauf'
+import { schreibeFunde, type AnreicherungsFeld, type Db } from './schreiben'
+import { alleSeiten } from '../db/alle-seiten'
+
+export const ANREICHERBARE_FELDER: AnreicherungsFeld[] =
+  ['website_url', 'email', 'telefon', 'vorname', 'nachname']
+
+export type LaufBericht = {
+  laufId: string
+  dryRun: boolean
+  betrachtet: number
+  /** Wie viele Leads eine belastbare Website bekamen (Sicherheit >= 70). */
+  websiteBelastbar: number
+  /** Je Feld: wie oft es geschrieben wurde (im Trockenlauf: wuerde). */
+  jeFeld: Record<string, number>
+  sicherheit: { hoch: number; mittel: number; niedrig: number }
+  /** Gruende fuer Nicht-Treffer, gruppiert — R-B: kein Treffer ist ein Ergebnis. */
+  gruende: Record<string, number>
+  fehler: { leadId: string; error: string }[]
+}
+
+function leerenBericht(laufId: string, dryRun: boolean): LaufBericht {
+  return {
+    laufId, dryRun, betrachtet: 0, websiteBelastbar: 0,
+    jeFeld: {}, sicherheit: { hoch: 0, mittel: 0, niedrig: 0 },
+    gruende: {}, fehler: [],
+  }
+}
+
+/**
+ * Faehrt F-15 + F-16 ueber die Arbeitsmenge: aktive, unbeanspruchte Leads mit
+ * mindestens einer Leerstelle.
+ *
+ * Sequenziell, nicht parallel. Die Drossel in `netz.ts` gilt je Host; parallel
+ * zu laufen wuerde sie nicht verletzen, aber der Nutzen waere gering (die
+ * Kandidaten-Hosts sind ohnehin verschieden) und ein Abbruch mitten im Lauf
+ * waere schwerer zu deuten.
+ *
+ * Ein Fehler bei EINEM Lead beendet den Lauf nicht — er wird gezaehlt und
+ * berichtet. Sonst entscheidet ein einzelner kaputter Datensatz darueber, ob
+ * die anderen 61 bearbeitet werden.
+ */
+export async function laufeAn(
+  db: Db,
+  opts: {
+    laufId: string
+    hole: Holer
+    limit?: number
+    /**
+     * Nur Leads dieser Herkunft.
+     *
+     * Gebraucht, um gezielt die frisch ENTDECKTEN anzureichern: die Abfrage
+     * sortiert nach Alter, und die Bestandsleads sind aelter — ohne Filter
+     * kaeme man an die neuen erst nach allen anderen.
+     */
+    quelle?: string
+    dryRun?: boolean
+    fortschritt?: (nr: number, gesamt: number, zeile: string) => void
+  },
+): Promise<{ ok: true; bericht: LaufBericht } | { ok: false; error: string }> {
+  const dryRun = opts.dryRun ?? false
+  const bericht = leerenBericht(opts.laufId, dryRun)
+
+  let abfrage = db
+    .from('sv_leads')
+    .select('id,firma,name,ort,plz,website_url')
+    // ⚠ HIER STAND `.eq('ist_aktiv', true)`. Entfernt am 20.08., weil die
+    // Spalte zwei verschiedene Dinge bedeutete:
+    //
+    //   fuer den Finder   „erscheint als Stift auf der oeffentlichen Karte"
+    //   hier              „ist ein Lead, den man bearbeiten soll"
+    //
+    // Die Lead-Discovery legt neue Bueros bewusst INAKTIV an, damit sie nicht
+    // ungefragt auf zwei oeffentlichen Karten erscheinen — eine davon im Embed
+    // auf FREMDEN Websites. Zusammen mit diesem Filter hiess das: entdeckte
+    // Leads werden nie angereichert und bleiben fuer immer ohne Kontaktdaten.
+    // Die ganze Kette Discovery → Anreicherung waere still gerissen.
+    //
+    // Gemessen: von 74 Leads ist KEIN EINZIGER inaktiv ausser den 10 gerade
+    // entdeckten. Der Filter schloss also genau sie aus und sonst nichts.
+    // Wofuer ein Lead noch offen ist, sagt `claim_status` — und der steht
+    // darunter.
+    .eq('claim_status', 'offen')
+    .or('email.is.null,telefon.is.null,website_url.is.null,vorname.is.null')
+    .order('erstellt_am', { ascending: true })
+    // ⚠ Tiebreaker ist Pflicht, nicht Kosmetik: alle 62 Bestandsleads tragen
+    // DENSELBEN erstellt_am (Excel-Import in einem Rutsch). Bei gleichen
+    // Sortierwerten garantiert PostgreSQL keine Reihenfolge — zwei Laeufe mit
+    // `--limit 5` trafen am 18.08. nachweislich verschiedene Leads. Ohne das
+    // ist ein Teillauf nicht reproduzierbar und ein abgebrochener Massenlauf
+    // (P6) nicht fortsetzbar.
+    .order('id', { ascending: true })
+
+  if (opts.quelle) abfrage = abfrage.eq('quelle', opts.quelle)
+
+  // ⚠ OHNE `--limit` MUSS SEITENWEISE GELESEN WERDEN. Ein einfaches `.select()`
+  // liefert höchstens 1.000 Zeilen — ohne Fehler, ohne Warnung. Der Massenlauf
+  // hätte still 1.000 statt aller Leads bearbeitet und im Bericht „1000 Leads
+  // betrachtet" als Vollzug gemeldet. Bei 7.000 Leads wären sechs Siebtel nie
+  // angefasst worden, und niemand hätte es an der Ausgabe gesehen.
+  //
+  // Mit `--limit` bleibt es beim einfachen Abruf: dort IST die Begrenzung
+  // gewollt und sichtbar.
+  let leads: Lead[]
+  if (opts.limit) {
+    const { data, error } = await abfrage.limit(opts.limit)
+    if (error) return { ok: false, error: `Leads nicht lesbar: ${error.message}` }
+    leads = (data ?? []) as Lead[]
+  } else {
+    const gelesen = await alleSeiten<Lead>((von, bis) => abfrage.range(von, bis))
+    if (!gelesen.ok) return { ok: false, error: `Leads nicht lesbar: ${gelesen.error}` }
+    leads = gelesen.zeilen
+  }
+
+  if (leads.length === 0) return { ok: true, bericht }
+
+  const robotsCache: RobotsCache = new Map()
+
+  for (const [i, lead] of (leads as Lead[]).entries()) {
+    bericht.betrachtet += 1
+    const kennung = lead.firma ?? lead.name
+
+    let befund
+    try {
+      befund = await verarbeiteLead(lead, opts.hole, robotsCache)
+    } catch (err) {
+      // Ein unerwarteter Fehler ist ein Befund, kein Abbruch.
+      const text = err instanceof Error ? err.message : String(err)
+      bericht.fehler.push({ leadId: lead.id, error: text })
+      opts.fortschritt?.(i + 1, leads.length, `${kennung}: FEHLER ${text}`)
+      continue
+    }
+
+    if (befund.grund) {
+      bericht.gruende[befund.grund] = (bericht.gruende[befund.grund] ?? 0) + 1
+      opts.fortschritt?.(i + 1, leads.length, `${kennung}: ${befund.grund}`)
+      continue
+    }
+
+    if (befund.websiteSicherheit >= 90) bericht.sicherheit.hoch += 1
+    else if (befund.websiteSicherheit >= 70) bericht.sicherheit.mittel += 1
+    else bericht.sicherheit.niedrig += 1
+    if (befund.websiteSicherheit >= 70) bericht.websiteBelastbar += 1
+
+    const res = await schreibeFunde(db, lead.id, befund.funde, opts.laufId, { dryRun })
+    if (!res.ok) {
+      bericht.fehler.push({ leadId: lead.id, error: res.error })
+      opts.fortschritt?.(i + 1, leads.length, `${kennung}: SCHREIBFEHLER ${res.error}`)
+      continue
+    }
+
+    for (const feld of res.geschrieben) {
+      bericht.jeFeld[feld] = (bericht.jeFeld[feld] ?? 0) + 1
+    }
+    opts.fortschritt?.(
+      i + 1, leads.length,
+      `${kennung}: ${befund.website} (${befund.websiteSicherheit}) -> ${res.geschrieben.join(', ') || 'nichts neu'}`,
+    )
+  }
+
+  return { ok: true, bericht }
+}

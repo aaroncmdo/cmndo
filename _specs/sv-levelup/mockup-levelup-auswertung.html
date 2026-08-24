@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SV-LevelUp — Gesamtauswertung, Maßnahmenplan und Gesprächsleitfaden</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,600;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --nacht:#0a121c; --asphalt:#111c29; --chrom:#e6ebf2;
+  --signal:#ff4d1c; --signal-tief:#e03c0f; --blau:#1668d6;
+  --flaeche:#ffffff; --flaeche-2:#f4f7fa; --flaeche-3:#e9eff5;
+  --ink:#0a121c; --text:#3c4b5d; --muted:#78899d;
+  --linie:#dfe7ef; --linie-stark:#c3cfdc;
+  --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --r:12px; --r-gross:20px;
+  --schatten:0 2px 4px rgba(10,18,28,.05), 0 14px 34px -18px rgba(10,18,28,.28);
+  --schatten-hoch:0 4px 8px rgba(10,18,28,.08), 0 30px 60px -24px rgba(10,18,28,.4);
+  --takt:cubic-bezier(.2,.8,.25,1);
+  --display:"Archivo","Archivo Narrow","Helvetica Neue Condensed",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --text-font:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,"SF Mono","Cascadia Mono","Roboto Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--text-font); font-size:16px; line-height:1.6; color:var(--text); background:var(--flaeche); -webkit-font-smoothing:antialiased}
+h1,h2,h3,.display{font-family:var(--display); font-style:italic; font-weight:800; color:var(--ink); letter-spacing:-.03em; line-height:1.02; text-transform:uppercase}
+h1{font-size:clamp(2.3rem,5.6vw,4.2rem)}
+h2{font-size:clamp(1.6rem,3.2vw,2.6rem)}
+h3{font-size:1.2rem; letter-spacing:-.02em; line-height:1.14; text-transform:none}
+h4{font-family:var(--display); font-style:italic; font-weight:700; font-size:1rem; color:var(--ink); letter-spacing:-.015em; text-transform:none}
+p{margin:0 0 1em}
+strong,b{font-weight:650; color:var(--ink)}
+.tnum{font-variant-numeric:tabular-nums}
+.huelle{max-width:1120px; margin:0 auto; padding:0 26px}
+.schmal{max-width:760px}
+.augbraue{font-family:var(--display); font-style:italic; font-weight:700; font-size:.8rem; letter-spacing:.16em; text-transform:uppercase; color:var(--signal)}
+.lead{font-size:1.14rem; line-height:1.6}
+.klein{font-size:.84rem; line-height:1.5; color:var(--muted)}
+.mini{font-size:.75rem; line-height:1.45; color:var(--muted)}
+.streifen{height:7px; background:repeating-linear-gradient(115deg, var(--signal) 0 22px, var(--signal-tief) 22px 44px, var(--nacht) 44px 62px, var(--asphalt) 62px 84px)}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:10px; font-family:var(--display); font-style:italic; font-weight:700; font-size:1rem; letter-spacing:.01em; text-transform:uppercase; padding:16px 30px; border:0; border-radius:var(--r); cursor:pointer; transition:transform .16s var(--takt), background .16s, box-shadow .16s}
+.btn:active{transform:translateY(2px)}
+.btn-haupt{background:var(--signal); color:#fff; box-shadow:0 3px 0 var(--signal-tief), 0 14px 28px -14px rgba(255,77,28,.85)}
+.btn-haupt:hover{background:var(--signal-tief)}
+.btn-hell{background:#fff; color:var(--ink); box-shadow:inset 0 0 0 2px var(--linie-stark)}
+.btn-hell:hover{box-shadow:inset 0 0 0 2px var(--ink)}
+.btn-geist{background:transparent; color:var(--muted); padding:10px 14px; font-size:.86rem}
+.btn-geist:hover{color:var(--ink)}
+.btn-breit{width:100%}
+.btn:disabled{opacity:.35; cursor:not-allowed; transform:none; box-shadow:none}
+
+.demo{position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:900; display:flex; align-items:center; gap:3px; padding:5px; background:rgba(10,18,28,.95); backdrop-filter:blur(14px); border-radius:100px; box-shadow:var(--schatten-hoch); max-width:calc(100vw - 28px); overflow-x:auto}
+.demo b{font-family:var(--display); font-style:italic; color:rgba(255,255,255,.45); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; padding:0 10px 0 13px; white-space:nowrap}
+.demo button{font-family:var(--display); font-style:italic; font-size:.75rem; font-weight:700; color:rgba(255,255,255,.7); background:transparent; border:0; padding:8px 12px; border-radius:100px; cursor:pointer; text-transform:uppercase; white-space:nowrap}
+.demo button:hover{color:#fff; background:rgba(255,255,255,.1)}
+.demo button[aria-current="true"]{background:var(--signal); color:#fff}
+
+.buehne{display:none; animation:auf .38s var(--takt)}
+.buehne[data-aktiv]{display:block}
+@keyframes auf{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion: reduce){.buehne{animation:none}}
+
+.kopf{background:var(--nacht); position:sticky; top:0; z-index:400}
+.kopf .huelle{display:flex; align-items:center; justify-content:space-between; height:68px}
+.logo{display:flex; align-items:center; gap:9px; font-family:var(--display); font-style:italic; font-weight:800; color:#fff; font-size:1.3rem; letter-spacing:-.035em; text-transform:uppercase}
+.logo .plakette{background:var(--signal); color:#fff; padding:5px 9px; border-radius:7px; font-size:.9rem; letter-spacing:-.02em; transform:skewX(-7deg)}
+.logo .plakette span{display:inline-block; transform:skewX(7deg)}
+.kopf .btn-geist{color:rgba(255,255,255,.6)}
+.kopf .btn-geist:hover{color:#fff}
+
+/* Fortschrittsleiste */
+.schritte{background:var(--nacht); border-top:1px solid rgba(255,255,255,.08)}
+.schritte .huelle{display:flex; gap:0; align-items:stretch; overflow-x:auto; scrollbar-width:none}
+.schritte .huelle::-webkit-scrollbar{display:none}
+.sr{display:flex; align-items:center; gap:9px; padding:13px 20px 13px 0; white-space:nowrap; opacity:.42}
+.sr .nr{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font:800 .72rem var(--mono); background:rgba(255,255,255,.14); color:#fff}
+.sr .tx{font-family:var(--display); font-style:italic; font-weight:700; font-size:.8rem; text-transform:uppercase; letter-spacing:.05em; color:#fff}
+.sr.aktiv{opacity:1}
+.sr.aktiv .nr{background:var(--signal)}
+.sr.fertig{opacity:.85}
+.sr.fertig .nr{background:var(--good)}
+.sr::after{content:"›"; color:rgba(255,255,255,.28); margin-left:14px; font-size:1.1rem}
+.sr:last-child::after{content:""}
+
+.hero{background:var(--nacht); color:#fff; padding:64px 0 72px; position:relative; overflow:hidden}
+.hero::before{content:""; position:absolute; inset:-40% -20% auto auto; width:60%; height:180%; background:radial-gradient(closest-side, rgba(255,77,28,.22), transparent 70%); pointer-events:none}
+.hero h1{color:#fff; position:relative}
+.hero .lead{color:rgba(255,255,255,.78); position:relative; max-width:60ch}
+.abschnitt{padding:56px 0}
+.abschnitt.grau{background:var(--flaeche-2)}
+
+/* Moduskarten */
+.modi{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:30px; position:relative}
+@media(max-width:820px){.modi{grid-template-columns:1fr}}
+.modus{background:rgba(255,255,255,.05); border:2px solid rgba(255,255,255,.14); border-radius:var(--r-gross); padding:26px 26px 22px; cursor:pointer; text-align:left; transition:all .18s var(--takt); position:relative; overflow:hidden}
+.modus:hover{border-color:rgba(255,255,255,.4); background:rgba(255,255,255,.08)}
+.modus[aria-pressed="true"]{border-color:var(--signal); background:rgba(255,77,28,.13); box-shadow:0 0 0 4px rgba(255,77,28,.15)}
+.modus .kennung{font-family:var(--display); font-style:italic; font-weight:700; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--signal)}
+.modus h3{color:#fff; margin:10px 0 8px; font-size:1.45rem; font-family:var(--display); font-style:italic; text-transform:uppercase; letter-spacing:-.02em}
+.modus p{color:rgba(255,255,255,.72); font-size:.92rem; margin:0 0 14px}
+.modus ul{list-style:none; display:flex; flex-direction:column; gap:6px}
+.modus li{color:rgba(255,255,255,.62); font-size:.82rem; display:flex; gap:8px; align-items:flex-start}
+.modus li::before{content:"—"; color:var(--signal); flex:none}
+.modus .haken{position:absolute; top:18px; right:18px; width:26px; height:26px; border-radius:50%; border:2px solid rgba(255,255,255,.25); display:grid; place-items:center; color:transparent; font-weight:800; font-size:.8rem}
+.modus[aria-pressed="true"] .haken{background:var(--signal); border-color:var(--signal); color:#fff}
+
+.feld{display:flex; gap:12px; margin-top:26px; flex-wrap:wrap}
+.feld input{flex:1 1 320px; min-width:0; border:2px solid var(--linie-stark); background:#fff; color:var(--ink); border-radius:var(--r); padding:16px 18px; font:500 1rem var(--text-font)}
+.feld input:focus{outline:0; border-color:var(--signal)}
+.hero .feld input{background:rgba(255,255,255,.96)}
+/* Prüfumfang */
+.module{display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; margin-top:26px}
+.mod{background:#fff; border:2px solid var(--linie); border-radius:var(--r-gross); padding:18px 20px; cursor:pointer; text-align:left; transition:all .16s var(--takt); position:relative; display:flex; flex-direction:column; gap:8px}
+.mod:hover{border-color:var(--linie-stark)}
+.mod[aria-pressed="true"]{border-color:var(--signal); box-shadow:0 0 0 3px rgba(255,77,28,.13)}
+.mod[data-gesperrt]{opacity:.42; cursor:not-allowed; background:var(--flaeche-2)}
+.mod[data-gesperrt]:hover{border-color:var(--linie)}
+.mod .zeile{display:flex; align-items:center; gap:11px}
+.mod .schalter{width:42px;height:24px;border-radius:100px;background:var(--linie-stark);position:relative;flex:none;transition:background .16s}
+.mod .schalter::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .18s var(--takt);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.mod[aria-pressed="true"] .schalter{background:var(--signal)}
+.mod[aria-pressed="true"] .schalter::after{transform:translateX(18px)}
+.mod h4{flex:1}
+.mod .dauer{font:700 .68rem var(--mono); color:var(--muted); background:var(--flaeche-2); padding:3px 8px; border-radius:100px; white-space:nowrap}
+.mod p{margin:0; font-size:.84rem; color:var(--text); line-height:1.5}
+.mod .liefert{font-size:.74rem; color:var(--muted); border-top:1px dashed var(--linie); padding-top:8px; margin-top:2px}
+.mod .liefert b{color:var(--ink); font-weight:650}
+.mod .warn{font:700 .68rem var(--mono); color:var(--warning); text-transform:uppercase; letter-spacing:.06em}
+.mod .neu{position:absolute; top:-9px; right:14px; background:var(--signal); color:#fff; font:800 .62rem var(--display); font-style:italic; letter-spacing:.1em; text-transform:uppercase; padding:3px 9px; border-radius:100px}
+
+.bilanz{display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-top:26px; background:var(--nacht); color:#fff; border-radius:var(--r-gross); padding:20px 24px}
+.bilanz .z{display:flex; gap:26px; flex-wrap:wrap}
+.bilanz .z div{display:flex; flex-direction:column}
+.bilanz .z span{font:700 .68rem var(--mono); letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.5)}
+.bilanz .z b{font-family:var(--display); font-style:italic; font-size:1.6rem; letter-spacing:-.03em}
+
+/* Warten */
+.pruefliste{display:flex; flex-direction:column; gap:10px; margin-top:28px; max-width:620px}
+.pz{display:flex; align-items:center; gap:13px; background:#fff; border:1px solid var(--linie); border-radius:var(--r); padding:13px 16px}
+.pz .ik{width:22px;height:22px;border-radius:50%;border:2px solid var(--linie-stark);flex:none;display:grid;place-items:center;font-size:.7rem;color:transparent}
+.pz.laeuft .ik{border-color:var(--signal); border-right-color:transparent; animation:dreh .8s linear infinite}
+.pz.fertig .ik{background:var(--good); border-color:var(--good); color:#fff}
+@keyframes dreh{to{transform:rotate(360deg)}}
+.pz .tx{flex:1; font-size:.92rem; font-weight:600; color:var(--ink)}
+.pz .st{font:700 .7rem var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.06em}
+.pz.fertig .st{color:var(--good)}
+
+/* Ergebnis */
+.kacheln{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-top:26px}
+.kachel{background:#fff; border:1px solid var(--linie); border-radius:var(--r-gross); padding:18px 20px; position:relative; overflow:hidden; box-shadow:var(--schatten)}
+.kachel .bar{position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--signal)}
+.kachel.g .bar{background:var(--good)} .kachel.b .bar{background:var(--blau)} .kachel.r .bar{background:var(--critical)}
+.kachel .lab{font-size:.78rem; color:var(--muted); font-weight:600}
+.kachel .val{font-family:var(--display); font-style:italic; font-weight:800; font-size:2.5rem; letter-spacing:-.045em; line-height:1.04; color:var(--ink); margin:6px 0 2px}
+.kachel .sub{font-size:.75rem; color:var(--muted)}
+
+.rows{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.row{display:grid;grid-template-columns:minmax(90px,200px) 1fr auto;align-items:center;gap:13px}
+.row .nm{font-size:.8rem;color:var(--muted);font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.track{height:20px;background:var(--flaeche-2);border-radius:5px;overflow:hidden}
+.fill{display:block;height:100%;border-radius:0 5px 5px 0;background:var(--linie-stark);transition:width .6s var(--takt)}
+.row.hi .fill{background:var(--signal)} .row.hi .nm{color:var(--ink)}
+.row.ok .fill{background:var(--good)} .row.gap .fill{background:var(--critical)}
+.row .vv{font:800 .82rem var(--display);font-style:italic;color:var(--ink);min-width:52px;text-align:right;font-variant-numeric:tabular-nums}
+
+.karte{background:#fff;border:1px solid var(--linie);border-radius:var(--r-gross);padding:22px 24px;box-shadow:var(--schatten)}
+.karte h3{margin-bottom:4px}
+.karte .u{font-size:.84rem;color:var(--muted);margin-bottom:16px}
+
+/* Gesperrter Bereich */
+.sperre{position:relative; margin-top:30px; border-radius:var(--r-gross); overflow:hidden; background:var(--nacht); color:#fff; padding:44px 30px; text-align:center}
+.sperre::before{content:""; position:absolute; inset:0; background:repeating-linear-gradient(115deg, rgba(255,77,28,.14) 0 26px, transparent 26px 52px); pointer-events:none}
+.sperre .schloss{width:56px;height:56px;border-radius:50%;background:var(--signal);display:grid;place-items:center;margin:0 auto 18px;font-size:1.5rem}
+.sperre h2{color:#fff; margin-bottom:10px}
+.sperre p{color:rgba(255,255,255,.75); max-width:56ch; margin:0 auto 22px}
+.sperrliste{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;max-width:860px;margin:0 auto 26px;text-align:left}
+.sperrliste div{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--r);padding:13px 15px}
+.sperrliste b{color:#fff;font-size:.9rem;display:block;margin-bottom:3px}
+.sperrliste span{color:rgba(255,255,255,.55);font-size:.78rem}
+
+/* Funnel */
+.frage{background:#fff;border:1px solid var(--linie);border-radius:var(--r-gross);padding:24px 26px;margin-bottom:14px;box-shadow:var(--schatten)}
+.frage h4{margin-bottom:14px;font-size:1.05rem}
+.wahl{display:flex;gap:10px;flex-wrap:wrap}
+.wahl button{border:2px solid var(--linie-stark);background:#fff;color:var(--text);border-radius:100px;padding:11px 20px;font:650 .88rem var(--text-font);cursor:pointer;transition:all .15s var(--takt)}
+.wahl button:hover{border-color:var(--ink);color:var(--ink)}
+.wahl button[aria-pressed="true"]{background:var(--signal);border-color:var(--signal);color:#fff}
+
+.slot{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:16px}
+.slot button{border:2px solid var(--linie-stark);background:#fff;border-radius:var(--r);padding:14px 10px;cursor:pointer;text-align:center;transition:all .15s var(--takt)}
+.slot button:hover{border-color:var(--ink)}
+.slot button[aria-pressed="true"]{border-color:var(--signal);background:rgba(255,77,28,.07)}
+.slot b{display:block;font-family:var(--display);font-style:italic;font-size:1rem;color:var(--ink)}
+.slot span{font-size:.74rem;color:var(--muted)}
+
+.merk{border-left:4px solid var(--signal);background:rgba(255,77,28,.06);border-radius:0 var(--r) var(--r) 0;padding:15px 18px;font-size:.9rem;margin-top:18px}
+.merk.gruen{border-left-color:var(--good);background:rgba(12,163,12,.07)}
+.merk.gelb{border-left-color:var(--warning);background:rgba(250,178,25,.09)}
+fuss{display:block}
+.fuss{background:var(--nacht);color:rgba(255,255,255,.55);padding:34px 0 90px;font-size:.82rem;margin-top:50px}
+.fuss b{color:#fff}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--linie-stark);background:var(--flaeche-2);padding:4px 11px;border-radius:100px;font:700 .66rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.chip.on{border-color:var(--good);background:rgba(12,163,12,.1);color:#0a7a0a}
+</style>
+<style>
+/* Ergänzungen für die Auswertungsseite */
+.umschalter{display:flex;gap:4px;background:rgba(255,255,255,.08);padding:5px;border-radius:100px}
+.umschalter button{font-family:var(--display);font-style:italic;font-weight:700;font-size:.8rem;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.65);background:transparent;border:0;padding:9px 18px;border-radius:100px;cursor:pointer;white-space:nowrap}
+.umschalter button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.umschalter button[aria-current="true"]{background:var(--signal);color:#fff}
+.modulbar{background:var(--flaeche-2);border-bottom:1px solid var(--linie);position:sticky;top:68px;z-index:300}
+.modulbar .huelle{display:flex;align-items:center;gap:10px;padding-top:12px;padding-bottom:12px;overflow-x:auto;scrollbar-width:none}
+.modulbar .huelle::-webkit-scrollbar{display:none}
+.modulbar .lb{font:700 .66rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;padding-right:4px}
+.pill{border:1.5px solid var(--linie-stark);background:#fff;color:var(--muted);border-radius:100px;padding:7px 14px;font:650 .78rem var(--text-font);cursor:pointer;white-space:nowrap;transition:all .14s var(--takt);display:flex;align-items:center;gap:7px}
+.pill:hover{border-color:var(--ink);color:var(--ink)}
+.pill[aria-pressed="true"]{background:var(--signal);border-color:var(--signal);color:#fff}
+.pill .pt{font:700 .66rem var(--mono);opacity:.7}
+.pill.alle{border-style:dashed}
+
+.saeule{display:grid;grid-template-columns:minmax(150px,230px) 1fr auto auto;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--linie)}
+.saeule:last-child{border:0}
+.saeule .nm{font-size:.88rem;font-weight:650;color:var(--ink)}
+.saeule .tr{height:22px;background:var(--flaeche-2);border-radius:5px;overflow:hidden;position:relative}
+.saeule .fl{display:block;height:100%;border-radius:0 5px 5px 0}
+.saeule .zi{position:absolute;top:0;bottom:0;width:2px;background:var(--ink);opacity:.32}
+.saeule .pv{font:800 .84rem var(--display);font-style:italic;min-width:64px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+.saeule .dl{font:800 .7rem var(--display);font-style:italic;min-width:56px;text-align:right}
+.saeule .dl.neg{color:var(--critical)} .saeule .dl.pos{color:var(--good)}
+
+.befund{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px}
+.bf{background:var(--flaeche-2);border-radius:var(--r);padding:12px 14px;border-left:3px solid var(--linie-stark)}
+.bf.rot{border-left-color:var(--critical)} .bf.gelb{border-left-color:var(--warning)} .bf.gruen{border-left-color:var(--good)}
+.bf b{display:block;font-family:var(--display);font-style:italic;font-size:1.35rem;color:var(--ink);letter-spacing:-.03em;line-height:1.1}
+.bf span{display:block;font-size:.76rem;color:var(--muted);margin-top:2px}
+.bf i{display:block;font-style:normal;font-size:.8rem;color:var(--text);margin-top:7px;padding-top:7px;border-top:1px dashed var(--linie-stark)}
+
+/* Maßnahmenplan */
+.phase{margin-bottom:30px}
+.phase > h3{display:flex;align-items:center;gap:12px;font-size:1.15rem;margin-bottom:4px}
+.phase > h3 .pnr{width:30px;height:30px;border-radius:8px;background:var(--signal);color:#fff;display:grid;place-items:center;font:800 .82rem var(--display);font-style:italic;flex:none}
+.phase.p2 > h3 .pnr{background:var(--nacht)} .phase.p3 > h3 .pnr{background:var(--good)}
+.phase .pu{font-size:.84rem;color:var(--muted);margin:0 0 14px 42px}
+.mliste{display:flex;flex-direction:column;gap:10px}
+.mp{display:grid;grid-template-columns:34px 1fr 150px;gap:14px;align-items:start;background:#fff;border:1px solid var(--linie);border-left:4px solid var(--signal);border-radius:var(--r);padding:15px 17px;box-shadow:var(--schatten)}
+.phase.p2 .mp{border-left-color:var(--nacht)} .phase.p3 .mp{border-left-color:var(--good)}
+@media(max-width:760px){.mp{grid-template-columns:30px 1fr}.mp .mt{grid-column:1/-1;flex-direction:row!important;align-items:center!important}}
+.mp .mn{font:800 1.15rem var(--display);font-style:italic;color:var(--linie-stark)}
+.mp h4{margin:0 0 4px}
+.mp p{margin:0;font-size:.85rem;color:var(--text);line-height:1.55}
+.mp .quelle{display:inline-block;margin-top:8px;font:700 .64rem var(--mono);letter-spacing:.05em;text-transform:uppercase;background:var(--flaeche-2);color:var(--muted);padding:3px 8px;border-radius:100px}
+.mp .mt{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.mp .mt b{font:800 .64rem var(--display);font-style:italic;letter-spacing:.06em;text-transform:uppercase;padding:5px 10px;border-radius:100px;background:var(--flaeche-2);color:var(--muted);white-space:nowrap}
+.mp .mt b.hoch{background:var(--signal);color:#fff}
+.mp .mt b.pkt{background:rgba(12,163,12,.13);color:#0a7a0a}
+
+.summe{display:flex;gap:26px;flex-wrap:wrap;background:var(--nacht);color:#fff;border-radius:var(--r-gross);padding:22px 26px;margin-bottom:26px;align-items:center;justify-content:space-between}
+.summe .z{display:flex;gap:28px;flex-wrap:wrap}
+.summe .z div{display:flex;flex-direction:column}
+.summe .z span{font:700 .66rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.summe .z b{font-family:var(--display);font-style:italic;font-size:1.7rem;letter-spacing:-.03em;color:#fff}
+.summe .z b em{font-style:italic;font-size:.9rem;opacity:.55;font-weight:600}
+
+/* Gesprächsleitfaden */
+.minplan{display:flex;flex-direction:column;gap:2px;margin-top:20px}
+.mz{display:grid;grid-template-columns:96px 1fr;gap:16px;align-items:start;padding:14px 0;border-bottom:1px solid var(--linie)}
+.mz .tt{font:800 .82rem var(--display);font-style:italic;color:var(--signal);letter-spacing:.04em;padding-top:2px}
+.mz h4{margin:0 0 4px}
+.mz p{margin:0;font-size:.87rem;color:var(--text);line-height:1.6}
+.mz .sag{background:var(--flaeche-2);border-left:3px solid var(--signal);border-radius:0 var(--r) var(--r) 0;padding:11px 14px;margin-top:9px;font-size:.87rem;color:var(--ink);font-style:italic}
+.mz .sag::before{content:"„"} .mz .sag::after{content:"“"}
+
+.baustein{background:#fff;border:1px solid var(--linie);border-radius:var(--r-gross);padding:20px 22px;box-shadow:var(--schatten);margin-bottom:12px}
+.baustein .kopfz{display:flex;align-items:center;gap:11px;margin-bottom:12px;flex-wrap:wrap}
+.baustein .kopfz h4{flex:1;font-size:1.05rem}
+.baustein .zahl{font:800 1.5rem var(--display);font-style:italic;color:var(--signal);letter-spacing:-.03em}
+.gz{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.gz{grid-template-columns:1fr}}
+.gz > div{background:var(--flaeche-2);border-radius:var(--r);padding:13px 15px}
+.gz h5{font:800 .66rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.gz p{margin:0;font-size:.85rem;line-height:1.55}
+.einwand{border-left:3px solid var(--warning);background:rgba(250,178,25,.08);border-radius:0 var(--r) var(--r) 0;padding:12px 15px;margin-top:12px;font-size:.85rem}
+.einwand b{display:block;margin-bottom:4px}
+.karten3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:16px}
+.leer{background:var(--flaeche-2);border:2px dashed var(--linie-stark);border-radius:var(--r-gross);padding:34px 26px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+
+
+<header class="kopf"><div class="huelle">
+  <div class="logo">SV<span class="plakette"><span>Level</span></span>Up</div>
+  <div class="umschalter">
+    <button data-v="auswertung" aria-current="true" onclick="zeigeV('auswertung')">Gesamtauswertung</button>
+    <button data-v="plan" onclick="zeigeV('plan')">Maßnahmenplan</button>
+    <button data-v="gespraech" onclick="zeigeV('gespraech')">Verkaufsgespräch</button>
+  </div>
+</div></header>
+<div class="streifen"></div>
+
+<div class="modulbar"><div class="huelle" id="modulbar">
+  <span class="lb">Geprüfte Module</span>
+</div></div>
+
+<!-- ══════ GESAMTAUSWERTUNG ══════ -->
+<section class="buehne" id="auswertung" data-aktiv>
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Gesamtauswertung · Sachverständigenbüro Musterwerk · Münster · 12.08.2026</div>
+    <h2 style="margin:10px 0 12px">Was gemessen wurde und was daraus folgt</h2>
+    <p class="lead schmal">Oben schalten Sie einzelne Module ab. Auswertung, Maßnahmenplan und
+    Gesprächsleitfaden richten sich danach — abgeschaltete Module tauchen nirgends mehr auf.</p>
+
+    <div class="kacheln" id="awKacheln"></div>
+
+    <div class="karte" style="margin-top:20px" id="awSaeulen">
+      <h3>Die sieben Säulen</h3>
+      <div class="u">Ihr Punktwert je Säule gegen den Zielwert. Der senkrechte Strich ist der Zielwert.</div>
+      <div id="saeulenListe"></div>
+    </div>
+
+    <div id="awBloecke" style="display:flex;flex-direction:column;gap:14px;margin-top:14px"></div>
+
+    <div class="merk gelb" style="margin-top:20px"><b>Wo Zahlen fehlen:</b>
+    <span id="awFehlt"></span></div>
+  </div></div>
+</section>
+
+<!-- ══════ MASSNAHMENPLAN ══════ -->
+<section class="buehne" id="plan">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Maßnahmenplan · aus den geprüften Modulen abgeleitet</div>
+    <h2 style="margin:10px 0 12px">Was zu tun ist — in der Reihenfolge der Wirkung</h2>
+    <p class="lead schmal">Jede Maßnahme stammt aus einem gemessenen Befund. Die Herkunft steht
+    darunter. Was nicht gemessen wurde, erzeugt auch keine Maßnahme.</p>
+
+    <div class="summe" style="margin-top:22px">
+      <div class="z">
+        <div><span>Maßnahmen</span><b id="sMass">0</b></div>
+        <div><span>Punkte erreichbar</span><b id="sPunkte">0 <em>von 100</em></b></div>
+        <div><span>Aufwand gesamt</span><b id="sAufwand">0 h</b></div>
+        <div><span>Zeitraum</span><b id="sZeit">—</b></div>
+      </div>
+      <button class="btn btn-haupt" onclick="zeigeV('gespraech')">Ins Gespräch übernehmen</button>
+    </div>
+
+    <div id="planPhasen"></div>
+
+    <div class="merk"><b>Reihenfolge ist nicht beliebig.</b> Phase 1 schafft die Grundlage — ohne
+    Unternehmensprofil bringt die beste Seite keine Anrufe, ohne Messung ist jede spätere
+    Entscheidung geraten. Rechtliche Angaben sind Hinweise, keine Rechtsberatung.</div>
+  </div></div>
+</section>
+<!-- ══════ VERKAUFSGESPRÄCH ══════ -->
+<section class="buehne" id="gespraech">
+  <div class="abschnitt"><div class="huelle">
+    <div class="augbraue">Citation-Call · Leitfaden · 30 Minuten</div>
+    <h2 style="margin:10px 0 12px">Der Gesprächsleitfaden</h2>
+    <p class="lead schmal">Aufgebaut auf genau dem Maßnahmenplan, der links steht. Jede Zahl, die
+    Sie sagen, ist gemessen — und Sie können sagen, woher sie kommt. Das ist der ganze Unterschied
+    zu einem Verkaufsgespräch.</p>
+
+    <div class="karten3">
+      <div class="kachel"><div class="bar"></div><div class="lab">Dauer</div>
+        <div class="val">30<span style="font-size:.42em;font-weight:600;color:var(--muted)"> min</span></div>
+        <div class="sub">plus 10 Minuten Puffer</div></div>
+      <div class="kachel g"><div class="bar"></div><div class="lab">Ziel des Gesprächs</div>
+        <div class="val">1</div><div class="sub">Entscheidung über Phase 1 — nicht mehr</div></div>
+      <div class="kachel b"><div class="bar"></div><div class="lab">Zahlen im Gespräch</div>
+        <div class="val" id="gZahlen">0</div><div class="sub">alle mit Quelle und Datum</div></div>
+    </div>
+
+    <div class="karte" style="margin-top:20px">
+      <h3>Der Minutenplan</h3>
+      <div class="u">Wer die Reihenfolge einhält, muss nicht überzeugen — die Zahlen tun es.</div>
+      <div class="minplan">
+        <div class="mz"><div class="tt">0 – 3 min</div><div>
+          <h4>Ankommen und Rahmen setzen</h4>
+          <p>Kein Smalltalk über das Wetter. Sagen Sie, was gleich passiert und wie lange es dauert.
+          Der Sachverständige soll wissen, dass er nichts kaufen muss.</p>
+          <div class="sag">Ich habe Ihr Umfeld gemessen — <b id="gModZahl">sieben</b> Module, alles öffentlich
+          zugängliche Daten. Ich gehe die drei wichtigsten Zahlen mit Ihnen durch, dann sage ich Ihnen,
+          was ich an Ihrer Stelle zuerst machen würde. Dreißig Minuten. Am Ende bekommen Sie den Plan als
+          PDF, egal wie Sie sich entscheiden.</div>
+        </div></div>
+        <div class="mz"><div class="tt">3 – 8 min</div><div>
+          <h4>Die Lage — ohne Wertung</h4>
+          <p>Erst das Feld, dann seine Position. Nie umgekehrt: Wer mit „Sie sind auf Platz 38"
+          anfängt, bekommt sofort eine Rechtfertigung statt eines Gesprächs.</p>
+          <div class="sag" id="gLage"></div>
+        </div></div>
+        <div class="mz"><div class="tt">8 – 18 min</div><div>
+          <h4>Die drei Zahlen, die zählen</h4>
+          <p>Nicht alle Befunde. Drei. Nach jeder Zahl eine Frage stellen und die Antwort abwarten —
+          das ist der Teil, in dem Sie erfahren, was er wirklich braucht.</p>
+          <div id="gBausteine" style="margin-top:14px"></div>
+        </div></div>
+        <div class="mz"><div class="tt">18 – 25 min</div><div>
+          <h4>Der Plan — nur Phase 1</h4>
+          <p>Zeigen Sie nicht alle Maßnahmen. Zeigen Sie die erste Phase und sagen Sie, was sie
+          bringt und was sie kostet. Der Rest kommt im PDF.</p>
+          <div id="gPhase1" style="margin-top:12px"></div>
+        </div></div>
+        <div class="mz"><div class="tt">25 – 30 min</div><div>
+          <h4>Die Entscheidung</h4>
+          <p>Eine Frage, kein Angebotspaket. Wer nein sagt, bekommt trotzdem den Plan — und ruft in
+          vier Monaten von selbst an, wenn die Zahlen sich nicht bewegt haben.</p>
+          <div class="sag">Sie haben jetzt zwei Wege. Entweder Sie machen Phase 1 selbst — der Plan
+          reicht dafür, alles steht drin. Oder wir machen sie zusammen, dann sind Sie in
+          <b id="gDauerP1">vier Wochen</b> durch statt in drei Monaten. Was ist Ihnen lieber?</div>
+          <div class="einwand"><b>Wenn er zögert:</b> Nicht nachlegen. Fragen Sie: „Was müsste passieren,
+          damit es sich für Sie lohnt?" — die Antwort ist entweder ein echter Einwand, den Sie ausräumen
+          können, oder ein Nein, das Sie akzeptieren.</div>
+        </div></div>
+      </div>
+    </div>
+
+    <div class="karte" style="margin-top:16px">
+      <h3>Einwände, die kommen werden</h3>
+      <div class="u">Jede Antwort steht auf einer gemessenen Zahl aus diesem Befund — nicht auf einer Meinung.</div>
+      <div id="gEinwaende" style="margin-top:6px"></div>
+    </div>
+
+    <div class="karte" style="margin-top:16px">
+      <h3>Was Sie im Gespräch NICHT sagen</h3>
+      <div class="u">Drei Sätze, die aus einem belegten Befund ein Verkaufsgespräch machen.</div>
+      <div class="gz" style="margin-top:12px">
+        <div><h5>Nicht sagen</h5><p>„Das bringt Ihnen X Aufträge im Monat."</p></div>
+        <div><h5>Warum nicht</h5><p>Nicht messbar. Die Annahmekette von Sichtbarkeit zu Auftrag ist zu
+        lang, und beim ersten ausbleibenden Auftrag ist das Vertrauen weg. Bei Anfragen aufhören.</p></div>
+        <div><h5>Nicht sagen</h5><p>„Ihre Konkurrenz macht das alles schon."</p></div>
+        <div><h5>Warum nicht</h5><p>Stimmt nachweislich nicht — 27 von 42 Büros im Umkreis messen
+        gar nichts, ein einziges schreibt über § 249. Die Wahrheit ist das bessere Argument.</p></div>
+        <div><h5>Nicht sagen</h5><p>„Wir garantieren Platz 1 bei Google."</p></div>
+        <div><h5>Warum nicht</h5><p>Niemand kann das. Sie können sagen: „Diese Zahl liegt heute bei 16,
+        das obere Viertel beginnt bei 43" — das ist überprüfbar und wirkt stärker.</p></div>
+      </div>
+    </div>
+
+    <div class="karte" style="margin-top:16px">
+      <h3>Nach dem Gespräch — dieselbe Stunde noch</h3>
+      <div class="u">Was in den nächsten sechzig Minuten passiert, entscheidet mehr als das Gespräch selbst.</div>
+      <ol style="margin:10px 0 0 20px;font-size:.9rem;line-height:1.9;color:var(--text)">
+        <li><b>Plan als PDF senden</b> — unverändert, mit Erhebungsdatum und Quellenverzeichnis.</li>
+        <li><b>Eine Zahl aus dem Gespräch aufgreifen</b> — die, bei der er am längsten geschwiegen hat.</li>
+        <li><b>Nächsten Messtermin setzen</b> — in 30 Tagen dieselbe Messung, dann sieht er die Bewegung.</li>
+        <li><b>Bei Nein: Wiedervorlage in 90 Tagen</b> — mit der Frage, ob sich die Zahl bewegt hat.</li>
+      </ol>
+      <div class="merk gruen" style="margin-top:14px"><b>Der stärkste Nachfassgrund überhaupt:</b>
+      Die Messung wiederholen und die Veränderung schicken. Wer nichts getan hat, sieht das schwarz auf
+      weiß — und das ist überzeugender als jedes Argument im Erstgespräch.</div>
+    </div>
+  </div></div>
+</section>
+
+<div class="fuss"><div class="huelle">
+  <b>SV-LevelUp · Entwurf</b> — Beispielwerte aus der Münsterland-Erhebung vom 12. August 2026.
+  Jede Zahl im Gespräch trägt Quelle und Datum. Rechtliche Angaben sind Hinweise, keine Rechtsberatung.
+</div></div>
+<script>
+/* ═══════════ Datenmodell — Beispielbefund Münsterland ═══════════ */
+const M = [
+{id:'gbp', kurz:'Unternehmensprofil', pt:20, ist:11, saeule:'Google-Unternehmensprofil',
+ befunde:[{w:'11 / 20',l:'Profilstärke',a:'gelb',i:'Kategorie steht auf „Ingenieurbüro“ statt „Gutachter“ — unter dieser Kategorie erscheinen die sichtbaren Büros des Gebiets.'},
+          {w:'4',l:'Fotos im Profil',a:'rot',i:'Die zehn stärksten Büros im Umkreis haben im Schnitt über 20.'},
+          {w:'24',l:'Bewertungen',a:'gelb',i:'Median im Gebiet 11, oberes Viertel ab 43.'}],
+ mass:[{t:'Kategorie auf „Gutachter“ umstellen',w:'Alle sichtbaren Büros des Gebiets stehen unter dieser Kategorie. Nebenkategorien für Wertgutachten und Leasingrückgabe ergänzen.',a:'30 min',wi:'hoch',p:4,q:'Modul Unternehmensprofil · Kategorieabgleich',ph:1},
+       {t:'20 Fotos hochladen',w:'Fahrzeuge in Begutachtung, Messgeräte, Person, Büro von außen. Profile mit Bildern werden häufiger angetippt.',a:'2 h',wi:'hoch',p:3,q:'Modul Unternehmensprofil · Bildzähler',ph:1},
+       {t:'Servicegebiet statt reiner Adresse',w:'Die zwölf Orte mit belegter Nachfrage eintragen — so erscheint das Profil auch dort in der Kartensuche.',a:'20 min',wi:'mittel',p:2,q:'Modul Unternehmensprofil + Keyword-Planer',ph:1},
+       {t:'Bewertungsprozess einrichten',w:'QR-Code auf der Gutachtenmappe, feste Formulierung bei der Übergabe. Zwei bis drei pro Woche. Kein Kauf — das ist wettbewerbswidrig und kostet im Zweifel das Profil.',a:'2 h',wi:'hoch',p:0,q:'Modul Unternehmensprofil · Bewertungszähler',ph:1}],
+ g:{zahl:'24',lab:'Bewertungen',sag:'Sie stehen bei 24 Bewertungen. Der Median im 50-km-Umkreis liegt bei 11 — Sie sind also in der oberen Hälfte. Das obere Viertel beginnt aber bei 43, und die beiden KÜS-Prüfstellen in Münster stehen bei 191 und 188.',frage:'Wie kommen bei Ihnen heute Bewertungen zustande — fragen Sie aktiv danach?',ein:'„Meine Kunden bewerten nicht." — Doch, aber nur wenn man fragt. Im Gebiet gibt es 21 Büros mit null Bewertungen und eines mit 374. Der Unterschied ist nicht die Kundschaft, sondern der Prozess.'}},
+
+{id:'web', kurz:'Website & Recht', pt:12, ist:7, saeule:'Technik & Ladezeit',
+ befunde:[{w:'7 / 10',l:'Aufbau-Index',a:'gelb',i:'Feld-Median 7, Bestwert im Feld 9 — erreicht von 2 der 42 gemessenen Büros.'},
+          {w:'2,4 s',l:'Ladezeit',a:'gelb',i:'Feld-Median 1,9 s. Neun Seiten im Feld brauchen über 3 s.'},
+          {w:'fehlt',l:'LocalBusiness-Daten',a:'rot',i:'Nur 11 von 42 Büros haben sie — hier entsteht Vorsprung ohne Gegenwehr.'}],
+ mass:[{t:'LocalBusiness-Auszeichnung einbauen',w:'JSON-LD mit Name, Adresse, Telefon, Öffnungszeiten, Servicegebiet. Drei Viertel des Feldes hat sie nicht.',a:'1 h',wi:'hoch',p:3,q:'Modul Website · Auszeichnungsprüfung',ph:1},
+       {t:'Ladezeit unter 1,5 s bringen',w:'Bilder in modernem Format, Schriften lokal einbinden, unnötige Skripte entfernen.',a:'3 h',wi:'mittel',p:2,q:'Modul Website · Zeitmessung',ph:2},
+       {t:'Telefonnummer als Klick-Link',w:'Nach einem Unfall wird vom Handy aus angerufen, nicht abgetippt. Neun von 42 Seiten im Feld haben das nicht.',a:'15 min',wi:'hoch',p:1,q:'Modul Website · Kontaktwege',ph:1}],
+ g:{zahl:'7/10',lab:'Aufbau-Index',sag:'Ihre Seite kommt auf 7 von 10 prüfbaren Merkmalen. Der Median im Umkreis ist auch 7 — Sie sind also Durchschnitt. Der beste Wert im ganzen Gebiet ist 9, und den erreichen zwei Büros von 42.',frage:'Wer betreut Ihre Seite heute — und wie schnell bekommen Sie eine Änderung durch?',ein:'„Meine Seite ist doch neu." — Neu heißt nicht vollständig. Drei der zehn Merkmale kosten zusammen keine zwei Stunden.'}},
+
+{id:'seo', kurz:'SEO & Inhalte', pt:12, ist:4, saeule:'SEO — On-Page & Keywords',
+ befunde:[{w:'5 von 10',l:'Begriffe ohne Seite',a:'rot',i:'Für fünf Ihrer zehn wichtigsten Suchbegriffe gibt es keine Seite. Kein Ranking ohne Ziel.'},
+          {w:'610',l:'Wörter Startseite',a:'rot',i:'Feld-Median 730. Nur 6 von 42 Seiten erreichen 1.500.'},
+          {w:'4',l:'interne Links',a:'rot',i:'Feld-Median 4,5 — 20 Seiten im Feld haben höchstens 3.'}],
+ mass:[{t:'Zwölf Ortsseiten schreiben',w:'Nur die Orte mit belegter Nachfrage: Münster, Greven, Warendorf, Coesfeld, Dülmen, Steinfurt, Rheine, Emsdetten, Senden, Nottuln, Ostbevern, Lüdinghausen. Nicht Telgte, Sendenhorst, Drensteinfurt, Everswinkel, Havixbeck, Altenberge — dort ist keine Nachfrage messbar.',a:'1 Tag je 4',wi:'hoch',p:5,q:'Modul SEO + Google Keyword-Planer',ph:2},
+       {t:'Startseite auf 1.500 Wörter',w:'Ablauf der Begutachtung, Kosten, Rechtslage, Gebiet. Nur sechs von 42 Büros im Umkreis schaffen das.',a:'4 h',wi:'mittel',p:2,q:'Modul SEO · Textumfang',ph:2},
+       {t:'Interne Verlinkung auf 25 Links',w:'Jede Ortsseite verlinkt auf die Leistungsseiten und umgekehrt.',a:'3 h',wi:'mittel',p:1,q:'Modul SEO · Linkzähler',ph:2}],
+ g:{zahl:'5',lab:'Begriffe ohne Seite',sag:'Für fünf Ihrer zehn wichtigsten Suchbegriffe gibt es auf Ihrer Seite keine passende Unterseite. Das ist keine Ranking-Frage — Google kann nichts anzeigen, was nicht existiert.',frage:'Wenn jemand „Kfz-Gutachter Greven" tippt: Welche Ihrer Seiten soll er finden?',ein:'„Ich bin doch für Münster da." — Sind Sie. Aber 11 der 12 Orte im Umkreis werden einzeln gesucht, und zwar mit Ortsnamen.'}},
+
+{id:'ux', kurz:'Nutzererlebnis', pt:12, ist:6, saeule:'Nutzererlebnis',
+ befunde:[{w:'nein',l:'Terminbuchung',a:'rot',i:'4 von 42 Büros im Umkreis haben eine.'},
+          {w:'nein',l:'WhatsApp',a:'gelb',i:'11 von 42 Büros bieten ihn an.'},
+          {w:'ja',l:'Telefon als Klick',a:'gruen',i:'33 von 42 Büros haben ihn.'}],
+ mass:[{t:'Online-Terminbuchung einbinden',w:'Nach einem Unfall zählt die erste Stunde. Wer sofort einen Termin sieht, ruft nicht drei weitere Büros an. Nur 4 von 42 Büros im Umkreis haben das.',a:'3 h',wi:'hoch',p:3,q:'Modul Nutzererlebnis · Buchungswerkzeug',ph:2},
+       {t:'WhatsApp-Kanal einrichten',w:'Fotos vom Schaden kommen per WhatsApp schneller als per E-Mail. 11 von 42 Büros nutzen das bereits.',a:'1 h',wi:'mittel',p:2,q:'Modul Nutzererlebnis · Kontaktwege',ph:2}],
+ g:{zahl:'4 von 42',lab:'mit Terminbuchung',sag:'Vier von 42 Büros im Umkreis haben eine Online-Terminbuchung. Nach einem Unfall entscheidet die erste Stunde — wer sofort einen Termin sieht, ruft nicht drei weitere Büros an.',frage:'Wie viele Anrufe bekommen Sie abends nach 18 Uhr — und was passiert dann?',ein:'„Ich will lieber persönlich telefonieren." — Das bleibt ja. Die Buchung fängt nur die ab, die um 21 Uhr auf dem Standstreifen stehen.'}},
+
+{id:'wett', kurz:'Wettbewerb 50 km', pt:16, ist:9, saeule:'Auffindbarkeit & Wettbewerbsposition',
+ befunde:[{w:'154',l:'Büros im Radius',a:'gelb',i:'Google Maps, zwölf Kartenausschnitte, 12.08.2026.'},
+          {w:'11',l:'Median je Büro',a:'gruen',i:'Die Hälfte des Feldes hat 11 Bewertungen oder weniger.'},
+          {w:'38.',l:'Ihre Position',a:'gelb',i:'von 154 — mit 24 Bewertungen.'}],
+ mass:[{t:'Auf 45 Bewertungen in sechs Monaten',w:'Das obere Viertel des Gebiets beginnt bei 43. Bei zwei Bewertungen pro Woche ist das in 11 Wochen erreicht.',a:'laufend',wi:'hoch',p:4,q:'Modul Wettbewerb · Verteilung im Radius',ph:2},
+       {t:'Monatlicher Wettbewerbsabgleich',w:'Dieselbe Messung einmal im Monat: die neun Nahbereichs-Büros, Anzeigenstatus, eigene Position. Der Wert entsteht im Vergleich über die Zeit.',a:'30 min/Monat',wi:'mittel',p:0,q:'Modul Wettbewerb · Wiederholmessung',ph:3}],
+ g:{zahl:'38.',lab:'von 154',sag:'Im 50-km-Umkreis sitzen 154 Sachverständigenbüros. Sie stehen auf Platz 38. Klingt viel — aber die Hälfte des Feldes hat 11 Bewertungen oder weniger, und 21 Büros haben gar keine. Die Konkurrenz, die wirklich zählt, sind rund zwanzig Adressen.',frage:'Welche drei Büros in Ihrer Nähe sehen Sie als Ihre eigentliche Konkurrenz?',ein:'„154 — da komme ich doch nie durch." — Doch. Der Marktführer in Münster steht bei 191, in Bielefeld bei 889. Ihr Gebiet ist der leichteste von sieben gemessenen Märkten.'}},
+
+{id:'verz', kurz:'Verzeichnisse', pt:12, ist:3, saeule:'Branchenverzeichnisse & NAP',
+ befunde:[{w:'2 von 9',l:'Einträge vorhanden',a:'rot',i:'Neun Verzeichnisse sind abfragbar, in zweien stehen Sie.'},
+          {w:'2',l:'abweichende Schreibweisen',a:'rot',i:'Name und Telefonnummer stimmen nicht überall zeichengleich.'},
+          {w:'3',l:'gesperrt',a:'gelb',i:'wlw, Trustpilot, BVSK per robots.txt — steht als „nicht geprüft“, nicht als „nicht vorhanden“.'}],
+ mass:[{t:'Sieben fehlende Einträge anlegen',w:'Gelbe Seiten, Das Örtliche, GoLocal, meinestadt.de, werkenntdenBESTEN, Yelp, die-kfzgutachter.de. Aus den 53 sichtbarsten Büros des Gebiets stehen nur neun überhaupt in einem der drei abgefragten Verzeichnisse.',a:'3 h',wi:'hoch',p:5,q:'Modul Verzeichnisse · Abgleich 15 Verzeichnisse',ph:1},
+       {t:'Schreibweisen vereinheitlichen',w:'Name, Adresse und Telefonnummer überall zeichengleich — abweichende Schreibweisen schwächen das Profil messbar.',a:'1 h',wi:'mittel',p:4,q:'Modul Verzeichnisse · NAP-Abgleich',ph:1}],
+ g:{zahl:'2 von 9',lab:'Verzeichnisse',sag:'Von neun abfragbaren Branchenverzeichnissen stehen Sie in zweien. Das ist kein Nachteil gegenüber dem Feld — von den 53 sichtbarsten Büros im Gebiet stehen nur neun überhaupt irgendwo. Es ist eine offene Tür.',frage:'Haben Sie diese Einträge selbst angelegt oder sind die irgendwann von allein entstanden?',ein:'„Bringt das überhaupt was?" — Einzeln wenig, zusammen viel: gleiche Angaben an neun Stellen sind ein Vertrauenssignal, das Google auswertet. Kostet drei Stunden, einmalig.'}},
+
+{id:'kwg', kurz:'Google Keyword-Planer', pt:14, ist:5, saeule:'SEO — On-Page & Keywords', neu:true,
+ befunde:[{w:'20 km',l:'Messradius',a:'gruen',i:'Standort des Büros plus 20 km — nicht die 50 km des Wettbewerbsradius. Wer sucht, sucht in der Nähe.'},
+          {w:'Konto fehlt',l:'Keyword-Planer',a:'rot',i:'Absolute Volumina brauchen ein aktives Google-Ads-Konto. Bis dahin stehen hier keine Zahlen — nur die Begriffe.'},
+          {w:'—',l:'CPC im Gebiet',a:'rot',i:'Nicht erhoben. Kommt mit dem Konto.'}],
+ mass:[{t:'Google-Ads-Konto anlegen — für den Keyword-Planer',w:'Der erste Nutzen des Kontos ist nicht die Anzeige, sondern die Zahl: Suchvolumen, Klickpreis und Wettbewerbsdruck für „Kfz Gutachter + Ort" im 20-km-Umkreis. Ohne Konto liefert der Planer keine absoluten Werte.',a:'2 h',wi:'hoch',p:6,q:'Modul Keyword-Planer · Zugangsprüfung',ph:1},
+       {t:'Standard-Keywords lokal erheben',w:'Für jeden der zwölf Orte im 20-km-Radius: „kfz gutachter <Ort>", „kfz sachverständiger <Ort>", „unfallgutachten <Ort>", „kfz gutachten <Ort>". Mit Volumen, Klickpreis und Wettbewerb — das ist die Grundlage für Ortsseiten und Kampagnenstruktur.',a:'2 h',wi:'hoch',p:5,q:'Modul Keyword-Planer · Ortsraster 20 km',ph:1},
+       {t:'Suchvolumen quartalsweise nachziehen',w:'Die Nachfrage schwankt übers Jahr um rund zwei Drittel — Index 90 im September, 54 Mitte Oktober (Google Trends, NRW).',a:'30 min/Quartal',wi:'mittel',p:0,q:'Modul Keyword-Planer + Google Trends',ph:3}],
+ g:{zahl:'20 km',lab:'Messradius',sag:'Die Keyword-Recherche läuft bewusst auf Ihren Standort plus 20 Kilometer — nicht auf die 50 Kilometer des Wettbewerbsradius. Wer nach einem Unfall sucht, sucht in der Nähe. Für die absoluten Zahlen brauche ich allerdings ein Google-Ads-Konto.',frage:'Haben Sie schon ein Ads-Konto — auch ein schlafendes reicht für den Keyword-Planer.',ein:'„Ich will keine Anzeigen schalten." — Müssen Sie auch nicht. Das Konto kostet nichts, solange keine Kampagne läuft. Es ist der einzige Weg zu echten Suchvolumen.'}},
+
+{id:'kwm', kurz:'Meta-Reichweite', pt:8, ist:2, saeule:'Auffindbarkeit & Wettbewerbsposition', neu:true,
+ befunde:[{w:'20 km',l:'Zielgebiet',a:'gruen',i:'Gleicher Radius wie bei Google — Standort plus 20 km.'},
+          {w:'Konto fehlt',l:'Meta Business',a:'rot',i:'Reichweitenschätzung und Interessen brauchen ein Meta-Business-Konto.'},
+          {w:'—',l:'Zielgruppengröße',a:'rot',i:'Nicht erhoben.'}],
+ mass:[{t:'Meta-Business-Konto anlegen',w:'Liefert die Reichweitenschätzung für den 20-km-Radius und die Interessen, über die sich Autofahrer nach einem Unfall ansprechen lassen. Andere Logik als Google: dort sucht jemand aktiv, hier wird er unterbrochen.',a:'1 h',wi:'mittel',p:4,q:'Modul Meta-Reichweite · Zugangsprüfung',ph:2},
+       {t:'Zielgruppen im 20-km-Radius schneiden',w:'Fahrzeughalter, Pendler, Interesse an Kfz-Versicherung und Autohäusern. Wichtig: Meta ersetzt die Suche nicht, es ergänzt sie — für Bekanntheit im Gebiet, nicht für die akute Anfrage.',a:'2 h',wi:'mittel',p:3,q:'Modul Meta-Reichweite · Zielgruppenschnitt',ph:2},
+       {t:'Google und Meta getrennt auswerten',w:'Zwei Kanäle, zwei Absichten, zwei Kennzahlenreihen. Google: Kosten je Anfrage. Meta: Kosten je erreichter Person im Gebiet. Wer beide Zahlen vermischt, steuert falsch.',a:'1 h',wi:'mittel',p:1,q:'Modul Meta + Google Keyword-Planer',ph:3}],
+ g:{zahl:'2 Kanäle',lab:'getrennt gerechnet',sag:'Wir trennen die Recherche bewusst nach Google und Meta. Bei Google sucht jemand aktiv nach einem Gutachter — bei Meta unterbrechen wir ihn. Zwei völlig verschiedene Absichten, deshalb auch zwei getrennte Kennzahlenreihen.',frage:'Läuft bei Ihnen heute irgendetwas auf Facebook oder Instagram?',ein:'„Meine Kundschaft ist nicht auf Instagram." — Für die akute Anfrage stimmt das. Meta baut Bekanntheit im Gebiet auf, damit man beim nächsten Unfall an Sie denkt — das ist ein anderer Zweck.'}},
+
+{id:'nach', kurz:'Longtail-Recherche', pt:8, ist:6, saeule:'SEO — On-Page & Keywords',
+ befunde:[{w:'1.021',l:'Suchanfragen erhoben',a:'gruen',i:'Google-Autocomplete, 174 Abfragen — ergänzt den Keyword-Planer um die Formulierungen.'},
+          {w:'151 / 150',l:'Wertminderung / Nutzungsausfall',a:'gelb',i:'Die zwei größten Themenfelder — im Umkreis behandelt sie niemand ausführlich.'},
+          {w:'1 von 42',l:'§ 249 BGB',a:'rot',i:'Genau eine Startseite im Umkreis erwähnt ihn.'}],
+ mass:[{t:'Vier Ratgeber schreiben',w:'§ 249 BGB, Wertminderung, Nutzungsausfall, Bagatellgrenze — in dieser Reihenfolge nach gemessener Nachfrage. Mit FAQ-Auszeichnung; die haben 3 von 42 Büros.',a:'2 Tage',wi:'hoch',p:4,q:'Modul Longtail · Themenernte',ph:2}],
+ g:{zahl:'1 von 42',lab:'zu § 249 BGB',sag:'Genau eine von 42 Websites im Umkreis erwähnt § 249 BGB — den Paragrafen, der Ihrem Kunden das Recht auf einen eigenen Gutachter gibt. Gleichzeitig sind das die häufigsten Suchanfragen: wer zahlt, darf ich selbst wählen, zahlt die Gegenseite.',frage:'Wie oft erklären Sie das am Telefon — und wie lange dauert das jedes Mal?',ein:'„Das steht doch überall im Netz." — Eben nicht. Im ganzen Umkreis hat es ein einziges Büro auf der Startseite.'}},
+
+{id:'ads', kurz:'Anzeigen', pt:10, ist:0, saeule:'Auffindbarkeit & Wettbewerbsposition',
+ befunde:[{w:'0',l:'Ihre Anzeigen',a:'rot',i:'Keine im Transparenzcenter gelistet.'},
+          {w:'6 von 19',l:'werbende Domains',a:'gelb',i:'Im gesamten geprüften Feld.'},
+          {w:'1',l:'im Nahbereich',a:'gruen',i:'Von sieben geprüften Domains im 15-km-Umkreis wirbt genau eine.'}],
+ mass:[{t:'Suchkampagne auf Ortskombinationen',w:'Radius 25 km, getrennte Anzeigengruppen je Ort, Landeseite ist die passende Ortsseite. Im Nahbereich wirbt genau ein Büro mit fünf Anzeigen.',a:'1 Tag + Budget',wi:'hoch',p:6,q:'Modul Anzeigen · Transparenzcenter',ph:3},
+       {t:'Conversion-Messung einrichten',w:'Anruf und Formular als Ereignis. sv-schumann.de wirbt mit 17 Anzeigen ohne jede Messung — genau der Fehler, den Sie nicht machen sollten.',a:'1 h',wi:'hoch',p:2,q:'Modul Anzeigen · Tag-Prüfung',ph:3}],
+ g:{zahl:'1',lab:'Werbender im Nahbereich',sag:'Im 15-Kilometer-Umkreis um Münster schaltet genau ein Büro Google-Anzeigen — mit fünf Stück. Die beiden KÜS-Prüfstellen, Stanoksei, Haves, Belz: null. Wer hier startet, konkurriert um Klicks fast mit niemandem.',frage:'Haben Sie schon einmal Anzeigen geschaltet — und was ist dabei herausgekommen?',ein:'„Anzeigen sind rausgeworfenes Geld." — Können sie sein, wenn niemand misst. Genau das passiert hier: ein Büro wirbt mit 17 Anzeigen und hat kein einziges Messtag auf der Seite.'}},
+
+{id:'markt', kurz:'Marktbewertung', pt:0, ist:0, saeule:null,
+ befunde:[{w:'80',l:'Einstiegs-Index',a:'gruen',i:'von 100 · Platz 1 von sieben gemessenen Märkten.'},
+          {w:'16',l:'Einstiegshürde',a:'gruen',i:'Median des Spitzenfelds. Oldenburg: 92, Bielefeld: 78.'},
+          {w:'8',l:'Nachfragebreite',a:'rot',i:'zweitniedrigste der sieben — Dortmund hat 19.'}],
+ mass:[{t:'Auf Wiederkehr und Zuweiser setzen',w:'Münster ist ein leichter, aber kein großer Markt. Bei einer Nachfragebreite von 8 kommen die Aufträge nicht allein über die Suche — Werkstätten und Verkehrsrechtskanzleien im Nahbereich sind der zweite Kanal.',a:'laufend',wi:'hoch',p:0,q:'Modul Marktbewertung · sieben Märkte',ph:2}],
+ g:{zahl:'80',lab:'von 100',sag:'Ich habe Ihr Gebiet gegen sechs andere Märkte gemessen — gleiche Methode, gleicher Tag. Münster kommt auf 80 von 100 und ist damit der leichteste der sieben. In Bielefeld müssten Sie gegen einen Marktführer mit 889 Bewertungen antreten, hier sind es 191.',frage:'War Ihnen das klar — oder fühlt sich Ihr Markt eher voll an?',ein:'„Bei uns ist alles dicht." — Gefühlt ja, gemessen nein. 154 Büros klingt viel, aber die Hälfte hat elf Bewertungen oder weniger.'}},
+
+{id:'nische', kurz:'Nischen', pt:0, ist:0, saeule:null,
+ befunde:[{w:'40',l:'Oldtimer-Nachfrage',a:'gruen',i:'größte gemessene Nische — braucht aber eine Zertifizierung.'},
+          {w:'28',l:'Fiktive Abrechnung',a:'gruen',i:'null lokaler Wettbewerb, keine Zertifizierung nötig.'},
+          {w:'0 von 42',l:'besetzt im Umkreis',a:'rot',i:'Keine der gemessenen Websites nennt eine Spezialisierung im Seitentitel.'}],
+ mass:[{t:'Eine Nische wählen und führen',w:'Empfehlung nach Messlage: fiktive Abrechnung als Content-Nische, Wohnmobil als Leistungsnische. Oldtimer erst ab Monat 12 — braucht Classic-Data-Zertifizierung.',a:'1 Tag',wi:'hoch',p:0,q:'Modul Nischen · zehn Spezialisierungen',ph:2}],
+ g:{zahl:'0 von 42',lab:'Nischen besetzt',sag:'Keine einzige der 42 gemessenen Websites im Umkreis nennt eine Spezialisierung im Seitentitel. Gleichzeitig gibt es messbare Nachfrage: 40 Suchanfragen zu Oldtimer-Wertgutachten, 28 zur fiktiven Abrechnung, 11 zu Wohnmobilen.',frage:'Gibt es etwas, das Sie besser können als der Durchschnitt — Wohnmobile, Oldtimer, Motorräder?',ein:'„Ich mache alles." — Das machen die anderen 153 auch. Eine Nische schließt nichts aus, sie gibt nur einen Grund, Sie zu finden.'}},
+
+{id:'volumen', kurz:'Marktvolumen', pt:0, ist:0, saeule:null,
+ befunde:[{w:'28.362',l:'gutachtenrelevante Schäden',a:'gelb',i:'pro Jahr im Gebiet — hergeleitet, mit offengelegten Annahmen.'},
+          {w:'184',l:'je Büro und Jahr',a:'gelb',i:'geteilt durch 154 Büros. Rechenweg im Bericht veränderbar.'}],
+ mass:[],
+ g:{zahl:'184',lab:'Aufträge je Büro',sag:'Rein rechnerisch entfallen auf jedes Büro im Gebiet 184 gutachtenrelevante Schäden pro Jahr. Das ist eine Herleitung, keine Messung — die Annahmen stehen offen im Bericht und Sie können sie ändern.',frage:'Wie viele Gutachten machen Sie heute im Monat?',ein:'„Die Zahl kann ja nicht stimmen." — Muss sie auch nicht. Sie zeigt die Größenordnung: der Markt ist groß genug, das Problem ist die Verteilung.'}},
+];
+
+const SAEULEN=[['Google-Unternehmensprofil',20],['Branchenverzeichnisse & NAP',12],
+ ['Auffindbarkeit & Wettbewerbsposition',16],['SEO — On-Page & Keywords',20],
+ ['Nutzererlebnis',12],['Technik & Ladezeit',12],['Vertrauen & Rechtssicherheit',8]];
+
+let AN = new Set(M.map(m=>m.id));
+function gew(){ return M.filter(m=>AN.has(m.id)); }
+/* ═══════════ Modulleiste ═══════════ */
+function baueLeiste(){
+  const el=document.getElementById('modulbar');
+  el.querySelectorAll('.pill').forEach(p=>p.remove());
+  const alle=document.createElement('button');
+  alle.className='pill alle'; alle.textContent = AN.size===M.length?'alle abwählen':'alle wählen';
+  alle.onclick=()=>{ AN = AN.size===M.length ? new Set() : new Set(M.map(m=>m.id)); alles(); };
+  el.appendChild(alle);
+  M.forEach(m=>{
+    const b=document.createElement('button');
+    b.className='pill'; b.setAttribute('aria-pressed', AN.has(m.id));
+    b.innerHTML=(m.neu?'✦ ':'')+m.kurz+(m.pt?'<span class="pt">'+m.pt+'P</span>':'');
+    b.onclick=()=>{ AN.has(m.id)?AN.delete(m.id):AN.add(m.id); alles(); };
+    el.appendChild(b);
+  });
+}
+
+/* ═══════════ Auswertung ═══════════ */
+function baueAuswertung(){
+  const g=gew();
+  const maxP=g.reduce((s,m)=>s+m.pt,0), istP=g.reduce((s,m)=>s+m.ist,0);
+  const score = maxP? Math.round(istP/maxP*100) : null;
+  const teil = maxP < 60;
+  const mass = g.flatMap(m=>m.mass);
+  document.getElementById('awKacheln').innerHTML =
+   '<div class="kachel'+(score===null?'':(score<40?' r':(score<70?'':' g')))+'"><div class="bar"></div>'
+   +'<div class="lab">'+(teil?'Teilbefund':'Gesamtscore')+'</div><div class="val">'
+   +(score===null?'—':(teil?score+'*':score))+'</div><div class="sub">'
+   +(maxP?('aus '+istP+' von '+maxP+' erhebbaren Punkten'):'keine bewerteten Module gewählt')+'</div></div>'
+   +'<div class="kachel b"><div class="bar"></div><div class="lab">Geprüfte Module</div><div class="val">'
+   +g.length+'</div><div class="sub">von '+M.length+' verfügbaren</div></div>'
+   +'<div class="kachel"><div class="bar"></div><div class="lab">Befunde</div><div class="val">'
+   +g.reduce((s,m)=>s+m.befunde.length,0)+'</div><div class="sub">jeder mit Quelle und Datum</div></div>'
+   +'<div class="kachel g"><div class="bar"></div><div class="lab">Abgeleitete Maßnahmen</div><div class="val">'
+   +mass.length+'</div><div class="sub">'+mass.reduce((s,x)=>s+x.p,0)+' Punkte erreichbar</div></div>';
+
+  const sl=document.getElementById('saeulenListe');
+  const genutzt = new Set(g.map(m=>m.saeule).filter(Boolean));
+  sl.innerHTML = SAEULEN.map(([n,max])=>{
+    const mods=g.filter(m=>m.saeule===n);
+    if(!mods.length) return '<div class="saeule" style="opacity:.4"><div class="nm">'+n+'</div>'
+      +'<div class="tr"></div><div class="pv">nicht erhoben</div><div class="dl"></div></div>';
+    const ist=mods.reduce((s,m)=>s+m.ist,0), soll=mods.reduce((s,m)=>s+m.pt,0);
+    const q=ist/soll, f = q<.4?'var(--critical)': q<.7?'var(--warning)':'var(--good)';
+    return '<div class="saeule"><div class="nm">'+n+'</div><div class="tr">'
+      +'<span class="fl" style="width:'+(q*100).toFixed(0)+'%;background:'+f+'"></span>'
+      +'<span class="zi" style="left:85%"></span></div>'
+      +'<div class="pv">'+ist+' / '+soll+'</div>'
+      +'<div class="dl '+(q<.85?'neg':'pos')+'">'+(q<.85?('−'+Math.round(soll*.85-ist)):'✓')+'</div></div>';
+  }).join('');
+  document.getElementById('awSaeulen').style.display = genutzt.size? 'block':'none';
+
+  document.getElementById('awBloecke').innerHTML = g.map(m=>
+    '<div class="karte"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+    +'<h3 style="flex:1">'+m.kurz+(m.neu?' <span style="font:800 .6rem var(--display);font-style:italic;background:var(--signal);color:#fff;padding:3px 8px;border-radius:100px;letter-spacing:.1em;text-transform:uppercase;vertical-align:middle">neu</span>':'')+'</h3>'
+    +(m.pt?'<span class="chip">'+m.ist+' von '+m.pt+' Punkten</span>':'<span class="chip">ohne Punktwertung</span>')+'</div>'
+    +'<div class="befund">'+m.befunde.map(b=>
+      '<div class="bf '+b.a+'"><b>'+b.w+'</b><span>'+b.l+'</span><i>'+b.i+'</i></div>').join('')
+    +'</div></div>').join('') || '<div class="leer">Kein Modul gewählt — schalten Sie oben mindestens eines ein.</div>';
+
+  const fehlt=[];
+  if(AN.has('kwg')) fehlt.push('absolutes Suchvolumen und Klickpreis (Google-Ads-Konto fehlt)');
+  if(AN.has('kwm')) fehlt.push('Reichweitenschätzung und Zielgruppengröße (Meta-Business-Konto fehlt)');
+  if(AN.has('wett')) fehlt.push('Besucherzahlen der Wettbewerber (nur über kostenpflichtige SEO-Werkzeuge messbar)');
+  if(AN.has('ads')) fehlt.push('Impression Share der Wettbewerber (Google gibt Auktionsdaten nur im eigenen Konto aus)');
+  document.getElementById('awFehlt').textContent = fehlt.length
+    ? fehlt.join(' · ') + '. Diese Werte stehen im Bericht als „nicht erhoben“ — nie als Schätzung.'
+    : 'Bei den gewählten Modulen sind alle Werte erhebbar.';
+}
+
+/* ═══════════ Maßnahmenplan ═══════════ */
+const PHASEN=[[1,'Fundament','Woche 1 – 4','Ohne diese Schritte wirkt nichts, was danach kommt.'],
+              [2,'Sichtbarkeit','Woche 4 – 12','Jetzt entsteht der Vorsprung, den im Feld kaum jemand verteidigt.'],
+              [3,'Nachfrage kaufen','ab Woche 8','Erst wenn gemessen wird, lohnt sich bezahlte Reichweite.']];
+const STD={'30 min':.5,'20 min':.3,'15 min':.25,'1 h':1,'2 h':2,'3 h':3,'4 h':4,'1 Tag':8,'2 Tage':16,
+ '1 Tag je 4':24,'1 Tag + Budget':8,'laufend':0,'30 min/Monat':0,'30 min/Quartal':0};
+function bauePlan(){
+  const alle=gew().flatMap(m=>m.mass.map(x=>({...x,mod:m.kurz})));
+  const rang={hoch:0,mittel:1,niedrig:2};
+  document.getElementById('sMass').textContent=alle.length;
+  document.getElementById('sPunkte').innerHTML=alle.reduce((s,x)=>s+x.p,0)+' <em>von 100</em>';
+  const std=alle.reduce((s,x)=>s+(STD[x.a]||0),0);
+  document.getElementById('sAufwand').textContent=std?Math.round(std)+' h':'—';
+  document.getElementById('sZeit').textContent=alle.length? (alle.some(x=>x.ph===3)?'12 Wochen':(alle.some(x=>x.ph===2)?'8 Wochen':'4 Wochen')):'—';
+  const el=document.getElementById('planPhasen');
+  if(!alle.length){ el.innerHTML='<div class="leer">Kein Modul gewählt — ohne Befund kein Plan.</div>'; return; }
+  el.innerHTML = PHASEN.map(([nr,name,zeit,unter])=>{
+    const ms=alle.filter(x=>x.ph===nr).sort((a,b)=>rang[a.wi]-rang[b.wi] || b.p-a.p);
+    if(!ms.length) return '';
+    return '<div class="phase p'+nr+'"><h3><span class="pnr">'+nr+'</span>'+name
+      +' <span style="font:700 .68rem var(--mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase">'+zeit+'</span></h3>'
+      +'<p class="pu">'+unter+'</p><div class="mliste">'
+      + ms.map((x,i)=>'<div class="mp"><div class="mn">'+String(i+1).padStart(2,'0')+'</div>'
+        +'<div><h4>'+x.t+'</h4><p>'+x.w+'</p><span class="quelle">'+x.q+'</span></div>'
+        +'<div class="mt"><b class="'+(x.wi==='hoch'?'hoch':'')+'">Wirkung '+x.wi+'</b>'
+        +'<b>'+x.a+'</b>'+(x.p?'<b class="pkt">+'+x.p+' Punkte</b>':'')+'</div></div>').join('')
+      +'</div></div>';
+  }).join('');
+}
+
+/* ═══════════ Gesprächsleitfaden ═══════════ */
+function baueGespraech(){
+  const g=gew();
+  document.getElementById('gZahlen').textContent = g.reduce((s,m)=>s+m.befunde.length,0);
+  document.getElementById('gModZahl').textContent = ['null','ein','zwei','drei','vier','fünf','sechs','sieben','acht','neun','zehn','elf','zwölf','dreizehn'][g.length]||g.length;
+  const w=g.find(m=>m.id==='wett'), mk=g.find(m=>m.id==='markt');
+  document.getElementById('gLage').innerHTML = mk
+    ? 'In Ihrem 50-km-Umkreis sitzen 154 Sachverständigenbüros. Ich habe Ihr Gebiet gegen sechs andere Märkte gemessen — Münster ist der leichteste der sieben. Die Hälfte des Feldes hat elf Bewertungen oder weniger.'
+    : (w ? 'In Ihrem 50-km-Umkreis sitzen 154 Sachverständigenbüros. Die Hälfte davon hat elf Bewertungen oder weniger, 21 haben gar keine. Die Konkurrenz, die wirklich zählt, sind rund zwanzig Adressen.'
+         : 'Ich habe die Module gemessen, die Sie ausgewählt haben — schauen wir uns die Befunde der Reihe nach an.');
+  // Die drei stärksten Gesprächsbausteine: schwächste Module zuerst
+  const sortiert=[...g].filter(m=>m.g).sort((a,b)=>{
+    const qa=a.pt? a.ist/a.pt : .5, qb=b.pt? b.ist/b.pt : .5; return qa-qb; });
+  const drei=sortiert.slice(0,3);
+  document.getElementById('gBausteine').innerHTML = drei.length? drei.map(m=>
+    '<div class="baustein"><div class="kopfz"><span class="zahl">'+m.g.zahl+'</span>'
+    +'<h4>'+m.kurz+' — '+m.g.lab+'</h4>'
+    +(m.pt?'<span class="chip">'+m.ist+' / '+m.pt+' Punkte</span>':'')+'</div>'
+    +'<div class="gz"><div><h5>So sagen Sie es</h5><p>'+m.g.sag+'</p></div>'
+    +'<div><h5>Dann fragen Sie</h5><p>'+m.g.frage+'</p></div></div>'
+    +'<div class="einwand"><b>Wahrscheinlicher Einwand</b>'+m.g.ein+'</div></div>').join('')
+    : '<div class="leer">Kein Modul gewählt — ohne Befund kein Gesprächsbaustein.</div>';
+  const p1=g.flatMap(m=>m.mass).filter(x=>x.ph===1);
+  document.getElementById('gPhase1').innerHTML = p1.length
+    ? '<div class="karten3">'+p1.slice(0,6).map(x=>
+        '<div class="kachel"><div class="bar"></div><div class="lab">'+x.a+' · Wirkung '+x.wi+'</div>'
+        +'<div style="font-family:var(--display);font-style:italic;font-weight:800;font-size:1.05rem;color:var(--ink);margin:7px 0 3px;letter-spacing:-.02em">'+x.t+'</div>'
+        +'<div class="sub">'+(x.p?'+'+x.p+' Punkte':'Grundlage, ohne Punktwert')+'</div></div>').join('')+'</div>'
+        +'<p class="klein" style="margin-top:12px">Zusammen '+p1.reduce((s,x)=>s+x.p,0)
+        +' Punkte in '+Math.round(p1.reduce((s,x)=>s+(STD[x.a]||0),0))+' Stunden Arbeit.</p>'
+    : '<div class="leer">Keine Phase-1-Maßnahmen aus den gewählten Modulen.</div>';
+  document.getElementById('gDauerP1').textContent = p1.length>4?'sechs Wochen':'vier Wochen';
+  document.getElementById('gEinwaende').innerHTML = g.filter(m=>m.g).map(m=>
+    '<div class="einwand" style="margin-top:10px"><b>'+m.kurz+'</b>'+m.g.ein+'</div>').join('')
+    || '<div class="leer">Kein Modul gewählt.</div>';
+}
+
+/* ═══════════ Navigation ═══════════ */
+function zeigeV(id){
+  document.querySelectorAll('.buehne').forEach(b=>b.removeAttribute('data-aktiv'));
+  document.getElementById(id).setAttribute('data-aktiv','');
+  document.querySelectorAll('.umschalter button').forEach(b=>
+    b.setAttribute('aria-current', String(b.dataset.v===id)));
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function alles(){ baueLeiste(); baueAuswertung(); bauePlan(); baueGespraech(); }
+alles();
+</script>
+</body>
+</html>

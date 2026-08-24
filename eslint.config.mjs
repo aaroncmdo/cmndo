@@ -16,6 +16,11 @@ const eslintConfig = defineConfig([
     // Unterordner autounfall-io/. Hat eigenen ESLint/tsconfig/Build — darf NICHT
     // vom claimondo-v2-Lint/Typecheck erfasst werden (eigenes Token-/Brand-System).
     "autounfall-io/**",
+    // sv-levelup = eigenstaendiges Next-Projekt (sv-levelup.claimondo.de,
+    // STANDALONE) im Unterordner sv-levelup/. Hat eigene
+    // eslint.config.mjs/tsconfig/vitest/Build — darf NICHT vom
+    // claimondo-v2-Lint/Typecheck erfasst werden.
+    "sv-levelup/**",
   ]),
 ]);
 
