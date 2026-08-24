@@ -158,6 +158,8 @@ export default async function GutachterFindenPage({
           Linkleiste reserviert, die es seit 21.08. nicht mehr gibt (Aaron:
           „so eine Bar passt mir nicht"). Der Crawl-Pfad haengt jetzt am
           FinderSprungPanel darunter. */}
+      {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
+      <main id="main-content">
       <GutachterFindenSection
         height="100dvh"
         initialCenter={initialCenter}
@@ -193,6 +195,7 @@ export default async function GutachterFindenPage({
           infos: t('sprung_infos'),
         }}
       />
-    </>
+      </main>
+</>
   )
 }

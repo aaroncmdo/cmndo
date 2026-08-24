@@ -36,7 +36,7 @@ export async function LandingPage({ authenticatedUser }: Props) {
   return (
     <div className="flex min-h-screen flex-col bg-claimondo-bg">
       <LandingTopbar authenticatedUser={authenticatedUser} />
-      <main id="main-content" className="flex-1">
+      <main className="flex-1">  {/* id="main-content" liegt jetzt in LandingTopbar (dort fuer ALLE Seiten) */}
         <HeroSection />
         <HomeTrustStripSection />
         {/* Freie Termine im HTML — die Startseite ist laut Zugriffslog die meistgelesene

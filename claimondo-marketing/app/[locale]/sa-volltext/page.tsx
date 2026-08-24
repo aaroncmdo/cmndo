@@ -2,7 +2,7 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export default function SAVolltextPage() {
   return (
-    <div className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
+    <main id="main-content" className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
       {/* Ambient-Gradient */}
       <div
         aria-hidden
@@ -80,6 +80,6 @@ export default function SAVolltextPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   )
 }
