@@ -210,7 +210,6 @@ Schockschaden ist eine hochsensible und juristisch komplexe Anspruchs-Grundlage.
 - BGH, Urteil vom 13.01.1976, VI ZR 58/74 (Erweiterung)
 - BGH, Urteil vom 04.04.1989, VI ZR 97/88 (Voraussetzungen)
 - BGH, Urteil vom 27.01.2015, VI ZR 548/12 (Aktualisierung)
-- AWMF S3-Leitlinie PTBS – [register.awmf.org](https://register.awmf.org)
 - Hacks/Wellner Schmerzensgeldtabelle
 
 ---

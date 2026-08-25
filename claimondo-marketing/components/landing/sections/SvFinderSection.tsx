@@ -33,6 +33,7 @@ const CITY_PILLS = [
 
 export async function SvFinderSection() {
   const t = await getTranslations('home')
+  const tNav = await getTranslations('nav')
   const hasFinder = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
 
   return (
@@ -72,14 +73,32 @@ export async function SvFinderSection() {
       {/* CTA in die Vollbild-Suche + City-Pills (SEO-Deep-Links) */}
       <div className="mx-auto mt-8 max-w-6xl px-5">
         <div className="flex flex-col items-center gap-5 text-center">
-          <Link
-            href="/gutachter-finden"
-            className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-7 py-3.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
-            data-tracking="cta-home-svfinder-fullscreen"
-          >
-            {t('einsatzgebiet.finder_cta')}
-            <ChevronRight className="h-4 w-4" aria-hidden />
-          </Link>
+          {/* Zwei Suchen nebeneinander. Der Werkstatt-Finder stand am 25.08.
+              auf der Startseite NUR in der Navigation — gemessen: kein
+              einziger Link im Seiteninhalt, waehrend der Gutachter-Finder
+              dort dreimal vorkam. Hier ist die passende Stelle, weil der
+              Abschnitt ohnehin vom Einsatzgebiet handelt (Aaron 25.08.).
+              Der Gutachter-Finder bleibt der gefuellte Primaerweg, die
+              Werkstatt-Suche steht als gleichwertige, aber ruhigere
+              Alternative daneben. */}
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
+            <Link
+              href="/gutachter-finden"
+              className="inline-flex items-center gap-2 rounded-full bg-claimondo-navy px-7 py-3.5 text-sm font-bold text-white shadow-claimondo-md transition-all hover:bg-claimondo-shield"
+              data-tracking="cta-home-svfinder-fullscreen"
+            >
+              {t('einsatzgebiet.finder_cta')}
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+            <Link
+              href="/werkstatt-finden"
+              className="inline-flex items-center gap-2 rounded-full border border-claimondo-border bg-white px-7 py-3.5 text-sm font-semibold text-claimondo-navy transition-all hover:border-claimondo-ondo hover:text-claimondo-ondo"
+              data-tracking="cta-home-werkstattfinder"
+            >
+              {tNav('werkstatt_finden')}
+              <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </div>
           <div>
             <p className="text-sm font-semibold text-claimondo-shield">
               {t('einsatzgebiet.city_intro')}

@@ -192,7 +192,6 @@ Wir prüfen kostenfrei, wo du in deinem Schadensfall stehst – und ob die Frist
 - Hentschel/König/Dauer, Straßenverkehrsrecht, jeweils aktuelle Auflage
 - Burmann/Heß/Hühnermann/Jahnke, Straßenverkehrsrecht-Kommentar
 - Geigel, Der Haftpflichtprozess, aktuelle Auflage
-- ARGE Verkehrsrecht im Deutschen Anwaltverein – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

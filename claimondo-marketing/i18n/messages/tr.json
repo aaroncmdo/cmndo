@@ -607,7 +607,7 @@
       "heading_accent": "taleplerin %30–40'ını kesiyor",
       "heading_suf": "— ve kimse itiraz etmiyor.¹",
       "body": "Claimondo, bunun istisna değil standart olduğu için var. Sigorta şirketleri, araç incelemesi yapmaksızın otomatik denetim raporları için ControlExpert veya K-Expert'i görevlendiriyor. UPE ek ücretleri, nakliye maliyetleri, değer kaybı siliniyor. Avukatsız tazminat talep eden kişi ilk kesintiye razı oluyor. BGH, birden fazla kararında mağduru destekliyor — trafik hukuku alanında uzman ortak hukuk bürosu bunu sizin için hayata geçirir.",
-      "quelle": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH temel kararları VI ZR 38/22 vd., VI ZR 65/18, VI ZR 174/24."
+      "quelle": "BGH temel kararları VI ZR 38/22 vd. · VI ZR 65/18 · VI ZR 174/24."
     },
     "werte": {
       "eyebrow": "Değerlerimiz",
@@ -1237,7 +1237,7 @@
       "col_kuerzung": "Kesinti Mekanizması",
       "col_gegenargument": "Karşı Argüman",
       "link_cta": "BGH'ye göre kesin olan",
-      "quellen": "Kaynaklar: NDR Reportajı Prüfdienstleister, Erstberatung Bilgi Veri Tabanı Mayıs 2026, juris.bundesgerichtshof.de",
+      "quellen": "juris.bundesgerichtshof.de",
       "taktiken": [
         {
           "trigger": "\"Her şeyle biz ilgileniyoruz\"",
@@ -1326,7 +1326,7 @@
       "warum_label": "Neden:",
       "besser_label": "Daha iyisi:",
       "card_cta": "Bu hatayı nasıl önlersiniz →",
-      "quellen": "Kaynaklar: ADAC, Verbraucherzentrale, RA Günter Fenderl (Trafik Hukuku Uzman Avukatı), Bernd Hertfelder (öbuv Kfz-SV), İlk Danışmanlık Bilgi Veri Tabanı Mayıs 2026",
+      "quellen": "",
       "fehler": [
         {
           "titel": "Karşı tarafın hasar yönetimine boyun eğmek",
@@ -1699,7 +1699,7 @@
       "p2_pre": "E-araçlarda eşik kapağı onarımları, altındaki",
       "p2_em": "kontrol ünitelerini",
       "p2_suf": "aylar sonra bozabilir. Batarya bölgesindeki bir hasarda uzman bilirkişi zorunludur — aksi hâlde gizli bir tam hasar riski doğar.",
-      "quelle": "Kaynak: Bernd Hertfelder (HWK Stuttgart, kamuya atanmış Kfz-Sachverständiger)"
+      "quelle": ""
     }
   },
   "faq": {
@@ -2226,7 +2226,7 @@
     "sub": "Bekleme hattı yok. Köln'den bir uzman 15 dakika içinde sizi arar.",
     "disclaimer": "İlk danışma 0 €. §249 BGB kapsamında hasar tazminatı, karşı tarafın zorunlu sigortası tarafından karşılanır (kabul beyanı şartıyla).",
     "answer_capsule": {
-      "quelle": "İlk Danışma · < 15 Dak · 0 € Maliyet",
+      "quelle": "",
       "text_pre": "Claimondo'da Ücretsiz Danışmanlık",
       "text_strong": "Claimondo'da Ücretsiz Danışmanlık",
       "text_body": "bağlayıcı değildir ve risksizdir. Köln ekibimizden bir hasar danışmanı sizinle nasıl yardımcı olabileceğimizi görüşür: sorumluluk meselesi, hasar miktarı, bilirkişi raporunun gerekli olup olmadığı ve karşı tarafın sigortasının hangi kalemleri ödemesi gerektiği. Telefon (Pzt–Cum 8–18), WhatsApp veya e-posta yoluyla iletişime geçebilirsiniz. Çağrı merkezi yok — ekiple doğrudan bağlantı."
@@ -3219,7 +3219,7 @@
     ],
     "urteil_intro": "Wettbewerbszentrale'nin açtığı dava üzerine Landgericht Bremen, bir sağlayıcının \"online araç ekspertizi\" reklamı yapmasını yasakladı. Mahkeme üç temel gerekçeye dayandı:",
     "urteil_zitat": "\"Hasar görmüş aracın bizzat yerinde incelenmesi, bir araç bilirkişisinin asli görevinin ayrılmaz parçasıdır.\"",
-    "urteil_zitat_quelle": "— LG Bremen, 9 O 1720/24 kararının özünden",
+    "urteil_zitat_quelle": "— LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Kişisel yerinde incelemenin yerini hiçbir şey tutamaz.",
@@ -3407,9 +3407,9 @@
     ],
     "einordnung_titel": "Ağ rakamlarını değerlendirmek için:",
     "einordnung_p": "Rakamlar yalnızca sınırlı ölçüde karşılaştırılabilir. Claimondo, her vakanın yerinde incelemeden partner hukuk bürosuna ve ödemeye kadar aktif olarak yönetildiği <strong>yönetilen bir ağ</strong> işletmektedir. Unfallgiganten ise bilirkişilerin ücretli profil ilanı satın aldığı bir <strong>dizin</strong>dir — 329 rakamı dizin kayıtlarını sayar, yönetilen vakaları değil.",
-    "quellen_footnote_before": "Karşılaştırmalı bilgilerin güncellik tarihi:",
-    "quellen_footnote_after": ". Kaynak: ilgili sağlayıcı web siteleri, erişim tarihi:",
-    "quellen_footnote_suffix": "(belgeler arşivlendi). Kaynaklar:",
+    "quellen_footnote_before": "",
+    "quellen_footnote_after": "",
+    "quellen_footnote_suffix": "",
     "wann_h2": "Hangi durumda hangi platform uygundur — karar yardımcısı",
     "wann_intro": "„En iyi\" platform diye bir şey yoktur; önemli olan sizin durumunuza en uygun olandır. Üç tipik senaryo:",
     "wann_cards": [
@@ -3454,7 +3454,7 @@
     "lg_p2": "<strong>Kararın yasaklamadığı şey:</strong> Bir görevin dijital olarak yürütülmesi — çevrimiçi bildirim, fotoğraf yükleme, dijital iletişim — bir bilirkişinin ardından aracı <strong>yerinde bizzat incelemesi</strong> koşuluyla geçerliliğini korumaktadır. Burada karşılaştırılan dört platformun tamamı bu karma modeli kullanmaktadır.",
     "lg_p3": "<strong>Neyi yasaklar:</strong> Yalnızca yüklenen fotoğraflara veya tıklama yanıtlarına dayalı, bizzat yerinde inceleme yapılmaksızın hazırlanan \"bilirkişi raporu\" — ve hizmet sağlayıcı Hukuki Hizmetler Siciline kayıtlı değilse (RDG §§ 2, 3) \"sigorta şirketine karşı tam süreç yönetimi\" reklamı yapmak.",
     "lg_link_online": "Kapsamlı değerlendirme: Çevrimiçi Araç Bilirkişi Raporu",
-    "lg_link_quelle": "Kaynak: Wettbewerbszentrale",
+    "lg_link_quelle": "",
     "faq_h2": "Aracı Karşılaştırması Hakkında Sık Sorulan Sorular",
     "faqs": [
       {
@@ -3548,7 +3548,7 @@
     "kuerzungen_th_kuerzung": "Tipik Kesinti",
     "kuerzungen_th_bgh": "BGH Dava No.",
     "kuerzungen_th_kern": "Kararın Özü",
-    "kuerzungen_quelle": "Kaynaklar: BGH karar veritabanı (bundesgerichtshof.de), BVSK e.V., ControlExpert sektör istatistikleri. Güncelleme 05/2026.",
+    "kuerzungen_quelle": "Kaynaklar: BGH karar veritabanı (bundesgerichtshof.de)",
     "markt_label": "Tablo 2",
     "markt_h2": "NRW'de Kfz Hasar Tazminat Piyasası 2026",
     "markt_p": "10 doğrulanmış veri kaynağıyla (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center) yapılan bağımsız rekabet analizi. Güncelleme Nisan 2026.",
@@ -3596,7 +3596,7 @@
     ],
     "markt_erkenntnis_h": "Temel Bulgu:",
     "markt_erkenntnis_p": "Google Helpful Content Güncellemesi'nden (Ocak 2025) bu yana organik trafiğinin yaklaşık %30'unu yitirdi — aylık 2.784'ten 1.668 ziyarete geriledi. Aynı zamanda 23 NRW rakibinin tamamında AI arama görünürlüğünün sıfır olmasıyla birlikte yapılandırılmış veri, Schema-Markup ve Answer-Capsule içeriği için eşsiz bir zaman penceresi açılmaktadır.",
-    "markt_quelle": "Kaynaklar: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, Kalkulations-API Partner Ağı, SerpApi Google Maps, Rakip Funnel Denetimi Q1/2026.",
+    "markt_quelle": "",
     "honorare_label": "Tablo 3",
     "honorare_h2": "Kfz bilirkişi ekspertizi ne kadar tutar?",
     "honorare_p_pre": "Ücretler ",
@@ -3625,7 +3625,7 @@
       "Önceki hasar oranı ve belge var/yok ort. değer kaybı farkı",
       "Şikâyet oranı ve tekrarlayan vekâlet payı"
     ],
-    "auswertung_quelle": "Veri tabanı: Claimondo platformu üzerinden yürütülen vekâletler 2024–2026, DSGVO kapsamında anonimleştirilmiştir. İlk yayım Q3 2026, yıllık güncelleme olarak.",
+    "auswertung_quelle": "",
     "methodik_label": "Yöntem",
     "methodik_h2": "Bu veriler nasıl toplandı",
     "methodik_bgh_strong": "BGH Kararları",
@@ -3665,7 +3665,7 @@
     "trust_kpi_2_label": "+ açıklama yeterli",
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "750 € üstünde ekspertiz hakkı",
-    "antwort_capsule_quelle": "Yapay Zekâ Analizi · < 15 Dak. · 0 € Maliyet",
+    "antwort_capsule_quelle": "",
     "antwort_p": "<strong>Claimondo'nun ücretsiz yapay zekâ ön değerlendirmesi</strong>, araç hasarınızın fotoğraf ve açıklamasını analiz eder; 15 dakika içinde şunları sunar: onarım maliyeti tahmini, beklenen yeniden edinme değeri ve bağımsız ekspertizin gerekip gerekmediğine dair öneri (yaklaşık 750 € üstündeki hasarlarda §249 BGB uyarınca bu hakkınız bulunmaktadır). Ön değerlendirme ücretsiz ve bağlayıcı değildir — resmi bir ekspertizin yerini tutmaz, ancak bir sonraki doğru adımı hemen belirlemenize yardımcı olur.",
     "ergebnis_h2": "Ücretsiz olarak bunları alırsınız",
     "ergebnis_punkte": [
@@ -3833,7 +3833,7 @@
     "hotspots_knoten": "Trafik kavşakları: {knoten}.",
     "hotspots_baustelle": "<strong>Güncel:</strong> {baustelle}.",
     "hotspots_outro": "Tam bu eksenler ve yoğunlaşma noktalarında bir kaza sonrasında hızlı yanı başınızdayız — genellikle 48 saat içinde, çoğunlukla ertesi gün.",
-    "hotspots_quelle": "Kaynak: {quelle}.",
+    "hotspots_quelle": "",
     "hilfe_eyebrow": "Pratik yardım",
     "hilfe_h2": "Kaza sonrası {ort}: Kim nerede yardım eder?",
     "hilfe_intro": "Yaralı veya tehlike varsa önce <strong>{notruf}</strong> acil hattını arayın. Ardından hasarı belgelendirin ve bağımsız bir bilirkişi görevlendirin.",
@@ -3849,7 +3849,7 @@
     "spoke_einsatz": "{stadt}, {hubName} ağımızın hizmet bölgesinde yer almaktadır — <link>{hubName} hizmetimiz hakkında daha fazla bilgi</link>.",
     "spoke_hotspot_einzelfall": "Yerinde belgelenmiş kaza",
     "spoke_hotspot_schwerpunkt": "Yerel kaza odak noktası",
-    "spoke_quelle": "Kaynak",
+    "spoke_quelle": "",
     "bgh_subline": " Almanya genelinde {ort} için de geçerlidir. Sigortacılar yine de kesinti yapar. Ortak hukuk büromuz geri alır.",
     "prozess_eyebrow": "32 günde ödemeye",
     "prozess_h2": "{ort} kazasından ödemeye — 5 adımda",
@@ -3911,16 +3911,16 @@
     "kfzbestand_h2": "{stadt} şehrindeki kayıtlı araçlar",
     "kfzbestand_text": "{stadt} şehrinde {pkw} otomobil kayıtlı, bunların {gewerblich} tanesi ticari sahiplere ait. Ayrıca {lkw} kamyon ve {kraftraeder} motosiklet bulunuyor.",
     "kfzbestand_quote": "Bu, 1.000 kişiye {proTausend} otomobil anlamına geliyor.",
-    "kfzbestand_quelle": "Federal Motorlu Taşıtlar Dairesi (KBA), {stand}",
+    "kfzbestand_quelle": "",
     "amtlich_eyebrow": "Resmî veriler",
     "amtlich_h2": "{ort} şehrinde trafik ve kazalar",
     "amtlich_intro": "Almanya Federal ve Eyalet İstatistik Dairelerinin kaza atlası, yaralanmayla sonuçlanan her trafik kazasını tam konumuyla kaydeder. {ort} için {zeitraum} döneminde şu yoğunlaşmalar ortaya çıkmaktadır:",
     "amtlich_hinweis": "Her nokta için yaklaşık 100 metrelik bir alan değerlendirilmiştir. Rakamlar nedenleri belirtmez — yoğun trafikli bir ana yol, bir ara sokaktan daha fazla kaza kaydeder.",
-    "amtlich_quelle": "Kaynak: <link>{quelle}</link> — {lizenz}",
+    "amtlich_quelle": "",
     "verkehr_h3": "Oradan ne kadar trafik geçiyor",
     "verkehr_intro": "Almanya Federal Karayolu Araştırma Enstitüsü, otoyollardaki ve federal yollardaki trafiği sürekli ölçmektedir. {ort} şehrine en yakın sayım noktaları şunlardır ({jahr} yılı değerlendirmesi):",
     "verkehr_zaehlstelle": "{name} sayım noktası, {km} km uzaklıkta",
-    "verkehr_quelle": "Kaynak: <link>BASt sürekli sayım noktaları</link> — {lizenz}",
+    "verkehr_quelle": "",
     "ratgeber_eyebrow": "Konu hakkında daha fazlası",
     "ratgeber_fehler": "Kazadan sonra kaçınmanız gereken 7 hata",
     "ratgeber_taktiken": "Sigortacıların taktikleri – ve buna karşı ne işe yarar",

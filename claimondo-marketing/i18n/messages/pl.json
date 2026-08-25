@@ -601,7 +601,7 @@
       "heading_accent": "30–40 % roszczeń",
       "heading_suf": "— i nikt nie protestuje.¹",
       "body": "Claimondo istnieje, bo to norma, a nie wyjątek. Ubezpieczyciele zlecają ControlExpert lub K-Expert automatyczne raporty weryfikacyjne — bez oględzin pojazdu. Narzuty UPE, koszty transportu, utrata wartości są wykreślane. Kto reguluje szkodę bez adwokata, akceptuje pierwszą obniżkę. BGH w wielu wyrokach staje po stronie poszkodowanego — kancelaria partnerska specjalizująca się w prawie ruchu drogowego egzekwuje to dla Państwa.",
-      "quelle": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, wiodące orzeczenia BGH VI ZR 38/22 i nast., VI ZR 65/18, VI ZR 174/24."
+      "quelle": "wiodące orzeczenia BGH VI ZR 38/22 i nast. · VI ZR 65/18 · VI ZR 174/24."
     },
     "werte": {
       "eyebrow": "Nasze wartości",
@@ -1231,7 +1231,7 @@
       "col_kuerzung": "Mechanizm redukcji",
       "col_gegenargument": "Kontrargument",
       "link_cta": "Co jest ugruntowane wyrokami BGH",
-      "quellen": "Źródła: reportaż NDR Prüfdienstleister, baza wiedzy — pierwsze doradztwo maj 2026, juris.bundesgerichtshof.de",
+      "quellen": "juris.bundesgerichtshof.de",
       "taktiken": [
         {
           "trigger": "„Zajmiemy się wszystkim\"",
@@ -1320,7 +1320,7 @@
       "warum_label": "Dlaczego:",
       "besser_label": "Lepiej:",
       "card_cta": "Jak uniknąć tego błędu →",
-      "quellen": "Źródła: ADAC, Verbraucherzentrale, RA Günter Fenderl (Fachanwalt Verkehrsrecht), Bernd Hertfelder (öbuv Kfz-SV), Baza wiedzy pierwszego doradztwa maj 2026",
+      "quellen": "",
       "fehler": [
         {
           "titel": "Przyjmowanie warunków zarządzania szkodą strony przeciwnej",
@@ -1693,7 +1693,7 @@
       "p2_pre": "Naprawy osłon progów w samochodach elektrycznych mogą",
       "p2_em": "ukryte pod nimi sterowniki",
       "p2_suf": "zniszczyć dopiero po kilku miesiącach. W przypadku uszkodzenia w obszarze baterii obowiązkowy jest wyspecjalizowany rzeczoznawca — w przeciwnym razie grozi ukryta szkoda całkowita.",
-      "quelle": "Źródło: Bernd Hertfelder (publicznie mianowany rzeczoznawca samochodowy, HWK Stuttgart)"
+      "quelle": ""
     }
   },
   "faq": {
@@ -2220,7 +2220,7 @@
     "sub": "Żadnych automatycznych kolejek. Specjalista z Kolonii oddzwoni w mniej niż 15 minut.",
     "disclaimer": "Pierwsza konsultacja 0 €. Likwidacja szkody na podstawie §249 BGB przez ubezpieczenie sprawcy (z zastrzeżeniem uznania odpowiedzialności).",
     "answer_capsule": {
-      "quelle": "Konsultacja · < 15 min · 0 € kosztów",
+      "quelle": "",
       "text_pre": "Bezpłatna konsultacja w Claimondo",
       "text_strong": "Bezpłatna konsultacja w Claimondo",
       "text_body": "jest niewiążąca i wolna od ryzyka. Doradca ds. szkód z naszego zespołu w Kolonii wyjaśni z Państwem, czy i w jaki sposób możemy pomóc: kwestia odpowiedzialności, wysokość szkody, czy sporządzenie ekspertyzy jest zasadne oraz które pozycje ubezpieczenie sprawcy musi zwrócić. Kontakt można nawiązać telefonicznie (pon.–pt. 8–18), przez WhatsApp lub e-mail. Żadnego callcenter — bezpośredni kontakt z zespołem."
@@ -3213,7 +3213,7 @@
     ],
     "urteil_intro": "Na wniosek Wettbewerbszentrale Sąd Krajowy w Bremie zakazał jednemu z dostawców reklamy „internetowych ekspertyz Kfz\". Sąd oparł się na trzech kluczowych argumentach:",
     "urteil_zitat": "„Osobiste oględziny uszkodzonego pojazdu należą do najistotniejszych obowiązków rzeczoznawcy samochodowego.\"",
-    "urteil_zitat_quelle": "— główna teza LG Bremen, 9 O 1720/24",
+    "urteil_zitat_quelle": "— główna teza LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Osobistych oględzin nie można zastąpić.",
@@ -3401,9 +3401,9 @@
     ],
     "einordnung_titel": "Uwaga do interpretacji liczb dotyczących sieci:",
     "einordnung_p": "Same liczby są jedynie warunkowo porównywalne. Claimondo prowadzi <strong>zarządzaną sieć</strong>, w której każda sprawa jest aktywnie koordynowana — od oględzin na miejscu, przez kancelarię partnerską, aż po wypłatę. Unfallgiganten to natomiast <strong>katalog</strong>, w którym rzeczoznawcy wykupują płatne listingi profilowe — liczba 329 oznacza wpisy katalogowe, nie zarządzane sprawy.",
-    "quellen_footnote_before": "Aktualność danych porównawczych:",
-    "quellen_footnote_after": ". Źródło: strony internetowe poszczególnych dostawców, dostęp w dniu",
-    "quellen_footnote_suffix": "(dokumenty zarchiwizowane). Źródła:",
+    "quellen_footnote_before": "",
+    "quellen_footnote_after": "",
+    "quellen_footnote_suffix": "",
     "wann_h2": "Która platforma pasuje do której sytuacji — pomoc w wyborze",
     "wann_intro": "Nie istnieje „najlepsza\" platforma — istnieje ta właściwa dla Twojej sytuacji. Trzy typowe przypadki:",
     "wann_cards": [
@@ -3448,7 +3448,7 @@
     "lg_p2": "<strong>Czego wyrok nie zakazuje:</strong> cyfrowej obsługi zlecenia — zgłoszenia online, przesyłania zdjęć, komunikacji cyfrowej — o ile rzeczoznawca następnie <strong>osobiście i na miejscu dokonuje oględzin</strong> pojazdu. Dokładnie ten hybrydowy model stosują wszystkie cztery porównywane platformy.",
     "lg_p3": "<strong>Czego zakazuje:</strong> „ekspertyz\" opartych wyłącznie na przesłanych zdjęciach lub odpowiedziach klikanych bez osobistych oględzin — oraz reklamy „kompleksowej obsługi wobec ubezpieczyciela\", gdy dostawca nie jest wpisany do rejestru usług prawnych (RDG §§ 2, 3).",
     "lg_link_online": "Szczegółowe omówienie: internetowe ekspertyzy Kfz",
-    "lg_link_quelle": "Źródło: Wettbewerbszentrale",
+    "lg_link_quelle": "",
     "faq_h2": "Najczęstsze pytania dotyczące porównania pośredników",
     "faqs": [
       {
@@ -3542,7 +3542,7 @@
     "kuerzungen_th_kuerzung": "Typowa redukcja",
     "kuerzungen_th_bgh": "BGH-Az.",
     "kuerzungen_th_kern": "Główna teza",
-    "kuerzungen_quelle": "Źródła: baza wyroków BGH (bundesgerichtshof.de), BVSK e.V., statystyki branżowe ControlExpert. Stan 05/2026.",
+    "kuerzungen_quelle": "Źródła: baza wyroków BGH (bundesgerichtshof.de)",
     "markt_label": "Tabela 2",
     "markt_h2": "Rynek likwidacji szkód Kfz w NRW 2026",
     "markt_p": "Własna analiza konkurencji z 10 zwalidowanymi źródłami danych (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). Stan kwiecień 2026.",
@@ -3590,7 +3590,7 @@
     ],
     "markt_erkenntnis_h": "Kluczowy wniosek:",
     "markt_erkenntnis_p": "utracił około 30 % organicznego ruchu od aktualizacji Google Helpful Content (styczeń 2025) — z 2.784 do 1.668 wizyt/miesiąc. Przy jednoczesnej 0 % widoczności w wyszukiwaniu AI u wszystkich 23 konkurentów NRW otwiera się wyjątkowe okno czasowe dla danych strukturalnych + Schema-Markup + treści w formacie Answer Capsule.",
-    "markt_quelle": "Źródła: SE Ranking AI Search Visibility, baza słów kluczowych DataForSEO, sieć partnerów Kalkulations-API, Google Maps SerpApi, audyt lejka sprzedażowego konkurencji Q1/2026.",
+    "markt_quelle": "",
     "honorare_label": "Tabela 3",
     "honorare_h2": "Ile kosztuje ekspertyza rzeczoznawcy pojazdu?",
     "honorare_p_pre": "Honoraria opierają się na ",
@@ -3619,7 +3619,7 @@
       "Wskaźnik szkód poprzednich + śr. różnica utraty wartości z/bez dokumentacji",
       "Wskaźnik reklamacji + udział stałych klientów"
     ],
-    "auswertung_quelle": "Podstawa danych: obsługiwane sprawy na platformie Claimondo 2024–2026, zanonimizowane zgodnie z RODO. Pierwsza publikacja Q3 2026 jako coroczna aktualizacja.",
+    "auswertung_quelle": "",
     "methodik_label": "Metodologia",
     "methodik_h2": "Jak zbierano te dane",
     "methodik_bgh_strong": "Wyroki BGH",
@@ -3659,7 +3659,7 @@
     "trust_kpi_2_label": "+ opis wystarczą",
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "od 750 € roszczenie do ekspertyzy",
-    "antwort_capsule_quelle": "Analiza AI · < 15 Min · 0 € kosztów",
+    "antwort_capsule_quelle": "",
     "antwort_p": "<strong>Bezpłatna wstępna ocena AI firmy Claimondo</strong> analizuje zdjęcia i opis szkody w Pańskim pojeździe i dostarcza w niecałe 15 minut: szacunek kosztów naprawy, przewidywaną wartość odtworzeniową oraz zalecenie, czy niezależna ekspertyza jest wskazana (od ok. 750 € szkody przysługuje Panu/Pani prawo na podstawie §249 BGB). Wstępna ocena jest bezpłatna i bez zobowiązań — nie zastępuje oficjalnej ekspertyzy, lecz pomaga Panu/Pani natychmiast podjąć właściwy następny krok.",
     "ergebnis_h2": "To Pan/Pani otrzymuje — bezpłatnie",
     "ergebnis_punkte": [
@@ -3827,7 +3827,7 @@
     "hotspots_knoten": "Węzły drogowe: {knoten}.",
     "hotspots_baustelle": "<strong>Aktualnie:</strong> {baustelle}.",
     "hotspots_outro": "Właśnie przy tych arteriach i punktach krytycznych jesteśmy szybko na miejscu po wypadku — zazwyczaj w ciągu 48 godzin, często już następnego dnia.",
-    "hotspots_quelle": "Źródło: {quelle}.",
+    "hotspots_quelle": "",
     "hilfe_eyebrow": "Praktyczna pomoc",
     "hilfe_h2": "Po wypadku {ort}: kto pomaga i gdzie?",
     "hilfe_intro": "Jeśli są ranni lub istnieje zagrożenie, najpierw zadzwoń pod numer alarmowy <strong>{notruf}</strong>. Następnie udokumentuj szkodę i wezwij niezależnego rzeczoznawcę.",
@@ -3843,7 +3843,7 @@
     "spoke_einsatz": "{stadt} leży w obszarze działania naszej sieci {hubName} — <link>więcej o naszej działalności w {hubName}</link>.",
     "spoke_hotspot_einzelfall": "Udokumentowany wypadek na miejscu",
     "spoke_hotspot_schwerpunkt": "Lokalny punkt skupienia wypadków",
-    "spoke_quelle": "Źródło",
+    "spoke_quelle": "",
     "bgh_subline": " Obowiązuje również ogólnoniemiecko {ort}. Ubezpieczyciele mimo to obciążają potrąceniami. Nasza kancelaria partnerska je odzyskuje.",
     "prozess_eyebrow": "Do wypłaty w 32 dniach",
     "prozess_h2": "Od wypadku {ort} do wypłaty — w 5 krokach",
@@ -3905,16 +3905,16 @@
     "kfzbestand_h2": "Zarejestrowane pojazdy w {stadt}",
     "kfzbestand_text": "W {stadt} zarejestrowanych jest {pkw} samochodów osobowych, w tym {gewerblich} na właścicieli firmowych. Do tego dochodzi {lkw} samochodów ciężarowych i {kraftraeder} motocykli.",
     "kfzbestand_quote": "To {proTausend} samochodów na 1000 mieszkańców.",
-    "kfzbestand_quelle": "Federalny Urząd Transportu Samochodowego (KBA), {stand}",
+    "kfzbestand_quelle": "",
     "amtlich_eyebrow": "Dane urzędowe",
     "amtlich_h2": "Ruch drogowy i wypadki w mieście {ort}",
     "amtlich_intro": "Atlas wypadków niemieckich urzędów statystycznych federacji i krajów związkowych rejestruje każdy wypadek drogowy z obrażeniami ciała wraz z dokładną lokalizacją. Dla miasta {ort} w okresie {zeitraum} wynikają z niego następujące skupiska:",
     "amtlich_hinweis": "Dla każdego miejsca oceniono obszar o wielkości około 100 metrów. Liczby nie wskazują przyczyn — ruchliwa droga główna notuje więcej wypadków niż ulica boczna.",
-    "amtlich_quelle": "Źródło: <link>{quelle}</link> — {lizenz}",
+    "amtlich_quelle": "",
     "verkehr_h3": "Jakie natężenie ruchu tam panuje",
     "verkehr_intro": "Federalny Instytut Badawczy Dróg mierzy ruch na autostradach i drogach krajowych w sposób ciągły. Te punkty pomiarowe znajdują się najbliżej miasta {ort} (dane roczne za {jahr}):",
     "verkehr_zaehlstelle": "Punkt pomiarowy {name}, odległość {km} km",
-    "verkehr_quelle": "Źródło: <link>stałe punkty pomiarowe BASt</link> — {lizenz}",
+    "verkehr_quelle": "",
     "ratgeber_eyebrow": "Więcej na ten temat",
     "ratgeber_fehler": "7 błędów, których należy unikać po wypadku",
     "ratgeber_taktiken": "Taktyki ubezpieczycieli – i co na nie pomaga",

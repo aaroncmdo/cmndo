@@ -238,7 +238,6 @@ Mietwagen-Streitigkeiten sind ein häufiges, gut beherrschbares Feld – typisch
 - BGH, Urteil vom 11.03.2008, VI ZR 164/07 (Schwacke als Schätzgrundlage)
 - BGH, Urteil vom 24.06.2008, VI ZR 234/07 (Erforderlichkeit Mietwagen)
 - Schwacke Mietpreis-Liste – Eurotax
-- Fraunhofer-Institut Mietpreisspiegel – fraunhofer.de
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

@@ -42,8 +42,6 @@ Bei den Schadenpositionen stützt sich die R+V auf **Carexpert-Prüfberichte**, 
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- versicherungsbote.de (2020) – „R+V-Schadenregulierung in der Kritik" (DAV-Protest Elmar Fuchs)
 - AG Nürnberg, Urteil vom 31.03.2014 – 20 C 10301/12 (Wertminderung)
 - AG Frankfurt am Main, Urteil vom 22.10.2015 – 32 C 3278/15 (SV-Honorar)
 

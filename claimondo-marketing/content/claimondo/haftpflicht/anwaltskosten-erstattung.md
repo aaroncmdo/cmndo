@@ -234,8 +234,6 @@ Anwaltskosten sind das stärkste Argument für eine spezialisierte Vertretung �
 - RVG-Vergütungsverzeichnis (VV-RVG)
 - BGH, Urteil vom 08.07.2014, VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Gerold/Schmidt, RVG-Kommentar
-- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
-- Deutscher Anwaltverein – [anwaltverein.de](https://anwaltverein.de)
 
 ---
 

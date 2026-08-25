@@ -42,10 +42,8 @@ Zur Konzern-Einordnung: Die **CosmosDirekt** ist die Direkttochter der Generali.
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - AG Koblenz, Urteil vom 29.07.2013 – 161 C 611/13
 - AG Aachen, Urteil vom 31.07.2014 – 120 C 168/14 (AachenMünchener/Generali)
-- Anwalts-Dokumentation: captain-huk.de; Kfz-Schaden-Manager 12/2016 (Werkstattsteuerungs-Anteile)
 
 ## Häufige Fragen
 

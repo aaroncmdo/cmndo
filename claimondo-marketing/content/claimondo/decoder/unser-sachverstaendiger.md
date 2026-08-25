@@ -222,7 +222,6 @@ Eigener Sachverständiger ist die wichtigste einzelne Entscheidung in der Schade
 - Bürgerliches Gesetzbuch § 249 – [gesetze-im-internet.de/bgb/__249.html](https://www.gesetze-im-internet.de/bgb/__249.html)
 - BGH, ständige Rechtsprechung zur freien Sachverständigen-Wahl
 - BGH, Urteil vom 23.01.2007, VI ZR 67/06 (SV-Kosten als Schadensposition)
-- BVSK Honorartabelle, jeweils aktuelle Fassung – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

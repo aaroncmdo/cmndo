@@ -208,7 +208,6 @@ Mitverschuldens-Streitigkeiten sind ein Kerngeschäft spezialisierter Verkehrsre
 - Straßenverkehrsgesetz §§ 7, 17, 18 – [gesetze-im-internet.de/stvg](https://www.gesetze-im-internet.de/stvg/)
 - Straßenverkehrs-Ordnung § 21a – Anschnallpflicht
 - BGH-Rechtsprechung zur Beweislast Mitverschulden (ständige Rechtsprechung)
-- ADAC Quotenkatalog
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 - Greger/Zwickel, Haftungsrecht des Straßenverkehrs
 
