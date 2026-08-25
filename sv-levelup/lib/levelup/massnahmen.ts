@@ -35,7 +35,7 @@ type Vorlage = {
  * ⚠ BESCHLUSS, nicht zitiert: die ausformulierte Messvorschrift
  * (`references/scoring-modell.md`) ist nicht auffindbar. Die Texte sind aus der
  * Sache hergeleitet — bei den beiden Rechtspflichten ist die Sache eindeutig
- * (§ 5 TMG, Art. 13 DSGVO), bei den uebrigen ist es Fachwissen. Taucht die
+ * (§ 5 DDG, Art. 13 DSGVO), bei den uebrigen ist es Fachwissen. Taucht die
  * Vorschrift auf, ist SIE massgeblich.
  *
  * Ein Kriterium OHNE Vorlage erzeugt bewusst keine Massnahme: lieber eine
@@ -45,7 +45,7 @@ export const VORLAGEN: Record<string, Vorlage> = {
   // ── web ────────────────────────────────────────────────────────────────
   impressum: {
     t: 'Impressum verlinken',
-    w: 'Ein Impressum nach § 5 TMG ist für geschäftsmäßige Websites Pflicht; sein Fehlen ist abmahnfähig. Der Link gehört in den Fußbereich jeder Seite.',
+    w: 'Ein Impressum nach § 5 DDG ist für geschäftsmäßige Websites Pflicht; sein Fehlen ist abmahnfähig. Der Link gehört in den Fußbereich jeder Seite.',
     minuten: 30,
   },
   datenschutz: {
