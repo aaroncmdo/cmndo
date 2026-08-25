@@ -143,14 +143,18 @@ export async function ladeEinsatzStaedte(): Promise<string[]> {
     const admin = createAdminClient()
     const { data } = await admin
       .from('sachverstaendige')
-      .select('standort_lat, standort_lng')
+      .select('standort_lat, standort_lng, paket_umkreis_km')
       .eq('ist_aktiv', true)
       .eq('verifiziert', true)
       .eq('ist_testaccount', false)
       .not('isochrone_polygon', 'is', null)
       .not('standort_lat', 'is', null)
       .not('standort_lng', 'is', null)
-    const svs = (data ?? []) as Array<{ standort_lat: number | null; standort_lng: number | null }>
+    const svs = (data ?? []) as Array<{
+      standort_lat: number | null
+      standort_lng: number | null
+      paket_umkreis_km: number | null
+    }>
     if (svs.length === 0) return []
 
     // JE SV die naechstgelegene Stadt — nicht "die ersten N Staedte mit einem SV im Umkreis".
@@ -167,10 +171,26 @@ export async function ladeEinsatzStaedte(): Promise<string[]> {
     const gesehen = new Set<string>()
     const treffer: string[] = []
     for (const sv of svs) {
+      // ⚠ JE SV SEIN GEBUCHTER UMKREIS, nicht pauschal 30 km.
+      //
+      // Gemessen am 25.08.2026 lag der feste Wert in BEIDE Richtungen daneben:
+      // Nihal (Duesseldorf) und Andreas (Erkelenz) haben 40 km — ihre Randstaedte
+      // fielen heraus, obwohl sie dort arbeiten. Kelvin und Shakib haben 15 km —
+      // fuer sie wurden Staedte als abgedeckt gezeigt, in die sie gar nicht fahren.
+      // Beides kostet: einmal ein verlorener Lead, einmal ein Klick, der ins Leere
+      // fuehrt (der Kunde landet im Finder und findet keinen Termin).
+      //
+      // `paket_umkreis_km` ist der gebuchte, also geschaeftlich verbindliche Wert.
+      // Die Isochrone waere noch genauer (Fahrzeit statt Luftlinie), kostet aber
+      // Punkt-in-Polygon gegen ~10k Vertices je SV — fuer eine Uebersichtsliste
+      // unverhaeltnismaessig. Fehlt der Wert, bleibt es beim bisherigen Default.
+      const radius = typeof sv.paket_umkreis_km === 'number' && sv.paket_umkreis_km > 0
+        ? sv.paket_umkreis_km
+        : 30
       let beste: { name: string; km: number } | null = null
       for (const stadt of STAEDTE) {
         const km = distanzKm(Number(sv.standort_lat), Number(sv.standort_lng), stadt.lat, stadt.lng)
-        if (km <= 30 && (!beste || km < beste.km)) beste = { name: stadt.name, km }
+        if (km <= radius && (!beste || km < beste.km)) beste = { name: stadt.name, km }
       }
       if (beste && !gesehen.has(beste.name)) {
         gesehen.add(beste.name)
