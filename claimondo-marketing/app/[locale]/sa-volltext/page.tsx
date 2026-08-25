@@ -2,7 +2,7 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export default function SAVolltextPage() {
   return (
-    <main id="main-content" className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen bg-claimondo-bg py-12 px-4 sm:px-6">
       {/* Ambient-Gradient */}
       <div
         aria-hidden

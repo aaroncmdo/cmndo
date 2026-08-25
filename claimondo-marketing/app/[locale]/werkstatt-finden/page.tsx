@@ -100,7 +100,7 @@ export default async function WerkstattFindenPage({
       {/* Vollbild-Finder (Karte + 4-Schritt-Wizard). initialCenter aus ?stadt/?plz/?lat&lng.
           Embed-only: bewusst KEIN Content darunter (sauberer Mobile-Scroll). */}
       {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
       <WerkstattFindenSection
         height="100dvh"
         initialCenter={initialCenter}

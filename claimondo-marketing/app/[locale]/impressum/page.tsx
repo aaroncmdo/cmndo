@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 
 export default function ImpressumPage() {
   return (
-    <main id="main-content" className="relative min-h-screen bg-claimondo-bg font-[family-name:var(--font-montserrat)]">
+    <main id="main-content" tabIndex={-1} className="relative min-h-screen bg-claimondo-bg font-[family-name:var(--font-montserrat)]">
       {/* Ambient-Gradient */}
       <div
         aria-hidden
