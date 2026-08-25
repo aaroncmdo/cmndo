@@ -8,6 +8,7 @@
 // schreibt durchschnitt/anzahl/photo_reference in `google_bewertungen_cache`.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { meldeGoogleFehler } from '@/lib/google-maps/melde-fehler'
 
 const PLACES_API_BASE = 'https://maps.googleapis.com/maps/api/place/details/json'
 
@@ -41,6 +42,9 @@ export async function fetchUndCacheGoogleBewertung(
     }
 
     if (json.status !== 'OK' || !json.result) {
+      // Kontingent erschoepft oder Zugang verweigert? Das darf nicht nur im
+      // pm2-Log stehen — der Health-Check `google-maps-zugang` liest das hier.
+      await meldeGoogleFehler('places-details (Bewertungen)', json.status, `profil ${profileId}`)
       return { ok: false, error: `Places API: ${json.status}` }
     }
 
