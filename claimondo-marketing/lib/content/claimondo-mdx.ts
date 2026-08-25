@@ -486,7 +486,7 @@ export function getVersicherer(): VersichererAsset[] {
       const base = getVersichererBaseInfo(a.slug)
       if (!base) {
         console.warn(
-          `[getVersicherer] kein VERSICHERER_LISTE-Eintrag fuer Slug "${a.slug}" — uebersprungen`,
+          `[getVersicherer] kein VERSICHERER_LISTE-Eintrag fuer Slug "${a.slug}" – uebersprungen`,
         )
         return null
       }

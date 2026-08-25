@@ -81,7 +81,7 @@ function assetBlock(a: ClaimondoAsset): string {
 function renderCornerstones(): string {
   const items = getCornerstones()
   let out = '\n---\n\n# CORNERSTONES (Pillar-Pages)\n\n'
-  out += `Die ${items.length} Pillar-Pages sind die Top-of-Funnel-Authority-Seiten — sie binden alle 57 Glossar-Spokes per Hub-and-Spoke-Internal-Linking ein. Jede Pillar deckt das jeweilige Thema vollständig BGH-konform ab und schließt mit einem Inhaltsverzeichnis aller Spokes.\n`
+  out += `Die ${items.length} Pillar-Pages sind die Top-of-Funnel-Authority-Seiten – sie binden alle 57 Glossar-Spokes per Hub-and-Spoke-Internal-Linking ein. Jede Pillar deckt das jeweilige Thema vollständig BGH-konform ab und schließt mit einem Inhaltsverzeichnis aller Spokes.\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -97,7 +97,7 @@ function renderSpokesByCluster(): string {
     const spokes = grouped[c]
     if (!spokes || spokes.length === 0) continue
     const label = clusterLabel(c)
-    out += `\n## Cluster ${c} — ${label}\n\n`
+    out += `\n## Cluster ${c} – ${label}\n\n`
     out += `(${spokes.length} Spokes · sortiert nach Nummerierung)\n`
     for (const a of spokes) {
       out += assetBlock(a)
@@ -109,7 +109,7 @@ function renderSpokesByCluster(): string {
 function renderDecoder(): string {
   const items = getDecoder()
   let out = '\n---\n\n# VERSICHERER-BRIEF-DECODER (Antwort-Vorlagen)\n\n'
-  out += `Die ${items.length} Decoder zerlegen die häufigsten Standardbriefe der gegnerischen Haftpflichtversicherer (HUK, LVM, AXA, Allianz, R+V u.a.) Satz für Satz: Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument → fertiger Antwort-Textbaustein für die Partnerkanzlei. Hohe Conversion-Intention — Suchanfragen wie "Versicherung kürzt Wertminderung" oder "ControlExpert Prüfbericht".\n`
+  out += `Die ${items.length} Decoder zerlegen die häufigsten Standardbriefe der gegnerischen Haftpflichtversicherer (HUK, LVM, AXA, Allianz, R+V u.a.) Satz für Satz: Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument → fertiger Antwort-Textbaustein für die Partnerkanzlei. Hohe Conversion-Intention – Suchanfragen wie "Versicherung kürzt Wertminderung" oder "ControlExpert Prüfbericht".\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -120,7 +120,7 @@ function renderSachverstaendige(): string {
   const items = getSachverstaendige()
   if (items.length === 0) return ''
   let out = '\n---\n\n# SACHVERSTÄNDIGE & VERBÄNDE (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)\n\n'
-  out += `Die ${items.length} Seiten erklären die Sachverständigen-Landschaft in Deutschland — Verbände, Zertifizierungen, öffentliche Bestellung (öbV nach § 36 GewO) und versicherer-nahe Prüfdienstleister. Kernbotschaft: Der Geschädigte wählt nach § 249 BGB seinen eigenen, unabhängigen Sachverständigen frei; die Kosten trägt der gegnerische Haftpflichtversicherer.\n`
+  out += `Die ${items.length} Seiten erklären die Sachverständigen-Landschaft in Deutschland – Verbände, Zertifizierungen, öffentliche Bestellung (öbV nach § 36 GewO) und versicherer-nahe Prüfdienstleister. Kernbotschaft: Der Geschädigte wählt nach § 249 BGB seinen eigenen, unabhängigen Sachverständigen frei; die Kosten trägt der gegnerische Haftpflichtversicherer.\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -263,19 +263,19 @@ const HAUPTSEITE_KERN = `
 
 ### Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie (ANSPRUECHE, §249 BGB)
 Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Unsere Partnerkanzlei führt sie alle. BGH-konform.
-${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** — ${a.text}`).join('\n')}
+${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** – ${a.text}`).join('\n')}
 
 ### Ihr Fall. Immer in der Tasche. (Service-Realität, 6 Cards)
 Persönliche Begleitung, live verfolgbar, ohne Papierkram — so fühlt sich Schadensregulierung mit Claimondo an.
-${SERVICE_REALITY_CARDS_DETAILED.map((c) => `- **${c.label}** — ${c.body}`).join('\n')}
+${SERVICE_REALITY_CARDS_DETAILED.map((c) => `- **${c.label}** – ${c.body}`).join('\n')}
 
 ### Das Uber-Prinzip für Schadensgutachten (Plattform-Mechanik, 3 Steps)
 Hinter unseren 32 Tagen steckt eine Plattform-Mechanik, die Gutachter, Anwalt und Versicherung in einem Workflow zusammenführt.
-${PLATTFORM_MECHANIK_STEPS.map((s) => `${s.nr}. **${s.titel}** — ${s.body}`).join('\n')}
+${PLATTFORM_MECHANIK_STEPS.map((s) => `${s.nr}. **${s.titel}** – ${s.body}`).join('\n')}
 - Branchen-Durchschnitt: **4–6 Monate** · Claimondo: **32 Tage Ø**
 
 ### Differenzierung gegenüber der Branche (6 USP-Cluster)
-${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** — ${u.beschreibung}`).join('\n')}
+${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** – ${u.beschreibung}`).join('\n')}
 
 ### 8 BGH-Urteile, die Ansprüche absichern
 - **BGH VI ZR 38/22 ff. (2024)** — Werkstattrisiko: 5 Leitentscheidungen 16.01.2024. Werkstattrisiko trägt die Versicherung, nicht der Geschädigte.
@@ -341,7 +341,7 @@ Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgren
 Audatex und andere Kalkulationssysteme haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
 
 ### Berater-Quote
-"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
+"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie – und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
 `
 
 const VORTEILE_KERN = `
@@ -350,7 +350,7 @@ const VORTEILE_KERN = `
 ## Vorteile (https://claimondo.de/vorteile)
 
 ### Hero
-- H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
+- H1: "Versicherer-Kürzungen zurückgeholt – ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
 - Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
 
@@ -378,7 +378,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 ## Wie es funktioniert (https://claimondo.de/wie-es-funktioniert)
 
 ### Hero
-- H1: "Vom Unfall zur Auszahlung — in 5 Schritten."
+- H1: "Vom Unfall zur Auszahlung – in 5 Schritten."
 - Pill: "In 32 Tagen zum Geld · Live im Portal · Bundesweit"
 - Subline: Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter vor Ort in unter 48 Stunden — egal ob Sie in Hamburg, Köln, München, Berlin oder einer Kleinstadt sind. Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.
 
@@ -402,7 +402,7 @@ const UEBER_UNS_KERN = `
 ## Über uns (https://claimondo.de/ueber-uns)
 
 ### Tagline
-"Vollständige Schadensregulierung — auf Augenhöhe."
+"Vollständige Schadensregulierung – auf Augenhöhe."
 
 ### Brand-KPIs
 - 2025 in Köln gegründet
@@ -491,7 +491,7 @@ Anleitung zur Beweissicherung am Unfallort plus downloadbare PDF-Vorlage (A4) f�
 `
 
 function renderFaq(): string {
-  let out = '\n---\n\n## FAQ (https://claimondo.de/faq) — 14 Themen-Gruppen, 45+ Q&As\n\n'
+  let out = '\n---\n\n## FAQ (https://claimondo.de/faq) – 14 Themen-Gruppen, 45+ Q&As\n\n'
   for (const g of FAQ_GRUPPEN) {
     out += `### ${g.gruppe}\n\n`
     for (const f of g.fragen) {
@@ -509,7 +509,7 @@ function renderHubCities(): string {
   const hubs = getHubCities()
   if (hubs.length === 0) return ''
   let out = `\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (${hubs.map((h) => h.name).join(', ')})\n\n`
-  out += `Die ${hubs.length} Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
+  out += `Die ${hubs.length} Hub-Cities mit verifizierter Lokaltiefe – Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
   for (const s of hubs) {
     const h = s.hyperlocal
     out += `\n---\n\n## Kfz-Gutachter ${s.name}\n`
@@ -528,7 +528,7 @@ function renderHubCities(): string {
     for (const hot of h.unfallHotspots) {
       out += `- **${hot.ort}${hot.bezirk ? ` (${hot.bezirk})` : ''}:** ${hot.beschreibung}\n`
     }
-    out += `\nHauptachsen — Autobahnen: ${h.hauptachsen.autobahnen.join(', ')}. Bundesstraßen: ${h.hauptachsen.bundesstrassen.join(', ')}.`
+    out += `\nHauptachsen – Autobahnen: ${h.hauptachsen.autobahnen.join(', ')}. Bundesstraßen: ${h.hauptachsen.bundesstrassen.join(', ')}.`
     if (h.hauptachsen.knoten.length) out += ` Verkehrsknoten: ${h.hauptachsen.knoten.join(', ')}.`
     if (h.hauptachsen.aktuelleBaustelle) out += ` Aktuell: ${h.hauptachsen.aktuelleBaustelle}.`
     out += `\n*Quelle: ${h.hotspotQuelle}.*\n`
@@ -552,14 +552,14 @@ function renderHubCities(): string {
 }
 
 function renderStaedte(): string {
-  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> — bundesweite Coverage\n\n'
-  out += `Claimondo vermittelt zertifizierte Sachverständige in **allen 16 Bundesländern**. ${STAEDTE.length} indexierte Stadt-Pages decken die wichtigsten Ballungsräume und Mittelzentren ab — von der Nordsee bis zu den Alpen, vom Saarland bis zur Oder. Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n`
+  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> – bundesweite Coverage\n\n'
+  out += `Claimondo vermittelt zertifizierte Sachverständige in **allen 16 Bundesländern**. ${STAEDTE.length} indexierte Stadt-Pages decken die wichtigsten Ballungsräume und Mittelzentren ab – von der Nordsee bis zu den Alpen, vom Saarland bis zur Oder. Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n`
   out += '| Stadt | Slug | Landgericht | Anwaltskammer | PLZ | Bevölkerung | BVSK-Spanne | Bundesland |\n'
   out += '|---|---|---|---|---|---|---|---|\n'
   for (const s of STAEDTE) {
     out += `| ${s.name} | ${s.slug} | ${s.lokal.landgericht} | ${s.lokal.kammer} | ${s.plzPrefix} | ${s.bevoelkerung} | ${s.bvskHonorarSpanne} | ${s.bundesland} |\n`
   }
-  out += '\nDarüber hinaus erreichen wir per **bundesweitem Partner-Netzwerk** auch Orte ohne eigene Stadt-Page — Termin in unter 48 h überall in Deutschland.\n'
+  out += '\nDarüber hinaus erreichen wir per **bundesweitem Partner-Netzwerk** auch Orte ohne eigene Stadt-Page – Termin in unter 48 h überall in Deutschland.\n'
   return out
 }
 

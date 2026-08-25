@@ -100,9 +100,9 @@ export function organizationSchema(opts?: {
     url: SITE_URL,
     logo: `${SITE_URL}/claimondo-icon.svg`,
     image: `${SITE_URL}/claimondo-icon.svg`,
-    slogan: 'Vollständige Schadensregulierung — auf Augenhöhe.',
+    slogan: 'Vollständige Schadensregulierung – auf Augenhöhe.',
     description:
-      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über zertifizierte Sachverständige und eine Partnerkanzlei für Verkehrsrecht werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt — kostenfrei für unverschuldet Geschädigte (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+      'Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Über zertifizierte Sachverständige und eine Partnerkanzlei für Verkehrsrecht werden alle nach §249 BGB zustehenden Ansprüche durchgesetzt – kostenfrei für unverschuldet Geschädigte (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
     foundingDate: '2025',
     foundingLocation: {
       '@type': 'Place',
@@ -283,7 +283,7 @@ export function serviceSchema(args: {
       price: '0',
       priceCurrency: 'EUR',
       description:
-        'Kostenfrei für unverschuldet Geschädigte — alle Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB.',
+        'Kostenfrei für unverschuldet Geschädigte – alle Kosten trägt die gegnerische Haftpflichtversicherung gemäß §249 BGB.',
     },
   }
 }
@@ -601,7 +601,7 @@ export function onlineGutachtenSchema(opts?: { modified?: string }) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
+    headline: '„Online-Kfz-Gutachten" – was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
     description:
       'Einordnung des LG-Bremen-Urteils 9 O 1720/24 (16.01.2026) zu Online-Kfz-Gutachten: was zulaessig ist, was nicht, und worauf Geschaedigte achten sollten.',
     author: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },

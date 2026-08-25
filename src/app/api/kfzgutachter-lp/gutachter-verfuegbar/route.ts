@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { meldeGoogleFehler } from '@/lib/google-maps/melde-fehler'
 import {
   pointInRing,
   isValidPolygon,
@@ -138,6 +139,10 @@ export async function POST(req: Request) {
       typeof loc.lat !== 'number' ||
       typeof loc.lng !== 'number'
     ) {
+      // Der Besucher hat gerade eine Adresse gewaehlt und bekommt kein Ergebnis.
+      // Liegt es am Kontingent oder am Schluessel, muss das sichtbar werden —
+      // sonst ist es ein verlorener Lead ohne Spur.
+      await meldeGoogleFehler('places-details (LP-Verfuegbarkeit)', placeData.status)
       return NextResponse.json(
         { ok: false, error: 'no_location' },
         { status: 502 },

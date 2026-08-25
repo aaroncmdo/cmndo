@@ -51,7 +51,7 @@ export async function notifyTeamPartnerSignup(opts: NotifyTeamPartnerSignupOpts)
   try {
     if (istInterneIdentitaet(opts.email, opts.name ?? opts.firma)) {
       console.log(
-        `[notify-team-signup] interne/Test-Identitaet (${opts.email ?? opts.firma}) — Team-WA unterdrueckt`,
+        `[notify-team-signup] interne/Test-Identitaet (${opts.email ?? opts.firma}) – Team-WA unterdrueckt`,
       )
       return
     }

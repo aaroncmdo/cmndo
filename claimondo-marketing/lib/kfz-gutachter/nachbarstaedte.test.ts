@@ -53,7 +53,7 @@ describe('einwohnerZahl', () => {
   })
 })
 
-describe('naechsteStaedte — der behobene Fehler', () => {
+describe('naechsteStaedte – der behobene Fehler', () => {
   it('gibt Berlin keine einzige NRW-Stadt mehr', () => {
     const treffer = naechsteStaedte('berlin').map((s) => s.slug)
     expect(treffer.filter((slug) => NRW.includes(slug))).toEqual([])
@@ -76,7 +76,7 @@ describe('naechsteStaedte — der behobene Fehler', () => {
   })
 })
 
-describe('naechsteStaedte — Grossstadt-Garantie (Gegenprobe Koeln)', () => {
+describe('naechsteStaedte – Grossstadt-Garantie (Gegenprobe Koeln)', () => {
   it('behaelt fuer Koeln Bonn, Duesseldorf und Leverkusen', () => {
     const treffer = naechsteStaedte('koeln').map((s) => s.slug)
     expect(treffer).toContain('leverkusen')
@@ -106,7 +106,7 @@ describe('naechsteStaedte — Grossstadt-Garantie (Gegenprobe Koeln)', () => {
   })
 })
 
-describe('naechsteStaedte — Vertrag', () => {
+describe('naechsteStaedte – Vertrag', () => {
   it('schliesst die Stadt selbst aus (alle 92 geprueft)', () => {
     const verstoesse = STAEDTE.filter((s) =>
       naechsteStaedte(s.slug).some((n) => n.slug === s.slug),
@@ -114,7 +114,7 @@ describe('naechsteStaedte — Vertrag', () => {
     expect(verstoesse.map((s) => s.slug)).toEqual([])
   })
 
-  it('steuert mit limit die GEWAEHLTEN — Rueckkanten kommen zusaetzlich', () => {
+  it('steuert mit limit die GEWAEHLTEN – Rueckkanten kommen zusaetzlich', () => {
     // Das Limit begrenzt, wie viele Orte eine Stadt selbst waehlt. Wer sie
     // gewaehlt hat, kommt oben drauf: sonst waere die Kante wieder einseitig.
     expect(naechsteAus('koeln', STAEDTE, 3)).toHaveLength(3)
@@ -145,12 +145,12 @@ describe('naechsteStaedte — Vertrag', () => {
   })
 })
 
-describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
+describe('Reziprozitaet – Nachbarschaft ist symmetrisch', () => {
   // Aaron-Entscheid 16.08.: der Block zeigt die selbst gewaehlten Orte UND die,
   // die einen selbst gewaehlt haben. Ohne das bleibt jede Stadt unsichtbar, die
   // zwar Nachbarn hat, aber bei keinem von ihnen unter die naechsten faellt.
 
-  it('hat KEINE einseitige Kante mehr — A zeigt B, also zeigt B auch A', () => {
+  it('hat KEINE einseitige Kante mehr – A zeigt B, also zeigt B auch A', () => {
     const netz = new Map(STAEDTE.map((s) => [s.slug, naechsteStaedte(s.slug).map((n) => n.slug)]))
     const einseitig: string[] = []
     for (const [von, ziele] of netz) {
@@ -168,7 +168,7 @@ describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
     expect(waisen).toEqual([])
   })
 
-  it('rettet siegen — die Stadt, die vorher niemand waehlte', () => {
+  it('rettet siegen – die Stadt, die vorher niemand waehlte', () => {
     // siegen liegt am NRW-Rand; alle seine Nachbarn haben Naeheres. Vor der
     // Reziprozitaet war es die einzige Waise unter 92 Staedten.
     expect(STAEDTE.filter((s) => naechsteAus(s.slug, STAEDTE, 6).some((n) => n.slug === 'siegen')))
@@ -185,7 +185,7 @@ describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
     )
   })
 
-  it('bringt keine fernen Staedte ins Spiel — die Umkreis-Grenze gilt weiter', () => {
+  it('bringt keine fernen Staedte ins Spiel – die Umkreis-Grenze gilt weiter', () => {
     const verstoesse: string[] = []
     for (const s of STAEDTE) {
       for (const n of naechsteStaedte(s.slug)) {
@@ -246,7 +246,7 @@ describe('Reziprozitaet — Nachbarschaft ist symmetrisch', () => {
   })
 })
 
-describe('naechsteAus — deterministischer Tie-Break', () => {
+describe('naechsteAus – deterministischer Tie-Break', () => {
   // Vier Kandidaten exakt gleich weit von der Basis entfernt (gleicher Breitengrad,
   // symmetrische Laengengrade). Ohne Tie-Break entschiede die Array-Reihenfolge.
   const gleichWeit = [

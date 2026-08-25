@@ -96,6 +96,22 @@ export default async function GutachterFinderEmbedPage({
   const vorauswahlAdresse =
     adresseRoh && initialCenter ? { adresse: adresseRoh, lat: initialCenter.lat, lng: initialCenter.lng } : null
 
+  // Vorname des im Deeplink genannten Gutachters — NUR zur Anzeige („Ihr Termin bei Gaith").
+  //
+  // ⚠ Warum das noetig ist: `sv`/`slot` wirken erst NACH dem Matching (waehleVorauswahl /
+  // versucheSlotVorauswahl), und das Matching startet erst, wenn ein Ort gesetzt ist. Kommt
+  // der Kunde ohne `adresse=` — der Normalfall, denn die Stadtseite kennt nur die Stadt —,
+  // sieht er einen voellig leeren Wizard: kein Gutachter, kein Termin, kein Hinweis. Genau
+  // das meldete Aaron am 25.08.2026: „durch den link wird nicht gebucht, es wird schlicht
+  // nichts gemacht." Die Werte waren die ganze Zeit da, nur unsichtbar.
+  //
+  // Der Name kommt aus der ohnehin geladenen Partnerliste — kein zusaetzlicher Query. Ist
+  // die ID unbekannt (abgelaufener/erfundener Link), bleibt er null und der Hinweis nennt
+  // nur den Termin. Nie ein Fehler, nie eine leere Seite.
+  const vorauswahlSvName = vorauswahlSv
+    ? (svs.find((s) => s.id === vorauswahlSv)?.vorname ?? null)
+    : null
+
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
@@ -133,6 +149,7 @@ export default async function GutachterFinderEmbedPage({
             vorauswahlSlotStart={vorauswahlSlot}
             utmSource={utmSource}
             vorauswahlAdresse={vorauswahlAdresse}
+            vorauswahlSvName={vorauswahlSvName}
           />
         }
       />

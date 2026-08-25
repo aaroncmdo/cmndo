@@ -20,7 +20,7 @@ const de: S = {
 
 const en: S = {
   autoVersendet:
-    'This email was sent automatically. If you have any questions, please do not reply to this email — contact us through the portal instead.',
+    'This email was sent automatically. If you have any questions, please do not reply to this email – contact us through the portal instead.',
   abwicklungUeber: 'Processed via the Claimondo platform',
   impressum: 'Legal notice',
   datenschutz: 'Privacy policy',

@@ -3,18 +3,18 @@ import { titelMitZusatz, angezeigteLaenge, BRAND_SUFFIX, TITEL_MAX_ANZEIGE } fro
 
 // Die Staffel, die die Stadtseiten nutzen — hier als Fixture, damit die Tests
 // genau das pruefen, was live laeuft.
-const STAFFEL = [' — kostenfrei nach Unfall', ' — kostenfrei', ''] as const
+const STAFFEL = [' – kostenfrei nach Unfall', ' – kostenfrei', ''] as const
 
 describe('titelMitZusatz', () => {
   it('nimmt den vollen Zusatz, wenn er passt', () => {
     const t = titelMitZusatz('Kfz-Gutachter Köln', STAFFEL)
-    expect(t).toBe('Kfz-Gutachter Köln — kostenfrei nach Unfall')
+    expect(t).toBe('Kfz-Gutachter Köln – kostenfrei nach Unfall')
     expect(angezeigteLaenge(t)).toBeLessThanOrEqual(TITEL_MAX_ANZEIGE)
   })
 
   it('faellt auf den kurzen Zusatz zurueck, wenn der volle nicht mehr passt', () => {
     const t = titelMitZusatz('Kfz-Gutachter Ludwigshafen am Rhein', STAFFEL)
-    expect(t).toBe('Kfz-Gutachter Ludwigshafen am Rhein — kostenfrei')
+    expect(t).toBe('Kfz-Gutachter Ludwigshafen am Rhein – kostenfrei')
     expect(angezeigteLaenge(t)).toBeLessThanOrEqual(TITEL_MAX_ANZEIGE)
   })
 
@@ -22,7 +22,7 @@ describe('titelMitZusatz', () => {
     // Basis aus der Rechnung bauen statt Zeichen zu zaehlen: gerade so lang,
     // dass der kurze Zusatz nicht mehr passt, der nackte Titel aber schon.
     const platz = TITEL_MAX_ANZEIGE - BRAND_SUFFIX.length
-    const basis = 'x'.repeat(platz - ' — kostenfrei'.length + 1)
+    const basis = 'x'.repeat(platz - ' – kostenfrei'.length + 1)
     const t = titelMitZusatz(basis, STAFFEL)
     expect(t).toBe(basis)
     expect(angezeigteLaenge(t)).toBeLessThanOrEqual(TITEL_MAX_ANZEIGE)
@@ -44,8 +44,8 @@ describe('titelMitZusatz', () => {
   })
 
   it('respektiert eine abweichende Obergrenze', () => {
-    expect(titelMitZusatz('Kurz', [' — Zusatz', ''], 100)).toBe('Kurz — Zusatz')
-    expect(titelMitZusatz('Kurz', [' — Zusatz', ''], 20)).toBe('Kurz')
+    expect(titelMitZusatz('Kurz', [' – Zusatz', ''], 100)).toBe('Kurz – Zusatz')
+    expect(titelMitZusatz('Kurz', [' – Zusatz', ''], 20)).toBe('Kurz')
   })
 
   it('kommt mit einer einelementigen Staffel klar', () => {
@@ -60,7 +60,7 @@ describe('titelMitZusatz', () => {
     // Wichtig, weil die Ortsnamen voller Umlaute sind — eine byte-basierte
     // Zaehlung wuerde "Mülheim an der Ruhr" faelschlich als zu lang werten.
     const t = titelMitZusatz('Kfz-Gutachter Mülheim an der Ruhr', STAFFEL)
-    expect(t).toBe('Kfz-Gutachter Mülheim an der Ruhr — kostenfrei')
+    expect(t).toBe('Kfz-Gutachter Mülheim an der Ruhr – kostenfrei')
     expect(angezeigteLaenge(t)).toBe(58)
   })
 })

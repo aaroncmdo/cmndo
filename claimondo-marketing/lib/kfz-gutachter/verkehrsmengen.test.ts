@@ -25,7 +25,7 @@ describe('getVerkehrsmengen', () => {
     expect(getVerkehrsmengen('gibt-es-nicht')).toBeNull()
   })
 
-  it('nennt NIRGENDS 0 Fahrzeuge — das wäre eine falsche Aussage', () => {
+  it('nennt NIRGENDS 0 Fahrzeuge – das wäre eine falsche Aussage', () => {
     // ⚠ 638 der 2.127 Zählstellen haben kein DTV (Ausfälle). Als 0 gerendert
     // stünde „hier fahren täglich 0 Fahrzeuge" auf einer realen Stadtseite.
     const null_werte: string[] = []
@@ -83,14 +83,14 @@ describe('schwerverkehrAnteil', () => {
 })
 
 describe('zaehlstelleSatz', () => {
-  it('bleibt eine Messung — keine Deutung', () => {
+  it('bleibt eine Messung – keine Deutung', () => {
     const satz = zaehlstelleSatz(zs(), 'de-DE')
     expect(satz).toContain('171.135 Fahrzeuge pro Tag')
     expect(satz).toContain('20.500 Lkw und Busse (12 %)')
     expect(satz).not.toMatch(/gefährlich|viel los|deshalb|Stau|Chaos/i)
   })
 
-  it('formatiert nach Locale — hartcodiertes de-DE wäre auf 5 von 6 falsch', () => {
+  it('formatiert nach Locale – hartcodiertes de-DE wäre auf 5 von 6 falsch', () => {
     expect(zaehlstelleSatz(zs(), 'en-US')).toContain('171,135')
     expect(zaehlstelleSatz(zs(), 'de-DE')).toContain('171.135')
   })

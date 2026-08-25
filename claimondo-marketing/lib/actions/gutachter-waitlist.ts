@@ -85,7 +85,7 @@ export async function stelleWaitlistAnfrage(input: SubmitInput): Promise<Result>
     .maybeSingle()
 
   if (bestehend && bestehend.status !== 'aktiv' && bestehend.status !== 'abgelehnt') {
-    return { ok: false, error: 'Eine Bewerbung mit dieser E-Mail liegt bereits vor — wir melden uns in Kürze.' }
+    return { ok: false, error: 'Eine Bewerbung mit dieser E-Mail liegt bereits vor – wir melden uns in Kürze.' }
   }
 
   const geo = await geocodePlz(input.plz)
@@ -122,7 +122,7 @@ export async function stelleWaitlistAnfrage(input: SubmitInput): Promise<Result>
 
   if (error) {
     console.error('[gutachter-waitlist] insert error:', error.message)
-    return { ok: false, error: 'Speichern fehlgeschlagen — bitte erneut versuchen.' }
+    return { ok: false, error: 'Speichern fehlgeschlagen – bitte erneut versuchen.' }
   }
 
   // Admin-Benachrichtigung (best-effort, blockt nicht den Erfolgsfall)
