@@ -3976,7 +3976,8 @@
     "onboarding_quelle",
     "basic_onboarding_abgeschlossen_am",
     "ist_testaccount",
-    "ki_intake_aktiv"
+    "ki_intake_aktiv",
+    "ki_sichtbar"
    ]
   },
   "schadenkarten": {
