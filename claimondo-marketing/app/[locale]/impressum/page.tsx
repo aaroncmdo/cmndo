@@ -1,6 +1,15 @@
 import type { Metadata } from 'next'
 import PageHeader from '@/components/shared/PageHeader'
-import { HQ_STREET, HQ_POSTAL_CODE, HQ_CITY, FOUNDER_NICOLAS_NAME, FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
+import {
+  HQ_STREET,
+  HQ_POSTAL_CODE,
+  HQ_CITY,
+  FOUNDER_NICOLAS_NAME,
+  FOUNDER_AARON_NAME,
+  BETREIBER_NAME,
+  BETREIBER_REGISTERGERICHT,
+  BETREIBER_HRB,
+} from '@/lib/seo/brand-constants'
 // Anbieterkennzeichnung nach § 5 DDG traegt dieselbe Nummer wie die CTAs
 // (Aaron-Entscheid 21.08.2026). Das Gesetz verlangt eine Nummer, unter der man
 // ankommt — keine bestimmte Nummernart. Zwei verschiedene Nummern auf einem
@@ -59,9 +68,35 @@ export default function ImpressumPage() {
             </p>
           </div>
 
+          {/* Betreiber von Website und App. Die Claimondo GmbH ist noch in
+              Gruendung und hat deshalb keine Registernummer; betrieben werden
+              claimondo.de und app.claimondo.de von der bereits eingetragenen
+              Gesellschaft. § 5 DDG verlangt Registergericht und -nummer des
+              Diensteanbieters — die kann nur diese liefern. */}
+          <div>
+            <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Betrieb von Website und App</h2>
+            <p>
+              Diese Website (claimondo.de) und die Anwendung (app.claimondo.de)
+              werden betrieben durch:<br />
+              {BETREIBER_NAME}<br />
+              {HQ_STREET}<br />
+              {HQ_POSTAL_CODE} {HQ_CITY}
+            </p>
+          </div>
+
           <div>
             <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Handelsregister</h2>
-            <p>Eintragung in Vorbereitung</p>
+            {BETREIBER_REGISTERGERICHT && BETREIBER_HRB ? (
+              <p>
+                {BETREIBER_NAME}<br />
+                {BETREIBER_REGISTERGERICHT}, {BETREIBER_HRB}
+              </p>
+            ) : (
+              /* Solange Registergericht ODER Nummer fehlt, bleibt der bisherige
+                 Hinweis stehen. Eine halbe Registerangabe waere schlechter als
+                 gar keine — siehe brand-constants.ts. */
+              <p>Eintragung in Vorbereitung</p>
+            )}
           </div>
 
           <div>
