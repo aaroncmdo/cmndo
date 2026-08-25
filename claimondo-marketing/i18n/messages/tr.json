@@ -721,7 +721,7 @@
         "Uzmanlık alanı · tüm Almanya'da erişilebilir",
         "Sigorta kesintisi geri alındı¹"
       ],
-      "methodik_note": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1176,7 +1176,7 @@
         },
         {
           "frage": "Araç hasarımı sigortaya kendim bildirmem gerekiyor mu?",
-          "antwort": "Hayır. Karşı tarafın sigortasıyla doğrudan konuşmayın — aksi takdirde sigorta kendi bilirkişisini (ControlExpert, K-Expert) gönderir ve bu bilirkişi sistematik biçimde kesinti yapar. Sigorta denetim servisleri taleplerin tipik olarak %30–40'ını kesiyor (Kaynak: NDR Reportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH emsal kararları VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24). Bağımsız ve sertifikalı bir bilirkişiyle tüm BGH uyumlu kalemler eksiksiz tespit edilir."
+          "antwort": "Hayır. Karşı tarafın sigortasıyla doğrudan konuşmayın — aksi takdirde sigorta kendi bilirkişisini (ControlExpert, K-Expert) gönderir ve bu bilirkişi sistematik biçimde kesinti yapar. Sigorta denetim servisleri taleplerin tipik olarak %30–40'ını kesiyor (Kaynak: NDR Reportajı \"Prüfdienstleister\" 2022, değerlendirmeleri, BGH emsal kararları VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24). Bağımsız ve sertifikalı bir bilirkişiyle tüm BGH uyumlu kalemler eksiksiz tespit edilir."
         },
         {
           "frage": "Kaza sonrası ne kadar değer kaybı alırım?",
@@ -1231,7 +1231,7 @@
     "versicherer_taktiken": {
       "badge": "Sigortacıların gerçekte yaptıkları",
       "heading": "Sigorta taktikleri — ve biz onlara nasıl karşı koyuyoruz",
-      "intro": "Sigortacılar hasarları <ce>ControlExpert</ce>, <ke>K-Expert</ke> ve <dekra>DEKRA</dekra> gibi denetim servislerine yönlendirir — bu servisler araç incelemesi yapmadan rakamları düşük tutar. Sigorta denetim servisleri taleplerin tipik olarak %30–40'ını kesiyor (NDR Reportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.). Claimondo ile haklarınızı korursunuz.",
+      "intro": "Sigortacılar hasarları <ce>ControlExpert</ce>, <ke>K-Expert</ke> ve <dekra>DEKRA</dekra> gibi denetim servislerine yönlendirir — bu servisler araç incelemesi yapmadan rakamları düşük tutar. Sigorta denetim servisleri taleplerin tipik olarak %30–40'ını kesiyor (NDR Reportajı 2022, BGH VI ZR 38/22 vd.). Claimondo ile haklarınızı korursunuz.",
       "col_trigger": "Tetikleyici / İfade",
       "col_wer": "Kim / Denetim Servisi",
       "col_kuerzung": "Kesinti Mekanizması",
@@ -1330,7 +1330,7 @@
       "fehler": [
         {
           "titel": "Karşı tarafın hasar yönetimine boyun eğmek",
-          "warum": "\"Her şeyle biz ilgileniriz\" şu anlama gelir: anlaşmalı serviste hasar yönlendirmesi, bilirkişi yok, değer kaybı yok — denetim servisi kesintileri nedeniyle tipik olarak %30–40 daha düşük tazminat (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.).",
+          "warum": "\"Her şeyle biz ilgileniriz\" şu anlama gelir: anlaşmalı serviste hasar yönlendirmesi, bilirkişi yok, değer kaybı yok — denetim servisi kesintileri nedeniyle tipik olarak %30–40 daha düşük tazminat (NDR Röportajı 2022, BGH VI ZR 38/22 vd.).",
           "besser": "Karşı tarafın sigortasıyla telefonda görüşmeyin. Hasarınızı Claimondo'ya bildirin, tüm iletişimi biz üstleniyoruz.",
           "href": "/decoder/werkstatt-netz"
         },
@@ -1515,7 +1515,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kesintiler Geri Alındı",
       "h1_suffix": "— katkı payı olmadan.",
-      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Trafik hukuku alanında uzman ortak hukuk büromuz bunları geri alır — bağımsız bilirkişi ve BGH-Rechtsprechung desteğiyle.",
+      "sub": "Sigorta şirketlerinin Prüfdienst denetim birimleri, talepleri tipik olarak %30–40 oranında kesiyor (BGH VI ZR 38/22 ff.). Trafik hukuku alanında uzman ortak hukuk büromuz bunları geri alır — bağımsız bilirkişi ve BGH-Rechtsprechung desteğiyle.",
       "cta_primary": "Hasarı Çevrimiçi Bildir",
       "cta_call_aria": "Claimondo Hattını Ara",
       "trust_footer": "Anonim danışmanlık · 15 dak. içinde yanıt · DSGVO uyumlu"
@@ -1538,7 +1538,7 @@
         "label": "Ø ödemeye kadar geçen süre"
       }
     ],
-    "kpi_methodik": "¹ Kaynak: NDR-Reportage Prüfdienstleister 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Karşı tarafın trafik sigortasının sorumluluğu kabul etmesi kaydıyla.",
+    "kpi_methodik": "¹ Kaynak: değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Karşı tarafın trafik sigortasının sorumluluğu kabul etmesi kaydıyla.",
     "grid": {
       "eyebrow": "Somut olarak ne elde edersiniz",
       "heading": "Claimondo'nun Prüfdienst kesintilerini geri almasının altı nedeni.",
@@ -1635,7 +1635,7 @@
       },
       {
         "frage": "Neden karşı tarafın sigortasıyla doğrudan konuşmamalıyım?",
-        "antwort": "Çünkü sigorta, kendi bilirkişisini (ControlExpert, K-Expert) atayarak sistematik biçimde kesinti uygular — denetim hizmetleri tipik olarak taleplerin %30–40'ını kesiyor (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.). Kibarca şunu söyleyin: \"Teşekkür ederim, bağımsız bir bilirkişi ve seçtiğim uzman avukatı devreye alma hakkımı kullanacağım.\" — ardından hasarınızı bize bildirin."
+        "antwort": "Çünkü sigorta, kendi bilirkişisini (ControlExpert, K-Expert) atayarak sistematik biçimde kesinti uygular — denetim hizmetleri tipik olarak taleplerin %30–40'ını kesiyor (BGH VI ZR 38/22 vd.). Kibarca şunu söyleyin: \"Teşekkür ederim, bağımsız bir bilirkişi ve seçtiğim uzman avukatı devreye alma hakkımı kullanacağım.\" — ardından hasarınızı bize bildirin."
       }
     ],
     "bottom_cta": {
@@ -1718,7 +1718,7 @@
     "warn_strong": "Önemli:",
     "warn_pre": "Sigorta denetim hizmetleri tipik olarak",
     "warn_highlight": "taleplerin %30–40'ını kesiyor",
-    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 vd.) — itiraz etmeyeceğinizi umarak.",
+    "warn_suf": "(/BGH VI ZR 38/22 vd.) — itiraz etmeyeceğinizi umarak.",
     "cta_heading": "Sorunuz listede yok mu? Size özel yanıt verelim.",
     "cta_sub": "Ücretsiz, bağlayıcı olmayan danışmanlık — çağrı merkezi yok, doğrudan bir uzmanla. 15 dakika içinde geri arama.",
     "cta_online": "Hasarı çevrimiçi bildir",
@@ -1864,7 +1864,7 @@
         "fragen": [
           {
             "frage": "Gerçekten avukata ihtiyacım var mı? Sigortayla doğrudan anlaşamaz mıyım?",
-            "antwort": "Sigortayla doğrudan görüşebilirsiniz — ancak bu durumda inceleme servisi kesintileri nedeniyle talebinizin tipik olarak %30–40'ını kaybedersiniz (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.). Sigortalar değer kaybını, UPE fark bedelini, nakliye masraflarını ve daha fazlasını kesiyor. Bir avukat bu taktikleri bilir. Karşı tarafın kusuru söz konusu olduğunda avukatlık ücretleri tamamen karşı tarafça karşılandığından hesap basittir: 0 € risk (§249 BGB uyarınca, kabul beyanı saklı kalmak kaydıyla), BGH uyumlu azami talepler. Bir avukat neredeyse her zaman kazandırır."
+            "antwort": "Sigortayla doğrudan görüşebilirsiniz — ancak bu durumda inceleme servisi kesintileri nedeniyle talebinizin tipik olarak %30–40'ını kaybedersiniz (NDR Röportajı 2022, BGH VI ZR 38/22 vd.). Sigortalar değer kaybını, UPE fark bedelini, nakliye masraflarını ve daha fazlasını kesiyor. Bir avukat bu taktikleri bilir. Karşı tarafın kusuru söz konusu olduğunda avukatlık ücretleri tamamen karşı tarafça karşılandığından hesap basittir: 0 € risk (§249 BGB uyarınca, kabul beyanı saklı kalmak kaydıyla), BGH uyumlu azami talepler. Bir avukat neredeyse her zaman kazandırır."
           },
           {
             "frage": "Avukat bana ne kadara mal olur?",
@@ -1969,7 +1969,7 @@
         "Uzman Avukat Kaynakları",
         "Sigorta Kesintisi Geri Alındı¹"
       ],
-      "methodik_note": "¹ Kaynak: NDR Röportajı „Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Kaynak: NDR Röportajı „Prüfdienstleister\" 2022, değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "wie_es_funktioniert": {
@@ -2011,7 +2011,7 @@
       {
         "titel": "Danışmanınız sizi arar",
         "text": "15 dakika içinde kişisel geri arama. Tüm süreç boyunca tek bir sabit muhatap — çağrı merkezi yok.",
-        "detail": "Danışmanınız sizinle tazminat haklarınızı görüşür: onarım, değer kaybı, kiralık araç, kullanım kaybı, avukatlık ücretleri. Karşı tarafın sigortasıyla doğrudan konuşmazsınız — bu, tipik %30–40 inceleme servisi kesintilerini önler (NDR Röportajı 2022, Verbraucherzentrale, BGH VI ZR 38/22 vd.)."
+        "detail": "Danışmanınız sizinle tazminat haklarınızı görüşür: onarım, değer kaybı, kiralık araç, kullanım kaybı, avukatlık ücretleri. Karşı tarafın sigortasıyla doğrudan konuşmazsınız — bu, tipik %30–40 inceleme servisi kesintilerini önler (NDR Röportajı 2022, BGH VI ZR 38/22 vd.)."
       },
       {
         "titel": "Bilirkişi aracınızı inceler",
@@ -2135,7 +2135,7 @@
         "label": "sigorta kesintisi geri alındı²"
       }
     ],
-    "kpi_methodik": "¹ Karşı tarafın sorumluluk sigortasının kabulüne tabidir. ² Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "kpi_methodik": "¹ Karşı tarafın sorumluluk sigortasının kabulüne tabidir. ² Kaynak: NDR Röportajı \"Prüfdienstleister\" 2022, değerlendirmeleri, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "faqs": [
       {
         "frage": "Haritada uygun bilirkişiyi nasıl bulurum?",
@@ -2879,7 +2879,7 @@
     "antwort2_h2": "Bağımsız bir bilirkişi ne kadar tutar?",
     "antwort2_text": "Ücret, aracın yeniden edinim değerine göre belirlenir ve <strong>BVSK-Honorartabelle</strong>'ye uyar — hasar miktarı ve bölgeye göre genellikle 600 € ile 2.400 € arasında değişir. Karşı tarafın kusuru söz konusuysa siz hiçbir şey ödemezsiniz: bilirkişiniz, Sicherungsabtretung (§398 BGB) aracılığıyla doğrudan karşı tarafın sigortasıyla hesaplaşır.",
     "antwort3_h2": "Neden sigorta bilirkişisi değil?",
-    "antwort3_text": "ControlExpert veya K-Expert gibi sigorta bilirkişileri, karşı tarafın sigortası adına çalışır ve sistematik olarak kesiyor — UPE ek maliyetleri, taşıma giderleri, komşu panel boyaması, değer kaybı. Sigorta denetim hizmetleri taleplerin <strong>tipik olarak %30–40'ını kesiyor</strong> (NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri). BGH, VI ZR 38/22 ve devamı / VI ZR 65/18 / VI ZR 174/24 emsal kararlarında mağdurları desteklemektedir — bağımsız, sertifikalı bir bilirkişi ile BGH uyumlu tüm kalemler eksiksiz belgelenir.",
+    "antwort3_text": "ControlExpert veya K-Expert gibi sigorta bilirkişileri, karşı tarafın sigortası adına çalışır ve sistematik olarak kesiyor — UPE ek maliyetleri, taşıma giderleri, komşu panel boyaması, değer kaybı. Sigorta denetim hizmetleri taleplerin <strong>tipik olarak %30–40'ını kesiyor</strong> (değerlendirmeleri). BGH, VI ZR 38/22 ve devamı / VI ZR 65/18 / VI ZR 174/24 emsal kararlarında mağdurları desteklemektedir — bağımsız, sertifikalı bir bilirkişi ile BGH uyumlu tüm kalemler eksiksiz belgelenir.",
     "pillars_eyebrow": "Daha fazlası",
     "pillars_h2": "Araç hasarınıza ilişkin konular",
     "pillars_cta_label": "Daha fazla bilgi",
@@ -3535,11 +3535,11 @@
     "trust_kpi_bgh_label": "BGH dava numarası 1992–2025",
     "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle aralığı",
-    "trust_methodikNote": "¹ Kaynak: NDR haberi \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24.",
+    "trust_methodikNote": "¹ Kaynak: NDR haberi \"Prüfdienstleister\" 2022, değerlendirmeleri, BGH VI ZR 38/22 vd. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Yönetici Özeti",
     "exec_p1": "Almanya'daki Kfz sorumluluk hasarlarında hasar kalemlerinin büyük çoğunluğu, karşı taraf sigortası tarafından denetim hizmetleri aracılığıyla kesiliyor — UPE ek ücretleri, nakliye masrafları, komşu panel boyası ve değer kaybı en sık kesilenler arasında. Sigorta denetim hizmetleri ",
     "exec_p1_strong": "taleplerin tipik olarak %30–40'ını kesiyor",
-    "exec_p1_suffix": " (NDR haberi \"Prüfdienstleister\" 2022, Verbraucherzentrale değerlendirmeleri, BGH VI ZR 38/22 vd.). BGH birçok kararında mağduru desteklemektedir — ancak hukuki temsil olmaksızın bu kararlar nadiren hayata geçirilmektedir.",
+    "exec_p1_suffix": "(NDR haberi \"Prüfdienstleister\" 2022, değerlendirmeleri, BGH VI ZR 38/22 vd.). BGH birçok kararında mağduru desteklemektedir — ancak hukuki temsil olmaksızın bu kararlar nadiren hayata geçirilmektedir.",
     "exec_p2": "Bu rapor, ilgili BGH içtihadı, BVSK-Honorartabelle 2025/2026 ve NRW'nin beş büyük şehrine ait bölgesel özelliklerle birlikte en sık yapılan sekiz kesinti kalemini belgelemektedir.",
     "kuerzungen_label": "Tablo 1",
     "kuerzungen_h2": "En sık yapılan 8 kesinti kalemi ve ilgili BGH içtihadı",
@@ -4077,7 +4077,7 @@
     "vorteile": {
       "title": "Avantajlar — Sigortacı kesintileri geri alındı",
       "description": "Suçsuz kazada 0 € masraf payı (§249 BGB). Denetim hizmeti kesintisi yerine bağımsız bilirkişi. Size gerçekte neyin hak edildiğini görün.",
-      "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (NDR/BGH'a göre tipik olarak %30–40) geri alıyoruz."
+      "og_description": "Suçsuz kazada §249 BGB uyarınca 0 € masraf payı. Bağımsız bilirkişi, tam talep hakkı. Denetim hizmeti kesintilerini (BGH'a göre tipik olarak %30–40) geri alıyoruz."
     },
     "faq": {
       "title": "Araç hasarı SSS — Bilmeniz gerekenler (BGH ile kanıtlı)",

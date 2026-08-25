@@ -715,7 +715,7 @@
         "obszar specjalizacji · dostępni w całej Polsce",
         "odzyskane redukcje ubezpieczyciela¹"
       ],
-      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1170,7 +1170,7 @@
         },
         {
           "frage": "Czy muszę samodzielnie zgłaszać szkodę komunikacyjną do ubezpieczenia?",
-          "antwort": "Nie. Nie rozmawiaj bezpośrednio z ubezpieczeniem sprawcy — w przeciwnym razie prześle ono własnego rzeczoznawcę (ControlExpert, K-Expert), który systematycznie zaniża kwoty. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, wyroki BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24). Niezależny, certyfikowany rzeczoznawca rzetelnie ujmuje wszystkie pozycje zgodne z wytycznymi BGH."
+          "antwort": "Nie. Nie rozmawiaj bezpośrednio z ubezpieczeniem sprawcy — w przeciwnym razie prześle ono własnego rzeczoznawcę (ControlExpert, K-Expert), który systematycznie zaniża kwoty. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy wyroki BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24). Niezależny, certyfikowany rzeczoznawca rzetelnie ujmuje wszystkie pozycje zgodne z wytycznymi BGH."
         },
         {
           "frage": "Jak wysoką utratę wartości mogę uzyskać po wypadku?",
@@ -1225,7 +1225,7 @@
     "versicherer_taktiken": {
       "badge": "Co ubezpieczyciele naprawdę robią",
       "heading": "Taktyki ubezpieczycieli — i jak im przeciwdziałamy",
-      "intro": "Ubezpieczyciele przekazują szkody do Prüfdienstleister, takich jak <ce>ControlExpert</ce>, <ke>K-Expert</ke> i <dekra>DEKRA</dekra> — ci zaniżają kwoty bez oglądania pojazdu. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Z Claimondo zachowujesz pełną kwotę.",
+      "intro": "Ubezpieczyciele przekazują szkody do Prüfdienstleister, takich jak <ce>ControlExpert</ce>, <ke>K-Expert</ke> i <dekra>DEKRA</dekra> — ci zaniżają kwoty bez oglądania pojazdu. Prüfdienstleister ubezpieczycieli obcinają typowo 30–40 % roszczeń (reportaż NDR 2022, BGH VI ZR 38/22 i nast.). Z Claimondo zachowujesz pełną kwotę.",
       "col_trigger": "Wyzwalacz / twierdzenie",
       "col_wer": "Podmiot / Prüfdienst",
       "col_kuerzung": "Mechanizm redukcji",
@@ -1324,7 +1324,7 @@
       "fehler": [
         {
           "titel": "Przyjmowanie warunków zarządzania szkodą strony przeciwnej",
-          "warum": "„Zajmiemy się wszystkim\" oznacza: kierowanie szkody do warsztatu partnerskiego, brak rzeczoznawcy, brak utraty wartości — typowo 30–40 % mniej roszczenia przez obcięcia serwisów weryfikacyjnych (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.).",
+          "warum": "„Zajmiemy się wszystkim\" oznacza: kierowanie szkody do warsztatu partnerskiego, brak rzeczoznawcy, brak utraty wartości — typowo 30–40 % mniej roszczenia przez obcięcia serwisów weryfikacyjnych (reportaż NDR 2022, BGH VI ZR 38/22 i nast.).",
           "besser": "Nie rozmawiać telefonicznie z ubezpieczeniem sprawcy. Zgłosić szkodę w Claimondo — przejmujemy całą komunikację.",
           "href": "/decoder/werkstatt-netz"
         },
@@ -1509,7 +1509,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Odzyskane cięcia",
       "h1_suffix": "— bez udziału własnego.",
-      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Nasza kancelaria partnerska ds. prawa drogowego odzyskuje je — z niezależnym rzeczoznawcą i orzecznictwem BGH za plecami.",
+      "sub": "Prüfdienst ubezpieczycieli typowo obniża 30–40 % roszczeń (reportaż NDR 2022, BGH VI ZR 38/22 i nast.). Nasza kancelaria partnerska ds. prawa drogowego odzyskuje je — z niezależnym rzeczoznawcą i orzecznictwem BGH za plecami.",
       "cta_primary": "Zgłoś szkodę online",
       "cta_call_aria": "Zadzwoń na infolinię Claimondo",
       "trust_footer": "Anonimowa porada · Odpowiedź <15 min · Zgodność z RODO"
@@ -1532,7 +1532,7 @@
         "label": "Ø do wypłaty"
       }
     ],
-    "kpi_methodik": "¹ Źródło: reportaż NDR o Prüfdienstleister 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24. ² Z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy.",
+    "kpi_methodik": "¹ Źródło: reportaż NDR o Prüfdienstleister 2022, analizy BGH VI ZR 38/22 i nast. / VI ZR 65/18 / VI ZR 174/24. ² Z zastrzeżeniem uznania przez ubezpieczyciela OC sprawcy.",
     "grid": {
       "eyebrow": "Co konkretnie otrzymujesz",
       "heading": "Sześć powodów, dla których Claimondo odzyskuje cięcia Prüfdienst.",
@@ -1629,7 +1629,7 @@
       },
       {
         "frage": "Dlaczego nie powinienem rozmawiać bezpośrednio z ubezpieczeniem sprawcy?",
-        "antwort": "Ponieważ korzysta ono z własnego rzeczoznawcy (ControlExpert, K-Expert) i systematycznie obcina roszczenia — dostawcy weryfikacyjni typowo potrącają 30–40 % roszczeń (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i in.). Powiedz uprzejmie: „Dziękuję, skorzystam z przysługującego mi prawa do powołania niezależnego rzeczoznawcy i adwokata specjalisty według własnego wyboru.\" — i zgłoś szkodę u nas."
+        "antwort": "Ponieważ korzysta ono z własnego rzeczoznawcy (ControlExpert, K-Expert) i systematycznie obcina roszczenia — dostawcy weryfikacyjni typowo potrącają 30–40 % roszczeń (reportaż NDR 2022, BGH VI ZR 38/22 i in.). Powiedz uprzejmie: „Dziękuję, skorzystam z przysługującego mi prawa do powołania niezależnego rzeczoznawcy i adwokata specjalisty według własnego wyboru.\" — i zgłoś szkodę u nas."
       }
     ],
     "bottom_cta": {
@@ -1712,7 +1712,7 @@
     "warn_strong": "Ważne:",
     "warn_pre": "Serwisy weryfikacyjne ubezpieczycieli zazwyczaj obcinają",
     "warn_highlight": "30–40 % roszczeń",
-    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) — licząc na to, że nie wniesiesz sprzeciwu.",
+    "warn_suf": "(/BGH VI ZR 38/22 ff.) — licząc na to, że nie wniesiesz sprzeciwu.",
     "cta_heading": "Nie znalazłeś swojego pytania? Odpowiemy osobiście.",
     "cta_sub": "Bezpłatna, niezobowiązująca porada — bez call center, bezpośrednio ze specjalistą. Oddzwonienie w mniej niż 15 minut.",
     "cta_online": "Zgłoś szkodę online",
@@ -1727,7 +1727,7 @@
           },
           {
             "frage": "Co tracę, jeśli po prostu „wezmę pieniądze\" bez rzeczoznawcy?",
-            "antwort": "Zazwyczaj 30–40% swojego roszczenia — taki jest cytowany przedział redukcji stosowanych przez serwisy weryfikacyjne ubezpieczycieli, według reportażu NDR „Prüfdienstleister\" (2022), analiz Verbraucherzentrale i kluczowych orzeczeń BGH (VI ZR 38/22 i in., VI ZR 65/18, VI ZR 174/24). Przykład z praktyki: wartość wyceny 11.900 € → po redukcjach ubezpieczyciela pozostaje około 8.000 €. Przepada: podatek VAT (§249 Abs. 2 BGB), narzuty UPE, koszty transportu do lakierni, lakierowanie sąsiednie — i często całkowita utrata wartości. Do tego ryzyko HIS: kto inkasuje pieniądze bez faktury za naprawę, a później ponownie zgłasza szkodę, ryzykuje całkowitą odmowę wypłaty przez ubezpieczyciela."
+            "antwort": "Zazwyczaj 30–40% swojego roszczenia — taki jest cytowany przedział redukcji stosowanych przez serwisy weryfikacyjne ubezpieczycieli, według reportażu NDR „Prüfdienstleister\" (2022), analiz i kluczowych orzeczeń BGH (VI ZR 38/22 i in., VI ZR 65/18, VI ZR 174/24). Przykład z praktyki: wartość wyceny 11.900 € → po redukcjach ubezpieczyciela pozostaje około 8.000 €. Przepada: podatek VAT (§249 Abs. 2 BGB), narzuty UPE, koszty transportu do lakierni, lakierowanie sąsiednie — i często całkowita utrata wartości. Do tego ryzyko HIS: kto inkasuje pieniądze bez faktury za naprawę, a później ponownie zgłasza szkodę, ryzykuje całkowitą odmowę wypłaty przez ubezpieczyciela."
           },
           {
             "frage": "Czy muszę najpierw płacić z własnej kieszeni?",
@@ -1858,7 +1858,7 @@
         "fragen": [
           {
             "frage": "Czy naprawdę potrzebuję adwokata? Czy nie można załatwić tego bezpośrednio z ubezpieczycielem?",
-            "antwort": "Możesz rozmawiać bezpośrednio z ubezpieczycielem — tracisz jednak zazwyczaj 30–40 % swoich roszczeń przez redukcje służb kontrolnych (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.). Ubezpieczyciele obcinają utraté wartości, narzuty UPE, koszty przemieszczenia pojazdu i inne pozycje. Adwokat zna te taktyki. Ponieważ koszty adwokackie przy winie osoby trzeciej w całości ponosi strona przeciwna, rachunek jest prosty: 0 € ryzyka (na podstawie §249 BGB, z zastrzeżeniem uznania), maksymalne roszczenia zgodne z orzecznictwem BGH. Adwokat niemal zawsze się opłaca."
+            "antwort": "Możesz rozmawiać bezpośrednio z ubezpieczycielem — tracisz jednak zazwyczaj 30–40 % swoich roszczeń przez redukcje służb kontrolnych (reportaż NDR 2022, BGH VI ZR 38/22 i nast.). Ubezpieczyciele obcinają utraté wartości, narzuty UPE, koszty przemieszczenia pojazdu i inne pozycje. Adwokat zna te taktyki. Ponieważ koszty adwokackie przy winie osoby trzeciej w całości ponosi strona przeciwna, rachunek jest prosty: 0 € ryzyka (na podstawie §249 BGB, z zastrzeżeniem uznania), maksymalne roszczenia zgodne z orzecznictwem BGH. Adwokat niemal zawsze się opłaca."
           },
           {
             "frage": "Ile kosztuje mnie adwokat?",
@@ -1963,7 +1963,7 @@
         "Źródła od adwokatów specjalistów",
         "Odzyskane potrącenia ubezpieczyciela¹"
       ],
-      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "wie_es_funktioniert": {
@@ -2005,7 +2005,7 @@
       {
         "titel": "Twój doradca oddzwoni",
         "text": "Osobiste oddzwonienie w czasie poniżej 15 minut. Jeden stały opiekun przez cały czas trwania sprawy — żadnego call center.",
-        "detail": "Wyjaśni z Tobą Twoje roszczenia: naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania, koszty adwokata. NIE rozmawiasz bezpośrednio z ubezpieczeniem sprawcy — to pozwala uniknąć typowych 30–40 % cięć przez służby weryfikacyjne (reportaż NDR 2022, Verbraucherzentrale, BGH VI ZR 38/22 i nast.)."
+        "detail": "Wyjaśni z Tobą Twoje roszczenia: naprawa, utrata wartości, wynajem auta, utrata możliwości użytkowania, koszty adwokata. NIE rozmawiasz bezpośrednio z ubezpieczeniem sprawcy — to pozwala uniknąć typowych 30–40 % cięć przez służby weryfikacyjne (reportaż NDR 2022, BGH VI ZR 38/22 i nast.)."
       },
       {
         "titel": "Rzeczoznawca dokonuje oględzin Twojego pojazdu",
@@ -2129,7 +2129,7 @@
         "label": "odzyskanych cięć ubezpieczyciela²"
       }
     ],
-    "kpi_methodik": "¹ Z zastrzeżeniem uznania przez sprawcę odpowiedzialności cywilnej ubezpieczyciela. ² Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "kpi_methodik": "¹ Z zastrzeżeniem uznania przez sprawcę odpowiedzialności cywilnej ubezpieczyciela. ² Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "faqs": [
       {
         "frage": "Jak znaleźć na mapie odpowiedniego rzeczoznawcę?",
@@ -2873,7 +2873,7 @@
     "antwort2_h2": "Ile kosztuje niezależny rzeczoznawca?",
     "antwort2_text": "Honorarium ustala się na podstawie wartości odtworzeniowej pojazdu zgodnie z <strong>BVSK-Honorartabelle</strong> — zazwyczaj od 600 € do 2.400 € w zależności od wysokości szkody i regionu. Gdy winę ponosi druga strona, nie płacisz nic: rzeczoznawca rozlicza się bezpośrednio z ubezpieczeniem sprawcy na podstawie Sicherungsabtretung (§398 BGB).",
     "antwort3_h2": "Dlaczego nie rzeczoznawca ubezpieczyciela?",
-    "antwort3_text": "Rzeczoznawcy ubezpieczycieli tacy jak ControlExpert czy K-Expert działają na zlecenie ubezpieczenia sprawcy i systematycznie zaniżają wyceny — narzuty UPE, koszty transportu, lakierowanie sąsiednich elementów, utrata wartości. Serwisy weryfikacyjne ubezpieczycieli odcinają <strong>zazwyczaj 30–40% roszczeń</strong> (reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale). BGH w kluczowych orzeczeniach VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 staje po stronie poszkodowanych — niezależny certyfikowany rzeczoznawca rzetelnie uwzględnia wszystkie pozycje zgodne z linią BGH.",
+    "antwort3_text": "Rzeczoznawcy ubezpieczycieli tacy jak ControlExpert czy K-Expert działają na zlecenie ubezpieczenia sprawcy i systematycznie zaniżają wyceny — narzuty UPE, koszty transportu, lakierowanie sąsiednich elementów, utrata wartości. Serwisy weryfikacyjne ubezpieczycieli odcinają <strong>zazwyczaj 30–40% roszczeń</strong> (reportaż NDR „Prüfdienstleister\" 2022, analizy ). BGH w kluczowych orzeczeniach VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 staje po stronie poszkodowanych — niezależny certyfikowany rzeczoznawca rzetelnie uwzględnia wszystkie pozycje zgodne z linią BGH.",
     "pillars_eyebrow": "Dowiedz się więcej",
     "pillars_h2": "Tematy związane z Twoją szkodą komunikacyjną",
     "pillars_cta_label": "Więcej informacji",
@@ -3529,11 +3529,11 @@
     "trust_kpi_bgh_label": "sygnatury BGH 1992–2025",
     "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "Rozpiętość BVSK-Honorartabelle",
-    "trust_methodikNote": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "trust_methodikNote": "¹ Źródło: reportaż NDR „Prüfdienstleister\" 2022, analizy BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Streszczenie wykonawcze",
     "exec_p1": "Przy szkodach z OC komunikacyjnego w Niemczech większość pozycji szkodowych jest obcinana przez ubezpieczyciela sprawcy za pośrednictwem serwisów weryfikacyjnych — narzuty UPE, koszty transportu, lakierowanie sąsiednie i utrata wartości najczęściej. Serwisy weryfikacyjne ubezpieczycieli obcinają ",
     "exec_p1_strong": "typowo 30–40 % roszczeń",
-    "exec_p1_suffix": " (reportaż NDR „Prüfdienstleister\" 2022, analizy Verbraucherzentrale, BGH VI ZR 38/22 ff.). BGH w wielu wyrokach staje po stronie poszkodowanego — bez reprezentacji adwokackiej wyroki te są jednak rzadko egzekwowane.",
+    "exec_p1_suffix": "(reportaż NDR „Prüfdienstleister\" 2022, analizy BGH VI ZR 38/22 ff.). BGH w wielu wyrokach staje po stronie poszkodowanego — bez reprezentacji adwokackiej wyroki te są jednak rzadko egzekwowane.",
     "exec_p2": "Niniejszy raport dokumentuje osiem najczęstszych pozycji redukcji wraz z odpowiednim orzecznictwem BGH, BVSK-Honorartabelle 2025/2026 oraz regionalne osobliwości pięciu największych miast NRW.",
     "kuerzungen_label": "Tabela 1",
     "kuerzungen_h2": "8 najczęstszych pozycji redukcji + odpowiednie orzecznictwo BGH",
@@ -4071,7 +4071,7 @@
     "vorteile": {
       "title": "Korzyści — odzyskane potrącenia ubezpieczyciela",
       "description": "0 € udziału własnego przy niezawinionej kolizji (§249 BGB). Niezależny rzeczoznawca zamiast potrącenia przez serwis kontrolny. Proszę zobaczyć, co rzeczywiście Panu/Pani przysługuje.",
-      "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 % wg NDR/BGH) odzyskujemy."
+      "og_description": "0 € udziału własnego przy niezawinionej kolizji wg §249 BGB. Niezależny rzeczoznawca, pełne roszczenie. Potrącenia serwisów kontrolnych (zwykle 30–40 % wg BGH) odzyskujemy."
     },
     "faq": {
       "title": "FAQ szkoda Kfz — co warto wiedzieć (poparte BGH)",

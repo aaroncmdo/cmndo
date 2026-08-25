@@ -721,7 +721,7 @@
         "focus area · available nationwide",
         "insurer reduction recovered¹"
       ],
-      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "gutachter_finder": {
@@ -1176,7 +1176,7 @@
         },
         {
           "frage": "Do I have to report my vehicle damage to the insurance myself?",
-          "antwort": "No. Do not speak directly with the opposing insurance — they will send their own appraiser (ControlExpert, K-Expert), who systematically reduces claims. Insurer review services typically cut 30–40 % of claims (source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH landmark rulings VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). With an independent certified expert, all BGH-compliant positions are properly documented."
+          "antwort": "No. Do not speak directly with the opposing insurance — they will send their own appraiser (ControlExpert, K-Expert), who systematically reduces claims. Insurer review services typically cut 30–40 % of claims (source: NDR documentary \"Prüfdienstleister\" 2022, analyses, BGH landmark rulings VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). With an independent certified expert, all BGH-compliant positions are properly documented."
         },
         {
           "frage": "How much diminished value can I recover after an accident?",
@@ -1231,7 +1231,7 @@
     "versicherer_taktiken": {
       "badge": "What insurers actually do",
       "heading": "Insurer tactics — and how we counter them",
-      "intro": "Insurers route claims to review services such as <ce>ControlExpert</ce>, <ke>K-Expert</ke> and <dekra>DEKRA</dekra> — who artificially reduce figures without inspecting the vehicle. Insurer review services typically cut 30–40 % of claims (NDR documentary 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). With Claimondo, you keep what you are owed.",
+      "intro": "Insurers route claims to review services such as <ce>ControlExpert</ce>, <ke>K-Expert</ke> and <dekra>DEKRA</dekra> — who artificially reduce figures without inspecting the vehicle. Insurer review services typically cut 30–40 % of claims (NDR documentary 2022, BGH VI ZR 38/22 ff.). With Claimondo, you keep what you are owed.",
       "col_trigger": "Trigger / Claim",
       "col_wer": "Party / Review service",
       "col_kuerzung": "Reduction mechanism",
@@ -1330,7 +1330,7 @@
       "fehler": [
         {
           "titel": "Engaging with the opposing party's claims management",
-          "warum": "\"We'll take care of everything\" means: claims steering to a partner workshop, no independent expert, no diminished value — typically 30–40% less in entitlements due to audit-service reductions (NDR investigative report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).",
+          "warum": "\"We'll take care of everything\" means: claims steering to a partner workshop, no independent expert, no diminished value — typically 30–40% less in entitlements due to audit-service reductions (NDR investigative report 2022, BGH VI ZR 38/22 ff.).",
           "besser": "Do not speak to the opposing insurance by phone. Report your claim with Claimondo — we handle all communication.",
           "href": "/decoder/werkstatt-netz"
         },
@@ -1515,7 +1515,7 @@
       "h1_plain": "Insurer audit-service",
       "h1_accent": "Reductions recovered",
       "h1_suffix": "— at no cost to you.",
-      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Our partner law firm for traffic law recovers them — backed by an independent appraiser and BGH case law.",
+      "sub": "Insurer audit services typically cut 30–40% of claims (NDR report 2022, BGH VI ZR 38/22 ff.). Our partner law firm for traffic law recovers them — backed by an independent appraiser and BGH case law.",
       "cta_primary": "Report damage online",
       "cta_call_aria": "Call the Claimondo hotline",
       "trust_footer": "Anonymous advice · Response <15 min · GDPR-compliant"
@@ -1538,7 +1538,7 @@
         "label": "Ø until payout"
       }
     ],
-    "kpi_methodik": "¹ Source: NDR report on audit service providers 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Subject to acknowledgement by the opposing liability insurer.",
+    "kpi_methodik": "¹ Source: NDR report on audit service providers 2022, analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Subject to acknowledgement by the opposing liability insurer.",
     "grid": {
       "eyebrow": "What you actually get",
       "heading": "Six reasons why Claimondo recovers insurer audit-service reductions.",
@@ -1635,7 +1635,7 @@
       },
       {
         "frage": "Why should I not speak directly with the opposing insurance?",
-        "antwort": "Because they deploy their own appraiser (ControlExpert, K-Expert) and systematically reduce claims — assessment services typically cut 30–40% of entitlements (NDR investigative report 2022, Verbraucherzentrale, BGH VI ZR 38/22 et seq.). Simply say: \"Thank you, I will exercise my right to engage an independent expert and specialist lawyer of my choice.\" — and report the claim to us."
+        "antwort": "Because they deploy their own appraiser (ControlExpert, K-Expert) and systematically reduce claims — assessment services typically cut 30–40% of entitlements (NDR investigative report 2022, BGH VI ZR 38/22 et seq.). Simply say: \"Thank you, I will exercise my right to engage an independent expert and specialist lawyer of my choice.\" — and report the claim to us."
       }
     ],
     "bottom_cta": {
@@ -1718,7 +1718,7 @@
     "warn_strong": "Important:",
     "warn_pre": "Insurer review services typically reduce",
     "warn_highlight": "30–40% of claims",
-    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) — hoping you won't challenge it.",
+    "warn_suf": "(/BGH VI ZR 38/22 ff.) — hoping you won't challenge it.",
     "cta_heading": "Question not listed? We answer personally.",
     "cta_sub": "Free, no-obligation consultation — no call centre, direct with a specialist. Callback in under 15 minutes.",
     "cta_online": "Report damage online",
@@ -1733,7 +1733,7 @@
           },
           {
             "frage": "What do I lose if I simply \"take the money\" without an expert report?",
-            "antwort": "Typically 30–40% of your claim — that is the documented reduction range applied by insurer review services, according to the NDR report \"Prüfdienstleister\" (2022), Verbraucherzentrale analyses, and BGH landmark rulings (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). A real-world example: expert-assessed value €11,900 → after insurer reductions approximately €8,000 remains. Lost: VAT (§249 Abs. 2 BGB), UPE surcharges, transport costs, blending costs — and frequently the entire diminished value. Add to that the HIS risk: anyone who accepts payment without a repair invoice and later has another claim risks full rejection by the insurer."
+            "antwort": "Typically 30–40% of your claim — that is the documented reduction range applied by insurer review services, according to the NDR report \"Prüfdienstleister\" (2022), analyses, and BGH landmark rulings (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). A real-world example: expert-assessed value €11,900 → after insurer reductions approximately €8,000 remains. Lost: VAT (§249 Abs. 2 BGB), UPE surcharges, transport costs, blending costs — and frequently the entire diminished value. Add to that the HIS risk: anyone who accepts payment without a repair invoice and later has another claim risks full rejection by the insurer."
           },
           {
             "frage": "Do I have to pay upfront?",
@@ -1864,7 +1864,7 @@
         "fragen": [
           {
             "frage": "Do I really need a lawyer? Can't I deal directly with the insurance?",
-            "antwort": "You can deal directly with the insurance — but you will typically lose 30–40% of your claim through reductions made by their assessment services (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 et seq.). Insurers routinely reduce diminished value, UPE surcharges, transport costs, and more. A lawyer knows these tactics. Since the opposing party bears all legal costs in cases of third-party fault, the calculation is straightforward: €0 risk (pursuant to §249 BGB, subject to acknowledgement of liability), BGH-compliant maximum claims. A lawyer is almost always worthwhile."
+            "antwort": "You can deal directly with the insurance — but you will typically lose 30–40% of your claim through reductions made by their assessment services (NDR report 2022, BGH VI ZR 38/22 et seq.). Insurers routinely reduce diminished value, UPE surcharges, transport costs, and more. A lawyer knows these tactics. Since the opposing party bears all legal costs in cases of third-party fault, the calculation is straightforward: €0 risk (pursuant to §249 BGB, subject to acknowledgement of liability), BGH-compliant maximum claims. A lawyer is almost always worthwhile."
           },
           {
             "frage": "What will the lawyer cost me?",
@@ -1969,7 +1969,7 @@
         "Specialist lawyer sources",
         "Insurer deduction recovered¹"
       ],
-      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "wie_es_funktioniert": {
@@ -2011,7 +2011,7 @@
       {
         "titel": "Your advisor gets in touch",
         "text": "Personal callback in under 15 minutes. One dedicated contact for the entire case — no call centre.",
-        "detail": "They clarify your claims with you: repair, diminished value (Wertminderung), rental car, loss of use (Nutzungsausfall), legal costs. You do NOT speak directly with the opposing insurance — this avoids the typical 30–40 % audit-service reductions (NDR report 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
+        "detail": "They clarify your claims with you: repair, diminished value (Wertminderung), rental car, loss of use (Nutzungsausfall), legal costs. You do NOT speak directly with the opposing insurance — this avoids the typical 30–40 % audit-service reductions (NDR report 2022, BGH VI ZR 38/22 ff.)."
       },
       {
         "titel": "independent appraiser inspects your vehicle",
@@ -2135,7 +2135,7 @@
         "label": "insurer reductions recovered²"
       }
     ],
-    "kpi_methodik": "¹ Subject to acknowledgement by the opposing liability insurer. ² Source: NDR report \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "kpi_methodik": "¹ Subject to acknowledgement by the opposing liability insurer. ² Source: NDR report \"Prüfdienstleister\" 2022, analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "faqs": [
       {
         "frage": "How do I find the right appraiser on the map?",
@@ -2879,7 +2879,7 @@
     "antwort2_h2": "What does an independent appraiser cost?",
     "antwort2_text": "The fee is based on the vehicle's replacement value and follows the <strong>BVSK-Honorartabelle</strong> — typically between €600 and €2,400 depending on the extent of damage and region. If the other party is at fault, you pay nothing: your appraiser settles directly with the opposing insurer via Sicherungsabtretung (§398 BGB).",
     "antwort3_h2": "Why not use the insurer's appraiser?",
-    "antwort3_text": "Insurance appraisers such as ControlExpert or K-Expert act on behalf of the opposing insurer and systematically reduce claims — UPE surcharges, transport costs, blending, diminished value. Insurer review services cut <strong>typically 30–40% of claims</strong> (NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses). The BGH upholds injured parties' rights in its leading decisions VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 — with an independent certified appraiser, all BGH-compliant claim items are properly documented.",
+    "antwort3_text": "Insurance appraisers such as ControlExpert or K-Expert act on behalf of the opposing insurer and systematically reduce claims — UPE surcharges, transport costs, blending, diminished value. Insurer review services cut <strong>typically 30–40% of claims</strong> (NDR documentary \"Prüfdienstleister\" 2022, analyses). The BGH upholds injured parties' rights in its leading decisions VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 — with an independent certified appraiser, all BGH-compliant claim items are properly documented.",
     "pillars_eyebrow": "Learn more",
     "pillars_h2": "Topics around your car claim",
     "pillars_cta_label": "Find out more",
@@ -3535,11 +3535,11 @@
     "trust_kpi_bgh_label": "BGH case references 1992–2025",
     "trust_kpi_bvsk_wert": "300–2,500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle range",
-    "trust_methodikNote": "¹ Source: NDR report “Audit service providers” 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "trust_methodikNote": "¹ Source: NDR report “Audit service providers” 2022, analyses, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Executive Summary",
     "exec_p1": "In motor liability claims in Germany, the majority of claim items are reduced by the opposing insurer via audit services — UPE surcharges, transfer costs, adjacent panel repainting, and diminished value most frequently. Insurer audit services reduce ",
     "exec_p1_strong": "typically 30–40 % of claims",
-    "exec_p1_suffix": " (NDR report “Audit service providers” 2022, Verbraucherzentrale analyses, BGH VI ZR 38/22 ff.). The BGH supports injured parties in several rulings — however, without legal representation these rulings are rarely enforced.",
+    "exec_p1_suffix": "(NDR report “Audit service providers” 2022, analyses, BGH VI ZR 38/22 ff.). The BGH supports injured parties in several rulings — however, without legal representation these rulings are rarely enforced.",
     "exec_p2": "This report documents the eight most common reduction items with relevant BGH case law, the BVSK-Honorartabelle 2025/2026, and regional characteristics of the five largest NRW cities.",
     "kuerzungen_label": "Table 1",
     "kuerzungen_h2": "The 8 most common reduction items + relevant BGH case law",
@@ -4077,7 +4077,7 @@
     "vorteile": {
       "title": "Benefits — insurer deductions recovered",
       "description": "€0 out of pocket if the crash was not your fault (§249 BGB). An independent independent assessor instead of an inspection-service cut. See what you are really entitled to.",
-      "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per NDR/BGH)."
+      "og_description": "€0 out of pocket if the crash was not your fault under §249 BGB. Independent assessor, full claim. We recover inspection-service cuts (typically 30–40 % per BGH)."
     },
     "faq": {
       "title": "Car accident claim FAQ — what you need to know (BGH-backed)",
