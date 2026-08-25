@@ -81,7 +81,7 @@ function assetBlock(a: ClaimondoAsset): string {
 function renderCornerstones(): string {
   const items = getCornerstones()
   let out = '\n---\n\n# CORNERSTONES (Pillar-Pages)\n\n'
-  out += `Die ${items.length} Pillar-Pages sind die Top-of-Funnel-Authority-Seiten – sie binden alle 57 Glossar-Spokes per Hub-and-Spoke-Internal-Linking ein. Jede Pillar deckt das jeweilige Thema vollständig BGH-konform ab und schließt mit einem Inhaltsverzeichnis aller Spokes.\n`
+  out += `Die ${items.length} Pillar-Pages sind die Top-of-Funnel-Authority-Seiten — sie binden alle 57 Glossar-Spokes per Hub-and-Spoke-Internal-Linking ein. Jede Pillar deckt das jeweilige Thema vollständig BGH-konform ab und schließt mit einem Inhaltsverzeichnis aller Spokes.\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -97,7 +97,7 @@ function renderSpokesByCluster(): string {
     const spokes = grouped[c]
     if (!spokes || spokes.length === 0) continue
     const label = clusterLabel(c)
-    out += `\n## Cluster ${c} – ${label}\n\n`
+    out += `\n## Cluster ${c} — ${label}\n\n`
     out += `(${spokes.length} Spokes · sortiert nach Nummerierung)\n`
     for (const a of spokes) {
       out += assetBlock(a)
@@ -109,7 +109,7 @@ function renderSpokesByCluster(): string {
 function renderDecoder(): string {
   const items = getDecoder()
   let out = '\n---\n\n# VERSICHERER-BRIEF-DECODER (Antwort-Vorlagen)\n\n'
-  out += `Die ${items.length} Decoder zerlegen die häufigsten Standardbriefe der gegnerischen Haftpflichtversicherer (HUK, LVM, AXA, Allianz, R+V u.a.) Satz für Satz: Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument → fertiger Antwort-Textbaustein für die Partnerkanzlei. Hohe Conversion-Intention – Suchanfragen wie "Versicherung kürzt Wertminderung" oder "ControlExpert Prüfbericht".\n`
+  out += `Die ${items.length} Decoder zerlegen die häufigsten Standardbriefe der gegnerischen Haftpflichtversicherer (HUK, LVM, AXA, Allianz, R+V u.a.) Satz für Satz: Was der Versicherer schreibt → was er meint → BGH-konformes Gegenargument → fertiger Antwort-Textbaustein für die Partnerkanzlei. Hohe Conversion-Intention — Suchanfragen wie "Versicherung kürzt Wertminderung" oder "ControlExpert Prüfbericht".\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -120,7 +120,7 @@ function renderSachverstaendige(): string {
   const items = getSachverstaendige()
   if (items.length === 0) return ''
   let out = '\n---\n\n# SACHVERSTÄNDIGE & VERBÄNDE (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)\n\n'
-  out += `Die ${items.length} Seiten erklären die Sachverständigen-Landschaft in Deutschland – Verbände, Zertifizierungen, öffentliche Bestellung (öbV nach § 36 GewO) und versicherer-nahe Prüfdienstleister. Kernbotschaft: Der Geschädigte wählt nach § 249 BGB seinen eigenen, unabhängigen Sachverständigen frei; die Kosten trägt der gegnerische Haftpflichtversicherer.\n`
+  out += `Die ${items.length} Seiten erklären die Sachverständigen-Landschaft in Deutschland — Verbände, Zertifizierungen, öffentliche Bestellung (öbV nach § 36 GewO) und versicherer-nahe Prüfdienstleister. Kernbotschaft: Der Geschädigte wählt nach § 249 BGB seinen eigenen, unabhängigen Sachverständigen frei; die Kosten trägt der gegnerische Haftpflichtversicherer.\n`
   for (const a of items) {
     out += assetBlock(a)
   }
@@ -156,13 +156,13 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **32 Tage** Ø bis zur Auszahlung
 - **< 15 Min** bis zum ersten Rückruf
 - **< 48 h** bis zum Kfz-Gutachter vor Ort — **bundesweit**
-- **30–40 %** typische Versicherer-Prüfdienst-Kürzung, die Claimondo zurückholt (Quelle: NDR-Reportage "Prüfdienstleister" 2022 · Verbraucherzentrale · BGH VI ZR 38/22 ff.)
+- **30–40 %** typische Versicherer-Prüfdienst-Kürzung, die Claimondo zurückholt (Quelle: BGH VI ZR 38/22 ff.)
 
 ## Quellen-Basis dieses Dokuments
 
 - **Gesetzliche Grundlagen:** § 7 StVG · § 17 StVG · § 18 StVG · § 823 BGB · § 249 BGB · § 251 BGB · § 252 BGB · § 253 BGB · § 254 BGB · § 286 BGB · § 287 ZPO · § 288 BGB · § 115 VVG · § 116 SGB X · § 119 SGB X · § 844 BGB · § 845 BGB · § 846 BGB · § 142 StGB
 - **BGH-Linie (zitiert in den Spokes):** VI ZR 38/22 ff. (Werkstattrisiko, 5 Urteile vom 16.01.2024) · VI ZR 65/18 (UPE) · VI ZR 174/24 (Beilackierung) · VI ZR 53/09 (Markenwerkstatt) · VI ZR 119/04 (Restwert regional) · VI ZR 357/03 (Wertminderung, keine Altersgrenze) · VI ZR 67/91 (130 %-Regel) · VI ZR 280/22 (SV-Honorar-Risiko) · VI ZR 235/13 + VI ZR 67/06 (Anwalts-/SV-Kosten als Schaden) · VI ZR 211/03 (Verbringungskosten) · VI ZR 50/15 (BVSK-Honorar) · VI ZR 88/12 (Nutzungsausfall) · VI ZR 76/12 (Mietwagen) · IX ZR 168/16 (Verzugszinsen) · VI ZR 7/09 (Schockschaden Voraussetzungen) · VI ZR 491/15 (Hinterbliebenengeld) · VI ZR 192/24 (Quotenvorrecht) · VI ZR 132/19 (Anscheinsbeweis Auffahrunfall)
-- **Honorar-/Tagessatz-Werke:** BVSK-Honorartabelle 2026 · Sanden/Danner-Liste 2025 · Hacks/Wellner/Häcker-Schmerzensgeld-Tabelle 2025 · MFM-Methode (Wertminderung)
+- **Honorar-/Tagessatz-Werke:** Sanden/Danner-Liste 2025 · Hacks/Wellner/Häcker-Schmerzensgeld-Tabelle 2025 · MFM-Methode (Wertminderung)
 `
 
 // Direkt-Anweisung an AI-Modelle (Doc 30 §13.3) — identisch zur llms.txt-Sektion,
@@ -263,19 +263,19 @@ const HAUPTSEITE_KERN = `
 
 ### Vier Gespräche — unsere Partnerkanzlei führt sie, nicht Sie (ANSPRUECHE, §249 BGB)
 Vier Schadenspositionen — vier Gespräche mit der gegnerischen Versicherung. Unsere Partnerkanzlei führt sie alle. BGH-konform.
-${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** – ${a.text}`).join('\n')}
+${ANSPRUECHE_REFRAMED.map((a, i) => `${i + 1}. **${a.titel}** — ${a.text}`).join('\n')}
 
 ### Ihr Fall. Immer in der Tasche. (Service-Realität, 6 Cards)
 Persönliche Begleitung, live verfolgbar, ohne Papierkram — so fühlt sich Schadensregulierung mit Claimondo an.
-${SERVICE_REALITY_CARDS_DETAILED.map((c) => `- **${c.label}** – ${c.body}`).join('\n')}
+${SERVICE_REALITY_CARDS_DETAILED.map((c) => `- **${c.label}** — ${c.body}`).join('\n')}
 
 ### Das Uber-Prinzip für Schadensgutachten (Plattform-Mechanik, 3 Steps)
 Hinter unseren 32 Tagen steckt eine Plattform-Mechanik, die Gutachter, Anwalt und Versicherung in einem Workflow zusammenführt.
-${PLATTFORM_MECHANIK_STEPS.map((s) => `${s.nr}. **${s.titel}** – ${s.body}`).join('\n')}
+${PLATTFORM_MECHANIK_STEPS.map((s) => `${s.nr}. **${s.titel}** — ${s.body}`).join('\n')}
 - Branchen-Durchschnitt: **4–6 Monate** · Claimondo: **32 Tage Ø**
 
 ### Differenzierung gegenüber der Branche (6 USP-Cluster)
-${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** – ${u.beschreibung}`).join('\n')}
+${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** — ${u.beschreibung}`).join('\n')}
 
 ### 8 BGH-Urteile, die Ansprüche absichern
 - **BGH VI ZR 38/22 ff. (2024)** — Werkstattrisiko: 5 Leitentscheidungen 16.01.2024. Werkstattrisiko trägt die Versicherung, nicht der Geschädigte.
@@ -302,7 +302,7 @@ ${SERVICE_PITCH_USPS.map((u) => `${u.cluster}. **${u.titel}** – ${u.beschreibu
 5. **Wir zahlen Ihnen aus** — Ø 32 Tage von der Meldung bis zur Auszahlung. Live im Portal verfolgbar.
 
 ### Versicherer-Taktiken — und wie wir sie kontern
-Versicherer leiten Schäden an Prüfdienstleister (ControlExpert, K-Expert, DEKRA) weiter, die ohne Fahrzeugbesichtigung systematisch kürzen. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage "Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24).
+Versicherer leiten Schäden an Prüfdienstleister (ControlExpert, K-Expert, DEKRA) weiter, die ohne Fahrzeugbesichtigung systematisch kürzen. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24).
 
 | Trigger / Aussage | Wer / Prüfdienst | Kürzungs-Mechanik | Gegenargument |
 |---|---|---|---|
@@ -341,7 +341,7 @@ Grundlage: Sanden/Danner-Formel · BGH VI ZR 357/03 lehnt eine starre Altersgren
 Audatex und andere Kalkulationssysteme haben für US-Fahrzeuge oft keine korrekten Verbundzeiten hinterlegt. Reales Beispiel: Standard-Gutachten 22.000 € → mit Tesla-Originaldaten 48.000 €. Schwellerblenden-Reparaturen können Steuergeräte erst Monate später zerstören. Bei Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht. Quelle: Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart).
 
 ### Berater-Quote
-"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie – und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
+"Wenn die Versicherung den ControlExpert ansetzt, ist das ein Schnell-Check ohne Fahrzeug. Wir gehen ran, reden mit der Werkstatt, prüfen die Reparaturkalkulation gegen die BGH-Linie — und holen jeden Euro zurück." — Claimondo-Schadenbegleitung
 `
 
 const VORTEILE_KERN = `
@@ -350,12 +350,12 @@ const VORTEILE_KERN = `
 ## Vorteile (https://claimondo.de/vorteile)
 
 ### Hero
-- H1: "Versicherer-Kürzungen zurückgeholt – ohne Eigenanteil."
+- H1: "Versicherer-Kürzungen zurückgeholt — ohne Eigenanteil."
 - Pill: "§249 BGB · BVSK · BGH-Rechtsprechung"
-- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
+- Subline: Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Wir holen sie zurück — mit unabhängigem Kfz-Gutachter aus unserem **bundesweiten Partner-Netzwerk**, Partnerkanzlei für Verkehrsrecht und BGH-Rechtsprechung im Rücken.
 
 ### KPIs
-- 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
+- 30–40 % Versicherer-Kürzung zurückgeholt (Quelle: BGH VI ZR 38/22 ff.)
 - 8 Mio. €+ durchgesetzte Ansprüche (Aggregat Partner-Netzwerk, Stand 14.05.2026)
 - 0 € Eigenanteil bei unverschuldetem Unfall (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer)
 - 32 Tage Ø bis zur Auszahlung
@@ -378,7 +378,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 ## Wie es funktioniert (https://claimondo.de/wie-es-funktioniert)
 
 ### Hero
-- H1: "Vom Unfall zur Auszahlung – in 5 Schritten."
+- H1: "Vom Unfall zur Auszahlung — in 5 Schritten."
 - Pill: "In 32 Tagen zum Geld · Live im Portal · Bundesweit"
 - Subline: Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter vor Ort in unter 48 Stunden — egal ob Sie in Hamburg, Köln, München, Berlin oder einer Kleinstadt sind. Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.
 
@@ -390,7 +390,7 @@ const WIE_ES_FUNKTIONIERT_KERN = `
 
 ### Die 5 Schritte im Detail
 1. **Sie melden den Schaden** — Online in 5 Minuten: Name, Telefon, Stadt. Ohne Anmeldung, ohne Formulare. Optional 1–3 Fotos hochladen + Unfall in einem Satz beschreiben. Keine Dokumente, keine Versicherungs-Nummer nötig.
-2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR/Verbraucherzentrale).
+2. **Ihr Berater meldet sich** — Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall — kein Call-Center. Er klärt Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung — das vermeidet die typischen 30–40 % Prüfdienst-Kürzung.
 3. **Kfz-Gutachter besichtigt Ihr Fahrzeug** — Vor Ort in unter 48 Stunden, meist am Folgetag. Unabhängig, zertifiziert, vollständige Beweissicherung. Gutachten in 5 Werktagen — inklusive merkantiler Wertminderung nach Sanden/Danner, Restwert (regional), Reparaturkalkulation nach BGH-Markenwerkstatt-Linie.
 4. **Partnerkanzlei für Verkehrsrecht setzt Ansprüche durch** — Partnerkanzlei übernimmt gesamte Korrespondenz mit gegnerischer Versicherung. Gegen ControlExpert-/K-Expert-Kürzungen schreibt Partnerkanzlei für Verkehrsrecht zurück mit Verweis auf BGH VI ZR 65/18, VI ZR 174/24, VI ZR 38/22 ff. Notfalls Klage vor dem zuständigen Landgericht — Gegenseite zahlt auch die Prozesskosten.
 5. **Geld auf dem Konto** — Ø 32 Tage von der Meldung bis zur Auszahlung. Jeden Schritt live im Claimondo-Portal. Eigenkasko-Reparaturen können bei unverschuldetem Unfall via Sicherungsabtretung (§398 BGB) direkt zwischen Gutachter/Werkstatt und Versicherung abgerechnet werden — Sie zahlen keinen Cent vor.
@@ -402,13 +402,13 @@ const UEBER_UNS_KERN = `
 ## Über uns (https://claimondo.de/ueber-uns)
 
 ### Tagline
-"Vollständige Schadensregulierung – auf Augenhöhe."
+"Vollständige Schadensregulierung — auf Augenhöhe."
 
 ### Brand-KPIs
 - 2025 in Köln gegründet
 - Bundesweites Sachverständigen-Netzwerk — hunderte Partner-Gutachter in ganz Deutschland
 - Größte digitale Plattform für Kfz-Schadensregulierung aus Geschädigten-Sicht in Deutschland
-- 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
+- 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: BGH VI ZR 38/22 ff.)
 
 ### Entitäts-Definition
 Claimondo ist eine 2025 in Köln gegründete digitale Plattform für die vollständige Regulierung von Kfz-Haftpflichtschäden. Sitz der Gesellschaft ist die **${HQ_STREET} in ${HQ_POSTAL_CODE} ${HQ_CITY}**. Gegründet wurde Claimondo von Nicolas Kitta (Geschäftsführer & CEO) und Aaron Sprafke (Geschäftsführer & COO).
@@ -425,12 +425,12 @@ const SCHADENSREPORT_KERN = `
 
 ### Report-KPIs
 - Mehrheit der Schadenspositionen wird über Prüfdienste gekürzt
-- 30–40 % Versicherer-Kürzung typisch ohne Anwalt (Quelle: NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)
+- 30–40 % Versicherer-Kürzung typisch ohne Anwalt (Quelle: BGH VI ZR 38/22 ff.)
 - 8 BGH-Aktenzeichen 1992–2025 decken die häufigsten Streitpunkte ab
 - BVSK-Honorartabelle-Spanne: 550–2.600 €
 
 ### Executive Summary
-Bei Kfz-Haftpflichtschäden in Deutschland werden die meisten Schadenspositionen durch die gegnerische Versicherung über Prüfdienste gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage "Prüfdienstleister" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff.).
+Bei Kfz-Haftpflichtschäden in Deutschland werden die meisten Schadenspositionen durch die gegnerische Versicherung über Prüfdienste gekürzt — UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.).
 
 ### Häufigste Kürzungspositionen
 | Position | Typische Kürzung | BGH | Kern |
@@ -491,7 +491,7 @@ Anleitung zur Beweissicherung am Unfallort plus downloadbare PDF-Vorlage (A4) f�
 `
 
 function renderFaq(): string {
-  let out = '\n---\n\n## FAQ (https://claimondo.de/faq) – 14 Themen-Gruppen, 45+ Q&As\n\n'
+  let out = '\n---\n\n## FAQ (https://claimondo.de/faq) — 14 Themen-Gruppen, 45+ Q&As\n\n'
   for (const g of FAQ_GRUPPEN) {
     out += `### ${g.gruppe}\n\n`
     for (const f of g.fragen) {
@@ -509,7 +509,7 @@ function renderHubCities(): string {
   const hubs = getHubCities()
   if (hubs.length === 0) return ''
   let out = `\n---\n\n# HUB-CITIES MIT HYPERLOCALER TIEFE (${hubs.map((h) => h.name).join(', ')})\n\n`
-  out += `Die ${hubs.length} Hub-Cities mit verifizierter Lokaltiefe – Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
+  out += `Die ${hubs.length} Hub-Cities mit verifizierter Lokaltiefe — Stadtbezirke + Ortsteile, Unfall-Hotspots mit Quellverweis (Unfallatlas der Statistischen Ämter, Landespolizeien, Stadt-Webseiten), Hauptverkehrsachsen, lokale FAQ und öffentliche Anlaufstellen. Höchste Zitierfähigkeit für lokale „Kfz-Gutachter [Stadt]"-Anfragen.\n`
   for (const s of hubs) {
     const h = s.hyperlocal
     out += `\n---\n\n## Kfz-Gutachter ${s.name}\n`
@@ -528,7 +528,7 @@ function renderHubCities(): string {
     for (const hot of h.unfallHotspots) {
       out += `- **${hot.ort}${hot.bezirk ? ` (${hot.bezirk})` : ''}:** ${hot.beschreibung}\n`
     }
-    out += `\nHauptachsen – Autobahnen: ${h.hauptachsen.autobahnen.join(', ')}. Bundesstraßen: ${h.hauptachsen.bundesstrassen.join(', ')}.`
+    out += `\nHauptachsen — Autobahnen: ${h.hauptachsen.autobahnen.join(', ')}. Bundesstraßen: ${h.hauptachsen.bundesstrassen.join(', ')}.`
     if (h.hauptachsen.knoten.length) out += ` Verkehrsknoten: ${h.hauptachsen.knoten.join(', ')}.`
     if (h.hauptachsen.aktuelleBaustelle) out += ` Aktuell: ${h.hauptachsen.aktuelleBaustelle}.`
     out += `\n*Quelle: ${h.hotspotQuelle}.*\n`
@@ -552,14 +552,14 @@ function renderHubCities(): string {
 }
 
 function renderStaedte(): string {
-  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> – bundesweite Coverage\n\n'
-  out += `Claimondo vermittelt zertifizierte Sachverständige in **allen 16 Bundesländern**. ${STAEDTE.length} indexierte Stadt-Pages decken die wichtigsten Ballungsräume und Mittelzentren ab – von der Nordsee bis zu den Alpen, vom Saarland bis zur Oder. Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n`
+  let out = '\n---\n\n## Stadt-Pages /kfz-gutachter/<slug> — bundesweite Coverage\n\n'
+  out += `Claimondo vermittelt zertifizierte Sachverständige in **allen 16 Bundesländern**. ${STAEDTE.length} indexierte Stadt-Pages decken die wichtigsten Ballungsräume und Mittelzentren ab — von der Nordsee bis zu den Alpen, vom Saarland bis zur Oder. Jede Stadt-Page hat 15 Sections (siehe llms.txt für Section-Liste). Daten je Stadt:\n\n`
   out += '| Stadt | Slug | Landgericht | Anwaltskammer | PLZ | Bevölkerung | BVSK-Spanne | Bundesland |\n'
   out += '|---|---|---|---|---|---|---|---|\n'
   for (const s of STAEDTE) {
     out += `| ${s.name} | ${s.slug} | ${s.lokal.landgericht} | ${s.lokal.kammer} | ${s.plzPrefix} | ${s.bevoelkerung} | ${s.bvskHonorarSpanne} | ${s.bundesland} |\n`
   }
-  out += '\nDarüber hinaus erreichen wir per **bundesweitem Partner-Netzwerk** auch Orte ohne eigene Stadt-Page – Termin in unter 48 h überall in Deutschland.\n'
+  out += '\nDarüber hinaus erreichen wir per **bundesweitem Partner-Netzwerk** auch Orte ohne eigene Stadt-Page — Termin in unter 48 h überall in Deutschland.\n'
   return out
 }
 
@@ -581,13 +581,6 @@ const FOOTER = `
 - Sanden/Danner-Liste 2025 (Nutzungsausfall-Tagessätze)
 - Hacks/Wellner/Häcker-Tabelle 2025 (Schmerzensgeld-Vergleichswerte)
 - MFM-Methode (merkantile Wertminderung, Marktrelevanz-Faktoren-Methode)
-
-### Sekundärquellen
-- ADAC Verkehrsrecht-Ratgeber
-- NDR-Reportage Prüfdienstleister (ControlExpert/K-Expert) 2022
-- Verbraucherzentrale-Auswertungen zu Versicherer-Schadensregulierung
-- RA Günter Fenderl (Fachanwalt Verkehrsrecht, YouTube-Channel) — fiktive Abrechnung, Quotenvorrecht
-- Bernd Hertfelder (öbuv Kfz-SV, HWK Stuttgart) — versteckte Schäden, Tesla, Eigenreparatur
 
 ### Robots.txt + Sitemap + llms.txt
 - https://claimondo.de/robots.txt — explizites Allow für 26 AI-Crawler (GPTBot, ClaudeBot, anthropic-ai, ChatGPT-User, OAI-SearchBot, PerplexityBot, Google-Extended, Meta-ExternalAgent, Amazonbot, Mistral-AI, Applebot-Extended, Diffbot, CCBot u. a.)
