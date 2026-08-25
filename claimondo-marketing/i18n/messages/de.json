@@ -594,12 +594,12 @@
       "report_damage_direct": "Schaden direkt melden",
       "view_sv_map": "Sachverständigen-Karte ansehen",
       "cs_find_sv_label": "Sachverständigen auf der Karte finden:",
-      "cs_find_sv_tail": "— interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
+      "cs_find_sv_tail": "– interaktive Karte mit allen Partner-Sachverständigen, Marker klicken, freien Termin sehen.",
       "cs_ki_label": "Kostenlose KI-Erstbewertung",
       "cs_ki_mid": "in 60 Sekunden:",
-      "cs_ki_tail": "— drei Fotos und eine kurze Beschreibung reichen.",
+      "cs_ki_tail": "– drei Fotos und eine kurze Beschreibung reichen.",
       "cs_report_mid": "mit Rückruf in unter 15 Minuten:",
-      "cs_report_tail": "— ohne Anmeldung, 3 Felder.",
+      "cs_report_tail": "– ohne Anmeldung, 3 Felder.",
       "cs_phone_hours": "(Mo–Fr 08–20, Sa+So 09–18 Uhr)"
     },
     "cluster": {
@@ -678,7 +678,7 @@
     "vorteile": {
       "title": "Vorteile – Versicherer-Kürzungen zurückgeholt",
       "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger Kfz-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
-      "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück."
+      "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut BGH) holen wir zurück."
     },
     "faq": {
       "title": "FAQ Kfz-Schaden – BGH-belegte Antworten",
@@ -874,7 +874,7 @@
     },
     "hero": {
       "eyebrow": "Über Claimondo",
-      "headline": "Vollständige Schadensregulierung —",
+      "headline": "Vollständige Schadensregulierung –",
       "headline_accent": "auf Augenhöhe.",
       "subline": "Wir sind die Plattform die Geschädigten gibt was ihnen zusteht – nicht das was die Versicherung gerade noch durchwinkt."
     },
@@ -899,7 +899,7 @@
       "eyebrow": "Was wir glauben",
       "heading_pre": "In Deutschland kürzen Versicherer-Prüfdienste typischerweise",
       "heading_accent": "30–40 % der Ansprüche",
-      "heading_suf": "— und niemand widerspricht.¹",
+      "heading_suf": "– und niemand widerspricht.¹",
       "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten – ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen – unsere Partnerkanzlei für Verkehrsrecht setzt das für Sie durch.",
       "quelle": "¹ Quelle: BGH-Leitentscheidungen VI ZR 38/22 ff. · VI ZR 65/18 · VI ZR 174/24."
     },
@@ -1010,7 +1010,7 @@
         "Schwerpunkt · bundesweit erreichbar",
         "Versicherer-Kürzung zurückgeholt¹"
       ],
-      "methodik_note": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     },
     "cta": {
       "heading": "Direkt reden – schneller als jede Versicherung",
@@ -1323,7 +1323,7 @@
         },
         {
           "frage": "Muss ich meinen Kfz-Schaden selbst bei der Versicherung melden?",
-          "antwort": "Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung – die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen."
+          "antwort": "Nein. Sprechen Sie nicht direkt mit der gegnerischen Versicherung – die schickt sonst ihren eigenen Gutachter (ControlExpert, K-Expert), der systematisch kürzt. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (Quelle: BGH-Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24). Mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen."
         },
         {
           "frage": "Wie viel Wertminderung bekomme ich nach einem Unfall?",
@@ -1373,12 +1373,12 @@
         "Wertminderung entfällt, Positionen pauschal gekürzt",
         "Typisch 30–40 % weniger als der echte Schaden"
       ],
-      "fussnote": "Typische Kürzung durch Versicherer-Prüfdienste: 30–40 % (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
+      "fussnote": "Typische Kürzung durch Versicherer-Prüfdienste: 30–40 % (BGH VI ZR 38/22 ff.)."
     },
     "versicherer_taktiken": {
       "badge": "Was Versicherer wirklich tun",
       "heading": "Versicherer-Taktiken – und wie wir sie kontern",
-      "intro": "Versicherer leiten Schäden an Prüfdienstleister wie <ce>ControlExpert</ce>, <ke>K-Expert</ke> und <dekra>DEKRA</dekra> weiter – die rechnen ohne Fahrzeugbesichtigung künstlich klein. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Mit Claimondo behalten Sie sie.",
+      "intro": "Versicherer leiten Schäden an Prüfdienstleister wie <ce>ControlExpert</ce>, <ke>K-Expert</ke> und <dekra>DEKRA</dekra> weiter – die rechnen ohne Fahrzeugbesichtigung künstlich klein. Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Mit Claimondo behalten Sie sie.",
       "col_trigger": "Trigger / Aussage",
       "col_wer": "Wer / Prüfdienst",
       "col_kuerzung": "Kürzungs-Mechanik",
@@ -1477,7 +1477,7 @@
       "fehler": [
         {
           "titel": "Auf das Schadenmanagement der Gegenseite eingehen",
-          "warum": "„Wir kümmern uns um alles” bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung – typischerweise 30–40 % weniger Anspruch durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.).",
+          "warum": "„Wir kümmern uns um alles” bedeutet: Schadensteuerung in Partnerwerkstatt, kein Gutachter, keine Wertminderung – typischerweise 30–40 % weniger Anspruch durch Prüfdienst-Kürzungen (BGH VI ZR 38/22 ff.).",
           "besser": "Nicht mit der gegnerischen Versicherung telefonieren. Schaden bei Claimondo melden, wir übernehmen die gesamte Kommunikation.",
           "href": "/decoder/werkstatt-netz"
         },
@@ -1528,7 +1528,7 @@
       "eyebrow": "Persönliche Begleitung",
       "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
       "quote": "Sie haben einen festen Ansprechpartner: Wir koordinieren Gutachter, Werkstatt und unsere Partnerkanzlei, behalten jede Frist im Blick und halten Sie auf dem Laufenden – Sie müssen niemandem hinterhertelefonieren.",
-      "quote_attribution": "— Claimondo-Schadenbegleitung",
+      "quote_attribution": "– Claimondo-Schadenbegleitung",
       "cta_ablauf": "So funktioniert der Ablauf",
       "foto_alt": "Persönlicher Claimondo-Berater am Telefon"
     },
@@ -1568,7 +1568,7 @@
       "success_body": "Ein Berater ruft Sie in <strong>unter 15 Minuten</strong> zurück – täglich zwischen 8 und 20 Uhr, außerhalb dieser Zeiten am nächsten Morgen. Bitte halten Sie das Telefon bereit, die Nummer kann unterdrückt sein.",
       "success_no_response": "Sie hören nichts? Rufen Sie uns direkt an:",
       "success_another": "Noch eine Anfrage senden",
-      "error_no_response": "Klappt nicht? Rufen Sie uns direkt an —",
+      "error_no_response": "Klappt nicht? Rufen Sie uns direkt an –",
       "datenschutz_prefix": "Mit dem Absenden akzeptiere ich die",
       "datenschutz_link": "Datenschutzerklärung",
       "error_fallback": "Übermittlung fehlgeschlagen"
@@ -1813,7 +1813,7 @@
       "h1_plain": "Prüfdienst-",
       "h1_accent": "Kürzungen zurückgeholt",
       "h1_suffix": " – ohne Eigenanteil.",
-      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Unsere Partnerkanzlei für Verkehrsrecht holt sie zurück – mit unabhängigem Kfz-Gutachter und BGH-Rechtsprechung im Rücken.",
+      "sub": "Versicherer-Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Unsere Partnerkanzlei für Verkehrsrecht holt sie zurück – mit unabhängigem Kfz-Gutachter und BGH-Rechtsprechung im Rücken.",
       "cta_primary": "Schaden online melden",
       "cta_call_aria": "Claimondo Hotline anrufen",
       "trust_footer": "Anonyme Beratung · Antwort <15 Min · DSGVO-konform"
@@ -1836,7 +1836,7 @@
         "label": "Ø bis zur Auszahlung"
       }
     ],
-    "kpi_methodik": "¹ Quelle: NDR-Reportage Prüfdienstleister 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer.",
+    "kpi_methodik": "¹ Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24. ² Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer.",
     "grid": {
       "eyebrow": "Was Sie konkret bekommen",
       "heading": "Sechs Gründe, warum Claimondo Prüfdienst-Kürzungen zurückholt.",
@@ -1933,7 +1933,7 @@
       },
       {
         "frage": "Warum sollte ich nicht direkt mit der gegnerischen Versicherung sprechen?",
-        "antwort": "Weil sie ihren eigenen Gutachter (ControlExpert, K-Expert) ansetzt und systematisch kürzt – Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Sagen Sie höflich: „Vielen Dank, ich mache von meinem Recht Gebrauch, einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl einzuschalten.\" – und melden den Schaden bei uns."
+        "antwort": "Weil sie ihren eigenen Gutachter (ControlExpert, K-Expert) ansetzt und systematisch kürzt – Prüfdienste kürzen typischerweise 30–40 % der Ansprüche (BGH VI ZR 38/22 ff.). Sagen Sie höflich: „Vielen Dank, ich mache von meinem Recht Gebrauch, einen unabhängigen Sachverständigen und Fachanwalt meiner Wahl einzuschalten.\" – und melden den Schaden bei uns."
       }
     ],
     "bottom_cta": {
@@ -2023,7 +2023,7 @@
         "label": "Versicherer-Kürzung zurückgeholt²"
       }
     ],
-    "kpi_methodik": "¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ² Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "kpi_methodik": "¹ Vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer. ² Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "faqs": [
       {
         "frage": "Wie finde ich auf der Karte den passenden Sachverständigen?",
@@ -2171,7 +2171,7 @@
     ]
   },
   "faq": {
-    "heading": "Häufige Fragen —",
+    "heading": "Häufige Fragen –",
     "heading_accent": "Antworten in unter 60 Sekunden.",
     "sub": "Antworten zu Kfz-Schaden, Wertminderung, Versicherer-Kürzungen, Quotenvorrecht, Tesla-/E-Auto und mehr – alle mit BGH-Aktenzeichen und §-Verweisen belegt. Suchen Sie nach einem Stichwort oder springen Sie direkt zur passenden Gruppe.",
     "trust_badge": "BGH-belegt · 27 Fachanwalt-Quellen",
@@ -2186,7 +2186,7 @@
     "warn_strong": "Wichtig:",
     "warn_pre": "Versicherer-Prüfdienste kürzen typischerweise",
     "warn_highlight": "30–40 % der Ansprüche",
-    "warn_suf": "(NDR/Verbraucherzentrale/BGH VI ZR 38/22 ff.) – in der Hoffnung, dass Sie nicht widersprechen.",
+    "warn_suf": "(/BGH VI ZR 38/22 ff.) – in der Hoffnung, dass Sie nicht widersprechen.",
     "cta_heading": "Frage nicht dabei? Wir antworten persönlich.",
     "cta_sub": "Kostenlose, unverbindliche Beratung – ohne Callcenter, direkt mit einem Fachmann. Rückruf in unter 15 Minuten.",
     "cta_online": "Schaden online melden",
@@ -2201,7 +2201,7 @@
           },
           {
             "frage": "Was verliere ich, wenn ich einfach \"Geld nehme\" ohne Gutachter?",
-            "antwort": "Typischerweise 30–40 % Ihres Anspruchs – so lautet die quotierte Bandbreite von Versicherer-Prüfdienst-Kürzungen laut NDR-Reportage „Prüfdienstleister\" (2022), Verbraucherzentrale-Auswertungen und BGH-Leitentscheidungen (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben rund 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung – und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer."
+            "antwort": "Typischerweise 30–40 % Ihres Anspruchs – so lautet die quotierte Bandbreite von Versicherer-Prüfdienst-Kürzungen laut ), und BGH-Leitentscheidungen (VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24). Beispiel aus der Praxis: Gutachtenwert 11.900 € → nach Versicherer-Kürzungen bleiben rund 8.000 € übrig. Verloren gehen: Mehrwertsteuer (§249 Abs. 2 BGB), UPE-Aufschläge, Verbringungskosten, Beilackierung – und häufig die komplette Wertminderung. Dazu das HIS-Risiko: Wer ohne Reparaturrechnung kassiert und später wieder einen Schaden hat, riskiert die vollständige Ablehnung durch den Versicherer."
           },
           {
             "frage": "Muss ich in Vorleistung gehen?",
@@ -2218,7 +2218,7 @@
         "fragen": [
           {
             "frage": "Warum zahlt die Versicherung nie den vollen Gutachtenbetrag?",
-            "antwort": "Weil sie es kann – solange niemand widerspricht. Versicherer beauftragen ControlExpert, K-Expert oder DEKRA mit automatisierten Prüfberichten, die ohne Fahrzeugbesichtigung Positionen streichen. NDR-Reportage: Versicherungs-Gutachter 2.000 € → unabhängiges Gutachten nach Demontage: 9.000 €. BGH-Urteile stehen dagegen (VI ZR 65/18, VI ZR 174/24) – aber nur wer widerspricht, bekommt sein Recht."
+            "antwort": "Weil sie es kann – solange niemand widerspricht. Versicherer beauftragen ControlExpert, K-Expert oder DEKRA mit automatisierten Prüfberichten, die ohne Fahrzeugbesichtigung Positionen streichen. VI ZR 174/24) – aber nur wer widerspricht, bekommt sein Recht."
           },
           {
             "frage": "Was streichen Versicherungen am häufigsten?",
@@ -2332,7 +2332,7 @@
         "fragen": [
           {
             "frage": "Brauche ich wirklich einen Anwalt? Geht das nicht direkt mit der Versicherung?",
-            "antwort": "Sie können direkt mit der Versicherung reden – verlieren dabei aber typischerweise 30–40 % Ihres Anspruchs durch Prüfdienst-Kürzungen (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.). Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko (nach §249 BGB, vorbehaltlich Anerkenntnis), BGH-konforme Maximalansprüche. Ein Anwalt lohnt sich praktisch immer."
+            "antwort": "Sie können direkt mit der Versicherung reden – verlieren dabei aber typischerweise 30–40 % Ihres Anspruchs durch Prüfdienst-Kürzungen (BGH VI ZR 38/22 ff.). Versicherungen kürzen Wertminderung, UPE-Aufschläge, Verbringungskosten und mehr. Ein Anwalt kennt diese Taktiken. Da die Anwaltskosten bei Fremdverschulden vollständig die Gegenseite trägt, ist die Rechnung einfach: 0 € Risiko (nach §249 BGB, vorbehaltlich Anerkenntnis), BGH-konforme Maximalansprüche. Ein Anwalt lohnt sich praktisch immer."
           },
           {
             "frage": "Was kostet mich der Anwalt?",
@@ -2437,13 +2437,13 @@
         "Fachanwalt-Quellen",
         "Versicherer-Kürzung zurückgeholt¹"
       ],
-      "methodik_note": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
+      "methodik_note": "¹ Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24."
     }
   },
   "wie_es_funktioniert": {
     "hero": {
       "badge": "In 32 Tagen zum Geld · Live im Portal",
-      "h1_plain": "Vom Unfall zur Auszahlung —",
+      "h1_plain": "Vom Unfall zur Auszahlung –",
       "h1_accent": "in 5 Schritten.",
       "sub": "Sie machen Schritt 1. Wir machen den Rest. Berater-Rückruf in unter 15 Minuten, Kfz-Gutachter kommt in unter 48 Stunden zu Ihrem Fahrzeug, Anwalt setzt jeden Anspruch durch. Live verfolgbar im Portal.",
       "cta_primary": "Schaden online melden"
@@ -2479,7 +2479,7 @@
       {
         "titel": "Ihr Berater meldet sich",
         "text": "Persönlicher Rückruf in unter 15 Minuten. Ein fester Ansprechpartner für den gesamten Fall – kein Call-Center.",
-        "detail": "Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung – das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (NDR-Reportage 2022, Verbraucherzentrale, BGH VI ZR 38/22 ff.)."
+        "detail": "Er klärt mit Ihnen Ihre Ansprüche: Reparatur, Wertminderung, Mietwagen, Nutzungsausfall, Anwaltskosten. Sie sprechen NICHT direkt mit der gegnerischen Versicherung – das vermeidet die typischen 30–40 % Prüfdienst-Kürzung (BGH VI ZR 38/22 ff.)."
       },
       {
         "titel": "Kfz-Gutachter besichtigt Ihr Fahrzeug",
@@ -2499,7 +2499,7 @@
     ],
     "portal": {
       "eyebrow": "Das Claimondo-Portal",
-      "heading_pre": "Wie Uber —",
+      "heading_pre": "Wie Uber –",
       "heading_accent": "nur für Ihren Kfz-Schaden.",
       "sub": "Sehen Sie live, was gerade passiert: Gutachter unterwegs, Anwalt aktiv, Geld in Bearbeitung. Kein Anrufen, kein Warten – alle Schritte in einer App, jederzeit transparent.",
       "features": [
@@ -2542,7 +2542,7 @@
       "heading": "Ein Berater. Eine Nummer. Die ganze Strecke.",
       "foto_alt": "Persönlicher Claimondo-Berater am Telefon",
       "blockquote": "„Sobald wir Ihre Meldung haben, übernehmen wir alles. Sie hören in 15 Minuten von mir, der Gutachter ist am nächsten Tag bei Ihnen, und ich melde mich persönlich bei jedem Meilenstein. Sie müssen mit der gegnerischen Versicherung kein einziges Mal sprechen.\"",
-      "byline": "— Claimondo-Schadenbegleitung"
+      "byline": "– Claimondo-Schadenbegleitung"
     },
     "faq": {
       "eyebrow": "Häufige Fragen zum Ablauf",
@@ -3278,7 +3278,7 @@
   },
   "kfz_gutachter_hub": {
     "hero_eyebrow": "Unabhängige Kfz-Sachverständige",
-    "hero_h1_line1": "Kfz-Gutachter finden —",
+    "hero_h1_line1": "Kfz-Gutachter finden –",
     "hero_h1_line2": "unabhängig & kostenfrei.",
     "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen Sachverständigen-Verzeichnis, bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil – die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
@@ -3293,7 +3293,7 @@
     "antwort2_h2": "Was kostet ein unabhängiger Sachverständiger?",
     "antwort2_text": "Das Honorar richtet sich nach dem Wiederbeschaffungswert des Fahrzeugs und folgt der <strong>BVSK-Honorartabelle</strong> – typischerweise zwischen 600 € und 2.400 € je nach Schadenshöhe und Region. Bei Fremdverschulden zahlen Sie nichts: Ihr Gutachter rechnet via Sicherungsabtretung (§398 BGB) direkt mit der gegnerischen Versicherung ab.",
     "antwort3_h2": "Warum nicht den Versicherungs-Gutachter?",
-    "antwort3_text": "Versicherungs-Gutachter wie ControlExpert oder K-Expert arbeiten im Auftrag der gegnerischen Versicherung und kürzen systematisch – UPE-Aufschläge, Verbringungskosten, Beilackierung, Wertminderung. Versicherer-Prüfdienste kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> (NDR-Reportage „Prüfdienstleister“ 2022, Verbraucherzentrale-Auswertungen). Der BGH stützt in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die Geschädigten – mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.",
+    "antwort3_text": "Versicherungs-Gutachter wie ControlExpert oder K-Expert arbeiten im Auftrag der gegnerischen Versicherung und kürzen systematisch – UPE-Aufschläge, Verbringungskosten, Beilackierung, Wertminderung. Versicherer-Prüfdienste kürzen <strong>typischerweise 30–40 % der Ansprüche</strong> . Der BGH stützt in den Leitentscheidungen VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24 die Geschädigten – mit einem unabhängigen zertifizierten Sachverständigen werden alle BGH-konformen Positionen sauber aufgenommen.",
     "pillars_eyebrow": "Vertiefen",
     "pillars_h2": "Themen rund um Ihren Kfz-Schaden",
     "pillars_cta_label": "Mehr erfahren",
@@ -3633,7 +3633,7 @@
     ],
     "urteil_intro": "Auf Klage der Wettbewerbszentrale untersagte das Landgericht Bremen einem Anbieter die Werbung für „Online-Kfz-Gutachten“. Das Gericht stützte sich auf drei Kern-Überlegungen:",
     "urteil_zitat": "„Die persönliche Inaugenscheinnahme des beschädigten Fahrzeugs gehört zur ureigensten Aufgabe eines Kfz-Sachverständigen.“",
-    "urteil_zitat_quelle": "— sinngemäße Kernaussage des LG Bremen",
+    "urteil_zitat_quelle": "– sinngemäße Kernaussage des LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Persönliche Besichtigung ist nicht ersetzbar.",
@@ -4174,11 +4174,11 @@
     "trust_kpi_bgh_label": "BGH-Aktenzeichen 1992–2025",
     "trust_kpi_bvsk_wert": "300–2.500 €",
     "trust_kpi_bvsk_label": "BVSK-Honorartabelle Spanne",
-    "trust_methodikNote": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
+    "trust_methodikNote": "¹ Quelle: BGH VI ZR 38/22 ff. / VI ZR 65/18 / VI ZR 174/24.",
     "exec_label": "Executive Summary",
     "exec_p1": "Bei Kfz-Haftpflichtschäden in Deutschland wird die Mehrheit der Schadenspositionen durch die gegnerische Versicherung über Prüfdienste gekürzt – UPE-Aufschläge, Verbringungskosten, Beilackierung und Wertminderung am häufigsten. Versicherer-Prüfdienste kürzen ",
     "exec_p1_strong": "typischerweise 30–40 % der Ansprüche",
-    "exec_p1_suffix": " (NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten – ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.",
+    "exec_p1_suffix": "(BGH VI ZR 38/22 ff.). Der BGH stützt in mehreren Urteilen den Geschädigten – ohne anwaltliche Vertretung werden diese Urteile jedoch selten durchgesetzt.",
     "exec_p2": "Dieser Report dokumentiert die acht häufigsten Kürzungspositionen mit zugehöriger BGH-Rechtsprechung, die BVSK-Honorartabelle 2025/2026 und regionale Besonderheiten der fünf größten NRW-Städte.",
     "kuerzungen_label": "Tabelle 1",
     "kuerzungen_h2": "Die 8 häufigsten Kürzungspositionen + zugehörige BGH-Rechtsprechung",

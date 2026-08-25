@@ -85,7 +85,7 @@ describe('hotspotOrt', () => {
     expect(hotspotOrt(hs({ stadtteil: null }))).toBe('Hohenstaufenring')
   })
 
-  it('schreibt nummerierte Straßen aus — „A 30" allein liest sich wie ein Tippfehler', () => {
+  it('schreibt nummerierte Straßen aus – „A 30" allein liest sich wie ein Tippfehler', () => {
     expect(hotspotOrt(hs({ strasse: 'A 30', stadtteil: null }))).toBe('Autobahn A 30')
     expect(hotspotOrt(hs({ strasse: 'B 16a', stadtteil: null }))).toBe('Bundesstraße B 16a')
     expect(hotspotOrt(hs({ strasse: 'L 182', stadtteil: 'Heimerzheim' }))).toBe('Landesstraße L 182 (Heimerzheim)')
@@ -102,7 +102,7 @@ describe('hotspotOrt', () => {
 })
 
 describe('hotspotSatz', () => {
-  it('bleibt eine Faktenaussage — keine Wertung, keine Ursache', () => {
+  it('bleibt eine Faktenaussage – keine Wertung, keine Ursache', () => {
     const satz = hotspotSatz(hs(), '2021–2025')
     expect(satz).toBe('2021–2025 wurden hier 64 Unfälle mit Personenschaden erfasst.')
     // Die Formulierungen, die den Quellenzwang überhaupt nötig gemacht haben:

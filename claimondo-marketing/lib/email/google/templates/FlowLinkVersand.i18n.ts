@@ -29,7 +29,7 @@ type S = {
 
 const de: S = {
   subject: (vorname) => `${vorname}, Ihr Schadenportal ist bereit`,
-  preview: (svVorname, svNachname) => `Ihr Claimondo-Schadenportal — Termin mit ${svVorname} ${svNachname}`,
+  preview: (svVorname, svNachname) => `Ihr Claimondo-Schadenportal – Termin mit ${svVorname} ${svNachname}`,
   greeting: (vorname) => `Hallo ${vorname},`,
   intro:
     'wir haben Ihren Fall aufgenommen. Ihr persönliches Schadenportal ist nun bereit. Dort laden Sie die nötigen Unterlagen hoch und unterschreiben Vollmacht + Sachverständigen-Auftrag.',
@@ -46,7 +46,7 @@ const de: S = {
 
 const en: S = {
   subject: (vorname) => `${vorname}, your claim portal is ready`,
-  preview: (svVorname, svNachname) => `Your Claimondo claim portal — appointment with ${svVorname} ${svNachname}`,
+  preview: (svVorname, svNachname) => `Your Claimondo claim portal – appointment with ${svVorname} ${svNachname}`,
   greeting: (vorname) => `Hello ${vorname},`,
   intro:
     'we have registered your case. Your personal claim portal is now ready. There you upload the required documents and sign the power of attorney + assessor engagement.',
@@ -63,7 +63,7 @@ const en: S = {
 
 const tr: S = {
   subject: (vorname) => `${vorname}, hasar portalınız hazır`,
-  preview: (svVorname, svNachname) => `Claimondo hasar portalınız — ${svVorname} ${svNachname} ile randevu`,
+  preview: (svVorname, svNachname) => `Claimondo hasar portalınız – ${svVorname} ${svNachname} ile randevu`,
   greeting: (vorname) => `Merhaba ${vorname},`,
   intro:
     'dosyanızı oluşturduk. Kişisel hasar portalınız artık hazır. Orada gerekli belgeleri yükler ve vekaletname + bilirkişi görevlendirmesini imzalarsınız.',
@@ -80,7 +80,7 @@ const tr: S = {
 
 const ar: S = {
   subject: (vorname) => `${vorname}، بوابة المطالبة الخاصة بك جاهزة`,
-  preview: (svVorname, svNachname) => `بوابة المطالبة Claimondo الخاصة بك — موعد مع ${svVorname} ${svNachname}`,
+  preview: (svVorname, svNachname) => `بوابة المطالبة Claimondo الخاصة بك – موعد مع ${svVorname} ${svNachname}`,
   greeting: (vorname) => `مرحباً ${vorname}،`,
   intro:
     'لقد سجّلنا حالتك. أصبحت بوابة المطالبة الشخصية الخاصة بك جاهزة الآن. هناك ترفع المستندات المطلوبة وتوقّع التوكيل + تكليف الخبير.',
@@ -97,7 +97,7 @@ const ar: S = {
 
 const ru: S = {
   subject: (vorname) => `${vorname}, ваш портал по урегулированию ущерба готов`,
-  preview: (svVorname, svNachname) => `Ваш портал Claimondo по урегулированию ущерба — встреча с ${svVorname} ${svNachname}`,
+  preview: (svVorname, svNachname) => `Ваш портал Claimondo по урегулированию ущерба – встреча с ${svVorname} ${svNachname}`,
   greeting: (vorname) => `Здравствуйте, ${vorname},`,
   intro:
     'мы зарегистрировали ваше дело. Ваш персональный портал по урегулированию ущерба теперь готов. Там вы загружаете необходимые документы и подписываете доверенность + поручение эксперту.',
@@ -114,7 +114,7 @@ const ru: S = {
 
 const pl: S = {
   subject: (vorname) => `${vorname}, Twój portal szkodowy jest gotowy`,
-  preview: (svVorname, svNachname) => `Twój portal szkodowy Claimondo — termin z ${svVorname} ${svNachname}`,
+  preview: (svVorname, svNachname) => `Twój portal szkodowy Claimondo – termin z ${svVorname} ${svNachname}`,
   greeting: (vorname) => `Cześć ${vorname},`,
   intro:
     'przyjęliśmy Twoją sprawę. Twój osobisty portal szkodowy jest już gotowy. Tam prześlesz niezbędne dokumenty oraz podpiszesz pełnomocnictwo + zlecenie dla rzeczoznawcy.',

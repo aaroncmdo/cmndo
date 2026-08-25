@@ -119,6 +119,7 @@ export function FinderWizard({
   vorauswahlSlotStart = null,
   utmSource = null,
   vorauswahlAdresse = null,
+  vorauswahlSvName = null,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -156,6 +157,15 @@ export function FinderWizard({
    * Ohne Adresse aendert sich nichts: Schritt 1 bleibt wie bisher.
    */
   vorauswahlAdresse?: { adresse: string; lat: number; lng: number } | null
+  /**
+   * Vorname des Gutachters aus `?sv=` — reine ANZEIGE im Ort-Schritt, keine Steuerwirkung.
+   *
+   * Ohne ihn wirkte der Deeplink wie kaputt: `sv`/`slot` greifen erst nach dem Matching,
+   * das Matching erst nach der Ortseingabe. Wer aus einem Chat kommt, in dem „Termin
+   * Dienstag 11:00 bei Gaith" stand, sah bis dahin einen komplett leeren Wizard und keinen
+   * Hinweis, dass seine Wahl ueberhaupt angekommen ist (Aaron 25.08.2026).
+   */
+  vorauswahlSvName?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -496,6 +506,46 @@ export function FinderWizard({
           und der Kasten waere nur noch Rauschen.
           Farben ueber die Status-Tokens (bg-success-soft / text-success-strong), nicht
           roh green-* — der Status-Ratchet blockt rohe Scales, siehe AGENTS.md. */}
+      {/* Deeplink-Quittung — der Kunde kommt aus einem Chat, in dem Gutachter UND Uhrzeit
+          schon standen. `sv`/`slot` wirken aber erst nach dem Matching, und das startet erst
+          nach der Ortseingabe. Bis dahin sah er einen leeren Wizard: kein Name, kein Termin,
+          kein Hinweis — als waere sein Klick ins Leere gegangen (Aaron 25.08.2026, „es wird
+          schlicht nichts gemacht"). Der Block sagt ihm, dass seine Wahl angekommen ist, und
+          benennt die EINE Angabe, die wirklich noch fehlt: wo das Fahrzeug steht.
+
+          Bewusst nur eine Quittung, KEINE Buchung: reserviert wird weiterhin erst am Ende,
+          und der Kunde kann jederzeit einen anderen Termin waehlen. Faellt der Slot bis dahin
+          weg, greift der stille Fallback auf die normale Auswahl (versucheSlotVorauswahl). */}
+      {phase === 'ort' && vorauswahlSlotStart && Number.isFinite(Date.parse(vorauswahlSlotStart)) ? (
+        <div className="flex items-start gap-3 rounded-ios-lg bg-claimondo-bg px-4 py-3">
+          <svg
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}
+            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"
+            className="mt-0.5 h-5 w-5 shrink-0 text-claimondo-ondo"
+          >
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18M9 16l2 2 4-4" />
+          </svg>
+          <div>
+            <p className="text-body font-bold text-claimondo-navy">
+              {vorauswahlSvName
+                ? `Ihr Termin bei ${vorauswahlSvName} ist vorgemerkt`
+                : 'Ihr Termin ist vorgemerkt'}
+            </p>
+            <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield">
+              {new Date(vorauswahlSlotStart).toLocaleString('de-DE', {
+                weekday: 'long',
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: 'Europe/Berlin',
+              })}
+              {' Uhr — bitte geben Sie nur noch an, wo Ihr Fahrzeug steht.'}
+            </p>
+          </div>
+        </div>
+      ) : null}
       {phase === 'ort' && (
         <div className="flex items-start gap-3 rounded-ios-lg bg-success-soft px-4 py-3">
           <svg

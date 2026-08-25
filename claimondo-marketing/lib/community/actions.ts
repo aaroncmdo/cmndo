@@ -72,7 +72,7 @@ export async function submitComment(
     .select('id', { count: 'exact', head: true })
     .eq('author_id', auth.user.id)
     .gte('created_at', since)
-  if ((count ?? 0) >= 5) return { ok: false, error: 'Zu viele Kommentare in kurzer Zeit — bitte später erneut.' }
+  if ((count ?? 0) >= 5) return { ok: false, error: 'Zu viele Kommentare in kurzer Zeit – bitte später erneut.' }
   if (containsLink(body) && !id?.trusted) {
     return { ok: false, error: 'Links sind erst nach Freischaltung deines Kontos möglich.' }
   }

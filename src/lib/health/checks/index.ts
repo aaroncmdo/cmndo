@@ -12,6 +12,7 @@ import { emailFailureRateCheck } from './email-failure-rate'
 import { twilioSendFailuresCheck } from './twilio-send-failures'
 import { webhookInboundSilentCheck } from './webhook-inbound-silent'
 import { configRequiredEnvCheck } from './config-required-env'
+import { googleMapsZugangCheck } from './google-maps-zugang'
 import { kanzleiTenancyScopingCheck } from './kanzlei-tenancy-scoping'
 import { orchestratorPipelineCheck } from './orchestrator-pipeline'
 // Data-Integrity-Guard (Ship-Safety P1): Invarianten-Checks
@@ -29,6 +30,7 @@ export const ALL_CHECKS: HealthCheck[] = [
   twilioSendFailuresCheck,
   webhookInboundSilentCheck,
   configRequiredEnvCheck,
+  googleMapsZugangCheck,
   kanzleiTenancyScopingCheck,
   orchestratorPipelineCheck,
   // Data-Integrity-Guard (Ship-Safety P1)

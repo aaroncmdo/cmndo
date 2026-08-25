@@ -47,7 +47,7 @@ export async function WerkstattAbdeckungHinweis({ stadt }: { stadt: string }) {
       <p className="mt-2 text-body-sm text-claimondo-shield">
         Nach dem Gutachten übernimmt eine Partner-Werkstatt die Reparatur. Bei unverschuldetem
         Schaden zahlt die gegnerische Haftpflicht; bei selbstverschuldetem Schaden ist die
-        Werkstatt der erste Schritt — mit Vollkasko reguliert Ihre eigene Versicherung.
+        Werkstatt der erste Schritt – mit Vollkasko reguliert Ihre eigene Versicherung.
       </p>
       {/* EIN Textknoten — sonst setzt React einen `<!-- -->`-Trenner zwischen Satz und
           URL und ein Extraktor kann beides auseinanderreissen. Siehe die ausfuehrliche

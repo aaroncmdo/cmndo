@@ -5,7 +5,7 @@ import { STAEDTE, getStadtBySlug } from './staedte'
 const koeln = getStadtBySlug('koeln')!
 const bocholt = getStadtBySlug('bocholt')!
 
-describe('stadtMetaDescription — ohne Ortstiefe', () => {
+describe('stadtMetaDescription – ohne Ortstiefe', () => {
   it('nennt den Ort und die zustaendigen Gerichte', () => {
     // Die alte Fassung war fuer JEDE Stadt derselbe Satz mit ausgetauschtem
     // Ortsnamen. Amtsgericht und PLZ sind gepflegte, ortsspezifische Fakten —
@@ -66,7 +66,7 @@ describe('stadtMetaDescription — ohne Ortstiefe', () => {
   })
 })
 
-describe('stadtMetaDescription — mit freigegebener Ortstiefe', () => {
+describe('stadtMetaDescription – mit freigegebener Ortstiefe', () => {
   const tiefe = {
     stadtbezirke: [
       { name: 'Innenstadt', ortsteile: [] },
@@ -116,7 +116,7 @@ describe('stadtMetaDescription — mit freigegebener Ortstiefe', () => {
 // Nur die Beschreibung kuerzt — auf der Seite bleibt der amtliche Name stehen,
 // dort ist er richtig.
 // ---------------------------------------------------------------------------
-describe('stadtMetaDescription — amtliche Bezirks-Praefixe', () => {
+describe('stadtMetaDescription – amtliche Bezirks-Praefixe', () => {
   const tiefeMit = (...namen: string[]) => ({ stadtbezirke: namen.map((name) => ({ name })) })
 
   it('kuerzt "Ortsbezirk 1 - Innenstadt I" auf den sprechenden Teil', () => {
@@ -153,7 +153,7 @@ describe('stadtMetaDescription — amtliche Bezirks-Praefixe', () => {
     expect(d).toContain(bocholt.lokal.amtsgericht)
   })
 
-  it('nennt rein nummerierte Bezirke NICHT — die sagen im Suchergebnis nichts', () => {
+  it('nennt rein nummerierte Bezirke NICHT – die sagen im Suchergebnis nichts', () => {
     // Duesseldorf, real auf prod (20.08.): sowohl der Hub-Snapshot ("Bezirk 1"
     // … "Bezirk 10") als auch der generierte DB-Inhalt ("Stadtbezirk 1" …)
     // tragen reine Nummern. Die Beschreibung lautete damit

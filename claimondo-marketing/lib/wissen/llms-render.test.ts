@@ -14,7 +14,7 @@ function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
     slug: 'wertminderung-berechnen',
     title: 'Wertminderung berechnen',
     body: '# Wertminderung berechnen\n\n> **Kurz erklärt:** …\n\n## Häufige Fragen\n**Was?**\nAntwort.',
-    excerpt: 'Merkantile Wertminderung nach Unfall — Formel und BGH-Linie.',
+    excerpt: 'Merkantile Wertminderung nach Unfall – Formel und BGH-Linie.',
     key_facts: ['§ 251 BGB', 'BGH VI ZR 35/22'],
     meta_description: 'Wertminderung nach Unfall berechnen.',
     // NULL = der Normalfall: ohne gepflegten SERP-Titel faellt die Seite auf `title` zurueck.
@@ -49,7 +49,7 @@ describe('artikelIndexLine', () => {
   it('enthaelt Titel, Link, Excerpt, Stand und Fakten', () => {
     const line = artikelIndexLine(makeArtikel())
     expect(line).toContain('[Wertminderung berechnen](https://claimondo.de/wissen/wertminderung-berechnen)')
-    expect(line).toContain('— Merkantile Wertminderung')
+    expect(line).toContain('– Merkantile Wertminderung')
     expect(line).toContain('(Stand: 2026-07-10)')
     expect(line).toContain('Fakten: § 251 BGB; BGH VI ZR 35/22')
   })

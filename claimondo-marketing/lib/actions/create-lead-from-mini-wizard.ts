@@ -208,7 +208,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
           .select('id')
           .in('rolle', ['dispatch', 'admin'])
         const fullName = [data.vorname, data.nachname].filter(Boolean).join(' ') || 'Lead'
-        const beschreibung = `Adresse "${data.unfallort}" konnte nicht geocoded werden — Lead in /dispatch/leads, aber nicht auf Triage-Karte sichtbar. Grund: ${failureReason ?? 'unbekannt'}.`
+        const beschreibung = `Adresse "${data.unfallort}" konnte nicht geocoded werden – Lead in /dispatch/leads, aber nicht auf Triage-Karte sichtbar. Grund: ${failureReason ?? 'unbekannt'}.`
         for (const d of dispatcher ?? []) {
           await createNotification(
             d.id as string,
@@ -285,7 +285,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       fall_id: null,
       typ: 'system',
       titel: `Mini-Wizard: Magic-Link per ${kanalLabel} versendet`,
-      beschreibung: `An ${dispatched.kanal === 'whatsapp' ? data.telefon : data.email} — Schuldfrage: ${data.schuldfrage}, Unfallort: ${data.unfallort}`,
+      beschreibung: `An ${dispatched.kanal === 'whatsapp' ? data.telefon : data.email} – Schuldfrage: ${data.schuldfrage}, Unfallort: ${data.unfallort}`,
     })
     .then(() => {}, () => {})
 

@@ -40,11 +40,11 @@ export const WARUM_CARDS: WarumCard[] = [
     Icon: Scale,
     titel: 'Disponiert statt vermittelt',
     text:
-      'Wie Uber, aber für Schadensgutachten: Sie bekommen den nächsten freien, unabhängigen Sachverständigen — nicht den, der in drei Wochen Zeit hat. Den Gutachter der Versicherung müssen Sie nach §249 BGB nicht akzeptieren.',
+      'Wie Uber, aber für Schadensgutachten: Sie bekommen den nächsten freien, unabhängigen Sachverständigen – nicht den, der in drei Wochen Zeit hat. Den Gutachter der Versicherung müssen Sie nach §249 BGB nicht akzeptieren.',
     quelle: '§249 BGB · BGH VI ZR 119/04',
     bullets: [
       'BGH-Bestätigung: Der Geschädigte hat das uneingeschränkte Wahlrecht des Sachverständigen (VI ZR 119/04).',
-      'Versicherer schlagen oft eigene Gutachter vor — diese sind unverbindlich und müssen nicht akzeptiert werden.',
+      'Versicherer schlagen oft eigene Gutachter vor – diese sind unverbindlich und müssen nicht akzeptiert werden.',
     ],
     cta: {
       label: 'Gutachter in Ihrer Region zeigen',
@@ -66,7 +66,7 @@ export const WARUM_CARDS: WarumCard[] = [
       { label: 'Verbringungskosten', amount: '~180 €' },
     ],
     hinweis:
-      'Prüfdienste kürzen typischerweise 30–40 % der Schadenspositionen — unsere Partnerkanzlei holt diese Kürzungen BGH-konform zurück.',
+      'Prüfdienste kürzen typischerweise 30–40 % der Schadenspositionen – unsere Partnerkanzlei holt diese Kürzungen BGH-konform zurück.',
     cta: {
       label: 'Schaden prüfen lassen',
       kind: 'scroll-to-form',
@@ -77,7 +77,7 @@ export const WARUM_CARDS: WarumCard[] = [
     Icon: BadgeCheck,
     titel: 'Wir reden mit der Versicherung',
     text:
-      'Sie nicht. Unsere Partnerkanzlei für Verkehrsrecht übernimmt die komplette Korrespondenz mit der gegnerischen Versicherung — Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld. Sie bleiben außen vor.',
+      'Sie nicht. Unsere Partnerkanzlei für Verkehrsrecht übernimmt die komplette Korrespondenz mit der gegnerischen Versicherung – Reparaturkosten, Wertminderung, Mietwagen, Nutzungsausfall, Schmerzensgeld. Sie bleiben außen vor.',
     quelle: 'BGH VI ZR 38/22 ff.',
     bullets: [
       'Reparaturkosten + UPE-Aufschläge',
@@ -85,7 +85,7 @@ export const WARUM_CARDS: WarumCard[] = [
       'Mietwagen oder Nutzungsausfall (BGH VI ZR 65/18)',
       'Schmerzensgeld bei Personenschaden',
     ],
-    hinweis: 'Kostenfrei für Sie — die Anwaltskosten trägt die gegnerische Versicherung.',
+    hinweis: 'Kostenfrei für Sie – die Anwaltskosten trägt die gegnerische Versicherung.',
     cta: {
       label: 'Rückruf in 15 Min',
       kind: 'open-popover',
