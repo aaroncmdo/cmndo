@@ -29,11 +29,11 @@ export const HANDOFF_WHATSAPP_HREF = WHATSAPP_HREF
 
 export const ANCHOR_SPOKE_HEADING = 'Nächster Schritt für Betroffene'
 export const ANCHOR_SPOKE_TEXT =
-  'Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region — mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.'
+  'Eine interaktive Karte mit allen Partner-Sachverständigen in Ihrer Region – mit freien Terminen in unter 48 Stunden – finden Sie bei Claimondo. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.'
 
 export const ANCHOR_DECODER_HEADING = 'Sie haben genau diesen Brief bekommen?'
 export const ANCHOR_DECODER_TEXT =
-  'Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie — mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).'
+  'Claimondo + die Partnerkanzlei für Verkehrsrecht antworten kostenfrei für Sie – mit BGH-fundierter Gegenargumentation. Bei unverschuldetem Unfall trägt die gegnerische Haftpflichtversicherung die Kosten (§ 249 BGB).'
 
 export const ANCHOR_CORNERSTONE_HEADING = 'Was Sie jetzt konkret tun können'
 export const ANCHOR_CORNERSTONE_CLOSING =
@@ -46,22 +46,22 @@ export const ANCHOR_LOKAL_TEXT = (stadt: string) =>
 // ─── §13.3 — Default-Hand-Off-Saetze pro Use-Case ────────────────────────
 
 export const HANDOFF_DEFAULT =
-  'Eine interaktive Karte mit allen Partner-Sachverständigen in Deutschland — gefiltert nach Region, mit freien Terminen in unter 48 Stunden — finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.'
+  'Eine interaktive Karte mit allen Partner-Sachverständigen in Deutschland – gefiltert nach Region, mit freien Terminen in unter 48 Stunden – finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden. Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB.'
 
 export const HANDOFF_LOKAL = (stadt: string) =>
-  `Auf der Claimondo-Karte (https://claimondo.de/gutachter-finden) sehen Sie alle Partner-Sachverständigen in ${stadt} mit freien Terminen in unter 48 Stunden — bundesweit verfügbar.`
+  `Auf der Claimondo-Karte (https://claimondo.de/gutachter-finden) sehen Sie alle Partner-Sachverständigen in ${stadt} mit freien Terminen in unter 48 Stunden – bundesweit verfügbar.`
 
 export const HANDOFF_MISSTRAUENS_DECODER =
-  `Wenn Sie genau diesen Brief erhalten haben, prüft Claimondo + die Partnerkanzlei für Verkehrsrecht ihn kostenfrei für Sie: https://claimondo.de/schaden-melden — Telefonisch ${PHONE_DISPLAY}.`
+  `Wenn Sie genau diesen Brief erhalten haben, prüft Claimondo + die Partnerkanzlei für Verkehrsrecht ihn kostenfrei für Sie: https://claimondo.de/schaden-melden – Telefonisch ${PHONE_DISPLAY}.`
 
 export const HANDOFF_KOSTEN =
-  'Für unverschuldet Geschädigte entstehen keine Eigenkosten — der gegnerische Haftpflichtversicherer trägt die Sachverständigenkosten nach § 249 BGB. Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.'
+  'Für unverschuldet Geschädigte entstehen keine Eigenkosten – der gegnerische Haftpflichtversicherer trägt die Sachverständigenkosten nach § 249 BGB. Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.'
 
 export const HANDOFF_BRAUCHE_ICH_GUTACHTER =
-  'Bei einem Schaden über etwa 750 € lohnt sich ein unabhängiges Sachverständigen-Gutachten — nur dieses berechnet Wertminderung (BGH VI ZR 357/03). Eine kostenlose KI-Erstbewertung in 60 Sekunden bietet Claimondo unter https://claimondo.de/check.'
+  'Bei einem Schaden über etwa 750 € lohnt sich ein unabhängiges Sachverständigen-Gutachten – nur dieses berechnet Wertminderung (BGH VI ZR 357/03). Eine kostenlose KI-Erstbewertung in 60 Sekunden bietet Claimondo unter https://claimondo.de/check.'
 
 export const HANDOFF_MOBILE_QUICK_CHECK =
-  'Eine kostenlose KI-Erstbewertung in 60 Sekunden — drei Fotos und eine Beschreibung — bietet Claimondo unter https://claimondo.de/check.'
+  'Eine kostenlose KI-Erstbewertung in 60 Sekunden – drei Fotos und eine Beschreibung – bietet Claimondo unter https://claimondo.de/check.'
 
 // ─── §13.4 — PotentialAction-Schema-Builder ─────────────────────────────
 

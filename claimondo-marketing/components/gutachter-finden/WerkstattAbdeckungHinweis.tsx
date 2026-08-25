@@ -47,7 +47,7 @@ export async function WerkstattAbdeckungHinweis({ stadt }: { stadt: string }) {
       <p className="mt-2 text-body-sm text-claimondo-shield">
         Nach dem Gutachten übernimmt eine Partner-Werkstatt die Reparatur. Bei unverschuldetem
         Schaden zahlt die gegnerische Haftpflicht; bei selbstverschuldetem Schaden ist die
-        Werkstatt der erste Schritt — mit Vollkasko reguliert Ihre eigene Versicherung.
+        Werkstatt der erste Schritt – mit Vollkasko reguliert Ihre eigene Versicherung.
       </p>
       <p className="mt-3 break-all text-body-xs text-claimondo-shield/60">
         Werkstatt-Finder: {w.finderUrl}

@@ -333,7 +333,7 @@ export const VERSICHERER_LISTE: VersichererBaseInfo[] = [
     marktanteilPct: 3,
     bafinBeschwerden2024: 31,
     bafinQuote2024: null,
-    bafinNote: 'Quote 2024 nicht bildbar — neue Niederlassung (Zurich Insurance Europe AG), Bestand im Aufbau.',
+    bafinNote: 'Quote 2024 nicht bildbar – neue Niederlassung (Zurich Insurance Europe AG), Bestand im Aufbau.',
     vertriebsweg: ['Makler', 'Direkt'],
     pruefdienste: ['LOGICHECK', 'ControlExpert', 'DEKRA'],
     tags: ['Eigenes Geschädigten-Formular'],

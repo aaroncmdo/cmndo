@@ -109,7 +109,7 @@ export async function submitCheckLead(
     console.error('[check] Anfrage-Insert fehlgeschlagen:', anfErr?.message)
     return {
       ok: false,
-      error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530',
+      error: 'Konfigurationsfehler – bitte rufen Sie an: +49 221 25 906 530',
     }
   }
 
@@ -122,7 +122,7 @@ export async function submitCheckLead(
     return {
       ok: false,
       error:
-        'Übermittlung erhalten — Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
+        'Übermittlung erhalten – Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
       anfrageId: anfrage.id,
     }
   }

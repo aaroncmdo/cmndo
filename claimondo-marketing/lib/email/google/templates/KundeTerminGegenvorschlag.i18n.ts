@@ -24,7 +24,7 @@ type S = {
 }
 
 const de: S = {
-  subject: (svName, neuerTerminDatum) => `Neuer Terminvorschlag von ${svName} — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `Neuer Terminvorschlag von ${svName} – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} schlägt einen neuen Termin vor: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'Neuer Terminvorschlag vom Sachverständigen',
@@ -42,7 +42,7 @@ const de: S = {
 }
 
 const en: S = {
-  subject: (svName, neuerTerminDatum) => `New appointment proposal from ${svName} — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `New appointment proposal from ${svName} – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} proposes a new appointment: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'New appointment proposal from the assessor',
@@ -60,7 +60,7 @@ const en: S = {
 }
 
 const tr: S = {
-  subject: (svName, neuerTerminDatum) => `${svName} tarafından yeni randevu önerisi — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `${svName} tarafından yeni randevu önerisi – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} yeni bir randevu öneriyor: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'Ekspertten yeni randevu önerisi',
@@ -78,7 +78,7 @@ const tr: S = {
 }
 
 const ar: S = {
-  subject: (svName, neuerTerminDatum) => `اقتراح موعد جديد من ${svName} — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `اقتراح موعد جديد من ${svName} – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} يقترح موعدًا جديدًا: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'اقتراح موعد جديد من الخبير المثمّن',
@@ -96,7 +96,7 @@ const ar: S = {
 }
 
 const ru: S = {
-  subject: (svName, neuerTerminDatum) => `Новое предложение по встрече от ${svName} — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `Новое предложение по встрече от ${svName} – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} предлагает новую встречу: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'Новое предложение по встрече от эксперта',
@@ -114,7 +114,7 @@ const ru: S = {
 }
 
 const pl: S = {
-  subject: (svName, neuerTerminDatum) => `Nowa propozycja terminu od ${svName} — ${neuerTerminDatum}`,
+  subject: (svName, neuerTerminDatum) => `Nowa propozycja terminu od ${svName} – ${neuerTerminDatum}`,
   preview: (svName, neuerTerminDatum, neuerTerminUhrzeit) =>
     `${svName} proponuje nowy termin: ${neuerTerminDatum} ${neuerTerminUhrzeit}`,
   heading: 'Nowa propozycja terminu od rzeczoznawcy',

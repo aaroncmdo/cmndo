@@ -10,7 +10,7 @@ function makeArtikel(overrides: Partial<WissenArtikel> = {}): WissenArtikel {
     body: '# Nutzungsausfall berechnen\n\n> **Kurz erklaert:** Nutzungsausfall ist der Anspruch ...',
     excerpt: 'Wer sein Fahrzeug unfallbedingt nicht nutzen kann, hat Anspruch auf Nutzungsausfall.',
     key_facts: ['§ 249 BGB', 'BGH VI ZR 100/10', 'Tabelle Sanden/Danner/Küppersbusch'],
-    meta_description: 'Nutzungsausfall nach Unfall berechnen — Tabelle, Fristen, BGH.',
+    meta_description: 'Nutzungsausfall nach Unfall berechnen – Tabelle, Fristen, BGH.',
     // NULL = der Normalfall: ohne gepflegten SERP-Titel faellt die Seite auf `title` zurueck.
     meta_title: null,
     // NULL = ohne Tags rendert die Sektion „Passend zum Thema" nichts (WissenVerwandteThemen).

@@ -10,9 +10,9 @@ export async function GET() {
   assertFeedFrontmatterValid()
   const feed = renderJsonFeed(
     {
-      title: 'Claimondo — Aktuelle Wissens-Updates Kfz-Schadensregulierung',
+      title: 'Claimondo – Aktuelle Wissens-Updates Kfz-Schadensregulierung',
       description:
-        'Neueste Wissens-Assets von Claimondo zur Kfz-Haftpflicht-Schadensregulierung — Cornerstones, Glossar-Spokes, Versicherer-Brief-Decoder und Sachverständigen-Verbände.',
+        'Neueste Wissens-Assets von Claimondo zur Kfz-Haftpflicht-Schadensregulierung – Cornerstones, Glossar-Spokes, Versicherer-Brief-Decoder und Sachverständigen-Verbände.',
       feedPath: '/feed.json',
     },
     await getNewsFeedItems(),

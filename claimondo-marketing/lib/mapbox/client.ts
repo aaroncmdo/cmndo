@@ -22,7 +22,7 @@ export function ensureMapboxInitialized(): boolean {
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
   if (!token) {
     console.warn(
-      '[mapbox] NEXT_PUBLIC_MAPBOX_TOKEN fehlt — Karte wird nicht initialisiert',
+      '[mapbox] NEXT_PUBLIC_MAPBOX_TOKEN fehlt – Karte wird nicht initialisiert',
     )
     return false
   }

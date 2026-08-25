@@ -49,7 +49,7 @@ export function collectFeedFrontmatterIssues(assets: ClaimondoAsset[]): FeedFron
     }
     for (const f of kf) {
       if (f.length < KEYFACT_MIN || f.length > KEYFACT_MAX) {
-        warnings.push(`${a.filePath}: keyFact ${f.length} Zeichen — "${f.slice(0, 40)}…"`)
+        warnings.push(`${a.filePath}: keyFact ${f.length} Zeichen – "${f.slice(0, 40)}…"`)
       }
     }
   }
