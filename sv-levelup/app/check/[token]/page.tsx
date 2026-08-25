@@ -5,6 +5,7 @@ import { baueBefund } from '@/lib/levelup/befund'
 import { baueKontext } from '@/lib/levelup/pruefumfang'
 import { MODULE } from '@/lib/levelup/registry'
 import { sperrgrund, vorauswahl } from '@/lib/levelup/sperrlogik'
+import { MESSBARE_MODULE } from '@/lib/levelup/module'
 import type { Db } from '@/lib/anreicherung/schreiben'
 import { CheckClient } from './CheckClient'
 
@@ -80,7 +81,7 @@ export default async function CheckSeite(props: { params: Promise<{ token: strin
       websiteUrl={check.website_url}
       ort={check.standort_ort}
       kacheln={kacheln}
-      vorausgewaehlt={check.module_gewuenscht.length > 0 ? check.module_gewuenscht : vorauswahl(kontext)}
+      vorausgewaehlt={check.module_gewuenscht.length > 0 ? check.module_gewuenscht : vorauswahl(kontext, MESSBARE_MODULE)}
       gewaehlt={check.module_gewaehlt}
       ersterBefund={fertigerBefund}
       hatTermin={hatTermin}
