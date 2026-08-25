@@ -138,7 +138,7 @@ export type StadtTermin = NaechsterTermin & { stadt: string }
  * Jetzt: SV-Standorte laden, jede der 173 gepflegten Staedte auf Naehe pruefen, die
  * Treffer nehmen. Ein neuer Partner erscheint damit ueberall automatisch.
  */
-async function ladeEinsatzStaedte(): Promise<string[]> {
+export async function ladeEinsatzStaedte(): Promise<string[]> {
   try {
     const admin = createAdminClient()
     const { data } = await admin
