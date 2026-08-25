@@ -20,11 +20,15 @@ describe('Score und Teilbefund', () => {
 
   it('verweigert den Score beim Massenlauf-Teilbefund', () => {
     // web 12 + seo 12 + ux 12 + verz 12 = 48 -> unter der Schwelle
-    expect(berechneScore(20, 48)).toEqual({ score: null, keinScore: true })
+    expect(berechneScore(20, 48)).toEqual({
+      score: null, keinScore: true, grund: 'zu_wenig_umfang',
+    })
   })
 
   it('verweigert den Score bei vier Modulen mit 10 Punkten (T-04)', () => {
-    expect(berechneScore(4, 10)).toEqual({ score: null, keinScore: true })
+    expect(berechneScore(4, 10)).toEqual({
+      score: null, keinScore: true, grund: 'zu_wenig_umfang',
+    })
   })
 
   it('gibt bei genau der Schwelle noch einen Score aus', () => {
@@ -36,7 +40,55 @@ describe('Score und Teilbefund', () => {
   })
 
   it('faengt punkteErhebbar = 0 ab, statt durch null zu teilen', () => {
-    expect(berechneScore(0, 0)).toEqual({ score: null, keinScore: true })
+    expect(berechneScore(0, 0)).toEqual({
+      score: null, keinScore: true, grund: 'zu_viel_ungemessen',
+    })
+  })
+})
+
+/**
+ * Der Fall, der diese Aenderung ausgeloest hat (25.08.2026).
+ *
+ * An echten Checks gemessen: drei Laeufe mit IDENTISCHER Modulliste hatten
+ * 116, 74 und 57 erhebbare Punkte — je nachdem, wie viele Module unterwegs
+ * scheiterten. Nur der erste bekam einen Score. Bestraft wurde der Nutzer fuer
+ * Fehlstellen, auf die er keinen Einfluss hat.
+ */
+describe('Umfang und Messquote getrennt', () => {
+  const GEWAEHLT = 116
+
+  it('gibt einen Score, wenn genug gewaehlt UND genug gemessen wurde', () => {
+    // 74 von 116 gemessen = 64 % — heute ohne Score, kuenftig mit.
+    const r = berechneScore(37, 74, GEWAEHLT)
+    expect(r.keinScore).toBe(false)
+    expect(r.score).toBe(50) // 37 von 74, nicht von 116
+  })
+
+  it('rechnet weiterhin auf das GEMESSENE, nicht auf das Gewaehlte', () => {
+    // ⚠ Der Nenner bleibt der gemessene Wert (R-B). Wer auf das Gewaehlte
+    // normierte, zaehlte nicht Gemessenes als nicht erreicht.
+    expect(berechneScore(37, 74, GEWAEHLT).score).toBe(50)
+    expect(berechneScore(37, 116, GEWAEHLT).score).toBe(32)
+  })
+
+  it('verweigert den Score, wenn ueber die Haelfte nicht gemessen werden konnte', () => {
+    // 57 von 116 = 49 % — zu duenn, um daraus einen Prozentwert zu machen.
+    expect(berechneScore(28, 57, GEWAEHLT)).toEqual({
+      score: null, keinScore: true, grund: 'zu_viel_ungemessen',
+    })
+  })
+
+  it('unterscheidet die beiden Gruende', () => {
+    // Zu wenig gewaehlt — sauber gemessen, aber ohne Aussagekraft.
+    expect(berechneScore(15, 30, 30).grund).toBe('zu_wenig_umfang')
+    // Genug gewaehlt, zu wenig davon messbar.
+    expect(berechneScore(10, 20, GEWAEHLT).grund).toBe('zu_viel_ungemessen')
+  })
+
+  it('bleibt ohne dritten Wert beim alten Verhalten', () => {
+    // Wo nichts scheiterte, sind gewaehlt und erhebbar gleich.
+    expect(berechneScore(58, 116).score).toBe(50)
+    expect(berechneScore(58, 116, 116).score).toBe(50)
   })
 })
 
