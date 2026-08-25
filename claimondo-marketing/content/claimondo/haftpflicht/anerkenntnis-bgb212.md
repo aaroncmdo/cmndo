@@ -246,7 +246,6 @@ Vergleichsverhandlungen sind das wirtschaftlich gefährlichste Stadium der Schad
 - BGH-Rechtsprechung zu Abgeltungsklauseln, ständige Rechtsprechung
 - Palandt/Grüneberg, BGB-Kommentar
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

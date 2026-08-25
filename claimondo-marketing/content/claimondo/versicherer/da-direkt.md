@@ -42,8 +42,6 @@ Bei Anwaltsdruck nimmt die DA Direkt – wie die Zurich – häufig auf BGH-Urte
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- Konzernzuordnung: da-direkt.de; DA Direkt = Zurich-Gruppe (Korrektur des verbreiteten „Generali"-Irrtums)
 - AG München, Urteil vom 09.11.2011 – 343 C 7350/10 (sechs verbundene Verfahren, SV-Kosten)
 - AG Siegburg, Urteil vom 24.07.2013 – 113 C 63/13 (SV-Honorar 74,20 €)
 - AG Koblenz, Urteil vom 29.07.2013 – 161 C 611/13

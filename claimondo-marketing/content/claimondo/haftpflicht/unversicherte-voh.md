@@ -91,7 +91,6 @@ Typisch 8–16 Wochen nach vollständigem Antrag.
 ## Quellen
 
 - PflVG § 12
-- verkehrsopferhilfe.de
 
 ---
 

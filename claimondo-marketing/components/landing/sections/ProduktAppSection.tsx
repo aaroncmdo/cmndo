@@ -80,8 +80,15 @@ export async function ProduktAppSection() {
               className="h-auto w-full"
             />
           </div>
-          {/* Mobile: gerahmter Portrait-Screenshot, oben angeschnitten */}
-          <div className="mx-auto max-w-[20rem] overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md md:hidden">
+          {/* Mobile: gerahmter Portrait-Screenshot, oben angeschnitten.
+              Der Anschnitt braucht eine HOEHENGRENZE — `overflow-hidden` allein
+              schneidet nichts ab, wenn der Container mitwaechst. Ohne sie rendert
+              das 600x2617-Bild bei 320 px Breite 1.395 px hoch: gemessen 24.08.
+              1.523 px inkl. Polsterung, also 1,8 Bildschirme fuer ein Bild ohne
+              Text. Mit der Grenze bleibt der obere, aussagekraeftige Teil des
+              Screenshots stehen (Phasen, Mein Geld) und der Rest ist angeschnitten
+              — genau das, was der urspruengliche Kommentar beschrieb. */}
+          <div className="mx-auto max-h-[26rem] max-w-[20rem] overflow-hidden rounded-ios-lg border border-claimondo-border bg-white shadow-claimondo-md md:hidden">
             <Image
               src="/img/home/portal-fallakte-mobile.webp"
               alt="Echtzeit-Fallakte im Claimondo-Kundenportal (mobil) – Phasen, Mein Geld, Betreuer und Chat"

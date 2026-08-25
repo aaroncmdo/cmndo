@@ -44,12 +44,9 @@ In der Forsa-Befragung von 1.072 Verkehrsanwälten (AG Verkehrsrecht im DAV, Ste
 
 ## Quellen
 
-- Bundeskartellamt, Freigabe vom 21.10.2020 – Verfahren B9-49/20 (Allianz/ControlExpert); Allianz-X-Pressemitteilung vom 09.03.2020
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - Forsa-Befragung im Auftrag der AG Verkehrsrecht im DAV, Oktober/November 2017 (Stern 49/2017)
 - AG Hagen, Urteil vom 24.05.2006 – 16 C 371/05 (ControlExpert-Kalkulation)
 - LG Frankfurt (Oder), Urteil vom 18.07.2016 – 72 O 10/15 (Verzögerung/Nutzungsausfall)
-- Bundesverband der Autovermieter (bav.de) zur LOGICHECK-Praxis
 
 ## Häufige Fragen
 
