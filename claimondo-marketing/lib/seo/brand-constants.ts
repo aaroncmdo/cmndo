@@ -22,6 +22,24 @@ export const HQ_COUNTRY = 'Deutschland'
 /** Einzeilige Prosa-Form für Fließtext/llms/Footer: „Hansaring 10, 50670 Köln". */
 export const HQ_ADDRESS_INLINE = `${HQ_STREET}, ${HQ_POSTAL_CODE} ${HQ_CITY}`
 
+// ─── Betreibergesellschaft (Impressum) ──────────────────────────────────────
+// Website (claimondo.de) und App (app.claimondo.de) werden von der bereits im
+// Handelsregister eingetragenen Gesellschaft betrieben, waehrend die Claimondo
+// GmbH sich noch in Gruendung befindet („i.G."). Die Anbieterkennzeichnung nach
+// § 5 DDG verlangt Registergericht und Registernummer des DIENSTEANBIETERS —
+// die kann nur die eingetragene Gesellschaft liefern.
+//
+// ⚠ HRB-NUMMER UND REGISTERGERICHT SIND BEWUSST LEER.
+// Die Impressum-Seite rendert den Registereintrag NUR, wenn beide Werte
+// gesetzt sind. Damit kann keine erfundene oder halbe Angabe live gehen —
+// eine falsche Registernummer im Impressum ist abmahnfaehig.
+// Eintragen: exakt so, wie es im Handelsregisterauszug steht.
+export const BETREIBER_NAME = 'Kitta & Sprafke UG (haftungsbeschränkt)'
+/** z. B. 'Amtsgericht Köln' — exakt wie im Registerauszug. */
+export const BETREIBER_REGISTERGERICHT = ''
+/** z. B. 'HRB 123456' — exakt wie im Registerauszug, mit Praefix. */
+export const BETREIBER_HRB = ''
+
 // ─── Telefon ──────────────────────────────────────────────────────────────
 // Die Nummern leben HIER und nicht in jsonld.ts, obwohl dort die Consumer
 // hängen: brand-constants importiert nichts (dokumentiertes Zirkel-Verbot),

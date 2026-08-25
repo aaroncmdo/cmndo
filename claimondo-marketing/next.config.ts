@@ -68,6 +68,27 @@ const nextConfig: NextConfig = {
         destination: 'https://app.claimondo.de/schaden-melden/fortsetzen/:token',
         permanent: false,
       },
+      {
+        // MCP-Endpunkt auf der Brand-Domain. Der Server liegt auf
+        // mcp.claimondo.de/mcp; Clients, die stattdessen die Hauptdomain
+        // probieren, liefen ins 404 — gemessen 25.08.2026 im Zugriffslog:
+        // 45 solcher Anfragen in 33 Stunden, waehrend mcp.claimondo.de im
+        // selben Zeitraum 1.871 erfolgreiche Antworten gab.
+        //
+        // 308 (permanent: true) ist hier PFLICHT, nicht Geschmack: MCP spricht
+        // JSON-RPC ueber POST. Ein 301/302 wuerde die Methode auf GET
+        // umschreiben und den Body verwerfen — der Client bekaeme eine
+        // sinnlose Antwort statt einer Verbindung. 308 erhaelt beides.
+        source: '/mcp',
+        destination: 'https://mcp.claimondo.de/mcp',
+        permanent: true,
+      },
+      {
+        // Unterpfade desselben Servers (Session-Endpunkte einiger Clients).
+        source: '/mcp/:path*',
+        destination: 'https://mcp.claimondo.de/mcp/:path*',
+        permanent: true,
+      },
     ]
   },
 
