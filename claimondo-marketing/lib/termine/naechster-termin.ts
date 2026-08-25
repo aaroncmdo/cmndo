@@ -147,6 +147,9 @@ export async function ladeEinsatzStaedte(): Promise<string[]> {
       .eq('ist_aktiv', true)
       .eq('verifiziert', true)
       .eq('ist_testaccount', false)
+      // Admin-Toggle: ein SV kann intern arbeiten, ohne oeffentlich als buchbar genannt
+      // zu werden. Default true — bestehende SVs bleiben sichtbar.
+      .eq('ki_sichtbar', true)
       .not('isochrone_polygon', 'is', null)
       .not('standort_lat', 'is', null)
       .not('standort_lng', 'is', null)

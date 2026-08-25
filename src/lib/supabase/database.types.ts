@@ -18860,6 +18860,7 @@ export type Database = {
           kalender_typ: string | null
           kapazitaeten_jsonb: Json | null
           ki_intake_aktiv: boolean
+          ki_sichtbar: boolean
           live_tracking_enabled: boolean | null
           logo_url: string | null
           notizen: string | null
@@ -18956,6 +18957,7 @@ export type Database = {
           kalender_typ?: string | null
           kapazitaeten_jsonb?: Json | null
           ki_intake_aktiv?: boolean
+          ki_sichtbar?: boolean
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null
@@ -19052,6 +19054,7 @@ export type Database = {
           kalender_typ?: string | null
           kapazitaeten_jsonb?: Json | null
           ki_intake_aktiv?: boolean
+          ki_sichtbar?: boolean
           live_tracking_enabled?: boolean | null
           logo_url?: string | null
           notizen?: string | null

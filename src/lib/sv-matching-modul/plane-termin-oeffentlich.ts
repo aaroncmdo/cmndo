@@ -280,8 +280,37 @@ export async function planeTerminOeffentlich(
   // Bei injiziertem Owner groesseren Pool laden, damit ein etwas fernerer zahlender Freund des
   // Owners nicht schon vor der relationalen Partition durch den Top-3-Schnitt faellt.
   const kandidatenLimit = ownerProfilId ? TOP_KANDIDATEN_MIT_OWNER : TOP_KANDIDATEN
-  const rohKandidaten = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, kandidatenLimit)
-  if (rohKandidaten.length === 0) return []
+  const rohKandidatenAlle = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, kandidatenLimit)
+  if (rohKandidatenAlle.length === 0) return []
+
+  // Admin-Toggle `ki_sichtbar`: erscheint dieser SV im oeffentlichen/KI-Kanal?
+  //
+  // ⚠ BEWUSST HIER und NICHT in `applyDispatchableFilter`. Jener Filter steuert die
+  // DISPATCH-Faehigkeit — wer dort herausfaellt, bekommt ueberhaupt keine Faelle mehr.
+  // Der Toggle soll aber nur die oeffentliche Sichtbarkeit regeln: ein SV kann intern
+  // weiter Auftraege annehmen, ohne auf Stadtseiten und in KI-Antworten als buchbar
+  // genannt zu werden. Deshalb wird NACH dem Matching gefiltert, nur auf diesem Pfad.
+  //
+  // Fail-OPEN (anders als der Test-SV-Guard, der fail-closed ist): faellt die Abfrage
+  // aus, bleiben alle Kandidaten drin. Ein stiller DB-Fehler soll das Netz nicht
+  // unsichtbar machen — das Schlimmste waere ein SV, der einen Tag zu lang erscheint,
+  // nicht ein leerer Finder.
+  let rohKandidaten = rohKandidatenAlle
+  try {
+    const { data: sichtbarkeit } = await admin
+      .from('sachverstaendige')
+      .select('id, ki_sichtbar')
+      .in('id', rohKandidatenAlle.map((c) => c.svId))
+    const versteckt = new Set(
+      ((sichtbarkeit ?? []) as Array<{ id: string; ki_sichtbar: boolean | null }>)
+        .filter((r) => r.ki_sichtbar === false)
+        .map((r) => r.id),
+    )
+    if (versteckt.size > 0) rohKandidaten = rohKandidatenAlle.filter((c) => !versteckt.has(c.svId))
+    if (rohKandidaten.length === 0) return []
+  } catch {
+    /* fail-open: siehe oben */
+  }
 
   // 13b (K10): Netzwerkpartner-Abo-Praedikat EINMAL auf dem ganzen Pool — dient sowohl dem Badge
   // (istNetzwerkpartner) als auch dem Freund-Filter (nur ZAHLENDE Freunde werden geboostet).
