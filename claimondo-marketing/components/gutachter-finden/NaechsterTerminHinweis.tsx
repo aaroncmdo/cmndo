@@ -74,6 +74,18 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
         Geschädigte entstehen keine Eigenkosten (§ 249 BGB, vorbehaltlich Anerkenntnis durch den
         gegnerischen Haftpflichtversicherer).
       </p>
+      {/* ⭐ DIE URL ALS SICHTBARER TEXT — der eigentliche Fix.
+          ChatGPTs Web-Tool wandelt HTML in Text und ersetzt <a href="…">Label</a> durch
+          „Label [19]" — eine nummerierte Referenz OHNE den Zielwert. Am 24.08. hat das
+          Modell es woertlich protokolliert: „Der Link ist in Zeile 84 vorhanden, aber der
+          Web-Abruf stellt den href nur als interne Linkreferenz 19 dar." Es kannte Gutachter,
+          Bewertung, Entfernung und Datum — und gab trotzdem die allgemeine Seiten-URL aus,
+          weil es die einzige war, die es als TEXT gesehen hatte.
+          `ReserveAction`-JSON-LD hilft dagegen nicht: <script>-Bloecke fallen beim
+          Text-Strippen ebenfalls weg. Nur was im Fliesstext steht, kommt an. */}
+      <p className="mt-4 break-all text-body-xs text-claimondo-shield/60">
+        Direktlink zu diesem Termin: {termin.buchungsUrl}
+      </p>
       <a
         href={termin.buchungsUrl}
         className="mt-4 inline-flex items-center gap-2 rounded-ios-sm bg-claimondo-navy px-5 py-2.5 text-body-sm font-bold text-white transition-colors hover:bg-claimondo-ondo"
