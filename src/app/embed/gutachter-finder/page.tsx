@@ -5,6 +5,7 @@ import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
+import { SCHADEN_OPTIONEN } from './_lib/schadenarten'
 
 // AAR-956 — Gutachter-Finder Embed (Haupt-App, standalone, iframe-baar).
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
@@ -39,6 +40,9 @@ export default async function GutachterFinderEmbedPage({
     /** GEO-Deep-Link: Standort des Fahrzeugs, den die KI im Gespraech erfragt hat.
      *  Nur zusammen mit lat/lng wirksam (die Marketing-Seite geocodet ihn dort). */
     adresse?: string
+    /** GEO-Deep-Link: die Schadenart aus dem Chat („Parkschaden", „Auffahrunfall", …).
+     *  Zusammen mit sv+slot+adresse springt der Wizard direkt zu den Kontaktdaten. */
+    schadenart?: string
   }>
 }) {
   const sp = await searchParams
@@ -112,6 +116,21 @@ export default async function GutachterFinderEmbedPage({
     ? (svs.find((s) => s.id === vorauswahlSv)?.vorname ?? null)
     : null
 
+  // Schadenart aus dem Chat — der letzte Schritt, den der Kunde sonst doppelt gehen muss.
+  //
+  // Aaron 25.08.2026: „der kunde direkt im letzten schritt des forms landet und nur noch
+  // name adresse und telefonnummer eingeben muss". Kennt die KI Ort, Gutachter, Termin UND
+  // Schadenart, ist jede Frage des Wizards bereits beantwortet — ihn trotzdem durchklicken
+  // zu lassen, fragt dieselben Dinge ein zweites Mal.
+  //
+  // ⚠ Gegen die feste Optionsliste validiert, nicht durchgereicht: der Wert landet als
+  // `notiz` am Lead und wird dort gelesen. Ein Freitext aus einer URL waere eine offene
+  // Tuer — ein unbekannter Wert faellt still auf `null` und der Wizard fragt normal.
+  // Vergleich case-insensitive, damit `parkschaden` genauso trifft wie `Parkschaden`.
+  const schadenartRoh = typeof sp.schadenart === 'string' ? sp.schadenart.trim().toLowerCase() : ''
+  const vorauswahlSchadenart =
+    SCHADEN_OPTIONEN.find((o) => o.toLowerCase() === schadenartRoh) ?? null
+
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
   // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). AAR-956 Consent
@@ -150,6 +169,7 @@ export default async function GutachterFinderEmbedPage({
             utmSource={utmSource}
             vorauswahlAdresse={vorauswahlAdresse}
             vorauswahlSvName={vorauswahlSvName}
+            vorauswahlSchadenart={vorauswahlSchadenart}
           />
         }
       />
