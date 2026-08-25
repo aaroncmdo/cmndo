@@ -47,7 +47,7 @@ export default function ImpressumPage() {
 
         <section className="rounded-3xl bg-white p-7 sm:p-10 shadow-sheet space-y-7 text-claimondo-shield/90 leading-relaxed tracking-[-.005em]">
           <div>
-            <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Angaben gemäß &sect; 5 TMG</h2>
+            <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Angaben gemäß &sect; 5 DDG</h2>
             <p>
               Claimondo GmbH i.G.<br />
               {HQ_STREET}<br />
@@ -105,7 +105,7 @@ export default function ImpressumPage() {
           </div>
 
           <div>
-            <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Verantwortlich für den Inhalt nach &sect; 55 Abs. 2 RStV</h2>
+            <h2 className="text-lg font-bold text-claimondo-navy tracking-[-.018em] mb-2">Verantwortlich für den Inhalt nach &sect; 18 Abs. 2 MStV</h2>
             <p>
               {FOUNDER_AARON_NAME}<br />
               {HQ_STREET}<br />
