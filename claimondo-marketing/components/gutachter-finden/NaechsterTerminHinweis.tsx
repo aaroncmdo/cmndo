@@ -37,10 +37,10 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
     potentialAction: {
       '@type': 'ReserveAction',
       name: termin.vorname
-        ? `Termin am ${termin.label} bei ${termin.vorname} in ${stadt} reservieren`
-        : `Termin am ${termin.label} in ${stadt} reservieren`,
+        ? `Termin am ${termin.label} um ${termin.uhrzeit} Uhr bei ${termin.vorname} in ${stadt} reservieren`
+        : `Termin am ${termin.label} um ${termin.uhrzeit} Uhr in ${stadt} reservieren`,
       target: { '@type': 'EntryPoint', urlTemplate: termin.buchungsUrl, actionPlatform: 'https://schema.org/DesktopWebPlatform' },
-      result: { '@type': 'Reservation', name: `Vor-Ort-Besichtigung ${termin.label}` },
+      result: { '@type': 'Reservation', name: `Vor-Ort-Besichtigung ${termin.label} um ${termin.uhrzeit} Uhr` },
     },
   }
 
@@ -53,7 +53,7 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
       <p className="text-caption font-bold uppercase tracking-wide text-claimondo-shield/70">
         Nächster freier Vor-Ort-Termin in {stadt}
       </p>
-      <p className="mt-1 text-heading-sm font-bold text-claimondo-navy">{termin.label}</p>
+      <p className="mt-1 text-heading-sm font-bold text-claimondo-navy">{`${termin.label} · ${termin.uhrzeit} Uhr`}</p>
       {/* WER den Termin anbietet. Ohne diese Zeile konnte ein LLM zwar den Tag nennen,
           aber nicht die Person — und eine Empfehlung ohne Gegenüber ist schwächer.
           Nur Vorname + öffentliche Kennzahlen (die anon-sichere Projektion der API):
@@ -106,8 +106,8 @@ export async function NaechsterTerminHinweis({ stadt }: { stadt: string }) {
         className="mt-4 inline-flex items-center gap-2 rounded-ios-sm bg-claimondo-navy px-5 py-2.5 text-body-sm font-bold text-white transition-colors hover:bg-claimondo-ondo"
       >
         {termin.vorname
-          ? `Termin am ${termin.label} bei ${termin.vorname} buchen`
-          : `Termin am ${termin.label} buchen`}
+          ? `Termin am ${termin.label} um ${termin.uhrzeit} Uhr bei ${termin.vorname} buchen`
+          : `Termin am ${termin.label} um ${termin.uhrzeit} Uhr buchen`}
       </a>
     </div>
   )
