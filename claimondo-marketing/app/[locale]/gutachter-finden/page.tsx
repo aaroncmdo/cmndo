@@ -88,6 +88,11 @@ export default async function GutachterFindenPage({
     /** ChatGPT haengt an jeden ausgegebenen Link `utm_source=chatgpt.com` an — der Wert
      *  wandert bis auf die Anfrage, damit sichtbar wird, WELCHE KI den Kunden brachte. */
     utm_source?: string
+    /** Standort des Fahrzeugs, den die KI im Gespraech erfragt hat. Wird hier server-seitig
+     *  geocodet und an den Embed durchgereicht — der Kunde muss ihn dann nicht erneut
+     *  eintippen. Bewusst OHNE Name/Telefon/E-Mail: die stuenden sonst in Chatverlaeufen,
+     *  Referrern und unseren Zugriffslogs. */
+    adresse?: string
   }>
 }) {
   const t = await getTranslations('gutachter_finden')
@@ -101,7 +106,9 @@ export default async function GutachterFindenPage({
   if (Number.isFinite(latNum) && Number.isFinite(lngNum)) {
     initialCenter = { lat: latNum, lng: lngNum }
   } else {
-    const query = sp.plz?.trim() || sp.stadt?.trim()
+    // Reihenfolge mit Absicht: die vom Modell erfragte ADRESSE ist praeziser als PLZ oder
+    // Stadt — der Gutachter faehrt zu einer Hausnummer, nicht in ein Zentrum.
+    const query = sp.adresse?.trim() || sp.plz?.trim() || sp.stadt?.trim()
     if (query) {
       const geo = await geocodeAdresse(query)
       if (geo) initialCenter = { lat: geo.lat, lng: geo.lng }
@@ -167,6 +174,7 @@ export default async function GutachterFindenPage({
         svId={sp.sv}
         slot={sp.slot}
         utmSource={sp.utm_source}
+        adresse={sp.adresse}
       />
 
       {/* Crawl-Pfad — loest die Linkleiste ab und verbessert sie in zwei Punkten:
