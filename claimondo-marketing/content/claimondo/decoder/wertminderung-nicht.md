@@ -246,7 +246,6 @@ Wertminderungs-Streitigkeiten sind eines der ertragreichsten Felder der Schadens
 - BGH, ständige Rechtsprechung zur merkantilen Wertminderung
 - BGH, Urteil vom 23.11.2004, VI ZR 357/03 (Wertminderungs-Grundsatz)
 - Ruhkopf/Sahm, „Die merkantile Wertminderung des Kraftfahrzeuges nach Unfallschäden"
-- BVSK Sachverständigen-Verband – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

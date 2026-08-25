@@ -48,13 +48,11 @@ Claimondo übernimmt diese Schritte für Sie: unabhängiges Gutachten, Anspruchs
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - Forsa-Befragung im Auftrag der AG Verkehrsrecht im DAV, Oktober/November 2017 (Stern 49/2017, 30.11.2017)
 - LG Düsseldorf, Urteil vom 15.02.2019 – 20 S 109/18 (ControlExpert-Prüfbericht)
 - AG Köln, Urteil vom 25.02.2016 – 275 C 179/15 (SV-Honorar-Kürzung)
 - AG Coburg, Urteil vom 14.07.2017 – 15 C 696/17
 - BGH, Beschluss vom 18.11.2008 – VI ZB 22/08 (130 %, Weiternutzungsfrist)
-- Anwalts-Dokumentation: captain-huk.de, kanzlei-schleyer.de
 
 ## Häufige Fragen
 

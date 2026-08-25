@@ -207,7 +207,6 @@ Quotelung ist eine der wirtschaftlich relevantesten Streit-Fragen. Eine Quote-Ve
 - Straßenverkehrsgesetz § 17 – [gesetze-im-internet.de/stvg/__17.html](https://www.gesetze-im-internet.de/stvg/__17.html)
 - BGH-Rechtsprechung zur Quotelung und Betriebsgefahr
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ADAC Quotenkatalog
 - Greger/Zwickel, Haftungsrecht des Straßenverkehrs
 
 ---

@@ -901,7 +901,7 @@
       "heading_accent": "30–40 % der Ansprüche",
       "heading_suf": "— und niemand widerspricht.¹",
       "body": "Claimondo existiert weil das Standard ist und nicht Ausnahme. Versicherungen beauftragen ControlExpert oder K-Expert mit automatisierten Prüfberichten – ohne Fahrzeugbesichtigung. UPE-Aufschläge, Verbringungskosten, Wertminderung werden gestrichen. Wer ohne Anwalt reguliert akzeptiert die erste Kürzung. Der BGH stützt den Geschädigten in mehreren Urteilen – unsere Partnerkanzlei für Verkehrsrecht setzt das für Sie durch.",
-      "quelle": "¹ Quelle: NDR-Reportage „Prüfdienstleister\" 2022, Verbraucherzentrale-Auswertungen, BGH-Leitentscheidungen VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
+      "quelle": "¹ Quelle: BGH-Leitentscheidungen VI ZR 38/22 ff. · VI ZR 65/18 · VI ZR 174/24."
     },
     "werte": {
       "eyebrow": "Unsere Werte",
@@ -1384,7 +1384,7 @@
       "col_kuerzung": "Kürzungs-Mechanik",
       "col_gegenargument": "Gegenargument",
       "link_cta": "Was BGH-fest gilt",
-      "quellen": "Quellen: NDR-Reportage Prüfdienstleister, Wissensdatenbank Erstberatung Mai 2026, juris.bundesgerichtshof.de",
+      "quellen": "Quellen: juris.bundesgerichtshof.de",
       "taktiken": [
         {
           "trigger": "„Wir kümmern uns um alles“",
@@ -1473,7 +1473,7 @@
       "warum_label": "Warum:",
       "besser_label": "Besser:",
       "card_cta": "So vermeiden Sie diesen Fehler →",
-      "quellen": "Quellen: ADAC, Verbraucherzentrale, RA Günter Fenderl (Fachanwalt Verkehrsrecht), Bernd Hertfelder (öbuv Kfz-SV), Wissensdatenbank Erstberatung Mai 2026",
+      "quellen": "",
       "fehler": [
         {
           "titel": "Auf das Schadenmanagement der Gegenseite eingehen",
@@ -1997,7 +1997,7 @@
       "p2_pre": "Schwellerblenden-Reparaturen können bei E-Autos die",
       "p2_em": "Steuergeräte darunter",
       "p2_suf": "erst Monate später zerstören. Bei einem Schaden im Batterie-Bereich ist Spezialgutachter-Pflicht – sonst droht ein versteckter Totalschaden.",
-      "quelle": "Quelle: Bernd Hertfelder (öffentlich bestellter Kfz-Sachverständiger, HWK Stuttgart)"
+      "quelle": ""
     }
   },
   "werkstatt_finden": {
@@ -2111,7 +2111,7 @@
     "sub": "Kein Warteschleifensystem. Ein Fachmann aus Köln meldet sich in unter 15 Minuten.",
     "disclaimer": "Erstberatung 0 €. Schadensregulierung nach §249 BGB durch die gegnerische Haftpflicht (vorbehaltlich Anerkenntnis).",
     "answer_capsule": {
-      "quelle": "Erstberatung · < 15 Min · 0 € Kosten",
+      "quelle": "",
       "text_pre": "Die kostenlose Beratung bei Claimondo",
       "text_strong": "Die kostenlose Beratung bei Claimondo",
       "text_body": " ist unverbindlich und ohne Risiko. Ein Schadensberater aus unserem Kölner Team klärt mit Ihnen ob und wie wir helfen können: Haftungsfrage, Schadenshöhe, ob ein Gutachten sinnvoll ist, und welche Positionen die gegnerische Versicherung erstatten muss. Sie können per Telefon (Mo–Fr 8–18 Uhr), WhatsApp oder E-Mail Kontakt aufnehmen. Kein Callcenter – direkter Draht zum Team."
@@ -3633,7 +3633,7 @@
     ],
     "urteil_intro": "Auf Klage der Wettbewerbszentrale untersagte das Landgericht Bremen einem Anbieter die Werbung für „Online-Kfz-Gutachten“. Das Gericht stützte sich auf drei Kern-Überlegungen:",
     "urteil_zitat": "„Die persönliche Inaugenscheinnahme des beschädigten Fahrzeugs gehört zur ureigensten Aufgabe eines Kfz-Sachverständigen.“",
-    "urteil_zitat_quelle": "— sinngemäße Kernaussage des LG Bremen, 9 O 1720/24",
+    "urteil_zitat_quelle": "— sinngemäße Kernaussage des LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Persönliche Besichtigung ist nicht ersetzbar.",
@@ -3821,9 +3821,9 @@
     ],
     "einordnung_titel": "Zur Einordnung der Netz-Zahlen:",
     "einordnung_p": "Die reinen Zahlen sind nur bedingt vergleichbar. Claimondo betreibt ein <strong>gemanagtes Netz</strong>, in dem jeder Fall aktiv von der Vor-Ort-Besichtigung über die Partnerkanzlei bis zur Auszahlung gesteuert wird. Unfallgiganten ist demgegenüber ein <strong>Verzeichnis</strong>, in dem Sachverständige kostenpflichtige Profil-Listings buchen – die Zahl 329 zählt Verzeichnis-Einträge, keine gemanagten Fälle.",
-    "quellen_footnote_before": "Stand der vergleichenden Angaben:",
-    "quellen_footnote_after": ". Quelle: jeweilige Anbieter-Websites, abgerufen am",
-    "quellen_footnote_suffix": "(Belege archiviert). Quellen:",
+    "quellen_footnote_before": "",
+    "quellen_footnote_after": "",
+    "quellen_footnote_suffix": "",
     "wann_h2": "Wann welche Plattform passt – Entscheidungshilfe",
     "wann_intro": "Es gibt nicht „die beste“ Plattform, sondern die passende für Ihre Situation. Drei typische Fälle:",
     "wann_cards": [
@@ -3868,7 +3868,7 @@
     "lg_p2": "<strong>Was das Urteil nicht verbietet:</strong> Die digitale Abwicklung eines Auftrags – Online-Meldung, Foto-Upload, digitale Kommunikation – bleibt zulässig, solange ein Sachverständiger das Fahrzeug anschließend <strong>persönlich vor Ort in Augenschein</strong> nimmt. Genau dieses hybride Modell nutzen alle hier verglichenen Plattformen.",
     "lg_p3": "<strong>Was es verbietet:</strong> „Gutachten“ allein auf Basis hochgeladener Fotos oder Klick-Antworten ohne persönliche Besichtigung – und die Werbung mit „kompletter Abwicklung gegenüber der Versicherung“, wenn der Anbieter nicht im Rechtsdienstleistungs-Register eingetragen ist (RDG §§ 2, 3).",
     "lg_link_online": "Ausführliche Einordnung: Online-Kfz-Gutachten",
-    "lg_link_quelle": "Quelle: Wettbewerbszentrale",
+    "lg_link_quelle": "",
     "faq_h2": "Häufige Fragen zum Vermittler-Vergleich",
     "faqs": [
       {
@@ -3968,7 +3968,7 @@
     "hotspots_knoten": "Verkehrsknoten: {knoten}.",
     "hotspots_baustelle": "<strong>Aktuell:</strong> {baustelle}.",
     "hotspots_outro": "Genau an diesen Achsen und Brennpunkten sind wir nach einem Unfall schnell für Sie vor Ort – meist in unter 48 Stunden, oft schon am Folgetag.",
-    "hotspots_quelle": "Quelle: {quelle}.",
+    "hotspots_quelle": "",
     "hilfe_eyebrow": "Praktische Hilfe",
     "hilfe_h2": "Nach dem Unfall {ort}: Wer hilft wo?",
     "hilfe_intro": "Bei Verletzten oder Gefahr zuerst den Notruf <strong>{notruf}</strong> wählen. Danach den Schaden dokumentieren und einen unabhängigen Sachverständigen einschalten.",
@@ -3984,7 +3984,7 @@
     "spoke_einsatz": "{stadt} liegt im Einsatzgebiet unseres {hubName}-Netzwerks – <link>mehr zu unserem Einsatz in {hubName}</link>.",
     "spoke_hotspot_einzelfall": "Dokumentierter Unfall vor Ort",
     "spoke_hotspot_schwerpunkt": "Lokaler Unfallschwerpunkt",
-    "spoke_quelle": "Quelle",
+    "spoke_quelle": "",
     "bgh_subline": " Bundeseinheitlich auch {ort} anwendbar. Versicherer kürzen trotzdem. Unsere Partnerkanzlei holt es zurück.",
     "prozess_eyebrow": "In 32 Tagen zum Geld",
     "prozess_h2": "Vom Unfall {ort} zur Auszahlung – in 5 Schritten",
@@ -4046,16 +4046,16 @@
     "kfzbestand_h2": "Fahrzeugbestand in {stadt}",
     "kfzbestand_text": "In {stadt} sind {pkw} Pkw zugelassen, davon {gewerblich} auf gewerbliche Halter. Dazu kommen {lkw} Lkw und {kraftraeder} Krafträder.",
     "kfzbestand_quote": "Das entspricht {proTausend} Pkw je 1.000 Einwohner.",
-    "kfzbestand_quelle": "Kraftfahrt-Bundesamt, {stand}",
+    "kfzbestand_quelle": "",
     "amtlich_eyebrow": "Amtliche Zahlen",
     "amtlich_h2": "Verkehr und Unfallgeschehen in {ort}",
     "amtlich_intro": "Der Unfallatlas der Statistischen Ämter des Bundes und der Länder erfasst jeden Straßenverkehrsunfall mit Personenschaden punktgenau. Für {ort} ergeben sich daraus im Zeitraum {zeitraum} diese Häufungen:",
     "amtlich_hinweis": "Ausgewertet wurde je Stelle ein Bereich von rund 100 Metern. Die Zahlen benennen keine Ursachen – eine stark befahrene Hauptachse verzeichnet mehr Unfälle als eine Nebenstraße.",
-    "amtlich_quelle": "Quelle: <link>{quelle}</link> – {lizenz}",
+    "amtlich_quelle": "",
     "verkehr_h3": "Wie viel Verkehr dort unterwegs ist",
     "verkehr_intro": "Die Bundesanstalt für Straßenwesen misst den Verkehr auf Autobahnen und Bundesstraßen dauerhaft. Diese Zählstellen liegen {ort} am nächsten (Jahresauswertung {jahr}):",
     "verkehr_zaehlstelle": "Zählstelle {name}, {km} km entfernt",
-    "verkehr_quelle": "Quelle: <link>BASt-Dauerzählstellen</link> – {lizenz}",
+    "verkehr_quelle": "",
     "ratgeber_eyebrow": "Mehr zum Thema",
     "ratgeber_fehler": "7 Fehler, die Sie nach einem Unfall vermeiden",
     "ratgeber_taktiken": "Die Taktiken der Versicherer – und was dagegen hilft",
@@ -4187,7 +4187,7 @@
     "kuerzungen_th_kuerzung": "Typische Kürzung",
     "kuerzungen_th_bgh": "BGH-Az.",
     "kuerzungen_th_kern": "Kernaussage",
-    "kuerzungen_quelle": "Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de), BVSK e.V., ControlExpert-Branchenstatistik. Stand 05/2026.",
+    "kuerzungen_quelle": "Quellen: BGH-Urteilsdatenbank (bundesgerichtshof.de)",
     "markt_label": "Tabelle 2",
     "markt_h2": "Der Markt für Kfz-Schadensregulierung in NRW 2026",
     "markt_p": "Eigene Wettbewerbs-Analyse mit 10 validierten Datenquellen (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). Stand April 2026.",
@@ -4235,7 +4235,7 @@
     ],
     "markt_erkenntnis_h": "Schlüssel-Erkenntnis:",
     "markt_erkenntnis_p": "hat seit dem Google Helpful Content Update (Januar 2025) etwa 30 % seines organischen Traffics verloren – von 2.784 auf 1.668 Visits/Monat. Bei gleichzeitig 0 % AI-Search-Sichtbarkeit aller 23 NRW-Wettbewerber öffnet sich ein einmaliges Zeitfenster für strukturierte Daten + Schema-Markup + Answer-Capsule-Content.",
-    "markt_quelle": "Quellen: SE Ranking AI Search Visibility, DataForSEO Keyword-DB, Kalkulations-API Partner-Netz, SerpApi Google Maps, Wettbewerber-Funnel-Audit Q1/2026.",
+    "markt_quelle": "",
     "honorare_label": "Tabelle 3",
     "honorare_h2": "Was kostet ein Kfz-Sachverständigen-Gutachten?",
     "honorare_p_pre": "Honorare folgen der ",
@@ -4264,7 +4264,7 @@
       "Vorschaden-Quote + ø Wertminderungs-Differenz mit/ohne Doku",
       "Reklamations-Quote + Anteil wiederkehrender Mandanten"
     ],
-    "auswertung_quelle": "Datengrundlage: bearbeitete Mandate über Claimondo-Plattform 2024–2026, anonymisiert nach DSGVO. Erste Veröffentlichung Q3 2026 als jährlicher Update.",
+    "auswertung_quelle": "",
     "methodik_label": "Methodik",
     "methodik_h2": "Wie diese Daten erhoben wurden",
     "methodik_bgh_strong": "BGH-Urteile",
@@ -4304,7 +4304,7 @@
     "trust_kpi_2_label": "+ Beschreibung reichen",
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "ab 750 € Gutachten-Anspruch",
-    "antwort_capsule_quelle": "KI-Analyse · < 15 Min · 0 € Kosten",
+    "antwort_capsule_quelle": "",
     "antwort_p": "<strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung ob ein unabhängiges Kfz-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich – sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten richtigen Schritt zu entscheiden.",
     "ergebnis_h2": "Das bekommen Sie – kostenlos",
     "ergebnis_punkte": [

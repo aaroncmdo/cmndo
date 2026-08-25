@@ -44,12 +44,9 @@ Die **BaFin-Quote** 2024 liegt mit 2,27 je 100.000 Verträge (100 Beschwerden) �
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- IWW „Unfallregulierung effektiv (UE)" – Berichterstattung zur AXA-Regresswelle
 - AG Heinsberg, Urteil vom 11.04.2022 – 18 C 32/22 (LOGICHECK / SV-Honorar)
 - AG Frankfurt am Main, Urteil vom 19.10.2015 – 32 C 2787/15
 - AG Düsseldorf, Urteil vom 02.08.2013 – 36 C 10926/12 (Werkstattverweisung)
-- Franke & Bornberg, Kfz-Tarifrating 2024; VEMA-Maklerverbund 2024
 
 ## Häufige Fragen
 

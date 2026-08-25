@@ -607,7 +607,7 @@
       "heading_accent": "30–40% of claims",
       "heading_suf": "— and no one pushes back.¹",
       "body": "Claimondo exists because this is the norm, not the exception. Insurers commission ControlExpert or K-Expert to produce automated review reports — without ever inspecting the vehicle. UPE surcharges, transfer costs, and diminished value get struck off. Anyone who settles without a lawyer accepts the first reduction. The BGH has ruled in favour of the injured party in multiple decisions — the partner law firm for traffic law enforces those rulings on your behalf.",
-      "quelle": "¹ Source: NDR documentary \"Prüfdienstleister\" 2022, Verbraucherzentrale analyses, BGH landmark decisions VI ZR 38/22 ff., VI ZR 65/18, VI ZR 174/24."
+      "quelle": "BGH landmark decisions VI ZR 38/22 ff. · VI ZR 65/18 · VI ZR 174/24."
     },
     "werte": {
       "eyebrow": "Our values",
@@ -1237,7 +1237,7 @@
       "col_kuerzung": "Reduction mechanism",
       "col_gegenargument": "Counter-argument",
       "link_cta": "What holds up under BGH scrutiny",
-      "quellen": "Sources: NDR documentary Prüfdienstleister, initial consultation knowledge base May 2026, juris.bundesgerichtshof.de",
+      "quellen": "juris.bundesgerichtshof.de",
       "taktiken": [
         {
           "trigger": "\"We take care of everything\"",
@@ -1326,7 +1326,7 @@
       "warum_label": "Why:",
       "besser_label": "Better:",
       "card_cta": "How to avoid this mistake →",
-      "quellen": "Sources: ADAC, Verbraucherzentrale, RA Günter Fenderl (specialist lawyer, traffic law), Bernd Hertfelder (publicly appointed and sworn automotive expert), Knowledge Base Initial Consultation May 2026",
+      "quellen": "",
       "fehler": [
         {
           "titel": "Engaging with the opposing party's claims management",
@@ -1699,7 +1699,7 @@
       "p2_pre": "Rocker panel repairs on electric vehicles can",
       "p2_em": "destroy the control units beneath them",
       "p2_suf": "months later. Any damage in the battery area requires a specialist expert — otherwise a hidden total loss is at risk.",
-      "quelle": "Source: Bernd Hertfelder (publicly appointed automotive expert, HWK Stuttgart)"
+      "quelle": ""
     }
   },
   "faq": {
@@ -2226,7 +2226,7 @@
     "sub": "No hold music. A specialist from Cologne gets back to you in under 15 minutes.",
     "disclaimer": "Initial consultation 0 €. Claim settlement under §249 BGB through the opposing liability insurer (subject to acknowledgement of liability).",
     "answer_capsule": {
-      "quelle": "Initial consultation · < 15 min · 0 € cost",
+      "quelle": "",
       "text_pre": "The free consultation at Claimondo",
       "text_strong": "The free consultation at Claimondo",
       "text_body": "is non-binding and risk-free. A claims advisor from our Cologne team will discuss with you whether and how we can help: liability, extent of damage, whether an expert report makes sense, and which positions the opposing insurance must reimburse. You can reach us by phone (Mon–Fri 8 am–6 pm), WhatsApp, or email. No call centre — direct line to the team."
@@ -3219,7 +3219,7 @@
     ],
     "urteil_intro": "Following a complaint by the Wettbewerbszentrale, the Landgericht Bremen prohibited a provider from advertising \"online Kfz-Gutachten.\" The court based its ruling on three core arguments:",
     "urteil_zitat": "\"The personal inspection of the damaged vehicle is the most fundamental task of a Kfz-Sachverständiger.\"",
-    "urteil_zitat_quelle": "— paraphrased core statement of LG Bremen, 9 O 1720/24",
+    "urteil_zitat_quelle": "— paraphrased core statement of LG Bremen",
     "urteil_punkte": [
       {
         "titel": "Personal inspection cannot be substituted.",
@@ -3407,9 +3407,9 @@
     ],
     "einordnung_titel": "A note on interpreting the network figures:",
     "einordnung_p": "The raw numbers are only partially comparable. Claimondo operates a <strong>managed network</strong> in which every case is actively steered — from on-site inspection through the partner law firm to final payout. Unfallgiganten, by contrast, is a <strong>directory</strong> where appraisers book paid profile listings — the figure 329 counts directory entries, not managed cases.",
-    "quellen_footnote_before": "Date of comparative data:",
-    "quellen_footnote_after": ". Source: respective provider websites, accessed on",
-    "quellen_footnote_suffix": "(evidence archived). Sources:",
+    "quellen_footnote_before": "",
+    "quellen_footnote_after": "",
+    "quellen_footnote_suffix": "",
     "wann_h2": "Which platform fits which situation — a decision guide",
     "wann_intro": "There is no single \"best\" platform — only the right one for your situation. Three typical scenarios:",
     "wann_cards": [
@@ -3454,7 +3454,7 @@
     "lg_p2": "<strong>What the ruling does not prohibit:</strong> the digital handling of an instruction — online submission, photo upload, digital communication — remains permissible, provided a qualified appraiser subsequently inspects the vehicle <strong>in person on-site</strong>. This hybrid model is precisely what all four platforms compared here use.",
     "lg_p3": "<strong>What it does prohibit:</strong> \"expert reports\" based solely on uploaded photos or click-through answers without a personal inspection — and advertising \"complete claims handling with the insurer\" when the provider is not registered under the Legal Services Act (RDG §§ 2, 3).",
     "lg_link_online": "Full analysis: online vehicle expert reports",
-    "lg_link_quelle": "Source: Wettbewerbszentrale",
+    "lg_link_quelle": "",
     "faq_h2": "Frequently asked questions about the platform comparison",
     "faqs": [
       {
@@ -3548,7 +3548,7 @@
     "kuerzungen_th_kuerzung": "Typical reduction",
     "kuerzungen_th_bgh": "BGH ref.",
     "kuerzungen_th_kern": "Key ruling",
-    "kuerzungen_quelle": "Sources: BGH judgment database (bundesgerichtshof.de), BVSK e.V., ControlExpert industry statistics. As of 05/2026.",
+    "kuerzungen_quelle": "Sources: BGH judgment database (bundesgerichtshof.de)",
     "markt_label": "Table 2",
     "markt_h2": "The market for car damage settlement in NRW 2026",
     "markt_p": "Independent competitive analysis using 10 validated data sources (DataForSEO, SE Ranking, SerpApi, Kalkulations-API, Chrome SERP, Google Maps, Ads Transparency Center). As of April 2026.",
@@ -3596,7 +3596,7 @@
     ],
     "markt_erkenntnis_h": "Key insight:",
     "markt_erkenntnis_p": "has lost approximately 30 % of its organic traffic since the Google Helpful Content Update (January 2025) — from 2,784 to 1,668 visits/month. With simultaneously 0 % AI search visibility across all 23 NRW competitors, a unique time window opens for structured data + schema markup + answer-capsule content.",
-    "markt_quelle": "Sources: SE Ranking AI Search Visibility, DataForSEO keyword database, Kalkulations-API partner network, SerpApi Google Maps, competitor funnel audit Q1/2026.",
+    "markt_quelle": "",
     "honorare_label": "Table 3",
     "honorare_h2": "What does a car appraiser’s expert report cost?",
     "honorare_p_pre": "Fees follow the ",
@@ -3625,7 +3625,7 @@
       "Prior damage rate + avg. diminished value difference with/without documentation",
       "Complaint rate + share of returning clients"
     ],
-    "auswertung_quelle": "Data basis: mandates processed via Claimondo platform 2024–2026, anonymized in accordance with DSGVO. First publication Q3 2026 as an annual update.",
+    "auswertung_quelle": "",
     "methodik_label": "Methodology",
     "methodik_h2": "How this data was collected",
     "methodik_bgh_strong": "BGH rulings",
@@ -3665,7 +3665,7 @@
     "trust_kpi_2_label": "+ description is enough",
     "trust_kpi_3_wert": "§249 BGB",
     "trust_kpi_3_label": "expert report entitlement from 750 €",
-    "antwort_capsule_quelle": "AI analysis · < 15 min · 0 € cost",
+    "antwort_capsule_quelle": "",
     "antwort_p": "<strong>The free AI initial assessment from Claimondo</strong> analyses photos and a description of your vehicle damage and delivers in under 15 minutes: an estimate of repair costs, the expected replacement value, and a recommendation on whether an independent expert report is advisable (from approximately 750 € in damage you are entitled to one under § 249 BGB). The initial assessment is free and non-binding — it does not replace an official expert report, but helps you immediately decide the right next step.",
     "ergebnis_h2": "What you receive — for free",
     "ergebnis_punkte": [
@@ -3833,7 +3833,7 @@
     "hotspots_knoten": "Traffic interchange: {knoten}.",
     "hotspots_baustelle": "<strong>Current:</strong> {baustelle}.",
     "hotspots_outro": "Precisely at these routes and hotspots we are on site quickly after an accident — usually within 48 hours, often already the next day.",
-    "hotspots_quelle": "Source: {quelle}.",
+    "hotspots_quelle": "",
     "hilfe_eyebrow": "Practical help",
     "hilfe_h2": "After the accident {ort}: who helps where?",
     "hilfe_intro": "If there are injuries or danger, call emergency services <strong>{notruf}</strong> first. Then document the damage and involve an independent appraiser.",
@@ -3849,7 +3849,7 @@
     "spoke_einsatz": "{stadt} is covered by our {hubName} network — <link>learn more about our work in {hubName}</link>.",
     "spoke_hotspot_einzelfall": "Documented on-site accident",
     "spoke_hotspot_schwerpunkt": "Local accident hotspot",
-    "spoke_quelle": "Source",
+    "spoke_quelle": "",
     "bgh_subline": " Applicable nationwide, including {ort}. Insurers still cut payments. Our partner law firm recovers them.",
     "prozess_eyebrow": "Paid out in 32 days",
     "prozess_h2": "From the accident {ort} to payout — in 5 steps",
@@ -3911,12 +3911,12 @@
     "kfzbestand_h2": "Registered vehicles in {stadt}",
     "kfzbestand_text": "{pkw} passenger cars are registered in {stadt}, {gewerblich} of them to commercial owners. In addition there are {lkw} trucks and {kraftraeder} motorcycles.",
     "kfzbestand_quote": "That is {proTausend} cars per 1,000 inhabitants.",
-    "kfzbestand_quelle": "Federal Motor Transport Authority (KBA), {stand}",
+    "kfzbestand_quelle": "",
     "amtlich_eyebrow": "Official figures",
     "amtlich_h2": "Traffic and accidents in {ort}",
     "amtlich_intro": "The accident atlas published by Germany's federal and state statistical offices records every road traffic accident involving personal injury, down to the exact location. For {ort}, the following clusters emerge over {zeitraum}:",
     "amtlich_hinweis": "Each location covers an area of roughly 100 metres. The figures do not identify causes — a busy main road records more accidents than a side street.",
-    "amtlich_quelle": "Source: <link>{quelle}</link> — {lizenz}",
+    "amtlich_quelle": "",
     "verkehr_h3": "How much traffic passes through",
     "verkehr_intro": "Germany's Federal Highway Research Institute continuously measures traffic on motorways and federal roads. These counting stations are closest to {ort} (annual figures for {jahr}):",
     "verkehr_zaehlstelle": "Counting station {name}, {km} km away",

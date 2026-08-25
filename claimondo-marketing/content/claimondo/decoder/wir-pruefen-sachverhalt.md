@@ -244,7 +244,6 @@ Wir prüfen kostenfrei und unverbindlich, was dir nach deinem Unfall zusteht –
 - BGH, Urteil vom 18.07.2017, Aktenzeichen VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Hentschel/König/Dauer, Straßenverkehrsrecht, jeweils aktuelle Auflage
 - Burmann/Heß/Hühnermann/Jahnke, Straßenverkehrsrecht-Kommentar
-- ARGE Verkehrsrecht im Deutschen Anwaltverein – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

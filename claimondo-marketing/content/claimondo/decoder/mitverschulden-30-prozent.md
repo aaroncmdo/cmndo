@@ -211,7 +211,6 @@ Mitverschuldens-Streitigkeiten gehören zu den ertragreichsten Disziplinen spezi
 - BGH, Urteil vom 18.07.2017, VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 - Greger/Zwickel, Haftungsrecht des Straßenverkehrs
-- ADAC Quotenkatalog (zur Orientierung)
 
 ---
 

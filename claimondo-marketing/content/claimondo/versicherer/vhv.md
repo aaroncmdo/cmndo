@@ -44,9 +44,6 @@ In der Forsa-Befragung von 1.072 Verkehrsanwälten (AG Verkehrsrecht im DAV, Ste
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
-- captain-huk.de (28.10.2016) – wörtliches VHV-Anschreiben „Grundsatzentscheidung im Hause VHV"
-- Kanzlei Voigt (RA Hamann), fahrzeug-karosserie.de – „Dem Prüfbericht keine Chance"
 - Forsa-Befragung im Auftrag der AG Verkehrsrecht im DAV, 2017 (Stern 49/2017)
 - AG Offenbach 36 C 248/15 (04.02.2016); AG Chemnitz 15 C 928/15 (30.07.2015); AG Salzgitter 22 C 57/15 (14.10.2015)
 

@@ -195,7 +195,6 @@ Mietwagen-Streit ist Standard-Eskalations-Feld. Differenz zur Versicherer-Bewert
 - BGH, Urteil vom 11.03.2008, VI ZR 164/07 (Schwacke als Schätzgrundlage)
 - BGH, Urteil vom 24.06.2008, VI ZR 234/07 (Erforderlichkeit Mietwagen)
 - Schwacke Mietpreis-Liste
-- Fraunhofer-Mietpreisspiegel – fraunhofer.de
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

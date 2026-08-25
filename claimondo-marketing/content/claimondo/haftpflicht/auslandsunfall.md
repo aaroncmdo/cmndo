@@ -94,7 +94,6 @@ Längere Verfahren, oft lokale Anwälte erforderlich. Reisende Rechtsschutz-Vers
 
 - Rom-II-Verordnung (EU)
 - Pflichtversicherungs-Gesetz (PflVG)
-- Deutsches Büro Grüne Karte e.V.
 
 ---
 

@@ -218,7 +218,6 @@ Verzug-Eskalation ist Routine für spezialisierte Verkehrsrechts-Kanzleien. Die 
 - BGH, Urteil vom 18.07.2017, VI ZR 235/13 (Anwaltskosten als Verzugsschaden)
 - Palandt/Grüneberg, BGB-Kommentar, §§ 286, 288
 - Hentschel/König/Dauer, Straßenverkehrsrecht
-- ARGE Verkehrsrecht – [verkehrsrecht.de](https://www.verkehrsrecht.de)
 
 ---
 

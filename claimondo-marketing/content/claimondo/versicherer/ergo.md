@@ -42,8 +42,6 @@ Weiter dokumentiert: pauschale **Wertminderungs-Kürzung auf Carexpert-Standards
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html); Auswertung transparent-beraten.de (Quote 4,7)
-- Kanzlei Schleyer – „Schlechte Erfahrung mit der ERGO" (Restwert-Hochsetzung 0 € → 34.620 €)
 - AG Heinsberg, Urteil vom 04.02.2014 – 18 C 403/13 (SV-Honorar)
 - AG Leipzig, Urteil vom 13.01.2012 – 109 C 9047/11
 - AG Mitte (Berlin) – Nachzahlung 619,43 € (kanzlei-schleyer.de)

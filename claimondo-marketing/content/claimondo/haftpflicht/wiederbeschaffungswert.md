@@ -231,8 +231,6 @@ Totalschaden-Fälle sind eines der ergebnisreichsten Felder der Schadensregulier
 - Versicherungsvertragsgesetz § 115 – Direktanspruch
 - BGH, Urteil vom 29.04.2003, VI ZR 393/02 (Restwert, regionale Erzielbarkeit)
 - BGH-Rechtsprechung zur Brutto-WBW bei Privatpersonen, ständige Rechtsprechung
-- Marktinformationen
-- BVSK Sachverständigen-Verband – [bvsk.de](https://www.bvsk.de)
 - Hentschel/König/Dauer, Straßenverkehrsrecht
 
 ---

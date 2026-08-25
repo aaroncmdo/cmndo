@@ -44,9 +44,7 @@ Bei der Durchsetzung gilt das übliche Muster: vorgerichtlich hartleibig, nach K
 
 ## Quellen
 
-- BaFin-Beschwerdestatistik 2024 (Kraftfahrt) – [bafin.de](https://www.bafin.de/DE/Verbraucher/BeschwerdenAnsprechpartner/Beschwerdestatistik/beschwerdestatistik_node.html)
 - Kanzlei Schleyer – „Das Problem mit der LVM" (BGH-Falschzitat, 104,13 €)
-- captain-huk.de (08.06.2014) – „passiver Rechtsschutz"-Schreiben
 - AG Hagen, Urteil vom 22.01.2014 – 11 C 281/13
 - AG Starnberg (anwalt.de, RA Schüll) – Leasingfahrzeug
 
