@@ -159,7 +159,7 @@ export default async function GutachterFindenPage({
           „so eine Bar passt mir nicht"). Der Crawl-Pfad haengt jetzt am
           FinderSprungPanel darunter. */}
       {/* Sprungziel des Skip-Links + <main>-Landmark: beides fehlte hier. */}
-      <main id="main-content">
+      <main id="main-content" tabIndex={-1}>
       <GutachterFindenSection
         height="100dvh"
         initialCenter={initialCenter}

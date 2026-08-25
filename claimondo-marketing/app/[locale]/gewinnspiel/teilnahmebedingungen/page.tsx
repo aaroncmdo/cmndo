@@ -126,7 +126,7 @@ const PARAGRAPHEN: { titel: string; text: string }[] = [
 
 export default function TeilnahmebedingungenPage() {
   return (
-    <main id="main-content" className="min-h-screen bg-claimondo-bg px-5 py-14 sm:px-8 sm:py-20">
+    <main id="main-content" tabIndex={-1} className="min-h-screen bg-claimondo-bg px-5 py-14 sm:px-8 sm:py-20">
       <article className="mx-auto max-w-2xl">
         <h1 className="text-3xl font-bold text-claimondo-navy sm:text-4xl">
           Teilnahmebedingungen
